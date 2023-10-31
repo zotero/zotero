@@ -1348,7 +1348,7 @@ describe("Zotero.CollectionTree", function() {
 			await cv.selectFeeds();
 			await waitForItemsLoad(win);
 
-			var quickSearch = win.document.getElementById('zotero-tb-search');
+			var quickSearch = win.document.getElementById('zotero-tb-search-textbox');
 			quickSearch.value = feedItem1.getField('title');
 			quickSearch.doCommand();
 

@@ -6,7 +6,7 @@
 
 #zotero-collections-pane
 {
-	min-width: 150px;
+	min-width: 250px;
 	width: 250px;
 }
 
@@ -196,6 +196,7 @@
 
 .toolbar {
 	height: 32px !important; /* Hard-code this to fix toolbar icon compression on Linux */
+	min-height: 32px; /* Needed to prevent squashing by stretched tag selector */
 	margin: 0;
 	padding: 0;
 	min-width: 1px;
@@ -278,6 +279,34 @@
 {
 	margin: 0;
 	padding: 0;
+}
+
+#zotero-collections-search {
+	height: 25px;
+	max-width: 0;
+	display: inline-block;
+	overflow: hidden;
+	transition: max-width 0.7s ease;
+	padding: 0;
+	margin: 0;
+	appearance: none;
+	visibility: hidden;
+}
+
+#zotero-collections-search.visible {
+	max-width: 200px; 
+	appearance: auto;
+	visibility: visible;
+}
+
+/* Hide collection search on pane collapse, otherwise it still shows when focused */
+#zotero-collections-pane[collapsed=true] #zotero-collections-search.visible {
+	visibility: hidden;
+}
+
+/* Hide the add button on pane collapse. Otherwise, it may show on top of 'New Item' */
+#zotero-collections-pane[collapsed=true] #zotero-tb-collection-add {
+	visibility: hidden;
 }
 
 
@@ -592,7 +621,7 @@
 	color: gray;
 }
 
-#zotero-toolbar
+.zotero-toolbar
 {
 	visibility: visible !important;
 	display: inherit !important;

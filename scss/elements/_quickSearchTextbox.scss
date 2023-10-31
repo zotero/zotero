@@ -26,6 +26,11 @@ quick-search-textbox {
 	display: none; /* Hide automatic dropmarker */
 }
 
+#zotero-tb-search-dropmarker {
+	position: relative;
+	left: 38px; 
+}
+
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
 	#zotero-tb-search-menu-button  { list-style-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }

@@ -56,6 +56,10 @@ var Zotero_Tabs = new function () {
 		get: () => this._tabs.length
 	});
 
+	Object.defineProperty(this, 'focusOptions', {
+		get: () => this._focusOptions
+	});
+
 	this._tabBarRef = React.createRef();
 	this._tabs = [{
 		id: 'zotero-pane',
@@ -65,6 +69,7 @@ var Zotero_Tabs = new function () {
 	this._selectedID = 'zotero-pane';
 	this._prevSelectedID = null;
 	this._history = [];
+	this._focusOptions = {};
 
 	this._unloadInterval = setInterval(() => {
 		this.unloadUnusedTabs();
@@ -115,6 +120,10 @@ var Zotero_Tabs = new function () {
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
+				moveFocus={this.moveFocus.bind(this)}
+				wrapFocusAround={this.focusWrapAround.bind(this)}
+				selectNext={this.selectNext.bind(this)}
+				selectPrev={this.selectPrev.bind(this)}
 			/>,
 			document.getElementById('tab-bar-container'),
 			() => {
@@ -372,14 +381,34 @@ var Zotero_Tabs = new function () {
 	this.select = function (id, reopening, options) {
 		var { tab, tabIndex } = this._getTab(id);
 		if (!tab || tab.id === this._selectedID) {
+			// Focus on reader when keepTabFocused is explicitly false
+			// E.g. when a tab is selected via Space or Enter
+			if (options?.keepTabFocused === false && tab?.id === this._selectedID) {
+				var reader = Zotero.Reader.getByTabID(this._selectedID);
+				if (reader) {
+					reader.focus();
+				}
+			}
 			return;
 		}
+		let selectedTab;
 		if (this._selectedID) {
-			let { tab: selectedTab } = this._getTab(this._selectedID);
+			selectedTab = this._getTab(this._selectedID).tab;
 			if (selectedTab) {
 				selectedTab.timeUnselected = Zotero.Date.getUnixTimestamp();
 			}
 		}
+		
+		// If the last focus data was recorded for a different item, discard it
+		if (this._focusOptions.itemID && this._focusOptions.itemID != tab?.data?.itemID) {
+			this._focusOptions = {};
+		}
+		// Save focus option for this item to tell reader and contextPane how to handle focus
+		if (options && selectedTab) {
+			this._focusOptions.keepTabFocused = !!options.keepTabFocused;
+			this._focusOptions.itemID = tab?.data?.itemID;
+		}
+
 		if (tab.type === 'reader-unloaded') {
 			this.close(tab.id);
 			Zotero.Reader.open(tab.data.itemID, options && options.location, {
@@ -393,7 +422,6 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		if (this._selectedID === 'zotero-pane') {
-			var { tab: selectedTab } = this._getTab(this._selectedID);
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 		this._prevSelectedID = reopening ? this._selectedID : null;
@@ -408,14 +436,18 @@ var Zotero_Tabs = new function () {
 			}
 			tab.lastFocusedElement = null;
 		}
+		let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
+		if (this._focusOptions.keepTabFocused && document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
+			// Keep focus on the currently selected tab during keyboard navigation
+			tabNode.focus();
+		}
 		// Allow React to create a tab node
 		setTimeout(() => {
-			document.querySelector(`.tab[data-id="${tab.id}"]`).scrollIntoView({ behavior: 'smooth' });
+			tabNode.scrollIntoView({ behavior: 'smooth' });
 		});
 		// Border is not included when scrolling element node into view, therefore we do it manually.
 		// TODO: `scroll-padding` since Firefox 68 can probably be used instead
 		setTimeout(() => {
-			let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
 			if (!tabNode) {
 				return;
 			}
@@ -466,17 +498,17 @@ var Zotero_Tabs = new function () {
 	/**
 	 * Select the previous tab (closer to the library tab)
 	 */
-	this.selectPrev = function () {
+	this.selectPrev = function (options) {
 		var { tabIndex } = this._getTab(this._selectedID);
-		this.select((this._tabs[tabIndex - 1] || this._tabs[this._tabs.length - 1]).id);
+		this.select((this._tabs[tabIndex - 1] || this._tabs[this._tabs.length - 1]).id, false, options || {});
 	};
 
 	/**
 	 * Select the next tab (farther to the library tab)
 	 */
-	this.selectNext = function () {
+	this.selectNext = function (options) {
 		var { tabIndex } = this._getTab(this._selectedID);
-		this.select((this._tabs[tabIndex + 1] || this._tabs[0]).id);
+		this.select((this._tabs[tabIndex + 1] || this._tabs[0]).id, false, options || {});
 	};
 	
 	/**
@@ -484,6 +516,62 @@ var Zotero_Tabs = new function () {
 	 */
 	this.selectLast = function () {
 		this.select(this._tabs[this._tabs.length - 1].id);
+	};
+
+	/**
+	 * Moves focus to a tab in the specified direction.
+	 * @param {String} direction. "first", "last", "left", "right", or "current"
+	 * If document.activeElement is a tab, "left" or "right" direction moves focus from that tab.
+	 * Otherwise, focus is moved in the given direction from the currently selected tab.
+	 */
+	this.moveFocus = function (direction) {
+		let focusedTabID = document.activeElement.getAttribute('data-id');
+		var { tabIndex } = this._getTab(this._selectedID);
+
+		let tabIndexToFocus = null;
+	
+		if (direction === "last") {
+			tabIndexToFocus = this._tabs.length - 1;
+		}
+		else if (direction == "first") {
+			tabIndexToFocus = 0;
+		}
+		else if (direction == "current") {
+			tabIndexToFocus = tabIndex;
+		}
+		else {
+			let focusedTabIndex = this._tabs.findIndex(tab => tab.id === focusedTabID);
+			
+			// If the currently focused element is not a tab, use tab that is selected
+			if (focusedTabIndex === -1) {
+				focusedTabIndex = tabIndex;
+			}
+	
+			switch (direction) {
+				case "left":
+					tabIndexToFocus = focusedTabIndex > 0 ? focusedTabIndex - 1 : null;
+					break;
+				case "right":
+					tabIndexToFocus = focusedTabIndex < this._tabs.length - 1 ? focusedTabIndex + 1 : null;
+					break;
+				default:
+					throw new Error(`${direction} is an invalid direction.`);
+			}
+		}
+	
+		if (tabIndexToFocus !== null) {
+			const nextTab = this._tabs[tabIndexToFocus];
+			// There may be duplicate tabs - in normal tab array and in pinned tabs
+			// So to get the right one, fetch all tabs with a given id and filter out one
+			// that's visible
+			let candidates = document.querySelectorAll(`[data-id="${nextTab.id}"]`);
+			for (let node of candidates) {
+				if (node.offsetParent) {
+					node.focus();
+					return;
+				}
+			}
+		}
 	};
 	
 	/**
@@ -650,5 +738,67 @@ var Zotero_Tabs = new function () {
 		document.getElementById('titlebar').hidden = true;
 		document.getElementById('tab-bar-container').hidden = true;
 		document.getElementById('main-window').setAttribute('legacytoolbar', 'true');
+	};
+
+	// Used to move focus back to itemTree or contextPane from the tabs.
+	this.focusWrapAround = function () {
+		// If no item is selected, focus items list.
+		const pane = document.getElementById("zotero-item-pane-content");
+		if (pane.selectedIndex === "0") {
+			document.getElementById("item-tree-main-default").focus();
+		}
+		else {
+			let selected = ZoteroPane.getSelectedItems();
+			// If the selected collection row is duplicates, just focus on the
+			// itemTree until the merge pane is keyboard accessible
+			// If multiple items selected, focus on itemTree as well.
+			let collectionRow = ZoteroPane.collectionsView.selectedTreeRow;
+			if (collectionRow.isDuplicates() || selected.length !== 1) {
+				document.getElementById("item-tree-main-default").focus();
+				return;
+			}
+			// Special treatment for notes and attachments in itemPane
+			selected = selected[0];
+			if (selected.isNote()) {
+				document.getElementById("zotero-note-editor").focus();
+				return;
+			}
+			if (selected.isAttachment()) {
+				document.getElementById("attachment-note-editor").focus();
+				return;
+			}
+			// Focusing on the last field in whichever tab is opened for
+			// regular items
+			const tabBox = document.getElementById("zotero-view-tabbox");
+			if (tabBox.selectedIndex === 0) {
+				const itembox = document.getElementById("zotero-editpane-item-box");
+				itembox.focusLastField();
+			}
+			else if (tabBox.selectedIndex === 1) {
+				const notes = document.getElementById("zotero-editpane-notes");
+				const nodes = notes.querySelectorAll("button");
+				const node = nodes[nodes.length - 1];
+				node.focus();
+				// TODO: the notes are currently inaccessible to the keyboard
+			}
+			else if (tabBox.selectedIndex === 2) {
+				const tagContainer = document.getElementById("tags-box-container");
+				const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
+				const last = tags[tags.length - 1];
+				if (last.id === "tags-box-add-button") {
+					last.focus();
+				}
+				else {
+					last.click();
+				}
+			}
+			else if (tabBox.selectedIndex === 3) {
+				const related = tabBox.querySelector("relatedbox");
+				related.receiveKeyboardFocus("end");
+			}
+			else {
+				throw new Error("The selectedIndex should always be between 1 and 4");
+			}
+		}
 	};
 };

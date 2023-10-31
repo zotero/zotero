@@ -100,7 +100,7 @@
 		
 		<!--EDIT-->
 		<command id="cmd_find"
-			oncommand="document.getElementById('zotero-tb-search').select()"/>
+			oncommand="document.getElementById('zotero-tb-search-textbox').select()"/>
 	</commandset>
 	
 	<keyset id="mainKeyset">
@@ -181,10 +181,35 @@
 								<menupopup id="menu_NewItemPopup"
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
 							</menu>
-							<menuitem id="menu_newNote" class="menu-type-library" label="&zotero.toolbar.newNote;"
-									command="cmd_zotero_newStandaloneNote"/>
 							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
 									command="cmd_zotero_newCollection"/>
+							<menu id="menu_libraryAdd"
+									label="&zotero.toolbar.newLibrary.label;">
+								<menupopup id="menu_libraryAddPopup">
+									<menuitem id="menu_groupAdd" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
+									<menu id="menu_feedAddMenu" label="&zotero.toolbar.feeds.new;">
+										<menupopup>
+											<menuitem id="menu_feedAddFromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
+												command="cmd_zotero_newFeed_fromURL"/>
+											<menuitem id="menu_feedAddFromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
+												oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
+										</menupopup>
+									</menu>
+								</menupopup>
+							</menu>
+							<menu id="menu_attachmentAdd" label="&zotero.items.menu.attach;">
+								<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
+									<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
+									<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
+									<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);" id="zotero-tb-attachment-add-file-link"/>
+								</menupopup>
+							</menu>
+							<menu id="menu_noteAdd" label="&zotero.toolbar.newNote;">
+								<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
+									<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
+									<menuitem label="&zotero.toolbar.note.child;" command="cmd_zotero_newChildNote"/>
+								</menupopup>
+							</menu>
 							<menuitem
 								id="menu_transferFromPDF"
 								class="menu-type-reader pdf"
@@ -706,7 +731,61 @@
 		</toolbar>
 	</toolbox>
 	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
-	<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
+	<hbox>
+		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" style="-moz-box-flex: 1;"/>
+		<hbox id="zotero-tabs-toolbar"  align="center">
+			<hbox align="center" pack="start">
+				<toolbarbutton
+						id="zotero-tb-locate"
+						class="zotero-tb-button"
+						tooltiptext="&zotero.toolbar.openURL.label;"
+						type="menu"
+						tabindex="-1"
+						wantdropmarker="true">
+					<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
+				</toolbarbutton>
+			</hbox>
+			<toolbarbutton id="zotero-tb-opened-tabs" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-opened-tabs-menu" type="panel" />
+			<hbox id="zotero-tb-sync-progress-box" align="center" pack="end">
+				<toolbarbutton id="zotero-tb-sync-stop"
+					tooltiptext="&zotero.sync.stop;"
+					tabindex="-1"
+					style="-moz-user-focus: normal;"
+					oncommand="this.hidden = true; Zotero.Sync.Runner.stop()"
+					hidden="true"/>
+			</hbox>
+
+			<hbox id="zotero-pq-buttons">
+			</hbox>
+
+			<toolbarbutton tabindex="-1" id="zotero-tb-sync-error" hidden="true" style="-moz-user-focus: normal;" />
+			
+			<!--
+				We put this here, but it can be used wherever
+				Zotero.Sync.Runner.updateErrorPanel() puts it
+			-->
+			<panel id="zotero-sync-error-panel" type="arrow" onpopupshown="
+			const buttons = this.getElementsByTagName('button');
+			if (buttons[0]) {
+				buttons[0].focus();
+			}" />
+			
+			<toolbarbutton id="zotero-tb-sync" tabindex="-1" class="zotero-tb-button" tooltip="_child"
+					oncommand="ZoteroPane.sync()">
+				<tooltip
+						id="zotero-tb-sync-tooltip"
+						onpopupshowing="Zotero.Sync.Runner.registerSyncStatus(this)"
+						onpopuphiding="Zotero.Sync.Runner.registerSyncStatus()"
+						noautohide="true">
+					<label id="zotero-tb-sync-label"/>
+					<label id="zotero-tb-sync-status" class="sync-button-tooltip-status" hidden="true"/>
+					<label id="zotero-tb-sync-last-sync" class="sync-button-tooltip-last-sync"/>
+					<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
+				</tooltip>
+			</toolbarbutton>
+		</hbox>
+	</hbox>
+	
 
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
@@ -722,7 +801,7 @@
 			disabled="true"/>
 		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
 		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xhtml', 'rtfScan', 'chrome,centerscreen')"/>
-		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection()"/>
+		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection()?.key)"/>
 		<command id="cmd_zotero_newFeed_fromURL" oncommand="ZoteroPane_Local.newFeedFromURL()"/>
 		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
@@ -751,166 +830,6 @@
 							onkeypress="ZoteroPane_Local.handleKeyPress(event)"
 							chromedir="&locale.dir;">
 							
-							<toolbar id="zotero-toolbar" tabindex="-1" class="toolbar toolbar-primary">
-								<hbox id="zotero-collections-toolbar" align="center">
-									<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
-									<toolbarbutton
-											id="zotero-tb-library-add-menu"
-											class="zotero-tb-button"
-											tabindex="-1"
-											tooltiptext="&zotero.toolbar.newLibrary.label;"
-											type="menu"
-											wantdropmarker="true">
-										<menupopup id="zotero-tb-library-add-popup">
-											<menuitem id="zotero-tb-group-add" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
-											<menu id="zotero-tb-feed-add-menu" label="&zotero.toolbar.feeds.new;">
-												<menupopup>
-													<menuitem id="zotero-tb-feed-add-fromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
-														command="cmd_zotero_newFeed_fromURL"/>
-													<menuitem id="zotero-tb-feed-add-fromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
-														oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
-												</menupopup>
-											</menu>
-										</menupopup>
-									</toolbarbutton>
-								</hbox>
-								
-								<hbox id="zotero-items-toolbar" align="center">
-									<toolbarbutton
-											id="zotero-tb-add"
-											class="zotero-tb-button"
-											tabindex="-1"
-											tooltiptext="&zotero.toolbar.newItem.label;"
-											type="menu"
-											wantdropmarker="true"
-											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
-										<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()">
-											<menuseparator/>
-											<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane_Local.addAttachmentFromDialog(true);" tooltiptext=""/>
-											<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane_Local.addAttachmentFromDialog();"  tooltiptext=""/>
-											<menuseparator/>
-											<menu label="&zotero.toolbar.moreItemTypes.label;" tooltiptext="">
-												<menupopup id="zotero-tb-add-more" onpopupshowing="event.stopPropagation()"/>
-											</menu>
-										</menupopup>
-									</toolbarbutton>
-									
-									<toolbarbutton id="zotero-tb-lookup" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel"
-											onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"/>
-									
-									<panel id="zotero-lookup-panel" type="arrow"
-											onpopupshowing="Zotero_Lookup.onShowing(event)"
-											onpopupshown="Zotero_Lookup.onShown(event)"
-											onpopuphidden="Zotero_Lookup.onHidden(event)"
-											onfocusout="Zotero_Lookup.onFocusOut(event)"
-									>
-										<vbox>
-											<label control="zotero-lookup-textbox">&zotero.lookup.description;</label>
-											<vbox id="zotero-lookup-multiline">
-												<html:textarea
-													id="zotero-lookup-textbox"
-													onkeypress="Zotero_Lookup.onKeyPress(event, this)"
-													oninput="Zotero_Lookup.onInput(event, this)"
-													rows="1"
-													wrap="off"/>
-												<hbox id="zotero-lookup-buttons" align="start" hidden="true">
-													<button
-														align="start"
-														oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-textbox'))"
-														label="&zotero.lookup.button.search;"/>
-													<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="-moz-box-flex: 1"/>
-												</hbox>
-											</vbox>
-										</vbox>
-									</panel>
-									
-									<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
-									<toolbarbutton
-											id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
-											type="menu"
-											tabindex="-1"
-											wantdropmarker="true"
-											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
-										<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
-											<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
-											<menuitem label="&zotero.toolbar.note.child;" command="cmd_zotero_newChildNote"/>
-										</menupopup>
-									</toolbarbutton>
-									<toolbarbutton
-											id="zotero-tb-attachment-add"
-											class="zotero-tb-button"
-											tabindex="-1"
-											tooltiptext="&zotero.items.menu.attach;"
-											type="menu"
-											wantdropmarker="true"
-											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
-										<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
-											<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
-											<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
-											<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);" id="zotero-tb-attachment-add-file-link"/>
-										</menupopup>
-									</toolbarbutton>
-									<toolbarseparator/>
-									<toolbarbutton id="zotero-tb-advanced-search" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" command="cmd_zotero_advancedSearch"/>
-									<spacer flex="1"/>
-									<image id="zotero-tb-search-spinner" class="zotero-spinner-14" style="display: none"/>
-									<quick-search-textbox id="zotero-tb-search" timeout="250"
-											onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
-											oninput="ZoteroPane_Local.handleSearchInput(this, event)"
-											oncommand="ZoteroPane_Local.search()"/>
-								</hbox>
-								
-								<hbox id="zotero-item-toolbar" flex="1" align="center">
-									<hbox align="center" pack="start" flex="1">
-										<toolbarbutton
-												id="zotero-tb-locate"
-												class="zotero-tb-button"
-												tooltiptext="&zotero.toolbar.openURL.label;"
-												type="menu"
-												wantdropmarker="true">
-											<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
-										</toolbarbutton>
-									</hbox>
-									<hbox id="zotero-tb-sync-progress-box" align="center" pack="end">
-										<toolbarbutton id="zotero-tb-sync-stop"
-											tooltiptext="&zotero.sync.stop;"
-											tabindex="-1"
-											style="-moz-user-focus: normal;"
-											oncommand="this.hidden = true; Zotero.Sync.Runner.stop()"
-											hidden="true"/>
-									</hbox>
-				
-									<hbox id="zotero-pq-buttons">
-									</hbox>
-				
-									<toolbarbutton tabindex="-1" id="zotero-tb-sync-error" hidden="true" style="-moz-user-focus: normal;" />
-									
-									<!--
-										We put this here, but it can be used wherever
-										Zotero.Sync.Runner.updateErrorPanel() puts it
-									-->
-									<panel id="zotero-sync-error-panel" type="arrow" onpopupshown="
-									const buttons = this.getElementsByTagName('button');
-									if (buttons[0]) {
-										buttons[0].focus();
-									}" />
-									
-									<toolbarbutton id="zotero-tb-sync" tabindex="-1" class="zotero-tb-button" tooltip="_child"
-											oncommand="ZoteroPane.sync()">
-										<tooltip
-												id="zotero-tb-sync-tooltip"
-												onpopupshowing="Zotero.Sync.Runner.registerSyncStatus(this)"
-												onpopuphiding="Zotero.Sync.Runner.registerSyncStatus()"
-												noautohide="true">
-											<label id="zotero-tb-sync-label"/>
-											<label id="zotero-tb-sync-status" class="sync-button-tooltip-status" hidden="true"/>
-											<label id="zotero-tb-sync-last-sync" class="sync-button-tooltip-last-sync"/>
-											<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
-										</tooltip>
-									</toolbarbutton>
-								</hbox>
-							</toolbar>
-		
 							<vbox id="sync-reminder-container" collapsed="true" role="status">
 								<html:div id="sync-reminder-banner">
 									<html:div id="sync-reminder-message"/>
@@ -1018,6 +937,19 @@
 							
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
+									<toolbar id="zotero-toolbar-collection-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
+										<hbox id="zotero-collections-toolbar" align="center" flex="1">
+											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+											<spacer flex="1"></spacer>
+											<html:div style="display: flex;flex-direction: row;">
+												<toolbarbutton id="zotero-tb-collection-search" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.revealCollectionSearch()"/>
+												<search-textbox
+													id="zotero-collections-search" class="hidden"
+													onkeydown="ZoteroPane.handleCollectionSearchKeypress(this, event)"
+													oncommand="ZoteroPane.handleCollectionSearchInput(this, event)"/>
+											</html:div>
+										</hbox>									
+									</toolbar>
 									<!-- This is used for positioning the sync error icon panel
 											under specific tree cells, which don't exist as
 											elements on their own -->
@@ -1055,9 +987,72 @@
 								</splitter>
 								
 								<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient" flex="1">
-									<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never">
-										<html:div id="zotero-items-tree"></html:div>
-									</hbox>
+									<vbox flex="1">
+										<toolbar id="zotero-toolbar-item-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
+											<hbox id="zotero-items-toolbar" align="center" flex="1">
+												<toolbarbutton
+														id="zotero-tb-add"
+														class="zotero-tb-button"
+														tabindex="-1"
+														tooltiptext="&zotero.toolbar.newItem.label;"
+														type="menu"
+														wantdropmarker="true"
+														onmousedown="if (this.disabled) { event.preventDefault(); return; }">
+													<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()"></menupopup>
+												</toolbarbutton>
+												
+												<toolbarbutton id="zotero-tb-lookup" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel"
+														onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"/>
+												
+												<panel id="zotero-lookup-panel" type="arrow"
+														onpopupshowing="Zotero_Lookup.onShowing(event)"
+														onpopupshown="Zotero_Lookup.onShown(event)"
+														onpopuphidden="Zotero_Lookup.onHidden(event)"
+														onfocusout="Zotero_Lookup.onFocusOut(event)"
+												>
+													<vbox>
+														<label control="zotero-lookup-textbox">&zotero.lookup.description;</label>
+														<vbox id="zotero-lookup-multiline">
+															<html:textarea
+																id="zotero-lookup-textbox"
+																onkeypress="Zotero_Lookup.onKeyPress(event, this)"
+																oninput="Zotero_Lookup.onInput(event, this)"
+																rows="1"
+																wrap="off"/>
+															<hbox id="zotero-lookup-buttons" align="start" hidden="true">
+																<button
+																	align="start"
+																	oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-textbox'))"
+																	label="&zotero.lookup.button.search;"/>
+																<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="-moz-box-flex: 1"/>
+															</hbox>
+														</vbox>
+													</vbox>
+												</panel>
+												
+												<toolbarbutton
+													id="zotero-tb-attachment-add"
+													class="zotero-tb-button"
+													tabindex="-1"
+													data-l10n-id="zotero-toolbar-new-attachment"
+													oncommand="var selected = ZoteroPane.getSelectedItems();if (this.disabled || !selected.length) { event.preventDefault(); return; };  ZoteroPane_Local.addAttachmentFromDialog(false, selected[0].id);">
+												</toolbarbutton>
+												<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
+			
+												<spacer flex="1"/>
+												<image id="zotero-tb-search-spinner" class="zotero-spinner-14" style="display: none"/>
+												<quick-search-textbox id="zotero-tb-search" timeout="250"
+														onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
+														oninput="ZoteroPane_Local.handleSearchInput(this, event)"
+														oncommand="ZoteroPane_Local.search()"/>
+											</hbox>
+											
+										</toolbar>
+										<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never">
+											<html:div id="zotero-items-tree"></html:div>
+										</hbox>
+									</vbox>
+									
 				
 									<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" orient="horizontal" zotero-persist="state orient"
 										onmousemove="ZoteroPane.updateToolbarPosition()"

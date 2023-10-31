@@ -7,7 +7,7 @@
 	-moz-appearance: none;
 }
 
-#zotero-pane #zotero-toolbar {
+#zotero-pane .zotero-toolbar {
 	-moz-appearance: none !important;
 	margin-top: -3px;
 	border-bottom: 1px solid var(--theme-border-color);
@@ -43,7 +43,7 @@
 	padding-right: .7em;
 }
 
-#zotero-toolbar {
+.zotero-toolbar {
 	-moz-appearance: toolbox !important;
 	padding-left: 2px;
 }

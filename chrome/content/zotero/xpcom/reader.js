@@ -1455,11 +1455,10 @@ class Reader {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
-
+		let win = Zotero.getMainWindow();
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
 		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {
-			let win = Zotero.getMainWindow();
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
@@ -1532,7 +1531,9 @@ class Reader {
 			this._readers.push(reader);
 		}
 		
-		if (!openInBackground) {
+		if (!openInBackground
+			&& !win.Zotero_Tabs.focusOptions.keepTabFocused) {
+			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
 		return reader;

@@ -1,3 +1,8 @@
+zotero-toolbar-new-attachment =
+    .tooltiptext = Add File
+zotero-toolbar-opened-tabs-menu =
+    .tooltiptext = List all tabs
+
 import-window =
     .title = Import
 

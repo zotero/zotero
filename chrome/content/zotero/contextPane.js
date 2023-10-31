@@ -222,7 +222,10 @@ var ZoteroContextPane = new function () {
 							if (Zotero_Tabs.selectedID == reader.tabID
 								&& (!document.activeElement
 									|| !document.activeElement.closest('.context-node iframe[id="editor-view"]'))) {
-								reader.focus();
+								if (!Zotero_Tabs.focusOptions?.keepTabFocused) {
+									// Do not move focus to the reader during keyboard navigation
+									reader.focus();
+								}
 							}
 							
 							var attachment = await Zotero.Items.getAsync(reader.itemID);

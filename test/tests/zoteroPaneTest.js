@@ -1485,4 +1485,97 @@ describe("ZoteroPane", function() {
 			stub.restore();
 		});
 	});
+	
+	describe("#focus()", function () {
+		before(async function () {
+			var collection = new Zotero.Collection;
+			collection.name = "Focus Test";
+			await collection.saveTx();
+			await waitForItemsLoad(win);
+		});
+
+		var tab = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			shiftKey: false,
+			bubbles: true
+		});
+
+		var shiftTab = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			shiftKey: true,
+			bubbles: true
+		});
+
+		var rightArrow = new KeyboardEvent('keydown', {
+			key: 'ArrowRight',
+			bubbles: true
+		});
+		var leftArrow = new KeyboardEvent('keydown', {
+			key: 'ArrowLeft',
+			bubbles: true
+		});
+
+
+		it("should shift-tab through the toolbar to item-tree", async function () {
+			let searchBox = doc.getElementById('zotero-tb-search-textbox');
+			searchBox.focus();
+
+			let sequence = [
+				"zotero-tb-search-dropmarker",
+				"zotero-tb-add",
+				"zotero-collections-search",
+				"zotero-tb-collection-add",
+				"zotero-tb-sync",
+				"zotero-tb-opened-tabs"
+			];
+
+			for (let id of sequence) {
+				doc.activeElement.dispatchEvent(shiftTab);
+				assert.equal(doc.activeElement.id, id);
+			}
+
+			doc.activeElement.dispatchEvent(shiftTab);
+			assert.equal(doc.activeElement.className, "tab selected");
+
+			doc.activeElement.dispatchEvent(shiftTab);
+			assert.equal(doc.activeElement.id, "item-tree-main-default");
+		});
+
+		it("should tab through the toolbar to collection-tree", async function () {
+			win.Zotero_Tabs.moveFocus("current");
+			let sequence = [
+				"zotero-tb-opened-tabs",
+				"zotero-tb-sync",
+				"zotero-tb-collection-add",
+				"zotero-collections-search",
+				"zotero-tb-add",
+				"zotero-tb-search-dropmarker",
+				'zotero-tb-search-textbox',
+				'collection-tree',
+			];
+			for (let id of sequence) {
+				doc.activeElement.dispatchEvent(tab);
+				assert.equal(doc.activeElement.id, id);
+			}
+		});
+
+		it("should navigate toolbarbuttons with arrows", async function () {
+			let addItem = doc.getElementById('zotero-tb-add');
+			addItem.focus();
+			
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-attachment-add");
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-note-add");
+
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-attachment-add");
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-add");
+		});
+	});
 })

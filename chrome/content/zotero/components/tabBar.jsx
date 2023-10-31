@@ -272,6 +272,46 @@ const TabBar = forwardRef(function (props, ref) {
 		event.preventDefault();
 	}
 
+	function handleKeyDown(event) {
+		event = event.nativeEvent;
+		let key = event.key;
+		if (key == "Tab") {
+			if (event.shiftKey) {
+				// On shift-tab, wrap focus back to itemTree/itemPane
+				props.wrapFocusAround();
+			}
+			else {
+				// On tab go back to opened tabs menu
+				document.getElementById('zotero-tb-opened-tabs').focus();
+			}
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		// Move focus between tabs with arrows
+		if (["ArrowLeft", "ArrowRight"].includes(key)) {
+			let direction = key == "ArrowLeft" ? "left" : "right";
+			const cmdOrCtrlOnly = Zotero.isMac
+				? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
+				: (event.ctrlKey && !event.shiftKey && !event.altKey);
+			// Ctrl/CMD and an arrow shifts focus
+			if (cmdOrCtrlOnly) {
+				props.moveFocus(direction);
+			}
+			// Just an arrow selects the tab
+			else if (direction == "left") {
+				props.selectPrev({ keepTabFocused: true });
+			}
+			else {
+				props.selectNext({ keepTabFocused: true });
+			};
+		}
+		// Select focused tab on space or enter and focus on content pane
+		if (key == " " || key == "Enter") {
+			let tabID = event.target.getAttribute('data-id');
+			props.onTabSelect(tabID, false, { keepTabFocused: false });
+		}
+	}
+
 	function renderTab({ id, title, selected, iconBackgroundImage }, index) {
 		return (
 			<div
@@ -285,6 +325,8 @@ const TabBar = forwardRef(function (props, ref) {
 				onAuxClick={(event) => handleTabClick(event, id)}
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
+				onKeyDown={handleKeyDown}
+				tabIndex="-1"
 			>
 				<div className="tab-name" dir="auto">{iconBackgroundImage &&
 					<span className="icon-bg" style={{ backgroundImage: iconBackgroundImage }}/>}{title}</div>

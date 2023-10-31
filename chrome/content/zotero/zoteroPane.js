@@ -144,265 +144,240 @@ var ZoteroPane = new function()
 		
 		// continue loading pane
 		_loadPane();
-		setUpToolbar();
+		setUpKeyboardNavigation();
 	};
 
-	function setUpToolbar() {
-		// if the hidden property is ever set on a grandparent or more distant
-		// ancestor this will need to be updated
-		const isVisible = b => !b.hidden && !b.parentElement.hidden;
-		const isTbButton = node => node && node.tagName === "toolbarbutton";
+	function setUpKeyboardNavigation() {
+		let collectionTreeToolbar = this.document.getElementById("zotero-toolbar-collection-tree");
+		let itemTreeToolbar = this.document.getElementById("zotero-toolbar-item-tree");
+		let tabsToolbar = this.document.getElementById("zotero-tabs-toolbar");
+		let itemTree = this.document.getElementById("zotero-items-tree");
+		let collectionsTree = this.document.getElementById("zotero-collections-tree");
+		let tagSelector = this.document.getElementById("zotero-tag-selector");
+		let tagContainer = this.document.getElementById('zotero-tag-selector-container');
+		let collectionsPane = this.document.getElementById("zotero-collections-pane");
 
-		function nextVisible(id, field = "after") {
-			let b = document.getElementById(id);
-			while (!isVisible(b)) {
-				const mapData = focusMap.get(b.id);
-				b = document.getElementById(mapData[field]);
+		// function to handle actual focusing based on a given event
+		// and a mapping of event targets + keys to the focus destinations
+		let moveFocus = function (actionsMap, event, verticalArrowIsTab = false) {
+			if (key === 'Tab' && modifierIsNotShift(event)) return;
+
+			var key = event.key;
+			if (event.shiftKey) {
+				key = 'Shift' + key;
 			}
-			return b;
-		}
-
-		/* constants */
-		const toolbar = this.document.getElementById("zotero-toolbar");
-
-		// assumes no toolbarbuttons are dynamically added, just hidden
-		// or revealed. If this changes, the observer will have to monitor
-		// changes to the childList for each hbox in the toolbar which might
-		// have dynamic children
-		const buttons = toolbar.getElementsByTagName("toolbarbutton");
-		const focusMap = new Map();
-		const zones = [
-			{
-				get start() {
-					return document.getElementById("zotero-tb-collection-add");
-				},
-				focusBefore() {
-					// If no item is selected, focus items list.
-					const pane = document.getElementById("zotero-item-pane-content");
-					if (pane.selectedIndex === "0") {
-						document.getElementById("item-tree-main-default").focus();
-					}
-					else {
-						const tabBox = document.getElementById("zotero-view-tabbox");
-						if (tabBox.selectedIndex === 0) {
-							const itembox = document.getElementById("zotero-editpane-item-box");
-							itembox.focusLastField();
-						}
-						else if (tabBox.selectedIndex === 1) {
-							const notes = document.getElementById("zotero-editpane-notes");
-							const nodes = notes.querySelectorAll("button");
-							const node = nodes[nodes.length - 1];
-							node.focus();
-							// TODO: the notes are currently inaccessible to the keyboard
-						}
-						else if (tabBox.selectedIndex === 2) {
-							const tagContainer = document.getElementById("tags-box-container");
-							const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
-							const last = tags[tags.length - 1];
-							if (last.id === "tags-box-add-button") {
-								last.focus();
-							}
-							else {
-								last.click();
-							}
-						}
-						else if (tabBox.selectedIndex === 3) {
-							const related = tabBox.querySelector("relatedbox");
-							related.receiveKeyboardFocus("end");
-						}
-						else {
-							throw new Error("The selectedIndex should always be between 1 and 4");
-						}
-					}
-				},
-				focusAfter() {
-					document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
-				}
-			},
-			{
-				get start() {
-					return document.getElementById("zotero-tb-locate");
-				},
-				focusBefore() {
-					document.getElementById("zotero-tb-search").focus();
-				},
-				focusAfter() {
-					document.getElementById("collection-tree").focus();
-				}
+			// ArrowUp or ArrowDown act the same way as as
+			// tab/shift-tab unles it is on a menu, in which case
+			// it'll open the menu popup
+			let isMenu = event.target.getAttribute('type') === 'menu'
+						|| event.originalTarget?.getAttribute('type') === 'menu';
+			if (isMenu && ['ArrowUp', 'ArrowDown'].includes(key)) {
+				return;
 			}
-		];
-
-		/*
-			observe buttons and containers for changes in the "hidden"
-			attribute
-		*/
-		const observer = new MutationObserver((mutations, _) => {
-			for (const mutation of mutations) {
-				if (mutation.target.hidden
-					&& (document.activeElement === mutation.target
-						|| mutation.target.contains(document.activeElement))
-				) {
-					const next = nextVisible(document.activeElement.id, "before");
-					next.focus();
-				}
+			if (verticalArrowIsTab && key == 'ArrowUp') {
+				key = 'Tab';
 			}
+			else if (verticalArrowIsTab && key == 'ArrowDown') {
+				key = 'ShiftTab';
+			}
+			let focusFunction = actionsMap[event.target.id]?.[key];
+			// If the focusFunction is undefined, nothing was found
+			// for this combination of keys, so do nothing
+			if (focusFunction === undefined) {
+				return;
+			}
+			// Otherwise, fetch the target to focus on
+			let target = focusFunction();
+			// If returned target is false, focusing was not handled,
+			// so fallback to default focus target
+			if (target === false) {
+				return;
+			}
+			// If target is undefined, the actionsMap's function
+			// handled focus by itself (e.g. by calling .click)
+			if (target) {
+				// If desired target is hidden/disabled, create a fake event
+				// and dispatch it on the hidden target to rerun moveFocus
+				// and place focus on the next non-hidden node
+				if (target.disabled || target.hidden || target.parentNode.hidden) {
+					event.target = target;
+					let fakeEventCopy = new KeyboardEvent('keydown', {
+						key: event.key,
+						shiftKey: event.shiftKey,
+						bubbles: true
+					});
+					target.dispatchEvent(fakeEventCopy);
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+				target.focus();
+			}
+			event.preventDefault();
+			event.stopPropagation();
+		};
+
+		tabsToolbar.addEventListener("keydown", (event) => {
+			// Mapping of target ids and possible key presses to desired focus outcomes
+			let actionsMap = {
+				'zotero-tb-opened-tabs': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById('zotero-tb-sync-error'),
+					ShiftTab: () => {
+						Zotero_Tabs.moveFocus("current");
+					},
+				},
+				'zotero-tb-sync': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => {
+						if (collectionsPane.getAttribute("collapsed")) {
+							return document.getElementById('zotero-tb-add');
+						}
+						return document.getElementById('zotero-tb-collection-add');
+					},
+					ShiftTab: () => document.getElementById('zotero-tb-sync-stop')
+				},
+				'zotero-tb-sync-stop': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById('zotero-tb-sync'),
+					ShiftTab: () => document.getElementById('zotero-tb-sync-error')
+				},
+				'zotero-tb-sync-error': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById('zotero-tb-sync-stop'),
+					ShiftTab: () => document.getElementById('zotero-tb-opened-tabs'),
+					Enter: () => document.getElementById("zotero-tb-sync-error")
+						.dispatchEvent(new MouseEvent("click", { target: event.target })),
+					' ': () => document.getElementById("zotero-tb-sync-error")
+						.dispatchEvent(new MouseEvent("click", { target: event.target }))
+				}
+			};
+			moveFocus(actionsMap, event);
 		});
 
-		/*
-			build a chain which connects all the <toolbarbutton>s,
-			except for zotero-tb-locate and zotero-tb-advanced-search
-			which is where the chain breaks
-		*/
-		let prev = null;
-		let _zone = zones[0];
-		for (const button of buttons) {
-			focusMap.set(button.id, {
-				before: prev,
-				after: null,
-				zone: _zone
-			});
-
-			/* observe each button for changes to "hidden" */
-			observer.observe(button, {
-				attributes: true,
-				attributeFilter: ["hidden"]
-			});
-
-			if (focusMap.has(prev)) {
-				focusMap.get(prev).after = button.id;
-			}
-
-			prev = button.id;
-
-			// break the chain at zotero-tb-advanced-search
-			if (button.id === "zotero-tb-advanced-search") {
-				_zone = zones[1];
-				prev = null;
-			}
-		}
-		
-		
-		observer.observe(document.getElementById("zotero-tb-sync-stop"), {
-			attributes: true,
-			attributeFilter: ["hidden"]
+		collectionTreeToolbar.addEventListener("keydown", (event) => {
+			let actionsMap = {
+				'zotero-tb-collection-add': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById('zotero-tb-collection-search').click(),
+					ShiftTab: () => document.getElementById('zotero-tb-sync')
+				},
+				'zotero-collections-search': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById('zotero-tb-add'),
+					ShiftTab: () => document.getElementById('zotero-tb-collection-add')
+				},
+			};
+			moveFocus(actionsMap, event, true);
 		});
 
-		// lookupButton and syncErrorButton show popup panels, and so need special treatment
-		const lookupButton = document.getElementById("zotero-tb-lookup");
-		const syncErrorButton = document.getElementById("zotero-tb-sync-error");
-
-		/* buttons at the start of zones need tabindex=0 */
-		for (const zone of zones) {
-			zone.start.setAttribute("tabindex", "0");
-		}
-
-		toolbar.addEventListener("keydown", (event) => {
-			// manually move focus when Shift+Tabbing from the search-menu-button
-			if (event.key === 'Tab' && event.shiftKey
-					&& !modifierIsNotShift(event)
-					&& event.originalTarget
-					&& event.originalTarget.id == "zotero-tb-search-menu-button") {
-				event.preventDefault();
-				event.stopPropagation();
-				zones[0].start.focus();
-				return;
-			}
-			// manually move focus to search menu when Shift+Tabbing from the search-menu
-			if (event.key === 'Tab' && event.shiftKey
-					&& !modifierIsNotShift(event)
-					&& event.originalTarget?.tagName == "input") {
-				event.preventDefault();
-				event.stopPropagation();
-				document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
-				return;
-			}
-			// only handle events on a <toolbarbutton>
-			if (!isTbButton(event.target)) return;
-
-			const mapData = focusMap.get(event.target.id);
-
-			if (!Zotero.rtl && event.key === 'ArrowRight'
-					|| Zotero.rtl && event.key === 'ArrowLeft') {
-				event.preventDefault();
-				event.stopPropagation();
-				if (mapData.after) {
-					nextVisible(mapData.after, "after").focus();
+		itemTreeToolbar.addEventListener("keydown", (event) => {
+			let openMenu = (node) => {
+				const popup = node.querySelector("menupopup");
+				if (popup !== null && !node.disabled) {
+					popup.openPopup();
 				}
-				return;
-			}
-			if (!Zotero.rtl && event.key === 'ArrowLeft'
-					|| Zotero.rtl && event.key === 'ArrowRight') {
-				event.preventDefault();
-				event.stopPropagation();
-				if (mapData.before) {
-					nextVisible(mapData.before, "before").focus();
+			};
+			let actionsMap = {
+				'zotero-tb-add': {
+					ArrowRight: () => document.getElementById("zotero-tb-lookup"),
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					ShiftTab: () => {
+						if (collectionsPane.getAttribute("collapsed")) {
+							return document.getElementById('zotero-tb-sync');
+						}
+						document.getElementById('zotero-tb-collection-search').click();
+						return null;
+					},
+					' ': () => {
+						openMenu(document.getElementById('zotero-tb-add'));
+					},
+					Enter: () => {
+						openMenu(document.getElementById('zotero-tb-add'));
+					}
+				},
+				'zotero-tb-lookup': {
+					ArrowRight: () => document.getElementById("zotero-tb-attachment-add"),
+					ArrowLeft: () => document.getElementById("zotero-tb-add"),
+					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click(),
+					Enter: () => Zotero_Lookup.showPanel(event.target),
+					' ': () => Zotero_Lookup.showPanel(event.target)
+				},
+				'zotero-tb-attachment-add': {
+					ArrowRight: () => document.getElementById("zotero-tb-note-add"),
+					ArrowLeft: () => document.getElementById("zotero-tb-lookup"),
+					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click()
+				},
+				'zotero-tb-note-add': {
+					ArrowRight: () => null,
+					ArrowLeft: () => document.getElementById("zotero-tb-attachment-add"),
+					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click()
+				},
+				'zotero-tb-search-textbox': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					ShiftTab: () => {
+						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
+					},
+					Tab: () => document.getElementById("collection-tree")
+				},
+				'zotero-tb-search-dropmarker': {
+					ArrowRight: () => null,
+					ArrowLeft: () => null,
+					Tab: () => document.getElementById("zotero-tb-search-textbox"),
+					ShiftTab: () => document.getElementById('zotero-tb-add')
 				}
-				return;
-			}
+			};
+			moveFocus(actionsMap, event, true);
+		});
 
-			/* manually trigger on space and enter */
-			if (event.key === ' ' || event.key === 'Enter') {
-				if (event.target.disabled) return;
-
-				if (event.target === lookupButton) {
-					event.preventDefault();
-					event.stopPropagation();
-					Zotero_Lookup.showPanel(event.target);
-				}
-				else if (event.target === syncErrorButton) {
-					event.preventDefault();
-					event.stopPropagation();
-					syncErrorButton.dispatchEvent(new MouseEvent("click", {
-						target: event.target
-					}));
-				}
-				else if (event.target.getAttribute('type') === 'menu') {
-					event.preventDefault();
-					event.stopPropagation();
-					const popup = event.target.querySelector("menupopup");
-					if (popup !== null && !event.target.disabled) {
-						popup.openPopup();
+		collectionsTree.addEventListener("keydown", (event) => {
+			let actionsMap = {
+				'collection-tree': {
+					ShiftTab: () => document.getElementById("zotero-tb-search-textbox"),
+					Tab: () => {
+						if (tagContainer.getAttribute('collapsed') == "true") {
+							return document.getElementById('item-tree-main-default');
+						}
+						// If tag selector is collapsed, go to itemTree, otherwise
+						// default to focusing on tag selector
+						return false;
 					}
 				}
-			}
+			};
+			moveFocus(actionsMap, event);
+		});
 
-			/* activate menus and popups on ArrowDown and ArrowUp, otherwise prepare for a focus change */
-			else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-				if (event.target === lookupButton && !event.target.disabled) {
-					event.preventDefault();
-					event.stopPropagation();
-					Zotero_Lookup.showPanel(event.target);
-				}
-				else if (event.target.getAttribute('type') === 'menu' && !event.target.disabled) {
-					event.preventDefault();
-					event.stopPropagation();
-					const popup = event.target.querySelector("menupopup");
-					if (popup !== null && !event.target.disabled) {
-						popup.openPopup();
+		itemTree.addEventListener("keydown", (event) => {
+			let actionsMap = {
+				'item-tree-main-default': {
+					ShiftTab: () => {
+						if (tagContainer.getAttribute('collapsed') == "true") {
+							return document.getElementById('collection-tree');
+						}
+						return document.getElementById('zotero-tag-selector').querySelector('button');
 					}
 				}
+			};
+			moveFocus(actionsMap, event);
+		});
 
-				/* prepare for a focus change */
-				else if (event.key === 'ArrowDown') {
-					event.preventDefault();
-					event.stopPropagation();
-					mapData.zone.focusBefore();
-				}
-				else if (event.key === 'ArrowUp') {
-					event.preventDefault();
-					event.stopPropagation();
-					mapData.zone.focusAfter();
-				}
-			}
-			else if (event.key === 'Tab' && !modifierIsNotShift(event)) {
+		tagSelector.addEventListener("keydown", (event) => {
+			// Special treatment for tag selector button because it has no id
+			if (event.target.tagName == "button" && event.key == "Tab" && !event.shiftKey) {
+				document.getElementById('item-tree-main-default').focus();
 				event.preventDefault();
 				event.stopPropagation();
-				if (event.shiftKey) {
-					mapData.zone.focusBefore();
-				}
-				else {
-					mapData.zone.focusAfter();
-				}
 			}
 		});
 	}
@@ -582,31 +557,33 @@ var ZoteroPane = new function()
 		var addMenu = document.getElementById('zotero-tb-add').firstElementChild;
 		
 		// Remove all nodes so we can regenerate
-		var options = [...addMenu.querySelectorAll('.zotero-tb-add')];
-		while (options.length) {
-			options.shift().remove();
-		}
-		var moreMenu = document.getElementById('zotero-tb-add-more');
-		while (moreMenu.hasChildNodes()) {
-			moreMenu.removeChild(moreMenu.firstChild);
-		}
+		addMenu.replaceChildren();
 		
-		var separator = addMenu.firstChild;
-		
-		// Populate primary types from MRU
-		
-		var itemTypes = [];
-		for (let type of primaryTypes) {
-			itemTypes.push({
+		// Primary types from MRU
+		let primaryItemTypes = primaryTypes.map((type) => {
+			return {
 				id: type.id,
 				name: type.name,
 				localized: Zotero.ItemTypes.getLocalizedString(type.id)
-			});
-		}
+			};
+		});
+		// Item types not in the MRU list
+		let secondaryItemTypes = Zotero.ItemTypes.getSecondaryTypes().map((type) => {
+			return {
+				id: type.id,
+				name: type.name,
+				localized: Zotero.ItemTypes.getLocalizedString(type.id)
+			};
+		});
 		var collation = Zotero.getLocaleCollation();
-		itemTypes.sort(function(a, b) {
+		primaryItemTypes.sort(function (a, b) {
 			return collation.compareString(1, a.localized, b.localized);
 		});
+		secondaryItemTypes.sort(function (a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
+		let lastPrimaryType = primaryItemTypes[primaryItemTypes.length - 1];
+		let itemTypes = primaryItemTypes.concat(secondaryItemTypes);
 		for (let itemType of itemTypes) {
 			let menuitem = document.createXULElement("menuitem");
 			menuitem.setAttribute("label", itemType.localized);
@@ -615,32 +592,12 @@ var ZoteroPane = new function()
 			menuitem.addEventListener("command", function () {
 				ZoteroPane.newItem(type, {}, null, true);
 			});
-			menuitem.className = "zotero-tb-add";
-			addMenu.insertBefore(menuitem, separator);
-		}
-		
-		// Populate submenu with each item type not in the MRU list
-		itemTypes = [];
-		for (let type of Zotero.ItemTypes.getSecondaryTypes()) {
-			itemTypes.push({
-				id: type.id,
-				name: type.name,
-				localized: Zotero.ItemTypes.getLocalizedString(type.id)
-			});
-		}
-		var collation = Zotero.getLocaleCollation();
-		itemTypes.sort(function(a, b) {
-			return collation.compareString(1, a.localized, b.localized);
-		});
-		for (var i = 0; i<itemTypes.length; i++) {
-			var menuitem = document.createXULElement("menuitem");
-			menuitem.setAttribute("label", itemTypes[i].localized);
-			menuitem.setAttribute("tooltiptext", "");
-			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function () {
-				ZoteroPane.newItem(type, {}, null, true);
-			});
-			moreMenu.appendChild(menuitem);
+			addMenu.appendChild(menuitem);
+			// Add a separator between primary and secondary types
+			if (lastPrimaryType.id == type) {
+				let separator = document.createXULElement("menuseparator");
+				addMenu.appendChild(separator);
+			}
 		}
 	}
 	
@@ -711,7 +668,7 @@ var ZoteroPane = new function()
 		// Focus the quicksearch on pane open
 		var searchBar = document.getElementById('zotero-tb-search');
 		setTimeout(function () {
-			searchBar.inputField.select();
+			searchBar.searchTextbox.select();
 		}, 1);
 		
 		//
@@ -1072,6 +1029,33 @@ var ZoteroPane = new function()
 		}
 		ZoteroPane_Local.collectionsView.setHighlightedRows();
 	}
+
+	this.revealCollectionSearch = function () {
+		let collectionSearchField = document.getElementById("zotero-collections-search");
+		let collectionSearchButton = document.getElementById("zotero-tb-collection-search");
+		var hideIfEmpty = function () {
+			if (!collectionSearchField.value.length) {
+				collectionSearchField.classList.remove("visible");
+				collectionSearchButton.style.display = '';
+			}
+		};
+		if (!collectionSearchField.classList.contains("visible")) {
+			collectionSearchButton.style.display = 'none';
+			collectionSearchField.classList.add("visible");
+			collectionSearchField.addEventListener('blur', hideIfEmpty);
+		}
+		collectionSearchField.focus();
+	};
+
+	this.handleCollectionSearchKeypress = function (textbox, event) {
+		if (event.keyCode == event.DOM_VK_ESCAPE) {
+			textbox.value = '';
+			textbox.blur();
+		}
+	};
+
+
+	this.handleCollectionSearchInput = function (textbox, _) { };
 	
 	function handleKeyUp(event) {
 		if ((Zotero.isWin && event.keyCode == 17) ||
@@ -1169,7 +1153,7 @@ var ZoteroPane = new function()
 					document.getElementById(ZoteroPane.collectionsView.id).focus();
 					break;
 				case 'quicksearch':
-					document.getElementById('zotero-tb-search').select();
+					document.getElementById('zotero-tb-search-textbox').select();
 					break;
 				case 'newItem':
 					(async function () {
@@ -1182,7 +1166,7 @@ var ZoteroPane = new function()
 						var menu = itemBox.itemTypeMenu;
 						// If the new item's type is changed immediately, update the MRU
 						var handleTypeChange = function () {
-							this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.value));
+							this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.getAttribute('value')));
 							itemBox.removeHandler('itemtypechange', handleTypeChange);
 						}.bind(this);
 						// Don't update the MRU on subsequent opens of the item type menu
@@ -1325,6 +1309,9 @@ var ZoteroPane = new function()
 	
 	
 	this.addItemTypeToNewItemTypeMRU = function (itemType) {
+		if (!itemType) {
+			throw new Error(`Item type not provided`);
+		}
 		var mru = Zotero.Prefs.get('newItemTypeMRU');
 		if (mru) {
 			var mru = mru.split(',');
@@ -1643,7 +1630,7 @@ var ZoteroPane = new function()
 			let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
 			
 			// Clear quick search and tag selector when switching views
-			document.getElementById('zotero-tb-search').value = "";
+			document.getElementById('zotero-tb-search-textbox').value = "";
 			if (ZoteroPane.tagSelector) {
 				ZoteroPane.tagSelector.clearTagSelection();
 			}
@@ -2722,8 +2709,8 @@ var ZoteroPane = new function()
 	
 	this.clearQuicksearch = Zotero.Promise.coroutine(function* () {
 		var search = document.getElementById('zotero-tb-search');
-		if (search.value !== '') {
-			search.value = '';
+		if (search.searchTextbox.value !== '') {
+			search.searchTextbox.value = '';
 			yield this.search();
 			return true;
 		}
@@ -2736,7 +2723,7 @@ var ZoteroPane = new function()
 	 */
 	this.handleSearchKeypress = function (textbox, event) {
 		if (event.keyCode == event.DOM_VK_ESCAPE) {
-			textbox.value = '';
+			textbox.searchTextbox.value = '';
 			this.search();
 		}
 		else if (event.keyCode == event.DOM_VK_RETURN) {
@@ -2760,12 +2747,12 @@ var ZoteroPane = new function()
 			return;
 		}
 		var search = document.getElementById('zotero-tb-search');
-		if (!runAdvanced && search.value.indexOf('"') != -1) {
+		var searchVal = search.searchTextbox.value;
+		if (!runAdvanced && searchVal.indexOf('"') != -1) {
 			return;
 		}
 		var spinner = document.getElementById('zotero-tb-search-spinner');
 		spinner.style.display = 'inline';
-		var searchVal = search.value;
 		yield this.itemsView.setFilter('search', searchVal);
 		spinner.style.display = 'none';
 		if (runAdvanced) {
@@ -6290,47 +6277,13 @@ var ZoteroPane = new function()
 		var paneStack = document.getElementById("zotero-pane-stack");
 		if(paneStack.hidden) return;
 
-		var stackedLayout = Zotero.Prefs.get("layout") === "stacked";
-
 		var collectionsPane = document.getElementById("zotero-collections-pane");
-		var collectionsToolbar = document.getElementById("zotero-collections-toolbar");
-		var collectionsTree = document.querySelector('#zotero-collections-tree .tree');
-		var itemsPane = document.getElementById("zotero-items-pane");
-		var itemsToolbar = document.getElementById("zotero-items-toolbar");
-		var itemPane = document.getElementById("zotero-item-pane");
-		var itemToolbar = document.getElementById("zotero-item-toolbar");
 		var tagSelector = document.getElementById("zotero-tag-selector");
 		
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
-		collectionsToolbar.style.width = collectionsPaneWidth + 'px';
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
-		if (collectionsTree) {
-			let borderSize = Zotero.isMac ? 0 : 2;
-			collectionsTree.style.maxWidth = (collectionsPaneWidth - borderSize) + 'px';
-		}
 		if (ZoteroPane.itemsView) {
 			ZoteroPane.itemsView.updateHeight();
-		}
-		
-		if (stackedLayout || itemPane.collapsed) {
-		// The itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).
-			itemsToolbar.setAttribute("flex", "1");
-			itemToolbar.setAttribute("flex", "0");
-		} else {
-			var itemsToolbarWidth = itemsPane.getBoundingClientRect().width;
-
-			if (collectionsPane.collapsed) {
-				itemsToolbarWidth -= collectionsToolbar.getBoundingClientRect().width;
-			}
-			// Not sure why this is necessary, but it keeps the search bar from overflowing into the
-			// right-hand pane
-			else {
-				itemsToolbarWidth -= 8;
-			}
-			
-			itemsToolbar.style.width = itemsToolbarWidth + "px";
-			itemsToolbar.setAttribute("flex", "0");
-			itemToolbar.setAttribute("flex", "1");
 		}
 		
 		this.handleTagSelectorResize();

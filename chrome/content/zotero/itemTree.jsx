@@ -499,7 +499,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var activeWindow = zp && zp.itemsView == this;
 
 		var quickSearch = this._ownerDocument.getElementById('zotero-tb-search');
-		var hasQuickSearch = quickSearch && quickSearch.value != '';
+		var hasQuickSearch = quickSearch && quickSearch.searchTextbox.value != '';
 
 		// 'collection-item' ids are in the form collectionID-itemID
 		if (type == 'collection-item') {
@@ -1098,7 +1098,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				Zotero.debug("_rowMap not yet set; not selecting items");
 				return 0;
 			}
-			
+
 			Zotero.debug('Item group not found and no row map in ItemTree.selectItem() -- discarding select', 2);
 			return 0;
 		}
