@@ -1416,6 +1416,10 @@ Zotero.File = new function(){
 			|| path.includes('Google Drive')
 			// OneDrive
 			|| path.toLowerCase().includes('onedrive')
+			// Baidu Netdisk
+			|| path.toLowerCase().includes('baidunetdisk')
+			// MEGA
+			|| path.includes('MEGA')
 			// pCloud
 			|| path.toLowerCase().includes('pcloud')
 			// iCloud Drive (~/Library/Mobile Documents/com~apple~CloudDocs)
