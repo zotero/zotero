@@ -153,7 +153,7 @@ var ZoteroItemPane = new function() {
 	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
 		var viewBox = document.getElementById('zotero-view-item');
 		if (viewBox.selectedIndex == 0 && action == 'refresh' && _lastItem) {
-			yield this.viewItem(_lastItem, null, 0);
+			yield this.viewItem(_lastItem, _lastItem.library?.editable ? null : 'view', 0);
 		}
 	});
 	
