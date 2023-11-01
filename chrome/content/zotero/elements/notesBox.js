@@ -25,6 +25,8 @@
 
 "use strict";
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 {
 	class NotesBox extends XULElement {
 		constructor() {
@@ -123,8 +125,7 @@
 			let notes = Zotero.Items.get(this._item.getNotes());
 			for (let item of notes) {
 				let id = item.id;
-				let icon = document.createElement("img");
-				icon.src = item.getImageSrc();
+				let icon = getCSSItemTypeIcon(item.getItemTypeIconName());
 
 				let label = document.createElement("label");
 				label.append(item.getDisplayTitle());

@@ -20,7 +20,36 @@ Icon.propTypes = {
 	style: object
 }
 
-module.exports = { Icon }
+const CSSIcon = (props) => {
+	props = Object.assign({}, props);
+	props.className = `icon icon-css icon-${props.name} ${props.className || ""}`;
+	delete props.name;
+	// Pass the props forward
+	return <span {...props}></span>;
+};
+
+CSSIcon.propTypes = {
+	children: element,
+	className: string,
+	name: string.isRequired,
+	style: object
+};
+
+const CSSItemTypeIcon = (props) => {
+	props = Object.assign({}, props);
+	let itemType = props.itemType;
+	delete props.itemType;
+	return <CSSIcon name="item-type" data-item-type={itemType} {...props} />;
+};
+
+CSSItemTypeIcon.propTypes = {
+	children: element,
+	className: string,
+	itemType: string.isRequired,
+	style: object
+};
+
+module.exports = { Icon, CSSIcon, CSSItemTypeIcon };
 
 
 function i(name, svgOrSrc, hasHiDPI = true) {
@@ -231,4 +260,10 @@ module.exports.getCSSIcon = function (key) {
 	}
 
 	return cssIconsCache.get(key).cloneNode(true);
+};
+
+module.exports.getCSSItemTypeIcon = function (itemType) {
+	let icon = module.exports.getCSSIcon('icon-item-type');
+	icon.dataset.itemType = itemType;
+	return icon;
 };

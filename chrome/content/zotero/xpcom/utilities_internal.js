@@ -1970,10 +1970,10 @@ Zotero.Utilities.Internal = {
 	 */
 	determineAttachmentIcon: function(attachment) {
 		if(attachment.linkMode === "linked_url") {
-			return Zotero.ItemTypes.getImageSrc("attachment-web-link");
+			return Zotero.ItemTypes.getImageSrc("attachmentWebLink");
 		}
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
-			? "attachment-pdf" : "attachment-snapshot");
+			? "attachmentPDF" : "attachmentSnapshot");
 	},
 	
 	/**

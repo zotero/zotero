@@ -25,6 +25,7 @@
 
 import React, { forwardRef, useImperativeHandle, useState, memo } from 'react';
 import cx from 'classnames';
+import { CSSItemTypeIcon } from 'components/icons';
 
 const MAX_UNEXPANDED_ALL_NOTES = 7;
 
@@ -40,7 +41,7 @@ const NoteRow = memo(({ id, title, body, date, onClick, onKeyDown, onContextMenu
 			<div className="inner">
 				{ parentItemType
 					? <div className="parent-line">
-						<img className="parent-item-type" src={Zotero.ItemTypes.getImageSrc(parentItemType)} />
+						<CSSItemTypeIcon className="parent-item-type" itemType={parentItemType} />
 						<span className="parent-title">{parentTitle}</span>
 					</div>
 					: null

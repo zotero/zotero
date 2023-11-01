@@ -28,6 +28,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var NotesList = require('components/itemPane/notesList').default;
+var { getCSSItemTypeIcon } = require('components/icons');
 
 var ZoteroContextPane = new function () {
 	var _tabCover;
@@ -850,13 +851,12 @@ var ZoteroContextPane = new function () {
 			var parentItem = item.parentItem;
 			if (parentItem) {
 				var container = document.createElement('div');
-				var img = document.createElement('img');
-				img.src = Zotero.ItemTypes.getImageSrc(parentItem.itemType);
-				img.className = 'parent-item-type';
+				var icon = getCSSItemTypeIcon(parentItem.getItemTypeIconName());
+				icon.classList.add('parent-item-type');
 				var title = document.createElement('div');
 				title.append(parentItem.getDisplayTitle());
 				title.className = 'parent-title';
-				container.append(img, title);
+				container.append(icon, title);
 				parentTitleContainer.append(container);
 			}
 			_updateAddToNote();

@@ -31,7 +31,7 @@ const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
-const { getDOMElement, getCSSIcon } = Icons;
+const { getDOMElement, getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
@@ -2767,22 +2767,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let ariaLabel;
 			// If the item has a child attachment
 			if (type !== null && type != 'none') {
-				icon = getCSSIcon('icon-item-type');
-
 				if (type == 'pdf') {
-					icon.dataset.itemType = 'attachmentPDF';
+					icon = getCSSItemTypeIcon('attachmentPDF');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
 				}
 				else if (type == 'snapshot') {
-					icon.dataset.itemType = 'attachmentSnapshot';
+					icon = getCSSItemTypeIcon('attachmentSnapshot');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
 				}
 				else if (type == 'epub') {
-					icon.dataset.itemType = 'attachmentEPUB';
+					icon = getCSSItemTypeIcon('attachmentEPUB');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
 				}
 				else {
-					icon.dataset.itemType = 'attachmentFile';
+					icon = getCSSItemTypeIcon('attachmentFile');
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
 				
@@ -3782,39 +3780,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_getIcon(index) {
 		var item = this.getRow(index).ref;
-		var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
-		if (itemType == 'attachment') {
-			var linkMode = item.attachmentLinkMode;
-			
-			if (item.isPDFAttachment()) {
-				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					itemType += 'PDFLink';
-				}
-				else {
-					itemType += 'PDF';
-				}
-			}
-			else if (item.isEPUBAttachment()) {
-				itemType += 'EPUB';
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-				itemType += "File";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				itemType += "Link";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-				itemType += "Snapshot";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				itemType += "WebLink";
-			}
-		}
-				
-		let icon = getCSSIcon('icon-item-type');
-		icon.dataset.itemType = itemType;
-		
-		return icon;
+		var itemType = item.getItemTypeIconName();
+		return getCSSItemTypeIcon(itemType);
 	}
 
 	_canGetBestAttachmentState(item) {

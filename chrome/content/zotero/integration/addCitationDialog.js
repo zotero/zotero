@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Zotero_Citation_Dialog = new function () {
@@ -835,8 +837,7 @@ var Zotero_Citation_Dialog = new function () {
 		}
 
 		itemNode.setAttribute("value", itemDataID);
-		let image = document.createXULElement('image');
-		image.src = item.getImageSrc();
+		let image = getCSSItemTypeIcon(item.getItemTypeIconName());
 		itemNode.append(image);
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.append(item.getDisplayTitle());

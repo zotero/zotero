@@ -48,10 +48,12 @@
 	.cell.numNotes {
 		text-align: center;
 	}
+}
 	
-	$itemTypesIcons: (
+$-itemTypesIcons: (
 	artwork,
 	attachment-epub,
+	attachment-epub-link,
 	attachment-file, // mapped to document below
 	attachment-link,
 	attachment-pdf-link,
@@ -96,35 +98,46 @@
 	tv-broadcast,
 	video-recording,
 	webpage
-	);
-	
-	$itemTypesMap: (
+);
+
+$-itemTypesMap: (
 	"attachment-file": "document"
-	);
-	
-	
-	.virtualized-table .row {
-		.icon-item-type {
-			width: 16px;
-			height: 16px;
+);
+
+.icon-item-type {
+	width: 16px;
+	height: 16px;
+}
+
+// Due to quirks of the state() mixin, we need two sets of .icon-item-type rules:
+// one when the icon is within a virtualized-table, and one when it isn't. We declare
+// a mixin here to avoid duplication.
+
+@mixin -icon-item-type-rules($color) {
+	.icon-item-type {
+		// default icon, for known item types more specific selectors below will apply
+		@include svgicon("document", $color, "16", "item-type", true);
+	}
+
+	@each $itemTypeIcon in $-itemTypesIcons {
+		$itemType: camelCase(str-replace(str-replace($itemTypeIcon, "pdf", "PDF"), "epub", "EPUB"));
+
+		@if map.has-key($-itemTypesMap, $itemTypeIcon) {
+			$itemTypeIcon: map.get($-itemTypesMap, $itemTypeIcon);
 		}
-		
-		@include focus-states using ($color) {
-			.icon-item-type {
-				// default icon, for known item types more specific selectors below will apply
-				@include svgicon("document", $color, "16", "item-type", true);
-			}
-			@each $itemTypeIcon in $itemTypesIcons {
-				$itemType: camelCase(str-replace(str-replace($itemTypeIcon, "pdf", "PDF"), "epub", "EPUB"));
-				
-				@if map.has-key($itemTypesMap, $itemTypeIcon) {
-					$itemTypeIcon: map.get($itemTypesMap, $itemTypeIcon);
-				}
-				
-				.icon-item-type[data-item-type=#{$itemType}] {
-					@include svgicon($itemTypeIcon, $color, "16", "item-type", true);
-				}
-			}
+
+		.icon-item-type[data-item-type=#{$itemType}] {
+			@include svgicon($itemTypeIcon, $color, "16", "item-type", true);
 		}
+	}
+}
+
+@include focus-states using($color) {
+	@include -icon-item-type-rules($color);
+}
+
+.virtualized-table .row {
+	@include focus-states using($color) {
+		@include -icon-item-type-rules($color);
 	}
 }
