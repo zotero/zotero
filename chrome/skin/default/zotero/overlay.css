@@ -207,7 +207,6 @@
 }
 
 #zotero-collections-toolbar {
-	margin-inline-end: 10px; /* Set to width of splitter for visual aesthetics */
 	padding-inline-start: 2px;
 }
 
@@ -282,11 +281,8 @@
 }
 
 #zotero-collections-search {
-	height: 25px;
 	max-width: 0;
-	display: inline-block;
-	overflow: hidden;
-	transition: max-width 0.7s ease;
+	transition: max-width 0.5s ease;
 	padding: 0;
 	margin: 0;
 	appearance: none;
@@ -294,9 +290,14 @@
 }
 
 #zotero-collections-search.visible {
-	max-width: 200px; 
+	max-width: 180px; 
 	appearance: auto;
 	visibility: visible;
+	/* Avoids flickering between pointer and text cursor during transition */
+	cursor: text;
+	/* Bring back default margins and padding */
+	padding: revert-layer;
+	margin: revert-layer;
 }
 
 /* Hide collection search on pane collapse, otherwise it still shows when focused */

@@ -1531,6 +1531,10 @@ describe("ZoteroPane", function() {
 
 			for (let id of sequence) {
 				doc.activeElement.dispatchEvent(shiftTab);
+				// Wait for collection search to be revealed
+				if (id === "zotero-collections-search") {
+					await Zotero.Promise.delay(300);
+				}
 				assert.equal(doc.activeElement.id, id);
 			}
 
@@ -1555,6 +1559,10 @@ describe("ZoteroPane", function() {
 			];
 			for (let id of sequence) {
 				doc.activeElement.dispatchEvent(tab);
+				// Wait for collection search to be revealed
+				if (id === "zotero-collections-search") {
+					await Zotero.Promise.delay(300);
+				}
 				assert.equal(doc.activeElement.id, id);
 			}
 		});

@@ -259,17 +259,46 @@ var ZoteroPane = new function()
 			moveFocus(actionsMap, event, true);
 		});
 
+		let collectionsSearchField = document.getElementById("zotero-collections-search");
+		let clearCollectionSearch = (removeFocus) => {
+			// Clear the search field
+			if (collectionsSearchField.value.length) {
+				collectionsSearchField.value = '';
+				ZoteroPane.collectionsView.setFilter("", true);
+				if (!removeFocus) {
+					return null;
+				}
+			}
+			ZoteroPane.hideCollectionSearch();
+			// If the search field is empty, focus the collection tree
+			return document.getElementById('collection-tree');
+		};
 		collectionTreeToolbar.addEventListener("keydown", (event) => {
 			let actionsMap = {
 				'zotero-tb-collection-add': {
 					ArrowRight: () => null,
 					ArrowLeft: () => null,
-					Tab: () => document.getElementById('zotero-tb-collection-search').click(),
+					Tab: () => document.getElementById('zotero-tb-collections-search').click(),
 					ShiftTab: () => document.getElementById('zotero-tb-sync')
 				},
 				'zotero-collections-search': {
 					Tab: () => document.getElementById('zotero-tb-add'),
-					ShiftTab: () => document.getElementById('zotero-tb-collection-add')
+					ShiftTab: () => document.getElementById('zotero-tb-collection-add'),
+					Enter: () => {
+						// Prevent Enter pressed before the filtering ran from doing anything
+						if (!ZoteroPane.collectionsView.filterEquals(collectionsSearchField.value)) {
+							return null;
+						}
+						// If the current row passes the filter, make sure it is visible and focus collectionTree
+						if (ZoteroPane.collectionsView.focusedRowMatchesFilter()) {
+							ZoteroPane.collectionsView.ensureRowIsVisible(ZoteroPane.collectionsView.selection.focused);
+							return document.getElementById('collection-tree');
+						}
+						// Otherwise, focus the first row passing the filter
+						ZoteroPane.collectionsView.focusFirstMatchingRow(false);
+						return null;
+					},
+					Escape: clearCollectionSearch
 				},
 			};
 			moveFocus(actionsMap, event, true);
@@ -291,7 +320,7 @@ var ZoteroPane = new function()
 						if (collectionsPane.getAttribute("collapsed")) {
 							return document.getElementById('zotero-tb-sync');
 						}
-						document.getElementById('zotero-tb-collection-search').click();
+						document.getElementById('zotero-tb-collections-search').click();
 						return null;
 					},
 					' ': () => {
@@ -305,7 +334,7 @@ var ZoteroPane = new function()
 					ArrowRight: () => document.getElementById("zotero-tb-attachment-add"),
 					ArrowLeft: () => document.getElementById("zotero-tb-add"),
 					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
-					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click(),
+					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click(),
 					Enter: () => Zotero_Lookup.showPanel(event.target),
 					' ': () => Zotero_Lookup.showPanel(event.target)
 				},
@@ -313,13 +342,13 @@ var ZoteroPane = new function()
 					ArrowRight: () => document.getElementById("zotero-tb-note-add"),
 					ArrowLeft: () => document.getElementById("zotero-tb-lookup"),
 					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
-					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click()
+					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-note-add': {
 					ArrowRight: () => null,
 					ArrowLeft: () => document.getElementById("zotero-tb-attachment-add"),
 					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
-					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click()
+					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-search-textbox': {
 					ShiftTab: () => {
@@ -348,6 +377,9 @@ var ZoteroPane = new function()
 						// If tag selector is collapsed, go to itemTree, otherwise
 						// default to focusing on tag selector
 						return false;
+					},
+					Escape: () => {
+						clearCollectionSearch(true);
 					}
 				}
 			};
@@ -424,6 +456,7 @@ var ZoteroPane = new function()
 		ZoteroContextPane.init();
 		await ZoteroPane.initCollectionsTree();
 		await ZoteroPane.initItemsTree();
+		ZoteroPane.initCollectionTreeSearch();
 		
 		// Add a default progress window
 		ZoteroPane.progressWindow = new Zotero.ProgressWindow({ window });
@@ -1026,32 +1059,36 @@ var ZoteroPane = new function()
 		ZoteroPane_Local.collectionsView.setHighlightedRows();
 	}
 
-	this.revealCollectionSearch = function () {
+	this.hideCollectionSearch = function () {
 		let collectionSearchField = document.getElementById("zotero-collections-search");
-		let collectionSearchButton = document.getElementById("zotero-tb-collection-search");
-		var hideIfEmpty = function () {
-			if (!collectionSearchField.value.length) {
-				collectionSearchField.classList.remove("visible");
-				collectionSearchButton.style.display = '';
+		let collectionSearchButton = document.getElementById("zotero-tb-collections-search");
+		if (!collectionSearchField.value.length && collectionSearchField.classList.contains("visible")) {
+			collectionSearchField.classList.remove("visible");
+			collectionSearchButton.style.display = '';
+			collectionSearchField.setAttribute("disabled", true);
+		}
+	}
+
+	this.initCollectionTreeSearch = function () {
+		let collectionSearchField = document.getElementById("zotero-collections-search");
+		let collectionSearchButton = document.getElementById("zotero-tb-collections-search");
+		collectionSearchField.addEventListener("blur", ZoteroPane.hideCollectionSearch);
+		collectionSearchButton.addEventListener("click", (_) => {
+			if (!collectionSearchField.classList.contains("visible")) {
+				collectionSearchButton.style.display = 'none';
+				collectionSearchField.classList.add("visible");
+				// Enable and focus the field only after it was revealed to prevent the cursor
+				// from changing between 'text' and 'pointer' back and forth as the input field expands
+				setTimeout(() => {
+					collectionSearchField.removeAttribute("disabled");
+					collectionSearchField.focus();
+				}, 250);
+				return;
 			}
-		};
-		if (!collectionSearchField.classList.contains("visible")) {
-			collectionSearchButton.style.display = 'none';
-			collectionSearchField.classList.add("visible");
-			collectionSearchField.addEventListener('blur', hideIfEmpty);
-		}
-		collectionSearchField.focus();
+			collectionSearchField.focus();
+		});
 	};
 
-	this.handleCollectionSearchKeypress = function (textbox, event) {
-		if (event.keyCode == event.DOM_VK_ESCAPE) {
-			textbox.value = '';
-			textbox.blur();
-		}
-	};
-
-
-	this.handleCollectionSearchInput = function (textbox, _) { };
 	
 	function handleKeyUp(event) {
 		if ((Zotero.isWin && event.keyCode == 17) ||
@@ -2720,6 +2757,13 @@ var ZoteroPane = new function()
 		else if (event.keyCode == event.DOM_VK_RETURN) {
 			this.search(true);
 		}
+	}
+
+
+	this.handleCollectionSearchInput = function () {
+		let collectionsSearchField = document.getElementById("zotero-collections-search");
+		// Set the filter without scrolling the selected row into the view
+		this.collectionsView.setFilter(collectionsSearchField.value, false);
 	}
 	
 	
