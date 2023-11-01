@@ -1645,7 +1645,7 @@ class EditorInstanceUtilities {
 
 		// Title
 		if (!str && itemData.title) {
-			str = `“${itemData.title}”`;
+			str += `“${itemData.title}”`;
 		}
 
 		// Date
@@ -1660,15 +1660,16 @@ class EditorInstanceUtilities {
 
 		// Locator
 		if (citationItem.locator) {
+			let label = '';
 			if (citationItem.label) {
 				// TODO: Localize and use short forms
-				var label = citationItem.label;
+				label = citationItem.label;
 			}
-			else if (/[\-–,]/.test(citationItem.locator)) {
-				var label = 'pp.';
+			else if (/[-–,]/.test(citationItem.locator)) {
+				label = 'pp.';
 			}
 			else {
-				var label = 'p.';
+				label = 'p.';
 			}
 
 			str += ', ' + label + ' ' + citationItem.locator;
