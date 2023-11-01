@@ -463,6 +463,8 @@ Zotero.ItemTypes = new function() {
 			case 'attachmentLink':
 			case 'attachmentPDF':
 			case 'attachmentPDFLink':
+			case 'attachmentEPUB':
+			case 'attachmentEPUBLink':
 			case 'attachmentSnapshot':
 			case 'attachmentWebLink':
 			case 'artwork':
