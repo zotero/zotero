@@ -34,6 +34,7 @@ Zotero.Report.HTML = new function () {
 			+ '<html>\n'
 			+ '	<head>\n'
 			+ '		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n'
+			+ '		<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; style-src \'unsafe-inline\' data:" />\n'
 			+ '		<title>' + Zotero.getString('report.title.default') + '</title>\n'
 			+ '		<link rel="stylesheet" type="text/css" href="' + _getCSSDataURI('detail') + '"/>\n'
 			+ '		<link rel="stylesheet" type="text/css" media="screen,projection" href="' + _getCSSDataURI('detail_screen') + '"/>\n'
