@@ -160,14 +160,14 @@ var ZoteroPane = new function()
 		// function to handle actual focusing based on a given event
 		// and a mapping of event targets + keys to the focus destinations
 		let moveFocus = function (actionsMap, event, verticalArrowIsTab = false) {
+			var key = event.key;
 			if (key === 'Tab' && modifierIsNotShift(event)) return;
 
-			var key = event.key;
 			if (event.shiftKey) {
 				key = 'Shift' + key;
 			}
 			// ArrowUp or ArrowDown act the same way as as
-			// tab/shift-tab unles it is on a menu, in which case
+			// shift-tab/tab unles it is on a menu, in which case
 			// it'll open the menu popup
 			let isMenu = event.target.getAttribute('type') === 'menu'
 						|| event.originalTarget?.getAttribute('type') === 'menu';
@@ -175,10 +175,10 @@ var ZoteroPane = new function()
 				return;
 			}
 			if (verticalArrowIsTab && key == 'ArrowUp') {
-				key = 'Tab';
+				key = 'ShiftTab';
 			}
 			else if (verticalArrowIsTab && key == 'ArrowDown') {
-				key = 'ShiftTab';
+				key = 'Tab';
 			}
 			let focusFunction = actionsMap[event.target.id]?.[key];
 			// If the focusFunction is undefined, nothing was found
@@ -256,7 +256,7 @@ var ZoteroPane = new function()
 						.dispatchEvent(new MouseEvent("click", { target: event.target }))
 				}
 			};
-			moveFocus(actionsMap, event);
+			moveFocus(actionsMap, event, true);
 		});
 
 		collectionTreeToolbar.addEventListener("keydown", (event) => {
@@ -268,8 +268,6 @@ var ZoteroPane = new function()
 					ShiftTab: () => document.getElementById('zotero-tb-sync')
 				},
 				'zotero-collections-search': {
-					ArrowRight: () => null,
-					ArrowLeft: () => null,
 					Tab: () => document.getElementById('zotero-tb-add'),
 					ShiftTab: () => document.getElementById('zotero-tb-collection-add')
 				},
@@ -324,8 +322,6 @@ var ZoteroPane = new function()
 					ShiftTab: () => document.getElementById('zotero-tb-collection-search').click()
 				},
 				'zotero-tb-search-textbox': {
-					ArrowRight: () => null,
-					ArrowLeft: () => null,
 					ShiftTab: () => {
 						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
 					},
@@ -2728,7 +2724,7 @@ var ZoteroPane = new function()
 	
 	
 	this.handleSearchInput = function (textbox, event) {
-		if (textbox.value.indexOf('"') != -1) {
+		if (textbox.searchTextbox.value.indexOf('"') != -1) {
 			this.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
 		}
 	}

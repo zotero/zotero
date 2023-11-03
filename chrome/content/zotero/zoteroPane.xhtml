@@ -1031,7 +1031,7 @@
 												<spacer flex="1"/>
 												<image id="zotero-tb-search-spinner" class="zotero-spinner-14" style="display: none"/>
 												<quick-search-textbox id="zotero-tb-search" timeout="250"
-														onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
+														onkeydown="ZoteroPane_Local.handleSearchKeypress(this, event)"
 														oninput="ZoteroPane_Local.handleSearchInput(this, event)"
 														oncommand="ZoteroPane_Local.search()"/>
 											</hbox>
