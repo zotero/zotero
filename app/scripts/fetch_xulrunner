@@ -113,24 +113,24 @@ function modify_omni {
 	unzip omni.ja
 	rm omni.ja
 	
-	replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.jsm
+	replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.sys.mjs
 	
 	# https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/internals/preferences.html
 	#
 	# It's not clear that most of these do anything anymore when not compiled in, but just in case
-	replace_line 'MOZ_REQUIRE_SIGNING:' 'MOZ_REQUIRE_SIGNING: false \&\&' modules/AppConstants.jsm
-	replace_line 'MOZ_DATA_REPORTING:' 'MOZ_DATA_REPORTING: false \&\&' modules/AppConstants.jsm
-	replace_line 'MOZ_SERVICES_HEALTHREPORT:' 'MOZ_SERVICES_HEALTHREPORT: false \&\&' modules/AppConstants.jsm
-	replace_line 'MOZ_TELEMETRY_REPORTING:' 'MOZ_TELEMETRY_REPORTING: false \&\&' modules/AppConstants.jsm
-	replace_line 'MOZ_TELEMETRY_ON_BY_DEFAULT:' 'MOZ_TELEMETRY_ON_BY_DEFAULT: false \&\&' modules/AppConstants.jsm
-	replace_line 'MOZ_CRASHREPORTER:' 'MOZ_CRASHREPORTER: false \&\&' modules/AppConstants.jsm
-	replace_line 'MOZ_UPDATE_CHANNEL:.+' 'MOZ_UPDATE_CHANNEL: "none",' modules/AppConstants.jsm
-	replace_line '"https:\/\/[^\/]+mozilla.com.+"' '""' modules/AppConstants.jsm
+	replace_line 'MOZ_REQUIRE_SIGNING:' 'MOZ_REQUIRE_SIGNING: false \&\&' modules/AppConstants.sys.mjs
+	replace_line 'MOZ_DATA_REPORTING:' 'MOZ_DATA_REPORTING: false \&\&' modules/AppConstants.sys.mjs
+	replace_line 'MOZ_SERVICES_HEALTHREPORT:' 'MOZ_SERVICES_HEALTHREPORT: false \&\&' modules/AppConstants.sys.mjs
+	replace_line 'MOZ_TELEMETRY_REPORTING:' 'MOZ_TELEMETRY_REPORTING: false \&\&' modules/AppConstants.sys.mjs
+	replace_line 'MOZ_TELEMETRY_ON_BY_DEFAULT:' 'MOZ_TELEMETRY_ON_BY_DEFAULT: false \&\&' modules/AppConstants.sys.mjs
+	replace_line 'MOZ_CRASHREPORTER:' 'MOZ_CRASHREPORTER: false \&\&' modules/AppConstants.sys.mjs
+	replace_line 'MOZ_UPDATE_CHANNEL:.+' 'MOZ_UPDATE_CHANNEL: "none",' modules/AppConstants.sys.mjs
+	replace_line '"https:\/\/[^\/]+mozilla.com.+"' '""' modules/AppConstants.sys.mjs
 	
 	# Don't use Mozilla Maintenance Service on Windows
-	replace_line 'MOZ_MAINTENANCE_SERVICE:' 'MOZ_MAINTENANCE_SERVICE: false \&\&' modules/AppConstants.jsm
+	replace_line 'MOZ_MAINTENANCE_SERVICE:' 'MOZ_MAINTENANCE_SERVICE: false \&\&' modules/AppConstants.sys.mjs
 	# Continue using app.update.auto in prefs.js on Windows
-	replace_line 'PER_INSTALLATION_PREFS_PLATFORMS = \["win"\]' 'PER_INSTALLATION_PREFS_PLATFORMS = []' modules/UpdateUtils.jsm
+	replace_line 'PER_INSTALLATION_PREFS_PLATFORMS = \["win"\]' 'PER_INSTALLATION_PREFS_PLATFORMS = []' modules/UpdateUtils.sys.mjs
 	
 	# Prompt if major update is available instead of installing automatically on restart
 	replace_line 'if \(!updateAuto\) \{' 'if (update.type == "major") {
@@ -139,13 +139,13 @@ function modify_omni {
       Services.obs.notifyObservers(update, "update-available", "show-prompt");
       return;
     }
-    if (!updateAuto) {' modules/UpdateService.jsm
+    if (!updateAuto) {' modules/UpdateService.sys.mjs
 	
 	# Avoid console warning about resource://gre/modules/FxAccountsCommon.js
-	replace_line 'const logins = this._data.logins;' 'const logins = this._data.logins; if (this._data.logins.length != -1) return;' modules/LoginStore.jsm
+	replace_line 'const logins = this._data.logins;' 'const logins = this._data.logins; if (this._data.logins.length != -1) return;' modules/LoginStore.sys.mjs
 	
 	# Prevent error during network requests
-	replace_line 'async lazyInit\(\) \{' 'async lazyInit() { if (this.features) return false;' modules/UrlClassifierExceptionListService.jsm
+	replace_line 'async lazyInit\(\) \{' 'async lazyInit() { if (this.features) return false;' modules/UrlClassifierExceptionListService.sys.mjs
 	
 	replace_line 'pref\("network.captive-portal-service.enabled".+' 'pref("network.captive-portal-service.enabled", false);' greprefs.js
 	replace_line 'pref\("network.connectivity-service.enabled".+' 'pref("network.connectivity-service.enabled", false);' greprefs.js
@@ -166,7 +166,7 @@ function modify_omni {
 	rm modules/FxAccounts*
 	# Causes a startup error -- try an empty file or a shim instead?
 	#rm modules/Telemetry*
-	rm modules/URLDecorationAnnotationsService.jsm
+	rm modules/URLDecorationAnnotationsService.sys.mjs
 	rm -rf modules/services-*
 	
 	# Clear most WebExtension manifest properties
@@ -187,11 +187,11 @@ function modify_omni {
       manifest.host_permissions = [];
       manifest.web_accessible_resources = undefined;
       manifest.experiment_apis = {};
-    }' modules/Extension.jsm
+    }' modules/Extension.sys.mjs
     
 	# Use applications.zotero instead of applications.gecko
 	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.jsm
-	replace_line 'manifest.applications\?.gecko' 'manifest.applications?.zotero' modules/Extension.jsm
+	replace_line 'manifest.applications\?.gecko' 'manifest.applications?.zotero' modules/Extension.sys.mjs
 	
 	# When installing addon, use app version instead of toolkit version for targetApplication
 	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/XPIInstall.jsm
@@ -204,13 +204,13 @@ function modify_omni {
 	
 	# For updates, look for applications.zotero instead of applications.gecko in manifest.json and
 	# use the app id and version for strict_min_version/strict_max_version comparisons
-	replace_line 'gecko: \{\},' 'zotero: {},' modules/addons/AddonUpdateChecker.jsm
-	replace_line 'if \(!\("gecko" in applications\)\) \{'  'if (!("zotero" in applications)) {' modules/addons/AddonUpdateChecker.jsm
-	replace_line '"gecko not in application entry' '"zotero not in application entry' modules/addons/AddonUpdateChecker.jsm
-	replace_line 'let app = getProperty\(applications, "gecko", "object"\);' 'let app = getProperty(applications, "zotero", "object");' modules/addons/AddonUpdateChecker.jsm
-	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/AddonUpdateChecker.jsm
-	replace_line 'AddonManagerPrivate.webExtensionsMinPlatformVersion' '7.0' modules/addons/AddonUpdateChecker.jsm
-	replace_line 'result.targetApplications.push' 'false && result.targetApplications.push' modules/addons/AddonUpdateChecker.jsm
+	replace_line 'gecko: \{\},' 'zotero: {},' modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line 'if \(!\("gecko" in applications\)\) \{'  'if (!("zotero" in applications)) {' modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line '"gecko not in application entry' '"zotero not in application entry' modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line 'let app = getProperty\(applications, "gecko", "object"\);' 'let app = getProperty(applications, "zotero", "object");' modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line 'AddonManagerPrivate.webExtensionsMinPlatformVersion' '7.0' modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line 'result.targetApplications.push' 'false && result.targetApplications.push' modules/addons/AddonUpdateChecker.sys.mjs
 	
 	# Allow addon installation by bypassing confirmation dialogs. If we want a confirmation dialog,
 	# we need to either add gXPInstallObserver from browser-addons.js [1][2] or provide our own with
@@ -218,27 +218,27 @@ function modify_omni {
 	#
 	# [1] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/browser/base/content/browser.js#1902-1923
 	# [2] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/browser/base/content/browser-addons.js#201
-	# [3] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/toolkit/mozapps/extensions/AddonManager.jsm#3114-3124
-	replace_line 'if \(info.addon.userPermissions\) \{' 'if (false) {' modules/AddonManager.jsm
-	replace_line '\} else if \(info.addon.sitePermissions\) \{' '} else if (false) {' modules/AddonManager.jsm
-	replace_line '\} else if \(requireConfirm\) \{' '} else if (false) {' modules/AddonManager.jsm
+	# [3] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/toolkit/mozapps/extensions/AddonManager.sys.mjs#3114-3124
+	replace_line 'if \(info.addon.userPermissions\) \{' 'if (false) {' modules/AddonManager.sys.mjs
+	replace_line '\} else if \(info.addon.sitePermissions\) \{' '} else if (false) {' modules/AddonManager.sys.mjs
+	replace_line '\} else if \(requireConfirm\) \{' '} else if (false) {' modules/AddonManager.sys.mjs
 	
 	# Make addon listener methods wait for promises, to allow calling asynchronous plugin `shutdown`
 	# and `uninstall` methods in our `onInstalling` handler
-	replace_line 'callAddonListeners\(aMethod' 'async callAddonListeners(aMethod' modules/AddonManager.jsm
+	replace_line 'callAddonListeners\(aMethod' 'async callAddonListeners(aMethod' modules/AddonManager.sys.mjs
 	# Don't need this one to be async, but we can't easily avoid modifying its `listener[aMethod].apply()` call
-	replace_line 'callManagerListeners\(aMethod' 'async callManagerListeners(aMethod' modules/AddonManager.jsm
+	replace_line 'callManagerListeners\(aMethod' 'async callManagerListeners(aMethod' modules/AddonManager.sys.mjs
 	replace_line 'AddonManagerInternal.callAddonListeners.apply\(AddonManagerInternal, aArgs\);' \
-		'return AddonManagerInternal.callAddonListeners.apply(AddonManagerInternal, aArgs);' modules/AddonManager.jsm
+		'return AddonManagerInternal.callAddonListeners.apply(AddonManagerInternal, aArgs);' modules/AddonManager.sys.mjs
 	replace_line 'listener\[aMethod\].apply\(listener, aArgs\);' \
 		'let maybePromise = listener[aMethod].apply(listener, aArgs);
-		if (maybePromise && maybePromise.then) await maybePromise;' modules/AddonManager.jsm
+		if (maybePromise && maybePromise.then) await maybePromise;' modules/AddonManager.sys.mjs
 	replace_line 'AddonManagerPrivate.callAddonListeners' 'await AddonManagerPrivate.callAddonListeners' modules/addons/XPIInstall.jsm
 	replace_line 'let uninstall = \(\) => \{' 'let uninstall = async () => {' modules/addons/XPIInstall.jsm
 	replace_line 'cancelUninstallAddon\(aAddon\)' 'async cancelUninstallAddon(aAddon)' modules/addons/XPIInstall.jsm
 	
 	# No idea why this is necessary, but without it initialization fails with "TypeError: "constructor" is read-only"
-	replace_line 'LoginStore.prototype.constructor = LoginStore;' '\/\/LoginStore.prototype.constructor = LoginStore;' modules/LoginStore.jsm
+	replace_line 'LoginStore.prototype.constructor = LoginStore;' '\/\/LoginStore.prototype.constructor = LoginStore;' modules/LoginStore.sys.mjs
 	#  
 	#  # Allow proxy password saving
 	#  perl -pi -e 's/get _inPrivateBrowsing\(\) \{/get _inPrivateBrowsing() {if (true) { return false; }/' components/nsLoginManagerPrompter.js
@@ -362,7 +362,7 @@ function modify_omni {
 	# command line (macOS)
 	replace_line 'function dch_handle\(cmdLine\) \{' 'function dch_handle(cmdLine) {
     if (cmdLine.state == Ci.nsICommandLine.STATE_REMOTE_AUTO) { return; }
-    ' modules/BrowserContentHandler.jsm
+    ' modules/BrowserContentHandler.sys.mjs
 }
 
 mkdir -p xulrunner
