@@ -30,9 +30,107 @@ const { loadSubScript } = Cc['@mozilla.org/moz/jssubscript-loader;1'].
                      getService(Ci.mozIJSSubScriptLoader);
 const { addObserver, notifyObservers } = Cc['@mozilla.org/observer-service;1'].
                         getService(Ci.nsIObserverService);
-const { XPCOMUtils } = Cu.import("resource://gre/modules/XPCOMUtils.jsm", {});
-const { NetUtil } = Cu.import("resource://gre/modules/NetUtil.jsm", {});
-const { join: pathJoin, normalize, dirname } = Cu.import("resource://gre/modules/osfile/ospath_unix.jsm");
+const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs", {});
+const { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs", {});
+
+
+
+
+// These are used for manipulating jar entry paths, which always use Unix
+// separators (originally copied from `ospath_unix.jsm` as part of the "OS.Path
+// to PathUtils" migration).
+
+/**
+ * Join path components.
+ * This is the recommended manner of getting the path of a file/subdirectory
+ * in a directory.
+ *
+ * Example: Obtaining $TMP/foo/bar in an OS-independent manner
+ *  var tmpDir = OS.Constants.Path.tmpDir;
+ *  var path = OS.Path.join(tmpDir, "foo", "bar");
+ *
+ * Under Unix, this will return "/tmp/foo/bar".
+ *
+ * Empty components are ignored, i.e. `OS.Path.join("foo", "", "bar)` is the
+ * same as `OS.Path.join("foo", "bar")`.
+ */
+var pathJoin = function(...path) {
+  // If there is a path that starts with a "/", eliminate everything before
+  let paths = [];
+  for (let subpath of path) {
+    if (subpath == null) {
+      throw new TypeError("invalid path component");
+    }
+    if (!subpath.length) {
+      continue;
+    } else if (subpath[0] == "/") {
+      paths = [subpath];
+    } else {
+      paths.push(subpath);
+    }
+  }
+  return paths.join("/");
+};
+
+/**
+ * Normalize a path by removing any unneeded ".", "..", "//".
+ */
+var normalize = function(path) {
+  let stack = [];
+  let absolute;
+  if (path.length >= 0 && path[0] == "/") {
+    absolute = true;
+  } else {
+    absolute = false;
+  }
+  path.split("/").forEach(function(v) {
+    switch (v) {
+      case "":
+      case ".": // fallthrough
+        break;
+      case "..":
+        if (!stack.length) {
+          if (absolute) {
+            throw new Error("Path is ill-formed: attempting to go past root");
+          } else {
+            stack.push("..");
+          }
+        } else if (stack[stack.length - 1] == "..") {
+          stack.push("..");
+        } else {
+          stack.pop();
+        }
+        break;
+      default:
+        stack.push(v);
+    }
+  });
+  let string = stack.join("/");
+  return absolute ? "/" + string : string;
+};
+
+/**
+ * Return the directory part of the path.
+ * The directory part of the path is everything before the last
+ * "/". If the last few characters of this part are also "/",
+ * they are ignored.
+ *
+ * If the path contains no directory, return ".".
+ */
+function dirname(path) {
+  let index = path.lastIndexOf("/");
+  if (index == -1) {
+    return ".";
+  }
+  while (index >= 0 && path[index] == "/") {
+    --index;
+  }
+  return path.slice(0, index + 1);
+}
+
+
+
+
 
 XPCOMUtils.defineLazyServiceGetter(this, "resProto",
                                    "@mozilla.org/network/protocol;1?name=resource",
@@ -1036,7 +1134,8 @@ function Loader(options) {
                 CC: bind(CC, Components), components: Components,
                 // `ChromeWorker` has to be inject in loader global scope.
                 // It is done by bootstrap.js:loadSandbox for the SDK.
-                ChromeWorker: ChromeWorker
+                ChromeWorker,
+                ChromeUtils,
     }
   }, modules);
 
