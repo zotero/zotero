@@ -25,6 +25,8 @@
 
 'use strict';
 
+Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+
 Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 
