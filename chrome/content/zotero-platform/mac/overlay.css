@@ -213,34 +213,6 @@
 	width: 8px;
 }
 
-#zotero-tags-splitter
-{
-	-moz-appearance: none;
-	border-top: 1px;
-	border-bottom: 1px;
-	border-color: #A5A5A5;
-	height: 8px;
-	background-image: url("chrome://zotero/skin/mac/hsplitter.png") !important;
-	background-repeat: repeat-x;
-	padding: 0;
-}
-
-#zotero-tags-splitter > grippy
-{
-	-moz-appearance: none;
-	background: url(chrome://zotero/skin/mac/hgrippy.png) center/auto 8px no-repeat;
-	height: 8px;
-}
-
-#zotero-tags-splitter > grippy:hover,
-#zotero-collections-splitter > grippy:hover,
-#zotero-items-splitter > grippy:hover,
-#zotero-context-splitter > grippy:hover,
-#zotero-context-splitter-stacked > grippy:hover
-{
-	background-color:transparent;
-}
-
 #zotero-context-toolbar-extension {
 	/* To cover #zotero-context-splitter 1px border */
 	margin-inline-start: -1px;

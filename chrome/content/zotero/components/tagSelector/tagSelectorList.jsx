@@ -26,7 +26,6 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 var { Collection } = require('react-virtualized');
-const { props } = require("bluebird");
 
 // See also .tag-selector-item in _tag-selector.scss
 var filterBarHeight = 36;
@@ -34,7 +33,7 @@ var tagPaddingLeft = 4;
 var tagPaddingRight = 4;
 var tagSpaceBetweenX = 2;
 var tagSpaceBetweenY = 4;
-var panePaddingTop = 8;
+var panePaddingTop = 4; // + splitter 9px tall
 var panePaddingLeft = 8;
 var panePaddingRight = 2; // + scrollbar width
 //var panePaddingBottom = 2;
