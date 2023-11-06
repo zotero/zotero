@@ -253,7 +253,7 @@ function modify_omni {
 	cp "$APP_ROOT_DIR/assets/multilocale.txt" res/multilocale.txt
 	
 	# Use Zotero URL opening in Mozilla dialogs (e.g., app update dialog)
-	replace_line 'function openURL\(aURL\) \{' 'function openURL(aURL) {let {Zotero} = ChromeUtils.import("chrome:\/\/zotero\/content\/include.jsm"); Zotero.launchURL(aURL); if (true) { return; }' chrome/toolkit/content/global/contentAreaUtils.js
+	replace_line 'function openURL\(aURL\) \{' 'function openURL(aURL) {let {Zotero} = ChromeUtils.importESModule("chrome:\/\/zotero\/content\/zotero.mjs"); Zotero.launchURL(aURL); if (true) { return; }' chrome/toolkit/content/global/contentAreaUtils.js
 	
 	#
 	# Modify Add-ons window

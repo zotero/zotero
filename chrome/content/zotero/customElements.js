@@ -25,6 +25,8 @@
 
 'use strict';
 
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+
 Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 
 Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);

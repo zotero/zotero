@@ -36,8 +36,10 @@ ChromeUtils.registerWindowActor("Translation", {
 	}
 });
 
+ChromeUtils.defineESModuleGetters(this, {
+	Zotero: "chrome://zotero/content/zotero.mjs",
+});
 XPCOMUtils.defineLazyModuleGetters(this, {
-	Zotero: "chrome://zotero/content/include.jsm",
 	TranslationManager: "chrome://zotero/content/actors/TranslationParent.jsm",
 });
 

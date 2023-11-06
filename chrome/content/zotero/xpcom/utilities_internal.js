@@ -26,8 +26,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-
 XPCOMUtils.defineLazyModuleGetters(globalThis, {
 	Subprocess: "resource://gre/modules/Subprocess.jsm",
 });

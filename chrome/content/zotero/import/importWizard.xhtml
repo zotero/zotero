@@ -17,9 +17,10 @@
 	</linkset>
 
 	<script>
-		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/fileInterface.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/import/importWizard.js", this);
 	</script>
 	
 	<wizard id="import-wizard" class="import-wizard" width="600" height="400">
@@ -114,7 +115,4 @@
 			</div>
 		</wizardpage>
 	</wizard>
-
-	<script src="../fileInterface.js"/>
-	<script src="./importWizard.js" />
 </window>
