@@ -25,10 +25,8 @@
 
 var EXPORTED_SYMBOLS = ["EPUB"];
 
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-XPCOMUtils.defineLazyModuleGetters(this, {
-	Zotero: "chrome://zotero/content/include.jsm"
+ChromeUtils.defineESModuleGetters(this, {
+	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
 const ZipReader = Components.Constructor(

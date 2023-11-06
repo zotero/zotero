@@ -60,7 +60,7 @@
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		
-		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 		
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);

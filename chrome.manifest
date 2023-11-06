@@ -63,9 +63,7 @@ locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/
 
 skin		zotero	default		chrome/skin/default/zotero/
 
-component	{e4c61080-ec2d-11da-8ad9-0800200c9a66}			components/zotero-service.js
 component	{531828f8-a16c-46be-b9aa-14845c3b010f}			components/zotero-service.js
-contract	@zotero.org/Zotero;1 							{e4c61080-ec2d-11da-8ad9-0800200c9a66}
 contract	@mozilla.org/browser/clh;1						{531828f8-a16c-46be-b9aa-14845c3b010f}
 category	command-line-handler m-zotero					@mozilla.org/browser/clh;1
 

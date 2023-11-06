@@ -25,9 +25,8 @@
 
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetters(this, {
-	Services: "resource://gre/modules/Services.jsm",
-	Zotero: "chrome://zotero/content/include.jsm"
+ChromeUtils.defineESModuleGetters(this, {
+	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
 var EXPORTED_SYMBOLS = ["BlockingObserver"];

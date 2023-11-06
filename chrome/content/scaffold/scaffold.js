@@ -29,13 +29,8 @@ var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm")
 var { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
 var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/ContentDOMReference.jsm");
 
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 import FilePicker from 'zotero/modules/filePicker';
-
-var Zotero = Components.classes["@zotero.org/Zotero;1"]
-				// Currently uses only nsISupports
-				//.getService(Components.interfaces.chnmIZoteroService).
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
 
 // Fix JSON stringify 2028/2029 "bug"
 // Borrowed from http://stackoverflow.com/questions/16686687/json-stringify-and-u2028-u2029-check

@@ -32,6 +32,7 @@ Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 	.getService(Components.interfaces.nsIOSFileConstantsService)
 	.init();
 
+const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetters(globalThis, {
 	AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
 });

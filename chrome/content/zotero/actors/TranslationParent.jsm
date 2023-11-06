@@ -1,8 +1,6 @@
 var EXPORTED_SYMBOLS = ["TranslationParent", "TranslationManager"];
 
-const Zotero = Components.classes['@zotero.org/Zotero;1']
-	.getService(Components.interfaces.nsISupports)
-	.wrappedJSObject;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 const TranslationManager = new class {
 	_registeredRemoteTranslates = new Map();

@@ -35,7 +35,9 @@ XPCOMUtils.defineLazyModuleGetters(this, {
 	HiddenFrame: "resource://gre/modules/HiddenFrame.jsm",
 	Services: "resource://gre/modules/Services.jsm",
 	setTimeout: "resource://gre/modules/Timer.jsm",
-	Zotero: "chrome://zotero/content/include.jsm"
+});
+ChromeUtils.defineESModuleGetters(this, {
+	Zotero: "chrome://zotero/content/zotero.mjs"
 });
 
 ChromeUtils.registerWindowActor("PageData", {
