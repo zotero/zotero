@@ -2902,10 +2902,10 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 				// for update from Zotero 2.1 or earlier
 				if (citationItem.uri) {
 					if (Array.isArray(citationItem.uris)) {
-						citationItem.uris.push(citationItem.uri);
+						citationItems.uris = citationItem.uris.concat(citationItem.uri);
 					}
 					else {
-						citationItem.uris = [citationItem.uri];
+						citationItem.uris = citationItem.uri;
 					}
 					delete citationItem.uri;
 				}
