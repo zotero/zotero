@@ -74,7 +74,9 @@ var ZoteroPane = new function()
 		
 		// Set key down handler
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
-		document.addEventListener('blur', ZoteroPane.handleBlur);
+		// focusout, unlike blur, bubbles up to document level
+		// so handleBlur gets triggered when any field, not just the document, looses focus
+		document.addEventListener('focusout', ZoteroPane.handleBlur);
 		
 		// Init toolbar buttons for all progress queues
 		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
@@ -1015,13 +1017,23 @@ var ZoteroPane = new function()
 			if ((Zotero.isWin && event.keyCode == 17 && !event.altKey) ||
 					(!Zotero.isWin && event.keyCode == 18 && !event.ctrlKey)
 					&& !event.shiftKey && !event.metaKey) {
-				
+				// On windows, the event is re-triggered multiple times
+				// for as long as Control is held.
+				// To account for that, stop if a highlight timer already exists.
+				if (this.highlightTimer) {
+					return;
+				}
 				this.highlightTimer = Components.classes["@mozilla.org/timer;1"].
 					createInstance(Components.interfaces.nsITimer);
 				// {} implements nsITimerCallback
 				this.highlightTimer.initWithCallback({
 					notify: ZoteroPane_Local.setHighlightedRowsCallback
 				}, 225, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+
+				// Prevent Alt from moving focus to menubar on linux
+				if (Zotero.isLinux) {
+					event.preventDefault();
+				}
 			}
 			// Unhighlight on key up
 			else if ((Zotero.isWin && event.ctrlKey) ||
@@ -1044,17 +1056,14 @@ var ZoteroPane = new function()
 	}
 	
 	function handleKeyUp(event) {
-		var from = event.originalTarget.id;
-		if (ZoteroPane.itemsView && from == ZoteroPane.itemsView.id) {
-			if ((Zotero.isWin && event.keyCode == 17) ||
-					(!Zotero.isWin && event.keyCode == 18)) {
-				if (this.highlightTimer) {
-					this.highlightTimer.cancel();
-					this.highlightTimer = null;
-				}
-				ZoteroPane_Local.collectionsView.setHighlightedRows();
-				return;
+		if ((Zotero.isWin && event.keyCode == 17) ||
+				(!Zotero.isWin && event.keyCode == 18)) {
+			if (this.highlightTimer) {
+				this.highlightTimer.cancel();
+				this.highlightTimer = null;
 			}
+			ZoteroPane_Local.collectionsView.setHighlightedRows();
+			return;
 		}
 	}
 	
