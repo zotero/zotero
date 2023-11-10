@@ -116,7 +116,7 @@ Zotero.File = new function(){
 	/**
 	 * Get the first 200 bytes of a source as a string (multibyte-safe)
 	 *
-	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source - The source to read
+	 * @param {string path|nsIFile|file URI} source - The source to read
 	 * @return {Promise}
 	 */
 	this.getSample = async function (file) {
