@@ -104,7 +104,7 @@
 	&.colored {
 		font-weight: bold;
 
-		&.selected {
+		&.selected:not(.emoji) {
 			background-color: currentcolor;
 
 			@each $colorHex, $colorVar in $tagColorsLookup {
