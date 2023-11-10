@@ -311,7 +311,7 @@ Zotero.File = new function(){
 		if (source instanceof Components.interfaces.nsIFile) {
 			source = source.path;
 		}
-		else if (source.startsWith('^file:')) {
+		else if (source.startsWith('file:')) {
 			source = OS.Path.fromFileURI(source);
 		}
 		var options = {};
