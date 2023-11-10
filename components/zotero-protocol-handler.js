@@ -1478,7 +1478,7 @@ AsyncChannel.prototype = {
 				uri.QueryInterface(Ci.nsIURL);
 				this.contentType = Zotero.MIME.getMIMETypeFromExtension(uri.fileExtension);
 				if (!this.contentType) {
-					let sample = yield Zotero.File.getSample(data);
+					let sample = yield Zotero.File.getSample(uri.spec);
 					this.contentType = Zotero.MIME.getMIMETypeFromData(sample);
 				}
 				
