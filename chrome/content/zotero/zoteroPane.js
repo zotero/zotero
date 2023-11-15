@@ -174,10 +174,11 @@ var ZoteroPane = new function()
 			if (isMenu && ['ArrowUp', 'ArrowDown'].includes(key)) {
 				return;
 			}
-			if (verticalArrowIsTab && key == 'ArrowUp') {
+			let onInput = event.originalTarget.tagName.toLowerCase() == "input";
+			if (verticalArrowIsTab && key == 'ArrowUp' && !onInput) {
 				key = 'ShiftTab';
 			}
-			else if (verticalArrowIsTab && key == 'ArrowDown') {
+			else if (verticalArrowIsTab && key == 'ArrowDown' && !onInput) {
 				key = 'Tab';
 			}
 			let focusFunction = actionsMap[event.target.id]?.[key];
