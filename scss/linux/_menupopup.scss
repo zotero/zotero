@@ -1,5 +1,20 @@
 menupopup, panel {
 	--panel-padding-block: 0;
-	--panel-border-radius: 2px;
-	--panel-border-color: ActiveBorder;
+	--panel-border-radius: 6px;
+	--panel-background: var(--material-toolbar);
+	--menuitem-hover-background-color: var(--fill-quinary);
+	--menuitem-disabled-hover-background-color: var(--fill-quinary);
+	@include light-dark(--panel-border-color, #dddddd, #1c1c1c);
+}
+
+menupopup {
+	menu {
+		menupopup {
+			margin-top: -4px;
+		}
+	}
+}
+
+:is(panel, menupopup)::part(content) {
+	padding: 6px 0px 6px 0px;
 }

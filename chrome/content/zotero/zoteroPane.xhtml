@@ -131,8 +131,8 @@
 		<key id="key_back"/>
 		<key id="key_forward"/>
 	</keyset>
-    
-    <keyset id="editMenuKeys">
+
+	<keyset id="editMenuKeys">
 		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
 		<!-- l10n and modifiers set in platformKeys.js -->
 		<key id="key_redo" command="cmd_redo"/>
@@ -150,11 +150,32 @@
 	</keyset>
 	
 	<vbox id="titlebar">
-		<hbox id="titlebar-buttonbox-container" skipintoolbarset="true">
-			<hbox id="titlebar-buttonbox">
-				<toolbarbutton class="titlebar-button titlebar-min" oncommand="window.minimize();"/>
-				<toolbarbutton class="titlebar-button titlebar-max" oncommand="onTitlebarMaxClick();"/>
-				<toolbarbutton class="titlebar-button titlebar-close" command="cmd_closeWindow"/>
+		<hbox class="titlebar-icon-container">
+			<image class="titlebar-icon" src="chrome://zotero/skin/zotero-new-z-16px.png"></image>
+		</hbox>
+		<hbox class="titlebar-buttonbox-container" skipintoolbarset="true">
+			<hbox class="titlebar-buttonbox titlebar-color">
+				<!-- TODO: remove `titlebar-btn` when we are on FX115. See https://phabricator.services.mozilla.com/D162757 -->
+				<toolbarbutton class="titlebar-button titlebar-min"
+					titlebar-btn="min"
+					oncommand="window.minimize();"
+					data-l10n-id="browser-window-minimize-button"
+					/>
+				<toolbarbutton class="titlebar-button titlebar-max"
+					titlebar-btn="max"
+					oncommand="window.maximize();"
+					data-l10n-id="browser-window-maximize-button"
+					/>
+				<toolbarbutton class="titlebar-button titlebar-restore"
+					titlebar-btn="max"
+					oncommand="window.fullScreen ? BrowserFullScreen() : window.restore();"
+					data-l10n-id="browser-window-restore-down-button"
+					/>
+				<toolbarbutton class="titlebar-button titlebar-close"
+					titlebar-btn="close"
+					oncommand="window.close();"
+					data-l10n-id="browser-window-close-button"
+					/>
 			</hbox>
 		</hbox>
 	</vbox>
@@ -162,7 +183,7 @@
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
 				defaultset="menubar-items"
-				mode="icons" iconsize="small" defaulticonsize="small"
+				mode="icons" iconsize="small" defaulticonsize="small" autohide="false"
 				context="toolbar-context-menu">
 			<toolbaritem id="menubar-items" align="center">
 				<!-- TODO: Localize labels -->
@@ -461,12 +482,27 @@
 									<menuitem
 										id="view-menuitem-standard"
 										label="&standardView.label;"
-										type="checkbox"
+										name="menu-ui-layout"
+										type="radio"
 									/>
 									<menuitem
 										id="view-menuitem-stacked"
 										label="&stackedView.label;"
-										type="checkbox"
+										name="menu-ui-layout"
+										type="radio"
+									/>
+									<menuseparator/>
+									<menuitem
+										id="view-menuitem-ui-density-compact"
+										data-l10n-id="menu-ui-density-compact"
+										name="menu-ui-density"
+										type="radio"
+									/>
+									<menuitem
+										id="view-menuitem-ui-density-comfortable"
+										data-l10n-id="menu-ui-density-comfortable"
+										name="menu-ui-density"
+										type="radio"
 									/>
 									<menuseparator/>
 									<menuitem
@@ -482,20 +518,6 @@
 									<menuitem
 										id="view-menuitem-tag-selector"
 										label="&tagSelector.label;"
-										type="checkbox"
-									/>
-								</menupopup>
-							</menu>
-							<menu id="density-menu" data-l10n-id="menu-ui-density">
-								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
-									<menuitem
-										id="view-menuitem-ui-density-compact"
-										data-l10n-id="menu-ui-density-compact"
-										type="checkbox"
-									/>
-									<menuitem
-										id="view-menuitem-ui-density-comfortable"
-										data-l10n-id="menu-ui-density-comfortable"
 										type="checkbox"
 									/>
 								</menupopup>

@@ -1,6 +1,6 @@
 #tab-bar-container {
-	--safe-area-start: 78px;
-	--safe-area-end: 20px;
+	--safe-area-start: 30px;
+	--safe-area-end: 0px;
 }
 
 .tabs {
@@ -9,8 +9,4 @@
 
 .tab {
 	-moz-window-dragging: no-drag;
-}
-
-#navigator-toolbox {
-	border: 0;
 }

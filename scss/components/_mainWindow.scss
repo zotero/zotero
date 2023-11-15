@@ -1,7 +1,12 @@
 // Styling for displaying tabs in the title bar
 :root:not([legacytoolbar="true"]) {
 	& {
-	  --tab-min-height: 30px;
+	@media (-moz-platform: windows) {
+		--tab-min-height: 36px;
+	}
+	@media not (-moz-platform: windows) {
+		--tab-min-height: 30px;
+	}
 	  --tabs-border-color: rgba(0,0,0,.3);
 	  --tabline-color: #0a84ff;
 	
@@ -61,7 +66,7 @@
 	
 	
 	#titlebar {
-		margin-bottom: -30px;
+		margin-bottom: calc(0px - var(--tab-min-height));
 		-moz-box-pack: center;
 	}
 	
@@ -98,31 +103,39 @@
 	  visibility: collapse;
 	}
 	
-	/* NB: these would be margin-inline-start/end if it wasn't for the fact that OS X
-	 * doesn't reverse the order of the items in the titlebar in RTL mode. */
-	.titlebar-placeholder[type="caption-buttons"],
-	#titlebar-buttonbox {
-	  margin-right: 12px;
-	  margin-left: 12px;
+	@media (-moz-platform: macos) {
+		/* NB: these would be margin-inline-start/end if it wasn't for the fact that OS X
+		* doesn't reverse the order of the items in the titlebar in RTL mode. */
+		.titlebar-placeholder[type="caption-buttons"],
+		.titlebar-buttonbox {
+			margin-right: 12px;
+			margin-left: 12px;
+		}
+		
+		.titlebar-buttonbox {
+			-moz-appearance: -moz-window-button-box;
+		}
+		
+		/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
+		.titlebar-buttonbox-container:-moz-locale-dir(rtl) {
+			-moz-box-ordinal-group: 1000;
+		}
+		
+		.titlebar-buttonbox-container:-moz-locale-dir(ltr) {
+			-moz-box-ordinal-group: 0;
+		}
+
+		.titlebar-icon {
+			display: none;
+		}
 	}
 	
-	#titlebar-buttonbox {
-	  -moz-appearance: -moz-window-button-box;
-	}
-	
-	/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
-	#titlebar-buttonbox-container:-moz-locale-dir(rtl) {
-	  -moz-box-ordinal-group: 1000;
-	}
-	
-	#titlebar-buttonbox-container:-moz-locale-dir(ltr) {
-	  -moz-box-ordinal-group: 0;
-	}
 	
 	
 	
 	
 	#tab-bar-container {
+		background: var(--material-tabbar);
 		-moz-window-dragging: drag;
 	}
 	
@@ -141,5 +154,21 @@
 	#zotero-layout-switcher .zotero-toolbar {
 		background: var(--material-tabbar);
 		border-bottom: var(--material-panedivider);
+		-moz-window-dragging: no-drag;
+	}
+
+	#zotero-tabs-toolbar {
+		background: var(--material-tabbar);
+	}
+}
+
+:root:not([sizemode=maximized], [sizemode=fullscreen]) .titlebar-restore,
+:root:is([sizemode=maximized], [sizemode=fullscreen]) .titlebar-max {
+	display: none;
+}
+
+#navigator-toolbox {
+	menu {
+		font-size: var(--zotero-font-size);
 	}
 }

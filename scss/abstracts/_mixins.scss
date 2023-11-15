@@ -36,28 +36,38 @@
 //        underneath selectors listed in arguments, e.g., .virtualized-table .row 
 //        by default. See `state` mixin for more details.
 @mixin focus-states(
-    $selectedState: '.row.selected',
-    $focused: '.virtualized-table:focus-within'
-    ) {
-    @media (prefers-color-scheme: light) {
-        @content("light");
-        
-        @include state($selectedState) {
-            @include state($focused) {
-                @content("white");
-            }
-        }
-    }
+	$selectedState: '.row.selected',
+	$focused: '.virtualized-table:focus-within'
+	) {
+	@media (prefers-color-scheme: light) {
+		@content("light");
+		
+		@include state($selectedState) {
+			@include state($focused) {
+				@content("white");
+			}
+		}
+	}
 
-    @media (prefers-color-scheme: dark) {
-        @content("dark");
-        
-        @include state($selectedState) {
-            @include state($focused) {
-                @content("white");
-            }
-        }
-    }
+	@media (prefers-color-scheme: dark) {
+		@content("dark");
+		
+		@include state($selectedState) {
+			@include state($focused) {
+				@content("white");
+			}
+		}
+	}
+}
+
+// An implementation of Firefox light-dark() CSS mixin, which is not supported in 102
+@mixin light-dark($prop, $light-color, $dark-color) {
+	@media (prefers-color-scheme: light) {
+		#{$prop}: $light-color;
+	}
+	@media (prefers-color-scheme: dark) {
+		#{$prop}: $dark-color;
+	}
 }
 
 @mixin color-scheme {

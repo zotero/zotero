@@ -96,7 +96,6 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + Zotero.appName;
-		this._updateTabBar();
 		// Hide any tab `title` tooltips that might be open
 		window.Zotero_Tooltip.stop();
 	};
@@ -696,48 +695,6 @@ var Zotero_Tabs = new function () {
 		});
 		popup.appendChild(menuitem);
 		popup.openPopupAtScreen(x, y, true);
-	};
-
-	/**
-	 * Update state of the tab bar.
-	 * Only used on Windows and Linux. On macOS, the tab bar is always shown.
-	 */
-	this._updateTabBar = function () {
-		if (Zotero.isMac) {
-			return;
-		}
-		if (this._tabs.length == 1) {
-			this._hideTabBar();
-		}
-		else {
-			this._showTabBar();
-		}
-	};
-	
-	/**
-	 * Show the tab bar.
-	 * Only used on Windows and Linux. On macOS, the tab bar is always shown.
-	 */
-	this._showTabBar = function () {
-		if (Zotero.isMac) {
-			return;
-		}
-		document.getElementById('titlebar').hidden = false;
-		document.getElementById('tab-bar-container').hidden = false;
-		document.getElementById('main-window').removeAttribute('legacytoolbar');
-	};
-	
-	/**
-	 * Hide the tab bar.
-	 * Only used on Windows and Linux. On macOS, the tab bar is always shown.
-	 */
-	this._hideTabBar = function () {
-		if (Zotero.isMac) {
-			return;
-		}
-		document.getElementById('titlebar').hidden = true;
-		document.getElementById('tab-bar-container').hidden = true;
-		document.getElementById('main-window').setAttribute('legacytoolbar', 'true');
 	};
 
 	// Used to move focus back to itemTree or contextPane from the tabs.

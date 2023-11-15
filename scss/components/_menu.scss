@@ -1,0 +1,13 @@
+$icons: (
+	attachments-web-link: "link",
+	attachments-file: "document",
+	attachments-link: "document-linked"
+);
+
+@each $cls, $icon in $icons {
+	.zotero-menuitem-#{$cls} {
+		@include focus-states using ($color) {
+			@include svgicon-menu($icon, $color, "16", "item-type");
+		}
+	}
+}

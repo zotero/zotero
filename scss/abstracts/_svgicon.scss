@@ -8,6 +8,10 @@
         -make-icon-background($icon, 'dark', $size, $prefix, $has2x) center/0;
 }
 
+@mixin svgicon-menu($icon, $color, $size: "16", $prefix: false, $has2x: false) {
+    list-style-image: -make-icon-background($icon, $color, $size, $prefix, $has2x),
+}
+
 @function -make-icon-background($icon, $color, $size, $prefix, $has2x) {
     @if $has2x {
         @if $prefix {
