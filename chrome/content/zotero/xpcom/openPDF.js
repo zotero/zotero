@@ -41,7 +41,7 @@ Zotero.OpenPDF = {
 			// Zotero PDF reader
 			if (!handler) {
 				let location = {
-					annotationKey,
+					annotationID: annotationKey,
 					pageIndex: page && page - 1
 				};
 				await Zotero.Reader.open(item.id, location);
