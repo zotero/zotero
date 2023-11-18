@@ -1414,6 +1414,7 @@ Zotero.File = new function(){
 		return path.toLowerCase().includes('dropbox')
 			// Google Drive
 			|| path.includes('Google Drive')
+			|| path.includes('GoogleDrive') // https://forums.zotero.org/discussion/109502/
 			// OneDrive
 			|| path.toLowerCase().includes('onedrive')
 			// Baidu Netdisk
