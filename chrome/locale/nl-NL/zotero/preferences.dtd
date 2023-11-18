@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Wachtwoord:">
 <!ENTITY zotero.preferences.sync.syncServer "Data-synchronisatie">
 <!ENTITY zotero.preferences.sync.setUpSync "Synchronisatie instellen">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Account ontkoppelen...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Account ontkoppelen…">
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Controleren of alle lokale bestanden op de server aanwezig zijn.">
 <!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
-<!ENTITY zotero.preferences.sync.reset.button "Herstellen...">
+<!ENTITY zotero.preferences.sync.reset.button "Herstellen…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Zoeken">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "Kiezen…">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(gespecificeerd via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Opslagmap tonen">
-<!ENTITY zotero.preferences.dataDir.migrate "Naar nieuwe standaardlocatie verplaatsen...">
+<!ENTITY zotero.preferences.dataDir.migrate "Naar nieuwe standaardlocatie verplaatsen…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Gekoppelde Bijlage-Bestandsmap">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor u toegang heeft tot al uw bestanden op verschillende computers zolang de bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">

@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
-<!ENTITY zotero.preferences.interface "介面">
+<!ENTITY zotero.preferences.interface "界面">
 <!ENTITY zotero.preferences.fileHandling "文件处理">
 <!ENTITY zotero.preferences.automaticSnapshots "从网页创建条目时自动抓取网页快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其他文件">

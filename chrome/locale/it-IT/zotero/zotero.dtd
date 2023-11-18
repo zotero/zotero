@@ -53,7 +53,7 @@
 <!ENTITY zotero.tabs.related.label "Correlati">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra i duplicati">
-<!ENTITY zotero.collections.showUnfiledItems "Mostra gli oggetti non classificati">
+<!ENTITY zotero.collections.showUnfiledItems "Mostra gli elementi non collocati">
 <!ENTITY zotero.collections.showRetractedItems "Mostra gli elementi ritirati dalla pubblicazione">
 
 <!ENTITY zotero.items.itemType "Tipo di elemento">

@@ -137,9 +137,9 @@
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Alle Tags dieser Bibliothek anzeigen">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Lösche automatische Tags in dieser Bibliothek...">
 <!ENTITY zotero.tagSelector.clearAll "Alle abwählen">
-<!ENTITY zotero.tagSelector.assignColor "Farbe zuweisen…">
-<!ENTITY zotero.tagSelector.renameTag "Tag umbenennen…">
-<!ENTITY zotero.tagSelector.deleteTag "Tag löschen…">
+<!ENTITY zotero.tagSelector.assignColor "Farbe zuweisen...">
+<!ENTITY zotero.tagSelector.renameTag "Tag umbenennen...">
+<!ENTITY zotero.tagSelector.deleteTag "Tag löschen...">
 <!ENTITY zotero.tagSelector.splitTag "Aufteilen…">
 
 <!ENTITY zotero.tagColorChooser.title "Tag Farbe und Position auswählen">
