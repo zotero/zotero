@@ -309,15 +309,25 @@ Zotero.Integration = new function() {
 		finally {
 			var diff = ((new Date()).getTime() - startTime)/1000;
 			Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} complete in ${diff}s`)
+		
+			if (Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
+				var oldWindow = Zotero.Integration.currentWindow;
+				oldWindow.close();
+				await Zotero.Promise.delay(50);
+			}
+
+			if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
+				Zotero.Integration.currentSession.progressBar.hide();
+				await Zotero.Promise.delay(50);
+			}
+			
 			if (document) {
 				try {
 					await document.cleanup();
 					await document.activate();
 					
 					// Call complete function if one exists
-					if (document.wrappedJSObject && document.wrappedJSObject.complete) {
-						document.wrappedJSObject.complete();
-					} else if (document.complete) {
+					if (document.complete) {
 						await document.complete();
 					}
 				} catch(e) {
@@ -325,18 +335,6 @@ Zotero.Integration = new function() {
 				}
 			}
 			
-			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
-				var oldWindow = Zotero.Integration.currentWindow;
-				Zotero.Promise.delay(100).then(function() {
-					oldWindow.close();
-				});
-			}
-
-			if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
-				Zotero.Promise.delay(5).then(function() {
-					Zotero.Integration.currentSession.progressBar.hide();
-				});
-			}
 			// This technically shouldn't be necessary since we call document.activate(),
 			// but http integration plugins may not have OS level access to windows to be
 			// able to activate themselves. E.g. Google Docs on Safari.
