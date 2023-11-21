@@ -843,8 +843,12 @@ var ZoteroPane = new function()
 					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 					if (reader) {
 						reader.focus();
-						event.preventDefault();
-						event.stopPropagation();
+						// Keep propagating if current focus is on input or textarea
+						// The Escape event needs to be handled by itemBox, tagBox, etc. to undo edits.
+						if (!["input", "textarea"].includes(document.activeElement.tagName)) {
+							event.preventDefault();
+							event.stopPropagation();
+						}
 					}
 				}
 			}
