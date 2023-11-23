@@ -37,7 +37,7 @@
     font: message-box;
     font-size: inherit;
     min-height: 100px;
-    height: 100%;
+    height: 0;
     pointer-events: auto;
 }
 
