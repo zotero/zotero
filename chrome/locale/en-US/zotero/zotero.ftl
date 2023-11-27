@@ -3,6 +3,20 @@ zotero-toolbar-new-attachment =
 zotero-toolbar-opened-tabs-menu =
     .tooltiptext = List all tabs
 
+item-menu-viewAttachment =
+    .label = Open {
+        $attachmentType ->
+            [pdf] PDF
+            [epub] EPUB
+            [snapshot] Snapshot
+            *[multiple] Attachments
+    } in {
+        $openIn ->
+            [tab] New Tab
+            [window] New Window
+            *[other] Reader
+    }
+
 import-window =
     .title = Import
 

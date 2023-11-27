@@ -3323,6 +3323,7 @@ var ZoteroPane = new function()
 		// when things are visible and when they're visible but disabled
 		var show = [], disable = [];
 		
+		let useHideOrDelete = "delete";
 		if (collectionTreeRow.isCollection()) {
 			show = [
 				'newSubcollection',
@@ -3418,6 +3419,7 @@ var ZoteroPane = new function()
 			show = ['deleteCollection'];
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
+			useHideOrDelete = "hide";
 		}
 		else if (collectionTreeRow.isHeader()) {
 		}
@@ -3471,6 +3473,15 @@ var ZoteroPane = new function()
 			if (library.archived) {
 				show.push('removeLibrary');
 			}
+		}
+
+		if (useHideOrDelete === 'delete') {
+			m.deleteCollection.classList.add('zotero-menuitem-delete-collection');
+			m.deleteCollection.classList.remove('zotero-menuitem-hide-collection');
+		}
+		else {
+			m.deleteCollection.classList.add('zotero-menuitem-hide-collection');
+			m.deleteCollection.classList.remove('zotero-menuitem-delete-collection');
 		}
 		
 		// Disable some actions if user doesn't have write access
@@ -3822,8 +3833,17 @@ var ZoteroPane = new function()
 					}
 					else if (!collectionTreeRow.isPublications()) {
 						if (item.itemType == 'book' || item.itemType == 'bookSection') {
-							menu.childNodes[m.duplicateAndConvert].setAttribute('label', Zotero.getString('pane.items.menu.duplicateAndConvert.'
+							let toBookMenuItem = menu.childNodes[m.duplicateAndConvert];
+							toBookMenuItem.setAttribute('label', Zotero.getString('pane.items.menu.duplicateAndConvert.'
 								+ (item.itemType == 'book' ? 'toBookSection' : 'toBook')));
+							if (item.itemType === 'book') {
+								toBookMenuItem.classList.add('zotero-menuitem-convert-to-book-section');
+								toBookMenuItem.classList.remove('zotero-menuitem-convert-to-book');
+							}
+							else {
+								toBookMenuItem.classList.add('zotero-menuitem-convert-to-book');
+								toBookMenuItem.classList.remove('zotero-menuitem-convert-to-book-section');
+							}
 							show.add(m.duplicateAndConvert);
 						}
 

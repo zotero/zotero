@@ -1611,7 +1611,7 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
-	 * 
+	 *
 	 * @param {Library|Collection} libraryOrCollection
 	 * @param {Node<menupopup>} elem Parent element
 	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
@@ -1619,7 +1619,7 @@ Zotero.Utilities.Internal = {
 	 * 		Receives the event and libraryOrCollection for given item.
 	 * @param {Function} disabledPred If provided, called on each library/collection
 	 * 		to determine whether disabled
-	 * 
+	 *
 	 * @return {Node<menuitem>|Node<menu>} appended node
 	 */
 	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
@@ -1637,8 +1637,8 @@ Zotero.Utilities.Internal = {
 			menuitem.setAttribute("disabled", disabled);
 			menuitem.addEventListener('command', command);
 			menuitem.classList.add('menuitem-iconic');
-			return menuitem
-		}	
+			return menuitem;
+		}
 		
 		function _createMenu(label, value, icon, command) {
 			let menu = doc.createXULElement('menu');
@@ -1662,7 +1662,7 @@ Zotero.Utilities.Internal = {
 		// Create menuitem for library or collection itself, to be placed either directly in the
 		// containing menu or as the top item in a submenu
 		var menuitem = _createMenuitem(
-			libraryOrCollection.name, 
+			libraryOrCollection.name,
 			libraryOrCollection.treeViewID,
 			imageSrc,
 			function (event) {
@@ -1674,14 +1674,15 @@ Zotero.Utilities.Internal = {
 		var collections;
 		if (libraryOrCollection.objectType == 'collection') {
 			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
-		} else {
+		}
+		else {
 			collections = Zotero.Collections.getByLibrary(libraryOrCollection.id);
 		}
 		
 		// If no subcollections, place menuitem for target directly in containing men
 		if (collections.length == 0) {
 			elem.appendChild(menuitem);
-			return menuitem
+			return menuitem;
 		}
 		
 		// Otherwise create a submenu for the target's subcollections
