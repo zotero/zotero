@@ -269,6 +269,22 @@ Zotero.CollectionTreeRow.prototype.getChildren = function () {
 	}
 }
 
+// Returns the list of deleted collections in the trash.
+// Subcollections of deleted collections are filtered out.
+Zotero.CollectionTreeRow.prototype.getTrashedCollections = async function () {
+	if (!this.isTrash()) {
+		return [];
+	}
+	let deleted = await Zotero.Collections.getDeleted(this.ref.libraryID);
+
+	let deletedParents = new Set();
+	for (let d of deleted) {
+		deletedParents.add(d.key);
+	}
+	return deleted.filter(d => !d.parentKey || !deletedParents.has(d.parentKey));
+};
+
+
 Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function* ()
 {
 	switch (this.type) {

@@ -898,7 +898,7 @@ describe("ZoteroPane", function() {
 			let iv = zp.itemsView;
 			assert.ok(await iv.selectItem(item.id));
 
-			await Zotero.Promise.delay(1);
+			await Zotero.Promise.delay(100);
 
 			let promise = waitForDialog();
 			let modifyPromise = waitForItemEvent('modify');
@@ -916,22 +916,22 @@ describe("ZoteroPane", function() {
 	});
 	
 	describe("#deleteSelectedCollection()", function () {
-		it("should delete collection but not descendant items by default", function* () {
+		it("should move collection to trash but not descendant items by default", function* () {
 			var collection = yield createDataObject('collection');
 			var item = yield createDataObject('item', { collections: [collection.id] });
 			var promise = waitForDialog();
 			yield zp.deleteSelectedCollection();
-			assert.isFalse(Zotero.Collections.exists(collection.id));
+			assert.isTrue(collection.deleted);
 			assert.isTrue(Zotero.Items.exists(item.id));
 			assert.isFalse(item.deleted);
 		});
 		
-		it("should delete collection and descendant items when deleteItems=true", function* () {
+		it("should move to trash collection and descendant items when deleteItems=true", function* () {
 			var collection = yield createDataObject('collection');
 			var item = yield createDataObject('item', { collections: [collection.id] });
 			var promise = waitForDialog();
 			yield zp.deleteSelectedCollection(true);
-			assert.isFalse(Zotero.Collections.exists(collection.id));
+			assert.isTrue(collection.deleted);
 			assert.isTrue(Zotero.Items.exists(item.id));
 			assert.isTrue(item.deleted);
 		});

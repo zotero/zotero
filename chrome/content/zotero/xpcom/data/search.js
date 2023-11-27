@@ -109,6 +109,9 @@ Zotero.defineProperty(Zotero.Search.prototype, 'treeViewImage', {
 	}
 });
 
+// Properties for a search to "pretend" to be an item for trash itemTree
+Object.assign(Zotero.Search.prototype, Zotero.DataObjectUtilities.itemTreeMockProperties);
+
 Zotero.Search.prototype.loadFromRow = function (row) {
 	var primaryFields = this._ObjectsClass.primaryFields;
 	for (let i=0; i<primaryFields.length; i++) {
