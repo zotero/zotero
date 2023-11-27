@@ -212,6 +212,101 @@ describe("Zotero.CollectionTree", function() {
 		})
 	})
 	
+	describe("Trash for collections/searches", function () {
+		var one, two, three;
+		for (let objectType of ['collection', 'search']) {
+			it(`should remove deleted ${objectType} from collectionTree`, async function () {
+				var ran = Zotero.Utilities.randomString();
+				one = await createDataObject(objectType, { name: ran + "_DELETE_ONE" });
+				two = await createDataObject(objectType, { name: ran + "_DELETE_TWO" });
+				three = await createDataObject(objectType, { name: ran + "_DELETE_THREE" });
+				
+				// Move them to trash
+				one.deleted = true;
+				two.deleted = true;
+				three.deleted = true;
+				await one.saveTx();
+				await two.saveTx();
+				await three.saveTx();
+
+				// Make sure they're gone from collectionTree
+				assert.isFalse(cv.getRowIndexByID(one.treeViewID));
+				assert.isFalse(cv.getRowIndexByID(two.treeViewID));
+				assert.isFalse(cv.getRowIndexByID(three.treeViewID));
+			})
+			it(`should put restored ${objectType} back into collectionTree`, async function () {
+				await cv.selectByID("T" + userLibraryID);
+				await waitForItemsLoad(win);
+
+				// Restore
+				await Zotero.DB.executeTransaction(async function () {
+					one.deleted = false;
+					two.deleted = false;
+					three.deleted = false;
+					await one.save({ skipSelect: true });
+					await two.save({ skipSelect: true });
+					await three.save({ skipSelect: true });
+				});
+
+				// Check if trash is still selected
+				let trashRow = cv.getRowIndexByID("T" + userLibraryID);
+				assert.equal(cv.selection.focused, trashRow);
+
+				// Check if restored entries are back in collectionTree
+				assert.isNumber(cv.getRowIndexByID(one.treeViewID));
+				assert.isNumber(cv.getRowIndexByID(two.treeViewID));
+				assert.isNumber(cv.getRowIndexByID(three.treeViewID));
+				// Make sure it's all gone from trash
+				assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(two.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(three.treeViewID));
+			});
+		}
+
+		it(`should delete subcollections when parent is deleted`, async function () {
+			var ran = Zotero.Utilities.randomString();
+			one = await createDataObject('collection', { name: ran + "_DELETE_ONE" });
+			two = await createDataObject('collection', { name: ran + "_DELETE_TWO", parentID: one.id });
+			three = await createDataObject('collection', { name: ran + "_DELETE_THREE", parentID: two.id });
+			
+			// Select top parent
+			cv.selection.select(cv.getRowIndexByID(one.treeViewID));
+			// Move parent to trash
+			await cv.deleteSelection();
+
+			// Make sure they're gone from collectionTree
+			assert.isFalse(cv.getRowIndexByID(one.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(two.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(three.treeViewID));
+		})
+
+		it(`should restore deleted subcollections with parent`, async function () {
+			await cv.selectByID("T" + userLibraryID);
+
+			// Restore items
+			await waitForItemsLoad(win);
+			zp.itemsView.selectItem(one.treeViewID);
+			await zp.restoreSelectedItems();
+
+			// Check if trash is still selected
+			let trashRow = cv.getRowIndexByID("T" + userLibraryID);
+			assert.equal(cv.selection.focused, trashRow);
+
+			// Check if restored collections are back in collectionTree
+			let parentRowIndex = cv.getRowIndexByID(one.treeViewID);
+			await cv.toggleOpenState(parentRowIndex);
+			assert.equal(cv.getRow(parentRowIndex).level, 1);
+			await Zotero.Promise.delay(5000);
+			let middleRowIndex = cv.getRowIndexByID(two.treeViewID);
+			assert.equal(cv.getRow(middleRowIndex).level, 2);
+			let bottomRowindex = cv.getRowIndexByID(three.treeViewID);
+			assert.equal(cv.getRow(bottomRowindex).level, 3);
+
+			await waitForItemsLoad(win);
+			//Make sure they're gone from trash
+			assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
+		});
+	});
 	describe("#notify()", function () {
 		it("should select a new collection", function* () {
 			// Create collection
