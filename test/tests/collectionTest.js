@@ -76,6 +76,58 @@ describe("Zotero.Collection", function() {
 			assert.notInclude(deleted, collection2.key);
 			assert.notInclude(deleted, collection3.key);
 		});
+
+		it("should send deleted collections to trash", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			var collection3 = await createDataObject('collection', { parentID: collection2.id });
+			
+			collection1.deleted = true;
+			await collection1.saveTx();
+			
+			var deleted = await Zotero.Collections.getDeleted(collection1.libraryID, true);
+			
+			assert.include(deleted, collection1.id);
+			assert.include(deleted, collection2.id);
+			assert.include(deleted, collection3.id);
+		});
+
+		it("should restore deleted collection", async function () {
+			var collection1 = await createDataObject('collection');
+			var item1 = await createDataObject('item', { collections: [collection1.id] });
+
+			assert.include(item1.getCollections(), collection1.id);
+
+			collection1.deleted = true;
+			await collection1.saveTx();
+
+			// Deleted collection is gone from item's cache
+			assert.notInclude(item1.getCollections(), collection1.id);
+
+			// Restore deleted collection
+			collection1.deleted = false;
+			await collection1.saveTx();
+
+			var deleted = await Zotero.Collections.getDeleted(collection1.libraryID, true);
+			
+			// Collection is restored from trash
+			assert.notInclude(deleted, collection1.id);
+
+			// Collection is back in item's cache
+			assert.include(item1.getCollections(), collection1.id);
+		});
+
+		it("should permanently delete collections from trash", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			var collection3 = await createDataObject('collection', { parentID: collection2.id });
+			
+			await collection1.eraseTx();
+			
+			assert.equal(await Zotero.Collections.getAsync(collection1.id), false);
+			assert.equal(await Zotero.Collections.getAsync(collection2.id), false);
+			assert.equal(await Zotero.Collections.getAsync(collection3.id), false);
+		});
 	})
 	
 	describe("#version", function () {

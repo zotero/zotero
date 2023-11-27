@@ -211,6 +211,10 @@ Zotero.Item.prototype._setParentKey = function() {
 	Zotero.Item._super.prototype._setParentKey.apply(this, arguments);
 }
 
+// Shared properties with Zotero.Collection and Zotero.Search to display them in trash
+// along actual items
+Object.assign(Zotero.Item.prototype, Zotero.DataObjectUtilities.itemTreeMockProperties);
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Public Zotero.Item methods
@@ -4993,7 +4997,6 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 Zotero.Item.prototype.isCollection = function() {
 	return false;
 }
-
 
 /**
  * Populate the object's data from an API JSON data object

@@ -849,114 +849,116 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		else if (action == 'modify') {
 			let row;
-			let id = ids[0];
-			let rowID = "C" + id;
-			let selectedIndex = this.selection.focused;
 			
-			let handleFocusDuringSearch = async (type) => {
-				let object = type == 'collection' ? Zotero.Collections.get(id) : Zotero.Searches.get(id);
-				// If collections/searches are being filtered, some rows
-				// need to be (un-)greyed out or removed, so reload.
-				if (!this._isFilterEmpty()) {
-					let offset = 0;
-					if (!this._includedInTree(object, true)) {
-						offset = this._calculateOffsetForRowSelection(type[0].toUpperCase() + id);
-					}
-					await this.reload();
-					this._selectAfterRowRemoval(selectedIndex - offset);
-				}
-			};
-
-			switch (type) {
-			case 'collection':
-				let collection = Zotero.Collections.get(id);
-				row = this.getRowIndexByID(rowID);
-				// If collection is visible
-				if (row !== false) {
-					// TODO: Only move if name changed
-					let reopen = this.isContainerOpen(row);
-					if (reopen) {
-						this._closeContainer(row);
-					}
-					this._removeRow(row);
-					// Collection was moved to trash, so don't add it back
-					if (collection.deleted) {
-						this._refreshRowMap();
-						// If collection was selected, select next row
-						if (selectedIndex == row) {
-							this._selectAfterRowRemoval(selectedIndex);
+			for (let id of ids) {
+				let rowID = "C" + id;
+				let selectedIndex = this.selection.focused;
+				
+				let handleFocusDuringSearch = async (type) => {
+					let object = type == 'collection' ? Zotero.Collections.get(id) : Zotero.Searches.get(id);
+					// If collections/searches are being filtered, some rows
+					// need to be (un-)greyed out or removed, so reload.
+					if (!this._isFilterEmpty()) {
+						let offset = 0;
+						if (!this._includedInTree(object, true)) {
+							offset = this._calculateOffsetForRowSelection(type[0].toUpperCase() + id);
 						}
+						await this.reload();
+						this._selectAfterRowRemoval(selectedIndex - offset);
 					}
-					else {
-						await this._addSortedRow('collection', id);
-						await this.selectByID(currentTreeRow.id);
-						if (reopen) {
-							let newRow = this.getRowIndexByID(rowID);
-							if (!this.isContainerOpen(newRow)) {
-								await this.toggleOpenState(newRow);
+				};
+				
+				switch (type) {
+					case 'collection':
+						let collection = Zotero.Collections.get(id);
+						row = this.getRowIndexByID(rowID);
+						// If collection is visible
+						if (row !== false) {
+							// TODO: Only move if name changed
+							let reopen = this.isContainerOpen(row);
+							if (reopen) {
+								this._closeContainer(row);
+							}
+							this._removeRow(row);
+							// Collection was moved to trash, so don't add it back
+							if (collection.deleted) {
+								this._refreshRowMap();
+								// If collection was selected, select next row
+								if (selectedIndex == row) {
+									this._selectAfterRowRemoval(selectedIndex);
+								}
+							}
+							else {
+								await this._addSortedRow('collection', id);
+								await this.selectByID(currentTreeRow.id);
+								if (reopen) {
+									let newRow = this.getRowIndexByID(rowID);
+									if (!this.isContainerOpen(newRow)) {
+										await this.toggleOpenState(newRow);
+									}
+								}
 							}
 						}
-					}
-				}
-				// If collection isn't currently visible and it isn't in the trash (because it was
-				// undeleted), add it (if possible without opening any containers)
-				else if (!collection.deleted) {
-					await this._addSortedRow('collection', id);
-					await this.selectByID(currentTreeRow.id);
-					// Invalidate parent in case it's become non-empty
-					let parentRow = this.getRowIndexByID("C" + collection.parentID);
-					if (parentRow !== false) {
-						this.tree.invalidateRow(parentRow);
-					}
-				}
-				await handleFocusDuringSearch('collection');
-				break;
-			
-			case 'search':
-				let search = Zotero.Searches.get(id);
-				row = this.getRowIndexByID("S" + id);
-				if (row !== false) {
-					// TODO: Only move if name changed
-					this._removeRow(row);
+						// If collection isn't currently visible and it isn't in the trash (because it was
+						// undeleted), add it (if possible without opening any containers)
+						else if (!collection.deleted) {
+							await this._addSortedRow('collection', id);
+							await this.selectByID(currentTreeRow.id);
+							// Invalidate parent in case it's become non-empty
+							let parentRow = this.getRowIndexByID("C" + collection.parentID);
+							if (parentRow !== false) {
+								this.tree.invalidateRow(parentRow);
+							}
+						}
+						await handleFocusDuringSearch('collection');
+						break;
 					
-					// Search was moved to trash
-					if (search.deleted) {
-						this._refreshRowMap();
-						// If search was selected, select next row
-						if (selectedIndex == row) {
-							this._selectAfterRowRemoval(selectedIndex);
+					case 'search':
+						let search = Zotero.Searches.get(id);
+						row = this.getRowIndexByID("S" + id);
+						if (row !== false) {
+							// TODO: Only move if name changed
+							this._removeRow(row);
+							
+							// Search was moved to trash
+							if (search.deleted) {
+								this._refreshRowMap();
+								// If search was selected, select next row
+								if (selectedIndex == row) {
+									this._selectAfterRowRemoval(selectedIndex);
+								}
+							}
+							// If search isn't in trash, add it back
+							else {
+								await this._addSortedRow('search', id);
+								await this.selectByID(currentTreeRow.id);
+							}
 						}
-					}
-					// If search isn't in trash, add it back
-					else {
-						await this._addSortedRow('search', id);
+						// If search isn't currently visible and it isn't in the trash (because it was
+						// undeleted), add it
+						else if (!search.deleted) {
+							await this._addSortedRow('search', id);
+							await this.selectByID(currentTreeRow.id);
+							// Invalidate parent in case it's become non-empty
+							// NOTE: Not currently used, because searches can't yet have parents
+							if (search.parentID) {
+								let parentRow = this.getRowIndexByID("S" + search.parentID);
+								if (parentRow !== false) {
+									this.tree.invalidateRow(parentRow);
+								}
+							}
+						}
+						await handleFocusDuringSearch('search');
+						break;
+						
+					case 'feed':
+						break;
+					
+					default:
+						await this.reload();
 						await this.selectByID(currentTreeRow.id);
-					}
+						break;
 				}
-				// If search isn't currently visible and it isn't in the trash (because it was
-				// undeleted), add it
-				else if (!search.deleted) {
-					await this._addSortedRow('search', id);
-					await this.selectByID(currentTreeRow.id);
-					// Invalidate parent in case it's become non-empty
-					// NOTE: Not currently used, because searches can't yet have parents
-					if (search.parentID) {
-						let parentRow = this.getRowIndexByID("S" + search.parentID);
-						if (parentRow !== false) {
-							this.tree.invalidateRow(parentRow);
-						}
-					}
-				}
-				await handleFocusDuringSearch('search');
-				break;
-				
-			case 'feed':
-				break;
-			
-			default:
-				await this.reload();
-				await this.selectByID(currentTreeRow.id);
-				break;
 			}
 		}
 		else if(action == 'add')
@@ -1259,12 +1261,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 */
 	async deleteSelection(deleteItems) {
 		var treeRow = this.getRow(this.selection.focused);
-		if (treeRow.isCollection() || treeRow.isFeed()) {
-			await treeRow.ref.eraseTx({ deleteItems });
+		if (treeRow.isFeed()) {
+			await treeRow.ref.eraseTx();
+			return;
 		}
-		else if (treeRow.isSearch()) {
-			await Zotero.Searches.erase(treeRow.ref.id);
+		treeRow.ref.deleted = true;
+		if (treeRow.isCollection()) {
+			await treeRow.ref.saveTx({ deleteItems });
+			return;
 		}
+		await treeRow.ref.saveTx();
 	}
 	
 	unregister() {
@@ -2740,7 +2746,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var collections = treeRow.getChildren();
 		
 		if (isLibrary) {
-			var savedSearches = await Zotero.Searches.getAll(libraryID);
+			var savedSearches = await Zotero.Searches.getAll(libraryID).filter(s => !s.deleted);
 			// Virtual collections default to showing if not explicitly hidden
 			var showDuplicates = this.props.hideSources.indexOf('duplicates') == -1
 					&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
@@ -2860,7 +2866,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		if (showTrash && this._isFilterEmpty()) {
 			let deletedItems = await Zotero.Items.getDeleted(libraryID, true);
-			if (deletedItems.length || Zotero.Prefs.get("showTrashWhenEmpty")) {
+			let deletedCollections = await Zotero.Collections.getDeleted(libraryID, true);
+			let deletedSearches = await Zotero.Searches.getDeleted(libraryID, true);
+			let trashNotEmpty = deletedItems.length || deletedCollections.length || deletedSearches.length;
+			if (trashNotEmpty || Zotero.Prefs.get("showTrashWhenEmpty")) {
 				var ref = {
 					libraryID: libraryID
 				};
@@ -2868,7 +2877,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					new Zotero.CollectionTreeRow(this, 'trash', ref, level + 1));
 				newRows++;
 			}
-			this._trashNotEmpty[libraryID] = !!deletedItems.length;
+			this._trashNotEmpty[libraryID] = trashNotEmpty;
 		}
 		
 		return newRows;

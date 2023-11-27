@@ -2391,13 +2391,12 @@ var ZoteroPane = new function()
 	 * @return {Promise}
 	 */
 	this.restoreSelectedItems = async function () {
-		let items = this.getSelectedItems();
-		if (!items.length) {
+		let selectedIDs = this.getSelectedItems(true);
+		if (!selectedIDs.length) {
 			return;
 		}
 
-		let selectedIDs = new Set(items.map(item => item.id));
-		let isSelected = itemOrID => (itemOrID.id ? selectedIDs.has(itemOrID.id) : selectedIDs.has(itemOrID));
+		let isSelected = itemOrID => (itemOrID.treeViewID ? selectedIDs.includes(itemOrID.treeViewID) : selectedIDs.includes(itemOrID));
 
 		await Zotero.DB.executeTransaction(async () => {
 			for (let row = 0; row < this.itemsView.rowCount; row++) {
@@ -2408,9 +2407,17 @@ var ZoteroPane = new function()
 
 				let parent = this.itemsView.getRow(row).ref;
 				let children = [];
-				if (!parent.isNote()) children.push(...parent.getNotes(true));
-				if (!parent.isAttachment()) children.push(...parent.getAttachments(true));
-
+				let subcollections = [];
+				if (parent.isCollection()) {
+					// If the restored item is a collection, restore its subcollections too
+					if (isSelected(parent)) {
+						subcollections = parent.getDescendents(false, 'collection', true).map(col => col.id);
+					}
+				}
+				else {
+					if (!parent.isNote()) children.push(...parent.getNotes(true));
+					if (!parent.isAttachment()) children.push(...parent.getAttachments(true));
+				}
 				if (isSelected(parent)) {
 					if (parent.deleted) {
 						parent.deleted = false;
@@ -2418,7 +2425,8 @@ var ZoteroPane = new function()
 					}
 
 					let noneSelected = !children.some(isSelected);
-					for (let child of Zotero.Items.get(children)) {
+					let allChildren = Zotero.Items.get(children).concat(Zotero.Collections.get(subcollections));
+					for (let child of allChildren) {
 						if ((noneSelected || isSelected(child)) && child.deleted) {
 							child.deleted = false;
 							await child.save();
@@ -2453,6 +2461,10 @@ var ZoteroPane = new function()
 		if (result) {
 			Zotero.showZoteroPaneProgressMeter(null, true);
 			try {
+				let deletedSearches = yield Zotero.Searches.getDeleted(libraryID, true);
+				yield Zotero.Searches.erase(deletedSearches);
+				let deletedCollections = yield Zotero.Collections.getDeleted(libraryID, true);
+				yield Zotero.Collections.erase(deletedCollections);
 				let deleted = yield Zotero.Items.emptyTrash(
 					libraryID,
 					{
@@ -3886,6 +3898,14 @@ var ZoteroPane = new function()
 		}
 		else {
 			menu.childNodes[m.showInLibrary].setAttribute('label', Zotero.getString('general.showInLibrary'));
+		}
+		// For collections and search, only keep restore/delete options
+		if (items.some(item => item.isCollection() || item.isSearch())) {
+			for (let option of options) {
+				if (!['restoreToLibrary', 'deleteFromLibrary'].includes(option)) {
+					show.delete(m[option]);
+				}
+			}
 		}
 		
 		// Set labels, plural if necessary

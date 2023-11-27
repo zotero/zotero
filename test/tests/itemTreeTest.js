@@ -758,6 +758,7 @@ describe("Zotero.ItemTree", function() {
 		});
 		
 		describe("Trash", function () {
+			var one, two, three;
 			it("should remove untrashed parent item when last trashed child is deleted", function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				var item = yield createDataObject('item');
@@ -770,8 +771,74 @@ describe("Zotero.ItemTree", function() {
 				var promise = waitForDialog();
 				yield zp.emptyTrash();
 				yield promise;
+				// Small delay for modal to close and notifications to go through
+				// otherwise, next publications tab does not get opened
+				yield Zotero.Promise.delay(100);
 				assert.equal(zp.itemsView.rowCount, 0);
 			});
+
+			it("should show only top-most trashed collection", async function() {
+				var userLibraryID = Zotero.Libraries.userLibraryID;
+				var ran = Zotero.Utilities.randomString();
+				var objectType = "collection";
+				one = await createDataObject(objectType, { name: ran + "_DELETE_ONE" });
+				two = await createDataObject(objectType, { name: ran + "_DELETE_TWO", parentID: one.id });
+				three = await createDataObject(objectType, { name: ran + "_DELETE_THREE", parentID: two.id });
+
+				one.deleted = true;
+				await one.saveTx();
+
+				// Go to trash
+				await zp.collectionsView.selectByID("T" + userLibraryID);
+				await waitForItemsLoad(win);
+
+				// Make sure only top-level collection shows
+				assert.isNumber(itemsView.getRowIndexByID(one.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(two.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(three.treeViewID));
+			})
+
+			it("should restore all subcollections when parent is restored", async function() {
+				var userLibraryID = Zotero.Libraries.userLibraryID;
+				// Go to trash
+				await zp.collectionsView.selectByID("T" + userLibraryID);
+				await waitForItemsLoad(win);
+
+				// Restore
+				await itemsView.selectItem(one.treeViewID);
+				await zp.restoreSelectedItems();
+				
+				// Make sure it's gone from trash
+				assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(two.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(three.treeViewID));
+
+				// Make sure it shows up back in collectionTree
+				assert.isNumber(zp.collectionsView.getRowIndexByID(one.treeViewID));
+			})
+
+			for (let objectType of ['collection', 'search']) {
+				it(`should remove ${objectType} from trash on delete`, async function (){
+					var userLibraryID = Zotero.Libraries.userLibraryID;
+					var ran = Zotero.Utilities.randomString();
+					one = await createDataObject(objectType, { name: ran + "_DELETE_ONE", deleted: true });
+					two = await createDataObject(objectType, { name: ran + "_DELETE_TWO", deleted: true  });
+					three = await createDataObject(objectType, { name: ran + "_DELETE_THREE", deleted: true  });
+
+					// Go to trash
+					await zp.collectionsView.selectByID("T" + userLibraryID);
+					await waitForItemsLoad(win);
+
+					// Permanently delete
+					await itemsView.selectItems([one.treeViewID, two.treeViewID, three.treeViewID]);
+					await itemsView.deleteSelection();
+
+					// Make sure it's gone from trash
+					assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
+					assert.isFalse(zp.itemsView.getRowIndexByID(two.treeViewID));
+					assert.isFalse(zp.itemsView.getRowIndexByID(three.treeViewID));
+				})
+			}
 		});
 		
 		describe("My Publications", function () {

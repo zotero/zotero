@@ -112,7 +112,11 @@
 			if (this.data.length == 1) {
 				let item = this.data[0];
 				
-				if (item.isNote()) {
+				// If a collection or search is selected, it must be in the trash.
+				if (item.isCollection() || item.isSearch()) {
+					renderStatus = this.renderMessage();
+				}
+				else if (item.isNote()) {
 					hideSidenav = true;
 					renderStatus = this.renderNoteEditor(item);
 				}
@@ -220,6 +224,18 @@
 			// Display label in the middle of the item pane
 			else {
 				if (count) {
+					if (count == 1) {
+						let item = this.data[0];
+						// If a collection or search is selected, it must be in the trash.
+						if (item.isCollection()) {
+							let subcollectionsCount = item.getDescendents(false, 'collection', true).length;
+							msg = Zotero.getString('pane.collections.deletedCollection', subcollectionsCount);
+						}
+						else if (item.isSearch()) {
+							msg = Zotero.getString('pane.collections.deletedSearch');
+						}
+					}
+					
 					msg = Zotero.getString('pane.item.selected.multiple', count);
 				}
 				else {
