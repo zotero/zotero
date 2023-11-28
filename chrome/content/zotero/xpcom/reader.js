@@ -1022,6 +1022,7 @@ class ReaderTab extends ReaderInstance {
 		this._tabContainer.appendChild(this._popupset);
 		
 		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.addEventListener('pointerdown', this._handlePointerDown);
 		this._window.addEventListener('pointerup', this._handlePointerUp);
 
 		this._iframe.setAttribute('tooltip', 'html-tooltip');
@@ -1045,35 +1046,45 @@ class ReaderTab extends ReaderInstance {
 		}
 	};
 
+	// We don't want to send fake pointerup event, if pointerdown and pointerup was in the same iframe
+	_handlePointerDown = (event) => {
+		if (this._window.Zotero_Tabs.selectedID === this.tabID
+			&& event.target.closest('#outerContainer')) {
+			this._pointerDownWindow = event.target.ownerDocument.defaultView;
+		}
+	};
+
 	// This is a nonsense work-around to trigger mouseup and pointerup
 	// events in PDF reader iframe when mouse up happens over another iframe
 	// i.e. note-editor. There should be a better way to solve this
 	_handlePointerUp = (event) => {
 		try {
+			var _window = event.target.ownerDocument.defaultView;
 			if (this._window.Zotero_Tabs.selectedID === this.tabID
-				&& this._iframeWindow
-				&& event.target
-				&& event.target.closest
-				&& !event.target.closest('#outerContainer')) {
-				let evt = new this._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
-				this._iframeWindow.dispatchEvent(evt);
+				// If the event isn't inside a reader PDF.js iframe, or isn't the same iframe (if using split view)
+				&& (!event.target.closest('#outerContainer') || this._pointerDownWindow !== _window)
+				&& this._pointerDownWindow
+			) {
+				let evt = new this._internalReader._primaryView._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
+				this._internalReader._primaryView._iframeWindow.dispatchEvent(evt);
+				this._internalReader._secondaryView?._iframeWindow.dispatchEvent(evt);
 				if (evt.defaultPrevented) {
 					event.preventDefault();
 					return;
 				}
-				if (evt.clickEventPrevented()) {
+				if (evt.clickEventPrevented && evt.clickEventPrevented()) {
 					event.preventClickEvent();
 				}
-
-				evt = new this._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
-				this._iframeWindow.dispatchEvent(evt);
+				evt = new this._internalReader._primaryView._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
+				this._internalReader._primaryView._iframeWindow.dispatchEvent(evt);
+				this._internalReader._secondaryView?._iframeWindow.dispatchEvent(evt);
 				if (evt.defaultPrevented) {
 					event.preventDefault();
 				}
 			}
+			this._pointerDownWindow = null;
 		}
 		catch (e) {
-			// TODO: Find a better solution for this or the whole method
 			if (!e.message.includes("can't access dead object")) {
 				Zotero.logError(e);
 			}
