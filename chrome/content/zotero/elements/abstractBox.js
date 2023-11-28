@@ -28,7 +28,11 @@
 {
 	class AbstractBox extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<editable-text multiline="true" data-l10n-id="abstract-field" />
+			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
+				<html:div class="body">
+					<editable-text multiline="true" data-l10n-id="abstract-field" />
+				</html:div>
+			</collapsible-section>
 		`);
 
 		_item = null;
@@ -83,8 +87,10 @@
 		}
 
 		async blurOpenField() {
-			this.abstractField.blur();
-			await this.save();
+			if (this.abstractField?.matches(':focus-within')) {
+				this.abstractField.blur();
+				await this.save();
+			}
 		}
 
 		render() {
@@ -92,9 +98,10 @@
 				return;
 			}
 
-			let title = this.item.getField('abstractNote');
-			if (this.abstractField.initialValue !== title) {
-				this.abstractField.value = title;
+			let abstract = this.item.getField('abstractNote');
+			if (!this.abstractField.initialValue || this.abstractField.initialValue !== abstract) {
+				this.abstractField.value = abstract;
+				this.abstractField.initialValue = '';
 			}
 			this.abstractField.readOnly = this._mode == 'view';
 			this.abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));

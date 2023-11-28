@@ -104,6 +104,11 @@
 		_updateSelectedPane() {
 			let topPane = null;
 			let containerBoundingRect = this.container.getBoundingClientRect();
+			// If not initialized with content, just select the first pane
+			if (containerBoundingRect.height == 0) {
+				this.selectedPane = 'info';
+				return;
+			}
 			for (let box of this._getPanes()) {
 				// Allow a little padding to deal with floating-point imprecision
 				if (box.getBoundingClientRect().top > containerBoundingRect.top + 5) {

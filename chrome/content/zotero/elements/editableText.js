@@ -27,13 +27,9 @@
 
 {
 	class EditableText extends XULElementBase {
-		content = MozXULElement.parseXULToFragment(`
-			<html:textarea rows="1" />
-		`);
+		_input;
 		
-		_textarea;
-		
-		static observedAttributes = ['multiline', 'readonly', 'label'];
+		static observedAttributes = ['multiline', 'readonly', 'placeholder', 'label', 'aria-label', 'value'];
 		
 		get multiline() {
 			return this.hasAttribute('multiline');
@@ -50,45 +46,74 @@
 		set readOnly(readOnly) {
 			this.toggleAttribute('readonly', readOnly);
 		}
-		
+
+		// Fluent won't set placeholder on an editable-text for some reason, so we use the label property to store
+		// the placeholder that will be set on the child <textarea> or <input>
 		get placeholder() {
-			return this._textarea.placeholder;
+			return this.label;
 		}
 		
 		set placeholder(placeholder) {
-			this._textarea.placeholder = placeholder;
+			this.label = placeholder;
 		}
 		
-		// Fluent won't set placeholder on an editable-text for some reason, so we use the label property to store
-		// the placeholder that will be set on the child <textarea>
 		get label() {
-			return this.getAttribute('label');
+			return this.getAttribute('label') || '';
 		}
 		
 		set label(label) {
-			this.setAttribute('label', label);
+			this.setAttribute('label', label || '');
 		}
 		
 		get ariaLabel() {
-			return this._textarea.getAttribute('aria-label');
+			return this.getAttribute('aria-label') || '';
 		}
 		
 		set ariaLabel(ariaLabel) {
-			this._textarea.setAttribute('aria-label', ariaLabel);
+			this.setAttribute('aria-label', ariaLabel);
 		}
 		
 		get value() {
-			return this._textarea.value;
+			return this.getAttribute('value') || '';
 		}
 		
 		set value(value) {
-			this._textarea.value = value;
-			this.dataset.value = value;
-			this.render();
+			this.setAttribute('value', value || '');
 		}
 		
 		get initialValue() {
-			return this._textarea.dataset.initialValue;
+			return this._input?.dataset.initialValue || '';
+		}
+		
+		set initialValue(initialValue) {
+			this._input.dataset.initialValue = initialValue || '';
+		}
+		
+		get autocomplete() {
+			let val = this.getAttribute('autocomplete');
+			try {
+				let props = JSON.parse(val);
+				if (typeof props === 'object') {
+					return props;
+				}
+			}
+			catch (e) {
+				// Ignore
+			}
+			return null;
+		}
+		
+		set autocomplete(val) {
+			if (val) {
+				this.setAttribute('autocomplete', JSON.stringify(val));
+			}
+			else {
+				this.removeAttribute('autocomplete');
+			}
+		}
+		
+		get ref() {
+			return this._input;
 		}
 		
 		attributeChangedCallback() {
@@ -96,46 +121,99 @@
 		}
 
 		init() {
-			this._textarea = this.querySelector('textarea');
-			this._textarea.addEventListener('input', () => {
-				if (!this.multiline) {
-					this._textarea.value = this._textarea.value.replace(/\n/g, ' ');
-				}
-				this.dataset.value = this._textarea.value;
-			});
-			this._textarea.addEventListener('focus', () => {
-				this._textarea.dataset.initialValue = this._textarea.value;
-			});
-			this._textarea.addEventListener('blur', () => {
-				delete this._textarea.dataset.initialValue;
-			});
-			this._textarea.addEventListener('keydown', (event) => {
-				if (event.key === 'Enter') {
-					if (!this.multiline || event.shiftKey) {
-						event.preventDefault();
-						this._textarea.blur();
-					}
-				}
-				else if (event.key === 'Escape') {
-					this._textarea.value = this._textarea.dataset.initialValue;
-					this._textarea.blur();
-				}
-			});
 			this.render();
 		}
 
 		render() {
-			if (!this._textarea) return;
-			this._textarea.readOnly = this.readOnly;
-			this._textarea.placeholder = this.label;
+			let autocompleteParams = this.autocomplete;
+			let autocompleteEnabled = !this.multiline && !!autocompleteParams;
+			if (!this._input || autocompleteEnabled !== (this._input.constructor.name === 'AutocompleteInput')) {
+				let input;
+				if (autocompleteEnabled) {
+					input = document.createElement('input', { is: 'autocomplete-input' });
+					input.type = 'autocomplete';
+				}
+				else {
+					input = document.createElement('textarea');
+					input.rows = 1;
+				}
+				input.classList.add('input');
+				let handleInput = () => {
+					if (!this.multiline) {
+						this._input.value = this._input.value.replace(/\n/g, ' ');
+					}
+					this.value = this._input.value;
+				};
+				let handleChange = () => {
+					this.value = this._input.value;
+				};
+				input.addEventListener('input', handleInput);
+				input.addEventListener('change', handleChange);
+				input.addEventListener('focus', () => {
+					this.dispatchEvent(new CustomEvent('focus'));
+					this._input.dataset.initialValue = this._input.value;
+				});
+				input.addEventListener('blur', () => {
+					this.dispatchEvent(new CustomEvent('blur'));
+					delete this._input.dataset.initialValue;
+				});
+				input.addEventListener('keydown', (event) => {
+					if (event.key === 'Enter') {
+						if (this.multiline === event.shiftKey) {
+							event.preventDefault();
+							this._input.blur();
+						}
+					}
+					else if (event.key === 'Escape') {
+						this._input.value = this._input.dataset.initialValue;
+						this._input.blur();
+					}
+				});
+				
+				let focused = false;
+				let selectionStart = this._input?.selectionStart;
+				let selectionEnd = this._input?.selectionEnd;
+				let selectionDirection = this._input?.selectionDirection;
+				if (this._input && document.activeElement === this._input) {
+					focused = true;
+					input.dataset.initialValue = this._input?.dataset.initialValue;
+				}
+				if (this._input) {
+					this._input.replaceWith(input);
+				}
+				else {
+					this.append(input);
+				}
+				this._input = input;
+				
+				if (focused) {
+					this._input.focus();
+				}
+				if (selectionStart !== undefined && selectionEnd !== undefined) {
+					this._input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+				}
+			}
+			this._input.readOnly = this.readOnly;
+			this._input.placeholder = this.label;
+			this._input.setAttribute('aria-label', this.ariaLabel);
+			this._input.value = this.value;
+			
+			if (autocompleteEnabled) {
+				this._input.setAttribute('autocomplete', 'on');
+				this._input.setAttribute('autocompletepopup', autocompleteParams.popup || '');
+				this._input.setAttribute('autocompletesearch', autocompleteParams.search || '');
+				delete autocompleteParams.popup;
+				delete autocompleteParams.search;
+				Object.assign(this._input, autocompleteParams);
+			}
 		}
 		
-		focus() {
-			this._textarea.focus();
+		focus(options) {
+			this._input?.focus(options);
 		}
 		
 		blur() {
-			this._textarea.blur();
+			this._input?.blur();
 		}
 	}
 	customElements.define("editable-text", EditableText);

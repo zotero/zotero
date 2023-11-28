@@ -79,3 +79,32 @@
 		@content("dark");
 	}
 }
+
+@mixin clicky-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+	padding-inline-start: 4px;
+	overflow: hidden;
+
+	&:hover {
+		border-radius: 5px;
+		background-color: var(--fill-quinary);
+	}
+
+	.label {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 10;
+		width: 0; // Needed to allow the label to shrink for some reason
+		flex: 1;
+		overflow: hidden;
+		line-height: 16px;
+	}
+	
+	@include comfortable {
+		.icon, .label {
+			padding-block: 2px;
+		}
+	}
+}

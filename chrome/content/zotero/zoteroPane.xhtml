@@ -1115,29 +1115,17 @@
 													<pane-header id="zotero-item-pane-header" />
 													
 													<html:div id="zotero-view-item" class="zotero-view-item">
-														<collapsible-section data-l10n-id="section-info" data-pane="info">
-															<item-box id="zotero-editpane-item-box"/>
-														</collapsible-section>
+														<item-box id="zotero-editpane-item-box" data-pane="info"/>
 														
-														<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
-															<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract"/>
-														</collapsible-section>
+														<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract" data-pane="abstract"/>
 
-														<collapsible-section data-l10n-id="section-attachments" data-pane="attachments" show-add="true">
-															<html:span>[placeholder for attachments section]</html:span>
-														</collapsible-section>
+														<attachments-box id="zotero-editpane-attachments" data-pane="attachments"/>
 
-														<collapsible-section data-l10n-id="section-notes" data-pane="notes" show-add="true">
-															<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes"/>
-														</collapsible-section>
+														<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" data-pane="notes"/>
 
-														<collapsible-section data-l10n-id="section-tags" data-pane="tags" show-add="true">
-															<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags"/>
-														</collapsible-section>
+														<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags" data-pane="tags"/>
 
-														<collapsible-section data-l10n-id="section-related" data-pane="related" show-add="true">
-															<related-box id="zotero-editpane-related" class="zotero-editpane-related"/>
-														</collapsible-section>
+														<related-box id="zotero-editpane-related" class="zotero-editpane-related" data-pane="related"/>
 													</html:div>
 												</html:div>
 												

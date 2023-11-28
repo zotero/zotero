@@ -25,7 +25,7 @@
 
 var ZoteroItemPane = new function() {
 	var _container;
-	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _tagsBox, _notesBox, _relatedBox, _boxes;
+	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _tagsBox, _notesBox, _relatedBox, _boxes;
 	var _deck;
 	var _lastItem;
 	var _selectedNoteID;
@@ -43,9 +43,10 @@ var ZoteroItemPane = new function() {
 		_itemBox = document.getElementById('zotero-editpane-item-box');
 		_abstractBox = document.getElementById('zotero-editpane-abstract');
 		_notesBox = document.getElementById('zotero-editpane-notes');
+		_attachmentsBox = document.getElementById('zotero-editpane-attachments');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
-		_boxes = [_itemBox, _abstractBox, _notesBox, _tagsBox, _relatedBox];
+		_boxes = [_itemBox, _abstractBox, _notesBox, _attachmentsBox, _tagsBox, _relatedBox];
 		
 		_deck = document.getElementById('zotero-item-pane-content');
 		
@@ -90,6 +91,7 @@ var ZoteroItemPane = new function() {
 			this.setTranslateButton();
 		}
 		
+		let inTrash = ZoteroPane.collectionsView.selectedTreeRow && ZoteroPane.collectionsView.selectedTreeRow.isTrash();
 		for (let box of [_header, ..._boxes]) {
 			if (mode) {
 				box.mode = mode;
@@ -103,6 +105,7 @@ var ZoteroItemPane = new function() {
 			}
 			
 			box.item = item;
+			box.inTrash = inTrash;
 		}
 		
 		_sidenav.selectedPane = pane;
@@ -112,7 +115,7 @@ var ZoteroItemPane = new function() {
 	
 	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
 		if (action == 'refresh' && _lastItem) {
-			yield this.viewItem(_lastItem, null, 0);
+			yield this.viewItem(_lastItem, null, _sidenav.selectedPane);
 		}
 	});
 	

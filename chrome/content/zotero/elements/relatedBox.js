@@ -25,56 +25,34 @@
 
 "use strict";
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 {
-	class RelatedBox extends XULElement {
+	class RelatedBox extends XULElementBase {
+		content = MozXULElement.parseXULToFragment(`
+			<collapsible-section data-l10n-id="section-related" data-pane="related">
+				<html:div class="body"/>
+			</collapsible-section>
+		`);
+
 		constructor() {
 			super();
 
 			this._mode = 'view';
 			this._item = null;
-			this._destroyed = false;
-
-			this.content = MozXULElement.parseXULToFragment(`
-				<box flex="1" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-					<div style="flex-grow: 1" xmlns="http://www.w3.org/1999/xhtml">
-						<div class="header">
-							<label id="related-num"/>
-							<button id="related-add">&zotero.item.add;</button>
-						</div>
-						<div id="related-grid" class="grid"/>
-					</div>
-				</box>
-			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 		
-		connectedCallback() {
-			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
-
-			let content = document.importNode(this.content, true);
-			this.append(content);
-
-			this._id('related-add').addEventListener('click', this.add);
-			this.addEventListener('add', this.add);
-
+		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
+			this._section = this.querySelector('collapsible-section');
+			this._section.addEventListener('add', this.add);
 		}
 		
 		destroy() {
-			if (this._destroyed) {
-				return;
-			}
-			window.removeEventListener("unload", this.destroy);
-			this._destroyed = true;
-			
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			this._section = null;
 		}
 		
-		disconnectedCallback() {
-			this.replaceChildren();
-			this.destroy();
-		}
-
 		get mode() {
 			return this._mode;
 		}
@@ -126,10 +104,8 @@
 		}
 
 		refresh() {
-			this._id('related-add').hidden = this._mode != 'edit';
-
-			let grid = this._id('related-grid');
-			grid.replaceChildren();
+			let body = this.querySelector('.body');
+			body.replaceChildren();
 
 			if (this._item) {
 				let relatedKeys = this._item.relatedItems;
@@ -144,33 +120,42 @@
 						continue;
 					}
 					let id = relatedItem.id;
-					let icon = document.createElement("img");
-					icon.src = relatedItem.getImageSrc();
 
-					let label = document.createElement("label");
+					let row = document.createElement('div');
+					row.className = 'row';
+
+					let icon = getCSSItemTypeIcon(relatedItem.getItemTypeIconName());
+
+					let label = document.createElement("span");
+					label.className = 'label';
 					label.append(relatedItem.getDisplayTitle());
 
 					let box = document.createElement('div');
 					box.addEventListener('click', () => this._handleShowItem(id));
-					box.className = 'box zotero-clicky';
+					box.className = 'box';
 					box.appendChild(icon);
 					box.appendChild(label);
-
-					grid.append(box);
+					row.append(box);
 
 					if (this._mode == 'edit') {
-						let remove = document.createElement("label");
-						remove.addEventListener('click', () => this._handleRemove(id));
+						let remove = document.createXULElement("toolbarbutton");
+						remove.addEventListener('command', () => this._handleRemove(id));
 						remove.className = 'zotero-clicky zotero-clicky-minus';
-						remove.append('-');
-						grid.append(remove);
+						row.append(remove);
 					}
+
+					body.append(row);
 				}
 				this._updateCount();
 			}
+
+			this._section.showAdd = this._mode == 'edit';
 		}
 
 		add = async () => {
+			this._section.empty = false;
+			this._section.open = true;
+
 			let io = { dataIn: null, dataOut: null, deferred: Zotero.Promise.defer(), itemTreeID: 'related-box-select-item-dialog' };
 			window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 				'chrome,dialog=no,centerscreen,resizable=yes', io);
@@ -233,19 +218,7 @@
 
 		_updateCount() {
 			let count = this._item.relatedItems.length;
-			let str = 'pane.item.related.count.';
-			switch (count) {
-				case 0:
-					str += 'zero';
-					break;
-				case 1:
-					str += 'singular';
-					break;
-				default:
-					str += 'plural';
-					break;
-			}
-			this._id('related-num').replaceChildren(Zotero.getString(str, [count]));
+			this._section.setCount(count);
 		}
 
 		_id(id) {

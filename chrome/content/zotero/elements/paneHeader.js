@@ -128,8 +128,10 @@
 		}
 		
 		async blurOpenField() {
-			this.titleField.blur();
-			await this.save();
+			if (this.titleField?.matches(':focus-within')) {
+				this.titleField.blur();
+				await this.save();
+			}
 		}
 		
 		render() {
@@ -140,8 +142,9 @@
 			this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			
 			let title = this.item.getField(this._titleFieldID);
-			if (this.titleField.initialValue !== title) {
+			if (!this.titleField.initialValue || this.titleField.initialValue !== title) {
 				this.titleField.value = title;
+				this.titleField.initialValue = '';
 			}
 			this.titleField.readOnly = this._mode == 'view';
 			this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);

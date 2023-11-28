@@ -50,6 +50,9 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/editableTe
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSidenav.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/abstractBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/collapsibleSection.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentsBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
 
 // Fix missing property bug that breaks arrow key navigation between <tab>s
 {

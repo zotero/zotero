@@ -1,49 +1,35 @@
 notes-box, related-box {
-	.header {
-		font-weight: normal;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+notes-box .body, related-box .body {
+	display: flex;
+	flex-direction: column;
+	padding-inline-start: 16px - 2px;
+
+	.row {
 		display: flex;
-		padding-left: 10px;
-		align-items: center;
+		gap: 4px;
+		align-items: flex-start;
 		
 		@include comfortable {
 			padding-block: 2px;
 		}
 
-		label {
-			margin-right: 5px;
-		}
-
-		button {
-			min-width: 79px;
-			margin: 5px 6px 3px;
-			padding-top: 1px;
-			padding-bottom: 1px;
-			color: ButtonText;
-			text-shadow: none;
-			font-size: inherit;
-		}
-	}
-
-	.grid {
-		display: grid;
-		grid-template-columns: 1fr auto;
-
 		.box {
-			overflow: hidden;
-			display: flex;
-			margin-left: 5px;
+			@include clicky-item;
+			flex: 1;
+		}
 
-			img {
-				width: 16px;
-				height: 16px;
-			}
+		toolbarbutton {
+			margin-inline-start: auto;
+			visibility: hidden;
+		}
 
-			label {
-				margin-left: 3px;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
+		&:is(:hover, :focus-within) toolbarbutton {
+			visibility: visible;
 		}
 	}
 }

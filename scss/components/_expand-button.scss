@@ -30,9 +30,7 @@
 	.toolbarbutton-menu-dropmarker {
 		display: block;
 		visibility: visible;
-		background-image: url("chrome://zotero/skin/chevron-6.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		@include svgicon("chevron-8", "universal", "8");
 		fill: var(--fill-secondary);
 		width: 8px;
 		height: 8px;

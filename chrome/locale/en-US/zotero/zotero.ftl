@@ -231,13 +231,22 @@ section-info =
 section-abstract =
     .label = { pane-abstract }
 section-attachments =
-    .label = { pane-attachments }
+    .label = { $count ->
+                 [one] { $count } Attachment
+                 *[other] { $count } Attachments
+             }
 section-notes =
-    .label = { pane-notes }
+    .label = { $count ->
+                 [one] { $count } Note
+                 *[other] { $count } Notes
+             }
 section-tags =
-    .label = { pane-tags }
+    .label = { $count ->
+                 [one] { $count } Tag
+                 *[other] { $count } Tags
+             }
 section-related =
-    .label = { pane-related }
+    .label = { $count } Related
 
 sidenav-info =
     .tooltiptext = { pane-info }

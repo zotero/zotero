@@ -502,10 +502,6 @@
 	height: 16px;
 }
 
-.zotero-box-label {
-	margin-inline-start: 3px !important;
-}
-
 #retracted-items-banner, #sync-reminder-banner {
 	display: flex;
 	justify-content: center;

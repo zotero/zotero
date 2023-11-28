@@ -57,42 +57,46 @@
 			this._initialVisibleCreators = 5;
 			
 			this.content = MozXULElement.parseXULToFragment(`
-				<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
-					<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-						<menupopup id="creator-type-menu" position="after_start"/>
-						<menupopup id="zotero-creator-transform-menu">
-							<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
-							<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.fixCase;"/>
-						</menupopup>
-						<menupopup id="zotero-doi-menu">
-							<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
-							<menuitem id="zotero-doi-menu-copy" label="&zotero.item.copyAsURL;"/>
-						</menupopup>
-						<guidance-panel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
-					</popupset>
-					<div id="retraction-box" hidden="hidden">
-						<div id="retraction-header">
-							<div id="retraction-header-text"/>
+				<collapsible-section data-l10n-id="section-info" data-pane="info">
+					<html:div class="body">
+						<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
+							<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+								<menupopup id="creator-type-menu" position="after_start"/>
+								<menupopup id="zotero-creator-transform-menu">
+									<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
+									<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.fixCase;"/>
+								</menupopup>
+								<menupopup id="zotero-doi-menu">
+									<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
+									<menuitem id="zotero-doi-menu-copy" label="&zotero.item.copyAsURL;"/>
+								</menupopup>
+								<guidance-panel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
+							</popupset>
+							<div id="retraction-box" hidden="hidden">
+								<div id="retraction-header">
+									<div id="retraction-header-text"/>
+								</div>
+								<div id="retraction-details">
+									<p id="retraction-date"/>
+									
+									<dl id="retraction-reasons"/>
+									
+									<p id="retraction-notice"/>
+									
+									<div id="retraction-links"/>
+									
+									<p id="retraction-credit"/>
+									<div id="retraction-hide"><button/></div>
+								</div>
+							</div>
+							<table id="info-table">
+								<tr>
+									<th><label class="key">&zotero.items.itemType;</label></th>
+								</tr>
+							</table>
 						</div>
-						<div id="retraction-details">
-							<p id="retraction-date"/>
-							
-							<dl id="retraction-reasons"/>
-							
-							<p id="retraction-notice"/>
-							
-							<div id="retraction-links"/>
-							
-							<p id="retraction-credit"/>
-							<div id="retraction-hide"><button/></div>
-						</div>
-					</div>
-					<table id="info-table">
-						<tr>
-							<th><label class="key">&zotero.items.itemType;</label></th>
-						</tr>
-					</table>
-				</div>
+					</html:div>
+				</collapsible-section>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 		
@@ -960,8 +964,7 @@
 			td.appendChild(toggleButton);
 			
 			// Minus (-) button
-			var removeButton = document.createElement('button');
-			removeButton.textContent = "-";
+			var removeButton = document.createXULElement('toolbarbutton');
 			removeButton.setAttribute("class", "zotero-clicky zotero-clicky-minus zotero-focusable");
 			removeButton.setAttribute('ztabindex', tabindex + 4);
 			removeButton.setAttribute('aria-label', Zotero.getString('general.delete'));
@@ -977,8 +980,7 @@
 			td.appendChild(removeButton);
 			
 			// Plus (+) button
-			var addButton = document.createElement('button');
-			addButton.textContent = "+";
+			var addButton = document.createXULElement('toolbarbutton');
 			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus zotero-focusable");
 			addButton.setAttribute('ztabindex', tabindex + 5);
 			// If row isn't saved, don't let user add more

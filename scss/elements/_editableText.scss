@@ -15,12 +15,12 @@ editable-text {
 	display: grid;
 	
 	&::after {
-		content: attr(data-value) ' ';
+		content: attr(value) ' ';
 		visibility: hidden;
 		margin: 1px;
 	}
 	
-	&::after, textarea {
+	&::after, .input {
 		grid-area: 1 / 1 / 2 / 2;
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 		font: inherit;
@@ -30,7 +30,10 @@ editable-text {
 		white-space: pre-wrap;
 	}
 	
-	textarea {
+	.input {
+		// Necessary for consistent padding, even if it's actually an <input>
+		-moz-default-appearance: textarea;
+		
 		min-height: 0;
 		margin: 0;
 		
@@ -55,11 +58,11 @@ editable-text {
 	}
 	
 	&[multiline] {
-		&::after, textarea {
+		&::after, .input {
 			overflow-y: auto;
 		}
 		
-		textarea {
+		.input {
 			min-height: 5em;
 		}
 	}

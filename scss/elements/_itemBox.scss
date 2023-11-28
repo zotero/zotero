@@ -1,4 +1,9 @@
 item-box {
+	display: flex;
+	flex-direction: column;
+}
+
+item-box .body {
 	--row-height: 1.5em;
 	
 	display: flex;

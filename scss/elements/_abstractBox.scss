@@ -1,5 +1,10 @@
 abstract-box {
 	display: flex;
+	flex-direction: column;
+}
+
+abstract-box .body {
+	display: flex;
 	
 	editable-text {
 		flex: 1;

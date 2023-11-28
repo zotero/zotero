@@ -2,7 +2,11 @@ collapsible-section {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-	border-bottom: 1px solid var(--fill-quinary);
+	padding-block: 4px;
+	
+	:not(:last-child) > & {
+		border-bottom: 1px solid var(--fill-quinary);
+	}
 
 	& > .head {
 		@include comfortable {
@@ -33,27 +37,38 @@ collapsible-section {
 			width: 20px;
 			height: 20px;
 			padding: 2px;
-			-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
-			fill: var(--fill-secondary);
-			stroke: var(--fill-secondary);
+			color: var(--fill-secondary);
 		}
 		
 		toolbarbutton.add {
-			list-style-image: icon-url("plus.svg");
+			@include svgicon-menu("plus", "universal", "16");
+			border-radius: 2px;
+			
+			&:hover {
+				background: var(--fill-quinary);
+			}
+			
+			&:active {
+				background: var(--fill-quarternary);
+			}
 		}
 
 		toolbarbutton.twisty .toolbarbutton-icon {
-			list-style-image: icon-url("chevron-12.svg");
+			@include svgicon-menu("chevron-12", "universal", "16");
 			transform: rotate(0deg);
 			transform-origin: center;
 			transition: transform 0.2s ease-in-out;
 		}
 	}
 	
-	&[open] > .head {
+	&[open]:not([empty]) > .head {
 		toolbarbutton.twisty .toolbarbutton-icon {
 			transform: rotate(-180deg);
 		}
+	}
+	
+	&[empty] > .head > toolbarbutton.twisty {
+		fill: var(--fill-tertiary);
 	}
 
 	@each $pane, $color in $item-pane-sections {
@@ -68,7 +83,6 @@ collapsible-section {
 	}
 	
 	& > :not(.head) {
-		overflow: hidden;
 		max-height: var(--open-height, auto);
 		opacity: 1;
 		transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out;
@@ -79,7 +93,8 @@ collapsible-section {
 			max-height: 0;
 			opacity: 0;
 			visibility: hidden;
-			transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0s 0.2s;
+			overflow-y: hidden;
+			transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0s 0.2s, overflow-y 0s 0.2s;
 		}
 	}
 }

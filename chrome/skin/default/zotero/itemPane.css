@@ -27,9 +27,10 @@
 	flex: 1;
 	overflow-y: auto;
 	padding: 0 8px;
+	overflow-anchor: none; /* Work around tags box causing scroll to jump - figure this out */
 }
 
-.zotero-view-item-container.feed-item .zotero-view-item > :is(notes-box, tags-box, related-box),
+.zotero-view-item-container.feed-item .zotero-view-item > :is(attachments-box, notes-box, tags-box, related-box),
 .zotero-view-item-container.feed-item .zotero-view-item-sidenav {
 	display: none;
 }
@@ -37,7 +38,6 @@
 .zotero-view-item > * {
 	box-sizing: border-box;
 	width: 100%;
-	padding-block: 4px;
 }
 
 .zotero-view-item > :last-child {

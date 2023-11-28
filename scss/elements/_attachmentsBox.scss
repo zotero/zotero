@@ -1,0 +1,10 @@
+attachments-box {
+	display: flex;
+	flex-direction: column;
+	
+	& > collapsible-section > .body {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+}

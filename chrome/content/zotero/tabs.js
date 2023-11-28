@@ -724,38 +724,11 @@ var Zotero_Tabs = new function () {
 				document.getElementById("attachment-note-editor").focus();
 				return;
 			}
-			// Focusing on the last field in whichever tab is opened for
-			// regular items
-			const tabBox = document.getElementById("zotero-view-tabbox");
-			if (tabBox.selectedIndex === 0) {
-				const itembox = document.getElementById("zotero-editpane-item-box");
-				itembox.focusLastField();
-			}
-			else if (tabBox.selectedIndex === 1) {
-				const notes = document.getElementById("zotero-editpane-notes");
-				const nodes = notes.querySelectorAll("button");
-				const node = nodes[nodes.length - 1];
-				node.focus();
-				// TODO: the notes are currently inaccessible to the keyboard
-			}
-			else if (tabBox.selectedIndex === 2) {
-				const tagContainer = document.getElementById("tags-box-container");
-				const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
-				const last = tags[tags.length - 1];
-				if (last.id === "tags-box-add-button") {
-					last.focus();
-				}
-				else {
-					last.click();
-				}
-			}
-			else if (tabBox.selectedIndex === 3) {
-				const related = tabBox.querySelector("relatedbox");
-				related.receiveKeyboardFocus("end");
-			}
-			else {
-				throw new Error("The selectedIndex should always be between 1 and 4");
-			}
+			// For regular items, focus the last field
+			// We do that by moving focus backwards from the element following the pane, because Services.focus doesn't
+			// support MOVEFOCUS_LAST on subtrees
+			Services.focus.moveFocus(window, document.getElementById('zotero-context-splitter'),
+				Services.focus.MOVEFOCUS_BACKWARD, 0);
 		}
 	};
 };

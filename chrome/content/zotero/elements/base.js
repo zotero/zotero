@@ -50,8 +50,8 @@ class XULElementBase extends XULElement {
 			document.l10n.connectRoot(this.shadowRoot);
 		}
 
-		this.init();
 		this.initialized = true;
+		this.init();
 	}
 
 	disconnectedCallback() {

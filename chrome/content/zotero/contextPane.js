@@ -938,45 +938,30 @@ var ZoteroContextPane = new function () {
 		div.className = 'zotero-view-item';
 		main.append(div);
 		
-		let createSection = (pane, showAdd = false) => {
-			let section = document.createXULElement('collapsible-section');
-			section.dataset.pane = pane;
-			section.setAttribute('data-l10n-id', 'section-' + pane);
-			section.toggleAttribute('show-add', showAdd);
-			return section;
-		};
-
 		// Info
-		var itemBoxContainer = createSection('info');
 		var itemBox = new (customElements.get('item-box'));
-		itemBoxContainer.append(itemBox);
+		itemBox.setAttribute('data-pane', 'info');
+		div.append(itemBox);
 		
 		// Abstract
-		var abstractBoxContainer = createSection('abstract');
 		var abstractBox = new (customElements.get('abstract-box'));
 		abstractBox.className = 'zotero-editpane-abstract';
-		abstractBoxContainer.append(abstractBox);
+		abstractBox.setAttribute('data-pane', 'abstract');
+		div.append(abstractBox);
 		
 		// TODO: Attachments
 
 		// Tags
-		var tagsBoxContainer = createSection('tags', true);
 		var tagsBox = new (customElements.get('tags-box'));
 		tagsBox.className = 'zotero-editpane-tags';
-		tagsBoxContainer.append(tagsBox);
+		tagsBox.setAttribute('data-pane', 'tags');
+		div.append(tagsBox);
 
 		// Related
-		var relatedBoxContainer = createSection('related', true);
 		var relatedBox = new (customElements.get('related-box'));
 		relatedBox.className = 'zotero-editpane-related';
-		relatedBox.addEventListener('click', (event) => {
-			if (event.originalTarget.closest('.zotero-clicky')) {
-				Zotero_Tabs.select('zotero-pane');
-			}
-		});
-		relatedBoxContainer.append(relatedBox);
-
-		div.append(itemBoxContainer, abstractBoxContainer, tagsBoxContainer, relatedBoxContainer);
+		relatedBox.setAttribute('data-pane', 'related');
+		div.append(relatedBox);
 		
 		// item-pane-sidenav
 		var sidenav = document.createXULElement('item-pane-sidenav');

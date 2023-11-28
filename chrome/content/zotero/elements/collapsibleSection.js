@@ -36,13 +36,16 @@
 		_listenerAdded = false;
 		
 		get open() {
+			if (this.empty) {
+				return false;
+			}
 			return this.hasAttribute('open');
 		}
 		
 		set open(val) {
 			val = !!val;
 			let open = this.open;
-			if (open === val) return;
+			if (open === val || this.empty) return;
 			this.render();
 			let openHeight = this._head?.nextSibling?.scrollHeight;
 			if (openHeight) {
@@ -58,9 +61,26 @@
 			if (!this.dispatchEvent(new CustomEvent('toggle', { bubbles: false, cancelable: true }))) {
 				// Revert
 				this.toggleAttribute('open', open);
+				return;
+			}
+			if (!val && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
+				this.ownerDocument.activeElement.blur();
 			}
 			
 			this._saveOpenState();
+		}
+		
+		get empty() {
+			return this.hasAttribute('empty');
+		}
+		
+		set empty(val) {
+			this.toggleAttribute('empty', !!val);
+		}
+		
+		setCount(count) {
+			this.setAttribute('data-l10n-args', JSON.stringify({ count }));
+			this.empty = !count;
 		}
 		
 		get label() {
@@ -80,7 +100,7 @@
 		}
 		
 		static get observedAttributes() {
-			return ['open', 'label', 'show-add'];
+			return ['open', 'empty', 'label', 'show-add'];
 		}
 		
 		attributeChangedCallback() {
@@ -92,7 +112,6 @@
 				throw new Error('data-pane is required');
 			}
 			
-			this._restoreOpenState();
 			this.tabIndex = 0;
 			
 			this._head = document.createElement('div');
@@ -108,8 +127,7 @@
 			this._addButton = document.createXULElement('toolbarbutton');
 			this._addButton.className = 'add';
 			this._addButton.addEventListener('command', (event) => {
-				// TODO: Is this the best approach?
-				this._head.nextSibling?.dispatchEvent(new CustomEvent('add', { ...event, bubbles: true }));
+				this.dispatchEvent(new CustomEvent('add', { ...event, bubbles: false }));
 			});
 			this._head.append(this._addButton);
 			
@@ -118,9 +136,14 @@
 			this._head.append(twisty);
 			
 			this.prepend(this._head);
+			this._restoreOpenState();
 			this.render();
 			
 			this._notifierID = Zotero.Prefs.registerObserver(`panes.${this.dataset.pane}.open`, this._restoreOpenState.bind(this));
+			
+			if (this.hasAttribute('data-l10n-id') && !this.hasAttribute('data-l10n-args')) {
+				this.setAttribute('data-l10n-args', JSON.stringify({ count: 0 }));
+			}
 		}
 		
 		destroy() {
