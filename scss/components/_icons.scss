@@ -36,14 +36,17 @@
 }
 
 $-icons: (
-	filter: 16,
-	chevron-6: 8
+	attachment,
+	chevron-6,
+	filter,
+	note,
 );
 
-@each $icon, $size in $-icons {
+@each $icon in $-icons {
 	.icon-#{$icon} {
 		@include color-scheme using($color) {
-			@include svgicon($icon, $color, $size);
+			background: url('chrome://zotero/skin/#{$icon}.svg') content-box no-repeat;
+			-moz-context-properties: fill, fill-opacity;
 		}
 	}
 }

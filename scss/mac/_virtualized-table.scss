@@ -20,16 +20,3 @@
 		min-width: 6px;
 	}
 }
-
-.virtualized-table-body, .drag-image-container{
-	.cell:not(:first-child) {
-		background-image: linear-gradient(#ddd, #ddd);
-		background-size: 1px 80%;
-		background-position: left;
-		&:dir(rtl) {
-			background-position: right;
-		}
-		background-repeat: no-repeat;
-		height: 100%;
-	}
-}

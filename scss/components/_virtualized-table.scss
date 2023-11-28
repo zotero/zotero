@@ -45,6 +45,7 @@
 		flex-grow: 1;
 		box-sizing: border-box;
 
+		&.first-column,
 		&.primary {
 			display: flex;
 			align-items: center;
@@ -57,7 +58,10 @@
 				flex-grow: 1;
 				text-overflow: ellipsis;
 				overflow: hidden;
-				margin-inline-start: 5px;
+
+				&:not(:first-child) {
+					margin-inline-start: 5px;
+				}
 			}
 
 			.twisty + .cell-text, .spacer-twisty + .cell-text {
@@ -126,7 +130,7 @@
 
 			@include state(".virtualized-table:not(:focus)") {
 				color: var(--fill-primary);
-				background-color: var(--fill-quarternary);
+				background-color: var(--color-quarternary-on-sidepane);
 			}
 		}
 
@@ -161,11 +165,17 @@
 			&.icon-css {
 				width: 16px;
 				height: 16px;
+				padding: 4px;
+				box-sizing: border-box;
+				background: url("chrome://zotero/skin/chevron-8.svg") content-box no-repeat;
+				-moz-context-properties: fill, fill-opacity;
 
 				@include focus-states using ($color) {
-					@include svgicon("chevron-8", $color, "8");
-					background-size: 8px;
-					background-repeat: no-repeat;
+					@if $color == "white" {
+						fill: var(--accent-white);
+					} @else {
+						fill: var(--fill-secondary);
+					}
 				}
 			}
 		}
@@ -181,37 +191,36 @@
 	}
 }
 
-.virtualized-table.multi-select:focus {
-
-	.row.focused {
-		border: 1px dotted highlight;
-		box-sizing: initial;
-		margin: -1px 0;
-		width: calc(100% - 2px);
-		z-index: 10000;
-
-		> *:first-child {
-			margin-inline-start: -1px;
-		}
-		> *:last-child {
-			margin-inline-end: -1px;
-		}
-	}
-}
-
 .virtualized-table-header {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	width: calc(100% - 11px);
-	border-bottom: 1px solid #ccc;
-	background: #f6f6f6;
-	height: 1.8em;
+	background: var(--material-background);
+	height: 1.83333333em; // 22px @ 12px font size
 	overflow: hidden;
-	border-inline-end: 1px solid #ddd;
+
+	@include comfortable {
+		height: 2.33333333em; // 28px @ 12px font size
+		padding: 0 8px;
+	}
 
 	&.static-columns {
 		pointer-events: none;
+	}
+
+	&::after {
+		content: "";
+		display: block;
+		border-bottom: var(--material-border-quarternary);
+		height: 1px;
+		width: 100%;
+		position: absolute;
+		top: calc(1.83333333em - 1px);
+
+		@include comfortable {
+			top: calc(2.33333333em - 1px);
+		}
 	}
 
 	.column-picker {
@@ -226,15 +235,19 @@
 		padding: 0 5px;
 
 		&:hover {
-			background: #fff;
+			background: var(--material-mix-quinary);
 		}
 
 		&.dragging {
-			background: #e9e9e9;
+			background: var(--material-mix-quarternary);
+		}
+
+		&.first-column {
+			padding-inline-start: 36px;
 		}
 
 		.resizer {
-			background: linear-gradient(#ddd, #ddd) no-repeat center/1px 80%;
+			background: linear-gradient(var(--fill-quarternary), var(--fill-quarternary)) no-repeat center/1px 66.666667%; // 14px @ 12px font size
 			cursor: col-resize;
 			height: 100%;
 			content: "\00a0";
@@ -242,6 +255,10 @@
 			position: absolute;
 			left: -5px;
 			min-width: 10px;
+
+			@include comfortable {
+				background-size: 1px 74.074074%; // 20px @ 12px font size
+			}
 		}
 
 		.label {
@@ -259,13 +276,23 @@
 				margin-inline-start: 0;
 			}
 
+			.icon-css {
+				fill: var(--fill-secondary);
+			}
+
 			justify-content: center;
 		}
 
 		.sort-indicator {
 			-moz-appearance: toolbarbutton-dropdown;
 			display: block;
-			margin-right: 10px;
+			margin-right: 3px; // + 5px padding = 8px total
+			
+			&.icon-css {
+				background: url("chrome://zotero/skin/chevron-8.svg") content-box no-repeat;
+				-moz-context-properties: fill, fill-opacity;
+				fill: var(--fill-primary);
+			}
 
 			&.ascending {
 				transform: rotate(180deg);
@@ -296,7 +323,7 @@
 *[dir=rtl] {
 	.virtualized-table-header {
 		.cell .sort-indicator {
-			left: 10px;
+			left: 3px; // + 5px padding = 8px total
 			right: initial;
 		}
 

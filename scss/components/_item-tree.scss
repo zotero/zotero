@@ -1,52 +1,107 @@
 @use "sass:map";
 
 #zotero-items-tree {
-	.virtualized-table-header .icon {
-		width: 13px;
-		height: 13px;
+
+	.virtualized-table-body {
+		padding: 4px 8px;
+	}
+
+	.virtualized-table-header {
+		padding: 0 8px;
+		box-sizing: border-box;
 	}
 	
-	.cell.primary {
-		.retracted {
-			width: 12px;
-			margin-inline-start: 3px;
+	.virtualized-table {
+		.row {
+			&.odd:not(.selected) {
+				background-color: -moz-oddtreerow;
+			}
+
+			&.even:not(.selected) {
+				background-color: -moz-eventreerow;
+			}
+
+			&.selected {
+				border-radius: 0;
+
+				&.first-selected {
+					border-top-left-radius: 5px;
+					border-top-right-radius: 5px;
+				}
+
+				&.last-selected {
+					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: 5px;
+				}
+			}
+			
+			.tag-swatch {
+				display: inline-block;
+
+				&.emoji + .emoji,
+				&.emoji + .colored {
+					margin-left: 4px;
+				}
+
+				&.colored {
+					-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+					width: 0.83333333em;
+					height: 0.83333333em;
+					background:
+						url("chrome://zotero/skin/tag-circle.svg") no-repeat center/80%,
+						url("chrome://zotero/skin/tag-circle-border.svg") no-repeat center/0;
+					fill: currentcolor;
+
+					@each $colorHex, $colorVar in $tagColorsLookup {
+						&[data-color="#{$colorHex}"] {
+							fill: var($colorVar);
+						}
+					}
+
+					@include focus-states using($color) {
+						@if $color =="white" {
+							background: url("chrome://zotero/skin/tag-circle-border.svg") no-repeat center/contain;
+							stroke: var(--accent-white);
+						}
+					}
+				}
+
+				&.colored + .colored {
+					background:
+						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/80%,
+						url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/0;
+					margin-left: -0.41666667em;
+
+					@include focus-states using($color) {
+						@if $color =="white" {
+							background: url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/contain;
+						}
+					}
+				}
+			}
 		}
-		
-		.tag-swatch {
-			display: inline-block;
-			min-width: .728em;
-			min-height: .728em;
-			margin-inline-start: 3px;
-			border-radius: .15em;
-		}
-	}
+
 	
-	.cell.hasAttachment {
-		box-sizing: content-box;
-		padding: 0 4px;
-		height: 100%;
-		// Don't show ellipsis
-		text-overflow: unset;
-		
-		.icon-treeitemattachmentpdf {
-			min-width: 10px;
-			max-width: 10px;
-			margin: 3px;
+		.cell.primary {
+			.retracted {
+				width: 12px;
+				margin-inline-start: 3px;
+			}
 		}
 		
-		.icon-link {
-			min-width: 14px;
-			max-width: 14px;
-			margin: 2px 1px;
+		.cell.hasAttachment {
+			box-sizing: content-box;
+			// Don't show ellipsis
+			text-overflow: unset;
+			
+			.icon-missing-file {
+				opacity: 0.4;
+			}
 		}
 		
-		.icon-missing-file {
-			opacity: 0.4;
+		.cell.numNotes {
+			text-align: center;
 		}
-	}
-	
-	.cell.numNotes {
-		text-align: center;
 	}
 }
 	
@@ -104,9 +159,26 @@ $-itemTypesMap: (
 	"attachment-file": "document"
 );
 
+$-attachmentIcons: (
+	attachment-epub,
+	attachment-epub-link,
+	attachment-link,
+	attachment-pdf-link,
+	attachment-pdf,
+	attachment-snapshot,
+	attachment-web-link,
+);
+
 .icon-item-type {
 	width: 16px;
 	height: 16px;
+}
+
+.icon-attachment-type {
+	width: 12px;
+	height: 12px;
+	padding: 1px;
+	box-sizing: content-box;
 }
 
 // Due to quirks of the state() mixin, we need two sets of .icon-item-type rules:
@@ -128,6 +200,13 @@ $-itemTypesMap: (
 
 		.icon-item-type[data-item-type=#{$itemType}] {
 			@include svgicon($itemTypeIcon, $color, "16", "item-type", true);
+		}
+		
+		@if index($-attachmentIcons, $itemTypeIcon) != false {
+			.icon-attachment-type[data-item-type=#{$itemType}] {
+				@include svgicon($itemTypeIcon, $color, "12", "item-type", false);
+				background-origin: content-box;
+			}
 		}
 	}
 }

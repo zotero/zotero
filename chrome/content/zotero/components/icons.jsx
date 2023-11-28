@@ -134,7 +134,6 @@ i('RTFScanAccept', "chrome://zotero/skin/rtfscan-accept.png", false);
 i('RTFScanLink', "chrome://zotero/skin/rtfscan-link.png", false);
 
 i('Attach', "chrome://zotero/skin/attach.png");
-i('AttachSmall', "chrome://zotero/skin/attach-small.png");
 i('BulletBlue', "chrome://zotero/skin/bullet_blue.png");
 i('BulletBlueEmpty', "chrome://zotero/skin/bullet_blue_empty.png");
 
@@ -169,7 +168,6 @@ i('TreeitemManuscript', 'chrome://zotero/skin/treeitem-manuscript.png');
 i('TreeitemMap', 'chrome://zotero/skin/treeitem-map.png', false);
 i('TreeitemNewspaperArticle', 'chrome://zotero/skin/treeitem-newspaperArticle.png');
 i('TreeitemNote', 'chrome://zotero/skin/treeitem-note.png');
-i('TreeitemNoteSmall', 'chrome://zotero/skin/treeitem-note-small.png');
 i('TreeitemPatent', 'chrome://zotero/skin/treeitem-patent.png');
 i('Treeitem', 'chrome://zotero/skin/treeitem.png');
 i('TreeitemPodcast', 'chrome://zotero/skin/treeitem-podcast.png', false);
@@ -262,8 +260,11 @@ module.exports.getCSSIcon = function (key) {
 	return cssIconsCache.get(key).cloneNode(true);
 };
 
-module.exports.getCSSItemTypeIcon = function (itemType) {
-	let icon = module.exports.getCSSIcon('icon-item-type');
+module.exports.getCSSItemTypeIcon = function (itemType, key = 'icon-item-type') {
+	let icon = module.exports.getCSSIcon(key);
 	icon.dataset.itemType = itemType;
 	return icon;
 };
+
+module.exports['IconAttachSmall'] = props => <CSSIcon name="attachment" className="icon-16" {...props} />;
+module.exports['IconTreeitemNoteSmall'] = props => <CSSIcon name="note" className="icon-16" {...props} />;

@@ -1,50 +1,70 @@
+@use 'sass:color';
+@use "sass:map";
+
+$-colors: (
+    accent-blue: #4072e5,
+    accent-blue10: #4072e54d,
+    accent-blue30: #4072e573,
+    accent-blue50: #4072e599,
+    accent-gold: #cc9200d9,
+    accent-green: #39bf68d9,
+    accent-orange: #ff794cd9,
+    accent-red: #db2c3ae5,
+    accent-teal: #59adc4e5,
+    accent-white: #fff,
+    accent-wood-dark: #996b6f,
+    accent-wood: #cc7a52e5,
+    accent-yellow: #faa700cc,
+    fill-primary: #ffffffe5,
+    fill-secondary: #ffffff8c,
+    fill-tertiary: #ffffff4d,
+    fill-quarternary: #ffffff1f,
+    fill-quinary: #ffffff0f,
+    fill-senary: #ffffff08,
+    color-background: #1e1e1e,
+    color-background50: #1e1e1e80,
+    color-background70: #1e1e1eb2,
+    color-border: #ffffff2e,
+    color-border50: #ffffff17,
+    color-button: #404040,
+    color-control: #ccc,
+    color-menu: #28282894,
+    color-panedivider: #404040,
+    color-sidepane: #303030,
+    color-tabbar: #1e1e1e,
+    color-toolbar: #272727,
+    color-scrollbar: rgb(117, 117, 117),
+    color-scrollbar-hover: rgb(158, 158, 158),
+    color-scrollbar-background: transparent,
+    tag-blue: #55a6dfd9,
+    tag-gray: #aaac,
+    tag-green: #74b04ad9,
+    tag-indigo: #5b6dd2,
+    tag-magenta: #d675e7d9,
+    tag-orange: #e59c4ccc,
+    tag-plum: #9b5579,
+    tag-purple: #9e8bdfe5,
+    tag-red: #ed706be5,
+    tag-teal: #439781,
+    tag-yellow: #f8d648bf,
+);
+
 @media (prefers-color-scheme: dark) {
     :root {
-        --accent-blue: #4072e5;
-        --accent-blue10: #4072e54d;
-        --accent-blue30: #4072e573;
-        --accent-blue50: #4072e599;
-        --accent-gold: #cc9200d9;
-        --accent-green: #39bf68d9;
-        --accent-orange: #ff794cd9;
-        --accent-red: #db2c3ae5;
-        --accent-teal: #59adc4e5;
-        --accent-white: #fff;
-        --accent-wood-dark: #996b6f;
-        --accent-wood: #cc7a52e5;
-        --accent-yellow: #faa700cc;
-        --fill-primary: #ffffffe5;
-        --fill-secondary: #ffffff8c;
-        --fill-tertiary: #ffffff4d;
-        --fill-quarternary: #ffffff1f;
-        --fill-quinary: #ffffff0f;
-        --fill-senary: #ffffff08;
-        --color-background: #1e1e1e;
-        --color-background50: #1e1e1e80;
-        --color-background70: #1e1e1eb2;
-        --color-border: #ffffff2e;
-        --color-border50: #ffffff17;
-        --color-button: #404040;
-        --color-control: #ccc;
-        --color-menu: #28282894;
-        --color-panedivider: #404040;
-        --color-sidepane: #303030;
-        --color-tabbar: #1e1e1e;
-        --color-toolbar: #272727;
-        --color-scrollbar: rgb(117, 117, 117);
-        --color-scrollbar-hover: rgb(158, 158, 158);
-        --color-scrollbar-background: transparent;
-        --tag-blue: #55a6dfd9;
-        --tag-gray: #aaac;
-        --tag-green: #74b04ad9;
-        --tag-indigo: #5b6dd2;
-        --tag-magenta: #d675e7d9;
-        --tag-orange: #e59c4ccc;
-        --tag-plum: #9b5579;
-        --tag-purple: #9e8bdfe5;
-        --tag-red: #ed706be5;
-        --tag-teal: #439781;
-        --tag-yellow: #f8d648bf;
+        @each $name, $color in $-colors {
+            --#{$name}: #{$color};
+        }
+
+        // composite (opaque) colors
+        --color-quinary-on-background: #{color.mix(
+            map.get($-colors, "color-background"), color.change(map.get($-colors, "fill-quinary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quinary")))
+        )};
+        --color-quarternary-on-background: #{color.mix(
+            map.get($-colors, "color-background"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
+        )};
+        --color-quarternary-on-sidepane: #{color.mix(
+            map.get($-colors, "color-sidepane"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
+        )};
 
         // background materials
         --material-background: var(--color-background);
@@ -56,7 +76,9 @@
         --material-sidepane: var(--color-sidepane);
         --material-tabbar: var(--color-tabbar);
         --material-toolbar: var(--color-toolbar);
-    
+        --material-mix-quinary: var(--color-quinary-on-background);
+        --material-mix-quarternary: var(--color-quarternary-on-background);
+
         // border materials
         --material-border-transparent: 1px solid transparent;
         --material-border: 1px solid var(--color-border);

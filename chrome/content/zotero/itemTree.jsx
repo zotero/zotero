@@ -2675,29 +2675,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		span.className = `cell ${column.className}`;
 		span.classList.add('primary');
 
-		// Add twisty, icon, tag swatches and retraction indicator
-		let twisty;
-		if (this.isContainerEmpty(index)) {
-			twisty = document.createElement('span');
-			twisty.classList.add("spacer-twisty");
-		}
-		else {
-			twisty = getCSSIcon("twisty");
-			twisty.classList.add('twisty');
-			if (this.isContainerOpen(index)) {
-				twisty.classList.add('open');
-			}
-			twisty.style.pointerEvents = 'auto';
-			twisty.addEventListener('mousedown', event => event.stopPropagation());
-			twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
-				{ passive: true });
-			twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
-				{ passive: true });
-		}
-
-		const icon = this._getIcon(index);
-		icon.classList.add('cell-icon');
-
 		const item = this.getRow(index).ref;
 		let retracted = "";
 		let retractedAriaLabel = "";
@@ -2711,7 +2688,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let tagSpans = '';
 		let coloredTags = item.getColoredTags();
 		if (coloredTags.length) {
-			tagSpans = coloredTags.map(x => this._getTagSwatch(x.tag, x.color));
+			let { emoji, colored } = coloredTags.reduce((acc, tag) => {
+				acc[Zotero.Utilities.Internal.isOnlyEmoji(tag.tag) ? 'emoji' : 'colored'].push(tag);
+				return acc;
+			}, { emoji: [], colored: [] });
+			tagSpans = [...emoji, ...colored].map(x => this._getTagSwatch(x.tag, x.color));
 			tagAriaLabel = tagSpans.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
 			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
 		}
@@ -2736,11 +2717,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		textSpan.dir = 'auto';
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
-		span.append(twisty, icon, retracted, ...tagSpans, textSpan);
-
-		// Set depth indent
-		const depth = this.getLevel(index);
-		span.firstChild.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
+		span.append(retracted, textSpan, ...tagSpans);
 
 		return span;
 	}
@@ -2767,19 +2744,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// If the item has a child attachment
 			if (type !== null && type != 'none') {
 				if (type == 'pdf') {
-					icon = getCSSItemTypeIcon('attachmentPDF');
+					icon = getCSSItemTypeIcon('attachmentPDF', 'icon-attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
 				}
 				else if (type == 'snapshot') {
-					icon = getCSSItemTypeIcon('attachmentSnapshot');
+					icon = getCSSItemTypeIcon('attachmentSnapshot', 'icon-attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
 				}
 				else if (type == 'epub') {
-					icon = getCSSItemTypeIcon('attachmentEPUB');
+					icon = getCSSItemTypeIcon('attachmentEPUB', 'icon-attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
 				}
 				else {
-					icon = getCSSItemTypeIcon('attachmentFile');
+					icon = getCSSItemTypeIcon('attachmentFile', 'icon-attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
 				
@@ -2818,27 +2795,72 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
-	_renderCell(index, data, column) {
+	_renderCell(index, data, column, isFirstColumn) {
+		let cell;
 		if (column.primary) {
-			return this._renderPrimaryCell(index, data, column);
+			cell = this._renderPrimaryCell(index, data, column);
 		}
 		else if (column.dataKey === 'hasAttachment') {
-			return this._renderHasAttachmentCell(index, data, column);
+			cell = this._renderHasAttachmentCell(index, data, column);
 		}
 		else if (column.renderCell) {
 			try {
-				return column.renderCell.apply(this, arguments);
+				cell = column.renderCell.apply(this, arguments);
 			}
 			catch (e) {
 				Zotero.logError(e);
 			}
 		}
-		let cell = renderCell.apply(this, arguments);
-		if (column.dataKey === 'numNotes' && data) {
-			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+		else {
+			cell = renderCell.apply(this, arguments);
+			if (column.dataKey === 'numNotes' && data) {
+				cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+			}
+			else if (column.dataKey === 'itemType') {
+				cell.setAttribute('aria-hidden', true);
+			}
 		}
-		else if (column.dataKey === 'itemType') {
-			cell.setAttribute('aria-hidden', true);
+
+		if (isFirstColumn) {
+			// Add depth indent, twisty and icon
+			const depth = this.getLevel(index);
+			let indentSpan = document.createElement('span');
+			indentSpan.className = "cell-indent";
+			indentSpan.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
+
+			let twisty;
+			if (this.isContainerEmpty(index)) {
+				twisty = document.createElement('span');
+				twisty.classList.add("spacer-twisty");
+			}
+			else {
+				twisty = getCSSIcon("twisty");
+				twisty.classList.add('twisty');
+				if (this.isContainerOpen(index)) {
+					twisty.classList.add('open');
+				}
+				twisty.style.pointerEvents = 'auto';
+				twisty.addEventListener('mousedown', event => event.stopPropagation());
+				twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
+					{ passive: true });
+				twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
+					{ passive: true });
+			}
+
+			const icon = this._getIcon(index);
+			icon.classList.add('cell-icon');
+
+			if (cell.querySelector('.cell-text') === null) {
+				// convert text-only cell to a cell with text and icon
+				let textSpan = document.createElement('span');
+				textSpan.className = "cell-text";
+				textSpan.innerHTML = cell.innerHTML;
+				cell.innerHTML = "";
+				cell.append(textSpan);
+			}
+
+			cell.prepend(indentSpan, twisty, icon);
+			cell.classList.add('first-column');
 		}
 		return cell;
 	}
@@ -2855,6 +2877,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		div.classList.toggle('selected', selection.isSelected(index));
+		div.classList.toggle('first-selected', selection.isFirstRowOfSelectionBlock(index));
+		div.classList.toggle('last-selected', selection.isLastRowOfSelectionBlock(index));
 		div.classList.toggle('focused', selection.focused == index);
 		div.classList.remove('drop', 'drop-before', 'drop-after');
 		const rowData = this._getRowData(index);
@@ -2871,9 +2895,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		let { firstColumn } = columns.reduce((acc, column) => {
+			return !column.hidden && column.ordinal < acc.lowestOrdinal
+				? { lowestOrdinal: column.ordinal, firstColumn: column }
+				: acc;
+		}, { lowestOrdinal: Infinity, firstColumn: null });
+
 		for (let column of columns) {
 			if (column.hidden) continue;
-			div.appendChild(this._renderCell(index, rowData[column.dataKey], column));
+			div.appendChild(this._renderCell(index, rowData[column.dataKey], column, column === firstColumn));
 		}
 
 		if (!oldDiv) {
@@ -3797,10 +3827,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// https://stackoverflow.com/a/54369605
 		if (Zotero.Utilities.Internal.isOnlyEmoji(tag)) {
 			span.textContent = tag;
+			span.className += ' emoji';
 		}
 		// Otherwise display color
 		else {
-			span.style.backgroundColor = color;
+			span.className += ' colored';
+			span.dataset.color = color.toLowerCase();
+			span.style.color = color;
 		}
 		return span;
 	}

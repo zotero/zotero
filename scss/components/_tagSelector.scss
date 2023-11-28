@@ -73,6 +73,10 @@
 	flex: 0 1;
 	padding: 3px 4px;
 	white-space: nowrap;
+
+	.icon-css {
+		fill: var(--fill-secondary);
+	}
 }
 
 .tag-selector-item {

@@ -30,7 +30,7 @@ const PropTypes = require('prop-types');
 const cx = require('classnames');
 const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
-const { IconDownChevron, getDOMElement } = require('components/icons');
+const { CSSIcon, getDOMElement } = require('components/icons');
 
 const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
@@ -77,6 +77,24 @@ class TreeSelection {
 	}
 
 	/**
+	 * Determines if the given index is the beginning of a selection block.
+	 * @param {number} index - The index to check.
+	 * @returns {boolean} - True if the index is the beginning of a selection block, false otherwise.
+	 */
+	isFirstRowOfSelectionBlock(index) {
+		return this.isSelected(index) && !this.selected.has(index - 1);
+	}
+	
+	/**
+	 * Checks if the given index is the end of a selection block.
+	 * @param {number} index - The index to check.
+	 * @returns {boolean} - True if the index is the end of a selection block, false otherwise.
+	 */
+	isLastRowOfSelectionBlock(index) {
+		return this.isSelected(index) && !this.selected.has(index + 1);
+	}
+
+	/**
 	 * Toggles an item's selection state, updates focused item to index.
 	 * @param index {Number} The index is 0-clamped.
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
@@ -98,6 +116,10 @@ class TreeSelection {
 		this.focused = index;
 		if (this._tree.invalidate) {
 			this._tree.invalidateRow(index);
+			// might extend, truncate, merge or split a selection block
+			// so need to invalidate next and previous rows as well
+			this._tree.invalidateRow(index - 1);
+			this._tree.invalidateRow(index + 1);
 			this._tree.invalidateRow(previousFocused);
 		}
 		this._updateTree(shouldDebounce);
@@ -194,10 +216,24 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return;
 
+		let oldEdges = new Set();
+		for (let oldIndex of oldSelected) {
+			if (!oldSelected.has(oldIndex + 1) || !oldSelected.has(oldIndex - 1)) {
+				oldEdges.add(oldIndex);
+			}
+		}
+
 		if (this._tree.invalidate) {
 			for (let index of this.selected) {
 				if (oldSelected.has(index)) {
 					oldSelected.delete(index);
+					
+					// ensure old and new selection block edges are invalidated
+					if (oldEdges.has(index) || !this.selected.has(index - 1) || !this.selected.has(index + 1)) {
+						this._tree.invalidateRow(index);
+					}
+
+					// skip invalidation for already selected rows, except for edges (above)
 					continue;
 				}
 				this._tree.invalidateRow(index);
@@ -983,7 +1019,6 @@ class VirtualizedTable extends React.Component {
 		this._updateWidth();
 		this.props.treeboxRef && this.props.treeboxRef(this._jsWindow);
 	
-		this._setAlternatingRows();
 		this._setXulTooltip();
 
 		window.addEventListener("resize", () => {
@@ -1038,20 +1073,6 @@ class VirtualizedTable extends React.Component {
 		popupset.appendChild(tooltip);
 	}
 	
-	_setAlternatingRows() {
-		if (this.props.alternatingRowColors) {
-			this._jsWindow.innerElem.style.background = `
-				repeating-linear-gradient(
-				  180deg,
-				  ${this.props.alternatingRowColors[1]},
-				  ${this.props.alternatingRowColors[1]} ${this._rowHeight}px,
-				  ${this.props.alternatingRowColors[0]} ${this._rowHeight}px,
-				  ${this.props.alternatingRowColors[0]} ${this._rowHeight * 2}px
-				)
-			`;
-		}
-	}
-	
 	_getWindowedListOptions() {
 		return {
 			getItemCount: this.props.getRowCount,
@@ -1072,8 +1093,9 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
 		node.style.height = this._rowHeight + 'px';
-		node.style.lineHeight = this._rowHeight + 'px';
 		node.id = this.props.id + "-row-" + index;
+		node.classList.toggle('odd', index % 2 == 1);
+		node.classList.toggle('even', index % 2 == 0);
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
 		}
@@ -1123,10 +1145,10 @@ class VirtualizedTable extends React.Component {
 				if (!Zotero.isNode && Zotero.isLinux) {
 					sortIndicator = <span className={"sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")}/>;
 				} else {
-					sortIndicator = <IconDownChevron className={"sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")}/>;
+					sortIndicator = <CSSIcon name="sort-indicator" className={"icon-8 sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")} />;
 				}
 			}
-			const className = cx("cell", column.className, { dragging: this.state.draggingColumn == index },
+			const className = cx("cell", column.className, { 'first-column': index === 0, dragging: this.state.draggingColumn == index },
 				{ "cell-icon": !!column.iconLabel });
 			return (<Draggable
 				onDragStart={this._handleColumnDragStart.bind(this, index)}
@@ -1254,7 +1276,6 @@ class VirtualizedTable extends React.Component {
 		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
-		this._setAlternatingRows();
 		this._jsWindow.invalidate();
 	};
 
@@ -1306,17 +1327,15 @@ class VirtualizedTable extends React.Component {
 		if (!this.props.showHeader) return;
 		const jsWindow = document.querySelector(`#${this._jsWindowID} .windowed-list`);
 		if (!jsWindow) return;
-		const tree = document.querySelector(`#${this.props.id}`);
 		const header = document.querySelector(`#${this.props.id} .virtualized-table-header`);
-		const scrollbarWidth = Math.max(0,
-			tree.getBoundingClientRect().width - jsWindow.getBoundingClientRect().width);
+		const scrollbarWidth = Zotero.Utilities.Internal.getScrollbarWidth();
 		let paddingWidth = 0;
 		if (Zotero.isLinux) {
 			paddingWidth = 2; // from the border
 		}
 		// Should be kept up to date with the _virtualized-table.scss value
 		// for .virtualized-table-header
-		header.style.width = `calc(100% - ${scrollbarWidth-paddingWidth}px)`;
+		header.style.width = `calc(100% - ${scrollbarWidth - paddingWidth}px)`;
 	}
 
 	/**
