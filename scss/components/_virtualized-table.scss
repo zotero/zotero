@@ -39,11 +39,16 @@
 	}
 	
 	.cell {
+		padding: 0 5px;
 		min-width: 30px;
 		cursor: default;
 		white-space: nowrap;
 		flex-grow: 1;
 		box-sizing: border-box;
+
+		&.first-column {
+			padding-inline-start: 0;
+		}
 
 		&.first-column,
 		&.primary {
@@ -234,7 +239,6 @@
 		position: relative;
 		height: 100%;
 		align-items: center;
-		padding: 0 5px;
 
 		&:hover {
 			background: var(--material-mix-quinary);
@@ -309,7 +313,6 @@
 	overflow: auto;
 
 	.cell {
-		padding: 0 5px;
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-height: 100%;
