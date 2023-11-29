@@ -14,11 +14,11 @@
 	.virtualized-table {
 		.row {
 			&.odd:not(.selected) {
-				background-color: -moz-oddtreerow;
+				background-color: var(--material-background);
 			}
 
 			&.even:not(.selected) {
-				background-color: -moz-eventreerow;
+				background-color: var(--material-sidepane);
 			}
 
 			&.selected {

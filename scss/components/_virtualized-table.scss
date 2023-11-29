@@ -130,8 +130,8 @@
 		}
 
 		&.selected:not(.highlighted) {
-			background-color: SelectedItem;
-			color: SelectedItemText;
+			background-color: var(--accent-blue);
+			color: #fff;
 
 			@include state(".virtualized-table:not(:focus)") {
 				color: var(--fill-primary);
@@ -193,6 +193,27 @@
 		height: 100%;
 		width: 2px;
 		background-color: #ccc;
+	}
+
+	.twisty {
+		width: 19px;
+
+		svg {
+			fill: #888;
+			width: 16px;
+		}
+	}
+
+	.selected:not(.highlighted) .twisty svg {
+		fill: #fff;
+	}
+
+	.spacer-twisty {
+		min-width: 19px;
+	}
+  
+	.spacer-header {
+		min-width: 6px;
 	}
 }
 
@@ -341,4 +362,8 @@
 	.row .twisty {
 		transform: rotate(90deg);
 	}
+}
+
+.virtualized-table, .drag-image-container {
+
 }
