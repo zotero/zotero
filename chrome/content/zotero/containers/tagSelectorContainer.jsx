@@ -589,10 +589,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				return;
 			}
 			
-			var elem = event.target;
+			let elem = event.target.closest('.tag-selector-item');
 			
 			// Ignore drops not on tags
-			if (!elem.classList.contains('tag-selector-item')) {
+			if (elem === null) {
 				return;
 			}
 			
@@ -603,13 +603,13 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			event.dataTransfer.dropEffect = remove ? "move" : "copy";
 		},
 		onDragExit: function (event) {
-			event.target.classList.remove('dragged-over');
+			event.target.closest('.tag-selector-item')?.classList?.remove?.('dragged-over');
 		},
 		onDrop: async function(event) {
-			var elem = event.target;
+			let elem = event.target.closest('.tag-selector-item');
 			
 			// Ignore drops not on tags
-			if (!elem.classList.contains('tag-selector-item')) {
+			if (elem === null) {
 				return;
 			}
 
