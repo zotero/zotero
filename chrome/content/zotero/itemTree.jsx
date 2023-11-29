@@ -2814,7 +2814,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else {
 			cell = renderCell.apply(this, arguments);
 			if (column.dataKey === 'numNotes' && data) {
-				cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+				cell.dataset.l10nId = 'items-table-cell-notes';
+				cell.dataset.l10nArgs = JSON.stringify({ count: data });
 			}
 			else if (column.dataKey === 'itemType') {
 				cell.setAttribute('aria-hidden', true);

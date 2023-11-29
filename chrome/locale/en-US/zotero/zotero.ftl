@@ -87,6 +87,12 @@ import-online-relink-only =
     .label = Relink Mendeley Desktop citations
 import-online-relink-kb = More Information
 
+items-table-cell-notes =
+    .aria-label = { $count ->
+        [one] { $count } Note
+        *[other] { $count } Notes
+    }
+
 report-error =
     .label = Report Error…
 
