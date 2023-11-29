@@ -130,7 +130,12 @@
 		}
 
 		&.selected:not(.highlighted) {
-			background-color: var(--accent-blue);
+			@media (-moz-platform: windows) {
+				background-color: var(--accent-blue);
+			}
+			@media not (-moz-platform: windows) {
+				background-color: SelectedItem;
+			}
 			color: #fff;
 
 			@include state(".virtualized-table:not(:focus)") {
@@ -362,8 +367,4 @@
 	.row .twisty {
 		transform: rotate(90deg);
 	}
-}
-
-.virtualized-table, .drag-image-container {
-
 }
