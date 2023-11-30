@@ -458,7 +458,7 @@ Zotero_Preferences.Sync = {
 	
 	onStorageSettingsChange: Zotero.Promise.coroutine(function* () {
 		// Clean URL
-		Zotero.Prefs.set('sync.storage.url', Zotero.Prefs.get('sync.storage.url')
+		Zotero.Prefs.set('sync.storage.url', Zotero.Prefs.get('sync.storage.url').trim()
 				.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''));
 		
 		var oldProtocol = Zotero.Prefs.get('sync.storage.protocol');
