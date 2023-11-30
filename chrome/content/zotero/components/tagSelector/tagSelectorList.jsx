@@ -105,7 +105,7 @@ class TagList extends React.PureComponent {
 		var row = 0;
 		let rowX = panePaddingLeft;
 
-		const separatorHeightCoefficient = 0.5;
+		const separatorHeightCoefficient = 0.25;
 		let separatorHeight = Math.round(rowHeight * separatorHeightCoefficient);
 		let shouldAddSeparator = false;
 		let hasColoredTags = !!this.props.tags[0]?.color;
