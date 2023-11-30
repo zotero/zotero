@@ -334,6 +334,8 @@ button {
 #zotero-prefpane-sync .form-grid > hbox
 {
 	margin-inline-start: 4px;
+	display: flex;
+	align-items: center;
 }
 
 #zotero-prefpane-sync .form-grid > hbox > label:first-child,
@@ -357,11 +359,12 @@ button {
 
 #zotero-prefpane-sync #sync-status-indicator
 {
-	width: 1.5em;
-	height: 1.7em;
-	margin-top: 0.4em;
+	width: 20px;
+	height: 20px;
+	margin-left: -1px;
 	background-repeat: no-repeat;
 	background-position: center;
+	background-size: contain;
 }
 
 #zotero-prefpane-sync #sync-status-indicator[verified=true]
