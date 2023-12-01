@@ -165,7 +165,7 @@
 						}
 					}
 					else if (event.key === 'Escape') {
-						this._input.value = this._input.dataset.initialValue;
+						this._input.value = this.value = this._input.dataset.initialValue;
 						this._input.blur();
 					}
 				});
