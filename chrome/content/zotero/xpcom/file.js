@@ -1417,8 +1417,9 @@ Zotero.File = new function(){
 			|| path.includes('GoogleDrive') // https://forums.zotero.org/discussion/109502/
 			// OneDrive
 			|| path.toLowerCase().includes('onedrive')
-			// Baidu Netdisk
+			// Baidu
 			|| path.toLowerCase().includes('baidunetdisk')
+			|| path.toLowerCase().includes('baidusyncdisk')
 			// MEGA
 			|| path.includes('MEGA')
 			// pCloud
