@@ -102,10 +102,8 @@
 		line-height: 16px;
 	}
 	
-	@include comfortable {
-		.icon, .label {
-			padding-block: 2px;
-		}
+	.icon, .label {
+		padding-block: 2px;
 	}
 }
 
