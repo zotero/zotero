@@ -6,24 +6,53 @@ item-pane-sidenav {
 	gap: 6px;
 	border-left: var(--material-panedivider);
 
+	.toolbarbutton-container {
+		position: relative;
+		// Disable pointer events here, re-enable on the button, so that :hover styles are only applied
+		// when the button itself is hovered
+		pointer-events: none;
+
+		&::after {
+			content: '';
+			position: absolute;
+			top: 1px;
+			inset-inline-end: 1px;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+		}
+
+		&.pinnable {
+			&.pinned::after {
+				background-color: var(--accent-blue);
+				background-image: icon-url("8/universal/pin.svg");
+				background-position: center;
+				background-repeat: no-repeat;
+			}
+		}
+	}
+
 	toolbarbutton {
 		// TODO: Extract button styles?
 		
 		width: 28px;
 		height: 28px;
+		margin: 0;
 		padding: 4px;
 		flex-shrink: 0;
 		border-radius: 5px;
 		-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
 
+		pointer-events: all;
+		
 		&:hover {
 			background-color: var(--fill-quinary);
 		}
-		
-		&:active, &[selected] {
+
+		&:active {
 			background-color: var(--fill-quarternary);
 		}
-		
+
 		&:disabled {
 			background-color: transparent;
 			fill: var(--fill-tertiary);
@@ -36,5 +65,9 @@ item-pane-sidenav {
 				stroke: $color;
 			}
 		}
+	}
+
+	menupopup {
+		@include macOS-hide-menu-icons;
 	}
 }

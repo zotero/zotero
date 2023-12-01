@@ -108,3 +108,22 @@
 		}
 	}
 }
+
+
+/* Hide icons on macOS. We use :is() to work around weird behavior in Fx101 where a regular child
+   selector doesn't match the first time the menu is opened. */
+@mixin macOS-hide-menu-icons {
+	$selector: &;
+	@at-root {
+		@media (-moz-platform: macos) {
+			// Yes, every single one of these :is-es is necessary!
+			:is(:is(#{$selector}) .menuitem-iconic, :is(#{$selector}) .menu-iconic) {
+				list-style-image: none !important;
+
+				.menu-iconic-left {
+					display: none !important;
+				}
+			}
+		}
+	}
+}

@@ -267,6 +267,16 @@ sidenav-tags =
 sidenav-related =
     .tooltiptext = { pane-related }
 
+pin-section =
+    .label = Pin Section
+unpin-section =
+    .label = Unpin Section
+
+collapse-other-sections =
+    .label = Collapse Other Sections
+expand-all-sections =
+    .label = Expand All Sections
+
 abstract-field =
     .label = Add abstract…
 

@@ -24,6 +24,7 @@ collapsible-section {
 			gap: 4px;
 			color: var(--fill-secondary);
 			font-weight: 590;
+			transition: color 0.2s ease-out;
 
 			&::before {
 				content: '';
@@ -59,6 +60,14 @@ collapsible-section {
 			transform-origin: center;
 			transition: transform 0.2s ease-in-out;
 		}
+
+		popupset > menupopup {
+			@include macOS-hide-menu-icons;
+		}
+	}
+	
+	&.highlight > .head > .title {
+		color: var(--fill-primary);
 	}
 	
 	&[open]:not([empty]) > .head {
@@ -96,5 +105,10 @@ collapsible-section {
 			overflow-y: hidden;
 			transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0s 0.2s, overflow-y 0s 0.2s;
 		}
+	}
+	
+	&.disable-transitions * {
+		transition: none !important;
+		color: red;
 	}
 }

@@ -28,31 +28,50 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<toolbarbutton
-				data-l10n-id="sidenav-info"
-				data-pane="info"/>
-			<toolbarbutton
-				data-l10n-id="sidenav-abstract"
-				data-pane="abstract"/>
-			<toolbarbutton
-				data-l10n-id="sidenav-attachments"
-				data-pane="attachments"/>
-			<toolbarbutton
-				data-l10n-id="sidenav-notes"
-				data-pane="notes"/>
-			<toolbarbutton
-				data-l10n-id="sidenav-tags"
-				data-pane="tags"/>
-			<toolbarbutton
-				data-l10n-id="sidenav-related"
-				data-pane="related"/>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-info"
+					data-pane="info"/>
+			</html:div>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-abstract"
+					data-pane="abstract"/>
+			</html:div>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-attachments"
+					data-pane="attachments"/>
+			</html:div>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-notes"
+					data-pane="notes"/>
+			</html:div>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-tags"
+					data-pane="tags"/>
+			</html:div>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-related"
+					data-pane="related"/>
+			</html:div>
+			
+			<popupset>
+				<menupopup class="context-menu">
+					<menuitem class="menuitem-iconic zotero-menuitem-pin" data-l10n-id="pin-section"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-unpin" data-l10n-id="unpin-section"/>
+				</menupopup>
+			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
 		_container = null;
 		
-		_currentSmoothScrollTarget = null;
-		
-		_smoothScrollTargetTimeout = null;
+		_contextMenuTarget = null;
+
+		_preserveMinScrollHeightTimeout = null;
 		
 		get container() {
 			return this._container;
@@ -60,26 +79,33 @@
 		
 		set container(val) {
 			if (this._container == val) return;
-			
-			this._container?.removeEventListener('scroll', this._updateSelectedPane.bind(this), { passive: true });
+			this._container?.removeEventListener('scroll', this._handleContainerScroll);
 			this._container = val;
-			this._container.addEventListener('scroll', this._updateSelectedPane.bind(this), { passive: true });
-
-			this._updateSelectedPane();
+			this._container.addEventListener('scroll', this._handleContainerScroll);
 			this.render();
 		}
 		
-		get selectedPane() {
-			return this.getAttribute('selectedPane');
+		get pinnedPane() {
+			return this.getAttribute('pinnedPane');
 		}
 		
-		set selectedPane(val) {
-			this.setAttribute('selectedPane', val);
-			this.render();
+		set pinnedPane(val) {
+			this.setAttribute('pinnedPane', val || '');
+			if (val) {
+				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getPane(val));
+			}
+		}
+		
+		get _minScrollHeight() {
+			return parseFloat(this._container.style.getPropertyValue('--min-scroll-height') || 0);
+		}
+		
+		set _minScrollHeight(val) {
+			this._container.style.setProperty('--min-scroll-height', val + 'px');
 		}
 
 		static get observedAttributes() {
-			return ['selectedPane'];
+			return ['pinnedPane'];
 		}
 
 		attributeChangedCallback() {
@@ -87,75 +113,134 @@
 		}
 
 		scrollToPane(id, behavior = 'smooth') {
-			let pane = this._getPane(id);
-			if (pane) {
-				this._currentSmoothScrollTarget = id;
-				pane.scrollIntoView({ block: 'start', behavior });
-				
-				if (this._smoothScrollTargetTimeout) {
-					clearTimeout(this._smoothScrollTargetTimeout);
+			let pane = this.getPane(id);
+			if (!pane) return;
+			
+			// The pane should always be at the very top
+			// If there isn't enough stuff below it for it to be at the top, we add padding
+			// We use a ::before pseudo-element for this so that we don't need to add another level to the DOM
+			this._makeSpaceForPane(pane);
+			if (behavior == 'smooth' && pane.getBoundingClientRect().top > this._container.getBoundingClientRect().top) {
+				if (this._preserveMinScrollHeightTimeout) {
+					clearTimeout(this._preserveMinScrollHeightTimeout);
 				}
-				this._smoothScrollTargetTimeout = setTimeout(() => {
-					this._currentSmoothScrollTarget = null;
+				this._preserveMinScrollHeightTimeout = setTimeout(() => {
+					this._preserveMinScrollHeightTimeout = null;
+					this._handleContainerScroll();
+				}, 1000);
+			}
+			pane.scrollIntoView({ block: 'start', behavior });
+			pane.focus();
+		}
+		
+		_flashPane(id) {
+			let paneSection = this.getPane(id)?.querySelector('collapsible-section');
+			if (paneSection) {
+				paneSection.classList.add('highlight');
+				setTimeout(() => {
+					paneSection.classList.remove('highlight');
 				}, 1000);
 			}
 		}
 		
-		_updateSelectedPane() {
-			let topPane = null;
-			let containerBoundingRect = this.container.getBoundingClientRect();
-			// If not initialized with content, just select the first pane
-			if (containerBoundingRect.height == 0) {
-				this.selectedPane = 'info';
-				return;
+		_makeSpaceForPane(pane) {
+			let oldMinScrollHeight = this._minScrollHeight;
+			let newMinScrollHeight = this._getMinScrollHeightForPane(pane);
+			if (newMinScrollHeight > oldMinScrollHeight) {
+				this._minScrollHeight = newMinScrollHeight;
 			}
-			for (let box of this._getPanes()) {
-				// Allow a little padding to deal with floating-point imprecision
-				if (box.getBoundingClientRect().top > containerBoundingRect.top + 5) {
-					break;
-				}
-				topPane = box.dataset.pane;
-			}
-			if (this._currentSmoothScrollTarget) {
-				if (this._currentSmoothScrollTarget == topPane) {
-					this._currentSmoothScrollTarget = null;
-				}
-				else {
-					return;
-				}
-			}
-			this.selectedPane = topPane || 'info';
-		}
-
-		_getPanes() {
-			return Array.from(this.container.querySelectorAll('[data-pane]'));
 		}
 		
-		_getPane(id) {
-			return this.container.querySelector(':scope > [data-pane="' + id + '"]');
+		_getMinScrollHeightForPane(pane) {
+			let paneRect = pane.getBoundingClientRect();
+			let containerRect = this._container.getBoundingClientRect();
+			// No offsetTop property for XUL elements
+			let offsetTop = paneRect.top - containerRect.top + this._container.scrollTop;
+			return offsetTop + containerRect.height;
+		}
+
+		_handleContainerScroll = () => {
+			if (this._preserveMinScrollHeightTimeout) return;
+			let minHeight = this._minScrollHeight;
+			if (minHeight) {
+				let newMinScrollHeight = this._container.scrollTop + this._container.clientHeight;
+				if (this.pinnedPane && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
+					return;
+				}
+				this._minScrollHeight = newMinScrollHeight;
+			}
+		};
+		
+		getPanes() {
+			return Array.from(this.container.querySelectorAll(':scope > [data-pane]'));
+		}
+		
+		getPane(id) {
+			return this.container.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]`);
+		}
+		
+		isPanePinnable(id) {
+			return id !== 'info';
 		}
 
 		init() {
 			if (!this.container) {
 				this.container = document.getElementById('zotero-view-item');
 			}
-
-			for (let toolbarbutton of this.children) {
-				toolbarbutton.addEventListener('command', () => {
-					this.selectedPane = toolbarbutton.dataset.pane;
-					this.scrollToPane(toolbarbutton.dataset.pane);
+			
+			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
+				let pane = toolbarbutton.dataset.pane;
+				let pinnable = this.isPanePinnable(pane);
+				toolbarbutton.parentElement.classList.toggle('pinnable', pinnable);
+				
+				toolbarbutton.addEventListener('click', (event) => {
+					switch (event.detail) {
+						case 1:
+							this.scrollToPane(pane, 'smooth');
+							this._flashPane(pane);
+							break;
+						case 2:
+							if (this.pinnedPane == pane || !pinnable) {
+								this.pinnedPane = null;
+							}
+							else {
+								this.pinnedPane = pane;
+							}
+							break;
+					}
 				});
+
+				if (pinnable) {
+					toolbarbutton.addEventListener('contextmenu', (event) => {
+						this._contextMenuTarget = pane;
+						this.querySelector('.zotero-menuitem-pin').hidden = this.pinnedPane == pane;
+						this.querySelector('.zotero-menuitem-unpin').hidden = this.pinnedPane != pane;
+						this.querySelector('.context-menu')
+							.openPopupAtScreen(event.screenX, event.screenY, true);
+					});
+				}
 			}
+			
+			this.querySelector('.zotero-menuitem-pin').addEventListener('command', () => {
+				this.scrollToPane(this._contextMenuTarget, 'smooth');
+				this.pinnedPane = this._contextMenuTarget;
+			});
+			this.querySelector('.zotero-menuitem-unpin').addEventListener('command', () => {
+				this.pinnedPane = null;
+			});
+			
 			this.render();
 		}
 
 		render() {
-			let currentPane = this.selectedPane;
-			for (let toolbarbutton of this.children) {
+			let pinnedPane = this.pinnedPane;
+			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
-				toolbarbutton.hidden = !this._getPane(pane);
-				toolbarbutton.toggleAttribute('selected', pane == currentPane);
-				toolbarbutton.setAttribute('aria-selected', pane == currentPane);
+				toolbarbutton.setAttribute('aria-selected', pane == pinnedPane);
+				toolbarbutton.parentElement.hidden = !this.getPane(pane);
+
+				// Set .pinned on the container, for pin styling
+				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
 			}
 		}
 	}

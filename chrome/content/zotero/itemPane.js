@@ -62,12 +62,8 @@ var ZoteroItemPane = new function() {
 	/*
 	 * Load a top-level item
 	 */
-	this.viewItem = Zotero.Promise.coroutine(function* (item, mode, pane) {
-		if (!pane) {
-			pane = 'info';
-		}
-		
-		Zotero.debug('Viewing item in pane ' + pane);
+	this.viewItem = Zotero.Promise.coroutine(function* (item, mode, pinnedPane) {
+		Zotero.debug('Viewing item');
 
 		_notesBox.parentItem = item;
 		
@@ -108,14 +104,20 @@ var ZoteroItemPane = new function() {
 			box.inTrash = inTrash;
 		}
 		
-		_sidenav.selectedPane = pane;
-		_sidenav.scrollToPane(pane, 'instant');
+		_scrollParent.style.paddingBottom = '';
+		if (pinnedPane) {
+			_sidenav.scrollToPane(pinnedPane, 'instant');
+			_sidenav.pinnedPane = pinnedPane;
+		}
+		else if (pinnedPane !== false) {
+			_sidenav.scrollToPane('info', 'instant');
+		}
 	});
 	
 	
 	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
 		if (action == 'refresh' && _lastItem) {
-			yield this.viewItem(_lastItem, null, _sidenav.selectedPane);
+			yield this.viewItem(_lastItem, null, false);
 		}
 	});
 	
@@ -250,8 +252,8 @@ var ZoteroItemPane = new function() {
 	};
 	
 	
-	this.getSidenavSelectedPane = function () {
-		return _sidenav.selectedPane;
+	this.getPinnedPane = function () {
+		return _sidenav.pinnedPane;
 	};
 	
 	

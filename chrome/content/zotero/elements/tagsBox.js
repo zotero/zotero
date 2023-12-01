@@ -84,7 +84,7 @@
 
 			let removeAllItemTags = this._id('remove-all-item-tags');
 			this._id('remove-all-item-tags').addEventListener('command', this.removeAll);
-			this.addEventListener('contextmenu', (event) => {
+			this.querySelector('.body').addEventListener('contextmenu', (event) => {
 				removeAllItemTags.disabled = !this.count;
 				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});

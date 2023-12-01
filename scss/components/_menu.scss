@@ -57,7 +57,10 @@ $menu-icons: (
 	add-to-collection: "new-collection",
 	new-tab: "new-tab",
 	new-window: "new-window",
-	
+	pin: "pin",
+	unpin: "pin-remove",
+	expand-all: "expand-all",
+	collapse-others: "collapse-others",
 );
 
 @each $cls, $icon in $menu-icons {
@@ -73,3 +76,7 @@ $menu-icons: (
 		}
 	}
 };
+
+#zotero-collectionmenu, #zotero-itemmenu {
+	@include macOS-hide-menu-icons;
+}

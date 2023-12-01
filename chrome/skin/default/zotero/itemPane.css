@@ -15,6 +15,7 @@
 .zotero-view-item-container {
 	display: flex;
 	flex-direction: row;
+	height: 0; /* Prevent overflow, somehow */
 }
 
 .zotero-view-item-main {
@@ -24,10 +25,22 @@
 }
 
 .zotero-view-item {
+	position: relative;
 	flex: 1;
 	overflow-y: auto;
 	padding: 0 8px;
 	overflow-anchor: none; /* Work around tags box causing scroll to jump - figure this out */
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+}
+
+.zotero-view-item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: var(--min-scroll-height);
+	pointer-events: none;
 }
 
 .zotero-view-item-container.feed-item .zotero-view-item > :is(attachments-box, notes-box, tags-box, related-box),
@@ -38,10 +51,6 @@
 .zotero-view-item > * {
 	box-sizing: border-box;
 	width: 100%;
-}
-
-.zotero-view-item > :last-child {
-	min-height: 100%;
 }
 
 .zotero-view-item > vbox

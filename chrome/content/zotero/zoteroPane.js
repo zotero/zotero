@@ -1818,14 +1818,9 @@ var ZoteroPane = new function()
 					var isCommons = collectionTreeRow.isBucket();
 					
 					let deck = document.getElementById('zotero-item-pane-content');
-					let pane;
-					if (deck.selectedIndex == 1) {
-						pane = ZoteroItemPane.getSidenavSelectedPane();
-					}
-					else {
-						deck.selectedIndex = 1;
-						pane = ZoteroItemPane.getSidenavSelectedPane();
-					}
+					deck.selectedIndex = 1;
+					
+					let pane = ZoteroItemPane.getPinnedPane();
 					
 					var button = document.getElementById('zotero-item-show-original');
 					if (isCommons) {

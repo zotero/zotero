@@ -47,9 +47,10 @@
 			let open = this.open;
 			if (open === val || this.empty) return;
 			this.render();
-			let openHeight = this._head?.nextSibling?.scrollHeight;
-			if (openHeight) {
-				this.style.setProperty('--open-height', `${openHeight}px`);
+			if (this._head?.nextSibling
+					&& this._head.nextSibling.getBoundingClientRect().height
+					&& this._head.nextSibling.scrollHeight) {
+				this.style.setProperty('--open-height', `${this._head.nextSibling.scrollHeight}px`);
 			}
 			else {
 				this.style.setProperty('--open-height', 'auto');
@@ -80,7 +81,9 @@
 		
 		setCount(count) {
 			this.setAttribute('data-l10n-args', JSON.stringify({ count }));
-			this.empty = !count;
+			this._runWithTransitionsDisabled(() => {
+				this.empty = !count;
+			});
 		}
 		
 		get label() {
@@ -119,6 +122,7 @@
 			this._head.className = 'head';
 			this._head.addEventListener('click', this._handleClick);
 			this._head.addEventListener('keydown', this._handleKeyDown);
+			this._head.addEventListener('contextmenu', this._handleContextMenu);
 
 			this._title = document.createElement('span');
 			this._title.className = 'title';
@@ -131,13 +135,21 @@
 			});
 			this._head.append(this._addButton);
 			
+			this._contextMenu = this._buildContextMenu();
+			let popupset = document.createXULElement('popupset');
+			popupset.append(this._contextMenu);
+			this._head.append(popupset);
+			
 			let twisty = document.createXULElement('toolbarbutton');
 			twisty.className = 'twisty';
 			this._head.append(twisty);
 			
 			this.prepend(this._head);
-			this._restoreOpenState();
-			this.render();
+
+			this._runWithTransitionsDisabled(() => {
+				this._restoreOpenState();
+				this.render();
+			});
 			
 			this._notifierID = Zotero.Prefs.registerObserver(`panes.${this.dataset.pane}.open`, this._restoreOpenState.bind(this));
 			
@@ -146,9 +158,79 @@
 			}
 		}
 		
+		_buildContextMenu() {
+			let containerRoot = this.closest('.zotero-view-item-container');
+			
+			let contextMenu = document.createXULElement('menupopup');
+			let collapseOtherSections = document.createXULElement('menuitem');
+			collapseOtherSections.classList.add('menuitem-iconic', 'zotero-menuitem-collapse-others');
+			collapseOtherSections.setAttribute('data-l10n-id', 'collapse-other-sections');
+			collapseOtherSections.addEventListener('command', () => {
+				for (let section of containerRoot.querySelectorAll('collapsible-section')) {
+					if (section !== this) {
+						section.open = false;
+					}
+				}
+			});
+			contextMenu.append(collapseOtherSections);
+
+			let expandAllSections = document.createXULElement('menuitem');
+			expandAllSections.classList.add('menuitem-iconic', 'zotero-menuitem-expand-all');
+			expandAllSections.setAttribute('data-l10n-id', 'expand-all-sections');
+			expandAllSections.addEventListener('command', () => {
+				for (let section of containerRoot.querySelectorAll('collapsible-section')) {
+					section.open = true;
+				}
+			});
+			contextMenu.append(expandAllSections);
+			
+			let pinSection, unpinSection;
+			let pinUnpinSeparator = document.createXULElement('menuseparator');
+			contextMenu.append(pinUnpinSeparator);
+
+			pinSection = document.createXULElement('menuitem');
+			pinSection.classList.add('menuitem-iconic', 'zotero-menuitem-pin');
+			pinSection.setAttribute('data-l10n-id', 'pin-section');
+			pinSection.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.scrollToPane(this.dataset.pane, 'smooth');
+				sidenav.pinnedPane = this.dataset.pane;
+			});
+			contextMenu.append(pinSection);
+
+			unpinSection = document.createXULElement('menuitem');
+			unpinSection.classList.add('menuitem-iconic', 'zotero-menuitem-unpin');
+			unpinSection.setAttribute('data-l10n-id', 'unpin-section');
+			unpinSection.addEventListener('command', () => {
+				this._getSidenav().pinnedPane = null;
+			});
+			contextMenu.append(unpinSection);
+
+			contextMenu.addEventListener('popupshowing', () => {
+				let sections = Array.from(containerRoot.querySelectorAll('collapsible-section'));
+				collapseOtherSections.disabled = sections.every(section => section === this || !section.open);
+				expandAllSections.disabled = sections.every(section => section.open);
+
+				let sidenav = this._getSidenav();
+				if (sidenav?.isPanePinnable(this.dataset.pane)) {
+					pinUnpinSeparator.hidden = false;
+					pinSection.hidden = sidenav.pinnedPane == this.dataset.pane;
+					unpinSection.hidden = sidenav.pinnedPane != this.dataset.pane;
+				}
+				else {
+					pinUnpinSeparator.hidden = true;
+					pinSection.hidden = true;
+					unpinSection.hidden = true;
+				}
+			});
+			
+			return contextMenu;
+		}
+		
 		destroy() {
 			this._head.removeEventListener('click', this._handleClick);
 			this._head.removeEventListener('keydown', this._handleKeyDown);
+			this._head.removeEventListener('contextmenu', this._handleContextMenu);
 			
 			Zotero.Prefs.unregisterObserver(this._notifierID);
 		}
@@ -159,6 +241,15 @@
 		
 		_restoreOpenState() {
 			this.open = Zotero.Prefs.get(`panes.${this.dataset.pane}.open`) ?? true;
+		}
+
+		_runWithTransitionsDisabled(fn) {
+			this.classList.add('disable-transitions');
+			fn();
+			// Need to wait a tick before re-enabling - forcing style recalculation isn't enough here
+			requestAnimationFrame(() => {
+				this.classList.remove('disable-transitions');
+			});
 		}
 		
 		_handleClick = (event) => {
@@ -173,6 +264,16 @@
 				event.preventDefault();
 			}
 		};
+		
+		_handleContextMenu = (event) => {
+			if (event.target.closest('.add')) return;
+			event.preventDefault();
+			this._contextMenu.openPopupAtScreen(event.screenX, event.screenY, true);
+		};
+		
+		_getSidenav() {
+			return this.closest('.zotero-view-item-container')?.querySelector('item-pane-sidenav');
+		}
 		
 		render() {
 			if (!this.initialized) return;
