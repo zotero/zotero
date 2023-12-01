@@ -9,6 +9,14 @@
 }
 
 editable-text {
+	--min-visible-lines: 0;
+	--max-visible-lines: 10;
+
+	&[multiline] {
+		--min-visible-lines: 5;
+		--max-visible-lines: 20;
+	}
+
 	// Fun auto-sizing approach from CSSTricks:
 	// https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 	
@@ -26,16 +34,16 @@ editable-text {
 		font: inherit;
 		line-height: inherit;
 		color: inherit;
-		overflow-y: hidden;
 		overflow-wrap: break-word;
 		white-space: pre-wrap;
+		max-height: calc(2ex * var(--max-visible-lines));
 	}
 	
 	.input {
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;
 		
-		min-height: 0;
+		min-height: calc(2ex * var(--min-visible-lines));
 		margin: 0;
 		
 		&:read-only, &:not(:focus) {
@@ -55,16 +63,6 @@ editable-text {
 		
 		::placeholder {
 			color: var(--fill-tertiary);
-		}
-	}
-	
-	&[multiline] {
-		&::after, .input {
-			overflow-y: auto;
-		}
-		
-		.input {
-			min-height: 5em;
 		}
 	}
 }
