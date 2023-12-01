@@ -154,7 +154,10 @@
 			let minHeight = this._minScrollHeight;
 			if (minHeight) {
 				let newMinScrollHeight = this._container.scrollTop + this._container.clientHeight;
-				if (this.pinnedPane && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
+				// Ignore overscroll (which generates scroll events on Windows 11, unlike on macOS)
+				// and don't shrink below the pinned pane's min scroll height
+				if (newMinScrollHeight > this._container.scrollHeight
+						|| this.pinnedPane && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
 					return;
 				}
 				this._minScrollHeight = newMinScrollHeight;
