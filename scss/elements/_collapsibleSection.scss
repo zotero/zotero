@@ -24,7 +24,6 @@ collapsible-section {
 			gap: 4px;
 			color: var(--fill-secondary);
 			font-weight: 590;
-			transition: color 0.2s ease-out;
 
 			&::before {
 				content: '';
@@ -64,10 +63,6 @@ collapsible-section {
 		popupset > menupopup {
 			@include macOS-hide-menu-icons;
 		}
-	}
-	
-	&.highlight > .head > .title {
-		color: var(--fill-primary);
 	}
 	
 	&[open]:not([empty]) > .head {

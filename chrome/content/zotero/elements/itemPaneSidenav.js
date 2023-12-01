@@ -133,16 +133,6 @@
 			pane.focus();
 		}
 		
-		_flashPane(id) {
-			let paneSection = this.getPane(id)?.querySelector('collapsible-section');
-			if (paneSection) {
-				paneSection.classList.add('highlight');
-				setTimeout(() => {
-					paneSection.classList.remove('highlight');
-				}, 1000);
-			}
-		}
-		
 		_makeSpaceForPane(pane) {
 			let oldMinScrollHeight = this._minScrollHeight;
 			let newMinScrollHeight = this._getMinScrollHeightForPane(pane);
@@ -197,7 +187,6 @@
 					switch (event.detail) {
 						case 1:
 							this.scrollToPane(pane, 'smooth');
-							this._flashPane(pane);
 							break;
 						case 2:
 							if (this.pinnedPane == pane || !pinnable) {
