@@ -114,14 +114,6 @@ tree {
 	padding-left: 0.05em;
 }
 
-.zotero-view-item {
-	padding: 0 !important;
-	-moz-appearance: none;
-	background-color: -moz-field;
-	border-width: 1px 0 0  0;
-	border-color: var(--theme-border-color);
-}
-
 #zotero-item-pane-groupbox {
 	-moz-appearance: none !important;
 	border-width: 0;
