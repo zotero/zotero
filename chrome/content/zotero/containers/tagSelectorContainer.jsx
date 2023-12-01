@@ -642,6 +642,15 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		await Zotero.Tags.setColor(this.libraryID, io.name, io.color, io.position);
 	}
 
+	async randomAssignColor() {
+		var letters = '0123456789ABCDEF';
+		var color = '#';
+		for (var i = 0; i < 6; i++) {
+			color += letters[Math.floor(Math.random() * 16)];
+		}
+		await Zotero.Tags.setColor(this.libraryID, this.contextTag.name, color);
+	}
+
 	async openTagSplitterWindow() {
 		const oldTagName = this.contextTag.name; // contextTag contains { name, width, color }
 		const dataIn = {
