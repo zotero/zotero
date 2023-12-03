@@ -27,7 +27,7 @@
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
+var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 	.getService(Components.interfaces.nsIOSFileConstantsService)
 	.init();
