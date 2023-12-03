@@ -1097,7 +1097,42 @@ Zotero.File = new function(){
 		}
 	};
 
-
+	// From public-domain Mozilla code
+	// https://searchfox.org/mozilla-central/rev/78a2c17cc80680a5a82446e4ce7c45a73b935383/security/sandbox/test/browser_content_sandbox_utils.js#85-115
+	//
+	// @param {String} sourcePath - The file to create a symlink to
+	// @param {String} targetPath - The location of the symlink to create
+	// @return {Promise<Boolean>} - True if successfully created, false otherwise
+	this.createSymlink = function (sourcePath, targetPath) {
+		const { ctypes } = ChromeUtils.importESModule(
+			"resource://gre/modules/ctypes.sys.mjs"
+		);
+		
+		try {
+			const libc = ctypes.open(
+				Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so"
+			);
+			
+			const symlink = libc.declare(
+				"symlink",
+				ctypes.default_abi,
+				ctypes.int, // return value
+				ctypes.char.ptr, // target
+				ctypes.char.ptr //linkpath
+			);
+			
+			if (symlink(sourcePath, targetPath)) {
+				return false;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Normalize to a Unix-style path, replacing backslashes (interpreted as
 	 * separators only on Windows) with forward slashes (interpreted as

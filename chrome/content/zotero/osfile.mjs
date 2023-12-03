@@ -1,0 +1,362 @@
+//
+// Compatibility shims from the Mozilla codebase
+//
+export let OS = {
+	Constants: {
+		Path: {
+			get homeDir() {
+				return FileUtils.getDir("Home", []).path;
+			},
+			
+			get libDir() {
+				return FileUtils.getDir("GreBinD", []).path;
+			},
+			
+			get profileDir() {
+				return FileUtils.getDir("ProfD", []).path;
+			},
+			
+			get tmpDir() {
+				return FileUtils.getDir("TmpD", []).path;
+			},
+		}
+	},
+	
+	File: {
+		DirectoryIterator: function (path) {
+			var initialized = false;
+			var paths = [];
+			
+			async function init() {
+				paths.push(...await IOUtils.getChildren(path));
+				initialized = true;
+			}
+			
+			async function getEntry(path) {
+				var info = await IOUtils.stat(path);
+				return {
+					name: PathUtils.filename(path),
+					path,
+					isDir: info.type == 'directory'
+				};
+			}
+			
+			this.nextBatch = async function (num) {
+				if (!initialized) {
+					await init();
+				}
+				var entries = [];
+				while (paths.length && num > 0) {
+					entries.push(await getEntry(paths.shift()));
+					num--;
+				}
+				return entries;
+			};
+			
+			this.forEach = async function (func) {
+				if (!initialized) {
+					await init();
+				}
+				var i = 0;
+				while (paths.length) {
+					let entry = await getEntry(paths.shift());
+					await func(entry, i++, this);
+				}
+			};
+			
+			this.close = function () {};
+		},
+		
+		Error: function (msg) {
+			this.message = msg;
+			this.stack = new Error().stack;
+		},
+		
+		copy: wrapWrite(async function (src, dest) {
+			return IOUtils.copy(src, dest);
+		}),
+		
+		exists: async function (path) {
+			try {
+				return await IOUtils.exists(path);
+			}
+			catch (e) {
+				if (e.message.includes('NS_ERROR_FILE_UNRECOGNIZED_PATH')) {
+					dump(e.message + "\n\n" + e.stack + "\n\n");
+					Components.utils.reportError(e);
+					return false;
+				}
+			}
+		},
+		
+		makeDir: wrapWrite(async function (path, options = {}) {
+			try {
+				return await IOUtils.makeDirectory(
+					path,
+					{
+						ignoreExisting: options.ignoreExisting !== false,
+						createAncestors: !!options.from,
+						permissions: options.unixMode
+					}
+				);
+			}
+			catch (e) {
+				// Broken symlink
+				if (e.name == 'InvalidAccessError') {
+					if (/Could not create directory because the target file(.+) exists and is not a directory/.test(e.message)) {
+						let osFileError = new OS.File.Error(e.message);
+						osFileError.becauseExists = true;
+						throw osFileError;
+					}
+				}
+			}
+		}),
+		
+		move: wrapWrite(async function (src, dest, options = {}) {
+			if (options.noCopy) {
+				throw new Error("noCopy is no longer supported");
+			}
+			
+			// Check noOverwrite
+			var destFileInfo = null;
+			try {
+				destFileInfo = await IOUtils.stat(dest)
+			}
+			catch (e) {
+				if (e.name != 'NotFoundError') {
+					throw e;
+				}
+			}
+			if (destFileInfo) {
+				if (destFileInfo.type == 'directory') {
+					throw new Error("OS.File.move() destination cannot be a directory -- use IOUtils.move()");
+				}
+				if (options.noOverwrite) {
+					let e = new OS.File.Error;
+					e.becauseExists = true;
+					throw e;
+				}
+			}
+			
+			return IOUtils.move(src, dest, options);
+		}),
+		
+		read: async function (path, options = {}) {
+			if (options.encoding) {
+				if (!/^utf\-?8$/i.test(options.encoding)) {
+					throw new Error("Can only read UTF-8");
+				}
+				return IOUtils.readUTF8(path);
+			}
+			return IOUtils.read(
+				path,
+				{
+					maxBytes: options.bytes
+				}
+			);
+		},
+		
+		remove: async function (path, options = {}) {
+			return IOUtils.remove(path, options);
+		},
+		
+		removeDir: async function (path, options = {}) {
+			return IOUtils.remove(
+				path,
+				{
+					recursive: true,
+					// OS.File.removeDir defaulted to ignoreAbsent: true
+					ignoreAbsent: options.ignoreAbsent !== false
+				}
+			);
+		},
+		
+		removeEmptyDir: async function (path) {
+			return IOUtils.remove(path);
+		},
+		
+		setDates: async function (path, atime, mtime) {
+			if (atime) {
+				await IOUtils.setAccessTime(path, atime.valueOf());
+			}
+			return await IOUtils.setModificationTime(path, mtime ? mtime.valueOf() : undefined);
+		},
+		
+		setPermissions: async function (path, { unixMode, winAttributes } = {}) {
+			await IOUtils.setPermissions(path, unixMode);
+			if (winAttributes && Zotero.isWin) {
+				let { readOnly, hidden, system } = winAttributes;
+				await IOUtils.setWindowsAttributes(path, { readOnly, hidden, system });
+			}
+		},
+		
+		stat: async function stat(path) {
+			var info;
+			try {
+				info = await IOUtils.stat(path);
+			}
+			catch (e) {
+				if (e.name == 'NotFoundError') {
+					let osFileError = new this.Error("File not found");
+					osFileError.becauseNoSuchFile = true;
+					throw osFileError;
+				}
+				throw e;
+			}
+			return {
+				isDir: info.type == 'directory',
+				isSymLink: true, // Supposedly was broken in Firefox
+				size: info.size,
+				lastAccessDate: new Date(info.lastAccessed),
+				lastModificationDate: new Date(info.lastModified)
+			};
+		},
+		
+		unixSymLink: async function (pathTarget, pathCreate) {
+			if (await IOUtils.exists(pathCreate)) {
+				let osFileError = new this.Error(pathCreate + " already exists");
+				osFileError.becauseExists = true;
+				throw osFileError;
+			}
+			
+			// Copy of Zotero.File.createSymlink
+			const { ctypes } = ChromeUtils.importESModule(
+				"resource://gre/modules/ctypes.sys.mjs"
+			);
+			
+			try {
+				const libc = ctypes.open(
+					Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so"
+				);
+				
+				const symlink = libc.declare(
+					"symlink",
+					ctypes.default_abi,
+					ctypes.int, // return value
+					ctypes.char.ptr, // target
+					ctypes.char.ptr //linkpath
+				);
+				
+				if (symlink(pathTarget, pathCreate)) {
+					throw new Error("Failed to create symlink at " + pathCreate);
+				}
+			}
+			catch (e) {
+				dump(e.message + "\n\n");
+				throw new Error("Failed to create symlink at " + pathCreate);
+			}
+		},
+		
+		writeAtomic: async function (path, bytes, options = {}) {
+			if (options.backupTo) {
+				options.backupFile = options.backupTo;
+			}
+			if (options.noOverwrite) {
+				options.mode = 'create';
+			}
+			if (options.encoding == 'utf-8') {
+				return IOUtils.writeUTF8(path, bytes, options);
+			}
+			return IOUtils.write(path, bytes, options);
+		},
+	},
+	
+	Path: {
+		basename: function (path) {
+			return PathUtils.filename(path);
+		},
+		
+		dirname: function (path) {
+			return PathUtils.parent(path);
+		},
+		
+		fromFileURI: function (uri) {
+			let url = new URL(uri);
+			if (url.protocol != "file:") {
+				throw new Error("fromFileURI expects a file URI");
+			}
+			let path = this.normalize(decodeURIComponent(url.pathname));
+			return path;
+		},
+		
+		join: function (path, ...args) {
+			var platformSlash = Services.appinfo.OS == 'WINNT' ? '\\' : '/';
+			try {
+				if (args.length == 0) {
+					return path;
+				}
+				if (args.length == 1 && args[0].includes(platformSlash)) {
+					return PathUtils.joinRelative(path, ...args);
+				}
+				return PathUtils.join(path, ...args);
+			}
+			catch (e) {
+				if (e.message.includes('NS_ERROR_FILE_UNRECOGNIZED_PATH')) {
+					Cu.reportError("WARNING: " + e.message + " -- update for IOUtils");
+					return [path, ...args].join(platformSlash);
+				}
+				throw e;
+			}
+		},
+		
+		// From Firefox 102
+		normalize: function (path) {
+			let stack = [];
+			let absolute;
+			if (path.length >= 0 && path[0] == "/") {
+				absolute = true;
+			}
+			else {
+				absolute = false;
+			}
+			path.split("/").forEach(function (v) {
+				switch (v) {
+					case "":
+					case ".": // fallthrough
+						break;
+					case "..":
+						if (!stack.length) {
+							if (absolute) {
+								throw new Error("Path is ill-formed: attempting to go past root");
+							}
+							else {
+								stack.push("..");
+							}
+						}
+						else if (stack[stack.length - 1] == "..") {
+							stack.push("..");
+						}
+						else {
+							stack.pop();
+						}
+						break;
+					default:
+						stack.push(v);
+				}
+			});
+			let string = stack.join("/");
+			return absolute ? "/" + string : string;
+		},
+		
+		toFileURI: function (path) {
+			return PathUtils.toFileURI(path);
+		},
+	}
+};
+
+
+function wrapWrite(func) {
+	return async function () {
+		try {
+			return await func(...arguments);
+		}
+		catch (e) {
+			if (DOMException.isInstance(e)) {
+				if (e.name == 'NoModificationAllowedError') {
+					e.becauseExists = true;
+				}
+			}
+			throw e;
+		}
+	};
+}
