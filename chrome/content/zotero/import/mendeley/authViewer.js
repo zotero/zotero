@@ -44,7 +44,7 @@ window.addEventListener("load", () => {
 		document.title = browser.contentTitle;
 	});
 
-	browser.loadURI(URI, {
+	browser.loadURI(Services.io.newURI(URI), {
 		triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
 	});
 }, false);
