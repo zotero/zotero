@@ -35,7 +35,6 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 
 <!DOCTYPE window [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
 	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
@@ -893,8 +892,7 @@
 						<vbox id="zotero-pane"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
-							onkeypress="ZoteroPane_Local.handleKeyPress(event)"
-							chromedir="&locale.dir;">
+							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
 							
 							<vbox id="sync-reminder-container" collapsed="true" role="status">
 								<html:div id="sync-reminder-banner">
