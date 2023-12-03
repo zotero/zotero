@@ -23,8 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
-import { Cc, Ci, Cu } from 'chrome';
-Cu.import("resource://gre/modules/osfile.jsm");
+const lazy = {};
+
+ChromeUtils.defineESModuleGetters(lazy, {
+	FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
+});
 
 /**
  * Interface to the system filepicker.
@@ -34,7 +37,7 @@ Cu.import("resource://gre/modules/osfile.jsm");
  *
  * @class
  */
-class FilePicker {
+export class FilePicker {
 	constructor() {
 		this._fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
 	}
@@ -76,7 +79,7 @@ class FilePicker {
 	 * @return {Promise<Integer>} One of the return constants
 	 */
 	async show() {
-		return new Zotero.Promise(function (resolve) {
+		return new Promise(function (resolve) {
 			this._fp.open(returnConstant => resolve(returnConstant));
 		}.bind(this));
 	};
@@ -164,7 +167,7 @@ FilePicker.prototype.filterVideo = 0x200;
 		set: function (val) {
 			if (prop == 'displayDirectory') {
 				// Convert to nsIFile
-				val = Zotero.File.pathToFile(val);
+				val = new lazy.FileUtils.File(val);
 			}
 			this._fp[prop] = val;
 		},
@@ -222,5 +225,3 @@ FilePicker.prototype.filterVideo = 0x200;
 });
 
 Object.freeze(FilePicker.prototype);
-
-export default FilePicker;
