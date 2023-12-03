@@ -36,7 +36,7 @@ const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm
 XPCOMUtils.defineLazyModuleGetters(globalThis, {
 	AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
 });
-
+const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
 /*

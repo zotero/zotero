@@ -34,33 +34,6 @@ function ZoteroCommandLineHandler() {}
 ZoteroCommandLineHandler.prototype = {
 	/* nsICommandLineHandler */
 	handle: async function (cmdLine) {
-		// Force debug output to window
-		if (cmdLine.handleFlag("ZoteroDebug", false)) {
-			zInitOptions.forceDebugLog = 2;
-		}
-		// Force debug output to text console
-		else if (cmdLine.handleFlag("ZoteroDebugText", false)) {
-			zInitOptions.forceDebugLog = 1;
-		}
-		// Pressing Ctrl-C via the terminal is interpreted as a crash, and after three crashes
-		// Firefox starts up in automatic safe mode (troubleshooting mode). To avoid this, we clear the crash
-		// counter when using one of the debug-logging flags, which generally imply terminal usage.
-		if (zInitOptions.forceDebugLog) {
-			Services.prefs.getBranch("toolkit.startup.").clearUserPref('recent_crashes');
-		}
-		
-		zInitOptions.forceDataDir = cmdLine.handleFlagWithParam("datadir", false);
-		
-		if (cmdLine.handleFlag("ZoteroTest", false)) {
-			zInitOptions.test = true;
-		}
-		if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
-			zInitOptions.automatedTest = true;
-		}
-		if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
-			zInitOptions.skipBundledFiles = true;
-		}
-		
 		// handler for Zotero integration commands
 		// this is typically used on Windows only, via WM_COPYDATA rather than the command line
 		var agent = cmdLine.handleFlagWithParam("ZoteroIntegrationAgent", false);
@@ -108,42 +81,6 @@ ZoteroCommandLineHandler.prototype = {
 			}
 		}
 		
-		param = cmdLine.handleFlag("debugger", false);
-		if (param) {
-			try {
-				let portOrPath = Services.prefs.getBranch('').getIntPref('devtools.debugger.remote-port');
-				
-				const { DevToolsLoader } = ChromeUtils.import(
-					"resource://devtools/shared/loader/Loader.jsm"
-				);
-				const loader = new DevToolsLoader({
-					freshCompartment: true,
-				});
-				const { DevToolsServer } = loader.require("devtools/server/devtools-server");
-				const { SocketListener } = loader.require("devtools/shared/security/socket");
-				
-				if (DevToolsServer.initialized) {
-					dump("Debugger server already initialized\n\n");
-					return;
-				}
-				
-				DevToolsServer.init();
-				DevToolsServer.registerAllActors();
-				DevToolsServer.allowChromeProcess = true;
-				const socketOptions = { portOrPath };
-				const listener = new SocketListener(DevToolsServer, socketOptions);
-				await listener.open();
-				if (!DevToolsServer.listeningSockets) {
-					throw new Error("No listening sockets");
-				}
-				
-				dump(`Debugger server started on ${portOrPath}\n\n`);
-			}
-			catch (e) {
-				dump(e + "\n\n");
-				Components.utils.reportError(e);
-			}
-		}
 		
 		// In Fx49-based Mac Standalone, if Zotero is closed, an associated file is launched, and
 		// Zotero hasn't been opened before, a -file parameter is passed and two main windows open.
