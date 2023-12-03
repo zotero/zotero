@@ -168,7 +168,7 @@ class HiddenBrowser {
 						oa
 					)
 				};
-				this.loadURI(url, loadURIOptions);
+				this.loadURI(Services.io.newURI(url), loadURIOptions);
 				let { webProgress } = this;
 				
 				let progressListener = {

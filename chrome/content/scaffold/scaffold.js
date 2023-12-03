@@ -92,7 +92,7 @@ var Scaffold = new function () {
 		browserUrl.addEventListener('keydown', function (e) {
 			if (e.key == 'Enter') {
 				Zotero.debug('Scaffold: Loading URL in browser: ' + browserUrl.value);
-				_browser.loadURI(browserUrl.value, {
+				_browser.loadURI(Services.io.newURI(browserUrl.value), {
 					triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
 				});
 			}
@@ -1903,7 +1903,7 @@ var Scaffold = new function () {
 			Zotero.launchURL(url);
 		}
 		else {
-			_browser.loadURI(url, {
+			_browser.loadURI(Services.io.newURI(url), {
 				triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
 			});
 			_showTab('browser');
