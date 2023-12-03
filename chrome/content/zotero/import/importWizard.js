@@ -25,7 +25,7 @@
 /* eslint camelcase: ["error", {allow: ["Zotero_File_Interface", "Zotero_Import_Wizard"]} ] */
 /* global Zotero_File_Interface: false, mendeleyAPIUtils: false */
 
-import FilePicker from 'zotero/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ProgressQueueTable from 'components/progressQueueTable';

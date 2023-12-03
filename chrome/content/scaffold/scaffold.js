@@ -30,7 +30,7 @@ var { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTran
 var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/ContentDOMReference.jsm");
 
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 // Fix JSON stringify 2028/2029 "bug"
 // Borrowed from http://stackoverflow.com/questions/16686687/json-stringify-and-u2028-u2029-check

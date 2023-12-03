@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 /*
  * This object contains the various functions for the interface

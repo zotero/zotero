@@ -25,7 +25,7 @@
 
 "use strict";
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 var React = require('react');
 var ReactDOM = require('react-dom');
