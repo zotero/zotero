@@ -4,6 +4,9 @@
 	overflow: hidden;
 }
 
+/*
+TODO: Replace with SVG
+
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment, pie)
 {
 	margin: 1px 0 0;
@@ -141,6 +144,7 @@
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie62) { -moz-image-region: rect(32px, 1984px, 64px, 1952px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie63) { -moz-image-region: rect(32px, 2016px, 64px, 1984px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie64) { -moz-image-region: rect(32px, 2048px, 64px, 2016px); }
+*/
 
 .items-tree-message {
 	display: flex;
