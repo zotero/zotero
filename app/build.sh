@@ -54,6 +54,19 @@ function cleanup {
 }
 trap cleanup EXIT
 
+function replace_line {
+	pattern=$1
+	replacement=$2
+	file=$3
+	
+	if egrep -q "$pattern" "$file"; then
+		perl -pi -e "s/$pattern/$replacement/" "$file"
+	else
+		echo "$pattern" not found in "$file" -- aborting 2>&1
+		exit 1
+	fi
+}
+
 function abspath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
@@ -365,6 +378,11 @@ done
 # Add to chrome manifest
 echo "" >> chrome.manifest
 cat "$CALLDIR/assets/chrome.manifest" >> chrome.manifest
+
+replace_line 'handle: function bch_handle\(cmdLine\) {' 'handle: function bch_handle(cmdLine) {
+  \/\/ TEST_OPTIONS_PLACEHOLDER
+  ' modules/BrowserContentHandler.sys.mjs
+export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets/commandLineHandler.js"; $replacement = <$fh>; close $fh; } s/\/\/ TEST_OPTIONS_PLACEHOLDER/$replacement/' modules/BrowserContentHandler.sys.mjs
 
 # Move test files to root directory
 if [ $include_tests -eq 1 ]; then

@@ -39,8 +39,8 @@ Zotero.DataDirectory = {
 	
 	get defaultDir() {
 		// Use special data directory for tests
-		if (Zotero.test) {
-			return OS.Path.join(OS.Path.dirname(OS.Constants.Path.profileDir), "Zotero");
+		if (CommandLineOptions.test) {
+			return OS.Path.join(PathUtils.parent(OS.Constants.Path.profileDir), "Zotero");
 		}
 		return OS.Path.join(OS.Constants.Path.homeDir, ZOTERO_CONFIG.CLIENT_NAME);
 	},
