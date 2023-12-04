@@ -544,8 +544,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			let removedGroups = [];
 			let keptGroups = [];
 			
-			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
+			let ps = Services.prompt;
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
@@ -1158,8 +1157,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 										.getService(Components.interfaces.nsIWindowMediator);
 							var win = wm.getMostRecentWindow("navigator:browser");
 							
-							var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+							var ps = Services.prompt;
 							var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 												+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 							if (e.error == Zotero.Error.ERROR_API_KEY_NOT_SET) {

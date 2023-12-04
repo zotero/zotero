@@ -769,9 +769,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @return bool True if the verification eventually succeeded, false otherwise
 	 */
 	handleVerificationError: Zotero.Promise.coroutine(function* (err, window, skipSuccessMessage) {
-		var promptService =
-			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-				createInstance(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var errorTitle, errorMsg;
 		

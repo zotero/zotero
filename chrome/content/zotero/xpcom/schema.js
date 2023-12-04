@@ -710,8 +710,7 @@ Zotero.Schema = new function(){
 	// This is mostly temporary
 	// TEMP - NSF
 	this.importSchema = Zotero.Promise.coroutine(function* (str, uri) {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		if (!uri.match(/https?:\/\/([^\.]+\.)?zotero.org\//)) {
 			Zotero.debug("Ignoring schema file from non-zotero.org domain");
@@ -2188,8 +2187,7 @@ Zotero.Schema = new function(){
 			catch (e) {
 				Zotero.debug(e, 1);
 				Components.utils.reportError(e);
-				let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+				let ps = Services.prompt;
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),

@@ -305,8 +305,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					)
 					: Zotero.getString('dataDir.notFound', Zotero.clientName);
 				_startupErrorHandler = async function() {
-					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-							createInstance(Components.interfaces.nsIPromptService);
+					var ps = Services.prompt;
 					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
 						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
@@ -552,8 +551,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			// Require >=2.1b3 database to ensure proper locking
 			let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
 			if (dbSystemVersion > 0 && dbSystemVersion < 31) {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.createInstance(Components.interfaces.nsIPromptService);
+				let ps = Services.prompt;
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
@@ -629,8 +627,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 							ZOTERO_CONFIG.DOMAIN_NAME);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
-						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService);
+						var ps = Services.prompt;
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
@@ -1249,9 +1246,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 */
 	this.alert = function (window, title, msg) {
 		this.debug(`Alert:\n\n${msg}`);
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		ps.alert(window, title, msg);
+		Services.prompt.alert(window, title, msg);
 	}
 	
 	

@@ -1406,8 +1406,7 @@
 						+ Zotero.ItemFields.getLocalizedString(fieldsToDelete[i]);
 				}
 				
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+				var promptService = Services.prompt;
 			}
 			
 			if (!fieldsToDelete || fieldsToDelete.length == 0

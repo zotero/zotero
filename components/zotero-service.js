@@ -108,9 +108,7 @@ ZoteroCommandLineHandler.prototype = {
 						var checkState = {
 							value: Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')
 						};
-						if (Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService)
-								.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
+						if (Services.prompt.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
 								Zotero.getString('ingester.importFile.text', [file.leafName]),
 								Zotero.getString('ingester.importFile.intoNewCollection'),
 								checkState)) {

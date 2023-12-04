@@ -157,8 +157,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Clears all customizations
 	 */
 	this.revertAll = function() {
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var out = {};
 		var regenerate = promptService.confirmEx(
@@ -181,8 +180,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Clears customizations to selected entry
 	 */
 	this.revert = function() {
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var out = {};
 		var regenerate = promptService.confirmEx(
@@ -214,8 +212,7 @@ var Zotero_Bibliography_Dialog = new function () {
 			isCited |= bibEditInterface.isCited(itemID);
 		}
 		if(isCited) {			
-			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-											.getService(Components.interfaces.nsIPromptService);
+			var promptService = Services.prompt;
 			
 			var out = {};
 			var regenerate = promptService.confirmEx(

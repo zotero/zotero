@@ -542,8 +542,7 @@ var ZoteroPane = new function()
 			Zotero.restoreFromServer = false;
 			
 			setTimeout(function () {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+				var ps = Services.prompt;
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 									+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 				var index = ps.confirmEx(
@@ -2402,9 +2401,7 @@ var ZoteroPane = new function()
 			var prompt = toDelete;
 		}
 		
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-		if (!prompt || promptService.confirm(window, prompt.title, prompt.text)) {
+		if (!prompt || Services.prompt.confirm(window, prompt.title, prompt.text)) {
 			this.itemsView.deleteSelection(force);
 		}
 	}
@@ -2461,8 +2458,7 @@ var ZoteroPane = new function()
 		}
 		
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		if (this.getCollectionTreeRow()) {
@@ -2596,10 +2592,7 @@ var ZoteroPane = new function()
 	this.emptyTrash = Zotero.Promise.coroutine(function* () {
 		var libraryID = this.getSelectedLibraryID();
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		
-		var result = ps.confirm(
+		var result = Services.prompt.confirm(
 			null,
 			"",
 			Zotero.getString('pane.collections.emptyTrash') + "\n\n"
@@ -2776,9 +2769,7 @@ var ZoteroPane = new function()
 		// This isn't currently shown, because the commands are disabled when not relevant, so this
 		// function isn't called
 		if (!items.length) {
-			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, "", Zotero.getString("fileInterface.noReferencesError"));
+			Services.prompt.alert(null, "", Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
 		
@@ -5212,23 +5203,17 @@ var ZoteroPane = new function()
 	
 	
 	this.displayCannotEditLibraryMessage = function () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", Zotero.getString('save.error.cannotMakeChangesToCollection'));
+		Services.prompt.alert(null, "", Zotero.getString('save.error.cannotMakeChangesToCollection'));
 	}
 	
 	
 	this.displayCannotEditLibraryFilesMessage = function () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", Zotero.getString('save.error.cannotAddFilesToCollection'));
+		Services.prompt.alert(null, "", Zotero.getString('save.error.cannotAddFilesToCollection'));
 	}
 	
 	
 	this.displayCannotAddToMyPublicationsMessage = function () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", Zotero.getString('save.error.cannotAddToMyPublications'));
+		Services.prompt.alert(null, "", Zotero.getString('save.error.cannotAddToMyPublications'));
 	}
 	
 	
