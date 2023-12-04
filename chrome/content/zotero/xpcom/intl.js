@@ -53,7 +53,7 @@ Zotero.Intl = new function () {
 			}
 		}
 		
-		Components.utils.import("resource://gre/modules/PluralForm.jsm");
+		Components.utils.import("resource://zotero/PluralForm.jsm");
 
 		// Exposed for tests
 		this._bundle = bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
