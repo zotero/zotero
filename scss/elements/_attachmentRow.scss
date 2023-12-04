@@ -2,6 +2,10 @@ attachment-row {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
+	
+	&[hidden] {
+		display: none;
+	}
 
 	& > .head {
 		display: flex;
@@ -39,7 +43,7 @@ attachment-row {
 		fill: var(--fill-tertiary);
 	}
 	
-	&.context > .head .title {
+	&.context > .head .label {
 		// TODO This color is used in virtualized-table - probably want to change to something theme-defined
 		color: gray;
 	}

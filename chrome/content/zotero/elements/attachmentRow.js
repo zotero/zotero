@@ -106,7 +106,9 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 		
 		get empty() {
-			return !this._attachment || !this._attachment.numAnnotations();
+			return !this._attachment
+				|| !this._attachment.isFileAttachment()
+				|| !this._attachment.numAnnotations();
 		}
 		
 		get contextRow() {
@@ -155,10 +157,13 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._label.textContent = this._attachment.getField('title');
 			
 			this._body.replaceChildren();
-			for (let annotation of this._attachment.getAnnotations()) {
-				let row = document.createXULElement('annotation-row');
-				row.annotation = annotation;
-				this._body.append(row);
+			
+			if (this._attachment.isFileAttachment()) {
+				for (let annotation of this._attachment.getAnnotations()) {
+					let row = document.createXULElement('annotation-row');
+					row.annotation = annotation;
+					this._body.append(row);
+				}
 			}
 
 			if (!this._listenerAdded) {

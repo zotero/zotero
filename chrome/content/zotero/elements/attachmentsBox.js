@@ -52,7 +52,7 @@
 			this._item = item;
 			this._body.replaceChildren();
 			if (item) {
-				for (let attachment of Zotero.Items.get(item.getAttachments())) {
+				for (let attachment of Zotero.Items.get(item.getAttachments(true))) {
 					this.addRow(attachment);
 				}
 				this.updateCount();
@@ -74,7 +74,7 @@
 		set inTrash(inTrash) {
 			this._inTrash = inTrash;
 			for (let row of this._body.children) {
-				row.contextRow = this._isContext(row.attachment);
+				this._updateRowAttributes(row, row.attachment);
 			}
 			this.updateCount();
 		}
@@ -124,11 +124,8 @@
 		}
 		
 		addRow(attachment) {
-			if (attachment.deleted && !this._inTrash) return;
-			
 			let row = document.createXULElement('attachment-row');
-			row.attachment = attachment;
-			row.contextRow = this._isContext(attachment);
+			this._updateRowAttributes(row, attachment);
 			
 			let inserted = false;
 			for (let existingRow of this._body.children) {
@@ -156,8 +153,12 @@
 			this._section.open = true;
 		};
 		
-		_isContext(attachment) {
-			return this._inTrash && !this._item.deleted && !attachment.deleted;
+		_updateRowAttributes(row, attachment) {
+			let hidden = !this._inTrash && attachment.deleted;
+			let context = this._inTrash && !this._item.deleted && !attachment.deleted;
+			row.attachment = attachment;
+			row.hidden = hidden;
+			row.contextRow = context;
 		}
 	}
 	customElements.define("attachments-box", AttachmentsBox);
