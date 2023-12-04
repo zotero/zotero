@@ -56,23 +56,18 @@ Zotero.Dictionaries = new function () {
 		if (!(await OS.File.exists(dictionariesDir))) {
 			return;
 		}
-		let iterator = new OS.File.DirectoryIterator(dictionariesDir);
-		try {
-			await iterator.forEach(async function (entry) {
-				if (entry.name.startsWith('.')) {
-					return;
-				}
-				try {
-					let dir = OS.Path.join(dictionariesDir, entry.name);
-					await _loadDirectory(dir);
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-			});
-		}
-		finally {
-			iterator.close();
+		
+		for (let path of await IOUtils.getChildren(dictionariesDir)) {
+			let filename = PathUtils.filename(path);
+			if (filename.startsWith('.')) {
+				continue;
+			}
+			try {
+				await _loadDirectory(path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 	};
 

@@ -41,7 +41,7 @@ Zotero.Sync.Storage.Utilities = {
 			zipFile,
 			{
 				onStopRequest: function (req, context, status) {
-					var zipFileName = OS.Path.basename(zipFile);
+					var zipFileName = PathUtils.filename(zipFile);
 					
 					var originalSize = 0;
 					for (let entry of context.entries) {

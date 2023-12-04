@@ -512,15 +512,9 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					var reader = new FileReader();
 					reader.addEventListener("loadend", Zotero.Promise.coroutine(function* () {
 						try {
-							
-							let file = yield OS.File.open(tmpZipPath, {
-								create: true
-							});
-							
-							var contents = new Uint8Array(reader.result);
+							let contents = new Uint8Array(reader.result);
 							contents = contents.slice(prefix2.length, suffix2.length * -1);
-							yield file.write(contents);
-							yield file.close();
+							yield IOUtils.write(tmpZipPath, contents);
 							
 							var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
 								.createInstance(Components.interfaces.nsIZipReader);

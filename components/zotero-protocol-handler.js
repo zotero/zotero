@@ -34,7 +34,6 @@ const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm")
 const { NetUtil } = ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
 
 const Cc = Components.classes;

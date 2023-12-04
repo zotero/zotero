@@ -4530,7 +4530,7 @@ var ZoteroPane = new function()
 							}
 						);
 						// Update path in case the name was changed to be unique
-						file = OS.Path.join(OS.Path.dirname(file), newName);
+						file = PathUtils.join(PathUtils.parent(file), newName);
 					}
 				}
 				catch (e) {
@@ -4953,7 +4953,7 @@ var ZoteroPane = new function()
 				);
 				return;
 			}
-			let fileExists = await OS.File.exists(path);
+			let fileExists = await IOUtils.exists(path);
 			
 			// If the file is an evicted iCloud Drive file, launch that to trigger a download.
 			// As of 10.13.6, launching an .icloud file triggers the download and opens the
@@ -4964,7 +4964,7 @@ var ZoteroPane = new function()
 			if (!fileExists && Zotero.isMac && isLinkedFile) {
 				// Get the path to the .icloud file
 				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
-				if (await OS.File.exists(iCloudPath)) {
+				if (await IOUtils.exists(iCloudPath)) {
 					Zotero.debug("Triggering download of iCloud file");
 					await launchFile(iCloudPath, item);
 					let time = new Date();
@@ -4995,7 +4995,7 @@ var ZoteroPane = new function()
 						// Wait a bit for the download and check again
 						await Zotero.Promise.delay(250);
 						Zotero.debug("Checking for downloaded file");
-						if (await OS.File.exists(path)) {
+						if (await IOUtils.exists(path)) {
 							Zotero.debug("File is ready");
 							fileExists = true;
 							break;
@@ -5112,12 +5112,12 @@ var ZoteroPane = new function()
 		if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) return;
 		
 		var path = attachment.getFilePath();
-		var fileExists = await OS.File.exists(path);
+		var fileExists = await IOUtils.exists(path);
 		
 		// If file doesn't exist but an evicted iCloud Drive file does, reveal that instead
 		if (!fileExists && Zotero.isMac && !attachment.isStoredFileAttachment()) {
 			let iCloudPath = Zotero.File.getEvictedICloudPath(path);
-			if (await OS.File.exists(iCloudPath)) {
+			if (await IOUtils.exists(iCloudPath)) {
 				path = iCloudPath;
 				fileExists = true;
 			}
@@ -5777,8 +5777,8 @@ var ZoteroPane = new function()
 		if (rv === fp.returnOK || rv === fp.returnReplace) {
 			let folder = fp.file;
 			for (let item of items) {
-				let outputFile = OS.Path.join(folder, item.attachmentFilename);
-				if (await OS.File.exists(outputFile)) {
+				let outputFile = PathUtils.join(folder, item.attachmentFilename);
+				if (await IOUtils.exists(outputFile)) {
 					let newNSIFile = Zotero.File.pathToFile(outputFile);
 					newNSIFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 					outputFile = newNSIFile.path;
@@ -5963,7 +5963,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 
-		// We can't use OS.Path.dirname because that function expects paths valid for the current platform...
+		// We can't use PathUtils.parent because that function expects paths valid for the current platform...
 		// but we can't normalize first because we're going to be comparing it to other un-normalized paths
 		let unNormalizedDirname = item.getFilePath();
 		let lastSlash = Math.max(
@@ -5978,7 +5978,7 @@ var ZoteroPane = new function()
 		for (let segmentsToDrop = 0; segmentsToDrop < parts.length; segmentsToDrop++) {
 			let correctedPath = join(basePath, ...parts.slice(segmentsToDrop));
 
-			if (!(await OS.File.exists(correctedPath))) {
+			if (!(await IOUtils.exists(correctedPath))) {
 				Zotero.debug('Does not exist: ' + correctedPath);
 				continue;
 			}
@@ -6001,7 +6001,7 @@ var ZoteroPane = new function()
 					.slice(segmentsToDrop);
 				if (!otherParts.length) continue;
 				let otherCorrectedPath = join(basePath, ...otherParts);
-				if (await OS.File.exists(otherCorrectedPath)) {
+				if (await IOUtils.exists(otherCorrectedPath)) {
 					if (Zotero.isWin) {
 						otherCorrectedPath = otherCorrectedPath.replace(/\//g, '\\');
 					}

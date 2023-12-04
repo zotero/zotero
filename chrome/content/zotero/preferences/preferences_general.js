@@ -26,7 +26,6 @@
 "use strict";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 Zotero_Preferences.General = {
@@ -153,7 +152,7 @@ Zotero_Preferences.General = {
 		
 		var fp = new FilePicker();
 		if (currentPath && currentPath != 'system') {
-			fp.displayDirectory = OS.Path.dirname(currentPath);
+			fp.displayDirectory = PathUtils.parent(currentPath);
 		}
 		fp.init(
 			window,
@@ -196,7 +195,7 @@ Zotero_Preferences.General = {
 					Zotero.logError(e);
 				}
 
-				let handlerFilename = OS.Path.basename(handler);
+				let handlerFilename = PathUtils.filename(handler);
 				if (Zotero.isMac) {
 					handlerFilename = handlerFilename.replace(/\.app$/, '');
 				}

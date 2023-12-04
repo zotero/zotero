@@ -2694,6 +2694,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 		return file.path;
 	}
 	
+	// NOTE: Test for platform slashes before changing to IOUtils.exists()
 	if (!(yield OS.File.exists(path))) {
 		Zotero.debug("Attachment file '" + path + "' not found", 2);
 		this._updateAttachmentStates(false);
@@ -2803,7 +2804,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 	}
 	
 	try {
-		let origName = OS.Path.basename(origPath);
+		let origName = PathUtils.filename(origPath);
 		if (this.isStoredFileAttachment()) {
 			var origModDate = (await OS.File.stat(origPath)).lastModificationDate;
 		}
@@ -2832,7 +2833,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		if (newName === false) {
 			return -1;
 		}
-		let destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
+		let destPath = OS.Path.join(PathUtils.parent(origPath), newName);
 		
 		await this.relinkAttachmentFile(destPath);
 		
@@ -2880,7 +2881,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		throw new Error('Cannot relink linked URL');
 	}
 	
-	var fileName = OS.Path.basename(path);
+	var fileName = PathUtils.filename(path);
 	if (fileName.endsWith(".lnk")) {
 		throw new Error("Cannot relink to Windows shortcut");
 	}
@@ -2893,7 +2894,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	// If selected file isn't in the attachment's storage directory,
 	// copy it in and use that one instead
 	var storageDir = Zotero.Attachments.getStorageDirectory(this).path;
-	if (this.isStoredFileAttachment() && OS.Path.dirname(path) != storageDir) {
+	if (this.isStoredFileAttachment() && PathUtils.parent(path) != storageDir) {
 		newPath = OS.Path.join(storageDir, newName);
 		
 		// If file with same name already exists in the storage directory,
@@ -2927,16 +2928,18 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		}
 	}
 	else {
-		newPath = OS.Path.join(OS.Path.dirname(path), newName);
+		newPath = OS.Path.join(PathUtils.parent(path), newName);
 		
 		// Rename file to filtered name if necessary
 		if (fileName != newName) {
 			Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
 			try {
-				yield OS.File.move(path, newPath, { noOverwrite: true });
+				yield IOUtils.move(path, newPath, { noOverwrite: true });
 			}
 			catch (e) {
-				if (e instanceof OS.File.Error && e.becauseExists && fileName.normalize() == newName) {
+				if (DOMException.isInstance(e)
+						&& e.name == 'NoModificationAllowedError'
+						&& fileName.normalize() == newName) {
 					// Ignore normalization differences that the filesystem ignores
 				}
 				else {
@@ -3187,7 +3190,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (prefixedPath) {
 			return prefixedPath[1].split('/').pop();
 		}
-		return OS.Path.basename(path);
+		return PathUtils.filename(path);
 	},
 	set: function (val) {
 		if (!this.isAttachment()) {
@@ -3265,7 +3268,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 				if (!val.startsWith(storagePath)) {
 					throw new Error("Imported file path must be within storage directory");
 				}
-				val = 'storage:' + OS.Path.basename(val);
+				val = 'storage:' + PathUtils.filename(val);
 			}
 		}
 		

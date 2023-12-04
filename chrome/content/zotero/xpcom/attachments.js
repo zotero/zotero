@@ -74,7 +74,7 @@ Zotero.Attachments = new function () {
 			var newName = fileBaseName + (ext != '' ? '.' + ext : '');
 		}
 		else {
-			var newName = Zotero.File.getValidFileName(OS.Path.basename(leafName));
+			var newName = Zotero.File.getValidFileName(leafName);
 		}
 		
 		if (leafName.endsWith(".lnk")) {
@@ -328,7 +328,7 @@ Zotero.Attachments = new function () {
 				
 				var storageDir = Zotero.getStorageDirectory();
 				destDir = this.getStorageDirectory(attachmentItem);
-				await OS.File.removeDir(destDir.path);
+				await IOUtils.remove(destDir.path, { recursive: true, ignoreAbsent: true });
 				newPath = OS.Path.join(destDir.path, fileName);
 				// Copy single file to new directory
 				if (options.singleFile) {
@@ -1747,7 +1747,7 @@ Zotero.Attachments = new function () {
 				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
 					directory: tmpDir,
 					libraryID: item.libraryID,
-					filename: OS.Path.basename(tmpFile),
+					filename: PathUtils.filename(tmpFile),
 					title: _getPDFTitleFromVersion(props.articleVersion),
 					url,
 					contentType: 'application/pdf',
@@ -2454,10 +2454,13 @@ Zotero.Attachments = new function () {
 			return false;
 		}
 		
-		return this.fixPathSlashes(OS.Path.join(
-			OS.Path.normalize(basePath),
+		basePath = this.fixPathSlashes(OS.Path.normalize(basePath));
+		path = this.fixPathSlashes(path);
+		
+		return PathUtils.joinRelative(
+			basePath,
 			path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length)
-		));
+		);
 	}
 	
 	
@@ -2494,7 +2497,7 @@ Zotero.Attachments = new function () {
 		}
 		
 		var numFiles = 0;
-		var parent = OS.Path.dirname(path);
+		var parent = PathUtils.parent(path);
 		var iterator = new OS.File.DirectoryIterator(parent);
 		try {
 			yield iterator.forEach((entry) => {
@@ -2546,7 +2549,7 @@ Zotero.Attachments = new function () {
 		}
 		
 		var numFiles = 0;
-		var parent = OS.Path.dirname(path);
+		var parent = PathUtils.parent(path);
 		var iterator = new OS.File.DirectoryIterator(parent);
 		try {
 			yield iterator.forEach(function (entry) {
@@ -2594,7 +2597,7 @@ Zotero.Attachments = new function () {
 		}
 		
 		var size = 0;
-		var parent = OS.Path.dirname(path);
+		var parent = PathUtils.parent(path);
 		let iterator = new OS.File.DirectoryIterator(parent);
 		try {
 			yield iterator.forEach(function (entry) {
@@ -2737,7 +2740,7 @@ Zotero.Attachments = new function () {
 		var json = item.toJSON();
 		json.linkMode = 'imported_file';
 		delete json.path;
-		json.filename = OS.Path.basename(file);
+		json.filename = PathUtils.filename(file);
 		var newItem = new Zotero.Item('attachment');
 		newItem.libraryID = item.libraryID;
 		newItem.fromJSON(json);
@@ -2798,9 +2801,9 @@ Zotero.Attachments = new function () {
 			Zotero.logError(e);
 		}
 		
-		if (newFile && json.filename != OS.Path.basename(newFile)) {
+		if (newFile && json.filename != PathUtils.filename(newFile)) {
 			Zotero.debug("Filename was changed");
-			newItem.attachmentFilename = OS.Path.basename(newFile);
+			newItem.attachmentFilename = PathUtils.filename(newFile);
 			await newItem.saveTx();
 		}
 		

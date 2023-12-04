@@ -284,7 +284,7 @@ Zotero.RecognizeDocument = new function () {
 		
 		var originalTitle = attachment.getField('title');
 		var path = attachment.getFilePath();
-		var originalFilename = OS.Path.basename(path);
+		var originalFilename = PathUtils.filename(path);
 		
 		// Rename attachment file to match new metadata
 		if (Zotero.Attachments.shouldAutoRenameFile(attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
@@ -405,7 +405,7 @@ Zotero.RecognizeDocument = new function () {
 	
 	async function _recognizePDF(item, filePath) {
 		let json = await extractPDFJSON(item.id);
-		json.fileName = OS.Path.basename(filePath);
+		json.fileName = PathUtils.filename(filePath);
 		
 		let containingTextPages = 0;
 		

@@ -326,7 +326,7 @@ Zotero.Translators = new function() {
 			return this.load(infoRe.exec(source)[0], path, source);
 		}
 		catch (e) {
-			throw new Error("Invalid or missing translator metadata JSON object in " + OS.Path.basename(path));
+			throw new Error("Invalid or missing translator metadata JSON object in " + PathUtils.filename(path));
 		}
 	}
 

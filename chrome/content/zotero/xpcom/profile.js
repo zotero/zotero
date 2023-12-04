@@ -24,8 +24,7 @@
 */
 
 "use strict";
-
-Components.utils.import("resource://gre/modules/osfile.jsm");
+var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 
 Zotero.Profile = {
 	dir: OS.Constants.Path.profileDir,
@@ -87,7 +86,7 @@ Zotero.Profile = {
 	
 	
 	getProfilesDir: function () {
-		return OS.Path.dirname(this.dir);
+		return PathUtils.parent(this.dir);
 	},
 	
 	
@@ -97,13 +96,13 @@ Zotero.Profile = {
 	 * @return {String|null} - Path, or null if none due to filesystem location
 	 */
 	getOtherAppProfilesDir: function () {
-		var dir = OS.Path.dirname(OS.Path.dirname(OS.Path.dirname(this.dir)));
+		var dir = PathUtils.parent(PathUtils.parent(PathUtils.parent(this.dir)));
 		if (dir === '' || dir == '.') {
 			return null;
 		}
 		
 		if (Zotero.isWin) {
-			dir = OS.Path.join(OS.Path.dirname(dir), "Mozilla", "Firefox");
+			dir = OS.Path.join(PathUtils.parent(dir), "Mozilla", "Firefox");
 		}
 		else if (Zotero.isMac) {
 			dir = OS.Path.join(dir, "Firefox");
@@ -143,7 +142,7 @@ Zotero.Profile = {
 		// to the list, which addresses the situation where the source directory is a custom
 		// location for the current profile but is a default in the other app (meaning it wouldn't
 		// be added above).
-		let dataDirParent = OS.Path.dirname(dataDir);
+		let dataDirParent = PathUtils.parent(dataDir);
 		if (otherAppProfiles.includes(dataDirParent) && !otherProfiles.includes(dataDirParent)) {
 			otherProfiles.push(dataDirParent);
 		}
@@ -199,7 +198,7 @@ Zotero.Profile = {
 			if (!profilesDir) {
 				return true;
 			}
-			let profilesParent = OS.Path.dirname(profilesDir);
+			let profilesParent = PathUtils.parent(profilesDir);
 			Zotero.debug("Looking for Firefox profile in " + profilesParent);
 			let defProfile = await this.getDefaultInProfilesDir(profilesParent);
 			if (defProfile) {

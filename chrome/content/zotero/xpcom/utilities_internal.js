@@ -559,7 +559,7 @@ Zotero.Utilities.Internal = {
 			encodingFlags |= nsIWBP.ENCODE_FLAGS_ENCODE_BASIC_ENTITIES;
 			
 			// Save auxiliary files to the same folder
-			filesFolder = OS.Path.dirname(destFile);
+			filesFolder = PathUtils.parent(destFile);
 		}
 		const wrapColumn = 80;
 		

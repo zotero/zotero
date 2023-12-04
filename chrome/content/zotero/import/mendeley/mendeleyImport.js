@@ -3,7 +3,7 @@
 var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"]; //eslint-disable-line no-unused-vars
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
+var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyOnlineMappings.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
@@ -766,7 +766,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesDB = async function (groupID) 
 };
 
 Zotero_Import_Mendeley.prototype._fetchFile = async function (fileID, filePath) {
-	const fileDir = OS.Path.dirname(filePath);
+	const fileDir = PathUtils.parent(filePath);
 	await Zotero.File.createDirectoryIfMissingAsync(fileDir);
 	const xhr = await apiFetch(this._tokens, `files/${fileID}`, {}, {}, { responseType: 'blob', followRedirects: false });
 	const uri = xhr.getResponseHeader('location');
@@ -1577,7 +1577,7 @@ Zotero_Import_Mendeley.prototype._findExistingFile = function (parentItemID, fil
 };
 
 Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
-	var parentDir = OS.Path.dirname(path);
+	var parentDir = PathUtils.parent(path);
 	return parentDir.endsWith(OS.Path.join('Application Support', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'))
@@ -1606,8 +1606,8 @@ Zotero_Import_Mendeley.prototype._getRealFilePath = async function (path) {
 	}
 	// For file paths in Downloaded folder, try relative to database if not found at the
 	// absolute location, in case this is a DB backup
-	var dataDir = OS.Path.dirname(this._file);
-	var altPath = OS.Path.join(dataDir, 'Downloaded', OS.Path.basename(path));
+	var dataDir = PathUtils.parent(this._file);
+	var altPath = OS.Path.join(dataDir, 'Downloaded', PathUtils.filename(path));
 	if (altPath != path && await OS.File.exists(altPath)) {
 		return altPath;
 	}

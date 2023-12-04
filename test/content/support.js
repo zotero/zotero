@@ -599,10 +599,10 @@ function initPDFToolsPath() {
 		pdfInfoFileName += '-linux-' + cpu;
 	}
 	
-	let pdfToolsPath = OS.Path.join(Zotero.Profile.dir, 'pdftools');
-	let pdfConverterPath = OS.Path.join(pdfToolsPath, pdfConvertedFileName);
-	let pdfInfoPath = OS.Path.join(pdfToolsPath, pdfInfoFileName);
-	let pdfDataPath = OS.Path.join(pdfToolsPath, 'poppler-data');
+	let pdfToolsPath = PathUtils.join(Zotero.Profile.dir, 'pdftools');
+	let pdfConverterPath = PathUtils.join(pdfToolsPath, pdfConvertedFileName);
+	let pdfInfoPath = PathUtils.join(pdfToolsPath, pdfInfoFileName);
+	let pdfDataPath = PathUtils.join(pdfToolsPath, 'poppler-data');
 	
 	Zotero.FullText.setPDFConverterPath(pdfConverterPath);
 	Zotero.FullText.setPDFInfoPath(pdfInfoPath);
@@ -636,9 +636,9 @@ var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
 		attempts = 3,
 		zoteroTmpDirPath = Zotero.getTempDirectory().path;
 	while (attempts--) {
-		path = OS.Path.join(zoteroTmpDirPath, Zotero.Utilities.randomString());
+		path = PathUtils.join(zoteroTmpDirPath, Zotero.Utilities.randomString());
 		try {
-			yield OS.File.makeDir(path, { ignoreExisting: false });
+			yield IOUtils.makeDirectory(path, { ignoreExisting: false });
 			break;
 		} catch (e) {
 			if (!attempts) throw e; // Throw on last attempt
@@ -685,7 +685,7 @@ async function resetDB(options = {}) {
 			// Otherwise swap in the initial copy we made of the DB, or an alternative non-zip file
 			// if given
 			else {
-				await OS.File.copy(options.dbFile || db + '-test-template', db);
+				await IOUtils.copy(options.dbFile || db + '-test-template', db);
 			}
 			_defaultGroup = null;
 		},
@@ -1048,7 +1048,7 @@ async function createAnnotation(type, parentItem, options = {}) {
 async function createEmbeddedImage(parentItem, options = {}) {
 	var attachment = await Zotero.Attachments.importEmbeddedImage({
 		blob: await File.createFromFileName(
-			OS.Path.join(getTestDataDirectory().path, 'test.png')
+			PathUtils.join(getTestDataDirectory().path, 'test.png')
 		),
 		parentItemID: parentItem.id
 	});
@@ -1061,7 +1061,7 @@ async function createEmbeddedImage(parentItem, options = {}) {
 
 
 async function getImageBlob() {
-	var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+	var path = PathUtils.join(getTestDataDirectory().path, 'test.png');
 	var imageData = await Zotero.File.getBinaryContentsAsync(path);
 	var array = new Uint8Array(imageData.length);
 	for (let i = 0; i < imageData.length; i++) {

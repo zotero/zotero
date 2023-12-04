@@ -201,7 +201,7 @@ FilePicker.prototype.filterVideo = 0x200;
 			switch (prop) {
 				case 'file':
 					// Convert from nsIFile
-					val = OS.Path.normalize(val.path);
+					val = PathUtils.normalize(val.path);
 					break;
 				
 				case 'files':
@@ -209,7 +209,7 @@ FilePicker.prototype.filterVideo = 0x200;
 					while (val.hasMoreElements()) {
 						let file = val.getNext();
 						file.QueryInterface(Ci.nsIFile);
-						files.push(file.path);
+						files.push(PathUtils.normalize(file.path));
 					}
 					val = files;
 					break;

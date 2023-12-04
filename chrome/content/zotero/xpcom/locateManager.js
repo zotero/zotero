@@ -474,7 +474,7 @@ Zotero.LocateManager = new function() {
 			if (await OS.File.exists(iconFile)) {
 				for (let i = 0; await OS.File.exists(iconFile); i++) {
 					iconFile = OS.Path.join(
-						OS.Path.dirname(iconFile),
+						PathUtils.parent(iconFile),
 						sanitizedAlias + "_" + i + "." + extension
 					);
 				}

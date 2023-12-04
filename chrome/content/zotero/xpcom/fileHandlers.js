@@ -159,7 +159,7 @@ Zotero.FileHandlers = {
 			}
 			
 			try {
-				if (await OS.File.exists(handler)) {
+				if (await IOUtils.exists(handler)) {
 					Zotero.debug(`Opening with handler ${handler}`);
 					Zotero.launchFileWithApplication(path, handler);
 					return true;
@@ -222,7 +222,7 @@ Zotero.FileHandlers = {
 						'-e', `tell app "${appPath}" to open "${filePath}"`
 					];
 					if (page !== undefined) {
-						let filename = OS.Path.basename(filePath)
+						let filename = PathUtils.filename(filePath)
 							.replace(quoteRE, '\\"');
 						args.push('-e', `tell document "${filename}" of application "${appPath}" to go to page ${page}`);
 					}
@@ -316,10 +316,10 @@ Zotero.FileHandlers = {
 								appPath = '/usr/bin/evince';
 						}
 					}
-					else if (await OS.File.exists('/usr/bin/okular')) {
+					else if (await IOUtils.exists('/usr/bin/okular')) {
 						appPath = '/usr/bin/okular';
 					}
-					else if (await OS.File.exists('/usr/bin/evince')) {
+					else if (await IOUtils.exists('/usr/bin/evince')) {
 						appPath = '/usr/bin/evince';
 					}
 					else {

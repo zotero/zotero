@@ -1,5 +1,3 @@
-Components.utils.import("resource://gre/modules/osfile.jsm");
-
 var Scaffold_Translators = {
 	// Keep in sync with translator.js
 	TRANSLATOR_TYPES: { import: 1, export: 2, web: 4, search: 8 },
@@ -35,7 +33,7 @@ var Scaffold_Translators = {
 					fmtime = entry.winLastWriteDate.getTime();
 				}
 				else {
-					fmtime = (await OS.File.stat(entry.path)).lastModificationDate.getTime();
+					fmtime = (await IOUtils.stat(entry.path)).lastModified;
 				}
 				let translatorID = this._translatorFiles.get(entry.name);
 				let loadFile = true;
@@ -92,7 +90,7 @@ var Scaffold_Translators = {
 			Zotero.debug("Scaffold: Can't delete missing translator");
 			return;
 		}
-		await OS.File.delete(OS.Path.join(this.getDirectory(), translator.filename));
+		await IOUtils.remove(PathUtils.join(this.getDirectory(), translator.filename));
 		this._translators.delete(translatorID);
 		this._translatorFiles.delete(translator.filename);
 	},
