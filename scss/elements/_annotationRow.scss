@@ -3,7 +3,7 @@ annotation-row {
 	flex-direction: column;
 
 	border-radius: 5px;
-	border: 1px solid var(--fill-quinary);
+	outline: 1px solid var(--fill-quinary);
 	background: var(--material-background);
 
 	.head {
