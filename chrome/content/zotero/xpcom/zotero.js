@@ -430,11 +430,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		this.initialized = true;
 		this.initializationDeferred.resolve();
 		
-		if(Zotero.isConnector) {
-			Zotero.Repo.init();
-			Zotero.locked = false;
-		}
-		
 		if(!Zotero.isFirstLoadThisSession) {
 			// trigger zotero-reloaded event
 			Zotero.debug('Triggering "zotero-reloaded" event');
@@ -855,20 +850,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return true;
 	}
 	
-	
-	/**
-	 * Called when the DB has been released by another Zotero process to perform necessary 
-	 * initialization steps
-	 */
-	this.onDBLockReleased = function() {
-		if(Zotero.isConnector) {
-			// if DB lock is released, switch out of connector mode
-			switchConnectorMode(false);
-		} else if(_waitingForDBLock) {
-			// if waiting for DB lock and we get it, continue init
-			_waitingForDBLock = false;
-		}
-	}
 	
 	this.shutdown = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Shutting down Zotero");
