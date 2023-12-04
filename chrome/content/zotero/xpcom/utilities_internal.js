@@ -138,69 +138,45 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
-	 * @param {OS.File|nsIFile|String} file  File or file path
+	 * @param {nsIFile|String} file  File or file path
 	 * @param {Boolean} [base64=FALSE]  Return as base-64-encoded string
 	 *                                  rather than hex string
 	 */
 	md5Async: async function (file, base64) {
-		const CHUNK_SIZE = 16384;
-		
 		function toHexString(charCode) {
 			return ("0" + charCode.toString(16)).slice(-2);
 		}
 		
 		var ch = Components.classes["@mozilla.org/security/hash;1"]
-				.createInstance(Components.interfaces.nsICryptoHash);
+			.createInstance(Components.interfaces.nsICryptoHash);
 		ch.init(ch.MD5);
 		
-		// Recursively read chunks of the file and return a promise for the hash
-		let readChunk = async function (file) {
+		try {
+			let is = Cc["@mozilla.org/network/file-input-stream;1"]
+				.createInstance(Ci.nsIFileInputStream);
+			is.init(Zotero.File.pathToFile(file), -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF);
+			ch.updateFromStream(is, -1);
+			let hash = ch.finish(base64);
+			// Base64
+			if (base64) {
+				return hash;
+			}
+			// Hex string
+			let hexStr = "";
+			for (let i = 0; i < hash.length; i++) {
+				hexStr += toHexString(hash.charCodeAt(i));
+			}
+			return hexStr;
+		}
+		catch (e) {
 			try {
-				let data = await file.read(CHUNK_SIZE);
-				ch.update(data, data.length);
-				if (data.length == CHUNK_SIZE) {
-					return readChunk(file);
-				}
-				
-				let hash = ch.finish(base64);
-				// Base64
-				if (base64) {
-					return hash;
-				}
-				// Hex string
-				let hexStr = "";
-				for (let i = 0; i < hash.length; i++) {
-					hexStr += toHexString(hash.charCodeAt(i));
-				}
-				return hexStr;
+				ch.finish(false);
 			}
 			catch (e) {
-				try {
-					ch.finish(false);
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-				throw e;
+				Zotero.logError(e);
 			}
-		};
-		
-		if (file instanceof OS.File) {
-			return readChunk(file);
+			throw e;
 		}
-		
-		var path = (file instanceof Components.interfaces.nsIFile) ? file.path : file;
-		var hash;
-		try {
-			var osFile = await OS.File.open(path);
-			hash = await readChunk(osFile);
-		}
-		finally {
-			if (osFile) {
-				await osFile.close();
-			}
-		}
-		return hash;
 	},
 	
 	
