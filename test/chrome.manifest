@@ -1,7 +1,3 @@
 content	zotero-unit			test/content/
 resource zotero-unit		test/resource/
 resource zotero-unit-tests  test/tests/
-
-component {b8570031-be5e-46e8-9785-38cd50a5d911} test/components/zotero-unit.js
-contract @zotero.org/zotero/tests-clh;1 {b8570031-be5e-46e8-9785-38cd50a5d911}
-category command-line-handler m-zotero-unit @zotero.org/zotero/tests-clh;1
