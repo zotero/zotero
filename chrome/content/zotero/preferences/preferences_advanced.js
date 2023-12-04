@@ -106,8 +106,7 @@ Zotero_Preferences.Advanced = {
 		}
 		
 		Components.utils.import("resource://zotero/config.js")
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		// If there's a migration marker, point data directory back to the current location and remove
 		// it to trigger the migration again
@@ -269,8 +268,7 @@ Zotero_Preferences.Advanced = {
 	
 	
 	resetTranslatorsAndStyles: function () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
@@ -294,8 +292,7 @@ Zotero_Preferences.Advanced = {
 	
 	
 	resetTranslators: async function () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
@@ -324,8 +321,7 @@ Zotero_Preferences.Advanced = {
 	
 	
 	resetStyles: async function () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
@@ -665,8 +661,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		}
 		
 		//Confirm change of the base path
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		var chooseStrPrefix = 'attachmentBasePath.chooseNewPath.';
 		var clearStrPrefix = 'attachmentBasePath.clearBasePath.';
@@ -756,8 +751,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		var relativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
 		
 		// Prompt for confirmation
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		var strPrefix = 'attachmentBasePath.clearBasePath.';
 		var title = Zotero.getString(strPrefix + 'title');

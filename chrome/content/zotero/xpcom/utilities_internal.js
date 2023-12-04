@@ -399,8 +399,7 @@ Zotero.Utilities.Internal = {
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
 	errorPrompt: function (title, e) {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		var message, buttonText, buttonCallback;
 		
 		if (e.dialogButtonText !== undefined) {

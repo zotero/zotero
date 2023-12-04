@@ -688,8 +688,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		
 		var tagColors = this.state.tagColors;
 		if (tagColors.size >= Zotero.Tags.MAX_COLORED_TAGS && !tagColors.has(io.name)) {
-			var ps = Cc['@mozilla.org/embedcomp/prompt-service;1']
-				.getService(Ci.nsIPromptService);
+			var ps = Services.prompt;
 			ps.alert(null, '', Zotero.getString('pane.tagSelector.maxColoredTags', Zotero.Tags.MAX_COLORED_TAGS));
 			return;
 		}
@@ -751,8 +750,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	async openRenamePrompt() {
-		var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1']
-			.getService(Ci.nsIPromptService);
+		var promptService = Services.prompt;
 
 		var newName = { value: this.contextTag.name };
 		var result = promptService.prompt(window,
@@ -786,8 +784,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	async openDeletePrompt() {
-		var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1']
-			.getService(Ci.nsIPromptService);
+		var promptService = Services.prompt;
 			
 		var confirmed = promptService.confirm(window,
 			Zotero.getString('pane.tagSelector.delete.title'),
@@ -834,8 +831,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			return;
 		}
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		var confirmed = ps.confirm(
 			window,
 			Zotero.getString('pane.tagSelector.deleteAutomatic.title'),

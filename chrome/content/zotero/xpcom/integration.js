@@ -147,8 +147,7 @@ Zotero.Integration = new function() {
 			
 			// can attempt to delete on OS X
 			try {
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+				let promptService = Services.prompt;
 				var deletePipe = promptService.confirm(null, Zotero.getString("integration.error.title"), Zotero.getString("integration.error.deletePipe"));
 				if(!deletePipe) return false;
 				let escapedFifoFile = pipe.path.replace("'", "'\\''");

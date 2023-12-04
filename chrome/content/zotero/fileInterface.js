@@ -504,8 +504,7 @@ var Zotero_File_Interface = new function() {
 	this.importFromClipboard = Zotero.Promise.coroutine(function* () {
 		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
 		if(!str) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
+			var ps = Services.prompt;
 			ps.alert(
 				null,
 				Zotero.getString('general.error'),
@@ -563,8 +562,7 @@ var Zotero_File_Interface = new function() {
 				yield onBeforeImport(false);
 			}
 			
-			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
+			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 			let index = ps.confirmEx(

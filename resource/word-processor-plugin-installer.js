@@ -124,10 +124,11 @@ ZoteroPluginInstaller.prototype = {
 		if(this.force && !this._addon.DISABLE_PROGRESS_WINDOW) {
 			var addon = this._addon;
 			setTimeout(function() {
-				Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService)
-					.alert(null, addon.EXTENSION_STRING,
-					Zotero.getString("zotero.preferences.wordProcessors.installationSuccess"));
+				Services.prompt.alert(
+					null,
+					addon.EXTENSION_STRING,
+					Zotero.getString("zotero.preferences.wordProcessors.installationSuccess")
+				);
 			}, 0);
 		}
 	},

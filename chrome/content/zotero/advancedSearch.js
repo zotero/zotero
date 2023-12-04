@@ -145,8 +145,7 @@ var ZoteroAdvancedSearch = new function() {
 	this.save = Zotero.Promise.coroutine(function* () {
 		_searchBox.updateSearch();
 		
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var libraryID = _searchBox.search.libraryID;
 		

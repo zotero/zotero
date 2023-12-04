@@ -361,8 +361,7 @@ Zotero.DataDirectory = {
 						|| ('winLastError' in e && e.winLastError == OS.Constants.Win.ERROR_ACCESS_DENIED))) {
 				Zotero.restarting = true;
 				let isDefaultDir = dataDir == Zotero.DataDirectory.defaultDir;
-				let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.createInstance(Components.interfaces.nsIPromptService);
+				let ps = Services.prompt;
 				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 				if (!isDefaultDir) {

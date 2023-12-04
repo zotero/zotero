@@ -210,8 +210,7 @@ Zotero.FileDragDataProvider.prototype = {
 			}
 
 			if (notFoundNames.length || existingItems.length) {
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+				var promptService = Services.prompt;
 			}
 
 			// Display alert if files were not found

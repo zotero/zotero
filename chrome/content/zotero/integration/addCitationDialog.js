@@ -540,8 +540,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(_autoRegeneratePref == -1) {
 			if(focusShifted) {	// only ask after onchange event; oninput is too
 								// frequent for this to be worthwhile
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-												.getService(Components.interfaces.nsIPromptService);
+				var promptService = Services.prompt;
 				
 				var saveBehavior = { value: false };
 				var regenerate = promptService.confirmEx(
@@ -613,8 +612,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(isCustom) {	
 			var citation = _editor.getContent(true);
 			if(Zotero.Utilities.trim(citation) == "") {				
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService);
+				var promptService = Services.prompt;
 				var insert = promptService.confirm(window,
 					Zotero.getString("integration.emptyCitationWarning.title"),
 					Zotero.getString("integration.emptyCitationWarning.body"));

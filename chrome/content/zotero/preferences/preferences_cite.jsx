@@ -210,8 +210,7 @@ Zotero_Preferences.Cite = {
 			var text = Zotero.getString('styles.deleteStyles');
 		}
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		if(ps.confirm(null, '', text)) {
 			// delete if requested
 			if(cslIDs.length == 1) {
