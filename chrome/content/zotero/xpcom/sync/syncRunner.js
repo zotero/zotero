@@ -386,7 +386,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					Zotero.getString('general.warning'),
 					Zotero.getString(
 							'account.warning.emptyLibrary',
-							[Zotero.clientName, OS.Path.basename(Zotero.DB.path)]
+							[Zotero.clientName, PathUtils.filename(Zotero.DB.path)]
 						) + "\n\n"
 						+ Zotero.getString(
 							'account.warning.emptyLibrary.dataWillBeDownloaded',

@@ -25,7 +25,6 @@
 
 "use strict";
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero/config.js");
 
 var React = require('react');

@@ -376,7 +376,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			var parentDirPath = await Zotero.Attachments.createDirectoryForItem(item);
 		}
 		else {
-			var parentDirPath = OS.Path.dirname(filePath);
+			var parentDirPath = PathUtils.parent(filePath);
 		}
 		var cacheFilePath = OS.Path.join(parentDirPath, this.fulltextCacheFile);
 		try {
@@ -831,7 +831,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var itemCacheFile = this.getItemCacheFile(item).path; // .zotero-ft-cache
 		
 		// If a storage directory doesn't exist, create it
-		if (!(yield OS.File.exists(OS.Path.dirname(processorCacheFile)))) {
+		if (!(yield OS.File.exists(PathUtils.parent(processorCacheFile)))) {
 			yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		
@@ -1645,7 +1645,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		var cacheFile = this.getItemCacheFile(item).path;
 		Zotero.debug("Writing converted full-text content to " + cacheFile);
-		if (!await OS.File.exists(OS.Path.dirname(cacheFile))) {
+		if (!await OS.File.exists(PathUtils.parent(cacheFile))) {
 			await Zotero.Attachments.createDirectoryForItem(item);
 		}
 		try {

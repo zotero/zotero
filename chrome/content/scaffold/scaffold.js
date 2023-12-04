@@ -230,7 +230,7 @@ var Scaffold = new function () {
 		if (await fp.show() != fp.returnOK) {
 			return false;
 		}
-		var path = OS.Path.normalize(fp.file);
+		var path = PathUtils.normalize(fp.file);
 		if (oldPath == path) {
 			return false;
 		}
@@ -293,7 +293,7 @@ var Scaffold = new function () {
 		monaco.languages.registerCompletionItemProvider('javascript', this.createCompletionProvider(monaco, editor));
 
 		let tsLib = await Zotero.File.getContentsAsync(
-			OS.Path.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
+			PathUtils.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
 		let tsLibPath = 'ts:filename/index.d.ts';
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(tsLib, tsLibPath);
 		// this would allow peeking:
@@ -2208,7 +2208,7 @@ var Scaffold = new function () {
 	}
 
 	function getDefaultESLintPath() {
-		return OS.Path.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'teslint');
+		return PathUtils.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'teslint');
 	}
 
 	async function getESLintPath() {
@@ -2218,7 +2218,7 @@ var Scaffold = new function () {
 
 		let eslintPath = getDefaultESLintPath();
 
-		while (!await OS.File.exists(eslintPath)) {
+		while (!await IOUtils.exists(eslintPath)) {
 			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING

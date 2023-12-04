@@ -1,5 +1,4 @@
 new function() {
-Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero-unit/httpd.js");
 
 const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');

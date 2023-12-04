@@ -111,19 +111,19 @@ Zotero_Preferences.Advanced = {
 		
 		// If there's a migration marker, point data directory back to the current location and remove
 		// it to trigger the migration again
-		var marker = OS.Path.join(defaultDir, Zotero.DataDirectory.MIGRATION_MARKER);
-		if (yield OS.File.exists(marker)) {
+		var marker = PathUtils.join(defaultDir, Zotero.DataDirectory.MIGRATION_MARKER);
+		if (yield IOUtils.exists(marker)) {
 			Zotero.Prefs.clear('dataDir');
 			Zotero.Prefs.clear('useDataDir');
-			yield OS.File.remove(marker);
+			yield IOUtils.remove(marker);
 			try {
-				yield OS.File.remove(OS.Path.join(defaultDir, '.DS_Store'));
+				yield IOUtils.remove(PathUtils.join(defaultDir, '.DS_Store'));
 			}
 			catch (e) {}
 		}
 		
 		// ~/Zotero exists and is non-empty
-		if ((yield OS.File.exists(defaultDir)) && !(yield Zotero.File.directoryIsEmpty(defaultDir))) {
+		if ((yield IOUtils.exists(defaultDir)) && !(yield Zotero.File.directoryIsEmpty(defaultDir))) {
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 			let index = ps.confirmEx(
@@ -139,7 +139,7 @@ Zotero_Preferences.Advanced = {
 			if (index == 0) {
 				yield Zotero.File.reveal(
 					// Windows opens the directory, which might be confusing here, so open parent instead
-					Zotero.isWin ? OS.Path.dirname(defaultDir) : defaultDir
+					Zotero.isWin ? PathUtils.parent(defaultDir) : defaultDir
 				);
 			}
 			return;
@@ -546,7 +546,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		var oldPath = Zotero.Prefs.get('baseAttachmentPath');
 		if (oldPath) {
 			try {
-				return OS.Path.normalize(oldPath);
+				return PathUtils.normalize(oldPath);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -638,7 +638,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			// If a file with the same relative path exists within the new base directory,
 			// don't touch the attachment, since it will continue to work
 			if (relPath) {
-				if (yield OS.File.exists(OS.Path.join(basePath, relPath))) {
+				if (yield IOUtils.exists(PathUtils.join(basePath, relPath))) {
 					numNewAttachments++;
 					continue;
 				}
@@ -821,8 +821,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	updateUI: async function () {
 		var filefield = document.getElementById('baseAttachmentPath');
 		var path = Zotero.Prefs.get('baseAttachmentPath');
-		Components.utils.import("resource://gre/modules/osfile.jsm");
-		if (await OS.File.exists(path)) {
+		if (path && await IOUtils.exists(path)) {
 			filefield.style.backgroundImage = 'url(moz-icon://' + Zotero.File.pathToFileURI(path) + '?size=16)';
 			filefield.value = path;
 		}

@@ -104,9 +104,9 @@ Zotero.File = new function(){
 			}
 		}
 		
-		var dir = OS.Path.dirname(file);
+		var dir = PathUtils.parent(file);
 		while (dir && dir != '/' && !await OS.File.exists(dir)) {
-			dir = OS.Path.dirname(dir);
+			dir = PathUtils.parent(dir);
 		}
 		
 		return (dir && dir != '/') ? dir : false;
@@ -523,7 +523,7 @@ Zotero.File = new function(){
 		var unique = options.unique || false;
 		
 		var origPath = file;
-		var origName = OS.Path.basename(origPath);
+		var origName = PathUtils.filename(origPath);
 		newName = Zotero.File.getValidFileName(newName);
 		
 		// Ignore if no change
@@ -538,9 +538,9 @@ Zotero.File = new function(){
 			overwrite = true;
 		}
 		
-		var parentDir = OS.Path.dirname(origPath);
+		var parentDir = PathUtils.parent(origPath);
 		var destPath = OS.Path.join(parentDir, newName);
-		var destName = OS.Path.basename(destPath);
+		var destName = PathUtils.filename(destPath);
 		// Get root + extension, if there is one
 		var pos = destName.lastIndexOf('.');
 		if (pos > 0) {
@@ -566,7 +566,7 @@ Zotero.File = new function(){
 			}
 			
 			try {
-				Zotero.debug(`Renaming ${origPath} to ${OS.Path.basename(destPath)}`);
+				Zotero.debug(`Renaming ${origPath} to ${PathUtils.filename(destPath)}`);
 				Zotero.debug(destPath);
 				await OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
 			}
@@ -686,14 +686,11 @@ Zotero.File = new function(){
 		
 		// Throw certain known errors (no more disk space) to interrupt the operation
 		function checkError(e) {
-			if (!(e instanceof OS.File.Error)) {
+			if (!(DOMException.isInstance(e))) {
 				return;
 			}
-			Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
-				.getService(Components.interfaces.nsIOSFileConstantsService)
-				.init();
-			if ((e.unixErrno !== undefined && e.unixErrno == OS.Constants.libc.ENOSPC)
-					|| (e.winLastError !== undefined && e.winLastError == OS.Constants.libc.ENOSPC)) {
+			// DEBUG: Test this
+			if (e.name == 'NotReadableError' && e.message.includes('Target device is full')) {
 				throw e;
 			}
 		}
@@ -765,24 +762,18 @@ Zotero.File = new function(){
 					}
 					
 					
-					// If can't use command, try moving with OS.File.move(). Technically this is
-					// unsupported for directories, but it works on all platforms as long as noCopy
-					// is set (and on some platforms regardless)
+					// If can't use command, try moving with IOUtils.move()
 					if (!moved && useFunction) {
-						Zotero.debug(`Moving ${entry.path} with OS.File`);
-						try {
-							await OS.File.move(
-								entry.path,
-								dest,
-								{
-									noCopy: true
-								}
-							);
-							moved = true;
-						}
-						catch (e) {
-							checkError(e);
-							Zotero.debug(e, 1);
+						Zotero.debug(`Moving ${entry.path} with IOUtils`);
+						if (!await IOUtils.exists(dest)) {
+							try {
+								await IOUtils.move(entry.path, dest);
+								moved = true;
+							}
+							catch (e) {
+								checkError(e);
+								Zotero.debug(e, 1);
+							}
 						}
 					}
 					
@@ -830,7 +821,7 @@ Zotero.File = new function(){
 			throw new Error("contentType not provided");
 		}
 		
-		var buf = await OS.File.read(file, {});
+		var buf = await IOUtils.read(file);
 		buf = new Uint8Array(buf).buffer;
 		return new Promise((resolve, reject) => {
 			let blob = new Blob([buf], { type: contentType });
@@ -846,19 +837,19 @@ Zotero.File = new function(){
 	};
 	
 	
-	this.setNormalFilePermissions = function (file) {
-		return OS.File.setPermissions(
-			file,
-			{
-				unixMode: 0o644,
-				winAttributes: {
+	this.setNormalFilePermissions = async function (path) {
+		await IOUtils.setPermissions(path, 0o644);
+		if (Zotero.isWin) {
+			await IOUtils.setWindowsAttributes(
+				path,
+				{
 					readOnly: false,
 					hidden: false,
 					system: false
 				}
-			}
-		);
-	}
+			);
+		};
+	};
 	
 	
 	this.createShortened = function (file, type, mode, maxBytes) {
@@ -982,7 +973,7 @@ Zotero.File = new function(){
 	 * @return {String} - Path of new file
 	 */
 	this.moveToUnique = async function (file, newFile) {
-		var targetDir = OS.Path.dirname(newFile);
+		var targetDir = PathUtils.parent(newFile);
 		
 		var newNSIFile = this.pathToFile(newFile);
 		newNSIFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
@@ -1193,7 +1184,7 @@ Zotero.File = new function(){
 			return false;
 		}
 		
-		Zotero.debug(`Creating ${OS.Path.basename(zipPath)} with ${entries.length} file(s)`);
+		Zotero.debug(`Creating ${PathUtils.filename(zipPath)} with ${entries.length} file(s)`);
 		
 		var context = {
 			zipWriter: zw,
@@ -1409,7 +1400,11 @@ Zotero.File = new function(){
 				// These show up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE' || e.name == 'NS_ERROR_FILE_NOT_FOUND'
 				// OS.File.Error
-				|| e.becauseAccessDenied || e.becauseNoSuchFile) {
+				|| e.becauseAccessDenied || e.becauseNoSuchFile
+				// IOUtils
+				|| e.name == 'NotAllowedError'
+				|| e.name == 'ReadOnlyError'
+				|| e.name == 'NotFoundError') {
 			let checkFileWindows = Zotero.getString('file.accessError.message.windows');
 			let checkFileOther = Zotero.getString('file.accessError.message.other');
 			let msg = str + "\n\n"
@@ -1440,7 +1435,7 @@ Zotero.File = new function(){
 	
 	
 	this.getEvictedICloudPath = function (path) {
-		return OS.Path.join(OS.Path.dirname(path), '.' + OS.Path.basename(path) + '.icloud');
+		return OS.Path.join(PathUtils.parent(path), '.' + PathUtils.filename(path) + '.icloud');
 	};
 	
 	
@@ -1487,7 +1482,7 @@ Zotero.File = new function(){
 					let info = yield OS.File.stat(file);
 					// Launch parent directory for files
 					if (!info.isDir) {
-						file = OS.Path.dirname(file);
+						file = PathUtils.parent(file);
 					}
 					Zotero.launchFile(file);
 				}

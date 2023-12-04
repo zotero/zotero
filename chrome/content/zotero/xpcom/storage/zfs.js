@@ -66,10 +66,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		// saveURI() below appears not to create empty files for Content-Length: 0,
 		// so we create one here just in case, which also lets us check file access
 		try {
-			let file = yield OS.File.open(destPath, {
-				truncate: true
-			});
-			file.close();
+			yield IOUtils.write(destPath, new Uint8Array());
 		}
 		catch (e) {
 			Zotero.File.checkFileAccessError(e, destPath, 'create');
@@ -367,7 +364,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var funcName = "Zotero.Sync.Storage.ZFS._getFileUploadParameters()";
 		
 		var path = item.getFilePath();
-		var filename = OS.Path.basename(path);
+		var filename = PathUtils.filename(path);
 		var zip = yield this._isZipUpload(item);
 		if (zip) {
 			var uploadPath = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip');
@@ -430,7 +427,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		};
 		if (zip) {
 			params.zipMD5 = yield Zotero.Utilities.Internal.md5Async(uploadPath);
-			params.zipFilename = OS.Path.basename(uploadPath);
+			params.zipFilename = PathUtils.filename(uploadPath);
 		}
 		var body = [];
 		for (let i in params) {

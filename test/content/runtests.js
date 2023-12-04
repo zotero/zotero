@@ -13,7 +13,7 @@ chai.config.truncateThreshold = 0
 function quit(failed) {
 	// Quit with exit status
 	if(!failed) {
-		OS.File.writeAtomic(OS.Path.join(OS.Constants.Path.profileDir, "success"), new Uint8Array(0));
+		IOUtils.write(PathUtils.join(FileUtils.getDir("ProfD", []).path, "success"), new Uint8Array(0));
 	}
 	if(!TestOptions.noquit) {
 		setTimeout(function () {
@@ -64,8 +64,8 @@ if (TestOptions.makeTestData) {
 			if (!first) dump('\n');
 			dump('Generating data for ' + params.name + '...');
 
-			let filePath = OS.Path.join(dataPath, params.name + '.js');
-			let exists = yield OS.File.exists(filePath);
+			let filePath = PathUtils.join(dataPath, params.name + '.js');
+			let exists = yield IOUtils.exists(filePath);
 			let currentData;
 			if (exists) {
 				currentData = loadSampleData(params.name);
@@ -79,8 +79,8 @@ if (TestOptions.makeTestData) {
 			}
 			let str = stableStringify(newData);
 
-			yield OS.File.writeAtomic(OS.Path.join(dataPath, params.name + '.js'), str);
-			dump('\nWritten to ' + OS.Path.join(dataPath, params.name + '.js\n'));
+			yield IOUtils.writeUTF8(PathUtils.join(dataPath, params.name + '.js'), str);
+			dump('\nWritten to ' + PathUtils.join(dataPath, params.name + '.js\n'));
 		}
 		dump("\n");
 	})()
@@ -286,7 +286,7 @@ if(run) {
 		
 		// Make a copy of the database that can be used in resetDB()
 		var dbFile = Zotero.DataDirectory.getDatabase();
-		await OS.File.copy(dbFile, dbFile + '-test-template');
+		await IOUtils.copy(dbFile, dbFile + '-test-template');
 		
 		initPDFToolsPath();
 		

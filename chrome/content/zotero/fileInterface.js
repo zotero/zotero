@@ -320,15 +320,15 @@ var Zotero_File_Interface = new function() {
 		Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 			.getService(Components.interfaces.nsIOSFileConstantsService)
 			.init();
-		var path = OS.Constants.Path.homeDir;
+		var path = FileUtils.getDir('Home', []).path;
 		if (Zotero.isMac) {
-			path = OS.Path.join(path, 'Library', 'Application Support', 'Mendeley Desktop');
+			path = PathUtils.join(path, ['Library', 'Application Support', 'Mendeley Desktop']);
 		}
 		else if (Zotero.isWin) {
-			path = OS.Path.join(path, 'AppData', 'Local', 'Mendeley Ltd', 'Mendeley Desktop');
+			path = PathUtils.join(path, ['AppData', 'Local', 'Mendeley Ltd', 'Mendeley Desktop']);
 		}
 		else if (Zotero.isLinux) {
-			path = OS.Path.join(path, '.local', 'share', 'data', 'Mendeley Ltd.', 'Mendeley Desktop');
+			path = PathUtils.join(path, ['.local', 'share', 'data', 'Mendeley Ltd.', 'Mendeley Desktop']);
 		}
 		else {
 			throw new Error("Invalid platform");
@@ -634,7 +634,7 @@ var Zotero_File_Interface = new function() {
 			progressWin.changeHeadline(Zotero.getString('fileInterface.importing'));
 			let icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
 			progress = new progressWin.ItemProgress(
-				icon, translation.path ? OS.Path.basename(translation.path) : translators[0].label
+				icon, translation.path ? PathUtils.filename(translation.path) : translators[0].label
 			);
 			progressWin.show();
 			

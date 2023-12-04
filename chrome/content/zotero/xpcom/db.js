@@ -75,7 +75,7 @@ Zotero.DBConnection = function(dbNameOrPath) {
 	
 	// Absolute path to DB
 	if (dbNameOrPath.startsWith('/') || (Zotero.isWin && dbNameOrPath.includes('\\'))) {
-		this._dbName = OS.Path.basename(dbNameOrPath).replace(/\.sqlite$/, '');
+		this._dbName = PathUtils.filename(dbNameOrPath).replace(/\.sqlite$/, '');
 		this._dbPath = dbNameOrPath;
 		this._externalDB = true;
 	}
@@ -1043,7 +1043,7 @@ Zotero.DBConnection.prototype.backupDatabase = async function (suffix, force) {
 			}
 			catch (e) {
 				if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-					alert("Cannot delete " + OS.Path.basename(tmpFile));
+					alert("Cannot delete " + PathUtils.filename(tmpFile));
 				}
 				throw (e);
 			}
@@ -1057,7 +1057,7 @@ Zotero.DBConnection.prototype.backupDatabase = async function (suffix, force) {
 			}
 			storageService.backupDatabaseFile(
 				Zotero.File.pathToFile(file),
-				OS.Path.basename(tmpFile),
+				PathUtils.filename(tmpFile),
 				Zotero.File.pathToFile(file).parent
 			);
 		}
@@ -1077,7 +1077,7 @@ Zotero.DBConnection.prototype.backupDatabase = async function (suffix, force) {
 		}
 		catch (e) {
 			Zotero.logError(e);
-			this._debug("Database file '" + OS.Path.basename(tmpFile) + "' can't be opened -- skipping backup");
+			this._debug("Database file '" + PathUtils.filename(tmpFile) + "' can't be opened -- skipping backup");
 			if (await OS.File.exists(tmpFile)) {
 				await OS.File.remove(tmpFile);
 			}
@@ -1115,8 +1115,8 @@ Zotero.DBConnection.prototype.backupDatabase = async function (suffix, force) {
 					continue;
 				}
 				
-				Zotero.debug("Moving " + OS.Path.basename(sourceFile)
-					+ " to " + OS.Path.basename(targetFile));
+				Zotero.debug("Moving " + PathUtils.filename(sourceFile)
+					+ " to " + PathUtils.filename(targetFile));
 				await OS.File.move(sourceFile, targetFile);
 			}
 		}
@@ -1129,7 +1129,7 @@ Zotero.DBConnection.prototype.backupDatabase = async function (suffix, force) {
 		}
 		
 		await OS.File.move(tmpFile, backupFile);
-		Zotero.debug("Backed up to " + OS.Path.basename(backupFile));
+		Zotero.debug("Backed up to " + PathUtils.filename(backupFile));
 		
 		return true;
 	}
@@ -1251,7 +1251,7 @@ Zotero.DBConnection.prototype._checkException = async function (e) {
 	
 	const supportURL = 'https://zotero.org/support/kb/corrupted_database';
 	
-	var filename = OS.Path.basename(this._dbPath);
+	var filename = PathUtils.filename(this._dbPath);
 	// Skip backups
 	this._dbIsCorrupt = true;
 	
@@ -1310,7 +1310,7 @@ Zotero.DBConnection.prototype._checkException = async function (e) {
  */
 Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	var file = this._dbPath;
-	var fileName = OS.Path.basename(file);
+	var fileName = PathUtils.filename(file);
 	var backupFile = this._dbPath + '.bak';
 	var corruptMarker = this._dbPath + '.is.corrupt';
 	
@@ -1348,7 +1348,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 				Zotero.getString('startupError', Zotero.appName),
 				Zotero.getString(
 					'db.dbCorruptedNoBackup',
-					[Zotero.appName, fileName, OS.Path.basename(damagedFile)]
+					[Zotero.appName, fileName, PathUtils.filename(damagedFile)]
 				)
 			);
 		}
@@ -1380,7 +1380,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 			Zotero.getString('general.error'),
 			Zotero.getString(
 				'db.dbRestoreFailed',
-				[Zotero.appName, fileName, OS.Path.basename(damagedFile)]
+				[Zotero.appName, fileName, PathUtils.filename(damagedFile)]
 			)
 		);
 		
@@ -1423,7 +1423,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 		Zotero.getString('general.warning'),
 		Zotero.getString(
 			'db.dbRestored',
-			[Zotero.appName, fileName, backupDate, backupTime, OS.Path.basename(damagedFile)]
+			[Zotero.appName, fileName, backupDate, backupTime, PathUtils.filename(damagedFile)]
 		) + '\n\n'
 		+ Zotero.getString('db.dbRestored.cloudStorage')
 	);

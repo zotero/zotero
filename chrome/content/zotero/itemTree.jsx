@@ -33,8 +33,8 @@ const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getDOMElement, getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
-const { Cc, Ci, Cu } = require('chrome');
-Cu.import("resource://gre/modules/osfile.jsm");
+const { Cc, Ci, Cu, ChromeUtils } = require('chrome');
+const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 
 /**
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
@@ -2404,7 +2404,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 									}
 								);
 								// Update path in case the name was changed to be unique
-								file = OS.Path.join(OS.Path.dirname(file), newName);
+								file = PathUtils.join(PathUtils.parent(file), newName);
 							}
 						}
 						catch (e) {

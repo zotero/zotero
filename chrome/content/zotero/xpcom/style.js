@@ -636,7 +636,7 @@ Zotero.Style = function (style, path) {
 	
 	if (path) {
 		this.path = path;
-		this.fileName = OS.Path.basename(path);
+		this.fileName = PathUtils.filename(path);
 	}
 	else {
 		this.string = style;
@@ -934,7 +934,7 @@ Zotero.Style.prototype.remove = Zotero.Promise.coroutine(function* () {
 		// copy dependent styles to hidden directory
 		let hiddenDir = OS.Path.join(Zotero.getStylesDirectory().path, 'hidden');
 		yield Zotero.File.createDirectoryIfMissingAsync(hiddenDir);
-		yield OS.File.move(this.path, OS.Path.join(hiddenDir, OS.Path.basename(this.path)));
+		yield OS.File.move(this.path, OS.Path.join(hiddenDir, PathUtils.filename(this.path)));
 	} else {
 		// remove defunct files
 		yield OS.File.remove(this.path);

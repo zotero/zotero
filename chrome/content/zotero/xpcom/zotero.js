@@ -276,7 +276,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		catch (e) {
 			// Zotero dir not found
-			if ((e instanceof OS.File.Error && e.becauseNoSuchFile) || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
+			if (e.name == 'NotFoundError') {
 				let foundInDefault = false;
 				try {
 					foundInDefault = (await OS.File.exists(Zotero.DataDirectory.defaultDir))
@@ -781,8 +781,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			let dbfile = Zotero.DataDirectory.getDatabase();
 
 			// Test write access on Zotero data directory
-			if (!Zotero.File.pathToFile(OS.Path.dirname(dbfile)).isWritable()) {
-				var msg = 'Cannot write to ' + OS.Path.dirname(dbfile) + '/';
+			if (!Zotero.File.pathToFile(PathUtils.parent(dbfile)).isWritable()) {
+				var msg = 'Cannot write to ' + PathUtils.parent(dbfile) + '/';
 			}
 			// Test write access on Zotero database
 			else if (!Zotero.File.pathToFile(dbfile).isWritable()) {
