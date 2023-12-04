@@ -84,6 +84,9 @@ Zotero.Integration = new function() {
 	 * Initialize LibreOffice, Word for Mac and Word for Windows plugin components.
 	 */
 	this.init = function () {
+		// TEMP
+		return;
+		
 		if (Zotero.test) return;
 		let classNames = ["@zotero.org/Zotero/integration/initializer?agent=LibreOffice;1"];
 		if (Zotero.isMac) {
