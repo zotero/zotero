@@ -1,3 +1,5 @@
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+
 chai.use(chaiAsPromised);
 
 // Useful "constants"
@@ -630,7 +632,6 @@ function getTestDataUrl(path) {
  * Returns an absolute path to an empty temporary directory
  */
 var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
-	Components.utils.import("resource://gre/modules/osfile.jsm");
 	let path,
 		attempts = 3,
 		zoteroTmpDirPath = Zotero.getTempDirectory().path;
