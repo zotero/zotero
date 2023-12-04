@@ -187,6 +187,10 @@
 				toolbarbutton.parentElement.classList.toggle('pinnable', pinnable);
 				
 				toolbarbutton.addEventListener('click', (event) => {
+					if (event.button !== 0) {
+						return;
+					}
+					
 					switch (event.detail) {
 						case 1:
 							this.scrollToPane(pane, 'smooth');
