@@ -41,7 +41,8 @@ describe("RemoteTranslate", function () {
 	describe("#setHandler()", function () {
 		it("should receive handler calls from the translator", async function () {
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			await translate.setTranslator(dummyTranslator);
 			
@@ -50,7 +51,7 @@ describe("RemoteTranslate", function () {
 			await translate.detect();
 			sinon.assert.calledWith(debug, translate, 'test string');
 			
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 	});
@@ -58,14 +59,15 @@ describe("RemoteTranslate", function () {
 	describe("#setTranslatorProvider()", function () {
 		it("should cause the passed provider to be queried instead of Zotero.Translators", async function () {
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			translate.setTranslatorProvider(translatorProvider);
 			
 			let detectedTranslators = await translate.detect();
 			assert.deepEqual(detectedTranslators.map(t => t.translatorID), [dummyTranslator.translatorID]);
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 	});
@@ -73,7 +75,8 @@ describe("RemoteTranslate", function () {
 	describe("#translate()", function () {
 		it("should return items without saving when libraryID is false", async function () {
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			translate.setTranslatorProvider(translatorProvider);
 			
@@ -87,13 +90,14 @@ describe("RemoteTranslate", function () {
 			sinon.assert.notCalled(itemDone); // No items should be saved
 			assert.equal(items[0].title, 'Title');
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 
 		it("should save items and call itemDone when libraryID is not false", async function () {
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			translate.setTranslator(dummyTranslator);
 
@@ -111,13 +115,14 @@ describe("RemoteTranslate", function () {
 			// Item should still be returned
 			assert.equal(items[0].getField('title'), 'Title');
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 
 		it("should call itemDone before done", async function () {
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			translate.setTranslator(dummyTranslator);
 
@@ -131,7 +136,7 @@ describe("RemoteTranslate", function () {
 			sinon.assert.calledOnce(done);
 			assert.isTrue(itemDone.calledBefore(done));
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 		
@@ -149,14 +154,15 @@ describe("RemoteTranslate", function () {
 			`);
 
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			translate.setTranslator(domParserDummy);
 
 			let items = await translate.translate({ libraryID: false });
 			assert.equal(items[0].title, 'content');
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 		
@@ -176,14 +182,15 @@ describe("RemoteTranslate", function () {
 			Zotero.Prefs.set('translators.testPref', 'Test value');
 			
 			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
 			translate.setTranslator(domParserDummy);
 
 			let items = await translate.translate({ libraryID: false });
 			assert.equal(items[0].title, 'Test value');
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			translate.dispose();
 		});
 	});

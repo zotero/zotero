@@ -454,6 +454,7 @@ describe("Connector Server", function () {
 					assert.lengthOf(response.items, 1);
 					let item = response.items[0];
 					if (item.attachments.length) {
+						await Zotero.Promise.delay(10);
 						let attachments = item.attachments;
 						assert.lengthOf(attachments, 1);
 						let attachment = attachments[0];
@@ -483,7 +484,6 @@ describe("Connector Server", function () {
 							continue;
 						}
 					}
-					await Zotero.Promise.delay(10);
 				}
 				
 				// Legacy endpoint should show 100

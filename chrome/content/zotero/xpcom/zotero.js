@@ -1128,6 +1128,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @param {String} uri
 	 * @param {Object} [options]
 	 * @param {Function} [options.onLoad] - Function to run once URI is loaded; passed the loaded document
+	 * @param {Object} [options.cookieSandbox] - Attach a cookie sandbox to the browser
 	 * @param {Boolean} [options.allowJavaScript] - Set to false to disable JavaScript
 	 */
 	this.openInViewer = function (uri, options) {
@@ -1140,7 +1141,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		for (let existingWin of viewerWins) {
 			if (existingWin.viewerOriginalURI === uri) {
 				existingWin.focus();
-				return;
+				return existingWin;
 			}
 		}
 		let ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
@@ -1172,6 +1173,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			};
 			win.addEventListener("load", func);
 		}
+		return win;
 	};
 	
 	
