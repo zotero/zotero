@@ -234,7 +234,13 @@ if (run && ZoteroUnit.tests) {
 				testFiles.push(file.leafName);
 			}
 		}
-		testFiles.sort();
+		testFiles.sort((a, b) => {
+			a = a.replace(/Test.js$/, '').toLowerCase();
+			b = b.replace(/Test.js$/, '').toLowerCase();
+			if (a < b) return -1;
+			if (a > b) return 1;
+			return 0;
+		});
 		
 		// Find the start and stop files
 		let startPos = 0;
