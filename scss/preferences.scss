@@ -40,7 +40,7 @@
 	flex-direction: row;
 	min-width: 0;
 	min-height: 0;
-	-moz-box-flex: 1;
+	flex: 1;
 	background-color: var(--material-sidepane);
 	// See scss/win/abstracts/mixin
 	--color-form-element-base-background: var(--material-sidepane);
@@ -83,7 +83,6 @@
 
 #prefs-search {
 	width: 16em;
-	-moz-box-pack: end;
 }
 
 #prefs-navigation {
@@ -97,7 +96,7 @@
 	& > richlistitem {
 		padding: 1em;
 		border-radius: 5px;
-		-moz-box-align: center;
+		align-items: center;
 		font-size: 1.1em;
 		transition: background-color 0.2s ease;
 		-moz-context-properties: fill, fill-opacity;
@@ -228,11 +227,6 @@ groupbox:not(:first-of-type) label > h2 {
 	display: none !important;
 }
 
-prefwindow .chromeclass-toolbar
-{
-	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
-}
-
 window[windowtype="zotero:pref"] {
    min-width: 600px;
 }
@@ -245,14 +239,6 @@ label {
 
 description, label, checkbox {
 	max-width: 630px;
-}
-
-radio[pane]
-{
-	min-width: 5.5em;
-	height: 48px;
-	-moz-box-align: center;
-	-moz-box-pack: end;
 }
 
 checkbox[disabled="true"] {
@@ -289,7 +275,7 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 	row-gap: .3em;
 
 	& > :nth-child(odd) {
-		-moz-box-pack: end; /* Right-justify left column */
+		justify-self: end; /* Right-justify left column */
 	}
 }
 
