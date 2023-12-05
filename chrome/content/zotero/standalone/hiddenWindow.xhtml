@@ -34,7 +34,12 @@
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
-<window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml">
+	<html:link rel="localization" href="branding/brand.ftl"/>
+	<html:link rel="localization" href="browser/menubar.ftl"/>
+	<html:link rel="localization" href="browser/browserSets.ftl"/>
+	
 	<script type="application/javascript">
 		Components.utils.import("resource://gre/modules/Services.jsm");
 		var { AppConstants } = ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
@@ -82,33 +87,33 @@
 	</commandset>
 	
 	<keyset id="mainKeyset">
-		<key id="key_close" key="TEMP_closeCmd.key;" command="cmd_close" modifiers="accel"/>
+		<key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel"/>
 		<key id="key_mainWindow" key="0" command="cmd_mainWindow" modifiers="accel"/>
 		<key id="key_preferencesCmdMac"
-				key="TEMP_preferencesCmdMac.commandkey;"
+				data-l10n-id="preferences-shortcut"
 				modifiers="accel"
 				internal="true"/>
 		<key id="key_hideThisAppCmdMac"
-				key="TEMP_hideThisAppCmdMac.commandkey;"
+				data-l10n-id="hide-app-shortcut"
 				modifiers="accel"
 				internal="true"/>
 		<key id="key_hideOtherAppsCmdMac"
-				key="TEMP_hideOtherAppsCmdMac.commandkey;"
+				data-l10n-id="hide-other-apps-shortcut"
 				modifiers="accel,alt"
 				internal="true"/>
 		<key id="key_quitApplication"
-				key="TEMP_quitApplicationCmdMac.key;"
+				data-l10n-id="quit-app-shortcut"
 				command="cmd_quitApplication"
 				modifiers="accel"
 				internal="true"/>
 		<key id="key_minimizeWindow"
 				command="minimizeWindow"
-				key="TEMP_minimizeWindow.key;"
+				data-l10n-id="window-minimize-command"
 				modifiers="accel"/>
 	</keyset>
 
 	<menubar id="main-menubar">
-		<menu id="fileMenu" label="TEMP_fileMenu.label;" accesskey="TEMP_fileMenu.accesskey;">
+		<menu id="fileMenu" data-l10n-id="menu-file">
 			<menupopup id="menu_FilePopup">
 				<!-- This gets moved to the Application menu automatically -->
 				<menuitem id="aboutName"
@@ -122,7 +127,7 @@
 				<menuitem id="menu_mac_services"
 						label="&servicesMenuMac.label;"/>
 				<menuitem id="menu_mac_hide_app"
-						label="TEMP_hideThisAppCmdMac.label;"
+						data-l10n-id="menu-application-hide-this"
 						key="key_hideThisAppCmdMac"/>
 				<menuitem id="menu_mac_hide_others"
 						label="&hideOtherAppsCmdMac.label;"
