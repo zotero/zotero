@@ -423,8 +423,6 @@ Zotero_Preferences.Sync = {
 		
 		document.getElementById('storage-user-download-mode').disabled = !enabled;
 		this.updateStorageTerms();
-		
-		window.sizeToContent();
 	}),
 	
 	
