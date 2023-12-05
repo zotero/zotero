@@ -4,12 +4,12 @@
 }
 
 #zotero-prefpane-sync .form-grid > hbox {
-	-moz-box-align: center;
+	align-items: center;
 }
 
 #zotero-prefpane-sync .form-grid > label:nth-child(odd)
 {
-	text-align: right;
+	text-align: end;
 }
 
 #zotero-prefpane-sync .form-grid > hbox

@@ -31,7 +31,7 @@
 
 #zotero-prefpane-advanced-feeds-feedDefaults .html-input {
 	width: 50px;
-	text-align: right;
+	text-align: end;
 }
 
 #zotero-prefpane-advanced-feeds-feedDefaults hbox {
@@ -52,7 +52,7 @@
 
 #zotero-prefpane-advanced-open-buttons {
 	display: block;
-	text-align: right;
+	text-align: end;
 	margin-top: 1em;
 	margin-bottom: .5em;
 }
@@ -67,5 +67,5 @@
 
 #fulltext-stats > .form-grid > label:nth-child(odd)
 {
-	text-align: right;
+	text-align: end;
 }
