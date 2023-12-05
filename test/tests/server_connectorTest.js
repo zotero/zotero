@@ -1018,7 +1018,7 @@ describe("Connector Server", function () {
 			let path = OS.Path.join(attachmentDirectory, item.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getContentsAsync(path);
-			assert.match(contents, /^<html><!--\n Page saved with SingleFile \n url:/);
+			assert.match(contents, /^<html style><!--\n Page saved with SingleFile \n url:/);
 		});
 
 		it("should override SingleFileZ from old connector in /saveItems", async function () {
@@ -1127,7 +1127,7 @@ describe("Connector Server", function () {
 			let path = OS.Path.join(attachmentDirectory, item.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getContentsAsync(path);
-			assert.match(contents, /^<html><!--\n Page saved with SingleFile \n url:/);
+			assert.match(contents, /^<html style><!--\n Page saved with SingleFile \n url:/);
 		});
 
 		it("should handle race condition with /saveItems", async function () {
