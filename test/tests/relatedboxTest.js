@@ -28,9 +28,9 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (!relatedbox._id('related-grid').childNodes.length);
+		while (!relatedbox.querySelectorAll('.row').length);
 		
-		assert.include(relatedbox._id('related-grid').innerHTML, title1);
+		assert.include(relatedbox.querySelector('.body').innerHTML, title1);
 		
 		title1 = 'cccccc';
 		item1.setField('title', title1);
@@ -40,7 +40,7 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (!relatedbox._id('related-grid').innerHTML.includes(title1));
+		while (!relatedbox.querySelector('.body').innerHTML.includes(title1));
 	});
 	
 	it("should update if a related item is deleted", async function () {
@@ -59,9 +59,9 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (!relatedbox._id('related-grid').childNodes.length);
+		while (!relatedbox.querySelectorAll('.row').length);
 		
-		assert.include(relatedbox._id('related-grid').innerHTML, title1);
+		assert.include(relatedbox.querySelector('.body').innerHTML, title1);
 		
 		await item1.eraseTx();
 		
@@ -69,7 +69,7 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (relatedbox._id('related-grid').innerHTML.includes(title1));
+		while (relatedbox.querySelector('.body').innerHTML.includes(title1));
 	});
 	
 	describe("Add button", function () {
@@ -78,11 +78,11 @@ describe("Related Box", function () {
 			var item2 = yield createDataObject('item');
 			
 			var relatedbox = doc.getElementById('zotero-editpane-related');
-			assert.lengthOf(relatedbox.querySelectorAll('#related-grid div'), 0);
+			assert.lengthOf(relatedbox.querySelectorAll('.row'), 0);
 			
 			// Click the Add button to open the Select Items dialog
 			setTimeout(function () {
-				relatedbox._id('related-add').click();
+				relatedbox.querySelector('collapsible-section .add').click();
 			});
 			var selectWin = yield waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
 			do {
@@ -102,9 +102,9 @@ describe("Related Box", function () {
 			do {
 				yield Zotero.Promise.delay(50);
 			}
-			while (!relatedbox.querySelectorAll('#related-grid div').length);
+			while (!relatedbox.querySelectorAll('.row').length);
 			
-			assert.lengthOf(relatedbox.querySelectorAll('#related-grid div'), 1);
+			assert.lengthOf(relatedbox.querySelectorAll('.row'), 1);
 			
 			var items = item1.relatedItems;
 			assert.lengthOf(items, 1);
@@ -133,7 +133,7 @@ describe("Related Box", function () {
 			do {
 				yield Zotero.Promise.delay(50);
 			}
-			while (!relatedbox.querySelectorAll('#related-grid div').length);
+			while (!relatedbox.querySelectorAll('.row').length);
 			
 			relatedbox.querySelector('.zotero-clicky-minus').click();
 			
@@ -141,7 +141,7 @@ describe("Related Box", function () {
 			do {
 				yield Zotero.Promise.delay(50);
 			}
-			while (relatedbox.querySelectorAll('#related-grid div').length);
+			while (relatedbox.querySelectorAll('.row').length);
 		})
 	})
 })
