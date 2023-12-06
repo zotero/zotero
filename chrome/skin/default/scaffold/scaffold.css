@@ -50,6 +50,11 @@
 	list-style-image: url('chrome://scaffold/skin/add.png');
 }
 
+tab {
+	/* toolkit/themes/osx/global/tabbox.css sets selected tabs' text color to #FFF, which is incorrect */
+	color: initial !important;
+}
+
 #metadata-grid {
 	-moz-box-flex: 1;
 	display: grid;
@@ -69,6 +74,15 @@
 
 #tabpanel-metadata input {
 	height: 1.5em;
+}
+
+#metadata-bottom-row {
+	display: flex;
+	align-items: center;
+}
+
+#metadata-bottom-row #textbox-minVersion {
+	margin-right: auto;
 }
 
 #hbox-testFrame {
