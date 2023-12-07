@@ -47,9 +47,7 @@
 			let open = this.open;
 			if (open === val || this.empty) return;
 			this.render();
-			if (this._head?.nextSibling
-					&& this._head.nextSibling.getBoundingClientRect().height
-					&& this._head.nextSibling.scrollHeight) {
+			if (!this._restoringOpenState && this._head?.nextSibling?.scrollHeight) {
 				this.style.setProperty('--open-height', `${this._head.nextSibling.scrollHeight}px`);
 			}
 			else {
@@ -240,7 +238,9 @@
 		}
 		
 		_restoreOpenState() {
+			this._restoringOpenState = true;
 			this.open = Zotero.Prefs.get(`panes.${this.dataset.pane}.open`) ?? true;
+			this._restoringOpenState = false;
 		}
 
 		_runWithTransitionsDisabled(fn) {
