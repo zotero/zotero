@@ -59,6 +59,9 @@
  * window state. Otherwise, elements in the navigator-toolbox, like the menubar,
  * can swallow those events. */
 .titlebar-buttonbox {
+	right: 0px;
+	position: absolute;
+	height: var(--tab-min-height);
 	z-index: 1;
 	display: flex;
 	align-items: center;

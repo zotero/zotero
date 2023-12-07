@@ -44,11 +44,14 @@
 }
 
 .titlebar-icon {
+	background-image: url(chrome://zotero/skin/z.svg);
+	width: 16px;
+	height: 16px;
+	z-index: 2;
 	-moz-window-dragging: no-drag;
 	pointer-events: all;
 	// to make the icon 36*36
 	margin: 10px;
-	object-fit: none;
 }
 
 
@@ -110,6 +113,9 @@
 /* Titlebar */
 
 .titlebar-buttonbox {
+	right: 0px;
+	position: absolute;
+	height: var(--tab-min-height);
 	appearance: none;
 	/* The button box must appear on top of the navigator-toolbox in order for
 	 * click and hover mouse events to work properly for the button in the restored
