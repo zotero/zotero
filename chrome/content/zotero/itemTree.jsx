@@ -2696,6 +2696,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			twisty.addEventListener('mousedown', event => event.stopPropagation());
 			twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
 				{ passive: true });
+			twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
+				{ passive: true });
 		}
 
 		const icon = this._getIcon(index);
