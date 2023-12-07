@@ -26,4 +26,4 @@ export RELEASE_OR_BETA=1
 MOZ_REQUIRE_SIGNING=
 
 # Build updater without MAR signature verification
-ac_add_options --disable-verify-mar
+ac_add_options --enable-unverified-updates
