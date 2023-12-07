@@ -12,6 +12,9 @@ menupopup {
 		margin-left: 4px;
 		margin-right: 4px;
 		border-radius: 4px;
+		&[_moz-menuactive="true"] {
+			background: var(--fill-quinary);
+		}
 	}
 	menu {
 		menupopup {
@@ -36,7 +39,5 @@ menupopup {
 @media (-moz-windows-non-native-menus) {
 	menuitem:is([checked="true"]):is([type="radio"]) > .menu-iconic-left {
 		list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
-		width: 4px;
-		height: 4px;
 	}
 }
