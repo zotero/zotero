@@ -1,0 +1,82 @@
+diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
+--- a/browser/app/nsBrowserApp.cpp
++++ b/browser/app/nsBrowserApp.cpp
+@@ -154,19 +154,30 @@ static bool IsArg(const char* arg, const
+ #endif
+ 
+   return false;
+ }
+ 
+ Bootstrap::UniquePtr gBootstrap;
+ 
+ static int do_main(int argc, char* argv[], char* envp[]) {
++  // Allow profile downgrade for Zotero
++  _putenv_s("MOZ_ALLOW_DOWNGRADE", "1");
++  // Don't create dedicated profile (default-esr)
++  _putenv_s("MOZ_LEGACY_PROFILES", "1");
++
+   // Allow firefox.exe to launch XULRunner apps via -app <application.ini>
+   // Note that -app must be the *first* argument.
+-  const char* appDataFile = getenv("XUL_APP_FILE");
++  UniqueFreePtr<char> iniPath = BinaryPath::GetApplicationIni();
++  if (!iniPath) {
++	  Output("Couldn't find application.ini.\n");
++	  return 255;
++
++  }
++  char *appDataFile = iniPath.get();
+   if ((!appDataFile || !*appDataFile) && (argc > 1 && IsArg(argv[1], "app"))) {
+     if (argc == 2) {
+       Output("Incorrect number of arguments passed to -app");
+       return 255;
+     }
+     appDataFile = argv[2];
+ 
+     char appEnv[MAXPATHLEN];
+diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
+--- a/xpcom/build/BinaryPath.h
++++ b/xpcom/build/BinaryPath.h
+@@ -283,16 +283,43 @@ class BinaryPath {
+     if (NS_FAILED(Get(path))) {
+       return nullptr;
+     }
+     UniqueFreePtr<char> result;
+     result.reset(strdup(path));
+     return result;
+   }
+ 
++  static UniqueFreePtr<char> GetApplicationIni() {
++	char path[MAXPATHLEN];
++	if (NS_FAILED(Get(path))) {
++		return nullptr;
++	}
++
++	char *c = path + strlen(path);
++	while (c >= path && *c != '\\' && *c != '/') {
++		*c = NULL;
++		c--;
++	}
++
++	if (c < path) {
++		return nullptr;
++	}
++
++	char iniPath[MAXPATHLEN];
++	int n = snprintf(iniPath, MAXPATHLEN, "%s\\app\\application.ini", path);
++	if (n < 0 || n >= MAXPATHLEN) {
++		return nullptr;
++	}
++
++	UniqueFreePtr<char> result;
++	result.reset(strdup(iniPath));
++	return result;
++  }
++
+ #ifdef MOZILLA_INTERNAL_API
+   static nsresult GetFile(nsIFile** aResult) {
+     nsCOMPtr<nsIFile> lf;
+ #  ifdef XP_WIN
+     wchar_t exePath[MAXPATHLEN];
+     nsresult rv = GetW(exePath);
+ #  else
+     char exePath[MAXPATHLEN];
