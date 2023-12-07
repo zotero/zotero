@@ -1186,13 +1186,13 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return item;
 		}
 		
-		var parser = new DOMParser();
-		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
-		doc = Zotero.HTTP.wrapDocument(doc, data.url);
-		
-		let title = doc.title;
-		if (!data.html) {
-			title = data.title;
+		if (data.html) {
+			var parser = new DOMParser();
+			var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
+			doc = Zotero.HTTP.wrapDocument(doc, data.url);
+			var title = doc.title;
+		} else {
+			title = data.title || data.url;
 		}
 		
 		// Create new webpage item
