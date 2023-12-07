@@ -565,7 +565,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		if (await fp.show() != fp.returnOK) {
 			return false;
 		}
-		var newPath = fp.file;
+		var newPath = PathUtils.normalize(fp.file);
 		
 		if (oldPath && oldPath == newPath) {
 			Zotero.debug("Base directory hasn't changed");
@@ -650,7 +650,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			}
 			// Existing relative attachments not within the new base directory
 			// will be converted to absolute paths
-			else if (relPath && this.getPath()) {
+			else if (relPath && Zotero.Prefs.get('baseAttachmentPath')) {
 				Zotero.debug(`Converting ${relPath} to absolute path`);
 				newAttachmentPaths[attachmentID] = attachmentPath;
 				numOldAttachments++;
