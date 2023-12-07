@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 /path/to/mozilla-unified x86_64|i686" >&2
+	exit 1
+fi
+
+gecko_path=$1
+arch=$2
+
+if [ ! -d "$gecko_path" ]; then
+	echo "$gecko_path is not a directory" >&2
+	exit 1
+fi
+
+# Install required Rust version
+rustup toolchain install $RUST_VERSION
+if [[ $arch = "x86_64" ]] || [[ $arch == "i686" ]]; then
+	rustup target add $arch-pc-windows-msvc
+else
+	echo "Unknown architecture $arch" >&2
+	exit 1
+fi
+rustup default $RUST_VERSION
+
+cp "$SCRIPT_DIR/mozconfig" "$gecko_path"
+
+if [ $arch = "i686" ]; then
+	export Z_ARCH=win32
+fi
+
+cd "$gecko_path"
+./mach build
+./mach package
