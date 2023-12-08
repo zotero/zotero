@@ -177,7 +177,7 @@
 				height: 16px;
 				padding: 4px;
 				box-sizing: border-box;
-				background: url("chrome://zotero/skin/chevron-8.svg") content-box no-repeat;
+				background: url("chrome://zotero/skin/8/universal/chevron-8.svg") content-box no-repeat;
 				-moz-context-properties: fill, fill-opacity;
 
 				@include focus-states using ($color) {
@@ -321,7 +321,7 @@
 			margin-right: 3px; // + 5px padding = 8px total
 			
 			&.icon-css {
-				background: url("chrome://zotero/skin/chevron-8.svg") content-box no-repeat;
+				background: url("chrome://zotero/skin/8/universal/chevron-8.svg") content-box no-repeat;
 				-moz-context-properties: fill, fill-opacity;
 				fill: var(--fill-primary);
 			}
