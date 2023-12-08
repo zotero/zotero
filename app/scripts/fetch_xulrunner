@@ -258,6 +258,10 @@ function modify_omni {
 	#
 	# Modify Add-ons window
 	#
+	
+	# Prevent display: block from overriding display: none on <hr>s
+	replace_line 'display: block !important;' 'display: block;' chrome/toolkit/content/global/elements/panel-list.css
+	
 	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.css"
 	echo >> $file
 	# Hide search bar, Themes and Plugins tabs, and sidebar footer
@@ -266,7 +270,7 @@ function modify_omni {
 	# Hide Details/Permissions tabs in addon details so we only show details
 	echo 'addon-details > button-group { display: none !important; }' >> $file
 	# Hide "Debug Addons" and "Manage Extension Shortcuts"
-	echo 'panel-item[action="debug-addons"], panel-item[action="reset-update-states"] + panel-item-separator, panel-item[action="manage-shortcuts"] { display: none }' >> $file
+	echo 'panel-item[action="debug-addons"], panel-item[action="reset-update-states"] + hr, panel-item[action="manage-shortcuts"] { display: none }' >> $file
 	
 	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
 	# Hide unsigned-addon warning
