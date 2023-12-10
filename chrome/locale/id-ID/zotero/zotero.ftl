@@ -1,10 +1,10 @@
 tabs-info =
     .label = Info
 tabs-notes =
-    .label = Notes
+    .label = Catatan
 tabs-attachments =
-    .label = Attachments
+    .label = Lampiran
 tabs-tags =
-    .label = Tags
+    .label = Tag
 tabs-related =
-    .label = Related
+    .label = Terkait

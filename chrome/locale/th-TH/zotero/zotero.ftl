@@ -1,0 +1,10 @@
+tabs-info =
+    .label = ข้อมูลข่าวสาร
+tabs-notes =
+    .label = หมายเหตุ
+tabs-attachments =
+    .label = ไฟล์แนบ
+tabs-tags =
+    .label = แท็ก
+tabs-related =
+    .label = เชื่อมโยงกับ

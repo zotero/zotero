@@ -1,10 +1,10 @@
 tabs-info =
     .label = Info
 tabs-notes =
-    .label = Notes
+    .label = Notater
 tabs-attachments =
-    .label = Attachments
+    .label = Vedlegg
 tabs-tags =
-    .label = Tags
+    .label = Emneord
 tabs-related =
-    .label = Related
+    .label = Relatert

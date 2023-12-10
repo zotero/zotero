@@ -7,17 +7,20 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
+	data-l10n-id="errorReport-window"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	onload="Zotero_Error_Report.init()">
 
 <linkset>
 	<html:link rel="localization" href="toolkit/global/wizard.ftl"/>
+	<html:link rel="localization" href="branding/brand.ftl" />
+	<html:link rel="localization" href="wizards.ftl" />
 </linkset>
 
 <script src="chrome://global/content/customElements.js"/>
 
-<wizard title="&zotero.errorReport.title;" width="550" height="450">
+<wizard width="550" height="450">
 	<script>
 	<![CDATA[
 		Components.utils.import("resource://zotero/config.js");
@@ -174,24 +177,19 @@
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
-	<wizardpage
-			pageid="report-sending"
-			next="report-submitted"
-			onpageshow="Zotero_Error_Report.sendErrorReport()"
-			data-header-label-id="">
-		<description>&zotero.errorReport.submissionInProgress;</description>
+	<wizardpage pageid="report-sending" next="report-submitted" onpageshow="Zotero_Error_Report.sendErrorReport()"
+		data-header-label-id="">
+		<description data-l10n-id="errorReport-submissionInProgress" />
 	</wizardpage>
 	
-	<wizardpage
-			pageid="report-submitted"
-			data-header-label-id="">
-		<description>&zotero.errorReport.submitted;</description>
+	<wizardpage pageid="report-submitted" data-header-label-id="">
+		<description data-l10n-id="errorReport-submitted" />
 		<description id="zotero-report-result" hidden="true">
-			&zotero.errorReport.reportID;
-			<html:input id="zotero-report-id" type="text" class="plain" readonly="true"/>
+			<html:div data-l10n-id="errorReport-reportID" />
+			<html:input id="zotero-report-id" type="text" class="plain" readonly="true" />
 		</description>
-		<description>&zotero.errorReport.postToForums;</description>
-		<description>&zotero.errorReport.notReviewed;</description>
+		<description data-l10n-id="errorReport-postToForums" />
+		<description data-l10n-id="errorReport-notReviewed" />
 	</wizardpage>
 </wizard>
 </window>

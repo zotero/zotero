@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Інформація
+tabs-notes =
+    .label = Примітки
+tabs-attachments =
+    .label = Вкладення
+tabs-tags =
+    .label = Теги
+tabs-related =
+    .label = Пов'язані

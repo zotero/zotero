@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Info
+tabs-notes =
+    .label = Jegyzetek
+tabs-attachments =
+    .label = Csatolmányok
+tabs-tags =
+    .label = Címkék
+tabs-related =
+    .label = Kapcsolatok

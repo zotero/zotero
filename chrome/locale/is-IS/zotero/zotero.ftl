@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Upplýsingar
+tabs-notes =
+    .label = Minnisblað
+tabs-attachments =
+    .label = Viðhengi
+tabs-tags =
+    .label = Merki
+tabs-related =
+    .label = Venslað

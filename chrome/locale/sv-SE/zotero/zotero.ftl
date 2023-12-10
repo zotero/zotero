@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Information
+tabs-notes =
+    .label = Anteckningar
+tabs-attachments =
+    .label = Bilagor
+tabs-tags =
+    .label = Etiketter
+tabs-related =
+    .label = Liknande källor

@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Инфо
+tabs-notes =
+    .label = Белешке
+tabs-attachments =
+    .label = Прилози
+tabs-tags =
+    .label = Ознаке
+tabs-related =
+    .label = Сродно

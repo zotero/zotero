@@ -1,0 +1,10 @@
+tabs-info =
+    .label = מידע
+tabs-notes =
+    .label = הערות
+tabs-attachments =
+    .label = צרופות
+tabs-tags =
+    .label = תגיות
+tabs-related =
+    .label = קשור

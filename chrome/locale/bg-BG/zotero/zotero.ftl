@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Информация
+tabs-notes =
+    .label = Бележки
+tabs-attachments =
+    .label = Прикачени файлове
+tabs-tags =
+    .label = Маркери
+tabs-related =
+    .label = Свързани

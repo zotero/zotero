@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Tiedot
+tabs-notes =
+    .label = Muistiinpanot
+tabs-attachments =
+    .label = Liitteet
+tabs-tags =
+    .label = Avainsanat
+tabs-related =
+    .label = Liittyvät

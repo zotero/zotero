@@ -1,0 +1,10 @@
+tabs-info =
+    .label = 資訊
+tabs-notes =
+    .label = 筆記
+tabs-attachments =
+    .label = 附件
+tabs-tags =
+    .label = 標籤
+tabs-related =
+    .label = 相關

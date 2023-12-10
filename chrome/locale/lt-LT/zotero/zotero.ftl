@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Informacija
+tabs-notes =
+    .label = Užrašai
+tabs-attachments =
+    .label = Priedai
+tabs-tags =
+    .label = Gairės
+tabs-related =
+    .label = Susiję

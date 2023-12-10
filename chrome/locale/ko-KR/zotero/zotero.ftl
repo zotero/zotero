@@ -1,0 +1,10 @@
+tabs-info =
+    .label = 정보
+tabs-notes =
+    .label = 노트
+tabs-attachments =
+    .label = 첨부
+tabs-tags =
+    .label = 태그
+tabs-related =
+    .label = 연관
