@@ -1695,7 +1695,7 @@ Zotero.Server.Connector.Ping.prototype = {
 	 * Sends 200 and HTML status on GET requests
 	 * @param data {Object} request information defined in connector.js
 	 */
-	init: function (req) {
+	init: async function (req) {
 		if (req.method == 'GET') {
 			return [200, "text/html", '<!DOCTYPE html><html>'
 				+ '<body>Zotero is running</body></html>'];
@@ -1705,11 +1705,13 @@ Zotero.Server.Connector.Ping.prototype = {
 				//Zotero.debug("Setting active URL to " + req.data.activeURL);
 				Zotero.QuickCopy.lastActiveURL = req.data.activeURL;
 			}
+			let translatorsHash = await Zotero.Translators.getTranslatorsHash();
 			
 			let response = {
 				prefs: {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
-					googleDocsAddNoteEnabled: true
+					googleDocsAddNoteEnabled: true,
+					translatorsHash
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {
