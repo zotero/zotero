@@ -2446,17 +2446,26 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	async focusFirstMatchingRow(scrollToLibrary) {
 		let index = 0;
 		let row = this.getRow(index);
-		while (index < this._rows.length && !this._matchesFilter(row.ref).matchesFilter) {
+		while (index < this._rows.length) {
 			row = this.getRow(index);
-			if (!row.isOpen) {
+			if (this._matchesFilter(row.ref).matchesFilter) {
+				// The matching row may not be selectable (e.g. Group Libraries header).
+				// In that case, just keep looking for the next row
+				let wasSelected = await this.selectByID(row.id);
+				if (wasSelected) {
+					// If selection happened, move focus onto the tree
+					this.tree.focus();
+					if (scrollToLibrary) {
+						this.ensureRowIsVisible(0);
+					}
+					return;
+				}
+			}
+			// Selection did not happen - keep going. Open any containers on the way
+			if (!this.isContainerOpen(index)) {
 				await this.toggleOpenState(index);
 			}
 			index += 1;
-		}
-		this.tree.focus();
-		await this.selectByID(row.id);
-		if (scrollToLibrary) {
-			this.ensureRowIsVisible(0);
 		}
 	}
 
