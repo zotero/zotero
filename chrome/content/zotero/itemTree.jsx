@@ -3155,8 +3155,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const legacyPersistSetting = persistSettings[legacyDataKey];
 		if (legacyPersistSetting) {
 			// Remove legacy pref
-			// TODO: uncomment once xul item tree fully phased out
-			// delete persistSettings[legacyDataKey];
+			delete persistSettings[legacyDataKey];
 			for (const key in legacyPersistSetting) {
 				if (typeof legacyPersistSetting[key] == "string") {
 					if (key == 'sortDirection') {
