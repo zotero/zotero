@@ -126,7 +126,7 @@ var ZoteroAdvancedSearch = new function() {
 			isTrash: () => false
 		};
 		
-		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		return this.itemsView.changeCollectionTreeRow(collectionTreeRow);
 	}
 	
 	
