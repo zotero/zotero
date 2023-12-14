@@ -71,8 +71,12 @@
 <!ENTITY zotero.items.menu.attach.fileLink				"Attach Link to File…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary				"Restore to Library">
+<!ENTITY zotero.items.menu.markAsDifferent				"Hide in Duplicate Items">
 <!ENTITY zotero.items.menu.duplicateItem					"Duplicate Item">
 <!ENTITY zotero.items.menu.mergeItems					"Merge Items…">
+<!ENTITY zotero.items.menu.mergeAllDuplicates			"Merge All Duplicates">
+<!ENTITY zotero.items.menu.mergeAllDuplicates.intoNewest "Into Newest Matching Item">
+<!ENTITY zotero.items.menu.mergeAllDuplicates.intoOldest "Into Oldest Matching Item">
 <!ENTITY zotero.items.menu.unrecognize                "Undo Retrieve Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect			"Choose the version of the item to use as the master item:">

@@ -2048,6 +2048,30 @@ var ZoteroPane = new function()
 		yield Zotero.FullText.indexItems(itemIDs, { complete: true });
 		yield document.getElementById('zotero-attachment-box').updateItemIndexedState();
 	});
+
+
+	/**
+	 * Add differentItemPredicate relations to each selected item and save.
+	 * @return {Promise}
+	 */
+	this.markSelectedItemsAsDifferent = async function () {
+		let items = this.getSelectedItems();
+		await Zotero.DB.executeTransaction(async () => {
+			for (let i = 0; i < items.length; i++) {
+				let subject = items[i];
+				for (let j = 0; j < items.length; j++) {
+					if (i === j) continue;
+					let object = items[j];
+					subject.addRelation(Zotero.Relations.differentItemPredicate, Zotero.URI.getItemURI(object));
+				}
+				await subject.save();
+
+				// Reusing a little hack from Zotero.Items.merge to remove
+				// without fully recalculating duplicates
+				Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', subject.id);
+			}
+		});
+	};
 	
 	
 	/**
@@ -2318,6 +2342,74 @@ var ZoteroPane = new function()
 		// Initialize the merge pane with the selected items
 		Zotero_Duplicates_Pane.setItems(this.getSelectedItems());
 	}
+
+
+	/**
+	 * Merge selected duplicate sets using the given key and sort direction
+	 * to determine the master item.
+	 *
+	 * Fields are merged as if the user selected each set in Duplicate Items,
+	 * left the "fields to keep" options at their default values, and clicked
+	 * Merge.
+	 *
+	 * @param {String} sortField The Zotero.Item property to compare
+	 * 		between items.
+	 * @param {Boolean} descending If true, the master item in each duplicate
+	 * 		set will be the item for which sortField is largest; if false, the
+	 * 		smallest.
+	 * @return {Promise}
+	 */
+	this.mergeAllDuplicates = async function (sortField, descending) {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+
+		Zotero.showZoteroPaneProgressMeter(null, true);
+		try {
+			Zotero.debug('Merging all selected duplicate sets');
+
+			let selectedIDs = new Set(
+				Zotero.Items.keepParents(this.getSelectedItems()).map(item => item.id));
+			let mergedIDs = new Set();
+			let collectionTreeRow = this.getCollectionTreeRow();
+			for (let itemID of selectedIDs) {
+				if (mergedIDs.has(itemID)) {
+					continue;
+				}
+
+				let duplicates = await Zotero.Items.getAsync(
+					collectionTreeRow.ref.getSetItemsByItemID(itemID)
+						.filter(id => selectedIDs.has(id)));
+				duplicates.forEach(dup => mergedIDs.add(dup));
+				duplicates.sort((a, b) => (descending ? -1 : 1) * (
+					a[sortField] > b[sortField] ? 1 : a[sortField] == b[sortField] ? 0 : -1
+				));
+				let masterItem = duplicates.shift();
+
+				let ignoreFields = ['dateAdded', 'dateModified', 'accessDate'];
+				let diff = masterItem.multiDiff(duplicates, ignoreFields);
+				if (diff) {
+					let masterItemJSON = masterItem.toJSON();
+					for (let [field, values] of Object.entries(diff)) {
+						if (!masterItemJSON[field]) {
+							masterItemJSON[field] = values[0];
+						}
+					}
+					masterItem.fromJSON(masterItemJSON);
+				}
+
+				// merge() saves the master item, including our changes above
+				await Zotero.Items.merge(masterItem, duplicates);
+
+				Zotero.updateZoteroPaneProgressMeter(mergedIDs.size / selectedIDs.size * 100);
+				Zotero.debug(`Merged set with ${duplicates.length + 1} items`);
+			}
+		}
+		finally {
+			Zotero.hideZoteroPaneOverlays();
+		}
+	};
 	
 	
 	this.deleteSelectedCollection = function (deleteItems) {
@@ -3483,12 +3575,14 @@ var ZoteroPane = new function()
 			'toggleRead',
 			'addToCollection',
 			'removeItems',
+			'markAsDifferent',
 			'duplicateAndConvert',
 			'duplicateItem',
 			'restoreToLibrary',
 			'moveToTrash',
 			'deleteFromLibrary',
 			'mergeItems',
+			'mergeAllDuplicates',
 			'sep4',
 			'exportItems',
 			'createBib',
@@ -3662,6 +3756,16 @@ var ZoteroPane = new function()
 				// Add in attachment separator
 				if (canCreateParent || canRecognize || canUnrecognize || canRename || canIndex) {
 					show.add(m.sep5);
+				}
+
+				if (collectionTreeRow.isDuplicates()) {
+					show.add(m.markAsDifferent);
+					let setFromFirst = collectionTreeRow.ref.getSetItemsByItemID(items[0].id);
+					if (!(items.length == setFromFirst.length
+						&& items.every(item => setFromFirst.includes(item.id)))) {
+						disable.add(m.markAsDifferent);
+						show.add(m.mergeAllDuplicates);
+					}
 				}
 				
 				// Block certain actions on files if no access and at least one item is a file

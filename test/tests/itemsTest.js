@@ -979,6 +979,37 @@ describe("Zotero.Items", function () {
 			assert.isFalse(attachment2.deleted);
 			assert.equal(attachment2.parentItemID, item1.id);
 		});
+
+		it("should remove different-item relations between items in the merge", async function () {
+			let diffPred = Zotero.Relations.differentItemPredicate;
+
+			let item1 = await createDataObject('item');
+			let item2 = await createDataObject('item');
+			let item3 = await createDataObject('item');
+
+			// Add different-item relations between all three
+			item1.addRelation(diffPred, Zotero.URI.getItemURI(item2));
+			item1.addRelation(diffPred, Zotero.URI.getItemURI(item3));
+			item2.addRelation(diffPred, Zotero.URI.getItemURI(item1));
+			item2.addRelation(diffPred, Zotero.URI.getItemURI(item3));
+			item3.addRelation(diffPred, Zotero.URI.getItemURI(item1));
+			item3.addRelation(diffPred, Zotero.URI.getItemURI(item2));
+
+			// But we only merge the first two
+			await Zotero.Items.merge(item1, [item2]);
+
+			let rels1 = item1.getRelationsByPredicate(diffPred);
+			let rels2 = item2.getRelationsByPredicate(diffPred);
+			let rels3 = item3.getRelationsByPredicate(diffPred);
+			assert.lengthOf(rels1, 1);
+			assert.lengthOf(rels2, 1);
+			assert.lengthOf(rels3, 2);
+
+			assert.equal(rels1[0], Zotero.URI.getItemURI(item3));
+			assert.equal(rels2[0], Zotero.URI.getItemURI(item3));
+			assert.equal(rels3[0], Zotero.URI.getItemURI(item1));
+			assert.equal(rels3[1], Zotero.URI.getItemURI(item2));
+		});
 	})
 	
 	

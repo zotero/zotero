@@ -28,6 +28,7 @@
 Zotero.Relations = new function () {
 	Zotero.defineProperty(this, 'relatedItemPredicate', {value: 'dc:relation'});
 	Zotero.defineProperty(this, 'linkedObjectPredicate', {value: 'owl:sameAs'});
+	Zotero.defineProperty(this, 'differentItemPredicate', {value: 'owl:differentFrom'});
 	Zotero.defineProperty(this, 'replacedItemPredicate', {value: 'dc:replaces'});
 	
 	this._namespaces = {

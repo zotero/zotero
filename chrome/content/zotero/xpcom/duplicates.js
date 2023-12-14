@@ -87,6 +87,9 @@ Zotero.Duplicates.prototype.getSearchObject = async function () {
  * @return {Integer[]}  Array of itemIDs
  */
 Zotero.Duplicates.prototype.getSetItemsByItemID = function (itemID) {
+	if (!this._sets) {
+		return [];
+	}
 	return this._sets.findAllInSet(this._getObjectFromID(itemID), true);
 }
 
@@ -107,6 +110,35 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 	
 	this._sets = new Zotero.DisjointSetForest;
 	var sets = this._sets;
+
+	var differentItemCache = new Map();
+
+	let differentItemPredID = Zotero.RelationPredicates.getID(Zotero.Relations.differentItemPredicate);
+	if (differentItemPredID !== false) {
+		Zotero.debug('Querying for differentItemPredicate relations');
+
+		let sql = "SELECT itemID AS subjectID, object as objectURI FROM itemRelations JOIN items USING (itemID) "
+			+ "WHERE predicateID = ? "
+			+ "AND libraryID = ? "
+			+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
+		let relations = yield Zotero.DB.queryAsync(sql, [differentItemPredID, this._libraryID]);
+
+		for (let { subjectID, objectURI } of relations) {
+			let objectID = Zotero.URI.getURIItemID(objectURI);
+			if (objectID) {
+				if (!differentItemCache.has(subjectID)) {
+					differentItemCache.set(subjectID, new Set());
+				}
+				differentItemCache.get(subjectID).add(objectID);
+			}
+		}
+
+		Zotero.debug(`Cached ${relations.length} differentItemPredicate relations`);
+	}
+
+	function areItemsMarkedDifferent(item1ID, item2ID) {
+		return differentItemCache.has(item1ID) && differentItemCache.get(item1ID).has(item2ID);
+	}
 	
 	function normalizeString(str) {
 		// Make sure we have a string and not an integer
@@ -175,6 +207,11 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 					) {
 						break;
 					}
+				}
+
+				if (areItemsMarkedDifferent(rows[i].itemID, rows[j].itemID)) {
+					j++;
+					continue;
 				}
 				
 				sets.union(
