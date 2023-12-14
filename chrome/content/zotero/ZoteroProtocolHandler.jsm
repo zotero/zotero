@@ -1265,7 +1265,9 @@ ZoteroProtocolHandler.prototype = {
 		Ci.nsIProtocolHandler.URI_NORELATIVE
 			| Ci.nsIProtocolHandler.URI_NOAUTH
 			| Ci.nsIProtocolHandler.URI_INHERITS_SECURITY_CONTEXT
-			| Ci.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE
+			// URI_IS_UI_RESOURCE: more secure than URI_LOADABLE_BY_ANYONE, less secure than URI_DANGEROUS_TO_LOAD
+			// This is the security level used by the chrome:// protocol
+			| Ci.nsIProtocolHandler.URI_IS_UI_RESOURCE
 			| Ci.nsIProtocolHandler.URI_NON_PERSISTABLE
 			| Ci.nsIProtocolHandler.URI_IS_LOCAL_RESOURCE
 			| Ci.nsIProtocolHandler.URI_SYNC_LOAD_IS_OK,
