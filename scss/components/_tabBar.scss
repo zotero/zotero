@@ -4,7 +4,7 @@
 	--safe-area-end: 0;
 	--tab-border: .5px solid var(--tab-border);
 
-	min-height: 30px;
+	min-height: var(--tab-min-height);
 	
 	&:not([hidden]) {
 		// display: flex overrides the hidden attribute
@@ -39,51 +39,77 @@
 	}
 
 	.scroll-start-arrow, .scroll-end-arrow {
-		height: 30px;
-		padding: 0 3px;
+		padding: 0 4px;
 		align-items: center;
-		z-index: 1;
-		color: var(--fill-tertiary);
+		color: var(--fill-secondary);
 		display: none;
 		box-shadow: none;
-		// Add bottom border to scroll arrows,
-		// and negate the extra vertical pixel added by the border with a negative margin
-		border-bottom: var(--tab-border);
-		margin-bottom: -1px;
-		box-sizing: border-box;
+		z-index: 1;
+
+		> button {
+			width: auto;
+			padding: 0;
+			border: 0;
+			height: 28px;
+			border-radius: 5px;
+			background: transparent;
+		}
 
 		.icon {
 			display: flex;
+			fill: var(--fill-tertiary);
 		}
 
 		&.active {
-			color: var(--fill-secondary);
-			&:hover {
-				background-color: var(--fill-quinary);
+			button {
+				&:hover {
+					background-color: var(--fill-quinary);
+				}
+			
+				&:active {
+					background-color: var(--fill-quarternary);
+				}
+			}
+
+			.icon {
+				fill: var(--fill-secondary);
 			}
 		}
 	}
 
 	.scroll-start-arrow {
 		border-right: var(--material-border-transparent);
+		border-left: var(--material-border-quarternary);
+
 		&.active {
 			border-right: var(--material-panedivider);
-			box-shadow: 3px 0 3px -3px rgba(0, 0, 0, .3);
+			box-shadow: 0.5px 0.5px 0px -0.5px rgba(0, 0, 0, 0.05), 3px 0px 3px -3px rgba(0, 0, 0, .3)
 		}
 	}
 
 	.scroll-end-arrow {
 		border-left: var(--material-border-transparent);
+
 		&.active {
 			border-left: var(--material-panedivider);
-			box-shadow: -3px 0 3px -3px rgba(0, 0, 0, .3)
+			box-shadow: -0.5px 0.5px 0px -0.5px rgba(0, 0, 0, 0.05), -3px 0 3px -3px rgba(0, 0, 0, .3)
+		}
+
+		.icon {
+			transform: rotate(180deg);
 		}
 	}
 
 	.pinned-tabs {
 		display: none;
+		padding-right: 8px;
+		
+		.tabs {
+			overflow: unset;
+		}
+		
 		.tab {
-			max-width: 110px;
+			max-width: 100px;
 		}
 	}
 
@@ -108,74 +134,76 @@
 	overflow: hidden;
 	left: 0;
 	right: 0;
+	padding: 4px 1px;
+	column-gap: 4px;
 
-	&:before {
-		content: "";
-		width: 0;
-		min-width: 0;
-		border-inline-end: var(--tab-border);
-	}
-
-	&:after {
-		content: "";
-		flex: 1 0 0;
-		width: 100%;
-		min-width: 0;
-		// Add bottom border to the space between the last tab and the spacer in #tab-bar-container::after
-		border-bottom: var(--tab-border);
-		border-inline-start: var(--tab-border);
+	.pinned-tabs & {
+		padding: 4px 0;
 	}
 }
 
 .tab {
 	box-sizing: border-box;
-	-moz-appearance: none;
 	max-width: 200px;
 	flex: 1 1 200px;
-	height: 30px;
-	line-height: 30px;
 	position: relative;
 	color: var(--fill-primary);
 	text-align: center;
-	padding: 0 22px;
-	min-width: 110px;
-	
-	&:not(:last-child) {
-		border-inline-end: var(--tab-border);
-	}
-	
+	min-width: 100px;
+	height: 28px;
+	line-height: 16px;
+	padding: 6px 22px 6px 6px;
+	display: flex;
+	border-radius: 5px;
+	transition: background-color 0.1s ease-out;
+
 	&.selected {
 		background: var(--material-button);
 		box-shadow: 0px 0px 0px 0.5px rgba(0, 0, 0, 0.05), 0px 0.5px 2.5px 0px rgba(0, 0, 0, 0.30);
 	}
-	
+
 	&.dragging {
-		border-inline-start: var(--tab-border);
 		z-index: 1;
 	}
 	
-	&.dragging + & {
-		border-inline-start: var(--tab-border);
+	&:not(:last-child) {
+		border-inline-end: var(--tab-border);
+	}
+
+	&:not(.selected):hover {
+		background-color: var(--fill-quinary);
+	}
+
+	&:first-child {
+		padding: 6px; // no 22px padding for X button because pinned tab cannot be closed
+
+		.tab-close {
+			display: none;
+		}
 	}
 	
 	.tab-name {
-		line-height: 30px;
-		overflow-x: hidden;
-		text-overflow: ellipsis;
-		display: -moz-box;
-		-moz-box-pack: center;
-		position: relative;
-		top: -2px;
-		overflow-y: hidden;
+		background: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px) text;
+		flex: 1 1 100%;
+		line-height: 16px;
+		margin-inline-start: 4px;
+		overflow: hidden;
+		text-align: left;
+		-webkit-text-fill-color: transparent;
+		white-space: nowrap;
 
-		.icon-bg {
-			margin-inline-end: 7px;
-			margin-top: -2px;
+		@include state('.tab:first-child') {
+			background: linear-gradient(to left, transparent 0px, var(--fill-primary) 10px) text;
 		}
+	}
+
+	.tab-icon {
+		flex: 0 0 16px;
 	}
 
 	.tab-close {
 		position: absolute;
+		transition: background-color 0.1s ease-out;
 
 		&:dir(ltr) {
 			right: 6px;
@@ -203,10 +231,6 @@
 		&:active {
 			background-color: var(--fill-quarternary);
 		}
-	}
-
-	&:first-child .tab-close {
-		display: none;
 	}
 
 	&:not(.selected) {

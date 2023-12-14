@@ -3,6 +3,14 @@ $icons: (
 	library-group, publications, trash-full, trash, unfiled, retracted, search,
 );
 
+@each $icon in $icons {
+	.icon-css.icon-#{$icon} {
+		@include focus-states using ($color) {
+			@include svgicon($icon, $color, "16", "collection-tree");
+		}
+	}
+}
+
 #zotero-collections-tree-container {
 	height: 5.2em;
 }
@@ -22,7 +30,7 @@ $icons: (
 			}
 	
 			@each $icon in $icons {
-				.icon-css.#{$icon} {
+				.icon-css.icon-#{$icon} {
 					@include focus-states using ($color) {
 						@include svgicon($icon, $color, "16", "collection-tree");
 					}

@@ -1293,6 +1293,45 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return false;
 	}
 
+	getIconName(index) {
+		const treeRow = this.getRow(index);
+		let collectionType = treeRow.type;
+		let icon = collectionType;
+
+		switch (collectionType) {
+			case 'group':
+				icon = 'library-group';
+				break;
+			case 'feed':
+				// Better alternative needed: https://github.com/zotero/zotero/pull/902#issuecomment-183185973
+				/*
+				if (treeRow.ref.updating) {
+					collectionType += 'Updating';
+				} else */if (treeRow.ref.lastCheckError) {
+					icon += '-error';
+				}
+				break;
+			case 'trash':
+				if (this._trashNotEmpty[treeRow.ref.libraryID]) {
+					icon += '-full';
+				}
+				break;
+
+			case 'feeds':
+				icon = 'feed-library';
+				break;
+
+			case 'header':
+				if (treeRow.ref.id == 'group-libraries-header') {
+					icon = 'groups';
+				}
+				break;
+			case 'separator':
+				return null;
+		}
+		return icon;
+	}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -2234,47 +2273,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	_getIcon(index) {
-		const treeRow = this.getRow(index);
-		var collectionType = treeRow.type;
-
-		if (collectionType == 'separator') {
-			return document.createElement('span');
-		}
+		let iconName = this.getIconName(index);
 		
-		let icon = collectionType;
-		
-		switch (collectionType) {
-			case 'group':
-				icon = 'library-group';
-				break;
-			case 'feed':
-				// Better alternative needed: https://github.com/zotero/zotero/pull/902#issuecomment-183185973
-				/*
-				if (treeRow.ref.updating) {
-					collectionType += 'Updating';
-				} else */if (treeRow.ref.lastCheckError) {
-					icon += '-error';
-				}
-				break;
-			
-			case 'trash':
-				if (this._trashNotEmpty[treeRow.ref.libraryID]) {
-					icon += '-full';
-				}
-				break;
-				
-			case 'feeds':
-				icon = 'feed-library';
-				break;
-			
-			case 'header':
-				if (treeRow.ref.id == 'group-libraries-header') {
-					icon = 'groups';
-				}
-				break;
-		}
-		
-		return getCSSIcon(icon);
+		return iconName
+			? getCSSIcon(iconName)
+			: document.createElement('span');
 	}
 
 	/**

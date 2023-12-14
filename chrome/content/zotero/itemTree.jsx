@@ -2744,19 +2744,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// If the item has a child attachment
 			if (type !== null && type != 'none') {
 				if (type == 'pdf') {
-					icon = getCSSItemTypeIcon('attachmentPDF', 'icon-attachment-type');
+					icon = getCSSItemTypeIcon('attachmentPDF', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
 				}
 				else if (type == 'snapshot') {
-					icon = getCSSItemTypeIcon('attachmentSnapshot', 'icon-attachment-type');
+					icon = getCSSItemTypeIcon('attachmentSnapshot', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
 				}
 				else if (type == 'epub') {
-					icon = getCSSItemTypeIcon('attachmentEPUB', 'icon-attachment-type');
+					icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
 				}
 				else {
-					icon = getCSSItemTypeIcon('attachmentFile', 'icon-attachment-type');
+					icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
 				

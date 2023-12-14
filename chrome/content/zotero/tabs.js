@@ -29,6 +29,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 import TabBar from 'components/tabBar';
+import { CSSIcon, CSSItemTypeIcon } from 'components/icons';
 
 // Reduce loaded tabs limit if the system has 8 GB or less memory.
 // TODO: Revise this after upgrading to Zotero 7
@@ -81,13 +82,33 @@ var Zotero_Tabs = new function () {
 	};
 
 	this._update = function () {
-		this._tabBarRef.current.setTabs(this._tabs.map(tab => ({
-			id: tab.id,
-			type: tab.type,
-			title: tab.title,
-			selected: tab.id == this._selectedID,
-			iconBackgroundImage: tab.iconBackgroundImage
-		})));
+		this._tabBarRef.current.setTabs(this._tabs.map((tab) => {
+			let icon = null;
+			if (tab.id === 'zotero-pane') {
+				let index = ZoteroPane.collectionsView?.selection?.focused;
+				if (typeof index !== 'undefined' && ZoteroPane.collectionsView.getRow(index)) {
+					let iconName = ZoteroPane.collectionsView.getIconName(index);
+					icon = <CSSIcon name={iconName} className="tab-icon" />;
+				}
+			}
+			else if (tab.data?.itemID) {
+				try {
+					let item = Zotero.Items.get(tab.data.itemID);
+					icon = <CSSItemTypeIcon itemType={item.getItemTypeIconName()} className="tab-icon" />;
+				}
+				catch (e) {
+					// item might not yet be loaded, we will get the icon on the next update
+				}
+			}
+
+			return {
+				id: tab.id,
+				type: tab.type,
+				title: tab.title,
+				selected: tab.id == this._selectedID,
+				icon,
+			};
+		}));
 		// Disable File > Close menuitem if multiple tabs are open
 		const multipleTabsOpen = this._tabs.length > 1;
 		document.getElementById('cmd_close').setAttribute('disabled', multipleTabsOpen);
@@ -243,21 +264,7 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		tab.title = title;
-		Zotero_Tabs.updateLibraryTabIcon();
 		this._update();
-	};
-
-	this.updateLibraryTabIcon = () => {
-		let index = ZoteroPane.collectionsView.selection.focused;
-		if (!ZoteroPane.collectionsView.getRow(index)) {
-			return;
-		}
-		let icon = ZoteroPane.collectionsView._getIcon(index);
-		var { tab } = this._getTab('zotero-pane');
-		if (!tab || !icon.style.backgroundImage) {
-			return;
-		}
-		tab.iconBackgroundImage = icon.style.backgroundImage;
 	};
 
 	/**

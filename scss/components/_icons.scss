@@ -25,6 +25,11 @@
 	-moz-appearance: none !important;
 }
 
+.icon-20 {
+	width: 20px;
+	height: 20px;
+}
+
 .icon-16 {
 	width: 16px;
 	height: 16px;
@@ -40,6 +45,8 @@ $-icons: (
 	chevron-6: 8,
 	filter: 16,
 	note: 16,
+	x-8: 16,
+	chevron-tabs: 20
 );
 
 @each $icon, $size in $-icons {

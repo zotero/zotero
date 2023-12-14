@@ -1,12 +1,7 @@
 // Styling for displaying tabs in the title bar
 :root:not([legacytoolbar="true"]) {
 	& {
-	@media (-moz-platform: windows) {
-		--tab-min-height: 36px;
-	}
-	@media not (-moz-platform: windows) {
-		--tab-min-height: 30px;
-	}
+	  --tab-min-height: 36px;
 	  --tabs-border-color: rgba(0,0,0,.3);
 	  --tabline-color: #0a84ff;
 	
@@ -137,14 +132,6 @@
 	#tab-bar-container {
 		background: var(--material-tabbar);
 		-moz-window-dragging: drag;
-	}
-	
-	#tab-bar-container .tab {
-		background: transparent;
-	}
-	
-	#tab-bar-container .tab.selected {
-		background: var(--material-tabbar)
 	}
 
 	.zotero-toolbar {
