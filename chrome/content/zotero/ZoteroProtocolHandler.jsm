@@ -27,6 +27,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+const EXPORTED_SYMBOLS = ['ZoteroProtocolHandler'];
+
 const ZOTERO_SCHEME = "zotero";
 const ZOTERO_PROTOCOL_CID = Components.ID("{9BC3D762-9038-486A-9D70-C997AF848A7C}");
 const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;
@@ -44,9 +46,7 @@ const ios = Services.io;
 // Dummy chrome URL used to obtain a valid chrome channel
 const DUMMY_CHROME_URL = "chrome://zotero/content/zoteroPane.xul";
 
-var Zotero = Components.classes["@zotero.org/Zotero;1"]
-	.getService(Components.interfaces.nsISupports)
-	.wrappedJSObject;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 function ZoteroProtocolHandler() {
 	this.wrappedJSObject = this;
@@ -1261,22 +1261,14 @@ ZoteroProtocolHandler.prototype = {
 	get scheme() {
 		return ZOTERO_SCHEME;
 	},
-	get protocolFlags() {
-		/*Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
-		Components.interfaces.nsIProtocolHandler.URI_NOAUTH |
-		// DEBUG: This should be URI_IS_LOCAL_FILE, and MUST be if any
-		// extensions that modify data are added
-		//  - https://www.zotero.org/trac/ticket/1156
-		//
-		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
-		//Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,*/
-		
-		return Ci.nsIProtocolHandler.URI_NORELATIVE
+	protocolFlags:
+		Ci.nsIProtocolHandler.URI_NORELATIVE
+			| Ci.nsIProtocolHandler.URI_NOAUTH
+			| Ci.nsIProtocolHandler.URI_INHERITS_SECURITY_CONTEXT
+			| Ci.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE
+			| Ci.nsIProtocolHandler.URI_NON_PERSISTABLE
 			| Ci.nsIProtocolHandler.URI_IS_LOCAL_RESOURCE
-			// URI_IS_UI_RESOURCE: more secure than URI_LOADABLE_BY_ANYONE, less secure than URI_DANGEROUS_TO_LOAD
-			// This is the security level used by the chrome:// protocol
-			| Ci.nsIProtocolHandler.URI_IS_UI_RESOURCE;
-	},
+			| Ci.nsIProtocolHandler.URI_SYNC_LOAD_IS_OK,
 	get defaultPort() {
 		return -1;
 	},
@@ -1368,6 +1360,18 @@ ZoteroProtocolHandler.prototype = {
 	classID: ZOTERO_PROTOCOL_CID,
 	//QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsIProtocolHandler])
 	QueryInterface: ChromeUtils.generateQI([Ci.nsISupportsWeakReference, Ci.nsIProtocolHandler]),
+};
+
+/**
+ * @static
+ */
+ZoteroProtocolHandler.init = function () {
+	Services.io.registerProtocolHandler(
+		'zotero',
+		new ZoteroProtocolHandler(),
+		ZoteroProtocolHandler.prototype.protocolFlags,
+		ZoteroProtocolHandler.prototype.defaultPort
+	);
 };
 
 
@@ -1569,6 +1573,3 @@ AsyncChannel.prototype = {
 				/*pdf.js wants this
 				|| iid.equals(Components.interfaces.nsIWritablePropertyBag)) {*/
 };
-
-
-var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroProtocolHandler]);

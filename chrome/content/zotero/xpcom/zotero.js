@@ -669,6 +669,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				throw e;
 			}
 			
+			const { ZoteroProtocolHandler } = ChromeUtils.import(
+				`chrome://zotero/content/ZoteroProtocolHandler.jsm`
+			);
+			ZoteroProtocolHandler.init();
+
 			yield Zotero.Users.init();
 			yield Zotero.Libraries.init();
 			
