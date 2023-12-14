@@ -45,9 +45,6 @@
 					</div>
 				</box>
 			`, ['chrome://zotero/locale/zotero.dtd']);
-
-			this._destroyed = false;
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
 		}
 		
 		connectedCallback() {
