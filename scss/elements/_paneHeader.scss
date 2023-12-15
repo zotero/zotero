@@ -31,6 +31,6 @@ pane-header {
 	}
 	
 	.menu-button toolbarbutton {
-		list-style-image: icon-url('locate.svg');
+		@include svgicon-menu("go-to", "universal", "20");
 	}
 }

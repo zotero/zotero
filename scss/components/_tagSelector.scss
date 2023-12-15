@@ -66,13 +66,31 @@
 }
 
 .tag-selector-actions {
+	appearance: none;
+	flex-shrink: 0;
+	border-radius: 5px;
+	margin: 0;
+	-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+	background-color: transparent;
 	align-self: center;
-	background-color: inherit;
 	border: 0;
 	display: block;
 	flex: 0 1;
 	padding: 3px 4px;
 	white-space: nowrap;
+
+	&:hover {
+		background-color: var(--fill-quinary);
+	}
+	
+	&:active, &[selected] {
+		background-color: var(--fill-quarternary);
+	}
+
+	&:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+	}
 
 	.icon-css {
 		fill: var(--fill-secondary);

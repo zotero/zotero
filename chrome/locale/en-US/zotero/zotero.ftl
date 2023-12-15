@@ -2,6 +2,8 @@ zotero-toolbar-new-attachment =
     .tooltiptext = Add File
 zotero-toolbar-opened-tabs-menu =
     .tooltiptext = List all tabs
+zotero-collections-search =
+    .placeholder = Filter Collections
 
 item-menu-viewAttachment =
     .label = Open {

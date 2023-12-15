@@ -7,117 +7,8 @@
 	margin-inline-start: 7px;
 }
 
-#zotero-tb-sync-stop .toolbarbutton-icon,
-#zotero-tb-sync-error .toolbarbutton-icon {
-	width: 16px;
-}
-
-.zotero-tb-button > .toolbarbutton-icon {
-	max-width: 31px;
-}
-
-.zotero-tb-button,
-.zotero-tb-button:first-child,
-.zotero-tb-button:last-child {
-  margin-inline-start: 0 !important;
-  margin-inline-end: 3px !important;
-  padding-right: 10px !important;
-  background: url("chrome://zotero/skin/mac/menubutton-end.png") right center/auto 24px no-repeat;
-}
-
-.zotero-tb-button[type=menu] {
-	padding-inline-end: 8px !important;
-}
-
-.zotero-tb-button > .toolbarbutton-icon {
-	background: url("chrome://zotero/skin/mac/menubutton-start.png") left center/auto 24px no-repeat;
-	padding: 4px 4px 4px 11px;
-}
-
-/* For menu buttons, decrease left padding by 1px */
-.zotero-tb-button[type=menu] > .toolbarbutton-icon {
-	padding-left: 9px;
-	max-width: 29px;
-}
-
-/* A decent hack: reverse the effective order of the dropmarker and icon in RTL
-   mode so that the above CSS, which places the menubutton-start.png background
-   on the toolbarbutton-icon, will make sense. (Otherwise the dropmarker appears
-   outside the button.) Then just flip the entire thing horizontally! We want to
-   do that anyway so that the Locate button will point to the left and Sync will
-   rotate counter-clockwise.
-
-   The other way to do this would be to set direction: ltr on buttons in the
-   RTL toolbar, but that breaks popup positioning. */
-#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-menu-dropmarker {
-	-moz-box-ordinal-group: 0;
-}
-
-#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-icon {
-	-moz-box-ordinal-group: 1;
-}
-
-#zotero-pane[dir=rtl] .zotero-tb-button,
-#zotero-pane[dir=rtl] .zotero-tb-button:first-child,
-#zotero-pane[dir=rtl] .zotero-tb-button:last-child {
-	transform: scaleX(-1);
-}
-
-#zotero-collections-toolbar {
-	padding-inline-start: 0;
-}
-
-.zotero-tb-button:-moz-window-inactive {
-	opacity: 0.5;
-}
-
-.zotero-tb-button:-moz-window-inactive > .toolbarbutton-icon {
-	background: url("chrome://zotero/skin/mac/menubutton-start-inactive-window.png") left center/auto 24px no-repeat;
-}
-
-/* Use a darker background when inactive so the button itself doesn't get too dark at 50% */
-.zotero-tb-button:-moz-window-inactive,
-.zotero-tb-button:-moz-window-inactive:first-child,
-.zotero-tb-button:-moz-window-inactive:last-child {
-	background: url("chrome://zotero/skin/mac/menubutton-end-inactive-window.png") right center/auto 24px no-repeat;
-}
-
-.zotero-tb-button[open="true"],
-.zotero-tb-button:not([disabled="true"]):hover:active {
-  background: url("chrome://zotero/skin/mac/menubutton-end-pressed.png") right center/auto 24px no-repeat;
-}
-
-.zotero-tb-button > menupopup {
-  -moz-margin-start: 2px;
-  margin-top: -4px;
-}
-
-#zotero-tb-sync > .toolbarbutton-icon {
-  -moz-padding-start: 8px;
-  padding-top: 1px;
-}
-
-#zotero-tb-sync-error[error=true]
-{
-	margin-bottom: 2px;
-}
-
-.zotero-tb-button[open="true"] > .toolbarbutton-icon,
-.zotero-tb-button:not([disabled="true"]):hover:active > .toolbarbutton-icon {
-  background: url("chrome://zotero/skin/mac/menubutton-start-pressed.png") left center/auto 24px no-repeat;
-}
-
-.zotero-tb-button > .toolbarbutton-text {
-  display:  none;
-}
-
 #zotero-tb-sync > .toolbarbutton-icon {
 	-moz-binding: none !important;
-	padding: 2px 0px 2px 8px !important;
-}
-
-#zotero-tb-sync {
-	margin: 0;
 }
 
 .zotero-item-pane-content .groupbox-body {
@@ -245,26 +136,8 @@ treechildren::-moz-tree-image {
 	padding-bottom: 1px;
 }
 
-#zotero-tb-advanced-search
-{
-	list-style-image: url('chrome://zotero/skin/mac/toolbar-advanced-search.png');
-}
-
-#zotero-tb-note-add
-{
-	list-style-image: url('chrome://zotero/skin/mac/toolbar-note-add.png');
-}
-
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
-	.zotero-tb-button,.zotero-tb-button:first-child,.zotero-tb-button:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end@2x.png") right center/auto 24px no-repeat; }
-	.zotero-tb-button > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start@2x.png") left center/auto 24px no-repeat; }
-	.zotero-tb-button:-moz-window-inactive > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start-inactive-window@2x.png") left center/auto 24px no-repeat; }
-	.zotero-tb-button:-moz-window-inactive,.zotero-tb-button:-moz-window-inactive:first-child,.zotero-tb-button:-moz-window-inactive:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end-inactive-window@2x.png") right center/auto 24px no-repeat; }
-	.zotero-tb-button[open="true"],.zotero-tb-button:not([disabled="true"]):hover:active  { background: url("chrome://zotero/skin/mac/menubutton-end-pressed@2x.png") right center/auto 24px no-repeat; }
-	.zotero-tb-button[open="true"] > .toolbarbutton-icon,.zotero-tb-button:not([disabled="true"]):hover:active > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start-pressed@2x.png") left center/auto 24px no-repeat; }
 	#zotero-collections-splitter[state=collapsed] > grippy, #zotero-items-splitter[state=collapsed] > grippy { background: url(chrome://zotero/skin/mac/vgrippy@2x.png) center/auto 8px no-repeat; }
 	#zotero-tags-splitter > grippy { background: url(chrome://zotero/skin/mac/hgrippy@2x.png) center/auto 8px no-repeat; }
-	#zotero-tb-advanced-search { list-style-image: url('chrome://zotero/skin/mac/toolbar-advanced-search@2x.png'); }
-	#zotero-tb-note-add { list-style-image: url('chrome://zotero/skin/mac/toolbar-note-add@2x.png'); }
 }

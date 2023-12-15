@@ -167,7 +167,7 @@ var ZoteroPane = new function()
 				key = 'Shift' + key;
 			}
 			// ArrowUp or ArrowDown act the same way as as
-			// shift-tab/tab unles it is on a menu, in which case
+			// shift-tab/tab unless it is on a menu, in which case
 			// it'll open the menu popup
 			let isMenu = event.target.getAttribute('type') === 'menu'
 						|| event.originalTarget?.getAttribute('type') === 'menu';
@@ -306,12 +306,6 @@ var ZoteroPane = new function()
 		});
 
 		itemTreeToolbar.addEventListener("keydown", (event) => {
-			let openMenu = (node) => {
-				const popup = node.querySelector("menupopup");
-				if (popup !== null && !node.disabled) {
-					popup.openPopup();
-				}
-			};
 			let actionsMap = {
 				'zotero-tb-add': {
 					ArrowRight: () => document.getElementById("zotero-tb-lookup"),
@@ -325,10 +319,10 @@ var ZoteroPane = new function()
 						return null;
 					},
 					' ': () => {
-						openMenu(document.getElementById('zotero-tb-add'));
+						document.getElementById('zotero-tb-add').open = true;
 					},
 					Enter: () => {
-						openMenu(document.getElementById('zotero-tb-add'));
+						document.getElementById('zotero-tb-add').open = true;
 					}
 				},
 				'zotero-tb-lookup': {

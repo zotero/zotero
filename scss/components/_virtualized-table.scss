@@ -130,12 +130,7 @@
 		}
 
 		&.selected:not(.highlighted) {
-			@media (-moz-platform: windows) {
-				background-color: var(--accent-blue);
-			}
-			@media not (-moz-platform: windows) {
-				background-color: SelectedItem;
-			}
+			background-color: var(--color-accent);
 			color: #fff;
 
 			@include state(".virtualized-table:not(:focus)") {

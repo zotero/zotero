@@ -7,46 +7,6 @@
 	-moz-appearance: none;
 }
 
-#zotero-pane .zotero-toolbar {
-	-moz-appearance: none !important;
-	margin-top: -3px;
-	border-bottom: 1px solid var(--theme-border-color);
-}
-
-
-@media (min-resolution: 1.25dppx) {
-	#zotero-pane-stack .toolbarbutton-icon {
-		width: 16px;
-	}
-	
-	#zotero-tb-sync > .toolbarbutton-icon {
-		width: 20px;
-	}
-}
-
-.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
-	margin-left: 4px;
-}
-
-#zotero-tb-sync-error {
-	margin-right: 4px;
-	padding-top: 4px;
-}
-
-#zotero-tb-sync {
-	margin-right: 1px;
-	padding-top: 4px;
-}
-
-.zotero-toolbar {
-	-moz-appearance: toolbox !important;
-	padding-left: 2px;
-}
-
-#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-icon {
-	transform: scaleX(-1);
-}
-
 #zotero-collections-splitter:not([state=collapsed]),
 #zotero-items-splitter:not([state=collapsed]),
 #zotero-tags-splitter:not([state=collapsed]),

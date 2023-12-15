@@ -77,7 +77,6 @@
 
 			let searchBox = document.createXULElement("search-textbox");
 			searchBox.id = "zotero-tb-search-textbox";
-			searchBox.inputField.style = "padding-left:10px";
 			this.searchTextbox = searchBox;
 			
 			wrapper.appendChild(dropmarkerHost);

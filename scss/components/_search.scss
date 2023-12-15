@@ -1,17 +1,50 @@
 .search {
 	position: relative;
 	min-width: 40px;
+	height: 36px;
+
+	input {
+		background: var(--material-background);
+		border-radius: 5px;
+		border: var(--material-border-quinary);
+		color: var(--fill-primary);
+		flex: 1 0;
+		margin: 6px 4px;
+		min-width: 40px;
+		padding: 3px 7px;
+	
+		&::placeholder {
+			color: var(--fill-tertiary);
+			opacity: 1.0;
+		}
+	
+		&:focus {
+			outline: none;
+			border-color: var(--color-focus-search-color);
+			box-shadow: 0 0 0 calc(var(--width-focus-border) - 1px) var(--color-focus-search-color);
+		}
+	}
+
+	.search-cancel-button {
+		position: absolute;
+		right: 0px;
+		width: 14px;
+		height: 14px;
+		padding: 5px 8px 5px 5px;
+		margin: 6px 4px 6px 0px;
+		cursor: default;
+		background: url(resource://gre-resources/searchfield-cancel.svg) no-repeat center/contain;
+		background-size: unset;
+	}
 }
 
-.search input {
+search-textbox {
+	appearance: none;
 	background: var(--material-background);
 	border-radius: 5px;
 	border: var(--material-border-quinary);
 	color: var(--fill-primary);
-	flex: 1 0;
-	margin: 6px 4px;
-	min-width: 40px;
-	padding: 3px 7px;
+	padding: 0px 6px 0px 0px;
 
 	&::placeholder {
 		color: var(--fill-tertiary);
@@ -20,13 +53,16 @@
 
 	&:focus {
 		outline: none;
-		border-color: SelectedItem;
-		box-shadow: 0 0 0 2px SelectedItem;
+		border-color: transparent;
+		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-search-color);
 	}
 }
 
-.search .search-cancel-button {
-	position: absolute;
-	right: 6px;
-	cursor: default;
+:is(search-textbox)::part(search-sign),
+:is(search-textbox)::part(search-icon) {
+	@include svgicon-menu("magnifier", "universal", "16");
+	color: var(--fill-secondary);
+	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+	padding: 6px 4px 6px 6px;
+	margin: 0px;
 }

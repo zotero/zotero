@@ -54,8 +54,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachment
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentRow.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
 
-// Fix missing property bug that breaks arrow key navigation between <tab>s
 {
+	// Fix missing property bug that breaks arrow key navigation between <tab>s
 	let MozTabPrototype = customElements.get('tab').prototype;
 	if (!MozTabPrototype.hasOwnProperty('container')) {
 		Object.defineProperty(MozTabPrototype, 'container', {
@@ -70,25 +70,62 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotation
 		});
 	}
 
+	// Add MacOS menupopup fade animation to menupopups
 	if (Zotero.isMac) {
-		// Monkey-patch the toolbarbutton CE so it shows a native menu popup
-		let MozToolbarbuttonPrototype = customElements.get('toolbarbutton').prototype;
-		if (MozToolbarbuttonPrototype) {
-			let originalRender = MozToolbarbuttonPrototype.render;
-			MozToolbarbuttonPrototype.render = function () {
-				originalRender.apply(this);
-				if (!this._zoteroMouseDownListenerAdded) {
-					this.addEventListener('mousedown', (event) => {
-						if (!event.defaultPrevented
-								&& !this.disabled
-								&& this.getAttribute('nonnativepopup') != 'true'
-								&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
-							event.preventDefault();
-						}
-					});
-					this._zoteroMouseDownListenerAdded = true;
+		let MozMenuPopupPrototype = customElements.get("menupopup").prototype;
+
+		// Initialize the menupopup when it's first opened
+		let originalEnsureInitialized = MozMenuPopupPrototype.ensureInitialized;
+		MozMenuPopupPrototype.ensureInitialized = function () {
+			if (!this._zoteroInitialized) {
+				this._zoteroInitialized = true;
+
+				/**
+				 * Add fade animation to the popup
+				 * animate="false" will disable the animation
+				 * animate="false-once" will disable the animation once, which we use for the
+				 *   command event, so that the popup doesn't flicker when the user clicks
+				 * animate="open" when the menu is open
+				 * animate="cancel" when is menu is hiding
+				 */
+				if (this.getAttribute("animate") !== "false") {
+					this.setAttribute("animate", "open");
 				}
-			};
-		}
+
+				// Update animate attribute when the popup is shown
+				this.addEventListener("popupshowing", () => {
+					if (this.getAttribute("animate") === "false") {
+						return;
+					}
+					this.setAttribute("animate", "open");
+				});
+				
+				// Update animate attribute when the popup is hiding and trigger the fade out animation
+				this.addEventListener("popuphiding", (e) => {
+					if (!this.getAttribute("animate") || ["false", "false-once"].includes(this.getAttribute("animate"))) {
+						return;
+					}
+					e.preventDefault();
+					e.stopPropagation();
+					this.setAttribute("animate", "cancel");
+					// Make the timeout slightly longer than the animation duration (180ms) in _menupopup.scss
+					setTimeout(() => {
+						this.removeAttribute("animate");
+						this.hidePopup();
+					}, 200);
+				});
+
+				// This event is triggered after clicking the menu and before popuphiding
+				// where we control whether the fade out animation should run
+				this.addEventListener("command", () => {
+					if (this.getAttribute("animate") === "false") {
+						return;
+					}
+					// Disable the fading animation when the popup is closed by clicking
+					this.setAttribute("animate", "false-once");
+				});
+			}
+			originalEnsureInitialized.apply(this);
+		};
 	}
 }

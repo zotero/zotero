@@ -1,0 +1,113 @@
+.toolbar {
+	height: 41px !important; /* Hard-code this to fix toolbar icon compression on Linux */
+	min-height: 41px; /* Needed to prevent squashing by stretched tag selector */
+	margin: 0;
+	padding: 0px 8px 0px 8px;
+	min-width: 1px;
+}
+
+/* A decent hack: reverse the effective order of the dropmarker and icon in RTL
+   mode so that the above CSS, which places the menubutton-start.png background
+   on the toolbarbutton-icon, will make sense. (Otherwise the dropmarker appears
+   outside the button.) Then just flip the entire thing horizontally! We want to
+   do that anyway so that the Locate button will point to the left and Sync will
+   rotate counter-clockwise.
+
+   The other way to do this would be to set direction: ltr on buttons in the
+   RTL toolbar, but that breaks popup positioning. */
+#zotero-pane[dir=rtl] {
+	.zotero-tb-button > .toolbarbutton-menu-dropmarker {
+		-moz-box-ordinal-group: 0;
+	}
+
+	.zotero-tb-button > .toolbarbutton-icon {
+		-moz-box-ordinal-group: 1;
+	}
+
+	.zotero-tb-button,
+	.zotero-tb-button:first-child,
+	.zotero-tb-button:last-child {
+		transform: scaleX(-1);
+	}
+
+	@media not (-moz-platform: macos) {
+		.zotero-tb-button > .toolbarbutton-icon {
+			transform: scaleX(-1);
+		}
+	}
+}
+
+.zotero-toolbar {
+	-moz-appearance: none;
+	@media (-moz-platform: macos) {
+		-moz-window-dragging: drag;
+	}
+	@media not (-moz-platform: macos) {
+		-moz-window-dragging: no-drag;
+	}
+}
+
+#zotero-layout-switcher .zotero-toolbar {
+	background: var(--material-toolbar);
+	border-bottom: var(--material-panedivider);
+}
+
+#zotero-collections-toolbar,
+#zotero-items-toolbar,
+#zotero-item-pane-header,
+#zotero-tabs-toolbar {
+	toolbarbutton {
+		width: 28px;
+		height: 28px;
+		padding: 0px 4px 0px 4px;
+		margin: 0px 4px 0px 4px;
+
+		&[type="menu"] {
+			min-width: 0;
+			width: 40px;
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+		}
+	}
+
+	&:first-child {
+		margin-left: 0px;
+	}
+
+	&:last-child {
+		margin-right: 0px;
+	}
+}
+
+#zotero-collections-search {
+	max-width: 0;
+	transition: max-width 0.5s ease;
+	padding: 0px 6px 0px 0px;
+	margin: 0;
+	appearance: none;
+	visibility: hidden;
+}
+
+#zotero-collections-search.visible {
+	max-width: 180px; 
+	visibility: visible;
+	/* Avoids flickering between pointer and text cursor during transition */
+	cursor: text;
+}
+
+/* Hide collection search on pane collapse, otherwise it still shows when focused */
+#zotero-collections-pane[collapsed=true] #zotero-collections-search.visible {
+	visibility: hidden;
+}
+
+/* Hide the add button on pane collapse. Otherwise, it may show on top of 'New Item' */
+#zotero-collections-pane[collapsed=true] #zotero-tb-collection-add {
+	visibility: hidden;
+}
+
+.zotero-tb-button {
+	-moz-user-focus: normal;
+}

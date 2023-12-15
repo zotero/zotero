@@ -159,3 +159,7 @@
 		font-size: var(--zotero-font-size);
 	}
 }
+
+:is(panel)::part(content) {
+	--panel-background: var(--material-toolbar);
+}
