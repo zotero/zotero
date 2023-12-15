@@ -139,6 +139,7 @@ const TabBar = forwardRef(function (props, ref) {
 	function handleDragStart(event, id, index) {
 		// Library tab is not draggable
 		if (index === 0) {
+			event.preventDefault();
 			return;
 		}
 		event.dataTransfer.effectAllowed = 'move';
