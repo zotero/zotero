@@ -84,13 +84,6 @@ var Scaffold = new function () {
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
 		_document = document;
-
-		if (!Zotero.isMac) {
-			// Hack to fix Windows/Linux toolbar
-			let toolbar = document.getElementById('zotero-toolbar');
-			toolbar.className = 'toolbar-scaffold-small';
-		}
-		
 		_browser = document.getElementById('browser');
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
