@@ -125,10 +125,6 @@
 		}
 	}
 	
-	
-	
-	
-	
 	#tab-bar-container {
 		background: var(--material-tabbar);
 		-moz-window-dragging: drag;
@@ -136,12 +132,17 @@
 
 	.zotero-toolbar {
 		-moz-appearance: none;
+		@media (-moz-platform: macos) {
+			-moz-window-dragging: drag;
+		}
+		@media not (-moz-platform: macos) {
+			-moz-window-dragging: no-drag;
+		}
 	}
 	
 	#zotero-layout-switcher .zotero-toolbar {
 		background: var(--material-tabbar);
 		border-bottom: var(--material-panedivider);
-		-moz-window-dragging: no-drag;
 	}
 
 	#zotero-tabs-toolbar {
