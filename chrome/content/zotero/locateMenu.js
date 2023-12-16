@@ -574,7 +574,7 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only for regular items
 	 */
 	ViewOptions._libraryLookup = new function() {
-		this.className = "zotero-menuitem-view-file";
+		this.className = "zotero-menuitem-library-lookup";
 		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
 		this.handleItems = Zotero.Promise.method(function (items, event) {
 			// If no resolver configured, show error
