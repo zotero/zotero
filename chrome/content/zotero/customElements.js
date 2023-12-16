@@ -103,8 +103,9 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotation
 				// Update animate attribute when the popup is hiding and trigger the fade out animation
 				this.addEventListener("popuphiding", (e) => {
 					if (
+						this !== e.target
 						// open="true" and aria-hidden="true" means it's a native menupopup
-						(this.getAttribute("open", "true") && this.getAttribute("aria-hidden", "true"))
+						|| (this.getAttribute("open", "true") && this.getAttribute("aria-hidden", "true"))
 						|| !this.getAttribute("animate")
 						|| ["false", "false-once"].includes(this.getAttribute("animate"))) {
 						return;
