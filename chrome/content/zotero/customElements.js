@@ -80,6 +80,12 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotation
 			if (!this._zoteroInitialized) {
 				this._zoteroInitialized = true;
 
+				// Following the implementation from https://searchfox.org/mozilla-esr102/source/toolkit/content/widgets/menupopup.js
+				let haveCheckableChild = this.querySelector(
+					":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio])"
+				);
+				this.toggleAttribute("needsgutter", haveCheckableChild);
+
 				/**
 				 * Add fade animation to the popup
 				 * animate="false" will disable the animation
@@ -92,8 +98,16 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotation
 					this.setAttribute("animate", "open");
 				}
 
-				// Update animate attribute when the popup is shown
-				this.addEventListener("popupshowing", () => {
+				this.addEventListener("popupshowing", (e) => {
+					if (this !== e.target) {
+						return;
+					}
+					// Following the implementation from https://searchfox.org/mozilla-esr102/source/toolkit/content/widgets/menupopup.js
+					let haveCheckableChild = this.querySelector(
+						":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio])"
+					);
+					this.toggleAttribute("needsgutter", haveCheckableChild);
+					// Update animate attribute when the popup is shown
 					if (this.getAttribute("animate") === "false") {
 						return;
 					}

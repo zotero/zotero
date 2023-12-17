@@ -16,7 +16,7 @@ menupopup {
 			);
 			color: -moz-mac-menutextselect;
 		}
-		
+
 		&:is([checked="true"], [selected="true"]) {
 			appearance: none !important;
 			border-radius: 4px;
@@ -25,7 +25,7 @@ menupopup {
 				display: inline-block;
 				vertical-align: middle;
 				line-height: 0;
-				width: 15px;
+				width: 14px;
 				margin-inline-start: 0px !important;
 			}
 		}
@@ -34,6 +34,18 @@ menupopup {
 			appearance: auto;
 		}
 	}
+
+	&[needsgutter] {
+		menu, menuitem {
+			padding-left: 20px;
+
+			// Add padding here so that it won't look weird when the customElement.js is not yet loaded
+			&:is([checked="true"], [selected="true"]) {
+				padding-left: 6px;
+			}
+		}
+	}
+
 	menuseparator {
 		appearance: none;
 		margin-left: 15px;
@@ -41,6 +53,13 @@ menupopup {
 		border-bottom: 1px solid;
 		padding-bottom: 0px;
 		@include light-dark(border-color, rgba(170, 170, 170, 0.5), rgba(100, 100, 100, 0.5));
+	}
+
+	.menu-right {
+		appearance: none;
+		@include svgicon-menu("chevron-8", "universal", "8");
+		rotate: -90deg;
+		margin-inline-end: 0px;
 	}
 }
 
