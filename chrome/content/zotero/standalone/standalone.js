@@ -29,7 +29,19 @@ Components.utils.import("resource://gre/modules/Services.jsm");
  * This object contains the various functions for the interface
  */
 const ZoteroStandalone = new function() {
-	const FONT_SIZES = ["1.0", "1.15", "1.3", "1.5", "1.7", "1.9", "2.1"];
+	const FONT_SIZES = [
+		"0.77", // 10
+		"0.85", // 11
+		"0.92", // 12
+		"1.00", // 13px
+		"1.08", // 14
+		"1.15", // 15
+		"1.23", // 16
+		"1.38", // 18
+		"1.54", // 20
+		"1.85", // 24
+	];
+	
 	//const NOTE_FONT_SIZES = ["11", "12", "13", "14", "18", "24", "36", "48", "64", "72", "96"];
 	const NOTE_FONT_SIZE_DEFAULT = "12";
 
@@ -588,7 +600,7 @@ const ZoteroStandalone = new function() {
 		var fontSize = Zotero.Prefs.get('fontSize');
 		this.updateMenuItemEnabled('view-menuitem-font-size-bigger', fontSize < FONT_SIZES[FONT_SIZES.length - 1]);
 		this.updateMenuItemEnabled('view-menuitem-font-size-smaller', fontSize > FONT_SIZES[0]);
-		this.updateMenuItemEnabled('view-menuitem-font-size-reset', fontSize != FONT_SIZES[0]);
+		this.updateMenuItemEnabled('view-menuitem-font-size-reset', fontSize != "1.00");
 		
 		var noteFontSize = Zotero.Prefs.get('note.fontSize');
 		for (let menuitem of document.querySelectorAll(`#note-font-size-menu menuitem`)) {
