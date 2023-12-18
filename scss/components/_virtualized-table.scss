@@ -245,6 +245,7 @@
 		top: calc(1.83333333em - 1px);
 		left: 0;
 		right: 0;
+		z-index: 1;
 
 		@include comfortable {
 			top: calc(2.33333333em - 1px);
