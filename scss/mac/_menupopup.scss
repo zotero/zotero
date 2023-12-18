@@ -2,13 +2,13 @@ menupopup {
 	color-scheme: auto;
 	--panel-padding: 5px 0;
 	menu, menuitem {
+		appearance: none;
 		margin-left: 5px;
 		margin-right: 5px;
 		padding: 3px 10px 3px 10px;
 		border-radius: 4px;
 
 		&[_moz-menuactive] {
-			appearance: none;
 			// Try best to match the native menu style
 			@include light-dark(
 				background-color, color-mix(in srgb, -moz-mac-active-menuitem 75%, transparent),
