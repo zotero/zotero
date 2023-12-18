@@ -39,7 +39,7 @@
 	}
 	
 	.cell {
-		padding: 0 5px;
+		padding: 0 8px;
 		min-width: 30px;
 		cursor: default;
 		white-space: nowrap;
@@ -290,13 +290,9 @@
 		}
 
 		.label {
-			margin-inline-start: 5px;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			flex: 1;
-		}
-		&:first-child .label {
-			margin-inline-start: 4px;
 		}
 
 		&.cell-icon {
