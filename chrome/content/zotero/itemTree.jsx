@@ -1556,8 +1556,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
+		this._lastToggleOpenStateIndex = index;
+
 		if (this.isContainerOpen(index)) {
-			return this._closeContainer(index, skipRowMapRefresh, true);
+			await this._closeContainer(index, skipRowMapRefresh, true);
+			this._lastToggleOpenStateIndex = null;
+			return;
 		}
 		if (!skipRowMapRefresh) {
 			var savedSelection = this.getSelectedItems(true);
@@ -1603,6 +1607,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._rows[index].isOpen = true;
 
 		if (count == 0) {
+			this._lastToggleOpenStateIndex = null;
 			return;
 		}
 
@@ -1613,6 +1618,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			await this._refreshPromise;
 			this._restoreSelection(savedSelection, false, true);
 			this.tree.invalidate();
+			this._lastToggleOpenStateIndex = null;
 		}
 	}
 
@@ -2869,6 +2875,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_renderItem(index, selection, oldDiv=null, columns) {
 		let div;
 		if (oldDiv) {
+			// if marked as last toggled avoid re-rendering this row so that twisty animation can run
+			if (this._lastToggleOpenStateIndex === index) {
+				let oldTwisty = oldDiv.querySelector('.twisty');
+				if (oldTwisty) {
+					oldTwisty.classList.toggle('open', this.isContainerOpen(index));
+					return oldDiv;
+				}
+			}
 			div = oldDiv;
 			div.innerHTML = "";
 		}

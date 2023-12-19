@@ -262,6 +262,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 	renderItem = (index, selection, oldDiv, columns) => {
 		const treeRow = this.getRow(index);
+
+		// if marked as last toggled avoid re-rendering this row so that twisty animation can run
+		if (oldDiv && this._lastToggleOpenStateIndex === index) {
+			let oldTwisty = oldDiv.querySelector('.twisty');
+			if (oldTwisty) {
+				oldTwisty.classList.toggle('open', this.isContainerOpen(index));
+				return oldDiv;
+			}
+		}
 		
 		// Div creation and content
 		let div = oldDiv || document.createElement('div');
@@ -1141,8 +1150,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	toggleOpenState = async (index) => {
 		if (this.isContainerEmpty(index)) return;
+
+		this._lastToggleOpenStateIndex = index;
 		if (this.isContainerOpen(index)) {
-			return this._closeContainer(index);
+			await this._closeContainer(index);
+			this._lastToggleOpenStateIndex = null;
+			return;
 		}
 
 		this.selection.selectEventsSuppressed = true;
@@ -1160,6 +1173,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._refreshRowMap();
 		this._saveOpenStates();
 		this.tree.invalidate(index);
+		this._lastToggleOpenStateIndex = null;
 	}
 
 	/**
