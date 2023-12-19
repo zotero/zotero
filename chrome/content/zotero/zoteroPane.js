@@ -2777,9 +2777,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		var spinner = document.getElementById('zotero-tb-search-spinner');
-		spinner.style.display = 'inline';
+		spinner.setAttribute("status", "animate");
 		yield this.itemsView.setFilter('search', searchVal);
-		spinner.style.display = 'none';
+		spinner.removeAttribute("status");
 		if (runAdvanced) {
 			this.clearItemsPaneMessage();
 		}

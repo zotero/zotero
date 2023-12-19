@@ -1,0 +1,25 @@
+@keyframes rotating {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.zotero-spinner-16 {
+	width: 16px;
+	height: 16px;
+	fill: var(--fill-secondary);
+	@include focus-states using ($color) {
+		@include svgicon("loading", $color, "16");
+	}
+	-moz-context-properties: fill, fill-opacity;
+	animation: none;
+	display: none;
+
+	&[status=animate] {
+		display: inline;
+		animation: rotating 0.5s steps(12) infinite;
+	}
+}

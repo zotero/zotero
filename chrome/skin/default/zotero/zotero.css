@@ -209,19 +209,6 @@ zoterosearch .menulist-icon {
 	align-items: center;
 }
 
-.zotero-spinner-14 {
-	list-style-image: url(chrome://zotero/skin/spinner-14px.png);
-	height: 14px;
-	width: 14px;
-	margin-right: 2px;
-}
-
-.zotero-spinner-16 {
-	list-style-image: url(chrome://zotero/skin/spinner-16px.png);
-	height: 16px;
-	width: 16px;
-}
-
 #zotero-edit-bibliography-dialog #item-list .listcell-icon {
 	max-width: 16px;
 }
@@ -236,6 +223,4 @@ zoterosearch .menulist-icon {
 @media (min-resolution: 1.25dppx) {
 	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
 	.zotero-scrape-popup-collection { list-style-image: url('chrome://zotero/skin/treesource-collection@2x.png'); }
-	.zotero-spinner-14  { list-style-image: url(chrome://zotero/skin/spinner-14px@2x.png); }
-	.zotero-spinner-16  { list-style-image: url(chrome://zotero/skin/spinner-16px@2x.png); }
 }
