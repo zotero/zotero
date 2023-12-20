@@ -199,6 +199,9 @@ var Zotero_QuickFormat = new function () {
 				_showCitation(node);
 				_resize();
 			}
+			requestAnimationFrame(() => {
+				_updateItemList({ citedItems: [] });
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -431,167 +434,232 @@ var Zotero_QuickFormat = new function () {
 			_updateItemList({ citedItems: [] });
 		}
 	});
-	
-	/**
-	 * Updates the item list
-	 */
-	var _updateItemList = async function (options = {}) {
-		options = Object.assign({
-				citedItems: false,
-				citedItemsMatchingSearch: false,
-				searchString: "",
-				searchResultIDs: [],
-				preserveSelection: false
-			}, options);
-		let { citedItems, citedItemsMatchingSearch, searchString,
-			searchResultIDs, preserveSelection } = options
-			
-		var selectedIndex = 1, previousItemID;
-		if (Zotero_QuickFormat.citingNotes) citedItems = [];
+
+	function _updateItemListCitedItems(options) {
+		let { citedItems, citedItemsMatchingSearch, nCitedItemsFromLibrary } = options;
+		if (Zotero_QuickFormat.citingNotes) return;
 		
-		// Do this so we can preserve the selected item after cited items have been loaded
-		if(preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
-			previousItemID = parseInt(referenceBox.selectedItem.getAttribute("zotero-item"), 10);
-		}
-		
-		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
-		
-		var nCitedItemsFromLibrary = {};
-		if(!citedItems) {
+		if (!citedItems) {
 			// We don't know whether or not we have cited items, because we are waiting for document
 			// data
 			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited.loading")));
-			selectedIndex = 2;
-		} else if(citedItems.length) {
+		}
+		else if (citedItems.length) {
 			// We have cited items
-			for(var i=0, n=citedItems.length; i<n; i++) {
-				var citedItem = citedItems[i];
+			for (let citedItem of citedItems) {
 				// Tabulate number of items in document for each library
-				if(!citedItem.cslItemID) {
+				if (!citedItem.cslItemID) {
 					var libraryID = citedItem.libraryID;
-					if(libraryID in nCitedItemsFromLibrary) {
+					if (libraryID in nCitedItemsFromLibrary) {
 						nCitedItemsFromLibrary[libraryID]++;
-					} else {
+					}
+					else {
 						nCitedItemsFromLibrary[libraryID] = 1;
 					}
 				}
 			}
 			
-			if(citedItemsMatchingSearch && citedItemsMatchingSearch.length) {
+			if (citedItemsMatchingSearch && citedItemsMatchingSearch.length) {
 				referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
-				for(var i=0; i<Math.min(citedItemsMatchingSearch.length, 50); i++) {
-					var citedItem = citedItemsMatchingSearch[i];
+				for (let citedItem of citedItemsMatchingSearch.slice(0, 50 - referenceBox.children.length)) {
 					referenceBox.appendChild(_buildListItem(citedItem));
 				}
 			}
+		}
+	}
+	
+	async function _updateItemListOpenItems(options) {
+		let win = Zotero.getMainWindow();
+		let tabs = win.Zotero_Tabs.getState();
+		let itemIDs = tabs.filter(t => t.type === 'reader').map(t => t.data.itemID);
+		if (!itemIDs.length) return;
+
+		let matchedItems = [];
+		let items = itemIDs.map(itemID => {
+			let item = Zotero.Items.get(itemID);
+			if (item && item.parentItemID) {
+				itemID = item.parentItemID;
+			}
+			return Zotero.Cite.getItem(item.parentItemID);
+		});
+		if (!options.searchString) {
+			matchedItems = items;
+		}
+		else {
+			Zotero.debug("QuickFormat: Searching open tabs");
+			let splits = Zotero.Fulltext.semanticSplitter(options.searchString);
+			for (let item of items) {
+				// Generate a string to search for each item
+				let itemStr = item.getCreators()
+					.map(creator => creator.firstName + " " + creator.lastName)
+					.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
+					.join(" ");
+				
+				// See if words match
+				for (let split of splits) {
+					if (itemStr.toLowerCase().includes(split)) matchedItems.push(item);
+				}
+			}
+			if (!matchedItems.length) return;
+			Zotero.debug("QuickFormat: Found matching open tabs");
+		}
+		referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.openTabs")));
+		for (let item of matchedItems.slice(0, 50 - referenceBox.children.length)) {
+			referenceBox.appendChild(_buildListItem(item));
+		}
+	}
+	
+	async function _updateItemListLibrarySearchResults(options) {
+		let { citedItemsMatchingSearch, searchString, previousItemID,
+			searchResultIDs, preserveSelection, nCitedItemsFromLibrary } = options;
+			
+		if (!searchResultIDs.length || (citedItemsMatchingSearch && citedItemsMatchingSearch.length >= 50)) {
+			return;
+		}
+			
+		// Search results might be in an unloaded library, so get items asynchronously and load
+		// necessary data
+		var items = await Zotero.Items.getAsync(searchResultIDs);
+		await Zotero.Items.loadDataTypes(items);
+		
+		searchString = searchString.toLowerCase();
+		let searchParts = Zotero.SearchConditions.parseSearchString(searchString);
+		var collation = Zotero.getLocaleCollation();
+		
+		function _itemSort(a, b) {
+			var firstCreatorA = a.firstCreator, firstCreatorB = b.firstCreator;
+			
+			// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
+			// using last name of first author
+			if (firstCreatorA && firstCreatorB) {
+				for (let part of searchParts) {
+					let caStartsWith = firstCreatorA.toLowerCase().startsWith(part.text);
+					let cbStartsWith = firstCreatorB.toLowerCase().startsWith(part.text);
+					if (caStartsWith && !cbStartsWith) {
+						return -1;
+					}
+					else if (!caStartsWith && cbStartsWith) {
+						return 1;
+					}
+				}
+			}
+			
+			var libA = a.libraryID, libB = b.libraryID;
+			if (libA !== libB) {
+				// Sort by number of cites for library
+				if (nCitedItemsFromLibrary[libA] && !nCitedItemsFromLibrary[libB]) {
+					return -1;
+				}
+				if (!nCitedItemsFromLibrary[libA] && nCitedItemsFromLibrary[libB]) {
+					return 1;
+				}
+				if (nCitedItemsFromLibrary[libA] !== nCitedItemsFromLibrary[libB]) {
+					return nCitedItemsFromLibrary[libB] - nCitedItemsFromLibrary[libA];
+				}
+				
+				// Sort by ID even if number of cites is equal
+				return libA - libB;
+			}
+		
+			// Sort by last name of first author
+			if (firstCreatorA !== "" && firstCreatorB === "") {
+				return -1;
+			}
+			else if (firstCreatorA === "" && firstCreatorB !== "") {
+				return 1;
+			}
+			else if (firstCreatorA) {
+				return collation.compareString(1, firstCreatorA, firstCreatorB);
+			}
+			
+			// Sort by date
+			var yearA = a.getField("date", true, true).substr(0, 4),
+				yearB = b.getField("date", true, true).substr(0, 4);
+			return yearA - yearB;
+		}
+		
+		function _noteSort(a, b) {
+			return collation.compareString(
+				1, b.getField('dateModified'), a.getField('dateModified')
+			);
+		}
+		
+		items.sort(Zotero_QuickFormat.citingNotes ? _noteSort : _itemSort);
+		
+		var previousLibrary = -1;
+		for (let item of items.slice(0, 50 - referenceBox.children.length)) {
+			let libraryID = item.libraryID;
+			
+			if (previousLibrary != libraryID) {
+				var libraryName = libraryID
+					? Zotero.Libraries.getName(libraryID)
+					: Zotero.getString('pane.collections.library');
+				referenceBox.appendChild(_buildListSeparator(libraryName));
+			}
+
+			referenceBox.appendChild(_buildListItem(item));
+			previousLibrary = libraryID;
+		}
+	}
+	
+	/**
+	 * Updates the item list
+	 */
+	async function _updateItemList(options = {}) {
+		options = Object.assign({
+			citedItems: false,
+			citedItemsMatchingSearch: false,
+			searchString: "",
+			searchResultIDs: [],
+			preserveSelection: false,
+			nCitedItemsFromLibrary: {},
+		}, options);
+			
+		let { preserveSelection, nCitedItemsFromLibrary } = options;
+		let previousItemID, selectedIndex = 1;
+
+		// Do this so we can preserve the selected item after cited items have been loaded
+		if (preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
+			previousItemID = parseInt(referenceBox.selectedItem.getAttribute("zotero-item"));
+		}
+		
+		// Clear item list
+		while (referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
+		
+		await _updateItemListOpenItems(options);
+		_updateItemListCitedItems(options);
+		await _updateItemListLibrarySearchResults(options);
+
+		if (previousItemID !== undefined) {
+			Array.from(referenceBox.children).some((elem, index) => {
+				if (elem.getAttribute('zotero-item') === previousItemID) {
+					selectedIndex = index;
+					return true;
+				}
+				return false;
+			});
+		}
+		
+		_resize();
+		if (referenceBox.children.length) {
+			referenceBox.selectedIndex = selectedIndex;
+			referenceBox.ensureIndexIsVisible(selectedIndex);
 		}
 		
 		// Also take into account items cited in this citation. This means that the sorting isn't
 		// exactly by # of items cited from each library, but maybe it's better this way.
 		_updateCitationObject();
-		for(var citationItem of io.citation.citationItems) {
+		for (let citationItem of io.citation.citationItems) {
 			var citedItem = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
-			if(!citedItem.cslItemID) {
-				var libraryID = citedItem.libraryID;
-				if(libraryID in nCitedItemsFromLibrary) {
+			if (!citedItem.cslItemID) {
+				let libraryID = citedItem.libraryID;
+				if (libraryID in nCitedItemsFromLibrary) {
 					nCitedItemsFromLibrary[libraryID]++;
-				} else {
+				}
+				else {
 					nCitedItemsFromLibrary[libraryID] = 1;
 				}
 			}
-		}
-
-		if(searchResultIDs.length && (!citedItemsMatchingSearch || citedItemsMatchingSearch.length < 50)) {
-			// Search results might be in an unloaded library, so get items asynchronously and load
-			// necessary data
-			var items = await Zotero.Items.getAsync(searchResultIDs);
-			await Zotero.Items.loadDataTypes(items);
-			
-			searchString = searchString.toLowerCase();
-			let searchParts = Zotero.SearchConditions.parseSearchString(searchString);
-			var collation = Zotero.getLocaleCollation();
-			
-			function _itemSort(a, b) {
-				var firstCreatorA = a.firstCreator, firstCreatorB = b.firstCreator;
-				
-				// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
-				// using last name of first author
-				if (firstCreatorA && firstCreatorB) {
-					for (let part of searchParts) {
-						let caStartsWith = firstCreatorA.toLowerCase().startsWith(part.text);
-						let cbStartsWith = firstCreatorB.toLowerCase().startsWith(part.text);
-						if (caStartsWith && !cbStartsWith) {
-							return -1;
-						}
-						else if (!caStartsWith && cbStartsWith) {
-							return 1;
-						}
-					}
-				}
-				
-				var libA = a.libraryID, libB = b.libraryID;
-				if(libA !== libB) {
-					// Sort by number of cites for library
-					if(nCitedItemsFromLibrary[libA] && !nCitedItemsFromLibrary[libB]) {
-						return -1;
-					}
-					if(!nCitedItemsFromLibrary[libA] && nCitedItemsFromLibrary[libB]) {
-						return 1;
-					}
-					if(nCitedItemsFromLibrary[libA] !== nCitedItemsFromLibrary[libB]) {
-						return nCitedItemsFromLibrary[libB] - nCitedItemsFromLibrary[libA];
-					}
-					
-					// Sort by ID even if number of cites is equal
-					return libA - libB;
-				}
-			
-				// Sort by last name of first author
-				if (firstCreatorA !== "" && firstCreatorB === "") {
-					return -1;
-				} else if (firstCreatorA === "" && firstCreatorB !== "") {
-					return 1
-				} else if (firstCreatorA) {
-					return collation.compareString(1, firstCreatorA, firstCreatorB);
-				}
-				
-				// Sort by date
-				var yearA = a.getField("date", true, true).substr(0, 4),
-					yearB = b.getField("date", true, true).substr(0, 4);
-				return yearA - yearB;
-			}
-			
-			function _noteSort(a, b) {
-				return collation.compareString(
-					1, b.getField('dateModified'), a.getField('dateModified')
-				);
-			}
-			
-			items.sort(Zotero_QuickFormat.citingNotes ? _noteSort : _itemSort);
-			
-			var previousLibrary = -1;
-			for(var i=0, n=Math.min(items.length, citedItemsMatchingSearch ? 50-citedItemsMatchingSearch.length : 50); i<n; i++) {
-				var item = items[i], libraryID = item.libraryID;
-				
-				if(previousLibrary != libraryID) {
-					var libraryName = libraryID ? Zotero.Libraries.getName(libraryID)
-						: Zotero.getString('pane.collections.library');
-					referenceBox.appendChild(_buildListSeparator(libraryName));
-				}
-
-				referenceBox.appendChild(_buildListItem(item));
-				previousLibrary = libraryID;
-				
-				if(preserveSelection && (item.cslItemID ? item.cslItemID : item.id) === previousItemID) {
-					selectedIndex = referenceBox.childNodes.length-1;
-				}
-			}
-		}
-		
-		_resize();
-		if((citedItemsMatchingSearch && citedItemsMatchingSearch.length) || searchResultIDs.length) {
-			referenceBox.selectedIndex = selectedIndex;
-			referenceBox.ensureIndexIsVisible(selectedIndex);
 		}
 	};
 	
