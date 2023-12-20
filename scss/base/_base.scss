@@ -12,7 +12,7 @@
     @media not (-moz-platform: windows) {
         --color-accent: SelectedItem;
     }
-    --color-focus-search-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+    --color-focus-search: color-mix(in srgb, var(--color-accent) 70%, transparent);
     @media (-moz-platform: windows) {
         @include light-dark(--color-focus-border, #000, #fff);
         --width-focus-border: 2px;

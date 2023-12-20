@@ -20,8 +20,8 @@
 	
 		&:focus {
 			outline: none;
-			border-color: var(--color-focus-search-color);
-			box-shadow: 0 0 0 calc(var(--width-focus-border) - 1px) var(--color-focus-search-color);
+			border-color: var(--color-focus-search);
+			box-shadow: 0 0 0 calc(var(--width-focus-border) - 1px) var(--color-focus-search);
 		}
 	}
 
@@ -54,7 +54,7 @@ search-textbox {
 	&:focus {
 		outline: none;
 		border-color: transparent;
-		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-search-color);
+		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-search);
 	}
 }
 
