@@ -415,10 +415,10 @@ var ZoteroPane = new function()
 		try {
 			let isDevBuild = Zotero.version.includes('-dev');
 			// Uncomment to test
-			//isDevBuild = isDevBuild || Zotero.version.includes('.SOURCE');
+			//isDevBuild = true;
 			if (isDevBuild) {
 				let label = document.createXULElement('label');
-				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer; margin-right: .5em');
+				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer; margin: 0 .5em 0 1em');
 				label.onclick = function () {
 					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
 				};
