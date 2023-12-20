@@ -35,9 +35,9 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 <!--EDIT MENU-->
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyCitationCmd.label "Citation">
+<!ENTITY copyBibliographyCmd.label "Bibliography">
+<!ENTITY copyNoteCmd.label "Note Text">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
