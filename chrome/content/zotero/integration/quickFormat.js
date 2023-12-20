@@ -27,8 +27,8 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js",
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
-	const specifiedLocatorRe = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-]+) *$/;
-	const yearRe = /,? *([0-9]+) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
+	const specifiedLocatorRe = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-–]+) *$/;
+	const yearRe = /,? *([0-9]+(?: *[-–] *[0-9]+)?) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
 	const locatorRe = / (?:,? *(p{0,2})\.?|(\:)) *([0-9\-–]+)$/i;
 	const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
 	const charRe = /[\w\u007F-\uFFFF]/;
