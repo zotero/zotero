@@ -238,18 +238,12 @@ var ZoteroPane = new function()
 						}
 						return document.getElementById('zotero-tb-collection-add');
 					},
-					ShiftTab: () => document.getElementById('zotero-tb-sync-stop')
-				},
-				'zotero-tb-sync-stop': {
-					ArrowRight: () => null,
-					ArrowLeft: () => null,
-					Tab: () => document.getElementById('zotero-tb-sync'),
 					ShiftTab: () => document.getElementById('zotero-tb-sync-error')
 				},
 				'zotero-tb-sync-error': {
 					ArrowRight: () => null,
 					ArrowLeft: () => null,
-					Tab: () => document.getElementById('zotero-tb-sync-stop'),
+					Tab: () => document.getElementById('zotero-tb-sync'),
 					ShiftTab: () => document.getElementById('zotero-tb-opened-tabs'),
 					Enter: () => document.getElementById("zotero-tb-sync-error")
 						.dispatchEvent(new MouseEvent("click", { target: event.target })),
@@ -423,14 +417,14 @@ var ZoteroPane = new function()
 			// Uncomment to test
 			//isDevBuild = isDevBuild || Zotero.version.includes('.SOURCE');
 			if (isDevBuild) {
-				let label = document.createElement('span');
+				let label = document.createXULElement('label');
 				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer; margin-right: .5em');
 				label.onclick = function () {
 					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
 				};
-				label.textContent = 'TEST BUILD — DO NOT USE';
-				let syncStop = document.getElementById('zotero-tb-sync-stop');
-				syncStop.parentNode.insertBefore(label, syncStop);
+				label.value = 'TEST BUILD — DO NOT USE';
+				let syncError = document.getElementById('zotero-tb-sync-error');
+				syncError.parentNode.insertBefore(label, syncError);
 			}
 			else if (Services.appinfo.inSafeMode) {
 				let label = document.createElement('span');
@@ -2787,11 +2781,16 @@ var ZoteroPane = new function()
 	
 	
 	this.sync = function () {
-		this.hideSyncReminder();
+		if (Zotero.Sync.Runner.syncInProgress) {
+			Zotero.Sync.Runner.stop();
+		}
+		else {
+			this.hideSyncReminder();
 
-		Zotero.Sync.Server.canAutoResetClient = true;
-		Zotero.Sync.Server.manualSyncRequired = false;
-		Zotero.Sync.Runner.sync();
+			Zotero.Sync.Server.canAutoResetClient = true;
+			Zotero.Sync.Server.manualSyncRequired = false;
+			Zotero.Sync.Runner.sync();
+		}
 	};
 
 
