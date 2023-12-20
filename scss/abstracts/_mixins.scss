@@ -125,3 +125,16 @@
 		}
 	}
 }
+
+@mixin macOS-inactive-opacity {
+	$selector: &;
+	@at-root {
+		@media (-moz-platform: macos) {
+			#{$selector} {
+				&:-moz-window-inactive {
+					opacity: 0.6;
+				}
+			}
+		}
+	}
+}

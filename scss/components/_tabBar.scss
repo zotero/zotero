@@ -4,7 +4,11 @@
 	--safe-area-end: 0;
 	--tab-border: .5px solid var(--tab-border);
 
+	background: var(--material-tabbar);
+	-moz-window-dragging: drag;
 	min-height: var(--tab-min-height);
+
+	@include macOS-inactive-opacity;
 	
 	&:not([hidden]) {
 		// display: flex overrides the hidden attribute
@@ -140,6 +144,7 @@
 	right: 0;
 	padding: 4px 1px;
 	column-gap: 4px;
+	-moz-window-dragging: drag;
 
 	.pinned-tabs & {
 		padding: 4px 0;
@@ -160,6 +165,9 @@
 	display: flex;
 	border-radius: 5px;
 	transition: background-color 0.1s ease-out;
+	-moz-window-dragging: no-drag;
+
+	@include macOS-inactive-opacity;
 
 	&.selected {
 		background: var(--material-button);

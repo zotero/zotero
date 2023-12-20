@@ -3,18 +3,6 @@
 	--safe-area-end: 20px;
 }
 
-.tabs {
-	-moz-window-dragging: drag;
-}
-
-.tab {
-	-moz-window-dragging: no-drag;
-
-	&:-moz-window-inactive {
-		opacity: 0.6;
-	}
-}
-
 #navigator-toolbox {
 	border: 0;
 }

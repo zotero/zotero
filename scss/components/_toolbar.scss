@@ -45,6 +45,8 @@
 	@media not (-moz-platform: macos) {
 		-moz-window-dragging: no-drag;
 	}
+
+	@include macOS-inactive-opacity;
 }
 
 #zotero-layout-switcher .zotero-toolbar {
