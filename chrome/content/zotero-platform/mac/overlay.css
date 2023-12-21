@@ -25,7 +25,7 @@
 #zotero-context-splitter:not([state=collapsed])[orient=horizontal]
 {
 	-moz-appearance: none;
-	border-inline-start: 1px solid #bdbdbd;
+	border-inline-start: var(--material-panedivider);
 	margin-inline-end: -4px;
 	width: 5px !important;
 	min-width: 5px;
