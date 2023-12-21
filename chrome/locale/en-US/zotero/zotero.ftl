@@ -9,6 +9,13 @@ zotero-tabs-menu-filter =
 zotero-tabs-menu-close-button =
     .tooltiptext = Close Tab
 
+item-creator-moveDown =
+    .label = Move Down
+item-creator-moveToTop =
+    .label = Move to Top
+item-creator-moveUp =
+    .label = Move Up
+
 item-menu-viewAttachment =
     .label = Open {
         $attachmentType ->
@@ -22,6 +29,13 @@ item-menu-viewAttachment =
             [window] New Window
             *[other] Reader
     }
+itembox-button-openLink =
+    .title = Open Link
+    .aria-label = Open Link
+
+itembox-button-options =
+    .aria-label = Open Context Menu
+    .title = Open Context Menu
 
 import-window =
     .title = Import

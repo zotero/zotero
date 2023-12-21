@@ -1,100 +1,115 @@
 item-box {
-	display: flex;
-	flex-direction: column;
-}
-
-item-box .body {
-	--row-height: 1.5em;
 	
 	display: flex;
 	min-width: 0;
 	width: 100%;
 
 	#item-box {
-		display: flex;
-		flex-direction: column;
-		margin-top: 8px;
-		align-items: start;
 		width: 100%;
 	}
 
 	#info-table {
 		display: grid;
 		grid-template-columns: max-content 1fr;
-		// Make sure rows are at least --row-height tall, but no taller than their tallest child
-		// This lets rows expand for multi-line editors
-		grid-auto-rows: minmax(var(--row-height), max-content);
-		align-items: center;
-		width: 100%;
-	}
-
-	tr {
-		display: contents;
-	}
-
-	td {
-		display: flex;
-		min-width: 0;
-		align-self: stretch;
-		align-items: center;
-		margin-inline-end: 5px;
-	}
-
-	td > input, .creator-name-box > input {
-		align-self: center;
-		// Fields have 3px borders; cancel them out
-		margin-top: -3px;
-		margin-bottom: -3px;
-		margin-inline-start: 0;
-		padding: 0;
+		column-gap: 10px;
+		row-gap: 2px;
+		width: inherit;
 	}
 	
-	td > input {
-		margin-inline-end: 5px;
+	.meta-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+		padding-inline-start: 8px;
+		padding-inline-end: 8px;
+
+		.meta-data {
+			width: 0;
+			min-width: 100%;
+			display: flex;
+			toolbarbutton {
+				margin-inline-start: 4px;
+			}
+
+		}
+		editable-text {
+			flex: 1; // stretch value field as much as possible
+			max-width: 100%; // stay within .meta-data when the itemBox is narrow
+			.input {
+				// keep input within editable-text when the itemBox is narrow
+				width: calc(100% - 2*var(--editable-text-padding-inline) - 1px)
+			}
+			// keep multiline fields as tall as they have to be unless they're focused
+			&[multiline] textarea:not(:focus) {
+				min-height: 1em;
+			}
+		}
+
+		.meta-label {
+			display: flex;
+			font-weight: normal;
+			text-align: end;
+			&[fieldname^="creator"] {
+				justify-content: space-between;
+				align-items: center;
+			}
+			> label {
+				margin-top: 2px;
+				@include comfortable {
+					margin-top: 3px;
+				}
+			}
+		}
+		
+		.key {
+			width: 100%;
+		}
+
+		toolbarbutton {
+			@include focus-ring;
+
+			// needed to have the outline appear on all platforms
+			-moz-appearance: none;
+
+			align-self: center;
+			// Make all buttons tigher to not stretch the rows
+			height: auto;
+			width: auto;
+			padding: 1px;
+		}
 	}
 
-	th > label {
-		margin-top: 1px !important;
-		margin-bottom: 1px !important;
-		-moz-box-pack: start;
-		margin-inline-start: 1px !important;
-		margin-inline-end: 5px !important;
-		padding: 0 2px;
+	.meta-label > label, .creator-type-label, #more-creators-label {
+		color: var(--fill-secondary);
 	}
 
-	td > [fieldname] {
-		width: 100%;
+	// All icons that are by default hidden
+	#info-table .show-on-hover {
+		visibility: hidden;
 	}
 
-	.value {
-		min-height: 14px;
-		align-self: center;
-		padding-inline: 2px;
+	.drag-hidden-creator {
+		opacity: 0;
 	}
-
-	.value:not(.multiline) {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.value.multiline {
-		white-space: pre-line;
-	}
-
-	/*td > vbox > description
-	{
-		margin: 0 !important;
-	}*/
+	// On hover of the meta-row, reveal all hidden icons
+	// unless there's .noHover class which keeps everything hidden
+	#info-table .meta-row:not(.noHover):hover .show-on-hover,
+	#info-table .meta-row:focus-within .show-on-hover {
+        visibility: visible;
+    }
 
 	#item-type-menu {
-		height: 1.5em !important;
-		min-height: 1.5em !important;
-		padding: 0 2px !important;
-		margin: 0 !important;
+		@include focus-ring;
+		margin: 0;
 		margin-inline-end: 5px !important;
-		max-height: 1.5em !important;
 		flex: 1;
+		padding-inline-start: 5px;
+
+		// Same padding as editable-text
+		@include comfortable {
+			padding-top: 3px;
+			padding-bottom: 3px;
+		}	
 
 		&::part(dropmarker) {
 			display: none;
@@ -103,10 +118,13 @@ item-box .body {
 		&::part(label) {
 			margin-inline-start: 0;
 		}
+
+		&[disabled] {
+			background: none;
+		}
 	}
 
 	#item-type-menu:not(:hover):not(:active) {
-		border: var(--material-border-transparent);
 		background-color: transparent;
 	}
 
@@ -119,128 +137,95 @@ item-box .body {
 		padding: 0 !important;
 	}
 
-	/* DEBUG: this doesn't seem to work, unfortunately
-	label[singleField=false]:after
-	{
-		content:",";
-	}
-	*/
-
-	/*textbox .textbox-input-box
-	{
-		margin: 0;
-	}*/
-
 	textarea {
 		font: inherit;
 		resize: none;
 	}
 
-	/* metadata field names */
-	th {
-		display: flex;
-		height: var(--row-height);
-		align-self: start;
-		align-items: center;
-		justify-content: end;
-		font-weight: normal;
-		margin-inline-start: 5px !important;
-		margin-inline-end: 0 !important;
-	}
 
 	#more-creators-label
 	{
 		font-weight: bold;
 	}
 
-	/*row > label
-	{
-		border: 1px solid transparent;
-	}
-	
-	row label
-	{
-		-moz-user-focus: ignore;
-	}*/
-
 	.pointer:hover, .pointer:hover > label {
 		cursor: pointer !important;
 	}
 
 	/* creator type menu */
-
+	.creator-type-label {
+		@include focus-ring;
+		display: inline-block;
+		// undo the padding so that the name is pushed to the end
+		margin-inline-end: -4px;
+		padding-left: 4px;
+		padding-right: 4px;
+		
+		&:hover, &:focus {
+			.creator-type-dropmarker {
+			  visibility: visible;
+			}
+		}
+	}
 	.creator-type-label, .creator-type-value {
 		-moz-box-align: center;
+		align-items: center;
+		display: flex;
+	}
+
+	.creator-type-value > .zotero-clicky {
+		// Some spacing between creator buttons
+		margin-right: 2px; 
 	}
 
 	.creator-name-box {
 		flex: 1;
-		min-width: 0;
 		display: flex;
-		align-items: baseline;
-
-		& > input {
-			flex: 1;
-			min-width: 60%;
+		editable-text input {
+			min-width: 0;
 		}
 
-		& > div {
-			flex-shrink: 1;
-			min-width: 10px;
+		// Margin adjusted by inline padding to have 4px between first and last name
+		*[fieldMode="0"]:first-child {
+			margin-inline-end: calc(max(0px, 4px - var(--editable-text-padding-inline)));
 		}
-
-		& > div:first-child[fieldMode="0"] {
-			// Cancel out padding before comma
-			margin-inline-end: -3px;
+		// Add comma when the last name is not focused
+		*[fieldMode="0"]:first-child:not(.focused) {
+			position: relative;
+			&::after {
+				content: ",";
+				position: absolute;
+				right: 0;
+				bottom: var(--editable-text-padding-block);
+			}
 		}
-	}
-
-	.creator-type-label > label
-	{
-		margin: 1px 0 !important;
-		margin-inline-end: 4px !important;
-		padding-inline-end: 2px !important;
 	}
 
 	.creator-type-dropmarker {
 		display: inline-block;
-		margin: 0 1em 1px;
-		background-image: url('chrome://zotero/skin/arrow-down.gif');
-		background-size: cover;
-		width: 11px;
-		height: 6px;
-	}
-
-	.creator-name-box, .date-box > span {
-		margin: 1px 0 !important;
-		margin-inline-start: 1px !important;
+		background-image: url('chrome://zotero/skin/16/universal/chevron-12.svg');
+		background-size: contain;
+		width: 8px;
+		height: 8px;
+		background-repeat: no-repeat;
+		padding-right: 4px;
+		align-self: center;
+		visibility: hidden;
 	}
 
 	.comma {
-		margin: 1px 0 !important;
+		margin-inline-end: calc(4px - var(--editable-text-padding-inline));
+		align-self: center;
 	}
 
 	#zotero-date-field-status
 	{
-		color: #666;
+		color: var(--fill-secondary);
 		padding: 0 !important;
-		padding-inline-start: 1px !important;
-		padding-inline-end: 10px !important;
+		padding-inline-start: 5px !important;
+		padding-inline-end: 1px !important;
 		white-space: nowrap;
-	}
-
-	.zotero-field-toggle
-	{
-		width: 27px !important;
-		max-width: 27px !important;
-		min-width: 27px !important;
-		height: 14px;
-		margin: 0 !important;
-		margin-inline-end: 5px !important;
-		background-repeat: no-repeat !important;
-		background-position: center !important;
-		border-width: 0 !important;
-		border-radius: 4px !important;
+		align-self: center;
 	}
 
 	/* Merge pane in duplicates view */
@@ -267,7 +252,7 @@ item-box .body {
 	}
 
 	#retraction-details {
-		background: #fbf0f0;
+		@include light-dark(background, #fbf0f0, var(--material-background));
 		padding: .5em 1.5em;
 		margin-top: 0;
 		margin-bottom: 1em;

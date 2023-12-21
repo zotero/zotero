@@ -139,9 +139,7 @@
 			span.innerText = this.value;
 			this.append(span);
 			let size = span.getBoundingClientRect();
-			let inlinePadding = getComputedStyle(this).getPropertyValue('--editable-text-padding-inline');
-			let blockPadding = getComputedStyle(this).getPropertyValue('--editable-text-padding-block');
-			this.style['max-width'] = `calc(${size.width}px + 2*${inlinePadding} + 2*${blockPadding})`;
+			this.style['max-width'] = `calc(${size.width}px)`;
 			this.querySelector("span").remove();
 		};
 		

@@ -15,7 +15,7 @@
 
 /* Minus and plus buttons with clicky glow effect */
 .zotero-clicky-minus, .zotero-clicky-plus {
-	margin: 0 !important;
+	margin: 0;
 	width: 20px;
 	height: 20px;
 	border-radius: 2px;
@@ -29,11 +29,33 @@
 .zotero-clicky-minus {
 	@include svgicon-menu("minus-circle", "universal", "16");
 	border: 0px !important;
+	margin: 0;
 }
 
 .zotero-clicky-plus {
 	@include svgicon-menu("plus-circle", "universal", "16");
 	border: 0px !important;
+	margin: 0;
+}
+
+.zotero-clicky-grippy {
+	@include svgicon-menu("grip", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-options {
+	@include svgicon-menu("options", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-open-link {
+	@include svgicon-menu("open-link", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-merge {
+	@include svgicon-menu("merge", "universal", "16");
+	margin: 0;
 }
 
 .zotero-clicky-cross {

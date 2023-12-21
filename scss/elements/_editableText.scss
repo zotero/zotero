@@ -40,9 +40,11 @@ editable-text {
 	
 	span {
 		visibility: hidden;
-		margin: 1px;
+		margin: 0;
+		border: 1px solid transparent;
 		width: fit-content;
 		white-space: nowrap;
+		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 	}
 	
 	&:not([nowrap])::after {
@@ -83,7 +85,7 @@ editable-text {
 		
 		&:hover:not(:read-only, :focus) {
 			border-radius: 5px;
-			border: 1px solid var(--fill-tertiary);
+			background-color: var(--fill-quinary);
 			box-shadow: 0 0 0 1px var(--fill-quinary);	
 		}
 		

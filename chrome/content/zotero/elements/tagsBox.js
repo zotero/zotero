@@ -351,7 +351,7 @@
 				itemID: this._item.id || ''
 			};
 			valueElement.autocomplete = {
-				ignoreBlurWhileSearching: true,
+				ignoreBlurWhileSearching: false,
 				popup: 'PopupAutoComplete',
 				search: 'zotero',
 				searchParam: JSON.stringify(params),

@@ -1,24 +1,7 @@
 item-box {
-	row > hbox,
-	row > vbox
-	{
-		margin-top: 0 !important;
-		margin-bottom: 0 !important;
-		padding-top: 0 !important;
-		padding-bottom: 0 !important;
-	}
-	
-	row vbox[fieldname]
-	{
-		margin-inline-start: 1px;
-	}
-	
-	.creator-type-label image {
-		margin-bottom: 0;
-	}
 	
 	@media (-moz-platform: windows-win10) {
-		td > input, td > textarea, .creator-name-box > input {
+		.meta-data > input, .meta-data > textarea, .creator-name-box > input {
 			// Give text fields a consistent, native-ish look using Windows 11
 			// colors. Ideally, we only want to do this on Windows 11, but
 			// Windows 11 can't currently be specifically targeted.
@@ -36,7 +19,6 @@ item-box {
 	
 	#item-type-menu
 	{
-		padding: 0 !important;
 		padding-inline-start: 1px !important;
 		margin: 0 !important;
 		margin-inline-start: 1px !important;
