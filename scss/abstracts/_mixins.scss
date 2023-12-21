@@ -142,3 +142,15 @@
 		}
 	}
 }
+/*
+	This mixin replaces the default focus-rings - those are platform-specific, do not show up on some
+	components (e.g. toolbarbutton) and sometimes are too wide (e.g. around textfield on macOS).
+	Box-shadow is used to be able to set the radius.
+*/
+@mixin focus-ring($width: 1px, $radius: 5px) {
+	&:focus-visible {
+	  outline: none;
+	  box-shadow: 0 0 0 $width -moz-accent-color;
+	  border-radius: $radius;
+	}
+  }
