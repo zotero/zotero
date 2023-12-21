@@ -1,13 +1,32 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "themes/light";
+@import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
+
 dialog
 {
 	padding-top: 0px;
 	padding-left: 0px;
 	padding-right: 0px;
+	
+	appearance: none;
+	background: var(--material-sidepane);
 }
 
 #aboutcontent
 {
-	background: white;
+	background: var(--material-background);
 	padding: 10px 16px;
 	font-size: 13px;
 	margin-bottom: 10px;
@@ -15,11 +34,13 @@ dialog
 
 #logo {
 	margin: 7px 0 0 7px;
+	-moz-context-properties: fill, fill-opacity;
+	fill: var(--fill-primary);
 }
 
 #version
 {
-	color: gray;
+	color: var(--fill-secondary);
 	margin-bottom: 5px;
 	-moz-user-select: text;
 	-moz-user-focus: normal;
