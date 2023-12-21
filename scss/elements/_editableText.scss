@@ -17,52 +17,101 @@ editable-text {
 		--max-visible-lines: 20;
 	}
 
+	&[nowrap] {
+		--min-visible-lines: 1;
+	}
+
+	&[tight] {
+		@include comfortable {
+			--editable-text-padding-inline: 4px;
+			--editable-text-padding-block: 2px;
+		}
+		
+		@include compact {
+			--editable-text-padding-inline: 3px;
+			--editable-text-padding-block: 1px;
+		}
+	}
+
 	// Fun auto-sizing approach from CSSTricks:
 	// https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 	
 	display: grid;
 	
-	&::after {
+	span {
+		visibility: hidden;
+		margin: 1px;
+		width: fit-content;
+		white-space: nowrap;
+	}
+	
+	&:not([nowrap])::after {
 		content: attr(value) ' ';
 		visibility: hidden;
 		margin: 1px;
-	}
-	
-	&::after, .input {
-		grid-area: 1 / 1 / 2 / 2;
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 		font: inherit;
 		line-height: inherit;
 		color: inherit;
-		overflow-wrap: break-word;
+	}
+	
+	&:not([nowrap])::after, &:not([nowrap]) .input {
+		grid-area: 1 / 1 / 2 / 2;
+		overflow-wrap: anywhere;
 		white-space: pre-wrap;
 		max-height: calc(2ex * var(--max-visible-lines));
 	}
 	
 	.input {
+		@include focus-ring;
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;
 		
 		min-height: calc(2ex * var(--min-visible-lines));
 		margin: 0;
-		
+		border: 1px solid transparent;
+
+		font: inherit;
+		line-height: inherit;
+		color: inherit;
+		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
+	
 		&:read-only, &:not(:focus) {
 			appearance: none;
-			border: none;
-			outline: none;
 			background: transparent;
-			margin: 1px;
 		}
 		
 		&:hover:not(:read-only, :focus) {
 			border-radius: 5px;
 			border: 1px solid var(--fill-tertiary);
-			box-shadow: 0 0 0 1px var(--fill-quinary);
-			margin: 0;
+			box-shadow: 0 0 0 1px var(--fill-quinary);	
 		}
 		
 		::placeholder {
 			color: var(--fill-tertiary);
 		}
+	}
+	
+	&[multiline] {
+		&::after, .input {
+			overflow-y: auto;
+		}
+		
+		.input {
+			min-height: 5em;
+		}
+	}
+	&[nowrap] {
+		.input:not(:focus, :hover) {
+			text-overflow: ellipsis;
+		}
+	}
+	&[hidden]{
+		display: none;
+	}
+	// somehow it fixes extra tall textareas on windows that was rendered to have at least
+	// 3 rows even when there's no text
+	textarea {
+		overflow: hidden;
 	}
 }

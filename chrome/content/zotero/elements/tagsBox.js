@@ -340,6 +340,8 @@
 			var valueElement = document.createXULElement("editable-text");
 			valueElement.setAttribute('fieldname', 'tag');
 			valueElement.setAttribute('flex', 1);
+			valueElement.setAttribute('nowrap', true);
+			valueElement.setAttribute('tight', true);
 			valueElement.className = 'zotero-box-label';
 			valueElement.readOnly = !this.editable;
 			valueElement.value = valueText;

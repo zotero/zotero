@@ -29,8 +29,21 @@
 	class EditableText extends XULElementBase {
 		_input;
 		
-		static observedAttributes = ['multiline', 'readonly', 'placeholder', 'label', 'aria-label', 'value'];
+		static observedAttributes = [
+			'multiline',
+			'readonly',
+			'placeholder',
+			'label',
+			'aria-label',
+			'aria-labelledby',
+			'value',
+			'nowrap'
+		];
 		
+		get noWrap() {
+			return this.hasAttribute('nowrap');
+		}
+
 		get multiline() {
 			return this.hasAttribute('multiline');
 		}
@@ -67,6 +80,10 @@
 		
 		get ariaLabel() {
 			return this.getAttribute('aria-label') || '';
+		}
+
+		get ariaLabelledBy() {
+			return this.getAttribute('aria-labelledby') || '';
 		}
 		
 		set ariaLabel(ariaLabel) {
@@ -115,6 +132,18 @@
 		get ref() {
 			return this._input;
 		}
+
+		sizeToContent = () => {
+			// Add a temp span, fetch it's width with current paddings and set max-width based on that
+			let span = document.createElement("span");
+			span.innerText = this.value;
+			this.append(span);
+			let size = span.getBoundingClientRect();
+			let inlinePadding = getComputedStyle(this).getPropertyValue('--editable-text-padding-inline');
+			let blockPadding = getComputedStyle(this).getPropertyValue('--editable-text-padding-block');
+			this.style['max-width'] = `calc(${size.width}px + 2*${inlinePadding} + 2*${blockPadding})`;
+			this.querySelector("span").remove();
+		};
 		
 		attributeChangedCallback() {
 			this.render();
@@ -134,7 +163,7 @@
 					input.type = 'autocomplete';
 				}
 				else {
-					input = document.createElement('textarea');
+					input = this.noWrap ? document.createElement('input') : document.createElement('textarea');
 					input.rows = 1;
 				}
 				input.classList.add('input');
@@ -147,24 +176,38 @@
 				let handleChange = () => {
 					this.value = this._input.value;
 				};
+				input.addEventListener('mousedown', () => {
+					this.setAttribute("mousedown", true);
+				});
 				input.addEventListener('input', handleInput);
 				input.addEventListener('change', handleChange);
 				input.addEventListener('focus', () => {
 					this.dispatchEvent(new CustomEvent('focus'));
+					this.classList.add("focused");
+					// Select all text if focused via keyboard
+					if (!this.getAttribute("mousedown")) {
+						this._input.select();
+					}
 					this._input.dataset.initialValue = this._input.value;
 				});
 				input.addEventListener('blur', () => {
 					this.dispatchEvent(new CustomEvent('blur'));
+					this.classList.remove("focused");
+					this._input.scrollLeft = 0;
+					this._input.setSelectionRange(0, 0);
+					this.removeAttribute("mousedown");
 					delete this._input.dataset.initialValue;
 				});
 				input.addEventListener('keydown', (event) => {
 					if (event.key === 'Enter') {
 						if (this.multiline === event.shiftKey) {
 							event.preventDefault();
+							this.dispatchEvent(new CustomEvent('escape_enter'));
 							this._input.blur();
 						}
 					}
 					else if (event.key === 'Escape') {
+						this.dispatchEvent(new CustomEvent('escape_enter'));
 						this._input.value = this.value = this._input.dataset.initialValue;
 						this._input.blur();
 					}
@@ -195,9 +238,19 @@
 			}
 			this._input.readOnly = this.readOnly;
 			this._input.placeholder = this.label;
-			this._input.setAttribute('aria-label', this.ariaLabel);
+			if (this.ariaLabel.length) {
+				this._input.setAttribute('aria-label', this.ariaLabel);
+			}
+			if (this.ariaLabelledBy.length) {
+				this._input.setAttribute('aria-labelledby', this.ariaLabelledBy);
+			}
 			this._input.value = this.value;
 			
+			// The actual input node can disappear if the component is moved
+			if (this.childElementCount == 0) {
+				this.replaceChildren(this._input);
+			}
+
 			if (autocompleteEnabled) {
 				this._input.setAttribute('autocomplete', 'on');
 				this._input.setAttribute('autocompletepopup', autocompleteParams.popup || '');
