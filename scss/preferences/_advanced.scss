@@ -1,0 +1,71 @@
+/* General pane */
+#zotero-prefpane-advanced-general-tab #openurl-menu {
+	width: 400px;
+}
+
+/* Shortcut Keys pane */
+#zotero-prefpane-advanced-keys-tab input
+{
+	margin-inline-start: 0;
+}
+
+/* Advanced pane */
+#zotero-keys-grid {
+	display: grid;
+	align-items: center;
+	grid-template-columns: 1fr max-content max-content;
+}
+
+#command-line-data-dir description {
+	font-size: 12px;
+	cursor: text;
+	-moz-user-select: text;
+}
+
+#command-line-data-dir label {
+	font-size: 11px;
+	font-style: italic;
+	padding-top: .4em;
+	padding-bottom: .4em;
+}
+
+#zotero-prefpane-advanced-feeds-feedDefaults .html-input {
+	width: 50px;
+	text-align: right;
+}
+
+#zotero-prefpane-advanced-feeds-feedDefaults hbox {
+	display: flex;
+	align-items: center;
+}
+
+#baseAttachmentPath {
+	padding-inline-start: 24px;
+	/* Background set in JS */
+	background: none;
+	background-repeat: no-repeat;
+	background-size: 16px;
+	background-position: center left 4px;
+	appearance: none;
+	border: none;
+}
+
+#zotero-prefpane-advanced-open-buttons {
+	display: block;
+	text-align: right;
+	margin-top: 1em;
+	margin-bottom: .5em;
+}
+
+/*
+ * Search pane
+ */
+#pdfinfo-status
+{
+	margin-top: 0 !important;
+}
+
+#fulltext-stats > .form-grid > label:nth-child(odd)
+{
+	text-align: right;
+}

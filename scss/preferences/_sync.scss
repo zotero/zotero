@@ -1,0 +1,106 @@
+/* Settings tab */
+#zotero-prefpane-sync .form-grid {
+	align-items: center;
+}
+
+#zotero-prefpane-sync .form-grid > hbox {
+	-moz-box-align: center;
+}
+
+#zotero-prefpane-sync .form-grid > label:nth-child(odd)
+{
+	text-align: right;
+}
+
+#zotero-prefpane-sync .form-grid > hbox
+{
+	margin-inline-start: 4px;
+	display: flex;
+	align-items: center;
+}
+
+#zotero-prefpane-sync .form-grid > hbox > label:first-child,
+#zotero-prefpane-sync .form-grid > hbox > menulist:first-child
+{
+	margin-inline: 0;
+}
+#zotero-prefpane-sync .form-grid > hbox > textbox
+{
+	margin-inline: 3px;
+}
+#zotero-prefpane-sync .form-grid > hbox > label:last-child
+{
+	margin-inline-start: 0;
+	margin-inline-end: 10px;
+}
+
+#zotero-prefpane-sync #sync-auth-button {
+	margin-inline-start: 0;
+}
+
+#zotero-prefpane-sync #sync-status-indicator
+{
+	width: 20px;
+	height: 20px;
+	margin-left: -1px;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+#zotero-prefpane-sync #sync-status-indicator[verified=true]
+{
+	@include svgicon("success", "universal", "20");
+}
+
+#zotero-prefpane-sync #sync-status-indicator[verified=false]
+{
+	@include svgicon("error", "universal", "20");
+}
+
+@keyframes rotating {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+#zotero-prefpane-sync #sync-status-indicator[animated]
+{
+	@include svgicon("sync", "universal", "20");
+	animation: rotating 2s linear infinite;
+}
+
+.storage-settings-download-options
+{
+	margin-inline-start: 40px;
+}
+
+#storage-webdav-settings > .form-grid {
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
+
+#storage-verify, #storage-abort, #storage-clean
+{
+	margin-inline-start: 0;
+	min-width: 8em;
+}
+
+#storage-terms label
+{
+	margin-inline-start: 0;
+	font-size: .9em;
+}
+
+#storage-terms label:first-child
+{
+	margin-inline-end: .25em;
+}
+
+#storage-terms label[class=zotero-text-link]
+{
+	margin-inline-end: 0;
+}

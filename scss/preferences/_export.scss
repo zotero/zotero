@@ -1,0 +1,23 @@
+#zotero-prefpane-export separator:not(.thin)
+{
+	height: 1em;
+}
+
+#quickCopy-instructions, #quickCopy-citationInstructions {
+	font-size: 12px;
+}
+
+#zotero-prefpane-export .virtualized-table-container {
+	height: 120px;
+}
+
+#zotero-quickCopy-format
+{
+	min-height: 1.5em; /* Fix collapse on Windows */
+}
+
+#noteQuickCopy-format-options th {
+	font-weight: normal;
+	text-align: right;
+	max-width: 3.6em;
+}
