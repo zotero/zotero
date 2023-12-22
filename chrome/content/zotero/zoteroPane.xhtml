@@ -757,8 +757,25 @@
 	<hbox id="zotero-title-bar">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" style="-moz-box-flex: 1;"/>
 		<hbox id="zotero-tabs-toolbar" class="zotero-toolbar" align="center">
-			<toolbarbutton id="zotero-tb-opened-tabs" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-opened-tabs-menu" type="panel" />
+			<toolbarbutton id="zotero-tb-tabs-menu" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-tabs-menu" type="panel"
+				oncommand="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showTabsMenu(this)"/>
 			<div xmlns="http://www.w3.org/1999/xhtml" class="zotero-tb-separator"></div>
+			<panel id="zotero-tabs-menu-panel" type="arrow" 
+					onpopuphiding="Zotero_Tabs.handleTabsMenuHiding(event)"
+					onpopupshowing="Zotero_Tabs.refreshTabsMenuList()"
+					onpopupshown="Zotero_Tabs.handleTabsMenuShown(event)"
+					onkeydown="Zotero_Tabs.handleTabsMenuKeyPress(event)"
+					tabindex="-1"
+					>
+				<vbox width="350" id="zotero-tabs-menu-wrapper">
+					<html:input id="zotero-tabs-menu-filter" 
+						oninput="Zotero_Tabs.handleTabsMenuFilterInput(event, this)"
+						tabindex="0"
+						data-l10n-id="zotero-tabs-menu-filter"
+					/>
+					<vbox id="zotero-tabs-menu-list"></vbox>
+				</vbox>
+			</panel>
 
 			<hbox id="zotero-pq-buttons">
 			</hbox>

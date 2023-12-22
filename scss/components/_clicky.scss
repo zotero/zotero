@@ -36,6 +36,12 @@
 	border: 0px !important;
 }
 
+.zotero-clicky-cross {
+	@include svgicon-menu("x-8", "universal", "16");
+	border: 0px !important;
+	color: var(--fill-secondary);
+}
+
 .zotero-clicky-minus[disabled=true], .zotero-clicky-plus[disabled=true] {
 	opacity: .5;
 }

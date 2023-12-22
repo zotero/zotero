@@ -1526,7 +1526,7 @@ describe("ZoteroPane", function() {
 				"zotero-collections-search",
 				"zotero-tb-collection-add",
 				"zotero-tb-sync",
-				"zotero-tb-opened-tabs"
+				"zotero-tb-tabs-menu"
 			];
 
 			for (let id of sequence) {
@@ -1548,7 +1548,7 @@ describe("ZoteroPane", function() {
 		it("should tab through the toolbar to collection-tree", async function () {
 			win.Zotero_Tabs.moveFocus("current");
 			let sequence = [
-				"zotero-tb-opened-tabs",
+				"zotero-tb-tabs-menu",
 				"zotero-tb-sync",
 				"zotero-tb-collection-add",
 				"zotero-collections-search",

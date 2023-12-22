@@ -283,7 +283,7 @@ const TabBar = forwardRef(function (props, ref) {
 			}
 			else {
 				// On tab go back to opened tabs menu
-				document.getElementById('zotero-tb-opened-tabs').focus();
+				document.getElementById('zotero-tb-tabs-menu').focus();
 			}
 			event.preventDefault();
 			event.stopPropagation();

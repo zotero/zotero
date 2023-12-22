@@ -221,7 +221,7 @@ var ZoteroPane = new function()
 		tabsToolbar.addEventListener("keydown", (event) => {
 			// Mapping of target ids and possible key presses to desired focus outcomes
 			let actionsMap = {
-				'zotero-tb-opened-tabs': {
+				'zotero-tb-tabs-menu': {
 					ArrowRight: () => null,
 					ArrowLeft: () => null,
 					Tab: () => document.getElementById('zotero-tb-sync-error'),
@@ -244,7 +244,7 @@ var ZoteroPane = new function()
 					ArrowRight: () => null,
 					ArrowLeft: () => null,
 					Tab: () => document.getElementById('zotero-tb-sync'),
-					ShiftTab: () => document.getElementById('zotero-tb-opened-tabs'),
+					ShiftTab: () => document.getElementById('zotero-tb-tabs-menu'),
 					Enter: () => document.getElementById("zotero-tb-sync-error")
 						.dispatchEvent(new MouseEvent("click", { target: event.target })),
 					' ': () => document.getElementById("zotero-tb-sync-error")
