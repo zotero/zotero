@@ -74,9 +74,6 @@ class Button extends PureComponent {
 	}
 	
 	get menuMarker() {
-		if (!Zotero.isNode && Zotero.isLinux) {
-			return this.props.isMenu && <span className="menu-marker"/>
-		}
 		return this.props.isMenu && <CSSIcon name="chevron-6" className="menu-marker icon-8"/>
 	}
 

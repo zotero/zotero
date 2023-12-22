@@ -10,7 +10,7 @@
 	line-height: inherit;
 	color: inherit;
 	text-align: center;
-	-moz-appearance: toolbarbutton;
+	-moz-appearance: none;
 
 	&[disabled],
 	&.disabled {
@@ -25,7 +25,7 @@
 		}
 	}
 	span.menu-marker {
-		-moz-appearance: toolbarbutton-dropdown;
+		-moz-appearance: none;
 		display: inline-block;
 		margin-left: 4px;
 	}
