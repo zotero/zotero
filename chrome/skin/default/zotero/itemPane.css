@@ -43,11 +43,6 @@
 	pointer-events: none;
 }
 
-.zotero-view-item-container.feed-item .zotero-view-item > :is(attachments-box, notes-box, tags-box, related-box),
-.zotero-view-item-container.feed-item .zotero-view-item-sidenav {
-	display: none;
-}
-
 .zotero-view-item > * {
 	box-sizing: border-box;
 	width: 100%;

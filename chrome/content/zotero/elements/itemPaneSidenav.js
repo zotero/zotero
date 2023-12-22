@@ -165,11 +165,11 @@
 		};
 		
 		getPanes() {
-			return Array.from(this.container.querySelectorAll(':scope > [data-pane]'));
+			return Array.from(this.container.querySelectorAll(':scope > [data-pane]:not([hidden])'));
 		}
 		
 		getPane(id) {
-			return this.container.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]`);
+			return this.container.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]:not([hidden])`);
 		}
 		
 		isPanePinnable(id) {

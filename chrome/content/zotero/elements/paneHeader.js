@@ -46,6 +46,8 @@
 			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
+		showInFeeds = true;
+		
 		_item = null;
 		
 		_titleFieldID = null;

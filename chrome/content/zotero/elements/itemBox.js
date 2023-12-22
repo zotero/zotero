@@ -43,6 +43,8 @@
 			this.blurHandler = null;
 			this.eventHandlers = [];
 			
+			this.showInFeeds = true;
+			
 			this._mode = 'view';
 			this._visibleFields = [];
 			this._hiddenFields = [];

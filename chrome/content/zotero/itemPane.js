@@ -89,6 +89,16 @@ var ZoteroItemPane = new function() {
 		
 		let inTrash = ZoteroPane.collectionsView.selectedTreeRow && ZoteroPane.collectionsView.selectedTreeRow.isTrash();
 		for (let box of [_header, ..._boxes]) {
+			if (!box.showInFeeds && item.isFeedItem) {
+				box.style.display = 'none';
+				box.hidden = true;
+				continue;
+			}
+			else {
+				box.style.display = '';
+				box.hidden = false;
+			}
+			
 			if (mode) {
 				box.mode = mode;
 				
@@ -112,6 +122,8 @@ var ZoteroItemPane = new function() {
 		else if (pinnedPane !== false) {
 			_sidenav.scrollToPane('info', 'instant');
 		}
+		
+		_sidenav.render();
 	});
 	
 	

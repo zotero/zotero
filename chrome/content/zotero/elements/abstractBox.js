@@ -34,6 +34,8 @@
 				</html:div>
 			</collapsible-section>
 		`);
+		
+		showInFeeds = true;
 
 		_item = null;
 
