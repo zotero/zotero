@@ -1016,23 +1016,29 @@ var ZoteroPane = new function()
 		let collectionSearchButton = document.getElementById("zotero-tb-collections-search");
 		if (!collectionSearchField.value.length && collectionSearchField.classList.contains("visible")) {
 			collectionSearchField.classList.remove("visible");
-			collectionSearchButton.style.display = '';
 			collectionSearchField.setAttribute("disabled", true);
+			setTimeout(() => {
+				collectionSearchButton.style.display = '';
+				collectionSearchField.style.visibility = 'hidden';
+			}, 50);
 		}
 	}
 
 	this.initCollectionTreeSearch = function () {
 		let collectionSearchField = document.getElementById("zotero-collections-search");
 		let collectionSearchButton = document.getElementById("zotero-tb-collections-search");
+		collectionSearchField.style.visibility = 'hidden';
 		collectionSearchField.addEventListener("blur", ZoteroPane.hideCollectionSearch);
 		collectionSearchButton.addEventListener("click", (_) => {
 			if (!collectionSearchField.classList.contains("visible")) {
 				collectionSearchButton.style.display = 'none';
-				collectionSearchField.classList.add("visible");
+				collectionSearchField.style.visibility = 'visible';
+				collectionSearchField.classList.add("visible", "expanding");
 				// Enable and focus the field only after it was revealed to prevent the cursor
 				// from changing between 'text' and 'pointer' back and forth as the input field expands
 				setTimeout(() => {
 					collectionSearchField.removeAttribute("disabled");
+					collectionSearchField.classList.remove("expanding");
 					collectionSearchField.focus();
 				}, 250);
 				return;

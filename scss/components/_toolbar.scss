@@ -86,18 +86,18 @@
 
 #zotero-collections-search {
 	max-width: 0;
-	transition: max-width 0.5s ease;
+	transition: max-width 0.2s ease;
 	padding: 0px 6px 0px 0px;
 	margin: 0;
 	appearance: none;
-	visibility: hidden;
 }
 
 #zotero-collections-search.visible {
 	max-width: 180px; 
-	visibility: visible;
-	/* Avoids flickering between pointer and text cursor during transition */
-	cursor: text;
+}
+
+#zotero-collections-search.expanding {
+	padding-right: 35px;
 }
 
 /* Hide collection search on pane collapse, otherwise it still shows when focused */
