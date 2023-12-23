@@ -415,7 +415,7 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
-		// Show warning in toolbar for 'dev' channel builds
+		// Show warning in toolbar for 'dev' channel builds and safe mode
 		try {
 			let isDevBuild = Zotero.version.includes('-dev');
 			// Uncomment to test
@@ -427,6 +427,16 @@ var ZoteroPane = new function()
 					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
 				};
 				label.textContent = 'TEST BUILD — DO NOT USE';
+				let syncStop = document.getElementById('zotero-tb-sync-stop');
+				syncStop.parentNode.insertBefore(label, syncStop);
+			}
+			else if (Services.appinfo.inSafeMode) {
+				let label = document.createElement('span');
+				label.setAttribute('style', 'font-weight: bold; color: darkblue; cursor: pointer; margin-right: .5em');
+				label.onclick = function () {
+					Zotero.Utilities.Internal.quit(true);
+				};
+				label.textContent = 'Safe Mode';
 				let syncStop = document.getElementById('zotero-tb-sync-stop');
 				syncStop.parentNode.insertBefore(label, syncStop);
 			}
