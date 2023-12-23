@@ -338,14 +338,6 @@ class ReaderInstance {
 					this._onChangeSidebarWidthCallback(width);
 				}
 			},
-			onFocusSplitButton: () => {
-				if (this instanceof ReaderTab) {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.document.getElementById('zotero-tb-toggle-item-pane').focus();
-					}
-				}
-			},
 			onFocusContextPane: () => {
 				if (this instanceof ReaderWindow || !this._window.ZoteroContextPane.focus()) {
 					this.focusFirst();

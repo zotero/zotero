@@ -839,12 +839,6 @@
 					<div id="zotero-tab-cover" class="hidden" xmlns="http://www.w3.org/1999/xhtml">
 						<label>&zotero.general.loading;</label>
 					</div>
-					<div id="zotero-tab-toolbar" class="toolbar" hidden="true" xmlns="http://www.w3.org/1999/xhtml">
-						<div id="zotero-tb-split"  class="split-button">
-							<button id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;" tabindex="-1"><span/></button>
-							<button id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;" tabindex="-1"><span/></button>
-						</div>
-					</div>
 					<deck id="tabs-deck" flex="1">
 						<vbox id="zotero-pane"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
@@ -1141,8 +1135,6 @@
 														<related-box id="zotero-editpane-related" class="zotero-editpane-related" data-pane="related"/>
 													</html:div>
 												</html:div>
-												
-												<item-pane-sidenav id="zotero-view-item-sidenav" class="zotero-view-item-sidenav"/>
 											</hbox>
 											
 											<!-- Note item -->
@@ -1182,6 +1174,8 @@
 											</vbox>
 										</deck>
 									</vbox>
+									
+									<item-pane-sidenav id="zotero-view-item-sidenav" class="zotero-view-item-sidenav"/>
 								</box>
 							</hbox>
 						</vbox>
@@ -1222,6 +1216,8 @@
 						</vbox>
 					</box>
 					
+					<item-pane-sidenav id="zotero-context-pane-sidenav" class="zotero-view-item-sidenav" hidden="true"/>
+
 					<popupset>
 						<menupopup id="context-pane-add-child-note-button-popup">
 							<menuitem id="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>

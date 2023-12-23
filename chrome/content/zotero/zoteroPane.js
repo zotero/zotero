@@ -790,44 +790,7 @@ var ZoteroPane = new function()
 	 */
 	function handleKeyDown(event, from) {
 		if (Zotero_Tabs.selectedIndex > 0) {
-			let itemPaneToggle = document.getElementById('zotero-tb-toggle-item-pane');
-			let notesPaneToggle = document.getElementById('zotero-tb-toggle-notes-pane');
-			// Using ArrowDown and ArrowUp to be consistent with pdf-reader
-			if (!Zotero.rtl && event.key === 'ArrowRight'
-				|| Zotero.rtl && event.key === 'ArrowLeft'
-				|| event.key === 'ArrowDown') {
-				if (event.target === itemPaneToggle) {
-					notesPaneToggle.focus();
-				}
-			}
-			else if (!Zotero.rtl && event.key === 'ArrowLeft'
-				|| Zotero.rtl && event.key === 'ArrowRight'
-				|| event.key === 'ArrowUp') {
-				if (event.target === notesPaneToggle) {
-					itemPaneToggle.focus();
-				}
-				else if (event.target === itemPaneToggle) {
-					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-					if (reader) {
-						reader.focusLastToolbarButton();
-					}
-				}
-			}
-			else if (event.key === 'Tab'
-				&& [itemPaneToggle, notesPaneToggle].includes(event.target)) {
-				if (event.shiftKey) {
-					ZoteroContextPane.focus();
-				}
-				else {
-					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-					if (reader) {
-						reader.tabToolbar();
-					}
-				}
-				event.preventDefault();
-				event.stopPropagation();
-			}
-			else if (event.key === 'Escape') {
+			if (event.key === 'Escape') {
 				if (!document.activeElement.classList.contains('reader')) {
 					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 					if (reader) {
@@ -6209,13 +6172,16 @@ var ZoteroPane = new function()
 	this.updateLayout = function() {
 		var layoutSwitcher = document.getElementById("zotero-layout-switcher");
 		var itemsSplitter = document.getElementById("zotero-items-splitter");
+		var sidenav = document.getElementById("zotero-view-item-sidenav");
 
 		if(Zotero.Prefs.get("layout") === "stacked") { // itemsPane above itemPane
 			layoutSwitcher.setAttribute("orient", "vertical");
 			itemsSplitter.setAttribute("orient", "vertical");
+			sidenav.classList.add("stacked");
 		} else {  // three-vertical-pane
 			layoutSwitcher.setAttribute("orient", "horizontal");
 			itemsSplitter.setAttribute("orient", "horizontal");
+			sidenav.classList.remove("stacked");
 		}
 
 		this.updateToolbarPosition();
@@ -6323,6 +6289,7 @@ var ZoteroPane = new function()
 
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
+		var sidenav = document.getElementById("zotero-view-item-sidenav");
 		
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
@@ -6331,6 +6298,8 @@ var ZoteroPane = new function()
 		}
 		
 		this.handleTagSelectorResize();
+		
+		sidenav.render();
 	}
 	
 	/**

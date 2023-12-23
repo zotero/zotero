@@ -74,14 +74,14 @@
 		}
 		
 		set empty(val) {
-			this.toggleAttribute('empty', !!val);
+			this._runWithTransitionsDisabled(() => {
+				this.toggleAttribute('empty', !!val);
+			});
 		}
 		
 		setCount(count) {
 			this.setAttribute('data-l10n-args', JSON.stringify({ count }));
-			this._runWithTransitionsDisabled(() => {
-				this.empty = !count;
-			});
+			this.empty = !count;
 		}
 		
 		get label() {
@@ -129,14 +129,20 @@
 			this._addButton = document.createXULElement('toolbarbutton');
 			this._addButton.className = 'add';
 			this._addButton.addEventListener('command', (event) => {
-				this.dispatchEvent(new CustomEvent('add', { ...event, bubbles: false }));
+				this.dispatchEvent(new CustomEvent('add', {
+					...event,
+					detail: { button: this._addButton },
+					bubbles: false
+				}));
 			});
 			this._head.append(this._addButton);
 			
 			this._contextMenu = this._buildContextMenu();
-			let popupset = document.createXULElement('popupset');
-			popupset.append(this._contextMenu);
-			this._head.append(popupset);
+			if (this._contextMenu) {
+				let popupset = document.createXULElement('popupset');
+				popupset.append(this._contextMenu);
+				this._head.append(popupset);
+			}
 			
 			let twisty = document.createXULElement('toolbarbutton');
 			twisty.className = 'twisty';
@@ -157,13 +163,15 @@
 		}
 		
 		_buildContextMenu() {
-			let containerRoot = this.closest('.zotero-view-item-container');
+			let containerRoot = this.closest('.zotero-view-item-container, context-notes-list');
 			
 			let contextMenu = document.createXULElement('menupopup');
 			let collapseOtherSections = document.createXULElement('menuitem');
 			collapseOtherSections.classList.add('menuitem-iconic', 'zotero-menuitem-collapse-others');
 			collapseOtherSections.setAttribute('data-l10n-id', 'collapse-other-sections');
 			collapseOtherSections.addEventListener('command', () => {
+				// Scroll to the top (first section), so we don't end up scrolled past the end
+				containerRoot.querySelector('collapsible-section').scrollIntoView({ block: 'start' });
 				for (let section of containerRoot.querySelectorAll('collapsible-section')) {
 					if (section !== this) {
 						section.open = false;
@@ -207,7 +215,7 @@
 			contextMenu.addEventListener('popupshowing', () => {
 				let sections = Array.from(containerRoot.querySelectorAll('collapsible-section'));
 				collapseOtherSections.disabled = sections.every(section => section === this || !section.open);
-				expandAllSections.disabled = sections.every(section => section.open);
+				expandAllSections.disabled = sections.every(section => section.open || section.empty);
 
 				let sidenav = this._getSidenav();
 				if (sidenav?.isPanePinnable(this.dataset.pane)) {
@@ -268,7 +276,7 @@
 		_handleContextMenu = (event) => {
 			if (event.target.closest('.add')) return;
 			event.preventDefault();
-			this._contextMenu.openPopupAtScreen(event.screenX, event.screenY, true);
+			this._contextMenu?.openPopupAtScreen(event.screenX, event.screenY, true);
 		};
 		
 		_getSidenav() {

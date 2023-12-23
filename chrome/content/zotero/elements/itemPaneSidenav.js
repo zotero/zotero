@@ -30,6 +30,11 @@
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="toolbarbutton-container">
 				<toolbarbutton
+					data-pane="toggle-collapse"/>
+			</html:div>
+			<html:div class="divider"/>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
 					data-l10n-id="sidenav-info"
 					data-pane="info"/>
 			</html:div>
@@ -58,6 +63,12 @@
 					data-l10n-id="sidenav-related"
 					data-pane="related"/>
 			</html:div>
+			<html:div class="divider"/>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
+					data-l10n-id="sidenav-notes"
+					data-pane="context-notes"/>
+			</html:div>
 			
 			<popupset>
 				<menupopup class="context-menu">
@@ -68,6 +79,8 @@
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
 		_container = null;
+		
+		_contextNotesPane = null;
 		
 		_contextMenuTarget = null;
 
@@ -82,6 +95,16 @@
 			this._container?.removeEventListener('scroll', this._handleContainerScroll);
 			this._container = val;
 			this._container.addEventListener('scroll', this._handleContainerScroll);
+			this.render();
+		}
+		
+		get contextNotesPane() {
+			return this._contextNotesPane;
+		}
+		
+		set contextNotesPane(val) {
+			if (this._contextNotesPane == val) return;
+			this._contextNotesPane = val;
 			this.render();
 		}
 		
@@ -103,6 +126,49 @@
 		set _minScrollHeight(val) {
 			this._container.style.setProperty('--min-scroll-height', val + 'px');
 		}
+		
+		get _contextNotesPaneVisible() {
+			return this._contextNotesPane
+				&& this._contextNotesPane.parentElement.selectedPanel == this._contextNotesPane;
+		}
+
+		set _contextNotesPaneVisible(val) {
+			if (!this._contextNotesPane) return;
+			// The context notes pane will always be a direct child of the deck we need to update
+			let deck = this._contextNotesPane.parentElement;
+			if (val) {
+				deck.selectedPanel = this._contextNotesPane;
+				this._collapsed = false;
+			}
+			else {
+				// But our _container is not a direct child of the deck,
+				// so find the child that contains it
+				deck.selectedPanel = Array.from(deck.children).find(child => child.contains(this._container));
+			}
+			this.render();
+		}
+		
+		get _collapsed() {
+			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
+			return collapsible.getAttribute('collapsed') === 'true';
+		}
+		
+		set _collapsed(val) {
+			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
+			let splitter = collapsible.previousElementSibling;
+			if (val) {
+				collapsible.setAttribute('collapsed', 'true');
+				splitter.setAttribute('state', 'collapsed');
+				splitter.setAttribute('substate', 'after');
+			}
+			else {
+				collapsible.removeAttribute('collapsed');
+				splitter.setAttribute('state', '');
+				splitter.setAttribute('substate', 'after');
+			}
+			window.dispatchEvent(new Event('resize'));
+			this.render();
+		}
 
 		static get observedAttributes() {
 			return ['pinnedPane'];
@@ -113,6 +179,15 @@
 		}
 
 		scrollToPane(id, behavior = 'smooth') {
+			if (this._collapsed) {
+				this._collapsed = false;
+				behavior = 'instant';
+			}
+			if (this._contextNotesPane && this._contextNotesPaneVisible) {
+				this._contextNotesPaneVisible = false;
+				behavior = 'instant';
+			}
+
 			let pane = this.getPane(id);
 			if (!pane) return;
 			
@@ -175,7 +250,7 @@
 		isPanePinnable(id) {
 			return id !== 'info';
 		}
-
+		
 		init() {
 			if (!this.container) {
 				this.container = document.getElementById('zotero-view-item');
@@ -183,6 +258,29 @@
 			
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
+				
+				if (pane === 'context-notes') {
+					toolbarbutton.addEventListener('click', (event) => {
+						if (event.button !== 0) {
+							return;
+						}
+						if (event.detail == 2) {
+							this.pinnedPane = null;
+						}
+						this._contextNotesPaneVisible = true;
+					});
+					continue;
+				}
+				else if (pane === 'toggle-collapse') {
+					toolbarbutton.addEventListener('click', (event) => {
+						if (event.button !== 0) {
+							return;
+						}
+						this._collapsed = !this._collapsed;
+					});
+					continue;
+				}
+				
 				let pinnable = this.isPanePinnable(pane);
 				toolbarbutton.parentElement.classList.toggle('pinnable', pinnable);
 				
@@ -232,7 +330,27 @@
 			let pinnedPane = this.pinnedPane;
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
-				toolbarbutton.setAttribute('aria-selected', pane == pinnedPane);
+				
+				if (pane == 'context-notes') {
+					let hidden = !this._contextNotesPane;
+					let selected = this._contextNotesPaneVisible;
+					
+					toolbarbutton.parentElement.hidden = hidden;
+					toolbarbutton.parentElement.previousElementSibling.hidden = hidden; // Divider
+					
+					toolbarbutton.setAttribute('aria-selected', selected);
+					toolbarbutton.classList.toggle('active', selected);
+					
+					continue;
+				}
+				else if (pane == 'toggle-collapse') {
+					toolbarbutton.setAttribute('data-l10n-id', 'sidenav-' + (this._collapsed ? 'expand' : 'collapse'));
+					toolbarbutton.classList.toggle('collapsed', this._collapsed);
+					continue;
+				}
+				
+				toolbarbutton.setAttribute('aria-selected',
+					!this._contextNotesPaneVisible && pane == pinnedPane);
 				toolbarbutton.parentElement.hidden = !this.getPane(pane);
 
 				// Set .pinned on the container, for pin styling

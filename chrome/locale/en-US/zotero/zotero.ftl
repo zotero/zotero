@@ -272,6 +272,10 @@ sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =
     .tooltiptext = { pane-related }
+sidenav-collapse =
+    .tooltiptext = Collapse Sidebar
+sidenav-expand =
+    .tooltiptext = Expand Sidebar
 
 pin-section =
     .label = Pin Section
@@ -288,3 +292,6 @@ abstract-field =
 
 tagselector-search =
     .placeholder = Filter Tags
+
+context-notes-search =
+    .placeholder = Search Notes

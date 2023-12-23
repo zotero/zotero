@@ -81,12 +81,12 @@ $z-index-loading-cover: 60;
 // Item pane
 // --------------------------------------------------
 $item-pane-sections: (
-		"info": var(--accent-blue),
-		"abstract": var(--accent-teal),
-		"attachments": var(--accent-green),
-		"notes": var(--accent-yellow),
-		"tags": var(--accent-orange),
-		"related": var(--accent-wood),
+	"info": var(--accent-blue),
+	"abstract": var(--accent-teal),
+	"attachments": var(--accent-green),
+	"notes": var(--accent-yellow),
+	"tags": var(--accent-orange),
+	"related": var(--accent-wood),
 );
 
 $tagColorsLookup: (

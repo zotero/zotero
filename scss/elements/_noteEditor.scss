@@ -1,30 +1,7 @@
-#links-box {
-	.grid {
-		display: grid;
-		grid-template-columns: auto 1fr;
+links-box {
+	display: flex;
+	flex-direction: column;
+	padding-inline: 8px;
 
-		& > * {
-			margin-top: 1px !important;
-			margin-bottom: 1px !important;
-			padding: 0 2px 0 2px !important;
-		}
-
-		.label {
-			color: #7f7f7f;
-			text-align: right;
-			font-weight: bold;
-			min-width: 62px;
-			border: var(--material-border-transparent);
-		}
-
-		.value {
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap
-		}
-	}
-}
-
-#related-popup, #tags-popup {
-	font: inherit;
+	border-top: 1px solid var(--fill-quinary);
 }
