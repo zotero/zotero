@@ -23,8 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-var { getCSSItemTypeIcon } = require('components/icons');
-
 var ZoteroContextPane = new function () {
 	var _tabCover;
 	var _contextPane;
@@ -71,7 +69,6 @@ var ZoteroContextPane = new function () {
 		_itemPaneDeck = document.createXULElement('deck');
 		// Notes pane deck
 		_notesPaneDeck = document.createXULElement('deck');
-		_notesPaneDeck.style.backgroundColor = 'white';
 		_notesPaneDeck.setAttribute('flex', 1);
 		_notesPaneDeck.className = 'notes-pane-deck';
 
@@ -393,21 +390,27 @@ var ZoteroContextPane = new function () {
 		list.setAttribute('flex', 1);
 		list.className = 'zotero-context-notes-list';
 
-		var noteContainer = document.createXULElement('vbox');
-		var title = document.createXULElement('vbox');
+		let noteContainer = document.createXULElement('vbox');
+		noteContainer.classList.add('zotero-context-note-container');
+		let title = document.createXULElement('vbox');
 		title.className = 'zotero-context-pane-editor-parent-line';
-		var editor = new (customElements.get('note-editor'));
+		let divider = document.createElement("div");
+		divider.classList.add("divider");
+		let editor = new (customElements.get('note-editor'));
 		editor.className = 'zotero-context-pane-pinned-note';
 		editor.setAttribute('flex', 1);
-		noteContainer.append(title, editor);
+		noteContainer.append(title, divider, editor);
 
-		var tabNotesContainer = document.createXULElement('vbox');
-		var title = document.createXULElement('vbox');
+		let tabNotesContainer = document.createXULElement('vbox');
+		tabNotesContainer.classList.add('zotero-context-note-container');
+		title = document.createXULElement('vbox');
 		title.className = 'zotero-context-pane-editor-parent-line';
+		divider = document.createElement("div");
+		divider.classList.add("divider");
 		let tabNotesDeck = document.createXULElement('deck');
 		tabNotesDeck.className = 'zotero-context-pane-tab-notes-deck';
 		tabNotesDeck.setAttribute('flex', 1);
-		tabNotesContainer.append(title, tabNotesDeck);
+		tabNotesContainer.append(title, divider, tabNotesDeck);
 		
 		let contextNode = document.createXULElement('deck');
 		contextNode.append(list, noteContainer, tabNotesContainer);
@@ -416,11 +419,6 @@ var ZoteroContextPane = new function () {
 		contextNode.className = 'context-node';
 		contextNode.setAttribute('data-library-id', libraryID);
 		contextNode.setAttribute('selectedIndex', 0);
-		
-		editor.returnHandler = () => {
-			contextNode.setAttribute('selectedIndex', 0);
-			_updateAddToNote();
-		};
 		
 		var head = document.createXULElement('hbox');
 		head.style.display = 'flex';
@@ -762,15 +760,6 @@ var ZoteroContextPane = new function () {
 				editor.mode = readOnly ? 'view' : 'edit';
 				editor.item = item;
 				editor.parentItem = null;
-				editor.returnHandler = () => {
-					// Immediately save note content before vbox with note-editor iframe is destroyed below
-					editor.saveSync();
-					_panesDeck.setAttribute('selectedIndex', 1);
-					_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
-					vbox.remove();
-					_updateAddToNote();
-					_preventGlobalDeckChange = true;
-				};
 
 				_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 2);
 				tabNotesDeck.setAttribute('selectedIndex', tabNotesDeck.children.length - 1);
@@ -788,18 +777,28 @@ var ZoteroContextPane = new function () {
 
 			editor.focus();
 
-			parentTitleContainer.innerHTML = '';
-			var parentItem = item.parentItem;
-			if (parentItem) {
-				var container = document.createElement('div');
-				var icon = getCSSItemTypeIcon(parentItem.getItemTypeIconName());
-				icon.classList.add('parent-item-type');
-				var title = document.createElement('div');
-				title.append(parentItem.getDisplayTitle());
+			let parentItem = item.parentItem;
+			if (!parentTitleContainer.querySelector(".parent-title-container")) {
+				let container = document.createElement('div');
+				container.classList.add("parent-title-container");
+				let returnBtn = document.createXULElement("toolbarbutton");
+				returnBtn.classList.add("zotero-tb-note-return");
+				returnBtn.addEventListener("command", () => {
+					// Immediately save note content before vbox with note-editor iframe is destroyed below
+					editor.saveSync();
+					_panesDeck.setAttribute('selectedIndex', 1);
+					_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
+					vbox.remove();
+					_updateAddToNote();
+					_preventGlobalDeckChange = true;
+				});
+				let title = document.createElement('div');
 				title.className = 'parent-title';
-				container.append(icon, title);
+				container.append(returnBtn, title);
 				parentTitleContainer.append(container);
 			}
+			parentTitleContainer.querySelector(".parent-title").textContent
+				= parentItem?.getDisplayTitle() || "";
 			_updateAddToNote();
 		}
 	}
@@ -836,7 +835,7 @@ var ZoteroContextPane = new function () {
 		if (!item) {
 			return;
 		}
-		var libraryID = item.libraryID;
+		libraryID = item.libraryID;
 		var readOnly = _isLibraryReadOnly(libraryID);
 		var parentID = item.parentID;
 		

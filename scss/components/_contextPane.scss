@@ -1,0 +1,94 @@
+#tabs-deck {
+	min-width: 600px;
+}
+
+#zotero-context-pane {
+	display: flex;
+	min-width: 360px;
+
+	.divider {
+		border-bottom: 1px solid var(--fill-quinary);
+		margin: 0 8px;
+	}
+
+	&.stacked {
+		position: fixed;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		font-size: 0;
+		pointer-events: none;
+	}
+
+	&.stacked-context-placeholder {
+		min-height: 300px;
+	}
+	&.standard .stacked-context-placeholder {
+		display: none;
+	}
+}
+
+#zotero-context-splitter-stacked {
+	pointer-events: auto;
+}
+
+#zotero-context-pane-inner {
+	width: 0;
+	background: var(--material-background);
+	font: message-box;
+	font-size: inherit;
+	min-height: 100px;
+	height: 0;
+	pointer-events: auto;
+}
+
+#zotero-item-toolbar {
+	height: 32px;
+}
+
+.zotero-context-notes-list {
+	background-color: var(--material-sidepane);
+}
+
+.zotero-context-note-container {
+	background-color: var(--material-background);
+}
+
+.zotero-context-pane-editor-parent-line {
+	height: 40px;
+
+	& .parent-title-container {
+		display: flex;
+		align-items: center;
+		padding: 6px 8px;
+	}
+
+	& .parent-item-type {
+		margin-inline-end: 3px;
+		width: 16px;
+	}
+
+	& .parent-title {
+		flex-grow: 1;
+		width: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		margin-left: 8px;
+	}
+}
+
+.zotero-tb-note-return {
+	@include svgicon-menu("chevron", "universal", "20");
+	rotate: 90deg;
+	padding: 4px;
+	width: 28px;
+	height: 28px;
+}
+
+#zotero-context-pane[collapsed=true] .notes-list-container,
+#zotero-context-pane-inner[collapsed=true] .notes-list-container,
+#zotero-context-pane[collapsed=true] .zotero-view-item > tabpanel > *,
+#zotero-context-pane-inner[collapsed=true] .zotero-view-item > tabpanel > * {
+	overflow: unset !important;
+}
