@@ -82,9 +82,10 @@ $z-index-loading-cover: 60;
 // --------------------------------------------------
 $item-pane-sections: (
 	"info": var(--accent-blue),
-	"abstract": var(--accent-teal),
+	"abstract": var(--accent-azure),
 	"attachments": var(--accent-green),
 	"notes": var(--accent-yellow),
+	"libraries-collections": var(--accent-teal),
 	"tags": var(--accent-orange),
 	"related": var(--accent-wood),
 );

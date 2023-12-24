@@ -55,6 +55,11 @@
 			</html:div>
 			<html:div class="toolbarbutton-container">
 				<toolbarbutton
+					data-l10n-id="sidenav-libraries-collections"
+					data-pane="libraries-collections"/>
+			</html:div>
+			<html:div class="toolbarbutton-container">
+				<toolbarbutton
 					data-l10n-id="sidenav-tags"
 					data-pane="tags"/>
 			</html:div>

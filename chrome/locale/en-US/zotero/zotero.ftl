@@ -235,6 +235,7 @@ pane-info = Info
 pane-abstract = Abstract
 pane-attachments = Attachments
 pane-notes = Notes
+pane-libraries-collections = Libraries and Collections
 pane-tags = Tags
 pane-related = Related
 
@@ -252,6 +253,8 @@ section-notes =
                  [one] { $count } Note
                  *[other] { $count } Notes
              }
+section-libraries-collections =
+    .label = { pane-libraries-collections }
 section-tags =
     .label = { $count ->
                  [one] { $count } Tag
@@ -268,6 +271,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-libraries-collections =
+    .tooltiptext = { pane-libraries-collections }
 sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =

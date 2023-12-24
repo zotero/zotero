@@ -7,7 +7,7 @@ notes-box, related-box {
 notes-box .body, related-box .body {
 	display: flex;
 	flex-direction: column;
-	padding-inline-start: 16px - 2px;
+	padding-inline-start: 16px;
 
 	.row {
 		display: flex;

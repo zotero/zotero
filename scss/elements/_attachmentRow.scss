@@ -44,8 +44,7 @@ attachment-row {
 	}
 	
 	&.context > .head .label {
-		// TODO This color is used in virtualized-table - probably want to change to something theme-defined
-		color: gray;
+		color: var(--fill-secondary);
 	}
 
 	& > .body {

@@ -55,6 +55,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachment
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextNotesList.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesCollectionsBox.js', this);
 
 {
 	// Fix missing property bug that breaks arrow key navigation between <tab>s

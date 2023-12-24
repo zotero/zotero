@@ -3953,10 +3953,10 @@ var ZoteroPane = new function()
 
 
 	this.buildAddToCollectionMenu = function (event) {
-		if (event.target.id !== 'zotero-add-to-collection-popup') return;
+		if (event.target !== event.currentTarget) return;
 
-		let popup = document.getElementById('zotero-add-to-collection-popup');
-		let separator = document.getElementById('zotero-add-to-collection-separator');
+		let popup = event.target;
+		let separator = popup.querySelector('menuseparator');
 		while (popup.childElementCount > 2) {
 			popup.removeChild(popup.lastElementChild);
 		}

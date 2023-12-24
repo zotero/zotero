@@ -25,7 +25,7 @@
 
 var ZoteroItemPane = new function() {
 	var _container;
-	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _tagsBox, _notesBox, _relatedBox, _boxes;
+	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _tagsBox, _notesBox, _librariesCollectionsBox, _relatedBox, _boxes;
 	var _deck;
 	var _lastItem;
 	var _selectedNoteID;
@@ -45,8 +45,9 @@ var ZoteroItemPane = new function() {
 		_notesBox = document.getElementById('zotero-editpane-notes');
 		_attachmentsBox = document.getElementById('zotero-editpane-attachments');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
+		_librariesCollectionsBox = document.getElementById('zotero-editpane-libraries-collections');
 		_relatedBox = document.getElementById('zotero-editpane-related');
-		_boxes = [_itemBox, _abstractBox, _notesBox, _attachmentsBox, _tagsBox, _relatedBox];
+		_boxes = [_itemBox, _abstractBox, _notesBox, _attachmentsBox, _librariesCollectionsBox, _tagsBox, _relatedBox];
 		
 		_deck = document.getElementById('zotero-item-pane-content');
 		
