@@ -31,3 +31,9 @@
 	}
 }
 
+button {
+	@media (-moz-platform: macos) {
+		// Prevent ugly non-native button styles on macOS
+		max-height: 25px;
+	}
+}

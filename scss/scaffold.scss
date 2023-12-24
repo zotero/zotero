@@ -96,20 +96,22 @@ richlistbox {
 	min-width:200px;
 }
 
-#zotero-toolbar {
-	margin-bottom: 3px;
-}
-
 #zotero-toolbar toolbarseparator {
 	height: 18px;
 }
 
-browser {
-	background: white;
+browser,
+#appcontent
+{
+	background: var(--material-toolbar);
+}
+
+#appcontent {
+	padding: 16px;
 }
 
 vbox > splitter {
-	cursor: row-resize;
+	cursor: row-rgb(4, 4, 4)e;
 }
 
 /* Adapted from Mozilla common-shared.css */
@@ -120,8 +122,8 @@ listheader,
 richlistbox {
 	appearance: none;
 	margin-inline: 0;
-	background-color: #fff;
-	border: 1px solid #ccc;
+	background: var(--material-background);
+	border: var(--material-panedivider);
 }
 
 listheader {
@@ -164,7 +166,7 @@ dialog richlistbox > richlistitem[disabled] {
 }
 
 #left-tabbox {
-	margin-top: 5px;
+	margin: 5px;
 }
 
 #checkboxes-translatorType checkbox {
@@ -176,7 +178,16 @@ dialog richlistbox > richlistitem[disabled] {
 	text-align: right;
 }
 
-#right-pane textarea {
-	margin-right: 5px;
-	margin-bottom: 5px;
+#pane-splitter {
+	// 16px (padding of tabbox container) - 9px
+	margin-left: 7px;
+}
+
+#right-pane {
+	margin: -16px -16px -16px 0px;
+	border-left: var(--material-panedivider);
+	textarea {
+		outline: none;
+		border: 0;
+	}
 }
