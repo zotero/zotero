@@ -52,12 +52,12 @@ var ZoteroItemPane = new function() {
 		_deck = document.getElementById('zotero-item-pane-content');
 		
 		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
-	}
+	};
 	
 	
 	this.onUnload = function () {
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
-	},
+	};
 	
 	
 	/*
@@ -128,7 +128,7 @@ var ZoteroItemPane = new function() {
 	});
 	
 	
-	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
+	this.notify = Zotero.Promise.coroutine(function* (action, _type, _ids, _extraData) {
 		if (action == 'refresh' && _lastItem) {
 			yield this.viewItem(_lastItem, null, false);
 		}
@@ -238,8 +238,8 @@ var ZoteroItemPane = new function() {
 
 		var key = Zotero.Keys.getKeyForCommand('saveToZotero');
 		
-		var tooltip = label 
-			+ (Zotero.rtl ? ' \u202B' : ' ') + '(' 
+		var tooltip = label
+			+ (Zotero.rtl ? ' \u202B' : ' ') + '('
 			+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
 			+ key + ')';
 		elem.title = tooltip;
@@ -260,7 +260,7 @@ var ZoteroItemPane = new function() {
 		elem.textContent = label;
 
 		var key = Zotero.Keys.getKeyForCommand('toggleRead');
-		var tooltip = label + (Zotero.rtl ? ' \u202B' : ' ') + '(' + key + ')'
+		var tooltip = label + (Zotero.rtl ? ' \u202B' : ' ') + '(' + key + ')';
 		elem.title = tooltip;
 	};
 	
@@ -277,6 +277,7 @@ var ZoteroItemPane = new function() {
 		let menupopup = document.createXULElement('menupopup');
 
 		if (includeEditMenuOptions) {
+			// eslint-disable-next-line no-undef
 			goBuildEditContextMenu();
 			let menuitems = [...document.getElementById('textbox-contextmenu').children];
 			menupopup.append(...menuitems.map(menuitem => menuitem.cloneNode(true)));
