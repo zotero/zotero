@@ -186,6 +186,7 @@ pref("extensions.zotero.purge.tags", false);
 
 // Zotero pane persistent data
 pref("extensions.zotero.pane.persist", "");
+pref("extensions.zotero.showAttachmentPreview", true);
 
 pref("extensions.zotero.fileHandler.pdf", "");
 pref("extensions.zotero.fileHandler.epub", "");

@@ -31,12 +31,12 @@
 	class ContextNotesList extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div>
-				<collapsible-section data-pane="context-item-notes" show-add="true" class="item-notes">
+				<collapsible-section data-pane="context-item-notes" class="item-notes" extra-buttons="add">
 					<html:div class="body"/>
 				</collapsible-section>
 			</html:div>
 			<html:div>
-				<collapsible-section data-pane="context-all-notes" show-add="true" class="all-notes">
+				<collapsible-section data-pane="context-all-notes" class="all-notes" extra-buttons="add">
 					<html:div class="body"/>
 				</collapsible-section>
 			</html:div>

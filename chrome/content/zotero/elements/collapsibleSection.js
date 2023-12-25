@@ -31,8 +31,6 @@
 		
 		_title = null;
 
-		_addButton = null;
-		
 		_listenerAdded = false;
 		
 		get open() {
@@ -62,6 +60,12 @@
 			// eslint-disable-next-line no-void
 			void getComputedStyle(this).maxHeight; // Force style calculation! Without this the animation doesn't work
 			this.toggleAttribute('open', newOpen);
+
+			this.dispatchEvent(new CustomEvent('toggle'), {
+				bubbles: false,
+				cancelable: false
+			});
+			
 			if (!newOpen && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
 				this.ownerDocument.activeElement.blur();
 			}
@@ -92,20 +96,17 @@
 			this.setAttribute('label', val);
 		}
 		
-		get showAdd() {
-			return this.hasAttribute('show-add');
-		}
-		
-		set showAdd(val) {
-			this.toggleAttribute('show-add', !!val);
-		}
-		
 		static get observedAttributes() {
-			return ['open', 'empty', 'label', 'show-add'];
+			return ['open', 'empty', 'label', 'extra-buttons'];
 		}
 		
-		attributeChangedCallback() {
-			this.render();
+		attributeChangedCallback(name) {
+			if (name === "extra-buttons") {
+				this._buildExtraButtons();
+			}
+			else {
+				this.render();
+			}
 		}
 		
 		init() {
@@ -125,18 +126,7 @@
 			this._title = document.createElement('span');
 			this._title.className = 'title';
 			this._head.append(this._title);
-			
-			this._addButton = document.createXULElement('toolbarbutton');
-			this._addButton.className = 'add';
-			this._addButton.addEventListener('command', (event) => {
-				this.dispatchEvent(new CustomEvent('add', {
-					...event,
-					detail: { button: this._addButton },
-					bubbles: false
-				}));
-			});
-			this._head.append(this._addButton);
-			
+
 			this._contextMenu = this._buildContextMenu();
 			if (this._contextMenu) {
 				let popupset = document.createXULElement('popupset');
@@ -147,6 +137,8 @@
 			let twisty = document.createXULElement('toolbarbutton');
 			twisty.className = 'twisty';
 			this._head.append(twisty);
+			
+			this._buildExtraButtons();
 			
 			this.prepend(this._head);
 
@@ -232,6 +224,30 @@
 			
 			return contextMenu;
 		}
+
+		_buildExtraButtons() {
+			if (!this.initialized) {
+				return;
+			}
+			this.querySelectorAll('.section-custom-button').forEach(elem => elem.remove());
+			let extraButtons = [];
+			let buttonTypes = (this.getAttribute('extra-buttons') || "").split(",");
+			for (let buttonType of buttonTypes) {
+				buttonType = buttonType.trim();
+				if (!buttonType) continue;
+				let button = document.createXULElement('toolbarbutton');
+				button.classList.add(buttonType, 'section-custom-button');
+				button.addEventListener('command', (event) => {
+					this.dispatchEvent(new CustomEvent(buttonType, {
+						...event,
+						detail: { button },
+						bubbles: false
+					}));
+				});
+				extraButtons.push(button);
+			}
+			this._head.querySelector('.twisty').before(...extraButtons);
+		}
 		
 		destroy() {
 			this._head.removeEventListener('click', this._handleClick);
@@ -264,12 +280,12 @@
 		}
 		
 		_handleClick = (event) => {
-			if (event.target.closest('.add, menupopup')) return;
+			if (event.target.closest('.section-custom-button, menupopup')) return;
 			this.open = !this.open;
 		};
 		
 		_handleKeyDown = (event) => {
-			if (event.target.closest('.add')) return;
+			if (event.target.closest('.section-custom-button')) return;
 			if (event.key === 'Enter' || event.key === ' ') {
 				this.open = !this.open;
 				event.preventDefault();
@@ -277,13 +293,17 @@
 		};
 		
 		_handleContextMenu = (event) => {
-			if (event.target.closest('.add')) return;
+			if (event.target.closest('.section-custom-button')) return;
 			event.preventDefault();
 			this._contextMenu?.openPopupAtScreen(event.screenX, event.screenY, true);
 		};
 		
 		_getSidenav() {
-			return this.closest('.zotero-view-item-container')?.querySelector('item-pane-sidenav');
+			// TODO: update this after unifying item pane & context pane
+			return document.querySelector(
+				Zotero_Tabs.selectedType === 'library'
+					? "#zotero-view-item-sidenav"
+					: "#zotero-context-pane-sidenav");
 		}
 		
 		render() {
@@ -291,7 +311,7 @@
 			
 			if (!this._listenerAdded && this._head?.nextSibling) {
 				this._head.nextSibling.addEventListener('transitionend', () => {
-					Zotero.debug('Animation done; height is ' + this._head.nextSibling.scrollHeight)
+					Zotero.debug('Animation done; height is ' + this._head.nextSibling.scrollHeight);
 					this.style.setProperty('--open-height', 'auto');
 				});
 				this._listenerAdded = true;
@@ -299,7 +319,6 @@
 			
 			this._head.setAttribute('aria-expanded', this.open);
 			this._title.textContent = this.label;
-			this._addButton.hidden = !this.showAdd;
 		}
 	}
 	customElements.define("collapsible-section", CollapsibleSection);

@@ -4,6 +4,10 @@ item-box {
 	min-width: 0;
 	width: 100%;
 
+	&[hidden] {
+		display: none;
+	}
+
 	#item-box {
 		width: 100%;
 	}
@@ -69,6 +73,11 @@ item-box {
 			// needed to have the outline appear on all platforms
 			-moz-appearance: none;
 			align-self: center;
+			// Make all buttons tigher to not stretch the rows
+			height: auto;
+			width: auto;
+			padding: 1px;
+			border-radius: 2px;
 		}
 	}
 

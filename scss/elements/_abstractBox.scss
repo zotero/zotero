@@ -1,6 +1,10 @@
 abstract-box {
 	display: flex;
 	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
 }
 
 abstract-box .body {

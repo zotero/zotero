@@ -31,19 +31,19 @@ import { getCSSItemTypeIcon } from 'components/icons';
 	class AttachmentRow extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="head">
-				<html:span class="twisty"/>
-				<html:div class="clicky-item">
+				<html:div class="clicky-item attachment-btn">
 					<html:span class="icon"/>
 					<html:div class="label"/>
 				</html:div>
+				<html:div class="clicky-item annotation-btn">
+					<html:span class="icon"/>
+					<html:span class="label"/>
+				</html:div>
 			</html:div>
-			<html:div class="body"/>
 		`);
 		
 		_attachment = null;
 		
-		_mode = null;
-
 		_listenerAdded = false;
 		
 		static get observedAttributes() {
@@ -59,34 +59,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this.render();
 		}
 
-		get open() {
-			if (this.empty) {
-				return false;
-			}
-			return this.hasAttribute('open');
-		}
-
-		set open(newOpen) {
-			newOpen = !!newOpen;
-			let oldOpen = this.open;
-			if (oldOpen === newOpen || this.empty) return;
-			this.render();
-			let openHeight = this._body.scrollHeight;
-			if (openHeight) {
-				this.style.setProperty('--open-height', `${openHeight}px`);
-			}
-			else {
-				this.style.setProperty('--open-height', 'auto');
-			}
-
-			// eslint-disable-next-line no-void
-			void getComputedStyle(this).maxHeight; // Force style calculation! Without this the animation doesn't work
-			this.toggleAttribute('open', newOpen);
-			if (!newOpen && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
-				this.ownerDocument.activeElement.blur();
-			}
-		}
-
 		get attachment() {
 			return this._attachment;
 		}
@@ -100,76 +72,56 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			return this._attachment.getField('title');
 		}
 		
-		get empty() {
-			return !this._attachment
-				|| !this._attachment.isFileAttachment()
-				|| !this._attachment.numAnnotations();
-		}
-		
-		get contextRow() {
-			return this.classList.contains('context');
-		}
-		
-		set contextRow(val) {
-			this.classList.toggle('context', !!val);
-		}
-		
 		init() {
-			this._head = this.querySelector('.head');
-			this._head.addEventListener('click', this._handleClick);
-			this._head.addEventListener('keydown', this._handleKeyDown);
-			
-			this._label = this.querySelector('.label');
-			this._body = this.querySelector('.body');
-			this.open = false;
+			this._attachmentButton = this.querySelector('.attachment-btn');
+			this._annotationButton = this.querySelector('.annotation-btn');
+
+			this._attachmentButton.addEventListener('click', this._handleAttachmentClick);
+			this._annotationButton.addEventListener('click', this._handleAnnotationClick);
+
 			this.render();
 		}
+
+		destroy() {
+			this._attachmentButton.removeEventListener('click', this._handleAttachmentClick);
+			this._annotationButton.removeEventListener('click', this._handleAnnotationClick);
+		}
 		
-		_handleClick = (event) => {
-			if (event.target.closest('.clicky-item')) {
-				let win = Zotero.getMainWindow();
-				if (win) {
-					win.ZoteroPane.selectItem(this._attachment.id);
-					win.Zotero_Tabs.select('zotero-pane');
-					win.focus();
-				}
-				return;
-			}
-			this.open = !this.open;
+		_handleAttachmentClick = (event) => {
+			ZoteroPane.viewAttachment(this._attachment.id, event);
 		};
-		
-		_handleKeyDown = (event) => {
-			if (event.key === 'Enter' || event.key === ' ') {
-				this.open = !this.open;
-				event.preventDefault();
+
+		_handleAnnotationClick = () => {
+			// TODO: jump to annotations pane
+			// ZoteroItemPane.setNextPane("attachment-annotations");
+			let pane = this._getSidenav()?.container.querySelector(`:scope > [data-pane="attachment-annotations"]`);
+			if (pane) {
+				pane._section.open = true;
+			}
+			let win = Zotero.getMainWindow();
+			if (win) {
+				win.ZoteroPane.selectItem(this._attachment.id);
+				win.Zotero_Tabs.select('zotero-pane');
+				win.focus();
 			}
 		};
-		
+
+		_getSidenav() {
+			// TODO: update this after unifying item pane & context pane
+			return document.querySelector(
+				Zotero_Tabs.selectedType === 'library'
+					? "#zotero-view-item-sidenav"
+					: "#zotero-context-pane-sidenav");
+		}
+
 		render() {
 			if (!this.initialized) return;
 			
-			this.querySelector('.icon').replaceWith(getCSSItemTypeIcon(this._attachment.getItemTypeIconName()));
-			this._label.textContent = this._attachment.getField('title');
-			
-			this._body.replaceChildren();
-			
-			if (this._attachment.isFileAttachment()) {
-				for (let annotation of this._attachment.getAnnotations()) {
-					let row = document.createXULElement('annotation-row');
-					row.annotation = annotation;
-					this._body.append(row);
-				}
-			}
-
-			if (!this._listenerAdded) {
-				this._body.addEventListener('transitionend', () => {
-					this.style.setProperty('--open-height', 'auto');
-				});
-				this._listenerAdded = true;
-			}
-
-			this._head.setAttribute('aria-expanded', this.open);
-			this.toggleAttribute('empty', this.empty);
+			this._attachmentButton.querySelector(".icon").replaceWith(getCSSItemTypeIcon(this._attachment.getItemTypeIconName()));
+			this._attachmentButton.querySelector(".label").textContent = this._attachment.getField('title');
+			let annotationCount = this.attachment.getAnnotations().length;
+			this._annotationButton.hidden = annotationCount === 0;
+			this._annotationButton.querySelector(".label").textContent = annotationCount;
 		}
 	}
 

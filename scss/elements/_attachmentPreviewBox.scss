@@ -1,0 +1,30 @@
+attachment-preview-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+
+	.body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	#preview-placeholder {
+		display: none;
+		color: var(--fill-secondary);
+		margin: 8px;
+	}
+
+	&:not([data-use-preview]) {
+		#preview-placeholder {
+			display: unset;
+		}
+
+		#attachment-preview {
+			display: none;
+		}
+	}
+}

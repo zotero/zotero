@@ -46,6 +46,11 @@
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						data-l10n-id="sidenav-attachment-preview"
+						data-pane="attachment-preview"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
 						data-l10n-id="sidenav-attachments"
 						data-pane="attachments"/>
 				</html:div>
@@ -53,6 +58,16 @@
 					<toolbarbutton
 						data-l10n-id="sidenav-notes"
 						data-pane="notes"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-attachment-info"
+						data-pane="attachment-info"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-attachment-annotations"
+						data-pane="attachment-annotations"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
@@ -93,7 +108,7 @@
 		
 		_contextMenuTarget = null;
 
-		_preserveMinScrollHeightTimeout = null;
+		_disableScrollHandler = false;
 		
 		_pendingPane = null;
 		
@@ -124,7 +139,10 @@
 		}
 		
 		set pinnedPane(val) {
-			this.setAttribute('pinnedPane', val || '');
+			if (!val || !this.getPane(val)) {
+				val = '';
+			}
+			this.setAttribute('pinnedPane', val);
 			if (val) {
 				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getPane(val));
 			}
@@ -216,14 +234,9 @@
 			// If there isn't enough stuff below it for it to be at the top, we add padding
 			// We use a ::before pseudo-element for this so that we don't need to add another level to the DOM
 			this._makeSpaceForPane(pane);
-			if (behavior == 'smooth' && pane.getBoundingClientRect().top > this._container.getBoundingClientRect().top) {
-				if (this._preserveMinScrollHeightTimeout) {
-					clearTimeout(this._preserveMinScrollHeightTimeout);
-				}
-				this._preserveMinScrollHeightTimeout = setTimeout(() => {
-					this._preserveMinScrollHeightTimeout = null;
-					this._handleContainerScroll();
-				}, 1000);
+			if (behavior == 'smooth') {
+				this._disableScrollHandler = true;
+				this._waitForScroll().then(() => this._disableScrollHandler = false);
 			}
 			pane.scrollIntoView({ block: 'start', behavior });
 			pane.focus();
@@ -246,7 +259,8 @@
 		}
 
 		_handleContainerScroll = () => {
-			if (this._preserveMinScrollHeightTimeout) return;
+			// Don't scroll hidden pane
+			if (this.hidden || this._disableScrollHandler) return;
 			let minHeight = this._minScrollHeight;
 			if (minHeight) {
 				let newMinScrollHeight = this._container.scrollTop + this._container.clientHeight;
@@ -259,6 +273,48 @@
 				this._minScrollHeight = newMinScrollHeight;
 			}
 		};
+
+		async _waitForScroll() {
+			let scrollPromise = Zotero.Promise.defer();
+			let lastScrollTop = this._container.scrollTop;
+			const waitFrame = async () => {
+				return new Promise((resolve) => {
+					requestAnimationFrame(resolve);
+				});
+			};
+			const waitFrames = async (n) => {
+				for (let i = 0; i < n; i++) {
+					await waitFrame();
+				}
+			};
+			const checkScrollStart = () => {
+				// If the scrollTop is not changed, wait for scroll to happen
+				if (lastScrollTop === this._container.scrollTop) {
+					requestAnimationFrame(checkScrollStart);
+				}
+				// Wait for scroll to end
+				else {
+					requestAnimationFrame(checkScrollEnd);
+				}
+			};
+			const checkScrollEnd = async () => {
+				// Wait for 3 frames to make sure not further scrolls
+				await waitFrames(3);
+				if (lastScrollTop === this._container.scrollTop) {
+					scrollPromise.resolve();
+				}
+				else {
+					lastScrollTop = this._container.scrollTop;
+					requestAnimationFrame(checkScrollEnd);
+				}
+			};
+			checkScrollStart();
+			// Abort after 3 seconds, which should be enough
+			return Promise.race([
+				scrollPromise.promise,
+				Zotero.Promise.delay(3000)
+			]);
+		}
 		
 		getPanes() {
 			return Array.from(this.container.querySelectorAll(':scope > [data-pane]:not([hidden])'));

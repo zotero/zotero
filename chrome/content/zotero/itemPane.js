@@ -25,7 +25,7 @@
 
 var ZoteroItemPane = new function() {
 	var _container;
-	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _tagsBox, _notesBox, _librariesCollectionsBox, _relatedBox, _boxes;
+	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _attachmentInfoBox, _attachmentPreviewBox, _attachmentAnnotationsBox, _tagsBox, _notesBox, _librariesCollectionsBox, _relatedBox, _boxes;
 	var _deck;
 	var _lastItem;
 	var _selectedNoteID;
@@ -43,11 +43,14 @@ var ZoteroItemPane = new function() {
 		_itemBox = document.getElementById('zotero-editpane-item-box');
 		_abstractBox = document.getElementById('zotero-editpane-abstract');
 		_notesBox = document.getElementById('zotero-editpane-notes');
+		_attachmentPreviewBox = document.getElementById('zotero-editpane-attachment-preview');
 		_attachmentsBox = document.getElementById('zotero-editpane-attachments');
+		_attachmentInfoBox = document.getElementById('zotero-attachment-box');
+		_attachmentAnnotationsBox = document.getElementById('zotero-editpane-attachment-annotations');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_librariesCollectionsBox = document.getElementById('zotero-editpane-libraries-collections');
 		_relatedBox = document.getElementById('zotero-editpane-related');
-		_boxes = [_itemBox, _abstractBox, _notesBox, _attachmentsBox, _librariesCollectionsBox, _tagsBox, _relatedBox];
+		_boxes = [_itemBox, _abstractBox, _notesBox, _attachmentPreviewBox, _attachmentsBox, _attachmentInfoBox, _attachmentAnnotationsBox, _librariesCollectionsBox, _tagsBox, _relatedBox];
 		
 		_deck = document.getElementById('zotero-item-pane-content');
 		
@@ -114,6 +117,10 @@ var ZoteroItemPane = new function() {
 			box.item = item;
 			box.inTrash = inTrash;
 		}
+
+		if (pinnedPane && !_sidenav.getPane(pinnedPane)) {
+			pinnedPane = "";
+		}
 		
 		_scrollParent.style.paddingBottom = '';
 		if (pinnedPane) {
@@ -121,7 +128,7 @@ var ZoteroItemPane = new function() {
 			_sidenav.pinnedPane = pinnedPane;
 		}
 		else if (pinnedPane !== false) {
-			_sidenav.scrollToPane('info', 'instant');
+			_sidenav.scrollToPane(_sidenav.getPanes()[0]?.getAttribute('data-pane'), 'instant');
 		}
 		
 		_sidenav.render();

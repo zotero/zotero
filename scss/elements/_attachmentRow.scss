@@ -9,61 +9,40 @@ attachment-row {
 
 	& > .head {
 		display: flex;
-		align-items: center;
-
-		.twisty {
-			width: 8px;
-			height: 8px;
-			margin: 4px;
-			align-self: flex-start;
-
-			@include comfortable {
-				padding-block: 2px;
-			}
-
-			@include svgicon("chevron-8", "universal", "8");
-			fill: var(--fill-secondary);
-			
-			transform: rotate(0deg);
-			transform-origin: center;
-			transition: transform 0.2s ease-in-out;
-		}
+		align-items: baseline;
+		gap: 4px;
 		
 		.clicky-item {
 			@include clicky-item;
 			flex: 1;
+			gap: 4px;
+			padding-inline: 4px;
 		}
-	}
+
+		.annotation-btn {
+			flex-grow: 0;
+			flex-basis: content;
+
+			&[hidden] {
+				display: none;
+			}
+
+			.icon {
+				width: 12px;
+				height: 12px;
+				@include svgicon("annotation-12", "universal", "16");
+				color: var(--fill-secondary);
+				padding-block: 4px;
+			}
 	
-	&[open]:not([empty]) > .head .twisty {
-		transform: rotate(-180deg);
-	}
-
-	&[empty] > .head .twisty {
-		fill: var(--fill-tertiary);
-	}
-	
-	&.context > .head .label {
-		color: var(--fill-secondary);
-	}
-
-	& > .body {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-
-		max-height: var(--open-height, auto);
-		opacity: 1;
-		transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out;
-	}
-
-	&:not([open]) {
-		& > .body {
-			max-height: 0;
-			opacity: 0;
-			visibility: hidden;
-			overflow-y: hidden;
-			transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0s 0.2s, overflow-y 0s 0.2s;
+			.label {
+				padding-block: 2px;
+				line-height: 16px;
+				width: 100%;
+				color: var(--fill-secondary);
+			}
 		}
+
+		
 	}
 }

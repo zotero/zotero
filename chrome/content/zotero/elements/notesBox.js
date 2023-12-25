@@ -30,7 +30,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 {
 	class NotesBox extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<collapsible-section data-l10n-id="section-notes" data-pane="notes">
+			<collapsible-section data-l10n-id="section-notes" data-pane="notes" extra-buttons="addd">
 				<html:div class="body"/>
 			</collapsible-section>
 		`);
@@ -69,7 +69,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				default:
 					throw new Error(`Invalid mode '${val}'`);
 			}
-
+			this.setAttribute('mode', val);
 			this._mode = val;
 		}
 
@@ -78,6 +78,13 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 
 		set item(val) {
+			if (val?.isRegularItem()) {
+				this.hidden = false;
+			}
+			else {
+				this.hidden = true;
+				return;
+			}
 			this._item = val;
 			this._refresh();
 		}
@@ -131,7 +138,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			}
 
 			let count = this._noteIDs.length;
-			this._section.showAdd = this._mode == 'edit';
 			this._section.setCount(count);
 		}
 

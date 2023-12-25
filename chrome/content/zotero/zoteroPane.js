@@ -1815,14 +1815,6 @@ var ZoteroPane = new function()
 					ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
 				}
 				
-				else if (item.isAttachment()) {
-					var attachmentBox = document.getElementById('zotero-attachment-box');
-					attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
-					attachmentBox.item = item;
-					
-					document.getElementById('zotero-item-pane-content').selectedIndex = 3;
-				}
-				
 				// Regular item
 				else {
 					var isCommons = collectionTreeRow.isBucket();
@@ -1878,7 +1870,7 @@ var ZoteroPane = new function()
 						this.setItemPaneMessage(msg);
 					}
 					else if (count) {
-						document.getElementById('zotero-item-pane-content').selectedIndex = 4;
+						document.getElementById('zotero-item-pane-content').selectedIndex = 3;
 						
 						// Load duplicates UI code
 						if (typeof Zotero_Duplicates_Pane == 'undefined') {

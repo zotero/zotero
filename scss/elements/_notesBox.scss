@@ -2,34 +2,44 @@ notes-box, related-box {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-}
 
-notes-box .body, related-box .body {
-	display: flex;
-	flex-direction: column;
-	padding-inline-start: 16px;
+	&[hidden] {
+		display: none;
+	}
 
-	.row {
+	&:not([mode=edit]) {
+		.add {
+			display: none;
+		}
+	}
+
+	.body {
 		display: flex;
-		gap: 4px;
-		align-items: flex-start;
-		
-		@include comfortable {
-			padding-block: 2px;
-		}
-
-		.box {
-			@include clicky-item;
-			flex: 1;
-		}
-
-		toolbarbutton {
-			margin-inline-start: auto;
-			visibility: hidden;
-		}
-
-		&:is(:hover, :focus-within) toolbarbutton {
-			visibility: visible;
+		flex-direction: column;
+		padding-inline-start: 16px;
+	
+		.row {
+			display: flex;
+			gap: 4px;
+			align-items: flex-start;
+			
+			@include comfortable {
+				padding-block: 2px;
+			}
+	
+			.box {
+				@include clicky-item;
+				flex: 1;
+			}
+	
+			toolbarbutton {
+				margin-inline-start: auto;
+				visibility: hidden;
+			}
+	
+			&:is(:hover, :focus-within) toolbarbutton {
+				visibility: visible;
+			}
 		}
 	}
 }

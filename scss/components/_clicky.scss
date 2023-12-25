@@ -64,6 +64,14 @@
 	color: var(--fill-secondary);
 }
 
+.zotero-clicky-preview-control {
+	@include svgicon-menu("preview-show", "universal", "16");
+	&[data-show-preview] {
+		@include svgicon-menu("preview-hide", "universal", "16");
+	}
+	border: 0px !important;
+}
+
 .zotero-clicky-minus[disabled=true], .zotero-clicky-plus[disabled=true] {
 	opacity: .5;
 }

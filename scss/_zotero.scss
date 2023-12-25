@@ -57,6 +57,8 @@
 // --------------------------------------------------
 
 @import "elements/attachmentBox";
+@import "elements/attachmentPreview";
+@import "elements/attachmentPreviewBox";
 @import "elements/colorPicker";
 @import "elements/guidancePanel";
 @import "elements/itemBox";
@@ -75,6 +77,7 @@
 @import "elements/collapsibleSection";
 @import "elements/attachmentsBox";
 @import "elements/attachmentRow";
+@import "elements/attachmentAnnotationsBox";
 @import "elements/annotationRow";
 @import "elements/noteRow";
 @import "elements/librariesCollectionsBox";

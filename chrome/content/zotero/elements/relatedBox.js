@@ -30,7 +30,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 {
 	class RelatedBox extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<collapsible-section data-l10n-id="section-related" data-pane="related">
+			<collapsible-section data-l10n-id="section-related" data-pane="related" extra-buttons="add">
 				<html:div class="body"/>
 			</collapsible-section>
 		`);
@@ -68,7 +68,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				default:
 					throw new Error(`Invalid mode '${val}'`);
 			}
-
+			this.setAttribute('mode', val);
 			this._mode = val;
 		}
 
@@ -81,7 +81,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this.refresh();
 		}
 
-		notify(event, type, ids, extraData) {
+		notify(event, type, ids, _extraData) {
 			if (!this._item || !this._item.id) return;
 
 			// Refresh if this item has been modified
@@ -148,8 +148,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				}
 				this._updateCount();
 			}
-
-			this._section.showAdd = this._mode == 'edit';
 		}
 
 		add = async () => {
@@ -225,7 +223,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			return this.querySelector(`[id=${id}]`);
 		}
 
-		receiveKeyboardFocus(direction) {
+		receiveKeyboardFocus(_direction) {
 			this._id("addButton").focus();
 			// TODO: the relatedbox is not currently keyboard accessible
 			// so we are ignoring the direction

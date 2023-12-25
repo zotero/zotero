@@ -287,6 +287,12 @@ pane-notes = Notes
 pane-libraries-collections = Libraries and Collections
 pane-tags = Tags
 pane-related = Related
+pane-attachment-info = Attachment Info
+pane-attachment-preview = Preview
+pane-attachment-annotations = Annotations
+
+pane-header-attachment-associated =
+    .label = Rename associated file
 
 section-info =
     .label = { pane-info }
@@ -296,6 +302,13 @@ section-attachments =
     .label = { $count ->
                  [one] { $count } Attachment
                  *[other] { $count } Attachments
+             }
+section-attachment-preview =
+    .label = { pane-attachment-preview }
+section-attachments-annotations =
+    .label = { $count ->
+                 [one] { $count } Annotation
+                 *[other] { $count } Annotations
              }
 section-notes =
     .label = { $count ->
@@ -311,6 +324,8 @@ section-tags =
              }
 section-related =
     .label = { $count } Related
+section-attachment-info =
+    .label = { pane-attachment-info }
 
 sidenav-info =
     .tooltiptext = { pane-info }
@@ -320,6 +335,12 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-attachment-info =
+    .tooltiptext = { pane-attachment-info }
+sidenav-attachment-preview =
+    .tooltiptext = { pane-attachment-preview }
+sidenav-attachment-annotations =
+    .tooltiptext = { pane-attachment-annotations }
 sidenav-libraries-collections =
     .tooltiptext = { pane-libraries-collections }
 sidenav-tags =
@@ -355,3 +376,33 @@ new-collection-dialog =
     .buttonlabelaccept = Create Collection
 new-collection-name = Name:
 new-collection-create-in = Create in:
+
+attachment-info-filename =
+    .value = Filename
+attachment-info-accessed =
+    .value = Accessed
+attachment-info-pages =
+    .value = Pages
+attachment-info-modified =
+    .value = Modified
+attachment-info-index =
+    .value = Indexed
+attachment-info-convert-note =
+    .label = Migrate to {
+        $type ->
+            [standalone] Standalone
+            [child] Item
+            *[unknown] New
+    } Note
+    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note
+    by migrating it to a separate note.
+
+attachment-preview-placeholder = No attachment to preview
+
+toggle-preview =
+    .label = {
+        $type ->
+            [open] Hide
+            [collapsed] Show
+            *[unknown] Toggle
+    } Attachment Preview

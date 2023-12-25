@@ -853,18 +853,7 @@ var ZoteroContextPane = new function () {
 		};
 		_itemContexts.push(context);
 		
-		if (!parentID) {
-			let vbox = document.createXULElement('vbox');
-			vbox.setAttribute('flex', '1');
-			vbox.setAttribute('align', 'center');
-			vbox.setAttribute('pack', 'center');
-			var description = document.createXULElement('description');
-			vbox.append(description);
-			description.append(Zotero.getString('pane.context.noParent'));
-			container.append(vbox);
-			return;
-		}
-		var parentItem = Zotero.Items.get(item.parentID);
+		let targetItem = parentID ? Zotero.Items.get(parentID) : item;
 		
 		// Dynamically create item pane tabs and panels as in zoteroPane.xhtml.
 		// Keep the code below in sync with zoteroPane.xhtml
@@ -900,7 +889,11 @@ var ZoteroContextPane = new function () {
 		abstractBox.setAttribute('data-pane', 'abstract');
 		div.append(abstractBox);
 		
-		// TODO: Attachments
+		// Attachment info
+		var attachmentBox = new (customElements.get('attachment-box'));
+		attachmentBox.className = 'zotero-editpane-attachment';
+		attachmentBox.setAttribute('data-pane', 'attachment-info');
+		div.append(attachmentBox);
 
 		// Tags
 		var tagsBox = new (customElements.get('tags-box'));
@@ -915,19 +908,22 @@ var ZoteroContextPane = new function () {
 		div.append(relatedBox);
 
 		paneHeader.mode = readOnly ? 'view' : 'edit';
-		paneHeader.item = parentItem;
+		paneHeader.item = targetItem;
 
 		itemBox.mode = readOnly ? 'view' : 'edit';
-		itemBox.item = parentItem;
+		itemBox.item = targetItem;
 
 		abstractBox.mode = readOnly ? 'view' : 'edit';
-		abstractBox.item = parentItem;
+		abstractBox.item = targetItem;
+
+		attachmentBox.mode = readOnly ? 'view' : 'edit';
+		attachmentBox.item = targetItem;
 
 		tagsBox.mode = readOnly ? 'view' : 'edit';
-		tagsBox.item = parentItem;
+		tagsBox.item = targetItem;
 
 		relatedBox.mode = readOnly ? 'view' : 'edit';
-		relatedBox.item = parentItem;
+		relatedBox.item = targetItem;
 		
 		if (_itemPaneDeck.selectedPanel === container) {
 			_sidenav.container = div;

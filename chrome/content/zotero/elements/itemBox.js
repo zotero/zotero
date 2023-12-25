@@ -299,6 +299,14 @@
 			if (!(val instanceof Zotero.Item)) {
 				throw new Error("'item' must be a Zotero.Item");
 			}
+
+			if (val?.isRegularItem()) {
+				this.hidden = false;
+			}
+			else {
+				this.hidden = true;
+				return;
+			}
 			
 			// When changing items, reset truncation of creator list
 			if (!this._item || val.id != this._item.id) {

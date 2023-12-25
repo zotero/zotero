@@ -32,11 +32,11 @@ collapsible-section {
 			height: 20px;
 			padding: 2px;
 			color: var(--fill-secondary);
+			border-radius: 2px;
 		}
 		
 		toolbarbutton.add {
 			@include svgicon-menu("plus", "universal", "16");
-			border-radius: 2px;
 			
 			&:hover {
 				background: var(--fill-quinary);

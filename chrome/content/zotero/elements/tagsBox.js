@@ -40,7 +40,7 @@
 			this._item = null;
 
 			this.content = MozXULElement.parseXULToFragment(`
-				<collapsible-section data-l10n-id="section-tags" data-pane="tags">
+				<collapsible-section data-l10n-id="section-tags" data-pane="tags" extra-buttons="add">
 					<html:div class="body">
 						<html:div id="rows" class="tags-box-list"/>
 						<popupset>
@@ -131,7 +131,7 @@
 				default:
 					throw new Error(`Invalid mode ${val}`);
 			}
-
+			this.setAttribute('mode', val);
 			this._mode = val;
 		}
 
@@ -149,17 +149,14 @@
 		}
 
 		notify(event, type, ids, extraData) {
-			if (type == 'setting') {
-				if (ids.some(val => val.split("/")[1] == 'tagColors') && this.item) {
-					this.reload();
-					return;
-				}
+			if (type == 'setting' && ids.some(val => val.split("/")[1] == 'tagColors') && this.item) {
+				this.reload();
 			}
 			else if (type == 'item-tag') {
-				let itemID, tagID;
+				let itemID, _tagID;
 
 				for (let i = 0; i < ids.length; i++) {
-					[itemID, tagID] = ids[i].split('-').map(x => parseInt(x));
+					[itemID, _tagID] = ids[i].split('-').map(x => parseInt(x));
 					if (!this.item || itemID != this.item.id) {
 						continue;
 					}
@@ -182,11 +179,8 @@
 
 				this.updateCount();
 			}
-			else if (type == 'tag') {
-				if (event == 'modify') {
-					this.reload();
-					return;
-				}
+			else if (type == 'tag' && event == 'modify') {
+				this.reload();
 			}
 		}
 
@@ -226,7 +220,6 @@
 				this.addDynamicRow(tags[i], i + 1);
 			}
 			this.updateCount(tags.length);
-			this._section.showAdd = this.editable;
 
 			this._reloading = false;
 			
@@ -308,7 +301,7 @@
 			// "-" button
 			if (this.editable) {
 				remove.setAttribute('disabled', false);
-				remove.addEventListener('click', async (event) => {
+				remove.addEventListener('click', async (_event) => {
 					if (tagData) {
 						let item = this.item;
 						this.remove(tagName);
@@ -667,7 +660,7 @@
 			}
 		}
 
-		_handleAddButtonClick = async (event) => {
+		_handleAddButtonClick = async (_event) => {
 			await this.blurOpenField();
 			this.newTag();
 		};

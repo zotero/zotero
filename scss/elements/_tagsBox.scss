@@ -1,74 +1,80 @@
 tags-box {
 	display: flex;
 	flex-direction: column;
-}
-
-tags-box .body {
-	display: flex;
-	flex-direction: column;
-	margin: 0;
-	padding-inline-start: 16px;
 	
-	.tags-box-list {
+	.body {
 		display: flex;
 		flex-direction: column;
-	}
+		margin: 0;
+		padding-inline-start: 16px;
+		
+		.tags-box-list {
+			display: flex;
+			flex-direction: column;
+		}
 
-	.row {
-		display: grid;
-		grid-template-columns: 12px 1fr 20px;
-		align-items: center;
-		column-gap: 4px;
+		.row {
+			display: grid;
+			grid-template-columns: 12px 1fr 20px;
+			align-items: center;
+			column-gap: 4px;
 
-		// Shift-Enter
-		&.multiline {
-			align-items: start;
-			min-height: 9em;
+			// Shift-Enter
+			&.multiline {
+				align-items: start;
+				min-height: 9em;
 
-			textarea.editable {
-				resize: none;
+				textarea.editable {
+					resize: none;
+				}
 			}
-		}
 
-		.zotero-box-icon {
-			grid-column: 1;
-			width: 12px;
-			height: 12px;
-			-moz-context-properties: fill;
-			background: icon-url('tag.svg') center no-repeat;
-		}
-		
-		&[tagType="0"] .zotero-box-icon {
-			// User tag: use tag color if we have one, blue accent if we don't
-			fill: var(--tag-color, var(--accent-blue));
-		}
-		
-		&[tagType="1"] .zotero-box-icon {
-			// Automatic tag: use tag color if we have one, gray if we don't
-			fill: var(--tag-color, var(--fill-secondary));
-		}
-
-		.zotero-box-label {
-			grid-column: 2;
-		}
-		
-		&.has-color {
 			.zotero-box-icon {
-				background-image: icon-url('tag-fill.svg');
+				grid-column: 1;
+				width: 12px;
+				height: 12px;
+				-moz-context-properties: fill;
+				background: icon-url('tag.svg') center no-repeat;
 			}
 			
+			&[tagType="0"] .zotero-box-icon {
+				// User tag: use tag color if we have one, blue accent if we don't
+				fill: var(--tag-color, var(--accent-blue));
+			}
+			
+			&[tagType="1"] .zotero-box-icon {
+				// Automatic tag: use tag color if we have one, gray if we don't
+				fill: var(--tag-color, var(--fill-secondary));
+			}
+
 			.zotero-box-label {
-				font-weight: 590;
+				grid-column: 2;
+			}
+			
+			&.has-color {
+				.zotero-box-icon {
+					background-image: icon-url('tag-fill.svg');
+				}
+				
+				.zotero-box-label {
+					font-weight: 590;
+				}
+			}
+
+			toolbarbutton {
+				margin-inline-start: auto;
+				visibility: hidden;
+			}
+
+			&:is(:hover, :focus-within) toolbarbutton {
+				visibility: visible;
 			}
 		}
+	}
 
-		toolbarbutton {
-			margin-inline-start: auto;
-			visibility: hidden;
-		}
-
-		&:is(:hover, :focus-within) toolbarbutton {
-			visibility: visible;
+	&:not([mode=edit]) {
+		.add {
+			display: none;
 		}
 	}
 }

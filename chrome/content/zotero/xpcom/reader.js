@@ -613,7 +613,7 @@ class ReaderInstance {
 		// this._postMessage({ action: 'focusLastToolbarButton' });
 	}
 
-	tabToolbar(reverse) {
+	tabToolbar(_reverse) {
 		// this._postMessage({ action: 'tabToolbar', reverse });
 		// Avoid toolbar find button being focused for a short moment
 		setTimeout(() => this._iframeWindow.focus());
@@ -848,6 +848,7 @@ class ReaderInstance {
 			}
 			return new this._iframeWindow.Blob([u8arr], { type: mime });
 		}
+		return undefined;
 	}
 
 	_getColorIcon(color, selected) {
@@ -1144,7 +1145,7 @@ class ReaderWindow extends ReaderInstance {
 			'.menu-type-reader.pdf, .menu-type-reader.epub, .menu-type-reader.snapshot'
 		).forEach(el => el.hidden = true);
 		this._window.document.querySelectorAll('.menu-type-reader.' + subtype).forEach(el => el.hidden = false);
-	};
+	}
 
 	close() {
 		this.uninit();
@@ -1207,6 +1208,266 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('go-menuitem-back').setAttribute('disabled', !this._internalReader.canNavigateBack);
 		this._window.document.getElementById('go-menuitem-forward').setAttribute('disabled', !this._internalReader.canNavigateForward);
+	}
+}
+
+
+class ReaderPreview extends ReaderInstance {
+	// TODO: implement these inside reader after redesign is done there
+	static CSS = {
+		global: `
+		#split-view, .split-view {
+			top: 0 !important;
+			inset-inline-start: 0 !important;
+		}
+		#reader-ui {
+			display: none !important;
+		}`,
+		pdf: `
+		#mainContainer {
+			/* Hide left-side vertical line */
+			margin-inline-start: -1px;
+		}
+		#viewerContainer {
+			overflow: hidden;
+		}
+		.pdfViewer {
+			padding: 6px 0px;
+		}
+		.pdfViewer .page {
+			border-radius: 5px;
+			box-shadow: none;
+		}
+		.pdfViewer .page::before {
+			content: "";
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			border-radius: 5px;
+		}
+		@media (prefers-color-scheme: light) {
+			#viewerContainer {
+				background: #f2f2f2;
+			}
+			.pdfViewer .page::before {
+				box-shadow: inset 0 0 0px 1px #0000001a;
+			}
+		}
+		@media (prefers-color-scheme: dark) {
+			#viewerContainer {
+				background: #303030;
+			}
+			.pdfViewer .page::before {
+				box-shadow: inset 0 0 0px 1px #ffffff1f;
+			}
+		}`,
+		epub: `
+		body.flow-mode-paginated {
+			margin: 8px !important;
+		}
+		body.flow-mode-paginated > .sections {
+			min-height: calc(100vh - 16px);
+			max-height: calc(100vh - 16px);
+		}
+		body.flow-mode-paginated > .sections.spread-mode-odd {
+			column-width: calc(50vw - 16px);
+		}
+		body.flow-mode-paginated replaced-body img, body.flow-mode-paginated replaced-body svg,
+		body.flow-mode-paginated replaced-body audio, body.flow-mode-paginated replaced-body video {
+			max-width: calc(50vw - 16px) !important;
+			max-height: calc(100vh - 16px) !important;
+		}
+		body.flow-mode-paginated replaced-body .table-like {
+			max-height: calc(100vh - 16px);
+		}
+		`,
+		snapshot: `
+		html {
+			pointer-events: none;
+			min-width: 1024px;
+			transform: scale(var(--win-scale));
+			transform-origin: 0 0;
+			overflow-x: hidden;
+		}`
+	};
+
+	constructor(options) {
+		super(options);
+		this._iframe = options.iframe;
+		this._iframeWindow = this._iframe.contentWindow;
+		this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+	}
+
+	async _open({ state, location, secondViewState }) {
+		let success;
+		try {
+			success = await super._open({ state, location, secondViewState });
+
+			this._injectCSS(this._iframeWindow.document, ReaderPreview.CSS.global);
+
+			let ready = await this._waitForInternalReader();
+			if (!ready) {
+				return false;
+			}
+
+			let win = this._internalReader._primaryView._iframeWindow;
+			if (this._type === "snapshot") {
+				win.addEventListener(
+					"resize", this.updateSnapshotAttr);
+				this.updateSnapshotAttr();
+			}
+			else if (this._type === "pdf") {
+				let viewer = win?.PDFViewerApplication?.pdfViewer;
+				let t = 0;
+				while (!viewer?.firstPagePromise && t < 100) {
+					t++;
+					await Zotero.Promise.delay(10);
+					viewer = win?.PDFViewerApplication?.pdfViewer;
+				}
+				await viewer?.firstPagePromise;
+				win.addEventListener("resize", this.updatePDFAttr);
+				this.updatePDFAttr();
+			}
+			else if (this._type === "epub") {
+				this.updateEPUBAttr();
+			}
+
+			this._injectCSS(
+				win.document,
+				ReaderPreview.CSS[this._type]
+			);
+
+			return success;
+		}
+		catch (e) {
+			Zotero.warn(`Failed to load preview for attachment ${await this._item.getFilePathAsync()}: ${String(e)}`);
+			this._item = null;
+			return false;
+		}
+	}
+
+	uninit() {
+		if (this._type === "snapshot") {
+			this._internalReader?._primaryView?._iframeWindow.removeEventListener(
+				"resize", this.updateSnapshotAttr);
+		}
+		else if (this._type === "pdf") {
+			this._internalReader?._primaryView?._iframeWindow.removeEventListener(
+				"resize", this.updatePDFAttr);
+		}
+		super.uninit();
+	}
+
+	/**
+	 * Goto previous/next page
+	 * @param {"prev" | "next"} type goto previous or next page
+	 * @returns {void}
+	 */
+	goto(type) {
+		if (type === "prev") {
+			this._internalReader.navigateToPreviousPage();
+		}
+		else {
+			this._internalReader.navigateToNextPage();
+		}
+	}
+
+	/**
+	 * Check if can goto previous/next page
+	 * @param {"prev" | "next"} type goto previous or next page
+	 * @returns {boolean}
+	 */
+	canGoto(type) {
+		if (type === "prev") {
+			return this._internalReader?._state?.primaryViewStats?.canNavigateToPreviousPage;
+		}
+		else {
+			return this._internalReader?._state?.primaryViewStats?.canNavigateToNextPage;
+		}
+	}
+
+	_isReadOnly() {
+		return true;
+	}
+
+	async _getState() {
+		if (this._type === "pdf") {
+			return { pageIndex: 0, scale: "page-height", scrollMode: 0, spreadMode: 0 };
+		}
+		else if (this._type === "epub") {
+			return Object.assign(await super._getState(), {
+				scale: 1,
+				flowMode: "paginated",
+				spreadMode: 0
+			});
+		}
+		else if (this._type === "snapshot") {
+			return { scale: 1, scrollYPercent: 0 };
+		}
+		return super._getState();
+	}
+
+	async _setState() {}
+
+	updateTitle() {}
+
+	_injectCSS(doc, content) {
+		if (!content) {
+			return;
+		}
+		let style = doc.createElement("style");
+		style.textContent = content;
+		doc.head.appendChild(style);
+	}
+
+	updateSnapshotAttr = () => {
+		let win = this._internalReader?._primaryView?._iframeWindow;
+		let root = win?.document?.documentElement;
+		root?.style.setProperty('--win-scale', String(this._iframe.getBoundingClientRect().width / 1024));
+	};
+
+	updateEPUBAttr() {
+		let view = this._internalReader?._primaryView;
+		let currentSize = parseFloat(
+			view._iframeWindow?.getComputedStyle(view?._iframeDocument?.documentElement).fontSize);
+		let scale = 12 / currentSize;
+		view?._setScale(scale);
+	}
+
+	updatePDFAttr = () => {
+		this._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfViewer.currentScaleValue = 'page-height';
+	};
+
+	getPageWidthHeightRatio() {
+		if (this._type !== 'pdf') {
+			return NaN;
+		}
+		try {
+			let viewport = this._internalReader?._primaryView?._iframeWindow
+				?.PDFViewerApplication?.pdfViewer._pages[0].viewport;
+			return viewport?.width / viewport?.height;
+		}
+		catch (e) {
+			return NaN;
+		}
+	}
+
+	async _waitForInternalReader() {
+		let n = 0;
+		try {
+			while (!this._internalReader?._primaryView?._iframeWindow) {
+				if (n >= 500) {
+					return false;
+				}
+				await Zotero.Promise.delay(10);
+				n++;
+			}
+			await this._internalReader._primaryView.initializedPromise;
+			return true;
+		}
+		catch (e) {
+			return false;
+		}
 	}
 }
 
@@ -1455,7 +1716,7 @@ class Reader {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
 					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return;
+					return undefined;
 				}
 			}
 		}
@@ -1528,6 +1789,26 @@ class Reader {
 			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
+		return reader;
+	}
+
+	async openPreview(itemID, iframe) {
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+
+		let item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw new Error('Item does not exist');
+		}
+
+		let reader = new ReaderPreview({
+			item,
+			sidebarWidth: 0,
+			sidebarOpen: false,
+			bottomPlaceholderHeight: 0,
+			iframe,
+		});
 		return reader;
 	}
 

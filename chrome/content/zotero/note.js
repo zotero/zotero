@@ -26,57 +26,41 @@
 // Auto-suggester fails without this
 Components.utils.import("resource://gre/modules/Services.jsm");
 
-var noteEditor;
-var notifierUnregisterID;
-var type;
+let noteEditor;
+let notifierUnregisterID;
 
 async function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
 	}
 	
-	var itemID = parseInt(io.itemID);
-	var collectionID = parseInt(io.collectionID);
-	var parentItemKey = io.parentItemKey;
-	
-	if (itemID) {
-		var ref = await Zotero.Items.getAsync(itemID);
-		var libraryID = ref.libraryID;
-	}
-	else {
-		if (parentItemKey) {
-			var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
-			var libraryID = ref.libraryID;
-		}
-		else {
-			if (collectionID && collectionID != '' && collectionID != 'undefined') {
-				var collection = Zotero.Collections.get(collectionID);
-				var libraryID = collection.libraryID;
-			}
-		}
-	}
-	type = Zotero.Libraries.get(libraryID).libraryType;
+	let itemID = parseInt(io.itemID);
+	let collectionID = parseInt(io.collectionID);
+	let parentItemKey = io.parentItemKey;
+	let ref;
+
 	noteEditor = document.getElementById('zotero-note-editor');
 	noteEditor.mode = 'edit';
 	noteEditor.viewMode = 'window';
 	
 	// Set font size from pref
 	Zotero.UIProperties.registerRoot(noteEditor);
-	
 	if (itemID) {
-		var ref = await Zotero.Items.getAsync(itemID);
+		ref = await Zotero.Items.getAsync(itemID);
 		noteEditor.item = ref;
 		document.title = ref.getNoteTitle();
+		// Readonly for attachment notes
+		if (ref.isAttachment()) {
+			noteEditor.mode = 'view';
+		}
 	}
 	else {
 		if (parentItemKey) {
-			var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
+			ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
 			noteEditor.parentItem = ref;
 		}
-		else {
-			if (collectionID && collectionID != '' && collectionID != 'undefined') {
-				noteEditor.collection = Zotero.Collections.get(collectionID);
-			}
+		else if (collectionID && collectionID != 'undefined') {
+			noteEditor.collection = Zotero.Collections.get(collectionID);
 		}
 		noteEditor.refresh();
 	}
@@ -86,7 +70,7 @@ async function onLoad() {
 }
 
 // If there's an error saving a note, close the window and crash the app
-function onError() {
+window.onEditorError = function () {
 	try {
 		window.opener.ZoteroPane.displayErrorMessage();
 	}
@@ -94,8 +78,7 @@ function onError() {
 		Zotero.logError(e);
 	}
 	window.close();
-}
-
+};
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
@@ -103,7 +86,7 @@ function onUnload() {
 }
 
 var NotifyCallback = {
-	notify: function(action, type, ids){
+	notify: function (action, type, ids) {
 		if (noteEditor.item && ids.includes(noteEditor.item.id)) {
 			if (action == 'delete') {
 				window.close();
@@ -117,7 +100,7 @@ var NotifyCallback = {
 			window.name = 'zotero-note-' + noteEditor.item.id;
 		}
 	}
-}
+};
 
-addEventListener("load", function(e) { onLoad(e); }, false);
-addEventListener("unload", function(e) { onUnload(e); }, false);
+addEventListener("load", onLoad, false);
+addEventListener("unload", onUnload, false);

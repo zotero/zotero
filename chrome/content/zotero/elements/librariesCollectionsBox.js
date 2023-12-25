@@ -30,7 +30,7 @@ import { getCSSIcon } from 'components/icons';
 {
 	class LibrariesCollectionsBox extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<collapsible-section data-l10n-id="section-libraries-collections" data-pane="libraries-collections">
+			<collapsible-section data-l10n-id="section-libraries-collections" data-pane="libraries-collections" extra-buttons="add">
 				<html:div class="body"/>
 			</collapsible-section>
 			
@@ -53,6 +53,13 @@ import { getCSSIcon } from 'components/icons';
 		}
 
 		set item(item) {
+			if (item?.isRegularItem()) {
+				this.hidden = false;
+			}
+			else {
+				this.hidden = true;
+				return;
+			}
 			this._item = item;
 			// Getting linked items is an async process, so start by rendering without them
 			this._linkedItems = [];
@@ -67,6 +74,7 @@ import { getCSSIcon } from 'components/icons';
 
 		set mode(mode) {
 			this._mode = mode;
+			this.setAttribute('mode', mode);
 			this.render();
 		}
 
@@ -248,8 +256,6 @@ import { getCSSIcon } from 'components/icons';
 					this._addObject(collection, item);
 				}
 			}
-
-			this._section.showAdd = this._mode == 'edit';
 		}
 	}
 	customElements.define("libraries-collections-box", LibrariesCollectionsBox);

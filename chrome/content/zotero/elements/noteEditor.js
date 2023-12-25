@@ -69,7 +69,7 @@
 
 			let content = document.importNode(this.content, true);
 			this._iframe = content.querySelector('#editor-view');
-			this._iframe.addEventListener('DOMContentLoaded', (event) => {
+			this._iframe.addEventListener('DOMContentLoaded', (_event) => {
 				// For iframes without chrome priviledges, for unknown reasons,
 				// dataTransfer.getData() returns empty value for `drop` event
 				// when dragging something from the outside of Zotero.
@@ -154,6 +154,7 @@
 				return callback();
 			}
 			this._onInitCallback = callback;
+			return undefined;
 		};
 
 		notify = async (event, type, ids, extraData) => {
@@ -219,6 +220,7 @@
 			switch (val) {
 				case 'merge':
 					displayLinks = false;
+					break;
 				case 'view':
 					break;
 
@@ -315,7 +317,7 @@
 				this._iframe.focus();
 				this._editorInstance._iframeWindow.document.querySelector('.toolbar-button-return').focus();
 			}
-			catch(e) {
+			catch (e) {
 			}
 		}
 

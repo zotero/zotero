@@ -32,6 +32,8 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", 
 
 // Load our custom elements
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreview.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreviewBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/guidancePanel.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/mergeGroup.js', this);
@@ -52,6 +54,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/abstractBo
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/collapsibleSection.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentsBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentAnnotationsBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextNotesList.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteRow.js', this);

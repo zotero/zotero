@@ -74,7 +74,7 @@ $z-index-level:         10;
 $z-index-level-active:  20;
 $z-index-navbar:        20;
 $z-index-menu:          30;
-$z-index-modal:			    40;
+$z-index-modal:         40;
 $z-index-drag-layer:    50;
 $z-index-loading-cover: 60;
 
@@ -85,19 +85,22 @@ $item-pane-sections: (
 	"abstract": var(--accent-azure),
 	"attachments": var(--accent-green),
 	"notes": var(--accent-yellow),
+	"attachment-info": var(--accent-green),
+	"attachment-preview": #926d70,
+	"attachment-annotations": var(--tag-purple),
 	"libraries-collections": var(--accent-teal),
 	"tags": var(--accent-orange),
 	"related": var(--accent-wood),
 );
 
 $tagColorsLookup: (
-    '#ff6666': --tag-red,
-    '#ff8c19': --tag-orange,
-    '#999999': --tag-gray,
-    '#5fb236': --tag-green,
-    '#009980': --tag-teal,
-    '#2ea8e5': --tag-blue,
-    '#576dd9': --tag-indigo,
-    '#a28ae5': --tag-purple,
-    '#a6507b': --tag-plum,
+	'#ff6666': --tag-red,
+	'#ff8c19': --tag-orange,
+	'#999999': --tag-gray,
+	'#5fb236': --tag-green,
+	'#009980': --tag-teal,
+	'#2ea8e5': --tag-blue,
+	'#576dd9': --tag-indigo,
+	'#a28ae5': --tag-purple,
+	'#a6507b': --tag-plum,
 );

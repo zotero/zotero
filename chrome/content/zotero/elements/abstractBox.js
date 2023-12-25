@@ -48,7 +48,13 @@
 		set item(item) {
 			this.blurOpenField();
 			this._item = item;
-			this.render();
+			if (item?.isRegularItem()) {
+				this.hidden = false;
+				this.render();
+			}
+			else {
+				this.hidden = true;
+			}
 		}
 
 		get mode() {

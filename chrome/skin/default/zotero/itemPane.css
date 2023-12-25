@@ -28,7 +28,7 @@
 .zotero-view-item {
 	position: relative;
 	flex: 1;
-	overflow-y: auto;
+	overflow-y: scroll;
 	padding: 0 8px;
 	overflow-anchor: none; /* Work around tags box causing scroll to jump - figure this out */
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);

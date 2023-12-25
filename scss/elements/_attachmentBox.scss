@@ -1,71 +1,108 @@
 attachment-box {
-	#metadata {
-		padding: 5px 2px 2px 2px;
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
 	}
 
-	#title
-	{
-		font-weight: bold;
-		/* Don't collapse blank attachment titles, since it prevents renaming */
-		min-height: 1.25em;
-	}
-
-	#metadata > label {
-		margin: 6px 10px 4px !important;
-	}
-
-	#reindex
-	{
-		padding-left: 5px;
-		list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
-	}
-
-	@media (min-resolution: 1.25dppx) {
-		#reindex {
-			list-style-image: url(chrome://zotero/skin/arrow_refresh@2x.png);
-			width: 20px;
+	&:not([data-use-preview]) {
+		attachment-preview {
+			visibility: hidden;
+			display: none;
 		}
 	}
 
-	#linksbox
+	.metadata-table {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		column-gap: 10px;
+		row-gap: 2px;
+		width: inherit;
+		& > .meta-row {
+			display: grid;
+			grid-template-columns: subgrid;
+			grid-column: span 2;
+			padding-inline-start: 8px;
+			padding-inline-end: 8px;
+
+			&[hidden] {
+				display: none;
+			}
+
+			& > .meta-label {
+				display: flex;
+				font-weight: normal;
+				text-align: end;
+
+				& > label {
+					color: var(--fill-secondary);
+					margin-top: 2px;
+					width: 100%;
+					@include comfortable {
+						margin-top: 3px;
+					}
+				}
+			}
+
+			& > .meta-data {
+				width: 0;
+				min-width: 100%;
+				display: flex;
+			}
+
+			editable-text {
+				flex: 1; // stretch value field as much as possible
+				max-width: 100%; // stay within .meta-data when the itemBox is narrow
+				.input {
+					// keep input within editable-text when the itemBox is narrow
+					width: calc(100% - 2*var(--editable-text-padding-inline) - 1px)
+				}
+			}
+
+			#index-status {
+				margin-inline: 0;
+				margin-block: 0;
+				height: 22px;
+				padding: 2px 4px;
+			}
+
+			#reindex
+			{
+				height: 22px;
+				width: 22px;
+				padding: 1px;
+				margin-left: 4px;
+				color: var(--fill-secondary);
+				@include svgicon-menu("sync", "universal", "20");
+			}
+		}
+	}
+
+	#url
 	{
-		margin-bottom: 4px;
+		padding: 1px 0;
 	}
 
-	tr label
-	{
-		margin: 0 !important;
-		padding: 0 !important;
-	}
+	#note-container {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		overflow: hidden;
+		margin: 4px 0;
 
-	td > label, td > hbox
-	{
-		margin-top: 1px !important;
-		margin-bottom: 1px !important;
-		-moz-box-pack: start;
-		-moz-margin-start: 1px !important;
-		-moz-margin-end: 5px !important;
-		padding: 0 2px 0 2px !important;
-		border-radius: 6px;
-		border: var(--material-border-transparent);
-	}
+		&[hidden] {
+			display: none;
+		}
 
-	td > hbox {
-		-moz-box-align: center;
-	}
-
-	/* Reindex icon makes the row larger */
-	#indexStatusRow > td > hbox {
-		margin: 0 !important;
-	}
-
-	td:first-child {
-		text-align: right;
-		font-weight: bold;
-		-moz-margin-start: 3px !important;
-		-moz-margin-end: 0 !important;
-		width: 62px;
-		text-align: right;
-		font-weight:bold;
+		#attachment-note-editor {
+			margin: 4px 0;
+			display: flex;
+			height: 300px;
+	
+			&[hidden] {
+				display: none;
+			}
+		}
 	}
 }

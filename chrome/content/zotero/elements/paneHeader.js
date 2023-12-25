@@ -149,7 +149,9 @@
 				this.titleField.initialValue = '';
 			}
 			this.titleField.readOnly = this._mode == 'view';
-			this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
+			if (this._titleFieldID) {
+				this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
+			}
 			this.menuButton.hidden = !this.item.isRegularItem() && !this.item.isAttachment();
 		}
 	}
