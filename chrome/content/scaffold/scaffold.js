@@ -2263,7 +2263,7 @@ var Scaffold = new function () {
 		try {
 			let proc = await Subprocess.call({
 				command: eslintPath,
-				arguments: ['-o', '-', '--', translatorPath],
+				arguments: ['--format', 'json', '--', translatorPath],
 			});
 			let lintOutput = '';
 			let chunk;
