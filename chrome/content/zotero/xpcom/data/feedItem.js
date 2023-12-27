@@ -234,7 +234,8 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 	}
 	
 	// Load document in hidden browser and point the RemoteTranslate to it
-	let browser = await HiddenBrowser.create(this.getField('url'));
+	let browser = new HiddenBrowser();
+	await browser.load(this.getField('url'));
 	try {
 		await translate.setBrowser(browser);
 		
@@ -287,7 +288,7 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 		return this;
 	}
 	finally {
-		HiddenBrowser.destroy(browser);
+		browser.destroy();
 		translate.dispose();
 	}
 };

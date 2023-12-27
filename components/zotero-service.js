@@ -71,6 +71,7 @@ const xpcomFilesLocal = [
 	'annotations',
 	'api',
 	'attachments',
+	'browserDownload',
 	'cite',
 	'citeprocRsBridge',
 	'cookieSandbox',

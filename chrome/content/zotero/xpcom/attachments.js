@@ -544,11 +544,11 @@ Zotero.Attachments = new function () {
 		var nativeHandlerImport = async function () {
 			let browser;
 			try {
-				browser = await HiddenBrowser.create(url, {
-					requireSuccessfulStatus: true,
+				browser = new HiddenBrowser({
 					docShell: { allowImages: true },
 					cookieSandbox,
 				});
+				await browser.load(url, { requireSuccessfulStatus: true });
 				return await Zotero.Attachments.importFromDocument({
 					libraryID,
 					browser,
@@ -563,7 +563,7 @@ Zotero.Attachments = new function () {
 				throw e;
 			}
 			finally {
-				if (browser) HiddenBrowser.destroy(browser);
+				if (browser) browser.destroy();
 			}
 		};
 		
@@ -597,7 +597,8 @@ Zotero.Attachments = new function () {
 					{
 						cookieSandbox,
 						referrer,
-						isPDF: contentType == 'application/pdf'
+						isPDF: contentType == 'application/pdf',
+						shouldDisplayCaptcha: true
 					}
 				);
 				
@@ -898,7 +899,7 @@ Zotero.Attachments = new function () {
 				if (browser) {
 					// If we have a full hidden browser, use SingleFile
 					Zotero.debug('Getting snapshot with HiddenBrowser.snapshot()');
-					let snapshotContent = yield HiddenBrowser.snapshot(browser);
+					let snapshotContent = yield browser.snapshot();
 
 					// Write main HTML file to disk
 					yield Zotero.File.putContentsAsync(tmpFile, snapshotContent);
@@ -1082,6 +1083,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.cookieSandbox]
 	 * @param {String} [options.referrer]
 	 * @param {Boolean} [options.isPDF] - Delete file if not PDF
+	 * @param {Boolean} [options.shouldDisplayCaptcha]
 	 */
 	this.downloadFile = async function (url, path, options = {}) {
 		Zotero.debug(`Downloading file from ${url}`);
@@ -1118,123 +1120,13 @@ Zotero.Attachments = new function () {
 			// Custom handling for PDFs that are bot-guarded
 			// via a JS-redirect
 			if (enforcingPDF && e instanceof this.InvalidPDFException) {
-				const downloadViaBrowserList = [
-					'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
-					'://www.sciencedirect.com',
-				];
-				const unproxiedUrls = Object.keys(Zotero.Proxies.getPotentialProxies(url));
-				for (let unproxiedUrl of unproxiedUrls) {
-					if (downloadViaBrowserList.some(checkUrl => unproxiedUrl.includes(checkUrl))) {
-						return this.downloadPDFViaBrowser(url, path, options);
-					}
+				if (Zotero.BrowserDownload.shouldAttemptDownloadViaBrowser(url)) {
+					return Zotero.BrowserDownload.downloadPDF(url, path, options);
 				}
 			}
 			throw e;
 		}
 	};
-
-	/**
-	 * @param {String} url
-	 * @param {String} path
-	 * @param {Object} [options]
-	 * @param {Object} [options.cookieSandbox]
-	 */
-	this.downloadPDFViaBrowser = async function (url, path, options = {}) {
-		Zotero.debug(`downloadPDFViaBrowser: Downloading file via browser from ${url}`);
-		const onLoadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.onLoadTimeout');
-		// Technically this is not a download, but the full operation timeout
-		const downloadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.downloadTimeout');
-		let channelBrowser, hiddenBrowser;
-		let hiddenBrowserPDFFoundDeferred = Zotero.Promise.defer();
-
-		let isOurPDF = false;
-		var pdfMIMETypeHandler = {
-			onStartRequest: function (name, _, channel) {
-				Zotero.debug(`downloadPDFViaBrowser: Sniffing a PDF loaded at ${name}`);
-				// try the browser
-				try {
-					channelBrowser = channel.notificationCallbacks.getInterface(Ci.nsILoadContext).topFrameElement;
-				}
-				catch (e) {}
-				if (channelBrowser) {
-					isOurPDF = hiddenBrowser === channelBrowser;
-				}
-				else {
-					// try the document for the load group
-					try {
-						channelBrowser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext)
-							.topFrameElement;
-					}
-					catch(e) {}
-					if (channelBrowser) {
-						isOurPDF = hiddenBrowser === channelBrowser;
-					}
-				}
-			},
-			onContent: async (blob, name, _, channel) => {
-				if (isOurPDF) {
-					Zotero.debug(`downloadPDFViaBrowser: Found our PDF at ${name}`);
-					await Zotero.File.putContentsAsync(path, blob);
-					hiddenBrowserPDFFoundDeferred.resolve();
-					return true;
-				}
-				else {
-					Zotero.debug(`downloadPDFViaBrowser: Not our PDF at ${name}`);
-					return false;
-				}
-			}
-		};
-		try {
-			Zotero.MIMETypeHandler.addHandlers("application/pdf", pdfMIMETypeHandler, true);
-			hiddenBrowser = await HiddenBrowser.create(url, {
-				requireSuccessfulStatus: true,
-				cookieSandbox: options.cookieSandbox,
-			});
-			let onLoadTimeoutDeferred = Zotero.Promise.defer();
-			let currentUrl = "";
-			hiddenBrowser.webProgress.addProgressListener({
-				QueryInterface: ChromeUtils.generateQI([Ci.nsIWebProgressListener, Ci.nsISupportsWeakReference]),
-				async onLocationChange() {
-					let url = hiddenBrowser.currentURI.spec;
-					if (currentUrl) {
-						Zotero.debug(`downloadPDFViaBrowser: A JS redirect occurred to ${url}`);
-					}
-					currentUrl = url;
-					Zotero.debug(`downloadPDFViaBrowser: Page with potential JS redirect loaded, giving it ${onLoadTimeout}ms to process`);
-					await Zotero.Promise.delay(onLoadTimeout);
-					// If URL changed that means we got redirected and the onLoadTimeout needs to restart
-					if (currentUrl === url && !isOurPDF) {
-						onLoadTimeoutDeferred.reject(new Error(`downloadPDFViaBrowser: Loading PDF via browser timed out on the JS challenge page after ${onLoadTimeout}ms`));
-					}
-				}
-			}, Ci.nsIWebProgress.NOTIFY_LOCATION);
-			await Zotero.Promise.race([
-				onLoadTimeoutDeferred.promise,
-				Zotero.Promise.delay(downloadTimeout).then(() => {
-					if (!isOurPDF) {
-						throw new Error(`downloadPDFViaBrowser: Loading PDF via browser timed out after ${downloadTimeout}ms`);
-					}
-				}),
-				hiddenBrowserPDFFoundDeferred.promise
-			]);
-		}
-		catch (e) {
-			try {
-				await OS.File.remove(path, { ignoreAbsent: true });
-			}
-			catch (err) {
-				Zotero.logError(err);
-			}
-			throw e;
-		}
-		finally {
-			Zotero.MIMETypeHandler.removeHandlers('application/pdf', pdfMIMETypeHandler);
-			if (hiddenBrowser) {
-				HiddenBrowser.destroy(hiddenBrowser);
-			}
-		}
-	};
-	
 	
 	/**
 	 * Make sure a file is a PDF
@@ -1845,6 +1737,7 @@ Zotero.Attachments = new function () {
 				tmpFile,
 				{
 					isPDF: true,
+					shouldDisplayCaptcha: true,
 					onAccessMethodStart: options.onAccessMethodStart,
 					onBeforeRequest: options.onBeforeRequest,
 					onRequestError: options.onRequestError
