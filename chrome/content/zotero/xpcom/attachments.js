@@ -1737,6 +1737,7 @@ Zotero.Attachments = new function () {
 				tmpFile,
 				{
 					isPDF: true,
+					shouldDisplayCaptcha: true,
 					onAccessMethodStart: options.onAccessMethodStart,
 					onBeforeRequest: options.onBeforeRequest,
 					onRequestError: options.onRequestError
