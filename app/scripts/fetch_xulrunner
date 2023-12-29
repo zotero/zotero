@@ -486,12 +486,12 @@ if [ $BUILD_LINUX == 1 ]; then
 			echo "Using $archived_file"
 			cp "$archived_file" "firefox-$GECKO_VERSION.tar.bz2"
 		elif [[ "$arch" == "aarch64" ]]; then
-			curl -O "http://ftp.de.debian.org/debian/pool/main/f/firefox-esr/firefox-esr_102.15.0esr-1~deb11u1_arm64.deb"
+			curl -O "https://ftp.debian.org/debian/pool/main/f/firefox-esr/firefox-esr_102.15.0esr-1~deb11u1_arm64.deb"
 			ar xOf firefox-esr_102.15.0esr-1\~deb11u1_arm64.deb data.tar.xz
 			tar -xf data.tar.xz
 			mv ./usr/lib/firefox-esr ./firefox
 			mv ./firefox/firefox-esr ./firefox/firefox-bin
-			rm -rf ./etc ./usr data.tar.xz firefox-esr_102.15.0esr-1\~deb11u1_arm64.deb
+			rm -rf etc usr data.tar.xz firefox-esr_102.15.0esr-1\~deb11u1_arm64.deb
 			tar -cvjSf firefox-102.15.1esr.tar.bz2 firefox
 		else
 			curl -O "$DOWNLOAD_URL/linux-$arch/en-US/firefox-$GECKO_VERSION.tar.bz2"
