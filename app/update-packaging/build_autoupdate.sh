@@ -141,13 +141,14 @@ for version in "$FROM" "$TO"; do
 	WIN64_ARCHIVE="Zotero-${version}_win-x64.zip"
 	LINUX_X86_ARCHIVE="Zotero-${version}_linux-i686.tar.bz2"
 	LINUX_X86_64_ARCHIVE="Zotero-${version}_linux-x86_64.tar.bz2"
+	LINUX_AARCH64_ARCHIVE="Zotero-${version}_linux-aarch64.tar.bz2"
 	
 	CACHE_DIR="$ROOT_DIR/cache"
 	if [ ! -e "$CACHE_DIR" ]; then
 		mkdir "$CACHE_DIR"
 	fi
 	
-	for archive in "$MAC_ARCHIVE" "$WIN32_ARCHIVE" "$WIN64_ARCHIVE" "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE"; do
+	for archive in "$MAC_ARCHIVE" "$WIN32_ARCHIVE" "$WIN64_ARCHIVE" "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE" "$LINUX_AARCH64_ARCHIVE"; do
 		if [[ $archive = "$MAC_ARCHIVE" ]] && [[ $BUILD_MAC != 1 ]]; then
 			continue
 		fi
@@ -161,6 +162,9 @@ for version in "$FROM" "$TO"; do
 			continue
 		fi
 		if [[ $archive = "$LINUX_X86_64_ARCHIVE" ]] && [[ $BUILD_LINUX != 1 ]]; then
+			continue
+		fi
+		if [[ $archive = "$LINUX_AARCH64_ARCHIVE" ]] && [[ $BUILD_LINUX != 1 ]]; then
 			continue
 		fi
 		
@@ -240,14 +244,14 @@ for version in "$FROM" "$TO"; do
 	
 	# Unpack Linux tarballs
 	if [ $BUILD_LINUX == 1 ]; then
-		if [[ -f "$LINUX_X86_ARCHIVE" ]] && [[ -f "$LINUX_X86_64_ARCHIVE" ]]; then
-			for build in "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE"; do
+		if [[ -f "$LINUX_X86_ARCHIVE" ]] && [[ -f "$LINUX_X86_64_ARCHIVE" ]] && [[ -f "$LINUX_AARCH64_ARCHIVE" ]]; then
+			for build in "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE" "$LINUX_AARCH64_ARCHIVE"; do
 				tar -xjf "$build"
 				rm "$build"
 			done
 			INCREMENTALS_FOUND=1
 		else
-			echo "$LINUX_X86_ARCHIVE/$LINUX_X86_64_ARCHIVE not found"
+			echo "$LINUX_X86_ARCHIVE/$LINUX_X86_64_ARCHIVE/$LINUX_AARCH64_ARCHIVE not found"
 		fi
 	fi
 	
@@ -259,7 +263,7 @@ export MOZ_PRODUCT_VERSION="$TO"
 export MAR_CHANNEL_ID="$CHANNEL"
 
 CHANGES_MADE=0
-for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
+for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64" "linux-aarch64"; do
 	if [[ $build == "mac" ]]; then
 		if [[ $BUILD_MAC == 0 ]]; then
 			continue
@@ -269,7 +273,7 @@ for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
 		if [[ $build == "win32" ]] || [[ $build == "win-x64" ]] && [[ $BUILD_WIN == 0 ]]; then
 			continue
 		fi
-		if [[ $build == "linux-i686" ]] || [[ $build == "linux-x86_64" ]] && [[ $BUILD_LINUX == 0 ]]; then
+		if [[ $build == "linux-i686" ]] || [[ $build == "linux-x86_64" ]] || [[ $build == "linux-aarch64" ]] && [[ $BUILD_LINUX == 0 ]]; then
 			continue
 		fi
 		dir="Zotero_$build"
