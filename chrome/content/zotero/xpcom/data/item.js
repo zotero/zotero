@@ -5501,7 +5501,7 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 		json.meta.numChildren = this.numChildren();
 	}
 	else {
-		json.meta.numChildren = false;
+		json.meta.numChildren = 0;
 	}
 	
 	if (this.isImportedAttachment()) {
