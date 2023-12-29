@@ -5517,6 +5517,21 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 
 
 Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
+	async function getFileSize(attachment) {
+		let path = attachment.getFilePath();
+		if (path) {
+			try {
+				return (await IOUtils.stat(path)).size;
+			}
+			catch (e) {
+				if (e.name != 'NotFoundError') {
+					throw e;
+				}
+			}
+		}
+		return undefined
+	}
+	
 	let json = this.toResponseJSON(options);
 	if (this.isRegularItem()) {
 		let bestAttachment = await this.getBestAttachment();
@@ -5526,10 +5541,11 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 				type: 'application/json',
 				attachmentType: bestAttachment.attachmentContentType
 			};
+			json.links.attachment.attachmentSize = await getFileSize(bestAttachment);
 		}
 	}
 	else if (this.isImportedAttachment()) {
-		json.links.enclosure.length = await Zotero.Attachments.getTotalFileSize(this);
+		json.links.enclosure.length = await getFileSize(this);
 	}
 	return json;
 };
