@@ -153,6 +153,11 @@
 			this.render();
 		}
 		
+		get _showCollapseButton() {
+			// Only show in reader
+			return !!this._contextNotesPane;
+		}
+		
 		get _collapsed() {
 			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
 			return collapsible.getAttribute('collapsed') === 'true';
@@ -349,8 +354,14 @@
 					continue;
 				}
 				else if (pane == 'toggle-collapse') {
+					let hidden = !this._showCollapseButton;
+
+					toolbarbutton.parentElement.hidden = hidden;
+					toolbarbutton.parentElement.nextElementSibling.hidden = hidden; // Divider
+
 					toolbarbutton.setAttribute('data-l10n-id', 'sidenav-' + (this._collapsed ? 'expand' : 'collapse'));
 					toolbarbutton.classList.toggle('collapsed', this._collapsed);
+					
 					continue;
 				}
 				
