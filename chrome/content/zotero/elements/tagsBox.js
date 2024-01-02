@@ -461,6 +461,7 @@
 			// Remove empty row at end
 			if (isNew && value === "") {
 				row.parentNode.removeChild(row);
+				this.updateCount();
 				return;
 			}
 
