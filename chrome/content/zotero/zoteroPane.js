@@ -1668,16 +1668,28 @@ var ZoteroPane = new function()
 	 */
 	this._updateEnabledActionsForRow = function (collectionTreeRow) {
 		const disableIfNoEdit = [
+			"menu_newItem",
+			"cmd_zotero_addByIdentifier",
+			"menu_attachmentAdd",
+			"menu_noteAdd",
+			
 			"cmd_zotero_newCollection",
 			"cmd_zotero_newSavedSearch",
 			"cmd_zotero_import",
 			"cmd_zotero_importFromClipboard",
-			"zotero-tb-add",
-			"menu_newItem",
-			"zotero-tb-lookup",
+			
+			"cmd_zotero_newStandaloneFileAttachment",
+			"cmd_zotero_newStandaloneLinkedFileAttachment",
+			"cmd_zotero_newChildFileAttachment",
+			"cmd_zotero_newChildLinkedFileAttachment",
+			"cmd_zotero_newChildURLAttachment",
 			"cmd_zotero_newStandaloneNote",
+			"cmd_zotero_newChildNote",
+			
+			"zotero-tb-add",
+			"zotero-tb-lookup",
+			"zotero-tb-attachment-add",
 			"zotero-tb-note-add",
-			"zotero-tb-attachment-add"
 		];
 		for (let i = 0; i < disableIfNoEdit.length; i++) {
 			let command = disableIfNoEdit[i];
@@ -1937,57 +1949,40 @@ var ZoteroPane = new function()
 	};
 	
 	
-	/**
-	 * @return {Promise}
-	 */
-	this.updateNoteButtonMenu = function () {
-		var items = ZoteroPane_Local.getSelectedItems();
-		var cmd = document.getElementById('cmd_zotero_newChildNote');
-		cmd.setAttribute("disabled", !this.canEdit() ||
-			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem())));
-	}
-	
-	
-	this.updateAttachmentButtonMenu = function (popup) {
-		var items = ZoteroPane_Local.getSelectedItems();
-		
-		var disabled = !this.canEdit() || !(items.length == 1 && items[0].isRegularItem());
-		
-		if (disabled) {
+	this.updateAddAttachmentMenu = function (popup) {
+		if (!this.canEdit()) {
 			for (let node of popup.childNodes) {
-				node.disabled = true;
+				if (node.tagName == 'menuitem') {
+					node.disabled = true;
+				}
 			}
 			return;
 		}
 		
-		var collectionTreeRow = this.getCollectionTreeRow();
+		var items = ZoteroPane.getSelectedItems();
+		var oneItemSelected = items.length == 1 && items[0].isRegularItem();
 		var canEditFiles = this.canEditFiles();
-		
-		var prefix = "menuitem-iconic zotero-menuitem-attachments-";
-		
-		for (var i=0; i<popup.childNodes.length; i++) {
-			var node = popup.childNodes[i];
-			var className = node.className;
-			
-			switch (className) {
-				case prefix + 'link':
-					node.disabled = collectionTreeRow.isWithinGroup();
-					break;
-				
-				case prefix + 'file':
-					node.disabled = !canEditFiles;
-					break;
-				
-				case prefix + 'web-link':
-					node.disabled = false;
-					break;
-				
-				default:
-					throw new Error(`Invalid class name '${className}'`);
-			}
+		var commandsEnabled = [
+			['cmd_zotero_newStandaloneFileAttachment', canEditFiles],
+			['cmd_zotero_newStandaloneLinkedFileAttachment', canEditFiles],
+			['cmd_zotero_newChildFileAttachment', oneItemSelected && canEditFiles],
+			['cmd_zotero_newChildLinkedFileAttachment', oneItemSelected && canEditFiles],
+			['cmd_zotero_newChildURLAttachment', oneItemSelected],
+		];
+		for (let command of commandsEnabled) {
+			document.getElementById(command[0]).setAttribute('disabled', !command[1]);
 		}
-	}
+	};
 	
+	/**
+	 * @return {Promise}
+	 */
+	this.updateNewNoteMenu = function () {
+		var items = ZoteroPane_Local.getSelectedItems();
+		var cmd = document.getElementById('cmd_zotero_newChildNote');
+		cmd.setAttribute("disabled", !this.canEdit() ||
+			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem())));
+	};
 	
 	/**
 	 * Update the <command> elements that control the shortcut keys and the enabled state of the
@@ -3810,7 +3805,7 @@ var ZoteroPane = new function()
 				
 				// Update attachment submenu
 				var popup = document.getElementById('zotero-add-attachment-popup')
-				this.updateAttachmentButtonMenu(popup);
+				this.updateAddAttachmentMenu(popup);
 				
 				// Block certain actions on files if no access
 				if (item.isFileAttachment() && !collectionTreeRow.filesEditable) {

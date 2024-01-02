@@ -1,5 +1,29 @@
-zotero-toolbar-new-attachment =
-    .tooltiptext = Add File
+add-attachment = Add Attachment
+new-note = New Note
+
+menu-add-by-identifier =
+    .label = Add by Identifier…
+
+menu-add-attachment =
+    .label = { add-attachment }
+menu-add-standalone-file-attachment =
+    .label = Add File…
+menu-add-standalone-linked-file-attachment =
+    .label = Add Link to File…
+menu-add-child-file-attachment =
+    .label = Attach File…
+menu-add-child-linked-file-attachment =
+    .label = Attach Link to File…
+menu-add-child-linked-url-attachment =
+    .label = Attach Web Link…
+
+menu-new-note =
+    .label = { new-note }
+menu-new-standalone-note =
+    .label = New Standalone Note
+menu-new-item-note =
+    .label = New Item Note
+
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
 zotero-collections-search =
@@ -8,6 +32,9 @@ zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
     .tooltiptext = Close Tab
+
+toolbar-add-attachment =
+    .tooltiptext = { add-attachment }
 
 item-creator-moveDown =
     .label = Move Down
@@ -29,6 +56,14 @@ item-menu-viewAttachment =
             [window] New Window
             *[other] Reader
     }
+
+item-menu-add-file =
+     .label = File
+item-menu-add-linked-file =
+     .label = Linked File
+item-menu-add-url =
+     .label = Web Link
+
 itembox-button-openLink =
     .title = Open Link
     .aria-label = Open Link

@@ -202,9 +202,60 @@
 								<menupopup id="menu_NewItemPopup"
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
 							</menu>
+							<menuitem
+								class="menu-type-library"
+								data-l10n-id="menu-add-by-identifier"
+								command="cmd_zotero_addByIdentifier"
+							/>
+							<menu
+									id="menu_attachmentAdd"
+									class="menu-type-library"
+									data-l10n-id="menu-add-attachment">
+								<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(this)">
+									<menuitem
+										data-l10n-id="menu-add-standalone-file-attachment"
+										command="cmd_zotero_newStandaloneFileAttachment"
+									/>
+									<menuitem
+										data-l10n-id="menu-add-standalone-linked-file-attachment"
+										command="cmd_zotero_newStandaloneLinkedFileAttachment"
+									/>
+									<menuseparator/>
+									<menuitem
+										data-l10n-id="menu-add-child-file-attachment"
+										command="cmd_zotero_newChildFileAttachment"
+									/>
+									<menuitem
+										data-l10n-id="menu-add-child-linked-file-attachment"
+										command="cmd_zotero_newChildLinkedFileAttachment"
+										id="zotero-tb-attachment-add-file-link"
+									/>
+									<menuitem
+										data-l10n-id="menu-add-child-linked-url-attachment"
+										command="cmd_zotero_newChildURLAttachment"
+									/>
+								</menupopup>
+							</menu>
+							<menu
+									id="menu_noteAdd"
+									class="menu-type-library"
+									data-l10n-id="menu-new-note">
+								<menupopup onpopupshowing="ZoteroPane_Local.updateNewNoteMenu()">
+									<menuitem
+										data-l10n-id="menu-new-standalone-note"
+										command="cmd_zotero_newStandaloneNote"
+									/>
+									<menuitem
+										data-l10n-id="menu-new-item-note"
+										command="cmd_zotero_newChildNote"
+									/>
+								</menupopup>
+							</menu>
+							<menuseparator/>
 							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
 									command="cmd_zotero_newCollection"/>
 							<menu id="menu_libraryAdd"
+									class="menu-type-library"
 									label="&zotero.toolbar.newLibrary.label;">
 								<menupopup id="menu_libraryAddPopup">
 									<menuitem id="menu_groupAdd" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
@@ -216,19 +267,6 @@
 												oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
 										</menupopup>
 									</menu>
-								</menupopup>
-							</menu>
-							<menu id="menu_attachmentAdd" label="&zotero.items.menu.attach;">
-								<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
-									<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);" id="zotero-tb-attachment-add-file-link"/>
-								</menupopup>
-							</menu>
-							<menu id="menu_noteAdd" label="&zotero.toolbar.newNote;">
-								<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
-									<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
-									<menuitem label="&zotero.toolbar.note.child;" command="cmd_zotero_newChildNote"/>
 								</menupopup>
 							</menu>
 							<menuitem
@@ -825,6 +863,12 @@
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection()?.key)"/>
 		<command id="cmd_zotero_newFeed_fromURL" oncommand="ZoteroPane_Local.newFeedFromURL()"/>
 		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
+		<command id="cmd_zotero_addByIdentifier" oncommand="Zotero_Lookup.showPanel()"/>
+		<command id="cmd_zotero_newStandaloneFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog()"/>
+		<command id="cmd_zotero_newStandaloneLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true)"/>
+		<command id="cmd_zotero_newChildFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(false, ZoteroPane.getSelectedItems()[0].id)"/>
+		<command id="cmd_zotero_newChildLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true, ZoteroPane.getSelectedItems()[0].id)"/>
+		<command id="cmd_zotero_newChildURLAttachment" oncommand="ZoteroPane.addAttachmentFromURI(true, ZoteroPane.getSelectedItems()[0].id)"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
 	</commandset>
@@ -913,9 +957,21 @@
 									
 									<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 										<menupopup id="zotero-add-attachment-popup">
-											<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
-											<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
-											<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
+											<menuitem
+												class="menuitem-iconic zotero-menuitem-attachments-file"
+												data-l10n-id="item-menu-add-file"
+												command="cmd_zotero_newChildFileAttachment"
+											/>
+											<menuitem
+												class="menuitem-iconic zotero-menuitem-attachments-link"
+												data-l10n-id="item-menu-add-linked-file"
+												command="cmd_zotero_newChildLinkedFileAttachment"
+											/>
+											<menuitem
+												class="menuitem-iconic zotero-menuitem-attachments-web-link"
+												data-l10n-id="item-menu-add-url"
+												command="cmd_zotero_newChildURLAttachment"
+											/>
 										</menupopup>
 									</menu>
 									<menuseparator/>
@@ -1017,8 +1073,14 @@
 													<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()"></menupopup>
 												</toolbarbutton>
 												
-												<toolbarbutton id="zotero-tb-lookup" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel"
-														onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"/>
+												<toolbarbutton
+													id="zotero-tb-lookup"
+													tabindex="-1"
+													class="zotero-tb-button"
+													tooltiptext="&zotero.toolbar.lookup.label;"
+													type="panel"
+													onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"
+												/>
 												
 												<panel id="zotero-lookup-panel" type="arrow"
 														onpopupshowing="Zotero_Lookup.onShowing(event)"
@@ -1047,14 +1109,54 @@
 												</panel>
 												
 												<toolbarbutton
-													id="zotero-tb-attachment-add"
-													class="zotero-tb-button"
-													tabindex="-1"
-													data-l10n-id="zotero-toolbar-new-attachment"
-													oncommand="var selected = ZoteroPane.getSelectedItems();if (this.disabled || !selected.length) { event.preventDefault(); return; };  ZoteroPane_Local.addAttachmentFromDialog(false, selected[0].id);">
+														id="zotero-tb-attachment-add"
+														class="zotero-tb-button"
+														tabindex="-1"
+														data-l10n-id="toolbar-add-attachment"
+														type="menu"
+														wantdropmarker="true">
+													<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(this)">
+														<menuitem
+															data-l10n-id="menu-add-standalone-file-attachment"
+															command="cmd_zotero_newStandaloneFileAttachment"
+														/>
+														<menuitem
+															data-l10n-id="menu-add-standalone-linked-file-attachment"
+															command="cmd_zotero_newStandaloneLinkedFileAttachment"
+														/>
+														<menuseparator/>
+														<menuitem
+															data-l10n-id="menu-add-child-file-attachment"
+															command="cmd_zotero_newChildFileAttachment"
+														/>
+														<menuitem
+															data-l10n-id="menu-add-child-linked-file-attachment"
+															command="cmd_zotero_newChildLinkedFileAttachment"
+															id="zotero-tb-attachment-add-file-link"
+														/>
+														<menuitem
+															data-l10n-id="menu-add-child-linked-url-attachment"
+															command="cmd_zotero_newChildURLAttachment"
+														/>
+													</menupopup>
 												</toolbarbutton>
-												<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
-			
+												<toolbarbutton
+														id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
+														type="menu"
+														tabindex="-1"
+														wantdropmarker="true">
+													<menupopup onpopupshowing="ZoteroPane.updateNewNoteMenu()">
+														<menuitem
+															data-l10n-id="menu-new-standalone-note"
+															command="cmd_zotero_newStandaloneNote"
+														/>
+														<menuitem
+															data-l10n-id="menu-new-item-note"
+															command="cmd_zotero_newChildNote"
+														/>
+													</menupopup>
+												</toolbarbutton>
+												
 												<spacer flex="1"/>
 												<image id="zotero-tb-search-spinner" class="zotero-spinner-16"/>
 												<quick-search-textbox id="zotero-tb-search" timeout="250"
