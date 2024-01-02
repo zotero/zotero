@@ -261,7 +261,7 @@
 		}
 		
 		_handleClick = (event) => {
-			if (event.target.closest('.add')) return;
+			if (event.target.closest('.add, menupopup')) return;
 			this.open = !this.open;
 		};
 		

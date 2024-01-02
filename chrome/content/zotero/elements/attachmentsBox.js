@@ -32,6 +32,7 @@
 				<html:div class="body">
 				</html:div>
 			</collapsible-section>
+			<popupset/>
 		`);
 
 		_item = null;
@@ -83,6 +84,11 @@
 			this._section = this.querySelector('collapsible-section');
 			this._section.addEventListener('add', this._handleAdd);
 			this._body = this.querySelector('.body');
+			
+			this._addPopup = document.getElementById('zotero-add-attachment-popup').cloneNode(true);
+			this._addPopup.id = '';
+			this.querySelector('popupset').append(this._addPopup);
+			
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentsBox');
 		}
 
@@ -147,10 +153,10 @@
 			this._section.setCount(count);
 		}
 		
-		_handleAdd = () => {
-			ZoteroPane.addAttachmentFromDialog(false, this._item.id);
-			this._section.empty = false;
+		_handleAdd = (event) => {
 			this._section.open = true;
+			ZoteroPane.updateAddAttachmentMenu(this._addPopup);
+			this._addPopup.openPopup(event.detail.button, 'after_end');
 		};
 		
 		_updateRowAttributes(row, attachment) {
