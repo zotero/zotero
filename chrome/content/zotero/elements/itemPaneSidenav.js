@@ -160,11 +160,13 @@
 		
 		get _collapsed() {
 			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
+			if (!collapsible) return false;
 			return collapsible.getAttribute('collapsed') === 'true';
 		}
 		
 		set _collapsed(val) {
 			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
+			if (!collapsible) return;
 			let splitter = collapsible.previousElementSibling;
 			if (val) {
 				collapsible.setAttribute('collapsed', 'true');
