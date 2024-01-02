@@ -46,6 +46,10 @@
 <!ENTITY zotero.upgrade.changeLogLink						"the changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink					"to find out what's new.">
 
+<!-- Used for columnpicker until the tree supports Fluent strings -->
+<!ENTITY zotero.tabs.notes.label                                               "Notes">
+<!ENTITY zotero.tabs.attachments.label                                 "Attachments">
+
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems			"Show Unfiled Items">
 <!ENTITY zotero.collections.showRetractedItems        "Show Retracted Items">
