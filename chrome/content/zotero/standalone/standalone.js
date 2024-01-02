@@ -296,19 +296,6 @@ const ZoteroStandalone = new function() {
 	};
 
 	this.onFileMenuOpen = function () {
-		var active = false;
-		try {
-			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
-					return item.isAttachment()
-						|| (item.isRegularItem() && item.getAttachments().length);
-				}).length;
-			}
-		}
-		catch (e) {}
-		this.updateMenuItemEnabled('manage-attachments-menu', active);
-		
 		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
