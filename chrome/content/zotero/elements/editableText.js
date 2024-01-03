@@ -43,6 +43,10 @@
 		get noWrap() {
 			return this.hasAttribute('nowrap');
 		}
+		
+		set noWrap(noWrap) {
+			this.toggleAttribute('nowrap', noWrap);
+		}
 
 		get multiline() {
 			return this.hasAttribute('multiline');
@@ -134,7 +138,7 @@
 		}
 
 		sizeToContent = () => {
-			// Add a temp span, fetch it's width with current paddings and set max-width based on that
+			// Add a temp span, fetch its width with current paddings and set max-width based on that
 			let span = document.createElement("span");
 			span.innerText = this.value;
 			this.append(span);

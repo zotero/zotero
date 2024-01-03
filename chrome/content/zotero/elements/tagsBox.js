@@ -440,10 +440,16 @@
 		};
 
 		makeMultiline(editable, value) {
+			editable.noWrap = false;
 			editable.multiline = true;
 			editable.value = value;
 			// Move cursor to end
 			editable.ref.selectionStart = value.length;
+		}
+		
+		makeSingleLine(editable) {
+			editable.noWrap = true;
+			editable.multiline = false;
 		}
 
 		saveTag = async (event) => {
@@ -467,6 +473,7 @@
 
 			// If row hasn't changed, we're done
 			if (oldValue == value) {
+				this.makeSingleLine(textbox);
 				return;
 			}
 
@@ -545,6 +552,11 @@
 					this.reload();
 					throw e;
 				}
+			}
+			
+			// If we didn't remove the textbox, make it single-line
+			if (textbox.parentElement) {
+				this.makeSingleLine(textbox);
 			}
 		};
 
