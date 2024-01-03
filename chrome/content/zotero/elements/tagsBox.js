@@ -587,7 +587,7 @@
 			for (let editable of tagEditables) {
 				// Sort tags without colors below tags with colors
 				if (!color && this._tagColors.has(editable.value)
-						|| collation.compareString(1, tagName, editable.value) > 0) {
+						|| editable.value && collation.compareString(1, tagName, editable.value) > 0) {
 					continue;
 				}
 
