@@ -63,6 +63,9 @@ $-colors: (
         --color-quarternary-on-background: #{color.mix(
             map.get($-colors, "color-background"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
         )};
+        --color-quinary-on-sidepane: #{color.mix(
+            map.get($-colors, "color-sidepane"), color.change(map.get($-colors, "fill-quinary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quinary")))
+        )};
         --color-quarternary-on-sidepane: #{color.mix(
             map.get($-colors, "color-sidepane"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
         )};
