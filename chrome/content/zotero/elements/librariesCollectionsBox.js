@@ -166,14 +166,14 @@ import { getCSSIcon } from 'components/icons';
 			return this._body.querySelector(`.row[data-id="${obj.treeViewID}"]`);
 		}
 		
-		_getChildren(row = null) {
+		_getChildren(row = null, deep = false) {
 			let rows = Array.from(this._body.querySelectorAll('.row'));
 			let startIndex = row ? rows.indexOf(row) + 1 : 0;
 			let level = row ? parseInt(row.dataset.level) + 1 : 0;
 			let children = [];
 			for (let i = startIndex; i < rows.length; i++) {
 				let childLevel = parseInt(rows[i].dataset.level);
-				if (childLevel == level) {
+				if (childLevel == level || deep && childLevel > level) {
 					children.push(rows[i]);
 				}
 				else if (childLevel < level) {
@@ -210,7 +210,7 @@ import { getCSSIcon } from 'components/icons';
 			if (!added) {
 				if (siblings.length) {
 					let lastSibling = siblings[siblings.length - 1];
-					let childrenOfLastSibling = this._getChildren(lastSibling);
+					let childrenOfLastSibling = this._getChildren(lastSibling, true);
 					if (childrenOfLastSibling.length) {
 						childrenOfLastSibling[childrenOfLastSibling.length - 1].after(row);
 					}
