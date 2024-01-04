@@ -257,6 +257,9 @@
 			// Need to wait a tick before re-enabling - forcing style recalculation isn't enough here
 			requestAnimationFrame(() => {
 				this.classList.remove('disable-transitions');
+				// --open-height is usually cleared when the animation ends, but we had animations disabled.
+				// Clear it manually.
+				this.style.setProperty('--open-height', 'auto');
 			});
 		}
 		
