@@ -150,7 +150,7 @@ var ZoteroPane = new function()
 	function setUpKeyboardNavigation() {
 		let collectionTreeToolbar = this.document.getElementById("zotero-toolbar-collection-tree");
 		let itemTreeToolbar = this.document.getElementById("zotero-toolbar-item-tree");
-		let tabsToolbar = this.document.getElementById("zotero-tabs-toolbar");
+		let titleBar = this.document.getElementById("zotero-title-bar");
 		let itemTree = this.document.getElementById("zotero-items-tree");
 		let collectionsTree = this.document.getElementById("zotero-collections-tree");
 		let tagSelector = this.document.getElementById("zotero-tag-selector");
@@ -181,14 +181,22 @@ var ZoteroPane = new function()
 			else if (verticalArrowIsTab && key == 'ArrowDown' && !onInput) {
 				key = 'Tab';
 			}
+			// Fetch the focusFunction by target id
 			let focusFunction = actionsMap[event.target.id]?.[key];
+			// If no function found by target id, try to search by class names
+			if (focusFunction === undefined) {
+				for (let className of event.target.classList) {
+					focusFunction = actionsMap[className]?.[key];
+					if (focusFunction) break;
+				}
+			}
 			// If the focusFunction is undefined, nothing was found
 			// for this combination of keys, so do nothing
 			if (focusFunction === undefined) {
 				return;
 			}
 			// Otherwise, fetch the target to focus on
-			let target = focusFunction();
+			let target = focusFunction(event);
 			// If returned target is false, focusing was not handled,
 			// so fallback to default focus target
 			if (target === false) {
@@ -218,7 +226,9 @@ var ZoteroPane = new function()
 			event.stopPropagation();
 		};
 
-		tabsToolbar.addEventListener("keydown", (event) => {
+		titleBar.addEventListener("keydown", (event) => {
+			let cmdOrCtrlOnly = e => (Zotero.isMac ? (e.metaKey && !e.ctrlKey) : e.ctrlKey) && !e.shiftKey && !e.altKey;
+
 			// Mapping of target ids and possible key presses to desired focus outcomes
 			let actionsMap = {
 				'zotero-tb-tabs-menu': {
@@ -249,6 +259,33 @@ var ZoteroPane = new function()
 						.dispatchEvent(new MouseEvent("click", { target: event.target })),
 					' ': () => document.getElementById("zotero-tb-sync-error")
 						.dispatchEvent(new MouseEvent("click", { target: event.target }))
+				},
+				tab: {
+					// keyboard navigation for tabs. 'tab' is the class, not the id
+					Tab: () => document.getElementById('zotero-tb-tabs-menu'),
+					ShiftTab: Zotero_Tabs.focusWrapAround,
+					ArrowRight: (e) => {
+						if (cmdOrCtrlOnly(e)) {
+							Zotero_Tabs.moveFocus("right");
+						}
+						else {
+							Zotero_Tabs.selectNext({ keepTabFocused: true });
+						}
+					},
+					ArrowLeft: (e) => {
+						if (cmdOrCtrlOnly(e)) {
+							Zotero_Tabs.moveFocus("left");
+						}
+						else {
+							Zotero_Tabs.selectPrev({ keepTabFocused: true });
+						}
+					},
+					Enter: (e) => {
+						Zotero_Tabs.select(e.target.getAttribute('data-id'), false, { keepTabFocused: false });
+					},
+					' ': (e) => {
+						Zotero_Tabs.select(e.target.getAttribute('data-id'), false, { keepTabFocused: false });
+					}
 				}
 			};
 			moveFocus(actionsMap, event, true);

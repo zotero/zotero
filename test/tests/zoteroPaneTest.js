@@ -1533,11 +1533,14 @@ describe("ZoteroPane", function() {
 				doc.activeElement.dispatchEvent(shiftTab);
 				// Wait for collection search to be revealed
 				if (id === "zotero-collections-search") {
-					await Zotero.Promise.delay(300);
+					await Zotero.Promise.delay(250);
 				}
 				assert.equal(doc.activeElement.id, id);
+				// Wait for collection search to be hidden for subsequent tests
+				if (id === "zotero-tb-collection-add") {
+					await Zotero.Promise.delay(50);
+				}
 			}
-
 			doc.activeElement.dispatchEvent(shiftTab);
 			assert.equal(doc.activeElement.className, "tab selected");
 
@@ -1561,7 +1564,7 @@ describe("ZoteroPane", function() {
 				doc.activeElement.dispatchEvent(tab);
 				// Wait for collection search to be revealed
 				if (id === "zotero-collections-search") {
-					await Zotero.Promise.delay(300);
+					await Zotero.Promise.delay(250);
 				}
 				assert.equal(doc.activeElement.id, id);
 			}

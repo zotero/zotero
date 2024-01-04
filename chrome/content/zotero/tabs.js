@@ -136,6 +136,12 @@ var Zotero_Tabs = new function () {
 				focusTabsMenuEntry();
 			}
 		}
+		// Disable tabs menu button when no reader tabs are present
+		document.getElementById("zotero-tb-tabs-menu").disabled = this._tabs.length == 1;
+		// Close tabs menu if all tabs are closed
+		if (this._tabs.length == 1 && this.isTabsMenuVisible()) {
+			this.tabsMenuPanel.hidePopup();
+		}
 	};
 
 	this.getTabIDByItemID = function (itemID) {
@@ -157,10 +163,6 @@ var Zotero_Tabs = new function () {
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
-				moveFocus={this.moveFocus.bind(this)}
-				wrapFocusAround={this.focusWrapAround.bind(this)}
-				selectNext={this.selectNext.bind(this)}
-				selectPrev={this.selectPrev.bind(this)}
 			/>,
 			document.getElementById('tab-bar-container'),
 			() => {
