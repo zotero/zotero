@@ -818,7 +818,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		var path = Zotero.Prefs.get('baseAttachmentPath');
 		Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (await OS.File.exists(path)) {
-			filefield.style.backgroundImage = 'url(moz-icon://file://' + path + '?size=16)';
+			filefield.style.backgroundImage = 'url(moz-icon://' + Zotero.File.pathToFileURI(path) + '?size=16)';
 			filefield.value = path;
 		}
 		else {
