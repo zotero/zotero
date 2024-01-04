@@ -1618,8 +1618,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			await this._refreshPromise;
 			this._restoreSelection(savedSelection, false, true);
 			this.tree.invalidate();
-			this._lastToggleOpenStateIndex = null;
 		}
+		this._lastToggleOpenStateIndex = null;
 	}
 
 	expandMatchParents(searchParentIDs) {
@@ -2875,14 +2875,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_renderItem(index, selection, oldDiv=null, columns) {
 		let div;
 		if (oldDiv) {
-			// if marked as last toggled avoid re-rendering this row so that twisty animation can run
-			if (this._lastToggleOpenStateIndex === index) {
-				let oldTwisty = oldDiv.querySelector('.twisty');
-				if (oldTwisty) {
-					oldTwisty.classList.toggle('open', this.isContainerOpen(index));
-					return oldDiv;
-				}
-			}
 			div = oldDiv;
 			div.innerHTML = "";
 		}
@@ -2945,6 +2937,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		if (rowData.contextRow) {
 			div.setAttribute('aria-disabled', true);
+		}
+
+		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
+		if (this._lastToggleOpenStateIndex === index) {
+			let twisty = div.querySelector('.twisty');
+			if (twisty) {
+				twisty.classList.toggle('open', !this.isContainerOpen(index));
+				setTimeout(() => {
+					twisty.classList.toggle('open', this.isContainerOpen(index));
+				}, 0);
+			}
 		}
 
 		return div;

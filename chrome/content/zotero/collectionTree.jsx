@@ -262,15 +262,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 	renderItem = (index, selection, oldDiv, columns) => {
 		const treeRow = this.getRow(index);
-
-		// if marked as last toggled avoid re-rendering this row so that twisty animation can run
-		if (oldDiv && this._lastToggleOpenStateIndex === index) {
-			let oldTwisty = oldDiv.querySelector('.twisty');
-			if (oldTwisty) {
-				oldTwisty.classList.toggle('open', this.isContainerOpen(index));
-				return oldDiv;
-			}
-		}
 		
 		// Div creation and content
 		let div = oldDiv || document.createElement('div');
@@ -406,6 +397,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					e.stopPropagation();
 					this.onDrop(e, index);
 				}, { passive: true });
+			}
+		}
+
+		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
+		if (this._lastToggleOpenStateIndex === index) {
+			let twisty = div.querySelector('.twisty');
+			if (twisty) {
+				twisty.classList.toggle('open', !this.isContainerOpen(index));
+				setTimeout(() => {
+					twisty.classList.toggle('open', this.isContainerOpen(index));
+				}, 0);
 			}
 		}
 
