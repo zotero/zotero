@@ -28,48 +28,52 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="toolbarbutton-container">
+			<html:div class="pin-wrapper">
 				<toolbarbutton
 					data-pane="toggle-collapse"/>
 			</html:div>
 			<html:div class="divider"/>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-info"
-					data-pane="info"/>
+			<html:div class="inherit-flex highlight-notes-inactive">
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-info"
+						data-pane="info"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-abstract"
+						data-pane="abstract"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-attachments"
+						data-pane="attachments"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-notes"
+						data-pane="notes"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-libraries-collections"
+						data-pane="libraries-collections"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-tags"
+						data-pane="tags"/>
+				</html:div>
+				<html:div class="pin-wrapper">
+					<toolbarbutton
+						data-l10n-id="sidenav-related"
+						data-pane="related"/>
+				</html:div>
 			</html:div>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-abstract"
-					data-pane="abstract"/>
-			</html:div>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-attachments"
-					data-pane="attachments"/>
-			</html:div>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-notes"
-					data-pane="notes"/>
-			</html:div>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-libraries-collections"
-					data-pane="libraries-collections"/>
-			</html:div>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-tags"
-					data-pane="tags"/>
-			</html:div>
-			<html:div class="toolbarbutton-container">
-				<toolbarbutton
-					data-l10n-id="sidenav-related"
-					data-pane="related"/>
-			</html:div>
+			
 			<html:div class="divider"/>
-			<html:div class="toolbarbutton-container">
+			
+			<html:div class="pin-wrapper highlight-notes-active">
 				<toolbarbutton
 					data-l10n-id="sidenav-notes"
 					data-pane="context-notes"/>
@@ -134,6 +138,7 @@
 		
 		get _contextNotesPaneVisible() {
 			return this._contextNotesPane
+				&& !this._collapsed
 				&& this._contextNotesPane.parentElement.selectedPanel == this._contextNotesPane;
 		}
 
@@ -339,19 +344,19 @@
 		}
 
 		render() {
+			let contextNotesPaneVisible = this._contextNotesPaneVisible;
 			let pinnedPane = this.pinnedPane;
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
 				
 				if (pane == 'context-notes') {
 					let hidden = !this._contextNotesPane;
-					let selected = this._contextNotesPaneVisible;
+					let selected = contextNotesPaneVisible;
 					
 					toolbarbutton.parentElement.hidden = hidden;
 					toolbarbutton.parentElement.previousElementSibling.hidden = hidden; // Divider
 					
 					toolbarbutton.setAttribute('aria-selected', selected);
-					toolbarbutton.classList.toggle('active', selected);
 					
 					continue;
 				}
@@ -367,13 +372,16 @@
 					continue;
 				}
 				
-				toolbarbutton.setAttribute('aria-selected',
-					!this._contextNotesPaneVisible && pane == pinnedPane);
+				toolbarbutton.setAttribute('aria-selected', !contextNotesPaneVisible && pane == pinnedPane);
 				toolbarbutton.parentElement.hidden = !this.getPane(pane);
 
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
 			}
+			
+			this.querySelector('.highlight-notes-active').classList.toggle('highlight', contextNotesPaneVisible);
+			this.querySelector('.highlight-notes-inactive').classList.toggle('highlight',
+				this._contextNotesPane && !contextNotesPaneVisible);
 		}
 	}
 	customElements.define("item-pane-sidenav", ItemPaneSidenav);

@@ -21,7 +21,21 @@ item-pane-sidenav {
 		padding-block: 4px;
 	}
 
-	.toolbarbutton-container {
+	.inherit-flex {
+		display: flex;
+		flex-direction: inherit;
+		flex-wrap: inherit;
+		align-items: inherit;
+		justify-content: inherit;
+		gap: inherit;
+	}
+	
+	.highlight {
+		border-radius: 5px;
+		background-color: var(--fill-quinary);
+	}
+
+	.pin-wrapper {
 		position: relative;
 		// Disable pointer events here, re-enable on the button, so that :hover styles are only applied
 		// when the button itself is hovered
@@ -64,7 +78,7 @@ item-pane-sidenav {
 			background-color: var(--fill-quinary);
 		}
 
-		&:active, &.active {
+		&:active {
 			background-color: var(--fill-quarternary);
 		}
 
