@@ -42,27 +42,27 @@
 			return this.hasAttribute('open');
 		}
 		
-		set open(val) {
-			val = !!val;
-			let open = this.open;
-			if (open === val || this.empty) return;
+		set open(newOpen) {
+			newOpen = !!newOpen;
+			let oldOpen = this.open;
+			if (oldOpen === newOpen || this.empty) return;
 			this.render();
+			
+			// Force open before getting scrollHeight, so we get the right value
+			// even if the body has a scrollable child
+			this.toggleAttribute('open', true);
 			if (!this._restoringOpenState && this._head?.nextSibling?.scrollHeight) {
 				this.style.setProperty('--open-height', `${this._head.nextSibling.scrollHeight}px`);
 			}
 			else {
 				this.style.setProperty('--open-height', 'auto');
 			}
+			this.toggleAttribute('open', oldOpen);
 			
 			// eslint-disable-next-line no-void
 			void getComputedStyle(this).maxHeight; // Force style calculation! Without this the animation doesn't work
-			this.toggleAttribute('open', val);
-			if (!this.dispatchEvent(new CustomEvent('toggle', { bubbles: false, cancelable: true }))) {
-				// Revert
-				this.toggleAttribute('open', open);
-				return;
-			}
-			if (!val && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
+			this.toggleAttribute('open', newOpen);
+			if (!newOpen && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
 				this.ownerDocument.activeElement.blur();
 			}
 			
@@ -291,6 +291,7 @@
 			
 			if (!this._listenerAdded && this._head?.nextSibling) {
 				this._head.nextSibling.addEventListener('transitionend', () => {
+					Zotero.debug('Animation done; height is ' + this._head.nextSibling.scrollHeight)
 					this.style.setProperty('--open-height', 'auto');
 				});
 				this._listenerAdded = true;

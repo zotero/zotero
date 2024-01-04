@@ -66,10 +66,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			return this.hasAttribute('open');
 		}
 
-		set open(val) {
-			val = !!val;
-			let open = this.open;
-			if (open === val || this.empty) return;
+		set open(newOpen) {
+			newOpen = !!newOpen;
+			let oldOpen = this.open;
+			if (oldOpen === newOpen || this.empty) return;
 			this.render();
 			let openHeight = this._body.scrollHeight;
 			if (openHeight) {
@@ -81,13 +81,8 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 			// eslint-disable-next-line no-void
 			void getComputedStyle(this).maxHeight; // Force style calculation! Without this the animation doesn't work
-			this.toggleAttribute('open', val);
-			if (!this.dispatchEvent(new CustomEvent('toggle', { bubbles: false, cancelable: true }))) {
-				// Revert
-				this.toggleAttribute('open', open);
-				return;
-			}
-			if (!val && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
+			this.toggleAttribute('open', newOpen);
+			if (!newOpen && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
 				this.ownerDocument.activeElement.blur();
 			}
 		}
