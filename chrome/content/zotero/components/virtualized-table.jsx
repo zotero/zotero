@@ -1329,9 +1329,8 @@ class VirtualizedTable extends React.Component {
 		if (Zotero.isLinux) {
 			paddingWidth = 2; // from the border
 		}
-		// Should be kept up to date with the _virtualized-table.scss value
-		// for .virtualized-table-header
-		header.style.width = `calc(100% - ${scrollbarWidth - paddingWidth}px)`;
+
+		header.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
 	}
 
 	/**

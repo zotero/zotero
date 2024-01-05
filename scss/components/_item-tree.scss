@@ -7,8 +7,50 @@
 	}
 
 	.virtualized-table-header {
-		padding: 0 8px;
+		width: 100%;
+		padding-left: 8px;
+		padding-right: calc(8px + var(--scrollbar-width, 0px));
 		box-sizing: border-box;
+
+		.first-column {
+			&::before {
+				content: "";
+				display: inline-block;
+				width: 8px;
+				height: 100%;
+				background: transparent;
+				position: absolute;
+				left: -8px;
+				
+				@include state(".first-column:hover") {
+					background: var(--material-mix-quinary);
+				}
+				
+				@include state(".first-column.dragging") {
+					background: var(--material-mix-quarternary);
+				}
+			}
+		}
+
+		.cell:last-child {
+			&::after {
+				content: "";
+				display: inline-block;
+				width: calc(var(--scrollbar-width, 0px) + 8px);
+				height: 100%;
+				background: transparent;
+				position: absolute;
+				right: calc(-1 * var(--scrollbar-width, 0px) - 8px);
+		
+				@include state(".cell:hover") {
+					background: var(--material-mix-quinary);
+				}
+
+				@include state(".cell.dragging") {
+					background: var(--material-mix-quarternary);
+				}
+			}
+		}
 	}
 	
 	.virtualized-table {
