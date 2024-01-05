@@ -822,11 +822,6 @@
 			this.querySelectorAll("[ztabindex]").forEach((node) =>{
 				node.setAttribute("tabindex", 0);
 			});
-			for (let elem of [...this.querySelectorAll("editable-text")]) {
-				if (!elem.getAttribute("autocomplete")) {
-					this.addAutocompleteToElement(elem);
-				}
-			}
 		}
 		
 		addItemTypeMenu() {
@@ -1204,7 +1199,6 @@
 			// Change if button position changes
 			var creatorNameBox = row.querySelector(".creator-name-box");
 			var lastName = creatorNameBox.firstChild;
-			var comma = creatorNameBox.firstChild.nextSibling;
 			var firstName = creatorNameBox.lastChild;
 
 			let tab;
@@ -1221,7 +1215,6 @@
 				
 				// Hide first name field and prepend to last name field
 				firstName.hidden = true;
-				comma.hidden = true;
 				
 				if (!initial) {
 					var first = firstName.value;
@@ -1273,7 +1266,6 @@
 				}
 				
 				firstName.hidden = false;
-				comma.hidden = false;
 			}
 			
 			// Save the last-used field mode
@@ -1527,6 +1519,10 @@
 			else {
 				valueElement.style.textAlign = 'left';
 			}
+			if (!fieldName.includes("creator")) {
+				// autocomplete for creator names is added in addCreatorRow
+				this.addAutocompleteToElement(valueElement);
+			}
 			return valueElement;
 		}
 		
@@ -1580,9 +1576,8 @@
 			if (field == 'creator') {
 				value = this.item.getCreator(creatorIndex)[creatorField];
 				if (value === undefined) {
-					value = "";
+					elem.value = "";
 				}
-				elem.value = value;
 			}
 			else {
 				value = this.item.getField(fieldName);
@@ -1787,10 +1782,10 @@
 				// Update the other label
 				let label;
 				if (otherField == 'firstName') {
-					label = textbox.nextSibling.nextSibling;
+					label = textbox.nextSibling;
 				}
 				else if (otherField == 'lastName') {
-					label = textbox.previousSibling.previousSibling;
+					label = textbox.previousSibling;
 				}
 				
 				label.value = creator[otherField];

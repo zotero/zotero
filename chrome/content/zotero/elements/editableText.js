@@ -37,7 +37,8 @@
 			'aria-label',
 			'aria-labelledby',
 			'value',
-			'nowrap'
+			'nowrap',
+			'autocomplete'
 		];
 		
 		get noWrap() {
@@ -188,7 +189,7 @@
 					this.classList.add("focused");
 					// Select all text if focused via keyboard
 					if (!this.getAttribute("mousedown")) {
-						this._input.select();
+						this._input.setSelectionRange(0, this._input.value.length, "backward");
 					}
 					this._input.dataset.initialValue = this._input.value;
 				});

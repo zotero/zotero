@@ -190,13 +190,16 @@ item-box {
 			margin-inline-end: calc(max(0px, 4px - var(--editable-text-padding-inline)));
 		}
 		// Add comma when the last name is not focused
-		*[fieldMode="0"]:first-child:not(.focused) {
+		*[fieldMode="0"]:first-child {
 			position: relative;
 			&::after {
 				content: ",";
 				position: absolute;
 				right: 0;
 				bottom: var(--editable-text-padding-block);
+			}
+			&.focused::after {
+				visibility: hidden;
 			}
 		}
 	}
