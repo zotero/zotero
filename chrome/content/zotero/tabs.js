@@ -403,15 +403,33 @@ var Zotero_Tabs = new function () {
 	 * @param {String} id
 	 * @param {Boolean} reopening
 	 */
-	this.select = function (id, reopening, options) {
+	this.select = function (id, reopening, options = {}) {
 		var { tab, tabIndex } = this._getTab(id);
+		// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
+		let focusZoteroPane = () => {
+			if (tab.id !== 'zotero-pane') return;
+			// Small delay to make sure the focus does not remain on the actual
+			// tab after mouse click
+			setTimeout(() => {
+				if (tab.lastFocusedElement) {
+					tab.lastFocusedElement.focus();
+				}
+				if (document.activeElement !== tab.lastFocusedElement) {
+					ZoteroPane_Local.itemsView.focus();
+				}
+				tab.lastFocusedElement = null;
+			});
+		};
 		if (!tab || tab.id === this._selectedID) {
-			// Focus on reader when keepTabFocused is explicitly false
+			// Focus on reader or zotero pane when keepTabFocused is explicitly false
 			// E.g. when a tab is selected via Space or Enter
-			if (options?.keepTabFocused === false && tab?.id === this._selectedID) {
+			if (options.keepTabFocused === false && tab?.id === this._selectedID) {
 				var reader = Zotero.Reader.getByTabID(this._selectedID);
 				if (reader) {
 					reader.focus();
+				}
+				if (tab.id == 'zotero-pane') {
+					focusZoteroPane();
 				}
 			}
 			return;
@@ -425,15 +443,20 @@ var Zotero_Tabs = new function () {
 		}
 		
 		// If the last focus data was recorded for a different item, discard it
-		if (this._focusOptions.itemID && this._focusOptions.itemID != tab?.data?.itemID) {
+		if (!this._focusOptions.itemID || this._focusOptions.itemID != tab?.data?.itemID) {
 			this._focusOptions = {};
 		}
 		// Save focus option for this item to tell reader and contextPane how to handle focus
-		if (options && selectedTab) {
+		if (Object.keys(options).length && selectedTab) {
 			this._focusOptions.keepTabFocused = !!options.keepTabFocused;
 			this._focusOptions.itemID = tab?.data?.itemID;
 		}
-
+		if (this._selectedID === 'zotero-pane'
+		&& !document.activeElement.classList.contains("tab")
+		&& document.activeElement.tagName !== 'window') {
+			// never return focus to another tab or <window>
+			selectedTab.lastFocusedElement = document.activeElement;
+		}
 		if (tab.type === 'reader-unloaded') {
 			this.close(tab.id);
 			Zotero.Reader.open(tab.data.itemID, options && options.location, {
@@ -446,25 +469,25 @@ var Zotero_Tabs = new function () {
 			});
 			return;
 		}
-		if (this._selectedID === 'zotero-pane') {
-			selectedTab.lastFocusedElement = document.activeElement;
-		}
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
 		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } }, true);
-		if (tab.id === 'zotero-pane' && tab.lastFocusedElement) {
-			tab.lastFocusedElement.focus();
-			if (document.activeElement !== tab.lastFocusedElement) {
-				ZoteroPane_Local.itemsView.focus();
-			}
-			tab.lastFocusedElement = null;
+		if (tab.id === 'zotero-pane' && (options.keepTabFocused !== true)) {
+			focusZoteroPane();
 		}
 		let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
 		if (this._focusOptions.keepTabFocused && document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
 			// Keep focus on the currently selected tab during keyboard navigation
-			tabNode.focus();
+			if (tab.id == 'zotero-pane') {
+				// Since there is more than one zotero-pane tab (pinned and not pinned),
+				// use moveFocus() to focus on the visible one
+				this.moveFocus('first');
+			}
+			else {
+				tabNode.focus();
+			}
 		}
 		// Allow React to create a tab node
 		setTimeout(() => {
