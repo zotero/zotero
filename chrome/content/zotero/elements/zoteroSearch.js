@@ -405,7 +405,7 @@
 			{
 				var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
 				var hidden = !operators[val];
-				operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
+				operatorsList.firstChild.childNodes[i].toggleAttribute('hidden', hidden);
 				if (!hidden && (selectThis == null || this.selectedOperator == val))
 				{
 					selectThis = i;
@@ -836,7 +836,7 @@
 				case 'fulltextContent':
 					var menu = this.querySelector('#textbox-fulltext-menu');
 					this.setAttribute('hasOptions', true);
-					button.setAttribute('hidden', false);
+					button.removeAttribute('hidden');
 					
 					var selectedIndex = 0;
 					if (mode){

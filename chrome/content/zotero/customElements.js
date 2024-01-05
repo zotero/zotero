@@ -107,7 +107,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesC
 					}
 					// Following the implementation from https://searchfox.org/mozilla-esr102/source/toolkit/content/widgets/menupopup.js
 					let haveCheckableChild = this.querySelector(
-						":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio])"
+						":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio],[selected],[checked])"
 					);
 					this.toggleAttribute("needsgutter", haveCheckableChild);
 					// Update animate attribute when the popup is shown
