@@ -46,7 +46,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Function} func - A promise-returning function
 	 * @return {Array} The return values from the successive runs
 	 */
-	"forEachChunkAsync": async function (arr, chunkSize, func) {
+	forEachChunkAsync: async function (arr, chunkSize, func) {
 		var retValues = [];
 		var tmpArray = arr.concat();
 		var num = arr.length;
@@ -66,29 +66,29 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Copy a text string to the clipboard
 	 */
-	"copyTextToClipboard":function(str) {
+	copyTextToClipboard: function (str) {
 		Components.classes["@mozilla.org/widget/clipboardhelper;1"]
 			.getService(Components.interfaces.nsIClipboardHelper)
 			.copyString(str);
 	},
 	
 	
-	 /*
+	/*
 	 * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
 	 *
 	 * @param	{String|nsIFile}	strOrFile
 	 * @param	{Boolean}			[base64=false]	Return as base-64-encoded string rather than hex string
 	 * @return	{String}
 	 */
-	"md5":function(strOrFile, base64) {
+	md5: function (strOrFile, base64) {
+		let ch = Components.classes["@mozilla.org/security/hash;1"]
+			.createInstance(Components.interfaces.nsICryptoHash);
 		if (typeof strOrFile == 'string') {
-			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-				createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+				.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
 			converter.charset = "UTF-8";
 			var result = {};
 			var data = converter.convertToByteArray(strOrFile, result);
-			var ch = Components.classes["@mozilla.org/security/hash;1"]
-				.createInstance(Components.interfaces.nsICryptoHash);
 			ch.init(ch.MD5);
 			ch.update(data, data.length);
 		}
@@ -107,8 +107,6 @@ Zotero.Utilities.Internal = {
 							.createInstance(Components.interfaces.nsIFileInputStream);
 			// open for reading
 			istream.init(strOrFile, 0x01, 0o444, 0);
-			var ch = Components.classes["@mozilla.org/security/hash;1"]
-						   .createInstance(Components.interfaces.nsICryptoHash);
 			// we want to use the MD5 algorithm
 			ch.init(ch.MD5);
 			// this tells updateFromStream to read the entire file
@@ -154,7 +152,7 @@ Zotero.Utilities.Internal = {
 		}
 		
 		var ch = Components.classes["@mozilla.org/security/hash;1"]
-				   .createInstance(Components.interfaces.nsICryptoHash);
+				.createInstance(Components.interfaces.nsICryptoHash);
 		ch.init(ch.MD5);
 		
 		// Recursively read chunks of the file and return a promise for the hash
@@ -208,7 +206,7 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	 /*
+	/*
 	  * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
 	  *
 	  * @param {String} str
@@ -257,9 +255,9 @@ Zotero.Utilities.Internal = {
 				size: 0,
 				data: '',
 				
-				onStartRequest: function (request) {},
+				onStartRequest: function (_request) {},
 				
-				onStopRequest: function (request, status) {
+				onStopRequest: function (_request, _status) {
 					this.binaryInputStream.close();
 					delete this.binaryInputStream;
 					
@@ -270,14 +268,14 @@ Zotero.Utilities.Internal = {
 					this.size += count;
 					
 					this.binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"]
-						.createInstance(Components.interfaces.nsIBinaryInputStream)
+						.createInstance(Components.interfaces.nsIBinaryInputStream);
 					this.binaryInputStream.setInputStream(inputStream);
 					this.data += this.binaryInputStream.readBytes(this.binaryInputStream.available());
 				},
 				
 				QueryInterface: function (iid) {
 					if (iid.equals(Components.interfaces.nsISupports)
-						   || iid.equals(Components.interfaces.nsIStreamListener)) {
+						|| iid.equals(Components.interfaces.nsIStreamListener)) {
 						return this;
 					}
 					throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -323,13 +321,13 @@ Zotero.Utilities.Internal = {
 			{
 				data: '',
 				
-				onStartRequest: function (request) {},
+				onStartRequest: function (_request) {},
 				
-				onStopRequest: function (request, status) {
+				onStopRequest: function (_request, _status) {
 					deferred.resolve(this.data);
 				},
 				
-				onDataAvailable: function (request, inputStream, offset, count) {
+				onDataAvailable: function (request, inputStream, _offset, _count) {
 					this.data += NetUtil.readInputStreamToString(
 						inputStream,
 						inputStream.available(),
@@ -337,12 +335,12 @@ Zotero.Utilities.Internal = {
 							charset: 'UTF-8',
 							replacement: 65533
 						}
-					)
+					);
 				},
 				
 				QueryInterface: function (iid) {
 					if (iid.equals(Components.interfaces.nsISupports)
-						   || iid.equals(Components.interfaces.nsIStreamListener)) {
+						|| iid.equals(Components.interfaces.nsIStreamListener)) {
 						return this;
 					}
 					throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -402,10 +400,10 @@ Zotero.Utilities.Internal = {
 	 */
 	byteLength: function (str) {
 		var s = str.length;
-		for (var i=str.length-1; i>=0; i--) {
+		for (var i = str.length - 1; i >= 0; i--) {
 			var code = str.charCodeAt(i);
 			if (code > 0x7f && code <= 0x7ff) s++;
-			else if (code > 0x7ff && code <= 0xffff) s+=2;
+			else if (code > 0x7ff && code <= 0xffff) s += 2;
 			if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
 		}
 		return s;
@@ -426,7 +424,7 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
-	"errorPrompt":function(title, e) {
+	errorPrompt: function (title, e) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 					.getService(Components.interfaces.nsIPromptService);
 		var message, buttonText, buttonCallback;
@@ -448,7 +446,7 @@ Zotero.Utilities.Internal = {
 				var zp = Zotero.getActiveZoteroPane();
 				// TODO: Open main window if closed
 				if (zp) zp.reportErrors();
-			}
+			};
 		}
 		// If secondary button is explicitly null, just use an alert
 		else if (buttonText === null) {
@@ -469,7 +467,9 @@ Zotero.Utilities.Internal = {
 		);
 		
 		if (index == 1) {
-			setTimeout(function () { buttonCallback(); }, 1);
+			setTimeout(function () {
+				buttonCallback();
+			}, 1);
 		}
 	},
 	
@@ -601,32 +601,34 @@ Zotero.Utilities.Internal = {
 	 * @param {String[]} args Arguments given
 	 * @return {Promise} Promise resolved to true if command succeeds, or an error otherwise
 	 */
-	"exec": Zotero.Promise.method(function (cmd, args) {
+	exec: Zotero.Promise.method(function (cmd, args) {
 		if (typeof cmd == 'string') {
 			Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			cmd = new FileUtils.File(cmd);
 		}
 		
-		if(!cmd.isExecutable()) {
+		if (!cmd.isExecutable()) {
 			throw new Error(cmd.path + " is not an executable");
 		}
 		
-		var proc = Components.classes["@mozilla.org/process/util;1"].
-				createInstance(Components.interfaces.nsIProcess);
+		var proc = Components.classes["@mozilla.org/process/util;1"]
+				.createInstance(Components.interfaces.nsIProcess);
 		proc.init(cmd);
 		
 		Zotero.debug("Running " + cmd.path + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
 		var deferred = Zotero.Promise.defer();
-		proc.runwAsync(args, args.length, {"observe":function(subject, topic) {
-			if(topic !== "process-finished") {
-				deferred.reject(new Error(cmd.path+" failed"));
-			} else if(proc.exitValue != 0) {
-				deferred.reject(new Error(cmd.path+" returned exit status "+proc.exitValue));
-			} else {
+		proc.runwAsync(args, args.length, { observe: function (subject, topic) {
+			if (topic !== "process-finished") {
+				deferred.reject(new Error(cmd.path + " failed"));
+			}
+			else if (proc.exitValue != 0) {
+				deferred.reject(new Error(cmd.path + " returned exit status " + proc.exitValue));
+			}
+			else {
 				deferred.resolve(true);
 			}
-		}});
+		} });
 		
 		return deferred.promise;
 	}),
@@ -639,10 +641,12 @@ Zotero.Utilities.Internal = {
 	 * @return {String}
 	 */
 	subprocess: async function (command, args) {
+		// eslint-disable-next-line no-undef
 		command = command.includes('/') ? command : await Subprocess.pathSearch(command);
 		
 		Zotero.debug("Running " + command + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
+		// eslint-disable-next-line no-undef
 		let proc = await Subprocess.call({
 			command,
 			arguments: args,
@@ -660,7 +664,7 @@ Zotero.Utilities.Internal = {
 	 * @param {String[]} mimeType MIME type of data to get
 	 * @return {String|null} Clipboard data, or null if none was available
 	 */
-	"getClipboard":function(mimeType) {
+	getClipboard: function (mimeType) {
 		var clip = Services.clipboard;
 		if (!clip.hasDataMatchingFlavors([mimeType], 1, clip.kGlobalClipboard)) {
 			return null;
@@ -686,18 +690,19 @@ Zotero.Utilities.Internal = {
 	 * @param {DOMWindow} suspected parent window
 	 * @return {boolean}
 	 */
-	"isIframeOf":function isIframeOf(childWindow, parentWindow) {
-		while(childWindow.parent !== childWindow) {
+	isIframeOf: function (childWindow, parentWindow) {
+		while (childWindow.parent !== childWindow) {
 			childWindow = childWindow.parent;
-			if(childWindow === parentWindow) return true;
+			if (childWindow === parentWindow) return true;
 		}
+		return false;
 	},
 	
 	
 	/**
 	 * Returns a DOMDocument object not attached to any window
 	 */
-	"getDOMDocument": function() {
+	getDOMDocument: function () {
 		return new DOMParser()
 			.parseFromString("<!DOCTYPE html><html></html>", "text/html");
 	},
@@ -722,7 +727,7 @@ Zotero.Utilities.Internal = {
 			let a = links[i];
 			let href = a.getAttribute('href');
 			a.setAttribute('tooltiptext', href);
-			a.onclick = function (event) {
+			a.onclick = function (_event) {
 				Zotero.launchURL(href);
 				if (options.callback) {
 					options.callback();
@@ -741,10 +746,9 @@ Zotero.Utilities.Internal = {
 	 *                              promise will return false. Before maxTime has elapsed, or if
 	 *                              maxTime isn't specified, the promises will yield true.
 	 */
-	"delayGenerator": function* (intervals, maxTime) {
+	delayGenerator: function* (intervals, maxTime) {
 		var delay;
 		var totalTime = 0;
-		var last = false;
 		intervals = intervals.slice();
 		while (true) {
 			let interval = intervals.shift();
@@ -783,7 +787,6 @@ Zotero.Utilities.Internal = {
 	getAsyncInputStream: function (gen, onError) {
 		// Initialize generator if necessary
 		var g = gen.next ? gen : gen();
-		var seq = 0;
 		
 		const PR_UINT32_MAX = Math.pow(2, 32) - 1;
 		var pipe = Cc["@mozilla.org/pipe;1"].createInstance(Ci.nsIPipe);
@@ -795,8 +798,6 @@ Zotero.Utilities.Internal = {
 		
 		
 		function onOutputStreamReady(aos) {
-			let currentSeq = seq++;
-			
 			var maybePromise = processNextValue();
 			// If generator returns a promise, wait for it
 			if (maybePromise.then) {
@@ -810,7 +811,7 @@ Zotero.Utilities.Internal = {
 			else {
 				aos.close();
 			}
-		};
+		}
 		
 		function processNextValue(lastVal) {
 			try {
@@ -858,7 +859,7 @@ Zotero.Utilities.Internal = {
 		return Zotero.HTTP.wrapDocument(doc, url);
 	},
 	
-	blobToText: async function (blob, charset=null) {
+	blobToText: async function (blob, charset = null) {
 		if (!charset) {
 			var matches = blob.type && blob.type.match(/charset=([a-z0-9\-_+])/i);
 			if (matches) {
@@ -867,7 +868,7 @@ Zotero.Utilities.Internal = {
 		}
 		return new Promise(function (resolve) {
 			let fr = new FileReader();
-			fr.addEventListener("loadend", function() {
+			fr.addEventListener("loadend", function () {
 				resolve(fr.result);
 			});
 			fr.readAsText(blob, charset);
@@ -920,7 +921,8 @@ Zotero.Utilities.Internal = {
 
 				if (!baseField || baseField == field) {
 					item.uniqueFields[field] = item[field];
-				} else {
+				}
+				else {
 					item[baseField] = item[field];
 					item.uniqueFields[baseField] = item[field];
 				}
@@ -932,7 +934,7 @@ Zotero.Utilities.Internal = {
 
 			// Creators
 			if (item.creators) {
-				for (let i=0; i<item.creators.length; i++) {
+				for (let i = 0; i < item.creators.length; i++) {
 					let creator = item.creators[i];
 
 					if (creator.name) {
@@ -951,7 +953,7 @@ Zotero.Utilities.Internal = {
 			}
 
 			// Tags
-			for (let i=0; i<item.tags.length; i++) {
+			for (let i = 0; i < item.tags.length; i++) {
 				if (!item.tags[i].type) {
 					item.tags[i].type = 0;
 				}
@@ -985,7 +987,7 @@ Zotero.Utilities.Internal = {
 			// Include attachments
 			item.attachments = [];
 			let attachments = zoteroItem.getAttachments();
-			for (let i=0; i<attachments.length; i++) {
+			for (let i = 0; i < attachments.length; i++) {
 				let zoteroAttachment = Zotero.Items.get(attachments[i]);
 				let attachment = zoteroAttachment.toJSON();
 				attachment.uri = Zotero.URI.getItemURI(zoteroAttachment);
@@ -997,7 +999,7 @@ Zotero.Utilities.Internal = {
 			// Include notes
 			item.notes = [];
 			let notes = zoteroItem.getNotes();
-			for (let i=0; i<notes.length; i++) {
+			for (let i = 0; i < notes.length; i++) {
 				let zoteroNote = Zotero.Items.get(notes[i]);
 				let note = zoteroNote.toJSON();
 				note.uri = Zotero.URI.getItemURI(zoteroNote);
@@ -1027,7 +1029,7 @@ Zotero.Utilities.Internal = {
 				Zotero.ItemTypes.getID(json.itemType)
 			)
 		);
-		let firstCreator = json.creators.find(creator => {
+		let firstCreator = json.creators.find((creator) => {
 			return creator.creatorType == primaryCreatorType || creator.creatorType == 'author';
 		});
 		if (!firstCreator) {
@@ -1092,7 +1094,6 @@ Zotero.Utilities.Internal = {
 		}
 		
 		// Process Extra lines
-		var keepLines = [];
 		var skipKeys = new Set();
 		var lines = extra.split(/\n/g);
 		
@@ -1262,7 +1263,7 @@ Zotero.Utilities.Internal = {
 				keepLines.push(line);
 				continue;
 			}
-			let [_, originalField, value] = parts;
+			let [_, originalField, _value] = parts;
 			
 			let key = this._normalizeExtraKey(originalField);
 			
@@ -1296,9 +1297,9 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	extractIdentifiers: function (text) {
+	extractIdentifiers: function (_text) {
 		Zotero.debug(`Zotero.Utilities.Internal.extractIdentifiers() is deprecated -- use Zotero.Utilities.extractIdentifiers() instead`);
-		return Zotero.Utilities.extractIdentifiers.apply(Zotero.Utilities, arguments);
+		return Zotero.Utilities.extractIdentifiers(...arguments);
 	},
 	
 	
@@ -1385,7 +1386,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Boolean} dontValidate Do not attempt to validate check digit
 	 * @return {String} Hyphenated ISBN or empty string if invalid ISBN is supplied
 	 */
-	"hyphenateISBN": function(isbn, dontValidate) {
+	hyphenateISBN: function (isbn, dontValidate) {
 		isbn = Zotero.Utilities.cleanISBN(isbn, dontValidate);
 		if (!isbn) return '';
 		
@@ -1395,8 +1396,9 @@ Zotero.Utilities.Internal = {
 			i = 0;
 		if (isbn.length == 10) {
 			uccPref = '978';
-		} else {
-			uccPref = isbn.substr(0,3);
+		}
+		else {
+			uccPref = isbn.substr(0, 3);
 			if (!ranges[uccPref]) return ''; // Probably invalid ISBN, but the checksum is OK
 			parts.push(uccPref);
 			i = 3; // Skip ahead
@@ -1404,7 +1406,7 @@ Zotero.Utilities.Internal = {
 		
 		var group = '',
 			found = false;
-		while (i < isbn.length-3 /* check digit, publication, registrant */) {
+		while (i < isbn.length - 3 /* check digit, publication, registrant */) {
 			group += isbn.charAt(i);
 			if (ranges[uccPref][group]) {
 				parts.push(group);
@@ -1426,12 +1428,12 @@ Zotero.Utilities.Internal = {
 		var registrant = '';
 		found = false;
 		i++; // Previous loop 'break'ed early
-		while (!found && i < isbn.length-2 /* check digit, publication */) {
+		while (!found && i < isbn.length - 2 /* check digit, publication */) {
 			registrant += isbn.charAt(i);
 			
-			for(let j=0; j < regRanges.length && registrant.length >= regRanges[j].length; j+=2) {
-				if(registrant.length == regRanges[j].length
-					&& registrant >= regRanges[j] && registrant <= regRanges[j+1] // Falls within the range
+			for (let j = 0; j < regRanges.length && registrant.length >= regRanges[j].length; j += 2) {
+				if (registrant.length == regRanges[j].length
+					&& registrant >= regRanges[j] && registrant <= regRanges[j + 1] // Falls within the range
 				) {
 					parts.push(registrant);
 					found = true;
@@ -1444,8 +1446,8 @@ Zotero.Utilities.Internal = {
 		
 		if (!found) return ''; // Outside of valid range, but maybe we need to update our data
 		
-		parts.push(isbn.substring(i,isbn.length-1)); // Publication is the remainder up to last digit
-		parts.push(isbn.charAt(isbn.length-1)); // Check digit
+		parts.push(isbn.substring(i, isbn.length - 1)); // Publication is the remainder up to last digit
+		parts.push(isbn.charAt(isbn.length - 1)); // Check digit
 		
 		return parts.join('-');
 	},
@@ -1591,8 +1593,6 @@ Zotero.Utilities.Internal = {
 		while (select.hasChildNodes()) {
 			select.removeChild(select.firstChild);
 		}
-		var selectedIndex = 0;
-		var i = 0;
 		for (let library of libraries) {
 			let option = select.ownerDocument.createElement('option');
 			option.setAttribute('value', library.libraryID);
@@ -1603,7 +1603,6 @@ Zotero.Utilities.Internal = {
 			if (library.libraryID == selectedLibraryID) {
 				option.setAttribute('selected', 'selected');
 			}
-			i++;
 		}
 	},
 	
@@ -1622,7 +1621,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @return {Node<menuitem>|Node<menu>} appended node
 	 */
-	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
+	createMenuForTarget: function (libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
 		var doc = elem.ownerDocument;
 		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createXULElement('menuitem');
@@ -1729,7 +1728,7 @@ Zotero.Utilities.Internal = {
 				.getService(Components.interfaces.nsIWindowMediator);
 			var enumerator = wm.getEnumerator("zotero:pref");
 			if (enumerator.hasMoreElements()) {
-				var win = enumerator.getNext();
+				win = enumerator.getNext();
 				win.focus();
 				if (paneID) {
 					win.Zotero_Preferences.navigation.value = paneID;
@@ -1778,8 +1777,8 @@ Zotero.Utilities.Internal = {
 	 */
 	lazy: function (fn) {
 		var x, called = false;
-		return function() {
-			if(!called) {
+		return function () {
+			if (!called) {
 				x = fn.apply(this);
 				called = true;
 			}
@@ -1820,7 +1819,7 @@ Zotero.Utilities.Internal = {
 	 *     initialization of the property. The getter is replaced with a simple
 	 *     property once initialized.
 	 */
-	defineProperty: function(obj, prop, desc, opts) {
+	defineProperty: function (obj, prop, desc, opts) {
 		if (typeof prop != 'string') throw new Error("Property must be a string");
 		var d = { __proto__: null, enumerable: true, configurable: true }; // Enumerable by default
 		for (let p in desc) {
@@ -1832,7 +1831,7 @@ Zotero.Utilities.Internal = {
 			if (opts.lazy && d.get) {
 				let getter = d.get;
 				d.configurable = true; // Make sure we can change the property later
-				d.get = function() {
+				d.get = function () {
 					let val = getter.call(this);
 					
 					// Redefine getter on this object as non-writable value
@@ -1843,14 +1842,14 @@ Zotero.Utilities.Internal = {
 					Object.defineProperty(this, prop, d);
 					
 					return val;
-				}
+				};
 			}
 		}
 		
 		Object.defineProperty(obj, prop, d);
 	},
 	
-	extendClass: function(superClass, newClass) {
+	extendClass: function (superClass, newClass) {
 		newClass._super = superClass;
 		newClass.prototype = Object.create(superClass.prototype);
 		newClass.prototype.constructor = newClass;
@@ -1861,14 +1860,14 @@ Zotero.Utilities.Internal = {
 	 * an array of values -- allows for functions to accept both arrays of
 	 * values and/or an arbitrary number of individual values
 	 */
-	flattenArguments: function (args){
+	flattenArguments: function (args) {
 		// Put passed scalar values into an array
 		if (args === null || typeof args == 'string' || typeof args.length == 'undefined') {
 			args = [args];
 		}
 			
 		var returns = [];
-		for (var i=0; i<args.length; i++){
+		for (var i = 0; i < args.length; i++) {
 			var arg = args[i];
 			if (!arg && arg !== 0) {
 				continue;
@@ -1888,8 +1887,8 @@ Zotero.Utilities.Internal = {
 		Zotero.UIProperties.set(rootElement);
 	},
 
-	getAncestorByTagName: function (elem, tagName){
-		while (elem.parentNode){
+	getAncestorByTagName: function (elem, tagName) {
+		while (elem.parentNode) {
 			elem = elem.parentNode;
 			if (elem.localName == tagName) {
 				return elem;
@@ -1898,7 +1897,7 @@ Zotero.Utilities.Internal = {
 		return false;
 	},
 	
-	quitZotero: function(restart=false) {
+	quitZotero: function (restart = false) {
 		Zotero.debug("Zotero.Utilities.Internal.quitZotero() is deprecated -- use quit()");
 		this.quit(restart);
 	},
@@ -1908,12 +1907,12 @@ Zotero.Utilities.Internal = {
 	 * Quits the program, optionally restarting.
 	 * @param {Boolean} [restart=false]
 	 */
-	quit: function(restart=false) {
+	quit: function (restart = false) {
 		var startup = Services.startup;
 		if (restart) {
 			Zotero.restarting = true;
 		}
-		startup.quit(startup.eAttemptQuit | (restart ? startup.eRestart : 0) );
+		startup.quit(startup.eAttemptQuit | (restart ? startup.eRestart : 0));
 	},
 
 	/**
@@ -1923,10 +1922,10 @@ Zotero.Utilities.Internal = {
 	 * @param {Object} source
 	 * @param {String[]} [props] Properties to assign. Assign all otherwise
 	 */
-	assignProps: function(target, source, props) {
+	assignProps: function (target, source, props) {
 		if (!props) props = Object.keys(source);
 
-		for (var i=0; i<props.length; i++) {
+		for (var i = 0; i < props.length; i++) {
 			if (source[props[i]] === undefined) continue;
 			target[props[i]] = source[props[i]];
 		}
@@ -1949,7 +1948,7 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Get the real target URL from an intermediate URL
 	 */
-	resolveIntermediateURL: function(url) {
+	resolveIntermediateURL: function (url) {
 		var patterns = [
 			// Google search results
 			{
@@ -1958,7 +1957,7 @@ Zotero.Utilities.Internal = {
 			}
 		];
 
-		for (var i=0, len=patterns.length; i<len; i++) {
+		for (var i = 0, len = patterns.length; i < len; i++) {
 			if (!url.match(patterns[i].regexp)) {
 				continue;
 			}
@@ -1975,12 +1974,13 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Gets the icon for a JSON-style attachment
 	 */
-	determineAttachmentIcon: function(attachment) {
-		if(attachment.linkMode === "linked_url") {
+	determineAttachmentIcon: function (attachment) {
+		if (attachment.linkMode === "linked_url") {
 			return Zotero.ItemTypes.getImageSrc("attachmentWebLink");
 		}
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
-			? "attachmentPDF" : "attachmentSnapshot");
+			? "attachmentPDF"
+			: "attachmentSnapshot");
 	},
 	
 	/**
@@ -2043,7 +2043,7 @@ Zotero.Utilities.Internal = {
 				removeListener: (listener) => {
 					this._removeListener(event, listener);
 				},
-			}
+			};
 		};
 
 		cls.prototype._addListener = function (event, listener, once, immediateAfterTrigger) {
@@ -2059,9 +2059,10 @@ Zotero.Utilities.Internal = {
 				return listener.call(this);
 			}
 			this._events[event].listeners.set(listener, once);
+			return undefined;
 		};
 		
-		cls.prototype._removeListener = function(event, listener) {
+		cls.prototype._removeListener = function (event, listener) {
 			let ev = this._events[event];
 			if (!ev || !ev.listeners) {
 				Zotero.debug(`EventListener.removeListener(): attempting to remove an invalid event ${event} listener`);
@@ -2071,7 +2072,7 @@ Zotero.Utilities.Internal = {
 		};
 
 		cls.prototype._waitForEvent = async function (event) {
-			return new Zotero.Promise((resolve, reject) => {
+			return new Zotero.Promise((resolve) => {
 				this._addListener(event, () => resolve(), true);
 			});
 		};
@@ -2084,7 +2085,7 @@ Zotero.Utilities.Internal = {
 	 * @param {string} input - The input string to split.
 	 * @returns {string[]} An array of strings split by outer-most brackets.
 	 */
-	splitByOuterBrackets: function(input, left = '{{', right = '}}') {
+	splitByOuterBrackets: function (input, left = '{{', right = '}}') {
 		const result = [];
 		let startIndex = 0;
 		let depth = 0;
@@ -2327,7 +2328,7 @@ Zotero.Utilities.Internal = {
 
 		return scrollbarWidth;
 	}
-}
+};
 
 /**
  * Runs an AppleScript on OS X
@@ -2335,62 +2336,67 @@ Zotero.Utilities.Internal = {
  * @param script {String}
  * @param block {Boolean} Whether the script should block until the process is finished.
  */
-Zotero.Utilities.Internal.executeAppleScript = new function() {
+Zotero.Utilities.Internal.executeAppleScript = new function () {
 	var _osascriptFile;
 	
-	return function(script, block) {
-		if(_osascriptFile === undefined) {
+	return function (script, block) {
+		if (_osascriptFile === undefined) {
 			_osascriptFile = Zotero.File.pathToFile('/usr/bin/osascript');
-			if(!_osascriptFile.exists()) _osascriptFile = false;
+			if (!_osascriptFile.exists()) _osascriptFile = false;
 		}
-		if(_osascriptFile) {
-			var proc = Components.classes["@mozilla.org/process/util;1"].
-			createInstance(Components.interfaces.nsIProcess);
+		if (_osascriptFile) {
+			var proc = Components.classes["@mozilla.org/process/util;1"]
+			.createInstance(Components.interfaces.nsIProcess);
 			proc.init(_osascriptFile);
 			try {
 				proc.run(!!block, ['-e', script], 2);
-			} catch(e) {}
+			}
+			catch (e) {}
 		}
-	}
-}
+	};
+};
 	
 
 /**
  * Activates Firefox
  */
-Zotero.Utilities.Internal.activate = new function() {
+Zotero.Utilities.Internal.activate = new function () {
 	// For Carbon and X11
 	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions;
+	// eslint-disable-next-line no-unused-vars
 	var _x11, _x11Display, _x11RootWindow, XClientMessageEvent, XFetchName, XFree, XQueryTree,
 		XOpenDisplay, XCloseDisplay, XFlush, XDefaultRootWindow, XInternAtom, XSendEvent,
 		XMapRaised, XGetWindowProperty, X11Atom, X11Bool, X11Display, X11Window, X11Status;
 					
-	/** 
+	/**
 	 * Bring a window to the foreground by interfacing directly with X11
 	 */
 	function _X11BringToForeground(win, intervalID) {
 		var windowTitle = win.getInterface(Ci.nsIWebNavigation).title;
 		
 		var x11Window = _X11FindWindow(_x11RootWindow, windowTitle);
-		if(!x11Window) return;
+		if (!x11Window) return;
 		win.clearInterval(intervalID);
 			
 		var event = new XClientMessageEvent();
 		event.type = 33; /* ClientMessage*/
 		event.serial = 0;
+		// eslint-disable-next-line camelcase
 		event.send_event = 1;
+		// eslint-disable-next-line camelcase
 		event.message_type = XInternAtom(_x11Display, "_NET_ACTIVE_WINDOW", 0);
 		event.display = _x11Display;
 		event.window = x11Window;
 		event.format = 32;
 		event.l0 = 2;
-		var mask = 1<<20 /* SubstructureRedirectMask */ | 1<<19 /* SubstructureNotifyMask */;
+		var mask = 1 << 20 /* SubstructureRedirectMask */ | 1 << 19/* SubstructureNotifyMask */;
 		
-		if(XSendEvent(_x11Display, _x11RootWindow, 0, mask, event.address())) {
+		if (XSendEvent(_x11Display, _x11RootWindow, 0, mask, event.address())) {
 			XMapRaised(_x11Display, x11Window);
 			XFlush(_x11Display);
 			Zotero.debug("Integration: Activated successfully");
-		} else {
+		}
+		else {
 			Zotero.debug("Integration: An error occurred activating the window");
 		}
 	}
@@ -2403,20 +2409,21 @@ Zotero.Utilities.Internal.activate = new function() {
 		
 		var res = _X11GetProperty(w, "_NET_CLIENT_LIST", 33 /** XA_WINDOW **/)
 			|| _X11GetProperty(w, "_WIN_CLIENT_LIST", 6 /** XA_CARDINAL **/);
-		if(!res) return false;
+		if (!res) return false;
 		
 		var nClients = res[1],
 			clientList = ctypes.cast(res[0], X11Window.array(nClients).ptr).contents,
 			foundName = new ctypes.char.ptr();
-		for(var i=0; i<nClients; i++) {			
-			if(XFetchName(_x11Display, clientList.addressOfElement(i).contents,
-					foundName.address())) {
-				var foundNameString = undefined;
+		for (var i = 0; i < nClients; i++) {
+			if (XFetchName(_x11Display, clientList.addressOfElement(i).contents,
+				foundName.address())) {
+				var foundNameString;
 				try {
 					foundNameString = foundName.readString();
-				} catch(e) {}
+				}
+				catch (e) {}
 				XFree(foundName);
-				if(foundNameString === searchName) return clientList.addressOfElement(i).contents;
+				if (foundNameString === searchName) return clientList.addressOfElement(i).contents;
 			}
 		}
 		XFree(res[0]);
@@ -2435,31 +2442,32 @@ Zotero.Utilities.Internal.activate = new function() {
 			nItemsReturned = new ctypes.unsigned_long(),
 			nBytesAfterReturn = new ctypes.unsigned_long(),
 			data = new ctypes.char.ptr();
-		if(!XGetWindowProperty(_x11Display, win, XInternAtom(_x11Display, propertyName, 0), 0, 1024,
-				0, propertyType, returnType.address(), returnFormat.address(),
-				nItemsReturned.address(), nBytesAfterReturn.address(), data.address())) {
+		if (!XGetWindowProperty(_x11Display, win, XInternAtom(_x11Display, propertyName, 0), 0, 1024,
+			0, propertyType, returnType.address(), returnFormat.address(),
+			nItemsReturned.address(), nBytesAfterReturn.address(), data.address())) {
 			var nElements = ctypes.cast(nItemsReturned, ctypes.unsigned_int).value;
-			if(nElements) return [data, nElements];
+			if (nElements) return [data, nElements];
 		}
 		return null;
 	}
 	
-	return function(win) {
+	return function (win) {
 		if (Zotero.isMac) {
 			if (win) {
 				Components.utils.import("resource://gre/modules/ctypes.jsm");
 				win.focus();
 				
-				if(!_carbon) {
+				if (!_carbon) {
 					_carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
+
 					/*
 					 * struct ProcessSerialNumber {
 					 *    unsigned long highLongOfPSN;
 					 *    unsigned long lowLongOfPSN;
 					 * };
 					 */
-					ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber", 
-						[{"highLongOfPSN":ctypes.uint32_t}, {"lowLongOfPSN":ctypes.uint32_t}]);
+					ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber",
+						[{ highLongOfPSN: ctypes.uint32_t }, { lowLongOfPSN: ctypes.uint32_t }]);
 						
 					/*
 					 * OSStatus SetFrontProcessWithOptions (
@@ -2474,15 +2482,16 @@ Zotero.Utilities.Internal.activate = new function() {
 				
 				var psn = new ProcessSerialNumber();
 				psn.highLongOfPSN = 0;
-				psn.lowLongOfPSN = 2 // kCurrentProcess
+				psn.lowLongOfPSN = 2; // kCurrentProcess
 				
-				win.addEventListener("load", function() {
-					var res = SetFrontProcessWithOptions(
+				win.addEventListener("load", function () {
+					var _res = SetFrontProcessWithOptions(
 						psn.address(),
 						1 // kSetFrontProcessFrontWindowOnly = (1 << 0)
 					);
 				}, false);
-			} else {
+			}
+			else {
 				let pid = Zotero.Utilities.Internal.getProcessID();
 				let script = `
 					tell application "System Events"
@@ -2491,17 +2500,20 @@ Zotero.Utilities.Internal.activate = new function() {
 				`;
 				Zotero.Utilities.Internal.executeAppleScript(script);
 			}
-		} else if(!Zotero.isWin && win) {
+		}
+		else if (!Zotero.isWin && win) {
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 
-			if(_x11 === false) return;
-			if(!_x11) {
+			if (_x11 === false) return;
+			if (!_x11) {
 				try {
 					_x11 = ctypes.open("libX11.so.6");
-				} catch(e) {
+				}
+				catch (e) {
 					try {
 						var libName = ctypes.libraryName("X11");
-					} catch(e) {
+					}
+					catch (e) {
 						_x11 = false;
 						Zotero.debug("Integration: Could not get libX11 name; not activating");
 						Zotero.logError(e);
@@ -2510,9 +2522,10 @@ Zotero.Utilities.Internal.activate = new function() {
 					
 					try {
 						_x11 = ctypes.open(libName);
-					} catch(e) {
+					}
+					catch (e) {
 						_x11 = false;
-						Zotero.debug("Integration: Could not open "+libName+"; not activating");
+						Zotero.debug("Integration: Could not open " + libName + "; not activating");
 						Zotero.logError(e);
 						return;
 					}
@@ -2542,18 +2555,20 @@ Zotero.Utilities.Internal.activate = new function() {
 				 */
 				XClientMessageEvent = new ctypes.StructType("XClientMessageEvent",
 					[
-						{"type":ctypes.int},
-						{"serial":ctypes.unsigned_long},
-						{"send_event":X11Bool},
-						{"display":X11Display.ptr},
-						{"window":X11Window},
-						{"message_type":X11Atom},
-						{"format":ctypes.int},
-						{"l0":ctypes.long},
-						{"l1":ctypes.long},
-						{"l2":ctypes.long},
-						{"l3":ctypes.long},
-						{"l4":ctypes.long}
+						{ type: ctypes.int },
+						{ serial: ctypes.unsigned_long },
+						// eslint-disable-next-line camelcase
+						{ send_event: X11Bool },
+						{ display: X11Display.ptr },
+						{ window: X11Window },
+						// eslint-disable-next-line camelcase
+						{ message_type: X11Atom },
+						{ format: ctypes.int },
+						{ l0: ctypes.long },
+						{ l1: ctypes.long },
+						{ l2: ctypes.long },
+						{ l3: ctypes.long },
+						{ l4: ctypes.long }
 					]
 				);
 				
@@ -2595,7 +2610,7 @@ Zotero.Utilities.Internal.activate = new function() {
 				 */
 				XOpenDisplay = _x11.declare("XOpenDisplay", ctypes.default_abi, X11Display.ptr,
 					ctypes.char.ptr);
-				 
+				
 				/*
 				 * int XCloseDisplay(
 				 *     Display*		display
@@ -2628,7 +2643,7 @@ Zotero.Utilities.Internal.activate = new function() {
 				 */
 				XInternAtom = _x11.declare("XInternAtom", ctypes.default_abi, X11Atom,
 					X11Display.ptr, ctypes.char.ptr, X11Bool);
-				 
+				
 				/*
 				 * Status XSendEvent(
 				 *     Display*		display,
@@ -2663,7 +2678,7 @@ Zotero.Utilities.Internal.activate = new function() {
 				 *     int*		 actual_format_return,
 				 *     unsigned long*	 nitems_return,
 				 *     unsigned long*	 bytes_after_return,
-				 *     unsigned char**	 prop_return 
+				 *     unsigned char**	 prop_return
 				 * );
 				 */
 				XGetWindowProperty = _x11.declare("XGetWindowProperty", ctypes.default_abi,
@@ -2673,35 +2688,35 @@ Zotero.Utilities.Internal.activate = new function() {
 				
 					
 				_x11Display = XOpenDisplay(null);
-				if(!_x11Display) {
+				if (!_x11Display) {
 					Zotero.debug("Integration: Could not open display; not activating");
 					_x11 = false;
 					return;
 				}
 				
-				Zotero.addShutdownListener(function() {
+				Zotero.addShutdownListener(function () {
 					XCloseDisplay(_x11Display);
 				});
 				
 				_x11RootWindow = XDefaultRootWindow(_x11Display);
-				if(!_x11RootWindow) {
+				if (!_x11RootWindow) {
 					Zotero.debug("Integration: Could not get root window; not activating");
 					_x11 = false;
 					return;
 				}
 			}
 
-			win.addEventListener("load", function() {
+			win.addEventListener("load", function () {
 				var intervalID;
-				intervalID = win.setInterval(function() {
+				intervalID = win.setInterval(function () {
 					_X11BringToForeground(win, intervalID);
 				}, 50);
 			}, false);
 		}
-	}
+	};
 };
 
-Zotero.Utilities.Internal.sendToBack = function() {
+Zotero.Utilities.Internal.sendToBack = function () {
 	if (Zotero.isMac) {
 		let pid = Zotero.Utilities.Internal.getProcessID();
 		Zotero.Utilities.Internal.executeAppleScript(`
@@ -2713,7 +2728,7 @@ Zotero.Utilities.Internal.sendToBack = function() {
 			end tell
 		`);
 	}
-}
+};
 
 
 Zotero.Utilities.Internal.getProcessID = function () {
@@ -2728,140 +2743,133 @@ Zotero.Utilities.Internal.getProcessID = function () {
  *  From http://www.webtoolkit.info/
  */
 Zotero.Utilities.Internal.Base64 = {
-	 // private property
-	 _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-	 
-	 // public method for encoding
-	 encode : function (input) {
-		 var output = "";
-		 var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-		 var i = 0;
-		 
-		 input = this._utf8_encode(input);
-		 
-		 while (i < input.length) {
-			 
-			 chr1 = input.charCodeAt(i++);
-			 chr2 = input.charCodeAt(i++);
-			 chr3 = input.charCodeAt(i++);
-			 
-			 enc1 = chr1 >> 2;
-			 enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-			 enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-			 enc4 = chr3 & 63;
-			 
-			 if (isNaN(chr2)) {
-				 enc3 = enc4 = 64;
-			 } else if (isNaN(chr3)) {
-				 enc4 = 64;
-			 }
-			 
-			 output = output +
-			 this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
-			 this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
-			 
-		 }
-		 
-		 return output;
-	 },
-	 
-	 // public method for decoding
-	 decode : function (input) {
-		 var output = "";
-		 var chr1, chr2, chr3;
-		 var enc1, enc2, enc3, enc4;
-		 var i = 0;
-		 
-		 input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-		 
-		 while (i < input.length) {
-			 
-			 enc1 = this._keyStr.indexOf(input.charAt(i++));
-			 enc2 = this._keyStr.indexOf(input.charAt(i++));
-			 enc3 = this._keyStr.indexOf(input.charAt(i++));
-			 enc4 = this._keyStr.indexOf(input.charAt(i++));
-			 
-			 chr1 = (enc1 << 2) | (enc2 >> 4);
-			 chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-			 chr3 = ((enc3 & 3) << 6) | enc4;
-			 
-			 output = output + String.fromCharCode(chr1);
-			 
-			 if (enc3 != 64) {
-				 output = output + String.fromCharCode(chr2);
-			 }
-			 if (enc4 != 64) {
-				 output = output + String.fromCharCode(chr3);
-			 }
-			 
-		 }
-		 
-		 output = this._utf8_decode(output);
-		 
-		 return output;
-		 
-	 },
-	 
-	 // private method for UTF-8 encoding
-	 _utf8_encode : function (string) {
-		 string = string.replace(/\r\n/g,"\n");
-		 var utftext = "";
-		 
-		 for (var n = 0; n < string.length; n++) {
-			 
-			 var c = string.charCodeAt(n);
-			 
-			 if (c < 128) {
-				 utftext += String.fromCharCode(c);
-			 }
-			 else if((c > 127) && (c < 2048)) {
-				 utftext += String.fromCharCode((c >> 6) | 192);
-				 utftext += String.fromCharCode((c & 63) | 128);
-			 }
-			 else {
-				 utftext += String.fromCharCode((c >> 12) | 224);
-				 utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-				 utftext += String.fromCharCode((c & 63) | 128);
-			 }
-			 
-		 }
-		 
-		 return utftext;
-	 },
-	 
-	 // private method for UTF-8 decoding
-	 _utf8_decode : function (utftext) {
-		 var string = "";
-		 var i = 0;
-		 var c = c1 = c2 = 0;
-		 
-		 while ( i < utftext.length ) {
-			 
-			 c = utftext.charCodeAt(i);
-			 
-			 if (c < 128) {
-				 string += String.fromCharCode(c);
-				 i++;
-			 }
-			 else if((c > 191) && (c < 224)) {
-				 c2 = utftext.charCodeAt(i+1);
-				 string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-				 i += 2;
-			 }
-			 else {
-				 c2 = utftext.charCodeAt(i+1);
-				 c3 = utftext.charCodeAt(i+2);
-				 string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-				 i += 3;
-			 }
-			 
-		 }
-		 
-		 return string;
-	 }
- }
+	// private property
+	_keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+	
+	// public method for encoding
+	encode: function (input) {
+		var output = "";
+		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+		var i = 0;
+		
+		input = this._utf8Encode(input);
+		
+		while (i < input.length) {
+			chr1 = input.charCodeAt(i++);
+			chr2 = input.charCodeAt(i++);
+			chr3 = input.charCodeAt(i++);
+			
+			enc1 = chr1 >> 2;
+			enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+			enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+			enc4 = chr3 & 63;
+			
+			if (isNaN(chr2)) {
+				enc3 = enc4 = 64;
+			}
+			else if (isNaN(chr3)) {
+				enc4 = 64;
+			}
+			
+			output = output
+			+ this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2)
+			+ this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+		}
+		
+		return output;
+	},
+	
+	// public method for decoding
+	decode: function (input) {
+		var output = "";
+		var chr1, chr2, chr3;
+		var enc1, enc2, enc3, enc4;
+		var i = 0;
+		
+		input = input.replace(/[^A-Za-z0-9+/=]/g, "");
+		
+		while (i < input.length) {
+			enc1 = this._keyStr.indexOf(input.charAt(i++));
+			enc2 = this._keyStr.indexOf(input.charAt(i++));
+			enc3 = this._keyStr.indexOf(input.charAt(i++));
+			enc4 = this._keyStr.indexOf(input.charAt(i++));
+			
+			chr1 = (enc1 << 2) | (enc2 >> 4);
+			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+			chr3 = ((enc3 & 3) << 6) | enc4;
+			
+			output += String.fromCharCode(chr1);
+			
+			if (enc3 != 64) {
+				output += String.fromCharCode(chr2);
+			}
+			if (enc4 != 64) {
+				output += String.fromCharCode(chr3);
+			}
+		}
+		
+		output = this._utf8Decode(output);
+		
+		return output;
+	},
+	
+	// private method for UTF-8 encoding
+	_utf8Encode: function (string) {
+		string = string.replace(/\r\n/g, "\n");
+		var utftext = "";
+		
+		for (var n = 0; n < string.length; n++) {
+			var c = string.charCodeAt(n);
+			
+			if (c < 128) {
+				utftext += String.fromCharCode(c);
+			}
+			else if ((c > 127) && (c < 2048)) {
+				utftext += String.fromCharCode((c >> 6) | 192);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+			else {
+				utftext += String.fromCharCode((c >> 12) | 224);
+				utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+		}
+		
+		return utftext;
+	},
+	
+	// private method for UTF-8 decoding
+	_utf8Decode: function (utftext) {
+		var string = "";
+		var i = 0;
+		var c, _c1, c2, c3 = 0;
+		
+		while (i < utftext.length) {
+			c = utftext.charCodeAt(i);
+			
+			if (c < 128) {
+				string += String.fromCharCode(c);
+				i++;
+			}
+			else if ((c > 191) && (c < 224)) {
+				c2 = utftext.charCodeAt(i + 1);
+				string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+				i += 2;
+			}
+			else {
+				c2 = utftext.charCodeAt(i + 1);
+				c3 = utftext.charCodeAt(i + 2);
+				string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+				i += 3;
+			}
+		}
+		
+		return string;
+	}
+};
 
 Zotero.Utilities.Internal.OpenURL = {
+
 	/**
 	 * Returns a URL to look up an item in the OpenURL resolver
 	 */
@@ -2932,6 +2940,6 @@ Zotero.Utilities.Internal.OpenURL = {
 	},
 };
 
-if (typeof process === 'object' && process + '' === '[object process]'){
-    module.exports = Zotero.Utilities.Internal;
+if (typeof process === 'object' && process + '' === '[object process]') {
+	module.exports = Zotero.Utilities.Internal;
 }
