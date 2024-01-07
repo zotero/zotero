@@ -10,6 +10,7 @@
 	border: 1px solid transparent;
 	padding-inline-start: 5px !important;
 	padding: 2px;
+	@include focus-ring(3px, 5px);
 }
 
 #zotero-tabs-menu-list {
@@ -17,6 +18,7 @@
 	margin: 0;
 
 	.zotero-tabs-menu-entry {
+		@include focus-ring(3px, 5px);
 		border-radius: 6px;
 		height: 22px;
 		margin: 0;
@@ -32,6 +34,13 @@
 			}
 			description {
 				overflow: hidden;
+				// override default description margins
+				margin-bottom: 0;
+				margin-block-start: 0;
+			}
+			.tab-icon {
+				width: 16px;
+				height: 16px;
 			}
 		}
 		

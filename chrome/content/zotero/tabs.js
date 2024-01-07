@@ -823,12 +823,9 @@ var Zotero_Tabs = new function () {
 	this.refreshTabsMenuList = () => {
 		// Empty existing nodes
 		this.tabsMenuList.replaceChildren();
+		this._tabsMenuFocusedIndex = 0;
 		let index = 1;
 		for (let tab of this._tabs) {
-			// Skip tabs when we have no itemID, like library
-			if (!tab.data?.itemID) {
-				continue;
-			}
 			// Skip tabs whose title wasn't added yet
 			if (tab.title == "") {
 				continue;
@@ -841,6 +838,14 @@ var Zotero_Tabs = new function () {
 			let row = document.createXULElement('toolbaritem');
 			let rowIndex = this._tabs.findIndex(x => x.id === tab.id);
 			row.setAttribute("index", rowIndex);
+			
+			// Title of the tab
+			let tabName = document.createXULElement('toolbarbutton');
+			tabName.setAttribute('flex', '1');
+			tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
+			tabName.setAttribute('tabindex', `${index++}`);
+			tabName.setAttribute('aria-label', tab.title);
+
 			// Cross button to close a tab
 			let closeButton = document.createXULElement('toolbarbutton');
 			closeButton.setAttribute('class', 'zotero-tabs-menu-entry zotero-clicky-cross close');
@@ -852,35 +857,33 @@ var Zotero_Tabs = new function () {
 				}
 				this.close(tab.id);
 			});
-			
-			// Title of the tab
-			let tabName = document.createXULElement('toolbarbutton');
-			tabName.setAttribute('flex', '1');
-			tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
-			tabName.setAttribute('tabindex', `${index++}`);
-			tabName.setAttribute('aria-label', tab.title);
+
+			// Library tab has no close button
+			if (tab.id == "zotero-pane") {
+				closeButton.hidden = true;
+				closeButton.disabled = true;
+			}
 
 			closeButton.setAttribute('tabindex', `${index++}`);
 
 			// Item type icon
 			let span = document.createElement("span");
-			span.className = "icon icon-css cell-icon";
-			span.classList.add("icon-item-type");
-			let item = Zotero.Items.get(tab.data.itemID);
-			let dataTypeLabel = "";
-			if (item.isPDFAttachment()) {
-				dataTypeLabel = "attachmentPDF";
+			span.className = "icon icon-css tab-icon";
+			if (tab.id == 'zotero-pane') {
+				// Determine which icon from the collection view rows to use (same as in _update())
+				let index = ZoteroPane.collectionsView?.selection?.focused;
+				if (typeof index !== 'undefined' && ZoteroPane.collectionsView.getRow(index)) {
+					let iconName = ZoteroPane.collectionsView.getIconName(index);
+					span.classList.add(`icon-${iconName}`);
+				}
 			}
-			else if (item.isEPUBAttachment()) {
-				dataTypeLabel = "attachmentEPUB";
+			else {
+				span.classList.add("icon-item-type");
+				let item = Zotero.Items.get(tab.data.itemID);
+				let dataTypeLabel = item.getItemTypeIconName();
+				span.setAttribute("data-item-type", dataTypeLabel);
 			}
-			else if (item.isSnapshotAttachment()) {
-				dataTypeLabel = "attachmentSnapshot";
-			}
-			else if (item.isFileAttachment()) {
-				dataTypeLabel = "attachmentFile";
-			}
-			span.setAttribute("data-item-type", dataTypeLabel);
+
 			tabName.appendChild(span);
 			// Actual label with bolded substrings matching the filter
 			let tabLabel = createTabsMenuLabel(tab.title, this._tabsMenuFilter);
@@ -920,8 +923,8 @@ var Zotero_Tabs = new function () {
 			row.appendChild(closeButton);
 	
 			row.addEventListener("dragstart", (e) => {
-				// No drag-drop on the cross button
-				if (e.target.classList.contains("close")) {
+				// No drag-drop on the cross button or the library tab
+				if (tab.id == 'zotero-pane' || e.target.classList.contains("close")) {
 					e.preventDefault();
 					e.stopPropagation();
 					return;
@@ -959,7 +962,9 @@ var Zotero_Tabs = new function () {
 
 			row.addEventListener('drop', (e) => {
 				let tabId = e.dataTransfer.getData("zotero/tab");
-				this.move(tabId, parseInt(row.getAttribute("index")));
+				let rowIndex = parseInt(row.getAttribute("index"));
+				if (rowIndex == 0) return;
+				this.move(tabId, rowIndex);
 			});
 
 			row.addEventListener('dragend', (_) => {
@@ -1050,11 +1055,15 @@ var Zotero_Tabs = new function () {
 		if (event.key == "Tab") {
 			event.preventDefault();
 			let isShift = event.shiftKey;
+			let moveTabIndex = () => tabindex++;
 			if (isShift) {
-				tabindex -= 1;
+				moveTabIndex = () => tabindex--;
 			}
-			else {
-				tabindex += 1;
+			moveTabIndex();
+			let candidate = this.tabsMenuList.parentElement.querySelector(`[tabindex="${tabindex}"]`);
+			// If the candidate is disabled (e.g. close button of library tab), skip it
+			if (candidate && candidate.disabled) {
+				moveTabIndex();
 			}
 			focusTabsMenuEntry(tabindex);
 		}
@@ -1077,6 +1086,12 @@ var Zotero_Tabs = new function () {
 			}
 			else {
 				tabindex -= step;
+			}
+			// If the candidate is a disabled element (e.g. close button of the library tab),
+			// move focus to the element before it
+			let candidate = this.tabsMenuList.parentElement.querySelector(`[tabindex="${tabindex}"]`);
+			if (candidate && candidate.disabled) {
+				tabindex--;
 			}
 			if (tabindex <= 0) {
 				// ArrowUp from the first tab or the first close button focuses the filter field.
