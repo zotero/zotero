@@ -134,7 +134,7 @@
 			background-color: var(--color-accent);
 			color: #fff;
 
-			@include state(".virtualized-table:not(:focus)") {
+			@include state(".virtualized-table:not(:focus-within)") {
 				color: var(--fill-primary);
 				background-color: var(--color-quarternary-on-sidepane);
 			}
