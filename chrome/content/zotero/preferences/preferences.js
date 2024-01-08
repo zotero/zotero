@@ -203,15 +203,15 @@ var Zotero_Preferences = {
 		}
 		else {
 			let labelElem = document.createXULElement('label');
-			if (rawLabel) {
-				labelElem.value = rawLabel;
+			if (!rawLabel) {
+				if (Zotero.Intl.strings.hasOwnProperty(label)) {
+					rawLabel = Zotero.Intl.strings[label];
+				}
+				else {
+					rawLabel = Zotero.getString(label);
+				}
 			}
-			else if (Zotero.Intl.strings.hasOwnProperty(label)) {
-				labelElem.value = Zotero.Intl.strings[label];
-			}
-			else {
-				labelElem.value = Zotero.getString(label);
-			}
+			labelElem.value = rawLabel;
 			listItem.append(labelElem);
 		}
 
@@ -223,6 +223,7 @@ var Zotero_Preferences = {
 
 		this.panes.set(id, {
 			...options,
+			rawLabel,
 			loaded: false,
 			container,
 		});
@@ -272,6 +273,10 @@ var Zotero_Preferences = {
 			contentFragment = document.importNode(contentFragment, true);
 
 			this._initImportedNodesPreInsert(contentFragment);
+			
+			let heading = document.createElement('h1');
+			heading.textContent = pane.rawLabel;
+			pane.container.append(heading);
 			pane.container.append(contentFragment);
 
 			await document.l10n.ready;
