@@ -351,6 +351,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			label.addEventListener('input', e => this.handleEditingChange(e, index));
 			label.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
 			label.addEventListener('mouseup', (e) => e.stopImmediatePropagation());
+			label.addEventListener('dblclick', (e) => e.stopImmediatePropagation());
 			label.addEventListener('blur', async (e) => {
 				await this.commitEditingName();
 				this.stopEditing();
