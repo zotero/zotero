@@ -229,6 +229,7 @@ Zotero.BrowserDownload = {
 				win.addEventListener('load', resolve);
 			});
 			browser = win.document.querySelector('browser');
+			Zotero.Utilities.Internal.activate(win);
 			
 			pdfMIMETypeHandler = this._makePDFMIMETypeHandler(browser, pdfFoundDeferred.resolve);
 			Zotero.MIMETypeHandler.addHandlers("application/pdf", pdfMIMETypeHandler, true);
