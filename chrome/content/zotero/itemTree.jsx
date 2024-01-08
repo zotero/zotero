@@ -1895,15 +1895,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else {
 			return this._searchItemIDs.has(row.id);
 		}
-	}
+	};
 	
 	isContainer = (index) => {
 		return this.getRow(index).ref.isRegularItem();
-	}
+	};
 
 	isContainerOpen = (index) => {
 		return this.getRow(index).isOpen;
-	}
+	};
 
 	isContainerEmpty = (index) => {
 		if (this.regularOnly) {
@@ -1916,7 +1916,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		var includeTrashed = this.collectionTreeRow.isTrash();
 		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
-	}
+	};
 
 	////////////////////////////////////////////////////////////////////////////////
 	///
@@ -1928,11 +1928,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Start a drag using HTML 5 Drag and Drop
 	 */
 	onDragStart = (event, index) => {
-		// See note in LibraryTreeView::setDropEffect()
-		if (Zotero.isWin || Zotero.isLinux) {
-			event.dataTransfer.effectAllowed = 'copyMove';
-		}
-		
 		// Propagate selection before we set the drag image if dragging not one of the selected rows
 		if (!this.selection.isSelected(index)) {
 			this.selection.select(index);
@@ -1944,129 +1939,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			elem.style.position = "initial";
 			this._dragImageContainer.appendChild(elem);
 		}
-		event.dataTransfer.setDragImage(this._dragImageContainer, 0, 0);
 
-		var itemIDs = this.getSelectedItems(true);
+		let itemIDs = this.getSelectedItems(true);
 		// Get selected item IDs in the item tree order
 		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
-		event.dataTransfer.setData("zotero/item", itemIDs);
 
-		var items = Zotero.Items.get(itemIDs);
 		Zotero.DragDrop.currentDragSource = this.collectionTreeRow;
 
-		// If at least one file is a non-web-link attachment and can be found,
-		// enable dragging to file system
-		var files = items
-			.filter(item => item.isAttachment())
-			.map(item => item.getFilePath())
-			.filter(path => path);
-
-		if (files.length) {
-			// Advanced multi-file drag (with unique filenames, which otherwise happen automatically on
-			// Windows but not Linux) and auxiliary snapshot file copying on macOS
-			let dataProvider;
-			if (Zotero.isMac) {
-				dataProvider = new Zotero.FileDragDataProvider(itemIDs);
-			}
-
-			for (let i = 0; i < files.length; i++) {
-				let file = Zotero.File.pathToFile(files[i]);
-
-				if (dataProvider) {
-					Zotero.debug("Adding application/x-moz-file-promise");
-					event.dataTransfer.mozSetDataAt("application/x-moz-file-promise", dataProvider, i);
-				}
-
-				// Allow dragging to filesystem on Linux and Windows
-				let uri;
-				if (!Zotero.isMac) {
-					Zotero.debug("Adding text/x-moz-url " + i);
-					uri = Zotero.File.pathToFileURI(file);
-					event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
-				}
-
-				// Allow dragging to web targets (e.g., Gmail)
-				Zotero.debug("Adding application/x-moz-file " + i);
-				event.dataTransfer.mozSetDataAt("application/x-moz-file", file, i);
-
-				if (Zotero.isWin) {
-					event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, i);
-				}
-				else if (Zotero.isLinux) {
-					// Don't create a symlink for an unmodified drag
-					event.dataTransfer.effectAllowed = 'copy';
-				}
-			}
-		}
-
-		// Get Quick Copy format for current URL (set via /ping from connector)
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-
-		// If all items are notes, use one of the note export translators
-		if (items.every(item => item.isNote())) {
-			format = Zotero.QuickCopy.getNoteFormat();
-		}
-
-		Zotero.debug("Dragging with format " + format);
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		try {
-			if (format.mode == 'export') {
-				// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
-				// and Note HTML translators instead
-				if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
-					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
-					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
-						if (!worked) {
-							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-							return;
-						}
-						Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
-							if (!worked) {
-								Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-								return;
-							}
-							event.dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
-							event.dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
-						});
-					});
-				}
-				else {
-					Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
-						if (!worked) {
-							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-							return;
-						}
-						var text = obj.string.replace(/\r\n/g, '\n');
-						// For Note HTML translator use body content only
-						if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-							// Use body content only
-							let parser = new DOMParser();
-							let doc = parser.parseFromString(text, 'text/html');
-							text = doc.body.innerHTML;
-						}
-						event.dataTransfer.setData('text/plain', text);
-					});
-				}
-			}
-			else if (format.mode == 'bibliography') {
-				var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
-				if (content) {
-					if (content.html) {
-						event.dataTransfer.setData("text/html", content.html);
-					}
-					event.dataTransfer.setData("text/plain", content.text);
-				}
-			}
-			else {
-				Zotero.logError("Invalid Quick Copy mode");
-			}
-		}
-		catch (e) {
-			Zotero.debug(e);
-			Zotero.logError(e + " with '" + format.id + "'");
-		}
-	}
+		Zotero.Utilities.Internal.onDragItems(event, itemIDs, this._dragImageContainer);
+	};
 
 	/**
 	 * We use this to set the drag action, which is used by view.canDrop(),
@@ -2161,7 +2042,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 			return false;
-		} finally {
+		}
+		finally {
 			let prevDropRow = this._dropRow;
 			if (event.dataTransfer.dropEffect != 'none') {
 				this._dropRow = row;
@@ -2173,19 +2055,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.tree.invalidateRow(row);
 			}
 		}
-	}
+	};
 
 	onDragEnd = () => {
 		this._dragImageContainer.innerHTML = "";
 		this._dropRow = null;
 		this.tree.invalidate();
-	}
+	};
 
 	onDragLeave = () => {
 		let dropRow = this._dropRow;
 		this._dropRow = null;
 		this.tree.invalidateRow(dropRow);
-	}
+	};
 
 	/**
 	 * Called by treeRow.onDragOver() before setting the dropEffect
