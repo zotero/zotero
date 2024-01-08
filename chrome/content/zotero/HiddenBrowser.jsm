@@ -87,7 +87,7 @@ class HiddenBrowser {
 				let weakBrowser = new WeakRef(browser);
 				setTimeout(() => {
 					let browser = weakBrowser.deref();
-					if (browser && browserFrameMap.has(browser)) {
+					if (browser && this._frame) {
 						Zotero.debug('Browser object still alive after 60 seconds - memory leak?');
 						Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
 					}
