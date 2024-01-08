@@ -175,14 +175,6 @@
 				box-sizing: border-box;
 				background: url("chrome://zotero/skin/8/universal/chevron-8.svg") content-box no-repeat;
 				-moz-context-properties: fill, fill-opacity;
-
-				@include focus-states using ($color) {
-					@if $color == "white" {
-						fill: var(--accent-white);
-					} @else {
-						fill: var(--fill-secondary);
-					}
-				}
 			}
 		}
 	}
@@ -343,5 +335,29 @@
 
 	.row .twisty {
 		transform: rotate(90deg);
+	}
+}
+
+.virtualized-table {
+	.row .twisty.icon-css {
+		@include focus-states using ($color) {
+			@if $color =="white" {
+				fill: var(--accent-white);
+			}
+
+			@else {
+				fill: var(--fill-secondary);
+			}
+		}
+	}
+}
+
+.drag-image-container {
+	box-sizing: border-box;
+
+	.row .twisty.icon-css {
+		@include focus-states('.row.selected', '.drag-image-container:focus-within') using ($color) {
+			fill: var(--fill-secondary);
+		}
 	}
 }

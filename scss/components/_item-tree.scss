@@ -2,7 +2,7 @@
 
 #zotero-items-tree {
 
-	.virtualized-table-body {
+	.virtualized-table-body, .drag-image-container {
 		padding: 4px 8px;
 	}
 
@@ -53,7 +53,7 @@
 		}
 	}
 	
-	.virtualized-table {
+	.virtualized-table, .drag-image-container {
 		.row {
 			&.odd:not(.selected) {
 				background-color: var(--material-background);
