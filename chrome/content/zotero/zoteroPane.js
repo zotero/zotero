@@ -296,7 +296,7 @@ var ZoteroPane = new function()
 			// Clear the search field
 			if (collectionsSearchField.value.length) {
 				collectionsSearchField.value = '';
-				ZoteroPane.collectionsView.setFilter("", true);
+				ZoteroPane.collectionsView.setFilter("");
 				if (!removeFocus) {
 					return null;
 				}
@@ -2747,8 +2747,7 @@ var ZoteroPane = new function()
 
 	this.handleCollectionSearchInput = function () {
 		let collectionsSearchField = document.getElementById("zotero-collections-search");
-		// Set the filter without scrolling the selected row into the view
-		this.collectionsView.setFilter(collectionsSearchField.value, false);
+		this.collectionsView.setFilter(collectionsSearchField.value);
 	}
 	
 	

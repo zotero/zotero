@@ -2372,14 +2372,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * Set collection filter and refresh collectionTree to only include
 	 * rows that match the filter. Rows that do not match the filter but have children that do
 	 * are displayed as context rows. All relevant rows are toggled open. Selection is kept
-	 * on the currently selected row if any.
+	 * on the currently selected row if any. If the filter is emptied out, the currently selected
+	 * row is scrolled to. Otherwise, scroll to the very top.
 	 * @param {String} filterText - Text that rows have to contain to match the filter
-	 * @param {Bool} scrollToSelected - Allow scrolling to the currently selected row.
 	 */
-	async setFilter(filterText, scrollToSelected) {
+	async setFilter(filterText) {
 		this._filter = filterText.toLowerCase();
 		let currentRow = this.getRow(this.selection.focused) || this._hiddenFocusedRow;
 		let currentRowDisplayed = currentRow && this._includedInTree(currentRow.ref);
+		let scrollToSelected = filterText.length == 0;
 		// If current row does not match any filters, it'll be hidden, so clear selection
 		if (!currentRowDisplayed) {
 			this.selection.clearSelection();
@@ -2410,6 +2411,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 		}
+		// If the selected collection is not scrolled to, scroll to the very top
+		if (!scrollToSelected) {
+			let collectionTable = document.getElementById("collection-tree").firstElementChild;
+			collectionTable.scrollTop = 0;
+		}
 	}
 
 
@@ -2439,7 +2445,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	filterEquals(filterValue) {
-		return filterValue === this._filter;
+		return filterValue.toLowerCase() === this._filter;
 	}
 	
 	_isFilterEmpty() {
