@@ -162,7 +162,8 @@
 			this.querySelector('#zotero-creator-transform-menu').addEventListener('popuphidden', (_) => {
 				let row = document.popupNode.closest('.meta-row');
 				for (let node of row.querySelectorAll('toolbarbutton.show-on-hover')) {
-					node.style.visibility = '';
+					node.style.removeProperty('visibility');
+					node.style.removeProperty('display');
 				}
 			});
 
@@ -1000,7 +1001,7 @@
 			
 			// Minus (-) button
 			var removeButton = document.createXULElement('toolbarbutton');
-			removeButton.setAttribute("class", "zotero-clicky zotero-clicky-minus show-on-hover");
+			removeButton.setAttribute("class", "zotero-clicky zotero-clicky-minus show-on-hover no-display");
 			removeButton.setAttribute('ztabindex', ++this._ztabindex);
 			removeButton.setAttribute('aria-label', Zotero.getString('general.delete'));
 			// If default first row, don't let user remove it
@@ -1016,7 +1017,7 @@
 			
 			// Plus (+) button
 			var addButton = document.createXULElement('toolbarbutton');
-			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus show-on-hover");
+			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus show-on-hover no-display");
 			addButton.setAttribute('ztabindex', ++this._ztabindex);
 			// If row isn't saved, don't let user add more
 			if (unsaved || !this.editable) {
@@ -1036,7 +1037,7 @@
 				optionsButton.style.visibility = "hidden";
 				this.disableButton(optionsButton);
 			}
-			optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover";
+			optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover no-display";
 			optionsButton.setAttribute('ztabindex', ++this._ztabindex);
 			optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 			let triggerPopup = (e) => {
@@ -2329,9 +2330,11 @@
 			
 			// Ensure the node is visible
 			next.style.visibility = "visible";
+			next.style.display = "block";
 			next.focus();
 			
-			next.style.visibility = "";
+			next.style.removeProperty("visibility");
+			next.style.removeProperty("display");
 			// 1) next.parentNode is always null for some reason
 			// 2) For some reason it's necessary to scroll to the next element when
 			// moving forward for the target element to be fully in view
@@ -2367,6 +2370,7 @@
 			let isRightClick = event.type == 'contextmenu';
 			if (!isRightClick) {
 				event.target.style.visibility = "visible";
+				event.target.style.display = "block";
 			}
 			// On click, we have x/y coordinates so use that
 			// On keyboard click, open it next to the target

@@ -20,8 +20,6 @@ item-box {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-column: span 2;
-		padding-inline-start: 8px;
-		padding-inline-end: 8px;
 
 		.meta-data {
 			width: 0;
@@ -70,12 +68,7 @@ item-box {
 
 			// needed to have the outline appear on all platforms
 			-moz-appearance: none;
-
 			align-self: center;
-			// Make all buttons tigher to not stretch the rows
-			height: auto;
-			width: auto;
-			padding: 1px;
 		}
 	}
 
@@ -86,6 +79,9 @@ item-box {
 	// All icons that are by default hidden
 	#info-table .show-on-hover {
 		visibility: hidden;
+		&.no-display {
+			display: none;
+		}
 	}
 
 	.drag-hidden-creator {
@@ -96,6 +92,7 @@ item-box {
 	#info-table .meta-row:not(.noHover):hover .show-on-hover,
 	#info-table .meta-row:focus-within .show-on-hover {
         visibility: visible;
+		display: block;
     }
 
 	#item-type-menu {
@@ -173,9 +170,11 @@ item-box {
 		display: flex;
 	}
 
-	.creator-type-value > .zotero-clicky {
-		// Some spacing between creator buttons
-		margin-right: 2px; 
+	// Some spacing between creator buttons
+	.creator-type-value > .zotero-clicky-plus,
+	.creator-type-value > .zotero-clicky-minus,
+	.creator-type-value > .zotero-clicky-options {
+		margin-left: 1px; 
 	}
 
 	.creator-name-box {
@@ -188,6 +187,7 @@ item-box {
 		// Margin adjusted by inline padding to have 4px between first and last name
 		*[fieldMode="0"]:first-child {
 			margin-inline-end: calc(max(0px, 4px - var(--editable-text-padding-inline)));
+			flex-grow: 3; // last name should have priority to expand over first name
 		}
 		// Add comma when the last name is not focused
 		*[fieldMode="0"]:first-child {
