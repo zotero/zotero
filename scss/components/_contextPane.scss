@@ -2,6 +2,10 @@
 	min-width: $min-width-collections-pane + $min-width-items-pane;
 }
 
+#tabs-deck:not([selectedIndex="0"]) #zotero-pane {
+	width: 0; /* Prevent the main pane from stretching the deck of the reader */
+}
+
 #zotero-context-pane {
 	display: flex;
 	min-width: $min-width-context-pane;
@@ -33,13 +37,30 @@
 }
 
 #zotero-context-pane-inner {
-	width: 0;
 	background: var(--material-background);
 	font: message-box;
 	font-size: inherit;
 	min-height: 100px;
 	height: 0;
 	pointer-events: auto;
+	background: var(--material-sidepane)
+}
+
+.zotero-context-panes-deck {
+	width: 100%;
+	display: block;
+}
+
+.zotero-context-panes-deck > deck {
+	height: 100%;
+}
+
+.zotero-view-item-container {
+	height: 100%;
+}
+
+#zotero-context-pane-inner  {
+	height: 0;
 }
 
 #zotero-item-toolbar {
@@ -91,4 +112,10 @@
 #zotero-context-pane[collapsed=true] .zotero-view-item > tabpanel > *,
 #zotero-context-pane-inner[collapsed=true] .zotero-view-item > tabpanel > * {
 	overflow: unset !important;
+}
+
+// fx115 - stop width or height from being set by dragging the splitter
+.zotero-view-item-sidenav {
+	width: auto !important;
+	height: auto !important;
 }

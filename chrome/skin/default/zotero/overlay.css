@@ -1,7 +1,6 @@
 #zotero-pane
 {
 	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
-	overflow: hidden;
 }
 
 /*
@@ -182,7 +181,44 @@ TODO: Replace with SVG
 
 #zotero-layout-switcher
 {
-	height: 0;
+	min-width: 560px;
+}
+
+/*
+	Fx115: make panes occupy all availabel width/height after layout switch
+*/
+#zotero-layout-switcher[orient="horizontal"] :is(#zotero-items-pane-container, #zotero-item-pane) {
+	height: auto !important;
+}
+
+#zotero-layout-switcher[orient="vertical"],
+#zotero-layout-switcher[orient="vertical"] :is(#zotero-items-pane-container, #zotero-item-pane) {
+	width: auto !important;
+}
+
+/* 
+	Fix to odd fx115 behavior that gives an un-collapsed pane the initial width of min-width + last width
+*/
+#zotero-collections-pane[collapsed=true] {
+	min-width: 0px !important;
+	width: 0px !important;
+}
+
+#zotero-item-pane[collapsed=true] {
+	min-width: 0px !important;
+	width: 0px !important;
+}
+
+#zotero-context-pane[collapsed=true] {
+	min-width: 0px !important;
+	width: 0px !important;
+}
+
+/* 
+	Fx115: this helps to avoid having a blank gap where the panel was before collapse
+*/
+#zotero-context-pane-inner[collapsed=true] {
+	height: 0 !important;
 }
 
 #zotero-pane toolbarseparator {
@@ -199,10 +235,54 @@ TODO: Replace with SVG
 	padding: 0;
 }
 
+/*
+	Somewhat unified splitter styles
+*/
+#zotero-collections-splitter:not([state=collapsed]),
+#zotero-items-splitter:not([state=collapsed]),
+#zotero-context-splitter:not([state=collapsed]),
+#zotero-context-splitter-stacked:not([state=collapsed])
+{
+	border:none;
+	background-color: transparent;
+}
+
+#zotero-collections-splitter:not([state=collapsed]),
+#zotero-items-splitter:not([state=collapsed])[orient=horizontal],
+#zotero-context-splitter:not([state=collapsed])[orient=horizontal]
+{
+	-moz-appearance: none;
+	width: 5px !important;
+	min-width: 5px;
+	/* Ensures all of the splitter serves as a mouse target */
+	z-index: 1;
+}
+
+#zotero-items-splitter:not([state=collapsed])[orient=horizontal],
+#zotero-context-splitter:not([state=collapsed])[orient=horizontal],
+#zotero-collections-splitter:not([state=collapsed]) {
+	border-inline-start: 1px solid #bdbdbd;
+	margin-inline-end: -4px;
+}
+
+#zotero-items-splitter[orient=vertical]:not([state=collapsed]),
+#zotero-context-splitter-stacked
+{
+	z-index: 1;
+	border-top: 1px solid #bdbdbd !important;
+	min-height: 5px;
+	margin-bottom: -4px;
+}
+
 #zotero-lookup-textbox {
 	margin: 4px;
 	padding: 2px;
 	-moz-box-flex: 1;
+}
+
+#zotero-lookup-panel {
+	min-height: 100px;
+	min-width: 500px;
 }
 
 #zotero-lookup-multiline-progress

@@ -10,12 +10,13 @@
 
 .zotero-item-pane-content {
 	min-height: 0;
+	flex: 1;
 }
 
 .zotero-view-item-container {
 	display: flex;
 	flex-direction: row;
-	height: 0; /* Prevent overflow, somehow */
+	height: 0;
 }
 
 .zotero-view-item-main {

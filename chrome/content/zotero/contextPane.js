@@ -63,6 +63,7 @@ var ZoteroContextPane = new function () {
 		_panesDeck = document.createXULElement('deck');
 		_panesDeck.setAttribute('flex', 1);
 		_panesDeck.setAttribute('selectedIndex', 0);
+		_panesDeck.classList = "zotero-context-panes-deck";
 
 		_contextPaneInner.append(_panesDeck);
 
@@ -314,6 +315,10 @@ var ZoteroContextPane = new function () {
 		if (!Zotero.Reader.getSidebarOpen()) {
 			width = 0;
 		}
+		let contextPaneWidth = _contextPane.getAttribute("width");
+		if (contextPaneWidth && !_contextPane.style.width) {
+			_contextPane.style.width = `${contextPaneWidth}px`;
+		}
 		if (Zotero.rtl) {
 			_contextPane.style.left = 0;
 			_contextPane.style.right = stacked ? width : 'unset';
@@ -338,6 +343,10 @@ var ZoteroContextPane = new function () {
 			_contextPane.classList.remove('standard');
 			_sidenav.classList.add('stacked');
 			_contextPaneInner.append(_sidenav);
+			// Fx115: in stacked layout, make contextPane occupy all width and remove min-height
+			// needed for standard layout
+			_contextPane.style.width = 'auto';
+			_contextPaneInner.style.removeProperty("min-height");
 		}
 		else {
 			_contextPaneSplitter.setAttribute('hidden', false);
@@ -347,6 +356,10 @@ var ZoteroContextPane = new function () {
 			_contextPane.classList.remove('stacked');
 			_sidenav.classList.remove('stacked');
 			_contextPane.append(_sidenav);
+			// FX115: in standard layout, make contextPane have the width it's supposed to and
+			// force it to occupy all height available
+			_contextPaneInner.style.minHeight = `100%`;
+			_contextPane.style.width = `${_contextPane.getAttribute("width")}px`;
 		}
 		
 		if (Zotero_Tabs.selectedIndex > 0) {

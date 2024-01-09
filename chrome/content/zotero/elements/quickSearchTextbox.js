@@ -32,7 +32,7 @@
 
 			this.searchTextbox = null;
 			this.content = MozXULElement.parseXULToFragment(`
-				<hbox id="search-wrapper" flex="1" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+				<hbox id="search-wrapper" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				</hbox>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
