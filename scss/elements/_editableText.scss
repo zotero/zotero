@@ -111,9 +111,11 @@ editable-text {
 	&[hidden]{
 		display: none;
 	}
-	// somehow it fixes extra tall textareas on windows that was rendered to have at least
-	// 3 rows even when there's no text
-	textarea {
-		overflow: hidden;
+	// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
+	// at the bottom of textarea on windows 
+	@media (-moz-platform: windows) {
+		textarea {
+			overflow-x: hidden;
+		}
 	}
 }
