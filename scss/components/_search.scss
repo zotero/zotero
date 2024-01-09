@@ -65,7 +65,9 @@ search-textbox {
 	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
 	// Use explicit left/right padding here because this element is flipped in RTL (see below)
 	padding: 6px 4px 6px 6px;
-	margin: 0;
+	margin: 0px;
+	width: auto; // override fx115 default width
+	display: block; // override fx115 display:none on macOS
 }
 
 :is(search-textbox):-moz-locale-dir(rtl)::part(search-sign),

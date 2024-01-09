@@ -11,3 +11,6 @@
 	// Let window chrome, tabs, and toolbar shrink even when sidebars overflow
 	min-width: 0;
 }
+#browser, #zotero-pane-stack, #zotero-trees {
+	min-height: 0;
+}

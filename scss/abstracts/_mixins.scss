@@ -245,7 +245,6 @@
 		}
 
 		@media not (-moz-platform: windows) {
-			outline: none;
 			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
 
 			@if $thin {
