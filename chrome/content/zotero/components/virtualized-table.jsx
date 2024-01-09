@@ -1643,7 +1643,7 @@ function renderCell(index, data, column, dir = null) {
 	column = column || { columnName: "" };
 	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;
-	span.innerText = data;
+	span.textContent = data;
 	if (dir) span.dir = dir;
 	return span;
 }
