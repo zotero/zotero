@@ -50,7 +50,8 @@ editable-text {
 	&:not([nowrap])::after {
 		content: attr(value) ' ';
 		visibility: hidden;
-		margin: 1px;
+		margin-inline-start: 1px;
+		margin-top: 1px;
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 		font: inherit;
 		line-height: inherit;
