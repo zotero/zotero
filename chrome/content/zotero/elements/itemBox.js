@@ -225,6 +225,9 @@
 			Zotero.Prefs.registerObserver('fontSize', () => {
 				this.refresh();
 			});
+			
+			this.style.setProperty('--comma-character',
+				"'" + Zotero.getString('punctuation.comma') + "'");
 		}
 		
 		destroy() {

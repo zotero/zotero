@@ -193,9 +193,9 @@ item-box {
 		*[fieldMode="0"]:first-child {
 			position: relative;
 			&::after {
-				content: ",";
+				content: var(--comma-character, ',');
 				position: absolute;
-				right: 0;
+				inset-inline-end: 0;
 				bottom: var(--editable-text-padding-block);
 			}
 			&.focused::after {
