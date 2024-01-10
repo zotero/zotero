@@ -110,7 +110,7 @@ item-pane-sidenav {
 				list-style-image: url("chrome://zotero/skin/itempane/20/expand.svg");
 			}
 
-			:dir(rtl) {
+			&:-moz-locale-dir(rtl) {
 				transform: scaleX(-1);
 			}
 
