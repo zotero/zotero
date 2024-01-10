@@ -2740,8 +2740,13 @@ var ZoteroPane = new function()
 	 */
 	this.handleSearchKeypress = function (textbox, event) {
 		if (event.keyCode == event.DOM_VK_ESCAPE) {
-			textbox.searchTextbox.value = '';
-			this.search();
+			if (textbox.searchTextbox.value) {
+				textbox.searchTextbox.value = '';
+				this.search();
+			}
+			else {
+				this.itemsView.focus();
+			}
 		}
 		else if (event.keyCode == event.DOM_VK_RETURN) {
 			this.search(true);
