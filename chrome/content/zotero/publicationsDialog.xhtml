@@ -37,7 +37,11 @@
 		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 	
-	<script src="chrome://global/content/customElements.js" />
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	</script>
 	<script src="chrome://zotero/content/elements/publicationsLicenseInfo.js" />
 
 	<wizard 

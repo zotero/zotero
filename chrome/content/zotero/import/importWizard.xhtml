@@ -15,7 +15,12 @@
 		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 
-	<script src="chrome://global/content/customElements.js"/>
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	</script>
+	
 	<wizard id="import-wizard" class="import-wizard" width="600" height="400">
 		<wizardpage pageid="page-start" data-header-label-id="import-where-from">
 			<radiogroup id="import-source-group" align="start">
@@ -108,8 +113,7 @@
 			</div>
 		</wizardpage>
 	</wizard>
-		
-	<script src="chrome://zotero/content/include.js"/>
+
 	<script src="../fileInterface.js"/>
 	<script src="./importWizard.js" />
 </window>

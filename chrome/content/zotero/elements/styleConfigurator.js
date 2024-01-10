@@ -26,8 +26,6 @@
 /* global XULElementBase: false */
 
 {
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
-
 	class StyleSelector extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<div id="style-selector"

@@ -14,7 +14,11 @@
 		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 	
-	<script src="chrome://global/content/customElements.js" />
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	</script>
 	
 	<wizard id="rtfscan-wizard" class="rtfscan-wizard" width="700" height="550" data-l10n-id="rtfScan-wizard">
 		<wizardpage pageid="page-start" data-l10n-id="rtfScan-intro-page">

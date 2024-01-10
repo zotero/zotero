@@ -155,4 +155,16 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesC
 			originalEnsureInitialized.apply(this);
 		};
 	}
+
+	// inject custom CSS into FF built-in custom elements (currently only <wizard>)
+	for (let element of ["wizard"]) {
+		let oldAttachShadow = customElements.get(element).prototype.attachShadow;
+		customElements.get(element).prototype.attachShadow = function () {
+			let shadowRoot = oldAttachShadow.apply(this, arguments);
+			shadowRoot.appendChild(MozXULElement.parseXULToFragment(
+				`<html:link rel="stylesheet" href="chrome://zotero/skin/${element}.css"/>`
+			));
+			return shadowRoot;
+		};
+	}
 }
