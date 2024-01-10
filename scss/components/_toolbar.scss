@@ -6,34 +6,9 @@
 	min-width: 1px;
 }
 
-/* A decent hack: reverse the effective order of the dropmarker and icon in RTL
-   mode so that the above CSS, which places the menubutton-start.png background
-   on the toolbarbutton-icon, will make sense. (Otherwise the dropmarker appears
-   outside the button.) Then just flip the entire thing horizontally! We want to
-   do that anyway so that the Locate button will point to the left and Sync will
-   rotate counter-clockwise.
-
-   The other way to do this would be to set direction: ltr on buttons in the
-   RTL toolbar, but that breaks popup positioning. */
 :root:-moz-locale-dir(rtl) {
-	.zotero-tb-button > .toolbarbutton-menu-dropmarker {
-		-moz-box-ordinal-group: 0;
-	}
-
 	.zotero-tb-button > .toolbarbutton-icon {
-		-moz-box-ordinal-group: 1;
-	}
-
-	.zotero-tb-button,
-	.zotero-tb-button:first-child,
-	.zotero-tb-button:last-child {
 		transform: scaleX(-1);
-	}
-
-	@media not (-moz-platform: macos) {
-		.zotero-tb-button > .toolbarbutton-icon {
-			transform: scaleX(-1);
-		}
 	}
 }
 
