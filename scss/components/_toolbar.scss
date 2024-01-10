@@ -15,7 +15,7 @@
 
    The other way to do this would be to set direction: ltr on buttons in the
    RTL toolbar, but that breaks popup positioning. */
-#zotero-pane[dir=rtl] {
+:root:-moz-locale-dir(rtl) {
 	.zotero-tb-button > .toolbarbutton-menu-dropmarker {
 		-moz-box-ordinal-group: 0;
 	}
