@@ -65,8 +65,13 @@ search-textbox {
 :is(search-textbox)::part(search-icon) {
 	@include svgicon-menu("magnifier", "universal", "16");
 	color: var(--fill-secondary);
-	// inline-end: 2px padding + 8px dropmarker width + 4px padding + 6px padding
-	padding-inline: 6px 4px;
-	padding-block: 6px;
+	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+	// Use explicit left/right padding here because this element is flipped in RTL (see below)
+	padding: 6px 4px 6px 6px;
 	margin: 0;
+}
+
+:is(search-textbox):-moz-locale-dir(rtl)::part(search-sign),
+:is(search-textbox):-moz-locale-dir(rtl)::part(search-icon) {
+	transform: scaleX(-1);
 }
