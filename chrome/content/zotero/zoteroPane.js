@@ -2745,7 +2745,7 @@ var ZoteroPane = new function()
 				this.search();
 			}
 			else {
-				this.itemsView.focus();
+				this.itemsView?.focus();
 			}
 		}
 		else if (event.keyCode == event.DOM_VK_RETURN) {
