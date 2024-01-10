@@ -3,6 +3,12 @@
 	--safe-area-end: 20px;
 }
 
+:root:is([sizemode=maximized], [sizemode=fullscreen]) {
+	#tab-bar-container {
+		--safe-area-start: 8px;
+	}
+}
+
 #navigator-toolbox {
 	border: 0;
 }
