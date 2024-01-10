@@ -114,9 +114,6 @@ i('Tick', "chrome://zotero/skin/tick.png");
 i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
 //i('Link', "chrome://zotero/skin/link.png");
 
-i('RTFScanAccept', "chrome://zotero/skin/rtfscan-accept.png", false);
-i('RTFScanLink', "chrome://zotero/skin/rtfscan-link.png", false);
-
 i('Attach', "chrome://zotero/skin/attach.png");
 i('BulletBlue', "chrome://zotero/skin/bullet_blue.png");
 i('BulletBlueEmpty', "chrome://zotero/skin/bullet_blue_empty.png");

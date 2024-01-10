@@ -79,4 +79,13 @@
 			}
 		}
 	}
+
+	$-icons: (document-accept, document-missing);
+	@each $icon in $-icons {
+		.icon-css.icon-#{$icon} {
+			@include focus-states using ($color) {
+				@include svgicon($icon, $color, "16");
+			}
+		}
+	}
 }

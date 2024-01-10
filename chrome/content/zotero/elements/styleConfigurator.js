@@ -96,7 +96,7 @@
 		}
 
 		get style() {
-			return this.style;
+			return this._style;
 		}
 
 		set style(style) {
@@ -159,7 +159,7 @@
 					<xul:style-selector id="style-selector" value="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}" />
 				</div>
 				<div class="locale-selector-wrapper">
-					<label for="locale-selector" class="file-input-label" data-l10n-id="bibliography-locale-label" />
+					<label for="locale-selector" class="locale-selector-label" data-l10n-id="bibliography-locale-label" />
 					<xul:locale-selector
 						id="locale-selector"
 						value="${this.getAttribute('locale') || Zotero.Prefs.get('export.lastLocale') || ''}"

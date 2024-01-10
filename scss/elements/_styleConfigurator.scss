@@ -1,18 +1,33 @@
 style-configurator {
 	display: block;
 	width: 100%;
+	
+	.style-configurator {
+		display: flex;
+		flex-direction: column;
+		gap: var(--style-configurator-gap, 24px);
+	}
 
+	.locale-selector-label {
+		margin: var(--style-configurator-locale-selector-label-margin, 0 8px 0 0);
+	}
+	
 	style-selector {
 		display: block;
 	}
 	
 	richlistbox {
-		padding: var(--style-configurator-richlistbox-padding, 2px);
+		padding: var(--style-configurator-richlistbox-padding, 4px 8px);
 		max-height: var(--style-configurator-richlistitem-max-height, 260px);
-		overflow: var(--style-configurator-richlistitem-overflow, auto scroll);
+		overflow: var(--style-configurator-richlistitem-overflow, hidden auto);
+		margin: var(--style-configurator-richlistbox-margin, 0);
 		
 		richlistitem {
-			line-height: var(--style-configurator-richlistitem-line-height, 1.5em);
+			line-height: var(--style-configurator-richlistitem-line-height, 1.66666666em);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			padding: var(--style-configurator-richlistitem-padding, 0px 8px 0px 4px);
+			border-radius: var(--style-configurator-richlistitem-border-radius, 5px);
 		}
 		
 		@media (-moz-platform: macos) {
@@ -22,16 +37,8 @@ style-configurator {
 		}
 	}
 	
-	.locale-selector-wrapper,
-	.style-selector-wrapper,
-	.display-as-wrapper {
-		margin: var(--style-configurator-field-margin, .5em 0 0 0);
-		padding: var(--style-configurator-field-padding, $space-xs);
-	}
-	
 	label[for="style-selector"] {
-		margin: var(--style-configurator-label-margin, .5em 0 0 0);
-		font-size: var(--style-configurator-label-font-size, 13px);
+		margin: var(--style-configurator-label-margin, 0 $space-min 0 0);
 	}
 	
 	.style-selector-wrapper {
@@ -45,9 +52,24 @@ style-configurator {
 	
 	.display-as-wrapper {
 		radiogroup {
+			margin: 0;
 			display: flex;
 			flex-direction: row;
 		}
+		
+		radio {
+			margin: 0;
+		}
+		
+		radio + radio {
+			margin-left: var(--style-configurator-radio-margin-left, 16px);
+		}
+	}
+}
+
+locale-selector {
+	menulist {
+		min-width: 200px;
 	}
 }
 
