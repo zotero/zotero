@@ -43,7 +43,7 @@ editable-text {
 		margin: 0;
 		border: 1px solid transparent;
 		width: fit-content;
-		white-space: nowrap;
+		white-space: pre;
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 	}
 	
