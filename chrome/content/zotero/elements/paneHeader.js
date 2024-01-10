@@ -35,7 +35,7 @@
 				
 				<html:div class="menu-button">
 					<toolbarbutton
-						class="expand-button"
+						class="zotero-tb-button expand-button"
 						tooltiptext="&zotero.toolbar.openURL.label;"
 						type="menu"
 						wantdropmarker="true"
