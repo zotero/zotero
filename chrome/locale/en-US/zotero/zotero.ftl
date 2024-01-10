@@ -349,3 +349,9 @@ tagselector-search =
 
 context-notes-search =
     .placeholder = Search Notes
+
+new-collection-dialog =
+    .title = New Collection
+    .buttonlabelaccept = Create Collection
+new-collection-name = Name:
+new-collection-create-in = Create in:

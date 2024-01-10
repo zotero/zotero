@@ -1356,7 +1356,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.newCollection = Zotero.Promise.coroutine(function* (parentKey) {
+	this.newCollection = async function (parentKey = null) {
 		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -1366,9 +1366,11 @@ var ZoteroPane = new function()
 		
 		// Get a unique "Untitled" name for this level in the collection hierarchy
 		var collections;
+		var parentCollectionID = null;
 		if (parentKey) {
 			let parent = Zotero.Collections.getIDFromLibraryAndKey(libraryID, parentKey);
 			collections = Zotero.Collections.getByParent(parent);
+			parentCollectionID = parent;
 		}
 		else {
 			collections = Zotero.Collections.getByLibrary(libraryID);
@@ -1379,25 +1381,24 @@ var ZoteroPane = new function()
 			collections.map(c => c.name).filter(n => n.startsWith(prefix))
 		);
 		
-		var newName = { value: name };
-		var result = Services.prompt.prompt(window,
-			Zotero.getString('pane.collections.newCollection'),
-			Zotero.getString('pane.collections.name'), newName, "", {});
-		
-		if (!result) {
+		var io = { name, libraryID, parentCollectionID };
+		window.openDialog("chrome://zotero/content/newCollectionDialog.xhtml",
+			"_blank", "chrome,modal,centerscreen,resizable=no", io);
+		var dataOut = io.dataOut;
+		if (!dataOut) {
 			return;
 		}
 		
-		if (!newName.value) {
-			newName.value = name;
+		if (!dataOut.name) {
+			dataOut.name = name;
 		}
 		
-		var collection = new Zotero.Collection;
-		collection.libraryID = libraryID;
-		collection.name = newName.value;
-		collection.parentKey = parentKey;
-		return collection.saveTx();
-	});
+		var collection = new Zotero.Collection();
+		collection.libraryID = dataOut.libraryID;
+		collection.name = dataOut.name;
+		collection.parentID = dataOut.parentCollectionID;
+		await collection.saveTx();
+	};
 	
 	this.importFeedsFromOPML = async function (event) {
 		while (true) {
@@ -4022,6 +4023,8 @@ var ZoteroPane = new function()
 			if (collection) {
 				throw new Error('collection must be null if createNew is true');
 			}
+			// Only allow targets within the current library for now
+			// TODO: Come back to this once we support copying items between libraries from the Add to Collection menu
 			let id = await this.newCollection();
 			if (!id) {
 				return;

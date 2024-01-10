@@ -1675,7 +1675,7 @@ Zotero.Utilities.Internal = {
 			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
 		}
 		else {
-			collections = Zotero.Collections.getByLibrary(libraryOrCollection.id);
+			collections = Zotero.Collections.getByLibrary(libraryOrCollection.libraryID);
 		}
 		
 		// If no subcollections, place menuitem for target directly in containing men
