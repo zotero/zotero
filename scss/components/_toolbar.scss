@@ -76,11 +76,11 @@
 	}
 
 	&:first-child {
-		margin-left: 0px;
+		margin-inline-start: 0;
 	}
 
 	&:last-child {
-		margin-right: 0px;
+		margin-inline-end: 0;
 	}
 }
 
