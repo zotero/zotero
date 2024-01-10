@@ -14,9 +14,10 @@ quick-search-textbox {
 	:is(search-textbox)::part(search-icon) {
 		@include svgicon-menu("magnifier", "universal", "16");
 		color: var(--fill-secondary);
-		// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
-		padding: 6px 14px 6px 6px;
-		margin: 0px;
+		// inline-end: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+		padding-inline: 6px 14px;
+		padding-block: 6px;
+		margin: 0;
 	}
 }
 
@@ -24,7 +25,7 @@ quick-search-textbox {
 	position: relative;
 	// 6px padding + 16px icon width + 2px padding + 8px dropmarker width + 4px padding
 	width: 36px;
-	margin-right: -36px;
+	margin-inline-end: -36px;
 	z-index: 2;
 }
 
@@ -32,7 +33,8 @@ quick-search-textbox {
 	width: 36px;
 	height: 28px;
 	// 6px padding + 16px icon width + 2px padding
-	padding: 0px 4px 0px 24px;
+	padding-block: 0;
+	padding-inline: 24px 4px;
 	margin: 0;
 	border: 0;
 	border-radius: 5px;
@@ -54,10 +56,11 @@ quick-search-textbox {
 }
 
 #zotero-tb-search-textbox {
-	padding: 0px 6px 0px 0px;
+	padding: 0;
+	padding-inline-end: 6px;
 	margin: 0;
 	position: relative;
-	left: 0px;
+	inset-inline-start: 0;
 	width: var(--search-textbox-width);
 	height: 28px;
 	z-index: 1;
