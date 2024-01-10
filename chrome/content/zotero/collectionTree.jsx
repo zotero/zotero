@@ -810,6 +810,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					this._removeRow(row);
 					this._removeRow(row - 1);
 				}
+				this._refreshRowMap();
 			}
 			// If there's an active filter, we can have a child matching filter be deleted
 			// which means the non-matching parent needs to be removed, so the tree is rebuilt
