@@ -155,7 +155,8 @@ i('TreeitemTvBroadcast', 'chrome://zotero/skin/treeitem-tvBroadcast.png', false)
 i('TreeitemVideoRecording', 'chrome://zotero/skin/treeitem-videoRecording.png', false);
 i('TreeitemWebpageGray', 'chrome://zotero/skin/treeitem-webpage-gray.png');
 i('TreeitemWebpage', 'chrome://zotero/skin/treeitem-webpage.png');
-
+i('TreeitemCollection', 'chrome://zotero/skin/treesource-collection.png', false);
+i('TreeitemSearch', 'chrome://zotero/skin/treesource-search.png', false);
 // Treesource
 i('TreesourceBucket', 'chrome://zotero/skin/treesource-bucket.png', false);
 i('TreesourceCollection', 'chrome://zotero/skin/treesource-collection.png');
