@@ -65,6 +65,9 @@ editable-text {
 	}
 	
 	.input {
+		--width-focus-border: 1px;
+		--radius-focus-border: 5px;
+		
 		@include focus-ring;
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;

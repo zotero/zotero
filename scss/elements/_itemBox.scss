@@ -7,6 +7,8 @@ item-box {
 	&[hidden] {
 		display: none;
 	}
+	--width-focus-border: 1px;
+	--radius-focus-border: 5px;
 
 	#item-box {
 		width: 100%;

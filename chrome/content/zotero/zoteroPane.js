@@ -37,6 +37,7 @@ var ZoteroPane = new function()
 	this._listeners = {};
 	this.__defineGetter__('loaded', function () { return _loaded; });
 	var _lastSelectedItems = [];
+	var lastFocusedElement = null;
 	
 	//Privileged methods
 	this.destroy = destroy;
@@ -434,7 +435,29 @@ var ZoteroPane = new function()
 		});
 	}
 
-	
+	function addFocusHandlers() {
+		// When a menupopup shows, hide the focus ring around the currently focused element
+		document.addEventListener("popupshowing", (e) => {
+			if (e.target.tagName == "menupopup") {
+				document.activeElement.style.setProperty('--width-focus-border', '0');
+				document.activeElement.classList.add("hidden-focus");
+			}
+		});
+
+		// When a panel popup hides, refocus the previous element
+		// When a menupopup hides, stop hiding the focus-ring
+		document.addEventListener("popuphiding", e => {
+			if (e.target.tagName == "panel") {
+				ZoteroPane.lastFocusedElement.focus();
+			}
+			let noFocus = [...document.querySelectorAll(".hidden-focus")];
+			for (let node of noFocus) {
+				node.style.removeProperty('--width-focus-border');
+				node.classList.remove("hidden-focus");
+			}
+		});
+	}
+
 	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
 	 * mode
@@ -589,6 +612,7 @@ var ZoteroPane = new function()
 		catch (e) {
 			Zotero.logError(e);
 		}
+		addFocusHandlers();
 	}
 	
 	
@@ -1042,6 +1066,15 @@ var ZoteroPane = new function()
 	}
 	
 	this.handleBlur = (event) => {
+		// When focus shifts, unless we are inside of a panel, save
+		// the last focused element to be able to return focus to it when the panel closes
+		if (!event.target.closest("panel")) {
+			this.lastFocusedElement = event.target;
+			// Special treatment to focus on quick-search dropmarker inside of the shadow DOM
+			if (this.lastFocusedElement.id == "zotero-tb-search-dropmarker") {
+				this.lastFocusedElement = document.getElementById("zotero-tb-search")._searchModePopup.parentElement;
+			}
+		}
 		if (this.highlightTimer) {
 			this.highlightTimer.cancel();
 			this.highlightTimer = null;
