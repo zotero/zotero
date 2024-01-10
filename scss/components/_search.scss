@@ -27,11 +27,13 @@
 
 	.search-cancel-button {
 		position: absolute;
-		right: 0px;
+		inset-inline-end: 0;
 		width: 14px;
 		height: 14px;
-		padding: 5px 8px 5px 5px;
-		margin: 6px 4px 6px 0px;
+		padding-inline: 5px 8px;
+		padding-block: 5px;
+		margin-inline: 0 4px;
+		margin-block: 6px;
 		cursor: default;
 		background: url(resource://gre-resources/searchfield-cancel.svg) no-repeat center/contain;
 		background-size: unset;
@@ -44,7 +46,8 @@ search-textbox {
 	border-radius: 5px;
 	border: var(--material-border-quinary);
 	color: var(--fill-primary);
-	padding: 0px 6px 0px 0px;
+	padding: 0;
+	padding-inline-end: 6px;
 
 	&::placeholder {
 		color: var(--fill-tertiary);
@@ -62,7 +65,8 @@ search-textbox {
 :is(search-textbox)::part(search-icon) {
 	@include svgicon-menu("magnifier", "universal", "16");
 	color: var(--fill-secondary);
-	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
-	padding: 6px 4px 6px 6px;
-	margin: 0px;
+	// inline-end: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+	padding-inline: 6px 4px;
+	padding-block: 6px;
+	margin: 0;
 }

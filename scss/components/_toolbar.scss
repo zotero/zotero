@@ -87,7 +87,8 @@
 #zotero-collections-search {
 	max-width: 0;
 	transition: max-width 0.2s ease;
-	padding: 0px 6px 0px 0px;
+	padding: 0;
+	padding-inline-end: 6px;
 	margin: 0;
 	appearance: none;
 }
@@ -97,7 +98,7 @@
 }
 
 #zotero-collections-search.expanding {
-	padding-right: 35px;
+	padding-inline-end: 35px;
 }
 
 /* Hide collection search on pane collapse, otherwise it still shows when focused */
