@@ -450,28 +450,31 @@ var ZoteroPane = new function()
 		
 		// Show warning in toolbar for 'dev' channel builds and troubleshooting mode
 		try {
+			let afterElement = 'zotero-tb-tabs-menu';
 			let isDevBuild = Zotero.version.includes('-dev');
+			let isSafeMode = Services.appinfo.inSafeMode;
 			// Uncomment to test
 			//isDevBuild = true;
-			if (isDevBuild) {
-				let label = document.createXULElement('label');
-				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer; margin: 0 .5em 0 1em');
-				label.onclick = function () {
-					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
-				};
-				label.value = 'TEST BUILD — DO NOT USE';
-				let syncError = document.getElementById('zotero-tb-sync-error');
-				syncError.parentNode.insertBefore(label, syncError);
-			}
-			else if (Services.appinfo.inSafeMode) {
-				let label = document.createElement('span');
-				label.setAttribute('style', 'font-weight: bold; color: darkblue; cursor: pointer; margin-right: .5em');
-				label.onclick = function () {
-					Zotero.Utilities.Internal.quit(true);
-				};
-				label.textContent = 'Troubleshooting Mode';
-				let syncStop = document.getElementById('zotero-tb-sync-stop');
-				syncStop.parentNode.insertBefore(label, syncStop);
+			//isSafeMode = true;
+			if (isDevBuild || isSafeMode) {
+				let label = document.createElement('div');
+				label.className = "toolbar-mode-warning";
+				let msg = '';
+				if (isDevBuild) {
+					label.onclick = function () {
+						Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
+					};
+					msg = 'TEST BUILD — DO NOT USE';
+				}
+				else if (isSafeMode) {
+					label.classList.add('safe-mode');
+					label.onclick = function () {
+						Zotero.Utilities.Internal.quit(true);
+					};
+					msg = 'Troubleshooting Mode';
+				}
+				label.textContent = msg;
+				document.getElementById(afterElement).after(label);
 			}
 		}
 		catch (e) {

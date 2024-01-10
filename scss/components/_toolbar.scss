@@ -113,3 +113,18 @@
 .zotero-tb-button {
 	-moz-user-focus: normal;
 }
+
+/* Label in toolbar for dev mode or troubleshooting mode */
+.toolbar-mode-warning {
+	font-weight: bold;
+	cursor: pointer;
+	margin: 0 .8em 0 .2em;
+	color: red;
+
+	&.safe-mode {
+		color: darkblue;
+		@media (prefers-color-scheme: dark) {
+			color: lightblue;
+		}
+	}
+}
