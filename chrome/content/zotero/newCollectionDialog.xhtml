@@ -39,8 +39,12 @@
 	width="250"
 	onload="Zotero_New_Collection_Dialog._handleLoad()"
 >
-	<script src="include.js"/>
-	<script src="newCollectionDialog.js"/>
+	<script>
+		const { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
+		Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/newCollectionDialog.js', this);
+	</script>
 	
 	<linkset>
 		<html:link rel="localization" href="branding/brand.ftl"/>
