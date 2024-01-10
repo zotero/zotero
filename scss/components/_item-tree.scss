@@ -20,7 +20,7 @@
 				height: 100%;
 				background: transparent;
 				position: absolute;
-				left: -8px;
+				inset-inline-start: -8px;
 				
 				@include state(".first-column:hover") {
 					background: var(--material-mix-quinary);
@@ -40,7 +40,7 @@
 				height: 100%;
 				background: transparent;
 				position: absolute;
-				right: calc(-1 * var(--scrollbar-width, 0px) - 8px);
+				inset-inline-end: calc(-1 * var(--scrollbar-width, 0px) - 8px);
 		
 				@include state(".cell:hover") {
 					background: var(--material-mix-quinary);
