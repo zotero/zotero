@@ -132,6 +132,7 @@ var Zotero_Tabs = new function () {
 			var o = {
 				type,
 				title: tab.title,
+				timeUnselected: tab.timeUnselected
 			};
 			if (tab.data) {
 				o.data = tab.data;

@@ -46,6 +46,7 @@ var Zotero_QuickFormat = new function () {
 	
 	const SEARCH_TIMEOUT = 250;
 	const SHOWN_REFERENCES = 7;
+	const ITEM_LIST_MAX_ITEMS = 50;
 	
 	/**
 	 * Pre-initialization, when the dialog has loaded but has not yet appeared
@@ -435,14 +436,12 @@ var Zotero_QuickFormat = new function () {
 		}
 	});
 
-	function _updateItemListCitedItems(options) {
+	function _getMatchingCitedItems(options) {
 		let { citedItems, citedItemsMatchingSearch, nCitedItemsFromLibrary } = options;
 		if (Zotero_QuickFormat.citingNotes) return;
 		
 		if (!citedItems) {
-			// We don't know whether or not we have cited items, because we are waiting for document
-			// data
-			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited.loading")));
+			return null;
 		}
 		else if (citedItems.length) {
 			// We have cited items
@@ -458,35 +457,36 @@ var Zotero_QuickFormat = new function () {
 					}
 				}
 			}
-			
-			if (citedItemsMatchingSearch && citedItemsMatchingSearch.length) {
-				referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
-				for (let citedItem of citedItemsMatchingSearch.slice(0, 50 - referenceBox.children.length)) {
-					referenceBox.appendChild(_buildListItem(citedItem));
-				}
-			}
+			return citedItemsMatchingSearch;
 		}
 	}
 	
-	async function _updateItemListOpenItems(options) {
+	async function _getMatchingReaderOpenItems(options) {
 		let win = Zotero.getMainWindow();
 		let tabs = win.Zotero_Tabs.getState();
-		let itemIDs = tabs.filter(t => t.type === 'reader').map(t => t.data.itemID);
-		if (!itemIDs.length) return;
+		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
+			// Sort selected tab first
+			if (a.selected) return -1;
+			else if (b.selected) return 1;
+			// Then in reverse chronological select order
+			else if (a.timeUnselected && b.timeUnselected) return b.timeUnselected - a.timeUnselected;
+			// Then in reverse order for tabs that never got loaded in this session
+			else if (a.timeUnselected) return -1;
+			return 1;
+		}).map(t => t.data.itemID);
+		if (!itemIDs.length) return [];
 
-		let matchedItems = [];
-		let items = itemIDs.map(itemID => {
+		let items = itemIDs.map((itemID) => {
 			let item = Zotero.Items.get(itemID);
 			if (item && item.parentItemID) {
 				itemID = item.parentItemID;
 			}
 			return Zotero.Cite.getItem(item.parentItemID);
 		});
-		if (!options.searchString) {
-			matchedItems = items;
-		}
-		else {
+		let matchedItems = items;
+		if (options.searchString) {
 			Zotero.debug("QuickFormat: Searching open tabs");
+			matchedItems = [];
 			let splits = Zotero.Fulltext.semanticSplitter(options.searchString);
 			for (let item of items) {
 				// Generate a string to search for each item
@@ -500,21 +500,25 @@ var Zotero_QuickFormat = new function () {
 					if (itemStr.toLowerCase().includes(split)) matchedItems.push(item);
 				}
 			}
-			if (!matchedItems.length) return;
 			Zotero.debug("QuickFormat: Found matching open tabs");
 		}
-		referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.openTabs")));
-		for (let item of matchedItems.slice(0, 50 - referenceBox.children.length)) {
-			referenceBox.appendChild(_buildListItem(item));
-		}
+		return matchedItems;
 	}
 	
-	async function _updateItemListLibrarySearchResults(options) {
-		let { citedItemsMatchingSearch, searchString, previousItemID,
-			searchResultIDs, preserveSelection, nCitedItemsFromLibrary } = options;
-			
-		if (!searchResultIDs.length || (citedItemsMatchingSearch && citedItemsMatchingSearch.length >= 50)) {
-			return;
+	async function _getMatchingLibraryItems(options) {
+		let { searchString,
+			searchResultIDs, nCitedItemsFromLibrary } = options;
+
+		let win = Zotero.getMainWindow();
+		let selectedItems = [];
+		if (win.Zotero_Tabs.selectedType === "library" && !Zotero_QuickFormat.citingNotes) {
+			selectedItems = Zotero.getActiveZoteroPane().getSelectedItems();
+		}
+		if (!searchString) {
+			return [selectedItems, []];
+		}
+		else if (!searchResultIDs.length) {
+			return [[], []];
 		}
 			
 		// Search results might be in an unloaded library, so get items asynchronously and load
@@ -586,20 +590,18 @@ var Zotero_QuickFormat = new function () {
 		
 		items.sort(Zotero_QuickFormat.citingNotes ? _noteSort : _itemSort);
 		
-		var previousLibrary = -1;
-		for (let item of items.slice(0, 50 - referenceBox.children.length)) {
-			let libraryID = item.libraryID;
-			
-			if (previousLibrary != libraryID) {
-				var libraryName = libraryID
-					? Zotero.Libraries.getName(libraryID)
-					: Zotero.getString('pane.collections.library');
-				referenceBox.appendChild(_buildListSeparator(libraryName));
+		// Split filtered items into selected and other bins
+		let matchingSelectedItems = [];
+		let matchingItems = [];
+		for (let item of items) {
+			if (selectedItems.findIndex(i => i.id === item.id) !== -1) {
+				matchingSelectedItems.push(item);
 			}
-
-			referenceBox.appendChild(_buildListItem(item));
-			previousLibrary = libraryID;
+			else {
+				matchingItems.push(item);
+			}
 		}
+		return [matchingSelectedItems, matchingItems];
 	}
 	
 	/**
@@ -626,9 +628,57 @@ var Zotero_QuickFormat = new function () {
 		// Clear item list
 		while (referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		
-		await _updateItemListOpenItems(options);
-		_updateItemListCitedItems(options);
-		await _updateItemListLibrarySearchResults(options);
+		let openItems = await _getMatchingReaderOpenItems(options);
+		let citedItems = _getMatchingCitedItems(options);
+		let [selectedItems, libraryItems] = await _getMatchingLibraryItems(options);
+		
+		// Selected items are only returned if the currently selected tab is a library tab and
+		// in that case displayed  at the top
+		if (selectedItems.length) {
+			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.selectedItems")));
+			for (let item of selectedItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
+				referenceBox.appendChild(_buildListItem(item));
+			}
+		}
+
+		// Open reader items
+		if (openItems.length && ITEM_LIST_MAX_ITEMS - referenceBox.children.length) {
+			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.openTabs")));
+			for (let item of openItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
+				referenceBox.appendChild(_buildListItem(item));
+			}
+		}
+		
+		// Items cited in the document
+		if (ITEM_LIST_MAX_ITEMS - referenceBox.children.length) {
+			if (citedItems === null) {
+				// We don't know whether or not we have cited items, because we are waiting for document
+				// data
+				referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited.loading")));
+			}
+			else if (citedItems && citedItems.length) {
+				referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
+				for (let item of citedItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
+					referenceBox.appendChild(_buildListItem(item));
+				}
+			}
+		}
+			
+		// Any other items matching in any of the user's libraries.
+		var previousLibrary = -1;
+		for (let item of libraryItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
+			let libraryID = item.libraryID;
+			
+			if (previousLibrary != libraryID) {
+				var libraryName = libraryID
+					? Zotero.Libraries.getName(libraryID)
+					: Zotero.getString('pane.collections.library');
+				referenceBox.appendChild(_buildListSeparator(libraryName));
+			}
+
+			referenceBox.appendChild(_buildListItem(item));
+			previousLibrary = libraryID;
+		}
 
 		if (previousItemID !== undefined) {
 			Array.from(referenceBox.children).some((elem, index) => {
@@ -661,7 +711,7 @@ var Zotero_QuickFormat = new function () {
 				}
 			}
 		}
-	};
+	}
 	
 	/**
 	 * Builds a string describing an item. We avoid CSL here for speed.
