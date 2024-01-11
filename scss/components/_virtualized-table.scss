@@ -75,12 +75,11 @@
 				margin-inline-end: 0;
 			}
 
-			// Put the margin on the other side if the directionality of the
+			// Add margin on the end side if the directionality of the
 			// .cell-text is the opposite of that of the table
 			&:dir(ltr) .cell-text:dir(rtl),
 			&:dir(rtl) .cell-text:dir(ltr) {
-				margin-inline-start: 0;
-				margin-inline-end: 6px;
+				margin-inline-end: 5px;
 			}
 
 			&:dir(ltr) .cell-text {

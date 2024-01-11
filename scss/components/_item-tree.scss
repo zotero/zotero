@@ -8,8 +8,8 @@
 
 	.virtualized-table-header {
 		width: 100%;
-		padding-left: 8px;
-		padding-right: calc(8px + var(--scrollbar-width, 0px));
+		padding-inline-start: 8px;
+		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
 		box-sizing: border-box;
 
 		.first-column {
@@ -77,12 +77,22 @@
 				}
 			}
 			
+			.colored-tag-swatches {
+				direction: ltr;
+				transform: scaleX(-1);
+			}
+			
 			.tag-swatch {
 				display: inline-block;
 
 				&.emoji + .emoji,
-				&.emoji + .colored {
+				&.emoji + .colored-tag-swatches {
 					margin-left: 4px;
+					
+					:root:-moz-locale-dir(rtl) & {
+						margin-left: 0;
+						margin-right: 4px;
+					}
 				}
 
 				&.colored {

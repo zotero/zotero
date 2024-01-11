@@ -2691,15 +2691,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		let tagAriaLabel = '';
-		let tagSpans = '';
+		let tagSpans = [];
 		let coloredTags = item.getColoredTags();
 		if (coloredTags.length) {
 			let { emoji, colored } = coloredTags.reduce((acc, tag) => {
 				acc[Zotero.Utilities.Internal.isOnlyEmoji(tag.tag) ? 'emoji' : 'colored'].push(tag);
 				return acc;
 			}, { emoji: [], colored: [] });
-			tagSpans = [...emoji, ...colored].map(x => this._getTagSwatch(x.tag, x.color));
-			tagAriaLabel = tagSpans.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
+			
+			tagSpans.push(...emoji.map(x => this._getTagSwatch(x.tag)));
+			
+			if (colored.length) {
+				let coloredTagSpans = colored.map(x => this._getTagSwatch(x.tag, x.color));
+				let coloredTagSpanWrapper = document.createElement('span');
+				coloredTagSpanWrapper.className = 'colored-tag-swatches';
+				coloredTagSpanWrapper.append(...coloredTagSpans);
+				tagSpans.push(coloredTagSpanWrapper);
+			}
+
+			tagAriaLabel = coloredTags.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
 			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
 		}
 
