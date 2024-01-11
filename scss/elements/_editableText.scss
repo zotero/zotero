@@ -10,7 +10,7 @@
 
 editable-text {
 	--min-visible-lines: 0;
-	--max-visible-lines: 10;
+	--max-visible-lines: 6;
 
 	&[multiline] {
 		--min-visible-lines: 5;
