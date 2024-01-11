@@ -1530,6 +1530,7 @@ var ZoteroPane = new function()
 				onContextMenu: (...args) => ZoteroPane.onCollectionsContextMenuOpen(...args),
 				dragAndDrop: true
 			});
+			collectionsTree.firstChild.addEventListener("focus", ZoteroPane.collectionsView.recordCollectionTreeFocus);
 		}
 		catch (e) {
 			Zotero.logError(e);

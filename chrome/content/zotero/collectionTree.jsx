@@ -90,6 +90,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		this._filter = "";
 		this._filterResultsCache = {};
+		this._filterInitialScrollPosition = null;
+		this._filterInitialCollapsedRows = [];
+		this._treeWasFocused = false;
 		this._hiddenFocusedRow = null;
 		
 		this.onLoad = this.createEventBinding('load', true, true);
@@ -2370,6 +2373,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 
+	// Record if the collection tree has been focused. this._treeWasFocused is set to false when
+	// filtering starts. When the filter is cleared, if this._treeWasFocused is still false,
+	// no selection/focusing was done on the collectionTree, so we should reset previous scroll
+	// position. Otherwise, we should scroll to place the selected row in the middle.
+	recordCollectionTreeFocus = () => {
+		this._treeWasFocused = true;
+	};
+
 	/**
 	 * Set collection filter and refresh collectionTree to only include
 	 * rows that match the filter. Rows that do not match the filter but have children that do
@@ -2379,10 +2390,19 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param {String} filterText - Text that rows have to contain to match the filter
 	 */
 	async setFilter(filterText) {
+		let collectionTable = document.getElementById("collection-tree").firstElementChild;
+		let isEmpty = this._isFilterEmpty();
+		let willBeEmpty = filterText.length == 0;
 		this._filter = filterText.toLowerCase();
 		let currentRow = this.getRow(this.selection.focused) || this._hiddenFocusedRow;
 		let currentRowDisplayed = currentRow && this._includedInTree(currentRow.ref);
-		let scrollToSelected = filterText.length == 0;
+		let shouldRestoreScrollPosition = willBeEmpty && !isEmpty && !this._treeWasFocused;
+		// Save the initial scroll position, selected row and which rows were collapsed before the filtering starts
+		if (!willBeEmpty && isEmpty) {
+			this._filterInitialScrollPosition = collectionTable.scrollTop;
+			this._filterInitialCollapsedRows = this._rows.filter(r => !r.isOpen).map(r => r.id);
+			this._treeWasFocused = false;
+		}
 		// If current row does not match any filters, it'll be hidden, so clear selection
 		if (!currentRowDisplayed) {
 			this.selection.clearSelection();
@@ -2396,7 +2416,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			// Re-select previously selected row
 			else {
-				await this.selectByID(currentRow.id, scrollToSelected);
+				await this.selectByID(currentRow.id, !shouldRestoreScrollPosition);
 			}
 		}
 
@@ -2413,10 +2433,33 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 		}
-		// If the selected collection is not scrolled to, scroll to the very top
-		if (!scrollToSelected) {
-			let collectionTable = document.getElementById("collection-tree").firstElementChild;
+		// If the filter has been cleared and the selection has not changed, restore the initial scroll position
+		if (shouldRestoreScrollPosition) {
+			// For the initial scroll position to make sense, collapse rows that were initially collapsed
+			for (let rowID of this._filterInitialCollapsedRows) {
+				let index = this.getRowIndexByID(rowID);
+				if (index && this._rows[index].isOpen) {
+					this.toggleOpenState(index);
+				}
+			}
+			this._filterInitialCollapsedRows = [];
+			collectionTable.scrollTop = this._filterInitialScrollPosition;
+			this._filterInitialScrollPosition = null;
+		}
+		// During filtering, scroll to the very top
+		else if (!willBeEmpty) {
 			collectionTable.scrollTop = 0;
+		}
+		// If the filtering is cleared and the selection has changed, scroll to have the
+		// newly selected row in the middle
+		else if (willBeEmpty && !isEmpty) {
+			let selectedRow = collectionTable.querySelector(".row.selected");
+			let rowRect = selectedRow.getBoundingClientRect();
+			let tableRect = collectionTable.getBoundingClientRect();
+			let rowMiddle = rowRect.top + rowRect.height / 2;
+			let tableMiddle = tableRect.top + tableRect.height / 2;
+			let scrollPosition = collectionTable.scrollTop + rowMiddle - tableMiddle;
+			collectionTable.scrollTop = scrollPosition;
 		}
 	}
 
