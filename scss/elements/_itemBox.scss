@@ -34,8 +34,8 @@ item-box {
 			flex: 1; // stretch value field as much as possible
 			max-width: 100%; // stay within .meta-data when the itemBox is narrow
 			.input {
-				// keep input within editable-text when the itemBox is narrow
-				width: calc(100% - 2*var(--editable-text-padding-inline) - 1px)
+				// allow input to be shrunk by other elements when the itemBox is narrow
+				min-width: 0;
 			}
 			// keep multiline fields as tall as they have to be unless they're focused
 			&[multiline] textarea:not(:focus) {
