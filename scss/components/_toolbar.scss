@@ -37,7 +37,6 @@
 		width: 28px;
 		height: 28px;
 		padding: 0px 4px 0px 4px;
-		margin: 0px 4px 0px 4px;
 
 		&[type="menu"] {
 			min-width: 0;
@@ -49,14 +48,21 @@
 			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
 		}
 	}
+}
 
-	&:first-child {
-		margin-inline-start: 0;
+#zotero-items-toolbar,
+#zotero-tabs-toolbar {
+	toolbarbutton {
+		margin: 0px 4px 0px 4px;
 	}
+}
 
-	&:last-child {
-		margin-inline-end: 0;
-	}
+#zotero-items-toolbar:first-child {
+	margin-inline-start: -4px;
+}
+
+#zotero-collections-toolbar {
+	border-bottom: 1px solid transparent;
 }
 
 #zotero-collections-search {

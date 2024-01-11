@@ -198,14 +198,6 @@
 	height:24px;
 }
 
-#zotero-collections-toolbar {
-	padding-inline-start: 2px;
-}
-
-#zotero-items-toolbar {
-	margin-inline-end: 10px;
-}
-
 .zotero-button-clear-image {
   list-style-image: none
 }
