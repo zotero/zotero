@@ -121,14 +121,22 @@ var Zotero_LocateMenu = new function() {
 	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
-		var menuitem = _createMenuItem(optionObject.label || Zotero.getString(`locate.${optionName}.label`),
-			null, null);
+		var menuitem;
+		if (optionObject.l10nKey) {
+			menuitem = _createMenuItem('', null, null); // Set by Fluent
+			menuitem.setAttribute("data-l10n-id", optionObject.l10nKey);
+			if (optionObject.l10nArgs) {
+				menuitem.setAttribute("data-l10n-args", optionObject.l10nArgs);
+			}
+		}
+		else {
+			menuitem = _createMenuItem(optionObject.label || Zotero.getString(`locate.${optionName}.label`),
+				null, null);
+		}
 		if (optionObject.className && showIcons) {
 			menuitem.setAttribute("class", `menuitem-iconic ${optionObject.className}`);
 		}
 		menuitem.setAttribute("zotero-locate", "true");
-		optionObject.l10nKey && menuitem.setAttribute("data-l10n-id", optionObject.l10nKey);
-		optionObject.l10nArgs && menuitem.setAttribute("data-l10n-args", optionObject.l10nArgs);
 		
 		menuitem.addEventListener("command", function (event) {
 			optionObject.handleItems(selectedItems, event);
@@ -377,8 +385,6 @@ var Zotero_LocateMenu = new function() {
 		// "in New Tab" when it's true) in toolbar Locate menu
 		this.hideInToolbar = alternateWindowBehavior;
 		
-		// Must have a label, otherwise an error is thrown in `Zotero.getString`
-		this.label = "PLACEHOLDER";
 		this.l10nKey = "item-menu-viewAttachment";
 		Object.defineProperty(this, "l10nArgs", {
 			get: () => JSON.stringify({
