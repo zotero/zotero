@@ -17,7 +17,14 @@ $icons: (
 
 #zotero-collections-tree {
 	width: 100%;
-	background: transparent;
+
+	#main-window & {
+		// virtualized-table has a default background (--material-background)
+		// which is what we want in most places, including dialogs that include
+		// #zotero-collections-tree, however main window collection tree is an
+		// exception
+		background: transparent;
+	}
 
 	.virtualized-table {
 		overflow-y: auto;
