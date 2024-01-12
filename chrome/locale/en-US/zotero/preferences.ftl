@@ -32,3 +32,7 @@ preferences-color-scheme-light =
     .label = Light
 preferences-color-scheme-dark =
     .label = Dark
+
+preferences-advanced-language-and-region-title = Language and Region
+preferences-advanced-enable-bidi-ui =
+    .label = Enable bidirectional text editing utilities

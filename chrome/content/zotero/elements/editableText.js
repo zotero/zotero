@@ -29,6 +29,8 @@
 	class EditableText extends XULElementBase {
 		_input;
 		
+		_textDirection = null;
+		
 		static observedAttributes = [
 			'multiline',
 			'readonly',
@@ -101,6 +103,7 @@
 		
 		set value(value) {
 			this.setAttribute('value', value || '');
+			this.resetTextDirection();
 		}
 		
 		get initialValue() {
@@ -138,6 +141,13 @@
 			return this._input;
 		}
 
+		resetTextDirection() {
+			this._textDirection = null;
+			if (this._input) {
+				this._input.dir = null;
+			}
+		}
+		
 		sizeToContent = () => {
 			// Add a temp span, fetch its width with current paddings and set max-width based on that
 			let span = document.createElement("span");
@@ -174,10 +184,10 @@
 					if (!this.multiline) {
 						this._input.value = this._input.value.replace(/\n/g, ' ');
 					}
-					this.value = this._input.value;
+					this.setAttribute('value', this._input.value);
 				};
 				let handleChange = () => {
-					this.value = this._input.value;
+					this.setAttribute('value', this._input.value);
 				};
 				input.addEventListener('mousedown', () => {
 					this.setAttribute("mousedown", true);
@@ -211,7 +221,9 @@
 					}
 					else if (event.key === 'Escape') {
 						this.dispatchEvent(new CustomEvent('escape_enter'));
-						this._input.value = this.value = this._input.dataset.initialValue;
+						let initialValue = this._input.dataset.initialValue;
+						this.setAttribute('value', initialValue);
+						this._input.value = initialValue;
 						this._input.blur();
 					}
 				});
@@ -261,6 +273,16 @@
 				delete autocompleteParams.popup;
 				delete autocompleteParams.search;
 				Object.assign(this._input, autocompleteParams);
+			}
+
+			// Set text direction automatically if user has enabled bidi utilities
+			if ((!this._input.dir || this._input.dir === 'auto') && Zotero.Prefs.get('bidi.browser.ui', true)) {
+				if (!this._textDirection) {
+					this._textDirection = window.windowUtils.getDirectionFromText(this._input.value) === Ci.nsIDOMWindowUtils.DIRECTION_RTL
+						? 'rtl'
+						: 'ltr';
+				}
+				this._input.dir = this._textDirection;
 			}
 		}
 		

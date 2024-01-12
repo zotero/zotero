@@ -96,6 +96,7 @@ function goBuildEditContextMenu() {
     let popup = document.getElementById("textbox-contextmenu");
     if (!popup) {
         MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
+        MozXULElement.insertFTLIfNeeded("browser/menubar.ftl");
         document.documentElement.appendChild(
             MozXULElement.parseXULToFragment(`
               <popupset>
@@ -108,12 +109,25 @@ function goBuildEditContextMenu() {
                   <menuitem data-l10n-id="text-action-paste" command="cmd_paste"></menuitem>
                   <menuitem data-l10n-id="text-action-delete" command="cmd_delete"></menuitem>
                   <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll"></menuitem>
+                  <menuseparator></menuseparator>
+                  <menuitem data-l10n-id="menu-edit-bidi-switch-text-direction" command="cmd_switchTextDirection"></menuitem>
                 </menupopup>
               </popupset>
             `)
         );
         popup = document.documentElement.lastElementChild.firstElementChild;
     }
+    
+    try {
+        let menuitemSwitchTextDirection = popup.querySelector("[command='cmd_switchTextDirection']");
+        let showSwitchTextDirection = Services.prefs.getBoolPref("bidi.browser.ui", false);
+        menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
+        menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
+    }
+    catch (e) {
+        // Not worth failing over Services.jsm not being imported in a utility window
+    }
+    
     return popup;
 }
 

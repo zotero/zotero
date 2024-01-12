@@ -54,8 +54,9 @@
 		style="display: flex;"
 		tooltip="html-tooltip">
 	
-	
-	<html:link rel="localization" href="browser/menubar.ftl"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+	</linkset>
 	
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");

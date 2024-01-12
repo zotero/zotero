@@ -48,8 +48,10 @@
 				width="1000" height="700"
 				persist="screenX screenY width height sizemode">
 	
-	<html:link rel="localization" href="browser/menubar.ftl"/>
-	<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	</linkset>
 
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
