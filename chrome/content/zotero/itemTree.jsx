@@ -40,7 +40,7 @@ Cu.import("resource://gre/modules/osfile.jsm");
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
  */
 
-const CHILD_INDENT = 12;
+const CHILD_INDENT = 16;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms

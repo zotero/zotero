@@ -32,7 +32,7 @@ const { getCSSIcon } = require('components/icons');
 const { getDragTargetOrient } = require('components/utils');
 const { Cc, Ci, Cu } = require('chrome');
 
-const CHILD_INDENT = 15;
+const CHILD_INDENT = 16;
 
 var CollectionTree = class CollectionTree extends LibraryTree {
 	static async init(domEl, opts) {

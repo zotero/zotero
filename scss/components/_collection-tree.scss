@@ -41,7 +41,7 @@ $icons: (
 	}
 
 	.virtualized-table-body {
-		padding: 0 8px;
+		padding: 0 8px 8px;
 	}
 
 	.cell.primary {
@@ -56,7 +56,7 @@ $icons: (
 			flex-shrink: 1;
 			text-overflow: ellipsis;
 			overflow: hidden;
-			margin-left: 6px;
+			margin-left: 4px;
 		}
 
 		input.cell-text {
