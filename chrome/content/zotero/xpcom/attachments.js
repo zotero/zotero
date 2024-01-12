@@ -2253,7 +2253,7 @@ Zotero.Attachments = new function () {
 		};
 
 
-		const common = (value, { truncate = false, prefix = '', suffix = '', case: textCase = '' } = {}) => {
+		const common = (value, { truncate = false, prefix = '', suffix = '', replaceFrom = '', replaceTo = '', regexOpts = '', case: textCase = '' } = {}) => {
 			if (value === '' || value === null || typeof value === 'undefined') {
 				return '';
 			}
@@ -2283,6 +2283,9 @@ Zotero.Attachments = new function () {
 
 			let affixed = false;
 
+			if (replaceFrom) {
+				value = value.replace(new RegExp(replaceFrom, regexOpts), replaceTo);
+			}
 			if (prefix && !value.startsWith(prefix)) {
 				value = prefix + value;
 				affixed = true;
