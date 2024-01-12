@@ -7,58 +7,6 @@
 	-moz-appearance: none;
 }
 
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed]),
-#zotero-tags-splitter:not([state=collapsed]),
-#zotero-context-splitter:not([state=collapsed]),
-#zotero-context-splitter-stacked:not([state=collapsed]) {
-	border: 0;
-	background-color: transparent;
-	position: relative;
-	/* Positive z-index positions the splitter on top of its siblings and makes
-	it clickable on both sides. */
-	z-index: 1;
-}
-
-#zotero-context-splitter:not([state=collapsed]),
-#zotero-context-splitter-stacked:not([state=collapsed]) {
-	z-index: 0;
-}
-
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed]):not([orient=vertical]),
-#zotero-tags-splitter:not([state=collapsed]),
-#zotero-context-splitter:not([state=collapsed]) {
-	border-inline-end: var(--material-panedivider);
-	min-width: 0;
-	width: 3px;
-	margin-inline-start: -3px;
-}
-
-#zotero-tags-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed])[orient=vertical],
-#zotero-context-splitter-stacked:not([state=collapsed]) {
-	border-block-end: var(--material-panedivider);
-	min-height: 0;
-	height: 3px;
-	margin-block-start: -3px;
-}
-
-#zotero-collections-splitter > grippy,
-#zotero-items-splitter > grippy,
-#zotero-tags-splitter > grippy,
-#zotero-context-splitter > grippy {
-	border: 0;
-}
-
-#zotero-collections-splitter:not([state=collapsed]) > grippy,
-#zotero-items-splitter:not([state=collapsed]) > grippy,
-#zotero-tags-splitter:not([state=collapsed]) > grippy,
-#zotero-context-splitter:not([state=collapsed]) > grippy,
-#zotero-context-splitter-stacked:not([state=collapsed]) > grippy {
-	display: none;
-}
-
 tree {
 	border-width: 0;
 }

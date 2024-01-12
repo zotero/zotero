@@ -1,0 +1,89 @@
+splitter {
+	appearance: none;
+	z-index: 1;
+	position: relative;
+	background: transparent;
+	border: none;
+
+	--draggable-size: 5px;
+	
+	@include compact {
+		--draggable-size: 5px;
+
+		&[state="collapsed"] {
+			--draggable-size: 8px;
+		}
+	}
+	@include comfortable {
+		--draggable-size: 8px;
+
+		&[state="collapsed"] {
+			--draggable-size: 10px;
+		}
+	}
+
+	&[orient=vertical] {
+		min-height: var(--draggable-size);
+
+		&[collapse="before"],
+		&[substate="before"] {
+			border-top: var(--material-border-quarternary);
+			margin-bottom: calc(1px - var(--draggable-size));
+			&[state="collapsed"] {
+				border-bottom: var(--material-border-quarternary);
+				border-top: 0;
+				margin-bottom: 0;
+			}
+		}
+
+		&[collapse="after"],
+		&[substate="after"] {
+			border-bottom: var(--material-border-quarternary);
+			margin-top: calc(1px - var(--draggable-size));
+			&[state="collapsed"] {
+				border-top: var(--material-border-quarternary);
+				border-bottom: 0;
+				margin-top: 0;
+			}
+		}
+	}
+
+	&:not([orient=vertical]) {
+		min-width: var(--draggable-size);
+
+		&[collapse="before"],
+		&[substate="before"],
+		&[collapse="after"]:-moz-locale-dir(rtl),
+		&[substate="after"]:-moz-locale-dir(rtl) {
+			border-left: var(--material-border-quarternary);
+			margin-right: calc(1px - var(--draggable-size));
+			&[state="collapsed"] {
+				border-right: var(--material-border-quarternary);
+				border-left: 0;
+				margin-right: 0;
+			}
+		}
+
+		&[collapse="after"],
+		&[substate="after"],
+		&[collapse="before"]:-moz-locale-dir(rtl),
+		&[substate="before"]:-moz-locale-dir(rtl) {
+			border-right: var(--material-border-quarternary);
+			margin-left: calc(1px - var(--draggable-size));
+			&[state="collapsed"] {
+				border-left: var(--material-border-quarternary);
+				border-right: 0;
+				margin-left: 0;
+			}
+		}
+	}
+}
+
+#zotero-items-splitter,
+#zotero-context-splitter {
+	&[state="collapsed"] {
+		--draggable-size: 1px;
+		border: 0;
+		margin-left: -1px;
+	}
+}

@@ -20,94 +20,6 @@
 	color: #7f7f7f;
 }
 
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed])[orient=horizontal],
-#zotero-context-splitter:not([state=collapsed])[orient=horizontal]
-{
-	-moz-appearance: none;
-	border-inline-start: var(--material-panedivider);
-	margin-inline-end: -4px;
-	width: 5px !important;
-	min-width: 5px;
-	/* Create a separate stacking context to be on top */
-	opacity: 0.99;
-	background-image: none;
-}
-
-#zotero-items-splitter[orient=vertical],
-#zotero-context-splitter-stacked
-{
-	-moz-border-start: none;
-	-moz-border-end: none;
-	background-color: #bdbdbd;
-	max-height: 1px;
-	min-height: 1px;
-	height: 1px;
-}
-
-#zotero-collections-splitter:not([state=collapsed]) > grippy,
-#zotero-items-splitter:not([state=collapsed]) > grippy,
-#zotero-context-splitter:not([state=collapsed]) > grippy,
-#zotero-context-splitter-stacked:not([state=collapsed]) > grippy
-{
-	display: none;
-}
-
-#zotero-collections-splitter[state=collapsed] {
-	border: 0 solid #d6d6d6 !important;
-	padding: 0;
-}
-
-#zotero-collections-splitter[state=collapsed]
-{
-	background-image: url("chrome://zotero/skin/mac/vsplitter.png");
-	background-repeat: repeat-y;
-	max-width: 8px !important;
-	min-width: 8px !important;
-	width: 8px !important;
-}
-
-#zotero-items-splitter[state=collapsed][orient=horizontal],
-#zotero-context-splitter[state=collapsed][orient=horizontal] {
-	max-width: 1px;
-	min-width: 1px;
-	width: 1px;
-	background: transparent;
-	margin-inline-start: -1px;
-	position: relative;
-}
-
-#zotero-items-splitter[state=collapsed][orient=vertical],
-#zotero-context-splitter-stacked[state=collapsed][orient=vertical] {
-	max-height: 1px;
-	min-height: 1px;
-	height: 1px;
-	background: transparent;
-	margin-top: -1px;
-	position: relative;
-}
-
-#zotero-collections-splitter[state=collapsed] {
-	border-right-width: 1px !important;
-}
-
-#zotero-items-splitter[state=collapsed],
-#zotero-context-splitter[state=collapsed],
-#zotero-context-splitter-stacked[state=collapsed]
-{
-	border-left-width: 1px !important;
-}
-
-#zotero-collections-splitter[state=collapsed] > grippy,
-#zotero-items-splitter[state=collapsed] > grippy,
-#zotero-context-splitter[state=collapsed] > grippy,
-#zotero-context-splitter-stacked[state=collapsed] > grippy
-{
-	-moz-appearance: none;
-	background: url(chrome://zotero/skin/mac/vgrippy.png) center/auto 8px no-repeat;
-	width: 8px;
-}
-
 /* How to get active twisty?
 treechildren::-moz-tree-twisty(active) {
 	-moz-appearance: none;
@@ -133,10 +45,4 @@ tree:focus treechildren::-moz-tree-twisty(selected, open) {
 treechildren::-moz-tree-image {
 	height: 16px;
 	padding-bottom: 1px;
-}
-
-/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.25dppx) {
-	#zotero-collections-splitter[state=collapsed] > grippy, #zotero-items-splitter[state=collapsed] > grippy { background: url(chrome://zotero/skin/mac/vgrippy@2x.png) center/auto 8px no-repeat; }
-	#zotero-tags-splitter > grippy { background: url(chrome://zotero/skin/mac/hgrippy@2x.png) center/auto 8px no-repeat; }
 }

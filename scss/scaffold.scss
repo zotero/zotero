@@ -178,11 +178,6 @@ dialog richlistbox > richlistitem[disabled] {
 	text-align: right;
 }
 
-#pane-splitter {
-	// 16px (padding of tabbox container) - 9px
-	margin-left: 7px;
-}
-
 #right-pane {
 	margin: -16px -16px -16px 0px;
 	border-left: var(--material-panedivider);

@@ -6331,9 +6331,9 @@ var ZoteroPane = new function()
 	/**
 	 * Moves around the toolbar when the user moves around the pane
 	 */
-	this.updateToolbarPosition = function() {
+	this.updateToolbarPosition = function () {
 		var paneStack = document.getElementById("zotero-pane-stack");
-		if(paneStack.hidden) return;
+		if (paneStack.hidden) return;
 
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");

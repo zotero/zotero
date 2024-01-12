@@ -17,16 +17,3 @@ tab {
 #zotero-prefs .numberbox-input-box{
 	-moz-appearance: textfield;
 }
-
-#zotero-pane splitter {
-	border: 0;
-	width: 6px;
-	background-color: transparent;
-	background-image: none;
-}
-
-#zotero-context-splitter-stacked {
-	-moz-appearance: none;
-	background-color: #ececec;
-	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
-}
