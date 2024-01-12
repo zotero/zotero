@@ -1350,6 +1350,10 @@ describe("Zotero.Attachments", function() {
 				'Barius and Pixelus - 1975 - Lorem Ipsum'
 			);
 			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{firstCreator suffix=" - " replaceFrom=" *and *" replaceTo="&"}}{{year suffix=" - " replaceFrom="(\\d{2})(\\d{2})" replaceTo="$2"}}{{title truncate="50" replaceFrom=".m" replaceTo="a"}} - {{title truncate="50" replaceFrom=".m" replaceTo="a" regexOpts="g"}}'),
+				'Barius&Pixelus - 75 - Lora Ipsum - Lora Ipsa'
+			);
+			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, '{{year suffix="-"}}{{firstCreator truncate="10" suffix="-"}}{{title truncate="5" }}'),
 				'1975-Barius and-Lorem'
 			);
