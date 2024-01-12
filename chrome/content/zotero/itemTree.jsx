@@ -246,6 +246,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let row = this._rows[i];
 				// Top-level items
 				if (row.level == 0) {
+					// A top-level attachment moved into a parent. Don't copy, it will be added
+					// via this loop for the parent item.
+					if (row.ref.parentID) {
+						continue;
+					}
 					let isSearchParent = newSearchParentIDs.has(row.ref.id);
 					// If not showing children or no children match the search, close
 					if (this.regularOnly || !isSearchParent) {
@@ -259,6 +264,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (!newSearchItems.has(row.ref) && !isSearchParent) {
 						continue;
 					}
+				}
+				else if (row.level == 1 && !row.ref.parentID) {
+					// A child attachment moved into top-level. It needs to be added anew in a different
+					// location.
+					itemsToAdd.push(row.ref);
+					continue;
 				}
 				// Child items
 				else if (skipChildren) {
@@ -2389,21 +2400,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 							toMove.push(item.id);
 						}
 					});
-				}
-			}
-
-			// If moving, remove items from source collection
-			if (dropEffect == 'move' && toMove.length) {
-				if (!sameLibrary) {
-					throw new Error("Cannot move items between libraries");
-				}
-				if (!sourceCollectionTreeRow || !sourceCollectionTreeRow.isCollection()) {
-					throw new Error("Drag source must be a collection");
-				}
-				if (collectionTreeRow.id != sourceCollectionTreeRow.id) {
-					await Zotero.DB.executeTransaction(async function () {
-						await collectionTreeRow.ref.removeItems(toMove);
-					}.bind(this));
 				}
 			}
 		}
