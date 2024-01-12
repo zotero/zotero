@@ -1328,9 +1328,11 @@ var ZoteroPane = new function()
 		if (manual) {
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
-			
-			// Focus the title field
-			document.getElementById('zotero-editpane-item-box').focusFirstField();
+			// Focus the title field if the itemPane is expanded
+			let itemPane = document.getElementById("zotero-item-pane");
+			if (!itemPane.getAttribute("collapsed")) {
+				document.getElementById('zotero-item-pane-header').querySelector("editable-text").focus();
+			}
 		}
 		
 		return Zotero.Items.getAsync(itemID);

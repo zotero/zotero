@@ -18,21 +18,19 @@ describe("ZoteroPane", function() {
 	describe("#newItem", function () {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textboxes = itemBox.querySelectorAll('input, textarea');
-			assert.lengthOf(textboxes, 1);
-			assert.equal(textboxes[0].getAttribute('fieldname'), 'title');
-			textboxes[0].blur();
+			let title = doc.getElementById('zotero-item-pane-header').querySelector("editable-text");
+			assert.equal(doc.activeElement.getAttribute("aria-label"), title.getAttribute("aria-label"));
+			title.blur();
 			yield Zotero.Promise.delay(1);
 		})
 		
 		it("should save an entered value when New Item is used", function* () {
 			var value = "Test";
 			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textbox = itemBox.querySelector('textarea');
-			textbox.value = value;
-			yield itemBox.blurOpenField();
+			let header = doc.getElementById('zotero-item-pane-header');
+			let title = header.querySelector("editable-text");
+			title.value = value;
+			yield header.save();
 			item = yield Zotero.Items.getAsync(item.id);
 			assert.equal(item.getField('title'), value);
 		})
