@@ -223,6 +223,10 @@ var ZoteroContextPane = new function () {
 
 				_selectItemContext(ids[0]);
 				_update();
+				// When a loaded tab is selected, scroll to the pinned pane, if any
+				if (_sidenav.pinnedPane) {
+					_sidenav.scrollToPane(_sidenav.pinnedPane, 'instant');
+				}
 			}
 		}
 	};
@@ -352,6 +356,7 @@ var ZoteroContextPane = new function () {
 		
 		_updatePaneWidth();
 		_updateAddToNote();
+		_sidenav.showPendingPane();
 	}
 
 	function _togglePane(paneIndex) {
@@ -926,6 +931,10 @@ var ZoteroContextPane = new function () {
 		
 		if (_itemPaneDeck.selectedPanel === container) {
 			_sidenav.container = div;
+		}
+		// When a tab is loaded, scroll to the pinned pane, if any
+		if (_sidenav.pinnedPane) {
+			_sidenav.scrollToPane(_sidenav.pinnedPane, 'instant');
 		}
 	}
 };
