@@ -13,7 +13,7 @@
     }
     @media (-moz-platform: macos) {
         --color-accent: SelectedItem;
-        --color-focus-border: color-mix(in srgb, var(--color-accent) 70%, transparent);
+        --color-focus-border: color-mix(in srgb, var(--color-accent) 50%, transparent);
         --width-focus-border: 3px;
     }
     @media (-moz-platform: linux) {
@@ -21,7 +21,7 @@
         --color-focus-border: var(--color-accent);
         --width-focus-border: 2px;
     }
-    --color-focus-search: color-mix(in srgb, var(--color-accent) 70%, transparent);
+    --color-focus-search: color-mix(in srgb, var(--color-accent) 50%, transparent);
 }
 
 #zotero-collections-pane, #zotero-item-pane {
