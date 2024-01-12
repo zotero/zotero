@@ -54,7 +54,7 @@ label.zotero-text-link {
 
 .zotero-message-error
 {
-	font-weight: bold;
+	font-weight: 600;
 }
 
 #zotero-progress-box
@@ -68,7 +68,7 @@ label.zotero-text-link {
 
 #zotero-progress-text-headline
 {
-	font-weight: bold;
+	font-weight: 600;
 	margin-bottom: 2px;
 }
 
@@ -122,7 +122,7 @@ label.zotero-text-link {
 }
 
 .zotero-warning {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 1.25em;
   margin-bottom: 1em;
 }
@@ -151,7 +151,7 @@ label.zotero-text-link {
 	max-width: 300px;
 	padding-bottom: 4px;
 	padding-top: 4px;
-	font-weight: bold;
+	font-weight: 600;
 	color: red;
 	text-align: center;
 }

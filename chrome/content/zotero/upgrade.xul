@@ -127,7 +127,7 @@
 		<description>&zotero.upgrade.newVersionInstalled;</description>
 		<description id="zotero-upgrade-required">&zotero.upgrade.upgradeRequired; &zotero.upgrade.autoBackup;</description>
 		<description id="zotero-major-upgrade" hidden="true">
-			<label value="&zotero.upgrade.majorUpgrade;" style="font-weight: bold"/>
+			<label value="&zotero.upgrade.majorUpgrade;" style="font-weight: 600"/>
 			&zotero.upgrade.majorUpgradeBeforeLink;
 			<label class="text-link" value="&zotero.upgrade.majorUpgradeLink;"
 				onclick="try { Zotero_Schema_Upgrade.onUpgradeInstructionsLinkClick(); } catch (e) { alert(e); }"/>

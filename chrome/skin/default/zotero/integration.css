@@ -95,7 +95,7 @@
 
 .citation-dialog.title {
 	margin: 0;
-	font-weight: bold;
+	font-weight: 600;
 	overflow: hidden;
 }
 
@@ -235,7 +235,7 @@ richlistitem[selected="true"] {
 	margin-left: 0;
 	margin-right: 0;
 	max-width: 300px;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 #citation-properties-info > label {

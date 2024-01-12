@@ -71,7 +71,7 @@ item-box {
 
 	#more-creators-label
 	{
-		font-weight: bold;
+		font-weight: 600;
 	}
 
 	.pointer:hover, .pointer:hover > label {
@@ -180,7 +180,7 @@ item-box {
 		padding: 1.5em 1em;
 		background: #d93425;
 		color: white;
-		font-weight: bold;
+		font-weight: 600;
 	}
 
 	#retraction-details {
@@ -194,7 +194,7 @@ item-box {
 	}
 
 	#retraction-details dt {
-		font-weight: bold;
+		font-weight: 600;
 	}
 
 	#retraction-details dt:not(:first-child) {

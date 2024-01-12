@@ -537,7 +537,7 @@ function ZoteroProtocolHandler() {
 							Zotero.Report.HTML.listGenerator(items, combineChildItems, params.libraryID),
 							function () {
 								Zotero.logError(e);
-								return '<span style="color: red; font-weight: bold">Error generating report</span>';
+								return '<span style="color: red; font-weight: 600">Error generating report</span>';
 							}
 						);
 				}

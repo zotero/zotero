@@ -238,7 +238,7 @@
 /* Library names */
 #zotero-tb-sync-progress-tooltip rows > label
 {
-	font-weight: bold;
+	font-weight: 600;
 	margin-top: 8px;
 }
 
@@ -264,7 +264,7 @@
 
 #zotero-sync-error-panel .error-header, #zotero-sync-reminder-panel .header {
 	font-size: 14px;
-	font-weight: bold;
+	font-weight: 600;
 	margin-bottom: 1em;
 	-moz-user-select: text;
 	cursor: text
@@ -272,7 +272,7 @@
 
 .zotero-sync-error-panel-library-name {
 	font-size: 12px;
-	font-weight: bold;
+	font-weight: 600;
 	margin-left: 0;
 	margin-bottom: 1.1em;
 }
@@ -327,7 +327,7 @@
 	justify-content: center;
 	background: #d93425;
 	line-height: 2.2em;
-	font-weight: bold;
+	font-weight: 600;
 	color: white;
 	font-size: 13.5px;
 	text-align: center;
