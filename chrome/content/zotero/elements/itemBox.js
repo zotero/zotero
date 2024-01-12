@@ -458,6 +458,9 @@
 				if (activeArea) {
 					this._selectField = activeArea.getAttribute("fieldname");
 				}
+				if (document.activeElement == this.itemTypeMenu) {
+					this._selectField = "item-type-menu";
+				}
 				this.refresh();
 				break;
 			}
@@ -488,6 +491,12 @@
 			this.addItemTypeMenu();
 			this.updateItemTypeMenuSelection();
 			this.itemTypeMenu.disabled = !this.showTypeMenu;
+			// Re-focus item type menu if it was focused before refresh
+			if (this._selectField == "item-type-menu") {
+				Services.focus.setFocus(this.itemTypeMenu, Services.focus.FLAG_SHOWRING);
+				this._selectField = null;
+				this._lastTabIndex = null;
+			}
 			var fieldNames = [];
 			
 			// Manual field order
@@ -2271,11 +2280,6 @@
 				}
 			}, this);
 		}
-		
-		focusFirstField() {
-			this._focusNextField(0);
-		}
-
 		
 		focusField(fieldName) {
 			let field = this.querySelector(`[fieldname="${fieldName}"][ztabindex]`);

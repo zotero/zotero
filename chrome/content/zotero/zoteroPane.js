@@ -1236,13 +1236,14 @@ var ZoteroPane = new function()
 							itemBox.removeHandler('itemtypechange', handleTypeChange);
 							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
 							// Focus the title field after menu closes
-							itemBox.focusFirstField();
+							let title = document.querySelector("#zotero-item-pane-header").querySelector("editable-text");
+							title.focus();
 						};
 						itemBox.addHandler('itemtypechange', handleTypeChange);
 						itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
 						
-						menu.focus();
-						document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
+						Services.focus.setFocus(menu, Services.focus.FLAG_SHOWRING);
+						itemBox.itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
 					}.bind(this)());
 					break;
 				case 'newNote':
