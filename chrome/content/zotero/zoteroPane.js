@@ -6348,6 +6348,8 @@ var ZoteroPane = new function()
 		this.handleTagSelectorResize();
 		
 		sidenav.render();
+		// If the itemPane has just been expanded, scroll to the correct pane
+		sidenav.showPendingPane();
 	}
 	
 	/**

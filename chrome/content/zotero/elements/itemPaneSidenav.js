@@ -95,6 +95,8 @@
 
 		_preserveMinScrollHeightTimeout = null;
 		
+		_pendingPane = null;
+		
 		get container() {
 			return this._container;
 		}
@@ -196,9 +198,11 @@
 		}
 
 		scrollToPane(id, behavior = 'smooth') {
+			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
+			// when itemPane is expanded.
 			if (this._collapsed) {
-				this._collapsed = false;
-				behavior = 'instant';
+				this._pendingPane = id;
+				return;
 			}
 			if (this._contextNotesPane && this._contextNotesPaneVisible) {
 				this._contextNotesPaneVisible = false;
@@ -267,6 +271,12 @@
 		isPanePinnable(id) {
 			return id !== 'info';
 		}
+
+		showPendingPane() {
+			if (!this._pendingPane || this._collapsed) return;
+			this.scrollToPane(this._pendingPane, 'instant');
+			this._pendingPane = null;
+		}
 		
 		init() {
 			if (!this.container) {
@@ -305,10 +315,12 @@
 					if (event.button !== 0) {
 						return;
 					}
-					
+
+					let scrollType = this._collapsed ? 'instant' : 'smooth';
+					this._collapsed = false;
 					switch (event.detail) {
 						case 1:
-							this.scrollToPane(pane, 'smooth');
+							this.scrollToPane(pane, scrollType);
 							break;
 						case 2:
 							if (this.pinnedPane == pane || !pinnable) {
