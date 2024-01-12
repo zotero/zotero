@@ -2491,6 +2491,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 	focusedRowMatchesFilter() {
 		let row = this.getRow(this.selection.focused);
+		if (row.isDuplicates() || row.isUnfiled() || row.isRetracted() || row.isTrash() || row.isPublications()) {
+			return false;
+		}
 		return this._matchesFilter(row.ref).matchesFilter;
 	}
 
