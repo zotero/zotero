@@ -292,18 +292,18 @@ var ZoteroPane = new function()
 		});
 
 		let collectionsSearchField = document.getElementById("zotero-collections-search");
-		let clearCollectionSearch = (removeFocus) => {
-			// Clear the search field
+		let clearCollectionSearch = () => {
+			// If empty filter - just focus the collectionTree
+			if (collectionsSearchField.value.length == 0) {
+				return document.getElementById("collection-tree");
+			}
+			// Clear the search field and focus collection tree
 			if (collectionsSearchField.value.length) {
 				collectionsSearchField.value = '';
-				ZoteroPane.collectionsView.setFilter("");
-				if (!removeFocus) {
-					return null;
-				}
+				ZoteroPane.collectionsView.setFilter("", true);
 			}
 			ZoteroPane.hideCollectionSearch();
-			// If the search field is empty, focus the collection tree
-			return document.getElementById('collection-tree');
+			return null;
 		};
 		collectionTreeToolbar.addEventListener("keydown", (event) => {
 			let actionsMap = {
@@ -404,9 +404,7 @@ var ZoteroPane = new function()
 						// default to focusing on tag selector
 						return false;
 					},
-					Escape: () => {
-						clearCollectionSearch(true);
-					}
+					Escape: clearCollectionSearch
 				}
 			};
 			moveFocus(actionsMap, event);

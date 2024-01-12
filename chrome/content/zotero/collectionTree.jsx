@@ -2388,8 +2388,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * on the currently selected row if any. If the filter is emptied out, the currently selected
 	 * row is scrolled to. Otherwise, scroll to the very top.
 	 * @param {String} filterText - Text that rows have to contain to match the filter
+	 * @param {Bool} focusTree - Focus the collection tree after the filtering is complete
 	 */
-	async setFilter(filterText) {
+	async setFilter(filterText, focusTree = false) {
 		let collectionTable = document.getElementById("collection-tree").firstElementChild;
 		let isEmpty = this._isFilterEmpty();
 		let willBeEmpty = filterText.length == 0;
@@ -2460,6 +2461,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			let tableMiddle = tableRect.top + tableRect.height / 2;
 			let scrollPosition = collectionTable.scrollTop + rowMiddle - tableMiddle;
 			collectionTable.scrollTop = scrollPosition;
+		}
+		// Focus the collection tree
+		if (focusTree) {
+			collectionTable.parentNode.focus();
 		}
 	}
 
