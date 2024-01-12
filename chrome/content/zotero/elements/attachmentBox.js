@@ -185,8 +185,8 @@
 			if (!(val instanceof Zotero.Item)) {
 				throw new Error("'item' must be a Zotero.Item");
 			}
-			this._item = val;
-			if (this._item.isAttachment()) {
+			if (val.isAttachment()) {
+				this._item = val;
 				this.hidden = false;
 				this.render();
 			}

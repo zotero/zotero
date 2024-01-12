@@ -180,7 +180,6 @@
 			else {
 				this._attachments.insertBefore(row, this._attachments.children[index]);
 			}
-			console.log("attch box addRow", attachment, open, row);
 			return row;
 		}
 
