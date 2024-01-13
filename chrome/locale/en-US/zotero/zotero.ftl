@@ -377,16 +377,11 @@ new-collection-dialog =
 new-collection-name = Name:
 new-collection-create-in = Create in:
 
-attachment-info-filename =
-    .value = Filename
-attachment-info-accessed =
-    .value = Accessed
-attachment-info-pages =
-    .value = Pages
-attachment-info-modified =
-    .value = Modified
-attachment-info-index =
-    .value = Indexed
+attachment-info-filename = Filename
+attachment-info-accessed = Accessed
+attachment-info-pages = Pages
+attachment-info-modified = Modified
+attachment-info-index = Indexed
 attachment-info-convert-note =
     .label = Migrate to {
         $type ->
