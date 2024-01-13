@@ -1446,7 +1446,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * Item must be a non-web-link attachment that isn't already fully indexed
 	 */
 	this.canReindex = Zotero.Promise.coroutine(function* (item) {
-		if (!item.canIndex(item)) {
+		if (!this.canIndex(item)) {
 			return false;
 		}
 		switch (yield this.getIndexedState(item)) {
