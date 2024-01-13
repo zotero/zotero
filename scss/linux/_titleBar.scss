@@ -19,10 +19,15 @@
 	visibility: visible;
 	// space for 30*30 icon
 	padding-left: var(--tab-min-height);
+	height: var(--tab-min-height);
 }
 
 #menubar-items {
 	pointer-events: all;
+}
+
+#main-menubar {
+	height: var(--tab-min-height);
 }
 
 #titlebar {
@@ -31,6 +36,10 @@
 
 .titlebar-buttonbox {
 	pointer-events: all;
+}
+
+.titlebar-button {
+	margin: 4px 0;
 }
 
 .titlebar-icon-container {
