@@ -3095,8 +3095,8 @@ var ZoteroPane = new function()
 	}
 
 
-	function openPopup(popup, clientX, clientY) {
-		popup.openPopupAtScreen(clientX + 1, clientY + 1, true);
+	function openPopup(popup, screenX, screenY) {
+		popup.openPopupAtScreen(screenX + 1, screenY + 1, true);
 	}
 	
 	
@@ -3105,8 +3105,8 @@ var ZoteroPane = new function()
 	 */
 	this.onCollectionsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildCollectionContextMenu();
-		x = x || event.clientX;
-		y = y || event.clientY;
+		x = x || event.screenX;
+		y = y || event.screenY;
 		// TEMP: Quick fix for https://forums.zotero.org/discussion/105103/
 		if (Zotero.isWin) {
 			x += 10;
@@ -3120,8 +3120,8 @@ var ZoteroPane = new function()
 	 */
 	this.onItemsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildItemContextMenu();
-		x = x || event.clientX;
-		y = y || event.clientY;
+		x = x || event.screenX;
+		y = y || event.screenY;
 		// TEMP: Quick fix for https://forums.zotero.org/discussion/105103/
 		if (Zotero.isWin) {
 			x += 10;

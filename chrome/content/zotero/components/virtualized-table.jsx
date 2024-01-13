@@ -719,7 +719,7 @@ class VirtualizedTable extends React.Component {
 			if (!modifierClick && !this.selection.isSelected(index)) {
 				this._onSelection(index, false, false);
 			}
-			this.props.onItemContextMenu(e, window.screenX + e.clientX, window.screenY + e.clientY);
+			this.props.onItemContextMenu(e, e.screenX, e.screenY);
 		}
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention
 		if (!modifierClick && !this.selection.isSelected(index)) {
