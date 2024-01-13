@@ -37,23 +37,23 @@
 						ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
 					<html:div class="metadata-table">
 						<html:div id="fileNameRow" class="meta-row">
-							<html:div class="meta-label"><label id="fileName-label" data-l10n-id="attachment-info-filename"/></html:div>
+							<html:div class="meta-label"><label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
 							<html:div class="meta-data"><editable-text id="fileName" nowrap="true" tight="true"/></html:div>
 						</html:div>
 						<html:div id="accessedRow" class="meta-row">
-							<html:div class="meta-label"><label id="accessed-label" data-l10n-id="attachment-info-accessed"/></html:div>
+							<html:div class="meta-label"><label id="accessed-label" class="key" data-l10n-id="attachment-info-accessed"/></html:div>
 							<html:div class="meta-data"><editable-text id="accessed" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="pagesRow" class="meta-row">
-							<html:div class="meta-label"><label id="pages-label" data-l10n-id="attachment-info-pages"/></html:div>
+							<html:div class="meta-label"><label id="pages-label" class="key" data-l10n-id="attachment-info-pages"/></html:div>
 							<html:div class="meta-data"><editable-text id="pages" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="dateModifiedRow" class="meta-row" hidden="true" >
-							<html:div class="meta-label"><label id="dateModified-label" data-l10n-id="attachment-info-modified"/></html:div>
+							<html:div class="meta-label"><label id="dateModified-label" class="key" data-l10n-id="attachment-info-modified"/></html:div>
 							<html:div class="meta-data"><editable-text id="dateModified" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="indexStatusRow" class="meta-row">
-							<html:div class="meta-label"><label id="index-status-label" data-l10n-id="attachment-info-index"/></html:div>
+							<html:div class="meta-label"><label id="index-status-label" class="key" data-l10n-id="attachment-info-index"/></html:div>
 							<html:div class="meta-data">
 								<label id="index-status"/>
 								<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>

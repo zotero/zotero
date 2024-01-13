@@ -13,69 +13,30 @@ attachment-box {
 		}
 	}
 
+	.body {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
 	.metadata-table {
-		display: grid;
-		grid-template-columns: max-content 1fr;
-		column-gap: 10px;
-		row-gap: 2px;
-		width: inherit;
-		& > .meta-row {
-			display: grid;
-			grid-template-columns: subgrid;
-			grid-column: span 2;
-			padding-inline-start: 8px;
-			padding-inline-end: 8px;
+		@include meta-table;
 
-			&[hidden] {
-				display: none;
-			}
+		#index-status {
+			margin-inline: 0;
+			margin-block: 0;
+			height: 22px;
+			padding: 2px 4px;
+		}
 
-			& > .meta-label {
-				display: flex;
-				font-weight: normal;
-				text-align: end;
-
-				& > label {
-					color: var(--fill-secondary);
-					margin-top: 2px;
-					width: 100%;
-					@include comfortable {
-						margin-top: 3px;
-					}
-				}
-			}
-
-			& > .meta-data {
-				width: 0;
-				min-width: 100%;
-				display: flex;
-			}
-
-			editable-text {
-				flex: 1; // stretch value field as much as possible
-				max-width: 100%; // stay within .meta-data when the itemBox is narrow
-				.input {
-					// keep input within editable-text when the itemBox is narrow
-					width: calc(100% - 2*var(--editable-text-padding-inline) - 1px)
-				}
-			}
-
-			#index-status {
-				margin-inline: 0;
-				margin-block: 0;
-				height: 22px;
-				padding: 2px 4px;
-			}
-
-			#reindex
-			{
-				height: 22px;
-				width: 22px;
-				padding: 1px;
-				margin-left: 4px;
-				color: var(--fill-secondary);
-				@include svgicon-menu("sync", "universal", "20");
-			}
+		#reindex
+		{
+			height: 22px;
+			width: 22px;
+			padding: 1px;
+			margin-left: 4px;
+			color: var(--fill-secondary);
+			@include svgicon-menu("sync", "universal", "20");
 		}
 	}
 
