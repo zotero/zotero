@@ -244,7 +244,7 @@
 			}
 		}
 
-		render() {
+		async render() {
 			Zotero.debug('Refreshing attachment box');
 
 			if (this.usePreview) {
@@ -259,53 +259,46 @@
 			let indexStatusRow = this._id('indexStatusRow');
 			let selectButton = this._id('select-button');
 
+			let fileExists = await IOUtils.exists(this._item.getFilePath());
 			let isImportedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			let isLinkedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
 			
-			// Metadata for URL's
-			if (isImportedURL || isLinkedURL) {
-				// URL
-				if (this.displayURL) {
-					let urlSpec = this.item.getField('url');
-					urlField.setAttribute('value', urlSpec);
-					urlField.setAttribute('tooltiptext', urlSpec);
-					urlField.setAttribute('hidden', false);
-					if (this.clickableLink) {
-						urlField.onclick = function (event) {
-							if (event.button == 0) {
-								ZoteroPane_Local.loadURI(this.value, event);
-							}
-						};
-						urlField.className = 'zotero-text-link';
-					}
-					else {
-						urlField.className = '';
-					}
-					urlField.hidden = false;
+			// URL
+			if (this.displayURL && (isImportedURL || isLinkedURL)) {
+				let urlSpec = this.item.getField('url');
+				urlField.setAttribute('value', urlSpec);
+				urlField.setAttribute('tooltiptext', urlSpec);
+				urlField.setAttribute('hidden', false);
+				if (this.clickableLink) {
+					urlField.onclick = function (event) {
+						if (event.button == 0) {
+							ZoteroPane_Local.loadURI(this.value, event);
+						}
+					};
+					urlField.className = 'zotero-text-link';
 				}
 				else {
-					urlField.hidden = true;
+					urlField.className = '';
 				}
-				
-				// Access date
-				if (this.displayAccessed) {
-					let itemAccessDate = this.item.getField('accessDate');
-					if (itemAccessDate) {
-						itemAccessDate = Zotero.Date.sqlToDate(itemAccessDate, true);
-						this._id("accessed").value = itemAccessDate.toLocaleString();
-						accessed.hidden = false;
-					}
-					else {
-						accessed.hidden = true;
-					}
+				urlField.hidden = false;
+			}
+			else {
+				urlField.hidden = true;
+			}
+			
+			// Access date
+			if (this.displayAccessed && isImportedURL) {
+				let itemAccessDate = this.item.getField('accessDate');
+				if (itemAccessDate) {
+					itemAccessDate = Zotero.Date.sqlToDate(itemAccessDate, true);
+					this._id("accessed").value = itemAccessDate.toLocaleString();
+					accessed.hidden = false;
 				}
 				else {
 					accessed.hidden = true;
 				}
 			}
-			// Metadata for files
 			else {
-				urlField.hidden = true;
 				accessed.hidden = true;
 			}
 			
@@ -345,7 +338,7 @@
 				pagesRow.hidden = true;
 			}
 			
-			if (this.displayDateModified && !this._item.isWebAttachment()) {
+			if (this.displayDateModified && fileExists && !this._item.isWebAttachment()) {
 				// Conflict resolution uses a modal window, so promises won't work, but
 				// the sync process passes in the file mod time as dateModified
 				if (this.synchronous) {
@@ -371,7 +364,7 @@
 			}
 			
 			// Full-text index information
-			if (this.displayIndexed) {
+			if (this.displayIndexed && fileExists && await Zotero.FullText.canIndex(this.item)) {
 				this.updateItemIndexedState()
 					.then(function () {
 						if (!this.item) return;
@@ -429,7 +422,7 @@
 						str = 'general.yes';
 						break;
 				}
-				indexStatus.value = Zotero.getString(str);
+				indexStatus.textContent = Zotero.getString(str);
 				
 				// Reindex button tooltip (string stored in zotero.properties)
 				str = Zotero.getString('pane.items.menu.reindexItem');

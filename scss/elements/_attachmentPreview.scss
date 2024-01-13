@@ -49,6 +49,7 @@ attachment-preview {
 		pdf: "attachment-pdf",
 		snapshot: "attachment-snapshot",
 		epub: "attachment-epub",
+		image: "document",
 	);
 
 	@each $cls, $icon in $preview-icons {
@@ -174,6 +175,10 @@ attachment-preview {
 	&[data-preview-status=fail] {
 		#preview {
 			display: none;
+		}
+
+		.media-preview {
+			display: none !important;
 		}
 
 		.icon {

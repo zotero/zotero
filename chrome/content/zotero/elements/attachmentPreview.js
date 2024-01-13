@@ -70,7 +70,7 @@
 				transparent="transparent"
 				src="resource://zotero/reader/reader.html"
 				flex="1"/>
-			<html:img id="image-preview"></html:img>
+			<html:img id="image-preview" class="media-preview"></html:img>
 			<html:span class="icon"></html:span>
 			<html:div class="btn-container">
 				<toolbarbutton id="prev" class="btn-prev" ondblclick="event.stopPropagation()"
@@ -324,6 +324,7 @@
 					media = document.createElement("audio");
 				}
 				media.id = mediaID;
+				media.classList.add("media-preview");
 				this._id("next-preview").after(media);
 			}
 			media.onload = () => {
