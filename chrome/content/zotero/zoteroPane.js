@@ -1319,6 +1319,12 @@ var ZoteroPane = new function()
 			}
 		});
 		
+		// Expand the item pane if it's closed
+		var itemPane = document.getElementById("zotero-item-pane");
+		if (itemPane.getAttribute("collapsed") == "true") {
+			itemPane.setAttribute("collapsed", false)
+		}
+		
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
@@ -1328,11 +1334,8 @@ var ZoteroPane = new function()
 		if (manual) {
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
-			// Focus the title field if the itemPane is expanded
-			let itemPane = document.getElementById("zotero-item-pane");
-			if (!itemPane.getAttribute("collapsed")) {
-				document.getElementById('zotero-item-pane-header').querySelector("editable-text").focus();
-			}
+			// Focus the title field
+			document.getElementById('zotero-item-pane-header').querySelector("editable-text").focus();
 		}
 		
 		return Zotero.Items.getAsync(itemID);
