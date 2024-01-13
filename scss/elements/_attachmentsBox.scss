@@ -38,11 +38,9 @@ attachments-box {
 	& > collapsible-section > .body {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
 
 		attachment-preview {
 			opacity: 1;
-			padding: 2px 0px 4px 0px;
 	
 			&[data-preview-status=fail] {
 				display: none;
@@ -59,7 +57,7 @@ attachments-box {
 		}
 
 		.attachments-container {
-			padding-left: 16px;
+			padding-left: 12px;
 		}
 	}
 }

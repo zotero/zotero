@@ -10,7 +10,11 @@ attachment-annotations-box {
 		& > .body {
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 4px;
+			
+			@include comfortable {
+				gap: 8px;
+			}
 		}
 	}
 }

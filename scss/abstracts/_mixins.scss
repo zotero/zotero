@@ -114,7 +114,7 @@
 @mixin meta-table {
 	display: grid;
 	grid-template-columns: max-content 1fr;
-	column-gap: 10px;
+	column-gap: 8px;
 	row-gap: 2px;
 	width: inherit;
 

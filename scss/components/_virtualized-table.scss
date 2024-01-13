@@ -222,7 +222,7 @@
 	background: var(--material-background);
 	height: 1.83333333em; // 22px @ 12px font size
 	overflow: hidden;
-	border-bottom: var(--material-border-quarternary);
+	border-bottom: 1px solid var(--material-border-quarternary);
 
 	@include comfortable {
 		height: 2.33333333em; // 28px @ 12px font size
