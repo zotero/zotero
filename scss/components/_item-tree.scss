@@ -56,11 +56,11 @@
 	.virtualized-table, .drag-image-container {
 		.row {
 			&.odd:not(.selected) {
-				background-color: var(--material-background);
+				background-color: var(--material-sidepane);
 			}
 
 			&.even:not(.selected) {
-				background-color: var(--material-sidepane);
+				background-color: var(--material-background);
 			}
 
 			&.selected {
