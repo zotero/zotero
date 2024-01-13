@@ -120,7 +120,7 @@ Zotero.MIME = new function(){
 	
 	
 	function isTextType(mimeType) {
-		return mimeType.substr(0, 5) == 'text/' || _textTypes[mimeType];
+		return mimeType.substr(0, 5) == 'text/' || mimeType in _textTypes;
 	}
 	
 	this.isWebPageType = function(mimeType) {
