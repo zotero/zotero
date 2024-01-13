@@ -487,8 +487,8 @@ ZoteroCommandLineHandler.prototype = {
 			zInitOptions.forceDebugLog = 1;
 		}
 		// Pressing Ctrl-C via the terminal is interpreted as a crash, and after three crashes
-		// Firefox starts up in automatic safe mode. To avoid this, we clear the crash counter when
-		// using one of the debug-logging flags, which generally imply terminal usage.
+		// Firefox starts up in automatic safe mode (troubleshooting mode). To avoid this, we clear the crash
+		// counter when using one of the debug-logging flags, which generally imply terminal usage.
 		if (zInitOptions.forceDebugLog) {
 			Services.prefs.getBranch("toolkit.startup.").clearUserPref('recent_crashes');
 		}

@@ -415,7 +415,7 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
-		// Show warning in toolbar for 'dev' channel builds and safe mode
+		// Show warning in toolbar for 'dev' channel builds and troubleshooting mode
 		try {
 			let isDevBuild = Zotero.version.includes('-dev');
 			// Uncomment to test
@@ -436,7 +436,7 @@ var ZoteroPane = new function()
 				label.onclick = function () {
 					Zotero.Utilities.Internal.quit(true);
 				};
-				label.textContent = 'Safe Mode';
+				label.textContent = 'Troubleshooting Mode';
 				let syncStop = document.getElementById('zotero-tb-sync-stop');
 				syncStop.parentNode.insertBefore(label, syncStop);
 			}
