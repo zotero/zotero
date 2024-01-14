@@ -259,7 +259,7 @@
 			let indexStatusRow = this._id('indexStatusRow');
 			let selectButton = this._id('select-button');
 
-			let fileExists = await IOUtils.exists(this._item.getFilePath());
+			let fileExists = this._item.isFileAttachment() && await this._item.fileExists();
 			let isImportedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			let isLinkedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
 			
@@ -287,7 +287,7 @@
 			}
 			
 			// Access date
-			if (this.displayAccessed && isImportedURL) {
+			if (this.displayAccessed && (isImportedURL || isLinkedURL)) {
 				let itemAccessDate = this.item.getField('accessDate');
 				if (itemAccessDate) {
 					itemAccessDate = Zotero.Date.sqlToDate(itemAccessDate, true);

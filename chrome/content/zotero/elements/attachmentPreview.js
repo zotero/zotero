@@ -98,7 +98,7 @@
 		}
 
 		set item(val) {
-			this._item = (val instanceof Zotero.Item && val.isAttachment()) ? val : null;
+			this._item = (val instanceof Zotero.Item && val.isFileAttachment()) ? val : null;
 			if (this.isVisible) {
 				this.render();
 			}
@@ -200,7 +200,7 @@
 			}
 			this._renderingItemID = itemID;
 			let success = false;
-			if (this.isValidType && await IOUtils.exists(this._item.getFilePath())) {
+			if (this.isValidType && await this._item.fileExists()) {
 				if (this.isReaderType) {
 					success = await this._renderReader();
 				}
