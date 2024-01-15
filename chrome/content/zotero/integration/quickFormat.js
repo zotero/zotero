@@ -43,6 +43,7 @@ var Zotero_QuickFormat = new function () {
 	var locatorLocked = true;
 	var locatorNode = null;
 	var _searchPromise;
+	var inputIsPristine = true;
 	
 	const SEARCH_TIMEOUT = 250;
 	const SHOWN_REFERENCES = 7;
@@ -462,6 +463,7 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	async function _getMatchingReaderOpenItems(options) {
+		if (Zotero_QuickFormat.citingNotes) return [];
 		let win = Zotero.getMainWindow();
 		let tabs = win.Zotero_Tabs.getState();
 		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
@@ -619,6 +621,7 @@ var Zotero_QuickFormat = new function () {
 			
 		let { preserveSelection, nCitedItemsFromLibrary } = options;
 		let previousItemID, selectedIndex = 1;
+		let citationItemIDs = new Set()
 
 		// Do this so we can preserve the selected item after cited items have been loaded
 		if (preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
@@ -627,6 +630,23 @@ var Zotero_QuickFormat = new function () {
 		
 		// Clear item list
 		while (referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
+		
+		// Take into account items cited in this citation. This means that the sorting isn't
+		// exactly by # of items cited from each library, but maybe it's better this way.
+		_updateCitationObject();
+		for (let citationItem of io.citation.citationItems) {
+			var citedItem = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
+			citationItemIDs.add(citedItem.cslItemID ? citedItem.cslItemID : citedItem.id);
+			if (!citedItem.cslItemID) {
+				let libraryID = citedItem.libraryID;
+				if (libraryID in nCitedItemsFromLibrary) {
+					nCitedItemsFromLibrary[libraryID]++;
+				}
+				else {
+					nCitedItemsFromLibrary[libraryID] = 1;
+				}
+			}
+		}
 		
 		let openItems = await _getMatchingReaderOpenItems(options);
 		let citedItems = _getMatchingCitedItems(options);
@@ -680,6 +700,10 @@ var Zotero_QuickFormat = new function () {
 			previousLibrary = libraryID;
 		}
 
+		if (!referenceBox.children.length) {
+			return;
+		}
+	
 		if (previousItemID !== undefined) {
 			Array.from(referenceBox.children).some((elem, index) => {
 				if (elem.getAttribute('zotero-item') === previousItemID) {
@@ -690,27 +714,20 @@ var Zotero_QuickFormat = new function () {
 			});
 		}
 		
-		_resize();
-		if (referenceBox.children.length) {
-			referenceBox.selectedIndex = selectedIndex;
-			referenceBox.ensureIndexIsVisible(selectedIndex);
-		}
-		
-		// Also take into account items cited in this citation. This means that the sorting isn't
-		// exactly by # of items cited from each library, but maybe it's better this way.
-		_updateCitationObject();
-		for (let citationItem of io.citation.citationItems) {
-			var citedItem = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
-			if (!citedItem.cslItemID) {
-				let libraryID = citedItem.libraryID;
-				if (libraryID in nCitedItemsFromLibrary) {
-					nCitedItemsFromLibrary[libraryID]++;
-				}
-				else {
-					nCitedItemsFromLibrary[libraryID] = 1;
-				}
+		for (let i = referenceBox.children.length - 1; i >= 0; i--) {
+			let id = parseInt(referenceBox.children[i].getAttribute('zotero-item'));
+			if (citationItemIDs.has(id)) {
+				referenceBox.removeChild(referenceBox.children[i]);
+				continue;
+			}
+			if (id === previousItemID) {
+				selectedIndex = i;
 			}
 		}
+			
+		_resize();
+		referenceBox.selectedIndex = selectedIndex;
+		referenceBox.ensureIndexIsVisible(selectedIndex);
 	}
 	
 	/**
@@ -940,7 +957,8 @@ var Zotero_QuickFormat = new function () {
 	 * Converts the selected item to a bubble
 	 */
 	this._bubbleizeSelected = Zotero.Promise.coroutine(function* () {
-		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
+		const panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
+		if(!panelShowing || !referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
 
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
 		if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
@@ -1018,7 +1036,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _resize() {
 		var childNodes = referenceBox.childNodes, numReferences = 0, numSeparators = 0,
-			firstReference, firstSeparator, height;
+			firstReference, firstSeparator, numCitationItems, editorContent;
 		for(var i=0, n=childNodes.length; i<n && numReferences < SHOWN_REFERENCES; i++) {
 			if(childNodes[i].className === "citation-dialog item") {
 				numReferences++;
@@ -1031,6 +1049,9 @@ var Zotero_QuickFormat = new function () {
 				if(!firstSeparator) firstSeparator = childNodes[i];
 			}
 		}
+		
+		numCitationItems = io.citation.citationItems.length;
+		editorContent = _getCurrentEditorTextNode().wholeText || "";
 		
 		if(qfe.scrollHeight > 30) {
 			qfe.setAttribute("multiline", true);
@@ -1055,7 +1076,10 @@ var Zotero_QuickFormat = new function () {
 		}
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
-		if(numReferences || numSeparators) {
+		// Open the reference panel if there are references to show, except unless the user types something, and then
+		// backspaces to remove that text (otherwise if we don't close the reference panel in that instance it is impossible
+		// to accept the dialog without adding the selected reference by backspacing the search query).
+		if((numReferences || numSeparators) && (!numCitationItems || editorContent.length || inputIsPristine)) {
 			if(((!referenceHeight && firstReference) || (!separatorHeight && firstSeparator)
 					|| !panelFrameHeight) && !panelShowing) {
 				_openReferencePanel();
@@ -1347,6 +1371,7 @@ var Zotero_QuickFormat = new function () {
 		_searchPromise = Zotero.Promise.delay(SEARCH_TIMEOUT)
 			.then(() => _quickFormat())
 			.then(() => {
+				inputIsPristine = false;
 				_searchPromise = null;
 				spinner.style.visibility = 'hidden';
 			});
