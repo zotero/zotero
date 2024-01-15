@@ -458,7 +458,7 @@ var Zotero_QuickFormat = new function () {
 					}
 				}
 			}
-			return citedItemsMatchingSearch;
+			return citedItemsMatchingSearch.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		}
 	}
 	
@@ -504,7 +504,7 @@ var Zotero_QuickFormat = new function () {
 			}
 			Zotero.debug("QuickFormat: Found matching open tabs");
 		}
-		return matchedItems;
+		return matchedItems.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 	}
 	
 	async function _getMatchingLibraryItems(options) {
@@ -515,6 +515,7 @@ var Zotero_QuickFormat = new function () {
 		let selectedItems = [];
 		if (win.Zotero_Tabs.selectedType === "library" && !Zotero_QuickFormat.citingNotes) {
 			selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isRegularItem());
+			selectedItems = selectedItems.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		}
 		if (!searchString) {
 			return [selectedItems, []];
@@ -591,6 +592,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		items.sort(Zotero_QuickFormat.citingNotes ? _noteSort : _itemSort);
+		items = items.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		
 		// Split filtered items into selected and other bins
 		let matchingSelectedItems = [];
@@ -617,11 +619,11 @@ var Zotero_QuickFormat = new function () {
 			searchResultIDs: [],
 			preserveSelection: false,
 			nCitedItemsFromLibrary: {},
+			citationItemIDs: new Set()
 		}, options);
 			
 		let { preserveSelection, nCitedItemsFromLibrary } = options;
 		let previousItemID, selectedIndex = 1;
-		let citationItemIDs = new Set()
 
 		// Do this so we can preserve the selected item after cited items have been loaded
 		if (preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
@@ -636,7 +638,7 @@ var Zotero_QuickFormat = new function () {
 		_updateCitationObject();
 		for (let citationItem of io.citation.citationItems) {
 			var citedItem = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
-			citationItemIDs.add(citedItem.cslItemID ? citedItem.cslItemID : citedItem.id);
+			options.citationItemIDs.add(citedItem.cslItemID ? citedItem.cslItemID : citedItem.id);
 			if (!citedItem.cslItemID) {
 				let libraryID = citedItem.libraryID;
 				if (libraryID in nCitedItemsFromLibrary) {
@@ -714,17 +716,6 @@ var Zotero_QuickFormat = new function () {
 			});
 		}
 		
-		for (let i = referenceBox.children.length - 1; i >= 0; i--) {
-			let id = parseInt(referenceBox.children[i].getAttribute('zotero-item'));
-			if (citationItemIDs.has(id)) {
-				referenceBox.removeChild(referenceBox.children[i]);
-				continue;
-			}
-			if (id === previousItemID) {
-				selectedIndex = i;
-			}
-		}
-			
 		_resize();
 		referenceBox.selectedIndex = selectedIndex;
 		referenceBox.ensureIndexIsVisible(selectedIndex);
