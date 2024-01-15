@@ -514,7 +514,7 @@ var Zotero_QuickFormat = new function () {
 		let win = Zotero.getMainWindow();
 		let selectedItems = [];
 		if (win.Zotero_Tabs.selectedType === "library" && !Zotero_QuickFormat.citingNotes) {
-			selectedItems = Zotero.getActiveZoteroPane().getSelectedItems();
+			selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isRegularItem());
 		}
 		if (!searchString) {
 			return [selectedItems, []];
