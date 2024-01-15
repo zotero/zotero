@@ -33,6 +33,8 @@ var Zotero_CSL_Editor = new function() {
 
 	async function init() {
 		await Zotero.Schema.schemaUpdatePromise;
+
+		const isDarkMQL = Zotero.getMainWindow()?.matchMedia('(prefers-color-scheme: dark)');
 		
 		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
@@ -65,7 +67,7 @@ var Zotero_CSL_Editor = new function() {
 		let editorWin = document.getElementById("zotero-csl-editor-iframe").contentWindow;
 		let { monaco: _monaco, editor: _editor } = await editorWin.loadMonaco({
 			language: 'xml',
-			theme: 'vs-light'
+			theme: isDarkMQL.matches ? 'vs-dark' : 'vs-light'
 		});
 		monaco = _monaco;
 		editor = _editor;
@@ -78,6 +80,10 @@ var Zotero_CSL_Editor = new function() {
 			// Call asynchronously, see note in Zotero.Styles
 			window.setTimeout(this.onStyleSelected.bind(this, currentStyle.styleID), 1);
 		}
+
+		isDarkMQL.addEventListener("change", (ev) => {
+			monaco.editor.setTheme(ev.matches ? 'vs-dark' : 'vs-light');
+		});
 	}
 	
 	this.onStyleSelected = function(styleID) {
