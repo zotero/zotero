@@ -68,23 +68,12 @@ item-pane-sidenav {
 		height: 28px;
 		margin: 0;
 		padding: 4px;
-		flex-shrink: 0;
-		border-radius: 5px;
-		-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
-
 		pointer-events: all;
-		
-		&:hover {
-			background-color: var(--fill-quinary);
-		}
 
-		&:active {
-			background-color: var(--fill-quarternary);
-		}
-
-		&:disabled {
-			background-color: transparent;
-			fill: var(--fill-tertiary);
+		&:disabled,
+		&[disabled="true"] {
+			opacity: 60%;
+			pointer-events: none;
 		}
 		
 		@each $pane, $color in $item-pane-sections {

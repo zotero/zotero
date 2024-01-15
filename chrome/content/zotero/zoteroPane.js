@@ -1844,12 +1844,20 @@ var ZoteroPane = new function()
 			if (!collectionTreeRow) {
 				return false;
 			}
-			
+
+			let pane = document.getElementById('zotero-item-pane');
+			let deck = document.getElementById('zotero-item-pane-content');
+			let sidenav = document.getElementById('zotero-view-item-sidenav');
+
+			let hideSidenav = false;
+
 			// Single item selected
 			if (selectedItems.length == 1) {
 				var item = selectedItems[0];
+				sidenav.querySelectorAll('toolbarbutton').forEach(button => button.disabled = false);
 				
 				if (item.isNote()) {
+					hideSidenav = true;
 					ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
 				}
 				
@@ -1857,7 +1865,6 @@ var ZoteroPane = new function()
 				else {
 					var isCommons = collectionTreeRow.isBucket();
 					
-					let deck = document.getElementById('zotero-item-pane-content');
 					deck.selectedIndex = 1;
 					
 					let pane = ZoteroItemPane.getPinnedPane();
@@ -1890,6 +1897,13 @@ var ZoteroPane = new function()
 			}
 			// Zero or multiple items selected
 			else {
+				let defaultSidenavButtons = [
+					"info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"
+				];
+				sidenav.querySelectorAll('toolbarbutton').forEach((button) => {
+					button.disabled = true;
+					button.parentElement.hidden = !defaultSidenavButtons.includes(button.dataset.pane);
+				});
 				if (collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();
 				}
@@ -1908,7 +1922,7 @@ var ZoteroPane = new function()
 						this.setItemPaneMessage(msg);
 					}
 					else if (count) {
-						document.getElementById('zotero-item-pane-content').selectedIndex = 3;
+						deck.selectedIndex = 3;
 						
 						// Load duplicates UI code
 						if (typeof Zotero_Duplicates_Pane == 'undefined') {
@@ -1956,6 +1970,16 @@ var ZoteroPane = new function()
 					
 					return false;
 				}
+			}
+
+			const sidenavWidth = 37;
+			if (hideSidenav && !sidenav.hidden) {
+				sidenav.hidden = true;
+				pane.width = `${(pane.clientWidth) + sidenavWidth}`;
+			}
+			else if (!hideSidenav && sidenav.hidden) {
+				sidenav.hidden = false;
+				pane.width = `${pane.clientWidth - sidenavWidth}`;
 			}
 			
 			return true;

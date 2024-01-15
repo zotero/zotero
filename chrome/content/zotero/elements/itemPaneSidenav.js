@@ -36,51 +36,61 @@
 			<html:div class="inherit-flex highlight-notes-inactive">
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-info"
 						data-pane="info"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-abstract"
 						data-pane="abstract"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-attachment-preview"
 						data-pane="attachment-preview"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-attachments"
 						data-pane="attachments"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-notes"
 						data-pane="notes"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-attachment-info"
 						data-pane="attachment-info"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-attachment-annotations"
 						data-pane="attachment-annotations"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-libraries-collections"
 						data-pane="libraries-collections"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-tags"
 						data-pane="tags"/>
 				</html:div>
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						disabled="true"
 						data-l10n-id="sidenav-related"
 						data-pane="related"/>
 				</html:div>
@@ -416,6 +426,10 @@
 			let pinnedPane = this.pinnedPane;
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
+				// TEMP: never disable context notes button
+				if (this._contextNotesPane) {
+					toolbarbutton.disabled = false;
+				}
 				
 				if (pane == 'context-notes') {
 					let hidden = !this._contextNotesPane;
