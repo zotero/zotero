@@ -58,6 +58,12 @@ attachments-box {
 
 		.attachments-container {
 			padding-left: 12px;
+			display: flex;
+			flex-direction: column;
+
+			@include comfortable {
+				gap: 4px;
+			}
 		}
 	}
 }
