@@ -57,7 +57,11 @@ describe("ZoteroPane", function() {
 	
 	describe("#newCollection()", function () {
 		it("should create a collection", function* () {
-			var promise = waitForDialog();
+			var promise = waitForDialog(
+				null,
+				'accept',
+				'chrome://zotero/content/newCollectionDialog.xhtml'
+			);
 			var id = yield zp.newCollection();
 			yield promise;
 			var collection = Zotero.Collections.get(id);
