@@ -873,12 +873,14 @@ class ReaderInstance {
 		let rect = this._iframe.getBoundingClientRect();
 		x += rect.left;
 		y += rect.top;
-		setTimeout(() => menupopup.openPopup(null, 'before_start', x, y, true));
 		tagsbox.mode = 'edit';
 		tagsbox.item = item;
-		if (tagsbox.mode == 'edit' && tagsbox.count == 0) {
-			tagsbox.newTag();
-		}
+		menupopup.openPopup(null, 'before_start', x, y, true);
+		setTimeout(() => {
+			if (tagsbox.count == 0) {
+				tagsbox.newTag();
+			}
+		});
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
