@@ -1399,7 +1399,7 @@ var ZoteroPane = new function()
 	this.newCollection = async function (parentKey = null) {
 		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
-			return;
+			return null;
 		}
 		
 		var libraryID = this.getSelectedLibraryID();
@@ -1426,7 +1426,7 @@ var ZoteroPane = new function()
 			"_blank", "chrome,modal,centerscreen,resizable=no", io);
 		var dataOut = io.dataOut;
 		if (!dataOut) {
-			return;
+			return null;
 		}
 		
 		if (!dataOut.name) {
@@ -1437,7 +1437,7 @@ var ZoteroPane = new function()
 		collection.libraryID = dataOut.libraryID;
 		collection.name = dataOut.name;
 		collection.parentID = dataOut.parentCollectionID;
-		await collection.saveTx();
+		return collection.saveTx();
 	};
 	
 	this.importFeedsFromOPML = async function (event) {
