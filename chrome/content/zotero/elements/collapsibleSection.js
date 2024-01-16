@@ -280,6 +280,7 @@
 		}
 		
 		_handleClick = (event) => {
+			if (!this._getSidenav()) return;
 			if (event.target.closest('.section-custom-button, menupopup')) return;
 			this.open = !this.open;
 		};
@@ -293,12 +294,16 @@
 		};
 		
 		_handleContextMenu = (event) => {
-			if (event.target.closest('.section-custom-button')) return;
+			if (!this._getSidenav() || event.target.closest('.section-custom-button')) return;
 			event.preventDefault();
 			this._contextMenu?.openPopupAtScreen(event.screenX, event.screenY, true);
 		};
 		
 		_getSidenav() {
+			// If we're inside a popup, the main window sidenav is irrelevant
+			if (this.closest('popup, menupopup')) {
+				return null;
+			}
 			// TODO: update this after unifying item pane & context pane
 			return document.querySelector(
 				Zotero_Tabs.selectedType === 'library'
@@ -318,6 +323,7 @@
 			
 			this._head.setAttribute('aria-expanded', this.open);
 			this._title.textContent = this.label;
+			this._head.querySelector('.twisty').hidden = !this._getSidenav();
 		}
 	}
 	customElements.define("collapsible-section", CollapsibleSection);
