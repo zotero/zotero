@@ -56,7 +56,7 @@
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	overflow: scroll;
+	overflow: auto scroll;
 	padding-bottom: 10px;
 
 	& > * {
