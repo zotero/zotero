@@ -311,7 +311,6 @@
 			
 			if (!this._listenerAdded && this._head?.nextSibling) {
 				this._head.nextSibling.addEventListener('transitionend', () => {
-					Zotero.debug('Animation done; height is ' + this._head.nextSibling.scrollHeight);
 					this.style.setProperty('--open-height', 'auto');
 				});
 				this._listenerAdded = true;
