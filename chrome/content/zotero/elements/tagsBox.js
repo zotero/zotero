@@ -48,19 +48,6 @@
 							<menupopup id="tags-context-menu">
 								<menuitem id="remove-all-item-tags" label="&zotero.item.tags.removeAll;"/>
 							</menupopup>
-							<!-- Note: autocomplete-input can create this panel by itself, but it appears
-									   in the top DOM and is behind the tags box popup -->
-							<panel
-								is="autocomplete-richlistbox-popup"
-								type="autocomplete-richlistbox"
-								id="PopupAutoComplete"
-								role="group"
-								noautofocus="true"
-								hidden="true"
-								overflowpadding="4"
-								norolluponanchor="true"
-								nomaxresults="true"
-							/>
 						</popupset>
 					</html:div>
 				</collapsible-section>
@@ -88,6 +75,25 @@
 				removeAllItemTags.disabled = !this.count;
 				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
+			
+			if (!document.getElementById('PopupAutoComplete')) {
+				let popupset = document.querySelector('popupset');
+				if (!popupset) {
+					popupset = document.createXULElement('popupset');
+					document.documentElement.append(popupset);
+				}
+				
+				let autocomplete = document.createXULElement('panel', { is: 'autocomplete-richlistbox-popup' });
+				autocomplete.id = 'PopupAutoComplete';
+				autocomplete.setAttribute('type', 'autocomplete-richlistbox');
+				autocomplete.setAttribute('role', 'group');
+				autocomplete.setAttribute('noautofocus', true);
+				autocomplete.setAttribute('hidden', true);
+				autocomplete.setAttribute('overflowpadding', 4);
+				autocomplete.setAttribute('norolluponanchor', true);
+				autocomplete.setAttribute('nomaxresults', true);
+				popupset.append(autocomplete);
+			}
 
 			// Register our observer with priority 101 (after Zotero.Tags) so we get updated tag colors
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item-tag', 'setting'], 'tagsBox', 101);
