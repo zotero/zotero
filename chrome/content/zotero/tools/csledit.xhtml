@@ -24,7 +24,7 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % csleditDTD SYSTEM "chrome://zotero/locale/csledit.dtd"> %csleditDTD;
@@ -43,34 +43,39 @@
 	<script src="csledit.js"/>
 	
 	<vbox flex="1">
-		<hbox align="center">
-			<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Editor.refresh()"/>
-			<button id="zotero-csl-save" label="&zotero.general.saveAs;" oncommand="Zotero_CSL_Editor.save()"/>
-			<menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" native="true" />
-			<label value=":" />
-			<html:input size="5" id="preview-pages" oninput="Zotero_CSL_Editor.refreshDebounced()"/>
-			<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" native="true" />
-			<label value="&styles.editor.citePosition;" />
-			<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()" native="true">
-				<menupopup>
-					<menuitem label="first" value="0"/>
-					<menuitem label="subsequent" value="1"/>
-					<menuitem label="ibid" value="2"/>
-					<menuitem label="ibid-with-locator" value="3"/>
-					<menuitem label="near-note" value="4"/>
-				</menupopup>
-			</menulist>
-			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.refresh()" native="true"/>
-		</hbox>
-		<hbox align="center">
-			<menulist id="zotero-csl-list" style="margin-left: 7px; min-height: 1.6em; min-width: 100px" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)" native="true"/>
-		</hbox>
+		<vbox class="csl-edit-toolbars">
+			<hbox class="csl-edit-toolbar">
+				<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Editor.refresh()"/>
+				<button id="zotero-csl-save" label="&zotero.general.saveAs;" oncommand="Zotero_CSL_Editor.save()"/>
+				<html:div class="divider" />
+				<menulist id="zotero-csl-page-type" oncommand="Zotero_CSL_Editor.refresh()" native="true" />
+				<label value=":" />
+				<html:input size="5" id="preview-pages" oninput="Zotero_CSL_Editor.refreshDebounced()"/>
+				<html:div class="divider" />
+				<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" native="true" />
+				<html:div class="divider" />
+				<label value="&styles.editor.citePosition;" />
+				<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()" native="true">
+					<menupopup>
+						<menuitem label="first" value="0"/>
+						<menuitem label="subsequent" value="1"/>
+						<menuitem label="ibid" value="2"/>
+						<menuitem label="ibid-with-locator" value="3"/>
+						<menuitem label="near-note" value="4"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+			<hbox class="csl-edit-toolbar">
+				<menulist id="zotero-csl-list" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)" native="true"/>
+				<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.refresh()" native="true" />
+			</hbox>
+		</vbox>
 		<iframe id="zotero-csl-editor-iframe" src="chrome://scaffold/content/monaco/monaco.html" flex="1"
 			onmousedown="this.focus()"/>
-		<splitter id="csledit-splitter" collapse="before" persist="state">
+		<splitter id="csledit-splitter" collapse="before" persist="state" orient="vertical">
 			<grippy/>
 		</splitter>
-		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em;background:white" overflow="auto" type="content"/>
+		<iframe id="zotero-csl-preview-box" flex="1" overflow="auto" type="content"/>
 	</vbox>
 	
 	<keyset>
