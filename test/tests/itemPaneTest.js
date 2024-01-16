@@ -225,12 +225,12 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
+			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 2);
+			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			// Update note text
 			note2.setNote('C');
@@ -240,7 +240,7 @@ describe("Item pane", function () {
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while ([...grid.querySelectorAll('div.box > label')].every(label => label.textContent != 'C'));
+			while ([...body.querySelectorAll('.row .label')].every(label => label.textContent != 'C'));
 		});
 		
 		it("should refresh on child note trash", function* () {
@@ -261,24 +261,24 @@ describe("Item pane", function () {
 				note2.setNote('B');
 				await note2.save();
 			});
-			
-			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
+
+			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 2);
+			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			// Click "-" in first note
 			var promise = waitForDialog();
-			grid.querySelector(".zotero-clicky-minus").click();
+			body.querySelector(".zotero-clicky-minus").click();
 			yield promise;
 			
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 1);
+			while (body.querySelectorAll('.row .label').length !== 1);
 		});
 		
 		it("should refresh on child note delete", function* () {
@@ -300,12 +300,12 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
+			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 2);
+			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			yield note2.eraseTx();
 			
@@ -313,7 +313,7 @@ describe("Item pane", function () {
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 1);
+			while (body.querySelectorAll('.row .label').length !== 1);
 		});
 	});
 	
