@@ -1025,6 +1025,7 @@ class ReaderTab extends ReaderInstance {
 	
 	close() {
 		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.removeEventListener('pointerdown', this._handlePointerDown);
 		this._window.removeEventListener('pointerup', this._handlePointerUp);
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
