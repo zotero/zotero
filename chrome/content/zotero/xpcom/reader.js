@@ -865,8 +865,6 @@ class ReaderInstance {
 			}
 		});
 		menupopup.className = 'tags-popup';
-		menupopup.style.font = 'inherit';
-		menupopup.style.minWidth = '300px';
 		menupopup.setAttribute('ignorekeys', true);
 		let tagsbox = new (this._window.customElements.get('tags-box'));
 		menupopup.appendChild(tagsbox);
