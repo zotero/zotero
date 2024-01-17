@@ -9,6 +9,10 @@
 
 :not(.specificity) {
 
+    .wizard-header-box-1 {
+        background: var(--material-sidepane);
+    }
+
     .wizard-header-box-text {
         padding: 0;
     }

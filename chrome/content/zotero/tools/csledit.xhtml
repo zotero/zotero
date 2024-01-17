@@ -33,6 +33,7 @@
 
 <window
 	id="csl-edit"
+	class="zotero-window"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	onload="Zotero_CSL_Editor.init();"
@@ -42,7 +43,7 @@
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="csledit.js"/>
 	
-	<vbox flex="1">
+	<vbox class="zotero-window" flex="1">
 		<vbox class="csl-edit-toolbars">
 			<hbox class="csl-edit-toolbar">
 				<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Editor.refresh()"/>

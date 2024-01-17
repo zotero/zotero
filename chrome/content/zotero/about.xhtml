@@ -8,16 +8,18 @@
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="moveToAlertPosition(); sizeToContent(); document.getElementById('zotero-about').getButton('accept').focus();"
-	inwindowmenu="false">
+	inwindowmenu="false"
+	class="zotero-window">
 <dialog
 		id="zotero-about"
+		class="zotero-window"
 		buttons="accept"
 		buttonlabelaccept="&zotero.about.close;"
 		ondialogaccept="return true;">
 	
 	<script src="include.js"/>
 	
-	<vbox id="aboutcontent">
+	<vbox id="aboutcontent" class="zotero-dialog">
 		<div xmlns="http://www.w3.org/1999/xhtml">
 			<img id="logo" src="chrome://zotero/skin/zotero.svg" alt="Zotero" />
 		</div>

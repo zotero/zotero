@@ -13,8 +13,8 @@ richlistcheckbox {
 }
  
 richlistcheckbox[selected="true"] {
-	background-color: -moz-cellhighlight;
-	color: -moz-cellhighlighttext;
+	background-color: var(--color-accent);
+	color: var(--fill-primary);
 }
 
 richlistbox:where(:focus) > richlistcheckbox[selected="true"] {

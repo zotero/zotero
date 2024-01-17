@@ -48,6 +48,11 @@
         font-size: 15px;
     }
 
+    #result {
+        border: var(--material-panedivider);
+        background: var(--material-background);
+    }
+
     #run-as-async-label {
         font-size: 13px;
     }
