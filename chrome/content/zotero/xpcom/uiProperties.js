@@ -54,7 +54,9 @@ Zotero.UIProperties = new class {
 	
 	_setFontSize(root) {
 		let size = Zotero.Prefs.get('fontSize');
-		root.style.fontSize = root.style['--zotero-font-size'] = size + 'em';
+		let sizeCSS = size + 'rem';
+		root.style.fontSize = sizeCSS;
+		root.style.setProperty('--zotero-font-size', sizeCSS);
 		if (size <= 1) {
 			size = 'small';
 		}
