@@ -446,8 +446,9 @@ var ZoteroPane = new function()
 
 		// When a panel popup hides, refocus the previous element
 		// When a menupopup hides, stop hiding the focus-ring
-		document.addEventListener("popuphiding", e => {
-			if (e.target.tagName == "panel") {
+		document.addEventListener("popuphiding", (e) => {
+			if (e.target.tagName == "panel"
+					&& document.activeElement && e.target.contains(document.activeElement)) {
 				ZoteroPane.lastFocusedElement.focus();
 			}
 			let noFocus = [...document.querySelectorAll(".hidden-focus")];

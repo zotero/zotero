@@ -988,7 +988,6 @@ var Zotero_Tabs = new function () {
 		let menuFilter = document.getElementById('zotero-tabs-menu-filter');
 		menuFilter.value = "";
 		this._tabsMenuFilter = "";
-		this.refreshTabsMenuList();
 	};
 
 	this.handleTabsMenuShown = function (_) {
