@@ -68,17 +68,16 @@ describe("Item Tags Box", function () {
 				}
 			]);
 			yield item.saveTx();
-			
-			var tagsbox = doc.querySelector('tags-box');
-			var rows = tagsbox.querySelectorAll('li');
+			var tagsbox = doc.querySelector('#zotero-editpane-tags');
+			var rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 1);
-			assert.equal(rows[0].textContent, tag);
+			assert.equal(rows[0].querySelector("editable-text").value, tag);
 			
 			yield Zotero.Tags.rename(Zotero.Libraries.userLibraryID, tag, newTag);
 			
-			rows = tagsbox.querySelectorAll('li');
+			rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 1);
-			assert.equal(rows[0].textContent, newTag);
+			assert.equal(rows[0].querySelector("editable-text").value, newTag);
 		})
 		
 		it("should update when a tag's color is removed", function* () {
@@ -98,19 +97,22 @@ describe("Item Tags Box", function () {
 			]);
 			yield item.saveTx();
 			
-			var tagsbox = doc.querySelector('tags-box');
-			var rows = tagsbox.querySelectorAll('li');
+			var tagsbox = doc.querySelector('#zotero-editpane-tags');
+			var rows = tagsbox.querySelectorAll('.row');
+
+			// Colored tags are sorted first
+			assert.ok(getComputedStyle(rows[0]).getPropertyValue('--tag-color'));
+			assert.equal(rows[0].querySelector("editable-text").value, tag);
 			
-			// Colored tags aren't sorted first, for now
-			assert.notOk(rows[0].querySelector('label').style.color);
-			assert.ok(rows[1].querySelector('label').style.color);
-			assert.equal(rows[0].textContent, "_A");
-			assert.equal(rows[1].textContent, tag);
+			assert.notOk(getComputedStyle(rows[1]).getPropertyValue('--tag-color'));
+			assert.equal(rows[1].querySelector("editable-text").value, "_A");
 			
 			yield Zotero.Tags.setColor(libraryID, tag, false);
 			
-			rows = tagsbox.querySelectorAll('li');
-			assert.notOk(rows[1].querySelector('label').style.color);
+			// No color remains on the tag
+			rows = tagsbox.querySelectorAll('.row');
+			assert.notOk(getComputedStyle(rows[0]).getPropertyValue('--tag-color'));
+			assert.notOk(getComputedStyle(rows[1]).getPropertyValue('--tag-color'));
 		})
 		
 		it("should update when a tag is removed from the library", function* () {
@@ -124,14 +126,14 @@ describe("Item Tags Box", function () {
 			]);
 			yield item.saveTx();
 			
-			var tagsbox = doc.querySelector('tags-box');
-			var rows = tagsbox.querySelectorAll('li');
+			var tagsbox = doc.querySelector('#zotero-editpane-tags');
+			var rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 1);
-			assert.equal(rows[0].textContent, tag);
+			assert.equal(rows[0].querySelector("editable-text").value, tag);
 			
 			yield Zotero.Tags.removeFromLibrary(Zotero.Libraries.userLibraryID, Zotero.Tags.getID(tag));
 			
-			rows = tagsbox.querySelectorAll('li');
+			rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 0);
 		})
 	})
