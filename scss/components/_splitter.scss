@@ -29,10 +29,12 @@ splitter {
 		&[substate="before"] {
 			border-top: var(--material-border-quarternary);
 			margin-bottom: calc(1px - var(--draggable-size));
+			margin-top: -1px;
 			&[state="collapsed"] {
 				border-bottom: var(--material-border-quarternary);
 				border-top: 0;
 				margin-bottom: 0;
+				margin-top: 0;
 			}
 		}
 
@@ -40,10 +42,12 @@ splitter {
 		&[substate="after"] {
 			border-bottom: var(--material-border-quarternary);
 			margin-top: calc(1px - var(--draggable-size));
+			margin-bottom: -1px;
 			&[state="collapsed"] {
 				border-top: var(--material-border-quarternary);
 				border-bottom: 0;
 				margin-top: 0;
+				margin-bottom: 0;
 			}
 		}
 	}
@@ -57,10 +61,12 @@ splitter {
 		&[substate="after"]:-moz-locale-dir(rtl) {
 			border-left: var(--material-border-quarternary);
 			margin-right: calc(1px - var(--draggable-size));
+			margin-left: -1px;
 			&[state="collapsed"] {
 				border-right: var(--material-border-quarternary);
 				border-left: 0;
 				margin-right: 0;
+				margin-left: 0;
 			}
 		}
 
@@ -70,10 +76,12 @@ splitter {
 		&[substate="before"]:-moz-locale-dir(rtl) {
 			border-right: var(--material-border-quarternary);
 			margin-left: calc(1px - var(--draggable-size));
+			margin-right: -1px;
 			&[state="collapsed"] {
 				border-left: var(--material-border-quarternary);
 				border-right: 0;
 				margin-left: 0;
+				margin-right: 0;
 			}
 		}
 	}
