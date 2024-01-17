@@ -13,9 +13,12 @@
 	id="zotero-feed-settings"
 	onload="Zotero_Feed_Settings.init()">
 <dialog>
-	<script src="include.js"/>
-	<script src="chrome://zotero/content/customElements.js"/>
-	<script src="feedSettings.js"/>
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/feedSettings.js", this);
+	</script>
 	
 	<html:div class="form-grid">
 		<hbox align="center">
