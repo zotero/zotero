@@ -96,6 +96,10 @@
 		background-color: var(--fill-quarternary);
 	}
 
+	.icon {
+		height: calc(1.3333333333 * var(--zotero-font-size));
+	}
+
 	.label {
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
@@ -103,7 +107,6 @@
 		width: 0; // Needed to allow the label to shrink for some reason
 		flex: 1;
 		overflow: hidden;
-		line-height: 16px;
 	}
 	
 	.icon, .label {
