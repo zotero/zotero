@@ -222,7 +222,7 @@ groupbox:not(:first-of-type) label > h2 {
 }
 
 .hidden-by-search {
-	display: none;
+	display: none !important;
 }
 
 prefwindow .chromeclass-toolbar
