@@ -131,9 +131,8 @@ Zotero.Prefs = new function() {
 						}
 						break;
 					
-					// Set UI density to Compact for existing users
 					case 10:
-						this.set('uiDensity', 'compact');
+						// Used internally
 						break;
 				}
 			}
