@@ -989,6 +989,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					}
 				}
 			}
+			this._refreshRowMap();
 		}
 		else if (action == 'refresh' && type == 'trash') {
 			// We need to update the trash's status (full or empty), and if empty,
