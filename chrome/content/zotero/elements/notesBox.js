@@ -30,7 +30,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 {
 	class NotesBox extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<collapsible-section data-l10n-id="section-notes" data-pane="notes" extra-buttons="addd">
+			<collapsible-section data-l10n-id="section-notes" data-pane="notes" extra-buttons="add">
 				<html:div class="body"/>
 			</collapsible-section>
 		`);
