@@ -248,14 +248,6 @@
 	text-align: right;
 }
 
-#zotero-tb-pq-recognize {
-	list-style-image: url(chrome://zotero/skin/pdf-search.png);
-}
-
-#zotero-tb-pq-recognize .toolbarbutton-icon {
-	width: 18px;
-	margin-top: 1px;
-}
 
 /* Sync error panel */
 #zotero-sync-error-panel, #zotero-sync-reminder-panel {
