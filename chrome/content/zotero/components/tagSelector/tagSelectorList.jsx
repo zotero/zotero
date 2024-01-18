@@ -97,7 +97,7 @@ class TagList extends React.PureComponent {
 	updatePositions() {
 		const tagPaddingTop = this.props.uiDensity === 'comfortable' ? 2 : 1;
 		const tagPaddingBottom = tagPaddingTop;
-		this.scrollbarWidth = Zotero.Utilities.Internal.getScrollbarWidth();
+		this.scrollbarWidth = Math.max(Zotero.Utilities.Internal.getScrollbarWidth(), 6);
 
 		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
 		var rowHeight = tagPaddingTop + this.props.lineHeight + tagPaddingBottom + tagSpaceBetweenY;

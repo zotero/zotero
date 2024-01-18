@@ -47,6 +47,10 @@
 	margin: 0;
 	padding: 0;
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+
+	.ReactVirtualized__Collection__innerScrollContainer {
+		padding-bottom: 8px;
+	}
 }
 
 .tag-selector-filter-pane {
