@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "變更紀錄">
 <!ENTITY zotero.upgrade.changeLogAfterLink "以獲知新的內容。">
 
-<!ENTITY zotero.tabs.info.label "資訊">
 <!ENTITY zotero.tabs.notes.label "筆記">
 <!ENTITY zotero.tabs.attachments.label "附件">
-<!ENTITY zotero.tabs.tags.label "標籤">
-<!ENTITY zotero.tabs.related.label "相關">
 
 <!ENTITY zotero.toolbar.duplicate.label "顯示重覆的項目">
 <!ENTITY zotero.collections.showUnfiledItems "顯示未歸檔的項目">

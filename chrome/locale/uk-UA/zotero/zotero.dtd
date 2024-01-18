@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "журнал змін">
 <!ENTITY zotero.upgrade.changeLogAfterLink "щоб дізнатись про нові функції.">
 
-<!ENTITY zotero.tabs.info.label "Інформація">
 <!ENTITY zotero.tabs.notes.label "Примітки">
 <!ENTITY zotero.tabs.attachments.label "Вкладення">
-<!ENTITY zotero.tabs.tags.label "Теги">
-<!ENTITY zotero.tabs.related.label "Пов'язані">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показати дублювання">
 <!ENTITY zotero.collections.showUnfiledItems "Показати незаповненні записи">

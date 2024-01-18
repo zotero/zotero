@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "breytingafærsluskrána">
 <!ENTITY zotero.upgrade.changeLogAfterLink "til að sjá hvað er nýtt.">
 
-<!ENTITY zotero.tabs.info.label "Upplýsingar">
 <!ENTITY zotero.tabs.notes.label "Minnisblað">
 <!ENTITY zotero.tabs.attachments.label "Viðhengi">
-<!ENTITY zotero.tabs.tags.label "Merki">
-<!ENTITY zotero.tabs.related.label "Venslað">
 
 <!ENTITY zotero.toolbar.duplicate.label "Sýna eins færslur">
 <!ENTITY zotero.collections.showUnfiledItems "Sýna sameinaðar færslur">

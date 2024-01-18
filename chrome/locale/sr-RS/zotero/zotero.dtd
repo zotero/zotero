@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "записник промена">
 <!ENTITY zotero.upgrade.changeLogAfterLink "да би видели шта је ново.">
 
-<!ENTITY zotero.tabs.info.label "Инфо">
 <!ENTITY zotero.tabs.notes.label "Белешке">
 <!ENTITY zotero.tabs.attachments.label "Прилози">
-<!ENTITY zotero.tabs.tags.label "Ознаке">
-<!ENTITY zotero.tabs.related.label "Сродно">
 
 <!ENTITY zotero.toolbar.duplicate.label "Прикажи дупликате">
 <!ENTITY zotero.collections.showUnfiledItems "Прикажи неразврстане">

@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "log perubahan">
 <!ENTITY zotero.upgrade.changeLogAfterLink "untuk mengetahui hal-hal apa saja yang baru.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Catatan">
 <!ENTITY zotero.tabs.attachments.label "Lampiran">
-<!ENTITY zotero.tabs.tags.label "Tag">
-<!ENTITY zotero.tabs.related.label "Terkait">
 
 <!ENTITY zotero.toolbar.duplicate.label "Tunjukkan Duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Tunjukkan Item-Item yang Belum Diisikan">

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Alapértelmezett">
 <!ENTITY zotero.preferences.items "elemek">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Beállítások">
 <!ENTITY zotero.preferences.custom "Egyedi...">
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "A gyorsmásolás kikapcsolása, amikor az elemek száma több, mint">
 
 <!ENTITY zotero.preferences.prefpane.cite "Hivatkozás">
-<!ENTITY zotero.preferences.cite.styles "Stílusok">
 <!ENTITY zotero.preferences.cite.wordProcessors "Szövegszerkesztők">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "A klasszikus Add Citation ablak használata">
 <!ENTITY zotero.preferences.styleEditor "Stílus szerkesztő">

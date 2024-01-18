@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "τον κατάλογο των αλλαγών (changelog)">
 <!ENTITY zotero.upgrade.changeLogAfterLink "για να δείτε τι νεότερο υπάρχει.">
 
-<!ENTITY zotero.tabs.info.label "Πληροφορίες">
 <!ENTITY zotero.tabs.notes.label "Σημειώσεις">
 <!ENTITY zotero.tabs.attachments.label "Προσαρτήματα">
-<!ENTITY zotero.tabs.tags.label "Ετικέτες">
-<!ENTITY zotero.tabs.related.label "Σχετίζεται με">
 
 <!ENTITY zotero.toolbar.duplicate.label "Εμφάνιση διπλότυπων">
 <!ENTITY zotero.collections.showUnfiledItems "Εμφάνιση Αταξινόμητων στοιχείων">

@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "im Changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "aufgelistet.">
 
-<!ENTITY zotero.tabs.info.label "Infos">
 <!ENTITY zotero.tabs.notes.label "Notizen">
 <!ENTITY zotero.tabs.attachments.label "Anhänge">
-<!ENTITY zotero.tabs.tags.label "Tags">
-<!ENTITY zotero.tabs.related.label "Zugehörig">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplikate anzeigen">
 <!ENTITY zotero.collections.showUnfiledItems "Einträge ohne Sammlung anzeigen">

@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "raportul schimbărilor">
 <!ENTITY zotero.upgrade.changeLogAfterLink "pentru a vedea ce este nou.">
 
-<!ENTITY zotero.tabs.info.label "Informații">
 <!ENTITY zotero.tabs.notes.label "Note">
 <!ENTITY zotero.tabs.attachments.label "Anexe">
-<!ENTITY zotero.tabs.tags.label "Etichete">
-<!ENTITY zotero.tabs.related.label "Relații">
 
 <!ENTITY zotero.toolbar.duplicate.label "Afișează duplicatele">
 <!ENTITY zotero.collections.showUnfiledItems "Arată înregistrările neîndosariate">

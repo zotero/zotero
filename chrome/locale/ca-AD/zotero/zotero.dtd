@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "la llista de canvis">
 <!ENTITY zotero.upgrade.changeLogAfterLink "per esbrinar si hi ha novetats">
 
-<!ENTITY zotero.tabs.info.label "Informació">
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.attachments.label "Adjunts">
-<!ENTITY zotero.tabs.tags.label "Etiquetes">
-<!ENTITY zotero.tabs.related.label "Relacionats">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra els duplicats">
 <!ENTITY zotero.collections.showUnfiledItems "Mostra els elements no arxivats">

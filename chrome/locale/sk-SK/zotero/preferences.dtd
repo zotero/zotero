@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Predvolené:">
 <!ENTITY zotero.preferences.items "záznamov">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Nastavenia">
 <!ENTITY zotero.preferences.custom "Vlastné...">
 
 <!ENTITY zotero.preferences.prefpane.general "Všeobecné">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Zakázať rýchle kopírovanie pri presúvaní viac než">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citovanie">
-<!ENTITY zotero.preferences.cite.styles "Štýly">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textové editory">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použiť klasické okno pridávania citácií">
 <!ENTITY zotero.preferences.styleEditor "Editor štýlov">

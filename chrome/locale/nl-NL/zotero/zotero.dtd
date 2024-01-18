@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "het logboek van veranderingen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
 <!ENTITY zotero.tabs.attachments.label "Bijlagen">
-<!ENTITY zotero.tabs.tags.label "Labels">
-<!ENTITY zotero.tabs.related.label "Gerelateerd">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
 <!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde items tonen">

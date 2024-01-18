@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "변경 사항">
 <!ENTITY zotero.upgrade.changeLogAfterLink "보기">
 
-<!ENTITY zotero.tabs.info.label "정보">
 <!ENTITY zotero.tabs.notes.label "노트">
 <!ENTITY zotero.tabs.attachments.label "첨부">
-<!ENTITY zotero.tabs.tags.label "태그">
-<!ENTITY zotero.tabs.related.label "연관">
 
 <!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">

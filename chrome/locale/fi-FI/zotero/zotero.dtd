@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "muutosloki">
 <!ENTITY zotero.upgrade.changeLogAfterLink "tutustuaksesi uusiin ominaisuuksiin ja päivityksiin.">
 
-<!ENTITY zotero.tabs.info.label "Tiedot">
 <!ENTITY zotero.tabs.notes.label "Muistiinpanot">
 <!ENTITY zotero.tabs.attachments.label "Liitteet">
-<!ENTITY zotero.tabs.tags.label "Avainsanat">
-<!ENTITY zotero.tabs.related.label "Liittyvät">
 
 <!ENTITY zotero.toolbar.duplicate.label "Näytä kaksoiskappaleet">
 <!ENTITY zotero.collections.showUnfiledItems "Näytä arkistoimattomat nimikkeet">

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "기본값:">
 <!ENTITY zotero.preferences.items "항목">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "설정">
 <!ENTITY zotero.preferences.custom "사용자 지정...">
 
 <!ENTITY zotero.preferences.prefpane.general "일반">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "다음 항목 이상을 끌어넣을 경우 빠른 복사 동작 안함:">
 
 <!ENTITY zotero.preferences.prefpane.cite "인용">
-<!ENTITY zotero.preferences.cite.styles "스타일">
 <!ENTITY zotero.preferences.cite.wordProcessors "워드 프로세서">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "클래식 인용 대화창 사용">
 <!ENTITY zotero.preferences.styleEditor "스타일 편집기">

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "پیش‌فرض:">
 <!ENTITY zotero.preferences.items "آیتم‌">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "تنظیمات">
 <!ENTITY zotero.preferences.custom "سفارشی...">
 
 <!ENTITY zotero.preferences.prefpane.general "عمومی">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "غیر فعال کردن رونوشت سریع در زمان کشیدن بیش از ">
 
 <!ENTITY zotero.preferences.prefpane.cite "یادکرد">
-<!ENTITY zotero.preferences.cite.styles "شیوه‌ها">
 <!ENTITY zotero.preferences.cite.wordProcessors "واژه‌پردازها">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استفاده از پنجره استناد‌کننده کلاسیک">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Standaard:">
 <!ENTITY zotero.preferences.items "items">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Instellingen">
 <!ENTITY zotero.preferences.custom "Aangepast...">
 
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Snelle kopie uitzetten bij het verslepen van meer dan">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citeren">
-<!ENTITY zotero.preferences.cite.styles "Stijlen">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstverwerkers">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gebruik het klassieke “Citaat Toevoegen”-dialoogvenster">
 <!ENTITY zotero.preferences.styleEditor "Stijlbewerker">

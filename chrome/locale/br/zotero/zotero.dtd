@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "renabl ar cheñchamantoù">
 <!ENTITY zotero.upgrade.changeLogAfterLink "evit dizoloiñ ar pezh a zo nevez.">
 
-<!ENTITY zotero.tabs.info.label "Titou.">
 <!ENTITY zotero.tabs.notes.label "Notennoù">
 <!ENTITY zotero.tabs.attachments.label "Pezhioù-stag">
-<!ENTITY zotero.tabs.tags.label "Balizoù">
-<!ENTITY zotero.tabs.related.label "Kevreet">
 
 <!ENTITY zotero.toolbar.duplicate.label "Diskouez an doublennoù">
 <!ENTITY zotero.collections.showUnfiledItems "Diskouez an elfennoù amrummet">

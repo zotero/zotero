@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "a változások listájában">
 <!ENTITY zotero.upgrade.changeLogAfterLink "az újdonságoknak.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Jegyzetek">
 <!ENTITY zotero.tabs.attachments.label "Csatolmányok">
-<!ENTITY zotero.tabs.tags.label "Címkék">
-<!ENTITY zotero.tabs.related.label "Kapcsolatok">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplumok listázása">
 <!ENTITY zotero.collections.showUnfiledItems "Besorolatlan elemek mutatása">

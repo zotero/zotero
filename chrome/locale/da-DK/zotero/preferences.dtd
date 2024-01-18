@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Default:">
 <!ENTITY zotero.preferences.items "Elementer">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Indstillinger">
 <!ENTITY zotero.preferences.custom "Tilpasset...">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Slå Quick Copy fra hvis du trækker mere end">
 
 <!ENTITY zotero.preferences.prefpane.cite "Henvis">
-<!ENTITY zotero.preferences.cite.styles "Bibliografiske formater">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstbehandlere">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Brug den klassiske dialog til Tilføj Henvisning">
 <!ENTITY zotero.preferences.styleEditor "Håndtering af bibliografiske formater">

@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "سجل التغييرات">
 <!ENTITY zotero.upgrade.changeLogAfterLink "لمعرفة الجديد.">
 
-<!ENTITY zotero.tabs.info.label "معلومات">
 <!ENTITY zotero.tabs.notes.label "ملاحظات">
 <!ENTITY zotero.tabs.attachments.label "مرفقات">
-<!ENTITY zotero.tabs.tags.label "أوسمة">
-<!ENTITY zotero.tabs.related.label "عناصر ذات صلة">
 
 <!ENTITY zotero.toolbar.duplicate.label "عرض التكرارات">
 <!ENTITY zotero.collections.showUnfiledItems "عرض العناصر غير المصنفة">

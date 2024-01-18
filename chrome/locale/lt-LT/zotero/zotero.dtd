@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "pakeitimų žurnale">
 <!ENTITY zotero.upgrade.changeLogAfterLink "apie naujoves.">
 
-<!ENTITY zotero.tabs.info.label "Informacija">
 <!ENTITY zotero.tabs.notes.label "Užrašai">
 <!ENTITY zotero.tabs.attachments.label "Priedai">
-<!ENTITY zotero.tabs.tags.label "Gairės">
-<!ENTITY zotero.tabs.related.label "Susiję">
 
 <!ENTITY zotero.toolbar.duplicate.label "Rodyti besidubliuojančius">
 <!ENTITY zotero.collections.showUnfiledItems "Rodyti neužpildytus">

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "الإفتراضي:">
 <!ENTITY zotero.preferences.items "عناصر">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "اعدادات">
 <!ENTITY zotero.preferences.custom "مخصص...">
 
 <!ENTITY zotero.preferences.prefpane.general "عام">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "تعطيل النسخ السريع عند السحب بالماوس لأكثر من">
 
 <!ENTITY zotero.preferences.prefpane.cite "استشهاد">
-<!ENTITY zotero.preferences.cite.styles "الأنماط">
 <!ENTITY zotero.preferences.cite.wordProcessors "معالجات النصوص">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استخدم المربع الحواري التقليدي لاضافة استشهاد">
 <!ENTITY zotero.preferences.styleEditor "محرر النمط">

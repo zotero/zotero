@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "Changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
 
-<!ENTITY zotero.tabs.info.label "Information">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
-<!ENTITY zotero.tabs.tags.label "Etiketter">
-<!ENTITY zotero.tabs.related.label "Liknande källor">
 
 <!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">

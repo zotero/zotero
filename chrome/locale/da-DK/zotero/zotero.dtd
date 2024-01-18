@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "listen med ændringer">
 <!ENTITY zotero.upgrade.changeLogAfterLink "for at se nyhederne.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Noter">
 <!ENTITY zotero.tabs.attachments.label "Vedhæftede filer">
-<!ENTITY zotero.tabs.tags.label "Mærker">
-<!ENTITY zotero.tabs.related.label "Relationer">
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Vis ukategoriserede elementer">

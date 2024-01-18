@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "endringsloggen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "for å finne ut kva som er nytt.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notat">
 <!ENTITY zotero.tabs.attachments.label "Vedlegg">
-<!ENTITY zotero.tabs.tags.label "Taggar">
-<!ENTITY zotero.tabs.related.label "Relatert">
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Vis uplasserte objekt">

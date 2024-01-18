@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "zapisnik sprememb,">
 <!ENTITY zotero.upgrade.changeLogAfterLink "kjer so navedene novosti.">
 
-<!ENTITY zotero.tabs.info.label "Podatki">
 <!ENTITY zotero.tabs.notes.label "Opombe">
 <!ENTITY zotero.tabs.attachments.label "Priponke">
-<!ENTITY zotero.tabs.tags.label "Značke">
-<!ENTITY zotero.tabs.related.label "Sorodno">
 
 <!ENTITY zotero.toolbar.duplicate.label "Pokaži dvojnike">
 <!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene vnose">

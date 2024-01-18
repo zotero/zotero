@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Αρχικές">
 <!ENTITY zotero.preferences.items "στοιχεία">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Ρυθμίσεις">
 <!ENTITY zotero.preferences.custom "Προσαρμογή...">
 
 <!ENTITY zotero.preferences.prefpane.general "Γενικές">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Απενεργοποίηση της Γρήγορης αντιγραφής όταν σύρονται περισσότερα από">
 
 <!ENTITY zotero.preferences.prefpane.cite "Παράθεση/Παραπομπή">
-<!ENTITY zotero.preferences.cite.styles "Στυλ">
 <!ENTITY zotero.preferences.cite.wordProcessors "Επεξεργαστές κειμένου">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Χρήση του κλασικού διαλόγου Προσθήκης παραπομπής">
 <!ENTITY zotero.preferences.styleEditor "Επεξεργασία στυλ">

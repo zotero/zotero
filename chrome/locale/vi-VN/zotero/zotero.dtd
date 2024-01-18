@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "sổ nhật ký các thay đổi (changelog)">
 <!ENTITY zotero.upgrade.changeLogAfterLink "để biết có gì mới.">
 
-<!ENTITY zotero.tabs.info.label "Thông tin">
 <!ENTITY zotero.tabs.notes.label "Ghi chép">
 <!ENTITY zotero.tabs.attachments.label "Phần đính kèm">
-<!ENTITY zotero.tabs.tags.label "Thẻ">
-<!ENTITY zotero.tabs.related.label "Liên quan">
 
 <!ENTITY zotero.toolbar.duplicate.label "Liệt kê các mục trùng lặp">
 <!ENTITY zotero.collections.showUnfiledItems "Liệt kê các mục chưa phân loại">

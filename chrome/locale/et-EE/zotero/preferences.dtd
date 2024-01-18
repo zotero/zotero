@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Vaikimisi:">
 <!ENTITY zotero.preferences.items "kirjet">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Seaded">
 <!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Üldine">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Peatada kiirkopeerimine juhul kui lohistatakse rohkem kui">
 
 <!ENTITY zotero.preferences.prefpane.cite "Viitamine">
-<!ENTITY zotero.preferences.cite.styles "Stiilid">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstiredaktorid">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Tavaline tsitaadi lisamise vorm">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">

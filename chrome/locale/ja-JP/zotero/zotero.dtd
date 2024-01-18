@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "更新履歴">
 <!ENTITY zotero.upgrade.changeLogAfterLink "をご覧ください。">
 
-<!ENTITY zotero.tabs.info.label "情報">
 <!ENTITY zotero.tabs.notes.label "メモ">
 <!ENTITY zotero.tabs.attachments.label "添付ファイル">
-<!ENTITY zotero.tabs.tags.label "タグ">
-<!ENTITY zotero.tabs.related.label "関連アイテム">
 
 <!ENTITY zotero.toolbar.duplicate.label "重複アイテムを表示">
 <!ENTITY zotero.collections.showUnfiledItems "未整理のアイテムを表示">

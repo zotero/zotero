@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "កំណត់ហេតុផ្លាស់ប្តូរ">
 <!ENTITY zotero.upgrade.changeLogAfterLink "ដើម្បីរកមើលអ្វីដែលថ្មី។">
 
-<!ENTITY zotero.tabs.info.label "ទិន្នន័យ">
 <!ENTITY zotero.tabs.notes.label "កំណត់ត្រា">
 <!ENTITY zotero.tabs.attachments.label "ឯកសារកម្ជាប់">
-<!ENTITY zotero.tabs.tags.label "ស្លាក">
-<!ENTITY zotero.tabs.related.label "ពាក់ព័ន្ធ">
 
 <!ENTITY zotero.toolbar.duplicate.label "បង្ហាញឯកសារត្រួត">
 <!ENTITY zotero.collections.showUnfiledItems "បង្ហាញឯកសារមិនទាន់បានតម្កល់ទុក">

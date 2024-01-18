@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Default:">
 <!ENTITY zotero.preferences.items "Item">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Pengaturan">
 <!ENTITY zotero.preferences.custom "Kustom...">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Matikan fitur Salin Cepat saat menarik lebih dari">
 
 <!ENTITY zotero.preferences.prefpane.cite "Mengutip">
-<!ENTITY zotero.preferences.cite.styles "Gaya">
 <!ENTITY zotero.preferences.cite.wordProcessors "Pengolah Kata">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gunakan kotak dialog Tambahkan Sitasi klasik">
 <!ENTITY zotero.preferences.styleEditor "Editor Gaya">
