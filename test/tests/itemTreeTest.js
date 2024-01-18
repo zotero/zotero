@@ -37,7 +37,7 @@ describe("Zotero.ItemTree", function() {
 		let quicksearch;
 		
 		before(() => {
-			quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch = win.document.getElementById('zotero-tb-search-textbox');
 		});
 		after(async () => {
 			quicksearch.value = "";
