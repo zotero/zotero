@@ -1457,7 +1457,7 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(focusedRow.id, "C" + collection5.id);
 		});
 
-		it('should only open relevant collections', async function () {
+		it('should collapse collections collapsed before filtering', async function () {
 			// Collapse top level collections 1 and 6
 			for (let c of [collection1, collection6]) {
 				let index = cv.getRowIndexByID("C" + c.id);
@@ -1467,16 +1467,23 @@ describe("Zotero.CollectionTree", function() {
 				}
 			}
 			
-			// Set filter and remove it
 			await cv.setFilter(collection5.name);
-			await cv.setFilter("");
 
-			// Collection 1 and 2 had a matching child, so they are opened
+			// Collection 1 and 2 have a matching child, so they are opened
 			let colOneRow = cv.getRow(cv.getRowIndexByID("C" + collection1.id));
 			assert.isTrue(colOneRow.isOpen);
 			let colTwoRow = cv.getRow(cv.getRowIndexByID("C" + collection2.id));
 			assert.isTrue(colTwoRow.isOpen);
-			// Collection 6 had no matches, it remains closed
+			// Collection 6 has no matches, it is filtered out
+			let colSixRowIndex = cv.getRowIndexByID("C" + collection6.id);
+			assert.isFalse(colSixRowIndex);
+
+			// Empty the filter
+			await cv.setFilter("");
+
+			// Collection 1 and 6 should remain collapsed as before filtering
+			colOneRow = cv.getRow(cv.getRowIndexByID("C" + collection1.id));
+			assert.isFalse(colOneRow.isOpen);
 			let colSixRow = cv.getRow(cv.getRowIndexByID("C" + collection6.id));
 			assert.isFalse(colSixRow.isOpen);
 		});
