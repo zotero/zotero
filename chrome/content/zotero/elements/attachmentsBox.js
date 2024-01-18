@@ -54,14 +54,11 @@
 		set item(item) {
 			let isRegularItem = item?.isRegularItem();
 			this.hidden = !isRegularItem;
-			if (this._item === item) {
+			if (!isRegularItem || this._item === item) {
 				return;
 			}
 			
 			this._item = item;
-			if (!isRegularItem) {
-				return;
-			}
 			this.refresh();
 		}
 
@@ -184,6 +181,8 @@
 		}
 
 		async refresh() {
+			if (!this._item) return;
+			
 			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 
 			await this._updateAttachmentIDs();
