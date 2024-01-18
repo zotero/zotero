@@ -17,10 +17,14 @@ describe("Item Tags Box", function () {
 	
 	describe("Tag Editing", function () {
 		it("should update tag when pressing Enter in textbox", async function () {
-			// Bring the window to the front. Without this, fields will never get focus.
+			// editable-text behavior relies on focus, so we first need to bring the window to the front.
+			let win = Zotero.getMainWindow();
+			let activatePromise = new Promise(
+				resolve => win.addEventListener('activate', resolve, { once: true })
+			);
 			Zotero.Utilities.Internal.activate();
-			Zotero.Utilities.Internal.activate(Zotero.getMainWindow());
-			await Zotero.Promise.delay(100);
+			Zotero.Utilities.Internal.activate(win);
+			await activatePromise;
 			
 			var tag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
@@ -34,7 +38,6 @@ describe("Item Tags Box", function () {
 			
 			var firstRow = rows[0];
 			firstRow.focus();
-			await Zotero.Promise.delay(100);
 			firstRow.ref.value = newTag;
 			firstRow.ref.dispatchEvent(new Event('input'));
 			
