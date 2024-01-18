@@ -532,19 +532,6 @@
 									/>
 									<menuseparator/>
 									<menuitem
-										id="view-menuitem-ui-density-compact"
-										data-l10n-id="menu-ui-density-compact"
-										name="menu-ui-density"
-										type="radio"
-									/>
-									<menuitem
-										id="view-menuitem-ui-density-comfortable"
-										data-l10n-id="menu-ui-density-comfortable"
-										name="menu-ui-density"
-										type="radio"
-									/>
-									<menuseparator/>
-									<menuitem
 										id="view-menuitem-collections-pane"
 										label="&collectionsPane.label;"
 										type="checkbox"
@@ -560,6 +547,22 @@
 										type="checkbox"
 									/>
 								</menupopup>
+							</menu>
+							<menu id="density-menu" data-l10n-id="menu-density">
+								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
+									<menuitem
+										id="view-menuitem-ui-density-compact"
+										data-l10n-id="menu-ui-density-compact"
+										name="menu-ui-density"
+										type="radio"
+									/>
+									<menuitem
+										id="view-menuitem-ui-density-comfortable"
+										data-l10n-id="menu-ui-density-comfortable"
+										name="menu-ui-density"
+										type="radio"
+									/>
+							</menupopup>
 							</menu>
 							<menu id="font-size-menu"
 									label="&fontSize.label;">

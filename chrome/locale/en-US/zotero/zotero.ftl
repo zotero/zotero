@@ -1,3 +1,6 @@
+menu-density =
+    .label = Density
+
 add-attachment = Add Attachment
 new-note = New Note
 
