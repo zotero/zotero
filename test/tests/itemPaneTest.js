@@ -319,33 +319,45 @@ describe("Item pane", function () {
 	
 	
 	describe("Attachment pane", function () {
-		it("should refresh on file rename", function* () {
-			var file = getTestDataDirectory();
+		it("should refresh on file rename", async function () {
+			let file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({
+			let item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
-			var newName = 'test2.png';
-			yield item.renameAttachmentFile(newName);
+			let newName = 'test2.png';
+
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let label = itemBox._id('fileName');
+			let promise = waitForDOMAttributes(label, 'value', (newValue) => {
+				return newValue === newName;
+			});
+
+			await item.renameAttachmentFile(newName);
 			
-			var itemBox = doc.getElementById('zotero-attachment-box');
-			var label = itemBox._id('fileName');
+			await promise;
 			assert.equal(label.value, newName);
-		})
+		});
 		
 		it("should update on attachment title change", async function () {
-			var file = getTestDataDirectory();
+			let file = getTestDataDirectory();
 			file.append('test.png');
-			var item = await Zotero.Attachments.importFromFile({ file });
-			var newTitle = 'New Title';
+			let item = await Zotero.Attachments.importFromFile({ file });
+			let newTitle = 'New Title';
+
+			let paneHeader = doc.getElementById('zotero-item-pane-header');
+			let label = paneHeader.titleField;
+			let promise = waitForDOMAttributes(label, 'value', (newValue) => {
+				return newValue === newTitle;
+			});
+
 			item.setField('title', newTitle);
 			await item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-attachment-box');
-			var label = itemBox._id('title');
-			assert.equal(label.textContent, newTitle);
-		})
-	})
+			await promise;
+			assert.equal(label.value, newTitle);
+		});
+	});
 	
 	
 	describe("Note editor", function () {
