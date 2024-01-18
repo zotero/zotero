@@ -36,10 +36,16 @@
 
 .titlebar-buttonbox {
 	pointer-events: all;
+	margin: 0 4px;
 }
 
 .titlebar-button {
 	margin: 4px 0;
+	width: calc(var(--tab-min-height) - 8px);
+	height: calc(var(--tab-min-height) - 8px);
+	position: relative;
+	// Fix KDE rendering bug
+	z-index: 1;
 }
 
 .titlebar-icon-container {
