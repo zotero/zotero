@@ -282,12 +282,8 @@ var ZoteroItemPane = new function() {
 		let valueSentenceCased = Zotero.Utilities.sentenceCase(value);
 
 		let menupopup = document.createXULElement('menupopup');
-
 		if (includeEditMenuOptions) {
-			// eslint-disable-next-line no-undef
-			goBuildEditContextMenu();
-			let menuitems = [...document.getElementById('textbox-contextmenu').children];
-			menupopup.append(...menuitems.map(menuitem => menuitem.cloneNode(true)));
+			Zotero.Utilities.Internal.updateEditContextMenu(menupopup);
 			menupopup.append(document.createXULElement('menuseparator'));
 		}
 

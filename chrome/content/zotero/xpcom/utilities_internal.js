@@ -2327,6 +2327,34 @@ Zotero.Utilities.Internal = {
 		document.documentElement.removeChild(scrollDiv);
 
 		return scrollbarWidth;
+	},
+	
+	updateEditContextMenu(menupopup, hideEditMenuItems = false) {
+		for (let menuitem of Array.from(menupopup.children)) {
+			if (!menuitem.hasAttribute('data-edit-menu-item')) {
+				break;
+			}
+			menuitem.remove();
+		}
+		
+		let win = menupopup.ownerDocument.defaultView;
+		let editPopup = win.goBuildEditContextMenu();
+		let editMenuItems = Array.from(editPopup.children).map((menuitem) => {
+			menuitem = menuitem.cloneNode(true);
+			menuitem.setAttribute('data-edit-menu-item', 'true');
+			if (hideEditMenuItems) {
+				menuitem.hidden = true;
+			}
+			return menuitem;
+		});
+		if (!hideEditMenuItems && menupopup.childElementCount) {
+			let separator = win.document.createXULElement('menuseparator');
+			separator.setAttribute('data-edit-menu-item', 'true');
+			editMenuItems.push(separator);
+		}
+		menupopup.prepend(...editMenuItems);
+
+		win.goUpdateGlobalEditMenuItems(true);
 	}
 };
 

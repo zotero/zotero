@@ -626,7 +626,10 @@
 					rowData.oncontextmenu = (event) => {
 						this._linkMenu.dataset.link = link;
 						document.popupNode = rowLabel.parentElement;
-						this.handlePopupOpening(event, this._id('zotero-link-menu'));
+						
+						let menupopup = this._id('zotero-link-menu');
+						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, !event.target.closest('input'));
+						this.handlePopupOpening(event, menupopup);
 					};
 				}
 				
@@ -1062,9 +1065,14 @@
 			optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 			let triggerPopup = (e) => {
 				document.popupNode = firstlast;
+
+				let menupopup = this._id('zotero-creator-transform-menu');
+				let hideEditMenuItems = !e.target.closest('input');
+				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, hideEditMenuItems);
+				
 				this._id('creator-transform-swap-names').hidden = fieldMode > 0;
 				this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(rowData.parentNode);
-				this.handlePopupOpening(e, this._id('zotero-creator-transform-menu'));
+				this.handlePopupOpening(e, menupopup);
 			};
 			rowData.appendChild(optionsButton);
 			
@@ -2118,6 +2126,10 @@
 		 * @return {Promise}
 		 */
 		async swapNames(_event) {
+			if (this.saveOnEdit) {
+				await this.blurOpenField();
+			}
+			
 			var row = document.popupNode.closest('.meta-row');
 			var typeBox = row.querySelector('[fieldname]');
 			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -2127,10 +2139,8 @@
 			fields.lastName = firstName;
 			fields.firstName = lastName;
 			this.modifyCreator(creatorIndex, fields);
+			
 			if (this.saveOnEdit) {
-				// If a field is open, blur it, which will trigger a save and cause
-				// the saveTx() to be a no-op
-				await this.blurOpenField();
 				await this.item.saveTx();
 			}
 		}
@@ -2382,6 +2392,7 @@
 		}
 
 		handlePopupOpening(event, popup) {
+			event.stopPropagation();
 			let isRightClick = event.type == 'contextmenu';
 			if (!isRightClick) {
 				event.target.style.visibility = "visible";
