@@ -515,7 +515,14 @@
 									oncommand="ZoteroStandalone.currentReader.toggleVerticalSplit()"
 							/>
 							<menuseparator class="menu-type-reader"/>
-
+							<menuitem
+									id="view-menuitem-use-dark-mode-for-content"
+									class="menu-type-reader"
+									type="checkbox"
+									label="&zotero.pdfReader.useDarkModeForContent;"
+									oncommand="Zotero.Prefs.set('reader.useDarkModeForContent', !Zotero.Prefs.get('reader.useDarkModeForContent'))"
+							/>
+							<menuseparator class="menu-type-reader"/>
 							<menu id="layout-menu" label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem

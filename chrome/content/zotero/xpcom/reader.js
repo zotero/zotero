@@ -215,6 +215,7 @@ class ReaderInstance {
 				...Zotero.Intl.getPrefixedStrings('pdfReader.')
 			},
 			showAnnotations: true,
+			useDarkModeForContent: Zotero.Prefs.get('reader.useDarkModeForContent'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -507,6 +508,7 @@ class ReaderInstance {
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
+			Zotero.Prefs.registerObserver('reader.useDarkModeForContent', this._handleContentDarkModeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleFontFamilyChange),
 		];
 
@@ -830,6 +832,10 @@ class ReaderInstance {
 
 	_handleTabTitlePrefChange = async () => {
 		await this.updateTitle();
+	};
+
+	_handleContentDarkModeChange = () => {
+		this._internalReader.useDarkModeForContent(Zotero.Prefs.get('reader.useDarkModeForContent'));
 	};
 
 	_handleFontFamilyChange = () => {
