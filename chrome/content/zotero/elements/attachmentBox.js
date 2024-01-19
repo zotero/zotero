@@ -91,6 +91,8 @@
 
 			this._section = null;
 			this._preview = null;
+
+			this._isRendering = false;
 		}
 
 		get mode() {
@@ -245,7 +247,11 @@
 		}
 
 		async render() {
+			if (this._isRendering) {
+				return;
+			}
 			Zotero.debug('Refreshing attachment box');
+			this._isRendering = true;
 
 			if (this.usePreview) {
 				this._preview.item = this.item;
@@ -386,6 +392,7 @@
 			else {
 				selectButton.hidden = true;
 			}
+			this._isRendering = false;
 		}
 
 		onViewClick(event) {

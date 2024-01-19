@@ -69,6 +69,8 @@ var ZoteroItemPane = new function() {
 		Zotero.debug('Viewing item');
 
 		_notesBox.parentItem = item;
+
+		let isSameItem = _lastItem?.id === item.id;
 		
 		_lastItem = item;
 
@@ -117,20 +119,21 @@ var ZoteroItemPane = new function() {
 			box.inTrash = inTrash;
 		}
 
-		if (pinnedPane && !_sidenav.getPane(pinnedPane)) {
-			pinnedPane = "";
+		if (!isSameItem) {
+			if (pinnedPane && !_sidenav.getPane(pinnedPane)) {
+				pinnedPane = "";
+			}
+			
+			_scrollParent.style.paddingBottom = '';
+			if (pinnedPane) {
+				_sidenav.scrollToPane(pinnedPane, 'instant');
+				_sidenav.pinnedPane = pinnedPane;
+			}
+			else if (pinnedPane !== false) {
+				_sidenav.scrollToPane(_sidenav.getPanes()[0]?.getAttribute('data-pane'), 'instant');
+			}
+			_sidenav.render();
 		}
-		
-		_scrollParent.style.paddingBottom = '';
-		if (pinnedPane) {
-			_sidenav.scrollToPane(pinnedPane, 'instant');
-			_sidenav.pinnedPane = pinnedPane;
-		}
-		else if (pinnedPane !== false) {
-			_sidenav.scrollToPane(_sidenav.getPanes()[0]?.getAttribute('data-pane'), 'instant');
-		}
-		
-		_sidenav.render();
 	});
 	
 	
