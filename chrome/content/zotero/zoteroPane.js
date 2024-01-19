@@ -2385,7 +2385,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		document.getElementById('zotero-item-pane-content').selectedIndex = 4;
+		document.getElementById('zotero-item-pane-content').selectedIndex = 3;
 		
 		if (typeof Zotero_Duplicates_Pane == 'undefined') {
 			Zotero.debug("Loading duplicatesMerge.js");
