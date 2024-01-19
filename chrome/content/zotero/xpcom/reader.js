@@ -1347,7 +1347,7 @@ class ReaderPreview extends ReaderInstance {
 			return success;
 		}
 		catch (e) {
-			Zotero.warn(`Failed to load preview for attachment ${await this._item.getFilePathAsync()}: ${String(e)}`);
+			Zotero.warn(`Failed to load preview for attachment ${this._item?.libraryID}/${this._item?.key}: ${String(e)}`);
 			this._item = null;
 			return false;
 		}

@@ -50,6 +50,7 @@
 
 			this._isDiscardPlanned = false;
 			this._isDiscarding = false;
+			this._failedCount = 0;
 
 			this._intersectionOb = new IntersectionObserver(this._handleIntersection.bind(this));
 			this._resizeOb = new ResizeObserver(this._handleResize.bind(this));
@@ -293,8 +294,10 @@
 				await this.discard(true);
 				this._reader = await Zotero.Reader.openPreview(this._item.id, this._id("preview"));
 				success = await this._reader._open({});
-				if (!success) {
+				// Retry 3 times if failed
+				if (!success && this._failedCount < 3) {
 					this._nextPreviewInitializePromise.resolve();
+					this._failedCount++;
 					// If failed on half-way of initialization, discard it
 					this.discard(true);
 					setTimeout(() => {
@@ -306,6 +309,7 @@
 			else {
 				success = true;
 			}
+			if (success) this._failedCount = 0;
 			prev && (prev.disabled = true);
 			next && (next.disabled = false);
 			return success;
