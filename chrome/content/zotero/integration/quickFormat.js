@@ -631,7 +631,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		// Clear item list
-		while (referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
+		_clearEntryList();
 		
 		// Take into account items cited in this citation. This means that the sorting isn't
 		// exactly by # of items cited from each library, but maybe it's better this way.
@@ -702,6 +702,7 @@ var Zotero_QuickFormat = new function () {
 			previousLibrary = libraryID;
 		}
 
+		_resize();
 		if (!referenceBox.children.length) {
 			return;
 		}
@@ -716,7 +717,6 @@ var Zotero_QuickFormat = new function () {
 			});
 		}
 		
-		_resize();
 		referenceBox.selectedIndex = selectedIndex;
 		referenceBox.ensureIndexIsVisible(selectedIndex);
 	}
