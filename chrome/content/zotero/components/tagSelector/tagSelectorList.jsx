@@ -28,15 +28,15 @@ const PropTypes = require('prop-types');
 var { Collection } = require('react-virtualized');
 
 // See also .tag-selector-item in _tag-selector.scss
-var filterBarHeight = 36;
+var filterBarHeight = 37;
 var tagPaddingLeft = 4;
 var tagPaddingRight = 4;
 var tagSpaceBetweenX = 2;
 var tagSpaceBetweenY = 2;
-var panePaddingTop = 4; // + splitter 9px tall
+var panePaddingTop = 8 + 1; // extra 1px offset for margin-bottom: -1px in #zotero-tags-splitter
 var panePaddingLeft = 8;
-var panePaddingRight = 2; // + scrollbar width
-//var panePaddingBottom = 2;
+var panePaddingRight = 2; // + scrollbar width (but no less than 8px total)
+// var panePaddingBottom = 8; // configurable in _tag-selector.scss
 var minHorizontalPadding = panePaddingLeft + tagPaddingLeft + tagPaddingRight + panePaddingRight;
 
 
@@ -142,14 +142,17 @@ class TagList extends React.PureComponent {
 	}
 	
 	cellSizeAndPositionGetter = ({ index }) => {
-		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
+		const tagPaddingTopBottom = this.props.uiDensity === 'comfortable' ? 2 : 1;
+		const tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
+		
+		// NOTE: box-sizing is set to border-box on tags for i.e. padding needs to be included
 		return {
-			width: Math.min(this.props.tags[index].width, tagMaxWidth),
-			height: this.props.lineHeight,
+			width: Math.min(this.props.tags[index].width + tagPaddingLeft + tagPaddingRight, tagMaxWidth),
+			height: this.props.lineHeight + (2 * tagPaddingTopBottom),
 			x: this.positions[index][0],
 			y: this.positions[index][1]
 		};
-	}
+	};
 	
 	renderTag = ({ index, _key, style }) => {
 		var tag = this.props.tags[index];
@@ -208,7 +211,7 @@ class TagList extends React.PureComponent {
 				<span>{tag.name}</span>
 			</div>
 		);
-	}
+	};
 	
 	render() {
 		Zotero.debug("Rendering tag list");

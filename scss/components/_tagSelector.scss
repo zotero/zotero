@@ -111,6 +111,7 @@
 	padding: 1px 4px;
 	text-overflow: ellipsis;
 	white-space: pre;
+	box-sizing: border-box;
 
 	@include comfortable {
 		padding: 2px 4px;
