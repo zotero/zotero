@@ -1290,11 +1290,16 @@ class ReaderPreview extends ReaderInstance {
 		`,
 		snapshot: `
 		html {
-			pointer-events: none;
+			pointer-events: none !important;
+			user-select: none !important;
 			min-width: 1024px;
 			transform: scale(var(--win-scale));
 			transform-origin: 0 0;
 			overflow-x: hidden;
+		}
+		
+		body {
+			overflow-y: visible;
 		}`
 	};
 
