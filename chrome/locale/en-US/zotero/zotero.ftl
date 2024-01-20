@@ -67,13 +67,14 @@ item-menu-add-linked-file =
 item-menu-add-url =
      .label = Web Link
 
-itembox-button-openLink =
-    .title = Open Link
-    .aria-label = Open Link
+view-online = View Online
+item-menu-option-view-online =
+    .label = {view-online}
+item-button-view-online =
+    .tooltiptext = {view-online}
 
 itembox-button-options =
-    .aria-label = Open Context Menu
-    .title = Open Context Menu
+    .tooltiptext = Open Context Menu
 
 import-window =
     .title = Import

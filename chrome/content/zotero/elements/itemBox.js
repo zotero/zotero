@@ -73,7 +73,7 @@
 									<menuitem id="zotero-creator-move-down" class="zotero-creator-move" data-l10n-id="item-creator-moveDown"/>
 								</menupopup>
 								<menupopup id="zotero-link-menu">
-									<menuitem id="zotero-link-menu-view-online" label="&zotero.item.viewOnline;"/>
+									<menuitem id="zotero-link-menu-view-online" data-l10n-id="item-menu-option-view-online"/>
 									<menuitem id="zotero-link-menu-copy" label="&zotero.item.copyAsURL;"/>
 								</menupopup>
 								<guidance-panel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
@@ -597,7 +597,7 @@
 				if ((fieldName == 'url' || fieldName == 'homepage')
 						// Only make plausible HTTP URLs clickable
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
-					openLinkButton = this.createOpenLinkIcon(rowLabel, val);
+					openLinkButton = this.createOpenLinkIcon(val);
 					addContextMenu = true;
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -611,7 +611,7 @@
 								.replace(/\?/g, '%3f')
 								.replace(/%/g, '%25')
 								.replace(/"/g, '%22');
-						openLinkButton = this.createOpenLinkIcon(rowLabel, doi);
+						openLinkButton = this.createOpenLinkIcon(doi);
 						addContextMenu = true;
 					}
 				}
@@ -1026,7 +1026,7 @@
 			var removeButton = document.createXULElement('toolbarbutton');
 			removeButton.setAttribute("class", "zotero-clicky zotero-clicky-minus show-on-hover no-display");
 			removeButton.setAttribute('ztabindex', ++this._ztabindex);
-			removeButton.setAttribute('aria-label', Zotero.getString('general.delete'));
+			removeButton.setAttribute('tooltiptext', Zotero.getString('general.delete'));
 			// If default first row, don't let user remove it
 			if (defaultRow || !this.editable) {
 				this.disableButton(removeButton);
@@ -1042,6 +1042,7 @@
 			var addButton = document.createXULElement('toolbarbutton');
 			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus show-on-hover no-display");
 			addButton.setAttribute('ztabindex', ++this._ztabindex);
+			addButton.setAttribute('tooltiptext', Zotero.getString('general.create'));
 			// If row isn't saved, don't let user add more
 			if (unsaved || !this.editable) {
 				this.disableButton(addButton);
@@ -1445,7 +1446,7 @@
 			}
 		}
 		
-		createOpenLinkIcon(rowLabel, value) {
+		createOpenLinkIcon(value) {
 			// In duplicates/trash mode return nothing
 			if (!this.editable) {
 				return null;
@@ -1454,9 +1455,8 @@
 			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover";
 			openLink.addEventListener("click", event => ZoteroPane.loadURI(value, event));
 			openLink.addEventListener('keypress', event => this.handleKeyPress(event));
-			rowLabel.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
 			openLink.setAttribute("ztabindex", ++this._ztabindex);
-			openLink.setAttribute('data-l10n-id', "itembox-button-openLink");
+			openLink.setAttribute('data-l10n-id', "item-button-view-online");
 			return openLink;
 		}
 
