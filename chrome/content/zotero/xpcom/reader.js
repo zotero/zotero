@@ -621,7 +621,7 @@ class ReaderInstance {
 		// this._postMessage({ action: 'focusLastToolbarButton' });
 	}
 
-	tabToolbar(reverse) {
+	tabToolbar(_reverse) {
 		// this._postMessage({ action: 'tabToolbar', reverse });
 		// Avoid toolbar find button being focused for a short moment
 		setTimeout(() => this._iframeWindow.focus());
@@ -856,6 +856,7 @@ class ReaderInstance {
 			}
 			return new this._iframeWindow.Blob([u8arr], { type: mime });
 		}
+		return null;
 	}
 
 	_getColorIcon(color, selected) {
@@ -1152,7 +1153,7 @@ class ReaderWindow extends ReaderInstance {
 			'.menu-type-reader.pdf, .menu-type-reader.epub, .menu-type-reader.snapshot'
 		).forEach(el => el.hidden = true);
 		this._window.document.querySelectorAll('.menu-type-reader.' + subtype).forEach(el => el.hidden = false);
-	};
+	}
 
 	close() {
 		this.uninit();
@@ -1535,7 +1536,6 @@ class Reader {
 		if (!openInBackground) {
 			reader.focus();
 		}
-		return reader;
 	}
 
 	/**
