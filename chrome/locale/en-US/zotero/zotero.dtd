@@ -332,4 +332,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF					"Import Annotations…">
 <!ENTITY zotero.pdfReader.rotatePageLeft                    "Rotate Page Left">
 <!ENTITY zotero.pdfReader.rotatePageRight                   "Rotate Page Right">
-<!ENTITY zotero.pdfReader.useDarkModeForContent             "Use Dark Mode for Content">

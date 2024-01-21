@@ -76,6 +76,9 @@ item-button-view-online =
 itembox-button-options =
     .tooltiptext = Open Context Menu
 
+reader-use-dark-mode-for-content =
+    .label = Use Dark Mode for Content
+
 import-window =
     .title = Import
 
