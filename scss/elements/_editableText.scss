@@ -116,10 +116,8 @@ editable-text {
 		display: none;
 	}
 	// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
-	// at the bottom of textarea on windows 
-	@media (-moz-platform: windows) {
-		textarea {
-			overflow-x: hidden;
-		}
+	// at the bottom of textarea on all platforms with non-overlay scrollbars 
+	textarea {
+		overflow-x: hidden;
 	}
 }
