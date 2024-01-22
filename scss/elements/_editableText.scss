@@ -37,6 +37,7 @@ editable-text {
 	// https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
 	
 	display: grid;
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 	
 	span {
 		visibility: hidden;
@@ -111,7 +112,7 @@ editable-text {
 			text-overflow: ellipsis;
 		}
 	}
-	&[hidden]{
+	&[hidden] {
 		display: none;
 	}
 	// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
