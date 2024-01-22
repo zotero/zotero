@@ -34,42 +34,116 @@ describe("Zotero.ItemTree", function() {
 	});
 	
 	describe("when performing a quick search", function () {
-		let parentItem, match, nonMatch;
-		let selectAllEvent = {key: 'a'};
-		before(async function () {
-			parentItem = await createDataObject('item');
-			match = await importFileAttachment('test.png', { title: 'find-me', parentItemID: parentItem.id });
-			nonMatch = await importFileAttachment('test.png', { title: 'not-a-result', parentItemID: parentItem.id });
-			if (Zotero.isMac) {
-				selectAllEvent.metaKey = true;
-			} else {
-				selectAllEvent.ctrlKey = true;
-			}
+		let quicksearch;
+		
+		before(() => {
+			quicksearch = win.document.getElementById('zotero-tb-search');
 		});
-
-		it("should not select non-matching children when issuing a Select All command", async function () {
-			var quicksearch = win.document.getElementById('zotero-tb-search');
-			quicksearch.value = match.getField('title');
+		after(async () => {
+			quicksearch.value = "";
 			quicksearch.doCommand();
 			await itemsView._refreshPromise;
-			itemsView.tree._onKeyDown(selectAllEvent);
-
-			var selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 1);
-			assert.equal(selected[0], match.id);
 		});
-
-		it("should expand collapsed parents with matching children when issuing a Select All command", async function () {
-			itemsView.collapseAllRows();
-			var selected = itemsView.getSelectedItems(true);
-			// After collapse the parent item is selected
-			assert.lengthOf(selected, 1);
-			assert.equal(selected[0], parentItem.id);
+		
+		describe("when issuing a Select All command", function () {
+			let parentItem, match;
+			let selectAllEvent = { key: 'a' };
 			
-			itemsView.tree._onKeyDown(selectAllEvent);
-			selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 1);
-			assert.equal(selected[0], match.id);
+			before(async function () {
+				parentItem = await createDataObject('item');
+				match = await importFileAttachment('test.png', { title: 'find-me', parentItemID: parentItem.id });
+				await importFileAttachment('test.png', { title: 'not-a-result', parentItemID: parentItem.id });
+				if (Zotero.isMac) {
+					selectAllEvent.metaKey = true;
+				}
+				else {
+					selectAllEvent.ctrlKey = true;
+				}
+			});
+			
+			after(async function() {
+				await parentItem.erase();
+			});
+			
+			it("should not select non-matching children", async function () {
+				quicksearch.value = match.getField('title');
+				quicksearch.doCommand();
+				await itemsView._refreshPromise;
+				itemsView.tree._onKeyDown(selectAllEvent);
+
+				var selected = itemsView.getSelectedItems(true);
+				assert.lengthOf(selected, 1);
+				assert.equal(selected[0], match.id);
+			});
+
+			it("should expand collapsed parents with matching children", async function () {
+				itemsView.collapseAllRows();
+				var selected = itemsView.getSelectedItems(true);
+				// After collapse the parent item is selected
+				assert.lengthOf(selected, 1);
+				assert.equal(selected[0], parentItem.id);
+				
+				itemsView.tree._onKeyDown(selectAllEvent);
+				selected = itemsView.getSelectedItems(true);
+				assert.lengthOf(selected, 1);
+				assert.equal(selected[0], match.id);
+			});
+		});
+		
+		describe("when dragging attachments", function () {
+			let parentItem, childItem;
+			before(async () => {
+				parentItem = await createDataObject('item', { title: "match-parent" });
+				childItem = await importFileAttachment('test.png', { title: 'match-child', parentItemID: parentItem.id });
+			});
+			
+			it("should display a child attachment when it is dragged into top level if it matches the search", async function () {
+				childItem.parentID = parentItem.id;
+				await childItem.save();
+				
+				quicksearch.value = "match";
+				quicksearch.doCommand();
+				
+				await itemsView._refreshPromise;
+				assert.lengthOf(itemsView._rows, 2);
+				assert.equal(itemsView.getRow(0).id, parentItem.id);
+				assert.equal(itemsView.getRow(1).id, childItem.id);
+				assert.equal(itemsView.getRow(1).level, 1);
+				
+				// The drop effectively does this
+				childItem.parentID = false;
+				await childItem.save();
+				await itemsView._refreshPromise;
+				
+				assert.lengthOf(itemsView._rows, 2);
+				assert.equal(itemsView.getRow(0).id, childItem.id);
+				assert.equal(itemsView.getRow(0).level, 0);
+				assert.equal(itemsView.getRow(1).id, parentItem.id);
+			});
+			
+			it("should display a child attachment when it is dragged onto a parent item if it matches the search", async function () {
+				childItem.parentID = false;
+				await childItem.save();
+				
+				quicksearch.value = "match";
+				quicksearch.doCommand();
+				
+				await itemsView._refreshPromise;
+				assert.lengthOf(itemsView._rows, 2);
+				assert.equal(itemsView.getRow(0).id, childItem.id);
+				assert.equal(itemsView.getRow(0).level, 0);
+				assert.equal(itemsView.getRow(1).id, parentItem.id);
+				
+				// The drop effectively does this
+				childItem.parentID = parentItem.id;
+				await childItem.save();
+				await itemsView._refreshPromise;
+				
+				assert.lengthOf(itemsView._rows, 2);
+				assert.equal(itemsView.getRow(0).id, parentItem.id);
+				assert.equal(itemsView.getRow(1).id, childItem.id);
+				assert.equal(itemsView.getRow(1).level, 1);
+			});
 		});
 	});
 	

@@ -818,6 +818,8 @@ var ZoteroContextPane = new function () {
 				editor.item = item;
 				editor.parentItem = null;
 				editor.returnHandler = () => {
+					// Immediately save note content before vbox with note-editor iframe is destroyed below
+					editor.saveSync();
 					_panesDeck.setAttribute('selectedIndex', 1);
 					_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
 					vbox.remove();

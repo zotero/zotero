@@ -8,7 +8,7 @@ describe("Zotero.Attachments", function() {
 	
 	afterEach(function () {
 		if (browser) {
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 			browser = null;
 		}
 	});
@@ -282,21 +282,25 @@ describe("Zotero.Attachments", function() {
 	
 	
 	describe("#importFromURL()", function () {
-		it("should download a PDF from a JS redirect page", async function () {
-			this.timeout(65e3);
-			
-			var item = await Zotero.Attachments.importFromURL({
-				libraryID: Zotero.Libraries.userLibraryID,
-				url: 'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
-				contentType: 'application/pdf'
+		it("should use BrowserDownload for a JS redirect page", async function () {
+			let downloadPDFStub = sinon.stub(Zotero.BrowserDownload, "downloadPDF");
+			downloadPDFStub.callsFake(async (_url, path) => {
+				await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), path);
 			});
-			
-			assert.isTrue(item.isPDFAttachment());
-			var sample = await Zotero.File.getContentsAsync(item.getFilePath(), null, 1000);
-			assert.equal(Zotero.MIME.sniffForMIMEType(sample), 'application/pdf');
-			
-			// Clean up
-			await Zotero.Items.erase(item.id);
+			try {
+				var item = await Zotero.Attachments.importFromURL({
+					libraryID: Zotero.Libraries.userLibraryID,
+					url: 'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
+					contentType: 'application/pdf'
+				});
+				
+				assert.isTrue(downloadPDFStub.calledOnce);
+			}
+			finally {
+				// Clean up
+				await Zotero.Items.erase(item.id);
+				downloadPDFStub.restore();
+			}
 		});
 	});
 	
@@ -306,12 +310,13 @@ describe("Zotero.Attachments", function() {
 			var item = yield createDataObject('item');
 			
 			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
-			browser = yield HiddenBrowser.create(uri);
+			browser = new HiddenBrowser(uri);
+			yield browser.load(uri);
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
 			var attachment = yield Zotero.Attachments.linkFromDocument({
-				document: yield HiddenBrowser.getDocument(browser),
+				document: yield browser.getDocument(),
 				parentItemID: item.id
 			});
 			
@@ -354,7 +359,8 @@ describe("Zotero.Attachments", function() {
 			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot");
 			httpd.registerDirectory("/" + prefix + "/", new FileUtils.File(uri));
 			
-			browser = await HiddenBrowser.create(testServerPath + "/index.html");
+			browser = new HiddenBrowser();
+			await browser.load(testServerPath + "/index.html");
 			Zotero.FullText.indexNextInTest();
 			var attachment = await Zotero.Attachments.importFromDocument({
 				browser,
@@ -401,7 +407,8 @@ describe("Zotero.Attachments", function() {
 				}
 			);
 
-			browser = await HiddenBrowser.create(testServerPath + "/index.html");
+			let browser = new HiddenBrowser();
+			await browser.load(testServerPath + "/index.html");
 			var attachment = await Zotero.Attachments.importFromDocument({
 				browser,
 				parentItemID: item.id
@@ -448,7 +455,8 @@ describe("Zotero.Attachments", function() {
 				}
 			);
 
-			browser = await HiddenBrowser.create(testServerPath + "/index.html");
+			let browser = new HiddenBrowser();
+			await browser.load(testServerPath + "/index.html");
 			var attachment = await Zotero.Attachments.importFromDocument({
 				browser,
 				parentItemID: item.id
@@ -494,7 +502,8 @@ describe("Zotero.Attachments", function() {
 				}
 			);
 
-			browser = await HiddenBrowser.create(testServerPath + "/index.html");
+			let browser = new HiddenBrowser();
+			await browser.load(testServerPath + "/index.html");
 			let attachment = await Zotero.Attachments.importFromDocument({
 				browser,
 				parentItemID: item.id

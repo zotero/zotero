@@ -1602,12 +1602,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var pageData;
 		try {
 			let url = Zotero.File.pathToFileURI(path);
-			browser = await HiddenBrowser.create(url, { blockRemoteResources: true });
-			pageData = await HiddenBrowser.getPageData(browser, ['characterSet', 'bodyText']);
+			browser = new HiddenBrowser();
+			await browser.load(url, { blockRemoteResources: true });
+			pageData = await browser.getPageData(['characterSet', 'bodyText']);
 		}
 		finally {
 			if (browser) {
-				HiddenBrowser.destroy(browser);
+				browser.destroy();
 			}
 		}
 		return {

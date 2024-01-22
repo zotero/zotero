@@ -645,6 +645,29 @@ const ZoteroStandalone = new function() {
 	};
 	
 	
+	this.promptForRestartInTroubleshootingMode = async function () {
+		let ps = Services.prompt;
+		let [title, description] = await document.l10n.formatValues([
+			'restart-in-troubleshooting-mode-dialog-title',
+			'restart-in-troubleshooting-mode-dialog-description'
+		]);
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			title,
+			description,
+			buttonFlags,
+			Zotero.getString('general.restartNow'),
+			null, null, null, {}
+		);
+		
+		if (index == 0) {
+			Services.startup.restartInSafeMode(Ci.nsIAppStartup.eAttemptQuit);
+		}
+	};
+	
+	
 	this.updateAddonsPane = function (doc) {
 		//var rootWindow = doc.ownerGlobal.windowRoot.ownerGlobal;
 		

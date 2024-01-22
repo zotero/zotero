@@ -208,11 +208,20 @@ Zotero.Server.Connector.SaveSession.prototype.onProgress = function (item, progr
 		delete o.progress;
 		delete o.contentType;
 	}
+	if (o.itemType === item.itemType) {
+		o.progress = progress;
+		return;
+	}
 	o.itemType = item.itemType;
 	o.attachments = item.attachments;
-	if (item.itemType == 'attachment') {
-		o.progress = progress;
-	}
+};
+
+Zotero.Server.Connector.SaveSession.prototype.isSavingDone = function () {
+	return this.savingDone
+		|| Object.values(this._progressItems).every(i => i.progress === 100 || typeof i.progress !== "number")
+		&& Object.values(this._progressItems).every((i) => {
+			return !i.attachments || i.attachments.every(a => a.progress === 100 || typeof i.progress !== "number");
+		});
 };
 
 Zotero.Server.Connector.SaveSession.prototype.getProgressItem = function (id) {
@@ -640,8 +649,6 @@ Zotero.Server.Connector.SavePage.prototype = {
 			}
 			let items = await translate.translate({libraryID, collections: collection ? [collection.id] : false});
 			session.addItems(items);
-			// Return 'done: true' so the connector stops checking for updates
-			session.savingDone = true;
 		}.bind(this));
 	},
 
@@ -786,10 +793,6 @@ Zotero.Server.Connector.SaveItems.prototype = {
 				// Add items to session once all attachments have been saved
 				.then(function (items) {
 					session.addItems(items);
-					if (session.pendingAttachments.length === 0) {
-						// Return 'done: true' so the connector stops checking for updates
-						session.savingDone = true;
-					}
 				});
 			}
 			catch (e) {
@@ -873,8 +876,9 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			function (attachment, progress, error) {
 				session.onProgress(attachment, progress, error);
 			},
-			(...args) => {
-				if (onTopLevelItemsDone) onTopLevelItemsDone(...args);
+			(itemsJSON, items) => {
+				itemsJSON.forEach(item => session.onProgress(item, 100));
+				if (onTopLevelItemsDone) onTopLevelItemsDone(itemsJSON, items);
 			},
 			function (parentItemID, attachment) {
 				session.pendingAttachments.push([parentItemID, attachment]);
@@ -984,18 +988,18 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 
 			let url = session.pendingAttachments[0][1].url;
 
-			let browser = await HiddenBrowser.create(url, {
-				requireSuccessfulStatus: true,
+			let browser = new HiddenBrowser({
 				docShell: {
 					allowImages: true
 				},
 				cookieSandbox,
 			});
+			await browser.load(url, { requireSuccessfulStatus: true });
 			try {
-				snapshotContent = await HiddenBrowser.snapshot(browser);
+				snapshotContent = await browser.snapshot();
 			}
 			finally {
-				HiddenBrowser.destroy(browser);
+				browser.destroy();
 			}
 		}
 		else {
@@ -1011,8 +1015,6 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 			for (let [_parentItemID, attachment] of session.pendingAttachments) {
 				session.onProgress(attachment, false);
 			}
-
-			session.savingDone = true;
 
 			return [200, 'text/plain', 'No snapshot content attached.'];
 		}
@@ -1074,9 +1076,6 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 					session.onProgress(attachment, progress, error);
 				},
 			);
-
-			// Return 'done: true' so the connector stops checking for updates
-			session.savingDone = true;
 		}
 
 		return 201;
@@ -1186,13 +1185,13 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return item;
 		}
 		
-		var parser = new DOMParser();
-		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
-		doc = Zotero.HTTP.wrapDocument(doc, data.url);
-		
-		let title = doc.title;
-		if (!data.html) {
-			title = data.title;
+		if (data.html) {
+			var parser = new DOMParser();
+			var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
+			doc = Zotero.HTTP.wrapDocument(doc, data.url);
+			var title = doc.title;
+		} else {
+			title = data.title || data.url;
 		}
 		
 		// Create new webpage item
@@ -1338,7 +1337,7 @@ Zotero.Server.Connector.SessionProgress.prototype = {
 						}
 						return newItem;
 					}),
-				done: session.savingDone
+				done: session.isSavingDone()
 			})
 		];
 	}
@@ -1686,7 +1685,7 @@ Zotero.Server.Connector.Ping.prototype = {
 	 * Sends 200 and HTML status on GET requests
 	 * @param data {Object} request information defined in connector.js
 	 */
-	init: function (req) {
+	init: async function (req) {
 		if (req.method == 'GET') {
 			return [200, "text/html", '<!DOCTYPE html><html>'
 				+ '<body>Zotero is running</body></html>'];
@@ -1696,11 +1695,13 @@ Zotero.Server.Connector.Ping.prototype = {
 				//Zotero.debug("Setting active URL to " + req.data.activeURL);
 				Zotero.QuickCopy.lastActiveURL = req.data.activeURL;
 			}
+			let translatorsHash = await Zotero.Translators.getTranslatorsHash();
 			
 			let response = {
 				prefs: {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
-					googleDocsAddNoteEnabled: true
+					googleDocsAddNoteEnabled: true,
+					translatorsHash
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {

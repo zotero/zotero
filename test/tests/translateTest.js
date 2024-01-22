@@ -689,8 +689,9 @@ describe("Zotero.Translate", function() {
 		});
 
 		it('web translators should save attachment from browser document', function* () {
-			let browser = yield HiddenBrowser.create("http://127.0.0.1:23119/test/translate/test.html");
-			let doc = yield HiddenBrowser.getDocument(browser);
+			let browser = new HiddenBrowser();
+			yield browser.load("http://127.0.0.1:23119/test/translate/test.html");
+			let doc = yield browser.getDocument();
 
 			let translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
@@ -719,7 +720,7 @@ describe("Zotero.Translate", function() {
 			assert.equal(snapshot.attachmentContentType, "text/html");
 			checkTestTags(snapshot, true);
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 		});
 		
 		it('web translators should save attachment from non-browser document', function* () {
