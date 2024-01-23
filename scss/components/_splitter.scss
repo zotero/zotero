@@ -1,3 +1,16 @@
+@mixin splitter-invisible-size($side) {
+	border-#{$side}: 0;
+	border-#{another-side($side)}: var(--material-border-quarternary);
+	margin-#{$side}: calc(1px - var(--draggable-size));
+	margin-#{another-side($side)}: -1px;
+	&[state="collapsed"] {
+		border-#{$side}: var(--material-border-quarternary);
+		border-#{another-side($side)}: 0;
+		margin-#{$side}: 0;
+		margin-#{another-side($side)}: 0;
+	}
+}
+
 splitter {
 	appearance: none;
 	z-index: 1;
@@ -27,28 +40,12 @@ splitter {
 
 		&[collapse="before"],
 		&[substate="before"] {
-			border-top: var(--material-border-quarternary);
-			margin-bottom: calc(1px - var(--draggable-size));
-			margin-top: -1px;
-			&[state="collapsed"] {
-				border-bottom: var(--material-border-quarternary);
-				border-top: 0;
-				margin-bottom: 0;
-				margin-top: 0;
-			}
+			@include splitter-invisible-size(bottom);
 		}
 
 		&[collapse="after"],
 		&[substate="after"] {
-			border-bottom: var(--material-border-quarternary);
-			margin-top: calc(1px - var(--draggable-size));
-			margin-bottom: -1px;
-			&[state="collapsed"] {
-				border-top: var(--material-border-quarternary);
-				border-bottom: 0;
-				margin-top: 0;
-				margin-bottom: 0;
-			}
+			@include splitter-invisible-size(top);
 		}
 	}
 
@@ -59,36 +56,21 @@ splitter {
 		&[substate="before"],
 		&[collapse="after"]:-moz-locale-dir(rtl),
 		&[substate="after"]:-moz-locale-dir(rtl) {
-			border-left: var(--material-border-quarternary);
-			margin-right: calc(1px - var(--draggable-size));
-			margin-left: -1px;
-			&[state="collapsed"] {
-				border-right: var(--material-border-quarternary);
-				border-left: 0;
-				margin-right: 0;
-				margin-left: 0;
-			}
+			@include splitter-invisible-size(right);
 		}
 
 		&[collapse="after"],
 		&[substate="after"],
 		&[collapse="before"]:-moz-locale-dir(rtl),
 		&[substate="before"]:-moz-locale-dir(rtl) {
-			border-right: var(--material-border-quarternary);
-			margin-left: calc(1px - var(--draggable-size));
-			margin-right: -1px;
-			&[state="collapsed"] {
-				border-left: var(--material-border-quarternary);
-				border-right: 0;
-				margin-left: 0;
-				margin-right: 0;
-			}
+			@include splitter-invisible-size(left);
 		}
 	}
 }
 
 #zotero-items-splitter,
 #zotero-context-splitter {
+	@include splitter-invisible-size(right);
 	&[state="collapsed"] {
 		--draggable-size: 1px;
 		border: 0;

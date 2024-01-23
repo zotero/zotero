@@ -37,3 +37,18 @@
 
     @return $result;
 }
+
+@function another-side($side) {
+    @if $side == "bottom" {
+        @return "top";
+    }
+    @else if $side == "top" {
+        @return "bottom";
+    }
+    @else if $side == "left" {
+        @return "right";
+    }
+    @else if $side == "right" {
+        @return "left";
+    }
+}
