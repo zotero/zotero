@@ -44,6 +44,7 @@ const CHILD_INDENT = 16;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
+const SLIDE_ANIMATION_DURATION = 200; //ms
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
@@ -1605,11 +1606,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		this._rows[index].isOpen = true;
+		this._lastToggleOpenStateCount = count;
 
 		if (count == 0) {
 			this._lastToggleOpenStateIndex = null;
 			return;
 		}
+
 
 		if (!skipRowMapRefresh) {
 			Zotero.debug('Refreshing item row map');
@@ -2831,8 +2834,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.setAttribute('aria-disabled', true);
 		}
 
+		div.style.zIndex = null;
+
 		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
 		if (this._lastToggleOpenStateIndex === index) {
+			div.style.zIndex = 1;
 			let twisty = div.querySelector('.twisty');
 			if (twisty) {
 				twisty.classList.toggle('open', !this.isContainerOpen(index));
@@ -2842,8 +2848,38 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		if (index > this._lastToggleOpenStateIndex && this._lastToggleOpenStateCount > 0) {
+			const needsTransform = !div.style.transform;
+			if (needsTransform) {
+				let delay = 0;
+				let duration = SLIDE_ANIMATION_DURATION;
+				
+				if (index < 1 + this._lastToggleOpenStateIndex + this._lastToggleOpenStateCount) {
+					// new rows need to slide sequentially (initially all are squashed behind the parent row)
+					const newRowIndex = index - this._lastToggleOpenStateIndex;
+					const remainingNewRowsCount = this._lastToggleOpenStateCount - newRowIndex;
+
+					delay = (remainingNewRowsCount / this._lastToggleOpenStateCount) * SLIDE_ANIMATION_DURATION;
+					duration = SLIDE_ANIMATION_DURATION - delay;
+
+					div.style.transform = `translateY(${-(index - this._lastToggleOpenStateIndex) * 100}%)`;
+				}
+				else {
+					div.style.transform = `translateY(${-(this._lastToggleOpenStateCount) * 100}%)`;
+				}
+				setTimeout(() => {
+					div.style.transition = `background-color 0.125s linear, transform ${duration / 1000}s linear ${delay / 1000}s`;
+					div.style.transform = '';
+				}, 0);
+				setTimeout(() => {
+					div.style.transition = null;
+					div.style.transform = null;
+				}, SLIDE_ANIMATION_DURATION);
+			}
+		}
+
 		return div;
-	};
+	}
 	
 	_handleRowMouseUpDown = (event) => {
 		const modifierIsPressed = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
