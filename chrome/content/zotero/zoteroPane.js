@@ -1973,24 +1973,26 @@ var ZoteroPane = new function()
 				}
 			}
 
-			let isStackedMode = Zotero.Prefs.get("layout") === "stacked";
-			const sidenavSize = 37;
-			if (hideSidenav && !sidenav.hidden) {
-				sidenav.hidden = true;
-				if (isStackedMode) {
-					pane.height = `${(pane.clientHeight) + sidenavSize}`;
+			if (!document.querySelector("#zotero-items-splitter").collapsed) {
+				let isStackedMode = Zotero.Prefs.get("layout") === "stacked";
+				const sidenavSize = 37;
+				if (hideSidenav && !sidenav.hidden) {
+					sidenav.hidden = true;
+					if (isStackedMode) {
+						pane.height = `${(pane.clientHeight) + sidenavSize}`;
+					}
+					else {
+						pane.width = `${(pane.clientWidth) + sidenavSize}`;
+					}
 				}
-				else {
-					pane.width = `${(pane.clientWidth) + sidenavSize}`;
-				}
-			}
-			else if (!hideSidenav && sidenav.hidden) {
-				sidenav.hidden = false;
-				if (isStackedMode) {
-					pane.height = `${(pane.clientHeight) - sidenavSize}`;
-				}
-				else {
-					pane.width = `${(pane.clientWidth) - sidenavSize}`;
+				else if (!hideSidenav && sidenav.hidden) {
+					sidenav.hidden = false;
+					if (isStackedMode) {
+						pane.height = `${(pane.clientHeight) - sidenavSize}`;
+					}
+					else {
+						pane.width = `${(pane.clientWidth) - sidenavSize}`;
+					}
 				}
 			}
 			

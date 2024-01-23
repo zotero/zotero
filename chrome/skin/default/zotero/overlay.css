@@ -186,6 +186,8 @@
 {
 	width: 342px;
 	min-width: 342px;
+	/* Need a min height to prevent layout issues in stacked mode */
+	min-height: 168px;
 }
 
 #zotero-layout-switcher

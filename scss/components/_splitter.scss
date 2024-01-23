@@ -69,11 +69,23 @@ splitter {
 }
 
 #zotero-items-splitter,
-#zotero-context-splitter {
-	@include splitter-invisible-size(right);
-	&[state="collapsed"] {
-		--draggable-size: 1px;
-		border: 0;
-		margin-left: -1px;
+#zotero-context-splitter,
+#zotero-context-splitter-stacked {
+	&[orient=vertical] {
+		&[state="collapsed"] {
+			margin-bottom: -1px;
+			--draggable-size: 1px;
+			border: 0;
+		}
+	}
+
+	&:not([orient=vertical]) {
+		@include splitter-invisible-size(right);
+
+		&[state="collapsed"] {
+			margin-right: -1px;
+			--draggable-size: 1px;
+			border: 0;
+		}
 	}
 }
