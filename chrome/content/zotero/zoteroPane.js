@@ -1973,14 +1973,25 @@ var ZoteroPane = new function()
 				}
 			}
 
-			const sidenavWidth = 37;
+			let isStackedMode = Zotero.Prefs.get("layout") === "stacked";
+			const sidenavSize = 37;
 			if (hideSidenav && !sidenav.hidden) {
 				sidenav.hidden = true;
-				pane.width = `${(pane.clientWidth) + sidenavWidth}`;
+				if (isStackedMode) {
+					pane.height = `${(pane.clientHeight) + sidenavSize}`;
+				}
+				else {
+					pane.width = `${(pane.clientWidth) + sidenavSize}`;
+				}
 			}
 			else if (!hideSidenav && sidenav.hidden) {
 				sidenav.hidden = false;
-				pane.width = `${pane.clientWidth - sidenavWidth}`;
+				if (isStackedMode) {
+					pane.height = `${(pane.clientHeight) - sidenavSize}`;
+				}
+				else {
+					pane.width = `${(pane.clientWidth) - sidenavSize}`;
+				}
 			}
 			
 			return true;
@@ -1993,7 +2004,7 @@ var ZoteroPane = new function()
 		.finally(function () {
 			return this.itemsView.runListeners('select');
 		}.bind(this));
-	}
+	};
 	
 	
 	/**
