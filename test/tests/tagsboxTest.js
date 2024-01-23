@@ -109,16 +109,15 @@ describe("Item Tags Box", function () {
 			var tagsbox = doc.querySelector('tags-box');
 			var rows = tagsbox.querySelectorAll('li');
 			
-			// Colored tags aren't sorted first, for now
-			assert.notOk(rows[0].querySelector('label').style.color);
-			assert.ok(rows[1].querySelector('label').style.color);
-			assert.equal(rows[0].textContent, "_A");
-			assert.equal(rows[1].textContent, tag);
+			assert.ok(rows[0].querySelector('label').style.color);
+			assert.notOk(rows[1].querySelector('label').style.color);
+			assert.equal(rows[1].textContent, "_A");
+			assert.equal(rows[0].textContent, tag);
 			
 			yield Zotero.Tags.setColor(libraryID, tag, false);
 			
 			rows = tagsbox.querySelectorAll('li');
-			assert.notOk(rows[1].querySelector('label').style.color);
+			assert.notOk(rows[0].querySelector('label').style.color);
 		})
 		
 		it("should update when a tag is removed from the library", function* () {

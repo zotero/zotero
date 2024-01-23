@@ -237,9 +237,10 @@
 
 			var tags = this.item.getTags();
 
-			// Sort tags alphabetically
-			var collation = Zotero.getLocaleCollation();
-			tags.sort((a, b) => collation.compareString(1, a.tag, b.tag));
+
+			// Sort tags alphabetically with colored tags at the top
+			tags.sort((a, b) => Zotero.Tags.compareTagsOrder(this.item.libraryID, a.tag, b.tag));
+			
 
 			for (let i = 0; i < tags.length; i++) {
 				this.addDynamicRow(tags[i], i + 1);
@@ -768,7 +769,6 @@
 			}
 
 			// Move row to appropriate place, alphabetically
-			var collation = Zotero.getLocaleCollation();
 			var labels = rowsElement.getElementsByAttribute('fieldname', 'tag');
 
 			var inserted = false;
@@ -780,7 +780,7 @@
 					continue;
 				}
 
-				if (collation.compareString(1, tagName, labels[i].textContent) > 0
+				if (Zotero.Tags.compareTagsOrder(this.item.libraryID, tagName, labels[i].textContent) > 0
 					// Ignore textbox at end
 					&& labels[i].tagName != 'input') {
 					labels[i].setAttribute('ztabindex', index);

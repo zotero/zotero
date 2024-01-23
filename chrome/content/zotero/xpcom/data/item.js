@@ -4379,30 +4379,26 @@ Zotero.Item.prototype.getImageSrc = function() {
 }
 
 
-Zotero.Item.prototype.getTagColors = function () {
-	Zotero.warn("Zotero.Item::getTagColors() is deprecated -- use Zotero.Item::getColoredTags()");
-	return this.getColoredTags().map(x => x.color);
-};
-
-
 /**
- * Return tags and colors
+ * Return tags with assigned colors and tags that contain emojis
  *
  * @return {Object[]} - Array of object with 'tag' and 'color' properties
  */
-Zotero.Item.prototype.getColoredTags = function () {
+Zotero.Item.prototype.getItemsListTags = function () {
 	var tags = this.getTags();
 	if (!tags.length) return [];
 	
-	let colorData = [];
 	let tagColors = Zotero.Tags.getColors(this.libraryID);
+	let colorOrEmojiTags = [];
 	for (let tag of tags) {
 		let data = tagColors.get(tag.tag);
-		if (data) {
-			colorData.push({tag: tag.tag, ...data});
+		let containsEmoji = Zotero.Utilities.Internal.containsEmoji(tag.tag);
+		if (data || containsEmoji) {
+			colorOrEmojiTags.push({ tag: tag.tag, ...data });
 		}
 	}
-	return colorData.sort((a, b) => a.position - b.position).map(x => ({ tag: x.tag, color: x.color }));
+	colorOrEmojiTags.sort((a, b) => Zotero.Tags.compareTagsOrder(this.libraryID, a.tag, b.tag));
+	return colorOrEmojiTags.map(x => ({ tag: x.tag, color: x.color || null }));
 };
 
 

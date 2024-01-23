@@ -68,24 +68,23 @@ describe("Zotero.Utilities.Internal", function () {
 	});
 	
 	
-	describe("#isOnlyEmoji()", function () {
-		it("should return true for emoji", function () {
-			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("🐩"));
+	describe("#containsEmoji()", function () {
+		it("should return true for text with an emoji", function () {
+			assert.isTrue(Zotero.Utilities.Internal.containsEmoji("🐩 Hello 🐩"));
 		});
 		
-		it("should return true for emoji with text representation that use Variation Selector-16", function () {
-			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("⭐️"));
+		it("should return true for text with an emoji with text representation that use Variation Selector-16", function () {
+			assert.isTrue(Zotero.Utilities.Internal.containsEmoji("This is a ⭐️"));
 		});
 		
-		it("should return true for emoji made up of multiple characters with ZWJ", function () {
-			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("👨‍🌾"));
+		it("should return true for text with an emoji made up of multiple characters with ZWJ", function () {
+			assert.isTrue(Zotero.Utilities.Internal.containsEmoji("I am a 👨‍🌾"));
 		});
 		
 		it("should return false for integer", function () {
-			assert.isFalse(Zotero.Utilities.Internal.isOnlyEmoji("0"));
+			assert.isFalse(Zotero.Utilities.Internal.containsEmoji("0"));
 		});
 	});
-	
 	
 	describe("#delayGenerator", function () {
 		var spy;

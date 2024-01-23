@@ -222,4 +222,44 @@ describe("Zotero.Tags", function () {
 			]);
 		});
 	});
-})
+
+	describe("#extractEmojiForItemsList()", function () {
+		it("should return first emoji span", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("🐩🐩🐩  🐩🐩🐩🐩"), "🐩🐩🐩");
+		});
+		it("should return first emoji span when string doesn't start with emoji", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("./'!@#$ 🐩🐩🐩  🐩🐩🐩🐩"), "🐩🐩🐩");
+		});
+		
+		it("should return first emoji span for text with an emoji with Variation Selector-16", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Here are ⭐️⭐️⭐️⭐️⭐️"), "⭐️⭐️⭐️⭐️⭐️");
+		});
+		
+		it("should return first emoji span for text with an emoji made up of multiple characters with ZWJ", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("We are 👨‍🌾👨‍🌾. And I am a 👨‍🏫."), "👨‍🌾👨‍🌾");
+		});
+	});
+
+	describe("#compareTagsOrder()", function () {
+		it('should order colored tags by position and other tags - alphabetically', async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			await createDataObject('item', {
+				tags: [
+					{ tag: 'one' },
+					{ tag: 'two', type: 1 },
+					{ tag: 'three' },
+					{ tag: 'four', type: 1 },
+					{ tag: 'five' }
+				]
+			});
+			await Zotero.Tags.setColor(libraryID, 'three', '#111111', 0);
+			await Zotero.Tags.setColor(libraryID, 'four', '#222222', 1);
+			await Zotero.Tags.setColor(libraryID, 'two', '#222222', 2);
+ 
+			assert.equal(Zotero.Tags.compareTagsOrder(libraryID, 'three', 'one'), -1, "colored vs not colored => -1");
+			assert.equal(Zotero.Tags.compareTagsOrder(libraryID, 'one', 'three'), 1, "not colored vs colored => 1");
+			assert.equal(Zotero.Tags.compareTagsOrder(libraryID, 'two', 'three'), 2, "colored vs colored => compare their positions");
+			assert.isAbove(Zotero.Tags.compareTagsOrder(libraryID, 'one', 'five'), 0, "not colored vs not colored => alphabetical");
+		});
+	});
+});
