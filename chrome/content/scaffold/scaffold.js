@@ -1000,7 +1000,7 @@ var Scaffold = new function () {
 		let translate;
 		let isRemoteWeb = false;
 		if (functionToRun == "detectWeb" || functionToRun == "doWeb") {
-			translate = new RemoteTranslate();
+			translate = new RemoteTranslate({ disableErrorReporting: true });
 			isRemoteWeb = true;
 			if (!_testTargetRegex(input)) {
 				_logOutput("Target did not match " + _getCurrentURI(input));
@@ -1703,7 +1703,7 @@ var Scaffold = new function () {
 		let input = await _getInput(type);
 
 		if (type == "web") {
-			let translate = new RemoteTranslate();
+			let translate = new RemoteTranslate({ disableErrorReporting: true });
 			try {
 				await translate.setBrowser(_browser);
 				await translate.setTranslatorProvider(_translatorProvider);
@@ -2074,7 +2074,7 @@ var Scaffold = new function () {
 					_logOutput("Page URL differs from test. Will be updated. " + browser.currentURI.spec);
 				}
 
-				let translate = new RemoteTranslate();
+				let translate = new RemoteTranslate({ disableErrorReporting: true });
 				try {
 					await translate.setBrowser(browser);
 					await translate.setTranslatorProvider(_translatorProvider);
