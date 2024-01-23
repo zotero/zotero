@@ -672,13 +672,7 @@ if [ $BUILD_WIN == 1 ]; then
 		
 		# Sign updater
 		if [ $SIGN -eq 1 ]; then
-			"`cygpath -u \"$SIGNTOOL\"`" \
-				sign /n "$SIGNTOOL_CERT_SUBJECT" \
-				/d "$SIGNATURE_DESC Updater" \
-				/fd SHA256 \
-				/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-				/td SHA256 \
-				"`cygpath -w \"$APPDIR/updater.exe\"`"
+			"$CALLDIR/win/codesign" "$APPDIR/updater.exe" "$SIGNATURE_DESC Updater"
 		fi
 		
 		# Copy app files
@@ -742,13 +736,7 @@ if [ $BUILD_WIN == 1 ]; then
 				mv "$BUILD_DIR/win_installer/helper.exe" "$APPDIR/uninstall"
 
 				if [ $SIGN -eq 1 ]; then
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC Uninstaller" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$APPDIR/uninstall/helper.exe\"`"
+					"$CALLDIR/win/codesign" "$APPDIR/uninstall/helper.exe" "$SIGNATURE_DESC Uninstaller"
 					sleep $SIGNTOOL_DELAY
 				fi
 				
@@ -762,15 +750,7 @@ if [ $BUILD_WIN == 1 ]; then
 				fi
 				
 				if [ $SIGN -eq 1 ]; then
-					# Sign zotero.exe
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC" \
-						/du "$SIGNATURE_URL" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$APPDIR/zotero.exe\"`"
+					"$CALLDIR/win/codesign" "$APPDIR/zotero.exe" "$SIGNATURE_DESC"
 					sleep $SIGNTOOL_DELAY
 				fi
 				
@@ -793,14 +773,7 @@ if [ $BUILD_WIN == 1 ]; then
 				mv "$BUILD_DIR/win_installer/setup.exe" "$INSTALLER_STAGE_DIR"
 
 				if [ $SIGN == 1 ]; then
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC Setup" \
-						/du "$SIGNATURE_URL" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$INSTALLER_STAGE_DIR/setup.exe\"`"
+					"$CALLDIR/win/codesign" "$INSTALLER_STAGE_DIR/setup.exe" "$SIGNATURE_DESC Setup"
 					sleep $SIGNTOOL_DELAY
 				fi
 				
@@ -814,14 +787,7 @@ if [ $BUILD_WIN == 1 ]; then
 				
 				# Sign installer .exe
 				if [ $SIGN == 1 ]; then
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC Setup" \
-						/du "$SIGNATURE_URL" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$INSTALLER_PATH\"`"
+					"$CALLDIR/win/codesign" "$INSTALLER_PATH" "$SIGNATURE_DESC Installer"
 				fi
 				
 				chmod 755 "$INSTALLER_PATH"

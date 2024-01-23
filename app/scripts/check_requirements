@@ -93,9 +93,9 @@ if [ $platform = "w" ]; then
 	echo -n "Checking for uuidgen: "
 	which uuidgen || { $FAIL_CMD; FAILED=1; }
 	
-	echo -n "Checking for signtool: "
-	if [ -x "`cygpath -u \"$SIGNTOOL\"`" ]; then
-		echo "`cygpath -u \"$SIGNTOOL\"`"
+	echo -n "Checking for code-signing script: "
+	if [ -x "$APP_ROOT_DIR/win/codesign" ]; then
+		echo "$APP_ROOT_DIR/win/codesign"
 	else
 		$FAIL_CMD
 		FAILED=1
