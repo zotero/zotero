@@ -1005,6 +1005,10 @@ var Zotero_Tabs = new function () {
 		this.refreshTabsMenuList();
 	};
 
+	this.resetFocusIndex = (_) => {
+		this._tabsMenuFocusedIndex = 0;
+	};
+
 
 	/**
 	 * Focus on the element in the tabs menu with [tabindex=tabIndex] if given
@@ -1046,6 +1050,7 @@ var Zotero_Tabs = new function () {
 	 * - ArrowUp from the filter field focuses the last tab
 	 * - Home/PageUp focuses the filter field
 	 * - End/PageDown focues the last tab title
+	 * - CMD-f will focus the input field
 	 */
 	this.handleTabsMenuKeyPress = function (event) {
 		let tabindex = this._tabsMenuFocusedIndex;
@@ -1113,6 +1118,15 @@ var Zotero_Tabs = new function () {
 				return;
 			}
 			event.target.click();
+		}
+		else if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
+			focusTabsMenuEntry(0);
+			event.preventDefault();
+			event.stopPropagation();
 		}
 	};
 };

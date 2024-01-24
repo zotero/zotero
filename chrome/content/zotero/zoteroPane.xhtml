@@ -817,6 +817,7 @@
 				<vbox width="350" id="zotero-tabs-menu-wrapper">
 					<html:input id="zotero-tabs-menu-filter" 
 						oninput="Zotero_Tabs.handleTabsMenuFilterInput(event, this)"
+						onfocus="Zotero_Tabs.resetFocusIndex()"
 						tabindex="0"
 						data-l10n-id="zotero-tabs-menu-filter"
 					/>
