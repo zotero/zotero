@@ -991,8 +991,6 @@ var Zotero_Tabs = new function () {
 	};
 
 	this.handleTabsMenuShown = function (_) {
-		// Default panel's padding is inside of a shadow dom, so it's easier to cancel it here
-		this.tabsMenuPanel.shadowRoot.firstChild.style = 'padding: 0px !important; margin: 0px !important';
 		focusTabsMenuEntry(0);
 	};
 
