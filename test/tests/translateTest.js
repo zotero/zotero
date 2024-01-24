@@ -883,6 +883,30 @@ describe("Zotero.Translate", function() {
 				assert.equal(item.getField("extra"), "Key 1: Value 1\nRandom junk\nKey 2: Value 2");
 				assert.isUndefined(item.setExtra);
 			});
+			
+			it("should overwrite field if already present", async function () {
+				let translator = buildDummyTranslator(1,
+					String.raw`function doImport() {
+						var item = new Zotero.Item();
+						item.itemType = "book";
+						item.title = "The Ultimate Owl Guide";
+						item.extra = "Random junk\nKey 1: Value 1.1";
+						item.setExtra("Key 1", "Value 1.2");
+						item.extra += "\nRandom junk";
+						item.setExtra("Key 2", "Value 2");
+						item.setExtra("Key 1", "Value 1.3");
+						item.complete();
+					}`
+				);
+				let translate = new Zotero.Translate.Import();
+				translate.setTranslator(translator);
+				translate.setString("");
+				let items = await translate.translate();
+				assert.lengthOf(items, 1);
+				let [item] = items;
+				assert.equal(item.getField("extra"), "Random junk\nKey 1: Value 1.3\nRandom junk\nKey 2: Value 2");
+				assert.isUndefined(item.setExtra);
+			});
 		});
 	});
 	
