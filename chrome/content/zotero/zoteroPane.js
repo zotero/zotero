@@ -1093,6 +1093,7 @@ var ZoteroPane = new function()
 			setTimeout(() => {
 				collectionSearchButton.style.display = '';
 				collectionSearchField.style.visibility = 'hidden';
+				collectionSearchField.style.removeProperty('max-width');
 			}, 50);
 		}
 	}
@@ -1105,6 +1106,11 @@ var ZoteroPane = new function()
 		collectionSearchButton.addEventListener("click", (_) => {
 			if (!collectionSearchField.classList.contains("visible")) {
 				collectionSearchButton.style.display = 'none';
+				// If the collectionPane is narrow, set smaller max-width
+				let maxWidth = collectionSearchField.getAttribute("data-expanded-width");
+				if (maxWidth) {
+					collectionSearchField.style.maxWidth = `${maxWidth}px`;
+				}
 				collectionSearchField.style.visibility = 'visible';
 				collectionSearchField.classList.add("visible", "expanding");
 				// Enable and focus the field only after it was revealed to prevent the cursor
@@ -6412,6 +6418,19 @@ var ZoteroPane = new function()
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
 		if (ZoteroPane.itemsView) {
 			ZoteroPane.itemsView.updateHeight();
+		}
+		// Temp JS solution to shrink the collection search so that it does not overflow outside
+		// of the collection pane
+		var collectionSearch = document.getElementById("zotero-collections-search");
+		collectionSearch.removeAttribute("data-expanded-width");
+		if (collectionsPaneWidth < 220) {
+			collectionSearch.setAttribute("data-expanded-width", 150);
+			if (collectionSearch.classList.contains("visible")) {
+				collectionSearch.style.maxWidth = "150px";
+			}
+		}
+		else {
+			collectionSearch.style.removeProperty('max-width');
 		}
 		
 		this.handleTagSelectorResize();

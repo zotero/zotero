@@ -84,7 +84,7 @@
 
 /* Hide collection search on pane collapse, otherwise it still shows when focused */
 #zotero-collections-pane[collapsed=true] #zotero-collections-search.visible {
-	visibility: hidden;
+	display: none;
 }
 
 /* Hide the add button on pane collapse. Otherwise, it may show on top of 'New Item' */
