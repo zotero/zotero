@@ -118,6 +118,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
+		this._animation = null;
 	}
 
 	unregister() {
@@ -1557,11 +1558,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		this._lastToggleOpenStateIndex = index;
 
 		if (this.isContainerOpen(index)) {
 			await this._closeContainer(index, skipRowMapRefresh, true);
-			this._lastToggleOpenStateIndex = null;
 			return;
 		}
 		if (!skipRowMapRefresh) {
@@ -1606,12 +1605,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		this._rows[index].isOpen = true;
-		this._lastToggleOpenStateCount = count;
 
 		if (count == 0) {
-			this._lastToggleOpenStateIndex = null;
 			return;
 		}
+
+		this._animation = {
+			index, count, isOpen: true,
+		};
 
 
 		if (!skipRowMapRefresh) {
@@ -1622,7 +1623,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._restoreSelection(savedSelection, false, true);
 			this.tree.invalidate();
 		}
-		this._lastToggleOpenStateIndex = null;
+		this._animation = null;
 	}
 
 	expandMatchParents(searchParentIDs) {
@@ -2835,46 +2836,78 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		div.style.zIndex = null;
+		div.style.transition = null;
+		div.style.transform = null;
 
-		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
-		if (this._lastToggleOpenStateIndex === index) {
-			div.style.zIndex = 1;
-			let twisty = div.querySelector('.twisty');
-			if (twisty) {
-				twisty.classList.toggle('open', !this.isContainerOpen(index));
-				setTimeout(() => {
-					twisty.classList.toggle('open', this.isContainerOpen(index));
-				}, 0);
+		if (this._animation !== null) {
+			// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
+			if (this._animation?.index === index) {
+				div.style.zIndex = '1';
+				div.dataset.shouldHaveZIndex = '1';
+				let twisty = div.querySelector('.twisty');
+				if (twisty) {
+					twisty.classList.toggle('open', !this.isContainerOpen(index));
+					setTimeout(() => {
+						twisty.classList.toggle('open', this.isContainerOpen(index));
+					}, 0);
+				}
 			}
-		}
 
-		if (index > this._lastToggleOpenStateIndex && this._lastToggleOpenStateCount > 0) {
-			const needsTransform = !div.style.transform;
-			if (needsTransform) {
-				let delay = 0;
-				let duration = SLIDE_ANIMATION_DURATION;
-				
-				if (index < 1 + this._lastToggleOpenStateIndex + this._lastToggleOpenStateCount) {
-					// new rows need to slide sequentially (initially all are squashed behind the parent row)
-					const newRowIndex = index - this._lastToggleOpenStateIndex;
-					const remainingNewRowsCount = this._lastToggleOpenStateCount - newRowIndex;
+			if (this._animation?.index !== null && index > this._animation.index && this._animation?.count !== null && this._animation.count > 0) {
+				const needsTransform = !div.style.transform;
+				if (needsTransform) {
+					let delay = 0;
+					let duration = SLIDE_ANIMATION_DURATION;
 
-					delay = (remainingNewRowsCount / this._lastToggleOpenStateCount) * SLIDE_ANIMATION_DURATION;
-					duration = SLIDE_ANIMATION_DURATION - delay;
+					if (this._animation.isOpen) {
+						if (index < 1 + this._animation.index + this._animation.count) {
+							// new rows need to slide sequentially (initially all are squashed behind the parent row)
+							const newRowIndex = index - this._animation.index;
+							const remainingNewRowsCount = this._animation.count - newRowIndex;
 
-					div.style.transform = `translateY(${-(index - this._lastToggleOpenStateIndex) * 100}%)`;
+							delay = (remainingNewRowsCount / this._animation.count) * SLIDE_ANIMATION_DURATION;
+							duration = SLIDE_ANIMATION_DURATION - delay;
+							// hide all new rows behind the parent row before animating
+							div.style.transform = `translateY(${-(index - this._animation.index) * 100}%)`;
+						}
+						else {
+							// move the remaining rows down
+							div.style.transform = `translateY(${-(this._animation.count) * 100}%)`;
+						}
+						setTimeout(() => {
+							div.style.transition = `background-color 0.125s linear, transform ${duration / 1000}s linear ${delay / 1000}s`;
+							div.style.transform = '';
+						}, 0);
+						setTimeout(() => {
+							div.style.transition = null;
+							div.style.transform = null;
+						}, SLIDE_ANIMATION_DURATION);
+					}
+					else {
+						// eslint-disable-next-line no-lonely-if
+						if (index < 1 + this._animation.index + this._animation.count) {
+							// animate collapsed rows up and hide behind parent row
+							div.style.transform = `translateY(${-(index - this._animation.index) * 100}%)`;
+							
+							const newRowIndex = index - this._animation.index;
+							delay = 0;
+							duration = (newRowIndex / this._animation.count) * SLIDE_ANIMATION_DURATION;
+						}
+						else {
+							// move the remaining rows up
+							div.style.transform = `translateY(${-(this._animation.count) * 100}%)`;
+						}
+						div.style.transition = `background-color 0.125s linear, transform ${duration / 1000}s linear ${delay / 1000}s`;
+						this._pendingCallback = this._animation.callback;
+						
+						setTimeout(() => {
+							if (this._animation?.callback) {
+								// first time callback is called it must clear this._animation so it doesn't get called again
+								this._animation.callback();
+							}
+						}, SLIDE_ANIMATION_DURATION);
+					}
 				}
-				else {
-					div.style.transform = `translateY(${-(this._lastToggleOpenStateCount) * 100}%)`;
-				}
-				setTimeout(() => {
-					div.style.transition = `background-color 0.125s linear, transform ${duration / 1000}s linear ${delay / 1000}s`;
-					div.style.transform = '';
-				}, 0);
-				setTimeout(() => {
-					div.style.transition = null;
-					div.style.transform = null;
-				}, SLIDE_ANIMATION_DURATION);
 			}
 		}
 
@@ -2924,12 +2957,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var count = 0;
 		var level = this.getLevel(index);
+		let rowsToRemove = [];
 
 		// Remove child rows
-		while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
-			// Skip the map update here and just refresh the whole map below,
-			// since we might be removing multiple rows
-			this._removeRow(index + 1, true);
+		for (let i = 1; i < this._rows.length; i++) {
+			if (this.getLevel(index + i) <= level) {
+				break;
+			}
+			rowsToRemove.push(index + i);
 			count++;
 		}
 
@@ -2939,12 +2974,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		if (!skipRowMapRefresh) {
-			Zotero.debug('Refreshing item row map');
-			this._refreshRowMap();
+		if (skipRowMapRefresh) {
+			this._removeRows(rowsToRemove);
+		}
+		else {
+			this._animation = {
+				index, count, isOpen: false,
+				callback: async () => {
+					this._animation = null; // ensure animation is cleared before next render
+					this._removeRows(rowsToRemove);
+					await this._refreshPromise;
+					this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
+					this.tree.invalidate();
+				}
+			};
 			
-			await this._refreshPromise;
-			this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
 			this.tree.invalidate();
 		}
 	}
