@@ -93,6 +93,8 @@
 			this._preview = null;
 
 			this._isRendering = false;
+			
+			this._isEditingFilename = false;
 		}
 
 		get mode() {
@@ -204,8 +206,13 @@
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 
-			this._id("fileName").addEventListener('blur', () => {
-				this.editFileName(this._id("fileName").value);
+			let fileName = this._id("fileName");
+			fileName.addEventListener('focus', () => {
+				this._isEditingFilename = true;
+			});
+			fileName.addEventListener('blur', () => {
+				this.editFileName(fileName.value);
+				this._isEditingFilename = false;
 			});
 
 			this._preview = this._id("attachment-preview");
@@ -280,6 +287,8 @@
 			}
 			Zotero.debug('Refreshing attachment box');
 			this._isRendering = true;
+			// Cancel editing filename when refreshing
+			this._isEditingFilename = false;
 
 			if (this.usePreview) {
 				this._preview.item = this.item;
@@ -350,7 +359,7 @@
 			else {
 				fileNameRow.hidden = true;
 			}
-			this._id("fileName").readonly = !this.editable;
+			this._id("fileName").toggleAttribute("readonly", (!this.editable || !fileExists));
 
 			// Page count
 			if (this.displayPages && this._item.isPDFAttachment()) {
@@ -486,18 +495,48 @@
 		}
 
 		async editFileName(newFilename) {
+			if (!this._isEditingFilename) {
+				return;
+			}
 			let item = this.item;
 			// Rename associated file
 			let nsIPS = Services.prompt;
+			let getExtension = function (filename) {
+				const extRegex = /\.\w{1,10}$/;
+				if (extRegex.test(filename)) {
+					return filename.match(extRegex)[0];
+				}
+				return "";
+			};
 			newFilename = newFilename.trim();
 			let oldFilename = item.getFilename();
 			if (oldFilename === newFilename) {
 				return;
 			}
-			if (newFilename.search(/\.\w{1,10}$/) == -1) {
+			// Don't allow empty filename
+			if (!newFilename) {
+				this.render();
+				return;
+			}
+			let newExt = getExtension(newFilename);
+			let oldExt = getExtension(oldFilename);
+			if (!newExt && oldExt) {
 				// User did not specify extension. Use current
-				let oldExt = oldFilename.match(/\.\w{1,10}$/);
-				if (oldExt) newFilename += oldExt[0];
+				newFilename += oldExt;
+				newExt = oldExt;
+			}
+			if (newExt !== oldExt && oldExt) {
+				// User changed extension. Confirm
+				let index = Zotero.Prompt.confirm({
+					window,
+					title: Zotero.getString('general.warning'),
+					text: Zotero.getString('pane.item.attachments.rename.confirmExtChange.text', [oldExt, newExt, Zotero.appName]),
+					button0: Zotero.getString('pane.item.attachments.rename.confirmExtChange.keep', oldExt),
+					button1: Zotero.getString('pane.item.attachments.rename.confirmExtChange.change', newExt),
+				});
+				if (index == 0) {
+					newFilename = newFilename.replace(/\.\w{1,10}$/, oldExt);
+				}
 			}
 			let renamed = await item.renameAttachmentFile(newFilename);
 			if (renamed == -1) {
