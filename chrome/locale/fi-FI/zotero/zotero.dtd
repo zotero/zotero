@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lauseen aakkoslaji">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vaihda Etu/Suku">
 <!ENTITY zotero.item.creatorTransform.fixCase "Korjaa aakkoslaji">
-<!ENTITY zotero.item.viewOnline "Katso verkossa">
 <!ENTITY zotero.item.copyAsURL "Kopioi URL-osoitteena">
 <!ENTITY zotero.item.deletePermanently "Poista lopullisesti...">
 

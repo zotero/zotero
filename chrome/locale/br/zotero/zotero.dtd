@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lizherenn gentañ ar frazenn e pennlizherenn">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Diskouez enlinenn">
 <!ENTITY zotero.item.copyAsURL "Eilañ evel URL">
 <!ENTITY zotero.item.deletePermanently "Dilemel da virviken...">
 

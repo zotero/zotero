@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Kot v stavku">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj ime/priimek">
 <!ENTITY zotero.item.creatorTransform.fixCase "Popravi velike/male začetnice">
-<!ENTITY zotero.item.viewOnline "Pokaži na spletu">
 <!ENTITY zotero.item.copyAsURL "Kopiraj kot URL">
 <!ENTITY zotero.item.deletePermanently "Izbriši trajno ...">
 

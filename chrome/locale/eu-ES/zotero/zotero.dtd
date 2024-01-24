@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lehen letra letra larriz">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Trukatu lehena/azkena">
 <!ENTITY zotero.item.creatorTransform.fixCase "Konpondu letra-kaxa">
-<!ENTITY zotero.item.viewOnline "Linean ikusi">
 <!ENTITY zotero.item.copyAsURL "Kopiatu URL gisa">
 <!ENTITY zotero.item.deletePermanently "Betirako ezabatu...">
 

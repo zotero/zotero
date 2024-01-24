@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Stafagerð setninga">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Skoða nettengt">
 <!ENTITY zotero.item.copyAsURL "Afrita sem URL-slóð">
 <!ENTITY zotero.item.deletePermanently "Eyða endanlega…">
 

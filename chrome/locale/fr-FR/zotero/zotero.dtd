@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverser prénom/nom">
 <!ENTITY zotero.item.creatorTransform.fixCase "Corriger la casse">
-<!ENTITY zotero.item.viewOnline "Afficher en ligne">
 <!ENTITY zotero.item.copyAsURL "Copier comme un lien">
 <!ENTITY zotero.item.deletePermanently "Supprimer définitivement…">
 

@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Store bokstavar etter setningsreglar">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Vis på nett">
 <!ENTITY zotero.item.copyAsURL "Kopier som URL">
 <!ENTITY zotero.item.deletePermanently "Slett for godt …">
 

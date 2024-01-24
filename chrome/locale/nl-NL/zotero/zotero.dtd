@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (van een zin)">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Bekijk online">
 <!ENTITY zotero.item.copyAsURL "Kopieer als URL">
 <!ENTITY zotero.item.deletePermanently "Permanent verwijderen…">
 

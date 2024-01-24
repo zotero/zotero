@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Majusculă ca la propoziție">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Schimbați primul/ultimul">
 <!ENTITY zotero.item.creatorTransform.fixCase "Repară majusculele">
-<!ENTITY zotero.item.viewOnline "Vezi online">
 <!ENTITY zotero.item.copyAsURL "Copiază ca URL">
 <!ENTITY zotero.item.deletePermanently "Șterge permanent...">
 

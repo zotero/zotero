@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Jak w zdaniu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamień imię i nazwisko">
 <!ENTITY zotero.item.creatorTransform.fixCase "Popraw wielkie litery">
-<!ENTITY zotero.item.viewOnline "Pokaż online">
 <!ENTITY zotero.item.copyAsURL "Kopiuj jako URL">
 <!ENTITY zotero.item.deletePermanently "Usuń trwale...">
 

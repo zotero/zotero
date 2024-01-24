@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "englische Satz-Großschreibung">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vor-/Nachname tauschen">
 <!ENTITY zotero.item.creatorTransform.fixCase "Groß-/Kleinschreibung anpassen">
-<!ENTITY zotero.item.viewOnline "Online anzeigen">
 <!ENTITY zotero.item.copyAsURL "Als URL kopieren">
 <!ENTITY zotero.item.deletePermanently "Endgültig löschen...">
 

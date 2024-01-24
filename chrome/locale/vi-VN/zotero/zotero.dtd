@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Viết hoa đầu câu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Xem trực tuyến">
 <!ENTITY zotero.item.copyAsURL "Sao chép thành URL">
 <!ENTITY zotero.item.deletePermanently "Xóa hoàn toàn...">
 

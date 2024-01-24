@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "句首字母大小寫">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交換前/後">
 <!ENTITY zotero.item.creatorTransform.fixCase "修正大小寫">
-<!ENTITY zotero.item.viewOnline "線上檢視">
 <!ENTITY zotero.item.copyAsURL "複製成 URL">
 <!ENTITY zotero.item.deletePermanently "刪除授權……">
 

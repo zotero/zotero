@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules de la frase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Intercanvia primer/últim">
 <!ENTITY zotero.item.creatorTransform.fixCase "Arregla majúscules/minúscules">
-<!ENTITY zotero.item.viewOnline "Mira en línia">
 <!ENTITY zotero.item.copyAsURL "Copia com a URL">
 <!ENTITY zotero.item.deletePermanently "Elimina permanentment…">
 

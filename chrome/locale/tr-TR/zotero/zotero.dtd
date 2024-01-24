@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
 <!ENTITY zotero.item.creatorTransform.fixCase "Büyük Harfleri Düzelt">
-<!ENTITY zotero.item.viewOnline "Çevrimiçi Göster">
 <!ENTITY zotero.item.copyAsURL "URL'i Kopyala">
 <!ENTITY zotero.item.deletePermanently "Kalıcı Olarak Sil...">
 

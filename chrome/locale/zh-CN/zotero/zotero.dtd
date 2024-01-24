@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交换 名字/姓氏">
 <!ENTITY zotero.item.creatorTransform.fixCase "修正大小写">
-<!ENTITY zotero.item.viewOnline "在线查看">
 <!ENTITY zotero.item.copyAsURL "复制为网址">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
 

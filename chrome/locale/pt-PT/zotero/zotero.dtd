@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúsculas Iniciais de Frase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverter primeiro/último">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Ver em Linha">
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Remover Permanentemente…">
 

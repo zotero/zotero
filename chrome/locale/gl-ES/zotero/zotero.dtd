@@ -111,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúsculas comezando cada oración">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Trocar Nome/Apelidos">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fixar maiúsculas">
-<!ENTITY zotero.item.viewOnline "Ver en liña">
 <!ENTITY zotero.item.copyAsURL "Gardar como URL">
 <!ENTITY zotero.item.deletePermanently "Eliminar ao completo...">
 
