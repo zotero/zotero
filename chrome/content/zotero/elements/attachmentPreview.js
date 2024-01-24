@@ -181,6 +181,8 @@
 			this.addEventListener("mouseenter", this.updateGoto);
 			this.addEventListener("dragstart", this._handleDragStart);
 			this.addEventListener("dragend", this._handleDragEnd);
+			this.addEventListener("focusin", this._handleFocusIn);
+			this.addEventListener("keypress", this._handleKeypress);
 			this.setAttribute("data-preview-type", "unknown");
 		}
 
@@ -192,6 +194,8 @@
 			this.removeEventListener("mouseenter", this.updateGoto);
 			this.removeEventListener("dragstart", this._handleDragStart);
 			this.removeEventListener("dragend", this._handleDragEnd);
+			this.removeEventListener("focusin", this._handleFocusIn);
+			this.removeEventListener("keypress", this._handleKeypress);
 		}
 
 		async render() {
@@ -277,6 +281,36 @@
 		updateGoto() {
 			this._id("prev").disabled = !this._reader?.canGoto("prev");
 			this._id("next").disabled = !this._reader?.canGoto("next");
+		}
+
+		_handleFocusIn() {
+			this.focus();
+		}
+
+		_handleKeypress(e) {
+			let stopEvent = false;
+			// Space or enter open attachment
+			if ([" ", "Enter"].includes(e.key)) {
+				this.openAttachment(e);
+				stopEvent = true;
+			}
+			// Hacky way to preventing the focus from going into the actual reader where it can
+			// get stuck. On tab from the preview, try to find the next element and focus it.
+			else if (e.key == "Tab" && !e.shiftKey) {
+				let toFocus = this.nextElementSibling.querySelector('[tabindex="0"]');
+				if (!toFocus && this.nextElementSibling.getAttribute("tabindex") == "0") {
+					toFocus = this.nextElementSibling;
+				}
+				if (toFocus) {
+					toFocus.focus();
+					stopEvent = true;
+				}
+			}
+
+			if (stopEvent) {
+				e.stopPropagation();
+				e.preventDefault();
+			}
 		}
 
 		async _renderReader() {

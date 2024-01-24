@@ -122,7 +122,8 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 				let box = document.createElement('div');
 				box.addEventListener('click', () => this._handleShowItem(id));
-				box.className = 'box';
+				box.className = 'box keyboard-clickable';
+				box.setAttribute("tabindex", 0);
 				box.append(icon, label);
 
 				row.append(box);
@@ -131,6 +132,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 					let remove = document.createXULElement("toolbarbutton");
 					remove.addEventListener('command', () => this._handleRemove(id));
 					remove.className = 'zotero-clicky zotero-clicky-minus';
+					remove.setAttribute("tabindex", "0");
 					row.append(remove);
 				}
 

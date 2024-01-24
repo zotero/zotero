@@ -54,6 +54,8 @@ var ZoteroItemPane = new function() {
 		_deck = document.getElementById('zotero-item-pane-content');
 		
 		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
+
+		_container.addEventListener("keypress", this.handleKeypress);
 	};
 	
 	
@@ -165,6 +167,49 @@ var ZoteroItemPane = new function() {
 		noteEditor.item = item;
 		
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
+	};
+
+	// Keyboard navigation within the itemPane. Also handles contextPane keyboard nav
+	this.handleKeypress = function (event) {
+		let stopEvent = () => {
+			event.preventDefault();
+			event.stopPropagation();
+		};
+		let isLibraryTab = Zotero_Tabs.selectedIndex == 0;
+		let sidenav = document.getElementById(
+			isLibraryTab ? 'zotero-view-item-sidenav' : 'zotero-context-pane-sidenav'
+		);
+		// Tab from the scrollable area focuses the pinned pane if it exists
+		if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && sidenav.pinnedPane) {
+			let pane = sidenav.getPane(sidenav.pinnedPane);
+			pane.firstChild._head.focus();
+			stopEvent();
+			return;
+		}
+		// Space or Enter on a button or 'keyboard-clickable' triggers a click
+		if ([" ", "Enter"].includes(event.key)
+			&& (event.target.tagName == "toolbarbutton"
+				|| event.target.classList.contains("keyboard-clickable"))) {
+			event.target.click();
+			stopEvent();
+		}
+		// Tab tavigation between entries and buttons within library, related and notes boxes
+		if (event.key == "Tab" && event.target.closest(".box")) {
+			let next = null;
+			if (event.key == "Tab" && !event.shiftKey) {
+				next = event.target.nextElementSibling;
+			}
+			if (event.key == "Tab" && event.shiftKey) {
+				next = event.target.parentNode.previousElementSibling?.lastChild;
+			}
+			// Force the element to be visible before focusing
+			if (next) {
+				next.style.visibility = "visible";
+				next.focus();
+				next.style.removeProperty("visibility");
+				stopEvent();
+			}
+		}
 	};
 	
 	

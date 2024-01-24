@@ -1914,16 +1914,15 @@
 							return;
 						}
 						event.preventDefault();
+						event.stopPropagation();
 						this._focusNextField(this._lastTabIndex, true);
 					}
 					else {
-						event.preventDefault();
-						// If on the last field, return focus to item tree
-						if (this._lastTabIndex == this._tabIndexMaxFields) {
-							document.getElementById('item-tree-main-default')?.focus();
-							return;
+						let focused = this._focusNextField(++this._lastTabIndex);
+						if (focused) {
+							event.preventDefault();
+							event.stopPropagation();
 						}
-						this._focusNextField(++this._lastTabIndex);
 					}
 			}
 		}

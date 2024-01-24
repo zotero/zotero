@@ -3,12 +3,16 @@ collapsible-section {
 	flex-direction: column;
 	gap: 2px;
 	padding-block: 4px;
-	
+
+	--width-focus-border: 2px;
+	--radius-focus-border: 5px;
+
 	:not(:last-child) > & {
 		border-bottom: 1px solid var(--fill-quinary);
 	}
 
 	& > .head {
+		@include focus-ring;
 		@include comfortable {
 			padding-block: 2px;
 		}
@@ -102,4 +106,9 @@ collapsible-section {
 	&.disable-transitions * {
 		transition: none !important;
 	}
+
+	toolbarbutton, .box, .keyboard-clickable {
+		@include focus-ring;
+	}
+	
 }

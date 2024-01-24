@@ -32,8 +32,8 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
-					<attachment-preview id="attachment-preview"/>
-					<label id="url" crop="end"
+					<attachment-preview id="attachment-preview" tabindex="0"/>
+					<label id="url" crop="end" tabindex="0"
 						ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
 					<html:div class="metadata-table">
 						<html:div id="fileNameRow" class="meta-row">
@@ -56,7 +56,7 @@
 							<html:div class="meta-label"><html:label id="index-status-label" class="key" data-l10n-id="attachment-info-index"/></html:div>
 							<html:div class="meta-data">
 								<html:label id="index-status"/>
-								<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
+								<toolbarbutton id="reindex" tabindex="0" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
 							</html:div>
 						</html:div>
 					</html:div>
@@ -228,6 +228,34 @@
 					this._preview.render();
 				}
 			});
+
+			// Work around the reindex toolbarbutton not wanting to properly receive focus on tab.
+			// Make <image> focusable. On focus of the image, bounce the focus to the toolbarbutton.
+			// Temporarily remove tabindex from the <image> so that the focus can move past the
+			// reindex button
+			let reindexButton = this._id("indexStatusRow").querySelector(".meta-data toolbarbutton");
+			if (reindexButton) {
+				reindexButton.addEventListener("focusin", function (e) {
+					if (e.target.tagName == "image") {
+						reindexButton.focus();
+						reindexButton.querySelector("image").removeAttribute("tabindex");
+					}
+				});
+				reindexButton.addEventListener("blur", function (_) {
+					setTimeout(() => {
+						if (document.activeElement !== reindexButton) {
+							reindexButton.querySelector("image").setAttribute("tabindex", "0");
+						}
+					});
+				});
+			}
+			// Prevents the button from getting stuck in active state
+			reindexButton.addEventListener("keydown", (e) => {
+				if (e.key == " ") {
+					e.preventDefault();
+					reindexButton.click();
+				}
+			});
 		}
 
 		destroy() {
@@ -281,7 +309,7 @@
 							ZoteroPane_Local.loadURI(this.value, event);
 						}
 					};
-					urlField.className = 'zotero-text-link';
+					urlField.className = 'zotero-text-link keyboard-clickable';
 				}
 				else {
 					urlField.className = '';
@@ -381,6 +409,13 @@
 				indexStatusRow.hidden = true;
 			}
 			
+			// Make the image of the reindex toolbarbutton focusable because for some reason the
+			// actual toolbarbutton does not receive focus on tab
+			let reindexButton = indexStatusRow.querySelector("toolbarbutton");
+			if (document.activeElement !== reindexButton) {
+				reindexButton.querySelector("image").setAttribute("tabindex", "0");
+			}
+
 			this.initAttachmentNoteEditor();
 			
 			if (this.displayButton) {

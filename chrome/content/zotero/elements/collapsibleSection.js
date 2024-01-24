@@ -66,8 +66,10 @@
 				cancelable: false
 			});
 			
-			if (!newOpen && this.ownerDocument?.activeElement && this.contains(this.ownerDocument?.activeElement)) {
-				this.ownerDocument.activeElement.blur();
+			// Blur the focus if it's within the body (not the header) of the section on collapse
+			let focused = this.ownerDocument?.activeElement;
+			if (!newOpen && focused && this.lastChild.contains(focused)) {
+				focused.blur();
 			}
 			
 			this._saveOpenState();
@@ -114,11 +116,12 @@
 				throw new Error('data-pane is required');
 			}
 			
-			this.tabIndex = 0;
 			
 			this._head = document.createElement('div');
 			this._head.role = 'button';
 			this._head.className = 'head';
+			this._head.setAttribute("tabindex", "0");
+			this._head.addEventListener('mousedown', this._mouseDown);
 			this._head.addEventListener('click', this._handleClick);
 			this._head.addEventListener('keydown', this._handleKeyDown);
 			this._head.addEventListener('contextmenu', this._handleContextMenu);
@@ -136,6 +139,7 @@
 			
 			let twisty = document.createXULElement('toolbarbutton');
 			twisty.className = 'twisty';
+			twisty.setAttribute("tabindex", "0");
 			this._head.append(twisty);
 			
 			this._buildExtraButtons();
@@ -237,6 +241,7 @@
 				if (!buttonType) continue;
 				let button = document.createXULElement('toolbarbutton');
 				button.classList.add(buttonType, 'section-custom-button');
+				button.setAttribute("tabindex", "0");
 				button.addEventListener('command', (event) => {
 					this.dispatchEvent(new CustomEvent(buttonType, {
 						...event,
@@ -251,6 +256,7 @@
 		
 		destroy() {
 			this._head.removeEventListener('click', this._handleClick);
+			this._head.removeEventListener('mousedown', this._mouseDown);
 			this._head.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
 			
@@ -284,12 +290,78 @@
 			if (event.target.closest('.section-custom-button, menupopup')) return;
 			this.open = !this.open;
 		};
+
+		// Prevent moving focus to the header on click
+		_mouseDown = (event) => {
+			event.preventDefault();
+		};
 		
 		_handleKeyDown = (event) => {
-			if (event.target.closest('.section-custom-button')) return;
-			if (event.key === 'Enter' || event.key === ' ') {
-				this.open = !this.open;
+			let tgt = event.target;
+			let stopEvent = () => {
 				event.preventDefault();
+				event.stopPropagation();
+			};
+
+			// Tab/Shift-Tab from section header through header buttons
+			if (event.key === "Tab") {
+				let nextBtn;
+				if (tgt.classList.contains("head") && event.shiftKey) {
+					return;
+				}
+				if (tgt.classList.contains("head")) {
+					nextBtn = this._head.querySelector("toolbarbutton");
+				}
+				else {
+					nextBtn = event.shiftKey ? tgt.previousElementSibling : tgt.nextElementSibling;
+				}
+				
+				if (nextBtn?.tagName == "popupset") {
+					nextBtn = this._head;
+				}
+				if (nextBtn) {
+					nextBtn.focus();
+					stopEvent();
+				}
+			}
+			if (event.target.tagName === "toolbarbutton") {
+				// No actions on right/left on header buttons
+				if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
+					stopEvent();
+					return;
+				}
+				// Let itemPane.js listener handle space or Enter clicks
+				if ([" ", "Enter"].includes(event.key)) {
+					return;
+				}
+			}
+			// Space/Enter toggle section open/closed.
+			// ArrowLeft/ArrowRight on actual header will close/open
+			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key)) {
+				stopEvent();
+				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == "ArrowRight");
+				event.target.focus();
+			}
+			if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+				let up = event.key == "ArrowUp";
+				// Arrow up from a button focuses the header
+				if (up && this._head !== tgt) {
+					this._head.focus();
+					stopEvent();
+					return;
+				}
+				// ArrowUp focuses the header of the previous section, ArrowDown - of the next one
+				let box = this.parentNode;
+				let nextBox;
+				nextBox = up ? box.previousElementSibling : box.nextElementSibling;
+				while (nextBox && nextBox.hidden) {
+					nextBox = up ? nextBox.previousElementSibling : nextBox.nextElementSibling;
+				}
+				let nextSection = nextBox?.querySelector("collapsible-section");
+				if (nextSection) {
+					nextSection._head.focus();
+					stopEvent();
+				}
 			}
 		};
 		

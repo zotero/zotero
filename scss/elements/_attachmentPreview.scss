@@ -14,6 +14,7 @@ attachment-preview {
 	--preview-width: 400;
 	--preview-height: calc(min(var(--preview-width) / var(--width-height-ratio), var(--max-height)));
 	max-height: var(--max-height);
+	@include focus-ring;
 
 	&[hidden] {
 		display: none;

@@ -80,10 +80,12 @@ var ZoteroContextPane = new function () {
 		window.addEventListener('resize', _update);
 		Zotero.Reader.onChangeSidebarWidth = _updatePaneWidth;
 		Zotero.Reader.onToggleSidebar = _updatePaneWidth;
+		_contextPaneInner.addEventListener("keypress", ZoteroItemPane.handleKeypress);
 	};
 
 	this.destroy = function () {
 		window.removeEventListener('resize', _update);
+		_contextPaneInner.removeEventListener("keypress", ZoteroItemPane.handleKeypress);
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Reader.onChangeSidebarWidth = () => {};
 		Zotero.Reader.onToggleSidebar = () => {};

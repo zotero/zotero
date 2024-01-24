@@ -31,7 +31,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 	class AttachmentRow extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="head">
-				<html:div class="clicky-item attachment-btn">
+				<html:div class="clicky-item attachment-btn keyboard-clickable" tabindex="0">
 					<html:span class="icon"/>
 					<html:div class="label"/>
 				</html:div>
