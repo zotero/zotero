@@ -121,7 +121,7 @@
 			this._head.role = 'button';
 			this._head.className = 'head';
 			this._head.setAttribute("tabindex", "0");
-			this._head.addEventListener('mousedown', this._mouseDown);
+			this._head.addEventListener('mousedown', this._handleMouseDown);
 			this._head.addEventListener('click', this._handleClick);
 			this._head.addEventListener('keydown', this._handleKeyDown);
 			this._head.addEventListener('contextmenu', this._handleContextMenu);
@@ -256,7 +256,7 @@
 		
 		destroy() {
 			this._head.removeEventListener('click', this._handleClick);
-			this._head.removeEventListener('mousedown', this._mouseDown);
+			this._head.removeEventListener('mousedown', this._handleMouseDown);
 			this._head.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
 			
@@ -292,7 +292,7 @@
 		};
 
 		// Prevent moving focus to the header on click
-		_mouseDown = (event) => {
+		_handleMouseDown = (event) => {
 			event.preventDefault();
 		};
 		
