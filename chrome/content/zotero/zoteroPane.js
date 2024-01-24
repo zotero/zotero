@@ -436,9 +436,10 @@ var ZoteroPane = new function()
 	}
 
 	function addFocusHandlers() {
-		// When a menupopup shows, hide the focus ring around the currently focused element
+		// When the item type menupopup from itemBoxshows,
+		// hide the focus ring around the currently focused element
 		document.addEventListener("popupshowing", (e) => {
-			if (e.target.tagName == "menupopup") {
+			if (e.target.tagName == "menupopup" && e.target.parentNode.id == "item-type-menu") {
 				document.activeElement.style.setProperty('--width-focus-border', '0');
 				document.activeElement.classList.add("hidden-focus");
 			}
@@ -447,7 +448,7 @@ var ZoteroPane = new function()
 		// When a panel popup hides, refocus the previous element
 		// When a menupopup hides, stop hiding the focus-ring
 		document.addEventListener("popuphiding", (e) => {
-			if (e.target.tagName == "panel"
+			if (ZoteroPane.lastFocusedElement && e.target.tagName == "panel"
 					&& document.activeElement && e.target.contains(document.activeElement)) {
 				ZoteroPane.lastFocusedElement.focus();
 			}
