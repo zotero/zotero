@@ -141,6 +141,11 @@
 	--panel-background: var(--material-toolbar);
 }
 
+#main-window {
+	min-width: $min-width-collections-pane + $min-width-items-pane + $min-width-item-pane + $width-sidenav;
+	min-height: 300px;
+}
+
 #zotero-pane-stack > hbox {
 	// Let window chrome, tabs, and toolbar shrink even when sidebars overflow
 	min-width: 0;

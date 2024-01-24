@@ -4,12 +4,6 @@
 	overflow: hidden;
 }
 
-#zotero-collections-pane
-{
-	min-width: 250px;
-	width: 250px;
-}
-
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment, pie)
 {
 	margin: 1px 0 0;
@@ -180,14 +174,6 @@
 	color: rgb(0, 149, 221);
 	cursor: pointer;
 	text-decoration: underline;
-}
-
-#zotero-item-pane
-{
-	width: 342px;
-	min-width: 342px;
-	/* Need a min height to prevent layout issues in stacked mode */
-	min-height: 168px;
 }
 
 #zotero-layout-switcher

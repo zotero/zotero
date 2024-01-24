@@ -11,6 +11,11 @@ $icons: (
 	}
 }
 
+#zotero-collections-pane {
+	min-width: $min-width-collections-pane;
+	width: $min-width-collections-pane;
+}
+
 #zotero-collections-tree-container {
 	height: 5.2em;
 }

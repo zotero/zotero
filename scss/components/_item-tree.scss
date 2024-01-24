@@ -1,7 +1,17 @@
 @use "sass:map";
 
-#zotero-items-tree {
+#zotero-items-pane-container {
+	min-width: $min-width-items-pane;
+}
 
+#zotero-items-pane {
+	min-width: $min-width-items-pane;
+	min-height: 150px;
+	height: 150px;
+	width: 290px;
+}
+
+#zotero-items-tree {
 	.virtualized-table-body, .drag-image-container {
 		padding: 4px 8px 8px;
 	}

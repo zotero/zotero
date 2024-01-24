@@ -1,10 +1,10 @@
 #tabs-deck {
-	min-width: 600px;
+	min-width: $min-width-collections-pane + $min-width-items-pane;
 }
 
 #zotero-context-pane {
 	display: flex;
-	min-width: 360px;
+	min-width: $min-width-item-pane;
 
 	.divider {
 		border-bottom: 1px solid var(--fill-quinary);

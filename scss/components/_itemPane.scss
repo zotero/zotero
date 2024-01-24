@@ -1,0 +1,6 @@
+#zotero-item-pane {
+	width: $min-width-item-pane;
+	min-width: $min-width-item-pane;
+	/* Need a min height to prevent layout issues in stacked mode */
+	min-height: 168px;
+}
