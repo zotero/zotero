@@ -134,8 +134,9 @@ var ZoteroItemPane = new function() {
 			else if (pinnedPane !== false) {
 				_sidenav.scrollToPane(_sidenav.getPanes()[0]?.getAttribute('data-pane'), 'instant');
 			}
-			_sidenav.render();
 		}
+
+		_sidenav.render();
 	});
 	
 	
