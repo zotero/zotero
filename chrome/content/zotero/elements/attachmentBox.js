@@ -530,7 +530,9 @@
 				let index = Zotero.Prompt.confirm({
 					window,
 					title: Zotero.getString('general.warning'),
-					text: Zotero.getString('pane.item.attachments.rename.confirmExtChange.text', [oldExt, newExt, Zotero.appName]),
+					text: Zotero.getString('pane.item.attachments.rename.confirmExtChange.text1', [oldExt, newExt])
+						+ "\n\n"
+						+ Zotero.getString('pane.item.attachments.rename.confirmExtChange.text2', Zotero.appName),
 					button0: Zotero.getString('pane.item.attachments.rename.confirmExtChange.keep', oldExt),
 					button1: Zotero.getString('pane.item.attachments.rename.confirmExtChange.change', newExt),
 				});
