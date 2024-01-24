@@ -789,7 +789,7 @@ var Zotero_Tabs = new function () {
 		let xhtmlNS = "http://www.w3.org/1999/xhtml";
 		let desc = document.createXULElement('description');
 
-		let regex = new RegExp(`(${this._tabsMenuFilter})`, 'gi');
+		let regex = new RegExp(`(${Zotero.Utilities.quotemeta(this._tabsMenuFilter)})`, 'gi');
 		let matches = title.matchAll(regex);
 
 		let lastIndex = 0;
