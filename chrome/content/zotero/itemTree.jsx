@@ -44,7 +44,6 @@ const CHILD_INDENT = 16;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
-const SLIDE_ANIMATION_DURATION = 200; //ms
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
@@ -118,7 +117,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
-		this._animation = null;
 	}
 
 	unregister() {
@@ -2840,88 +2838,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.setAttribute('aria-disabled', true);
 		}
 
-		div.style.zIndex = null;
-		div.style.transition = null;
-		div.style.transform = null;
-
-		if (this._animation !== null) {
-			if (this._animation?.index === index) {
-				// there is a chance that twisty row will get re-rendered while
-				// transition is playing (e.g. user changes selection). In such
-				// case we need to make sure that twisty row is on top of other
-				// rows but we no longer try to play transition to avoid
-				// animation stutter
-				div.style.zIndex = '1';
-				if (!this._animation.twistyAnimated) {
-					this._animation.twistyAnimated = true;
-					let twisty = div.querySelector('.twisty');
-					if (twisty) {
-						// since row has been re-rendered, if it has been toggled
-						// open/close, we need to force twisty animation. We do this by
-						// setting the opposite state and then toggling it back
-						twisty.classList.toggle('open', !this.isContainerOpen(index));
-						setTimeout(() => {
-							twisty.classList.toggle('open', this.isContainerOpen(index));
-						}, 0);
-					}
-				}
-			}
-
-			if (this._animation?.index !== null && index > this._animation.index && this._animation?.count !== null && this._animation.count > 0) {
-				const needsTransform = !div.style.transform;
-				if (needsTransform) {
-					let delay = 0;
-					let duration = SLIDE_ANIMATION_DURATION;
-
-					if (this._animation.isOpen) {
-						if (index < 1 + this._animation.index + this._animation.count) {
-							// new rows need to slide sequentially (initially all are squashed behind the parent row)
-							const newRowIndex = index - this._animation.index;
-							const remainingNewRowsCount = this._animation.count - newRowIndex;
-
-							delay = (remainingNewRowsCount / this._animation.count) * SLIDE_ANIMATION_DURATION;
-							duration = SLIDE_ANIMATION_DURATION - delay;
-							// hide all new rows behind the parent row before animating
-							div.style.transform = `translateY(${-(index - this._animation.index) * 100}%)`;
-						}
-						else {
-							// move the remaining rows down
-							div.style.transform = `translateY(${-(this._animation.count) * 100}%)`;
-						}
-						setTimeout(() => {
-							div.style.transition = `transform ${duration / 1000}s linear ${delay / 1000}s`;
-							div.style.transform = '';
-						}, 0);
-					}
-					else {
-						// eslint-disable-next-line no-lonely-if
-						if (index < 1 + this._animation.index + this._animation.count) {
-							// animate collapsed rows up and hide behind parent row
-							div.style.transform = `translateY(${-(index - this._animation.index) * 100}%)`;
-							
-							const newRowIndex = index - this._animation.index;
-							delay = 0;
-							duration = (newRowIndex / this._animation.count) * SLIDE_ANIMATION_DURATION;
-						}
-						else {
-							// move the remaining rows up
-							div.style.transform = `translateY(${-(this._animation.count) * 100}%)`;
-						}
-						div.style.transition = `transform ${duration / 1000}s linear ${delay / 1000}s`;
-						this._pendingCallback = this._animation.callback;
-					}
-					// cleanup and callback
-					setTimeout(() => {
-						if (this._animation?.callback) {
-							// first time callback is called it must clear this._animation so it doesn't get called again
-							this._animation.callback();
-						}
-						div.style.transition = null;
-						div.style.transform = null;
-					}, SLIDE_ANIMATION_DURATION);
-				}
-			}
-		}
+		this._animateExpandCollapse(index, div);
 
 		return div;
 	}
@@ -2976,7 +2893,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		// Remove child rows
 		for (let i = 1; i < this._rows.length; i++) {
-			if (this.getLevel(index + i) <= level) {
+			if (index + i >= this._rows.length || this.getLevel(index + i) <= level) {
 				break;
 			}
 			rowsToRemove.push(index + i);
