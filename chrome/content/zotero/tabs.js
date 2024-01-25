@@ -790,9 +790,7 @@ var Zotero_Tabs = new function () {
 	 * @returns <description> with bold substrings of title matching this._tabsMenuFilter
 	 */
 	let createTabsMenuLabel = (title) => {
-		let xhtmlNS = "http://www.w3.org/1999/xhtml";
-		let desc = document.createXULElement('description');
-
+		let desc = document.createElement('label');
 		let regex = new RegExp(`(${Zotero.Utilities.quotemeta(this._tabsMenuFilter)})`, 'gi');
 		let matches = title.matchAll(regex);
 
@@ -804,9 +802,12 @@ var Zotero_Tabs = new function () {
 				desc.appendChild(document.createTextNode(title.substring(lastIndex, match.index)));
 			}
 			// Add matched text wrapped in <b>
-			let b = document.createElementNS(xhtmlNS, 'b');
-			b.textContent = match[0];
-			desc.appendChild(b);
+			
+			if (match[0]) {
+				let b = document.createElement('b');
+				b.textContent = match[0];
+				desc.appendChild(b);
+			}
 			lastIndex = match.index + match[0].length;
 		}
 
@@ -839,12 +840,14 @@ var Zotero_Tabs = new function () {
 				continue;
 			}
 			// Top-level entry of the opened tabs array
-			let row = document.createXULElement('toolbaritem');
+			let row = document.createElement('div');
 			let rowIndex = this._tabs.findIndex(x => x.id === tab.id);
+			row.classList = "row";
 			row.setAttribute("index", rowIndex);
-			
+			row.setAttribute("draggable", true);
+
 			// Title of the tab
-			let tabName = document.createXULElement('toolbarbutton');
+			let tabName = document.createElement('div');
 			tabName.setAttribute('flex', '1');
 			tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
 			tabName.setAttribute('tabindex', `${index++}`);
@@ -852,10 +855,13 @@ var Zotero_Tabs = new function () {
 			tabName.setAttribute('tooltiptext', tab.title);
 
 			// Cross button to close a tab
-			let closeButton = document.createXULElement('toolbarbutton');
-			closeButton.setAttribute('class', 'zotero-tabs-menu-entry zotero-clicky-cross close');
+			let closeButton = document.createElement('div');
+			closeButton.className = "zotero-tabs-menu-entry close";
+			let closeIcon = document.createElement('span');
+			closeIcon.setAttribute('class', 'icon icon-css icon-x-8 icon-16');
 			closeButton.setAttribute('data-l10n-id', 'zotero-tabs-menu-close-button');
-			closeButton.addEventListener("command", () => {
+			closeButton.appendChild(closeIcon);
+			closeButton.addEventListener("click", () => {
 				// Keep the focus on the cross at the same spot
 				if (this._tabsMenuFocusedIndex == this.tabsMenuList.childElementCount * 2) {
 					this._tabsMenuFocusedIndex = Math.max(this._tabsMenuFocusedIndex - 2, 0);
@@ -866,7 +872,6 @@ var Zotero_Tabs = new function () {
 			// Library tab has no close button
 			if (tab.id == "zotero-pane") {
 				closeButton.hidden = true;
-				closeButton.disabled = true;
 			}
 
 			closeButton.setAttribute('tabindex', `${index++}`);
@@ -892,7 +897,6 @@ var Zotero_Tabs = new function () {
 			tabName.appendChild(span);
 			// Actual label with bolded substrings matching the filter
 			let tabLabel = createTabsMenuLabel(tab.title, this._tabsMenuFilter);
-			tabLabel.setAttribute('flex', 1);
 			tabName.appendChild(tabLabel);
 
 			// Selected tab is bold
@@ -900,7 +904,7 @@ var Zotero_Tabs = new function () {
 				tabName.classList.add('selected');
 			}
 			// Onclick, go to selected tab + close popup
-			tabName.addEventListener("command", () => {
+			tabName.addEventListener("click", () => {
 				this.tabsMenuPanel.hidePopup();
 				this.select(tab.id);
 			});
@@ -1068,8 +1072,8 @@ var Zotero_Tabs = new function () {
 			}
 			moveTabIndex();
 			let candidate = this.tabsMenuList.parentElement.querySelector(`[tabindex="${tabindex}"]`);
-			// If the candidate is disabled (e.g. close button of library tab), skip it
-			if (candidate && candidate.disabled) {
+			// If the candidate is hidden (e.g. close button of library tab), skip it
+			if (candidate && candidate.hidden) {
 				moveTabIndex();
 			}
 			focusTabsMenuEntry(tabindex);
@@ -1116,7 +1120,7 @@ var Zotero_Tabs = new function () {
 			}
 			focusTabsMenuEntry(tabindex);
 		}
-		else if (event.key == "Enter") {
+		else if (["Enter", " "].includes(event.key)) {
 			event.preventDefault();
 			if (event.target.id == "zotero-tabs-menu-filter") {
 				focusTabsMenuEntry(1);
