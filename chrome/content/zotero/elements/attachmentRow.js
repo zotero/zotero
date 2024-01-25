@@ -119,7 +119,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			
 			this._attachmentButton.querySelector(".icon").replaceWith(getCSSItemTypeIcon(this._attachment.getItemTypeIconName()));
 			this._attachmentButton.querySelector(".label").textContent = this._attachment.getField('title');
-			let annotationCount = this.attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL ? 0 : this.attachment.getAnnotations().length;
+			let annotationCount = this.attachment.isFileAttachment() ? this.attachment.getAnnotations().length : 0;
 			this._annotationButton.hidden = annotationCount == 0;
 			this._annotationButton.querySelector(".label").textContent = annotationCount;
 		}
