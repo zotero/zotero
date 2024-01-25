@@ -422,6 +422,12 @@
 		}
 
 		render() {
+			// TEMP: only render sidenav when pane is visible
+			if (this.container.id === "zotero-view-item"
+				&& document.querySelector("#zotero-item-pane-content").selectedIndex !== "1"
+			) {
+				return;
+			}
 			let contextNotesPaneVisible = this._contextNotesPaneVisible;
 			let pinnedPane = this.pinnedPane;
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
