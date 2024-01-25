@@ -2934,6 +2934,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
+		if (this._animation) {
+			this._animation.selectionChanged = true;
+		}
 		if (this.collectionTreeRow.isDuplicates() && selection.count == 1 && this.duplicateMouseSelection) {
 			var itemID = this.getRow(selection.focused).ref.id;
 			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(itemID);
@@ -2993,10 +2996,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._animation = {
 				index, count, isOpen: false,
 				callback: async () => {
+					const selectionChanged = this._animation?.selectionChanged;
 					this._animation = null; // ensure animation is cleared before next render
 					this._removeRows(rowsToRemove);
 					await this._refreshPromise;
-					this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
+					if (!selectionChanged) {
+						this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
+					}
 					this.tree.invalidate();
 				}
 			};
