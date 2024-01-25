@@ -1479,7 +1479,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		switch (type) {
 			case 'search':
 				this.collectionTreeRow.setSearch(data);
-				break;
+				break; 
 			case 'tags':
 				this.collectionTreeRow.setTags(data);
 				break;
@@ -1558,6 +1558,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
+		// cleanup after ongoing animations, if any is running
+		this._animation?.callback?.();
 
 		if (this.isContainerOpen(index)) {
 			await this._closeContainer(index, skipRowMapRefresh, true);
@@ -1610,10 +1612,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		this._animation = {
-			index, count, isOpen: true,
-		};
-
 
 		if (!skipRowMapRefresh) {
 			Zotero.debug('Refreshing item row map');
@@ -1621,10 +1619,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			await this._refreshPromise;
 			this._restoreSelection(savedSelection, false, true);
+			
+			this._animation = {
+				index, count, isOpen: true,
+				callback: () => {
+					this._animation = null;
+				}
+			};
+			
 			this.tree.invalidate();
 		}
-		this._animation = null;
-	}
+	};
 
 	expandMatchParents(searchParentIDs) {
 		// Expand parents of child matches
@@ -2840,16 +2845,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.style.transform = null;
 
 		if (this._animation !== null) {
-			// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
 			if (this._animation?.index === index) {
+				// there is a chance that twisty row will get re-rendered while
+				// transition is playing (e.g. user changes selection). In such
+				// case we need to make sure that twisty row is on top of other
+				// rows but we no longer try to play transition to avoid
+				// animation stutter
 				div.style.zIndex = '1';
-				div.dataset.shouldHaveZIndex = '1';
-				let twisty = div.querySelector('.twisty');
-				if (twisty) {
-					twisty.classList.toggle('open', !this.isContainerOpen(index));
-					setTimeout(() => {
-						twisty.classList.toggle('open', this.isContainerOpen(index));
-					}, 0);
+				if (!this._animation.twistyAnimated) {
+					this._animation.twistyAnimated = true;
+					let twisty = div.querySelector('.twisty');
+					if (twisty) {
+						// since row has been re-rendered, if it has been toggled
+						// open/close, we need to force twisty animation. We do this by
+						// setting the opposite state and then toggling it back
+						twisty.classList.toggle('open', !this.isContainerOpen(index));
+						setTimeout(() => {
+							twisty.classList.toggle('open', this.isContainerOpen(index));
+						}, 0);
+					}
 				}
 			}
 
@@ -2875,13 +2889,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 							div.style.transform = `translateY(${-(this._animation.count) * 100}%)`;
 						}
 						setTimeout(() => {
-							div.style.transition = `background-color 0.125s linear, transform ${duration / 1000}s linear ${delay / 1000}s`;
+							div.style.transition = `transform ${duration / 1000}s linear ${delay / 1000}s`;
 							div.style.transform = '';
 						}, 0);
-						setTimeout(() => {
-							div.style.transition = null;
-							div.style.transform = null;
-						}, SLIDE_ANIMATION_DURATION);
 					}
 					else {
 						// eslint-disable-next-line no-lonely-if
@@ -2897,16 +2907,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 							// move the remaining rows up
 							div.style.transform = `translateY(${-(this._animation.count) * 100}%)`;
 						}
-						div.style.transition = `background-color 0.125s linear, transform ${duration / 1000}s linear ${delay / 1000}s`;
+						div.style.transition = `transform ${duration / 1000}s linear ${delay / 1000}s`;
 						this._pendingCallback = this._animation.callback;
-						
-						setTimeout(() => {
-							if (this._animation?.callback) {
-								// first time callback is called it must clear this._animation so it doesn't get called again
-								this._animation.callback();
-							}
-						}, SLIDE_ANIMATION_DURATION);
 					}
+					// cleanup and callback
+					setTimeout(() => {
+						if (this._animation?.callback) {
+							// first time callback is called it must clear this._animation so it doesn't get called again
+							this._animation.callback();
+						}
+						div.style.transition = null;
+						div.style.transform = null;
+					}, SLIDE_ANIMATION_DURATION);
 				}
 			}
 		}
