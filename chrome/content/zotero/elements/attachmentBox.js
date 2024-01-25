@@ -263,6 +263,8 @@
 					reindexButton.click();
 				}
 			});
+
+			this.querySelectorAll(".meta-label").forEach(label => label.addEventListener("click", this._handleMetaLabelClick));
 		}
 
 		destroy() {
@@ -621,6 +623,16 @@
 			this.item.setNote("");
 			await this.item.saveTx();
 		}
+
+		_handleMetaLabelClick = (event) => {
+			let labelWrapper = event.target.closest(".meta-label");
+			if (labelWrapper.nextSibling.contains(document.activeElement)) {
+				document.activeElement.blur();
+			}
+			else if (!labelWrapper.nextSibling.firstChild.readOnly) {
+				labelWrapper.nextSibling.firstChild.focus();
+			}
+		};
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
