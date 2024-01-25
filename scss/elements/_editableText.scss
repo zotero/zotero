@@ -100,10 +100,6 @@ editable-text {
 	}
 	
 	&[multiline] {
-		&::after, .input {
-			overflow-y: auto;
-		}
-		
 		.input {
 			min-height: 5em;
 		}
