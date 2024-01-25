@@ -181,7 +181,7 @@
 }
 
 richlistitem[selected="true"] {
-	background: Highlight;
+	background: Highlight !important;
 	color: HighlightText;
 }
 
