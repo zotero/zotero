@@ -131,7 +131,7 @@
 			this._container?.removeEventListener('scroll', this._handleContainerScroll);
 			this._container = val;
 			this._container.addEventListener('scroll', this._handleContainerScroll);
-			this.render();
+			this.render(true);
 		}
 		
 		get contextNotesPane() {
@@ -421,9 +421,9 @@
 			this.render();
 		}
 
-		render() {
+		render(force = false) {
 			// TEMP: only render sidenav when pane is visible
-			if (this.container.id === "zotero-view-item"
+			if (!force && this.container.id === "zotero-view-item"
 				&& document.querySelector("#zotero-item-pane-content").selectedIndex !== "1"
 			) {
 				return;
