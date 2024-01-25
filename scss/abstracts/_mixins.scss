@@ -142,7 +142,7 @@
 		&:not(.noHover):hover .show-on-hover,
 		&:focus-within .show-on-hover {
 			visibility: visible;
-			display: block;
+			display: revert;
 		}
 	
 		.meta-data {
