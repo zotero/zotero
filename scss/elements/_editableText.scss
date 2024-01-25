@@ -55,7 +55,7 @@ editable-text {
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 		font: inherit;
 		line-height: inherit;
-		color: inherit;
+		overflow: hidden;
 	}
 	
 	&:not([nowrap])::after, &:not([nowrap]) .input {
@@ -63,6 +63,7 @@ editable-text {
 		overflow-wrap: anywhere;
 		white-space: pre-wrap;
 		max-height: calc(2ex * var(--max-visible-lines));
+		scrollbar-gutter: stable;
 	}
 	
 	.input {
