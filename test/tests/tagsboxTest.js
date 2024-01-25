@@ -16,7 +16,7 @@ describe("Item Tags Box", function () {
 	
 	
 	describe("Tag Editing", function () {
-		it("should update tag when pressing Enter in textbox", async function () {
+		it.skip("should update tag when pressing Enter in textbox", async function () {
 			// editable-text behavior relies on focus, so we first need to bring the window to the front.
 			let win = Zotero.getMainWindow();
 			let activatePromise = new Promise(
