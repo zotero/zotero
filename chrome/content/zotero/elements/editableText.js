@@ -169,7 +169,9 @@
 		render() {
 			let autocompleteParams = this.autocomplete;
 			let autocompleteEnabled = !this.multiline && !!autocompleteParams;
-			if (!this._input || autocompleteEnabled !== (this._input.constructor.name === 'AutocompleteInput')) {
+			if (!this._input
+					|| (this._input.constructor.name === 'AutocompleteInput') !== autocompleteEnabled
+					|| this._input.tagName !== (this.noWrap ? 'input' : 'textarea')) {
 				let input;
 				if (autocompleteEnabled) {
 					input = document.createElement('input', { is: 'autocomplete-input' });

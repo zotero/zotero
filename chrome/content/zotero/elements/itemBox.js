@@ -1467,13 +1467,15 @@
 				var fieldID = Zotero.ItemFields.getID(fieldName);
 			}
 			
-			var isMultiline = Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName);
+			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
+			let isLong = Zotero.ItemFields.isLong(fieldName);
+			
 			var valueElement = document.createXULElement("editable-text");
 			valueElement.className = 'value';
 			if (isMultiline) {
 				valueElement.setAttribute('multiline', true);
 			}
-			else {
+			else if (!isLong) {
 				// Usual fields occupy all available space and keep info on one line
 				valueElement.setAttribute("nowrap", true);
 			}
@@ -1548,7 +1550,7 @@
 			else {
 				valueElement.style.textAlign = 'left';
 			}
-			if (!fieldName.includes("creator")) {
+			if (!isLong && !fieldName.includes("creator")) {
 				// autocomplete for creator names is added in addCreatorRow
 				this.addAutocompleteToElement(valueElement);
 			}
