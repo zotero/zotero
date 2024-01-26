@@ -119,8 +119,8 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			
 			this._attachmentButton.querySelector(".icon").replaceWith(getCSSItemTypeIcon(this._attachment.getItemTypeIconName()));
 			this._attachmentButton.querySelector(".label").textContent = this._attachment.getField('title');
-			let annotationCount = this.attachment.isWebAttachment() ? 0 : this.attachment.getAnnotations().length;
-			this._annotationButton.hidden = annotationCount === 0;
+			let annotationCount = this.attachment.isFileAttachment() ? this.attachment.getAnnotations().length : 0;
+			this._annotationButton.hidden = annotationCount == 0;
 			this._annotationButton.querySelector(".label").textContent = annotationCount;
 		}
 	}
