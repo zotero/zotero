@@ -1526,8 +1526,7 @@
 				// Display the SQL date as a tooltip for date fields
 				// TEMP - filingDate
 				if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || fieldName == 'filingDate') {
-					valueElement.setAttribute('title',
-						Zotero.Date.multipartToSQL(this.item.getField(fieldName, true)));
+					valueElement.tooltipText = Zotero.Date.multipartToSQL(this.item.getField(fieldName, true));
 				}
 			}
 			
