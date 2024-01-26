@@ -246,11 +246,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Browser
 		Zotero.browser = "g";
 		
-		if (this.isWin) {
-			let branch = Services.prefs.getBranch("toolkit.startup.");
-			if (branch.getIntPref('recent_crashes', 0) > 2) {
-				branch.clearUserPref('recent_crashes');
-			}
+		// TEMP: Disable automatic safe mode until we can figure out why some shutdowns are
+		// counting as crashes
+		var branch = Services.prefs.getBranch("toolkit.startup.");
+		if (branch.getIntPref('recent_crashes', 0) > 2) {
+			branch.clearUserPref('recent_crashes');
 		}
 		
 		Zotero.Intl.init();
