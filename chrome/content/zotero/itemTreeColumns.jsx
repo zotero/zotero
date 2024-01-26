@@ -337,7 +337,7 @@ const COLUMNS = [
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
-		width: "16",
+		width: "32",
 		zoteroPersist: ["hidden", "sortDirection"]
 	},
 	{
@@ -346,8 +346,8 @@ const COLUMNS = [
 		showInColumnPicker: true,
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
-		width: "14",
-		minWidth: 14,
+		width: "32",
+		minWidth: 32,
 		staticWidth: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},

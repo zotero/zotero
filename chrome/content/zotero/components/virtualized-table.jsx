@@ -444,6 +444,7 @@ class VirtualizedTable extends React.Component {
 
 		onDragOver: PropTypes.func,
 		onDrop: PropTypes.func,
+		onSetOrder: PropTypes.func,
 
 		// Enter, double-clicking
 		onActivate: PropTypes.func,
@@ -1569,6 +1570,10 @@ var Columns = class {
 			if (a.ordinal == b.ordinal) return a == column ? -1 : 1;
 			return a.ordinal - b.ordinal;
 		});
+
+		this._virtualizedTable.props.onSetOrder?.(this._columns);
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+
 		let prefs = this._getPrefs();
 		// reassign columns their ordinal values and set the prefs
 		this._columns.forEach((column, index) => {
