@@ -55,7 +55,8 @@ editable-text {
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 		font: inherit;
 		line-height: inherit;
-		color: inherit;
+		overflow: hidden;
+		scrollbar-gutter: stable;
 	}
 	
 	&:not([nowrap])::after, &:not([nowrap]) .input {
@@ -99,10 +100,6 @@ editable-text {
 	}
 	
 	&[multiline] {
-		&::after, .input {
-			overflow-y: auto;
-		}
-		
 		.input {
 			min-height: 5em;
 		}
@@ -115,9 +112,12 @@ editable-text {
 	&[hidden] {
 		display: none;
 	}
-	// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
-	// at the bottom of textarea on all platforms with non-overlay scrollbars 
 	textarea {
+		// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
+		// at the bottom of textarea on all platforms with non-overlay scrollbars
 		overflow-x: hidden;
+		
+		// Match the gutters we apply to ::after
+		overflow-y: scroll;
 	}
 }
