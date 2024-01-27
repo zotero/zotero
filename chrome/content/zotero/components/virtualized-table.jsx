@@ -36,7 +36,7 @@ const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 const COLUMN_MIN_WIDTH = 20;
-const COLUMN_PADDING = 10; // N.B. MUST BE INLINE WITH CSS!!!
+const COLUMN_PADDING = 16; // N.B. MUST BE INLINE WITH CSS!!!
 
 const noop = () => 0;
 
@@ -849,8 +849,8 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
-		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + (aColumn.noPadding ? 0 : COLUMN_PADDING);
+		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + (bColumn.noPadding ? 0 : COLUMN_PADDING);
 		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};

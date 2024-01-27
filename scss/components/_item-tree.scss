@@ -21,6 +21,16 @@
 		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
 		box-sizing: border-box;
 
+		.cell.hasAttachment,
+		.cell.numNotes {
+			padding: 0;
+			text-align: center;
+
+			&.first-column {
+				padding-inline-start: 28px;
+			}
+		}
+
 		.first-column {
 			&::before {
 				content: "";
@@ -159,8 +169,12 @@
 			}
 		}
 		
-		.cell.numNotes {
+		.numNotes {
 			text-align: center;
+
+			.cell-text {
+				text-align: center;
+			}
 		}
 	}
 }

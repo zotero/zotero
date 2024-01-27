@@ -953,7 +953,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				column.width = isFirstColumn ? parseInt(columnDef.width) + FIRST_COLUMN_EXTRA_WIDTH : columnDef.width;
 			}
 			if (column.staticWidth) {
-				column.minWidth = isFirstColumn ? (columnDef?.minWidth ?? 0) + FIRST_COLUMN_EXTRA_WIDTH : columnDef.minWidth;
+				column.minWidth = isFirstColumn ? (columnDef?.minWidth ?? 20) + FIRST_COLUMN_EXTRA_WIDTH : columnDef.minWidth;
 				column.width = isFirstColumn ? Math.max(parseInt(column.width) ?? 0, column.minWidth) : column.width;
 			}
 		});
