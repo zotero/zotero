@@ -129,6 +129,8 @@ function modify_omni {
 	
 	# Don't use Mozilla Maintenance Service on Windows
 	replace_line 'MOZ_MAINTENANCE_SERVICE:' 'MOZ_MAINTENANCE_SERVICE: false \&\&' modules/AppConstants.jsm
+	# Continue using app.update.auto in prefs.js on Windows
+	replace_line 'PER_INSTALLATION_PREFS_PLATFORMS = \["win"\]' 'PER_INSTALLATION_PREFS_PLATFORMS = []' modules/UpdateUtils.jsm
 	
 	# Prompt if major update is available instead of installing automatically on restart
 	replace_line 'if \(!updateAuto\) \{' 'if (update.type == "major") {
