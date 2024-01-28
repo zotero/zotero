@@ -41,6 +41,7 @@ class TagSelector extends React.PureComponent {
 					tags={this.props.tags}
 					dragObserver={this.props.dragObserver}
 					onSelect={this.props.onSelect}
+					onKeyDown={this.props.onKeyDown}
 					onTagContext={this.props.onTagContext}
 					loaded={this.props.loaded}
 					width={this.props.width}
@@ -63,7 +64,7 @@ class TagSelector extends React.PureComponent {
 							title="zotero.toolbar.actions.label"
 							className="tag-selector-actions"
 							isMenu
-							onMouseDown={ev => this.props.onSettings(ev)}
+							onClick={ev => this.props.onSettings(ev)}
 						/>
 					</div>
 				</div>
@@ -88,6 +89,7 @@ TagSelector.propTypes = {
 		onDrop: PropTypes.func
 	}),
 	onSelect: PropTypes.func,
+	onKeyDown: PropTypes.func,
 	onTagContext: PropTypes.func,
 	loaded: PropTypes.bool,
 	width: PropTypes.number.isRequired,

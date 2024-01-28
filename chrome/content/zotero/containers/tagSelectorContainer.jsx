@@ -528,6 +528,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			searchString={this.state.searchString}
 			dragObserver={this.dragObserver}
 			onSelect={this.handleTagSelected}
+			onKeyDown={this.handleKeyDown}
 			onTagContext={this.handleTagContext}
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}
@@ -576,6 +577,34 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 		if (typeof(this.props.onSelection) === 'function') {
 			this.props.onSelection(selectedTags);
+		}
+	}
+
+	handleKeyDown = (e) => {
+		if (["ArrowRight", "ArrowLeft"].includes(e.key)) {
+			let nextTag = (node) => {
+				if (e.key == "ArrowRight") return node.nextElementSibling;
+				return node.previousElementSibling;
+			};
+			let nextOne = nextTag(e.target);
+			// Skip disabled tags
+			while (nextOne && nextOne.classList.contains("disabled")) {
+				nextOne = nextTag(nextOne);
+			}
+			if (nextOne) {
+				nextOne.focus();
+			}
+		}
+		else if (e.key == "Tab" && !e.shiftKey) {
+			this.focusTextbox();
+			e.preventDefault();
+		}
+		else if (e.key == "Tab" && e.shiftKey) {
+			document.querySelector('.tag-selector-list').focus();
+			e.preventDefault();
+		}
+		if ([" ", "Enter"].includes(e.key)) {
+			e.target.click();
 		}
 	}
 
