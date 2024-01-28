@@ -81,7 +81,7 @@ Zotero.Prompt = {
 			typeof button0 == 'number' ? null : button0,
 			typeof button1 == 'number' ? null : button1,
 			typeof button2 == 'number' ? null : button2,
-			checkLabel, checkbox
+			checkLabel, typeof checkbox == 'object' ? checkbox : {}
 		);
 	}
 };

@@ -37,7 +37,7 @@ describe("Zotero.ItemTree", function() {
 		let quicksearch;
 		
 		before(() => {
-			quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch = win.document.getElementById('zotero-tb-search-textbox');
 		});
 		after(async () => {
 			quicksearch.value = "";
@@ -344,7 +344,7 @@ describe("Zotero.ItemTree", function() {
 			await createDataObject('item');
 			
 			var quicksearch = win.document.getElementById('zotero-tb-search');
-			quicksearch.value = Zotero.randomString();
+			quicksearch.searchTextbox.value = Zotero.randomString();
 			quicksearch.doCommand();
 			await itemsView._refreshPromise;
 			
@@ -367,7 +367,7 @@ describe("Zotero.ItemTree", function() {
 			
 			yield createDataObject('item');
 			
-			var quicksearch = win.document.getElementById('zotero-tb-search');
+			var quicksearch = win.document.getElementById('zotero-tb-search-textbox');
 			quicksearch.value = searchString;
 			quicksearch.doCommand();
 			yield itemsView._refreshPromise;

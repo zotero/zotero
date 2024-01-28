@@ -1,0 +1,62 @@
+libraries-collections-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+	
+	.body {
+		display: flex;
+		flex-direction: column;
+		margin-inline-start: 12px;
+		
+		.row {
+			display: flex;
+			align-items: flex-start;
+			gap: 4px;
+			margin-inline-start: calc(16px * var(--level, 0));
+			
+			@include comfortable {
+				padding-block: 2px;
+			}
+			
+			&.context {
+				color: var(--fill-secondary);
+
+				.box .icon {
+					opacity: 0.5;
+				}
+			}
+			
+			.box {
+				@include clicky-item;
+				flex: 1;
+				
+				&.current {
+					font-weight: 600;
+				}
+				
+				.icon {
+					width: 16px;
+				}
+			}
+
+			toolbarbutton {
+				margin-inline-start: auto;
+				visibility: hidden;
+				border-radius: 2px;
+			}
+
+			&:is(:hover, :focus-within) toolbarbutton {
+				visibility: visible;
+			}
+		}
+	}
+
+	&:not([mode=edit]) {
+		.add {
+			display: none;
+		}
+	}
+}

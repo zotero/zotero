@@ -1,74 +1,80 @@
 tags-box {
-	.tags-box-header {
+	display: flex;
+	flex-direction: column;
+	
+	.body {
 		display: flex;
-		padding-left: 10px;
-		align-items: center;
-
-		button {
-			min-width: 79px;
-			margin: 5px 6px 3px;
-			padding-top: 1px;
-			padding-bottom: 1px;
-			color: ButtonText;
-			text-shadow: none;
-			font-size: inherit;
-		}
-	}
-
-	.tags-box-list {
-		list-style: none;
+		flex-direction: column;
 		margin: 0;
-		padding: 2px 0 0; // Leave space for textbox border on top tag
-
-		li {
+		padding-inline-start: 16px;
+		
+		.tags-box-list {
 			display: flex;
-			margin: 3px 0;
-			margin-inline-start: 6px;
+			flex-direction: column;
+		}
+
+		.row {
+			display: grid;
+			grid-template-columns: 12px 1fr 20px;
 			align-items: center;
-			height: 1.5em;
+			column-gap: 4px;
 
 			// Shift-Enter
 			&.multiline {
 				align-items: start;
-				height: 9em;
+				min-height: 9em;
 
 				textarea.editable {
 					resize: none;
 				}
 			}
 
-			&:not(.multiline) .editable {
-				padding: 0 1px;
-			}
-
 			.zotero-box-icon {
-				width: 16px;
-				height: 16px;
+				grid-column: 1;
+				width: 12px;
+				height: 12px;
+				-moz-context-properties: fill;
+				background: icon-url('tag.svg') center no-repeat;
+			}
+			
+			&[tagType="0"] .zotero-box-icon {
+				// User tag: use tag color if we have one, blue accent if we don't
+				fill: var(--tag-color, var(--accent-blue));
+			}
+			
+			&[tagType="1"] .zotero-box-icon {
+				// Automatic tag: use tag color if we have one, gray if we don't
+				fill: var(--tag-color, var(--fill-secondary));
 			}
 
 			.zotero-box-label {
-				flex-grow: 1;
-				white-space: nowrap;
-				overflow-x: hidden;
-				text-overflow: ellipsis;
-				width: 0;
+				grid-column: 2;
+			}
+			
+			&.has-color {
+				.zotero-box-icon {
+					background-image: icon-url('tag-fill.svg');
+				}
+				
+				.zotero-box-label {
+					font-weight: 600;
+				}
 			}
 
-			.editable {
-				font-family: inherit;
-				font-size: inherit;
-				flex-grow: 1;
-				margin: 0 2px;
-				width: 0;
+			toolbarbutton {
+				margin-inline-start: auto;
+				visibility: hidden;
 			}
 
-			button {
-				border: 0;
-				background: none;
-				padding: 0;
-				width: 20px;
-				height: 18px;
+			&:is(:hover, :focus-within) toolbarbutton {
+				visibility: visible;
 			}
+		}
+	}
+
+	&:not([mode=edit]) {
+		.add {
+			display: none;
 		}
 	}
 }

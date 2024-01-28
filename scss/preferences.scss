@@ -1,0 +1,301 @@
+// Abstracts
+// --------------------------------------------------
+
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "themes/light";
+@import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
+
+// Panes
+// --------------------------------------------------
+
+@import "preferences/general";
+@import "preferences/file_renaming";
+@import "preferences/sync";
+@import "preferences/sync_reset";
+@import "preferences/export";
+@import "preferences/cite";
+@import "preferences/advanced";
+
+#zotero-prefs {
+	width: 800px;
+	height: 600px;
+	min-width: 800px;
+	min-height: 600px;
+}
+
+#prefs-outer-container {
+	display: flex;
+	flex-direction: row;
+	min-width: 0;
+	min-height: 0;
+	-moz-box-flex: 1;
+	background-color: var(--material-sidepane);
+	color: var(--fill-primary);
+}
+
+#prefs-inner-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+#prefs-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: auto scroll;
+	padding-bottom: 10px;
+
+	& > * {
+		display: flex;
+		flex-direction: column;
+		margin: 5px 15px;
+		max-width: 800px;
+	}
+
+	& > [hidden] {
+		display: none;
+	}
+}
+
+#prefs-search-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	min-height: 40px;
+	padding-inline-end: 8px;
+}
+
+#prefs-search {
+	width: 16em;
+	-moz-box-pack: end;
+}
+
+#prefs-navigation {
+	width: 180px;
+	flex-shrink: 0;
+	appearance: none;
+	background: transparent;
+	border: none;
+	margin: 6px;
+
+	& > richlistitem {
+		padding: 1em;
+		border-radius: 5px;
+		-moz-box-align: center;
+		font-size: 1.1em;
+		transition: background-color 0.2s ease;
+		-moz-context-properties: fill, fill-opacity;
+		fill: currentColor;
+		@include macOS-inactive-opacity;
+
+		&:is([selected="true"], [data-parent-selected="true"]) {
+			@media (-moz-platform: macos) {
+				background-color: color-mix(in srgb, var(--color-accent) 80%, transparent);
+			}
+			@media not (-moz-platform: macos) {
+				background-color: var(--color-accent);
+			}
+			color: #fff;;
+		}
+
+		&:not([selected="true"], [data-parent-selected="true"]):hover {
+			background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+		}
+	}
+
+	& > hr {
+		margin: 8px 0;
+		border: none;
+		border-top: var(--material-panedivider)
+	}
+}
+
+#prefs-navigation > richlistitem image {
+	width: 24px;
+}
+
+#prefs-subpane-back-button-container {
+	flex: 1;
+}
+
+#prefs-subpane-back-button {
+	margin-left: 20px;
+	@include svgicon-menu("chevron", "universal", "20");
+	rotate: 90deg;
+}
+
+#prefs-help-container {
+	display: flex;
+	align-items: end;
+}
+
+h1 {
+	margin: 0 6px 12px 6px;
+	font-size: 17px;
+	font-weight: 400;
+}
+
+.header {
+	margin-bottom: 8px;
+}
+
+/* Headers in subsections */
+.main-section {
+	margin-bottom: 16px;
+
+	&:not([hidden]):not(.hidden-by-search) ~ .main-section {
+		padding-top: 16px;
+		margin-top: 32px;
+		border-top: var(--material-panedivider);
+	}
+}
+
+groupbox > label > h2, groupbox > * > label > h2 {
+	border-bottom: none;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+groupbox:first-of-type label > h2 {
+	margin-top: .5em !important;
+}
+
+/* Space out sections */
+groupbox:not(:first-of-type) label > h2 {
+	margin-top: 2em !important;
+}
+
+/* Approach to search tooltips (mostly borrowed from Fx prefs): */
+.search-tooltip-parent {
+	position: relative;
+}
+
+.search-tooltip {
+	min-width: 20px;
+	max-width: 200px;
+	position: absolute;
+	bottom: 24px;
+	background-color: #ffe900;
+	border: 1px solid rgba(0, 0, 0, 40%);
+	padding: 2px 8px;
+	text-align: center;
+
+	&::before,
+	&::after {
+		content: '';
+		position: absolute;
+		width: 0;
+		height: 0;
+		left: calc(50% - 3px);
+		border-inline: 6px solid transparent;
+	}
+
+	&::before {
+		top: calc(100% + 1px);
+		border-top: 6px solid rgba(0, 0, 0, 40%);
+	}
+
+	&::after {
+		top: 100%;
+		border-top: 6px solid #ffe900;
+	}
+
+	& > span {
+		user-select: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.hidden-by-search {
+	display: none !important;
+}
+
+prefwindow .chromeclass-toolbar
+{
+	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
+}
+
+window[windowtype="zotero:pref"] {
+   min-width: 600px;
+}
+
+label {
+	/* Apply XUL label styles to all labels */
+	margin-block: 1px 2px;
+	margin-inline: 6px 5px;
+}
+
+description, label, checkbox {
+	max-width: 630px;
+}
+
+radio[pane]
+{
+	min-width: 5.5em;
+	height: 48px;
+	-moz-box-align: center;
+	-moz-box-pack: end;
+}
+
+checkbox[disabled="true"] {
+	color: gray !important;
+}
+
+menulist[disabled="true"] {
+	opacity: 75%;
+	/* Disable default hover styling */
+	pointer-events: none;
+}
+
+#export-citePaperJournalArticleURL
+{
+	font-size: .85em;
+}
+
+.statusLine
+{
+	margin-top: .75em;
+	margin-bottom: .75em;
+	font-size: .85em;
+}
+
+/* Links within messages */
+description label[class=zotero-text-link], label[class=zotero-text-link]
+{
+	margin: 0;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	row-gap: .3em;
+
+	& > :nth-child(odd) {
+		-moz-box-pack: end; /* Right-justify left column */
+	}
+}
+
+.pref-row {
+	display: flex;
+	align-items: center;
+}
+
+button {
+	flex-shrink: 0;
+}

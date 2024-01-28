@@ -1,5 +1,9 @@
 item-box {
-	.zotero-clicky {
-		min-height: 17px;
+
+	#item-type-menu {
+		padding: 1px;
+		@include comfortable {
+			padding: 2px;
+		}
 	}
 }

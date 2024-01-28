@@ -20,6 +20,42 @@ function waitForDOMEvent(target, event, capture) {
 	return deferred.promise;
 }
 
+/**
+ * Waits for a DOM element's attribute(s) to change.
+ * @param {HTMLElement} target DOM element
+ * @param {string | string[]} attributes array of attributes to watch
+ * @param {(newValue, oldValue) => boolean} callback called whenever attributes changes. return true to stop waiting
+ */
+async function waitForDOMAttributes(target, attributes, callback) {
+	if (typeof attributes === "string") {
+		attributes = [attributes];
+	}
+	let deferred = Zotero.Promise.defer();
+	function handleMutation(mutations) {
+		for (let mutation of mutations) {
+			if (mutation.type === 'attributes') {
+				let oldValue = mutation.oldValue;
+				let newValue = mutation.target.value;
+				if (callback(newValue, oldValue)) {
+					observer.disconnect();
+					deferred.resolve();
+					return;
+				}
+			}
+		}
+	}
+	
+	let observer = new MutationObserver(handleMutation);
+	observer.observe(target, {
+		attributes: true,
+		attributeFilter: attributes,
+		attributeOldValue: true,
+	});
+
+	await deferred.promise;
+	observer.disconnect();
+}
+
 async function waitForRecognizer() {
 	var win = await waitForWindow('chrome://zotero/content/progressQueueDialog.xhtml')
 	// Wait for status to show as complete

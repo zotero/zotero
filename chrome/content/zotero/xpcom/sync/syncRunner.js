@@ -1414,17 +1414,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			// Update sync icon
 			var syncIcon = doc.getElementById('zotero-tb-sync');
-			var stopIcon = doc.getElementById('zotero-tb-sync-stop');
 			if (state == 'animate') {
 				syncIcon.setAttribute('status', state);
-				// Disable button while spinning
-				syncIcon.disabled = true;
-				stopIcon.hidden = false;
 			}
 			else {
 				syncIcon.removeAttribute('status');
-				syncIcon.disabled = false;
-				stopIcon.hidden = true;
 			}
 		}
 		

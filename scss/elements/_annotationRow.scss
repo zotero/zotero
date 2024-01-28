@@ -1,0 +1,64 @@
+annotation-row {
+	display: flex;
+	flex-direction: column;
+
+	border-radius: 5px;
+	border: 1px solid var(--color-quinary-on-sidepane);
+	background: var(--material-background);
+
+	.head {
+		display: flex;
+		padding: 4px 8px;
+		align-items: center;
+		gap: 4px;
+		border-bottom: 1px solid var(--fill-quinary);
+		
+		.icon {
+			width: 16px;
+			height: 16px;
+			-moz-context-properties: fill;
+			fill: var(--annotation-color, var(--fill-secondary));
+		}
+		
+		.title {
+			font-weight: 600;
+		}
+	}
+	
+	.body {
+		img {
+			max-width: 100%;
+		}
+		
+		.quote, .comment {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 9;
+			overflow: hidden;
+		}
+		
+		.quote {
+			margin: 3px 8px;
+			padding-inline-start: 6px;
+			border-inline-start: 2px solid var(--annotation-color, var(--fill-secondary));
+			color: var(--fill-secondary);
+			
+			@include comfortable {
+				margin-block: 5px;
+			}
+		}
+		
+		.comment {
+			padding: 3px 8px;
+			
+			@include comfortable {
+				padding-block: 4px;
+			}
+		}
+	}
+	
+	.tags {
+		border-top: 1px solid var(--fill-quinary);
+		padding: 3px 8px;
+	}
+}

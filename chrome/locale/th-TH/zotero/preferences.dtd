@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "ค่าโดยปริยาย:">
 <!ENTITY zotero.preferences.items "รายการ">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "ตั้งค่า">
 <!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "ทั่วไป">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ไม่ใช้การสำเนาแบบเร็วเมื่อลากรายการมากกว่า ">
 
 <!ENTITY zotero.preferences.prefpane.cite "อ้างอิง">
-<!ENTITY zotero.preferences.cite.styles "รูปแบบ">
 <!ENTITY zotero.preferences.cite.wordProcessors "โปรแกรมประมวลคำ">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "ใช้หน้าจอการอ้างอิงแบบคลาสสิก">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">

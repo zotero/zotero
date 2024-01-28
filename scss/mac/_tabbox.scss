@@ -1,0 +1,76 @@
+tabbox {
+	tabs {
+		tab {
+			appearance: none;
+			// Since the tab with opacity is weird, we just use hard-coded colors
+			@include light-dark(background, #ededed, #343434);
+			box-shadow:
+				0px 2px 2px -2px var(--fill-quarternary) inset,
+				0px -2px 2px -2px var(--fill-quarternary) inset,
+				0px 4px 4px -4px var(--fill-quinary) inset,
+				0px -4px 4px -4px var(--fill-quinary) inset;
+
+			&::before {
+				content: "";
+				position: absolute;
+				height: 14px;
+				top: 5px;
+				border-left: 1px solid var(--fill-quarternary);
+			}
+
+			&:first-of-type {
+				border-top-left-radius: 5px;
+				border-bottom-left-radius: 5px;
+				box-shadow:
+					0px 2px 2px -2px var(--fill-quarternary) inset,
+					0px -2px 2px -2px var(--fill-quarternary) inset,
+					0px 4px 4px -4px var(--fill-quinary) inset,
+					0px -4px 4px -4px var(--fill-quinary) inset,
+					2px 0px 2px -2px var(--fill-quarternary) inset,
+					4px 0px 4px -4px var(--fill-quinary) inset;
+				&::before {
+					display: none;
+				}
+			}
+
+			&:last-of-type {
+				border-top-right-radius: 5px;
+				border-bottom-right-radius: 5px;
+				box-shadow:
+					0px 2px 2px -2px var(--fill-quarternary) inset,
+					0px -2px 2px -2px var(--fill-quarternary) inset,
+					0px 4px 4px -4px var(--fill-quinary) inset,
+					0px -4px 4px -4px var(--fill-quinary) inset,
+					-2px 0px 2px -2px var(--fill-quarternary) inset,
+					-4px 0px 4px -4px var(--fill-quinary) inset;
+			}
+
+			&[visuallyselected=true] {
+				& + tab {
+					&::before {
+						display: none;
+					}
+				}
+
+				&::before {
+					display: none;
+				}
+
+				.tab-middle {
+					border-radius: 5px;
+					background: var(--material-button);
+					box-shadow:
+						0px 1px 0.75px 0px var(--fill-quinary),
+						0px 0.25px 0.25px 0px var(--color-border);;
+					border: 0.5px solid var(--fill-senary);
+				}
+			}
+		}
+	}
+	tabpanels {
+		appearance: none;
+		background: var(--color-sidepane);
+		border: 1px solid var(--fill-quinary);
+		border-radius: 5px;
+	}
+}

@@ -27,7 +27,7 @@ h2 {
 }
 
 h2.parentItem {
-	font-weight: bold;
+	font-weight: 600;
 	font-size: 1em;
 	padding: 0 0 .5em;
 	border-bottom: 1px solid #ccc;
@@ -46,7 +46,7 @@ h2.parentItem .title {
 
 h3 {
 	margin-bottom: .6em;
-	font-weight: bold !important;
+	font-weight: 600 !important;
 	font-size: 1em;
 	display: block;
 }

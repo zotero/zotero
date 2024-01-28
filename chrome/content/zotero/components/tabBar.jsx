@@ -27,7 +27,7 @@
 
 import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, useLayoutEffect } from 'react';
 import cx from 'classnames';
-const { IconXmark, IconArrowLeft, IconArrowRight } = require('./icons');
+const { CSSIcon } = require('./icons');
 
 const SCROLL_ARROW_SCROLL_BY = 222;
 
@@ -139,6 +139,7 @@ const TabBar = forwardRef(function (props, ref) {
 	function handleDragStart(event, id, index) {
 		// Library tab is not draggable
 		if (index === 0) {
+			event.preventDefault();
 			return;
 		}
 		event.dataTransfer.effectAllowed = 'move';
@@ -272,7 +273,7 @@ const TabBar = forwardRef(function (props, ref) {
 		event.preventDefault();
 	}
 
-	function renderTab({ id, title, selected, iconBackgroundImage }, index) {
+	function renderTab({ id, title, selected, icon }, index) {
 		return (
 			<div
 				key={id}
@@ -285,19 +286,20 @@ const TabBar = forwardRef(function (props, ref) {
 				onAuxClick={(event) => handleTabClick(event, id)}
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
+				tabIndex="-1"
 			>
-				<div className="tab-name" dir="auto">{iconBackgroundImage &&
-					<span className="icon-bg" style={{ backgroundImage: iconBackgroundImage }}/>}{title}</div>
+				{icon}
+				<div className="tab-name" dir="auto">{title}</div>
 				<div
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}
 				>
-					<IconXmark/>
+					<CSSIcon name="x-8" className="icon-16" />
 				</div>
 			</div>
 		);
 	}
-
+	
 	return (
 		<div>
 			<div
@@ -317,9 +319,14 @@ const TabBar = forwardRef(function (props, ref) {
 					ref={startArrowRef}
 					className="scroll-start-arrow"
 					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
-					onClick={handleClickScrollStart}
-					onDoubleClick={handleScrollArrowDoubleClick}
-				><IconArrowLeft/></div>
+				>
+					<button
+						onClick={handleClickScrollStart}
+						onDoubleClick={handleScrollArrowDoubleClick}
+					>
+						<CSSIcon name="chevron-tabs" className="icon-20" />
+					</button>
+				</div>
 				<div className="tabs-wrapper">
 					<div
 						ref={tabsRef}
@@ -336,12 +343,19 @@ const TabBar = forwardRef(function (props, ref) {
 					ref={endArrowRef}
 					className="scroll-end-arrow"
 					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
-					onClick={handleClickScrollEnd}
-					onDoubleClick={handleScrollArrowDoubleClick}
-				><IconArrowRight/></div>
+				>
+					<button
+						onClick={handleClickScrollEnd}
+						onDoubleClick={handleScrollArrowDoubleClick}
+					>
+						<CSSIcon name="chevron-tabs" className="icon-20" />
+					</button>
+				</div>
 			</div>
 		</div>
 	);
 });
+
+TabBar.displayName = 'TabBar';
 
 export default TabBar;

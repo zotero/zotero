@@ -1,0 +1,27 @@
+// Override/enhance wizard styles
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+:host(:not(.specificity)) {
+    padding: 24px;
+    font-size: 12px;
+}
+
+:not(.specificity) {
+
+    .wizard-header-box-1 {
+        background: var(--material-sidepane);
+    }
+
+    .wizard-header-box-text {
+        padding: 0;
+    }
+
+    .wizard-header-label {
+        margin-inline-start: 0;
+    }
+}
+
+html|*.wizard-page-box:not(.specificity) {
+    padding: 16px 0;
+}

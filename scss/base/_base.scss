@@ -1,0 +1,30 @@
+:root {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    font-style: normal;
+    line-height: 1.3333333333;
+    @media (-moz-platform: windows) {
+        --color-accent: var(--accent-blue);
+        @include light-dark(--color-focus-border, #000, #fff);
+        --width-focus-border: 2px;
+    }
+    @media (-moz-platform: macos) {
+        --color-accent: SelectedItem;
+        --color-focus-border: color-mix(in srgb, var(--color-accent) 50%, transparent);
+        --width-focus-border: 3px;
+    }
+    @media (-moz-platform: linux) {
+        --color-accent: SelectedItem;
+        --color-focus-border: var(--color-accent);
+        --width-focus-border: 2px;
+    }
+    --color-focus-search: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+#zotero-collections-pane, #zotero-item-pane {
+    background: var(--material-sidepane);
+}
+
+#zotero-title-bar {
+    border-bottom: var(--material-panedivider);
+}

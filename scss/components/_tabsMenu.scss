@@ -1,0 +1,67 @@
+#zotero-tabs-menu-panel::part(content) {
+	padding: 0;
+	margin: 0;
+}
+
+#zotero-tabs-menu-wrapper {
+	background: var(--material-sidepane);
+	padding: 7px;
+	border-radius: 5px;
+	--width-focus-border: 3px;
+	--radius-focus-border: 5px;
+}
+
+#zotero-tabs-menu-filter {
+	margin: 0 0 7px 0;
+	border-radius: 5px;
+	border: 1px solid transparent;
+	padding-inline-start: 5px !important;
+	padding: 2px;
+	@include focus-ring;
+}
+
+#zotero-tabs-menu-list {
+	appearance: none;
+	margin: 0;
+
+	.zotero-tabs-menu-entry {
+		@include focus-ring;
+		border-radius: 6px;
+		height: 22px;
+		margin: 0;
+		&.close {
+			width: 22px;
+		}
+		&.title {
+			padding: 0;
+			padding-inline-start: 6px;
+			color: unset;
+			&.selected {
+				font-weight: 600;
+			}
+			description {
+				overflow: hidden;
+				// override default description margins
+				margin-bottom: 0;
+				margin-block-start: 0;
+			}
+			.tab-icon {
+				width: 16px;
+				height: 16px;
+			}
+		}
+		
+		// Using .hover class instead of pseudo element to avoid the 
+		// hover effect from sticking around after drag-and-drop
+		// https://bugs.webkit.org/show_bug.cgi?id=134555
+		&.hover {
+			background-color: var(--fill-quinary) !important;
+		}
+		&:active {
+			background-color: var(--fill-quarternary) !important;
+		}
+	}
+	#zotero-tabs-menu-dragged {
+		opacity: 0;
+	}	
+}

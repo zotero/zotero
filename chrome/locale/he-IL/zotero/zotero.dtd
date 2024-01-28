@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "ביומן השינויים">
 <!ENTITY zotero.upgrade.changeLogAfterLink "כדי ללמוד מה חדש">
 
-<!ENTITY zotero.tabs.info.label "מידע">
 <!ENTITY zotero.tabs.notes.label "הערות">
 <!ENTITY zotero.tabs.attachments.label "צרופות">
-<!ENTITY zotero.tabs.tags.label "תגיות">
-<!ENTITY zotero.tabs.related.label "קשור">
 
 <!ENTITY zotero.toolbar.duplicate.label "הצגת כפילויות">
 <!ENTITY zotero.collections.showUnfiledItems "הצגת פריטים שלא תויקו">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "מצב רישיות משפט">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "הצגה באינטרנט">
 <!ENTITY zotero.item.copyAsURL "העתקה ככתובת">
 <!ENTITY zotero.item.deletePermanently "מחיקה לצמיתות…">
 

@@ -48,7 +48,7 @@ description {
 
 #zotero-report-id {
 	color: red;
-	font-weight: bold;
+	font-weight: 600;
 	outline: 0;
 	background: none;
 }

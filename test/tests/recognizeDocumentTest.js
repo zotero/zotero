@@ -13,11 +13,18 @@ describe("Document Recognition", function() {
 		yield selectLibrary(win);
 	});
 	
-	afterEach(function() {
+	afterEach(async function() {
 		for(let win of getWindows("chrome://zotero/content/progressQueueDialog.xhtml")) {
 			win.close();
 		}
-		Zotero.ProgressQueues.get('recognize').cancel();
+		
+		// Wait for all rows to be done processing
+		var queue = Zotero.ProgressQueues.get('recognize');
+		while (queue.getRows().some(row => row.status == Zotero.ProgressQueue.ROW_PROCESSING)) {
+			await Zotero.Promise.delay(50);
+		}
+		
+		queue.cancel();
 		Zotero.RecognizeDocument.recognizeStub = null;
 		Zotero.Prefs.clear('autoRenameFiles.linked');
 	});
@@ -436,7 +443,6 @@ describe("Document Recognition", function() {
 				file: testDir,
 				collections: [collection.id]
 			});
-			await win.ZoteroPane.selectItem(attachment.id); // No idea why this is necessary for only this test
 
 			win.ZoteroPane.recognizeSelected();
 

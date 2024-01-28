@@ -1,32 +1,71 @@
+// | 6px padding | 16px icon width | 2px padding | 8px dropmarker width | 4px padding |
 quick-search-textbox {
+	--search-textbox-width: 172px;
 	font-size: var(--zotero-font-size);
 	margin-right: 0;
-	width: 172px;
-	height: 25px;
+	width: var(--search-textbox-width);
+	height: 28px;
+
+	*[zoteroFontSize=small] {
+		font-size: 11px;
+	}
+
+	:is(search-textbox)::part(search-sign),
+	:is(search-textbox)::part(search-icon) {
+		@include svgicon-menu("magnifier", "universal", "16");
+		color: var(--fill-secondary);
+		// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+		// Use explicit left/right padding here because this element is flipped in RTL (see _search.scss)
+		padding: 6px 14px 6px 6px;
+		margin: 0;
+	}
 }
 
-*[zoteroFontSize=small] quick-search-textbox {
-	font-size: 11px;
+#zotero-tb-search-dropmarker {
+	position: relative;
+	// 6px padding + 16px icon width + 2px padding + 8px dropmarker width + 4px padding
+	width: 36px;
+	margin-inline-end: -36px;
+	z-index: 2;
 }
 
 #zotero-tb-search-menu-button {
+	width: 36px;
+	height: 28px;
+	// 6px padding + 16px icon width + 2px padding
+	padding-block: 0;
+	padding-inline: 24px 4px;
 	margin: 0;
-	padding: 0;
-	-moz-appearance: none;
+	border: 0;
+	border-radius: 5px;
+	appearance: none;
 	min-width: 0;
 	cursor: default;
-	list-style-image: url("chrome://zotero/skin/searchbar-dropmarker.png");
+	@include svgicon-menu("chevron-6", "universal", "8");
+	color: var(--fill-secondary);
+	background: transparent;
+
+	&:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+	}
+
+	.button-menu-dropmarker {
+		display: none; /* Hide automatic dropmarker */
+	}
 }
 
-#zotero-tb-search-menu-button .button-icon {
-	width: 7px;
+#zotero-tb-search-textbox {
+	padding: 0;
+	padding-inline-end: 6px;
+	margin: 0;
+	position: relative;
+	inset-inline-start: 0;
+	width: var(--search-textbox-width);
+	height: 28px;
+	z-index: 1;
 }
 
-#zotero-tb-search-menu-button .button-menu-dropmarker {
-	display: none; /* Hide automatic dropmarker */
-}
-
-/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.25dppx) {
-	#zotero-tb-search-menu-button  { list-style-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }
+#zotero-tb-search-spinner {
+	margin: 0 8px;
 }

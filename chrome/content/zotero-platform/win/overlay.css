@@ -7,103 +7,6 @@
 	-moz-appearance: none;
 }
 
-#zotero-pane #zotero-toolbar {
-	-moz-appearance: none !important;
-	margin-top: -3px;
-	border-bottom: 1px solid var(--theme-border-color);
-}
-
-
-@media (min-resolution: 1.25dppx) {
-	#zotero-pane-stack .toolbarbutton-icon {
-		width: 16px;
-	}
-	
-	#zotero-tb-sync > .toolbarbutton-icon {
-		width: 20px;
-	}
-}
-
-.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
-	margin-left: 4px;
-}
-
-#zotero-tb-sync-error {
-	margin-right: 4px;
-	padding-top: 4px;
-}
-
-#zotero-tb-sync {
-	margin-right: 1px;
-	padding-top: 4px;
-}
-
-.zotero-view-tabbox tab {
-	padding-left: .7em;
-	padding-right: .7em;
-}
-
-#zotero-toolbar {
-	-moz-appearance: toolbox !important;
-	padding-left: 2px;
-}
-
-#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-icon {
-	transform: scaleX(-1);
-}
-
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed]),
-#zotero-tags-splitter:not([state=collapsed]),
-#zotero-context-splitter:not([state=collapsed]),
-#zotero-context-splitter-stacked:not([state=collapsed]) {
-	border: 0;
-	background-color: transparent;
-	position: relative;
-	/* Positive z-index positions the splitter on top of its siblings and makes
-	it clickable on both sides. */
-	z-index: 1;
-}
-
-#zotero-context-splitter:not([state=collapsed]),
-#zotero-context-splitter-stacked:not([state=collapsed]) {
-	z-index: 0;
-}
-
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed]):not([orient=vertical]),
-#zotero-tags-splitter:not([state=collapsed]),
-#zotero-context-splitter:not([state=collapsed]) {
-	border-inline-end: 1px solid var(--theme-border-color);
-	min-width: 0;
-	width: 3px;
-	margin-inline-start: -3px;
-}
-
-#zotero-tags-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed])[orient=vertical],
-#zotero-context-splitter-stacked:not([state=collapsed]) {
-	border-block-end: 1px solid var(--theme-border-color);
-	min-height: 0;
-	height: 3px;
-	margin-block-start: -3px;
-}
-
-#zotero-collections-splitter > grippy,
-#zotero-items-splitter > grippy,
-#zotero-tags-splitter > grippy,
-#zotero-context-splitter > grippy {
-	border: 0;
-}
-
-#zotero-collections-splitter:not([state=collapsed]) > grippy,
-#zotero-items-splitter:not([state=collapsed]) > grippy,
-#zotero-tags-splitter:not([state=collapsed]) > grippy,
-#zotero-context-splitter:not([state=collapsed]) > grippy,
-#zotero-context-splitter-stacked:not([state=collapsed]) > grippy {
-	display: none;
-}
-
 tree {
 	border-width: 0;
 }
@@ -117,22 +20,6 @@ tree {
 #tags-box {
 	padding-top: 0.1em;
 	padding-left: 0.05em;
-}
-
-.zotero-editpane-tabs spacer {
-	border: 0;
-}
-
-.zotero-view-item {
-	padding: 0 !important;
-	-moz-appearance: none;
-	background-color: -moz-field;
-	border-width: 1px 0 0  0;
-	border-color: var(--theme-border-color);
-}
-
-.zotero-editpane-tabs {
-	margin-top: 2px;
 }
 
 #zotero-item-pane-groupbox {

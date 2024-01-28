@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "ברירת מחדל:">
 <!ENTITY zotero.preferences.items "פריטים">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "הגדרות">
 <!ENTITY zotero.preferences.custom "התאמה אישית…">
 
 <!ENTITY zotero.preferences.prefpane.general "כללי">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "השבתת ההעתקה המהירה בעת גרירה של יותר מ־">
 
 <!ENTITY zotero.preferences.prefpane.cite "ציטוט">
-<!ENTITY zotero.preferences.cite.styles "סגנונות">
 <!ENTITY zotero.preferences.cite.wordProcessors "מעבדי תמלילים">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "להשתמש בחלונית הוספת הציטוט הקלסית">
 <!ENTITY zotero.preferences.styleEditor "עורך סגנונות">

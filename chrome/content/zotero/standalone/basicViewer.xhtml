@@ -27,7 +27,6 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
 <?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
@@ -48,8 +47,10 @@
 				width="1000" height="700"
 				persist="screenX screenY width height sizemode">
 	
-	<html:link rel="localization" href="browser/menubar.ftl"/>
-	<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	</linkset>
 
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");

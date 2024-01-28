@@ -97,6 +97,8 @@ pref("extensions.update.url", "");
 // Don't try to load the "Get Add-ons" tab on first load of Add-ons window
 pref("extensions.ui.lastCategory", "addons://list/extension");
 
+// Not set on Windows in Firefox anymore since it's a per-installation pref,
+// but we override that in fetch_xulrunner
 pref("app.update.auto", true);
 
 // URL user can browse to manually if for some reason all update installation

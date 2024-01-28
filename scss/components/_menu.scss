@@ -1,0 +1,82 @@
+$item-type-icons: (
+	attachments-file: "document",
+	attachments-link: "attachment-link",
+	attachments-pdf: "attachment-pdf",
+	attachments-snapshot: "attachment-snapshot",
+	attachments-epub: "attachment-epub",
+	attach-note: "note",
+	find-pdf: "attachment-pdf",
+	convert-to-book-section: "book-section",
+	convert-to-book: "book",
+);
+
+@each $cls, $icon in $item-type-icons {
+	.zotero-menuitem-#{$cls} {
+		@include focus-states using ($color) {
+			@include svgicon-menu($icon, $color, "16", "item-type");
+		}
+	}
+};
+
+$menu-icons: (
+	attach: "attachment",
+	attachments-web-link: "link",
+	view-online: "globe",
+	view-file: "folder-open",
+	view-external: "page",
+	library-lookup: "library-lookup",
+	new-feed: "feed",
+	note: "note",
+	new-saved-search: "saved-search",
+	show-duplicates: "duplicate",
+	show-unfiled: "unfiled",
+	show-retracted: "retracted",
+	sync: "sync",
+	new-collection: "new-collection",
+	edit-collection: "rename",
+	edit-feed: "edit",
+	refresh-feed: "sync",
+	delete-collection: "delete-collection",
+	hide-collection: "hide",
+	remove-items: "delete-collection",
+	show-in-library: "library",
+	move-to-trash: "trash",
+	delete-from-lib: "empty-trash",
+	duplicate-item: "duplicate-item",
+	merge-items: "merge",
+	export: "export",
+	restore-to-library: "restore",
+	create-bibliography: "list-number",
+	create-report: "report",
+	retrieve-metadata: "retrieve-metadata",
+	unrecognize: "restore",
+	reindex: "reindex",
+	create-parent: "page",
+	rename-from-parent: "rename",
+	create-note-from-annotations: "light-dark:note-annotation",
+	add-to-collection: "new-collection",
+	new-tab: "new-tab",
+	new-window: "new-window",
+	pin: "pin",
+	unpin: "pin-remove",
+	expand-all: "expand-all",
+	collapse-others: "collapse-others",
+);
+
+@each $cls, $icon in $menu-icons {
+	.zotero-menuitem-#{$cls} {
+		// If icon starts with "light-dark:", use light and dark icon
+		@if str-slice($icon, 0, 11) == "light-dark:" {
+			@include focus-states using ($color) {
+				@include svgicon-menu(str-slice($icon, 12), $color, "16");
+			}
+		}
+		@else {
+			@include svgicon-menu($icon, "universal", "16", false, false, (var(--fill-secondary), var(--fill-secondary)));
+		}
+	}
+};
+
+#zotero-collectionmenu, #zotero-itemmenu {
+	@include macOS-hide-menu-icons;
+}

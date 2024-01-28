@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "Changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
 
-<!ENTITY zotero.tabs.info.label "Information">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
-<!ENTITY zotero.tabs.tags.label "Etiketter">
-<!ENTITY zotero.tabs.related.label "Liknande källor">
 
 <!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Visa online">
 <!ENTITY zotero.item.copyAsURL "Kopiera som URL">
 <!ENTITY zotero.item.deletePermanently "Radera permanent…">
 

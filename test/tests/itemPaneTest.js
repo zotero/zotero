@@ -16,14 +16,14 @@ describe("Item pane", function () {
 			var id = yield item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.querySelectorAll('[fieldname="title"]')[1];
-			assert.equal(label.textContent, '');
+			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
+			assert.equal(label.value, '');
 			
-			item.setField('title', 'Test');
+			item.setField('series', 'Test');
 			yield item.saveTx();
 			
-			label = itemBox.querySelectorAll('[fieldname="title"]')[1];
-			assert.equal(label.textContent, 'Test');
+			label = itemBox.querySelectorAll('[fieldname="series"]')[1];
+			assert.equal(label.value, 'Test');
 			
 			yield Zotero.Items.erase(id);
 		})
@@ -41,10 +41,10 @@ describe("Item pane", function () {
 			await item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.querySelector('[fieldname="creator-0-lastName"]')
-			var parent = label.parentNode;
+			var lastName = itemBox.querySelector('#itembox-field-value-creator-0-lastName');
+			var parent = lastName.closest(".creator-type-value");
 			assert.property(parent, 'oncontextmenu');
-			assert.isFunction(label.parentNode.oncontextmenu);
+			assert.isFunction(parent.oncontextmenu);
 			
 			var menupopup = itemBox.querySelector('#zotero-creator-transform-menu');
 			// Fake a right-click
@@ -73,12 +73,60 @@ describe("Item pane", function () {
 			await item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.querySelector('[fieldname="creator-0-lastName"]')
-			var firstlast = label.closest('.creator-name-box');
-			firstlast.oncontextmenu(new MouseEvent('click', { bubbles: true, button: 2 }));
+			var label = itemBox.querySelector('#itembox-field-value-creator-0-lastName');
+			var firstlast = label.closest('.creator-type-value');
+			firstlast.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, button: 2 }));
 			
 			var menuitem = doc.getElementById('creator-transform-swap-names');
 			assert.isTrue(menuitem.hidden);
+		});
+
+		it("should reorder creators", async function () {
+			var item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					lastName: "One",
+					creatorType: "author"
+				},
+				{
+					lastName: "Two",
+					creatorType: "author"
+				},
+				{
+					lastName: "Three",
+					creatorType: "author"
+				}
+			]);
+			await item.saveTx();
+			
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			// Move One to the last spot
+			itemBox.moveCreator(0, null, 3);
+			await waitForItemEvent('modify');
+			let thirdLastName = itemBox.querySelector("[fieldname='creator-2-lastName']").value;
+			assert.equal(thirdLastName, "One");
+
+			// Move One to the second spot
+			itemBox.moveCreator(2, null, 1);
+			await waitForItemEvent('modify');
+			let secondLastname = itemBox.querySelector("[fieldname='creator-1-lastName']").value;
+			assert.equal(secondLastname, "One");
+
+			// Move Two down
+			itemBox.moveCreator(0, 'down');
+			await waitForItemEvent('modify');
+			secondLastname = itemBox.querySelector("[fieldname='creator-1-lastName']").value;
+			let firstLastName = itemBox.querySelector("[fieldname='creator-0-lastName']").value;
+			assert.equal(secondLastname, "Two");
+			assert.equal(firstLastName, "One");
+
+			// Move Three up
+			itemBox.moveCreator(2, 'up');
+			await waitForItemEvent('modify');
+			secondLastname = itemBox.querySelector("[fieldname='creator-1-lastName']").value;
+			thirdLastName = itemBox.querySelector("[fieldname='creator-2-lastName']").value;
+			assert.equal(secondLastname, "Three");
+			assert.equal(thirdLastName, "Two");
 		});
 		
 		
@@ -119,9 +167,7 @@ describe("Item pane", function () {
 			var item = await createDataObject('item');
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.querySelector('div[fieldname="accessDate"].zotero-clicky');
-			label.click();
-			var textbox = itemBox.querySelector('input[fieldname="accessDate"]');
+			var textbox = itemBox.querySelector('[fieldname="accessDate"]');
 			textbox.value = 'now';
 			// Blur events don't necessarily trigger if window doesn't have focus
 			itemBox.hideEditor(textbox);
@@ -148,11 +194,11 @@ describe("Item pane", function () {
 			
 			let itemBox = doc.getElementById('zotero-editpane-item-box');
 
-			itemBox.querySelector('div[fieldname="creator-0-lastName"]').click();
+			itemBox.querySelector('[fieldname="creator-0-lastName"]').click();
 			itemBox.hideEditor(itemBox.querySelector('input[fieldname="creator-0-lastName"]'));
 			
 			assert.equal(
-				itemBox.querySelector('div[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
+				itemBox.querySelector('[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
 				'1'
 			);
 		});
@@ -179,15 +225,12 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
-			tabs.selectedItem = notesTab;
+			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 2);
+			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			// Update note text
 			note2.setNote('C');
@@ -197,7 +240,7 @@ describe("Item pane", function () {
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while ([...grid.querySelectorAll('div.box > label')].every(label => label.textContent != 'C'));
+			while ([...body.querySelectorAll('.row .label')].every(label => label.textContent != 'C'));
 		});
 		
 		it("should refresh on child note trash", function* () {
@@ -218,27 +261,24 @@ describe("Item pane", function () {
 				note2.setNote('B');
 				await note2.save();
 			});
-			
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
-			tabs.selectedItem = notesTab;
+
+			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 2);
+			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			// Click "-" in first note
 			var promise = waitForDialog();
-			grid.querySelector(".zotero-clicky-minus").click();
+			body.querySelector(".zotero-clicky-minus").click();
 			yield promise;
 			
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 1);
+			while (body.querySelectorAll('.row .label').length !== 1);
 		});
 		
 		it("should refresh on child note delete", function* () {
@@ -260,15 +300,12 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
-			tabs.selectedItem = notesTab;
+			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 2);
+			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			yield note2.eraseTx();
 			
@@ -276,39 +313,51 @@ describe("Item pane", function () {
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (grid.querySelectorAll('div.box > label').length !== 1);
+			while (body.querySelectorAll('.row .label').length !== 1);
 		});
 	});
 	
 	
 	describe("Attachment pane", function () {
-		it("should refresh on file rename", function* () {
-			var file = getTestDataDirectory();
+		it("should refresh on file rename", async function () {
+			let file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({
+			let item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
-			var newName = 'test2.png';
-			yield item.renameAttachmentFile(newName);
+			let newName = 'test2.png';
+
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let label = itemBox._id('fileName');
+			let promise = waitForDOMAttributes(label, 'value', (newValue) => {
+				return newValue === newName;
+			});
+
+			await item.renameAttachmentFile(newName);
 			
-			var itemBox = doc.getElementById('zotero-attachment-box');
-			var label = itemBox._id('fileName');
+			await promise;
 			assert.equal(label.value, newName);
-		})
+		});
 		
 		it("should update on attachment title change", async function () {
-			var file = getTestDataDirectory();
+			let file = getTestDataDirectory();
 			file.append('test.png');
-			var item = await Zotero.Attachments.importFromFile({ file });
-			var newTitle = 'New Title';
+			let item = await Zotero.Attachments.importFromFile({ file });
+			let newTitle = 'New Title';
+
+			let paneHeader = doc.getElementById('zotero-item-pane-header');
+			let label = paneHeader.titleField;
+			let promise = waitForDOMAttributes(label, 'value', (newValue) => {
+				return newValue === newTitle;
+			});
+
 			item.setField('title', newTitle);
 			await item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-attachment-box');
-			var label = itemBox._id('title');
-			assert.equal(label.textContent, newTitle);
-		})
-	})
+			await promise;
+			assert.equal(label.value, newTitle);
+		});
+	});
 	
 	
 	describe("Note editor", function () {

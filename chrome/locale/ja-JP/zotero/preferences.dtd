@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "既定値:">
 <!ENTITY zotero.preferences.items "アイテム">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "設定">
 <!ENTITY zotero.preferences.custom "カスタム...">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する:">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
-<!ENTITY zotero.preferences.cite.styles "引用スタイル">
 <!ENTITY zotero.preferences.cite.wordProcessors "ワード・プロセッサ">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "旧式の出典表記追加ダイアログを使用する">
 <!ENTITY zotero.preferences.styleEditor "引用スタイルエディタ">

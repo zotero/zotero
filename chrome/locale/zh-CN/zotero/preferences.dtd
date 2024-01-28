@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "默认:">
 <!ENTITY zotero.preferences.items "条目">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "设置">
 <!ENTITY zotero.preferences.custom "自定义…">
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "禁用快速复制，当拖动超过">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
-<!ENTITY zotero.preferences.cite.styles "样式">
 <!ENTITY zotero.preferences.cite.wordProcessors "文档编辑软件">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用经典版“添加引注”对话框">
 <!ENTITY zotero.preferences.styleEditor "样式编辑器">

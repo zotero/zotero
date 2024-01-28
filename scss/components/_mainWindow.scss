@@ -1,7 +1,7 @@
 // Styling for displaying tabs in the title bar
 :root:not([legacytoolbar="true"]) {
 	& {
-	  --tab-min-height: 30px;
+	  --tab-min-height: 36px;
 	  --tabs-border-color: rgba(0,0,0,.3);
 	  --tabline-color: #0a84ff;
 	
@@ -61,7 +61,7 @@
 	
 	
 	#titlebar {
-		margin-bottom: -30px;
+		margin-bottom: calc(0px - var(--tab-min-height));
 		-moz-box-pack: center;
 	}
 	
@@ -98,45 +98,55 @@
 	  visibility: collapse;
 	}
 	
-	/* NB: these would be margin-inline-start/end if it wasn't for the fact that OS X
-	 * doesn't reverse the order of the items in the titlebar in RTL mode. */
-	.titlebar-placeholder[type="caption-buttons"],
-	#titlebar-buttonbox {
-	  margin-right: 12px;
-	  margin-left: 12px;
+	@media (-moz-platform: macos) {
+		/* NB: these would be margin-inline-start/end if it wasn't for the fact that OS X
+		* doesn't reverse the order of the items in the titlebar in RTL mode. */
+		.titlebar-placeholder[type="caption-buttons"],
+		.titlebar-buttonbox {
+			margin-right: 12px;
+			margin-left: 12px;
+		}
+		
+		.titlebar-buttonbox {
+			-moz-appearance: -moz-window-button-box;
+		}
+		
+		/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
+		.titlebar-buttonbox-container:-moz-locale-dir(rtl) {
+			-moz-box-ordinal-group: 1000;
+		}
+		
+		.titlebar-buttonbox-container:-moz-locale-dir(ltr) {
+			-moz-box-ordinal-group: 0;
+		}
+
+		.titlebar-icon {
+			display: none;
+		}
 	}
-	
-	#titlebar-buttonbox {
-	  -moz-appearance: -moz-window-button-box;
+}
+
+:root:not([sizemode=maximized], [sizemode=fullscreen]) .titlebar-restore,
+:root:is([sizemode=maximized], [sizemode=fullscreen]) .titlebar-max {
+	display: none;
+}
+
+#navigator-toolbox {
+	menu {
+		font-size: var(--zotero-font-size);
 	}
-	
-	/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
-	#titlebar-buttonbox-container:-moz-locale-dir(rtl) {
-	  -moz-box-ordinal-group: 1000;
-	}
-	
-	#titlebar-buttonbox-container:-moz-locale-dir(ltr) {
-	  -moz-box-ordinal-group: 0;
-	}
-	
-	
-	
-	
-	#tab-bar-container {
-		-moz-window-dragging: drag;
-	}
-	
-	#tab-bar-container .tab {
-		background: $transparent;
-	}
-	
-	#tab-bar-container .tab.selected {
-		background: $toolbar-background-color;
-	}
-	
-	#zotero-toolbar {
-		-moz-appearance: none;
-		background: $toolbar-background-color;
-		border-bottom: $toolbar-border;
-	}
+}
+
+:is(panel)::part(content) {
+	--panel-background: var(--material-toolbar);
+}
+
+#main-window {
+	min-width: $min-width-collections-pane + $min-width-items-pane + $min-width-item-pane + $width-sidenav;
+	min-height: 300px;
+}
+
+#zotero-pane-stack > hbox {
+	// Let window chrome, tabs, and toolbar shrink even when sidebars overflow
+	min-width: 0;
 }

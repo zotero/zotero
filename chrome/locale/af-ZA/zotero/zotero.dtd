@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "the changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.attachments.label "Aanhegsels">
-<!ENTITY zotero.tabs.tags.label "Etikette">
-<!ENTITY zotero.tabs.related.label "Verwant">
 
 <!ENTITY zotero.toolbar.duplicate.label "Wys duplikate">
 <!ENTITY zotero.collections.showUnfiledItems "Wys ongeliaseerde items">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "View Online">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 

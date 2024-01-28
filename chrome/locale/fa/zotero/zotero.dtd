@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "گزارش تغییرات">
 <!ENTITY zotero.upgrade.changeLogAfterLink "را ببینید.">
 
-<!ENTITY zotero.tabs.info.label "اطلاعات">
 <!ENTITY zotero.tabs.notes.label "یادداشت‌ها">
 <!ENTITY zotero.tabs.attachments.label "‌پیوست‌ها">
-<!ENTITY zotero.tabs.tags.label "برچسب‌ها">
-<!ENTITY zotero.tabs.related.label "مرتبط">
 
 <!ENTITY zotero.toolbar.duplicate.label "نمایش آیتم‌‌های تکراری">
 <!ENTITY zotero.collections.showUnfiledItems "نمایش آیتم‌های دسته‌بندی نشده">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "نمایش نسخه برخط">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 

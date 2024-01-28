@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "muudatuste">
 <!ENTITY zotero.upgrade.changeLogAfterLink "nimekirjas.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Märkused">
 <!ENTITY zotero.tabs.attachments.label "Manused">
-<!ENTITY zotero.tabs.tags.label "Märksõnad">
-<!ENTITY zotero.tabs.related.label "Seotud">
 
 <!ENTITY zotero.toolbar.duplicate.label "Näidata duplikaate">
 <!ENTITY zotero.collections.showUnfiledItems "Teemata kirjed">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lause tõst">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Online vaade">
 <!ENTITY zotero.item.copyAsURL "Kopeerida URL kujul">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 

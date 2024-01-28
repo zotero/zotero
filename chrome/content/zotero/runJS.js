@@ -93,9 +93,15 @@ window.addEventListener("load", function (e) {
 		// TODO: Enable if we modify to autocomplete from the Zotero API
 		//enableLiveAutocompletion: true,
 		highlightActiveLine: false,
-		showGutter: false,
-		theme: "ace/theme/chrome",
+		showGutter: false
 	});
 	codeEditor.on('input', handleInput);
 	codeEditor.focus();
+	
+	const isDarkMQL = Zotero.getMainWindow()?.matchMedia('(prefers-color-scheme: dark)');
+	isDarkMQL.addEventListener("change", (ev) => {
+		codeEditor.setOptions({
+			theme: ev.matches ? 'ace/theme/monokai' : 'ace/theme/chrome'
+		});
+	});
 }, false);

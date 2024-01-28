@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "ข้อมูลการเปลี่ยนแปลง">
 <!ENTITY zotero.upgrade.changeLogAfterLink "ดูว่ามีอะไรใหม่">
 
-<!ENTITY zotero.tabs.info.label "ข้อมูลข่าวสาร">
 <!ENTITY zotero.tabs.notes.label "หมายเหตุ">
 <!ENTITY zotero.tabs.attachments.label "ไฟล์แนบ">
-<!ENTITY zotero.tabs.tags.label "แท็ก">
-<!ENTITY zotero.tabs.related.label "เชื่อมโยงกับ">
 
 <!ENTITY zotero.toolbar.duplicate.label "แสดงรายการซ้ำ">
 <!ENTITY zotero.collections.showUnfiledItems "แสดงรายการที่ไม่ได้จัดกลุ่ม">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "แบบประโยค">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "ดูออนไลน์">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 

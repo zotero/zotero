@@ -44,7 +44,7 @@
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
 						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content"/>
 						<div id="links-container">
-							<links-box id="links-box" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
+							<links-box id="links-box" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
 						</div>
 					</div>
 				</box>
@@ -69,7 +69,7 @@
 
 			let content = document.importNode(this.content, true);
 			this._iframe = content.querySelector('#editor-view');
-			this._iframe.addEventListener('DOMContentLoaded', (event) => {
+			this._iframe.addEventListener('DOMContentLoaded', (_event) => {
 				// For iframes without chrome priviledges, for unknown reasons,
 				// dataTransfer.getData() returns empty value for `drop` event
 				// when dragging something from the outside of Zotero.
@@ -154,6 +154,7 @@
 				return callback();
 			}
 			this._onInitCallback = callback;
+			return undefined;
 		};
 
 		notify = async (event, type, ids, extraData) => {
@@ -219,6 +220,7 @@
 			switch (val) {
 				case 'merge':
 					displayLinks = false;
+					break;
 				case 'view':
 					break;
 
@@ -315,7 +317,7 @@
 				this._iframe.focus();
 				this._editorInstance._iframeWindow.document.querySelector('.toolbar-button-return').focus();
 			}
-			catch(e) {
+			catch (e) {
 			}
 		}
 
@@ -338,26 +340,12 @@
 			this._destroyed = false;
 
 			this.content = MozXULElement.parseXULToFragment(`
-				<div id="links-box" xmlns="http://www.w3.org/1999/xhtml">
-					<div class="grid">
-						<div id="parent-label" class="label" hidden="true"/>
-						<div id="parent-value" class="value zotero-clicky" hidden="true"/>
-						
-						<div id="related-label" class="label"/>
-						<div id="related-value" class="value zotero-clicky"/>
-						
-						<div id="tags-label" class="label"/>
-						<div id="tags-value" class="value zotero-clicky"/>
-					</div>
-				</div>
-				<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-						<menupopup id="related-popup" width="300">
-							<related-box id="related"/>
-						</menupopup>
-						<menupopup id="tags-popup" width="300" ignorekeys="true">
-							<tags-box id="tags"/>
-						</menupopup>
-					</popupset>
+<!--
+				<html:div id="parent-label" class="label" hidden="true"/>
+				<html:div id="parent-value" class="value zotero-clicky" hidden="true"/>
+-->
+				<tags-box id="tags"/>
+				<related-box id="related"/>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 
@@ -366,10 +354,6 @@
 			window.addEventListener("unload", () => this.destroy(), { once: true });
 
 			this.append(document.importNode(this.content, true));
-
-			this._id('parent-value').addEventListener('click', this._parentClickHandler);
-			this._id('related-value').addEventListener('click', this._relatedClickHandler);
-			this._id('tags-value').addEventListener('click', this._tagsClickHandler);
 		}
 
 		destroy() {
@@ -390,15 +374,6 @@
 			this._id('tags').item = this._item;
 
 			this.refresh();
-
-			// Hide popup to prevent it being visible out of the context or
-			// in some cases even invisible but still blocking the next click
-			this._id('related-popup').addEventListener('click', (event) => {
-				let target = event.originalTarget;
-				if (target.classList.contains('zotero-box-label')) {
-					this._id('related-popup').hidePopup();
-				}
-			});
 		}
 
 		set mode(val) {
@@ -419,109 +394,7 @@
 		}
 
 		refresh() {
-			this._updateParentRow();
-			this._updateTagsSummary();
-			this._updateRelatedSummary();
 		}
-
-		_updateParentRow() {
-			let hidden = !this._parentItem || !!this._notitle;
-			this._id('parent-value').hidden = hidden;
-			this._id('parent-label').hidden = hidden;
-			if (!hidden) {
-				this._id('parent-label').replaceChildren(Zotero.getString('pane.item.parentItem'));
-				this._id('parent-value').replaceChildren(document.createTextNode(this._parentItem.getDisplayTitle(true)));
-			}
-		}
-
-		_updateRelatedSummary() {
-			var r = '';
-			if (this._item) {
-				var keys = this._item.relatedItems;
-				if (keys.length) {
-					for (let key of keys) {
-						let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, key);
-						if (!item) {
-							Zotero.debug(`Related item ${this._item.libraryID}/${key} not found `
-								+ `for item ${this._item.libraryKey}`, 2);
-							continue;
-						}
-						r = r + item.getDisplayTitle() + ", ";
-					}
-					r = r.slice(0, -2);
-				}
-			}
-
-			let v = r;
-
-			if (!v || v == '') {
-				v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
-			}
-
-			this._id('related-label').innerText = Zotero.getString('itemFields.related')
-				+ Zotero.getString('punctuation.colon');
-			this._id('related-value').innerText = v;
-		}
-
-		_updateTagsSummary() {
-			var r = '';
-
-			if (this._item) {
-				var tags = this._item.getTags();
-
-				// Sort tags alphabetically
-				var collation = Zotero.getLocaleCollation();
-				tags.sort((a, b) => collation.compareString(1, a.tag, b.tag));
-
-				for (let i = 0; i < tags.length; i++) {
-					r = r + tags[i].tag + ", ";
-				}
-				r = r.slice(0, -2);
-			}
-
-			let v = r;
-
-			if (!v || v == '') {
-				v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
-			}
-
-			this._id('tags-label').innerText = Zotero.getString('itemFields.tags')
-				+ Zotero.getString('punctuation.colon');
-			this._id('tags-value').innerText = v;
-		}
-
-		_parentClickHandler = () => {
-			if (!this._item || !this._item.id) {
-				return;
-			}
-			var parentID = this._item.parentID;
-			var win = Zotero.getMainWindow();
-			if (win) {
-				win.ZoteroPane.selectItem(parentID);
-				win.Zotero_Tabs.select('zotero-pane');
-				win.focus();
-			}
-		};
-
-		_relatedClickHandler = (event) => {
-			var relatedList = this._item.relatedItems;
-			if (relatedList.length > 0) {
-				this._id('related-popup').openPopup(this, 'topleft topleft', 0, 0, false);
-			}
-			else if (this._mode == 'edit') {
-				this._id('related').add();
-			}
-		};
-
-		_tagsClickHandler = (event) => {
-			this._id('tags-popup').openPopup(this, 'topleft topleft', 0, 0, true);
-			// If editable and no existing tags, open new empty row
-			if (this._mode == 'edit' && !this._item.getTags().length) {
-				setTimeout(() => {
-					this._id('tags').addNew();
-				});
-			}
-		};
 
 		_id(id) {
 			return this.querySelector(`#${id}`);

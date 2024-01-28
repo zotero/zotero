@@ -215,6 +215,7 @@ class ReaderInstance {
 				...Zotero.Intl.getPrefixedStrings('pdfReader.')
 			},
 			showAnnotations: true,
+			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -336,14 +337,6 @@ class ReaderInstance {
 			onChangeSidebarWidth: (width) => {
 				if (this._onChangeSidebarWidthCallback) {
 					this._onChangeSidebarWidthCallback(width);
-				}
-			},
-			onFocusSplitButton: () => {
-				if (this instanceof ReaderTab) {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.document.getElementById('zotero-tb-toggle-item-pane').focus();
-					}
 				}
 			},
 			onFocusContextPane: () => {
@@ -515,6 +508,7 @@ class ReaderInstance {
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
+			Zotero.Prefs.registerObserver('reader.contentDarkMode', this._handleContentDarkModeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleFontFamilyChange),
 		];
 
@@ -621,7 +615,7 @@ class ReaderInstance {
 		// this._postMessage({ action: 'focusLastToolbarButton' });
 	}
 
-	tabToolbar(reverse) {
+	tabToolbar(_reverse) {
 		// this._postMessage({ action: 'tabToolbar', reverse });
 		// Avoid toolbar find button being focused for a short moment
 		setTimeout(() => this._iframeWindow.focus());
@@ -840,6 +834,10 @@ class ReaderInstance {
 		await this.updateTitle();
 	};
 
+	_handleContentDarkModeChange = () => {
+		this._internalReader.useDarkModeForContent(Zotero.Prefs.get('reader.contentDarkMode'));
+	};
+
 	_handleFontFamilyChange = () => {
 		this._internalReader.setFontFamily(Zotero.Prefs.get('reader.ebookFontFamily'));
 	};
@@ -856,6 +854,7 @@ class ReaderInstance {
 			}
 			return new this._iframeWindow.Blob([u8arr], { type: mime });
 		}
+		return undefined;
 	}
 
 	_getColorIcon(color, selected) {
@@ -872,8 +871,6 @@ class ReaderInstance {
 			}
 		});
 		menupopup.className = 'tags-popup';
-		menupopup.style.font = 'inherit';
-		menupopup.style.minWidth = '300px';
 		menupopup.setAttribute('ignorekeys', true);
 		let tagsbox = new (this._window.customElements.get('tags-box'));
 		menupopup.appendChild(tagsbox);
@@ -882,12 +879,14 @@ class ReaderInstance {
 		let rect = this._iframe.getBoundingClientRect();
 		x += rect.left;
 		y += rect.top;
-		setTimeout(() => menupopup.openPopup(null, 'before_start', x, y, true));
 		tagsbox.mode = 'edit';
 		tagsbox.item = item;
-		if (tagsbox.mode == 'edit' && tagsbox.count == 0) {
-			tagsbox.newTag();
-		}
+		menupopup.openPopup(null, 'before_start', x, y, true);
+		setTimeout(() => {
+			if (tagsbox.count == 0) {
+				tagsbox.newTag();
+			}
+		});
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
@@ -1032,6 +1031,7 @@ class ReaderTab extends ReaderInstance {
 	
 	close() {
 		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.removeEventListener('pointerdown', this._handlePointerDown);
 		this._window.removeEventListener('pointerup', this._handlePointerUp);
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
@@ -1152,7 +1152,7 @@ class ReaderWindow extends ReaderInstance {
 			'.menu-type-reader.pdf, .menu-type-reader.epub, .menu-type-reader.snapshot'
 		).forEach(el => el.hidden = true);
 		this._window.document.querySelectorAll('.menu-type-reader.' + subtype).forEach(el => el.hidden = false);
-	};
+	}
 
 	close() {
 		this.uninit();
@@ -1215,6 +1215,271 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('go-menuitem-back').setAttribute('disabled', !this._internalReader.canNavigateBack);
 		this._window.document.getElementById('go-menuitem-forward').setAttribute('disabled', !this._internalReader.canNavigateForward);
+	}
+}
+
+
+class ReaderPreview extends ReaderInstance {
+	// TODO: implement these inside reader after redesign is done there
+	static CSS = {
+		global: `
+		#split-view, .split-view {
+			top: 0 !important;
+			inset-inline-start: 0 !important;
+		}
+		#reader-ui {
+			display: none !important;
+		}`,
+		pdf: `
+		#mainContainer {
+			/* Hide left-side vertical line */
+			margin-inline-start: -1px;
+		}
+		#viewerContainer {
+			overflow: hidden;
+		}
+		.pdfViewer {
+			padding: 6px 0px;
+		}
+		.pdfViewer .page {
+			border-radius: 5px;
+			box-shadow: none;
+		}
+		.pdfViewer .page::before {
+			content: "";
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			border-radius: 5px;
+		}
+		@media (prefers-color-scheme: light) {
+			#viewerContainer {
+				background: #f2f2f2;
+			}
+			.pdfViewer .page::before {
+				box-shadow: inset 0 0 0px 1px #0000001a;
+			}
+		}
+		@media (prefers-color-scheme: dark) {
+			#viewerContainer {
+				background: #303030;
+			}
+			.pdfViewer .page::before {
+				box-shadow: inset 0 0 0px 1px #ffffff1f;
+			}
+		}`,
+		epub: `
+		body.flow-mode-paginated {
+			margin: 8px !important;
+		}
+		body.flow-mode-paginated > .sections {
+			min-height: calc(100vh - 16px);
+			max-height: calc(100vh - 16px);
+		}
+		body.flow-mode-paginated > .sections.spread-mode-odd {
+			column-width: calc(50vw - 16px);
+		}
+		body.flow-mode-paginated replaced-body img, body.flow-mode-paginated replaced-body svg,
+		body.flow-mode-paginated replaced-body audio, body.flow-mode-paginated replaced-body video {
+			max-width: calc(50vw - 16px) !important;
+			max-height: calc(100vh - 16px) !important;
+		}
+		body.flow-mode-paginated replaced-body .table-like {
+			max-height: calc(100vh - 16px);
+		}
+		`,
+		snapshot: `
+		html {
+			pointer-events: none !important;
+			user-select: none !important;
+			min-width: 1024px;
+			transform: scale(var(--win-scale));
+			transform-origin: 0 0;
+			overflow-x: hidden;
+		}
+		
+		body {
+			overflow-y: visible;
+		}`
+	};
+
+	constructor(options) {
+		super(options);
+		this._iframe = options.iframe;
+		this._iframeWindow = this._iframe.contentWindow;
+		this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+	}
+
+	async _open({ state, location, secondViewState }) {
+		let success;
+		try {
+			success = await super._open({ state, location, secondViewState });
+
+			this._injectCSS(this._iframeWindow.document, ReaderPreview.CSS.global);
+
+			let ready = await this._waitForInternalReader();
+			if (!ready) {
+				return false;
+			}
+
+			let win = this._internalReader._primaryView._iframeWindow;
+			if (this._type === "snapshot") {
+				win.addEventListener(
+					"resize", this.updateSnapshotAttr);
+				this.updateSnapshotAttr();
+			}
+			else if (this._type === "pdf") {
+				let viewer = win?.PDFViewerApplication?.pdfViewer;
+				let t = 0;
+				while (!viewer?.firstPagePromise && t < 100) {
+					t++;
+					await Zotero.Promise.delay(10);
+					viewer = win?.PDFViewerApplication?.pdfViewer;
+				}
+				await viewer?.firstPagePromise;
+				win.addEventListener("resize", this.updatePDFAttr);
+				this.updatePDFAttr();
+			}
+			else if (this._type === "epub") {
+				this.updateEPUBAttr();
+			}
+
+			this._injectCSS(
+				win.document,
+				ReaderPreview.CSS[this._type]
+			);
+
+			return success;
+		}
+		catch (e) {
+			Zotero.warn(`Failed to load preview for attachment ${this._item?.libraryID}/${this._item?.key}: ${String(e)}`);
+			this._item = null;
+			return false;
+		}
+	}
+
+	uninit() {
+		if (this._type === "snapshot") {
+			this._internalReader?._primaryView?._iframeWindow.removeEventListener(
+				"resize", this.updateSnapshotAttr);
+		}
+		else if (this._type === "pdf") {
+			this._internalReader?._primaryView?._iframeWindow.removeEventListener(
+				"resize", this.updatePDFAttr);
+		}
+		super.uninit();
+	}
+
+	/**
+	 * Goto previous/next page
+	 * @param {"prev" | "next"} type goto previous or next page
+	 * @returns {void}
+	 */
+	goto(type) {
+		if (type === "prev") {
+			this._internalReader.navigateToPreviousPage();
+		}
+		else {
+			this._internalReader.navigateToNextPage();
+		}
+	}
+
+	/**
+	 * Check if can goto previous/next page
+	 * @param {"prev" | "next"} type goto previous or next page
+	 * @returns {boolean}
+	 */
+	canGoto(type) {
+		if (type === "prev") {
+			return this._internalReader?._state?.primaryViewStats?.canNavigateToPreviousPage;
+		}
+		else {
+			return this._internalReader?._state?.primaryViewStats?.canNavigateToNextPage;
+		}
+	}
+
+	_isReadOnly() {
+		return true;
+	}
+
+	async _getState() {
+		if (this._type === "pdf") {
+			return { pageIndex: 0, scale: "page-height", scrollMode: 0, spreadMode: 0 };
+		}
+		else if (this._type === "epub") {
+			return Object.assign(await super._getState(), {
+				scale: 1,
+				flowMode: "paginated",
+				spreadMode: 0
+			});
+		}
+		else if (this._type === "snapshot") {
+			return { scale: 1, scrollYPercent: 0 };
+		}
+		return super._getState();
+	}
+
+	async _setState() {}
+
+	updateTitle() {}
+
+	_injectCSS(doc, content) {
+		if (!content) {
+			return;
+		}
+		let style = doc.createElement("style");
+		style.textContent = content;
+		doc.head.appendChild(style);
+	}
+
+	updateSnapshotAttr = () => {
+		let win = this._internalReader?._primaryView?._iframeWindow;
+		let root = win?.document?.documentElement;
+		root?.style.setProperty('--win-scale', String(this._iframe.getBoundingClientRect().width / 1024));
+	};
+
+	updateEPUBAttr() {
+		let view = this._internalReader?._primaryView;
+		let currentSize = parseFloat(
+			view._iframeWindow?.getComputedStyle(view?._iframeDocument?.documentElement).fontSize);
+		let scale = 12 / currentSize;
+		view?._setScale(scale);
+	}
+
+	updatePDFAttr = () => {
+		this._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfViewer.currentScaleValue = 'page-height';
+	};
+
+	getPageWidthHeightRatio() {
+		if (this._type !== 'pdf') {
+			return NaN;
+		}
+		try {
+			let viewport = this._internalReader?._primaryView?._iframeWindow
+				?.PDFViewerApplication?.pdfViewer._pages[0].viewport;
+			return viewport?.width / viewport?.height;
+		}
+		catch (e) {
+			return NaN;
+		}
+	}
+
+	async _waitForInternalReader() {
+		let n = 0;
+		try {
+			while (!this._internalReader?._primaryView?._iframeWindow) {
+				if (n >= 500) {
+					return false;
+				}
+				await Zotero.Promise.delay(10);
+				n++;
+			}
+			await this._internalReader._primaryView.initializedPromise;
+			return true;
+		}
+		catch (e) {
+			return false;
+		}
 	}
 }
 
@@ -1455,16 +1720,15 @@ class Reader {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
-
+		let win = Zotero.getMainWindow();
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
 		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {
-			let win = Zotero.getMainWindow();
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
 					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return;
+					return undefined;
 				}
 			}
 		}
@@ -1532,9 +1796,31 @@ class Reader {
 			this._readers.push(reader);
 		}
 		
-		if (!openInBackground) {
+		if (!openInBackground
+			&& !win.Zotero_Tabs.focusOptions.keepTabFocused) {
+			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
+		return reader;
+	}
+
+	async openPreview(itemID, iframe) {
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+
+		let item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw new Error('Item does not exist');
+		}
+
+		let reader = new ReaderPreview({
+			item,
+			sidebarWidth: 0,
+			sidebarOpen: false,
+			bottomPlaceholderHeight: 0,
+			iframe,
+		});
 		return reader;
 	}
 

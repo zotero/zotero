@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "pakeitimų žurnale">
 <!ENTITY zotero.upgrade.changeLogAfterLink "apie naujoves.">
 
-<!ENTITY zotero.tabs.info.label "Informacija">
 <!ENTITY zotero.tabs.notes.label "Užrašai">
 <!ENTITY zotero.tabs.attachments.label "Priedai">
-<!ENTITY zotero.tabs.tags.label "Gairės">
-<!ENTITY zotero.tabs.related.label "Susiję">
 
 <!ENTITY zotero.toolbar.duplicate.label "Rodyti besidubliuojančius">
 <!ENTITY zotero.collections.showUnfiledItems "Rodyti neužpildytus">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Rodyti Internete">
 <!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
 <!ENTITY zotero.item.deletePermanently "Pašalinti negrįžtamai...">
 

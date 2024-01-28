@@ -45,7 +45,7 @@ var ZoteroAdvancedSearch = new function() {
 		
 		// Set font size from pref
 		var sbc = document.getElementById('zotero-search-box-container');
-		Zotero.setFontSize(sbc);
+		Zotero.UIProperties.registerRoot(sbc);
 		
 		_searchBox.onLibraryChange = this.onLibraryChange;
 		var io = window.arguments[0];

@@ -1353,7 +1353,7 @@ var Zotero_QuickFormat = new function () {
 	function _resetSearchTimer() {
 		// Show spinner
 		var spinner = document.querySelector('.citation-dialog.spinner');
-		spinner.style.visibility = '';
+		spinner.setAttribute("status", "animate");
 		// Cancel current search if active
 		if (_searchPromise && _searchPromise.isPending()) {
 			_searchPromise.cancel();
@@ -1364,7 +1364,7 @@ var Zotero_QuickFormat = new function () {
 			.then(() => {
 				inputIsPristine = false;
 				_searchPromise = null;
-				spinner.style.visibility = 'hidden';
+				spinner.removeAttribute("status");
 			});
 	}
 	

@@ -1,0 +1,69 @@
+#sync-reset-form {
+	margin-inline-start: 1em;
+}
+
+#reset-sync-warning {
+	font-size: 12px;
+}
+
+#sync-reset-form {
+	margin-top: 1em;
+}
+
+#sync-reset-library-menu-container > label {
+	font-weight: 600;
+	font-size: 15px;
+}
+
+#sync-reset-library-menu {
+	width: 14em;
+	margin-inline-start: .25em;
+	font-size: 15px;
+	height: 1.6em;
+}
+
+#sync-reset-radiogroup {
+	margin-bottom: 1.4em;
+}
+
+#sync-reset-radiogroup > div {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Allow a click between lines to select the radio */
+#sync-reset-radiogroup > div label {
+	display: block;
+}
+
+#sync-reset-radiogroup > div:first-child {
+	margin-top: 1.4em;
+}
+
+#sync-reset-radiogroup > div radio .radio-label {
+	font-weight: 600;
+	font-size: 15px;
+	margin-bottom: .2em;
+}
+
+#sync-reset-radiogroup > div .sync-reset-option-desc {
+	font-size: 12px;
+}
+
+#sync-reset-radiogroup > div radio {
+	float: left;
+	margin-top: 1em;
+}
+
+#sync-reset-radiogroup > div radio .radio-check {
+	margin-inline-end: 1.05em;
+}
+
+#sync-reset-radiogroup > div[disabled] span {
+	color: gray;
+}
+
+#sync-reset button {
+	font-size: 14px;
+}

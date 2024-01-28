@@ -1,0 +1,114 @@
+collapsible-section {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding-block: 4px;
+
+	--width-focus-border: 2px;
+	--radius-focus-border: 5px;
+
+	:not(:last-child) > & {
+		border-bottom: 1px solid var(--fill-quinary);
+	}
+
+	& > .head {
+		@include focus-ring;
+		@include comfortable {
+			padding-block: 2px;
+		}
+		
+		display: flex;
+		align-items: center;
+		
+		.title {
+			flex: 1;
+			
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			color: var(--fill-secondary);
+			font-weight: 600;
+		}
+		
+		toolbarbutton {
+			flex-shrink: 0;
+			width: 20px;
+			height: 20px;
+			padding: 2px;
+			color: var(--fill-secondary);
+			border-radius: 2px;
+		}
+		
+		toolbarbutton.add {
+			@include svgicon-menu("plus", "universal", "16");
+			
+			&:hover {
+				background: var(--fill-quinary);
+			}
+			
+			&:active {
+				background: var(--fill-quarternary);
+			}
+		}
+
+		toolbarbutton.twisty .toolbarbutton-icon {
+			@include svgicon-menu("chevron-12", "universal", "16");
+			transform: rotate(0deg);
+			transform-origin: center;
+			transition: transform 0.2s ease-in-out;
+		}
+
+		popupset > menupopup {
+			@include macOS-hide-menu-icons;
+		}
+	}
+	
+	&[open]:not([empty]) > .head {
+		toolbarbutton.twisty .toolbarbutton-icon {
+			transform: rotate(-180deg);
+		}
+	}
+	
+	&[empty] > .head > toolbarbutton.twisty {
+		fill: var(--fill-tertiary);
+	}
+
+	@each $pane, $color in $item-pane-sections {
+		&[data-pane="#{$pane}"] {
+			& > .head > .title::before {
+				content: '';
+				width: 16px;
+				height: 16px;
+				background: icon-url("itempane/16/#{$pane}.svg") no-repeat center;
+				-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+				fill: $color;
+				stroke: $color;
+			}
+		}
+	}
+	
+	& > :not(.head) {
+		max-height: var(--open-height, auto);
+		opacity: 1;
+		transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out;
+	}
+	
+	&:not([open]) {
+		& > :not(.head) {
+			max-height: 0;
+			opacity: 0;
+			visibility: hidden;
+			overflow-y: hidden;
+			transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0s 0.2s, overflow-y 0s 0.2s;
+		}
+	}
+	
+	&.disable-transitions * {
+		transition: none !important;
+	}
+
+	toolbarbutton, .box, .keyboard-clickable {
+		@include focus-ring;
+	}
+	
+}

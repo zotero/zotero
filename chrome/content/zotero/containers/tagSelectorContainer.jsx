@@ -42,6 +42,9 @@ const defaults = {
 };
 const { Cc, Ci } = require('chrome');
 
+// first n tags will be measured using DOM method for more accurate measurment (at the cost of performance)
+const FORCE_DOM_TAGS_FOR_COUNT = 200;
+
 Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	constructor(props) {
 		super(props);
@@ -50,7 +53,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			['collection-item', 'item', 'item-tag', 'tag', 'setting'],
 			'tagSelector'
 		);
-		this._prefObserverID = Zotero.Prefs.registerObserver('fontSize', this.handleFontChange.bind(this));
+		this._prefObserverID = Zotero.Prefs.registerObserver('fontSize', this.handleUIPropertiesChange.bind(this));
+		this._prefObserverID = Zotero.Prefs.registerObserver('uiDensity', this.handleUIPropertiesChange.bind(this));
+		this._mediaQueryList = window.matchMedia("(min-resolution: 1.5dppx)");
+		this._mediaQueryList.addEventListener("change", this.handleUIPropertiesChange.bind(this));
 		
 		this.tagListRef = React.createRef();
 		this.searchBoxRef = React.createRef();
@@ -66,7 +72,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		this.state = {
 			...defaults,
 			...this.getContainerDimensions(),
-			...this.getFontInfo()
+			...this.getFontInfo(),
+			isHighDensity: this._mediaQueryList.matches
 		};
 	}
 	
@@ -357,6 +364,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		container.appendChild(elem);
 		var style = window.getComputedStyle(elem);
 		var props = {
+			lineHeight: style.getPropertyValue('line-height'),
 			fontSize: style.getPropertyValue('font-size'),
 			fontFamily: style.getPropertyValue('font-family')
 		};
@@ -365,36 +373,61 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 	
 	/**
-	 * Recompute tag widths based on the current font settings
+	 * Recompute tag widths when either font, UI density or pixel density changes
 	 */
-	handleFontChange() {
+	handleUIPropertiesChange(ev) {
 		this.widths.clear();
 		this.widthsBold.clear();
+		const isHighDensity = ev.target instanceof MediaQueryList ? ev.matches : this.state.isHighDensity;
 		this.setState({
-			...this.getFontInfo()
+			...this.getFontInfo(),
+			uiDensity: Zotero.Prefs.get('uiDensity'),
+			isHighDensity
 		});
 	}
 	
 	/**
 	 * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
+	 * Except for emoji tags, where, on high-density screens, we use actual DOM element for more accurate
+	 * measurement (which is 4-5x slower) because canvas method can be off by enough to cause visible artifacts.
+	 * It's possible to force use of DOM method for other tags using forceUseDOM parameter.
 	 *
 	 * @param {String} text The text to be rendered.
 	 * @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
+	 * @param {String} forceUseDOM Force use of DOM method for measuring text width
 	 *
 	 * @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
 	 */
-	getTextWidth(text, font) {
-		// re-use canvas object for better performance
-		var canvas = this.canvas || (this.canvas = document.createElement("canvas"));
-		var context = canvas.getContext("2d");
-		context.font = font;
-		// Add a little more to make sure we don't crop
-		var metrics = context.measureText(text);
-		return Math.ceil(metrics.width);
+	getTextWidth(text, font, forceUseDOM = false) {
+		let width;
+		const useDOM = forceUseDOM || (this.state.isHighDensity && Zotero.Utilities.Internal.includesEmoji(text));
+		if (useDOM) {
+			if (!this.divMeasure) {
+				this.divMeasure = document.createElement('div');
+				this.divMeasure.style.position = 'absolute';
+				this.divMeasure.style.top = '-9999px';
+				this.divMeasure.whiteSpace = 'nowrap';
+				document.querySelector('#zotero-tag-selector').appendChild(this.divMeasure);
+			}
+
+			this.divMeasure.style.font = font;
+			this.divMeasure.textContent = text;
+			width = this.divMeasure.clientWidth;
+			this.divMeasure.textContent = '';
+		}
+		else {
+			// re-use canvas object for better performance
+			var canvas = this.canvas || (this.canvas = document.createElement("canvas"));
+			var context = canvas.getContext("2d");
+			context.font = font;
+			var metrics = context.measureText(text);
+			width = metrics.width;
+		}
+		
+		return width;
 	}
 	
-	getWidth(name) {
-		var num = 0;
+	getWidth(name, forceUseDOM = false) {
 		var font = this.state.fontSize + ' ' + this.state.fontFamily;
 		// Colored tags are shown in bold, which results in a different width
 		var fontBold = 'bold ' + font;
@@ -402,8 +435,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		let widths = hasColor ? this.widthsBold : this.widths;
 		let width = widths.get(name);
 		if (width === undefined) {
-			width = this.getTextWidth(name, hasColor ? fontBold : font);
-			//Zotero.debug(`Calculated ${hasColor ? 'bold ' : ''}width of ${width} for tag '${name}'`);
+			width = this.getTextWidth(name, hasColor ? fontBold : font, forceUseDOM);
+			// Zotero.debug(`Calculated ${hasColor ? 'bold ' : ''}width of ${width} for tag '${name}' using ${forceUseDOM ? 'DOM' : 'hybrid'} method`);
 			widths.set(name, width);
 		}
 		return width;
@@ -460,7 +493,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		// Prepare tag objects for list component
 		//var d = new Date();
 		var inTagColors = true;
-		tags = tags.map((tag) => {
+		tags = tags.map((tag, i) => {
 			let name = tag.tag;
 			tag = {
 				name,
@@ -480,10 +513,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			if ((this.displayAllTags || inTagColors) && !this.state.scope.has(name)) {
 				tag.disabled = true;
 			}
-			tag.width = this.getWidth(name);
+			const forceUseDOM = this.state.isHighDensity && i < FORCE_DOM_TAGS_FOR_COUNT;
+			tag.width = this.getWidth(name, forceUseDOM);
 			return tag;
 		});
-		//Zotero.debug(`Prepared tags in ${new Date() - d} ms`);
+		// clean up divMeasure, which might have been used for measuring emoji tags
+		this.divMeasure?.parentNode?.removeChild?.(this.divMeasure);
+		this.divMeasure = null;
+		// Zotero.debug(`Prepared ${tags.length} tags in ${new Date() - d} ms`);
 		return <TagSelector
 			tags={tags}
 			searchBoxRef={this.searchBoxRef}
@@ -498,6 +535,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			width={this.state.width}
 			height={this.state.height}
 			fontSize={parseInt(this.state.fontSize.replace('px', ''))}
+			lineHeight={parseInt(this.state.lineHeight.replace('px', ''))}
+			uiDensity={Zotero.Prefs.get('uiDensity')}
 		/>;
 	}
 
@@ -550,10 +589,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				return;
 			}
 			
-			var elem = event.target;
+			let elem = event.target.closest('.tag-selector-item');
 			
 			// Ignore drops not on tags
-			if (!elem.classList.contains('tag-selector-item')) {
+			if (elem === null) {
 				return;
 			}
 			
@@ -564,13 +603,13 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			event.dataTransfer.dropEffect = remove ? "move" : "copy";
 		},
 		onDragExit: function (event) {
-			event.target.classList.remove('dragged-over');
+			event.target.closest('.tag-selector-item')?.classList?.remove?.('dragged-over');
 		},
 		onDrop: async function(event) {
-			var elem = event.target;
+			let elem = event.target.closest('.tag-selector-item');
 			
 			// Ignore drops not on tags
-			if (!elem.classList.contains('tag-selector-item')) {
+			if (elem === null) {
 				return;
 			}
 

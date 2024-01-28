@@ -1,44 +1,44 @@
 notes-box, related-box {
-	.header {
-		font-weight: normal;
-		display: flex;
-		padding-left: 10px;
-		align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
 
-		label {
-			margin-right: 5px;
-		}
+	&[hidden] {
+		display: none;
+	}
 
-		button {
-			min-width: 79px;
-			margin: 5px 6px 3px;
-			padding-top: 1px;
-			padding-bottom: 1px;
-			color: ButtonText;
-			text-shadow: none;
-			font-size: inherit;
+	&:not([mode=edit]) {
+		.add {
+			display: none;
 		}
 	}
 
-	.grid {
-		display: grid;
-		grid-template-columns: 1fr auto;
-
-		.box {
-			overflow: hidden;
+	.body {
+		display: flex;
+		flex-direction: column;
+		padding-inline-start: 12px;
+	
+		.row {
 			display: flex;
-			margin-left: 5px;
-
-			img {
-				width: 16px;
-				height: 16px;
+			gap: 4px;
+			align-items: flex-start;
+			
+			@include comfortable {
+				padding-block: 2px;
 			}
-
-			label {
-				margin-left: 3px;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
+	
+			.box {
+				@include clicky-item;
+				flex: 1;
+			}
+	
+			toolbarbutton {
+				margin-inline-start: auto;
+				visibility: hidden;
+			}
+	
+			&:is(:hover, :focus-within) toolbarbutton {
+				visibility: visible;
 			}
 		}
 	}

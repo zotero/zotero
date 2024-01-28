@@ -2,3 +2,248 @@
 // Mixins
 // --------------------------------------------------
 
+@mixin compact {
+	$selector: &;
+	@at-root [zoteroUIDensity="compact"] {
+		@if $selector {
+			#{$selector} {
+				@content;
+			}
+		}
+		
+		@else {
+			@content;
+		}
+	}
+}
+
+@mixin comfortable {
+	$selector: &;
+	@at-root [zoteroUIDensity="comfortable"] {
+		@if $selector {
+			#{$selector} {
+				@content;
+			}
+		}
+
+		@else {
+			@content;
+		}
+	}
+}
+
+// @NOTE: this mixin uses `state` mixin, therefore must be used in a selector nested
+//        underneath selectors listed in arguments, e.g., .virtualized-table .row 
+//        by default. See `state` mixin for more details.
+@mixin focus-states(
+	$selectedState: '.row.selected',
+	$focused: '.virtualized-table:focus-within'
+	) {
+	@media (prefers-color-scheme: light) {
+		@content("light");
+		
+		@include state($selectedState) {
+			@include state($focused) {
+				@content("white");
+			}
+		}
+	}
+
+	@media (prefers-color-scheme: dark) {
+		@content("dark");
+		
+		@include state($selectedState) {
+			@include state($focused) {
+				@content("white");
+			}
+		}
+	}
+}
+
+// An implementation of Firefox light-dark() CSS mixin, which is not supported in 102
+@mixin light-dark($prop, $light-color, $dark-color) {
+	@media (prefers-color-scheme: light) {
+		#{$prop}: $light-color;
+	}
+	@media (prefers-color-scheme: dark) {
+		#{$prop}: $dark-color;
+	}
+}
+
+@mixin color-scheme {
+	@media (prefers-color-scheme: light) {
+		@content("light");
+	}
+	
+	@media (prefers-color-scheme: dark) {
+		@content("dark");
+	}
+}
+
+@mixin clicky-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+	padding-inline-start: 4px;
+	overflow: hidden;
+	border-radius: 5px;
+
+	&:not([disabled]):hover {
+		background-color: var(--fill-quinary);
+	}
+	
+	&:not([disabled]):active {
+		background-color: var(--fill-quarternary);
+	}
+
+	.icon {
+		height: calc(1.3333333333 * var(--zotero-font-size));
+	}
+
+	.label {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 10;
+		width: 0; // Needed to allow the label to shrink for some reason
+		flex: 1;
+		overflow: hidden;
+	}
+	
+	.icon, .label {
+		padding-block: 2px;
+	}
+}
+
+@mixin meta-table {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	column-gap: 8px;
+	row-gap: 2px;
+	width: inherit;
+
+	.show-on-hover {
+		visibility: hidden;
+		&.no-display {
+			display: none;
+		}
+	}
+
+	.meta-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+
+		&[hidden] {
+			display: none;
+		}	
+
+		// On hover of the meta-row, reveal all hidden icons
+		// unless there's .noHover class which keeps everything hidden
+		&:not(.noHover):hover .show-on-hover,
+		&:focus-within .show-on-hover {
+			visibility: visible;
+			display: block;
+		}
+	
+		.meta-data {
+			width: 0;
+			min-width: 100%;
+			display: flex;
+			toolbarbutton {
+				margin-inline-start: 4px;
+			}
+	
+		}
+		editable-text {
+			flex: 1; // stretch value field as much as possible
+			max-width: 100%; // stay within .meta-data when the itemBox is narrow
+			.input {
+				// allow input to be shrunk by other elements when the itemBox is narrow
+				min-width: 0;
+			}
+			// keep multiline fields as tall as they have to be unless they're focused
+			&[multiline] textarea:not(:focus) {
+				min-height: 1em;
+			}
+		}
+	
+		.meta-label {
+			display: flex;
+			font-weight: normal;
+			text-align: end;
+			color: var(--fill-secondary);
+
+			&[fieldname^="creator"] {
+				justify-content: space-between;
+				align-items: center;
+			}
+			> label {
+				margin-top: 2px;
+				@include comfortable {
+					margin-top: 3px;
+				}
+			}
+		}
+		
+		.key {
+			width: 100%;
+		}
+	
+		toolbarbutton {
+			@include focus-ring;
+	
+			// needed to have the outline appear on all platforms
+			appearance: none;
+			-moz-appearance: none;
+			align-self: center;
+			// Make all buttons tigher to not stretch the rows
+			height: auto;
+			width: auto;
+			padding: 1px;
+			border-radius: 2px;
+		}
+	}
+}
+
+/* Hide icons on macOS. We use :is() to work around weird behavior in Fx101 where a regular child
+   selector doesn't match the first time the menu is opened. */
+@mixin macOS-hide-menu-icons {
+	$selector: &;
+	@at-root {
+		@media (-moz-platform: macos) {
+			// Yes, every single one of these :is-es is necessary!
+			:is(:is(#{$selector}) .menuitem-iconic, :is(#{$selector}) .menu-iconic) {
+				list-style-image: none !important;
+
+				.menu-iconic-left {
+					display: none !important;
+				}
+			}
+		}
+	}
+}
+
+@mixin macOS-inactive-opacity {
+	$selector: &;
+	@at-root {
+		@media (-moz-platform: macos) {
+			#{$selector} {
+				&:-moz-window-inactive {
+					opacity: 0.6;
+				}
+			}
+		}
+	}
+}
+/*
+	This mixin replaces the default focus-rings - those are platform-specific, do not show up on some
+	components (e.g. toolbarbutton) and sometimes are too wide (e.g. around textfield on macOS).
+	Box-shadow is used to be able to set the radius.
+*/
+@mixin focus-ring {
+	&:focus-visible {
+	  outline: none;
+	  box-shadow: 0 0 0 var(--width-focus-border) -moz-accent-color;
+	  border-radius: var(--radius-focus-border);
+	}
+  }

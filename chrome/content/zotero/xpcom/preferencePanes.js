@@ -31,7 +31,7 @@ Zotero.PreferencePanes = {
 		{
 			id: 'zotero-prefpane-general',
 			label: 'zotero.preferences.prefpane.general',
-			image: 'chrome://zotero/skin/prefs-general.png',
+			image: 'chrome://zotero/skin/20/universal/cog.svg',
 			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_general.js'],
 			defaultXUL: true,
@@ -40,7 +40,7 @@ Zotero.PreferencePanes = {
 		{
 			id: 'zotero-prefpane-sync',
 			label: 'zotero.preferences.prefpane.sync',
-			image: 'chrome://zotero/skin/prefs-sync.png',
+			image: 'chrome://zotero/skin/20/universal/sync.svg',
 			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
@@ -49,7 +49,7 @@ Zotero.PreferencePanes = {
 		{
 			id: 'zotero-prefpane-export',
 			label: 'zotero.preferences.prefpane.export',
-			image: 'chrome://zotero/skin/prefs-export.png',
+			image: 'chrome://zotero/skin/20/universal/export.svg',
 			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_export.js'],
 			defaultXUL: true,
@@ -58,7 +58,7 @@ Zotero.PreferencePanes = {
 		{
 			id: 'zotero-prefpane-cite',
 			label: 'zotero.preferences.prefpane.cite',
-			image: 'chrome://zotero/skin/prefs-styles.png',
+			image: 'chrome://zotero/skin/20/universal/cite.svg',
 			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_cite.js'],
 			defaultXUL: true,
@@ -67,7 +67,7 @@ Zotero.PreferencePanes = {
 		{
 			id: 'zotero-prefpane-advanced',
 			label: 'zotero.preferences.prefpane.advanced',
-			image: 'chrome://zotero/skin/prefs-advanced.png',
+			image: 'chrome://zotero/skin/20/universal/wrench-screwdriver.svg',
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_advanced.js'],
 			defaultXUL: true,

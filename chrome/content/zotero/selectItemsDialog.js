@@ -40,7 +40,7 @@ const isAddEditItemsDialog = !!document.querySelector('#zotero-add-citation-dial
 var doLoad = async function () {
 	// Set font size from pref
 	var sbc = document.getElementById('zotero-select-items-container');
-	Zotero.setFontSize(sbc);
+	Zotero.UIProperties.registerRoot(sbc);
 	
 	io = window.arguments[0];
 	if(io.wrappedJSObject) io = io.wrappedJSObject;

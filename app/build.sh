@@ -455,10 +455,6 @@ cp "$CALLDIR/assets/updater.ini" "$base_dir"
 # Adjust chrome.manifest
 #perl -pi -e 's^(chrome|resource)/^jar:zotero.jar\!/$1/^g' "$BUILD_DIR/zotero/chrome.manifest"
 
-# Copy icons
-mkdir "$base_dir/chrome"
-cp -R "$CALLDIR/assets/icons" "$base_dir/chrome/icons"
-
 # Copy application.ini and modify
 cp "$CALLDIR/assets/application.ini" "$app_dir/application.ini"
 perl -pi -e "s/\{\{VERSION}}/$VERSION/" "$app_dir/application.ini"
@@ -862,6 +858,10 @@ if [ $BUILD_LINUX == 1 ]; then
 		# Add word processor plug-ins
 		mkdir "$APPDIR/integration"
 		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration/install" "$APPDIR/integration/libreoffice"
+		
+		# Copy icons
+		cp "$CALLDIR/linux/icons/icon128.png" "$APPDIR/icons/"
+		cp "$CALLDIR/linux/icons/symbolic.svg" "$APPDIR/icons/"
 		
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;

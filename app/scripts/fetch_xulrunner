@@ -129,6 +129,8 @@ function modify_omni {
 	
 	# Don't use Mozilla Maintenance Service on Windows
 	replace_line 'MOZ_MAINTENANCE_SERVICE:' 'MOZ_MAINTENANCE_SERVICE: false \&\&' modules/AppConstants.jsm
+	# Continue using app.update.auto in prefs.js on Windows
+	replace_line 'PER_INSTALLATION_PREFS_PLATFORMS = \["win"\]' 'PER_INSTALLATION_PREFS_PLATFORMS = []' modules/UpdateUtils.jsm
 	
 	# Prompt if major update is available instead of installing automatically on restart
 	replace_line 'if \(!updateAuto\) \{' 'if (update.type == "major") {
@@ -197,6 +199,8 @@ function modify_omni {
 	# Accept zotero@chnm.gmu.edu for target application to allow Zotero 6 plugins to remain
 	# installed in Zotero 7
 	replace_line "if \(targetApp.id == Services.appinfo.ID\) \{" "if (targetApp.id == 'zotero\@chnm.gmu.edu') targetApp.id = '$APP_ID'; if (targetApp.id == Services.appinfo.ID) {" modules/addons/XPIDatabase.jsm
+	# Fix addon.id is undefined with built-in theme addons, anyway we don't support theme addons
+	replace_line 'addon.type === "theme"' 'false' modules/addons/XPIDatabase.jsm
 	
 	# For updates, look for applications.zotero instead of applications.gecko in manifest.json and
 	# use the app id and version for strict_min_version/strict_max_version comparisons

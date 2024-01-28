@@ -6,6 +6,8 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window data-l10n-id="import-window"
+		id="import-wizard-window"
+		class="zotero-window"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		onload="Zotero_Import_Wizard.init()"
@@ -15,8 +17,13 @@
 		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 
-	<script src="chrome://global/content/customElements.js"/>
-	<wizard id="import-wizard" class="import-wizard" width="600" height="400">
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	</script>
+	
+	<wizard id="import-wizard" class="import-wizard zotero-window" width="600" height="400">
 		<wizardpage pageid="page-start" data-header-label-id="import-where-from">
 			<radiogroup id="import-source-group" align="start">
 				<radio value="file" data-l10n-id="import-source-file" />
@@ -108,8 +115,7 @@
 			</div>
 		</wizardpage>
 	</wizard>
-		
-	<script src="chrome://zotero/content/include.js"/>
+
 	<script src="../fileInterface.js"/>
 	<script src="./importWizard.js" />
 </window>

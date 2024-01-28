@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "журнал изменений">
 <!ENTITY zotero.upgrade.changeLogAfterLink "чтобы узнать что нового.">
 
-<!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Заметки">
 <!ENTITY zotero.tabs.attachments.label "Вложения">
-<!ENTITY zotero.tabs.tags.label "Теги">
-<!ENTITY zotero.tabs.related.label "Связанные">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показать дубликаты">
 <!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые записи">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Как в предложении">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Поменять местами имя и фамилию">
 <!ENTITY zotero.item.creatorTransform.fixCase "Исправить регистр">
-<!ENTITY zotero.item.viewOnline "Просмотреть онлайн">
 <!ENTITY zotero.item.copyAsURL "Скопировать как URL">
 <!ENTITY zotero.item.deletePermanently "Удалить навсегда…">
 

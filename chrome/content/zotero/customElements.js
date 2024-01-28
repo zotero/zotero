@@ -25,11 +25,15 @@
 
 'use strict';
 
+Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+
 Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 
 // Load our custom elements
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreview.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreviewBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/guidancePanel.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/mergeGroup.js', this);
@@ -43,9 +47,21 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/elements/splitMenuB
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/tagsBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/textLink.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/zoteroSearch.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/paneHeader.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/editableText.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSidenav.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/abstractBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/collapsibleSection.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentsBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentAnnotationsBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextNotesList.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesCollectionsBox.js', this);
 
-// Fix missing property bug that breaks arrow key navigation between <tab>s
 {
+	// Fix missing property bug that breaks arrow key navigation between <tab>s
 	let MozTabPrototype = customElements.get('tab').prototype;
 	if (!MozTabPrototype.hasOwnProperty('container')) {
 		Object.defineProperty(MozTabPrototype, 'container', {
@@ -58,5 +74,97 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/zoteroSear
 				}
 			}
 		});
+	}
+
+	// Add MacOS menupopup fade animation to menupopups
+	if (Zotero.isMac) {
+		let MozMenuPopupPrototype = customElements.get("menupopup").prototype;
+
+		// Initialize the menupopup when it's first opened
+		let originalEnsureInitialized = MozMenuPopupPrototype.ensureInitialized;
+		MozMenuPopupPrototype.ensureInitialized = function () {
+			if (!this._zoteroInitialized) {
+				this._zoteroInitialized = true;
+
+				// Following the implementation from https://searchfox.org/mozilla-esr102/source/toolkit/content/widgets/menupopup.js
+				let haveCheckableChild = this.querySelector(
+					":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio])"
+				);
+				this.toggleAttribute("needsgutter", haveCheckableChild);
+
+				/**
+				 * Add fade animation to the popup
+				 * animate="false" will disable the animation
+				 * animate="false-once" will disable the animation once, which we use for the
+				 *   command event, so that the popup doesn't flicker when the user clicks
+				 * animate="open" when the menu is open
+				 * animate="cancel" when is menu is hiding
+				 */
+				if (this.getAttribute("animate") !== "false") {
+					this.setAttribute("animate", "open");
+				}
+
+				this.addEventListener("popupshowing", (e) => {
+					if (this !== e.target) {
+						return;
+					}
+					// Following the implementation from https://searchfox.org/mozilla-esr102/source/toolkit/content/widgets/menupopup.js
+					let haveCheckableChild = this.querySelector(
+						":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio],[selected],[checked])"
+					);
+					this.toggleAttribute("needsgutter", haveCheckableChild);
+					// Update animate attribute when the popup is shown
+					if (this.getAttribute("animate") === "false") {
+						return;
+					}
+					this.setAttribute("animate", "open");
+				});
+				
+				// Update animate attribute when the popup is hiding and trigger the fade out animation
+				this.addEventListener("popuphiding", (e) => {
+					if (
+						this !== e.target
+						// Don't animate the popup if it's a submenu
+						|| this.parentElement?.parentElement?.localName === "menupopup"
+						// open="true" and aria-hidden="true" means it's a native menupopup
+						|| (this.getAttribute("open", "true") && this.getAttribute("aria-hidden", "true"))
+						|| !this.getAttribute("animate")
+						|| ["false", "false-once"].includes(this.getAttribute("animate"))) {
+						return;
+					}
+					e.preventDefault();
+					e.stopPropagation();
+					this.setAttribute("animate", "cancel");
+					// Make the timeout slightly longer than the animation duration (180ms) in _menupopup.scss
+					setTimeout(() => {
+						this.removeAttribute("animate");
+						this.hidePopup();
+					}, 200);
+				});
+
+				// This event is triggered after clicking the menu and before popuphiding
+				// where we control whether the fade out animation should run
+				this.addEventListener("command", () => {
+					if (this.getAttribute("animate") === "false") {
+						return;
+					}
+					// Disable the fading animation when the popup is closed by clicking
+					this.setAttribute("animate", "false-once");
+				});
+			}
+			originalEnsureInitialized.apply(this);
+		};
+	}
+
+	// inject custom CSS into FF built-in custom elements (currently only <wizard>)
+	for (let element of ["wizard"]) {
+		let oldAttachShadow = customElements.get(element).prototype.attachShadow;
+		customElements.get(element).prototype.attachShadow = function () {
+			let shadowRoot = oldAttachShadow.apply(this, arguments);
+			shadowRoot.appendChild(MozXULElement.parseXULToFragment(
+				`<html:link rel="stylesheet" href="chrome://zotero/skin/${element}.css"/>`
+			));
+			return shadowRoot;
+		};
 	}
 }

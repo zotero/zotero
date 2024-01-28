@@ -1,0 +1,9 @@
+:root#new-collection-dialog {
+	dialog > vbox {
+		margin-bottom: 10px;
+	}
+	
+	menulist::part(icon) {
+		margin-inline-end: 3px;
+	}
+}

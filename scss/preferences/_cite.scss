@@ -1,0 +1,22 @@
+#wordProcessors > label:not(:first-child) {
+	margin-top: 10px;
+}
+
+#wordProcessorInstallers {
+	margin-block: 0.5em;
+}
+
+#wordProcessorInstallers > groupbox > label > h2 {
+	/* Override spacing added between groupboxes */
+	margin-top: 0.5em !important;
+}
+
+#styleManager
+{
+	height: 250px;
+}
+
+#styleManager-updated
+{
+	width: 105px;
+}

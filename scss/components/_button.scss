@@ -3,37 +3,37 @@
 // --------------------------------------------------
 
 .btn {
-  font: {
-    family: inherit;
-    size: inherit;
-  }
-  line-height: inherit;
-  color: inherit;
-  text-align: center;
-  -moz-appearance: toolbarbutton;
+	font: {
+		family: inherit;
+		size: inherit;
+	}
+	line-height: inherit;
+	color: inherit;
+	text-align: center;
+	-moz-appearance: none;
 
-  &[disabled],
-  &.disabled {
-    opacity: $btn-disabled-opacity;
-  }
+	&[disabled],
+	&.disabled {
+		opacity: $btn-disabled-opacity;
+	}
 }
 
 .btn-icon {
-  .icon {
-    &:first-child {
-      margin-left: -5px;
-    }
-    &:last-child {
-      margin-right: -5px;
-    }
-    svg, img {
-      vertical-align: middle;
-    }
-  }
-  span.menu-marker {
-    -moz-appearance: toolbarbutton-dropdown;
-    display: inline-block;
-    margin-right: -5px;
-  }
+	.icon {
+		svg, img {
+			vertical-align: middle;
+		}
+	}
+	span.menu-marker {
+		-moz-appearance: none;
+		display: inline-block;
+		margin-left: 4px;
+	}
 }
 
+button {
+	@media (-moz-platform: macos) {
+		// Prevent ugly non-native button styles on macOS
+		max-height: 25px;
+	}
+}

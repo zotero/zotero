@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "endringsloggen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "for å finne ut hva som er nytt.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notater">
 <!ENTITY zotero.tabs.attachments.label "Vedlegg">
-<!ENTITY zotero.tabs.tags.label "Emneord">
-<!ENTITY zotero.tabs.related.label "Relatert">
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis duplikater">
 <!ENTITY zotero.collections.showUnfiledItems "Vis ikke arkiverte elementer">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Kun første ord med stor bokstav">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Bytt fornavn/etternavn">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fiks til stor forbokstav">
-<!ENTITY zotero.item.viewOnline "Vis på nett">
 <!ENTITY zotero.item.copyAsURL "Kopier som URL">
 <!ENTITY zotero.item.deletePermanently "Slett permanent…">
 

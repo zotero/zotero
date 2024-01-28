@@ -26,9 +26,6 @@
 /* global XULElementBase: false */
 
 {
-	const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
-
 	const links = {
 		cc: 'https://wiki.creativecommons.org/Considerations_for_licensors_and_licensees',
 		cc0: 'https://wiki.creativecommons.org/CC0_FAQ'

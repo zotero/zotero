@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "raportul schimbărilor">
 <!ENTITY zotero.upgrade.changeLogAfterLink "pentru a vedea ce este nou.">
 
-<!ENTITY zotero.tabs.info.label "Informații">
 <!ENTITY zotero.tabs.notes.label "Note">
 <!ENTITY zotero.tabs.attachments.label "Anexe">
-<!ENTITY zotero.tabs.tags.label "Etichete">
-<!ENTITY zotero.tabs.related.label "Relații">
 
 <!ENTITY zotero.toolbar.duplicate.label "Afișează duplicatele">
 <!ENTITY zotero.collections.showUnfiledItems "Arată înregistrările neîndosariate">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Majusculă ca la propoziție">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Schimbați primul/ultimul">
 <!ENTITY zotero.item.creatorTransform.fixCase "Repară majusculele">
-<!ENTITY zotero.item.viewOnline "Vezi online">
 <!ENTITY zotero.item.copyAsURL "Copiază ca URL">
 <!ENTITY zotero.item.deletePermanently "Șterge permanent...">
 

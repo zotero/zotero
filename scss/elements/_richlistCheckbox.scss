@@ -13,19 +13,19 @@ richlistcheckbox {
 }
  
 richlistcheckbox[selected="true"] {
-	background-color: -moz-cellhighlight;
-	color: -moz-cellhighlighttext;
+	background-color: var(--color-accent);
+	color: var(--fill-primary);
 }
 
 richlistbox:where(:focus) > richlistcheckbox[selected="true"] {
-	background-color: SelectedItem;
+	background-color: var(--color-accent);
 	color: SelectedItemText;
 }
 
 richlistbox[seltype="multiple"]:focus > richlistcheckbox[current="true"],
 richlistbox.theme-listbox:focus > richlistcheckbox[current="true"] {
 	outline: var(--default-focusring);
-	outline-color: SelectedItem;
+	outline-color: var(--color-accent);
 	outline-offset: calc(-1 * var(--default-focusring-width));
 }
 

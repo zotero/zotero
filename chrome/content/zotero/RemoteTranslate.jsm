@@ -52,7 +52,9 @@ class RemoteTranslate {
 	
 	_wasSuccess = false;
 	
-	constructor() {
+	constructor({ disableErrorReporting = false } = {}) {
+		this._disableErrorReporting = disableErrorReporting;
+		
 		TranslationManager.add(this._id, this);
 		TranslationManager.setHandler(this._id, 'done', (_, success) => this._wasSuccess = success);
 	}
@@ -64,18 +66,24 @@ class RemoteTranslate {
 	async setBrowser(browser) {
 		this._browser = browser;
 		let actor = this._browser.browsingContext.currentWindowGlobal.getActor("Translation");
+
+		// Make only relevant prefs available
+		// https://github.com/zotero/zotero-connectors/blob/d5f025de9b4f513535cbf4639c6b59bf115d790d/src/common/zotero.js#L264-L265
+		let prefs = this._getPrefs([
+			'downloadAssociatedFiles',
+			'automaticSnapshots',
+			'reportTranslationFailure',
+			'capitalizeTitles',
+			'translators.',
+		]);
+		if (this._disableErrorReporting) {
+			prefs.reportTranslationFailure = false;
+		}
+		
 		await actor.sendAsyncMessage("initTranslation", {
 			schemaJSON: Zotero.File.getResource('resource://zotero/schema/global/schema.json'),
 			dateFormatsJSON: Zotero.File.getResource('resource://zotero/schema/dateFormats.json'),
-			// Make only relevant prefs available
-			// https://github.com/zotero/zotero-connectors/blob/d5f025de9b4f513535cbf4639c6b59bf115d790d/src/common/zotero.js#L264-L265
-			prefs: this._getPrefs([
-				'downloadAssociatedFiles',
-				'automaticSnapshots',
-				'reportTranslationFailure',
-				'capitalizeTitles',
-				'translators.',
-			]),
+			prefs,
 		});
 	}
 	

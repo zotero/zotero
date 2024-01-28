@@ -84,13 +84,6 @@ var Scaffold = new function () {
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
 		_document = document;
-
-		if (!Zotero.isMac) {
-			// Hack to fix Windows/Linux toolbar
-			let toolbar = document.getElementById('zotero-toolbar');
-			toolbar.className = 'toolbar-scaffold-small';
-		}
-		
 		_browser = document.getElementById('browser');
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
@@ -165,7 +158,7 @@ var Scaffold = new function () {
 		this.initTestsEditor();
 
 		// Set font size from general pref
-		Zotero.setFontSize(document.getElementById('scaffold-pane'));
+		Zotero.UIProperties.registerRoot(document.getElementById('scaffold-pane'));
 
 		// Set font size of code editor
 		var size = Zotero.Prefs.get("scaffold.fontSize");
@@ -1000,7 +993,7 @@ var Scaffold = new function () {
 		let translate;
 		let isRemoteWeb = false;
 		if (functionToRun == "detectWeb" || functionToRun == "doWeb") {
-			translate = new RemoteTranslate();
+			translate = new RemoteTranslate({ disableErrorReporting: true });
 			isRemoteWeb = true;
 			if (!_testTargetRegex(input)) {
 				_logOutput("Target did not match " + _getCurrentURI(input));
@@ -1703,7 +1696,7 @@ var Scaffold = new function () {
 		let input = await _getInput(type);
 
 		if (type == "web") {
-			let translate = new RemoteTranslate();
+			let translate = new RemoteTranslate({ disableErrorReporting: true });
 			try {
 				await translate.setBrowser(_browser);
 				await translate.setTranslatorProvider(_translatorProvider);
@@ -2074,7 +2067,7 @@ var Scaffold = new function () {
 					_logOutput("Page URL differs from test. Will be updated. " + browser.currentURI.spec);
 				}
 
-				let translate = new RemoteTranslate();
+				let translate = new RemoteTranslate({ disableErrorReporting: true });
 				try {
 					await translate.setBrowser(browser);
 					await translate.setTranslatorProvider(_translatorProvider);

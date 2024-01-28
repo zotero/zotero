@@ -108,7 +108,9 @@ async function getWatch() {
 				result = await getSymlinks(path, { nodir: true }, signatures);
 			}
 
-			onSuccess(result);
+			if (result) {
+				onSuccess(result);
+			}
 			onSuccess(await cleanUp(signatures));
 
 			if (shouldAddOmni && result.outFiles?.length) {

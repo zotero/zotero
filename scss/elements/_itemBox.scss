@@ -1,95 +1,43 @@
 item-box {
-	--row-height: 1.5em;
 	
 	display: flex;
 	min-width: 0;
 	width: 100%;
 
+	&[hidden] {
+		display: none;
+	}
+	--width-focus-border: 1px;
+	--radius-focus-border: 5px;
+
 	#item-box {
-		display: flex;
-		flex-direction: column;
-		margin-top: 8px;
-		align-items: start;
 		width: 100%;
 	}
 
 	#info-table {
-		display: grid;
-		grid-template-columns: max-content 1fr;
-		// Make sure rows are at least --row-height tall, but no taller than their tallest child
-		// This lets rows expand for multi-line editors
-		grid-auto-rows: minmax(var(--row-height), max-content);
-		align-items: center;
-		width: 100%;
+		@include meta-table;
 	}
 
-	tr {
-		display: contents;
+	.creator-type-label, #more-creators-label {
+		color: var(--fill-secondary);
 	}
 
-	td {
-		display: flex;
-		min-width: 0;
-		align-self: stretch;
-		align-items: center;
-		margin-inline-end: 5px;
+	.drag-hidden-creator {
+		opacity: 0;
 	}
-
-	td > input, .creator-name-box > input {
-		align-self: center;
-		// Fields have 3px borders; cancel them out
-		margin-top: -3px;
-		margin-bottom: -3px;
-		margin-inline-start: 0;
-		padding: 0;
-	}
-	
-	td > input {
-		margin-inline-end: 5px;
-	}
-
-	th > label {
-		margin-top: 1px !important;
-		margin-bottom: 1px !important;
-		-moz-box-pack: start;
-		margin-inline-start: 1px !important;
-		margin-inline-end: 5px !important;
-		padding: 0 2px;
-	}
-
-	td > [fieldname] {
-		width: 100%;
-	}
-
-	.value {
-		min-height: 14px;
-		align-self: center;
-		padding-inline: 2px;
-	}
-
-	.value:not(.multiline) {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.value.multiline {
-		white-space: pre-line;
-	}
-
-	/*td > vbox > description
-	{
-		margin: 0 !important;
-	}*/
 
 	#item-type-menu {
-		height: 1.5em !important;
-		min-height: 1.5em !important;
-		padding: 0 2px !important;
-		margin: 0 !important;
+		@include focus-ring;
+		margin: 0;
 		margin-inline-end: 5px !important;
-		max-height: 1.5em !important;
 		flex: 1;
+		padding-inline-start: 5px;
+
+		// Same padding as editable-text
+		@include comfortable {
+			padding-top: 3px;
+			padding-bottom: 3px;
+		}	
 
 		&::part(dropmarker) {
 			display: none;
@@ -98,10 +46,13 @@ item-box {
 		&::part(label) {
 			margin-inline-start: 0;
 		}
+
+		&[disabled] {
+			background: none;
+		}
 	}
 
 	#item-type-menu:not(:hover):not(:active) {
-		border: 1px solid transparent;
 		background-color: transparent;
 	}
 
@@ -114,128 +65,101 @@ item-box {
 		padding: 0 !important;
 	}
 
-	/* DEBUG: this doesn't seem to work, unfortunately
-	label[singleField=false]:after
-	{
-		content:",";
-	}
-	*/
-
-	/*textbox .textbox-input-box
-	{
-		margin: 0;
-	}*/
-
 	textarea {
 		font: inherit;
 		resize: none;
 	}
 
-	/* metadata field names */
-	th {
-		display: flex;
-		height: var(--row-height);
-		align-self: start;
-		align-items: center;
-		justify-content: end;
-		font-weight: normal;
-		margin-inline-start: 5px !important;
-		margin-inline-end: 0 !important;
-	}
 
 	#more-creators-label
 	{
-		font-weight: bold;
+		font-weight: 600;
 	}
-
-	/*row > label
-	{
-		border: 1px solid transparent;
-	}
-	
-	row label
-	{
-		-moz-user-focus: ignore;
-	}*/
 
 	.pointer:hover, .pointer:hover > label {
 		cursor: pointer !important;
 	}
 
 	/* creator type menu */
-
+	.creator-type-label {
+		@include focus-ring;
+		display: inline-block;
+		// undo the padding so that the name is pushed to the end
+		margin-inline-end: -4px;
+		padding-left: 4px;
+		padding-right: 4px;
+		
+		&:hover, &:focus {
+			.creator-type-dropmarker {
+			  visibility: visible;
+			}
+		}
+	}
 	.creator-type-label, .creator-type-value {
 		-moz-box-align: center;
+		align-items: center;
+		display: flex;
+	}
+
+	// Some spacing between creator buttons
+	.creator-type-value > .zotero-clicky-plus,
+	.creator-type-value > .zotero-clicky-minus,
+	.creator-type-value > .zotero-clicky-options {
+		margin-left: 1px; 
 	}
 
 	.creator-name-box {
 		flex: 1;
-		min-width: 0;
 		display: flex;
-		align-items: baseline;
-
-		& > input {
-			flex: 1;
-			min-width: 60%;
+		editable-text input {
+			min-width: 0;
 		}
 
-		& > div {
-			flex-shrink: 1;
-			min-width: 10px;
+		// Margin adjusted by inline padding to have 4px between first and last name
+		*[fieldMode="0"]:first-child {
+			margin-inline-end: calc(max(0px, 4px - var(--editable-text-padding-inline)));
+			flex-grow: 3; // last name should have priority to expand over first name
 		}
-
-		& > div:first-child[fieldMode="0"] {
-			// Cancel out padding before comma
-			margin-inline-end: -3px;
+		// Add comma when the last name is not focused
+		*[fieldMode="0"]:first-child {
+			position: relative;
+			&::after {
+				content: var(--comma-character, ',');
+				position: absolute;
+				inset-inline-end: 0;
+				bottom: var(--editable-text-padding-block);
+			}
+			&.focused::after {
+				visibility: hidden;
+			}
 		}
-	}
-
-	.creator-type-label > label
-	{
-		margin: 1px 0 !important;
-		margin-inline-end: 4px !important;
-		padding-inline-end: 2px !important;
 	}
 
 	.creator-type-dropmarker {
 		display: inline-block;
-		margin: 0 1em 1px;
-		background-image: url('chrome://zotero/skin/arrow-down.gif');
-		background-size: cover;
-		width: 11px;
-		height: 6px;
-	}
-
-	.creator-name-box, .date-box > span {
-		margin: 1px 0 !important;
-		margin-inline-start: 1px !important;
+		background-image: url('chrome://zotero/skin/16/universal/chevron-12.svg');
+		background-size: contain;
+		width: 8px;
+		height: 8px;
+		background-repeat: no-repeat;
+		padding-right: 4px;
+		align-self: center;
+		visibility: hidden;
 	}
 
 	.comma {
-		margin: 1px 0 !important;
+		margin-inline-end: calc(4px - var(--editable-text-padding-inline));
+		align-self: center;
 	}
 
 	#zotero-date-field-status
 	{
-		color: #666;
+		color: var(--fill-secondary);
 		padding: 0 !important;
-		padding-inline-start: 1px !important;
-		padding-inline-end: 10px !important;
+		padding-inline-start: 5px !important;
+		padding-inline-end: 1px !important;
 		white-space: nowrap;
-	}
-
-	.zotero-field-toggle
-	{
-		width: 27px !important;
-		max-width: 27px !important;
-		min-width: 27px !important;
-		height: 14px;
-		margin: 0 !important;
-		margin-inline-end: 5px !important;
-		background-repeat: no-repeat !important;
-		background-position: center !important;
-		border-width: 0 !important;
-		border-radius: 4px !important;
+		align-self: center;
 	}
 
 	/* Merge pane in duplicates view */
@@ -258,20 +182,21 @@ item-box {
 		padding: 1.5em 1em;
 		background: #d93425;
 		color: white;
-		font-weight: bold;
+		font-weight: 600;
 	}
 
 	#retraction-details {
-		background: #fbf0f0;
+		@include light-dark(background, #fbf0f0, var(--material-background));
 		padding: .5em 1.5em;
 		margin-top: 0;
 		margin-bottom: 1em;
 		cursor: text;
+		user-select: text;
 		-moz-user-select: text;
 	}
 
 	#retraction-details dt {
-		font-weight: bold;
+		font-weight: 600;
 	}
 
 	#retraction-details dt:not(:first-child) {

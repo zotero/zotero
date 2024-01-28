@@ -203,26 +203,28 @@ var Zotero_Preferences = {
 		}
 		else {
 			let labelElem = document.createXULElement('label');
-			if (rawLabel) {
-				labelElem.value = rawLabel;
+			if (!rawLabel) {
+				if (Zotero.Intl.strings.hasOwnProperty(label)) {
+					rawLabel = Zotero.Intl.strings[label];
+				}
+				else {
+					rawLabel = Zotero.getString(label);
+				}
 			}
-			else if (Zotero.Intl.strings.hasOwnProperty(label)) {
-				labelElem.value = Zotero.Intl.strings[label];
-			}
-			else {
-				labelElem.value = Zotero.getString(label);
-			}
+			labelElem.value = rawLabel;
 			listItem.append(labelElem);
 		}
 
 		this.navigation.append(listItem);
 
 		let container = document.createElement('div');
+		container.classList.add('pane-container');
 		container.hidden = true;
 		this.helpContainer.before(container);
 
 		this.panes.set(id, {
 			...options,
+			rawLabel,
 			loaded: false,
 			container,
 		});
@@ -272,7 +274,16 @@ var Zotero_Preferences = {
 			contentFragment = document.importNode(contentFragment, true);
 
 			this._initImportedNodesPreInsert(contentFragment);
+			
+			let heading = document.createElement('h1');
+			heading.textContent = pane.rawLabel;
 			pane.container.append(contentFragment);
+			if (pane.container.querySelector('.main-section')) {
+				pane.container.querySelector('.main-section').prepend(heading);
+			}
+			else {
+				pane.container.prepend(heading);
+			}
 
 			await document.l10n.ready;
 			await document.l10n.translateFragment(pane.container);
@@ -580,12 +591,13 @@ ${str}
 		let termForDisplay = Zotero.Utilities.trimInternal(term).toLowerCase();
 		term = this._normalizeSearch(term);
 
-		for (let container of this.content.children) {
-			let root = container.firstElementChild;
-			if (!root) continue;
-
-			for (let child of root.children) {
-				let matches = await this._findNodesMatching(child, term);
+		for (let paneContainer of this.content.querySelectorAll(':scope > .pane-container')) {
+			let roots = paneContainer.children;
+			while (roots.length === 1 && roots[0].childElementCount) {
+				roots = roots[0].children;
+			}
+			for (let root of roots) {
+				let matches = await this._findNodesMatching(root, term);
 				if (matches.length) {
 					let touchedTabPanels = new Set();
 					for (let node of matches) {
@@ -637,9 +649,13 @@ ${str}
 					}
 				}
 				else {
-					child.classList.add('hidden-by-search');
-					child.ariaHidden = true;
+					root.classList.add('hidden-by-search');
+					root.ariaHidden = true;
 				}
+			}
+			if (Array.from(roots).every(root => root.classList.contains('hidden-by-search'))) {
+				paneContainer.classList.add('hidden-by-search');
+				paneContainer.ariaHidden = true;
 			}
 		}
 	}),

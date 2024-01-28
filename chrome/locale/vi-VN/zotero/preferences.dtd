@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Mặc định:">
 <!ENTITY zotero.preferences.items "các mục tài liệu">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Các thiết lập">
 <!ENTITY zotero.preferences.custom "Tùy chỉnh...">
 
 <!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Tắt copy nhanh khi kéo nhiều hơn">
 
 <!ENTITY zotero.preferences.prefpane.cite "Trích dẫn">
-<!ENTITY zotero.preferences.cite.styles "Các kiểu trích dẫn">
 <!ENTITY zotero.preferences.cite.wordProcessors "Các phần mềm soạn thảo">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Dùng màn hình Thêm trích dẫn kiểu cũ">
 <!ENTITY zotero.preferences.styleEditor "Bộ soạn thảo style">

@@ -1,0 +1,188 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "themes/light";
+@import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
+
+$scaffold-toolbarbutton-icons: (
+		load: 'folder-open',
+		save: 'save',
+		saveToZotero: 'save-to-zotero',
+		detect: 'run-detect',
+		do: 'run-do',
+		template: 'plus'
+);
+
+@each $cls, $icon in $scaffold-toolbarbutton-icons {
+	#tb-#{$cls} {
+		@include svgicon-menu($icon, "universal", "20");
+	}
+};
+
+#zotero-toolbar {
+	toolbarbutton {
+		width: 28px;
+		height: 28px;
+		padding: 0 4px;
+		margin: 0 4px;
+		
+		.toolbarbutton-menu-dropmarker {
+			margin-inline-start: 4px;
+		}
+	}
+	
+	toolbarseparator {
+		appearance: none;
+		width: 1px;
+		height: 20px;
+		background-color: var(--fill-quinary);
+	}
+}
+
+tab {
+	/* toolkit/themes/osx/global/tabbox.css sets selected tabs' text color to #FFF, which is incorrect */
+	color: initial !important;
+}
+
+#metadata-grid {
+	-moz-box-flex: 1;
+	display: grid;
+	align-content: start;
+	align-items: center;
+	grid-template-columns: max-content 1fr;
+}
+
+#metadata-grid > label:nth-child(2n + 1) {
+	justify-self: right;
+}
+
+.button-row {
+	display: grid;
+	grid-template-columns: 1fr max-content;
+}
+
+#tabpanel-metadata input {
+	height: 1.5em;
+}
+
+#metadata-bottom-row {
+	display: flex;
+	align-items: center;
+}
+
+#metadata-bottom-row #textbox-minVersion {
+	margin-right: auto;
+}
+
+#hbox-testFrame {
+	-moz-box-align: center;
+}
+
+#output {
+	height:200px;
+}
+
+richlistbox {
+	min-width:200px;
+}
+
+#zotero-toolbar toolbarseparator {
+	height: 18px;
+}
+
+browser,
+#appcontent
+{
+	background: var(--material-toolbar);
+}
+
+#appcontent {
+	padding: 16px;
+}
+
+vbox > splitter {
+	cursor: row-rgb(4, 4, 4)e;
+}
+
+/* Adapted from Mozilla common-shared.css */
+/* https://searchfox.org/mozilla-central/rev/2f5ed7b7244172d46f538051250b14fb4d8f1a5f/toolkit/themes/shared/in-content/common-shared.css */
+
+select[size][multiple],
+listheader,
+richlistbox {
+	appearance: none;
+	margin-inline: 0;
+	background: var(--material-background);
+	border: var(--material-panedivider);
+}
+
+listheader {
+	padding-bottom: 1px;
+}
+
+treecol {
+	appearance: none;
+	border: none;
+}
+
+listheader + richlistbox {
+	margin-top: 0;
+	border-top: none;
+}
+
+select[size][multiple] > option,
+treechildren::-moz-tree-row {
+	padding: 0.3em;
+	margin: 0;
+	border: none;
+	background-image: none;
+}
+
+richlistitem hbox {
+	overflow: hidden;
+}
+
+richlistitem[selected] menulist:focus-visible {
+	outline-offset: -2px;
+}
+
+richlistbox[disabled] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+dialog richlistbox > richlistitem[disabled] {
+	font-weight: 600;
+}
+
+#left-tabbox {
+	margin: 5px;
+}
+
+#checkboxes-translatorType checkbox {
+	margin-right: 10px;
+	display: inline-block;
+}
+
+#tabpanel-metadata label:first-child {
+	text-align: right;
+}
+
+#right-pane {
+	margin: -16px -16px -16px 0px;
+	border-left: var(--material-panedivider);
+	textarea {
+		outline: none;
+		border: 0;
+	}
+}

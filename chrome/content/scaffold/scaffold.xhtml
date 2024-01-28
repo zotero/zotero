@@ -24,11 +24,11 @@
 	***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://scaffold/skin/scaffold.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/scaffold.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
@@ -45,7 +45,9 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="display: flex;">
 
-	<html:link rel="localization" href="browser/menubar.ftl"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+	</linkset>
 
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -371,7 +373,7 @@
 				</toolbarbutton>
 			</hbox>
 		</toolbar>
-		<hbox flex="1">
+		<hbox id="appcontent" flex="1">
 			<tabbox id="left-tabbox" flex="2" width="300">
 				<tabs id="tabs">
 					<tab id="tab-metadata" label="&scaffold.tabs.metadata.label;"/>
@@ -411,10 +413,10 @@
 							<html:input type="text" id="textbox-displayOptions" flex="1"/>
 
 							<label class="label-metadata" value="&scaffold.metadata.minVersion.label;" control="textbox-minVersion"/>
-							<html:div>
-								<html:input type="text" id="textbox-minVersion" flex="1" value="5.0"/>
+							<html:div id="metadata-bottom-row">
+								<html:input type="text" id="textbox-minVersion" value="5.0"/>
 								<label class="label-metadata" value="&scaffold.metadata.priority.label;" control="textbox-priority"/>
-								<html:input type="text" id="textbox-priority" flex="1" value="&scaffold.metadata.priority.default;"/>
+								<html:input type="text" id="textbox-priority" value="&scaffold.metadata.priority.default;"/>
 							</html:div>
 
 							<label class="label-metadata" value="&scaffold.metadata.hiddenPrefs.label;" control="textbox-hidden-prefs" style="display: none"/>
@@ -496,7 +498,7 @@
 					</tabpanel>
 				</tabpanels>
 			</tabbox>
-			<splitter resizeafter="farthest" />
+			<splitter id="pane-splitter" resizeafter="farthest" />
 
 			<vbox id="right-pane" flex="1">
 				<html:textarea style="-moz-box-flex: 1" id="output" readonly="true"/>

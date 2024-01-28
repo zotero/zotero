@@ -24,6 +24,28 @@
 -->
 <vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
 	<vbox class="main-section">
+		<groupbox>
+			<label><html:h2>&zotero.preferences.interface;</html:h2></label>
+		
+			<hbox align="center">
+				<label data-l10n-id="preferences-color-scheme"/>
+				<radiogroup orient="horizontal" id="color-scheme" preference="browser.theme.toolbar-theme">
+					<radio data-l10n-id="preferences-color-scheme-auto" value="2"/>
+					<radio data-l10n-id="preferences-color-scheme-light" value="1"/>
+					<radio data-l10n-id="preferences-color-scheme-dark" value="0"/>
+				</radiogroup>
+			</hbox>
+		
+			<hbox align="center">
+				<label value="&zotero.bibliography.locale.label;"/>
+				<menulist id="locale-menu"
+						onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
+						native="true">
+					<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
+				</menulist>
+			</hbox>
+		</groupbox>
+		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
@@ -181,32 +203,18 @@
 				<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
 			</hbox>
 		</groupbox>
+
+		<groupbox>
+			<label><html:h2>&zotero.preferences.groups;</html:h2></label>
+
+			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
+			<vbox style="margin-left: 2em">
+				<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
+				<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
+				<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
+				<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
+				<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
+			</vbox>
+		</groupbox>
 	</vbox>
-	
-	<groupbox>
-		<label><html:h2>&zotero.preferences.groups;</html:h2></label>
-		
-		<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
-		<vbox style="margin-left: 2em">
-			<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
-			<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
-			<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
-			<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
-			<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
-		</vbox>
-	</groupbox>
-	
-	<groupbox>
-	<label><html:h2>&zotero.preferences.interface;</html:h2></label>
-
-	<hbox align="center">
-		<label value="&zotero.bibliography.locale.label;"/>
-		<menulist id="locale-menu"
-				onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
-				native="true">
-			<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
-		</menulist>
-	</hbox>
-</groupbox>
-
 </vbox>

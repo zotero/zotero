@@ -37,7 +37,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 		
 		try {
 			// Set font size from pref
-			Zotero.setFontSize(document.getElementById("tag-color-chooser-container"));
+			Zotero.UIProperties.registerRoot(document.getElementById("tag-color-chooser-container"));
 			
 			if (window.arguments && window.arguments.length) {
 				_io = window.arguments[0];

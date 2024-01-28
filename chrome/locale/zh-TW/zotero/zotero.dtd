@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "變更紀錄">
 <!ENTITY zotero.upgrade.changeLogAfterLink "以獲知新的內容。">
 
-<!ENTITY zotero.tabs.info.label "資訊">
 <!ENTITY zotero.tabs.notes.label "筆記">
 <!ENTITY zotero.tabs.attachments.label "附件">
-<!ENTITY zotero.tabs.tags.label "標籤">
-<!ENTITY zotero.tabs.related.label "相關">
 
 <!ENTITY zotero.toolbar.duplicate.label "顯示重覆的項目">
 <!ENTITY zotero.collections.showUnfiledItems "顯示未歸檔的項目">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "句首字母大小寫">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交換前/後">
 <!ENTITY zotero.item.creatorTransform.fixCase "修正大小寫">
-<!ENTITY zotero.item.viewOnline "線上檢視">
 <!ENTITY zotero.item.copyAsURL "複製成 URL">
 <!ENTITY zotero.item.deletePermanently "刪除授權……">
 

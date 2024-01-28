@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "По умолчанию:">
 <!ENTITY zotero.preferences.items "записи(-ей)">
 <!ENTITY zotero.preferences.period ",">
-<!ENTITY zotero.preferences.settings "Настройки">
 <!ENTITY zotero.preferences.custom "Особые…">
 
 <!ENTITY zotero.preferences.prefpane.general "Общие">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Выключить быстрое копирование при перетаскивании более">
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитирование">
-<!ENTITY zotero.preferences.cite.styles "Стили">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстовые редакторы">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Использовать старый диалог «Добавление цитаты»">
 <!ENTITY zotero.preferences.styleEditor "Редактор стилей цитирования">

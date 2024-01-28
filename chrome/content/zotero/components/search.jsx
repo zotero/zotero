@@ -27,6 +27,7 @@
 
 const React = require('react');
 const PropTypes = require('prop-types');
+const { pick } = require('./utils');
 
 class Search extends React.PureComponent {
 	constructor(props) {
@@ -91,6 +92,7 @@ class Search extends React.PureComponent {
 					onChange={this.handleChange}
 					onKeyDown={this.handleKeyDown}
 					value={this.state.immediateValue}
+					{...pick(this.props, p => p.startsWith('data-') || p.startsWith('aria-'))}
 				/>
 				{this.state.immediateValue !== ''
 					? <div
@@ -106,6 +108,7 @@ class Search extends React.PureComponent {
 		onSearch: PropTypes.func,
 		timeout: PropTypes.number,
 		value: PropTypes.string,
+		placeholder: PropTypes.string,
 	};
 
 	static defaultProps = {

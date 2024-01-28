@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Implicite:">
 <!ENTITY zotero.preferences.items "înregistrări">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Setări">
 <!ENTITY zotero.preferences.custom "Personalizare...">
 
 <!ENTITY zotero.preferences.prefpane.general "Generale">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Dezactivează Copierea rapidă în timpul tragerii a mai mult de">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citează">
-<!ENTITY zotero.preferences.cite.styles "Stiluri">
 <!ENTITY zotero.preferences.cite.wordProcessors "Procesoare de text">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Folosește caseta clasică de dialog Adaugă citare">
 <!ENTITY zotero.preferences.styleEditor "Editor de stil">

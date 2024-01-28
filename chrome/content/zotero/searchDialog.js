@@ -33,7 +33,7 @@ function doLoad()
 {
 	// Set font size from pref
 	var sbc = document.getElementById('zotero-search-box-container');
-	Zotero.setFontSize(sbc);
+	Zotero.UIProperties.registerRoot(sbc);
 	
 	io = window.arguments[0];
 	

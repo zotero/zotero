@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 9;
+		var toVersion = 10;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -129,6 +129,10 @@ Zotero.Prefs = new function() {
 							}
 							this.clear('attachmentRenameFormatString');
 						}
+						break;
+					
+					case 10:
+						// Used internally
 						break;
 				}
 			}
@@ -263,13 +267,11 @@ Zotero.Prefs = new function() {
 				Zotero.Schema.stopRepositoryTimer();
 			}
 		}],
-		["fontSize", function (val) {
-			Zotero.setFontSize(
-				Zotero.getActiveZoteroPane().document.getElementById('zotero-pane')
-			);
-			Zotero.setFontSize(Zotero.getActiveZoteroPane().document.getElementById('zotero-context-pane'));
-			Zotero.getActiveZoteroPane().collectionsView && Zotero.getActiveZoteroPane().collectionsView.updateFontSize();
-			Zotero.getActiveZoteroPane().itemsView && Zotero.getActiveZoteroPane().itemsView.updateFontSize();
+		["fontSize", function () {
+			Zotero.UIProperties.setAll();
+		}],
+		["uiDensity", function () {
+			Zotero.UIProperties.setAll();
 		}],
 		["recursiveCollections", function() {
 			Zotero.getActiveZoteroPane().itemsView.refreshAndMaintainSelection();

@@ -21,6 +21,7 @@
 		"XPCOMUtils": false,
 		"XRegExp": false,
 		"XULElement": false,
+		"XULElementBase": false,
 		"Cu": false,
 		"ChromeWorker": false,
 		"Localization": false,
@@ -28,7 +29,12 @@
 		"L10nRegistry": false,
 		"ZoteroPane_Local": false,
 		"ZoteroPane": false,
-		"IOUtils": false
+		"Zotero_Tabs": false,
+		"ZoteroItemPane": false,
+		"IOUtils": false,
+		"NetUtil": false,
+		"FileUtils": false,
+		"globalThis": false
 	},
 	"extends": [
 		"@zotero",

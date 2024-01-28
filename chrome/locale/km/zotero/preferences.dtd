@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "លំនាំដើម:">
 <!ENTITY zotero.preferences.items "ឯកសារ">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "ការកំណត់នានា">
 <!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "ទូទៅ">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ចម្លងលឿនមិនអាចដំណើរការបាន នៅពេលទាញយកឯកសារច្រើនជាង">
 
 <!ENTITY zotero.preferences.prefpane.cite "អាគតដ្ឋាន">
-<!ENTITY zotero.preferences.cite.styles "រចនាបថ">
 <!ENTITY zotero.preferences.cite.wordProcessors "កម្មវិធីវាយអត្ថបទ">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "ប្រើទម្រង់អាគតដ្ឋានបែបបុរាណ">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">

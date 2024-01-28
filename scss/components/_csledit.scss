@@ -1,0 +1,49 @@
+#csl-edit {
+    font-size: 12px;
+
+    #csledit-splitter, #zotero-csl-editor-iframe {
+        border-top: var(--material-panedivider);
+    }
+
+    .divider {
+        border-left: var(--material-border-quinary);
+        width: 1px;
+        height: 16px;
+    }
+
+    .csl-edit-toolbars {
+        padding: 8px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .csl-edit-toolbar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+
+        menulist {
+            min-width: 80px;
+        }
+
+        button, menulist {
+            margin: 0;
+        }
+    }
+
+    .checkbox-label-box {
+        white-space: nowrap;
+    }
+}
+
+#csl-edit-preview {
+    font-size: 12px;
+    background: var(--material-background);
+    margin: 11px 16px 16px 16px; // splitter adds 5px of visual padding at the top. Using margin here so it collapses with the margin of the first header in the preview.
+
+    .error, .warning {
+        color: var(--accent-red)
+    }
+}

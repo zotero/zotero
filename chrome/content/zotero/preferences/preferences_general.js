@@ -113,6 +113,11 @@ Zotero_Preferences.General = {
 			Services.locale.requestedLocales = [menu.value];
 		}
 		
+		// https://searchfox.org/mozilla-central/rev/961a9e56a0b5fa96ceef22c61c5e75fb6ba53395/browser/base/content/utilityOverlay.js#383-387
+		if (Services.locale.isAppLocaleRTL) {
+			Zotero.Prefs.set("bidi.browser.ui", true, true);
+		}
+		
 		if (!changed) {
 			return;
 		}

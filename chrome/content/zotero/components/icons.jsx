@@ -20,7 +20,36 @@ Icon.propTypes = {
 	style: object
 }
 
-module.exports = { Icon }
+const CSSIcon = (props) => {
+	props = Object.assign({}, props);
+	props.className = `icon icon-css icon-${props.name} ${props.className || ""}`;
+	delete props.name;
+	// Pass the props forward
+	return <span {...props}></span>;
+};
+
+CSSIcon.propTypes = {
+	children: element,
+	className: string,
+	name: string.isRequired,
+	style: object
+};
+
+const CSSItemTypeIcon = (props) => {
+	props = Object.assign({}, props);
+	let itemType = props.itemType;
+	delete props.itemType;
+	return <CSSIcon name="item-type" data-item-type={itemType} {...props} />;
+};
+
+CSSItemTypeIcon.propTypes = {
+	children: element,
+	className: string,
+	itemType: string.isRequired,
+	style: object
+};
+
+module.exports = { Icon, CSSIcon, CSSItemTypeIcon };
 
 
 function i(name, svgOrSrc, hasHiDPI = true) {
@@ -80,32 +109,12 @@ i('Twisty', (
 		<path d="M8 13.4c-.5 0-.9-.2-1.2-.6L.4 5.2C0 4.7-.1 4.3.2 3.7S1 3 1.6 3h12.8c.6 0 1.2.1 1.4.7.3.6.2 1.1-.2 1.6l-6.4 7.6c-.3.4-.7.5-1.2.5z"/>
 	</svg>
 ));
-i('ArrowLeft', (
-	/* This Source Code Form is subject to the terms of the Mozilla Public
-	 * License, v. 2.0. If a copy of the MPL was not distributed with this
-	 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-		<path d="m5.001 8.352 5.465 5.466a.626.626 0 0 0 .884-.886L6.416 7.999l4.933-4.932a.626.626 0 0 0-.885-.885L5 7.647l.001.705z"/>
-	</svg>
-));
-i('ArrowRight', (
-	/* This Source Code Form is subject to the terms of the Mozilla Public
-	 * License, v. 2.0. If a copy of the MPL was not distributed with this
-	 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-		<path d="m10.999 8.352-5.465 5.466a.626.626 0 0 1-.884-.886l4.935-4.934-4.934-4.931a.626.626 0 0 1 .885-.885L11 7.647l-.001.705z"/>
-	</svg>
-));
 i('Cross', "chrome://zotero/skin/cross.png");
 i('Tick', "chrome://zotero/skin/tick.png");
 i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
 //i('Link', "chrome://zotero/skin/link.png");
 
-i('RTFScanAccept', "chrome://zotero/skin/rtfscan-accept.png", false);
-i('RTFScanLink', "chrome://zotero/skin/rtfscan-link.png", false);
-
 i('Attach', "chrome://zotero/skin/attach.png");
-i('AttachSmall', "chrome://zotero/skin/attach-small.png");
 i('BulletBlue', "chrome://zotero/skin/bullet_blue.png");
 i('BulletBlueEmpty', "chrome://zotero/skin/bullet_blue_empty.png");
 
@@ -140,7 +149,6 @@ i('TreeitemManuscript', 'chrome://zotero/skin/treeitem-manuscript.png');
 i('TreeitemMap', 'chrome://zotero/skin/treeitem-map.png', false);
 i('TreeitemNewspaperArticle', 'chrome://zotero/skin/treeitem-newspaperArticle.png');
 i('TreeitemNote', 'chrome://zotero/skin/treeitem-note.png');
-i('TreeitemNoteSmall', 'chrome://zotero/skin/treeitem-note-small.png');
 i('TreeitemPatent', 'chrome://zotero/skin/treeitem-patent.png');
 i('Treeitem', 'chrome://zotero/skin/treeitem.png');
 i('TreeitemPodcast', 'chrome://zotero/skin/treeitem-podcast.png', false);
@@ -217,4 +225,27 @@ module.exports.getDOMElement = function (icon) {
 	div.innerHTML = renderToStaticMarkup(React.createElement(module.exports[icon]));
 	domElementCache[icon] = div.firstChild;
 	return domElementCache[icon].cloneNode(true);
-}
+};
+
+let cssIconsCache = new Map();
+
+module.exports.getCSSIcon = function (key) {
+	if (!cssIconsCache.has(key)) {
+		let iconEl = document.createElement('span');
+		iconEl.classList.add('icon');
+		iconEl.classList.add('icon-css');
+		iconEl.classList.add(`icon-${key}`);
+		cssIconsCache.set(key, iconEl);
+	}
+
+	return cssIconsCache.get(key).cloneNode(true);
+};
+
+module.exports.getCSSItemTypeIcon = function (itemType, key = 'item-type') {
+	let icon = module.exports.getCSSIcon(key);
+	icon.dataset.itemType = itemType;
+	return icon;
+};
+
+module.exports['IconAttachSmall'] = props => <CSSIcon name="attachment" className="icon-16" {...props} />;
+module.exports['IconTreeitemNoteSmall'] = props => <CSSIcon name="note" className="icon-16" {...props} />;

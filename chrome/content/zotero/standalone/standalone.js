@@ -29,7 +29,19 @@ Components.utils.import("resource://gre/modules/Services.jsm");
  * This object contains the various functions for the interface
  */
 const ZoteroStandalone = new function() {
-	const FONT_SIZES = ["1.0", "1.15", "1.3", "1.5", "1.7", "1.9", "2.1"];
+	const FONT_SIZES = [
+		"0.77", // 10
+		"0.85", // 11
+		"0.92", // 12
+		"1.00", // 13px
+		"1.08", // 14
+		"1.15", // 15
+		"1.23", // 16
+		"1.38", // 18
+		"1.54", // 20
+		"1.85", // 24
+	];
+	
 	//const NOTE_FONT_SIZES = ["11", "12", "13", "14", "18", "24", "36", "48", "64", "72", "96"];
 	const NOTE_FONT_SIZE_DEFAULT = "12";
 
@@ -46,11 +58,138 @@ const ZoteroStandalone = new function() {
 			window.document.documentElement.setAttribute('sizemode', 'normal');
 		}
 		
+		// Create tab bar by default
+		document.documentElement.setAttribute('drawintitlebar', true);
+		document.documentElement.setAttribute('tabsintitlebar', true);
 		if (Zotero.isMac) {
-			// Create tab bar by default
-			document.documentElement.setAttribute('drawintitlebar', true);
-			document.documentElement.setAttribute('tabsintitlebar', true);
 			document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
+		}
+		else {
+			document.documentElement.setAttribute('chromemargin', '0,2,2,2');
+		}
+
+		if (Zotero.isWin) {
+			let windowIcon = document.querySelector(".titlebar-icon");
+			// Simulate Windows window control
+			windowIcon.addEventListener("dblclick", (ev) => {
+				if (ev.button !== 0) {
+					return;
+				}
+				window.close();
+			});
+			const DBLCLICK_INTERVAL = 300;
+			let leftClicked = false;
+			let simulatingClick = false;
+			windowIcon.addEventListener("click", (ev) => {
+				// If already/about to open, do nothing.
+				if (simulatingClick || leftClicked) {
+					return;
+				}
+				// Left-click: open at icon
+				if (ev.button === 0) {
+					leftClicked = true;
+					// Reset leftClicked flag to allow open again
+					const onWindowClick = (ev) => {
+						leftClicked = false;
+						window.removeEventListener("click", onWindowClick);
+					}
+					// Delay to allow dblclick happen
+					setTimeout(() => {
+						// Clicking inside image (36*36)
+						openWindowMenu(2, 35, ()=>{
+							setTimeout(()=>window.addEventListener("click", onWindowClick), 0);
+						});
+
+					}, DBLCLICK_INTERVAL);
+					return;
+				}
+
+				// Right-click: open at cursor
+				if (ev.button === 2) {
+					openWindowMenu();
+				}
+
+				/**
+				 * What we do here:
+				 * We want to open the window menu when clicking the window icon.
+				 * Why we do this way:
+				 * The window menu is a native menu, which is not accessible from JS.
+				 * Firefox didn't expose this to the JS level (they do at a C++ level),
+				 * which forces us to simulate a native right-click on a `-moz-window-drag: drag` element.
+				 * How we do this:
+				 * 1. temporarily change the -moz-window-drag of the icon after clicking,
+				 * 2. simulate a native right-click (which triggers the window menu),
+				 * 3. change the -moz-window-drag back to no-drag.
+				 * The function is to open window menu. If X or Y not given, use click position.
+				 */
+				function openWindowMenu(clientX = undefined, clientY = undefined, callback = undefined) {
+					simulatingClick = true;
+					windowIcon.style["-moz-window-dragging"] = "drag";
+	
+					const resolution = windowUtils.getResolution();
+					const scaleValue = window.devicePixelRatio;
+					const getX = (inputX) => {
+						let winInnerOffsetX
+							= window.top.mozInnerScreenX
+								+ (window.mozInnerScreenX - window.top.mozInnerScreenX) * resolution;
+						return (
+							(inputX * resolution + winInnerOffsetX)* scaleValue
+						);
+					};
+					const getY = (inputY) => {
+						let winInnerOffsetY
+							= window.top.mozInnerScreenY
+								+ (window.mozInnerScreenY - window.top.mozInnerScreenY) * resolution;
+						return (
+							(inputY * resolution + winInnerOffsetY) * scaleValue
+						);
+					};
+
+					const x = getX(clientX ?? ev.x);
+					const y = getY(clientY ?? ev.y);
+
+					// Following implementation from https://searchfox.org/mozilla-central/rev/ffdc4971dc18e1141cb2a90c2b0b776365650270/testing/mochitest/tests/SimpleTest/EventUtils.js#1323
+					windowUtils.sendNativeMouseEvent(
+						x,
+						y,
+						windowUtils.NATIVE_MOUSE_MESSAGE_BUTTON_DOWN,
+						2, // button
+						0, // modifierFlags
+						windowIcon,
+						function () {
+							windowUtils.sendNativeMouseEvent(
+								x,
+								y,
+								windowUtils.NATIVE_MOUSE_MESSAGE_BUTTON_UP,
+								2, // button
+								0, // modifierFlags
+								windowIcon,
+								{
+									observe: (_subject, topic, _data) => {
+										if (topic == "mouseevent") {
+											if (typeof clientX !== "undefined" || typeof clientY !== "undefined")
+											{
+												// Move mouse back if the click position is given
+												windowUtils.sendNativeMouseEvent(
+													getX(ev.x),
+													getY(ev.y),
+													windowUtils.NATIVE_MOUSE_MESSAGE_MOVE,
+													0, // button
+													0, // modifierFlags
+													windowIcon
+												);
+											}
+											windowIcon.style["-moz-window-dragging"] = "no-drag";
+											callback && callback();
+											simulatingClick = false;
+										}
+									},
+								},
+							);
+						}
+					);
+				}
+			});
 		}
 		
 		this.switchMenuType('library');
@@ -157,19 +296,6 @@ const ZoteroStandalone = new function() {
 	};
 
 	this.onFileMenuOpen = function () {
-		var active = false;
-		try {
-			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
-					return item.isAttachment()
-						|| (item.isRegularItem() && item.getAttachments().length);
-				}).length;
-			}
-		}
-		catch (e) {}
-		this.updateMenuItemEnabled('manage-attachments-menu', active);
-		
 		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
@@ -431,12 +557,19 @@ const ZoteroStandalone = new function() {
 			}
 			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.splitType === 'vertical');
 			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.splitType === 'horizontal');
+			this.updateMenuItemCheckmark('view-menuitem-use-dark-mode-for-content', Zotero.Prefs.get('reader.contentDarkMode'));
+			this.updateMenuItemEnabled('view-menuitem-use-dark-mode-for-content', window.matchMedia('(prefers-color-scheme: dark)').matches);
 		}
 	
 		// Layout mode
 		var mode = Zotero.Prefs.get('layout');
 		this.updateMenuItemCheckmark('view-menuitem-standard', mode != 'stacked');
 		this.updateMenuItemCheckmark('view-menuitem-stacked', mode == 'stacked');
+		
+		// Density
+		let density = Zotero.Prefs.get('uiDensity');
+		this.updateMenuItemCheckmark('view-menuitem-ui-density-compact', density == 'compact');
+		this.updateMenuItemCheckmark('view-menuitem-ui-density-comfortable', density == 'comfortable');
 		
 		// Panes
 		this.updateMenuItemCheckmark(
@@ -456,7 +589,7 @@ const ZoteroStandalone = new function() {
 		var fontSize = Zotero.Prefs.get('fontSize');
 		this.updateMenuItemEnabled('view-menuitem-font-size-bigger', fontSize < FONT_SIZES[FONT_SIZES.length - 1]);
 		this.updateMenuItemEnabled('view-menuitem-font-size-smaller', fontSize > FONT_SIZES[0]);
-		this.updateMenuItemEnabled('view-menuitem-font-size-reset', fontSize != FONT_SIZES[0]);
+		this.updateMenuItemEnabled('view-menuitem-font-size-reset', fontSize != "1.00");
 		
 		var noteFontSize = Zotero.Prefs.get('note.fontSize');
 		for (let menuitem of document.querySelectorAll(`#note-font-size-menu menuitem`)) {
@@ -496,6 +629,14 @@ const ZoteroStandalone = new function() {
 			
 			case 'stacked':
 				Zotero.Prefs.set('layout', 'stacked');
+				break;
+			
+			case 'ui-density-comfortable':
+				Zotero.Prefs.set('uiDensity', 'comfortable');
+				break;
+			
+			case 'ui-density-compact':
+				Zotero.Prefs.set('uiDensity', 'compact');
 				break;
 			
 			case 'collections-pane':

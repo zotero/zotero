@@ -1,0 +1,28 @@
+#select-items-dialog {
+    padding: 2em;
+
+    #zotero-select-items-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #zotero-collections-tree-container {
+        min-width: 200px;
+    }
+
+    #search-toolbar {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    #search-toolbar {
+        flex: 0 0 auto;
+    }
+
+    #collections-items-container {
+        flex: 1 1 auto;
+        margin-bottom: 8px;
+    }
+}

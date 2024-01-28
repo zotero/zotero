@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Lehenetsia:">
 <!ENTITY zotero.preferences.items "elementu">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Ezarpenak">
 <!ENTITY zotero.preferences.custom "Pertsonalizatua...">
 
 <!ENTITY zotero.preferences.prefpane.general "Orokorra">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Kopia azkarra desgaitu hauek baino gehiago arrastratzean: ">
 
 <!ENTITY zotero.preferences.prefpane.cite "Aipatu">
-<!ENTITY zotero.preferences.cite.styles "Estiloak">
 <!ENTITY zotero.preferences.cite.wordProcessors "Testu prozesatzaileak">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Erabili Aipua gehitu elkarrizketa klasikoa">
 <!ENTITY zotero.preferences.styleEditor "Estilo editorea">

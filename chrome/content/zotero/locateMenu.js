@@ -34,9 +34,7 @@ var Zotero_LocateMenu = new function() {
   	/**
   	 * Clear and build the locate menu
   	 */
-	this.buildLocateMenu = function() {
-		var locateMenu = document.getElementById('zotero-tb-locate-menu');
-		
+	this.buildLocateMenu = function (locateMenu) {
 		// clear menu
 		while(locateMenu.childElementCount > 0) {
 			locateMenu.removeChild(locateMenu.firstChild);
@@ -123,11 +121,20 @@ var Zotero_LocateMenu = new function() {
 	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
-		var menuitem = _createMenuItem(optionObject.label || Zotero.getString(`locate.${optionName}.label`),
-			null, null);
-		if (showIcons) {
-			menuitem.setAttribute("class", "menuitem-iconic");
-			menuitem.style.listStyleImage = `url('${optionObject.icon}')`;
+		var menuitem;
+		if (optionObject.l10nKey) {
+			menuitem = _createMenuItem('', null, null); // Set by Fluent
+			menuitem.setAttribute("data-l10n-id", optionObject.l10nKey);
+			if (optionObject.l10nArgs) {
+				menuitem.setAttribute("data-l10n-args", optionObject.l10nArgs);
+			}
+		}
+		else {
+			menuitem = _createMenuItem(optionObject.label || Zotero.getString(`locate.${optionName}.label`),
+				null, null);
+		}
+		if (optionObject.className && showIcons) {
+			menuitem.setAttribute("class", `menuitem-iconic ${optionObject.className}`);
 		}
 		menuitem.setAttribute("zotero-locate", "true");
 		
@@ -154,7 +161,7 @@ var Zotero_LocateMenu = new function() {
 			for(var viewOption in ViewOptions) {
 				if (!optionsToShow[viewOption]
 						&& (!isToolbarMenu || !ViewOptions[viewOption].hideInToolbar)) {
-					optionsToShow[viewOption] = yield ViewOptions[viewOption].canHandleItem(item);
+					optionsToShow[viewOption] = yield ViewOptions[viewOption].canHandleItem(item, selectedItems);
 				}
 			}
 		}
@@ -327,13 +334,25 @@ var Zotero_LocateMenu = new function() {
 	 * Get the first 50 selected items
 	 */
 	function _getSelectedItems() {
-		var allSelectedItems = ZoteroPane_Local.getSelectedItems();
-		var selectedItems = [];
-		while(selectedItems.length < 50 && allSelectedItems.length) {
-			var item = allSelectedItems.shift();
-			if(!item.isNote()) selectedItems.push(item);
+		if (Zotero_Tabs.selectedID == 'zotero-pane') {
+			var allSelectedItems = ZoteroPane_Local.getSelectedItems();
+			var selectedItems = [];
+			while (selectedItems.length < 50 && allSelectedItems.length) {
+				var item = allSelectedItems.shift();
+				if (!item.isNote()) selectedItems.push(item);
+			}
+			return selectedItems;
 		}
-		return selectedItems;
+		else {
+			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			if (reader) {
+				let item = Zotero.Items.get(reader.itemID);
+				if (item.parentItem) {
+					return [item.parentItem];
+				}
+			}
+			return [];
+		}
 	}
 	
 	var ViewOptions = {};
@@ -344,40 +363,57 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
 	 * a PDF
 	 */
-	function ViewPDF(alternateWindowBehavior) {
-		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
-		this._mimeTypes = ["application/pdf"];
+	function ViewAttachment(alternateWindowBehavior) {
+		const classNames = {
+			pdf: "zotero-menuitem-attachments-pdf",
+			epub: "zotero-menuitem-attachments-epub",
+			snapshot: "zotero-menuitem-attachments-snapshot",
+			multiple: "zotero-menuitem-new-tab",
+		};
+		const attachmentTypes = {
+			"application/pdf": "pdf",
+			"application/epub+zip": "epub",
+			"text/html": "snapshot",
+		};
+		this._attachmentType = "multiple";
+		Object.defineProperty(this, "className", {
+			get: () => (alternateWindowBehavior ? "zotero-menuitem-new-window" : classNames[this._attachmentType]),
+		});
+		this._mimeTypes = ["application/pdf", "application/epub+zip", "text/html"];
 
 		// Don't show alternate-behavior option ("in New Window" when openReaderInNewWindow is false,
 		// "in New Tab" when it's true) in toolbar Locate menu
 		this.hideInToolbar = alternateWindowBehavior;
 		
-		Object.defineProperty(this, 'label', {
-			get() {
-				if (alternateWindowBehavior) {
-					return Zotero.getString(Zotero.Prefs.get('openReaderInNewWindow')
-						? 'locate.pdfNewTab.label'
-						: 'locate.pdfNewWindow.label');
-				}
-				else {
-					return Zotero.getString('locate.pdf.label');
-				}
-			}
+		this.l10nKey = "item-menu-viewAttachment";
+		Object.defineProperty(this, "l10nArgs", {
+			get: () => JSON.stringify({
+				attachmentType: this._attachmentType,
+				openIn: alternateWindowBehavior ? 'window' : 'tab',
+			})
 		});
 		
-		this.canHandleItem = async function (item) {
+		this.canHandleItem = async function (item, items) {
 			// Don't show alternate-behavior option when using an external PDF viewer
 			if (alternateWindowBehavior && Zotero.Prefs.get("fileHandler.pdf")) {
 				return false;
 			}
-			return _getFirstAttachmentWithMIMEType(item, this._mimeTypes).then((item) => !!item);
-		}
+			const attachment = await _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+			// Trick to update the attachment type
+			if (items.length > 1) {
+				this._attachmentType = "multiple";
+			}
+			else if (attachment) {
+				this._attachmentType = attachmentTypes[attachment.attachmentContentType];
+			}
+			return !!attachment;
+		};
 		
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
 			var attachments = [];
 			for (let item of items) {
 				var attachment = yield _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
-				if(attachment) attachments.push(attachment.id);
+				if (attachment) attachments.push(attachment.id);
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event, false,
@@ -397,16 +433,16 @@ var Zotero_LocateMenu = new function() {
 		});
 	}
 
-	ViewOptions.pdf = new ViewPDF(false);
-	ViewOptions.pdfAlternateWindowBehavior = new ViewPDF(true);
-	
+	ViewOptions.viewAttachmentInTab = new ViewAttachment(false);
+	ViewOptions.viewAttachmentInWindow = new ViewAttachment(true);
+
 	/**
 	 * "View Online" option
 	 *
 	 * Should appear only when an item or an attachment has a URL
 	 */
 	ViewOptions.online = new function() {
-		this.icon = "chrome://zotero/skin/locate-view-online.png";
+		this.className = "zotero-menuitem-view-online";
 		
 		this.canHandleItem = function (item) {
 			return _getURL(item).then((val) => val !== false);
@@ -451,57 +487,7 @@ var Zotero_LocateMenu = new function() {
 			return false;
 		});
 	};
-	
-	/**
-	 * "View Snapshot" option
-	 *
-	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
-	 * a snapshot
-	 */
-	ViewOptions.snapshot = new function() {
-		this.icon = "chrome://zotero/skin/treeitem-attachment-snapshot.png";
-		this._mimeTypes = ["text/html", "application/xhtml+xml"];
-		this.canHandleItem = ViewOptions.pdf.canHandleItem;
-		this.handleItems = ViewOptions.pdf.handleItems;
-	};
-	
-	/**
-	 * "View File" option
-	 *
-	 * Should appear only when an item or a linked or attached file or web attachment does not
-	 * satisfy the conditions for "Open PDF" or "View Snapshot"
-	 */
-	ViewOptions.file = new function() {
-		this.icon = "chrome://zotero/skin/treeitem-attachment-file.png";
-		
-		this.canHandleItem = function (item) {
-			return _getFile(item).then((item) => !!item);
-		}
-		
-		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
-			var attachments = [];
-			for (let item of items) {
-				var attachment = yield _getFile(item);
-				if(attachment) attachments.push(attachment.id);
-			}
-			
-			ZoteroPane_Local.viewAttachment(attachments, event);
-		});
-		
-		var _getFile = Zotero.Promise.coroutine(function* (item) {
-			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
-			for (let i = 0; i < attachments.length; i++) {
-				let attachment = attachments[i];
-				if (!(yield ViewOptions.snapshot.canHandleItem(attachment))
-						&& !(yield ViewOptions.pdf.canHandleItem(attachment))
-						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					return attachment;
-				}
-			}
-			return false;
-		});
-	};
-	
+
 	/**
 	 * "Open in External Viewer" option
 	 *
@@ -509,7 +495,7 @@ var Zotero_LocateMenu = new function() {
 	 * viewed by an internal non-native handler and "launchNonNativeFiles" pref is disabled
 	 */
 	ViewOptions.externalViewer = new function() {
-		this.icon = "chrome://zotero/skin/locate-external-viewer.png";
+		this.className = "zotero-menuitem-view-external";
 		this.useExternalViewer = true;
 		
 		this.canHandleItem = Zotero.Promise.coroutine(function* (item) {
@@ -574,7 +560,7 @@ var Zotero_LocateMenu = new function() {
 	 * file or web attachment
 	 */
 	ViewOptions.showFile = new function() {
-		this.icon = "chrome://zotero/skin/locate-show-file.png";
+		this.className = "zotero-menuitem-view-file";
 		this.useExternalViewer = true;
 		
 		this.canHandleItem = function (item) {
@@ -606,7 +592,7 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only for regular items
 	 */
 	ViewOptions._libraryLookup = new function() {
-		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
+		this.className = "zotero-menuitem-library-lookup";
 		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
 		this.handleItems = Zotero.Promise.method(function (items, event) {
 			// If no resolver configured, show error

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Подразумевано:">
 <!ENTITY zotero.preferences.items "ставке">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Подешавања">
 <!ENTITY zotero.preferences.custom "Произвољно…">
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Онемогући Брзо копирање када се превуче више од">
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитат">
-<!ENTITY zotero.preferences.cite.styles "Стилови">
 <!ENTITY zotero.preferences.cite.wordProcessors "Програм за уређивање текста">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Користи класични прозорчић за цитирање">
 <!ENTITY zotero.preferences.styleEditor "Уредник стилова">

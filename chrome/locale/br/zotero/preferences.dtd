@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Dre-ziouer:">
 <!ENTITY zotero.preferences.items "elfennoù">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Arventennoù">
 <!ENTITY zotero.preferences.custom "Personelaat...">
 
 <!ENTITY zotero.preferences.prefpane.general "Hollek">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Lazhañ an Eilañ prim pa lakaer rinklañ muioc'h evit">
 
 <!ENTITY zotero.preferences.prefpane.cite "Arroudennañ">
-<!ENTITY zotero.preferences.cite.styles "Stiloù">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tretadur testenn">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Implijout ar prenestr ouzhpennañ arroudennoù klasel">
 <!ENTITY zotero.preferences.styleEditor "Aozer stil">

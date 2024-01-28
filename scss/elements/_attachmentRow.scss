@@ -1,0 +1,48 @@
+attachment-row {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	
+	&[hidden] {
+		display: none;
+	}
+
+	& > .head {
+		display: flex;
+		align-items: baseline;
+		gap: 4px;
+		
+		.clicky-item {
+			@include clicky-item;
+			flex: 1;
+			gap: 4px;
+			padding-inline: 4px;
+		}
+
+		.annotation-btn {
+			flex-grow: 0;
+			flex-basis: content;
+
+			&[hidden] {
+				display: none;
+			}
+
+			.icon {
+				width: 12px;
+				height: 12px;
+				@include svgicon("annotation-12", "universal", "16");
+				color: var(--fill-secondary);
+				padding-block: 4px;
+			}
+	
+			.label {
+				padding-block: 2px;
+				line-height: 16px;
+				width: 100%;
+				color: var(--fill-secondary);
+			}
+		}
+
+		
+	}
+}

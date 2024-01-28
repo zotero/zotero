@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "protokol o zmenách">
 <!ENTITY zotero.upgrade.changeLogAfterLink "aby ste sa dozvedeli o novinkách a zmenách v tejto verzii.">
 
-<!ENTITY zotero.tabs.info.label "Informácie">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.attachments.label "Prílohy">
-<!ENTITY zotero.tabs.tags.label "Značky">
-<!ENTITY zotero.tabs.related.label "Súvisiace">
 
 <!ENTITY zotero.toolbar.duplicate.label "Zobraziť duplicity">
 <!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené záznam">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Prvé veľké písmeno vo vete">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Zobraziť online">
 <!ENTITY zotero.item.copyAsURL "Kopírovať ako URL">
 <!ENTITY zotero.item.deletePermanently "Odstrániť natrvalo...">
 

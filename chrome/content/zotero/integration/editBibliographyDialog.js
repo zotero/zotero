@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 var Zotero_Bibliography_Dialog = new function () {
 	var bibEditInterface;
 	var _lastSelectedItemID = false;
@@ -325,8 +327,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		for(var i=0; i<items.length; i++) {
 			var itemNode = document.createXULElement("richlistitem");
 			itemNode.setAttribute("value", i);
-			let image = document.createXULElement('image');
-			image.src = items[i].getImageSrc();
+			let image = getCSSItemTypeIcon(items[i].getItemTypeIconName());
 			itemNode.append(image);
 			itemNode.append(items[i].getDisplayTitle());
 			itemNode.setAttribute("class", "listitem-iconic");

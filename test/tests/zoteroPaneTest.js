@@ -18,21 +18,19 @@ describe("ZoteroPane", function() {
 	describe("#newItem", function () {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textboxes = itemBox.querySelectorAll('input, textarea');
-			assert.lengthOf(textboxes, 1);
-			assert.equal(textboxes[0].getAttribute('fieldname'), 'title');
-			textboxes[0].blur();
+			let title = doc.getElementById('zotero-item-pane-header').querySelector("editable-text");
+			assert.equal(doc.activeElement.getAttribute("aria-label"), title.getAttribute("aria-label"));
+			title.blur();
 			yield Zotero.Promise.delay(1);
 		})
 		
 		it("should save an entered value when New Item is used", function* () {
 			var value = "Test";
 			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textbox = itemBox.querySelector('textarea');
-			textbox.value = value;
-			yield itemBox.blurOpenField();
+			let header = doc.getElementById('zotero-item-pane-header');
+			let title = header.querySelector("editable-text");
+			title.value = value;
+			yield header.save();
 			item = yield Zotero.Items.getAsync(item.id);
 			assert.equal(item.getField('title'), value);
 		})
@@ -59,7 +57,11 @@ describe("ZoteroPane", function() {
 	
 	describe("#newCollection()", function () {
 		it("should create a collection", function* () {
-			var promise = waitForDialog();
+			var promise = waitForDialog(
+				null,
+				'accept',
+				'chrome://zotero/content/newCollectionDialog.xhtml'
+			);
 			var id = yield zp.newCollection();
 			yield promise;
 			var collection = Zotero.Collections.get(id);
@@ -1483,6 +1485,110 @@ describe("ZoteroPane", function() {
 			}
 
 			stub.restore();
+		});
+	});
+	
+	describe("#focus()", function () {
+		before(async function () {
+			var collection = new Zotero.Collection;
+			collection.name = "Focus Test";
+			await collection.saveTx();
+			await waitForItemsLoad(win);
+		});
+
+		var tab = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			shiftKey: false,
+			bubbles: true
+		});
+
+		var shiftTab = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			shiftKey: true,
+			bubbles: true
+		});
+
+		var rightArrow = new KeyboardEvent('keydown', {
+			key: 'ArrowRight',
+			bubbles: true
+		});
+		var leftArrow = new KeyboardEvent('keydown', {
+			key: 'ArrowLeft',
+			bubbles: true
+		});
+
+
+		it("should shift-tab through the toolbar to item-tree", async function () {
+			let searchBox = doc.getElementById('zotero-tb-search-textbox');
+			searchBox.focus();
+
+			let sequence = [
+				"zotero-tb-search-dropmarker",
+				"zotero-tb-add",
+				"zotero-collections-search",
+				"zotero-tb-collection-add",
+				"zotero-tb-sync",
+				"zotero-tb-tabs-menu"
+			];
+
+			for (let id of sequence) {
+				doc.activeElement.dispatchEvent(shiftTab);
+				// Wait for collection search to be revealed
+				if (id === "zotero-collections-search") {
+					await Zotero.Promise.delay(250);
+				}
+				assert.equal(doc.activeElement.id, id);
+				// Wait for collection search to be hidden for subsequent tests
+				if (id === "zotero-tb-collection-add") {
+					await Zotero.Promise.delay(50);
+				}
+			}
+			doc.activeElement.dispatchEvent(shiftTab);
+			assert.equal(doc.activeElement.className, "tab selected");
+
+			doc.activeElement.dispatchEvent(shiftTab);
+			assert.equal(doc.activeElement.id, "item-tree-main-default");
+		});
+
+		it("should tab through the toolbar to collection-tree", async function () {
+			win.Zotero_Tabs.moveFocus("current");
+			let sequence = [
+				"zotero-tb-tabs-menu",
+				"zotero-tb-sync",
+				"zotero-tb-collection-add",
+				"zotero-collections-search",
+				"zotero-tb-add",
+				"zotero-tb-search-dropmarker",
+				'zotero-tb-search-textbox',
+				'collection-tree',
+			];
+			for (let id of sequence) {
+				doc.activeElement.dispatchEvent(tab);
+				// Wait for collection search to be revealed
+				if (id === "zotero-collections-search") {
+					await Zotero.Promise.delay(250);
+				}
+				assert.equal(doc.activeElement.id, id);
+			}
+		});
+
+		it("should navigate toolbarbuttons with arrows", async function () {
+			let addItem = doc.getElementById('zotero-tb-add');
+			addItem.focus();
+			
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-attachment-add");
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-note-add");
+
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-attachment-add");
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-add");
 		});
 	});
 })

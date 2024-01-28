@@ -1,8 +1,3 @@
-//
-// Zotero React Client
-// --------------------------------------------------
-
-
 // Abstracts
 // --------------------------------------------------
 
@@ -12,11 +7,15 @@
 @import "abstracts/placeholders";
 @import "abstracts/utilities";
 @import "abstracts/split-button";
-
-// Theme
-// --------------------------------------------------
+@import "abstracts/svgicon";
 
 @import "themes/light";
+@import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
 
 // Components
 // --------------------------------------------------
@@ -25,8 +24,10 @@
 @import "components/autosuggest";
 @import "components/button";
 @import "components/clicky";
+@import "components/contextPane";
 @import "components/collection-tree";
 @import "components/createParent";
+@import "components/csledit";
 @import "components/dictionaryManager";
 @import "components/editable";
 @import "components/exportOptions";
@@ -35,21 +36,36 @@
 @import "components/item-tree";
 @import "components/longTagFixer";
 @import "components/mainWindow";
+@import "components/menu";
 @import "components/notesList";
 @import "components/progressMeter";
 @import "components/publications-dialog";
-@import "components/rtfScan.scss";
+@import "components/richlistbox";
+@import "components/rtfScan";
+@import "components/runJS";
 @import "components/search";
+@import "components/selectItemsDialog";
+@import "components/spinner";
 @import "components/syncButtonTooltip";
 @import "components/tabBar";
 @import "components/tagSelector";
+@import "components/splitter";
 @import "components/textLink";
+@import "components/toolbar";
+@import "components/toolbarbutton";
 @import "components/virtualized-table";
+@import "components/window";
+@import "components/tabsMenu";
+@import "components/newCollectionDialog";
+@import "components/reader";
+@import "components/itemPane";
 
 // Elements
 // --------------------------------------------------
 
 @import "elements/attachmentBox";
+@import "elements/attachmentPreview";
+@import "elements/attachmentPreviewBox";
 @import "elements/colorPicker";
 @import "elements/guidancePanel";
 @import "elements/itemBox";
@@ -61,3 +77,14 @@
 @import "elements/styleConfigurator";
 @import "elements/tagsBox";
 @import "elements/zoteroSearch";
+@import "elements/paneHeader";
+@import "elements/editableText";
+@import "elements/itemPaneSidenav";
+@import "elements/abstractBox";
+@import "elements/collapsibleSection";
+@import "elements/attachmentsBox";
+@import "elements/attachmentRow";
+@import "elements/attachmentAnnotationsBox";
+@import "elements/annotationRow";
+@import "elements/noteRow";
+@import "elements/librariesCollectionsBox";

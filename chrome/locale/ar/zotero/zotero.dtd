@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "سجل التغييرات">
 <!ENTITY zotero.upgrade.changeLogAfterLink "لمعرفة الجديد.">
 
-<!ENTITY zotero.tabs.info.label "معلومات">
 <!ENTITY zotero.tabs.notes.label "ملاحظات">
 <!ENTITY zotero.tabs.attachments.label "مرفقات">
-<!ENTITY zotero.tabs.tags.label "أوسمة">
-<!ENTITY zotero.tabs.related.label "عناصر ذات صلة">
 
 <!ENTITY zotero.toolbar.duplicate.label "عرض التكرارات">
 <!ENTITY zotero.collections.showUnfiledItems "عرض العناصر غير المصنفة">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "حالة الجملة">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "العرض على الانترنت">
 <!ENTITY zotero.item.copyAsURL "نسخ كمسار انترنت">
 <!ENTITY zotero.item.deletePermanently "حذف نهائي...">
 

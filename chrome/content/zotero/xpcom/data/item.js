@@ -3757,6 +3757,9 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	else if (item.isSnapshotAttachment()) {
 		type = 'snapshot';
 	}
+	else if (item.isEPUBAttachment()) {
+		type = 'epub';
+	}
 	else {
 		type = 'other';
 	}
@@ -4349,34 +4352,47 @@ Zotero.DataObject.prototype.setPublications = Zotero.Promise.coroutine(function*
 
 
 Zotero.Item.prototype.getImageSrc = function() {
+	let itemType = this.getItemTypeIconName();
+	return Zotero.ItemTypes.getImageSrc(itemType);
+}
+
+
+Zotero.Item.prototype.getItemTypeIconName = function () {
 	var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	if (itemType == 'attachment') {
 		var linkMode = this.attachmentLinkMode;
-		
-		if (this.attachmentContentType == 'application/pdf' && this.isFileAttachment()) {
+
+		if (this.isPDFAttachment()) {
 			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				itemType += '-pdf-link';
+				itemType += 'PDFLink';
 			}
 			else {
-				itemType += '-pdf';
+				itemType += 'PDF';
+			}
+		}
+		else if (this.isEPUBAttachment()) {
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				itemType += 'EPUBLink';
+			}
+			else {
+				itemType += 'EPUB';
 			}
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-			itemType += "-file";
+			itemType += "File";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			itemType += "-link";
+			itemType += "Link";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-			itemType += "-snapshot";
+			itemType += "Snapshot";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			itemType += "-web-link";
+			itemType += "WebLink";
 		}
 	}
-	
-	return Zotero.ItemTypes.getImageSrc(itemType);
-}
+	return itemType;
+};
 
 
 Zotero.Item.prototype.getTagColors = function () {
