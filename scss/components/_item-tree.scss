@@ -27,7 +27,7 @@
 			text-align: center;
 
 			&.first-column {
-				padding-inline-start: 28px;
+				padding-inline-start: 32px;
 			}
 		}
 
@@ -159,6 +159,10 @@
 				margin-inline-start: 3px;
 			}
 		}
+
+		.cell.no-padding {
+			padding: 0;
+		}
 		
 		.cell.hasAttachment {
 			// Don't show ellipsis
@@ -169,7 +173,7 @@
 			}
 		}
 		
-		.numNotes {
+		.numNotes, .hasAttachment {
 			text-align: center;
 
 			.cell-text {

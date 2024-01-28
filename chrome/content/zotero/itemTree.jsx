@@ -2721,6 +2721,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		if (column.noPadding) {
+			cell.classList.add('no-padding');
+		}
+
 		if (isFirstColumn) {
 			// Add depth indent, twisty and icon
 			const depth = this.getLevel(index);
