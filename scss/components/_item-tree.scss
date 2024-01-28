@@ -165,8 +165,17 @@
 		}
 		
 		.cell.hasAttachment {
-			// Don't show ellipsis
 			text-overflow: unset;
+			align-items: center;
+			display: flex;
+			justify-content: center;
+
+			.cell-text {
+				text-overflow: unset;
+				align-items: center;
+				display: flex;
+				justify-content: center;
+			}
 			
 			.icon-missing-file {
 				opacity: 0.4;
