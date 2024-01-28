@@ -44,7 +44,6 @@ const CHILD_INDENT = 16;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
-const FIRST_COLUMN_EXTRA_WIDTH = 28; // 16px for twisty + 16px for icon - 8px column padding + 4px margin
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
@@ -943,21 +942,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.selection.select(this.selection.focused);
 		}
 	};
-
-	adjustColumnWidths = (columns) => {
-		const columnDefs = this.getColumns();
-		columns.filter(c => !c.hidden).forEach((column, index) => {
-			const isFirstColumn = index === 0;
-			const columnDef = columnDefs.find(c => c.dataKey === column.dataKey);
-			if (column.fixedWidth) {
-				column.width = isFirstColumn ? parseInt(columnDef.width) + FIRST_COLUMN_EXTRA_WIDTH : columnDef.width;
-			}
-			if (column.staticWidth) {
-				column.minWidth = isFirstColumn ? (columnDef?.minWidth ?? 20) + FIRST_COLUMN_EXTRA_WIDTH : columnDef.minWidth;
-				column.width = isFirstColumn ? Math.max(parseInt(column.width) ?? 0, column.minWidth) : column.width;
-			}
-		});
-	};
 	
 	render() {
 		const itemsPaneMessageHTML = this._itemsPaneMessage || this.props.emptyMessage;
@@ -1001,6 +985,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					storeColumnPrefs: this._storeColumnPrefs,
 					getDefaultColumnOrder: this._getDefaultColumnOrder,
 					containerWidth: this.domEl.clientWidth,
+					firstColumnExtraWidth: 28, // 16px for twisty + 16px for icon - 8px column padding + 4px margin
 
 					multiSelect: true,
 
@@ -1021,7 +1006,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onActivate: this.handleActivate,
 
 					onItemContextMenu: (...args) => this.props.onContextMenu(...args),
-					onSetOrder: this.adjustColumnWidths,
 					
 					role: 'tree',
 					label: Zotero.getString('pane.items.title'),
@@ -3181,18 +3165,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._columns.push(column);
 		}
 
-		let sortedColumns = this._columns.sort((a, b) => a.ordinal - b.ordinal);
-		let firstColumn = sortedColumns.filter(column => !column.hidden)[0];
-		
-		if (firstColumn.fixedWidth) {
-			firstColumn.width = parseInt(firstColumn.width) + FIRST_COLUMN_EXTRA_WIDTH;
-		}
-		if (firstColumn.staticWidth) {
-			firstColumn.minWidth = (firstColumn.minWidth ?? 0) + FIRST_COLUMN_EXTRA_WIDTH;
-			firstColumn.width = Math.max(parseInt(firstColumn.width), firstColumn.minWidth);
-		}
-
-		return sortedColumns;
+		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
 	}
 	
 	_getColumn(index) {
@@ -3569,11 +3542,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			menuitem.setAttribute('type', 'checkbox');
 			menuitem.setAttribute('label', label);
 			menuitem.setAttribute('colindex', i);
-			menuitem.addEventListener('command', () => {
-				this.tree._columns.toggleHidden(i);
-				this.adjustColumnWidths(this.tree._columns._columns);
-				this.tree._columns.onResize(Object.fromEntries(this.tree._columns._columns.map(c => [c.dataKey, c.width])));
-			});
+			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
 			if (!column.hidden) {
 				menuitem.setAttribute('checked', true);
 			}
