@@ -48,6 +48,7 @@ const Icons = require('components/icons');
  * @property {boolean} [columnPickerSubMenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
+ * @property {boolean} [tabularNumbers] - Use tabular (fixed-width) numbers in rendered cells, if the system font supports them
  * @property {(item: Zotero.Item, dataKey: string) => string} [dataProvider] - Custom data provider that is called when rendering cells
  * @property {(index: number, data: string, column: ItemTreeColumnOptions & {className: string}) => HTMLElement} [renderCell] - The cell renderer function
  * @property {string[]} [zoteroPersist] - Which column properties should be persisted between zotero close
@@ -89,6 +90,7 @@ const COLUMNS = [
 		label: "itemFields.date",
 		showInColumnPicker: true,
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -99,6 +101,7 @@ const COLUMNS = [
 		showInColumnPicker: true,
 		flex: 1,
 		staticWidth: true,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -140,6 +143,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.accessDate",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -158,6 +162,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.callNumber",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -175,6 +180,7 @@ const COLUMNS = [
 		showInColumnPicker: true,
 		label: "itemFields.dateAdded",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -184,6 +190,7 @@ const COLUMNS = [
 		showInColumnPicker: true,
 		label: "zotero.items.dateModified_column",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -220,6 +227,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.volume",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -229,6 +237,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.edition",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -238,6 +247,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.number",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -247,6 +257,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.pages",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -256,6 +267,7 @@ const COLUMNS = [
 		columnPickerSubMenu: true,
 		label: "itemFields.issue",
 		flex: 1,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -349,6 +361,7 @@ const COLUMNS = [
 		width: "14",
 		minWidth: 14,
 		staticWidth: true,
+		tabularNumbers: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{

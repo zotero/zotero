@@ -163,6 +163,11 @@
 		.cell.numNotes {
 			text-align: center;
 		}
+		
+		.cell.tabular-nums {
+			font-variant-numeric: tabular-nums;
+			letter-spacing: -0.01em;
+		}
 	}
 }
 	

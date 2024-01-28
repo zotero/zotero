@@ -2761,6 +2761,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			cell.prepend(indentSpan, twisty, icon);
 			cell.classList.add('first-column');
 		}
+		
+		if (column.tabularNumbers) {
+			cell.classList.add('tabular-nums');
+		}
+		
 		return cell;
 	}
 
