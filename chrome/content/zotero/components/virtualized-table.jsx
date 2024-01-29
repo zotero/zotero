@@ -36,7 +36,7 @@ const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 const COLUMN_MIN_WIDTH = 20;
-const COLUMN_PADDING = 10; // N.B. MUST BE INLINE WITH CSS!!!
+const COLUMN_PADDING = 16; // N.B. MUST BE INLINE WITH CSS!!!
 
 const noop = () => 0;
 
@@ -414,6 +414,7 @@ class VirtualizedTable extends React.Component {
 		staticColumns: PropTypes.bool,
 		// Used for initial column widths calculation
 		containerWidth: PropTypes.number,
+		firstColumnExtraWidth: PropTypes.number,
 
 		// Internal windowed-list ref
 		treeboxRef: PropTypes.func,
@@ -848,8 +849,8 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
-		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + (aColumn.noPadding ? 0 : COLUMN_PADDING);
+		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + (bColumn.noPadding ? 0 : COLUMN_PADDING);
 		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
@@ -1425,6 +1426,12 @@ var Columns = class {
 			if (column.type) {
 				column.className += ` cell-${column.type}`;
 			}
+			if (column.fixedWidth) {
+				column.originalWidth = column.width;
+			}
+			if (column.staticWidth) {
+				column.originalMinWidth = column.minWidth || 20;
+			}
 			columns.push(column);
 		}
 		// Sort columns by their `ordinal` field
@@ -1456,6 +1463,7 @@ var Columns = class {
 		// Storing back persist settings to account for legacy upgrades
 		this._storePrefs(columnsSettings);
 
+		this._adjustColumnWidths();
 		// Set column width CSS rules
 		this.onResize(columnWidths);
 		// Whew, all this just to get a list of columns
@@ -1520,6 +1528,24 @@ var Columns = class {
 		this._virtualizedTable.props.storeColumnPrefs(prefs);
 	}
 
+	_adjustColumnWidths = () => {
+		if (!this._virtualizedTable.props.firstColumnExtraWidth) {
+			return;
+		}
+
+		const extraWidth = this._virtualizedTable.props.firstColumnExtraWidth;
+		this._columns.filter(c => !c.hidden).forEach((column, index) => {
+			const isFirstColumn = index === 0;
+			if (column.fixedWidth) {
+				column.width = isFirstColumn ? parseInt(column.originalWidth) + extraWidth : column.originalWidth;
+			}
+			if (column.staticWidth) {
+				column.minWidth = isFirstColumn ? (column.originalMinWidth ?? 20) + extraWidth : column.originalMinWidth;
+				column.width = isFirstColumn ? Math.max(parseInt(column.width) ?? 0, column.minWidth) : column.width;
+			}
+		});
+	};
+
 	/**
 	 * Programatically sets the injected CSS width rules for each column.
 	 * This is necessary for performance reasons
@@ -1530,8 +1556,7 @@ var Columns = class {
 		if (storePrefs) {
 			var prefs = this._getPrefs();
 		}
-		const header = document.querySelector(`#${this._styleKey} .virtualized-table-header`);
-		const headerWidth = header ? header.getBoundingClientRect().width : 300;
+
 		for (let [dataKey, width] of Object.entries(columnWidths)) {
 			if (typeof dataKey == "number") {
 				dataKey = this._columns[dataKey].dataKey;
@@ -1569,6 +1594,10 @@ var Columns = class {
 			if (a.ordinal == b.ordinal) return a == column ? -1 : 1;
 			return a.ordinal - b.ordinal;
 		});
+
+		this._adjustColumnWidths();
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+
 		let prefs = this._getPrefs();
 		// reassign columns their ordinal values and set the prefs
 		this._columns.forEach((column, index) => {
@@ -1596,6 +1625,8 @@ var Columns = class {
 			}
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
+		this._adjustColumnWidths();
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
@@ -1608,6 +1639,8 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
+		this._adjustColumnWidths();
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}

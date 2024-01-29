@@ -985,6 +985,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					storeColumnPrefs: this._storeColumnPrefs,
 					getDefaultColumnOrder: this._getDefaultColumnOrder,
 					containerWidth: this.domEl.clientWidth,
+					firstColumnExtraWidth: 28, // 16px for twisty + 16px for icon - 8px column padding + 4px margin
 
 					multiSelect: true,
 
@@ -2720,6 +2721,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		if (column.noPadding) {
+			cell.classList.add('no-padding');
+		}
+
 		if (isFirstColumn) {
 			// Add depth indent, twisty and icon
 			const depth = this.getLevel(index);
@@ -3163,7 +3168,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			this._columns.push(column);
 		}
-		
+
 		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
 	}
 	

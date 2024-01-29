@@ -21,6 +21,16 @@
 		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
 		box-sizing: border-box;
 
+		.cell.hasAttachment,
+		.cell.numNotes {
+			padding: 0;
+			text-align: center;
+
+			&.first-column {
+				padding-inline-start: 32px;
+			}
+		}
+
 		.first-column {
 			&::before {
 				content: "";
@@ -149,19 +159,35 @@
 				margin-inline-start: 3px;
 			}
 		}
+
+		.cell.no-padding {
+			padding: 0;
+		}
 		
 		.cell.hasAttachment {
-			box-sizing: content-box;
-			// Don't show ellipsis
 			text-overflow: unset;
+			align-items: center;
+			display: flex;
+			justify-content: center;
+
+			.cell-text {
+				text-overflow: unset;
+				align-items: center;
+				display: flex;
+				justify-content: center;
+			}
 			
 			.icon-missing-file {
 				opacity: 0.4;
 			}
 		}
 		
-		.cell.numNotes {
+		.numNotes, .hasAttachment {
 			text-align: center;
+
+			.cell-text {
+				text-align: center;
+			}
 		}
 	}
 }

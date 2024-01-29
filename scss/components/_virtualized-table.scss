@@ -71,7 +71,9 @@
 				overflow: hidden;
 
 				&:not(:first-child) {
-					margin-inline-start: 4px;
+					@include state(".cell.first-column:not(.hasAttachment)") {
+						margin-inline-start: 4px;
+					}
 				}
 			}
 
