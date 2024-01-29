@@ -1185,6 +1185,8 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this._internalReader.splitType === 'vertical');
 		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this._internalReader.splitType === 'horizontal');
+		this._window.document.getElementById('view-menuitem-use-dark-mode-for-content').setAttribute('checked', Zotero.Prefs.get('reader.contentDarkMode'));
+		this._window.document.getElementById('view-menuitem-use-dark-mode-for-content').setAttribute('disabled', !this._window.matchMedia('(prefers-color-scheme: dark)').matches);
 	}
 
 	_onGoMenuOpen() {

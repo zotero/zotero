@@ -26,6 +26,7 @@
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
 		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 
 	<script type="application/javascript">
@@ -273,6 +274,14 @@
 					type="checkbox"
 					label="&zotero.pdfReader.splitVertically;"
 					oncommand="reader.toggleVerticalSplit()"
+				/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+					id="view-menuitem-use-dark-mode-for-content"
+					class="menu-type-reader"
+					type="checkbox"
+					data-l10n-id="reader-use-dark-mode-for-content"
+					oncommand="Zotero.Prefs.set('reader.contentDarkMode', !Zotero.Prefs.get('reader.contentDarkMode'))"
 				/>
 			</menupopup>
 		</menu>
