@@ -438,6 +438,17 @@
 			return '(' + Zotero.getString('pane.item.defaultFullName') + ')';
 		}
 		
+		get _ignoreFields() {
+			let value = ['title', 'abstractNote']
+				.flatMap(field => [
+					field,
+					...(Zotero.ItemFields.getTypeFieldsFromBase(field, true) || [])
+				]);
+			// Cache the result
+			Object.defineProperty(this, '_ignoreFields', { value });
+			return value;
+		}
+
 		get _linkMenu() {
 			return this._id('zotero-link-menu');
 		}
@@ -526,7 +537,7 @@
 
 			for (let i = 0; i < fieldNames.length; i++) {
 				var fieldName = fieldNames[i];
-				if (["abstractNote", "title", "caseName", "subject"].includes(fieldName)) {
+				if (this._ignoreFields.includes(fieldName)) {
 					continue;
 				}
 				var val = '';
