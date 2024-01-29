@@ -1,3 +1,8 @@
+general-print = Print
+
+menu-print =
+    .label = { general-print }
+
 menu-density =
     .label = Density
 
