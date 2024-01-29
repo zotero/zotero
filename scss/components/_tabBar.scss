@@ -161,8 +161,10 @@
 	min-width: 100px;
 	height: 28px;
 	line-height: 16px;
-	padding: 6px 22px 6px 6px;
+	padding-right: 22px;
+	padding-left: 6px;
 	display: flex;
+	align-items: center;
 	border-radius: 5px;
 	transition: background-color 0.1s ease-out;
 	-moz-window-dragging: no-drag;
@@ -197,7 +199,7 @@
 	.tab-name {
 		background: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px) text;
 		flex: 1 1 100%;
-		line-height: 16px;
+		line-height: 1.38461538em;
 		margin-inline-start: 4px;
 		overflow: hidden;
 		text-align: left;
@@ -211,6 +213,7 @@
 
 	.tab-icon {
 		flex: 0 0 16px;
+		height: 16px;
 	}
 
 	.tab-close {
@@ -225,7 +228,6 @@
 			left: 6px;
 		}
 
-		top: 6px;
 		width: 16px;
 		height: 16px;
 		text-align: center;
