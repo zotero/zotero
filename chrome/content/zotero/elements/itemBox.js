@@ -95,7 +95,7 @@
 									<div id="retraction-hide"><button/></div>
 								</div>
 							</div>
-							<div id="info-table"> </div>
+							<div id="info-table"></div>
 						</div>
 					</html:div>
 				</collapsible-section>
@@ -207,9 +207,24 @@
 				event => this.capitalizeCreatorName(event));
 			
 			this._linkMenu.addEventListener('popupshowing', () => {
-				let disabled = !this._linkMenu.dataset.link;
-				this._id('zotero-link-menu-view-online').disabled = disabled;
-				this._id('zotero-link-menu-copy').disabled = disabled;
+				let menu = this._linkMenu;
+				let link = menu.dataset.link;
+				let val = menu.dataset.val;
+
+				let viewOnline = this._id('zotero-link-menu-view-online');
+				let copy = this._id('zotero-link-menu-copy');
+				
+				viewOnline.disabled = !link;
+				copy.disabled = !link;
+				copy.hidden = link === val;
+				
+				let existingCopyMenuitem = menu.querySelector('menuitem[data-action="cmd_copy"]');
+				if (existingCopyMenuitem) {
+					existingCopyMenuitem.after(copy);
+				}
+				else {
+					menu.append(copy);
+				}
 			});
 			
 			this._id('zotero-link-menu-view-online').addEventListener(
@@ -535,12 +550,11 @@
 				}
 			}
 
-			for (let i = 0; i < fieldNames.length; i++) {
-				var fieldName = fieldNames[i];
+			for (let fieldName of fieldNames) {
 				if (this._ignoreFields.includes(fieldName)) {
 					continue;
 				}
-				var val = '';
+				let val = '';
 				
 				if (fieldName) {
 					var fieldID = Zotero.ItemFields.getID(fieldName);
@@ -604,13 +618,13 @@
 				}
 				let openLinkButton;
 				let link = val;
-				let addContextMenu = false;
+				let addLinkContextMenu = false;
 				// TEMP - NSF (homepage)
 				if ((fieldName == 'url' || fieldName == 'homepage')
 						// Only make plausible HTTP URLs clickable
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
 					openLinkButton = this.createOpenLinkIcon(val);
-					addContextMenu = true;
+					addLinkContextMenu = true;
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
 					// Pull out DOI, in case there's a prefix
@@ -625,7 +639,7 @@
 								.replace(/"/g, '%22');
 						openLinkButton = this.createOpenLinkIcon(doi);
 						link = doi;
-						addContextMenu = true;
+						addLinkContextMenu = true;
 					}
 				}
 				let rowData = document.createElement('div');
@@ -634,9 +648,10 @@
 				if (openLinkButton) {
 					rowData.appendChild(openLinkButton);
 				}
-				if (addContextMenu) {
+				if (addLinkContextMenu) {
 					rowData.oncontextmenu = (event) => {
 						this._linkMenu.dataset.link = link;
+						this._linkMenu.dataset.val = val;
 						document.popupNode = rowLabel.parentElement;
 						
 						let menupopup = this._id('zotero-link-menu');
@@ -2402,7 +2417,9 @@
 		}
 
 		handlePopupOpening(event, popup) {
+			event.preventDefault();
 			event.stopPropagation();
+			
 			let isRightClick = event.type == 'contextmenu';
 			if (!isRightClick) {
 				event.target.style.visibility = "visible";

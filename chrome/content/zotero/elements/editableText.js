@@ -235,12 +235,6 @@
 						event.preventDefault();
 					}
 				});
-				input.addEventListener('contextmenu', (event) => {
-					// Prevent the text editing context menu from opening when unfocused
-					if (document.activeElement !== this._input) {
-						event.preventDefault();
-					}
-				});
 				
 				let focused = false;
 				let selectionStart = this._input?.selectionStart;
@@ -309,4 +303,33 @@
 		}
 	}
 	customElements.define("editable-text", EditableText);
+	
+	document.addEventListener('contextmenu', (event) => {
+		if (event.defaultPrevented
+				|| !event.target.closest('editable-text')
+				|| document.activeElement && event.target.contains(document.activeElement)) {
+			return;
+		}
+		
+		event.preventDefault();
+		
+		let editableText = event.target.closest('editable-text');
+		let menupopup = document.getElementById('zotero-editable-text-menu');
+		if (!menupopup) {
+			menupopup = document.createXULElement('menupopup');
+			menupopup.id = 'zotero-editable-text-menu';
+			
+			let popupset = document.querySelector('popupset');
+			if (!popupset) {
+				popupset = document.createXULElement('popupset');
+				document.documentElement.append(popupset);
+			}
+			popupset.append(menupopup);
+		}
+
+		menupopup.addEventListener('popupshowing', () => {
+			Zotero.Utilities.Internal.updateEditContextMenu(menupopup, editableText);
+		}, { once: true });
+		menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
+	});
 }

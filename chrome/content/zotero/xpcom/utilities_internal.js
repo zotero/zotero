@@ -2334,10 +2334,9 @@ Zotero.Utilities.Internal = {
 		win.goUpdateGlobalEditMenuItems(true);
 		
 		for (let menuitem of Array.from(menupopup.children)) {
-			if (!menuitem.hasAttribute('data-edit-menu-item')) {
-				break;
+			if (menuitem.hasAttribute('data-edit-menu-item')) {
+				menuitem.remove();
 			}
-			menuitem.remove();
 		}
 		
 		if (target && target.tagName === 'editable-text') {
@@ -2345,11 +2344,9 @@ Zotero.Utilities.Internal = {
 		}
 		let targetInput = target?.closest('input, textarea');
 		let showEdit = targetInput
-			&& !targetInput.readOnly
 			&& targetInput.ownerDocument.activeElement
 			&& targetInput.ownerDocument.activeElement === targetInput;
-		let showCopyField = targetInput && !showEdit;
-		let showPasteField = showCopyField && !targetInput.readOnly;
+		let disablePasteField = targetInput && targetInput.readOnly;
 		
 		let editMenuItems = [];
 		if (showEdit) {
@@ -2360,29 +2357,34 @@ Zotero.Utilities.Internal = {
 				editMenuItems.push(menuitem);
 			}
 		}
-		else {
-			if (showCopyField) {
-				let copyMenuitem = win.document.createXULElement('menuitem');
-				copyMenuitem.setAttribute('data-l10n-id', 'text-action-copy');
-				copyMenuitem.setAttribute('data-edit-menu-item', 'true');
-				copyMenuitem.disabled = !targetInput.value;
-				copyMenuitem.addEventListener('command', () => {
-					Zotero.Utilities.Internal.copyTextToClipboard(targetInput.value);
-				});
-				editMenuItems.push(copyMenuitem);
-			}
-			if (showPasteField) {
-				let pasteMenuitem = win.document.createXULElement('menuitem');
-				pasteMenuitem.setAttribute('data-l10n-id', 'text-action-paste');
-				pasteMenuitem.setAttribute('data-edit-menu-item', 'true');
-				pasteMenuitem.disabled = win.document.getElementById('cmd_paste')?.disabled;
-				pasteMenuitem.addEventListener('command', () => {
-					targetInput.focus();
-					targetInput.value = Zotero.Utilities.Internal.getClipboard('text/unicode') || '';
-					targetInput.dispatchEvent(new Event('input'));
-				});
-				editMenuItems.push(pasteMenuitem);
-			}
+		else if (targetInput) {
+			let targetInputWeak = new WeakRef(targetInput);
+			
+			let copyMenuitem = win.document.createXULElement('menuitem');
+			copyMenuitem.setAttribute('data-l10n-id', 'text-action-copy');
+			copyMenuitem.setAttribute('data-edit-menu-item', 'true');
+			copyMenuitem.setAttribute('data-action', 'copy');
+			copyMenuitem.disabled = !targetInput.value;
+			copyMenuitem.addEventListener('command', () => {
+				let targetInput = targetInputWeak.deref();
+				if (!targetInput) return;
+				Zotero.Utilities.Internal.copyTextToClipboard(targetInput.value);
+			});
+			editMenuItems.push(copyMenuitem);
+
+			let pasteMenuitem = win.document.createXULElement('menuitem');
+			pasteMenuitem.setAttribute('data-l10n-id', 'text-action-paste');
+			pasteMenuitem.setAttribute('data-edit-menu-item', 'true');
+			pasteMenuitem.setAttribute('data-action', 'paste');
+			pasteMenuitem.disabled = disablePasteField || win.document.getElementById('cmd_paste')?.disabled;
+			pasteMenuitem.addEventListener('command', () => {
+				let targetInput = targetInputWeak.deref();
+				if (!targetInput) return;
+				targetInput.focus();
+				targetInput.value = Zotero.Utilities.Internal.getClipboard('text/unicode') || '';
+				targetInput.dispatchEvent(new Event('input'));
+			});
+			editMenuItems.push(pasteMenuitem);
 		}
 		if (editMenuItems.length) {
 			if (menupopup.childElementCount) {
