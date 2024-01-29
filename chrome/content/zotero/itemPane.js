@@ -325,15 +325,12 @@ var ZoteroItemPane = new function() {
 	};
 	
 	
-	this.buildFieldTransformMenu = function ({ value, onTransform, includeEditMenuOptions = false }) {
+	this.buildFieldTransformMenu = function ({ target, onTransform }) {
+		let value = target.value;
 		let valueTitleCased = Zotero.Utilities.capitalizeTitle(value.toLowerCase(), true);
 		let valueSentenceCased = Zotero.Utilities.sentenceCase(value);
 
 		let menupopup = document.createXULElement('menupopup');
-		if (includeEditMenuOptions) {
-			Zotero.Utilities.Internal.updateEditContextMenu(menupopup);
-			menupopup.append(document.createXULElement('menuseparator'));
-		}
 
 		let titleCase = document.createXULElement('menuitem');
 		titleCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.titlecase'));
@@ -350,6 +347,8 @@ var ZoteroItemPane = new function() {
 		});
 		sentenceCase.disabled = valueSentenceCased == value;
 		menupopup.append(sentenceCase);
+
+		Zotero.Utilities.Internal.updateEditContextMenu(menupopup, target);
 
 		return menupopup;
 	};

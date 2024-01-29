@@ -2329,7 +2329,10 @@ Zotero.Utilities.Internal = {
 		return scrollbarWidth;
 	},
 	
-	updateEditContextMenu(menupopup, hideEditMenuItems = false) {
+	updateEditContextMenu(menupopup, target = null) {
+		let win = menupopup.ownerDocument.defaultView;
+		win.goUpdateGlobalEditMenuItems(true);
+		
 		for (let menuitem of Array.from(menupopup.children)) {
 			if (!menuitem.hasAttribute('data-edit-menu-item')) {
 				break;
@@ -2337,24 +2340,58 @@ Zotero.Utilities.Internal = {
 			menuitem.remove();
 		}
 		
-		let win = menupopup.ownerDocument.defaultView;
-		let editPopup = win.goBuildEditContextMenu();
-		let editMenuItems = Array.from(editPopup.children).map((menuitem) => {
-			menuitem = menuitem.cloneNode(true);
-			menuitem.setAttribute('data-edit-menu-item', 'true');
-			if (hideEditMenuItems) {
-				menuitem.hidden = true;
-			}
-			return menuitem;
-		});
-		if (!hideEditMenuItems && menupopup.childElementCount) {
-			let separator = win.document.createXULElement('menuseparator');
-			separator.setAttribute('data-edit-menu-item', 'true');
-			editMenuItems.push(separator);
+		if (target && target.tagName === 'editable-text') {
+			target = target.ref;
 		}
-		menupopup.prepend(...editMenuItems);
-
-		win.goUpdateGlobalEditMenuItems(true);
+		let targetInput = target?.closest('input, textarea');
+		let showEdit = targetInput
+			&& !targetInput.readOnly
+			&& targetInput.ownerDocument.activeElement
+			&& targetInput.ownerDocument.activeElement === targetInput;
+		let showCopyField = targetInput && !showEdit;
+		let showPasteField = showCopyField && !targetInput.readOnly;
+		
+		let editMenuItems = [];
+		if (showEdit) {
+			let editPopup = win.goBuildEditContextMenu();
+			for (let menuitem of editPopup.children) {
+				menuitem = menuitem.cloneNode(true);
+				menuitem.setAttribute('data-edit-menu-item', 'true');
+				editMenuItems.push(menuitem);
+			}
+		}
+		else {
+			if (showCopyField) {
+				let copyMenuitem = win.document.createXULElement('menuitem');
+				copyMenuitem.setAttribute('data-l10n-id', 'text-action-copy');
+				copyMenuitem.setAttribute('data-edit-menu-item', 'true');
+				copyMenuitem.disabled = !targetInput.value;
+				copyMenuitem.addEventListener('command', () => {
+					Zotero.Utilities.Internal.copyTextToClipboard(targetInput.value);
+				});
+				editMenuItems.push(copyMenuitem);
+			}
+			if (showPasteField) {
+				let pasteMenuitem = win.document.createXULElement('menuitem');
+				pasteMenuitem.setAttribute('data-l10n-id', 'text-action-paste');
+				pasteMenuitem.setAttribute('data-edit-menu-item', 'true');
+				pasteMenuitem.disabled = win.document.getElementById('cmd_paste')?.disabled;
+				pasteMenuitem.addEventListener('command', () => {
+					targetInput.focus();
+					targetInput.value = Zotero.Utilities.Internal.getClipboard('text/unicode') || '';
+					targetInput.dispatchEvent(new Event('input'));
+				});
+				editMenuItems.push(pasteMenuitem);
+			}
+		}
+		if (editMenuItems.length) {
+			if (menupopup.childElementCount) {
+				let separator = win.document.createXULElement('menuseparator');
+				separator.setAttribute('data-edit-menu-item', 'true');
+				menupopup.prepend(separator);
+			}
+			menupopup.prepend(...editMenuItems);
+		}
 	}
 };
 
