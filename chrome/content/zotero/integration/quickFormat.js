@@ -483,7 +483,7 @@ var Zotero_QuickFormat = new function () {
 			if (item && item.parentItemID) {
 				itemID = item.parentItemID;
 			}
-			return Zotero.Cite.getItem(item.parentItemID);
+			return Zotero.Cite.getItem(itemID);
 		});
 		let matchedItems = items;
 		if (options.searchString) {
