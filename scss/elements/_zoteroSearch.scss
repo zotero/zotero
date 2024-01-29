@@ -64,9 +64,13 @@ zoterosearch {
 	#textbox-button {
 		cursor: default;
 		appearance: none;
-		justify-self: end;
-		margin-inline-end: 8px;
+		justify-self: start;
+		margin-inline-start: 10px;
 		align-self: center;
+	}
+
+	zoterosearchtextbox[hasOptions="true"] #search-textbox {
+		padding-inline-start: 16px;
 	}
 
 	.search-in-the-last {
