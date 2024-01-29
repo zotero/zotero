@@ -785,27 +785,24 @@ var ZoteroContextPane = new function () {
 			editor.focus();
 
 			let parentItem = item.parentItem;
-			if (!parentTitleContainer.querySelector(".parent-title-container")) {
-				let container = document.createElement('div');
-				container.classList.add("parent-title-container");
-				let returnBtn = document.createXULElement("toolbarbutton");
-				returnBtn.classList.add("zotero-tb-note-return");
-				returnBtn.addEventListener("command", () => {
-					// Immediately save note content before vbox with note-editor iframe is destroyed below
-					editor.saveSync();
-					_panesDeck.setAttribute('selectedIndex', 1);
-					_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
-					vbox.remove();
-					_updateAddToNote();
-					_preventGlobalDeckChange = true;
-				});
-				let title = document.createElement('div');
-				title.className = 'parent-title';
-				container.append(returnBtn, title);
-				parentTitleContainer.append(container);
-			}
-			parentTitleContainer.querySelector(".parent-title").textContent
-				= parentItem?.getDisplayTitle() || "";
+			let container = document.createElement('div');
+			container.classList.add("parent-title-container");
+			let returnBtn = document.createXULElement("toolbarbutton");
+			returnBtn.classList.add("zotero-tb-note-return");
+			returnBtn.addEventListener("command", () => {
+				// Immediately save note content before vbox with note-editor iframe is destroyed below
+				editor.saveSync();
+				_panesDeck.setAttribute('selectedIndex', 1);
+				_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
+				vbox.remove();
+				_updateAddToNote();
+				_preventGlobalDeckChange = true;
+			});
+			let title = document.createElement('div');
+			title.className = 'parent-title';
+			title.textContent = parentItem?.getDisplayTitle() || '';
+			container.append(returnBtn, title);
+			parentTitleContainer.replaceChildren(container);
 			_updateAddToNote();
 		}
 	}
