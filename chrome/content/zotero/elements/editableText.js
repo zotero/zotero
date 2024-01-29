@@ -31,6 +31,8 @@
 		
 		_textDirection = null;
 		
+		_ignoredWindowInactiveBlur = false;
+		
 		static observedAttributes = [
 			'multiline',
 			'readonly',
@@ -197,6 +199,13 @@
 				input.addEventListener('input', handleInput);
 				input.addEventListener('change', handleChange);
 				input.addEventListener('focus', () => {
+					// If the last blur was ignored because it was caused by the window becoming inactive,
+					// ignore this focus event as well, so we don't reset initialValue
+					if (this._ignoredWindowInactiveBlur) {
+						this._ignoredWindowInactiveBlur = false;
+						return;
+					}
+					
 					this.dispatchEvent(new CustomEvent('focus'));
 					this.classList.add("focused");
 					// Select all text if focused via keyboard
@@ -206,6 +215,13 @@
 					this._input.dataset.initialValue = this._input.value;
 				});
 				input.addEventListener('blur', () => {
+					// Ignore this blur if it was caused by the window becoming inactive (see above)
+					if (Services.focus.activeWindow !== window) {
+						this._ignoredWindowInactiveBlur = true;
+						return;
+					}
+					this._ignoredWindowInactiveBlur = false;
+					
 					this.dispatchEvent(new CustomEvent('blur'));
 					this.classList.remove("focused");
 					this._input.scrollLeft = 0;
