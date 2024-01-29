@@ -592,6 +592,7 @@
 					valueElement.setAttribute('aria-labelledby', label.id);
 				}
 				let openLinkButton;
+				let link = val;
 				let addContextMenu = false;
 				// TEMP - NSF (homepage)
 				if ((fieldName == 'url' || fieldName == 'homepage')
@@ -612,6 +613,7 @@
 								.replace(/%/g, '%25')
 								.replace(/"/g, '%22');
 						openLinkButton = this.createOpenLinkIcon(doi);
+						link = doi;
 						addContextMenu = true;
 					}
 				}
@@ -622,7 +624,6 @@
 					rowData.appendChild(openLinkButton);
 				}
 				if (addContextMenu) {
-					let link = val;
 					rowData.oncontextmenu = (event) => {
 						this._linkMenu.dataset.link = link;
 						document.popupNode = rowLabel.parentElement;
