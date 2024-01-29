@@ -101,16 +101,16 @@ function goBuildEditContextMenu() {
             MozXULElement.parseXULToFragment(`
               <popupset>
                 <menupopup id="textbox-contextmenu" class="textbox-contextmenu">
-                  <menuitem data-l10n-id="text-action-undo" command="cmd_undo"></menuitem>
-                  <menuitem data-l10n-id="text-action-redo" command="cmd_redo"></menuitem>
+                  <menuitem data-l10n-id="text-action-undo" command="cmd_undo" data-action="undo"></menuitem>
+                  <menuitem data-l10n-id="text-action-redo" command="cmd_redo" data-action="redo"></menuitem>
                   <menuseparator></menuseparator>
-                  <menuitem data-l10n-id="text-action-cut" command="cmd_cut"></menuitem>
-                  <menuitem data-l10n-id="text-action-copy" command="cmd_copy"></menuitem>
-                  <menuitem data-l10n-id="text-action-paste" command="cmd_paste"></menuitem>
-                  <menuitem data-l10n-id="text-action-delete" command="cmd_delete"></menuitem>
-                  <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll"></menuitem>
+                  <menuitem data-l10n-id="text-action-cut" command="cmd_cut" data-action="cut"></menuitem>
+                  <menuitem data-l10n-id="text-action-copy" command="cmd_copy" data-action="copy"></menuitem>
+                  <menuitem data-l10n-id="text-action-paste" command="cmd_paste" data-action="paste"></menuitem>
+                  <menuitem data-l10n-id="text-action-delete" command="cmd_delete" data-action="delete"></menuitem>
+                  <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll" data-action="selectAll"></menuitem>
                   <menuseparator></menuseparator>
-                  <menuitem data-l10n-id="menu-edit-bidi-switch-text-direction" command="cmd_switchTextDirection"></menuitem>
+                  <menuitem data-l10n-id="menu-edit-bidi-switch-text-direction" command="cmd_switchTextDirection" data-action="switchTextDirection"></menuitem>
                 </menupopup>
               </popupset>
             `)
