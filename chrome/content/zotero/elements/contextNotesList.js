@@ -30,7 +30,7 @@
 	
 	class ContextNotesList extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div>
+			<html:div class="item-notes-container">
 				<collapsible-section data-pane="context-item-notes" class="item-notes" extra-buttons="add">
 					<html:div class="body"/>
 				</collapsible-section>
@@ -105,6 +105,7 @@
 		}
 
 		init() {
+			this._itemNotesSectionContainer = this.querySelector('.item-notes-container');
 			this._itemNotesSection = this.querySelector('.item-notes');
 			this._allNotesSection = this.querySelector('.all-notes');
 			
@@ -122,6 +123,8 @@
 		render() {
 			this._itemNotesSection.empty = !this._itemNotes.length;
 			this._allNotesSection.empty = !this._allNotes.length;
+
+			this._itemNotesSectionContainer.hidden = !this._hasParent;
 			
 			let itemNotesBody = this._itemNotesSection.querySelector('.body');
 			let allNotesBody = this._allNotesSection.querySelector('.body');
