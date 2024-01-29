@@ -85,13 +85,11 @@
 				if (!this._item) return;
 				
 				event.preventDefault();
-				let oldValue = this.titleField.value;
 				let menupopup = ZoteroItemPane.buildFieldTransformMenu({
-					value: oldValue,
+					target: this.titleField,
 					onTransform: (newValue) => {
-						this._setTransformedValue(oldValue, newValue);
+						this._setTransformedValue(newValue);
 					},
-					includeEditMenuOptions: true
 				});
 				this.ownerDocument.querySelector('popupset').append(menupopup);
 				menupopup.addEventListener('popuphidden', () => menupopup.remove());
@@ -111,7 +109,7 @@
 			}
 		}
 		
-		async _setTransformedValue(oldValue, newValue) {
+		async _setTransformedValue(newValue) {
 			await this.blurOpenField();
 			this._item.setField(this._titleFieldID, newValue);
 			let shortTitleVal = this._item.getField('shortTitle');

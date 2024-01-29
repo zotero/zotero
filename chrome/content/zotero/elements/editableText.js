@@ -218,6 +218,18 @@
 						this._input.blur();
 					}
 				});
+				input.addEventListener('mousedown', (event) => {
+					// Prevent a right-click from focusing the input when unfocused
+					if (event.button === 2 && document.activeElement !== this._input) {
+						event.preventDefault();
+					}
+				});
+				input.addEventListener('contextmenu', (event) => {
+					// Prevent the text editing context menu from opening when unfocused
+					if (document.activeElement !== this._input) {
+						event.preventDefault();
+					}
+				});
 				
 				let focused = false;
 				let selectionStart = this._input?.selectionStart;

@@ -628,7 +628,7 @@
 						document.popupNode = rowLabel.parentElement;
 						
 						let menupopup = this._id('zotero-link-menu');
-						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, !event.target.closest('input'));
+						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('input'));
 						this.handlePopupOpening(event, menupopup);
 					};
 				}
@@ -648,9 +648,8 @@
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					// eslint-disable-next-line no-loop-func
 					let triggerPopup = (e) => {
-						let oldValue = valueElement.value;
 						let menupopup = ZoteroItemPane.buildFieldTransformMenu({
-							value: oldValue,
+							target: valueElement,
 							onTransform: (newValue) => {
 								this._setFieldTransformedValue(valueElement, newValue);
 							}
@@ -1071,8 +1070,7 @@
 				document.popupNode = firstlast;
 
 				let menupopup = this._id('zotero-creator-transform-menu');
-				let hideEditMenuItems = !e.target.closest('input');
-				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, hideEditMenuItems);
+				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, e.target.closest('input'));
 				
 				this._id('creator-transform-swap-names').hidden = fieldMode > 0;
 				this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(rowData.parentNode);
