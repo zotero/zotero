@@ -126,7 +126,7 @@ function onSearch()
 {
 	if (itemsView)
 	{
-		var searchVal = document.getElementById('zotero-tb-search').value;
+		var searchVal = document.getElementById('zotero-tb-search-textbox').value;
 		itemsView.setFilter('search', searchVal);
 	}
 }
