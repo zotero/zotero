@@ -197,18 +197,13 @@
 	}
 	
 	.tab-name {
-		background: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px) text;
 		flex: 1 1 100%;
 		line-height: 1.38461538em;
 		margin-inline-start: 4px;
 		overflow: hidden;
 		text-align: left;
-		-webkit-text-fill-color: transparent;
 		white-space: nowrap;
-
-		@include state('.tab:first-child') {
-			background: linear-gradient(to left, transparent 0px, var(--fill-primary) 10px) text;
-		}
+		mask-image: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px);
 	}
 
 	.tab-icon {
