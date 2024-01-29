@@ -44,6 +44,10 @@
 				// override default description margins
 				margin-bottom: 0;
 				margin-block-start: 0;
+				// show as much of the description as possible
+				white-space: nowrap;
+				min-width: 280px;
+				text-overflow: ellipsis;
 			}
 			.tab-icon {
 				width: 16px;

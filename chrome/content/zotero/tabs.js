@@ -845,6 +845,7 @@ var Zotero_Tabs = new function () {
 			tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
 			tabName.setAttribute('tabindex', `${index++}`);
 			tabName.setAttribute('aria-label', tab.title);
+			tabName.setAttribute('tooltiptext', tab.title);
 
 			// Cross button to close a tab
 			let closeButton = document.createXULElement('toolbarbutton');
