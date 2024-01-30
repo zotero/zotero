@@ -82,12 +82,12 @@ var ZoteroContextPane = new function () {
 		window.addEventListener('resize', _update);
 		Zotero.Reader.onChangeSidebarWidth = _updatePaneWidth;
 		Zotero.Reader.onToggleSidebar = _updatePaneWidth;
-		_contextPaneInner.addEventListener("keypress", ZoteroItemPane.handleKeypress);
+		_contextPaneInner.addEventListener("keypress", ZoteroPane.itemPane._itemDetails.handleKeypress);
 	};
 
 	this.destroy = function () {
 		window.removeEventListener('resize', _update);
-		_contextPaneInner.removeEventListener("keypress", ZoteroItemPane.handleKeypress);
+		_contextPaneInner.removeEventListener("keypress", ZoteroPane.itemPane._itemDetails.handleKeypress);
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Reader.onChangeSidebarWidth = () => {};
 		Zotero.Reader.onToggleSidebar = () => {};
@@ -227,10 +227,6 @@ var ZoteroContextPane = new function () {
 
 				_selectItemContext(ids[0]);
 				_update();
-				// When a loaded tab is selected, scroll to the pinned pane, if any
-				if (_sidenav.pinnedPane) {
-					_sidenav.scrollToPane(_sidenav.pinnedPane, 'instant');
-				}
 			}
 		}
 	};
@@ -265,10 +261,12 @@ var ZoteroContextPane = new function () {
 				}
 			}
 		}
+		return null;
 	}
 
 	function _focus() {
 		var splitter;
+		let node;
 		if (Zotero.Prefs.get('layout') == 'stacked') {
 			splitter = _contextPaneSplitterStacked;
 		}
@@ -284,7 +282,7 @@ var ZoteroContextPane = new function () {
 				return true;
 			}
 			else {
-				var node = _notesPaneDeck.selectedPanel;
+				node = _notesPaneDeck.selectedPanel;
 				if (node.selectedIndex == 0) {
 					node.querySelector('search-textbox').focus();
 					return true;
@@ -375,12 +373,13 @@ var ZoteroContextPane = new function () {
 		
 		_updatePaneWidth();
 		_updateAddToNote();
-		_sidenav.showPendingPane();
+		_sidenav.container?.render();
 	}
 
 	function _togglePane() {
 		var splitter = Zotero.Prefs.get('layout') == 'stacked'
-			? _contextPaneSplitterStacked : _contextPaneSplitter;
+			? _contextPaneSplitterStacked
+			: _contextPaneSplitter;
 
 		var open = true;
 		if (splitter.getAttribute('state') != 'collapsed') {
@@ -396,6 +395,7 @@ var ZoteroContextPane = new function () {
 		if (reader) {
 			return Zotero.Items.get(reader.itemID);
 		}
+		return null;
 	}
 	
 	function _addNotesContext(libraryID) {
@@ -522,7 +522,7 @@ var ZoteroContextPane = new function () {
 			if (item) {
 				document.getElementById('context-pane-list-move-to-trash').setAttribute('disabled', readOnly);
 				var popup = document.getElementById('context-pane-list-popup');
-				let handleCommand = (event) => _handleListPopupClick(id, event);
+				let handleCommand = event => _handleListPopupClick(id, event);
 				popup.addEventListener('popupshowing', () => {
 					popup.addEventListener('command', handleCommand, { once: true });
 					popup.addEventListener('popuphiding', () => {
@@ -549,7 +549,8 @@ var ZoteroContextPane = new function () {
 
 		function _isVisible() {
 			let splitter = Zotero.Prefs.get('layout') == 'stacked'
-				? _contextPaneSplitterStacked : _contextPaneSplitter;
+				? _contextPaneSplitterStacked
+				: _contextPaneSplitter;
 			
 			return Zotero_Tabs.selectedID != 'zotero-pane'
 				&& _panesDeck.selectedIndex == 1
@@ -604,7 +605,7 @@ var ZoteroContextPane = new function () {
 				for (let cachedNote of context.cachedNotes) {
 					cachedNotesIndex.set(cachedNote.id, cachedNote);
 				}
-				notes = notes.map(note => {
+				notes = notes.map((note) => {
 					var parentItem = note.parentItem;
 					// If neither note nor parent item is affected try to return the cached note
 					if (!context.affectedIDs.has(note.id)
@@ -760,8 +761,9 @@ var ZoteroContextPane = new function () {
 
 			var tabNotesDeck = _notesPaneDeck.selectedPanel.querySelector('.zotero-context-pane-tab-notes-deck');
 			var parentTitleContainer;
+			let vbox;
 			if (isChild) {
-				var vbox = document.createXULElement('vbox');
+				vbox = document.createXULElement('vbox');
 				vbox.setAttribute('data-tab-id', Zotero_Tabs.selectedID);
 				vbox.style.display = 'flex';
 
@@ -821,24 +823,16 @@ var ZoteroContextPane = new function () {
 	}
 
 	function _selectItemContext(tabID) {
+		let previousPinnedPane = _sidenav.container?.pinnedPane || "";
 		let selectedPanel = Array.from(_itemPaneDeck.children).find(x => x.id == tabID + '-context');
 		if (selectedPanel) {
 			_itemPaneDeck.selectedPanel = selectedPanel;
-			let div = selectedPanel.querySelector('.zotero-view-item');
-			// _addItemContext() awaits, so the div may not have been created yet. We'll set _sidenav.container
-			// below even if we don't set it here.
-			if (div) {
-				_sidenav.container = div;
-			}
+			selectedPanel.sidenav = _sidenav;
+			if (previousPinnedPane) selectedPanel.pinnedPane = previousPinnedPane;
 		}
 	}
 
 	async function _addItemContext(tabID, itemID) {
-		var container = document.createXULElement('vbox');
-		container.id = tabID + '-context';
-		container.className = 'zotero-item-pane-content';
-		_itemPaneDeck.appendChild(container);
-	
 		var { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		var library = Zotero.Libraries.get(libraryID);
 		await library.waitForDataLoad('item');
@@ -859,86 +853,22 @@ var ZoteroContextPane = new function () {
 			update: () => {}
 		};
 		_itemContexts.push(context);
+
+		let previousPinnedPane = _sidenav.container?.pinnedPane || "";
 		
 		let targetItem = parentID ? Zotero.Items.get(parentID) : item;
-		
-		// Dynamically create item pane tabs and panels as in zoteroPane.xhtml.
-		// Keep the code below in sync with zoteroPane.xhtml
 
-		// hbox
-		var hbox = document.createXULElement('hbox');
-		hbox.setAttribute('flex', '1');
-		hbox.className = 'zotero-view-item-container';
-		container.append(hbox);
-		
-		// main
-		var main = document.createElement('div');
-		main.className = 'zotero-view-item-main';
-		hbox.append(main);
-		
-		// pane-header
-		var paneHeader = document.createXULElement('pane-header');
-		main.append(paneHeader);
+		let itemDetails = document.createXULElement('item-details');
+		itemDetails.id = tabID + '-context';
+		itemDetails.className = 'zotero-item-pane-content';
+		_itemPaneDeck.appendChild(itemDetails);
 
-		// div
-		var div = document.createElement('div');
-		div.className = 'zotero-view-item';
-		div.setAttribute("tabindex", "0");
-		main.append(div);
-		
-		// Info
-		var itemBox = new (customElements.get('item-box'));
-		itemBox.setAttribute('data-pane', 'info');
-		div.append(itemBox);
-		
-		// Abstract
-		var abstractBox = new (customElements.get('abstract-box'));
-		abstractBox.className = 'zotero-editpane-abstract';
-		abstractBox.setAttribute('data-pane', 'abstract');
-		div.append(abstractBox);
-		
-		// Attachment info
-		var attachmentBox = new (customElements.get('attachment-box'));
-		attachmentBox.className = 'zotero-editpane-attachment';
-		attachmentBox.setAttribute('data-pane', 'attachment-info');
-		div.append(attachmentBox);
+		itemDetails.mode = readOnly ? "view" : null;
+		itemDetails.item = targetItem;
+		itemDetails.sidenav = _sidenav;
+		if (previousPinnedPane) itemDetails.pinnedPane = previousPinnedPane;
 
-		// Tags
-		var tagsBox = new (customElements.get('tags-box'));
-		tagsBox.className = 'zotero-editpane-tags';
-		tagsBox.setAttribute('data-pane', 'tags');
-		div.append(tagsBox);
-
-		// Related
-		var relatedBox = new (customElements.get('related-box'));
-		relatedBox.className = 'zotero-editpane-related';
-		relatedBox.setAttribute('data-pane', 'related');
-		div.append(relatedBox);
-
-		paneHeader.mode = readOnly ? 'view' : 'edit';
-		paneHeader.item = targetItem;
-
-		itemBox.mode = readOnly ? 'view' : 'edit';
-		itemBox.item = targetItem;
-
-		abstractBox.mode = readOnly ? 'view' : 'edit';
-		abstractBox.item = targetItem;
-
-		attachmentBox.mode = readOnly ? 'view' : 'edit';
-		attachmentBox.item = targetItem;
-
-		tagsBox.mode = readOnly ? 'view' : 'edit';
-		tagsBox.item = targetItem;
-
-		relatedBox.mode = readOnly ? 'view' : 'edit';
-		relatedBox.item = targetItem;
-		
-		if (_itemPaneDeck.selectedPanel === container) {
-			_sidenav.container = div;
-		}
-		// When a tab is loaded, scroll to the pinned pane, if any
-		if (_sidenav.pinnedPane) {
-			_sidenav.scrollToPane(_sidenav.pinnedPane, 'instant');
-		}
+		_selectItemContext(tabID);
+		await itemDetails.render();
 	}
 };

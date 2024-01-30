@@ -1,0 +1,13 @@
+item-pane {
+	&[collapsed="true"] {
+		visibility: inherit;
+
+		#zotero-item-pane-content {
+			visibility: collapse;
+		}
+	}
+
+	&.stacked {
+		-moz-box-orient: vertical;
+	}
+}

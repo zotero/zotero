@@ -28,7 +28,7 @@
 import { getCSSIcon } from 'components/icons';
 
 {
-	class LibrariesCollectionsBox extends XULElementBase {
+	class LibrariesCollectionsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-libraries-collections" data-pane="libraries-collections" extra-buttons="add">
 				<html:div class="body"/>
@@ -61,11 +61,7 @@ import { getCSSIcon } from 'components/icons';
 				return;
 			}
 			this._item = item;
-			// Getting linked items is an async process, so start by rendering without them
 			this._linkedItems = [];
-			this.render();
-			
-			this._updateLinkedItems();
 		}
 
 		get mode() {
@@ -75,33 +71,25 @@ import { getCSSIcon } from 'components/icons';
 		set mode(mode) {
 			this._mode = mode;
 			this.setAttribute('mode', mode);
-			this.render();
 		}
 
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'librariesCollectionsBox');
 			this._body = this.querySelector('.body');
-			this._section = this.querySelector('collapsible-section');
-			this._section.addEventListener('add', (event) => {
-				this.querySelector('.add-popup').openPopupAtScreen(
-					event.detail.button.screenX,
-					event.detail.button.screenY,
-					true
-				);
-				this._section.open = true;
-			});
-			this.render();
+			this.initCollapsibleSection();
+			this._section.addEventListener('add', this._handleAdd);
 		}
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			this._section.removeEventListener('add', this._handleAdd);
 		}
 
 		notify(action, type, ids) {
 			if (action == 'modify'
 					&& this._item
 					&& (ids.includes(this._item.id) || this._linkedItems.some(item => ids.includes(item.id)))) {
-				this.render();
+				this.render(true);
 			}
 		}
 		
@@ -238,27 +226,53 @@ import { getCSSIcon } from 'components/icons';
 			return row;
 		}
 		
-		async _updateLinkedItems() {
+		render(force = false) {
+			if (!this._item) return;
+			if (!this._section.open) return;
+			if (!force && this._isAlreadyRendered()) return;
+
+			this._body.replaceChildren();
+			
+			for (let item of [this._item]) {
+				this._addObject(Zotero.Libraries.get(item.libraryID), item);
+				for (let collection of Zotero.Collections.get(item.getCollections())) {
+					this._addObject(collection, item);
+				}
+			}
+			if (force) {
+				this.secondaryRender();
+			}
+		}
+
+		async secondaryRender() {
+			if (!this._item) {
+				return;
+			}
+			// Skip if already rendered
+			if (this._linkedItems.length > 0) {
+				return;
+			}
+
 			this._linkedItems = (await Promise.all(Zotero.Libraries.getAll()
 					.filter(lib => lib.libraryID !== this._item.libraryID)
 					.map(lib => this._item.getLinkedItem(lib.libraryID, true))))
 				.filter(Boolean);
-			this.render();
-		}
-		
-		render() {
-			if (!this._item) {
-				return;
-			}
-
-			this._body.replaceChildren();
-			for (let item of [this._item, ...this._linkedItems]) {
+			for (let item of this._linkedItems) {
 				this._addObject(Zotero.Libraries.get(item.libraryID), item);
 				for (let collection of Zotero.Collections.get(item.getCollections())) {
 					this._addObject(collection, item);
 				}
 			}
 		}
+
+		_handleAdd = (event) => {
+			this.querySelector('.add-popup').openPopupAtScreen(
+				event.detail.button.screenX,
+				event.detail.button.screenY,
+				true
+			);
+			this._section.open = true;
+		};
 	}
 	customElements.define("libraries-collections-box", LibrariesCollectionsBox);
 }

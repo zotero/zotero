@@ -120,17 +120,13 @@
 
 		_disableScrollHandler = false;
 		
-		_pendingPane = null;
-		
 		get container() {
 			return this._container;
 		}
 		
 		set container(val) {
 			if (this._container == val) return;
-			this._container?.removeEventListener('scroll', this._handleContainerScroll);
 			this._container = val;
-			this._container.addEventListener('scroll', this._handleContainerScroll);
 			this.render(true);
 		}
 		
@@ -145,25 +141,21 @@
 		}
 		
 		get pinnedPane() {
-			return this.getAttribute('pinnedPane');
+			return this.container?.pinnedPane;
 		}
 		
 		set pinnedPane(val) {
-			if (!val || !this.getPane(val)) {
-				val = '';
-			}
-			this.setAttribute('pinnedPane', val);
-			if (val) {
-				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getPane(val));
-			}
+			if (!this.container) return;
+			this.container.pinnedPane = val;
 		}
-		
-		get _minScrollHeight() {
-			return parseFloat(this._container.style.getPropertyValue('--min-scroll-height') || 0);
+
+		get _collapsed() {
+			return this.container?._collapsed;
 		}
-		
-		set _minScrollHeight(val) {
-			this._container.style.setProperty('--min-scroll-height', val + 'px');
+
+		set _collapsed(val) {
+			if (!this.container) return;
+			this.container._collapsed = val;
 		}
 		
 		get _contextNotesPaneVisible() {
@@ -191,213 +183,18 @@
 		get _showCollapseButton() {
 			return false;
 		}
-		
-		get _collapsed() {
-			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
-			if (!collapsible) return false;
-			return collapsible.getAttribute('collapsed') === 'true';
-		}
-		
-		set _collapsed(val) {
-			let collapsible = this.container.closest('splitter:not([hidden="true"]) + *');
-			if (!collapsible) return;
-			let splitter = collapsible.previousElementSibling;
-			if (val) {
-				collapsible.setAttribute('collapsed', 'true');
-				splitter.setAttribute('state', 'collapsed');
-				splitter.setAttribute('substate', 'after');
-			}
-			else {
-				collapsible.removeAttribute('collapsed');
-				splitter.setAttribute('state', '');
-				splitter.setAttribute('substate', 'after');
-			}
-			window.dispatchEvent(new Event('resize'));
-			this.render();
-		}
 
-		static get observedAttributes() {
-			return ['pinnedPane'];
-		}
-
-		attributeChangedCallback() {
-			this.render();
-		}
-
-		scrollToPane(id, behavior = 'smooth') {
-			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
-			// when itemPane is expanded.
-			if (this._collapsed) {
-				this._pendingPane = id;
-				return;
-			}
-			if (this._contextNotesPane && this._contextNotesPaneVisible) {
-				this._contextNotesPaneVisible = false;
-				behavior = 'instant';
-			}
-
-			let pane = this.getPane(id);
-			if (!pane) return;
-			
-			// The pane should always be at the very top
-			// If there isn't enough stuff below it for it to be at the top, we add padding
-			// We use a ::before pseudo-element for this so that we don't need to add another level to the DOM
-			this._makeSpaceForPane(pane);
-			if (behavior == 'smooth') {
-				this._disableScrollHandler = true;
-				this._waitForScroll().then(() => this._disableScrollHandler = false);
-			}
-			pane.scrollIntoView({ block: 'start', behavior });
-			pane.focus();
-		}
-		
-		_makeSpaceForPane(pane) {
-			let oldMinScrollHeight = this._minScrollHeight;
-			let newMinScrollHeight = this._getMinScrollHeightForPane(pane);
-			if (newMinScrollHeight > oldMinScrollHeight) {
-				this._minScrollHeight = newMinScrollHeight;
-			}
-		}
-		
-		_getMinScrollHeightForPane(pane) {
-			let paneRect = pane.getBoundingClientRect();
-			let containerRect = this._container.getBoundingClientRect();
-			// No offsetTop property for XUL elements
-			let offsetTop = paneRect.top - containerRect.top + this._container.scrollTop;
-			return offsetTop + containerRect.height;
-		}
-
-		_handleContainerScroll = () => {
-			// Don't scroll hidden pane
-			if (this.hidden || this._disableScrollHandler) return;
-			let minHeight = this._minScrollHeight;
-			if (minHeight) {
-				let newMinScrollHeight = this._container.scrollTop + this._container.clientHeight;
-				// Ignore overscroll (which generates scroll events on Windows 11, unlike on macOS)
-				// and don't shrink below the pinned pane's min scroll height
-				if (newMinScrollHeight > this._container.scrollHeight
-						|| this.pinnedPane && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
-					return;
-				}
-				this._minScrollHeight = newMinScrollHeight;
-			}
-		};
-
-		async _waitForScroll() {
-			let scrollPromise = Zotero.Promise.defer();
-			let lastScrollTop = this._container.scrollTop;
-			const waitFrame = async () => {
-				return new Promise((resolve) => {
-					requestAnimationFrame(resolve);
-				});
-			};
-			const waitFrames = async (n) => {
-				for (let i = 0; i < n; i++) {
-					await waitFrame();
-				}
-			};
-			const checkScrollStart = () => {
-				// If the scrollTop is not changed, wait for scroll to happen
-				if (lastScrollTop === this._container.scrollTop) {
-					requestAnimationFrame(checkScrollStart);
-				}
-				// Wait for scroll to end
-				else {
-					requestAnimationFrame(checkScrollEnd);
-				}
-			};
-			const checkScrollEnd = async () => {
-				// Wait for 3 frames to make sure not further scrolls
-				await waitFrames(3);
-				if (lastScrollTop === this._container.scrollTop) {
-					scrollPromise.resolve();
-				}
-				else {
-					lastScrollTop = this._container.scrollTop;
-					requestAnimationFrame(checkScrollEnd);
-				}
-			};
-			checkScrollStart();
-			// Abort after 3 seconds, which should be enough
-			return Promise.race([
-				scrollPromise.promise,
-				Zotero.Promise.delay(3000)
-			]);
-		}
-		
-		getPanes() {
-			return Array.from(this.container.querySelectorAll(':scope > [data-pane]:not([hidden])'));
-		}
-		
-		getPane(id) {
-			return this.container.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]:not([hidden])`);
-		}
-		
 		isPanePinnable(id) {
 			return id !== 'info' && id !== 'context-all-notes' && id !== 'context-item-notes';
 		}
-
-		showPendingPane() {
-			if (!this._pendingPane || this._collapsed) return;
-			this.scrollToPane(this._pendingPane, 'instant');
-			this._pendingPane = null;
-		}
 		
 		init() {
-			if (!this.container) {
-				this.container = document.getElementById('zotero-view-item');
-			}
-			
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
-				
-				if (pane === 'context-notes') {
-					toolbarbutton.addEventListener('click', (event) => {
-						if (event.button !== 0) {
-							return;
-						}
-						if (event.detail == 2) {
-							this.pinnedPane = null;
-						}
-						this._contextNotesPaneVisible = true;
-					});
-					continue;
-				}
-				else if (pane === 'toggle-collapse') {
-					toolbarbutton.addEventListener('click', (event) => {
-						if (event.button !== 0) {
-							return;
-						}
-						this._collapsed = !this._collapsed;
-					});
-					continue;
-				}
 				
 				let pinnable = this.isPanePinnable(pane);
 				toolbarbutton.parentElement.classList.toggle('pinnable', pinnable);
 				
-				toolbarbutton.addEventListener('click', (event) => {
-					if (event.button !== 0) {
-						return;
-					}
-
-					let scrollType = this._collapsed ? 'instant' : 'smooth';
-					this._collapsed = false;
-					switch (event.detail) {
-						case 1:
-							this.scrollToPane(pane, scrollType);
-							break;
-						case 2:
-							if (this.pinnedPane == pane || !pinnable) {
-								this.pinnedPane = null;
-							}
-							else {
-								this.pinnedPane = pane;
-							}
-							break;
-					}
-				});
-
 				if (pinnable) {
 					toolbarbutton.addEventListener('contextmenu', (event) => {
 						this._contextMenuTarget = pane;
@@ -408,25 +205,24 @@
 					});
 				}
 			}
+
+			this.addEventListener('click', this.handleButtonClick);
 			
 			this.querySelector('.zotero-menuitem-pin').addEventListener('command', () => {
-				this.scrollToPane(this._contextMenuTarget, 'smooth');
+				this.container.scrollToPane(this._contextMenuTarget, 'smooth');
 				this.pinnedPane = this._contextMenuTarget;
 			});
 			this.querySelector('.zotero-menuitem-unpin').addEventListener('command', () => {
 				this.pinnedPane = null;
 			});
-			
-			this.render();
 		}
 
-		render(force = false) {
-			// TEMP: only render sidenav when pane is visible
-			if (!force && this.container.id === "zotero-view-item"
-				&& document.querySelector("#zotero-item-pane-content").selectedIndex !== "1"
-			) {
-				return;
-			}
+		destroy() {
+			this.removeEventListener('click', this.handleButtonClick);
+		}
+
+		render() {
+			if (!this.container) return;
 			let contextNotesPaneVisible = this._contextNotesPaneVisible;
 			let pinnedPane = this.pinnedPane;
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
@@ -460,7 +256,7 @@
 				}
 				
 				toolbarbutton.setAttribute('aria-selected', !contextNotesPaneVisible && pane == pinnedPane);
-				toolbarbutton.parentElement.hidden = !this.getPane(pane);
+				toolbarbutton.parentElement.hidden = !this.container.getPane(pane);
 
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
@@ -470,6 +266,96 @@
 			this.querySelector('.highlight-notes-inactive').classList.toggle('highlight',
 				this._contextNotesPane && !contextNotesPaneVisible);
 		}
+
+		updatePaneStatus(paneID) {
+			if (!paneID) {
+				this.render();
+				return;
+			}
+			let toolbarbutton = this.querySelector(`toolbarbutton[data-pane=${paneID}]`);
+			if (!toolbarbutton) return;
+			toolbarbutton.parentElement.hidden = !this.container.getPane(paneID);
+			if (this.pinnedPane) {
+				if (paneID == this.pinnedPane && !toolbarbutton.parentElement.classList.contains("pinned")) {
+					this.querySelector(".pin-wrapper.pinned")?.classList.remove("pinned");
+					toolbarbutton.parentElement.classList.add('pinned');
+				}
+			}
+			else {
+				this.querySelector(".pin-wrapper.pinned")?.classList.remove("pinned");
+			}
+		}
+
+		toggleDefaultStatus(isDefault) {
+			this._defaultStatus = isDefault;
+			this.renderDefaultStatus();
+		}
+
+		renderDefaultStatus() {
+			if (this._defaultStatus) {
+				this.querySelectorAll('toolbarbutton').forEach((elem) => {
+					elem.disabled = true;
+					elem.parentElement.hidden = !(
+						["info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"]
+							.includes(elem.dataset.pane));
+				});
+			}
+			else {
+				this.querySelectorAll('toolbarbutton').forEach((elem) => {
+					elem.disabled = false;
+				});
+				this.render(true);
+			}
+		}
+
+		handleButtonClick = (event) => {
+			let toolbarbutton = event.target;
+			let pane = toolbarbutton.dataset.pane;
+			if (!pane) return;
+			switch (pane) {
+				case "context-notes":
+					if (event.button !== 0) {
+						return;
+					}
+					if (event.detail == 2) {
+						this.pinnedPane = null;
+					}
+					this._contextNotesPaneVisible = true;
+					break;
+				case "toggle-collapse":
+					if (event.button !== 0) {
+						return;
+					}
+					this._collapsed = !this._collapsed;
+					break;
+				default: {
+					if (event.button !== 0) {
+						return;
+					}
+					let pinnable = this.isPanePinnable(pane);
+					let scrollType = this._collapsed ? 'instant' : 'smooth';
+					if (this._collapsed) this._collapsed = false;
+					switch (event.detail) {
+						case 1:
+							if (this._contextNotesPane && this._contextNotesPaneVisible) {
+								this._contextNotesPaneVisible = false;
+								scrollType = 'instant';
+							}
+							this.container.scrollToPane(pane, scrollType);
+							break;
+						case 2:
+							if (this.pinnedPane == pane || !pinnable) {
+								this.pinnedPane = null;
+							}
+							else {
+								this.pinnedPane = pane;
+							}
+							break;
+					}
+				}
+			}
+			this.render();
+		};
 	}
 	customElements.define("item-pane-sidenav", ItemPaneSidenav);
 }

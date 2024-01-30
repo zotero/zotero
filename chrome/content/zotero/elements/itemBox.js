@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	class ItemBox extends XULElement {
+	class ItemBox extends ItemPaneSectionElementBase {
 		constructor() {
 			super();
 			
@@ -56,8 +56,10 @@
 			this._draggedCreator = false;
 			this._ztabindex = 0;
 			this._selectField = null;
-			
-			this.content = MozXULElement.parseXULToFragment(`
+		}
+
+		get content() {
+			return MozXULElement.parseXULToFragment(`
 				<collapsible-section data-l10n-id="section-info" data-pane="info" style="width:100%">
 					<html:div class="body">
 						<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
@@ -102,12 +104,8 @@
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 		
-		connectedCallback() {
-			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
-			
-			this.appendChild(document.importNode(this.content, true));
-
+		init() {
+			this.initCollapsibleSection();
 			this._creatorTypeMenu.addEventListener('command', async (event) => {
 				var typeBox = document.popupNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -129,7 +127,7 @@
 				}
 			});
 
-			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (event) => {
+			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (_event) => {
 				var row = document.popupNode.closest('.meta-row');
 				var typeBox = row.querySelector('.creator-type-label').parentNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -185,7 +183,6 @@
 							break;
 					}
 					this.moveCreator(index, dir);
-					return;
 				}
 				else if (event.explicitOriginalTarget.id == "creator-transform-switch") {
 					// Switch creator field mode action
@@ -193,7 +190,6 @@
 					var lastName = creatorNameBox.firstChild;
 					let fieldMode = parseInt(lastName.getAttribute("fieldMode"));
 					this.switchCreatorMode(row, fieldMode == 1 ? 0 : 1, false, true, index);
-					return;
 				}
 			});
 
@@ -235,7 +231,7 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 			Zotero.Prefs.registerObserver('fontSize', () => {
-				this.refresh();
+				this.render(true);
 			});
 			
 			this.style.setProperty('--comma-character',
@@ -243,23 +239,8 @@
 		}
 		
 		destroy() {
-			if (this._destroyed) {
-				return;
-			}
-			window.removeEventListener("unload", this.destroy);
-			this._destroyed = true;
-			
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
-		
-		disconnectedCallback() {
-			// Empty the DOM. We will rebuild if reconnected.
-			while (this.lastChild) {
-				this.removeChild(this.lastChild);
-			}
-			this.destroy();
-		}
-		
 		
 		//
 		// Public properties
@@ -340,7 +321,6 @@
 			this._item = val;
 			this._lastTabIndex = null;
 			this.scrollToTop();
-			this.refresh();
 		}
 		
 		// .ref is an alias for .item
@@ -484,18 +464,24 @@
 				if (document.activeElement == this.itemTypeMenu) {
 					this._selectField = "item-type-menu";
 				}
-				this.refresh();
+				this.render(true);
 				break;
 			}
 		}
 		
-		refresh() {
+		render(force = false) {
 			Zotero.debug('Refreshing item box');
 
 			if (!this.item) {
 				Zotero.debug('No item to refresh', 2);
 				return;
 			}
+			if (!this._section.open) return;
+
+			// Always update retraction status
+			this.updateRetracted();
+
+			if (!force && this._isAlreadyRendered()) return;
 			
 			this.updateRetracted();
 
@@ -672,14 +658,14 @@
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					// eslint-disable-next-line no-loop-func
 					let triggerPopup = (e) => {
-						let menupopup = ZoteroItemPane.buildFieldTransformMenu({
+						let menupopup = ZoteroPane.buildFieldTransformMenu({
 							target: valueElement,
 							onTransform: (newValue) => {
 								this._setFieldTransformedValue(valueElement, newValue);
 							}
 						});
 						this.querySelector('popupset').append(menupopup);
-						menupopup.addEventListener('popuphidden', (e) => {
+						menupopup.addEventListener('popuphidden', () => {
 							menupopup.remove();
 							optionsButton.style.visibility = '';
 						});
@@ -722,7 +708,7 @@
 								menuitem.getAttribute('fieldname'),
 								menuitem.getAttribute('originalValue')
 							);
-							this.refresh();
+							this.render(true);
 						});
 						popup.appendChild(menuitem);
 					}
@@ -879,7 +865,7 @@
 			}
 			this._refreshed = true;
 			// Add tabindex=0 to all focusable element
-			this.querySelectorAll("[ztabindex]").forEach((node) =>{
+			this.querySelectorAll("[ztabindex]").forEach((node) => {
 				node.setAttribute("tabindex", 0);
 			});
 			// Make sure that any opened popup closes
@@ -1155,7 +1141,7 @@
 				// If the row is still hidden, no 'drop' event happened, meaning creator rows
 				// were not reordered. To make sure everything is in correct order, just refresh.
 				if (row.classList.contains("drag-hidden-creator")) {
-					this.refresh();
+					this.render(true);
 				}
 			});
 			
@@ -1200,12 +1186,12 @@
 			rowData.setAttribute("ztabindex", ++this._ztabindex);
 			rowData.addEventListener('click', () => {
 				this._displayAllCreators = true;
-				this.refresh();
+				this.render(true);
 			});
 			rowData.addEventListener('keypress', (e) => {
 				if (["Enter", ' '].includes(e.key)) {
 					this._displayAllCreators = true;
-					this.refresh();
+					this.render(true);
 				}
 			});
 			rowData.textContent = Zotero.getString('general.numMore', num);
@@ -1421,7 +1407,7 @@
 					await this.item.saveTx();
 				}
 				else {
-					this.refresh();
+					this.render(true);
 				}
 				
 				functionsToRun.forEach(f => f.bind(this)());
@@ -1512,7 +1498,7 @@
 			valueElement.setAttribute('tight', true);
 
 			valueElement.addEventListener("focus", e => this.updateLastFocused(e));
-			valueElement.addEventListener("keypress", (e) => this.handleKeyPress(e));
+			valueElement.addEventListener("keypress", e => this.handleKeyPress(e));
 			switch (fieldName) {
 				case 'itemType':
 					valueElement.setAttribute('itemTypeID', valueText);

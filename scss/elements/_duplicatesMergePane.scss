@@ -1,0 +1,24 @@
+duplicates-merge-pane {
+	-moz-box-orient: vertical;
+
+	groupbox {
+		margin: 8px 0 0 0;
+	}
+
+	#zotero-duplicates-merge-button
+	{
+		font-size: 13px;
+	}
+
+	#zotero-duplicates-merge-item-box-container {
+		overflow-y: auto;
+		padding: 0 8px;
+	}
+
+	/* Show duplicates date list item as selected even when not focused
+	(default behavior on other platforms) */
+	#zotero-duplicates-merge-original-date:not(:focus) > richlistitem[selected="true"] {
+		background-color: -moz-cellhighlight;
+		color: -moz-cellhighlighttext;
+	}
+}

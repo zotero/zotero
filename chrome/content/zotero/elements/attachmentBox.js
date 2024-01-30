@@ -28,7 +28,7 @@
 
 
 {
-	class AttachmentBox extends XULElementBase {
+	class AttachmentBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
@@ -181,6 +181,15 @@
 			this.toggleAttribute('data-use-preview', val);
 		}
 
+		get tabType() {
+			return this._tabType;
+		}
+
+		set tabType(tabType) {
+			this._tabType = tabType;
+			if (tabType == "reader") this.usePreview = false;
+		}
+
 		get item() {
 			return this._item;
 		}
@@ -192,15 +201,16 @@
 			if (val.isAttachment()) {
 				this._item = val;
 				this.hidden = false;
-				this.render();
+				this._preview.disableResize = false;
 			}
 			else {
 				this.hidden = true;
+				this._preview.disableResize = true;
 			}
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 
 			this._id('url').addEventListener('contextmenu', (event) => {
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
@@ -229,12 +239,6 @@
 			});
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
-
-			this._section.addEventListener("toggle", (ev) => {
-				if (ev.target.open && this.usePreview) {
-					this._preview.render();
-				}
-			});
 
 			// Work around the reindex toolbarbutton not wanting to properly receive focus on tab.
 			// Make <image> focusable. On focus of the image, bounce the focus to the toolbarbutton.
@@ -282,15 +286,17 @@
 					continue;
 				}
 				
-				this.render();
+				this.render(true);
 				break;
 			}
 		}
 
-		async render() {
-			if (this._isRendering) {
-				return;
-			}
+		async render(force = false) {
+			if (!this.item) return;
+			if (this._isRendering) return;
+			if (!this._section.open) return;
+			if (!force && this._isAlreadyRendered()) return;
+
 			Zotero.debug('Refreshing attachment box');
 			this._isRendering = true;
 			// Cancel editing filename when refreshing
@@ -298,6 +304,7 @@
 
 			if (this.usePreview) {
 				this._preview.item = this.item;
+				this._preview.render();
 			}
 			
 			let fileNameRow = this._id('fileNameRow');
@@ -521,7 +528,7 @@
 			}
 			// Don't allow empty filename
 			if (!newFilename) {
-				this.render();
+				this.render(true);
 				return;
 			}
 			let newExt = getExtension(newFilename);
@@ -577,7 +584,7 @@
 					Zotero.getString('pane.item.attachments.fileNotFound.text1')
 				);
 			}
-			this.render();
+			this.render(true);
 		}
 
 		initAttachmentNoteEditor() {
