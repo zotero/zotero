@@ -40,6 +40,7 @@
 			this._destroyed = false;
 
 			this.content = MozXULElement.parseXULToFragment(`
+				<html:div class="custom-head empty"></html:div>
 				<box flex="1" tooltip="html-tooltip" style="display: flex; flex-grow: 1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
 						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content"/>
@@ -321,6 +322,20 @@
 			}
 		}
 
+		renderCustomHead(callback) {
+			let customHead = this.querySelector(".custom-head");
+			customHead.replaceChildren();
+			let append = (...args) => {
+				customHead.append(...args);
+			};
+			if (callback) callback({
+				doc: document,
+				append: (...args) => {
+					append(...Components.utils.cloneInto(args, window, { wrapReflectors: true, cloneFunctions: true }));
+				}
+			});
+		}
+
 		_id(id) {
 			return this.querySelector(`#${id}`);
 		}
@@ -394,6 +409,8 @@
 		}
 
 		refresh() {
+			this._id('related').render();
+			this._id('tags').render();
 		}
 
 		_id(id) {

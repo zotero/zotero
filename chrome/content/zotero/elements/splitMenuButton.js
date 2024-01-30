@@ -25,13 +25,16 @@
 
 "use strict";
 
+/**
+ * A split menubutton with a clickable left side and a dropmarker that opens a menu.
+ */
 {
-	/**
-	 * A split menubutton with a clickable left side and a dropmarker that opens a menu.
-	 */
 	class SplitMenuButton extends HTMLButtonElement {
 		_image = null;
+
 		_label = null;
+
+		_commandListenerCache = [];
 		
 		constructor() {
 			super();
@@ -54,21 +57,43 @@
 		}
 
 		connectedCallback() {
-			this.append(this.constructor.contentFragment);
-			
-			// Prevent DOM-attached mouse handlers from running in the dropmarker area
-			for (const eventType of ['mousedown', 'mouseup', 'click']) {
-				const handler = this.getAttribute('on' + eventType);
-				if (!handler) {
-					continue;
-				}
-				this['on' + eventType] = null;
-				this.addEventListener(eventType, (event) => {
-					if (!this._isEventInDropmarkerBox(event)) {
-						eval(handler).bind(this);
-					}
-				});
+			this.append(this.contentFragment);
+		}
+
+		disconnectedCallback() {
+			while (this._commandListenerCache.length) {
+				let cache = this._commandListenerCache.pop();
+				super.removeEventListener("click", cache.actual);
 			}
+		}
+
+		addEventListener(type, listener, options) {
+			if (type == "command") {
+				let newListener = (event) => {
+					if (!this._isEventInDropmarkerBox(event)) {
+						listener(event);
+					}
+				};
+				this._commandListenerCache.push({
+					original: listener,
+					actual: newListener
+				});
+				super.addEventListener("click", newListener, options);
+				return;
+			}
+			super.addEventListener(type, listener, options);
+		}
+
+		removeEventListener(type, listener, options) {
+			if (type == "command") {
+				let cacheIndex = this._commandListenerCache.findIndex(cache => cache.original == listener);
+				if (cacheIndex != -1) {
+					let cache = this._commandListenerCache.splice(cacheIndex, 1)[0];
+					super.removeEventListener("click", cache.actual, options);
+					return;
+				}
+			}
+			super.removeEventListener(type, listener, options);
 		}
 
 		get image() {
@@ -87,7 +112,7 @@
 			this.querySelector('[anonid="button-text"]').textContent = value;
 		}
 		
-		static get contentFragment() {
+		get contentFragment() {
 			// Zotero.hiDPI[Suffix] may not have been initialized yet, so calculate it ourselves
 			let hiDPISuffix = window.devicePixelRatio > 1 ? '@2x' : '';
 			let frag = document.importNode(
@@ -109,7 +134,7 @@
 		
 		_isEventInDropmarkerBox(event) {
 			let rect = this.querySelector('[anonid="dropmarker-box"]').getBoundingClientRect();
-			return !Zotero.rtl && event.clientX >= rect.left || Zotero.rtl && event.clientX <= rect.right
+			return !Zotero.rtl && event.clientX >= rect.left || Zotero.rtl && event.clientX <= rect.right;
 		}
 	}
 

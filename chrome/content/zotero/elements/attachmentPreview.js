@@ -24,8 +24,7 @@
 */
 
 {
-	// eslint-disable-next-line no-undef
-	class AttachmentPreview extends XULElementBase {
+	class AttachmentPreview extends ItemPaneSectionElementBase {
 		static fileTypeMap = {
 			// TODO: support video and audio
 			// 'video/mp4': 'video',
@@ -49,7 +48,7 @@
 			this._isDiscarding = false;
 			this._failedCount = 0;
 
-			this._intersectionOb = new IntersectionObserver(this._handleIntersection.bind(this));
+			// this._intersectionOb = new IntersectionObserver(this._handleIntersection.bind(this));
 			this._resizeOb = new ResizeObserver(this._handleResize.bind(this));
 		}
 
@@ -97,14 +96,6 @@
 
 		set item(val) {
 			this._item = (val instanceof Zotero.Item && val.isFileAttachment()) ? val : null;
-			if (this.isVisible) {
-				this.render();
-			}
-		}
-
-		setItemAndRender(item) {
-			this._item = item;
-			this.render();
 		}
 
 		get previewType() {
@@ -140,7 +131,16 @@
 		}
 
 		get hasPreview() {
-			return this.getAttribute("data-preview-status") === "success";
+			return this.dataset.previewStatus === "success";
+		}
+
+		get disableResize() {
+			return this.dataset.disableResize !== "false";
+		}
+
+		set disableResize(val) {
+			this.dataset.disableResize = val ? "true" : "false";
+			this._handleResize();
 		}
 
 		setPreviewStatus(val) {
@@ -151,32 +151,9 @@
 			this.setAttribute("data-preview-status", val);
 		}
 
-		get isVisible() {
-			const rect = this.getBoundingClientRect();
-			// Sample per 20 px
-			const samplePeriod = 20;
-			let x = rect.left + rect.width / 2;
-			let yStart = rect.top;
-			let yEnd = rect.bottom;
-			let elAtPos;
-			// Check visibility from top/bottom to center
-			for (let dy = 1; dy < Math.floor((yEnd - yStart) / 2); dy += samplePeriod) {
-				elAtPos = document.elementFromPoint(x, yStart + dy);
-				if (this.contains(elAtPos)) {
-					return true;
-				}
-				elAtPos = document.elementFromPoint(x, yEnd - dy);
-				if (this.contains(elAtPos)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		init() {
 			this.setPreviewStatus("loading");
 			this._dragImageContainer = this.querySelector(".drag-container");
-			this._intersectionOb.observe(this);
 			this._resizeOb.observe(this);
 			this.addEventListener("dblclick", (event) => {
 				this.openAttachment(event);
@@ -193,7 +170,6 @@
 
 		destroy() {
 			this._reader?.uninit();
-			this._intersectionOb.disconnect();
 			this._resizeOb.disconnect();
 			this.removeEventListener("DOMContentLoaded", this._handleReaderLoad);
 			this.removeEventListener("mouseenter", this.updateGoto);
@@ -401,41 +377,8 @@
 			}
 		}
 
-		async _handleIntersection(entries) {
-			const DISCARD_TIMEOUT = 60000;
-			let needsRefresh = false;
-			let needsDiscard = false;
-			entries.forEach((entry) => {
-				if (entry.isIntersecting) {
-					needsRefresh = true;
-				}
-				else {
-					needsDiscard = true;
-				}
-			});
-			if (needsRefresh) {
-				let sidenav = this._getSidenav();
-				// Sidenav is in smooth scrolling mode
-				if (sidenav?._disableScrollHandler) {
-					// Wait for scroll to finish
-					await sidenav._waitForScroll();
-					// If the preview is not visible, do not render
-					if (!this.isVisible) {
-						return;
-					}
-				}
-				// Try to render the preview when the preview enters viewport
-				this.render();
-			}
-			else if (!this._isDiscardPlanned && needsDiscard) {
-				this._isDiscardPlanned = true;
-				setTimeout(() => {
-					this.discard();
-				}, DISCARD_TIMEOUT);
-			}
-		}
-
 		_handleResize() {
+			if (this.disableResize) return;
 			this.style.setProperty("--preview-width", `${this.clientWidth}px`);
 		}
 
@@ -473,14 +416,6 @@
 			}
 			!scaleRatio && (scaleRatio = defaultSize);
 			this.style.setProperty("--width-height-ratio", scaleRatio);
-		}
-
-		_getSidenav() {
-			// TODO: update this after unifying item pane & context pane
-			return document.querySelector(
-				Zotero_Tabs.selectedType === 'library'
-					? "#zotero-view-item-sidenav"
-					: "#zotero-context-pane-sidenav");
 		}
 
 		_id(id) {

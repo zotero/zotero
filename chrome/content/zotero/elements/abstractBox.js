@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	class AbstractBox extends XULElementBase {
+	class AbstractBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
 				<html:div class="body">
@@ -50,7 +50,6 @@
 			this._item = item;
 			if (item?.isRegularItem()) {
 				this.hidden = false;
-				this.render();
 			}
 			else {
 				this.hidden = true;
@@ -67,13 +66,12 @@
 			}
 			this.blurOpenField();
 			this._mode = mode;
-			this.render();
 		}
 
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'abstractBox');
 
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 
 			this._abstractField = this.querySelector('editable-text');
 			this._abstractField.addEventListener('change', () => this.save());
@@ -88,7 +86,7 @@
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render();
+				this.render(true);
 			}
 		}
 		
@@ -97,7 +95,7 @@
 				this.item.setField('abstractNote', this._abstractField.value);
 				await this.item.saveTx();
 			}
-			this.render();
+			this.render(true);
 		}
 
 		async blurOpenField() {
@@ -107,10 +105,9 @@
 			}
 		}
 
-		render() {
-			if (!this.item) {
-				return;
-			}
+		render(force = false) {
+			if (!this.item) return;
+			if (!force && this._isAlreadyRendered()) return;
 
 			let abstract = this.item.getField('abstractNote');
 			this._section.summary = abstract;

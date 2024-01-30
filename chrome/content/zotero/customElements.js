@@ -31,13 +31,18 @@ Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 
 Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSection.js', this);
 
 // Load our custom elements
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreview.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreviewBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/duplicatesMergePane.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/guidancePanel.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemDetails.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPane.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemMessagePane.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/mergeGroup.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/menulistItemTypes.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteEditor.js', this);

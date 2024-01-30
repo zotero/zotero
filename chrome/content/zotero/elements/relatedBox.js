@@ -28,29 +28,24 @@
 import { getCSSItemTypeIcon } from 'components/icons';
 
 {
-	class RelatedBox extends XULElementBase {
+	class RelatedBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-related" data-pane="related" extra-buttons="add">
 				<html:div class="body"/>
 			</collapsible-section>
 		`);
-
-		constructor() {
-			super();
-
-			this._mode = 'view';
-			this._item = null;
-		}
 		
 		init() {
+			this._mode = 'view';
+			this._item = null;
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this.add);
 		}
 		
 		destroy() {
+			this._section.removeEventListener('add', this.add);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			this._section = null;
 		}
 		
 		get mode() {
@@ -78,7 +73,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 		set item(val) {
 			this._item = val;
-			this.refresh();
 		}
 
 		notify(event, type, ids, _extraData) {
@@ -86,7 +80,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 			// Refresh if this item has been modified
 			if (event == 'modify' && ids.includes(this._item.id)) {
-				this.refresh();
+				this.render(true);
 				return;
 			}
 
@@ -96,14 +90,17 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				let relatedItemIDs = new Set(this._item.relatedItems.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)));
 				for (let id of ids) {
 					if (relatedItemIDs.has(id)) {
-						this.refresh();
+						this.render(true);
 						return;
 					}
 				}
 			}
 		}
 
-		refresh() {
+		render(force = false) {
+			if (!this.item) return;
+			if (!force && this._isAlreadyRendered()) return;
+
 			let body = this.querySelector('.body');
 			body.replaceChildren();
 

@@ -93,7 +93,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 		_handleAnnotationClick = () => {
 			// TODO: jump to annotations pane
-			// ZoteroItemPane.setNextPane("attachment-annotations");
 			let pane = this._getSidenav()?.container.querySelector(`:scope > [data-pane="attachment-annotations"]`);
 			if (pane) {
 				pane._section.open = true;

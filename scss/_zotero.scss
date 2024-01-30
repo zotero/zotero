@@ -60,7 +60,6 @@
 @import "components/tabsMenu";
 @import "components/newCollectionDialog";
 @import "components/reader";
-@import "components/itemPane";
 
 // Elements
 // --------------------------------------------------
@@ -90,3 +89,8 @@
 @import "elements/annotationRow";
 @import "elements/noteRow";
 @import "elements/librariesCollectionsBox";
+@import "elements/duplicatesMergePane";
+@import "elements/itemMessagePane";
+@import "elements/itemDetails";
+@import "elements/itemPane";
+@import "elements/contextPane";
