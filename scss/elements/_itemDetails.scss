@@ -11,6 +11,11 @@
 .zotero-item-pane-content {
 	min-height: 0;
 	flex: 1;
+	width: $min-width-item-pane;
+	min-width: $min-width-item-pane;
+	/* Need a min height to prevent layout issues in stacked mode */
+	min-height: 168px;
+	background: var(--material-sidepane);
 }
 
 .zotero-view-item-container {
@@ -33,6 +38,9 @@
 	padding: 0 8px;
 	overflow-anchor: none; /* Work around tags box causing scroll to jump - figure this out */
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+	display: flex;
+	flex-direction: column;
+	gap: 1px; /* Need gap for intersection computing */
 }
 
 .zotero-view-item::before {
@@ -53,34 +61,4 @@
 .zotero-view-item > vbox
 {
 	margin-left: 5px;
-}
-
-/* Buttons in trash and feed views */
-.zotero-item-pane-top-buttons > button {
-	-moz-box-flex: 1
-}
-
-/* Merge pane in duplicates view */
-#zotero-duplicates-merge-button
-{
-	font-size: 13px;
-}
-
-#zotero-duplicates-merge-pane > groupbox {
-	margin: 8px 0 0 0;
-}
-
-#zotero-duplicates-merge-item-box-container {
-	overflow-y: scroll;
-}
-
-#zotero-feed-item-toggleRead-button {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	max-width: 150px;
-}
-
-#zotero-feed-item-addTo-button {
-	max-width: 250px;
 }

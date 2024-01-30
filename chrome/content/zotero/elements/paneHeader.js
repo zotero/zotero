@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	class PaneHeader extends XULElementBase {
+	class PaneHeader extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="head">
 				<html:div class="title">
@@ -43,6 +43,8 @@
 						<menupopup onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>	
 					</toolbarbutton>
 				</html:div>
+			</html:div>
+			<html:div class="custom-head">
 			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
@@ -61,7 +63,6 @@
 		set item(item) {
 			this.blurOpenField();
 			this._item = item;
-			this.render();
 		}
 		
 		get mode() {
@@ -70,7 +71,6 @@
 		
 		set mode(mode) {
 			this._mode = mode;
-			this.render();
 		}
 
 		init() {
@@ -85,7 +85,7 @@
 				if (!this._item) return;
 				
 				event.preventDefault();
-				let menupopup = ZoteroItemPane.buildFieldTransformMenu({
+				let menupopup = ZoteroPane.buildFieldTransformMenu({
 					target: this.titleField,
 					onTransform: (newValue) => {
 						this._setTransformedValue(newValue);
@@ -95,8 +95,6 @@
 				menupopup.addEventListener('popuphidden', () => menupopup.remove());
 				menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
 			});
-			
-			this.render();
 		}
 		
 		destroy() {
@@ -105,7 +103,7 @@
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render();
+				this.render(true);
 			}
 		}
 		
@@ -124,7 +122,7 @@
 				this.item.setField(this._titleFieldID, this.titleField.value);
 				await this.item.saveTx();
 			}
-			this.render();
+			this.render(true);
 		}
 		
 		async blurOpenField() {
@@ -134,10 +132,11 @@
 			}
 		}
 		
-		render() {
+		render(force = false) {
 			if (!this.item) {
 				return;
 			}
+			if (!force && this._isAlreadyRendered()) return;
 
 			this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			
@@ -151,6 +150,20 @@
 				this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
 			}
 			this.menuButton.hidden = !this.item.isRegularItem() && !this.item.isAttachment();
+		}
+
+		renderCustomHead(callback) {
+			let customHead = this.querySelector(".custom-head");
+			customHead.replaceChildren();
+			let append = (...args) => {
+				customHead.append(...args);
+			};
+			if (callback) callback({
+				doc: document,
+				append: (...args) => {
+					append(...Components.utils.cloneInto(args, window, { wrapReflectors: true, cloneFunctions: true }));
+				}
+			});
 		}
 	}
 	customElements.define("pane-header", PaneHeader);

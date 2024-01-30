@@ -17,11 +17,6 @@ tree {
 	padding-left: 0.05em;
 }
 
-#zotero-item-pane-groupbox {
-	-moz-appearance: none !important;
-	border-width: 0;
-}
-
 .zotero-editpane-item-box > scrollbox, .zotero-view-item > tabpanel > vbox, 
 #zotero-editpane-tags > scrollbox, .zotero-editpane-related {
 	padding-top: 5px;

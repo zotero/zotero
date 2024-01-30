@@ -1,3 +1,28 @@
+note-editor {
+	-moz-box-orient: vertical;
+
+	.custom-head {
+		display: flex;
+		flex-direction: row;
+		align-self: stretch;
+		gap: 6px;
+		padding: 6px 8px;
+		background: var(--material-toolbar);
+		border-bottom: var(--material-panedivider);
+		height: 28px;
+
+		&:empty {
+			display: none;
+		}
+
+		button {
+			height: 26px;
+			margin: 0;
+			flex-grow: 1;
+		}
+	}
+}
+
 links-box {
 	display: flex;
 	flex-direction: column;
