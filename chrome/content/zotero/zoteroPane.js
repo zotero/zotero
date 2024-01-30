@@ -2642,17 +2642,7 @@ var ZoteroPane = new function()
 		var row = this.getCollectionTreeRow();
 		if (row) {
 			if (row.isCollection()) {
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-				
-				var newName = { value: row.getName() };
-				var result = promptService.prompt(window, "",
-					Zotero.getString('pane.collections.rename'), newName, "", {});
-				
-				if (result && newName.value) {
-					row.ref.name = newName.value;
-					row.ref.saveTx();
-				}
+				this.collectionsView.startEditing(row);
 			}
 			else {
 				let s = row.ref.clone();
