@@ -115,14 +115,19 @@
 
 				popup.append(item);
 			}
-			let separator = document.createXULElement('menuseparator');
-			popup.append(separator);
-			let advancedSearchOption = document.createXULElement('menuitem');
-			advancedSearchOption.label = Zotero.getString("zotero.toolbar.advancedSearch");
-			advancedSearchOption.addEventListener("command", () => {
-				ZoteroPane.openAdvancedSearchWindow();
-			});
-			popup.append(advancedSearchOption);
+			
+			// Add Advanced Search menu item in main window
+			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
+				let separator = document.createXULElement('menuseparator');
+				popup.append(separator);
+				let advancedSearchOption = document.createXULElement('menuitem');
+				advancedSearchOption.label = Zotero.getString("zotero.toolbar.advancedSearch");
+				advancedSearchOption.addEventListener("command", () => {
+					ZoteroPane.openAdvancedSearchWindow();
+				});
+				popup.append(advancedSearchOption);
+			}
+			
 			return this._searchModePopup = popup;
 		}
 
