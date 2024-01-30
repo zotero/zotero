@@ -794,7 +794,7 @@ var ZoteroContextPane = new function () {
 				editor.saveSync();
 				_panesDeck.setAttribute('selectedIndex', 1);
 				_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
-				vbox.remove();
+				vbox?.remove();
 				_updateAddToNote();
 				_preventGlobalDeckChange = true;
 			});
