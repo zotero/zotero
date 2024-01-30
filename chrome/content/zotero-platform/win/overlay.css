@@ -36,6 +36,14 @@ tree {
 	padding-left: 5px;
 }
 
+/* 
+	Default scrollbar displays up/down arrows even 
+	when there is no overflow and the scrollbar is hidden
+*/
+.zotero-view-item {
+	scrollbar-width: thin;
+}
+
 .zotero-view-item > tabpanel > vbox {
 	padding-left: 5px;
 }
