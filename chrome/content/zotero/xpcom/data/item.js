@@ -2434,6 +2434,20 @@ Zotero.Item.prototype.isEPUBAttachment = function () {
 	return this.isFileAttachment() && this.attachmentContentType == 'application/epub+zip';
 };
 
+/**
+ * @return {Boolean} - Returns true if item is a stored or linked image attachment
+ */
+Zotero.Item.prototype.isImageAttachment = function () {
+	return this.isFileAttachment() && this.attachmentContentType.startsWith('image/');
+};
+
+/**
+ * @return {Boolean} - Returns true if item is a stored or linked video attachment
+ */
+Zotero.Item.prototype.isVideoAttachment = function () {
+	return this.isFileAttachment() && this.attachmentContentType.startsWith('video/');
+};
+
 
 /**
  * Returns number of child attachments of item
@@ -3735,7 +3749,7 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 /**
  * Return state of best attachment (or this item if it's a standalone attachment)
  *
- * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'other')
+ * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'epub'|'image'|'video'|'other')
  *     and boolean 'exists'
  */
 Zotero.Item.prototype.getBestAttachmentState = async function () {
@@ -3759,6 +3773,12 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	}
 	else if (item.isEPUBAttachment()) {
 		type = 'epub';
+	}
+	else if (item.isImageAttachment()) {
+		type = 'image';
+	}
+	else if (item.isVideoAttachment()) {
+		type = 'video';
 	}
 	else {
 		type = 'other';
@@ -4377,6 +4397,12 @@ Zotero.Item.prototype.getItemTypeIconName = function () {
 			else {
 				itemType += 'EPUB';
 			}
+		}
+		else if (this.isImageAttachment()) {
+			itemType += 'Image';
+		}
+		else if (this.isVideoAttachment()) {
+			itemType += 'Video';
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 			itemType += "File";

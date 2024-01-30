@@ -1219,7 +1219,7 @@ describe("Zotero.Item", function () {
 			yield parentItem.getBestAttachmentState();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
-				{ type: 'other', exists: true }
+				{ type: 'image', exists: true }
 			);
 		})
 		
@@ -1236,7 +1236,7 @@ describe("Zotero.Item", function () {
 			yield parentItem.getBestAttachmentState();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
-				{ type: 'other', exists: false }
+				{ type: 'image', exists: false }
 			);
 		})
 

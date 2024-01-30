@@ -2654,6 +2654,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 					icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
 				}
+				else if (type == 'image') {
+					icon = getCSSItemTypeIcon('attachmentImage', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasImage');
+				}
+				else if (type == 'video') {
+					icon = getCSSItemTypeIcon('attachmentVideo', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasVideo');
+				}
 				else {
 					icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
