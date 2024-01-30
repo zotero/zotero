@@ -7,7 +7,6 @@ body {
 }
 
 .citation-dialog.search {
-	background: white;
 	padding: 0 2px 0 0;
 	border: 1px solid rgba(0, 0, 0, 0.5);
 	-moz-appearance: textfield;
