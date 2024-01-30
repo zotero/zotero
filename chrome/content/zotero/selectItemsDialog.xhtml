@@ -53,10 +53,9 @@
 <script>
 	var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
 	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
-	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
-	
 	// Custom elements
 	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
 </script>
 
 <vbox id="zotero-select-items-container" flex="1">
