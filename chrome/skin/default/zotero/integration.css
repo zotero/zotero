@@ -139,6 +139,7 @@
 	padding: 0;
 	padding-top: 0;
 	padding-bottom: 0;
+	background: white;
 }
 
 .citation-dialog.iframe {
@@ -154,6 +155,12 @@
 	outline: none;
 	line-height: 2em;
 	background: white;
+	color: black;
+}
+
+.citation-dialog.editor::selection {
+	color: white;
+	background: var(--color-accent);
 }
 
 .citation-dialog.spinner {

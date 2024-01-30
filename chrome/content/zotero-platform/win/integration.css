@@ -5,7 +5,6 @@ window.citation-dialog {
 }
 
 .citation-dialog.search {
-	background: white;
 	padding: 2px 2px 2px 0;
 	border: 1px solid rgba(0, 0, 0, 0.5);
 	border-radius: 10px;
