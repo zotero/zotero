@@ -221,9 +221,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let index = indices[0];
 		let treeRow = this.getRow(index);
 		if (treeRow.isCollection() && this.editable && this.selection.focused == index) {
-			this._editing = treeRow;
-			treeRow.editingName = treeRow.ref.name;
-			this.tree.invalidateRow(index);
+			this.startEditing(treeRow);
 		}
 		else if (treeRow.isLibrary()) {
 			let uri = Zotero.URI.getCurrentUserLibraryURI();
@@ -255,6 +253,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		delete treeRow.editingName;
 		await treeRow.ref.saveTx();
 	}
+	
+	startEditing = (treeRow) => {
+		if (!treeRow.isCollection()) {
+			throw new Error('Only collections can be edited inline');
+		}
+		this._editing = treeRow;
+		treeRow.editingName = treeRow.ref.name;
+		this.tree.invalidateRow(this._rowMap[treeRow.id]);
+	};
 	
 	stopEditing = () => {
 		this._editing = null;
