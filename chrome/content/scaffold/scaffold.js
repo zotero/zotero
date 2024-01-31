@@ -2076,8 +2076,13 @@ var Scaffold = new function () {
 					translate.setHandler("debug", _debug);
 					translate.setHandler("error", _error);
 					translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
+					
 					let newTest = await translate.newTest();
 					newTest = _sanitizeItemsInTest(newTest);
+					if (test.defer) {
+						newTest.defer = true;
+					}
+					
 					this.newTests.push(newTest);
 					this.testDoneCallback(newTest);
 					this._updateTests();
