@@ -1629,6 +1629,11 @@
 		async showEditor(elem) {
 			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
 			var fieldName = elem.getAttribute('fieldname');
+
+			// Multiline field will be at least 6 lines
+			if (Zotero.ItemFields.isMultiline(fieldName)) {
+				elem.setAttribute("min-lines", 6);
+			}
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			let value;
 			if (field == 'creator') {
@@ -1977,6 +1982,10 @@
 			
 			var fieldName = textbox.getAttribute('fieldname');
 			
+			// Multiline fields go back to occupying as much space as needed
+			if (Zotero.ItemFields.isMultiline(fieldName)) {
+				textbox.setAttribute("min-lines", 1);
+			}
 			var value = textbox.value.trim();
 			
 			var [field, creatorIndex, creatorField] = fieldName.split('-');

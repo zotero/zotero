@@ -9,17 +9,9 @@
 }
 
 editable-text {
-	--min-visible-lines: 0;
-	--max-visible-lines: 6;
-
-	&[multiline] {
-		--min-visible-lines: 5;
-		--max-visible-lines: 20;
-	}
-
-	&[nowrap] {
-		--min-visible-lines: 1;
-	}
+	// Default variables overriden by max-lines, min-lines attribute
+	--min-visible-lines: 1;
+	--max-visible-lines: 1;
 
 	&[tight] {
 		@include comfortable {
@@ -56,16 +48,23 @@ editable-text {
 		font: inherit;
 		line-height: inherit;
 		overflow: hidden;
-		scrollbar-gutter: stable;
 	}
 	
 	&:not([nowrap])::after, &:not([nowrap]) .input {
 		grid-area: 1 / 1 / 2 / 2;
 		overflow-wrap: anywhere;
 		white-space: pre-wrap;
-		max-height: calc(2ex * var(--max-visible-lines));
-		// Somehow this hides scroll arrows on windows when the content is short or empty
-		scrollbar-width: thin;
+		scrollbar-width: none;
+	}
+
+	&[max-lines] {
+		&::after, .input {
+			max-height: calc(2ex * var(--max-visible-lines));
+			scrollbar-width: auto;
+		}
+		&::after {
+			scrollbar-gutter: stable;
+		}
 	}
 	
 	.input {
@@ -102,12 +101,6 @@ editable-text {
 		
 		::placeholder {
 			color: var(--fill-tertiary);
-		}
-	}
-	
-	&[multiline] {
-		.input {
-			min-height: 5em;
 		}
 	}
 	&[nowrap] {
