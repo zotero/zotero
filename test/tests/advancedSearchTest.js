@@ -43,7 +43,7 @@ describe("Advanced Search", function () {
 		
 		searchWin.close();
 		
-		item.eraseTx();
+		yield item.eraseTx();
 	});
 	
 	describe("Conditions", function () {
