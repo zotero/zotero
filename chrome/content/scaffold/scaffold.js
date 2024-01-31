@@ -2046,11 +2046,12 @@ var Scaffold = new function () {
 			_logOutput("Loading web page from " + test.url);
 			
 			const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
-			let browser;
+			let browser = new HiddenBrowser({
+				docShell: { allowMetaRedirects: true }
+			});
 			try {
-				browser = await HiddenBrowser.create(test.url, {
-					requireSuccessfulStatus: true,
-					docShell: { allowMetaRedirects: true }
+				await browser.load(test.url, {
+					requireSuccessfulStatus: true
 				});
 
 				if (test.defer) {
@@ -2092,7 +2093,7 @@ var Scaffold = new function () {
 				this._updateTests();
 			}
 			finally {
-				if (browser) HiddenBrowser.destroy(browser);
+				if (browser) browser.destroy();
 			}
 		}
 		else {
