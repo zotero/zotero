@@ -1024,11 +1024,11 @@
 											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 											<spacer flex="1"></spacer>
 											<html:div style="display: flex;flex-direction: row;">
-												<toolbarbutton id="zotero-tb-collections-search" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;"/>
-												<!-- For unknown reason, the data-l10n-id.placeholder doesn't work here. Hard code it for now -->
+												<toolbarbutton id="zotero-tb-collections-search" data-l10n-id="zotero-collections-search-btn" tabindex="-1" class="zotero-tb-button"/>
 												<search-textbox
 													id="zotero-collections-search" class="hidden" disabled="true"
-													placeholder="Filter Collections" data-l10n-id="zotero-collections-search"
+													data-l10n-id="zotero-collections-search"
+													data-l10n-attrs="placeholder"
 													oncommand="ZoteroPane.handleCollectionSearchInput()"/>
 											</html:div>
 										</hbox>									
