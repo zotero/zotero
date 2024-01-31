@@ -102,6 +102,13 @@ var Zotero_Preferences = {
 			Zotero.Prefs.unregisterObserver(symbol);
 		}
 		this._observerSymbols.clear();
+
+		for (let [_key, pane] of this.panes) {
+			for (let child of pane.container.children) {
+				let event = new Event('unload');
+				child.dispatchEvent(event);
+			}
+		}
 	},
 	
 	waitForFirstPaneLoad: async function () {
