@@ -93,7 +93,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 		_handleAnnotationClick = () => {
 			// TODO: jump to annotations pane
-			let pane = this._getSidenav()?.container.querySelector(`:scope > [data-pane="attachment-annotations"]`);
+			let pane;
+			if (ZoteroContextPane) {
+				pane = ZoteroContextPane.getSidenav()?.container.querySelector(`:scope > [data-pane="attachment-annotations"]`);
+			}
 			if (pane) {
 				pane._section.open = true;
 			}
@@ -104,14 +107,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				win.focus();
 			}
 		};
-
-		_getSidenav() {
-			// TODO: update this after unifying item pane & context pane
-			return document.querySelector(
-				Zotero_Tabs.selectedType === 'library'
-					? "#zotero-view-item-sidenav"
-					: "#zotero-context-pane-sidenav");
-		}
 
 		render() {
 			if (!this.initialized) return;
