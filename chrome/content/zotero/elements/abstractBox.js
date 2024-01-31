@@ -30,7 +30,7 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
 				<html:div class="body">
-					<editable-text multiline="true" data-l10n-id="abstract-field" />
+					<editable-text multiline="true" data-l10n-id="abstract-field" data-l10n-attrs="placeholder" />
 				</html:div>
 			</collapsible-section>
 		`);

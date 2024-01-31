@@ -35,7 +35,6 @@
 			'multiline',
 			'readonly',
 			'placeholder',
-			'label',
 			'aria-label',
 			'aria-labelledby',
 			'value',
@@ -67,22 +66,12 @@
 			this.toggleAttribute('readonly', readOnly);
 		}
 
-		// Fluent won't set placeholder on an editable-text for some reason, so we use the label property to store
-		// the placeholder that will be set on the child <textarea> or <input>
 		get placeholder() {
-			return this.label;
+			return this.getAttribute('placeholder') || '';
 		}
 		
 		set placeholder(placeholder) {
-			this.label = placeholder;
-		}
-		
-		get label() {
-			return this.getAttribute('label') || '';
-		}
-		
-		set label(label) {
-			this.setAttribute('label', label || '');
+			this.setAttribute('placeholder', placeholder || '');
 		}
 		
 		get ariaLabel() {
@@ -254,7 +243,7 @@
 				}
 			}
 			this._input.readOnly = this.readOnly;
-			this._input.placeholder = this.label;
+			this._input.placeholder = this.placeholder;
 			if (this.ariaLabel.length) {
 				this._input.setAttribute('aria-label', this.ariaLabel);
 			}

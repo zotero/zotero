@@ -375,7 +375,7 @@ expand-all-sections =
     .label = Expand All Sections
 
 abstract-field =
-    .label = Add abstract…
+    .placeholder = Add abstract…
 
 tagselector-search =
     .placeholder = Filter Tags
