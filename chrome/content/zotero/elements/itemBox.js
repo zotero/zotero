@@ -135,13 +135,7 @@
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 				var item = this.item;
 				var exists = item.hasCreatorAt(index);
-				if (exists) {
-					var fieldMode = item.getCreator(index).name !== undefined ? 1 : 0;
-				}
-				var hideTransforms = !exists || !!fieldMode;
-				if (hideTransforms) {
-					event.preventDefault();
-				}
+				var fieldMode = row.querySelector("[fieldMode]").getAttribute("fieldMode");
 				
 				var moreCreators = item.numCreators() > index + 1;
 				
@@ -149,7 +143,10 @@
 				var hideMoveUp = !exists || index == 0;
 				var hideMoveDown = !exists || !moreCreators;
 				var hideMoveSep = hideMoveUp && hideMoveDown;
+				var hideNameSwap = fieldMode == '1' || !exists;
 				
+				this._id('creator-transform-swap-names').hidden = hideNameSwap;
+				this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(row);
 				this._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
 				this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
 				this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
@@ -846,6 +843,10 @@
 			this.querySelectorAll("[ztabindex]").forEach((node) =>{
 				node.setAttribute("tabindex", 0);
 			});
+			// Make sure that any opened popup closes
+			this.querySelectorAll("menupopup").forEach((popup) => {
+				popup.hidePopup();
+			});
 		}
 		
 		addItemTypeMenu() {
@@ -925,21 +926,6 @@
 				lastName = creatorData.lastName;
 			}
 			
-			// Sub in placeholder text for empty fields
-			if (fieldMode == 1) {
-				if (lastName === "") {
-					lastName = this._defaultFullName;
-				}
-			}
-			else {
-				if (firstName === "") {
-					firstName = this._defaultFirstName;
-				}
-				if (lastName === "") {
-					lastName = this._defaultLastName;
-				}
-			}
-			
 			// Use the first entry in the drop-down for the default type if none specified
 			var typeID = creatorTypeIDOrName
 				? Zotero.CreatorTypes.getID(creatorTypeIDOrName)
@@ -1008,6 +994,7 @@
 				)
 			);
 			
+			lastNameElem.placeholder = this._defaultLastName;
 			fieldName = 'creator-' + rowIndex + '-firstName';
 			var firstNameElem = firstlast.appendChild(
 				this.createValueElement(
@@ -1016,6 +1003,7 @@
 					++this._ztabindex
 				)
 			);
+			firstNameElem.placeholder = this._defaultFirstName;
 			if (fieldMode > 0) {
 				firstlast.lastChild.hidden = true;
 			}
@@ -1052,12 +1040,9 @@
 			}
 			rowData.appendChild(addButton);
 
-			let realName = (firstName && firstName != this._defaultFirstName)
-				|| (lastName && lastName != this._defaultLastName);
-
 			// Options button that opens creator transform menu
 			let optionsButton = document.createXULElement("toolbarbutton");
-			if (!realName || !this.editable) {
+			if (!this.editable) {
 				optionsButton.style.visibility = "hidden";
 				this.disableButton(optionsButton);
 			}
@@ -1071,8 +1056,6 @@
 				let hideEditMenuItems = !e.target.closest('input');
 				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, hideEditMenuItems);
 				
-				this._id('creator-transform-swap-names').hidden = fieldMode > 0;
-				this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(rowData.parentNode);
 				this.handlePopupOpening(e, menupopup);
 			};
 			rowData.appendChild(optionsButton);
@@ -1236,6 +1219,7 @@
 			if (fieldMode == 1) {
 				creatorNameBox.setAttribute('switch-mode-label', Zotero.getString('pane.item.switchFieldMode.two'));
 				lastName.setAttribute('fieldMode', '1');
+				lastName.placeholder = this._defaultFullName;
 				delete lastName.style.width;
 				delete lastName.style.maxWidth;
 				
@@ -1248,15 +1232,13 @@
 				
 				if (!initial) {
 					var first = firstName.value;
-					if (first && first != this._defaultFirstName) {
+					if (first) {
 						let last = lastName.value;
 						lastName.value = first + ' ' + last;
 					}
 				}
-				
-				if (lastName.value == this._defaultLastName) {
-					lastName.value = this._defaultFullName;
-				}
+				// Clear first name value after it was moved to the full name field
+				firstName.value = "";
 				
 				// If one of the creator fields is open, leave it open after swap
 				let activeField = this.getFocusedTextArea();
@@ -1270,6 +1252,7 @@
 				creatorNameBox.setAttribute('switch-mode-label', Zotero.getString('pane.item.switchFieldMode.one'));
 				lastName.setAttribute('fieldMode', '0');
 
+				lastName.placeholder = this._defaultLastName;
 				// Add firstname field to tabindex
 				tab = parseInt(lastName.getAttribute('ztabindex'));
 				firstName.setAttribute('ztabindex', tab + 1);
@@ -1277,7 +1260,7 @@
 				if (!initial) {
 					// Move all but last word to first name field and show it
 					let last = lastName.value;
-					if (last && last != this._defaultFullName) {
+					if (last) {
 						var lastNameRE = /(.*?)[ ]*([^ ]+[ ]*)$/;
 						var parts = lastNameRE.exec(last);
 						if (parts[2] && parts[2] != last) {
@@ -1285,14 +1268,6 @@
 							firstName.value = parts[1];
 						}
 					}
-				}
-				
-				if (!firstName.value) {
-					firstName.value = this._defaultFirstName;
-				}
-				
-				if (lastName.value == this._defaultFullName) {
-					lastName.value = this._defaultLastName;
 				}
 				
 				firstName.hidden = false;
@@ -1307,6 +1282,8 @@
 			if (!initial) {
 				var fields = this.getCreatorFields(row);
 				fields.fieldMode = fieldMode;
+				firstName.sizeToContent();
+				lastName.sizeToContent();
 				this.modifyCreator(rowIndex, fields);
 				if (this.saveOnEdit) {
 					let activeField = this.getFocusedTextArea();
@@ -1929,7 +1906,7 @@
 		}
 		
 		async hideEditor(textbox) {
-			if (this.ignoreBlur) {
+			if (this.ignoreBlur || !textbox) {
 				return;
 			}
 			// Handle cases where creator autocomplete doesn't trigger
@@ -1960,23 +1937,6 @@
 				var otherFields = this.getCreatorFields(row);
 				otherFields[creatorField] = value;
 				this.modifyCreator(creatorIndex, otherFields);
-				
-				var val = this.item.getCreator(creatorIndex);
-				val = val ? val[creatorField] : null;
-				
-				if (!val) {
-					// Reset to '(first)'/'(last)'/'(name)'
-					if (creatorField == 'lastName') {
-						val = otherFields.fieldMode
-							? this._defaultFullName
-							: this._defaultLastName;
-					}
-					else if (creatorField == 'firstName') {
-						val = this._defaultFirstName;
-					}
-					textbox.value = val;
-				}
-				
 				
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 					this._showCreatorTypeGuidance = true;
@@ -2091,16 +2051,6 @@
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
 			};
-
-			// Ignore '(first)'
-			if (fields.fieldMode == 1 || fields.firstName == this._defaultFirstName) {
-				fields.firstName = '';
-			}
-			// Ignore '(last)' or '(name)'
-			if (fields.lastName == this._defaultFullName
-					|| fields.lastName == this._defaultLastName) {
-				fields.lastName = '';
-			}
 			
 			return fields;
 		}
@@ -2156,11 +2106,12 @@
 		 */
 		async capitalizeCreatorName(_event) {
 			var row = document.popupNode.closest('.meta-row');
-			var typeBox = row.querySelector('.creator-type-label').parentNode;
-			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+			let label = row.querySelector('.meta-label');
+			var creatorIndex = parseInt(label.getAttribute('fieldname').split('-')[1]);
+			let [lastName, firstName] = [...row.querySelectorAll("editable-text")];
+			lastName.value = Zotero.Utilities.capitalizeName(lastName.value);
+			firstName.value = Zotero.Utilities.capitalizeName(firstName.value);
 			var fields = this.getCreatorFields(row);
-			fields.firstName = fields.firstName && Zotero.Utilities.capitalizeName(fields.firstName);
-			fields.lastName = fields.lastName && Zotero.Utilities.capitalizeName(fields.lastName);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
 				// If a field is open, blur it, which will trigger a save and cause

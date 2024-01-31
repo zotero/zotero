@@ -140,7 +140,7 @@
 		sizeToContent = () => {
 			// Add a temp span, fetch its width with current paddings and set max-width based on that
 			let span = document.createElement("span");
-			span.innerText = this.value;
+			span.innerText = this.value || this.placeholder;
 			this.append(span);
 			let size = span.getBoundingClientRect();
 			this.style['max-width'] = `calc(${size.width}px)`;
