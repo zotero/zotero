@@ -350,7 +350,6 @@ var Zotero_Tabs = new function () {
 	this.undoClose = function () {
 		var historyEntry = this._history.pop();
 		if (historyEntry) {
-			let maxIndex = -1;
 			for (let tab of historyEntry) {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					Zotero.Reader.open(tab.data.itemID,
@@ -359,15 +358,12 @@ var Zotero_Tabs = new function () {
 							tabIndex: tab.index,
 							openInBackground: true
 						}
-					);
-					if (tab.index > maxIndex) {
-						maxIndex = tab.index;
-					}
+					).then((_) => {
+						if (tab.index > -1) {
+							this.jump(tab.index);
+						}
+					});
 				}
-			}
-			// Select last reopened tab
-			if (maxIndex > -1) {
-				this.jump(maxIndex);
 			}
 		}
 	};
