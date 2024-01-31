@@ -335,7 +335,7 @@
 		}
 		
 		isPanePinnable(id) {
-			return id !== 'info';
+			return id !== 'info' && id !== 'context-all-notes' && id !== 'context-item-notes';
 		}
 
 		showPendingPane() {
