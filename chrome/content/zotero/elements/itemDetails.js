@@ -60,9 +60,9 @@
 
 						<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" data-pane="notes"/>
 
-						<attachment-box id="zotero-attachment-box" flex="1" data-pane="attachment-info" data-use-preview="true" hidden="true"/>
+						<attachment-box id="zotero-attachment-box" data-pane="attachment-info" data-use-preview="true" hidden="true"/>
 						
-						<attachment-annotations-box id="zotero-editpane-attachment-annotations" flex="1" data-pane="attachment-annotations" hidden="true"/>
+						<attachment-annotations-box id="zotero-editpane-attachment-annotations" data-pane="attachment-annotations" hidden="true"/>
 						
 						<libraries-collections-box id="zotero-editpane-libraries-collections" class="zotero-editpane-libraries-collections" data-pane="libraries-collections"/>
 
@@ -80,6 +80,17 @@
 
 		set item(item) {
 			this._item = item;
+		}
+
+		/*
+		 * For contextPane update
+		 */
+		get parentID() {
+			return this._cachedParentID;
+		}
+
+		set parentID(parentID) {
+			this._cachedParentID = parentID;
 		}
 
 		get mode() {
@@ -145,6 +156,8 @@
 		set sidenav(sidenav) {
 			this._sidenav = sidenav;
 			sidenav.container = this;
+			// Manually update once and further changes will be synced automatically to sidenav
+			this.forceUpdateSideNav();
 		}
 
 		static get observedAttributes() {
@@ -366,6 +379,10 @@
 			return true;
 		}
 
+		forceUpdateSideNav() {
+			this.getPanes().forEach(elem => this._sidenav.updatePaneStatus(elem.dataset.pane));
+		}
+
 		async scrollToPane(paneID, behavior = 'smooth') {
 			let pane = this.getPane(paneID);
 			if (!pane) return null;
@@ -374,7 +391,7 @@
 
 			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
 			// when itemPane is expanded.
-			if (this._collapsed || this.getAttribute("no-render")) {
+			if (this._collapsed) {
 				return null;
 			}
 
@@ -487,15 +504,6 @@
 				isLibraryTab ? 'zotero-view-item-sidenav' : 'zotero-context-pane-sidenav'
 			);
 
-			// Shift-tab from title when reader is opened focuses the last button in tabs toolbar
-			if (event.target.closest(".title") && event.key == "Tab"
-				&& event.shiftKey && Zotero_Tabs.selectedType == "reader") {
-				let focusable = [...document.querySelectorAll("#zotero-tabs-toolbar toolbarbutton:not([disabled]):not([hidden])")];
-				let btn = focusable[focusable.length - 1];
-				btn.focus();
-				stopEvent();
-				return;
-			}
 			// Tab from the scrollable area focuses the pinned pane if it exists
 			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && sidenav.pinnedPane) {
 				let pane = sidenav.getPane(sidenav.pinnedPane);

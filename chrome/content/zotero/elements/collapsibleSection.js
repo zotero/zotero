@@ -401,12 +401,9 @@
 			if (document.documentElement.getAttribute('windowtype') !== 'navigator:browser') {
 				return null;
 			}
-			if (typeof Zotero_Tabs == "undefined") return null;
+			if (!ZoteroContextPane) return null;
 			// TODO: update this after unifying item pane & context pane
-			return document.querySelector(
-				Zotero_Tabs.selectedType === 'library'
-					? "#zotero-view-item-sidenav"
-					: "#zotero-context-pane-sidenav");
+			return ZoteroContextPane.getSidenav();
 		}
 		
 		render() {

@@ -37,6 +37,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreview.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreviewBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextPane.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/duplicatesMergePane.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/guidancePanel.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemBox.js', this);
@@ -65,6 +66,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachment
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextNotesList.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteRow.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/notesContext.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesCollectionsBox.js', this);
 
 {
