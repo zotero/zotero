@@ -92,27 +92,7 @@
 		 * @param {"message" | "item" | "note" | "duplicates"} type view type
 		 */
 		set viewType(type) {
-			switch (type) {
-				case "message": {
-					this._deck.selectedIndex = 0;
-					break;
-				}
-				case "item": {
-					this._deck.selectedIndex = 1;
-					break;
-				}
-				case "note": {
-					this._deck.selectedIndex = 2;
-					break;
-				}
-				case "duplicates": {
-					this._deck.selectedIndex = 3;
-					break;
-				}
-			}
-			// If item pane is no selected, do not render
-			this._itemDetails.toggleAttribute("no-render", type == "item");
-			this._itemDetails.sidenav.toggleDefaultStatus(type != "item");
+			this.setAttribute("view-type", type);
 		}
 
 		render() {
@@ -163,6 +143,11 @@
 			
 			this._itemDetails.mode = this.editable ? null : "view";
 			this._itemDetails.item = item;
+
+			if (this.hasAttribute("collapsed")) {
+				return true;
+			}
+
 			this._itemDetails.render();
 			
 			if (item.isFeedItem) {
@@ -466,13 +451,27 @@
 		}
 
 		static get observedAttributes() {
-			return ['collapsed'];
+			return ['collapsed', 'width', 'height', 'view-type'];
 		}
 
-		attributeChangedCallback(name) {
+		attributeChangedCallback(name, oldValue, newValue) {
 			switch (name) {
 				case "collapsed": {
 					this.handleResize();
+					break;
+				}
+				case "width": {
+					this.style.width = `${newValue}px`;
+					break;
+				}
+				case "height": {
+					this.style.height = `${newValue}px`;
+					break;
+				}
+				case "view-type": {
+					if (newValue !== oldValue) {
+						this._handleViewTypeChange(newValue);
+					}
 				}
 			}
 		}
@@ -496,6 +495,33 @@
 					this._itemDetails.render();
 				}
 			}
+		}
+
+		_handleViewTypeChange(type) {
+			let previousViewType = this.viewType;
+			switch (type) {
+				case "message": {
+					this._deck.selectedIndex = 0;
+					break;
+				}
+				case "item": {
+					this._deck.selectedIndex = 1;
+					break;
+				}
+				case "note": {
+					this._deck.selectedIndex = 2;
+					break;
+				}
+				case "duplicates": {
+					this._deck.selectedIndex = 3;
+					break;
+				}
+			}
+			let isViewingItem = type == "item";
+			if (previousViewType != "item" && isViewingItem) {
+				this._itemDetails.forceUpdateSideNav();
+			}
+			this._itemDetails.sidenav.toggleDefaultStatus(!isViewingItem);
 		}
 	}
 	customElements.define("item-pane", ItemPane);
