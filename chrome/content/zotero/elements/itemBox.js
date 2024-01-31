@@ -639,6 +639,11 @@
 				|| Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
 					let optionsButton = document.createXULElement("toolbarbutton");
 					optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover";
+					// Options button after single-line fields will not occupy space unless hovered.
+					// This does not apply to multiline fields because it would move textareaa on hover.
+					if (!(Zotero.ItemFields.isLong(fieldName) || Zotero.ItemFields.isMultiline(fieldName))) {
+						optionsButton.classList.add("no-display");
+					}
 					optionsButton.setAttribute("ztabindex", ++this._ztabindex);
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					// eslint-disable-next-line no-loop-func
@@ -1452,7 +1457,7 @@
 				return null;
 			}
 			let openLink = document.createXULElement("toolbarbutton");
-			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover";
+			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover no-display";
 			openLink.addEventListener("click", event => ZoteroPane.loadURI(value, event));
 			openLink.addEventListener('keypress', event => this.handleKeyPress(event));
 			openLink.setAttribute("ztabindex", ++this._ztabindex);
