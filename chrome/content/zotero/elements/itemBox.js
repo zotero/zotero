@@ -888,8 +888,6 @@
 			row.appendChild(labelWrapper);
 			row.appendChild(rowData);
 			this._infoTable.appendChild(row);
-			// Remove the default bold font from the label in shadow dom
-			this.querySelector("#item-type-menu").shadowRoot.querySelector("#label-box").style = "font-weight: normal";
 		}
 		
 		updateItemTypeMenuSelection() {

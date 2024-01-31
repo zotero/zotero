@@ -42,6 +42,10 @@ item-box {
 		&::part(dropmarker) {
 			display: none;
 		}
+		
+		&::part(label-box) {
+			font-weight: normal;
+		}
 
 		&::part(label) {
 			margin-inline-start: 0;
