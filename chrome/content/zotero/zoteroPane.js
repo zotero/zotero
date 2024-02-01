@@ -3409,7 +3409,8 @@ var ZoteroPane = new function()
 			}
 			
 			// Adjust labels
-			m.editSelectedCollection.setAttribute('label', Zotero.getString('pane.collections.menu.rename.collection'));
+			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-rename-collection');
+			
 			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collection'));
 			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collectionAndItems'));
 			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.collection'));
@@ -3467,7 +3468,7 @@ var ZoteroPane = new function()
 			}
 			
 			// Adjust labels
-			m.editSelectedCollection.setAttribute('label', Zotero.getString('pane.collections.menu.edit.savedSearch'));
+			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-modify-saved-search');
 			m.duplicate.setAttribute('label', Zotero.getString('pane.collections.menu.duplicate.savedSearch'));
 			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
 			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));

@@ -44,6 +44,11 @@ zotero-tabs-menu-close-button =
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 
+collections-menu-rename-collection =
+    .label = Rename Collection
+collections-menu-edit-saved-search =
+    .label = Edit Saved Search
+
 item-creator-moveDown =
     .label = Move Down
 item-creator-moveToTop =
