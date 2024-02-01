@@ -640,7 +640,7 @@
 					let optionsButton = document.createXULElement("toolbarbutton");
 					optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover";
 					// Options button after single-line fields will not occupy space unless hovered.
-					// This does not apply to multiline fields because it would move textareaa on hover.
+					// This does not apply to multiline fields because it would move textarea on hover.
 					if (!(Zotero.ItemFields.isLong(fieldName) || Zotero.ItemFields.isMultiline(fieldName))) {
 						optionsButton.classList.add("no-display");
 					}
