@@ -4399,10 +4399,10 @@ Zotero.Item.prototype.getItemTypeIconName = function () {
 			}
 		}
 		else if (this.isImageAttachment()) {
-			itemType += 'Image';
+			itemType += linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE ? 'ImageLink' : 'Image';
 		}
 		else if (this.isVideoAttachment()) {
-			itemType += 'Video';
+			itemType += linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE ? 'VideoLink' : 'Video';
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 			itemType += "File";
