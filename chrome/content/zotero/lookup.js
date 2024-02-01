@@ -187,24 +187,6 @@ var Zotero_Lookup = new function () {
 	/**
 	 * Focuses the field
 	 */
-	this.onShowing = function (event) {
-		// Ignore context menu
-		if (event.originalTarget.id != 'zotero-lookup-panel') return;
-		
-		document.getElementById("zotero-lookup-panel").style.padding = "10px";
-		
-		// Resize arrow box to fit content
-		if (Zotero.isMac) {
-			let panel = document.getElementById("zotero-lookup-panel");
-			let box = panel.firstChild;
-			panel.sizeTo(box.scrollWidth, box.scrollHeight);
-		}
-	}
-	
-	
-	/**
-	 * Focuses the field
-	 */
 	this.onShown = function (event) {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
@@ -279,13 +261,6 @@ var Zotero_Lookup = new function () {
 
 		mlTxtBox.rows = on ? 5 : 1;
 		mlButtons.hidden = !on;
-
-		// Resize arrow box to fit content -- also done in onShowing()
-		if(Zotero.isMac) {
-			var panel = document.getElementById("zotero-lookup-panel");
-			var box = panel.firstChild;
-			panel.sizeTo(box.scrollWidth, box.scrollHeight);
-		}
 
 		return mlTxtBox;
 	};
