@@ -31,7 +31,6 @@
 			super();
 			
 			this.clickable = false;
-			this.editable = false;
 			this.saveOnEdit = false;
 			this.showTypeMenu = false;
 			this.hideEmptyFields = false;
@@ -40,8 +39,6 @@
 			
 			this.eventHandlers = [];
 			this.itemTypeMenu = null;
-			
-			this.showInFeeds = true;
 			
 			this._mode = 'view';
 			this._visibleFields = [];
@@ -231,7 +228,7 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 			Zotero.Prefs.registerObserver('fontSize', () => {
-				this.render(true);
+				this._forceRenderAll();
 			});
 			
 			this.style.setProperty('--comma-character',
@@ -253,7 +250,6 @@
 		
 		set mode(val) {
 			this.clickable = false;
-			this.editable = false;
 			this.saveOnEdit = false;
 			this.showTypeMenu = false;
 			this.hideEmptyFields = false;
@@ -266,7 +262,6 @@
 				
 				case 'edit':
 					this.clickable = true;
-					this.editable = true;
 					this.saveOnEdit = true;
 					this.showTypeMenu = true;
 					break;
@@ -282,6 +277,19 @@
 			
 			this._mode = val;
 			this.setAttribute('mode', val);
+
+			this._editable = this.mode == "edit";
+		}
+
+		get editable() {
+			return this._editable;
+		}
+
+		set editable(editable) {
+			// TODO: Replace `mode` with `editable`?
+			this.mode = editable ? "edit" : "view";
+			// Use the current `_editable` set by `mode`
+			super.editable = this._editable;
 		}
 		
 		get item() {
@@ -464,12 +472,12 @@
 				if (document.activeElement == this.itemTypeMenu) {
 					this._selectField = "item-type-menu";
 				}
-				this.render(true);
+				this._forceRenderAll();
 				break;
 			}
 		}
 		
-		render(force = false) {
+		render() {
 			Zotero.debug('Refreshing item box');
 
 			if (!this.item) {
@@ -481,9 +489,7 @@
 			// Always update retraction status
 			this.updateRetracted();
 
-			if (!force && this._isAlreadyRendered()) return;
-			
-			this.updateRetracted();
+			if (this._isAlreadyRendered()) return;
 
 			// Init tab index to begin after all creator rows
 			this._ztabindex = this._tabIndexMinCreators * (this.item.numCreators() || 1);
@@ -708,7 +714,7 @@
 								menuitem.getAttribute('fieldname'),
 								menuitem.getAttribute('originalValue')
 							);
-							this.render(true);
+							this._forceRenderAll();
 						});
 						popup.appendChild(menuitem);
 					}
@@ -1141,7 +1147,7 @@
 				// If the row is still hidden, no 'drop' event happened, meaning creator rows
 				// were not reordered. To make sure everything is in correct order, just refresh.
 				if (row.classList.contains("drag-hidden-creator")) {
-					this.render(true);
+					this._forceRenderAll();
 				}
 			});
 			
@@ -1186,12 +1192,12 @@
 			rowData.setAttribute("ztabindex", ++this._ztabindex);
 			rowData.addEventListener('click', () => {
 				this._displayAllCreators = true;
-				this.render(true);
+				this._forceRenderAll();
 			});
 			rowData.addEventListener('keypress', (e) => {
 				if (["Enter", ' '].includes(e.key)) {
 					this._displayAllCreators = true;
-					this.render(true);
+					this._forceRenderAll();
 				}
 			});
 			rowData.textContent = Zotero.getString('general.numMore', num);
@@ -1407,7 +1413,7 @@
 					await this.item.saveTx();
 				}
 				else {
-					this.render(true);
+					this._forceRenderAll();
 				}
 				
 				functionsToRun.forEach(f => f.bind(this)());

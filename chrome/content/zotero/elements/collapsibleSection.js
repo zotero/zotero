@@ -401,9 +401,9 @@
 			if (document.documentElement.getAttribute('windowtype') !== 'navigator:browser') {
 				return null;
 			}
-			if (!ZoteroContextPane) return null;
+			if (typeof ZoteroContextPane == "undefined") return null;
 			// TODO: update this after unifying item pane & context pane
-			return ZoteroContextPane.getSidenav();
+			return ZoteroContextPane.sidenav;
 		}
 		
 		render() {

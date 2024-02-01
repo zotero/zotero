@@ -67,12 +67,20 @@
 			this._data = data;
 		}
 
-		get viewMode() {
-			return this._viewMode;
+		get collectionTreeRow() {
+			return this._collectionTreeRow;
 		}
 
-		set viewMode(mode) {
-			this._viewMode = mode;
+		set collectionTreeRow(val) {
+			this._collectionTreeRow = val;
+		}
+
+		get itemsView() {
+			return this._itemsView;
+		}
+
+		set itemsView(val) {
+			this._itemsView = val;
 		}
 
 		get editable() {
@@ -81,17 +89,18 @@
 
 		set editable(editable) {
 			this._editable = editable;
+			this.toggleAttribute('readonly', !editable);
 		}
 
-		get viewType() {
+		get mode() {
 			return ["message", "item", "note", "duplicates"][this._deck.selectedIndex];
 		}
 
 		/**
-		 * Set view type
+		 * Set mode of item pane
 		 * @param {"message" | "item" | "note" | "duplicates"} type view type
 		 */
-		set viewType(type) {
+		set mode(type) {
 			this.setAttribute("view-type", type);
 		}
 
@@ -121,14 +130,14 @@
 
 		notify(action, type) {
 			if (type == 'item' && action == 'modify') {
-				if (this.viewMode.isFeedsOrFeed) {
+				if (this.collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();
 				}
 			}
 		}
 
 		renderNoteEditor(item) {
-			this.viewType = "note";
+			this.mode = "note";
 
 			let noteEditor = document.getElementById('zotero-note-editor');
 			noteEditor.mode = this.editable ? 'edit' : 'view';
@@ -139,9 +148,10 @@
 		}
 
 		renderItemPane(item) {
-			this.viewType = "item";
+			this.mode = "item";
 			
-			this._itemDetails.mode = this.editable ? null : "view";
+			this._itemDetails.editable = this.editable;
+			this._itemDetails.tabType = "library";
 			this._itemDetails.item = item;
 
 			if (this.hasAttribute("collapsed")) {
@@ -180,7 +190,7 @@
 			let count = this.data.length;
 			
 			// Display duplicates merge interface in item pane
-			if (this.viewMode.isDuplicates) {
+			if (this.collectionTreeRow.isDuplicates()) {
 				if (!this.editable) {
 					if (count) {
 						msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
@@ -191,11 +201,11 @@
 					this.setItemPaneMessage(msg);
 				}
 				else if (count) {
-					this.viewType = "duplicates";
+					this.mode = "duplicates";
 					
 					// On a Select All of more than a few items, display a row
 					// count instead of the usual item type mismatch error
-					let displayNumItemsOnTypeError = count > 5 && count == this.viewMode.rowCount;
+					let displayNumItemsOnTypeError = count > 5 && count == this.itemsView.rowCount;
 					
 					// Initialize the merge pane with the selected items
 					this._duplicatesPane.setItems(this.data, displayNumItemsOnTypeError);
@@ -211,7 +221,7 @@
 					msg = Zotero.getString('pane.item.selected.multiple', count);
 				}
 				else {
-					let rowCount = this.viewMode.rowCount;
+					let rowCount = this.itemsView.rowCount;
 					let str = 'pane.item.unselected.';
 					switch (rowCount) {
 						case 0:
@@ -235,7 +245,7 @@
 		}
 
 		setItemPaneMessage(msg) {
-			this.viewType = "message";
+			this.mode = "message";
 			this._messagePane.render(msg);
 		}
 		
@@ -258,7 +268,7 @@
 			}
 			
 			// My Publications buttons
-			var isPublications = this.viewMode.isPublications;
+			var isPublications = this.collectionTreeRow.isPublications();
 			// Show in My Publications view if selected items are all notes or non-linked-file attachments
 			var showMyPublicationsButtons = isPublications
 				&& this.data.every((item) => {
@@ -274,13 +284,13 @@
 
 			// Trash button
 			let nonDeletedItemsSelected = this.data.some(item => !item.deleted);
-			if (this.viewMode.isTrash && !nonDeletedItemsSelected) {
+			if (this.collectionTreeRow.isTrash() && !nonDeletedItemsSelected) {
 				container.renderCustomHead(this.renderTrashHead.bind(this));
 				return;
 			}
 			
 			// Feed buttons
-			if (this.viewMode.isFeedsOrFeed) {
+			if (this.collectionTreeRow.isFeedsOrFeed()) {
 				container.renderCustomHead(this.renderFeedHead.bind(this));
 				this.updateReadLabel();
 				return;
@@ -476,6 +486,10 @@
 			}
 		}
 
+		async handleBlur() {
+			await this._itemDetails.blurOpenField();
+		}
+
 		handleResize() {
 			if (this.getAttribute("collapsed")) {
 				this.removeAttribute("width");
@@ -491,14 +505,14 @@
 				if (!width || Number(width) < minWidth) this.setAttribute("width", String(minWidth));
 				if (!height || Number(height) < minHeight) this.setAttribute("height", String(minHeight));
 				// Render item pane after open
-				if ((!width || !height) && this.viewType == "item") {
+				if ((!width || !height) && this.mode == "item") {
 					this._itemDetails.render();
 				}
 			}
 		}
 
 		_handleViewTypeChange(type) {
-			let previousViewType = this.viewType;
+			let previousViewType = this.mode;
 			switch (type) {
 				case "message": {
 					this._deck.selectedIndex = 0;

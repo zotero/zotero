@@ -59,9 +59,7 @@
 			};
 			if (callback) callback({
 				doc: document,
-				append: (...args) => {
-					append(...Components.utils.cloneInto(args, window, { wrapReflectors: true, cloneFunctions: true }));
-				}
+				append,
 			});
 		}
 	}

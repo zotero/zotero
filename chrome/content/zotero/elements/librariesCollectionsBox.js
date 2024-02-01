@@ -42,18 +42,14 @@ import { getCSSIcon } from 'components/icons';
 			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 
-		_item = null;
-		
 		_linkedItems = [];
-
-		_mode = null;
 
 		get item() {
 			return this._item;
 		}
 
 		set item(item) {
-			if (item?.isRegularItem()) {
+			if (item?.isRegularItem() && !item?.isFeedItem) {
 				this.hidden = false;
 			}
 			else {
@@ -62,15 +58,6 @@ import { getCSSIcon } from 'components/icons';
 			}
 			this._item = item;
 			this._linkedItems = [];
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(mode) {
-			this._mode = mode;
-			this.setAttribute('mode', mode);
 		}
 
 		init() {
@@ -82,14 +69,14 @@ import { getCSSIcon } from 'components/icons';
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			this._section.removeEventListener('add', this._handleAdd);
+			this._section?.removeEventListener('add', this._handleAdd);
 		}
 
 		notify(action, type, ids) {
 			if (action == 'modify'
 					&& this._item
 					&& (ids.includes(this._item.id) || this._linkedItems.some(item => ids.includes(item.id)))) {
-				this.render(true);
+				this._forceRenderAll();
 			}
 		}
 		
@@ -127,7 +114,7 @@ import { getCSSIcon } from 'components/icons';
 			
 			row.append(box);
 			
-			if (this._mode == 'edit' && obj instanceof Zotero.Collection && !isContext) {
+			if (this.editable && obj instanceof Zotero.Collection && !isContext) {
 				let remove = document.createXULElement('toolbarbutton');
 				remove.className = 'zotero-clicky zotero-clicky-minus';
 				remove.setAttribute("tabindex", "0");
@@ -226,10 +213,10 @@ import { getCSSIcon } from 'components/icons';
 			return row;
 		}
 		
-		render(force = false) {
+		render() {
 			if (!this._item) return;
 			if (!this._section.open) return;
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			this._body.replaceChildren();
 			
@@ -239,15 +226,13 @@ import { getCSSIcon } from 'components/icons';
 					this._addObject(collection, item);
 				}
 			}
-			if (force) {
-				this.secondaryRender();
-			}
 		}
 
-		async secondaryRender() {
+		async asyncRender() {
 			if (!this._item) {
 				return;
 			}
+			if (this._isAlreadyRendered("async")) return;
 			// Skip if already rendered
 			if (this._linkedItems.length > 0) {
 				return;

@@ -46,7 +46,7 @@
 						data-l10n-id="sidenav-abstract"
 						data-pane="abstract"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper" hidden="true">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-attachment-preview"
@@ -64,13 +64,13 @@
 						data-l10n-id="sidenav-notes"
 						data-pane="notes"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper" hidden="true">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-attachment-info"
 						data-pane="attachment-info"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper" hidden="true">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-attachment-annotations"
@@ -127,7 +127,7 @@
 		set container(val) {
 			if (this._container == val) return;
 			this._container = val;
-			this.render(true);
+			this.render();
 		}
 		
 		get contextNotesPane() {
@@ -189,6 +189,7 @@
 		}
 		
 		init() {
+			this._buttonContainer = this.querySelector('.inherit-flex');
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
 				let pane = toolbarbutton.dataset.pane;
 				
@@ -266,14 +267,59 @@
 				this._contextNotesPane && !contextNotesPaneVisible);
 		}
 
+		addPane(paneID) {
+			let toolbarbutton = this.querySelector(`toolbarbutton[data-pane=${paneID}]`);
+			if (toolbarbutton) {
+				toolbarbutton.parentElement.hidden = false;
+				return;
+			}
+			let pane = this.container.getPane(paneID);
+			if (!pane) return;
+			let sidenavOptions = {};
+			try {
+				sidenavOptions = JSON.parse(pane.dataset.sidenavOptions);
+			}
+			catch (e) {}
+			let { icon, darkIcon, l10nID, l10nArgs } = sidenavOptions;
+			if (!darkIcon) darkIcon = icon;
+			toolbarbutton = document.createXULElement("toolbarbutton");
+			toolbarbutton.setAttribute("custom", "true");
+			toolbarbutton.dataset.pane = paneID;
+			toolbarbutton.dataset.l10nId = l10nID;
+			toolbarbutton.dataset.l10nArgs = l10nArgs;
+			toolbarbutton.style = `--custom-sidenav-icon-light: url('${icon}'); --custom-sidenav-icon-dark: url('${darkIcon}');`;
+			toolbarbutton.addEventListener('contextmenu', (event) => {
+				this._contextMenuTarget = paneID;
+				this.querySelector('.zotero-menuitem-pin').hidden = this.pinnedPane == paneID;
+				this.querySelector('.zotero-menuitem-unpin').hidden = this.pinnedPane != paneID;
+				this.querySelector('.context-menu')
+					.openPopupAtScreen(event.screenX, event.screenY, true);
+			});
+
+			let container = document.createElement("div");
+			container.classList.add("pin-wrapper");
+			container.classList.add("pinnable");
+			container.append(toolbarbutton);
+			if (this._defaultStatus) toolbarbutton.disabled = true;
+			toolbarbutton.parentElement.hidden = this._defaultStatus || !this.container.getEnabledPane(paneID);
+			this._buttonContainer.append(container);
+		}
+
+		removePane(paneID) {
+			let toolbarbutton = this.querySelector(`toolbarbutton[data-pane=${paneID}]`);
+			if (!toolbarbutton) return;
+			toolbarbutton.parentElement.remove();
+		}
+
 		updatePaneStatus(paneID) {
 			if (!paneID) {
 				this.render();
 				return;
 			}
+
 			let toolbarbutton = this.querySelector(`toolbarbutton[data-pane=${paneID}]`);
 			if (!toolbarbutton) return;
-			toolbarbutton.parentElement.hidden = !this.container.getPane(paneID);
+			toolbarbutton.parentElement.hidden = !this.container.getEnabledPane(paneID);
 			if (this.pinnedPane) {
 				if (paneID == this.pinnedPane && !toolbarbutton.parentElement.classList.contains("pinned")) {
 					this.querySelector(".pin-wrapper.pinned")?.classList.remove("pinned");
@@ -303,7 +349,7 @@
 				this.querySelectorAll('toolbarbutton').forEach((elem) => {
 					elem.disabled = false;
 				});
-				this.render(true);
+				this.render();
 			}
 		}
 

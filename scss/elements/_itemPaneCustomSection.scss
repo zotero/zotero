@@ -1,0 +1,45 @@
+item-pane-custom-section {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+	
+	.body {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+	}
+
+	collapsible-section {
+		&[custom] > .head {
+			& .title::before {
+				content: '';
+				width: 16px;
+				height: 16px;
+				-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+				fill: currentColor;
+				stroke: currentColor;
+		
+				@media (prefers-color-scheme: light) {
+					background: var(--custom-section-icon-light) no-repeat center;
+				}
+				@media (prefers-color-scheme: dark) {
+					background: var(--custom-section-icon-dark) no-repeat center;
+				}
+			}
+	
+			toolbarbutton.section-custom-button {
+				fill: currentColor;
+				-moz-context-properties: fill, fill-opacity;
+				@media (prefers-color-scheme: light) {
+					list-style-image: var(--custom-button-icon-light)
+				}
+				@media (prefers-color-scheme: dark) {
+					list-style-image: var(--custom-button-icon-dark)
+				}
+			}
+		}
+	}
+}
