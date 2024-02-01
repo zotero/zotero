@@ -9,7 +9,12 @@
 
     #zotero-collections-tree-container {
         min-width: 200px;
+		min-height: 100%;
     }
+
+	#zotero-items-pane-content {
+		min-height: 100%;
+	}
 
     #search-toolbar {
         display: flex;
