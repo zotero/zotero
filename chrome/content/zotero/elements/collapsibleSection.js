@@ -98,8 +98,16 @@
 			this.setAttribute('label', val);
 		}
 		
+		get summary() {
+			return this.getAttribute('summary');
+		}
+		
+		set summary(val) {
+			this.setAttribute('summary', val);
+		}
+		
 		static get observedAttributes() {
-			return ['open', 'empty', 'label', 'extra-buttons'];
+			return ['open', 'empty', 'label', 'summary', 'extra-buttons'];
 		}
 		
 		attributeChangedCallback(name) {
@@ -126,9 +134,18 @@
 			this._head.addEventListener('keydown', this._handleKeyDown);
 			this._head.addEventListener('contextmenu', this._handleContextMenu);
 
+			let titleBox = document.createElement('div');
+			titleBox.className = 'title-box';
+			
 			this._title = document.createElement('span');
 			this._title.className = 'title';
-			this._head.append(this._title);
+			titleBox.append(this._title);
+			
+			this._summary = document.createElement('span');
+			this._summary.className = 'summary';
+			titleBox.append(this._summary);
+
+			this._head.append(titleBox);
 
 			this._contextMenu = this._buildContextMenu();
 			if (this._contextMenu) {
@@ -403,6 +420,7 @@
 			
 			this._head.setAttribute('aria-expanded', this.open);
 			this._title.textContent = this.label;
+			this._summary.textContent = this.summary;
 			this._head.querySelector('.twisty').hidden = this._disableCollapsing;
 		}
 	}
