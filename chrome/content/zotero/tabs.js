@@ -347,24 +347,26 @@ var Zotero_Tabs = new function () {
 	/**
 	 * Undo tabs closing
 	 */
-	this.undoClose = function () {
+	this.undoClose = async function () {
 		var historyEntry = this._history.pop();
 		if (historyEntry) {
 			let maxIndex = -1;
+			let openPromises = [];
 			for (let tab of historyEntry) {
 				if (Zotero.Items.exists(tab.data.itemID)) {
-					Zotero.Reader.open(tab.data.itemID,
+					openPromises.push(Zotero.Reader.open(tab.data.itemID,
 						null,
 						{
 							tabIndex: tab.index,
 							openInBackground: true
 						}
-					);
+					));
 					if (tab.index > maxIndex) {
 						maxIndex = tab.index;
 					}
 				}
 			}
+			await Promise.all(openPromises);
 			// Select last reopened tab
 			if (maxIndex > -1) {
 				this.jump(maxIndex);
