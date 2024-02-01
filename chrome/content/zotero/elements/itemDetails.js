@@ -24,8 +24,6 @@
 */
 
 {
-	const AsyncFunction = (async () => {}).constructor;
-
 	const waitFrame = async () => {
 		return waitNoLongerThan(new Promise((resolve) => {
 			requestAnimationFrame(resolve);
@@ -93,12 +91,21 @@
 			this._cachedParentID = parentID;
 		}
 
-		get mode() {
-			return this._mode;
+		get editable() {
+			return this._editable;
 		}
 
-		set mode(mode) {
-			this._mode = mode;
+		set editable(editable) {
+			this._editable = editable;
+			this.toggleAttribute('readonly', !editable);
+		}
+
+		get tabType() {
+			return this._tabType;
+		}
+
+		set tabType(tabType) {
+			this._tabType = tabType;
 		}
 
 		get pinnedPane() {
@@ -106,12 +113,12 @@
 		}
 		
 		set pinnedPane(val) {
-			if (!val || !this.getPane(val)) {
+			if (!val || !this.getEnabledPane(val)) {
 				val = '';
 			}
 			this.setAttribute('pinnedPane', val);
 			if (val) {
-				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getPane(val));
+				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getEnabledPane(val));
 			}
 			this.sidenav.updatePaneStatus(val);
 		}
@@ -180,10 +187,12 @@
 			});
 			this._initIntersectionObserver();
 
-			this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'ItemDetails');
+			this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'itempane'], 'ItemDetails');
 
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
+
+			this._lastUpdateCustomSection = 0;
 		}
 
 		destroy() {
@@ -204,47 +213,22 @@
 			Zotero.debug('Viewing item');
 			this._isRendering = true;
 
+			this.renderCustomSections();
+
 			let panes = this.getPanes();
-			let pendingBoxes = [];
-			let inTrash = ZoteroPane.collectionsView.selectedTreeRow && ZoteroPane.collectionsView.selectedTreeRow.isTrash();
-			let tabType = Zotero_Tabs.selectedType;
 			for (let box of [this._header, ...panes]) {
-				if (!box.showInFeeds && item.isFeedItem) {
-					box.style.display = 'none';
-					box.hidden = true;
-					continue;
-				}
-				else {
-					box.style.display = '';
-					box.hidden = false;
-				}
-				
-				if (this.mode) {
-					box.mode = this.mode;
-					
-					if (box.mode == 'view') {
-						box.hideEmptyFields = true;
-					}
-				}
-				else {
-					box.mode = 'edit';
-				}
-				
+				box.editable = this.editable;
+				box.tabType = this.tabType;
 				box.item = item;
-				box.inTrash = inTrash;
-				box.tabType = tabType;
-				// Render sync boxes immediately
+				// Execute sync render immediately
 				if (!box.hidden && box.render) {
-					if (box.render instanceof AsyncFunction) {
-						pendingBoxes.push(box);
-					}
-					else {
+					if (box.render) {
 						box.render();
 					}
 				}
 			}
 
-			let pinnedPaneElem = this.getPane(this.pinnedPane);
+			let pinnedPaneElem = this.getEnabledPane(this.pinnedPane);
 			let pinnedIndex = panes.indexOf(pinnedPaneElem);
 			
 			this._paneParent.style.paddingBottom = '';
@@ -257,28 +241,18 @@
 				this._paneParent.scrollTo(0, 0);
 			}
 
-			// Only render visible panes
-			for (let box of pendingBoxes) {
+			// Only execute async render for visible panes
+			for (let box of panes) {
+				if (!box.asyncRender) {
+					continue;
+				}
 				if (pinnedIndex > -1 && panes.indexOf(box) < pinnedIndex) {
 					continue;
 				}
 				if (!this.isPaneVisible(box.dataset.pane)) {
 					continue;
 				}
-				await waitNoLongerThan(box.render(), 500);
-			}
-			// After all panes finish first rendering, try secondary rendering
-			for (let box of panes) {
-				if (!box.secondaryRender) {
-					continue;
-				}
-				if (pinnedIndex > -1 && panes.indexOf(box) < pinnedIndex) {
-					continue;
-				}
-				if (this.isPaneVisible(box.dataset.pane)) {
-					continue;
-				}
-				await waitNoLongerThan(box.secondaryRender(), 500);
+				await waitNoLongerThan(box.asyncRender(), 500);
 			}
 			if (this.item.id == item.id) {
 				this._isRendering = false;
@@ -303,20 +277,20 @@
 			// Create
 			let currentPaneIDs = currentPaneElements.map(elem => elem.dataset.pane);
 			for (let section of targetPanes) {
-				let { paneID, head, sidenav, fragment,
-					onInit, onDestroy, onDataChange, onRender, onSecondaryRender, onToggle,
+				let { paneID, head, sidenav, bodyXHTML,
+					onInit, onDestroy, onItemChange, onRender, onAsyncRender, onToggle,
 					sectionButtons } = section;
 				if (currentPaneIDs.includes(paneID)) continue;
 				let elem = new (customElements.get("item-pane-custom-section"));
 				elem.dataset.sidenavOptions = JSON.stringify(sidenav || {});
 				elem.paneID = paneID;
-				elem.fragment = fragment;
+				elem.bodyXHTML = bodyXHTML;
 				elem.registerSectionIcon({ icon: head.icon, darkIcon: head.darkIcon });
 				elem.registerHook({ type: "init", callback: onInit });
 				elem.registerHook({ type: "destroy", callback: onDestroy });
-				elem.registerHook({ type: "dataChange", callback: onDataChange });
+				elem.registerHook({ type: "itemChange", callback: onItemChange });
 				elem.registerHook({ type: "render", callback: onRender });
-				elem.registerHook({ type: "secondaryRender", callback: onSecondaryRender });
+				elem.registerHook({ type: "asyncRender", callback: onAsyncRender });
 				elem.registerHook({ type: "toggle", callback: onToggle });
 				if (sectionButtons) {
 					for (let buttonOptions of sectionButtons) {
@@ -335,13 +309,20 @@
 			this._header.renderCustomHead(callback);
 		}
 
-		notify = async (action, _type, _ids, _extraData) => {
+		notify = async (action, type, _ids, _extraData) => {
 			if (action == 'refresh' && this.item) {
+				if (type == 'item-pane') {
+					this.renderCustomSections();
+				}
 				await this.render();
 			}
 		};
 
 		getPane(id) {
+			return this._paneParent.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]`);
+		}
+
+		getEnabledPane(id) {
 			return this._paneParent.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]:not([hidden])`);
 		}
 
@@ -368,8 +349,12 @@
 			return visiblePanes;
 		}
 
+		getCustomPanes() {
+			return Array.from(this._paneParent.querySelectorAll(':scope > item-pane-custom-section[data-pane]'));
+		}
+
 		isPaneVisible(paneID) {
-			let paneElem = this.getPane(paneID);
+			let paneElem = this.getEnabledPane(paneID);
 			if (!paneElem) return false;
 			let paneRect = paneElem.getBoundingClientRect();
 			let containerRect = this._paneParent.getBoundingClientRect();
@@ -384,7 +369,7 @@
 		}
 
 		async scrollToPane(paneID, behavior = 'smooth') {
-			let pane = this.getPane(paneID);
+			let pane = this.getEnabledPane(paneID);
 			if (!pane) return null;
 
 			let scrollPromise;
@@ -486,7 +471,7 @@
 				// Ignore overscroll (which generates scroll events on Windows 11, unlike on macOS)
 				// and don't shrink below the pinned pane's min scroll height
 				if (newMinScrollHeight > this._paneParent.scrollHeight
-						|| this.getPane(this.pinnedPane) && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
+						|| this.getEnabledPane(this.pinnedPane) && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
 					return;
 				}
 				this._minScrollHeight = newMinScrollHeight;
@@ -539,6 +524,16 @@
 			}
 		};
 
+		/**
+		 * This function handles the intersection of panes with the viewport.
+		 * It triggers rendering and discarding of panes based on their visibility.
+		 * Panes are not rendered until they become visible in the viewport.
+		 * This approach prevents unnecessary rendering of all panes at once when switching items,
+		 * which can lead to slow performance and excessive battery usage,
+		 * especially for slow panes, e.g. attachment preview.
+		 * @param {IntersectionObserverEntry[]} entries
+		 * @returns {Promise<void>}
+		 */
 		_handleIntersection = async (entries) => {
 			if (this._isRendering) return;
 			let needsRefresh = [];
@@ -564,8 +559,8 @@
 					if (needsCheckVisibility && !this.isPaneVisible(paneElem.dataset.pane)) {
 						return;
 					}
-					await paneElem.render();
-					if (paneElem.secondaryRender) await paneElem.secondaryRender();
+					if (paneElem.render) paneElem.render();
+					if (paneElem.asyncRender) await paneElem.asyncRender();
 				});
 			}
 			if (needsDiscard.length > 0) {
@@ -573,7 +568,7 @@
 					if (needsCheckVisibility && this.isPaneVisible(paneElem.dataset.pane)) {
 						return;
 					}
-					paneElem.discard();
+					if (paneElem.discard) paneElem.discard();
 				});
 			}
 		};

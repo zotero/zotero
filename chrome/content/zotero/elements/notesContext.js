@@ -62,6 +62,7 @@
 
 		set editable(editable) {
 			this._editable = editable;
+			this.toggleAttribute('readonly', !editable);
 		}
 
 		get libraryID() {
@@ -90,20 +91,21 @@
 			this.node.selectedPanel = selectedPanel;
 		}
 
-		get viewType() {
+		get mode() {
 			return ["notesList", "standaloneNote", "childNote"][this.node.selectedIndex];
 		}
 
-		set viewType(viewType) {
-			let viewTypeMap = {
+		set mode(mode) {
+			let modeMap = {
 				notesList: "0",
 				standaloneNote: "1",
 				childNote: "2",
 			};
-			if (!(viewType in viewTypeMap)) {
-				throw new Error(`NotesContext.viewType must be one of ["notesList", "standaloneNote", "childNote"], but got ${viewType}`);
+			if (!(mode in modeMap)) {
+				throw new Error(`NotesContext.mode must be one of ["notesList", "standaloneNote", "childNote"], but got ${mode}`);
 			}
-			this.node.setAttribute("selectedIndex", viewTypeMap[viewType]);
+			// fx115: setting attribute doesn't work
+			this.node.selectedIndex = modeMap[mode];
 		}
 
 		static get observedAttributes() {
@@ -124,8 +126,6 @@
 
 		affectedIDs = new Set();
 
-		updateFromCache = () => this._updateNotesList(true);
-		
 		init() {
 			this.node = this.querySelector(".context-node");
 			this.editor = this.querySelector(".zotero-context-pane-pinned-note");
@@ -143,7 +143,7 @@
 		}
 
 		focus() {
-			if (this.viewType == "notesList") {
+			if (this.mode == "notesList") {
 				this.input.focus();
 				return true;
 			}
@@ -218,7 +218,7 @@
 		}
 
 		_createNote(child) {
-			this.viewType = "standaloneNote";
+			this.mode = "standaloneNote";
 			let item = new Zotero.Item('note');
 			item.libraryID = this.libraryID;
 			if (child) {
@@ -236,17 +236,17 @@
 		}
 
 		_isNotesListVisible() {
-			let splitter = ZoteroContextPane.getSplitter();
+			let splitter = ZoteroContextPane.splitter;
 			
 			return Zotero_Tabs.selectedID != 'zotero-pane'
-				&& ZoteroContextPane.viewType == "notes"
-				&& this.viewType == "notesList"
+				&& ZoteroContextPane.context.mode == "notes"
+				&& this.mode == "notesList"
 				&& splitter.getAttribute('state') != 'collapsed';
 		}
 
 		_getCurrentEditor() {
-			let splitter = ZoteroContextPane.getSplitter();
-			if (splitter.getAttribute('state') == 'collapsed' || ZoteroContextPane.viewType != "notes") return null;
+			let splitter = ZoteroContextPane.splitter;
+			if (splitter.getAttribute('state') == 'collapsed' || ZoteroContextPane.context.mode != "notes") return null;
 			return this.node.selectedPanel.querySelector('note-editor');
 		}
 
@@ -289,13 +289,13 @@
 				editor.item = item;
 				editor.parentItem = null;
 
-				this.viewType = "childNote";
+				this.mode = "childNote";
 				tabNotesDeck.setAttribute('selectedIndex', tabNotesDeck.children.length - 1);
 
 				parentTitleContainer = this.querySelector('.context-note-child > .zotero-context-pane-editor-parent-line');
 			}
 			else {
-				this.viewType = "standaloneNote";
+				this.mode = "standaloneNote";
 				editor.mode = this.editable ? 'edit' : 'view';
 				editor.item = item;
 				editor.parentItem = null;
@@ -313,8 +313,8 @@
 			returnBtn.addEventListener("command", () => {
 				// Immediately save note content before vbox with note-editor iframe is destroyed below
 				editor.saveSync();
-				ZoteroContextPane.viewType = "notes";
-				this.viewType = "notesList";
+				ZoteroContextPane.context.mode = "notes";
+				this.mode = "notesList";
 				vbox?.remove();
 				ZoteroContextPane.updateAddToNote();
 				this._preventViewTypeCache = true;
@@ -325,6 +325,10 @@
 			container.append(returnBtn, title);
 			parentTitleContainer.replaceChildren(container);
 			ZoteroContextPane.updateAddToNote();
+		}
+
+		updateNotesListFromCache() {
+			this._updateNotesList(true);
 		}
 
 		async _updateNotesList(useCached) {
@@ -417,16 +421,15 @@
 		}
 
 		_cacheViewType() {
-			if (ZoteroContextPane.viewType == "notes"
-				&& this.viewType != "childNote" && !this._preventViewTypeCache) {
-				this._cachedViewType = this.viewType;
+			if (ZoteroContextPane.context.mode == "notes"
+				&& this.mode != "childNote" && !this._preventViewTypeCache) {
+				this._cachedViewType = this.mode;
 			}
 			this._preventViewTypeCache = false;
 		}
 
 		_restoreViewType() {
-			if (!this._cachedViewType) return;
-			this.viewType = this._cachedViewType;
+			this.mode = this._cachedViewType || "notesList";
 			this._cachedViewType = "";
 		}
 

@@ -48,7 +48,6 @@
 			this._tabDirection = null;
 			this._tagColors = [];
 			this._notifierID = null;
-			this._mode = 'view';
 			this._item = null;
 
 			this.initCollapsibleSection();
@@ -90,34 +89,8 @@
 		}
 
 		destroy() {
-			this._section.removeEventListener('add', this._handleAddButtonClick);
+			this._section?.removeEventListener('add', this._handleAddButtonClick);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			this.clickable = false;
-			this.editable = false;
-
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-					break;
-
-				case 'edit':
-					this.clickable = true;
-					this.editable = true;
-					break;
-
-				default:
-					throw new Error(`Invalid mode ${val}`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
 		}
 
 		get item() {
@@ -125,6 +98,7 @@
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			// Don't reload if item hasn't changed
 			if (this._item == val) {
 				return;
@@ -134,7 +108,7 @@
 
 		notify(event, type, ids, extraData) {
 			if (type == 'setting' && ids.some(val => val.split("/")[1] == 'tagColors') && this.item) {
-				this.render(true);
+				this._forceRenderAll();
 			}
 			else if (type == 'item-tag') {
 				let itemID, _tagID;
@@ -164,13 +138,13 @@
 				this.updateCount();
 			}
 			else if (type == 'tag' && event == 'modify') {
-				this.render(true);
+				this._forceRenderAll();
 			}
 		}
 
-		render(force = false) {
+		render() {
 			if (!this.item) return;
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			Zotero.debug('Reloading tags box');
 
@@ -297,7 +271,7 @@
 							await item.saveTx();
 						}
 						catch (e) {
-							this.render(true);
+							this._forceRenderAll();
 							throw e;
 						}
 					}
@@ -471,7 +445,7 @@
 							await this.item.saveTx();
 						}
 						catch (e) {
-							this.render(true);
+							this._forceRenderAll();
 							throw e;
 						}
 					}
@@ -488,7 +462,7 @@
 						await this.item.saveTx();
 					}
 					catch (e) {
-						this.render(true);
+						this._forceRenderAll();
 						throw e;
 					}
 				}
@@ -511,7 +485,7 @@
 
 				tags.forEach(tag => this.item.addTag(tag));
 				await this.item.saveTx();
-				this.render(true);
+				this._forceRenderAll();
 			}
 			// Single tag at end
 			else {
@@ -529,7 +503,7 @@
 					await this.item.saveTx();
 				}
 				catch (e) {
-					this.render(true);
+					this._forceRenderAll();
 					throw e;
 				}
 			}

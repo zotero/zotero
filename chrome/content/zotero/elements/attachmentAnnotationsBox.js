@@ -37,7 +37,7 @@
 		}
 
 		set tabType(tabType) {
-			this._tabType = tabType;
+			super.tabType = tabType;
 			this._updateHidden();
 		}
 		
@@ -46,7 +46,7 @@
 		}
 
 		set item(item) {
-			this._item = item;
+			super.item = item;
 			this._updateHidden();
 		}
 
@@ -60,13 +60,13 @@
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render(true);
+				this._forceRenderAll();
 			}
 		}
 
-		render(force = false) {
+		render() {
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			let annotations = this.item.getAnnotations();
 			this._section.setCount(annotations.length);

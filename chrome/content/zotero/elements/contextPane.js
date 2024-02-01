@@ -43,19 +43,24 @@
 			sidenav.contextNotesPane = this._notesPaneDeck;
 		}
 
-		get viewType() {
+		get mode() {
 			return ["item", "notes"][this._panesDeck.getAttribute('selectedIndex')];
 		}
 
-		set viewType(viewType) {
-			let viewTypeMap = {
+		set mode(mode) {
+			let modeMap = {
 				item: "0",
 				notes: "1",
 			};
-			if (!(viewType in viewTypeMap)) {
-				throw new Error(`ContextPane.viewType must be one of ["item", "notes"], but got ${viewType}`);
+			if (!(mode in modeMap)) {
+				throw new Error(`ContextPane.mode must be one of ["item", "notes"], but got ${mode}`);
 			}
-			this._panesDeck.setAttribute("selectedIndex", viewTypeMap[viewType]);
+			this._panesDeck.selectedIndex = modeMap[mode];
+		}
+
+		get activeEditor() {
+			let currentContext = this._getCurrentNotesContext();
+			return currentContext?._getCurrentEditor();
 		}
 
 		init() {
@@ -153,7 +158,7 @@
 
 		_handleTabSelect(action, type, ids) {
 			// TEMP: move these variables to ZoteroContextPane
-			let _contextPaneSplitter = document.getElementById('zotero-context-splitter');
+			let _contextPaneSplitter = ZoteroContextPane.splitter;
 			let _contextPane = document.getElementById('zotero-context-pane');
 			// It seems that changing `hidden` or `collapsed` values might
 			// be related with significant slow down when there are too many
@@ -161,7 +166,7 @@
 			if (Zotero_Tabs.selectedType == 'library') {
 				_contextPaneSplitter.setAttribute('hidden', true);
 				_contextPane.setAttribute('collapsed', true);
-				ZoteroContextPane.showTabCover(false);
+				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
 			else if (Zotero_Tabs.selectedType == 'reader') {
@@ -191,9 +196,9 @@
 			if (!reader) {
 				return;
 			}
-			ZoteroContextPane.showTabCover(true);
+			ZoteroContextPane.showLoadingMessage(true);
 			await reader._initPromise;
-			ZoteroContextPane.showTabCover(false);
+			ZoteroContextPane.showLoadingMessage(false);
 			// Focus reader pages view if context pane note editor is not selected
 			if (Zotero_Tabs.selectedID == reader.tabID
 				&& !Zotero_Tabs.isTabsMenuVisible()
@@ -209,7 +214,7 @@
 			if (attachment) {
 				this._selectNotesContext(attachment.libraryID);
 				let notesContext = this._getNotesContext(attachment.libraryID);
-				notesContext.updateFromCache();
+				notesContext.updateNotesListFromCache();
 			}
 
 			let currentNoteContext = this._getCurrentNotesContext();
@@ -217,7 +222,7 @@
 			let selectedIndex = Array.from(tabNotesDeck.children).findIndex(x => x.getAttribute('data-tab-id') == reader.tabID);
 			if (selectedIndex != -1) {
 				tabNotesDeck.setAttribute('selectedIndex', selectedIndex);
-				currentNoteContext.viewType = "childNote";
+				currentNoteContext.mode = "childNote";
 			}
 			else {
 				currentNoteContext._restoreViewType();
@@ -253,26 +258,23 @@
 			context?.remove();
 		}
 
-		_getActiveEditor() {
-			let currentContext = this._getCurrentNotesContext();
-			return currentContext?._getCurrentEditor();
-		}
-
 		_getItemContext(tabID) {
 			return this._itemPaneDeck.querySelector(`[data-tab-id="${tabID}"]`);
 		}
 
 		_removeItemContext(tabID) {
-			this._itemPaneDeck.querySelector(`[data-tab-id="${tabID}"]`).remove();
+			this._itemPaneDeck.querySelector(`[data-tab-id="${tabID}"]`)?.remove();
 		}
 	
 		_selectItemContext(tabID) {
-			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
+			let previousContainer = this._sidenav.container;
 			let selectedPanel = this._getItemContext(tabID);
 			if (selectedPanel) {
 				this._itemPaneDeck.selectedPanel = selectedPanel;
 				selectedPanel.sidenav = this._sidenav;
-				if (previousPinnedPane) selectedPanel.pinnedPane = previousPinnedPane;
+				// Inherits previous pinned states
+				if (previousContainer) selectedPanel.pinnedPane = previousContainer.pinnedPane;
+				selectedPanel.render();
 			}
 		}
 	
@@ -286,7 +288,7 @@
 				return;
 			}
 			libraryID = item.libraryID;
-			let readOnly = !Zotero.Libraries.get(libraryID).editable;
+			let editable = Zotero.Libraries.get(libraryID).editable;
 			let parentID = item.parentID;
 	
 			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
@@ -299,7 +301,8 @@
 			itemDetails.className = 'zotero-item-pane-content';
 			this._itemPaneDeck.appendChild(itemDetails);
 	
-			itemDetails.mode = readOnly ? "view" : null;
+			itemDetails.editable = editable;
+			itemDetails.tabType = "reader";
 			itemDetails.item = targetItem;
 			// Manually cache parentID
 			itemDetails.parentID = parentID;
@@ -313,14 +316,13 @@
 			}
 		}
 	
-		_focus() {
-			let splitter = ZoteroContextPane.getSplitter();
-			let node;
+		handleFocus() {
+			let splitter = ZoteroContextPane.splitter;
 	
 			if (splitter.getAttribute('state') != 'collapsed') {
-				if (this.viewType == "item") {
-					node = this._itemPaneDeck.selectedPanel;
-					node.focus();
+				if (this.mode == "item") {
+					let header = this._itemPaneDeck.selectedPanel.querySelector("pane-header editable-text");
+					header.focus();
 					return true;
 				}
 				else {
