@@ -1198,7 +1198,7 @@ var ZoteroPane = new function()
 		if (this.itemsView && from == this.itemsView.id) {
 			// Focus TinyMCE explicitly on tab key, since the normal focusing doesn't work right
 			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
-				if (ZoteroPane.itemPane.viewType == "note") {
+				if (ZoteroPane.itemPane.mode == "note") {
 					document.getElementById('zotero-note-editor').focus();
 					event.preventDefault();
 					return;
@@ -1347,7 +1347,7 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		yield this.itemPane._itemDetails.blurOpenField();
+		yield this.itemPane.handleBlur();
 		
 		if (row !== undefined && row !== null) {
 			var collectionTreeRow = this.collectionsView.getRow(row);
@@ -1845,14 +1845,8 @@ var ZoteroPane = new function()
 			// Display buttons at top of item pane depending on context. This needs to run even if the
 			// selection hasn't changed, because the selected items might have been modified.
 			this.itemPane.data = selectedItems;
-			let viewMode = {
-			isFeedsOrFeed: collectionTreeRow.isFeedsOrFeed(),
-			isDuplicates: collectionTreeRow.isDuplicates(),
-			isPublications: collectionTreeRow.isPublications(),
-			isTrash: collectionTreeRow.isTrash(),
-			rowCount: this.itemsView.rowCount,
-			};
-			this.itemPane.viewMode = viewMode;
+			this.itemPane.collectionTreeRow = collectionTreeRow;
+			this.itemPane.itemsView = this.itemsView;
 			this.itemPane.editable = this.collectionsView.editable;
 			this.itemPane.updateItemPaneButtons(selectedItems);
 			
@@ -2222,11 +2216,11 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		this.itemPane.viewType = "duplicates";
+		this.itemPane.mode = "duplicates";
 		
 		// Initialize the merge pane with the selected items
 		this.itemPane._duplicatesPane.setItems(this.getSelectedItems());
-	}
+	};
 	
 	
 	this.deleteSelectedCollection = function (deleteItems) {

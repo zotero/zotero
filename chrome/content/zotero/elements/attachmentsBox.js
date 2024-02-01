@@ -37,13 +37,7 @@
 			<popupset/>
 		`);
 
-		_item = null;
-		
 		_attachmentIDs = [];
-
-		_mode = null;
-		
-		_inTrash = false;
 
 		_preview = null;
 
@@ -56,37 +50,18 @@
 				return;
 			}
 			
-			this._item = item;
+			super.item = item;
 			let hidden = !item?.isRegularItem() || item?.isFeedItem;
 			this.hidden = hidden;
 			this._preview.disableResize = !!hidden;
 		}
-		
+
 		get inTrash() {
-			return this._inTrash;
-		}
-		
-		set inTrash(inTrash) {
-			if (this._inTrash === inTrash) {
-				return;
+			if (this.tabType != "library") {
+				return false;
 			}
-			this._inTrash = inTrash;
-			if (!this._item?.isRegularItem()) {
-				return;
-			}
-			for (let row of Array.from(this._attachments.querySelectorAll("attachment-row"))) {
-				this._updateRowAttributes(row, row.attachment);
-			}
-			this.updateCount();
-		}
-
-		get tabType() {
-			return this._tabType;
-		}
-
-		set tabType(tabType) {
-			this._tabType = tabType;
-			this._updateHidden();
+			return ZoteroPane.collectionsView.selectedTreeRow
+				&& ZoteroPane.collectionsView.selectedTreeRow.isTrash();
 		}
 
 		get usePreview() {
@@ -116,7 +91,7 @@
 		}
 
 		destroy() {
-			this._section.removeEventListener('add', this._handleAdd);
+			this._section?.removeEventListener('add', this._handleAdd);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
@@ -175,9 +150,15 @@
 			return row;
 		}
 
-		async render(force = false) {
+		render() {
 			if (!this._item) return;
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
+			this.updateCount();
+		}
+
+		async asyncRender() {
+			if (!this._item) return;
+			if (this._isAlreadyRendered("async")) return;
 			
 			await this._updateAttachmentIDs();
 
@@ -187,12 +168,11 @@
 			for (let attachment of itemAttachments) {
 				this.addRow(attachment);
 			}
-			this.updateCount();
 			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 		}
 		
 		updateCount() {
-			let count = this._item.numAttachments(this._inTrash);
+			let count = this._item.numAttachments(this.inTrash);
 			this._section.setCount(count);
 		}
 
@@ -249,11 +229,9 @@
 		};
 		
 		_updateRowAttributes(row, attachment) {
-			let hidden = !this._inTrash && attachment.deleted;
-			let context = this._inTrash && !this._item.deleted && !attachment.deleted;
+			let hidden = !this.inTrash && attachment.deleted;
 			row.attachment = attachment;
 			row.hidden = hidden;
-			row.contextRow = context;
 		}
 
 		async _updateAttachmentIDs() {
@@ -270,10 +248,6 @@
 				sortedAttachmentIDs = allAttachmentIDs;
 			}
 			this._attachmentIDs = sortedAttachmentIDs;
-		}
-
-		_updateHidden() {
-			this.hidden = !this._item?.isRegularItem();
 		}
 	}
 	customElements.define("attachments-box", AttachmentsBox);

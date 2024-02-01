@@ -1,6 +1,10 @@
 tags-box {
 	display: flex;
 	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
 	
 	.body {
 		display: flex;
@@ -72,7 +76,7 @@ tags-box {
 		}
 	}
 
-	&:not([mode=edit]) {
+	&[readonly] {
 		.add {
 			display: none;
 		}

@@ -100,11 +100,6 @@ tab {
 	-moz-box-align: center;
 }
 
-#output {
-	height:200px;
-	background: var(--material-background);
-}
-
 richlistbox {
 	min-width:200px;
 }
@@ -129,11 +124,13 @@ vbox > splitter {
 
 #left-tabbox {
 	margin: 5px;
+	width: 100% !important;
 }
 
-#checkboxes-translatorType checkbox {
-	margin-right: 10px;
-	display: inline-block;
+#checkboxes-translatorType {
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
 }
 
 #tabpanel-metadata label:first-child {
@@ -143,7 +140,11 @@ vbox > splitter {
 #right-pane {
 	margin: -16px -16px -16px 0px;
 	border-left: var(--material-panedivider);
-	textarea {
+
+	#output {
+		width: 100%;
+		height: 100%;
+		background: var(--material-background);
 		outline: none;
 		border: 0;
 	}

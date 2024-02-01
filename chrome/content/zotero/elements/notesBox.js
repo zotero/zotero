@@ -36,7 +36,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		`);
 		
 		init() {
-			this._mode = 'view';
 			this._item = null;
 			this._noteIDs = [];
 			this.initCollapsibleSection();
@@ -45,35 +44,16 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 		
 		destroy() {
-			this._section.removeEventListener('add', this._handleAdd);
+			this._section?.removeEventListener('add', this._handleAdd);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 		
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
-			if (val?.isRegularItem()) {
+			if (val?.isRegularItem() && !val?.isFeedItem) {
 				this.hidden = false;
 			}
 			else {
@@ -85,15 +65,15 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 		notify(event, type, ids, _extraData) {
 			if (['modify', 'delete'].includes(event) && ids.some(id => this._noteIDs.includes(id))) {
-				this.render(true);
+				this._forceRenderAll();
 			}
 		}
 
-		render(force = false) {
+		render() {
 			if (!this._item) {
 				return;
 			}
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			this._noteIDs = this._item.getNotes();
 
@@ -123,7 +103,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 				row.append(box);
 
-				if (this._mode == 'edit') {
+				if (this.editable) {
 					let remove = document.createXULElement("toolbarbutton");
 					remove.addEventListener('command', () => this._handleRemove(id));
 					remove.className = 'zotero-clicky zotero-clicky-minus';

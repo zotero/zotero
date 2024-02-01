@@ -415,7 +415,7 @@
 			</hbox>
 		</toolbar>
 		<hbox id="appcontent" flex="1">
-			<tabbox id="left-tabbox" flex="2" width="300">
+			<tabbox id="left-tabbox" flex="1" width="300">
 				<tabs id="tabs">
 					<tab id="tab-metadata" label="&scaffold.tabs.metadata.label;"/>
 					<tab id="tab-code" label="&scaffold.tabs.code.label;"/>
@@ -541,8 +541,8 @@
 			</tabbox>
 			<splitter id="pane-splitter" resizeafter="farthest" />
 
-			<vbox id="right-pane" flex="1">
-				<html:textarea style="-moz-box-flex: 1" id="output" readonly="true"/>
+			<vbox id="right-pane">
+				<html:textarea id="output" readonly="true"/>
 			</vbox>
 		</hbox>
 

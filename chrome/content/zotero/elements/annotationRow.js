@@ -38,8 +38,6 @@
 
 		_annotation = null;
 
-		_mode = null;
-
 		_listenerAdded = false;
 
 		static get observedAttributes() {
