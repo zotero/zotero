@@ -70,6 +70,10 @@ editable-text {
 		--width-focus-border: 1px;
 		--radius-focus-border: 5px;
 		
+		// No focus ring for read-only fields
+		&:read-only {
+			--width-focus-border: 0px;
+		}
 		@include focus-ring;
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;
