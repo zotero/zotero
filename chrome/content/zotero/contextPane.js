@@ -867,10 +867,6 @@ var ZoteroContextPane = new function () {
 		main.className = 'zotero-view-item-main';
 		hbox.append(main);
 		
-		// pane-header
-		var paneHeader = document.createXULElement('pane-header');
-		main.append(paneHeader);
-
 		// div
 		var div = document.createElement('div');
 		div.className = 'zotero-view-item';
@@ -905,9 +901,6 @@ var ZoteroContextPane = new function () {
 		relatedBox.className = 'zotero-editpane-related';
 		relatedBox.setAttribute('data-pane', 'related');
 		div.append(relatedBox);
-
-		paneHeader.mode = readOnly ? 'view' : 'edit';
-		paneHeader.item = targetItem;
 
 		itemBox.mode = readOnly ? 'view' : 'edit';
 		itemBox.item = targetItem;

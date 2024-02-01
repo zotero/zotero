@@ -311,9 +311,6 @@ pane-attachment-info = Attachment Info
 pane-attachment-preview = Preview
 pane-attachment-annotations = Annotations
 
-pane-header-attachment-associated =
-    .label = Rename associated file
-
 section-info =
     .label = { pane-info }
 section-abstract =

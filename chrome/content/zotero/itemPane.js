@@ -25,7 +25,7 @@
 
 var ZoteroItemPane = new function() {
 	var _container;
-	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _attachmentInfoBox, _attachmentAnnotationsBox, _tagsBox, _notesBox, _librariesCollectionsBox, _relatedBox, _boxes;
+	var _sidenav, _scrollParent, _itemBox, _abstractBox, _attachmentsBox, _attachmentInfoBox, _attachmentAnnotationsBox, _tagsBox, _notesBox, _librariesCollectionsBox, _relatedBox, _boxes;
 	var _deck;
 	var _lastItem;
 	var _selectedNoteID;
@@ -37,7 +37,6 @@ var ZoteroItemPane = new function() {
 		}
 		
 		_container = document.getElementById('zotero-view-item-container');
-		_header = document.getElementById('zotero-item-pane-header');
 		_sidenav = document.getElementById('zotero-view-item-sidenav');
 		_scrollParent = document.getElementById('zotero-view-item');
 		_itemBox = document.getElementById('zotero-editpane-item-box');
@@ -95,7 +94,7 @@ var ZoteroItemPane = new function() {
 		}
 		
 		let inTrash = ZoteroPane.collectionsView.selectedTreeRow && ZoteroPane.collectionsView.selectedTreeRow.isTrash();
-		for (let box of [_header, ..._boxes]) {
+		for (let box of _boxes) {
 			if (!box.showInFeeds && item.isFeedItem) {
 				box.style.display = 'none';
 				box.hidden = true;
@@ -150,9 +149,6 @@ var ZoteroItemPane = new function() {
 	this.blurOpenField = async function () {
 		if (_itemBox.contains(document.activeElement)) {
 			await _itemBox.blurOpenField();
-		}
-		else if (_header.contains(document.activeElement)) {
-			await _header.blurOpenField();
 		}
 		_scrollParent.focus();
 	};

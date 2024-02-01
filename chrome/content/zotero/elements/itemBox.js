@@ -95,6 +95,9 @@
 									<div id="retraction-hide"><button/></div>
 								</div>
 							</div>
+							<sticky xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+								<html:div id="title-box"/>
+							</sticky>
 							<div id="info-table"></div>
 						</div>
 					</html:div>
@@ -465,6 +468,10 @@
 			return this._id('zotero-link-menu');
 		}
 		
+		get _titleBox() {
+			return this._id('title-box');
+		}
+		
 		
 		//
 		// Methods
@@ -502,6 +509,8 @@
 			// Init tab index to begin after all creator rows
 			this._ztabindex = this._tabIndexMinCreators * (this.item.numCreators() || 1);
 			delete this._linkMenu.dataset.link;
+			
+			this.updateTitleBox();
 			
 			//
 			// Clear and rebuild metadata fields
@@ -878,6 +887,32 @@
 			this.querySelectorAll("menupopup").forEach((popup) => {
 				popup.hidePopup();
 			});
+		}
+		
+		updateTitleBox() {
+			let titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
+			let titleFieldName = Zotero.ItemFields.getName(titleFieldID);
+			
+			let valueElem = this.createValueElement(this.item.getField(titleFieldID), titleFieldName);
+			valueElem.placeholder = Zotero.ItemFields.getLocalizedString(titleFieldID);
+			valueElem.addEventListener('contextmenu', (event) => {
+				if (!this.item) return;
+
+				event.preventDefault();
+				let oldValue = valueElem.value;
+				let menupopup = ZoteroItemPane.buildFieldTransformMenu({
+					value: oldValue,
+					onTransform: (newValue) => {
+						this._setFieldTransformedValue(valueElem, newValue);
+					},
+					includeEditMenuOptions: true
+				});
+				this.ownerDocument.querySelector('popupset').append(menupopup);
+				menupopup.addEventListener('popuphidden', () => menupopup.remove());
+				menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
+			});
+
+			this._titleBox.replaceChildren(valueElem);
 		}
 		
 		addItemTypeMenu() {
@@ -2070,6 +2105,13 @@
 			var fieldName = label.getAttribute('fieldname');
 			this._modifyField(fieldName, newValue);
 			
+			if (Zotero.ItemFields.isFieldOfBase(fieldName, 'title')) {
+				let shortTitleVal = this.item.getField('shortTitle');
+				if (newValue.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
+					this.item.setField('shortTitle', newValue.substr(0, shortTitleVal.length));
+				}
+			}
+
 			if (this.saveOnEdit) {
 				// If a field is open, blur it, which will trigger a save and cause
 				// the saveTx() to be a no-op

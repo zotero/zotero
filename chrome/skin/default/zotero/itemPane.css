@@ -23,6 +23,9 @@
 	display: flex;
 	flex-direction: column;
 	background: var(--material-sidepane);
+	
+	/* Set a dummy transform so that position: fixed elements are positioned relative to this */
+	transform: translate(0);
 }
 
 .zotero-view-item {

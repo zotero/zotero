@@ -18,6 +18,11 @@ attachment-box {
 		flex-direction: column;
 		gap: 2px;
 	}
+	
+	#attachment-title {
+		color: var(--fill-primary);
+		font-weight: 700;
+	}
 
 	.metadata-table {
 		@include meta-table;

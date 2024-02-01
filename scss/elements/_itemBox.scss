@@ -25,6 +25,11 @@ item-box {
 	.drag-hidden-creator {
 		opacity: 0;
 	}
+	
+	#title-box editable-text {
+		color: var(--fill-primary);
+		font-weight: 700;
+	}
 
 	#item-type-menu {
 		@include focus-ring;

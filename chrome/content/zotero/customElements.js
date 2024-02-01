@@ -47,7 +47,6 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/elements/splitMenuB
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/tagsBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/textLink.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/zoteroSearch.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/paneHeader.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/editableText.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSidenav.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/abstractBox.js', this);
@@ -59,6 +58,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotation
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextNotesList.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteRow.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesCollectionsBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/sticky.js', this);
 
 {
 	// Fix missing property bug that breaks arrow key navigation between <tab>s

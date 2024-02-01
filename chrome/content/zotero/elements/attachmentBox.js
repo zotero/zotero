@@ -32,6 +32,11 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
+					<sticky>
+						<html:div id="attachment-title-box">
+							<editable-text id="attachment-title" nowrap="true" tight="true"/>
+						</html:div>
+					</sticky>
 					<attachment-preview id="attachment-preview" tabindex="0"/>
 					<label id="url" crop="end" tabindex="0"
 						ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
@@ -205,6 +210,12 @@
 			this._id('url').addEventListener('contextmenu', (event) => {
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
+			
+			let title = this._id('attachment-title');
+			title.addEventListener('blur', () => {
+				this._item.setField('title', title.value);
+				this._item.saveTx();
+			});
 
 			let fileName = this._id("fileName");
 			fileName.addEventListener('focus', () => {
@@ -296,6 +307,7 @@
 				this._preview.item = this.item;
 			}
 			
+			let title = this._id('attachment-title');
 			let fileNameRow = this._id('fileNameRow');
 			let urlField = this._id('url');
 			let accessed = this._id('accessedRow');
@@ -307,6 +319,10 @@
 			let fileExists = this._item.isFileAttachment() && await this._item.fileExists();
 			let isImportedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			let isLinkedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
+
+			title.placeholder = Zotero.ItemFields.getLocalizedString('title');
+			title.value = this.item.getField('title');
+			title.readOnly = !this.editable;
 			
 			// URL
 			if (this.displayURL && (isImportedURL || isLinkedURL)) {
