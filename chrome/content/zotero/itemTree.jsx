@@ -1367,9 +1367,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				if (sortField == 'hasAttachment') {
 					// PDFs at the top
-					const order = ['pdf', 'snapshot', 'epub', 'other', 'none'];
-					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : 4);
-					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : 4);
+					const order = ['pdf', 'snapshot', 'epub', 'image', 'video', 'other', 'none'];
+					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : (order.length - 1));
+					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : (order.length - 1));
 					return fieldA - fieldB;
 				}
 
