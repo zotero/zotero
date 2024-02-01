@@ -278,11 +278,13 @@ TODO: Replace with SVG
 	margin: 4px;
 	padding: 2px;
 	-moz-box-flex: 1;
+	overflow-x: hidden; /* Fixes a glitch that renders an extra row */
 }
 
 #zotero-lookup-panel {
 	min-height: 100px;
 	min-width: 500px;
+	padding: 10px;
 }
 
 #zotero-lookup-multiline-progress
