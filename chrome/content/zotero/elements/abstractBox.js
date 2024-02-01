@@ -73,9 +73,11 @@
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'abstractBox');
 
-			this.abstractField = this.querySelector('editable-text');
-			this.abstractField.addEventListener('change', () => this.save());
-			this.abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
+			this._section = this.querySelector('collapsible-section');
+
+			this._abstractField = this.querySelector('editable-text');
+			this._abstractField.addEventListener('change', () => this.save());
+			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
 
 			this.render();
 		}
@@ -92,15 +94,15 @@
 		
 		async save() {
 			if (this.item) {
-				this.item.setField('abstractNote', this.abstractField.value);
+				this.item.setField('abstractNote', this._abstractField.value);
 				await this.item.saveTx();
 			}
 			this.render();
 		}
 
 		async blurOpenField() {
-			if (this.abstractField?.matches(':focus-within')) {
-				this.abstractField.blur();
+			if (this._abstractField?.matches(':focus-within')) {
+				this._abstractField.blur();
 				await this.save();
 			}
 		}
@@ -111,12 +113,13 @@
 			}
 
 			let abstract = this.item.getField('abstractNote');
-			if (!this.abstractField.initialValue || this.abstractField.initialValue !== abstract) {
-				this.abstractField.value = abstract;
-				this.abstractField.initialValue = '';
+			this._section.summary = abstract;
+			if (!this._abstractField.initialValue || this._abstractField.initialValue !== abstract) {
+				this._abstractField.value = abstract;
+				this._abstractField.initialValue = '';
 			}
-			this.abstractField.readOnly = this._mode == 'view';
-			this.abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));
+			this._abstractField.readOnly = this._mode == 'view';
+			this._abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));
 		}
 	}
 	customElements.define("abstract-box", AbstractBox);
