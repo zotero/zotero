@@ -472,6 +472,10 @@
 			return this._id('title-box');
 		}
 		
+		get _section() {
+			return this.querySelector('collapsible-section');
+		}
+		
 		
 		//
 		// Methods
@@ -510,7 +514,7 @@
 			this._ztabindex = this._tabIndexMinCreators * (this.item.numCreators() || 1);
 			delete this._linkMenu.dataset.link;
 			
-			this.updateTitleBox();
+			this.updateTitle();
 			
 			//
 			// Clear and rebuild metadata fields
@@ -889,11 +893,12 @@
 			});
 		}
 		
-		updateTitleBox() {
+		updateTitle() {
 			let titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			let titleFieldName = Zotero.ItemFields.getName(titleFieldID);
+			let title = this.item.getField(titleFieldID);
 			
-			let valueElem = this.createValueElement(this.item.getField(titleFieldID), titleFieldName);
+			let valueElem = this.createValueElement(title, titleFieldName);
 			valueElem.placeholder = Zotero.ItemFields.getLocalizedString(titleFieldID);
 			valueElem.addEventListener('contextmenu', (event) => {
 				if (!this.item) return;
@@ -913,6 +918,7 @@
 			});
 
 			this._titleBox.replaceChildren(valueElem);
+			this._section.summary = title;
 		}
 		
 		addItemTypeMenu() {
