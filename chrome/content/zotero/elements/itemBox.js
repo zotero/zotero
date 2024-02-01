@@ -50,7 +50,7 @@
 			this._editableFields = [];
 			this._fieldAlternatives = {};
 			this._fieldOrder = [];
-			this._tabIndexMinCreators = 10;
+			this._tabIndexMinCreators = 100;
 			this._tabIndexMaxFields = 0;
 			this._initialVisibleCreators = 5;
 			this._draggedCreator = false;
