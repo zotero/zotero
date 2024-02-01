@@ -20,14 +20,35 @@ collapsible-section {
 		display: flex;
 		align-items: center;
 		
-		.title {
+		.title-box {
 			flex: 1;
-			
 			display: flex;
 			align-items: center;
-			gap: 4px;
-			color: var(--fill-secondary);
-			font-weight: 600;
+			gap: 8px;
+			
+			.title {
+				flex: 0 0 auto;
+
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				color: var(--fill-secondary);
+				font-weight: 600;
+			}
+
+			.summary {
+				flex: 1;
+				
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 1;
+				overflow: hidden;
+				color: var(--fill-secondary);
+				text-overflow: ellipsis;
+				
+				opacity: 1;
+				transition: opacity 0.2s ease-in-out;
+			}
 		}
 		
 		toolbarbutton {
@@ -67,6 +88,10 @@ collapsible-section {
 		toolbarbutton.twisty .toolbarbutton-icon {
 			transform: rotate(-180deg);
 		}
+		
+		.title-box .summary {
+			opacity: 0;
+		}
 	}
 	
 	&[empty] > .head > toolbarbutton.twisty {
@@ -75,7 +100,7 @@ collapsible-section {
 
 	@each $pane, $color in $item-pane-sections {
 		&[data-pane="#{$pane}"] {
-			& > .head > .title::before {
+			& > .head .title::before {
 				content: '';
 				width: 16px;
 				height: 16px;
