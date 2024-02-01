@@ -46,6 +46,7 @@ var ZoteroContextPane = new function () {
 	this.update = _update;
 	this.getActiveEditor = _getActiveEditor;
 	this.focus = _focus;
+	this.togglePane = _togglePane;
 
 	this.init = function () {
 		if (!Zotero) {
@@ -335,7 +336,7 @@ var ZoteroContextPane = new function () {
 			_contextPane.classList.add('stacked');
 			_contextPane.classList.remove('standard');
 			_sidenav.classList.add('stacked');
-			_contextPaneInner.after(_sidenav);
+			_contextPaneInner.append(_sidenav);
 		}
 		else {
 			_contextPaneSplitter.setAttribute('hidden', false);
@@ -344,14 +345,16 @@ var ZoteroContextPane = new function () {
 			_contextPane.classList.add('standard');
 			_contextPane.classList.remove('stacked');
 			_sidenav.classList.remove('stacked');
-			_contextPane.after(_sidenav);
+			_contextPane.append(_sidenav);
 		}
 		
 		if (Zotero_Tabs.selectedIndex > 0) {
-			var height = 0;
-			if (Zotero.Prefs.get('layout') == 'stacked'
-				&& _contextPane.getAttribute('collapsed') != 'true') {
-				height = _contextPaneInner.getBoundingClientRect().height;
+			var height = null;
+			if (Zotero.Prefs.get('layout') == 'stacked') {
+				height = 0;
+				if (_contextPane.getAttribute('collapsed') != 'true') {
+					height = _contextPaneInner.getBoundingClientRect().height;
+				}
 			}
 			Zotero.Reader.setBottomPlaceholderHeight(height);
 		}
@@ -361,24 +364,19 @@ var ZoteroContextPane = new function () {
 		_sidenav.showPendingPane();
 	}
 
-	function _togglePane(paneIndex) {
+	function _togglePane() {
 		var splitter = Zotero.Prefs.get('layout') == 'stacked'
 			? _contextPaneSplitterStacked : _contextPaneSplitter;
 
-		var isOpen = splitter.getAttribute('state') != 'collapsed';
-		var hide = false;
-		var currentPane = _panesDeck.selectedIndex;
-		if (isOpen && currentPane == paneIndex) {
-			hide = true;
-		}
-		else {
-			_panesDeck.setAttribute('selectedIndex', paneIndex);
+		var open = true;
+		if (splitter.getAttribute('state') != 'collapsed') {
+			open = false;
 		}
 		
-		splitter.setAttribute('state', hide ? 'collapsed' : 'open');
+		splitter.setAttribute('state', open ? 'open' : 'collapsed');
 		_update();
 
-		if (!hide) {
+		if (open) {
 			ZoteroContextPane.focus();
 		}
 	}

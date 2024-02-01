@@ -497,6 +497,12 @@ class ReaderInstance {
 					await this.reload();
 					this._internalReader.unfreeze();
 				}
+			},
+			onToggleContextPane: () => {
+				Zotero.debug('toggle context pane')
+				let win = Zotero.getMainWindow();
+				win.ZoteroContextPane.togglePane();
+
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 

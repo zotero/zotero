@@ -4,7 +4,7 @@
 
 #zotero-context-pane {
 	display: flex;
-	min-width: $min-width-item-pane;
+	min-width: $min-width-context-pane;
 
 	.divider {
 		border-bottom: 1px solid var(--fill-quinary);

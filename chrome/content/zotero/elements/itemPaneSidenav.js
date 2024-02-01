@@ -189,8 +189,7 @@
 		}
 		
 		get _showCollapseButton() {
-			// Only show in reader
-			return !!this._contextNotesPane;
+			return false;
 		}
 		
 		get _collapsed() {
