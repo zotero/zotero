@@ -753,7 +753,7 @@ var Zotero_Tabs = new function () {
 	// Used to move focus back to itemTree or contextPane from the tabs.
 	this.focusWrapAround = function () {
 		// If no item is selected, focus items list.
-		if (ZoteroPane.itemPane.viewType == "message") {
+		if (ZoteroPane.itemPane.mode == "message") {
 			document.getElementById("item-tree-main-default").focus();
 		}
 		else {

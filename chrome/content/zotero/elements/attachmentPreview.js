@@ -48,7 +48,6 @@
 			this._isDiscarding = false;
 			this._failedCount = 0;
 
-			// this._intersectionOb = new IntersectionObserver(this._handleIntersection.bind(this));
 			this._resizeOb = new ResizeObserver(this._handleResize.bind(this));
 		}
 

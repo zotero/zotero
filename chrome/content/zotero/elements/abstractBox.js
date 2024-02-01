@@ -35,19 +35,13 @@
 			</collapsible-section>
 		`);
 		
-		showInFeeds = true;
-
-		_item = null;
-
-		_mode = null;
-
 		get item() {
 			return this._item;
 		}
 
 		set item(item) {
 			this.blurOpenField();
-			this._item = item;
+			super.item = item;
 			if (item?.isRegularItem()) {
 				this.hidden = false;
 			}
@@ -56,16 +50,16 @@
 			}
 		}
 
-		get mode() {
-			return this._mode;
+		get editable() {
+			return this._editable;
 		}
 
-		set mode(mode) {
-			if (this._mode === mode) {
+		set editable(editable) {
+			if (this._editable === editable) {
 				return;
 			}
 			this.blurOpenField();
-			this._mode = mode;
+			super.editable = editable;
 		}
 
 		init() {
@@ -86,7 +80,7 @@
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render(true);
+				this._forceRenderAll();
 			}
 		}
 		
@@ -95,7 +89,7 @@
 				this.item.setField('abstractNote', this._abstractField.value);
 				await this.item.saveTx();
 			}
-			this.render(true);
+			this._forceRenderAll();
 		}
 
 		async blurOpenField() {
@@ -105,9 +99,9 @@
 			}
 		}
 
-		render(force = false) {
+		render() {
 			if (!this.item) return;
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			let abstract = this.item.getField('abstractNote');
 			this._section.summary = abstract;
@@ -119,7 +113,7 @@
 			else {
 				this._abstractField.value = abstract;
 			}
-			this._abstractField.readOnly = this._mode == 'view';
+			this._abstractField.readOnly = !this.editable;
 			this._abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));
 		}
 	}

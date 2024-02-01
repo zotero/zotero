@@ -907,8 +907,9 @@ class ReaderInstance {
 		let rect = this._iframe.getBoundingClientRect();
 		x += rect.left;
 		y += rect.top;
-		tagsbox.mode = 'edit';
+		tagsbox.editable = true;
 		tagsbox.item = item;
+		tagsbox.render();
 		menupopup.openPopup(null, 'before_start', x, y, true);
 		setTimeout(() => {
 			if (tagsbox.count == 0) {
@@ -1125,7 +1126,10 @@ class ReaderTab extends ReaderInstance {
 
 	_addToNote(annotations) {
 		annotations = annotations.map(x => ({ ...x, attachmentItemID: this._item.id }));
-		let noteEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
+		if (!this._window.ZoteroContextPane) {
+			return;
+		}
+		let noteEditor = this._window.ZoteroContextPane.activeEditor;
 		if (!noteEditor) {
 			return;
 		}

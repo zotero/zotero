@@ -166,7 +166,7 @@
 			this._masterItem = item;
 			itembox.item = item.clone();
 			// The item.id is null which equals to _lastRenderItemID, so we need to force render it
-			itembox.render(true);
+			itembox._forceRenderAll();
 		}
 		
 		async merge() {

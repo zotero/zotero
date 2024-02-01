@@ -23,8 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-let ZoteroContextPane = new function () {
-	let _tabCover;
+var ZoteroContextPane = new function () {
+	let _loadingMessageContainer;
 	let _contextPane;
 	let _contextPaneInner;
 	let _contextPaneSplitter;
@@ -32,43 +32,42 @@ let ZoteroContextPane = new function () {
 	let _librarySidenav;
 	let _readerSidenav;
 
-	// Using attribute instead of property to set 'selectedIndex'
-	// is more reliable
-	
+	Object.defineProperty(this, 'activeEditor', {
+		get: () => _contextPaneInner.activeEditor
+	});
+
+	Object.defineProperty(this, 'sidenav', {
+		get: () => (Zotero_Tabs.selectedType == "library"
+			? _librarySidenav
+			: _readerSidenav)
+	});
+
+	Object.defineProperty(this, 'splitter', {
+		get: () => (_isStacked()
+			? _contextPaneSplitterStacked
+			: _contextPaneSplitter)
+	});
+
 	this.update = _update;
 
-	this.getActiveEditor = () => {
-		return _contextPaneInner._getActiveEditor();
-	};
-
 	this.focus = () => {
-		return _contextPaneInner._focus();
+		return _contextPaneInner.handleFocus();
 	};
 
-	this.getSidenav = () => {
-		return Zotero_Tabs.selectedType == "library"
-			? _librarySidenav
-			: _readerSidenav;
-	};
-
-	this.getSplitter = () => {
-		return _isStacked()
-			? _contextPaneSplitterStacked
-			: _contextPaneSplitter;
-	};
-
-	this.showTabCover = (isShow) => {
-		_tabCover.classList.toggle('hidden', !isShow);
+	this.showLoadingMessage = (isShow) => {
+		_loadingMessageContainer.classList.toggle('hidden', !isShow);
 	};
 
 	this.updateAddToNote = _updateAddToNote;
+
+	this.togglePane = _togglePane;
 
 	this.init = function () {
 		if (!Zotero) {
 			return;
 		}
 
-		_tabCover = document.getElementById('zotero-tab-cover');
+		_loadingMessageContainer = document.getElementById('zotero-tab-cover');
 		_contextPane = document.getElementById('zotero-context-pane');
 		// <context-pane> CE
 		_contextPaneInner = document.getElementById('zotero-context-pane-inner');
@@ -78,6 +77,8 @@ let ZoteroContextPane = new function () {
 		_readerSidenav = document.getElementById('zotero-context-pane-sidenav');
 		
 		_contextPaneInner.sidenav = _readerSidenav;
+
+		this.context = _contextPaneInner;
 
 		window.addEventListener('resize', _update);
 		Zotero.Reader.onChangeSidebarWidth = _updatePaneWidth;
@@ -93,7 +94,7 @@ let ZoteroContextPane = new function () {
 	function _updateAddToNote() {
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
-			let editor = ZoteroContextPane.getActiveEditor();
+			let editor = ZoteroContextPane.activeEditor;
 			let libraryReadOnly = editor && editor.item && _isLibraryReadOnly(editor.item.libraryID);
 			let noteReadOnly = editor && editor.item
 				&& (editor.item.deleted || editor.item.parentItem && editor.item.parentItem.deleted);
@@ -157,17 +158,18 @@ let ZoteroContextPane = new function () {
 		}
 		
 		if (Zotero_Tabs.selectedIndex > 0) {
-			let height = 0;
-			if (_isStacked()
-				&& _contextPane.getAttribute('collapsed') != 'true') {
-				height = _contextPaneInner.getBoundingClientRect().height;
+			var height = null;
+			if (_isStacked()) {
+				height = 0;
+				if (_contextPane.getAttribute('collapsed') != 'true') {
+					height = _contextPaneInner.getBoundingClientRect().height;
+				}
 			}
 			Zotero.Reader.setBottomPlaceholderHeight(height);
 		}
 		
 		_updatePaneWidth();
 		_updateAddToNote();
-		_readerSidenav.container?.render();
 	}
 	
 	function _isLibraryReadOnly(libraryID) {
@@ -175,7 +177,7 @@ let ZoteroContextPane = new function () {
 	}
 
 	function _togglePane() {
-		var splitter = ZoteroContextPane.getSplitter();
+		var splitter = ZoteroContextPane.splitter;
 	
 		var open = true;
 		if (splitter.getAttribute('state') != 'collapsed') {

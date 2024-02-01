@@ -36,7 +36,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		`);
 		
 		init() {
-			this._mode = 'view';
 			this._item = null;
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
 			this.initCollapsibleSection();
@@ -44,34 +43,16 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 		
 		destroy() {
-			this._section.removeEventListener('add', this.add);
+			this._section?.removeEventListener('add', this.add);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 		
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			this._item = val;
 		}
 
@@ -80,7 +61,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 			// Refresh if this item has been modified
 			if (event == 'modify' && ids.includes(this._item.id)) {
-				this.render(true);
+				this._forceRenderAll();
 				return;
 			}
 
@@ -90,16 +71,16 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				let relatedItemIDs = new Set(this._item.relatedItems.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)));
 				for (let id of ids) {
 					if (relatedItemIDs.has(id)) {
-						this.render(true);
+						this._forceRenderAll();
 						return;
 					}
 				}
 			}
 		}
 
-		render(force = false) {
+		render() {
 			if (!this.item) return;
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			let body = this.querySelector('.body');
 			body.replaceChildren();
@@ -135,7 +116,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 					box.appendChild(label);
 					row.append(box);
 
-					if (this._mode == 'edit') {
+					if (this.editable) {
 						let remove = document.createXULElement("toolbarbutton");
 						remove.addEventListener('command', () => this._handleRemove(id));
 						remove.className = 'zotero-clicky zotero-clicky-minus';

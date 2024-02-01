@@ -62,14 +62,6 @@ collapsible-section {
 		
 		toolbarbutton.add {
 			@include svgicon-menu("plus", "universal", "16");
-			
-			&:hover {
-				background: var(--fill-quinary);
-			}
-			
-			&:active {
-				background: var(--fill-quarternary);
-			}
 		}
 
 		toolbarbutton.twisty .toolbarbutton-icon {

@@ -54,8 +54,6 @@
 		
 		_titleFieldID = null;
 		
-		_mode = null;
-
 		get item() {
 			return this._item;
 		}
@@ -63,14 +61,6 @@
 		set item(item) {
 			this.blurOpenField();
 			this._item = item;
-		}
-		
-		get mode() {
-			return this._mode;
-		}
-		
-		set mode(mode) {
-			this._mode = mode;
 		}
 
 		init() {
@@ -103,7 +93,7 @@
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render(true);
+				this._forceRenderAll();
 			}
 		}
 		
@@ -122,7 +112,7 @@
 				this.item.setField(this._titleFieldID, this.titleField.value);
 				await this.item.saveTx();
 			}
-			this.render(true);
+			this._forceRenderAll();
 		}
 		
 		async blurOpenField() {
@@ -131,12 +121,12 @@
 				await this.save();
 			}
 		}
-		
-		render(force = false) {
+
+		render() {
 			if (!this.item) {
 				return;
 			}
-			if (!force && this._isAlreadyRendered()) return;
+			if (this._isAlreadyRendered()) return;
 
 			this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			
@@ -149,7 +139,7 @@
 			else {
 				this.titleField.value = title;
 			}
-			this.titleField.readOnly = this._mode == 'view';
+			this.titleField.readOnly = !this.editable;
 			if (this._titleFieldID) {
 				this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
 			}
@@ -164,9 +154,7 @@
 			};
 			if (callback) callback({
 				doc: document,
-				append: (...args) => {
-					append(...Components.utils.cloneInto(args, window, { wrapReflectors: true, cloneFunctions: true }));
-				}
+				append,
 			});
 		}
 	}
