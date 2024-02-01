@@ -289,7 +289,7 @@ const TabBar = forwardRef(function (props, ref) {
 				tabIndex="-1"
 			>
 				{icon}
-				<div className="tab-name" dir="auto">{title}</div>
+				<div className="tab-name">{title}</div>
 				<div
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}

@@ -161,8 +161,8 @@
 	min-width: 100px;
 	height: 28px;
 	line-height: 16px;
-	padding-right: 22px;
-	padding-left: 6px;
+	padding-inline-end: 22px;
+	padding-inline-start: 6px;
 	display: flex;
 	align-items: center;
 	border-radius: 5px;
@@ -201,9 +201,16 @@
 		line-height: 1.38461538em;
 		margin-inline-start: 4px;
 		overflow: hidden;
-		text-align: left;
+		text-align: start;
 		white-space: nowrap;
-		mask-image: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px);
+
+		&:dir(ltr) {
+			mask-image: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px);
+		}
+
+		&:dir(rtl) {
+			mask-image: linear-gradient(to right, transparent 0px, var(--fill-primary) 20px);
+		}
 	}
 
 	.tab-icon {
