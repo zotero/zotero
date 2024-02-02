@@ -904,13 +904,11 @@
 				if (!this.item) return;
 
 				event.preventDefault();
-				let oldValue = valueElem.value;
 				let menupopup = ZoteroItemPane.buildFieldTransformMenu({
-					value: oldValue,
+					target: valueElem,
 					onTransform: (newValue) => {
 						this._setFieldTransformedValue(valueElem, newValue);
-					},
-					includeEditMenuOptions: true
+					}
 				});
 				this.ownerDocument.querySelector('popupset').append(menupopup);
 				menupopup.addEventListener('popuphidden', () => menupopup.remove());
