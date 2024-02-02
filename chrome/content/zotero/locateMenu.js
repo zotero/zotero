@@ -34,7 +34,7 @@ var Zotero_LocateMenu = new function() {
   	/**
   	 * Clear and build the locate menu
   	 */
-	this.buildLocateMenu = function (locateMenu) {
+	this.buildLocateMenu = async function (locateMenu) {
 		// clear menu
 		while(locateMenu.childElementCount > 0) {
 			locateMenu.removeChild(locateMenu.firstChild);
@@ -43,7 +43,7 @@ var Zotero_LocateMenu = new function() {
 		var selectedItems = _getSelectedItems();
 		
 		if(selectedItems.length) {
-			_addViewOptions(locateMenu, selectedItems, true, true, true);
+			await _addViewOptions(locateMenu, selectedItems, true, true, true);
 			
 			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
@@ -122,25 +122,35 @@ var Zotero_LocateMenu = new function() {
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
 		var menuitem;
+		if (optionObject._cachedMenuitem) {
+			menuitem = optionObject._cachedMenuitem;
+		}
+		else {
+			menuitem = document.createXULElement("menuitem");
+			menuitem.addEventListener("command", function (event) {
+				optionObject.handleItems(selectedItems, event);
+			}, false);
+			menuitem.setAttribute("zotero-locate", "true");
+			optionObject._cachedMenuitem = menuitem;
+		}
+		
 		if (optionObject.l10nKey) {
-			menuitem = _createMenuItem('', null, null); // Set by Fluent
 			menuitem.setAttribute("data-l10n-id", optionObject.l10nKey);
 			if (optionObject.l10nArgs) {
 				menuitem.setAttribute("data-l10n-args", optionObject.l10nArgs);
 			}
 		}
 		else {
-			menuitem = _createMenuItem(optionObject.label || Zotero.getString(`locate.${optionName}.label`),
-				null, null);
+			menuitem.label = optionObject.label || Zotero.getString(`locate.${optionName}.label`);
 		}
-		if (optionObject.className && showIcons) {
-			menuitem.setAttribute("class", `menuitem-iconic ${optionObject.className}`);
-		}
-		menuitem.setAttribute("zotero-locate", "true");
 		
-		menuitem.addEventListener("command", function (event) {
-			optionObject.handleItems(selectedItems, event);
-		}, false);
+		if (optionObject.className && showIcons) {
+			menuitem.className = `menuitem-iconic ${optionObject.className}`;
+		}
+		else {
+			menuitem.className = '';
+		}
+		
 		return menuitem;
 	}
 	

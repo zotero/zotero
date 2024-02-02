@@ -109,10 +109,7 @@
 			<html:div class="pin-wrapper">
 				<toolbarbutton
 					tooltiptext="&zotero.toolbar.openURL.label;"
-					type="menu"
-					data-action="locate">
-					<menupopup onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>
-				</toolbarbutton>
+					data-action="locate"/>
 			</html:div>
 			
 			<popupset>
@@ -120,6 +117,8 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-pin" data-l10n-id="pin-section"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-unpin" data-l10n-id="unpin-section"/>
 				</menupopup>
+				
+				<menupopup class="locate-menu"/>
 			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
@@ -458,6 +457,32 @@
 						this._collapsed = !this._collapsed;
 					});
 				}
+				else if (action === 'locate') {
+					toolbarbutton.addEventListener('click', async (event) => {
+						if (event.button !== 0) {
+							return;
+						}
+						// Normally we would just add the menupopup as a child of the toolbarbutton
+						// and let XUL handle opening the popup for us, but that has two issues,
+						// both async-related:
+						// 1. buildLocateMenu() does async work to determine which menuitems to show
+						//    based on the items' attachments, and if we don't wait for that to finish,
+						//    the menu will initially be empty and items will pop into existence as they
+						//    get added.
+						// 2. Fluent translates the menuitems asynchronously. Normally localizations are
+						//    cached - and we do speed up the process a bit by reusing menuitems - but
+						//    because the menu will sometimes contain an item that hasn't been localized
+						//    on previous opens, there will still be cases in which it needs to load a new
+						//    localization file, and that causes pop-in after the menu has already appeared.
+						// Because popupshowing doesn't allow us to do asynchronous work before the menu
+						// appears, do the work here and then show the menu ourselves.
+						toolbarbutton.setAttribute('open', true);
+						let locateMenu = this.querySelector('.locate-menu');
+						await Zotero_LocateMenu.buildLocateMenu(locateMenu);
+						await document.l10n.translateFragment(locateMenu);
+						locateMenu.openPopup(toolbarbutton, 'after_start', 0, 0, false, false);
+					});
+				}
 			}
 			
 			this.querySelector('.zotero-menuitem-pin').addEventListener('command', () => {
@@ -466,6 +491,9 @@
 			});
 			this.querySelector('.zotero-menuitem-unpin').addEventListener('command', () => {
 				this.pinnedPane = null;
+			});
+			this.querySelector('.locate-menu').addEventListener('popuphidden', () => {
+				this.querySelector('toolbarbutton[data-action="locate"]').removeAttribute('open');
 			});
 			
 			this.render();
