@@ -64,6 +64,8 @@ editable-text {
 		overflow-wrap: anywhere;
 		white-space: pre-wrap;
 		max-height: calc(2ex * var(--max-visible-lines));
+		// Somehow this hides scroll arrows on windows when the content is short or empty
+		scrollbar-width: thin;
 	}
 	
 	.input {
