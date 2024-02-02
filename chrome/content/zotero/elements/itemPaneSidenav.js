@@ -309,7 +309,7 @@
 			let containerRect = this._container.getBoundingClientRect();
 			// No offsetTop property for XUL elements
 			let offsetTop = paneRect.top - containerRect.top + this._container.scrollTop;
-			return offsetTop + containerRect.height;
+			return offsetTop + containerRect.height - this._getStickyScrollPadding(pane);
 		}
 
 		_handleContainerScroll = () => {
