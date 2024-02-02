@@ -37,6 +37,7 @@ $-colors: (
     color-scrollbar: rgb(117, 117, 117),
     color-scrollbar-hover: rgb(158, 158, 158),
     color-scrollbar-background: transparent,
+    color-stripe: #ffffff0d,
     tag-blue: #2ea8e5d9,
     tag-gray: #aaac,
     tag-green: #5fb236d9,
@@ -69,6 +70,9 @@ $-colors: (
         --color-quarternary-on-sidepane: #{color.mix(
             map.get($-colors, "color-sidepane"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
         )};
+        --color-stripe-on-background: #{color.mix(
+            map.get($-colors, "color-background"), color.change(map.get($-colors, "color-stripe"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "color-stripe")))
+        )};
 
         // background materials
         --material-background: var(--color-background);
@@ -82,6 +86,7 @@ $-colors: (
         --material-toolbar: var(--color-toolbar);
         --material-mix-quinary: var(--color-quinary-on-background);
         --material-mix-quarternary: var(--color-quarternary-on-background);
+        --material-stripe: var(--color-stripe-on-background);
 
         // border materials
         --material-border-transparent: 1px solid transparent;
