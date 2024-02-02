@@ -32,17 +32,6 @@
 				<html:div class="title">
 					<editable-text />
 				</html:div>
-				
-				<html:div class="menu-button">
-					<toolbarbutton
-						class="zotero-tb-button expand-button"
-						tooltiptext="&zotero.toolbar.openURL.label;"
-						type="menu"
-						wantdropmarker="true"
-						tabindex="0">
-						<menupopup onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>	
-					</toolbarbutton>
-				</html:div>
 			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
@@ -77,7 +66,6 @@
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
 			
 			this.titleField = this.querySelector('.title editable-text');
-			this.menuButton = this.querySelector('.menu-button');
 			
 			this.titleField.addEventListener('change', () => this.save());
 			this.titleField.ariaLabel = Zotero.getString('itemFields.title');
@@ -150,7 +138,6 @@
 			if (this._titleFieldID) {
 				this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
 			}
-			this.menuButton.hidden = !this.item.isRegularItem() && !this.item.isAttachment();
 		}
 	}
 	customElements.define("pane-header", PaneHeader);
