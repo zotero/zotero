@@ -218,7 +218,7 @@
 				copy.disabled = !link;
 				copy.hidden = link === val;
 				
-				let existingCopyMenuitem = menu.querySelector('menuitem[data-action="cmd_copy"]');
+				let existingCopyMenuitem = menu.querySelector('menuitem[data-action="copy"]');
 				if (existingCopyMenuitem) {
 					existingCopyMenuitem.after(copy);
 				}
