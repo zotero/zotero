@@ -2330,6 +2330,10 @@
 			if (!field) return false;
 			return this._focusNextField(field.getAttribute('ztabindex'));
 		}
+		
+		focusTitle() {
+			this._titleBox.firstElementChild?.focus();
+		}
 
 		getFocusedTextArea() {
 			let input = this._infoTable.querySelector('input[data-initial-value], textarea[data-initial-value]');

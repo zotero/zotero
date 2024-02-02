@@ -1261,8 +1261,7 @@ var ZoteroPane = new function()
 							itemBox.removeHandler('itemtypechange', handleTypeChange);
 							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
 							// Focus the title field after menu closes
-							let title = document.querySelector("#zotero-item-pane-header").querySelector("editable-text");
-							title.focus();
+							document.querySelector("#zotero-editpane-item-box").focusTitle();
 						};
 						itemBox.addHandler('itemtypechange', handleTypeChange);
 						itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
@@ -1394,7 +1393,7 @@ var ZoteroPane = new function()
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
 			// Focus the title field
-			document.getElementById('zotero-item-pane-header').querySelector("editable-text").focus();
+			document.querySelector('#zotero-editpane-item-box').focusTitle();
 		}
 		
 		return Zotero.Items.getAsync(itemID);
