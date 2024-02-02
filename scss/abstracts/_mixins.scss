@@ -161,10 +161,6 @@
 				// allow input to be shrunk by other elements when the itemBox is narrow
 				min-width: 0;
 			}
-			// keep multiline fields as tall as they have to be unless they're focused
-			&[multiline] textarea:not(:focus) {
-				min-height: 1em;
-			}
 		}
 	
 		.meta-label {

@@ -41,7 +41,9 @@
 			'aria-labelledby',
 			'value',
 			'nowrap',
-			'autocomplete'
+			'autocomplete',
+			'min-lines',
+			'max-lines'
 		];
 		
 		get noWrap() {
@@ -51,6 +53,15 @@
 		set noWrap(noWrap) {
 			this.toggleAttribute('nowrap', noWrap);
 		}
+
+		get minLines() {
+			return this.getAttribute('min-lines') || 0;
+		}
+
+		get maxLines() {
+			return this.getAttribute('max-lines') || 0;
+		}
+		
 
 		get multiline() {
 			return this.hasAttribute('multiline');
@@ -266,6 +277,20 @@
 			}
 			this._input.readOnly = this.readOnly;
 			this._input.placeholder = this.placeholder;
+
+			if (this._input.tagName == "textarea") {
+				// Reset to initial state
+				this.style.removeProperty("--min-visible-lines");
+				this.style.removeProperty("--max-visible-lines");
+				// Set how tall the textarea can/must be
+				if (this.minLines > 0) {
+					this.style.setProperty("--min-visible-lines", this.minLines);
+				}
+				if (this.maxLines > 0) {
+					this.style.setProperty("--max-visible-lines", this.maxLines);
+				}
+			}
+
 			if (this.ariaLabel.length) {
 				this._input.setAttribute('aria-label', this.ariaLabel);
 			}
