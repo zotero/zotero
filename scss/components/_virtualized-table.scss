@@ -147,7 +147,7 @@
 		}
 
 		&.highlighted {
-			background: #FFFF99;
+			background: var(--accent-highlight);
 		}
 
 		&.unread {
