@@ -216,7 +216,7 @@
 				});
 				input.addEventListener('blur', () => {
 					// Ignore this blur if it was caused by the window becoming inactive (see above)
-					if (Services.focus.activeWindow !== window) {
+					if (Services.focus.activeWindow !== window && !Zotero.test) {
 						this._ignoredWindowInactiveBlur = true;
 						return;
 					}
@@ -329,6 +329,13 @@
 		}
 		
 		blur() {
+			// If the window is inactive and we're running tests, the blur event will never fire,
+			// so just make believe
+			if (Zotero.test && Services.focus.activeWindow !== window) {
+				this._input?.dispatchEvent(new Event('blur'));
+				return;
+			}
+
 			this._input?.blur();
 		}
 	}

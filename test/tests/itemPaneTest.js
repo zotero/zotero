@@ -345,9 +345,8 @@ describe("Item pane", function () {
 			let item = await Zotero.Attachments.importFromFile({ file });
 			let newTitle = 'New Title';
 
-			let paneHeader = doc.getElementById('zotero-item-pane-header');
-			let label = paneHeader.titleField;
-			let promise = waitForDOMAttributes(label, 'value', (newValue) => {
+			let titleField = doc.querySelector('#zotero-attachment-box #attachment-title');
+			let promise = waitForDOMAttributes(titleField, 'value', (newValue) => {
 				return newValue === newTitle;
 			});
 
@@ -355,7 +354,7 @@ describe("Item pane", function () {
 			await item.saveTx();
 			
 			await promise;
-			assert.equal(label.value, newTitle);
+			assert.equal(titleField.value, newTitle);
 		});
 	});
 	
