@@ -16,15 +16,18 @@ describe("Item Tags Box", function () {
 	
 	
 	describe("Tag Editing", function () {
-		it.skip("should update tag when pressing Enter in textbox", async function () {
-			// editable-text behavior relies on focus, so we first need to bring the window to the front.
-			let win = Zotero.getMainWindow();
-			let activatePromise = new Promise(
-				resolve => win.addEventListener('activate', resolve, { once: true })
-			);
-			Zotero.Utilities.Internal.activate();
-			Zotero.Utilities.Internal.activate(win);
-			await activatePromise;
+		it("should update tag when pressing Enter in textbox", async function () {
+			if (!doc.hasFocus()) {
+				// editable-text behavior relies on focus, so we first need to bring the window to the front.
+				// Required not all platforms. In some cases (e.g. Linux), the window is at the front from the start.
+				let win = Zotero.getMainWindow();
+				let activatePromise = new Promise(
+					resolve => win.addEventListener('activate', resolve, { once: true })
+				);
+				Zotero.Utilities.Internal.activate();
+				Zotero.Utilities.Internal.activate(win);
+				await activatePromise;
+			}
 			
 			var tag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
