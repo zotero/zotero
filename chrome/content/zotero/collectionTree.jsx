@@ -252,6 +252,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		treeRow.ref.name = treeRow.editingName;
 		delete treeRow.editingName;
 		await treeRow.ref.saveTx();
+		window.Zotero_Tabs.rename("zotero-pane", treeRow.ref.name);
 	}
 	
 	startEditing = (treeRow) => {

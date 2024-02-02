@@ -2665,6 +2665,7 @@ var ZoteroPane = new function()
 				if (io.dataOut) {
 					row.ref.fromJSON(io.dataOut.json);
 					yield row.ref.saveTx();
+					Zotero_Tabs.rename("zotero-pane", row.ref.name);
 				}
 			}
 		}
@@ -2708,6 +2709,7 @@ var ZoteroPane = new function()
 		feed.cleanupReadAfter = data.cleanupReadAfter;
 		feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
 		yield feed.saveTx();
+		Zotero_Tabs.rename("zotero-pane", feed.name);
 	});
 	
 	this.refreshFeed = function() {
