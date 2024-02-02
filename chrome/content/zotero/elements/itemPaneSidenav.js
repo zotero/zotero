@@ -28,11 +28,6 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="pin-wrapper">
-				<toolbarbutton
-					data-pane="toggle-collapse"/>
-			</html:div>
-			<html:div class="divider"/>
 			<html:div class="inherit-flex highlight-notes-inactive">
 				<html:div class="pin-wrapper">
 					<toolbarbutton
@@ -102,6 +97,17 @@
 				<toolbarbutton
 					data-l10n-id="sidenav-notes"
 					data-pane="context-notes"/>
+			</html:div>
+			
+			<html:div class="divider"/>
+			
+			<html:div class="pin-wrapper">
+				<toolbarbutton
+					tooltiptext="&zotero.toolbar.openURL.label;"
+					type="menu"
+					data-action="locate">
+					<menupopup/>
+				</toolbarbutton>
 			</html:div>
 			
 			<popupset>
@@ -180,10 +186,6 @@
 			this.render();
 		}
 		
-		get _showCollapseButton() {
-			return false;
-		}
-
 		isPanePinnable(id) {
 			return id !== 'info' && id !== 'context-all-notes' && id !== 'context-item-notes';
 		}
@@ -209,6 +211,24 @@
 
 			this.addEventListener('click', this.handleButtonClick);
 			
+			// Set up action toolbarbuttons
+			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-action]')) {
+				let action = toolbarbutton.dataset.action;
+				
+				if (action === 'locate') {
+					toolbarbutton.addEventListener('mousedown', async (event) => {
+						if (event.button !== 0 || toolbarbutton.open) {
+							return;
+						}
+						event.preventDefault();
+						let menu = toolbarbutton.querySelector('menupopup');
+						await Zotero_LocateMenu.buildLocateMenu(menu);
+						await document.l10n.translateFragment(menu);
+						toolbarbutton.open = true;
+					});
+				}
+			}
+			
 			this.querySelector('.zotero-menuitem-pin').addEventListener('command', () => {
 				this.container.scrollToPane(this._contextMenuTarget, 'smooth');
 				this.pinnedPane = this._contextMenuTarget;
@@ -226,7 +246,7 @@
 			if (!this.container) return;
 			let contextNotesPaneVisible = this._contextNotesPaneVisible;
 			let pinnedPane = this.pinnedPane;
-			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
+			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-pane]')) {
 				let pane = toolbarbutton.dataset.pane;
 				// TEMP: never disable context notes button
 				if (this._contextNotesPane) {
@@ -244,22 +264,19 @@
 					
 					continue;
 				}
-				else if (pane == 'toggle-collapse') {
-					let hidden = !this._showCollapseButton;
-
-					toolbarbutton.parentElement.hidden = hidden;
-					toolbarbutton.parentElement.nextElementSibling.hidden = hidden; // Divider
-
-					toolbarbutton.setAttribute('data-l10n-id', 'sidenav-' + (this._collapsed ? 'expand' : 'collapse'));
-					toolbarbutton.classList.toggle('collapsed', this._collapsed);
-					
-					continue;
-				}
 				
 				toolbarbutton.setAttribute('aria-selected', !contextNotesPaneVisible && pane == pinnedPane);
 				// No need to set `hidden` here, since it's updated by ItemDetails#_handlePaneStatus
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
+			}
+			
+			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-action]')) {
+				let action = toolbarbutton.dataset.action;
+				
+				if (action == 'locate') {
+					toolbarbutton.parentElement.hidden = false;
+				}
 			}
 			
 			this.querySelector('.highlight-notes-active').classList.toggle('highlight', contextNotesPaneVisible);
@@ -338,11 +355,15 @@
 
 		renderDefaultStatus() {
 			if (this._defaultStatus) {
-				this.querySelectorAll('toolbarbutton').forEach((elem) => {
+				this.querySelectorAll('toolbarbutton[data-pane]').forEach((elem) => {
 					elem.disabled = true;
 					elem.parentElement.hidden = !(
 						["info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"]
 							.includes(elem.dataset.pane));
+				});
+
+				this.querySelectorAll('toolbarbutton[data-action]').forEach((elem) => {
+					elem.disabled = false;
 				});
 			}
 			else {
@@ -366,12 +387,6 @@
 						this.pinnedPane = null;
 					}
 					this._contextNotesPaneVisible = true;
-					break;
-				case "toggle-collapse":
-					if (event.button !== 0) {
-						return;
-					}
-					this._collapsed = !this._collapsed;
 					break;
 				default: {
 					if (event.button !== 0) {
