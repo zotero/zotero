@@ -1048,7 +1048,10 @@ var ZoteroPane = new function()
 			//
 			// We use Control (17) on Windows because Alt triggers the menubar;
 			// 	otherwise we use Alt/Option (18)
-			if ((Zotero.isWin && event.keyCode == 17 && !event.altKey) ||
+			// On windows, do not highlight when an input is focused to not interfere with
+			// Ctrl-C/Ctrl-V copy-paste shortcuts
+			let inputFocused = ["input", "textarea"].includes(document.activeElement.tagName);
+			if ((Zotero.isWin && event.keyCode == 17 && !event.altKey && !inputFocused) ||
 					(!Zotero.isWin && event.keyCode == 18 && !event.ctrlKey)
 					&& !event.shiftKey && !event.metaKey) {
 				// On windows, the event is re-triggered multiple times
