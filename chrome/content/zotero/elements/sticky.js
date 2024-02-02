@@ -47,25 +47,17 @@
 			let replacement = document.createElement('div');
 			replacement.classList.add('replacement');
 			replacement.hidden = true;
+			this._replacement = replacement;
 			this.append(replacement);
 			
 			let intersectionObserver = new IntersectionObserver(([{ intersectionRatio }]) => {
 				let scrollParent = this.scrollParent;
 				let box = this._box;
 				
-				if (!scrollParent || !box
-						|| box.getBoundingClientRect().top > this.scrollParent.getBoundingClientRect().top) {
-					this.classList.remove('stuck');
-					replacement.hidden = true;
-					return;
-				}
-				
-				let stuck = intersectionRatio < 1;
-				this.classList.toggle('stuck', stuck);
-				replacement.hidden = !stuck;
-				if (stuck) {
-					replacement.style.height = `${box.offsetHeight}px`;
-				}
+				let stuck = scrollParent && box
+					&& box.getBoundingClientRect().top <= this.scrollParent.getBoundingClientRect().top
+					&& intersectionRatio < 1;
+				this._setStuck(stuck);
 			}, { threshold: 1 });
 
 			// Attach the observer now, and reattach it if the child is added/replaced
@@ -86,6 +78,14 @@
 			this.addEventListener('wheel', (event) => {
 				this.parentElement.dispatchEvent(new WheelEvent('wheel', event));
 			});
+		}
+		
+		_setStuck(stuck) {
+			this.classList.toggle('stuck', stuck);
+			this._replacement.hidden = !stuck;
+			if (stuck) {
+				this._replacement.style.height = `${this._box.offsetHeight}px`;
+			}
 		}
 	}
 
