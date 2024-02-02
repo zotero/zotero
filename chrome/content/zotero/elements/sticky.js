@@ -39,7 +39,7 @@
 			return this.closest(this.scrollParentSelector);
 		}
 		
-		get _box() {
+		get box() {
 			return this.querySelector(':scope > :not(.replacement)');
 		}
 		
@@ -52,7 +52,7 @@
 			
 			let intersectionObserver = new IntersectionObserver(([{ intersectionRatio }]) => {
 				let scrollParent = this.scrollParent;
-				let box = this._box;
+				let box = this.box;
 				
 				let stuck = scrollParent && box
 					&& box.getBoundingClientRect().top <= this.scrollParent.getBoundingClientRect().top
@@ -62,14 +62,14 @@
 
 			// Attach the observer now, and reattach it if the child is added/replaced
 			intersectionObserver.observe(replacement);
-			if (this._box) {
-				intersectionObserver.observe(this._box);
+			if (this.box) {
+				intersectionObserver.observe(this.box);
 			}
 			new MutationObserver(() => {
 				intersectionObserver.disconnect();
 				intersectionObserver.observe(replacement);
-				if (this._box) {
-					intersectionObserver.observe(this._box);
+				if (this.box) {
+					intersectionObserver.observe(this.box);
 				}
 			}).observe(this, { childList: true });
 
@@ -84,7 +84,7 @@
 			this.classList.toggle('stuck', stuck);
 			this._replacement.hidden = !stuck;
 			if (stuck) {
-				this._replacement.style.height = `${this._box.offsetHeight}px`;
+				this._replacement.style.height = `${this.box.offsetHeight || this.box.getBoundingClientRect().height}px`;
 			}
 		}
 	}

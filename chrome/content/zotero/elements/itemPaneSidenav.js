@@ -246,6 +246,7 @@
 				this._contextNotesPaneVisible = false;
 				behavior = 'instant';
 			}
+			this._updateStickyScrollPadding();
 
 			let pane = this.getPane(id);
 			if (!pane) return;
@@ -260,6 +261,39 @@
 			}
 			pane.scrollIntoView({ block: 'start', behavior });
 			pane.focus();
+		}
+		
+		_updateStickyScrollPadding(scrollTarget = null) {
+			this._container.style.scrollPaddingTop = this._getStickyScrollPadding(scrollTarget) + 'px';
+		}
+		
+		_getStickyScrollPadding(scrollTarget = null) {
+			let sticky = this._container.querySelector('sticky');
+			if (!sticky) {
+				// No sticky element in the DOM
+				return 0;
+			}
+			let containingOpenSection = sticky.closest('collapsible-section[open]:not([empty])');
+			if (!containingOpenSection) {
+				// Not contained in an open section
+				return 0;
+			}
+			let stickyBoundingRect = sticky.getBoundingClientRect();
+			if (!stickyBoundingRect.height) {
+				// Not displayed on screen (e.g. section is hidden)
+				return 0;
+			}
+			if (scrollTarget) {
+				let scrollTargetTop = scrollTarget.getBoundingClientRect().top;
+				let stickyTop = stickyBoundingRect.top;
+				if (scrollTargetTop < stickyTop) {
+					// Scroll target is above sticky
+					return 0;
+				}
+			}
+			// Since none of the above checks passed, we do need padding. Use the clientHeight of the box,
+			// not its bounding rect, so we let the border of the sticky overlap with the border of the section
+			return sticky.box.clientHeight;
 		}
 		
 		_makeSpaceForPane(pane) {
