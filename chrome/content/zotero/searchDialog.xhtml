@@ -20,11 +20,10 @@
 
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/searchDialog.js", this);
 	</script>
-	
-	<script src="include.js"/>
-	<script src="searchDialog.js"/>
 	
 	<popupset>
 		<panel is="autocomplete-richlistbox-popup"
