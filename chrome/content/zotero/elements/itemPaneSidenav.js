@@ -469,6 +469,8 @@
 						//    based on the items' attachments, and if we don't wait for that to finish,
 						//    the menu will initially be empty and items will pop into existence as they
 						//    get added.
+						//    https://bugzilla.mozilla.org/show_bug.cgi?id=1691553
+						//    https://bugzilla.mozilla.org/show_bug.cgi?id=1737951
 						// 2. Fluent translates the menuitems asynchronously. Normally localizations are
 						//    cached - and we do speed up the process a bit by reusing menuitems - but
 						//    because the menu will sometimes contain an item that hasn't been localized
