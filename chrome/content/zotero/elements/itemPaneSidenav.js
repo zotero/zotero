@@ -450,18 +450,12 @@
 				let action = toolbarbutton.dataset.action;
 				
 				if (action === 'toggle-collapse') {
-					toolbarbutton.addEventListener('click', (event) => {
-						if (event.button !== 0) {
-							return;
-						}
+					toolbarbutton.addEventListener('command', () => {
 						this._collapsed = !this._collapsed;
 					});
 				}
 				else if (action === 'locate') {
-					toolbarbutton.addEventListener('click', async (event) => {
-						if (event.button !== 0) {
-							return;
-						}
+					toolbarbutton.addEventListener('command', async () => {
 						// Normally we would just add the menupopup as a child of the toolbarbutton
 						// and let XUL handle opening the popup for us, but that has two issues,
 						// both async-related:
