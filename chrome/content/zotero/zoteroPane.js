@@ -1927,7 +1927,7 @@ var ZoteroPane = new function()
 				];
 				sidenav.querySelectorAll('toolbarbutton').forEach((button) => {
 					button.disabled = true;
-					button.parentElement.hidden = !defaultSidenavButtons.includes(button.dataset.pane);
+					button.parentElement.hidden = !button.dataset.action && !defaultSidenavButtons.includes(button.dataset.pane);
 				});
 				if (collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();

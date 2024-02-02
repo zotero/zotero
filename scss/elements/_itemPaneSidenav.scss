@@ -85,15 +85,15 @@ item-pane-sidenav {
 			}
 		}
 
-		// Special case for Notes context pane button:
+		// Notes context pane button
 		&[data-pane="context-notes"] {
 			list-style-image: url("chrome://zotero/skin/itempane/20/notes.svg");
 			fill: map.get($item-pane-sections, "notes");
 			stroke: map.get($item-pane-sections, "notes");
 		}
 		
-		// Special case for Expand/Collapse button:
-		&[data-pane="toggle-collapse"] {
+		// Expand/Collapse button
+		&[data-action="toggle-collapse"] {
 			list-style-image: url("chrome://zotero/skin/itempane/20/collapse.svg");
 			
 			&.collapsed {
@@ -106,6 +106,11 @@ item-pane-sidenav {
 
 			fill: var(--fill-secondary);
 			stroke: var(--fill-secondary);
+		}
+		
+		// Locate button
+		&[data-action="locate"] {
+			@include svgicon-menu("go-to", "universal", "20");
 		}
 	}
 	
@@ -125,7 +130,7 @@ item-pane-sidenav {
 		border-inline-end: 1px solid var(--fill-quinary);
 	}
 
-	menupopup {
+	.context-menu {
 		@include macOS-hide-menu-icons;
 	}
 }
