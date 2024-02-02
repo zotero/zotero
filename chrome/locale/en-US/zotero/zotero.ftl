@@ -34,8 +34,11 @@ menu-new-item-note =
 
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
+filter-collections = Filter Collections
 zotero-collections-search =
-    .placeholder = Filter Collections
+    .placeholder = { filter-collections }
+zotero-collections-search-btn =
+    .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
