@@ -3468,7 +3468,7 @@ var ZoteroPane = new function()
 			}
 			
 			// Adjust labels
-			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-modify-saved-search');
+			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-edit-saved-search');
 			m.duplicate.setAttribute('label', Zotero.getString('pane.collections.menu.duplicate.savedSearch'));
 			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
 			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
