@@ -885,9 +885,11 @@
 				});
 			}
 			this._refreshed = true;
-			// Add tabindex=0 to all focusable element
+			// Add tabindex=0 to all focusable element that are not editable-text
 			this.querySelectorAll("[ztabindex]").forEach((node) =>{
-				node.setAttribute("tabindex", 0);
+				if (node.tagName !== "editable-text") {
+					node.setAttribute("tabindex", 0);
+				}
 			});
 			// Make sure that any opened popup closes
 			this.querySelectorAll("menupopup").forEach((popup) => {
@@ -1136,7 +1138,6 @@
 
 			if (!this.preventFocus) {
 				for (const domEl of [labelWrapper, removeButton, addButton, optionsButton]) {
-					domEl.setAttribute('tabindex', '0');
 					domEl.addEventListener('keypress', this.handleKeyPress.bind(this));
 					domEl.addEventListener('focusin', this.updateLastFocused.bind(this));
 				}
