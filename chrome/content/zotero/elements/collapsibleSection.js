@@ -285,8 +285,12 @@
 			});
 		}
 		
+		get _disableCollapsing() {
+			return !!this.closest('panel, menupopup');
+		}
+
 		_handleClick = (event) => {
-			if (!this._getSidenav()) return;
+			if (this._disableCollapsing) return;
 			if (event.target.closest('.section-custom-button, menupopup')) return;
 			this.open = !this.open;
 		};
@@ -373,7 +377,11 @@
 		
 		_getSidenav() {
 			// If we're inside a popup, the main window sidenav is irrelevant
-			if (this.closest('popup, menupopup')) {
+			if (this.closest('panel, menupopup')) {
+				return null;
+			}
+			// If we're not in the main window, we don't have a sidenav
+			if (document.documentElement.getAttribute('windowtype') !== 'navigator:browser') {
 				return null;
 			}
 			// TODO: update this after unifying item pane & context pane
@@ -395,7 +403,7 @@
 			
 			this._head.setAttribute('aria-expanded', this.open);
 			this._title.textContent = this.label;
-			this._head.querySelector('.twisty').hidden = !this._getSidenav();
+			this._head.querySelector('.twisty').hidden = this._disableCollapsing;
 		}
 	}
 	customElements.define("collapsible-section", CollapsibleSection);
