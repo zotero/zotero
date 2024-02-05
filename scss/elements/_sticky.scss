@@ -2,7 +2,7 @@ sticky {
 	display: inline;
 	
 	& > :not(.replacement) {
-		z-index: 2;
+		z-index: 1;
 		box-sizing: border-box;
 		position: sticky;
 		top: -1px;
