@@ -510,11 +510,13 @@
 			
 			this.updateRetracted();
 
+			this._ztabindex = 0;
+			this.updateTitle();
+
 			// Init tab index to begin after all creator rows
 			this._ztabindex = this._tabIndexMinCreators * (this.item.numCreators() || 1);
 			delete this._linkMenu.dataset.link;
 			
-			this.updateTitle();
 			
 			//
 			// Clear and rebuild metadata fields
@@ -749,7 +751,7 @@
 			// Creators
 			//
 			
-			this._ztabindex = 1; // Reset tab index to 1, since creators go before other fields
+			this._ztabindex = 2; // Reset tab index to 2, since creators go before other fields
 			// Creator type menu
 			if (this.editable) {
 				while (this._creatorTypeMenu.hasChildNodes()) {
@@ -954,7 +956,7 @@
 				this.itemTypeMenu = menulist;
 				rowData.appendChild(menulist);
 			}
-			this.itemTypeMenu.setAttribute('ztabindex', '1');
+			this.itemTypeMenu.setAttribute('ztabindex', '2');
 			this.itemTypeMenu.disabled = !this.showTypeMenu;
 			row.appendChild(labelWrapper);
 			row.appendChild(rowData);
@@ -2352,11 +2354,10 @@
 		 * completes, so it doesn't know where it's supposed to go next.)
 		 */
 		_focusNextField(tabindex, back) {
-			var box = this._infoTable;
 			tabindex = parseInt(tabindex);
 			
 			// Get all fields with ztabindex attributes
-			var tabbableFields = box.querySelectorAll('*[ztabindex]:not([disabled=true])');
+			var tabbableFields = this.querySelectorAll('*[ztabindex]:not([disabled=true])');
 			
 			if (!tabbableFields.length) {
 				Zotero.debug("No tabbable fields found");
