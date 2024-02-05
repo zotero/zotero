@@ -50,13 +50,13 @@
 			this._replacement = replacement;
 			this.append(replacement);
 			
-			let intersectionObserver = new IntersectionObserver(([{ intersectionRatio }]) => {
+			let intersectionObserver = new IntersectionObserver(([{ target, intersectionRatio }]) => {
 				let scrollParent = this.scrollParent;
 				let box = this.box;
 				
 				let stuck = scrollParent && box
 					&& box.getBoundingClientRect().top <= this.scrollParent.getBoundingClientRect().top
-					&& intersectionRatio < 1;
+					&& (target === this.box || intersectionRatio < 1);
 				this._setStuck(stuck);
 			}, { threshold: 1 });
 
