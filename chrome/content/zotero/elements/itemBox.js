@@ -2328,15 +2328,14 @@
 		}
 		
 		focusField(fieldName) {
+			if (!this.item) return false;
+			fieldName = Zotero.ItemFields.getName(Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemType, fieldName))
+				|| fieldName;
 			let field = this.querySelector(`[fieldname="${fieldName}"][ztabindex]`);
 			if (!field) return false;
 			return this._focusNextField(field.getAttribute('ztabindex'));
 		}
 		
-		focusTitle() {
-			this._titleBox.firstElementChild?.focus();
-		}
-
 		getFocusedTextArea() {
 			let input = this._infoTable.querySelector('input[data-initial-value], textarea[data-initial-value]');
 			if (input) {
