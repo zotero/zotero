@@ -1,0 +1,13 @@
+@each $cls, $icon in $menu-icons {
+	.zotero-menuitem-#{$cls} {
+		// If icon starts with "light-dark:", use light and dark icon
+		@if str-slice($icon, 0, 11) == "light-dark:" {
+			@include focus-states using ($color) {
+				@include svgicon-menu(str-slice($icon, 12), $color, "16");
+			}
+		}
+		@else {
+			@include svgicon-menu($icon, "universal", "16", false, false, false);
+		}
+	}
+};

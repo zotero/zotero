@@ -15,6 +15,10 @@
 	-moz-appearance: -moz-window-titlebar;
 }
 
+#zotero-title-bar {
+	border-top: 1px solid var(--toolbar-field-border-color);
+}
+
 #toolbar-menubar {
 	pointer-events: none;
 	visibility: visible;
