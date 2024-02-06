@@ -1,10 +1,7 @@
 menupopup, panel, #search-mode-popup {
-	--panel-padding-block: 0;
-	--panel-border-radius: 6px;
-	--panel-background: var(--material-toolbar);
-	--menuitem-hover-background-color: var(--fill-quinary);
-	--menuitem-disabled-hover-background-color: var(--fill-quinary);
-	@include light-dark(--panel-border-color, #dddddd, #1c1c1c);
+	--panel-padding-block: initial;
+	--panel-border-color: initial;
+	--panel-border-radius: 3px;
 }
 
 menupopup {
@@ -16,5 +13,5 @@ menupopup {
 }
 
 :is(panel, menupopup)::part(content) {
-	padding: 6px 0px 6px 0px;
+	padding: 3px 0;
 }
