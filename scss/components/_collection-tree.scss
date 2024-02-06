@@ -55,6 +55,11 @@ $icons: (
 	.virtualized-table-body {
 		padding: 0 8px 8px;
 	}
+	
+	// Highlight takes priority over selection
+	.row.highlighted.selected {
+		background: #FFFF99;
+	}
 
 	.cell.primary {
 		display: flex;

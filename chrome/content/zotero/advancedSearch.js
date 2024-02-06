@@ -70,26 +70,12 @@ var ZoteroAdvancedSearch = new function() {
 			columns,
 		});
 
-		// A minimal implementation of Zotero.CollectionTreeRow
-		var collectionTreeRow = {
-			view: {},
+		this.itemsView.changeCollectionTreeRow({
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
-			getItems: async () => [],
-			isLibrary: () => false,
-			isCollection: () => false,
-			isSearch: () => true,
-			isPublications: () => false,
-			isDuplicates: () => false,
-			isFeed: () => false,
-			isFeeds: () => false,
-			isFeedsOrFeed: () => false,
-			isShare: () => false,
-			isTrash: () => false
-		};
-
-		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+			isSearch: () => true
+		});
 	}
 	
 	this.onUnload = function () {
@@ -100,12 +86,11 @@ var ZoteroAdvancedSearch = new function() {
 		_searchBox.updateSearch();
 		_searchBox.active = true;
 		
-		// A minimal implementation of Zotero.CollectionTreeRow
-		var collectionTreeRow = {
-			view: {},
+		return this.itemsView.changeCollectionTreeRow({
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
+			isSearch: () => true,
 			getItems: async function () {
 				await Zotero.Libraries.get(_libraryID).waitForDataLoad('item');
 
@@ -113,20 +98,8 @@ var ZoteroAdvancedSearch = new function() {
 				search.libraryID = _libraryID;
 				var ids = await search.search();
 				return Zotero.Items.get(ids);
-			},
-			isLibrary: () => false,
-			isCollection: () => false,
-			isSearch: () => true,
-			isPublications: () => false,
-			isDuplicates: () => false,
-			isFeed: () => false,
-			isFeeds: () => false,
-			isFeedsOrFeed: () => false,
-			isShare: () => false,
-			isTrash: () => false
-		};
-		
-		return this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+			}
+		});
 	}
 	
 	

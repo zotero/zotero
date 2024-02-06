@@ -1,0 +1,42 @@
+#zotero-citation-explorer-dialog {
+	.virtualized-table-container {
+		height: 100%;
+		flex: 1;
+	}
+	
+	.xul-border-div {
+		-moz-box-flex: 1;
+	}
+	
+	.flex {
+		flex: 1
+	}
+
+	#citations-label {
+		margin: 5px 0 4px;
+	}
+	
+	.hbox {
+		display: flex;
+		flex-direction: row;
+		
+		.separator {
+			margin: 0 3px;
+			border-right: 2px solid #ddd;
+		}
+	}
+	
+	.vbox {
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.panel {
+		border: solid 1px ThreeDShadow;
+		padding: 5px;
+	}
+	
+	.search-box {
+		margin: 2px -1px;
+	}
+}

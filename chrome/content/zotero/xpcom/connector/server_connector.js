@@ -1701,6 +1701,7 @@ Zotero.Server.Connector.Ping.prototype = {
 				prefs: {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
 					googleDocsAddNoteEnabled: true,
+					googleDocsCitationExplorerEnabled: true,
 					translatorsHash
 				}
 			};

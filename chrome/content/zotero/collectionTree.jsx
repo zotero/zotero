@@ -679,6 +679,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		await this.waitForLoad();
 
 		// Check if items from multiple libraries were specified
+		// Check if items from multiple libraries were specified
 		if (items.length > 1 && new Set(items.map(item => item.libraryID)).size > 1) {
 			Zotero.debug("Can't select items in multiple libraries", 2);
 			return 0;
