@@ -277,8 +277,9 @@ var ZoteroContextPane = new function () {
 
 		if (splitter.getAttribute('state') != 'collapsed') {
 			if (_panesDeck.selectedIndex == 0) {
-				var node = _itemPaneDeck.selectedPanel;
-				node.focus();
+				// Focus the title in the header
+				var header = _itemPaneDeck.selectedPanel.querySelector("pane-header editable-text");
+				header.focus();
 				return true;
 			}
 			else {
@@ -873,6 +874,7 @@ var ZoteroContextPane = new function () {
 		// div
 		var div = document.createElement('div');
 		div.className = 'zotero-view-item';
+		div.setAttribute("tabindex", "0");
 		main.append(div);
 		
 		// Info
