@@ -1,8 +1,8 @@
 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path opacity="0.5" d="M12 1H0V11H12V1Z" fill="white"/>
-<path opacity="0.2" d="M11 2V10H1V2H11ZM12 1H0V11H12V1Z" fill="black"/>
-<path d="M11 2H1V10H11V2Z" fill="white"/>
-<path d="M8 5C8.55228 5 9 4.55228 9 4C9 3.44772 8.55228 3 8 3C7.44772 3 7 3.44772 7 4C7 4.55228 7.44772 5 8 5Z" fill="#FF794C"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M11 9L8.5 6.5L7 8L4.5 5.5L1 9V10H11V9Z" fill="#B0E5C3"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M11 8.29289L8.50008 5.79297L7.00008 7.29297L4.50008 4.79297L1 8.29304V9.70726L4.50008 6.20718L6.29297 8.00008L4.29304 10H5.70726L8.50008 7.20718L11 9.70711V8.29289Z" fill="#39BF68"/>
+<path opacity="0.5" d="M6.707 0H1V12H11V4.293L6.707 0Z" fill="white"/>
+<path d="M6.293 1L10 4.707V11H2V1H6.293Z" fill="white"/>
+<path opacity="0.2" d="M6.707 0H1V12H11V4.293L6.707 0ZM7 1.707L9.293 4H7V1.707ZM2 11V1H6V5H10V11H2Z" fill="black"/>
+<path opacity="0.08" d="M7 1.70703V4H9.293L7 1.70703Z" fill="black"/>
+<path d="M4 6C4.55228 6 5 5.55228 5 5C5 4.44772 4.55228 4 4 4C3.44772 4 3 4.44772 3 5C3 5.55228 3.44772 6 4 6Z" fill="#FF794C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 8.57132L7 6.42847L9.5 9.9999H6.5H4.5H2.5L4.5 7.14275L5.5 8.57132Z" fill="#88D9A4"/>
 </svg>
