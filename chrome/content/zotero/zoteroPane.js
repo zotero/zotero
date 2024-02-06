@@ -1018,7 +1018,6 @@ var ZoteroPane = new function()
 		if ([" ", "Enter"].includes(event.key)
 			&& (["button", "toolbarbutton"].includes(tgt.tagName)
 				|| tgt.classList.contains("keyboard-clickable"))) {
-			console.log("SHOULD OPEN THE THING", event);
 			if (event.target.querySelector("menupopup")) {
 				event.target.open = true;
 			}
