@@ -100,6 +100,7 @@
 			let scrollDistance = this.scrollParent.scrollTop - this._replacement.offsetTop;
 			this.box.style.setProperty('--full-height', this._replacement.style.height);
 			this.box.style.setProperty('--scroll-distance', scrollDistance + 'px');
+			this.box.style.setProperty('--scrollbar-width', this.scrollParent.offsetWidth - this.scrollParent.clientWidth + 'px');
 		};
 	}
 

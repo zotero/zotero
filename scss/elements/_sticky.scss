@@ -3,10 +3,8 @@ sticky {
 	
 	& > :not(.replacement) {
 		z-index: 1;
-		box-sizing: border-box;
 		position: sticky;
 		top: -1px;
-		inset-inline-start: 0;
 
 		padding-top: 1px + 2px; // 1px to offset top, 2px as actual padding
 		padding-bottom: 2px;
@@ -19,15 +17,10 @@ sticky {
 	
 	&.stuck > :not(.replacement) {
 		position: fixed;
-		// Replicate the inline padding on the item pane, which won't apply once we're fixed
-		// We need box-sizing: border-box for this
-		width: 100%;
+		inset-inline-start: 0;
+		inset-inline-end: var(--scrollbar-width);
 		padding-inline: 8px;
 		background: var(--material-sidepane);
 		border-bottom: var(--material-border-quinary);
-	}
-	
-	& > .replacement {
-		
 	}
 }
