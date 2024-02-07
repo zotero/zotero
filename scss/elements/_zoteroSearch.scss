@@ -67,6 +67,10 @@ zoterosearch {
 		justify-self: start;
 		margin-inline-start: 12px;
 		align-self: center;
+		
+		&:hover, &:active, &[open] {
+			background: none;
+		}
 	}
 
 	zoterosearchtextbox[hasOptions="true"] #search-textbox {
