@@ -42,7 +42,8 @@ else {
 	document.addEventListener('DOMContentLoaded', init);
 }
 
-function init() {
+function init(event) {
+	if (event.target !== document) return;
 	setAccessKeysHidden(true);
 
 	menuBar = document.querySelector("#main-menubar");
