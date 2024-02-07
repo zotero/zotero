@@ -67,6 +67,12 @@ editable-text {
 		}
 	}
 	
+	sticky.stuck & {
+		&::after, .input {
+			max-height: clamp(12ex, calc(var(--full-height) - var(--scroll-distance)), var(--full-height));
+		}
+	}
+	
 	.input {
 		--width-focus-border: 1px;
 		--radius-focus-border: 5px;

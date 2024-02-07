@@ -28,7 +28,7 @@
 {
 	class Sticky extends XULElementBase {
 		get scrollParentSelector() {
-			return this.getAttribute('scroll-parent') || '.zotero-view-item-main';
+			return this.getAttribute('scroll-parent') || '.zotero-view-item';
 		}
 		
 		set scrollParentSelector(selector) {
@@ -55,8 +55,8 @@
 				let box = this.box;
 				
 				let stuck = scrollParent && box
-					&& box.getBoundingClientRect().top <= this.scrollParent.getBoundingClientRect().top
-					&& (target === this.box || intersectionRatio < 1);
+					&& box.getBoundingClientRect().top <= scrollParent.getBoundingClientRect().top
+					&& (target === box || intersectionRatio < 1);
 				this._setStuck(stuck);
 			}, { threshold: 1 });
 
@@ -85,8 +85,22 @@
 			this._replacement.hidden = !stuck;
 			if (stuck) {
 				this._replacement.style.height = `${this.box.offsetHeight || this.box.getBoundingClientRect().height}px`;
+				this.scrollParent.addEventListener('scroll', this._handleScroll);
+				this._handleScroll();
 			}
 		}
+		
+		_handleScroll = (event) => {
+			if (event && (event.target !== this.scrollParent || !this.classList.contains('stuck'))) {
+				this.box.style.removeProperty('--full-height');
+				this.box.style.removeProperty('--scroll-distance');
+				event.target.removeEventListener('scroll', this._handleScroll);
+				return;
+			}
+			let scrollDistance = this.scrollParent.scrollTop - this._replacement.offsetTop;
+			this.box.style.setProperty('--full-height', this._replacement.style.height);
+			this.box.style.setProperty('--scroll-distance', scrollDistance + 'px');
+		};
 	}
 
 	customElements.define("sticky", Sticky);
