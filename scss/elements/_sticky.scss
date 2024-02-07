@@ -13,6 +13,8 @@ sticky {
 			padding-top: 1px + 3px;
 			padding-bottom: 3px;
 		}
+		
+		border-bottom: var(--material-border-transparent);
 	}
 	
 	&.stuck > :not(.replacement) {
