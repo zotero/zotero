@@ -1,7 +1,7 @@
 sticky {
 	display: inline;
 	
-	& > :first-child {
+	& > :not(.replacement) {
 		z-index: 1;
 		box-sizing: border-box;
 		position: sticky;
@@ -17,11 +17,17 @@ sticky {
 		}
 	}
 	
-	&.stuck > :first-child {
+	&.stuck > :not(.replacement) {
+		position: fixed;
 		// Replicate the inline padding on the item pane, which won't apply once we're fixed
 		// We need box-sizing: border-box for this
 		width: 100%;
+		padding-inline: 8px;
 		background: var(--material-sidepane);
 		border-bottom: var(--material-border-quinary);
+	}
+	
+	& > .replacement {
+		
 	}
 }
