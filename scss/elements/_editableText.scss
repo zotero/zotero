@@ -68,6 +68,8 @@ editable-text {
 	}
 	
 	sticky.stuck & {
+		mask: linear-gradient(to top, transparent, min(var(--scroll-distance), 1em), white);
+		
 		&::after, .input {
 			max-height: clamp(12ex, calc(var(--full-height) - var(--scroll-distance)), var(--full-height));
 		}
