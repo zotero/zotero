@@ -17,6 +17,10 @@ sticky {
 		border-bottom: var(--material-border-transparent);
 	}
 	
+	&.long > :not(.replacement) {
+		position: relative;
+	}
+	
 	&.stuck > :not(.replacement) {
 		position: fixed;
 		inset-inline-start: 0;
