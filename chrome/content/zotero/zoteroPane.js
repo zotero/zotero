@@ -1043,17 +1043,21 @@ var ZoteroPane = new function()
 			return;
 		}
 
-		if (from == 'zotero-pane') {			
+		if (from == 'zotero-pane') {
 			// Highlight collections containing selected items
 			//
-			// We use Control (17) on Windows because Alt triggers the menubar;
-			// 	otherwise we use Alt/Option (18)
-			// On windows, do not highlight when an input is focused to not interfere with
-			// Ctrl-C/Ctrl-V copy-paste shortcuts
+			// We use Control (17) on Windows and Linux because Alt triggers the menubar;
+			// On Mac, we use Option (18)
+			let enableHighlight = !event.shiftKey && !event.metaKey;
+			if (Zotero.isMac) {
+				enableHighlight = event.key == "Alt" && !event.ctrlKey;
+			}
+			else {
+				enableHighlight = event.key == "Control" && !event.altKey;
+			}
+			// Do not interfere with Control-C/Control-V shortcuts
 			let inputFocused = ["input", "textarea"].includes(document.activeElement.tagName);
-			if ((Zotero.isWin && event.keyCode == 17 && !event.altKey && !inputFocused) ||
-					(!Zotero.isWin && event.keyCode == 18 && !event.ctrlKey)
-					&& !event.shiftKey && !event.metaKey) {
+			if (enableHighlight && !inputFocused) {
 				// On windows, the event is re-triggered multiple times
 				// for as long as Control is held.
 				// To account for that, stop if a highlight timer already exists.
@@ -1066,20 +1070,6 @@ var ZoteroPane = new function()
 				this.highlightTimer.initWithCallback({
 					notify: ZoteroPane_Local.setHighlightedRowsCallback
 				}, 225, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-
-				// Prevent Alt from moving focus to menubar on linux
-				if (Zotero.isLinux) {
-					event.preventDefault();
-				}
-			}
-			// Unhighlight on key up
-			else if ((Zotero.isWin && event.ctrlKey) ||
-					(!Zotero.isWin && event.altKey)) {
-				if (this.highlightTimer) {
-					this.highlightTimer.cancel();
-					this.highlightTimer = null;
-				}
-				ZoteroPane_Local.collectionsView.setHighlightedRows();
 			}
 		}
 	}
@@ -1145,8 +1135,9 @@ var ZoteroPane = new function()
 
 	
 	function handleKeyUp(event) {
-		if ((Zotero.isWin && event.keyCode == 17) ||
-				(!Zotero.isWin && event.keyCode == 18)) {
+		// When Option/Control is released, clear collection highlighting
+		if ((Zotero.isMac && event.key == "Alt")
+				|| (!Zotero.isMac && event.key == "Control")) {
 			if (this.highlightTimer) {
 				this.highlightTimer.cancel();
 				this.highlightTimer = null;
