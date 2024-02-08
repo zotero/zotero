@@ -50,14 +50,21 @@
 			this._replacement = replacement;
 			this.append(replacement);
 			
-			let intersectionObserver = new IntersectionObserver(([{ target, intersectionRatio }]) => {
-				let scrollParent = this.scrollParent;
-				let box = this.box;
-				
-				let stuck = scrollParent && box
-					&& box.getBoundingClientRect().top <= scrollParent.getBoundingClientRect().top
-					&& (target === box || intersectionRatio < 1);
-				this._setStuck(stuck);
+			let intersectionObserver = new IntersectionObserver((entries) => {
+				for (let { target, intersectionRatio } of entries) {
+					// Only pay attention to the replacement when stuck and the box when not stuck
+					if (target !== (this.classList.contains('stuck') ? replacement : this.box)) {
+						continue;
+					}
+					
+					let scrollParent = this.scrollParent;
+					let box = this.box;
+
+					let stuck = scrollParent && box
+						&& box.getBoundingClientRect().top <= scrollParent.getBoundingClientRect().top
+						&& intersectionRatio < 1;
+					this._setStuck(stuck);
+				}
 			}, { threshold: 1 });
 
 			// Attach the observer now, and reattach it if the child is added/replaced
