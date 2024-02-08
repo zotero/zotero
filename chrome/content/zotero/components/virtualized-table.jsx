@@ -127,6 +127,7 @@ class TreeSelection {
 
 	clearSelection() {
 		this.selected = new Set();
+		this.pivot = 0;
 		if (this.selectEventsSuppressed) return;
 		
 		if (this._tree.invalidate) {
