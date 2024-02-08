@@ -97,7 +97,9 @@
 				event.target.removeEventListener('scroll', this._handleScroll);
 				return;
 			}
-			let scrollDistance = this.scrollParent.scrollTop - this._replacement.offsetTop;
+			// Add some padding to the scroll distance to keep the metadata rows from being cut off by the header
+			// Why this value? It looks right.
+			let scrollDistance = this.scrollParent.scrollTop - this._replacement.offsetTop + 10;
 			this.box.style.setProperty('--full-height', this._replacement.style.height);
 			this.box.style.setProperty('--scroll-distance', scrollDistance + 'px');
 			this.box.style.setProperty('--scrollbar-width', this.scrollParent.offsetWidth - this.scrollParent.clientWidth + 'px');
