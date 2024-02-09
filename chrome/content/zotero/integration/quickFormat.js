@@ -514,9 +514,15 @@ var Zotero_QuickFormat = new function () {
 
 		let win = Zotero.getMainWindow();
 		let selectedItems = [];
-		if (win.Zotero_Tabs.selectedType === "library" && !Zotero_QuickFormat.citingNotes) {
-			selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isRegularItem());
-			selectedItems = selectedItems.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
+		if (win.Zotero_Tabs.selectedType === "library") {
+			if (!Zotero_QuickFormat.citingNotes) {
+				selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isRegularItem());
+				// Filter out already cited items
+				selectedItems = selectedItems.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
+			}
+			else {
+				selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isNote());
+			}
 		}
 		if (!searchString) {
 			return [selectedItems, []];
