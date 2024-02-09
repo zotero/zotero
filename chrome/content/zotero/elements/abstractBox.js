@@ -62,6 +62,10 @@
 		}
 
 		set mode(mode) {
+			if (this._mode === mode) {
+				return;
+			}
+			this.blurOpenField();
 			this._mode = mode;
 			this.render();
 		}
