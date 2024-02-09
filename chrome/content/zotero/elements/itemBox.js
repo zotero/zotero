@@ -854,7 +854,15 @@
 				if (!this.editable) {
 					break;
 				}
-				label.addEventListener('click', (_) => {
+				
+				label.addEventListener('mousedown', (event) => {
+					// Prevent default focus/blur behavior - we implement our own below
+					event.preventDefault();
+				});
+				
+				label.addEventListener('click', (event) => {
+					event.preventDefault();
+					
 					let labelWrapper = label.closest(".meta-label");
 					if (labelWrapper.nextSibling.contains(document.activeElement)) {
 						document.activeElement.blur();

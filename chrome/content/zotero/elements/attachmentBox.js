@@ -264,7 +264,11 @@
 				}
 			});
 
-			this.querySelectorAll(".meta-label").forEach(label => label.addEventListener("click", this._handleMetaLabelClick));
+			for (let label of this.querySelectorAll(".meta-label")) {
+				// Prevent default focus/blur behavior - we implement our own below
+				label.addEventListener("mousedown", event => event.preventDefault());
+				label.addEventListener("click", this._handleMetaLabelClick);
+			}
 		}
 
 		destroy() {
@@ -625,6 +629,8 @@
 		}
 
 		_handleMetaLabelClick = (event) => {
+			event.preventDefault();
+			
 			let labelWrapper = event.target.closest(".meta-label");
 			if (labelWrapper.nextSibling.contains(document.activeElement)) {
 				document.activeElement.blur();
