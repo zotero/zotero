@@ -2,6 +2,8 @@ links-box {
 	display: flex;
 	flex-direction: column;
 	padding-inline: 8px;
+	max-height: 50vh;
+	overflow-y: auto;
 
 	border-top: 1px solid var(--fill-quinary);
 }
