@@ -485,10 +485,10 @@ var Zotero_QuickFormat = new function () {
 			}
 			return Zotero.Cite.getItem(itemID);
 		});
-		let matchedItems = items;
+		let matchedItems = new Set(items);
 		if (options.searchString) {
 			Zotero.debug("QuickFormat: Searching open tabs");
-			matchedItems = [];
+			matchedItems = new Set();
 			let splits = Zotero.Fulltext.semanticSplitter(options.searchString);
 			for (let item of items) {
 				// Generate a string to search for each item
@@ -499,12 +499,13 @@ var Zotero_QuickFormat = new function () {
 				
 				// See if words match
 				for (let split of splits) {
-					if (itemStr.toLowerCase().includes(split)) matchedItems.push(item);
+					if (itemStr.toLowerCase().includes(split)) matchedItems.add(item);
 				}
 			}
 			Zotero.debug("QuickFormat: Found matching open tabs");
 		}
-		return matchedItems.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
+		// Filter out already cited items
+		return Array.from(matchedItems).filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 	}
 	
 	async function _getMatchingLibraryItems(options) {
