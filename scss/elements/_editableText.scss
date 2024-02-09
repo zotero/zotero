@@ -9,6 +9,8 @@
 }
 
 editable-text {
+	$radius-focus-border: 5px;
+	
 	// Default variables overriden by max-lines, min-lines attribute
 	--min-visible-lines: 1;
 	--max-visible-lines: 1;
@@ -42,12 +44,13 @@ editable-text {
 	
 	&:not([nowrap])::after {
 		content: attr(value) ' ';
-		visibility: hidden;
 		border: 1px solid transparent;
 		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
 		font: inherit;
+		color: transparent;
 		line-height: inherit;
 		overflow: hidden;
+		pointer-events: none;
 	}
 	
 	&:not([nowrap])::after, &:not([nowrap]) .input {
@@ -71,7 +74,11 @@ editable-text {
 		$max-height: 15ex;
 		$gradient-extent: $max-height - 1ex;
 		
-		mask: linear-gradient(to bottom, white, max($gradient-extent, calc(100% - min(var(--scroll-distance), 1em))), transparent);
+		&::after {
+			background: var(--material-sidepane);
+			mask: linear-gradient(to bottom, transparent, max($gradient-extent, calc(100% - min(var(--scroll-distance), 1em))), white);
+			border-radius: $radius-focus-border;
+		}
 		
 		&::after, .input {
 			max-height: clamp($max-height, calc(var(--full-height) - var(--scroll-distance) - 12px), var(--full-height));
@@ -80,7 +87,7 @@ editable-text {
 	
 	.input {
 		--width-focus-border: 1px;
-		--radius-focus-border: 5px;
+		--radius-focus-border: #{$radius-focus-border};
 		
 		// No focus ring for read-only fields
 		&:read-only {
