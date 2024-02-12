@@ -72,11 +72,11 @@ editable-text {
 		$gradient-extent: $max-height - 1ex;
 		
 		&:not(:focus-within) {
-			mask: linear-gradient(to bottom, white, max($gradient-extent, calc(100% - min(var(--scroll-distance), 1em))), transparent);
+			mask: linear-gradient(to bottom, white, max($gradient-extent, calc(100% - min(var(--scroll-top), 1em))), transparent);
 		}
 		
 		&::after, .input {
-			max-height: clamp($max-height, calc(var(--full-height) - var(--scroll-distance) - 12px), var(--full-height));
+			max-height: clamp($max-height, calc(var(--full-height) - var(--scroll-top) - 12px), var(--full-height));
 		}
 	}
 	

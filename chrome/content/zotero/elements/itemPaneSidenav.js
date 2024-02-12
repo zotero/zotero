@@ -245,10 +245,11 @@
 				this._contextNotesPaneVisible = false;
 				behavior = 'instant';
 			}
-			this._updateStickyScrollPadding();
 
 			let pane = this.getPane(id);
 			if (!pane) return;
+
+			this._updateStickyScrollPadding(pane);
 			
 			// The pane should always be at the very top
 			// If there isn't enough stuff below it for it to be at the top, we add padding
@@ -262,11 +263,11 @@
 			pane.focus();
 		}
 		
-		_updateStickyScrollPadding(scrollTarget = null) {
+		_updateStickyScrollPadding(scrollTarget) {
 			this._container.style.scrollPaddingTop = this._getStickyScrollPadding(scrollTarget) + 'px';
 		}
 		
-		_getStickyScrollPadding(scrollTarget = null) {
+		_getStickyScrollPadding(scrollTarget) {
 			let sticky = this._container.querySelector('sticky');
 			if (!sticky) {
 				// No sticky element in the DOM
@@ -282,17 +283,9 @@
 				// Not displayed on screen (e.g. section is hidden)
 				return 0;
 			}
-			if (scrollTarget) {
-				let scrollTargetTop = scrollTarget.getBoundingClientRect().top;
-				let stickyTop = stickyBoundingRect.top;
-				if (scrollTargetTop < stickyTop) {
-					// Scroll target is above sticky
-					return 0;
-				}
-			}
-			// Since none of the above checks passed, we do need padding. Use the clientHeight of the box,
-			// not its bounding rect, so we let the border of the sticky overlap with the border of the section
-			return sticky.box.clientHeight;
+			// Since none of the above checks passed, we do need padding. Get the height of the sticky
+			// element at the target scroll position
+			return sticky.getBoxHeightAtPosition(scrollTarget.getBoundingClientRect().top - this._container.getBoundingClientRect().top + this._container.scrollTop);
 		}
 		
 		_makeSpaceForPane(pane) {

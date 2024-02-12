@@ -105,13 +105,13 @@
 		_handleScroll = (event) => {
 			if (event && (event.target !== this.scrollParent || !this.classList.contains('stuck'))) {
 				this.box.style.removeProperty('--full-height');
-				this.box.style.removeProperty('--scroll-distance');
+				this.box.style.removeProperty('--scroll-top');
 				event.target.removeEventListener('scroll', this._handleScroll);
 				return;
 			}
-			let scrollDistance = this.scrollParent.scrollTop - this._replacement.offsetTop;
+			let scrollTop = this.scrollParent.scrollTop - this._replacement.offsetTop;
 			this.box.style.setProperty('--full-height', this._replacement.style.height);
-			this.box.style.setProperty('--scroll-distance', scrollDistance + 'px');
+			this.box.style.setProperty('--scroll-top', scrollTop + 'px');
 			this.box.style.setProperty('--scrollbar-width', this.scrollParent.offsetWidth - this.scrollParent.clientWidth + 'px');
 		};
 
@@ -123,6 +123,42 @@
 				this.scrollParent.addEventListener('scroll', this._handleScroll);
 				this._handleScroll();
 			}
+		}
+
+		/**
+		 * Simulate the height of the box at the specified scrollTop.
+		 *
+		 * @param {number} scrollTop
+		 * @returns {number} Height of the box at that position
+		 */
+		getBoxHeightAtPosition(scrollTop) {
+			if (this.classList.contains('long')) {
+				return 0;
+			}
+			
+			// Save properties
+			let oldStuck = this.classList.contains('stuck');
+			let oldFullHeight = this.box.style.getPropertyValue('--full-height');
+			let oldScrollTop = this.box.style.getPropertyValue('--scroll-top');
+			
+			// Set properties to simulated values
+			this.classList.toggle('stuck', true);
+			this.box.style.setProperty('--full-height', this._replacement.style.height);
+			this.box.style.setProperty('--scroll-top', (scrollTop - this._replacement.offsetTop) + 'px');
+			this.box.style.setProperty('--scrollbar-width', this.scrollParent.offsetWidth - this.scrollParent.clientWidth + 'px');
+			
+			// Force reflow
+			// eslint-disable-next-line no-void
+			void getComputedStyle(this.box).height;
+			
+			let height = this.box.clientHeight;
+			
+			// Restore properties
+			this.classList.toggle('stuck', oldStuck);
+			this.box.style.setProperty('--full-height', oldFullHeight);
+			this.box.style.setProperty('--scroll-top', oldScrollTop);
+			
+			return height;
 		}
 	}
 
