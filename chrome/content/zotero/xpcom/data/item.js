@@ -1914,7 +1914,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		if (!parentItem.isFileAttachment()) {
 			throw new Error("Annotation parent must be a file attachment");
 		}
-		if (!['application/pdf', 'application/epub+zip', 'text/html'].includes(parentItem.attachmentContentType)) {
+		if (!parentItem.attachmentReaderType) {
 			throw new Error("Annotation parent must be a PDF, EPUB, or HTML snapshot");
 		}
 		let type = this._getLatestField('annotationType');
@@ -3079,6 +3079,25 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentContentType', {
 		}
 		this._changed.attachmentData.contentType = true;
 		this._attachmentContentType = val;
+	}
+});
+
+
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentReaderType', {
+	get() {
+		if (!this.isFileAttachment()) {
+			return undefined;
+		}
+		switch (this.attachmentContentType) {
+			case 'application/pdf':
+				return 'pdf';
+			case 'application/epub+zip':
+				return 'epub';
+			case 'text/html':
+				return 'snapshot';
+			default:
+				return undefined;
+		}
 	}
 });
 

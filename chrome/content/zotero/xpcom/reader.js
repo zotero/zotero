@@ -48,11 +48,9 @@ class ReaderInstance {
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
 
-		switch (this._item.attachmentContentType) {
-			case 'application/pdf': this._type = 'pdf'; break;
-			case 'application/epub+zip': this._type = 'epub'; break;
-			case 'text/html': this._type = 'snapshot'; break;
-			default: throw new Error('Unsupported attachment type');
+		this._type = this._item.attachmentReaderType;
+		if (!this._type) {
+			throw new Error('Unsupported attachment type');
 		}
 
 		return new Proxy(this, {

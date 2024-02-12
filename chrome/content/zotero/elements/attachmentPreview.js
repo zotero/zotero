@@ -27,9 +27,6 @@
 	// eslint-disable-next-line no-undef
 	class AttachmentPreview extends XULElementBase {
 		static fileTypeMap = {
-			'application/pdf': 'pdf',
-			'application/epub+zip': 'epub',
-			'text/html': 'snapshot',
 			// TODO: support video and audio
 			// 'video/mp4': 'video',
 			// 'video/webm': 'video',
@@ -111,6 +108,9 @@
 		}
 
 		get previewType() {
+			if (this._item?.attachmentReaderType) {
+				return this._item.attachmentReaderType;
+			}
 			let contentType = this._item?.attachmentContentType;
 			if (!contentType) {
 				return "file";
