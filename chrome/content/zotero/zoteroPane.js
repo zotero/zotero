@@ -245,7 +245,12 @@ var ZoteroPane = new function()
 					ArrowLeft: () => null,
 					Tab: () => {
 						if (Zotero_Tabs.selectedIndex > 0) {
-							ZoteroContextPane.focus();
+							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+							if (reader) {
+								// Move focus to the reader and focus the toolbar
+								reader.focusFirst();
+								reader.focusToolbar();
+							}
 							return null;
 						}
 						if (collectionsPane.getAttribute("collapsed")) {
@@ -317,9 +322,6 @@ var ZoteroPane = new function()
 					ArrowLeft: () => null,
 					Tab: () => document.getElementById('zotero-tb-collections-search').click(),
 					ShiftTab: () => document.getElementById('zotero-tb-sync')
-					// Enter: () => {
-					// 	document.getElementById('zotero-tb-collection-add').click();
-					// }
 				},
 				'zotero-collections-search': {
 					Tab: () => document.getElementById('zotero-tb-add'),
@@ -857,16 +859,22 @@ var ZoteroPane = new function()
 		if (Zotero_Tabs.selectedIndex > 0) {
 			if (event.key === 'Escape') {
 				// If focus is on an opened popup, let Escape just close it
-				// Also, do nothing if focus is inside of tabs toolbar
-				if (document.activeElement.open
-					|| document.querySelector("#zotero-tabs-toolbar").contains(document.activeElement)) {
+				if (document.activeElement.open) {
 					return;
 				}
-				// Escape when a reader tab is opened re-focuses the tab in the tab bar
-				// Timeout to let the focused editable-text reset the value
-				setTimeout(() => {
-					Zotero_Tabs.moveFocus("current");
-				});
+
+				if (!document.activeElement.classList.contains('reader')) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focus();
+						// Keep propagating if current focus is on input or textarea
+						// The Escape event needs to be handled by itemBox, tagBox, etc. to undo edits.
+						if (!["input", "textarea"].includes(document.activeElement.tagName)) {
+							event.preventDefault();
+							event.stopPropagation();
+						}
+					}
+				}
 			}
 			else if (event.key === 'Tab' && event.shiftKey) {
 				let node = document.activeElement;

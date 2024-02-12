@@ -502,7 +502,20 @@ class ReaderInstance {
 				Zotero.debug('toggle context pane')
 				let win = Zotero.getMainWindow();
 				win.ZoteroContextPane.togglePane();
-
+			},
+			onToolbarShiftTab: () => {
+				// Shift-tab from the toolbar focuses the sync button
+				let win = Zotero.getMainWindow();
+				win.document.getElementById("zotero-tb-sync").focus();
+			},
+			onIframeTab: () => {
+				// Tab after the last tabstop will focus the contextPane
+				let win = Zotero.getMainWindow();
+				let focused = win.ZoteroContextPane.focus();
+				// If context pane wasn't focused (e.g. it's collapsed), focus the tab bar
+				if (!focused) {
+					win.Zotero_Tabs.moveFocus("current");
+				}
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 

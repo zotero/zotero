@@ -181,15 +181,6 @@ var ZoteroItemPane = new function() {
 			isLibraryTab ? 'zotero-view-item-sidenav' : 'zotero-context-pane-sidenav'
 		);
 
-		// Shift-tab from title when reader is opened focuses the last button in tabs toolbar
-		if (event.target.closest(".title") && event.key == "Tab"
-			&& event.shiftKey && Zotero_Tabs.selectedType == "reader") {
-			let focusable = [...document.querySelectorAll("#zotero-tabs-toolbar toolbarbutton:not([disabled]):not([hidden])")];
-			let btn = focusable[focusable.length - 1];
-			btn.focus();
-			stopEvent();
-			return;
-		}
 		// Tab from the scrollable area focuses the pinned pane if it exists
 		if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && sidenav.pinnedPane) {
 			let pane = sidenav.getPane(sidenav.pinnedPane);
