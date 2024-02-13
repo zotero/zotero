@@ -91,7 +91,7 @@ class ReaderInstance {
 	}
 
 	getSecondViewState() {
-		let state = this._iframeWindow.wrappedJSObject.getSecondViewState();
+		let state = this._iframeWindow?.wrappedJSObject?.getSecondViewState?.();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
 	}
 
