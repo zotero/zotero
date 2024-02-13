@@ -202,11 +202,11 @@ Zotero_Preferences.General = {
 				}
 				customMenuItem.setAttribute('label', handlerFilename);
 				if (icon) {
-					customMenuItem.className = 'menuitem-iconic';
+					customMenuItem.classList.add('menuitem-iconic');
 					customMenuItem.setAttribute('image', icon);
 				}
 				else {
-					customMenuItem.className = '';
+					customMenuItem.classList.remove('menuitem-iconic');
 				}
 				customMenuItem.hidden = false;
 				menulist.selectedIndex = 2;
