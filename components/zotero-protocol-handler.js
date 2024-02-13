@@ -1135,7 +1135,7 @@ function ZoteroProtocolHandler() {
 	 * Also supports ZotFile format:
 	 * zotero://open-pdf/[libraryID]_[key]/[page]
 	 */
-	var OpenPDFExtension = {
+	var OpenExtension = {
 		noContent: true,
 		
 		doAction: async function (uri) {
@@ -1145,8 +1145,7 @@ function ZoteroProtocolHandler() {
 			if (!uriPath) {
 				return 'Invalid URL';
 			}
-			uriPath = uriPath.substr('//open-pdf/'.length);
-			var mimeType, content = '';
+			uriPath = uriPath.replace(/^\/\/open(-pdf)?\//, '');
 			
 			var params = {
 				objectType: 'item'
@@ -1174,11 +1173,7 @@ function ZoteroProtocolHandler() {
 			
 			Zotero.API.parseParams(params);
 			var results = await Zotero.API.getResultsFromParams(params);
-			var page = params.page;
-			if (parseInt(page) != page) {
-				page = null;
-			}
-			var annotation = params.annotation;
+			var { annotation, page, cfi, sel } = params;
 			
 			if (!results.length) {
 				Zotero.warn(`No item found for ${uriPath}`);
@@ -1198,32 +1193,43 @@ function ZoteroProtocolHandler() {
 				return;
 			}
 			
-			if (!path.toLowerCase().endsWith('.pdf')
-					&& Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) != 'application/pdf') {
-				Zotero.warn(`${path} is not a PDF`);
-				return;
+			try {
+				if (page) {
+					await Zotero.FileHandlers.open(item, {
+						location: {
+							position: {
+								pageIndex: page
+							},
+							annotationID: annotation
+						}
+					});
+				}
+				else if (cfi) {
+					await Zotero.FileHandlers.open(item, {
+						location: {
+							position: {
+								type: 'FragmentSelector',
+								conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
+								value: cfi
+							}
+						}
+					});
+				}
+				else if (sel) {
+					await Zotero.FileHandlers.open(item, {
+						location: {
+							position: {
+								type: 'CssSelector',
+								value: sel
+							}
+						}
+					});
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
 			}
 			
-			var opened = false;
-			if (page || annotation) {
-				try {
-					opened = await Zotero.OpenPDF.openToPage(item, page, annotation);
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-			}
-			
-			// If something went wrong, just open PDF without page
-			if (!opened) {
-				Zotero.debug("Launching PDF without page number");
-				let zp = Zotero.getActiveZoteroPane();
-				// TODO: Open pane if closed (macOS)
-				if (zp) {
-					zp.viewAttachment([item.id]);
-				}
-				return;
-			}
 			Zotero.Notifier.trigger('open', 'file', item.id);
 		},
 		
@@ -1241,7 +1247,8 @@ function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
 	this._extensions[ZOTERO_SCHEME + "://pdf.js"] = PDFJSExtension;
-	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenPDFExtension;
+	this._extensions[ZOTERO_SCHEME + "://open"] = OpenExtension;
+	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenExtension;
 }
 
 

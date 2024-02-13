@@ -25,259 +25,374 @@
 
 /* eslint-disable array-element-newline */
 
-Zotero.OpenPDF = {
-	openToPage: async function (pathOrItem, page, annotationKey) {
-		var handler = Zotero.Prefs.get("fileHandler.pdf");
+Zotero.FileHandlers = {
+	async open(item, params) {
+		let { location, openInWindow = false } = params || {};
 		
-		var path;
-		if (pathOrItem == 'string') {
-			Zotero.logError("Zotero.OpenPDF.openToPage() now takes a Zotero.Item rather than a path "
-				+ "-- please update your code");
-			path = pathOrItem;
+		let path = await item.getFilePathAsync();
+		if (!path) {
+			Zotero.warn(`File not found: ${item.attachmentPath}`);
+			return false;
+		}
+		
+		Zotero.debug('Opening ' + path);
+		
+		let readerType = item.attachmentReaderType;
+		
+		// Not a file that we/external readers handle with page number support -
+		// just open it with the system handler
+		if (!readerType) {
+			Zotero.debug('No associated reader type -- launching default application');
+			Zotero.launchFile(path);
+			return true;
+		}
+		
+		let handler = Zotero.Prefs.get(`fileHandler.${readerType}`);
+		if (!handler) {
+			Zotero.debug('No external handler for ' + readerType + ' -- opening in Zotero');
+			await Zotero.Reader.open(item.id, location, {
+				openInWindow,
+				allowDuplicate: openInWindow
+			});
+			return true;
+		}
+
+		let systemHandler = this._getSystemHandler(item.attachmentContentType);
+
+		if (handler === 'system') {
+			handler = systemHandler;
+			Zotero.debug(`System handler is ${handler}`);
 		}
 		else {
-			let item = pathOrItem;
-			let library = Zotero.Libraries.get(item.libraryID);
-			// Zotero PDF reader
-			if (!handler) {
-				let location = {
-					annotationID: annotationKey,
-					pageIndex: page && page - 1
-				};
-				await Zotero.Reader.open(item.id, location);
-				return true;
-			}
-			
-			path = await item.getFilePathAsync();
-			if (!path) {
-				Zotero.warn(`${path} not found`);
-				return false;
-			}
-		}
-		
-		var opened = false;
-		
-		if (handler != 'system') {
 			Zotero.debug(`Custom handler is ${handler}`);
 		}
 		
+		let handlers;
 		if (Zotero.isMac) {
-			if (!this._openWithHandlerMac(handler, path, page)) {
-				// Try to detect default app
-				handler = this._getPDFHandlerName();
-				if (!this._openWithHandlerMac(handler, path, page)) {
-					// Fall back to Preview
-					this._openWithPreview(path, page);
-				}
-			}
-			opened = true;
+			handlers = this._handlersMac[readerType];
 		}
 		else if (Zotero.isWin) {
-			if (handler == 'system') {
-				handler = this._getPDFHandlerWindows();
-				if (handler) {
-					Zotero.debug(`Default handler is ${handler}`);
-				}
-			}
-			if (handler) {
-				// Include flags to open the PDF on a given page in various apps
-				//
-				// Adobe Acrobat: http://partners.adobe.com/public/developer/en/acrobat/PDFOpenParameters.pdf
-				// PDF-XChange: http://help.tracker-software.com/eu/default.aspx?pageid=PDFXView25:command_line_options
-				let args = ['/A', 'page=' + page, path];
-				Zotero.Utilities.Internal.exec(handler, args);
-				opened = true;
-			}
-			else {
-				Zotero.debug("No handler found");
-			}
+			handlers = this._handlersWin[readerType];
 		}
 		else if (Zotero.isLinux) {
-			if (handler == 'system') {
-				handler = await this._getPDFHandlerLinux();
-				if (handler) {
-					Zotero.debug(`Resolved handler is ${handler}`);
+			handlers = this._handlersLinux[readerType];
+		}
+		
+		let page = location?.position?.pageIndex ?? undefined;
+		// Add 1 to page index for external readers
+		if (page !== undefined && parseInt(page) == page) {
+			page = parseInt(page) + 1;
+		}
+		
+		// If there are handlers for this platform and this reader type...
+		if (handlers) {
+			// First try to open with the custom handler
+			try {
+				for (let [i, { name, open }] of handlers.entries()) {
+					if (name.test(handler)) {
+						Zotero.debug('Opening with handler ' + i);
+						await open(handler, { filePath: path, location, page });
+						return true;
+					}
 				}
 			}
-			if (handler && (handler.includes('evince') || handler.includes('okular'))) {
-				this._openWithEvinceOrOkular(handler, path, page);
-				opened = true;
+			catch (e) {
+				Zotero.logError(e);
 			}
-			// Fall back to okular and then evince if unknown handler
-			else if (await OS.File.exists('/usr/bin/okular')) {
-				this._openWithEvinceOrOkular('/usr/bin/okular', path, page);
-				opened = true;
-			}
-			else if (await OS.File.exists('/usr/bin/evince')) {
-				this._openWithEvinceOrOkular('/usr/bin/evince', path, page);
-				opened = true;
-			}
-			else {
-				Zotero.debug("No handler found");
-			}
-		}
-		return opened;
-	},
-	
-	_getPDFHandlerName: function () {
-		var handlerService = Cc["@mozilla.org/uriloader/handler-service;1"]
-			.getService(Ci.nsIHandlerService);
-		var handlers = handlerService.enumerate();
-		var handler;
-		while (handlers.hasMoreElements()) {
-			let handlerInfo = handlers.getNext().QueryInterface(Ci.nsIHandlerInfo);
-			if (handlerInfo.type == 'application/pdf') {
-				handler = handlerInfo;
-				break;
-			}
-		}
-		if (!handler) {
-			// We can't get the name of the system default handler unless we add an entry
-			Zotero.debug("Default handler not found -- adding default entry");
-			let mimeService = Components.classes["@mozilla.org/mime;1"]
-				.getService(Components.interfaces.nsIMIMEService);
-			let mimeInfo = mimeService.getFromTypeAndExtension("application/pdf", "");
-			mimeInfo.preferredAction = 4;
-			mimeInfo.alwaysAskBeforeHandling = false;
-			handlerService.store(mimeInfo);
-			
-			// And once we do that, we can get the name (but not the path, unfortunately)
-			let handlers = handlerService.enumerate();
-			while (handlers.hasMoreElements()) {
-				let handlerInfo = handlers.getNext().QueryInterface(Ci.nsIHandlerInfo);
-				if (handlerInfo.type == 'application/pdf') {
-					handler = handlerInfo;
-					break;
+
+			// If we get here, we don't have special handling for the custom
+			// handler that the user has set. If we have a location, we really
+			// want to open with something we know how to pass a page number to,
+			// so we'll see if we know how to do that for the system handler.
+			if (location) {
+				try {
+					if (systemHandler && handler !== systemHandler) {
+						Zotero.debug(`Custom handler did not match -- falling back to system handler ${systemHandler}`);
+						handler = systemHandler;
+						for (let [i, { name, open }] of handlers.entries()) {
+							if (name.test(handler)) {
+								Zotero.debug('Opening with handler ' + i);
+								await open(handler, { filePath: path, location, page });
+								return true;
+							}
+						}
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+
+				// And lastly, the fallback handler for this platform/reader type,
+				// if we have one
+				let fallback = handlers.find(h => h.fallback);
+				if (fallback) {
+					try {
+						Zotero.debug('Opening with fallback');
+						await fallback.open(null, { filePath: path, location, page });
+						return true;
+					}
+					catch (e) {
+						// Don't log error if fallback fails
+						// Just move on and try system handler
+					}
 				}
 			}
 		}
+		
+		Zotero.debug("Opening handler without page number");
+		
+		handler = handler || systemHandler;
 		if (handler) {
-			Zotero.debug(`Default handler is ${handler.defaultDescription}`);
-			return handler.defaultDescription;
+			if (Zotero.isMac) {
+				try {
+					await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', handler, path]);
+					return true;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			
+			try {
+				if (await OS.File.exists(handler)) {
+					Zotero.debug(`Opening with handler ${handler}`);
+					Zotero.launchFileWithApplication(path, handler);
+					return true;
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			Zotero.logError(`${handler} not found`);
 		}
-		return false;
+		
+		Zotero.debug('Launching file normally');
+		Zotero.launchFile(path);
+		return true;
+	},
+
+	_handlersMac: {
+		pdf: [
+			{
+				name: /Preview/,
+				fallback: true,
+				async open(appPath, { filePath, page }) {
+					await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', "Preview", filePath]);
+					if (page !== undefined) {
+						// Go to page using AppleScript
+						let args = [
+							'-e', 'tell app "Preview" to activate',
+							'-e', 'tell app "System Events" to keystroke "g" using {option down, command down}',
+							'-e', `tell app "System Events" to keystroke "${page}"`,
+							'-e', 'tell app "System Events" to keystroke return'
+						];
+						await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
+					}
+				},
+			},
+			{
+				name: /Adobe Acrobat/,
+				async open(appPath, { page }) {
+					if (page !== undefined) {
+						// Go to page using AppleScript
+						let args = [
+							'-e', `tell app "${appPath}" to activate`,
+							'-e', 'tell app "System Events" to keystroke "n" using {command down, shift down}',
+							'-e', `tell app "System Events" to keystroke "${page}"`,
+							'-e', 'tell app "System Events" to keystroke return'
+						];
+						await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
+					}
+				}
+			},
+			{
+				name: /Skim/,
+				async open(appPath, { filePath, page }) {
+					// Escape double-quotes in path
+					var quoteRE = /"/g;
+					filePath = filePath.replace(quoteRE, '\\"');
+					let args = [
+						'-e', `tell app "${appPath}" to activate`,
+						'-e', `tell app "${appPath}" to open "${filePath}"`
+					];
+					if (page !== undefined) {
+						let filename = OS.Path.basename(filePath)
+							.replace(quoteRE, '\\"');
+						args.push('-e', `tell document "${filename}" of application "${appPath}" to go to page ${page}`);
+					}
+					await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
+				}
+			},
+			{
+				name: /PDF Expert/,
+				async open(appPath, { page }) {
+					// Go to page using AppleScript (same as Preview)
+					let args = [
+						'-e', `tell app "${appPath}" to activate`
+					];
+					if (page !== undefined) {
+						args.push(
+							'-e', 'tell app "System Events" to keystroke "g" using {option down, command down}',
+							'-e', `tell app "System Events" to keystroke "${page}"`,
+							'-e', 'tell app "System Events" to keystroke return'
+						);
+					}
+					await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
+				}
+			},
+		],
+		epub: [
+			{
+				name: /Calibre/i,
+				async open(appPath, { filePath, location }) {
+					if (!appPath.endsWith('ebook-viewer.app')) {
+						appPath += '/Contents/ebook-viewer.app';
+					}
+					let args = ['-a', appPath, filePath];
+					if (location?.position?.value) {
+						args.push('--args', '--open-at=' + location.position.value);
+					}
+					await Zotero.Utilities.Internal.exec('/usr/bin/open', args);
+				}
+			},
+		]
+	},
+
+	_handlersWin: {
+		pdf: [
+			{
+				name: new RegExp(''), // Match any handler
+				async open(appPath, { filePath, page }) {
+					let args = [filePath];
+					if (page !== undefined) {
+						// Include flags to open the PDF on a given page in various apps
+						//
+						// Adobe Acrobat: http://partners.adobe.com/public/developer/en/acrobat/PDFOpenParameters.pdf
+						// PDF-XChange: http://help.tracker-software.com/eu/default.aspx?pageid=PDFXView25:command_line_options
+						args.unshift('/A', 'page=' + page);
+					}
+					await Zotero.Utilities.Internal.exec(appPath, args);
+				}
+			}
+		],
+		epub: [
+			{
+				name: /Calibre/i,
+				async open(appPath, { filePath, location }) {
+					if (appPath.toLowerCase().endsWith('calibre.exe')) {
+						appPath = appPath.slice(0, -11) + 'ebook-viewer.exe';
+					}
+					let args = [filePath];
+					if (location?.position?.value) {
+						args.push('--open-at=' + location.position.value);
+					}
+					await Zotero.Utilities.Internal.exec(appPath, args);
+				}
+			}
+		]
+	},
+
+	_handlersLinux: {
+		pdf: [
+			{
+				name: /evince|okular/i,
+				fallback: true,
+				async open(appPath, { filePath, page }) {
+					if (appPath) {
+						switch (appPath.toLowerCase()) {
+							case 'okular':
+								appPath = '/usr/bin/okular';
+
+							// It's "Document Viewer" on stock Ubuntu
+							case 'document viewer':
+							case 'evince':
+								appPath = '/usr/bin/evince';
+						}
+					}
+					else if (await OS.File.exists('/usr/bin/okular')) {
+						appPath = '/usr/bin/okular';
+					}
+					else if (await OS.File.exists('/usr/bin/evince')) {
+						appPath = '/usr/bin/evince';
+					}
+					else {
+						throw new Error('No PDF reader found');
+					}
+
+					// TODO: Try to get default from mimeapps.list, etc., in case system default is okular
+					// or evince somewhere other than /usr/bin
+
+					let args = [filePath];
+					if (page !== undefined) {
+						args.unshift('-p', page);
+					}
+					await Zotero.Utilities.Internal.exec(appPath, args);
+				}
+			}
+		],
+		epub: [
+			{
+				name: /calibre/i,
+				async open(appPath, { filePath, location }) {
+					if (appPath.toLowerCase().endsWith('calibre')) {
+						appPath = appPath.slice(0, -7) + 'ebook-viewer';
+					}
+					let args = [filePath];
+					if (location?.position?.value) {
+						args.push('--open-at=' + location.position.value);
+					}
+					await Zotero.Utilities.Internal.exec(appPath, args);
+				}
+			}
+		]
+	},
+
+	_getSystemHandler(mimeType) {
+		if (Zotero.isWin) {
+			return this._getSystemHandlerWin(mimeType);
+		}
+		else {
+			return this._getSystemHandlerPOSIX(mimeType);
+		}
 	},
 	
-	//
-	// Mac
-	//
-	_openWithHandlerMac: function (handler, path, page) {
-		if (!handler) {
-			return false;
-		}
-		if (handler.includes('Preview')) {
-			this._openWithPreview(path, page);
-			return true;
-		}
-		if (handler.includes('Adobe Acrobat')) {
-			this._openWithAcrobat(handler, path, page);
-			return true;
-		}
-		if (handler.includes('Skim')) {
-			this._openWithSkim(handler, path, page);
-			return true;
-		}
-		if (handler.includes('PDF Expert')) {
-			this._openWithPDFExpert(handler, path, page);
-			return true;
-		}
-		return false;
-	},
-	
-	_openWithPreview: async function (filePath, page) {
-		await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', "Preview", filePath]);
-		// Go to page using AppleScript
-		let args = [
-			'-e', 'tell app "Preview" to activate',
-			'-e', 'tell app "System Events" to keystroke "g" using {option down, command down}',
-			'-e', `tell app "System Events" to keystroke "${page}"`,
-			'-e', 'tell app "System Events" to keystroke return'
-		];
-		await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
-	},
-	
-	_openWithAcrobat: async function (appPath, filePath, page) {
-		await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', appPath, filePath]);
-		// Go to page using AppleScript
-		let args = [
-			'-e', `tell app "${appPath}" to activate`,
-			'-e', 'tell app "System Events" to keystroke "n" using {command down, shift down}',
-			'-e', `tell app "System Events" to keystroke "${page}"`,
-			'-e', 'tell app "System Events" to keystroke return'
-		];
-		await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
-	},
-	
-	_openWithSkim: async function (appPath, filePath, page) {
-		// Escape double-quotes in path
-		var quoteRE = /"/g;
-		filePath = filePath.replace(quoteRE, '\\"');
-		let filename = OS.Path.basename(filePath).replace(quoteRE, '\\"');
-		let args = [
-			'-e', `tell app "${appPath}" to activate`,
-			'-e', `tell app "${appPath}" to open "${filePath}"`
-		];
-		args.push('-e', `tell document "${filename}" of application "${appPath}" to go to page ${page}`);
-		await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
-	},
-	
-	_openWithPDFExpert: async function (appPath, filePath, page) {
-		await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', appPath, filePath]);
-		// Go to page using AppleScript (same as Preview)
-		let args = [
-			'-e', `tell app "${appPath}" to activate`,
-			'-e', 'tell app "System Events" to keystroke "g" using {option down, command down}',
-			'-e', `tell app "System Events" to keystroke "${page}"`,
-			'-e', 'tell app "System Events" to keystroke return'
-		];
-		await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
-	},
-	
-	//
-	// Windows
-	//
-	/**
-	 * Get path to default pdf reader application on windows
-	 *
-	 * From getPDFReader() in ZotFile (GPL)
-	 * https://github.com/jlegewie/zotfile/blob/master/chrome/content/zotfile/utils.js
-	 *
-	 * @return {String|false} - Path to default pdf reader application, or false if none
-	 */
-	_getPDFHandlerWindows: function () {
+	_getSystemHandlerWin(mimeType) {
+		// Based on getPDFReader() in ZotFile (GPL)
+		// https://github.com/jlegewie/zotfile/blob/a6c9e02e17b60cbc1f9bb4062486548d9ef583e3/chrome/content/zotfile/utils.js
+
 		var wrk = Components.classes["@mozilla.org/windows-registry-key;1"]
 			.createInstance(Components.interfaces.nsIWindowsRegKey);
-		// Get handler for PDFs
+		// Get handler
+		var extension = Zotero.MIME.getPrimaryExtension(mimeType);
 		var tryKeys = [
 			{
 				root: wrk.ROOT_KEY_CURRENT_USER,
-				path: 'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\.pdf\\UserChoice',
+				path: `Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\.${extension}\\UserChoice`,
 				value: 'Progid'
 			},
 			{
 				root: wrk.ROOT_KEY_CLASSES_ROOT,
-				path: '.pdf',
+				path: `.${extension}`,
 				value: ''
 			}
 		];
 		var progId;
-		for (let i = 0; !progId && i < tryKeys.length; i++) {
+		for (let key of tryKeys) {
 			try {
-				wrk.open(
-					tryKeys[i].root,
-					tryKeys[i].path,
-					wrk.ACCESS_READ
-				);
-				progId = wrk.readStringValue(tryKeys[i].value);
+				wrk.open(key.root, key.path, wrk.ACCESS_READ);
+				progId = wrk.readStringValue(key.value);
+				if (progId) {
+					break;
+				}
 			}
 			catch (e) {}
 		}
-		
+
 		if (!progId) {
 			wrk.close();
 			return false;
 		}
-		
+
 		// Get version specific handler, if it exists
 		try {
 			wrk.open(
@@ -288,66 +403,96 @@ Zotero.OpenPDF = {
 			progId = wrk.readStringValue('') || progId;
 		}
 		catch (e) {}
-		
+
 		// Get command
 		var success = false;
 		tryKeys = [
 			progId + '\\shell\\Read\\command',
 			progId + '\\shell\\Open\\command'
 		];
-		for (let i = 0; !success && i < tryKeys.length; i++) {
+		for (let key of tryKeys) {
 			try {
 				wrk.open(
 					wrk.ROOT_KEY_CLASSES_ROOT,
-					tryKeys[i],
+					key,
 					wrk.ACCESS_READ
 				);
 				success = true;
+				break;
 			}
 			catch (e) {}
 		}
-		
+
 		if (!success) {
 			wrk.close();
 			return false;
 		}
-		
+
 		try {
 			var command = wrk.readStringValue('').match(/^(?:".+?"|[^"]\S+)/);
 		}
 		catch (e) {}
-		
+
 		wrk.close();
-		
+
 		if (!command) return false;
 		return command[0].replace(/"/g, '');
 	},
 	
-	//
-	// Linux
-	//
-	_getPDFHandlerLinux: async function () {
-		var name = this._getPDFHandlerName();
-		switch (name.toLowerCase()) {
-		case 'okular':
-			return `/usr/bin/${name}`;
-		
-		// It's "Document Viewer" on stock Ubuntu
-		case 'document viewer':
-		case 'evince':
-			return `/usr/bin/evince`;
+	_getSystemHandlerPOSIX(mimeType) {
+		var handlerService = Cc["@mozilla.org/uriloader/handler-service;1"]
+			.getService(Ci.nsIHandlerService);
+		var handlers = handlerService.enumerate();
+		var handler;
+		while (handlers.hasMoreElements()) {
+			let handlerInfo = handlers.getNext().QueryInterface(Ci.nsIHandlerInfo);
+			if (handlerInfo.type == mimeType) {
+				handler = handlerInfo;
+				break;
+			}
+		}
+		if (!handler) {
+			// We can't get the name of the system default handler unless we add an entry
+			Zotero.debug("Default handler not found -- adding default entry");
+			let mimeService = Components.classes["@mozilla.org/mime;1"]
+				.getService(Components.interfaces.nsIMIMEService);
+			let mimeInfo = mimeService.getFromTypeAndExtension(mimeType, "");
+			mimeInfo.preferredAction = 4;
+			mimeInfo.alwaysAskBeforeHandling = false;
+			handlerService.store(mimeInfo);
+
+			// And once we do that, we can get the name (but not the path, unfortunately)
+			let handlers = handlerService.enumerate();
+			while (handlers.hasMoreElements()) {
+				let handlerInfo = handlers.getNext().QueryInterface(Ci.nsIHandlerInfo);
+				if (handlerInfo.type == mimeType) {
+					handler = handlerInfo;
+					break;
+				}
+			}
+		}
+		if (handler) {
+			Zotero.debug(`Default handler is ${handler.defaultDescription}`);
+			return handler.defaultDescription;
+		}
+		return false;
+	}
+};
+
+Zotero.OpenPDF = {
+	openToPage: async function (pathOrItem, page, annotationKey) {
+		Zotero.warn('Zotero.OpenPDF.openToPage() is deprecated -- use Zotero.FileHandlers.open()');
+		if (typeof pathOrItem === 'string') {
+			throw new Error('Zotero.OpenPDF.openToPage() requires an item -- update your code!');
 		}
 		
-		// TODO: Try to get default from mimeapps.list, etc., in case system default is okular
-		// or evince somewhere other than /usr/bin
-		var homeDir = OS.Constants.Path.homeDir;
-		
-		return false;
-		
-	},
-	
-	_openWithEvinceOrOkular: function (appPath, filePath, page) {
-		var args = ['-p', page, filePath];
-		Zotero.Utilities.Internal.exec(appPath, args);
+		await Zotero.FileHandlers.open(pathOrItem, {
+			location: {
+				annotationID: annotationKey,
+				position: {
+					pageIndex: page,
+				}
+			}
+		});
 	}
-}
+};
