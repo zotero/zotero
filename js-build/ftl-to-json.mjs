@@ -14,17 +14,17 @@ async function getJSON() {
 		const sourceFile = join(sourceDir, sourceFileBaseName + '.ftl');
 		const destFile = join(sourceDir, sourceFileBaseName + '.json');
 		const ftl = await fs.readFile(sourceFile, 'utf8');
-		const json = ftlToJSON(ftl, { transformTerms: false, storeTermsInJSON: false });
+		const json = ftlToJSON(ftl, { transformTerms: false, storeTermsInJSON: false, skipRefOnly: true });
 		await fs.outputJSON(destFile, json, { spaces: '\t' });
 		onProgress(destFile, destFile, 'json');
 	}
 	const t2 = performance.now();
-		return ({
-			action: 'ftl->json',
-			count: sourceFileBaseNames.length,
-			totalCount: sourceFileBaseNames.length,
-			processingTime: t2 - t1
-		});
+	return ({
+		action: 'ftl->json',
+		count: sourceFileBaseNames.length,
+		totalCount: sourceFileBaseNames.length,
+		processingTime: t2 - t1
+	});
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
