@@ -38,6 +38,16 @@ async function getFTL() {
 			console.error(`File ${fallbackJSONPath} does not exist -- please run 'ftl-to-json' first`);
 			exit(1);
 		}
+
+		let jsonFromEnUSFTL = {};
+		try {
+			const enUSFtlPath = join(getLocaleDir('en-US'), sourceFileBaseName + '.ftl');
+			const ftl = await fs.readFile(enUSFtlPath, 'utf8');
+			jsonFromEnUSFTL = ftlToJSON(ftl, { transformTerms: false, storeTermsInJSON: false });
+		}
+		catch (e) {
+			console.warn(`No en-US .ftl file for ${sourceFileBaseName}.`);
+		}
 		
 		const fallbackJSON = await fs.readJSON(fallbackJSONPath);
 		
@@ -67,7 +77,7 @@ async function getFTL() {
 				// no .json file from transifex
 			}
 			
-			const mergedJSON = { ...fallbackJSON, ...jsonFromLocalFTL, ...jsonFromTransifex };
+			const mergedJSON = { ...fallbackJSON, ...jsonFromEnUSFTL, ...jsonFromLocalFTL, ...jsonFromTransifex };
 			const ftl = JSONToFtl(mergedJSON, { addTermsToFTL: false, storeTermsInJSON: false, transformTerms: false, terms });
 			
 			const outFtlPath = join(getLocaleDir(locale), sourceFileBaseName + '.ftl');
