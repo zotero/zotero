@@ -998,6 +998,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			file.launch();
 		}
 		catch (e) {
+			// macOS only: if there's no associated application, launch() will throw, but
+			// the OS will show a dialog asking the user to choose an application. We don't
+			// want to show the Firefox dialog in that case.
+			if (Zotero.isMac && file.exists()) {
+				return;
+			}
+			
 			Zotero.debug(e, 2);
 			Zotero.debug("launch() not supported -- trying fallback executable", 2);
 			
@@ -1013,18 +1020,19 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			catch (e) {
 				Zotero.debug(e);
-				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
+				Zotero.debug("Launching via executable failed -- passing to loadURI()");
 				
 				// If nsIFile.launch() isn't available and the fallback
 				// executable doesn't exist, we just let the Firefox external
 				// helper app window handle it
-				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-								.getService(Components.interfaces.nsIFileProtocolHandler);
-				var uri = nsIFPH.newFileURI(file);
+				var uri = Services.io.newFileURI(file);
 				
 				var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
 								getService(Components.interfaces.nsIExternalProtocolService);
-				nsIEPS.loadUrl(uri);
+				nsIEPS.loadURI(
+					uri,
+					Services.scriptSecurityManager.getSystemPrincipal(),
+				);
 			}
 		}
 	};
