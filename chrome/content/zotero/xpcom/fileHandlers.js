@@ -68,7 +68,10 @@ Zotero.FileHandlers = {
 		}
 		
 		let handlers;
-		if (Zotero.isMac) {
+		if (this._mockHandlers) {
+			handlers = this._mockHandlers[readerType];
+		}
+		else if (Zotero.isMac) {
 			handlers = this._handlersMac[readerType];
 		}
 		else if (Zotero.isWin) {
