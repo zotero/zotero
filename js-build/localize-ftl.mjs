@@ -1,4 +1,4 @@
-import { extractTerms, ftlToJSON, JSONToFtl } from 'ftl-tx';
+import { ftlToJSON, JSONToFtl } from 'ftl-tx';
 import fs from 'fs-extra';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -9,7 +9,6 @@ import { exit } from 'process';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const localesDir = join(ROOT, 'chrome', 'locale');
 const sourceDir = join(localesDir, 'en-US', 'zotero');
-const termsSourceFTLPath = join(ROOT, 'app', 'assets', 'branding', 'locale', 'brand.ftl');
 
 function getLocaleDir(locale) {
 	return join(localesDir, locale, 'zotero');
@@ -17,13 +16,6 @@ function getLocaleDir(locale) {
 
 async function getFTL() {
 	const t1 = performance.now();
-	
-	if (!(await fs.pathExists(termsSourceFTLPath))) {
-		console.error(`Required file ${termsSourceFTLPath} does not exist`);
-		exit(1);
-	}
-	
-	const terms = extractTerms(await fs.readFile(termsSourceFTLPath, 'utf-8'));
 	
 	const foundLocales = (await fs.readdir(localesDir, { withFileTypes: true }))
 		.filter(dirent => dirent.isDirectory())
@@ -43,7 +35,7 @@ async function getFTL() {
 		try {
 			const enUSFtlPath = join(getLocaleDir('en-US'), sourceFileBaseName + '.ftl');
 			const ftl = await fs.readFile(enUSFtlPath, 'utf8');
-			jsonFromEnUSFTL = ftlToJSON(ftl, { transformTerms: false, storeTermsInJSON: false });
+			jsonFromEnUSFTL = ftlToJSON(ftl);
 		}
 		catch (e) {
 			console.warn(`No en-US .ftl file for ${sourceFileBaseName}.`);
@@ -61,7 +53,7 @@ async function getFTL() {
 			let jsonFromLocalFTL = {};
 			try {
 				const ftl = await fs.readFile(ftlFilePath, 'utf8');
-				jsonFromLocalFTL = ftlToJSON(ftl, { transformTerms: false, storeTermsInJSON: false });
+				jsonFromLocalFTL = ftlToJSON(ftl);
 			}
 			catch (e) {
 				// no local .ftl file
@@ -78,7 +70,7 @@ async function getFTL() {
 			}
 			
 			const mergedJSON = { ...fallbackJSON, ...jsonFromEnUSFTL, ...jsonFromLocalFTL, ...jsonFromTransifex };
-			const ftl = JSONToFtl(mergedJSON, { addTermsToFTL: false, storeTermsInJSON: false, transformTerms: false, terms });
+			const ftl = JSONToFtl(mergedJSON);
 			
 			const outFtlPath = join(getLocaleDir(locale), sourceFileBaseName + '.ftl');
 			await fs.outputFile(outFtlPath, ftl);
