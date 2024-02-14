@@ -521,7 +521,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		
 		var contentType = item.attachmentContentType;
-		var charset = item.attachmentCharacterSet;
+		var charset = item.attachmentCharset;
 		
 		if (!contentType) {
 			Zotero.debug("No content type in indexItem()", 2);
@@ -557,7 +557,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		// Otherwise load it in a hidden browser
 		else {
-			let pageData = await getPageData(path);
+			// If the file's content type can't be displayed in a browser, treat it as text/plain
+			if (!Cc["@mozilla.org/webnavigation-info;1"].getService(Ci.nsIWebNavigationInfo)
+					.isTypeSupported(contentType)) {
+				contentType = 'text/plain';
+			}
+			
+			let pageData = await getPageData(path, contentType);
 			text = pageData.bodyText;
 			if (!charset) {
 				charset = pageData.characterSet;
@@ -1601,17 +1607,24 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	});
 	
 	
-	async function getPageData(path) {
+	async function getPageData(path, contentType) {
 		const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+		var blobURL;
 		var browser;
 		var pageData;
 		try {
-			let url = Zotero.File.pathToFileURI(path);
+			// Wrap the file in a blob to set its content type
+			let arrayBuffer = await (await fetch(Zotero.File.pathToFileURI(path))).arrayBuffer();
+			let blob = new Blob([arrayBuffer], { type: contentType });
+			blobURL = URL.createObjectURL(blob);
 			browser = new HiddenBrowser({ blockRemoteResources: true });
-			await browser.load(url);
+			await browser.load(blobURL);
 			pageData = await browser.getPageData(['characterSet', 'bodyText']);
 		}
 		finally {
+			if (blobURL) {
+				URL.revokeObjectURL(blobURL);
+			}
 			if (browser) {
 				browser.destroy();
 			}
