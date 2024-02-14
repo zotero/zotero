@@ -1607,8 +1607,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var pageData;
 		try {
 			let url = Zotero.File.pathToFileURI(path);
-			browser = new HiddenBrowser();
-			await browser.load(url, { blockRemoteResources: true });
+			browser = new HiddenBrowser({ blockRemoteResources: true });
+			await browser.load(url);
 			pageData = await browser.getPageData(['characterSet', 'bodyText']);
 		}
 		finally {
