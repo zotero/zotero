@@ -451,7 +451,7 @@ Zotero.ItemTypes = new function() {
 			return _customImages[id];
 		}
 
-		let isDark = Zotero.getMainWindow()?.matchMedia('(prefers-color-scheme: dark)').matches;
+		let isDark = Zotero.UIProperties.isDarkMode === true;
 		
 		switch (itemType) {
 			// Use treeitem.png
