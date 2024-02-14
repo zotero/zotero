@@ -598,7 +598,7 @@ Zotero.Styles = new function() {
 			menuitem.setAttribute('label', selectLocale);
 			menuitem.setAttribute('value', selectLocale);
 			menuitem.setAttributeNS('zotero:', 'customLocale', true);
-			menulist.append(menuitem);
+			menulist.menupopup.append(menuitem);
 		}
 		
 		return menulist.value = selectLocale;
