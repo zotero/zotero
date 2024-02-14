@@ -376,12 +376,20 @@ ${str}
 			|| elem.tagName == 'checkbox';
 	},
 
-	_syncFromPref(elem, preference) {
+	_syncFromPref(elem, preference, force = false) {
 		let value = Zotero.Prefs.get(preference, true);
 		if (this._useChecked(elem)) {
+			value = !!value;
+			if (!force && elem.checked === value) {
+				return;
+			}
 			elem.checked = value;
 		}
 		else {
+			value = String(value);
+			if (!force && elem.value === value) {
+				return;
+			}
 			elem.value = value;
 		}
 		elem.dispatchEvent(new Event('syncfrompreference'));
@@ -450,7 +458,7 @@ ${str}
 
 			// Set timeout before populating the value so the pane can add listeners first
 			return new Promise(resolve => setTimeout(() => {
-				this._syncFromPref(elem, elem.getAttribute('preference'));
+				this._syncFromPref(elem, elem.getAttribute('preference'), true);
 				resolve();
 			}));
 		};
