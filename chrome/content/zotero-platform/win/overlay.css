@@ -2,11 +2,6 @@
 	--theme-border-color: #cecece;
 }
 
-/* Hide horrible blue effect for menu bar and toolbar */
-#navigator-toolbox {
-	-moz-appearance: none;
-}
-
 tree {
 	border-width: 0;
 }

@@ -58,24 +58,6 @@
 	}
 	
 	
-	
-	
-	#titlebar {
-		margin-bottom: calc(0px - var(--tab-min-height));
-		-moz-box-pack: center;
-	}
-	
-	.titlebar-buttonbox-container {
-	  -moz-box-ordinal-group: 1000;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
 	/* ::::: Tabs in Titlebar :::::: */
 	
 	&:not([chromemargin]) > #titlebar {
@@ -88,10 +70,6 @@
 	 */
 	&[tabsintitlebar] > #titlebar {
 	  min-height: calc(var(--tab-min-height) + var(--space-above-tabbar));
-	}
-	
-	&[tabsintitlebar="true"]:not(:-moz-lwtheme) > #titlebar {
-	  -moz-appearance: -moz-window-titlebar;
 	}
 	
 	&:not([tabsintitlebar]) .titlebar-placeholder {
@@ -110,15 +88,6 @@
 		.titlebar-buttonbox {
 			-moz-appearance: -moz-window-button-box;
 		}
-		
-		/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
-		.titlebar-buttonbox-container:-moz-locale-dir(rtl) {
-			-moz-box-ordinal-group: 1000;
-		}
-		
-		.titlebar-buttonbox-container:-moz-locale-dir(ltr) {
-			-moz-box-ordinal-group: 0;
-		}
 
 		.titlebar-icon {
 			display: none;
@@ -131,7 +100,10 @@
 	display: none;
 }
 
-#navigator-toolbox {
+#titlebar {
+	display: flex;
+	align-items: center;
+	-moz-window-dragging: drag;
 	menu {
 		font-size: var(--zotero-font-size);
 	}
