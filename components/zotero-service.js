@@ -356,10 +356,10 @@ function ZoteroService() {
 					zContext.Zotero.startupError = e.stack || e;
 				}
 			})
-			.then(function () {
+			.then(async function () {
 				if (zContext.Zotero.startupErrorHandler || zContext.Zotero.startupError) {
 					if (zContext.Zotero.startupErrorHandler) {
-						zContext.Zotero.startupErrorHandler();
+						await zContext.Zotero.startupErrorHandler();
 					}
 					else if (zContext.Zotero.startupError) {
 						// Try to repair the DB on the next startup, in case it helps resolve

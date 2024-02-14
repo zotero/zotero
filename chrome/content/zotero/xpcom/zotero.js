@@ -303,7 +303,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						]
 					)
 					: Zotero.getString('dataDir.notFound', Zotero.clientName);
-				_startupErrorHandler = function() {
+				_startupErrorHandler = async function() {
 					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 							createInstance(Components.interfaces.nsIPromptService);
 					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
@@ -329,7 +329,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						}
 						// Locate data directory
 						else if (index == 2) {
-							Zotero.DataDirectory.choose(true);
+							await Zotero.DataDirectory.choose(true);
 						}
 
 					}
@@ -354,7 +354,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						}
 						// Locate data directory
 						else if (index == 2) {
-							Zotero.DataDirectory.choose(true);
+							await Zotero.DataDirectory.choose(true);
 						}
 					}
 				}
