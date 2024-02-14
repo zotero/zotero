@@ -2,29 +2,26 @@
 	// Allow right-click context menu on menubar
 	pointer-events: none;
 	visibility: visible;
-	// Space for 36*36 icon
-	padding-left: var(--tab-min-height);
+	flex: 1;
 }
 
 #menubar-items {
 	pointer-events: all;
 }
 
-#titlebar {
-	pointer-events: none;
-	height: var(--tab-min-height);
-	margin-bottom: calc(0px - var(--tab-min-height));
-}
-
 .titlebar-buttonbox {
+	height: 100%;
 	pointer-events: all;
 }
 
-#navigator-toolbox {
+#titlebar {
 	height :var(--tab-min-height);
 	-moz-box-pack: center;
 	pointer-events: none;
 	border-bottom: var(--material-border);
+	toolbar {
+		appearance: none;
+	}
 	menubar {
 		height :var(--tab-min-height);
 		padding: 5px 1px 5px 1px !important;
@@ -41,11 +38,6 @@
     }
 }
 
-.titlebar-icon-container {
-	margin-bottom: calc(0px - var(--tab-min-height));
-	height :var(--tab-min-height);
-}
-
 .titlebar-icon {
 	-moz-window-dragging: no-drag;
 	pointer-events: all;
@@ -53,13 +45,6 @@
 	margin: 10px;
 	object-fit: none;
 }
-
-.titlebar-buttonbox-container {
-	-moz-box-pack: end;
-	height :var(--tab-min-height);
-	background: var(--material-tabbar);
-}
-
 
 
 // Following rules from https://searchfox.org/mozilla-central/source/browser/themes/windows/browser.css
@@ -108,7 +93,7 @@
 		}
 	}
 
-	&[sizemode="normal"] #navigator-toolbox {
+	&[sizemode="normal"] #titlebar {
 		border-top: .5px solid ActiveBorder;
 		&:-moz-window-inactive {
 		border-top-color: InactiveBorder;
@@ -128,16 +113,6 @@
 	 * Windows 7 with Aero Glass.
 	 */
 	z-index: 1;
-}
-
-.titlebar-buttonbox-container {
-	align-items: stretch;
-
-	/* Prevent window controls from overlapping the nav bar's shadow on the tab
-	 * bar. */
-	#TabsToolbar > & {
-	margin-bottom: var(--tabs-navbar-shadow-size);
-	}
 }
 
 /* Window control buttons */

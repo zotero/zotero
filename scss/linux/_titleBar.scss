@@ -8,18 +8,21 @@
 	background: var(--material-tabbar);
 }
 
-#navigator-toolbox {
+#titlebar {
 	height: var(--tab-min-height);
 	-moz-box-pack: center;
 	pointer-events: none;
+	-moz-appearance: -moz-window-titlebar;
 }
 
 #toolbar-menubar {
 	pointer-events: none;
 	visibility: visible;
 	// space for 30*30 icon
-	padding-left: var(--tab-min-height);
+	margin: 0 8px;
 	height: var(--tab-min-height);
+	appearance: none;
+	flex: 1;
 }
 
 #menubar-items {
@@ -30,39 +33,19 @@
 	height: var(--tab-min-height);
 }
 
-#titlebar {
-	pointer-events: none;
-}
-
 .titlebar-buttonbox {
 	pointer-events: all;
-	margin: 0 4px;
+	margin: 0 10px;
 }
 
 .titlebar-button {
-	margin: 4px 0;
-	width: calc(var(--tab-min-height) - 8px);
-	height: calc(var(--tab-min-height) - 8px);
-	position: relative;
+	position: static;
 	// Fix KDE rendering bug
 	z-index: 1;
 }
 
 .titlebar-icon-container {
-	margin-bottom: calc(0px - var(--tab-min-height));
-	height: var(--tab-min-height);
-}
-
-.titlebar-icon {
-	-moz-window-dragging: drag;
-	// to make the icon 30*30
-	margin: 7px;
-	object-fit: none;
-}
-
-.titlebar-buttonbox-container {
-	-moz-box-pack: end;
-	height: var(--tab-min-height);
+	display: none;
 }
 
 // Following rules from https://searchfox.org/mozilla-central/source/browser/themes/linux/browser.css
@@ -73,9 +56,9 @@
  * can swallow those events. */
 .titlebar-buttonbox {
 	z-index: 1;
+	display: flex;
 	align-items: center;
-	// Disable button stretch
-	-moz-box-align: baseline;
+	height: var(--tab-min-height);
 }
 
 /* Render titlebar command buttons according to system config.
@@ -156,7 +139,8 @@
 }
 
 @media (-moz-gtk-csd-reversed-placement) {
-	.titlebar-buttonbox-container {
-	order: -1;
+	.titlebar-buttonbox {
+		order: -1;
+		margin-right: 0;
 	}
 }

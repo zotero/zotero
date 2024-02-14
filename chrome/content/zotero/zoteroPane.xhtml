@@ -101,8 +101,53 @@
 		<!--EDIT-->
 		<command id="cmd_find"
 			oncommand="document.getElementById('zotero-tb-search-textbox').select()"/>
+			
+		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
+		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.showImportWizard();"/>
+		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
+		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
+		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
+		<command id="cmd_zotero_copyCitation"
+				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"
+				 disabled="true"/>
+		<command id="cmd_zotero_copyBibliography"
+				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
+				 disabled="true"/>
+		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
+		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xhtml', 'rtfScan', 'chrome,centerscreen')"/>
+		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection()?.key)"/>
+		<command id="cmd_zotero_newFeed_fromURL" oncommand="ZoteroPane_Local.newFeedFromURL()"/>
+		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
+		<command id="cmd_zotero_addByIdentifier" oncommand="Zotero_Lookup.showPanel()"/>
+		<command id="cmd_zotero_newStandaloneFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog()"/>
+		<command id="cmd_zotero_newStandaloneLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true)"/>
+		<command id="cmd_zotero_newChildFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(false, ZoteroPane.getSelectedItems()[0].id)"/>
+		<command id="cmd_zotero_newChildLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true, ZoteroPane.getSelectedItems()[0].id)"/>
+		<command id="cmd_zotero_newChildURLAttachment" oncommand="ZoteroPane.addAttachmentFromURI(true, ZoteroPane.getSelectedItems()[0].id)"/>
+		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
+		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
 	</commandset>
-	
+
+	<commandset id="macCommandSet"> <!-- was mainCommandSet -->
+		<command id="minimizeWindow"
+				 label="&minimizeWindow.label;"
+				 oncommand="window.minimize();" />
+		<command id="zoomWindow"
+				 label="&zoomWindow.label;"
+				 oncommand="zoomWindow();" />
+	</commandset>
+
+	<keyset id="macKeyset">  <!-- was mainKeySet -->
+		<key id="key_minimizeWindow"
+			 command="minimizeWindow"
+			 key="&minimizeWindow.key;"
+			 modifiers="accel"/>
+		<key id="key_openHelpMac"
+			 oncommand="ZoteroStandalone.openHelp();"
+			 key="&helpMac.commandkey;"
+			 modifiers="accel"/>
+	</keyset>
+
 	<keyset id="mainKeyset">
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_quitApplication"
@@ -153,33 +198,6 @@
 		<hbox class="titlebar-icon-container">
 			<image class="titlebar-icon" src="chrome://zotero/skin/z.svg"></image>
 		</hbox>
-		<hbox class="titlebar-buttonbox-container" skipintoolbarset="true">
-			<hbox class="titlebar-buttonbox titlebar-color">
-				<!-- TODO: remove `titlebar-btn` when we are on FX115. See https://phabricator.services.mozilla.com/D162757 -->
-				<toolbarbutton class="titlebar-button titlebar-min"
-					titlebar-btn="min"
-					oncommand="window.minimize();"
-					data-l10n-id="browser-window-minimize-button"
-					/>
-				<toolbarbutton class="titlebar-button titlebar-max"
-					titlebar-btn="max"
-					oncommand="window.maximize();"
-					data-l10n-id="browser-window-maximize-button"
-					/>
-				<toolbarbutton class="titlebar-button titlebar-restore"
-					titlebar-btn="max"
-					oncommand="window.fullScreen ? BrowserFullScreen() : window.restore();"
-					data-l10n-id="browser-window-restore-down-button"
-					/>
-				<toolbarbutton class="titlebar-button titlebar-close"
-					titlebar-btn="close"
-					oncommand="window.close();"
-					data-l10n-id="browser-window-close-button"
-					/>
-			</hbox>
-		</hbox>
-	</vbox>
-	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
 				defaultset="menubar-items"
@@ -685,27 +703,8 @@
 							</menu>
 						</menupopup>
 					</menu>
-					
-					<commandset id="macCommandSet"> <!-- was mainCommandSet -->
-						<command id="minimizeWindow"
-								label="&minimizeWindow.label;"
-								oncommand="window.minimize();" />
-						<command id="zoomWindow"
-								label="&zoomWindow.label;"
-								oncommand="zoomWindow();" />
-					</commandset>
-					
-					<keyset id="macKeyset">  <!-- was mainKeySet -->
-						<key id="key_minimizeWindow"
-								command="minimizeWindow"
-								key="&minimizeWindow.key;"
-								modifiers="accel"/>
-						<key id="key_openHelpMac"
-								oncommand="ZoteroStandalone.openHelp();"
-								key="&helpMac.commandkey;"
-								modifiers="accel"/>
-					</keyset>
-					
+				
+					 <!-- Only on macOS -->
 					<menu id="windowMenu"
 							label="&windowMenu.label;"
 							datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
@@ -799,7 +798,32 @@
 				</menubar>
 			</toolbaritem>
 		</toolbar>
-	</toolbox>
+		
+		<hbox class="titlebar-buttonbox titlebar-color">
+			<!-- TODO: remove `titlebar-btn` when we are on FX115. See https://phabricator.services.mozilla.com/D162757 -->
+			<toolbarbutton class="titlebar-button titlebar-min"
+				titlebar-btn="min"
+				oncommand="window.minimize();"
+				data-l10n-id="browser-window-minimize-button"
+				/>
+			<toolbarbutton class="titlebar-button titlebar-max"
+				titlebar-btn="max"
+				oncommand="window.maximize();"
+				data-l10n-id="browser-window-maximize-button"
+				/>
+			<toolbarbutton class="titlebar-button titlebar-restore"
+				titlebar-btn="max"
+				oncommand="window.fullScreen ? BrowserFullScreen() : window.restore();"
+				data-l10n-id="browser-window-restore-down-button"
+				/>
+			<toolbarbutton class="titlebar-button titlebar-close"
+				titlebar-btn="close"
+				oncommand="window.close();"
+				data-l10n-id="browser-window-close-button"
+				/>
+		</hbox>
+	</vbox>
+	
 	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
 	<hbox id="zotero-title-bar">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" style="-moz-box-flex: 1;"/>
@@ -855,35 +879,6 @@
 			</toolbarbutton>
 		</hbox>
 	</hbox>
-	
-
-	<commandset id="mainCommandSet">
-		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
-		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.showImportWizard();"/>
-		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
-		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
-		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
-		<command id="cmd_zotero_copyCitation"
-			oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"
-			disabled="true"/>
-		<command id="cmd_zotero_copyBibliography"
-			oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
-			disabled="true"/>
-		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
-		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xhtml', 'rtfScan', 'chrome,centerscreen')"/>
-		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection()?.key)"/>
-		<command id="cmd_zotero_newFeed_fromURL" oncommand="ZoteroPane_Local.newFeedFromURL()"/>
-		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
-		<command id="cmd_zotero_addByIdentifier" oncommand="Zotero_Lookup.showPanel()"/>
-		<command id="cmd_zotero_newStandaloneFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog()"/>
-		<command id="cmd_zotero_newStandaloneLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true)"/>
-		<command id="cmd_zotero_newChildFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(false, ZoteroPane.getSelectedItems()[0].id)"/>
-		<command id="cmd_zotero_newChildLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true, ZoteroPane.getSelectedItems()[0].id)"/>
-		<command id="cmd_zotero_newChildURLAttachment" oncommand="ZoteroPane.addAttachmentFromURI(true, ZoteroPane.getSelectedItems()[0].id)"/>
-		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
-		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
-	</commandset>
-	
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
 			<stack id="zotero-pane-stack" flex="1">
