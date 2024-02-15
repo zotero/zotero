@@ -458,7 +458,7 @@ var Zotero_QuickFormat = new function () {
 					}
 				}
 			}
-			return citedItemsMatchingSearch.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
+			return citedItemsMatchingSearch;
 		}
 	}
 	
@@ -599,7 +599,6 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		items.sort(Zotero_QuickFormat.citingNotes ? _noteSort : _itemSort);
-		items = items.filter(i => !options.citationItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		
 		// Split filtered items into selected and other bins
 		let matchingSelectedItems = [];
