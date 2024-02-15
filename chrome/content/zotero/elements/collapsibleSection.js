@@ -123,8 +123,8 @@
 			this._head.setAttribute("tabindex", "0");
 			this._head.addEventListener('mousedown', this._handleMouseDown);
 			this._head.addEventListener('click', this._handleClick);
-			this._head.addEventListener('keydown', this._handleKeyDown);
 			this._head.addEventListener('contextmenu', this._handleContextMenu);
+			this.addEventListener('keydown', this._handleKeyDown);
 
 			this._title = document.createElement('span');
 			this._title.className = 'title';
@@ -257,8 +257,8 @@
 		destroy() {
 			this._head.removeEventListener('click', this._handleClick);
 			this._head.removeEventListener('mousedown', this._handleMouseDown);
-			this._head.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
+			this.removeEventListener('keydown', this._handleKeyDown);
 			
 			Zotero.Prefs.unregisterObserver(this._notifierID);
 		}
@@ -306,64 +306,86 @@
 				event.preventDefault();
 				event.stopPropagation();
 			};
+			if (this._head.contains(tgt)) {
+				// Tab/Shift-Tab from section header through header buttons
+				if (event.key === "Tab") {
+					let nextBtn;
+					if (tgt.classList.contains("head") && event.shiftKey) {
+						// Shift-tab from the last section of node editor
+						let section = tgt.closest("collapsible-section").parentNode;
+						let noteEditor = tgt.closest("note-editor");
+						if (!section.previousElementSibling && noteEditor) {
+							noteEditor.focusCoreEditor();
+							stopEvent();
+						}
+						return;
+					}
+					if (tgt.classList.contains("head")) {
+						nextBtn = this._head.querySelector("toolbarbutton");
+					}
+					else {
+						nextBtn = event.shiftKey ? tgt.previousElementSibling : tgt.nextElementSibling;
+					}
+					
+					if (nextBtn?.tagName == "popupset") {
+						nextBtn = this._head;
+					}
+					if (nextBtn) {
+						nextBtn.focus();
+						stopEvent();
+					}
+				}
+				if (event.target.tagName === "toolbarbutton") {
+					// No actions on right/left on header buttons
+					if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
+						stopEvent();
+						return;
+					}
+				}
+				// Space/Enter toggle section open/closed.
+				// ArrowLeft/ArrowRight on actual header will close/open
+				if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key)) {
+					stopEvent();
+					this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == "ArrowRight");
+					event.target.focus();
+				}
+				if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+					let up = event.key == "ArrowUp";
+					// Arrow up from a button focuses the header
+					if (up && this._head !== tgt) {
+						this._head.focus();
+						stopEvent();
+						return;
+					}
+					// ArrowUp focuses the header of the previous section, ArrowDown - of the next one
+					let box = this.parentNode;
+					let nextBox;
+					nextBox = up ? box.previousElementSibling : box.nextElementSibling;
+					while (nextBox && nextBox.hidden) {
+						nextBox = up ? nextBox.previousElementSibling : nextBox.nextElementSibling;
+					}
+					let nextSection = nextBox?.querySelector("collapsible-section");
+					if (nextSection) {
+						nextSection._head.focus();
+						stopEvent();
+					}
+				}
+			}
 
-			// Tab/Shift-Tab from section header through header buttons
-			if (event.key === "Tab") {
-				let nextBtn;
-				if (tgt.classList.contains("head") && event.shiftKey) {
-					return;
+			// Tab tavigation between entries and buttons within library, related and notes boxes
+			if (event.key == "Tab" && event.target.closest(".box")) {
+				let next = null;
+				if (event.key == "Tab" && !event.shiftKey) {
+					next = event.target.nextElementSibling;
 				}
-				if (tgt.classList.contains("head")) {
-					nextBtn = this._head.querySelector("toolbarbutton");
+				if (event.key == "Tab" && event.shiftKey) {
+					next = event.target.parentNode.previousElementSibling?.lastChild;
 				}
-				else {
-					nextBtn = event.shiftKey ? tgt.previousElementSibling : tgt.nextElementSibling;
-				}
-				
-				if (nextBtn?.tagName == "popupset") {
-					nextBtn = this._head;
-				}
-				if (nextBtn) {
-					nextBtn.focus();
-					stopEvent();
-				}
-			}
-			if (event.target.tagName === "toolbarbutton") {
-				// No actions on right/left on header buttons
-				if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
-					stopEvent();
-					return;
-				}
-				// Let itemPane.js listener handle space or Enter clicks
-				if ([" ", "Enter"].includes(event.key)) {
-					return;
-				}
-			}
-			// Space/Enter toggle section open/closed.
-			// ArrowLeft/ArrowRight on actual header will close/open
-			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key)) {
-				stopEvent();
-				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == "ArrowRight");
-				event.target.focus();
-			}
-			if (["ArrowUp", "ArrowDown"].includes(event.key)) {
-				let up = event.key == "ArrowUp";
-				// Arrow up from a button focuses the header
-				if (up && this._head !== tgt) {
-					this._head.focus();
-					stopEvent();
-					return;
-				}
-				// ArrowUp focuses the header of the previous section, ArrowDown - of the next one
-				let box = this.parentNode;
-				let nextBox;
-				nextBox = up ? box.previousElementSibling : box.nextElementSibling;
-				while (nextBox && nextBox.hidden) {
-					nextBox = up ? nextBox.previousElementSibling : nextBox.nextElementSibling;
-				}
-				let nextSection = nextBox?.querySelector("collapsible-section");
-				if (nextSection) {
-					nextSection._head.focus();
+				// Force the element to be visible before focusing
+				if (next) {
+					next.style.visibility = "visible";
+					next.focus();
+					next.style.removeProperty("visibility");
 					stopEvent();
 				}
 			}
