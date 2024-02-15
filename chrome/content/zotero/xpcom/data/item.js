@@ -2729,7 +2729,13 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 		Zotero.logError(`Attachment parent ${this.libraryID}/${parentKey} doesn't exist`);
 		return;
 	}
-	item.clearBestAttachmentState();
+
+	if (item._bestAttachmentState?.key && this.key === item._bestAttachmentState.key) {
+		item._bestAttachmentState.exists = exists;
+	}
+	else {
+		item.clearBestAttachmentState();
+	}
 };
 
 
@@ -3701,7 +3707,11 @@ Zotero.Item.prototype.getBestAttachment = Zotero.Promise.coroutine(function* () 
 		throw ("getBestAttachment() can only be called on regular items");
 	}
 	var attachments = yield this.getBestAttachments();
-	return attachments ? attachments[0] : false;
+	let bestAttachment = attachments ? attachments[0] : false;
+	if (bestAttachment) {
+		this._bestAttachmentState = { key: bestAttachment.key, ...(this._bestAttachmentState || {}) };
+	}
+	return bestAttachment;
 });
 
 
