@@ -87,6 +87,8 @@
 			});
 			this.append(content);
 
+			// Handle moving focus from the editor to tags/related sections
+			this._iframe.addEventListener('keypress', this.handleKeypress);
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
 		}
@@ -98,6 +100,7 @@
 			this._destroyed = true;
 			
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			this._iframe.removeEventListener('keypress', this.handleKeypress);
 		}
 		
 		disconnectedCallback() {
@@ -192,6 +195,29 @@
 
 			if (ids.includes(id) || this._parentItem && ids.includes(this._parentItem.id)) {
 				this._id('links-box').refresh();
+			}
+		};
+
+		handleKeypress = (e) => {
+			// On tab from the editor, move focus to the first section header after the note
+			if (e.key == "Tab" && !e.shiftKey && e.target.classList.contains("editor-core")) {
+				this.querySelector("#links-container [tabindex='0']").focus();
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			// Skip top-most node of iframe on shift-tab from buttons
+			if (e.key == "Tab" && e.shiftKey && e.target.classList.contains("toolbar-button")) {
+				e.target.closest("html").focus();
+			}
+			// Shift-tab from core-editor focuses toolbar button
+			if (e.key == "Tab" && e.shiftKey && e.target.classList.contains("editor-core")) {
+				this._iframe.contentDocument.querySelector('.toolbar button').focus();
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			// Space or enter on editor moves focus inside of it and makes cursor visible
+			if ([" ", "Enter"].includes(e.key) && e.target.classList.contains("editor-core")) {
+				this._iframe.contentDocument.querySelector(".primary-editor").focus();
 			}
 		};
 
@@ -319,6 +345,10 @@
 			}
 			catch (e) {
 			}
+		}
+
+		focusCoreEditor() {
+			this._iframe.contentDocument.querySelector(".editor-core").focus();
 		}
 
 		_id(id) {
