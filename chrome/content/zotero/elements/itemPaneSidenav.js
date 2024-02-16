@@ -268,22 +268,14 @@
 		}
 		
 		_getStickyScrollPadding(scrollTarget) {
-			let sticky = this._container.querySelector('sticky');
+			// Look for stickies contained in open sections
+			let stickies = this._container.querySelectorAll('collapsible-section[open]:not([empty]) sticky');
+			// Find the first one that's visible (section isn't hidden)
+			let sticky = [...stickies].find(sticky => sticky.getBoundingClientRect().height);
 			if (!sticky) {
-				// No sticky element in the DOM
 				return 0;
 			}
-			let containingOpenSection = sticky.closest('collapsible-section[open]:not([empty])');
-			if (!containingOpenSection) {
-				// Not contained in an open section
-				return 0;
-			}
-			let stickyBoundingRect = sticky.getBoundingClientRect();
-			if (!stickyBoundingRect.height) {
-				// Not displayed on screen (e.g. section is hidden)
-				return 0;
-			}
-			// Since none of the above checks passed, we do need padding. Get the height of the sticky
+			// Since there's a visible sticky, we do need padding. Get the height of the sticky
 			// element at the target scroll position
 			return sticky.getBoxHeightAtPosition(scrollTarget.getBoundingClientRect().top - this._container.getBoundingClientRect().top + this._container.scrollTop);
 		}
