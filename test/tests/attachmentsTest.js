@@ -1547,6 +1547,13 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
+		it("should trim spaces from template string", function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemBookSection, ' {{ bookTitle case="snake" }} '),
+				'book_title'
+			);
+		});
+
 		it("should convert old attachmentRenameFormatString to use new attachmentRenameTemplate syntax", function () {
 			assert.equal(
 				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%c - }{%y - }{%t{50}}'),

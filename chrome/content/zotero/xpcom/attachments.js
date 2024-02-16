@@ -2146,6 +2146,8 @@ Zotero.Attachments = new function () {
 			formatString = Zotero.Prefs.get('attachmentRenameTemplate');
 		}
 
+		formatString = formatString.trim();
+
 		const getSlicedCreatorsOfType = (creatorType, slice) => {
 			let creatorTypeIDs;
 			switch (creatorType) {
