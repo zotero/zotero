@@ -84,14 +84,4 @@ Zotero.UIProperties = new class {
 		root.style.setProperty('--zotero-ui-density', density);
 		root.setAttribute('zoteroUIDensity', density);
 	}
-
-	/**
-	 * @returns {boolean|undefined} Whether Zotero is in dark mode.
-	 * If main window is not available, returns undefined.
-	 */
-	get isDarkMode() {
-		let win = Zotero.getMainWindow();
-		if (!win) return undefined;
-		return win.matchMedia('(prefers-color-scheme: dark)').matches;
-	}
 };
