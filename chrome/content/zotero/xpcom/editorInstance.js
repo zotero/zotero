@@ -689,21 +689,27 @@ class EditorInstance {
 		let { id, type, data } = subscription;
 		if (type === 'image') {
 			let { attachmentKey } = data;
-			let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
-			
-			// Note: Images aren't visible in merge dialog because:
-			// - Attachments aren't downloaded at the time
-			// - We are checking if attachments belong to the current note
-			
-			if (item.parentID === this._item.id) {
-				if (await item.getFilePathAsync()) {
-					let src = await this._getDataURL(item);
-					this._postMessage({ action: 'notifySubscription', id, data: { src } });
+			let n = 0;
+			// For now wait up to 60 seconds, as there is no point to wait for very long sync to finish
+			while (n++ < 60) {
+				let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
+				// Attachment item (not the file) might not be synced at the time
+				if (!item && Zotero.Sync.Runner.syncInProgress) {
+					await Zotero.Promise.delay(1000);
+					continue;
 				}
-				else {
-					await Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
-					// this._postMessage({ action: 'notifySubscription', id, data: { src: 'error' } });
+				// Check if the attachment is actually the child
+				if (item.parentID === this._item.id) {
+					if (await item.getFilePathAsync()) {
+						let src = await this._getDataURL(item);
+						this._postMessage({ action: 'notifySubscription', id, data: { src } });
+					}
+					else {
+						await Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
+						// this._postMessage({ action: 'notifySubscription', id, data: { src: 'error' } });
+					}
 				}
+				break;
 			}
 		}
 	}

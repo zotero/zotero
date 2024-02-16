@@ -87,7 +87,7 @@
 			});
 			this.append(content);
 
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteEditor');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'file'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
 		}
 		
