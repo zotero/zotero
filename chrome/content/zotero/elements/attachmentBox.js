@@ -197,6 +197,11 @@
 			if (val.isAttachment()) {
 				this._item = val;
 				this.hidden = false;
+				
+				let sticky = this.querySelector('sticky');
+				sticky.scrollParent = this.closest('.zotero-view-item');
+				sticky.invalidate();
+				
 				this.render();
 			}
 			else {

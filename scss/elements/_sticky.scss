@@ -3,7 +3,7 @@ sticky {
 	
 	& > :not(.replacement) {
 		z-index: 1;
-		position: sticky;
+		position: relative;
 		top: -1px;
 
 		padding-top: 1px + 2px; // 1px to offset top, 2px as actual padding
@@ -15,10 +15,6 @@ sticky {
 		}
 		
 		border-bottom: var(--material-border-transparent);
-	}
-	
-	&.long > :not(.replacement) {
-		position: relative;
 	}
 	
 	&.stuck > :not(.replacement) {

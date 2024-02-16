@@ -340,6 +340,13 @@
 				this.blurOpenField();
 			}
 			
+			// If the item has been changed, invalidate our sticky
+			if (!this._item || val.id != this._item.id) {
+				let sticky = this.querySelector('sticky');
+				sticky.scrollParent = this.closest('.zotero-view-item');
+				sticky.invalidate();
+			}
+			
 			this._item = val;
 			this._lastTabIndex = null;
 			this.scrollToTop();

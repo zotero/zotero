@@ -27,20 +27,52 @@
 
 {
 	class Sticky extends XULElementBase {
-		get scrollParentSelector() {
-			return this.getAttribute('scroll-parent') || '.zotero-view-item';
-		}
-		
-		set scrollParentSelector(selector) {
-			this.setAttribute('scroll-parent', selector);
-		}
-		
 		get scrollParent() {
-			return this.closest(this.scrollParentSelector);
+			return this._scrollParent;
+		}
+		
+		set scrollParent(scrollParent) {
+			if (scrollParent === this._scrollParent) {
+				return;
+			}
+			
+			if (this._scrollParent) {
+				this._scrollParent.removeEventListener('scroll', this._handleScroll);
+			}
+			this._scrollParent = scrollParent;
+			if (scrollParent) {
+				scrollParent.addEventListener('scroll', this._handleScroll);
+				this._resizeObserver.disconnect();
+				this._resizeObserver.observe(scrollParent);
+				this._handleScroll();
+			}
 		}
 		
 		get box() {
 			return this.querySelector(':scope > :not(.replacement)');
+		}
+		
+		get stuck() {
+			return this.classList.contains('stuck');
+		}
+		
+		set stuck(stuck) {
+			stuck = !!stuck;
+			if (this.stuck === stuck) return;
+
+			if (stuck) {
+				let height = `${this._getBoxHeight()}px`;
+				this.classList.add('stuck');
+				this._replacement.hidden = false;
+				this._replacement.style.height = height;
+				this.box.style.setProperty('--full-height', height);
+			}
+			else {
+				this.classList.remove('stuck');
+				this._replacement.hidden = true;
+				this._replacement.style.height = '';
+				this.box.style.removeProperty('--full-height');
+			}
 		}
 		
 		init() {
@@ -50,13 +82,9 @@
 			this._replacement = replacement;
 			this.append(replacement);
 			
-			this._intersectionObserver = new IntersectionObserver(this._handleIntersection, { threshold: 1 });
-			this._resizeObserver = new ResizeObserver(this._handleResize);
-
-			// Attach the observers now, and reattach them if the child is added/replaced
-			this._attachObservers();
-			new MutationObserver(() => this._attachObservers())
-				.observe(this, { childList: true });
+			this._resizeObserver = new ResizeObserver(() => {
+				this.style.setProperty('--scroll-parent-height', this.scrollParent.clientHeight + 'px');
+			});
 
 			// An element with position: fixed will eat wheel events, so dispatch them
 			// to the parent manually
@@ -65,65 +93,44 @@
 			});
 		}
 		
-		_attachObservers() {
-			this._intersectionObserver.disconnect();
+		destroy() {
+			if (this._scrollParent) {
+				this._scrollParent.removeEventListener('scroll', this._handleScroll);
+			}
 			this._resizeObserver.disconnect();
-			
-			this._intersectionObserver.observe(this._replacement);
-			if (this.box) {
-				this._intersectionObserver.observe(this.box);
-				this._resizeObserver.observe(this.box);
-			}
-			if (this.scrollParent) {
-				this._resizeObserver.observe(this.scrollParent);
-			}
-			this._handleResize();
 		}
 
-		_handleIntersection = (entries) => {
-			let scrollParent = this.scrollParent;
-			let box = this.box;
-
-			for (let { target, intersectionRatio } of entries) {
-				// Only pay attention to the replacement when stuck and the box when not stuck
-				if (target !== (this.classList.contains('stuck') ? this._replacement : this.box)) {
-					continue;
-				}
-
-				let stuck = scrollParent && box
-					&& box.getBoundingClientRect().top <= scrollParent.getBoundingClientRect().top
-					&& intersectionRatio < 1;
-				this._setStuck(stuck);
-			}
-		};
-
-		_handleResize = () => {
-			this.classList.toggle('long',
-				this.box && this.scrollParent && this.box.offsetHeight > this.scrollParent.offsetHeight);
-		};
-
+		invalidate() {
+			let height = this._getBoxHeight();
+			this._replacement.style.height = height + 'px';
+			this.box.style.setProperty('--full-height', height + 'px');
+			this._handleScroll();
+		}
+		
 		_handleScroll = (event) => {
-			if (event && (event.target !== this.scrollParent || !this.classList.contains('stuck'))) {
-				this.box.style.removeProperty('--full-height');
-				this.box.style.removeProperty('--scroll-top');
+			let scrollParent = this._scrollParent;
+			let box = this.box;
+			let replacement = this._replacement;
+
+			if (event && event.target !== this.scrollParent) {
+				box.style.removeProperty('--full-height');
+				box.style.removeProperty('--scroll-top');
 				event.target.removeEventListener('scroll', this._handleScroll);
 				return;
 			}
-			let scrollTop = this.scrollParent.scrollTop - this._replacement.offsetTop;
-			this.box.style.setProperty('--full-height', this._replacement.style.height);
-			this.box.style.setProperty('--scroll-top', scrollTop + 'px');
-			this.box.style.setProperty('--scrollbar-width', this.scrollParent.offsetWidth - this.scrollParent.clientWidth + 'px');
-		};
-
-		_setStuck(stuck) {
-			this.classList.toggle('stuck', stuck);
-			this._replacement.hidden = !stuck;
-			if (stuck) {
-				this._replacement.style.height = `${this.box.offsetHeight || this.box.getBoundingClientRect().height}px`;
-				this.scrollParent.addEventListener('scroll', this._handleScroll);
-				this._handleScroll();
+			
+			if (!scrollParent || !box) {
+				this.stuck = false;
+				return;
 			}
-		}
+			
+			let basis = replacement.hidden ? box : replacement;
+			let basisRect = basis.getBoundingClientRect();
+			let scrollParentRect = scrollParent.getBoundingClientRect();
+			this.stuck = basisRect.top <= scrollParentRect.top;
+			box.style.setProperty('--scroll-top', (scrollParent.scrollTop - replacement.offsetTop) + 'px');
+			box.style.setProperty('--scrollbar-width', scrollParent.offsetWidth - scrollParent.clientWidth + 'px');
+		};
 
 		/**
 		 * Simulate the height of the box at the specified scrollTop.
@@ -132,20 +139,20 @@
 		 * @returns {number} Height of the box at that position
 		 */
 		getBoxHeightAtPosition(scrollTop) {
-			if (this.classList.contains('long')) {
+			if (!this.box || !this.scrollParent) {
 				return 0;
 			}
 			
 			// Save properties
 			let oldStuck = this.classList.contains('stuck');
-			let oldFullHeight = this.box.style.getPropertyValue('--full-height');
 			let oldScrollTop = this.box.style.getPropertyValue('--scroll-top');
+			let oldFullHeight = this.box.style.getPropertyValue('--full-height');
 			
 			// Set properties to simulated values
 			this.classList.toggle('stuck', true);
-			this.box.style.setProperty('--full-height', this._replacement.style.height);
 			this.box.style.setProperty('--scroll-top', (scrollTop - this._replacement.offsetTop) + 'px');
 			this.box.style.setProperty('--scrollbar-width', this.scrollParent.offsetWidth - this.scrollParent.clientWidth + 'px');
+			this.box.style.setProperty('--full-height', this._replacement.style.height);
 			
 			// Force reflow
 			// eslint-disable-next-line no-void
@@ -155,7 +162,28 @@
 			
 			// Restore properties
 			this.classList.toggle('stuck', oldStuck);
+			this.box.style.setProperty('--scroll-top', oldScrollTop);
 			this.box.style.setProperty('--full-height', oldFullHeight);
+			
+			return height;
+		}
+
+		_getBoxHeight() {
+			// Save properties
+			let oldStuck = this.classList.contains('stuck');
+			let oldScrollTop = this.box.style.getPropertyValue('--scroll-top');
+
+			// Set properties to simulated values
+			this.classList.toggle('stuck', false);
+			this.box.style.setProperty('--scroll-top', '0px');
+
+			// Force reflow
+			// eslint-disable-next-line no-void
+			void getComputedStyle(this.box).height;
+			let height = this.box.clientHeight;
+			
+			// Restore properties
+			this.classList.toggle('stuck', oldStuck);
 			this.box.style.setProperty('--scroll-top', oldScrollTop);
 			
 			return height;

@@ -67,6 +67,12 @@ editable-text {
 		}
 	}
 	
+	sticky & {
+		&::after, .input {
+			max-height: var(--scroll-parent-height);
+		}
+	}
+	
 	sticky.stuck & {
 		$max-height: 15ex;
 		$gradient-extent: $max-height - 1ex;
