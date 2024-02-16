@@ -2187,6 +2187,9 @@ Zotero.Attachments = new function () {
 			if (truncate) {
 				value = value.substr(0, truncate);
 			}
+
+			value = value.trim();
+
 			if (prefix) {
 				value = prefix + value;
 			}

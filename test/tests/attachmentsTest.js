@@ -1290,7 +1290,7 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
-		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection;
+		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection, itemSpaces;
 
 		before(() => {
 			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
@@ -1331,6 +1331,7 @@ describe("Zotero.Attachments", function() {
 			itemIncomplete = createUnsavedDataObject('item', { title: 'Incomplete', itemType: 'preprint' });
 			itemBookSection = createUnsavedDataObject('item', { title: 'Book Section', itemType: 'bookSection' });
 			itemBookSection.setField('bookTitle', 'Book Title');
+			itemSpaces = createUnsavedDataObject('item', { title: ' Spaces! ', itemType: 'book' });
 		});
 
 		
@@ -1360,6 +1361,26 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{firstCreator suffix=" - "}}{{year suffix=" - "}}{{title}}'),
 				'Author et al. - 2000 - Has Many Authors'
+			);
+		});
+
+		it('should trim whitespaces from a value', function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemSpaces, '{{ title }}'),
+				'Spaces!'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{title truncate="6"}}'),
+				'Lorem'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{firstCreator truncate="7"}}'),
+				'Barius'
+			);
+			// but preserve if it's configured as a prefix or suffix
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{title prefix=" " suffix=" "}}'),
+				' Lorem Ipsum '
 			);
 		});
 
