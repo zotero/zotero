@@ -13,21 +13,22 @@ collapsible-section {
 
 	& > .head {
 		@include focus-ring;
-		@include comfortable {
-			padding-block: 2px;
-		}
 		
 		display: flex;
 		align-items: center;
 		
 		.title {
 			flex: 1;
-			
 			display: flex;
 			align-items: center;
 			gap: 4px;
 			color: var(--fill-secondary);
 			font-weight: 600;
+			padding-block: 2px;
+
+			@include comfortable {
+				padding-block: 4px;
+			}
 		}
 		
 		toolbarbutton {

@@ -111,6 +111,10 @@
 	
 	.icon, .label {
 		padding-block: 2px;
+
+		@include comfortable {
+			padding-block: 4px;
+		}
 	}
 }
 
@@ -118,7 +122,7 @@
 	display: grid;
 	grid-template-columns: max-content 1fr;
 	column-gap: 8px;
-	row-gap: 2px;
+	row-gap: 0px;
 	width: inherit;
 
 	.show-on-hover {

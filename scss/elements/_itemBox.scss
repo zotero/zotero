@@ -29,14 +29,14 @@ item-box {
 	#item-type-menu {
 		@include focus-ring;
 		margin: 0;
-		margin-inline-end: 5px !important;
 		flex: 1;
-		padding-inline-start: 5px;
+		// Padding = editable-text[tight] + 1
+		padding-inline: 4px;
+		padding-block: 2px;
 
-		// Same padding as editable-text
 		@include comfortable {
-			padding-top: 3px;
-			padding-bottom: 3px;
+			padding-inline: 5px;
+			padding-block: 4px;
 		}	
 
 		&::part(dropmarker) {
@@ -92,6 +92,10 @@ item-box {
 		margin-inline-end: -4px;
 		padding-left: 4px;
 		padding-right: 4px;
+
+		@include comfortable {
+			padding-block: 4px;
+		}
 		
 		&:hover, &:focus {
 			.creator-type-dropmarker {
