@@ -239,7 +239,7 @@
 @mixin focus-ring {
 	&:focus-visible {
 	  outline: none;
-	  box-shadow: 0 0 0 var(--width-focus-border) -moz-accent-color;
+	  box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
 	  border-radius: var(--radius-focus-border);
 	}
   }
