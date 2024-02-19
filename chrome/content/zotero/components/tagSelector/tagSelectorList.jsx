@@ -177,14 +177,16 @@ class TagList extends React.PureComponent {
 			className,
 			onClick: ev => !tag.disabled && this.props.onSelect(tag.name, ev),
 			onContextMenu: ev => this.props.onTagContext(tag, ev),
+			onKeyDown: ev => this.props.onKeyDown(ev),
 			onDragOver,
 			onDragExit,
-			onDrop
+			onDrop,
 		};
 		
 		props.style = {
 			...style
 		};
+		props.tabIndex = "0";
 		
 		// Don't specify explicit width unless we're truncating, because for some reason the width
 		// from canvas can sometimes be slightly smaller than the actual width, resulting in an
@@ -274,6 +276,7 @@ class TagList extends React.PureComponent {
 			onDrop: PropTypes.func
 		}),
 		onSelect: PropTypes.func,
+		onKeyDown: PropTypes.func,
 		onTagContext: PropTypes.func,
 		loaded: PropTypes.bool,
 		width: PropTypes.number.isRequired,

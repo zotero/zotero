@@ -428,12 +428,30 @@ var ZoteroPane = new function()
 			moveFocus(actionsMap, event);
 		});
 
-		tagSelector.addEventListener("keydown", (event) => {
+		tagSelector.addEventListener("keydown", (e) => {
+			// Tab from the scrollable tag list or Shift-Tab from the input field focuses the first
+			// non-disabled tag. If there are none, the tags are skipped
+			if ((e.target.classList.contains("tag-selector-list") && e.key == "Tab" && !e.shiftKey)
+				|| e.target.tagName == "input" && e.key == "Tab" && e.shiftKey) {
+				let firstNonDisabledTag = document.querySelector('.tag-selector-item:not(.disabled)');
+				if (firstNonDisabledTag) {
+					firstNonDisabledTag.focus();
+				}
+				else if (e.target.classList.contains("tag-selector-list")) {
+					tagSelector.querySelector("input").focus();
+				}
+				else {
+					tagSelector.querySelector(".tag-selector-list").focus();
+				}
+				
+				e.preventDefault();
+				e.stopPropagation();
+			}
 			// Special treatment for tag selector button because it has no id
-			if (event.target.tagName == "button" && event.key == "Tab" && !event.shiftKey) {
+			if (e.target.tagName == "button" && e.key == "Tab" && !e.shiftKey) {
 				document.getElementById('item-tree-main-default').focus();
-				event.preventDefault();
-				event.stopPropagation();
+				e.preventDefault();
+				e.stopPropagation();
 			}
 		});
 	}

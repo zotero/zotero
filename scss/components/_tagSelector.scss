@@ -117,6 +117,10 @@
 		padding: 2px 4px;
 	}
 
+	--width-focus-border: 1px;
+	--radius-focus-border: 5px;
+	@include focus-ring;
+
 	&:hover {
 		background-color: var(--fill-quinary);
 	}
