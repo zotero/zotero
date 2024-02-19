@@ -130,7 +130,7 @@ class HiddenBrowser {
 	async load(source, options) {
 		await this._createdPromise;
 		let url;
-		if (/^(file|https?|chrome|resource):/.test(source)) {
+		if (/^(file|https?|chrome|resource|blob):/.test(source)) {
 			url = source;
 		}
 		// Convert string path to file: URL

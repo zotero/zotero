@@ -65,6 +65,29 @@ describe("Zotero.FullText", function () {
 					Zotero.Fulltext.INDEX_STATE_UNINDEXED
 				);
 			})
+
+			describe("Indexing with HiddenBrowser", () => {
+				it("should index attachment as its attachmentContentType when supported", async function () {
+					// Firefox would normally load this as text/x-shellscript, but we detect text/plain
+					let item = await importFileAttachment('test.sh');
+					assert.equal(item.attachmentContentType, 'text/plain');
+					assert.equal(await Zotero.Fulltext.getIndexedState(item), Zotero.Fulltext.INDEX_STATE_INDEXED);
+				});
+
+				it("should index attachment as text/plain when its text/* attachmentContentType is unsupported", async function () {
+					// Now we force text/x-shellscript, which the HiddenBrowser would normally refuse to load
+					// It should still load, because we fall back to text/plain from an unsupported text/* content type
+					let item = await importFileAttachment('test.sh', { contentType: 'text/x-shellscript' });
+					assert.equal(item.attachmentContentType, 'text/x-shellscript');
+					assert.equal(await Zotero.Fulltext.getIndexedState(item), Zotero.Fulltext.INDEX_STATE_INDEXED);
+				});
+
+				it("should not index attachment with non-text attachmentContentType", async function () {
+					let item = await importFileAttachment('test.txt', { contentType: 'image/png' });
+					assert.equal(item.attachmentContentType, 'image/png');
+					assert.equal(await Zotero.Fulltext.getIndexedState(item), Zotero.Fulltext.INDEX_STATE_UNINDEXED);
+				});
+			});
 		});
 		
 		describe("#indexPDF()", function () {
