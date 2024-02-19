@@ -9,7 +9,7 @@ attachment-row {
 
 	& > .head {
 		display: flex;
-		align-items: baseline;
+		align-items: flex-start;
 		gap: 4px;
 		
 		.clicky-item {
@@ -22,6 +22,7 @@ attachment-row {
 		.annotation-btn {
 			flex-grow: 0;
 			flex-basis: content;
+			align-items: center;
 
 			&[hidden] {
 				display: none;
