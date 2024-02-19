@@ -1,8 +1,5 @@
 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path opacity="0.5" d="M6.707 0H1V12H11V4.293L6.707 0Z" fill="white"/>
-<path d="M6.293 1L10 4.707V11H2V1H6.293Z" fill="white"/>
-<path opacity="0.2" d="M6.707 0H1V12H11V4.293L6.707 0ZM7 1.707L9.293 4H7V1.707ZM2 11V1H6V5H10V11H2Z" fill="black"/>
-<path opacity="0.08" d="M7 1.70703V4H9.293L7 1.70703Z" fill="black"/>
-<path d="M8.33013 7.5L4 10L4 5L8.33013 7.5Z" fill="#C2DEFF"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M8.33013 7.5L4 5V10L8.33013 7.5ZM6.33013 7.5L5 6.73205V8.26795L6.33013 7.5Z" fill="#66ADFF"/>
+<path d="M11 4H1V11H11V4Z" fill="#DADADA"/>
+<path d="M4.5 5.61603L7.76314 7.5L4.5 9.38397L4.5 5.61603Z" fill="#B4B4B4" stroke="#444444"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11 2V3H9.20711L10.2071 2H11ZM8.79289 2L7.79289 3H6.20711L7.20711 2H8.79289ZM3.20711 3H4.79289L5.79289 2H4.20711L3.20711 3ZM2.79289 2L1.79289 3H1V2H2.79289ZM1 4H11V11H1V4ZM12 1H0V12H12V1Z" fill="#444444"/>
 </svg>
