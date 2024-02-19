@@ -98,7 +98,7 @@ window.addEventListener("load", function (e) {
 	codeEditor.on('input', handleInput);
 	codeEditor.focus();
 	
-	const isDarkMQL = Zotero.getMainWindow()?.matchMedia('(prefers-color-scheme: dark)');
+	const isDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
 	isDarkMQL.addEventListener("change", (ev) => {
 		codeEditor.setOptions({
 			theme: ev.matches ? 'ace/theme/monokai' : 'ace/theme/chrome'

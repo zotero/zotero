@@ -34,7 +34,7 @@ var Zotero_CSL_Editor = new function () {
 	async function init() {
 		await Zotero.Schema.schemaUpdatePromise;
 
-		const isDarkMQL = Zotero.getMainWindow()?.matchMedia('(prefers-color-scheme: dark)');
+		const isDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
 		
 		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
@@ -83,6 +83,7 @@ var Zotero_CSL_Editor = new function () {
 
 		isDarkMQL.addEventListener("change", (ev) => {
 			monaco.editor.setTheme(ev.matches ? 'vs-dark' : 'vs-light');
+			this.refresh();
 		});
 	}
 	
@@ -266,11 +267,17 @@ var Zotero_CSL_Editor = new function () {
 	};
 
 	this.updateIframe = function (content, containerClass = 'preview') {
+		const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 		let iframe = document.getElementById('zotero-csl-preview-box');
 		iframe.contentDocument.documentElement.innerHTML = `<html>
 		<head>
 			<title></title>
 			<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css">
+			<style>
+				html {
+					color-scheme: ${isDarkMode ? "dark" : "light"};
+				}
+			</style>
 		</head>
 		<body id="csl-edit-preview"><div class="${containerClass}">${content}</div></body>
 		</html>`;

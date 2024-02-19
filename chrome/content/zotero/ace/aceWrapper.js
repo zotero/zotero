@@ -38,7 +38,7 @@ window.addEventListener("DOMContentLoaded", function(e) {
 	TextMode = require("ace/mode/text").Mode;
 	EditSession = require("ace/edit_session").EditSession;
 	
-	const isDark = Zotero.getMainWindow()?.matchMedia('(prefers-color-scheme: dark)').matches;
+	const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 	editor = ace.edit('ace-div', {
 		theme: isDark ? 'ace/theme/monokai' : 'ace/theme/chrome'
 	});
