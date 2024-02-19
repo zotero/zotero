@@ -1,8 +1,11 @@
 collapsible-section {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
 	padding-block: 4px;
+
+	@include comfortable {
+		padding-block: 8px;
+	}
 
 	--width-focus-border: 2px;
 	--radius-focus-border: 5px;
