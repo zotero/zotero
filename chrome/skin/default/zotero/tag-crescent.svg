@@ -1,5 +1,8 @@
-<svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="tag-crescent">
-<path id="Vector" fill-rule="evenodd" clip-rule="evenodd" d="M2.39941 7.66685C3.38403 6.75368 4.00023 5.4488 4.00023 4C4.00023 2.5512 3.38403 1.24632 2.39941 0.33315C2.88957 0.118875 3.43097 0 4.00013 0C6.20927 0 8.00013 1.79086 8.00013 4C8.00013 6.20914 6.20927 8 4.00013 8C3.43097 8 2.88957 7.88113 2.39941 7.66685Z" fill="context-fill" />
+<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_4_8958" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12" height="12">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M0 11.917C2.83771 11.441 5 8.973 5 6C5 3.027 2.83771 0.559036 0 0.0829584V0H12V12H0V11.917Z" fill="#D9D9D9"/>
+</mask>
+<g id="tag-crescent" mask="url(#mask0_4_8958)">
+<circle id="Vector" cx="6" cy="6" r="5" fill="context-fill"/>
 </g>
 </svg>
