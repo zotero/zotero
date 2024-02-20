@@ -107,6 +107,53 @@ describe("HiddenBrowser", function() {
 	});
 
 	describe("#snapshot()", function () {
+		var httpd1;
+		var httpd2;
+		var port1 = 16213;
+		var port2 = 16214;
+		var baseURL1 = `http://127.0.0.1:${port1}/`;
+		var baseURL2 = `http://127.0.0.1:${port2}/`;
+
+		before(function () {
+			Cu.import("resource://zotero-unit/httpd.js");
+			// Create two servers with two separate origins
+			httpd1 = new HttpServer();
+			httpd1.start(port1);
+			httpd2 = new HttpServer();
+			httpd2.start(port2);
+		});
+
+		beforeEach(async function () {
+			httpd1.registerPathHandler(
+				'/parent',
+				{
+					handle: function (request, response) {
+						response.setHeader('Content-Type', 'text/html', false);
+						response.setStatusLine(null, 200, 'OK');
+						response.write(`
+							<p>This is text in the parent.</p>
+							<iframe src="${baseURL2}child">
+						`);
+					}
+				}
+			);
+			httpd2.registerPathHandler(
+				'/child',
+				{
+					handle: function (request, response) {
+						response.setHeader('Content-Type', 'text/html', false);
+						response.setStatusLine(null, 200, 'OK');
+						response.write('<p>This is text in the child.</p>');
+					}
+				}
+			);
+		});
+
+		after(async function () {
+			await new Promise(resolve => httpd1.stop(resolve));
+			await new Promise(resolve => httpd2.stop(resolve));
+		});
+		
 		it("should return a SingleFile snapshot", async function () {
 			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
 			var browser = new HiddenBrowser();
@@ -114,6 +161,16 @@ describe("HiddenBrowser", function() {
 			let snapshot = await browser.snapshot();
 			assert.include(snapshot, 'Page saved with SingleFile');
 			assert.include(snapshot, 'This is hidden text.');
+		});
+		
+		it("should successfully import a snapshot, skipping a cross-origin iframe", async function () {
+			let url = baseURL1 + 'parent';
+			let browser = new HiddenBrowser();
+			await browser.load(url);
+			let snapshot = await browser.snapshot();
+			assert.include(snapshot, 'This is text in the parent.');
+			// Child frame will be skipped
+			assert.notInclude(snapshot, 'This is text in the child.');
 		});
 	});
 });
