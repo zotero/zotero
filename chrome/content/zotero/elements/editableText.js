@@ -203,7 +203,7 @@
 				input.addEventListener('change', handleChange);
 				input.addEventListener('focus', () => {
 					// If the last blur was ignored because it was caused by the window becoming inactive,
-					// ignore this focus event as well, so we don't reset initialValue
+					// ignore this focus event as well
 					if (this._ignoredWindowInactiveBlur) {
 						this._ignoredWindowInactiveBlur = false;
 						return;
@@ -215,7 +215,9 @@
 					if (!this.getAttribute("mousedown")) {
 						this._input.setSelectionRange(0, this._input.value.length, "backward");
 					}
-					this._input.dataset.initialValue = this._input.value;
+					if (!('initialValue' in this._input.dataset)) {
+						this._input.dataset.initialValue = this._input.value;
+					}
 				});
 				input.addEventListener('blur', () => {
 					// Ignore this blur if it was caused by the window becoming inactive (see above)
@@ -353,6 +355,11 @@
 		}
 		
 		focus(options) {
+			// If the window isn't active, the focus event won't fire yet,
+			// so store the initial value now
+			if (this._input && Services.focus.activeWindow !== window && !('initialValue' in this._input.dataset)) {
+				this._input.dataset.initialValue = this._input.value;
+			}
 			this._input?.focus(options);
 		}
 		
