@@ -487,6 +487,7 @@ ${str}
 			}
 			if (this._mutationObservers.has(elem)) {
 				this._mutationObservers.get(elem).disconnect();
+				this._mutationObservers.delete(elem);
 			}
 		};
 
