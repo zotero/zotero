@@ -50,7 +50,14 @@ class SingleFileChild extends JSWindowActorChild {
 		// Create sandboxes for all the frames we find
 		const frameSandboxes = [];
 		for (let i = 0; i < sandbox.window.frames.length; ++i) {
-			let frameSandbox = this.createSnapshotSandbox(sandbox.window.frames[i]);
+			let frameWindow = sandbox.window.frames[i];
+			
+			if (this.isCrossOrigin(frameWindow)) {
+				console.warn('Unable to inject SingleFile into cross-origin frame ' + i);
+				continue;
+			}
+			
+			let frameSandbox = this.createSnapshotSandbox(frameWindow);
 
 			// Run all the scripts of SingleFile scripts in Sandbox
 			frameScripts.forEach(
@@ -162,6 +169,16 @@ class SingleFileChild extends JSWindowActorChild {
 		);
 
 		return sandbox;
+	}
+	
+	isCrossOrigin(window) {
+		try {
+			void window.document;
+			return false;
+		}
+		catch (e) {
+			return true;
+		}
 	}
 
 	// From Mozilla's ScreenshotsComponentChild.jsm
