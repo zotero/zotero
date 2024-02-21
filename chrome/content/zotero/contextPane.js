@@ -376,10 +376,6 @@ var ZoteroContextPane = new function () {
 		
 		splitter.setAttribute('state', open ? 'open' : 'collapsed');
 		_update();
-
-		if (open) {
-			ZoteroContextPane.focus();
-		}
 	}
 	
 	function _getCurrentAttachment() {
