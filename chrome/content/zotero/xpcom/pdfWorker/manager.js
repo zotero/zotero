@@ -532,6 +532,7 @@ class PDFWorker {
 					await object.reload(null, true);
 				}
 			}
+			await Zotero.Items.updateSynced(ids, false);
 			await Zotero.Notifier.trigger('modify', 'item', ids, {});
 
 			await IOUtils.write(path, new Uint8Array(modifiedBuf));
