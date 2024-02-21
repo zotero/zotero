@@ -53,7 +53,9 @@ search-textbox {
 		opacity: 1.0;
 	}
 
-	@include focus-ring(focus);
+	@media not (-moz-platform: windows) {
+		@include focus-ring(focus);
+	}
 }
 
 :is(search-textbox)::part(search-sign),
