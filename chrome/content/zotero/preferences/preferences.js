@@ -704,7 +704,7 @@ ${str}
 	 * @return {Promise<Node[]>}
 	 */
 	async _findNodesMatching(root, term) {
-		const EXCLUDE_SELECTOR = 'input, [hidden="true"], [no-highlight]';
+		const EXCLUDE_SELECTOR = 'input, [hidden]:not([hidden="false"]), [no-highlight]';
 
 		let matched = new Set();
 		let treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
