@@ -27,6 +27,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 <?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
@@ -45,7 +46,8 @@
 				windowtype="zotero:basicViewer" 
 				title="&brandShortName;"
 				width="1000" height="700"
-				persist="screenX screenY width height sizemode">
+				persist="screenX screenY width height sizemode"
+				class="zotero-window">
 	
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
@@ -122,7 +124,7 @@
 		</menupopup>
 	</popupset>
 	
-	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
+	<toolbox id="navigator-toolbox" class="toolbox-top menubar-container" mode="icons" defaultmode="icons">
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
 				defaultset="menubar-items"

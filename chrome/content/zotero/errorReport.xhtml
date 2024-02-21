@@ -9,13 +9,17 @@
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	onload="Zotero_Error_Report.init()">
+	onload="Zotero_Error_Report.init()" class="zotero-window">
 
 <linkset>
 	<html:link rel="localization" href="toolkit/global/wizard.ftl"/>
 </linkset>
 
-<script src="chrome://global/content/customElements.js"/>
+<script>
+	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+</script>
 
 <wizard title="&zotero.errorReport.title;" width="550" height="450">
 	<script>
