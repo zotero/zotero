@@ -99,6 +99,7 @@
 			.colored-tag-swatches {
 				direction: ltr;
 				transform: scaleX(-1);
+				display: flex;
 			}
 			
 			.tag-swatch {
@@ -116,10 +117,10 @@
 
 				&.colored {
 					-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
-					width: 0.83333333em;
-					height: 0.83333333em;
+					width: 0.92307692em;
+					height: 0.92307692em;
 					background:
-						url("chrome://zotero/skin/tag-circle.svg") no-repeat center/80%,
+						url("chrome://zotero/skin/tag-circle.svg") no-repeat center/100%,
 						url("chrome://zotero/skin/tag-circle-border.svg") no-repeat center/0;
 					fill: currentcolor;
 
@@ -139,9 +140,9 @@
 
 				&.colored + .colored {
 					background:
-						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/80%,
+						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/100%,
 						url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/0;
-					margin-left: -0.41666667em;
+					margin-left: -0.38461538em;
 
 					@include focus-states using($color) {
 						@if $color =="white" {
