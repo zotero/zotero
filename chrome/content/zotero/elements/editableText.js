@@ -254,6 +254,31 @@
 						event.preventDefault();
 					}
 				});
+				input.addEventListener('dragover', (event) => {
+					// If the input is not focused, override the default drop behavior
+					if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
+							&& event.dataTransfer.getData('text/plain')) {
+						event.preventDefault();
+						event.dataTransfer.dropEffect = 'copy';
+					}
+				});
+				input.addEventListener('drop', (event) => {
+					let text = event.dataTransfer.getData('text/plain');
+					// If the input is not focused, replace its entire value with the dropped text
+					// Otherwise, the normal drop effect takes place and the text is inserted at the cursor
+					if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
+							&& text) {
+						event.preventDefault();
+						document.activeElement?.blur();
+						// Wait a tick to work around an apparent Firefox bug where the cursor stays inside the old
+						// input even though the new input becomes visually focused
+						setTimeout(() => {
+							this.focus();
+							this._input.value = text;
+							handleInput();
+						});
+					}
+				});
 				
 				let focused = false;
 				let selectionStart = this._input?.selectionStart;
