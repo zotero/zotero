@@ -239,7 +239,7 @@
 					}
 					else if (event.key === 'Escape') {
 						this.dispatchEvent(new CustomEvent('escape_enter'));
-						let initialValue = this._input.dataset.initialValue;
+						let initialValue = this._input.dataset.initialValue ?? '';
 						this.setAttribute('value', initialValue);
 						this._input.value = initialValue;
 						this._input.blur();
