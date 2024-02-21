@@ -31,6 +31,8 @@ var Zotero_Preferences = {
 	_firstPaneLoadDeferred: Zotero.Promise.defer(),
 	
 	_observerSymbols: new Map(),
+	
+	_mutationObservers: new Map(),
 
 	init: function () {
 		this.navigation = document.getElementById('prefs-navigation');
@@ -442,14 +444,29 @@ ${str}
 			this._observerSymbols.set(elem, symbol);
 			
 			if (elem.tagName === 'menulist') {
-				// Set up an observer to resync if this menulist has items added/removed later
+				// Set up an observer to resync if this menulist has items added later
 				// (If we set elem.value before the corresponding item is added, the label won't be updated when it
 				//  does get added, unless we do this)
-				new MutationObserver(() => this._syncFromPref(elem, preference))
-					.observe(elem, {
-						childList: true,
-						subtree: true
-					});
+				let mutationObserver = new MutationObserver((mutations) => {
+					let value = Zotero.Prefs.get(preference, true);
+					for (let mutation of mutations) {
+						for (let node of mutation.addedNodes) {
+							if (node.tagName === 'menuitem' && node.value === value) {
+								Zotero.debug(`Preferences: menulist attached to ${preference} has new item matching current pref value '${value}'`);
+								// Set selectedItem so the menulist updates its label, icon, and description
+								// The selectedItem setter fires select and ValueChange, but we don't listen to either
+								// of those events
+								elem.selectedItem = node;
+								return;
+							}
+						}
+					}
+				});
+				mutationObserver.observe(elem, {
+					childList: true,
+					subtree: true
+				});
+				this._mutationObservers.set(elem, mutationObserver);
 			}
 
 			elem.addEventListener('command', this._syncToPrefOnModify.bind(this));
@@ -467,6 +484,9 @@ ${str}
 			if (this._observerSymbols.has(elem)) {
 				Zotero.Prefs.unregisterObserver(this._observerSymbols.get(elem));
 				this._observerSymbols.delete(elem);
+			}
+			if (this._mutationObservers.has(elem)) {
+				this._mutationObservers.get(elem).disconnect();
 			}
 		};
 

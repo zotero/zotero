@@ -69,10 +69,11 @@ Zotero_Preferences.Export = {
 		// Initialize locale drop-down
 		var localeMenulist = document.getElementById("zotero-quickCopy-locale-menu");
 		Zotero.Styles.populateLocaleList(localeMenulist);
+		localeMenulist.addEventListener('syncfrompreference', () => {
+			this._lastSelectedLocale = Zotero.Prefs.get("export.quickCopy.locale");
+			this.updateQuickCopyUI();
+		});
 		localeMenulist.setAttribute('preference', "extensions.zotero.export.quickCopy.locale");
-		
-		this._lastSelectedLocale = Zotero.Prefs.get("export.quickCopy.locale");
-		this.updateQuickCopyUI();
 		
 		yield this.refreshQuickCopySiteList();
 	}),
