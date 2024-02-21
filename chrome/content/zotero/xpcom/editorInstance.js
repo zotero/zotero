@@ -1046,9 +1046,8 @@ class EditorInstance {
 		/**
 		 * Citation editing functions and properties accessible to quickFormat.js and addCitationDialog.js
 		 */
-		let CI = function (citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
+		let CI = function (citation) {
 			this.citation = citation;
-			this.sortable = sortable;
 			this.filterLibraryIDs = filterLibraryIDs;
 			this.disableClassicDialog = true;
 			
@@ -1244,11 +1243,7 @@ class EditorInstance {
 		let citation = new Citation();
 		citation.citationItems = citationData.citationItems;
 		citation.properties = citationData.properties;
-		let styleID = Zotero.Prefs.get('export.lastStyle');
-		let locale = Zotero.Prefs.get('export.lastLocale');
-		let csl = Zotero.Styles.get(styleID).getCiteProc(locale);
-		var io = new CI(citation, csl.opt.sort_citations);
-
+		var io = new CI(citation);
 
 		var allOptions = 'chrome,centerscreen';
 		// without this, Firefox gets raised with our windows under Compiz
