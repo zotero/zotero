@@ -12,12 +12,15 @@
     }
     @media (-moz-platform: macos) {
         --color-accent: SelectedItem;
+        --color-focus-border: color-mix(in srgb, var(--color-accent) 50%, transparent);
         --width-focus-border: 3px;
     }
     @media (-moz-platform: linux) {
         --color-accent: SelectedItem;
+        --color-focus-border: -moz-accent-color;
         --width-focus-border: 2px;
     }
+    // Only used on Windows
     --color-form-element-background: var(--color-background);
 }
 

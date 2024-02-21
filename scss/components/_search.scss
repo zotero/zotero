@@ -6,7 +6,8 @@
 	input {
 		background-color: var(--material-background);
 		border-radius: 5px;
-		border: var(--material-border-quinary);
+		// Overwrite input style on Windows
+		border: var(--material-border-quinary) !important;
 		color: var(--fill-primary);
 		flex: 1 0;
 		margin: 6px 0px;
@@ -52,7 +53,7 @@ search-textbox {
 		opacity: 1.0;
 	}
 
-	@include focus-ring;
+	@include focus-ring(focus);
 }
 
 :is(search-textbox)::part(search-sign),
