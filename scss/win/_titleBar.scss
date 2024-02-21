@@ -14,7 +14,8 @@
 	pointer-events: all;
 }
 
-#titlebar {
+#titlebar,
+.menubar-container {
 	height :var(--tab-min-height);
 	-moz-box-pack: center;
 	pointer-events: none;

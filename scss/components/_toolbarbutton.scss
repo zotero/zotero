@@ -27,6 +27,8 @@ toolbarbutton {
 	&:active, &[selected] {
 		background-color: var(--fill-quarternary);
 	}
+
+	@include focus-ring;
 	
 	&:disabled,
 	&[disabled="true"] {

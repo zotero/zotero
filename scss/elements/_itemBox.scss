@@ -8,7 +8,6 @@ item-box {
 		display: none;
 	}
 	--width-focus-border: 1px;
-	--radius-focus-border: 5px;
 
 	#item-box {
 		width: 100%;
@@ -57,7 +56,7 @@ item-box {
 	}
 
 	#item-type-menu:not(:hover):not(:active) {
-		background-color: transparent;
+		background: transparent !important;
 	}
 
 	#item-type-menu > .menulist-label-box {

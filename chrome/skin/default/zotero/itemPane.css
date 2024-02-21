@@ -55,12 +55,6 @@
 }
 
 /* Buttons in trash and feed views */
-.zotero-item-pane-top-buttons {
-	-moz-appearance: toolbar;
-	-moz-box-pack: center;
-	min-height: 3em;
-}
-
 .zotero-item-pane-top-buttons > button {
 	-moz-box-flex: 1
 }

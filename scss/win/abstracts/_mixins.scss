@@ -1,0 +1,80 @@
+@mixin windows-form-element-base {
+	appearance: none;
+	padding: 0;
+	border: solid 1px transparent;
+	border-radius: 3px;
+
+	background-origin: border-box;
+	background-clip: padding-box, padding-box, border-box;
+	// Overwrite default background color
+	background-color: unset;
+	// Simulate linear-gradient border with border-radius using background-image
+	@media (prefers-color-scheme: light) {
+		background-image:
+			linear-gradient(var(--color-background70), var(--color-background70)),
+			// Must be non-transparent color
+			linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+			linear-gradient(180deg, rgba(0, 0, 0, 0.0578) 90.58%, rgba(0, 0, 0, 0.1622) 100%);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		background-image:
+			linear-gradient(var(--fill-quinary), var(--fill-quinary)),
+			linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+			linear-gradient(180deg, rgba(255, 255, 255, 0.093) 0%, rgba(255, 255, 255, 0.0698) 9.57%);
+	}
+}
+
+@mixin windows-form-element-hover {
+	@media (prefers-color-scheme: light) {
+		background-image:
+			linear-gradient(var(--color-background50), var(--color-background50)),
+			linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+			linear-gradient(180deg, rgba(0, 0, 0, 0.0578) 90.58%, rgba(0, 0, 0, 0.1622) 100%);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		background-image:
+			linear-gradient(var(--fill-quarternary), var(--fill-quarternary)),
+			linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+			linear-gradient(180deg, rgba(255, 255, 255, 0.093) 0%, rgba(255, 255, 255, 0.0698) 9.57%);
+	}
+}
+
+@mixin windows-form-element-active {
+	@media (prefers-color-scheme: light) {
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)),
+			linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+			linear-gradient(var(--fill-quinary), var(--fill-quinary));
+	}
+
+	@media (prefers-color-scheme: dark) {
+		background-image:
+			linear-gradient(var(--fill-senary), var(--fill-senary)),
+			linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+			linear-gradient(var(--fill-quinary), var(--fill-quinary));
+	}
+}
+
+@mixin windows-form-element {
+	height: 28px;
+
+	@include windows-form-element-base;
+
+	&:not([disabled]) {
+		&:hover {
+			@include windows-form-element-hover;
+		}
+	
+		&:active {
+			@include windows-form-element-active;
+		}
+	
+		@include focus-ring;
+	}
+
+	&:disabled {
+		@include windows-form-element-active;
+	}
+}

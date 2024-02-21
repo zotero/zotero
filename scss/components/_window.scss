@@ -1,7 +1,9 @@
 .zotero-window {
     background: var(--material-sidepane);
+    --color-form-element-background: var(--material-sidepane);
 }
 
 .zotero-dialog {
     background: var(--material-background);
+    --color-form-element-background: var(--material-background);
 }

@@ -1,0 +1,24 @@
+menulist {
+	@include windows-form-element;
+
+	padding: 4px 11px 6px 11px;
+
+	&:focus-visible {
+		&::part(label-box) {
+			outline: none;
+		}
+	}
+
+	&[open] {
+		@include windows-form-element-active;
+
+		// Overwrite hover status
+		&:hover {
+			@include windows-form-element-active;
+		}
+	}
+
+	&::part(dropmarker) {
+		margin-top: 0;
+	}
+}

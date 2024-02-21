@@ -238,8 +238,15 @@
 */
 @mixin focus-ring {
 	&:focus-visible {
-	  outline: none;
-	  box-shadow: 0 0 0 var(--width-focus-border) -moz-accent-color;
-	  border-radius: var(--radius-focus-border);
+		@media (-moz-platform: windows) {
+			outline: var(--color-focus-outer-border) solid var(--width-focus-outer-border);
+			outline-offset: var(--width-focus-border);
+			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+		}
+
+		@media not (-moz-platform: windows) {
+			outline: none;
+			box-shadow: 0 0 0 var(--width-focus-border) -moz-accent-color;
+		}
 	}
-  }
+}

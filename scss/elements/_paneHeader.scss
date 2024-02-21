@@ -32,7 +32,6 @@ pane-header {
 	
 	.menu-button toolbarbutton {
 		@include svgicon-menu("go-to", "universal", "20");
-		--radius-focus-border: 5px;
 		--width-focus-border: 2px;
 		@include focus-ring;
 	}

@@ -42,11 +42,6 @@
 			min-width: 0;
 			width: 40px;
 		}
-
-		&:focus-visible {
-			outline: none;
-			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
-		}
 	}
 }
 

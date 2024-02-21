@@ -4,7 +4,7 @@
 	height: 36px;
 
 	input {
-		background: var(--material-background);
+		background-color: var(--material-background);
 		border-radius: 5px;
 		border: var(--material-border-quinary);
 		color: var(--fill-primary);
@@ -18,10 +18,8 @@
 			opacity: 1.0;
 		}
 	
-		&:focus {
-			outline: none;
-			border-color: var(--color-focus-search);
-			box-shadow: 0 0 0 calc(var(--width-focus-border) - 1px) var(--color-focus-search);
+		@media not (-moz-platform: windows) {
+			@include focus-ring;
 		}
 	}
 
@@ -54,11 +52,7 @@ search-textbox {
 		opacity: 1.0;
 	}
 
-	&:focus {
-		outline: none;
-		border-color: transparent;
-		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-search);
-	}
+	@include focus-ring;
 }
 
 :is(search-textbox)::part(search-sign),
