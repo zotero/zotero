@@ -421,3 +421,7 @@ toggle-preview =
             [collapsed] Show
             *[unknown] Toggle
     } Attachment Preview
+
+quickformat-aria-bubble = Down Arrow to open citation properties. Up Arrow to close citation properties after.
+quickformat-aria-input = Type to search for your item. Tab to navigate the items list.
+quickformat-aria-item = Tab to go back to the search field. Enter to select this item.

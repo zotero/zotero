@@ -26,6 +26,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css" type="text/css"?>
@@ -39,7 +40,7 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
-	onkeypress="Zotero_QuickFormat.onKeyPress(event)"
+	onkeypress="Zotero_QuickFormat.onWindowKeyPress(event)"
 	onunload="Zotero_QuickFormat.onUnload()">
 	
 	<script src="../include.js"/>
@@ -49,18 +50,12 @@
 
 	<box orient="horizontal" class="citation-dialog entry">
 		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
-			<hbox class="citation-dialog search" flex="1" align="start">
+			<hbox class="citation-dialog main" flex="1" align="start">
 				<hbox flex="1">
-					<iframe
-						class="citation-dialog iframe"
-						ondragstart="event.stopPropagation()"
-						src="citationDialogIframe.html"
-						tabindex="1"
-						flex="1"
-						type="content"
-						remote="false"
-						maychangeremoteness="false"/>
-					<image class="citation-dialog spinner zotero-spinner-16"/>
+					<html:div flex="1" spellcheck="false" class="citation-dialog editor insert-note" role="application"></html:div>
+					<vbox class="citation-dialog spinner">
+						<image class="zotero-spinner-16"/>
+					</vbox>
 				</hbox>
 			</hbox>
 			<html:progress class="citation-dialog progress-meter" max="100"/>

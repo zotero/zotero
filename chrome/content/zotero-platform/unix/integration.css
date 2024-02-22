@@ -18,6 +18,7 @@ window.citation-dialog {
 }
 
 #zotero-icon {
-	margin: 0 0 0 2px;
+	padding: 4px 4px 6px 4px !important;
+	margin: 2px 0;
 	-moz-appearance: none;
 }
