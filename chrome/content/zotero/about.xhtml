@@ -10,14 +10,17 @@
 	onload="moveToAlertPosition(); sizeToContent(); document.getElementById('zotero-about').getButton('accept').focus();"
 	inwindowmenu="false"
 	class="zotero-window">
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	</script>
 <dialog
 		id="zotero-about"
 		class="zotero-window"
 		buttons="accept"
 		buttonlabelaccept="&zotero.about.close;"
 		ondialogaccept="return true;">
-	
-	<script src="include.js"/>
 	
 	<vbox id="aboutcontent" class="zotero-dialog">
 		<div xmlns="http://www.w3.org/1999/xhtml">
@@ -28,7 +31,6 @@
 			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;"/>
 		</hbox>
 		<script>
-			var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 			var version = Zotero.version;
 			if (!Zotero.isMac) {
 				version += ` (${Services.appinfo.is64Bit ? '64' : '32'}-bit)`;

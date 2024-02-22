@@ -23,7 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
-var Scaffold_Load = new function() {
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+
+var Scaffold_Load = new function () {
 	this.onLoad = async function () {
 		document.addEventListener('dialogaccept', () => this.accept());
 
@@ -37,18 +41,18 @@ var Scaffold_Load = new function() {
 			window.close();
 		});
 		
-		listbox.addEventListener('keypress', (e) => {
-			if (e.key == ' ' && e.target == listbox) {
-				e.preventDefault();
-			}
-		});
+		// listbox.addEventListener('keypress', (e) => {
+		// 	if (e.key == ' ' && e.target == listbox) {
+		// 		e.preventDefault();
+		// 	}
+		// });
 		
-		var translators = {};		
+		var translators = {};
 
-		// Get the matching translators		
+		// Get the matching translators
 		var translatorProvider = window.arguments[0].translatorProvider;
 		var url = window.arguments[0].url;
-		var rootUrl = window.arguments[0].rootUrl
+		var rootUrl = window.arguments[0].rootUrl;
 		url = Zotero.Proxies.proxyToProper(url);
 		translators["Matching Translators"] = (await translatorProvider.getWebTranslatorsForLocation(url, rootUrl))[0];
 		translators["Web Translators"] = (await translatorProvider.getAllForType("web"))
@@ -68,8 +72,8 @@ var Scaffold_Load = new function() {
 			listitem.style.MozUserInput = 'none';
 			listitem.append(set);
 			listbox.appendChild(listitem);
-			for (var j=0; j<translators[set].length; j++) {
-				var translator = translators[set][j];
+			for (var j = 0; j < translators[set].length; j++) {
+				translator = translators[set][j];
 				listitem = document.createXULElement("richlistitem");
 				// set search label for type-to-find functionality. This is not displayed.
 				listitem.searchLabel = translator.label;
@@ -96,5 +100,5 @@ var Scaffold_Load = new function() {
 		
 		Zotero.debug(translatorID);
 		window.arguments[0].dataOut = translator;
-	}
-}
+	};
+};
