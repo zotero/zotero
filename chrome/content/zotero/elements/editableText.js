@@ -190,7 +190,8 @@
 					}
 					this.setAttribute('value', this._input.value);
 				};
-				let handleChange = () => {
+				let handleChange = (event) => {
+					event.stopPropagation();
 					this.setAttribute('value', this._input.value);
 				};
 				input.addEventListener('mousedown', () => {
@@ -222,7 +223,10 @@
 					}
 					this._ignoredWindowInactiveBlur = false;
 					
-					this.dispatchEvent(new CustomEvent('blur'));
+					this.dispatchEvent(new Event('blur'));
+					if (this.value !== this._input.dataset.initialValue) {
+						this.dispatchEvent(new Event('change'));
+					}
 					this.classList.remove("focused");
 					this._input.scrollLeft = 0;
 					this._input.setSelectionRange(0, 0);
