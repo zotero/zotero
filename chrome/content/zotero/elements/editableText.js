@@ -109,11 +109,11 @@
 		}
 		
 		get initialValue() {
-			return this._input?.dataset.initialValue || '';
+			return this._input?.dataset.initialValue ?? '';
 		}
 		
 		set initialValue(initialValue) {
-			this._input.dataset.initialValue = initialValue || '';
+			this._input.dataset.initialValue = initialValue ?? '';
 		}
 		
 		get autocomplete() {
@@ -365,6 +365,10 @@
 		
 		blur() {
 			this._input?.blur();
+		}
+		
+		get focused() {
+			return this._input && document.activeElement === this._input;
 		}
 	}
 	customElements.define("editable-text", EditableText);
