@@ -74,7 +74,7 @@ var ZoteroPane = new function()
 		Zotero.debug("Initializing Zotero pane");
 		
 		// Set key down handler
-		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
+		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown);
 		// focusout, unlike blur, bubbles up to document level
 		// so handleBlur gets triggered when any field, not just the document, looses focus
 		document.addEventListener('focusout', ZoteroPane.handleBlur);
@@ -875,47 +875,24 @@ var ZoteroPane = new function()
 	 */
 	function handleKeyDown(event, from) {
 		if (Zotero_Tabs.selectedIndex > 0) {
+			// Escape from outside of the reader will focus reader's scrollable area
 			if (event.key === 'Escape') {
-				// If focus is on an opened popup, let Escape just close it
-				if (document.activeElement.open) {
-					return;
-				}
-
 				if (!document.activeElement.classList.contains('reader')) {
 					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 					if (reader) {
 						reader.focus();
-						// Keep propagating if current focus is on input or textarea
-						// The Escape event needs to be handled by itemBox, tagBox, etc. to undo edits.
-						if (!["input", "textarea"].includes(document.activeElement.tagName)) {
-							event.preventDefault();
-							event.stopPropagation();
-						}
 					}
 				}
 			}
-			else if (event.key === 'Tab' && event.shiftKey) {
-				let node = document.activeElement;
-				if (node && node.nodeType === Node.ELEMENT_NODE && (
-					node.parentNode.classList.contains('zotero-view-item')
-					|| node.getAttribute('type') === 'search'
-					|| node.getAttribute('anonid') === 'editor-view'
-					&& node.contentWindow.document.activeElement.classList.contains('toolbar-button-return'))) {
-					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-					if (reader) {
-						reader.focus();
-					}
-					event.preventDefault();
-					event.stopPropagation();
-				}
-			}
+			// Tab into the reader from outside of it (e.g. from the contextPane)
+			// will focus the scrollable area
 			else if (event.key === 'Tab') {
 				if (!document.activeElement.classList.contains('reader')) {
 					setTimeout(() => {
 						if (document.activeElement.classList.contains('reader')) {
 							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 							if (reader) {
-								reader.focusFirst();
+								reader.focus();
 							}
 						}
 					});
