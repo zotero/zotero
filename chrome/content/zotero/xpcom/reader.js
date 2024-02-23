@@ -25,6 +25,8 @@
 
 import FilePicker from 'zotero/modules/filePicker';
 
+const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
@@ -192,6 +194,13 @@ class ReaderInstance {
 			data.reader = this;
 			Zotero.Reader._dispatchEvent(data);
 		});
+
+		this._blockingObserver = new BlockingObserver({
+			shouldBlock(uri) {
+				return uri.scheme === 'http' || uri.scheme === 'https';
+			}
+		});
+		this._blockingObserver.register(this._iframe);
 
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
@@ -552,6 +561,9 @@ class ReaderInstance {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		}
 		this._flushState();
+		if (this._blockingObserver) {
+			this._blockingObserver.unregister(this._iframe);
+		}
 	}
 
 	get itemID() {
