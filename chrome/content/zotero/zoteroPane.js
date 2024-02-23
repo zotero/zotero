@@ -4908,64 +4908,15 @@ var ZoteroPane = new function()
 				await item.saveTx();
 			}
 
-			if (['application/pdf', 'application/epub+zip', 'text/html'].includes(contentType)) {
-				let type;
-				if (contentType === 'application/pdf') {
-					type = 'pdf';
-				}
-				else if (contentType === 'application/epub+zip') {
-					type = 'epub';
-				}
-				else {
-					type = 'snapshot';
-				}
-				let handler = Zotero.Prefs.get('fileHandler.' + type);
-				
-				// Zotero PDF reader
-				if (!handler) {
-					let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
-					let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
-					if (useAlternateWindowBehavior) {
-						openInWindow = !openInWindow;
-					}
-					await Zotero.Reader.open(
-						item.id,
-						extraData && extraData.location,
-						{
-							openInWindow,
-							allowDuplicate: openInWindow
-						}
-					);
-					return;
-				}
-				// Try to open external PDF reader to page number if specified
-				// TODO: Implement for EPUBs if readers support it
-				else if (type == 'pdf') {
-					let pageIndex = extraData?.location?.position?.pageIndex;
-					if (pageIndex !== undefined) {
-						await Zotero.OpenPDF.openToPage(
-							item,
-							parseInt(pageIndex) + 1
-						);
-						return;
-					}
-				}
-				// Custom PDF handler
-				// TODO: Remove this and unify with Zotero.OpenPDF
-				if (handler != 'system') {
-					try {
-						if (await OS.File.exists(handler)) {
-							Zotero.launchFileWithApplication(path, handler);
-							return;
-						}
-					}
-					catch (e) {
-						Zotero.logError(e);
-					}
-					Zotero.logError(`${handler} not found -- launching file normally`);
-				}
+			let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+			let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
+			if (useAlternateWindowBehavior) {
+				openInWindow = !openInWindow;
 			}
-			Zotero.launchFile(path);
+			await Zotero.FileHandlers.open(item, {
+				location: extraData?.location,
+				openInWindow,
+			});
 		};
 		
 		for (let i = 0; i < itemIDs.length; i++) {

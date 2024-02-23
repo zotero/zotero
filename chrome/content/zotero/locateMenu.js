@@ -370,11 +370,6 @@ var Zotero_LocateMenu = new function() {
 			snapshot: "zotero-menuitem-attachments-snapshot",
 			multiple: "zotero-menuitem-new-tab",
 		};
-		const attachmentTypes = {
-			"application/pdf": "pdf",
-			"application/epub+zip": "epub",
-			"text/html": "snapshot",
-		};
 		this._attachmentType = "multiple";
 		Object.defineProperty(this, "className", {
 			get: () => (alternateWindowBehavior ? "zotero-menuitem-new-window" : classNames[this._attachmentType]),
@@ -404,7 +399,7 @@ var Zotero_LocateMenu = new function() {
 				this._attachmentType = "multiple";
 			}
 			else if (attachment) {
-				this._attachmentType = attachmentTypes[attachment.attachmentContentType];
+				this._attachmentType = attachment.attachmentReaderType;
 			}
 			return !!attachment;
 		};

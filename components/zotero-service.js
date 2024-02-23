@@ -113,7 +113,7 @@ const xpcomFilesLocal = [
 	'locateManager',
 	'mime',
 	'notifier',
-	'openPDF',
+	'fileHandlers',
 	'plugins',
 	'reader',
 	'progressQueue',
