@@ -203,6 +203,10 @@ $-itemTypesIcons: (
 	attachment-pdf,
 	attachment-snapshot,
 	attachment-web-link,
+	attachment-image,
+	attachment-image-link,
+	attachment-video,
+	attachment-video-link,
 	audio-recording,
 	bill,
 	blog-post,
@@ -255,6 +259,9 @@ $-attachmentIcons: (
 	attachment-pdf,
 	attachment-snapshot,
 	attachment-web-link,
+	attachment-file,
+	attachment-image,
+	attachment-video
 );
 
 .icon-item-type {
@@ -289,13 +296,6 @@ $-attachmentIcons: (
 		.icon-item-type[data-item-type=#{$itemType}] {
 			@include svgicon($itemTypeIcon, $color, "16", "item-type", true);
 		}
-		
-		@if index($-attachmentIcons, $itemTypeIcon) != false {
-			.icon-attachment-type[data-item-type=#{$itemType}] {
-				@include svgicon($itemTypeIcon, $color, "12", "item-type", false);
-				background-origin: content-box;
-			}
-		}
 	}
 }
 
@@ -306,5 +306,13 @@ $-attachmentIcons: (
 .virtualized-table .row {
 	@include focus-states using($color) {
 		@include -icon-item-type-rules($color);
+
+		@each $itemAttachmentIcon in $-attachmentIcons {
+			$itemType: camelCase(str-replace(str-replace($itemAttachmentIcon, "pdf", "PDF"), "epub", "EPUB"));
+			.icon-attachment-type[data-item-type=#{$itemType}] {
+				@include svgicon($itemAttachmentIcon, $color, "12", "item-type", false);
+				background-origin: content-box;
+			}
+		}
 	}
 }

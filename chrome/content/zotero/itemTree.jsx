@@ -1367,9 +1367,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				if (sortField == 'hasAttachment') {
 					// PDFs at the top
-					const order = ['pdf', 'snapshot', 'epub', 'other', 'none'];
-					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : 4);
-					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : 4);
+					const order = ['pdf', 'snapshot', 'epub', 'image', 'video', 'other', 'none'];
+					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : (order.length - 1));
+					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : (order.length - 1));
 					return fieldA - fieldB;
 				}
 
@@ -2653,6 +2653,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 				else if (type == 'epub') {
 					icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
+				}
+				else if (type == 'image') {
+					icon = getCSSItemTypeIcon('attachmentImage', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasImage');
+				}
+				else if (type == 'video') {
+					icon = getCSSItemTypeIcon('attachmentVideo', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasVideo');
 				}
 				else {
 					icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
