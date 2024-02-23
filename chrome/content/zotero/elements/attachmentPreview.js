@@ -75,9 +75,9 @@
 			<html:span class="icon"></html:span>
 			<html:div class="btn-container">
 				<toolbarbutton id="prev" class="btn-prev" ondblclick="event.stopPropagation()"
-					data-goto="prev" oncommand="this.closest('attachment-preview').goto(event)"/>
+					oncommand="this.closest('attachment-preview').goto('prev');event.stopPropagation();"/>
 				<toolbarbutton id="next" class="btn-next" ondblclick="event.stopPropagation()"
-					data-goto="next" oncommand="this.closest('attachment-preview').goto(event)"/>
+					oncommand="this.closest('attachment-preview').goto('next');event.stopPropagation();"/>
 			</html:div>
 			<html:div class="drag-container"></html:div>
 		`);
@@ -135,6 +135,10 @@
 			return ["video", "audio", "image"].includes(this.previewType);
 		}
 
+		get isPaginatedType() {
+			return ["pdf", "epub"].includes(this.previewType);
+		}
+
 		get hasPreview() {
 			return this.getAttribute("data-preview-status") === "success";
 		}
@@ -181,6 +185,7 @@
 			this.addEventListener("mouseenter", this.updateGoto);
 			this.addEventListener("dragstart", this._handleDragStart);
 			this.addEventListener("dragend", this._handleDragEnd);
+			this.addEventListener("click", this._handleFocusIn);
 			this.addEventListener("focusin", this._handleFocusIn);
 			this.addEventListener("keypress", this._handleKeypress);
 			this.setAttribute("data-preview-type", "unknown");
@@ -194,6 +199,7 @@
 			this.removeEventListener("mouseenter", this.updateGoto);
 			this.removeEventListener("dragstart", this._handleDragStart);
 			this.removeEventListener("dragend", this._handleDragEnd);
+			this.removeEventListener("click", this._handleFocusIn);
 			this.removeEventListener("focusin", this._handleFocusIn);
 			this.removeEventListener("keypress", this._handleKeypress);
 		}
@@ -272,9 +278,14 @@
 			ZoteroPane.viewAttachment(this._item.id, event, false, options);
 		}
 
-		goto(ev) {
-			this._reader?.goto(ev.target.getAttribute("data-goto"));
-			ev.stopPropagation();
+		/**
+		 * @param {"prev" | "next"} type
+		 */
+		goto(type) {
+			if (!this._reader?.canGoto(type)) {
+				return;
+			}
+			this._reader?.goto(type);
 			setTimeout(() => this.updateGoto(), 300);
 		}
 
@@ -305,6 +316,14 @@
 					toFocus.focus();
 					stopEvent = true;
 				}
+			}
+			else if (this.isPaginatedType && ["ArrowLeft", "ArrowRight"].includes(e.key)) {
+				let gotoType = {
+					ArrowLeft: "prev",
+					ArrowRight: "next"
+				};
+				this.goto(gotoType[e.key]);
+				stopEvent = true;
 			}
 
 			if (stopEvent) {
