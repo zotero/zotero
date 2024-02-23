@@ -8,8 +8,7 @@
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="moveToAlertPosition(); sizeToContent(); document.getElementById('zotero-about').getButton('accept').focus();"
-	inwindowmenu="false"
-	class="zotero-window">
+	inwindowmenu="false">
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);

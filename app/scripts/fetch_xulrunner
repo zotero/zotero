@@ -299,7 +299,7 @@ function modify_omni {
 	
 	# Import style into built-in dialogs
 	replace_line '<window id=\"commonDialogWindow\"' \
-		'<window id=\"commonDialogWindow\" class=\"zotero-window\"' \
+		'<window id=\"commonDialogWindow\" class=\"zotero-dialog\"' \
 		chrome/toolkit/content/global/commonDialog.xhtml
 	replace_line '<\?xml-stylesheet href=\"chrome:\/\/global\/skin\/commonDialog.css\" type=\"text\/css\"\?>' \
 		'<\?xml-stylesheet href=\"chrome:\/\/global\/skin\/commonDialog.css\" type=\"text\/css\"\?>
