@@ -32,6 +32,8 @@
 		}
 
 		.first-column {
+			padding-inline-start: 36px;
+
 			&::before {
 				content: "";
 				display: inline-block;

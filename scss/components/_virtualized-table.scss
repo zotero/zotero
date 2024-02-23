@@ -48,12 +48,8 @@
 		box-sizing: border-box;
 
 		&.label {
-			padding-inline-end: 4px;
-		}
-
-		&.label,
-		&.first-column {
 			padding-inline-start: 0;
+			padding-inline-end: 4px;
 		}
 
 		&.first-column,
@@ -225,6 +221,7 @@
 	height: 1.83333333em; // 22px @ 12px font size
 	overflow: hidden;
 	border-bottom: 1px solid var(--material-border-quarternary);
+	padding-inline: 8px;
 
 	@include comfortable {
 		height: 2.33333333em; // 28px @ 12px font size
@@ -268,10 +265,6 @@
 
 		&.dragging {
 			background: var(--material-mix-quarternary);
-		}
-
-		&.first-column {
-			padding-inline-start: 36px;
 		}
 
 		.resizer {
@@ -329,6 +322,7 @@
 	flex: 1 0;
 	max-width: 100%;
 	overflow: auto;
+	padding: 4px 8px 8px;
 
 	.cell {
 		text-overflow: ellipsis;
