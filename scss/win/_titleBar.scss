@@ -1,4 +1,6 @@
 #toolbar-menubar {
+	// Need this to force show the menubar
+	display: initial;
 	// Allow right-click context menu on menubar
 	pointer-events: none;
 	visibility: visible;

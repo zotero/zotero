@@ -18,6 +18,7 @@
 		"MozXULElement": false,
 		"PluralForm": false,
 		"Services": false,
+		"windowUtils": false,
 		"XPCOMUtils": false,
 		"XRegExp": false,
 		"XULElement": false,
