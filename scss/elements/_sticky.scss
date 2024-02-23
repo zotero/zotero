@@ -5,8 +5,9 @@ sticky {
 		z-index: 1;
 		position: relative;
 		top: -1px;
-		// Prevent top: -1px from cutting into elements above, like banners
-		clip-path: inset(1px 0 0 0);
+		// Prevent top: -1px from cutting into elements above, like banners, by clipping the top pixel
+		// -100% on the horizontal dimensions so we don't clip the sides
+		clip-path: inset(1px -100% 0 -100%);
 
 		padding-top: 1px + 2px; // 1px to offset top, 2px as actual padding
 		padding-bottom: 2px;
