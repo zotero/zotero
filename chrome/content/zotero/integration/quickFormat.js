@@ -446,6 +446,8 @@ var Zotero_QuickFormat = new function () {
 						_clearEntryList();
 						locatorLocked = false;
 						locatorNode = prevNode;
+						let input = _getCurrentInput();
+						input.value = "";
 						return;
 					}
 				}

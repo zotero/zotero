@@ -136,7 +136,7 @@
 	border-style: solid;
 	border-width: 1px;
 	border-color: #a8c0ec;
-	padding: 0 11px 0 6px;
+	padding: 0 6px;
 	margin: 3px 2px 0 2px;
 	display: inline-block;
 	white-space: nowrap;
@@ -147,26 +147,6 @@
 	height: 16px;
 }
 
-.citation-dialog.bubble::before {
-	background: url("searchbar-dropmarker@2x.png") no-repeat center / contain;
-	display: inline-block;
-	content: "";
-	width: 5px;
-	height: 8px;
-	margin-right: 2px;
-	visibility: hidden;
-}
-
-.citation-dialog.bubble:hover:before,
-.citation-dialog.bubble:focus-visible:before {
-	visibility: visible;
-}
-
-.citation-dialog.bubble[selected="true"]:before {
-	visibility: visible;
-	/* Temporary trick to make the dropmarker lighter */
-	filter: invert(100%); 
-}
 
 .citation-dialog.bubble:hover {
 	background-color: #bbcef1;
@@ -185,6 +165,7 @@
 	padding-top: 0;
 	padding-bottom: 0;
 	background: white;
+	border-radius: 10px;
 }
 
 .citation-dialog.iframe {
@@ -269,10 +250,8 @@ richlistitem[selected="true"] {
 
 /* Add cursor and hover/active effects to make the Z icon act like a button */
 #zotero-icon:not([disabled]) {
-	border: solid #ccc 1px;
-	padding: 5px 7px 5px 5px;
-	border-radius: 5px;
 	cursor: pointer;
+	padding: 5px 4px 5px 5px;
 }
 
 #zotero-icon:not([disabled]):hover,
@@ -281,27 +260,14 @@ richlistitem[selected="true"] {
 	background: #f2f2f2;
 }
 
-#zotero-icon:not([disabled]):active {
-	background: #e6e6e6;
-}
 
-#zotero-icon:not([disabled])::before {
+#zotero-icon:not([disabled])::after {
 	background: url("searchbar-dropmarker@2x.png") no-repeat center / contain;
 	display: inline-block;
 	content: "";
 	width: 5px;
 	height: 8px;
-}
-
-#zotero-icon .toolbarbutton-text {
-	display: none;
-}
-
-#zotero-icon .toolbarbutton-icon {
-	width: 16px;
-	height: 16px;
-	padding: 0;
-	margin: 0;
+	margin-left: 1px;
 }
 
 #citation-properties:is(panel, menupopup)::part(content) {
