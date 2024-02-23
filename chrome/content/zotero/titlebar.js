@@ -25,6 +25,13 @@
 
 
 (() => {
+let platforms = document.querySelector("window")?.getAttribute("drawintitlebar-platforms");
+if (platforms) {
+	if (Zotero.isMac && !platforms.includes("mac")) return;
+	else if (Zotero.isWin && !platforms.includes("win")) return;
+	else if (Zotero.isLinux && !platforms.includes("linux")) return;
+}
+
 window.addEventListener("load", function () {
 	// Fix window without menubar/titlebar when Zotero is closed in full-screen mode in OS X 10.11+
 	if (Zotero.isMac && window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
