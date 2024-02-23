@@ -5947,6 +5947,33 @@ var ZoteroPane = new function()
 		}
 	};
 
+	this.toggleSelectedItemAsPrimaryAttachment = async function () {
+		if (!this.canEdit() || !this.canEditFiles()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		var items = this.getSelectedItems();
+
+		if (items.length !== 1 || !items[0].parentItemID || !items[0].isFileAttachment()) {
+			return;
+		}
+		let item = items[0];
+
+		// Check if attachment's parent already has relation to this item.
+		// If yes - we need to remove it. Otherwise, create new relation.
+		let parent = await Zotero.Items.getAsync(item.parentItemID);
+		let existingPrimaryAttachment = parent.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+
+		if (existingPrimaryAttachment !== item.key) {
+			let updatedRelations = parent.getRelations();
+			updatedRelations[Zotero.Relations.primaryAttachmentPredicate] = item.key;
+			parent.setRelations(updatedRelations);
+		}
+		else {
+			parent.removeRelation(Zotero.Relations.primaryAttachmentPredicate, item.key);
+		}
+		await parent.saveTx({ skipDateModifiedUpdate: true });
+	}
 
 	/**
 	 * Attempt to find a file in the LABD matching the passed attachment

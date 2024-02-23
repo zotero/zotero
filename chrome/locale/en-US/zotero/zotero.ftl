@@ -32,6 +32,14 @@ menu-new-standalone-note =
 menu-new-item-note =
     .label = New Item Note
 
+menu-primary-attachment =
+    .label = {
+        $type ->
+            [set] Set
+            [unset] Unset
+            *[unknown] Set
+    } as Primary Attachment
+
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
 filter-collections = Filter Collections

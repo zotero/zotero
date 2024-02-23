@@ -1231,6 +1231,18 @@ Zotero.Item.prototype.addRelatedItem = function (item) {
 	return this.addRelation(Zotero.Relations.relatedItemPredicate, Zotero.URI.getItemURI(item));
 }
 
+/**
+ * Removes primary attachment relations of this item if it exists.
+ */
+Zotero.Item.prototype._removePrimaryAttachmentRelation = async function (env) {
+	let primaryAttachmentFor = (await Zotero.Relations.getByPredicateAndObject(
+		'item', Zotero.Relations.primaryAttachmentPredicate, this.key
+	))[0];
+	if (primaryAttachmentFor) {
+		primaryAttachmentFor.removeRelation(Zotero.Relations.primaryAttachmentPredicate, this.key);
+		await primaryAttachmentFor.save({ skipEditCheck: env.options.skipEditCheck, skipDateModifiedUpdate: true });
+	}
+}
 
 /**
  * @param {Zotero.Item}
@@ -1524,6 +1536,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	if (this._changed.parentKey) {
 		if (parentItemKey && parentItemKey == this.key) {
 			throw new Error("Item cannot be set as parent of itself");
+		}
+		// If the file is moved, make sure the primary file relation
+		// of this file is removed.
+		if (this.isFileAttachment()) {
+			yield this._removePrimaryAttachmentRelation(env);
 		}
 		
 		// Make sure parent is a regular item
@@ -3674,7 +3691,11 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	
 	var cacheKey = (Zotero.Prefs.get('sortAttachmentsChronologically') ? 'chronological' : 'alphabetical')
 		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
-	
+
+	let primaryAttachmentKey = this.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+	if (primaryAttachmentKey) {
+		cacheKey += `_primary=${primaryAttachmentKey}`;
+	}
 	if (this._attachments[cacheKey]) {
 		return this._attachments[cacheKey];
 	}
@@ -3690,6 +3711,13 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 		rows.sort((a, b) => collation.compareString(1, a.title, b.title));
 	}
 	var ids = rows.map(row => row.itemID);
+	// If there is a primary attachment for this item, move it to the
+	// top of the array
+	if (primaryAttachmentKey) {
+		let primaryAttachment = Zotero.Items.getByLibraryAndKey(this.libraryID, primaryAttachmentKey);
+		ids = ids.filter(id => id !== primaryAttachment.id);
+		ids.unshift(primaryAttachment.id);
+	}
 	this._attachments[cacheKey] = ids;
 	return ids;
 }
@@ -3705,6 +3733,15 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 Zotero.Item.prototype.getBestAttachment = Zotero.Promise.coroutine(function* () {
 	if (!this.isRegularItem()) {
 		throw ("getBestAttachment() can only be called on regular items");
+	}
+	// If there is a non-deleted primary attachment for this item, return it
+	// otherwise, default to previous bestAttachments algorithm
+	let primaryAttachmentKey = this.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+	if (primaryAttachmentKey) {
+		let primaryAttachment = Zotero.Items.getByLibraryAndKey(this.libraryID, primaryAttachmentKey);
+		if (!primaryAttachment.deleted) {
+			return primaryAttachment;
+		}
 	}
 	var attachments = yield this.getBestAttachments();
 	let bestAttachment = attachments ? attachments[0] : false;
@@ -4863,6 +4900,8 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 			if (id) {
 				yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 			}
+
+			yield this._removePrimaryAttachmentRelation(env);
 		}
 		
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
