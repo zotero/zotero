@@ -8,6 +8,7 @@ menupopup, panel, #search-mode-popup {
 
 menupopup {
 	menu, menuitem {
+		appearance: none !important;
 		margin-left: 4px;
 		margin-right: 4px;
 		border-radius: 4px;
