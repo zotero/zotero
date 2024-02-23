@@ -27,6 +27,7 @@
 var EXPORTED_SYMBOLS = ["HiddenBrowser"];
 
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
 
 /* global HiddenFrame, E10SUtils, this */
 XPCOMUtils.defineLazyModuleGetters(this, {
@@ -95,7 +96,12 @@ class HiddenBrowser {
 			}
 			
 			if (options.blockRemoteResources) {
-				RemoteResourceBlockingObserver.watch(browser);
+				this._blockingObserver = new BlockingObserver({
+					shouldBlock(uri) {
+						return uri.scheme !== 'file';
+					}
+				});
+				this._blockingObserver.register(browser);
 			}
 			
 			this._browser = browser;
@@ -258,44 +264,11 @@ class HiddenBrowser {
 		if (this._frame) {
 			(async () => {
 				await this._createdPromise;
-				RemoteResourceBlockingObserver.unwatch(this);
+				this._blockingObserver?.unregister(this._browser);
 				this._frame.destroy();
 				this._frame = null;
 				Zotero.debug("Deleted hidden browser");
 			})();
-		}
-	}
-};
-
-const RemoteResourceBlockingObserver = {
-	_observerAdded: false,
-	_ids: new Set(),
-	
-	observe(subject) {
-		let channel = subject.QueryInterface(Ci.nsIHttpChannel);
-		let id = Zotero.platformMajorVersion > 102 ? channel.browserId : channel.topBrowsingContextId;
-		if (this._ids.has(id) && channel.URI.scheme !== 'file') {
-			channel.cancel(Cr.NS_BINDING_ABORTED);
-		}
-	},
-	
-	watch(browser) {
-		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.id;
-		this._ids.add(id);
-		if (!this._observerAdded) {
-			Services.obs.addObserver(this, 'http-on-modify-request');
-			Zotero.debug('RemoteResourceBlockingObserver: Added observer');
-			this._observerAdded = true;
-		}
-	},
-	
-	unwatch(browser) {
-		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.id;
-		this._ids.delete(id);
-		if (this._observerAdded && !this._ids.size) {
-			Services.obs.removeObserver(this, 'http-on-modify-request');
-			Zotero.debug('RemoteResourceBlockingObserver: Removed observer');
-			this._observerAdded = false;
 		}
 	}
 };
