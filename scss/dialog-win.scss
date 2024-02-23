@@ -20,4 +20,9 @@
 
 @import "win/abstracts/mixins";
 
-@import "win/components/button"
+@import "win/components/button";
+
+
+.dialog-button-box {
+	margin-top: 8px;
+}
