@@ -41,11 +41,11 @@ var Scaffold_Load = new function () {
 			window.close();
 		});
 		
-		// listbox.addEventListener('keypress', (e) => {
-		// 	if (e.key == ' ' && e.target == listbox) {
-		// 		e.preventDefault();
-		// 	}
-		// });
+		listbox.addEventListener('keypress', (e) => {
+			if (e.key == ' ' && e.target == listbox) {
+				e.preventDefault();
+			}
+		});
 		
 		var translators = {};
 
