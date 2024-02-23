@@ -48,7 +48,8 @@
 		@include focus-ring;
 	}
 
-	&:disabled {
+	&:disabled,
+	&[disabled] {
 		@include windows-form-element-active;
 	}
 }

@@ -5,7 +5,7 @@ richlistbox.theme-listbox {
     richlistitem {
         --listitem-selectedBackground: var(--tag-gray);
         --listitem-selectedFocusCurrentBackground: var(--color-accent);
-        --listitem-selectedTextColor: var(--fill-primary);
+        --listitem-selectedTextColor: var(--accent-white);
         --listitem-selectedBorder: transparent;
         --listitem-selectedBottomBorder: transparent;
         --listitem-selectedCurrentBorder: transparent;
@@ -13,8 +13,8 @@ richlistbox.theme-listbox {
         --listitem-selectedFocusBottomBorder: transparent;
         --listitem-selectedFocusCurrentBorder: transparent;
         --listitem-selectedFocusBackground: var(--color-accent);
-        --listitem-selectedFocusColor: var(--fill-primary);
-        --listitem-selectedColor: var(--fill-primary);
+        --listitem-selectedFocusColor: var(--accent-white);
+        --listitem-selectedColor: var(--accent-white);
         --listitem-selectedFocusCurrentBottomBorder: transparent;
     }
 }
