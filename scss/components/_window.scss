@@ -1,11 +1,11 @@
 @mixin zotero-window {
 	background: var(--material-sidepane);
-	--color-form-element-background: var(--material-sidepane);
+	--color-form-element-base-background: var(--material-sidepane);
 }
 
 @mixin zotero-dialog {
 	background: var(--material-background);
-	--color-form-element-background: var(--material-background);
+	--color-form-element-base-background: var(--material-background);
 }
 
 window:root,
