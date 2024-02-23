@@ -40,8 +40,10 @@ $scaffold-toolbarbutton-icons: (
 }
 
 #zotero-toolbar {
-	appearance: none;
-	background: var(--material-sidepane);
+	@media not (-moz-platform: macos) {
+		appearance: none;
+		background: var(--material-sidepane);
+	}
 	border-bottom: var(--material-panedivider);
 
 	toolbarbutton {

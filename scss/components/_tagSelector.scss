@@ -114,8 +114,7 @@
 		padding: 2px 4px;
 	}
 
-	--width-focus-border: 1px;
-	@include focus-ring;
+	@include focus-ring(true);
 
 	&:hover {
 		background-color: var(--fill-quinary);

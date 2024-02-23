@@ -7,7 +7,6 @@ item-box {
 	&[hidden] {
 		display: none;
 	}
-	--width-focus-border: 1px;
 
 	#item-box {
 		width: 100%;
@@ -26,7 +25,7 @@ item-box {
 	}
 
 	#item-type-menu {
-		@include focus-ring;
+		@include focus-ring(true);
 		margin: 0;
 		margin-inline-end: 5px !important;
 		flex: 1;
@@ -85,7 +84,7 @@ item-box {
 
 	/* creator type menu */
 	.creator-type-label {
-		@include focus-ring;
+		@include focus-ring(true);
 		display: inline-block;
 		// undo the padding so that the name is pushed to the end
 		margin-inline-end: -4px;

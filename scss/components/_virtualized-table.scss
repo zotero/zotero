@@ -222,6 +222,8 @@
 	overflow: hidden;
 	border-bottom: 1px solid var(--material-border-quarternary);
 	padding-inline: 8px;
+	box-sizing: border-box;
+	padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
 
 	@include comfortable {
 		height: 2.33333333em; // 28px @ 12px font size
