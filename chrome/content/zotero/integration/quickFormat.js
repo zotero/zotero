@@ -2022,15 +2022,12 @@ var Zotero_QuickFormat = new function () {
 		} else {
 			delete citationItem["suffix"];
 		}
-		if(itemPopoverLocatorLabel.selectedIndex !== 0) {
-			citationItem["label"] = itemPopoverLocatorLabel.selectedItem.value;
-		} else {
-			delete citationItem["label"];
-		}
 		if(itemPopoverLocator.value) {
 			citationItem["locator"] = itemPopoverLocator.value;
+			citationItem["label"] = itemPopoverLocatorLabel.selectedItem.value;
 		} else {
 			delete citationItem["locator"];
+			delete citationItem["label"];
 		}
 		if(itemPopoverSuppressAuthor.checked) {
 			citationItem["suppress-author"] = true;
