@@ -42,7 +42,7 @@ class ReaderInstance {
 		this._iframeWindow = null;
 		this._title = '';
 		this._isReaderInitialized = false;
-		this._showItemPaneToggle = false;
+		this._showContextPaneToggle = false;
 		this._initPromise = new Promise((resolve, reject) => {
 			this._resolveInitPromise = resolve;
 			this._rejectInitPromise = reject;
@@ -211,7 +211,7 @@ class ReaderInstance {
 			location,
 			readOnly: this._isReadOnly(),
 			authorName: this._item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
-			showItemPaneToggle: this._showItemPaneToggle,
+			showContextPaneToggle: this._showContextPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
@@ -1020,7 +1020,7 @@ class ReaderTab extends ReaderInstance {
 		this._sidebarWidth = options.sidebarWidth;
 		this._sidebarOpen = options.sidebarOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
-		this._showItemPaneToggle = true;
+		this._showContextPaneToggle = true;
 		this._onToggleSidebarCallback = options.onToggleSidebar;
 		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
