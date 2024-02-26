@@ -203,6 +203,7 @@
 .citation-dialog.item {
 	-moz-user-focus: normal;
 	padding: 3px 5px 3px 10px;
+	font-size: 12px;
 }
 
 .citation-dialog.item:not(:last-child), .citation-dialog.separator:not(:last-child) {
