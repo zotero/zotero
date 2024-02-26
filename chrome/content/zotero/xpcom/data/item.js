@@ -3782,7 +3782,7 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
  *     and boolean 'exists'
  */
 Zotero.Item.prototype.getBestAttachmentState = async function () {
-	if (this._bestAttachmentState !== null) {
+	if (this._bestAttachmentState !== null && this._bestAttachmentState.type) {
 		return this._bestAttachmentState;
 	}
 	var item = this.isAttachment() && this.isTopLevelItem()
@@ -3813,7 +3813,8 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 		type = 'other';
 	}
 	var exists = await item.fileExists();
-	return this._bestAttachmentState = { type, exists };
+	let key = item.key;
+	return this._bestAttachmentState = { type, exists, key };
 };
 
 

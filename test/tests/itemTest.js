@@ -1219,9 +1219,9 @@ describe("Zotero.Item", function () {
 			yield parentItem.getBestAttachmentState();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
-				{ type: 'image', exists: true }
+				{ type: 'image', exists: true, key: childItem.key }
 			);
-		})
+		});
 		
 		it("should cache state for a missing file", function* () {
 			var parentItem = yield createDataObject('item');
@@ -1236,19 +1236,51 @@ describe("Zotero.Item", function () {
 			yield parentItem.getBestAttachmentState();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
-				{ type: 'image', exists: false }
+				{ type: 'image', exists: false, key: childItem.key }
 			);
-		})
+		});
 
 		it("should cache state for a standalone attachment", async function () {
 			var standaloneAttachment = await importPDFAttachment();
 			await standaloneAttachment.getBestAttachmentState();
 			assert.deepEqual(
 				standaloneAttachment.getBestAttachmentStateCached(),
-				{ type: 'pdf', exists: true }
+				{ type: 'pdf', exists: true, key: standaloneAttachment.key }
 			);
 		});
-	})
+
+		it("should update best attachment state without clearing it for as long as item key matches", async function () {
+			var parentItem = await createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var childItem = await Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: parentItem.id
+			});
+			let path = await childItem.getFilePathAsync();
+			await OS.File.remove(path);
+			await parentItem.getBestAttachment();
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ key: childItem.key }
+			);
+			await childItem._updateAttachmentStates(false);
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ exists: false, key: childItem.key }
+			);
+			await parentItem.getBestAttachmentState();
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ type: 'image', exists: false, key: childItem.key }
+			);
+			await childItem._updateAttachmentStates(true);
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ type: 'image', exists: true, key: childItem.key }
+			);
+		});
+	});
 	
 	
 	describe("#fileExists()", function () {
