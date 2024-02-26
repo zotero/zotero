@@ -107,8 +107,8 @@ Zotero.Cite = {
 					continue;
 				}
 			}
-			// Add all terms to the cache. If a term has form="short",
-			// add a "_short" suffix after the locator. E.g. page_short = "p."
+			// Add all terms to the cache. If a term has a form, add "_<form>" suffix after the locator.
+			// E.g. <term name="page" form="short"> is saved as "page_short" = "p."
 			for (let elem of terms) {
 				let single = elem.querySelector("single");
 				// If <single> is empty, use the locator name directly
@@ -125,7 +125,7 @@ Zotero.Cite = {
 				map.set(locator + (form ? `_${form}` : ''), Zotero.Utilities.capitalize(str));
 			}
 		}
-		
+
 		return map.get(locator + (form ? `_${form}` : ''));
 	},
 	
