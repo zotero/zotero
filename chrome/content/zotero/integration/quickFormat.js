@@ -335,9 +335,10 @@ var Zotero_QuickFormat = new function () {
 						}, 500);
 						clearLastFocused(newInput);
 					}
-					else if (document.activeElement !== newInput) {
+					else if (document.activeElement !== newInput && !isEditorCleared()) {
 						// If no dragging, delete it if focus has moved elsewhere.
 						// If focus remained, the entire dialog lost focus, so do nothing
+						// If this is the last, non-removable, input - do not remove it as well.
 						newInput.remove();
 						clearLastFocused(newInput);
 					}
@@ -1215,9 +1216,12 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 		let inputNode = _getCurrentInput() || _lastFocusedInput;
-		// References should be shown if there are matching items and the input is either
-		// non-empty or the dialog just opened. Otherwise, the panel is hidden.
-		let showReferencePanel = visibleNodes.length > 0 && (!isInputEmpty(inputNode) || inputIsPristine);
+		// References should be shown if:
+		// - there are matching items and the input is non-empty
+		// - the dialog just opened
+		// - everything but the last, non-removable, input has been cleared.
+		// Otherwise, the panel is hidden.
+		let showReferencePanel = visibleNodes.length > 0 && (!isInputEmpty(inputNode) || inputIsPristine || isEditorCleared());
 		if (!showReferencePanel) {
 			referencePanel.hidePopup();
 			return;
@@ -1555,6 +1559,11 @@ var Zotero_QuickFormat = new function () {
 	function isInput(node) {
 		if (!node) return false;
 		return node.classList.contains("zotero-bubble-input");
+	}
+
+	// Check if the editor has only one child node: the non-removable input
+	function isEditorCleared() {
+		return editor.childElementCount == 1 && editor.firstChild.classList.contains("zotero-bubble-input");
 	}
 
 	/**
