@@ -1025,14 +1025,9 @@ var Zotero_QuickFormat = new function () {
 		
 		// Locator
 		if(citationItem.locator) {
-			if(citationItem.label) {
-				// TODO localize and use short forms
-				var label = citationItem.label;
-			} else if(/[\-–,]/.test(citationItem.locator)) {
-				var label = "pp.";
-			} else {
-				var label = "p."
-			}
+			// Try to fetch the short form of the locator label. E.g. "p." for "page"
+			// If there is no locator label, default to "page" for now
+			let label = (Zotero.Cite.getLocatorString(citationItem.label || 'page', 'short') || '').toLocaleLowerCase();
 			
 			str += ", "+label+" "+citationItem.locator;
 		}

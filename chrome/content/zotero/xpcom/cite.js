@@ -44,9 +44,10 @@ Zotero.Cite = {
 	 * Get localized string for locator
 	 *
 	 * @param {String} locator - Locator name (e.g., 'book')
+	 * @param {string} form - Fetch a specific form of the locator. E.g. form="short" for "page" is "p."
 	 * @return {String} - Localized string (e.g., 'Livre')
 	 */
-	getLocatorString: function (locator) {
+	getLocatorString: function (locator, form = null) {
 		// 'timestamp' not included in CSL locales
 		if (locator == 'timestamp') {
 			return Zotero.getString('citation.locator.timestamp');
@@ -60,6 +61,11 @@ Zotero.Cite = {
 		
 		// If locator strings are already cached for the current locale, use that
 		if (this._locatorStrings.has(cslLocale)) {
+			// If a specific form is requested, try to return it. Fallback to the regular form if not found.
+			if (form) {
+				let locatorWithForm = this._locatorStrings.get(cslLocale).get(locator + `_${form}`);
+				if (locatorWithForm) return locatorWithForm;
+			}
 			return this._locatorStrings.get(cslLocale).get(locator);
 		}
 		var map = new Map();
@@ -78,16 +84,17 @@ Zotero.Cite = {
 		var englishDoc;
 		// Cache all locators for the current locale
 		for (let locator of this.labels) {
-			let elem = doc.querySelector(`term[name="${locator}"]:not([form="short"]) > single`);
-			if (!elem) {
+			// Fetch all <term>s - including the short form
+			let terms = [...doc.querySelectorAll(`term[name="${locator}"]`)];
+			if (!terms.length) {
 				// If locator not found, get from the U.S. English locale
 				if (cslLocale != 'en-US') {
 					Zotero.logError(`Locator '${locator}' not found in ${cslLocale} locale -- trying en-US`);
 					if (!englishDoc) {
 						englishDoc = parser.parseFromString(Zotero.Cite.Locale.get('en-US'), 'text/xml');
 					}
-					elem = englishDoc.querySelector(`term[name="${locator}"]:not([form="short"]) > single`);
-					if (!elem) {
+					terms = englishDoc.querySelectorAll(`term[name="${locator}"]}`);
+					if (!terms.length) {
 						Zotero.logError(`Locator '${locator}' not found in en-US locale -- using name`);
 					}
 				}
@@ -95,22 +102,31 @@ Zotero.Cite = {
 					Zotero.logError(`Locator '${locator}' not found in en-US locale -- using name`);
 				}
 				// If still not found, use the locator name directly
-				if (!elem) {
+				if (!terms.length) {
 					map.set(locator, Zotero.Utilities.capitalize(locator));
 					continue;
 				}
 			}
-			// If <single> is empty, use the locator name directly
-			let str = elem.textContent;
-			if (!str) {
-				Zotero.logError(`Locator '${locator}' is empty in ${cslLocale} locale -- using name`);
-				map.set(locator, Zotero.Utilities.capitalize(locator));
-				continue;
+			// Add all terms to the cache. If a term has form="short",
+			// add a "_short" suffix after the locator. E.g. page_short = "p."
+			for (let elem of terms) {
+				let single = elem.querySelector("single");
+				// If <single> is empty, use the locator name directly
+				if (!single) {
+					single = elem;
+				}
+				let str = single.textContent;
+				if (!str) {
+					Zotero.logError(`Locator '${locator}' is empty in ${cslLocale} locale -- using name`);
+					map.set(locator, Zotero.Utilities.capitalize(locator));
+					continue;
+				}
+				let form = elem.getAttribute('form');
+				map.set(locator + (form ? `_${form}` : ''), Zotero.Utilities.capitalize(str));
 			}
-			map.set(locator, Zotero.Utilities.capitalize(str));
 		}
 		
-		return map.get(locator);
+		return map.get(locator + (form ? `_${form}` : ''));
 	},
 	
 	/**
