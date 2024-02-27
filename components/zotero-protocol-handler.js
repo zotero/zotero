@@ -1193,38 +1193,40 @@ function ZoteroProtocolHandler() {
 				return;
 			}
 			
+			var location = null;
+			if (page) {
+				location = {
+					position: {
+						pageIndex: page
+					},
+					annotationID: annotation
+				};
+			}
+			else if (cfi) {
+				location = {
+					position: {
+						type: 'FragmentSelector',
+						conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
+						value: cfi
+					}
+				};
+			}
+			else if (sel) {
+				location = {
+					position: {
+						type: 'CssSelector',
+						value: sel
+					}
+				};
+			}
+
+			var openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+
 			try {
-				if (page) {
-					await Zotero.FileHandlers.open(item, {
-						location: {
-							position: {
-								pageIndex: page
-							},
-							annotationID: annotation
-						}
-					});
-				}
-				else if (cfi) {
-					await Zotero.FileHandlers.open(item, {
-						location: {
-							position: {
-								type: 'FragmentSelector',
-								conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
-								value: cfi
-							}
-						}
-					});
-				}
-				else if (sel) {
-					await Zotero.FileHandlers.open(item, {
-						location: {
-							position: {
-								type: 'CssSelector',
-								value: sel
-							}
-						}
-					});
-				}
+				await Zotero.FileHandlers.open(item, {
+					location,
+					openInWindow,
+				});
 			}
 			catch (e) {
 				Zotero.logError(e);
