@@ -89,7 +89,8 @@ ZoteroPluginInstaller.prototype = {
 							"chrome,resizable=no,close=no,centerscreen", null);
 					this._progressWindow.addEventListener("load", () => { this._firstRunListener() }, false);
 				} else {
-					this._addon.install(this);
+					let result = this._addon.install(this);
+					if (result.then) await result;
 				}
 			}
 		} catch(e) {
