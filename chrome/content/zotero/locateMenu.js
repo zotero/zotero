@@ -390,7 +390,6 @@ var Zotero_LocateMenu = new function() {
 				}
 			},
 		});
-		this._mimeTypes = ["application/pdf", "application/epub+zip", "text/html"];
 
 		// Don't show alternate-behavior option ("in New Window" when openReaderInNewWindow is false,
 		// "in New Tab" when it's true) in toolbar Locate menu
@@ -419,7 +418,7 @@ var Zotero_LocateMenu = new function() {
 		});
 		
 		this.canHandleItem = async function (item) {
-			const attachment = await _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+			const attachment = await _getFirstUsableAttachment(item);
 			// Don't show alternate-behavior option when using an external PDF viewer
 			return attachment
 				&& !(alternateWindowBehavior && Zotero.Prefs.get(`fileHandler.${attachment.attachmentReaderType}`));
@@ -429,7 +428,7 @@ var Zotero_LocateMenu = new function() {
 			let attachmentType = null;
 			let numAttachments = 0;
 			for (let item of items) {
-				let attachment = await _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+				let attachment = await _getFirstUsableAttachment(item);
 				let thisAttachmentType = attachment?.attachmentReaderType;
 				if (!thisAttachmentType) {
 					continue;
@@ -451,7 +450,7 @@ var Zotero_LocateMenu = new function() {
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
 			var attachments = [];
 			for (let item of items) {
-				var attachment = yield _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+				var attachment = yield _getFirstUsableAttachment(item);
 				if (attachment) attachments.push(attachment.id);
 			}
 			
@@ -459,11 +458,11 @@ var Zotero_LocateMenu = new function() {
 				{ forceAlternateWindowBehavior: alternateWindowBehavior });
 		});
 		
-		var _getFirstAttachmentWithMIMEType = Zotero.Promise.coroutine(function* (item, mimeTypes) {
+		var _getFirstUsableAttachment = Zotero.Promise.coroutine(function* (item) {
 			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
 			for (let i = 0; i < attachments.length; i++) {
 				let attachment = attachments[i];
-				if (mimeTypes.indexOf(attachment.attachmentContentType) !== -1
+				if (attachment.attachmentReaderType
 						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					return attachment;
 				}
