@@ -1,4 +1,9 @@
 general-print = Print
+return-or-enter =
+    { PLATFORM() ->
+        [macos] Return
+        *[other] Enter
+    }
 
 menu-print =
     .label = { general-print }
@@ -424,4 +429,4 @@ toggle-preview =
 
 quickformat-aria-bubble = Press Down Arrow to open citation properties.
 quickformat-aria-input = Type your search term. Use Down Arrow and Up Arrow to navigate the search results.
-quickformat-aria-item = Press Enter to select this item. Press Tab to return to the search field.
+quickformat-aria-item = Press { return-or-enter } to select this item. Press Tab to return to the search field.
