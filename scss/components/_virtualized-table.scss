@@ -336,6 +336,10 @@
 		// pointer-events are enabled, and we need to rerender the rows for selection
 		// before dragging.
 		pointer-events: none;
+
+		&.first-column {
+			padding-inline-start: 0;
+		}
 	}
 }
 
