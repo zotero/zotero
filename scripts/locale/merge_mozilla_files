@@ -61,6 +61,8 @@ def main():
         ["sl", "https://addons.mozilla.org/en-US/firefox/addon/slovenski-jezik-language-pa/", "sl-SI"],
         ["sr", "https://addons.mozilla.org/en-US/firefox/addon/%D1%81%D1%80%D0%BF%D1%81%D0%BA%D0%B8-sr-language-pack/", "sr-RS"],
         ["sv-SE", "https://addons.mozilla.org/en-US/firefox/addon/svenska-se-language-pack/", "sv-SE"],
+        #["ta", "https://addons.mozilla.org/en-US/firefox/addon/tamil-language-pack-1/", "ta"],
+        ["ta", "https://web.archive.org/web/20210724103430/https://addons.mozilla.org/en-US/firefox/addon/tamil-language-pack-1/", "ta"],
         ["th", "https://addons.mozilla.org/en-US/firefox/addon/thai-language-pack/", "th-TH"],
         ["tr", "https://addons.mozilla.org/en-US/firefox/addon/t%C3%BCrk%C3%A7e-tr-language-pack/", "tr-TR"],
         ["uk", "https://addons.mozilla.org/en-US/firefox/addon/ukrainian-language-pack/", "uk-UA"],

@@ -1,0 +1,209 @@
+<!ENTITY zotero.preferences.title						"சோட்டெரோ விருப்பத்தேர்வுகள்">
+
+<!ENTITY zotero.preferences.helpButton.label "உதவி">
+
+<!ENTITY zotero.preferences.default					"இயல்புநிலை:">
+<!ENTITY zotero.preferences.items						 "பொருட்களை">
+<!ENTITY zotero.preferences.period						 ".">
+<!ENTITY zotero.preferences.settings					"அமைப்புகள்">
+<!ENTITY zotero.preferences.custom                    "வழக்கம்…">
+
+<!ENTITY zotero.preferences.prefpane.general				"பொது">
+
+<!ENTITY zotero.preferences.interface				"இடைமுகம்">
+<!ENTITY zotero.preferences.fileHandling				"கோப்பு கையாளுதல்">
+<!ENTITY zotero.preferences.automaticSnapshots			"வலைப்பக்கங்களிலிருந்து உருப்படிகளை உருவாக்கும்போது தானாகவே திரைப்படிப்புகளை எடுத்துக் கொள்ளுங்கள்">
+<!ENTITY zotero.preferences.downloadAssociatedFiles		"உருப்படிகளைச் சேமிக்கும்போது தானாகவே தொடர்புடைய எஆவகள் மற்றும் பிற கோப்புகளை இணைக்கவும்">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked  "இணைக்கப்பட்ட கோப்புகளை மறுபெயரிடுங்கள்">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "எஆவகளளை இதன்மூலம் திற">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "கணினி இயல்புநிலை">
+
+<!ENTITY zotero.preferences.miscellaneous				"மற்றவை">
+<!ENTITY zotero.preferences.autoUpdate					"புதுப்பிக்கப்பட்ட மொழிபெயர்ப்பாளர்கள் மற்றும் பாணிகளை தானாகவே சரிபார்க்கவும்">
+<!ENTITY zotero.preferences.updateNow					"இப்பொழுது மேம்படுத்து">
+<!ENTITY zotero.preferences.reportTranslationFailure		"உடைந்த தள மொழிபெயர்ப்பாளர்களைப் புகாரளி">
+<!ENTITY zotero.preferences.parseRISRefer				"பதிவிறக்கம் செய்யப்பட்ட பிப்டெக்ச்/ரிச்/பார்க்க கோப்புகளுக்கு சோட்டெரோவைப் பயன்படுத்தவும்">
+<!ENTITY zotero.preferences.automaticTags				"முக்கிய சொற்கள் மற்றும் பொருள் தலைப்புகளுடன் உருப்படிகளை தானாகவே குறிக்கவும்">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre		"இதற்கு மேல் குப்பையில் உள்ள பொருட்களை தானாக அகற்றவும்">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost		"சில நாட்களுக்கு முன்பு">
+
+<!ENTITY zotero.preferences.reader.tabsTitle.label             "என தாவல்களைக் காட்டு">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle  "உருவாக்கியவர் - ஆண்டு - தலைப்பு">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear  "தலைப்பு - உருவாக்கியவர் - ஆண்டு">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename          "கோப்புப்பெயர்">
+
+<!ENTITY zotero.preferences.groups						"குழுக்கள்">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude	"நூலகங்களுக்கு இடையில் உருப்படிகளை நகலெடுக்கும் போது, பின்வருமாறு:">
+<!ENTITY zotero.preferences.groups.childNotes			"குழந்தை குறிப்புகள்">
+<!ENTITY zotero.preferences.groups.childFiles			"குழந்தை திரைப்படிப்புகள் மற்றும் இறக்குமதி செய்யப்பட்ட கோப்புகள்">
+<!ENTITY zotero.preferences.groups.annotations        "சிறுகுறிப்புகள்">
+<!ENTITY zotero.preferences.groups.childLinks			"குழந்தை இணைப்புகள்">
+<!ENTITY zotero.preferences.groups.tags				"குறிச்சொற்கள்">
+
+<!ENTITY zotero.preferences.feeds						"ஊட்டங்கள்">
+<!ENTITY zotero.preferences.feeds.sorting.label		"வரிசைப்படுத்துதல்:">
+<!ENTITY zotero.preferences.feeds.sorting.newest		"முதலில் புதிய உருப்படிகள்">
+<!ENTITY zotero.preferences.feeds.sorting.oldest		"முதலில் பழைய உருப்படிகள்">
+<!ENTITY zotero.preferences.feeds.feedDefaults			"ஊட்டம் இயல்புநிலைகள்">
+
+<!ENTITY zotero.preferences.openurl.choose            "ஒரு தீர்வியைத் தேர்வுசெய்க…">
+<!ENTITY zotero.preferences.openurl.custom				"வழக்கம்…">
+<!ENTITY zotero.preferences.openurl.server				"தீர்வி:">
+<!ENTITY zotero.preferences.openurl.version				"பதிப்பு:">
+
+<!ENTITY zotero.preferences.prefpane.sync							"ஒத்திசைவு">
+<!ENTITY zotero.preferences.sync.username							"பயனர்பெயர்:">
+<!ENTITY zotero.preferences.sync.password							"கடவுச்சொல்:">
+<!ENTITY zotero.preferences.sync.syncServer						"தரவு ஒத்திசைவு">
+<!ENTITY zotero.preferences.sync.setUpSync							"ஒத்திசைவை அமைக்கவும்">
+<!ENTITY zotero.preferences.sync.unlinkAccount						"கணக்கை துண்டிக்கவும்…">
+<!ENTITY zotero.preferences.sync.createAccount						"கணக்கை உருவாக்கு">
+<!ENTITY zotero.preferences.sync.lostPassword						"கடவுச்சொல் இழந்ததா?">
+<!ENTITY zotero.preferences.sync.syncAutomatically					"தானாக ஒத்திசை">
+<!ENTITY zotero.preferences.sync.syncFullTextContent              "முழு உரை உள்ளடக்கத்தை ஒத்திசை">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc         "உங்கள் சோட்டெரோ நூலகங்களில் உள்ள கோப்புகளின் முழு உரை உள்ளடக்கத்தை சோட்டெரோ.நிறுவனம் மற்றும் பிற இணைக்கப்பட்ட சாதனங்களுடன் ஒத்திசைக்க முடியும், நீங்கள் எங்கிருந்தாலும் உங்கள் கோப்புகளை எளிதாக தேட அனுமதிக்கிறது. உங்கள் கோப்புகளின் முழு உரை உள்ளடக்கம் பகிரங்கமாக பகிரப்படாது.">
+<!ENTITY zotero.preferences.sync.about								"ஒத்திசைவு பற்றி">
+<!ENTITY zotero.preferences.sync.fileSyncing						"கோப்பு ஒத்திசைவு">
+<!ENTITY zotero.preferences.sync.fileSyncing.url					"முகவரி:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary				"இணைப்பு கோப்புகளை எனது நூலகத்தில் ஒத்திசை இதன்மூலம்">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups				"சோட்டெரோ சேமிப்பகத்தைப் பயன்படுத்தி குழு நூலகங்களில் இணைப்பு கோப்புகளை ஒத்திசை">
+<!ENTITY zotero.preferences.sync.fileSyncing.download				"கோப்புகளைப் பதிவிறக்கவும்">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime	"ஒத்திசைவு நேரத்தில்">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand		"தேவைக்கு ஏற்ப">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer         "சேவையகத்தை சரிபார்க்கவும்">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1					"சோட்டெரோ சேமிப்பகத்தைப் பயன்படுத்துவதன் மூலம், அதன் கட்டுப்பாட்டுக்கு நீங்கள் ஒப்புக்கொள்கிறீர்கள்">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2					"விதிமுறைகள் மற்றும் நிபந்தனைகள்">
+<!ENTITY zotero.preferences.sync.librariesToSync					"ஒத்திசைக்க நூலகங்கள்">
+<!ENTITY zotero.preferences.sync.librariesToSync.button				"நூலகங்களைத் தேர்வுசெய்க…">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync				"ஒத்திசைவு">
+<!ENTITY zotero.preferences.sync.librariesToSync.library			"நூலகம்">
+<!ENTITY zotero.preferences.sync.reset.warning1						"பின்வரும் செயல்பாடுகள் அரிதான, குறிப்பிட்ட சூழ்நிலைகளில் மட்டுமே பயன்படுத்தப்படுகின்றன, மேலும் அவை பொதுவான சரிசெய்தலுக்கு பயன்படுத்தப்படக்கூடாது. பல சந்தர்ப்பங்களில், மீட்டமைப்பது கூடுதல் சிக்கல்களை ஏற்படுத்தும். பார்க்க">
+<!ENTITY zotero.preferences.sync.reset.warning2						"ஒத்திசைவு மீட்டமை விருப்பங்கள்">
+<!ENTITY zotero.preferences.sync.reset.warning3						"மேலும் தகவலுக்கு.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "தரவு ஒத்திசைவு வரலாற்றை மீட்டமை">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "ஒத்திசைவு வரலாற்றைப் புறக்கணித்து, தொலைநிலை தரவுகளுடன் உள்ளக தரவை ஒன்றிணை">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary          "நிகழ்நிலை நூலகத்திலிருந்து மீட்டமை">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc     "நிகழ்நிலை நூலகத்திலிருந்து தரவைக் கொண்டு உள்ளக சோட்டெரோ தரவை மேலெழுதவும்.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary            "நிகழ்நிலை நூலகத்தை மாற்றவும்">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc       "உள்ளக சோட்டெரோ தரவுடன் நிகழ்நிலை நூலகத்தை மேலெழுதவும்">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory       "கோப்பு ஒத்திசைவு வரலாற்றை மீட்டமை">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc  "அனைத்து இணைப்பு கோப்புகளையும் சேமிப்பக சேவையுடன் ஒப்பிடுக">
+<!ENTITY zotero.preferences.sync.reset								"மீட்டமை">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions				"மீட்டமை விருப்பங்களைக் காட்டு…">
+<!ENTITY zotero.preferences.sync.reset.button						"மீட்டமை…">
+
+
+<!ENTITY zotero.preferences.prefpane.search				"தேடல்">
+<!ENTITY zotero.preferences.search.fulltextCache			"முழு உரை தற்காலிக சேமிப்பு">
+<!ENTITY zotero.preferences.search.indexStats				"குறியீட்டு புள்ளிவிவரங்கள்">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed		"குறியிடப்பட்ட:">
+<!ENTITY zotero.preferences.search.indexStats.partial		"பகுதி:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed	"ஒருங்கிணைக்கப்படாதது:">
+<!ENTITY zotero.preferences.search.indexStats.words		"சொற்கள்:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength			"ஒரு கோப்பிற்கு குறியீட்டுக்கு அதிகபட்ச எழுத்துக்கள்:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages			"ஒரு கோப்பிற்கு குறியீட்டுக்கு அதிகபட்ச பக்கங்கள்:">
+
+<!ENTITY zotero.preferences.prefpane.export				"ஏற்றுமதி">
+
+<!ENTITY zotero.preferences.citationOptions.caption			"மேற்கோள் விருப்பங்கள்">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "குறிப்புகளில் காகித கட்டுரைகளின் முகவரிகளைச் சேர்">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "இந்த விருப்பம் முடக்கப்பட்டிருக்கும் போது, கட்டுரையில் பக்க வரம்பு குறிப்பிடப்படாவிட்டால் மட்டுமே சர்னல், செய்தித்தாள் மற்றும் செய்தித்தாள் கட்டுரைகளை மேற்கோள் காட்டும்போது சோட்டெரோ முகவரிகளை உள்ளடக்கியது.">
+
+<!ENTITY zotero.preferences.quickCopy.caption				"விரைவான நகல்">
+<!ENTITY zotero.preferences.quickCopy.itemFormat       		"உருப்படி வடிவம்:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat       		"குறிப்பு வடிவம்:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML			"உஉகுமொ ஆக நகலெடுக்கவும்">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings 	"தளம் சார்ந்த அமைப்புகள்:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "தளம்/பாதை">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(எ.கா., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format    "வடிவம்">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale		"மொழி">
+<!ENTITY zotero.preferences.quickCopy.dragLimit			 "விட அதிகமாக இழுக்கும்போது விரைவான நகலை முடக்கு">
+
+<!ENTITY zotero.preferences.prefpane.cite					"மேற்கோள்">
+<!ENTITY zotero.preferences.cite.styles			"பாணிகள்">
+<!ENTITY zotero.preferences.cite.wordProcessors	"சொல் செயலிகள்">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog		"பழமையான சேர் மேற்கோள் உரையாடலைப் பயன்படுத்தவும்">
+<!ENTITY zotero.preferences.styleEditor                  "பாணி ஆசிரியர்">
+<!ENTITY zotero.preferences.stylePreview                 "பாணி முன்னோட்டம்">
+
+<!ENTITY zotero.preferences.cite.styles.styleManager				"பாணி மேலாளர்">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title		"தலைப்பு">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated		"புதுப்பிக்கப்பட்டது">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl		"சிஎச்எல்">
+<!ENTITY zotero.preferences.export.getAdditionalStyles			"கூடுதல் பாணிகளைப் பெறுங்கள்…">
+
+<!ENTITY zotero.preferences.keys.saveToZotero "சோட்டெரோவைச் சேமி (முகவரி பட்டி சின்னம்)">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane		"நூலகங்கள் பலகம் மீது கவனம் செலுத்து">
+<!ENTITY zotero.preferences.keys.quicksearch				"விரைவு தேடல்">
+<!ENTITY zotero.preferences.keys.newItem					"புதிய உருப்படியை உருவாக்கவும்">
+<!ENTITY zotero.preferences.keys.newNote					"புதிய குறிப்பை உருவாக்கவும்">
+<!ENTITY zotero.preferences.keys.toggleAllRead				"அனைத்து ஊட்ட உருப்படிகளையும் படித்தாக/படிக்காததாகக் குறிக்கவும்">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard		"தேர்ந்தெடுக்கப்பட்ட உருப்படி மேற்கோள்களை இடைநிலைபலகைக்கு நகலெடுக்கவும்">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"தேர்ந்தெடுக்கப்பட்ட உருப்படிகளை இடைநிலைபலகைக்கு நகலெடுக்கவும்">
+<!ENTITY zotero.preferences.keys.importFromClipboard		"இடைநிலைபலகையிலிருந்து இறக்குமதி">
+<!ENTITY zotero.preferences.keys.changesTakeEffect             "மறுதொடக்கம் செய்த பிறகு மாற்றங்கள் நடைமுறைக்கு வருகின்றன">
+
+<!ENTITY zotero.preferences.prefpane.proxies				"பதிலாள்கள்">
+
+<!ENTITY zotero.preferences.proxies.proxyOptions			"பதிலாள் விருப்பங்கள்">
+<!ENTITY zotero.preferences.proxies.desc_before_link		"சேமிக்கப்பட்ட பதிலாள்கள் மூலம் சோட்டெரோ கோரிக்கைகளை வெளிப்படையாக திருப்பிவிடும். பார்க்க">
+<!ENTITY zotero.preferences.proxies.desc_link				"பதிலாள் ஆவணம்">
+<!ENTITY zotero.preferences.proxies.desc_after_link 		"மேலும் தகவலுக்கு.">
+<!ENTITY zotero.preferences.proxies.transparent				"பதிலாள் திசைதிருப்பலை இயக்கவும்">
+<!ENTITY zotero.preferences.proxies.autoRecognize			"பதிலாள் வளங்களை தானாக அங்கீகரிக்கவும்">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"பதிலாள் மூலம் திருப்பிவிடும்போது அறிவிப்பைக் காட்டுங்கள்">
+<!ENTITY zotero.preferences.proxies.disableByDomain			"எனது தளம் பெயர் இருக்கும்போது பதிலாள் திருப்பிவிடுவதை முடக்கு">
+<!ENTITY zotero.preferences.proxies.configured				"கட்டமைக்கப்பட்ட பதிலாள்கள்">
+<!ENTITY zotero.preferences.proxies.hostname				"புரவலன்பெயர்">
+<!ENTITY zotero.preferences.proxies.scheme					"திட்டம்">
+
+<!ENTITY zotero.preferences.proxies.multiSite				"பல தளங்கள்">
+<!ENTITY zotero.preferences.proxies.autoAssociate			"புதிய புரவலன்களை தானாக இணைக்கவும்">
+<!ENTITY zotero.preferences.proxies.variables				"உங்கள் பதிலாள் திட்டத்தில் பின்வரும் மாறிகளைப் பயன்படுத்தலாம்:">
+<!ENTITY zotero.preferences.proxies.h_variable				"&#37;h - பதிலாள் தளத்தின் புரவலன்பெயர் (எ.கா., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable				"&#37;p - பதிலாள் பக்கத்தின் பாதை முன் சாய்வுகோடு தவிர (எ.கா., பற்றி/அட்டவணை.html)">
+<!ENTITY zotero.preferences.proxies.d_variable				"&#37;d - அடைவு பாதை (எ.கா., பற்றி/)">
+<!ENTITY zotero.preferences.proxies.f_variable				"&#37;f - கோப்பு பெயர் (i.n., அட்டவணை.html)">
+<!ENTITY zotero.preferences.proxies.a_variable				"&#37;a - எந்த சரம்">
+
+<!ENTITY zotero.preferences.prefpane.advanced				"மேம்பட்ட">
+<!ENTITY zotero.preferences.advanced.filesAndFolders		"கோப்புகள் மற்றும் கோப்புறைகள்">
+<!ENTITY zotero.preferences.advanced.keys					"குறுக்குவழிகள்">
+
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "மேம்பட்ட உள்ளமைவு">
+
+<!ENTITY zotero.preferences.prefpane.locate					"கண்டுபிடி">
+<!ENTITY zotero.preferences.locate.locateEngineManager		"கட்டுரை தேடல் இயந்திர மேலாளர்">
+<!ENTITY zotero.preferences.locate.description				"விவரம்">
+<!ENTITY zotero.preferences.locate.name						"பெயர்">
+<!ENTITY zotero.preferences.locate.addDescription			"பட்டியலில் இல்லாத ஒரு தேடல் இயந்திரத்தைச் சேர்க்க, உங்கள் உலாவியில் விரும்பிய தேடுபொறியைப் பார்வையிட்டு, சோடெரோவின் இடம் மெனுவிலிருந்து “சேர்” என்பதைத் தேர்ந்தெடுக்கவும்.">
+<!ENTITY zotero.preferences.locate.restoreDefaults			"இயல்புநிலைகளை மீட்டெடுங்கள்">
+
+<!ENTITY zotero.preferences.charset							"எழுத்து குறியாக்கம்">
+<!ENTITY zotero.preferences.charset.importCharset			"எழுத்துக்குறி குறியாக்கத்தை இறக்குமதி செய்">
+<!ENTITY zotero.preferences.charset.displayExportOption		"ஏற்றுமதியில் எழுத்துக்குறி குறியாக்க விருப்பத்தைக் காண்பி">
+
+<!ENTITY zotero.preferences.dataDir						"தரவு அடைவு இருப்பிடம்">
+<!ENTITY zotero.preferences.dataDir.useProfile			"சுயவிவர கோப்பகத்தைப் பயன்படுத்தவும்">
+<!ENTITY zotero.preferences.dataDir.custom				"வழக்கம்:">
+<!ENTITY zotero.preferences.dataDir.choose				"தேர்வு…">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine        "(கட்டளை வரி வழியாக குறிப்பிடப்பட்டுள்ளது)">
+<!ENTITY zotero.preferences.dataDir.reveal				"தரவு கோப்பகத்தைக் காட்டு">
+<!ENTITY zotero.preferences.dataDir.migrate               "புதிய இயல்புநிலை இருப்பிடத்திற்கு இடம்பெயரவும்…">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption        "இணைக்கப்பட்ட இணைப்பு அடிப்படை அடைவு">
+<!ENTITY zotero.preferences.attachmentBaseDir.message        "அடிப்படை கோப்பகத்திற்குள் இணைக்கப்பட்ட கோப்பு இணைப்புகளுக்கான உறவினர் பாதைகளை சோட்டெரோ பயன்படுத்தும், இது அடிப்படை கோப்பகத்திற்குள் உள்ள கோப்பு அமைப்பு ஒரே மாதிரியாக இருக்கும் வரை வெவ்வேறு கணினிகளில் கோப்புகளை அணுக அனுமதிக்கிறது.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath       "அடிப்படை அடைவு:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "தேர்வு…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath  "முழுமையான பாதைகளுக்கு திரும்பவும்…">
+
+<!ENTITY zotero.preferences.dbMaintenance							"தரவுத்தள பராமரிப்பு">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"தரவுத்தள ஒருமைப்பாட்டை சரிபார்">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles	"மொழிபெயர்ப்பாளர்கள் மற்றும் பாணிகளை மீட்டமை…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators				"மொழிபெயர்ப்பாளர்களை மீட்டமை…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles					"பாணிகளை மீட்டமை…">
+
+<!ENTITY zotero.preferences.configEditor                 "கட்டமைப்பு ஆசிரியர்">

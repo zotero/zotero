@@ -1,0 +1,19 @@
+<!ENTITY zotero.publications.my_publications "எனது வெளியீடுகள்">
+
+<!ENTITY zotero.publications.intro "எனது வெளியீடுகளில் நீங்கள் சேர்க்கும் உருப்படிகள் உங்கள் சுயவிவரப் பக்கத்தில் சோட்டெரோ.நிறுவ இல் காண்பிக்கப்படும். இணைக்கப்பட்ட கோப்புகளைச் சேர்க்க நீங்கள் தேர்வுசெய்தால், அவை நீங்கள் குறிப்பிடும் உரிமத்தின் கீழ் பொதுவில் கிடைக்கும். நீங்களே உருவாக்கிய வேலையை மட்டுமே சேர்க்கவும், அவற்றை விநியோகிப்பதற்கான உரிமைகள் இருந்தால் மட்டுமே கோப்புகளைச் சேர்க்கவும், அவ்வாறு செய்ய விரும்பினால்.">
+<!ENTITY zotero.publications.include.checkbox.files "கோப்புகளைச் சேர்க்கவும்">
+<!ENTITY zotero.publications.include.checkbox.notes "குறிப்புகளைச் சேர்க்கவும்">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "எனது வெளியீடுகள் சேகரிப்பிலிருந்து எந்த நேரத்திலும் என்ன காட்ட வேண்டும் என்பதை நீங்கள் சரிசெய்யலாம்.">
+
+<!ENTITY zotero.publications.sharing.title "உங்கள் பணி எவ்வாறு பகிரப்படலாம் என்பதைத் தேர்வுசெய்க">
+<!ENTITY zotero.publications.sharing.text "உங்கள் பணிக்கான அனைத்து உரிமைகளையும் நீங்கள் முன்பதிவு செய்யலாம், படைப்பாற்றல் பொது உரிமத்தின் கீழ் உரிமம் வழங்கலாம் அல்லது பொது களத்தில் அர்ப்பணிக்கலாம். எல்லா சந்தர்ப்பங்களிலும், சோட்டெரோ.நிறுவ வழியாக பணிகள் பகிரங்கமாகக் கிடைக்கும்.">
+<!ENTITY zotero.publications.sharing.prompt "உங்கள் வேலையை மற்றவர்களால் பகிர அனுமதிக்க விரும்புகிறீர்களா?">
+<!ENTITY zotero.publications.sharing.cc "ஆம், படைப்பாற்றல் பொது உரிமத்தின் கீழ்">
+<!ENTITY zotero.publications.sharing.cc0 "ஆம், எனது வேலையை பொது களத்தில் வைக்கவும்">
+<!ENTITY zotero.publications.sharing.reserved "இல்லை, சோட்டெரோ.நிறுவ இல் எனது படைப்புகளை மட்டும் வெளியிடுங்கள்">
+
+<!ENTITY zotero.publications.chooseLicense.title "ஒரு படைப்பாற்றல் பொது உரிமம் தேர்ந்தேடு"> 
+<!ENTITY zotero.publications.chooseLicense.text "ஒரு படைப்பாற்றல் பொது உரிமம் மற்றவர்கள் உங்கள் வேலையை பொருத்தமான கடன் வழங்கும் வரை, உரிமத்திற்கான இணைப்பை வழங்கவும், மாற்றங்கள் செய்யப்பட்டுள்ளதா என்பதைக் குறிக்கவும் உங்கள் வேலையை நகலெடுத்து மறுபகிர்வு செய்ய அனுமதிக்கிறது. கூடுதல் நிபந்தனைகளை கீழே குறிப்பிடலாம்.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "உங்கள் வேலையின் தழுவல்களை பகிர அனுமதிக்கவா?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "ஆம், மற்றவர்கள் ஒரே மாதிரியாக பகிர்ந்து கொள்ளும் வரை">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "உங்கள் வேலையின் வணிக பயன்பாடுகளை அனுமதிக்கவா?">

@@ -1,0 +1,13 @@
+<!ENTITY zotero.version		"பதிப்பு">
+<!ENTITY zotero.whatsNew "புதியது என்ன">
+<!ENTITY zotero.createdby		"உருவாக்கியவர்:">
+<!ENTITY zotero.director		"இயக்குனர்:">
+<!ENTITY zotero.directors		"இயக்குநர்கள்:">
+<!ENTITY zotero.developers		"உருவாக்குபவர்கள்:">
+<!ENTITY zotero.alumni			"பழைய மாணவர்கள்:">
+<!ENTITY zotero.about.localizations	"உள்ளூர்மயமாக்கல்கள்:">
+<!ENTITY zotero.about.additionalSoftware	"மூன்றாம் தரப்பு மென்பொருள்:">
+<!ENTITY zotero.thanks			"சிறப்பு நன்றி:">
+<!ENTITY zotero.about.close	"மூடு">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "மேலும் வரவுகளை &amp; ஒப்புதல்கள்">
+<!ENTITY zotero.citationProcessing	"மேற்கோள் &amp;  நூலியல் செயலாக்கம்">

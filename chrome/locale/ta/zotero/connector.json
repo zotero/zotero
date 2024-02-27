@@ -1,0 +1,194 @@
+{
+    "general_more": {
+        "message": "மேலும்…",
+        "description": ""
+    },
+    "general_moreInfo": {
+        "message": "மேலும் தகவல்…",
+        "description": ""
+    },
+    "general_needHelp": {
+        "message": "உதவி தேவை?",
+        "description": ""
+    },
+    "general_done": {
+        "message": "முடிந்தது",
+        "description": ""
+    },
+    "general_yes": {
+        "message": "ஆம்",
+        "description": ""
+    },
+    "general_no": {
+        "message": "இல்லை",
+        "description": ""
+    },
+    "general_tryAgain": {
+        "message": "மீண்டும் முயற்சி வெற்றி",
+        "description": ""
+    },
+    "general_warning": {
+        "message": "எச்சரிக்கை",
+        "description": ""
+    },
+    "general_cancel": {
+        "message": "ரத்துசெய்",
+        "description": ""
+    },
+    "general_pleaseWait": {
+        "message": "தயவுசெய்து காத்திருங்கள்…",
+        "description": ""
+    },
+    "general_copyToClipboard": {
+        "message": "கிளிப்போர்டுக்கு நகலெடுக்கவும்",
+        "description": ""
+    },
+    "progressWindow_savingTo": {
+        "message": "சேமித்தல்",
+        "description": ""
+    },
+    "progressWindow_tagPlaceholder": {
+        "message": "குறிச்சொற்கள் (காற்புள்ளிகளால் பிரிக்கப்பட்டன)",
+        "description": ""
+    },
+    "progressWindow_error_translation": {
+        "message": "இந்த உருப்படியைச் சேமிக்கும்போது பிழை ஏற்பட்டது. மேலும் தகவலுக்கு $ 1 ஐப் பார்க்கவும்.",
+        "description": ""
+    },
+    "progressWindow_error_siteAccessLimitsError": {
+        "message": "இந்த உருப்படியைச் சேமிக்கும்போது பிழை ஏற்பட்டது. $1 நீங்கள் ஒரே நேரத்தில் சேமிக்கக்கூடிய பொருட்களின் எண்ணிக்கையை கட்டுப்படுத்தலாம். மேலும் தகவலுக்கு $2 ஐப் பார்க்கவும்.",
+        "description": "The placeholders are for the failing translator label (e.g., Google Scholar) and the Site Access Limits link"
+    },
+    "progressWindow_error_troubleshootingTranslatorIssues": {
+        "message": "சரிசெய்தல் மொழிபெயர்ப்பாளர் சிக்கல்கள்",
+        "description": ""
+    },
+    "progressWindow_error_siteAccessLimits": {
+        "message": "தள அணுகல் வரம்புகள்",
+        "description": ""
+    },
+    "progressWindow_error_fallback": {
+        "message": "பிழை $1 உடன் சேமித்தது. அதற்கு பதிலாக $2 ஐப் பயன்படுத்தி சேமிக்க முயற்சிக்கிறது.",
+        "description": "The placeholders will contain the names of Zotero translators (e.g., JSTOR or Embedded Metadata)."
+    },
+    "progressWindow_error_upgradeClient": {
+        "message": "இந்த நற்பொருத்தம் உங்கள் $1 பதிப்பால் ஆதரிக்கப்படவில்லை. தயவுசெய்து $2 க்கு மேம்படுத்தவும்.",
+        "description": "$2 will be a link with the localized text 'latest version'."
+    },
+    "progressWindow_error_upgradeClient_latestVersion": {
+        "message": "அண்மைக் கால பதிப்பு",
+        "description": ""
+    },
+    "appConnector": {
+        "message": "$ 1 இணைப்பு",
+        "description": ""
+    },
+    "upgradeApp": {
+        "message": "மேம்படுத்தவும் $1",
+        "description": ""
+    },
+    "firstRun_title": {
+        "message": "நீங்கள் $1 இணைப்பியை நிறுவியுள்ளீர்கள்!",
+        "description": ""
+    },
+    "firstRun_text1": {
+        "message": "$1 இணைப்பான் உங்களுக்கு <a href=\"$2\"> உங்கள் உலாவியில் இருந்து ஒரே கிளிக்கில் உருப்படிகளை $ 1 </a> க்கு சேமிக்க உதவுகிறது.",
+        "description": ""
+    },
+    "firstRun_text2": {
+        "message": "நீங்கள் இன்னும் <a href=\"$2\"> பதிவிறக்கம் </a> செய்யவில்லையென்றால், சிறந்த அனுபவத்திற்கான முழுமையான $1 பயன்பாடு.",
+        "description": ""
+    },
+    "firstRun_acceptButton": {
+        "message": "அறிந்துகொண்டேன்",
+        "description": "The Accept button for the first-run dialog"
+    },
+    "error_connection_isAppRunning": {
+        "message": "$1 இயங்குகிறதா?",
+        "description": ""
+    },
+    "error_connection_save": {
+        "message": "$1 இதால் $2 டெச்க்டாப் பயன்பாட்டுடன் தொடர்பு கொள்ள முடியவில்லை. இணைப்பு உங்கள் $3 கணக்கிற்கு சில பக்கங்களை நேரடியாக சேமிக்க முடியும், ஆனால் சிறந்த முடிவுகளுக்கு சேமிக்க முயற்சிக்கும் முன் $2 திறந்திருப்பதை உறுதிசெய்ய வேண்டும்.",
+        "description": "$1 will contain the localized string 'Zotero Connector'. $2 will contain the app name. $3 will contain the domain name."
+    },
+    "error_connection_downloadOrTroubleshoot": {
+        "message": "நீங்கள் <a href=\"$1\"> பதிவிறக்கம் $2 </a> அல்லது <a href=\"$3\"> இணைப்பை சரிசெய்யவும் </a> தேவைப்பட்டால்.",
+        "description": ""
+    },
+    "error_connection_enableSavingToOnlineLibrary": {
+        "message": "நிகழ்நிலை நூலகத்திற்கு சேமிப்பதை இயக்கவும்",
+        "description": ""
+    },
+    "reports_report_submitted": {
+        "message": "உங்கள் பிழை அறிக்கை சமர்ப்பிக்கப்பட்டுள்ளது.\n\nஅறிக்கை அடையாலம்: $1\n\n மன்றங்களில் குறிப்பிடப்படாவிட்டால் மதிப்பாய்வு செய்யப்படாது.\n\nபிழை அறிக்கைகள் மன்றங்களில் குறிப்பிடபடவில்லை எனில் மதிப்பாய்வு செய்யபடாது",
+        "description": ""
+    },
+    "reports_debug_output_submitted": {
+        "message": "உங்கள் பிழைத்திருத்த வெளியீடு சமர்ப்பிக்கப்பட்டுள்ளது. \n\n பிழைத்திருத்த ஐடி $1 ஆகும்.",
+        "description": ""
+    },
+    "reports_submission_failed": {
+        "message": "உங்கள் அறிக்கையைச் சமர்ப்பிப்பதில் பிழை ஏற்பட்டது.\n\n$1\n\n இணைய தொடர்பை சரிபார்க்கவும். சிக்கல் தொடர்ந்தால், சோட்டெரோ மன்றங்களுக்கு ஒரு செய்தியை இடுங்கள்.",
+        "description": "$1 will be the error message sent to the Zotero servers"
+    },
+    "integration_error_clientUpgrade": {
+        "message": "இணைய அடிப்படையிலான மேற்கோளுக்கு $1 அல்லது அதற்குப் பிறகு தேவை.",
+        "description": ""
+    },
+    "integration_error_connection": {
+        "message": "$1 டெச்க்டாப் பயன்பாட்டுடன் தொடர்பு கொள்ள முடியவில்லை. வலை அடிப்படையிலான மேற்கோளைப் பயன்படுத்த $2 திறந்திருக்க வேண்டும்.",
+        "description": "$1 will be the localized string for the extension (e.g., Zotero Connector). $2 will be the app name (e.g., Zotero)."
+    },
+    "integration_googleDocs_unlinkBeforeSaving_warning": {
+        "message": "இந்த ஆவணத்தில் செயலில் உள்ள சோட்டெரோ மேற்கோள்கள் உள்ளன, அவை பதிவிறக்கம் செய்யப்பட்ட நகலில் zotero.org இணைப்புகளாகத் தோன்றும்.",
+        "description": ""
+    },
+    "integration_googleDocs_unlinkBeforeSaving_instructions": {
+        "message": "பகிர்வுக்கு ஏற்ற ஒரு பதிப்பை உருவாக்க, <b> ஒரு நகலை உருவாக்கவும்… </b> கோப்பு மெனுவிலிருந்து, புதிய ஆவணத்தில் உள்ள சோடெரோ மெனுவிலிருந்து <b> ஐ அவென்ரி மேற்கோள்கள் </b> ஐத் தேர்ந்தெடுக்கவும், பின்னர் இணைக்கப்படாத பதிப்பைப் பதிவிறக்கவும் . மேலும் மாற்றங்களைச் செய்ய வேண்டியிருந்தால் இந்த அசல் இணைக்கப்பட்ட ஆவணத்தை வைத்திருங்கள்.",
+        "description": ""
+    },
+    "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+        "message": "இணைக்கப்பட்ட பதிப்பை எப்படியும் பதிவிறக்கவும்",
+        "description": ""
+    },
+    "integration_googleDocs_updating": {
+        "message": "$1 உங்கள் ஆவணத்தை புதுப்பிக்கிறது.",
+        "description": ""
+    },
+    "integration_googleDocs_docxAlert": {
+        "message": "microsoft நுண்மென் வேர்ட் .docx கோப்புகளை நேரடியாக கூகிள் டாக்சில் திருத்தும்போது ஒருங்கிணைப்பு கிடைக்காது. இந்தச் செயல்பாட்டை இயக்க google டாக்சாக சேமிக்கவும் கோப்பைத் தேர்வுசெய்க. see <a href=\"https://www.zoteroorg/support/kb/moving_documents_between_word_processors\"> சொல் செயலிகளுக்கு இடையில் நகரும் ஆவணங்கள் </a>.",
+        "description": ""
+    },
+    "integration_googleDocs_documentLocked": {
+        "message": "ஆவண மேற்கோள்கள் மற்றொரு $1 பயனரால் திருத்தப்படுகின்றன. தயவுசெய்து பின்னர் மீண்டும் முயற்சிக்கவும்.",
+        "description": ""
+    },
+    "integration_googleDocs_documentLocked_moreInfo": {
+        "message": "பல பயனர்கள் ஒரே நேரத்தில் மேற்கோள்களைத் திருத்துவதைத் தடுக்க $1 உங்கள் ஆவணத்தை பூட்டுகிறது. ஆவணத்தில் ஒரே நேரத்தில் மேற்கோள் திருத்துதல் மேற்கோள் அல்லது ஆவண ஊழலுக்கு வழிவகுக்கும். பிணையம் தோல்விகள் போன்ற சில எதிர்பாராத சூழ்நிலைகள் உங்கள் ஆவணம் நிரந்தரமாக பூட்டப்படுவதற்கு வழிவகுக்கும். இது நடந்தது என்று நீங்கள் நம்பினால், நீங்கள் பூட்டை மேலெழுதலாம். <br/> <br/> ஆவண பூட்டை மீற விரும்புகிறீர்களா?",
+        "description": ""
+    },
+    "integration_googleDocs_documentPermissionError": {
+        "message": "நீங்கள் தேர்ந்தெடுத்த google கணக்கில் இந்த ஆவணத்தைத் திருத்த இசைவு இல்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும், திருத்துதல் அணுகலுடன் கணக்கைத் தேர்வுசெய்யவும்.",
+        "description": ""
+    },
+    "integration_googleDocs_orphanedCitations_buttonTooltip": {
+        "message": "இணைக்கப்படாத $1 மேற்கோள்களைக் காட்டு",
+        "description": ""
+    },
+    "integration_googleDocs_orphanedCitations_alert": {
+        "message": "நீங்கள் திருத்த முயற்சிக்கும் மேற்கோள் $ 1 இலிருந்து இணைக்கப்படவில்லை.",
+        "description": ""
+    },
+    "integration_googleDocs_orphanedCitations_alertButton": {
+        "message": "மறுபரிசீலனை மேற்கோள்",
+        "description": ""
+    },
+    "integration_googleDocs_orphanedCitations_disclaimer": {
+        "message": "இந்த மேற்கோள்கள் <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\"> $1 இலிருந்து திறந்து வைக்கப்படவில்லை. அவை உங்கள் நூலியல் புதுப்பிப்பதில் அல்லது தோன்றுவதற்கு முன்பு அவற்றை மறுபரிசீலனை செய்ய வேண்டும்.",
+        "description": ""
+    },
+    "general_saveTo": {
+        "message": "$1 என சேமிக்கவும்",
+        "description": ""
+    }
+}

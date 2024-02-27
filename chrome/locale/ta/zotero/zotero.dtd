@@ -1,0 +1,337 @@
+﻿<!ENTITY zotero.general.yes                               "ஆம்">
+<!ENTITY zotero.general.no                                "இல்லை">
+<!ENTITY zotero.general.optional							"(விரும்பினால்)">
+<!ENTITY zotero.general.note								"குறிப்பு:">
+<!ENTITY zotero.general.selectAll							"அனைத்தையும் தெரிவுசெய்">
+<!ENTITY zotero.general.deselectAll						"அனைத்து தெரிவுகளையும் நிராகரி">
+<!ENTITY zotero.general.edit								"தொகு">
+<!ENTITY zotero.general.delete 								"அழி">
+<!ENTITY zotero.general.moveToTrash                       "குப்பைக்கு நகர்த்தவும்">
+<!ENTITY zotero.general.ok								"சரி">
+<!ENTITY zotero.general.cancel								"ரத்துசெய்">
+<!ENTITY zotero.general.refresh								"புதுப்பிப்பு">
+<!ENTITY zotero.general.saveAs								"என சேமி...">
+<!ENTITY zotero.general.options                            "விருப்பங்கள்">
+<!ENTITY zotero.general.advancedOptions.label				"மேம்பட்ட விருப்பங்கள்">
+<!ENTITY zotero.general.tools                             "கருவிகள்">
+<!ENTITY zotero.general.more                              "மேலும்">
+<!ENTITY zotero.general.moreInformation                   "மேலும் செய்தி">
+<!ENTITY zotero.general.loading "ஏற்றுகிறது…">
+<!ENTITY zotero.general.close                              "மூடு">
+<!ENTITY zotero.general.minimize                           "குறைக்கவும்">
+<!ENTITY zotero.general.other                              "மற்றொன்று…">
+<!ENTITY zotero.general.bigger                             "பெரியது">
+<!ENTITY zotero.general.smaller                            "சிறிய">
+<!ENTITY zotero.general.reset                              "மீட்டமை">
+
+
+<!ENTITY zotero.errorReport.title							"சோட்டெரோ பிழை அறிக்கை">
+<!ENTITY zotero.errorReport.submissionInProgress			"பிழை அறிக்கை சமர்ப்பிக்கப்படும் போது காத்திருங்கள்.">
+<!ENTITY zotero.errorReport.submitted						"உங்கள் பிழை அறிக்கை சமர்ப்பிக்கப்பட்டுள்ளது.">
+<!ENTITY zotero.errorReport.reportID						"அறிக்கை அடையாளம்:">
+<!ENTITY zotero.errorReport.postToForums					"இந்த அறிக்கை அடையாளம், சிக்கலின் விளக்கம் மற்றும் அதை இனப்பெருக்கம் செய்ய தேவையான எந்த படிகளும் மூலம் சோட்டெரோ மன்றங்களுக்கு (forums.zotero.org) ஒரு செய்தியை இடுங்கள்.">
+<!ENTITY zotero.errorReport.notReviewed					"மன்றங்களில் குறிப்பிடப்படாவிட்டால் பிழை அறிக்கைகள் மதிப்பாய்வு செய்யப்படாது.">
+
+<!ENTITY zotero.upgrade.title							"சோட்டெரோ மேம்படுத்தல் வழிகாட்டி">
+<!ENTITY zotero.upgrade.newVersionInstalled				"நீங்கள் சோட்டெரோவின் புதிய பதிப்பை நிறுவியுள்ளீர்கள்.">
+<!ENTITY zotero.upgrade.upgradeRequired					"உங்கள் சோட்டெரோ தரவுத்தளத்தை புதிய பதிப்போடு பணிபுரிய மேம்படுத்த வேண்டும்.">
+<!ENTITY zotero.upgrade.autoBackup							"ஏதேனும் மாற்றங்கள் செய்யப்படுவதற்கு முன்பு உங்கள் இருக்கும் தரவுத்தளம் தானாகவே காப்புப் பிரதி எடுக்கப்படும்.">
+<!ENTITY zotero.upgrade.majorUpgrade						"இது ஒரு பெரிய மேம்படுத்தல்.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink				"நீங்கள் மதிப்பாய்வு செய்துள்ளீர்கள் என்பதை உறுதிப்படுத்திக் கொள்ளுங்கள்">
+<!ENTITY zotero.upgrade.majorUpgradeLink					"வழிமுறைகளை மேம்படுத்தவும்">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink				"தொடர்வதற்கு முன்.">
+<!ENTITY zotero.upgrade.upgradeInProgress					"மேம்படுத்தல் செயல்முறை முடிவடையும் வரை காத்திருங்கள். இதற்கு சில நிமிடங்கள் ஆகலாம்.">
+<!ENTITY zotero.upgrade.upgradeSucceeded					"உங்கள் சோட்டெரோ தரவுத்தளம் வெற்றிகரமாக மேம்படுத்தப்பட்டுள்ளது.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink				"தயவுசெய்து பார்க்கவும்">
+<!ENTITY zotero.upgrade.changeLogLink						"சேஞ்ச்லாக்">
+<!ENTITY zotero.upgrade.changeLogAfterLink					"புதியது என்ன என்பதைக் கண்டுபிடிக்க.">
+
+<!ENTITY zotero.tabs.info.label						"தகவல்">
+<!ENTITY zotero.tabs.notes.label						"குறிப்புகள்">
+<!ENTITY zotero.tabs.attachments.label					"இணைப்புகள்">
+<!ENTITY zotero.tabs.tags.label						"குறிச்சொற்கள்">
+<!ENTITY zotero.tabs.related.label						"தொடர்புடைய">
+
+<!ENTITY zotero.toolbar.duplicate.label				"நகல்களைக் காட்டு">
+<!ENTITY zotero.collections.showUnfiledItems			"உடைக்கப்படாத பொருட்களைக் காட்டு">
+<!ENTITY zotero.collections.showRetractedItems        "பின்வாங்கிய உருப்படிகளைக் காட்டு">
+
+<!ENTITY zotero.items.itemType							"உருப்படி வகை">
+<!ENTITY zotero.items.creator_column					"உருவாக்கியவர்">
+<!ENTITY zotero.items.year_column						"ஆண்டு">
+<!ENTITY zotero.items.dateModified_column				"தேதி மாற்றியமைக்கப்பட்டது">
+<!ENTITY zotero.items.moreColumns.label					"மேலும் நெடுவரிசைகள்">
+<!ENTITY zotero.items.restoreColumnOrder.label			"நெடுவரிசை வரிசையை மீட்டமைக்கவும்">
+
+<!ENTITY zotero.items.menu.showInLibrary					"நூலகத்தில் காண்பி">
+<!ENTITY zotero.items.menu.attach.note					"குறிப்பு சேர்க்க">
+<!ENTITY zotero.items.menu.attach						"இணைப்பை சேர்">
+<!ENTITY zotero.items.menu.attach.link.uri				"முகவரி உடன் இணைப்பை இணைக்கவும்…">
+<!ENTITY zotero.items.menu.attach.file					"கோப்பின் சேமிக்கப்பட்ட நகலை இணைக்கவும்…">
+<!ENTITY zotero.items.menu.attach.fileLink				"கோப்பில் இணைப்பை இணைக்கவும்…">
+
+<!ENTITY zotero.items.menu.restoreToLibrary				"நூலகத்திற்கு மீட்டமைக்கவும்">
+<!ENTITY zotero.items.menu.duplicateItem					"நகல் உருப்படி">
+<!ENTITY zotero.items.menu.mergeItems					"உருப்படிகளை ஒன்றிணைக்கவும்…">
+<!ENTITY zotero.items.menu.unrecognize                "மெட்டாடேட்டாவை மீட்டெடுக்கவும்">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect			"முதன்மை உருப்படியாக பயன்படுத்த உருப்படியின் பதிப்பைத் தேர்வுசெய்க:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect				"உருப்படியின் பிற பதிப்புகளிலிருந்து வைத்திருக்க புலங்களைத் தேர்ந்தெடுக்கவும்:">
+
+<!ENTITY zotero.toolbar.newItem.label					"புதிய பொருள்">
+<!ENTITY zotero.toolbar.moreItemTypes.label			"மேலும்">
+<!ENTITY zotero.toolbar.lookup.label				"அடையாளங்காட்டி மூலம் உருப்படி(களை) சேர்">
+<!ENTITY zotero.toolbar.removeItem.label				"உருப்படியை அகற்று…">
+<!ENTITY zotero.toolbar.newLibrary.label			"புதிய நூலகம்">
+<!ENTITY zotero.toolbar.newCollection.label			"புதிய தொகுப்பு…">
+<!ENTITY zotero.toolbar.newGroup						"புதிய குழு…">
+<!ENTITY zotero.toolbar.newSubcollection.label			"புதிய துணைக்குழு…">
+<!ENTITY zotero.toolbar.newSavedSearch.label			"புதிய சேமித்த தேடல்…">
+<!ENTITY zotero.toolbar.emptyTrash.label				"வெற்று குப்பை">
+<!ENTITY zotero.toolbar.tagSelector.label			"குறிச்சொல் தேர்வாளரைக் காட்டு/மறைக்கவும்">
+<!ENTITY zotero.toolbar.actions.label					"செயல்கள்">
+<!ENTITY zotero.toolbar.import.label					"இறக்குமதி…">
+<!ENTITY zotero.toolbar.importFromClipboard			"கிளிப்போர்டிலிருந்து இறக்குமதி">
+<!ENTITY zotero.toolbar.export.label					"ஏற்றுமதி நூலகம்…">
+<!ENTITY zotero.toolbar.rtfScan.label					"உஉவ வருடல்">
+<!ENTITY zotero.toolbar.timeline.label				"காலவரிசையை உருவாக்கவும்">
+<!ENTITY zotero.toolbar.preferences.label				"விருப்பத்தேர்வுகள்…">
+<!ENTITY zotero.toolbar.supportAndDocumentation		"உதவி மற்றும் ஆவணங்கள்">
+<!ENTITY zotero.toolbar.about.label					"சோட்டெரோ பற்றி">
+<!ENTITY zotero.toolbar.advancedSearch				"மேம்பட்ட தேடல்">
+<!ENTITY zotero.toolbar.openURL.label					"கண்டுபிடி">
+<!ENTITY zotero.toolbar.openURL.tooltip				"உங்கள் உள்ளக நூலகம் மூலம் கண்டுபிடிக்கவும்">
+
+<!ENTITY zotero.toolbar.feeds.new					"புதிய ஊட்டம்">
+<!ENTITY zotero.toolbar.feeds.new.fromURL			"முகவரி இலிருந்து…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML			"ஒபிஎம்எல் இலிருந்து…">
+<!ENTITY zotero.toolbar.feeds.edit					"ஊட்டத்தைத் திருத்து…">
+
+<!ENTITY zotero.item.add								"கூட்டு">
+<!ENTITY zotero.item.attachment.file.show				"கோப்பைக் காட்டு">
+<!ENTITY zotero.item.textTransform						"உரையை மாற்றவும்">
+<!ENTITY zotero.item.textTransform.titlecase			"தலைப்பு வழக்கு">
+<!ENTITY zotero.item.textTransform.sentencecase			"தண்டனை வழக்கு">
+<!ENTITY zotero.item.creatorTransform.nameSwap      	"முதலில்/கடைசி இடமாற்றம்">
+<!ENTITY zotero.item.creatorTransform.fixCase         "வழக்கு சரிசெய்யவும்">
+<!ENTITY zotero.item.viewOnline							"ஆன்லைனில் காண்க">
+<!ENTITY zotero.item.copyAsURL							"முகவரி ஆக நகலெடுக்கவும்">
+<!ENTITY zotero.item.deletePermanently                 "நிரந்தரமாக நீக்கு…">
+
+<!ENTITY zotero.item.tags.removeAll                 "எல்லா குறிச்சொற்களையும் அகற்று…">
+
+<!ENTITY zotero.toolbar.newNote				"புதிய குறிப்பு">
+<!ENTITY zotero.toolbar.note.standalone				"புதிய முழுமையான குறிப்பு">
+<!ENTITY zotero.toolbar.note.child					"குழந்தை குறிப்பைச் சேர்">
+<!ENTITY zotero.toolbar.lookup						"அடையாளங்காட்டியால் தேடல்…">
+<!ENTITY zotero.toolbar.attachment.linked				"கோப்பிற்கான இணைப்பு…">
+<!ENTITY zotero.toolbar.attachment.add					"கோப்பின் நகலை சேமி…">
+<!ENTITY zotero.toolbar.attachment.weblink				"தற்போதைய பக்கத்திற்கு இணைப்பைச் சேமி">
+<!ENTITY zotero.toolbar.attachment.snapshot			"தற்போதைய பக்கத்தின் திரைப்பிடித்துக் கொள்ளுங்கள்">
+<!ENTITY zotero.toolbar.context.item			"உருப்படி">
+<!ENTITY zotero.toolbar.context.notes			"குறிப்புகள்">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay			"காண்பிக்க குறிச்சொற்கள் இல்லை">
+<!ENTITY zotero.tagSelector.loadingTags            "குறிச்சொற்களை ஏற்றுகிறது…">
+<!ENTITY zotero.tagSelector.showAutomatic			"தானியங்கி காட்டு">
+<!ENTITY zotero.tagSelector.displayAllInLibrary	"இந்த நூலகத்தில் உள்ள அனைத்து குறிச்சொற்களையும் காண்பி">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "இந்த நூலகத்தில் தானியங்கி குறிச்சொற்களை நீக்கு…">
+<!ENTITY zotero.tagSelector.clearAll					"அனைத்து தெரிவுகளையும் நிராகரி">
+<!ENTITY zotero.tagSelector.assignColor              "வண்ணத்தை ஒதுக்கு…">
+<!ENTITY zotero.tagSelector.renameTag				"குறிச்சொல் மறுபெயரிடு…">
+<!ENTITY zotero.tagSelector.deleteTag				"குறிச்சொல்லை நீக்கு…">
+<!ENTITY zotero.tagSelector.splitTag			"பிளவு…">
+
+<!ENTITY zotero.tagColorChooser.title          "குறிச்சொல் வண்ணம் மற்றும் நிலையைத் தேர்வுசெய்க">
+<!ENTITY zotero.tagColorChooser.color          "வண்ணம்:">
+<!ENTITY zotero.tagColorChooser.position       "நிலை:">
+<!ENTITY zotero.tagColorChooser.setColor       "வண்ணத்தை அமைக்கவும்">
+<!ENTITY zotero.tagColorChooser.removeColor    "நிறத்தை அகற்று">
+
+<!ENTITY zotero.lookup.description				"உங்கள் நூலகத்தில் சேர்க்க ஐச்பிஎன், டிஒஐ, பிஎம்ஐடி, அர்சிவ் ஐடிகள் அல்லது எடிச் பிப்குறியை உள்ளிடவும்:">
+<!ENTITY zotero.lookup.button.search				"தேடல்">
+
+<!ENTITY zotero.createParent.title				"பெற்றோர் உருப்படியை உருவாக்கவும்">
+<!ENTITY zotero.createParent.button.manual		"கையேடு நுழைவு">
+
+<!ENTITY zotero.selectitems.title						"உருப்படிகளைத் தேர்ந்தெடுக்கவும்">
+<!ENTITY zotero.selectitems.intro.label				"உங்கள் நூலகத்தில் எந்த உருப்படிகளைச் சேர்க்க விரும்புகிறீர்கள் என்பதைத் தேர்ந்தெடுக்கவும்">
+<!ENTITY zotero.selectitems.cancel.label				"ரத்துசெய்">
+<!ENTITY zotero.selectitems.select.label				"சரி">
+
+<!ENTITY zotero.bibliography.title						"மேற்கோள்/நூலியல் உருவாக்கவும்">
+<!ENTITY zotero.bibliography.style.label				"மேற்கோள் நடை:">
+<!ENTITY zotero.bibliography.manageStyles             "பாணிகளை நிர்வகி…">
+<!ENTITY zotero.bibliography.locale.label				"மொழி:">
+<!ENTITY zotero.bibliography.outputMode				"வெளியீட்டு முறை:">
+<!ENTITY zotero.bibliography.bibliography				"நூலியல்">
+<!ENTITY zotero.bibliography.outputMethod				"வெளியீட்டு முறை:">
+<!ENTITY zotero.bibliography.saveAsRTF.label			"உஉவ ஆக சேமி">
+<!ENTITY zotero.bibliography.saveAsHTML.label			"உஉகுமொ ஆக சேமி">
+<!ENTITY zotero.bibliography.copyToClipboard.label		"கிளிப்போர்டுக்கு நகலெடு">
+<!ENTITY zotero.bibliography.print.label				"அச்சிடுக">
+
+<!ENTITY zotero.integration.docPrefs.title				"ஆவண விருப்பத்தேர்வுகள்">
+<!ENTITY zotero.integration.addEditCitation.title		"மேற்கோளைச் சேர்/திருத்தவும்">
+<!ENTITY zotero.integration.editBibliography.title		"நூலியல் திருத்து">
+<!ENTITY zotero.integration.quickFormatDialog.title		"விரைவான வடிவமைப்பு மேற்கோள்">
+
+<!ENTITY zotero.progress.title							"முன்னேற்றம்">
+
+<!ENTITY zotero.import                                 "இறக்குமதி">
+<!ENTITY zotero.import.whereToImportFrom               "நீங்கள் எங்கிருந்து இறக்குமதி செய்ய விரும்புகிறீர்கள்?">
+<!ENTITY zotero.import.source.file                     "ஒரு கோப்பு (பிப்டெக்ச், ரிச், சோட்டெரோ ஆர்டிஃப், முதலியன)">
+<!ENTITY zotero.import.source.folder                   "எஆவகள் அல்லது பிற கோப்புகளின் கோப்புறை">
+<!ENTITY zotero.import.onlineImport                    "நிகழ்நிலை இறக்குமதி">
+<!ENTITY zotero.import.importing                       "இறக்குமதி…">
+<!ENTITY zotero.import.database                        "தரவுத்தளம்">
+<!ENTITY zotero.import.lastModified                    "கடைசியாக மாற்றப்பட்டது">
+<!ENTITY zotero.import.size                            "அளவு">
+<!ENTITY zotero.import.createCollection                "இறக்குமதி செய்யப்பட்ட சேகரிப்புகள் மற்றும் பொருட்களை புதிய சேகரிப்பில் வைக்கவும்">
+<!ENTITY zotero.import.fileHandling                    "கோப்பு கையாளுதல்">
+<!ENTITY zotero.import.online.newItemsOnly             "புதிய உருப்படிகளை மட்டுமே பதிவிறக்கவும்; முன்னர் இறக்குமதி செய்யப்பட்ட பொருட்களை புதுப்பிக்க வேண்டாம்">
+
+<!ENTITY zotero.exportOptions.title						"ஏற்றுமதி…">
+<!ENTITY zotero.exportOptions.format.label				"வடிவம்:">
+<!ENTITY zotero.exportOptions.translatorOptions.label	"மொழிபெயர்ப்பாளர் விருப்பங்கள்">
+
+<!ENTITY zotero.charset.label							"எழுத்து குறியாக்கம்">
+<!ENTITY zotero.moreEncodings.label						"மேலும் குறியாக்கங்கள்">
+
+<!ENTITY zotero.citation.keepSorted.label				"ஆதாரங்களை வரிசைப்படுத்துங்கள்">
+
+<!ENTITY zotero.citation.suppressAuthor.label			"எழுத்தாளரை ஓப்பு">
+<!ENTITY zotero.citation.prefix.label					"முன்னொட்டு:">
+<!ENTITY zotero.citation.suffix.label					"பின்னொட்டு:">
+<!ENTITY zotero.citation.editorWarning.label  		"எச்சரிக்கை: நீங்கள் திருத்தியில் ஒரு மேற்கோளைத் திருத்தினால், உங்கள் தரவுத்தளத்தில் அல்லது மேற்கோள் பாணியில் ஏற்படும் மாற்றங்களை பிரதிபலிக்க இது இனி புதுப்பிக்காது.">
+
+<!ENTITY zotero.richText.italic.label					"சாய்வு">
+<!ENTITY zotero.richText.bold.label						"தடிமான">
+<!ENTITY zotero.richText.underline.label				"அடிக்கோடிட்டு">
+<!ENTITY zotero.richText.superscript.label				"சூப்பர்கைஉரை">
+<!ENTITY zotero.richText.subscript.label				"சந்தா">
+
+<!ENTITY zotero.annotate.toolbar.add.label				"சிறுகுறிப்பு சேர்">
+<!ENTITY zotero.annotate.toolbar.collapse.label			"அனைத்து சிறுகுறிப்புகளையும் உடைக்கவும்">
+<!ENTITY zotero.annotate.toolbar.expand.label			"அனைத்து சிறுகுறிப்புகளையும் விரிவாக்குங்கள்">
+<!ENTITY zotero.annotate.toolbar.highlight.label		"உரையை முன்னிலைப்படுத்து">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label		"உரையை முன்னிலைப்படுத்தாதே">
+
+<!ENTITY zotero.integration.prefs.displayAs.label		"மேற்கோள்களைக் காண்பி:">
+<!ENTITY zotero.integration.prefs.footnotes.label		"அடிக்குறிப்புகள்">
+<!ENTITY zotero.integration.prefs.endnotes.label		"இறுதி குறிப்புகள்">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label		"மேற்கோள்களை இவ்வாறு சேமி:">
+<!ENTITY zotero.integration.prefs.bookmarks.label		"புத்தக்குறிகள்">
+<!ENTITY zotero.integration.prefs.bookmarks.caption		"புத்தக்குறிகள் வார்த்தைக்கும் லிப்ரூஃபிசுக்கும் இடையில் பகிரப்படலாம், ஆனால் தற்செயலாக மாற்றியமைக்கப்பட்டால் பிழைகளை ஏற்படுத்தக்கூடும், மேலும் அடிக்குறிப்புகளில் செருக முடியாது.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label       "மேற்கோள்களை தானாக புதுப்பிக்கவும்">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip     "நிலுவையில் உள்ள புதுப்பிப்புகளுடன் மேற்கோள்கள் ஆவணத்தில் முன்னிலைப்படுத்தப்படும்">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "புதுப்பிப்புகளை முடக்குவது பெரிய ஆவணங்களில் மேற்கோள் செருகலை விரைவுபடுத்தும். மேற்கோள்களை கைமுறையாக புதுப்பிக்க புதுப்பிக்கவும்.">
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label 		"மெட்லைன் நாளிதழ் சுருக்கங்களைப் பயன்படுத்துங்கள்">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption	"“சர்னல் ஏபிபிஆர்” புலம் புறக்கணிக்கப்படும்.">
+
+<!ENTITY zotero.integration.prefs.exportDocument 		"வேறு சொல் செயலிக்கு மாறவும்…">
+
+<!ENTITY zotero.integration.showEditor.label			"திருத்தி காட்டு">
+<!ENTITY zotero.integration.classicView.label			"பழைய பார்வை">
+
+<!ENTITY zotero.integration.references.label			"நூலியல் குறிப்புகள்">
+
+<!ENTITY zotero.sync.stop                             "ஒத்திசைவை நிறுத்துங்கள்">
+<!ENTITY zotero.sync.error							"பிழை">
+<!ENTITY zotero.sync.storage.progress				"முன்னேற்றம்:">
+<!ENTITY zotero.sync.storage.downloads				"பதிவிறக்கங்கள்:">
+<!ENTITY zotero.sync.storage.uploads					"பதிவேற்றங்கள்:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong		"உங்கள் சோட்டெரோ நூலகத்தில் பின்வரும் குறிச்சொல் சேவையகத்துடன் ஒத்திசைக்க மிக நீளமானது:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit		"ஒத்திசைக்கப்பட்ட குறிச்சொற்கள் 256 எழுத்துகளை விடக் குறைவாக இருக்க வேண்டும்.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete			"நீங்கள் குறிச்சொல்லை பல குறிச்சொற்களாகப் பிரிக்கலாம், குறிச்சொல்லை குறைக்க கைமுறையாக திருத்தலாம் அல்லது அதை நீக்கலாம்.">
+<!ENTITY zotero.sync.longTagFixer.split					"பிளவு">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe				"பிரிந்தது">
+<!ENTITY zotero.sync.longTagFixer.character				"எழுத்து">
+<!ENTITY zotero.sync.longTagFixer.characters				"எழுத்துக்கள்">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved	"சரிபார்க்கப்படாத குறிச்சொற்கள் சேமிக்கப்படாது.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted			"குறிச்சொல் எல்லா பொருட்களிலிருந்தும் நீக்கப்படும்.">
+
+<!ENTITY zotero.merge.title                           "சச்சரவுக்கான தீர்வு">
+<!ENTITY zotero.merge.of                              "இதன்">
+<!ENTITY zotero.merge.deleted                         "நீக்கப்பட்டது">
+
+<!ENTITY zotero.proxy.recognized.title					"பதிலாள் அங்கீகரிக்கப்பட்டது">
+<!ENTITY zotero.proxy.recognized.warning				"உங்கள் நூலகம், பள்ளி அல்லது நிறுவன வலைத்தளத்திலிருந்து இணைக்கப்பட்ட பதிலாள்களை மட்டுமே சேர்">
+<!ENTITY zotero.proxy.recognized.warning.secondary		"பிற பதிலாள்களைச் சேர்ப்பது தீங்கிழைக்கும் தளங்களை நீங்கள் நம்பும் தளங்களாக மாறுவதற்கு அனுமதிக்கிறது."> 
+<!ENTITY zotero.proxy.recognized.disable.label			"முன்னர் அங்கீகரிக்கப்பட்ட பதிலாள்கள் மூலம் கோரிக்கைகளை தானாக திருப்பி விட வேண்டாம்">
+<!ENTITY zotero.proxy.recognized.ignore.label			"புறக்கணி">
+
+<!ENTITY zotero.feedSettings.title                      "அமைப்புகளுக்கு உணவளிக்கவும்">
+<!ENTITY zotero.feedSettings.saveButton.label           "சேமி">
+<!ENTITY zotero.feedSettings.url.label                  "முகவரி:">
+<!ENTITY zotero.feedSettings.title.label                "தலைப்பு:">
+<!ENTITY zotero.feedSettings.refresh.label1             "ஒவ்வொன்றையும் புதுப்பிக்கவும்">
+<!ENTITY zotero.feedSettings.refresh.label2             "மணி(கள்)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1         "படிக்காத ஊட்ட உருப்படிகளை அகற்றவும்">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2         "நாட்கள்">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1         "பின்னர் வாசிப்பு தீவன உருப்படிகளை அகற்று">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2         "நாட்கள்">
+
+<!ENTITY zotero.rtfScan.title		                    "உஉவ வருடல்">
+<!ENTITY zotero.rtfScan.cancel.label					"ரத்துசெய்">
+<!ENTITY zotero.rtfScan.citation.label					"மேற்கோள்">
+<!ENTITY zotero.rtfScan.itemName.label					"பொருளின் பெயர்">
+<!ENTITY zotero.rtfScan.unmappedCitations.label				"தடையற்ற மேற்கோள்கள்">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label			"தெளிவற்ற மேற்கோள்கள்">
+<!ENTITY zotero.rtfScan.mappedCitations.label				"வரைபட மேற்கோள்கள்">
+<!ENTITY zotero.rtfScan.introPage.label				"அறிமுகம்">
+<!ENTITY zotero.rtfScan.introPage.description		"சோட்டெரோ தானாகவே மேற்கோள்களைப் பிரித்தெடுத்து மறுவடிவமைக்கலாம் மற்றும் ஆர்டிஎஃப் கோப்புகளில் ஒரு நூலியல் செருகலாம். ஆர்டிஎஃப் வருடல் நற்பொருத்தம் தற்போது பின்வரும் வடிவங்களின் மாறுபாடுகளில் மேற்கோள்களை ஆதரிக்கிறது:">
+<!ENTITY zotero.rtfScan.introPage.description2		"தொடங்க, ஒரு உஉவ உள்ளீட்டு கோப்பு மற்றும் கீழே உள்ள வெளியீட்டு கோப்பைத் தேர்ந்தெடுக்கவும்:">
+<!ENTITY zotero.rtfScan.scanPage.label				"மேற்கோள்களுக்கு வருடல்">
+<!ENTITY zotero.rtfScan.scanPage.description		"மேற்கோள்களுக்காக உங்கள் ஆவணத்தை சோட்டெரோ வருடல் செய்கிறார். தயவுசெய்து பொருமைையாயிறு.">
+<!ENTITY zotero.rtfScan.citationsPage.label				"மேற்கோள் காட்டப்பட்ட உருப்படிகளை சரிபார்க்கவும்">
+<!ENTITY zotero.rtfScan.citationsPage.description		"தொடர்புடைய உருப்படிகளை சோட்டெரோ சரியாகத் தேர்ந்தெடுத்துள்ளதா என்பதை உறுதிப்படுத்த கீழே உள்ள அங்கீகரிக்கப்பட்ட மேற்கோள்களின் பட்டியலை மதிப்பாய்வு செய்யவும். அடுத்த கட்டத்திற்குச் செல்வதற்கு முன் எந்தவொரு தடையற்ற அல்லது தெளிவற்ற மேற்கோள்களும் தீர்க்கப்பட வேண்டும்.">
+<!ENTITY zotero.rtfScan.stylePage.label				"ஆவண வடிவமைப்பு">
+<!ENTITY zotero.rtfScan.formatPage.label				"மேற்கோள்களை வடிவமைத்தல்">
+<!ENTITY zotero.rtfScan.formatPage.description		"சோட்டெரோ உங்கள் உஉவ கோப்பை செயலாக்குகிறது மற்றும் வடிவமைக்கிறது. தயவுசெய்து பொருமைையாயிறு.">
+<!ENTITY zotero.rtfScan.completePage.label				"உஉவ வருடல் முடிந்தது">
+<!ENTITY zotero.rtfScan.completePage.description		"உங்கள் ஆவணம் இப்போது வருடல் செய்யப்பட்டு செயலாக்கப்பட்டுள்ளது. அது சரியாக வடிவமைக்கப்பட்டுள்ளதா என்பதை உறுதிப்படுத்தவும்.">
+<!ENTITY zotero.rtfScan.inputFile.label			"உள்ளீட்டு கோப்பு">
+<!ENTITY zotero.rtfScan.outputFile.label			"வெளியீட்டு கோப்பு">
+
+<!ENTITY zotero.file.choose.label			"கோப்பை தேர்ந்தெடு…">
+<!ENTITY zotero.file.noneSelected.label			"எந்த கோப்பும் தேர்வு செய்ய படவில்லை">
+
+<!ENTITY zotero.attachLink.title                     "முகவரி உடன் இணைப்பை இணைக்கவும்">
+<!ENTITY zotero.attachLink.label.link                "இணைப்பு:">
+<!ENTITY zotero.attachLink.label.title               "தலைப்பு:">
+
+<!ENTITY zotero.context.addChildNote						"உருப்படி குறிப்பைச் சேர்">
+<!ENTITY zotero.context.addChildNoteFromAnnotations			"சிறுகுறிப்புகளிலிருந்து உருப்படி குறிப்பைச் சேர்">
+<!ENTITY zotero.context.addStandaloneNote					"முழுமையான குறிப்பைச் சேர்">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations	"சிறுகுறிப்புகளிலிருந்து முழுமையான குறிப்பைச் சேர்">
+<!ENTITY zotero.context.editInWindow						"ஒரு தனி சாளரத்தில் திருத்து">
+
+<!ENTITY zotero.pdfReader.firstPage							"முதல் பக்கம்">
+<!ENTITY zotero.pdfReader.lastPage							"கடைசி பக்கம்">
+<!ENTITY zotero.pdfReader.back								"பின்">
+<!ENTITY zotero.pdfReader.forward							"முன்னோக்கி">
+<!ENTITY zotero.pdfReader.handTool							"கை கருவி">
+<!ENTITY zotero.pdfReader.verticalScrolling					"செங்குத்து உருட்டு">
+<!ENTITY zotero.pdfReader.horizontalScrolling				"கிடைமட்ட உருட்டு">
+<!ENTITY zotero.pdfReader.wrappedScrolling					"போர்த்தப்பட்ட உருட்டு">
+<!ENTITY zotero.pdfReader.noSpreads							"பரவல்கள் இல்லை">
+<!ENTITY zotero.pdfReader.oddSpreads						"ஒற்றைப்படை பரவுகிறது">
+<!ENTITY zotero.pdfReader.evenSpreads						"சம்மாகபரவுகிறது">
+<!ENTITY zotero.pdfReader.scrolled							"உருட்டு">
+<!ENTITY zotero.pdfReader.paginated							"பிணைப்பு">
+<!ENTITY zotero.pdfReader.zoomIn							"பெரிதாக்கு">
+<!ENTITY zotero.pdfReader.zoomOut							"சிறிதாக்கு">
+<!ENTITY zotero.pdfReader.zoomReset							"பெரிதாக்கு மீட்டமை">
+<!ENTITY zotero.pdfReader.zoomAuto							"தானாகவே மறுஅளவிடுகிறது">
+<!ENTITY zotero.pdfReader.zoomPageWidth						"பக்க அகலத்திற்கு பெரிதாக்கு">
+<!ENTITY zotero.pdfReader.zoomPageHeight					"பக்க உயரத்திற்கு பெரிதாக்கு">
+<!ENTITY zotero.pdfReader.splitVertically					"செங்குத்தாக பிரி">
+<!ENTITY zotero.pdfReader.splitHorizontally					"கிடைமட்டமாக பிரி">
+<!ENTITY zotero.pdfReader.transferFromPDF					"இறக்குமதி சிறுகுறிப்புகள்…">
+<!ENTITY zotero.pdfReader.rotatePageLeft                    "பக்கத்தை இடதுபக்கம் சுழற்று">
+<!ENTITY zotero.pdfReader.rotatePageRight                   "பக்கத்தை வலதுபக்கம் சுழற்று">
