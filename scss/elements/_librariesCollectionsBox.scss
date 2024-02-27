@@ -17,10 +17,6 @@ libraries-collections-box {
 			gap: 4px;
 			margin-inline-start: calc(16px * var(--level, 0));
 			
-			@include comfortable {
-				padding-block: 2px;
-			}
-			
 			&.context {
 				color: var(--fill-secondary);
 

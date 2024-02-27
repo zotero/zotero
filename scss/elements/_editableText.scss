@@ -1,6 +1,6 @@
 @include comfortable {
 	--editable-text-padding-inline: 4px;
-	--editable-text-padding-block: 4px;
+	--editable-text-padding-block: 3px;
 }
 
 @include compact {
@@ -16,7 +16,7 @@ editable-text {
 	&[tight] {
 		@include comfortable {
 			--editable-text-padding-inline: 4px;
-			--editable-text-padding-block: 2px;
+			--editable-text-padding-block: 3px;
 		}
 		
 		@include compact {
@@ -80,8 +80,8 @@ editable-text {
 		-moz-default-appearance: textarea;
 		
 		min-height: calc(2ex * var(--min-visible-lines));
-		margin: 0;
-		border: 1px solid transparent;
+		margin: 1px;
+		border: 0px solid transparent;
 
 		font: inherit;
 		line-height: inherit;

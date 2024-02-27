@@ -5,6 +5,7 @@
 
 	input {
 		background: var(--material-background);
+		background-clip: padding-box;
 		border-radius: 5px;
 		border: var(--material-border-quinary);
 		color: var(--fill-primary);
@@ -43,6 +44,7 @@
 search-textbox {
 	appearance: none;
 	background: var(--material-background);
+	background-clip: padding-box;
 	border-radius: 5px;
 	border: var(--material-border-quinary);
 	color: var(--fill-primary);

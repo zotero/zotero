@@ -22,10 +22,6 @@ notes-box, related-box {
 			display: flex;
 			gap: 4px;
 			align-items: flex-start;
-			
-			@include comfortable {
-				padding-block: 2px;
-			}
 	
 			.box {
 				@include clicky-item;

@@ -222,12 +222,12 @@
 	align-items: center;
 	width: 100%;
 	background: var(--material-background);
-	height: 1.83333333em; // 22px @ 12px font size
+	height: calc(1.33333333em + 6px); // 24px @ 13px font size
 	overflow: hidden;
 	border-bottom: 1px solid var(--material-border-quarternary);
 
 	@include comfortable {
-		height: 2.33333333em; // 28px @ 12px font size
+		height: calc(1.33333333em + 10px); // 28px @ 13px font size
 		padding: 0 8px;
 	}
 
@@ -242,13 +242,13 @@
 		height: 1px;
 		width: 100%;
 		position: absolute;
-		top: calc(1.83333333em - 1px);
+		top: calc(1.33333333em + 5px);
 		left: 0;
 		right: 0;
 		z-index: 1;
 
 		@include comfortable {
-			top: calc(2.33333333em - 1px);
+			top: calc(1.33333333em + 9px);
 		}
 	}
 
@@ -275,7 +275,7 @@
 		}
 
 		.resizer {
-			background: linear-gradient(var(--fill-quarternary), var(--fill-quarternary)) no-repeat center/1px 66.666667%; // 14px @ 12px font size
+			background: linear-gradient(var(--fill-quarternary), var(--fill-quarternary)) no-repeat center/1px calc(1.33333333em - 2px); // 16px @ 13px font size
 			cursor: col-resize;
 			height: 100%;
 			content: "\00a0";
@@ -285,7 +285,7 @@
 			min-width: 10px;
 
 			@include comfortable {
-				background-size: 1px 74.074074%; // 20px @ 12px font size
+				background-size: 1px calc(1.33333333em + 2px); // 20px @ 13px font size
 			}
 		}
 
@@ -293,6 +293,11 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 			flex: 1;
+
+			&.numNotes, &.hasAttachment {
+				display: flex;
+				justify-content: center;
+			}
 		}
 
 		&.cell-icon {
