@@ -40,7 +40,6 @@ var Zotero_QuickFormat = new function () {
 		itemPopover, itemPopoverPrefix, itemPopoverSuffix, itemPopoverSuppressAuthor, itemPopoverLocatorLabel, itemPopoverLocator,
 		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false,
 		isPaste = false, _itemPopoverClosed, skipInputRefocus;
-	var locatorLocked = true;
 	var locatorNode = null;
 	var _searchPromise;
 	var inputIsPristine = true;
@@ -357,6 +356,7 @@ var Zotero_QuickFormat = new function () {
 			if (newInput.previousElementSibling?.tagName == "br") {
 				newInput.previousElementSibling.remove();
 			}
+			locatorNode = null;
 		});
 		return newInput;
 	}
@@ -398,9 +398,6 @@ var Zotero_QuickFormat = new function () {
 	 */
 	var _quickFormat = Zotero.Promise.coroutine(function* () {
 		var str = _getEditorContent();
-		if (str && str.match(/\s$/)) {
-			locatorLocked = true;
-		}
 		var haveConditions = false;
 		
 		const etAl = " et al.";
@@ -414,7 +411,7 @@ var Zotero_QuickFormat = new function () {
 		currentLocatorLabel = false;
 		
 		// check for adding a number onto a previous page number
-		if(!locatorLocked && numRe.test(str)) {
+		if (locatorNode && numRe.test(str)) {
 			// add to previous cite
 			let citationItem = JSON.parse(locatorNode && locatorNode.dataset.citationItem || "null");
 			if (citationItem) {
@@ -427,6 +424,7 @@ var Zotero_QuickFormat = new function () {
 				_clearEntryList();
 				let input = _getCurrentInput();
 				input.value = "";
+				input.dispatchEvent(new Event('input', { bubbles: true }));
 				return;
 			}
 		}
@@ -438,17 +436,17 @@ var Zotero_QuickFormat = new function () {
 				if(m.index === 0) {
 					// add to previous cite
 					let node = _getCurrentInput();
-					var prevNode = locatorLocked ? node.previousElementSibling : locatorNode;
+					var prevNode = locatorNode || node.previousElementSibling;
 					let citationItem = JSON.parse(prevNode && prevNode.dataset.citationItem || "null");
 					if (citationItem) {
 						citationItem.locator = m[2];
+						citationItem.label = "page";
 						prevNode.dataset.citationItem = JSON.stringify(citationItem);
 						prevNode.textContent = _buildBubbleString(citationItem);
 						_clearEntryList();
-						locatorLocked = false;
-						locatorNode = prevNode;
 						let input = _getCurrentInput();
 						input.value = "";
+						input.dispatchEvent(new Event('input', { bubbles: true }));
 						return;
 					}
 				}
@@ -1149,14 +1147,8 @@ var Zotero_QuickFormat = new function () {
 				citationItem["label"] = currentLocatorLabel;
 			}
 		}
-		locatorLocked = "locator" in citationItem;
-		
-		// We are setting a locator node here, but below 2 calls reset
-		// the bubble list for sorting, so we do some additional
-		// handling to maintain the correct locator node in
-		// _showCitation()
 		let input = _getCurrentInput() || _lastFocusedInput;
-		locatorNode = _insertBubble(citationItem, input);
+		let newBubble = _insertBubble(citationItem, input);
 		isPaste = false;
 		_clearEntryList();
 		// After the first bubble was made, the next input should not display the panel
@@ -1167,6 +1159,7 @@ var Zotero_QuickFormat = new function () {
 
 		yield _previewAndSort();
 		refocusInput(false);
+		locatorNode = getAllBubbles().filter(bubble => bubble.textContent == newBubble.textContent)[0];
 		return true;
 	});
 	
@@ -1300,17 +1293,11 @@ var Zotero_QuickFormat = new function () {
 				&& io.citation.sortedItems
 				&& io.citation.sortedItems.length) {
 			for(var i=0, n=io.citation.sortedItems.length; i<n; i++) {
-				const bubble = _insertBubble(io.citation.sortedItems[i][1], insertBefore);
-				if (locatorNode && bubble.textContent == locatorNode.textContent) {
-					locatorNode = bubble;
-				}
+				_insertBubble(io.citation.sortedItems[i][1], insertBefore);
 			}
 		} else {
 			for(var i=0, n=io.citation.citationItems.length; i<n; i++) {
-				const bubble = _insertBubble(io.citation.citationItems[i], insertBefore);
-				if (locatorNode && bubble.textContent == locatorNode.textContent) {
-					locatorNode = bubble;
-				}
+				_insertBubble(io.citation.citationItems[i], insertBefore);
 			}
 		}
 	}
@@ -1688,7 +1675,6 @@ var Zotero_QuickFormat = new function () {
 			Zotero_QuickFormat._bubbleizeSelected();
 		}
 		else if (["ArrowLeft", "ArrowRight"].includes(event.key) && !event.shiftKey) {
-			locatorLocked = true;
 			// On arrow left from the beginning of the input, move to previous bubble
 			if (event.key === "ArrowLeft" && this.selectionStart === 0) {
 				moveFocusBack(this);
@@ -1710,7 +1696,6 @@ var Zotero_QuickFormat = new function () {
 		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key) && referencePanel.state === "open") {
 			// Arrow up/down from wherever will navigate the references panel if that's opened
-			locatorLocked = true;
 			handleItemSelection(event);
 		}
 		else if (event.key == "Tab" && !event.shiftKey && referencePanel.state === "open") {
@@ -2029,8 +2014,6 @@ var Zotero_QuickFormat = new function () {
 		} else {
 			delete citationItem["suppress-author"];
 		}
-		locatorLocked = "locator" in citationItem;
-		locatorNode = panelRefersToBubble;
 		panelRefersToBubble.dataset.citationItem = JSON.stringify(citationItem);
 		panelRefersToBubble.textContent = _buildBubbleString(citationItem);
 	};
