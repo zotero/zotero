@@ -4823,7 +4823,7 @@ var ZoteroPane = new function()
 						// Pull out DOI, in case there's a prefix
 						doi = Zotero.Utilities.cleanDOI(doi);
 						if (doi) {
-							uri = "http://dx.doi.org/" + encodeURIComponent(doi);
+							uri = "https://doi.org/" + encodeURIComponent(doi);
 						}
 					}
 				}
