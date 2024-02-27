@@ -59,7 +59,7 @@ editable-text {
 
 	&[max-lines] {
 		&::after, .input {
-			max-height: calc(2ex * var(--max-visible-lines));
+			max-height: calc(var(--line-height) * var(--max-visible-lines));
 			scrollbar-width: auto;
 		}
 		&::after {
@@ -79,7 +79,7 @@ editable-text {
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;
 		
-		min-height: calc(2ex * var(--min-visible-lines));
+		min-height: calc(var(--line-height) * var(--min-visible-lines));
 		margin: 0;
 		border: 1px solid transparent;
 

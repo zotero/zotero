@@ -292,6 +292,17 @@
 				if (this.maxLines > 0) {
 					this.style.setProperty("--max-visible-lines", this.maxLines);
 				}
+				
+				// Calculate line-height in ems so we don't need to recalculate if font-size changes
+				// TODO: Revisit once we can use the css 'lh' unit (fx >=120)
+				let { lineHeight, fontSize } = getComputedStyle(this._input);
+				let lineHeightRelative = parseFloat(lineHeight) / parseFloat(fontSize);
+				if (isNaN(lineHeightRelative)) {
+					this.style.setProperty('--line-height', '2ex');
+				}
+				else {
+					this.style.setProperty('--line-height', lineHeightRelative + 'em');
+				}
 			}
 
 			if (this.ariaLabel.length) {
