@@ -1194,11 +1194,9 @@ function ZoteroProtocolHandler() {
 			}
 			
 			var location = null;
-			if (page) {
+			if (page || annotation) {
 				location = {
-					position: {
-						pageIndex: page
-					},
+					pageIndex: page ? parseInt(page) : undefined,
 					annotationID: annotation
 				};
 			}

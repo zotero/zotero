@@ -29,15 +29,31 @@ describe("Zotero.FileHandlers", () => {
 		it("should open a PDF internally when no handler is set", async function () {
 			let pdf = await importFileAttachment('wonderland_short.pdf');
 			await Zotero.FileHandlers.open(pdf, {
-				location: { position: { pageIndex: 2 } }
+				location: { pageIndex: 2 }
 			});
-			assert.ok(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
+			let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+			assert.ok(reader);
+			
+			// Wait for _setState() (is there an easier way to do this?)
+			let stub = sinon.stub(reader, '_setState');
+			let setStatePromise = new Promise((resolve) => {
+				stub.callsFake(async (...args) => {
+					await stub.wrappedMethod.apply(reader, args);
+					resolve();
+				});
+			});
+			await reader._waitForReader();
+			await setStatePromise;
+			
+			// Check that the reader navigated to the correct page
+			assert.equal(pdf.getAttachmentLastPageIndex(), 2);
+			stub.restore();
 		});
 
 		it("should open a PDF in a new window when no handler is set and openInWindow is passed", async function () {
 			let pdf = await importFileAttachment('wonderland_short.pdf');
 			await Zotero.FileHandlers.open(pdf, {
-				location: { position: { pageIndex: 2 } },
+				location: { pageIndex: 2 },
 				openInWindow: true
 			});
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
