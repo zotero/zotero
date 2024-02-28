@@ -1193,29 +1193,32 @@ function ZoteroProtocolHandler() {
 				return;
 			}
 			
-			var location = null;
-			if (page || annotation) {
-				location = {
-					pageIndex: page ? parseInt(page) : undefined,
-					annotationID: annotation
-				};
+			var location = {};
+			
+			if (page) {
+				location.pageIndex = parseInt(page);
 			}
-			else if (cfi) {
-				location = {
-					position: {
-						type: 'FragmentSelector',
-						conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
-						value: cfi
-					}
+			if (annotation) {
+				location.annotationID = annotation;
+			}
+			
+			if (cfi) {
+				location.position = {
+					type: 'FragmentSelector',
+					conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
+					value: cfi
 				};
 			}
 			else if (sel) {
-				location = {
-					position: {
-						type: 'CssSelector',
-						value: sel
-					}
+				location.position = {
+					type: 'CssSelector',
+					value: sel
 				};
+			}
+			
+			// Don't pass empty location
+			if (!Object.keys(location).length) {
+				location = null;
 			}
 
 			var openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
