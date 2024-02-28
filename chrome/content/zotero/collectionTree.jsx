@@ -1529,7 +1529,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 				var ids = data;
 				var items = Zotero.Items.get(ids);
-				items = Zotero.Items.keepParents(items);
+				items = Zotero.Items.keepTopLevel(items);
 				var skip = true;
 				for (let item of items) {
 					// Can only drag top-level items
@@ -2047,7 +2047,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			
 			if (targetTreeRow.isPublications()) {
-				items = Zotero.Items.keepParents(items);
+				items = Zotero.Items.keepTopLevel(items);
 				let io = window.ZoteroPane.showPublicationsWizard(items);
 				if (!io) {
 					return;

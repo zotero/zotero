@@ -1243,7 +1243,7 @@ describe("Zotero.Items", function () {
 		});
 	});
 	
-	describe("#keepParents()", function () {
+	describe("#keepTopLevel()", function () {
 		it("should remove child items of passed items", async function () {
 			var item1 = await createDataObject('item');
 			var item2 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
@@ -1253,7 +1253,7 @@ describe("Zotero.Items", function () {
 			var otherItem = await createDataObject('item');
 			var item6 = await createDataObject('item', { itemType: 'note', parentItemID: otherItem.id });
 			
-			var items = Zotero.Items.keepParents([item1, item2, item3, item4, item5, item6]);
+			var items = Zotero.Items.keepTopLevel([item1, item2, item3, item4, item5, item6]);
 			assert.sameMembers(
 				// Convert to ids for clearer output
 				items.map(item => item.id),
@@ -1265,7 +1265,7 @@ describe("Zotero.Items", function () {
 			var item1 = await createDataObject('item');
 			var item2 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
 			var item3 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
-			var items = Zotero.Items.keepParents([item2, item3]);
+			var items = Zotero.Items.keepTopLevel([item2, item3]);
 			assert.sameMembers(
 				items.map(item => item.id),
 				[item2.id, item3.id]
