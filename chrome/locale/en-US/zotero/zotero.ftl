@@ -70,6 +70,7 @@ item-menu-viewAttachment =
             [pdf] PDF
             [epub] EPUB
             [snapshot] Snapshot
+            *[other] Attachment
         }
         *[other] { $attachmentType ->
             [pdf] PDFs
