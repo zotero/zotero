@@ -153,7 +153,7 @@ var Zotero_LocateMenu = new function() {
 	 * @param {Boolean} isToolbarMenu Whether the menu being populated is displayed in the toolbar
 	 * 		(and not the item tree context menu)
 	 */
-	var _addViewOptions = Zotero.Promise.coroutine(function* (locateMenu, selectedItems, showIcons, addExtraOptions, isToolbarMenu) {
+	var _addViewOptions = async function (locateMenu, selectedItems, showIcons, addExtraOptions, isToolbarMenu) {
 		var optionsToShow = {};
 		
 		// check which view options are available
@@ -161,9 +161,14 @@ var Zotero_LocateMenu = new function() {
 			for(var viewOption in ViewOptions) {
 				if (!optionsToShow[viewOption]
 						&& (!isToolbarMenu || !ViewOptions[viewOption].hideInToolbar)) {
-					optionsToShow[viewOption] = yield ViewOptions[viewOption].canHandleItem(item, selectedItems);
+					optionsToShow[viewOption] = await ViewOptions[viewOption].canHandleItem(item);
 				}
 			}
+		}
+		
+		// Let the ViewOptions update their display properties
+		for (let viewOption in optionsToShow) {
+			await ViewOptions[viewOption].updateMenuItem?.(selectedItems);
 		}
 		
 		// add available view options to menu
@@ -189,7 +194,7 @@ var Zotero_LocateMenu = new function() {
 					ViewOptions[viewOption], showIcons), lastNode);
 			}
 		}
-	});
+	};
 	
 	/**
 	 * Get available locate engines that can handle a set of items 
@@ -364,17 +369,27 @@ var Zotero_LocateMenu = new function() {
 	 * a PDF
 	 */
 	function ViewAttachment(alternateWindowBehavior) {
-		const classNames = {
-			pdf: "zotero-menuitem-attachments-pdf",
-			epub: "zotero-menuitem-attachments-epub",
-			snapshot: "zotero-menuitem-attachments-snapshot",
-			multiple: "zotero-menuitem-new-tab",
-		};
-		this._attachmentType = "multiple";
+		this._attachmentType = "mixed";
+		this._numAttachments = 0;
 		Object.defineProperty(this, "className", {
-			get: () => (alternateWindowBehavior ? "zotero-menuitem-new-window" : classNames[this._attachmentType]),
+			get() {
+				switch (this._attachmentType) {
+					case "pdf":
+						return "zotero-menuitem-attachments-pdf";
+					case "epub":
+						return "zotero-menuitem-attachments-epub";
+					case "snapshot":
+						return "zotero-menuitem-attachments-snapshot";
+					default: {
+						let openInNewWindow = Zotero.Prefs.get("openReaderInNewWindow");
+						if (alternateWindowBehavior) {
+							openInNewWindow = !openInNewWindow;
+						}
+						return openInNewWindow ? "zotero-menuitem-new-window" : "zotero-menuitem-new-tab";
+					}
+				}
+			},
 		});
-		this._mimeTypes = ["application/pdf", "application/epub+zip", "text/html"];
 
 		// Don't show alternate-behavior option ("in New Window" when openReaderInNewWindow is false,
 		// "in New Tab" when it's true) in toolbar Locate menu
@@ -382,32 +397,60 @@ var Zotero_LocateMenu = new function() {
 		
 		this.l10nKey = "item-menu-viewAttachment";
 		Object.defineProperty(this, "l10nArgs", {
-			get: () => JSON.stringify({
-				attachmentType: this._attachmentType,
-				openIn: alternateWindowBehavior ? 'window' : 'tab',
-			})
+			get: () => {
+				let openIn;
+				if (this._attachmentType !== "mixed" && Zotero.Prefs.get(`fileHandler.${this._attachmentType}`)) {
+					openIn = "external";
+				}
+				else {
+					let openInNewWindow = Zotero.Prefs.get("openReaderInNewWindow");
+					if (alternateWindowBehavior) {
+						openInNewWindow = !openInNewWindow;
+					}
+					openIn = openInNewWindow ? "window" : "tab";
+				}
+				return JSON.stringify({
+					attachmentType: this._attachmentType,
+					numAttachments: this._numAttachments,
+					openIn,
+				});
+			}
 		});
 		
-		this.canHandleItem = async function (item, items) {
+		this.canHandleItem = async function (item) {
+			const attachment = await _getFirstUsableAttachment(item);
 			// Don't show alternate-behavior option when using an external PDF viewer
-			if (alternateWindowBehavior && Zotero.Prefs.get("fileHandler.pdf")) {
-				return false;
+			return attachment
+				&& !(alternateWindowBehavior && Zotero.Prefs.get(`fileHandler.${attachment.attachmentReaderType}`));
+		};
+		
+		this.updateMenuItem = async function (items) {
+			let attachmentType = null;
+			let numAttachments = 0;
+			for (let item of items) {
+				let attachment = await _getFirstUsableAttachment(item);
+				let thisAttachmentType = attachment?.attachmentReaderType;
+				if (!thisAttachmentType) {
+					continue;
+				}
+				
+				if (attachmentType === null) {
+					attachmentType = thisAttachmentType;
+				}
+				else if (attachmentType !== thisAttachmentType) {
+					attachmentType = "mixed";
+				}
+				
+				numAttachments++;
 			}
-			const attachment = await _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
-			// Trick to update the attachment type
-			if (items.length > 1) {
-				this._attachmentType = "multiple";
-			}
-			else if (attachment) {
-				this._attachmentType = attachment.attachmentReaderType;
-			}
-			return !!attachment;
+			this._attachmentType = attachmentType;
+			this._numAttachments = numAttachments;
 		};
 		
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
 			var attachments = [];
 			for (let item of items) {
-				var attachment = yield _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+				var attachment = yield _getFirstUsableAttachment(item);
 				if (attachment) attachments.push(attachment.id);
 			}
 			
@@ -415,16 +458,16 @@ var Zotero_LocateMenu = new function() {
 				{ forceAlternateWindowBehavior: alternateWindowBehavior });
 		});
 		
-		var _getFirstAttachmentWithMIMEType = Zotero.Promise.coroutine(function* (item, mimeTypes) {
+		var _getFirstUsableAttachment = Zotero.Promise.coroutine(function* (item) {
 			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
 			for (let i = 0; i < attachments.length; i++) {
 				let attachment = attachments[i];
-				if (mimeTypes.indexOf(attachment.attachmentContentType) !== -1
+				if (attachment.attachmentReaderType
 						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					return attachment;
 				}
 			}
-			return false;
+			return null;
 		});
 	}
 

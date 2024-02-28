@@ -65,17 +65,24 @@ item-creator-moveUp =
     .label = Move Up
 
 item-menu-viewAttachment =
-    .label = Open {
-        $attachmentType ->
+    .label = Open { $numAttachments ->
+        [one] { $attachmentType ->
             [pdf] PDF
             [epub] EPUB
             [snapshot] Snapshot
-            *[multiple] Attachments
-    } in {
+            *[other] Attachment
+        }
+        *[other] { $attachmentType ->
+            [pdf] PDFs
+            [epub] EPUBs
+            [snapshot] Snapshots
+            *[other] Attachments
+        }
+    } {
         $openIn ->
-            [tab] New Tab
-            [window] New Window
-            *[other] Reader
+            [tab] in New Tab
+            [window] in New Window
+            *[other] { "" }
     }
 
 item-menu-add-file =
