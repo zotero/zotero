@@ -372,6 +372,10 @@ var Zotero_QuickFormat = new function () {
 				let secondInputValue = node.nextElementSibling.value;
 				node.value += ` ${secondInputValue}`;
 				node.dispatchEvent(new Event('input', { bubbles: true }));
+				// Make sure focus is not lost when two inputs are combined
+				if (node.nextElementSibling == document.activeElement) {
+					node.focus();
+				}
 				node.nextElementSibling.remove();
 			}
 			node = node.nextElementSibling;
@@ -1627,12 +1631,27 @@ var Zotero_QuickFormat = new function () {
 		let clickY = event.clientY;
 		let { lastBubble, startOfTheLine } = getLastBubbleBeforePoint(clickX, clickY);
 		// If click happened right before another input, focus that input
-		// instead of adding another one
-		if (isInput(lastBubble?.nextElementSibling)) {
-			lastBubble.nextElementSibling.focus();
-			return;
+		// instead of adding another one. There may be a br node on the way, so we have to check
+		// more than just the next node.
+		if (lastBubble) {
+			let nextNode = lastBubble.nextElementSibling;
+			while (nextNode && !nextNode.classList.contains("bubble")) {
+				if (isInput(nextNode)) {
+					nextNode.focus();
+					return;
+				}
+				nextNode = nextNode.nextElementSibling;
+			}
 		}
 		let newInput = _createInputField();
+		let currentInput = _getCurrentInput() || _lastFocusedInput;
+		// If there is a current input, delete it here.
+		// It can be handled by the "blur" event handler but it happens
+		// after a small delay which causes bubbles to shift back and forth
+		if (currentInput && isInputEmpty(currentInput)) {
+			clearLastFocused(currentInput);
+			currentInput.remove();
+		}
 		if (lastBubble !== null) {
 			lastBubble.after(newInput);
 			if (startOfTheLine) {
@@ -1686,12 +1705,18 @@ var Zotero_QuickFormat = new function () {
 				event.preventDefault();
 			}
 		}
-		else if (["Backspace", "Delete"].includes(event.key) && !this.value) {
+		else if (["Backspace", "Delete"].includes(event.key)
+			&& (this.selectionStart + this.selectionEnd) === 0) {
 			event.preventDefault();
-			moveFocusBack(this);
-			// Cannot delete the input if there is nothing else left in the editor
-			if (getAllBubbles().length > 0) {
-				this.remove();
+			// Backspace/Delete from the beginning of an input will delete the previous bubble.
+			// If there are two inputs next to each other as a result, they are merged
+			if (this.previousElementSibling) {
+				this.previousElementSibling.remove();
+				_combineNeighboringInputs();
+			}
+			// If this removed the last bubble, make sure the reference panel is open
+			if (isEditorCleared()) {
+				_resetSearchTimer();
 			}
 		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key) && referencePanel.state === "open") {
