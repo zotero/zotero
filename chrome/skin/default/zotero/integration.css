@@ -117,6 +117,9 @@
 	box-sizing: border-box; 
 	height: 15px;
 	margin: 0;
+	/* Keep the background and text color unchanged in dark mode */
+	background-color: transparent;
+	color: black;
 }
 
 .citation-dialog span {
