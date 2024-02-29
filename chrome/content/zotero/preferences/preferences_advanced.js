@@ -54,8 +54,8 @@ Zotero_Preferences.Advanced = {
 			event.target.value = this.onDataDirLoad();
 		});
 
-		document.getElementById('data-dir').addEventListener('synctopreference', (event) => {
-			this.onDataDirUpdate(event);
+		document.getElementById('data-dir').addEventListener('synctopreference', () => {
+			this.onDataDirUpdate();
 		});
 
 		document.getElementById('data-dir-path').addEventListener('syncfrompreference', (event) => {
@@ -386,7 +386,7 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	
-	onDataDirUpdate: Zotero.Promise.coroutine(function* (event, forceNew) {
+	onDataDirUpdate: Zotero.Promise.coroutine(function* (forceNew) {
 		var radiogroup = document.getElementById('data-dir');
 		var newUseDataDir = radiogroup.selectedIndex == 1;
 		
@@ -405,9 +405,14 @@ Zotero_Preferences.Advanced = {
 	}),
 	
 	
-	chooseDataDir: function(event) {
-		document.getElementById('data-dir').selectedIndex = 1;
-		this.onDataDirUpdate(event, true);
+	chooseDataDir: function() {
+		let radiogroup = document.getElementById('data-dir');
+		if (radiogroup.selectedIndex == 0) {
+			radiogroup.selectedIndex = 1;
+		}
+		else {
+			this.onDataDirUpdate(true);
+		}
 	},
 	
 	
