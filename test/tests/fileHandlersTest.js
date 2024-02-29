@@ -34,20 +34,12 @@ describe("Zotero.FileHandlers", () => {
 			let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
 			assert.ok(reader);
 			
-			// Wait for _setState() (is there an easier way to do this?)
-			let stub = sinon.stub(reader, '_setState');
-			let setStatePromise = new Promise((resolve) => {
-				stub.callsFake(async (...args) => {
-					await stub.wrappedMethod.apply(reader, args);
-					resolve();
-				});
-			});
+			let notifierPromise = waitForNotifierEvent('add', 'setting');
 			await reader._waitForReader();
-			await setStatePromise;
+			await notifierPromise;
 			
 			// Check that the reader navigated to the correct page
 			assert.equal(pdf.getAttachmentLastPageIndex(), 2);
-			stub.restore();
 		});
 
 		it("should open a PDF in a new window when no handler is set and openInWindow is passed", async function () {
