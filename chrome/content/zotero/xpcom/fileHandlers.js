@@ -195,7 +195,8 @@ Zotero.FileHandlers = {
 			},
 			{
 				name: /Adobe Acrobat/,
-				async open(appPath, { page }) {
+				async open(appPath, { filePath, page }) {
+					await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', appPath, filePath]);
 					if (page !== undefined) {
 						// Go to page using AppleScript
 						let args = [
@@ -228,7 +229,8 @@ Zotero.FileHandlers = {
 			},
 			{
 				name: /PDF Expert/,
-				async open(appPath, { page }) {
+				async open(appPath, { filePath, page }) {
+					await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', appPath, filePath]);
 					// Go to page using AppleScript (same as Preview)
 					let args = [
 						'-e', `tell app "${appPath}" to activate`
