@@ -4015,7 +4015,7 @@ var ZoteroPane = new function()
 		// Add to collection
 		if (!collectionTreeRow.isFeedsOrFeed()
 			&& collectionTreeRow.editable
-			&& Zotero.Items.keepParents(items).every(item => item.isTopLevelItem())
+			&& Zotero.Items.keepTopLevel(items).every(item => item.isTopLevelItem())
 		) {
 			menu.childNodes[m.addToCollection].setAttribute('label', Zotero.getString('pane.items.menu.addToCollection'));
 			show.add(m.addToCollection);
@@ -4080,7 +4080,7 @@ var ZoteroPane = new function()
 			popup.removeChild(popup.lastElementChild);
 		}
 
-		let items = Zotero.Items.keepParents(this.getSelectedItems());
+		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
@@ -4104,7 +4104,7 @@ var ZoteroPane = new function()
 
 	this.addSelectedItemsToCollection = async function (collection, createNew = false) {
 		// Get items first because newCollection() will deselect
-		let items = Zotero.Items.keepParents(this.getSelectedItems());
+		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
 
 		if (createNew) {
 			if (collection) {
