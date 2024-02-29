@@ -400,8 +400,8 @@ ${str}
 	_syncToPrefOnModify(event) {
 		if (event.currentTarget.getAttribute('preference')) {
 			let value = this._useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
-			Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
 			event.currentTarget.dispatchEvent(new Event('synctopreference'));
+			Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
 		}
 	},
 
