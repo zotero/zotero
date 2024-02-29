@@ -81,7 +81,7 @@ Zotero.FileHandlers = {
 			handlers = this._handlersLinux[readerType];
 		}
 		
-		let page = location?.position?.pageIndex ?? undefined;
+		let page = location?.pageIndex ?? undefined;
 		// Add 1 to page index for external readers
 		if (page !== undefined && parseInt(page) == page) {
 			page = parseInt(page) + 1;
@@ -492,9 +492,7 @@ Zotero.OpenPDF = {
 		await Zotero.FileHandlers.open(pathOrItem, {
 			location: {
 				annotationID: annotationKey,
-				position: {
-					pageIndex: page,
-				}
+				pageIndex: page,
 			}
 		});
 	}
