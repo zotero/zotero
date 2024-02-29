@@ -1004,7 +1004,7 @@
 
 			// If not editable or only 1 creator row, hide grippy
 			if (!this.editable || this.item.numCreators() < 2) {
-				grippy.style.visibility = 'hidden';
+				grippy.classList.add("single-creator-grippy");
 				grippy.setAttribute('disabled', true);
 			}
 

@@ -69,6 +69,11 @@ item-box {
 		padding: 0 !important;
 	}
 
+	// Do not display grippy if there is only one creator
+	.meta-label > .single-creator-grippy {
+		visibility: hidden !important;
+	}
+
 	textarea {
 		font: inherit;
 		resize: none;
