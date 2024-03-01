@@ -315,11 +315,13 @@ Zotero.Items = function() {
 				item.updateDisplayTitle()
 			}
 			catch (e) {
-				// A few item types need creators to be loaded. Instead of making
-				// updateDisplayTitle() async and loading conditionally, just catch the error
+				// A few item types need creators or to be loaded. Annotations need to be loaded
+				// to be displayed in itemTree too.
+				// Instead of making updateDisplayTitle() async and loading conditionally, just catch the error
 				// and load on demand
 				if (e instanceof Zotero.Exception.UnloadedDataException) {
 					yield item.loadDataType('creators');
+					yield item.loadDataType('annotation');
 					item.updateDisplayTitle()
 				}
 				else {

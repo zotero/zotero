@@ -100,6 +100,10 @@
 
 		.cell-icon {
 			min-width: 16px;
+
+			&.annotation-icon {
+				-moz-context-properties: fill;
+			}
 		}
 	}
 
