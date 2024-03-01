@@ -79,7 +79,7 @@
 				return;
 			}
 			this._inTrash = inTrash;
-			if (!this._item.isRegularItem()) {
+			if (!this._item?.isRegularItem()) {
 				return;
 			}
 			for (let row of Array.from(this._attachments.querySelectorAll("attachment-row"))) {
