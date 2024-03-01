@@ -1926,7 +1926,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	isContainer = (index) => {
 		let item = this.getRow(index).ref;
-		return item.isRegularItem() || (item.isFileAttachment() && item.numAnnotations());
+		return item.isRegularItem() || item.isFileAttachment();
 	}
 
 	isContainerOpen = (index) => {
