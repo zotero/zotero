@@ -18,6 +18,10 @@
 	height: 16px;
 }
 
+#item-pane-header-locale-menu {
+	min-width: 12em;
+}
+
 @media (-moz-platform: windows) {
 	button, menulist, radio, checkbox, input {
 		margin-block: 4px;
