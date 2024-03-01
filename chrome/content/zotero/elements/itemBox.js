@@ -439,14 +439,7 @@
 		}
 		
 		get _ignoreFields() {
-			let value = ['title', 'abstractNote']
-				.flatMap(field => [
-					field,
-					...(Zotero.ItemFields.getTypeFieldsFromBase(field, true) || [])
-				]);
-			// Cache the result
-			Object.defineProperty(this, '_ignoreFields', { value });
-			return value;
+			return ['abstractNote'];
 		}
 
 		get _linkMenu() {
@@ -2069,6 +2062,13 @@
 			var fieldName = label.getAttribute('fieldname');
 			this._modifyField(fieldName, newValue);
 			
+			if (Zotero.ItemFields.isFieldOfBase(fieldName, 'title')) {
+				let shortTitleVal = this.item.getField('shortTitle');
+				if (newValue.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
+					this._modifyField('shortTitle', newValue.substring(0, shortTitleVal.length));
+				}
+			}
+
 			if (this.saveOnEdit) {
 				// If a field is open, blur it, which will trigger a save and cause
 				// the saveTx() to be a no-op

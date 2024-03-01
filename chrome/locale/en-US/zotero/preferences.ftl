@@ -33,6 +33,19 @@ preferences-color-scheme-light =
 preferences-color-scheme-dark =
     .label = Dark
 
+preferences-item-pane-header = Item Pane Header:
+preferences-item-pane-header-none =
+    .label = None
+preferences-item-pane-header-title =
+    .label = Title
+preferences-item-pane-header-title-creator-year =
+    .label = Title, Creator, Year
+preferences-item-pane-header-bib-entry =
+    .label = Bibliography Entry
+preferences-item-pane-header-style = Header Citation Style:
+preferences-item-pane-header-locale = Header Language:
+preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
+
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
