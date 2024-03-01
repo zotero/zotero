@@ -3782,7 +3782,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (item.isAnnotation()) {
 			let img = document.createElement("img");
 			img.className = "annotation-icon";
-			img.src = 'chrome://zotero/skin/16/universal/annotate-' + item.annotationType + '.svg';
+			let type = item.annotationType;
+			if (type == 'image') {
+				type = 'area';
+			}
+			img.src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
 			img.style.fill = item.annotationColor;
 			return img;
 		}
