@@ -322,6 +322,7 @@ Zotero.Items = function() {
 				if (e instanceof Zotero.Exception.UnloadedDataException) {
 					yield item.loadDataType('creators');
 					yield item.loadDataType('annotation');
+					yield item.loadDataType('tags');
 					item.updateDisplayTitle()
 				}
 				else {

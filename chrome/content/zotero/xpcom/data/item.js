@@ -985,7 +985,24 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 		}
 	}
 	else if (itemTypeID == itemTypeAnnotation) {
-		title = `"${(this.annotationComment || "").substring(0, 300)}". ${(this.annotationText || "").substring(0, 300)}`;
+		let isEmpty = str => (str || "").length == 0;
+		let tags = this.getTags();
+		const maxLength = 150;
+		if (!isEmpty(this.annotationComment)) {
+			title = `"${this.annotationComment.substring(0, maxLength)}"`;
+		}
+		if (!isEmpty(this.annotationText) && title.length < maxLength) {
+			title += `${!isEmpty(title) ? " | " : ""} ${this.annotationText.substring(0, maxLength)}`;
+		}
+
+		if (["image", "ink"].includes(this.annotationType) && title.length < maxLength) {
+			let annotationName = `${Zotero.Utilities.capitalize(this.annotationType)} ${Zotero.getString("itemTypes.annotation")}`;
+			title = `${annotationName}${isEmpty(title) ? "" : " | " + title}`;
+		}
+
+		if (tags.length > 0 && title.length < maxLength) {
+			title += (" | " + tags.map(t => t.tag).join(", "));
+		}
 	}
 	this._displayTitle = title;
 };
