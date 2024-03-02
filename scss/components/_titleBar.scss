@@ -64,7 +64,7 @@
 
 #titlebar {
 	display: flex;
-	align-items: center;
+	justify-content: center;
 	-moz-window-dragging: drag;
 	menu {
 		font-size: var(--zotero-font-size);
