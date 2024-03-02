@@ -1,4 +1,6 @@
 #toolbar-menubar {
+	// Need this to force show the menubar
+	display: initial;
 	// Allow right-click context menu on menubar
 	pointer-events: none;
 	visibility: visible;
@@ -14,7 +16,9 @@
 	pointer-events: all;
 }
 
-#titlebar {
+#titlebar,
+.menubar-container {
+	appearance: none;
 	height :var(--tab-min-height);
 	-moz-box-pack: center;
 	pointer-events: none;

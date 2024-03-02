@@ -8,7 +8,6 @@
 	padding: 7px;
 	border-radius: 5px;
 	--width-focus-border: 3px;
-	--radius-focus-border: 5px;
 }
 
 #zotero-tabs-menu-filter {
@@ -17,7 +16,10 @@
 	border: 1px solid transparent;
 	padding-inline-start: 5px !important;
 	padding: 2px;
-	@include focus-ring;
+
+	@media not (-moz-platform: windows) {
+		@include focus-ring;
+	}
 }
 
 #zotero-tabs-menu-list {

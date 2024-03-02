@@ -24,11 +24,12 @@
 	***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/scaffold.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/scaffold.css" type="text/css"?>
+
 
 <!DOCTYPE window [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
@@ -43,10 +44,13 @@
 	title="Scaffold"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	style="display: flex;">
+	style="display: flex;"
+	drawintitlebar-platforms="win, linux">
 
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 
 	<script>
@@ -55,6 +59,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js", this);
@@ -70,6 +75,8 @@
 
 		// Custom elements
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/menuAccessKey.js", this);
 	</script>
 
 	<commandset id="mainCommandSet">
@@ -148,201 +155,236 @@
 		<broadcaster id="validate-tests"/>
 	</broadcasterset>
 
-	<vbox flex="1" id="scaffold-pane">
-		
-		<menubar id="mb">
-			<menu id="mb-file" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
-				<menupopup id="mb-file-popup">
-					<menuitem id="mb-file-new" label="&scaffold.menu.new;" key="new" command="cmd_new"/>
-					<menuitem id="mb-file-load" label="&scaffold.menu.open;" key="load" command="cmd_load"/>
-					<menuitem id="mb-file-setTranslatorsDirectory" label="&scaffold.menu.setTranslatorsDirectory;" oncommand="Scaffold.promptForTranslatorsDirectory()"/>
-					<menuseparator/>
-					<menuitem id="mb-file-save" label="&scaffold.toolbar.save.label;" key="save" command="cmd_save"/>
-					<menuitem id="mb-file-saveToZotero" label="&scaffold.toolbar.saveToZotero.label;" key="save-to-zotero" command="cmd_save_to_zotero"/>
-					<menuseparator/>
-					<menuitem id="mb-file-runDetect" label="&scaffold.menu.runDetect;" key="detect-web" command="cmd_run_detect"/>
-					<menuitem id="mb-file-runDo" label="&scaffold.menu.runDo;" key="run-do-web" command="cmd_run_translator_or_tests"/>
-					<menuseparator/>
-					<menuitem id="menu_close" label="&closeCmd.label;" key="key_close" accesskey="&closeCmd.accesskey;" command="cmd_close"/>
-				</menupopup>
-			</menu>
-
-			<menu id="menu_edit" data-l10n-id="menu-edit">
-				<menupopup id="menu_EditPopup">
-					<menuitem id="menu_undo"
-							key="key_undo"
-							command="cmd_undo" data-l10n-id="text-action-undo"/>
-					<menuitem id="menu_redo"
-							key="key_redo"
-							command="cmd_redo" data-l10n-id="text-action-redo"/>
-					<menuseparator/>
-					<menuitem id="menu_cut"
-							key="key_cut"
-							command="cmd_cut" data-l10n-id="text-action-cut"/>
-					<menuitem id="menu_copy"
-							key="key_copy"
-							command="cmd_copy" data-l10n-id="text-action-copy"/>
-					<menuitem id="menu_paste"
-							key="key_paste"
-							command="cmd_paste" data-l10n-id="text-action-paste"/>
-					<menuitem id="menu_delete"
-							key="key_delete"
-							command="cmd_delete" data-l10n-id="text-action-delete"/>
-					<menuseparator/>
-					<menuitem id="menu_selectAll"
-							key="key_selectAll"
-							command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
-					<menuseparator/>
-					<menuitem id="menu_find" label="&findCmd.label;"
-							key="key_find" accesskey="&findCmd.accesskey;"
-							command="cmd_find"/>
-					<!--
-					#ifdef XP_UNIX
-					#ifndef XP_MACOSX
-					<menuseparator/>
-					<menuitem id="menu_preferences"
-						oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-preferences"/>
-					#endif
-					#endif
-					-->
-				</menupopup>
-			</menu>
-
-			<menu id="mb-view" label="&viewMenu.label;">
-				<menupopup id="mb-view-popup">
-					<menu id="mb-font-size-fields" label="&fontSize.label;">
-						<menupopup id="mb-help-fields-popup">
-							<menuitem id="mb-view-biggerFont" label="&zotero.general.bigger;" key="increase-font-size" command="cmd_increase_font_size"/>
-							<menuitem id="mb-view-smallerFont" label="&zotero.general.smaller;" key="decrease-font-size" command="cmd_decrease_font_size"/>
+	<vbox id="titlebar">
+		<hbox class="titlebar-icon-container">
+			<image class="titlebar-icon" src="chrome://zotero/skin/z.svg"></image>
+		</hbox>
+		<!-- Menu -->
+		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
+				defaultset="menubar-items"
+				mode="icons" iconsize="small" defaulticonsize="small" autohide="false"
+				context="toolbar-context-menu">
+			<toolbaritem id="menubar-items" align="center">
+				<menubar id="main-menubar">
+					<menu id="mb-file" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+						<menupopup id="mb-file-popup">
+							<menuitem id="mb-file-new" label="&scaffold.menu.new;" key="new" command="cmd_new"/>
+							<menuitem id="mb-file-load" label="&scaffold.menu.open;" key="load" command="cmd_load"/>
+							<menuitem id="mb-file-setTranslatorsDirectory" label="&scaffold.menu.setTranslatorsDirectory;" oncommand="Scaffold.promptForTranslatorsDirectory()"/>
 							<menuseparator/>
-							<menuitem id="mb-view-restoreFont" label="&zotero.general.reset;" key="restore-font-size" command="restore-font-size"/>
+							<menuitem id="mb-file-save" label="&scaffold.toolbar.save.label;" key="save" command="cmd_save"/>
+							<menuitem id="mb-file-saveToZotero" label="&scaffold.toolbar.saveToZotero.label;" key="save-to-zotero" command="cmd_save_to_zotero"/>
+							<menuseparator/>
+							<menuitem id="mb-file-runDetect" label="&scaffold.menu.runDetect;" key="detect-web" command="cmd_run_detect"/>
+							<menuitem id="mb-file-runDo" label="&scaffold.menu.runDo;" key="run-do-web" command="cmd_run_translator_or_tests"/>
+							<menuseparator/>
+							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close" accesskey="&closeCmd.accesskey;" command="cmd_close"/>
 						</menupopup>
 					</menu>
-				</menupopup>
-			</menu>
-
-			<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
-				<menupopup id="menu_ToolsPopup">
-					<menu id="menu_template"
-							label="&scaffold.menu.template;"
-							observes="code-tab-only">
-						<menupopup>
-								<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
-								<menu label="&scaffold.toolbar.template.scrape.label;">
-									<menupopup id="menu_template_scrapePopup">
-										<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
-										<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
-										<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
-										<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
-									</menupopup>
-								</menu>
+		
+					<menu id="menu_edit" data-l10n-id="menu-edit">
+						<menupopup id="menu_EditPopup">
+							<menuitem id="menu_undo"
+									key="key_undo"
+									command="cmd_undo" data-l10n-id="text-action-undo"/>
+							<menuitem id="menu_redo"
+									key="key_redo"
+									command="cmd_redo" data-l10n-id="text-action-redo"/>
+							<menuseparator/>
+							<menuitem id="menu_cut"
+									key="key_cut"
+									command="cmd_cut" data-l10n-id="text-action-cut"/>
+							<menuitem id="menu_copy"
+									key="key_copy"
+									command="cmd_copy" data-l10n-id="text-action-copy"/>
+							<menuitem id="menu_paste"
+									key="key_paste"
+									command="cmd_paste" data-l10n-id="text-action-paste"/>
+							<menuitem id="menu_delete"
+									key="key_delete"
+									command="cmd_delete" data-l10n-id="text-action-delete"/>
+							<menuseparator/>
+							<menuitem id="menu_selectAll"
+									key="key_selectAll"
+									command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+							<menuseparator/>
+							<menuitem id="menu_find" label="&findCmd.label;"
+									key="key_find" accesskey="&findCmd.accesskey;"
+									command="cmd_find"/>
+							<!--
+							#ifdef XP_UNIX
+							#ifndef XP_MACOSX
+							<menuseparator/>
+							<menuitem id="menu_preferences"
+								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-preferences"/>
+							#endif
+							#endif
+							-->
 						</menupopup>
 					</menu>
-					<menuseparator/>
-					<menu id="linter-menu"
-							label="&scaffold.menu.linter;"
-							onpopupshowing="Scaffold.populateLinterMenu()">
-						<menupopup>
-							<menuitem id="menu_eslintStatus" disabled="true"/>
-							<menuitem id="menu_toggleESLint" oncommand="Scaffold.toggleESLint()"/>
-						</menupopup>
-					</menu>
-				</menupopup>
-			</menu>
-
-			<commandset id="macCommandSet"> <!-- was mainCommandSet -->
-				<command id="minimizeWindow"
-						label="&minimizeWindow.label;"
-						oncommand="window.minimize();" />
-				<command id="zoomWindow"
-						label="&zoomWindow.label;"
-						oncommand="zoomWindow();" />
-			</commandset>
-
-			<keyset id="macKeyset">  <!-- was mainKeySet -->
-				<key id="key_minimizeWindow"
-						command="minimizeWindow"
-						key="&minimizeWindow.key;"
-						modifiers="accel"/>
-				<key id="key_quitApplication"
-						key="&quitApplicationCmdMac.key;"
-						command="cmd_quitApplication"
-						modifiers="accel"
-						internal="true"/>
-			</keyset>
-
-			<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
-			<menupopup id="menu_FilePopup">
-				<menuitem id="menu_preferences"
-						label="&preferencesCmdMac.label;"
-						key="key_preferencesCmdMac"
-						oncommand="Zotero.Utilities.Internal.openPreferences()"/>
-				<menuitem id="menu_mac_services"
-						label="&servicesMenuMac.label;"/>
-				<menuitem id="menu_mac_hide_app"
-						label="&hideThisAppCmdMac.label;"
-						key="key_hideThisAppCmdMac"/>
-				<menuitem id="menu_mac_hide_others"
-						label="&hideOtherAppsCmdMac.label;"
-						key="key_hideOtherAppsCmdMac"/>
-				<menuitem id="menu_mac_show_all"
-						label="&showAllAppsCmdMac.label;"/>
-				<menuitem id="menu_FileQuitItem"
-						label="&quitApplicationCmdMac.label;"
-						key="key_quitApplication"
-						command="cmd_quitApplication"/>
-			</menupopup>
-
-			<menu id="windowMenu"
-					label="&windowMenu.label;"
-					datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
-					onpopupshowing="macWindowMenuDidShow();"
-					onpopuphidden="macWindowMenuDidHide();"
-					hidden="false">
-				<template>
-					<rule>
-						<menupopup>
-							<menuitem uri="rdf:*"
-									label="rdf:http://home.netscape.com/NC-rdf#Name"
-									type="radio"
-									name="windowList"
-									oncommand="ShowWindowFromResource(event.target)"/>
-						</menupopup>
-					</rule>
-				</template>
-				<menupopup id="windowPopup">
-					<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
-					<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
-					<!-- decomment when "BringAllToFront" is implemented
-						<menuseparator/>
-						<menuitem label="&bringAllToFront.label;" disabled="true"/> -->
-					<menuseparator id="sep-window-list"/>
-				</menupopup>
-			</menu>
-			<!-- endif -->
-
-			<menu id="helpMenu" label="&helpMenu.label;" accesskey="&helpMenu.accesskey;">
-				<menupopup id="mb-help-popup">
-					<menuitem id="mb-help-types" label="&scaffold.toolbar.template.itemTypes.label;" oncommand="Scaffold.addTemplate('templateAllTypes')"/>
-					<menu id="mb-help-fields" label="&scaffold.toolbar.template.newItem.label;">
-						<menupopup id="mb-help-fields-popup">
-							<menuitem id="mb-help-fields-book" label="book" oncommand="Scaffold.addTemplate('templateNewItem', 'book')"/>
-							<menuitem id="mb-help-fields-booksection" label="bookSection" oncommand="Scaffold.addTemplate('templateNewItem', 'bookSection')"/>
-							<menuitem id="mb-help-fields-conferencepaper" label="conferencePaper" oncommand="Scaffold.addTemplate('templateNewItem', 'conferencePaper')"/>
-							<menuitem id="mb-help-fields-journalarticle" label="journalArticle" oncommand="Scaffold.addTemplate('templateNewItem', 'journalArticle')"/>
-							<menuitem id="mb-help-fields-magazinearticle" label="magazineArticle" oncommand="Scaffold.addTemplate('templateNewItem', 'magazineArticle')"/>
-							<menuitem id="mb-help-fields-newspaperarticle" label="newspaperArticle" oncommand="Scaffold.addTemplate('templateNewItem', 'newspaperArticle')"/>
-							<menu id="mb-help-fields-more" label="&scaffold.toolbar.template.more.label;">
-								<menupopup id="mb-help-fields-more-popup">
-								<!-- This will be filled on load with all other item types -->
+		
+					<menu id="mb-view" label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
+						<menupopup id="mb-view-popup">
+							<menu id="mb-font-size-fields" label="&fontSize.label;">
+								<menupopup id="mb-help-fields-popup">
+									<menuitem id="mb-view-biggerFont" label="&zotero.general.bigger;" key="increase-font-size" command="cmd_increase_font_size"/>
+									<menuitem id="mb-view-smallerFont" label="&zotero.general.smaller;" key="decrease-font-size" command="cmd_decrease_font_size"/>
+									<menuseparator/>
+									<menuitem id="mb-view-restoreFont" label="&zotero.general.reset;" key="restore-font-size" command="restore-font-size"/>
 								</menupopup>
 							</menu>
 						</menupopup>
 					</menu>
-				</menupopup>
-			</menu>
-		</menubar>
+		
+					<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
+						<menupopup id="menu_ToolsPopup">
+							<menu id="menu_template"
+									label="&scaffold.menu.template;"
+									observes="code-tab-only">
+								<menupopup>
+										<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
+										<menu label="&scaffold.toolbar.template.scrape.label;">
+											<menupopup id="menu_template_scrapePopup">
+												<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
+												<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
+												<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
+												<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
+											</menupopup>
+										</menu>
+								</menupopup>
+							</menu>
+							<menuseparator/>
+							<menu id="linter-menu"
+									label="&scaffold.menu.linter;"
+									onpopupshowing="Scaffold.populateLinterMenu()">
+								<menupopup>
+									<menuitem id="menu_eslintStatus" disabled="true"/>
+									<menuitem id="menu_toggleESLint" oncommand="Scaffold.toggleESLint()"/>
+								</menupopup>
+							</menu>
+						</menupopup>
+					</menu>
+		
+					<commandset id="macCommandSet"> <!-- was mainCommandSet -->
+						<command id="minimizeWindow"
+								label="&minimizeWindow.label;"
+								oncommand="window.minimize();" />
+						<command id="zoomWindow"
+								label="&zoomWindow.label;"
+								oncommand="zoomWindow();" />
+					</commandset>
+		
+					<keyset id="macKeyset">  <!-- was mainKeySet -->
+						<key id="key_minimizeWindow"
+								command="minimizeWindow"
+								key="&minimizeWindow.key;"
+								modifiers="accel"/>
+						<key id="key_quitApplication"
+								key="&quitApplicationCmdMac.key;"
+								command="cmd_quitApplication"
+								modifiers="accel"
+								internal="true"/>
+					</keyset>
+		
+					<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
+					<menupopup id="menu_FilePopup">
+						<menuitem id="menu_preferences"
+								label="&preferencesCmdMac.label;"
+								key="key_preferencesCmdMac"
+								oncommand="Zotero.Utilities.Internal.openPreferences()"/>
+						<menuitem id="menu_mac_services"
+								label="&servicesMenuMac.label;"/>
+						<menuitem id="menu_mac_hide_app"
+								label="&hideThisAppCmdMac.label;"
+								key="key_hideThisAppCmdMac"/>
+						<menuitem id="menu_mac_hide_others"
+								label="&hideOtherAppsCmdMac.label;"
+								key="key_hideOtherAppsCmdMac"/>
+						<menuitem id="menu_mac_show_all"
+								label="&showAllAppsCmdMac.label;"/>
+						<menuitem id="menu_FileQuitItem"
+								label="&quitApplicationCmdMac.label;"
+								key="key_quitApplication"
+								command="cmd_quitApplication"/>
+					</menupopup>
+		
+					<menu id="windowMenu"
+							label="&windowMenu.label;"
+							datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
+							onpopupshowing="macWindowMenuDidShow();"
+							onpopuphidden="macWindowMenuDidHide();"
+							hidden="false">
+						<template>
+							<rule>
+								<menupopup>
+									<menuitem uri="rdf:*"
+											label="rdf:http://home.netscape.com/NC-rdf#Name"
+											type="radio"
+											name="windowList"
+											oncommand="ShowWindowFromResource(event.target)"/>
+								</menupopup>
+							</rule>
+						</template>
+						<menupopup id="windowPopup">
+							<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
+							<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+							<!-- decomment when "BringAllToFront" is implemented
+								<menuseparator/>
+								<menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+							<menuseparator id="sep-window-list"/>
+						</menupopup>
+					</menu>
+					<!-- endif -->
+		
+					<menu id="helpMenu" label="&helpMenu.label;" accesskey="&helpMenu.accesskey;">
+						<menupopup id="mb-help-popup">
+							<menuitem id="mb-help-types" label="&scaffold.toolbar.template.itemTypes.label;" oncommand="Scaffold.addTemplate('templateAllTypes')"/>
+							<menu id="mb-help-fields" label="&scaffold.toolbar.template.newItem.label;">
+								<menupopup id="mb-help-fields-popup">
+									<menuitem id="mb-help-fields-book" label="book" oncommand="Scaffold.addTemplate('templateNewItem', 'book')"/>
+									<menuitem id="mb-help-fields-booksection" label="bookSection" oncommand="Scaffold.addTemplate('templateNewItem', 'bookSection')"/>
+									<menuitem id="mb-help-fields-conferencepaper" label="conferencePaper" oncommand="Scaffold.addTemplate('templateNewItem', 'conferencePaper')"/>
+									<menuitem id="mb-help-fields-journalarticle" label="journalArticle" oncommand="Scaffold.addTemplate('templateNewItem', 'journalArticle')"/>
+									<menuitem id="mb-help-fields-magazinearticle" label="magazineArticle" oncommand="Scaffold.addTemplate('templateNewItem', 'magazineArticle')"/>
+									<menuitem id="mb-help-fields-newspaperarticle" label="newspaperArticle" oncommand="Scaffold.addTemplate('templateNewItem', 'newspaperArticle')"/>
+									<menu id="mb-help-fields-more" label="&scaffold.toolbar.template.more.label;">
+										<menupopup id="mb-help-fields-more-popup">
+										<!-- This will be filled on load with all other item types -->
+										</menupopup>
+									</menu>
+								</menupopup>
+							</menu>
+						</menupopup>
+					</menu>
+				</menubar>
+			</toolbaritem>
+		</toolbar>
+		<hbox class="titlebar-buttonbox titlebar-color">
+			<!-- TODO: remove `titlebar-btn` when we are on FX115. See https://phabricator.services.mozilla.com/D162757 -->
+			<toolbarbutton class="titlebar-button titlebar-min"
+				titlebar-btn="min"
+				oncommand="window.minimize();"
+				data-l10n-id="browser-window-minimize-button"
+				/>
+			<toolbarbutton class="titlebar-button titlebar-max"
+				titlebar-btn="max"
+				oncommand="window.maximize();"
+				data-l10n-id="browser-window-maximize-button"
+				/>
+			<toolbarbutton class="titlebar-button titlebar-restore"
+				titlebar-btn="max"
+				oncommand="window.fullScreen ? BrowserFullScreen() : window.restore();"
+				data-l10n-id="browser-window-restore-down-button"
+				/>
+			<toolbarbutton class="titlebar-button titlebar-close"
+				titlebar-btn="close"
+				oncommand="window.close();"
+				data-l10n-id="browser-window-close-button"
+				/>
+		</hbox>
+	</vbox>
 
+	<vbox flex="1" id="scaffold-pane">
 		<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
 			<hbox id="scaffold-toolbar" align="center">
 				<toolbarbutton id="tb-load" tooltiptext="&scaffold.toolbar.load.label;" command="cmd_load" class="zotero-tb-button" />

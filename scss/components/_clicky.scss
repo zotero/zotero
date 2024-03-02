@@ -4,11 +4,11 @@
 
 	&:not([disabled=true]) {
 		&:hover {
-			background-color: var(--fill-quinary) !important;
+			background: var(--fill-quinary) !important;
 		}
 
 		&:active {
-			background-color: var(--fill-quarternary) !important;
+			background: var(--fill-quarternary) !important;
 		}
 	}
 }

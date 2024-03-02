@@ -279,7 +279,7 @@ var Zotero_CSL_Editor = new function () {
 				}
 			</style>
 		</head>
-		<body id="csl-edit-preview"><div class="${containerClass}">${content}</div></body>
+		<body id="csl-edit-preview"><div class="${containerClass} zotero-dialog">${content}</div></body>
 		</html>`;
 	};
 }();

@@ -5,7 +5,6 @@ collapsible-section {
 	padding-block: 4px;
 
 	--width-focus-border: 2px;
-	--radius-focus-border: 5px;
 
 	:not(:last-child) > & {
 		border-bottom: 1px solid var(--fill-quinary);

@@ -17,3 +17,9 @@
 .fileHandler-menu .menulist-icon {
 	height: 16px;
 }
+
+@media (-moz-platform: windows) {
+	button, menulist, radio, checkbox, input {
+		margin-block: 4px;
+	}
+}

@@ -1,12 +1,20 @@
-richlistbox {
+richlistbox.theme-listbox {
     background: var(--material-background);
     border: var(--material-panedivider);
 
     richlistitem {
-        color: var(--fill-primary);
-
-        &[selected=true] {
-            background: var(--color-accent);
-        }
+        --listitem-selectedBackground: var(--tag-gray);
+        --listitem-selectedFocusCurrentBackground: var(--color-accent);
+        --listitem-selectedTextColor: var(--accent-white);
+        --listitem-selectedBorder: transparent;
+        --listitem-selectedBottomBorder: transparent;
+        --listitem-selectedCurrentBorder: transparent;
+        --listitem-selectedFocusBorder: transparent;
+        --listitem-selectedFocusBottomBorder: transparent;
+        --listitem-selectedFocusCurrentBorder: transparent;
+        --listitem-selectedFocusBackground: var(--color-accent);
+        --listitem-selectedFocusColor: var(--accent-white);
+        --listitem-selectedColor: var(--accent-white);
+        --listitem-selectedFocusCurrentBottomBorder: transparent;
     }
 }

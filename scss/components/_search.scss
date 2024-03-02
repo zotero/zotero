@@ -4,9 +4,10 @@
 	height: 36px;
 
 	input {
-		background: var(--material-background);
+		background-color: var(--material-background);
 		border-radius: 5px;
-		border: var(--material-border-quinary);
+		// Overwrite input style on Windows
+		border: var(--material-border-quinary) !important;
 		color: var(--fill-primary);
 		flex: 1 0;
 		margin: 6px 0px;
@@ -18,10 +19,8 @@
 			opacity: 1.0;
 		}
 	
-		&:focus {
-			outline: none;
-			border-color: var(--color-focus-search);
-			box-shadow: 0 0 0 calc(var(--width-focus-border) - 1px) var(--color-focus-search);
+		@media not (-moz-platform: windows) {
+			@include focus-ring;
 		}
 	}
 
@@ -54,10 +53,8 @@ search-textbox {
 		opacity: 1.0;
 	}
 
-	&:focus {
-		outline: none;
-		border-color: transparent;
-		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-search);
+	@media not (-moz-platform: windows) {
+		@include focus-ring(false, focus);
 	}
 }
 

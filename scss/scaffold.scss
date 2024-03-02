@@ -29,7 +29,23 @@ $scaffold-toolbarbutton-icons: (
 	}
 };
 
+.menubar-container {
+	display: flex;
+	background: var(--material-sidepane);
+	border-bottom: var(--material-panedivider);
+
+	#main-menubar {
+		pointer-events: all;
+	}
+}
+
 #zotero-toolbar {
+	@media not (-moz-platform: macos) {
+		appearance: none;
+		background: var(--material-sidepane);
+	}
+	border-bottom: var(--material-panedivider);
+
 	toolbarbutton {
 		width: 28px;
 		height: 28px;
@@ -71,10 +87,6 @@ tab {
 	grid-template-columns: 1fr max-content;
 }
 
-#tabpanel-metadata input {
-	height: 1.5em;
-}
-
 #metadata-bottom-row {
 	display: flex;
 	align-items: center;
@@ -90,6 +102,7 @@ tab {
 
 #output {
 	height:200px;
+	background: var(--material-background);
 }
 
 richlistbox {
@@ -112,57 +125,6 @@ browser,
 
 vbox > splitter {
 	cursor: row-rgb(4, 4, 4)e;
-}
-
-/* Adapted from Mozilla common-shared.css */
-/* https://searchfox.org/mozilla-central/rev/2f5ed7b7244172d46f538051250b14fb4d8f1a5f/toolkit/themes/shared/in-content/common-shared.css */
-
-select[size][multiple],
-listheader,
-richlistbox {
-	appearance: none;
-	margin-inline: 0;
-	background: var(--material-background);
-	border: var(--material-panedivider);
-}
-
-listheader {
-	padding-bottom: 1px;
-}
-
-treecol {
-	appearance: none;
-	border: none;
-}
-
-listheader + richlistbox {
-	margin-top: 0;
-	border-top: none;
-}
-
-select[size][multiple] > option,
-treechildren::-moz-tree-row {
-	padding: 0.3em;
-	margin: 0;
-	border: none;
-	background-image: none;
-}
-
-richlistitem hbox {
-	overflow: hidden;
-}
-
-richlistitem[selected] menulist:focus-visible {
-	outline-offset: -2px;
-}
-
-richlistbox[disabled] {
-	opacity: 0.6;
-	pointer-events: none;
-}
-
-dialog richlistbox > richlistitem[disabled] {
-	font-weight: 600;
 }
 
 #left-tabbox {

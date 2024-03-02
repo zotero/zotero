@@ -68,14 +68,17 @@ editable-text {
 	}
 	
 	.input {
-		--width-focus-border: 1px;
-		--radius-focus-border: 5px;
+		border-radius: 5px;
 		
 		// No focus ring for read-only fields
 		&:read-only {
 			--width-focus-border: 0px;
+			--width-focus-outer-border: 0px;
 		}
-		@include focus-ring;
+
+		@media not (-moz-platform: windows) {
+			@include focus-ring(true);
+		}
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;
 		
@@ -90,13 +93,12 @@ editable-text {
 	
 		&:read-only, &:not(:focus) {
 			appearance: none;
-			background: transparent;
+			background: transparent !important;
 		}
 		
 		&:hover:not(:read-only, :focus) {
-			border-radius: 5px;
-			background-color: var(--fill-quinary);
-			box-shadow: 0 0 0 1px var(--fill-quinary);	
+			background: var(--fill-quinary) !important;
+			box-shadow: 0 0 0 1px var(--fill-quinary);
 		}
 		
 		::placeholder {

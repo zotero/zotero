@@ -32,6 +32,7 @@ quick-search-textbox {
 #zotero-tb-search-menu-button {
 	width: 36px;
 	height: 28px;
+	min-height: 28px;
 	// 6px padding + 16px icon width + 2px padding
 	padding-block: 0;
 	padding-inline: 24px 4px;
@@ -45,10 +46,7 @@ quick-search-textbox {
 	color: var(--fill-secondary);
 	background: transparent;
 
-	&:focus-visible {
-		outline: none;
-		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
-	}
+	@include focus-ring;
 
 	.button-menu-dropmarker {
 		display: none; /* Hide automatic dropmarker */

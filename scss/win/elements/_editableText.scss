@@ -1,0 +1,13 @@
+editable-text {
+	.input {
+		height: unset;
+		// Disable focus ring
+		outline: none;
+		padding-inline-start: unset;
+
+		&:not(:focus, :focus-visible),
+		&:read-only {
+			border: none !important;
+		}
+	}
+}

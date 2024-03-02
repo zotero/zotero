@@ -15,7 +15,11 @@
 	<html:link rel="localization" href="toolkit/global/wizard.ftl"/>
 </linkset>
 
-<script src="chrome://global/content/customElements.js"/>
+<script>
+	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+</script>
 
 <wizard title="&zotero.errorReport.title;" width="550" height="450">
 	<script>

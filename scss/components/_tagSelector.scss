@@ -92,10 +92,7 @@
 		background-color: var(--fill-quarternary);
 	}
 
-	&:focus-visible {
-		outline: none;
-		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
-	}
+	@include focus-ring;
 
 	.icon-css {
 		fill: var(--fill-secondary);
@@ -117,9 +114,7 @@
 		padding: 2px 4px;
 	}
 
-	--width-focus-border: 1px;
-	--radius-focus-border: 5px;
-	@include focus-ring;
+	@include focus-ring(true);
 
 	&:hover {
 		background-color: var(--fill-quinary);
