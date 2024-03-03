@@ -37,7 +37,7 @@
 							</search-textbox>
 						</vbox>
 					</hbox>
-					<vbox style="display: flex; min-width: 0;" flex="1">
+					<vbox style="display: flex; min-width: 0; flex-direction: row;" flex="1">
 						<html:div class="notes-list-container" tabindex="-1">
 							<context-notes-list></context-notes-list>
 						</html:div>
@@ -279,8 +279,7 @@
 				vbox.style.display = 'flex';
 
 				editor = new (customElements.get('note-editor'));
-				editor.style.display = 'flex';
-				editor.style.width = '100%';
+				editor.style.flex = "1";
 				vbox.append(editor);
 
 				tabNotesDeck.append(vbox);
