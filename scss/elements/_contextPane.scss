@@ -1,3 +1,15 @@
 context-pane {
     -moz-box-orient: vertical;
+
+    #zotero-context-pane-item-deck,
+    #zotero-context-pane-notes-deck {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+    }
+
+    .zotero-context-notes-list {
+        min-width: 0;
+        min-height: 0;
+    }
 }
