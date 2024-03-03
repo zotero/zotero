@@ -159,7 +159,8 @@
 			<image class="titlebar-icon" src="chrome://zotero/skin/z.svg"></image>
 		</hbox>
 		<!-- Menu -->
-		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
+		<!-- TEMP: Should be <toolbar>, but only HTML -moz-window-dragging: drag elements have rclick menu on Windows -->
+		<html:div type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
 				defaultset="menubar-items"
 				mode="icons" iconsize="small" defaulticonsize="small" autohide="false"
 				context="toolbar-context-menu">
@@ -357,7 +358,7 @@
 					</menu>
 				</menubar>
 			</toolbaritem>
-		</toolbar>
+		</html:div>
 		<hbox class="titlebar-buttonbox titlebar-color">
 			<!-- TODO: remove `titlebar-btn` when we are on FX115. See https://phabricator.services.mozilla.com/D162757 -->
 			<toolbarbutton class="titlebar-button titlebar-min"
@@ -478,7 +479,7 @@
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
-						<vbox flex="1">
+						<vbox flex="1" style="max-width: 100%;">
 							<!-- The `height` attribute on the vbox and iframe is overridden by `flex`. Without it,
 							     though, the richlistbox grows when tests are added. -->
 							<vbox flex="1" height="auto">
