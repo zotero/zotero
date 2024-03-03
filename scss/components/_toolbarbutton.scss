@@ -12,7 +12,6 @@ toolbarbutton {
 
 	.toolbarbutton-menu-dropmarker {
 		-moz-default-appearance: none;
-		visibility: visible;
 		@include svgicon-menu("chevron-8", "universal", "8");
 		color: var(--fill-secondary);
 		width: 8px;
