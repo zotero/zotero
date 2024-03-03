@@ -1,4 +1,7 @@
 item-pane {
+	min-width: $min-width-item-pane + $width-sidenav;
+	min-height: $min-width-item-pane + $width-sidenav;
+
 	&[collapsed="true"] {
 		min-width: $width-sidenav;
 		min-height: $width-sidenav;
@@ -27,6 +30,11 @@ item-pane {
 	}
 
 	&.stacked {
-		-moz-box-orient: vertical;
+		flex-direction: column;
+		height: 0px;
+
+		#zotero-item-pane-content {
+			width: 100%;
+		}
 	}
 }
