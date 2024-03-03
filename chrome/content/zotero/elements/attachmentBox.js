@@ -33,8 +33,10 @@
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
 					<attachment-preview id="attachment-preview" tabindex="0"/>
-					<label id="url" crop="end" tabindex="0"
-						ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
+					<html:div style="display: grid;">
+						<label id="url" crop="end" tabindex="0"
+							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
+					</html:div>
 					<html:div class="metadata-table">
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
