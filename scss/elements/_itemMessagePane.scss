@@ -1,5 +1,6 @@
 item-message-pane {
-	-moz-box-orient: vertical;
+	display: flex;
+	flex-direction: column;
 
 	.custom-head {
 		display: flex;
@@ -23,10 +24,7 @@ item-message-pane {
 	}
 
 	#zotero-item-pane-groupbox {
-		-moz-box-flex: 1;
-		-moz-box-pack: center;
-		-moz-box-align: center;
-		-moz-appearance: none !important;
+		flex: 1;
 		border-width: 0;
 	}
 }
