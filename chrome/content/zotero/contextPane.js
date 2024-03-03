@@ -136,8 +136,11 @@ var ZoteroContextPane = new function () {
 			_contextPaneSplitter.setAttribute('hidden', true);
 			_contextPane.classList.add('stacked');
 			_contextPane.classList.remove('standard');
-			_sidenav.classList.add('stacked');
-			_contextPaneInner.append(_sidenav);
+			_readerSidenav.classList.add('stacked');
+			if (_readerSidenav.parentElement != _contextPaneInner) {
+				_contextPaneInner.append(_readerSidenav);
+				_readerSidenav.render();
+			}
 			// Fx115: in stacked layout, make contextPane occupy all width and remove min-height
 			// needed for standard layout
 			_contextPane.style.width = 'auto';
@@ -149,8 +152,11 @@ var ZoteroContextPane = new function () {
 			_contextPaneSplitterStacked.setAttribute('state', 'open');
 			_contextPane.classList.add('standard');
 			_contextPane.classList.remove('stacked');
-			_sidenav.classList.remove('stacked');
-			_contextPane.append(_sidenav);
+			_readerSidenav.classList.remove('stacked');
+			if (_readerSidenav.parentElement != _contextPane) {
+				_contextPane.append(_readerSidenav);
+				_readerSidenav.render();
+			}
 			// FX115: in standard layout, make contextPane have the width it's supposed to and
 			// force it to occupy all height available
 			_contextPaneInner.style.minHeight = `100%`;
