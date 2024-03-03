@@ -12,8 +12,11 @@ item-pane-sidenav {
 	background: var(--material-sidepane);
 	position: relative; // Stop item pane content from overlapping
 	width: $width-sidenav;
+	height: auto;
 
 	&.stacked {
+		width: auto;
+		height: $width-sidenav;
 		flex-direction: row;
 		border-inline-start: none;
 		border-top: var(--material-panedivider);

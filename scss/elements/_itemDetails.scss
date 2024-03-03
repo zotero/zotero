@@ -1,5 +1,6 @@
 .zotero-item-pane-message-box description {
 	padding: 0 2em;
+	color: var(--fill-tertiary);
 }
 
 .zotero-item-pane-content > groupbox, .zotero-item-pane-content > groupbox > .groupbox-body
@@ -11,7 +12,7 @@
 .zotero-item-pane-content {
 	min-height: 0;
 	flex: 1;
-	width: $min-width-item-pane;
+	width: auto !important;
 	min-width: $min-width-item-pane;
 	/* Need a min height to prevent layout issues in stacked mode */
 	min-height: 168px;
@@ -21,7 +22,7 @@
 .zotero-view-item-container {
 	display: flex;
 	flex-direction: row;
-	height: 0;
+	height: auto;
 }
 
 .zotero-view-item-main {
