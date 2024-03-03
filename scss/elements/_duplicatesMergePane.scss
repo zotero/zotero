@@ -1,5 +1,6 @@
 duplicates-merge-pane {
-	-moz-box-orient: vertical;
+	display: flex;
+	flex-direction: column;
 
 	groupbox {
 		margin: 8px 0 0 0;
