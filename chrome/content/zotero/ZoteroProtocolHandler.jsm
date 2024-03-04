@@ -1366,6 +1366,8 @@ ZoteroProtocolHandler.prototype = {
 
 /**
  * @static
+ *
+ * Unregistered in Zotero.reinit() for tests
  */
 ZoteroProtocolHandler.init = function () {
 	Services.io.registerProtocolHandler(

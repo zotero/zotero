@@ -184,6 +184,9 @@ ZoteroContext.prototype = {
 	reinit: function (cb, options = {}) {
 		Services.obs.notifyObservers(zContext.Zotero, "zotero-before-reload");
 		return zContext.Zotero.shutdown().then(function() {
+			// Unregister custom protocol handler
+			Services.io.unregisterProtocolHandler('zotero');
+			
 			return cb ? cb() : false;
 		}).finally(function() {
 			makeZoteroContext();

@@ -23,7 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-const ZOTERO_AC_CID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
+const ZOTERO_AC_CLASS_ID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
+const ZOTERO_AC_CONTRACT_ID = "@mozilla.org/autocomplete/search;1?name=zotero";
 const EXPORTED_SYMBOLS = ['ZoteroAutoComplete'];
 
 const Cc = Components.classes;
@@ -351,19 +352,20 @@ ZoteroAutoComplete.prototype.stopSearch = function(){
 
 // Static
 ZoteroAutoComplete.init = function () {
-	let search = new ZoteroAutoComplete();
-	var name = "@mozilla.org/autocomplete/search;1?name=zotero";
-	var componentManager = Components.manager.QueryInterface(
-		Ci.nsIComponentRegistrar
-	);
-	componentManager.registerFactory(ZOTERO_AC_CID, "", name, search);
+	// If already registered (e.g., after a Zotero.reinit() in tests), skip
+	var registrar = Components.manager.QueryInterface(Ci.nsIComponentRegistrar);
+	if (registrar.isCIDRegistered(ZOTERO_AC_CLASS_ID)) {
+		return;
+	}
+	var search = new ZoteroAutoComplete();
+	registrar.registerFactory(ZOTERO_AC_CLASS_ID, "", ZOTERO_AC_CONTRACT_ID, search);
 };
 
 //
 // XPCOM goop
 //
 
-ZoteroAutoComplete.prototype.classID = ZOTERO_AC_CID;
+ZoteroAutoComplete.prototype.classID = ZOTERO_AC_CLASS_ID;
 ZoteroAutoComplete.prototype.QueryInterface = ChromeUtils.generateQI([
 	"nsIFactory",
 	"nsIAutoCompleteSearch"
