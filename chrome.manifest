@@ -63,9 +63,6 @@ locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/
 
 skin		zotero	default		chrome/skin/default/zotero/
 
-component	{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}			components/zotero-autocomplete.js
-contract	@mozilla.org/autocomplete/search;1?name=zotero 	{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}
-
 # Scaffold
 content scaffold             chrome/content/scaffold/
 locale  scaffold   en-US     chrome/locale/en-US/scaffold/

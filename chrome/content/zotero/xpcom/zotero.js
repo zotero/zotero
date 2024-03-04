@@ -674,6 +674,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			);
 			ZoteroProtocolHandler.init();
 
+			const { ZoteroAutoComplete } = ChromeUtils.import(
+				`chrome://zotero/content/zotero-autocomplete.js`
+			);
+			ZoteroAutoComplete.init();
+
 			yield Zotero.Users.init();
 			yield Zotero.Libraries.init();
 			
