@@ -295,7 +295,15 @@ var Zotero_Preferences = {
 			}
 
 			await document.l10n.ready;
-			await document.l10n.translateFragment(pane.container);
+			try {
+				await document.l10n.translateFragment(pane.container);
+			}
+			catch (e) {
+				// Some element had invalid l10n attributes, but elements with valid l10n attributes were
+				// translated successfully, so no need to treat this as fatal
+				// The error will be undefined for some reason, so make our own
+				Zotero.logError(new Error(`document.l10n.translateFragment() failed -- invalid data-l10n-id in pane '${pane.id}'?`));
+			}
 			await this._initImportedNodesPostInsert(pane.container);
 
 			pane.loaded = true;
