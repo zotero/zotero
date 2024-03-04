@@ -1051,16 +1051,17 @@ var ZoteroPane = new function()
 			//
 			// We use Control (17) on Windows and Linux because Alt triggers the menubar;
 			// On Mac, we use Option (18)
-			let enableHighlight = !event.shiftKey && !event.metaKey;
+			let enableHighlight = false;
 			if (Zotero.isMac) {
-				enableHighlight = event.key == "Alt" && !event.ctrlKey;
+				enableHighlight = !event.shiftKey && !event.metaKey && event.key == "Alt" && !event.ctrlKey;
 			}
 			else {
-				enableHighlight = event.key == "Control" && !event.altKey;
+				enableHighlight = !event.shiftKey && !event.metaKey && event.key == "Control" && !event.altKey;
 			}
-			// Do not interfere with Control-C/Control-V shortcuts
-			let inputFocused = ["input", "textarea"].includes(document.activeElement.tagName);
-			if (enableHighlight && !inputFocused) {
+			let isItemTreeFocused = document.activeElement.id == "item-tree-main-default";
+			// Only highlight collections when itemTree is focused to try to avoid
+			// conflicts with other shortcuts
+			if (enableHighlight && isItemTreeFocused) {
 				// On windows, the event is re-triggered multiple times
 				// for as long as Control is held.
 				// To account for that, stop if a highlight timer already exists.
@@ -1073,6 +1074,15 @@ var ZoteroPane = new function()
 				this.highlightTimer.initWithCallback({
 					notify: ZoteroPane_Local.setHighlightedRowsCallback
 				}, 225, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			}
+			// If anything but Ctlr/Options was pressed, most likely a different shortcut using Ctlr/Options
+			// is being used (e.g. Ctrl-Shift-A on windows). In that case, stop highlighting
+			else if ((Zotero.isMac && event.altKey) || (!Zotero.isMac && event.ctrlKey)) {
+				if (this.highlightTimer) {
+					this.highlightTimer.cancel();
+					this.highlightTimer = null;
+				}
+				ZoteroPane.collectionsView.setHighlightedRows();
 			}
 		}
 	}
