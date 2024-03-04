@@ -24,6 +24,7 @@
 */
 
 const ZOTERO_AC_CID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
+const EXPORTED_SYMBOLS = ['ZoteroAutoComplete'];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -31,9 +32,7 @@ const Cr = Components.results;
 
 Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
 
-var Zotero = Components.classes["@zotero.org/Zotero;1"]
-	.getService(Components.interfaces.nsISupports)
-	.wrappedJSObject;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 /*
  * Implements nsIAutoCompleteSearch
@@ -340,6 +339,9 @@ ZoteroAutoComplete.prototype.updateResults = function (values, ids, ongoing, res
 	this._listener.onSearchResult(this, this._result);
 }
 
+ZoteroAutoComplete.prototype.createInstance = function (iid) {
+	return this.QueryInterface(iid);
+};
 
 // FIXME
 ZoteroAutoComplete.prototype.stopSearch = function(){
@@ -347,14 +349,22 @@ ZoteroAutoComplete.prototype.stopSearch = function(){
 	this._cancelled = true;
 }
 
+// Static
+ZoteroAutoComplete.init = function () {
+	let search = new ZoteroAutoComplete();
+	var name = "@mozilla.org/autocomplete/search;1?name=zotero";
+	var componentManager = Components.manager.QueryInterface(
+		Ci.nsIComponentRegistrar
+	);
+	componentManager.registerFactory(ZOTERO_AC_CID, "", name, search);
+};
+
 //
 // XPCOM goop
 //
 
 ZoteroAutoComplete.prototype.classID = ZOTERO_AC_CID;
 ZoteroAutoComplete.prototype.QueryInterface = ChromeUtils.generateQI([
-	Components.interfaces.nsIAutoCompleteSearch,
-	Components.interfaces.nsIAutoCompleteObserver
+	"nsIFactory",
+	"nsIAutoCompleteSearch"
 ]);
-
-var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroAutoComplete]);
