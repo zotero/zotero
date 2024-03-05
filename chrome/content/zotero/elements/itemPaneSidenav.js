@@ -111,7 +111,7 @@
 					tooltiptext="&zotero.toolbar.openURL.label;"
 					type="menu"
 					data-action="locate">
-					<menupopup onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>
+					<menupopup/>
 				</toolbarbutton>
 			</html:div>
 			
@@ -422,6 +422,18 @@
 							return;
 						}
 						this._collapsed = !this._collapsed;
+					});
+				}
+				else if (action === 'locate') {
+					toolbarbutton.addEventListener('mousedown', async (event) => {
+						if (event.button !== 0 || toolbarbutton.open) {
+							return;
+						}
+						event.preventDefault();
+						let menu = toolbarbutton.querySelector('menupopup');
+						await Zotero_LocateMenu.buildLocateMenu(menu);
+						await document.l10n.translateFragment(menu);
+						toolbarbutton.open = true;
 					});
 				}
 			}

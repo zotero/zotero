@@ -34,7 +34,7 @@ var Zotero_LocateMenu = new function() {
   	/**
   	 * Clear and build the locate menu
   	 */
-	this.buildLocateMenu = function (locateMenu) {
+	this.buildLocateMenu = async function (locateMenu) {
 		// clear menu
 		while(locateMenu.childElementCount > 0) {
 			locateMenu.removeChild(locateMenu.firstChild);
@@ -43,7 +43,7 @@ var Zotero_LocateMenu = new function() {
 		var selectedItems = _getSelectedItems();
 		
 		if(selectedItems.length) {
-			_addViewOptions(locateMenu, selectedItems, true, true, true);
+			await _addViewOptions(locateMenu, selectedItems, true, true, true);
 			
 			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
