@@ -137,6 +137,14 @@ var Zotero_QuickFormat = new function () {
 					moveFocusForward(_lastFocusedInput);
 				}
 			});
+			referenceBox.addEventListener("focusin", (e) => {
+				// When a reference item is focused, add the section to the aria-description component
+				// so that is is announced before the hint.
+				if (e.target.classList.contains("item")) {
+					let ariaDescription = document.getElementById("item-description");
+					ariaDescription.dataset.l10nArgs = JSON.stringify({ section: e.target.dataset.section });
+				}
+			});
 			if (Zotero.isWin) {
 				if (Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
 					dialog.setAttribute("square", "true");
@@ -807,7 +815,7 @@ var Zotero_QuickFormat = new function () {
 		if (selectedItems.length) {
 			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.selectedItems")));
 			for (let item of selectedItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
-				referenceBox.appendChild(_buildListItem(item));
+				referenceBox.appendChild(_buildListItem(item, Zotero.getString("integration.selectedItems")));
 			}
 		}
 
@@ -815,7 +823,7 @@ var Zotero_QuickFormat = new function () {
 		if (openItems.length && ITEM_LIST_MAX_ITEMS - referenceBox.children.length) {
 			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.openTabs")));
 			for (let item of openItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
-				referenceBox.appendChild(_buildListItem(item));
+				referenceBox.appendChild(_buildListItem(item, Zotero.getString("integration.openTabs")));
 			}
 		}
 		
@@ -829,7 +837,7 @@ var Zotero_QuickFormat = new function () {
 			else if (citedItems && citedItems.length) {
 				referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
 				for (let item of citedItems.slice(0, ITEM_LIST_MAX_ITEMS - referenceBox.children.length)) {
-					referenceBox.appendChild(_buildListItem(item));
+					referenceBox.appendChild(_buildListItem(item, Zotero.getString("integration.cited")));
 				}
 			}
 		}
@@ -846,7 +854,7 @@ var Zotero_QuickFormat = new function () {
 				referenceBox.appendChild(_buildListSeparator(libraryName));
 			}
 
-			referenceBox.appendChild(_buildListItem(item));
+			referenceBox.appendChild(_buildListItem(item, libraryName));
 			previousLibrary = libraryID;
 		}
 
@@ -965,7 +973,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Creates an item to be added to the item list
 	 */
-	function _buildListItem(item) {
+	function _buildListItem(item, section) {
 		var titleNode = document.createXULElement("label");
 		titleNode.setAttribute("class", "citation-dialog title");
 		titleNode.setAttribute("flex", "1");
@@ -982,6 +990,8 @@ var Zotero_QuickFormat = new function () {
 		rll.setAttribute("class", "citation-dialog item");
 		rll.setAttribute("zotero-item", item.cslItemID ? item.cslItemID : item.id);
 		rll.setAttribute("aria-describedby", "item-description");
+		// Record which section (e.g. opened documents, selected, etc.) this item belongs to
+		rll.dataset.section = section;
 		rll.appendChild(titleNode);
 		rll.appendChild(infoNode);
 		rll.addEventListener("click", Zotero_QuickFormat._bubbleizeSelected, false);
@@ -1300,6 +1310,9 @@ var Zotero_QuickFormat = new function () {
 			}, false);
 		}
 
+		referencePanel.openPopup(dialog, "after_start", 15, 0, false, false, null);
+		// Clear the section from aria description of items. It will be set when the ref panel is focused.
+		document.getElementById("item-description").dataset.l10nArgs = JSON.stringify({ section: "none" });
 		referencePanel.openPopup(dialog, "after_start", 15, 0, false, false, null);
 	}
 	

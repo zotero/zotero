@@ -436,6 +436,9 @@ toggle-preview =
 
 quickformat-aria-bubble = Press Down Arrow to open citation properties.
 quickformat-aria-input = Type your search term. Use Down Arrow and Up Arrow to navigate the search results.
-quickformat-aria-item = Press { return-or-enter } to select this item. Press Tab to return to the search field.
+quickformat-aria-item = { $section ->
+    [none] { "" }
+    *[other] This item belongs to { $section }. Press { return-or-enter } to select this item. Press Tab to return to the search field.
+    }
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
