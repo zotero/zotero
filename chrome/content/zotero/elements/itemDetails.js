@@ -503,22 +503,12 @@
 				stopEvent();
 				return;
 			}
-			// Tab tavigation between entries and buttons within library, related and notes boxes
-			if (event.key == "Tab" && event.target.closest(".box")) {
-				let next = null;
-				if (event.key == "Tab" && !event.shiftKey) {
-					next = event.target.nextElementSibling;
-				}
-				if (event.key == "Tab" && event.shiftKey) {
-					next = event.target.parentNode.previousElementSibling?.lastChild;
-				}
-				// Force the element to be visible before focusing
-				if (next) {
-					next.style.visibility = "visible";
-					next.focus();
-					next.style.removeProperty("visibility");
-					stopEvent();
-				}
+			// +/- from the pane itself will collapse/expand all sections
+			if (["Equal", "Minus"].includes(event.code)
+				&& event.target.classList.contains("zotero-view-item")) {
+				this.querySelectorAll("collapsible-section").forEach((section) => {
+					section.open = (event.code == "Equal");
+				});
 			}
 		};
 
