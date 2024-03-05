@@ -1880,12 +1880,6 @@ var ZoteroPane = new function()
 					ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
 				}
 				
-				else if (item.isAnnotation()) {
-					var annotationBox = document.getElementById('zotero-annotations-box');
-					annotationBox.item = item;
-					document.getElementById('zotero-item-pane-content').selectedIndex = 5;
-				}
-				
 				// Regular item
 				else {
 					var isCommons = collectionTreeRow.isBucket();

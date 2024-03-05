@@ -61,6 +61,11 @@
 		set item(item) {
 			this.blurOpenField();
 			this._item = item;
+			if (item.isAnnotation()) {
+				this.style.display = 'none';
+				return;
+			}
+			this.style.display = '';
 			this.render();
 		}
 		

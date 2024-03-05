@@ -38,7 +38,7 @@
 
 		set item(item) {
 			this._item = item;
-			if (item?.isFileAttachment()) {
+			if (item?.isFileAttachment() || item?.isAnnotation()) {
 				this.hidden = false;
 				this.render();
 			}
@@ -66,9 +66,8 @@
 		}
 
 		render() {
-			if (!this.initialized || !this.item?.isFileAttachment()) return;
-
-			let annotations = this.item.getAnnotations();
+			if (!this.initialized && !(this.item?.isFileAttachment() || this.item?.isAnnotation())) return;
+			let annotations = this.item.isAnnotation() ? [this.item] : this.item.getAnnotations();
 			this._section.setCount(annotations.length);
 
 			this._body.replaceChildren();
