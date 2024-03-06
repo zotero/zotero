@@ -159,6 +159,10 @@ var Zotero_Preferences = {
 
 			this.helpContainer.hidden = !pane.helpURL;
 			document.getElementById('prefs-subpane-back-button').hidden = !pane.parent;
+
+			if (!pane.parent) {
+				Zotero.Prefs.set('lastSelectedPrefPane', paneID);
+			}
 		}
 		else {
 			for (let navItem of this.navigation.children) {
@@ -168,7 +172,6 @@ var Zotero_Preferences = {
 			this.helpContainer.hidden = true;
 			document.getElementById('prefs-subpane-back-button').hidden = true;
 		}
-		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
 	},
 
 	/**
