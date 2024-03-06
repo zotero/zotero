@@ -276,7 +276,7 @@ Zotero.FileHandlers = {
 						// PDF-XChange: http://help.tracker-software.com/eu/default.aspx?pageid=PDFXView25:command_line_options
 						args.unshift('/A', 'page=' + page);
 					}
-					await Zotero.Utilities.Internal.exec(appPath, args);
+					Zotero.Utilities.Internal.exec(appPath, args);
 				}
 			}
 		],
@@ -291,7 +291,7 @@ Zotero.FileHandlers = {
 					if (location?.position?.value) {
 						args.push('--open-at=' + location.position.value);
 					}
-					await Zotero.Utilities.Internal.exec(appPath, args);
+					Zotero.Utilities.Internal.exec(appPath, args);
 				}
 			}
 		]
@@ -331,7 +331,7 @@ Zotero.FileHandlers = {
 					if (page !== undefined) {
 						args.unshift('-p', page);
 					}
-					await Zotero.Utilities.Internal.exec(appPath, args);
+					Zotero.Utilities.Internal.exec(appPath, args);
 				}
 			}
 		],
@@ -346,7 +346,7 @@ Zotero.FileHandlers = {
 					if (location?.position?.value) {
 						args.push('--open-at=' + location.position.value);
 					}
-					await Zotero.Utilities.Internal.exec(appPath, args);
+					Zotero.Utilities.Internal.exec(appPath, args);
 				}
 			}
 		]
