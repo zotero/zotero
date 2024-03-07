@@ -46,6 +46,7 @@ pref("extensions.zotero.showTrashWhenEmpty", true);
 pref("extensions.zotero.trashAutoEmptyDays", 30);
 pref("extensions.zotero.viewOnDoubleClick", true);
 pref("extensions.zotero.firstRunGuidance", true);
+pref("extensions.zotero.firstRunGuidanceShown.z7Banner", true);
 pref("extensions.zotero.showConnectorVersionWarning", true);
 pref("extensions.zotero.reopenPanesOnRestart", true);
 
