@@ -656,3 +656,10 @@ find-pdf-files-added = { $count ->
     [one] { $count } file added
     *[other] { $count } files added
 }
+
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in Zotero 7</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = Remind Me Later
+post-upgrade-done =
+    .label = Done

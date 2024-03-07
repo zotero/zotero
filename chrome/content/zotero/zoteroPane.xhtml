@@ -1081,23 +1081,58 @@
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
 							
+							<vbox id="post-upgrade-container" collapsed="true" role="status">
+								<html:div id="post-upgrade-banner">
+									<html:div data-l10n-id="post-upgrade-message">
+										<html:a
+											data-l10n-name="new-features-link"
+											id="post-upgrade-new-features-link"
+											class="link"
+											onclick="alert('New features page')"
+											tabindex="0"
+										/>
+									</html:div>
+									<html:div>•</html:div>
+									<html:div data-l10n-id="post-upgrade-density"/>
+									<radiogroup
+										id="post-upgrade-density"
+										orient="horizontal"
+										oncommand="Zotero.Prefs.set('uiDensity', this.value)"
+									>
+										<radio value="compact" data-l10n-id="menu-ui-density-compact"/>
+										<radio value="comfortable" data-l10n-id="menu-ui-density-comfortable"/>
+									</radiogroup>
+									<html:div id="post-upgrade-buttons">
+										<button
+											data-l10n-id="post-upgrade-remind-me-later"
+											oncommand="ZoteroPane.hidePostUpgradeBanner(true)"
+										/>
+										<button
+											data-l10n-id="post-upgrade-done"
+											oncommand="ZoteroPane.hidePostUpgradeBanner(false)"
+											default="true"
+										/>
+									</html:div>
+								</html:div>
+							</vbox>
+
 							<vbox id="sync-reminder-container" collapsed="true" role="status">
 								<html:div id="sync-reminder-banner">
-									<html:div id="sync-reminder-message"/>
-									<html:a id="sync-reminder-action" class="sync-reminder-link"/>
-									<html:a id="sync-reminder-learn-more" class="sync-reminder-link"/>
-									<html:div id="sync-reminder-spacer"/>
-									<html:a id="sync-reminder-disable" class="sync-reminder-link"/>
-									<html:a id="sync-reminder-remind" class="sync-reminder-link"/>
-									<label is="text-link" id="sync-reminder-close">×</label>
+									<html:div id="sync-reminder-message" class="message"/>
+									<html:a id="sync-reminder-action" class="link"/>
+									<html:a id="sync-reminder-learn-more" class="link"/>
+									<html:div class="spacer"/>
+									<html:a id="sync-reminder-disable" class="link"/>
+									<html:a id="sync-reminder-remind" class="link"/>
+									<label is="text-link" id="sync-reminder-close" class="close-link">×</label>
 								</html:div>
 							</vbox>
 							
 							<vbox id="retracted-items-container" collapsed="true" role="status">
 								<html:div id="retracted-items-banner">
-									<html:div id="retracted-items-message"/>
+									<html:div id="retracted-items-message" class="message"/>
 									<label is="text-link" id="retracted-items-link"/>
-									<label is="text-link" id="retracted-items-close">×</label>
+									<label is="text-link" id="retracted-items-close" class="close-link">×</label>
 								</html:div>
 							</vbox>
 

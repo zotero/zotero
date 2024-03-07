@@ -1,0 +1,94 @@
+#post-upgrade-banner, #retracted-items-banner, #sync-reminder-banner {
+	display: flex;
+	justify-content: center;
+	text-align: center;
+	position: relative;
+	white-space: nowrap;
+	overflow: hidden;
+
+	label[is="text-link"], .link {
+		color: inherit;
+		border: none;
+		margin: 0;
+	}
+}
+
+#post-upgrade-container {
+	background: var(--material-background);
+}
+
+#post-upgrade-banner {
+	background: var(--accent-blue30);
+	color: var(--fill-primary);
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+
+	.link {
+		color: var(--accent-blue);
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	
+	#post-upgrade-buttons {
+		position: absolute;
+		inset-inline-end: 12px;
+		display: flex;
+		gap: 8px;
+		
+		button {
+			margin: 0;
+		}
+	}
+}
+
+#retracted-items-banner, #sync-reminder-banner {
+	line-height: 2.2em;
+	font-size: 13.5px;
+	padding: 0 2em;
+	font-weight: 600;
+
+	.message {
+		margin-inline-end: .8em;
+	}
+
+	.spacer {
+		flex: 1;
+	}
+
+	.close-link {
+		text-decoration: none;
+		position: absolute;
+		cursor: pointer;
+		top: -2px;
+		inset-inline-end: 9px;
+		font-size: 22px;
+	}
+}
+
+#retracted-items-banner {
+	background: #d93425;
+	color: white;
+
+	label[is="text-link"] {
+		margin-inline-start: 0.3em;
+		
+		&:active {
+			color: #f9e8e2;
+		}
+	}
+}
+
+#sync-reminder-banner {
+	background: rgb(255, 234, 80);
+	border-bottom: #a9a9a9 .5px solid;
+	color: black;
+
+	.link {
+		padding-inline: 0.5em;
+		
+		&:active {
+			color: #4b4b4b;
+		}
+	}
+}

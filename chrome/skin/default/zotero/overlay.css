@@ -333,67 +333,6 @@ TODO: Replace with SVG
 	height: 16px;
 }
 
-#retracted-items-banner, #sync-reminder-banner {
-	display: flex;
-	justify-content: center;
-	background: #d93425;
-	line-height: 2.2em;
-	font-weight: 600;
-	color: white;
-	font-size: 13.5px;
-	text-align: center;
-	padding: 0 2em;
-	position: relative;
-	white-space: nowrap;
-	overflow: hidden;
-}
-
-#sync-reminder-banner {
-	background: rgb(255, 234, 80);
-	border-bottom: #a9a9a9 .5px solid;
-	color: black;
-}
-
-#retracted-items-message, #sync-reminder-message {
-	margin-right: .8em;
-}
-
-#sync-reminder-spacer {
-	flex: 1;
-}
-
-#retracted-items-link, .sync-reminder-link, #retracted-items-close, #sync-reminder-close {
-	color: inherit;
-	border: none;
-	margin: 0;
-}
-
-#retracted-items-link {
-	margin-left: .3em;
-}
-
-.sync-reminder-link {
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-}
-
-#retracted-items-link:active {
-	color: #f9e8e2;
-}
-
-.sync-reminder-link:active {
-	color: #4b4b4b;
-}
-
-#retracted-items-close, #sync-reminder-close {
-	text-decoration: none;
-	position: absolute;
-	cursor: pointer;
-	top: -2px;
-	right: 9px;
-	font-size: 22px;
-}
-
 /* Missing in Fx60 */
 .autocomplete-richlistbox {
 	border: 1px solid transparent;
