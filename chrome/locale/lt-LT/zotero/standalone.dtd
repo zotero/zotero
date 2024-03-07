@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopijuoti citatą">
 <!ENTITY copyBibliographyCmd.label "Kopijuoti bibliografiją">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopijuoti pastabą">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Keisti puslapio kryptį">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "p">
@@ -45,7 +45,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Eiti">
 
 
 <!ENTITY viewMenu.label "Rodymas">

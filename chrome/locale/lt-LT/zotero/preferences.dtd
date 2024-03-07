@@ -26,17 +26,17 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šalinti šiukšlinės įrašus, senesnius nei">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "d.">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
-<!ENTITY zotero.preferences.reader.tabsTitle.filename "Failo vardas">
+<!ENTITY zotero.preferences.pdfReader "PDF žiūryklė">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Kortelių antraštės:">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "autorius - metai - pavadinimas">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "pavadinimas - autorius - metai">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Rinkmenos vardas">
 
 <!ENTITY zotero.preferences.groups "Grupės">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kopijuojant elementus tarp bibliotekų, įtraukti:">
 <!ENTITY zotero.preferences.groups.childNotes "įrašams priklausančias pastabas">
 <!ENTITY zotero.preferences.groups.childFiles "įrašams priklausančias tinklalapių momentines kopijas ir importuotus failus">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotacijos">
 <!ENTITY zotero.preferences.groups.childLinks "įrašams priklausančias nuorodas">
 <!ENTITY zotero.preferences.groups.tags "gaires">
 
@@ -46,7 +46,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Seniausi pradžioje">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Numatytosios kanalų parinktys">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Pasirinkti sprendiklį">
 <!ENTITY zotero.preferences.openurl.custom "Savitas...">
 <!ENTITY zotero.preferences.openurl.server "Sprendiklis:">
 <!ENTITY zotero.preferences.openurl.version "Versija:">
@@ -111,8 +111,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Jei parinktis nepasirinkta, Zotero URL adresus įtrauks tik jei cituojamas žurnalo, laikraščio ar periodinio leidinio straipsnyje nenurodyti puslapiai.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Greitas kopijavimas">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Įrašų formatas:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Pastabų formatas:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopijuoti HTML formatu">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Parinktys atskiroms svetainėms:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Sritis/kelias">
