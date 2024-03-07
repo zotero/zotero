@@ -12,6 +12,7 @@ general-choose-file = Choose File…
 general-open-settings = Open Settings
 general-help = Help
 general-tag = Tag
+general-done = Done
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -668,3 +669,10 @@ file-type-video = Video
 file-type-presentation = Presentation
 file-type-document = Document
 file-type-ebook = Ebook
+
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }
