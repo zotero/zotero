@@ -1993,8 +1993,10 @@ var ZoteroPane = new function()
 
 			if (!document.querySelector("#zotero-items-splitter").collapsed) {
 				let isStackedMode = Zotero.Prefs.get("layout") === "stacked";
+				let wasFillingHiddenSidenav = pane.hasAttribute("fill-hidden-sidenav");
 				const sidenavSize = 37;
-				if (hideSidenav && !sidenav.hidden) {
+				if (hideSidenav && !wasFillingHiddenSidenav) {
+					pane.setAttribute("fill-hidden-sidenav", true);
 					sidenav.hidden = true;
 					if (isStackedMode) {
 						pane.height = `${(pane.clientHeight) + sidenavSize}`;
@@ -2003,7 +2005,8 @@ var ZoteroPane = new function()
 						pane.width = `${(pane.clientWidth) + sidenavSize}`;
 					}
 				}
-				else if (!hideSidenav && sidenav.hidden) {
+				else if (!hideSidenav && wasFillingHiddenSidenav) {
+					pane.removeAttribute("fill-hidden-sidenav");
 					sidenav.hidden = false;
 					if (isStackedMode) {
 						pane.height = `${(pane.clientHeight) - sidenavSize}`;
