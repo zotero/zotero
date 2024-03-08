@@ -43,6 +43,7 @@ var ZoteroPane = new function()
 	this.destroy = destroy;
 	this.isFullScreen = isFullScreen;
 	this.handleKeyDown = handleKeyDown;
+	this.captureKeyDown = captureKeyDown;
 	this.handleKeyUp = handleKeyUp;
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.handleKeyPress = handleKeyPress;
@@ -75,6 +76,8 @@ var ZoteroPane = new function()
 		
 		// Set key down handler
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown);
+		// Keydown handling that captures events. E.g. tab navigation
+		document.addEventListener('keydown', ZoteroPane.captureKeyDown, true);
 		// focusout, unlike blur, bubbles up to document level
 		// so handleBlur gets triggered when any field, not just the document, looses focus
 		document.addEventListener('focusout', ZoteroPane.handleBlur);
@@ -869,37 +872,12 @@ var ZoteroPane = new function()
 		return document.getElementById('zotero-pane-stack').getAttribute('fullscreenmode') == 'true';
 	}
 	
-	
-	/*
-	 * Trigger actions based on keyboard shortcuts
+	/**
+	 * Capturing listener to handle shortcut-related keypresses when we need
+	 * to be sure that the events are not handled by any other lower-level component.
+	 * E.g. tab navigation hotkeys should work regardless of which component is focused.
 	 */
-	function handleKeyDown(event, from) {
-		if (Zotero_Tabs.selectedIndex > 0) {
-			// Escape from outside of the reader will focus reader's scrollable area
-			if (event.key === 'Escape') {
-				if (!document.activeElement.classList.contains('reader')) {
-					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-					if (reader) {
-						reader.focus();
-					}
-				}
-			}
-			// Tab into the reader from outside of it (e.g. from the contextPane)
-			// will focus the scrollable area
-			else if (event.key === 'Tab') {
-				if (!document.activeElement.classList.contains('reader')) {
-					setTimeout(() => {
-						if (document.activeElement.classList.contains('reader')) {
-							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-							if (reader) {
-								reader.focus();
-							}
-						}
-					});
-				}
-			}
-		}
-
+	function captureKeyDown(event) {
 		const cmdOrCtrlOnly = Zotero.isMac
 			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
 			: (event.ctrlKey && !event.shiftKey && !event.altKey);
@@ -1014,6 +992,41 @@ var ZoteroPane = new function()
 					event.preventDefault();
 					event.stopPropagation();
 					return;
+			}
+		}
+	}
+	
+	/*
+	 * Bubbling listener for navigation or shortcuts keydown events that should be
+	 * handled only if no lower-level element overrode it by stopping event propagation.
+	 * E.g. Escape when reader is opened refocuses the scrollable area of the reader. This should
+	 * not happen if Escape was pressed when a menupopup is opened - just let menupopup handle the
+	 * Escape and close the popup.
+	 */
+	function handleKeyDown(event, from) {
+		if (Zotero_Tabs.selectedIndex > 0) {
+			// Escape from outside of the reader will focus reader's scrollable area
+			if (event.key === 'Escape') {
+				if (!document.activeElement.classList.contains('reader')) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focus();
+					}
+				}
+			}
+			// Tab into the reader from outside of it (e.g. from the contextPane)
+			// will focus the scrollable area
+			else if (event.key === 'Tab') {
+				if (!document.activeElement.classList.contains('reader')) {
+					setTimeout(() => {
+						if (document.activeElement.classList.contains('reader')) {
+							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+							if (reader) {
+								reader.focus();
+							}
+						}
+					});
+				}
 			}
 		}
 		
