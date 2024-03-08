@@ -1914,6 +1914,14 @@ var ZoteroPane = new function()
 					}
 				}
 			}
+			else if (selectedItems.length > 1 && selectedItems.every(item => item.isAnnotation())) {
+				if (this.collectionsView.editable) {
+					yield ZoteroItemPane.viewAnnotations(selectedItems, null);
+				}
+				else {
+					yield ZoteroItemPane.viewAnnotations(selectedItems, 'view');
+				}
+			}
 			// Zero or multiple items selected
 			else {
 				let defaultSidenavButtons = [

@@ -63,6 +63,13 @@ var ZoteroItemPane = new function() {
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
 	};
 	
+	this.viewAnnotations = Zotero.Promise.coroutine(function* (items, mode) {
+		for (let box of [_header, ..._boxes]) {
+			box.hidden = true;
+		}
+		_attachmentAnnotationsBox.hidden = false;
+		_attachmentAnnotationsBox.items = items;
+	});
 	
 	/*
 	 * Load a top-level item
