@@ -1414,7 +1414,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Accepts current selection and adds citation
 	 */
-	this._accept = function() {
+	this.accept = function() {
 		if(accepted) return;
 		accepted = true;
 		try {
@@ -1450,7 +1450,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		else if (event.key == "Enter") {
 			event.preventDefault();
-			Zotero_QuickFormat._accept();
+			Zotero_QuickFormat.accept();
 		}
 		// In rare circumstances, the focus can get lost (e.g. if the focus is on an item
 		// in reference panel when it is refreshed and all nodes are deleted).
@@ -1553,7 +1553,8 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _resetSearchTimer() {
 		// Show spinner
-		var spinner = document.querySelector('.citation-dialog.spinner image');
+		var spinner = document.querySelector('.citation-dialog.icons image');
+		spinner.nextElementSibling.style.display = "none";
 		spinner.setAttribute("status", "animate");
 		// Cancel current search if active
 		if (_searchPromise && _searchPromise.isPending()) {
@@ -1565,6 +1566,7 @@ var Zotero_QuickFormat = new function () {
 			.then(() => {
 				_searchPromise = null;
 				spinner.removeAttribute("status");
+				spinner.nextElementSibling.style.removeProperty("display");
 			});
 	}
 
@@ -1879,7 +1881,7 @@ var Zotero_QuickFormat = new function () {
 		else if (keyCode == "Enter" && event.shiftKey) {
 			event.preventDefault();
 			event.stopPropagation();
-			this._accept();
+			this.accept();
 		}
 		else {
 			isPaste = false;

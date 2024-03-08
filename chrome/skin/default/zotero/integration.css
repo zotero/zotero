@@ -201,9 +201,25 @@
 	background: var(--color-accent);
 }
 
-.citation-dialog.spinner {
+.citation-dialog.icons {
 	display: flex;
-	align-items: center;
+	align-items: end;
+	flex-direction: column;
+	width: 30px;
+}
+
+.citation-dialog .icons .icon {
+	margin-right: 3px;
+}
+
+.citation-dialog .icons .zotero-spinner-16 {
+	margin-top: 5px;
+	margin-right: 5px;
+}
+
+.citation-dialog .accept-button {
+	list-style-image: url("chrome://zotero/skin/20/universal/arrow-right.svg");
+	fill: currentColor;
 }
 
 .citation-dialog.item {
