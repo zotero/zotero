@@ -18,10 +18,10 @@ function onError(err) {
 function onSuccess(result) {
 	var msg = `${green('Success:')} ${blue(`[${result.action}]`)} ${result.count} files processed`;
 	if (result.totalCount) {
-		msg += ` | ${result.totalCount} checked`; 
+		msg += ` | ${result.totalCount} checked`;
 	}
 
-	msg += ` [${yellow(`${result.processingTime.toFixed(2)}ms`)}]`;	
+	msg += ` [${yellow(`${result.processingTime.toFixed(2)}ms`)}]`;
 
 	console.log(msg);
 }
@@ -32,7 +32,8 @@ function onProgress(sourcefile, outfile, operation) {
 	}
 	if (NODE_ENV == 'debug') {
 		console.log(`${colors.blue(`[${operation}]`)} ${sourcefile} -> ${outfile}`);
-	} else {
+	}
+	else {
 		console.log(`${colors.blue(`[${operation}]`)} ${sourcefile}`);
 	}
 }
@@ -42,7 +43,8 @@ async function getSignatures() {
 	var signatures = {};
 	try {
 		signatures = await fs.readJson(signaturesFile);
-	} catch (_) {
+	}
+	catch (_) {
 		// if signatures files doesn't exist, return empty object instead
 	}
 	return signatures;
@@ -54,26 +56,65 @@ async function writeSignatures(signatures) {
 	await fs.outputJson(signaturesFile, signatures);
 }
 
+
+async function recursivelyRemoveEmptyDirsUp(dirsSeen, invalidDirsCount = 0, removedDirsCount = 0) {
+	const newDirsSeen = new Set();
+	for (let dir of dirsSeen) {
+		try {
+			// check if dir from signatures exists in source
+			await fs.access(dir, fs.constants.F_OK);
+		}
+		catch (_) {
+			invalidDirsCount++;
+			NODE_ENV == 'debug' && console.log(`Dir ${dir} found in signatures but not in src, deleting from build`);
+			try {
+				await fs.remove(path.join('build', dir));
+				const parentDir = path.dirname(dir);
+				if (!dirsSeen.has(parentDir) && parentDir !== ROOT) {
+					newDirsSeen.add(path.dirname(dir));
+				}
+				removedDirsCount++;
+			}
+			catch (_) {
+				// dir wasn't in the build either
+			}
+		}
+	}
+	if (newDirsSeen.size) {
+		return recursivelyRemoveEmptyDirsUp(newDirsSeen, invalidDirsCount, removedDirsCount);
+	}
+	return { invalidDirsCount, removedDirsCount };
+}
+
 async function cleanUp(signatures) {
 	const t1 = Date.now();
+	let dirsSeen = new Set();
 	var removedCount = 0, invalidCount = 0;
 
 	for (let f of Object.keys(signatures)) {
+		let dir = path.dirname(f);
+		dirsSeen.add(dir);
 		try {
 			// check if file from signatures exists in source
 			await fs.access(f, fs.constants.F_OK);
-		} catch (_) {
+		}
+		catch (_) {
 			invalidCount++;
 			NODE_ENV == 'debug' && console.log(`File ${f} found in signatures but not in src, deleting from build`);
 			try {
 				await fs.remove(path.join('build', f));
 				removedCount++;
-			} catch (_) {
+			}
+			catch (_) {
 				// file wasn't in the build either
 			}
 			delete signatures[f];
 		}
 	}
+
+	const { invalidDirsCount, removedDirsCount } = await recursivelyRemoveEmptyDirsUp(dirsSeen);
+	invalidCount += invalidDirsCount;
+	removedCount += removedDirsCount;
 
 	const t2 = Date.now();
 	return {
@@ -96,9 +137,9 @@ async function getFileSignature(file) {
 
 function compareSignatures(a, b) {
 	return typeof a === 'object'
-	&& typeof b === 'object' 
-	&& a != null
-	&& b != null
+	&& typeof b === 'object'
+	&& a !== null
+	&& b !== null
 	&& ['mode', 'mtime', 'isDirectory', 'isFile'].reduce((acc, k) => {
 		return acc ? k in a && k in b && a[k] == b[k] : false;
 	}, true);
@@ -108,7 +149,7 @@ function getPathRelativeTo(f, dirName) {
 	return path.relative(path.join(ROOT, dirName), path.join(ROOT, f));
 }
 
-const formatDirsForMatcher = dirs => {
+const formatDirsForMatcher = (dirs) => {
 	return dirs.length > 1 ? `{${dirs.join(',')}}` : dirs[0];
 };
 
@@ -117,12 +158,22 @@ function comparePaths(actualPath, testedPath) {
 	return path.normalize(actualPath) === path.normalize(testedPath);
 }
 
+function debounce(func, timeout = 200) {
+	let timer;
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => func.apply(this, args), timeout);
+	};
+}
+
 const envCheckTrue = env => !!(env && (parseInt(env) || env === true || env === "true"));
+
 
 module.exports = {
 	cleanUp,
 	comparePaths,
 	compareSignatures,
+	debounce,
 	envCheckTrue,
 	formatDirsForMatcher,
 	getFileSignature,
