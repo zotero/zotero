@@ -89,14 +89,14 @@ def main():
         if not os.path.isdir(d):
             raise FileNotFoundError(d + " not found")
         
-        log("Deleting CSL locale support files")
+        # Delete CSL locale support files
         subprocess.check_call([
             'find',
             os.path.normpath(tmp_src_dir + '/chrome/content/zotero/locale/csl/'),
             '-mindepth', '1',
             '!', '-name', '*.xml',
             '!', '-name', 'locales.json',
-            '-print',
+            #'-print',
             '-delete'
         ])
         
