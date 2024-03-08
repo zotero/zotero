@@ -1280,6 +1280,27 @@ describe("Zotero.Item", function () {
 				{ type: 'image', exists: true, key: childItem.key }
 			);
 		});
+
+		it("should update best attachment state when attachment is trashed", async function () {
+			var parentItem = await createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var childItem = await Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: parentItem.id
+			});
+
+			await parentItem.getBestAttachmentState();
+			childItem._updateAttachmentStates(true);
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ type: 'image', exists: true, key: childItem.key }
+			);
+
+			await Zotero.Items.trashTx([childItem.id]);
+			childItem._updateAttachmentStates(true);
+			assert.deepEqual(parentItem.getBestAttachmentStateCached(), { type: null });
+		});
 	});
 	
 	

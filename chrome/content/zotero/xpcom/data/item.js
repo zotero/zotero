@@ -2744,7 +2744,7 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 		return;
 	}
 
-	if (item._bestAttachmentState?.key && this.key === item._bestAttachmentState.key) {
+	if (!this.deleted && item._bestAttachmentState?.key && this.key === item._bestAttachmentState.key) {
 		item._bestAttachmentState.exists = exists;
 	}
 	else {
