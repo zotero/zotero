@@ -131,7 +131,7 @@ var Zotero_QuickFormat = new function () {
 				}
 			});
 			if (Zotero.isWin) {
-				dialog.style.marginBottom = "-36px";
+				referencePanel.style.marginTop = "-34px";
 				if (Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
 					dialog.setAttribute("square", "true");
 				}
