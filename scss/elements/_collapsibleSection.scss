@@ -44,6 +44,7 @@ collapsible-section {
 				overflow: hidden;
 				color: var(--fill-secondary);
 				text-overflow: ellipsis;
+				overflow-wrap: anywhere;
 				
 				opacity: 1;
 				transition: opacity 0.2s ease-in-out;
