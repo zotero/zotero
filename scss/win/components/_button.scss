@@ -10,14 +10,14 @@ input:is([type=button], [type=submit]) {
 		color: var(--accent-white);
 
 		&:not([disabled]) {
-			--color-form-element-background: var(--accent-blue);
+			--color-form-element-background: var(--color-accent);
 
 			&:hover {
-				--color-form-element-background: rgba(64, 114, 229, 0.9);
+				--color-form-element-background: color-mix(in srgb, var(--color-accent) 90%, transparent);
 			}
 
 			&:active {
-				--color-form-element-background: rgba(64, 114, 229, 0.8);
+				--color-form-element-background: color-mix(in srgb, var(--color-accent) 80%, transparent);
 			}
 
 			@include focus-ring;
