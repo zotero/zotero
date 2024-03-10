@@ -1,6 +1,6 @@
 editable-text {
 	.input {
-		height: unset;
+		height: unset !important;
 		// Disable focus ring
 		outline: none;
 		padding-inline-start: unset;
