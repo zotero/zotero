@@ -73,12 +73,13 @@ $icons: (
 		}
 
 		input.cell-text {
-			border: 1px highlight solid;
+			border: 1px var(--color-accent) solid;
 			padding: 1px 2px;
 			margin-right: 5px;
 			width: 100%;
 			font-size: inherit;
 			pointer-events: auto;
+			background: var(--material-background);
 		}
 
 		.cell-icon {
