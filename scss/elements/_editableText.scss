@@ -79,6 +79,15 @@ editable-text {
 		@media not (-moz-platform: windows) {
 			@include focus-ring(true);
 		}
+		// Do not use default Windows focus-ring
+		@media (-moz-platform: windows) {
+			&:focus-visible {
+				outline: none;
+				box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+				--width-focus-border: 1px;
+				--color-focus-border: var(--color-accent);
+			}
+		}
 		// Necessary for consistent padding, even if it's actually an <input>
 		-moz-default-appearance: textarea;
 		
