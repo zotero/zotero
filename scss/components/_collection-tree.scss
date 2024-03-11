@@ -60,6 +60,8 @@ $icons: (
 	.cell.primary {
 		display: flex;
 		align-items: center;
+		// Stretch the cell to full height
+		align-self: stretch;
 
 		:not(.cell-text) {
 			flex-shrink: 0
@@ -73,7 +75,10 @@ $icons: (
 		}
 
 		input.cell-text {
-			border: 1px var(--color-accent) solid;
+			// Stretch the input to full height and be centered vertically
+			align-self: stretch;
+			border: none;
+			outline: color-mix(in srgb, var(--color-accent) 80%, var(--material-background)) solid 2px;
 			padding: 1px 2px;
 			margin-right: 5px;
 			width: 100%;
