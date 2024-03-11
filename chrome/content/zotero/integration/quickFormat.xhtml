@@ -106,11 +106,9 @@
 			<html:input type="text" aria-labelledby="suffix-label" tabindex="6" class="citation-textbox" id="suffix" flex="1"
 					 oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 			<html:div>
-				<html:input type="checkbox" id="suppress-author" native="true" tabindex="7"
-							onchange="Zotero_QuickFormat.onCitationPropertiesChanged(event)"/>
-				<html:label for="suppress-author">
-					&zotero.citation.suppressAuthor.label;
-				</html:label>
+				<checkbox type="checkbox" id="suppress-author" native="true" tabindex="7"
+						oncommand="Zotero_QuickFormat.onCitationPropertiesChanged(event)"
+						label="&zotero.citation.suppressAuthor.label;"/>
 			</html:div>
 		</html:div>
 		<vbox flex="1" align="center">
