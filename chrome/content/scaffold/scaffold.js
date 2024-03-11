@@ -275,6 +275,8 @@ var Scaffold = new function () {
 				_lastModifiedTime = modifiedTime;
 			}
 		}
+		
+		_updateTitle();
 	};
 
 	this.initImportEditor = function () {
@@ -637,6 +639,7 @@ var Scaffold = new function () {
 
 		document.getElementById('textbox-label').focus();
 		_showTab('metadata');
+		_updateTitle();
 	};
 
 	/*
@@ -727,6 +730,7 @@ var Scaffold = new function () {
 		
 		Zotero.Prefs.set('scaffold.lastTranslatorID', translator.translatorID);
 		
+		_updateTitle();
 		return true;
 	};
 
@@ -2318,6 +2322,47 @@ var Scaffold = new function () {
 			return activeElement.id.substring(7);
 		}
 		return null;
+	}
+	
+	async function _getGitBranchName() {
+		let gitPath = await Subprocess.pathSearch('git');
+		if (!gitPath) return null;
+		
+		let dir = Scaffold_Translators.getDirectory();
+		if (!dir) return null;
+		
+		let proc = await Subprocess.call({
+			command: gitPath,
+			arguments: ['rev-parse', '--abbrev-ref', 'HEAD'],
+			workdir: dir,
+		});
+		let output = '';
+		let chunk;
+		while ((chunk = await proc.stdout.readString())) {
+			output += chunk;
+		}
+		return output.trim();
+	}
+	
+	async function _updateTitle() {
+		let title = 'Scaffold';
+
+		let label = document.getElementById('textbox-label').value;
+		if (label) {
+			title += ' - ' + label;
+		}
+		
+		try {
+			let branch = await _getGitBranchName();
+			if (branch) {
+				title += ' (' + branch + ')';
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		
+		document.title = title;
 	}
 };
 
