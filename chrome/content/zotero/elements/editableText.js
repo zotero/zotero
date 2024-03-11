@@ -184,6 +184,7 @@
 					input.rows = 1;
 				}
 				input.classList.add('input');
+				input.toggleAttribute("no-windows-native", true);
 				let handleInput = () => {
 					if (!this.multiline) {
 						this._input.value = this._input.value.replace(/\n/g, ' ');
