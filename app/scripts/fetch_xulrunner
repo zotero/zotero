@@ -277,9 +277,6 @@ function modify_omni {
 	# Use our own strings for the removal prompt
 	replace_line 'let \{ BrowserAddonUI \} = windowRoot.ownerGlobal;' '' $file
 	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
-
-	replace_line 'let homepageURL = homepageRow.querySelector\(\"a\"\);' 'let homepageURL = homepageRow.querySelector(\"\.text-link\");' $file
-	replace_line 'homepageURL.href = addon.homepageURL;' 'homepageURL.setAttribute("href", addon.homepageURL);' $file
 	
 	# Customize empty-list message
 	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
@@ -287,10 +284,13 @@ function modify_omni {
         p.id = "empty-list-message";
         return p;' $file
 	# Swap in include.js, which we need for Zotero.getString(), for abuse-reports.js, which we don't need
-
-	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.html"
+	
+	# Open plugin links in external browser
+	replace_line 'let homepageURL = homepageRow.querySelector\(\"a\"\);' 'let homepageURL = homepageRow.querySelector(\"\.text-link\");' $file
+	replace_line 'homepageURL.href = addon.homepageURL;' 'homepageURL.setAttribute("href", addon.homepageURL);' $file
 	replace_line '<a target=\"_blank\" data-telemetry-name=\"homepage\" dir=\"ltr\"><\/a>' \
-		'<label target=\"_blank\" class=\"text-link\" data-telemetry-name=\"homepage\" dir=\"ltr\"><\/label>' $file
+		'<label target=\"_blank\" class=\"text-link\" data-telemetry-name=\"homepage\" dir=\"ltr\"><\/label>' \
+		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
 	
 	# Hide Recommendations tab in sidebar and recommendations in main pane
 	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' chrome/toolkit/content/mozapps/extensions/aboutaddonsCommon.js
