@@ -315,7 +315,6 @@ class EditorInstance {
 		let win = Zotero.getMainWindow();
 		if (win) {
 			win.ZoteroPane.selectItems(ids);
-			win.Zotero_Tabs.select('zotero-pane');
 			win.focus();
 		}
 	}

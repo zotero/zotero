@@ -730,7 +730,6 @@ class ReaderInstance {
 			let item = Zotero.Items.get(this._item.id);
 			let id = item.parentID || item.id;
 			win.ZoteroPane.selectItems([id]);
-			win.Zotero_Tabs.select('zotero-pane');
 			win.focus();
 		}
 	}

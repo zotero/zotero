@@ -3110,7 +3110,7 @@ var ZoteroPane = new function()
 			document.getElementById(ZoteroPane.itemsView.id).focus();
 		}
 		
-		Zotero_Tabs.select('zotero-pane');
+		Zotero_Tabs.select('zotero-pane', false, { focusElementID: ZoteroPane.itemsView.id });
 	};
 	
 	

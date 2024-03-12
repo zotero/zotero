@@ -410,6 +410,9 @@ var Zotero_Tabs = new function () {
 		// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
 		let focusZoteroPane = () => {
 			if (tab.id !== 'zotero-pane') return;
+			if (options.focusElementID) {
+				tab.lastFocusedElement = document.getElementById(options.focusElementID);
+			}
 			// Small delay to make sure the focus does not remain on the actual
 			// tab after mouse click
 			setTimeout(() => {
@@ -658,7 +661,6 @@ var Zotero_Tabs = new function () {
 						itemID = item.parentItemID;
 					}
 					ZoteroPane_Local.selectItem(itemID);
-					this.select('zotero-pane');
 				}
 			});
 			popup.appendChild(menuitem);
