@@ -111,7 +111,6 @@ var ZoteroPane = new function()
 		});
 		Zotero.UIProperties.registerRoot(document.getElementById('zotero-context-pane'));
 		ZoteroPane_Local.updateLayout();
-		ZoteroPane_Local.updateLayoutConstraints();
 		this.updateWindow();
 		window.addEventListener("resize", () => {
 			this.updateWindow();
@@ -765,7 +764,6 @@ var ZoteroPane = new function()
 
 		this.unserializePersist();
 		this.updateLayout();
-		this.updateLayoutConstraints();
 		this.initContainers();
 		
 		// Focus the quicksearch on pane open
