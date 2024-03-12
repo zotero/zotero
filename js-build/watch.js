@@ -102,6 +102,7 @@ async function processFile(path) {
 		}
 	}
 	catch (err) {
+		onError(err);
 		result = false;
 	}
 	return result;
@@ -116,7 +117,7 @@ async function processFiles(mutex) {
 		let t2 = Date.now();
 		let aggrResult;
 
-		if (results.length === 1) {
+		if (results.length === 1 && results[0]) {
 			onSuccess(results[0]);
 			aggrResult = results[0];
 		}
@@ -140,7 +141,7 @@ async function processFiles(mutex) {
 		
 		onSuccess(await cleanUp(signatures));
 
-		if (shouldAddOmni && aggrResult.outFiles?.length) {
+		if (shouldAddOmni && aggrResult?.outFiles?.length) {
 			onSuccess(await addOmniFiles(aggrResult.outFiles));
 		}
 	}
