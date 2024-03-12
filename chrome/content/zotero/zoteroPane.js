@@ -6256,10 +6256,12 @@ var ZoteroPane = new function()
 			layoutSwitcher.setAttribute("orient", "vertical");
 			itemsSplitter.setAttribute("orient", "vertical");
 			sidenav.classList.add("stacked");
+			document.documentElement.classList.add("stacked");
 		} else {  // three-vertical-pane
 			layoutSwitcher.setAttribute("orient", "horizontal");
 			itemsSplitter.setAttribute("orient", "horizontal");
 			sidenav.classList.remove("stacked");
+			document.documentElement.classList.remove("stacked");
 		}
 
 		this.updateToolbarPosition();
@@ -6365,10 +6367,20 @@ var ZoteroPane = new function()
 		var paneStack = document.getElementById("zotero-pane-stack");
 		if (paneStack.hidden) return;
 
+		var titlebar = document.getElementById('zotero-title-bar');
+		var trees = document.getElementById('zotero-trees');
+		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
 		var sidenav = document.getElementById("zotero-view-item-sidenav");
 		
+		// Calculate the heights of the components that aren't able to shrink automatically
+		// when the window is resized
+		let fixedComponentWidth = trees.clientWidth - itemsPaneContainer.clientWidth;
+		let fixedComponentHeight = titlebar.clientHeight + trees.clientHeight - itemsPaneContainer.clientHeight;
+		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
+		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
+
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
 		if (ZoteroPane.itemsView) {

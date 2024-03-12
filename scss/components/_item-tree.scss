@@ -6,7 +6,7 @@
 
 #zotero-items-pane {
 	min-width: $min-width-items-pane;
-	min-height: 150px;
+	min-height: $min-height-items-pane;
 	height: 150px;
 	width: 290px;
 }
