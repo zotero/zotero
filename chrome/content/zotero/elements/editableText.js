@@ -109,11 +109,11 @@
 		}
 		
 		get initialValue() {
-			return this._input?.dataset.initialValue || '';
+			return this._input?.dataset.initialValue ?? '';
 		}
 		
 		set initialValue(initialValue) {
-			this._input.dataset.initialValue = initialValue || '';
+			this._input.dataset.initialValue = initialValue ?? '';
 		}
 		
 		get autocomplete() {
@@ -204,7 +204,7 @@
 				input.addEventListener('change', handleChange);
 				input.addEventListener('focus', () => {
 					// If the last blur was ignored because it was caused by the window becoming inactive,
-					// ignore this focus event as well, so we don't reset initialValue
+					// ignore this focus event as well
 					if (this._ignoredWindowInactiveBlur) {
 						this._ignoredWindowInactiveBlur = false;
 						return;
@@ -216,7 +216,9 @@
 					if (!this.getAttribute("mousedown")) {
 						this._input.setSelectionRange(0, this._input.value.length, "backward");
 					}
-					this._input.dataset.initialValue = this._input.value;
+					if (!('initialValue' in this._input.dataset)) {
+						this._input.dataset.initialValue = this._input.value;
+					}
 				});
 				input.addEventListener('blur', () => {
 					// Ignore this blur if it was caused by the window becoming inactive (see above)
@@ -253,6 +255,31 @@
 					// Prevent a right-click from focusing the input when unfocused
 					if (event.button === 2 && document.activeElement !== this._input) {
 						event.preventDefault();
+					}
+				});
+				input.addEventListener('dragover', (event) => {
+					// If the input is not focused, override the default drop behavior
+					if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
+							&& event.dataTransfer.getData('text/plain')) {
+						event.preventDefault();
+						event.dataTransfer.dropEffect = 'copy';
+					}
+				});
+				input.addEventListener('drop', (event) => {
+					let text = event.dataTransfer.getData('text/plain');
+					// If the input is not focused, replace its entire value with the dropped text
+					// Otherwise, the normal drop effect takes place and the text is inserted at the cursor
+					if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
+							&& text) {
+						event.preventDefault();
+						document.activeElement?.blur();
+						// Wait a tick to work around an apparent Firefox bug where the cursor stays inside the old
+						// input even though the new input becomes visually focused
+						setTimeout(() => {
+							this.focus();
+							this._input.value = text;
+							handleInput();
+						});
 					}
 				});
 				
@@ -340,11 +367,20 @@
 		}
 		
 		focus(options) {
+			// If the window isn't active, the focus event won't fire yet,
+			// so store the initial value now
+			if (this._input && Services.focus.activeWindow !== window && !('initialValue' in this._input.dataset)) {
+				this._input.dataset.initialValue = this._input.value;
+			}
 			this._input?.focus(options);
 		}
 		
 		blur() {
 			this._input?.blur();
+		}
+		
+		get focused() {
+			return this._input && document.activeElement === this._input;
 		}
 	}
 	customElements.define("editable-text", EditableText);

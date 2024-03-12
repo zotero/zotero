@@ -114,9 +114,13 @@
 
 			let abstract = this.item.getField('abstractNote');
 			this._section.summary = abstract;
-			if (!this._abstractField.initialValue || this._abstractField.initialValue !== abstract) {
+			// If focused, update the value that will be restored on Escape;
+			// otherwise, update the displayed value
+			if (this._abstractField.focused) {
+				this._abstractField.initialValue = abstract;
+			}
+			else {
 				this._abstractField.value = abstract;
-				this._abstractField.initialValue = '';
 			}
 			this._abstractField.readOnly = this._mode == 'view';
 			this._abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));

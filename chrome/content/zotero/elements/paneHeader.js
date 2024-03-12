@@ -142,9 +142,13 @@
 			this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			
 			let title = this.item.getField(this._titleFieldID);
-			if (!this.titleField.initialValue || this.titleField.initialValue !== title) {
+			// If focused, update the value that will be restored on Escape;
+			// otherwise, update the displayed value
+			if (this.titleField.focused) {
+				this.titleField.initialValue = title;
+			}
+			else {
 				this.titleField.value = title;
-				this.titleField.initialValue = '';
 			}
 			this.titleField.readOnly = this._mode == 'view';
 			if (this._titleFieldID) {
