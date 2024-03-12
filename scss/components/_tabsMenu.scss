@@ -3,16 +3,23 @@
 	margin: 0;
 }
 
+#zotero-tabs-menu-panel {
+	min-height: 0;
+}
+
 #zotero-tabs-menu-wrapper {
 	width: 350px;
 	background: var(--material-sidepane);
-	padding: 7px;
+	padding: 0;
 	border-radius: 5px;
 	--width-focus-border: 2px;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
 #zotero-tabs-menu-filter {
-	margin: 0 0 7px 0;
+	margin: 7px;
 	border-radius: 5px;
 	border: 1px solid transparent;
 	padding-inline-start: 5px !important;
@@ -26,6 +33,13 @@
 #zotero-tabs-menu-list {
 	appearance: none;
 	margin: 0;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: thin;
+
+	& > toolbaritem {
+		margin: 0 7px;
+	}
 
 	.row {
 		display: flex;

@@ -985,6 +985,16 @@ var Zotero_Tabs = new function () {
 		focusTabsMenuEntry(0);
 	};
 
+	this.handleTabsMenuShowing = function (_) {
+		this.refreshTabsMenuList();
+
+		// Try to scroll selected tab into the center
+		let selectedTab = this.tabsMenuList.querySelector(".selected");
+		if (selectedTab) {
+			selectedTab.scrollIntoView({ block: 'center' });
+		}
+	};
+
 	/**
 	 * Record the value of the filter
 	 */
