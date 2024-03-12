@@ -2616,7 +2616,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		textSpan.dir = 'auto';
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
-		span.append(retracted, textSpan, ...tagSpans);
+		if (Zotero.Prefs.get('ui.tagsAfterTitle')) {
+			span.append(retracted, textSpan, ...tagSpans);
+		}
+		else {
+			span.append(retracted, ...tagSpans, textSpan);
+		}
 
 		return span;
 	}

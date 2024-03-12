@@ -103,6 +103,11 @@
 				transform: scaleX(-1);
 				display: flex;
 			}
+
+			.icon-item-type + .tag-swatch,
+			.icon-item-type + .colored-tag-swatches {
+				margin-left: 4px;
+			}
 			
 			.tag-swatch {
 				display: inline-block;
