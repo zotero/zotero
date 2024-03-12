@@ -1036,8 +1036,8 @@
 								
 								<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
 									zotero-persist="state"
-									onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateToolbarPosition();"
-									oncommand="ZoteroPane_Local.updateToolbarPosition()">
+									onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateLayoutConstraints();"
+									oncommand="ZoteroPane_Local.updateLayoutConstraints()">
 									<grippy id="zotero-collections-grippy"/>
 								</splitter>
 								
@@ -1155,8 +1155,8 @@
 									
 				
 									<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" orient="horizontal" zotero-persist="state orient"
-										onmousemove="ZoteroPane.updateToolbarPosition()"
-										oncommand="ZoteroPane.updateToolbarPosition()">
+										onmousemove="ZoteroPane.updateLayoutConstraints()"
+										oncommand="ZoteroPane.updateLayoutConstraints()">
 										<grippy id="zotero-items-grippy"/>
 									</splitter>
 				

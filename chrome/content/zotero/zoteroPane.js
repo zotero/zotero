@@ -116,16 +116,16 @@ var ZoteroPane = new function()
 		Zotero.UIProperties.registerRoot(document.getElementById('zotero-context-pane'));
 		this.itemPane = document.querySelector("#zotero-item-pane");
 		ZoteroPane_Local.updateLayout();
-		ZoteroPane_Local.updateToolbarPosition();
+		ZoteroPane_Local.updateLayoutConstraints();
 		this.updateWindow();
 		window.addEventListener("resize", () => {
 			this.updateWindow();
 			let tabsDeck = document.querySelector('#tabs-deck')
 			if (!tabsDeck || tabsDeck.getAttribute('selectedIndex') == 0) {
-				this.updateToolbarPosition();
+				this.updateLayoutConstraints();
 			}
 		});
-		window.setTimeout(this.updateToolbarPosition.bind(this), 0);
+		window.setTimeout(this.updateLayoutConstraints.bind(this), 0);
 		
 		Zotero.updateQuickSearchBox(document);
 		
@@ -769,7 +769,7 @@ var ZoteroPane = new function()
 
 		this.unserializePersist();
 		this.updateLayout();
-		this.updateToolbarPosition();
+		this.updateLayoutConstraints();
 		this.initContainers();
 		
 		// Focus the quicksearch on pane open
@@ -5975,7 +5975,7 @@ var ZoteroPane = new function()
 			document.documentElement.classList.remove("stacked");
 		}
 
-		this.updateToolbarPosition();
+		this.updateLayoutConstraints();
 		if (ZoteroPane.itemsView) {
 			// Need to immediately rerender the items here without any debouncing
 			// since tree height will have changed
@@ -6072,9 +6072,10 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Moves around the toolbar when the user moves around the pane
+	 * Update the window min-width/height, collections search width, tag selector, and sidenav
+	 * when the window or elements within it are resized.
 	 */
-	this.updateToolbarPosition = function () {
+	this.updateLayoutConstraints = function () {
 		var paneStack = document.getElementById("zotero-pane-stack");
 		if (paneStack.hidden) return;
 
