@@ -3,7 +3,7 @@
 #zotero-items-pane-container {
 	min-width: $min-width-items-pane;
 	height: 150px;
-	min-height: 200px;
+	min-height: $min-height-items-pane;
 }
 
 #zotero-items-pane {

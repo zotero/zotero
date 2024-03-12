@@ -3,8 +3,12 @@
 }
 
 #main-window {
-	min-width: $min-width-collections-pane + $min-width-items-pane + $min-width-item-pane + $width-sidenav;
+	min-width: max(var(--width-of-fixed-components) + $min-width-items-pane, $min-width-tabs-deck);
 	min-height: 300px;
+}
+
+#main-window.stacked {
+	min-height: calc(var(--height-of-fixed-components) + $min-height-items-pane + $height-toolbar);
 }
 
 #zotero-pane {

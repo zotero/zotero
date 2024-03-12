@@ -1,5 +1,5 @@
 #tabs-deck {
-	min-width: $min-width-collections-pane + $min-width-items-pane;
+	min-width: $min-width-tabs-deck;
 
 	& > :not(.deck-selected) {
 		// Hide all sub-trees that are in the invisible tab deck
