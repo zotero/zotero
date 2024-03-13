@@ -1008,17 +1008,22 @@ var Zotero_Tabs = new function () {
 			absoluteTabsMenuTop = window.screenY - panelRect.height + anchorRect.top;
 			absoluteTabsMenuBottom = window.screenY + panelRect.height + anchorRect.bottom;
 		}
+		// screen.availTop is not always right on Linux, so ignore it
+		let availableTop = Zotero.isLinux ? 0 : screen.availTop;
+
 		// Check if the end of the tabs menu is close to the edge of the screen
-		let atTopScreenEdge = valuesAreWithinMargin(absoluteTabsMenuTop, window.screen.availTop, gapBeforeScreenEdge);
-		let atBottomScreenEdge = valuesAreWithinMargin(absoluteTabsMenuBottom, screen.availHeight + screen.availTop, gapBeforeScreenEdge);
+		let atTopScreenEdge = valuesAreWithinMargin(absoluteTabsMenuTop, availableTop, gapBeforeScreenEdge);
+		let atBottomScreenEdge = valuesAreWithinMargin(absoluteTabsMenuBottom, screen.availHeight + availableTop, gapBeforeScreenEdge);
 
 		let gap;
-		// Limit max height of the menu to leave the specified gap till the screen's edge
-		if (atTopScreenEdge) {
-			gap = gapBeforeScreenEdge - (absoluteTabsMenuTop - window.screen.availTop);
+		// Limit max height of the menu to leave the specified gap till the screen's edge.
+		// Due to screen.availTop behavior on linux, the menu can go outside of what is supposed
+		// to be the available screen area, so special treatment for those edge cases.
+		if (atTopScreenEdge || (Zotero.isLinux && absoluteTabsMenuTop < 0)) {
+			gap = gapBeforeScreenEdge - (absoluteTabsMenuTop - availableTop);
 		}
-		if (atBottomScreenEdge) {
-			gap = gapBeforeScreenEdge - (screen.availHeight + screen.availTop - absoluteTabsMenuBottom);
+		if (atBottomScreenEdge || (Zotero.isLinux && absoluteTabsMenuBottom > screen.availHeight)) {
+			gap = gapBeforeScreenEdge - (screen.availHeight + availableTop - absoluteTabsMenuBottom);
 		}
 		if (gap) {
 			panel.style.maxHeight = `${panelRect.height - gap}px`;
