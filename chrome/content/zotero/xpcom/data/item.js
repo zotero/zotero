@@ -3787,32 +3787,39 @@ Zotero.Item.prototype.getBestAttachmentState = async function (checkIfExists = t
 	if (this._bestAttachmentState !== null && this._bestAttachmentState.type && (!checkIfExists || ('exists' in this._bestAttachmentState && this._bestAttachmentState.exists !== null))) {
 		return this._bestAttachmentState;
 	}
-	var item = this.isAttachment() && this.isTopLevelItem()
-		? this
-		: await this.getBestAttachment();
-	if (!item) {
-		return this._bestAttachmentState = {
-			type: 'none'
-		};
-	}
-	var type;
-	if (item.isPDFAttachment()) {
-		type = 'pdf';
-	}
-	else if (item.isSnapshotAttachment()) {
-		type = 'snapshot';
-	}
-	else if (item.isEPUBAttachment()) {
-		type = 'epub';
-	}
-	else if (item.isImageAttachment()) {
-		type = 'image';
-	}
-	else if (item.isVideoAttachment()) {
-		type = 'video';
+	var item;
+	if (!this._bestAttachmentState?.type || !this._bestAttachmentState.key) {
+		item = this.isAttachment() && this.isTopLevelItem()
+			? this
+			: await this.getBestAttachment();
+		if (!item) {
+			return this._bestAttachmentState = {
+				type: 'none'
+			};
+		}
+		var type;
+		if (item.isPDFAttachment()) {
+			type = 'pdf';
+		}
+		else if (item.isSnapshotAttachment()) {
+			type = 'snapshot';
+		}
+		else if (item.isEPUBAttachment()) {
+			type = 'epub';
+		}
+		else if (item.isImageAttachment()) {
+			type = 'image';
+		}
+		else if (item.isVideoAttachment()) {
+			type = 'video';
+		}
+		else {
+			type = 'other';
+		}
 	}
 	else {
-		type = 'other';
+		item = await this.ObjectsClass.getByLibraryAndKeyAsync(this.libraryID, this._bestAttachmentState.key);
+		type = this._bestAttachmentState.type;
 	}
 	
 	var exists = checkIfExists ? await item.fileExists() : null;
