@@ -3774,15 +3774,17 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 });
 
 
-
 /**
  * Return state of best attachment (or this item if it's a standalone attachment)
  *
- * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'epub'|'image'|'video'|'other')
- *     and boolean 'exists'
+ * @param {Boolean} [checkIfExists=true] - Whether to check if the attachment file exists
+ * @return {Promise<Object>} - Promise for object with the following properties:
+ *   - 'type': string, indicating the type of the best attachment ('none', 'pdf', 'snapshot', 'epub', 'image', 'video', 'other')
+ *   - 'key': string, the key of the best attachment
+ *   - 'exists': boolean, indicating whether the attachment file exists. `exists` is null if `checkIfExists` is false and no cached value is available
  */
-Zotero.Item.prototype.getBestAttachmentState = async function () {
-	if (this._bestAttachmentState !== null && this._bestAttachmentState.type) {
+Zotero.Item.prototype.getBestAttachmentState = async function (checkIfExists = true) {
+	if (this._bestAttachmentState !== null && this._bestAttachmentState.type && (!checkIfExists || ('exists' in this._bestAttachmentState && this._bestAttachmentState.exists !== null))) {
 		return this._bestAttachmentState;
 	}
 	var item = this.isAttachment() && this.isTopLevelItem()
@@ -3812,7 +3814,8 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	else {
 		type = 'other';
 	}
-	var exists = await item.fileExists();
+	
+	var exists = checkIfExists ? await item.fileExists() : null;
 	let key = item.key;
 	return this._bestAttachmentState = { type, exists, key };
 };
