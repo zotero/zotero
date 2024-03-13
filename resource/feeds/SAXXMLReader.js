@@ -62,7 +62,15 @@ class SAXXMLReader {
 		if (!response.ok) {
 			throw new Error("Unable to fetch data");
 		}
-		this._data = await response.text();
+		let buf = await response.arrayBuffer();
+		// We should use NetUtil.parseResponseContentType, but we don't have access to it here
+		let charset = response.headers.get("Content-Type")
+			?.match(/charset=([^;]+)/)
+			?.[1];
+		if (!charset) {
+			charset = 'utf-8';
+		}
+		this._data = new TextDecoder(charset).decode(buf);
 		this._parseAndNotify();
 	}
 	
