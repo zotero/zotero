@@ -123,12 +123,14 @@ async function processFiles(mutex) {
 		}
 		else if (results.length > 1) {
 			aggrResult = results.reduce((acc, result) => {
-				if (!(result.action in acc)) {
-					acc.actions[result.action] = 0;
+				if (result) {
+					if (!(result.action in acc)) {
+						acc.actions[result.action] = 0;
+					}
+					acc.actions[result.action] += result?.count ?? 0;
+					acc.count += result?.count ?? 0;
+					acc.outFiles = acc.outFiles.concat(result?.outFiles ?? []);
 				}
-				acc.actions[result.action] += result.count;
-				acc.count += result.count;
-				acc.outFiles = acc.outFiles.concat(result.outFiles || []);
 				return acc;
 			}, { actions: {}, count: 0, processingTime: t2 - t1, outFiles: [] });
 
@@ -171,7 +173,7 @@ async function batchProcessFiles(path, mutex, debouncedProcessFiles) {
 			console.log(colors.yellow(`Waiting for previous batch to finish...`));
 		}
 		if (++counter >= 40) {
-			onError(`Batch processing timeout after ${counter * pollInterval}ms. ${mutex.nextBatch.size} files in this batch have not been processed 😢`);
+			onError(`Batch processing timeout after ${counter * pollInterval}ms. ${mutex?.nextBatch?.size ?? 0} files in this batch have not been processed 😢`);
 			mutex.batch.clear();
 			mutex.nextBatch = null;
 			mutex.isLocked = false;
@@ -181,7 +183,7 @@ async function batchProcessFiles(path, mutex, debouncedProcessFiles) {
 		await new Promise(resolve => setTimeout(resolve, pollInterval));
 	}
 	if (counter > 0) {
-		console.log(colors.green(`Previous batch finished in ${Date.now() - started}ms. ${mutex.nextBatch.size} files in the next batch.`));
+		console.log(colors.green(`Previous batch finished in ${Date.now() - started}ms. ${mutex?.nextBatch?.size ?? 0} files in the next batch.`));
 	}
 	if (mutex.nextBatch) {
 		mutex.batch = new Set([...mutex.nextBatch]);
