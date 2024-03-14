@@ -117,7 +117,14 @@ var Zotero_QuickFormat = new function () {
 					_lastFocusedInput.focus();
 				}
 				else if (["ArrowDown", "ArrowUp"].includes(event.key)) {
-					handleItemSelection(event);
+					// ArrowUp from first item focuses the input
+					if (referenceBox.selectedIndex == 1 && event.key == "ArrowUp") {
+						_lastFocusedInput.focus();
+						referenceBox.selectedIndex = -1;
+					}
+					else {
+						handleItemSelection(event);
+					}
 				}
 				// Right/Left arrow will hide ref panel and move focus to the previour/next element
 				else if ("ArrowLeft" == event.key) {
@@ -1714,6 +1721,10 @@ var Zotero_QuickFormat = new function () {
 			_resetSearchTimer();
 		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key) && referencePanel.state === "open") {
+			// ArrowUp when item is selected does nothing
+			if (referenceBox.selectedIndex < 1 && event.key == "ArrowUp") {
+				return;
+			}
 			// Arrow up/down will navigate the references panel if that's opened
 			if (referenceBox.selectedIndex < 1) {
 				referenceBox.selectedIndex = 1;
