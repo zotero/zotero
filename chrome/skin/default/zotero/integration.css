@@ -206,14 +206,15 @@
 	align-items: end;
 	flex-direction: column;
 	width: 30px;
+	justify-content: center;
 }
 
 .citation-dialog .icons .icon {
 	margin-right: 3px;
+	width: 100%;
 }
 
 .citation-dialog .icons .zotero-spinner-16 {
-	margin-top: 5px;
 	margin-right: 5px;
 }
 
