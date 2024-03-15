@@ -4,16 +4,6 @@ window.citation-dialog {
 	-moz-appearance: none;
 }
 
-.citation-dialog.search {
-	padding: 2px 2px 2px 0;
-	border: 1px solid rgba(0, 0, 0, 0.5);
-	border-radius: 10px;
-	-moz-appearance: none;
-}
-
-.citation-dialog.search:not([multiline="true"]) {
-	height: 28px !important;
-}
 
 .citation-dialog.entry {
 	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
