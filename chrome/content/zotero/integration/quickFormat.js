@@ -1114,7 +1114,7 @@ var Zotero_QuickFormat = new function () {
 	this._bubbleizeSelected = Zotero.Promise.coroutine(function* () {
 		const panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		let inputExists = _lastFocusedInput || _getCurrentInput()
-		if(!panelShowing || !referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
+		if(!panelShowing || !referenceBox.hasChildNodes() || !referenceBox.selectedItem || _searchPromise?.isPending()) return false;
 
 		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem || !inputExists) return false;
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
@@ -1436,7 +1436,7 @@ var Zotero_QuickFormat = new function () {
 	 * Accepts current selection and adds citation
 	 */
 	this.accept = function() {
-		if(accepted) return;
+		if (accepted || _searchPromise?.isPending()) return;
 		accepted = true;
 		try {
 			_updateCitationObject();
