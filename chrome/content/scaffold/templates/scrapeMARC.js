@@ -6,7 +6,7 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setTranslator('a6ee60df-1ddc-4aae-bb25-45e0537be973'); // MARC
 	let MARC = await translator.getTranslatorObject();
 
-	let record = new MARC.Record();
+	let record = new MARC.record();
 	let item = new Zotero.Item();
 	// ignore the table headings in lines[0]
 	record.leader = text(lines[1], 'td', 4);
