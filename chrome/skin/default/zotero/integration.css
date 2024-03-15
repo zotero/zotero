@@ -185,7 +185,7 @@
 	font: -moz-field;
 	outline: none;
 	line-height: 2em;
-	width: 710px;
+	width: 700px; /* initial editor width - adjusted after dom load */
 	height: 28px;
 	font-size: 13px;
 	background: white;
@@ -203,19 +203,15 @@
 
 .citation-dialog.icons {
 	display: flex;
-	align-items: end;
+	align-items: center;
 	flex-direction: column;
-	width: 30px;
 	justify-content: center;
+	width: 36px;
 }
 
-.citation-dialog .icons .icon {
-	margin-right: 3px;
-	width: 100%;
-}
-
-.citation-dialog .icons .zotero-spinner-16 {
-	margin-right: 5px;
+.citation-dialog.entry {
+	max-width: 800px;
+	min-width: 800px;
 }
 
 .citation-dialog .accept-button {

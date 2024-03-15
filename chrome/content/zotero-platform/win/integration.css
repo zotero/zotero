@@ -19,10 +19,6 @@ window.citation-dialog {
 	border-radius: 15px;
 }
 
-#zotero-icon {
-	margin: -1px 0 0 4px;
-	-moz-appearance: none;
-}
 
 body {
 	line-height: 1.65em;

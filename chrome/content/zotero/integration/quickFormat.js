@@ -84,6 +84,7 @@ var Zotero_QuickFormat = new function () {
 			
 			dialog = document.querySelector(".citation-dialog.entry");
 			editor = document.querySelector(".citation-dialog.editor");
+			_resizeEditor();
 			dialog.addEventListener("click", _onQuickSearchClick, false);
 			dialog.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			editor.addEventListener("dragover", _onEditorDragOver);
@@ -1182,6 +1183,19 @@ var Zotero_QuickFormat = new function () {
 		e.preventDefault();
 	}
 
+	// Set the editor's width so that it fills up all remaining space in the window.
+	// It should be window.width - padding - icon wrappers width. The is needed to be explicitly set
+	// so that the editor's height expands/shrinks vertically without going outside of the
+	// window boundaries.
+	function _resizeEditor() {
+		let editorParentWidth = editor.parentNode.getBoundingClientRect().width;
+		let iconWrapperWidth = document.querySelector(".citation-dialog.icons").getBoundingClientRect().width;
+		let editorDesiredWidth = editorParentWidth - iconWrapperWidth * 2;
+		// Sanity check: editor width should never be that small
+		if (editorDesiredWidth > 700) {
+			editor.style.width = `${editorDesiredWidth}px`;
+		}
+	}
 	function _resizeWindow() {
 		let box = document.querySelector(".citation-dialog.entry");
 		let contentHeight = box.getBoundingClientRect().height;
@@ -1560,7 +1574,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _resetSearchTimer() {
 		// Show spinner
-		var spinner = document.querySelector('.citation-dialog.icons image');
+		var spinner = document.querySelector('.citation-dialog.icons.end image');
 		spinner.nextElementSibling.style.display = "none";
 		spinner.setAttribute("status", "animate");
 		// Cancel current search if active
