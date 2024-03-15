@@ -4407,13 +4407,12 @@ Zotero.Item.prototype.getImageSrc = function() {
 }
 
 
-Zotero.Item.prototype.getItemTypeIconName = function () {
+Zotero.Item.prototype.getItemTypeIconName = function (skipLinkMode = false) {
 	var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	if (itemType == 'attachment') {
 		var linkMode = this.attachmentLinkMode;
-
 		if (this.isPDFAttachment()) {
-			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 				itemType += 'PDFLink';
 			}
 			else {
@@ -4421,7 +4420,7 @@ Zotero.Item.prototype.getItemTypeIconName = function () {
 			}
 		}
 		else if (this.isEPUBAttachment()) {
-			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 				itemType += 'EPUBLink';
 			}
 			else {
@@ -4429,15 +4428,15 @@ Zotero.Item.prototype.getItemTypeIconName = function () {
 			}
 		}
 		else if (this.isImageAttachment()) {
-			itemType += linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE ? 'ImageLink' : 'Image';
+			itemType += linkMode == (!skipLinkMode && Zotero.Attachments.LINK_MODE_LINKED_FILE) ? 'ImageLink' : 'Image';
 		}
 		else if (this.isVideoAttachment()) {
-			itemType += linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE ? 'VideoLink' : 'Video';
+			itemType += linkMode == (!skipLinkMode && Zotero.Attachments.LINK_MODE_LINKED_FILE) ? 'VideoLink' : 'Video';
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 			itemType += "File";
 		}
-		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+		else if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 			itemType += "Link";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {

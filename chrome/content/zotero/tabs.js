@@ -105,7 +105,7 @@ var Zotero_Tabs = new function () {
 			else if (tab.data?.itemID) {
 				try {
 					let item = Zotero.Items.get(tab.data.itemID);
-					icon = <CSSItemTypeIcon itemType={item.getItemTypeIconName()} className="tab-icon" />;
+					icon = <CSSItemTypeIcon itemType={item.getItemTypeIconName(true)} className="tab-icon" />;
 				}
 				catch (e) {
 					// item might not yet be loaded, we will get the icon on the next update
@@ -885,7 +885,7 @@ var Zotero_Tabs = new function () {
 			else {
 				span.classList.add("icon-item-type");
 				let item = Zotero.Items.get(tab.data.itemID);
-				let dataTypeLabel = item.getItemTypeIconName();
+				let dataTypeLabel = item.getItemTypeIconName(true);
 				span.setAttribute("data-item-type", dataTypeLabel);
 			}
 
