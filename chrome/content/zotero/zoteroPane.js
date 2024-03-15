@@ -2861,7 +2861,7 @@ var ZoteroPane = new function()
 		// Make sure that the filter ends up being hidden if the value is cleared
 		// after the blur event fires. This happens on windows on cross icon click.
 		if (collectionsSearchField.value.length == 0
-			&& document.activeElement !== collectionsSearchField) {
+				&& document.activeElement !== collectionsSearchField) {
 			this.hideCollectionSearch();
 		}
 	}
