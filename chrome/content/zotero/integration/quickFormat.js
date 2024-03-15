@@ -131,7 +131,6 @@ var Zotero_QuickFormat = new function () {
 				}
 			});
 			if (Zotero.isWin) {
-				referencePanel.style.marginTop = "-34px";
 				if (Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
 					dialog.setAttribute("square", "true");
 				}
@@ -1188,6 +1187,17 @@ var Zotero_QuickFormat = new function () {
 		// Resized so that outerHeight=contentHeight
 		let outerHeightAdjustment = Math.max(window.outerHeight - window.innerHeight, 0);
 		window.resizeTo(WINDOW_WIDTH, contentHeight + outerHeightAdjustment);
+		if (Zotero.isWin) {
+			// On windows, if the editor height changes, the panel will remain where it was.
+			// Check if the panel is not next to the dialog, and if so - close and reopen it
+			// to position references panel properly
+			let dialogBottom = dialog.getBoundingClientRect().bottom;
+			let panelTop = referencePanel.getBoundingClientRect().top;
+			if (Math.abs(dialogBottom - panelTop) > 5) {
+				referencePanel.hidePopup();
+				_openReferencePanel();
+			}
+		}
 		if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
 			document.children[0].setAttribute('drawintitlebar', 'false');
 			document.children[0].setAttribute('drawintitlebar', 'true');
@@ -1274,8 +1284,7 @@ var Zotero_QuickFormat = new function () {
 			}, false);
 		}
 
-		referencePanel.openPopup(document.documentElement, "after_start", 15,
-			dialog.clientHeight-window.clientHeight, false, false, null);
+		referencePanel.openPopup(dialog, "after_start", 15, 0, false, false, null);
 	}
 	
 	/**
