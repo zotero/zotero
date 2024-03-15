@@ -2858,6 +2858,12 @@ var ZoteroPane = new function()
 	this.handleCollectionSearchInput = function () {
 		let collectionsSearchField = document.getElementById("zotero-collections-search");
 		this.collectionsView.setFilter(collectionsSearchField.value);
+		// Make sure that the filter ends up being hidden if the value is cleared
+		// after the blur event fires. This happens on windows on cross icon click.
+		if (collectionsSearchField.value.length == 0
+				&& document.activeElement !== collectionsSearchField) {
+			this.hideCollectionSearch();
+		}
 	}
 	
 	
