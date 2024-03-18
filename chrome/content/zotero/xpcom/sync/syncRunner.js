@@ -1339,7 +1339,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				e.errorType = 'warning';
 				e.dialogButtonText = Zotero.getString('general.checkForUpdates');
 				e.dialogButtonCallback = () => {
-					Zotero.openCheckForUpdatesWindow();
+					Zotero.openCheckForUpdatesWindow({ modal: true });
 				};
 				e.dialogButton2Text = Zotero.getString('general.moreInformation');
 				e.dialogButton2Callback = () => {
