@@ -3,10 +3,6 @@ body {
 	font-size: 15px;
 }
 
-body[multiline="true"] {
-	line-height: 26px;
-}
-
 window.citation-dialog {
 	background: transparent;
 	-moz-appearance: none;
@@ -18,13 +14,6 @@ window.citation-dialog {
 	height: 37px;
 }
 
-.citation-dialog.search {
-	padding: 2px 2px 0 2px;
-	margin: 2.5px 3.5px;
-	border: 1px solid rgba(0, 0, 0, 0.5);
-	-moz-appearance: none;
-	border-radius: 10px;
-}
 
 
 .citation-dialog.entry {
@@ -36,10 +25,6 @@ window.citation-dialog {
 	background: -moz-linear-gradient(-90deg, rgb(249, 231, 179) 0, rgb(228, 193, 94) 50%, rgb(221, 184, 81) 50%);
 }
 
-#zotero-icon {
-	margin: -1px 0 0 4px;
-	-moz-appearance: none;
-}
 
 #citation-properties menulist {
 	-moz-appearance: none; color: #fff;
