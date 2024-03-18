@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2024 YOUR_NAME <- TODO
+    Copyright © $$YEAR$$ YOUR_NAME <- TODO
 
     This file is part of Zotero.
 

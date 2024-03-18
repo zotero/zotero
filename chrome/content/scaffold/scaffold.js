@@ -924,6 +924,7 @@ var Scaffold = new function () {
 				//newWeb, scrapeEM, scrapeRIS, scrapeBibTeX, scrapeMARC
 				//These names in the XUL file have to match the file names in template folder.
 				let value = Zotero.File.getContentsFromURL(`chrome://scaffold/content/templates/${template}.js`);
+				value = value.replace('$$YEAR$$', new Date().getFullYear());
 				let cursorOffset = value.indexOf('$$CURSOR$$');
 				value = value.replace('$$CURSOR$$', '');
 
