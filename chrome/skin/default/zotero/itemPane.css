@@ -59,20 +59,6 @@
 	-moz-box-flex: 1
 }
 
-/* Merge pane in duplicates view */
-#zotero-duplicates-merge-button
-{
-	font-size: 13px;
-}
-
-#zotero-duplicates-merge-pane > groupbox {
-	margin: 8px 0 0 0;
-}
-
-#zotero-duplicates-merge-item-box-container {
-	overflow-y: scroll;
-}
-
 #zotero-feed-item-toggleRead-button {
 	overflow: hidden;
 	white-space: nowrap;

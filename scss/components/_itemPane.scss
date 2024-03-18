@@ -5,3 +5,39 @@
 	min-height: 168px;
 	background: var(--material-sidepane);
 }
+
+#zotero-duplicates-merge-pane {
+	&, #zotero-duplicates-merge-version-select, #zotero-duplicates-merge-item-box-container {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	padding-top: 9px;
+	
+	> groupbox {
+		// Override default margin/padding that breaks our styles here
+		margin: 0;
+		padding: 0;
+		padding-inline: 8px;
+		
+		> :is(description, label, button) {
+			margin: 0;
+		}
+	}
+
+	#zotero-duplicates-merge-field-select {
+		margin-bottom: 1px;
+	}
+
+	#zotero-duplicates-merge-item-box-container {
+		flex: 1;
+		padding-inline: 8px;
+		overflow-y: scroll;
+		border-top: var(--material-border-quinary);
+		
+		collapsible-section > .head {
+			display: none;
+		}
+	}
+}
