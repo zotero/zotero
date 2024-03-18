@@ -42,7 +42,6 @@ var Zotero_QuickFormat = new function () {
 		isPaste = false, _itemPopoverClosed, skipInputRefocus;
 	var locatorNode = null;
 	var _searchPromise;
-	var inputIsPristine = true;
 	
 	var _lastFocusedInput = null;
 	var _bubbleMouseDown = false;
@@ -85,6 +84,7 @@ var Zotero_QuickFormat = new function () {
 			
 			dialog = document.querySelector(".citation-dialog.entry");
 			editor = document.querySelector(".citation-dialog.editor");
+			_resizeEditor();
 			dialog.addEventListener("click", _onQuickSearchClick, false);
 			dialog.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			editor.addEventListener("dragover", _onEditorDragOver);
@@ -94,7 +94,7 @@ var Zotero_QuickFormat = new function () {
 			// Navigation within the reference panel
 			referenceBox.addEventListener("keypress", (event) => {
 				// Enter or ; selects the reference
-				if (event.key == "Enter" || event.charCode == 59) {
+				if ((event.key == "Enter" && !event.shiftKey) || event.charCode == 59) {
 					event.preventDefault();
 					event.stopPropagation();
 					event.target.closest("richlistitem").click();
@@ -118,7 +118,14 @@ var Zotero_QuickFormat = new function () {
 					_lastFocusedInput.focus();
 				}
 				else if (["ArrowDown", "ArrowUp"].includes(event.key)) {
-					handleItemSelection(event);
+					// ArrowUp from first item focuses the input
+					if (referenceBox.selectedIndex == 1 && event.key == "ArrowUp") {
+						_lastFocusedInput.focus();
+						referenceBox.selectedIndex = -1;
+					}
+					else {
+						handleItemSelection(event);
+					}
 				}
 				// Right/Left arrow will hide ref panel and move focus to the previour/next element
 				else if ("ArrowLeft" == event.key) {
@@ -858,10 +865,14 @@ var Zotero_QuickFormat = new function () {
 			});
 		}
 		
-		referenceBox.selectedIndex = selectedIndex;
+		let currentInput = _getCurrentInput();
+		// Do not select the item in reference panel if the editor
+		// is non-empty and nothing has been typed yet
+		if (selectedIndex > 1 || isEditorCleared() || !isInputEmpty(currentInput)) {
+			referenceBox.selectedIndex = selectedIndex;
+		}
 		referenceBox.ensureIndexIsVisible(selectedIndex);
 		// Record the last input used for a search
-		let currentInput = _getCurrentInput();
 		if (currentInput) {
 			_lastFocusedInput = currentInput;
 		}
@@ -1102,7 +1113,7 @@ var Zotero_QuickFormat = new function () {
 	this._bubbleizeSelected = Zotero.Promise.coroutine(function* () {
 		const panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		let inputExists = _lastFocusedInput || _getCurrentInput()
-		if(!panelShowing || !referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
+		if(!panelShowing || !referenceBox.hasChildNodes() || !referenceBox.selectedItem || _searchPromise?.isPending()) return false;
 
 		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem || !inputExists) return false;
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
@@ -1154,9 +1165,6 @@ var Zotero_QuickFormat = new function () {
 		let newBubble = _insertBubble(citationItem, input);
 		isPaste = false;
 		_clearEntryList();
-		// After the first bubble was made, the next input should not display the panel
-		// even if there were no searches yet
-		inputIsPristine = false;
 		clearLastFocused(input);
 		input.remove();
 
@@ -1174,6 +1182,19 @@ var Zotero_QuickFormat = new function () {
 		e.preventDefault();
 	}
 
+	// Set the editor's width so that it fills up all remaining space in the window.
+	// It should be window.width - padding - icon wrappers width. The is needed to be explicitly set
+	// so that the editor's height expands/shrinks vertically without going outside of the
+	// window boundaries.
+	function _resizeEditor() {
+		let editorParentWidth = editor.parentNode.getBoundingClientRect().width;
+		let iconWrapperWidth = document.querySelector(".citation-dialog.icons").getBoundingClientRect().width;
+		let editorDesiredWidth = editorParentWidth - iconWrapperWidth * 2;
+		// Sanity check: editor width should never be that small
+		if (editorDesiredWidth > 700) {
+			editor.style.width = `${editorDesiredWidth}px`;
+		}
+	}
 	function _resizeWindow() {
 		let box = document.querySelector(".citation-dialog.entry");
 		let contentHeight = box.getBoundingClientRect().height;
@@ -1217,13 +1238,8 @@ var Zotero_QuickFormat = new function () {
 				break;
 			}
 		}
-		let inputNode = _getCurrentInput() || _lastFocusedInput;
-		// References should be shown if:
-		// - there are matching items and the input is non-empty
-		// - the dialog just opened
-		// - everything but the last, non-removable, input has been cleared.
-		// Otherwise, the panel is hidden.
-		let showReferencePanel = visibleNodes.length > 0 && (!isInputEmpty(inputNode) || inputIsPristine || isEditorCleared());
+		// References should be shown whenever there are matching items
+		let showReferencePanel = visibleNodes.length > 0;
 		if (!showReferencePanel) {
 			referencePanel.hidePopup();
 			return;
@@ -1428,8 +1444,8 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Accepts current selection and adds citation
 	 */
-	this._accept = function() {
-		if(accepted) return;
+	this.accept = function() {
+		if (accepted || _searchPromise?.isPending()) return;
 		accepted = true;
 		try {
 			_updateCitationObject();
@@ -1464,7 +1480,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		else if (event.key == "Enter") {
 			event.preventDefault();
-			Zotero_QuickFormat._accept();
+			Zotero_QuickFormat.accept();
 		}
 		// In rare circumstances, the focus can get lost (e.g. if the focus is on an item
 		// in reference panel when it is refreshed and all nodes are deleted).
@@ -1567,7 +1583,8 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _resetSearchTimer() {
 		// Show spinner
-		var spinner = document.querySelector('.citation-dialog.spinner image');
+		var spinner = document.querySelector('.citation-dialog.icons.end image');
+		spinner.nextElementSibling.style.display = "none";
 		spinner.setAttribute("status", "animate");
 		// Cancel current search if active
 		if (_searchPromise && _searchPromise.isPending()) {
@@ -1577,9 +1594,9 @@ var Zotero_QuickFormat = new function () {
 		_searchPromise = Zotero.Promise.delay(SEARCH_TIMEOUT)
 			.then(() => _quickFormat())
 			.then(() => {
-				inputIsPristine = false;
 				_searchPromise = null;
 				spinner.removeAttribute("status");
+				spinner.nextElementSibling.style.removeProperty("display");
 			});
 	}
 
@@ -1697,7 +1714,7 @@ var Zotero_QuickFormat = new function () {
 
 	var onInputPress = function (event) {
 		if (accepted) return;
-		if ((event.charCode === 59 /* ; */ || event.key === "Enter") && referencePanel.state === "open") {
+		if ((event.charCode === 59 /* ; */ || (event.key === "Enter" && !event.shiftKey)) && referenceBox.selectedIndex >= 1) {
 			event.preventDefault();
 			event.stopPropagation();
 			Zotero_QuickFormat._bubbleizeSelected();
@@ -1723,19 +1740,30 @@ var Zotero_QuickFormat = new function () {
 				this.previousElementSibling.remove();
 				_combineNeighboringInputs();
 			}
-			// If this removed the last bubble, make sure the reference panel is open
-			if (isEditorCleared()) {
-				_resetSearchTimer();
-			}
+			// Rerun search to update opened documents section if needed
+			_resetSearchTimer();
 		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key) && referencePanel.state === "open") {
-			// Arrow up/down from wherever will navigate the references panel if that's opened
-			handleItemSelection(event);
+			// ArrowUp when item is selected does nothing
+			if (referenceBox.selectedIndex < 1 && event.key == "ArrowUp") {
+				return;
+			}
+			// Arrow up/down will navigate the references panel if that's opened
+			if (referenceBox.selectedIndex < 1) {
+				referenceBox.selectedIndex = 1;
+				referenceBox.selectedItem.focus();
+			}
+			else {
+				handleItemSelection(event);
+			}
 		}
 		else if (event.key == "Tab" && !event.shiftKey && referencePanel.state === "open") {
 			// Tab from the input will focus the selected item in the references list
 			event.preventDefault();
 			event.stopPropagation();
+			if (referenceBox.selectedIndex < 1) {
+				referenceBox.selectedIndex = 1;
+			}
 			referenceBox.selectedItem.focus();
 		}
 	};
@@ -1803,6 +1831,9 @@ var Zotero_QuickFormat = new function () {
 				moveFocusForward(this);
 			}
 			this.remove();
+			// Removed item bubble may belong to opened documents section. Reference panel
+			// needs to be reset so that it appears among other items.
+			_clearEntryList();
 			_combineNeighboringInputs();
 			// If all bubbles are removed, add and focus an input
 			if (getAllBubbles().length == 0) {
@@ -1879,6 +1910,12 @@ var Zotero_QuickFormat = new function () {
 			refocusInput();
 			
 			event.preventDefault();
+		}
+		// Shift-Enter will accept the existing dialog's state
+		else if (keyCode == "Enter" && event.shiftKey) {
+			event.preventDefault();
+			event.stopPropagation();
+			this.accept();
 		}
 		else {
 			isPaste = false;

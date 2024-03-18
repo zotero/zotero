@@ -55,7 +55,7 @@
 		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
 			<hbox class="citation-dialog main" flex="1" align="start">
 				<hbox flex="1">
-					<vbox flex="1" align="center" style="display: flex;align-items: center;max-width: 38px;justify-content: center;">
+					<vbox class="citation-dialog icons start">
 						<toolbarbutton id="zotero-icon" type="menu" tabindex="0" disabled="true">
 							<menupopup>
 								<menuitem id="keep-sorted" label="&zotero.citation.keepSorted.label;"
@@ -70,8 +70,9 @@
 						</toolbarbutton>
 					</vbox>
 					<html:div flex="1" spellcheck="false" class="citation-dialog editor" role="application"></html:div>
-					<vbox class="citation-dialog spinner">
-						<image class="zotero-spinner-16"/>
+					<vbox class="citation-dialog icons end">
+						<image class="icon zotero-spinner-16"/>
+						<toolbarbutton class="icon accept-button" onclick="Zotero_QuickFormat.accept()" data-l10n-id="quickformat-accept"></toolbarbutton>
 					</vbox>
 				</hbox>
 			</hbox>

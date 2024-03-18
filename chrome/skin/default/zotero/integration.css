@@ -185,7 +185,7 @@
 	font: -moz-field;
 	outline: none;
 	line-height: 2em;
-	width: 710px;
+	width: 700px; /* initial editor width - adjusted after dom load */
 	height: 28px;
 	font-size: 13px;
 	background: white;
@@ -201,9 +201,22 @@
 	background: var(--color-accent);
 }
 
-.citation-dialog.spinner {
+.citation-dialog.icons {
 	display: flex;
 	align-items: center;
+	flex-direction: column;
+	justify-content: center;
+	width: 36px;
+}
+
+.citation-dialog.entry {
+	max-width: 800px;
+	min-width: 800px;
+}
+
+.citation-dialog .accept-button {
+	list-style-image: url("chrome://zotero/skin/20/universal/arrow-right.svg");
+	fill: currentColor;
 }
 
 .citation-dialog.item {
