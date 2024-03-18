@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	width="550" height="110"
+	onload="ZoteroRenameFiles.init()"
+	id="zotero-progress"
+	style="display: flex;">
+    <linkset>
+		<html:link rel="localization" href="branding/brand.ftl" />
+		<html:link rel="localization" href="zotero.ftl" />
+	</linkset>
+	<vbox id="zotero-progress-box" style="padding:10px" flex="1">
+		<label id="status" control="progress-indicator" data-l10n-id="rename-files-is-renaming" />
+		<hbox align="center">
+			<html:progress id="progress-indicator" max="1" style="flex: 1" />
+			<button id="close-button" label="&zotero.general.close;" disabled="true" />
+		</hbox>
+	</vbox>
+    <script src="include.js" />
+    <script src="renameFiles.js" />
+</window>

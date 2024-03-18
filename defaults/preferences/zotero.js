@@ -35,6 +35,7 @@ pref("extensions.zotero.autoRecognizeFiles", true);
 pref("extensions.zotero.autoRenameFiles", true);
 pref("extensions.zotero.autoRenameFiles.linked", false);
 pref("extensions.zotero.autoRenameFiles.fileTypes", "application/pdf,application/epub+zip");
+pref("extensions.zotero.autoRenameFiles.onMetadataChange", true);
 pref("extensions.zotero.attachmentRenameTemplate", "{{ firstCreator suffix=\" - \" }}{{ year suffix=\" - \" }}{{ title truncate=\"100\" }}");
 pref("extensions.zotero.capitalizeTitles", false);
 pref("extensions.zotero.launchNonNativeFiles", false);

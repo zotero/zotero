@@ -27,21 +27,44 @@
 Zotero_Preferences.FileRenaming = {
 	mockItem: null,
 	defaultExt: 'pdf',
+	origTemplate: null,
+	
 	init: function () {
-		this.inputRef = document.getElementById('file-renaming-format-template');
+		this.origTemplate = Zotero.Prefs.get('attachmentRenameTemplate');
+		this.inputEl = document.getElementById('file-renaming-format-template');
+		this.backButtonEl = document.getElementById('prefs-subpane-back-button');
+		this.navigationEl = document.getElementById('prefs-navigation');
 		this.updatePreview();
-		this.inputRef.addEventListener('input', this.updatePreview.bind(this));
-		this.inputRef.addEventListener('blur', this.handleInputBlur.bind(this));
+		this.inputEl.addEventListener('input', this.updatePreview.bind(this));
+		this.inputEl.addEventListener('blur', this.handleInputBlur.bind(this));
 
 		this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
 		this._updatePreview = this.updatePreview.bind(this);
+		this._promptReplace = this.promptReplace.bind(this);
+
 		if (this._itemsView) {
 			this._itemsView.onSelect.addListener(this._updatePreview);
+		}
+		if (this.backButtonEl) {
+			this.backButtonEl.addEventListener('command', this._promptReplace);
+		}
+		if (this.navigationEl) {
+			this.navigationEl.addEventListener('select', this._promptReplace);
 		}
 	},
 
 	uninit: function () {
 		this._itemsView.onSelect.removeListener(this._updatePreview);
+		this.backButtonEl.removeEventListener('command', this._promptReplace);
+		this.navigationEl.removeEventListener('select', this._promptReplace);
+		this.promptReplace();
+	},
+
+	promptReplace: function () {
+		if (this.inputEl.value !== this.origTemplate) {
+			this.origTemplate = Zotero.Prefs.get('attachmentRenameTemplate');
+			Zotero_Preferences.General.promptAutoRenameFiles();
+		}
 	},
 
 	getActiveItem() {
@@ -62,14 +85,14 @@ Zotero_Preferences.FileRenaming = {
 
 	updatePreview() {
 		const [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), this.defaultExt, ''];
-		const formatString = this.inputRef.value;
+		const formatString = this.inputEl.value;
 		const preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
 		document.getElementById('file-renaming-format-preview').innerText = `${preview}.${ext}`;
 	},
 
 	handleInputBlur() {
-		const formatString = this.inputRef.value;
-		const prefKey = this.inputRef.getAttribute('preference');
+		const formatString = this.inputEl.value;
+		const prefKey = this.inputEl.getAttribute('preference');
 		if (formatString.replace(/\s/g, '') === '') {
 			Zotero.Prefs.clear(prefKey, true);
 			this.updatePreview();

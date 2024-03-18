@@ -717,3 +717,17 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+
+rename-files-is-renaming =
+    .value = Renaming files…
+    
+rename-files-renamed = 
+    .value = { $count ->
+        [0] No files were renamed
+        [one] One file was renamed
+        *[other] { $count } files were renamed
+    }
+
+rename-files-based-on-metadata =
+    .label = Rename Files Based on Metadata
