@@ -689,7 +689,7 @@
 					var button = document.createXULElement("toolbarbutton");
 					button.className = 'zotero-field-version-button zotero-clicky-merge';
 					button.setAttribute('type', 'menu');
-					button.setAttribute('wantdropmarker', true);
+					button.setAttribute('data-l10n-id', 'itembox-button-merge');
 					
 					var popup = button.appendChild(document.createXULElement("menupopup"));
 					

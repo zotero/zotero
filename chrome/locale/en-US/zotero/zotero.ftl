@@ -114,6 +114,8 @@ item-button-view-online =
 
 itembox-button-options =
     .tooltiptext = Open Context Menu
+itembox-button-merge =
+    .aria-label = Select Version
 
 reader-use-dark-mode-for-content =
     .label = Use Dark Mode for Content
