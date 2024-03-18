@@ -581,7 +581,7 @@ Zotero.Attachments = new function () {
 		// Save using remote web browser persist
 		var externalHandlerImport = async function (contentType) {
 			// Rename attachment
-			if (renameIfAllowedType && !fileBaseName && this.isRenameAllowedForType(contentType)) {
+			if (renameIfAllowedType && !fileBaseName && this.isRenameAllowedForType(contentType, libraryID)) {
 				let parentItem = Zotero.Items.get(parentItemID);
 				fileBaseName = this.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
 			}
@@ -2329,13 +2329,13 @@ Zotero.Attachments = new function () {
 	 * based on the metadata of the specified item and a format string
 	 *
 	 * (Optional) |formatString| specifies the format string -- otherwise
-	 * the 'attachmentRenameTemplate' pref is used
+	 * the 'attachmentRenameTemplate' synced setting for the user's library is used
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} formatString
 	 */
 	this.getFileBaseNameFromItem = function (item, options = {}) {
-		if (!(item instanceof Zotero.Item)) {
+		if (!(item instanceof Zotero.Item) || item.libraryID === null) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
 		if (typeof options === 'string') {
@@ -2346,7 +2346,8 @@ Zotero.Attachments = new function () {
 		let { formatString = null, attachmentTitle = '' } = options;
 
 		if (!formatString) {
-			formatString = Zotero.Prefs.get('attachmentRenameTemplate');
+			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			formatString = Zotero.SyncedSettings.get(item.libraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 		}
 
 		let chunks = [];
@@ -2615,28 +2616,59 @@ Zotero.Attachments = new function () {
 		return ext;
 	};
 	
-	this.shouldAutoRenameFile = function (isLink) {
-		if (!Zotero.Prefs.get('autoRenameFiles')) {
+	this.shouldAutoRenameFile = function (isLink, libraryID = null) {
+		if (libraryID === null) {
+			Zotero.debug('Calling Zotero.Attachments.shouldAutoRenameFile without a libraryID is deprecated. Assuming user library.');
+			libraryID = Zotero.Libraries.userLibraryID;
+		}
+		if (libraryID === Zotero.Libraries.userLibraryID && !Zotero.Prefs.get('autoRenameFiles')) {
 			return false;
 		}
+
+		if (libraryID !== Zotero.Libraries.userLibraryID && !Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles')) {
+			return false;
+		}
+
 		if (isLink) {
-			return Zotero.Prefs.get('autoRenameFiles.linked');
+			// Linked files may only be renamed in the user library, where it's based on the preference (in group libraries, it's always false)
+			return libraryID === Zotero.Libraries.userLibraryID ? Zotero.Prefs.get('autoRenameFiles.linked') : false;
 		}
 		return true;
 	}
 	
 	
-	this.isRenameAllowedForType = function (contentType) {
+	this.isRenameAllowedForType = function (contentType, libraryID = null) {
 		let typePrefixes;
-		try {
-			typePrefixes = Zotero.Prefs.get('autoRenameFiles.fileTypes')
-				.split(',')
-				.filter(Boolean);
-		}
-		catch (e) {
-			typePrefixes = [];
+		if (libraryID === null) {
+			Zotero.debug('Calling Zotero.Attachments.isRenameAllowedForType without a libraryID is deprecated. Assuming user library.');
+			libraryID = Zotero.Libraries.userLibraryID;
 		}
 
+		
+		if (libraryID === Zotero.Libraries.userLibraryID) {
+			try {
+				typePrefixes = Zotero.Prefs.get('autoRenameFiles.fileTypes')
+					.split(',')
+					.filter(Boolean);
+			}
+			catch (e) { // eslint-disable-line no-unused-vars
+				typePrefixes = [];
+			}
+		}
+		else {
+			try {
+				typePrefixes = Zotero.SyncedSettings.get(libraryID, 'autoRenameFilesFileTypes')
+					.split(',')
+					.filter(Boolean);
+			}
+			catch (e) { // eslint-disable-line no-unused-vars
+				const { DEFAULT_AUTO_RENAME_FILE_TYPES } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+				typePrefixes = DEFAULT_AUTO_RENAME_FILE_TYPES
+					.split(',')
+					.filter(Boolean);
+			}
+		}
+		
 		return typePrefixes.some(prefix => contentType.startsWith(prefix));
 	};
 	
@@ -2654,17 +2686,21 @@ Zotero.Attachments = new function () {
 	
 	
 	this.shouldAutoRenameAttachment = function (attachment) {
-		return Zotero.Attachments.shouldAutoRenameFile(attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)
-			&& Zotero.Attachments.isRenameAllowedForType(attachment.attachmentContentType);
+		return Zotero.Attachments.shouldAutoRenameFile(attachment.isLinkedFileAttachment(), attachment.libraryID)
+			&& Zotero.Attachments.isRenameAllowedForType(attachment.attachmentContentType, attachment.libraryID);
 	};
 	
 	
+	// NOTE: This should only be used during attachment item creation, where the
+	// attachment item does not exist yet, because when generating a new
+	// filename, the current file name is used in place of the
+	// `attachmentTitle`.
 	this.getRenamedFileBaseNameIfAllowedType = async function (parentItem, file) {
 		var contentType = file.endsWith('.pdf')
 			// Don't bother reading file if there's a .pdf extension
 			? 'application/pdf'
 			: await Zotero.MIME.getMIMETypeFromFile(file);
-		if (!this.isRenameAllowedForType(contentType)) {
+		if (!this.isRenameAllowedForType(contentType, parentItem.libraryID)) {
 			return false;
 		}
 		return this.getFileBaseNameFromItem(parentItem, { attachmentTitle: PathUtils.filename(file) });

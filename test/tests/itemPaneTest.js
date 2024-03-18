@@ -1714,6 +1714,85 @@ describe("Item pane", function () {
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
 
+		it("should disable the rename from parent button if already renamed", async function () {
+			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'application/pdf');
+			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: item.id
+			});
+
+			let zp = win.ZoteroPane;
+			await zp.selectItems([attachment.id]);
+
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			await zp.selectItems([attachment.id]);
+			await itemDetails._renderPromise;
+
+			let label = itemBox._id('fileName');
+			let button = itemBox._id('rename-from-parent');
+			
+			// File is auto-renamed during import, button should be disabled
+			assert.isTrue(button.disabled);
+			assert.equal(label.value, "Lorem Ipsum.pdf");
+			
+			await attachment.eraseTx();
+			await item.eraseTx();
+			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
+		});
+
+		it("should disable the rename from parent button, after file was renamed", async function () {
+			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'x-nonexistent/type');
+			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
+			let file = getTestDataDirectory();
+			file.append('test.txt');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: item.id
+			});
+
+			let zp = win.ZoteroPane;
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let label = itemBox._id('fileName');
+			let button = itemBox._id('rename-from-parent');
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			await zp.selectItems([attachment.id]);
+			await itemDetails._renderPromise;
+			assert.isFalse(button.disabled);
+
+			button.click();
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+
+			assert.equal(button.disabled, true);
+			assert.equal(label.value, "Lorem Ipsum.txt");
+			
+			await attachment.eraseTx();
+			await item.eraseTx();
+			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
+		});
+
+		it("should hide the rename from parent button for top-level items", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let topLevelAttachment = await Zotero.Attachments.importFromFile({
+				file: file,
+			});
+
+			let zp = win.ZoteroPane;
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let button = itemBox._id('rename-from-parent');
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			await zp.selectItems([topLevelAttachment.id]);
+			await itemDetails._renderPromise;
+			
+			assert.isTrue(button.hidden);
+			await topLevelAttachment.eraseTx();
+		});
+
 		it("should not transfer focused title while switching between items", async function () {
 			let item = new Zotero.Item('book');
 			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF_one', parentItemID: item.id });

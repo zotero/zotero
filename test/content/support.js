@@ -35,7 +35,7 @@ async function waitForDOMAttributes(target, attributes, callback) {
 		for (let mutation of mutations) {
 			if (mutation.type === 'attributes') {
 				let oldValue = mutation.oldValue;
-				let newValue = mutation.target.value;
+				let newValue = mutation.target.getAttribute(mutation.attributeName);
 				if (callback(newValue, oldValue)) {
 					observer.disconnect();
 					deferred.resolve();
@@ -360,7 +360,7 @@ function waitForItemEvent(event) {
 /**
  * Wait for a single notifier event and return a promise for the data
  *
- * Tests run after all other handlers (priority 101, since handlers are 100 by default)
+ * Tests run after all other handlers (priority 200, since handlers are 100 by default, file renaming is 150)
  */
 function waitForNotifierEvent(event, type) {
 	if (!event) throw new Error("event not provided");
@@ -374,7 +374,7 @@ function waitForNotifierEvent(event, type) {
 				extraData: extraData
 			});
 		}
-	}}, [type], 'test', 101);
+	}}, [type], 'test', 200);
 	return deferred.promise;
 }
 
