@@ -301,7 +301,7 @@ Zotero.RecognizeDocument = new function () {
 			let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: originalTitle });
 			let ext = Zotero.Attachments.getCorrectFileExtension(attachment);
 			let newName = fileBaseName + (ext ? '.' + ext : '');
-			let result = await attachment.renameAttachmentFile(newName, false, true);
+			let result = await attachment.renameAttachmentFile(newName, { overwrite: false, unique: true });
 			if (result !== true) {
 				throw new Error("Error renaming " + path);
 			}

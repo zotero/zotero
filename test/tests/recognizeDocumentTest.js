@@ -15,6 +15,7 @@ describe("Document Recognition", function () {
 		Zotero.Prefs.set('fulltext.textMaxLength', 0);
 		
 		this.timeout(60000);
+		Zotero.Prefs.set('autoRenameFiles.onMetadataChange', false); // Prevent auto-rename triggering during recognition
 		// Load Zotero pane and install PDF tools
 		yield Promise.all([
 			loadZoteroPane().then(w => win = w)
@@ -47,6 +48,7 @@ describe("Document Recognition", function () {
 		if (win) {
 			win.close();
 		}
+		Zotero.Prefs.clear('autoRenameFiles.onMetadataChange');
 	});
 	
 	describe("PDFs", function () {
@@ -67,6 +69,12 @@ describe("Document Recognition", function () {
 			assert.equal(item.getField("title"), "Shaping the Research Agenda");
 			assert.equal(item.getField("libraryCatalog"), "DOI.org (Crossref)");
 			assert.lengthOf(modifiedIDs, 2);
+
+			// after item has been recognized, attachment item will be modified
+			// two more times (by `attachment.renameAttachmentFile` and then by
+			// `attachment.setAutoAttachmentTitle` and in recognizeDocument.js):
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
 			
 			await waitForProgressWindow();
 			
@@ -228,13 +236,13 @@ describe("Document Recognition", function () {
 			});
 			
 			// Link to the PDF
-			var tempDir = await getTempDirectory();
-			var tempFile = OS.Path.join(tempDir, 'test.pdf');
+			let tempDir = await getTempDirectory();
+			let tempFile = OS.Path.join(tempDir, 'test.pdf');
 			await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), tempFile);
 			var attachment = await Zotero.Attachments.linkFromFile({
 				file: tempFile
 			});
-			
+
 			win.ZoteroPane.recognizeSelected();
 			
 			var addedIDs = await waitForItemEvent("add");
@@ -243,6 +251,12 @@ describe("Document Recognition", function () {
 			var item = Zotero.Items.get(addedIDs[0]);
 			assert.equal(item.getField("title"), itemTitle);
 			assert.lengthOf(modifiedIDs, 2);
+
+			// after item has been recognized, attachment item will be modified
+			// two more times (by `attachment.renameAttachmentFile` and then by
+			// `attachment.setAutoAttachmentTitle` and in recognizeDocument.js):
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
 			
 			await waitForProgressWindow();
 			
@@ -286,6 +300,7 @@ describe("Document Recognition", function () {
 
 			// The title should not have changed
 			assert.equal(attachment.getField('title'), 'test');
+			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
 		});
 
 		it("shouldn't rename a linked file attachment using parent metadata if pref disabled", async function () {
@@ -344,6 +359,12 @@ describe("Document Recognition", function () {
 			var item = Zotero.Items.get(addedIDs[0]);
 			assert.lengthOf(modifiedIDs, 2);
 
+			// after item has been recognized, attachment item will be modified
+			// two more times (by `attachment.renameAttachmentFile` and then by
+			// `attachment.setAutoAttachmentTitle` and in recognizeDocument.js):
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+
 			await waitForProgressWindow();
 
 			// The file should have been renamed
@@ -385,6 +406,12 @@ describe("Document Recognition", function () {
 			assert.equal(item.getField('title'), 'The Mania of the Nations on the Planet Mars: ISBN Database Edition');
 			assert.equal(Zotero.Utilities.cleanISBN(item.getField('ISBN')), isbn);
 			assert.lengthOf(modifiedIDs, 2);
+
+			// after item has been recognized, attachment item will be modified
+			// two more times (by `attachment.renameAttachmentFile` and then by
+			// `attachment.setAutoAttachmentTitle` and in recognizeDocument.js):
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
 
 			await waitForProgressWindow();
 
@@ -452,6 +479,12 @@ describe("Document Recognition", function () {
 			assert.equal(Zotero.Utilities.cleanDOI(item.getField('DOI')), doi);
 			assert.lengthOf(modifiedIDs, 2);
 
+			// after item has been recognized, attachment item will be modified
+			// two more times (by `attachment.renameAttachmentFile` and then by
+			// `attachment.setAutoAttachmentTitle` and in recognizeDocument.js):
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+
 			await waitForProgressWindow();
 
 			// The file should have been renamed
@@ -484,6 +517,12 @@ describe("Document Recognition", function () {
 			assert.equal(item.getCreators().length, 1);
 			assert.equal(item.getField('ISBN'), '');
 			assert.lengthOf(modifiedIDs, 2);
+
+			// after item has been recognized, attachment item will be modified
+			// two more times (by `attachment.renameAttachmentFile` and then by
+			// `attachment.setAutoAttachmentTitle` and in recognizeDocument.js):
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
 
 			await waitForProgressWindow();
 
