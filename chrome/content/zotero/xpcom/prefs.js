@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 15;
+		var toVersion = 16;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -179,12 +179,22 @@ Zotero.Prefs = new function() {
 							this.set('integration.citationDialogLastUsedMode', lastClosed);
 							this.clear('integration.citationDialogLastClosedMode');
 						}
+						break;
+					}
+					case 16: {
+						let attachmentRenameTemplate = this.get('attachmentRenameTemplate');
+						if (this.prefHasUserValue('attachmentRenameTemplate')) {
+							Zotero.initializationPromise.then(() => {
+								Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', attachmentRenameTemplate);
+								this.set('autoRenameFiles.done', false);
+							});
+						}
 					}
 				}
 			}
 			this.set('prefVersion', toVersion);
 		}
-	}
+	};
 	
 	
 	/**
