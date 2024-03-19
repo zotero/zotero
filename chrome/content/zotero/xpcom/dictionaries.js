@@ -136,20 +136,11 @@ Zotero.Dictionaries = new function () {
 			}
 
 			zipReader.close();
-			zipReader = null
+			zipReader = null;
 			Cu.forceGC();
-			await OS.File.remove(xpiPath);
 			await _loadDirectory(dir);
 		}
 		catch (e) {
-			try {
-				if (await OS.File.exists(xpiPath)) {
-					await OS.File.remove(xpiPath);
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
 			try {
 				if (await OS.File.exists(dir)) {
 					await OS.File.removeDir(dir);
@@ -159,6 +150,19 @@ Zotero.Dictionaries = new function () {
 				Zotero.logError(e);
 			}
 			throw e;
+		}
+		finally {
+			// Remove the downloaded file from the temp path
+			// Note: In same cases, on Windows, it can't be removed
+			// because something is keeping it open
+			try {
+				if (await OS.File.exists(xpiPath)) {
+					await OS.File.remove(xpiPath);
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 	};
 
