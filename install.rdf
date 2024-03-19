@@ -6,7 +6,7 @@
   
     <em:id>zotero@chnm.gmu.edu</em:id>
     <em:name>Zotero</em:name>
-    <em:version>6.0.36.SOURCE</em:version>
+    <em:version>6.0.37.SOURCE</em:version>
     <em:multiprocessCompatible>false</em:multiprocessCompatible>
     <em:type>2</em:type> <!-- type=extension --> 
     
