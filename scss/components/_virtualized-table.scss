@@ -343,6 +343,13 @@
 	}
 }
 
+.virtualized-table.multi-select:focus {
+	.row.focused {
+		outline: 1px dotted var(--color-accent);
+		z-index: 10000;
+	}
+}
+
 *[dir=rtl] {
 	.virtualized-table-header {
 		.cell .sort-indicator {
