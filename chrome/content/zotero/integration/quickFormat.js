@@ -106,7 +106,7 @@ var Zotero_QuickFormat = new function () {
 				if ((event.key == "Enter" && !event.shiftKey) || event.charCode == 59) {
 					event.preventDefault();
 					event.stopPropagation();
-					event.target.closest("richlistitem").click();
+					Zotero_QuickFormat._bubbleizeSelected();
 				}
 				// Tab will move focus back to the input field
 				else if (event.key === "Tab") {
@@ -127,8 +127,10 @@ var Zotero_QuickFormat = new function () {
 					_lastFocusedInput.focus();
 				}
 				else if (["ArrowDown", "ArrowUp"].includes(event.key)) {
+					event.preventDefault();
+					event.stopPropagation();
 					// ArrowUp from first item focuses the input
-					if (referenceBox.selectedIndex == 1 && event.key == "ArrowUp") {
+					if (event.key == "ArrowUp" && referenceBox.selectedIndex == 1 && referenceBox.selectedItem == document.activeElement) {
 						_lastFocusedInput.focus();
 						referenceBox.selectedIndex = -1;
 					}
@@ -146,6 +148,37 @@ var Zotero_QuickFormat = new function () {
 					moveFocusForward(_lastFocusedInput);
 				}
 			});
+			referenceBox.addEventListener("click", (e) => {
+				let item = e.target.closest("richlistitem");
+				if (!item || e.button !== 0) return;
+				// Prevent selecting separator with CMD/Ctrl-Click
+				if (item.disabled) {
+					// Clear selection on header click
+					referenceBox.clearSelection();
+					referenceBox.currentIndex = 0;
+					e.preventDefault();
+					return;
+				}
+				let mouseMultiSelect = e.shiftKey || (Zotero.isMac && e.metaKey) || (!Zotero.isMac && e.ctrlKey);
+				let multipleSelected = referenceBox.selectedCount > 1;
+				let isItemSelected = [...referenceBox.selectedItems].findIndex(node => node == item) !== -1;
+				// Click without multiselect modifier will confirm the selection
+				if (!mouseMultiSelect) {
+					// If item is multi-selected, do not discard the selection
+					if (multipleSelected && isItemSelected) {
+						e.preventDefault();
+					}
+					Zotero_QuickFormat._bubbleizeSelected();
+					return;
+				}
+				// Shift-click can end up selecting disabled separator, so make sure it's removed
+				setTimeout(() => {
+					let selectedSeparators = [...document.querySelectorAll("richlistitem[disabled='true'][selected='true']")];
+					for (let node of selectedSeparators) {
+						referenceBox.removeItemFromSelection(node);
+					}
+				});
+			}, true);
 			if (Zotero.isWin) {
 				if (Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
 					dialog.setAttribute("square", "true");
@@ -890,6 +923,15 @@ var Zotero_QuickFormat = new function () {
 		var nodes = [];
 		var str = "";
 
+		// Add a red label to retracted items
+		if (Zotero.Retractions.isRetracted(item)) {
+			var label = document.createXULElement("label");
+			label.setAttribute("value", Zotero.getString("retraction.banner"));
+			label.setAttribute("crop", "end");
+			label.style.color = 'red';
+			label.style['margin-inline-end'] = '5px';
+			infoHbox.appendChild(label);
+		}
 		if (item.isNote()) {
 			var date = Zotero.Date.sqlToDate(item.dateModified, true);
 			date = Zotero.Date.toFriendlyDate(date);
@@ -989,7 +1031,6 @@ var Zotero_QuickFormat = new function () {
 		rll.setAttribute("aria-describedby", "item-description");
 		rll.appendChild(titleNode);
 		rll.appendChild(infoNode);
-		rll.addEventListener("click", Zotero_QuickFormat._bubbleizeSelected, false);
 		
 		return rll;
 	}
@@ -1113,64 +1154,85 @@ var Zotero_QuickFormat = new function () {
 		if (!skipResize) {
 			_resizeReferencePanel();
 		}
+		referenceBox.selectedIndex = -1;
+	}
+
+	// Select the first appropriate reference from the items list.
+	// If there are multi-selected items, select the first one of them.
+	// Otherwise, select the first non-header row.
+	function _selectFirstReference() {
+		if (referenceBox.selectedIndex > 0) return;
+		let firstItem = [...referenceBox.selectedItems].find(node => referenceBox.contains(node));
+		if (firstItem) {
+			referenceBox.selectedItem = firstItem;
+		}
+		else {
+			referenceBox.selectedIndex = 1;
+		}
 	}
 	
 	/**
 	 * Converts the selected item to a bubble
 	 */
 	this._bubbleizeSelected = Zotero.Promise.coroutine(function* () {
-		const panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
-		let inputExists = _lastFocusedInput || _getCurrentInput()
-		if(!panelShowing || !referenceBox.hasChildNodes() || !referenceBox.selectedItem || _searchPromise?.isPending()) return false;
-
-		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem || !inputExists) return false;
-		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
-		if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
-			var item = Zotero.Cite.getItem(citationItem.id);
-			citationItem.uris = item.cslURIs;
-			citationItem.itemData = item.cslItemData;
-		}
-		else if (Zotero.Retractions.isRetracted({ id: parseInt(citationItem.id) })) {
-			citationItem.id = parseInt(citationItem.id);
-			if (Zotero.Retractions.shouldShowCitationWarning(citationItem)) {
-				referencePanel.hidden = true;
-				var ps = Services.prompt;
-				var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-					+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-				var checkbox = { value: false };
-				var result = ps.confirmEx(null,
-					Zotero.getString('general.warning'),
-					Zotero.getString('retraction.citeWarning.text1') + '\n\n'
-						+ Zotero.getString('retraction.citeWarning.text2'),
-					buttonFlags,
-					Zotero.getString('general.continue'),
-					null,
-					Zotero.getString('pane.items.showItemInLibrary'),
-					Zotero.getString('retraction.citationWarning.dontWarn'), checkbox);
-				referencePanel.hidden = false;
-				if (result > 0) {
-					if (result == 2) {
-						Zotero_QuickFormat.showInLibrary(parseInt(citationItem.id));
+		let input = _lastFocusedInput || _getCurrentInput();
+		if (referenceBox.selectedCount == 0 || referencePanel.state !== 'open' || !input) return false;
+		let lastAddedBubble;
+		let multipleSelected = referenceBox.selectedCount > 1;
+		// It is technically possible for referenceBox.selectedItems to include nodes that were removed
+		// (e.g. during panel refreshing). This should never happen but this is a sanity check to make sure
+		let selectedItems = [...referenceBox.selectedItems].filter(node => referenceBox.contains(node));
+		for (let selectedItem of selectedItems) {
+			let itemID = parseInt(selectedItem.getAttribute("zotero-item"));
+			let item = { id: itemID };
+			if (Zotero.Retractions.isRetracted(item)) {
+				if (Zotero.Retractions.shouldShowCitationWarning(item)) {
+					var ps = Services.prompt;
+					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+					var checkbox = { value: false };
+					var result = ps.confirmEx(null,
+						Zotero.getString('general.warning'),
+						Zotero.getString('retraction.citeWarning.text1') + '\n\n'
+							+ Zotero.getString('retraction.citeWarning.text2'),
+						buttonFlags,
+						Zotero.getString('general.continue'),
+						null,
+						Zotero.getString('pane.items.showItemInLibrary'),
+						Zotero.getString('retraction.citationWarning.dontWarn'), checkbox);
+					if (result > 0) {
+						if (result == 2) {
+							Zotero_QuickFormat.showInLibrary(itemID);
+						}
+						// Retraction should not be added
+						referenceBox.removeItemFromSelection(selectedItem);
+						return false;
 					}
-					return false;
-				}
-				if (checkbox.value) {
-					Zotero.Retractions.disableCitationWarningsForItem(citationItem);
+					if (checkbox.value) {
+						Zotero.Retractions.disableCitationWarningsForItem(item);
+					}
 				}
 			}
-			citationItem.ignoreRetraction = true;
 		}
-		
-		_updateLocator(_getEditorContent());
-		if(currentLocator) {
-			 citationItem["locator"] = currentLocator;
-			if(currentLocatorLabel) {
-				citationItem["label"] = currentLocatorLabel;
+		for (let selectedItem of selectedItems) {
+			var citationItem = { id: selectedItem.getAttribute("zotero-item") };
+			if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
+				var item = Zotero.Cite.getItem(citationItem.id);
+				citationItem.uris = item.cslURIs;
+				citationItem.itemData = item.cslItemData;
 			}
+			if (currentLocator) {
+				citationItem.locator = currentLocator;
+				if (currentLocatorLabel) {
+					citationItem.label = currentLocatorLabel;
+				}
+			}
+			lastAddedBubble = _insertBubble(citationItem, input);
 		}
-		let input = _getCurrentInput() || _lastFocusedInput;
-		let newBubble = _insertBubble(citationItem, input);
+		if (!lastAddedBubble) {
+			return false;
+		}
 		isPaste = false;
 		_clearEntryList();
 		clearLastFocused(input);
@@ -1178,7 +1240,10 @@ var Zotero_QuickFormat = new function () {
 
 		yield _previewAndSort();
 		refocusInput(false);
-		locatorNode = getAllBubbles().filter(bubble => bubble.textContent == newBubble.textContent)[0];
+		// Do not record locator node if multiple bubbles are added
+		if (!multipleSelected) {
+			locatorNode = getAllBubbles().filter(bubble => bubble.textContent == lastAddedBubble.textContent)[0];
+		}
 		return true;
 	});
 	
@@ -1710,6 +1775,9 @@ var Zotero_QuickFormat = new function () {
 	function _onQuickSearchClick(event) {
 		if (qfGuidance) qfGuidance.hide();
 		if (!event.target.classList.contains("editor")) {
+			// On click of border outside of the editor, clear multi-select
+			referenceBox.currentIndex = 0;
+			referenceBox.clearSelection();
 			return;
 		}
 		let clickX = event.clientX;
@@ -1752,9 +1820,13 @@ var Zotero_QuickFormat = new function () {
 	// Essentially a rewrite of default richlistbox  arrow navigation
 	// so that it works with voiceover on CMD-ArrowUp/Down
 	var handleItemSelection = (event) => {
-		event.preventDefault();
-		event.stopPropagation();
-		let selected = referenceBox.selectedItem;
+		let selected = referenceBox.contains(document.activeElement) ? document.activeElement : referenceBox.selectedItem;
+		// Multiselect happens during arrowUp/Down navigation when Shift/Cmd is being held
+		let selectMultiple = event.shiftKey || event.metaKey;
+		let initiallySelected = null;
+		if (referenceBox.contains(document.activeElement) && selectMultiple) {
+			initiallySelected = selected;
+		}
 		let selectNext = (node) => {
 			return event.key == "ArrowDown" ? node.nextElementSibling : node.previousElementSibling;
 		};
@@ -1764,8 +1836,27 @@ var Zotero_QuickFormat = new function () {
 		}
 		while (selected && selected.disabled);
 		if (selected) {
-			referenceBox.selectedItem = selected;
 			selected.focus();
+			let multiSelected = [...referenceBox.selectedItems];
+			if (selectMultiple) {
+				// If the selected item is already selected, the previous one
+				// should be un-selected
+				if (multiSelected.includes(selected)) {
+					referenceBox.removeItemFromSelection(initiallySelected);
+				}
+				else {
+					referenceBox.addItemToSelection(selected);
+					// If there are multiple selected items, focus the last one
+					let following = selectNext(selected);
+					while (following && following.selected) {
+						following.focus();
+						following = selectNext(following);
+					}
+				}
+			}
+			else {
+				referenceBox.selectedItem = selected;
+			}
 		}
 	};
 	
@@ -1802,13 +1893,15 @@ var Zotero_QuickFormat = new function () {
 			_resetSearchTimer();
 		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key) && referencePanel.state === "open") {
+			event.preventDefault();
+			event.stopPropagation();
 			// ArrowUp when item is selected does nothing
 			if (referenceBox.selectedIndex < 1 && event.key == "ArrowUp") {
 				return;
 			}
 			// Arrow up/down will navigate the references panel if that's opened
 			if (referenceBox.selectedIndex < 1) {
-				referenceBox.selectedIndex = 1;
+				_selectFirstReference();
 				referenceBox.selectedItem.focus();
 			}
 			else {
@@ -1820,7 +1913,7 @@ var Zotero_QuickFormat = new function () {
 			event.preventDefault();
 			event.stopPropagation();
 			if (referenceBox.selectedIndex < 1) {
-				referenceBox.selectedIndex = 1;
+				_selectFirstReference();
 			}
 			referenceBox.selectedItem.focus();
 		}
@@ -2247,7 +2340,7 @@ var Zotero_QuickFormat = new function () {
 	 * Show an item in the library it came from
 	 */
 	this.showInLibrary = async function (itemID) {
-		let citationItem = JSON.parse(panelRefersToBubble.dataset.citationItem || "{}");
+		let citationItem = JSON.parse(panelRefersToBubble?.dataset.citationItem || "{}");
 		var id = itemID || citationItem.id;
 		var pane = Zotero.getActiveZoteroPane();
 		// Open main window if it's not open (Mac)
