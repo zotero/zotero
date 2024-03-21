@@ -1242,7 +1242,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @returns {Promise<void>}
 	 */
 	async deleteSelection(deleteItems) {
-		var treeRow = this.getRow(this.selection.focused);
+		var treeRow = this.getSelectedRow();
 		if (treeRow.isCollection() || treeRow.isFeed()) {
 			await treeRow.ref.eraseTx({ deleteItems });
 		}
@@ -1287,6 +1287,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return this.getRow(index).getName();
 	}
 	
+	// Get the currently active row: the right-clicked row if it exists,
+	// or the selected row.
+	getSelectedRow() {
+		if (this.selection.contextMenuRowExists) {
+			return this.getRow(this.selection.contextMenuRow);
+		}
+		return this.getRow(this.selection.focused);
+	}
+
 	/**
 	 * Return libraryID of selected row (which could be a collection, etc.)
 	 */
@@ -1297,28 +1306,25 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	getSelectedCollection(asID) {
-		var collection = this.getRow(this.selection.focused);
+		var collection = this.getSelectedRow();
 		if (collection && collection.isCollection()) {
 			return asID ? collection.ref.id : collection.ref;
 		}
+		return false;
 	}
 	
 	getSelectedSearch(asID) {
-		if (this.getRow(this.selection.focused)) {
-			var search = this.getRow(this.selection.focused);
-			if (search && search.isSearch()) {
-				return asID ? search.ref.id : search.ref;
-			}
+		var search = this.getSelectedRow();
+		if (search && search.isSearch()) {
+			return asID ? search.ref.id : search.ref;
 		}
 		return false;
 	}
 	
 	getSelectedGroup(asID) {
-		if (this.getRow(this.selection.focused)) {
-			var group = this.getRow(this.selection.focused);
-			if (group && group.isGroup()) {
-				return asID ? group.ref.id : group.ref;
-			}
+		let group = this.getSelectedRow();
+		if (group && group.isGroup()) {
+			return asID ? group.ref.id : group.ref;
 		}
 		return false;
 	}
