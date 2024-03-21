@@ -78,6 +78,79 @@ function openUpdateURL(event) {
 	}
 }
 
+class AbortError extends Error {
+	constructor(...params) {
+		super(...params);
+		this.name = this.constructor.name;
+	}
+}
+
+/**
+* `AbortablePromise`s automatically add themselves to this set on construction
+* and remove themselves when they settle.
+*/
+var gPendingAbortablePromises = new Set();
+
+/**
+* Creates a Promise that can be resolved immediately with an abort method.
+*
+* Note that the underlying Promise will probably still run to completion since
+* there isn't any general way to abort Promises. So if it is possible to abort
+* the operation instead or in addition to using this class, that is preferable.
+*/
+class AbortablePromise {
+	#abortFn;
+	#promise;
+	#hasCompleted = false;
+	
+	constructor(promise) {
+		let abortPromise = new Promise((resolve, reject) => {
+				this.#abortFn = () => reject(new AbortError());
+		});
+		this.#promise = Promise.race([promise, abortPromise]);
+		this.#promise = this.#promise.finally(() => {
+			this.#hasCompleted = true;
+			gPendingAbortablePromises.delete(this);
+		});
+		gPendingAbortablePromises.add(this);
+	}
+	
+	abort() {
+		if (this.#hasCompleted) {
+			return;
+		}
+		this.#abortFn();
+	}
+	
+	/**
+	* This can be `await`ed on to get the result of the `AbortablePromise`. It
+	* will resolve with the value that the Promise provided to the constructor
+	* resolves with.
+	*/
+	get promise() {
+		return this.#promise;
+	}
+	
+	/**
+	* Will be `true` if the Promise provided to the constructor has resolved or
+	* `abort()` has been called. Otherwise `false`.
+	*/
+	get hasCompleted() {
+		return this.#hasCompleted;
+	}
+}
+
+function makeAbortable(promise) {
+	let abortable = new AbortablePromise(promise);
+	return abortable.promise;
+}
+
+function abortAllPromises() {
+	for (const promise of gPendingAbortablePromises) {
+		promise.abort();
+	}
+}
+
 /**
  * A set of shared data and control functions for the wizard as a whole.
  */
@@ -522,8 +595,9 @@ var gUpdates = {
 			var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 				Ci.nsIUpdateManager
 			);
-			if (um.activeUpdate) {
-				this.setUpdate(um.activeUpdate);
+			let activeUpdate = um.downloadingUpdate || um.readyUpdate;
+			if (activeUpdate) {
+				this.setUpdate(activeUpdate);
 				aCallback("downloading");
 				return;
 			}
@@ -569,33 +643,113 @@ var gCheckingPage = {
 	/**
 	 * Initialize
 	 */
-	onPageShow() {
+	async onPageShow() {
 		gUpdates.setButtons(null, null, null, false, true);
 		gUpdates.wiz.getButton("cancel").focus();
 
-		// Clear elevation never prefs to handle the scenario where the user clicked
-		// "never" for an update and then canceled a manual update check.	If the
-		// preference isn't cleared then future notifications will never happen.
-		if (Services.prefs.prefHasUserValue(PREF_APP_UPDATE_ELEVATE_NEVER)) {
-			Services.prefs.clearUserPref(PREF_APP_UPDATE_ELEVATE_NEVER);
+		try {
+			this._checker = Cc["@mozilla.org/updates/update-checker;1"].createInstance(
+				Ci.nsIUpdateChecker
+			);
+			let check = await this._checker.checkForUpdates(this._checker.FOREGROUND_CHECK);
+			let result;
+			try {
+				result = await makeAbortable(check.result);
+			}
+			catch (e) {
+				// If we are aborting, stop the update check on our way out.
+				if (e instanceof AbortError) {
+					this._checker.stopCheck(check.id);
+				}
+				throw e;
+			}
+			
+			if (!result.checksAllowed) {
+				// This shouldn't happen. The cases where this can happen should be
+				// handled specifically, above.
+				LOG("gCheckingPage:onPageShow - !checksAllowed; INTERNAL_ERROR");
+				gUpdates.wiz.goTo("errors");
+				return;
+			}
+			
+			if (!result.succeeded) {
+				LOG("gCheckingPage:onPageShow - Update check failed; CHECKING_FAILED");
+				gUpdates.wiz.goTo("errors");
+				return;
+			}
+			
+			LOG("gCheckingPage:onPageShow - Update check succeeded");
+			gUpdates.setUpdate(gAUS.selectUpdate(result.updates));
+			if (!gUpdates.update) {
+				LOG("gCheckingPage:onPageShow - result: NO_UPDATES_FOUND");
+				gUpdates.wiz.goTo("noupdatesfound");
+				return;
+			}
+			
+			if (gUpdates.update.unsupported) {
+				LOG("gCheckingPage:onPageShow - result: UNSUPPORTED SYSTEM");
+				gUpdates.wiz.goTo("unsupported");
+				return;
+			}
+			
+			if (gUpdates.update.elevationFailure) {
+				LOG("gCheckingPage:onPageShow - result: elevationFailure")
+				// Prevent multiple notifications for the same update when the client
+				// has had an elevation failure.
+				gUpdates.never();
+				gUpdates.wiz.goTo("manualUpdate");
+				return;
+			}
+			
+			if (!gAUS.canApplyUpdates) {
+				LOG("gCheckingPage:onPageShow - result: MANUAL_UPDATE");
+				gUpdates.wiz.goTo("manualUpdate");
+				return;
+			}
+			
+			/*let updateAuto = await makeAbortable(
+				lazy.UpdateUtils.getAppUpdateAutoEnabled()
+			);
+			if (!updateAuto || this.aus.manualUpdateOnly) {
+				LOG(
+					"gCheckingPage:onPageShow - Need to wait for user approval to start the " +
+					"download."
+					);
+				
+				let downloadPermissionPromise = new Promise(resolve => {
+						this.#permissionToDownloadGivenFn = resolve;
+				});
+				// There are other interfaces through which the user can start the
+				// download, so we want to listen both for permission, and for the
+				// download to independently start.
+				let downloadStartPromise = Promise.race([
+						downloadPermissionPromise,
+						this.aus.stateTransition,
+				]);
+				
+				this.#setStatus(AppUpdater.STATUS.DOWNLOAD_AND_INSTALL);
+				
+				await makeAbortable(downloadStartPromise);
+				LOG("gCheckingPage:onPageShow - Got user approval. Proceeding with download");
+				// If we resolved because of `aus.stateTransition`, we may actually be
+				// downloading a different update now.
+				if (this.um.downloadingUpdate) {
+					this.#update = this.um.downloadingUpdate;
+				}
+			} else {
+				LOG(
+					"gCheckingPage:onPageShow - updateAuto is active and " +
+					"manualUpdateOnlydateOnly is inactive. Start the download."
+					);
+			}
+			await this.#downloadUpdate();*/
+			gUpdates.wiz.goTo(gUpdates.updatesFoundPageId);
 		}
-
-		// The user will be notified if there is an error so clear the background
-		// check error count.
-		if (Services.prefs.prefHasUserValue(PREF_APP_UPDATE_BACKGROUNDERRORS)) {
-			Services.prefs.clearUserPref(PREF_APP_UPDATE_BACKGROUNDERRORS);
+		catch (e) {
+			LOG("gCheckingPage:onPageShow - result: Exception");
+			LOG(e);
+			gUpdates.wiz.goTo("errors");
 		}
-
-		// The preference will be set back to true if the system is still
-		// unsupported.
-		if (Services.prefs.prefHasUserValue(PREF_APP_UPDATE_NOTIFIEDUNSUPPORTED)) {
-			Services.prefs.clearUserPref(PREF_APP_UPDATE_NOTIFIEDUNSUPPORTED);
-		}
-
-		this._checker = Cc["@mozilla.org/updates/update-checker;1"].createInstance(
-			Ci.nsIUpdateChecker
-		);
-		this._checker.checkForUpdates(this.updateListener, true);
 	},
 
 	/**
@@ -604,59 +758,6 @@ var gCheckingPage = {
 	 */
 	onWizardCancel() {
 		this._checker.stopCurrentCheck();
-	},
-
-	/**
-	 * An object implementing nsIUpdateCheckListener that is notified as the
-	 * update check commences.
-	 */
-	updateListener: {
-		/**
-		 * See nsIUpdateCheckListener
-		 */
-		async onCheckComplete(request, updates) {
-			gUpdates.setUpdate(gAUS.selectUpdate(updates));
-			if (gUpdates.update) {
-				LOG("gCheckingPage", "onCheckComplete - update found");
-				if (gUpdates.update.unsupported) {
-					gUpdates.wiz.goTo("unsupported");
-					return;
-				}
-
-				if (gUpdates.update.elevationFailure) {
-					// Prevent multiple notifications for the same update when the client
-					// has had an elevation failure.
-					gUpdates.never();
-					gUpdates.wiz.goTo("manualUpdate");
-					return;
-				}
-
-				if (!gAUS.canApplyUpdates) {
-					gUpdates.wiz.goTo("manualUpdate");
-					return;
-				}
-
-				gUpdates.wiz.goTo(gUpdates.updatesFoundPageId);
-				return;
-			}
-
-			LOG("gCheckingPage", "onCheckComplete - no update found");
-			gUpdates.wiz.goTo("noupdatesfound");
-		},
-
-		/**
-		 * See nsIUpdateCheckListener
-		 */
-		async onError(request, update) {
-			LOG("gCheckingPage", "onError - proceeding to error page");
-			gUpdates.setUpdate(update);
-			gUpdates.wiz.goTo("errors");
-		},
-
-		/**
-		 * See nsISupports.idl
-		 */
-		QueryInterface: ChromeUtils.generateQI(["nsIUpdateCheckListener"]),
 	},
 };
 
@@ -732,7 +833,7 @@ var gUpdatesFoundBasicPage = {
 	/**
 	 * Initialize
 	 */
-	onPageShow() {
+	async onPageShow() {
 		gUpdates.wiz.canRewind = false;
 		var update = gUpdates.update;
 		gUpdates.setButtons(
@@ -745,23 +846,21 @@ var gUpdatesFoundBasicPage = {
 		btn.focus();
 
 		var updateName = update.name;
-		if (update.channel == "nightly") {
-			updateName = gUpdates.getAUSString("updateNightlyName", [
-				gUpdates.brandName,
-				update.displayVersion,
-				update.buildID,
-			]);
-		}
 		var updateNameElement = document.getElementById("updateName");
 		updateNameElement.value = updateName;
 
-		var introText = gUpdates.getAUSString("intro_" + update.type, [
-			gUpdates.brandName,
-			update.displayVersion,
-		]);
-		var introElem = document.getElementById("updatesFoundInto");
+		var introElem = document.getElementById("updatesFoundIntro");
 		introElem.setAttribute("severity", update.type);
-		introElem.textContent = introText;
+		if (update.type == 'major') {
+			let introText = gUpdates.getAUSString("intro_" + update.type, [
+				gUpdates.brandName,
+				update.displayVersion,
+			]);
+			introElem.textContent = introText;
+		}
+		else {
+			document.l10n.setAttributes(introElem, 'update-updates-found-intro-minor');
+		}
 
 		var updateMoreInfoURL = document.getElementById("updateMoreInfoURL");
 		if (update.detailsURL) {
@@ -823,18 +922,16 @@ var gDownloadingPage = {
 		var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		var activeUpdate = um.activeUpdate;
+		var activeUpdate = um.downloadingUpdate || um.readyUpdate;
 		if (activeUpdate) {
 			gUpdates.setUpdate(activeUpdate);
 
 			// It's possible the update has already been downloaded and is being
 			// applied by the time this page is shown, depending on how fast the
 			// download goes and how quickly the 'next' button is clicked to get here.
-			if (
-				activeUpdate.state == STATE_PENDING ||
-				activeUpdate.state == STATE_PENDING_ELEVATE ||
-				activeUpdate.state == STATE_PENDING_SERVICE
-			) {
+			if (activeUpdate.state == STATE_PENDING
+					|| activeUpdate.state == STATE_PENDING_ELEVATE
+					|| activeUpdate.state == STATE_PENDING_SERVICE) {
 				if (!activeUpdate.getProperty("stagingFailed")) {
 					gUpdates.setButtons("hideButton", null, null, false);
 					gUpdates.wiz.getButton("extra1").focus();
@@ -843,6 +940,11 @@ var gDownloadingPage = {
 					return;
 				}
 
+				gUpdates.wiz.goTo("finished");
+				return;
+			}
+			else if (activeUpdate.state == STATE_APPLIED
+					|| activeUpdate.state == STATE_APPLIED_SERVICE) {
 				gUpdates.wiz.goTo("finished");
 				return;
 			}
@@ -978,7 +1080,7 @@ var gDownloadingPage = {
 		var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		um.activeUpdate = gUpdates.update;
+		um.readyUpdate = gUpdates.update;
 
 		// Continue download in the background at full speed.
 		LOG(
@@ -1161,7 +1263,7 @@ var gErrorsPage = {
 		gUpdates.setButtons(null, null, "okButton", true);
 		gUpdates.wiz.getButton("finish").focus();
 
-		var statusText = gUpdates.update.statusText;
+		var statusText = gUpdates.update?.statusText || "";
 		LOG("gErrorsPage", "onPageShow - update.statusText: " + statusText);
 
 		var errorReason = document.getElementById("errorReason");

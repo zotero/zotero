@@ -104,6 +104,9 @@ itembox-button-options =
 reader-use-dark-mode-for-content =
     .label = Use Dark Mode for Content
 
+update-updates-found-intro-minor = An update for { -app-name } is available:
+update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+
 import-window =
     .title = Import
 

@@ -1,10 +1,3 @@
-/* Hide the wizard's header so the size of the billboard can size the window
-on creation. A custom header will be used in its place when a header is
-needed. */
-.wizard-header {
-	display: none;
-}
-
 /* Display the custom header */
 .update-header {
 	display: -moz-box !important;
@@ -16,12 +9,6 @@ needed. */
 
 #downloadProgress {
 	-moz-box-flex: 1;
-}
-
-/* Update History Window */
-richlistitem.update {
-	display: -moz-box;
-	-moz-box-orient: vertical;
 }
 
 .update-name {
