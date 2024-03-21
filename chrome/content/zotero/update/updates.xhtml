@@ -30,6 +30,7 @@
 
 <wizard>
   <linkset>
+    <html:link rel="localization" href="zotero.ftl"/>
     <html:link rel="localization" href="toolkit/global/wizard.ftl"/>
   </linkset>
   
@@ -92,11 +93,11 @@
               object="gUpdatesFoundBasicPage" next="downloading">
     <update-header id="updatesFoundBasicHeader" label=""/>
     <vbox class="update-content" flex="1">
-      <label id="updatesFoundInto"/>
+      <label id="updatesFoundIntro"/>
       <separator class="thin"/>
       <label id="updateName" crop="right" value=""/>
       <separator id="updateNameSep" class="thin"/>
-      <label id="upgradeEvangelism">&evangelism.desc;</label>
+      <label data-l10n-id="update-updates-found-desc"/>
       <separator id="upgradeEvangelismSep" flex="1"/>
       <vbox flex="1">
         <hbox id="moreInfoURL">
