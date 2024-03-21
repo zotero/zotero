@@ -344,7 +344,7 @@
 }
 
 .virtualized-table.multi-select:focus {
-	.row.focused {
+	.row.focused:not(.selected) {
 		outline: 1px dotted var(--color-accent);
 		z-index: 10000;
 	}
