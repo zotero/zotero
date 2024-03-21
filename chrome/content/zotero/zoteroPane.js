@@ -484,6 +484,29 @@ var ZoteroPane = new function()
 		});
 	}
 
+	// On windows, right click may dispatch 'click' event on toolbarbuttons.
+	// Checks which button was clicked and stops the 'click' event if it
+	// was not triggered via left-click.
+	// Instead, dispatch 'contextmenu' event on the target
+	function filterUndesiredClickEvents() {
+		if (!Zotero.isWin) return;
+		document.addEventListener("click", (e) => {
+			if (e.target.tagName == "toolbarbutton" && e.button !== 0) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (e.button == 2) {
+					e.target.dispatchEvent(new MouseEvent('contextmenu', {
+						bubbles: true,
+						clientX: e.clientX,
+						clientY: e.clientY,
+						screenX: e.screenX,
+						screenY: e.screenY
+					}));
+				}
+			}
+		}, true);
+	}
+
 	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
 	 * mode
@@ -639,6 +662,7 @@ var ZoteroPane = new function()
 			Zotero.logError(e);
 		}
 		addFocusHandlers();
+		filterUndesiredClickEvents();
 	}
 	
 	
