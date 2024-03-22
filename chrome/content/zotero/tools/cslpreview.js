@@ -24,25 +24,27 @@
     Contributed by Julian Onions
 */
 
-var Zotero_CSL_Preview = new function() {
-	this.init = init;
-	this.refresh = refresh;
-	this.generateBibliography = generateBibliography;
+// eslint-disable-next-line no-unused-vars
+var Zotero_CSL_Preview = new function () {
+	this.lastContent = null;
 	
-	function init() { 
+	this.init = function () {
 		var menulist = document.getElementById("locale-menu");
 		
 		Zotero.Styles.populateLocaleList(menulist);
-		menulist.value = Zotero.Prefs.get('export.lastLocale');;
+		menulist.value = Zotero.Prefs.get('export.lastLocale');
 		
-		var iframe = document.getElementById('zotero-csl-preview-box');
-		iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('styles.preview.instructions') + '</p></body></html>';
-	}
-	function refresh() {
-		var iframe = document.getElementById('zotero-csl-preview-box');
+		this.updateIframe(Zotero.getString('styles.preview.instructions'));
+		
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", () => {
+			this.updateIframe(this.lastContent.content, this.lastContent.containerClass);
+		});
+	};
+
+	this.refresh = function () {
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length === 0) {
-			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('styles.editor.warning.noItems') + '</p></body></html>';
+			this.updateIframe(Zotero.getString('styles.editor.warning.noItems'), 'warning');
 			return;
 		}
 		var progressWin = new Zotero.ProgressWindow();
@@ -52,11 +54,12 @@ var Zotero_CSL_Preview = new function() {
 		progressWin.addLines(document.title, icon);
 		progressWin.show();
 		progressWin.startCloseTimer();
-		var f = function() {
+		// Give progress window time to appear
+		setTimeout(() => {
 			var d = new Date();
 			var styles = Zotero.Styles.getVisible();
 			// XXX needs its own string really for the title!
-			var str = '<html><head><title></title></head><body>';
+			var str = '<div>';
 			for (let style of styles) {
 				if (style.source) {
 					continue;
@@ -65,7 +68,7 @@ var Zotero_CSL_Preview = new function() {
 				let bib;
 				let err = false;
 				try {
-					bib = generateBibliography(style);
+					bib = this.generateBibliography(style);
 				}
 				catch (e) {
 					err = e;
@@ -77,19 +80,15 @@ var Zotero_CSL_Preview = new function() {
 					str += '<hr>';
 				}
 			}
-			
-			str += '</body></html>';
-			iframe.contentDocument.documentElement.innerHTML = str;
-			
+
+			str += '</div>';
+			this.updateIframe(str);
+
 			Zotero.debug(`Generated previews in ${new Date() - d} ms`);
-		};
-		// Give progress window time to appear
-		setTimeout(f, 100);
-	}
+		}, 100);
+	};
 	
-	function generateBibliography(style) {
-		var iframe = document.getElementById('zotero-csl-preview-box');
-		
+	this.generateBibliography = function (style) {
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length === 0) {
 			return '';
@@ -115,7 +114,7 @@ var Zotero_CSL_Preview = new function() {
 		
 		// Generate bibliography
 		var bibliography = '';
-		if(style.hasBibliography) {
+		if (style.hasBibliography) {
 			styleEngine.updateItems(items.map(item => item.id));
 			bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 		}
@@ -123,7 +122,23 @@ var Zotero_CSL_Preview = new function() {
 		styleEngine.free();
 		
 		return '<p>' + citations + '</p>' + bibliography;
-	}
-	
-	
+	};
+
+	this.updateIframe = function (content, containerClass = 'preview') {
+		this.lastContent = { content, containerClass };
+		const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		let iframe = document.getElementById('zotero-csl-preview-box');
+		iframe.contentDocument.documentElement.innerHTML = `<html>
+		<head>
+			<title></title>
+			<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css">
+			<style>
+				html {
+					color-scheme: ${isDarkMode ? "dark" : "light"};
+				}
+			</style>
+		</head>
+		<body id="csl-edit-preview"><div class="${containerClass} zotero-dialog">${content}</div></body>
+		</html>`;
+	};
 }();

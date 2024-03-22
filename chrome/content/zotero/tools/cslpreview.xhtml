@@ -25,7 +25,7 @@
     Contributed by Julian Onions
 -->
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % cslpreviewDTD SYSTEM "chrome://zotero/locale/cslpreview.dtd"> %cslpreviewDTD;
@@ -59,7 +59,7 @@
 			
 			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Preview.refresh()"/>
 		</hbox>
-		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
+		<iframe id="zotero-csl-preview-box" flex="1" overflow="auto" type="content"/>
 	</vbox>
 	
 </window>
