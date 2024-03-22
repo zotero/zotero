@@ -190,6 +190,42 @@ describe("Zotero.Translate", function() {
 			}
 			assert.deepEqual(savedItems, trueItems, "saved items match inputs");
 		});
+		
+		it("should set shortTitle by truncating before first colon or after first question mark", async function () {
+			let mapping = {
+				'A title: a subtitle': 'A title',
+				'A title: a subtitle: a second subtitle': 'A title',
+				'Does this have a subtitle? Yes': 'Does this have a subtitle?',
+				'Does this have a subtitle? Yes: an investigation': 'Does this have a subtitle?',
+			};
+			
+			let items = await saveItemsThroughTranslator('web', Object.keys(mapping).map(title => ({
+				itemType: 'book',
+				title
+			})));
+			for (let item of items) {
+				assert.equal(item.getField('shortTitle'), mapping[item.getField('title')]);
+			}
+		});
+
+		it("should close supported tags when setting shortTitle", async function () {
+			let mapping = {
+				'Review of <i>Conflict in a Buddhist Society: Tibet under the Dalai Lamas</i>': 'Review of <i>Conflict in a Buddhist Society</i>',
+				'Fearing Fear: <i>The War of the Worlds</i> and Disaster Coverage': 'Fearing Fear',
+				'Review of <span class="nocase">ibn Battuta\'s Tuḥfat an-Nuẓẓār: The Origins of the Travelogue</span>': 'Review of <span class="nocase">ibn Battuta\'s Tuḥfat an-Nuẓẓār</span>',
+				'Low text <sup><b>and high, bold text:</b></sup> More text': 'Low text <sup><b>and high, bold text</b></sup>',
+				'<marquee>This is my <font color=red>AWESOME</font> website:</marquee>': '<marquee>This is my <font color=red>AWESOME</font> website',
+				'<i><marquee>Italic AND marquee? It\'s more likely than you think</marquee></i>': '<i><marquee>Italic AND marquee?</i>',
+			};
+
+			let items = await saveItemsThroughTranslator('web', Object.keys(mapping).map(title => ({
+				itemType: 'book',
+				title
+			})));
+			for (let item of items) {
+				assert.equal(item.getField('shortTitle'), mapping[item.getField('title')]);
+			}
+		});
 
 		it('should accept deprecated SQL accessDates', function* () {
 			let myItem = {
