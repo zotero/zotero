@@ -1159,10 +1159,10 @@ var Scaffold = new function () {
 		if (Array.isArray(item.attachments)) {
 			for (let attachment of item.attachments) {
 				if (attachment.document) {
-					attachment.document = '[object Document]';
 					attachment.mimeType = 'text/html';
+					attachment.url = attachment.document.location?.href;
+					delete attachment.document;
 				}
-				delete attachment.url;
 				delete attachment.complete;
 			}
 		}
