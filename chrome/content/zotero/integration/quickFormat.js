@@ -1145,6 +1145,14 @@ var Zotero_QuickFormat = new function () {
 	function getAllBubbles() {
 		return [...editor.querySelectorAll(".bubble")];
 	}
+
+	// Delete the bubble and clear locator node if it pointed at this bubble
+	function _deleteBubble(bubble) {
+		if (bubble == locatorNode) {
+			locatorNode = null;
+		}
+		bubble.remove();
+	}
 	
 	/**
 	 * Clear reference box
@@ -1814,6 +1822,7 @@ var Zotero_QuickFormat = new function () {
 		else {
 			editor.prepend(newInput);
 		}
+		locatorNode = null;
 		newInput.focus();
 	}
 
@@ -1886,7 +1895,7 @@ var Zotero_QuickFormat = new function () {
 			// Backspace/Delete from the beginning of an input will delete the previous bubble.
 			// If there are two inputs next to each other as a result, they are merged
 			if (this.previousElementSibling) {
-				this.previousElementSibling.remove();
+				_deleteBubble(this.previousElementSibling);
 				_combineNeighboringInputs();
 			}
 			// Rerun search to update opened documents section if needed
@@ -1981,7 +1990,7 @@ var Zotero_QuickFormat = new function () {
 			if (!moveFocusBack(this)) {
 				moveFocusForward(this);
 			}
-			this.remove();
+			_deleteBubble(this);
 			// Removed item bubble may belong to opened documents section. Reference panel
 			// needs to be reset so that it appears among other items.
 			_clearEntryList();
