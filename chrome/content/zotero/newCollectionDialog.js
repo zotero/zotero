@@ -46,9 +46,18 @@ var Zotero_New_Collection_Dialog = {
 	_updateMenu() {
 		let createInField = document.querySelector('#create-in');
 		let menupopup = createInField.firstElementChild;
+		let id = menupopup.id;
 		// Fascinatingly, clearing the children of the menupopup isn't enough here.
 		// We have to completely recreate it or it will no longer be willing to open.
 		menupopup.replaceWith(menupopup = document.createXULElement('menupopup'));
+		menupopup.id = id;
+
+		let style = document.createElement('style');
+		style.innerHTML = `image {
+			-moz-context-properties: fill, fill-opacity;
+			fill: var(--fill-secondary);
+		 }`;
+		createInField.shadowRoot.appendChild(style);
 
 		let createdNode = Zotero.Utilities.Internal.createMenuForTarget(
 			Zotero.Libraries.get(this._libraryID),
