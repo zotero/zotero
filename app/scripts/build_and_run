@@ -12,7 +12,8 @@ fi
 REBUILD=0
 SKIP_BUNDLED_FILES=0
 DEBUGGER=0
-while getopts "rbd" opt; do
+JSCONSOLE=0
+while getopts "rbdc" opt; do
 	case $opt in
 		r)
 			REBUILD=1
@@ -25,6 +26,10 @@ while getopts "rbd" opt; do
 		d)
 			DEBUGGER=1
 			;;
+			
+		c)
+		  JSCONSOLE=1
+		  ;;
 		
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
@@ -65,6 +70,9 @@ fi
 if [ $DEBUGGER -eq 1 ]; then
 	PARAMS="$PARAMS -debugger"
 fi
+if [ $JSCONSOLE -eq 1 ]; then
+	PARAMS="$PARAMS -jsconsole"
+fi
 
 if [ "`uname`" = "Darwin" ]; then
 	command="Zotero.app/Contents/MacOS/zotero"
@@ -77,4 +85,4 @@ else
 	exit 1
 fi
 
-"$APP_ROOT_DIR/staging/$command" $profile -ZoteroDebugText -jsconsole -purgecaches $PARAMS "$@"
+"$APP_ROOT_DIR/staging/$command" $profile -ZoteroDebugText -purgecaches $PARAMS "$@"
