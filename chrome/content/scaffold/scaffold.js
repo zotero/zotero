@@ -1155,6 +1155,7 @@ var Scaffold = new function () {
 	 * logs item output
 	 */
 	function _myItemDone(obj, item) {
+		delete item.id;
 		if (Array.isArray(item.attachments)) {
 			for (let attachment of item.attachments) {
 				if (attachment.document) {
