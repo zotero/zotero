@@ -1,5 +1,5 @@
 note-editor {
-	-moz-box-orient: vertical;
+	flex-direction: column;
 
 	.custom-head {
 		display: flex;
