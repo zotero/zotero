@@ -869,7 +869,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
  *
  * This is the same as the standard title field (with includeBaseMapped on)
  */
-Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
+Zotero.Item.prototype.getDisplayTitle = function () {
 	if (this._displayTitle !== null) {
 		return this._displayTitle;
 	}
