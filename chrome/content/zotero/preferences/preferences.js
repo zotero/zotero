@@ -328,17 +328,10 @@ var Zotero_Preferences = {
 		let pane = this.panes.get(id);
 
 		pane.container.hidden = false;
-		// The automatic <h1> is introduced by commit 784f877
-		let target;
-		if (pane.container.childElementCount == 1) {
-			// If there is only one child element
-			target = pane.container.children[0];
+		for (let child of pane.container.children) {
+			let event = new Event('showing');
+			child.dispatchEvent(event);
 		}
-		else {
-			// Otherwise dispatch to the first non-h1 child element
-			target = Array.from(pane.container.children).find(elem => elem.tagName != 'h1');
-		}
-		target.dispatchEvent(new Event('showing'));
 	},
 	
 	_parseXHTMLToFragment(str, entities = []) {
