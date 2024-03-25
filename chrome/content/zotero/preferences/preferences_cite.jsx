@@ -81,7 +81,7 @@ Zotero_Preferences.Cite = {
 				var updated = Zotero.Date.sqlToDate(style.updated, true);
 				return {
 					title: style.title,
-					updated: updated ? updated.toLocaleDateString() : ""
+					updated: updated ? updated.toLocaleDateString(window.navigator.language) : ""
 				};
 			});
 		

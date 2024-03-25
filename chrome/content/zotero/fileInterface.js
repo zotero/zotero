@@ -609,13 +609,13 @@ var Zotero_File_Interface = new function() {
 				let allCollections = Zotero.Collections.getByLibrary(libraryID);
 				for(var i=0; i<allCollections.length; i++) {
 					if(allCollections[i].name == collectionName) {
-						collectionName += " "+(new Date()).toLocaleString();
+						collectionName += " " + (new Date()).toLocaleString(window.navigator.language);
 						break;
 					}
 				}
 			}
 			else {
-				collectionName = defaultNewCollectionPrefix + " " + (new Date()).toLocaleString();
+				collectionName = defaultNewCollectionPrefix + " " + (new Date()).toLocaleString(window.navigator.language);
 			}
 			importCollection = new Zotero.Collection;
 			importCollection.libraryID = libraryID;

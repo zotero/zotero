@@ -780,7 +780,7 @@ Zotero.DataDirectory = {
 			let index = ps.confirmEx(null,
 				"Other Data Directory Found",
 				"Zotero found a previous data directory within your Firefox profile, "
-					+ `last modified on ${mtime.toLocaleDateString()}. `
+				+ `last modified on ${mtime.toLocaleDateString(window.navigator.language)}. `
 					+ "If items or files are missing from Zotero that were present in Zotero for Firefox, "
 					+ "your previous data directory may not have been properly migrated to the new default location "
 					+ `in ${this.defaultDir}.\n\n`
