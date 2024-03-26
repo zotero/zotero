@@ -844,7 +844,7 @@
 						tabindex="0"
 						data-l10n-id="zotero-tabs-menu-filter"
 					/>
-					<vbox id="zotero-tabs-menu-list"></vbox>
+					<vbox id="zotero-tabs-menu-list" tooltip="html-tooltip"></vbox>
 				</vbox>
 			</panel>
 
@@ -883,6 +883,7 @@
 			<stack id="zotero-pane-stack" flex="1">
 				<!-- A placeholder to persist pdf-reader sidebar collapse state to avoid introducing another pref -->
 				<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed width"/>
+				<tooltip id="html-tooltip" page="true"/>
 				<hbox>
 					<div id="zotero-tab-cover" class="hidden" xmlns="http://www.w3.org/1999/xhtml">
 						<label>&zotero.general.loading;</label>
@@ -914,7 +915,6 @@
 							</vbox>
 							
 							<popupset>
-								<tooltip id="html-tooltip" page="true"/>
 								<menupopup id="zotero-collectionmenu"
 										oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 									<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
@@ -1007,7 +1007,6 @@
 									<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
 								</menupopup>
 								
-								<tooltip id="fake-tooltip"/>
 							</popupset>
 							
 							<hbox id="zotero-trees" flex="1">
