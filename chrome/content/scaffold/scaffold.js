@@ -58,7 +58,8 @@ function fix2028(str) {
 }
 
 var Scaffold = new function () {
-	var _browser, _frames = [], _document;
+	var _browser;
+	var _cookieSandbox;
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
@@ -83,8 +84,8 @@ var Scaffold = new function () {
 
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
-		_document = document;
 		_browser = document.getElementById('browser');
+		_cookieSandbox = new Zotero.CookieSandbox(_browser);
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
 			document.getElementById("browser-url").value = data.url;
@@ -1914,6 +1915,8 @@ var Scaffold = new function () {
 			testsByType[test.type].push(test);
 		}
 
+		let rememberCookies = document.getElementById('checkbox-remember-cookies').checked;
+
 		for (let [type, testsOfType] of Object.entries(testsByType)) {
 			if (testsOfType.length) {
 				let tester = new Zotero_TranslatorTester(
@@ -1922,6 +1925,12 @@ var Scaffold = new function () {
 					_debug,
 					_translatorProvider
 				);
+				if (rememberCookies) {
+					tester.setCookieSandbox(_cookieSandbox);
+				}
+				else {
+					tester.setCookieSandbox(new Zotero.CookieSandbox());
+				}
 				tester.setTests(testsOfType);
 				tester.runTests(callback);
 			}
@@ -2024,12 +2033,6 @@ var Scaffold = new function () {
 		this.testsToUpdate = tests.slice();
 		this.numTestsTotal = this.testsToUpdate.length;
 		this.newTests = [];
-		this.tester = new Zotero_TranslatorTester(
-			_getTranslatorFromPane(),
-			"web",
-			_debug,
-			_translatorProvider
-		);
 	};
 	
 	TestUpdater.prototype.updateTests = function (testDoneCallback, doneCallback) {

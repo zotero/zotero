@@ -505,6 +505,15 @@
 									<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
 									<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
 									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the test definitions with the latest data" oncommand="Scaffold.updateSelectedTests()"/>
+
+									<hbox flex="1" pack="end">
+										<checkbox
+											id="checkbox-remember-cookies"
+											label="&scaffold.testing.rememberCookies;"
+											native="true"
+											checked="true"
+										/>
+									</hbox>
 								</hbox>
 							</vbox>
 							<splitter/>
