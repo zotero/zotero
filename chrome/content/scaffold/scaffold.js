@@ -700,6 +700,22 @@ var Scaffold = new function () {
 		// Then go to line 1
 		_editors.code.setPosition({ lineNumber: 1, column: 1 });
 		
+		// Set Test Input editor language based on translator metadata
+		let language = 'plaintext';
+		if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.import) {
+			if (translator.target.includes('json')) {
+				language = 'json';
+			}
+			else if (translator.target.includes('xml')) {
+				language = 'xml';
+			}
+		}
+		else if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.search) {
+			language = 'json';
+		}
+		_editors.importGlobal.editor.setModelLanguage(_editors.import.getModel(), language);
+		_editors.import.setPosition({ lineNumber: 1, column: 1 });
+		
 		// Reset configOptions and displayOptions before loading
 		document.getElementById('textbox-configOptions').value = '';
 		document.getElementById('textbox-displayOptions').value = '';
