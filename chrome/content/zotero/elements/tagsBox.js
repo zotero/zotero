@@ -75,26 +75,6 @@
 				removeAllItemTags.disabled = !this.count;
 				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
-			
-			if (!document.getElementById('PopupAutoComplete')) {
-				let popupset = document.querySelector('popupset');
-				if (!popupset) {
-					popupset = document.createXULElement('popupset');
-					document.documentElement.append(popupset);
-				}
-				
-				let autocomplete = document.createXULElement('panel', { is: 'autocomplete-richlistbox-popup' });
-				autocomplete.id = 'PopupAutoComplete';
-				autocomplete.setAttribute('type', 'autocomplete-richlistbox');
-				autocomplete.setAttribute('role', 'group');
-				autocomplete.setAttribute('noautofocus', true);
-				autocomplete.setAttribute('hidden', true);
-				autocomplete.setAttribute('overflowpadding', 4);
-				autocomplete.setAttribute('norolluponanchor', true);
-				autocomplete.setAttribute('nomaxresults', true);
-				popupset.append(autocomplete);
-			}
-
 			// Register our observer with priority 101 (after Zotero.Tags) so we get updated tag colors
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item-tag', 'setting'], 'tagsBox', 101);
 		}
