@@ -910,6 +910,9 @@ class VirtualizedTable extends React.Component {
 	 * @param event
 	 */
 	_handleMouseOver = (event) => {
+		// On scroll, mouse position does not change, so _handleMouseMove does not fire
+		// to close the fake tooltip. Make sure it is closed here.
+		Zotero_Tooltip.stop();
 		let elem = event.target;
 		if (!elem.classList.contains('cell') || elem.classList.contains('cell-icon')) return;
 		let textElem = elem.querySelector('.label, .cell-text');
