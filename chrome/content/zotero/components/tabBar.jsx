@@ -225,18 +225,6 @@ const TabBar = forwardRef(function (props, ref) {
 		event.stopPropagation();
 	}
 	
-	function handleTabMouseMove(title) {
-		// Fix `title` not working for HTML-in-XUL. Using `mousemove` ensures we restart the tooltip
-		// after just a small movement even when the active tab has changed under the cursor, which
-		// matches behavior in Firefox.
-		window.Zotero_Tooltip.start(title);
-	}
-	
-	function handleTabBarMouseOut() {
-		// Hide any possibly open `title` tooltips when mousing out of any tab or the tab bar as a
-		// whole. `mouseout` bubbles up from element you moved out of, so it covers both cases.
-		window.Zotero_Tooltip.stop();
-	}
 
 	function handleWheel(event) {
 		// Normalize wheel speed
@@ -280,7 +268,6 @@ const TabBar = forwardRef(function (props, ref) {
 				data-id={id}
 				className={cx('tab', { selected, dragging: dragging && id === dragIDRef.current })}
 				draggable={true}
-				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
 				onAuxClick={(event) => handleTabClick(event, id)}
@@ -289,7 +276,7 @@ const TabBar = forwardRef(function (props, ref) {
 				tabIndex="-1"
 			>
 				{icon}
-				<div className="tab-name">{title}</div>
+				<div className="tab-name" title={title}>{title}</div>
 				<div
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}
@@ -310,7 +297,6 @@ const TabBar = forwardRef(function (props, ref) {
 				<div className="pinned-tabs">
 					<div
 						className="tabs"
-						onMouseOut={handleTabBarMouseOut}
 					>
 						{tabs.length ? renderTab(tabs[0], 0) : null}
 					</div>
@@ -332,7 +318,6 @@ const TabBar = forwardRef(function (props, ref) {
 						ref={tabsRef}
 						className="tabs"
 						onDragOver={handleTabBarDragOver}
-						onMouseOut={handleTabBarMouseOut}
 						onScroll={updateScrollArrows}
 						dir={Zotero.dir}
 					>

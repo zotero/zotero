@@ -67,12 +67,24 @@ var Zotero_Tooltip = new function () {
 	
 	function handleMouseStop() {
 		var tooltipElem = document.getElementById('fake-tooltip');
+		// Create the fake tooltip if it does not exist
+		if (!tooltipElem) {
+			tooltipElem = document.createXULElement("tooltip");
+			tooltipElem.id = "fake-tooltip";
+			// The tooltip location is important. If the tooltip is placed
+			// within a lower level component, it may be not visible
+			document.documentElement.appendChild(tooltipElem);
+		}
 		tooltipElem.setAttribute('label', text);
 		tooltipElem.openPopupAtScreen(x, y, false, null);
 	}
 	
 	function hidePopup() {
 		var tooltipElem = document.getElementById('fake-tooltip');
-		tooltipElem.hidePopup();
+		if (tooltipElem) {
+			tooltipElem.hidePopup();
+		}
 	}
 };
+
+export { Zotero_Tooltip };

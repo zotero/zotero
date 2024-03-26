@@ -47,7 +47,7 @@ zotero-collections-search-btn =
 zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
-    .tooltiptext = Close Tab
+    .title = Close Tab
 
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
