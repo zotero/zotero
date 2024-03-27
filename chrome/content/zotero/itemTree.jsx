@@ -1724,7 +1724,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			throw new Error("ItemTree.deleteSelection() no longer takes two parameters");
 		}
 
-		if (this.selection.count == 0) {
+		if (!this.selection.actionableRowExists) {
 			return;
 		}
 		
@@ -1741,7 +1741,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.tree.invalidate();
 
 			// Create an array of selected items
-			var ids = Array.from(this.selection.selected).map(index => this.getRow(index).id);
+			var ids = this.getSelectedItems(true);
 
 			var collectionTreeRow = this.collectionTreeRow;
 
@@ -1787,7 +1787,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	getSelectedItems(asIDs) {
-		var items = this.selection ? Array.from(this.selection.selected) : [];
+		let items = [];
+		if (this.selection.contextMenuRowExists) {
+			items = [this.selection.contextMenuRow];
+		}
+		else if (this.selection?.selected) {
+			items = Array.from(this.selection.selected);
+		}
 		items = items.filter(index => index < this._rows.length);
 		try {
 			if (asIDs) return items.map(index => this.getRow(index).ref.id);

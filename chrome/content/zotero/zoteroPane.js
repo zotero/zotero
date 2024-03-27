@@ -484,6 +484,29 @@ var ZoteroPane = new function()
 		});
 	}
 
+	// On windows, right click may dispatch 'click' event on toolbarbuttons.
+	// Checks which button was clicked and stops the 'click' event if it
+	// was not triggered via left-click.
+	// Instead, dispatch 'contextmenu' event on the target
+	function filterUndesiredClickEvents() {
+		if (!Zotero.isWin) return;
+		document.addEventListener("click", (e) => {
+			if (e.target.tagName == "toolbarbutton" && e.button !== 0) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (e.button == 2) {
+					e.target.dispatchEvent(new MouseEvent('contextmenu', {
+						bubbles: true,
+						clientX: e.clientX,
+						clientY: e.clientY,
+						screenX: e.screenX,
+						screenY: e.screenY
+					}));
+				}
+			}
+		}, true);
+	}
+
 	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
 	 * mode
@@ -549,7 +572,7 @@ var ZoteroPane = new function()
 										.getService(Components.interfaces.nsIPromptService);
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 									+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-				var index = ps.confirmEx(
+				var index = this._openConfirmPromptEx(
 					null,
 					"Zotero Restore",
 					"The local Zotero database has been cleared."
@@ -639,6 +662,7 @@ var ZoteroPane = new function()
 			Zotero.logError(e);
 		}
 		addFocusHandlers();
+		filterUndesiredClickEvents();
 	}
 	
 	
@@ -801,7 +825,7 @@ var ZoteroPane = new function()
 					+ "If you’re new to Zotero, you can ignore this message.";
 				var url = 'https://www.zotero.org/support/kb/data_missing_after_zotero_5_upgrade';
 				var dontShowAgain = {};
-				let index = ps.confirmEx(null,
+				let index = this._openConfirmPromptEx(null,
 					Zotero.getString('general.warning'),
 					text,
 					buttonFlags,
@@ -1842,8 +1866,13 @@ var ZoteroPane = new function()
 	
 	
 	this.getCollectionTreeRow = function () {
-		return this.collectionsView && this.collectionsView.selection.count
-			&& this.collectionsView.getRow(this.collectionsView.selection.focused);
+		if (!(this.collectionsView && this.collectionsView.selection.actionableRowExists)) {
+			return false;
+		}
+		if (this.collectionsView.selection.contextMenuRowExists) {
+			return this.collectionsView.getRow(this.collectionsView.selection.contextMenuRow);
+		}
+		return this.collectionsView.getRow(this.collectionsView.selection.focused);
 	}
 	
 	
@@ -2307,7 +2336,7 @@ var ZoteroPane = new function()
 	this.canDeleteSelectedItems = function () {
 		let collectionTreeRow = this.getCollectionTreeRow();
 		if (collectionTreeRow.isTrash()) {
-			for (let index of this.itemsView.selection.selected) {
+			for (let index of getSelectedItems()) {
 				while (index != -1 && !this.itemsView.getRow(index).ref.deleted) {
 					index = this.itemsView.getParentIndex(index);
 				}
@@ -2336,7 +2365,7 @@ var ZoteroPane = new function()
 	 * @param  {Boolean}  [fromMenu=false]  If triggered from context menu, which always prompts for deletes
 	 */
 	this.deleteSelectedItems = function (force, fromMenu) {
-		if (!this.itemsView || !this.itemsView.selection.count) {
+		if (!this.itemsView || !this.itemsView.selection.actionableRowExists) {
 			return;
 		}
 		var collectionTreeRow = this.getCollectionTreeRow();
@@ -2425,9 +2454,7 @@ var ZoteroPane = new function()
 			var prompt = toDelete;
 		}
 		
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-		if (!prompt || promptService.confirm(window, prompt.title, prompt.text)) {
+		if (!prompt || this._openConfirmPrompt(window, prompt.title, prompt.text)) {
 			this.itemsView.deleteSelection(force);
 		}
 	}
@@ -2513,7 +2540,7 @@ var ZoteroPane = new function()
 			}
 			
 			// Display prompt
-			var index = ps.confirmEx(
+			var index = this._openConfirmPromptEx(
 				null,
 				title,
 				message,
@@ -2619,10 +2646,7 @@ var ZoteroPane = new function()
 	this.emptyTrash = Zotero.Promise.coroutine(function* () {
 		var libraryID = this.getSelectedLibraryID();
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		
-		var result = ps.confirm(
+		var result = this._openConfirmPrompt(
 			null,
 			"",
 			Zotero.getString('pane.collections.emptyTrash') + "\n\n"
@@ -3369,7 +3393,7 @@ var ZoteroPane = new function()
 				let ps = Services.prompt;
 				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-				let index = ps.confirmEx(
+				let index = this._openConfirmPromptEx(
 					null,
 					Zotero.getString('pane.collections.removeLibrary'),
 					Zotero.getString('pane.collections.removeLibrary.text', library.name),
@@ -5302,7 +5326,7 @@ var ZoteroPane = new function()
 		if (noLocate) {
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-			let index = ps.confirmEx(null,
+			let index = this._openConfirmPromptEx(null,
 				title,
 				text,
 				buttonFlags,
@@ -5319,7 +5343,7 @@ var ZoteroPane = new function()
 		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
 			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-		var index = ps.confirmEx(null,
+		var index = this._openConfirmPromptEx(null,
 			title,
 			text,
 			buttonFlags,
@@ -5358,7 +5382,7 @@ var ZoteroPane = new function()
 		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
 			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-		let index = ps.confirmEx(null,
+		let index = this._openConfirmPromptEx(null,
 			title,
 			text,
 			buttonFlags,
@@ -5386,7 +5410,7 @@ var ZoteroPane = new function()
 		text = Zotero.getString('pane.item.attachments.autoRelinkOthers.text', numOthers, numOthers);
 		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
-		index = ps.confirmEx(null,
+		index = this._openConfirmPromptEx(null,
 			title,
 			text,
 			buttonFlags,
@@ -5427,7 +5451,7 @@ var ZoteroPane = new function()
 			
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-			let index = ps.confirmEx(
+			let index = this._openConfirmPromptEx(
 				null,
 				title,
 				msg,
@@ -5871,7 +5895,7 @@ var ZoteroPane = new function()
 		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		var deleteOriginal = {};
-		var index = ps.confirmEx(null,
+		var index = this._openConfirmPromptEx(null,
 			Zotero.getString('attachment.convertToStored.title', [num], num),
 			Zotero.getString('attachment.convertToStored.text', [num], num),
 			buttonFlags,
@@ -6253,7 +6277,7 @@ var ZoteroPane = new function()
 		var ps = Services.prompt;
 		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
-		let index = ps.confirmEx(
+		let index = this._openConfirmPromptEx(
 			null,
 			Zotero.getString('retraction.replacedItem.title'),
 			Zotero.getString('retraction.replacedItem.text1')
@@ -6429,6 +6453,51 @@ var ZoteroPane = new function()
 	 */
 	this.openAboutDialog = function() {
 		window.openDialog('chrome://zotero/content/about.xhtml', 'about', 'chrome,centerscreen');
+	}
+
+	this._openConfirmPromptEx = function (...args) {
+		return this._openPrompt(true, ...args);
+	}
+
+	this._openConfirmPrompt = function (...args) {
+		return this._openPrompt(false, ...args);
+	}
+	
+	// Wrapper to open up the prompt dialog. If applicable,
+	// lock the context menu row before the dialog is opened
+	// and release it after. Otherwise, the context menu row gets
+	// cleared as soon as the contextmenu disappears, and the dialog
+	// confirms action on the wrong entry.
+	this._openPrompt = function (ex = false, ...args) {
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		let selection;
+		if (this.collectionsView.selection.contextMenuRowExists) {
+			selection = this.collectionsView.selection;
+		}
+		else if (this.itemsView.selection.contextMenuRowExists) {
+			selection = this.itemsView.selection;
+		}
+		if (selection) {
+			selection.keepContextRow();
+		}
+		
+		let result;
+		if (ex) {
+			result = ps.confirmEx(...args);
+		}
+		else {
+			result = ps.confirm(...args);
+		}
+		if (selection) {
+			// After the _openPrompt returns, remaining handlers rely on the
+			// contextRow still being present. For now, just delay to give
+			// them enough time to fetch the row before it's cleared
+			setTimeout(() => {
+				selection.releaseContextRow();
+			});
+		}
+		return result;
 	}
 	
 	/**

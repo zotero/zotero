@@ -154,6 +154,10 @@
 			color: var(--fill-secondary);
 		}
 
+		&.context-menu-row {
+			background-color: var(--accent-azure) !important;
+		}
+
 		.spacer-twisty {
 			display: inline-block;
 			min-width: 16px;

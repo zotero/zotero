@@ -62,6 +62,8 @@ class TreeSelection {
 			pivot: 0,
 			focused: 0,
 			selected: new Set([]),
+			contextMenuRow: null,
+			_contextMenuRowKeeper: { promise: null, resolve: null },
 			_selectEventsSuppressed: false
 		});
 	}
@@ -258,8 +260,41 @@ class TreeSelection {
 		}
 	}
 
+
+	// Create a promise to prevent the context menu row from being cleared.
+	// If the promise exists, the handler responsible for it
+	// will wait for the promise to be resolved before proceeding.
+	// If this is called, releaseContextRow must be called after, otherwise the row
+	// will keep appearing right-clicked.
+	// This is to accomodate actions that trigger confirmation dialogs, so the actual
+	// row must wait for the dialog to be closed before clearing the context menu row.
+	keepContextRow() {
+		let resolve;
+		this._contextMenuRowKeeper.promise = new Zotero.Promise(function () {
+			resolve = arguments[0];
+		});
+		this._contextMenuRowKeeper.resolve = resolve;
+	}
+
+	// Allow the context menu row to be cleared (e.g. after the confirmation dialog is closed)
+	releaseContextRow() {
+		if (this._contextMenuRowKeeper.resolve) {
+			this._contextMenuRowKeeper.resolve();
+			this._contextMenuRowKeeper = { promise: null, resolve: null };
+		}
+	}
+
+
 	get count() {
 		return this.selected.size;
+	}
+
+	get contextMenuRowExists() {
+		return this.contextMenuRow !== null;
+	}
+
+	get actionableRowExists() {
+		return this.selected.size > 0 || this.contextMenuRowExists;
 	}
 
 	get selectEventsSuppressed() {
@@ -717,14 +752,54 @@ class VirtualizedTable extends React.Component {
 	
 	_handleMouseDown = async (e, index) => {
 		const modifierClick = e.shiftKey || e.ctrlKey || e.metaKey;
-		if (e.button == 2) {
-			if (!modifierClick && !this.selection.isSelected(index)) {
-				this._onSelection(index, false, false);
+		// All modifier clicks handled in mouseUp per mozilla itemtree convention
+		if (modifierClick) {
+			this.focus();
+			return;
+		}
+		// Handle right-click when context menu handler is defined
+		if (e.button == 2 && this.props.onItemContextMenu) {
+			// Make sure the previous context menu row is cleared
+			if (!this.selection.isSelected(index)) {
+				let maybeOldContextMenuRow = this.selection.contextMenuRow;
+				this.selection.contextMenuRow = index;
+				if (maybeOldContextMenuRow && maybeOldContextMenuRow !== index) {
+					this.invalidateRow(maybeOldContextMenuRow);
+				}
 			}
 			this.props.onItemContextMenu(e, e.screenX, e.screenY);
+			let target = null;
+			let handleContextMenu = (e) => {
+				// Do not ignore tooltip popups
+				if (e.target.tagName !== "menupopup") return;
+				// Make it visible that the context menu row is active
+				if (!this.selection.isSelected(index)) {
+					this.invalidateRow(index);
+				}
+				// Remember the target popup so that we can distinguish between the
+				// hiding of the main popup and the hiding of submenus
+				target = e.target;
+				document.addEventListener("popuphidden", removeContextMenuMark);
+				document.removeEventListener('popupshowing', handleContextMenu);
+			};
+			let removeContextMenuMark = async (e) => {
+				// Ignore sub-menus
+				if (e.target !== target) return;
+				// If there is a pending promise, the context menu must have opened
+				// a confirmation dialog. Wait for it to be confirmed or cancelled.
+				if (this.selection._contextMenuRowKeeper.promise?.isPending()) {
+					await this.selection._contextMenuRowKeeper.promise;
+				}
+				// Clear the context menu row
+				this.selection.contextMenuRow = null;
+				this.invalidateRow(index);
+				target = null;
+				document.removeEventListener('popuphidden', removeContextMenuMark);
+			};
+			document.addEventListener("popupshowing", handleContextMenu);
 		}
-		// All modifier clicks handled in mouseUp per mozilla itemtree convention
-		if (!modifierClick && !this.selection.isSelected(index)) {
+		// In any other case, select the row
+		else if (!this.selection.isSelected(index)) {
 			this._onSelection(index, false, false);
 		}
 		this.focus();
@@ -1098,6 +1173,7 @@ class VirtualizedTable extends React.Component {
 		node.id = this.props.id + "-row-" + index;
 		node.classList.toggle('odd', index % 2 == 1);
 		node.classList.toggle('even', index % 2 == 0);
+		node.classList.toggle('context-menu-row', this.selection.contextMenuRow == index);
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
 		}
