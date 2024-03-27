@@ -416,6 +416,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 		Zotero.Standalone.init();
 		await Zotero.initComplete();
+		// Ingest command line arguments that were not handled due to late command line handler registration.
+		Zotero.CommandLineIngester.ingest();
 	};
 	
 	/**

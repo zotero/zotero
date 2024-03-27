@@ -6,6 +6,8 @@ export var CommandLineOptions = {
 	test: false,
 	automatedTest: false,
 	skipBundledFiles: false,
+	file: false,
+	url: false,
 };
 
 export var TestOptions = {
