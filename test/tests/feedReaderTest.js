@@ -249,4 +249,39 @@ describe("Zotero.FeedReader", function () {
 			assert.equal(item.enclosedItems[0].url, "https://static01.nyt.com/images/2021/06/16/world/16biden-photos1/16biden-photos1-moth.jpg");
 		});
 	});
+
+	describe("Legacy text encodings", function () {
+		var httpd;
+		var port = 16213;
+		var baseURL = `http://127.0.0.1:${port}/`;
+
+		before(function () {
+			Cu.import("resource://zotero-unit/httpd.js");
+			httpd = new HttpServer();
+			httpd.start(port);
+
+			httpd._handler._mimeMappings.rss = "text/xml; charset=ISO-8859-1";
+
+			httpd.registerPathHandler("/feedWindows1252.rss", {
+				handle(request, response) {
+					response.setStatusLine(null, 200, 'OK');
+					let file = getTestDataDirectory();
+					file.append("feedWindows1252.rss");
+					httpd._handler._writeFileResponse(request, file, response, 0, file.fileSize);
+				}
+			});
+		});
+		
+		after(async function () {
+			await new Promise(resolve => httpd.stop(resolve));
+		});
+		
+		it("should handle an ISO-8859-1 (windows-1252) feed", async function () {
+			let fr = new Zotero.FeedReader(baseURL + "feedWindows1252.rss");
+			await fr.process();
+			let itemIterator = new fr.ItemIterator();
+			let item = await itemIterator.next().value;
+			assert.equal(item.title, "Skriftlig spørsmål fra Tage Pettersen (H) til helse- og omsorgsministeren. Til behandling");
+		});
+	});
 })
