@@ -131,7 +131,7 @@
 			this._head.setAttribute("tabindex", "0");
 			this._head.addEventListener('mousedown', this._handleMouseDown);
 			this._head.addEventListener('click', this._handleClick);
-			this._head.addEventListener('keydown', this._handleKeyDown);
+			this.addEventListener('keydown', this._handleKeyDown);
 			this._head.addEventListener('contextmenu', this._handleContextMenu);
 
 			let titleBox = document.createElement('div');
@@ -156,7 +156,6 @@
 			
 			let twisty = document.createXULElement('toolbarbutton');
 			twisty.className = 'twisty';
-			twisty.setAttribute("tabindex", "0");
 			this._head.append(twisty);
 			
 			this._buildExtraButtons();
@@ -274,7 +273,7 @@
 		destroy() {
 			this._head.removeEventListener('click', this._handleClick);
 			this._head.removeEventListener('mousedown', this._handleMouseDown);
-			this._head.removeEventListener('keydown', this._handleKeyDown);
+			this.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
 			
 			Zotero.Prefs.unregisterObserver(this._notifierID);
@@ -325,22 +324,25 @@
 			};
 
 			// Tab/Shift-Tab from section header through header buttons
-			if (event.key === "Tab") {
+			if (this._head.contains(tgt) && event.key === "Tab") {
 				let nextBtn;
-				if (tgt.classList.contains("head") && event.shiftKey) {
-					return;
-				}
 				if (tgt.classList.contains("head")) {
-					nextBtn = this._head.querySelector("toolbarbutton");
+					// Shift-Tab from header is handled by default
+					if (event.shiftKey) {
+						return;
+					}
+					// Tab from header focuses the first focusable button
+					nextBtn = this._head.querySelector("toolbarbutton[tabindex='0']");
 				}
 				else {
-					nextBtn = event.shiftKey ? tgt.previousElementSibling : tgt.nextElementSibling;
+					// Some buttons are not focusable - keep going until we find one that is
+					nextBtn = tgt;
+					do {
+						nextBtn = event.shiftKey ? nextBtn.previousElementSibling : nextBtn.nextElementSibling;
+					} while (nextBtn && nextBtn.getAttribute('tabindex') != '0');
 				}
 				
-				if (nextBtn?.tagName == "popupset") {
-					nextBtn = this._head;
-				}
-				if (nextBtn) {
+				if (nextBtn && nextBtn !== tgt) {
 					nextBtn.focus();
 					stopEvent();
 				}
@@ -351,14 +353,10 @@
 					stopEvent();
 					return;
 				}
-				// Let itemPane.js listener handle space or Enter clicks
-				if ([" ", "Enter"].includes(event.key)) {
-					return;
-				}
 			}
-			// Space/Enter toggle section open/closed.
-			// ArrowLeft/ArrowRight on actual header will close/open
-			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key)) {
+			// Space/Enter on header toggle section's open status
+			// ArrowLeft closes, ArrowRight opens the section
+			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key) && tgt.classList.contains("head")) {
 				stopEvent();
 				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == "ArrowRight");
 				event.target.focus();
@@ -383,6 +381,32 @@
 					nextSection._head.focus();
 					stopEvent();
 				}
+			}
+			// Tab tavigation between entries and buttons within library, related and notes boxes
+			if (event.key == "Tab" && event.target.closest(".box")) {
+				let next = null;
+				if (event.key == "Tab" && !event.shiftKey) {
+					next = event.target.nextElementSibling;
+				}
+				if (event.key == "Tab" && event.shiftKey) {
+					next = event.target.parentNode.previousElementSibling?.lastChild;
+				}
+				// Force the element to be visible before focusing
+				if (next) {
+					next.style.visibility = "visible";
+					next.focus();
+					next.style.removeProperty("visibility");
+					stopEvent();
+				}
+			}
+			// +/- from section header will collapse/expand all sections
+			if (["Equal", "Minus"].includes(event.code) && tgt.classList.contains("head")) {
+				let collapsibleBox = tgt.closest('collapsible-section').parentNode;
+				let sectionSiblings = [...collapsibleBox.parentNode.querySelectorAll("collapsible-section")];
+				for (let section of sectionSiblings) {
+					section.open = (event.code == "Equal");
+				}
+				event.stopPropagation();
 			}
 		};
 		
