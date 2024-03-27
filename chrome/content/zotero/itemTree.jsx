@@ -1478,7 +1478,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		switch (type) {
 			case 'search':
 				this.collectionTreeRow.setSearch(data);
-				break;
+				break; 
 			case 'tags':
 				this.collectionTreeRow.setTags(data);
 				break;
@@ -1557,11 +1557,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		this._lastToggleOpenStateIndex = index;
+		// cleanup after ongoing animations, if any is running
+		this._animation?.callback?.();
 
 		if (this.isContainerOpen(index)) {
 			await this._closeContainer(index, skipRowMapRefresh, true);
-			this._lastToggleOpenStateIndex = null;
 			return;
 		}
 		if (!skipRowMapRefresh) {
@@ -1608,9 +1608,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._rows[index].isOpen = true;
 
 		if (count == 0) {
-			this._lastToggleOpenStateIndex = null;
 			return;
 		}
+
 
 		if (!skipRowMapRefresh) {
 			Zotero.debug('Refreshing item row map');
@@ -1618,10 +1618,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			await this._refreshPromise;
 			this._restoreSelection(savedSelection, false, true);
+			
+			this._animation = {
+				index, count, isOpen: true,
+				callback: () => {
+					this._animation = null;
+				}
+			};
+			
 			this.tree.invalidate();
 		}
-		this._lastToggleOpenStateIndex = null;
-	}
+	};
 
 	expandMatchParents(searchParentIDs) {
 		// Expand parents of child matches
@@ -2849,19 +2856,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.setAttribute('aria-disabled', true);
 		}
 
-		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
-		if (this._lastToggleOpenStateIndex === index) {
-			let twisty = div.querySelector('.twisty');
-			if (twisty) {
-				twisty.classList.toggle('open', !this.isContainerOpen(index));
-				setTimeout(() => {
-					twisty.classList.toggle('open', this.isContainerOpen(index));
-				}, 0);
-			}
-		}
+		this._animateExpandCollapse(index, div);
 
 		return div;
-	};
+	}
 	
 	_handleRowMouseUpDown = (event) => {
 		const modifierIsPressed = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
@@ -2871,6 +2869,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
+		if (this._animation) {
+			this._animation.selectionChanged = true;
+		}
 		if (this.collectionTreeRow.isDuplicates() && selection.count == 1 && this.duplicateMouseSelection) {
 			var itemID = this.getRow(selection.focused).ref.id;
 			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(itemID);
@@ -2906,12 +2907,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var count = 0;
 		var level = this.getLevel(index);
+		let rowsToRemove = [];
 
 		// Remove child rows
-		while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
-			// Skip the map update here and just refresh the whole map below,
-			// since we might be removing multiple rows
-			this._removeRow(index + 1, true);
+		for (let i = 1; i < this._rows.length; i++) {
+			if (index + i >= this._rows.length || this.getLevel(index + i) <= level) {
+				break;
+			}
+			rowsToRemove.push(index + i);
 			count++;
 		}
 
@@ -2921,12 +2924,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		if (!skipRowMapRefresh) {
-			Zotero.debug('Refreshing item row map');
-			this._refreshRowMap();
+		if (skipRowMapRefresh) {
+			this._removeRows(rowsToRemove);
+		}
+		else {
+			this._animation = {
+				index, count, isOpen: false,
+				callback: async () => {
+					const selectionChanged = this._animation?.selectionChanged;
+					this._animation = null; // ensure animation is cleared before next render
+					this._removeRows(rowsToRemove);
+					await this._refreshPromise;
+					if (!selectionChanged) {
+						this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
+					}
+					this.tree.invalidate();
+				}
+			};
 			
-			await this._refreshPromise;
-			this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
 			this.tree.invalidate();
 		}
 	}
