@@ -46,6 +46,7 @@ const xpcomFilesAll = [
 	'utilities/openurl',
 	'utilities/xregexp-all',
 	'utilities/xregexp-unicode-zotero',
+	'utilities/jsonld',
 	'utilities_internal',
 	'translate/src/utilities_translate',
 	'file',
