@@ -1447,6 +1447,26 @@ describe("Zotero.CollectionTree", function() {
 			assert.sameMembers(displayedRowNames, expectedNames);
 		});
 
+		it('should be able to expand to see non-passing subcollections', async function () {
+			await cv.setFilter("collection_level_one_1");
+			// After filtering, only the matching collection is displayed
+			let displayedRowNames = cv._rows.filter(row => row.type == "collection").map(row => row.ref.name);
+			let expectedNames = [
+				"collection_level_one_1"
+			];
+			assert.sameMembers(displayedRowNames, expectedNames);
+
+			await cv.expandLibrary(userLibraryID, true);
+			// But it can be expanded to reveal subcollections even if they don't match
+			displayedRowNames = cv._rows.filter(row => row.type == "collection").map(row => row.ref.name);
+			expectedNames = [
+				"collection_level_one_1",
+				"collection_level_two_21",
+				"collection_level_two_22",
+			];
+			assert.sameMembers(displayedRowNames, expectedNames);
+		});
+
 		it('should not move focus from selected collection during filtering', async function () {
 			await cv.selectByID("C" + collection5.id);
 			await cv.setFilter("three");
@@ -1490,9 +1510,10 @@ describe("Zotero.CollectionTree", function() {
 
 		for (let type of ['collection', 'search']) {
 			// eslint-disable-next-line no-loop-func
-			it(`should only hide ${type} if it's renamed to not match the filter`, async function () {
-				await cv.setFilter(type);
-				let objectToSelect = type == 'collection' ? collection5 : search2;
+			it(`should hide ${type} if it's renamed to not match the filter`, async function () {
+				let objectToSelect = type == 'collection' ? collection1 : search1;
+				await cv.setFilter(objectToSelect.name);
+				let originalName = objectToSelect.name;
 				objectToSelect.name += "_updated";
 				await objectToSelect.saveTx();
 				let displayedRowNames = cv._rows.map(row => row.getName());
@@ -1502,6 +1523,9 @@ describe("Zotero.CollectionTree", function() {
 				await objectToSelect.saveTx();
 				displayedRowNames = cv._rows.map(row => row.getName());
 				assert.notInclude(displayedRowNames, objectToSelect.name);
+
+				objectToSelect.name = originalName;
+				await objectToSelect.saveTx();
 			});
 		}
 
