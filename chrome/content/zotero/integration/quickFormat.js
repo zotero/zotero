@@ -142,11 +142,6 @@ var Zotero_QuickFormat = new function () {
 					dialog.setAttribute("square", "true");
 				}
 			}
-			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
-			// as titlebar+maincontent, so we have hack around that here.
-			else if (Zotero.isMac) {
-				dialog.style.marginBottom = "-28px";
-			}
 			
 			keepSorted = document.getElementById("keep-sorted");
 			showEditor = document.getElementById("show-editor");
@@ -1208,16 +1203,19 @@ var Zotero_QuickFormat = new function () {
 		// Resized so that outerHeight=contentHeight
 		let outerHeightAdjustment = Math.max(window.outerHeight - window.innerHeight, 0);
 		window.resizeTo(WINDOW_WIDTH, contentHeight + outerHeightAdjustment);
-		if (Zotero.isWin) {
-			// On windows, if the editor height changes, the panel will remain where it was.
-			// Check if the panel is not next to the dialog, and if so - close and reopen it
-			// to position references panel properly
-			let dialogBottom = dialog.getBoundingClientRect().bottom;
-			let panelTop = referencePanel.getBoundingClientRect().top;
-			if (Math.abs(dialogBottom - panelTop) > 5) {
-				referencePanel.hidePopup();
-				_openReferencePanel();
-			}
+		// If the editor height changes, the panel will remain where it was.
+		// Check if the panel is not next to the dialog, and if so - close and reopen it
+		// to position references panel properly
+		let dialogBottom = dialog.getBoundingClientRect().bottom;
+		let panelTop = referencePanel.getBoundingClientRect().top;
+		if (Math.abs(dialogBottom - panelTop) > 5) {
+			referencePanel.hidePopup();
+			// Without a brief delay, panel may open at the old location
+			setTimeout(() => {
+				// _resizeReferencePanel will also check if the panel needs to be
+				// reopened in the first place
+				_resizeReferencePanel();
+			});
 		}
 		if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
 			document.children[0].setAttribute('drawintitlebar', 'false');
