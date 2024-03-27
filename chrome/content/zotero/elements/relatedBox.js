@@ -78,6 +78,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 		set item(val) {
 			this._item = val;
+			this.hidden = this._item.isAnnotation();
 			this.refresh();
 		}
 

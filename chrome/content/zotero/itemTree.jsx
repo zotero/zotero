@@ -213,8 +213,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.CollectionTreeCache.clear();
 			// Get the full set of items we want to show
 			let newSearchItems = await this.collectionTreeRow.getItems();
-			// TEMP: Hide annotations
-			newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
 			// Remove notes and attachments if necessary
 			if (this.regularOnly) {
 				newSearchItems = newSearchItems.filter(item => item.isRegularItem());
@@ -251,7 +249,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (row.ref.parentID) {
 						continue;
 					}
-					let isSearchParent = newSearchParentIDs.has(row.ref.id);
+					let attachments = row.ref.isRegularItem() ? row.ref.getAttachments() : [];
+					let isSearchParent = newSearchParentIDs.has(row.ref.id) || attachments.some(id => newSearchParentIDs.has(id));
 					// If not showing children or no children match the search, close
 					if (this.regularOnly || !isSearchParent) {
 						row.isOpen = false;
@@ -275,8 +274,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				else if (skipChildren) {
 					continue;
 				}
-				newRows.push(row);
-				allItemIDs.add(row.ref.id);
+				if (!allItemIDs.has(row.ref.id)) {
+					newRows.push(row);
+					allItemIDs.add(row.ref.id);
+				}
 			}
 			
 			// Add new items
@@ -290,6 +291,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 						continue;
 					}
 					item = Zotero.Items.get(parentItemID);
+					let parentsParent = item.parentItemID;
+					if (parentsParent) {
+						if (allItemIDs.has(parentsParent)) {
+							continue;
+						}
+						item = Zotero.Items.get(parentsParent);
+					}
 				}
 				// Parent item may have already been added from child
 				else if (allItemIDs.has(item.id)) {
@@ -298,9 +306,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				// Add new top-level items
 				let row = new ItemTreeRow(item, 0, false);
-				newRows.push(row);
-				allItemIDs.add(item.id);
-				addedItemIDs.add(item.id);
+				if (!allItemIDs.has(item.id)) {
+					newRows.push(row);
+					allItemIDs.add(item.id);
+					addedItemIDs.add(item.id);
+				}
 			}
 			
 			this._rows = newRows;
@@ -1578,10 +1588,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		//Get children
 		var includeTrashed = this.collectionTreeRow.isTrash();
-		var attachments = item.getAttachments(includeTrashed);
-		var notes = item.getNotes(includeTrashed);
+		var attachments = item.isRegularItem() ? item.getAttachments(includeTrashed) : [];
+		var notes = item.isRegularItem() ? item.getNotes(includeTrashed) : [];
 
-		var newRows;
+		var annotations = [];
+
+		if (item.isFileAttachment()) {
+			annotations = item.getAnnotations();
+		}
+		var newRows = [];
 		if (attachments.length && notes.length) {
 			newRows = notes.concat(attachments);
 		}
@@ -1591,10 +1606,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else if (notes.length) {
 			newRows = notes;
 		}
+		if (annotations.length) {
+			newRows = newRows.concat(annotations);
+		}
 
 		if (newRows) {
-			newRows = Zotero.Items.get(newRows);
-
+			if (!item.isFileAttachment()) {
+				newRows = Zotero.Items.get(newRows);
+			}
 			for (let i = 0; i < newRows.length; i++) {
 				count++;
 				this._addRow(
@@ -1631,8 +1650,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var savedSelection = this.getSelectedItems(true);
 		for (var i=0; i<this.rowCount; i++) {
-			var id = this.getRow(i).ref.id;
-			if (searchParentIDs.has(id) && this.isContainer(i) && !this.isContainerOpen(i)) {
+			if (!this.isContainer(i) || this.isContainerOpen(i)) {
+				continue;
+			}
+			let item = this.getRow(i).ref;
+			let attachments = item.isRegularItem() ? item.getAttachments() : [];
+			if (attachments.some(id => searchParentIDs.has(id))) {
+				this.toggleOpenState(i, true);
+			}
+			if (searchParentIDs.has(item.id)) {
 				this.toggleOpenState(i, true);
 			}
 		}
@@ -1899,8 +1925,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	};
 	
 	isContainer = (index) => {
-		return this.getRow(index).ref.isRegularItem();
-	};
+		let item = this.getRow(index).ref;
+		return item.isRegularItem() || item.isFileAttachment();
+	}
 
 	isContainerOpen = (index) => {
 		return this.getRow(index).isOpen;
@@ -1912,6 +1939,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		var item = this.getRow(index).ref;
+		if (item.isFileAttachment()) {
+			return item.numAnnotations() == 0;
+		}
 		if (!item.isRegularItem()) {
 			return true;
 		}
@@ -2818,8 +2848,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				: acc;
 		}, { lowestOrdinal: Infinity, firstColumn: null });
 
+		let isAnnotation = this.getRow(index).ref.isAnnotation();
 		for (let column of columns) {
 			if (column.hidden) continue;
+			if (isAnnotation && column !== firstColumn) continue;
 			div.appendChild(this._renderCell(index, rowData[column.dataKey], column, column === firstColumn));
 		}
 
@@ -3353,20 +3385,27 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_saveOpenState(close) {
 		if (!this.tree) return [];
 		var itemIDs = [];
+		var toClose = [];
 		if (close) {
 			if (!this.selection.selectEventsSuppressed) {
 				var unsuppress = this.selection.selectEventsSuppressed = true;
 			}
 		}
+
 		for (var i=0; i<this._rows.length; i++) {
 			if (this.isContainer(i) && this.isContainerOpen(i)) {
-				itemIDs.push(this.getRow(i).ref.id);
-				if (close) {
-					this._closeContainer(i, true);
+				let row = this.getRow(i);
+				itemIDs.push(row.ref.id);
+				if (close && row.level == 0) {
+					toClose.push(this.getRow(i).ref.id);
 				}
 			}
 		}
 		if (close) {
+			for (i = toClose.length - 1; i >= 0; i--) {
+				let row = this._rowMap[toClose[i]];
+				this._closeContainer(row, true);
+			}
 			this._refreshRowMap();
 			if (unsuppress) {
 				this.selection.selectEventsSuppressed = false;
@@ -3375,13 +3414,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return itemIDs;
 	}
 
-	_rememberOpenState(itemIDs) {
+	_rememberOpenState(itemIDs, secondLevel = false) {
 		if (!this.tree) return;
 		var rowsToOpen = [];
+		var nextLevelToOpen = [];
 		for (let id of itemIDs) {
 			var row = this._rowMap[id];
 			// Item may not still exist
 			if (row == undefined) {
+				if (!secondLevel) {
+					nextLevelToOpen.push(id);
+				}
 				continue;
 			}
 			rowsToOpen.push(row);
@@ -3398,6 +3441,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.toggleOpenState(rowsToOpen[i], true);
 		}
 		this._refreshRowMap();
+
+		if (nextLevelToOpen.length) {
+			this._rememberOpenState(nextLevelToOpen, true);
+		}
 		if (unsuppress) {
 			this.selection.selectEventsSuppressed = false;
 		}
@@ -3737,6 +3784,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_getIcon(index) {
 		var item = this.getRow(index).ref;
+		if (item.isAnnotation()) {
+			let img = document.createElement("img");
+			img.className = "annotation-icon";
+			let type = item.annotationType;
+			if (type == 'image') {
+				type = 'area';
+			}
+			img.src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
+			img.style.fill = item.annotationColor;
+			return img;
+		}
 		var itemType = item.getItemTypeIconName();
 		return getCSSItemTypeIcon(itemType);
 	}

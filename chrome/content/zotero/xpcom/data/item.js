@@ -890,7 +890,7 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 	var itemTypeLetter = Zotero.ItemTypes.getID('letter');
 	var itemTypeInterview = Zotero.ItemTypes.getID('interview');
 	var itemTypeCase = Zotero.ItemTypes.getID('case');
-	
+	var itemTypeAnnotation = Zotero.ItemTypes.getID('annotation');
 	var creatorTypeAuthor = Zotero.CreatorTypes.getID('author');
 	var creatorTypeRecipient = Zotero.CreatorTypes.getID('recipient');
 	var creatorTypeInterviewer = Zotero.CreatorTypes.getID('interviewer');
@@ -984,7 +984,26 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 			title = '[' + strParts.join(', ') + ']';
 		}
 	}
-	
+	else if (itemTypeID == itemTypeAnnotation) {
+		let isEmpty = str => (str || "").length == 0;
+		let tags = this.getTags();
+		const maxLength = 150;
+		if (!isEmpty(this.annotationComment)) {
+			title = `"${this.annotationComment.substring(0, maxLength)}"`;
+		}
+		if (!isEmpty(this.annotationText) && title.length < maxLength) {
+			title += `${!isEmpty(title) ? " | " : ""} ${this.annotationText.substring(0, maxLength)}`;
+		}
+
+		if (["image", "ink"].includes(this.annotationType) && title.length < maxLength) {
+			let annotationName = `${Zotero.Utilities.capitalize(this.annotationType)} ${Zotero.getString("itemTypes.annotation")}`;
+			title = `${annotationName}${isEmpty(title) ? "" : " | " + title}`;
+		}
+
+		if (tags.length > 0 && title.length < maxLength) {
+			title += (" | " + tags.map(t => t.tag).join(", "));
+		}
+	}
 	this._displayTitle = title;
 };
 

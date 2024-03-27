@@ -1937,6 +1937,14 @@ var ZoteroPane = new function()
 					}
 				}
 			}
+			else if (selectedItems.length > 1 && selectedItems.every(item => item.isAnnotation())) {
+				if (this.collectionsView.editable) {
+					yield ZoteroItemPane.viewAnnotations(selectedItems, null);
+				}
+				else {
+					yield ZoteroItemPane.viewAnnotations(selectedItems, 'view');
+				}
+			}
 			// Zero or multiple items selected
 			else {
 				let defaultSidenavButtons = [
@@ -3775,7 +3783,8 @@ var ZoteroPane = new function()
 						&& !collectionTreeRow.isDuplicates()
 						&& !collectionTreeRow.isFeedsOrFeed()) {
 					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)
-							|| items.some(item => isAttachmentWithExtractableAnnotations(item))) {
+							|| items.some(item => isAttachmentWithExtractableAnnotations(item))
+							|| items.some(item => item.isAnnotation())) {
 						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
 						show.add(m.createNoteFromAnnotations);
 						let key;
@@ -3845,6 +3854,12 @@ var ZoteroPane = new function()
 				menu.setAttribute('itemID', item.id);
 				menu.setAttribute('itemKey', item.key);
 				
+				if (item.isAnnotation()) {
+					show.delete(m.sep4);
+					show.delete(m.exportItems);
+					show.delete(m.createBib);
+					show.delete(m.loadReport);
+				}
 				if (!isTrash) {
 					// Show in Library
 					if (!collectionTreeRow.isLibrary(true)) {
@@ -3865,15 +3880,16 @@ var ZoteroPane = new function()
 						}
 					}
 					// Show "(Create|Add) Note from Annotations" on attachment with extractable annotations
-					else if (isAttachmentWithExtractableAnnotations(item)) {
+					// or annotations themselves
+					else if (isAttachmentWithExtractableAnnotations(item) || item.isAnnotation()) {
 						show.add(m.createNoteFromAnnotations);
 						show.add(m.sep2);
 					}
 					if (show.has(m.createNoteFromAnnotations)) {
 						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
 						let str;
-						// Show "Create" on standalone attachments
-						if (item.isAttachment() && item.isTopLevelItem()) {
+						// Show "Create" on standalone attachments or annotations
+						if ((item.isAttachment() && item.isTopLevelItem())) {
 							str = 'pane.items.menu.createNoteFromAnnotations';
 							menuitem.setAttribute('oncommand', 'ZoteroPane.createStandaloneNoteFromAnnotationsFromSelected()');
 						}
@@ -3927,6 +3943,9 @@ var ZoteroPane = new function()
 						if (showSep5) {
 							show.add(m.sep5);
 						}
+					}
+					else if (item.isAnnotation()) {
+						// Some annotation specific menus?
 					}
 					else if (item.isFeedItem) {
 						show.add(m.toggleRead);
@@ -4880,6 +4899,9 @@ var ZoteroPane = new function()
 			else if (item.isAttachment()) {
 				yield this.viewAttachment(item.id, event);
 			}
+			else if (item.isAnnotation()) {
+				this.viewPDF(item.parentItemID, JSON.parse(item.annotationPosition));
+			}
 		}
 	});
 	
@@ -5559,6 +5581,7 @@ var ZoteroPane = new function()
 		}
 		
 		var attachments = [];
+		var annotations = [];
 		for (let item of items) {
 			if (item.isRegularItem()) {
 				// Find all child items with extractable annotations
@@ -5570,17 +5593,19 @@ var ZoteroPane = new function()
 			else if (isAttachmentWithExtractableAnnotations(item)) {
 				attachments.push(item);
 			}
+			else if (item.isAnnotation() && item.annotationType !== 'ink' && item.annotationType != 'image') {
+				annotations.push(item);
+			}
 			else {
 				continue;
 			}
 		}
 		
-		if (!attachments.length) {
+		if (!attachments.length && !annotations.length) {
 			Zotero.debug("No attachments found", 2);
 			return;
 		}
 		
-		var annotations = [];
 		for (let attachment of attachments) {
 			try {
 				await Zotero.PDFWorker.import(attachment.id, true);
@@ -5588,12 +5613,13 @@ var ZoteroPane = new function()
 			catch (e) {
 				Zotero.logError(e);
 			}
-			annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
+			annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink' && x.annotationType != 'image'));
 		}
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
 			annotations,
 			{
-				parentID: topLevelItem.id
+				parentID: topLevelItem.id,
+				skipFirstSave: true
 			}
 		);
 		await this.selectItem(note.id);
@@ -5674,6 +5700,9 @@ var ZoteroPane = new function()
 			else if (isAttachmentWithExtractableAnnotations(item)) {
 				attachments.push(item);
 			}
+			else if (item.isAnnotation()) {
+				annotations.push(item);
+			}
 			else {
 				continue;
 			}
@@ -5684,7 +5713,7 @@ var ZoteroPane = new function()
 				catch (e) {
 					Zotero.logError(e);
 				}
-				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
+				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink' && x.annotationType != 'image'));
 			}
 		}
 		
@@ -5696,7 +5725,8 @@ var ZoteroPane = new function()
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
 			annotations,
 			{
-				collectionID: this.getSelectedCollection(true)
+				collectionID: this.getSelectedCollection(true),
+				skipFirstSave: true
 			}
 		);
 		await this.selectItem(note.id);

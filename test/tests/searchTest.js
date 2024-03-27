@@ -255,7 +255,7 @@ describe("Zotero.Search", function() {
 					s.libraryID = userLibraryID;
 					s.addCondition('tag', 'is', tag);
 					var matches = await s.search();
-					assert.sameMembers(matches, [attachment.id]);
+					assert.sameMembers(matches, [annotation.id]);
 				});
 				
 				// TEMP
@@ -428,7 +428,7 @@ describe("Zotero.Search", function() {
 					s.addCondition('annotationText', 'contains', str);
 					var matches = await s.search();
 					// TEMP: Match parent attachment
-					assert.sameMembers(matches, [attachment.id]);
+					assert.sameMembers(matches, [annotation.id]);
 				});
 			});
 			
@@ -444,7 +444,7 @@ describe("Zotero.Search", function() {
 					s.addCondition('annotationComment', 'contains', str);
 					var matches = await s.search();
 					// TEMP: Match parent attachment
-					assert.sameMembers(matches, [attachment.id]);
+					assert.sameMembers(matches, [annotation.id]);
 				});
 			});
 			
@@ -598,7 +598,7 @@ describe("Zotero.Search", function() {
 						s.addCondition('quicksearch-fields', 'contains', tag);
 						var matches = await s.search();
 						// TEMP: Match parent attachment
-						assert.sameMembers(matches, [attachment.id]);
+						assert.sameMembers(matches, [annotation.id]);
 					});
 				})
 				
@@ -613,7 +613,7 @@ describe("Zotero.Search", function() {
 						s.addCondition('quicksearch-everything', 'contains', comment);
 						var matches = await s.search();
 						// TEMP: Match parent attachment
-						assert.sameMembers(matches, [attachment.id]);
+						assert.sameMembers(matches, [annotation.id]);
 					});
 				});
 			});

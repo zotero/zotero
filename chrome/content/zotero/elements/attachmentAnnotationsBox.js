@@ -38,13 +38,30 @@
 
 		set item(item) {
 			this._item = item;
-			if (item?.isFileAttachment()) {
+			this._items = null;
+			if (item?.isFileAttachment() || item?.isAnnotation()) {
 				this.hidden = false;
 				this.render();
 			}
 			else {
 				this.hidden = true;
 			}
+		}
+
+		set items(items) {
+			this._items = items;
+			this._item = null;
+			if (!items.every(item => item.isAnnotation())) {
+				this.hidden = true;
+			}
+			else {
+				this.hidden = false;
+				this.render();
+			}
+		}
+
+		get items() {
+			return this._items;
 		}
 
 		init() {
@@ -60,15 +77,24 @@
 		}
 
 		notify(action, type, ids) {
-			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
+			console.log("MODIFY ", action, type);
+			if (action == 'modify'
+				&& (this.item && ids.includes(this.item.id))
+				|| (this.items && this.items.some(item => ids.includes(item.id)))) {
+				console.log("Rerender ", this.item);
 				this.render();
 			}
 		}
 
 		render() {
-			if (!this.initialized || !this.item?.isFileAttachment()) return;
-
-			let annotations = this.item.getAnnotations();
+			if (!this.initialized || !this._shouldRender()) return;
+			let annotations = [];
+			if (this.item) {
+				annotations = this.item.isAnnotation() ? [this.item] : this.item.getAnnotations();
+			}
+			else {
+				annotations = this._items;
+			}
 			this._section.setCount(annotations.length);
 
 			this._body.replaceChildren();
@@ -97,6 +123,16 @@
 			}
 			this.render();
 		};
+
+		_shouldRender() {
+			if (this.item) {
+				return this.item.isFileAttachment() || this.item.isAnnotation();
+			}
+			if (this.items) {
+				return this.items.every(item => item.isAnnotation());
+			}
+			return false;
+		}
 	}
 	customElements.define("attachment-annotations-box", AttachmentAnnotationsBox);
 }

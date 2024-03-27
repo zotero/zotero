@@ -2,6 +2,10 @@ tags-box {
 	display: flex;
 	flex-direction: column;
 	
+	&[hidden] {
+		display: none;
+	}
+	
 	.body {
 		display: flex;
 		flex-direction: column;

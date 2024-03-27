@@ -1294,7 +1294,7 @@ class EditorInstance {
 	 * @param {Integer} options.collectionID - Only valid if parentID not provided
 	 * @returns {Promise<Zotero.Item>}
 	 */
-	static async createNoteFromAnnotations(annotations, { parentID, collectionID } = {}) {
+	static async createNoteFromAnnotations(annotations, { parentID, collectionID, skipFirstSave } = {}) {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
@@ -1321,7 +1321,11 @@ class EditorInstance {
 		else if (collectionID) {
 			note.addToCollection(collectionID);
 		}
-		await note.saveTx();
+		// Each save causes change of focus, so for standalone notes from
+		// itemTree attachments, skip it to avoid blinking
+		if (!skipFirstSave) {
+			await note.saveTx();
+		}
 		let editorInstance = new EditorInstance();
 		editorInstance._item = note;
 		let jsonAnnotations = [];

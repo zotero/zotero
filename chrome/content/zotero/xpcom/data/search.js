@@ -614,7 +614,10 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				sql += " OR itemID IN (SELECT itemID FROM itemAttachments"
 				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
 				+ "itemID IN (SELECT itemID FROM itemNotes"
-				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))";
+				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))"
+				+ " OR itemID IN ( SELECT itemID FROM itemAnnotations WHERE "
+				+ " parentItemID IN ( SELECT itemID FROM itemAttachments WHERE "
+				+ " parentItemID IN ( SELECT itemID FROM " + tmpTable + ")))";
 			}
 			sql += ")";
 			
@@ -950,10 +953,7 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._requireData('conditions');
 	
-	// TEMP: Match parent attachment for annotation matches
-	// var sql = 'SELECT itemID FROM items';
-	var sql = "SELECT COALESCE(IA.parentItemID, itemID) AS itemID FROM items "
-		+ "LEFT JOIN itemAnnotations IA USING (itemID)";
+	var sql = 'SELECT itemID FROM items';
 	
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
@@ -1196,16 +1196,14 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					}
 					
 					switch (condition.name) {
-						// TEMP: Match parent attachments of matching annotations
 						case 'tag':
-							condSQL += "SELECT COALESCE(IAnT.parentItemID, itemID) FROM itemTags "
+							condSQL += "SELECT itemID FROM itemTags "
 								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
 							break;
 						
-						// TEMP: Match parent attachments of matching annotations
 						case 'annotationText':
 						case 'annotationComment':
-							condSQL += `SELECT parentItemID FROM ${condition.table} WHERE (`
+							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`
 							break;
 							
 						default:
@@ -1787,11 +1785,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 		
 		// Add on quicksearch conditions
 		if (quicksearchSQLSet) {
-			// TEMP: Match parent attachments for annotations
-			//sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
-			sql = "SELECT COALESCE(IAn.parentItemID, itemID) AS itemID FROM items "
-				+ "LEFT JOIN itemAnnotations IAn USING (itemID) "
-				+ "WHERE itemID IN (" + sql + ") "
+			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
 				+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
 			
 			for (var k=0; k<quicksearchParamsSet.length; k++) {
