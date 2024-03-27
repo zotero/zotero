@@ -340,7 +340,7 @@
 				let itemAccessDate = this.item.getField('accessDate');
 				if (itemAccessDate) {
 					itemAccessDate = Zotero.Date.sqlToDate(itemAccessDate, true);
-					this._id("accessed").value = itemAccessDate.toLocaleString();
+					this._id("accessed").value = itemAccessDate.toLocaleString(window.navigator.language);
 					accessed.hidden = false;
 				}
 				else {
@@ -393,7 +393,7 @@
 				if (this.synchronous) {
 					this._id("dateModified").value = Zotero.Date.sqlToDate(
 						this.item.getField('dateModified'), true
-					).toLocaleString();
+					).toLocaleString(window.navigator.language);
 					dateModifiedRow.hidden = false;
 				}
 				else {
@@ -402,7 +402,7 @@
 						if (!this._id) return;
 						
 						if (mtime) {
-							this._id("dateModified").value = new Date(mtime).toLocaleString();
+							this._id("dateModified").value = new Date(mtime).toLocaleString(window.navigator.language);
 						}
 						dateModifiedRow.hidden = !mtime;
 					}.bind(this));

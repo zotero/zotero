@@ -94,7 +94,7 @@ var Zotero_Duplicates_Pane = new function () {
 			var numRows = 0;
 			for (let item of items) {
 				var date = Zotero.Date.sqlToDate(item.dateAdded, true);
-				dateList.appendItem(date.toLocaleString());
+				dateList.appendItem(date.toLocaleString(window.navigator.language));
 				numRows++;
 			}
 			

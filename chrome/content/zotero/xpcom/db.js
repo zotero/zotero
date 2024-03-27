@@ -1259,8 +1259,8 @@ Zotero.DBConnection.prototype._checkException = async function (e) {
 	var backupTime = null;
 	try {
 		let info = await OS.File.stat(this._dbPath + '.bak');
-		backupDate = info.lastModificationDate.toLocaleDateString();
-		backupTime = info.lastModificationDate.toLocaleTimeString();
+		backupDate = info.lastModificationDate.toLocaleDateString(window.navigator.language);
+		backupTime = info.lastModificationDate.toLocaleTimeString(window.navigator.language);
 		Zotero.debug(`Found ${this._dbPath} with date of ${backupDate}`);
 	}
 	catch (e) {}

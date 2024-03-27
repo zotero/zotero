@@ -1335,7 +1335,7 @@ class EditorInstance {
 
 		let vars = {
 			title: Zotero.getString('pdfReader.annotations'),
-			date: new Date().toLocaleString()
+			date: new Date().toLocaleString(Zotero.getMainWindow()?.navigator?.language)
 		};
 		let html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
 		// New line is needed for note title parser

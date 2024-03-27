@@ -3011,10 +3011,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 						// If no time, interpret as local, not UTC
 						if (Zotero.Date.isSQLDate(val)) {
 							date = Zotero.Date.sqlToDate(val);
-							val = date.toLocaleDateString();
+							val = date.toLocaleDateString(window.navigator.language);
 						}
 						else {
-							val = date.toLocaleString();
+							val = date.toLocaleString(window.navigator.language);
 						}
 					}
 					else {

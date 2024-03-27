@@ -1598,10 +1598,10 @@
 						// DST (including the current date at 00:00:00) and we're
 						// in standard time
 						date = Zotero.Date.sqlToDate(valueText + ' 12:00:00');
-						valueText = date.toLocaleDateString();
+						valueText = date.toLocaleDateString(window.navigator.language);
 					}
 					else {
-						valueText = date.toLocaleString();
+						valueText = date.toLocaleString(window.navigator.language);
 					}
 				}
 				else {
@@ -2456,7 +2456,7 @@
 						this._id('retraction-date').hidden = false;
 						this._id('retraction-date').textContent = Zotero.getString(
 							'retraction.date',
-							data.date.toLocaleDateString()
+							data.date.toLocaleDateString(window.navigator.language)
 						);
 					}
 					else {
