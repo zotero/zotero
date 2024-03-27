@@ -328,7 +328,10 @@ var Zotero_Preferences = {
 		let pane = this.panes.get(id);
 
 		pane.container.hidden = false;
-		pane.container.children[0].dispatchEvent(new Event('showing'));
+		for (let child of pane.container.children) {
+			let event = new Event('showing');
+			child.dispatchEvent(event);
+		}
 	},
 	
 	_parseXHTMLToFragment(str, entities = []) {
