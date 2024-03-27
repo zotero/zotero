@@ -240,6 +240,40 @@ describe("Zotero.Search", function() {
 					var matches = await s.search();
 					assert.lengthOf(matches, 0);
 				});
+
+				it("should match child even if its parent does not match query in collection", async function () {
+					var collection = await createDataObject('collection');
+					var parent = await createDataObject('item', { collections: [collection.id] });
+					var attachment = await importPDFAttachment(parent, { title: "test" });
+					
+					var s = new Zotero.Search();
+					s.libraryID = parent.libraryID;
+					s.addCondition('collection', 'is', collection.key);
+					s.addCondition('title', 'contains', 'test');
+					var matches = await s.search();
+					assert.sameMembers(matches, [attachment.id]);
+				});
+
+				it("should have same result after the same search conditions is removed and added", async function () {
+					var itemOne = await createDataObject('item', { title: "One" });
+					var itemTwo = await createDataObject('item', { title: "Two" });
+
+					var s = new Zotero.Search();
+					s.libraryID = itemOne.libraryID;
+					s.addCondition("joinMode", "any");
+					// Match both collections
+					s.addCondition('title', 'contains', 'One');
+					s.addCondition('title', 'contains', 'Two');
+					var matches = await s.search();
+					assert.sameMembers(matches, [itemOne.id, itemTwo.id]);
+
+					// Remove the first condition and add it again
+					s.removeCondition(1);
+					s.addCondition('title', 'contains', 'One');
+					matches = await s.search();
+					// Result should be the same
+					assert.sameMembers(matches, [itemOne.id, itemTwo.id]);
+				});
 			});
 			
 			describe("tag", function () {

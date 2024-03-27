@@ -93,6 +93,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._needsSort = false;
 		this._introText = null;
+		this._searchItemIDs = new Set();
 		
 		this._rowCache = {};
 		
@@ -222,6 +223,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let newSearchItemIDs = new Set(newSearchItems.map(item => item.id));
 			// Find the items that aren't yet in the tree
 			let itemsToAdd = newSearchItems.filter(item => this._rowMap[item.id] === undefined);
+			let unmatchedRowsExist = [...this._searchItemIDs].filter(id => !newSearchItemIDs.has(id)).length > 0;
 			// Find the parents of search matches
 			let newSearchParentIDs = new Set(
 				this.regularOnly
@@ -305,13 +307,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			this._rows = newRows;
 			this._refreshRowMap();
+			// items matching the search - needs to be set before possible tree invalidation to display
+			// newly added matching entries as non-context rows
+			this._searchItemIDs = newSearchItemIDs;
 			// Sort only the new items
 			//
 			// This still results in a lot of extra work (e.g., when clearing a quick search, we have to
 			// re-sort all items that didn't match the search), so as a further optimization we could keep
 			// a sorted list of items for a given column configuration and restore items from that.
-			await this.sort([...addedItemIDs]);
-			
+			let sorted = await this.sort([...addedItemIDs]);
 			// Toggle all open containers closed and open to refresh child items
 			//
 			// This could be avoided by making sure that items in notify() that aren't present are always
@@ -328,9 +332,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._refreshRowMap();
 			
 			this._searchMode = newSearchMode;
-			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this._rowCache = {};
 				
+			let containersNeedToBeOpened = [...newSearchParentIDs].filter((parendID) => {
+				return !this.isContainerOpen(this.getRowIndexByID(parendID));
+			});
+
 			if (!this.collectionTreeRow.isPublications()) {
 				this.expandMatchParents(newSearchParentIDs);
 			}
@@ -345,6 +352,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			setTimeout(function () {
 				resolve();
 			});
+
+			// If nothing was sorted in this.sort() or if there are containers that need to be
+			// toggled open, the tree may get stuck unchanged until the next item selection or refresh.
+			// This mainly applies to saved searched. Invalidating the tree here helps us avoid it.
+			if (this.tree
+				&& (containersNeedToBeOpened.length > 0 || (!sorted && unmatchedRowsExist))) {
+				await this._refreshPromise;
+				this.tree.invalidate();
+			}
 		}
 		catch (e) {
 			setTimeout(function () {
@@ -565,12 +581,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			for (const id of ids) {
 				delete this._rowCache[id];
 			}
-
-			// If saved search, publications, or trash, just re-run search
-			if (collectionTreeRow.isSearch()
-				|| collectionTreeRow.isPublications()
-				|| collectionTreeRow.isTrash()
-				|| hasQuickSearch) {
+			// If publications, or trash, just re-run search
+			if (collectionTreeRow.isPublications()
+				|| collectionTreeRow.isTrash()) {
 				await this.refresh();
 				refreshed = true;
 				madeChanges = true;
@@ -579,6 +592,76 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (!collectionTreeRow.isTrash()) {
 					sort = true;
 				}
+			}
+			else if (collectionTreeRow.isSearchMode()) {
+				// Re-run search on given ids scoped to current search object
+				let currentSearchObject = collectionTreeRow.ref;
+				let s = new Zotero.Search();
+				s.setScope(currentSearchObject);
+				s.addCondition('joinMode', 'any');
+				for (let id of ids) {
+					s.addCondition('itemID', 'is', id);
+				}
+				// Add/remove itemIDs to/from this._searchItemIDs based on
+				// search results
+				let searchResultsSet = new Set(await s.search());
+				for (let id of ids) {
+					if (searchResultsSet.has(id)) {
+						this._searchItemIDs.add(id);
+					}
+					else {
+						this._searchItemIDs.delete(id);
+					}
+				}
+				let searchParentIDs = new Set(
+					[...this._searchItemIDs].filter(itemID => !!Zotero.Items.get(itemID).parentItemID).map(itemID => Zotero.Items.get(itemID).parentItemID)
+				);
+				
+				for (let id of ids) {
+					let rowIndex = this.getRowIndexByID(id);
+					let item = Zotero.Items.get(id);
+					// If a row exists but its item is not in search results,
+					// it should be removed unless its children match the search
+					if (!searchResultsSet.has(id) && rowIndex !== false) {
+						// Go to parent if possible
+						if (item.parentItemID) {
+							item = Zotero.Items.get(item.parentItemID);
+							rowIndex = this.getRowIndexByID(item.id);
+						}
+						let isMatchesParent = searchParentIDs.has(item.id);
+						let isMatch = this._searchItemIDs.has(item.id);
+						// Delete a row that does not match the search and has no matching children
+						if (!isMatchesParent && !isMatch) {
+							this._removeRow(rowIndex);
+						}
+					}
+					// If a row does not exist but is returned by the search
+					// it should be added
+					else if (searchResultsSet.has(id) && rowIndex === false) {
+						let shouldOpen = false;
+						if (item.parentItemID) {
+							// Check if its parent's row exists
+							let parentIndex = this.getRowIndexByID(item.parentItemID);
+							if (parentIndex === false) {
+								// If not - parent row will be added
+								item = Zotero.Items.get(item.parentItemID);
+								shouldOpen = true;
+							}
+							// If parent's row exists, it just needs to be opened
+							else if (!this.isContainerOpen(parentIndex)) {
+								this.toggleOpenState(parentIndex, true);
+								continue;
+							}
+						}
+						// Add row (or parent row) and open it if posible
+						this._addRow(new ItemTreeRow(item, 0, false), this.rowCount);
+						if (shouldOpen && this.isContainer(this.rowCount - 1)) {
+							this.toggleOpenState(this.rowCount - 1, true);
+						}
+					}
+				}
+				madeChanges = true;
+				sort = true;
 			}
 			else if (collectionTreeRow.isFeedsOrFeed()) {
 				window.ZoteroPane.updateReadLabel();
@@ -946,7 +1029,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	render() {
 		const itemsPaneMessageHTML = this._itemsPaneMessage || this.props.emptyMessage;
 		const showMessage = !this.collectionTreeRow || this._itemsPaneMessage;
-		
+
 		const itemsPaneMessage = (<div
 			key="items-pane-message"
 			onDragOver={e => this.props.dragAndDrop && this.onDragOver(e, -1)}
@@ -1220,7 +1303,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	async sort(itemIDs) {
 		var t = new Date;
-		
+
 		// For child items, just close and reopen parents
 		if (itemIDs) {
 			let parentItemIDs = new Set();
@@ -1251,7 +1334,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				Zotero.debug(`Sorted ${numSorted} child items by parent toggle`);
 			}
 			if (!skipped.length) {
-				return;
+				return 0;
 			}
 			itemIDs = skipped;
 			if (numSorted) {
@@ -1471,6 +1554,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var numSorted = itemIDs ? itemIDs.length : this._rows.length;
 		Zotero.debug(`Sorted ${numSorted} ${Zotero.Utilities.pluralize(numSorted, ['item', 'items'])} `
 			+ `in ${new Date - t} ms`);
+		return numSorted;
 	}
 
 	async setFilter(type, data) {

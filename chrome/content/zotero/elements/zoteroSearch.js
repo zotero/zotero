@@ -142,11 +142,20 @@
 			var conditionsBox = this.querySelector('#conditions');
 			
 			this.search.removeCondition(id);
-			
+			let found = false;
 			for (var i = 0, len=conditionsBox.childNodes.length; i < len; i++){
 				if (conditionsBox.childNodes[i].conditionID == id){
 					conditionsBox.removeChild(conditionsBox.childNodes[i]);
-					break;
+					found = true;
+					i--;
+					len--;
+					continue;
+				}
+				// When a condition is removed, ids of remaining conditions
+				// are shifted to remain in arithmetic sequence. The conditionID
+				// of the nodes need to be updated accordingly
+				if (found) {
+					conditionsBox.childNodes[i].conditionID--;
 				}
 			}
 			
