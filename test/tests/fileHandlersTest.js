@@ -109,5 +109,39 @@ describe("Zotero.FileHandlers", () => {
 			readerOpenSpy.restore();
 			getSystemHandlerStub.restore();
 		});
+
+		it("should fall back when handler is set to system and we can't retrieve the system handler", async function () {
+			let pdf = await importFileAttachment('wonderland_short.pdf');
+			let wasRun = false;
+			let readerOpenSpy = sinon.spy(Zotero.Reader, 'open');
+			let launchFileStub = sinon.stub(Zotero, 'launchFile');
+			Zotero.FileHandlers._mockHandlers = {
+				pdf: [
+					{
+						name: new RegExp(''),
+						async open() {
+							wasRun = true;
+						}
+					}
+				]
+			};
+
+			// Set our custom handler to something nonexistent,
+			// and stub the system handler to something nonexistent as well
+			Zotero.Prefs.set('fileHandler.pdf', 'system');
+			let getSystemHandlerStub = sinon.stub(Zotero.FileHandlers, '_getSystemHandler');
+			getSystemHandlerStub.returns(false);
+
+			await Zotero.FileHandlers.open(pdf, { location: {} });
+			assert.isFalse(wasRun);
+			assert.isFalse(readerOpenSpy.called);
+			assert.isTrue(launchFileStub.called);
+			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
+			assert.isEmpty(Zotero.Reader.getWindowStates());
+
+			readerOpenSpy.restore();
+			launchFileStub.restore();
+			getSystemHandlerStub.restore();
+		});
 	});
 });

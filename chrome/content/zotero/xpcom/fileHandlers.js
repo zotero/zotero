@@ -90,17 +90,19 @@ Zotero.FileHandlers = {
 		// If there are handlers for this platform and this reader type...
 		if (handlers) {
 			// First try to open with the custom handler
-			try {
-				for (let [i, { name, open }] of handlers.entries()) {
-					if (name.test(handler)) {
-						Zotero.debug('Opening with handler ' + i);
-						await open(handler, { filePath: path, location, page });
-						return true;
+			if (handler) {
+				try {
+					for (let [i, { name, open }] of handlers.entries()) {
+						if (name.test(handler)) {
+							Zotero.debug('Opening with handler ' + i);
+							await open(handler, { filePath: path, location, page });
+							return true;
+						}
 					}
 				}
-			}
-			catch (e) {
-				Zotero.logError(e);
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 
 			// If we get here, we don't have special handling for the custom
