@@ -30,6 +30,7 @@ Zotero.Server = new function() {
 		201:"Created",
 		204:"No Content",
 		300:"Multiple Choices",
+		304:"Not Modified",
 		400:"Bad Request",
 		403:"Forbidden",
 		404:"Not Found",
@@ -287,12 +288,30 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 		this._requestFinished(this._generateResponse(400, "text/plain", "Invalid method specified\n"));
 		return;
 	}
-	if(!Zotero.Server.Endpoints[method[2]]) {
-		this._requestFinished(this._generateResponse(404, "text/plain", "No endpoint found\n"));
-		return;
+	
+	this.pathParams = {};
+	if (Zotero.Server.Endpoints[method[2]]) {
+		this.endpoint = Zotero.Server.Endpoints[method[2]];
+	}
+	else {
+		let router = new Zotero.Router(this.pathParams);
+		for (let [potentialTemplate, endpoint] of Object.entries(Zotero.Server.Endpoints)) {
+			if (!potentialTemplate.includes(':')) continue;
+			router.add(potentialTemplate, () => {
+				this.pathParams._endpoint = endpoint;
+			}, true, /* Do not allow missing params */ false);
+		}
+		if (router.run(method[2].split('?')[0])) { // Don't let parser handle query params - we do that already
+			this.endpoint = this.pathParams._endpoint;
+			delete this.pathParams._endpoint;
+			delete this.pathParams.url;
+		}
+		else {
+			this._requestFinished(this._generateResponse(404, "text/plain", "No endpoint found\n"));
+			return;
+		}
 	}
 	this.pathname = method[2];
-	this.endpoint = Zotero.Server.Endpoints[method[2]];
 	this.query = method[3];
 	
 	if(method[1] == "HEAD" || method[1] == "OPTIONS") {
@@ -503,7 +522,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 		// Pass to endpoint
 		//
 		// Single-parameter endpoint
-		//   - Takes an object with 'method', 'pathname', 'query', 'headers', and 'data'
+		//   - Takes an object with 'method', 'pathname', 'pathParams', 'searchParams', 'headers', and 'data'
 		//   - Returns a status code, an array containing [statusCode, contentType, body],
 		//     or a promise for either
 		if (endpoint.init.length === 1
@@ -525,7 +544,8 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 			let maybePromise = endpoint.init({
 				method,
 				pathname: this.pathname,
-				query: this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {},
+				pathParams: this.pathParams,
+				searchParams: new URLSearchParams(this.query ? this.query.substring(1) : ''),
 				headers,
 				data: decodedData
 			});
@@ -552,9 +572,9 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 			const uaRe = /[\r\n]User-Agent: +([^\r\n]+)/i;
 			var m = uaRe.exec(this.header);
 			var url = {
-				"pathname":this.pathname,
-				"query":this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {},
-				"userAgent":m && m[1]
+				pathname: this.pathname,
+				searchParams: new URLSearchParams(this.query ? this.query.substring(1) : ''),
+				userAgent: m && m[1]
 			};
 			endpoint.init(url, decodedData, sendResponseCallback);
 		}

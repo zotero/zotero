@@ -716,6 +716,20 @@ Zotero.Collection.prototype.serialize = function(nested) {
 }
 
 
+Zotero.Collection.prototype.toResponseJSON = function (options = {}) {
+	let json = this.constructor._super.prototype.toResponseJSON.call(this, options);
+	json.meta.numCollections = this.getChildCollections(true).length;
+	json.meta.numItems = this.getChildItems(true).length;
+	if (this.parentID) {
+		json.links.up = {
+			href: Zotero.URI.toAPIURL(Zotero.URI.getCollectionURI(Zotero.Collections.get(this.parentID)), options.apiURL),
+			type: 'application/json'
+		};
+	}
+	return json;
+};
+
+
 /**
  * Populate the object's data from an API JSON data object
  *

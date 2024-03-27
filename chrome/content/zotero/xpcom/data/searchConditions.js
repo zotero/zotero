@@ -81,6 +81,14 @@ Zotero.SearchConditions = new function(){
 					false: true
 				}
 			},
+
+			{
+				name: 'includeDeleted',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
 			
 			// Don't include child items
 			{

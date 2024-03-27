@@ -2345,7 +2345,7 @@ Zotero.Item.prototype.isAttachment = function() {
 }
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isImportedAttachment = function() {
 	if (!this.isAttachment()) {
@@ -2361,7 +2361,7 @@ Zotero.Item.prototype.isImportedAttachment = function() {
 }
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isStoredFileAttachment = function() {
 	if (!this.isAttachment()) {
@@ -2371,7 +2371,7 @@ Zotero.Item.prototype.isStoredFileAttachment = function() {
 }
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isWebAttachment = function() {
 	if (!this.isAttachment()) {
@@ -5472,12 +5472,60 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 	// parsedDate
 	var parsedDate = Zotero.Date.multipartToSQL(this.getField('date', true, true));
 	if (parsedDate) {
-		// 0000?
+		// Trim off trailing -00 segments
+		parsedDate = parsedDate.replace(/(-00)+$/, '');
 		json.meta.parsedDate = parsedDate;
 	}
 	// numChildren
 	if (this.isRegularItem()) {
 		json.meta.numChildren = this.numChildren();
+	}
+	else {
+		json.meta.numChildren = 0;
+	}
+	
+	if (this.isImportedAttachment()) {
+		json.links.enclosure = {
+			href: this.getLocalFileURL(),
+			type: this.attachmentContentType,
+			title: this.attachmentFilename
+		};
+	}
+	
+	return json;
+};
+
+
+Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
+	async function getFileSize(attachment) {
+		let path = attachment.getFilePath();
+		if (path) {
+			try {
+				return (await IOUtils.stat(path)).size;
+			}
+			catch (e) {
+				if (e.name != 'NotFoundError') {
+					throw e;
+				}
+			}
+		}
+		return undefined
+	}
+	
+	let json = this.toResponseJSON(options);
+	if (this.isRegularItem()) {
+		let bestAttachment = await this.getBestAttachment();
+		if (bestAttachment) {
+			json.links.attachment = {
+				href: Zotero.URI.toAPIURL(Zotero.URI.getItemURI(bestAttachment), options.apiURL),
+				type: 'application/json',
+				attachmentType: bestAttachment.attachmentContentType
+			};
+			json.links.attachment.attachmentSize = await getFileSize(bestAttachment);
+		}
+	}
+	else if (this.isImportedAttachment()) {
+		json.links.enclosure.length = await getFileSize(this);
 	}
 	return json;
 };
