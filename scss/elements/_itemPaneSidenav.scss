@@ -12,8 +12,11 @@ item-pane-sidenav {
 	background: var(--material-sidepane);
 	position: relative; // Stop item pane content from overlapping
 	width: $width-sidenav;
+	height: auto;
 
 	&.stacked {
+		width: auto;
+		height: $width-sidenav;
 		flex-direction: row;
 		border-inline-start: none;
 		border-top: var(--material-panedivider);
@@ -106,6 +109,18 @@ item-pane-sidenav {
 
 			fill: var(--fill-secondary);
 			stroke: var(--fill-secondary);
+		}
+
+		&[custom] {
+			@media (prefers-color-scheme: light) {
+				list-style-image: var(--custom-sidenav-icon-light);
+			}
+			@media (prefers-color-scheme: dark) {
+				list-style-image: var(--custom-sidenav-icon-dark);
+			}
+			fill: var(--fill-secondary);
+			stroke: var(--fill-secondary);
+			-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
 		}
 	}
 	

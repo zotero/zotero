@@ -1,8 +1,0 @@
-/* Set to hidden in user-agent css for some reason. */
-#zotero-feed-item-addTo-button .menu-iconic-left {
-	visibility: visible;
-}
-
-.zotero-item-pane-content {
-	margin-right: 6px;
-}

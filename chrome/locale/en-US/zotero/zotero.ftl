@@ -37,6 +37,11 @@ menu-new-standalone-note =
 menu-new-item-note =
     .label = New Item Note
 
+menu-restoreToLibrary =
+    .label = Restore to Library
+menu-deletePermanently =
+    .label = Delete Permanently…
+
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
 filter-collections = Filter Collections

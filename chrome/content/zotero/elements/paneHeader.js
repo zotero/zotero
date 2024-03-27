@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	class PaneHeader extends XULElementBase {
+	class PaneHeader extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="head">
 				<html:div class="title">
@@ -44,6 +44,8 @@
 					</toolbarbutton>
 				</html:div>
 			</html:div>
+			<html:div class="custom-head">
+			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
 		showInFeeds = true;
@@ -52,8 +54,6 @@
 		
 		_titleFieldID = null;
 		
-		_mode = null;
-
 		get item() {
 			return this._item;
 		}
@@ -61,16 +61,6 @@
 		set item(item) {
 			this.blurOpenField();
 			this._item = item;
-			this.render();
-		}
-		
-		get mode() {
-			return this._mode;
-		}
-		
-		set mode(mode) {
-			this._mode = mode;
-			this.render();
 		}
 
 		init() {
@@ -85,7 +75,7 @@
 				if (!this._item) return;
 				
 				event.preventDefault();
-				let menupopup = ZoteroItemPane.buildFieldTransformMenu({
+				let menupopup = ZoteroPane.buildFieldTransformMenu({
 					target: this.titleField,
 					onTransform: (newValue) => {
 						this._setTransformedValue(newValue);
@@ -95,8 +85,6 @@
 				menupopup.addEventListener('popuphidden', () => menupopup.remove());
 				menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
 			});
-			
-			this.render();
 		}
 		
 		destroy() {
@@ -105,7 +93,7 @@
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render();
+				this._forceRenderAll();
 			}
 		}
 		
@@ -124,7 +112,7 @@
 				this.item.setField(this._titleFieldID, this.titleField.value);
 				await this.item.saveTx();
 			}
-			this.render();
+			this._forceRenderAll();
 		}
 		
 		async blurOpenField() {
@@ -133,11 +121,12 @@
 				await this.save();
 			}
 		}
-		
+
 		render() {
 			if (!this.item) {
 				return;
 			}
+			if (this._isAlreadyRendered()) return;
 
 			this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			
@@ -146,11 +135,23 @@
 				this.titleField.value = title;
 				this.titleField.initialValue = '';
 			}
-			this.titleField.readOnly = this._mode == 'view';
+			this.titleField.readOnly = !this.editable;
 			if (this._titleFieldID) {
 				this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
 			}
 			this.menuButton.hidden = !this.item.isRegularItem() && !this.item.isAttachment();
+		}
+
+		renderCustomHead(callback) {
+			let customHead = this.querySelector(".custom-head");
+			customHead.replaceChildren();
+			let append = (...args) => {
+				customHead.append(...args);
+			};
+			if (callback) callback({
+				doc: document,
+				append,
+			});
 		}
 	}
 	customElements.define("pane-header", PaneHeader);

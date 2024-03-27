@@ -26,20 +26,8 @@
 "use strict";
 
 {
-	class TagsBox extends XULElement {
-		constructor() {
-			super();
-
-			this.count = 0;
-			this.clickHandler = null;
-
-			this._tabDirection = null;
-			this._tagColors = [];
-			this._notifierID = null;
-			this._mode = 'view';
-			this._item = null;
-
-			this.content = MozXULElement.parseXULToFragment(`
+	class TagsBox extends ItemPaneSectionElementBase {
+		content = MozXULElement.parseXULToFragment(`
 				<collapsible-section data-l10n-id="section-tags" data-pane="tags" extra-buttons="add">
 					<html:div class="body">
 						<html:div id="rows" class="tags-box-list"/>
@@ -52,16 +40,17 @@
 					</html:div>
 				</collapsible-section>
 			`, ['chrome://zotero/locale/zotero.dtd']);
-		}
 
-		connectedCallback() {
-			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
+		init() {
+			this.count = 0;
+			this.clickHandler = null;
 
-			let content = document.importNode(this.content, true);
-			this.append(content);
+			this._tabDirection = null;
+			this._tagColors = [];
+			this._notifierID = null;
+			this._item = null;
 
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAddButtonClick);
 			this.addEventListener('click', (event) => {
 				if (event.target === this) {
@@ -100,45 +89,8 @@
 		}
 
 		destroy() {
-			if (this._destroyed) {
-				return;
-			}
-			window.removeEventListener("unload", this.destroy);
-			this._destroyed = true;
-
-			this._section = null;
+			this._section?.removeEventListener('add', this._handleAddButtonClick);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-		}
-
-		disconnectedCallback() {
-			this.replaceChildren();
-			this.destroy();
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			this.clickable = false;
-			this.editable = false;
-
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-					break;
-
-				case 'edit':
-					this.clickable = true;
-					this.editable = true;
-					break;
-
-				default:
-					throw new Error(`Invalid mode ${val}`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
 		}
 
 		get item() {
@@ -146,17 +98,17 @@
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			// Don't reload if item hasn't changed
 			if (this._item == val) {
 				return;
 			}
 			this._item = val;
-			this.reload();
 		}
 
 		notify(event, type, ids, extraData) {
 			if (type == 'setting' && ids.some(val => val.split("/")[1] == 'tagColors') && this.item) {
-				this.reload();
+				this._forceRenderAll();
 			}
 			else if (type == 'item-tag') {
 				let itemID, _tagID;
@@ -186,11 +138,14 @@
 				this.updateCount();
 			}
 			else if (type == 'tag' && event == 'modify') {
-				this.reload();
+				this._forceRenderAll();
 			}
 		}
 
-		reload() {
+		render() {
+			if (!this.item) return;
+			if (this._isAlreadyRendered()) return;
+
 			Zotero.debug('Reloading tags box');
 
 			// Cancel field focusing while we're updating
@@ -316,7 +271,7 @@
 							await item.saveTx();
 						}
 						catch (e) {
-							this.reload();
+							this._forceRenderAll();
 							throw e;
 						}
 					}
@@ -490,7 +445,7 @@
 							await this.item.saveTx();
 						}
 						catch (e) {
-							this.reload();
+							this._forceRenderAll();
 							throw e;
 						}
 					}
@@ -507,7 +462,7 @@
 						await this.item.saveTx();
 					}
 					catch (e) {
-						this.reload();
+						this._forceRenderAll();
 						throw e;
 					}
 				}
@@ -530,7 +485,7 @@
 
 				tags.forEach(tag => this.item.addTag(tag));
 				await this.item.saveTx();
-				this.reload();
+				this._forceRenderAll();
 			}
 			// Single tag at end
 			else {
@@ -548,7 +503,7 @@
 					await this.item.saveTx();
 				}
 				catch (e) {
-					this.reload();
+					this._forceRenderAll();
 					throw e;
 				}
 			}

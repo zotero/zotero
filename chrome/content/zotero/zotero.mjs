@@ -107,6 +107,7 @@ const xpcomFilesLocal = [
 	'id',
 	'integration',
 	'itemTreeManager',
+	'itemPaneManager',
 	'locale',
 	'locateManager',
 	'mime',

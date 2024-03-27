@@ -6,15 +6,6 @@
 	-moz-binding: none !important;
 }
 
-.zotero-item-pane-content .groupbox-body {
-	-moz-appearance: none;
-	background-color: #ffffff;
-}
-
-#zotero-item-pane-message-box description {
-	color: #7f7f7f;
-}
-
 /* How to get active twisty?
 treechildren::-moz-tree-twisty(active) {
 	-moz-appearance: none;

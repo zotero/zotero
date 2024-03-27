@@ -403,9 +403,11 @@ describe("Item pane", function () {
 				
 				let button = doc.getElementById('zotero-feed-item-toggleRead-button');
 				
-				assert.equal(button.textContent, Zotero.getString('pane.item.markAsUnread'));
+				assert.equal(button.label, Zotero.getString('pane.item.markAsUnread'));
 				yield item.toggleRead(false);
-				assert.equal(button.textContent, Zotero.getString('pane.item.markAsRead'));
+				// Button is re-created
+				button = doc.getElementById('zotero-feed-item-toggleRead-button');
+				assert.equal(button.label, Zotero.getString('pane.item.markAsRead'));
 			});
 		});
 	});

@@ -257,7 +257,7 @@ var Zotero_Tabs = new function () {
 		index = index || this._tabs.length;
 		this._tabs.splice(index, 0, tab);
 		this._update();
-		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: data }, true);
+		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: Object.assign({}, data, { type }) }, true);
 		if (select) {
 			let previousID = this._selectedID;
 			this.select(id);
@@ -751,8 +751,7 @@ var Zotero_Tabs = new function () {
 	// Used to move focus back to itemTree or contextPane from the tabs.
 	this.focusWrapAround = function () {
 		// If no item is selected, focus items list.
-		const pane = document.getElementById("zotero-item-pane-content");
-		if (pane.selectedIndex === "0") {
+		if (ZoteroPane.itemPane.mode == "message") {
 			document.getElementById("item-tree-main-default").focus();
 		}
 		else {

@@ -24,49 +24,49 @@
 */
 
 {
-	class AttachmentAnnotationsBox extends XULElementBase {
+	class AttachmentAnnotationsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachments-annotations" data-pane="attachment-annotations">
 				<html:div class="body">
 				</html:div>
 			</collapsible-section>
 		`);
+
+		get tabType() {
+			return this._tabType;
+		}
+
+		set tabType(tabType) {
+			super.tabType = tabType;
+			this._updateHidden();
+		}
 		
 		get item() {
 			return this._item;
 		}
 
 		set item(item) {
-			this._item = item;
-			if (item?.isFileAttachment()) {
-				this.hidden = false;
-				this.render();
-			}
-			else {
-				this.hidden = true;
-			}
+			super.item = item;
+			this._updateHidden();
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
-			this._section.addEventListener("toggle", this._handleSectionOpen);
+			this.initCollapsibleSection();
+
 			this._body = this.querySelector('.body');
-
-			this.render();
 		}
 
-		destroy() {
-			this._section.removeEventListener("toggle", this._handleSectionOpen);
-		}
+		destroy() {}
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this.render();
+				this._forceRenderAll();
 			}
 		}
 
 		render() {
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
+			if (this._isAlreadyRendered()) return;
 
 			let annotations = this.item.getAnnotations();
 			this._section.setCount(annotations.length);
@@ -91,12 +91,9 @@
 			}
 		}
 
-		_handleSectionOpen = (event) => {
-			if (event.target !== this._section || !this._section.open) {
-				return;
-			}
-			this.render();
-		};
+		_updateHidden() {
+			this.hidden = !this.item?.isFileAttachment() || this.tabType == "reader";
+		}
 	}
 	customElements.define("attachment-annotations-box", AttachmentAnnotationsBox);
 }

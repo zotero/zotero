@@ -1,8 +1,3 @@
-#zotero-pane
-{
-	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
-}
-
 /*
 TODO: Replace with SVG
 
@@ -204,23 +199,6 @@ TODO: Replace with SVG
 	width: 0px !important;
 }
 
-#zotero-item-pane[collapsed=true] {
-	min-width: 0px !important;
-	width: 0px !important;
-}
-
-#zotero-context-pane[collapsed=true] {
-	min-width: 0px !important;
-	width: 0px !important;
-}
-
-/* 
-	Fx115: this helps to avoid having a blank gap where the panel was before collapse
-*/
-#zotero-context-pane-inner[collapsed=true] {
-	height: 0 !important;
-}
-
 #zotero-pane toolbarseparator {
 	height:24px;
 }
@@ -233,45 +211,6 @@ TODO: Replace with SVG
 {
 	margin: 0;
 	padding: 0;
-}
-
-/*
-	Somewhat unified splitter styles
-*/
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed]),
-#zotero-context-splitter:not([state=collapsed]),
-#zotero-context-splitter-stacked:not([state=collapsed])
-{
-	border:none;
-	background-color: transparent;
-}
-
-#zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed])[orient=horizontal],
-#zotero-context-splitter:not([state=collapsed])[orient=horizontal]
-{
-	-moz-appearance: none;
-	width: 5px !important;
-	min-width: 5px;
-	/* Ensures all of the splitter serves as a mouse target */
-	z-index: 1;
-}
-
-#zotero-items-splitter:not([state=collapsed])[orient=horizontal],
-#zotero-context-splitter:not([state=collapsed])[orient=horizontal],
-#zotero-collections-splitter:not([state=collapsed]) {
-	border-inline-start: 1px solid #bdbdbd;
-	margin-inline-end: -4px;
-}
-
-#zotero-items-splitter[orient=vertical]:not([state=collapsed]),
-#zotero-context-splitter-stacked
-{
-	z-index: 1;
-	border-top: 1px solid #bdbdbd !important;
-	min-height: 5px;
-	margin-bottom: -4px;
 }
 
 #zotero-lookup-textbox {

@@ -7,6 +7,11 @@
 	min-height: 300px;
 }
 
+#zotero-pane {
+	min-width: 0;
+	min-height: 0;
+}
+
 #zotero-pane-stack > hbox {
 	// Let window chrome, tabs, and toolbar shrink even when sidebars overflow
 	min-width: 0;

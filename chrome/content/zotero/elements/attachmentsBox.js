@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	class AttachmentsBox extends XULElementBase {
+	class AttachmentsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachments" data-pane="attachments" extra-buttons="add">
 				<html:div class="body">
@@ -37,13 +37,7 @@
 			<popupset/>
 		`);
 
-		_item = null;
-		
 		_attachmentIDs = [];
-
-		_mode = null;
-		
-		_inTrash = false;
 
 		_preview = null;
 
@@ -52,40 +46,22 @@
 		}
 
 		set item(item) {
-			let isRegularItem = item?.isRegularItem();
-			this.hidden = !isRegularItem;
-			if (!isRegularItem || this._item === item) {
+			if (this._item === item) {
 				return;
 			}
 			
-			this._item = item;
-			this.refresh();
+			super.item = item;
+			let hidden = !item?.isRegularItem() || item?.isFeedItem;
+			this.hidden = hidden;
+			this._preview.disableResize = !!hidden;
 		}
 
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(mode) {
-			this._mode = mode;
-		}
-		
 		get inTrash() {
-			return this._inTrash;
-		}
-		
-		set inTrash(inTrash) {
-			if (this._inTrash === inTrash) {
-				return;
+			if (this.tabType != "library") {
+				return false;
 			}
-			this._inTrash = inTrash;
-			if (!this._item?.isRegularItem()) {
-				return;
-			}
-			for (let row of Array.from(this._attachments.querySelectorAll("attachment-row"))) {
-				this._updateRowAttributes(row, row.attachment);
-			}
-			this.updateCount();
+			return ZoteroPane.collectionsView.selectedTreeRow
+				&& ZoteroPane.collectionsView.selectedTreeRow.isTrash();
 		}
 
 		get usePreview() {
@@ -98,9 +74,8 @@
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
-			// this._section.addEventListener('togglePreview', this._handleTogglePreview);
 
 			this._attachments = this.querySelector('.attachments-container');
 			
@@ -112,16 +87,11 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentsBox');
 
-			this._section.addEventListener("toggle", (ev) => {
-				if (ev.target.open) {
-					this._preview.render();
-				}
-			});
-
 			this._section._contextMenu.addEventListener('popupshowing', this._handleContextMenu, { once: true });
 		}
 
 		destroy() {
+			this._section?.removeEventListener('add', this._handleAdd);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
@@ -180,11 +150,16 @@
 			return row;
 		}
 
-		async refresh() {
+		render() {
 			if (!this._item) return;
-			
-			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
+			if (this._isAlreadyRendered()) return;
+			this.updateCount();
+		}
 
+		async asyncRender() {
+			if (!this._item) return;
+			if (this._isAlreadyRendered("async")) return;
+			
 			await this._updateAttachmentIDs();
 
 			let itemAttachments = Zotero.Items.get(this._attachmentIDs);
@@ -193,24 +168,35 @@
 			for (let attachment of itemAttachments) {
 				this.addRow(attachment);
 			}
-			this.updateCount();
+			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 		}
 		
 		updateCount() {
-			let count = this._item.numAttachments(this._inTrash);
+			let count = this._item.numAttachments(this.inTrash);
 			this._section.setCount(count);
 		}
 
 		async updatePreview() {
-			if (!this.usePreview) {
+			if (!this.usePreview || !this._section.open) {
 				return;
 			}
-			let attachment = await this._item.getBestAttachment();
-			if (!this._preview.hasPreview) {
-				this._preview.setItemAndRender(attachment);
+			let attachment = await this._getPreviewAttachment();
+			if (!attachment) {
+				this.toggleAttribute('data-use-preview', false);
 				return;
 			}
 			this._preview.item = attachment;
+			await this._preview.render();
+		}
+
+		async _getPreviewAttachment() {
+			let attachment = await this._item.getBestAttachment();
+			if (this.tabType === "reader"
+				&& Zotero_Tabs._getTab(Zotero_Tabs.selectedID)?.tab?.data?.itemID == attachment.id) {
+				// In the reader, only show the preview when viewing a secondary attachment
+				return null;
+			}
+			return attachment;
 		}
 
 		_handleAdd = (event) => {
@@ -231,7 +217,8 @@
 			}
 		};
 
-		_handleContextMenu = () => {
+		_handleContextMenu = async () => {
+			if (!await this._getPreviewAttachment()) return;
 			let contextMenu = this._section._contextMenu;
 			let menu = document.createXULElement("menuitem");
 			menu.classList.add('menuitem-iconic', 'zotero-menuitem-toggle-preview');
@@ -242,11 +229,9 @@
 		};
 		
 		_updateRowAttributes(row, attachment) {
-			let hidden = !this._inTrash && attachment.deleted;
-			let context = this._inTrash && !this._item.deleted && !attachment.deleted;
+			let hidden = !this.inTrash && attachment.deleted;
 			row.attachment = attachment;
 			row.hidden = hidden;
-			row.contextRow = context;
 		}
 
 		async _updateAttachmentIDs() {

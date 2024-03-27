@@ -1,0 +1,40 @@
+item-pane {
+	min-width: $min-width-item-pane + $width-sidenav;
+	min-height: $min-width-item-pane + $width-sidenav;
+
+	&[collapsed="true"] {
+		min-width: $width-sidenav;
+		min-height: $width-sidenav;
+		max-width: $width-sidenav;
+
+		&[view-type=note] {
+			min-width: 0;
+			width: 0px !important;
+		}
+
+		visibility: inherit;
+
+		&.stacked {
+			max-width: unset;
+			max-height: $width-sidenav;
+
+			&[view-type=note] {
+				min-height: 0;
+				height: 0px !important;
+			}
+		}
+
+		#zotero-item-pane-content {
+			visibility: collapse;
+		}
+	}
+
+	&.stacked {
+		flex-direction: column;
+		height: 0px;
+
+		#zotero-item-pane-content {
+			width: 100%;
+		}
+	}
+}

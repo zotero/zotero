@@ -28,57 +28,32 @@
 import { getCSSItemTypeIcon } from 'components/icons';
 
 {
-	class RelatedBox extends XULElementBase {
+	class RelatedBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-related" data-pane="related" extra-buttons="add">
 				<html:div class="body"/>
 			</collapsible-section>
 		`);
-
-		constructor() {
-			super();
-
-			this._mode = 'view';
-			this._item = null;
-		}
 		
 		init() {
+			this._item = null;
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this.add);
 		}
 		
 		destroy() {
+			this._section?.removeEventListener('add', this.add);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			this._section = null;
 		}
 		
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			this._item = val;
-			this.refresh();
 		}
 
 		notify(event, type, ids, _extraData) {
@@ -86,7 +61,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 			// Refresh if this item has been modified
 			if (event == 'modify' && ids.includes(this._item.id)) {
-				this.refresh();
+				this._forceRenderAll();
 				return;
 			}
 
@@ -96,14 +71,17 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				let relatedItemIDs = new Set(this._item.relatedItems.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)));
 				for (let id of ids) {
 					if (relatedItemIDs.has(id)) {
-						this.refresh();
+						this._forceRenderAll();
 						return;
 					}
 				}
 			}
 		}
 
-		refresh() {
+		render() {
+			if (!this.item) return;
+			if (this._isAlreadyRendered()) return;
+
 			let body = this.querySelector('.body');
 			body.replaceChildren();
 
@@ -138,7 +116,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 					box.appendChild(label);
 					row.append(box);
 
-					if (this._mode == 'edit') {
+					if (this.editable) {
 						let remove = document.createXULElement("toolbarbutton");
 						remove.addEventListener('command', () => this._handleRemove(id));
 						remove.className = 'zotero-clicky zotero-clicky-minus';

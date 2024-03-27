@@ -28,13 +28,15 @@
 
 
 {
-	class AttachmentBox extends XULElementBase {
+	class AttachmentBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
 					<attachment-preview id="attachment-preview" tabindex="0"/>
-					<label id="url" crop="end" tabindex="0"
-						ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
+					<html:div style="display: grid;">
+						<label id="url" crop="end" tabindex="0"
+							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
+					</html:div>
 					<html:div class="metadata-table">
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
@@ -77,7 +79,6 @@
 		constructor() {
 			super();
 
-			this.editable = false;
 			this.clickableLink = false;
 			this.displayButton = false;
 			this.displayNote = false;
@@ -104,7 +105,6 @@
 		set mode(val) {
 			Zotero.debug("Setting mode to '" + val + "'");
 					
-			this.editable = false;
 			this.synchronous = false;
 			this.displayURL = false;
 			this.displayFileName = false;
@@ -128,7 +128,6 @@
 					break;
 				
 				case 'edit':
-					this.editable = true;
 					this.displayURL = true;
 					this.displayFileName = true;
 					this.clickableLink = true;
@@ -150,7 +149,6 @@
 				
 				case 'mergeedit':
 					this.synchronous = true;
-					this.editable = true;
 					this.displayURL = true;
 					this.displayFileName = true;
 					this.displayAccessed = true;
@@ -171,6 +169,19 @@
 			}
 			
 			this._mode = val;
+
+			this._editable = ["edit", "mergeedit"].includes(this._mode);
+		}
+
+		get editable() {
+			return this._editable;
+		}
+
+		set editable(editable) {
+			// TODO: Replace `mode` with `editable`?
+			this.mode = editable ? "edit" : "view";
+			// Use the current `_editable` set by `mode`
+			super.editable = this._editable;
 		}
 
 		get usePreview() {
@@ -179,6 +190,15 @@
 
 		set usePreview(val) {
 			this.toggleAttribute('data-use-preview', val);
+		}
+
+		get tabType() {
+			return this._tabType;
+		}
+
+		set tabType(tabType) {
+			super.tabType = tabType;
+			if (tabType == "reader") this.usePreview = false;
 		}
 
 		get item() {
@@ -192,15 +212,16 @@
 			if (val.isAttachment()) {
 				this._item = val;
 				this.hidden = false;
-				this.render();
+				this._preview.disableResize = false;
 			}
 			else {
 				this.hidden = true;
+				this._preview.disableResize = true;
 			}
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 
 			this._id('url').addEventListener('contextmenu', (event) => {
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
@@ -229,12 +250,6 @@
 			});
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
-
-			this._section.addEventListener("toggle", (ev) => {
-				if (ev.target.open && this.usePreview) {
-					this._preview.render();
-				}
-			});
 
 			// Work around the reindex toolbarbutton not wanting to properly receive focus on tab.
 			// Make <image> focusable. On focus of the image, bounce the focus to the toolbarbutton.
@@ -282,15 +297,17 @@
 					continue;
 				}
 				
-				this.render();
+				this._forceRenderAll();
 				break;
 			}
 		}
 
-		async render() {
-			if (this._isRendering) {
-				return;
-			}
+		async asyncRender() {
+			if (!this.item) return;
+			if (this._isRendering) return;
+			if (!this._section.open) return;
+			if (this._isAlreadyRendered("async")) return;
+
 			Zotero.debug('Refreshing attachment box');
 			this._isRendering = true;
 			// Cancel editing filename when refreshing
@@ -298,6 +315,7 @@
 
 			if (this.usePreview) {
 				this._preview.item = this.item;
+				this._preview.render();
 			}
 			
 			let fileNameRow = this._id('fileNameRow');
@@ -352,7 +370,13 @@
 			}
 			
 			if (this.displayFileName && !isLinkedURL) {
-				let fileName = this.item.attachmentFilename;
+				let fileName = "";
+				try {
+					fileName = this.item.attachmentFilename;
+				}
+				catch (e) {
+					Zotero.warn("Error getting attachment filename: " + e);
+				}
 				
 				if (fileName) {
 					this._id("fileName").value = fileName;
@@ -521,7 +545,7 @@
 			}
 			// Don't allow empty filename
 			if (!newFilename) {
-				this.render();
+				this._forceRenderAll();
 				return;
 			}
 			let newExt = getExtension(newFilename);
@@ -577,7 +601,7 @@
 					Zotero.getString('pane.item.attachments.fileNotFound.text1')
 				);
 			}
-			this.render();
+			this._forceRenderAll();
 		}
 
 		initAttachmentNoteEditor() {

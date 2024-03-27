@@ -914,6 +914,8 @@ class EditorInstance {
 	}
 
 	_getSpellChecker() {
+		// Fix cannot access dead object error
+		if (Components.utils.isDeadWrapper(this._iframeWindow)) return null;
 		if (!this._spellChecker) {
 			let editingSession = this._iframeWindow.docShell.editingSession;
 			this._spellChecker = new InlineSpellChecker(

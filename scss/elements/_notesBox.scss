@@ -7,7 +7,7 @@ notes-box, related-box {
 		display: none;
 	}
 
-	&:not([mode=edit]) {
+	&[readonly] {
 		.add {
 			display: none;
 		}

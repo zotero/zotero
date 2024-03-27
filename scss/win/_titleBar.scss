@@ -2,13 +2,13 @@
 	// Need this to force show the menubar
 	display: initial;
 	// Allow right-click context menu on menubar
-	pointer-events: none;
 	visibility: visible;
 	flex: 1;
 }
 
 #menubar-items {
 	pointer-events: all;
+	-moz-window-dragging: drag;
 }
 
 .titlebar-buttonbox {
@@ -19,9 +19,9 @@
 #titlebar,
 .menubar-container {
 	appearance: none;
+	flex-direction: row;
 	height :var(--tab-min-height);
 	-moz-box-pack: center;
-	pointer-events: none;
 	border-bottom: var(--material-border);
 	background: var(--material-tabbar);
 	toolbar {
@@ -34,7 +34,11 @@
 	menu {
 		border-radius: 4px;
 	}
+	#main-menubar {
+		align-self: flex-start;
+	}
 	#main-menubar > menu {
+		height: 100%;
 		padding: 0px 4px 0px 4px;
 	}
 	#main-menubar > menu > menupopup {

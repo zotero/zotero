@@ -581,7 +581,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 			else if (collectionTreeRow.isFeedsOrFeed()) {
-				window.ZoteroPane.updateReadLabel();
+				// Moved to itemPane CE
 			}
 			// If not a search, process modifications manually
 			else {
@@ -1173,7 +1173,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Single item
 		if (rowsToSelect.length == 1) {
 			// this.selection.select() triggers the tree onSelect handler attribute, which calls
-			// ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(), which refreshes the
+			// ZoteroPane.itemSelected(), which calls ZoteroPane.itemPane.render(), which refreshes the
 			// itembox. But since the 'onselect' doesn't handle promises, itemSelected() isn't waited for
 			// here, which means that 'yield selectItem(itemID)' continues before the itembox has been
 			// refreshed. To get around this, we wait for a select event that's triggered by

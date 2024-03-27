@@ -54,7 +54,7 @@ libraries-collections-box {
 		}
 	}
 
-	&:not([mode=edit]) {
+	&[readonly] {
 		.add {
 			display: none;
 		}

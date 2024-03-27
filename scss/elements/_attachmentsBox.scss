@@ -24,7 +24,8 @@ attachments-box {
 		}
 	}
 
-	&:not([data-use-preview]) {
+	&:not([data-use-preview]),
+	& > collapsible-section[empty] {
 		attachment-preview {
 			visibility: hidden;
 			display: none;

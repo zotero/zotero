@@ -212,7 +212,7 @@
 			pinSection.setAttribute('data-l10n-id', 'pin-section');
 			pinSection.addEventListener('command', () => {
 				let sidenav = this._getSidenav();
-				sidenav.scrollToPane(this.dataset.pane, 'smooth');
+				sidenav.container.scrollToPane(this.dataset.pane, 'smooth');
 				sidenav.pinnedPane = this.dataset.pane;
 			});
 			contextMenu.append(pinSection);
@@ -401,11 +401,9 @@
 			if (document.documentElement.getAttribute('windowtype') !== 'navigator:browser') {
 				return null;
 			}
+			if (typeof ZoteroContextPane == "undefined") return null;
 			// TODO: update this after unifying item pane & context pane
-			return document.querySelector(
-				Zotero_Tabs.selectedType === 'library'
-					? "#zotero-view-item-sidenav"
-					: "#zotero-context-pane-sidenav");
+			return ZoteroContextPane.sidenav;
 		}
 		
 		render() {
