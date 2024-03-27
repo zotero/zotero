@@ -16,6 +16,12 @@ if (CommandLineOptions.forceDebugLog) {
 }
 
 CommandLineOptions.forceDataDir = cmdLine.handleFlagWithParam("datadir", false);
+// Set here, to be acted upon in xpcom/commandLineHandler.js
+CommandLineOptions.file = cmdLine.handleFlagWithParam("file", false);
+CommandLineOptions.url = cmdLine.handleFlagWithParam("url", false);
+if (CommandLineOptions.url) {
+	CommandLineOptions.url = cmdLine.resolveURI(CommandLineOptions.url);
+}
 
 var processTestOptions = false;
 if (cmdLine.handleFlag("ZoteroTest", false)) {

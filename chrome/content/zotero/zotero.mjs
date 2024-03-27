@@ -32,6 +32,7 @@ const Cu = Components.utils;
 /** XPCOM files to be loaded for all modes **/
 const xpcomFilesAll = [
 	'zotero',
+	'commandLineHandler',
 	'intl',
 	'prefs',
 	'dataDirectory',
