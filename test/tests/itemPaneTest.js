@@ -9,6 +9,138 @@ describe("Item pane", function () {
 	after(function () {
 		win.close();
 	});
+
+	describe("Item pane header", function () {
+		let itemData = {
+			itemType: 'book',
+			title: 'Birds - A Primer of Ornithology (Teach Yourself Books)',
+			creators: [{
+				creatorType: 'author',
+				lastName: 'Hyde',
+				firstName: 'George E.'
+			}]
+		};
+		
+		before(async function () {
+			await Zotero.Styles.init();
+		});
+		
+		after(function () {
+			Zotero.Prefs.clear('itemPaneHeader');
+			Zotero.Prefs.clear('itemPaneHeader.bibEntry.style');
+			Zotero.Prefs.clear('itemPaneHeader.bibEntry.locale');
+		});
+		
+		it("should be hidden when set to None mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'none');
+			await createDataObject('item', itemData);
+			assert.isTrue(doc.querySelector('pane-header').hidden);
+		});
+		
+		it("should show title when set to Title mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'title');
+			let item = await createDataObject('item', itemData);
+			
+			assert.isFalse(doc.querySelector('pane-header .title').hidden);
+			assert.isTrue(doc.querySelector('pane-header .creator-year').hidden);
+			assert.isTrue(doc.querySelector('pane-header .bib-entry').hidden);
+			
+			assert.equal(doc.querySelector('pane-header .title editable-text').value, item.getField('title'));
+		});
+		
+		it("should show title/creator/year when set to Title/Creator/Year mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'titleCreatorYear');
+			let item = await createDataObject('item', itemData);
+			item.setField('date', '1962-05-01');
+			await item.saveTx();
+			
+			assert.isTrue(doc.querySelector('pane-header .bib-entry').hidden);
+			assert.isFalse(doc.querySelector('pane-header .title').hidden);
+			assert.isFalse(doc.querySelector('pane-header .creator-year').hidden);
+			
+			assert.equal(doc.querySelector('pane-header .title editable-text').value, item.getField('title'));
+			let creatorYearText = doc.querySelector('pane-header .creator-year').textContent;
+			assert.include(creatorYearText, 'Hyde');
+			assert.include(creatorYearText, '1962');
+		});
+
+		it("should show bib entry when set to Bibliography Entry mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
+			await createDataObject('item', itemData);
+
+			assert.isFalse(doc.querySelector('pane-header .bib-entry').hidden);
+			assert.isTrue(doc.querySelector('pane-header .title').hidden);
+			assert.isTrue(doc.querySelector('pane-header .creator-year').hidden);
+
+			let bibEntry = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild.textContent;
+			assert.equal(bibEntry.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+		});
+
+		it("should update bib entry on item change when set to Bibliography Entry mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
+			let item = await createDataObject('item', itemData);
+			
+			let bibEntryElem = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild;
+			
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			
+			item.setField('date', '1962-05-01');
+			await item.saveTx();
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (1962). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			
+			item.setCreators([
+				{
+					creatorType: 'author',
+					lastName: 'Smith',
+					firstName: 'John'
+				}
+			]);
+			await item.saveTx();
+			assert.equal(bibEntryElem.textContent.trim(), 'Smith, J. (1962). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			
+			item.setField('title', 'Birds');
+			await item.saveTx();
+			assert.equal(bibEntryElem.textContent.trim(), 'Smith, J. (1962). Birds.');
+		});
+
+		it("should update bib entry on style change when set to Bibliography Entry mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
+			await createDataObject('item', itemData);
+
+			let bibEntryElem = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild;
+			
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/chicago-author-date');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, George E. n.d. Birds - A Primer of Ornithology (Teach Yourself Books).');
+		});
+
+		it("should update bib entry on locale change when set to Bibliography Entry mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
+			await createDataObject('item', itemData);
+
+			let bibEntryElem = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild;
+
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.locale', 'de-DE');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (o. J.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+		});
+
+		it("should fall back to Title/Creator/Year when citation style is missing", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
+			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/an-id-that-does-not-match-any-citation-style');
+			await createDataObject('item', itemData);
+
+			assert.isTrue(doc.querySelector('pane-header .bib-entry').hidden);
+			assert.isFalse(doc.querySelector('pane-header .title').hidden);
+			assert.isFalse(doc.querySelector('pane-header .creator-year').hidden);
+		});
+	});
 	
 	describe("Info pane", function () {
 		it("should refresh on item update", function* () {

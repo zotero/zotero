@@ -79,7 +79,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// See note in style.js
-		if (!Zotero.Styles.initialized) {
+		if (!Zotero.Styles.initialized()) {
 			// Initialize styles
 			yield Zotero.Styles.init();
 		}
