@@ -278,7 +278,7 @@ Zotero.FileHandlers = {
 						// PDF-XChange: http://help.tracker-software.com/eu/default.aspx?pageid=PDFXView25:command_line_options
 						args.unshift('/A', 'page=' + page);
 					}
-					Zotero.Utilities.Internal.exec(appPath, args);
+					await Zotero.FileHandlers._checkAndExecWithoutBlocking(appPath, args);
 				}
 			}
 		],
@@ -293,7 +293,7 @@ Zotero.FileHandlers = {
 					if (location?.position?.value) {
 						args.push('--open-at=' + location.position.value);
 					}
-					Zotero.Utilities.Internal.exec(appPath, args);
+					await Zotero.FileHandlers._checkAndExecWithoutBlocking(appPath, args);
 				}
 			}
 		]
@@ -333,7 +333,7 @@ Zotero.FileHandlers = {
 					if (page !== undefined) {
 						args.unshift('-p', page);
 					}
-					Zotero.Utilities.Internal.exec(appPath, args);
+					await Zotero.FileHandlers._checkAndExecWithoutBlocking(appPath, args);
 				}
 			}
 		],
@@ -348,7 +348,7 @@ Zotero.FileHandlers = {
 					if (location?.position?.value) {
 						args.push('--open-at=' + location.position.value);
 					}
-					Zotero.Utilities.Internal.exec(appPath, args);
+					await Zotero.FileHandlers._checkAndExecWithoutBlocking(appPath, args);
 				}
 			}
 		]
@@ -483,7 +483,24 @@ Zotero.FileHandlers = {
 			return handler.defaultDescription;
 		}
 		return false;
-	}
+	},
+
+	/**
+	 * Check that a command exists and is executable, and run without waiting
+	 * for it to finish
+	 */
+	async _checkAndExecWithoutBlocking(command, args) {
+		// Run the same checks that exec() runs so that we reject if the
+		// executable doesn't exist or isn't actually executable
+		if (!await OS.File.exists(command)) {
+			throw new Error(`${command} not found`);
+		}
+		if (!Zotero.File.pathToFile(command).isExecutable()) {
+			throw new Error(`${command} is not an executable`);
+		}
+		// Do not await
+		Zotero.Utilities.Internal.exec(command, args);
+	},
 };
 
 Zotero.OpenPDF = {
