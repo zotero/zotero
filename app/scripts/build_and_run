@@ -69,7 +69,11 @@ fi
 if [ "`uname`" = "Darwin" ]; then
 	command="Zotero.app/Contents/MacOS/zotero"
 elif [ "`uname`" = "Linux" ]; then
-	command="Zotero_linux-x86_64/zotero"
+	if [[ "`arch`" = "aarch64" ]]; then
+		command="Zotero_linux-aarch64/zotero"
+	else
+		command="Zotero_linux-x86_64/zotero"
+	fi
 elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
 	command="Zotero_win-x64/zotero.exe"
 else

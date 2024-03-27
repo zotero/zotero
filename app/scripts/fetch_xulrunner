@@ -133,13 +133,15 @@ function modify_omni {
 	replace_line 'PER_INSTALLATION_PREFS_PLATFORMS = \["win"\]' 'PER_INSTALLATION_PREFS_PLATFORMS = []' modules/UpdateUtils.jsm
 	
 	# Prompt if major update is available instead of installing automatically on restart
-	replace_line 'if \(!updateAuto\) \{' 'if (update.type == "major") {
-      LOG("UpdateService:_selectAndInstallUpdate - prompting because it is a major update");
-      AUSTLMY.pingCheckCode(this._pingSuffix, AUSTLMY.CHK_SHOWPROMPT_PREF);
-      Services.obs.notifyObservers(update, "update-available", "show-prompt");
-      return;
-    }
-    if (!updateAuto) {' modules/UpdateService.jsm
+	if [[ "$1" != "aarch64" ]]; then
+		replace_line 'if \(!updateAuto\) \{' 'if (update.type == "major") {
+	      LOG("UpdateService:_selectAndInstallUpdate - prompting because it is a major update");
+	      AUSTLMY.pingCheckCode(this._pingSuffix, AUSTLMY.CHK_SHOWPROMPT_PREF);
+	      Services.obs.notifyObservers(update, "update-available", "show-prompt");
+	      return;
+	    }
+	    if (!updateAuto) {' modules/UpdateService.jsm
+	fi
 	
 	# Avoid console warning about resource://gre/modules/FxAccountsCommon.js
 	replace_line 'const logins = this._data.logins;' 'const logins = this._data.logins; if (this._data.logins.length != -1) return;' modules/LoginStore.jsm
@@ -498,7 +500,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ "${CI:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
 		arches="x86_64"
 	else
-		arches="i686 x86_64"
+		arches="i686 x86_64 aarch64"
 	fi
 	for arch in $arches; do
 		xdir="firefox-$arch"
@@ -508,6 +510,14 @@ if [ $BUILD_LINUX == 1 ]; then
 		if [ -e "$archived_file" ]; then
 			echo "Using $archived_file"
 			cp "$archived_file" "firefox-$GECKO_VERSION.tar.bz2"
+		elif [[ "$arch" == "aarch64" ]]; then
+			curl -O "https://ftp.debian.org/debian/pool/main/f/firefox-esr/firefox-esr_102.15.0esr-1~deb11u1_arm64.deb"
+			ar xOf firefox-esr_102.15.0esr-1\~deb11u1_arm64.deb data.tar.xz
+			tar -xf data.tar.xz
+			mv ./usr/lib/firefox-esr ./firefox
+			mv ./firefox/firefox-esr ./firefox/firefox-bin
+			rm -rf etc usr data.tar.xz firefox-esr_102.15.0esr-1\~deb11u1_arm64.deb
+			tar -cvjSf firefox-102.15.1esr.tar.bz2 firefox
 		else
 			curl -O "$DOWNLOAD_URL/linux-$arch/en-US/firefox-$GECKO_VERSION.tar.bz2"
 		fi
@@ -516,7 +526,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		mv firefox firefox-$arch
 
 		pushd firefox-$arch
-		modify_omni
+		modify_omni $arch
 		popd
 		echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
 		rm "firefox-$GECKO_VERSION.tar.bz2"
