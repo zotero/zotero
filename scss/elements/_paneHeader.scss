@@ -25,14 +25,4 @@ pane-header {
 			flex: 1;
 		}
 	}
-	
-	.menu-button {
-		align-self: start;
-	}
-	
-	.menu-button toolbarbutton {
-		@include svgicon-menu("go-to", "universal", "20");
-		--width-focus-border: 2px;
-		@include focus-ring;
-	}
 }

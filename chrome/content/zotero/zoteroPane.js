@@ -1939,12 +1939,15 @@ var ZoteroPane = new function()
 			}
 			// Zero or multiple items selected
 			else {
-				let defaultSidenavButtons = [
+				let defaultPanes = [
 					"info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"
 				];
+				let defaultActions = ["locate"];
 				sidenav.querySelectorAll('toolbarbutton').forEach((button) => {
-					button.disabled = true;
-					button.parentElement.hidden = !defaultSidenavButtons.includes(button.dataset.pane);
+					button.disabled = !button.dataset.action;
+					button.parentElement.hidden
+						= button.dataset.pane && !defaultPanes.includes(button.dataset.pane)
+							|| button.dataset.action && !defaultActions.includes(button.dataset.action);
 				});
 				if (collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();
