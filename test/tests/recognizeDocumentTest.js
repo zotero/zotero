@@ -3,6 +3,7 @@ describe("Document Recognition", function() {
 	
 	before(function* () {
 		this.timeout(60000);
+		Zotero.Prefs.set('autoRenameFiles.whenMetadataChanges', false); // Prevent auto-rename triggering during recognition
 		// Load Zotero pane and install PDF tools
 		yield Zotero.Promise.all([
 			loadZoteroPane().then(w => win = w)
@@ -33,6 +34,7 @@ describe("Document Recognition", function() {
 		if (win) {
 			win.close();
 		}
+		Zotero.Prefs.clear('autoRenameFiles.whenMetadataChanges');
 	});
 	
 	describe("PDFs", function () {
@@ -228,7 +230,7 @@ describe("Document Recognition", function() {
 		
 		it("should rename a linked file attachment using parent metadata if no existing file attachments and pref enabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', true);
-			var itemTitle = Zotero.Utilities.randomString();;
+			var itemTitle = Zotero.Utilities.randomString();
 			Zotero.RecognizeDocument.recognizeStub = async function () {
 				return createDataObject('item', { title: itemTitle });
 			};
