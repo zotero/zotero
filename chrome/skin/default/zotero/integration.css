@@ -192,10 +192,6 @@
 	color: black;
 }
 
-.citation-dialog.editor.insert-note {
-	width: 750px;
-}
-
 .citation-dialog.editor::selection {
 	color: white;
 	background: var(--color-accent);

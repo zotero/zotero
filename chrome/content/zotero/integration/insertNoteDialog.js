@@ -27,5 +27,5 @@ var defaultBubbleizeSelected = Zotero_QuickFormat._bubbleizeSelected;
 Zotero_QuickFormat.citingNotes = true;
 Zotero_QuickFormat._bubbleizeSelected = async function () {
 	await defaultBubbleizeSelected();
-	await Zotero_QuickFormat._accept();
+	await Zotero_QuickFormat.accept();
 }

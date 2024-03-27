@@ -1188,8 +1188,11 @@ var Zotero_QuickFormat = new function () {
 	// window boundaries.
 	function _resizeEditor() {
 		let editorParentWidth = editor.parentNode.getBoundingClientRect().width;
-		let iconWrapperWidth = document.querySelector(".citation-dialog.icons").getBoundingClientRect().width;
-		let editorDesiredWidth = editorParentWidth - iconWrapperWidth * 2;
+		// Find the widths of all icon containers.
+		// Quick format dialog has 2 sets of icons but insert note dialog has only one
+		let iconWrappers = [...document.querySelectorAll(".citation-dialog.icons")];
+		let iconWrapperWidth = iconWrappers.reduce((totalWidth, iconWrapper) => totalWidth + iconWrapper.getBoundingClientRect().width, 0);
+		let editorDesiredWidth = editorParentWidth - iconWrapperWidth;
 		// Sanity check: editor width should never be that small
 		if (editorDesiredWidth > 700) {
 			editor.style.width = `${editorDesiredWidth}px`;
@@ -1584,7 +1587,9 @@ var Zotero_QuickFormat = new function () {
 	function _resetSearchTimer() {
 		// Show spinner
 		var spinner = document.querySelector('.citation-dialog.icons.end image');
-		spinner.nextElementSibling.style.display = "none";
+		// Accept button does not exist in insertNote dialog
+		let acceptButton = spinner.nextElementSibling;
+		if (acceptButton) acceptButton.style.display = "none";
 		spinner.setAttribute("status", "animate");
 		// Cancel current search if active
 		if (_searchPromise && _searchPromise.isPending()) {
@@ -1596,7 +1601,7 @@ var Zotero_QuickFormat = new function () {
 			.then(() => {
 				_searchPromise = null;
 				spinner.removeAttribute("status");
-				spinner.nextElementSibling.style.removeProperty("display");
+				if (acceptButton) acceptButton.style.removeProperty("display");
 			});
 	}
 
