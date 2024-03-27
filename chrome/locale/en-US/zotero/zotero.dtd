@@ -135,6 +135,7 @@
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll					"Deselect All">
 <!ENTITY zotero.tagSelector.assignColor              "Assign Color…">
+<!ENTITY zotero.tagSelector.randomAssignColor        "Randomly assign a color…">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag…">
 <!ENTITY zotero.tagSelector.deleteTag				"Delete Tag…">
 <!ENTITY zotero.tagSelector.splitTag			"Split…">
