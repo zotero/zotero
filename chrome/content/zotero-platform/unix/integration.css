@@ -2,23 +2,7 @@ body {
 	line-height: 1.5em;
 }
 
-.citation-dialog.search:not([multiline="true"]) {
-	height: 29px !important;
-}
-
-.citation-dialog.search {
-	padding: 0 2px 0 0;
-	border: 1px solid rgba(0, 0, 0, 0.5);
-	-moz-appearance: textfield;
-}
-
 window.citation-dialog {
 	-moz-appearance: none;
 	padding: 5px;
-}
-
-#zotero-icon {
-	padding: 4px 4px 6px 4px !important;
-	margin: 2px 0;
-	-moz-appearance: none;
 }

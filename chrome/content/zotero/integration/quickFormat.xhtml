@@ -55,7 +55,7 @@
 		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
 			<hbox class="citation-dialog main" flex="1" align="start">
 				<hbox flex="1">
-					<vbox flex="1" align="center" style="display: flex;align-items: center;max-width: 38px;justify-content: center;">
+					<vbox class="citation-dialog icons start">
 						<toolbarbutton id="zotero-icon" type="menu" tabindex="0" disabled="true">
 							<menupopup>
 								<menuitem id="keep-sorted" label="&zotero.citation.keepSorted.label;"
@@ -70,8 +70,9 @@
 						</toolbarbutton>
 					</vbox>
 					<html:div flex="1" spellcheck="false" class="citation-dialog editor" role="application"></html:div>
-					<vbox class="citation-dialog spinner">
-						<image class="zotero-spinner-16"/>
+					<vbox class="citation-dialog icons end">
+						<image class="icon zotero-spinner-16"/>
+						<toolbarbutton class="icon accept-button" onclick="Zotero_QuickFormat.accept()" data-l10n-id="quickformat-accept"></toolbarbutton>
 					</vbox>
 				</hbox>
 			</hbox>
@@ -82,7 +83,7 @@
 	<html:div id="input-description" class="aria-hidden" role="tooltip" data-l10n-id="quickformat-aria-input"></html:div>
 	<html:div id="item-description" class="aria-hidden" role="tooltip" data-l10n-id="quickformat-aria-item"></html:div>
 	<panel class="citation-dialog reference-panel" noautofocus="true" norestorefocus="true"
-		   height="0" width="0">
+		   height="0" width="0" flip="none">
 		<richlistbox class="citation-dialog reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical"
@@ -106,11 +107,9 @@
 			<html:input type="text" aria-labelledby="suffix-label" tabindex="6" class="citation-textbox" id="suffix" flex="1"
 					 oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 			<html:div>
-				<html:input type="checkbox" id="suppress-author" native="true" tabindex="7"
-							onchange="Zotero_QuickFormat.onCitationPropertiesChanged(event)"/>
-				<html:label for="suppress-author">
-					&zotero.citation.suppressAuthor.label;
-				</html:label>
+				<checkbox type="checkbox" id="suppress-author" native="true" tabindex="7"
+						oncommand="Zotero_QuickFormat.onCitationPropertiesChanged(event)"
+						label="&zotero.citation.suppressAuthor.label;"/>
 			</html:div>
 		</html:div>
 		<vbox flex="1" align="center">

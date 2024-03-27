@@ -40,6 +40,24 @@ function WindowDraggingElement(elem, window) {
   this._elem = elem;
   this._window = window;
   this._elem.addEventListener("mousedown", this, false);
+  this.panelToReopen = null;
+  // On windows, the mouse can often "outrun" the window, so
+  // the dragging will stop. If this happens, the window will
+  // begin dragging on next hover until the next mousedown.
+  // Quit dragging gracefully to prevent it.
+  if (Zotero.isWin) {
+	this._elem.addEventListener("mouseleave", (e) => {
+        if (this._draggingWindow) {
+			this._draggingWindow = false;
+			this._window.removeEventListener("mousemove", this, false);
+			this._window.removeEventListener("mouseup", this, false);
+			if (this.panelToReopen) {
+			  this.panelToReopen.panel.openPopup(this.panelToReopen.anchor, "after_start", 15, 0, false, false, null);
+			}
+			this.panelToReopen = null;
+		  }
+	});
+  }
 }
 
 WindowDraggingElement.prototype = {
@@ -103,6 +121,14 @@ WindowDraggingElement.prototype = {
       case "mousemove":
         if (this._draggingWindow) {
           let toDrag = this.isPanel() ? this._elem : this._window;
+		  // If there is an open panel, close it when dragging starts
+		  // and reopen it when dragging is done
+		  document.querySelectorAll("panel").forEach(((panel) => {
+			if (panel.state == "open") {
+				this.panelToReopen = { panel: panel, anchor: panel.anchorNode };
+				panel.hidePopup();
+			}
+		  }));
           toDrag.moveTo(aEvent.screenX - this._deltaX, aEvent.screenY - this._deltaY);
         }
         break;
@@ -111,6 +137,10 @@ WindowDraggingElement.prototype = {
           this._draggingWindow = false;
           this._window.removeEventListener("mousemove", this, false);
           this._window.removeEventListener("mouseup", this, false);
+		  if (this.panelToReopen) {
+			this.panelToReopen.panel.openPopup(this.panelToReopen.anchor, "after_start", 15, 0, false, false, null);
+		  }
+		  this.panelToReopen = null;
         }
         break;
     }
