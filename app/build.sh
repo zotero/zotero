@@ -266,6 +266,7 @@ fi
 # Merge preserved files from Firefox
 #
 # components
+rmdir components
 mv components-fx components
 
 mv defaults defaults-z
