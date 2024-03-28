@@ -1268,17 +1268,15 @@ Zotero.HTTP = new function() {
 			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
 			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
 					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-				// Show actual error from the networking stack, with the hyperlink around the
-				// error code removed
-				msg = Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
-				if (msg.includes('.' + ZOTERO_CONFIG.DOMAIN_NAME + ' ')
-						|| msg.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1] + ' ')) {
+				msg = Zotero.getString('networkError.connectionNotSecure', Zotero.appName) + (secInfo.errorCodeString ? ` ${secInfo.errorCodeString}` : '');
+				if (channel.originalURI?.spec.includes(ZOTERO_CONFIG.DOMAIN_NAME)
+					|| channel.originalURI?.spec.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1])) {
 					msg = Zotero.getString('networkError.connectionMonitored', Zotero.appName)
 						+ "\n\n"
 						+ (isProxyAuthRequest
 							? Zotero.getString('startupError.internetFunctionalityMayNotWork') + "\n\n"
 							: "")
-						+ Zotero.getString('general.error') + ": " + msg.split(/\n/)[0];
+						+ msg;
 				}
 				dialogButtonText = Zotero.getString('general.moreInformation');
 				dialogButtonCallback = function () {
@@ -1287,8 +1285,7 @@ Zotero.HTTP = new function() {
 			}
 			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
 					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-				msg = Zotero.getString('networkError.connectionNotSecure')
-					+ Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
+				msg = Zotero.getString('networkError.connectionNotSecure', Zotero.appName) + (secInfo.errorCodeString ? ` ${secInfo.errorCodeString}` : '');
 			}
 			if (msg) {
 				throw new Zotero.HTTP.SecurityException(
