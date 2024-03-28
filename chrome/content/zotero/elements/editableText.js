@@ -185,111 +185,21 @@
 				}
 				input.classList.add('input');
 				input.toggleAttribute("no-windows-native", true);
-				let handleInput = () => {
-					if (!this.multiline) {
-						this._input.value = this._input.value.replace(/\n/g, ' ');
-					}
-					this.setAttribute('value', this._input.value);
-				};
-				let handleChange = (event) => {
-					if (Services.focus.activeWindow !== window) {
-						event.stopPropagation();
-					}
-					this.setAttribute('value', this._input.value);
-				};
-				input.addEventListener('mousedown', () => {
-					this.setAttribute("mousedown", true);
-				});
-				input.addEventListener('input', handleInput);
-				input.addEventListener('change', handleChange);
-				input.addEventListener('focus', () => {
-					// If the last blur was ignored because it was caused by the window becoming inactive,
-					// ignore this focus event as well
-					if (this._ignoredWindowInactiveBlur) {
-						this._ignoredWindowInactiveBlur = false;
-						return;
-					}
-					
-					this.dispatchEvent(new CustomEvent('focus'));
-					this.classList.add("focused");
-					// Select all text if focused via keyboard
-					if (!this.getAttribute("mousedown")) {
-						this._input.setSelectionRange(0, this._input.value.length, "backward");
-					}
-					if (!('initialValue' in this._input.dataset)) {
-						this._input.dataset.initialValue = this._input.value;
-					}
-				});
-				input.addEventListener('blur', () => {
-					// Ignore this blur if it was caused by the window becoming inactive (see above)
-					if (Services.focus.activeWindow !== window) {
-						this._ignoredWindowInactiveBlur = true;
-						return;
-					}
-					this._ignoredWindowInactiveBlur = false;
-					
-					this.dispatchEvent(new Event('blur'));
-					this.classList.remove("focused");
-					this._input.scrollLeft = 0;
-					this._input.setSelectionRange(0, 0);
-					this.removeAttribute("mousedown");
-					delete this._input.dataset.initialValue;
-				});
-				input.addEventListener('keydown', (event) => {
-					if (event.key === 'Enter') {
-						if (this.multiline === event.shiftKey) {
-							event.preventDefault();
-							this.dispatchEvent(new CustomEvent('escape_enter'));
-							this._input.blur();
-						}
-					}
-					else if (event.key === 'Escape') {
-						this.dispatchEvent(new CustomEvent('escape_enter'));
-						let initialValue = this._input.dataset.initialValue ?? '';
-						this.setAttribute('value', initialValue);
-						this._input.value = initialValue;
-						this._input.blur();
-					}
-				});
-				input.addEventListener('mousedown', (event) => {
-					// Prevent a right-click from focusing the input when unfocused
-					if (event.button === 2 && document.activeElement !== this._input) {
-						event.preventDefault();
-					}
-				});
-				input.addEventListener('dragover', (event) => {
-					// If the input is not focused, override the default drop behavior
-					if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
-							&& !this.readOnly
-							&& event.dataTransfer.getData('text/plain')) {
-						event.preventDefault();
-						event.dataTransfer.dropEffect = 'copy';
-					}
-				});
-				input.addEventListener('drop', (event) => {
-					// If the input is not focused, replace its entire value with the dropped text
-					// Otherwise, the normal drop effect takes place and the text is inserted at the cursor
-					if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
-							&& !this.readOnly
-							&& event.dataTransfer.getData('text/plain')) {
-						event.preventDefault();
-						document.activeElement?.blur();
-						// Wait a tick to work around an apparent Firefox bug where the cursor stays inside the old
-						// input even though the new input becomes visually focused
-						setTimeout(() => {
-							this.focus();
-							this._input.value = event.dataTransfer.getData('text/plain');
-							handleInput();
-						});
-					}
-				});
+				input.addEventListener('input', this._handleInput);
+				input.addEventListener('change', this._handleChange);
+				input.addEventListener('focus', this._handleFocus);
+				input.addEventListener('blur', this._handleBlur);
+				input.addEventListener('keydown', this._handleKeyDown);
+				input.addEventListener('mousedown', this._handleMouseDown);
+				input.addEventListener('dragover', this._handleDragOver);
+				input.addEventListener('drop', this._handleDrop);
 				
-				let focused = false;
+				let focused = this._input && document.activeElement === this._input;
 				let selectionStart = this._input?.selectionStart;
 				let selectionEnd = this._input?.selectionEnd;
 				let selectionDirection = this._input?.selectionDirection;
-				if (this._input && document.activeElement === this._input) {
-					focused = true;
+				
+				if (focused) {
 					input.dataset.initialValue = this._input?.dataset.initialValue;
 				}
 				if (this._input) {
@@ -367,6 +277,108 @@
 			}
 		}
 		
+		_handleInput = () => {
+			if (!this.multiline) {
+				this._input.value = this._input.value.replace(/\n/g, ' ');
+			}
+			this.setAttribute('value', this._input.value);
+		};
+		
+		_handleChange = (event) => {
+			if (Services.focus.activeWindow !== window) {
+				event.stopPropagation();
+			}
+			this.setAttribute('value', this._input.value);
+		};
+		
+		_handleFocus = () => {
+			// If the last blur was ignored because it was caused by the window becoming inactive,
+			// ignore this focus event as well
+			if (this._ignoredWindowInactiveBlur) {
+				this._ignoredWindowInactiveBlur = false;
+				return;
+			}
+
+			this.dispatchEvent(new CustomEvent('focus'));
+			this.classList.add("focused");
+			// Select all text if focused via keyboard
+			if (!this.getAttribute("mousedown")) {
+				this._input.setSelectionRange(0, this._input.value.length, "backward");
+			}
+			if (!('initialValue' in this._input.dataset)) {
+				this._input.dataset.initialValue = this._input.value;
+			}
+		};
+		
+		_handleBlur = () => {
+			// Ignore this blur if it was caused by the window becoming inactive (see above)
+			if (Services.focus.activeWindow !== window) {
+				this._ignoredWindowInactiveBlur = true;
+				return;
+			}
+			this._ignoredWindowInactiveBlur = false;
+
+			this.dispatchEvent(new Event('blur'));
+			this.classList.remove("focused");
+			this._input.scrollLeft = 0;
+			this._input.setSelectionRange(0, 0);
+			this.removeAttribute("mousedown");
+			delete this._input.dataset.initialValue;
+		};
+		
+		_handleKeyDown = (event) => {
+			if (event.key === 'Enter') {
+				if (this.multiline === event.shiftKey) {
+					event.preventDefault();
+					this.dispatchEvent(new CustomEvent('escape_enter'));
+					this._input.blur();
+				}
+			}
+			else if (event.key === 'Escape') {
+				this.dispatchEvent(new CustomEvent('escape_enter'));
+				let initialValue = this._input.dataset.initialValue ?? '';
+				this.setAttribute('value', initialValue);
+				this._input.value = initialValue;
+				this._input.blur();
+			}
+		};
+		
+		_handleMouseDown = (event) => {
+			this.setAttribute("mousedown", true);
+			// Prevent a right-click from focusing the input when unfocused
+			if (event.button === 2 && document.activeElement !== this._input) {
+				event.preventDefault();
+			}
+		};
+		
+		_handleDragOver = (event) => {
+			// If the input is not focused, override the default drop behavior
+			if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
+					&& !this.readOnly
+					&& event.dataTransfer.getData('text/plain')) {
+				event.preventDefault();
+				event.dataTransfer.dropEffect = 'copy';
+			}
+		};
+		
+		_handleDrop = (event) => {
+			// If the input is not focused, replace its entire value with the dropped text
+			// Otherwise, the normal drop effect takes place and the text is inserted at the cursor
+			if ((document.activeElement !== this._input || Services.focus.activeWindow !== window)
+					&& !this.readOnly
+					&& event.dataTransfer.getData('text/plain')) {
+				event.preventDefault();
+				document.activeElement?.blur();
+				// Wait a tick to work around an apparent Firefox bug where the cursor stays inside the old
+				// input even though the new input becomes visually focused
+				setTimeout(() => {
+					this.focus();
+					this._input.value = event.dataTransfer.getData('text/plain');
+					this._handleInput();
+				});
+			}
+		};
+
 		focus(options) {
 			// If the window isn't active, the focus event won't fire yet,
 			// so store the initial value now
