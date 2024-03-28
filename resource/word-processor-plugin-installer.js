@@ -234,10 +234,10 @@ ZoteroPluginInstaller.prototype = {
 		var me = this;
 		setTimeout(function() {
 			me._progressWindow.focus();
-			setTimeout(function() {
+			setTimeout(async function() {
 				me._progressWindow.focus();
 				try {
-					me._addon.install(me);
+					await me._addon.install(me);
 				} catch(e) {
 					me.error();
 					throw e;
