@@ -194,7 +194,7 @@
 				input.addEventListener('dragover', this._handleDragOver);
 				input.addEventListener('drop', this._handleDrop);
 				
-				let focused = this._input && document.activeElement === this._input;
+				let focused = this.focused;
 				let selectionStart = this._input?.selectionStart;
 				let selectionEnd = this._input?.selectionEnd;
 				let selectionDirection = this._input?.selectionDirection;
