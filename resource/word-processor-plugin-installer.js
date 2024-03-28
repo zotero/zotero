@@ -29,11 +29,7 @@
 
 var EXPORTED_SYMBOLS = ["ZoteroPluginInstaller"];
 
-var Zotero = Components.classes["@zotero.org/Zotero;1"]
-				// Currently uses only nsISupports
-				//.getService(Components.interfaces.chnmIZoteroService).
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 

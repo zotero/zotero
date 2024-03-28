@@ -71,6 +71,12 @@ const TEMPLATE_VERSIONS = {
 
 const MENDELEY_URI_RE = /^http:\/\/www\.mendeley\.com\/documents\/\?uuid=(.*)/;
 
+const PLUGIN_PATHS = {
+	LibreOffice: 'chrome://zotero-libreoffice-integration-components/content/zoteroLibreOfficeIntegration.mjs',
+	WinWord: 'chrome://zotero-winword-integration/content/zoteroWinWordIntegration.mjs',
+	MacWord: 'chrome://zotero-macword-integration/content/zoteroMacWordIntegration.mjs'
+};
+
 
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
@@ -84,24 +90,22 @@ Zotero.Integration = new function() {
 	 * Initialize LibreOffice, Word for Mac and Word for Windows plugin components.
 	 */
 	this.init = function () {
-		// TEMP
-		return;
-		
 		if (Zotero.test) return;
-		let classNames = ["@zotero.org/Zotero/integration/initializer?agent=LibreOffice;1"];
+		let entryPoints = [PLUGIN_PATHS.LibreOffice];
 		if (Zotero.isMac) {
-			classNames.push("@zotero.org/Zotero/integration/installer?agent=MacWord;1")
-		} else if (Zotero.isWindows) {
-			classNames.push("@zotero.org/Zotero/integration/initializer?agent=WinWord;1");
+			entryPoints.push(PLUGIN_PATHS.MacWord);
 		}
-		for (let className of classNames) {
+		else if (Zotero.isWindows) {
+			entryPoints.push(PLUGIN_PATHS.WinWord);
+		}
+		for (let entryPoint of entryPoints) {
 			try {
-				Components.classes[className]
-					.getService(Components.interfaces.nsISupports);
+				const { init } = ChromeUtils.importESModule(entryPoint);
+				init();
 			}
 			catch (e) {
 				Zotero.logError(e);
-			}	
+			}
 		}
 	}
 	
@@ -221,26 +225,23 @@ Zotero.Integration = new function() {
 		}
 	});
 	
-	this.getApplication = function(agent, command, docId) {
+	this.getApplication = function (agent, command, docId) {
 		if (agent == 'http') {
 			return new Zotero.HTTPIntegrationClient.Application();
 		}
 		// Try to load the appropriate Zotero component; otherwise display an error
-		var component
 		try {
-			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
-			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
-			try {
-				return Components.classes[componentClass]
-					.getService(Components.interfaces.zoteroIntegrationApplication);
-			} catch (e) {
-				return Components.classes[componentClass]
-					.getService(Components.interfaces.nsISupports).wrappedJSObject;
-			}
-		} catch(e) {
+			// Replace MacWord2016 and MacWord16 with just MacWord.
+			agent = agent.startsWith('MacWord') ? 'MacWord' : agent;
+			var entryPoint = PLUGIN_PATHS[agent];
+			Zotero.debug("Integration: Instantiating "+agent+" plugin handler for command "+command+(docId ? " with doc "+docId : ""));
+			const { Application } = ChromeUtils.importESModule(entryPoint);
+			return new Application();
+		}
+		catch (e) {
 			throw new Zotero.Exception.Alert("integration.error.notInstalled",
 				[], "integration.error.title");
-		}	
+		}
 	};
 	
 	/**
