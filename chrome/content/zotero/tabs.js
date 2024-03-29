@@ -128,8 +128,6 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + Zotero.appName;
-		// Hide any tab `title` tooltips that might be open
-		window.Zotero_Tooltip.stop();
 		if (this.isTabsMenuVisible()) {
 			this.refreshTabsMenuList();
 			if (document.activeElement.id !== "zotero-tabs-menu-filter") {
@@ -636,7 +634,6 @@ var Zotero_Tabs = new function () {
 
 	this._openMenu = function (x, y, id) {
 		var { tab, tabIndex } = this._getTab(id);
-		window.Zotero_Tooltip.stop();
 		let menuitem;
 		let popup = document.createXULElement('menupopup');
 		document.querySelector('popupset').appendChild(popup);
@@ -849,7 +846,7 @@ var Zotero_Tabs = new function () {
 			tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
 			tabName.setAttribute('tabindex', `${index++}`);
 			tabName.setAttribute('aria-label', tab.title);
-			tabName.setAttribute('tooltiptext', tab.title);
+			tabName.setAttribute('title', tab.title);
 
 			// Cross button to close a tab
 			let closeButton = document.createElement('div');
@@ -905,25 +902,6 @@ var Zotero_Tabs = new function () {
 				this.tabsMenuPanel.hidePopup();
 				this.select(tab.id);
 			});
-			// Manually handle hover effects as a workaround for a likely mozilla bug that
-			// keeps :hover at the location of dragstart after drop.
-			for (let node of [tabName, closeButton]) {
-				node.addEventListener('mouseenter', (_) => {
-					if (this._tabsMenuIgnoreMouseover) {
-						return;
-					}
-					node.classList.add('hover');
-					// If the mouse moves over a tab, send focus back to the panel
-					// to avoid having two fields that appear greyed out.
-					if (document.activeElement.id !== "zotero-tabs-menu-filter") {
-						this._tabsMenuFocusedIndex = -1;
-						this.tabsMenuPanel.focus();
-					}
-				});
-				node.addEventListener('mouseleave', (_) => {
-					node.classList.remove('hover');
-				});
-			}
 
 			row.appendChild(tabName);
 			row.appendChild(closeButton);
