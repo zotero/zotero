@@ -78,10 +78,7 @@
 			}
 		}
 		
-		// Using .hover class instead of pseudo element to avoid the 
-		// hover effect from sticking around after drag-and-drop
-		// https://bugs.webkit.org/show_bug.cgi?id=134555
-		&.hover {
+		&:hover {
 			background-color: var(--fill-quinary) !important;
 		}
 		&:active {

@@ -196,10 +196,8 @@ class TagList extends React.PureComponent {
 			delete props.style.width;
 		}
 		else {
-			// Setting this via props doesn't seem to work in XUL, but setting it on hover does.
-			// Hopefully in an HTML window we'll be able to just set 'title'.
 			props.onMouseOver = function (event) {
-				event.target.setAttribute('tooltiptext', tag.name);
+				event.target.setAttribute('title', tag.name);
 			};
 		}
 		
