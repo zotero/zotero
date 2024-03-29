@@ -130,14 +130,17 @@ var ZoteroCommandLineHandler = {
 };
 
 const Cm = Components.manager.QueryInterface(Ci.nsIComponentRegistrar);
-Cm.registerFactory(
-	ZoteroCommandLineHandler.classID,
-	"command-line-handler",
-	ZoteroCommandLineHandler.contractID,
-	ZoteroCommandLineHandler
-);
-const catman = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
-
-catman.addCategoryEntry("command-line-handler",
-	"m-zotero",
-	ZoteroCommandLineHandler.contractID, false, true);
+// Don't register if already registered (e.g., after a reinit() in tests)
+if (!Cm.isCIDRegistered(ZoteroCommandLineHandler.classID)) {
+	Cm.registerFactory(
+		ZoteroCommandLineHandler.classID,
+		"command-line-handler",
+		ZoteroCommandLineHandler.contractID,
+		ZoteroCommandLineHandler
+	);
+	const catman = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
+	
+	catman.addCategoryEntry("command-line-handler",
+		"m-zotero",
+		ZoteroCommandLineHandler.contractID, false, true);
+}
