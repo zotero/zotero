@@ -2385,7 +2385,7 @@
 			let isRightClick = event.type == 'contextmenu';
 			if (!isRightClick) {
 				event.target.style.visibility = "visible";
-				event.target.style.display = "block";
+				event.target.style.display = "revert";
 			}
 			// On click, we have x/y coordinates so use that
 			// On keyboard click, open it next to the target
