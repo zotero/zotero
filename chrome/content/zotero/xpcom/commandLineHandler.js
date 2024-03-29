@@ -130,6 +130,7 @@ var ZoteroCommandLineHandler = {
 };
 
 const Cm = Components.manager.QueryInterface(Ci.nsIComponentRegistrar);
+// Don't register if already registered (e.g., after a reinit() in tests)
 if (!Cm.isCIDRegistered(ZoteroCommandLineHandler.classID)) {
 	Cm.registerFactory(
 		ZoteroCommandLineHandler.classID,
