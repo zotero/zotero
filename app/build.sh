@@ -246,7 +246,6 @@ set -e
 cd $omni_dir
 # Move some Firefox files that would be overwritten out of the way
 mv chrome.manifest chrome.manifest-fx
-mv components components-fx
 mv defaults defaults-fx
 
 # Extract Zotero files
@@ -261,13 +260,6 @@ else
 	fi
 	rsync -a $rsync_params "$SOURCE_DIR/" ./
 fi
-
-#
-# Merge preserved files from Firefox
-#
-# components
-rmdir components
-mv components-fx components
 
 mv defaults defaults-z
 mv defaults-fx defaults
