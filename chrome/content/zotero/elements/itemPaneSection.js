@@ -176,18 +176,21 @@ class ItemPaneSectionElementBase extends XULElementBase {
 
 			let styles = [];
 			for (let type of Object.keys(this._sectionButtons)) {
-				let { icon, darkIcon, onClick } = this._sectionButtons[type];
+				let { icon, darkIcon, l10nID, onClick } = this._sectionButtons[type];
 				if (!darkIcon) {
 					darkIcon = icon;
 				}
 				let listener = (event) => {
-					let props = this._assembleProps(this._getHookProps());
-					props.event = event;
+					let props = this._assembleProps(
+						this._getHookProps(),
+						{ event },
+					);
 					onClick(props);
 				};
 				this._section.addEventListener(type, listener);
 				this._sectionListeners.push({ type, listener });
 				let button = this._section.querySelector(`.${type}`);
+				button.dataset.l10nId = l10nID;
 				button.style = `--custom-button-icon-light: url('${icon}'); --custom-button-icon-dark: url('${darkIcon}');`;
 			}
 
@@ -234,7 +237,7 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		}
 
 		registerSectionButton(options) {
-			let { type, icon, darkIcon, onClick } = options;
+			let { type, icon, darkIcon, l10nID, onClick } = options;
 			if (!darkIcon) {
 				darkIcon = icon;
 			}
@@ -243,7 +246,7 @@ class ItemPaneSectionElementBase extends XULElementBase {
 				return;
 			}
 			this._sectionButtons[type.replace(/[^a-zA-Z0-9-_]/g, "-")] = {
-				icon, darkIcon, onClick
+				icon, darkIcon, l10nID, onClick
 			};
 		}
 

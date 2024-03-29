@@ -31,11 +31,14 @@
  * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`
  * @typedef SectionL10n
  * @type {object}
- * @property {string} l10nID - data-l10n-id for localization
+ * @property {string} l10nID - data-l10n-id for localization of section header label
  * @property {string} [l10nArgs] - data-l10n-args for localization
  * @typedef SectionButton
  * @type {object}
  * @property {string} type - Button type, must be valid DOMString and without ","
+ * @property {string} icon - Icon URI
+ * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`
+ * @property {string} [l10nID] - data-l10n-id for localization of button tooltiptext
  * @property {(props: SectionEventHookArgs) => void} onClick - Button click callback
  * @typedef SectionBasicHookArgs
  * @type {object}
