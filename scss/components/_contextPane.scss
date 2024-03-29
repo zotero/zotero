@@ -1,5 +1,12 @@
 #tabs-deck {
 	min-width: $min-width-collections-pane + $min-width-items-pane;
+
+	& > :not(.deck-selected) {
+		// Hide all sub-trees that are in the invisible tab deck
+		// to avoid the invisible tab decks' -moz-window-dragging to be triggered.
+		// Do not use display: none to avoid reflowing the layout.
+		-moz-subtree-hidden-only-visually: 1;
+	}
 }
 
 #zotero-context-pane {
