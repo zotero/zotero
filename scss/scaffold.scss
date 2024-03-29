@@ -71,7 +71,7 @@ tab {
 }
 
 #metadata-grid {
-	-moz-box-flex: 1;
+	flex: 1;
 	display: grid;
 	align-content: start;
 	align-items: center;
@@ -119,12 +119,20 @@ browser,
 }
 
 vbox > splitter {
-	cursor: row-rgb(4, 4, 4)e;
+	cursor: row-resize;
 }
 
 #left-tabbox {
+	flex: 1;
+	min-width: 500px;
 	margin: 5px;
-	width: 100% !important;
+	overflow: clip;
+	
+	tabpanel {
+		display: flex;
+		width: 100%;
+		min-width: 0;
+	}
 }
 
 #checkboxes-translatorType {
@@ -138,6 +146,7 @@ vbox > splitter {
 }
 
 #right-pane {
+	min-width: 350px;
 	margin: -16px -16px -16px 0px;
 	border-left: var(--material-panedivider);
 

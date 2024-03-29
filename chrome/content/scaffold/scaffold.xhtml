@@ -416,7 +416,7 @@
 			</hbox>
 		</toolbar>
 		<hbox id="appcontent" flex="1">
-			<tabbox id="left-tabbox" flex="1" width="300">
+			<tabbox id="left-tabbox">
 				<tabs id="tabs">
 					<tab id="tab-metadata" label="&scaffold.tabs.metadata.label;"/>
 					<tab id="tab-code" label="&scaffold.tabs.code.label;"/>
@@ -524,7 +524,7 @@
 						<vbox flex="1">
 							<hbox align="center">
 								<label control="textbox-tabUrl" value="&scaffold.tabUrl.label;"/>
-								<html:input id="browser-url" style="-moz-box-flex: 1;"/>
+								<html:input id="browser-url" style="flex: 1;"/>
 								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
 							</hbox>
 							
@@ -550,7 +550,6 @@
 				</tabpanels>
 			</tabbox>
 			<splitter id="pane-splitter" resizeafter="farthest" />
-
 			<vbox id="right-pane">
 				<html:textarea id="output" readonly="true"/>
 			</vbox>
