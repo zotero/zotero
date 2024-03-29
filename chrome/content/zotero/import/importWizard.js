@@ -256,8 +256,21 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			}
 			catch (e) {
 				const feedbackEl = document.getElementById('mendeley-online-login-feedback');
+				if (e instanceof Zotero.HTTP.SecurityException) {
+					feedbackEl.setAttribute('data-l10n-id', 'import-online-connection-unsecure');
+					feedbackEl.setAttribute('data-l10n-args', JSON.stringify({ targetApp: "Mendeley", errorCode: e.message }));
+				}
+				else if (e instanceof Zotero.HTTP.UnexpectedStatusException && (e.status === 400 || e.status === 401 || e.status === 403)) {
+					feedbackEl.setAttribute('data-l10n-id', 'import-online-wrong-credentials');
+					feedbackEl.setAttribute('data-l10n-args', JSON.stringify({ targetApp: "Mendeley" }));
+					this.wizard.canAdvance = false; // change to login/password input will reset this
+				}
+				else {
+					feedbackEl.setAttribute('data-l10n-id', 'import-online-connection-error');
+					feedbackEl.setAttribute('data-l10n-args', JSON.stringify({ targetApp: "Mendeley" }));
+				}
+				
 				feedbackEl.style.display = '';
-				this.wizard.canAdvance = false; // change to either of the inputs will reset thi
 			}
 			finally {
 				userNameEl.disabled = false;
