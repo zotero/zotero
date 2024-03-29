@@ -1268,7 +1268,7 @@ Zotero.HTTP = new function() {
 			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
 			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
 					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-				msg = Zotero.getString('networkError.connectionNotSecure', Zotero.appName) + (secInfo.errorCodeString ? ` ${secInfo.errorCodeString}` : '');
+				msg = secInfo.errorCodeString;
 				if (channel.originalURI?.spec.includes(ZOTERO_CONFIG.DOMAIN_NAME)
 					|| channel.originalURI?.spec.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1])) {
 					msg = Zotero.getString('networkError.connectionMonitored', Zotero.appName)
@@ -1285,7 +1285,7 @@ Zotero.HTTP = new function() {
 			}
 			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
 					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-				msg = Zotero.getString('networkError.connectionNotSecure', Zotero.appName) + (secInfo.errorCodeString ? ` ${secInfo.errorCodeString}` : '');
+				msg = secInfo.errorCodeString;
 			}
 			if (msg) {
 				throw new Zotero.HTTP.SecurityException(
