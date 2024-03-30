@@ -634,7 +634,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			// If a file with the same relative path exists within the new base directory,
 			// don't touch the attachment, since it will continue to work
 			if (relPath) {
-				if (yield IOUtils.exists(PathUtils.join(basePath, relPath))) {
+				if (yield IOUtils.exists(PathUtils.joinRelative(basePath, relPath))) {
 					numNewAttachments++;
 					continue;
 				}
