@@ -68,7 +68,7 @@
  * @type {object}
  * @property {string} paneID - Unique pane ID
  * @property {string} pluginID - Set plugin ID to auto remove section when plugin is disabled/removed
- * @property {SectionL10n & SectionIcon} head - Header options. Icon should be 16*16 and `label` need to be localized
+ * @property {SectionL10n & SectionIcon} header - Header options. Icon should be 16*16 and `label` need to be localized
  * @property {SectionL10n & SectionIcon} sidenav - Sidenav options. Icon should be 20*20 and `tooltiptext` need to be localized
  * @property {string} [bodyXHTML] - Pane body's innerHTML, default to XUL namespace
  * @property {(props: SectionInitHookArgs) => void} [onInit]
@@ -208,7 +208,7 @@ class ItemPaneManager {
 		let requiredParamsType = {
 			paneID: "string",
 			pluginID: "string",
-			head: (val) => {
+			header: (val) => {
 				if (typeof val != "object") {
 					return "ItemPaneManager section options head must be object";
 				}

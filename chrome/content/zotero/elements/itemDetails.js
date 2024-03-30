@@ -277,7 +277,7 @@
 			// Create
 			let currentPaneIDs = currentPaneElements.map(elem => elem.dataset.pane);
 			for (let section of targetPanes) {
-				let { paneID, head, sidenav, bodyXHTML,
+				let { paneID, header, sidenav, bodyXHTML,
 					onInit, onDestroy, onItemChange, onRender, onAsyncRender, onToggle,
 					sectionButtons } = section;
 				if (currentPaneIDs.includes(paneID)) continue;
@@ -285,7 +285,7 @@
 				elem.dataset.sidenavOptions = JSON.stringify(sidenav || {});
 				elem.paneID = paneID;
 				elem.bodyXHTML = bodyXHTML;
-				elem.registerSectionIcon({ icon: head.icon, darkIcon: head.darkIcon });
+				elem.registerSectionIcon({ icon: header.icon, darkIcon: header.darkIcon });
 				elem.registerHook({ type: "init", callback: onInit });
 				elem.registerHook({ type: "destroy", callback: onDestroy });
 				elem.registerHook({ type: "itemChange", callback: onItemChange });
@@ -298,8 +298,8 @@
 					}
 				}
 				this._paneParent.append(elem);
-				elem.setL10nID(head.l10nID);
-				elem.setL10nArgs(head.l10nArgs);
+				elem.setL10nID(header.l10nID);
+				elem.setL10nArgs(header.l10nArgs);
 				this._intersectionOb.observe(elem);
 				this.sidenav.addPane(paneID);
 			}
