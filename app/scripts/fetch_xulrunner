@@ -292,8 +292,8 @@ function modify_omni {
 	# Open plugin links in external browser
 	replace_line 'let homepageURL = homepageRow.querySelector\(\"a\"\);' 'let homepageURL = homepageRow.querySelector(\"\.text-link\");' $file
 	replace_line 'homepageURL.href = addon.homepageURL;' 'homepageURL.setAttribute("href", addon.homepageURL);' $file
-	replace_line '<a target=\"_blank\" data-telemetry-name=\"homepage\" dir=\"ltr\"><\/a>' \
-		'<label target=\"_blank\" class=\"text-link\" data-telemetry-name=\"homepage\" dir=\"ltr\"><\/label>' \
+	replace_line '<a target="_blank" dir="ltr"><\/a>' \
+		'<label target="_blank" class="text-link" dir="ltr"><\/label>' \
 		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
 	
 	# Hide Recommendations tab in sidebar and recommendations in main pane
