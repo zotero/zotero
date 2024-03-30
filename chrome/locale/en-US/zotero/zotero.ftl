@@ -185,7 +185,9 @@ import-online-relink-only =
     .label = Relink Mendeley Desktop citations
 import-online-relink-kb = More Information
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
-import-online-connection-unsecure = { -app-name } could not make a secure connection to { $targetApp }. Error code: { $errorCode }.
+import-online-connection-insecure = { -app-name } could not make a secure connection to { $targetApp }.
+
+    Error code: { $errorCode }
 
 items-table-cell-notes =
     .aria-label = { $count ->
