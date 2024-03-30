@@ -193,7 +193,7 @@ class ItemPaneManager {
 	_removeSection(paneID) {
 		// If any check fails, return check results and do not remove any section
 		if (!this._customSections[paneID]) {
-			Zotero.warn(`ItemPaneManager section option with paneID ${paneID} does not exist.`);
+			Zotero.warn(`ItemPaneManager: Can't remove unknown section '${paneID}'`);
 			return false;
 		}
 		delete this._customSections[paneID];
@@ -210,25 +210,25 @@ class ItemPaneManager {
 			pluginID: "string",
 			header: (val) => {
 				if (typeof val != "object") {
-					return "ItemPaneManager section options head must be object";
+					return "ItemPaneManager: 'header' must be object";
 				}
 				if (!val.l10nID || typeof val.l10nID != "string") {
-					return "ItemPaneManager section options head l10nID must be non-empty string";
+					return "ItemPaneManager: header.l10nID must be a non-empty string";
 				}
 				if (!val.icon || typeof val.icon != "string") {
-					return "ItemPaneManager section options head icon must be non-empty string";
+					return "ItemPaneManager: header.icon must be a non-empty string";
 				}
 				return true;
 			},
 			sidenav: (val) => {
 				if (typeof val != "object") {
-					return "ItemPaneManager section options sidenav must be object";
+					return "ItemPaneManager: 'sidenav' must be object";
 				}
 				if (!val.l10nID || typeof val.l10nID != "string") {
-					return "ItemPaneManager section options sidenav l10nID must be non-empty string";
+					return "ItemPaneManager: sidenav.l10nID must be a non-empty string";
 				}
 				if (!val.icon || typeof val.icon != "string") {
-					return "ItemPaneManager section options sidenav icon must be non-empty string";
+					return "ItemPaneManager: sidenav.icon must be a non-empty string";
 				}
 				return true;
 			},
@@ -248,12 +248,12 @@ class ItemPaneManager {
 		for (let key of Object.keys(requiredParamsType)) {
 			let val = options[key];
 			if (!val) {
-				Zotero.warn(`ItemPaneManager section option must have ${key}`);
+				Zotero.warn(`ItemPaneManager: Section options must have ${key}`);
 				return false;
 			}
 			let requiredType = requiredParamsType[key];
 			if (typeof requiredType == "string" && typeof val != requiredType) {
-				Zotero.warn(`ItemPaneManager section option ${key} must be ${requiredType}, but got ${typeof val}`);
+				Zotero.warn(`ItemPaneManager: Section option '${key}' must be ${requiredType}, got ${typeof val}`);
 				return false;
 			}
 			if (typeof requiredType == "function") {
@@ -265,11 +265,11 @@ class ItemPaneManager {
 			}
 		}
 		if (builtInPaneIDs.includes(options.paneID)) {
-			Zotero.warn(`ItemPaneManager section option paneID must not conflict with built-in paneID, but got ${options.paneID}`);
+			Zotero.warn(`ItemPaneManager: 'paneID' must not conflict with built-in paneID, got ${options.paneID}`);
 			return false;
 		}
 		if (this._customSections[options.paneID]) {
-			Zotero.warn(`ItemPaneManager section option paneID must be unique, but got ${options.paneID}`);
+			Zotero.warn(`ItemPaneManager: 'paneID' must be unique, got ${options.paneID}`);
 			return false;
 		}
 		
@@ -313,7 +313,7 @@ class ItemPaneManager {
 		// Remove the columns one by one
 		// This is to ensure that the columns are removed and not interrupted by any non-existing columns
 		paneIDs.forEach(id => this._removeSection(id));
-		Zotero.debug(`ItemPaneManager sections registered by plugin ${pluginID} unregistered due to shutdown`);
+		Zotero.debug(`ItemPaneManager: Section for plugin ${pluginID} unregistered due to shutdown`);
 		await this._notifyItemPane();
 	}
 
