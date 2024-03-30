@@ -51,6 +51,7 @@
 	
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
 	</linkset>
 	
 	<script>
@@ -125,18 +126,19 @@
 
 	<commandset id="macCommandSet"> <!-- was mainCommandSet -->
 		<command id="minimizeWindow"
-				 label="&minimizeWindow.label;"
+				 data-l10n-id="window-minimize-command"
 				 oncommand="window.minimize();" />
 		<command id="zoomWindow"
-				 label="&zoomWindow.label;"
+				 data-l10n-id="window-zoom-command"
 				 oncommand="zoomWindow();" />
 	</commandset>
 
 	<keyset id="macKeyset">  <!-- was mainKeySet -->
 		<key id="key_minimizeWindow"
 			 command="minimizeWindow"
-			 key="&minimizeWindow.key;"
-			 modifiers="accel"/>
+			 data-l10n-id="window-minimize-shortcut"
+			 modifiers="accel"
+			 internal="true"/>
 		<key id="key_openHelpMac"
 			 oncommand="ZoteroStandalone.openHelp();"
 			 key="&helpMac.commandkey;"
@@ -702,25 +704,11 @@
 				
 					 <!-- Only on macOS -->
 					<menu id="windowMenu"
-							label="&windowMenu.label;"
-							datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
-							onpopupshowing="macWindowMenuDidShow();"
-							onpopuphidden="macWindowMenuDidHide();"
-							hidden="false">
-						<template>
-							<rule>
-								<menupopup>
-									<menuitem uri="rdf:*"
-											label="rdf:http://home.netscape.com/NC-rdf#Name"
-											type="radio"
-											name="windowList"
-											oncommand="ShowWindowFromResource(event.target)"/>
-								</menupopup>
-							</rule>
-						</template>
+							data-l10n-id="menu-window-menu">
 						<menupopup id="windowPopup">
-							<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
-							<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+							<menuseparator/>
+							<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+							<menuitem command="zoomWindow"/>
 							<!-- decomment when "BringAllToFront" is implemented
 								<menuseparator/>
 								<menuitem label="&bringAllToFront.label;" disabled="true"/> -->

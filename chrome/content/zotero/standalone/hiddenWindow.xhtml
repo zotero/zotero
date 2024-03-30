@@ -147,17 +147,16 @@
 			</menupopup>
 		</menu>
 
-		<menu id="windowMenu" label="&windowMenu.label;">
-			<menupopup>
-				<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
-				<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+		<menu id="windowMenu"
+				data-l10n-id="menu-window-menu">
+			<menupopup id="windowPopup">
 				<menuseparator/>
-				<menuitem command="cmd_mainWindow" label="&brandShortName;" key="key_mainWindow"/>
-				<!--
-					Prevent error from macWindowMenuDidShow(), which is called from a built-in
-					nWindowMenuShowing(), when opening menu
-				-->
-				<menuseparator id="sep-window-list" hidden="true"/>
+				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow"/>
+				<!-- decomment when "BringAllToFront" is implemented
+					<menuseparator/>
+					<menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+				<menuseparator id="sep-window-list"/>
 			</menupopup>
 		</menu>
 	</menubar>

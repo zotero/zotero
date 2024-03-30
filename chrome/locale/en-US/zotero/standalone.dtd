@@ -70,11 +70,7 @@
 <!ENTITY developer.label           "Developer">
 
 <!--WINDOW MENU-->
-<!ENTITY minimizeWindow.key       "m">
-<!ENTITY minimizeWindow.label     "Minimize">
 <!ENTITY bringAllToFront.label    "Bring All to Front">
-<!ENTITY zoomWindow.label         "Zoom">
-<!ENTITY windowMenu.label         "Window">
 
 <!--HELP MENU-->
 <!ENTITY helpMenu.label           "Help"> 
