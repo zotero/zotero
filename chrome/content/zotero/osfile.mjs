@@ -225,20 +225,32 @@ export let OS = {
 			);
 			
 			try {
-				const libc = ctypes.open(
-					Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so"
-				);
-				
-				const symlink = libc.declare(
-					"symlink",
-					ctypes.default_abi,
-					ctypes.int, // return value
-					ctypes.char.ptr, // target
-					ctypes.char.ptr //linkpath
-				);
-				
-				if (symlink(pathTarget, pathCreate)) {
-					throw new Error("Failed to create symlink at " + pathCreate);
+				if (Services.appinfo.OS === "Darwin") {
+					const libc = ctypes.open(
+						Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so"
+					);
+					
+					const symlink = libc.declare(
+						"symlink",
+						ctypes.default_abi,
+						ctypes.int, // return value
+						ctypes.char.ptr, // target
+						ctypes.char.ptr //linkpath
+					);
+					
+					if (symlink(pathTarget, pathCreate)) {
+						throw new Error("Failed to create symlink at " + pathCreate);
+					}
+				}
+				// The above is failing with "invalid ELF header" for libc.so on GitHub Actions, so
+				// just use ln -s on non-macOS systems
+				else {
+					let ln = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
+					ln.initWithPath("/bin/ln");
+					let process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
+					process.init(ln);
+					let args = ["-s", pathTarget, pathCreate];
+					process.run(true, args, args.length);
 				}
 			}
 			catch (e) {
