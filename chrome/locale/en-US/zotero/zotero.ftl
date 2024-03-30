@@ -42,6 +42,9 @@ menu-restoreToLibrary =
 menu-deletePermanently =
     .label = Delete Permanently…
 
+menu-tools-plugins =
+    .label = Plugins
+
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
 filter-collections = Filter Collections
