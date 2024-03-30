@@ -93,6 +93,8 @@ var require = (function() {
 		clearTimeout: win.clearTimeout,
 		requestAnimationFrame: win.setTimeout,
 		cancelAnimationFrame: win.clearTimeout,
+		IOUtils: IOUtils,
+		PathUtils: PathUtils,
 		TextEncoder: TextEncoder,
 		TextDecoder: TextDecoder,
 	};
