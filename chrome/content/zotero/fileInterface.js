@@ -390,7 +390,7 @@ var Zotero_File_Interface = new function() {
 		args.wrappedJSObject = args;
 		
 		Services.ww.openWindow(null, "chrome://zotero/content/import/importWizard.xhtml",
-			"importFile", "chrome,dialog=yes,centerscreen,width=600,height=400,modal", args);
+			"importFile", "chrome,dialog=yes,centerscreen,modal", args);
 	};
 	
 	
