@@ -1,7 +1,7 @@
 diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
 --- a/browser/app/nsBrowserApp.cpp
 +++ b/browser/app/nsBrowserApp.cpp
-@@ -149,19 +149,31 @@ static bool IsArg(const char* arg, const
+@@ -154,19 +154,31 @@ static bool IsArg(const char* arg, const
  #endif
  
    return false;
@@ -34,6 +34,30 @@ diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
      appDataFile = argv[2];
  
      char appEnv[MAXPATHLEN];
+diff --git a/python/mozbuild/mozbuild/action/unpack_dmg.py b/python/mozbuild/mozbuild/action/unpack_dmg.py
+--- a/python/mozbuild/mozbuild/action/unpack_dmg.py
++++ b/python/mozbuild/mozbuild/action/unpack_dmg.py
+@@ -34,18 +34,18 @@ def main(args):
+     options = parser.parse_args(args)
+ 
+     dmg_tool = bootstrap_toolchain("dmg/dmg")
+     hfs_tool = bootstrap_toolchain("dmg/hfsplus")
+ 
+     dmg.extract_dmg(
+         dmgfile=Path(options.dmgfile),
+         output=Path(options.outpath),
+-        dmg_tool=Path(dmg_tool),
+-        hfs_tool=Path(hfs_tool),
++        dmg_tool=_path_or_none(dmg_tool),
++        hfs_tool=_path_or_none(hfs_tool),
+         dsstore=_path_or_none(options.dsstore),
+         background=_path_or_none(options.background),
+         icon=_path_or_none(options.icon),
+     )
+     return 0
+ 
+ 
+ if __name__ == "__main__":
 diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
 --- a/xpcom/build/BinaryPath.h
 +++ b/xpcom/build/BinaryPath.h
@@ -94,7 +118,7 @@ diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
      if (!libDir) {
        return NS_ERROR_FAILURE;
      }
-@@ -267,16 +307,29 @@ class BinaryPath {
+@@ -283,16 +323,29 @@ class BinaryPath {
      if (NS_FAILED(Get(path))) {
        return nullptr;
      }
