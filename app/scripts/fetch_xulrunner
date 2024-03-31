@@ -162,8 +162,10 @@ function modify_omni {
 	# Disable unwanted components
 	remove_line '(RemoteSettings|services-|telemetry|Telemetry|URLDecorationAnnotationsService)' components/components.manifest
 	
-	# Ignore relative paths in PATH in Subprocess.pathSearch(), used when bare command is passed to Utilities.Internal.subprocess()
-	replace_line 'let path = PathUtils.join\(dir, bin\);' 'if (!dir.startsWith("\/")) continue; let path = PathUtils.join(dir, bin);' modules/subprocess/subprocess_unix.sys.mjs
+	# On Mac/Linux, ignore relative paths in PATH in Subprocess.pathSearch(), used when a bare command is passed to Utilities.Internal.subprocess()
+	if [[ $1 != win* ]]; then
+		replace_line 'let path = PathUtils.join\(dir, bin\);' 'if (!dir.startsWith("\/")) continue; let path = PathUtils.join(dir, bin);' modules/subprocess/subprocess_unix.sys.mjs
+	fi
 	
 	# Remove unwanted files
 	rm modules/FxAccounts*
