@@ -103,6 +103,8 @@ function get_utf16_chars {
 # Make various modifications to the stock Firefox app
 #
 function modify_omni {
+	platform=$1
+	
 	mkdir omni
 	mv omni.ja omni
 	cd omni
@@ -163,7 +165,7 @@ function modify_omni {
 	remove_line '(RemoteSettings|services-|telemetry|Telemetry|URLDecorationAnnotationsService)' components/components.manifest
 	
 	# On Mac/Linux, ignore relative paths in PATH in Subprocess.pathSearch(), used when a bare command is passed to Utilities.Internal.subprocess()
-	if [[ $1 != win* ]]; then
+	if [[ $platform != win* ]]; then
 		replace_line 'let path = PathUtils.join\(dir, bin\);' 'if (!dir.startsWith("\/")) continue; let path = PathUtils.join(dir, bin);' modules/subprocess/subprocess_unix.sys.mjs
 	fi
 	
@@ -528,7 +530,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		mv firefox firefox-$arch
 
 		pushd firefox-$arch
-		modify_omni
+		modify_omni $arch
 		popd
 		echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
 		rm "firefox-$GECKO_VERSION.tar.bz2"
