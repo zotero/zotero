@@ -3982,7 +3982,7 @@ var ZoteroPane = new function()
 			if (uri.startsWith('zotero:')) {
 				let nsIURI = Services.io.newURI(uri, null, null);
 				let handler = Services.io.getProtocolHandler("zotero").wrappedJSObject;
-				let extension = handler.wrappedJSObject.getExtension(nsIURI);
+				let extension = handler.getExtension(nsIURI);
 				if (extension.noContent) {
 					extension.doAction(nsIURI);
 					return;
