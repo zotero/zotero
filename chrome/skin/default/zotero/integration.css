@@ -186,7 +186,7 @@
 	outline: none;
 	line-height: 2em;
 	width: 700px; /* initial editor width - adjusted after dom load */
-	height: 28px;
+	min-height: 28px;
 	font-size: 13px;
 	background: white;
 	color: black;

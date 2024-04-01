@@ -18,12 +18,3 @@ window.citation-dialog {
 	-moz-border-radius: 15px;
 	border-radius: 15px;
 }
-
-
-body {
-	line-height: 1.65em;
-}
-
-body[multiline="true"] {
-	padding-bottom: 2px;
-}

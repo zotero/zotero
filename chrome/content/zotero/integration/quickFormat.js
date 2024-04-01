@@ -142,11 +142,6 @@ var Zotero_QuickFormat = new function () {
 					dialog.setAttribute("square", "true");
 				}
 			}
-			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
-			// as titlebar+maincontent, so we have hack around that here.
-			else if (Zotero.isMac) {
-				dialog.style.marginBottom = "-28px";
-			}
 			
 			keepSorted = document.getElementById("keep-sorted");
 			showEditor = document.getElementById("show-editor");
@@ -1211,16 +1206,16 @@ var Zotero_QuickFormat = new function () {
 		// Resized so that outerHeight=contentHeight
 		let outerHeightAdjustment = Math.max(window.outerHeight - window.innerHeight, 0);
 		window.resizeTo(WINDOW_WIDTH, contentHeight + outerHeightAdjustment);
-		if (Zotero.isWin) {
-			// On windows, if the editor height changes, the panel will remain where it was.
-			// Check if the panel is not next to the dialog, and if so - close and reopen it
-			// to position references panel properly
-			let dialogBottom = dialog.getBoundingClientRect().bottom;
-			let panelTop = referencePanel.getBoundingClientRect().top;
-			if (Math.abs(dialogBottom - panelTop) > 5) {
-				referencePanel.hidePopup();
-				_openReferencePanel();
-			}
+		
+		// If the editor height changes, the panel will remain where it was.
+		// Check if the panel is not next to the dialog, and if so - close and reopen it
+		// to position references panel properly
+		let dialogBottom = dialog.getBoundingClientRect().bottom;
+		let panelTop = referencePanel.getBoundingClientRect().top;
+		if (Math.abs(dialogBottom - panelTop) > 5) {
+			referencePanel.hidePopup();
+			// Skip a tick, otherwise the panel may just remain open where it was
+			setTimeout(_openReferencePanel);
 		}
 		if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
 			document.children[0].setAttribute('drawintitlebar', 'false');
@@ -1302,8 +1297,9 @@ var Zotero_QuickFormat = new function () {
 				referencePanel.setAttribute("noautohide", "true");
 			}, false);
 		}
-
-		referencePanel.openPopup(dialog, "after_start", 15, 0, false, false, null);
+		// Try to make the panel appear right in the center on windows
+		let leftMargin = Zotero.isWin ? 0 : 10;
+		referencePanel.openPopup(dialog, "after_start", leftMargin, 0, false, false, null);
 	}
 	
 	/**
@@ -1437,6 +1433,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _onProgress(percent) {
 		var meter = document.querySelector(".citation-dialog.progress-meter");
+		meter.style.visibility = 'visible';
 		if(percent === null) {
 			meter.removeAttribute('value');
 		} else {

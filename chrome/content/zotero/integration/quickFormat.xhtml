@@ -40,9 +40,9 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
-	width="800"
 	onkeypress="Zotero_QuickFormat.onWindowKeyPress(event)"
-	onunload="Zotero_QuickFormat.onUnload()">
+	onunload="Zotero_QuickFormat.onUnload()"
+	style="width: 800px;">
 	<script src="../include.js"/>
 	<script src="windowDraggingUtils.js" type="text/javascript"/>
 	<script src="quickFormat.js" type="text/javascript"/>
@@ -83,7 +83,7 @@
 	<html:div id="input-description" class="aria-hidden" role="tooltip" data-l10n-id="quickformat-aria-input"></html:div>
 	<html:div id="item-description" class="aria-hidden" role="tooltip" data-l10n-id="quickformat-aria-item"></html:div>
 	<panel class="citation-dialog reference-panel" noautofocus="true" norestorefocus="true"
-		   height="0" width="0">
+		   height="0" width="0" flip="none">
 		<richlistbox class="citation-dialog reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical"
