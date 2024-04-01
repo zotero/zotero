@@ -32,20 +32,24 @@ if (platforms) {
 	else if (Zotero.isLinux && !platforms.includes("linux")) return;
 }
 
+// Set attributes that affect window chrome sizing immediately, to avoid shrinking when
+// AppWindow::LoadPersistentWindowState() restores width/height
+// https://searchfox.org/mozilla-central/rev/10f46c9c638e0e5935ed9fa12aadc9d0d4e71ade/xpfe/appshell/AppWindow.cpp#2582-2584
+
+// Create tab bar by default
+document.documentElement.setAttribute('drawintitlebar', true);
+document.documentElement.setAttribute('tabsintitlebar', true);
+if (Zotero.isMac) {
+	document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
+}
+else {
+	document.documentElement.setAttribute('chromemargin', '0,2,2,2');
+}
+
 window.addEventListener("load", function () {
 	// Fix window without menubar/titlebar when Zotero is closed in full-screen mode in OS X 10.11+
 	if (Zotero.isMac && window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
 		window.document.documentElement.setAttribute('sizemode', 'normal');
-	}
-
-	// Create tab bar by default
-	document.documentElement.setAttribute('drawintitlebar', true);
-	document.documentElement.setAttribute('tabsintitlebar', true);
-	if (Zotero.isMac) {
-		document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
-	}
-	else {
-		document.documentElement.setAttribute('chromemargin', '0,2,2,2');
 	}
 
 	if (Zotero.isWin) {
