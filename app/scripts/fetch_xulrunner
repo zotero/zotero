@@ -216,7 +216,7 @@ function modify_omni {
 	replace_line '"gecko not in application entry' '"zotero not in application entry' modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line 'let app = getProperty\(applications, "gecko", "object"\);' 'let app = getProperty(applications, "zotero", "object");' modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/AddonUpdateChecker.sys.mjs
-	replace_line 'AddonManagerPrivate.webExtensionsMinPlatformVersion' '7.0' modules/addons/AddonUpdateChecker.sys.mjs
+	replace_line 'lazy.AddonManagerPrivate.webExtensionsMinPlatformVersion' '"7.0"' modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line 'result.targetApplications.push' 'false && result.targetApplications.push' modules/addons/AddonUpdateChecker.sys.mjs
 	
 	# Allow addon installation by bypassing confirmation dialogs. If we want a confirmation dialog,
