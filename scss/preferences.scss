@@ -80,6 +80,7 @@
 }
 
 #prefs-search {
+	margin-inline-start: auto;
 	width: 16em;
 }
 
@@ -127,12 +128,8 @@
 	width: 24px;
 }
 
-#prefs-subpane-back-button-container {
-	flex: 1;
-}
-
 #prefs-subpane-back-button {
-	margin-left: 20px;
+	margin-inline-start: 20px;
 	@include svgicon-menu("chevron", "universal", "20");
 	rotate: 90deg;
 }
