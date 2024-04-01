@@ -3981,9 +3981,8 @@ var ZoteroPane = new function()
 			// Handle no-content zotero: URLs (e.g., zotero://select) without opening viewer
 			if (uri.startsWith('zotero:')) {
 				let nsIURI = Services.io.newURI(uri, null, null);
-				let handler = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
-					.getService();
-				let extension = handler.wrappedJSObject.getExtension(nsIURI);
+				let handler = Services.io.getProtocolHandler("zotero").wrappedJSObject;
+				let extension = handler.getExtension(nsIURI);
 				if (extension.noContent) {
 					extension.doAction(nsIURI);
 					return;
