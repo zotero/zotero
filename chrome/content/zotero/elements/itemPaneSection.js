@@ -30,9 +30,8 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	}
 
 	set item(item) {
-		let success = this._handleDataChange("item", this._item, item);
-		if (success === false) return;
 		this._item = item;
+		if (this._handleItemChange) this._handleItemChange();
 	}
 
 	get editable() {
@@ -49,9 +48,8 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	}
 
 	set tabType(tabType) {
-		let success = this._handleDataChange("tabType", this._tabType, tabType);
-		if (success === false) return;
 		this._tabType = tabType;
+		this.setAttribute('tabType', tabType);
 	}
 	
 	connectedCallback() {
@@ -74,13 +72,6 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		if (this._section) {
 			this._section.addEventListener("toggle", this._handleSectionToggle);
 		}
-	}
-
-	/**
-	 * @returns {boolean} if false, data change will not be saved
-	 */
-	_handleDataChange(_type, _value) {
-		return true;
 	}
 
 	_handleSectionToggle = async (event) => {
@@ -334,12 +325,10 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			this._hooks.toggle(props);
 		};
 
-		_handleDataChange(type, _oldValue, _newValue) {
-			if (type == "item" && this._hooks.itemChange) {
-				let props = this._assembleProps(this._getHookProps());
-				this._hooks.itemChange(props);
-			}
-			return true;
+		_handleItemChange() {
+			if (!this._hooks.itemChange) return;
+			let props = this._assembleProps(this._getHookProps());
+			this._hooks.itemChange(props);
 		}
 	}
 
