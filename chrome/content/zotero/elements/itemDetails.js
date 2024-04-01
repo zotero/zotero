@@ -113,11 +113,14 @@
 		}
 		
 		set pinnedPane(val) {
-			if (!val || !this.getEnabledPane(val)) {
+			if (val && !this.getEnabledPane(val)) {
+				// Store pinned pane because custom sections may not be ready yet
+				this._pendingPinnedPane = val;
 				val = '';
 			}
 			this.setAttribute('pinnedPane', val);
 			if (val) {
+				this._pendingPinnedPane = '';
 				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getEnabledPane(val));
 			}
 			this.sidenav.updatePaneStatus(val);
@@ -302,6 +305,10 @@
 				elem.setL10nArgs(header.l10nArgs);
 				this._intersectionOb.observe(elem);
 				this.sidenav.addPane(paneID);
+			}
+			// Update pending pinned pane
+			if (this._pendingPinnedPane && this.getEnabledPane(this._pendingPinnedPane)) {
+				this.pinnedPane = this._pendingPinnedPane;
 			}
 		}
 
