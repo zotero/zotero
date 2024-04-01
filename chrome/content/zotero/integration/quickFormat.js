@@ -70,8 +70,13 @@ var Zotero_QuickFormat = new function () {
 			// Only hide chrome on Windows or Mac
 			if(Zotero.isMac) {
 				document.documentElement.setAttribute("drawintitlebar", true);
-			} else if(Zotero.isWin) {
-				document.documentElement.setAttribute("hidechrome", true);
+			}
+	
+			// Required for dragging to work on windows.
+			// These values are important and changing them may affect how the dialog
+			// is rendered
+			if (Zotero.isWin) {
+				document.documentElement.setAttribute('chromemargin', '0,0,15,0');
 			}
 
 			// Include a different key combo in message on Mac
@@ -80,11 +85,11 @@ var Zotero_QuickFormat = new function () {
 				qf && qf.setAttribute('about', qf.getAttribute('about') + "Mac");
 			}
 			
-			new WindowDraggingElement(document.querySelector("window.citation-dialog"), window);
-			
 			dialog = document.querySelector(".citation-dialog.entry");
 			editor = document.querySelector(".citation-dialog.editor");
 			_resizeEditor();
+			dialog.addEventListener("mouseover", _onDialogMouseOver, true);
+			dialog.addEventListener("mouseleave", _onDialogMouseLeave);
 			dialog.addEventListener("click", _onQuickSearchClick, false);
 			dialog.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			editor.addEventListener("dragover", _onEditorDragOver);
@@ -230,7 +235,6 @@ var Zotero_QuickFormat = new function () {
 					screenX = window.screenX;
 					screenY = window.screenY;
 				}
-				window.resizeTo(window.outerWidth, dialog.clientHeight);
 				var xRange = [window.screen.availLeft, window.screen.left + window.screen.width - window.outerWidth];
 				var yRange = [window.screen.availTop, window.screen.top + window.screen.height - window.outerHeight];
 				if (screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
@@ -252,6 +256,7 @@ var Zotero_QuickFormat = new function () {
 				_updateItemList({ citedItems: [] });
 			});
 			refocusInput();
+			_initWindowDragTracker();
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -1177,6 +1182,44 @@ var Zotero_QuickFormat = new function () {
 		e.preventDefault();
 	}
 
+	/**
+	 * FX115.
+	 * Keep track when the window is being dragged and if so - hide reference panel.
+	 * Reopen it when the window stops being dragged.
+	 * This is to handle the <panel> not following the window as it is moved across the screen.
+	 * -moz-window-drag interferes with mouseup/down events on windows, so this is an alternative
+	 * to those listeners.
+	 */
+	function _initWindowDragTracker() {
+		const CHECK_FREQUENCY = 100;
+		let windowTop = window.screenTop;
+		let windowLeft = window.screenLeft;
+		let checksWithoutMovement = 0;
+		// Periodically, check if the window's positioning changed
+		let checkWindowsPosition = () => {
+			setTimeout(() => {
+				// If it did, the window is being dragged. Hide the reference panel
+				if (windowTop !== window.screenTop || windowLeft !== window.screenLeft) {
+					referencePanel.hidePopup();
+					windowTop = window.screenTop;
+					windowLeft = window.screenLeft;
+					checksWithoutMovement = 0;
+				}
+				// If the position hasn't changed for a while, make sure the panel is reopened
+				else if (checksWithoutMovement >= 2) {
+					_resizeReferencePanel();
+				}
+				// Don't reopen the panel on the first check when the window didn't move to
+				// avoid blinking.
+				else {
+					checksWithoutMovement += 1;
+				}
+				checkWindowsPosition();
+			}, CHECK_FREQUENCY);
+		};
+		checkWindowsPosition();
+	}
+
 	// Set the editor's width so that it fills up all remaining space in the window.
 	// It should be window.width - padding - icon wrappers width. The is needed to be explicitly set
 	// so that the editor's height expands/shrinks vertically without going outside of the
@@ -1199,14 +1242,22 @@ var Zotero_QuickFormat = new function () {
 		if (Zotero.isLinux) {
 			contentHeight += 10;
 		}
-		if (Math.abs(contentHeight - window.innerHeight) < 5) {
+		// Resized so that outerHeight=contentHeight
+		let outerHeightAdjustment = Math.max(window.outerHeight - window.innerHeight, 0);
+		let width = WINDOW_WIDTH;
+		let height = contentHeight + outerHeightAdjustment;
+		// On windows, there is a 10px margin around the dialog. It's required for dragging
+		// to be picked up at the edges of the dialog, otherwise it will be ignored and only
+		// inner half of the dialog can be used to drag the window.
+		if (Zotero.isWin) {
+			width += 10 * 2;
+			height += 10 * 2;
+		}
+		if (Math.abs(height - window.innerHeight) < 5) {
 			// Do not do anything if the difference is just a few pixels
 			return;
 		}
-		// Resized so that outerHeight=contentHeight
-		let outerHeightAdjustment = Math.max(window.outerHeight - window.innerHeight, 0);
-		window.resizeTo(WINDOW_WIDTH, contentHeight + outerHeightAdjustment);
-		
+		window.resizeTo(width, height);
 		// If the editor height changes, the panel will remain where it was.
 		// Check if the panel is not next to the dialog, and if so - close and reopen it
 		// to position references panel properly
@@ -1298,7 +1349,7 @@ var Zotero_QuickFormat = new function () {
 			}, false);
 		}
 		// Try to make the panel appear right in the center on windows
-		let leftMargin = Zotero.isWin ? 0 : 10;
+		let leftMargin = Zotero.isWin ? 5 : 15;
 		referencePanel.openPopup(dialog, "after_start", leftMargin, 0, false, false, null);
 	}
 	
@@ -1650,6 +1701,19 @@ var Zotero_QuickFormat = new function () {
 		return { lastBubble: lastBubble, startOfTheLine: startOfTheLine };
 	}
 	
+	// Make window draggable when mouse is over the dialog's wrapper
+	function _onDialogMouseOver(e) {
+		dialog.style["-moz-window-dragging"] = e.target == dialog ? "drag" : "no-drag";
+	}
+
+	// Remove -moz-window-dragging when mouse is over anything else to not interfere
+	// with bubble reordering
+	function _onDialogMouseLeave(e) {
+		if (e.target == dialog) {
+			dialog.style.removeProperty("-moz-window-dragging");
+		}
+	}
+
 	function _onQuickSearchClick(event) {
 		if (qfGuidance) qfGuidance.hide();
 		if (!event.target.classList.contains("editor")) {
