@@ -615,7 +615,7 @@ Zotero.Utilities.Internal = {
 	 */
 	subprocess: async function (command, args = []) {
 		// eslint-disable-next-line no-undef
-		command = command.includes('/') ? command : await Subprocess.pathSearch(command);
+		command = PathUtils.isAbsolute(command) ? command : await Subprocess.pathSearch(command);
 		
 		Zotero.debug("Running " + command + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
