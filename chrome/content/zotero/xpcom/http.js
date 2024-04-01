@@ -5,6 +5,8 @@
 Zotero.HTTP = new function() {
 	var _errorDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 	var _errorDelayMax = 60 * 60 * 1000; // 1 hour
+
+	var { SecurityInfo } = ChromeUtils.importESModule("resource://gre/modules/SecurityInfo.sys.mjs");
 	
 	/**
 	 * Exception returned for unexpected status when promise* is used
@@ -1260,15 +1262,14 @@ Zotero.HTTP = new function() {
 			return;
 		}
 		
-		let secInfo = channel.securityInfo;
+		let { state, errorMessage } = SecurityInfo.getSecurityInfo(channel);
+		
 		let msg;
 		let dialogButtonText;
 		let dialogButtonCallback;
-		if (secInfo instanceof Ci.nsITransportSecurityInfo) {
-			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
-			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
-					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-				msg = secInfo.errorCodeString;
+		if (state !== 'secure') {
+			if (state === 'broken' || state === 'insecure') {
+				msg = errorMessage ?? channel.securityInfo?.errorCodeString ?? '';
 				if (channel.originalURI?.spec.includes(ZOTERO_CONFIG.DOMAIN_NAME)
 					|| channel.originalURI?.spec.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1])) {
 					msg = Zotero.getString('networkError.connectionMonitored', Zotero.appName)
@@ -1282,10 +1283,6 @@ Zotero.HTTP = new function() {
 				dialogButtonCallback = function () {
 					Zotero.launchURL('https://www.zotero.org/support/kb/ssl_certificate_error');
 				};
-			}
-			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
-					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-				msg = secInfo.errorCodeString;
 			}
 			if (msg) {
 				throw new Zotero.HTTP.SecurityException(
@@ -1301,8 +1298,7 @@ Zotero.HTTP = new function() {
 				);
 			}
 		}
-	}
-	
+	};
 	
 	async function _checkRetry(req) {
 		var retryAfter = req.getResponseHeader("Retry-After");
