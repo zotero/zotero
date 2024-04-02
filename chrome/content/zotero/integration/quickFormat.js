@@ -1199,25 +1199,27 @@ var Zotero_QuickFormat = new function () {
 		let windowTop = window.screenTop;
 		let windowLeft = window.screenLeft;
 		let checksWithoutMovement = 0;
-		// Periodically, check if the window's positioning changed
 		let checkWindowsPosition = () => {
+			// Don't let the counter increase indefinitely
+			if (checksWithoutMovement > 1000000) {
+				checksWithoutMovement = 10;
+			}
 			setTimeout(() => {
-				// If it did, the window is being dragged. Hide the reference panel
+				// If the window's positioning changed, the window is being dragged. Hide the reference panel
 				if (windowTop !== window.screenTop || windowLeft !== window.screenLeft) {
 					referencePanel.hidePopup();
 					windowTop = window.screenTop;
 					windowLeft = window.screenLeft;
 					checksWithoutMovement = 0;
+					checkWindowsPosition();
+					return;
 				}
-				// If the position hasn't changed for a while, make sure the panel is reopened
-				else if (checksWithoutMovement >= 2) {
+				// If the position hasn't changed for a while, make sure the panel is reopened.
+				if (checksWithoutMovement == 2 && isInput(document.activeElement) && referencePanel.state !== "open") {
 					_resizeReferencePanel();
 				}
-				// Don't reopen the panel on the first check when the window didn't move to
-				// avoid blinking.
-				else {
-					checksWithoutMovement += 1;
-				}
+				checksWithoutMovement += 1;
+				// Keep checking every once in a while
 				checkWindowsPosition();
 			}, CHECK_FREQUENCY);
 		};
