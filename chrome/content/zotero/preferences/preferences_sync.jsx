@@ -145,11 +145,7 @@ Zotero_Preferences.Sync = {
 		}
 		catch (e) {
 			setTimeout(function () {
-				Zotero.alert(
-					window,
-					Zotero.getString('general.error'),
-					e.message
-				);
+				Zotero.Sync.Runner.alert(e);
 			});
 			throw e;
 		}

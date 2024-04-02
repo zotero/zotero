@@ -1593,6 +1593,53 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}
 	
 	
+	this.alert = function (e) {
+		e = Zotero.Sync.Runner.parseError(e);
+		var ps = Services.prompt;
+		var buttonText = e.dialogButtonText;
+		var buttonCallback = e.dialogButtonCallback;
+		
+		if (e.errorType == 'warning' || e.errorType == 'error') {
+			let title = Zotero.getString('general.' + e.errorType);
+			// TODO: Display header in bold
+			let msg = (e.dialogHeader ? e.dialogHeader + '\n\n' : '') + e.message;
+			
+			if (e.errorType == 'warning' || buttonText === null) {
+				ps.alert(null, title, e.message);
+				return;
+			}
+			
+			if (!buttonText) {
+				buttonText = Zotero.getString('errorReport.reportError');
+				buttonCallback = function () {
+					ZoteroPane.reportErrors();
+				};
+			}
+			
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			let index = ps.confirmEx(
+				null,
+				title,
+				msg,
+				buttonFlags,
+				"",
+				buttonText,
+				"", null, {}
+			);
+			
+			if (index == 1) {
+				setTimeout(buttonCallback, 1);
+			}
+		}
+		// Upgrade message
+		else if (e.errorType == 'upgrade') {
+			ps.alert(null, "", e.message);
+			return;
+		}
+	};
+	
+	
 	/**
 	 * Register labels in sync icon tooltip to receive updates
 	 *
