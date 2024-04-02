@@ -109,9 +109,9 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			.querySelector('#page-done-error > button')
 			.addEventListener('keydown', this.onReportErrorInteract.bind(this));
 		document
-			.getElementById('mendeley-username').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
+			.getElementById('mendeley-username').addEventListener('input', this.onMendeleyAuthInput.bind(this));
 		document
-			.getElementById('mendeley-password').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
+			.getElementById('mendeley-password').addEventListener('input', this.onMendeleyAuthInput.bind(this));
 		document
 			.getElementById('relink-only-checkbox').addEventListener('command', this.onRelinkOnlyChange.bind(this));
 
@@ -279,7 +279,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		}
 	},
 
-	onMendeleyAuthKeyUp() {
+	onMendeleyAuthInput() {
 		document.getElementById('mendeley-online-login-feedback').style.display = 'none';
 		this.wizard.canAdvance = document.getElementById('mendeley-username').value.length > 0
 			&& document.getElementById('mendeley-password').value.length > 0;
