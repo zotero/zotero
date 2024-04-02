@@ -94,8 +94,6 @@ var Zotero_QuickFormat = new function () {
 			dialog = document.querySelector(".citation-dialog.entry");
 			editor = document.querySelector(".citation-dialog.editor");
 			_resizeEditor();
-			dialog.addEventListener("mouseover", _onDialogMouseOver, true);
-			dialog.addEventListener("mouseleave", _onDialogMouseLeave);
 			dialog.addEventListener("click", _onQuickSearchClick, false);
 			dialog.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			editor.addEventListener("dragover", _onEditorDragOver);
@@ -1702,19 +1700,6 @@ var Zotero_QuickFormat = new function () {
 			lastBubble = bubbles[lastBubble];
 		}
 		return { lastBubble: lastBubble, startOfTheLine: startOfTheLine };
-	}
-	
-	// Make window draggable when mouse is over the dialog's wrapper
-	function _onDialogMouseOver(e) {
-		dialog.style["-moz-window-dragging"] = e.target == dialog ? "drag" : "no-drag";
-	}
-
-	// Remove -moz-window-dragging when mouse is over anything else to not interfere
-	// with bubble reordering
-	function _onDialogMouseLeave(e) {
-		if (e.target == dialog) {
-			dialog.style.removeProperty("-moz-window-dragging");
-		}
 	}
 
 	function _onQuickSearchClick(event) {
