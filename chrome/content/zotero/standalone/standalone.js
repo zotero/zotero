@@ -739,7 +739,8 @@ const ZoteroStandalone = new function() {
 	 * Checks for updates
 	 */
 	this.checkForUpdates = function() {
-		window.open('chrome://zotero/content/update/updates.xhtml', 'updateChecker', 'chrome,centerscreen');
+		Zotero.debug('ZoteroStandalone.checkForUpdates is deprecated -- use Zotero.openCheckForUpdatesWindow() instead');
+		Zotero.openCheckForUpdatesWindow();
 	}
 	
 	/**

@@ -649,7 +649,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						
 						// "Check for Update" button
 						if (index === 0) {
-							Zotero.openCheckForUpdatesWindow();
+							Zotero.openCheckForUpdatesWindow({ modal: true });
 						}
 						// Load More Info page
 						else if (index == 2) {
@@ -973,9 +973,19 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 	
 	
-	this.openCheckForUpdatesWindow = function () {
-		Services.ww.openWindow(null, 'chrome://zotero/content/update/updates.xhtml',
-			'updateChecker', 'chrome,centerscreen,modal', null);
+	this.openCheckForUpdatesWindow = function ({ modal } = {}) {
+		let win = Services.wm.getMostRecentWindow('Update:Wizard');
+		if (win) {
+			win.focus();
+		}
+		else {
+			let flags = 'chrome,centerscreen';
+			if (modal) {
+				flags += ',modal';
+			}
+			Services.ww.openWindow(null, 'chrome://zotero/content/update/updates.xhtml',
+				'updateChecker', flags, null);
+		}
 	};
 	
 	
