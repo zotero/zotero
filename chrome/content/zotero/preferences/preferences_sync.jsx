@@ -273,7 +273,7 @@ Zotero_Preferences.Sync = {
 				label: "zotero.preferences.sync.librariesToSync.sync",
 				fixedWidth: true,
 				// TODO: Specify in ems?
-				width: '45'
+				width: '50'
 			},
 			{
 				dataKey: "name",
