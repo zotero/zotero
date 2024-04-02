@@ -144,7 +144,12 @@ async function processFiles(mutex) {
 		onSuccess(await cleanUp(signatures));
 
 		if (shouldAddOmni && aggrResult?.outFiles?.length) {
-			onSuccess(await addOmniFiles(aggrResult.outFiles));
+			try {
+				onSuccess(await addOmniFiles(aggrResult.outFiles));
+			}
+			catch (err) {
+				onError(`omni update failed: ${err}`);
+			}
 		}
 	}
 	finally {
