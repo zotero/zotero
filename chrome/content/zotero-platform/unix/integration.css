@@ -8,7 +8,5 @@ window.citation-dialog.note-dialog {
 }
 
 .citation-dialog.entry {
-	max-width: 780px;
-	min-width: 780px;
 	padding: 10px;
 }
