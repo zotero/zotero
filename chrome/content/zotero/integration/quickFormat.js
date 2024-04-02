@@ -1487,7 +1487,6 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _onProgress(percent) {
 		var meter = document.querySelector(".citation-dialog.progress-meter");
-		meter.style.visibility = 'visible';
 		if(percent === null) {
 			meter.removeAttribute('value');
 		} else {
