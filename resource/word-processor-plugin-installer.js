@@ -175,7 +175,6 @@ ZoteroPluginInstaller.prototype = {
 		groupbox.appendChild(label);
 
 		var description = document.createXULElement("description");
-		description.style.width = "45em";
 		description.appendChild(document.createTextNode(
 			isInstalled ?
 				Zotero.getString('zotero.preferences.wordProcessors.installed', this._addon.APP) :
