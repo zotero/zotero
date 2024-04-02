@@ -79,6 +79,12 @@ var Zotero_QuickFormat = new function () {
 				document.documentElement.setAttribute('chromemargin', '0,0,15,0');
 			}
 
+			// Hide chrome on linux and explcitly make window unresizable
+			if (Zotero.isLinux) {
+				document.documentElement.setAttribute("resizable", false);
+				document.documentElement.setAttribute("hidechrome", true);
+			}
+
 			// Include a different key combo in message on Mac
 			if(Zotero.isMac) {
 				var qf = document.querySelector('.citation-dialog.guidance');
@@ -1239,9 +1245,6 @@ var Zotero_QuickFormat = new function () {
 	function _resizeWindow() {
 		let box = document.querySelector(".citation-dialog.entry");
 		let contentHeight = box.getBoundingClientRect().height;
-		if (Zotero.isLinux) {
-			contentHeight += 10;
-		}
 		// Resized so that outerHeight=contentHeight
 		let outerHeightAdjustment = Math.max(window.outerHeight - window.innerHeight, 0);
 		let width = WINDOW_WIDTH;
