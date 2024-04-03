@@ -1626,12 +1626,18 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 			let file = await attachmentItem.getFilePathAsync();
 			if (file) {
 				// Fix blank PDF attachment MIME type from previous imports
+				let type = 'application/pdf';
 				if (!attachmentItem.attachmentContentType) {
-					let type = 'application/pdf';
 					if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(file)) == type) {
 						attachmentItem.attachmentContentType = type;
 						await attachmentItem.saveTx(this._saveOptions);
 					}
+				}
+
+				if (attachmentItem.attachmentContentType !== type) {
+					Zotero.debug(`Skipping ${annotations.length} annotations for non-PDF (${attachmentItem.attachmentContentType}) file ${file}`);
+					// do not attempt to import annotations for non-PDF files
+					return;
 				}
 				
 				let annotationMap = new Map();
