@@ -10,6 +10,7 @@
 
 #locale-box h2 {
 	font-size: 14px;
+	margin-block: 0;
 }
 
 radio:not(:first-child)
