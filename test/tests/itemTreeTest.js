@@ -259,7 +259,34 @@ describe("Zotero.ItemTree", function () {
 			assert.equal(itemsView.getCellText(row, 'title'), str);
 			await modifyDataObject(item);
 			assert.notEqual(itemsView.getCellText(row, 'title'), str);
-		})
+		});
+
+		it("should parse dates", async function () {
+			let testCases = {
+				'15th of May, 2024': '5/15/2024',
+				'2013': '2013',
+				'Published 2013': '2013',
+				'12 AD, January 10': '1/10',
+				'Jan 1, 2020': '1/1/2020',
+				'March 11': '3/11',
+				'11 March': '3/11',
+				'2013-12-05 03:30:01': '12/5/2013',
+				'xyz': 'xyz',
+			};
+			
+			let origLocale = Zotero.locale;
+			Zotero.locale = 'en-US';
+			
+			for (let [unparsed, parsed] of Object.entries(testCases)) {
+				let item = await createDataObject('item');
+				item.setField('date', unparsed);
+				await item.saveTx();
+				let row = itemsView.getRowIndexByID(item.id);
+				assert.equal(itemsView.getCellText(row, 'date'), parsed);
+			}
+			
+			Zotero.locale = origLocale;
+		});
 	})
 	
 	describe.skip("#sort()", function () {

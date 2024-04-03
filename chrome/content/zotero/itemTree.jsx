@@ -3449,23 +3449,59 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'dateModified':
 			case 'accessDate':
 			case 'date':
-				if (key == 'date' && !this.collectionTreeRow.isFeedsOrFeed()) {
-					break;
-				}
 				if (val) {
-					let date = Zotero.Date.sqlToDate(val, true);
-					if (date) {
-						// If no time, interpret as local, not UTC
-						if (Zotero.Date.isSQLDate(val)) {
-							date = Zotero.Date.sqlToDate(val);
-							val = date.toLocaleDateString();
+					if (key != 'date' || this.collectionTreeRow.isFeedsOrFeed()) {
+						let date = Zotero.Date.sqlToDate(val, true);
+						if (date) {
+							// If no time, interpret as local, not UTC
+							if (Zotero.Date.isSQLDate(val)) {
+								date = Zotero.Date.sqlToDate(val);
+								val = date.toLocaleDateString();
+							}
+							else {
+								val = date.toLocaleString();
+							}
 						}
 						else {
-							val = date.toLocaleString();
+							val = '';
 						}
 					}
 					else {
-						val = '';
+						// key == 'date' and we aren't in a feed
+						// Try to parse the date
+						let { year, month, day } = Zotero.Date.strToDate(val);
+						// See strToMultipart() - discard year if it contains a suffix
+						if (!/^\d{1,4}$/.test(year)) {
+							year = undefined;
+						}
+						year = parseInt(year);
+						if (isNaN(year)) {
+							year = undefined;
+						}
+						month = parseInt(month);
+						if (isNaN(month)) {
+							month = undefined;
+						}
+						day = parseInt(day);
+						if (isNaN(day)) {
+							day = undefined;
+						}
+						if (year !== undefined || month !== undefined || day !== undefined) {
+							try {
+								let date = new Date();
+								// Passing two-digit year to Date constructor parses it as 1900-1999,
+								// so use setFullYear() instead
+								date.setFullYear(year || 0, month || 0, day || 1);
+								val = new Intl.DateTimeFormat(Zotero.locale, {
+									year: year === undefined ? undefined : 'numeric',
+									month: month === undefined ? undefined : 'numeric',
+									day: day === undefined ? undefined : 'numeric',
+								}).format(date);
+							}
+							catch (e) {
+								// Error parsing or formatting date - keep raw value
+							}
+						}
 					}
 				}
 			}
