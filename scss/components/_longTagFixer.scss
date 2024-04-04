@@ -2,6 +2,7 @@
 	padding: 20px;
 	font-size: 12px;
 	line-height: 1.333333333;
+	width: 600px;
 
 	h1 {
 		font-size: 13px;
@@ -20,6 +21,20 @@
 
 	tabpanels {
 		padding-top: 15px;
+		
+		tabpanel {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			min-width: 0;
+			// prevent dialog from resizing when switching tabs or split character
+			min-height: 250px;
+
+			// fix min-width leaking to children for some reason causing weird glitch with checkboxes
+			* {
+				min-width: unset;
+			}
+		}
 
 		@include variant("#zotero-long-tag-fixer.is-long-tag") {
 			padding-top: 33px;
@@ -59,7 +74,7 @@
 
 	.split-tab {
 		.tag-list {
-			height: calc(8 * (1em + 10px));
+			max-height: calc(8 * (1em + 10px));
 			overflow-x: hidden;
 			padding: 8px;
 
