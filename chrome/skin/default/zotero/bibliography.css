@@ -1,7 +1,16 @@
+.bibliography-window
+{
+	min-width: 400pt;
+}
+
+dialog
+{
+	max-width: 100vw;
+}
+
 #style-listbox
 {
 	height: 14rem;
-	width: 325pt;
 }
 
 #manage-styles {
