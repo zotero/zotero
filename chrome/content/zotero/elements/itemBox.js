@@ -1403,9 +1403,15 @@
 			// y-m-d status indicator
 			var ymd = document.createElement('span');
 			ymd.id = 'zotero-date-field-status';
-			ymd.textContent = Zotero.Date.strToDate(Zotero.Date.multipartToStr(value))
-					.order.split('').join(' ');
 			ymd.classList.add('show-on-focus', 'no-display');
+
+			let updateStatus = () => {
+				ymd.textContent = Zotero.Date.strToDate(Zotero.Date.multipartToStr(elem.value.trim()))
+					.order.split('').join(' ');
+			};
+			elem.addEventListener('focus', updateStatus);
+			elem.addEventListener('input', updateStatus);
+
 			rowData.appendChild(elem);
 			rowData.appendChild(ymd);
 			
