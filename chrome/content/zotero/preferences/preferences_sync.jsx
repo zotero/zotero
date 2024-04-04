@@ -220,7 +220,7 @@ Zotero_Preferences.Sync = {
 			);
 			if (index == 0) {
 				if (check.value) {
-					var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
+					var resetDataDirFile = PathUtils.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
 					yield Zotero.Sync.Runner.deleteAPIKey();
@@ -757,7 +757,7 @@ Zotero_Preferences.Sync = {
 							Zotero.DB.skipBackup = true;
 							
 							await Zotero.File.putContentsAsync(
-								OS.Path.join(Zotero.DataDirectory.dir, 'restore-from-server'),
+								PathUtils.join(Zotero.DataDirectory.dir, 'restore-from-server'),
 								''
 							);
 							
