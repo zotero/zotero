@@ -19,7 +19,7 @@
 }
 
 #zotero-tabs-menu-filter {
-	margin: 7px;
+	margin: 7px 7px 2px 7px;
 	border-radius: 5px;
 	border: 1px solid transparent;
 	padding-inline-start: 5px !important;
@@ -36,14 +36,11 @@
 	overflow-x: hidden;
 	overflow-y: scroll;
 	scrollbar-width: thin;
-
-	& > toolbaritem {
-		margin: 0 7px;
-	}
+	padding: 5px 0;
 
 	.row {
 		display: flex;
-		padding-inline-start: 4px;
+		padding-inline: 4px;
 	}
 
 	.zotero-tabs-menu-entry {
