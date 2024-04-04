@@ -230,6 +230,7 @@ ZoteroPluginInstaller.prototype = {
 	_firstRunListener: function() {
 		this._progressWindowLabel = this._progressWindow.document.getElementById("progress-label");
 		this._progressWindowLabel.value = Zotero.getString('zotero.preferences.wordProcessors.installing', this._addon.EXTENSION_STRING);
+		this._progressWindow.sizeToContent();
 		var me = this;
 		setTimeout(function() {
 			me._progressWindow.focus();
