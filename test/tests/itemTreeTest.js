@@ -263,13 +263,14 @@ describe("Zotero.ItemTree", function () {
 
 		it("should parse dates", async function () {
 			let testCases = {
-				'15th of May, 2024': '5/15/2024',
+				'15th May, 2024': '5/15/2024',
+				'15th of May, 2024': '15th of May, 2024',
 				'2013': '2013',
-				'Published 2013': '2013',
-				'12 AD, January 10': '1/10',
+				'Published 2013': 'Published 2013',
+				'12 AD, January 10': '12 AD, January 10',
 				'Jan 1, 2020': '1/1/2020',
-				'March 11': '3/11',
-				'11 March': '3/11',
+				'March 11, 076': '3/11/76',
+				'11 March, 1000': '3/11/1000',
 				'2013-12-05 03:30:01': '12/5/2013',
 				'xyz': 'xyz',
 			};

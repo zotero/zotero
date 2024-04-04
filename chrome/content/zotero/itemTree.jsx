@@ -3469,7 +3469,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					else {
 						// key == 'date' and we aren't in a feed
 						// Try to parse the date
-						let { year, month, day } = Zotero.Date.strToDate(val);
+						let { year, month, day, part } = Zotero.Date.strToDate(val);
 						// See strToMultipart() - discard year if it contains a suffix
 						if (!/^\d{1,4}$/.test(year)) {
 							year = undefined;
@@ -3478,15 +3478,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 						if (isNaN(year)) {
 							year = undefined;
 						}
-						month = parseInt(month);
-						if (isNaN(month)) {
-							month = undefined;
-						}
-						day = parseInt(day);
-						if (isNaN(day)) {
-							day = undefined;
-						}
-						if (year !== undefined || month !== undefined || day !== undefined) {
+						// Use parsed value as long as we got a year and one other part,
+						// and there wasn't any leftover content in the field that
+						// couldn't be parsed
+						if (year !== undefined && !part && (month !== undefined || day !== undefined)) {
 							try {
 								let date = new Date();
 								// Passing two-digit year to Date constructor parses it as 1900-1999,
