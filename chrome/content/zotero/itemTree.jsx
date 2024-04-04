@@ -3467,36 +3467,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 						}
 					}
 					else {
-						// key == 'date' and we aren't in a feed
-						// Try to parse the date
-						let { year, month, day, part } = Zotero.Date.strToDate(val);
-						// See strToMultipart() - discard year if it contains a suffix
-						if (!/^\d{1,4}$/.test(year)) {
-							year = undefined;
-						}
-						year = parseInt(year);
-						if (isNaN(year)) {
-							year = undefined;
-						}
-						// Use parsed value as long as we got a year and one other part,
-						// and there wasn't any leftover content in the field that
-						// couldn't be parsed
-						if (year !== undefined && !part && (month !== undefined || day !== undefined)) {
-							try {
-								let date = new Date();
-								// Passing two-digit year to Date constructor parses it as 1900-1999,
-								// so use setFullYear() instead
-								date.setFullYear(year || 0, month || 0, day || 1);
-								val = new Intl.DateTimeFormat(Zotero.locale, {
-									year: year === undefined ? undefined : 'numeric',
-									month: month === undefined ? undefined : 'numeric',
-									day: day === undefined ? undefined : 'numeric',
-								}).format(date);
-							}
-							catch (e) {
-								// Error parsing or formatting date - keep raw value
-							}
-						}
+						// key == 'date' and we aren't in a feed - use human-readable date
+						val = treeRow.ref.getDisplayDate();
 					}
 				}
 			}

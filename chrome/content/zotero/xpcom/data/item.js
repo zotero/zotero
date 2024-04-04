@@ -1076,6 +1076,41 @@ Zotero.Item.prototype.getTabTitle = async function () {
 };
 
 
+Zotero.Item.prototype.getDisplayDate = function () {
+	let rawDate = this.getField('date', false, true);
+	if (!rawDate) {
+		return '';
+	}
+	let { year, month, day, part } = Zotero.Date.strToDate(rawDate);
+	// See strToMultipart() - discard year if it contains a suffix
+	if (!/^\d{1,4}$/.test(year)) {
+		year = undefined;
+	}
+	year = parseInt(year);
+	if (isNaN(year)) {
+		year = undefined;
+	}
+	// Use parsed value as long as we got a year and one other part
+	if (year !== undefined && !part && (month !== undefined || day !== undefined)) {
+		try {
+			let date = new Date();
+			// Passing two-digit year to Date constructor parses it as 1900-1999,
+			// so use setFullYear() instead
+			date.setFullYear(year || 0, month || 0, day || 1);
+			return new Intl.DateTimeFormat(Zotero.locale, {
+				year: year === undefined ? undefined : 'numeric',
+				month: month === undefined ? undefined : 'numeric',
+				day: day === undefined ? undefined : 'numeric',
+			}).format(date);
+		}
+		catch (e) {
+			// Error parsing or formatting date - keep raw value
+		}
+	}
+	return rawDate;
+};
+
+
 /*
  * Returns the number of creators for this item
  */

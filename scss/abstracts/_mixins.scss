@@ -167,7 +167,8 @@
 		}	
 
 		&:not(:hover):not(:focus-within) .show-on-hover,
-		&.noHover .show-on-hover {
+		&.noHover .show-on-hover,
+		&:not(:focus-within) .show-on-focus {
 			clip-path: inset(50%);
 			&.no-display {
 				width: 0;
