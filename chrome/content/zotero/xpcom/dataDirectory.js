@@ -444,15 +444,20 @@ Zotero.DataDirectory = {
 	},
 	
 	
+	/**
+	 * @return {String|false} - New path or false if not changed
+	 */
 	choose: async function (forceQuitNow, useHomeDir, moreInfoCallback) {
 		var win = Services.wm.getMostRecentWindow('navigator:browser');
 		var ps = Services.prompt;
+		var newPath;
 		
 		if (useHomeDir) {
 			let changed = this.set(this.defaultDir);
 			if (!changed) {
 				return false;
 			}
+			newPath = this.defaultDir;
 		}
 		else {
 			while (true) {
@@ -548,6 +553,7 @@ Zotero.DataDirectory = {
 					}
 
 					this.set(file.path);
+					newPath = file.path;
 					
 					break;
 				}
@@ -575,7 +581,7 @@ Zotero.DataDirectory = {
 			Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
 		
-		return useHomeDir ? true : file;
+		return newPath;
 	},
 	
 	
