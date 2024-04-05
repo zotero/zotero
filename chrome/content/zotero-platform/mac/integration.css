@@ -7,7 +7,6 @@ window.citation-dialog {
 	background: transparent;
 	-moz-appearance: none;
 	padding: 0;
-	width: 800px;
 }
 
 .citation-dialog.progress-bar .citation-dialog.deck {
