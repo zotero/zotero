@@ -10,6 +10,7 @@
 
 #titlebar {
 	height: var(--tab-min-height);
+	flex-direction: row;
 	-moz-box-pack: center;
 	pointer-events: none;
 	-moz-appearance: -moz-window-titlebar;
