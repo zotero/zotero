@@ -93,20 +93,12 @@ Zotero_Preferences.Sync = {
 	},
 
 
-	credentialsChange: function (event) {
+	credentialsChange: function (_event) {
 		var username = document.getElementById('sync-username-textbox');
 		var password = document.getElementById('sync-password');
-
 		var syncAuthButton = document.getElementById('sync-auth-button');
-
-		syncAuthButton.setAttribute('disabled', 'true');
-
-		// When using backspace, the value is not updated until after the keypress event
-		setTimeout(function() {
-			if (username.value.length && password.value.length) {
-				syncAuthButton.setAttribute('disabled', 'false');
-			}
-		});
+		
+		syncAuthButton.setAttribute('disabled', !(username.value.length && password.value.length));
 	},
 	
 	
