@@ -33,6 +33,8 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		title="&zotero.progress.title;"
+        no-titlebar-icon="true"
+        drawintitlebar-platforms="win,linux"
         width="300"
         windowtype="alert:alert">
 		
@@ -42,6 +44,9 @@
 		</hbox>
 	</vbox>
 	<script>
+        var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+        var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+        Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		window.addEventListener("DOMContentLoaded", () => window.sizeToContent())
 	</script>
 </window>

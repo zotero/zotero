@@ -52,7 +52,7 @@ window.addEventListener("load", function () {
 		window.document.documentElement.setAttribute('sizemode', 'normal');
 	}
 
-	if (Zotero.isWin) {
+	if (Zotero.isWin && !document.querySelector("window")?.hasAttribute("no-titlebar-icon")) {
 		let windowIcon = document.querySelector(".titlebar-icon");
 		// Simulate Windows window control
 		windowIcon.addEventListener("dblclick", (ev) => {
