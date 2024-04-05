@@ -318,7 +318,7 @@
 
 		notify = async (action, type, _ids, _extraData) => {
 			if (action == 'refresh' && this.item) {
-				if (type == 'item-pane') {
+				if (type == 'itempane') {
 					this.renderCustomSections();
 				}
 				await this.render();
