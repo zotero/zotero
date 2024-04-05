@@ -1627,7 +1627,7 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 			if (file) {
 				// Fix blank PDF attachment MIME type from previous imports
 				let type = 'application/pdf';
-				if (!attachmentItem.attachmentContentType) {
+				if (!attachmentItem.attachmentContentType || attachmentItem.attachmentContentType === 'application/octet-stream') {
 					if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(file)) == type) {
 						attachmentItem.attachmentContentType = type;
 						await attachmentItem.saveTx(this._saveOptions);
