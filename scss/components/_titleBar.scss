@@ -64,6 +64,7 @@
 
 #titlebar {
 	display: flex;
+	flex-direction: row;
 	justify-content: center;
 	-moz-window-dragging: drag;
 	menu {
