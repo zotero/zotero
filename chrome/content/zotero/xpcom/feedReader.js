@@ -417,7 +417,7 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 	if (feedEntry.title) item.title = Zotero.FeedReader._getRichText(feedEntry.title, 'title');
 	
 	if (feedEntry.summary) {
-		item.abstractNote = Zotero.FeedReader._getRichText(feedEntry.summary, 'abstractNote');
+		item.abstractNote = new XMLSerializer().serializeToString(feedEntry.summary.createDocumentFragment());
 		
 		if (!item.title) {
 			// We will probably have to trim this, so let's use plain text to
@@ -529,8 +529,7 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
  * Convert HTML-formatted text to Zotero-compatible formatting
  */
 Zotero.FeedReader._getRichText = function (feedText, field) {
-	let domDiv = Zotero.Utilities.Internal.getDOMDocument().createElement("div");
-	let domFragment = feedText.createDocumentFragment(domDiv);
+	let domFragment = feedText.createDocumentFragment();
 	return Zotero.Utilities.trimInternal(domFragment.textContent);
 };
 

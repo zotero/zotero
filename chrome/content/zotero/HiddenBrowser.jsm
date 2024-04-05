@@ -29,6 +29,8 @@ var EXPORTED_SYMBOLS = ["HiddenBrowser"];
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
 
+ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
+
 /* global HiddenFrame, E10SUtils, this */
 XPCOMUtils.defineLazyModuleGetters(this, {
 	E10SUtils: "resource://gre/modules/E10SUtils.jsm",
@@ -38,18 +40,6 @@ XPCOMUtils.defineLazyModuleGetters(this, {
 });
 ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs"
-});
-
-ChromeUtils.registerWindowActor("PageData", {
-	child: {
-		moduleURI: "chrome://zotero/content/actors/PageDataChild.jsm"
-	}
-});
-
-ChromeUtils.registerWindowActor("SingleFile", {
-	child: {
-		moduleURI: "chrome://zotero/content/actors/SingleFileChild.jsm"
-	}
 });
 
 const progressListeners = new Set();

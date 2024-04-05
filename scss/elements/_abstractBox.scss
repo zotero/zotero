@@ -10,7 +10,7 @@ abstract-box {
 abstract-box .body {
 	display: flex;
 	
-	editable-text {
+	editable-text, browser {
 		flex: 1;
 	}
 }

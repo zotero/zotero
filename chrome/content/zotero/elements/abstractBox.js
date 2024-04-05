@@ -26,6 +26,10 @@
 "use strict";
 
 {
+	ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
+
+	const SANDBOX_ALL_FLAGS = 0xFFFFF;
+	
 	class AbstractBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
@@ -70,6 +74,12 @@
 			this._abstractField = this.querySelector('editable-text');
 			this._abstractField.addEventListener('change', () => this.save());
 			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
+			
+			this._feedAbstractBrowser = document.createXULElement('browser');
+			this._feedAbstractBrowser.setAttribute('type', 'content');
+			this._feedAbstractBrowser.setAttribute('remote', true);
+			this._feedAbstractBrowser.setAttribute('messagemanagergroup', 'feedAbstract');
+			// Don't add the browser yet - we add it when rendering on a feed item
 
 			this.render();
 		}
@@ -103,7 +113,32 @@
 			if (!this.item) return;
 			if (this._isAlreadyRendered()) return;
 
+			if (this.item.isFeedItem) {
+				this._renderFeedItem();
+			}
+			else {
+				this._renderRegularItem();
+			}
+		}
+		
+		_renderFeedItem() {
 			let abstract = this.item.getField('abstractNote');
+			this._abstractField.replaceWith(this._feedAbstractBrowser);
+			this._section.summary = Zotero.Utilities.cleanTags(abstract);
+			
+			this._feedAbstractBrowser.style.visibility = 'hidden';
+			this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
+			this._feedAbstractBrowser.loadURI(
+				Services.io.newURI('data:application/xhtml+xml,' + encodeURIComponent(abstract)),
+				{
+					triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
+				}
+			);
+		}
+		
+		_renderRegularItem() {
+			let abstract = this.item.getField('abstractNote');
+			this._feedAbstractBrowser.replaceWith(this._abstractField);
 			this._section.summary = abstract;
 			// If focused, update the value that will be restored on Escape;
 			// otherwise, update the displayed value

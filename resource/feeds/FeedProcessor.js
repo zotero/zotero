@@ -575,12 +575,10 @@ TextConstruct.prototype = {
 		return this.text;
 	},
 	
-	createDocumentFragment: function (element) {
+	createDocumentFragment: function () {
 		if (this.type == "text") {
-			const doc = element.ownerDocument;
-			const docFragment = doc.createDocumentFragment();
-			const node = doc.createTextNode(this.text);
-			docFragment.appendChild(node);
+			const docFragment = new DocumentFragment();
+			docFragment.append(this.text);
 			return docFragment;
 		}
 		

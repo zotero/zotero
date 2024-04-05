@@ -27,14 +27,7 @@ var EXPORTED_SYMBOLS = ["RemoteTranslate"];
 
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-ChromeUtils.registerWindowActor("Translation", {
-	parent: {
-		moduleURI: "chrome://zotero/content/actors/TranslationParent.jsm"
-	},
-	child: {
-		moduleURI: "chrome://zotero/content/actors/TranslationChild.jsm"
-	}
-});
+ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
 
 ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
