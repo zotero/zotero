@@ -1205,6 +1205,68 @@ describe("ZoteroPane", function() {
 			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
 			assert.isTrue(restoreMenuItem.disabled);
 		});
+
+		it("should show “Copy Zotero URL” when a single item is selected", async function () {
+			const item = await createDataObject('item');
+			const userLibraryID = Zotero.Libraries.userLibraryID;
+
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			const menu = win.document.getElementById('zotero-itemmenu');
+			const copyAppUrl = menu.querySelector('.zotero-menuitem-copy-app-url');
+
+			// The "Copy Zotero URL" context menu item is visible.
+			assert.isFalse(copyAppUrl.hidden);
+		});
+
+		it("should show “Copy Zotero URL” when an attachment is selected", async function () {
+			const item = await createDataObject('item');
+			const attachment = await importFileAttachment('test.png', { parentItemID: item.id });
+			const userLibraryID = Zotero.Libraries.userLibraryID;
+
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([attachment.id]);
+			await zp.buildItemContextMenu();
+
+			const menu = win.document.getElementById('zotero-itemmenu');
+			const copyAppUrl = menu.querySelector('.zotero-menuitem-copy-app-url');
+
+			// The "Copy Zotero URL" context menu item is visible.
+			assert.isFalse(copyAppUrl.hidden);
+		});
+
+		it("should not show “Copy Zotero URL” when multiple items are selected", async function () {
+			const item1 = await createDataObject('item');
+			const item2 = await createDataObject('item');
+			const userLibraryID = Zotero.Libraries.userLibraryID;
+
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.buildItemContextMenu();
+
+			const menu = win.document.getElementById('zotero-itemmenu');
+			const copyAppUrl = menu.querySelector('.zotero-menuitem-copy-app-url');
+
+			// The "Copy Zotero URL" context menu item is NOT visible.
+			assert.isTrue(copyAppUrl.hidden);
+		});
+
+		it("should not show “Copy Zotero URL” when the selected item is in the trash", async function () {
+			const item = await createDataObject('item', { deleted: true });
+			const userLibraryID = Zotero.Libraries.userLibraryID;
+
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			const menu = win.document.getElementById('zotero-itemmenu');
+			const copyAppUrl = menu.querySelector('.zotero-menuitem-copy-app-url');
+
+			// The "Copy Zotero URL" context menu item is NOT visible.
+			assert.isTrue(copyAppUrl.hidden);
+		});
 	});
 
 	describe("#restoreSelectedItems()", function () {
@@ -1591,6 +1653,43 @@ describe("ZoteroPane", function() {
 			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
 			doc.activeElement.dispatchEvent(leftArrow);
 			assert.equal(doc.activeElement.id, "zotero-tb-add");
+		});
+	});
+
+	describe("Copy Zotero URL", function () {
+		it("should copy URL for selected item to clipboard", async function () {
+			const item = await createDataObject('item');
+			const userLibraryID = Zotero.Libraries.userLibraryID;
+
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			const menu = win.document.getElementById('zotero-itemmenu');
+			const copyAppUrl = menu.querySelector('.zotero-menuitem-copy-app-url');
+
+			const expectedValue = `zotero://select/library/items/${item.key}`;
+
+			// Click the menu item to copy the URL to the clipboard.
+			copyAppUrl.click();
+
+			const clipboard = Components.classes["@mozilla.org/widget/clipboard;1"]
+				.getService(Components.interfaces.nsIClipboard);
+			const transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+				.createInstance(Components.interfaces.nsITransferable);
+
+			transferable.addDataFlavor("text/plain");
+			clipboard.getData(transferable, clipboard.kGlobalClipboard);
+
+			const str = {};
+			const len = {};
+
+			transferable.getTransferData("text/plain", str, len);
+
+			const query = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+			const actualValue = query.data.substring(0, len.value);
+
+			assert.equal(actualValue, expectedValue);
 		});
 	});
 })

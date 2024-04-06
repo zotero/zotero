@@ -3425,6 +3425,8 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
+			'sep6',
+			'copyAppUrl',
 		];
 		
 		var m = {};
@@ -3721,6 +3723,9 @@ var ZoteroPane = new function()
 
 						show.add(m.duplicateItem);
 					}
+
+					show.add(m.sep6);
+					show.add(m.copyAppUrl);
 				}
 				
 				// Update attachment submenu
@@ -3846,6 +3851,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizeDocument'));
 		menu.childNodes[m.renameAttachments].setAttribute('label', Zotero.getString('pane.items.menu.renameAttachments' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
+		menu.childNodes[m.copyAppUrl].setAttribute('label', Zotero.getString('pane.items.menu.copyAppUrl'));
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
 		for (let i in m) {
@@ -5142,6 +5148,24 @@ var ZoteroPane = new function()
 	};
 	
 	
+	this.copyAppUrlForSelectedItem = function () {
+		const items = ZoteroPane.getSelectedItems();
+
+		if (!items || !items.length) {
+			throw new Error('No items currently selected');
+		}
+
+		if (items.length !== 1) {
+			throw new Error('Unable to copy the URL for more than one item at a time');
+		}
+
+		const selectedItem = items[0];
+		const url = `zotero://select/library/items/${selectedItem.key}`;
+
+		Zotero.Utilities.Internal.copyTextToClipboard(url);
+	};
+
+
 	this.recognizeSelected = function() {
 		Zotero.RecognizeDocument.recognizeItems(ZoteroPane.getSelectedItems());
 		Zotero.ProgressQueues.get('recognize').getDialog().open();
