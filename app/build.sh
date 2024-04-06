@@ -650,11 +650,6 @@ if [ $BUILD_WIN == 1 ]; then
 		# Copy relevant assets from Firefox
 		cp -R "$runtime_path"/!(application.ini|browser|defaults|devtools-files|crashreporter*|firefox.exe|maintenanceservice*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
-		# Copy vcruntime140_1.dll
-		if [ $arch = "win-x64" ]; then
-			cp "$CALLDIR/xulrunner/vc-$arch/vcruntime140_1.dll" "$APPDIR"
-		fi
-		
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
 		check_lfs_file "$CALLDIR/win/zotero.exe.tar.xz"
