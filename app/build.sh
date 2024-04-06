@@ -638,7 +638,7 @@ if [ $BUILD_WIN == 1 ]; then
 	
 	fi
 	
-	for arch in "win32" "win-x64"; do
+	for arch in win32 win-x64 win-aarch64; do
 		echo "Building Zotero_$arch"
 		
 		runtime_path="${WIN_RUNTIME_PATH_PREFIX}${arch}"
@@ -715,10 +715,16 @@ if [ $BUILD_WIN == 1 ]; then
 		cp -RH "$CALLDIR/modules/zotero-word-for-windows-integration/install" "$APPDIR/integration/word-for-windows"
 		if [ $arch = 'win32' ]; then
 			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll"
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll"
 		elif [ $arch = 'win-x64' ]; then
 			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll" \
 				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
-		fi	
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll"
+		elif [ $arch = 'win-aarch64' ]; then
+			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll" \
+				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll"
+		fi
 		
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
@@ -732,6 +738,9 @@ if [ $BUILD_WIN == 1 ]; then
 				if [ "$arch" = "win32" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				elif [ "$arch" = "win-x64" ]; then
+					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
+				elif [ "$arch" = "win-aarch64" ]; then
+					# TODO
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				fi
 
@@ -753,6 +762,8 @@ if [ $BUILD_WIN == 1 ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_win32_setup.exe"
 				elif [ "$arch" = "win-x64" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_x64_setup.exe"
+				elif [ "$arch" = "win-aarch64" ]; then
+					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_aarch64_setup.exe"
 				fi
 				
 				if [ $SIGN -eq 1 ]; then
@@ -778,6 +789,9 @@ if [ $BUILD_WIN == 1 ]; then
 				if [ "$arch" = "win32" ]; then	
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				elif [ "$arch" = "win-x64" ]; then
+					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
+				elif [ "$arch" = "win-aarch64" ]; then
+					# TODO
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				fi
 
