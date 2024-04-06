@@ -579,37 +579,6 @@ async function getPromiseError(promise) {
 }
 
 /**
- * Init paths for PDF tools and data
- */
-function initPDFToolsPath() {
-	let pdfConvertedFileName = 'pdftotext';
-	let pdfInfoFileName = 'pdfinfo';
-	
-	if (Zotero.isWin) {
-		pdfConvertedFileName += '-win.exe';
-		pdfInfoFileName += '-win.exe';
-	}
-	else if (Zotero.isMac) {
-		pdfConvertedFileName += '-mac';
-		pdfInfoFileName += '-mac';
-	}
-	else {
-		let cpu = Zotero.platform.split(' ')[1];
-		pdfConvertedFileName += '-linux-' + cpu;
-		pdfInfoFileName += '-linux-' + cpu;
-	}
-	
-	let pdfToolsPath = PathUtils.join(Zotero.Profile.dir, 'pdftools');
-	let pdfConverterPath = PathUtils.join(pdfToolsPath, pdfConvertedFileName);
-	let pdfInfoPath = PathUtils.join(pdfToolsPath, pdfInfoFileName);
-	let pdfDataPath = PathUtils.join(pdfToolsPath, 'poppler-data');
-	
-	Zotero.FullText.setPDFConverterPath(pdfConverterPath);
-	Zotero.FullText.setPDFInfoPath(pdfInfoPath);
-	Zotero.FullText.setPDFDataPath(pdfDataPath);
-}
-
-/**
  * Returns the nsIFile corresponding to the test data directory
  * (i.e., test/tests/data)
  */
@@ -693,7 +662,6 @@ async function resetDB(options = {}) {
 		options
 	);
 	await Zotero.Schema.schemaUpdatePromise;
-	initPDFToolsPath();
 }
 
 /**
