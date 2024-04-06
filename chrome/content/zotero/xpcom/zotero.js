@@ -238,11 +238,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
 			   .getService(Components.interfaces.nsIAppShellService)
 			   .hiddenDOMWindow;
-		this.platform = win.navigator.platform;
-		this.isMac = this.platform.substr(0, 3) == "Mac";
-		this.isWin = (this.platform.substr(0, 3) == "Win");
-		this.isLinux = (this.platform.substr(0, 5) == "Linux");
-		this.oscpu = win.navigator.oscpu;
+		var os = Services.appinfo.OS;
+		this.isMac = os == 'Darwin';
+		this.isWin = os == 'WINNT';
+		this.isLinux = os == 'Linux';
+		
+		// aarch64, x86_64, x86
+		this.arch = Services.appinfo.XPCOMABI.split('-')[0];
 		
 		// Browser
 		Zotero.browser = "g";
