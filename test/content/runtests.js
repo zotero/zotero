@@ -288,8 +288,6 @@ if(run) {
 		var dbFile = Zotero.DataDirectory.getDatabase();
 		await IOUtils.copy(dbFile, dbFile + '-test-template');
 		
-		initPDFToolsPath();
-		
 		return mocha.run();
 	};
 }
