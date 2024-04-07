@@ -54,8 +54,8 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	
 	connectedCallback() {
 		super.connectedCallback();
-		if (!this.render) {
-			Zotero.warn("Pane section must have method render().");
+		if (!this.render && !this.asyncRender) {
+			Zotero.warn("Pane section must have method render or asyncRender.");
 		}
 	}
 
