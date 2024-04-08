@@ -52,7 +52,7 @@
     "ftl-tx": "^0.6.0",
     "globby": "^6.1.0",
     "jspath": "^0.4.0",
-    "mocha": "^3.5.3",
+    "mocha": "^10.4.0",
     "multimatch": "^2.1.0",
     "pako": "^2.1.0",
     "react-virtualized": "^9.22.4",
