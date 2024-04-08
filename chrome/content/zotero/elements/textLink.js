@@ -19,6 +19,7 @@
 
 		connectedCallback() {
 			this.classList.add('zotero-text-link');
+			this.setAttribute('role', 'link');
 		}
 
 		get href() {

@@ -343,6 +343,7 @@
 						}
 					};
 					urlField.className = 'zotero-text-link keyboard-clickable';
+					urlField.setAttribute('role', 'link');
 				}
 				else {
 					urlField.className = '';

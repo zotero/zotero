@@ -3247,6 +3247,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// Activate text links
 				for (let span of div.getElementsByTagName('span')) {
 					if (span.classList.contains('text-link')) {
+						span.setAttribute('role', 'link');
 						if (span.hasAttribute('data-href')) {
 							span.onclick = function () {
 								doc.defaultView.ZoteroPane.loadURI(this.getAttribute('data-href'));

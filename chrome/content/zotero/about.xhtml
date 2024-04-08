@@ -27,7 +27,7 @@
 		</div>
 		<hbox>
 			<label id="version"/>
-			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;"/>
+			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;" role="link"/>
 		</hbox>
 		<script>
 			var version = Zotero.version;
@@ -85,6 +85,7 @@
 					// Activate text links
 					for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
 						span.className = 'text-link';
+						span.setAttribute('role', 'link');
 						span.onclick = function () {
 							Zotero.launchURL(this.getAttribute('data-href'));
 						};
