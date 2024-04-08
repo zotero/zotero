@@ -12,7 +12,7 @@
 <!ENTITY zotero.publications.sharing.cc0 "ஆம், எனது வேலையை பொது களத்தில் வைக்கவும்">
 <!ENTITY zotero.publications.sharing.reserved "இல்லை, சோட்டெரோ.நிறுவ இல் எனது படைப்புகளை மட்டும் வெளியிடுங்கள்">
 
-<!ENTITY zotero.publications.chooseLicense.title "ஒரு படைப்பாற்றல் பொது உரிமம் தேர்ந்தேடு"> 
+<!ENTITY zotero.publications.chooseLicense.title "ஒரு படைப்பாற்றல் பொது உரிமம் தேர்ந்தேடு">
 <!ENTITY zotero.publications.chooseLicense.text "ஒரு படைப்பாற்றல் பொது உரிமம் மற்றவர்கள் உங்கள் வேலையை பொருத்தமான கடன் வழங்கும் வரை, உரிமத்திற்கான இணைப்பை வழங்கவும், மாற்றங்கள் செய்யப்பட்டுள்ளதா என்பதைக் குறிக்கவும் உங்கள் வேலையை நகலெடுத்து மறுபகிர்வு செய்ய அனுமதிக்கிறது. கூடுதல் நிபந்தனைகளை கீழே குறிப்பிடலாம்.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "உங்கள் வேலையின் தழுவல்களை பகிர அனுமதிக்கவா?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "ஆம், மற்றவர்கள் ஒரே மாதிரியாக பகிர்ந்து கொள்ளும் வரை">

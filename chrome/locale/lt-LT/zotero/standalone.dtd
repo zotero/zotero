@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Priedai">
 <!ENTITY developer.label "Programuotojams">
 
-<!ENTITY minimizeWindow.key "r">
-<!ENTITY minimizeWindow.label "Suskleisti">
 <!ENTITY bringAllToFront.label "Perkelti visus į priekį">
-<!ENTITY zoomWindow.label "Mastelis">
-<!ENTITY windowMenu.label "Langas">
 
 <!ENTITY helpMenu.label "Žinynas">
 <!ENTITY helpMenu.accesskey "Ž">

@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Πρόσθετα">
 <!ENTITY developer.label "Προγραμματιστής">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Ελαχιστοποίηση">
 <!ENTITY bringAllToFront.label "Όλα στο προσκήνιο">
-<!ENTITY zoomWindow.label "Μεγέθυνση">
-<!ENTITY windowMenu.label "Παράθυρο">
 
 <!ENTITY helpMenu.label "Βοήθεια">
 <!ENTITY helpMenu.accesskey "Η">

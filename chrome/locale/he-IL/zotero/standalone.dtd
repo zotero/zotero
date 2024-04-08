@@ -63,11 +63,7 @@
 <!ENTITY addons.label "תוספים">
 <!ENTITY developer.label "פיתוח">
 
-<!ENTITY minimizeWindow.key "ז">
-<!ENTITY minimizeWindow.label "מזעור">
 <!ENTITY bringAllToFront.label "קידום של הכול לחזית">
-<!ENTITY zoomWindow.label "תקריב">
-<!ENTITY windowMenu.label "חלון">
 
 <!ENTITY helpMenu.label "עזרה">
 <!ENTITY helpMenu.accesskey "ע">

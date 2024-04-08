@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Dodatki">
 <!ENTITY developer.label "Razvijalec">
 
-<!ENTITY minimizeWindow.key "k">
-<!ENTITY minimizeWindow.label "Skrči">
 <!ENTITY bringAllToFront.label "Postavi vse v ospredje">
-<!ENTITY zoomWindow.label "Povečava">
-<!ENTITY windowMenu.label "Okno">
 
 <!ENTITY helpMenu.label "Pomoč">
 <!ENTITY helpMenu.accesskey "m">

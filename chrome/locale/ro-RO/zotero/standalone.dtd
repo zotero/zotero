@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Extensii">
 <!ENTITY developer.label "Dezvoltator">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimizare">
 <!ENTITY bringAllToFront.label "Adu totul în față">
-<!ENTITY zoomWindow.label "Panoramare">
-<!ENTITY windowMenu.label "Fereastră">
 
 <!ENTITY helpMenu.label "Ajutor">
 <!ENTITY helpMenu.accesskey "H">

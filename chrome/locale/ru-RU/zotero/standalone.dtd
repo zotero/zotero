@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Дополнения">
 <!ENTITY developer.label "Разработчик">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Свернуть">
 <!ENTITY bringAllToFront.label "Переместить всё вперед">
-<!ENTITY zoomWindow.label "Масштаб">
-<!ENTITY windowMenu.label "Окно">
 
 <!ENTITY helpMenu.label "Справка">
 <!ENTITY helpMenu.accesskey "H">

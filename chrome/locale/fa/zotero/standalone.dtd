@@ -63,11 +63,7 @@
 <!ENTITY addons.label "افزودنی‌ها">
 <!ENTITY developer.label "توسعه‌دهنده">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "کوچک‌ کردن">
 <!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "بزرگنمایی">
-<!ENTITY windowMenu.label "پنجره">
 
 <!ENTITY helpMenu.label "راهنما">
 <!ENTITY helpMenu.accesskey "H">

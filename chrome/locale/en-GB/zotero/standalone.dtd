@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimise">
 <!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Window">
 
 <!ENTITY helpMenu.label "Help">
 <!ENTITY helpMenu.accesskey "H">

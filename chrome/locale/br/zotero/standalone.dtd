@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Lugantoù">
 <!ENTITY developer.label "Diorren">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Bihanaat">
 <!ENTITY bringAllToFront.label "Degas pep-tra d'ar rak-leur">
-<!ENTITY zoomWindow.label "Zoumiñ">
-<!ENTITY windowMenu.label "Prenestr">
 
 <!ENTITY helpMenu.label "Sikour">
 <!ENTITY helpMenu.accesskey "H">

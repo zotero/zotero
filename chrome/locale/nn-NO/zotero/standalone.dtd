@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Tillegg">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimer">
 <!ENTITY bringAllToFront.label "Løft opp alle">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Vindauge">
 
 <!ENTITY helpMenu.label "Hjelp">
 <!ENTITY helpMenu.accesskey "H">

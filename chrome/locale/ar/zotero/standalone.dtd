@@ -63,11 +63,7 @@
 <!ENTITY addons.label "ملحقات">
 <!ENTITY developer.label "المطور">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "تصغير">
 <!ENTITY bringAllToFront.label "أحضر الكل للأمام">
-<!ENTITY zoomWindow.label "تقريب">
-<!ENTITY windowMenu.label "نافذة">
 
 <!ENTITY helpMenu.label "مساعدة">
 <!ENTITY helpMenu.accesskey "م">

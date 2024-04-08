@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Lisad">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimeerida">
 <!ENTITY bringAllToFront.label "Kõik nähtavale tuua">
-<!ENTITY zoomWindow.label "Suurenda">
-<!ENTITY windowMenu.label "Aken">
 
 <!ENTITY helpMenu.label "Abi">
 <!ENTITY helpMenu.accesskey "H">
