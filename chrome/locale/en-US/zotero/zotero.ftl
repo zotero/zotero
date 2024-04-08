@@ -184,6 +184,7 @@ import-online-blocked-by-plugin = The import cannot continue with { $plugin } in
 import-online-relink-only =
     .label = Relink Mendeley Desktop citations
 import-online-relink-kb = More Information
+import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
 
 items-table-cell-notes =
     .aria-label = { $count ->
