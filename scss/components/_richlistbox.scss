@@ -1,20 +1,36 @@
 richlistbox.theme-listbox {
-    background: var(--material-background);
-    border: var(--material-panedivider);
+	background: var(--material-background);
+	border: var(--material-panedivider);
 
-    richlistitem {
-        --listitem-selectedBackground: var(--tag-gray);
-        --listitem-selectedFocusCurrentBackground: var(--color-accent);
-        --listitem-selectedTextColor: var(--accent-white);
-        --listitem-selectedBorder: transparent;
-        --listitem-selectedBottomBorder: transparent;
-        --listitem-selectedCurrentBorder: transparent;
-        --listitem-selectedFocusBorder: transparent;
-        --listitem-selectedFocusBottomBorder: transparent;
-        --listitem-selectedFocusCurrentBorder: transparent;
-        --listitem-selectedFocusBackground: var(--color-accent);
-        --listitem-selectedFocusColor: var(--accent-white);
-        --listitem-selectedColor: var(--accent-white);
-        --listitem-selectedFocusCurrentBottomBorder: transparent;
-    }
+	richlistitem {
+		--listitem-selectedBackground: var(--tag-gray);
+		--listitem-selectedFocusCurrentBackground: var(--color-accent);
+		--listitem-selectedTextColor: var(--accent-white);
+		--listitem-selectedBorder: transparent;
+		--listitem-selectedBottomBorder: transparent;
+		--listitem-selectedCurrentBorder: transparent;
+		--listitem-selectedFocusBorder: transparent;
+		--listitem-selectedFocusBottomBorder: transparent;
+		--listitem-selectedFocusCurrentBorder: transparent;
+		--listitem-selectedFocusBackground: var(--color-accent);
+		--listitem-selectedFocusColor: var(--accent-white);
+		--listitem-selectedColor: var(--accent-white);
+		--listitem-selectedFocusCurrentBottomBorder: transparent;
+	}
+}
+
+richlistitem {
+	padding: 0.2em 0.4em;
+}
+
+richlistitem, richlistitem > * {
+	// Prevent word cut-off with double-byte characters
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+richlistcheckbox[selected=true] {
+	background-color: -moz-cellhighlight;
+	color: -moz-cellhighlighttext;	
 }

@@ -15,21 +15,6 @@
 	padding:0;
 }
 
-richlistitem {
-	padding: 0.2em 0.4em;
-}
-
-richlistitem, richlistitem > * {
-	overflow-x: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-richlistcheckbox[selected=true] {
-	background-color: -moz-cellhighlight;
-	color: -moz-cellhighlighttext;	
-}
-
 groupbox > label > h2, groupbox > * > label > h2 {
 	font-size: 14px;
 	margin-top: 1em;
