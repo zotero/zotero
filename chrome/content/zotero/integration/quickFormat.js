@@ -2101,7 +2101,7 @@ var Zotero_QuickFormat = new function () {
 		event.stopPropagation();
 		event.preventDefault();
 
-		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
+		var str = Zotero.Utilities.Internal.getClipboard("text/plain");
 		if (str) {
 			isPaste = true;
 			this.value += str.replace(/[\r\n]/g, " ").trim();
