@@ -5996,7 +5996,7 @@ var ZoteroPane = new function()
 	this.unserializePersist = function () {
 		_unserialized = true;
 		var serializedValues = Zotero.Prefs.get("pane.persist");
-		if (!serializedValues) return;
+		if(!serializedValues) return;
 		serializedValues = JSON.parse(serializedValues);
 		
 		for (var id in serializedValues) {
@@ -6007,7 +6007,7 @@ var ZoteroPane = new function()
 			}
 			
 			var elValues = serializedValues[id];
-			for (var attr in elValues) {
+			for(var attr in elValues) {
 				// Ignore persisted collapsed state for collection and item pane splitters, since
 				// people close them by accident and don't know how to get them back
 				// TODO: Add a hidden pref to allow them to stay closed if people really want that?
@@ -6015,9 +6015,6 @@ var ZoteroPane = new function()
 						&& attr == 'state'
 						&& Zotero.Prefs.get('reopenPanesOnRestart')) {
 					continue;
-				}
-				if (["width", "height"].includes(attr)) {
-					el.style[attr] = `${elValues[attr]}px`;
 				}
 				el.setAttribute(attr, elValues[attr]);
 			}
@@ -6027,8 +6024,7 @@ var ZoteroPane = new function()
 			// may not yet be initialized
 			try {
 				this.itemsView.sort();
-			}
-			catch (e) {}
+			} catch(e) {};
 		}
 	};
 
