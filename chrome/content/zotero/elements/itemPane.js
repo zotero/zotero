@@ -27,7 +27,7 @@
 {
 	class ItemPane extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<deck id="zotero-item-pane-content" class="zotero-item-pane-content" selectedIndex="0" flex="1" zotero-persist="width height" height="300">
+			<deck id="zotero-item-pane-content" class="zotero-item-pane-content" selectedIndex="0" flex="1">
 				<item-message-pane id="zotero-item-message" />
 				
 				<item-details id="zotero-item-details" />

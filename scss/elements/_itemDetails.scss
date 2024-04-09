@@ -13,6 +13,7 @@
 	min-height: 0;
 	flex: 1;
 	width: auto !important;
+	height: auto !important;
 	min-width: $min-width-item-pane;
 	/* Need a min height to prevent layout issues in stacked mode */
 	min-height: 168px;
