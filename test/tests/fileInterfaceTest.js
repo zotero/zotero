@@ -156,7 +156,7 @@ describe("Zotero_File_Interface", function() {
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 			
 			// Plain text
-			str = getDataForFlavor('text/unicode');
+			str = getDataForFlavor('text/plain');
 			assert.equal(str, '(A, 2016; B, 2016)');
 		});
 		
@@ -173,7 +173,7 @@ describe("Zotero_File_Interface", function() {
 			assert.include(str, '<i>B</i>');
 			
 			// Plain text
-			str = getDataForFlavor('text/unicode');
+			str = getDataForFlavor('text/plain');
 			assert.equal(str, 'A. (2016).\nB. (2016).\n');
 		});
 		
@@ -193,7 +193,7 @@ describe("Zotero_File_Interface", function() {
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 			
 			// Plain text
-			str = getDataForFlavor('text/unicode');
+			str = getDataForFlavor('text/plain');
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 		});
 		
@@ -211,7 +211,7 @@ describe("Zotero_File_Interface", function() {
 			assert.include(str, '<i>B</i>');
 			
 			// Plain text
-			str = getDataForFlavor('text/unicode');
+			str = getDataForFlavor('text/plain');
 			assert.include(str, 'line-height');
 			assert.include(str, '<i>A</i>');
 			assert.include(str, '<i>B</i>');

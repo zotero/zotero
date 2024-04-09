@@ -2354,7 +2354,7 @@ Zotero.Utilities.Internal = {
 				let targetInput = targetInputWeak.deref();
 				if (!targetInput) return;
 				targetInput.focus();
-				targetInput.value = Zotero.Utilities.Internal.getClipboard('text/unicode') || '';
+				targetInput.value = Zotero.Utilities.Internal.getClipboard('text/plain') || '';
 				targetInput.dispatchEvent(new Event('input'));
 			});
 			editMenuItems.push(pasteMenuitem);

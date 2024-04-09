@@ -279,8 +279,8 @@ var Zotero_File_Interface = new function() {
 					let str = Components.classes['@mozilla.org/supports-string;1']
 						.createInstance(Components.interfaces.nsISupportsString);
 					str.data = text;
-					transferable.addDataFlavor('text/unicode');
-					transferable.setTransferData('text/unicode', str, text.length * 2);
+					transferable.addDataFlavor('text/plain');
+					transferable.setTransferData('text/plain', str, text.length * 2);
 
 					// Add HTML
 					str = Components.classes['@mozilla.org/supports-string;1']
@@ -502,7 +502,7 @@ var Zotero_File_Interface = new function() {
 	 * Imports from clipboard
 	 */
 	this.importFromClipboard = Zotero.Promise.coroutine(function* () {
-		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
+		var str = Zotero.Utilities.Internal.getClipboard("text/plain");
 		if(!str) {
 			var ps = Services.prompt;
 			ps.alert(
@@ -823,8 +823,8 @@ var Zotero_File_Interface = new function() {
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = output;
-		transferable.addDataFlavor("text/unicode");
-		transferable.setTransferData("text/unicode", str, output.length * 2);
+		transferable.addDataFlavor("text/plain");
+		transferable.setTransferData("text/plain", str, output.length * 2);
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		
