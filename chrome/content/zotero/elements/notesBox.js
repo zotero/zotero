@@ -53,6 +53,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 
 		set item(val) {
+			if (this.tabType !== "library") {
+				this.hidden = true;
+				return;
+			}
 			if (val?.isRegularItem() && !val?.isFeedItem) {
 				this.hidden = false;
 			}
