@@ -39,6 +39,7 @@ var ZoteroPane = new function()
 	this.__defineGetter__('loaded', function () { return _loaded; });
 	var _lastSelectedItems = [];
 	var lastFocusedElement = null;
+	this.lastKeyPress = null;
 	
 	//Privileged methods
 	this.destroy = destroy;
@@ -877,6 +878,7 @@ var ZoteroPane = new function()
 	 * E.g. tab navigation hotkeys should work regardless of which component is focused.
 	 */
 	function captureKeyDown(event) {
+		ZoteroPane.lastKeyPress = (event.shiftKey ? "Shift" : "") + event.key;
 		const cmdOrCtrlOnly = Zotero.isMac
 			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
 			: (event.ctrlKey && !event.shiftKey && !event.altKey);
@@ -1016,6 +1018,7 @@ var ZoteroPane = new function()
 			// Tab into the reader from outside of it (e.g. from the contextPane)
 			// will focus the scrollable area
 			else if (event.key === 'Tab') {
+				// Do we need it if focus wraps around from tab to the last context pane element
 				if (!document.activeElement.classList.contains('reader')) {
 					setTimeout(() => {
 						if (document.activeElement.classList.contains('reader')) {
@@ -1100,6 +1103,29 @@ var ZoteroPane = new function()
 	}
 	
 	this.handleBlur = (event) => {
+		// If one tabs through the item/context pane all the way to the end and
+		// the focus leaves the pane, wrap it around to refocus the selected tab
+		let itemPane = document.getElementById("zotero-item-pane");
+		let contextPane = document.getElementById("zotero-context-pane");
+		let loosingFocus = event.target;
+		let receivingFocus = event.relatedTarget;
+		let itemPaneLostFocus = itemPane.contains(loosingFocus) && !itemPane.contains(receivingFocus);
+		let contextPaneLostFocus = contextPane.contains(loosingFocus) && !contextPane.contains(receivingFocus);
+		// Do not do anything if the window lost focus or if the last
+		// keypress was anything but a Ttab. That way, it won't interfere with other navigation such as
+		// Shift-tab from the header into the itemsView.
+		if (Services.focus.activeWindow === window && this.lastKeyPress === "Tab"
+			&& (itemPaneLostFocus || contextPaneLostFocus)) {
+			if (receivingFocus) {
+				Zotero_Tabs.moveFocus("current");
+			}
+			// event.relatedTarget is null when the reader is opened and we need a small
+			// delay otherwise the focus lands within the reader
+			else {
+				setTimeout(() => Zotero_Tabs.moveFocus("current"));
+			}
+			this.lastKeyPress = null;
+		}
 		// When focus shifts, unless we are inside of a panel, save
 		// the last focused element to be able to return focus to it when the panel closes
 		if (!event.target.closest("panel")) {
