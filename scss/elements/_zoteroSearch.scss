@@ -32,7 +32,7 @@ zoterosearch {
 	}
 
 	.search-condition {
-		-moz-box-flex: 1;
+		flex: 1;
 		display: flex;
 		align-items: center;
 
@@ -78,7 +78,7 @@ zoterosearch {
 	}
 
 	.search-in-the-last {
-		-moz-box-flex: 1;
+		flex: 1;
 		display: flex;
 		align-items: center;
 		

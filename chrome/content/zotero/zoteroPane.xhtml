@@ -805,7 +805,7 @@
 	
 	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
 	<hbox id="zotero-title-bar">
-		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" style="-moz-box-flex: 1;"/>
+		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" />
 		<hbox id="zotero-tabs-toolbar" class="zotero-toolbar" align="center">
 			<toolbarbutton id="zotero-tb-tabs-menu" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-tabs-menu" type="panel"
 				oncommand="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showTabsMenu(this)"/>
@@ -1084,7 +1084,7 @@
 																	align="start"
 																	oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-textbox'))"
 																	label="&zotero.lookup.button.search;"/>
-																<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="-moz-box-flex: 1"/>
+																<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="flex: 1"/>
 															</hbox>
 														</vbox>
 													</vbox>

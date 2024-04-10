@@ -8,11 +8,11 @@
 }
 
 #downloadProgress {
-	-moz-box-flex: 1;
+	flex: 1;
 }
 
 .update-name {
-	-moz-box-flex: 1;
+	flex: 1;
 }
 
 #errorReason {

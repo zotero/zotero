@@ -216,7 +216,6 @@ TODO: Replace with SVG
 #zotero-lookup-textbox {
 	margin: 4px;
 	padding: 2px;
-	-moz-box-flex: 1;
 	overflow-x: hidden; /* Fixes a glitch that renders an extra row */
 }
 

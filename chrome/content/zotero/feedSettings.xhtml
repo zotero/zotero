@@ -26,12 +26,12 @@
 		</hbox>
 		<html:input id="feed-url"
 				oninput="Zotero_Feed_Settings.invalidateURL();Zotero_Feed_Settings.validateURL()"
-				autofocus="true" style="width: 30em; max-width: 30em; -moz-box-flex: 1;"/>
+				autofocus="true" style="width: 30em; max-width: 30em;"/>
 
 		<hbox align="center">
 			<label value="&zotero.feedSettings.title.label;" control="feed-title"/>
 		</hbox>
-		<html:input id="feed-title" style="-moz-box-flex: 1;"/>
+		<html:input id="feed-title" style="max-width: 30em;" />
 	</html:div>
 	<vbox id="advanced-options" class="zotero-advanced-options">
 		<hbox onclick="Zotero_Feed_Settings.toggleAdvancedOptions()"  class="zotero-advanced-options-label">
