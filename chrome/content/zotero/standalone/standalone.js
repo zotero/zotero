@@ -350,15 +350,13 @@ const ZoteroStandalone = new function() {
 		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
 		copyLocalLinkMenu.hidden = !selected.length;
 
-		// TODO: Central source for these, extensible by plugins?
-		let readerMIMETypes = ['application/pdf', 'application/epub+zip', 'text/html'];
 		copyLocalReaderLink.disabled = !selected.some((item) => {
 			if (item.isAttachment()) {
-				return readerMIMETypes.includes(item.attachmentMIMEType);
+				return item.attachmentReaderType;
 			}
 			if (item.isRegularItem()) {
 				return Zotero.Items.get(item.getAttachments())
-					.some(attachment => readerMIMETypes.includes(attachment.attachmentMIMEType));
+					.some(attachment => attachment.attachmentReaderType);
 			}
 			return false;
 		});

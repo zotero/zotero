@@ -2773,7 +2773,7 @@ var ZoteroPane = new function()
 			links = items.map((item) => {
 				let itemPath = Zotero.API.getLibraryPrefix(item.libraryID) + '/items/' + item.key;
 				if (type === 'reader') {
-					return 'zotero://open-pdf/' + itemPath;
+					return 'zotero://open/' + itemPath;
 				}
 				else {
 					return 'zotero://select/' + itemPath;
