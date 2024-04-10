@@ -735,7 +735,8 @@
 			}
 		}
 
-		onAddClicked() {
+		onAddClicked(event) {
+			event.preventDefault();
 			if (this.parent){
 				let ref = this.parent.search.getCondition(
 					this.parent.search.addCondition(
