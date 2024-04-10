@@ -32,7 +32,7 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
-					<attachment-preview id="attachment-preview" tabindex="0"/>
+					<attachment-preview id="attachment-preview" tabindex="0" data-l10n-id="attachment-preview"/>
 					<html:div style="display: grid;">
 						<label id="url" crop="end" tabindex="0"
 							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
@@ -40,19 +40,19 @@
 					<html:div class="metadata-table">
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
-							<html:div class="meta-data"><editable-text id="fileName" nowrap="true" tight="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" nowrap="true" tight="true"/></html:div>
 						</html:div>
 						<html:div id="accessedRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="accessed-label" class="key" data-l10n-id="attachment-info-accessed"/></html:div>
-							<html:div class="meta-data"><editable-text id="accessed" nowrap="true" tight="true" readonly="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="accessed" aria-labelledby="accessed-label" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="pagesRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="pages-label" class="key" data-l10n-id="attachment-info-pages"/></html:div>
-							<html:div class="meta-data"><editable-text id="pages" nowrap="true" tight="true" readonly="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="pages" aria-labelledby="pages-label" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="dateModifiedRow" class="meta-row" hidden="true" >
 							<html:div class="meta-label"><html:label id="dateModified-label" class="key" data-l10n-id="attachment-info-modified"/></html:div>
-							<html:div class="meta-data"><editable-text id="dateModified" nowrap="true" tight="true" readonly="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="dateModified" aria-labelledby="dateModified-label" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="indexStatusRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="index-status-label" class="key" data-l10n-id="attachment-info-index"/></html:div>

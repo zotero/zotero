@@ -258,6 +258,7 @@
 				if (!buttonType) continue;
 				let button = document.createXULElement('toolbarbutton');
 				button.classList.add(buttonType, 'section-custom-button');
+				button.setAttribute("data-l10n-id", `section-button-${buttonType}`);
 				button.setAttribute("tabindex", "0");
 				button.addEventListener('command', (event) => {
 					this.dispatchEvent(new CustomEvent(buttonType, {
@@ -417,9 +418,11 @@
 			}
 			
 			this._head.setAttribute('aria-expanded', this.open);
+			this._head.setAttribute("aria-label", this.label);
 			this._title.textContent = this.label;
 			this._summary.textContent = this.summary;
 			this._head.querySelector('.twisty').hidden = this._disableCollapsing;
+			this._head.querySelector('.twisty').setAttribute('data-l10n-id', `section-button-${this.open ? "collapse" : "expand"}`);
 		}
 	}
 	customElements.define("collapsible-section", CollapsibleSection);

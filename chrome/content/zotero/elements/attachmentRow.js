@@ -31,11 +31,11 @@ import { getCSSItemTypeIcon } from 'components/icons';
 	class AttachmentRow extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="head">
-				<html:div class="clicky-item attachment-btn keyboard-clickable" tabindex="0">
+				<html:div class="clicky-item attachment-btn keyboard-clickable" tabindex="0" role="button">
 					<html:span class="icon"/>
 					<html:div class="label"/>
 				</html:div>
-				<html:div class="clicky-item annotation-btn">
+				<html:div class="clicky-item annotation-btn keyboard-clickable" tabindex="0" role="button" data-l10n-id="section-button-annotations" data-l10n-attrs="tooltiptext,aria-label" >
 					<html:span class="icon"/>
 					<html:span class="label"/>
 				</html:div>
@@ -112,8 +112,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			if (!this.initialized) return;
 			
 			this._attachmentButton.querySelector(".icon").replaceWith(getCSSItemTypeIcon(this._attachment.getItemTypeIconName()));
+			this._attachmentButton.setAttribute("aria-label", this._attachment.getField('title'));
 			this._attachmentButton.querySelector(".label").textContent = this._attachment.getField('title');
 			let annotationCount = this.attachment.isFileAttachment() ? this.attachment.getAnnotations().length : 0;
+			this._annotationButton.setAttribute('data-l10n-args', JSON.stringify({ count: annotationCount }));
 			this._annotationButton.hidden = annotationCount == 0;
 			this._annotationButton.querySelector(".label").textContent = annotationCount;
 		}

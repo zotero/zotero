@@ -370,6 +370,25 @@ section-related =
 section-attachment-info =
     .label = { pane-attachment-info }
 
+section-button-remove =
+    .tooltiptext = Remove
+section-button-add =
+    .tooltiptext = Add new
+section-button-expand =
+    .tooltiptext = Expand
+section-button-collapse =
+    .tooltiptext = Collapse
+annotations-count =
+    { $count ->
+        [one] { $count } Annotation
+       *[other] { $count } Annotations
+    }
+section-button-annotations =
+    .title = { annotations-count }
+    .aria-label = { annotations-count }
+attachment-preview =
+    .aria-label = { pane-attachment-preview }
+
 sidenav-info =
     .tooltiptext = { pane-info }
 sidenav-abstract =
