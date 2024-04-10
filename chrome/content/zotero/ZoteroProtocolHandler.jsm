@@ -1205,13 +1205,13 @@ function ZoteroProtocolHandler() {
 				location.position = {
 					type: 'FragmentSelector',
 					conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
-					value: cfi
+					value: decodeURIComponent(cfi)
 				};
 			}
 			else if (sel) {
 				location.position = {
 					type: 'CssSelector',
-					value: sel
+					value: decodeURIComponent(sel)
 				};
 			}
 			
