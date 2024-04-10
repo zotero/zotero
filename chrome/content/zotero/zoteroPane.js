@@ -2746,11 +2746,17 @@ var ZoteroPane = new function()
 		}
 		
 		let items = [];
+		let selectedAnnotation = null;
 		if (Zotero_Tabs.selectedID != 'zotero-pane') {
 			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 			if (reader) {
 				let item = Zotero.Items.get(reader.itemID);
 				items = [item];
+
+				let selectedAnnotationKeys = reader.selectedAnnotationKeys;
+				if (selectedAnnotationKeys.length === 1) {
+					selectedAnnotation = Zotero.Items.getByLibraryAndKey(item.libraryID, selectedAnnotationKeys[0]);
+				}
 			}
 		}
 		else {
@@ -2773,6 +2779,21 @@ var ZoteroPane = new function()
 			links = items.map((item) => {
 				let itemPath = Zotero.API.getLibraryPrefix(item.libraryID) + '/items/' + item.key;
 				if (type === 'reader') {
+					if (items.length === 1 && selectedAnnotation && selectedAnnotation.annotationPosition) {
+						let { annotationPosition, key } = selectedAnnotation;
+						annotationPosition = JSON.parse(annotationPosition);
+						// See Note HTML/Markdown translators
+						if (annotationPosition.type === 'FragmentSelector') {
+							itemPath += '?cfi=' + encodeURIComponent(annotationPosition.value);
+						}
+						else if (annotationPosition.type === 'CssSelector') {
+							itemPath += '?sel=' + encodeURIComponent(annotationPosition.value);
+						}
+						else {
+							itemPath += '?page=' + (annotationPosition.pageIndex + 1);
+						}
+						itemPath += '&annotation=' + key;
+					}
 					return 'zotero://open/' + itemPath;
 				}
 				else {
