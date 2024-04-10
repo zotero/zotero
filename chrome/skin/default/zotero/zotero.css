@@ -141,20 +141,6 @@ label.zotero-text-link {
 	text-align: center;
 }
 
-#zotero-advanced-search-dialog #zotero-search-box-controls {
-	padding: 3px;
-}
-
-#zotero-advanced-search-dialog .virtualized-table-container
-{
-	min-height: 250px;
-}
-
-#zotero-advanced-search-dialog #zotero-search-buttons
-{
-	margin: 3px 0;
-}
-
 /* Constrain 2x collection/search icons */
 zoterosearch .menulist-icon {
 	height: 16px;
