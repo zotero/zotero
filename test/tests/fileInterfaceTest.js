@@ -111,6 +111,26 @@ describe("Zotero_File_Interface", function() {
 		assert.equal(item.getField('title'), "Test");
 	});
 	
+	
+	describe("#importFromClipboard()", function () {
+		it("should import BibTeX from the clipboard", async function () {
+			var str = "@article{last_test_nodate,\n	title = {Test},\n	author = {Last, First},\n}";
+			Zotero.Utilities.Internal.copyTextToClipboard(str);
+			var promise = waitForItemEvent('add');
+			await win.Zotero_File_Interface.importFromClipboard();
+			var ids = await promise;
+			assert.lengthOf(ids, 1);
+			
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
+			assert.equal(item.getField('title'), "Test");
+			var creator = item.getCreators()[0];
+			assert.propertyVal(creator, 'firstName', "First")
+			assert.propertyVal(creator, 'lastName', "Last")
+		});
+	});
+	
+	
 	describe("#copyItemsToClipboard()", function () {
 		var clipboardService, item1, item2;
 		
