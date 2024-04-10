@@ -127,7 +127,7 @@ def main():
             
             html = str(response.read(), 'utf-8')
             xpi_url = json.loads(
-                '"' + re.match('.*(https:[^"]+\.xpi)', html, flags=re.DOTALL).group(1) + '"'
+                '"' + re.match('.*(https:[^"]+\\.xpi)', html, flags=re.DOTALL).group(1) + '"'
             )
             file_name = xpi_url.split("/")[-1]
             pack_file = os.path.join(pack_dir, file_name)
