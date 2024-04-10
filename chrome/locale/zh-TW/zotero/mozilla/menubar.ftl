@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = 歷史
 menu-view-synced-tabs-sidebar =
     .label = 同步的分頁
+menu-view-megalist-sidebar =
+    .label = 密碼
 menu-view-full-zoom =
     .label = 縮放
     .accesskey = Z
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = 最近關閉的分頁
 menu-history-undo-window-menu =
     .label = 最近關閉的視窗
-menu-history-reopen-all-tabs = 回復所有分頁
-menu-history-reopen-all-windows = 回復所有視窗
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = 搜尋瀏覽記錄
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = 管理書籤
-menu-bookmark-current-tab =
-    .label = 將目前分頁加入書籤
-menu-bookmark-edit =
-    .label = 編輯此書籤
 menu-bookmark-tab =
     .label = 將目前分頁加入書籤…
 menu-edit-bookmark =
     .label = 編輯此書籤…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = 搜尋書籤
 menu-bookmarks-all-tabs =
     .label = 將所有分頁加入書籤…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = 關閉疑難排解模式
     .accesskey = M
+menu-help-switch-device =
+    .label = 切換至新裝置
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = 這不是詐騙網站…
     .accesskey = d
+menu-report-broken-site =
+    .label = 回報網站問題

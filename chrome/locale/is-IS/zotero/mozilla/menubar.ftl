@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -140,6 +146,8 @@ menu-view-history-button =
     .label = Ferill
 menu-view-synced-tabs-sidebar =
     .label = Samstilltir flipar
+menu-view-megalist-sidebar =
+    .label = Lykilorð
 menu-view-full-zoom =
     .label = Aðdráttur
     .accesskey = ð
@@ -220,8 +228,9 @@ menu-history-undo-menu =
     .label = Nýlega lokaðir flipar
 menu-history-undo-window-menu =
     .label = Nýlega lokaðir gluggar
-menu-history-reopen-all-tabs = Enduropna alla flipa
-menu-history-reopen-all-windows = Enduropna alla glugga
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Leita í vafurferli
 
 ## Bookmarks Menu
 
@@ -230,14 +239,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = Sýsla með bókamerki
-menu-bookmark-current-tab =
-    .label = Bókamerkja núverandi flipa
-menu-bookmark-edit =
-    .label = Breyta bókamerki
 menu-bookmark-tab =
     .label = Bókamerkja núverandi flipa…
 menu-edit-bookmark =
     .label = Breyta þessu bókamerki…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Leita í bókamerkjum
 menu-bookmarks-all-tabs =
     .label = Setja alla flipa í bókamerki…
 menu-bookmarks-toolbar =
@@ -331,6 +339,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Slökkva á úrræðaleitarham
     .accesskey = m
+menu-help-switch-device =
+    .label = Skipti yfir í nýtt tæki
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -339,3 +350,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Þetta er ekki svindlsvæði…
     .accesskey = d
+menu-report-broken-site =
+    .label = Tilkynna bilað vefsvæði

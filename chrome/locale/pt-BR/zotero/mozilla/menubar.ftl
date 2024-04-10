@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Histórico
 menu-view-synced-tabs-sidebar =
     .label = Abas sincronizadas
+menu-view-megalist-sidebar =
+    .label = Senhas
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = Z
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Abas fechadas recentemente
 menu-history-undo-window-menu =
     .label = Janelas fechadas recentemente
-menu-history-reopen-all-tabs = Reabrir todas as abas
-menu-history-reopen-all-windows = Reabrir todas as janelas
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Pesquisar no histórico
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = v
 menu-bookmarks-manage =
     .label = Gerenciar favoritos
-menu-bookmark-current-tab =
-    .label = Adicionar aba atual aos favoritos
-menu-bookmark-edit =
-    .label = Editar este favorito
 menu-bookmark-tab =
     .label = Adicionar aba atual aos favoritos…
 menu-edit-bookmark =
     .label = Editar este favorito…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Pesquisar nos favoritos
 menu-bookmarks-all-tabs =
     .label = Adicionar todas as abas…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Desativar modo de solução de problemas
     .accesskey = m
+menu-help-switch-device =
+    .label = Mudança para outro dispositivo
+    .accesskey = M
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Este não é um site enganoso…
     .accesskey = E
+menu-report-broken-site =
+    .label = Relatar site com problemas

@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -98,7 +104,7 @@ menu-file-print =
     .label = Εκτύπωση…
     .accesskey = κ
 menu-file-import-from-another-browser =
-    .label = Εισαγωγή από άλλο φυλλομετρητή…
+    .label = Εισαγωγή από άλλο πρόγραμμα περιήγησης…
     .accesskey = Ε
 menu-file-go-offline =
     .label = Εργασία εκτός σύνδεσης
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Ιστορικό
 menu-view-synced-tabs-sidebar =
     .label = Συγχρονισμένες καρτέλες
+menu-view-megalist-sidebar =
+    .label = Κωδικοί πρόσβασης
 menu-view-full-zoom =
     .label = Ζουμ
     .accesskey = Ζ
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Πρόσφατα κλεισμένες καρτέλες
 menu-history-undo-window-menu =
     .label = Πρόσφατα κλεισμένα παράθυρα
-menu-history-reopen-all-tabs = Επαναφορά όλων των καρτελών
-menu-history-reopen-all-windows = Επαναφορά όλων των παραθύρων
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Αναζήτηση ιστορικού
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = Σ
 menu-bookmarks-manage =
     .label = Διαχείριση σελιδοδεικτών
-menu-bookmark-current-tab =
-    .label = Προσθήκη καρτέλας στους σελιδοδείκτες
-menu-bookmark-edit =
-    .label = Επεξεργασία σελιδοδείκτη
 menu-bookmark-tab =
     .label = Προσθήκη σελιδοδείκτη…
 menu-edit-bookmark =
     .label = Επεξεργασία σελιδοδείκτη…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Αναζήτηση σελιδοδεικτών
 menu-bookmarks-all-tabs =
     .label = Αποθήκευση όλων των καρτελών…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Απενεργοποίηση λειτουργίας επίλυσης προβλημάτων
     .accesskey = ν
+menu-help-switch-device =
+    .label = Εναλλαγή σε νέα συσκευή
+    .accesskey = ν
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Αυτός δεν είναι παραπλανητικός ιστότοπος…
     .accesskey = δ
+menu-report-broken-site =
+    .label = Αναφορά προβληματικού ιστοτόπου

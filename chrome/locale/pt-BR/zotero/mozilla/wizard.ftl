@@ -13,8 +13,8 @@ wizard-win-button-back =
     .accesskey = V
 
 wizard-macos-button-next =
-    .label = Continuar
-    .accesskey = C
+    .label = Avançar
+    .accesskey = A
 wizard-linux-button-next =
     .label = Avançar
     .accesskey = A

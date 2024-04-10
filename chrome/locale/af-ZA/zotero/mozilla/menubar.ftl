@@ -34,9 +34,11 @@ menu-quit =
             [windows] s
            *[other] A
         }
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Sluit { -brand-shorter-name } af
+
 menu-about =
     .label = Aangaande { -brand-shorter-name }
     .accesskey = A
@@ -192,8 +194,6 @@ menu-history-undo-window-menu =
 menu-bookmarks-menu =
     .label = Boekmerke
     .accesskey = B
-menu-bookmark-edit =
-    .label = Redigeer hierdie boekmerk
 menu-bookmarks-all-tabs =
     .label = Boekmerk alle oortjies…
 menu-bookmarks-toolbar =

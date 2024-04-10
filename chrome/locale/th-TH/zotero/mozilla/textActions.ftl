@@ -22,6 +22,11 @@ text-action-copy =
     .accesskey = ค
 text-action-copy-shortcut =
     .key = C
+# This command copies the link, removing additional
+# query parameters used to track users across sites.
+text-action-strip-on-share =
+    .label = คัดลอกโดยไม่ติดตามไซต์
+    .accesskey = n
 text-action-paste =
     .label = วาง
     .accesskey = ว
@@ -57,3 +62,5 @@ text-action-spell-dictionaries =
     .accesskey = ภ
 text-action-search-text-box-clear =
     .title = ล้าง
+text-action-highlight-selection =
+    .label = เน้นสีส่วนที่เลือก

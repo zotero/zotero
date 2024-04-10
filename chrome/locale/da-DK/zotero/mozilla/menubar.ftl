@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -140,6 +146,8 @@ menu-view-history-button =
     .label = Historik
 menu-view-synced-tabs-sidebar =
     .label = Synkroniserede faneblade
+menu-view-megalist-sidebar =
+    .label = Adgangskoder
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = Z
@@ -220,8 +228,9 @@ menu-history-undo-menu =
     .label = Senest lukkede faneblade
 menu-history-undo-window-menu =
     .label = Senest lukkede vinduer
-menu-history-reopen-all-tabs = Genåbn alle faneblade
-menu-history-reopen-all-windows = Genåbn alle vinduer
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Søg i historik
 
 ## Bookmarks Menu
 
@@ -230,14 +239,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = Håndter bogmærker
-menu-bookmark-current-tab =
-    .label = Bogmærk dette faneblad
-menu-bookmark-edit =
-    .label = Rediger bogmærke
 menu-bookmark-tab =
     .label = Bogmærk dette faneblad…
 menu-edit-bookmark =
     .label = Rediger bogmærke…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Søg i bogmærker
 menu-bookmarks-all-tabs =
     .label = Bogmærk alle faneblade…
 menu-bookmarks-toolbar =
@@ -331,6 +339,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Slå fejlsøgnings-tilstand fra
     .accesskey = f
+menu-help-switch-device =
+    .label = Skifte til en ny enhed
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -339,3 +350,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Dette er ikke et vildledende websted…
     .accesskey = v
+menu-report-broken-site =
+    .label = Rapporter problem med websted

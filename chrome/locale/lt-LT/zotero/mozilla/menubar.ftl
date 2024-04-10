@@ -38,9 +38,11 @@ menu-quit =
             [windows] B
            *[other] B
         }
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Baigti „{ -brand-shorter-name }“ darbą
+
 menu-about =
     .label = Apie „{ -brand-shorter-name }“
     .accesskey = A
@@ -221,8 +223,6 @@ menu-history-undo-menu =
     .label = Paskiausiai užvertos kortelės
 menu-history-undo-window-menu =
     .label = Paskiausiai užverti langai
-menu-history-reopen-all-tabs = Įkelti visas korteles
-menu-history-reopen-all-windows = Įkelti visus langus
 
 ## Bookmarks Menu
 
@@ -231,10 +231,10 @@ menu-bookmarks-menu =
     .accesskey = A
 menu-bookmarks-manage =
     .label = Tvarkyti adresyną
-menu-bookmark-current-tab =
-    .label = Įrašyti šią kortelę į adresyną
-menu-bookmark-edit =
-    .label = Taisyti adresyno įrašą
+menu-bookmark-tab =
+    .label = Įrašyti šią kortelę į adresyną…
+menu-edit-bookmark =
+    .label = Taisyti šį adresyno įrašą…
 menu-bookmarks-all-tabs =
     .label = Visas korteles įtraukti į adresyną…
 menu-bookmarks-toolbar =

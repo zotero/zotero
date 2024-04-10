@@ -38,9 +38,11 @@ menu-quit =
             [windows] خ
            *[other] ت
         }
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = ترک { -brand-shorter-name }
+
 menu-about =
     .label = دربارهٔ { -brand-shorter-name }
     .accesskey = د
@@ -219,8 +221,6 @@ menu-history-undo-menu =
     .label = زبانه‌های تازه بسته شده
 menu-history-undo-window-menu =
     .label = پنجره‌های تازه بسته شده
-menu-history-reopen-all-tabs = بازآوری همهٔ زبانه‌ها
-menu-history-reopen-all-windows = بازآوری همهٔ پنجره‌ها
 
 ## Bookmarks Menu
 
@@ -229,10 +229,6 @@ menu-bookmarks-menu =
     .accesskey = ن
 menu-bookmarks-manage =
     .label = مدیریت نشانک‌ها
-menu-bookmark-current-tab =
-    .label = نشانک‌گذاری زبانهٔ فعلی
-menu-bookmark-edit =
-    .label = ویرایش این نشانک
 menu-bookmark-tab =
     .label = نشانک‌گذاری زبانهٔ کنونی…
 menu-edit-bookmark =
@@ -330,6 +326,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = خاموش کردن حالت عیب‌یابی
     .accesskey = M
+menu-help-switch-device =
+    .label = تعویض به افزاره‌ای جدید
+    .accesskey = ت
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

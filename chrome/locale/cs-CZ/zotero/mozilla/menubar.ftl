@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -145,6 +151,8 @@ menu-view-history-button =
     .label = Historie
 menu-view-synced-tabs-sidebar =
     .label = Synchronizované panely
+menu-view-megalist-sidebar =
+    .label = Hesla
 menu-view-full-zoom =
     .label = Velikost stránky
     .accesskey = V
@@ -225,8 +233,9 @@ menu-history-undo-menu =
     .label = Naposledy zavřené panely
 menu-history-undo-window-menu =
     .label = Naposledy zavřená okna
-menu-history-reopen-all-tabs = Znovu otevřít všechny panely
-menu-history-reopen-all-windows = Znovu otevřít všechna okna
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Hledat v historii
 
 ## Bookmarks Menu
 
@@ -235,14 +244,13 @@ menu-bookmarks-menu =
     .accesskey = o
 menu-bookmarks-manage =
     .label = Správa záložek
-menu-bookmark-current-tab =
-    .label = Přidat současný panel do záložek
-menu-bookmark-edit =
-    .label = Upravit záložku
 menu-bookmark-tab =
     .label = Přidat současný panel do záložek…
 menu-edit-bookmark =
     .label = Upravit záložku…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Hledat v záložkách
 menu-bookmarks-all-tabs =
     .label = Přidat všechny panely do záložek…
 menu-bookmarks-toolbar =
@@ -340,6 +348,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Ukončit režim řešení potíží
     .accesskey = m
+menu-help-switch-device =
+    .label = Přechod na nové zařízení
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -348,3 +359,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Tato stránka není klamavá…
     .accesskey = l
+menu-report-broken-site =
+    .label = Nahlásit nefunkční stránku

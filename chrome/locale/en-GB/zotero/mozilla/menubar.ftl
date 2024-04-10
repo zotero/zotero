@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = History
 menu-view-synced-tabs-sidebar =
     .label = Synced Tabs
+menu-view-megalist-sidebar =
+    .label = Passwords
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = Z
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Recently Closed Tabs
 menu-history-undo-window-menu =
     .label = Recently Closed Windows
-menu-history-reopen-all-tabs = Reopen All Tabs
-menu-history-reopen-all-windows = Reopen All Windows
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Search History
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = Manage Bookmarks
-menu-bookmark-current-tab =
-    .label = Bookmark Current Tab
-menu-bookmark-edit =
-    .label = Edit This Bookmark
 menu-bookmark-tab =
     .label = Bookmark Current Tab…
 menu-edit-bookmark =
     .label = Edit This Bookmark…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Search Bookmarks
 menu-bookmarks-all-tabs =
     .label = Bookmark All Tabs…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Turn Troubleshoot Mode Off
     .accesskey = M
+menu-help-switch-device =
+    .label = Switching to a New Device
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = This Isn’t a Deceptive Site…
     .accesskey = D
+menu-report-broken-site =
+    .label = Report Broken Site

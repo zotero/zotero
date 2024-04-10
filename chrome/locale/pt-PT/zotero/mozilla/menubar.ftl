@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Histórico
 menu-view-synced-tabs-sidebar =
     .label = Separadores sincronizados
+menu-view-megalist-sidebar =
+    .label = Palavras-passe
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = Z
@@ -184,11 +192,11 @@ menu-view-full-screen =
 
 # This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
-    .label = Entrar na vista de leitura
-    .accesskey = l
+    .label = Entrar Visualização de Leitura
+    .accesskey = E
 # This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
-    .label = Fechar vista de leitura
+    .label = Fechar Visualização de Leitura
     .accesskey = l
 
 ##
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Separadores fechados recentemente
 menu-history-undo-window-menu =
     .label = Janelas fechadas recentemente
-menu-history-reopen-all-tabs = Reabrir todos os separadores
-menu-history-reopen-all-windows = Reabrir todas as janelas
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Pesquisar histórico
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = M
 menu-bookmarks-manage =
     .label = Gerir marcadores
-menu-bookmark-current-tab =
-    .label = Adicionar separador aos marcadores
-menu-bookmark-edit =
-    .label = Editar este marcador
 menu-bookmark-tab =
     .label = Adicionar separador atual aos marcadores…
 menu-edit-bookmark =
     .label = Editar este marcador…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Pesquisar marcadores
 menu-bookmarks-all-tabs =
     .label = Adicionar todos os separadores aos marcadores…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Desligar o modo de diagnóstico
     .accesskey = m
+menu-help-switch-device =
+    .label = Mudar para um dispositivo novo
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Este não é um site decetivo…
     .accesskey = d
+menu-report-broken-site =
+    .label = Reportar site com problemas

@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -141,6 +147,8 @@ menu-view-history-button =
     .label = História
 menu-view-synced-tabs-sidebar =
     .label = Synchronizované karty
+menu-view-megalist-sidebar =
+    .label = Heslá
 menu-view-full-zoom =
     .label = Lupa
     .accesskey = L
@@ -221,8 +229,9 @@ menu-history-undo-menu =
     .label = Nedávno zatvorené karty
 menu-history-undo-window-menu =
     .label = Nedávno zatvorené okná
-menu-history-reopen-all-tabs = Obnoviť všetky karty
-menu-history-reopen-all-windows = Obnoviť všetky okná
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Hľadať v histórii
 
 ## Bookmarks Menu
 
@@ -231,14 +240,13 @@ menu-bookmarks-menu =
     .accesskey = o
 menu-bookmarks-manage =
     .label = Spravovať záložky
-menu-bookmark-current-tab =
-    .label = Pridať túto kartu medzi záložky
-menu-bookmark-edit =
-    .label = Upraviť túto záložku
 menu-bookmark-tab =
     .label = Pridať túto kartu medzi záložky
 menu-edit-bookmark =
     .label = Upraviť túto záložku…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Hľadať v záložkách
 menu-bookmarks-all-tabs =
     .label = Pridať všetky karty medzi záložky…
 menu-bookmarks-toolbar =
@@ -332,6 +340,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Vypnúť režim riešenia problémov
     .accesskey = r
+menu-help-switch-device =
+    .label = Prechod na nové zariadenie
+    .accesskey = P
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -340,3 +351,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Toto nie je podvodná stránka…
     .accesskey = T
+menu-report-broken-site =
+    .label = Nahlásiť nefunkčnú stránku

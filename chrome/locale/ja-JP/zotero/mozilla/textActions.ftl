@@ -22,6 +22,11 @@ text-action-copy =
     .accesskey = C
 text-action-copy-shortcut =
     .key = C
+# This command copies the link, removing additional
+# query parameters used to track users across sites.
+text-action-strip-on-share =
+    .label = サイト追跡を除いてコピー
+    .accesskey = n
 text-action-paste =
     .label = 貼り付け
     .accesskey = P
@@ -57,3 +62,5 @@ text-action-spell-dictionaries =
     .accesskey = L
 text-action-search-text-box-clear =
     .title = 消去
+text-action-highlight-selection =
+    .label = 選択範囲を強調表示

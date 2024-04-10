@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -102,7 +108,7 @@ menu-file-print =
     .label = Moullañ…
     .accesskey = M
 menu-file-import-from-another-browser =
-    .label = Enporzhiañ eus ur merdeer all...
+    .label = Enporzhiañ eus ur merdeer all…
     .accesskey = E
 menu-file-go-offline =
     .label = Labourat ezlinenn
@@ -143,6 +149,8 @@ menu-view-history-button =
     .label = Roll istor
 menu-view-synced-tabs-sidebar =
     .label = Ivinelloù goubredet
+menu-view-megalist-sidebar =
+    .label = Gerioù-tremen
 menu-view-full-zoom =
     .label = Zoum
     .accesskey = Z
@@ -223,8 +231,9 @@ menu-history-undo-menu =
     .label = Ivinelloù serret nevez zo
 menu-history-undo-window-menu =
     .label = Prenestroù serret nevez zo
-menu-history-reopen-all-tabs = Digeriñ en-dro an holl ivinelloù
-menu-history-reopen-all-windows = Digeriñ en-dro an holl brenestroù
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Klask er roll istor
 
 ## Bookmarks Menu
 
@@ -233,14 +242,13 @@ menu-bookmarks-menu =
     .accesskey = n
 menu-bookmarks-manage =
     .label = Merañ ar sinedoù
-menu-bookmark-current-tab =
-    .label = Lakaat an ivinell vremanel er sinedoù
-menu-bookmark-edit =
-    .label = Embann ar sined-mañ
 menu-bookmark-tab =
     .label = Lakaat an ivinell a-vremañ er sinedoù…
 menu-edit-bookmark =
     .label = Embann ar sined-mañ…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Klask er sinedoù
 menu-bookmarks-all-tabs =
     .label = Ouzhpennañ an holl ivinelloù d'ar sinedoù
 menu-bookmarks-toolbar =
@@ -326,7 +334,7 @@ menu-help-more-troubleshooting-info =
 menu-help-report-site-issue =
     .label = Danevell kudennoù al lec'hienn…
 menu-help-share-ideas =
-    .label = Kinnig mennozhioù hag alioù...
+    .label = Kinnig mennozhioù hag alioù…
     .accesskey = K
 menu-help-enter-troubleshoot-mode2 =
     .label = Mod disac’hañ
@@ -334,11 +342,16 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Diweredekaat ar mod disac’hañ
     .accesskey = D
+menu-help-switch-device =
+    .label = Tremen war un trevnad nevez
+    .accesskey = T
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
-    .label = Danevelliñ al lec'hienn dagus…
+    .label = Danevelliñ ul lec’hienn dagus…
     .accesskey = d
 menu-help-not-deceptive =
     .label = N'eo ket ul lec’hienn dagus…
     .accesskey = d
+menu-report-broken-site =
+    .label = Danevelliñ ul lec'hienn torret

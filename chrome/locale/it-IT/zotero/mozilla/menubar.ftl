@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -30,11 +36,9 @@ menu-application-touch-bar =
 menu-quit =
     .label = Esci
     .accesskey = E
-
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Esci da { -brand-shorter-name }
-
 menu-about =
     .label = Informazioni su { -brand-shorter-name }
     .accesskey = I
@@ -133,6 +137,8 @@ menu-view-history-button =
     .label = Cronologia
 menu-view-synced-tabs-sidebar =
     .label = Schede sincronizzate
+menu-view-megalist-sidebar =
+    .label = Password
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = Z
@@ -213,8 +219,9 @@ menu-history-undo-menu =
     .label = Schede chiuse di recente
 menu-history-undo-window-menu =
     .label = Finestre chiuse di recente
-menu-history-reopen-all-tabs = Riapri tutte le schede
-menu-history-reopen-all-windows = Riapri tutte le finestre
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Cerca nella cronologia
 
 ## Bookmarks Menu
 
@@ -223,14 +230,13 @@ menu-bookmarks-menu =
     .accesskey = e
 menu-bookmarks-manage =
     .label = Gestisci segnalibri
-menu-bookmark-current-tab =
-    .label = Aggiungi scheda corrente ai segnalibri
-menu-bookmark-edit =
-    .label = Modifica segnalibro
 menu-bookmark-tab =
     .label = Aggiungi scheda corrente ai segnalibri…
 menu-edit-bookmark =
     .label = Modifica segnalibro…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Cerca nei segnalibri
 menu-bookmarks-all-tabs =
     .label = Tutte le schede nei segnalibri…
 menu-bookmarks-toolbar =
@@ -308,7 +314,7 @@ menu-help =
     .label = Aiuto
     .accesskey = A
 menu-get-help =
-    .label = Ottieni assistenza
+    .label = Ricevi assistenza
     .accesskey = n
 menu-help-more-troubleshooting-info =
     .label = Altre informazioni per la risoluzione di problemi
@@ -324,12 +330,17 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Disattiva Modalità risoluzione problemi
     .accesskey = m
+menu-help-switch-device =
+    .label = Passa a un nuovo dispositivo
+    .accesskey = P
 # Label of the Help menu item. Either this or
-# safeb.palm.notdeceptive.label from
-# phishing-afterload-warning-message.dtd is shown.
+# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Segnala un sito ingannevole…
     .accesskey = e
 menu-help-not-deceptive =
     .label = Non è un sito ingannevole…
     .accesskey = e
+menu-report-broken-site =
+    .label = Segnala problemi con il sito
+

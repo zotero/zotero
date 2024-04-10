@@ -34,16 +34,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } விட்டு வெளியேறு
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = { -brand-shorter-name } உலாவியை விட்டு வெளியேறு
+
 menu-about =
     .label = { -brand-shorter-name } பற்றி
     .accesskey = A
@@ -73,9 +68,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = கோப்பினைத் திற
     .accesskey = O
-menu-file-close =
-    .label = மூடுக
-    .accesskey = C
 menu-file-close-window =
     .label = சாளரத்தை மூடுக
     .accesskey = d
@@ -88,9 +80,6 @@ menu-file-email-link =
 menu-file-print-setup =
     .label = பக்க அமைவு…
     .accesskey = u
-menu-file-print-preview =
-    .label = அச்சு முன்தோற்றம்
-    .accesskey = v
 menu-file-print =
     .label = அச்சிடு…
     .accesskey = P
@@ -103,9 +92,6 @@ menu-file-go-offline =
 menu-edit =
     .label = தொகு
     .accesskey = E
-menu-edit-find-on =
-    .label = இப்பக்கத்தில் தேடு…
-    .accesskey = F
 menu-edit-find-again =
     .label = மீண்டும் தேடு
     .accesskey = g
@@ -121,9 +107,6 @@ menu-view =
 menu-view-toolbars-menu =
     .label = கருவிப்பட்டைகள்
     .accesskey = T
-menu-view-customize-toolbar =
-    .label = விருப்பமை…
-    .accesskey = C
 menu-view-sidebar =
     .label = பக்கப்பட்டை
     .accesskey = e
@@ -154,9 +137,6 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = அடிப்படை பக்கப் பாணி
     .accesskey = B
-menu-view-charset =
-    .label = உரை குறியாக்கம்
-    .accesskey = c
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -170,6 +150,17 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = முழுத்திரை
     .accesskey = F
+
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = வாசிக்கும் முறைக்கு மாறவும்
+    .accesskey = R
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = வாசிப்பு தோற்றத்தை மூடு
+    .accesskey = R
 
 ##
 
@@ -205,12 +196,6 @@ menu-history-undo-window-menu =
 menu-bookmarks-menu =
     .label = புத்தகக்குறிகள்
     .accesskey = B
-menu-bookmarks-show-all =
-    .label = அனைத்தையும் காண்பி
-menu-bookmark-this-page =
-    .label = புத்தகக்குறியிடு
-menu-bookmark-edit =
-    .label = புத்தகக்குறியைத் திருத்து
 menu-bookmarks-all-tabs =
     .label = கீற்றுகளை புத்தகக்குறியிடு…
 menu-bookmarks-toolbar =
@@ -228,32 +213,15 @@ menu-tools =
 menu-tools-downloads =
     .label = பதிவிறக்கங்கள்
     .accesskey = D
-menu-tools-addons =
-    .label = துணை நிரல்கள்
-    .accesskey = A
 menu-tools-sync-now =
     .label = இப்போது ஒத்திசை
     .accesskey = S
-menu-tools-web-developer =
-    .label = உருவாக்குநர் கருவிகள்
-    .accesskey = W
 menu-tools-page-source =
     .label = பக்க மூலம்
     .accesskey = o
 menu-tools-page-info =
     .label = பக்க தகவல்
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] தேர்வுகள்
-           *[other] முன்னுரிமைகள்
-        }
-    .accesskey =
-        { PLATFORM() ->
-            [windows] O
-           *[other] n
-        }
 menu-tools-layout-debugger =
     .label = வடிவமைப்பு வழுநீக்கி
     .accesskey = L
@@ -271,15 +239,6 @@ menu-window-bring-all-to-front =
 # NOTE: For Engineers, any additions or changes to Help menu strings should
 # also be reflected in the related strings in appmenu.ftl. Those strings, by
 # convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-help-product
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
 # Example: appmenu-get-help
 #
 # These strings are duplicated to allow for different casing depending on
@@ -288,29 +247,8 @@ menu-window-bring-all-to-front =
 menu-help =
     .label = உதவி
     .accesskey = H
-menu-help-product =
-    .label = { -brand-shorter-name } உதவி
-    .accesskey = H
-menu-help-show-tour =
-    .label = { -brand-shorter-name } செயல்முறை விளக்கம்
-    .accesskey = o
-menu-help-keyboard-shortcuts =
-    .label = விசைப்பலகை குறுக்கு வழிகள்
-    .accesskey = K
-menu-help-troubleshooting-info =
-    .label = பிழைத்திருத்தல் தகவல்
-    .accesskey = T
 menu-help-report-site-issue =
     .label = தள சிக்கலை தெரிவி…
-menu-help-feedback-page =
-    .label = கருத்துக்களைச் சமர்ப்பி…
-    .accesskey = S
-menu-help-safe-mode-without-addons =
-    .label = நிரலை நீக்கியபின் மீட்துவக்கு…
-    .accesskey = R
-menu-help-safe-mode-with-addons =
-    .label = நிரலை நீக்கியபின் மீட்துவக்கு…
-    .accesskey = R
 # Label of the Help menu item. Either this or
 # safeb.palm.notdeceptive.label from
 # phishing-afterload-warning-message.dtd is shown.

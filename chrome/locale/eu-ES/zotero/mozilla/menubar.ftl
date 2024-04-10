@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -219,8 +225,9 @@ menu-history-undo-menu =
     .label = Itxitako azken fitxak
 menu-history-undo-window-menu =
     .label = Itxitako azken leihoak
-menu-history-reopen-all-tabs = Ireki berriro fitxa guztiak
-menu-history-reopen-all-windows = Ireki berriro leiho guztiak
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Bilatu historia
 
 ## Bookmarks Menu
 
@@ -229,14 +236,13 @@ menu-bookmarks-menu =
     .accesskey = m
 menu-bookmarks-manage =
     .label = Kudeatu laster-markak
-menu-bookmark-current-tab =
-    .label = Egin uneko fitxaren laster-marka
-menu-bookmark-edit =
-    .label = Editatu laster-marka
 menu-bookmark-tab =
     .label = Egin uneko fitxaren laster-marka…
 menu-edit-bookmark =
     .label = Editatu laster-marka…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Bilatu laster-markak
 menu-bookmarks-all-tabs =
     .label = Egin fitxa guztien laster-marka…
 menu-bookmarks-toolbar =
@@ -330,6 +336,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Desaktibatu arazoak konpontzeko modua
     .accesskey = s
+menu-help-switch-device =
+    .label = Gailu berri batera aldatzea
+    .accesskey = d
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +347,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Hau ez da gune iruzurtia…
     .accesskey = i
+menu-report-broken-site =
+    .label = Eman hondatutako gunearen berri

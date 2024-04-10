@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Sivuhistoria
 menu-view-synced-tabs-sidebar =
     .label = Synkronoidut välilehdet
+menu-view-megalist-sidebar =
+    .label = Salasanat
 menu-view-full-zoom =
     .label = Sivun suurennus
     .accesskey = S
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Suljetut välilehdet
 menu-history-undo-window-menu =
     .label = Suljetut ikkunat
-menu-history-reopen-all-tabs = Avaa uudelleen kaikki välilehdet
-menu-history-reopen-all-windows = Avaa uudelleen kaikki ikkunat
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Etsi historiasta
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = K
 menu-bookmarks-manage =
     .label = Järjestele kirjanmerkkejä
-menu-bookmark-current-tab =
-    .label = Lisää nykyinen välilehti kirjanmerkkeihin
-menu-bookmark-edit =
-    .label = Muokkaa kirjanmerkkiä
 menu-bookmark-tab =
     .label = Lisää nykyinen välilehti kirjanmerkkeihin…
 menu-edit-bookmark =
     .label = Muokkaa kirjanmerkkiä…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Etsi kirjanmerkeistä
 menu-bookmarks-all-tabs =
     .label = Lisää kaikki välilehdet kirjanmerkkeihin…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Poista vianmääritystila käytöstä
     .accesskey = P
+menu-help-switch-device =
+    .label = Uuteen laitteeseen vaihtaminen
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Tämä ei ole petollinen sivusto…
     .accesskey = p
+menu-report-broken-site =
+    .label = Ilmoita rikkinäisestä sivustosta

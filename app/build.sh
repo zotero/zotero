@@ -359,7 +359,11 @@ for locale in `ls chrome/locale/`; do
 	cp chrome/locale/$locale/zotero/mozilla/wizard.ftl localization/$locale/toolkit/global
 	
 	mkdir -p localization/$locale/browser
+	cp chrome/locale/$locale/zotero/mozilla/browserSets.ftl localization/$locale/browser
 	cp chrome/locale/$locale/zotero/mozilla/menubar.ftl localization/$locale/browser
+	
+	mkdir -p localization/$locale/devtools/client
+	cp chrome/locale/$locale/zotero/mozilla/toolbox.ftl localization/$locale/devtools/client
 	
 	# TEMP: Until we've created zotero.ftl in all locales
 	touch chrome/locale/$locale/zotero/zotero.ftl
