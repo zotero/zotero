@@ -231,7 +231,15 @@ class ReaderInstance {
 			onAddToNote: (annotations) => {
 				this._addToNote(annotations);
 			},
-			onSaveAnnotations: async (annotations) => {
+			onSaveAnnotations: async (annotations, callback) => {
+				// Reader iframe will wait for this function to finish to make sure there
+				// aren't simultaneous transaction waiting to modify the same annotation item.
+				// Although simultaneous changes are still possible from different reader instances,
+				// but unlikely to be a problem.
+				// It's best to test that by running the code below in Run JavaScript tool:
+				// await Zotero.DB.executeTransaction(async function () {
+				//     await Zotero.Promise.delay(15000);
+				// });
 				let attachment = Zotero.Items.get(this.itemID);
 				let notifierQueue = new Zotero.Notifier.Queue();
 				try {
@@ -274,6 +282,9 @@ class ReaderInstance {
 					throw e;
 				}
 				finally {
+					// Reader iframe doesn't have permissions to wait for onSaveAnnotations
+					// promise, therefore using callback to inform when saving finishes
+					callback();
 					await Zotero.Notifier.commit(notifierQueue);
 				}
 			},
