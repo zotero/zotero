@@ -215,6 +215,7 @@ Zotero.ProgressWindow = function(options = {}) {
 				var elem = _progressWindow.document.createXULElement('label');
 				elem.setAttribute('value', part.text);
 				elem.setAttribute('class', 'zotero-text-link');
+				elem.setAttribute('role', 'link');
 				for (var i in part.attributes) {
 					elem.setAttribute(i, part.attributes[i]);
 				}

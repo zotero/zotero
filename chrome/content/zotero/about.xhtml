@@ -27,7 +27,7 @@
 		</div>
 		<hbox>
 			<label id="version"/>
-			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;"/>
+			<label id="changelog" is="zotero-text-link" value="&zotero.whatsNew;"/>
 		</hbox>
 		<script>
 			var version = Zotero.version;
@@ -44,8 +44,7 @@
 				<script><![CDATA[
 					Components.utils.import("resource://zotero/config.js");
 					
-					document.getElementById('changelog').onclick =
-						() => Zotero.launchURL(ZOTERO_CONFIG.CHANGELOG_URL);
+					document.getElementById('changelog').href = ZOTERO_CONFIG.CHANGELOG_URL;
 					
 					// Replace [links] in localized strings with spans with onclick handlers
 					//
@@ -85,6 +84,7 @@
 					// Activate text links
 					for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
 						span.className = 'text-link';
+						span.setAttribute('role', 'link');
 						span.onclick = function () {
 							Zotero.launchURL(this.getAttribute('data-href'));
 						};

@@ -34,7 +34,7 @@
 				<html:div class="body">
 					<attachment-preview id="attachment-preview" tabindex="0"/>
 					<html:div style="display: grid;">
-						<label id="url" crop="end" tabindex="0"
+						<label id="url" is="zotero-text-link" crop="end" tabindex="0"
 							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
 					</html:div>
 					<html:div class="metadata-table">
@@ -334,18 +334,9 @@
 			if (this.displayURL && (isImportedURL || isLinkedURL)) {
 				let urlSpec = this.item.getField('url');
 				urlField.setAttribute('value', urlSpec);
-				urlField.setAttribute('tooltiptext', urlSpec);
-				urlField.setAttribute('hidden', false);
-				if (this.clickableLink) {
-					urlField.onclick = function (event) {
-						if (event.button == 0) {
-							ZoteroPane_Local.loadURI(this.value, event);
-						}
-					};
-					urlField.className = 'zotero-text-link keyboard-clickable';
-				}
-				else {
-					urlField.className = '';
+				urlField.href = urlSpec;
+				if (!this.clickableLink) {
+					urlField.noClick = true;
 				}
 				urlField.hidden = false;
 			}
