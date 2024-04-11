@@ -52,6 +52,9 @@ class BlockingObserver {
 
 	register(browser) {
 		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.top.id;
+		if (id === 0) {
+			throw new Error('BlockingObserver: Browser is not initialized');
+		}
 		this._ids.add(id);
 		if (!this._observerAdded) {
 			Services.obs.addObserver(this, 'http-on-modify-request');
@@ -62,8 +65,20 @@ class BlockingObserver {
 
 	unregister(browser) {
 		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.top.id;
+		if (id === 0) {
+			throw new Error('BlockingObserver: Browser is not initialized');
+		}
 		this._ids.delete(id);
 		if (this._observerAdded && !this._ids.size) {
+			Services.obs.removeObserver(this, 'http-on-modify-request');
+			Zotero.debug('BlockingObserver: Removed observer');
+			this._observerAdded = false;
+		}
+	}
+	
+	dispose() {
+		if (this._observerAdded) {
+			this._ids.clear();
 			Services.obs.removeObserver(this, 'http-on-modify-request');
 			Zotero.debug('BlockingObserver: Removed observer');
 			this._observerAdded = false;
@@ -73,6 +88,9 @@ class BlockingObserver {
 	observe(subject) {
 		let channel = subject.QueryInterface(Ci.nsIHttpChannel);
 		let id = Zotero.platformMajorVersion > 102 ? channel.browserId : channel.topBrowsingContextId;
+		if (id === 0) {
+			return;
+		}
 		if (this._ids.has(id) && this.shouldBlock(channel.URI)) {
 			channel.cancel(Cr.NS_BINDING_ABORTED);
 		}
