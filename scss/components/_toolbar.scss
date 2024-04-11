@@ -115,3 +115,10 @@
 	width: 18px;
 	margin-top: 1px;
 }
+
+toolbox {
+	@media (-moz-platform: linux) {
+		background: Menu;
+		appearance: initial;
+	}
+}
