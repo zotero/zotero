@@ -187,7 +187,9 @@ class TagList extends React.PureComponent {
 			...style
 		};
 		props.tabIndex = "0";
-		
+		props.role = "checkbox";
+		props['aria-checked'] = tag.selected;
+		props['aria-disabled'] = tag.disabled;
 		// Don't specify explicit width unless we're truncating, because for some reason the width
 		// from canvas can sometimes be slightly smaller than the actual width, resulting in an
 		// unnecessary ellipsis.
@@ -249,6 +251,7 @@ class TagList extends React.PureComponent {
 					verticalOverscanSize={300}
 					width={this.props.width}
 					height={this.props.height - filterBarHeight}
+					aria-label={document.querySelector("#zotero-tag-selector").getAttribute("label") || ""}
 				/>
 			);
 		}
