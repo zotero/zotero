@@ -43,10 +43,6 @@ describe("HiddenBrowser", function() {
 		});
 		
 		it("should prevent a remote request with blockRemoteResources", async function () {
-			// TEMP: Disable in CI for now to avoid HTTP request failures
-			// https://github.com/zotero/zotero/issues/3962
-			if (Zotero.automatedTest) this.skip();
-			
 			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
 			let browser = new HiddenBrowser({ blockRemoteResources: true });
 			await browser.load(path);
