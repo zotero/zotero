@@ -42,8 +42,9 @@ class BlockingObserver {
 	 */
 	constructor({ shouldBlock }) {
 		// TEMP: Disable in CI for now to avoid HTTP request failures
+		// https://github.com/zotero/zotero/issues/3962
 		if (Zotero.automatedTest) {
-			this.shouldBlock = false;
+			this.shouldBlock = () => false;
 			return;
 		}
 		this.shouldBlock = shouldBlock;
