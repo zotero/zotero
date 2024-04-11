@@ -6,11 +6,6 @@ describe("Retractions", function () {
 	var retractedDOI = '10.1056/NEJMoa1200303'; // mixed case
 	
 	before(async function () {
-		// TEMP: Temporarily disabled in CI due to failures in fx115
-		if (Zotero.automatedTest) {
-			this.skip();
-		}
-		
 		userLibraryID = Zotero.Libraries.userLibraryID;
 		win = await loadZoteroPane();
 		zp = win.ZoteroPane;
@@ -36,11 +31,6 @@ describe("Retractions", function () {
 	});
 	
 	after(async function () {
-		// TEMP
-		if (Zotero.automatedTest) {
-			return;
-		}
-		
 		win.close();
 		checkQueueItemsStub.restore();
 		
