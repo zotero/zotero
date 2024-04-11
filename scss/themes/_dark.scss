@@ -74,6 +74,11 @@ $-colors: (
         --color-stripe-on-background: #{color.mix(
             map.get($-colors, "color-background"), color.change(map.get($-colors, "color-stripe"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "color-stripe")))
         )};
+        --color-menu-opaque: rgb(
+            #{color.alpha(map.get($-colors, "color-menu")) * color.red(map.get($-colors, "color-menu"))},
+            #{color.alpha(map.get($-colors, "color-menu")) * color.green(map.get($-colors, "color-menu"))},
+            #{color.alpha(map.get($-colors, "color-menu")) * color.blue(map.get($-colors, "color-menu"))}
+        );
 
         // background materials
         --material-background: var(--color-background);
