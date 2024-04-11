@@ -15,13 +15,6 @@ class FeedAbstractParent extends JSWindowActorParent {
 				this._resizeBrowser(data.offsetWidth, data.offsetHeight);
 				return;
 			}
-			
-			case "show": {
-				let browser = this.browsingContext?.embedderElement;
-				if (!browser) return;
-				browser.style.visibility = "visible";
-				return;
-			}
 		}
 	}
 	

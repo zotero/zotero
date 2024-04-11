@@ -35,6 +35,7 @@
 			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
 				<html:div class="body">
 					<editable-text multiline="true" data-l10n-id="abstract-field" data-l10n-attrs="placeholder" />
+					<browser type="content" remote="true" messagemanagergroup="feedAbstract" hidden="true" />
 				</html:div>
 			</collapsible-section>
 		`);
@@ -75,11 +76,8 @@
 			this._abstractField.addEventListener('change', () => this.save());
 			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
 			
-			this._feedAbstractBrowser = document.createXULElement('browser');
-			this._feedAbstractBrowser.setAttribute('type', 'content');
-			this._feedAbstractBrowser.setAttribute('remote', true);
-			this._feedAbstractBrowser.setAttribute('messagemanagergroup', 'feedAbstract');
-			// Don't add the browser yet - we add it when rendering on a feed item
+			this._feedAbstractBrowser = this.querySelector('browser');
+			this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
 
 			this.render();
 		}
@@ -123,22 +121,18 @@
 		
 		_renderFeedItem() {
 			let abstract = this.item.getField('abstractNote');
-			this._abstractField.replaceWith(this._feedAbstractBrowser);
+			this._abstractField.hidden = true;
+			this._feedAbstractBrowser.hidden = false;
 			this._section.summary = Zotero.Utilities.cleanTags(abstract);
 			
-			this._feedAbstractBrowser.style.visibility = 'hidden';
-			this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
-			this._feedAbstractBrowser.loadURI(
-				Services.io.newURI('data:application/xhtml+xml,' + encodeURIComponent(abstract)),
-				{
-					triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
-				}
-			);
+			let actor = this._feedAbstractBrowser.browsingContext.currentWindowGlobal.getActor('FeedAbstract');
+			actor.sendAsyncMessage('setContent', abstract);
 		}
 		
 		_renderRegularItem() {
 			let abstract = this.item.getField('abstractNote');
-			this._feedAbstractBrowser.replaceWith(this._abstractField);
+			this._abstractField.hidden = false;
+			this._feedAbstractBrowser.hidden = true;
 			this._section.summary = abstract;
 			// If focused, update the value that will be restored on Escape;
 			// otherwise, update the displayed value

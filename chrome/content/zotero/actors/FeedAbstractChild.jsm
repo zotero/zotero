@@ -10,6 +10,15 @@ class FeedAbstractChild extends JSWindowActorChild {
 		this._stylesheetPromise = this.sendQuery('getStylesheet');
 	}
 	
+	async receiveMessage({ name, data }) {
+		switch (name) {
+			case "setContent": {
+				this.document.documentElement.innerHTML = data;
+				break;
+			}
+		}
+	}
+	
 	async handleEvent(event) {
 		switch (event.type) {
 			case "DOMDocElementInserted": {
@@ -17,9 +26,6 @@ class FeedAbstractChild extends JSWindowActorChild {
 				new this.contentWindow.ResizeObserver(() => this._sendResize())
 					.observe(this._getResizeRoot());
 				await this._sendResize();
-				this.contentWindow.requestAnimationFrame(() => {
-					this.sendAsyncMessage("show");
-				});
 				break;
 			}
 		}
