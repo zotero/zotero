@@ -51,7 +51,7 @@ class BlockingObserver {
 	}
 
 	register(browser) {
-		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.top.id;
+		let id = browser.browserId;
 		if (id === 0) {
 			throw new Error('BlockingObserver: Browser is not initialized');
 		}
@@ -64,7 +64,7 @@ class BlockingObserver {
 	}
 
 	unregister(browser) {
-		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.top.id;
+		let id = browser.browserId;
 		if (id === 0) {
 			throw new Error('BlockingObserver: Browser is not initialized');
 		}
@@ -87,7 +87,7 @@ class BlockingObserver {
 
 	observe(subject) {
 		let channel = subject.QueryInterface(Ci.nsIHttpChannel);
-		let id = Zotero.platformMajorVersion > 102 ? channel.browserId : channel.topBrowsingContextId;
+		let id = channel.browserId;
 		if (id === 0) {
 			return;
 		}
