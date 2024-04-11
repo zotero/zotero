@@ -1,5 +1,11 @@
 let { CommandLineOptions, TestOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 
+// Only allow BrowserContentHandler to open a new window if this is the initial launch,
+// meaning our CLH isn't registered yet.
+if (cmdLine.state != Ci.nsICommandLine.STATE_INITIAL_LAUNCH) {
+	cmdLine.preventDefault = true;
+}
+
 // Force debug output to window
 if (cmdLine.handleFlag("ZoteroDebug", false)) {
 	CommandLineOptions.forceDebugLog = 2;

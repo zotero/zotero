@@ -31,18 +31,16 @@ Zotero.CommandLineIngester = {
 	ingest: async function () {
 		const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 
+		var mainWindow = Zotero.getMainWindow();
 		var fileToOpen;
 		// Handle zotero:// and file URIs
 		var uri = CommandLineOptions.url;
 		if (uri) {
 			if (uri.schemeIs("zotero")) {
 				// Check for existing window and focus it
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-				var win = wm.getMostRecentWindow("navigator:browser");
-				if (win) {
-					win.focus();
-					win.ZoteroPane.loadURI(uri.spec);
+				if (mainWindow) {
+					mainWindow.focus();
+					mainWindow.ZoteroPane.loadURI(uri.spec);
 				}
 			}
 			// See below
@@ -77,11 +75,7 @@ Zotero.CommandLineIngester = {
 						'import.createNewCollection.fromFileOpenHandler', checkState.value
 					);
 
-					// Perform file import in front window
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-					var browserWindow = wm.getMostRecentWindow("navigator:browser");
-					browserWindow.Zotero_File_Interface.importFile({
+					mainWindow.Zotero_File_Interface.importFile({
 						file,
 						createNewCollection: checkState.value
 					});
@@ -107,15 +101,16 @@ var ZoteroCommandLineHandler = {
 		// this is typically used on Windows only, via WM_COPYDATA rather than the command line
 		var agent = cmdLine.handleFlagWithParam("ZoteroIntegrationAgent", false);
 		if (agent) {
-			// Don't open a new window
-			cmdLine.preventDefault = true;
-			
 			var command = cmdLine.handleFlagWithParam("ZoteroIntegrationCommand", false);
 			var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
 			var templateVersion = parseInt(cmdLine.handleFlagWithParam("ZoteroIntegrationTemplateVersion", false));
 			templateVersion = isNaN(templateVersion) ? 0 : templateVersion;
 			
 			Zotero.Integration.execCommand(agent, command, docId, templateVersion);
+		}
+		// Only open main window if we aren't handling an integration command
+		else if (!Zotero.getMainWindow()) {
+			Zotero.openMainWindow();
 		}
 		
 		await Zotero.CommandLineIngester.ingest();
