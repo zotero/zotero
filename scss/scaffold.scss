@@ -101,7 +101,15 @@ tab {
 }
 
 richlistbox {
-	min-width:200px;
+	min-width: 200px;
+
+	richlistitem {
+		align-items: center;
+
+		> hbox {
+			display: block;
+		}
+	}
 }
 
 #zotero-toolbar toolbarseparator {
@@ -156,5 +164,11 @@ vbox > splitter {
 		background: var(--material-background);
 		outline: none;
 		border: 0;
+	}
+}
+
+#scaffold-load {
+	#listbox {
+		height: 300px;
 	}
 }

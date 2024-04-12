@@ -84,10 +84,6 @@ var Scaffold_Load = new function () {
 				listcell.setAttribute('flex', '1');
 				listcell.append(translator.label);
 				listitem.appendChild(listcell);
-				listcell = document.createXULElement("hbox");
-				listcell.setAttribute('width', '130');
-				listcell.append(translator.creator);
-				listitem.appendChild(listcell);
 
 				listbox.appendChild(listitem);
 			}

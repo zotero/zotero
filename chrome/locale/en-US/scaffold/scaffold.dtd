@@ -61,8 +61,6 @@
 <!ENTITY scaffold.metadata.priority.default				"100">
 
 <!ENTITY scaffold.load.title							"Open Translator">
-<!ENTITY scaffold.load.label.label						"Label">
-<!ENTITY scaffold.load.creator.label					"Creator">
 
 <!ENTITY scaffold.editor.external.label					"Use external editor">
 

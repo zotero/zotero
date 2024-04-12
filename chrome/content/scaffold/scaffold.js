@@ -650,7 +650,7 @@ var Scaffold = new function () {
 			io.translatorProvider = _translatorProvider;
 			io.url = io.rootUrl = _browser.currentURI.spec;
 			window.openDialog("chrome://scaffold/content/load.xhtml",
-				"_blank", "chrome,modal", io);
+				"_blank", "chrome,modal,resizable=no", io);
 			translator = io.dataOut;
 		}
 		else {
@@ -1759,7 +1759,7 @@ var Scaffold = new function () {
 			let hbox = document.createXULElement('hbox');
 			hbox.append(elem);
 			if (flex !== undefined) hbox.setAttribute('flex', flex);
-			if (width !== undefined) hbox.setAttribute('width', width);
+			if (width !== undefined) hbox.style.width = width + 'px';
 			return hbox;
 		}
 
@@ -1783,7 +1783,7 @@ var Scaffold = new function () {
 		let oldStatuses = {};
 		for (let i = 0; i < count; i++) {
 			let item = listBox.getItemAtIndex(i);
-			let [, statusCell] = item.firstElementChild.children;
+			let [, statusCell] = item.children;
 			oldStatuses[item.dataset.testString] = statusCell.getAttribute('value');
 		}
 
@@ -1798,24 +1798,18 @@ var Scaffold = new function () {
 
 			item.innerHTML = ''; // clear children/content if reusing
 
-			let hbox = document.createXULElement('hbox');
-			hbox.setAttribute('flex', 1);
-			hbox.setAttribute('align', 'center');
-
 			let input = document.createXULElement('label');
-			input.value = getTestLabel(test);
-			hbox.appendChild(wrapWithHBox(input, { flex: 1 }));
+			input.append(getTestLabel(test));
+			item.appendChild(wrapWithHBox(input, { flex: 1 }));
 
 			let status = document.createXULElement('label');
-			status.value = oldStatuses[testString] || 'Not run';
-			hbox.appendChild(wrapWithHBox(status, { width: 150 }));
+			status.append(oldStatuses[testString] || 'Not run');
+			item.appendChild(wrapWithHBox(status, { width: 150 }));
 
 			let defer = document.createXULElement('checkbox');
 			defer.checked = test.defer;
 			defer.disabled = true;
-			hbox.appendChild(wrapWithHBox(defer, { width: 30 }));
-
-			item.appendChild(hbox);
+			item.appendChild(wrapWithHBox(defer, { width: 30 }));
 
 			item.dataset.testString = testString;
 			item.dataset.testType = test.type;
