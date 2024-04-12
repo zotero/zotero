@@ -6085,8 +6085,8 @@ var ZoteroPane = new function()
 		
 		// Calculate the heights of the components that aren't able to shrink automatically
 		// when the window is resized
-		let fixedComponentWidth = trees.clientWidth - itemsPaneContainer.clientWidth;
-		let fixedComponentHeight = titlebar.clientHeight + trees.clientHeight - itemsPaneContainer.clientHeight;
+		let fixedComponentWidth = trees.scrollWidth - itemsPaneContainer.scrollWidth;
+		let fixedComponentHeight = titlebar.scrollHeight + trees.scrollHeight - itemsPaneContainer.scrollHeight;
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
 
