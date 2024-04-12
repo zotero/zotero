@@ -288,7 +288,14 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			if (!this._hooks.init) return;
 			let props = this._assembleProps(
 				this._getHookProps(),
-				{ refresh: async () => this._handleRefresh() },
+				{
+					refresh: async () => this._handleRefresh(),
+					getData: () => ({
+						item: this.item,
+						tabType: this.tabType,
+						editable: this.editable,
+					}),
+				},
 			);
 			this._hooks.init(props);
 		}

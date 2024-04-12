@@ -59,7 +59,7 @@
  * @property {(buttonType: string, options: {disabled?: boolean; hidden?: boolean}) => void} setSectionButtonStatus - Set pane section button status
  * @typedef SectionHookArgs
  * @type {SectionBasicHookArgs & SectionUIHookArgs}
- * @typedef  {SectionHookArgs & { refresh: () => Promise<void> }} SectionInitHookArgs
+ * @typedef  {SectionHookArgs & { refresh: () => Promise<void>, getData: () => ({item: Zotero.Item, tabType: string, editable: boolean}) }} SectionInitHookArgs
  * A `refresh` is exposed to plugins to allows plugins to refresh the section when necessary,
  * e.g. item modify notifier callback. Note that calling `refresh` during initialization
  * have no effect.
