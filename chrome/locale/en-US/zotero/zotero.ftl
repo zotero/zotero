@@ -6,7 +6,6 @@ return-or-enter =
     }
 
 general-remove = Remove
-general-new = Add new
 general-expand = Expand
 general-collapse = Collapse
 
@@ -378,7 +377,7 @@ section-attachment-info =
 section-button-remove =
     .tooltiptext = { general-remove }
 section-button-add =
-    .tooltiptext = { general-new }
+    .tooltiptext = Add new
 section-button-expand =
     .tooltiptext = { general-expand }
 section-button-collapse =
