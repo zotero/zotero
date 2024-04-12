@@ -2,6 +2,10 @@
 	min-height: 400px;
 	min-width: 500px;
 	
+	#zotero-search-box-container {
+		max-height: 100vh;
+	}
+	
 	#zotero-search-box-controls {
 		padding: 3px;
 	}
