@@ -1936,7 +1936,11 @@ Zotero.VersionHeader = {
 		
 		// Default UA (not a faked UA from the connector
 		if (pos != -1) {
-			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`
+			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`;
+			// To fix cloudflare bot detection. rv frozen to avoid some websites
+			// detecting us as IE11. See https://bugzilla.mozilla.org/show_bug.cgi?id=1806690
+			// For some reason we are note getting this from the Firefox base.
+			ua = ua.replace('rv:115', 'rv:109');
 		}
 		
 		return ua;
