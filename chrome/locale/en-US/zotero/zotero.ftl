@@ -6,8 +6,7 @@ return-or-enter =
     }
 
 general-remove = Remove
-general-expand = Expand
-general-collapse = Collapse
+general-add = Add
 
 menu-print =
     .label = { general-print }
@@ -377,11 +376,11 @@ section-attachment-info =
 section-button-remove =
     .tooltiptext = { general-remove }
 section-button-add =
-    .tooltiptext = Add new
+    .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = { general-expand }
+    .tooltiptext = Expand section
 section-button-collapse =
-    .tooltiptext = { general-collapse }
+    .tooltiptext = Collapse section
 annotations-count =
     { $count ->
         [one] { $count } Annotation
