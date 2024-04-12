@@ -29,7 +29,7 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-preview" data-pane="attachment-preview">
 				<html:div class="body">
-					<attachment-preview id="attachment-preview"/>
+					<attachment-preview id="attachment-preview" data-l10n-id="attachment-preview"/>
 					<html:span id="preview-placeholder" data-l10n-id="attachment-preview-placeholder"></html:span>
 				</html:div>
 			</collapsible-section>

@@ -30,7 +30,7 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachments" data-pane="attachments" extra-buttons="add">
 				<html:div class="body">
-					<attachment-preview tabindex="0"/>
+					<attachment-preview tabindex="0" data-l10n-id="attachment-preview"/>
 					<html:div class="attachments-container"></html:div>
 				</html:div>
 			</collapsible-section>

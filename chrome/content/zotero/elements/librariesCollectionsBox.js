@@ -91,8 +91,10 @@ import { getCSSIcon } from 'components/icons';
 			row.classList.toggle('context', isContext);
 			
 			let box = document.createElement('div');
-			box.className = 'box keyboard_clickable';
+			box.className = 'box keyboard-clickable';
 			box.setAttribute("tabindex", "0");
+			box.setAttribute('aria-label', obj.name);
+			box.setAttribute('role', "button");
 			
 			let iconName;
 			if (obj instanceof Zotero.Group) {
@@ -118,6 +120,7 @@ import { getCSSIcon } from 'components/icons';
 				let remove = document.createXULElement('toolbarbutton');
 				remove.className = 'zotero-clicky zotero-clicky-minus';
 				remove.setAttribute("tabindex", "0");
+				remove.setAttribute("data-l10n-id", 'section-button-remove');
 				remove.addEventListener('command', () => {
 					if (Services.prompt.confirm(
 						window,
