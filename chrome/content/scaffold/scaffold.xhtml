@@ -468,9 +468,7 @@
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
 						<vbox flex="1" style="max-width: 100%;">
-							<!-- The `height` attribute on the vbox and iframe is overridden by `flex`. Without it,
-							     though, the richlistbox grows when tests are added. -->
-							<vbox flex="1" height="auto">
+							<vbox id="testing-listbox-container">
 								<keyset>
 									<key id="key-delete-tests" observes="validate-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
 								</keyset>
@@ -505,7 +503,7 @@
 								</hbox>
 							</vbox>
 							<splitter/>
-							<iframe src="monaco/monaco.html" id="editor-tests" flex="2" height="auto" onmousedown="this.focus()"/>
+							<iframe src="monaco/monaco.html" id="editor-tests" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 					<tabpanel>
