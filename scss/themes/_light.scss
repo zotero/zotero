@@ -1,6 +1,3 @@
-@use 'sass:color';
-@use "sass:map";
-
 $-colors: (
     accent-azure: #66adff,
     accent-blue: #4072e5,
@@ -54,52 +51,6 @@ $-colors: (
 
 @media (prefers-color-scheme: light) {
     :root {
-        @each $name, $color in $-colors {
-            --#{$name}: #{$color};
-        }
-        
-        // composite (opaque) colors
-        --color-quinary-on-background: #{color.mix(
-            map.get($-colors, "color-background"), color.change(map.get($-colors, "fill-quinary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quinary")))
-        )};
-        --color-quarternary-on-background: #{color.mix(
-            map.get($-colors, "color-background"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
-        )};
-        --color-quinary-on-sidepane: #{color.mix(
-            map.get($-colors, "color-sidepane"), color.change(map.get($-colors, "fill-quinary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quinary")))
-        )};
-        --color-quarternary-on-sidepane: #{color.mix(
-            map.get($-colors, "color-sidepane"), color.change(map.get($-colors, "fill-quarternary"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "fill-quarternary")))
-        )};
-        --color-stripe-on-background: #{color.mix(
-            map.get($-colors, "color-background"), color.change(map.get($-colors, "color-stripe"), $alpha: 1), 100% * (1 - color.alpha(map.get($-colors, "color-stripe")))
-        )};
-       --color-menu-opaque: rgb(
-            #{color.alpha(map.get($-colors, "color-menu")) * color.red(map.get($-colors, "color-menu"))},
-            #{color.alpha(map.get($-colors, "color-menu")) * color.green(map.get($-colors, "color-menu"))},
-            #{color.alpha(map.get($-colors, "color-menu")) * color.blue(map.get($-colors, "color-menu"))}
-        );
-
-        // background materials
-        --material-background: var(--color-background);
-        --material-background50: var(--color-background50);
-        --material-background70: var(--color-background70);
-        --material-button: var(--color-button);
-        --material-control: var(--color-control);
-        --material-menu: var(--color-menu);
-        --material-sidepane: var(--color-sidepane);
-        --material-tabbar: var(--color-tabbar);
-        --material-toolbar: var(--color-toolbar);
-        --material-mix-quinary: var(--color-quinary-on-background);
-        --material-mix-quarternary: var(--color-quarternary-on-background);
-        --material-stripe: var(--color-stripe-on-background);
-
-        // border materials
-        --material-border-transparent: 1px solid transparent;
-        --material-border: 1px solid var(--color-border);
-        --material-border50: 1px solid var(--color-border50);
-        --material-panedivider: 1px solid var(--color-panedivider);
-        --material-border-quinary: 1px solid var(--fill-quinary);
-        --material-border-quarternary: 1px solid var(--fill-quarternary);
+        @include derive-colors($-colors);
     }
 }
