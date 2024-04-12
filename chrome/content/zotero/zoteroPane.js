@@ -321,6 +321,20 @@ var ZoteroPane = new function()
 			ZoteroPane.hideCollectionSearch();
 			return null;
 		};
+		let focusCollectionTree = () => {
+			// Prevent Enter/Tab pressed before the filtering ran from doing anything
+			if (!ZoteroPane.collectionsView.filterEquals(collectionsSearchField.value)) {
+				return null;
+			}
+			// If the current row passes the filter, make sure it is visible and focus collectionTree
+			if (ZoteroPane.collectionsView.focusedRowMatchesFilter()) {
+				ZoteroPane.collectionsView.ensureRowIsVisible(ZoteroPane.collectionsView.selection.focused);
+				return document.getElementById('collection-tree');
+			}
+			// Otherwise, focus the first row passing the filter
+			ZoteroPane.collectionsView.focusFirstMatchingRow(false);
+			return null;
+		};
 		collectionTreeToolbar.addEventListener("keydown", (event) => {
 			let actionsMap = {
 				'zotero-tb-collection-add': {
@@ -330,22 +344,9 @@ var ZoteroPane = new function()
 					ShiftTab: () => document.getElementById('zotero-tb-sync')
 				},
 				'zotero-collections-search': {
-					Tab: () => document.getElementById('zotero-tb-add'),
+					Tab: focusCollectionTree,
 					ShiftTab: () => document.getElementById('zotero-tb-collection-add'),
-					Enter: () => {
-						// Prevent Enter pressed before the filtering ran from doing anything
-						if (!ZoteroPane.collectionsView.filterEquals(collectionsSearchField.value)) {
-							return null;
-						}
-						// If the current row passes the filter, make sure it is visible and focus collectionTree
-						if (ZoteroPane.collectionsView.focusedRowMatchesFilter()) {
-							ZoteroPane.collectionsView.ensureRowIsVisible(ZoteroPane.collectionsView.selection.focused);
-							return document.getElementById('collection-tree');
-						}
-						// Otherwise, focus the first row passing the filter
-						ZoteroPane.collectionsView.focusFirstMatchingRow(false);
-						return null;
-					},
+					Enter: focusCollectionTree,
 					Escape: clearCollectionSearch
 				},
 			};
@@ -362,8 +363,10 @@ var ZoteroPane = new function()
 						if (collectionsPane.getAttribute("collapsed")) {
 							return document.getElementById('zotero-tb-sync');
 						}
-						document.getElementById('zotero-tb-collections-search').click();
-						return null;
+						if (tagContainer.getAttribute('collapsed') == "true") {
+							return focusCollectionTree();
+						}
+						return document.querySelector("#zotero-tag-selector button");
 					}
 				},
 				'zotero-tb-lookup': {
@@ -390,7 +393,7 @@ var ZoteroPane = new function()
 					ShiftTab: () => {
 						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
 					},
-					Tab: () => document.getElementById("collection-tree")
+					Tab: () => document.getElementById('item-tree-main-default')
 				},
 				'zotero-tb-search-dropmarker': {
 					ArrowRight: () => null,
@@ -405,12 +408,12 @@ var ZoteroPane = new function()
 		collectionsTree.addEventListener("keydown", (event) => {
 			let actionsMap = {
 				'collection-tree': {
-					ShiftTab: () => document.getElementById("zotero-tb-search-textbox"),
+					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click(),
 					Tab: () => {
 						if (tagContainer.getAttribute('collapsed') == "true") {
-							return document.getElementById('item-tree-main-default');
+							return document.getElementById('zotero-tb-add');
 						}
-						// If tag selector is collapsed, go to itemTree, otherwise
+						// If tag selector is collapsed, go to "New item" button, otherwise
 						// default to focusing on tag selector
 						return false;
 					},
@@ -423,12 +426,7 @@ var ZoteroPane = new function()
 		itemTree.addEventListener("keydown", (event) => {
 			let actionsMap = {
 				'item-tree-main-default': {
-					ShiftTab: () => {
-						if (tagContainer.getAttribute('collapsed') == "true") {
-							return document.getElementById('collection-tree');
-						}
-						return document.getElementById('zotero-tag-selector').querySelector('button');
-					}
+					ShiftTab: () => document.getElementById('zotero-tb-search-textbox')
 				}
 			};
 			moveFocus(actionsMap, event);
@@ -455,7 +453,7 @@ var ZoteroPane = new function()
 			}
 			// Special treatment for tag selector button because it has no id
 			if (e.target.tagName == "button" && e.key == "Tab" && !e.shiftKey) {
-				document.getElementById('item-tree-main-default').focus();
+				document.getElementById('zotero-tb-add').focus();
 				e.preventDefault();
 				e.stopPropagation();
 			}
