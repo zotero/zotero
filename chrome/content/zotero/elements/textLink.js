@@ -5,20 +5,16 @@
 		constructor() {
 			super();
 			this.addEventListener('click', (event) => {
-				if (event.button == 0) {
+				if (event.button == 0 && !this.noClick) {
 					this.open(event);
 				}
 			}, true);
-			this.addEventListener('keypress', (event) => {
-				if (event.key == 'Enter' || event.key == 'Return') {
-					event.preventDefault();
-					this.click();
-				}
-			});
 		}
 
 		connectedCallback() {
 			this.classList.add('zotero-text-link');
+			this.classList.add('keyboard-clickable');
+			this.setAttribute('role', 'link');
 		}
 
 		get href() {
@@ -27,6 +23,15 @@
 
 		set href(href) {
 			this.setAttribute('href', href);
+			this.setAttribute('tooltiptext', href);
+		}
+
+		get noClick() {
+			return this.getAttribute('no-click');
+		}
+
+		set noClick(val) {
+			this.setAttribute('no-click', !!val);
 		}
 
 		open(event) {
