@@ -350,12 +350,53 @@ export let OS = {
 			return absolute ? "/" + string : string;
 		},
 		
+		split: function (path) {
+			if (Services.appinfo.OS == "WINNT") {
+				// winIsAbsolute()
+				let index = path.indexOf(":");
+				let absolute = path.length > index + 1 && path[index + 1] == "\\";
+				
+				return {
+					absolute,
+					winDrive: winGetDrive(path),
+					components: path.split("\\")
+				};
+			}
+			
+			return {
+				absolute: path.length && path[0] == "/",
+				components: path.split("/")
+			};
+		},
+		
 		toFileURI: function (path) {
 			return PathUtils.toFileURI(path);
 		},
 	}
 };
 
+// From Fx60 ospath_win.jsm
+var winGetDrive = function (path) {
+	if (path == null) {
+		throw new TypeError("path is invalid");
+	}
+	
+	if (path.startsWith("\\\\")) {
+		// UNC path
+		if (path.length == 2) {
+			return null;
+		}
+		let index = path.indexOf("\\", 2);
+		if (index == -1) {
+			return path;
+		}
+		return path.slice(0, index);
+	}
+	// Non-UNC path
+	let index = path.indexOf(":");
+	if (index <= 0) return null;
+	return path.slice(0, index + 1);
+};
 
 function wrapWrite(func) {
 	return async function () {
