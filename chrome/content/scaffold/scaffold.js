@@ -323,7 +323,8 @@ var Scaffold = new function () {
 		});
 
 		editor.updateOptions({
-			links: false
+			links: false,
+			stickyScroll: { enabled: false }
 		});
 
 		monaco.languages.registerCodeLensProvider('json', this.createTestCodeLensProvider(monaco, editor));
