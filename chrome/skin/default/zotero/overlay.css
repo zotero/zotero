@@ -182,8 +182,11 @@ TODO: Replace with SVG
 	them here with !important.
 */
 #zotero-layout-switcher[orient="horizontal"] :is(#zotero-items-pane-container, #zotero-item-pane) {
-	width: auto !important;
 	height: auto !important;
+}
+
+#zotero-layout-switcher[orient="horizontal"] #zotero-items-pane-container {
+	width: auto !important;
 }
 
 #zotero-layout-switcher[orient="vertical"],
