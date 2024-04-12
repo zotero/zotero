@@ -35,6 +35,7 @@ Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetters(globalThis, {
 	AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
+	AppConstants: "resource://gre/modules/AppConstants.jsm",
 });
 const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
@@ -967,7 +968,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	
 	this.openMainWindow = function () {
-		const { AppConstants } = ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 		var chromeURI = AppConstants.BROWSER_CHROME_URL;
 		var flags = "chrome,all,dialog=no";
 		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
