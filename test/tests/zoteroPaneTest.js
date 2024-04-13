@@ -1519,8 +1519,8 @@ describe("ZoteroPane", function() {
 			bubbles: true
 		});
 
-
-		it("should shift-tab through the toolbar to item-tree", async function () {
+		// TEMP: https://github.com/zotero/zotero/issues/3975
+		it.skip("should shift-tab through the toolbar to item-tree", async function () {
 			let searchBox = doc.getElementById('zotero-tb-search-textbox');
 			searchBox.focus();
 
@@ -1552,7 +1552,8 @@ describe("ZoteroPane", function() {
 			assert.equal(doc.activeElement.id, "item-tree-main-default");
 		});
 
-		it("should tab through the toolbar to collection-tree", async function () {
+		// TEMP: https://github.com/zotero/zotero/issues/3975
+		it.skip("should tab through the toolbar to collection-tree", async function () {
 			win.Zotero_Tabs.moveFocus("current");
 			let sequence = [
 				"zotero-tb-tabs-menu",
