@@ -1495,7 +1495,15 @@ describe("ZoteroPane", function() {
 			var collection = new Zotero.Collection;
 			collection.name = "Focus Test";
 			await collection.saveTx();
+			// Make sure there is a tag
+			var item = new Zotero.Item('newspaperArticle');
+			item.setCollections([collection.id]);
+			await item.setTags(["Tag"]);
+			await item.saveTx({
+				skipSelect: true
+			});
 			await waitForItemsLoad(win);
+			await zp.collectionsView.selectLibrary(userLibraryID);
 		});
 
 		var tab = new KeyboardEvent('keydown', {
@@ -1519,19 +1527,23 @@ describe("ZoteroPane", function() {
 			bubbles: true
 		});
 
-		// TEMP: https://github.com/zotero/zotero/issues/3975
-		it.skip("should shift-tab through the toolbar to item-tree", async function () {
+		// Focus sequence for Zotero Pane
+		let sequence = [
+			"zotero-tb-search-dropmarker",
+			"zotero-tb-add",
+			"tag-selector-actions",
+			"search-input",
+			"tag-selector-item",
+			"tag-selector-list",
+			"collection-tree",
+			"zotero-collections-search",
+			"zotero-tb-collection-add",
+			"zotero-tb-sync",
+			"zotero-tb-tabs-menu"
+		];
+		it("should shift-tab across the zotero pane", async function () {
 			let searchBox = doc.getElementById('zotero-tb-search-textbox');
 			searchBox.focus();
-
-			let sequence = [
-				"zotero-tb-search-dropmarker",
-				"zotero-tb-add",
-				"zotero-collections-search",
-				"zotero-tb-collection-add",
-				"zotero-tb-sync",
-				"zotero-tb-tabs-menu"
-			];
 
 			for (let id of sequence) {
 				doc.activeElement.dispatchEvent(shiftTab);
@@ -1539,7 +1551,14 @@ describe("ZoteroPane", function() {
 				if (id === "zotero-collections-search") {
 					await Zotero.Promise.delay(250);
 				}
-				assert.equal(doc.activeElement.id, id);
+				// Some elements don't have id, so use classes to verify they're focused
+				if (doc.activeElement.id) {
+					assert.equal(doc.activeElement.id, id);
+				}
+				else {
+					let clases = [...doc.activeElement.classList];
+					assert.include(clases, id);
+				}
 				// Wait for collection search to be hidden for subsequent tests
 				if (id === "zotero-tb-collection-add") {
 					await Zotero.Promise.delay(50);
@@ -1552,26 +1571,23 @@ describe("ZoteroPane", function() {
 			assert.equal(doc.activeElement.id, "item-tree-main-default");
 		});
 
-		// TEMP: https://github.com/zotero/zotero/issues/3975
-		it.skip("should tab through the toolbar to collection-tree", async function () {
+		it("should tab across the zotero pane", async function () {
 			win.Zotero_Tabs.moveFocus("current");
-			let sequence = [
-				"zotero-tb-tabs-menu",
-				"zotero-tb-sync",
-				"zotero-tb-collection-add",
-				"zotero-collections-search",
-				"zotero-tb-add",
-				"zotero-tb-search-dropmarker",
-				'zotero-tb-search-textbox',
-				'collection-tree',
-			];
+			sequence.reverse();
 			for (let id of sequence) {
 				doc.activeElement.dispatchEvent(tab);
 				// Wait for collection search to be revealed
 				if (id === "zotero-collections-search") {
 					await Zotero.Promise.delay(250);
 				}
-				assert.equal(doc.activeElement.id, id);
+				// Some elements don't have id, so use classes to verify they're focused
+				if (doc.activeElement.id) {
+					assert.equal(doc.activeElement.id, id);
+				}
+				else {
+					let clases = [...doc.activeElement.classList];
+					assert.include(clases, id);
+				}
 			}
 		});
 
