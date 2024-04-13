@@ -618,32 +618,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		
-		// Test whether URL is WebDAV-enabled
-		var req = yield Zotero.HTTP.request(
-			"OPTIONS",
-			uri,
-			{
-				successCodes: [200, 204, 404],
-				requestObserver: function (req) {
-					if (req.channel) {
-						channel = req.channel;
-					}
-					if (options.onRequest) {
-						options.onRequest(req);
-					}
-				},
-				errorDelayMax: 0,
-				debug: true
-			}
-		);
-		
-		Zotero.debug(req.getAllResponseHeaders());
-		
-		var dav = req.getResponseHeader("DAV");
-		if (dav == null) {
-			throw new this.VerificationError("NOT_DAV", uri);
-		}
-		
 		var headers = { Depth: 0 };
 		var contentTypeXML = { "Content-Type": "text/xml; charset=utf-8" };
 		
@@ -663,6 +637,13 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			errorDelayMax: 0,
 			debug: true
 		});
+		
+		Zotero.debug(req.getAllResponseHeaders());
+		
+		var dav = req.getResponseHeader("DAV");
+		if (dav == null) {
+			throw new this.VerificationError("NOT_DAV", uri);
+		}
 		
 		if (req.status == 207) {
 			// Test if missing files return 404s
