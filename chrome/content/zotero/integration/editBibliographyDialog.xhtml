@@ -35,7 +35,6 @@
 	id="edit-bibliography-dialog"
 	orient="vertical"
 	title="&zotero.integration.editBibliography.title;"
-	width="750" height="450"
 	onload="Zotero_Bibliography_Dialog.load();"
 	onclose="Zotero_Bibliography_Dialog.close();"
 	onunload="doUnload();"
@@ -67,7 +66,7 @@
 						<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
-						<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 150px">
+						<vbox id="zotero-collections-tree-container" class="virtualized-table-container">
 							<html:div id="zotero-collections-tree" class="edit-bibl"></html:div>
 						</vbox>
 
