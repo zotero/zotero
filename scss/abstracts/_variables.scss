@@ -107,8 +107,12 @@ $tagColorsLookup: (
 
 // Layout constants
 // --------------------------------------------------
+$min-width-tabs-deck: 570px;
 $min-width-collections-pane: 200px;
 $min-width-items-pane: 370px;
 $min-width-item-pane: 300px;
 $min-width-context-pane: 300px;
 $width-sidenav: 37px;
+
+$height-toolbar: 41px;
+$min-height-items-pane: 150px;

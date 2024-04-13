@@ -75,7 +75,7 @@ const ZoteroStandalone = new function() {
 								this.switchReaderSubtype(subtype);
 							}
 						}
-						setTimeout(() => ZoteroPane.updateToolbarPosition(), 0);
+						setTimeout(() => ZoteroPane.updateLayoutConstraints(), 0);
 					}
 				}
 			},
@@ -512,7 +512,7 @@ const ZoteroStandalone = new function() {
 					document.getElementById('zotero-collections-splitter').setAttribute('state', 'collapsed');
 					collectionsPane.setAttribute('collapsed', true);
 				}
-				ZoteroPane.updateToolbarPosition();
+				ZoteroPane.updateLayoutConstraints();
 				break;
 			
 			case 'item-pane':
@@ -527,7 +527,7 @@ const ZoteroStandalone = new function() {
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'collapsed');
 					itemPane.setAttribute('collapsed', true);
 				}
-				ZoteroPane.updateToolbarPosition();
+				ZoteroPane.updateLayoutConstraints();
 				break;
 			
 			case 'tag-selector':

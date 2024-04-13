@@ -174,16 +174,19 @@ TODO: Replace with SVG
 	text-decoration: underline;
 }
 
-#zotero-layout-switcher
-{
-	min-width: 560px;
-}
-
 /*
-	Fx115: make panes occupy all availabel width/height after layout switch
+	Fx115: make panes occupy all available width/height after layout switch
+	or splitter expand/collapse.
+	The splitter element stores state in the style attribute's width/height
+	properties, and if we remove them, the splitter breaks. So we override
+	them here with !important.
 */
 #zotero-layout-switcher[orient="horizontal"] :is(#zotero-items-pane-container, #zotero-item-pane) {
 	height: auto !important;
+}
+
+#zotero-layout-switcher[orient="horizontal"] #zotero-items-pane-container {
+	width: auto !important;
 }
 
 #zotero-layout-switcher[orient="vertical"],

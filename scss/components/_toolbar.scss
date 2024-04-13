@@ -1,6 +1,6 @@
 .toolbar {
-	height: 41px !important; /* Hard-code this to fix toolbar icon compression on Linux */
-	min-height: 41px; /* Needed to prevent squashing by stretched tag selector */
+	height: $height-toolbar !important; /* Hard-code this to fix toolbar icon compression on Linux */
+	min-height: $height-toolbar; /* Needed to prevent squashing by stretched tag selector */
 	margin: 0;
 	padding: 0px 8px 0px 8px;
 	min-width: 1px;
