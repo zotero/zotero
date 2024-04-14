@@ -92,6 +92,7 @@ class Search extends React.PureComponent {
 					onChange={this.handleChange}
 					onKeyDown={this.handleKeyDown}
 					value={this.state.immediateValue}
+					className="search-input"
 					{...pick(this.props, p => p.startsWith('data-') || p.startsWith('aria-'))}
 				/>
 				{this.state.immediateValue !== ''
