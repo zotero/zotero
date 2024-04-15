@@ -41,10 +41,6 @@
 		}
 	}
 
-	tab[visuallyselected="true"]:not(:-moz-window-inactive) {
-		color: unset;
-	}
-
 	#intro {
 		display: none;
 		flex-direction: column;

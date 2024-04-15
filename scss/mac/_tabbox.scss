@@ -46,6 +46,11 @@ tabbox {
 			}
 
 			&[visuallyselected=true] {
+				/* fx115: toolkit/themes/osx/global/tabbox.css sets selected tabs' text color to #FFF, which is incorrect */
+				&:not(:-moz-window-inactive) {
+					color: unset;
+				}
+
 				& + tab {
 					&::before {
 						display: none;

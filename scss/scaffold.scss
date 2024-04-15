@@ -65,11 +65,6 @@ $scaffold-toolbarbutton-icons: (
 	}
 }
 
-tab {
-	/* toolkit/themes/osx/global/tabbox.css sets selected tabs' text color to #FFF, which is incorrect */
-	color: initial !important;
-}
-
 #metadata-grid {
 	flex: 1;
 	display: grid;
