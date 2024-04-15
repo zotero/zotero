@@ -46,6 +46,8 @@ class TagList extends React.PureComponent {
 		this.collectionRef = React.createRef();
 		this.scrollToTopOnNextUpdate = false;
 		this.prevTagCount = 0;
+		this.focusedTagIndex = null;
+		this.renderedTagRange = [];
 	}
 	
 	componentDidUpdate(prevProps) {
@@ -159,7 +161,7 @@ class TagList extends React.PureComponent {
 		
 		const { onDragOver, onDragExit, onDrop } = this.props.dragObserver;
 		
-		var className = 'tag-selector-item';
+		var className = 'tag-selector-item keyboard-clickable';
 		if (tag.selected) {
 			className += ' selected';
 		}
@@ -177,10 +179,12 @@ class TagList extends React.PureComponent {
 			className,
 			onClick: ev => !tag.disabled && this.props.onSelect(tag.name, ev),
 			onContextMenu: ev => this.props.onTagContext(tag, ev),
-			onKeyDown: ev => this.props.onKeyDown(ev),
 			onDragOver,
 			onDragExit,
 			onDrop,
+			onFocus: (_) => {
+				this.focusedTagIndex = index;
+			}
 		};
 		
 		props.style = {
@@ -214,6 +218,84 @@ class TagList extends React.PureComponent {
 			</div>
 		);
 	};
+
+	// If windowing kicks in and the focused tag's node has been removed,
+	// scroll in its direction until it is re-created and focused.
+	async scrollToFocusedTag() {
+		if (this.focusedTagIndex === null) return;
+		if (this.renderedTagRange.includes(this.focusedTagIndex)) return;
+		// Determine the direction of the scrolling
+		let scrollUp = true;
+		if (this.focusedTagIndex > this.renderedTagRange[0]) {
+			scrollUp = false;
+		}
+		let tagsList = document.querySelector('.tag-selector-list');
+		// Sanity check to make sure we're not stuck in infinite loop
+		let maxCounter = 0;
+		// Keep scrolling until the desired tag is rendered
+		while (!this.renderedTagRange.includes(this.focusedTagIndex) && maxCounter < 10) {
+			if (scrollUp) {
+				tagsList.scrollTop -= tagsList.clientHeight;
+			}
+			else {
+				tagsList.scrollTop += tagsList.clientHeight;
+			}
+			maxCounter += 1;
+			// Wait a moment to let this.handleSectionRendered update this.renderedTagRange
+			await Zotero.Promise.delay(10);
+		}
+	}
+
+	handleSectionRendered = ({ indices }) => {
+		let tagsList = document.querySelector('.tag-selector-list');
+		// <Collection> sets role="grid" which is not semantically correct
+		tagsList.setAttribute("role", "group");
+		// Check if the tag that is supposed to be focused is within the rendered tags range.
+		// If it is, make sure it is focused. If it is not - focus the tags list.
+		this.renderedTagRange = indices;
+		if (this.focusedTagIndex === null) return;
+		if (indices.includes(this.focusedTagIndex)) {
+			let tagsNodes = [...tagsList.querySelectorAll(".tag-selector-item")];
+			let tagToFocus = this.props.tags[this.focusedTagIndex];
+			let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
+			if (nodeToFocus) {
+				nodeToFocus.focus();
+			}
+		}
+		else {
+			tagsList.focus();
+		}
+	};
+
+	handleBlur = (event) => {
+		// If the focus leaves the tags list, clear the last focused tag index
+		let tagsList = document.querySelector('.tag-selector-list');
+		if (!tagsList.contains(event.relatedTarget)) {
+			this.focusedTagIndex = null;
+		}
+	};
+
+	async handleKeyDown(e) {
+		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
+		// If the windowing kicks in, the node of the initially-focused tag may not
+		// exist, so first try to scroll towards it to have the node re-created
+		await this.scrollToFocusedTag();
+		// At this point, the node is supposed to exist and be focused
+		if (!document.activeElement.classList.contains("tag-selector-item")) return;
+		// Handle arrow navigation
+		let nextTag = (node) => {
+			if (e.key == "ArrowRight") return node.nextElementSibling;
+			return node.previousElementSibling;
+		};
+		let nextOne = nextTag(document.activeElement);
+		// Skip disabled tags
+		while (nextOne && nextOne.classList.contains("disabled")) {
+			nextOne = nextTag(nextOne);
+		}
+		if (nextOne) {
+			nextOne.focus();
+		}
+	}
 	
 	render() {
 		Zotero.debug("Rendering tag list");
@@ -252,12 +334,13 @@ class TagList extends React.PureComponent {
 					width={this.props.width}
 					height={this.props.height - filterBarHeight}
 					aria-label={document.querySelector("#zotero-tag-selector").getAttribute("label") || ""}
+					onSectionRendered={this.handleSectionRendered}
 				/>
 			);
 		}
 		
 		return (
-			<div className="tag-selector-list-container">
+			<div className="tag-selector-list-container" onBlur={this.handleBlur} onKeyDown={this.handleKeyDown.bind(this)}>
 				{tagList}
 			</div>
 		);
