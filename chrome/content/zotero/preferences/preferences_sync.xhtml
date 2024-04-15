@@ -30,15 +30,15 @@
 
                 <hbox>
                     <html:div class="form-grid">
-                        <label value="&zotero.preferences.sync.username;"/>
-                        <html:input id="sync-username-textbox"
+                        <label id="username-label" value="&zotero.preferences.sync.username;"/>
+                        <html:input id="sync-username-textbox" aria-labelledby="username-label"
                             onblur="Zotero_Preferences.Sync.trimUsername()"
                             oninput="Zotero_Preferences.Sync.credentialsChange(event)"
                             onchange="Zotero_Preferences.Sync.credentialsChange(event)"
                             onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
                         
-                        <label value="&zotero.preferences.sync.password;"/>
-                        <html:input id="sync-password" type="password"
+                        <label id="password-label" value="&zotero.preferences.sync.password;"/>
+                        <html:input id="sync-password" type="password" aria-labelledby="password-label"
                             oninput="Zotero_Preferences.Sync.credentialsChange(event)"
                             onchange="Zotero_Preferences.Sync.credentialsChange(event)"
                             onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
