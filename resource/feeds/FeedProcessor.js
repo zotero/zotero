@@ -577,7 +577,8 @@ TextConstruct.prototype = {
 	
 	createDocumentFragment: function () {
 		if (this.type == "text") {
-			const docFragment = new DocumentFragment();
+			const docFragment = new DOMParser().parseFromString('<!doctype html>', 'text/html')
+				.createDocumentFragment();
 			docFragment.append(this.text);
 			return docFragment;
 		}
@@ -594,7 +595,9 @@ TextConstruct.prototype = {
 		}
 		
 		const parsedDoc = new DOMParser().parseFromString(this.text, parserType);
-		return parsedDoc.documentElement;
+		const docFragment = parsedDoc.createDocumentFragment();
+		docFragment.append(parsedDoc.documentElement);
+		return docFragment;
 	},
 };
 
