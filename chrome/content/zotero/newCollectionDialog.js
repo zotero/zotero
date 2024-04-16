@@ -27,7 +27,9 @@ var Zotero_New_Collection_Dialog = {
 	_handleLoad() {
 		let io = window.arguments[0];
 		
-		document.querySelector('#name').value = io.name;
+		let nameElem = document.querySelector('#name');
+		nameElem.value = io.name;
+		nameElem.select();
 		document.addEventListener('dialogaccept', () => this._handleAccept());
 		
 		this._libraryID = io.libraryID;
