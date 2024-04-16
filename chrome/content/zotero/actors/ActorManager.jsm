@@ -29,6 +29,7 @@ ChromeUtils.registerWindowActor("FeedAbstract", {
 		moduleURI: "chrome://zotero/content/actors/FeedAbstractChild.jsm",
 		events: {
 			DOMDocElementInserted: {},
+			click: {},
 		}
 	},
 	messageManagerGroups: ["feedAbstract"]
