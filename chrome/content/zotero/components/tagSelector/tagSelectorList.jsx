@@ -48,7 +48,7 @@ class TagList extends React.PureComponent {
 		this.prevTagCount = 0;
 		this.focusedTagIndex = null;
 		this.lastFocusedTagIndex = null;
-		this.keypressToHandleOnNextUpdate = null;
+		this.resolveTagsRenderedPromise = null;
 		this.state = {
 			scrollToCell: null
 		};
@@ -242,6 +242,23 @@ class TagList extends React.PureComponent {
 		}
 	}
 
+	// Try to refocus a focused tag that was removed due to windowing
+	refocusTag() {
+		let tagsList = document.querySelector('.tag-selector-list');
+		let tagsNodes = [...tagsList.querySelectorAll(".tag-selector-item")];
+		let tagToFocus = this.props.tags[this.focusedTagIndex];
+		let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
+		if (nodeToFocus) {
+			nodeToFocus.focus();
+		}
+	}
+
+	waitForSectionRender() {
+		return new Promise((resolve, _) => {
+			this.resolveTagsRenderedPromise = resolve;
+		});
+	}
+
 	handleSectionRendered = ({ indices }) => {
 		let tagsList = document.querySelector('.tag-selector-list');
 		// <Collection> sets role="grid" which is not semantically correct
@@ -257,15 +274,9 @@ class TagList extends React.PureComponent {
 		// Check if the tag that is supposed to be focused is within the rendered tags range.
 		// If it is, make sure it is focused. If it is not - focus the tags list.
 		if (indices.includes(this.focusedTagIndex)) {
-			let tagsNodes = [...tagsList.querySelectorAll(".tag-selector-item")];
-			let tagToFocus = this.props.tags[this.focusedTagIndex];
-			let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
-			if (nodeToFocus) {
-				nodeToFocus.focus();
-				if (this.keypressToHandleOnNextUpdate) {
-					this.shiftFocus(this.keypressToHandleOnNextUpdate);
-					this.keypressToHandleOnNextUpdate = null;
-				}
+			this.refocusTag();
+			if (this.resolveTagsRenderedPromise) {
+				this.resolveTagsRenderedPromise();
 			}
 		}
 		else {
@@ -287,8 +298,12 @@ class TagList extends React.PureComponent {
 		// If the windowing kicks in, the node of the initially-focused tag may not
 		// exist, so first we may need to scroll to it.
 		if (!document.activeElement.classList.contains("tag-selector-item")) {
-			this.setState({ scrollToCell: this.focusedTagIndex });
-			this.keypressToHandleOnNextUpdate = e;
+			this.setState({ scrollToCell: this.focusedTagIndex }, async () => {
+				// Even though the state was updated, the tags are not rendered yet.
+				// So we have to wait for handleSectionRendered to run before proceeding.
+				await this.waitForSectionRender();
+				this.shiftFocus(e);
+			});
 			return;
 		}
 		this.shiftFocus(e);
