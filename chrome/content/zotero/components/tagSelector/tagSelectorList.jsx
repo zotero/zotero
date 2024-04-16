@@ -47,6 +47,7 @@ class TagList extends React.PureComponent {
 		this.scrollToTopOnNextUpdate = false;
 		this.prevTagCount = 0;
 		this.focusedTagIndex = null;
+		this.lastFocusedTagIndex = null;
 		this.keypressToHandleOnNextUpdate = null;
 		this.state = {
 			scrollToCell: null
@@ -186,6 +187,7 @@ class TagList extends React.PureComponent {
 			onDragExit,
 			onDrop,
 			onFocus: (_) => {
+				this.lastFocusedTagIndex = this.focusedTagIndex;
 				this.focusedTagIndex = index;
 			}
 		};
@@ -245,8 +247,13 @@ class TagList extends React.PureComponent {
 		// <Collection> sets role="grid" which is not semantically correct
 		tagsList.setAttribute("role", "group");
 
-		this.setState({ scrollToCell: undefined });
 		if (this.focusedTagIndex === null) return;
+		// If the focused tag does not changed, the scrollToCell won't change
+		// either, so the <Collection> won't scroll to the desired tag if we don't reset it.
+		// E.g. second arrowLeft keypress when first tag is focused won't scroll to it.
+		if (this.lastFocusedTagIndex === this.focusedTagIndex) {
+			this.setState({ scrollToCell: null });
+		}
 		// Check if the tag that is supposed to be focused is within the rendered tags range.
 		// If it is, make sure it is focused. If it is not - focus the tags list.
 		if (indices.includes(this.focusedTagIndex)) {
@@ -271,6 +278,7 @@ class TagList extends React.PureComponent {
 		let tagsList = document.querySelector('.tag-selector-list');
 		if (!tagsList.contains(event.relatedTarget)) {
 			this.focusedTagIndex = null;
+			this.lastFocusedTagIndex = null;
 		}
 	};
 
