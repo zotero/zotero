@@ -34,6 +34,7 @@
 
 <window
 	id="add-citation-dialog"
+	class="contain-richlistbox"
 	windowtype="zotero:item-selector"
 	orient="vertical"
 	title="&zotero.integration.addEditCitation.title;"
@@ -61,67 +62,65 @@
 
 
 	<vbox id="zotero-select-items-container" flex="1">
-		<vbox flex="1">
-			<hbox flex="1">
-				<vbox align="stretch" flex="1" style="min-width: 500px">
-					<hbox align="center" pack="end">
-						<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
-					</hbox>
-					<hbox flex="1" style="margin-top: 5px">
-						<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 200px; min-height: 100%;">
-							<html:div id="zotero-collections-tree"></html:div>
-						</vbox>
-
-						<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1" style="width: 100%; min-height: 100%;">
-							<html:div id="zotero-items-tree"></html:div>
-						</hbox>
-					</hbox>
-				</vbox>
-						
-				<hbox hidden="true" id="multiple-sources" align="stretch">
-					<vbox align="center" pack="center" id="citation-buttons">
-						<toolbarbutton id="up" oncommand="Zotero_Citation_Dialog.up()" disabled="true"/>
-						<toolbarbutton id="add" oncommand="Zotero_Citation_Dialog.add()" disabled="true"/>
-						<toolbarbutton id="remove" oncommand="Zotero_Citation_Dialog.remove()" disabled="true"/>
-						<toolbarbutton id="down" oncommand="Zotero_Citation_Dialog.down()" disabled="true"/>
-					</vbox>
-					<vbox align="left">
-						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.citationSortUnsort()" label="&zotero.citation.keepSorted.label;" native="true"/>
-						<richlistbox id="item-list" flex="1" align="stretch" seltype="single" style="width: 250px;"
-							onselect="Zotero_Citation_Dialog.listItemSelected();"/>
-					</vbox>
+		<hbox flex="1">
+			<vbox align="stretch" flex="1" style="min-width: 500px">
+				<hbox align="center" pack="end">
+					<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
 				</hbox>
-			</hbox>
-			
-			<hbox align="stretch" style="margin-top: 8px">
-				<vbox flex="1">
-					<hbox align="center">
-						<label value="&zotero.citation.prefix.label;"/>
-						<html:input type="text" class="fix" id="prefix" tabindex="3"
-									oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
-									onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
+				<hbox flex="1" style="margin-top: 5px">
+					<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 200px; min-height: 100%;">
+						<html:div id="zotero-collections-tree"></html:div>
+					</vbox>
+
+					<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1" style="width: 100%; min-height: 100%;">
+						<html:div id="zotero-items-tree"></html:div>
 					</hbox>
-					<hbox align="center">
-						<label value="&zotero.citation.suffix.label;"/>
-						<html:input type="text" class="fix" id="suffix" tabindex="4"
-									oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
-									onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
-					</hbox>
-					<spacer flex="1"/>
+				</hbox>
+			</vbox>
+					
+			<hbox hidden="true" id="multiple-sources" align="stretch">
+				<vbox align="center" pack="center" id="citation-buttons">
+					<toolbarbutton id="up" oncommand="Zotero_Citation_Dialog.up()" disabled="true"/>
+					<toolbarbutton id="add" oncommand="Zotero_Citation_Dialog.add()" disabled="true"/>
+					<toolbarbutton id="remove" oncommand="Zotero_Citation_Dialog.remove()" disabled="true"/>
+					<toolbarbutton id="down" oncommand="Zotero_Citation_Dialog.down()" disabled="true"/>
 				</vbox>
-				<separator flex="4"/>
-				<vbox flex="1">
-					<hbox align="stretch">
-						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5" native="true">
-							<menupopup id="locator-type-popup"/>
-						</menulist>
-						<html:input oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2"/>
-					</hbox>
-					<separator style="height: 2px" flex="1"/>
-					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6" native="true"/>
+				<vbox align="left">
+					<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.citationSortUnsort()" label="&zotero.citation.keepSorted.label;" native="true"/>
+					<richlistbox id="item-list" flex="1" align="stretch" seltype="single" style="width: 250px;"
+						onselect="Zotero_Citation_Dialog.listItemSelected();"/>
 				</vbox>
 			</hbox>
-		</vbox>
+		</hbox>
+		
+		<hbox align="stretch" style="margin-top: 8px">
+			<vbox flex="1">
+				<hbox align="center">
+					<label value="&zotero.citation.prefix.label;"/>
+					<html:input type="text" class="fix" id="prefix" tabindex="3"
+								oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
+								onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
+				</hbox>
+				<hbox align="center">
+					<label value="&zotero.citation.suffix.label;"/>
+					<html:input type="text" class="fix" id="suffix" tabindex="4"
+								oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
+								onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
+				</hbox>
+				<spacer flex="1"/>
+			</vbox>
+			<separator flex="4"/>
+			<vbox flex="1">
+				<hbox align="stretch">
+					<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5" native="true">
+						<menupopup id="locator-type-popup"/>
+					</menulist>
+					<html:input oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2"/>
+				</hbox>
+				<separator style="height: 2px" flex="1"/>
+				<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6" native="true"/>
+			</vbox>
+		</hbox>
 
 		<iframe id="editor" src="simpleEditor.html" hidden="true" flex="1" type="content" remote="false" maychangeremoteness="false"/>
 		<description id="zotero-editor-warning" style="margin: 9px 1px 0" hidden="true">&zotero.citation.editorWarning.label;</description>

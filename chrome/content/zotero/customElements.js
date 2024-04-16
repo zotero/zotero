@@ -167,13 +167,20 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesC
 
 	// inject custom CSS into FF built-in custom elements (currently only <wizard>)
 	const InjectCSSConfig = {
-		global: ["wizard"],
+		global: [
+			"wizard",
+			{
+				element: "dialog",
+				patchedFunction: "connectedCallback"
+			}
+		],
 		win: [
 			"wizard",
 			{
 				element: "dialog",
 				// The `attachShadow` are cleared in <dialog>, we need to monkey-patch after `connectedCallback`.
-				patchee: "connectedCallback"
+				patchedFunction: "connectedCallback",
+				filename: "wizard-dialog"
 			}
 		],
 		mac: [],
@@ -185,24 +192,24 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesC
 		if (key == "linux" && !Zotero.isLinux) continue;
 		let prefix = "";
 		if (key == "global") {
-			prefix = "zotero/skin/";
+			prefix = "zotero/skin/xulElementPatches/";
 		}
 		else {
-			prefix = "zotero-platform/content/";
+			prefix = "zotero-platform/content/xulElementPatches/";
 		}
 		for (let config of configs) {
-			let element, patchee;
+			let element, patchedFunction;
 			// By default, monkey-patch `attachShadow`
 			if (typeof config === "string") {
 				element = config;
-				patchee = "attachShadow";
+				patchedFunction = "attachShadow";
 			}
 			else {
 				element = config.element;
-				patchee = config.patchee;
+				patchedFunction = config.patchedFunction;
 			}
-			let oldFunc = customElements.get(element).prototype[patchee];
-			customElements.get(element).prototype[patchee] = function () {
+			let oldFunc = customElements.get(element).prototype[patchedFunction];
+			customElements.get(element).prototype[patchedFunction] = function () {
 				let ret = oldFunc.apply(this, arguments);
 				this.shadowRoot.append(MozXULElement.parseXULToFragment(
 					`<html:link rel="stylesheet" href="chrome://${prefix}${element}.css"/>`

@@ -384,3 +384,7 @@ window.citation-dialog {
 window#add-citation-dialog, window#edit-bibliography-dialog {
 	min-height: 600px;
 }
+
+window#add-citation-dialog dialog, window#edit-bibliography-dialog dialog {
+	max-height: 100vh;
+}

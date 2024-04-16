@@ -37,3 +37,12 @@
         margin-bottom: 8px;
     }
 }
+
+// richlistbox elements are crazy and will expand beyond the window size
+// unless all/most elements in the hierarchy that contain that
+// richlistbox have a min-height: 0 set
+.contain-richlistbox {
+    vbox, hbox {
+        min-height: 0;
+    }
+}
