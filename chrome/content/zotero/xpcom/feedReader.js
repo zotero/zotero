@@ -417,7 +417,11 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 	if (feedEntry.title) item.title = Zotero.FeedReader._getRichText(feedEntry.title, 'title');
 	
 	if (feedEntry.summary) {
-		item.abstractNote = new XMLSerializer().serializeToString(feedEntry.summary.createDocumentFragment());
+		let summaryFragment = feedEntry.summary.createDocumentFragment();
+		if (summaryFragment.querySelectorAll('body').length === 1) {
+			summaryFragment.replaceChildren(...summaryFragment.querySelector('body').childNodes);
+		}
+		item.abstractNote = new XMLSerializer().serializeToString(summaryFragment);
 		
 		if (!item.title) {
 			// We will probably have to trim this, so let's use plain text to
