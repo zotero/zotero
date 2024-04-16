@@ -95,11 +95,15 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		return false;
 	}
 
-	async _forceRenderAll() {
-		if (this.hidden) return;
+	_resetRenderedFlags() {
 		// Clear cached flags to allow re-rendering
 		delete this._syncRenderItemID;
 		delete this._asyncRenderItemID;
+	}
+
+	async _forceRenderAll() {
+		if (this.hidden) return;
+		this._resetRenderedFlags();
 		if (this.render) this.render();
 		if (this.asyncRender) await this.asyncRender();
 	}
