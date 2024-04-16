@@ -47,7 +47,10 @@ class TagList extends React.PureComponent {
 		this.scrollToTopOnNextUpdate = false;
 		this.prevTagCount = 0;
 		this.focusedTagIndex = null;
-		this.renderedTagRange = [];
+		this.keypressToHandleOnNextUpdate = null;
+		this.state = {
+			scrollToCell: null
+		};
 	}
 	
 	componentDidUpdate(prevProps) {
@@ -219,30 +222,21 @@ class TagList extends React.PureComponent {
 		);
 	};
 
-	// If windowing kicks in and the focused tag's node has been removed,
-	// scroll in its direction until it is re-created and focused.
-	async scrollToFocusedTag() {
-		if (this.focusedTagIndex === null) return;
-		if (this.renderedTagRange.includes(this.focusedTagIndex)) return;
-		// Determine the direction of the scrolling
-		let scrollUp = true;
-		if (this.focusedTagIndex > this.renderedTagRange[0]) {
-			scrollUp = false;
+	shiftFocus(e) {
+		if (!document.activeElement.classList.contains("tag-selector-item")) return;
+		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
+		// Handle arrow navigation
+		let nextTag = (node) => {
+			if (e.key == "ArrowRight") return node.nextElementSibling;
+			return node.previousElementSibling;
+		};
+		let nextOne = nextTag(document.activeElement);
+		// Skip disabled tags
+		while (nextOne && nextOne.classList.contains("disabled")) {
+			nextOne = nextTag(nextOne);
 		}
-		let tagsList = document.querySelector('.tag-selector-list');
-		// Sanity check to make sure we're not stuck in infinite loop
-		let maxCounter = 0;
-		// Keep scrolling until the desired tag is rendered
-		while (!this.renderedTagRange.includes(this.focusedTagIndex) && maxCounter < 10) {
-			if (scrollUp) {
-				tagsList.scrollTop -= tagsList.clientHeight;
-			}
-			else {
-				tagsList.scrollTop += tagsList.clientHeight;
-			}
-			maxCounter += 1;
-			// Wait a moment to let this.handleSectionRendered update this.renderedTagRange
-			await Zotero.Promise.delay(10);
+		if (nextOne) {
+			nextOne.focus();
 		}
 	}
 
@@ -250,16 +244,21 @@ class TagList extends React.PureComponent {
 		let tagsList = document.querySelector('.tag-selector-list');
 		// <Collection> sets role="grid" which is not semantically correct
 		tagsList.setAttribute("role", "group");
+
+		this.setState({ scrollToCell: undefined });
+		if (this.focusedTagIndex === null) return;
 		// Check if the tag that is supposed to be focused is within the rendered tags range.
 		// If it is, make sure it is focused. If it is not - focus the tags list.
-		this.renderedTagRange = indices;
-		if (this.focusedTagIndex === null) return;
 		if (indices.includes(this.focusedTagIndex)) {
 			let tagsNodes = [...tagsList.querySelectorAll(".tag-selector-item")];
 			let tagToFocus = this.props.tags[this.focusedTagIndex];
 			let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
 			if (nodeToFocus) {
 				nodeToFocus.focus();
+				if (this.keypressToHandleOnNextUpdate) {
+					this.shiftFocus(this.keypressToHandleOnNextUpdate);
+					this.keypressToHandleOnNextUpdate = null;
+				}
 			}
 		}
 		else {
@@ -275,26 +274,16 @@ class TagList extends React.PureComponent {
 		}
 	};
 
-	async handleKeyDown(e) {
+	handleKeyDown(e) {
 		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
 		// If the windowing kicks in, the node of the initially-focused tag may not
-		// exist, so first try to scroll towards it to have the node re-created
-		await this.scrollToFocusedTag();
-		// At this point, the node is supposed to exist and be focused
-		if (!document.activeElement.classList.contains("tag-selector-item")) return;
-		// Handle arrow navigation
-		let nextTag = (node) => {
-			if (e.key == "ArrowRight") return node.nextElementSibling;
-			return node.previousElementSibling;
-		};
-		let nextOne = nextTag(document.activeElement);
-		// Skip disabled tags
-		while (nextOne && nextOne.classList.contains("disabled")) {
-			nextOne = nextTag(nextOne);
+		// exist, so first we may need to scroll to it.
+		if (!document.activeElement.classList.contains("tag-selector-item")) {
+			this.setState({ scrollToCell: this.focusedTagIndex });
+			this.keypressToHandleOnNextUpdate = e;
+			return;
 		}
-		if (nextOne) {
-			nextOne.focus();
-		}
+		this.shiftFocus(e);
 	}
 	
 	render() {
@@ -335,6 +324,7 @@ class TagList extends React.PureComponent {
 					height={this.props.height - filterBarHeight}
 					aria-label={document.querySelector("#zotero-tag-selector").getAttribute("label") || ""}
 					onSectionRendered={this.handleSectionRendered}
+					scrollToCell={Number.isInteger(this.state.scrollToCell) ? this.state.scrollToCell : undefined}
 				/>
 			);
 		}
