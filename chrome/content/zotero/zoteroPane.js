@@ -137,9 +137,16 @@ var ZoteroPane = new function()
 		
 		// Set the sync tooltip label
 		Components.utils.import("resource://zotero/config.js");
-		document.getElementById('zotero-tb-sync-label').value = Zotero.getString(
-			'sync.syncWith', ZOTERO_CONFIG.DOMAIN_NAME
-		);
+		let syncLabel = document.getElementById('zotero-tb-sync-label');
+		syncLabel.value = Zotero.getString('sync.syncWith', ZOTERO_CONFIG.DOMAIN_NAME);
+		let syncButton = document.querySelector("#zotero-tb-sync");
+		syncButton.setAttribute("aria-label", syncLabel.value);
+		// Update the aria-description on focus
+		syncButton.addEventListener("focus", function (_) {
+			Zotero.Sync.Runner.registerSyncStatus(this.firstChild);
+			let lastSync = document.querySelector("#zotero-tb-sync-last-sync").value;
+			this.setAttribute("aria-description", lastSync || "");
+		});
 		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
