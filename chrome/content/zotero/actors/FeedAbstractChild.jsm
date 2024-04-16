@@ -30,6 +30,8 @@ class FeedAbstractChild extends JSWindowActorChild {
 			}
 			
 			case "click": {
+				// Prevent default click behavior (link opening, form submission,
+				// and so on) in all cases; open links externally
 				event.preventDefault();
 				if (event.button === 0 && event.target.localName === 'a' && event.target.href) {
 					await this._sendLaunchURL(event.target.href);
