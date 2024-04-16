@@ -658,7 +658,6 @@ async function resetDB(options = {}) {
 			}
 			_defaultGroup = null;
 		},
-		false,
 		options
 	);
 	await Zotero.Schema.schemaUpdatePromise;
