@@ -98,9 +98,9 @@
 		notify(action, type, ids) {
 			if (!this._item?.isRegularItem()) return;
 
-			this.updatePreview();
-
 			this._updateAttachmentIDs().then(() => {
+				this.updatePreview();
+
 				let attachments = Zotero.Items.get((this._attachmentIDs).filter(id => ids.includes(id)));
 				if (attachments.length === 0) {
 					return;
@@ -177,7 +177,11 @@
 		}
 
 		async updatePreview() {
-			if (!this.usePreview || !this._section.open) {
+			if (!this.usePreview
+				// Skip only when the section is manually collapsed (when there's attachment),
+				// This is necessary to ensure the rendering of the first added attachment
+				// because the section is force-collapsed if no attachment.
+				|| (this._attachmentIDs.length && !this._section.open)) {
 				return;
 			}
 			let attachment = await this._getPreviewAttachment();
