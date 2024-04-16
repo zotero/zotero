@@ -57,6 +57,7 @@ zotero-collections-search-btn =
     .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
     .placeholder = Search Tabs
+    .aria-label = Search Tabs
 zotero-tabs-menu-close-button =
     .title = Close Tab
 
@@ -433,9 +434,11 @@ abstract-field =
 
 tagselector-search =
     .placeholder = Filter Tags
+    .aria-label = Filter Tags
 
 context-notes-search =
     .placeholder = Search Notes
+    .aria-label = Search Notes
 
 new-collection-dialog =
     .title = New Collection

@@ -1170,6 +1170,7 @@ var ZoteroPane = new function()
 	this.initCollectionTreeSearch = function () {
 		let collectionSearchField = document.getElementById("zotero-collections-search");
 		let collectionSearchButton = document.getElementById("zotero-tb-collections-search");
+		collectionSearchField.inputField.setAttribute("aria-label", collectionSearchField.placeholder);
 		collectionSearchField.style.visibility = 'hidden';
 		collectionSearchField.addEventListener("blur", ZoteroPane.hideCollectionSearch);
 		collectionSearchButton.addEventListener("click", (_) => {
