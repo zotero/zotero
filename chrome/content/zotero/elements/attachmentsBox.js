@@ -96,6 +96,9 @@
 		}
 
 		notify(action, type, ids) {
+			if (ids.includes(this._item?.id)) {
+				this._resetRenderedFlags();
+			}
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
