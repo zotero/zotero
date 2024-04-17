@@ -111,22 +111,28 @@
 			if (!this.item) return;
 			if (this._isAlreadyRendered()) return;
 
-			if (this.item.isFeedItem) {
-				this._renderFeedItem();
-			}
-			else {
+			if (!this.item.isFeedItem) {
 				this._renderRegularItem();
 			}
 		}
 		
-		_renderFeedItem() {
+		async asyncRender() {
+			if (!this._item) return;
+			if (this._isAlreadyRendered("async")) return;
+			
+			if (this.item.isFeedItem) {
+				await this._renderFeedItem();
+			}
+		}
+		
+		async _renderFeedItem() {
 			let abstract = this.item.getField('abstractNote');
 			this._abstractField.hidden = true;
 			this._feedAbstractBrowser.hidden = false;
 			this._section.summary = Zotero.Utilities.cleanTags(abstract);
 			
 			let actor = this._feedAbstractBrowser.browsingContext.currentWindowGlobal.getActor('FeedAbstract');
-			actor.sendAsyncMessage('setContent', abstract);
+			await actor.sendQuery('setContent', abstract);
 		}
 		
 		_renderRegularItem() {
