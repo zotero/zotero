@@ -468,9 +468,15 @@ toggle-preview =
             *[unknown] Toggle
     } Attachment Preview
 
-quickformat-aria-bubble = Press Down Arrow to open citation properties.
-quickformat-aria-input = Type your search term. Use Down Arrow and Up Arrow to navigate the search results.
-quickformat-aria-item = Press { return-or-enter } to select this item. Press Tab to return to the search field.
+quickformat-general-instructions = Use Left/Right arrows to navigate the entries of this citation. {
+    $dialogMenu ->
+        [active] Press Shift-Tab to focus the dialog's menu.
+        *[other] { "" }
+} Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
+
+quickformat-aria-bubble = Item included in this citation. Press Down Arrow to open citation properties. { quickformat-general-instructions }
+quickformat-aria-input = Citation item search input. Type to search for an item to include in this citation. Then Press Tab to focus and navigate the list of matching items to add to this citation. { quickformat-general-instructions }
+quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
 
