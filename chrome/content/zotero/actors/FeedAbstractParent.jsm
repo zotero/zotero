@@ -12,7 +12,7 @@ class FeedAbstractParent extends JSWindowActorParent {
 			}
 			
 			case "resize": {
-				this._resizeBrowser(data.offsetWidth, data.offsetHeight);
+				this._resizeBrowser(data.offsetHeight);
 				return;
 			}
 			
@@ -23,10 +23,9 @@ class FeedAbstractParent extends JSWindowActorParent {
 		}
 	}
 	
-	_resizeBrowser(width, height) {
+	_resizeBrowser(height) {
 		let browser = this.browsingContext?.embedderElement;
 		if (!browser) return;
-		browser.style.width = width + 'px';
 		browser.style.height = height + 'px';
 	}
 }
