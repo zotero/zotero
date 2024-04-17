@@ -15,3 +15,7 @@ html, body {
 	background: var(--material-sidepane);
 	overflow: clip;
 }
+
+img, svg {
+	max-width: 100%;
+}
