@@ -858,6 +858,179 @@
 			</toolbarbutton>
 		</hbox>
 	</hbox>
+	<!-- fx115: unify popupsets inside tabs into a global one to properly display popups -->
+	<popupset>
+		<!-- Library -->
+		<menupopup id="zotero-collectionmenu"
+				oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
+			<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
+			<menuitem class="zotero-menuitem-sync"/>
+			<menuseparator/>
+			<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
+			<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
+			<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
+			<menuitem class="zotero-menuitem-refresh-feed"/>
+			<menuseparator/>
+			<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
+			<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
+			<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
+			<menuitem class="zotero-menuitem-edit-collection"/>
+			<menuitem class="zotero-menuitem-duplicate-collection"/>
+			<menuitem class="zotero-menuitem-mark-read-feed"/>
+			<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
+			<menu class="zotero-collectionmenu-feed-add-menu" label="&zotero.toolbar.feeds.new;">
+				<menupopup>
+					<menuitem label="&zotero.toolbar.feeds.new.fromURL;"
+							command="cmd_zotero_newFeed_fromURL"/>
+					<menuitem label="&zotero.toolbar.feeds.new.fromOPML;"
+							oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
+				</menupopup>
+			</menu>
+			<menuitem class="zotero-menuitem-delete-collection"/>
+			<menuitem class="zotero-menuitem-move-to-trash"/>
+			<menuseparator/>
+			<menuitem class="zotero-menuitem-export"/>
+			<menuitem class="zotero-menuitem-create-bibliography"/>
+			<menuitem class="zotero-menuitem-export" label="&zotero.toolbar.export.label;"/>
+			<menuitem class="zotero-menuitem-create-report"/>
+			<menuitem class="zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;"/>
+			<menuitem class="zotero-menuitem-removeLibrary"/>
+		</menupopup>
+		<menupopup id="zotero-itemmenu">
+			<!-- Keep order in sync with buildItemContextMenu -->
+			<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
+			<menuseparator/>
+			<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
+			<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
+			
+			<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"/>
+			
+			<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
+				<menupopup id="zotero-add-attachment-popup">
+					<menuitem
+						class="menuitem-iconic zotero-menuitem-attachments-file"
+						data-l10n-id="item-menu-add-file"
+						command="cmd_zotero_newChildFileAttachment"
+					/>
+					<menuitem
+						class="menuitem-iconic zotero-menuitem-attachments-link"
+						data-l10n-id="item-menu-add-linked-file"
+						command="cmd_zotero_newChildLinkedFileAttachment"
+					/>
+					<menuitem
+						class="menuitem-iconic zotero-menuitem-attachments-web-link"
+						data-l10n-id="item-menu-add-url"
+						command="cmd_zotero_newChildURLAttachment"
+					/>
+				</menupopup>
+			</menu>
+			<menuseparator/>
+			<menuitem class="menuitem-iconic zotero-menuitem-find-pdf" oncommand="ZoteroPane.findPDFForSelectedItems()"/>
+			<menuseparator/>
+			<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
+			<menu class="menu-iconic zotero-menuitem-add-to-collection">
+				<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
+					<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
+					<menuseparator id="zotero-add-to-collection-separator"/>
+				</menupopup>
+			</menu>
+			<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-duplicate-and-convert" oncommand="ZoteroPane_Local.duplicateAndConvertSelectedItem();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-restore-to-library" label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedItems(true, true);"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-delete-from-lib" oncommand="ZoteroPane_Local.deleteSelectedItems(false, true)"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-merge-items" label="&zotero.items.menu.mergeItems;" oncommand="ZoteroPane_Local.mergeSelectedItems();"/>
+			<menuseparator/>
+			<menuitem class="menuitem-iconic zotero-menuitem-export" oncommand="Zotero_File_Interface.exportItems();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-create-bibliography" oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadItemReport()"/>
+			<menuseparator/>
+			<menuitem class="menuitem-iconic zotero-menuitem-retrieve-metadata" oncommand="ZoteroPane.recognizeSelected();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-unrecognize" label="&zotero.items.menu.unrecognize;" oncommand="ZoteroPane.unrecognizeSelected()"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
+		</menupopup>
+
+		<!-- Context pane -->
+		<menupopup id="context-pane-add-child-note-button-popup">
+			<menuitem id="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>
+			<menuitem id="context-pane-add-child-note-from-annotations" label="&zotero.context.addChildNoteFromAnnotations;"/>
+		</menupopup>
+
+		<menupopup id="context-pane-add-standalone-note-button-popup">
+			<menuitem id="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
+			<menuitem id="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
+		</menupopup>
+		
+		<menupopup id="context-pane-list-popup">
+			<menuitem id="context-pane-list-show-in-library" label="&zotero.items.menu.showInLibrary;"/>
+			<menuitem id="context-pane-list-edit-in-window" label="&zotero.context.editInWindow;"/>
+			<menuseparator/>
+			<menuitem id="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
+		</menupopup>
+
+		<!-- Tag Selector -->
+		<menupopup id="tag-menu">
+			<menuitem label="&zotero.tagSelector.assignColor;"
+				oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
+			<menuitem label="&zotero.tagSelector.renameTag;"
+				oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
+			<menuitem id="split-tag" label="&zotero.tagSelector.splitTag;"
+				oncommand="ZoteroPane.tagSelector.openTagSplitterWindow(event)"/>
+			<menuitem label="&zotero.tagSelector.deleteTag;"
+				oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
+		</menupopup>
+		<menupopup id="tag-selector-view-settings-menu"
+			onpopupshowing="
+				document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+				document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
+				document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
+				(async function () {
+					var libraryID = ZoteroPane.tagSelector.libraryID;
+					var library = Zotero.Libraries.get(libraryID);
+					var enabled = false;
+					if (library.editable) {
+						if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
+							enabled = true;
+						}
+					}
+					document.getElementById('delete-automatic-tags').disabled = !enabled;
+				})();">
+			<menuitem id="num-selected" disabled="true"/>
+			<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
+				oncommand="ZoteroPane.tagSelector.deselectAll();;"/>
+			<menuseparator/>
+			<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
+				oncommand="ZoteroPane.tagSelector.toggleShowAutomatic();"/>
+			<menuitem
+				id="display-all-tags"
+				label="&zotero.tagSelector.displayAllInLibrary;"
+				type="checkbox"
+				oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags();"
+			/>
+			<menuseparator/>
+			<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
+										oncommand="ZoteroPane.tagSelector.deleteAutomatic();
+											this.setAttribute('checked', false);"/>
+		</menupopup>
+		<!-- itemPane translateItem -->
+		<menupopup id="zotero-item-addTo-menu" onpopupshowing="ZoteroPane.itemPane.buildTranslateSelectContextMenu(event);"></menupopup>
+
+		<!-- Autocomplete -->
+		<panel
+			is="autocomplete-richlistbox-popup"
+			type="autocomplete-richlistbox"
+			id="PopupAutoComplete"
+			role="group"
+			noautofocus="true"
+			hidden="true"
+			overflowpadding="4"
+			norolluponanchor="true"
+			nomaxresults="true"
+		/>
+	</popupset>
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
 			<stack id="zotero-pane-stack" flex="1">
@@ -893,101 +1066,6 @@
 									<label is="text-link" id="retracted-items-close">×</label>
 								</html:div>
 							</vbox>
-							
-							<popupset>
-								<menupopup id="zotero-collectionmenu"
-										oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
-									<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
-									<menuitem class="zotero-menuitem-sync"/>
-									<menuseparator/>
-									<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
-									<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
-									<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
-									<menuitem class="zotero-menuitem-refresh-feed"/>
-									<menuseparator/>
-									<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
-									<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
-									<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
-									<menuitem class="zotero-menuitem-edit-collection"/>
-									<menuitem class="zotero-menuitem-duplicate-collection"/>
-									<menuitem class="zotero-menuitem-mark-read-feed"/>
-									<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
-									<menu class="zotero-collectionmenu-feed-add-menu" label="&zotero.toolbar.feeds.new;">
-										<menupopup>
-											<menuitem label="&zotero.toolbar.feeds.new.fromURL;"
-													command="cmd_zotero_newFeed_fromURL"/>
-											<menuitem label="&zotero.toolbar.feeds.new.fromOPML;"
-													oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
-										</menupopup>
-									</menu>
-									<menuitem class="zotero-menuitem-delete-collection"/>
-									<menuitem class="zotero-menuitem-move-to-trash"/>
-									<menuseparator/>
-									<menuitem class="zotero-menuitem-export"/>
-									<menuitem class="zotero-menuitem-create-bibliography"/>
-									<menuitem class="zotero-menuitem-export" label="&zotero.toolbar.export.label;"/>
-									<menuitem class="zotero-menuitem-create-report"/>
-									<menuitem class="zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;"/>
-									<menuitem class="zotero-menuitem-removeLibrary"/>
-								</menupopup>
-								<menupopup id="zotero-itemmenu">
-									<!-- Keep order in sync with buildItemContextMenu -->
-									<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
-									<menuseparator/>
-									<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
-									<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
-									
-									<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"/>
-									
-									<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
-										<menupopup id="zotero-add-attachment-popup">
-											<menuitem
-												class="menuitem-iconic zotero-menuitem-attachments-file"
-												data-l10n-id="item-menu-add-file"
-												command="cmd_zotero_newChildFileAttachment"
-											/>
-											<menuitem
-												class="menuitem-iconic zotero-menuitem-attachments-link"
-												data-l10n-id="item-menu-add-linked-file"
-												command="cmd_zotero_newChildLinkedFileAttachment"
-											/>
-											<menuitem
-												class="menuitem-iconic zotero-menuitem-attachments-web-link"
-												data-l10n-id="item-menu-add-url"
-												command="cmd_zotero_newChildURLAttachment"
-											/>
-										</menupopup>
-									</menu>
-									<menuseparator/>
-									<menuitem class="menuitem-iconic zotero-menuitem-find-pdf" oncommand="ZoteroPane.findPDFForSelectedItems()"/>
-									<menuseparator/>
-									<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
-									<menu class="menu-iconic zotero-menuitem-add-to-collection">
-										<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
-											<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
-											<menuseparator id="zotero-add-to-collection-separator"/>
-										</menupopup>
-									</menu>
-									<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-duplicate-and-convert" oncommand="ZoteroPane_Local.duplicateAndConvertSelectedItem();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-restore-to-library" label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedItems(true, true);"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-delete-from-lib" oncommand="ZoteroPane_Local.deleteSelectedItems(false, true)"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-merge-items" label="&zotero.items.menu.mergeItems;" oncommand="ZoteroPane_Local.mergeSelectedItems();"/>
-									<menuseparator/>
-									<menuitem class="menuitem-iconic zotero-menuitem-export" oncommand="Zotero_File_Interface.exportItems();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-create-bibliography" oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadItemReport()"/>
-									<menuseparator/>
-									<menuitem class="menuitem-iconic zotero-menuitem-retrieve-metadata" oncommand="ZoteroPane.recognizeSelected();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-unrecognize" label="&zotero.items.menu.unrecognize;" oncommand="ZoteroPane.unrecognizeSelected()"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
-									<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
-								</menupopup>
-								
-							</popupset>
 							
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
@@ -1202,71 +1280,6 @@
 						</vbox>
 						<item-pane-sidenav id="zotero-context-pane-sidenav" class="zotero-view-item-sidenav" hidden="true"/>
 					</box>
-
-					<popupset>
-						<menupopup id="context-pane-add-child-note-button-popup">
-							<menuitem id="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>
-							<menuitem id="context-pane-add-child-note-from-annotations" label="&zotero.context.addChildNoteFromAnnotations;"/>
-						</menupopup>
-		
-						<menupopup id="context-pane-add-standalone-note-button-popup">
-							<menuitem id="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
-							<menuitem id="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
-						</menupopup>
-						
-						<menupopup id="context-pane-list-popup">
-							<menuitem id="context-pane-list-show-in-library" label="&zotero.items.menu.showInLibrary;"/>
-							<menuitem id="context-pane-list-edit-in-window" label="&zotero.context.editInWindow;"/>
-							<menuseparator/>
-							<menuitem id="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
-						</menupopup>
-						<!-- Tag Selector -->
-						<menupopup id="tag-menu">
-							<menuitem label="&zotero.tagSelector.assignColor;"
-								oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
-							<menuitem label="&zotero.tagSelector.renameTag;"
-								oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
-							<menuitem id="split-tag" label="&zotero.tagSelector.splitTag;"
-								oncommand="ZoteroPane.tagSelector.openTagSplitterWindow(event)"/>
-							<menuitem label="&zotero.tagSelector.deleteTag;"
-								oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
-						</menupopup>
-						<menupopup id="tag-selector-view-settings-menu"
-							onpopupshowing="
-								document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
-								document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
-								document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
-								(async function () {
-									var libraryID = ZoteroPane.tagSelector.libraryID;
-									var library = Zotero.Libraries.get(libraryID);
-									var enabled = false;
-									if (library.editable) {
-										if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
-											enabled = true;
-										}
-									}
-									document.getElementById('delete-automatic-tags').disabled = !enabled;
-								})();">
-							<menuitem id="num-selected" disabled="true"/>
-							<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
-								oncommand="ZoteroPane.tagSelector.deselectAll();;"/>
-							<menuseparator/>
-							<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
-								oncommand="ZoteroPane.tagSelector.toggleShowAutomatic();"/>
-							<menuitem
-								id="display-all-tags"
-								label="&zotero.tagSelector.displayAllInLibrary;"
-								type="checkbox"
-								oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags();"
-							/>
-							<menuseparator/>
-							<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
-														oncommand="ZoteroPane.tagSelector.deleteAutomatic();
-															this.setAttribute('checked', false);"/>
-						</menupopup>
-						<!-- itemPane translateItem -->
-						<menupopup id="zotero-item-addTo-menu" onpopupshowing="ZoteroPane.itemPane.buildTranslateSelectContextMenu(event);"></menupopup>
-					</popupset>
 				</hbox>
 				
 				<!-- Barrier to prevent tabbing into Zotero pane when busy -->
@@ -1293,18 +1306,4 @@
 			</stack>
 		</vbox>
 	</hbox>
-	<!-- fx115: the popupset has to be here to properly display autocomplete popup -->
-	<popupset>
-		<panel
-			is="autocomplete-richlistbox-popup"
-			type="autocomplete-richlistbox"
-			id="PopupAutoComplete"
-			role="group"
-			noautofocus="true"
-			hidden="true"
-			overflowpadding="4"
-			norolluponanchor="true"
-			nomaxresults="true"
-		/>
-	</popupset>
 </window>
