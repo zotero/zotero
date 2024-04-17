@@ -47,6 +47,10 @@
 	<script src="quickFormat.js" type="text/javascript"/>
 	<script src="insertNoteDialog.js" type="text/javascript"/>
 
+	<linkset>
+		<html:link rel="localization" href="zotero.ftl"/>
+	</linkset>
+	
 	<box orient="horizontal" class="citation-dialog entry">
 		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
 			<hbox class="citation-dialog main" flex="1" align="start">
@@ -64,4 +68,6 @@
 		   height="0" width="0" flip="none">
 		<richlistbox class="citation-dialog reference-list" flex="1"/>
 	</panel>
+	<html:div id="input-description" class="aria-hidden" role="tooltip" data-l10n-id="insert-note-aria-input"></html:div>
+	<html:div id="item-description" class="aria-hidden" role="tooltip" data-l10n-id="insert-note-aria-item"></html:div>
 </window>

@@ -480,6 +480,8 @@ quickformat-aria-item = Press { return-or-enter } to add this item to the citati
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
 
+insert-note-aria-input = Type to search through your notes. Press Tab to begin navigating the results. Press Escape to close the dialog.
+insert-note-aria-item = Press Enter to select this note. Use Arrow Up, Arrow Down to navigate search results. Press Tab to go back to the search field. Press Escape to close the dialog.
 quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
