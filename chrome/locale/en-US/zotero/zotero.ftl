@@ -473,3 +473,8 @@ quickformat-aria-input = Type your search term. Use Down Arrow and Up Arrow to n
 quickformat-aria-item = Press { return-or-enter } to select this item. Press Tab to return to the search field.
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
+
+quicksearch-mode =
+    .aria-label = Quick Search mode
+quicksearch-input =
+    .aria-label = Quick Search

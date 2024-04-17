@@ -31,6 +31,7 @@
 			super();
 
 			this.searchTextbox = null;
+			MozXULElement.insertFTLIfNeeded("zotero.ftl");
 			this.content = MozXULElement.parseXULToFragment(`
 				<hbox id="search-wrapper" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				</hbox>
@@ -57,6 +58,7 @@
 			// which we need for the menupopup, don't break the search textbox
 			let dropmarkerHost = document.createXULElement('hbox');
 			let dropmarkerShadow = dropmarkerHost.attachShadow({ mode: 'open' });
+			document.l10n.connectRoot(dropmarkerHost.shadowRoot);
 			dropmarkerHost.id = 'zotero-tb-search-dropmarker';
 
 			let s1 = document.createElement("link");
@@ -69,13 +71,15 @@
 
 			let dropmarker = document.createXULElement('button');
 			dropmarker.id = "zotero-tb-search-menu-button";
-			dropmarker.tabIndex = -1;
+			dropmarker.tabIndex = 0;
 			dropmarker.setAttribute("type", "menu");
+			dropmarker.setAttribute("data-l10n-id", "quicksearch-mode");
 			dropmarker.append(this.searchModePopup);
 
 			dropmarkerShadow.append(s1, s2, dropmarker);
 
 			let searchBox = document.createXULElement("search-textbox");
+			searchBox.inputField.setAttribute("data-l10n-id", "quicksearch-input");
 			searchBox.id = "zotero-tb-search-textbox";
 			this.searchTextbox = searchBox;
 			
@@ -142,6 +146,8 @@
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
 			this.searchTextbox.placeholder = this._searchModes[mode];
+			// Have the placeholder announced by screen readers after the label for additional context
+			this.searchTextbox.inputField.setAttribute("aria-description", this.searchTextbox.placeholder);
 		}
 
 		_id(id) {
