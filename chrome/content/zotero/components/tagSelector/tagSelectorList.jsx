@@ -224,24 +224,6 @@ class TagList extends React.PureComponent {
 		);
 	};
 
-	shiftFocus(e) {
-		if (!document.activeElement.classList.contains("tag-selector-item")) return;
-		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
-		// Handle arrow navigation
-		let nextTag = (node) => {
-			if (e.key == "ArrowRight") return node.nextElementSibling;
-			return node.previousElementSibling;
-		};
-		let nextOne = nextTag(document.activeElement);
-		// Skip disabled tags
-		while (nextOne && nextOne.classList.contains("disabled")) {
-			nextOne = nextTag(nextOne);
-		}
-		if (nextOne) {
-			nextOne.focus();
-		}
-	}
-
 	// Try to refocus a focused tag that was removed due to windowing
 	refocusTag() {
 		let tagsList = document.querySelector('.tag-selector-list');
@@ -302,10 +284,22 @@ class TagList extends React.PureComponent {
 			// Even after the <Collection> re-renders, the new tag nodes may not be rendered yet.
 			// So we have to wait for handleSectionRendered to run before proceeding.
 			await this.waitForSectionRender();
-			this.shiftFocus(e);
-			return;
 		}
-		this.shiftFocus(e);
+		// Sanity check to make sure that now a tag node is focused
+		if (!document.activeElement.classList.contains("tag-selector-item")) return;
+		// Handle arrow navigation
+		let nextTag = (node) => {
+			if (e.key == "ArrowRight") return node.nextElementSibling;
+			return node.previousElementSibling;
+		};
+		let nextOne = nextTag(document.activeElement);
+		// Skip disabled tags
+		while (nextOne && nextOne.classList.contains("disabled")) {
+			nextOne = nextTag(nextOne);
+		}
+		if (nextOne) {
+			nextOne.focus();
+		}
 	}
 	
 	render() {
