@@ -293,17 +293,16 @@ class TagList extends React.PureComponent {
 		}
 	};
 
-	handleKeyDown(e) {
+	async handleKeyDown(e) {
 		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
 		// If the windowing kicks in, the node of the initially-focused tag may not
 		// exist, so first we may need to scroll to it.
 		if (!document.activeElement.classList.contains("tag-selector-item")) {
-			this.setState({ scrollToCell: this.focusedTagIndex }, async () => {
-				// Even though the state was updated, the tags are not rendered yet.
-				// So we have to wait for handleSectionRendered to run before proceeding.
-				await this.waitForSectionRender();
-				this.shiftFocus(e);
-			});
+			this.setState({ scrollToCell: this.focusedTagIndex });
+			// Even after the <Collection> re-renders, the new tag nodes may not be rendered yet.
+			// So we have to wait for handleSectionRendered to run before proceeding.
+			await this.waitForSectionRender();
+			this.shiftFocus(e);
 			return;
 		}
 		this.shiftFocus(e);
