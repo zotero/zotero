@@ -475,6 +475,6 @@ quickformat-accept =
     .tooltiptext = Save edits to this citation
 
 quicksearch-mode =
-    .aria-label = Quick-search mode menu
+    .aria-label = Quick Search mode
 quicksearch-input =
-    .aria-label = Quick-search input
+    .aria-label = Quick Search
