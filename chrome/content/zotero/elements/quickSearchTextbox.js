@@ -146,7 +146,7 @@
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
 			this.searchTextbox.placeholder = this._searchModes[mode];
-			// Have the placeholder announced by screen readers after the label for annitional context
+			// Have the placeholder announced by screen readers after the label for additional context
 			this.searchTextbox.inputField.setAttribute("aria-description", this.searchTextbox.placeholder);
 		}
 
