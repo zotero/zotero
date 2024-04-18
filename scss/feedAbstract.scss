@@ -1,0 +1,21 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "themes/light";
+@import "themes/dark";
+
+@import "base/base";
+
+html, body {
+	background: var(--material-sidepane);
+	overflow: clip;
+}
+
+img, svg {
+	max-width: 100%;
+}

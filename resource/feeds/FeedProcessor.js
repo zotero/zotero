@@ -575,12 +575,11 @@ TextConstruct.prototype = {
 		return this.text;
 	},
 	
-	createDocumentFragment: function (element) {
+	createDocumentFragment: function () {
 		if (this.type == "text") {
-			const doc = element.ownerDocument;
-			const docFragment = doc.createDocumentFragment();
-			const node = doc.createTextNode(this.text);
-			docFragment.appendChild(node);
+			const docFragment = new DOMParser().parseFromString('<!doctype html>', 'text/html')
+				.createDocumentFragment();
+			docFragment.append(this.text);
 			return docFragment;
 		}
 		
@@ -596,7 +595,9 @@ TextConstruct.prototype = {
 		}
 		
 		const parsedDoc = new DOMParser().parseFromString(this.text, parserType);
-		return parsedDoc.documentElement;
+		const docFragment = parsedDoc.createDocumentFragment();
+		docFragment.append(parsedDoc.documentElement);
+		return docFragment;
 	},
 };
 

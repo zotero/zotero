@@ -123,7 +123,7 @@ describe("Zotero.FeedReader", function () {
 		it('should parse items correctly for a sparse RSS feed', function* () {
 			let expected = { guid: 'http://liftoff.msfc.nasa.gov/2003/06/03.html#item573',
 				title: 'Star City',
-				abstractNote: 'How do Americans get ready to work with Russians aboard the International Space Station? They take a crash course in culture, language and protocol at Russia\'s Star City.',
+				abstractNote: 'How do Americans get ready to work with Russians aboard the International Space Station? They take a crash course in culture, language and protocol at Russia\'s <a xmlns="http://www.w3.org/1999/xhtml" href="http://howe.iki.rssi.ru/GCTC/gctc_e.htm">Star City</a>.',
 				url: 'http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp',
 				creators: [{ firstName: '', lastName: 'editor@example.com', creatorType: 'author', fieldMode: 1 }],
 				date: 'Tue, 03 Jun 2003 09:39:21 GMT',
@@ -203,17 +203,7 @@ describe("Zotero.FeedReader", function () {
 			assert.isNull(item);
 		});
 		
-		it('should decode entities', async () => {
-			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
-			await fr.process();
-			const itemIterator = new fr.ItemIterator();
-			const item = await itemIterator.next().value;
-			
-			assert.equal(item.title, `Encoded "entity"`);
-			assert.equal(item.abstractNote, "They take a crash course in language & protocol.");
-		});
-
-		it('should remove tags', async () => {
+		it('should preserve tags in text fields', async () => {
 			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
 			await fr.process();
 			const itemIterator = new fr.ItemIterator();
@@ -225,8 +215,20 @@ describe("Zotero.FeedReader", function () {
 			
 			// The entry title is text only, so tags are just more text.
 			assert.equal(item.title, "Embedded <b>tags</b>");
+		});
+
+		it('should parse HTML fields', async () => {
+			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
+			await fr.process();
+			const itemIterator = new fr.ItemIterator();
+			let item;
+			for (let i = 0; i < 2; i++) {
+				// eslint-disable-next-line no-await-in-loop
+				item = await itemIterator.next().value;
+			}
+
 			// The entry description is XHTML, so tags are removed there.
-			assert.equal(item.abstractNote, "The proposed VASIMR engine would do that.");
+			assert.equal(item.abstractNote, 'The proposed <b xmlns="http://www.w3.org/1999/xhtml">VASIMR</b> engine would do that.');
 		});
 
 		it('should parse CDATA as text', async () => {

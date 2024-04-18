@@ -26,11 +26,16 @@
 "use strict";
 
 {
+	ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
+
+	const SANDBOX_ALL_FLAGS = 0xFFFFF;
+	
 	class AbstractBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
 				<html:div class="body">
 					<editable-text multiline="true" data-l10n-id="abstract-field" data-l10n-attrs="placeholder" />
+					<browser type="content" remote="true" messagemanagergroup="feedAbstract" hidden="true" />
 				</html:div>
 			</collapsible-section>
 		`);
@@ -70,6 +75,9 @@
 			this._abstractField = this.querySelector('editable-text');
 			this._abstractField.addEventListener('change', () => this.save());
 			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
+			
+			this._feedAbstractBrowser = this.querySelector('browser');
+			this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
 
 			this.render();
 		}
@@ -103,7 +111,34 @@
 			if (!this.item) return;
 			if (this._isAlreadyRendered()) return;
 
+			if (!this.item.isFeedItem) {
+				this._renderRegularItem();
+			}
+		}
+		
+		async asyncRender() {
+			if (!this._item) return;
+			if (this._isAlreadyRendered("async")) return;
+			
+			if (this.item.isFeedItem) {
+				await this._renderFeedItem();
+			}
+		}
+		
+		async _renderFeedItem() {
 			let abstract = this.item.getField('abstractNote');
+			this._abstractField.hidden = true;
+			this._feedAbstractBrowser.hidden = false;
+			this._section.summary = Zotero.Utilities.cleanTags(abstract);
+			
+			let actor = this._feedAbstractBrowser.browsingContext.currentWindowGlobal.getActor('FeedAbstract');
+			await actor.sendQuery('setContent', abstract);
+		}
+		
+		_renderRegularItem() {
+			let abstract = this.item.getField('abstractNote');
+			this._abstractField.hidden = false;
+			this._feedAbstractBrowser.hidden = true;
 			this._section.summary = abstract;
 			// If focused, update the value that will be restored on Escape;
 			// otherwise, update the displayed value
