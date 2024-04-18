@@ -6040,6 +6040,8 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
+			let allowedAttributes = (el.getAttribute('zotero-persist') || '').split(/[\s,]+/);
+			
 			var elValues = serializedValues[id];
 			for (var attr in elValues) {
 				// Ignore persisted collapsed state for collection and item pane splitters, since
@@ -6048,6 +6050,11 @@ var ZoteroPane = new function()
 				if ((el.id == 'zotero-collections-splitter' || el.id == 'zotero-items-splitter')
 						&& attr == 'state'
 						&& Zotero.Prefs.get('reopenPanesOnRestart')) {
+					continue;
+				}
+				// Ignore attributes that are no longer persisted for the element
+				if (!allowedAttributes.includes(attr)) {
+					Zotero.debug(`Not restoring '${attr}' for #${id}`);
 					continue;
 				}
 				if (["width", "height"].includes(attr)) {
