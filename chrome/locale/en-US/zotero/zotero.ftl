@@ -474,8 +474,8 @@ quickformat-general-instructions = Use Left/Right arrows to navigate the entries
         *[other] { "" }
 } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
 
-quickformat-aria-bubble = Item included in this citation. Press Down Arrow to open citation properties. { quickformat-general-instructions }
-quickformat-aria-input = Citation item search input. Type to search for an item to include in this citation. Then Press Tab to focus and navigate the list of matching items to add to this citation. { quickformat-general-instructions }
+quickformat-aria-bubble = Item included in this citation. Press Down Arrow to open a dialog with citation properties to add details. { quickformat-general-instructions }
+quickformat-aria-input = Citation item search input. Type to search for an item to include in this citation. Then Press Tab to focus and navigate the list of search results to add to this citation. { quickformat-general-instructions }
 quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
 quickformat-accept = 
     .tooltiptext = Save edits to this citation

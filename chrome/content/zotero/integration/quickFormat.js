@@ -1077,6 +1077,7 @@ var Zotero_QuickFormat = new function () {
 		bubble.setAttribute("role", "button");
 		bubble.setAttribute("tabindex", "0");
 		bubble.setAttribute("aria-describedby", "bubble-description");
+		bubble.setAttribute("aria-haspopup", true);
 		bubble.className = "citation-dialog bubble";
 		// VoiceOver works better without it
 		if (!Zotero.isMac) {
