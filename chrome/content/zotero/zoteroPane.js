@@ -419,9 +419,12 @@ var ZoteroPane = new function()
 						if (tagContainer.getAttribute('collapsed') == "true") {
 							return document.getElementById('zotero-tb-add');
 						}
-						// If tag selector is collapsed, go to "New item" button, otherwise
-						// default to focusing on tag selector
-						return tagContainer.querySelector(".tag-selector-list");
+						// If tag selector is collapsed, go to "New item" button, otherwise focus tag selector
+						let firstNonDisabledTag = tagSelector.querySelector('.tag-selector-item:not(.disabled)');
+						if (firstNonDisabledTag) {
+							return firstNonDisabledTag;
+						}
+						return tagSelector.querySelector(".search-input");
 					},
 					Escape: clearCollectionSearch
 				}
@@ -452,20 +455,14 @@ var ZoteroPane = new function()
 				},
 				'tag-selector-item': {
 					Tab: () => tagSelector.querySelector(".search-input"),
-					ShiftTab: () => tagSelector.querySelector(".tag-selector-list"),
+					ShiftTab: () => document.getElementById("collection-tree"),
 				},
 				'tag-selector-actions': {
 					Tab: () => document.getElementById('zotero-tb-add'),
 					ShiftTab: () => tagSelector.querySelector(".search-input")
 				},
 				'tag-selector-list': {
-					Tab: () => {
-						let firstNonDisabledTag = tagSelector.querySelector('.tag-selector-item:not(.disabled)');
-						if (firstNonDisabledTag) {
-							return firstNonDisabledTag;
-						}
-						return tagSelector.querySelector(".search-input");
-					},
+					Tab: () => tagSelector.querySelector(".search-input"),
 					ShiftTab: () => document.getElementById("collection-tree"),
 				}
 			};

@@ -1534,7 +1534,6 @@ describe("ZoteroPane", function() {
 			"tag-selector-actions",
 			"search-input",
 			"tag-selector-item",
-			"tag-selector-list",
 			"collection-tree",
 			"zotero-collections-search",
 			"zotero-tb-collection-add",
