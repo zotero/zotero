@@ -1007,6 +1007,8 @@ var Zotero_QuickFormat = new function () {
 		var rll = document.createXULElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("disabled", true);
+		// This ensures that screen readers don't include it while announcing elements' count
+		rll.setAttribute("role", "presentation");
 		rll.setAttribute("class", loading ? "citation-dialog loading" : "citation-dialog separator");
 		rll.appendChild(titleNode);
 		rll.addEventListener("mousedown", _ignoreClick, true);
