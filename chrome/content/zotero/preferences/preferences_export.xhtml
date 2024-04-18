@@ -35,7 +35,7 @@
 		
 		<separator/>
 		
-		<label value="&zotero.preferences.quickCopy.itemFormat;" control="quickCopy-menu"/>
+		<label value="&zotero.preferences.quickCopy.itemFormat;" control="zotero-quickCopy-menu"/>
 		<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;" native="true"/>
 		
 		<hbox align="center">
@@ -96,14 +96,14 @@
 			<button disabled="true" id="quickCopy-edit" label="&zotero.general.edit;"
 				onclick="if (!this.disabled) Zotero_Preferences.Export.showQuickCopySiteEditor(true)"/>
 			<spacer flex="1"/>
-			<button disabled="true" id="quickCopy-delete" label="-" onclick="if (!this.disabled) Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
-			<button label="+"
-				onclick="Zotero_Preferences.Export.showQuickCopySiteEditor()"/>
+			<button disabled="true" id="quickCopy-delete" label="-" data-l10n-id="preferences-minus-btn" onclick="if (!this.disabled) Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
+			<button label="+" data-l10n-id="preferences-plus-btn"
+				onclick="Zotero_Preferences.Export.showQuickCopySiteEditor()">+</button>
 		</hbox>
 		
 		<hbox align="center">
 			<label value="&zotero.preferences.quickCopy.dragLimit;"/>
-			<html:input type="text" preference="extensions.zotero.export.quickCopy.dragLimit" size="3"/>
+			<html:input aria-label="&zotero.preferences.quickCopy.dragLimit; _ &zotero.preferences.items;" type="text" preference="extensions.zotero.export.quickCopy.dragLimit" size="3"/>
 			<label value="&zotero.preferences.items;" flex="1"/>
 		</hbox>
 	</groupbox>

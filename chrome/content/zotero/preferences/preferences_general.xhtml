@@ -37,7 +37,7 @@
 			</hbox>
 		
 			<hbox align="center">
-				<label value="&zotero.bibliography.locale.label;"/>
+				<label value="&zotero.bibliography.locale.label;" control="locale-menu"/>
 				<menulist id="locale-menu"
 						onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
 						native="true">
@@ -193,21 +193,21 @@
 		<groupbox>
 			<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
 			
-			<hbox>
+			<hbox align="center">
+				<label control="openurl-menu" value="&zotero.preferences.openurl.choose;"></label>
 				<menulist id="openurl-menu" native="true">
 					<menupopup
 							id="openurl-primary-popup"
 							onpopupshowing="Zotero_Preferences.General.handleOpenURLPopupShowing(event)"
 							oncommand="Zotero_Preferences.General.handleOpenURLSelected(event)">
-						<menuitem label="&zotero.preferences.openurl.choose;"/>
+						<menuitem label="&zotero.preferences.openurl.custom;"/>
 					</menupopup>
 				</menulist>
 			</hbox>
 			
 			<hbox style="display: flex; align-items: center;">
-				<label id="openUrl-label" value="&zotero.preferences.openurl.server;"/>
+				<label control="openURLServerField" value="&zotero.preferences.openurl.server;"/>
 				<html:input type="text" id="openURLServerField" style="flex: 1;"
-					aria-labelledby="openURLServerField"
 					oninput="Zotero_Preferences.General.onOpenURLCustomized();"
 					preference="extensions.zotero.openURL.resolver"
 				/>
@@ -233,7 +233,7 @@
 			<checkbox label="&zotero.preferences.automaticTags;" preference="extensions.zotero.automaticTags" native="true"/>
 			<hbox align="center">
 				<label id="trashAutoEmpty-label" value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
-				<html:input aria-labelledby="trashAutoEmpty-label" type="text" size="2" preference="extensions.zotero.trashAutoEmptyDays"/>
+				<html:input aria-label="&zotero.preferences.trashAutoEmptyDaysPre; _ &zotero.preferences.trashAutoEmptyDaysPost;" type="text" size="2" preference="extensions.zotero.trashAutoEmptyDays"/>
 				<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
 			</hbox>
 		</groupbox>
