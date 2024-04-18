@@ -1,8 +1,8 @@
 function update() {
 	var isAsync = document.getElementById('run-as-async').checked;
 	var resultLabel = document.getElementById('result-label');
-	var val = isAsync ? 'Return value' : 'Result';
-	resultLabel.textContent = val + ':';
+	var type = isAsync ? 'async' : 'none';
+	resultLabel.setAttribute('data-l10n-args', `{"type":"${type}"}`);
 }
 
 async function run() {
@@ -85,6 +85,7 @@ window.addEventListener("load", function (e) {
 		return;
 	}
 
+	MozXULElement.insertFTLIfNeeded("zotero.ftl");
 	var codeWin = document.getElementById("editor-code").contentWindow;
 	codeEditor = codeWin.editor;
 	var session = codeEditor.getSession();
