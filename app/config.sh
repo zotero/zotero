@@ -7,7 +7,8 @@ GECKO_VERSION_WIN="115.9.1esr"
 RUST_VERSION=1.69.0
 
 # URL prefix for custom builds of Firefox components
-custom_components_url="https://download.zotero.org/dev/"
+custom_components_url="https://download.zotero.org/dev/firefox-components/"
+custom_components_hash_mac="bec8e3adebf8d5021f1f35fd2c65d752d4979839cbdd1ee1aa4b1d3d5ba0953b"
 
 APP_NAME="Zotero"
 APP_ID="zotero\@zotero.org"
