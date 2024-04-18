@@ -38,11 +38,13 @@
 	data-l10n-id="new-collection-dialog"
 	data-l10n-attrs="title"
 	width="350"
+	drawintitlebar-platforms="mac"
 	onload="Zotero_New_Collection_Dialog._handleLoad()"
 >
 	<script>
 		const { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
 		Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/titlebar.js', this);
 		Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
 		Services.scriptloader.loadSubScript('chrome://zotero/content/newCollectionDialog.js', this);
 	</script>

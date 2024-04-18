@@ -10,6 +10,7 @@
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.exportOptions.title;"
+	drawintitlebar-platforms="mac"
 	onload="Zotero_File_Interface_Export.init()">
 <dialog
 	buttons="cancel,accept"
@@ -18,6 +19,7 @@
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	</script>
 	<script src="charsetMenu.js"/>
