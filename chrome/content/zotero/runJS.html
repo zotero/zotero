@@ -1,36 +1,37 @@
 <html id="run-js">
 	<head>
-		<title>Run JavaScript</title>
+		<title data-l10n-id="runJS-title"></title>
 		<link href="chrome://zotero-platform/content/zotero.css" rel="stylesheet"/>
 	</head>
 	<body>
 		<nav>
-			<button onclick="run()">Run</button>
+			<button data-l10n-id="runJS-run" onclick="run()"></button>
 			<span id="run-label"></span>
-			<button id="help-button" onclick="openHelp()">Help</button>
+			<button data-l10n-id="runJS-help" id="help-button" onclick="openHelp()"></button>
 		</nav>
 		
 		<main>
 			<div class="textbox-container">
 				<div class="textbox-header">
-					<label class="textbox-label" for="editor-code">Code:</label>
-					<label id="run-as-async-label" for="run-as-async">
+					<label id="code-editor-label" data-l10n-id="runJS-editor-label" class="textbox-label"></label>
+					<div>
+						<label id="run-as-async-label" data-l10n-id="runJS-run-async" for="run-as-async"></label>
 						<input id="run-as-async" type="checkbox" onclick="update()">
-						Run as async function
-					</label>
+					</div>
 				</div>
 				<iframe
 						src="chrome://zotero/content/ace/ace.html"
 						id="editor-code"
 						class="editor-code"
+						aria-labelledby="code-editor-label"
 				></iframe>
 			</div>
 			
 			<div class="textbox-container">
 				<div class="textbox-header">
-					<label id="result-label" class="textbox-label" for="result"/>
+					<label id="result-label" class="textbox-label" for="result" data-l10n-id="runJS-result"/>
 				</div>
-				<textarea id="result" readonly></textarea>
+				<textarea id="result" readonly aria-disabled="true"></textarea>
 			</div>
 		</main>
 		

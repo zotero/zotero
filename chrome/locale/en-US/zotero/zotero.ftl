@@ -10,6 +10,7 @@ general-add = Add
 general-remind-me-later = Remind Me Later
 general-choose-file = Choose File…
 general-open-settings = Open Settings
+general-help = Help
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -257,6 +258,16 @@ rtfScan-complete-page =
 
 rtfScan-complete-page-description = Your document has now been scanned and processed. Please ensure that it is formatted correctly.
 
+runJS-title = Run JavaScript
+runJS-editor-label = Code:
+runJS-run = Run
+runJS-help = { general-help }
+runJS-result = {
+    $type ->
+        [async] Return value:
+        *[other] Result:
+}
+runJS-run-async = Run as async function
 
 bibliography-style-label = Citation Style:
 bibliography-locale-label = Language:
