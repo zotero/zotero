@@ -969,7 +969,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	this.openMainWindow = function () {
 		var chromeURI = AppConstants.BROWSER_CHROME_URL;
-		var flags = "chrome,all,dialog=no";
+		var flags = "chrome,all,dialog=no,resizable=yes";
 		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher);
 		ww.openWindow(null, chromeURI, '_blank', flags, null);
