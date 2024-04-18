@@ -534,7 +534,11 @@ class ReaderInstance {
 				if (!focused) {
 					win.Zotero_Tabs.moveFocus("current");
 				}
-			}
+			},
+			onSetZoom: (iframe, zoom) => {
+				iframe.browsingContext.textZoom = 1;
+				iframe.browsingContext.fullZoom = zoom;
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
