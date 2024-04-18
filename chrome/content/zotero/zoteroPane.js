@@ -6074,7 +6074,7 @@ var ZoteroPane = new function()
 	};
 
 	/**
-	 * Serializes zotero-persist elements to preferences
+	 * Serializes zotero-persist attributes to preferences
 	 */
 	this.serializePersist = function() {
 		if (!_unserialized) return;
@@ -6084,6 +6084,7 @@ var ZoteroPane = new function()
 		catch (e) {
 			serializedValues = {};
 		}
+		var persistedElements = new Set();
 		for (let el of document.querySelectorAll("[zotero-persist]")) {
 			if (!el.getAttribute) continue;
 			var id = el.getAttribute("id");
@@ -6092,9 +6093,16 @@ var ZoteroPane = new function()
 			for (let attr of el.getAttribute("zotero-persist").split(/[\s,]+/)) {
 				if (el.hasAttribute(attr)) {
 					elValues[attr] = el.getAttribute(attr);
+					persistedElements.add(id);
 				}
 			}
 			serializedValues[id] = elValues;
+		}
+		// Remove elements that no longer persist anything
+		for (let i in serializedValues) {
+			if (!persistedElements.has(i)) {
+				delete serializedValues[i];
+			}
 		}
 		Zotero.Prefs.set("pane.persist", JSON.stringify(serializedValues));
 	}
