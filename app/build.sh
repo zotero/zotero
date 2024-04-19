@@ -498,8 +498,8 @@ if [ $BUILD_MAC == 1 ]; then
 	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/zotero"
 	chmod 755 "$CONTENTSDIR/MacOS/zotero"
 
-	# TEMP: Modified versions of some Firefox components for Big Sur, placed in xulrunner/MacOS
-	#cp "$MAC_RUNTIME_PATH/../MacOS/"{libc++.1.dylib,libnss3.dylib,XUL} "$CONTENTSDIR/MacOS/"
+	# TEMP: Custom version of XUL with some backported Mozilla bug fixes
+	cp "$MAC_RUNTIME_PATH/../MacOS/XUL" "$CONTENTSDIR/MacOS/"
 
 	# Use our own updater, because Mozilla's requires updates signed by Mozilla
 	cd "$CONTENTSDIR/MacOS"

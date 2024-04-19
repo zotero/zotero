@@ -355,6 +355,10 @@ function modify_omni {
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
 	
+	# Show Services menu on input fields
+	# (JS part of https://hg.mozilla.org/mozilla-central/rev/defc298879844981e7c1817f13e3fc2caf84f148 for input boxes)
+	replace_line '<menupopup class="textbox-contextmenu">' '<menupopup class="textbox-contextmenu" showservicesmenu="true">' chrome/toolkit/content/global/elements/moz-input-box.js
+    
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
 	cd ..
@@ -409,18 +413,33 @@ if [ $BUILD_MAC == 1 ]; then
 		hdiutil detach -quiet /Volumes/Firefox
 	fi
 	
-	# Download custom components
-	#echo
-	#rm -rf MacOS
-	#if [ -e "Firefox $GECKO_VERSION MacOS.zip" ]; then
-	#	echo "Using Firefox $GECKO_VERSION MacOS.zip"
-	#	unzip "Firefox $GECKO_VERSION MacOS.zip"
-	#else
-	#	echo "Downloading Firefox $GECKO_VERSION MacOS.zip"
-	#	curl -o MacOS.zip "${custom_components_url}Firefox%20$GECKO_VERSION%20MacOS.zip"
-	#	unzip MacOS.zip
-	#fi
-	#echo
+	# Download custom components (e.g., XUL), as an xz-compressed tarball of the MacOS folder with
+	# custom files in it
+	echo
+	rm -rf MacOS
+	if [ -n "$custom_components_hash_mac" ]; then
+		if [ -e "Firefox $GECKO_VERSION MacOS.zip" ]; then
+			echo "Using Firefox $GECKO_VERSION MacOS.zip"
+			unzip "Firefox $GECKO_VERSION MacOS.zip"
+		else
+			echo "Downloading custom Firefox components"
+			echo
+			curl -o MacOS.tar.xz "${custom_components_url}mac/$custom_components_hash_mac.tar.xz"
+			
+			# Verify hash
+			if [[ "`uname`" = "Darwin" ]]; then
+				shasum=sha256sum
+			else
+				shasum=shasum
+			fi
+			echo
+			echo "$custom_components_hash_mac  MacOS.tar.xz" | $shasum -c -
+			echo
+			
+			tar xvf MacOS.tar.xz
+		fi
+		echo
+	fi
 	
 	pushd Firefox.app/Contents/Resources
 	modify_omni mac
