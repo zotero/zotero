@@ -251,7 +251,7 @@ runJS-result = {
         [async] Return value:
         *[other] Result:
 }
-runJS-runAsync = Run as async function
+runJS-run-async = Run as async function
 
 bibliography-style-label = Citation Style:
 bibliography-locale-label = Language:
