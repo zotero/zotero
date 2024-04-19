@@ -6178,14 +6178,20 @@ var ZoteroPane = new function()
 		this.itemPane.handleResize();
 	}
 
-	this.onColumnPickerSubmenuOpen = function () {
+	this.onColumnPickerPopupShowing = function (event) {
 		let menuPopup = document.getElementById('column-picker-submenu').menupopup;
+		if (event.target !== menuPopup) {
+			return;
+		}
 		menuPopup.replaceChildren();
 		this.itemsView?.buildColumnPickerMenu(menuPopup);
 	};
 
-	this.onSortSubmenuOpen = function () {
+	this.onSortPopupShowing = function (event) {
 		let menuPopup = document.getElementById('sort-submenu').menupopup;
+		if (event.target !== menuPopup) {
+			return;
+		}
 		menuPopup.replaceChildren();
 		this.itemsView?.buildSortMenu(menuPopup);
 
