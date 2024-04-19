@@ -1574,7 +1574,7 @@ var ZoteroPane = new function()
 		);
 		
 		var io = { dataIn: { search: s, name }, dataOut: null };
-		window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal',io);
+		window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
 		if (!io.dataOut) {
 			return false;
 		}
@@ -2496,7 +2496,7 @@ var ZoteroPane = new function()
 					},
 					dataOut: null
 				};
-				window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal',io);
+				window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
 				if (io.dataOut) {
 					row.ref.fromJSON(io.dataOut.json);
 					yield row.ref.saveTx();
