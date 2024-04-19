@@ -13,7 +13,7 @@
 		<main>
 			<div class="textbox-container">
 				<div class="textbox-header">
-					<label data-l10n-id="runJS-code" class="textbox-label" for="editor-code"></label>
+					<label id="code-editor-label" data-l10n-id="runJS-editor-label" class="textbox-label"></label>
 					<div>
 						<label id="run-as-async-label" data-l10n-id="runJS-runAsync" for="run-as-async"></label>
 						<input id="run-as-async" type="checkbox" onclick="update()">
@@ -23,7 +23,7 @@
 						src="chrome://zotero/content/ace/ace.html"
 						id="editor-code"
 						class="editor-code"
-						data-l10n-id="runJS-editor"
+						aria-labelledby="code-editor-label"
 				></iframe>
 			</div>
 			

@@ -243,12 +243,9 @@ rtfScan-complete-page =
 rtfScan-complete-page-description = Your document has now been scanned and processed. Please ensure that it is formatted correctly.
 
 runJS-title = Run Javascript
-runJs-code = Javascript code editor
-runJS-editor =
-    .aria-label = { runJs-code }
+runJS-editor-label = Javascript code editor
 runJS-run = Run
 runJS-help = Help
-runJS-code = { runJs-code }:
 runJS-result = {
     $type ->
         [async] Return value:
