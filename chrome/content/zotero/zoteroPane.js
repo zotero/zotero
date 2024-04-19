@@ -558,8 +558,7 @@ var ZoteroPane = new function()
 			key.id = 'key_sortCol' + i;
 			key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'accel alt');
 			key.setAttribute('key', (i + 1) % 10);
-			// addListener('command', ...) doesn't trigger unless attached to a menuitem
-			key.setAttribute('oncommand', `ZoteroPane.itemsView.toggleSort(${i}, true)`);
+			key.addEventListener('command', () => ZoteroPane.itemsView.toggleSort(i, true));
 			sortSubmenuKeys.append(key);
 		}
 		
