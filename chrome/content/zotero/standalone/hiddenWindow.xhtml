@@ -36,6 +36,7 @@
 
 <window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml">
+	<html:link rel="localization" href="zotero.ftl"/>
 	<html:link rel="localization" href="branding/brand.ftl"/>
 	<html:link rel="localization" href="browser/menubar.ftl"/>
 	<html:link rel="localization" href="browser/browserSets.ftl"/>
@@ -83,7 +84,7 @@
 		<command id="cmd_close" disabled="true"/>
 		<command id="minimizeWindow" disabled="true" data-l10n-id="window-minimize-command"/>
 		<command id="zoomWindow" disabled="true" data-l10n-id="window-zoom-command"/>
-		<command id="cmd_mainWindow" label="&brandShortName;" oncommand="openMainWindow();"/>
+		<command id="cmd_mainWindow" data-l10n-id="main-window-command" oncommand="openMainWindow();"/>
 	</commandset>
 	
 	<keyset id="mainKeyset">

@@ -478,3 +478,6 @@ quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
     .aria-label = Quick Search
+
+main-window-command =
+    .label = { -app-name }
