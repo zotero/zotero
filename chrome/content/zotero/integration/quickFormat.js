@@ -165,6 +165,7 @@ var Zotero_QuickFormat = new function () {
 				let menuitem = document.getElementById(menuitemID);
 				if (menuitem && menuitem.getAttribute("hidden") != "true") {
 					document.getElementById("zotero-icon").removeAttribute("disabled");
+					document.getElementById("input-description").setAttribute("data-l10n-args", `{ "dialogMenu":"active"}`);
 				}
 			}
 			// Nodes for citation properties panel
@@ -1078,6 +1079,7 @@ var Zotero_QuickFormat = new function () {
 		bubble.setAttribute("role", "button");
 		bubble.setAttribute("tabindex", "0");
 		bubble.setAttribute("aria-describedby", "bubble-description");
+		bubble.setAttribute("aria-haspopup", true);
 		bubble.className = "citation-dialog bubble";
 		// VoiceOver works better without it
 		if (!Zotero.isMac) {
