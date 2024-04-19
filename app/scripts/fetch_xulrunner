@@ -325,7 +325,7 @@ function modify_omni {
 	
 	# Import style into built-in dialogs
 	replace_line 'id=\"commonDialogWindow\"' \
-		'id=\"commonDialogWindow\" class=\"zotero-dialog\"' \
+		'id=\"commonDialogWindow\" class=\"zotero-dialog\" drawintitlebar-platforms=\"mac\"' \
 		chrome/toolkit/content/global/commonDialog.xhtml
 	replace_line '<\?xml-stylesheet href=\"chrome:\/\/global\/skin\/commonDialog.css\" type=\"text\/css\"\?>' \
 		'<\?xml-stylesheet href=\"chrome:\/\/global\/skin\/commonDialog.css\" type=\"text\/css\"\?>
@@ -337,6 +337,7 @@ function modify_omni {
 		try {
 			Services.dirsvc.get(\"ProfD\", Ci.nsIFile);
 			Services.scriptloader.loadSubScript(\"chrome:\/\/zotero\/content\/include.js\", this);
+			Services.scriptloader.loadSubScript(\"chrome:\/\/zotero\/content\/titlebar.js\", this);
 			Services.scriptloader.loadSubScript(\"chrome:\/\/zotero\/content\/customElements.js\", this);
 		} catch (e) {}' \
 		chrome/toolkit/content/global/commonDialog.xhtml

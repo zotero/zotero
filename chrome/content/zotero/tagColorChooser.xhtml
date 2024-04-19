@@ -34,6 +34,7 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.tagColorChooser.title;"
 	onload="Zotero_Tag_Color_Chooser.init()"
+	drawintitlebar-platforms="mac"
 	width="350"
 	height="140">
 <dialog
@@ -45,6 +46,7 @@
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tagColorChooser.js", this);
 
 		// Custom elements

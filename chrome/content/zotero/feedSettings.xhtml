@@ -11,11 +11,13 @@
 	title="&zotero.feedSettings.title;" buttons="cancel,accept"
 	buttonlabelaccept="&zotero.feedSettings.saveButton.label;"
 	id="zotero-feed-settings"
+	drawintitlebar-platforms="mac"
 	onload="Zotero_Feed_Settings.init()">
 <dialog>
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/feedSettings.js", this);
 	</script>
