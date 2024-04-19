@@ -16,8 +16,11 @@
 	min-height: 1.5em; /* Fix collapse on Windows */
 }
 
-#noteQuickCopy-format-options th {
-	font-weight: normal;
-	text-align: end;
-	max-width: 3.6em;
+#noteQuickCopy-wrapper {
+	justify-content: center;
+}
+
+#noteQuickCopy-format-options hbox {
+	justify-content: end;
+	width: 100%;
 }

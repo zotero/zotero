@@ -258,9 +258,9 @@ Zotero_Preferences.Export = {
 			}
 			item.value = JSON.stringify(format);
 		}
-		// After updating menulist item value we have to wait a bit before doing click(), to avoid anomalies
-		// like an empty row in menulist. 0 in setTimeout is not enough
-		setTimeout(() => menulist.click(), 50);
+		// After updating item's value we have to wait before dispatching event.
+		// menulist.value does not reflect changes immediately item.value is updated.
+		setTimeout(() => menulist.dispatchEvent(new Event("change", { bubbles: true })), 50);
 	},
 	
 	
