@@ -2465,6 +2465,182 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	// //////////////////////////////////////////////////////////////////////////////
 	//
+	//  Menu utilities for ZoteroPane
+	//
+	// //////////////////////////////////////////////////////////////////////////////
+
+	buildColumnPickerMenu(menupopup) {
+		const prefix = 'zotero-column-picker-';
+		// Filter out ignored columns
+		const columns = this._getColumns();
+		let columnMenuitemElements = {};
+		for (let i = 0; i < columns.length; i++) {
+			const column = columns[i];
+			if (column.showInColumnPicker === false) continue;
+			let label = formatColumnName(column);
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute('type', 'checkbox');
+			menuitem.setAttribute('label', label);
+			menuitem.setAttribute('colindex', i);
+			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
+			if (!column.hidden) {
+				menuitem.setAttribute('checked', true);
+			}
+			if (column.disabledIn && column.disabledIn.includes(this.collectionTreeRow.visibilityGroup)) {
+				menuitem.setAttribute('disabled', true);
+			}
+			columnMenuitemElements[column.dataKey] = menuitem;
+			menupopup.appendChild(menuitem);
+		}
+
+		try {
+			// More Columns menu
+			let id = prefix + 'more-menu';
+
+			let moreMenu = document.createXULElement('menu');
+			moreMenu.setAttribute('label', Zotero.getString('pane.items.columnChooser.moreColumns'));
+			moreMenu.setAttribute('anonid', id);
+
+			let moreMenuPopup = document.createXULElement('menupopup');
+			moreMenuPopup.setAttribute('anonid', id + '-popup');
+
+			let moreItems = [];
+			for (let i = 0; i < columns.length; i++) {
+				const column = columns[i];
+				if (column.columnPickerSubMenu) {
+					moreItems.push(columnMenuitemElements[column.dataKey]);
+				}
+			}
+
+			// Sort fields and move to submenu
+			var collation = Zotero.getLocaleCollation();
+			moreItems.sort(function (a, b) {
+				return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
+			});
+			moreItems.forEach(function (elem) {
+				moreMenuPopup.appendChild(menupopup.removeChild(elem));
+			});
+
+			let sep = document.createXULElement('menuseparator');
+			menupopup.appendChild(sep);
+			moreMenu.appendChild(moreMenuPopup);
+			menupopup.appendChild(moreMenu);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.debug(e, 1);
+		}
+
+		//
+		// Secondary Sort menu
+		//
+		if (!this.collectionTreeRow.isFeedsOrFeed()) {
+			try {
+				const id = prefix + 'sort-menu';
+				const primaryField = this.getSortField();
+				const sortFields = this.getSortFields();
+				let secondaryField = false;
+				if (sortFields[1]) {
+					secondaryField = sortFields[1];
+				}
+
+				const primaryFieldLabel = formatColumnName(columns.find(c => c.dataKey == primaryField));
+
+				const sortMenu = document.createXULElement('menu');
+				sortMenu.setAttribute('label',
+					Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
+				sortMenu.setAttribute('anonid', id);
+
+				const sortMenuPopup = document.createXULElement('menupopup');
+				sortMenuPopup.setAttribute('anonid', id + '-popup');
+
+				// Generate menuitems
+				const sortOptions = [
+					'title',
+					'firstCreator',
+					'itemType',
+					'date',
+					'year',
+					'publisher',
+					'publicationTitle',
+					'dateAdded',
+					'dateModified'
+				];
+				for (let field of sortOptions) {
+					// Hide current primary field, and don't show Year for Date, since it would be a no-op
+					if (field == primaryField || (primaryField == 'date' && field == 'year')) {
+						continue;
+					}
+					let column = columns.find(c => c.dataKey == field);
+					let label = formatColumnName(column);
+
+					let sortMenuItem = document.createXULElement('menuitem');
+					sortMenuItem.setAttribute('fieldName', field);
+					sortMenuItem.setAttribute('label', label);
+					sortMenuItem.setAttribute('type', 'checkbox');
+					if (field == secondaryField) {
+						sortMenuItem.setAttribute('checked', 'true');
+					}
+					sortMenuItem.addEventListener('command', async () => {
+						if (this._setSecondarySortField(field)) {
+							await this.sort();
+						}
+					})
+					sortMenuPopup.appendChild(sortMenuItem);
+				}
+
+				sortMenu.appendChild(sortMenuPopup);
+				menupopup.appendChild(sortMenu);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				Zotero.debug(e, 1);
+			}
+		}
+
+		let sep = document.createXULElement('menuseparator');
+		// sep.setAttribute('anonid', prefix + 'sep');
+		menupopup.appendChild(sep);
+
+		//
+		// Restore Default Column Order
+		//
+		let menuitem = document.createXULElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
+		menuitem.setAttribute('anonid', prefix + 'restore-order');
+		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
+		menupopup.appendChild(menuitem);
+	}
+
+	buildSortMenu(menupopup) {
+		this._getColumns()
+			.filter(column => !column.hidden)
+			.forEach((column, i) => {
+				let menuItem = document.createXULElement('menuitem');
+				menuItem.setAttribute('type', 'checkbox');
+				menuItem.setAttribute('checked', this.getSortField() == column.dataKey);
+				menuItem.setAttribute('label', formatColumnName(column));
+				menuItem.addEventListener('command', () => {
+					this.toggleSort(i, true);
+				});
+				menupopup.append(menuItem);
+			});
+	}
+
+	toggleSort(sortIndex, countVisible = false) {
+		if (countVisible) {
+			let cols = this._getColumns();
+			sortIndex = cols.indexOf(cols.filter(col => !col.hidden)[sortIndex]);
+			if (sortIndex == -1) {
+				return;
+			}
+		}
+		this.tree._columns.toggleSort(sortIndex);
+	}
+
+
+	// //////////////////////////////////////////////////////////////////////////////
+	//
 	//  Private methods
 	//
 	// //////////////////////////////////////////////////////////////////////////////
@@ -3532,16 +3708,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	_displayColumnPickerMenu = (event) => {
 		if (!this.props.columnPicker) return;
-		const prefix = 'zotero-column-picker-';
-		const doc = document;
 		let popupset = document.querySelector('#zotero-column-picker-popupset');
 		if (!popupset) {
-			popupset = doc.createXULElement('popupset');
+			popupset = document.createXULElement('popupset');
 			popupset.id = 'zotero-column-picker-popupset';
 			document.children[0].appendChild(popupset);
 		}
 		
-		const menupopup = doc.createXULElement('menupopup');
+		const menupopup = document.createXULElement('menupopup');
 		menupopup.id = 'zotero-column-picker';
 		menupopup.addEventListener('popuphiding', (event) => {
 			if (event.target.id == menupopup.id) {
@@ -3549,145 +3723,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		
-		// Filter out ignored columns
-		const columns = this._getColumns();
-		let columnMenuitemElements = {};
-		for (let i = 0; i < columns.length; i++) {
-			const column = columns[i];
-			if (column.showInColumnPicker === false) continue;
-			let label = formatColumnName(column);
-			let menuitem = doc.createXULElement('menuitem');
-			menuitem.setAttribute('type', 'checkbox');
-			menuitem.setAttribute('label', label);
-			menuitem.setAttribute('colindex', i);
-			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
-			if (!column.hidden) {
-				menuitem.setAttribute('checked', true);
-			}
-			if (column.disabledIn && column.disabledIn.includes(this.collectionTreeRow.visibilityGroup)) {
-				menuitem.setAttribute('disabled', true);
-			}
-			columnMenuitemElements[column.dataKey] = menuitem;
-			menupopup.appendChild(menuitem);
-		}
-		
-		try {
-			// More Columns menu
-			let id = prefix + 'more-menu';
-			
-			let moreMenu = doc.createXULElement('menu');
-			moreMenu.setAttribute('label', Zotero.getString('pane.items.columnChooser.moreColumns'));
-			moreMenu.setAttribute('anonid', id);
-			
-			let moreMenuPopup = doc.createXULElement('menupopup');
-			moreMenuPopup.setAttribute('anonid', id + '-popup');
-
-			let moreItems = [];
-			for (let i = 0; i < columns.length; i++) {
-				const column = columns[i];
-				if (column.columnPickerSubMenu) {
-					moreItems.push(columnMenuitemElements[column.dataKey]);
-				}
-			}
-			
-			// Sort fields and move to submenu
-			var collation = Zotero.getLocaleCollation();
-			moreItems.sort(function (a, b) {
-				return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
-			});
-			moreItems.forEach(function (elem) {
-				moreMenuPopup.appendChild(menupopup.removeChild(elem));
-			});
-
-			let sep = doc.createXULElement('menuseparator');
-			menupopup.appendChild(sep);
-			moreMenu.appendChild(moreMenuPopup);
-			menupopup.appendChild(moreMenu);
-		}
-		catch (e) {
-			Zotero.logError(e);
-			Zotero.debug(e, 1);
-		}
-
-		//
-		// Secondary Sort menu
-		//
-		if (!this.collectionTreeRow.isFeedsOrFeed()) {
-			try {
-				const id = prefix + 'sort-menu';
-				const primaryField = this.getSortField();
-				const sortFields = this.getSortFields();
-				let secondaryField = false;
-				if (sortFields[1]) {
-					secondaryField = sortFields[1];
-				}
-				
-				const primaryFieldLabel = formatColumnName(columns.find(c => c.dataKey == primaryField));
-				
-				const sortMenu = doc.createXULElement('menu');
-				sortMenu.setAttribute('label',
-					Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
-				sortMenu.setAttribute('anonid', id);
-				
-				const sortMenuPopup = doc.createXULElement('menupopup');
-				sortMenuPopup.setAttribute('anonid', id + '-popup');
-				
-				// Generate menuitems
-				const sortOptions = [
-					'title',
-					'firstCreator',
-					'itemType',
-					'date',
-					'year',
-					'publisher',
-					'publicationTitle',
-					'dateAdded',
-					'dateModified'
-				];
-				for (let field of sortOptions) {
-					// Hide current primary field, and don't show Year for Date, since it would be a no-op
-					if (field == primaryField || (primaryField == 'date' && field == 'year')) {
-						continue;
-					}
-					let column = columns.find(c => c.dataKey == field);
-					let label = formatColumnName(column);
-					
-					let sortMenuItem = doc.createXULElement('menuitem');
-					sortMenuItem.setAttribute('fieldName', field);
-					sortMenuItem.setAttribute('label', label);
-					sortMenuItem.setAttribute('type', 'checkbox');
-					if (field == secondaryField) {
-						sortMenuItem.setAttribute('checked', 'true');
-					}
-					sortMenuItem.addEventListener('command', async () => {
-						if (this._setSecondarySortField(field)) {
-							await this.sort();
-						}
-					})
-					sortMenuPopup.appendChild(sortMenuItem);
-				}
-				
-				sortMenu.appendChild(sortMenuPopup);
-				menupopup.appendChild(sortMenu);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				Zotero.debug(e, 1);
-			}
-		}
-		
-		let sep = doc.createXULElement('menuseparator');
-		// sep.setAttribute('anonid', prefix + 'sep');
-		menupopup.appendChild(sep);
-		
-		//
-		// Restore Default Column Order
-		//
-		let menuitem = doc.createXULElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
-		menuitem.setAttribute('anonid', prefix + 'restore-order');
-		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
-		menupopup.appendChild(menuitem);
+		this.buildColumnPickerMenu(menupopup);
 
 		popupset.appendChild(menupopup);
 		menupopup.openPopupAtScreen(
