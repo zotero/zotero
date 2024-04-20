@@ -1112,5 +1112,6 @@ async function startHTTPServer(port = null) {
 			await Zotero.Promise.delay(10);
 		}
 	}
-	return { httpd, port };
+	var baseURL = `http://localhost:${port}/`
+	return { httpd, port, baseURL };
 }
