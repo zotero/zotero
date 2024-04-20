@@ -468,19 +468,19 @@ toggle-preview =
             *[unknown] Toggle
     } Attachment Preview
 
-quickformat-general-instructions = Use Left/Right arrows to navigate the entries of this citation. {
+quickformat-general-instructions = Use Left/Right Arrow to navigate the items of this citation. {
     $dialogMenu ->
         [active] Press Shift-Tab to focus the dialog's menu.
         *[other] { "" }
 } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
 
-quickformat-aria-bubble = Item included in this citation. Press Down Arrow to open a dialog with citation properties to add details. { quickformat-general-instructions }
-quickformat-aria-input = Citation item search input. Type to search for an item to include in this citation. Then Press Tab to focus and navigate the list of search results to add to this citation. { quickformat-general-instructions }
+quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
+quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
 quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
 
-insert-note-aria-input = Notes search input. Type to search through your notes. Then Press Tab to focus and navigate the list of results. Press Escape to close the dialog.
+insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
 insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
 quicksearch-mode =
     .aria-label = Quick Search mode
