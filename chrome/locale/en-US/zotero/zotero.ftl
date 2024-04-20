@@ -48,6 +48,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Plugins
 
+main-window-command =
+    .label = { -app-name }
+
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
 filter-collections = Filter Collections
@@ -478,6 +481,3 @@ quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
     .aria-label = Quick Search
-
-main-window-command =
-    .label = { -app-name }
