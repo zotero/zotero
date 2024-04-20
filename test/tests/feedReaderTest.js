@@ -252,13 +252,11 @@ describe("Zotero.FeedReader", function () {
 
 	describe("Legacy text encodings", function () {
 		var httpd;
-		var port = 16213;
-		var baseURL = `http://127.0.0.1:${port}/`;
+		var port;
+		var baseURL;
 
-		before(function () {
-			Cu.import("resource://zotero-unit/httpd.js");
-			httpd = new HttpServer();
-			httpd.start(port);
+		before(async function () {
+			({ httpd, port, baseURL } = await startHTTPServer());
 
 			httpd._handler._mimeMappings.rss = "text/xml; charset=ISO-8859-1";
 
