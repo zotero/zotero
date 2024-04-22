@@ -436,7 +436,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		
 		try {
 			const result = await Zotero_File_Interface.importFile({
-				addToLibraryRoot: !shouldCreateCollection,
+				createNewCollection: shouldCreateCollection,
 				file: this.file,
 				fileTypes,
 				folder: this.folder,

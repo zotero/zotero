@@ -399,7 +399,7 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * @param {Object} options
 	 * @param {nsIFile|string|null} [options.file=null] - File to import, or none to show a filepicker
-	 * @param {Boolean} [options.addToLibraryRoot=false]
+	 * @param {Boolean} [options.addToLibraryRoot=false] - Use root library instead of a selected collection
 	 * @param {Boolean} [options.createNewCollection=true] - Put items in a new collection
 	 * @param {Boolean} [options.linkFiles=false] - Link to files instead of storing them
 	 * @param {Function} [options.onBeforeImport] - Callback to receive translation object, useful
