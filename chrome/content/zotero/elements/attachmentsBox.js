@@ -113,20 +113,20 @@
 						this.addRow(attachment);
 					}
 				}
-				else if (action == 'modify') {
+				// When annotation added to attachment, action=modify
+				// When annotation deleted from attachment, action=refresh
+				else if (action == 'modify' || action == 'refresh') {
 					for (let attachment of attachments) {
 						let row = this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
-						let open = false;
 						if (row) {
-							open = row.open;
 							row.remove();
 						}
-						this.addRow(attachment).open = open;
+						this.addRow(attachment);
 					}
 				}
 				else if (action == 'delete') {
-					for (let attachment of attachments) {
-						let row = this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
+					for (let id of ids) {
+						let row = this.querySelector(`attachment-row[attachment-id="${id}"]`);
 						if (row) {
 							row.remove();
 						}
@@ -137,11 +137,9 @@
 			});
 		}
 		
-		addRow(attachment, open = false) {
+		addRow(attachment) {
 			let row = document.createXULElement('attachment-row');
 			this._updateRowAttributes(row, attachment);
-			// Set open state before adding to dom to prevent animation
-			row.toggleAttribute("open", open);
 			
 			let index = this._attachmentIDs.indexOf(attachment.id);
 			if (index < 0 || index >= this._attachments.children.length) {
@@ -199,7 +197,7 @@
 		async _getPreviewAttachment() {
 			let attachment = await this._item.getBestAttachment();
 			if (this.tabType === "reader"
-				&& Zotero_Tabs._getTab(Zotero_Tabs.selectedID)?.tab?.data?.itemID == attachment.id) {
+				&& Zotero_Tabs._getTab(this.tabID)?.tab?.data?.itemID == attachment.id) {
 				// In the reader, only show the preview when viewing a secondary attachment
 				return null;
 			}

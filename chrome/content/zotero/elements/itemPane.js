@@ -151,6 +151,7 @@
 			this.mode = "item";
 			
 			this._itemDetails.editable = this.editable;
+			this._itemDetails.tabID = "zotero-pane";
 			this._itemDetails.tabType = "library";
 			this._itemDetails.item = item;
 
