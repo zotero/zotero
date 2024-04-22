@@ -81,6 +81,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		this.searchBoxRef.current.focus();
 	}
 
+	focusTagList() {
+		this.tagListRef.current.focus();
+	}
+
+	isTagListEmpty() {
+		this.tagListRef.current.isEmpty();
+	}
+
 	componentDidCatch(error, info) {
 		// Async operations might attempt to update the react components
 		// after window close in tests, which will cause unnecessary crashing.
@@ -528,7 +536,6 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			searchString={this.state.searchString}
 			dragObserver={this.dragObserver}
 			onSelect={this.handleTagSelected}
-			onKeyDown={this.handleKeyDown}
 			onTagContext={this.handleTagContext}
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}

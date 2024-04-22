@@ -224,6 +224,36 @@ class TagList extends React.PureComponent {
 		);
 	};
 
+	tagSelectorList() {
+		return document.querySelector('.tag-selector-list');
+	}
+
+	isEmpty() {
+		return !this.tagSelectorList().querySelector('.tag-selector-item:not(.disabled)');
+	}
+
+	clearRecordedFocusedTag() {
+		this.lastFocusedTagIndex = null;
+		this.focusedTagIndex = null;
+	}
+
+	// Focus the last focused tag from the list. If there is none, focus the first
+	// non-disabled tag.
+	async focus() {
+		if (this.focusedTagIndex === null) {
+			let enabledTag = this.tagSelectorList().querySelector('.tag-selector-item:not(.disabled)');
+			if (!enabledTag) return;
+			enabledTag.focus();
+			return;
+		}
+		let tagRefocused = this.refocusTag();
+		if (tagRefocused) return;
+		// If the tag could not be refocused, it means it was removed due to windowing,
+		// so we need to scroll to it.
+		this.setState({ scrollToCell: this.focusedTagIndex });
+		await this.waitForSectionRender();
+	}
+
 	// Try to refocus a focused tag that was removed due to windowing
 	refocusTag() {
 		let tagsList = document.querySelector('.tag-selector-list');
@@ -232,7 +262,9 @@ class TagList extends React.PureComponent {
 		let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
 		if (nodeToFocus) {
 			nodeToFocus.focus();
+			return true;
 		}
+		return false;
 	}
 
 	waitForSectionRender() {
@@ -263,15 +295,6 @@ class TagList extends React.PureComponent {
 		}
 		else {
 			tagsList.focus();
-		}
-	};
-
-	handleBlur = (event) => {
-		// If the focus leaves the tags list, clear the last focused tag index
-		let tagsList = document.querySelector('.tag-selector-list');
-		if (!tagsList.contains(event.relatedTarget)) {
-			this.focusedTagIndex = null;
-			this.lastFocusedTagIndex = null;
 		}
 	};
 
@@ -326,6 +349,7 @@ class TagList extends React.PureComponent {
 			if (tagCount < this.prevTagCount - 1) {
 				this.scrollToTopOnNextUpdate = true;
 			}
+			this.clearRecordedFocusedTag();
 			this.prevTagCount = tagCount;
 			this.updatePositions();
 			tagList = (
@@ -346,7 +370,7 @@ class TagList extends React.PureComponent {
 		}
 		
 		return (
-			<div className="tag-selector-list-container" onBlur={this.handleBlur} onKeyDown={this.handleKeyDown.bind(this)}>
+			<div className="tag-selector-list-container" onKeyDown={this.handleKeyDown.bind(this)}>
 				{tagList}
 			</div>
 		);
