@@ -29,6 +29,10 @@ $scaffold-toolbarbutton-icons: (
 	}
 };
 
+#scaffold {
+	min-height: 600px;
+}
+
 .menubar-container {
 	display: flex;
 	background: var(--material-sidepane);
