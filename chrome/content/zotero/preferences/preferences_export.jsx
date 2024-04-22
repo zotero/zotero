@@ -40,8 +40,8 @@ Zotero_Preferences.Export = {
 		document.l10n.formatValues(['general-add', 'general-remove'])
 			.then((res) => {
 				let [add, remove] = res;
-				document.querySelector(("#quickCopy-delete")).setAttribute('aria-label', remove);
-				document.querySelector(("#quickCopy-add")).setAttribute('aria-label', add);
+				document.querySelector("#quickCopy-delete").setAttribute('aria-label', remove);
+				document.querySelector("#quickCopy-add").setAttribute('aria-label', add);
 			});
 	},
 	
