@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Visa källor från undersamling">
 <!ENTITY fontSize.label "Teckenstorlek">
 <!ENTITY noteFontSize.label "Teckenstorlek för anteckning">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Verktyg">
 <!ENTITY toolsMenu.accesskey "T">

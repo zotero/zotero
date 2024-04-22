@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Zobraziť exempláre v podadresároch">
 <!ENTITY fontSize.label "Veľkosť písma">
 <!ENTITY noteFontSize.label "Veľkosť písma v poznámkach">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">

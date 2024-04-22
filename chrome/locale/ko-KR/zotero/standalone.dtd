@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "하위 컬렉션 항목 표시">
 <!ENTITY fontSize.label "글꼴 크기">
 <!ENTITY noteFontSize.label "노트 글꼴 크기">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "도구">
 <!ENTITY toolsMenu.accesskey "T">

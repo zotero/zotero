@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Amosar os elementos das subcolecións">
 <!ENTITY fontSize.label "Tamaño da tipografía:">
 <!ENTITY noteFontSize.label "Tamaño tipográfico das notas">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Ferramentas">
 <!ENTITY toolsMenu.accesskey "F">

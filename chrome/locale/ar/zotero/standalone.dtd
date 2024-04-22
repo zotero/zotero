@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "إظهار العناصر من المجموعات الفرعية">
 <!ENTITY fontSize.label "حجم الخط">
 <!ENTITY noteFontSize.label "حجم خط الملاحظات">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">

@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "הצגת פריטים מתת־אוספים">
 <!ENTITY fontSize.label "גודל גופן">
 <!ENTITY noteFontSize.label "גודל גופן הערה">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "כלים">
 <!ENTITY toolsMenu.accesskey "כ">

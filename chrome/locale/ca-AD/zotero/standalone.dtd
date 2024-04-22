@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Mostra elements de les subcol·leccions">
 <!ENTITY fontSize.label "Mida de la lletra">
 <!ENTITY noteFontSize.label "Mida de lletra de les notes">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Eines">
 <!ENTITY toolsMenu.accesskey "n">

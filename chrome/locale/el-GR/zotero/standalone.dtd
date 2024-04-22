@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Εμφάνιση Στοιχείων από τις Υποσυλλογές">
 <!ENTITY fontSize.label "Μέγεθος Γραμματοσειράς">
 <!ENTITY noteFontSize.label "Σημείωση Μεγέθους Γραμματοσειράς">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Εργαλεία">
 <!ENTITY toolsMenu.accesskey "Τ">

@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Tampilkan Item dari Subkoleksi">
 <!ENTITY fontSize.label "Ukuran font">
 <!ENTITY noteFontSize.label "Ukuran font catatan">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Perkakas">
 <!ENTITY toolsMenu.accesskey "T">

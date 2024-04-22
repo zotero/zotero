@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Items uit deelverzamelingen tonen">
 <!ENTITY fontSize.label "Lettergrootte">
 <!ENTITY noteFontSize.label "Lettergrootte notities">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Opties">
 <!ENTITY toolsMenu.accesskey "O">

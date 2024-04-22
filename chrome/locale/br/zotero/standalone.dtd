@@ -55,6 +55,8 @@
 <!ENTITY recursiveCollections.label "Diskouez an elfennoù diwar an is-dastumadeg">
 <!ENTITY fontSize.label "Ment skritur">
 <!ENTITY noteFontSize.label "Notenn ment skritur">
+<!ENTITY columns.label "Columns">
+<!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Ostilhoù">
 <!ENTITY toolsMenu.accesskey "T">
