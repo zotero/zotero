@@ -100,6 +100,14 @@
 			this.toggleAttribute('readonly', !editable);
 		}
 
+		get tabID() {
+			return this._tabID;
+		}
+	
+		set tabID(tabID) {
+			this._tabID = tabID;
+		}
+
 		get tabType() {
 			return this._tabType;
 		}
@@ -215,12 +223,18 @@
 			let item = this.item;
 			Zotero.debug('Viewing item');
 			this._isRendering = true;
+			// For tests
+			let resolve;
+			if (Zotero.test) {
+				this._renderPromise = new Promise(r => resolve = r);
+			}
 
 			this.renderCustomSections();
 
 			let panes = this.getPanes();
 			for (let box of [this._header, ...panes]) {
 				box.editable = this.editable;
+				box.tabID = this.tabID;
 				box.tabType = this.tabType;
 				box.item = item;
 				// Execute sync render immediately
@@ -259,6 +273,9 @@
 			}
 			if (this.item.id == item.id) {
 				this._isRendering = false;
+			}
+			if (Zotero.test) {
+				resolve();
 			}
 		}
 

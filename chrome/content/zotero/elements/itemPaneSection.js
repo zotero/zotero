@@ -43,6 +43,14 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		this.toggleAttribute('readonly', !editable);
 	}
 
+	get tabID() {
+		return this._tabID;
+	}
+
+	set tabID(tabID) {
+		this._tabID = tabID;
+	}
+
 	get tabType() {
 		return this._tabType;
 	}

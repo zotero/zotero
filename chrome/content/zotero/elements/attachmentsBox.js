@@ -70,7 +70,9 @@
 
 		set usePreview(val) {
 			this.toggleAttribute('data-use-preview', val);
-			this.updatePreview();
+			if (this.item) {
+				this.updatePreview();
+			}
 		}
 
 		init() {
@@ -83,11 +85,17 @@
 			this._addPopup.id = '';
 			this.querySelector('popupset').append(this._addPopup);
 			
+			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 			this._preview = this.querySelector('attachment-preview');
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentsBox');
 
 			this._section._contextMenu.addEventListener('popupshowing', this._handleContextMenu, { once: true });
+
+			// For tests
+			this._asyncRendering = false;
+			// Indicate if the preview should update, can be none | initial | final
+			this._renderStage = "none";
 		}
 
 		destroy() {
@@ -96,16 +104,13 @@
 		}
 
 		notify(action, type, ids) {
-			if (ids.includes(this._item?.id)) {
-				this._resetRenderedFlags();
-			}
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
 				this.updatePreview();
 
 				let attachments = Zotero.Items.get((this._attachmentIDs).filter(id => ids.includes(id)));
-				if (attachments.length === 0) {
+				if (attachments.length === 0 && action !== "delete") {
 					return;
 				}
 				if (action == 'add') {
@@ -113,20 +118,20 @@
 						this.addRow(attachment);
 					}
 				}
-				else if (action == 'modify') {
+				// When annotation added to attachment, action=modify
+				// When annotation deleted from attachment, action=refresh
+				else if (action == 'modify' || action == 'refresh') {
 					for (let attachment of attachments) {
 						let row = this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
-						let open = false;
 						if (row) {
-							open = row.open;
 							row.remove();
 						}
-						this.addRow(attachment).open = open;
+						this.addRow(attachment);
 					}
 				}
 				else if (action == 'delete') {
-					for (let attachment of attachments) {
-						let row = this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
+					for (let id of ids) {
+						let row = this.querySelector(`attachment-row[attachment-id="${id}"]`);
 						if (row) {
 							row.remove();
 						}
@@ -137,11 +142,9 @@
 			});
 		}
 		
-		addRow(attachment, open = false) {
+		addRow(attachment) {
 			let row = document.createXULElement('attachment-row');
 			this._updateRowAttributes(row, attachment);
-			// Set open state before adding to dom to prevent animation
-			row.toggleAttribute("open", open);
 			
 			let index = this._attachmentIDs.indexOf(attachment.id);
 			if (index < 0 || index >= this._attachments.children.length) {
@@ -156,12 +159,15 @@
 		render() {
 			if (!this._item) return;
 			if (this._isAlreadyRendered()) return;
+			this._renderStage = "initial";
 			this.updateCount();
 		}
 
 		async asyncRender() {
 			if (!this._item) return;
 			if (this._isAlreadyRendered("async")) return;
+			this._renderStage = "final";
+			this._asyncRendering = true;
 			
 			await this._updateAttachmentIDs();
 
@@ -171,25 +177,34 @@
 			for (let attachment of itemAttachments) {
 				this.addRow(attachment);
 			}
-			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
+			await this.updatePreview();
+			this._asyncRendering = false;
 		}
 		
 		updateCount() {
+			if (!this._item?.isRegularItem()) {
+				return;
+			}
 			let count = this._item.numAttachments(this.inTrash);
 			this._section.setCount(count);
 		}
 
 		async updatePreview() {
+			// Skip if asyncRender is not finished/executed, which means the box is invisible
+			// The box will be rendered when it becomes visible
+			if (this._renderStage !== "final") {
+				return;
+			}
+			let attachment = await this._getPreviewAttachment();
+			this.toggleAttribute('data-use-preview', !!attachment && Zotero.Prefs.get('showAttachmentPreview'));
+			if (!attachment) {
+				return;
+			}
 			if (!this.usePreview
 				// Skip only when the section is manually collapsed (when there's attachment),
 				// This is necessary to ensure the rendering of the first added attachment
 				// because the section is force-collapsed if no attachment.
 				|| (this._attachmentIDs.length && !this._section.open)) {
-				return;
-			}
-			let attachment = await this._getPreviewAttachment();
-			if (!attachment) {
-				this.toggleAttribute('data-use-preview', false);
 				return;
 			}
 			this._preview.item = attachment;
@@ -199,7 +214,7 @@
 		async _getPreviewAttachment() {
 			let attachment = await this._item.getBestAttachment();
 			if (this.tabType === "reader"
-				&& Zotero_Tabs._getTab(Zotero_Tabs.selectedID)?.tab?.data?.itemID == attachment.id) {
+				&& Zotero_Tabs._getTab(this.tabID)?.tab?.data?.itemID == attachment.id) {
 				// In the reader, only show the preview when viewing a secondary attachment
 				return null;
 			}

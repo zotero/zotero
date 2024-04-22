@@ -165,6 +165,7 @@
 			this.addEventListener("focusin", this._handleFocusIn);
 			this.addEventListener("keypress", this._handleKeypress);
 			this.setAttribute("data-preview-type", "unknown");
+			this._notifierID = Zotero.Notifier.registerObserver(this, ["item"], "attachmentPreview");
 		}
 
 		destroy() {
@@ -177,6 +178,38 @@
 			this.removeEventListener("click", this._handleFocusIn);
 			this.removeEventListener("focusin", this._handleFocusIn);
 			this.removeEventListener("keypress", this._handleKeypress);
+			Zotero.Notifier.unregisterObserver(this._notifierID);
+		}
+
+		notify(event, type, ids, extraData) {
+			if (!this.item) return;
+			if (this.isReaderType && this._reader) {
+				// Following chrome/content/zotero/xpcom/reader.js
+				if (event === "delete") {
+					let disappearedIDs = this._reader.annotationItemIDs.filter(x => ids.includes(x));
+					if (disappearedIDs.length) {
+						let keys = disappearedIDs.map(id => extraData[id].key);
+						this._reader.unsetAnnotations(keys);
+					}
+				}
+				else if (["add", "modify"].includes(event)) {
+					let annotationItems = this.item.getAnnotations();
+					this._reader.annotationItemIDs = annotationItems.map(x => x.id);
+					let affectedAnnotations = annotationItems.filter(({ id }) => (
+						ids.includes(id)
+						&& !(extraData && extraData[id] && extraData[id].instanceID === this._reader._instanceID)
+					));
+					if (affectedAnnotations.length) {
+						this._reader.setAnnotations(affectedAnnotations);
+					}
+				}
+				return;
+			}
+			if (this.isMediaType) {
+				if (["refresh", "modify"].includes(event) && ids.includes(this.item.id)) {
+					this.discard().then(() => this.render());
+				}
+			}
 		}
 
 		async render() {
@@ -184,6 +217,14 @@
 			if (!this.initialized && itemID === this._renderingItemID) {
 				return;
 			}
+			// For tests
+			let resolve;
+			if (Zotero.test) {
+				this._renderPromise = new Promise(r => resolve = r);
+				// Expose `resolve` for `this.discard`
+				this._renderPromise.resolve = resolve;
+			}
+
 			this._renderingItemID = itemID;
 			let success = false;
 			if (this.isValidType && await this._item.fileExists()) {
@@ -203,6 +244,9 @@
 			if (this._renderingItemID === itemID) {
 				this._renderingItemID = null;
 			}
+			if (Zotero.test) {
+				resolve();
+			}
 		}
 
 		async discard(force = false) {
@@ -213,7 +257,7 @@
 			if (this._isDiscarding) {
 				return;
 			}
-			if (!force && this.isVisible) {
+			if (!force && (this.isVisible || !this._reader)) {
 				return;
 			}
 			this._isDiscarding = true;
@@ -237,6 +281,7 @@
 			this._id("preview")?.after(this.nextPreview);
 			this.setPreviewStatus("loading");
 			this._isDiscarding = false;
+			this._renderPromise?.resolve();
 		}
 
 		async openAttachment(event) {

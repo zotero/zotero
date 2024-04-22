@@ -46,53 +46,95 @@
 		}
 
 		set item(item) {
-			super.item = item;
+			super.item = (item instanceof Zotero.Item && item.isFileAttachment()) ? item : null;
 			this._updateHidden();
 		}
 
 		init() {
 			this.initCollapsibleSection();
 
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentAnnotationsBox');
+
 			this._body = this.querySelector('.body');
+
+			this._annotationItems = [];
 		}
 
-		destroy() {}
+		destroy() {
+			Zotero.Notifier.unregisterObserver(this._notifierID);
+		}
 
-		notify(action, type, ids) {
-			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
-				this._forceRenderAll();
+		notify(event, _type, ids, _extraData) {
+			if (!this.item) return;
+
+			this._annotationItems = this.item.getAnnotations();
+			let annotations = this._annotationItems.filter(
+				annotation => ids.includes(annotation.id));
+			
+			if (["add", "modify"].includes(event)) {
+				for (let annotation of annotations) {
+					let row = this.querySelector(`annotation-row[annotation-id="${annotation.id}"]`);
+					row?.remove();
+					this.addRow(annotation);
+				}
 			}
+			else if (event == 'delete') {
+				for (let id of ids) {
+					let row = this.querySelector(`annotation-row[annotation-id="${id}"]`);
+					row?.remove();
+				}
+			}
+			this.updateCount();
 		}
 
 		render() {
+			this._annotationItems = this.item.getAnnotations();
+			this.updateCount();
+		}
+
+		async asyncRender() {
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
 			if (this._isAlreadyRendered()) return;
 
-			let annotations = this.item.getAnnotations();
-			this._section.setCount(annotations.length);
+			await Zotero.PDFWorker.renderAttachmentAnnotations(this.item.id);
 
 			this._body.replaceChildren();
 
-			if (!this._section.open) {
-				return;
-			}
-
-			let count = annotations.length;
-			if (count === 0) {
-				this.hidden = true;
+			if (!this._section.open || this._annotationItems.length === 0) {
 				return;
 			}
 
 			this.hidden = false;
-			for (let annotation of annotations) {
-				let row = document.createXULElement('annotation-row');
-				row.annotation = annotation;
-				this._body.append(row);
+			for (let annotation of this._annotationItems) {
+				this.addRow(annotation);
 			}
 		}
 
+		addRow(annotation) {
+			let row = document.createXULElement('annotation-row');
+			row.annotation = annotation;
+			
+			let index = this._annotationItems.findIndex(item => item.id == annotation.id);
+			if (index < 0 || index >= this._body.children.length) {
+				this._body.append(row);
+			}
+			else {
+				this._body.insertBefore(row, this._body.children[index]);
+			}
+			return row;
+		}
+
+		updateCount() {
+			let count = this._annotationItems.length;
+			this._section.setCount(count);
+			if (count === 0) {
+				this.hidden = true;
+			}
+			return count;
+		}
+
 		_updateHidden() {
-			this.hidden = !this.item?.isFileAttachment() || this.tabType == "reader";
+			this.hidden = !this.item || this.tabType == "reader";
 		}
 	}
 	customElements.define("attachment-annotations-box", AttachmentAnnotationsBox);
