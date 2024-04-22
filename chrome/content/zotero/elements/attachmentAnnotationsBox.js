@@ -46,7 +46,7 @@
 		}
 
 		set item(item) {
-			super.item = item;
+			super.item = (item instanceof Zotero.Item && item.isFileAttachment()) ? item : null;
 			this._updateHidden();
 		}
 
@@ -130,7 +130,7 @@
 		}
 
 		_updateHidden() {
-			this.hidden = !this.item?.isFileAttachment() || this.tabType == "reader";
+			this.hidden = !this.item || this.tabType == "reader";
 		}
 	}
 	customElements.define("attachment-annotations-box", AttachmentAnnotationsBox);
