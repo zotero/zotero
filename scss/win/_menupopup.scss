@@ -1,0 +1,44 @@
+menupopup, panel, #search-mode-popup {
+	--panel-border-radius: 8px;
+	--panel-background: var(--material-toolbar);
+	--menuitem-hover-background-color: var(--fill-quinary);
+	--menuitem-disabled-hover-background-color: var(--fill-quinary);
+	@include light-dark(--panel-border-color, #dddddd, #1c1c1c);
+}
+
+menupopup {
+	menu, menuitem {
+		appearance: none !important;
+		margin-left: 4px;
+		margin-right: 4px;
+		border-radius: 4px;
+		&[_moz-menuactive="true"] {
+			background: var(--fill-quinary);
+		}
+	}
+	menu {
+		menupopup {
+			padding-left: 6px;
+			margin-top: -4px;
+		}
+	}
+	menuseparator {
+		margin: 4px 0px 4px 0px;
+		border-top: var(--material-border50);
+	}
+}
+
+.menu-accel {
+	color: var(--fill-secondary);
+	font-size: 11px;
+}
+
+.menu-iconic-left[disabled="true"] {
+	opacity: 50%;
+}
+
+@media (-moz-windows-non-native-menus) {
+	menuitem:is([checked="true"]):is([type="radio"]) > .menu-iconic-left {
+		list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
+	}
+}

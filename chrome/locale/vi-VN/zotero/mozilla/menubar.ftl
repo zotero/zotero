@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Lịch sử
 menu-view-synced-tabs-sidebar =
     .label = Các thẻ đã đồng bộ
+menu-view-megalist-sidebar =
+    .label = Mật khẩu
 menu-view-full-zoom =
     .label = Thu phóng
     .accesskey = Z
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Thẻ mới đóng gần đây
 menu-history-undo-window-menu =
     .label = Các cửa sổ mới đóng
-menu-history-reopen-all-tabs = Mở lại tất cả các thẻ
-menu-history-reopen-all-windows = Mở lại tất cả các cửa sổ
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Tìm kiếm lịch sử
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = Quản lý dấu trang
-menu-bookmark-current-tab =
-    .label = Đánh dấu thẻ hiện tại
-menu-bookmark-edit =
-    .label = Chỉnh sửa dấu trang này
 menu-bookmark-tab =
     .label = Đánh dấu thẻ hiện tại…
 menu-edit-bookmark =
     .label = Chỉnh sửa dấu trang này…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Tìm kiếm dấu trang
 menu-bookmarks-all-tabs =
     .label = Đánh dấu tất cả các thẻ…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Tắt chế độ xử lý sự cố
     .accesskey = M
+menu-help-switch-device =
+    .label = Chuyển sang một thiết bị mới
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Đây không phải là một trang lừa đảo…
     .accesskey = d
+menu-report-broken-site =
+    .label = Báo cáo trang web bị hỏng

@@ -56,7 +56,7 @@ window.addEventListener("load", /*async */function () {
 	// Get URI and options passed in via openWindow()
 	let { uri, options } = window.arguments[0].wrappedJSObject;
 	window.viewerOriginalURI = uri;
-	loadURI(uri, options);
+	loadURI(Services.io.newURI(uri), options);
 }, false);
 
 window.addEventListener("keypress", function (event) {
@@ -89,6 +89,9 @@ function loadURI(uri, options = {}) {
 	}
 	else {
 		browser.browsingContext.sandboxFlags |= SANDBOXED_SCRIPTS;
+	}
+	if (options.cookieSandbox) {
+		options.cookieSandbox.attachToBrowser(browser);
 	}
 	browser.loadURI(
 		uri,

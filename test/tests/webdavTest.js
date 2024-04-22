@@ -373,12 +373,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 								Zotero.getTempDirectory().path,
 								Zotero.Utilities.randomString() + '.zip'
 							);
-							let file = yield OS.File.open(tmpZipPath, {
-								create: true
-							});
-							var contents = new Uint8Array(reader.result);
-							yield file.write(contents);
-							yield file.close();
+							let contents = new Uint8Array(reader.result);
+							yield IOUtils.write(tmpZipPath, contents);
 							
 							// Make sure ZIP file contains the necessary entries
 							var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]

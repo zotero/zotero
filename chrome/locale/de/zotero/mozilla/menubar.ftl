@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Chronik
 menu-view-synced-tabs-sidebar =
     .label = Synchronisierte Tabs
+menu-view-megalist-sidebar =
+    .label = Passwörter
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = o
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Kürzlich geschlossene Tabs
 menu-history-undo-window-menu =
     .label = Kürzlich geschlossene Fenster
-menu-history-reopen-all-tabs = Alle Tabs wieder öffnen
-menu-history-reopen-all-windows = Alle Fenster wieder öffnen
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Chronik durchsuchen
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = L
 menu-bookmarks-manage =
     .label = Lesezeichen verwalten
-menu-bookmark-current-tab =
-    .label = Aktuellen Tab als Lesezeichen hinzufügen
-menu-bookmark-edit =
-    .label = Lesezeichen bearbeiten
 menu-bookmark-tab =
     .label = Aktuellen Tab als Lesezeichen hinzufügen…
 menu-edit-bookmark =
     .label = Dieses Lesezeichen bearbeiten…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Lesezeichen durchsuchen
 menu-bookmarks-all-tabs =
     .label = Lesezeichen für alle Tabs hinzufügen…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Fehlerbehebungsmodus deaktivieren
     .accesskey = m
+menu-help-switch-device =
+    .label = Zu einem neuen Gerät wechseln
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Dies ist keine betrügerische Website…
     .accesskey = g
+menu-report-broken-site =
+    .label = Problem mit Website melden

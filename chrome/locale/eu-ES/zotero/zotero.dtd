@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "aldaketen erregistroa">
 <!ENTITY zotero.upgrade.changeLogAfterLink "berrikuntzen berri izateko.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Oharrak">
 <!ENTITY zotero.tabs.attachments.label "Eranskinak">
-<!ENTITY zotero.tabs.tags.label "Etiketak">
-<!ENTITY zotero.tabs.related.label "Erlazionatutakoak">
 
 <!ENTITY zotero.toolbar.duplicate.label "Bikoiztuak erakutsi">
 <!ENTITY zotero.collections.showUnfiledItems "Erakutsi artxibatu gabeko elemetuak">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lehen letra letra larriz">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Trukatu lehena/azkena">
 <!ENTITY zotero.item.creatorTransform.fixCase "Konpondu letra-kaxa">
-<!ENTITY zotero.item.viewOnline "Linean ikusi">
 <!ENTITY zotero.item.copyAsURL "Kopiatu URL gisa">
 <!ENTITY zotero.item.deletePermanently "Betirako ezabatu...">
 

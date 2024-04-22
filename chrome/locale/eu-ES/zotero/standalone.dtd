@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Gehigarriak">
 <!ENTITY developer.label "Garatzailea">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimizatu">
 <!ENTITY bringAllToFront.label "Guztiak aurrekaldera ekarri">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Leihoa">
 
 <!ENTITY helpMenu.label "Laguntza">
 <!ENTITY helpMenu.accesskey "H">

@@ -27,17 +27,12 @@ var EXPORTED_SYMBOLS = ["RemoteTranslate"];
 
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-ChromeUtils.registerWindowActor("Translation", {
-	parent: {
-		moduleURI: "chrome://zotero/content/actors/TranslationParent.jsm"
-	},
-	child: {
-		moduleURI: "chrome://zotero/content/actors/TranslationChild.jsm"
-	}
-});
+ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
 
+ChromeUtils.defineESModuleGetters(this, {
+	Zotero: "chrome://zotero/content/zotero.mjs",
+});
 XPCOMUtils.defineLazyModuleGetters(this, {
-	Zotero: "chrome://zotero/content/include.jsm",
 	TranslationManager: "chrome://zotero/content/actors/TranslationParent.jsm",
 });
 
@@ -52,7 +47,9 @@ class RemoteTranslate {
 	
 	_wasSuccess = false;
 	
-	constructor() {
+	constructor({ disableErrorReporting = false } = {}) {
+		this._disableErrorReporting = disableErrorReporting;
+		
 		TranslationManager.add(this._id, this);
 		TranslationManager.setHandler(this._id, 'done', (_, success) => this._wasSuccess = success);
 	}
@@ -64,9 +61,24 @@ class RemoteTranslate {
 	async setBrowser(browser) {
 		this._browser = browser;
 		let actor = this._browser.browsingContext.currentWindowGlobal.getActor("Translation");
+
+		// Make only relevant prefs available
+		// https://github.com/zotero/zotero-connectors/blob/d5f025de9b4f513535cbf4639c6b59bf115d790d/src/common/zotero.js#L264-L265
+		let prefs = this._getPrefs([
+			'downloadAssociatedFiles',
+			'automaticSnapshots',
+			'reportTranslationFailure',
+			'capitalizeTitles',
+			'translators.',
+		]);
+		if (this._disableErrorReporting) {
+			prefs.reportTranslationFailure = false;
+		}
+		
 		await actor.sendAsyncMessage("initTranslation", {
 			schemaJSON: Zotero.File.getResource('resource://zotero/schema/global/schema.json'),
 			dateFormatsJSON: Zotero.File.getResource('resource://zotero/schema/dateFormats.json'),
+			prefs,
 		});
 	}
 	
@@ -258,5 +270,21 @@ class RemoteTranslate {
 				Zotero.logError(e);
 			}
 		}
+	}
+	
+	_getPrefs(keys) {
+		let rootBranch = 'extensions.zotero.'; // ZOTERO_CONFIG isn't available here
+		let prefs = {};
+		for (let key of keys) {
+			if (key.endsWith('.')) {
+				for (let childKey of Zotero.Prefs.rootBranch.getChildList(rootBranch + key)) {
+					prefs[childKey.substring(rootBranch.length)] = Zotero.Prefs.get(childKey, true);
+				}
+			}
+			else {
+				prefs[key] = Zotero.Prefs.get(key);
+			}
+		}
+		return prefs;
 	}
 }

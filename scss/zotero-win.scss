@@ -4,13 +4,20 @@
 // Windows specific
 // --------------------------------------------------
 
+@import "win/abstracts/mixins";
+
 @import "win/createParent";
-@import "win/search";
-@import "win/tag-selector";
-@import "win/item-tree";
-@import "win/virtualized-table";
+@import "win/tabBar";
+@import "win/titleBar";
+@import "win/menupopup";
 
 // Elements
 
 @import "win/elements/itemBox";
-@import "win/elements/quickSearchTextbox";
+
+// Components
+
+@import "win/components/button";
+@import "win/components/input";
+@import "win/components/menulist";
+@import "win/components/tabbox";

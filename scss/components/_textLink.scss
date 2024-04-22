@@ -2,6 +2,6 @@
 	-moz-user-focus: normal;
 	color: -moz-nativehyperlinktext;
 	text-decoration: underline;
-	border: 1px solid transparent;
+	border: var(--material-border-transparent);
 	cursor: pointer;
 }

@@ -1,0 +1,8 @@
+<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_4_8958" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="12" height="12">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M0 11.917C2.83771 11.441 5 8.973 5 6C5 3.027 2.83771 0.559036 0 0.0829584V0H12V12H0V11.917Z" fill="#D9D9D9"/>
+</mask>
+<g id="tag-crescent" mask="url(#mask0_4_8958)">
+<circle id="Vector" cx="6" cy="6" r="5" fill="context-fill"/>
+</g>
+</svg>

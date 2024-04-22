@@ -10,6 +10,9 @@ CHANNEL="beta"
 BRANCH="main"
 export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/beta/ZoteroSafariExtension.appex"
 
+# Set Safari extension LSMinimumSystemVersion to Mojave for betas
+perl -pi -e 's/<string>11\.0<\/string>/<string>10.14<\/string>/' "$SAFARI_APPEX"/Contents/Info.plist
+
 cd "$SCRIPT_DIR"
 ./check_requirements
 

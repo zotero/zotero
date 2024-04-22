@@ -78,13 +78,6 @@ if [ $platform = "w" ]; then
 	echo -n "Checking for 7z: "
 	which 7z || { $FAIL_CMD; FAILED=1; }
 	
-	echo "Checking for vcruntime140_1.dll: "
-	for arch in win-x64; do
-		echo -n "  xulrunner/vc-$arch/vcruntime140_1.dll "
-		[ -f "$APP_ROOT_DIR/xulrunner/vc-$arch/vcruntime140_1.dll" ] || { $FAIL_CMD; FAILED=1; }
-	done
-	echo
-	
 	echo -n "Checking for rcedit: "
 	which rcedit || { $FAIL_CMD; FAILED=1; echo " -- Install with fetch_rcedit"; }
 fi
@@ -100,9 +93,9 @@ if [ $platform = "w" ]; then
 	echo -n "Checking for uuidgen: "
 	which uuidgen || { $FAIL_CMD; FAILED=1; }
 	
-	echo -n "Checking for signtool: "
-	if [ -x "`cygpath -u \"$SIGNTOOL\"`" ]; then
-		echo "`cygpath -u \"$SIGNTOOL\"`"
+	echo -n "Checking for code-signing script: "
+	if [ -x "$APP_ROOT_DIR/win/codesign" ]; then
+		echo "$APP_ROOT_DIR/win/codesign"
 	else
 		$FAIL_CMD
 		FAILED=1

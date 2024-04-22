@@ -1,0 +1,93 @@
+#run-js {
+    body {
+        font-size: 12px;
+        margin: 0;
+        height: 100%;
+    }
+
+    nav {
+        padding: 8px 5px 5px;
+        height: 25px;
+    }
+
+    button {
+        font-size: 15px;
+    }
+
+    #help-button {
+        margin-left: 15px;
+    }
+
+    #run-label {
+        margin-left: 2px;
+        font-size: 12px;
+    }
+
+    main {
+        display: flex;
+        justify-content: stretch;
+        height: calc(100% - 38px);
+    }
+
+    .textbox-container {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        flex-grow: 1;
+        padding: 10px;
+    }
+
+    .textbox-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        line-height: 1.5;
+    }
+
+    .textbox-label {
+        font-size: 15px;
+    }
+
+    #result {
+        border: var(--material-panedivider);
+        background: var(--material-background);
+    }
+
+    #run-as-async-label {
+        font-size: 13px;
+    }
+
+    label {
+        flex-grow: 0;
+    }
+
+    input[type=checkbox] {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    iframe {
+        border: var(--material-panedivider);;
+    }
+
+    iframe,
+    textarea {
+        flex-grow: 1;
+        margin: 5px 0;
+        font-family: Monaco, Consolas, Inconsolata, monospace;
+        font-size: 12px;
+        resize: none;
+    }
+
+    textarea {
+        padding: 8px;
+    }
+
+    textarea.error {
+        color: var(--accent-red);
+    }
+
+    .editor-code {
+        flex: 1;
+    }
+}

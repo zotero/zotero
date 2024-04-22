@@ -13,6 +13,7 @@
 	min-height: 100px;
 	width: 100%;
 	display: flex;
+	height: 100%;
 }
 
 .tag-selector {
@@ -28,7 +29,6 @@
 	display: flex;
 	overflow: hidden;
 	height: 100px;
-	background-color: $tag-selector-bg;
 }
 
 .tag-selector-list-container > div {
@@ -43,18 +43,27 @@
 }
 
 .tag-selector-list {
-	list-style: none;
 	display: inline-block;
+	list-style: none;
 	margin: 0;
 	padding: 0;
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+
+	.ReactVirtualized__Collection__innerScrollContainer {
+		padding-bottom: 8px;
+	}
+}
+
+.tag-selector-filter-pane {
+	padding: 0 8px 0;
 }
 
 .tag-selector-filter-container {
-	height: 30px;
-	flex: 0 0 1em;
+	border-top: var(--material-panedivider);
 	display: flex;
 	flex-direction: row;
-	padding: 0.125em 0 0.125em 0.5em;
+	flex: 0 0 1em;
+	gap: 4px;
 }
 
 .tag-selector-filter-container .search {
@@ -63,22 +72,101 @@
 }
 
 .tag-selector-actions {
-	flex: 0 1;
+	appearance: none;
+	flex-shrink: 0;
+	border-radius: 5px;
+	margin: 0;
+	-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+	background-color: transparent;
+	align-self: center;
+	border: 0;
 	display: block;
+	flex: 0 1;
+	padding: 3px 4px;
 	white-space: nowrap;
-	background-color: inherit;
+
+	&:hover {
+		background-color: var(--fill-quinary);
+	}
+	
+	&:active, &[selected] {
+		background-color: var(--fill-quarternary);
+	}
+
+	@include focus-ring;
+
+	.icon-css {
+		fill: var(--fill-secondary);
+	}
 }
 
 .tag-selector-item {
+	border-radius: 4px;
 	cursor: pointer;
+	font-size: 0.916666667em;
+	line-height: 1.272727273;
 	overflow: hidden;
+	padding: 1px 4px;
 	text-overflow: ellipsis;
 	white-space: pre;
-	padding: 1px 4px 3px; // See also TagSelectorList.jsx
-	background-color: $tag-selector-bg;
+	box-sizing: border-box;
+
+	@include comfortable {
+		padding: 2px 4px;
+	}
+
+	@include focus-ring(true);
+
+	&:hover {
+		background-color: var(--fill-quinary);
+	}
+
+	&.selected {
+		background-color: var(--fill-secondary);
+
+		&:hover {
+			opacity: .75;
+		}
+	}
 
 	&.colored {
-		font-weight: bold;
+		font-weight: 600;
+
+		&.selected:not(.emoji) {
+			background-color: currentcolor;
+
+			@each $colorHex, $colorVar in $tagColorsLookup {
+				@include state('.tag-selector-item[data-color="#{$colorHex}"]') {
+					background-color: var($colorVar);
+				}
+			}
+		}
+
+		&:not(.emoji) {
+			&::before {
+				content: " ";
+				display: inline-block;
+				width: 0.636363636em; // 7px (+ 1px border = 8px)
+				height: 0.636363636em;
+				margin-right: .272727273em;
+				border-radius: 50%;
+				background-color: currentcolor; // fallback for non-standard colors
+				vertical-align: -0.363636364em; // -4px
+				border: var(--material-border-transparent);
+
+				@include state('.tag-selector-item.selected') {
+					border-color: var(--color-background);
+				}
+			}
+
+			@each $colorHex, $colorVar in $tagColorsLookup {
+				@include state('.tag-selector-item[data-color="#{$colorHex}"]') {
+					&::before {
+						background-color: var($colorVar);
+					}
+				}
+			}
+		}
 	}
 
 	&.disabled {
@@ -87,7 +175,15 @@
 	}
 	
 	&.dragged-over {
-		color: $shade-0;
-		background: $shade-6;
+		color: var(--color-background);
+		background-color: var(--fill-secondary);
+	}
+
+	span {
+		color: var(--fill-primary);
+
+		@include state('.tag-selector-item.selected') {
+			color: var(--color-background);
+		}
 	}
 }

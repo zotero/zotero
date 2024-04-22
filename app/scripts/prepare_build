@@ -89,14 +89,14 @@ def main():
         if not os.path.isdir(d):
             raise FileNotFoundError(d + " not found")
         
-        log("Deleting CSL locale support files")
+        # Delete CSL locale support files
         subprocess.check_call([
             'find',
             os.path.normpath(tmp_src_dir + '/chrome/content/zotero/locale/csl/'),
             '-mindepth', '1',
             '!', '-name', '*.xml',
             '!', '-name', 'locales.json',
-            '-print',
+            #'-print',
             '-delete'
         ])
         
@@ -118,7 +118,7 @@ def main():
             with open(os.path.join(translators_dir, fn), 'r', encoding='utf-8') as f:
                 contents = f.read()
             # Parse out the JSON metadata block
-            m = re.match('^\s*{[\S\s]*?}\s*?[\r\n]', contents)
+            m = re.match(r'^\s*{[\S\s]*?}\s*?[\r\n]', contents)
             if not m:
                 raise Exception("Metadata block not found in " + f.name)
             metadata = json.loads(m.group(0))

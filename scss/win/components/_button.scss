@@ -1,0 +1,31 @@
+// skip React Button element
+button:not(.btn, [type=checkbox], [type=radio]),
+input:is([type=button], [type=submit]) {
+	@include windows-form-element;
+
+	padding: 4px 11px 6px 11px;
+	margin-top: 2px;
+
+	&[default] {
+		color: var(--accent-white);
+
+		&:not([disabled]) {
+			--color-form-element-background: var(--accent-blue);
+
+			&:hover {
+				--color-form-element-background: rgba(64, 114, 229, 0.9);
+			}
+
+			&:active {
+				--color-form-element-background: rgba(64, 114, 229, 0.8);
+			}
+
+			@include focus-ring;
+		}
+
+		&[disabled] {
+			@include light-dark(--color-form-element-background, var(--fill-tertiary), var(--fill-quaternary));
+			--color-form-element-border: linear-gradient(transparent, transparent);
+		}
+	}
+}

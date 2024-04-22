@@ -97,6 +97,8 @@ pref("extensions.update.url", "");
 // Don't try to load the "Get Add-ons" tab on first load of Add-ons window
 pref("extensions.ui.lastCategory", "addons://list/extension");
 
+// Not set on Windows in Firefox anymore since it's a per-installation pref,
+// but we override that in fetch_xulrunner
 pref("app.update.auto", true);
 
 // URL user can browse to manually if for some reason all update installation
@@ -141,3 +143,15 @@ pref("mousewheel.with_alt.action", 1);
 
 // Use the system print dialog instead of the new tab-based print dialog in Firefox
 pref("print.prefer_system_dialog", true);
+
+// Disable libvpx decoding/encoding
+pref("media.webm.enabled", false);
+pref("media.encoder.webm.enabled", false);
+pref("media.mediasource.webm.enabled", false);
+pref("media.mediasource.webm.audio.enabled", false);
+pref("media.mediasource.vp9.enabled", false);
+pref("media.ffvpx.enabled", false);
+pref("media.ffvpx.mp3.enabled", false);
+pref("media.rdd-vpx.enabled", false);
+pref("media.rdd-ffvpx.enabled", false);
+pref("media.utility-ffvpx.enabled", false);

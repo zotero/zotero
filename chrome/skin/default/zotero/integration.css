@@ -95,7 +95,7 @@
 
 .citation-dialog.title {
 	margin: 0;
-	font-weight: bold;
+	font-weight: 600;
 	overflow: hidden;
 }
 
@@ -108,20 +108,51 @@
 	padding: 0;
 }
 
+.citation-dialog .zotero-bubble-input {
+	outline: none;
+	min-width: 10px;
+	width: 10px;
+	border: none !important;
+	max-width: 700px; /* Entire line of the editor */
+	box-sizing: border-box; 
+	height: 15px;
+	margin: 0;
+	/* Keep the background and text color unchanged in dark mode */
+	background-color: transparent !important;
+	color: black;
+	background-image: none !important;
+	padding: 0;
+	margin-inline: 2px;
+}
+
+.citation-dialog span {
+	/* Same left padding as for input */
+	padding-left: 4px;
+	/* Make last white space be counted during width calculations */
+	white-space: pre;
+}
+
+#dragged-bubble {
+	opacity: 0.3;
+}
+
 .citation-dialog.bubble {
 	border-radius: 8px;
 	background-color: #dee7f8;
 	border-style: solid;
 	border-width: 1px;
 	border-color: #a8c0ec;
-	padding: 0 6px 0 6px;
-	margin: -1px 2px 0 2px;
+	padding: 0 6px;
+	margin: 3px 2px 0 2px;
 	display: inline-block;
 	white-space: nowrap;
 	line-height: normal;
 	color: #000;
-	-moz-user-select: all;
+	-moz-user-select: none;
+	cursor: pointer;
+	height: 16px;
 }
+
 
 .citation-dialog.bubble:hover {
 	background-color: #bbcef1;
@@ -134,11 +165,13 @@
 	color: #fff;
 }
 
-.citation-dialog.search {
+.citation-dialog.main {
 	margin: 0;
 	padding: 0;
 	padding-top: 0;
 	padding-bottom: 0;
+	background: white;
+	border-radius: 10px;
 }
 
 .citation-dialog.iframe {
@@ -147,24 +180,53 @@
 }
 
 .citation-dialog.editor {
-	padding: 0 2px 0 2px;
 	margin: 0;
 	font: -moz-field;
-	overflow: hidden;
 	outline: none;
 	line-height: 2em;
+	width: 700px; /* initial editor width - adjusted after dom load */
+	min-height: 28px;
+	font-size: 13px;
+	background: white;
+	color: black;
 }
 
-.citation-dialog.spinner {
-	margin-top: 2px;
-	margin-right: 8px;
+.citation-dialog.editor::selection {
+	color: white;
+	background: var(--color-accent);
+}
+
+.citation-dialog.icons {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	justify-content: center;
+	width: 36px;
+}
+
+.citation-dialog.entry {
+	max-width: 800px;
+	min-width: 800px;
+	-moz-window-dragging: drag;
+}
+
+.citation-dialog.deck {
+	-moz-window-dragging: no-drag;
+}
+
+.citation-dialog.progress-meter[value] {
+	visibility: visible;
+}
+
+.citation-dialog .accept-button {
+	list-style-image: url("chrome://zotero/skin/20/universal/arrow-right.svg");
+	fill: currentColor;
 }
 
 .citation-dialog.item {
-	font-size: 12px;
-	font: -moz-field;
 	-moz-user-focus: normal;
 	padding: 3px 5px 3px 10px;
+	font-size: 12px;
 }
 
 .citation-dialog.item:not(:last-child), .citation-dialog.separator:not(:last-child) {
@@ -181,7 +243,7 @@
 }
 
 richlistitem[selected="true"] {
-	background: Highlight;
+	background: Highlight !important;
 	color: HighlightText;
 }
 
@@ -210,15 +272,26 @@ richlistitem[selected="true"] {
 	margin: 0;
 }
 
-#zotero-icon .toolbarbutton-text {
-	display: none;
+/* Add cursor and hover/active effects to make the Z icon act like a button */
+#zotero-icon:not([disabled]) {
+	cursor: pointer;
+	padding: 5px 4px 5px 5px;
 }
 
-#zotero-icon .toolbarbutton-icon {
-	width: 16px;
-	height: 16px;
-	padding: 0;
-	margin: 0;
+#zotero-icon:not([disabled]):hover,
+#zotero-icon:not([disabled]):focus,
+#zotero-icon[open="true"]:not([disabled]) {
+	background: #f2f2f2;
+}
+
+
+#zotero-icon:not([disabled])::after {
+	background: url("searchbar-dropmarker@2x.png") no-repeat center / contain;
+	display: inline-block;
+	content: "";
+	width: 5px;
+	height: 8px;
+	margin-left: 1px;
 }
 
 #citation-properties:is(panel, menupopup)::part(content) {
@@ -235,7 +308,7 @@ richlistitem[selected="true"] {
 	margin-left: 0;
 	margin-right: 0;
 	max-width: 300px;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 #citation-properties-info > label {
@@ -295,4 +368,23 @@ panel button .button-text {
 
 window.citation-dialog {
 	width: 600px;
+}
+
+.aria-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+window#add-citation-dialog, window#edit-bibliography-dialog {
+	min-height: 600px;
+}
+
+window#add-citation-dialog dialog, window#edit-bibliography-dialog dialog {
+	max-height: 100vh;
 }

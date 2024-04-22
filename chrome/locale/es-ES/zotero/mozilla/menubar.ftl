@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -140,6 +146,8 @@ menu-view-history-button =
     .label = Historial
 menu-view-synced-tabs-sidebar =
     .label = Pestañas sincronizadas
+menu-view-megalist-sidebar =
+    .label = Contraseñas
 menu-view-full-zoom =
     .label = Tamaño
     .accesskey = m
@@ -220,8 +228,9 @@ menu-history-undo-menu =
     .label = Pestañas cerradas recientemente
 menu-history-undo-window-menu =
     .label = Ventanas cerradas recientemente
-menu-history-reopen-all-tabs = Reabrir todas las pestañas
-menu-history-reopen-all-windows = Reabrir todas las ventanas
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Buscar en el historial
 
 ## Bookmarks Menu
 
@@ -230,14 +239,13 @@ menu-bookmarks-menu =
     .accesskey = M
 menu-bookmarks-manage =
     .label = Administrar marcadores
-menu-bookmark-current-tab =
-    .label = Añadir pestaña actual a marcadores
-menu-bookmark-edit =
-    .label = Editar este marcador
 menu-bookmark-tab =
     .label = Añadir pestaña actual a marcadores…
 menu-edit-bookmark =
     .label = Editar este marcador…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Buscar marcadores
 menu-bookmarks-all-tabs =
     .label = Añadir pestañas a marcadores…
 menu-bookmarks-toolbar =
@@ -331,6 +339,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Desactivar modo de resolución de problemas
     .accesskey = M
+menu-help-switch-device =
+    .label = Cambiar a un nuevo dispositivo
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -339,3 +350,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Este no es un sitio engañoso…
     .accesskey = E
+menu-report-broken-site =
+    .label = Informar de problemas con un sitio

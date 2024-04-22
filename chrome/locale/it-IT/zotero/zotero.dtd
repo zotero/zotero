@@ -46,14 +46,11 @@
 <!ENTITY zotero.upgrade.changeLogLink "registro delle modifiche">
 <!ENTITY zotero.upgrade.changeLogAfterLink "per conoscere le novità.">
 
-<!ENTITY zotero.tabs.info.label "Informazioni">
 <!ENTITY zotero.tabs.notes.label "Note">
 <!ENTITY zotero.tabs.attachments.label "Allegati">
-<!ENTITY zotero.tabs.tags.label "Tag">
-<!ENTITY zotero.tabs.related.label "Correlati">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra i duplicati">
-<!ENTITY zotero.collections.showUnfiledItems "Mostra gli oggetti non classificati">
+<!ENTITY zotero.collections.showUnfiledItems "Mostra gli elementi non collocati">
 <!ENTITY zotero.collections.showRetractedItems "Mostra gli elementi ritirati dalla pubblicazione">
 
 <!ENTITY zotero.items.itemType "Tipo di elemento">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Maiuscola iniziale">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Scambia Nome/Cognome">
 <!ENTITY zotero.item.creatorTransform.fixCase "Correggi maiuscole">
-<!ENTITY zotero.item.viewOnline "Visualizza online">
 <!ENTITY zotero.item.copyAsURL "Copia come URL">
 <!ENTITY zotero.item.deletePermanently "Elimina definitivamente…">
 

@@ -1,0 +1,83 @@
+toolbarbutton {
+	appearance: none;
+	flex-shrink: 0;
+	&:not(.titlebar-button) {
+		border-radius: 5px;
+	}
+	margin: 0;
+	color: var(--fill-secondary);
+	-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+	background-color: transparent;
+
+
+	.toolbarbutton-menu-dropmarker {
+		-moz-default-appearance: none;
+		@include svgicon-menu("chevron-8", "universal", "8");
+		color: var(--fill-secondary);
+		width: 8px;
+		height: 8px;
+	}
+
+	&:hover {
+		background-color: var(--fill-quinary);
+	}
+	
+	&:active, &[selected] {
+		background-color: var(--fill-quarternary);
+	}
+
+	@include focus-ring;
+	
+	&:disabled,
+	&[disabled="true"] {
+		background-color: transparent;
+		color: var(--fill-tertiary);
+
+		.toolbarbutton-menu-dropmarker {
+			color: var(--fill-tertiary);
+		}
+	}
+
+	&[open="true"] {
+		background-color: var(--fill-quarternary);
+	}
+}
+
+@keyframes rotating {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+toolbarbutton[status=animate] {
+	.toolbarbutton-icon {
+		color: var(--fill-secondary);
+		animation: rotating 2s linear infinite;
+	}
+}
+
+.zotero-tb-separator {
+	height: 36px;
+	border-right: var(--material-panedivider);
+}
+
+$toolbarbutton-icons: (
+	collection-add: "add-collection",
+	collections-search: "magnifier",
+	add: "add-item",
+	lookup: "magic-wand",
+	attachment-add: "add-file",
+	note-add: "note",
+	tabs-menu: "chevron",
+	sync-error: "error",
+	sync: "sync",
+);
+
+@each $cls, $icon in $toolbarbutton-icons {
+	#zotero-tb-#{$cls} {
+		@include svgicon-menu($icon, "universal", "20");
+	}
+};

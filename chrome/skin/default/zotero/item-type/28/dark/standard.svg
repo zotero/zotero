@@ -1,0 +1,24 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path opacity="0.24" d="M19 1.698V7H24.302L19 1.698Z" fill="white"/>
+<g opacity="0.34">
+<path d="M8 12H7V13H8V12Z" fill="#39BF68"/>
+<path d="M8 17H7V18H8V17Z" fill="#39BF68"/>
+<path d="M8 22H7V23H8V22Z" fill="#39BF68"/>
+</g>
+<g opacity="0.85">
+<path d="M8 12V13H7V12H8ZM9 11H6V14H9V11Z" fill="#39BF68"/>
+<path d="M8 17V18H7V17H8ZM9 16H6V19H9V16Z" fill="#39BF68"/>
+<path d="M8 22V23H7V22H8ZM9 21H6V24H9V21Z" fill="#39BF68"/>
+</g>
+<g opacity="0.75">
+<path d="M11 18H16.106C16.497 17.617 16.936 17.283 17.408 17H11V18Z" fill="white"/>
+<path d="M23 12H11V13H23V12Z" fill="white"/>
+<path d="M16 7H6V8H16V7Z" fill="white"/>
+<path d="M11 22V23H14C14 22.66 14.033 22.327 14.08 22H11Z" fill="white"/>
+</g>
+<path opacity="0.85" d="M21 18C18.239 18 16 20.239 16 23C16 25.761 18.239 28 21 28C23.761 28 26 25.761 26 23C26 20.239 23.761 18 21 18ZM20 25.707L17.646 23.353L18.353 22.646L19.999 24.292L23.645 20.646L24.352 21.353L19.998 25.707H20Z" fill="#39BF68"/>
+<g opacity="0.6">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M3 0H18.717L26 7.283V23C26 21.8744 25.6279 20.8356 25 19.9999V8H18V1H4V27H17.9999C18.8356 27.6279 19.8744 28 21 28H3V0ZM24.302 7L19 1.698V7H24.302Z" fill="white"/>
+<path d="M21 28C23.761 28 26 25.761 26 23V28H21Z" fill="white"/>
+</g>
+</svg>

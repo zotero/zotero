@@ -239,8 +239,8 @@
 					<menupopup/>
 				</menulist>
 				<zoterosearchagefield id="value-date-age" class="value-date-age" hidden="true"/>
-				<label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
-				<label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
+				<toolbarbutton id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
+				<toolbarbutton id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
 			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
@@ -405,7 +405,7 @@
 			{
 				var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
 				var hidden = !operators[val];
-				operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
+				operatorsList.firstChild.childNodes[i].toggleAttribute('hidden', hidden);
 				if (!hidden && (selectThis == null || this.selectedOperator == val))
 				{
 					selectThis = i;
@@ -729,12 +729,14 @@
 
 		onRemoveClicked() {
 			if (this.parent){
+				window.resizeBy(0, -1 * this.getBoundingClientRect().height);
+				window.dispatchEvent(new CustomEvent('resize'));
 				this.parent.removeCondition(this.conditionID);
-				window.sizeToContent()
 			}
 		}
 
-		onAddClicked() {
+		onAddClicked(event) {
+			event.preventDefault();
 			if (this.parent){
 				let ref = this.parent.search.getCondition(
 					this.parent.search.addCondition(
@@ -744,7 +746,7 @@
 					)
 				)
 				this.parent.addCondition(ref);
-				window.sizeToContent();
+				window.resizeBy(0, this.getBoundingClientRect().height);
 			}
 		}
 
@@ -836,7 +838,7 @@
 				case 'fulltextContent':
 					var menu = this.querySelector('#textbox-fulltext-menu');
 					this.setAttribute('hasOptions', true);
-					button.setAttribute('hidden', false);
+					button.removeAttribute('hidden');
 					
 					var selectedIndex = 0;
 					if (mode){

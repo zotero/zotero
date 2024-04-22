@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Historikk
 menu-view-synced-tabs-sidebar =
     .label = Synkroniserte faner
+menu-view-megalist-sidebar =
+    .label = Passord
 menu-view-full-zoom =
     .label = Skalering
     .accesskey = r
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Nylig lukkede faner
 menu-history-undo-window-menu =
     .label = Nylig lukkede vinduer
-menu-history-reopen-all-tabs = Åpne alle faner på nytt
-menu-history-reopen-all-windows = Åpne alle vinduer på nytt
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Søk i historikk
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = Behandle bokmerker
-menu-bookmark-current-tab =
-    .label = Bokmerk gjeldende fane
-menu-bookmark-edit =
-    .label = Rediger dette bokmerket
 menu-bookmark-tab =
     .label = Bokmerk gjeldende fane …
 menu-edit-bookmark =
     .label = Rediger dette bokmerket …
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Søk i bokmerker
 menu-bookmarks-all-tabs =
     .label = Bokmerk alle faner …
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Slå av feilsøkingsmodus
     .accesskey = S
+menu-help-switch-device =
+    .label = Bytter til en ny enhet
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Dette er ikke et villedende nettsted …
     .accesskey = d
+menu-report-broken-site =
+    .label = Rapporter problem med et nettsted

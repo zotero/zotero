@@ -30,7 +30,7 @@ pref("extensions.zotero.findPDFs.resolvers", '[]');
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.unboundedTagSearch",false);
-pref("extensions.zotero.fontSize", "1.0");
+pref("extensions.zotero.fontSize", "1.00");
 pref("extensions.zotero.layout", "standard");
 pref("extensions.zotero.recursiveCollections", false);
 pref("extensions.zotero.autoRecognizeFiles", true);
@@ -72,6 +72,8 @@ pref("extensions.zotero.lastLongTagDelimiter", ";");
 
 pref("extensions.zotero.fallbackSort", "firstCreator,date,title,dateAdded");
 pref("extensions.zotero.sortCreatorAsString", false);
+
+pref("extensions.zotero.uiDensity", "comfortable");
 
 
 //Tag Selector
@@ -185,6 +187,7 @@ pref("extensions.zotero.purge.tags", false);
 
 // Zotero pane persistent data
 pref("extensions.zotero.pane.persist", "");
+pref("extensions.zotero.showAttachmentPreview", true);
 
 pref("extensions.zotero.fileHandler.pdf", "");
 pref("extensions.zotero.fileHandler.epub", "");
@@ -217,4 +220,8 @@ pref("extensions.zotero.scaffold.eslint.enabled", true);
 pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
 
 // Reader
+pref("extensions.zotero.reader.contentDarkMode", true);
 pref("extensions.zotero.reader.ebookFontFamily", "Georgia, serif");
+
+// Set color scheme to auto by default
+pref("browser.theme.toolbar-theme", 2);

@@ -1,0 +1,111 @@
+menupopup {
+	color-scheme: auto;
+	--panel-padding: 5px 0;
+	menu, menuitem {
+		appearance: none;
+		margin-left: 5px;
+		margin-right: 5px;
+		padding: 3px 10px 3px 10px;
+		border-radius: 4px;
+
+		&[_moz-menuactive] {
+			// Try best to match the native menu style
+			@include light-dark(
+				background-color, color-mix(in srgb, -moz-mac-active-menuitem 75%, transparent),
+				color-mix(in srgb, -moz-mac-active-menuitem 90%, transparent)
+			);
+			color: -moz-mac-menutextselect;
+		}
+
+		&:is([checked="true"], [selected="true"]) {
+			appearance: none !important;
+			border-radius: 4px;
+			&::before {
+				content: '\2713';
+				display: inline-block;
+				vertical-align: middle;
+				line-height: 0;
+				width: 14px;
+				margin-inline-start: 0px !important;
+			}
+		}
+
+		&[disabled="true"] {
+			appearance: auto;
+		}
+	}
+
+	&[needsgutter] {
+		menu, menuitem {
+			padding-left: 20px;
+
+			// Add padding here so that it won't look weird when the customElement.js is not yet loaded
+			&:is([checked="true"], [selected="true"]) {
+				padding-left: 6px;
+			}
+		}
+	}
+
+	menuseparator {
+		appearance: none;
+		margin-left: 15px;
+		margin-right: 15px;
+		border-bottom: 1px solid;
+		padding-bottom: 0px;
+		@include light-dark(border-color, rgba(170, 170, 170, 0.5), rgba(100, 100, 100, 0.5));
+	}
+
+	.menu-right {
+		appearance: none;
+		@include svgicon-menu("chevron-8", "universal", "8");
+		rotate: -90deg;
+		margin-inline-end: 0px;
+	}
+}
+
+// Modified based on rules from https://searchfox.org/mozilla-esr102/source/browser/base/content/browser.css
+
+/* On Mac, use the properties "-moz-window-transform" and "-moz-window-opacity"
+instead of "transform" and "opacity" for these animations.
+The -moz-window* properties apply to the whole window including the window's
+shadow, and they don't affect the window's "shape", so the system doesn't
+have to recompute the shadow shape during the animation. This makes them a
+lot faster. In fact, Gecko no longer triggers shadow shape recomputations
+for repaints.
+These properties are not implemented on other platforms. */
+menupopup:not([animate="false"]) {
+	transition-property: -moz-window-transform, -moz-window-opacity;
+	transition-duration: 0.18s, 0.18s;
+	transition-timing-function:
+	var(--animation-easing-function), ease-out;
+}
+
+/* Only do the fade-in animation on pre-Big Sur to avoid missing shadows on
+* Big Sur, see bug 1672091. */
+@media (-moz-mac-big-sur-theme: 0) {
+	menupopup:not([animate="false"]) {
+		-moz-window-opacity: 0;
+		-moz-window-transform: translateY(-70px);
+	}
+
+	menupopup[side="bottom"]:not([animate="false"]) {
+		-moz-window-transform: translateY(70px);
+	}
+}
+
+/* [animate] is here only so that this rule has greater specificity than the
+* rule right above */
+menupopup[animate][animate="open"] {
+	-moz-window-opacity: 1.0;
+	transition-duration: 0.18s, 0.18s;
+	-moz-window-transform: none;
+	transition-timing-function:
+	var(--animation-easing-function), ease-in-out;
+}
+
+menupopup[animate][animate="cancel"] {
+	-moz-window-opacity: 0;
+	-moz-window-transform: none;
+}
+
+// End of browser.css

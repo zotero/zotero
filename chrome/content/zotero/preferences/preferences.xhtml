@@ -24,7 +24,6 @@
     ***** END LICENSE BLOCK *****
 -->
 <!DOCTYPE window [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd"> %preferencesDTD;
@@ -49,6 +48,8 @@
 		windowtype="zotero:pref"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
+		width="800"
+		height="600"
 		style="display: flex;">
 	
 	<linkset>
@@ -85,13 +86,10 @@
 		<richlistbox id="prefs-navigation"></richlistbox>
 		<html:div id="prefs-inner-container">
 			<html:div id="prefs-search-container">
-				<html:div id="prefs-subpane-back-button-container">
-					<button
-						id="prefs-subpane-back-button"
-						label="‹"
-						aria-label="&zotero.pdfReader.back;"
-						hidden="true"/>
-				</html:div>
+				<toolbarbutton
+					id="prefs-subpane-back-button"
+					aria-label="&zotero.pdfReader.back;"
+					hidden="true"/>
 				<search-textbox id="prefs-search" placeholder="&zotero.lookup.button.search;" timeout="1"/>
 			</html:div>
 			<html:div id="prefs-content">

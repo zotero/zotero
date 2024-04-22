@@ -6,6 +6,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window data-l10n-id="import-window"
+		id="import-wizard-window"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		onload="Zotero_Import_Wizard.init()"
@@ -15,8 +16,14 @@
 		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 
-	<script src="chrome://global/content/customElements.js"/>
-	<wizard id="import-wizard" class="import-wizard" width="600" height="400">
+	<script>
+		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/fileInterface.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/import/importWizard.js", this);
+	</script>
+	
+	<wizard id="import-wizard" class="import-wizard">
 		<wizardpage pageid="page-start" data-header-label-id="import-where-from">
 			<radiogroup id="import-source-group" align="start">
 				<radio value="file" data-l10n-id="import-source-file" />
@@ -50,7 +57,7 @@
 					<html:input type="password" id="mendeley-password" />
 				</div>
 			</fieldset>
-			<div id="mendeley-online-login-feedback" data-l10n-id="import-online-wrong-credentials" />
+			<div id="mendeley-online-login-feedback" />
 		</wizardpage>
 		<wizardpage
 			pageid="page-options"
@@ -108,8 +115,4 @@
 			</div>
 		</wizardpage>
 	</wizard>
-		
-	<script src="chrome://zotero/content/include.js"/>
-	<script src="../fileInterface.js"/>
-	<script src="./importWizard.js" />
 </window>

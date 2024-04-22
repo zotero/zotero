@@ -13,7 +13,7 @@
 <!ENTITY zotero.publications.sharing.reserved "Нет, опубликовать только на zotero.org">
 
 <!ENTITY zotero.publications.chooseLicense.title "Выбрать лицензию «Creative Commons»">
-<!ENTITY zotero.publications.chooseLicense.text "Лицензия «Creative Commons» разрешает третьей стороне копировать и распространять если она дает ссылку на первоисточник, ссылку на лицензию и указывает внесенные изменения. Дополнительные условия могут быть указаны ниже.">
+<!ENTITY zotero.publications.chooseLicense.text "Лицензия «Creative Commons» разрешает третьей стороне копирование и распространение производных работ при указании ссылки на первоисточник, ссылки на лицензию и внесённых изменений. Дополнительные условия могут быть указаны ниже.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Разрешить распространение производных работ?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Да, если третья сторона не ограничивает распространение">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Разрешить коммерческое использование вашей работы?">

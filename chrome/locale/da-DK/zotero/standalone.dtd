@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Tilføjelser">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimer">
 <!ENTITY bringAllToFront.label "Før alle op foran">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Vindue">
 
 <!ENTITY helpMenu.label "Hjælp">
 <!ENTITY helpMenu.accesskey "H">

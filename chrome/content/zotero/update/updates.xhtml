@@ -5,13 +5,12 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/content/update/updates.css"?>
 
-<!DOCTYPE wizard [
-<!ENTITY % updateDTD SYSTEM "chrome://zotero/locale/mozilla/updates.dtd">
-<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
-%updateDTD;
-%brandDTD;
+<!DOCTYPE window [
+	<!ENTITY % updateDTD SYSTEM "chrome://zotero/locale/mozilla/updates.dtd"> %updateDTD;
+	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd"> %brandDTD;
 ]>
 
 <window id="updates"
@@ -22,16 +21,16 @@
         style="width: auto; height: auto"
         onload="gUpdates.onLoad();"
         onunload="gUpdates.onUnload();">
-
-<script src="chrome://global/content/customElements.js"/>
 <script src="chrome://global/content/contentAreaUtils.js"/>
 <script src="chrome://global/content/globalOverlay.js"/>
 <script src="chrome://zotero/content/editMenuOverlay.js"/>
 <script src="chrome://zotero/content/update/updates.js"/>
 <script src="chrome://zotero/content/update/update-header.js"/>
 
-<wizard>
+<wizard width="500" height="400">
   <linkset>
+    <html:link rel="localization" href="branding/brand.ftl"/>
+    <html:link rel="localization" href="zotero.ftl"/>
     <html:link rel="localization" href="toolkit/global/wizard.ftl"/>
   </linkset>
   
@@ -94,11 +93,11 @@
               object="gUpdatesFoundBasicPage" next="downloading">
     <update-header id="updatesFoundBasicHeader" label=""/>
     <vbox class="update-content" flex="1">
-      <label id="updatesFoundInto"/>
+      <label id="updatesFoundIntro"/>
       <separator class="thin"/>
       <label id="updateName" crop="right" value=""/>
       <separator id="updateNameSep" class="thin"/>
-      <label id="upgradeEvangelism">&evangelism.desc;</label>
+      <label data-l10n-id="update-updates-found-desc"/>
       <separator id="upgradeEvangelismSep" flex="1"/>
       <vbox flex="1">
         <hbox id="moreInfoURL">

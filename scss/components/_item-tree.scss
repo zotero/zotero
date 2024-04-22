@@ -1,56 +1,324 @@
-#zotero-items-pane {
-	min-width: 290px;
-	min-height: 150px;
+@use "sass:map";
+
+#zotero-items-pane-container {
+	min-width: $min-width-items-pane;
 	height: 150px;
-	width: 290px;
+	min-height: $min-height-items-pane;
+}
+
+#zotero-items-pane {
+	min-width: $min-width-items-pane;
 }
 
 #zotero-items-tree {
-	.virtualized-table-header .icon {
-		width: 13px;
-		height: 13px;
+	.virtualized-table-body, .drag-image-container {
+		padding: 4px 8px 8px;
+	}
+
+	.virtualized-table-header {
+		padding-inline-start: 8px;
+		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
+		box-sizing: border-box;
+
+		.cell.hasAttachment,
+		.cell.numNotes {
+			padding: 0;
+			text-align: center;
+
+			&.first-column {
+				padding-inline-start: 32px;
+			}
+		}
+
+		.first-column {
+			padding-inline-start: 36px;
+
+			&::before {
+				content: "";
+				display: inline-block;
+				width: 8px;
+				height: 100%;
+				background: transparent;
+				position: absolute;
+				inset-inline-start: -8px;
+				
+				@include state(".first-column:hover") {
+					background: var(--material-mix-quinary);
+				}
+				
+				@include state(".first-column.dragging") {
+					background: var(--material-mix-quarternary);
+				}
+			}
+		}
+
+		.cell:last-child {
+			&::after {
+				content: "";
+				display: inline-block;
+				width: calc(var(--scrollbar-width, 0px) + 8px);
+				height: 100%;
+				background: transparent;
+				position: absolute;
+				inset-inline-end: calc(-1 * var(--scrollbar-width, 0px) - 8px);
+		
+				@include state(".cell:hover") {
+					background: var(--material-mix-quinary);
+				}
+
+				@include state(".cell.dragging") {
+					background: var(--material-mix-quarternary);
+				}
+			}
+		}
 	}
 	
-	.cell.primary {
-		.retracted {
-			width: 12px;
-			margin-inline-start: 3px;
+	.virtualized-table, .drag-image-container {
+		.row {
+			&.odd:not(.selected) {
+				background-color: var(--material-stripe);
+			}
+
+			&.even:not(.selected) {
+				background-color: var(--material-background);
+			}
+
+			&.selected {
+				border-radius: 0;
+
+				&.first-selected {
+					border-top-left-radius: 5px;
+					border-top-right-radius: 5px;
+				}
+
+				&.last-selected {
+					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: 5px;
+				}
+			}
+			
+			.colored-tag-swatches {
+				direction: ltr;
+				transform: scaleX(-1);
+				display: flex;
+			}
+
+			.icon-item-type + .tag-swatch,
+			.icon-item-type + .colored-tag-swatches {
+				margin-left: 4px;
+			}
+			
+			.tag-swatch {
+				display: inline-block;
+
+				&.emoji + .emoji,
+				&.emoji + .colored-tag-swatches {
+					margin-left: 4px;
+					
+					:root:-moz-locale-dir(rtl) & {
+						margin-left: 0;
+						margin-right: 4px;
+					}
+				}
+
+				&.colored {
+					-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+					width: 0.92307692em;
+					height: 0.92307692em;
+					background:
+						url("chrome://zotero/skin/tag-circle.svg") no-repeat center/100%,
+						url("chrome://zotero/skin/tag-circle-border.svg") no-repeat center/0;
+					fill: currentcolor;
+
+					@each $colorHex, $colorVar in $tagColorsLookup {
+						&[data-color="#{$colorHex}"] {
+							fill: var($colorVar);
+						}
+					}
+
+					@include focus-states using($color) {
+						@if $color =="white" {
+							background: url("chrome://zotero/skin/tag-circle-border.svg") no-repeat center/contain;
+							stroke: var(--accent-white);
+						}
+					}
+				}
+
+				&.colored + .colored {
+					background:
+						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/100%,
+						url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/0;
+					margin-left: -0.38461538em;
+
+					@include focus-states using($color) {
+						@if $color =="white" {
+							background: url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/contain;
+						}
+					}
+				}
+			}
+		}
+
+	
+		.cell.primary {
+			.retracted {
+				width: 12px;
+				margin-inline-start: 3px;
+			}
+		}
+
+		.cell.no-padding {
+			padding: 0;
 		}
 		
-		.tag-swatch {
-			display: inline-block;
-			min-width: .728em;
-			min-height: .728em;
-			margin-inline-start: 3px;
-			border-radius: .15em;
+		.cell.hasAttachment {
+			text-overflow: unset;
+			align-items: center;
+			display: flex;
+			justify-content: center;
+
+			.cell-text {
+				text-overflow: unset;
+				align-items: center;
+				display: flex;
+				justify-content: center;
+			}
+			
+			.icon-missing-file {
+				opacity: 0.4;
+			}
+		}
+		
+		.numNotes, .hasAttachment {
+			text-align: center;
+
+			.cell-text {
+				text-align: center;
+			}
 		}
 	}
+}
 	
-	.cell.hasAttachment {
-		box-sizing: content-box;
-		padding: 0 4px;
-		height: 100%;
-		// Don't show ellipsis
-		text-overflow: unset;
-		
-		.icon-treeitemattachmentpdf {
-			min-width: 10px;
-			max-width: 10px;
-			margin: 3px;
+$-itemTypesIcons: (
+	artwork,
+	attachment-epub,
+	attachment-epub-link,
+	attachment-file, // mapped to document below
+	attachment-link,
+	attachment-pdf-link,
+	attachment-pdf,
+	attachment-snapshot,
+	attachment-web-link,
+	attachment-image,
+	attachment-image-link,
+	attachment-video,
+	attachment-video-link,
+	audio-recording,
+	bill,
+	blog-post,
+	book-section,
+	book,
+	case,
+	computer-program,
+	conference-paper,
+	dataset,
+	dictionary-entry,
+	document,
+	email,
+	encyclopedia-article,
+	epub,
+	film,
+	forum-post,
+	hearing,
+	instant-message,
+	interview,
+	journal-article,
+	letter,
+	magazine-article,
+	manuscript,
+	map,
+	newspaper-article,
+	note,
+	patent,
+	podcast,
+	preprint,
+	presentation,
+	radio-broadcast,
+	report,
+	standard,
+	statute,
+	thesis,
+	tv-broadcast,
+	video-recording,
+	webpage
+);
+
+$-itemTypesMap: (
+	"attachment-file": "document"
+);
+
+$-attachmentIcons: (
+	attachment-epub,
+	attachment-epub-link,
+	attachment-link,
+	attachment-pdf-link,
+	attachment-pdf,
+	attachment-snapshot,
+	attachment-web-link,
+	attachment-file,
+	attachment-image,
+	attachment-video
+);
+
+.icon-item-type {
+	width: 16px;
+	height: 16px;
+}
+
+.icon-attachment-type {
+	width: 12px;
+	height: 12px;
+	padding: 1px;
+	box-sizing: content-box;
+}
+
+// Due to quirks of the state() mixin, we need two sets of .icon-item-type rules:
+// one when the icon is within a virtualized-table, and one when it isn't. We declare
+// a mixin here to avoid duplication.
+
+@mixin -icon-item-type-rules($color) {
+	.icon-item-type {
+		// default icon, for known item types more specific selectors below will apply
+		@include svgicon("document", $color, "16", "item-type", true);
+	}
+
+	@each $itemTypeIcon in $-itemTypesIcons {
+		$itemType: camelCase(str-replace(str-replace($itemTypeIcon, "pdf", "PDF"), "epub", "EPUB"));
+
+		@if map.has-key($-itemTypesMap, $itemTypeIcon) {
+			$itemTypeIcon: map.get($-itemTypesMap, $itemTypeIcon);
 		}
-		
-		.icon-link {
-			min-width: 14px;
-			max-width: 14px;
-			margin: 2px 1px;
-		}
-		
-		.icon-missing-file {
-			opacity: 0.4;
+
+		.icon-item-type[data-item-type=#{$itemType}] {
+			@include svgicon($itemTypeIcon, $color, "16", "item-type", true);
 		}
 	}
-	
-	.cell.numNotes {
-		text-align: center;
+}
+
+@include focus-states using($color) {
+	@include -icon-item-type-rules($color);
+}
+
+.virtualized-table .row {
+	@include focus-states using($color) {
+		@include -icon-item-type-rules($color);
+
+		@each $itemAttachmentIcon in $-attachmentIcons {
+			$itemType: camelCase(str-replace(str-replace($itemAttachmentIcon, "pdf", "PDF"), "epub", "EPUB"));
+			.icon-attachment-type[data-item-type=#{$itemType}] {
+				@include svgicon($itemAttachmentIcon, $color, "12", "item-type", false);
+				background-origin: content-box;
+			}
+		}
 	}
 }

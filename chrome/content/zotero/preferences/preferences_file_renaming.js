@@ -31,7 +31,16 @@ Zotero_Preferences.FileRenaming = {
 		this.inputRef = document.getElementById('file-renaming-format-template');
 		this.updatePreview();
 		this.inputRef.addEventListener('input', this.updatePreview.bind(this));
-		Zotero.getActiveZoteroPane()?.itemsView.onSelect.addListener(this.updatePreview.bind(this));
+
+		this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
+		this._updatePreview = this.updatePreview.bind(this);
+		if (this._itemsView) {
+			this._itemsView.onSelect.addListener(this._updatePreview);
+		}
+	},
+
+	uninit: function () {
+		this._itemsView.onSelect.removeListener(this._updatePreview);
 	},
 
 	getActiveTopLevelItem() {

@@ -32,7 +32,7 @@ zoterosearch {
 	}
 
 	.search-condition {
-		-moz-box-flex: 1;
+		flex: 1;
 		display: flex;
 		align-items: center;
 
@@ -52,7 +52,7 @@ zoterosearch {
 
 	#condition-tooltips hbox > label
 	{
-		font-weight: bold;
+		font-weight: 600;
 	}
 
 	.toolbarbutton-text
@@ -64,13 +64,21 @@ zoterosearch {
 	#textbox-button {
 		cursor: default;
 		appearance: none;
-		justify-self: end;
-		margin-inline-end: 8px;
+		justify-self: start;
+		margin-inline-start: 12px;
 		align-self: center;
+		
+		&:hover, &:active, &[open] {
+			background: none;
+		}
+	}
+
+	zoterosearchtextbox[hasOptions="true"] #search-textbox {
+		padding-inline-start: 20px;
 	}
 
 	.search-in-the-last {
-		-moz-box-flex: 1;
+		flex: 1;
 		display: flex;
 		align-items: center;
 		

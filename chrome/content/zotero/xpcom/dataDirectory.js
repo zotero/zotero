@@ -25,7 +25,7 @@
 
 "use strict";
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 Zotero.DataDirectory = {
 	MIGRATION_MARKER: 'migrate-dir',
@@ -39,8 +39,8 @@ Zotero.DataDirectory = {
 	
 	get defaultDir() {
 		// Use special data directory for tests
-		if (Zotero.test) {
-			return OS.Path.join(OS.Path.dirname(OS.Constants.Path.profileDir), "Zotero");
+		if (CommandLineOptions.test) {
+			return OS.Path.join(PathUtils.parent(OS.Constants.Path.profileDir), "Zotero");
 		}
 		return OS.Path.join(OS.Constants.Path.homeDir, ZOTERO_CONFIG.CLIENT_NAME);
 	},
@@ -65,13 +65,7 @@ Zotero.DataDirectory = {
 			}
 			// Absolute path
 			else {
-				// Ignore non-absolute paths
-				if ("winIsAbsolute" in OS.Path) {
-					if (!OS.Path.winIsAbsolute(dir)) {
-						dir = false;
-					}
-				}
-				else if (!dir.startsWith('/')) {
+				if (!PathUtils.isAbsolute(dir)) {
 					dir = false;
 				}
 				if (!dir) {
@@ -79,7 +73,7 @@ Zotero.DataDirectory = {
 				}
 				
 				// Require parent directory to exist
-				if (!(yield OS.File.exists(OS.Path.dirname(dir)))) {
+				if (!(yield OS.File.exists(PathUtils.parent(dir)))) {
 					throw `Parent directory of -datadir ${dir} not found`;
 				}
 				
@@ -104,9 +98,9 @@ Zotero.DataDirectory = {
 					nsIFile.persistentDescriptor = prefVal;
 				}
 				catch (e) {
-					Zotero.debug("Persistent descriptor in extensions.zotero.dataDir did not resolve", 1);
-					e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-					throw e;
+					let msg = "Persistent descriptor in extensions.zotero.dataDir did not resolve";
+					Zotero.debug(msg, 1);
+					throw new DOMException(msg, 'NotFoundError');
 				}
 				// This removes lastDataDir
 				this.set(nsIFile.path);
@@ -127,8 +121,9 @@ Zotero.DataDirectory = {
 					}
 					catch (e) {
 						Zotero.logError(e);
-						Zotero.debug(`Invalid marker file:\n\n${contents}`, 1);
-						throw { name: "NS_ERROR_FILE_NOT_FOUND" };
+						let msg = `Invalid marker file:\n\n${contents}`;
+						Zotero.debug(msg, 1);
+						throw new DOMException(msg, 'NotFoundError');
 					}
 				}
 				else {
@@ -137,8 +132,9 @@ Zotero.DataDirectory = {
 					}
 					catch (e) {
 						Zotero.logError(e);
-						Zotero.debug(`Invalid path '${prefVal}' in dataDir pref`, 1);
-						throw { name: "NS_ERROR_FILE_NOT_FOUND" };
+						let msg = `Invalid path '${prefVal}' in dataDir pref`;
+						Zotero.debug(msg, 1);
+						throw new DOMException(msg, 'NotFoundError');
 					}
 				}
 			}
@@ -156,8 +152,9 @@ Zotero.DataDirectory = {
 				}
 				// For other custom directories that don't exist, show not-found dialog
 				else {
-					Zotero.debug(`Custom data directory ${dataDir} not found`, 1);
-					throw { name: "NS_ERROR_FILE_NOT_FOUND" };
+					let msg = `Custom data directory ${dataDir} not found`;
+					Zotero.debug(msg, 1);
+					throw new DOMException(msg, 'NotFoundError');
 				}
 			}
 			
@@ -194,7 +191,7 @@ Zotero.DataDirectory = {
 			// one does and it contains a database
 			try {
 				if ((yield Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir, false)).length) {
-					let profileName = OS.Path.basename(Zotero.Profile.dir).match(/[^.]+\.(.+)/)[1];
+					let profileName = PathUtils.filename(Zotero.Profile.dir).match(/[^.]+\.(.+)/)[1];
 					let newDataDir = this.defaultDir + ' ' + profileName;
 					if (!(yield OS.File.exists(newDataDir))
 							|| (yield OS.File.exists(OS.Path.join(newDataDir, dbFilename)))) {
@@ -224,13 +221,13 @@ Zotero.DataDirectory = {
 			try {
 				let dir = OS.Path.join(Zotero.Profile.dir, this.legacyDirName);
 				let dbFile = OS.Path.join(dir, dbFilename);
-				profileSubdirModTime = (yield OS.File.stat(dbFile)).lastModificationDate;
+				profileSubdirModTime = new Date((yield IOUtils.stat(dbFile)).lastModified);
 				Zotero.debug(`Database found at ${dbFile}, last modified ${profileSubdirModTime}`);
 				dataDir = dir;
 				useProfile = true;
 			}
 			catch (e) {
-				if (!(e instanceof OS.File.Error && e.becauseNoSuchFile)) {
+				if (e.name != 'NotFoundError') {
 					throw e;
 				}
 			}
@@ -242,7 +239,7 @@ Zotero.DataDirectory = {
 				// Get default profile in Firefox dir
 				let defProfile;
 				let profilesDir = Zotero.Profile.getOtherAppProfilesDir();
-				let profilesParent = profilesDir ? OS.Path.dirname(profilesDir) : null;
+				let profilesParent = profilesDir ? PathUtils.parent(profilesDir) : null;
 				if (profilesParent) {
 					Zotero.debug("Looking for Firefox profile in " + profilesParent);
 					try {
@@ -276,14 +273,15 @@ Zotero.DataDirectory = {
 							catch (e) {
 								Zotero.logError(e);
 								if (!useProfile) {
-									Zotero.debug("Persistent descriptor in extensions.zotero.dataDir "
-										+ "did not resolve", 1);
-									throw { name: "NS_ERROR_FILE_NOT_FOUND" };
+									let msg = "Persistent descriptor in extensions.zotero.dataDir "
+										+ "did not resolve";
+									Zotero.debug(msg, 1);
+									throw new DOMException(msg, 'NotFoundError');
 								}
 							}
 							try {
 								let dbFile = OS.Path.join(nsIFile.path, dbFilename);
-								let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
+								let mtime = new Date((yield IOUtils.stat(dbFile)).lastModified);
 								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
 								// If custom location has a newer DB, use that
 								if (!useProfile || mtime > profileSubdirModTime) {
@@ -311,7 +309,7 @@ Zotero.DataDirectory = {
 							try {
 								let dir = OS.Path.join(profileDir, this.legacyDirName);
 								let dbFile = OS.Path.join(dir, dbFilename);
-								let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
+								let mtime = new Date((yield IOUtils.stat(dbFile)).lastModified);
 								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
 								// If newer than Zotero profile directory, use this one
 								if (!useProfile || mtime > profileSubdirModTime) {
@@ -323,7 +321,7 @@ Zotero.DataDirectory = {
 							// Legacy subdirectory doesn't exist or there was a problem accessing it, so
 							// just fall through to default location
 							catch (e) {
-								if (!(e instanceof OS.File.Error && e.becauseNoSuchFile)) {
+								if (e.name != 'NotFoundError') {
 									Zotero.logError(e);
 									Zotero.fxProfileAccessError = true;
 								}
@@ -363,8 +361,7 @@ Zotero.DataDirectory = {
 						|| ('winLastError' in e && e.winLastError == OS.Constants.Win.ERROR_ACCESS_DENIED))) {
 				Zotero.restarting = true;
 				let isDefaultDir = dataDir == Zotero.DataDirectory.defaultDir;
-				let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.createInstance(Components.interfaces.nsIPromptService);
+				let ps = Services.prompt;
 				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 				if (!isDefaultDir) {
@@ -447,21 +444,26 @@ Zotero.DataDirectory = {
 	},
 	
 	
+	/**
+	 * @return {String|false} - New path or false if not changed
+	 */
 	choose: async function (forceQuitNow, useHomeDir, moreInfoCallback) {
 		var win = Services.wm.getMostRecentWindow('navigator:browser');
 		var ps = Services.prompt;
+		var newPath;
 		
 		if (useHomeDir) {
 			let changed = this.set(this.defaultDir);
 			if (!changed) {
 				return false;
 			}
+			newPath = this.defaultDir;
 		}
 		else {
 			while (true) {
 				let fp = new FilePicker();
 				fp.init(win, Zotero.getString('dataDir.selectDir'), fp.modeGetFolder);
-				fp.displayDirectory = this._dir ? this._dir : OS.Path.dirname(this.defaultDir);
+				fp.displayDirectory = this._dir ? this._dir : PathUtils.parent(this.defaultDir);
 				fp.appendFilters(fp.filterAll);
 				if (await fp.show() == fp.returnOK) {
 					let file = Zotero.File.pathToFile(fp.file);
@@ -471,7 +473,7 @@ Zotero.DataDirectory = {
 					// If set to 'storage', offer to use the parent directory
 					if (await this.isStorageDirectory(file.path)) {
 						let buttonFlags = ps.STD_YES_NO_BUTTONS;
-						let parentPath = OS.Path.dirname(file.path);
+						let parentPath = PathUtils.parent(file.path);
 						let index = ps.confirmEx(
 							null,
 							Zotero.getString('general.error'),
@@ -551,6 +553,7 @@ Zotero.DataDirectory = {
 					}
 
 					this.set(file.path);
+					newPath = file.path;
 					
 					break;
 				}
@@ -578,7 +581,7 @@ Zotero.DataDirectory = {
 			Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
 		
-		return useHomeDir ? true : file;
+		return newPath;
 	},
 	
 	
@@ -653,11 +656,11 @@ Zotero.DataDirectory = {
 	
 	isLegacy: function (dir) {
 		// 'zotero'
-		return OS.Path.basename(dir) == this.legacyDirName
+		return PathUtils.filename(dir) == this.legacyDirName
 				// '69pmactz.default'
-				&& OS.Path.basename(OS.Path.dirname(dir)).match(/^[0-9a-z]{8}\..+/)
+				&& PathUtils.filename(PathUtils.parent(dir)).match(/^[0-9a-z]{8}\..+/)
 				// 'Profiles'
-				&& OS.Path.basename(OS.Path.dirname(OS.Path.dirname(dir))) == 'Profiles';
+				&& PathUtils.filename(PathUtils.parent(PathUtils.parent(dir))) == 'Profiles';
 	},
 	
 	
@@ -693,10 +696,10 @@ Zotero.DataDirectory = {
 	
 	
 	isStorageDirectory: async function (dir) {
-		if (OS.Path.basename(dir) != 'storage') {
+		if (PathUtils.filename(dir) != 'storage') {
 			return false;
 		}
-		let sqlitePath = OS.Path.join(OS.Path.dirname(dir), 'zotero.sqlite');
+		let sqlitePath = OS.Path.join(PathUtils.parent(dir), 'zotero.sqlite');
 		return OS.File.exists(sqlitePath);
 	},
 	
@@ -724,7 +727,7 @@ Zotero.DataDirectory = {
 		if (Zotero.Prefs.get('ignoreLegacyDataDir.auto') || Zotero.Prefs.get('ignoreLegacyDataDir.explicit')) return;
 		try {
 			let profilesDir = Zotero.Profile.getOtherAppProfilesDir();
-			let profilesParent = profilesDir ? OS.Path.dirname(profilesDir) : null;
+			let profilesParent = profilesDir ? PathUtils.parent(profilesDir) : null;
 			if (!profilesParent) {
 				return;
 			}
@@ -750,13 +753,13 @@ Zotero.DataDirectory = {
 			try {
 				dir = OS.Path.join(profileDir, this.legacyDirName);
 				let dbFile = OS.Path.join(dir, this.getDatabaseFilename());
-				let info = await OS.File.stat(dbFile);
+				let info = await IOUtils.stat(dbFile);
 				if (info.size < 1200000) {
 					Zotero.debug(`Legacy database is ${info.size} bytes -- ignoring`);
 					Zotero.Prefs.set('ignoreLegacyDataDir.auto', true);
 					return;
 				}
-				mtime = info.lastModificationDate;
+				mtime = new Date(info.lastModified);
 				if (mtime < new Date(2017, 6, 1)) {
 					Zotero.debug(`Legacy database was last modified on ${mtime.toString()} -- ignoring`);
 					Zotero.Prefs.set('ignoreLegacyDataDir.auto', true);
@@ -766,7 +769,7 @@ Zotero.DataDirectory = {
 			}
 			catch (e) {
 				Zotero.Prefs.set('ignoreLegacyDataDir.auto', true);
-				if (e.becauseNoSuchFile) {
+				if (e.name == 'NotFoundError') {
 					return;
 				}
 				throw e;
@@ -921,8 +924,8 @@ Zotero.DataDirectory = {
 			let otherProfiles = yield Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
 			// 'touch' each prefs.js file to make sure we can access it
 			for (let dir of otherProfiles) {
-				let prefs = OS.Path.join(dir, "prefs.js");
-				yield OS.File.setDates(prefs);
+				let prefsFile = OS.Path.join(dir, "prefs.js");
+				yield IOUtils.setModificationTime(prefsFile);
 			}
 		}
 		catch (e) {
@@ -1132,11 +1135,11 @@ Zotero.DataDirectory = {
 		
 		// Create the new directory
 		if (!partial) {
-			yield OS.File.makeDir(
+			yield IOUtils.makeDirectory(
 				newDir,
 				{
 					ignoreExisting: false,
-					unixMode: 0o755
+					permissions: 0o755
 				}
 			);
 		}
@@ -1201,7 +1204,7 @@ Zotero.DataDirectory = {
 				allowExistingTarget: true,
 				// Don't overwrite root files (except for hidden files like .DS_Store)
 				noOverwrite: path => {
-					return OS.Path.dirname(path) == oldDir && !OS.Path.basename(path).startsWith('.')
+					return PathUtils.parent(path) == oldDir && !PathUtils.filename(path).startsWith('.')
 				},
 			}
 		));

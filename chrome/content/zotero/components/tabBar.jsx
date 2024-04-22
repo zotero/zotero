@@ -27,7 +27,7 @@
 
 import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, useLayoutEffect } from 'react';
 import cx from 'classnames';
-const { IconXmark, IconArrowLeft, IconArrowRight } = require('./icons');
+const { CSSIcon } = require('./icons');
 
 const SCROLL_ARROW_SCROLL_BY = 222;
 
@@ -139,6 +139,7 @@ const TabBar = forwardRef(function (props, ref) {
 	function handleDragStart(event, id, index) {
 		// Library tab is not draggable
 		if (index === 0) {
+			event.preventDefault();
 			return;
 		}
 		event.dataTransfer.effectAllowed = 'move';
@@ -224,18 +225,6 @@ const TabBar = forwardRef(function (props, ref) {
 		event.stopPropagation();
 	}
 	
-	function handleTabMouseMove(title) {
-		// Fix `title` not working for HTML-in-XUL. Using `mousemove` ensures we restart the tooltip
-		// after just a small movement even when the active tab has changed under the cursor, which
-		// matches behavior in Firefox.
-		window.Zotero_Tooltip.start(title);
-	}
-	
-	function handleTabBarMouseOut() {
-		// Hide any possibly open `title` tooltips when mousing out of any tab or the tab bar as a
-		// whole. `mouseout` bubbles up from element you moved out of, so it covers both cases.
-		window.Zotero_Tooltip.stop();
-	}
 
 	function handleWheel(event) {
 		// Normalize wheel speed
@@ -272,32 +261,32 @@ const TabBar = forwardRef(function (props, ref) {
 		event.preventDefault();
 	}
 
-	function renderTab({ id, title, selected, iconBackgroundImage }, index) {
+	function renderTab({ id, title, selected, icon }, index) {
 		return (
 			<div
 				key={id}
 				data-id={id}
 				className={cx('tab', { selected, dragging: dragging && id === dragIDRef.current })}
 				draggable={true}
-				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
 				onAuxClick={(event) => handleTabClick(event, id)}
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
+				tabIndex="-1"
 			>
-				<div className="tab-name" dir="auto">{iconBackgroundImage &&
-					<span className="icon-bg" style={{ backgroundImage: iconBackgroundImage }}/>}{title}</div>
+				{icon}
+				<div className="tab-name" title={title}>{title}</div>
 				<div
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}
 				>
-					<IconXmark/>
+					<CSSIcon name="x-8" className="icon-16" />
 				</div>
 			</div>
 		);
 	}
-
+	
 	return (
 		<div>
 			<div
@@ -308,7 +297,6 @@ const TabBar = forwardRef(function (props, ref) {
 				<div className="pinned-tabs">
 					<div
 						className="tabs"
-						onMouseOut={handleTabBarMouseOut}
 					>
 						{tabs.length ? renderTab(tabs[0], 0) : null}
 					</div>
@@ -317,15 +305,19 @@ const TabBar = forwardRef(function (props, ref) {
 					ref={startArrowRef}
 					className="scroll-start-arrow"
 					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
-					onClick={handleClickScrollStart}
-					onDoubleClick={handleScrollArrowDoubleClick}
-				><IconArrowLeft/></div>
+				>
+					<button
+						onClick={handleClickScrollStart}
+						onDoubleClick={handleScrollArrowDoubleClick}
+					>
+						<CSSIcon name="chevron-tabs" className="icon-20" />
+					</button>
+				</div>
 				<div className="tabs-wrapper">
 					<div
 						ref={tabsRef}
 						className="tabs"
 						onDragOver={handleTabBarDragOver}
-						onMouseOut={handleTabBarMouseOut}
 						onScroll={updateScrollArrows}
 						dir={Zotero.dir}
 					>
@@ -336,12 +328,19 @@ const TabBar = forwardRef(function (props, ref) {
 					ref={endArrowRef}
 					className="scroll-end-arrow"
 					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
-					onClick={handleClickScrollEnd}
-					onDoubleClick={handleScrollArrowDoubleClick}
-				><IconArrowRight/></div>
+				>
+					<button
+						onClick={handleClickScrollEnd}
+						onDoubleClick={handleScrollArrowDoubleClick}
+					>
+						<CSSIcon name="chevron-tabs" className="icon-20" />
+					</button>
+				</div>
 			</div>
 		</div>
 	);
 });
+
+TabBar.displayName = 'TabBar';
 
 export default TabBar;

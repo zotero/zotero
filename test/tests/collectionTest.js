@@ -332,6 +332,7 @@ describe("Zotero.Collection", function() {
 			var patchBase = col2.toJSON();
 			// Clear parent collection and regenerate JSON
 			col2.parentID = false;
+			yield col2.saveTx();
 			var json = col2.toJSON({ patchBase });
 			assert.isFalse(json.parentCollection);
 		});

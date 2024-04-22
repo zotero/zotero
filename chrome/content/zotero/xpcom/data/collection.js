@@ -85,17 +85,14 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewID', {
 	get: function () {
-		return "C" + this.id
+		return "C" + this.id;
 	}
 });
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewImage', {
 	get: function () {
 		// Keep in sync with collectionTreeView::getImageSrc()
-		if (Zotero.isMac) {
-			return `chrome://zotero-platform/content/treesource-collection${Zotero.hiDPISuffix}.png`;
-		}
-		return "chrome://zotero/skin/treesource-collection" + Zotero.hiDPISuffix + ".png";
+		return "chrome://zotero/skin/16/universal/folder.svg";
 	}
 });
 

@@ -30,13 +30,14 @@ const PropTypes = require('prop-types');
 const cx = require('classnames');
 const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
-const { IconDownChevron, getDOMElement } = require('components/icons');
+const { CSSIcon, getDOMElement } = require('components/icons');
+const { Zotero_Tooltip } = require('./tooltip');
 
 const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 const COLUMN_MIN_WIDTH = 20;
-const COLUMN_PADDING = 10; // N.B. MUST BE INLINE WITH CSS!!!
+const COLUMN_PADDING = 16; // N.B. MUST BE INLINE WITH CSS!!!
 
 const noop = () => 0;
 
@@ -77,6 +78,24 @@ class TreeSelection {
 	}
 
 	/**
+	 * Determines if the given index is the beginning of a selection block.
+	 * @param {number} index - The index to check.
+	 * @returns {boolean} - True if the index is the beginning of a selection block, false otherwise.
+	 */
+	isFirstRowOfSelectionBlock(index) {
+		return this.isSelected(index) && !this.selected.has(index - 1);
+	}
+	
+	/**
+	 * Checks if the given index is the end of a selection block.
+	 * @param {number} index - The index to check.
+	 * @returns {boolean} - True if the index is the end of a selection block, false otherwise.
+	 */
+	isLastRowOfSelectionBlock(index) {
+		return this.isSelected(index) && !this.selected.has(index + 1);
+	}
+
+	/**
 	 * Toggles an item's selection state, updates focused item to index.
 	 * @param index {Number} The index is 0-clamped.
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
@@ -98,6 +117,10 @@ class TreeSelection {
 		this.focused = index;
 		if (this._tree.invalidate) {
 			this._tree.invalidateRow(index);
+			// might extend, truncate, merge or split a selection block
+			// so need to invalidate next and previous rows as well
+			this._tree.invalidateRow(index - 1);
+			this._tree.invalidateRow(index + 1);
 			this._tree.invalidateRow(previousFocused);
 		}
 		this._updateTree(shouldDebounce);
@@ -105,6 +128,7 @@ class TreeSelection {
 
 	clearSelection() {
 		this.selected = new Set();
+		this.pivot = 0;
 		if (this.selectEventsSuppressed) return;
 		
 		if (this._tree.invalidate) {
@@ -194,10 +218,24 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return;
 
+		let oldEdges = new Set();
+		for (let oldIndex of oldSelected) {
+			if (!oldSelected.has(oldIndex + 1) || !oldSelected.has(oldIndex - 1)) {
+				oldEdges.add(oldIndex);
+			}
+		}
+
 		if (this._tree.invalidate) {
 			for (let index of this.selected) {
 				if (oldSelected.has(index)) {
 					oldSelected.delete(index);
+					
+					// ensure old and new selection block edges are invalidated
+					if (oldEdges.has(index) || !this.selected.has(index - 1) || !this.selected.has(index + 1)) {
+						this._tree.invalidateRow(index);
+					}
+
+					// skip invalidation for already selected rows, except for edges (above)
 					continue;
 				}
 				this._tree.invalidateRow(index);
@@ -378,6 +416,7 @@ class VirtualizedTable extends React.Component {
 		staticColumns: PropTypes.bool,
 		// Used for initial column widths calculation
 		containerWidth: PropTypes.number,
+		firstColumnExtraWidth: PropTypes.number,
 
 		// Internal windowed-list ref
 		treeboxRef: PropTypes.func,
@@ -683,7 +722,7 @@ class VirtualizedTable extends React.Component {
 			if (!modifierClick && !this.selection.isSelected(index)) {
 				this._onSelection(index, false, false);
 			}
-			this.props.onItemContextMenu(e, window.screenX + e.clientX, window.screenY + e.clientY);
+			this.props.onItemContextMenu(e, e.screenX, e.screenY);
 		}
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention
 		if (!modifierClick && !this.selection.isSelected(index)) {
@@ -812,8 +851,8 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
-		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + (aColumn.noPadding ? 0 : COLUMN_PADDING);
+		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + (bColumn.noPadding ? 0 : COLUMN_PADDING);
 		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
@@ -871,6 +910,9 @@ class VirtualizedTable extends React.Component {
 	 * @param event
 	 */
 	_handleMouseOver = (event) => {
+		// On scroll, mouse position does not change, so _handleMouseMove does not fire
+		// to close the fake tooltip. Make sure it is closed here.
+		Zotero_Tooltip.stop();
 		let elem = event.target;
 		if (!elem.classList.contains('cell') || elem.classList.contains('cell-icon')) return;
 		let textElem = elem.querySelector('.label, .cell-text');
@@ -890,6 +932,59 @@ class VirtualizedTable extends React.Component {
 			elem.removeAttribute('title');
 		}
 	}
+
+	/**
+	 * Manually handle tooltip setting for table cells with overflowing values.
+	 * Temporary, after
+	 * https://github.com/zotero/zotero/commit/8e2790e2d2a1d8b15efbf84935f0a80d58db4e44.
+	 * @param event
+	 */
+	_handleMouseMove = (event) => {
+		let tgt = event.target;
+		// Mouse left the previous cell - close the tooltip
+		if (!tgt.classList.contains("row")
+			|| event.clientX < parseInt(tgt.dataset.mouseLeft)
+			|| event.clientX > parseInt(tgt.dataset.mouseRight)) {
+			delete tgt.dataset.mouseLeft;
+			delete tgt.dataset.mouseRight;
+			Zotero_Tooltip.stop();
+		}
+
+		if (!tgt.classList.contains("row")) return;
+		let cells = tgt.querySelectorAll(".cell");
+		let targetCell;
+		// Find the cell the mouse is over
+		for (let cell of cells) {
+			let rect = cell.getBoundingClientRect();
+			if (event.clientX >= rect.left && event.clientX <= rect.right) {
+				targetCell = cell;
+				tgt.dataset.mouseLeft = rect.left;
+				tgt.dataset.mouseRight = rect.right;
+				break;
+			}
+		}
+		if (!targetCell) return;
+		// Primary cell will .cell-text child node
+		let textCell = targetCell.querySelector(".cell-text") || targetCell;
+		// If the cell has overflowing content, display the fake tooltip
+		if (textCell.offsetWidth < textCell.scrollWidth) {
+			Zotero_Tooltip.stop();
+			Zotero_Tooltip.start(textCell.textContent);
+		}
+	};
+
+	/**
+	 * Remove manually added fake tooltip from _handleMouseMove when the
+	 * mouse leaves the row completely.
+	 */
+	_handleMouseLeave = (_) => {
+		Zotero_Tooltip.stop();
+		let lastRow = document.querySelector("[mouseLeft][mouseRight]");
+		if (lastRow) {
+			delete lastRow.dataset.mouseLeft;
+			delete lastRow.dataset.mouseRight;
+		}
+	};
 
 	_handleResizerDragStop = (event) => {
 		event.stopPropagation();
@@ -983,7 +1078,6 @@ class VirtualizedTable extends React.Component {
 		this._updateWidth();
 		this.props.treeboxRef && this.props.treeboxRef(this._jsWindow);
 	
-		this._setAlternatingRows();
 		this._setXulTooltip();
 
 		window.addEventListener("resize", () => {
@@ -1038,20 +1132,6 @@ class VirtualizedTable extends React.Component {
 		popupset.appendChild(tooltip);
 	}
 	
-	_setAlternatingRows() {
-		if (this.props.alternatingRowColors) {
-			this._jsWindow.innerElem.style.background = `
-				repeating-linear-gradient(
-				  180deg,
-				  ${this.props.alternatingRowColors[1]},
-				  ${this.props.alternatingRowColors[1]} ${this._rowHeight}px,
-				  ${this.props.alternatingRowColors[0]} ${this._rowHeight}px,
-				  ${this.props.alternatingRowColors[0]} ${this._rowHeight * 2}px
-				)
-			`;
-		}
-	}
-	
 	_getWindowedListOptions() {
 		return {
 			getItemCount: this.props.getRowCount,
@@ -1072,8 +1152,9 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
 		node.style.height = this._rowHeight + 'px';
-		node.style.lineHeight = this._rowHeight + 'px';
 		node.id = this.props.id + "-row-" + index;
+		node.classList.toggle('odd', index % 2 == 1);
+		node.classList.toggle('even', index % 2 == 0);
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
 		}
@@ -1120,13 +1201,9 @@ class VirtualizedTable extends React.Component {
 			}
 			let sortIndicator = "";
 			if (!column.iconLabel && column.sortDirection) {
-				if (!Zotero.isNode && Zotero.isLinux) {
-					sortIndicator = <span className={"sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")}/>;
-				} else {
-					sortIndicator = <IconDownChevron className={"sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")}/>;
-				}
+				sortIndicator = <CSSIcon name="sort-indicator" className={"icon-8 sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")} />;
 			}
-			const className = cx("cell", column.className, { dragging: this.state.draggingColumn == index },
+			const className = cx("cell", column.className, { 'first-column': index === 0, dragging: this.state.draggingColumn == index },
 				{ "cell-icon": !!column.iconLabel });
 			return (<Draggable
 				onDragStart={this._handleColumnDragStart.bind(this, index)}
@@ -1173,6 +1250,8 @@ class VirtualizedTable extends React.Component {
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
 			onMouseOver: e => this._handleMouseOver(e),
+			onMouseMove: e => this._handleMouseMove(e),
+			onMouseLeave: e => this._handleMouseLeave(e),
 			className: cx(["virtualized-table", {
 				resizing: this.state.resizing,
 				'multi-select': this.props.multiSelect
@@ -1254,27 +1333,36 @@ class VirtualizedTable extends React.Component {
 		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
-		this._setAlternatingRows();
 		this._jsWindow.invalidate();
-	}
+	};
+
+	/**
+	 * @param customRowHeights an array of tuples specifying row index and row height: e.g. [[1, 10], [5, 10]]
+	 */
+	updateCustomRowHeights = (customRowHeights=[]) => {
+		return this._jsWindow.update({customRowHeights});
+	};
 	
 	_getRowHeight() {
 		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
 		if (!this.props.disableFontSizeScaling) {
 			rowHeight *= Zotero.Prefs.get('fontSize');
 		}
+		rowHeight += Zotero.Prefs.get('uiDensity') === 'comfortable' ? 10 : 4;
+
+		// @TODO: Check row height across platforms and remove commented code below
 		// padding
 		// This is weird, but Firefox trees always had different amount of padding on
 		// different OSes
-		if (Zotero.isMac) {
-			rowHeight *= 1.4;
-		}
-		else if (Zotero.isWin) {
-			rowHeight *= 1.2;
-		}
-		else {
-			rowHeight *= 1.1;
-		}
+		// if (Zotero.isMac) {
+		// 	rowHeight *= 1.4;
+		// }
+		// else if (Zotero.isWin) {
+		// 	rowHeight *= 1.2;
+		// }
+		// else {
+		// 	rowHeight *= 1.1;
+		// }
 		rowHeight = Math.round(Math.max(MINIMUM_ROW_HEIGHT, rowHeight));
 		return rowHeight;
 	}
@@ -1282,6 +1370,7 @@ class VirtualizedTable extends React.Component {
 	_getRenderedTextHeight() {
 		let div = document.createElement('div');
 		div.style.visibility = "hidden";
+		div.style.lineHeight = "1.3333333333333333";
 		div.textContent = "Zotero";
 		document.documentElement.appendChild(div);
 		let height = window.getComputedStyle(div).height;
@@ -1295,17 +1384,10 @@ class VirtualizedTable extends React.Component {
 		if (!this.props.showHeader) return;
 		const jsWindow = document.querySelector(`#${this._jsWindowID} .windowed-list`);
 		if (!jsWindow) return;
-		const tree = document.querySelector(`#${this.props.id}`);
 		const header = document.querySelector(`#${this.props.id} .virtualized-table-header`);
-		const scrollbarWidth = Math.max(0,
-			tree.getBoundingClientRect().width - jsWindow.getBoundingClientRect().width);
-		let paddingWidth = 0;
-		if (Zotero.isLinux) {
-			paddingWidth = 2; // from the border
-		}
-		// Should be kept up to date with the _virtualized-table.scss value
-		// for .virtualized-table-header
-		header.style.width = `calc(100% - ${scrollbarWidth-paddingWidth}px)`;
+		const scrollbarWidth = jsWindow.parentElement.getBoundingClientRect().width - jsWindow.parentElement.clientWidth;
+
+		header.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
 	}
 
 	/**
@@ -1404,6 +1486,12 @@ var Columns = class {
 			if (column.type) {
 				column.className += ` cell-${column.type}`;
 			}
+			if (column.fixedWidth) {
+				column.originalWidth = column.width;
+			}
+			if (column.staticWidth) {
+				column.originalMinWidth = column.minWidth || 20;
+			}
 			columns.push(column);
 		}
 		// Sort columns by their `ordinal` field
@@ -1435,6 +1523,7 @@ var Columns = class {
 		// Storing back persist settings to account for legacy upgrades
 		this._storePrefs(columnsSettings);
 
+		this._adjustColumnWidths();
 		// Set column width CSS rules
 		this.onResize(columnWidths);
 		// Whew, all this just to get a list of columns
@@ -1499,6 +1588,24 @@ var Columns = class {
 		this._virtualizedTable.props.storeColumnPrefs(prefs);
 	}
 
+	_adjustColumnWidths = () => {
+		if (!this._virtualizedTable.props.firstColumnExtraWidth) {
+			return;
+		}
+
+		const extraWidth = this._virtualizedTable.props.firstColumnExtraWidth;
+		this._columns.filter(c => !c.hidden).forEach((column, index) => {
+			const isFirstColumn = index === 0;
+			if (column.fixedWidth) {
+				column.width = isFirstColumn ? parseInt(column.originalWidth) + extraWidth : column.originalWidth;
+			}
+			if (column.staticWidth) {
+				column.minWidth = isFirstColumn ? (column.originalMinWidth ?? 20) + extraWidth : column.originalMinWidth;
+				column.width = isFirstColumn ? Math.max(parseInt(column.width) ?? 0, column.minWidth) : column.width;
+			}
+		});
+	};
+
 	/**
 	 * Programatically sets the injected CSS width rules for each column.
 	 * This is necessary for performance reasons
@@ -1509,8 +1616,7 @@ var Columns = class {
 		if (storePrefs) {
 			var prefs = this._getPrefs();
 		}
-		const header = document.querySelector(`#${this._styleKey} .virtualized-table-header`);
-		const headerWidth = header ? header.getBoundingClientRect().width : 300;
+
 		for (let [dataKey, width] of Object.entries(columnWidths)) {
 			if (typeof dataKey == "number") {
 				dataKey = this._columns[dataKey].dataKey;
@@ -1548,6 +1654,10 @@ var Columns = class {
 			if (a.ordinal == b.ordinal) return a == column ? -1 : 1;
 			return a.ordinal - b.ordinal;
 		});
+
+		this._adjustColumnWidths();
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+
 		let prefs = this._getPrefs();
 		// reassign columns their ordinal values and set the prefs
 		this._columns.forEach((column, index) => {
@@ -1575,6 +1685,8 @@ var Columns = class {
 			}
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
+		this._adjustColumnWidths();
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
@@ -1587,6 +1699,8 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
+		this._adjustColumnWidths();
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
@@ -1622,7 +1736,7 @@ function renderCell(index, data, column, dir = null) {
 	column = column || { columnName: "" };
 	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;
-	span.innerText = data;
+	span.textContent = data;
 	if (dir) span.dir = dir;
 	return span;
 }

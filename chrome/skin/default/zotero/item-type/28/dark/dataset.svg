@@ -1,0 +1,14 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path opacity="0.12" d="M10 11H4V14H10V11Z" fill="white"/>
+<path opacity="0.12" d="M17 11H11V14H17V11Z" fill="white"/>
+<path opacity="0.12" d="M24 11H18V14H24V11Z" fill="white"/>
+<path opacity="0.12" d="M24 15H18V18H24V15Z" fill="white"/>
+<path opacity="0.12" d="M17 15H11V18H17V15Z" fill="white"/>
+<path opacity="0.12" d="M10 15H4V18H10V15Z" fill="white"/>
+<path opacity="0.12" d="M10 19H4V22H10V19Z" fill="white"/>
+<path opacity="0.12" d="M17 19H11V22H17V19Z" fill="white"/>
+<path opacity="0.12" d="M24 19H18V22H24V19Z" fill="white"/>
+<path opacity="0.6" d="M27 3V25H1V3H27ZM28 2H0V26H28V2Z" fill="white"/>
+<path opacity="0.85" d="M25 6H3V7H25V6Z" fill="#39BF68"/>
+<path opacity="0.6" d="M3 10V23H25V10H3ZM11 11H17V14H11V11ZM11 15H17V18H11V15ZM4 11H10V14H4V11ZM4 15H10V18H4V15ZM4 22V19H10V22H4ZM11 22V19H17V22H11ZM24 22H18V19H24V22ZM24 18H18V15H24V18ZM24 14H18V11H24V14Z" fill="white"/>
+</svg>

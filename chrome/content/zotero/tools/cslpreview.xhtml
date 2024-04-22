@@ -25,7 +25,7 @@
     Contributed by Julian Onions
 -->
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % cslpreviewDTD SYSTEM "chrome://zotero/locale/cslpreview.dtd"> %cslpreviewDTD;
@@ -46,7 +46,7 @@
 			<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Preview.refresh()"/>
 			
 			<label value="&styles.preview.citationFormat;" />
-			<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
+			<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()" native="true">
 				<menupopup>
 					<menuitem value="all" label="&styles.preview.citationFormat.all;"/>
 					<menuitem value="author" label="&styles.preview.citationFormat.author;"/>
@@ -57,9 +57,13 @@
 				</menupopup>
 			</menulist>
 			
-			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Preview.refresh()"/>
+			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Preview.refresh()" native="true"/>
 		</hbox>
-		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
+		<iframe id="zotero-csl-preview-box" flex="1" overflow="auto" type="content"/>
 	</vbox>
 	
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+	</keyset>
+
 </window>

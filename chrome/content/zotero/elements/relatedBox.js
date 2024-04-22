@@ -25,92 +25,43 @@
 
 "use strict";
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 {
-	class RelatedBox extends XULElement {
-		constructor() {
-			super();
-
-			this._mode = 'view';
-			this._item = null;
-			this._destroyed = false;
-
-			this.content = MozXULElement.parseXULToFragment(`
-				<box flex="1" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-					<div style="flex-grow: 1" xmlns="http://www.w3.org/1999/xhtml">
-						<div class="header">
-							<label id="related-num"/>
-							<button id="related-add">&zotero.item.add;</button>
-						</div>
-						<div id="related-grid" class="grid"/>
-					</div>
-				</box>
-			`, ['chrome://zotero/locale/zotero.dtd']);
-
-			this._destroyed = false;
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
-		}
+	class RelatedBox extends ItemPaneSectionElementBase {
+		content = MozXULElement.parseXULToFragment(`
+			<collapsible-section data-l10n-id="section-related" data-pane="related" extra-buttons="add">
+				<html:div class="body"/>
+			</collapsible-section>
+		`);
 		
-		connectedCallback() {
-			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
-
-			let content = document.importNode(this.content, true);
-			this.append(content);
-
-			this._id('related-add').addEventListener('click', this.add);
-
+		init() {
+			this._item = null;
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
+			this.initCollapsibleSection();
+			this._section.addEventListener('add', this.add);
 		}
 		
 		destroy() {
-			if (this._destroyed) {
-				return;
-			}
-			window.removeEventListener("unload", this.destroy);
-			this._destroyed = true;
-			
+			this._section?.removeEventListener('add', this.add);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 		
-		disconnectedCallback() {
-			this.replaceChildren();
-			this.destroy();
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			this._item = val;
-			this.refresh();
 		}
 
-		notify(event, type, ids, extraData) {
+		notify(event, type, ids, _extraData) {
 			if (!this._item || !this._item.id) return;
 
 			// Refresh if this item has been modified
 			if (event == 'modify' && ids.includes(this._item.id)) {
-				this.refresh();
+				this._forceRenderAll();
 				return;
 			}
 
@@ -120,18 +71,19 @@
 				let relatedItemIDs = new Set(this._item.relatedItems.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)));
 				for (let id of ids) {
 					if (relatedItemIDs.has(id)) {
-						this.refresh();
+						this._forceRenderAll();
 						return;
 					}
 				}
 			}
 		}
 
-		refresh() {
-			this._id('related-add').hidden = this._mode != 'edit';
+		render() {
+			if (!this.item) return;
+			if (this._isAlreadyRendered()) return;
 
-			let grid = this._id('related-grid');
-			grid.replaceChildren();
+			let body = this.querySelector('.body');
+			body.replaceChildren();
 
 			if (this._item) {
 				let relatedKeys = this._item.relatedItems;
@@ -146,33 +98,45 @@
 						continue;
 					}
 					let id = relatedItem.id;
-					let icon = document.createElement("img");
-					icon.src = relatedItem.getImageSrc();
 
-					let label = document.createElement("label");
+					let row = document.createElement('div');
+					row.className = 'row';
+
+					let icon = getCSSItemTypeIcon(relatedItem.getItemTypeIconName());
+
+					let label = document.createElement("span");
+					label.className = 'label';
 					label.append(relatedItem.getDisplayTitle());
 
 					let box = document.createElement('div');
 					box.addEventListener('click', () => this._handleShowItem(id));
-					box.className = 'box zotero-clicky';
+					box.setAttribute("tabindex", "0");
+					box.setAttribute("role", "button");
+					box.setAttribute("aria-label", label.textContent);
+					box.className = 'box keyboard-clickable';
 					box.appendChild(icon);
 					box.appendChild(label);
+					row.append(box);
 
-					grid.append(box);
-
-					if (this._mode == 'edit') {
-						let remove = document.createElement("label");
-						remove.addEventListener('click', () => this._handleRemove(id));
+					if (this.editable) {
+						let remove = document.createXULElement("toolbarbutton");
+						remove.addEventListener('command', () => this._handleRemove(id));
 						remove.className = 'zotero-clicky zotero-clicky-minus';
-						remove.append('-');
-						grid.append(remove);
+						remove.setAttribute("data-l10n-id", 'section-button-remove');
+						remove.setAttribute("tabindex", "0");
+						row.append(remove);
 					}
+
+					body.append(row);
 				}
 				this._updateCount();
 			}
 		}
 
 		add = async () => {
+			this._section.empty = false;
+			this._section.open = true;
+
 			let io = { dataIn: null, dataOut: null, deferred: Zotero.Promise.defer(), itemTreeID: 'related-box-select-item-dialog' };
 			window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 				'chrome,dialog=no,centerscreen,resizable=yes', io);
@@ -235,26 +199,14 @@
 
 		_updateCount() {
 			let count = this._item.relatedItems.length;
-			let str = 'pane.item.related.count.';
-			switch (count) {
-				case 0:
-					str += 'zero';
-					break;
-				case 1:
-					str += 'singular';
-					break;
-				default:
-					str += 'plural';
-					break;
-			}
-			this._id('related-num').replaceChildren(Zotero.getString(str, [count]));
+			this._section.setCount(count);
 		}
 
 		_id(id) {
 			return this.querySelector(`[id=${id}]`);
 		}
 
-		receiveKeyboardFocus(direction) {
+		receiveKeyboardFocus(_direction) {
 			this._id("addButton").focus();
 			// TODO: the relatedbox is not currently keyboard accessible
 			// so we are ignoring the direction

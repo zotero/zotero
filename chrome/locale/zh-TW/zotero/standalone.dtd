@@ -63,11 +63,7 @@
 <!ENTITY addons.label "附加元件">
 <!ENTITY developer.label "開發者">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "最小化">
 <!ENTITY bringAllToFront.label "全部移到上層">
-<!ENTITY zoomWindow.label "縮放">
-<!ENTITY windowMenu.label "視窗">
 
 <!ENTITY helpMenu.label "說明">
 <!ENTITY helpMenu.accesskey "H">

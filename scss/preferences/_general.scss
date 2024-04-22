@@ -1,0 +1,25 @@
+#zotero-prefpane-general .statusLine {
+	margin-inline-start: .75em;
+}
+
+.indented-pref {
+	margin-inline-start: 2em;
+}
+
+.fileHandler-menus {
+	display: grid;
+	grid-template-columns: max-content max-content;
+	align-items: center;
+	justify-content: start;
+	column-gap: 1em;
+}
+
+.fileHandler-menu .menulist-icon {
+	height: 16px;
+}
+
+@media (-moz-platform: windows) {
+	button, menulist, radio, checkbox, input {
+		margin-block: 4px;
+	}
+}

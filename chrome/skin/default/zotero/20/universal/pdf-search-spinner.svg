@@ -1,0 +1,13 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M3 1H3.625H12.375H12.6339L12.8169 1.18306L17.8169 6.18306L18 6.36612V6.625V18.375V19H17.375H3.625H3V18.375V1.625V1ZM4.25 2.25V17.75H16.75V7.25H12.375H11.75V6.625V2.25H4.25ZM13 3.13388L15.8661 6H13V3.13388Z" fill="context-fill"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 8.75C8.42893 8.75 6.75 10.4289 6.75 12.5C6.75 14.5711 8.42893 16.25 10.5 16.25C12.5711 16.25 14.25 14.5711 14.25 12.5H13C13 13.8807 11.8807 15 10.5 15C9.11929 15 8 13.8807 8 12.5C8 11.1193 9.11929 10 10.5 10V8.75Z" fill="context-fill">
+    <animateTransform 
+        attributeName="transform" 
+        attributeType="XML" 
+        type="rotate"
+        dur="1s" 
+        from="0 10.5 12.5"
+        to="360 10.5 12.5" 
+        repeatCount="indefinite" />
+</path>
+</svg>

@@ -1,57 +1,77 @@
 .zotero-clicky {
 	border-radius: 6px;
-	border: 1px solid transparent;
+	padding: 2px;
+
+	&:not([disabled=true]) {
+		&:hover {
+			background: var(--fill-quinary) !important;
+		}
+
+		&:active {
+			background: var(--fill-quarternary) !important;
+		}
+	}
 }
 
 /* Minus and plus buttons with clicky glow effect */
 .zotero-clicky-minus, .zotero-clicky-plus {
-	color: transparent !important;
-	padding: 0 !important;
-	margin: 0 !important;
-	margin-inline-end: 5px !important;
-	width: 18px;
-	height: 18px;
+	margin: 0;
+	width: 20px;
+	height: 20px;
+	border-radius: 2px;
+	color: var(--fill-secondary);
+	
+	.toolbarbutton-text {
+		display: none;
+	}
 }
 
 .zotero-clicky-minus {
-	background: url(chrome://zotero/skin/minus.png) center/auto 18px no-repeat !important;
+	@include svgicon-menu("minus-circle", "universal", "16");
 	border: 0px !important;
+	margin: 0;
 }
 
 .zotero-clicky-plus {
-	background: url(chrome://zotero/skin/plus.png) center/auto 18px no-repeat !important;
+	@include svgicon-menu("plus-circle", "universal", "16");
+	border: 0px !important;
+	margin: 0;
+}
+
+.zotero-clicky-grippy {
+	@include svgicon-menu("grip", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-options {
+	@include svgicon-menu("options", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-open-link {
+	@include svgicon-menu("open-link", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-merge {
+	@include svgicon-menu("merge", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-cross {
+	@include svgicon-menu("x-8", "universal", "16");
+	border: 0px !important;
+	color: var(--fill-secondary);
+}
+
+.zotero-clicky-preview-control {
+	@include svgicon-menu("preview-show", "universal", "16");
+	&[data-show-preview] {
+		@include svgicon-menu("preview-hide", "universal", "16");
+	}
 	border: 0px !important;
 }
 
 .zotero-clicky-minus[disabled=true], .zotero-clicky-plus[disabled=true] {
 	opacity: .5;
-}
-
-.zotero-clicky-minus:not([disabled=true]):active {
-	background-image: url('chrome://zotero/skin/minus-active.png') !important;
-}
-
-.zotero-clicky-plus:not([disabled=true]):active {
-	background-image: url('chrome://zotero/skin/plus-active.png') !important;
-}
-
-.zotero-clicky:not([disabled=true]):not(.disabled):hover {
-	background: rgb(187, 206, 241);
-	border: 1px solid rgb(109, 149, 224);
-}
-
-.zotero-clicky:not([disabled=true]):not(.disabled):not(menulist):active,
-.zotero-clicky[selected="true"],
-.zotero-clicky.selected {
-	color: white;
-	background: rgb(89, 139, 236);
-}
-
-
-/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.25dppx) {
-	.zotero-clicky-minus  { background: url(chrome://zotero/skin/minus@2x.png) center/auto 18px no-repeat !important; }
-	.zotero-clicky-plus  { background: url(chrome://zotero/skin/plus@2x.png) center/auto 18px no-repeat !important; }
-	.zotero-clicky-minus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/minus-active@2x.png') !important; }
-	.zotero-clicky-plus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/plus-active@2x.png') !important; }
 }

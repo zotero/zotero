@@ -1,0 +1,137 @@
+@include comfortable {
+	--editable-text-padding-inline: 4px;
+	--editable-text-padding-block: 4px;
+}
+
+@include compact {
+	--editable-text-padding-inline: 4px;
+	--editable-text-padding-block: 1px;
+}
+
+editable-text {
+	// Default variables overriden by max-lines, min-lines attribute
+	--min-visible-lines: 1;
+	--max-visible-lines: 1;
+
+	&[tight] {
+		@include comfortable {
+			--editable-text-padding-inline: 4px;
+			--editable-text-padding-block: 2px;
+		}
+		
+		@include compact {
+			--editable-text-padding-inline: 3px;
+			--editable-text-padding-block: 1px;
+		}
+	}
+
+	// Fun auto-sizing approach from CSSTricks:
+	// https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
+	
+	display: grid;
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+	
+	span {
+		visibility: hidden;
+		margin: 0;
+		border: 1px solid transparent;
+		width: fit-content;
+		white-space: pre;
+		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
+	}
+	
+	&:not([nowrap])::after {
+		content: attr(value) ' ';
+		visibility: hidden;
+		border: 1px solid transparent;
+		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
+		font: inherit;
+		line-height: inherit;
+		overflow: hidden;
+	}
+	
+	&:not([nowrap])::after, &:not([nowrap]) .input {
+		grid-area: 1 / 1 / 2 / 2;
+		overflow-wrap: anywhere;
+		white-space: pre-wrap;
+		scrollbar-width: none;
+	}
+
+	&[max-lines] {
+		&::after, .input {
+			max-height: calc(var(--line-height) * var(--max-visible-lines));
+			scrollbar-width: auto;
+		}
+		&::after {
+			scrollbar-gutter: stable;
+		}
+	}
+	
+	.input {
+		border-radius: 5px;
+		
+		// No focus ring for read-only fields
+		&:read-only {
+			--width-focus-border: 0px;
+			--width-focus-outer-border: 0px;
+		}
+
+		@media not (-moz-platform: windows) {
+			@include focus-ring(true);
+		}
+		// Do not use default Windows focus-ring
+		@media (-moz-platform: windows) {
+			&:focus-visible {
+				outline: none;
+				box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+				--width-focus-border: 1px;
+				--color-focus-border: var(--color-accent);
+			}
+		}
+		// Necessary for consistent padding, even if it's actually an <input>
+		-moz-default-appearance: textarea;
+		
+		min-height: calc(var(--line-height) * var(--min-visible-lines));
+		margin: 0;
+		border: 1px solid transparent;
+
+		font: inherit;
+		line-height: inherit;
+		color: inherit;
+		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
+	
+		&:read-only, &:not(:focus) {
+			appearance: none;
+			background: transparent;
+		}
+		
+		&:hover:not(:read-only, :focus) {
+			background: var(--fill-quinary);
+			box-shadow: 0 0 0 1px var(--fill-quinary);
+		}
+
+		&:focus {
+			background: var(--material-background);
+		}
+		
+		::placeholder {
+			color: var(--fill-tertiary);
+		}
+	}
+	&[nowrap] {
+		.input:not(:focus, :hover) {
+			text-overflow: ellipsis;
+		}
+	}
+	&[hidden] {
+		display: none;
+	}
+	textarea {
+		// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
+		// at the bottom of textarea on all platforms with non-overlay scrollbars
+		overflow-x: hidden;
+		
+		// Match the gutters we apply to ::after
+		overflow-y: scroll;
+	}
+}

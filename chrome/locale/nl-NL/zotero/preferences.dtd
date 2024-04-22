@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Standaard:">
 <!ENTITY zotero.preferences.items "items">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Instellingen">
 <!ENTITY zotero.preferences.custom "Aangepast...">
 
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
@@ -56,7 +55,7 @@
 <!ENTITY zotero.preferences.sync.password "Wachtwoord:">
 <!ENTITY zotero.preferences.sync.syncServer "Data-synchronisatie">
 <!ENTITY zotero.preferences.sync.setUpSync "Synchronisatie instellen">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Account ontkoppelen...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Account ontkoppelen…">
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
@@ -90,7 +89,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Controleren of alle lokale bestanden op de server aanwezig zijn.">
 <!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
-<!ENTITY zotero.preferences.sync.reset.button "Herstellen...">
+<!ENTITY zotero.preferences.sync.reset.button "Herstellen…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Zoeken">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Snelle kopie uitzetten bij het verslepen van meer dan">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citeren">
-<!ENTITY zotero.preferences.cite.styles "Stijlen">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstverwerkers">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gebruik het klassieke “Citaat Toevoegen”-dialoogvenster">
 <!ENTITY zotero.preferences.styleEditor "Stijlbewerker">
@@ -193,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "Kiezen…">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(gespecificeerd via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Opslagmap tonen">
-<!ENTITY zotero.preferences.dataDir.migrate "Naar nieuwe standaardlocatie verplaatsen...">
+<!ENTITY zotero.preferences.dataDir.migrate "Naar nieuwe standaardlocatie verplaatsen…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Gekoppelde Bijlage-Bestandsmap">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor u toegang heeft tot al uw bestanden op verschillende computers zolang de bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">

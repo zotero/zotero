@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import VirtualizedTable from 'components/virtualized-table';
-import { getDOMElement } from 'components/icons';
+import { getCSSIcon } from 'components/icons';
 
 var { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
@@ -703,7 +703,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 			if (column.primary) {
 				let twisty;
 				if (row.children || (this.rows[index + 1] && this.rows[index + 1].parent == row)) {
-					twisty = getDOMElement("IconTwisty");
+					twisty = getCSSIcon("twisty");
 					twisty.classList.add('twisty');
 					if (!row.collapsed) {
 						twisty.classList.add('open');
@@ -733,12 +733,9 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 				let span = document.createElement('span');
 				span.className = `cell action ${column.className}`;
 				if (row.parent) {
-					if (row.action) {
-						span.appendChild(getDOMElement('IconRTFScanAccept'));
-					}
-					else {
-						span.appendChild(getDOMElement('IconRTFScanLink'));
-					}
+					let icon = getCSSIcon(row.action ? 'document-accept' : 'document-missing');
+					icon.classList.add('icon-16');
+					span.appendChild(icon);
 					span.addEventListener('mouseup', e => this.onActionMouseUp(e, index), { passive: true });
 					span.style.pointerEvents = 'auto';
 				}

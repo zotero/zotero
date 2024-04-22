@@ -24,6 +24,8 @@
 */
 
 class XULElementBase extends XULElement {
+	initialized = false;
+	
 	/**
 	 * @return {DocumentFragment | null}
 	 */
@@ -48,11 +50,20 @@ class XULElementBase extends XULElement {
 			document.l10n.connectRoot(this.shadowRoot);
 		}
 
+		window.addEventListener("unload", this._handleWindowUnload);
+
+		this.initialized = true;
 		this.init();
 	}
 
 	disconnectedCallback() {
 		this.replaceChildren();
 		this.destroy();
+		window.removeEventListener("unload", this._handleWindowUnload);
+		this.initialized = false;
 	}
+
+	_handleWindowUnload = () => {
+		this.disconnectedCallback();
+	};
 }

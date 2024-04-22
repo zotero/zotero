@@ -29,7 +29,19 @@ Components.utils.import("resource://gre/modules/Services.jsm");
  * This object contains the various functions for the interface
  */
 const ZoteroStandalone = new function() {
-	const FONT_SIZES = ["1.0", "1.15", "1.3", "1.5", "1.7", "1.9", "2.1"];
+	const FONT_SIZES = [
+		"0.77", // 10
+		"0.85", // 11
+		"0.92", // 12
+		"1.00", // 13px
+		"1.08", // 14
+		"1.15", // 15
+		"1.23", // 16
+		"1.38", // 18
+		"1.54", // 20
+		"1.85", // 24
+	];
+	
 	//const NOTE_FONT_SIZES = ["11", "12", "13", "14", "18", "24", "36", "48", "64", "72", "96"];
 	const NOTE_FONT_SIZE_DEFAULT = "12";
 
@@ -40,19 +52,7 @@ const ZoteroStandalone = new function() {
 	/**
 	 * Run when standalone window first opens
 	 */
-	this.onLoad = function() {
-		// Fix window without menubar/titlebar when Zotero is closed in full-screen mode in OS X 10.11+
-		if (Zotero.isMac && window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
-			window.document.documentElement.setAttribute('sizemode', 'normal');
-		}
-		
-		if (Zotero.isMac) {
-			// Create tab bar by default
-			document.documentElement.setAttribute('drawintitlebar', true);
-			document.documentElement.setAttribute('tabsintitlebar', true);
-			document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
-		}
-		
+	this.onLoad = function () {
 		this.switchMenuType('library');
 		this._notifierID = Zotero.Notifier.registerObserver(
 			{
@@ -75,7 +75,7 @@ const ZoteroStandalone = new function() {
 								this.switchReaderSubtype(subtype);
 							}
 						}
-						setTimeout(() => ZoteroPane.updateToolbarPosition(), 0);
+						setTimeout(() => ZoteroPane.updateLayoutConstraints(), 0);
 					}
 				}
 			},
@@ -131,13 +131,14 @@ const ZoteroStandalone = new function() {
 			return;
 		});
 		
-		// Switch to library tab if dragging over one or more PDF files
+		// Switch to library tab if dragging over PDF/EPUB/HTML file(s)
 		window.addEventListener('dragover', function (event) {
 			// TODO: Consider allowing more (or all) file types, although shouldn't interfere with image dragging to note editor
 			if (Zotero_Tabs.selectedID != 'zotero-pane'
 					&& event.dataTransfer.items
 					&& event.dataTransfer.items.length
-					&& !Array.from(event.dataTransfer.items).find(x => x.type != 'application/pdf')) {
+					&& !Array.from(event.dataTransfer.items).find(x =>
+						!['application/pdf', 'application/epub+zip', 'text/html'].includes(x.type))) {
 				Zotero_Tabs.select('zotero-pane');
 			}
 		}, true);
@@ -156,19 +157,6 @@ const ZoteroStandalone = new function() {
 	};
 
 	this.onFileMenuOpen = function () {
-		var active = false;
-		try {
-			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
-					return item.isAttachment()
-						|| (item.isRegularItem() && item.getAttachments().length);
-				}).length;
-			}
-		}
-		catch (e) {}
-		this.updateMenuItemEnabled('manage-attachments-menu', active);
-		
 		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
@@ -430,12 +418,19 @@ const ZoteroStandalone = new function() {
 			}
 			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.splitType === 'vertical');
 			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.splitType === 'horizontal');
+			this.updateMenuItemCheckmark('view-menuitem-use-dark-mode-for-content', Zotero.Prefs.get('reader.contentDarkMode'));
+			this.updateMenuItemEnabled('view-menuitem-use-dark-mode-for-content', window.matchMedia('(prefers-color-scheme: dark)').matches);
 		}
 	
 		// Layout mode
 		var mode = Zotero.Prefs.get('layout');
 		this.updateMenuItemCheckmark('view-menuitem-standard', mode != 'stacked');
 		this.updateMenuItemCheckmark('view-menuitem-stacked', mode == 'stacked');
+		
+		// Density
+		let density = Zotero.Prefs.get('uiDensity');
+		this.updateMenuItemCheckmark('view-menuitem-ui-density-compact', density == 'compact');
+		this.updateMenuItemCheckmark('view-menuitem-ui-density-comfortable', density == 'comfortable');
 		
 		// Panes
 		this.updateMenuItemCheckmark(
@@ -455,7 +450,7 @@ const ZoteroStandalone = new function() {
 		var fontSize = Zotero.Prefs.get('fontSize');
 		this.updateMenuItemEnabled('view-menuitem-font-size-bigger', fontSize < FONT_SIZES[FONT_SIZES.length - 1]);
 		this.updateMenuItemEnabled('view-menuitem-font-size-smaller', fontSize > FONT_SIZES[0]);
-		this.updateMenuItemEnabled('view-menuitem-font-size-reset', fontSize != FONT_SIZES[0]);
+		this.updateMenuItemEnabled('view-menuitem-font-size-reset', fontSize != "1.00");
 		
 		var noteFontSize = Zotero.Prefs.get('note.fontSize');
 		for (let menuitem of document.querySelectorAll(`#note-font-size-menu menuitem`)) {
@@ -497,6 +492,14 @@ const ZoteroStandalone = new function() {
 				Zotero.Prefs.set('layout', 'stacked');
 				break;
 			
+			case 'ui-density-comfortable':
+				Zotero.Prefs.set('uiDensity', 'comfortable');
+				break;
+			
+			case 'ui-density-compact':
+				Zotero.Prefs.set('uiDensity', 'compact');
+				break;
+			
 			case 'collections-pane':
 				var collectionsPane = document.getElementById('zotero-collections-pane');
 				// Show
@@ -509,7 +512,7 @@ const ZoteroStandalone = new function() {
 					document.getElementById('zotero-collections-splitter').setAttribute('state', 'collapsed');
 					collectionsPane.setAttribute('collapsed', true);
 				}
-				ZoteroPane.updateToolbarPosition();
+				ZoteroPane.updateLayoutConstraints();
 				break;
 			
 			case 'item-pane':
@@ -524,7 +527,7 @@ const ZoteroStandalone = new function() {
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'collapsed');
 					itemPane.setAttribute('collapsed', true);
 				}
-				ZoteroPane.updateToolbarPosition();
+				ZoteroPane.updateLayoutConstraints();
 				break;
 			
 			case 'tag-selector':
@@ -644,6 +647,29 @@ const ZoteroStandalone = new function() {
 	};
 	
 	
+	this.promptForRestartInTroubleshootingMode = async function () {
+		let ps = Services.prompt;
+		let [title, description] = await document.l10n.formatValues([
+			'restart-in-troubleshooting-mode-dialog-title',
+			'restart-in-troubleshooting-mode-dialog-description'
+		]);
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			title,
+			description,
+			buttonFlags,
+			Zotero.getString('general.restartNow'),
+			null, null, null, {}
+		);
+		
+		if (index == 0) {
+			Services.startup.restartInSafeMode(Ci.nsIAppStartup.eAttemptQuit);
+		}
+	};
+	
+	
 	this.updateAddonsPane = function (doc) {
 		//var rootWindow = doc.ownerGlobal.windowRoot.ownerGlobal;
 		
@@ -713,7 +739,8 @@ const ZoteroStandalone = new function() {
 	 * Checks for updates
 	 */
 	this.checkForUpdates = function() {
-		window.open('chrome://zotero/content/update/updates.xhtml', 'updateChecker', 'chrome,centerscreen');
+		Zotero.debug('ZoteroStandalone.checkForUpdates is deprecated -- use Zotero.openCheckForUpdatesWindow() instead');
+		Zotero.openCheckForUpdatesWindow();
 	}
 	
 	/**

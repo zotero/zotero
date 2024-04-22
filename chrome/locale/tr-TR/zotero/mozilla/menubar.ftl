@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -140,11 +146,13 @@ menu-view-history-button =
     .label = Geçmiş
 menu-view-synced-tabs-sidebar =
     .label = Eşitlenmiş sekmeler
+menu-view-megalist-sidebar =
+    .label = Parolalar
 menu-view-full-zoom =
     .label = Yakınlaştırma
     .accesskey = Y
 menu-view-full-zoom-enlarge =
-    .label = Yaklaştır
+    .label = Yakınlaştır
     .accesskey = Y
 menu-view-full-zoom-reduce =
     .label = Uzaklaştır
@@ -220,8 +228,9 @@ menu-history-undo-menu =
     .label = Son kapatılan sekmeler
 menu-history-undo-window-menu =
     .label = Son kapatılan pencereler
-menu-history-reopen-all-tabs = Tüm sekmeleri yeniden aç
-menu-history-reopen-all-windows = Tüm pencereleri yeniden aç
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Geçmişte ara
 
 ## Bookmarks Menu
 
@@ -230,14 +239,13 @@ menu-bookmarks-menu =
     .accesskey = Y
 menu-bookmarks-manage =
     .label = Yer imlerini yönet
-menu-bookmark-current-tab =
-    .label = Bu sekmeyi yer imlerine ekle
-menu-bookmark-edit =
-    .label = Bu yer imini düzenle
 menu-bookmark-tab =
     .label = Bu sekmeyi yer imlerine ekle…
 menu-edit-bookmark =
     .label = Bu yer imini düzenle…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Yer imlerinde ara
 menu-bookmarks-all-tabs =
     .label = Tüm sekmeleri yer imlerine ekle…
 menu-bookmarks-toolbar =
@@ -331,6 +339,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Sorun giderme modunu kapat
     .accesskey = m
+menu-help-switch-device =
+    .label = Yeni bir cihaza geçiş
+    .accesskey = c
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -339,3 +350,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Bu site aldatıcı değil…
     .accesskey = d
+menu-report-broken-site =
+    .label = Bozuk siteyi rapor et

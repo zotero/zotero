@@ -25,129 +25,104 @@
 
 "use strict";
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 {
-	class NotesBox extends XULElement {
-		constructor() {
-			super();
-
-			this._mode = 'view';
-			this._item = null;
-			this._destroyed = false;
-			this._noteIDs = [];
-
-			this.content = MozXULElement.parseXULToFragment(`
-				<box flex="1" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-					<div style="flex-grow: 1" xmlns="http://www.w3.org/1999/xhtml">
-						<div class="header">
-							<label id="notes-num"/>
-							<button id="notes-add">&zotero.item.add;</button>
-						</div>
-						<div id="notes-grid" class="grid"/>
-					</div>
-				</box>
-			`, ['chrome://zotero/locale/zotero.dtd']);
-		}
+	class NotesBox extends ItemPaneSectionElementBase {
+		content = MozXULElement.parseXULToFragment(`
+			<collapsible-section data-l10n-id="section-notes" data-pane="notes" extra-buttons="add">
+				<html:div class="body"/>
+			</collapsible-section>
+		`);
 		
-		connectedCallback() {
-			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
-
-			let content = document.importNode(this.content, true);
-			this.append(content);
-
-			this._id('notes-add').addEventListener('click', this._handleAdd);
-
+		init() {
+			this._item = null;
+			this._noteIDs = [];
+			this.initCollapsibleSection();
+			this._section.addEventListener('add', this._handleAdd);
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'notesBox');
 		}
 		
 		destroy() {
-			if (this._destroyed) {
-				return;
-			}
-			window.removeEventListener("unload", this.destroy);
-			this._destroyed = true;
-			
+			this._section?.removeEventListener('add', this._handleAdd);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 		
-		disconnectedCallback() {
-			this.replaceChildren();
-			this.destroy();
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
+			if (this.tabType !== "library") {
+				this.hidden = true;
+				return;
+			}
+			if (val?.isRegularItem() && !val?.isFeedItem) {
+				this.hidden = false;
+			}
+			else {
+				this.hidden = true;
+				return;
+			}
 			this._item = val;
-			this._refresh();
 		}
 
-		notify(event, type, ids, extraData) {
+		notify(event, type, ids, _extraData) {
 			if (['modify', 'delete'].includes(event) && ids.some(id => this._noteIDs.includes(id))) {
-				this._refresh();
+				this._forceRenderAll();
 			}
 		}
 
-		_refresh() {
+		render() {
 			if (!this._item) {
 				return;
 			}
+			if (this._isAlreadyRendered()) return;
 
 			this._noteIDs = this._item.getNotes();
-			this._id('notes-add').hidden = this._mode != 'edit';
 
-			let grid = this._id('notes-grid');
-			grid.replaceChildren();
+			let body = this.querySelector('.body');
+			body.replaceChildren();
 
 			let notes = Zotero.Items.get(this._item.getNotes());
 			for (let item of notes) {
 				let id = item.id;
-				let icon = document.createElement("img");
-				icon.src = item.getImageSrc();
 
-				let label = document.createElement("label");
-				label.append(item.getDisplayTitle());
+				let row = document.createElement('div');
+				row.className = 'row';
+				
+				let icon = getCSSItemTypeIcon('note');
+
+				let label = document.createElement("span");
+				label.className = 'label';
+				label.append(this._TODO_EXTRACT_noteToTitle(item.getNote(), {
+					maxLength: 0
+				}));
 
 				let box = document.createElement('div');
 				box.addEventListener('click', () => this._handleShowItem(id));
-				box.className = 'box zotero-clicky';
-				box.appendChild(icon);
-				box.appendChild(label);
+				box.className = 'box keyboard-clickable';
+				box.setAttribute("tabindex", 0);
+				box.setAttribute("aria-label", label.textContent);
+				box.setAttribute("role", "button");
+				box.append(icon, label);
 
-				grid.append(box);
+				row.append(box);
 
-				if (this._mode == 'edit') {
-					let remove = document.createElement("label");
-					remove.addEventListener('click', () => this._handleRemove(id));
+				if (this.editable) {
+					let remove = document.createXULElement("toolbarbutton");
+					remove.addEventListener('command', () => this._handleRemove(id));
 					remove.className = 'zotero-clicky zotero-clicky-minus';
-					remove.append('-');
-					grid.append(remove);
+					remove.setAttribute("tabindex", "0");
+					remove.setAttribute("data-l10n-id", 'section-button-remove');
+					row.append(remove);
 				}
+
+				body.append(row);
 			}
 
-			let num = this._noteIDs.length;
-			this._id('notes-num').replaceChildren(Zotero.getString('pane.item.notes.count', num, num));
+			let count = this._noteIDs.length;
+			this._section.setCount(count);
 		}
 
 		_handleAdd = (event) => {
@@ -167,6 +142,56 @@
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
+		}
+
+		/**
+		 * TODO: Extract this back to utilities_item.js when merging
+		 * Return first line (or first maxLength characters) of note content
+		 *
+		 * @param {String} text
+		 * @param {Object} [options]
+		 * @param {Boolean} [options.stopAtLineBreak] - Stop at <br/> instead of converting to space
+		 * @param {Number} [options.maxLength] - Defaults to 120. If set to 0, no limit is applied.
+		 * @return {String}
+		 */
+		_TODO_EXTRACT_noteToTitle(text, options = {}) {
+			var maxLength = options.maxLength;
+			if (maxLength === undefined) {
+				maxLength = 120;
+			}
+			else if (maxLength === 0) {
+				maxLength = Infinity;
+			}
+			
+			var origText = text;
+			text = text.trim();
+			// Add line breaks after block elements
+			text = text.replace(/(<\/(h\d|p|div)+>)/g, '$1\n');
+			if (options.stopAtLineBreak) {
+				text = text.replace(/<br\s*\/?>/g, '\n');
+			}
+			else {
+				text = text.replace(/<br\s*\/?>/g, ' ');
+			}
+			text = Zotero.Utilities.unescapeHTML(text);
+
+			// If first line is just an opening HTML tag, remove it
+			//
+			// Example:
+			//
+			// <blockquote>
+			// <p>Foo</p>
+			// </blockquote>
+			if (/^<[^>\n]+[^\/]>\n/.test(origText)) {
+				text = text.trim();
+			}
+
+			var t = text.substring(0, maxLength);
+			var ln = t.indexOf("\n");
+			if (ln > -1 && ln < maxLength) {
+				t = t.substring(0, ln);
+			}
+			return t;
 		}
 	}
 	customElements.define("notes-box", NotesBox);

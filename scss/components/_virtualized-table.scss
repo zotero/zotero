@@ -15,9 +15,9 @@
 	> div {
 		display: flex;
 		flex: 1;
-		background-color: -moz-field;
 		overflow: hidden;
 		position: relative;
+		background: var(--material-background);
 	}
 }
 
@@ -40,12 +40,19 @@
 	}
 	
 	.cell {
+		padding: 0 8px;
 		min-width: 30px;
 		cursor: default;
 		white-space: nowrap;
 		flex-grow: 1;
 		box-sizing: border-box;
 
+		&.label {
+			padding-inline-start: 0;
+			padding-inline-end: 4px;
+		}
+
+		&.first-column,
 		&.primary {
 			display: flex;
 			align-items: center;
@@ -58,7 +65,12 @@
 				flex-grow: 1;
 				text-overflow: ellipsis;
 				overflow: hidden;
-				margin-inline-start: 5px;
+
+				&:not(:first-child) {
+					@include state(".cell.first-column:not(.hasAttachment)") {
+						margin-inline-start: 4px;
+					}
+				}
 			}
 
 			.twisty + .cell-text, .spacer-twisty + .cell-text {
@@ -66,12 +78,11 @@
 				margin-inline-end: 0;
 			}
 
-			// Put the margin on the other side if the directionality of the
+			// Add margin on the end side if the directionality of the
 			// .cell-text is the opposite of that of the table
 			&:dir(ltr) .cell-text:dir(rtl),
 			&:dir(rtl) .cell-text:dir(ltr) {
-				margin-inline-start: 0;
-				margin-inline-end: 6px;
+				margin-inline-end: 5px;
 			}
 
 			&:dir(ltr) .cell-text {
@@ -94,10 +105,11 @@
 		align-items: center;
 		width: 100%;
 		box-sizing: border-box;
+		border-radius: 5px;
 
 		&.drop {
-			color: $shade-0 !important;
-			background: $shade-5 !important;
+			color: var(--material-background) !important;
+			background: var(--fill-secondary) !important;
 
 			* {
 				pointer-events: none !important;
@@ -108,7 +120,7 @@
 			position: absolute;
 			width: 20%;
 			height: 1px;
-			background-color: $shade-5;
+			background-color: var(--fill-secondary);
 			pointer-events: none;
 		}
 
@@ -121,20 +133,51 @@
 		}
 
 		&.selected:not(.highlighted) {
-			background-color: SelectedItem;
-			color: SelectedItemText;
+			background-color: var(--color-accent);
+			color: #fff;
+
+			@include state(".virtualized-table:not(:focus-within)") {
+				color: var(--fill-primary);
+				background-color: var(--color-quarternary-on-sidepane);
+			}
 		}
 
 		&.highlighted {
-			background: #FFFF99;
+			background: var(--accent-highlight);
 		}
 
 		&.unread {
-			font-weight: bold;
+			font-weight: 600;
 		}
 
 		&.context-row {
-			color: gray;
+			color: var(--fill-secondary);
+		}
+
+		.spacer-twisty {
+			display: inline-block;
+			min-width: 16px;
+		}
+
+		.twisty {
+			margin-inline-end: 0 !important;
+			display: flex;
+			align-items: center;
+			transition: transform 0.125s ease;
+			transform: rotate(-90deg);
+
+			&.open {
+				transform: rotate(0deg) !important;
+			}
+
+			&.icon-css {
+				width: 16px;
+				height: 16px;
+				padding: 4px;
+				box-sizing: border-box;
+				background: url("chrome://zotero/skin/8/universal/chevron-8.svg") content-box no-repeat;
+				-moz-context-properties: fill, fill-opacity;
+			}
 		}
 	}
 
@@ -146,23 +189,26 @@
 		width: 2px;
 		background-color: #ccc;
 	}
-}
 
-.virtualized-table.multi-select:focus {
+	.twisty {
+		width: 19px;
 
-	.row.focused {
-		border: 1px dotted highlight;
-		box-sizing: initial;
-		margin: -1px 0;
-		width: calc(100% - 2px);
-		z-index: 10000;
-
-		> *:first-child {
-			margin-inline-start: -1px;
+		svg {
+			fill: #888;
+			width: 16px;
 		}
-		> *:last-child {
-			margin-inline-end: -1px;
-		}
+	}
+
+	.selected:not(.highlighted) .twisty svg {
+		fill: #fff;
+	}
+
+	.spacer-twisty {
+		min-width: 19px;
+	}
+  
+	.spacer-header {
+		min-width: 0px;
 	}
 }
 
@@ -170,15 +216,39 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	width: calc(100% - 11px);
-	border-bottom: 1px solid #ccc;
-	background: #f6f6f6;
-	height: 1.8em;
+	width: 100%;
+	background: var(--material-background);
+	height: 1.83333333em; // 22px @ 12px font size
 	overflow: hidden;
-	border-inline-end: 1px solid #ddd;
+	border-bottom: 1px solid var(--material-border-quarternary);
+	padding-inline: 8px;
+	box-sizing: border-box;
+	padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
+
+	@include comfortable {
+		height: 2.33333333em; // 28px @ 12px font size
+		padding: 0 8px;
+	}
 
 	&.static-columns {
 		pointer-events: none;
+	}
+
+	&::after {
+		content: "";
+		display: block;
+		border-bottom: var(--material-border-quarternary);
+		height: 1px;
+		width: 100%;
+		position: absolute;
+		top: calc(1.83333333em - 1px);
+		left: 0;
+		right: 0;
+		z-index: 1;
+
+		@include comfortable {
+			top: calc(2.33333333em - 1px);
+		}
 	}
 
 	.column-picker {
@@ -190,18 +260,17 @@
 		position: relative;
 		height: 100%;
 		align-items: center;
-		padding: 0 5px;
 
 		&:hover {
-			background: #fff;
+			background: var(--material-mix-quinary);
 		}
 
 		&.dragging {
-			background: #e9e9e9;
+			background: var(--material-mix-quarternary);
 		}
 
 		.resizer {
-			background: linear-gradient(#ddd, #ddd) no-repeat center/1px 80%;
+			background: linear-gradient(var(--fill-quarternary), var(--fill-quarternary)) no-repeat center/1px 66.666667%; // 14px @ 12px font size
 			cursor: col-resize;
 			height: 100%;
 			content: "\00a0";
@@ -209,21 +278,25 @@
 			position: absolute;
 			left: -5px;
 			min-width: 10px;
+
+			@include comfortable {
+				background-size: 1px 74.074074%; // 20px @ 12px font size
+			}
 		}
 
 		.label {
-			margin-inline-start: 5px;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			flex: 1;
-		}
-		&:first-child .label {
-			margin-inline-start: 4px;
 		}
 
 		&.cell-icon {
 			> .label {
 				margin-inline-start: 0;
+			}
+
+			.icon-css {
+				fill: var(--fill-secondary);
 			}
 
 			justify-content: center;
@@ -232,7 +305,13 @@
 		.sort-indicator {
 			-moz-appearance: toolbarbutton-dropdown;
 			display: block;
-			margin-right: 10px;
+			margin-right: 3px; // + 5px padding = 8px total
+			
+			&.icon-css {
+				background: url("chrome://zotero/skin/8/universal/chevron-8.svg") content-box no-repeat;
+				-moz-context-properties: fill, fill-opacity;
+				fill: var(--fill-primary);
+			}
 
 			&.ascending {
 				transform: rotate(180deg);
@@ -245,9 +324,9 @@
 	flex: 1 0;
 	max-width: 100%;
 	overflow: auto;
+	padding: 4px 8px 8px;
 
 	.cell {
-		padding: 0 5px;
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-height: 100%;
@@ -257,34 +336,24 @@
 		// pointer-events are enabled, and we need to rerender the rows for selection
 		// before dragging.
 		pointer-events: none;
+
+		&.first-column {
+			padding-inline-start: 0;
+		}
 	}
 }
 
-.spacer-twisty {
-	display: inline-block;
-	min-width: 13px;
-}
-
-.twisty {
-	margin-inline-end: 0 !important;
-	display: flex;
-	align-items: center;
-
-	svg {
-		fill: #444;
-		transition: transform 0.125s ease;
-		transform: rotate(-90deg);
-	}
-
-	&.open svg {
-		transform: rotate(0deg) !important;
+.virtualized-table.multi-select:focus {
+	.row.focused:not(.selected) {
+		outline: 1px dotted var(--color-accent);
+		z-index: 10000;
 	}
 }
 
 *[dir=rtl] {
 	.virtualized-table-header {
 		.cell .sort-indicator {
-			left: 10px;
+			left: 3px; // + 5px padding = 8px total
 			right: initial;
 		}
 
@@ -294,7 +363,31 @@
 		}
 	}
 
-	.twisty svg {
+	.row .twisty {
 		transform: rotate(90deg);
+	}
+}
+
+.virtualized-table {
+	.row .twisty.icon-css {
+		@include focus-states using ($color) {
+			@if $color =="white" {
+				fill: var(--accent-white);
+			}
+
+			@else {
+				fill: var(--fill-secondary);
+			}
+		}
+	}
+}
+
+.drag-image-container {
+	box-sizing: border-box;
+
+	.row .twisty.icon-css {
+		@include focus-states('.row.selected', '.drag-image-container:focus-within') using ($color) {
+			fill: var(--fill-secondary);
+		}
 	}
 }

@@ -46,15 +46,12 @@
 <!ENTITY zotero.upgrade.changeLogLink "het logboek van veranderingen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
 <!ENTITY zotero.tabs.attachments.label "Bijlagen">
-<!ENTITY zotero.tabs.tags.label "Labels">
-<!ENTITY zotero.tabs.related.label "Gerelateerd">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
 <!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde items tonen">
-<!ENTITY zotero.collections.showRetractedItems "Teruggetrokken items tonen">
+<!ENTITY zotero.collections.showRetractedItems "Ingetrokken items tonen">
 
 <!ENTITY zotero.items.itemType "Type item">
 <!ENTITY zotero.items.creator_column "Maker">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (van een zin)">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Bekijk online">
 <!ENTITY zotero.item.copyAsURL "Kopieer als URL">
 <!ENTITY zotero.item.deletePermanently "Permanent verwijderen…">
 
@@ -183,12 +179,12 @@
 <!ENTITY zotero.import.source.file "Een bestand (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
 <!ENTITY zotero.import.onlineImport "online import">
-<!ENTITY zotero.import.importing "Importeren...">
+<!ENTITY zotero.import.importing "Importeren…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Laatst gewijzigd">
 <!ENTITY zotero.import.size "Grootte">
 <!ENTITY zotero.import.createCollection "Geïmporteerde verzamelingen en items in een nieuwe verzameling plaatsen">
-<!ENTITY zotero.import.fileHandling "Verwerking van bestanden">
+<!ENTITY zotero.import.fileHandling "Bestandsverwerking">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Exporteren…">
@@ -223,16 +219,16 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Verwijzingen bewaren als:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bladwijzers">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bladwijzers worden behouden tussen Microsoft Word en OpenOffice, maar kunnen per ongeluk worden gewijzigd. Om uitwisseling tussen beide tekstverwerkers mogelijk te maken is het met bookmarks niet mogelijk verwijzingen op te nemen in voet- of eindnoten als deze optie wordt geselecteerd.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bladwijzers worden behouden tussen Microsoft Word en OpenOffice, maar kunnen fouten veroorzaken als deze per ongeluk aangepast worden en kunnen niet toegevoegd worden aan voetnoten.">
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Verwijzingen automatisch bijwerken">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Verwijzingen die bijgewerkt moeten worden worden gearceerd in het document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Uitschakelen van update kan het invoegen van verwijzingen in grote documenten versnellen. Klik op Vernieuwen om verwijzingen handmatig bij te werken.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Verwijzingen die bijgewerkt moeten worden, worden gearceerd in het document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Uitschakelen van updates kan het invoegen van verwijzingen in grote documenten versnellen. Klik op Vernieuwen om verwijzingen handmatig bij te werken.">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Gebruik MEDLINE tijdschriftafkortingen">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Het veld &quot;Tijdschrift-afkorting&quot; wordt genegeerd">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Het veld ‘Tijdschrift-afkorting’ wordt genegeerd">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Verander van tekstverwerker...">
+<!ENTITY zotero.integration.prefs.exportDocument "Verander van tekstverwerker…">
 
 <!ENTITY zotero.integration.showEditor.label "Bewerker tonen">
 <!ENTITY zotero.integration.classicView.label "Klassieke weergave">
@@ -313,7 +309,7 @@
 
 <!ENTITY zotero.pdfReader.firstPage "Eerste pagina">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Terug">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">

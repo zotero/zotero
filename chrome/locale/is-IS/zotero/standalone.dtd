@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Viðbætur (add-ons)">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minnka">
 <!ENTITY bringAllToFront.label "Færa allt framfyrir">
-<!ENTITY zoomWindow.label "Þysja inn">
-<!ENTITY windowMenu.label "Gluggi">
 
 <!ENTITY helpMenu.label "Hjálp">
 <!ENTITY helpMenu.accesskey "H">

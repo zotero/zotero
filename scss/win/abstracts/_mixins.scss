@@ -1,0 +1,55 @@
+@mixin windows-form-element-base {
+	appearance: none;
+	padding: 0;
+	border: solid 1px transparent;
+	border-radius: 3px;
+
+	background-origin: border-box;
+	background-clip: padding-box, padding-box, border-box;
+	// Overwrite default background color
+	background-color: unset;
+	// Simulate linear-gradient border with border-radius using background-image
+
+	@include light-dark(--color-form-element-background, var(--color-background70), var(--fill-quinary));
+	@include light-dark(--color-form-element-border,
+		linear-gradient(180deg, rgba(0, 0, 0, 0.0578) 90.58%, rgba(0, 0, 0, 0.1622) 100%),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.093) 0%, rgba(255, 255, 255, 0.0698) 9.57%));
+
+	background-image:
+		linear-gradient(var(--color-form-element-background), var(--color-form-element-background)),
+		// Must be non-transparent color
+		linear-gradient(var(--color-form-element-base-background), var(--color-form-element-base-background)),
+		var(--color-form-element-border),
+}
+
+@mixin windows-form-element-hover {
+	@include light-dark(--color-form-element-background, var(--color-background50), var(--fill-quarternary));
+}
+
+@mixin windows-form-element-active {
+	@include light-dark(--color-form-element-background, rgba(255, 255, 255, 0.3), var(--fill-senary));
+	--color-form-element-border: linear-gradient(var(--fill-quinary), var(--fill-quinary));
+}
+
+@mixin windows-form-element {
+	height: 28px;
+
+	@include windows-form-element-base;
+
+	&:not([disabled]) {
+		&:hover {
+			@include windows-form-element-hover;
+		}
+	
+		&:active {
+			@include windows-form-element-active;
+		}
+	
+		@include focus-ring;
+	}
+
+	&:disabled,
+	&[disabled] {
+		@include windows-form-element-active;
+	}
+}

@@ -37,13 +37,16 @@
 		<html:link rel="localization" href="zotero.ftl" />
 	</linkset>
 	
-	<script src="chrome://global/content/customElements.js" />
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	</script>
 	<script src="chrome://zotero/content/elements/publicationsLicenseInfo.js" />
 
 	<wizard 
 		id="publications-dialog-wizard"
 		class="publications-dialog-wizard"
-		width="600" height="550"
 	>
 		<wizardpage pageid="intro" data-l10n-id="publications-intro-page">
 			<p class="description" data-l10n-id="publications-intro" />

@@ -18,9 +18,12 @@
 		"MozXULElement": false,
 		"PluralForm": false,
 		"Services": false,
+		"windowUtils": false,
 		"XPCOMUtils": false,
 		"XRegExp": false,
 		"XULElement": false,
+		"XULElementBase": false,
+		"ItemPaneSectionElementBase": false,
 		"Cu": false,
 		"ChromeWorker": false,
 		"Localization": false,
@@ -28,7 +31,12 @@
 		"L10nRegistry": false,
 		"ZoteroPane_Local": false,
 		"ZoteroPane": false,
-		"IOUtils": false
+		"Zotero_Tabs": false,
+		"ZoteroContextPane": false,
+		"IOUtils": false,
+		"NetUtil": false,
+		"FileUtils": false,
+		"globalThis": false
 	},
 	"extends": [
 		"@zotero",

@@ -1,0 +1,72 @@
+// Styling for displaying tabs in the title bar
+:root:not([legacytoolbar="true"]) {
+	--tab-min-height: 36px;
+
+	& {
+		--autocomplete-popup-background: -moz-field;
+		--autocomplete-popup-color: -moz-fieldtext;
+		--autocomplete-popup-border-color: ThreeDShadow;
+		--autocomplete-popup-highlight-background: Highlight;
+		--autocomplete-popup-highlight-color: HighlightText;
+		/* Note: Setting this to 0 (without px) breaks CSS calculations for OSX. */
+		--space-above-tabbar: 0px;
+	}
+	
+	&:-moz-window-inactive {
+		--toolbar-bgcolor: -moz-mac-chrome-inactive;
+	}
+
+	/* ::::: Tabs in Titlebar :::::: */
+	
+	&:not([chromemargin]) > #titlebar {
+		display: none;
+	}
+	
+	/**
+	 * For tabs in titlebar on OS X, we stretch the titlebar down so that the
+	 * tabstrip can overlap it.
+	 */
+	&[tabsintitlebar] > #titlebar {
+		min-height: calc(var(--tab-min-height) + var(--space-above-tabbar));
+	}
+	
+	&:not([tabsintitlebar]) .titlebar-placeholder {
+		visibility: collapse;
+	}
+	
+	@media (-moz-platform: macos) {
+		/* NB: these would be margin-inline-start/end if it wasn't for the fact that OS X
+		* doesn't reverse the order of the items in the titlebar in RTL mode. */
+		.titlebar-placeholder[type="caption-buttons"],
+		.titlebar-buttonbox {
+			margin-right: 12px;
+			margin-left: 12px;
+		}
+		
+		.titlebar-buttonbox {
+			-moz-appearance: -moz-window-button-box;
+		}
+
+		.titlebar-icon {
+			display: none;
+		}
+	}
+}
+
+:root:not([sizemode=maximized], [sizemode=fullscreen]) .titlebar-restore,
+:root:is([sizemode=maximized], [sizemode=fullscreen]) .titlebar-max {
+	display: none;
+}
+
+#zotero-title-bar {
+	border-bottom: var(--material-panedivider);
+}
+
+#titlebar {
+	display: flex;
+	justify-content: center;
+	-moz-window-dragging: drag;
+	menu {
+		font-size: var(--zotero-font-size);
+	}
+}

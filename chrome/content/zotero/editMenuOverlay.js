@@ -92,6 +92,45 @@ window.addEventListener(
   { once: true }
 );
 
+function goBuildEditContextMenu() {
+    let popup = document.getElementById("textbox-contextmenu");
+    if (!popup) {
+        MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
+        MozXULElement.insertFTLIfNeeded("browser/menubar.ftl");
+        document.documentElement.appendChild(
+            MozXULElement.parseXULToFragment(`
+              <popupset>
+                <menupopup id="textbox-contextmenu" class="textbox-contextmenu">
+                  <menuitem data-l10n-id="text-action-undo" command="cmd_undo" data-action="undo"></menuitem>
+                  <menuitem data-l10n-id="text-action-redo" command="cmd_redo" data-action="redo"></menuitem>
+                  <menuseparator></menuseparator>
+                  <menuitem data-l10n-id="text-action-cut" command="cmd_cut" data-action="cut"></menuitem>
+                  <menuitem data-l10n-id="text-action-copy" command="cmd_copy" data-action="copy"></menuitem>
+                  <menuitem data-l10n-id="text-action-paste" command="cmd_paste" data-action="paste"></menuitem>
+                  <menuitem data-l10n-id="text-action-delete" command="cmd_delete" data-action="delete"></menuitem>
+                  <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll" data-action="selectAll"></menuitem>
+                  <menuseparator></menuseparator>
+                  <menuitem data-l10n-id="menu-edit-bidi-switch-text-direction" command="cmd_switchTextDirection" data-action="switchTextDirection"></menuitem>
+                </menupopup>
+              </popupset>
+            `)
+        );
+        popup = document.documentElement.lastElementChild.firstElementChild;
+    }
+    
+    try {
+        let menuitemSwitchTextDirection = popup.querySelector("[command='cmd_switchTextDirection']");
+        let showSwitchTextDirection = Services.prefs.getBoolPref("bidi.browser.ui", false);
+        menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
+        menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
+    }
+    catch (e) {
+        // Not worth failing over Services.jsm not being imported in a utility window
+    }
+    
+    return popup;
+}
+
 // Support context menus on html textareas in the parent process:
 window.addEventListener("contextmenu", e => {
   const HTML_NS = "http://www.w3.org/1999/xhtml";
@@ -107,28 +146,7 @@ window.addEventListener("contextmenu", e => {
     return;
   }
 
-  let popup = document.getElementById("textbox-contextmenu");
-  if (!popup) {
-    MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
-    document.documentElement.appendChild(
-      MozXULElement.parseXULToFragment(`
-	  <popupset>
-        <menupopup id="textbox-contextmenu" class="textbox-contextmenu">
-          <menuitem data-l10n-id="text-action-undo" command="cmd_undo"></menuitem>
-          <menuitem data-l10n-id="text-action-redo" command="cmd_redo"></menuitem>
-          <menuseparator></menuseparator>
-          <menuitem data-l10n-id="text-action-cut" command="cmd_cut"></menuitem>
-          <menuitem data-l10n-id="text-action-copy" command="cmd_copy"></menuitem>
-          <menuitem data-l10n-id="text-action-paste" command="cmd_paste"></menuitem>
-          <menuitem data-l10n-id="text-action-delete" command="cmd_delete"></menuitem>
-          <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll"></menuitem>
-        </menupopup>
-	  </popupset>
-    `)
-    );
-    popup = document.documentElement.lastElementChild.firstElementChild;
-  }
-
+  let popup = goBuildEditContextMenu();
   goUpdateGlobalEditMenuItems(true);
   popup.openPopupAtScreen(e.screenX, e.screenY, true, e);
   // Don't show any other context menu at the same time. There can be a

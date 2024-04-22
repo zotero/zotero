@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "değişiklik kaydına">
 <!ENTITY zotero.upgrade.changeLogAfterLink "bakınız.">
 
-<!ENTITY zotero.tabs.info.label "Bilgi">
 <!ENTITY zotero.tabs.notes.label "Notlar">
 <!ENTITY zotero.tabs.attachments.label "Ekler">
-<!ENTITY zotero.tabs.tags.label "Etiketler">
-<!ENTITY zotero.tabs.related.label "İlişkili">
 
 <!ENTITY zotero.toolbar.duplicate.label "Yinelenmiş Eserleri Göster">
 <!ENTITY zotero.collections.showUnfiledItems "Dosyalanmamış Eserleri Göster">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
 <!ENTITY zotero.item.creatorTransform.fixCase "Büyük Harfleri Düzelt">
-<!ENTITY zotero.item.viewOnline "Çevrimiçi Göster">
 <!ENTITY zotero.item.copyAsURL "URL'i Kopyala">
 <!ENTITY zotero.item.deletePermanently "Kalıcı Olarak Sil...">
 

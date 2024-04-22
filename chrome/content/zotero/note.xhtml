@@ -5,7 +5,6 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 
 <!DOCTYPE window [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
@@ -23,6 +22,8 @@
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/note.js", this);
@@ -33,5 +34,5 @@
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
 
-	<note-editor id="zotero-note-editor" flex="1" onerror="return;onError()"/>
+	<note-editor id="zotero-note-editor" flex="1" onerror="return;onEditorError()"/>
 </window>

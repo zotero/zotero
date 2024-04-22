@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "預覽 Zotero 樣式">
+<!ENTITY styles.preview "Zotero樣式預覽">
 
-<!ENTITY styles.preview.citationFormat "引用文獻的格式：">
+<!ENTITY styles.preview.citationFormat "引用文獻格式：">
 <!ENTITY styles.preview.citationFormat.all "全部">
 <!ENTITY styles.preview.citationFormat.author "作者">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "商標">
+<!ENTITY styles.preview.citationFormat.authorDate "作者-日期">
+<!ENTITY styles.preview.citationFormat.label "標示">
 <!ENTITY styles.preview.citationFormat.note "筆記">
-<!ENTITY styles.preview.citationFormat.numeric "數字">
+<!ENTITY styles.preview.citationFormat.numeric "數值的">

@@ -29,11 +29,7 @@
 
 var EXPORTED_SYMBOLS = ["ZoteroPluginInstaller"];
 
-var Zotero = Components.classes["@zotero.org/Zotero;1"]
-				// Currently uses only nsISupports
-				//.getService(Components.interfaces.chnmIZoteroService).
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 
@@ -89,7 +85,8 @@ ZoteroPluginInstaller.prototype = {
 							"chrome,resizable=no,close=no,centerscreen", null);
 					this._progressWindow.addEventListener("load", () => { this._firstRunListener() }, false);
 				} else {
-					this._addon.install(this);
+					let result = this._addon.install(this);
+					if (result.then) await result;
 				}
 			}
 		} catch(e) {
@@ -123,10 +120,11 @@ ZoteroPluginInstaller.prototype = {
 		if(this.force && !this._addon.DISABLE_PROGRESS_WINDOW) {
 			var addon = this._addon;
 			setTimeout(function() {
-				Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService)
-					.alert(null, addon.EXTENSION_STRING,
-					Zotero.getString("zotero.preferences.wordProcessors.installationSuccess"));
+				Services.prompt.alert(
+					null,
+					addon.EXTENSION_STRING,
+					Zotero.getString("zotero.preferences.wordProcessors.installationSuccess")
+				);
 			}, 0);
 		}
 	},
@@ -177,7 +175,6 @@ ZoteroPluginInstaller.prototype = {
 		groupbox.appendChild(label);
 
 		var description = document.createXULElement("description");
-		description.style.width = "45em";
 		description.appendChild(document.createTextNode(
 			isInstalled ?
 				Zotero.getString('zotero.preferences.wordProcessors.installed', this._addon.APP) :
@@ -233,13 +230,14 @@ ZoteroPluginInstaller.prototype = {
 	_firstRunListener: function() {
 		this._progressWindowLabel = this._progressWindow.document.getElementById("progress-label");
 		this._progressWindowLabel.value = Zotero.getString('zotero.preferences.wordProcessors.installing', this._addon.EXTENSION_STRING);
+		this._progressWindow.sizeToContent();
 		var me = this;
 		setTimeout(function() {
 			me._progressWindow.focus();
-			setTimeout(function() {
+			setTimeout(async function() {
 				me._progressWindow.focus();
 				try {
-					me._addon.install(me);
+					await me._addon.install(me);
 				} catch(e) {
 					me.error();
 					throw e;

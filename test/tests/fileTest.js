@@ -70,6 +70,17 @@ describe("Zotero.File", function () {
 			}
 		});
 		
+		it("should take a file:// URI", async function () {
+			var file = OS.Path.join(getTestDataDirectory().path, "test.png");
+			var uri = PathUtils.toFileURI(file);
+			
+			var contents = await Zotero.File.getBinaryContentsAsync(uri);
+			assert.isAbove(contents.length, magicPNG.length);
+			for (let i = 0; i < magicPNG.length; i++) {
+				assert.equal(magicPNG[i], contents.charCodeAt(i));
+			}
+		});
+		
 		it("should respect maxLength", function* () {
 			var contents = yield Zotero.File.getBinaryContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "test.png"),

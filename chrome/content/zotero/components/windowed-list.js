@@ -46,8 +46,14 @@ module.exports = class {
 	 * 	- renderItem {Function} a function that returns a DOM element for an individual row to display
 	 * 	- itemHeight {Integer}
 	 * 	- targetElement {DOMElement} a container DOM element for the windowed-list
+	 * 	- customRowHeights {Array|optional} a sorted array of tuples [itemIndex, rowHeight]
 	 */
 	constructor(options) {
+		this.getItemCount = () => 0;
+		this.renderItem = () => 0;
+		this.itemHeight = 0;
+		this.targetElement = null;
+		this.customRowHeights = [];
 		for (let option of requiredOptions) {
 			if (!options.hasOwnProperty(option)) {
 				throw new Error('Attempted to initialize windowed-list without a required option: ' + option);
@@ -58,6 +64,7 @@ module.exports = class {
 		this.scrollOffset = 0;
 		this.overscanCount = 2;
 		this._lastItemCount = null;
+		this._rowOffsets = [[0, 0]];
 		
 		Object.assign(this, options);
 		this._renderedRows = new Map();
@@ -73,7 +80,7 @@ module.exports = class {
 
 		targetElement.appendChild(this.innerElem);
 		targetElement.addEventListener('scroll', this._handleScroll);
-		
+
 		this.update();
 	}
 
@@ -107,8 +114,8 @@ module.exports = class {
 	 */
 	invalidate() {
 		// Removes any items out of view and adds the ones not in view
-		this.render();
 		let oldRenderedRows = new Set(this._renderedRows.keys());
+		this.render();
 		// Rerender the rest
 		for (let index of Array.from(this._renderedRows.keys())) {
 			// Rerender only old rows, new ones got a fresh render in this.render() call
@@ -152,19 +159,41 @@ module.exports = class {
 		Object.assign(this, options);
 		const { itemHeight, targetElement, innerElem } = this;
 		const itemCount = this._getItemCount();
+		const [offsetIdx, offset] = this._rowOffsets.at(-1);
+		const listHeight = offset + (itemCount - offsetIdx) * this.itemHeight;
 		innerElem.style.position = 'relative';
-		innerElem.style.height = `${itemHeight * itemCount}px`;
+		innerElem.style.height = `${listHeight}px`;
+		
+		// Recalculate custom row height offsets
+		this._rowOffsets = [[0, 0]];
+		let previousRowOffset = 0;
+		let previousRowIndex = 0;
+		for (let [index, rowHeight] of this.customRowHeights) {
+			// Previous custom row offset + normal rows up to this custom row + this custom row
+			const offset = previousRowOffset + ((index - previousRowIndex) * itemHeight) + rowHeight;
+			this._rowOffsets.push([index + 1, offset]);
+			previousRowIndex = index + 1;
+			previousRowOffset = offset;
+		}
 
 		this.scrollDirection = 0;
 		this.scrollOffset = targetElement.scrollTop;
 	}
+	
+	getWindowHeight() {
+		return this.targetElement.getBoundingClientRect().height;
+	}
+
+	getElementByIndex = index => this._renderedRows.get(index);
 
 	/**
 	 * Scroll the top of the scrollbox to a specified location
 	 * @param scrollOffset {Integer} offset for the top of the tree
 	 */
 	scrollTo(scrollOffset) {
-		const maxOffset = Math.max(0, this.itemHeight * this._getItemCount() - this.getWindowHeight());
+		const [offsetIdx, offset] = this._rowOffsets.at(-1);
+		const listHeight = offset + (this._getItemCount() - offsetIdx) * this.itemHeight;
+		const maxOffset = Math.max(0, listHeight - this.getWindowHeight());
 		scrollOffset = Math.min(Math.max(0, scrollOffset), maxOffset);
 		this.scrollOffset = scrollOffset;
 		this.targetElement.scrollTop = scrollOffset;
@@ -176,63 +205,50 @@ module.exports = class {
 	 * @param index
 	 */
 	scrollToRow(index) {
-		const { itemHeight, scrollOffset } = this;
+		const { scrollOffset } = this;
 		const itemCount = this._getItemCount();
 		const height = this.getWindowHeight();
 
 		index = Math.max(0, Math.min(index, itemCount - 1));
 		let startPosition = this._getItemPosition(index);
-		let endPosition = startPosition + itemHeight;
+		let endPosition = this._getItemPosition(index + 1);
 		if (startPosition < scrollOffset) {
 			this.scrollTo(startPosition);
 		}
 		else if (endPosition > scrollOffset + height) {
-			this.scrollTo(Math.min(endPosition - height, (itemCount * itemHeight) - height));
+			this.scrollTo(endPosition - height - 1);
 		}
 	}
 	
 	getFirstVisibleRow() {
-		return Math.ceil(this.scrollOffset / this.itemHeight);
+		const idx = this._binarySearchOffsets(this._rowOffsets, this.scrollOffset, true);
+		const [offsetIdx, offset] = this._rowOffsets[idx];
+		return offsetIdx + Math.floor((this.scrollOffset - offset) / this.itemHeight);
 	}
 	
 	getLastVisibleRow() {
 		const height = this.getWindowHeight();
-		return Math.max(1, Math.floor((this.scrollOffset + height + 1) / this.itemHeight)) - 1;
+		const idx = this._binarySearchOffsets(this._rowOffsets, this.scrollOffset + height + 1, true);
+		const [offsetIdx, offset] = this._rowOffsets[idx];
+		return Math.max(1, offsetIdx + Math.ceil(((this.scrollOffset + height + 1) - offset) / this.itemHeight)) - 1;
 	}
 	
-	getWindowHeight() {
-		return this.targetElement.getBoundingClientRect().height;
-	}
-	
-	getIndexByMouseEventPosition = (yOffset) => {
-		return Math.min(this._getItemCount()-1, Math.floor((yOffset - this.innerElem.getBoundingClientRect().top) / this.itemHeight));
-	}
-	
-	getElementByIndex = index => this._renderedRows.get(index);
-
-	/**
-	 * @returns {Integer} - the number of fully visible items in the scrollbox
-	 */
-	getPageLength() {
-		const height = this.getWindowHeight();
-		return Math.ceil(height / this.itemHeight);
-	}
-
 	_getItemPosition = (index) => {
-		return (this.itemHeight * index);
+		const idx = this._binarySearchOffsets(this._rowOffsets, index);
+		const [offsetIdx, offset] = this._rowOffsets[idx];
+		return offset + (this.itemHeight * (index - offsetIdx));
 	};
 	
 	_getRangeToRender() {
-		const { itemHeight, overscanCount, scrollDirection, scrollOffset } = this;
+		const { overscanCount, scrollDirection } = this;
 		const itemCount = this._getItemCount();
-		const height =  this.getWindowHeight();
 
 		if (itemCount === 0) {
 			return [0, 0, 0, 0];
 		}
 
-		const startIndex = Math.floor(scrollOffset / itemHeight);
-		const stopIndex = Math.ceil((scrollOffset + height) / itemHeight + 1);
+		const startIndex = this.getFirstVisibleRow();
+		const stopIndex = this.getLastVisibleRow();
 
 		// Overscan by one item in each direction so that tab/focus works.
 		// If there isn't at least one extra item, tab loops back around.
@@ -285,6 +301,25 @@ module.exports = class {
 		this._resetScrollDirection();
 		this.render();
 	};
+	
+	_binarySearchOffsets(array, searchValue, lookupByOffset=false) {
+		if (array.length === 0) return -1;
+		const idx = lookupByOffset ? 1 : 0;
+		const searchIdx = Math.floor(array.length / 2.0);
+		const inspectValue = array[searchIdx][idx];
+		if (searchValue === inspectValue) {
+			return searchIdx;
+		}
+		else if (array.length === 1) {
+			return (searchValue > inspectValue) ? searchIdx : -1;
+		}
+		else if (searchValue > inspectValue) {
+			return (searchIdx + 1) + this._binarySearchOffsets(array.slice(searchIdx + 1), searchValue, lookupByOffset);
+		}
+		else {
+			return this._binarySearchOffsets(array.slice(0, searchIdx), searchValue, lookupByOffset);
+		}
+	}
 
 	_resetScrollDirection = Zotero.Utilities.debounce(() => this.scrollDirection = 0, 150);
 };

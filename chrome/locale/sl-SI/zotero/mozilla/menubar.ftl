@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -221,8 +227,9 @@ menu-history-undo-menu =
     .label = Nedavno zaprti zavihki
 menu-history-undo-window-menu =
     .label = Nedavno zaprta okna
-menu-history-reopen-all-tabs = Ponovno odpri vse zavihke
-menu-history-reopen-all-windows = Ponovno odpri vsa okna
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Išči po zgodovini
 
 ## Bookmarks Menu
 
@@ -231,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = Z
 menu-bookmarks-manage =
     .label = Upravljanje zaznamkov
-menu-bookmark-current-tab =
-    .label = Dodaj trenutni zavihek med zaznamke
-menu-bookmark-edit =
-    .label = Uredi ta zaznamek
 menu-bookmark-tab =
     .label = Dodaj trenutni zavihek med zaznamke …
 menu-edit-bookmark =
     .label = Uredi ta zaznamek …
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Iskanje po zaznamkih
 menu-bookmarks-all-tabs =
     .label = Dodaj vse zavihke med zaznamke …
 menu-bookmarks-toolbar =
@@ -332,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Izključi način za odpravljanje težav
     .accesskey = I
+menu-help-switch-device =
+    .label = Preklapljanje na novo napravo
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -340,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = To ni zavajajoča stran …
     .accesskey = z
+menu-report-broken-site =
+    .label = Prijavi nedelujočo stran

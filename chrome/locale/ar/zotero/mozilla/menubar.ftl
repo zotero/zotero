@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -144,6 +150,8 @@ menu-view-history-button =
     .label = التأريخ
 menu-view-synced-tabs-sidebar =
     .label = الألسنة المُزامنة
+menu-view-megalist-sidebar =
+    .label = كلمات السرّ
 menu-view-full-zoom =
     .label = قرّب
     .accesskey = ر
@@ -224,8 +232,9 @@ menu-history-undo-menu =
     .label = الألسنة المُغلقة مؤخرًا
 menu-history-undo-window-menu =
     .label = النوافذ المغلقة مؤخرًا
-menu-history-reopen-all-tabs = أعِد فتح كل الألسنة
-menu-history-reopen-all-windows = أعِد فتح كل النوافذ
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = ابحث في التأريخ
 
 ## Bookmarks Menu
 
@@ -234,10 +243,13 @@ menu-bookmarks-menu =
     .accesskey = ع
 menu-bookmarks-manage =
     .label = أدِر العلامات
-menu-bookmark-current-tab =
-    .label = علّم اللسان الحالي
-menu-bookmark-edit =
-    .label = حرّر هذه العلامة
+menu-bookmark-tab =
+    .label = علّم اللسان الحالي…
+menu-edit-bookmark =
+    .label = حرّر هذه العلامة…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = ابحث في العلامات
 menu-bookmarks-all-tabs =
     .label = علّم كل الألسنة…
 menu-bookmarks-toolbar =
@@ -322,12 +334,18 @@ menu-help-more-troubleshooting-info =
     .accesskey = ط
 menu-help-report-site-issue =
     .label = أبلغ عن مشكلة بالموقع…
+menu-help-share-ideas =
+    .label = شارك الأفكار والانطباعات...
+    .accesskey = ق
 menu-help-enter-troubleshoot-mode2 =
     .label = وضع مواجهة الأعطال
     .accesskey = ه
 menu-help-exit-troubleshoot-mode =
     .label = عطّل وضع مواجهة الأعطال
     .accesskey = ط
+menu-help-switch-device =
+    .label = التبديل إلى جهاز جديد
+    .accesskey = ز
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -336,3 +354,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = هذا ليس موقعًا مخادعًا…
     .accesskey = خ
+menu-report-broken-site =
+    .label = أبلِغ عن موقع معطوب

@@ -8,7 +8,7 @@ ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 CHANNEL="test"
 BRANCH="main"
-#export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/dev/ZoteroSafariExtension.appex"
+export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/test/ZoteroSafariExtension.appex"
 
 cd "$SCRIPT_DIR"
 ./check_requirements

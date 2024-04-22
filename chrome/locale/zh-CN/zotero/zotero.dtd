@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "变更日志">
 <!ENTITY zotero.upgrade.changeLogAfterLink "以了解有哪些新的改动.">
 
-<!ENTITY zotero.tabs.info.label "信息">
 <!ENTITY zotero.tabs.notes.label "笔记">
 <!ENTITY zotero.tabs.attachments.label "附件">
-<!ENTITY zotero.tabs.tags.label "标签">
-<!ENTITY zotero.tabs.related.label "关联文献">
 
 <!ENTITY zotero.toolbar.duplicate.label "显示重复条目">
 <!ENTITY zotero.collections.showUnfiledItems "显示未分类条目">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交换 名字/姓氏">
 <!ENTITY zotero.item.creatorTransform.fixCase "修正大小写">
-<!ENTITY zotero.item.viewOnline "在线查看">
 <!ENTITY zotero.item.copyAsURL "复制为网址">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
 

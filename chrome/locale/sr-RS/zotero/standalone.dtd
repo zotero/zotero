@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Додаци">
 <!ENTITY developer.label "Програмер">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Умањи">
 <!ENTITY bringAllToFront.label "Постави све напред">
-<!ENTITY zoomWindow.label "Увећај">
-<!ENTITY windowMenu.label "Прозор">
 
 <!ENTITY helpMenu.label "Помоћ">
 <!ENTITY helpMenu.accesskey "H">

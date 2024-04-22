@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Pengaya">
 <!ENTITY developer.label "Pengembang">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Kecilkan">
 <!ENTITY bringAllToFront.label "Bawa Semuanya ke Depan">
-<!ENTITY zoomWindow.label "Arahkan">
-<!ENTITY windowMenu.label "Jendela">
 
 <!ENTITY helpMenu.label "Bantuan">
 <!ENTITY helpMenu.accesskey "H">

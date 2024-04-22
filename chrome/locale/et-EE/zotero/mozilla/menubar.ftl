@@ -38,9 +38,11 @@ menu-quit =
             [windows] j
            *[other] j
         }
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Välju { -brand-shorter-name }ist
+
 menu-about =
     .label = { -brand-shorter-name }i teave
     .accesskey = e
@@ -220,8 +222,6 @@ menu-history-undo-menu =
     .label = Hiljuti suletud kaardid
 menu-history-undo-window-menu =
     .label = Hiljuti suletud aknad
-menu-history-reopen-all-tabs = Ava kõik kaardid uuesti
-menu-history-reopen-all-windows = Ava kõik aknad uuesti
 
 ## Bookmarks Menu
 
@@ -230,10 +230,6 @@ menu-bookmarks-menu =
     .accesskey = J
 menu-bookmarks-manage =
     .label = Halda järjehoidjaid
-menu-bookmark-current-tab =
-    .label = Lisa praegune kaart järjehoidjatesse
-menu-bookmark-edit =
-    .label = Muuda seda järjehoidjat
 menu-bookmarks-all-tabs =
     .label = Lisa kõik kaardid järjehoidjatesse...
 menu-bookmarks-toolbar =

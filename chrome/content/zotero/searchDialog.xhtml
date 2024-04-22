@@ -11,6 +11,7 @@
 	orient="vertical"
 	onload="doLoad();"
 	onunload="doUnload();"
+	drawintitlebar-platforms="mac"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="padding:2em">
@@ -20,11 +21,11 @@
 
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/searchDialog.js", this);
 	</script>
-	
-	<script src="include.js"/>
-	<script src="searchDialog.js"/>
 	
 	<popupset>
 		<panel is="autocomplete-richlistbox-popup"

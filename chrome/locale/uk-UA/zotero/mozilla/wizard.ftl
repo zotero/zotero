@@ -11,7 +11,6 @@ wizard-linux-button-back =
 wizard-win-button-back =
     .label = < Назад
     .accesskey = Н
-
 wizard-macos-button-next =
     .label = Продовжити
     .accesskey = П
@@ -21,14 +20,12 @@ wizard-linux-button-next =
 wizard-win-button-next =
     .label = Далі >
     .accesskey = Д
-
 wizard-macos-button-finish =
-    .label = Гаразд
+    .label = Виконано
 wizard-linux-button-finish =
-    .label = Гаразд
+    .label = Завершити
 wizard-win-button-finish =
-    .label = Гаразд
-
+    .label = Завершити
 wizard-macos-button-cancel =
     .label = Скасувати
 wizard-linux-button-cancel =

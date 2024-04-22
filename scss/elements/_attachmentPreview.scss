@@ -1,0 +1,204 @@
+attachment-preview {
+	width: 100%;
+	padding: 2px 0px 4px 0px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	transition: height 0.2s ease-in-out, opacity 0.2s ease-in-out;
+	// This is set in JS
+	// Suppose it's A4 size
+	--width-height-ratio: 0.7070707071;
+	--min-height: 56px;
+	--max-height: 600px;
+	// This is set in JS
+	--preview-width: 400;
+	--preview-height: calc(min(var(--preview-width) / var(--width-height-ratio), var(--max-height)));
+	max-height: var(--max-height);
+	@include focus-ring;
+
+	&[hidden] {
+		display: none;
+	}
+
+	#preview {
+		display: inline-block;
+		width: 100%;
+		height: 100%;
+		// Make sure minimal height before loading
+		min-height: var(--preview-height);
+		border-radius: 5px;
+		border: var(--material-border-quarternary);
+		pointer-events: none;
+	}
+
+	#next-preview {
+		display: none;
+	}
+
+	.icon {
+		// Force the image to load, otherwise the first dragging will not show a drag image
+		display: inline-block;
+		opacity: 0;
+		width: 100%;
+		height: 1px;
+		max-height: 1px;
+		margin-bottom: -1px;
+	}
+
+	$preview-icons: (
+		file: "document",
+		pdf: "attachment-pdf",
+		snapshot: "attachment-snapshot",
+		epub: "attachment-epub",
+		image: "document",
+	);
+
+	@each $cls, $icon in $preview-icons {
+		&[data-preview-type="#{$cls}"] {
+			.icon {
+				@include focus-states using ($color) {
+					@include svgicon($icon, $color, "28", "item-type");
+				}
+			}
+		}
+	}
+
+	.btn-container {
+		display: flex;
+		justify-content: center;
+		gap: 6px;
+		position: relative;
+		margin-top: -28px;
+		bottom: 6px;
+
+		toolbarbutton {
+			padding: 4px;
+			background-color: rgba(0,0,0,0.5);
+			
+			&:hover {
+				background-color: rgba(0,0,0,0.4);
+			}
+
+			&:active, &[selected] {
+				background-color: rgba(0,0,0,0.3);
+			}
+
+			&:disabled,
+			&[disabled="true"] {
+				background-color: rgba(0,0,0,0.2);
+			}
+		}
+	}
+
+	.btn-prev {
+		@include svgicon-menu("arrow-left", "universal", "20", false, false, (#fff, #fff));
+	}
+
+	.btn-next {
+		@include svgicon-menu("arrow-right", "universal", "20", false, false, (#fff, #fff));
+	}
+
+	.drag-container {
+		width: 64px;
+		height: 64px;
+		position: absolute;
+		top: -10000px;
+
+		.icon {
+			opacity: 1;
+			height: 56px;
+			max-height: 56px;
+			margin-bottom: 0px;
+		}
+	}
+
+	&[data-preview-type=pdf] {
+		#preview {
+			border: 0;
+		}
+
+		.btn-container {
+			// PDF page has 3px vertical padding so we offset 6px more
+			bottom: 12px;
+		}
+	}
+
+	&[data-preview-type=snapshot] {
+		#preview {
+			pointer-events: all;
+		}
+
+		.btn-container {
+			display: none;
+		}
+	}
+
+	$other-preview-types: (
+		image,
+		video,
+		audio,
+	);
+
+	@each $cls in $other-preview-types {
+		##{$cls}-preview {
+			display: none;
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			border-radius: 5px;
+			border: var(--material-border-quarternary);
+			max-height: var(--preview-height);
+			min-height: var(--min-height);
+			max-width: calc((var(--preview-height) - 2px) * var(--width-height-ratio));
+		}
+
+		&[data-preview-type="#{$cls}"] {
+			#preview {
+				display: none;
+			}
+
+			.btn-container {
+				display: none;
+			}
+
+			##{$cls}-preview {
+				display: inline-block;
+			}
+		}
+	}
+
+	&:not(:hover) {
+		.btn-container {
+			display: none;
+		}
+	}
+
+	&[data-preview-status=fail] {
+		#preview {
+			display: none;
+		}
+
+		.media-preview {
+			display: none !important;
+		}
+
+		.icon {
+			display: inline-block;
+			opacity: 1;
+			height: 56px;
+			max-height: 56px;
+			margin-bottom: 0px;
+		}
+
+		.btn-container {
+			display: none;
+		}
+	}
+
+	&[data-preview-status=loading] {
+		opacity: 0;
+		#preview {
+			opacity: 0;
+		}
+	}
+}

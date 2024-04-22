@@ -1,13 +1,11 @@
 Components.utils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
-Components.utils.import("resource://gre/modules/osfile.jsm");
 var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
+var { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 
-var ZoteroUnit = Components.classes["@zotero.org/zotero/tests-clh;1"].
-                 getService(Components.interfaces.nsISupports).
-                 wrappedJSObject;
-
-var dump = ZoteroUnit.dump;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+var { TestOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
+var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 
 // Mocha HTML reporter doesn't show deepEqual diffs, so we change this.
 chai.config.truncateThreshold = 0
@@ -15,9 +13,9 @@ chai.config.truncateThreshold = 0
 function quit(failed) {
 	// Quit with exit status
 	if(!failed) {
-		OS.File.writeAtomic(OS.Path.join(OS.Constants.Path.profileDir, "success"), new Uint8Array(0));
+		IOUtils.write(PathUtils.join(FileUtils.getDir("ProfD", []).path, "success"), new Uint8Array(0));
 	}
-	if(!ZoteroUnit.noquit) {
+	if(!TestOptions.noquit) {
 		setTimeout(function () {
 			Components.classes['@mozilla.org/toolkit/app-startup;1']
 				.getService(Components.interfaces.nsIAppStartup)
@@ -26,7 +24,7 @@ function quit(failed) {
 	}
 }
 
-if (ZoteroUnit.makeTestData) {
+if (TestOptions.makeTestData) {
 	let dataPath = getTestDataDirectory().path;
 	
 	Zotero.Prefs.set("export.citePaperJournalArticleURL", true);
@@ -66,8 +64,8 @@ if (ZoteroUnit.makeTestData) {
 			if (!first) dump('\n');
 			dump('Generating data for ' + params.name + '...');
 
-			let filePath = OS.Path.join(dataPath, params.name + '.js');
-			let exists = yield OS.File.exists(filePath);
+			let filePath = PathUtils.join(dataPath, params.name + '.js');
+			let exists = yield IOUtils.exists(filePath);
 			let currentData;
 			if (exists) {
 				currentData = loadSampleData(params.name);
@@ -81,8 +79,8 @@ if (ZoteroUnit.makeTestData) {
 			}
 			let str = stableStringify(newData);
 
-			yield OS.File.writeAtomic(OS.Path.join(dataPath, params.name + '.js'), str);
-			dump('\nWritten to ' + OS.Path.join(dataPath, params.name + '.js\n'));
+			yield IOUtils.writeUTF8(PathUtils.join(dataPath, params.name + '.js'), str);
+			dump('\nWritten to ' + PathUtils.join(dataPath, params.name + '.js\n'));
 		}
 		dump("\n");
 	})()
@@ -149,7 +147,7 @@ function Reporter(runner) {
 			+ indentStr + "  " + err.message + " at\n"
 			+ err.stack.replace(/^/gm, indentStr + "    ").trim() + "\n\n");
 		
-		if (ZoteroUnit.bail) {
+		if (TestOptions.bail) {
 			aborted = true;
 			runner.abort();
 		}
@@ -166,8 +164,8 @@ function Reporter(runner) {
 mocha.setup({
 	ui: "bdd",
 	reporter: Reporter,
-	timeout: ZoteroUnit.timeout || 10000,
-	grep: ZoteroUnit.grep
+	timeout: TestOptions.timeout || 10000,
+	grep: TestOptions.grep
 });
 
 coMocha(Mocha);
@@ -176,10 +174,10 @@ before(function () {
 	// Store all prefs set in runtests.sh
 	Components.utils.import("resource://zotero/config.js");
 	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
-	ZoteroUnit.customPrefs = {};
+	TestOptions.customPrefs = {};
 	prefBranch.getChildList("", {})
 		.filter(key => prefBranch.prefHasUserValue(key))
-		.forEach(key => ZoteroUnit.customPrefs[key] = Zotero.Prefs.get(key));
+		.forEach(key => TestOptions.customPrefs[key] = Zotero.Prefs.get(key));
 });
 
 /**
@@ -189,10 +187,10 @@ function resetPrefs() {
 	Components.utils.import("resource://zotero/config.js");
 	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 	prefBranch.getChildList("", {}).forEach(key => {
-		var origVal = ZoteroUnit.customPrefs[key];
+		var origVal = TestOptions.customPrefs[key];
 		if (origVal !== undefined) {
 			if (origVal != Zotero.Prefs.get(key)) {
-				Zotero.Prefs.set(key, ZoteroUnit.customPrefs[key]);
+				Zotero.Prefs.set(key, TestOptions.customPrefs[key]);
 			}
 		}
 		else if (prefBranch.prefHasUserValue(key)) {
@@ -210,8 +208,8 @@ var assert = chai.assert,
     expect = chai.expect;
 
 // Set up tests to run
-var run = ZoteroUnit.runTests;
-if (run && ZoteroUnit.tests) {
+var run = TestOptions.runTests;
+if (run && TestOptions.tests) {
 	function getTestFilename(test) {
 		// Remove any directory prefixes e.g. tests/fooTest.js, test/tests/fooTest.js
 		test = test.split(/[/\\]/).pop();
@@ -223,18 +221,24 @@ if (run && ZoteroUnit.tests) {
 	
 	var testDirectory = getTestDataDirectory().parent,
 	    testFiles = [];
-	if(ZoteroUnit.tests == "all") {
+	if(TestOptions.tests == "all") {
 		var enumerator = testDirectory.directoryEntries;
-		let startFile = ZoteroUnit.startAt ? getTestFilename(ZoteroUnit.startAt) : false;
+		let startFile = TestOptions.startAt ? getTestFilename(TestOptions.startAt) : false;
 		let started = !startFile;
-		let stopFile = ZoteroUnit.stopAt ? getTestFilename(ZoteroUnit.stopAt) : false;
+		let stopFile = TestOptions.stopAt ? getTestFilename(TestOptions.stopAt) : false;
 		while(enumerator.hasMoreElements()) {
 			var file = enumerator.getNext().QueryInterface(Components.interfaces.nsIFile);
 			if (file.leafName.endsWith(".js")) {
 				testFiles.push(file.leafName);
 			}
 		}
-		testFiles.sort();
+		testFiles.sort((a, b) => {
+			a = a.replace(/Test.js$/, '').toLowerCase();
+			b = b.replace(/Test.js$/, '').toLowerCase();
+			if (a < b) return -1;
+			if (a > b) return 1;
+			return 0;
+		});
 		
 		// Find the start and stop files
 		let startPos = 0;
@@ -253,7 +257,7 @@ if (run && ZoteroUnit.tests) {
 		}
 		testFiles = testFiles.slice(startPos, stopPos + 1);
 	} else {
-		var specifiedTests = ZoteroUnit.tests.split(",");
+		var specifiedTests = TestOptions.tests.split(",");
 		for (let test of specifiedTests) {
 			let fname = getTestFilename(test);
 			let file = testDirectory.clone();
@@ -282,9 +286,7 @@ if(run) {
 		
 		// Make a copy of the database that can be used in resetDB()
 		var dbFile = Zotero.DataDirectory.getDatabase();
-		await OS.File.copy(dbFile, dbFile + '-test-template');
-		
-		initPDFToolsPath();
+		await IOUtils.copy(dbFile, dbFile + '-test-template');
 		
 		return mocha.run();
 	};

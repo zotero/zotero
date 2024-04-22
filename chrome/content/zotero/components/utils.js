@@ -95,6 +95,50 @@ const scrollIntoViewIfNeeded = (element, container, opts = {}) => {
 
 const stopPropagation = ev => ev.stopPropagation();
 
+// pick and omit from https://github.com/zotero/web-common/blob/master/utils/immutable.js
+const omit = (object, deleteKeys) => {
+	if (typeof (deleteKeys) !== 'function') {
+		if (!Array.isArray(deleteKeys)) {
+			deleteKeys = [deleteKeys];
+		}
+		deleteKeys = deleteKeys.map(dk => (typeof (dk) !== 'string' ? dk.toString() : dk));
+	}
+
+	return Object.entries(object)
+		.reduce((aggr, [key, value]) => {
+			if (typeof (deleteKeys) === 'function') {
+				if (!deleteKeys(key, value)) { aggr[key] = value; }
+			} else if (!deleteKeys.includes(key)) {
+				aggr[key] = value;
+			}
+			return aggr;
+		}, {});
+};
+
+const pick = (object, pickKeys) => {
+	if (typeof (pickKeys) === 'function') {
+		return Object.entries(object)
+			.reduce((aggr, [key, value]) => {
+				if (pickKeys(key)) {
+					aggr[key] = value;
+				}
+				return aggr;
+			}, {});
+	}
+	if (!Array.isArray(pickKeys)) {
+		pickKeys = [pickKeys];
+	}
+
+	return Object.entries(object)
+		.reduce((aggr, [key, value]) => {
+			if (pickKeys.includes(key)) {
+				aggr[key] = value;
+			}
+			return aggr;
+		}, {});
+};
+
+
 export {
-	nextHTMLID, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded, stopPropagation
+	nextHTMLID, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded, stopPropagation, pick, omit
 };

@@ -376,7 +376,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			var parentDirPath = await Zotero.Attachments.createDirectoryForItem(item);
 		}
 		else {
-			var parentDirPath = OS.Path.dirname(filePath);
+			var parentDirPath = PathUtils.parent(filePath);
 		}
 		var cacheFilePath = OS.Path.join(parentDirPath, this.fulltextCacheFile);
 		try {
@@ -521,7 +521,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		
 		var contentType = item.attachmentContentType;
-		var charset = item.attachmentCharacterSet;
+		var charset = item.attachmentCharset;
 		
 		if (!contentType) {
 			Zotero.debug("No content type in indexItem()", 2);
@@ -557,7 +557,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		// Otherwise load it in a hidden browser
 		else {
-			let pageData = await getPageData(path);
+			// If the file's content type can't be displayed in a browser, treat it as text/plain
+			if (!Cc["@mozilla.org/webnavigation-info;1"].getService(Ci.nsIWebNavigationInfo)
+					.isTypeSupported(contentType)) {
+				contentType = 'text/plain';
+			}
+			
+			let pageData = await getPageData(path, contentType);
 			text = pageData.bodyText;
 			if (!charset) {
 				charset = pageData.characterSet;
@@ -825,7 +831,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var itemCacheFile = this.getItemCacheFile(item).path; // .zotero-ft-cache
 		
 		// If a storage directory doesn't exist, create it
-		if (!(yield OS.File.exists(OS.Path.dirname(processorCacheFile)))) {
+		if (!(yield OS.File.exists(PathUtils.parent(processorCacheFile)))) {
 			yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		
@@ -1427,31 +1433,36 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	}
 	
 	
+	this.canIndex = function (item) {
+		if (!item.isAttachment()
+				|| item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			return false;
+		}
+		var contentType = item.attachmentContentType;
+		return contentType
+			&& (contentType == 'application/pdf'
+				|| contentType == 'application/epub+zip'
+				|| Zotero.MIME.isTextType(contentType));
+	};
+	
+	
 	/*
 	 * Returns true if an item can be reindexed
 	 *
 	 * Item must be a non-web-link attachment that isn't already fully indexed
 	 */
 	this.canReindex = Zotero.Promise.coroutine(function* (item) {
-		if (item.isAttachment()
-				&& item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			let contentType = item.attachmentContentType;
-			if (!contentType
-					|| contentType != 'application/pdf'
-						&& contentType != 'application/epub+zip'
-						&& !Zotero.MIME.isTextType(contentType)) {
-				return false;
-			}
-			switch (yield this.getIndexedState(item)) {
-				case this.INDEX_STATE_UNAVAILABLE:
-				case this.INDEX_STATE_UNINDEXED:
-				case this.INDEX_STATE_PARTIAL:
-				case this.INDEX_STATE_QUEUED:
-				
-				// TODO: automatically reindex already-indexed attachments?
-				case this.INDEX_STATE_INDEXED:
-					return true;
-			}
+		if (!this.canIndex(item)) {
+			return false;
+		}
+		switch (yield this.getIndexedState(item)) {
+			case this.INDEX_STATE_UNAVAILABLE:
+			case this.INDEX_STATE_UNINDEXED:
+			case this.INDEX_STATE_PARTIAL:
+			case this.INDEX_STATE_QUEUED:
+			// TODO: automatically reindex already-indexed attachments?
+			case this.INDEX_STATE_INDEXED:
+				return true;
 		}
 		return false;
 	});
@@ -1596,18 +1607,26 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	});
 	
 	
-	async function getPageData(path) {
+	async function getPageData(path, contentType) {
 		const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+		var blobURL;
 		var browser;
 		var pageData;
 		try {
-			let url = Zotero.File.pathToFileURI(path);
-			browser = await HiddenBrowser.create(url, { blockRemoteResources: true });
-			pageData = await HiddenBrowser.getPageData(browser, ['characterSet', 'bodyText']);
+			// Wrap the file in a blob to set its content type
+			let arrayBuffer = await (await fetch(Zotero.File.pathToFileURI(path))).arrayBuffer();
+			let blob = new Blob([arrayBuffer], { type: contentType });
+			blobURL = URL.createObjectURL(blob);
+			browser = new HiddenBrowser({ blockRemoteResources: true });
+			await browser.load(blobURL);
+			pageData = await browser.getPageData(['characterSet', 'bodyText']);
 		}
 		finally {
+			if (blobURL) {
+				URL.revokeObjectURL(blobURL);
+			}
 			if (browser) {
-				HiddenBrowser.destroy(browser);
+				browser.destroy();
 			}
 		}
 		return {
@@ -1626,7 +1645,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		var cacheFile = this.getItemCacheFile(item).path;
 		Zotero.debug("Writing converted full-text content to " + cacheFile);
-		if (!await OS.File.exists(OS.Path.dirname(cacheFile))) {
+		if (!await OS.File.exists(PathUtils.parent(cacheFile))) {
 			await Zotero.Attachments.createDirectoryForItem(item);
 		}
 		try {

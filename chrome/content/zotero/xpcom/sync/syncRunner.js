@@ -386,7 +386,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					Zotero.getString('general.warning'),
 					Zotero.getString(
 							'account.warning.emptyLibrary',
-							[Zotero.clientName, OS.Path.basename(Zotero.DB.path)]
+							[Zotero.clientName, PathUtils.filename(Zotero.DB.path)]
 						) + "\n\n"
 						+ Zotero.getString(
 							'account.warning.emptyLibrary.dataWillBeDownloaded',
@@ -544,8 +544,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			let removedGroups = [];
 			let keptGroups = [];
 			
-			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
+			let ps = Services.prompt;
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
@@ -1158,8 +1157,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 										.getService(Components.interfaces.nsIWindowMediator);
 							var win = wm.getMostRecentWindow("navigator:browser");
 							
-							var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+							var ps = Services.prompt;
 							var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 												+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 							if (e.error == Zotero.Error.ERROR_API_KEY_NOT_SET) {
@@ -1339,7 +1337,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				e.errorType = 'warning';
 				e.dialogButtonText = Zotero.getString('general.checkForUpdates');
 				e.dialogButtonCallback = () => {
-					Zotero.openCheckForUpdatesWindow();
+					Zotero.openCheckForUpdatesWindow({ modal: true });
 				};
 				e.dialogButton2Text = Zotero.getString('general.moreInformation');
 				e.dialogButton2Callback = () => {
@@ -1414,17 +1412,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			// Update sync icon
 			var syncIcon = doc.getElementById('zotero-tb-sync');
-			var stopIcon = doc.getElementById('zotero-tb-sync-stop');
 			if (state == 'animate') {
 				syncIcon.setAttribute('status', state);
-				// Disable button while spinning
-				syncIcon.disabled = true;
-				stopIcon.hidden = false;
 			}
 			else {
 				syncIcon.removeAttribute('status');
-				syncIcon.disabled = false;
-				stopIcon.hidden = true;
 			}
 		}
 		
@@ -1599,6 +1591,53 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		return panel;
 	}
+	
+	
+	this.alert = function (e) {
+		e = Zotero.Sync.Runner.parseError(e);
+		var ps = Services.prompt;
+		var buttonText = e.dialogButtonText;
+		var buttonCallback = e.dialogButtonCallback;
+		
+		if (e.errorType == 'warning' || e.errorType == 'error') {
+			let title = Zotero.getString('general.' + e.errorType);
+			// TODO: Display header in bold
+			let msg = (e.dialogHeader ? e.dialogHeader + '\n\n' : '') + e.message;
+			
+			if (e.errorType == 'warning' || buttonText === null) {
+				ps.alert(null, title, e.message);
+				return;
+			}
+			
+			if (!buttonText) {
+				buttonText = Zotero.getString('errorReport.reportError');
+				buttonCallback = function () {
+					ZoteroPane.reportErrors();
+				};
+			}
+			
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			let index = ps.confirmEx(
+				null,
+				title,
+				msg,
+				buttonFlags,
+				"",
+				buttonText,
+				"", null, {}
+			);
+			
+			if (index == 1) {
+				setTimeout(buttonCallback, 1);
+			}
+		}
+		// Upgrade message
+		else if (e.errorType == 'upgrade') {
+			ps.alert(null, "", e.message);
+			return;
+		}
+	};
 	
 	
 	/**

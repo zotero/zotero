@@ -31,6 +31,8 @@ var Zotero_Preferences = {
 	_firstPaneLoadDeferred: Zotero.Promise.defer(),
 	
 	_observerSymbols: new Map(),
+	
+	_mutationObservers: new Map(),
 
 	init: function () {
 		this.navigation = document.getElementById('prefs-navigation');
@@ -102,6 +104,13 @@ var Zotero_Preferences = {
 			Zotero.Prefs.unregisterObserver(symbol);
 		}
 		this._observerSymbols.clear();
+
+		for (let [_key, pane] of this.panes) {
+			for (let child of pane.container.children) {
+				let event = new Event('unload');
+				child.dispatchEvent(event);
+			}
+		}
 	},
 	
 	waitForFirstPaneLoad: async function () {
@@ -144,11 +153,25 @@ var Zotero_Preferences = {
 					child.hidden = true;
 				}
 			}
+			for (let navItem of this.navigation.children) {
+				navItem.setAttribute('data-parent-selected', pane.parent && navItem.value === pane.parent);
+			}
 
 			this.helpContainer.hidden = !pane.helpURL;
 			document.getElementById('prefs-subpane-back-button').hidden = !pane.parent;
+
+			if (!pane.parent) {
+				Zotero.Prefs.set('lastSelectedPrefPane', paneID);
+			}
 		}
-		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
+		else {
+			for (let navItem of this.navigation.children) {
+				navItem.setAttribute('data-parent-selected', false);
+			}
+			
+			this.helpContainer.hidden = true;
+			document.getElementById('prefs-subpane-back-button').hidden = true;
+		}
 	},
 
 	/**
@@ -192,26 +215,28 @@ var Zotero_Preferences = {
 		}
 		else {
 			let labelElem = document.createXULElement('label');
-			if (rawLabel) {
-				labelElem.value = rawLabel;
+			if (!rawLabel) {
+				if (Zotero.Intl.strings.hasOwnProperty(label)) {
+					rawLabel = Zotero.Intl.strings[label];
+				}
+				else {
+					rawLabel = Zotero.getString(label);
+				}
 			}
-			else if (Zotero.Intl.strings.hasOwnProperty(label)) {
-				labelElem.value = Zotero.Intl.strings[label];
-			}
-			else {
-				labelElem.value = Zotero.getString(label);
-			}
+			labelElem.value = rawLabel;
 			listItem.append(labelElem);
 		}
 
 		this.navigation.append(listItem);
 
 		let container = document.createElement('div');
+		container.classList.add('pane-container');
 		container.hidden = true;
 		this.helpContainer.before(container);
 
 		this.panes.set(id, {
 			...options,
+			rawLabel,
 			loaded: false,
 			container,
 		});
@@ -261,10 +286,27 @@ var Zotero_Preferences = {
 			contentFragment = document.importNode(contentFragment, true);
 
 			this._initImportedNodesPreInsert(contentFragment);
+			
+			let heading = document.createElement('h1');
+			heading.textContent = pane.rawLabel;
 			pane.container.append(contentFragment);
+			if (pane.container.querySelector('.main-section')) {
+				pane.container.querySelector('.main-section').prepend(heading);
+			}
+			else {
+				pane.container.prepend(heading);
+			}
 
 			await document.l10n.ready;
-			await document.l10n.translateFragment(pane.container);
+			try {
+				await document.l10n.translateFragment(pane.container);
+			}
+			catch (e) {
+				// Some element had invalid l10n attributes, but elements with valid l10n attributes were
+				// translated successfully, so no need to treat this as fatal
+				// The error will be undefined for some reason, so make our own
+				Zotero.logError(new Error(`document.l10n.translateFragment() failed -- invalid data-l10n-id in pane '${pane.id}'?`));
+			}
 			await this._initImportedNodesPostInsert(pane.container);
 
 			pane.loaded = true;
@@ -286,7 +328,10 @@ var Zotero_Preferences = {
 		let pane = this.panes.get(id);
 
 		pane.container.hidden = false;
-		pane.container.children[0].dispatchEvent(new Event('showing'));
+		for (let child of pane.container.children) {
+			let event = new Event('showing');
+			child.dispatchEvent(event);
+		}
 	},
 	
 	_parseXHTMLToFragment(str, entities = []) {
@@ -347,12 +392,20 @@ ${str}
 			|| elem.tagName == 'checkbox';
 	},
 
-	_syncFromPref(elem, preference) {
+	_syncFromPref(elem, preference, force = false) {
 		let value = Zotero.Prefs.get(preference, true);
 		if (this._useChecked(elem)) {
+			value = !!value;
+			if (!force && elem.checked === value) {
+				return;
+			}
 			elem.checked = value;
 		}
 		else {
+			value = String(value);
+			if (!force && elem.value === value) {
+				return;
+			}
 			elem.value = value;
 		}
 		elem.dispatchEvent(new Event('syncfrompreference'));
@@ -361,8 +414,8 @@ ${str}
 	_syncToPrefOnModify(event) {
 		if (event.currentTarget.getAttribute('preference')) {
 			let value = this._useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
-			Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
 			event.currentTarget.dispatchEvent(new Event('synctopreference'));
+			Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
 		}
 	},
 
@@ -397,7 +450,6 @@ ${str}
 				// Ignore
 			}
 
-			Zotero.debug(`Attaching <${elem.tagName}> element to ${preference}`);
 			let symbol = Zotero.Prefs.registerObserver(
 				preference,
 				() => this._syncFromPref(elem, preference),
@@ -406,14 +458,29 @@ ${str}
 			this._observerSymbols.set(elem, symbol);
 			
 			if (elem.tagName === 'menulist') {
-				// Set up an observer to resync if this menulist has items added/removed later
+				// Set up an observer to resync if this menulist has items added later
 				// (If we set elem.value before the corresponding item is added, the label won't be updated when it
 				//  does get added, unless we do this)
-				new MutationObserver(() => this._syncFromPref(elem, preference))
-					.observe(elem, {
-						childList: true,
-						subtree: true
-					});
+				let mutationObserver = new MutationObserver((mutations) => {
+					let value = Zotero.Prefs.get(preference, true);
+					for (let mutation of mutations) {
+						for (let node of mutation.addedNodes) {
+							if (node.tagName === 'menuitem' && node.value === value) {
+								Zotero.debug(`Preferences: menulist attached to ${preference} has new item matching current pref value '${value}'`);
+								// Set selectedItem so the menulist updates its label, icon, and description
+								// The selectedItem setter fires select and ValueChange, but we don't listen to either
+								// of those events
+								elem.selectedItem = node;
+								return;
+							}
+						}
+					}
+				});
+				mutationObserver.observe(elem, {
+					childList: true,
+					subtree: true
+				});
+				this._mutationObservers.set(elem, mutationObserver);
 			}
 
 			elem.addEventListener('command', this._syncToPrefOnModify.bind(this));
@@ -422,16 +489,19 @@ ${str}
 
 			// Set timeout before populating the value so the pane can add listeners first
 			return new Promise(resolve => setTimeout(() => {
-				this._syncFromPref(elem, elem.getAttribute('preference'));
+				this._syncFromPref(elem, elem.getAttribute('preference'), true);
 				resolve();
 			}));
 		};
 		
 		let detachFromPreference = (elem) => {
 			if (this._observerSymbols.has(elem)) {
-				Zotero.debug(`Detaching <${elem.tagName}> element from preference`);
 				Zotero.Prefs.unregisterObserver(this._observerSymbols.get(elem));
 				this._observerSymbols.delete(elem);
+			}
+			if (this._mutationObservers.has(elem)) {
+				this._mutationObservers.get(elem).disconnect();
+				this._mutationObservers.delete(elem);
 			}
 		};
 
@@ -571,12 +641,13 @@ ${str}
 		let termForDisplay = Zotero.Utilities.trimInternal(term).toLowerCase();
 		term = this._normalizeSearch(term);
 
-		for (let container of this.content.children) {
-			let root = container.firstElementChild;
-			if (!root) continue;
-
-			for (let child of root.children) {
-				let matches = this._findNodesMatching(child, term);
+		for (let paneContainer of this.content.querySelectorAll(':scope > .pane-container')) {
+			let roots = paneContainer.children;
+			while (roots.length === 1 && roots[0].childElementCount) {
+				roots = roots[0].children;
+			}
+			for (let root of roots) {
+				let matches = await this._findNodesMatching(root, term);
 				if (matches.length) {
 					let touchedTabPanels = new Set();
 					for (let node of matches) {
@@ -628,9 +699,13 @@ ${str}
 					}
 				}
 				else {
-					child.classList.add('hidden-by-search');
-					child.ariaHidden = true;
+					root.classList.add('hidden-by-search');
+					root.ariaHidden = true;
 				}
+			}
+			if (Array.from(roots).every(root => root.classList.contains('hidden-by-search'))) {
+				paneContainer.classList.add('hidden-by-search');
+				paneContainer.ariaHidden = true;
 			}
 		}
 	}),
@@ -640,10 +715,10 @@ ${str}
 	 *
 	 * @param {Element} root
 	 * @param {String} term Must be normalized (normalizeSearch())
-	 * @return {Node[]}
+	 * @return {Promise<Node[]>}
 	 */
-	_findNodesMatching(root, term) {
-		const EXCLUDE_SELECTOR = 'input, [hidden="true"], [no-highlight]';
+	async _findNodesMatching(root, term) {
+		const EXCLUDE_SELECTOR = 'input, [hidden]:not([hidden="false"]), [no-highlight]';
 
 		let matched = new Set();
 		let treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -670,35 +745,50 @@ ${str}
 				continue;
 			}
 
-			if (elem.hasAttribute('data-search-strings-raw')) {
-				let rawStrings = elem.getAttribute('data-search-strings-raw')
-					.split(',')
-					.map(this._normalizeSearch)
-					.filter(Boolean);
-				if (rawStrings.some(s => s.includes(term))) {
-					matched.add(elem);
-					continue;
+			let strings = [];
+			if (elem.hasAttribute('data-search-strings-parsed')) {
+				strings = JSON.parse(elem.getAttribute('data-search-strings-parsed'));
+			}
+			else {
+				if (elem.hasAttribute('data-search-strings-raw')) {
+					let rawStrings = elem.getAttribute('data-search-strings-raw')
+						.split(',')
+						.map(this._normalizeSearch)
+						.filter(Boolean);
+					strings.push(...rawStrings);
 				}
+
+				if (elem.hasAttribute('data-search-strings')) {
+					let stringKeys = elem.getAttribute('data-search-strings')
+						.split(',')
+						.map(s => s.trim())
+						.filter(Boolean);
+					// Get strings from Fluent
+					let localizedStrings = await document.l10n.formatMessages(stringKeys);
+					localizedStrings = localizedStrings.flatMap((message, i) => {
+						// If we got something from Fluent, use the value and relevant attributes
+						if (message) {
+							return [message.value, message.attributes?.title, message.attributes?.label];
+						}
+
+						// If we didn't, try strings from DTDs and properties
+						let key = stringKeys[i];
+						return [
+							Zotero.Intl.strings.hasOwnProperty(key)
+								? Zotero.Intl.strings[key]
+								: Zotero.getString(key)
+						];
+					}).filter(Boolean)
+						.map(this._normalizeSearch)
+						.filter(Boolean);
+					strings.push(...localizedStrings);
+				}
+
+				elem.setAttribute('data-search-strings-parsed', JSON.stringify(strings));
 			}
 
-			if (elem.hasAttribute('data-search-strings')) {
-				let stringKeys = elem.getAttribute('data-search-strings')
-					.split(',')
-					.map(s => s.trim())
-					.filter(Boolean);
-				for (let key of stringKeys) {
-					if (Zotero.Intl.strings.hasOwnProperty(key)) {
-						if (this._normalizeSearch(Zotero.Intl.strings[key]).includes(term)) {
-							matched.add(elem);
-							break;
-						}
-					}
-					else if (this._normalizeSearch(Zotero.getString(key).replace(/%(\d+\$)?S/g, ''))
-							.includes(term)) {
-						matched.add(elem);
-						break;
-					}
-				}
+			if (strings.some(s => s.includes(term))) {
+				matched.add(elem);
 			}
 		}
 

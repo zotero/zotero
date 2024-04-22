@@ -26,13 +26,18 @@
 "use strict";
 
 {
-	// The search-textbox CE is defined lazily. Create one now to get
-	// search-textbox defined, allowing us to inherit from it.
-	if (!customElements.get("search-textbox")) {
-		delete document.createXULElement("search-textbox");
-	}
-	
-	class QuickSearchTextbox extends customElements.get("search-textbox") {
+	class QuickSearchTextbox extends XULElement {
+		constructor() {
+			super();
+
+			this.searchTextbox = null;
+			MozXULElement.insertFTLIfNeeded("zotero.ftl");
+			this.content = MozXULElement.parseXULToFragment(`
+				<hbox id="search-wrapper" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+				</hbox>
+			`, ['chrome://zotero/locale/zotero.dtd']);
+		}
+
 		_searchModes = {
 			titleCreatorYear: Zotero.getString('quickSearch.mode.titleCreatorYear'),
 			fields: Zotero.getString('quickSearch.mode.fieldsAndTags'),
@@ -42,16 +47,19 @@
 		_searchModePopup = null;
 
 		connectedCallback() {
-			super.connectedCallback();
-
-			if (this.delayConnectedCallback()) {
-				return;
-			}
+			let content = document.importNode(this.content, true);
+			this.append(content);
+			// Top level wrapper that will have dropmarker and search-textbox as children.
+			// That way, we can move focus-ring between these two siblings regardless of
+			// their shadom DOMs.
+			let wrapper = this._id('search-wrapper');
 
 			// Need to create an inner shadow DOM so that global.css styles,
 			// which we need for the menupopup, don't break the search textbox
 			let dropmarkerHost = document.createXULElement('hbox');
 			let dropmarkerShadow = dropmarkerHost.attachShadow({ mode: 'open' });
+			document.l10n.connectRoot(dropmarkerHost.shadowRoot);
+			dropmarkerHost.id = 'zotero-tb-search-dropmarker';
 
 			let s1 = document.createElement("link");
 			s1.rel = "stylesheet";
@@ -63,14 +71,22 @@
 
 			let dropmarker = document.createXULElement('button');
 			dropmarker.id = "zotero-tb-search-menu-button";
-			dropmarker.tabIndex = -1;
+			dropmarker.tabIndex = 0;
 			dropmarker.setAttribute("type", "menu");
+			dropmarker.setAttribute("data-l10n-id", "quicksearch-mode");
 			dropmarker.append(this.searchModePopup);
 
 			dropmarkerShadow.append(s1, s2, dropmarker);
 
-			this.inputField.before(dropmarkerHost);
-
+			let searchBox = document.createXULElement("search-textbox");
+			searchBox.inputField.setAttribute("data-l10n-id", "quicksearch-input");
+			searchBox.id = "zotero-tb-search-textbox";
+			this.searchTextbox = searchBox;
+			
+			wrapper.appendChild(dropmarkerHost);
+			wrapper.appendChild(searchBox);
+			
+			
 			// If Alt-Up/Down, show popup
 			this.addEventListener('keypress', (event) => {
 				if (event.altKey && (event.keyCode == event.DOM_VK_UP || event.keyCode == event.DOM_VK_DOWN)) {
@@ -98,14 +114,24 @@
 					Zotero.Prefs.set("search.quicksearch-mode", mode);
 					this.updateMode();
 
-					if (this.value) {
-						this.dispatchEvent(new Event('command'));
-					}
+					this.dispatchEvent(new Event('command'));
 				});
 
 				popup.append(item);
 			}
-
+			
+			// Add Advanced Search menu item in main window
+			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
+				let separator = document.createXULElement('menuseparator');
+				popup.append(separator);
+				let advancedSearchOption = document.createXULElement('menuitem');
+				advancedSearchOption.label = Zotero.getString("zotero.toolbar.advancedSearch");
+				advancedSearchOption.addEventListener("command", () => {
+					ZoteroPane.openAdvancedSearchWindow();
+				});
+				popup.append(advancedSearchOption);
+			}
+			
 			return this._searchModePopup = popup;
 		}
 
@@ -119,7 +145,13 @@
 
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
-			this.placeholder = this._searchModes[mode];
+			this.searchTextbox.placeholder = this._searchModes[mode];
+			// Have the placeholder announced by screen readers after the label for additional context
+			this.searchTextbox.inputField.setAttribute("aria-description", this.searchTextbox.placeholder);
+		}
+
+		_id(id) {
+			return this.querySelector(`[id=${id}]`);
 		}
 	}
 	

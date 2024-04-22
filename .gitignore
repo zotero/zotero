@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
-build
+build/
 .signatures.json
 tmp
+app/win/codesign

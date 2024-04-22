@@ -1,0 +1,16 @@
+abstract-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+}
+
+abstract-box .body {
+	display: flex;
+	
+	editable-text, browser {
+		flex: 1;
+	}
+}

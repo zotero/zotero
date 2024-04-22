@@ -6,8 +6,7 @@
 # NOTE: For English locales, strings in this file should be in APA-style Title Case.
 # See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
 #
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
 
 ## Application Menu (macOS only)
 
@@ -110,7 +109,7 @@ menu-edit =
     .label = 編集
     .accesskey = E
 menu-edit-find-in-page =
-    .label = ページを検索...
+    .label = ページ内を検索...
     .accesskey = F
 menu-edit-find-again =
     .label = 次を検索
@@ -139,6 +138,8 @@ menu-view-history-button =
     .label = 履歴
 menu-view-synced-tabs-sidebar =
     .label = 同期タブ
+menu-view-megalist-sidebar =
+    .label = パスワード
 menu-view-full-zoom =
     .label = ズーム
     .accesskey = Z
@@ -219,8 +220,9 @@ menu-history-undo-menu =
     .label = 最近閉じたタブ
 menu-history-undo-window-menu =
     .label = 最近閉じたウィンドウ
-menu-history-reopen-all-tabs = タブをすべて開きなおす
-menu-history-reopen-all-windows = ウィンドウをすべて開きなおす
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = 履歴を検索
 
 ## Bookmarks Menu
 
@@ -229,14 +231,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = ブックマークを管理
-menu-bookmark-current-tab =
-    .label = 現在のタブをブックマーク
-menu-bookmark-edit =
-    .label = このブックマークを編集
 menu-bookmark-tab =
     .label = 現在のタブをブックマーク...
 menu-edit-bookmark =
     .label = このブックマークを編集...
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = ブックマークを検索
 menu-bookmarks-all-tabs =
     .label = すべてのタブをブックマーク...
 menu-bookmarks-toolbar =
@@ -330,6 +331,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = トラブルシューティングモードをオフにする
     .accesskey = M
+menu-help-switch-device =
+    .label = 新しい端末に切り替え
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +342,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = 詐欺サイトの誤報告を指摘...
     .accesskey = d
+menu-report-broken-site =
+    .label = 動作しないサイトを報告

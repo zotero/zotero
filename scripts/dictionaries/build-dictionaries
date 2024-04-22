@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import urllib.request, json, re
+import urllib.request, json, re, time
 from functools import cmp_to_key
 from locale import strcoll
 
@@ -41,6 +41,7 @@ locales = {
     'sl-SI': 'Slovenščina',
     'sr-RS': 'Српски',
     'sv-SE': 'Svenska',
+    'ta': 'தமிழ்',
     'th-TH': 'ไทย',
     'tr-TR': 'Türkçe',
     'uk-UA': 'Українська',
@@ -86,6 +87,7 @@ with urllib.request.urlopen("https://services.addons.mozilla.org/api/v4/addons/l
                 'url': dictionary['current_version']['files'][0]['url'],
                 'users': dictionary['average_daily_users'],
             })
+            time.sleep(1)
     dictionaries.sort(key=lambda x: x.get('users'), reverse=True)
 
 # Find dictionaries best matching the specified locales
@@ -137,6 +139,7 @@ for d in final_dictionaries:
         'dictionaries/' + d['id'] + '-' + d['version'] + '.xpi'
     )
     del(d['url'])
+    time.sleep(1)
 
 with open('dictionaries/dictionaries.json', 'w', encoding='utf-8') as f:
     json.dump(final_dictionaries, f, ensure_ascii=False, sort_keys=True, indent='\t')

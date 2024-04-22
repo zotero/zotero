@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -116,7 +122,7 @@ menu-edit-find-again =
     .label = מצא שוב
     .accesskey = ש
 menu-edit-bidi-switch-text-direction =
-    .label = הפוך כיוון כתיבה
+    .label = היפוך כיוון כתיבה
     .accesskey = כ
 
 ## View Menu
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = היסטוריה
 menu-view-synced-tabs-sidebar =
     .label = לשוניות מסונכרנות
+menu-view-megalist-sidebar =
+    .label = ססמאות
 menu-view-full-zoom =
     .label = מרחק מתצוגה
     .accesskey = ת
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = לשוניות שנסגרו לאחרונה
 menu-history-undo-window-menu =
     .label = חלונות שנסגרו לאחרונה
-menu-history-reopen-all-tabs = פתיחת כל הלשוניות מחדש
-menu-history-reopen-all-windows = פתיחת כל החלונות מחדש
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = חיפוש בהיסטוריה
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = ס
 menu-bookmarks-manage =
     .label = ניהול סימניות
-menu-bookmark-current-tab =
-    .label = יצירת סימנייה ללשונית הנוכחית
-menu-bookmark-edit =
-    .label = עריכת סימנייה זו
 menu-bookmark-tab =
     .label = יצירת סימנייה ללשונית הנוכחית…
 menu-edit-bookmark =
     .label = עריכת סימנייה זו…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = חיפוש בסימניות
 menu-bookmarks-all-tabs =
     .label = יצירת סימנייה לכל הלשוניות…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = כיבוי מצב לפתרון בעיות
     .accesskey = פ
+menu-help-switch-device =
+    .label = מעבר למכשיר חדש
+    .accesskey = מ
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = אתר זה אינו אתר מטעה…
     .accesskey = א
+menu-report-broken-site =
+    .label = דיווח על אתר שבור

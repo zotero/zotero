@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Standard:">
 <!ENTITY zotero.preferences.items "elementer">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Innstillinger">
 <!ENTITY zotero.preferences.custom "Egendefinert...">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Deaktiver hurtigkopi når du drar mer enn">
 
 <!ENTITY zotero.preferences.prefpane.cite "Henvis">
-<!ENTITY zotero.preferences.cite.styles "Stiler">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstbehandlere">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Bruk klassisk dialogboks for Legg til henvisninger ">
 <!ENTITY zotero.preferences.styleEditor "Redigeringsprogram for stiler">

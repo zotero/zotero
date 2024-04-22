@@ -63,11 +63,7 @@
 <!ENTITY addons.label "확장 기능">
 <!ENTITY developer.label "개발자">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "최소화">
 <!ENTITY bringAllToFront.label "모두 앞으로 가져오기">
-<!ENTITY zoomWindow.label "크기 조정">
-<!ENTITY windowMenu.label "창">
 
 <!ENTITY helpMenu.label "도움말">
 <!ENTITY helpMenu.accesskey "H">

@@ -188,6 +188,10 @@ class PDFWorker {
 				});
 			}
 			let attachmentPath = await attachment.getFilePathAsync();
+			if (!attachmentPath) {
+				Zotero.warn("Not exporting missing file " + attachment.getFilePath());
+				return 0;
+			}
 			let buf = await IOUtils.read(attachmentPath);
 			buf = new Uint8Array(buf).buffer;
 
@@ -528,6 +532,7 @@ class PDFWorker {
 					await object.reload(null, true);
 				}
 			}
+			await Zotero.Items.updateSynced(ids, false);
 			await Zotero.Notifier.trigger('modify', 'item', ids, {});
 
 			await IOUtils.write(path, new Uint8Array(modifiedBuf));
@@ -801,7 +806,7 @@ class PDFRenderer {
 				if (this._browser.contentWindow.location.href === 'about:blank') return;
 				this._browser.contentWindow.addEventListener('message', _handleMessage);
 			});
-			this._browser.loadURI(RENDERER_URL);
+			this._browser.loadURI(Services.io.newURI(RENDERER_URL));
 
 			let _handleMessage = async (event) => {
 				if (event.source !== this._browser.contentWindow) {

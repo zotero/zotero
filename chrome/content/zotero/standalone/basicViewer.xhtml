@@ -27,12 +27,11 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 <?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
 <!DOCTYPE window [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
 	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
@@ -45,11 +44,14 @@
 				onload="window.sizeToContent()"
 				windowtype="zotero:basicViewer" 
 				title="&brandShortName;"
-				width="1000" height="700"
+				style="min-width: 1000px; min-height: 700px;"
 				persist="screenX screenY width height sizemode">
 	
-	<html:link rel="localization" href="browser/menubar.ftl"/>
-	<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	</linkset>
 
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -121,7 +123,7 @@
 		</menupopup>
 	</popupset>
 	
-	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
+	<toolbox id="navigator-toolbox" class="toolbox-top menubar-container" mode="icons" defaultmode="icons">
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
 				defaultset="menubar-items"
@@ -177,33 +179,29 @@
 						</menupopup>
 					</menu>
 					
+					<commandset id="macCommandSet"> <!-- was mainCommandSet -->
+						<command id="minimizeWindow"
+								 data-l10n-id="window-minimize-command"
+								 oncommand="window.minimize();" />
+						<command id="zoomWindow"
+								 data-l10n-id="window-zoom-command"
+								 oncommand="zoomWindow();" />
+					</commandset>
+
 					<keyset id="macKeyset">  <!-- was mainKeySet -->
 						<key id="key_minimizeWindow"
 								command="minimizeWindow"
-								key="&minimizeWindow.key;"
-								modifiers="accel"/>
+								data-l10n-id="window-minimize-shortcut"
+								modifiers="accel"
+								internal="true"/>
 					</keyset>
 
 					<menu id="windowMenu"
-							label="&windowMenu.label;"
-							datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
-							onpopupshowing="macWindowMenuDidShow();"
-							onpopuphidden="macWindowMenuDidHide();"
-							hidden="false">
-						<template>
-							<rule>
-								<menupopup>
-									<menuitem uri="rdf:*"
-											label="rdf:http://home.netscape.com/NC-rdf#Name"
-											type="radio"
-											name="windowList"
-											oncommand="ShowWindowFromResource(event.target)"/>
-								</menupopup>
-							</rule>
-						</template>
+							data-l10n-id="menu-window-menu">
 						<menupopup id="windowPopup">
-							<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
-							<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+							<menuseparator/>
+							<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+							<menuitem command="zoomWindow"/>
 							<!-- decomment when "BringAllToFront" is implemented
 								<menuseparator/>
 								<menuitem label="&bringAllToFront.label;" disabled="true"/> -->

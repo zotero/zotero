@@ -41,7 +41,7 @@ Zotero.Sync.Storage.Utilities = {
 			zipFile,
 			{
 				onStopRequest: function (req, context, status) {
-					var zipFileName = OS.Path.basename(zipFile);
+					var zipFileName = PathUtils.filename(zipFile);
 					
 					var originalSize = 0;
 					for (let entry of context.entries) {
@@ -91,8 +91,7 @@ Zotero.Sync.Storage.Utilities = {
 			throw new Error("Unsupported library type " + libraryType);
 		}
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 			+ ps.BUTTON_DELAY_ENABLE;

@@ -40,6 +40,7 @@ const Icons = require('components/icons');
  * @property {string} [width] - A column width instead of flex ratio. See above.
  * @property {boolean} [fixedWidth] - Default: false. Set to true to disable column resizing
  * @property {boolean} [staticWidth] - Default: false. Set to true to prevent columns from changing width when the width of the tree increases or decreases
+ * @property {boolean} [noPadding] - Set to true for columns with padding disabled in stylesheet
  * @property {number} [minWidth] - Override the default [20px] column min-width for resizing
  * @property {React.Component} [iconLabel] - Set an Icon label instead of a text-based one
  * @property {string} [iconPath] - Set an Icon path, overrides {iconLabel}
@@ -49,6 +50,7 @@ const Icons = require('components/icons');
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
  * @property {(item: Zotero.Item, dataKey: string) => string} [dataProvider] - Custom data provider that is called when rendering cells
+ * @property {(index: number, data: string, column: ItemTreeColumnOptions & {className: string}) => HTMLElement} [renderCell] - The cell renderer function
  * @property {string[]} [zoteroPersist] - Which column properties should be persisted between zotero close
  */
 
@@ -336,7 +338,8 @@ const COLUMNS = [
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
-		width: "16",
+		width: "32",
+		noPadding: true,
 		zoteroPersist: ["hidden", "sortDirection"]
 	},
 	{
@@ -345,9 +348,10 @@ const COLUMNS = [
 		showInColumnPicker: true,
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
-		width: "14",
-		minWidth: 14,
+		width: "26",
+		minWidth: 26,
 		staticWidth: true,
+		noPadding: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{

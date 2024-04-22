@@ -2,8 +2,14 @@
 	// These variables can be overridden in platform styles to set platform-specific safe areas
 	--safe-area-start: 0;
 	--safe-area-end: 0;
+	--tab-border: .5px solid var(--tab-border);
 
-	min-height: 30px;
+	background: var(--material-tabbar);
+	-moz-window-dragging: drag;
+	min-height: var(--tab-min-height);
+	flex: 1;
+
+	@include macOS-inactive-opacity;
 	
 	&:not([hidden]) {
 		// display: flex overrides the hidden attribute
@@ -14,19 +20,23 @@
 		content: '';
 		min-width: var(--safe-area-start);
 		// Add bottom border to safe area space
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 	}
 
 	&::after {
 		content: '';
 		min-width: var(--safe-area-end);
 		// Add bottom border to safe area space
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 	}
 	
 	& > div {
 		flex-grow: 1;
 	}
+}
+
+#zotero-tabs-toolbar {
+	background: var(--material-tabbar);
 }
 
 .tab-bar-inner-container {
@@ -38,51 +48,78 @@
 	}
 
 	.scroll-start-arrow, .scroll-end-arrow {
-		height: 30px;
-		padding: 0 3px;
+		padding: 0 4px;
 		align-items: center;
-		z-index: 1;
-		color: #bebebe;
+		color: var(--fill-secondary);
 		display: none;
 		box-shadow: none;
-		// Add bottom border to scroll arrows,
-		// and negate the extra vertical pixel added by the border with a negative margin
-		border-bottom: $tab-border;
-		margin-bottom: -1px;
-		box-sizing: border-box;
+		z-index: 1;
+
+		> button {
+			width: auto;
+			padding: 0;
+			border: 0;
+			height: 28px;
+			border-radius: 5px;
+			background: transparent;
+		}
 
 		.icon {
 			display: flex;
+			fill: var(--fill-tertiary);
 		}
 
 		&.active {
-			color: #505050;
-			&:hover {
-				background-color: rgba(0, 0, 0, 0.08);
+			button {
+				&:hover {
+					background-color: var(--fill-quinary);
+				}
+			
+				&:active {
+					background-color: var(--fill-quarternary);
+				}
+			}
+
+			.icon {
+				fill: var(--fill-secondary);
 			}
 		}
 	}
 
 	.scroll-start-arrow {
-		border-right: 1px solid transparent;
+		border-right: var(--material-border-transparent);
+		border-left: var(--material-border-quarternary);
+
 		&.active {
-			border-right: 1px solid rgba(0, 0, 0, 0.2);
-			box-shadow: 1px 0 0 0 rgba(0,0,0,0.05);
+			border-right: var(--material-panedivider);
+			box-shadow: 0.5px 0.5px 0px -0.5px rgba(0, 0, 0, 0.05), 3px 0px 3px -3px rgba(0, 0, 0, .3)
 		}
 	}
 
 	.scroll-end-arrow {
-		border-left: 1px solid transparent;
+		border-left: var(--material-border-transparent);
+
 		&.active {
-			border-left: 1px solid rgba(0, 0, 0, 0.2);
-			box-shadow: -1px 0 0 0 rgba(0,0,0,0.05);
+			border-left: var(--material-panedivider);
+			box-shadow: -0.5px 0.5px 0px -0.5px rgba(0, 0, 0, 0.05), -3px 0 3px -3px rgba(0, 0, 0, .3)
+		}
+
+		.icon {
+			transform: rotate(180deg);
 		}
 	}
 
 	.pinned-tabs {
 		display: none;
+		padding-right: 8px;
+		
+		.tabs {
+			overflow: unset;
+			position: unset;
+		}
+		
 		.tab {
-			max-width: 110px;
+			max-width: 100px;
 		}
 	}
 
@@ -107,75 +144,85 @@
 	overflow: hidden;
 	left: 0;
 	right: 0;
+	padding: 4px 1px;
+	column-gap: 4px;
+	-moz-window-dragging: drag;
 
-	&:before {
-		content: "";
-		width: 0;
-		min-width: 0;
-		border-inline-end: $tab-border;
-	}
-
-	&:after {
-		content: "";
-		flex: 1 0 0;
-		width: 100%;
-		min-width: 0;
-		// Add bottom border to the space between the last tab and the spacer in #tab-bar-container::after
-		border-bottom: $tab-border;
-		border-inline-start: $tab-border;
+	.pinned-tabs & {
+		padding: 4px 0;
 	}
 }
 
 .tab {
 	box-sizing: border-box;
-	-moz-appearance: none;
 	max-width: 200px;
 	flex: 1 1 200px;
-	height: 30px;
-	line-height: 30px;
 	position: relative;
-	background: #f9f9f9;
-	border-top: 2px solid transparent;
-	color: #000;
+	color: var(--fill-primary);
 	text-align: center;
-	padding: 0 22px;
-	min-width: 110px;
-	
-	&:not(:last-child) {
-		border-inline-end: $tab-border;
-	}
-	
+	min-width: 100px;
+	height: 28px;
+	line-height: 16px;
+	padding-inline-end: 22px;
+	padding-inline-start: 6px;
+	display: flex;
+	align-items: center;
+	border-radius: 5px;
+	transition: background-color 0.1s ease-out;
+	-moz-window-dragging: no-drag;
+
+	@include macOS-inactive-opacity;
+
 	&.selected {
-		border-top: 2px solid $tab-background-color-selected;
+		background: var(--material-button);
+		box-shadow: 0px 0px 0px 0.5px rgba(0, 0, 0, 0.05), 0px 0.5px 2.5px 0px rgba(0, 0, 0, 0.30);
 	}
-	
+
 	&.dragging {
-		border-inline-start: $tab-border;
 		z-index: 1;
 	}
 	
-	&.dragging + & {
-		border-inline-start: $tab-border;
+	&:not(:last-child) {
+		border-inline-end: var(--tab-border);
+	}
+
+	&:not(.selected):hover {
+		background-color: var(--fill-quinary);
+	}
+
+	&:first-child {
+		padding: 6px; // no 22px padding for X button because pinned tab cannot be closed
+
+		.tab-close {
+			display: none;
+		}
 	}
 	
 	.tab-name {
-		line-height: 30px;
-		overflow-x: hidden;
-		text-overflow: ellipsis;
-		display: -moz-box;
-		-moz-box-pack: center;
-		position: relative;
-		top: -2px;
-		overflow-y: hidden;
+		flex: 1 1 100%;
+		line-height: 1.38461538em;
+		margin-inline-start: 4px;
+		overflow: hidden;
+		text-align: start;
+		white-space: nowrap;
 
-		.icon-bg {
-			margin-inline-end: 7px;
-			margin-top: -2px;
+		&:dir(ltr) {
+			mask-image: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px);
 		}
+
+		&:dir(rtl) {
+			mask-image: linear-gradient(to right, transparent 0px, var(--fill-primary) 20px);
+		}
+	}
+
+	.tab-icon {
+		flex: 0 0 16px;
+		height: 16px;
 	}
 
 	.tab-close {
 		position: absolute;
+		transition: background-color 0.1s ease-out;
 
 		&:dir(ltr) {
 			right: 6px;
@@ -185,7 +232,6 @@
 			left: 6px;
 		}
 
-		top: 6px;
 		width: 16px;
 		height: 16px;
 		text-align: center;
@@ -197,19 +243,15 @@
 		}
 		
 		&:hover {
-			background-color: rgba(0, 0, 0, 0.08);
+			background-color: var(--fill-quinary);
 		}
 		
 		&:active {
-			background-color: rgba(0, 0, 0, 0.16);
+			background-color: var(--fill-quarternary);
 		}
 	}
 
-	&:first-child .tab-close {
-		display: none;
-	}
-
 	&:not(.selected) {
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 	}
 }

@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "o rexistro de cambios">
 <!ENTITY zotero.upgrade.changeLogAfterLink "para saber que hai de novo.">
 
-<!ENTITY zotero.tabs.info.label "Información">
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.attachments.label "Anexo">
-<!ENTITY zotero.tabs.tags.label "Etiquetas">
-<!ENTITY zotero.tabs.related.label "Relacionados">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostrar os duplicados">
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar os elementos sen cubrir">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúsculas comezando cada oración">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Trocar Nome/Apelidos">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fixar maiúsculas">
-<!ENTITY zotero.item.viewOnline "Ver en liña">
 <!ENTITY zotero.item.copyAsURL "Gardar como URL">
 <!ENTITY zotero.item.deletePermanently "Eliminar ao completo...">
 

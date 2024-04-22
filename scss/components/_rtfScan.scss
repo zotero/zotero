@@ -1,4 +1,7 @@
 .rtfscan-wizard {
+	min-width: 700px;
+	min-height: 550px;
+	
 	wizardpage {
 		display: flex;
 		flex-direction: column;
@@ -33,9 +36,6 @@
 	}
 
 	.file-input-container {
-		background-color: $input-group-background-color;
-		border-radius: $border-radius-base;
-		border: 1px solid $input-group-border-color;
 		display: flex;
 		margin: auto $space-min auto;
 		padding: .5em;
@@ -69,7 +69,7 @@
 		>div {
 			display: flex;
 			flex: 1 0 auto;
-			background-color: -moz-field;
+			background: var(--material-background70);
 			overflow: hidden;
 			position: relative;
 		}
@@ -79,6 +79,15 @@
 
 			.windowed-list {
 				flex: 1 0 auto;
+			}
+		}
+	}
+
+	$-icons: (document-accept, document-missing);
+	@each $icon in $-icons {
+		.icon-css.icon-#{$icon} {
+			@include focus-states using ($color) {
+				@include svgicon($icon, $color, "16");
 			}
 		}
 	}

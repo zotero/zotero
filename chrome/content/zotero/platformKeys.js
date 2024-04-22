@@ -40,26 +40,6 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (fileQuitItemUnix) fileQuitItemUnix.hidden = true;
 		if (editPreferencesSeparator) editPreferencesSeparator.hidden = true;
 		if (editPreferencesItem) editPreferencesItem.hidden = true;
-
-		// Monkey-patch the toolbarbutton CE so it shows a native menu popup
-		let MozToolbarbutton = customElements.get('toolbarbutton');
-		if (MozToolbarbutton) {
-			let originalRender = MozToolbarbutton.prototype.render;
-			MozToolbarbutton.prototype.render = function () {
-				originalRender.apply(this);
-				if (!this._zoteroMouseDownListenerAdded) {
-					this.addEventListener('mousedown', (event) => {
-						if (!event.defaultPrevented
-								&& !this.disabled
-								&& this.getAttribute('nonnativepopup') != 'true'
-								&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
-							event.preventDefault();
-						}
-					});
-					this._zoteroMouseDownListenerAdded = true;
-				}
-			};
-		}
 	}
 	else {
 		// Set behavior on all non-macOS platforms

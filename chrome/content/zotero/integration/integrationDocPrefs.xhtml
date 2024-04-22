@@ -24,13 +24,16 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
+	id="integration-doc-prefs"
+	class="bibliography-window"
+	persist="screenX screenY width height sizemode"
 	title="&zotero.integration.docPrefs.title;"
 	onload="Zotero_File_Interface_Bibliography.init();"
 	>
@@ -38,18 +41,16 @@
 		id="zotero-doc-prefs-dialog"
 		orient="vertical"
 		buttons="accept,cancel,help"
-		persist="screenX screenY"
 		ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
 		ondialoghelp="Zotero_File_Interface_Bibliography.openHelpLink();"
-		onclose="document.documentElement.cancelDialog(); event.preventDefault(); event.stopPropagation();"
-		style="width: 600px">
+		onclose="document.documentElement.cancelDialog(); event.preventDefault(); event.stopPropagation();">
 		
 		<script src="../include.js"/>
 		<script src="../bibliography.js"/>
 		<vbox id="zotero-bibliography-container">
 			<groupbox>
 				<label><html:h2>&zotero.bibliography.style.label;</html:h2></label>
-				<richlistbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()" flex="1"/>
+				<richlistbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
 				<hbox align="right">
 					<label id="manage-styles" class="text-link"
 						onclick="Zotero_File_Interface_Bibliography.manageStyles()">&zotero.bibliography.manageStyles;</label>

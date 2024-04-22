@@ -1,0 +1,1508 @@
+diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
+--- a/browser/app/nsBrowserApp.cpp
++++ b/browser/app/nsBrowserApp.cpp
+@@ -154,19 +154,31 @@ static bool IsArg(const char* arg, const
+ #endif
+ 
+   return false;
+ }
+ 
+ Bootstrap::UniquePtr gBootstrap;
+ 
+ static int do_main(int argc, char* argv[], char* envp[]) {
++  // Allow profile downgrade for Zotero
++  setenv("MOZ_ALLOW_DOWNGRADE", "1", 1);
++  // Don't create dedicated profile (default-esr)
++  setenv("MOZ_LEGACY_PROFILES", "1", 1);
++
+   // Allow firefox.exe to launch XULRunner apps via -app <application.ini>
+   // Note that -app must be the *first* argument.
+-  const char* appDataFile = getenv("XUL_APP_FILE");
++  UniqueFreePtr<char> iniPath = BinaryPath::GetApplicationIni();
++  if (!iniPath) {
++    Output("Couldn't find application.ini.\n");
++    return 255;
++  }
++  char *appDataFile = iniPath.get();
++
++
+   if ((!appDataFile || !*appDataFile) && (argc > 1 && IsArg(argv[1], "app"))) {
+     if (argc == 2) {
+       Output("Incorrect number of arguments passed to -app");
+       return 255;
+     }
+     appDataFile = argv[2];
+ 
+     char appEnv[MAXPATHLEN];
+diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
+--- a/layout/base/PresShell.cpp
++++ b/layout/base/PresShell.cpp
+@@ -11529,18 +11529,17 @@ static nsIWidget* GetPresContextContaine
+   return mainWidget;
+ }
+ 
+ static bool IsTopLevelWidget(nsIWidget* aWidget) {
+   using WindowType = mozilla::widget::WindowType;
+ 
+   auto windowType = aWidget->GetWindowType();
+   return windowType == WindowType::TopLevel ||
+-         windowType == WindowType::Dialog || windowType == WindowType::Popup ||
+-         windowType == WindowType::Sheet;
++         windowType == WindowType::Dialog || windowType == WindowType::Popup;
+ }
+ 
+ PresShell::WindowSizeConstraints PresShell::GetWindowSizeConstraints() {
+   nsSize minSize(0, 0);
+   nsSize maxSize(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+   nsIFrame* rootFrame = FrameConstructor()->GetRootElementStyleFrame();
+   if (!rootFrame || !mPresContext) {
+     return {minSize, maxSize};
+diff --git a/layout/xul/nsXULTooltipListener.cpp b/layout/xul/nsXULTooltipListener.cpp
+--- a/layout/xul/nsXULTooltipListener.cpp
++++ b/layout/xul/nsXULTooltipListener.cpp
+@@ -365,53 +365,56 @@ nsresult nsXULTooltipListener::ShowToolt
+ 
+   // get the tooltip content designated for the target node
+   nsCOMPtr<nsIContent> tooltipNode;
+   GetTooltipFor(sourceNode, getter_AddRefs(tooltipNode));
+   if (!tooltipNode || sourceNode == tooltipNode)
+     return NS_ERROR_FAILURE;  // the target node doesn't need a tooltip
+ 
+   // set the node in the document that triggered the tooltip and show it
+-  if (tooltipNode->GetComposedDoc() &&
+-      nsContentUtils::IsChromeDoc(tooltipNode->GetComposedDoc())) {
+-    // Make sure the target node is still attached to some document.
+-    // It might have been deleted.
+-    if (sourceNode->IsInComposedDoc()) {
+-      if (!mIsSourceTree) {
+-        mLastTreeRow = -1;
+-        mLastTreeCol = nullptr;
+-      }
++  // Make sure the document still has focus.
++  auto* doc = tooltipNode->GetComposedDoc();
++  if (!doc || !nsContentUtils::IsChromeDoc(doc) ||
++      !doc->HasFocus(IgnoreErrors())) {
++    return NS_OK;
++  }
++  // Make sure the target node is still attached to some document.
++  // It might have been deleted.
++  if (sourceNode->IsInComposedDoc()) {
++    if (!mIsSourceTree) {
++      mLastTreeRow = -1;
++      mLastTreeCol = nullptr;
++    }
+ 
+-      mCurrentTooltip = do_GetWeakReference(tooltipNode);
+-      LaunchTooltip();
+-      mTargetNode = nullptr;
+-
+-      nsCOMPtr<nsIContent> currentTooltip = do_QueryReferent(mCurrentTooltip);
+-      if (!currentTooltip) return NS_OK;
++    mCurrentTooltip = do_GetWeakReference(tooltipNode);
++    LaunchTooltip();
++    mTargetNode = nullptr;
+ 
+-      // listen for popuphidden on the tooltip node, so that we can
+-      // be sure DestroyPopup is called even if someone else closes the tooltip
+-      currentTooltip->AddSystemEventListener(u"popuphiding"_ns, this, false,
+-                                             false);
++    nsCOMPtr<nsIContent> currentTooltip = do_QueryReferent(mCurrentTooltip);
++    if (!currentTooltip) return NS_OK;
++
++    // listen for popuphidden on the tooltip node, so that we can
++    // be sure DestroyPopup is called even if someone else closes the tooltip
++    currentTooltip->AddSystemEventListener(u"popuphiding"_ns, this, false,
++                                           false);
+ 
+-      // listen for mousedown, mouseup, keydown, and mouse events at
+-      // document level
+-      if (Document* doc = sourceNode->GetComposedDoc()) {
+-        // Probably, we should listen to untrusted events for hiding tooltips
+-        // on content since tooltips might disturb something of web
+-        // applications.  If we don't specify the aWantsUntrusted of
+-        // AddSystemEventListener(), the event target sets it to TRUE if the
+-        // target is in content.
+-        doc->AddSystemEventListener(u"wheel"_ns, this, true);
+-        doc->AddSystemEventListener(u"mousedown"_ns, this, true);
+-        doc->AddSystemEventListener(u"mouseup"_ns, this, true);
+-        doc->AddSystemEventListener(u"keydown"_ns, this, true);
+-      }
+-      mSourceNode = nullptr;
++    // listen for mousedown, mouseup, keydown, and mouse events at
++    // document level
++    if (Document* doc = sourceNode->GetComposedDoc()) {
++      // Probably, we should listen to untrusted events for hiding tooltips
++      // on content since tooltips might disturb something of web
++      // applications.  If we don't specify the aWantsUntrusted of
++      // AddSystemEventListener(), the event target sets it to TRUE if the
++      // target is in content.
++      doc->AddSystemEventListener(u"wheel"_ns, this, true);
++      doc->AddSystemEventListener(u"mousedown"_ns, this, true);
++      doc->AddSystemEventListener(u"mouseup"_ns, this, true);
++      doc->AddSystemEventListener(u"keydown"_ns, this, true);
+     }
++    mSourceNode = nullptr;
+   }
+ 
+   return NS_OK;
+ }
+ 
+ static void SetTitletipLabel(XULTreeElement* aTree, Element* aTooltip,
+                              int32_t aRow, nsTreeColumn* aCol) {
+   nsCOMPtr<nsITreeView> view = aTree->GetView();
+diff --git a/python/mozbuild/mozbuild/action/unpack_dmg.py b/python/mozbuild/mozbuild/action/unpack_dmg.py
+--- a/python/mozbuild/mozbuild/action/unpack_dmg.py
++++ b/python/mozbuild/mozbuild/action/unpack_dmg.py
+@@ -34,18 +34,18 @@ def main(args):
+     options = parser.parse_args(args)
+ 
+     dmg_tool = bootstrap_toolchain("dmg/dmg")
+     hfs_tool = bootstrap_toolchain("dmg/hfsplus")
+ 
+     dmg.extract_dmg(
+         dmgfile=Path(options.dmgfile),
+         output=Path(options.outpath),
+-        dmg_tool=Path(dmg_tool),
+-        hfs_tool=Path(hfs_tool),
++        dmg_tool=_path_or_none(dmg_tool),
++        hfs_tool=_path_or_none(hfs_tool),
+         dsstore=_path_or_none(options.dsstore),
+         background=_path_or_none(options.background),
+         icon=_path_or_none(options.icon),
+     )
+     return 0
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/widget/InitData.h b/widget/InitData.h
+--- a/widget/InitData.h
++++ b/widget/InitData.h
+@@ -12,17 +12,16 @@
+ 
+ namespace mozilla::widget {
+ 
+ // Window types
+ enum class WindowType : uint8_t {
+   TopLevel,   // default top level window
+   Dialog,     // top level window but usually handled differently
+               // by the OS
+-  Sheet,      // MacOSX sheet (special dialog class)
+   Popup,      // used for combo boxes, etc
+   Child,      // child windows (contained inside a window on the
+               // desktop (has no border))
+   Invisible,  // windows that are invisible or offscreen
+ };
+ 
+ // Popup types for WindowType::Popup
+ enum class PopupType : uint8_t {
+diff --git a/widget/cocoa/moz.build b/widget/cocoa/moz.build
+--- a/widget/cocoa/moz.build
++++ b/widget/cocoa/moz.build
+@@ -6,22 +6,16 @@
+ 
+ with Files("**"):
+     BUG_COMPONENT = ("Core", "Widget: Cocoa")
+     SCHEDULES.exclusive = ["macosx"]
+ 
+ with Files("*TextInput*"):
+     BUG_COMPONENT = ("Core", "DOM: UI Events & Focus Handling")
+ 
+-XPIDL_SOURCES += [
+-    "nsPIWidgetCocoa.idl",
+-]
+-
+-XPIDL_MODULE = "widget_cocoa"
+-
+ EXPORTS += [
+     "CFTypeRefPtr.h",
+     "DesktopBackgroundImage.h",
+     "MediaHardwareKeysEventSourceMac.h",
+     "MediaHardwareKeysEventSourceMacMediaCenter.h",
+     "mozView.h",
+     "nsBidiKeyboard.h",
+     "nsChangeObserver.h",
+diff --git a/widget/cocoa/nsChildView.mm b/widget/cocoa/nsChildView.mm
+--- a/widget/cocoa/nsChildView.mm
++++ b/widget/cocoa/nsChildView.mm
+@@ -1678,29 +1678,23 @@ void nsChildView::UpdateThemeGeometries(
+ 
+   if (![[mView window] isKindOfClass:[ToolbarWindow class]]) return;
+ 
+   // Update unified toolbar height and sheet attachment position.
+   int32_t windowWidth = mBounds.width;
+   int32_t titlebarBottom = FindTitlebarBottom(aThemeGeometries, windowWidth);
+   int32_t unifiedToolbarBottom =
+       FindUnifiedToolbarBottom(aThemeGeometries, windowWidth, titlebarBottom);
+-  int32_t toolboxBottom = FindFirstRectOfType(aThemeGeometries, eThemeGeometryTypeToolbox).YMost();
+ 
+   ToolbarWindow* win = (ToolbarWindow*)[mView window];
+   int32_t titlebarHeight =
+       [win drawsContentsIntoWindowFrame] ? 0 : CocoaPointsToDevPixels([win titlebarHeight]);
+   int32_t devUnifiedHeight = titlebarHeight + unifiedToolbarBottom;
+   [win setUnifiedToolbarHeight:DevPixelsToCocoaPoints(devUnifiedHeight)];
+ 
+-  int32_t sheetPositionDevPx = std::max(toolboxBottom, unifiedToolbarBottom);
+-  NSPoint sheetPositionView = {0, DevPixelsToCocoaPoints(sheetPositionDevPx)};
+-  NSPoint sheetPositionWindow = [mView convertPoint:sheetPositionView toView:nil];
+-  [win setSheetAttachmentPosition:sheetPositionWindow.y];
+-
+   // Update titlebar control offsets.
+   LayoutDeviceIntRect windowButtonRect =
+       FindFirstRectOfType(aThemeGeometries, eThemeGeometryTypeWindowButtons);
+   [win placeWindowButtons:[mView convertRect:DevPixelsToCocoaPoints(windowButtonRect) toView:nil]];
+ }
+ 
+ static Maybe<VibrancyType> ThemeGeometryTypeToVibrancyType(
+     nsITheme::ThemeGeometryType aThemeGeometryType) {
+@@ -4899,24 +4893,16 @@ BOOL ChildViewMouseTracker::WindowAccept
+       return WindowAcceptsEvent([aWindow parentWindow], aEvent, aView, aIsClickThrough);
+ 
+     case WindowType::TopLevel:
+     case WindowType::Dialog:
+       if ([aWindow attachedSheet]) return NO;
+ 
+       topLevelWindow = aWindow;
+       break;
+-    case WindowType::Sheet: {
+-      nsIWidget* parentWidget = windowWidget->GetSheetWindowParent();
+-      if (!parentWidget) return YES;
+-
+-      topLevelWindow = (NSWindow*)parentWidget->GetNativeData(NS_NATIVE_WINDOW);
+-      break;
+-    }
+-
+     default:
+       return YES;
+   }
+ 
+   if (!topLevelWindow || ([topLevelWindow isMainWindow] && !aIsClickThrough) ||
+       [aEvent type] == NSEventTypeOtherMouseDown ||
+       (([aEvent modifierFlags] & NSEventModifierFlagCommand) != 0 &&
+        [aEvent type] != NSEventTypeMouseMoved))
+diff --git a/widget/cocoa/nsCocoaWindow.h b/widget/cocoa/nsCocoaWindow.h
+--- a/widget/cocoa/nsCocoaWindow.h
++++ b/widget/cocoa/nsCocoaWindow.h
+@@ -7,17 +7,16 @@
+ #define nsCocoaWindow_h_
+ 
+ #undef DARWIN
+ 
+ #import <Cocoa/Cocoa.h>
+ 
+ #include "mozilla/RefPtr.h"
+ #include "nsBaseWidget.h"
+-#include "nsPIWidgetCocoa.h"
+ #include "nsCocoaUtils.h"
+ #include "nsTouchBar.h"
+ #include <dlfcn.h>
+ #include <queue>
+ 
+ class nsCocoaWindow;
+ class nsChildView;
+ class nsMenuBarX;
+@@ -191,60 +190,53 @@ typedef struct _nsCocoaWindowList {
+   // destroyed by updateTitlebarView.
+   MOZTitlebarView* mTitlebarView;  // [STRONG]
+   // mFullscreenTitlebarTracker attaches an invisible rectangle to the system
+   // title bar. This allows us to detect when the title bar is showing in
+   // fullscreen.
+   FullscreenTitlebarTracker* mFullscreenTitlebarTracker;
+ 
+   CGFloat mUnifiedToolbarHeight;
+-  CGFloat mSheetAttachmentPosition;
+   CGFloat mMenuBarHeight;
+   /* Store the height of the titlebar when this window is initialized. The
+      titlebarHeight getter returns 0 when in fullscreen, which is not useful in
+      some cases. */
+   CGFloat mInitialTitlebarHeight;
+   NSRect mWindowButtonsRect;
+ }
+ - (void)setUnifiedToolbarHeight:(CGFloat)aHeight;
+ - (CGFloat)unifiedToolbarHeight;
+ - (CGFloat)titlebarHeight;
+ - (NSRect)titlebarRect;
+ - (void)setTitlebarNeedsDisplay;
+ - (void)setDrawsContentsIntoWindowFrame:(BOOL)aState;
+-- (void)setSheetAttachmentPosition:(CGFloat)aY;
+-- (CGFloat)sheetAttachmentPosition;
+ - (void)placeWindowButtons:(NSRect)aRect;
+ - (NSRect)windowButtonsRect;
+ - (void)windowMainStateChanged;
+ @end
+ 
+-class nsCocoaWindow final : public nsBaseWidget, public nsPIWidgetCocoa {
++class nsCocoaWindow final : public nsBaseWidget {
+  private:
+   typedef nsBaseWidget Inherited;
+ 
+  public:
+   nsCocoaWindow();
+ 
+-  NS_DECL_ISUPPORTS_INHERITED
+-  NS_DECL_NSPIWIDGETCOCOA;  // semicolon for clang-format bug 1629756
+-
+   [[nodiscard]] virtual nsresult Create(nsIWidget* aParent, nsNativeWidget aNativeParent,
+                                         const DesktopIntRect& aRect, InitData* = nullptr) override;
+ 
+   [[nodiscard]] virtual nsresult Create(nsIWidget* aParent, nsNativeWidget aNativeParent,
+                                         const LayoutDeviceIntRect& aRect,
+                                         InitData* = nullptr) override;
+ 
+   virtual void Destroy() override;
+ 
+   virtual void Show(bool aState) override;
+   virtual bool NeedsRecreateToReshow() override;
+ 
+-  virtual nsIWidget* GetSheetWindowParent(void) override;
+   virtual void Enable(bool aState) override;
+   virtual bool IsEnabled() const override;
+   virtual void SetModal(bool aState) override;
+   virtual void SetFakeModal(bool aState) override;
+   virtual bool IsRunningAppModal() override;
+   virtual bool IsVisible() const override;
+   virtual void SetFocus(Raise, mozilla::dom::CallerType aCallerType) override;
+   virtual LayoutDeviceIntPoint WidgetToScreenOffset() override;
+@@ -393,47 +385,45 @@ class nsCocoaWindow final : public nsBas
+   virtual ~nsCocoaWindow();
+ 
+   nsresult CreateNativeWindow(const NSRect& aRect, BorderStyle aBorderStyle, bool aRectIsFrameRect,
+                               bool aIsPrivateBrowsing);
+   nsresult CreatePopupContentView(const LayoutDeviceIntRect& aRect, InitData*);
+   void DestroyNativeWindow();
+   void UpdateBounds();
+   int32_t GetWorkspaceID();
++  void SendSetZLevelEvent();
+ 
+   void DoResize(double aX, double aY, double aWidth, double aHeight, bool aRepaint,
+                 bool aConstrainToCurrentScreen);
+ 
+   void UpdateFullscreenState(bool aFullScreen, bool aNativeMode);
+   nsresult DoMakeFullScreen(bool aFullScreen, bool aUseSystemTransition);
+ 
+   virtual already_AddRefed<nsIWidget> AllocateChildPopupWidget() override {
+     return nsIWidget::CreateTopLevelWindow();
+   }
+ 
+   nsIWidget* mParent;         // if we're a popup, this is our parent [WEAK]
+   nsIWidget* mAncestorLink;   // link to traverse ancestors [WEAK]
+   BaseWindow* mWindow;        // our cocoa window [STRONG]
+   WindowDelegate* mDelegate;  // our delegate for processing window msgs [STRONG]
+   RefPtr<nsMenuBarX> mMenuBar;
+-  NSWindow* mSheetWindowParent;    // if this is a sheet, this is the NSWindow it's attached to
+   nsChildView* mPopupContentView;  // if this is a popup, this is its content widget
+   // if this is a toplevel window, and there is any ongoing fullscreen
+   // transition, it is the animation object.
+   NSAnimation* mFullscreenTransitionAnimation;
+   mozilla::StyleWindowShadow mShadowStyle;
+ 
+   CGFloat mBackingScaleFactor;
+   CGFloat mAspectRatio;
+ 
+   WindowAnimationType mAnimationType;
+ 
+   bool mWindowMadeHere;  // true if we created the window, false for embedding
+-  bool mSheetNeedsShow;  // if this is a sheet, are we waiting to be shown?
+-                         // this is used for sibling sheet contention only
+   nsSizeMode mSizeMode;
+   bool mInFullScreenMode;
+   // Whether we are currently using native fullscreen. It could be false because
+   // we are in the emulated fullscreen where we do not use the native fullscreen.
+   bool mInNativeFullScreenMode;
+ 
+   mozilla::Maybe<TransitionType> mTransitionCurrent;
+   std::queue<TransitionType> mTransitionsPending;
+diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
+--- a/widget/cocoa/nsCocoaWindow.mm
++++ b/widget/cocoa/nsCocoaWindow.mm
+@@ -30,16 +30,17 @@
+ #include "nsMenuUtilsX.h"
+ #include "nsStyleConsts.h"
+ #include "nsNativeThemeColors.h"
+ #include "nsNativeThemeCocoa.h"
+ #include "nsChildView.h"
+ #include "nsCocoaFeatures.h"
+ #include "nsIScreenManager.h"
+ #include "nsIWidgetListener.h"
++#include "nsXULPopupManager.h"
+ #include "SDKDeclarations.h"
+ #include "VibrancyManager.h"
+ #include "nsPresContext.h"
+ #include "nsDocShell.h"
+ 
+ #include "gfxPlatform.h"
+ #include "qcms.h"
+ 
+@@ -99,28 +100,27 @@ typedef enum {
+ static NSString* const CGSSpaceIDKey = @"ManagedSpaceID";
+ static NSString* const CGSSpacesKey = @"Spaces";
+ extern CGSConnection _CGSDefaultConnection(void);
+ extern CGError CGSSetWindowTransform(CGSConnection cid, CGSWindow wid, CGAffineTransform transform);
+ }
+ 
+ #define NS_APPSHELLSERVICE_CONTRACTID "@mozilla.org/appshell/appShellService;1"
+ 
+-NS_IMPL_ISUPPORTS_INHERITED(nsCocoaWindow, Inherited, nsPIWidgetCocoa)
+-
+-// A note on testing to see if your object is a sheet...
+-// |mWindowType == WindowType::Sheet| is true if your gecko nsIWidget is a sheet
+-// widget - whether or not the sheet is showing. |[mWindow isSheet]| will return
+-// true *only when the sheet is actually showing*. Choose your test wisely.
+-
+ static void RollUpPopups(
+     nsIRollupListener::AllowAnimations aAllowAnimations = nsIRollupListener::AllowAnimations::Yes) {
++  if (RefPtr pm = nsXULPopupManager::GetInstance()) {
++    pm->RollupTooltips();
++  }
++
+   nsIRollupListener* rollupListener = nsBaseWidget::GetActiveRollupListener();
+-  NS_ENSURE_TRUE_VOID(rollupListener);
+-
++
++  if (!rollupListener) {
++    return;
++  }
+   if (rollupListener->RollupNativeMenu()) {
+     return;
+   }
+ 
+   nsCOMPtr<nsIWidget> rollupWidget = rollupListener->GetRollupWidget();
+   if (!rollupWidget) {
+     return;
+   }
+@@ -129,24 +129,22 @@ static void RollUpPopups(
+   rollupListener->Rollup(options);
+ }
+ 
+ nsCocoaWindow::nsCocoaWindow()
+     : mParent(nullptr),
+       mAncestorLink(nullptr),
+       mWindow(nil),
+       mDelegate(nil),
+-      mSheetWindowParent(nil),
+       mPopupContentView(nil),
+       mFullscreenTransitionAnimation(nil),
+       mShadowStyle(StyleWindowShadow::Default),
+       mBackingScaleFactor(0.0),
+       mAnimationType(nsIWidget::eGenericWindowAnimation),
+       mWindowMadeHere(false),
+-      mSheetNeedsShow(false),
+       mSizeMode(nsSizeMode_Normal),
+       mInFullScreenMode(false),
+       mInNativeFullScreenMode(false),
+       mIgnoreOcclusionCount(0),
+       mHasStartedNativeFullscreen(false),
+       mModal(false),
+       mFakeModal(false),
+       mIsAnimationSuppressed(false),
+@@ -431,25 +429,16 @@ nsresult nsCocoaWindow::CreateNativeWind
+           features |= NSWindowStyleMaskClosable;
+         }
+       }
+       break;
+     case WindowType::TopLevel:
+     case WindowType::Dialog:
+       features = WindowMaskForBorderStyle(aBorderStyle);
+       break;
+-    case WindowType::Sheet:
+-      if (mParent->GetWindowType() != WindowType::Invisible &&
+-          aBorderStyle & BorderStyle::ResizeH) {
+-        features = NSWindowStyleMaskResizable;
+-      } else {
+-        features = NSWindowStyleMaskMiniaturizable;
+-      }
+-      features |= NSWindowStyleMaskTitled;
+-      break;
+     default:
+       NS_ERROR("Unhandled window type!");
+       return NS_ERROR_FAILURE;
+   }
+ 
+   NSRect contentRect;
+ 
+   if (aRectIsFrameRect) {
+@@ -650,24 +639,16 @@ void nsCocoaWindow::Destroy() {
+     if (mInNativeFullScreenMode) {
+       DestroyNativeWindow();
+     } else if (mWindow) {
+       nsCocoaUtils::HideOSChromeOnScreen(false);
+     }
+   }
+ }
+ 
+-nsIWidget* nsCocoaWindow::GetSheetWindowParent(void) {
+-  if (mWindowType != WindowType::Sheet) return nullptr;
+-  nsCocoaWindow* parent = static_cast<nsCocoaWindow*>(mParent);
+-  while (parent && (parent->mWindowType == WindowType::Sheet))
+-    parent = static_cast<nsCocoaWindow*>(parent->mParent);
+-  return parent;
+-}
+-
+ void* nsCocoaWindow::GetNativeData(uint32_t aDataType) {
+   NS_OBJC_BEGIN_TRY_BLOCK_RETURN;
+ 
+   void* retVal = nullptr;
+ 
+   switch (aDataType) {
+     // to emulate how windows works, we always have to return a NSView
+     // for NS_NATIVE_WIDGET
+@@ -707,17 +688,17 @@ void* nsCocoaWindow::GetNativeData(uint3
+   return retVal;
+ 
+   NS_OBJC_END_TRY_BLOCK_RETURN(nullptr);
+ }
+ 
+ bool nsCocoaWindow::IsVisible() const {
+   NS_OBJC_BEGIN_TRY_BLOCK_RETURN;
+ 
+-  return (mWindow && ([mWindow isVisibleOrBeingShown] || mSheetNeedsShow));
++  return mWindow && mWindow.isVisibleOrBeingShown;
+ 
+   NS_OBJC_END_TRY_BLOCK_RETURN(false);
+ }
+ 
+ void nsCocoaWindow::SetModal(bool aState) {
+   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+ 
+   if (!mWindow) return;
+@@ -734,64 +715,60 @@ void nsCocoaWindow::SetModal(bool aState
+     ++gXULModalLevel;
+     // When a non-sheet window gets "set modal", make the window(s) that it
+     // appears over behave as they should.  We can't rely on native methods to
+     // do this, for the following reason:  The OS runs modal non-sheet windows
+     // in an event loop (using [NSApplication runModalForWindow:] or similar
+     // methods) that's incompatible with the modal event loop in AppWindow::
+     // ShowModal() (each of these event loops is "exclusive", and can't run at
+     // the same time as other (similar) event loops).
+-    if (mWindowType != WindowType::Sheet) {
+-      while (ancestor) {
+-        if (ancestor->mNumModalDescendents++ == 0) {
+-          NSWindow* aWindow = ancestor->GetCocoaWindow();
+-          if (ancestor->mWindowType != WindowType::Invisible) {
+-            [[aWindow standardWindowButton:NSWindowCloseButton] setEnabled:NO];
+-            [[aWindow standardWindowButton:NSWindowMiniaturizeButton] setEnabled:NO];
+-            [[aWindow standardWindowButton:NSWindowZoomButton] setEnabled:NO];
+-          }
++    while (ancestor) {
++      if (ancestor->mNumModalDescendents++ == 0) {
++        NSWindow* aWindow = ancestor->GetCocoaWindow();
++        if (ancestor->mWindowType != WindowType::Invisible) {
++          [[aWindow standardWindowButton:NSWindowCloseButton] setEnabled:NO];
++          [[aWindow standardWindowButton:NSWindowMiniaturizeButton] setEnabled:NO];
++          [[aWindow standardWindowButton:NSWindowZoomButton] setEnabled:NO];
+         }
+-        ancestor = static_cast<nsCocoaWindow*>(ancestor->mParent);
+       }
+-      [mWindow setLevel:NSModalPanelWindowLevel];
+-      nsCocoaWindowList* windowList = new nsCocoaWindowList;
+-      if (windowList) {
+-        windowList->window = this;  // Don't ADDREF
+-        windowList->prev = gGeckoAppModalWindowList;
+-        gGeckoAppModalWindowList = windowList;
+-      }
++      ancestor = static_cast<nsCocoaWindow*>(ancestor->mParent);
++    }
++    [mWindow setLevel:NSModalPanelWindowLevel];
++    nsCocoaWindowList* windowList = new nsCocoaWindowList;
++    if (windowList) {
++      windowList->window = this;  // Don't ADDREF
++      windowList->prev = gGeckoAppModalWindowList;
++      gGeckoAppModalWindowList = windowList;
+     }
+   } else {
+     --gXULModalLevel;
+     NS_ASSERTION(gXULModalLevel >= 0, "Mismatched call to nsCocoaWindow::SetModal(false)!");
+-    if (mWindowType != WindowType::Sheet) {
+-      while (ancestor) {
+-        if (--ancestor->mNumModalDescendents == 0) {
+-          NSWindow* aWindow = ancestor->GetCocoaWindow();
+-          if (ancestor->mWindowType != WindowType::Invisible) {
+-            [[aWindow standardWindowButton:NSWindowCloseButton] setEnabled:YES];
+-            [[aWindow standardWindowButton:NSWindowMiniaturizeButton] setEnabled:YES];
+-            [[aWindow standardWindowButton:NSWindowZoomButton] setEnabled:YES];
+-          }
++    while (ancestor) {
++      if (--ancestor->mNumModalDescendents == 0) {
++        NSWindow* aWindow = ancestor->GetCocoaWindow();
++        if (ancestor->mWindowType != WindowType::Invisible) {
++          [[aWindow standardWindowButton:NSWindowCloseButton] setEnabled:YES];
++          [[aWindow standardWindowButton:NSWindowMiniaturizeButton] setEnabled:YES];
++          [[aWindow standardWindowButton:NSWindowZoomButton] setEnabled:YES];
+         }
+-        NS_ASSERTION(ancestor->mNumModalDescendents >= 0, "Widget hierarchy changed while modal!");
+-        ancestor = static_cast<nsCocoaWindow*>(ancestor->mParent);
+       }
+-      if (gGeckoAppModalWindowList) {
+-        NS_ASSERTION(gGeckoAppModalWindowList->window == this,
+-                     "Widget hierarchy changed while modal!");
+-        nsCocoaWindowList* saved = gGeckoAppModalWindowList;
+-        gGeckoAppModalWindowList = gGeckoAppModalWindowList->prev;
+-        delete saved;  // "window" not ADDREFed
+-      }
+-      if (mWindowType == WindowType::Popup)
+-        SetPopupWindowLevel();
+-      else
+-        [mWindow setLevel:NSNormalWindowLevel];
++      NS_ASSERTION(ancestor->mNumModalDescendents >= 0, "Widget hierarchy changed while modal!");
++      ancestor = static_cast<nsCocoaWindow*>(ancestor->mParent);
+     }
++    if (gGeckoAppModalWindowList) {
++      NS_ASSERTION(gGeckoAppModalWindowList->window == this,
++                   "Widget hierarchy changed while modal!");
++      nsCocoaWindowList* saved = gGeckoAppModalWindowList;
++      gGeckoAppModalWindowList = gGeckoAppModalWindowList->prev;
++      delete saved;  // "window" not ADDREFed
++    }
++    if (mWindowType == WindowType::Popup)
++      SetPopupWindowLevel();
++    else
++      [mWindow setLevel:NSNormalWindowLevel];
+   }
+ 
+   NS_OBJC_END_TRY_IGNORE_BLOCK;
+ }
+ 
+ void nsCocoaWindow::SetFakeModal(bool aState) {
+   mFakeModal = aState;
+   SetModal(aState);
+@@ -800,32 +777,28 @@ void nsCocoaWindow::SetFakeModal(bool aS
+ bool nsCocoaWindow::IsRunningAppModal() { return [NSApp _isRunningAppModal]; }
+ 
+ // Hide or show this window
+ void nsCocoaWindow::Show(bool bState) {
+   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+ 
+   if (!mWindow) return;
+ 
+-  if (!mSheetNeedsShow) {
+-    // Early exit if our current visibility state is already the requested state.
+-    if (bState == ([mWindow isVisible] || [mWindow isBeingShown])) {
+-      return;
+-    }
++  // Early exit if our current visibility state is already the requested state.
++  if (bState == ([mWindow isVisible] || [mWindow isBeingShown])) {
++    return;
+   }
+ 
+   [mWindow setBeingShown:bState];
+   if (bState && !mWasShown) {
+     mWasShown = true;
+   }
+ 
+-  nsIWidget* parentWidget = mParent;
+-  nsCOMPtr<nsPIWidgetCocoa> piParentWidget(do_QueryInterface(parentWidget));
+   NSWindow* nativeParentWindow =
+-      (parentWidget) ? (NSWindow*)parentWidget->GetNativeData(NS_NATIVE_WINDOW) : nil;
++      mParent ? (NSWindow*)mParent->GetNativeData(NS_NATIVE_WINDOW) : nil;
+ 
+   if (bState && !mBounds.IsEmpty()) {
+     // If we had set the activationPolicy to accessory, then right now we won't
+     // have a dock icon. Make sure that we undo that and show a dock icon now that
+     // we're going to show a window.
+     if ([NSApp activationPolicy] != NSApplicationActivationPolicyRegular) {
+       [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+       PR_SetEnv("MOZ_APP_NO_DOCK=");
+@@ -838,87 +811,17 @@ void nsCocoaWindow::Show(bool bState) {
+       }
+     }
+ 
+     if (mPopupContentView) {
+       // Ensure our content view is visible. We never need to hide it.
+       mPopupContentView->Show(true);
+     }
+ 
+-    if (mWindowType == WindowType::Sheet) {
+-      // bail if no parent window (its basically what we do in Carbon)
+-      if (!nativeParentWindow || !piParentWidget) return;
+-
+-      NSWindow* topNonSheetWindow = nativeParentWindow;
+-
+-      // If this sheet is the child of another sheet, hide the parent so that
+-      // this sheet can be displayed. Leave the parent mSheetNeedsShow alone,
+-      // that is only used to handle sibling sheet contention. The parent will
+-      // return once there are no more child sheets.
+-      bool parentIsSheet = false;
+-      if (NS_SUCCEEDED(piParentWidget->GetIsSheet(&parentIsSheet)) && parentIsSheet) {
+-        piParentWidget->GetSheetWindowParent(&topNonSheetWindow);
+-#ifdef MOZ_THUNDERBIRD
+-        [NSApp endSheet:nativeParentWindow];
+-#else
+-        [nativeParentWindow.sheetParent endSheet:nativeParentWindow];
+-#endif
+-      }
+-
+-      nsCOMPtr<nsIWidget> sheetShown;
+-      if (NS_SUCCEEDED(piParentWidget->GetChildSheet(true, getter_AddRefs(sheetShown))) &&
+-          (!sheetShown || sheetShown == this)) {
+-        // If this sheet is already the sheet actually being shown, don't
+-        // tell it to show again. Otherwise the number of calls to
+-#ifdef MOZ_THUNDERBIRD
+-        // [NSApp beginSheet...] won't match up with [NSApp endSheet...].
+-#else
+-        // [NSWindow beginSheet...] won't match up with [NSWindow endSheet...].
+-#endif
+-        if (![mWindow isVisible]) {
+-          mSheetNeedsShow = false;
+-          mSheetWindowParent = topNonSheetWindow;
+-#ifdef MOZ_THUNDERBIRD
+-          // Only set contextInfo if our parent isn't a sheet.
+-          NSWindow* contextInfo = parentIsSheet ? nil : mSheetWindowParent;
+-          [TopLevelWindowData deactivateInWindow:mSheetWindowParent];
+-          [NSApp beginSheet:mWindow
+-              modalForWindow:mSheetWindowParent
+-               modalDelegate:mDelegate
+-              didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
+-                 contextInfo:contextInfo];
+-#else
+-          NSWindow* sheet = mWindow;
+-          NSWindow* nonSheetParent = parentIsSheet ? nil : mSheetWindowParent;
+-          [TopLevelWindowData deactivateInWindow:mSheetWindowParent];
+-          [mSheetWindowParent beginSheet:sheet
+-                       completionHandler:^(NSModalResponse returnCode) {
+-                         // Note: 'nonSheetParent' (if it is set) is the window that is the parent
+-                         // of the sheet. If it's set, 'nonSheetParent' is always the top- level
+-                         // window, not another sheet itself.  But 'nonSheetParent' is nil if our
+-                         // parent window is also a sheet -- in that case we shouldn't send the
+-                         // top-level window any activate events (because it's our parent window
+-                         // that needs to get these events, not the top-level window).
+-                         [TopLevelWindowData deactivateInWindow:sheet];
+-                         [sheet orderOut:nil];
+-                         if (nonSheetParent) {
+-                           [TopLevelWindowData activateInWindow:nonSheetParent];
+-                         }
+-                       }];
+-#endif
+-          [TopLevelWindowData activateInWindow:mWindow];
+-          SendSetZLevelEvent();
+-        }
+-      } else {
+-        // A sibling of this sheet is active, don't show this sheet yet.
+-        // When the active sheet hides, its brothers and sisters that have
+-        // mSheetNeedsShow set will have their opportunities to display.
+-        mSheetNeedsShow = true;
+-      }
+-    } else if (mWindowType == WindowType::Popup) {
++    if (mWindowType == WindowType::Popup) {
+       // For reasons that aren't yet clear, calls to [NSWindow orderFront:] or
+       // [NSWindow makeKeyAndOrderFront:] can sometimes trigger "Error (1000)
+       // creating CGSWindow", which in turn triggers an internal inconsistency
+       // NSException.  These errors shouldn't be fatal.  So we need to wrap
+       // calls to ...orderFront: in TRY blocks.  See bmo bug 470864.
+       NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+       [[mWindow contentView] setNeedsDisplay:YES];
+       [mWindow orderFront:nil];
+@@ -974,120 +877,30 @@ void nsCocoaWindow::Show(bool bState) {
+       SendSetZLevelEvent();
+     }
+   } else {
+     // roll up any popups if a top-level window is going away
+     if (mWindowType == WindowType::TopLevel || mWindowType == WindowType::Dialog) {
+       RollUpPopups();
+     }
+ 
+-    // now get rid of the window/sheet
+-    if (mWindowType == WindowType::Sheet) {
+-      if (mSheetNeedsShow) {
+-        // This is an attempt to hide a sheet that never had a chance to
+-        // be shown. There's nothing to do other than make sure that it
+-        // won't show.
+-        mSheetNeedsShow = false;
+-      } else {
+-        // get sheet's parent *before* hiding the sheet (which breaks the linkage)
+-        NSWindow* sheetParent = mSheetWindowParent;
+-
+-        // hide the sheet
+-#ifdef MOZ_THUNDERBIRD
+-        [NSApp endSheet:mWindow];
+-#else
+-        [mSheetWindowParent endSheet:mWindow];
+-#endif
+-        [TopLevelWindowData deactivateInWindow:mWindow];
+-
+-        nsCOMPtr<nsIWidget> siblingSheetToShow;
+-        bool parentIsSheet = false;
+-
+-        if (nativeParentWindow && piParentWidget &&
+-            NS_SUCCEEDED(
+-                piParentWidget->GetChildSheet(false, getter_AddRefs(siblingSheetToShow))) &&
+-            siblingSheetToShow) {
+-          // First, give sibling sheets an opportunity to show.
+-          siblingSheetToShow->Show(true);
+-        } else if (nativeParentWindow && piParentWidget &&
+-                   NS_SUCCEEDED(piParentWidget->GetIsSheet(&parentIsSheet)) && parentIsSheet) {
+-#ifdef MOZ_THUNDERBIRD
+-          // Only set contextInfo if the parent of the parent sheet we're about
+-          // to restore isn't itself a sheet.
+-          NSWindow* contextInfo = sheetParent;
+-#else
+-          // Only set nonSheetGrandparent if the parent of the parent sheet we're about
+-          // to restore isn't itself a sheet.
+-          NSWindow* nonSheetGrandparent = sheetParent;
+-#endif
+-          nsIWidget* grandparentWidget = nil;
+-          if (NS_SUCCEEDED(piParentWidget->GetRealParent(&grandparentWidget)) &&
+-              grandparentWidget) {
+-            nsCOMPtr<nsPIWidgetCocoa> piGrandparentWidget(do_QueryInterface(grandparentWidget));
+-            bool grandparentIsSheet = false;
+-            if (piGrandparentWidget &&
+-                NS_SUCCEEDED(piGrandparentWidget->GetIsSheet(&grandparentIsSheet)) &&
+-                grandparentIsSheet) {
+-#ifdef MOZ_THUNDERBIRD
+-              contextInfo = nil;
+-#else
+-              nonSheetGrandparent = nil;
+-#endif
+-            }
+-          }
+-          // If there are no sibling sheets, but the parent is a sheet, restore
+-          // it.  It wasn't sent any deactivate events when it was hidden, so
+-          // don't call through Show, just let the OS put it back up.
+-#ifdef MOZ_THUNDERBIRD
+-          [NSApp beginSheet:nativeParentWindow
+-              modalForWindow:sheetParent
+-               modalDelegate:[nativeParentWindow delegate]
+-              didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
+-                 contextInfo:contextInfo];
+-#else
+-          [nativeParentWindow beginSheet:sheetParent
+-                       completionHandler:^(NSModalResponse returnCode) {
+-                         // Note: 'nonSheetGrandparent' (if it is set) is the window that is the
+-                         // parent of sheetParent. If it's set, 'nonSheetGrandparent' is always the
+-                         // top-level window, not another sheet itself.  But 'nonSheetGrandparent'
+-                         // is nil if our parent window is also a sheet -- in that case we shouldn't
+-                         // send the top-level window any activate events (because it's our parent
+-                         // window that needs to get these events, not the top-level window).
+-                         [TopLevelWindowData deactivateInWindow:sheetParent];
+-                         [sheetParent orderOut:nil];
+-                         if (nonSheetGrandparent) {
+-                           [TopLevelWindowData activateInWindow:nonSheetGrandparent];
+-                         }
+-                       }];
+-#endif
+-        } else {
+-          // Sheet, that was hard.  No more siblings or parents, going back
+-          // to a real window.
+-          NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+-          [sheetParent makeKeyAndOrderFront:nil];
+-          NS_OBJC_END_TRY_IGNORE_BLOCK;
+-        }
+-        SendSetZLevelEvent();
+-      }
+-    } else {
+-      // If the window is a popup window with a parent window we need to
+-      // unhook it here before ordering it out. When you order out the child
+-      // of a window it hides the parent window.
+-      if (mWindowType == WindowType::Popup && nativeParentWindow)
+-        [nativeParentWindow removeChildWindow:mWindow];
+-
+-      [mWindow orderOut:nil];
+-
+-      // If our popup window is a non-native context menu, tell the OS (and
+-      // other programs) that a menu has closed.
+-      if ([mWindow isKindOfClass:[PopupWindow class]] && [(PopupWindow*)mWindow isContextMenu]) {
+-        [[NSDistributedNotificationCenter defaultCenter]
+-            postNotificationName:@"com.apple.HIToolbox.endMenuTrackingNotification"
+-                          object:@"org.mozilla.gecko.PopupWindow"];
+-      }
++    // If the window is a popup window with a parent window we need to
++    // unhook it here before ordering it out. When you order out the child
++    // of a window it hides the parent window.
++    if (mWindowType == WindowType::Popup && nativeParentWindow)
++      [nativeParentWindow removeChildWindow:mWindow];
++
++    [mWindow orderOut:nil];
++
++    // If our popup window is a non-native context menu, tell the OS (and
++    // other programs) that a menu has closed.
++    if ([mWindow isKindOfClass:[PopupWindow class]] && [(PopupWindow*)mWindow isContextMenu]) {
++      [[NSDistributedNotificationCenter defaultCenter]
++          postNotificationName:@"com.apple.HIToolbox.endMenuTrackingNotification"
++                        object:@"org.mozilla.gecko.PopupWindow"];
+     }
+   }
+ 
+   [mWindow setBeingShown:NO];
+ 
+   NS_OBJC_END_TRY_IGNORE_BLOCK;
+ }
+ 
+@@ -2136,59 +1949,22 @@ void nsCocoaWindow::Invalidate(const Lay
+ // a drop, to a drag enter/leave, or a drag over event. The actual event
+ // is passed in |aMessage| and is passed along to our event hanlder so Gecko
+ // knows about it.
+ bool nsCocoaWindow::DragEvent(unsigned int aMessage, mozilla::gfx::Point aMouseGlobal,
+                               UInt16 aKeyModifiers) {
+   return false;
+ }
+ 
+-NS_IMETHODIMP nsCocoaWindow::SendSetZLevelEvent() {
+-  nsWindowZ placement = nsWindowZTop;
+-  nsCOMPtr<nsIWidget> actualBelow;
+-  if (mWidgetListener)
++void nsCocoaWindow::SendSetZLevelEvent() {
++  if (mWidgetListener) {
++    nsWindowZ placement = nsWindowZTop;
++    nsCOMPtr<nsIWidget> actualBelow;
+     mWidgetListener->ZLevelChanged(true, &placement, nullptr, getter_AddRefs(actualBelow));
+-  return NS_OK;
+-}
+-
+-NS_IMETHODIMP nsCocoaWindow::GetChildSheet(bool aShown, nsIWidget** _retval) {
+-  nsIWidget* child = GetFirstChild();
+-
+-  while (child) {
+-    if (child->GetWindowType() == WindowType::Sheet) {
+-      // if it's a sheet, it must be an nsCocoaWindow
+-      nsCocoaWindow* cocoaWindow = static_cast<nsCocoaWindow*>(child);
+-      if (cocoaWindow->mWindow && ((aShown && [cocoaWindow->mWindow isVisible]) ||
+-                                   (!aShown && cocoaWindow->mSheetNeedsShow))) {
+-        nsCOMPtr<nsIWidget> widget = cocoaWindow;
+-        widget.forget(_retval);
+-        return NS_OK;
+-      }
+-    }
+-    child = child->GetNextSibling();
+   }
+-
+-  *_retval = nullptr;
+-
+-  return NS_OK;
+-}
+-
+-NS_IMETHODIMP nsCocoaWindow::GetRealParent(nsIWidget** parent) {
+-  *parent = mParent;
+-  return NS_OK;
+-}
+-
+-NS_IMETHODIMP nsCocoaWindow::GetIsSheet(bool* isSheet) {
+-  mWindowType == WindowType::Sheet ? * isSheet = true : * isSheet = false;
+-  return NS_OK;
+-}
+-
+-NS_IMETHODIMP nsCocoaWindow::GetSheetWindowParent(NSWindow** sheetWindowParent) {
+-  *sheetWindowParent = mSheetWindowParent;
+-  return NS_OK;
+ }
+ 
+ // Invokes callback and ProcessEvent methods on Event Listener object
+ nsresult nsCocoaWindow::DispatchEvent(WidgetGUIEvent* event, nsEventStatus& aStatus) {
+   aStatus = nsEventStatus_eIgnore;
+ 
+   nsCOMPtr<nsIWidget> kungFuDeathGrip(event->mWidget);
+   mozilla::Unused << kungFuDeathGrip;  // Not used within this function
+@@ -3030,19 +2806,17 @@ void nsCocoaWindow::CocoaWindowDidResize
+ 
+ - (void)windowDidBecomeKey:(NSNotification*)aNotification {
+   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+ 
+   RollUpPopups();
+   ChildViewMouseTracker::ReEvaluateMouseEnterState();
+ 
+   NSWindow* window = [aNotification object];
+-  if ([window isSheet]) [WindowDelegate paintMenubarForWindow:window];
+-
+-  nsChildView* mainChildView =
++  auto* mainChildView =
+       static_cast<nsChildView*>([[(BaseWindow*)window mainChildView] widget]);
+   if (mainChildView) {
+     if (mainChildView->GetInputContext().IsPasswordEditor()) {
+       TextInputHandler::EnableSecureEventInput();
+     } else {
+       TextInputHandler::EnsureSecureEventInputDisabled();
+     }
+   }
+@@ -3051,22 +2825,16 @@ void nsCocoaWindow::CocoaWindowDidResize
+ }
+ 
+ - (void)windowDidResignKey:(NSNotification*)aNotification {
+   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+ 
+   RollUpPopups(nsIRollupListener::AllowAnimations::No);
+ 
+   ChildViewMouseTracker::ReEvaluateMouseEnterState();
+-
+-  // If a sheet just resigned key then we should paint the menu bar
+-  // for whatever window is now main.
+-  NSWindow* window = [aNotification object];
+-  if ([window isSheet]) [WindowDelegate paintMenubarForWindow:[NSApp mainWindow]];
+-
+   TextInputHandler::EnsureSecureEventInputDisabled();
+ 
+   NS_OBJC_END_TRY_IGNORE_BLOCK;
+ }
+ 
+ - (void)windowWillMove:(NSNotification*)aNotification {
+   RollUpPopups();
+ }
+@@ -3105,42 +2873,16 @@ void nsCocoaWindow::CocoaWindowDidResize
+ 
+ - (BOOL)windowShouldZoom:(NSWindow*)window toFrame:(NSRect)proposedFrame {
+   if (!mHasEverBeenZoomed && [window isZoomed]) return NO;  // See bug 429954.
+ 
+   mHasEverBeenZoomed = YES;
+   return YES;
+ }
+ 
+-- (NSRect)window:(NSWindow*)window willPositionSheet:(NSWindow*)sheet usingRect:(NSRect)rect {
+-  if ([window isKindOfClass:[ToolbarWindow class]]) {
+-    rect.origin.y = [(ToolbarWindow*)window sheetAttachmentPosition];
+-  }
+-  return rect;
+-}
+-
+-#ifdef MOZ_THUNDERBIRD
+-- (void)didEndSheet:(NSWindow*)sheet returnCode:(int)returnCode contextInfo:(void*)contextInfo {
+-  NS_OBJC_BEGIN_TRY_ABORT_BLOCK;
+-
+-  // Note: 'contextInfo' (if it is set) is the window that is the parent of
+-  // the sheet.  The value of contextInfo is determined in
+-  // nsCocoaWindow::Show().  If it's set, 'contextInfo' is always the top-
+-  // level window, not another sheet itself.  But 'contextInfo' is nil if
+-  // our parent window is also a sheet -- in that case we shouldn't send
+-  // the top-level window any activate events (because it's our parent
+-  // window that needs to get these events, not the top-level window).
+-  [TopLevelWindowData deactivateInWindow:sheet];
+-  [sheet orderOut:self];
+-  if (contextInfo) [TopLevelWindowData activateInWindow:(NSWindow*)contextInfo];
+-
+-  NS_OBJC_END_TRY_ABORT_BLOCK;
+-}
+-#endif
+-
+ - (void)windowDidChangeBackingProperties:(NSNotification*)aNotification {
+   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+ 
+   NSWindow* window = (NSWindow*)[aNotification object];
+ 
+   if ([window respondsToSelector:@selector(backingScaleFactor)]) {
+     CGFloat oldFactor =
+         [[[aNotification userInfo] objectForKey:@"NSBackingPropertyOldScaleFactorKey"] doubleValue];
+@@ -3787,17 +3529,16 @@ static const NSString* kStateWantsTitleD
+   NSRect contentRect = frameRect;
+ 
+   if ((self = [super initWithContentRect:contentRect
+                                styleMask:aStyle
+                                  backing:aBufferingType
+                                    defer:aFlag])) {
+     mTitlebarView = nil;
+     mUnifiedToolbarHeight = 22.0f;
+-    mSheetAttachmentPosition = aChildViewRect.size.height;
+     mWindowButtonsRect = NSZeroRect;
+     mInitialTitlebarHeight = [self titlebarHeight];
+ 
+     [self setTitlebarAppearsTransparent:YES];
+ #if !defined(MAC_OS_VERSION_11_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_11_0
+     if (nsCocoaFeatures::OnBigSurOrLater()) {
+ #else
+     if (@available(macOS 11.0, *)) {
+@@ -4014,24 +3755,16 @@ static bool ShouldShiftByMenubarHeightIn
+   [self updateTitlebarView];
+ }
+ 
+ - (void)setWantsTitleDrawn:(BOOL)aDrawTitle {
+   [super setWantsTitleDrawn:aDrawTitle];
+   [self setTitlebarNeedsDisplay];
+ }
+ 
+-- (void)setSheetAttachmentPosition:(CGFloat)aY {
+-  mSheetAttachmentPosition = aY;
+-}
+-
+-- (CGFloat)sheetAttachmentPosition {
+-  return mSheetAttachmentPosition;
+-}
+-
+ - (void)placeWindowButtons:(NSRect)aRect {
+   if (!NSEqualRects(mWindowButtonsRect, aRect)) {
+     mWindowButtonsRect = aRect;
+     [self reflowTitlebarElements];
+   }
+ }
+ 
+ - (NSRect)windowButtonsRect {
+diff --git a/widget/cocoa/nsMenuX.h b/widget/cocoa/nsMenuX.h
+--- a/widget/cocoa/nsMenuX.h
++++ b/widget/cocoa/nsMenuX.h
+@@ -181,17 +181,18 @@ class nsMenuX final : public nsMenuParen
+   already_AddRefed<nsIContent> GetMenuPopupContent();
+   void WillInsertChild(const MenuChild& aChild);
+   void WillRemoveChild(const MenuChild& aChild);
+   void AddMenuChild(MenuChild&& aChild);
+   void InsertMenuChild(MenuChild&& aChild);
+   void RemoveMenuChild(const MenuChild& aChild);
+   mozilla::Maybe<MenuChild> CreateMenuChild(nsIContent* aContent);
+   RefPtr<nsMenuItemX> CreateMenuItem(nsIContent* aMenuItemContent);
+-  GeckoNSMenu* CreateMenuWithGeckoString(nsString& aMenuTitle);
++  GeckoNSMenu* CreateMenuWithGeckoString(nsString& aMenuTitle,
++                                         bool aShowServices);
+   void DidFirePopupShowing();
+ 
+   // Find the index at which aChild needs to be inserted into mMenuChildren such that mMenuChildren
+   // remains in correct content order, i.e. the order in mMenuChildren is the same as the order of
+   // the DOM children of our <menupopup>.
+   size_t FindInsertionIndex(const MenuChild& aChild);
+ 
+   // Calculates the index at which aChild's NSMenuItem should be inserted into our NSMenu.
+diff --git a/widget/cocoa/nsMenuX.mm b/widget/cocoa/nsMenuX.mm
+--- a/widget/cocoa/nsMenuX.mm
++++ b/widget/cocoa/nsMenuX.mm
+@@ -89,20 +89,24 @@ nsMenuX::nsMenuX(nsMenuParentX* aParent,
+ 
+   mMenuDelegate = [[MenuDelegate alloc] initWithGeckoMenu:this];
+   mMenuDelegate.menuIsInMenubar = mMenuGroupOwner->GetMenuBar() != nullptr;
+ 
+   if (!nsMenuBarX::sNativeEventTarget) {
+     nsMenuBarX::sNativeEventTarget = [[NativeMenuItemTarget alloc] init];
+   }
+ 
++  bool shouldShowServices = false;
+   if (mContent->IsElement()) {
+     mContent->AsElement()->GetAttr(kNameSpaceID_None, nsGkAtoms::label, mLabel);
++
++    shouldShowServices =
++        mContent->AsElement()->HasAttr(nsGkAtoms::showservicesmenu);
+   }
+-  mNativeMenu = CreateMenuWithGeckoString(mLabel);
++  mNativeMenu = CreateMenuWithGeckoString(mLabel, shouldShowServices);
+ 
+   // register this menu to be notified when changes are made to our content object
+   NS_ASSERTION(mMenuGroupOwner, "No menu owner given, must have one");
+   mMenuGroupOwner->RegisterForContentChanges(mContent, this);
+ 
+   mVisible = !nsMenuUtilsX::NodeIsHiddenOrCollapsed(mContent);
+ 
+   NSString* newCocoaLabelString = nsMenuUtilsX::GetTruncatedCocoaLabel(mLabel);
+@@ -773,28 +777,33 @@ nsresult nsMenuX::SetEnabled(bool aIsEna
+ }
+ 
+ nsresult nsMenuX::GetEnabled(bool* aIsEnabled) {
+   NS_ENSURE_ARG_POINTER(aIsEnabled);
+   *aIsEnabled = mIsEnabled;
+   return NS_OK;
+ }
+ 
+-GeckoNSMenu* nsMenuX::CreateMenuWithGeckoString(nsString& aMenuTitle) {
++GeckoNSMenu* nsMenuX::CreateMenuWithGeckoString(nsString& aMenuTitle,
++                                                bool aShowServices) {
+   NS_OBJC_BEGIN_TRY_ABORT_BLOCK;
+ 
+   NSString* title = [NSString stringWithCharacters:(UniChar*)aMenuTitle.get()
+                                             length:aMenuTitle.Length()];
+   GeckoNSMenu* myMenu = [[GeckoNSMenu alloc] initWithTitle:title];
+   myMenu.delegate = mMenuDelegate;
+ 
+   // We don't want this menu to auto-enable menu items because then Cocoa
+   // overrides our decisions and things get incorrectly enabled/disabled.
+   myMenu.autoenablesItems = NO;
+ 
++  // Only show "Services", "Autofill" and similar entries provided by macOS
++  // if our caller wants them:
++  myMenu.allowsContextMenuPlugIns = aShowServices;
++
+   // we used to install Carbon event handlers here, but since NSMenu* doesn't
+   // create its underlying MenuRef until just before display, we delay until
+   // that happens. Now we install the event handlers when Cocoa notifies
+   // us that a menu is about to display - see the Cocoa MenuDelegate class.
+ 
+   return myMenu;
+ 
+   NS_OBJC_END_TRY_ABORT_BLOCK;
+diff --git a/widget/cocoa/nsNativeThemeCocoa.mm b/widget/cocoa/nsNativeThemeCocoa.mm
+--- a/widget/cocoa/nsNativeThemeCocoa.mm
++++ b/widget/cocoa/nsNativeThemeCocoa.mm
+@@ -387,19 +387,18 @@ static BOOL FrameIsInActiveWindow(nsIFra
+   if ([win isSheet]) {
+     return [win isKeyWindow];
+   }
+   return [win isMainWindow] && ![win attachedSheet];
+ }
+ 
+ // Toolbar controls and content controls respond to different window
+ // activeness states.
+-static BOOL IsActive(nsIFrame* aFrame, BOOL aIsToolbarControl) {
+-  if (aIsToolbarControl) return [NativeWindowForFrame(aFrame) isMainWindow];
+-  return FrameIsInActiveWindow(aFrame);
++static BOOL IsActiveToolbarControl(nsIFrame* aFrame) {
++  return NativeWindowForFrame(aFrame).isMainWindow;
+ }
+ 
+ static bool IsInSourceList(nsIFrame* aFrame) {
+   for (nsIFrame* frame = aFrame->GetParent(); frame;
+        frame = nsLayoutUtils::GetCrossDocParentFrameInProcess(frame)) {
+     if (frame->StyleDisplay()->EffectiveAppearance() == StyleAppearance::MozMacSourceList) {
+       return true;
+     }
+@@ -2397,17 +2396,17 @@ Maybe<nsNativeThemeCocoa::WidgetInfo> ns
+       return Some(WidgetInfo::Toolbar(isMain));
+     }
+ 
+     case StyleAppearance::MozWindowTitlebar: {
+       return Nothing();
+     }
+ 
+     case StyleAppearance::Statusbar:
+-      return Some(WidgetInfo::StatusBar(IsActive(aFrame, YES)));
++      return Some(WidgetInfo::StatusBar(IsActiveToolbarControl(aFrame)));
+ 
+     case StyleAppearance::MenulistButton:
+     case StyleAppearance::Menulist: {
+       ControlParams controlParams = ComputeControlParams(aFrame, elementState);
+       controlParams.pressed = IsOpenButton(aFrame);
+       DropdownParams params;
+       params.controlParams = controlParams;
+       params.pullsDown = false;
+diff --git a/widget/cocoa/nsPIWidgetCocoa.idl b/widget/cocoa/nsPIWidgetCocoa.idl
+--- a/widget/cocoa/nsPIWidgetCocoa.idl
++++ b/widget/cocoa/nsPIWidgetCocoa.idl
+@@ -1,37 +0,0 @@
+-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+-/* This Source Code Form is subject to the terms of the Mozilla Public
+- * License, v. 2.0. If a copy of the MPL was not distributed with this
+- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+-
+-#include "nsISupports.idl"
+-
+-interface nsIWidget;
+-
+-[ptr] native NSWindowPtr(NSWindow);
+-
+-//
+-// nsPIWidgetCocoa
+-//
+-// A private interface (unfrozen, private to the widget implementation) that
+-// gives us access to some extra features on a widget/window.
+-//
+-[uuid(f75ff69e-3a51-419e-bd29-042f804bc2ed)]
+-interface nsPIWidgetCocoa : nsISupports
+-{
+-  void SendSetZLevelEvent();
+-
+-  // Find the displayed child sheet (if aShown) or a child sheet that
+-  // wants to be displayed (if !aShown)
+-  nsIWidget GetChildSheet(in boolean aShown);
+-
+-  // Get the parent widget (if any) StandardCreate() was called with.
+-  nsIWidget GetRealParent();
+-
+-  // If the object implementing this interface is a sheet, this will return the
+-  // native NSWindow it is attached to
+-  readonly attribute NSWindowPtr sheetWindowParent;
+-
+-  // True if window is a sheet
+-  readonly attribute boolean isSheet;
+-
+-}; // nsPIWidgetCocoa
+diff --git a/widget/cocoa/nsWindowMap.mm b/widget/cocoa/nsWindowMap.mm
+--- a/widget/cocoa/nsWindowMap.mm
++++ b/widget/cocoa/nsWindowMap.mm
+@@ -160,17 +160,17 @@
+ // only child widgets (nsChildView objects)).  (The notification is sent
+ // to windowBecameKey: or windowBecameMain: below.)
+ //
+ // For use with clients that (like Firefox) do use top-level widgets (and
+ // have NSWindow delegates of class WindowDelegate).
+ + (void)activateInWindow:(NSWindow*)aWindow {
+   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
+ 
+-  WindowDelegate* delegate = (WindowDelegate*)[aWindow delegate];
++  WindowDelegate* delegate = (WindowDelegate*)aWindow.delegate;
+   if (!delegate || ![delegate isKindOfClass:[WindowDelegate class]]) return;
+ 
+   if ([delegate toplevelActiveState]) return;
+   [delegate sendToplevelActivateEvents];
+ 
+   NS_OBJC_END_TRY_IGNORE_BLOCK;
+ }
+ 
+diff --git a/widget/headless/HeadlessWidget.cpp b/widget/headless/HeadlessWidget.cpp
+--- a/widget/headless/HeadlessWidget.cpp
++++ b/widget/headless/HeadlessWidget.cpp
+@@ -155,20 +155,19 @@ void HeadlessWidget::GetCompositorWidget
+     mozilla::widget::CompositorWidgetInitData* aInitData) {
+   *aInitData =
+       mozilla::widget::HeadlessCompositorWidgetInitData(GetClientSize());
+ }
+ 
+ nsIWidget* HeadlessWidget::GetTopLevelWidget() { return mTopLevel; }
+ 
+ void HeadlessWidget::RaiseWindow() {
+-  MOZ_ASSERT(mWindowType == WindowType::TopLevel ||
+-                 mWindowType == WindowType::Dialog ||
+-                 mWindowType == WindowType::Sheet,
+-             "Raising a non-toplevel window.");
++  MOZ_ASSERT(
++      mWindowType == WindowType::TopLevel || mWindowType == WindowType::Dialog,
++      "Raising a non-toplevel window.");
+ 
+   // Do nothing if this is the currently active window.
+   RefPtr<HeadlessWidget> activeWindow = GetActiveWindow();
+   if (activeWindow == this) {
+     return;
+   }
+ 
+   // Raise the window to the top of the stack.
+@@ -199,17 +198,17 @@ void HeadlessWidget::Show(bool aState) {
+ 
+   LOG(("HeadlessWidget::Show [%p] state %d\n", (void*)this, aState));
+ 
+   // Top-level window and dialogs are activated/raised when shown.
+   // NB: alwaysontop windows are generally used for peripheral indicators,
+   //     so we don't focus them by default.
+   if (aState && !mAlwaysOnTop &&
+       (mWindowType == WindowType::TopLevel ||
+-       mWindowType == WindowType::Dialog || mWindowType == WindowType::Sheet)) {
++       mWindowType == WindowType::Dialog)) {
+     RaiseWindow();
+   }
+ 
+   ApplySizeModeSideEffects();
+ }
+ 
+ bool HeadlessWidget::IsVisible() const { return mVisible; }
+ 
+diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
+--- a/xpcom/build/BinaryPath.h
++++ b/xpcom/build/BinaryPath.h
+@@ -128,16 +128,56 @@ class BinaryPath {
+     } else {
+       rv = NS_ERROR_FAILURE;
+     }
+ 
+     CFRelease(executableURL);
+     return rv;
+   }
+ 
++  static nsresult GetApplicationIni(char aResult[MAXPATHLEN])
++  {
++    // Works even if we're not bundled.
++    CFBundleRef appBundle = CFBundleGetMainBundle();
++    if (!appBundle) {
++      return NS_ERROR_FAILURE;
++    }
++
++    CFURLRef iniURL = CFBundleCopyResourceURL(appBundle, CFSTR("application.ini"),
++                                              NULL, CFSTR("app"));
++    if (!iniURL) {
++      return NS_ERROR_FAILURE;
++    }
++
++    nsresult rv;
++    if (CFURLGetFileSystemRepresentation(iniURL, false, (UInt8*)aResult,
++                                         MAXPATHLEN)) {
++      // Sanitize path in case the app was launched from Terminal via
++      // './firefox' for example.
++      size_t readPos = 0;
++      size_t writePos = 0;
++      while (aResult[readPos] != '\0') {
++        if (aResult[readPos] == '.' && aResult[readPos + 1] == '/') {
++          readPos += 2;
++        } else {
++          aResult[writePos] = aResult[readPos];
++          readPos++;
++          writePos++;
++        }
++      }
++      aResult[writePos] = '\0';
++      rv = NS_OK;
++    } else {
++      rv = NS_ERROR_FAILURE;
++    }
++
++    CFRelease(iniURL);
++    return rv;
++  }
++
+ #elif defined(ANDROID)
+   static nsresult Get(char aResult[MAXPATHLEN]) {
+     // On Android, we use the MOZ_ANDROID_LIBDIR variable that is set by the
+     // Java bootstrap code.
+     const char* libDir = getenv("MOZ_ANDROID_LIBDIR");
+     if (!libDir) {
+       return NS_ERROR_FAILURE;
+     }
+@@ -283,16 +323,29 @@ class BinaryPath {
+     if (NS_FAILED(Get(path))) {
+       return nullptr;
+     }
+     UniqueFreePtr<char> result;
+     result.reset(strdup(path));
+     return result;
+   }
+ 
++#if defined(XP_MACOSX)
++  static UniqueFreePtr<char> GetApplicationIni()
++  {
++    char path[MAXPATHLEN];
++    if (NS_FAILED(GetApplicationIni(path))) {
++      return nullptr;
++    }
++    UniqueFreePtr<char> result;
++    result.reset(strdup(path));
++    return result;
++  }
++#endif
++
+ #ifdef MOZILLA_INTERNAL_API
+   static nsresult GetFile(nsIFile** aResult) {
+     nsCOMPtr<nsIFile> lf;
+ #  ifdef XP_WIN
+     wchar_t exePath[MAXPATHLEN];
+     nsresult rv = GetW(exePath);
+ #  else
+     char exePath[MAXPATHLEN];
+diff --git a/xpcom/ds/StaticAtoms.py b/xpcom/ds/StaticAtoms.py
+--- a/xpcom/ds/StaticAtoms.py
++++ b/xpcom/ds/StaticAtoms.py
+@@ -1141,16 +1141,17 @@ STATIC_ATOMS = [
+     Atom("self", "self"),
+     Atom("seltype", "seltype"),
+     Atom("setcookie", "set-cookie"),
+     Atom("setter", "setter"),
+     Atom("shadow", "shadow"),
+     Atom("shape", "shape"),
+     Atom("show", "show"),
+     Atom("showcaret", "showcaret"),
++    Atom("showservicesmenu", "showservicesmenu"),
+     Atom("sibling", "sibling"),
+     Atom("simple", "simple"),
+     Atom("simp_chinese_formal", "simp-chinese-formal"),
+     Atom("simp_chinese_informal", "simp-chinese-informal"),
+     Atom("single", "single"),
+     Atom("size", "size"),
+     Atom("sizes", "sizes"),
+     Atom("sizemode", "sizemode"),
+diff --git a/xpfe/appshell/nsAppShellService.cpp b/xpfe/appshell/nsAppShellService.cpp
+--- a/xpfe/appshell/nsAppShellService.cpp
++++ b/xpfe/appshell/nsAppShellService.cpp
+@@ -590,32 +590,16 @@ nsresult nsAppShellService::JustCreateTo
+                      nsIWebBrowserChrome::CHROME_TITLEBAR |
+                      nsIWebBrowserChrome::CHROME_STATUSBAR;
+   if (widgetInitData.mWindowType == widget::WindowType::Dialog &&
+       ((aChromeMask & pipMask) == pipMask) && !(aChromeMask & barMask)) {
+     widgetInitData.mPIPWindow = true;
+   }
+ #endif
+ 
+-#ifdef XP_MACOSX
+-  // Mac OS X sheet support
+-  // Adding CHROME_OPENAS_CHROME to sheetMask makes modal windows opened from
+-  // nsGlobalWindow::ShowModalDialog() be dialogs (not sheets), while modal
+-  // windows opened from nsPromptService::DoDialog() still are sheets.  This
+-  // fixes bmo bug 395465 (see nsCocoaWindow::StandardCreate() and
+-  // nsCocoaWindow::SetModal()).
+-  uint32_t sheetMask = nsIWebBrowserChrome::CHROME_OPENAS_DIALOG |
+-                       nsIWebBrowserChrome::CHROME_MODAL |
+-                       nsIWebBrowserChrome::CHROME_OPENAS_CHROME;
+-  if (parent && (parent != mHiddenWindow) &&
+-      ((aChromeMask & sheetMask) == sheetMask)) {
+-    widgetInitData.mWindowType = widget::WindowType::Sheet;
+-  }
+-#endif
+-
+ #if defined(XP_WIN)
+   if (widgetInitData.mWindowType == widget::WindowType::TopLevel ||
+       widgetInitData.mWindowType == widget::WindowType::Dialog)
+     widgetInitData.mClipChildren = true;
+ #endif
+ 
+   // note default chrome overrides other OS chrome settings, but
+   // not internal chrome

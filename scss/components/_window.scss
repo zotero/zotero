@@ -1,0 +1,28 @@
+@mixin zotero-window {
+	background: var(--material-sidepane);
+	--color-form-element-base-background: var(--material-sidepane);
+}
+
+@mixin zotero-dialog {
+	background: var(--material-background);
+	--color-form-element-base-background: var(--material-background);
+}
+
+window:root,
+window:root > wizard,
+body {
+	@include zotero-window();
+}
+
+window:root > dialog {
+	@include zotero-dialog();
+}
+
+// Can overwrite default style
+window:root .zotero-window {
+	@include zotero-window();
+}
+
+window:root .zotero-dialog {
+	@include zotero-dialog();
+}

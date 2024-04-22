@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Verstek:">
 <!ENTITY zotero.preferences.items "items">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
 
 <!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
 <!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">

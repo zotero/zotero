@@ -1,7 +1,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Corporation for Digital Scholarship
+	Copyright © 2023 Corporation for Digital Scholarship
 					 Vienna, Virginia, USA
 					 https://digitalscholar.org
 
@@ -88,6 +88,17 @@ class ItemTreeManager {
 	 *         // return: the data to display in the column
 	 *         return item.getField('title').split('').reverse().join('');
 	 *     },
+	 *     renderCell: (index, data, column) => {
+	 *         // index: the index of the row
+	 *         // data: the data to display in the column, return of `dataProvider`
+	 *         // column: the column options
+	 *         // return: the HTML to display in the cell
+	 *         const cell = document.createElement('span');
+	 *         cell.className = `cell ${column.className}`;
+	 *         cell.textContent = data;
+	 *         cell.style.color = 'red';
+	 *         return cell;
+	 *     },
 	 *     zoteroPersist: ['width', 'hidden', 'sortDirection'], // persist the column properties
 	 * });
 	 * ```
@@ -132,6 +143,7 @@ class ItemTreeManager {
 	 * @param {string | string[]} dataKeys - The dataKey of the column to unregister
 	 * @returns {boolean} true if the column(s) are unregistered
 	 * @example
+	 * The `registeredDataKey` is returned by the `registerColumns` function.
 	 * ```js
 	 * Zotero.ItemTreeManager.unregisterColumns(registeredDataKey);
 	 * ```
@@ -144,8 +156,6 @@ class ItemTreeManager {
 		await this._notifyItemTrees();
 		return true;
 	}
-
-	// TODO: add cell renderer registration
 
 	/**
 	 * Get column(s) that matches the properties of option

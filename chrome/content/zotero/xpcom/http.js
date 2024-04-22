@@ -5,6 +5,8 @@
 Zotero.HTTP = new function() {
 	var _errorDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 	var _errorDelayMax = 60 * 60 * 1000; // 1 hour
+
+	var { SecurityInfo } = ChromeUtils.importESModule("resource://gre/modules/SecurityInfo.sys.mjs");
 	
 	/**
 	 * Exception returned for unexpected status when promise* is used
@@ -1260,52 +1262,39 @@ Zotero.HTTP = new function() {
 			return;
 		}
 		
-		let secInfo = channel.securityInfo;
-		let msg;
+		let { state, errorMessage } = SecurityInfo.getSecurityInfo(channel);
+		if (state != 'broken') {
+			return;
+		}
+		
 		let dialogButtonText;
 		let dialogButtonCallback;
-		if (secInfo instanceof Ci.nsITransportSecurityInfo) {
-			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
-			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
-					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-				// Show actual error from the networking stack, with the hyperlink around the
-				// error code removed
-				msg = Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
-				if (msg.includes('.' + ZOTERO_CONFIG.DOMAIN_NAME + ' ')
-						|| msg.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1] + ' ')) {
-					msg = Zotero.getString('networkError.connectionMonitored', Zotero.appName)
-						+ "\n\n"
-						+ (isProxyAuthRequest
-							? Zotero.getString('startupError.internetFunctionalityMayNotWork') + "\n\n"
-							: "")
-						+ Zotero.getString('general.error') + ": " + msg.split(/\n/)[0];
-				}
-				dialogButtonText = Zotero.getString('general.moreInformation');
-				dialogButtonCallback = function () {
-					Zotero.launchURL('https://www.zotero.org/support/kb/ssl_certificate_error');
-				};
-			}
-			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
-					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-				msg = Zotero.getString('networkError.connectionNotSecure')
-					+ Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
-			}
-			if (msg) {
-				throw new Zotero.HTTP.SecurityException(
-					msg,
-					{
-						dialogHeader: Zotero.getString(
-							'networkError.connectionNotSecure',
-							Zotero.clientName
-						),
-						dialogButtonText,
-						dialogButtonCallback
-					}
-				);
-			}
+		let domain = channel.originalURI?.host ?? '';
+		let msg = Zotero.getString('networkError.insecureConnectionTo', [Zotero.appName, domain])
+			 + "\n\n";
+		if (channel.originalURI?.spec.includes(ZOTERO_CONFIG.DOMAIN_NAME)
+				|| channel.originalURI?.spec.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1])) {
+			msg += Zotero.getString('networkError.connectionMonitored', Zotero.appName)
+				+ "\n\n"
+				+ (isProxyAuthRequest
+					? Zotero.getString('startupError.internetFunctionalityMayNotWork') + "\n\n"
+					: "");
 		}
-	}
-	
+		msg += errorMessage ?? channel.securityInfo?.errorCodeString ?? '';
+		msg = msg.trim();
+		dialogButtonText = Zotero.getString('general.moreInformation');
+		dialogButtonCallback = function () {
+			Zotero.launchURL('https://www.zotero.org/support/kb/ssl_certificate_error');
+		};
+		throw new Zotero.HTTP.SecurityException(
+			msg,
+			{
+				dialogHeader: Zotero.getString('networkError.connectionNotSecure'),
+				dialogButtonText,
+				dialogButtonCallback
+			}
+		);
+	};
 	
 	async function _checkRetry(req) {
 		var retryAfter = req.getResponseHeader("Retry-After");

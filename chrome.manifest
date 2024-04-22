@@ -53,6 +53,7 @@ locale  zotero  sk-SK		chrome/locale/sk-SK/zotero/
 locale	zotero	sl-SI		chrome/locale/sl-SI/zotero/
 locale	zotero	sr-RS		chrome/locale/sr-RS/zotero/
 locale	zotero	sv-SE		chrome/locale/sv-SE/zotero/
+locale	zotero	ta		chrome/locale/ta/zotero/
 locale	zotero	th-TH		chrome/locale/th-TH/zotero/
 locale	zotero	tr-TR		chrome/locale/tr-TR/zotero/
 locale	zotero	uk-UA		chrome/locale/uk-UA/zotero/
@@ -61,18 +62,6 @@ locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/
 locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/
 
 skin		zotero	default		chrome/skin/default/zotero/
-
-component	{e4c61080-ec2d-11da-8ad9-0800200c9a66}			components/zotero-service.js
-component	{531828f8-a16c-46be-b9aa-14845c3b010f}			components/zotero-service.js
-contract	@zotero.org/Zotero;1 							{e4c61080-ec2d-11da-8ad9-0800200c9a66}
-contract	@mozilla.org/browser/clh;1						{531828f8-a16c-46be-b9aa-14845c3b010f}
-category	command-line-handler m-zotero					@mozilla.org/browser/clh;1
-
-component	{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}			components/zotero-autocomplete.js
-contract	@mozilla.org/autocomplete/search;1?name=zotero 	{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}
-
-component	{9BC3D762-9038-486A-9D70-C997AF848A7C}			components/zotero-protocol-handler.js	process=main
-contract	@mozilla.org/network/protocol;1?name=zotero 	{9BC3D762-9038-486A-9D70-C997AF848A7C}	process=main
 
 # Scaffold
 content scaffold             chrome/content/scaffold/

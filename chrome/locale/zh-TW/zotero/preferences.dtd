@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "預設：">
 <!ENTITY zotero.preferences.items "項目">
 <!ENTITY zotero.preferences.period "。">
-<!ENTITY zotero.preferences.settings "設定">
 <!ENTITY zotero.preferences.custom "自訂……">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少項目時，停用快速複製：">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
-<!ENTITY zotero.preferences.cite.styles "樣式">
 <!ENTITY zotero.preferences.cite.wordProcessors "文件編輯器">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻對話框">
 <!ENTITY zotero.preferences.styleEditor "樣式編輯器">

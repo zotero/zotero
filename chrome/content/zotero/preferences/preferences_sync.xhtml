@@ -24,29 +24,27 @@
 -->
 <vbox id="zotero-prefpane-sync" onload="Zotero_Preferences.Sync.init()">
     <vbox class="main-section">
-        <html:h1>&zotero.preferences.settings;</html:h1>
-        
         <vbox id="sync-unauthorized">
             <groupbox>
                 <label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
 
                 <hbox>
                     <html:div class="form-grid">
-                        <label value="&zotero.preferences.sync.username;"/>
-                        <html:input id="sync-username-textbox"
+                        <label id="username-label" value="&zotero.preferences.sync.username;"/>
+                        <html:input id="sync-username-textbox" aria-labelledby="username-label"
                             onblur="Zotero_Preferences.Sync.trimUsername()"
                             oninput="Zotero_Preferences.Sync.credentialsChange(event)"
                             onchange="Zotero_Preferences.Sync.credentialsChange(event)"
                             onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
                         
-                        <label value="&zotero.preferences.sync.password;"/>
-                        <html:input id="sync-password" type="password"
+                        <label id="password-label" value="&zotero.preferences.sync.password;"/>
+                        <html:input id="sync-password" type="password" aria-labelledby="password-label"
                             oninput="Zotero_Preferences.Sync.credentialsChange(event)"
                             onchange="Zotero_Preferences.Sync.credentialsChange(event)"
                             onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
                         
                         <box/>
-                        <hbox align="baseline">
+                        <hbox>
                             <button id="sync-auth-button"
                                 label="&zotero.preferences.sync.setUpSync;"
                                 oncommand="Zotero_Preferences.Sync.linkAccount(event)"
@@ -141,7 +139,7 @@
                                 </menupopup>
                             </menulist>
                             <label value="://"/>
-                            <html:input id="storage-url" style="-moz-box-flex: 1;"
+                            <html:input id="storage-url" style="flex: 1;"
                                 preference="extensions.zotero.sync.storage.url"
                                 onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                 onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
@@ -158,7 +156,7 @@
     
                         <label value="&zotero.preferences.sync.password;"/>
                         <hbox>
-                            <html:input id="storage-password" style="-moz-box-flex: 0;" type="password"
+                            <html:input id="storage-password" type="password"
                                 onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                 onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                         </hbox>
@@ -231,6 +229,7 @@
                 zotero.preferences.sync.reset.restoreToOnlineLibrary,
                 zotero.preferences.sync.reset.restoreToOnlineLibrary.desc,
                 zotero.preferences.sync.reset.fileSyncHistory,
-                zotero.preferences.sync.reset.resetFileSyncHistory.desc"/>
+                zotero.preferences.sync.reset.resetFileSyncHistory.desc,
+                zotero.preferences.sync.reset.warning2"/>
     </vbox>
 </vbox>

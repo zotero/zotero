@@ -1,13 +1,14 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Version of Gecko to build with
-GECKO_VERSION_MAC="102.11.0esr"
-GECKO_VERSION_LINUX="102.13.0esr"
-GECKO_VERSION_WIN="102.13.0esr"
-RUST_VERSION=1.60.0
+GECKO_VERSION_MAC="115.9.1esr"
+GECKO_VERSION_LINUX="115.9.1esr"
+GECKO_VERSION_WIN="115.9.1esr"
+RUST_VERSION=1.69.0
 
 # URL prefix for custom builds of Firefox components
-custom_components_url="https://download.zotero.org/dev/"
+custom_components_url="https://download.zotero.org/dev/firefox-components/"
+custom_components_hash_mac="bec8e3adebf8d5021f1f35fd2c65d752d4979839cbdd1ee1aa4b1d3d5ba0953b"
 
 APP_NAME="Zotero"
 APP_ID="zotero\@zotero.org"
@@ -28,13 +29,7 @@ NOTARIZATION_PASSWORD=""
 # Paths for Windows installer build
 NSIS_DIR='C:\Program Files (x86)\NSIS\'
 
-# Paths for Windows installer build only necessary for signed binaries
-SIGNTOOL='C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe'
-SIGNATURE_DESC='Zotero'
-SIGNATURE_URL='https://www.zotero.org/'
-SIGNTOOL_CERT_SUBJECT="Corporation for Digital Scholarship"
-SIGNTOOL_TIMESTAMP_SERVER="http://timestamp.sectigo.com"
-SIGNTOOL_DELAY=15
+SIGNTOOL_DELAY=5
 
 # Directory for unpacked binaries
 STAGE_DIR="$DIR/staging"
@@ -54,7 +49,6 @@ BUILD_PLATFORMS=""
 NUM_INCREMENTALS=6
 
 if [ "`uname`" = "Darwin" ]; then
-	alias mktemp='mktemp -t tmp'
 	shopt -s expand_aliases
 fi
 

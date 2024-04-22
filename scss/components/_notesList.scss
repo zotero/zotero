@@ -3,149 +3,49 @@
 	width: 100%;
 	overflow-y: auto;
 	flex-grow: 1;
-	background: #d2d8e2;
-	border-top: 1px solid lightgray;
+	background: var(--material-sidepane);
+	border-top: var(--material-border-quinary);
+	padding-inline: 8px;
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 }
 
-.notes-list {
+context-notes-list {
 	display: flex;
 	flex-direction: column;
+	flex: 1;
+	min-width: 0;
 	height: 0;
-	flex-grow: 1;
-	padding-top: 2px;
-
-	& > section {
-		margin: 5px 0;
-	}
-}
-
-.header-row {
-	margin: 0 7px;
-	display: flex;
-	justify-content: space-between;
-	height: 24px;
-
-	h2 {
-		font-weight: bold;
-		margin: 0;
-		font-size: 13px;
-		align-self: center;
-	}
-
-	button {
-		height: 24px;
-		padding-left: 4px;
-		padding-right: 4px;
-		// Necessary on linux to horizontaly center text
-		line-height: 0;
-	}
-}
-
-.empty-row {
-	margin: 4px 7px 0;
-	text-align: center;
-}
-
-.note-row {
-	border: 1px solid #bcc4d2;
-	border-radius: 5px;
-	margin: 4px 7px;
-	background-color: #fff;
 	
-	&:active {
-		background: #eef1f8;
-	}
-	
-	.inner {
-		> *:not(:first-child) {
-			margin-top: 3px;
+	.item-notes > .body, .all-notes > .body {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		gap: 6px;
+		
+		@include comfortable {
+			gap: 8px;
 		}
 		
-		.parent-line {
-			display: flex;
-			width: calc(100% - 16px);
-			border-bottom: 1px solid #d7dad7;
-			align-items: center;
-			padding: 5px 8px 4px;
-			margin-bottom: 5px;
+		&::before, &::after {
+			// Apply gap to start and end
+			content: '';
 		}
-		
-		.parent-item-type {
-			margin-right: 3px;
-			width: 16px; // Don't show HiDPI icons at 2x size
-		}
-		
-		.parent-title {
-			flex-grow: 1;
-			width: 0;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
-		
-		.title-line {
-			display: flex;
-			padding: 0 8px 0;
-			
-			.title {
-				flex-grow: 1;
-				width: 0;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				font-weight: bold;
-			}
-		}
-		
-		.body-line {
-			display: flex;
-			padding: 0 8px 6px;
 
-			.date {
-				color: $shade-6;
+		> .more {
+			appearance: none;
+			border-radius: 5px;
+			border: 1px solid var(--color-quinary-on-sidepane);
+			background: var(--material-background);
+
+			padding: 2px 8px;
+
+			@include comfortable {
+				padding-block: 4px;
 			}
 
-			.body {
-				flex-grow: 1;
-				width: 0;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				margin-left: 10px;
-				color: $shade-6;
+			&:active {
+				background-color: var(--accent-blue10);
 			}
-		}
-	}
-}
-
-.more-row {
-	border: 1px solid #bcc4d2;
-	border-radius: 5px;
-	margin: 4px 7px;
-	background-color: white;
-	text-align: center;
-	padding: 5px;
-
-	&:active {
-		background: #eef1f8;
-	}
-}
-
-.standalone-note-row {
-	.title-line {
-		padding-top: 6px !important;
-	}
-}
-
-.note-row, .more-row {
-	outline: 0;
-
-	&:-moz-focusring {
-		box-shadow: $toolbar-btn-focus-box-shadow;
-		z-index: 1;
-
-		@include retina {
-			box-shadow: $toolbar-btn-focus-box-shadow-2x;
 		}
 	}
 }

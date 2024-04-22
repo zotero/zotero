@@ -36,6 +36,7 @@ menu-application-touch-bar =
 menu-quit =
     .label = Изађи
     .accesskey = И
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label =
@@ -45,6 +46,7 @@ menu-quit-mac =
             [neuter] { -brand-shorter-name(case: "gen") }
            *[other] програма { -brand-shorter-name }
         }
+
 menu-about =
     .label =
         О { -brand-shorter-name.gender ->
@@ -231,8 +233,6 @@ menu-history-undo-menu =
     .label = Недавно затворене картице
 menu-history-undo-window-menu =
     .label = Недавно затворени прозори
-menu-history-reopen-all-tabs = Поново отвори све картице
-menu-history-reopen-all-windows = Поново отвори све прозоре
 
 ## Bookmarks Menu
 
@@ -241,10 +241,6 @@ menu-bookmarks-menu =
     .accesskey = б
 menu-bookmarks-manage =
     .label = Управљај обележивачима
-menu-bookmark-current-tab =
-    .label = Обележи тренутну картицу
-menu-bookmark-edit =
-    .label = Уреди обележивач
 menu-bookmark-tab =
     .label = Обележи тренутни језичак…
 menu-edit-bookmark =
@@ -344,6 +340,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Искључи режим за решавање проблема
     .accesskey = р
+menu-help-switch-device =
+    .label = Пребацивање на нови уређај
+    .accesskey = н
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

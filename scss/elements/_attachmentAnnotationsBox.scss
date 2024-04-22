@@ -1,0 +1,20 @@
+attachment-annotations-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+
+	& > collapsible-section {
+		& > .body {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			
+			@include comfortable {
+				gap: 8px;
+			}
+		}
+	}
+}

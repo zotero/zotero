@@ -18,10 +18,15 @@ text-action-cut =
 text-action-cut-shortcut =
     .key = X
 text-action-copy =
-    .label = Скопировать
+    .label = Копировать
     .accesskey = п
 text-action-copy-shortcut =
     .key = C
+# This command copies the link, removing additional
+# query parameters used to track users across sites.
+text-action-strip-on-share =
+    .label = Копировать без параметров отслеживания
+    .accesskey = е
 text-action-paste =
     .label = Вставить
     .accesskey = с
@@ -57,3 +62,5 @@ text-action-spell-dictionaries =
     .accesskey = ы
 text-action-search-text-box-clear =
     .title = Очистить
+text-action-highlight-selection =
+    .label = Подсветить выделение

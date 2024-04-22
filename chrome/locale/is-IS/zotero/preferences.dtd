@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Sjálfgefið:">
 <!ENTITY zotero.preferences.items "færslur">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Stillingar">
 <!ENTITY zotero.preferences.custom "Sérsniðið…">
 
 <!ENTITY zotero.preferences.prefpane.general "Almennt">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Afvirkja flýtiafrit þegar dregnar eru fleiri en">
 
 <!ENTITY zotero.preferences.prefpane.cite "Tilvísun">
-<!ENTITY zotero.preferences.cite.styles "Leturstílar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ritvinnslur">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Nota hefðbundið viðmót við að bæta við tilvísunum">
 <!ENTITY zotero.preferences.styleEditor "Breyta stíl">

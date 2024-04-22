@@ -28,18 +28,17 @@ const PropTypes = require('prop-types');
 var { Collection } = require('react-virtualized');
 
 // See also .tag-selector-item in _tag-selector.scss
-var filterBarHeight = 32;
-var tagPaddingTop = 4;
-var tagPaddingLeft = 2;
-var tagPaddingRight = 2;
-var tagPaddingBottom = 4;
-var tagSpaceBetweenX = 7;
-var tagSpaceBetweenY = 4;
-var panePaddingTop = 2;
-var panePaddingLeft = 2;
-var panePaddingRight = 25;
-//var panePaddingBottom = 2;
+var filterBarHeight = 37;
+var tagPaddingLeft = 4;
+var tagPaddingRight = 4;
+var tagSpaceBetweenX = 2;
+var tagSpaceBetweenY = 2;
+var panePaddingTop = 8 + 1; // extra 1px offset for margin-bottom: -1px in #zotero-tags-splitter
+var panePaddingLeft = 8;
+var panePaddingRight = 2; // + scrollbar width (but no less than 8px total)
+// var panePaddingBottom = 8; // configurable in _tag-selector.scss
 var minHorizontalPadding = panePaddingLeft + tagPaddingLeft + tagPaddingRight + panePaddingRight;
+
 
 class TagList extends React.PureComponent {
 	constructor(props) {
@@ -47,17 +46,25 @@ class TagList extends React.PureComponent {
 		this.collectionRef = React.createRef();
 		this.scrollToTopOnNextUpdate = false;
 		this.prevTagCount = 0;
+		this.focusedTagIndex = null;
+		this.lastFocusedTagIndex = null;
+		this.resolveTagsRenderedPromise = null;
+		this.state = {
+			scrollToCell: null
+		};
 	}
 	
 	componentDidUpdate(prevProps) {
 		// Redraw all tags on every refresh
 		if (this.collectionRef && this.collectionRef.current) {
 			// If width or height changed, recompute positions. It seems like this should happen
-			// automatically, but it doesn't as of 9.21.0.
+			// automatically, but it doesn't as of 9.21.0. Also check for density change.
+
 			if (prevProps.height != this.props.height
 					|| prevProps.width != this.props.width
-					|| prevProps.fontSize != this.props.fontSize
-					|| prevProps.tags != this.props.tags) {
+					|| prevProps.lineHeight != this.props.lineHeight
+					|| prevProps.tags != this.props.tags
+					|| prevProps.uiDensity !== this.props.uiDensity) {
 				this.collectionRef.current.recomputeCellSizesAndPositions();
 			}
 			// If dimensions didn't change, just redraw at current positions. Without this, clicking
@@ -94,16 +101,34 @@ class TagList extends React.PureComponent {
 	 * Calculate the x,y coordinates of all tags
 	 */
 	updatePositions() {
-		var tagMaxWidth = this.props.width - minHorizontalPadding;
-		var rowHeight = tagPaddingTop + this.props.fontSize + tagPaddingBottom + tagSpaceBetweenY;
+		const tagPaddingTop = this.props.uiDensity === 'comfortable' ? 2 : 1;
+		const tagPaddingBottom = tagPaddingTop;
+		this.scrollbarWidth = Math.max(Zotero.Utilities.Internal.getScrollbarWidth(), 6);
+
+		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
+		var rowHeight = tagPaddingTop + this.props.lineHeight + tagPaddingBottom + tagSpaceBetweenY;
 		var positions = [];
 		var row = 0;
 		let rowX = panePaddingLeft;
+
+		const separatorHeightCoefficient = 0.25;
+		let separatorHeight = Math.round(rowHeight * separatorHeightCoefficient);
+		let shouldAddSeparator = false;
+		let hasColoredTags = !!this.props.tags[0]?.color;
+		let forceNewLine = false;
+
 		for (let i = 0; i < this.props.tags.length; i++) {
 			let tag = this.props.tags[i];
-			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight;
+			// Add separator after reaching the first non-colored tag, assuming colored tags exist
+			if (!shouldAddSeparator && hasColoredTags && !tag.color) {
+				shouldAddSeparator = true;
+				forceNewLine = true;
+			}
+			// size of the colored dot + space between the dot and the tag name always sums up to fontSize (e.g., 8px + 3px at 11px fontSize)
+			const tagColorWidth = (tag.color && !Zotero.Utilities.Internal.isOnlyEmoji(tag.name)) ? this.props.fontSize : 0;
+			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight + tagColorWidth;
 			// If first row or cell fits, add to current row
-			if (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight))) {
+			if (!forceNewLine && (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingRight - this.scrollbarWidth)))) {
 				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
 			}
 			// Otherwise, start new row
@@ -112,27 +137,35 @@ class TagList extends React.PureComponent {
 				rowX = panePaddingLeft;
 				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
 			}
+			// Push all Y coordinates down by the height of the separator
+			if (shouldAddSeparator) {
+				positions[i][1] += separatorHeight;
+				forceNewLine = false;
+			}
 			rowX += tagWidth + tagSpaceBetweenX;
 		}
 		this.positions = positions;
 	}
 	
 	cellSizeAndPositionGetter = ({ index }) => {
-		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		const tagPaddingTopBottom = this.props.uiDensity === 'comfortable' ? 2 : 1;
+		const tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
+		
+		// NOTE: box-sizing is set to border-box on tags for i.e. padding needs to be included
 		return {
-			width: Math.min(this.props.tags[index].width, tagMaxWidth),
-			height: this.props.fontSize,
+			width: Math.min(this.props.tags[index].width + tagPaddingLeft + tagPaddingRight, tagMaxWidth),
+			height: this.props.lineHeight + (2 * tagPaddingTopBottom),
 			x: this.positions[index][0],
 			y: this.positions[index][1]
 		};
-	}
+	};
 	
 	renderTag = ({ index, _key, style }) => {
 		var tag = this.props.tags[index];
 		
 		const { onDragOver, onDragExit, onDrop } = this.props.dragObserver;
 		
-		var className = 'tag-selector-item zotero-clicky';
+		var className = 'tag-selector-item keyboard-clickable';
 		if (tag.selected) {
 			className += ' selected';
 		}
@@ -142,6 +175,9 @@ class TagList extends React.PureComponent {
 		if (tag.disabled) {
 			className += ' disabled';
 		}
+		if (Zotero.Utilities.Internal.isOnlyEmoji(tag.name)) {
+			className += ' emoji';
+		}
 		
 		let props = {
 			className,
@@ -149,37 +185,121 @@ class TagList extends React.PureComponent {
 			onContextMenu: ev => this.props.onTagContext(tag, ev),
 			onDragOver,
 			onDragExit,
-			onDrop
+			onDrop,
+			onFocus: (_) => {
+				this.lastFocusedTagIndex = this.focusedTagIndex;
+				this.focusedTagIndex = index;
+			}
 		};
 		
 		props.style = {
 			...style
 		};
-		
+		props.tabIndex = "0";
+		props.role = "checkbox";
+		props['aria-checked'] = tag.selected;
+		props['aria-disabled'] = tag.disabled;
 		// Don't specify explicit width unless we're truncating, because for some reason the width
 		// from canvas can sometimes be slightly smaller than the actual width, resulting in an
 		// unnecessary ellipsis.
-		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
 		if (props.style.width < tagMaxWidth) {
 			delete props.style.width;
 		}
 		else {
-			// Setting this via props doesn't seem to work in XUL, but setting it on hover does.
-			// Hopefully in an HTML window we'll be able to just set 'title'.
 			props.onMouseOver = function (event) {
-				event.target.setAttribute('tooltiptext', tag.name);
+				event.target.setAttribute('title', tag.name);
 			};
 		}
 		
 		if (tag.color) {
 			props.style.color = tag.color;
+			props['data-color'] = tag.color.toLowerCase();
 		}
 		
 		return (
 			<div key={tag.name} {...props}>
-				{tag.name}
+				<span>{tag.name}</span>
 			</div>
 		);
+	};
+
+	// Try to refocus a focused tag that was removed due to windowing
+	refocusTag() {
+		let tagsList = document.querySelector('.tag-selector-list');
+		let tagsNodes = [...tagsList.querySelectorAll(".tag-selector-item")];
+		let tagToFocus = this.props.tags[this.focusedTagIndex];
+		let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
+		if (nodeToFocus) {
+			nodeToFocus.focus();
+		}
+	}
+
+	waitForSectionRender() {
+		return new Promise((resolve, _) => {
+			this.resolveTagsRenderedPromise = resolve;
+		});
+	}
+
+	handleSectionRendered = ({ indices }) => {
+		let tagsList = document.querySelector('.tag-selector-list');
+		// <Collection> sets role="grid" which is not semantically correct
+		tagsList.setAttribute("role", "group");
+
+		if (this.focusedTagIndex === null) return;
+		// If the focused tag does not changed, the scrollToCell won't change
+		// either, so the <Collection> won't scroll to the desired tag if we don't reset it.
+		// E.g. second arrowLeft keypress when first tag is focused won't scroll to it.
+		if (this.lastFocusedTagIndex === this.focusedTagIndex) {
+			this.setState({ scrollToCell: null });
+		}
+		// Check if the tag that is supposed to be focused is within the rendered tags range.
+		// If it is, make sure it is focused. If it is not - focus the tags list.
+		if (indices.includes(this.focusedTagIndex)) {
+			this.refocusTag();
+			if (this.resolveTagsRenderedPromise) {
+				this.resolveTagsRenderedPromise();
+			}
+		}
+		else {
+			tagsList.focus();
+		}
+	};
+
+	handleBlur = (event) => {
+		// If the focus leaves the tags list, clear the last focused tag index
+		let tagsList = document.querySelector('.tag-selector-list');
+		if (!tagsList.contains(event.relatedTarget)) {
+			this.focusedTagIndex = null;
+			this.lastFocusedTagIndex = null;
+		}
+	};
+
+	async handleKeyDown(e) {
+		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
+		// If the windowing kicks in, the node of the initially-focused tag may not
+		// exist, so first we may need to scroll to it.
+		if (!document.activeElement.classList.contains("tag-selector-item")) {
+			this.setState({ scrollToCell: this.focusedTagIndex });
+			// Even after the <Collection> re-renders, the new tag nodes may not be rendered yet.
+			// So we have to wait for handleSectionRendered to run before proceeding.
+			await this.waitForSectionRender();
+		}
+		// Sanity check to make sure that now a tag node is focused
+		if (!document.activeElement.classList.contains("tag-selector-item")) return;
+		// Handle arrow navigation
+		let nextTag = (node) => {
+			if (e.key == "ArrowRight") return node.nextElementSibling;
+			return node.previousElementSibling;
+		};
+		let nextOne = nextTag(document.activeElement);
+		// Skip disabled tags
+		while (nextOne && nextOne.classList.contains("disabled")) {
+			nextOne = nextTag(nextOne);
+		}
+		if (nextOne) {
+			nextOne.focus();
+		}
 	}
 	
 	render() {
@@ -218,12 +338,15 @@ class TagList extends React.PureComponent {
 					verticalOverscanSize={300}
 					width={this.props.width}
 					height={this.props.height - filterBarHeight}
+					aria-label={document.querySelector("#zotero-tag-selector").getAttribute("label") || ""}
+					onSectionRendered={this.handleSectionRendered}
+					scrollToCell={Number.isInteger(this.state.scrollToCell) ? this.state.scrollToCell : undefined}
 				/>
 			);
 		}
 		
 		return (
-			<div className="tag-selector-list-container">
+			<div className="tag-selector-list-container" onBlur={this.handleBlur} onKeyDown={this.handleKeyDown.bind(this)}>
 				{tagList}
 			</div>
 		);
@@ -243,11 +366,14 @@ class TagList extends React.PureComponent {
 			onDrop: PropTypes.func
 		}),
 		onSelect: PropTypes.func,
+		onKeyDown: PropTypes.func,
 		onTagContext: PropTypes.func,
 		loaded: PropTypes.bool,
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
 		fontSize: PropTypes.number.isRequired,
+		lineHeight: PropTypes.number.isRequired,
+		uiDensity: PropTypes.string.isRequired
 	};
 }
 

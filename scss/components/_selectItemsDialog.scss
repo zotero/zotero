@@ -1,0 +1,48 @@
+#zotero-select-items-dialog {
+    display: flex;
+    min-width: 600px;
+    min-height: 450px;
+}
+
+#select-items-dialog {
+    padding: 2em;
+
+    #zotero-select-items-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #zotero-collections-tree-container {
+        min-width: 200px;
+		min-height: 100%;
+    }
+
+	#zotero-items-pane-content {
+		min-height: 100%;
+	}
+
+    #search-toolbar {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    #search-toolbar {
+        flex: 0 0 auto;
+    }
+
+    #collections-items-container {
+        flex: 1 1 auto;
+        margin-bottom: 8px;
+    }
+}
+
+// richlistbox elements are crazy and will expand beyond the window size
+// unless all/most elements in the hierarchy that contain that
+// richlistbox have a min-height: 0 set
+.contain-richlistbox {
+    vbox, hbox {
+        min-height: 0;
+    }
+}

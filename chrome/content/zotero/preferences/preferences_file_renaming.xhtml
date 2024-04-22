@@ -22,7 +22,11 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<vbox class="main-section" id="zotero-prefpane-file-renaming-format" onload="Zotero_Preferences.FileRenaming.init()">
+<vbox
+	class="main-section" id="zotero-prefpane-file-renaming-format"
+	onload="Zotero_Preferences.FileRenaming.init()"
+	onunload="Zotero_Preferences.FileRenaming.uninit()"
+>
 	<hbox class="header">
 		<html:h1 data-l10n-id="preferences-file-renaming-format-title" />
 	</hbox>

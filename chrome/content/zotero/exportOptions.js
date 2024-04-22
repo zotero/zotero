@@ -45,7 +45,7 @@ var Zotero_File_Interface_Export = new function() {
 	this.init = function () {
 		// Set font size from pref
 		var sbc = document.getElementById('zotero-export-options-container');
-		Zotero.setFontSize(sbc);
+		Zotero.UIProperties.registerRoot(sbc);
 		
 		var addedOptions = new Object();
 		

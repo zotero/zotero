@@ -34,9 +34,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
+
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = បិទ { -brand-shorter-name }
+
 menu-about =
     .label = អំពី { -brand-shorter-name }
     .accesskey = A
@@ -194,8 +196,6 @@ menu-history-undo-window-menu =
 menu-bookmarks-menu =
     .label = ចំណាំ
     .accesskey = B
-menu-bookmark-edit =
-    .label = កែ​សម្រួល​ចំណាំ​នេះ
 menu-bookmarks-all-tabs =
     .label = ចំណាំ​ផ្ទាំង​ទាំងអស់…
 menu-bookmarks-toolbar =

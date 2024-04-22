@@ -1,0 +1,91 @@
+@mixin splitter-invisible-size($side) {
+	border-#{$side}: 0;
+	border-#{another-side($side)}: var(--material-border-quarternary);
+	margin-#{$side}: calc(1px - var(--draggable-size));
+	margin-#{another-side($side)}: -1px;
+	&[state="collapsed"] {
+		border-#{$side}: var(--material-border-quarternary);
+		border-#{another-side($side)}: 0;
+		margin-#{$side}: 0;
+		margin-#{another-side($side)}: 0;
+	}
+}
+
+splitter {
+	appearance: none;
+	z-index: 1;
+	position: relative;
+	background: transparent;
+	border: none;
+
+	--draggable-size: 5px;
+	
+	@include compact {
+		--draggable-size: 5px;
+
+		&[state="collapsed"] {
+			--draggable-size: 8px;
+		}
+	}
+	@include comfortable {
+		--draggable-size: 8px;
+
+		&[state="collapsed"] {
+			--draggable-size: 10px;
+		}
+	}
+
+	&[orient=vertical] {
+		min-height: var(--draggable-size);
+
+		&[collapse="before"],
+		&[substate="before"] {
+			@include splitter-invisible-size(bottom);
+		}
+
+		&[collapse="after"],
+		&[substate="after"] {
+			@include splitter-invisible-size(top);
+		}
+	}
+
+	&:not([orient=vertical]) {
+		min-width: var(--draggable-size);
+
+		&[collapse="before"],
+		&[substate="before"],
+		&[collapse="after"]:-moz-locale-dir(rtl),
+		&[substate="after"]:-moz-locale-dir(rtl) {
+			@include splitter-invisible-size(right);
+		}
+
+		&[collapse="after"],
+		&[substate="after"],
+		&[collapse="before"]:-moz-locale-dir(rtl),
+		&[substate="before"]:-moz-locale-dir(rtl) {
+			@include splitter-invisible-size(left);
+		}
+	}
+}
+
+#zotero-items-splitter,
+#zotero-context-splitter,
+#zotero-context-splitter-stacked {
+	&[orient=vertical] {
+		&[state="collapsed"] {
+			margin-bottom: -1px;
+			--draggable-size: 1px;
+			border: 0;
+		}
+	}
+
+	&:not([orient=vertical]) {
+		@include splitter-invisible-size(right);
+
+		&[state="collapsed"] {
+			margin-right: -1px;
+			--draggable-size: 1px;
+			border: 0;
+		}
+	}
+}

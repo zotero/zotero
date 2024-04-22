@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = Historique
 menu-view-synced-tabs-sidebar =
     .label = Onglets synchronisés
+menu-view-megalist-sidebar =
+    .label = Mots de passe
 menu-view-full-zoom =
     .label = Zoom
     .accesskey = Z
@@ -152,7 +160,7 @@ menu-view-full-zoom-actual-size =
     .label = Taille réelle
     .accesskey = T
 menu-view-full-zoom-toggle =
-    .label = Zoom texte seulement
+    .label = Agrandir uniquement le texte
     .accesskey = x
 menu-view-page-style-menu =
     .label = Style de la page
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = Onglets récemment fermés
 menu-history-undo-window-menu =
     .label = Fenêtres récemment fermées
-menu-history-reopen-all-tabs = Rouvrir tous les onglets
-menu-history-reopen-all-windows = Rouvrir toutes les fenêtres
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Rechercher dans l’historique
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = M
 menu-bookmarks-manage =
     .label = Organiser les marque-pages
-menu-bookmark-current-tab =
-    .label = Marquer l’onglet courant
-menu-bookmark-edit =
-    .label = Modifier ce marque-page
 menu-bookmark-tab =
     .label = Marquer l’onglet courant…
 menu-edit-bookmark =
     .label = Modifier ce marque-page…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Rechercher des marque-pages
 menu-bookmarks-all-tabs =
     .label = Marquer tous les onglets…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Désactiver le mode de dépannage
     .accesskey = m
+menu-help-switch-device =
+    .label = Passer à un nouvel appareil
+    .accesskey = n
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Ce site n’est pas trompeur…
     .accesskey = C
+menu-report-broken-site =
+    .label = Signaler des problèmes avec ce site

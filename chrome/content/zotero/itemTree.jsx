@@ -31,16 +31,16 @@ const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
-const { getDOMElement } = Icons;
+const { getDOMElement, getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
-const { Cc, Ci, Cu } = require('chrome');
-Cu.import("resource://gre/modules/osfile.jsm");
+const { Cc, Ci, Cu, ChromeUtils } = require('chrome');
+const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 
 /**
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
  */
 
-const CHILD_INDENT = 12;
+const CHILD_INDENT = 16;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
@@ -246,6 +246,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let row = this._rows[i];
 				// Top-level items
 				if (row.level == 0) {
+					// A top-level attachment moved into a parent. Don't copy, it will be added
+					// via this loop for the parent item.
+					if (row.ref.parentID) {
+						continue;
+					}
 					let isSearchParent = newSearchParentIDs.has(row.ref.id);
 					// If not showing children or no children match the search, close
 					if (this.regularOnly || !isSearchParent) {
@@ -259,6 +264,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (!newSearchItems.has(row.ref) && !isSearchParent) {
 						continue;
 					}
+				}
+				else if (row.level == 1 && !row.ref.parentID) {
+					// A child attachment moved into top-level. It needs to be added anew in a different
+					// location.
+					itemsToAdd.push(row.ref);
+					continue;
 				}
 				// Child items
 				else if (skipChildren) {
@@ -488,7 +499,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var activeWindow = zp && zp.itemsView == this;
 
 		var quickSearch = this._ownerDocument.getElementById('zotero-tb-search');
-		var hasQuickSearch = quickSearch && quickSearch.value != '';
+		var hasQuickSearch = quickSearch && quickSearch.searchTextbox.value != '';
 
 		// 'collection-item' ids are in the form collectionID-itemID
 		if (type == 'collection-item') {
@@ -570,7 +581,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 			else if (collectionTreeRow.isFeedsOrFeed()) {
-				window.ZoteroPane.updateReadLabel();
+				// Moved to itemPane CE
 			}
 			// If not a search, process modifications manually
 			else {
@@ -763,8 +774,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			if (singleSelect) {
 				if (!extraData[singleSelect] || !extraData[singleSelect].skipSelect) {
-					// Reset to Info tab
-					this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
+					this._ownerDocument.getElementById('zotero-view-item').scrollTop = 0;
 					await this.selectItem(singleSelect);
 					reselect = true;
 				}
@@ -975,6 +985,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					storeColumnPrefs: this._storeColumnPrefs,
 					getDefaultColumnOrder: this._getDefaultColumnOrder,
 					containerWidth: this.domEl.clientWidth,
+					firstColumnExtraWidth: 28, // 16px for twisty + 16px for icon - 8px column padding + 4px margin
 
 					multiSelect: true,
 
@@ -1087,7 +1098,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				Zotero.debug("_rowMap not yet set; not selecting items");
 				return 0;
 			}
-			
+
 			Zotero.debug('Item group not found and no row map in ItemTree.selectItem() -- discarding select', 2);
 			return 0;
 		}
@@ -1162,7 +1173,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Single item
 		if (rowsToSelect.length == 1) {
 			// this.selection.select() triggers the tree onSelect handler attribute, which calls
-			// ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(), which refreshes the
+			// ZoteroPane.itemSelected(), which calls ZoteroPane.itemPane.render(), which refreshes the
 			// itembox. But since the 'onselect' doesn't handle promises, itemSelected() isn't waited for
 			// here, which means that 'yield selectItem(itemID)' continues before the itembox has been
 			// refreshed. To get around this, we wait for a select event that's triggered by
@@ -1356,9 +1367,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				if (sortField == 'hasAttachment') {
 					// PDFs at the top
-					const order = ['pdf', 'snapshot', 'other', 'none'];
-					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : 4);
-					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : 4);
+					const order = ['pdf', 'snapshot', 'epub', 'image', 'video', 'other', 'none'];
+					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : (order.length - 1));
+					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : (order.length - 1));
 					return fieldA - fieldB;
 				}
 
@@ -1546,8 +1557,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
+		this._lastToggleOpenStateIndex = index;
+
 		if (this.isContainerOpen(index)) {
-			return this._closeContainer(index, skipRowMapRefresh, true);
+			await this._closeContainer(index, skipRowMapRefresh, true);
+			this._lastToggleOpenStateIndex = null;
+			return;
 		}
 		if (!skipRowMapRefresh) {
 			var savedSelection = this.getSelectedItems(true);
@@ -1593,6 +1608,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._rows[index].isOpen = true;
 
 		if (count == 0) {
+			this._lastToggleOpenStateIndex = null;
 			return;
 		}
 
@@ -1604,6 +1620,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._restoreSelection(savedSelection, false, true);
 			this.tree.invalidate();
 		}
+		this._lastToggleOpenStateIndex = null;
 	}
 
 	expandMatchParents(searchParentIDs) {
@@ -1879,15 +1896,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else {
 			return this._searchItemIDs.has(row.id);
 		}
-	}
+	};
 	
 	isContainer = (index) => {
 		return this.getRow(index).ref.isRegularItem();
-	}
+	};
 
 	isContainerOpen = (index) => {
 		return this.getRow(index).isOpen;
-	}
+	};
 
 	isContainerEmpty = (index) => {
 		if (this.regularOnly) {
@@ -1900,7 +1917,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		var includeTrashed = this.collectionTreeRow.isTrash();
 		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
-	}
+	};
 
 	////////////////////////////////////////////////////////////////////////////////
 	///
@@ -1912,11 +1929,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Start a drag using HTML 5 Drag and Drop
 	 */
 	onDragStart = (event, index) => {
-		// See note in LibraryTreeView::setDropEffect()
-		if (Zotero.isWin || Zotero.isLinux) {
-			event.dataTransfer.effectAllowed = 'copyMove';
-		}
-		
 		// Propagate selection before we set the drag image if dragging not one of the selected rows
 		if (!this.selection.isSelected(index)) {
 			this.selection.select(index);
@@ -1928,129 +1940,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			elem.style.position = "initial";
 			this._dragImageContainer.appendChild(elem);
 		}
-		event.dataTransfer.setDragImage(this._dragImageContainer, 0, 0);
 
-		var itemIDs = this.getSelectedItems(true);
+		let itemIDs = this.getSelectedItems(true);
 		// Get selected item IDs in the item tree order
 		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
-		event.dataTransfer.setData("zotero/item", itemIDs);
 
-		var items = Zotero.Items.get(itemIDs);
 		Zotero.DragDrop.currentDragSource = this.collectionTreeRow;
 
-		// If at least one file is a non-web-link attachment and can be found,
-		// enable dragging to file system
-		var files = items
-			.filter(item => item.isAttachment())
-			.map(item => item.getFilePath())
-			.filter(path => path);
-
-		if (files.length) {
-			// Advanced multi-file drag (with unique filenames, which otherwise happen automatically on
-			// Windows but not Linux) and auxiliary snapshot file copying on macOS
-			let dataProvider;
-			if (Zotero.isMac) {
-				dataProvider = new Zotero.FileDragDataProvider(itemIDs);
-			}
-
-			for (let i = 0; i < files.length; i++) {
-				let file = Zotero.File.pathToFile(files[i]);
-
-				if (dataProvider) {
-					Zotero.debug("Adding application/x-moz-file-promise");
-					event.dataTransfer.mozSetDataAt("application/x-moz-file-promise", dataProvider, i);
-				}
-
-				// Allow dragging to filesystem on Linux and Windows
-				let uri;
-				if (!Zotero.isMac) {
-					Zotero.debug("Adding text/x-moz-url " + i);
-					uri = Zotero.File.pathToFileURI(file);
-					event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
-				}
-
-				// Allow dragging to web targets (e.g., Gmail)
-				Zotero.debug("Adding application/x-moz-file " + i);
-				event.dataTransfer.mozSetDataAt("application/x-moz-file", file, i);
-
-				if (Zotero.isWin) {
-					event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, i);
-				}
-				else if (Zotero.isLinux) {
-					// Don't create a symlink for an unmodified drag
-					event.dataTransfer.effectAllowed = 'copy';
-				}
-			}
-		}
-
-		// Get Quick Copy format for current URL (set via /ping from connector)
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-
-		// If all items are notes, use one of the note export translators
-		if (items.every(item => item.isNote())) {
-			format = Zotero.QuickCopy.getNoteFormat();
-		}
-
-		Zotero.debug("Dragging with format " + format);
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		try {
-			if (format.mode == 'export') {
-				// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
-				// and Note HTML translators instead
-				if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
-					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
-					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
-						if (!worked) {
-							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-							return;
-						}
-						Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
-							if (!worked) {
-								Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-								return;
-							}
-							event.dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
-							event.dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
-						});
-					});
-				}
-				else {
-					Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
-						if (!worked) {
-							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-							return;
-						}
-						var text = obj.string.replace(/\r\n/g, '\n');
-						// For Note HTML translator use body content only
-						if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-							// Use body content only
-							let parser = new DOMParser();
-							let doc = parser.parseFromString(text, 'text/html');
-							text = doc.body.innerHTML;
-						}
-						event.dataTransfer.setData('text/plain', text);
-					});
-				}
-			}
-			else if (format.mode == 'bibliography') {
-				var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
-				if (content) {
-					if (content.html) {
-						event.dataTransfer.setData("text/html", content.html);
-					}
-					event.dataTransfer.setData("text/plain", content.text);
-				}
-			}
-			else {
-				Zotero.logError("Invalid Quick Copy mode");
-			}
-		}
-		catch (e) {
-			Zotero.debug(e);
-			Zotero.logError(e + " with '" + format.id + "'");
-		}
-	}
+		Zotero.Utilities.Internal.onDragItems(event, itemIDs, this._dragImageContainer);
+	};
 
 	/**
 	 * We use this to set the drag action, which is used by view.canDrop(),
@@ -2145,7 +2043,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 			return false;
-		} finally {
+		}
+		finally {
 			let prevDropRow = this._dropRow;
 			if (event.dataTransfer.dropEffect != 'none') {
 				this._dropRow = row;
@@ -2157,19 +2056,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.tree.invalidateRow(row);
 			}
 		}
-	}
+	};
 
 	onDragEnd = () => {
 		this._dragImageContainer.innerHTML = "";
 		this._dropRow = null;
 		this.tree.invalidate();
-	}
+	};
 
 	onDragLeave = () => {
 		let dropRow = this._dropRow;
 		this._dropRow = null;
 		this.tree.invalidateRow(dropRow);
-	}
+	};
 
 	/**
 	 * Called by treeRow.onDragOver() before setting the dropEffect
@@ -2391,21 +2290,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					});
 				}
 			}
-
-			// If moving, remove items from source collection
-			if (dropEffect == 'move' && toMove.length) {
-				if (!sameLibrary) {
-					throw new Error("Cannot move items between libraries");
-				}
-				if (!sourceCollectionTreeRow || !sourceCollectionTreeRow.isCollection()) {
-					throw new Error("Drag source must be a collection");
-				}
-				if (collectionTreeRow.id != sourceCollectionTreeRow.id) {
-					await Zotero.DB.executeTransaction(async function () {
-						await collectionTreeRow.ref.removeItems(toMove);
-					}.bind(this));
-				}
-			}
 		}
 		else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 			// Disallow drop into read-only libraries
@@ -2520,7 +2404,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 									}
 								);
 								// Update path in case the name was changed to be unique
-								file = OS.Path.join(OS.Path.dirname(file), newName);
+								file = PathUtils.join(PathUtils.parent(file), newName);
 							}
 						}
 						catch (e) {
@@ -2578,6 +2462,182 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 	};
+
+	// //////////////////////////////////////////////////////////////////////////////
+	//
+	//  Menu utilities for ZoteroPane
+	//
+	// //////////////////////////////////////////////////////////////////////////////
+
+	buildColumnPickerMenu(menupopup) {
+		const prefix = 'zotero-column-picker-';
+		// Filter out ignored columns
+		const columns = this._getColumns();
+		let columnMenuitemElements = {};
+		for (let i = 0; i < columns.length; i++) {
+			const column = columns[i];
+			if (column.showInColumnPicker === false) continue;
+			let label = formatColumnName(column);
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute('type', 'checkbox');
+			menuitem.setAttribute('label', label);
+			menuitem.setAttribute('colindex', i);
+			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
+			if (!column.hidden) {
+				menuitem.setAttribute('checked', true);
+			}
+			if (column.disabledIn && column.disabledIn.includes(this.collectionTreeRow.visibilityGroup)) {
+				menuitem.setAttribute('disabled', true);
+			}
+			columnMenuitemElements[column.dataKey] = menuitem;
+			menupopup.appendChild(menuitem);
+		}
+
+		try {
+			// More Columns menu
+			let id = prefix + 'more-menu';
+
+			let moreMenu = document.createXULElement('menu');
+			moreMenu.setAttribute('label', Zotero.getString('pane.items.columnChooser.moreColumns'));
+			moreMenu.setAttribute('anonid', id);
+
+			let moreMenuPopup = document.createXULElement('menupopup');
+			moreMenuPopup.setAttribute('anonid', id + '-popup');
+
+			let moreItems = [];
+			for (let i = 0; i < columns.length; i++) {
+				const column = columns[i];
+				if (column.columnPickerSubMenu) {
+					moreItems.push(columnMenuitemElements[column.dataKey]);
+				}
+			}
+
+			// Sort fields and move to submenu
+			var collation = Zotero.getLocaleCollation();
+			moreItems.sort(function (a, b) {
+				return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
+			});
+			moreItems.forEach(function (elem) {
+				moreMenuPopup.appendChild(menupopup.removeChild(elem));
+			});
+
+			let sep = document.createXULElement('menuseparator');
+			menupopup.appendChild(sep);
+			moreMenu.appendChild(moreMenuPopup);
+			menupopup.appendChild(moreMenu);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.debug(e, 1);
+		}
+
+		//
+		// Secondary Sort menu
+		//
+		if (!this.collectionTreeRow.isFeedsOrFeed()) {
+			try {
+				const id = prefix + 'sort-menu';
+				const primaryField = this.getSortField();
+				const sortFields = this.getSortFields();
+				let secondaryField = false;
+				if (sortFields[1]) {
+					secondaryField = sortFields[1];
+				}
+
+				const primaryFieldLabel = formatColumnName(columns.find(c => c.dataKey == primaryField));
+
+				const sortMenu = document.createXULElement('menu');
+				sortMenu.setAttribute('label',
+					Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
+				sortMenu.setAttribute('anonid', id);
+
+				const sortMenuPopup = document.createXULElement('menupopup');
+				sortMenuPopup.setAttribute('anonid', id + '-popup');
+
+				// Generate menuitems
+				const sortOptions = [
+					'title',
+					'firstCreator',
+					'itemType',
+					'date',
+					'year',
+					'publisher',
+					'publicationTitle',
+					'dateAdded',
+					'dateModified'
+				];
+				for (let field of sortOptions) {
+					// Hide current primary field, and don't show Year for Date, since it would be a no-op
+					if (field == primaryField || (primaryField == 'date' && field == 'year')) {
+						continue;
+					}
+					let column = columns.find(c => c.dataKey == field);
+					let label = formatColumnName(column);
+
+					let sortMenuItem = document.createXULElement('menuitem');
+					sortMenuItem.setAttribute('fieldName', field);
+					sortMenuItem.setAttribute('label', label);
+					sortMenuItem.setAttribute('type', 'checkbox');
+					if (field == secondaryField) {
+						sortMenuItem.setAttribute('checked', 'true');
+					}
+					sortMenuItem.addEventListener('command', async () => {
+						if (this._setSecondarySortField(field)) {
+							await this.sort();
+						}
+					})
+					sortMenuPopup.appendChild(sortMenuItem);
+				}
+
+				sortMenu.appendChild(sortMenuPopup);
+				menupopup.appendChild(sortMenu);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				Zotero.debug(e, 1);
+			}
+		}
+
+		let sep = document.createXULElement('menuseparator');
+		// sep.setAttribute('anonid', prefix + 'sep');
+		menupopup.appendChild(sep);
+
+		//
+		// Restore Default Column Order
+		//
+		let menuitem = document.createXULElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
+		menuitem.setAttribute('anonid', prefix + 'restore-order');
+		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
+		menupopup.appendChild(menuitem);
+	}
+
+	buildSortMenu(menupopup) {
+		this._getColumns()
+			.filter(column => !column.hidden)
+			.forEach((column, i) => {
+				let menuItem = document.createXULElement('menuitem');
+				menuItem.setAttribute('type', 'checkbox');
+				menuItem.setAttribute('checked', this.getSortField() == column.dataKey);
+				menuItem.setAttribute('label', formatColumnName(column));
+				menuItem.addEventListener('command', () => {
+					this.toggleSort(i, true);
+				});
+				menupopup.append(menuItem);
+			});
+	}
+
+	toggleSort(sortIndex, countVisible = false) {
+		if (countVisible) {
+			let cols = this._getColumns();
+			sortIndex = cols.indexOf(cols.filter(col => !col.hidden)[sortIndex]);
+			if (sortIndex == -1) {
+				return;
+			}
+		}
+		this.tree._columns.toggleSort(sortIndex);
+	}
+
 
 	// //////////////////////////////////////////////////////////////////////////////
 	//
@@ -2680,27 +2740,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		span.className = `cell ${column.className}`;
 		span.classList.add('primary');
 
-		// Add twisty, icon, tag swatches and retraction indicator
-		let twisty;
-		if (this.isContainerEmpty(index)) {
-			twisty = document.createElement('span');
-			twisty.classList.add("spacer-twisty");
-		}
-		else {
-			twisty = getDOMElement("IconTwisty");
-			twisty.classList.add('twisty');
-			if (this.isContainerOpen(index)) {
-				twisty.classList.add('open');
-			}
-			twisty.style.pointerEvents = 'auto';
-			twisty.addEventListener('mousedown', event => event.stopPropagation());
-			twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
-				{ passive: true });
-		}
-
-		const icon = this._getIcon(index);
-		icon.classList.add('cell-icon');
-
 		const item = this.getRow(index).ref;
 		let retracted = "";
 		let retractedAriaLabel = "";
@@ -2711,11 +2750,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		let tagAriaLabel = '';
-		let tagSpans = '';
+		let tagSpans = [];
 		let coloredTags = item.getColoredTags();
 		if (coloredTags.length) {
-			tagSpans = coloredTags.map(x => this._getTagSwatch(x.tag, x.color));
-			tagAriaLabel = tagSpans.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
+			let { emoji, colored } = coloredTags.reduce((acc, tag) => {
+				acc[Zotero.Utilities.Internal.isOnlyEmoji(tag.tag) ? 'emoji' : 'colored'].push(tag);
+				return acc;
+			}, { emoji: [], colored: [] });
+			
+			tagSpans.push(...emoji.map(x => this._getTagSwatch(x.tag)));
+			
+			if (colored.length) {
+				let coloredTagSpans = colored.map(x => this._getTagSwatch(x.tag, x.color));
+				let coloredTagSpanWrapper = document.createElement('span');
+				coloredTagSpanWrapper.className = 'colored-tag-swatches';
+				coloredTagSpanWrapper.append(...coloredTagSpans);
+				tagSpans.push(coloredTagSpanWrapper);
+			}
+
+			tagAriaLabel = coloredTags.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
 			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
 		}
 
@@ -2739,11 +2792,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		textSpan.dir = 'auto';
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
-		span.append(twisty, icon, retracted, ...tagSpans, textSpan);
-
-		// Set depth indent
-		const depth = this.getLevel(index);
-		span.firstChild.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
+		if (Zotero.Prefs.get('ui.tagsAfterTitle')) {
+			span.append(retracted, textSpan, ...tagSpans);
+		}
+		else {
+			span.append(retracted, ...tagSpans, textSpan);
+		}
 
 		return span;
 	}
@@ -2770,26 +2824,33 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// If the item has a child attachment
 			if (type !== null && type != 'none') {
 				if (type == 'pdf') {
-					icon = getDOMElement('IconTreeitemAttachmentPDF');
+					icon = getCSSItemTypeIcon('attachmentPDF', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
-					if (!exists) {
-						icon.classList.add('icon-missing-file');
-					}
 				}
 				else if (type == 'snapshot') {
-					//icon = getDOMElement('IconTreeitemAttachmentSnapshot');
-					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+					icon = getCSSItemTypeIcon('attachmentSnapshot', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
 				}
+				else if (type == 'epub') {
+					icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
+				}
+				else if (type == 'image') {
+					icon = getCSSItemTypeIcon('attachmentImage', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasImage');
+				}
+				else if (type == 'video') {
+					icon = getCSSItemTypeIcon('attachmentVideo', 'attachment-type');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasVideo');
+				}
 				else {
-					//icon = getDOMElement('IconTreeitem');
-					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+					icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
-				icon.classList.add('cell-icon');
-				//if (!exists) {
-				//	icon.classList.add('icon-missing-file');
-				//}
+				
+				if (!exists) {
+					icon.classList.add('icon-missing-file');
+				}
 			}
 			//else if (type == 'none') {
 			//	if (item.getField('url') || item.getField('DOI')) {
@@ -2822,19 +2883,77 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
-	_renderCell(index, data, column) {
+	_renderCell(index, data, column, isFirstColumn) {
+		let cell;
 		if (column.primary) {
-			return this._renderPrimaryCell(index, data, column);
+			cell = this._renderPrimaryCell(index, data, column);
 		}
 		else if (column.dataKey === 'hasAttachment') {
-			return this._renderHasAttachmentCell(index, data, column);
+			cell = this._renderHasAttachmentCell(index, data, column);
 		}
-		let cell = renderCell.apply(this, arguments);
-		if (column.dataKey === 'numNotes' && data) {
-			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+		else if (column.renderCell) {
+			try {
+				cell = column.renderCell.apply(this, arguments);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
-		else if (column.dataKey === 'itemType') {
-			cell.setAttribute('aria-hidden', true);
+		else {
+			cell = renderCell.apply(this, arguments);
+			if (column.dataKey === 'numNotes' && data) {
+				cell.dataset.l10nId = 'items-table-cell-notes';
+				cell.dataset.l10nArgs = JSON.stringify({ count: data });
+			}
+			else if (column.dataKey === 'itemType') {
+				cell.setAttribute('aria-hidden', true);
+			}
+		}
+
+		if (column.noPadding) {
+			cell.classList.add('no-padding');
+		}
+
+		if (isFirstColumn) {
+			// Add depth indent, twisty and icon
+			const depth = this.getLevel(index);
+			let indentSpan = document.createElement('span');
+			indentSpan.className = "cell-indent";
+			indentSpan.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
+
+			let twisty;
+			if (this.isContainerEmpty(index)) {
+				twisty = document.createElement('span');
+				twisty.classList.add("spacer-twisty");
+			}
+			else {
+				twisty = getCSSIcon("twisty");
+				twisty.classList.add('twisty');
+				if (this.isContainerOpen(index)) {
+					twisty.classList.add('open');
+				}
+				twisty.style.pointerEvents = 'auto';
+				twisty.addEventListener('mousedown', event => event.stopPropagation());
+				twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
+					{ passive: true });
+				twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
+					{ passive: true });
+			}
+
+			const icon = this._getIcon(index);
+			icon.classList.add('cell-icon');
+
+			if (cell.querySelector('.cell-text') === null) {
+				// convert text-only cell to a cell with text and icon
+				let textSpan = document.createElement('span');
+				textSpan.className = "cell-text";
+				textSpan.innerHTML = cell.innerHTML;
+				cell.innerHTML = "";
+				cell.append(textSpan);
+			}
+
+			cell.prepend(indentSpan, twisty, icon);
+			cell.classList.add('first-column');
 		}
 		return cell;
 	}
@@ -2851,6 +2970,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		div.classList.toggle('selected', selection.isSelected(index));
+		div.classList.toggle('first-selected', selection.isFirstRowOfSelectionBlock(index));
+		div.classList.toggle('last-selected', selection.isLastRowOfSelectionBlock(index));
 		div.classList.toggle('focused', selection.focused == index);
 		div.classList.remove('drop', 'drop-before', 'drop-after');
 		const rowData = this._getRowData(index);
@@ -2867,9 +2988,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		let { firstColumn } = columns.reduce((acc, column) => {
+			return !column.hidden && column.ordinal < acc.lowestOrdinal
+				? { lowestOrdinal: column.ordinal, firstColumn: column }
+				: acc;
+		}, { lowestOrdinal: Infinity, firstColumn: null });
+
 		for (let column of columns) {
 			if (column.hidden) continue;
-			div.appendChild(this._renderCell(index, rowData[column.dataKey], column));
+			div.appendChild(this._renderCell(index, rowData[column.dataKey], column, column === firstColumn));
 		}
 
 		if (!oldDiv) {
@@ -2896,6 +3023,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		if (rowData.contextRow) {
 			div.setAttribute('aria-disabled', true);
+		}
+
+		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
+		if (this._lastToggleOpenStateIndex === index) {
+			let twisty = div.querySelector('.twisty');
+			if (twisty) {
+				twisty.classList.toggle('open', !this.isContainerOpen(index));
+				setTimeout(() => {
+					twisty.classList.toggle('open', this.isContainerOpen(index));
+				}, 0);
+			}
 		}
 
 		return div;
@@ -3145,8 +3283,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const legacyPersistSetting = persistSettings[legacyDataKey];
 		if (legacyPersistSetting) {
 			// Remove legacy pref
-			// TODO: uncomment once xul item tree fully phased out
-			// delete persistSettings[legacyDataKey];
+			delete persistSettings[legacyDataKey];
 			for (const key in legacyPersistSetting) {
 				if (typeof legacyPersistSetting[key] == "string") {
 					if (key == 'sortDirection') {
@@ -3190,7 +3327,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (this.props.persistColumns) {
 				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;;
 				const columnSettings = columnsSettings[column.dataKey];
-				if (!columnSettings) {
+				if (!columnSettings && this.id === 'main') {
 					column = this._setLegacyColumnSettings(column);
 				}
 
@@ -3220,7 +3357,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			this._columns.push(column);
 		}
-		
+
 		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
 	}
 	
@@ -3286,6 +3423,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// Activate text links
 				for (let span of div.getElementsByTagName('span')) {
 					if (span.classList.contains('text-link')) {
+						span.setAttribute('role', 'link');
 						if (span.hasAttribute('data-href')) {
 							span.onclick = function () {
 								doc.defaultView.ZoteroPane.loadURI(this.getAttribute('data-href'));
@@ -3570,16 +3708,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	_displayColumnPickerMenu = (event) => {
 		if (!this.props.columnPicker) return;
-		const prefix = 'zotero-column-picker-';
-		const doc = document;
 		let popupset = document.querySelector('#zotero-column-picker-popupset');
 		if (!popupset) {
-			popupset = doc.createXULElement('popupset');
+			popupset = document.createXULElement('popupset');
 			popupset.id = 'zotero-column-picker-popupset';
 			document.children[0].appendChild(popupset);
 		}
 		
-		const menupopup = doc.createXULElement('menupopup');
+		const menupopup = document.createXULElement('menupopup');
 		menupopup.id = 'zotero-column-picker';
 		menupopup.addEventListener('popuphiding', (event) => {
 			if (event.target.id == menupopup.id) {
@@ -3587,145 +3723,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		
-		// Filter out ignored columns
-		const columns = this._getColumns();
-		let columnMenuitemElements = {};
-		for (let i = 0; i < columns.length; i++) {
-			const column = columns[i];
-			if (column.showInColumnPicker === false) continue;
-			let label = formatColumnName(column);
-			let menuitem = doc.createXULElement('menuitem');
-			menuitem.setAttribute('type', 'checkbox');
-			menuitem.setAttribute('label', label);
-			menuitem.setAttribute('colindex', i);
-			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
-			if (!column.hidden) {
-				menuitem.setAttribute('checked', true);
-			}
-			if (column.disabledIn && column.disabledIn.includes(this.collectionTreeRow.visibilityGroup)) {
-				menuitem.setAttribute('disabled', true);
-			}
-			columnMenuitemElements[column.dataKey] = menuitem;
-			menupopup.appendChild(menuitem);
-		}
-		
-		try {
-			// More Columns menu
-			let id = prefix + 'more-menu';
-			
-			let moreMenu = doc.createXULElement('menu');
-			moreMenu.setAttribute('label', Zotero.getString('pane.items.columnChooser.moreColumns'));
-			moreMenu.setAttribute('anonid', id);
-			
-			let moreMenuPopup = doc.createXULElement('menupopup');
-			moreMenuPopup.setAttribute('anonid', id + '-popup');
-
-			let moreItems = [];
-			for (let i = 0; i < columns.length; i++) {
-				const column = columns[i];
-				if (column.columnPickerSubMenu) {
-					moreItems.push(columnMenuitemElements[column.dataKey]);
-				}
-			}
-			
-			// Sort fields and move to submenu
-			var collation = Zotero.getLocaleCollation();
-			moreItems.sort(function (a, b) {
-				return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
-			});
-			moreItems.forEach(function (elem) {
-				moreMenuPopup.appendChild(menupopup.removeChild(elem));
-			});
-
-			let sep = doc.createXULElement('menuseparator');
-			menupopup.appendChild(sep);
-			moreMenu.appendChild(moreMenuPopup);
-			menupopup.appendChild(moreMenu);
-		}
-		catch (e) {
-			Zotero.logError(e);
-			Zotero.debug(e, 1);
-		}
-
-		//
-		// Secondary Sort menu
-		//
-		if (!this.collectionTreeRow.isFeedsOrFeed()) {
-			try {
-				const id = prefix + 'sort-menu';
-				const primaryField = this.getSortField();
-				const sortFields = this.getSortFields();
-				let secondaryField = false;
-				if (sortFields[1]) {
-					secondaryField = sortFields[1];
-				}
-				
-				const primaryFieldLabel = formatColumnName(columns.find(c => c.dataKey == primaryField));
-				
-				const sortMenu = doc.createXULElement('menu');
-				sortMenu.setAttribute('label',
-					Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
-				sortMenu.setAttribute('anonid', id);
-				
-				const sortMenuPopup = doc.createXULElement('menupopup');
-				sortMenuPopup.setAttribute('anonid', id + '-popup');
-				
-				// Generate menuitems
-				const sortOptions = [
-					'title',
-					'firstCreator',
-					'itemType',
-					'date',
-					'year',
-					'publisher',
-					'publicationTitle',
-					'dateAdded',
-					'dateModified'
-				];
-				for (let field of sortOptions) {
-					// Hide current primary field, and don't show Year for Date, since it would be a no-op
-					if (field == primaryField || (primaryField == 'date' && field == 'year')) {
-						continue;
-					}
-					let column = columns.find(c => c.dataKey == field);
-					let label = formatColumnName(column);
-					
-					let sortMenuItem = doc.createXULElement('menuitem');
-					sortMenuItem.setAttribute('fieldName', field);
-					sortMenuItem.setAttribute('label', label);
-					sortMenuItem.setAttribute('type', 'checkbox');
-					if (field == secondaryField) {
-						sortMenuItem.setAttribute('checked', 'true');
-					}
-					sortMenuItem.addEventListener('command', async () => {
-						if (this._setSecondarySortField(field)) {
-							await this.sort();
-						}
-					})
-					sortMenuPopup.appendChild(sortMenuItem);
-				}
-				
-				sortMenu.appendChild(sortMenuPopup);
-				menupopup.appendChild(sortMenu);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				Zotero.debug(e, 1);
-			}
-		}
-		
-		let sep = doc.createXULElement('menuseparator');
-		// sep.setAttribute('anonid', prefix + 'sep');
-		menupopup.appendChild(sep);
-		
-		//
-		// Restore Default Column Order
-		//
-		let menuitem = doc.createXULElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
-		menuitem.setAttribute('anonid', prefix + 'restore-order');
-		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
-		menupopup.appendChild(menuitem);
+		this.buildColumnPickerMenu(menupopup);
 
 		popupset.appendChild(menupopup);
 		menupopup.openPopupAtScreen(
@@ -3776,41 +3774,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_getIcon(index) {
 		var item = this.getRow(index).ref;
-		var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
-		if (itemType == 'attachment') {
-			var linkMode = item.attachmentLinkMode;
-			
-			if (item.attachmentContentType == 'application/pdf' && item.isFileAttachment()) {
-				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					itemType += 'PDFLink';
-				}
-				else {
-					itemType += 'PDF';
-				}
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-				itemType += "File";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				itemType += "Link";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-				itemType += "Snapshot";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				itemType += "WebLink";
-			}
-		}
-		let iconClsName = "IconTreeitem" + Zotero.Utilities.capitalize(itemType);
-		if (!Icons[iconClsName]) {
-			iconClsName = "IconTreeitem";
-		}
-		var icon = getDOMElement(iconClsName);
-		if (!icon) {
-			Zotero.debug('Could not find tree icon for "' + itemType + '"');
-			return document.createElement('span');
-		}
-		return icon;
+		var itemType = item.getItemTypeIconName();
+		return getCSSItemTypeIcon(itemType);
 	}
 
 	_canGetBestAttachmentState(item) {
@@ -3827,10 +3792,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// https://stackoverflow.com/a/54369605
 		if (Zotero.Utilities.Internal.isOnlyEmoji(tag)) {
 			span.textContent = tag;
+			span.className += ' emoji';
 		}
 		// Otherwise display color
 		else {
-			span.style.backgroundColor = color;
+			span.className += ' colored';
+			span.dataset.color = color.toLowerCase();
+			span.style.color = color;
 		}
 		return span;
 	}

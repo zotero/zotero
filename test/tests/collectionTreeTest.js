@@ -1348,7 +1348,7 @@ describe("Zotero.CollectionTree", function() {
 			await cv.selectFeeds();
 			await waitForItemsLoad(win);
 
-			var quickSearch = win.document.getElementById('zotero-tb-search');
+			var quickSearch = win.document.getElementById('zotero-tb-search-textbox');
 			quickSearch.value = feedItem1.getField('title');
 			quickSearch.doCommand();
 
@@ -1372,6 +1372,209 @@ describe("Zotero.CollectionTree", function() {
 			
 			assert.equal(cv.getRow(cv.getRowIndexByID('F1')).ref.unreadCount, 1);
 			assert.lengthOf(win.document.querySelectorAll('#zotero-collections-tree .row.unread'), 2);
+		});
+	});
+
+	describe("#setFilter()", function () {
+		var collection1, collection2, collection3, collection4, collection5, collection6, collection7, collection8;
+		var search1, search2, feed1, feed2;
+		var allRows = [];
+		let keyboardClick = (key) => {
+			return new KeyboardEvent('keydown', {
+				key: key,
+				code: key,
+				bubbles: true,
+			});
+		};
+		before(async function () {
+			// Delete all previously added collections, feeds, searches
+			for (let col of Zotero.Collections.getByLibrary(userLibraryID)) {
+				await col.eraseTx();
+			}
+			await clearFeeds();
+			for (let s of Zotero.Searches.getByLibrary(userLibraryID)) {
+				await s.eraseTx();
+			}
+			// Display the collection search bar
+			win.document.getElementById("zotero-tb-collections-search").click();
+			// Do not hide the search panel on blur
+			win.document.getElementById("zotero-collections-search").removeEventListener('blur', zp.hideCollectionSearch);
+
+			feed1 = await createFeed({ name: "feed_1 " });
+			feed2 = await createFeed({ name: "feed_2" });
+			
+			collection1 = await createDataObject('collection', { name: "collection_level_one", libraryID: userLibraryID });
+			collection2 = await createDataObject('collection', { name: "collection_level_two_1", parentID: collection1.id, libraryID: userLibraryID });
+			collection3 = await createDataObject('collection', { name: "collection_level_two_2", parentID: collection1.id, libraryID: userLibraryID });
+			collection4 = await createDataObject('collection', { name: "collection_level_three_1", parentID: collection2.id, libraryID: userLibraryID });
+			collection5 = await createDataObject('collection', { name: "collection_level_three_11", parentID: collection2.id, libraryID: userLibraryID });
+			collection6 = await createDataObject('collection', { name: "collection_level_one_1", libraryID: userLibraryID });
+			collection7 = await createDataObject('collection', { name: "collection_level_two_21", parentID: collection6.id, libraryID: userLibraryID });
+			collection8 = await createDataObject('collection', { name: "collection_level_two_22", parentID: collection6.id, libraryID: userLibraryID });
+			search1 = await createDataObject('search', { name: "search_1", libraryID: userLibraryID });
+			search2 = await createDataObject('search', { name: "search_2", libraryID: userLibraryID });
+			allRows = [feed1, feed2, collection1, collection2, collection3, collection4, collection5, collection6, collection7, collection8, search1, search2];
+		});
+
+		beforeEach(async function () {
+			// Empty filter and let it settle
+			await cv.setFilter("");
+		});
+
+		after(async function () {
+			await cv.setFilter("");
+		});
+
+		for (let type of ['collection', 'search', 'feed']) {
+			// eslint-disable-next-line no-loop-func
+			it(`should show only ${type} matching the filter`, async function () {
+				await cv.setFilter(type);
+				let displayedRowNames = cv._rows.filter(row => row.type == type).map(row => row.getName());
+				let expectedRowNames = allRows.filter(row => row.name.includes(type)).map(row => row.name);
+				assert.sameMembers(displayedRowNames, expectedRowNames);
+			});
+		}
+
+		it('should show non-passing entries whose children pass the filter', async function () {
+			await cv.setFilter("three");
+			let displayedRowNames = cv._rows.filter(row => row.type == "collection").map(row => row.ref.name);
+			let expectedNames = [
+				"collection_level_one",
+				"collection_level_two_1",
+				"collection_level_three_1",
+				"collection_level_three_11"
+			];
+			assert.sameMembers(displayedRowNames, expectedNames);
+		});
+
+		it('should not move focus from selected collection during filtering', async function () {
+			await cv.selectByID("C" + collection5.id);
+			await cv.setFilter("three");
+			let focusedRow = cv.getRow(cv.selection.focused);
+			assert.equal(focusedRow.id, "C" + collection5.id);
+			await cv.setFilter("two");
+			focusedRow = cv.getRow(cv.selection.focused);
+			assert.equal(focusedRow.id, "C" + collection5.id);
+		});
+
+		it('should collapse collections collapsed before filtering', async function () {
+			// Collapse top level collections 1 and 6
+			for (let c of [collection1, collection6]) {
+				let index = cv.getRowIndexByID("C" + c.id);
+				let row = cv.getRow(index);
+				if (row.isOpen) {
+					await cv.toggleOpenState(index);
+				}
+			}
+			
+			await cv.setFilter(collection5.name);
+
+			// Collection 1 and 2 have a matching child, so they are opened
+			let colOneRow = cv.getRow(cv.getRowIndexByID("C" + collection1.id));
+			assert.isTrue(colOneRow.isOpen);
+			let colTwoRow = cv.getRow(cv.getRowIndexByID("C" + collection2.id));
+			assert.isTrue(colTwoRow.isOpen);
+			// Collection 6 has no matches, it is filtered out
+			let colSixRowIndex = cv.getRowIndexByID("C" + collection6.id);
+			assert.isFalse(colSixRowIndex);
+
+			// Empty the filter
+			await cv.setFilter("");
+
+			// Collection 1 and 6 should remain collapsed as before filtering
+			colOneRow = cv.getRow(cv.getRowIndexByID("C" + collection1.id));
+			assert.isFalse(colOneRow.isOpen);
+			let colSixRow = cv.getRow(cv.getRowIndexByID("C" + collection6.id));
+			assert.isFalse(colSixRow.isOpen);
+		});
+
+		for (let type of ['collection', 'search']) {
+			// eslint-disable-next-line no-loop-func
+			it(`should only hide ${type} if it's renamed to not match the filter`, async function () {
+				await cv.setFilter(type);
+				let objectToSelect = type == 'collection' ? collection5 : search2;
+				objectToSelect.name += "_updated";
+				await objectToSelect.saveTx();
+				let displayedRowNames = cv._rows.map(row => row.getName());
+				assert.include(displayedRowNames, objectToSelect.name);
+
+				objectToSelect.name = "not_matching_filter";
+				await objectToSelect.saveTx();
+				displayedRowNames = cv._rows.map(row => row.getName());
+				assert.notInclude(displayedRowNames, objectToSelect.name);
+			});
+		}
+
+		for (let type of ['collection', 'search']) {
+			// eslint-disable-next-line no-loop-func
+			it(`should only add ${type} if its name matches the filter`, async function () {
+				await cv.setFilter(type);
+				let newCollection = await createDataObject(type, { name: `new_${type}`, libraryID: userLibraryID });
+
+				let displayedRowNames = cv._rows.map(row => row.ref.name);
+				assert.include(displayedRowNames, newCollection.name);
+
+				newCollection = await createDataObject(type, { name: `not_passing_${type.substring(1)}`, libraryID: userLibraryID });
+
+				displayedRowNames = cv._rows.map(row => row.ref.name);
+				assert.notInclude(displayedRowNames, newCollection.name);
+			});
+		}
+
+		it(`should focus selected collection on Enter if it matches filter`, async function () {
+			await cv.selectByID(`C${collection3.id}`);
+			win.document.getElementById("zotero-collections-search").value = "_2";
+			await cv.setFilter("_2");
+			win.document.getElementById("zotero-collections-search").dispatchEvent(keyboardClick("Enter"));
+			assert.equal(cv.getSelectedCollection(true), collection3.id);
+			assert.equal(win.document.activeElement.id, 'collection-tree');
+		});
+
+		it(`should focus first matching collection on Enter if selected collection does not match filter`, async function () {
+			await cv.selectByID(`C${collection2.id}`);
+			win.document.getElementById("zotero-collections-search").focus();
+			win.document.getElementById("zotero-collections-search").value = "_2";
+			await cv.setFilter("_2");
+			win.document.getElementById("zotero-collections-search").dispatchEvent(keyboardClick("Enter"));
+			// Wait for the selection to go through
+			await Zotero.Promise.delay(100);
+			assert.equal(cv.getSelectedCollection(true), collection3.id);
+			assert.equal(win.document.activeElement.id, 'collection-tree');
+		});
+
+		it(`should not move focus from collection filter on Enter if no rows pass the filter`, async function () {
+			await cv.selectByID(`C${collection3.id}`);
+			win.document.getElementById("zotero-collections-search").focus();
+			win.document.getElementById("zotero-collections-search").value = "Not matching anything";
+			await cv.setFilter("Not matching anything");
+			win.document.getElementById("zotero-collections-search").dispatchEvent(keyboardClick("Enter"));
+			assert.equal(win.document.activeElement.id, 'zotero-collections-search');
+		});
+
+		it(`should skip context rows on arrow up/down`, async function () {
+			await cv.selectByID(`C${collection2.id}`);
+			await cv.setFilter("_2");
+			await cv.focusFirstMatchingRow();
+			// Skip collection6 that does not match on the way up and down
+			for (let col of [collection3, collection7, collection8]) {
+				assert.equal(cv.getSelectedCollection(true), col.id);
+				await cv.focusNextMatchingRow(cv.selection.focused);
+			}
+			await cv.selectByID(`C${collection8.id}`);
+			for (let col of [collection8, collection7, collection3]) {
+				assert.equal(cv.getSelectedCollection(true), col.id);
+				await cv.focusNextMatchingRow(cv.selection.focused, true);
+			}
+		});
+
+		it(`should clear filter on Escape from collectionTree`, async function () {
+			await cv.selectByID(`C${collection2.id}`);
+			let colTree = win.document.getElementById('collection-tree');
+			await cv.setFilter("_2");
+			cv.focusFirstMatchingRow();
+			colTree.dispatchEvent(keyboardClick("Escape"));
+			assert.equal(cv._filter, "");
+			assert.equal(cv.getSelectedCollection(true), collection2.id);
 		});
 	});
 })

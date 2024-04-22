@@ -26,8 +26,7 @@
 "use strict";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 Zotero_Preferences.General = {
 	_openURLResolvers: null,
@@ -113,6 +112,11 @@ Zotero_Preferences.General = {
 			Services.locale.requestedLocales = [menu.value];
 		}
 		
+		// https://searchfox.org/mozilla-central/rev/961a9e56a0b5fa96ceef22c61c5e75fb6ba53395/browser/base/content/utilityOverlay.js#383-387
+		if (Services.locale.isAppLocaleRTL) {
+			Zotero.Prefs.set("bidi.browser.ui", true, true);
+		}
+		
 		if (!changed) {
 			return;
 		}
@@ -148,7 +152,7 @@ Zotero_Preferences.General = {
 		
 		var fp = new FilePicker();
 		if (currentPath && currentPath != 'system') {
-			fp.displayDirectory = OS.Path.dirname(currentPath);
+			fp.displayDirectory = PathUtils.parent(currentPath);
 		}
 		fp.init(
 			window,
@@ -191,17 +195,17 @@ Zotero_Preferences.General = {
 					Zotero.logError(e);
 				}
 
-				let handlerFilename = OS.Path.basename(handler);
+				let handlerFilename = PathUtils.filename(handler);
 				if (Zotero.isMac) {
 					handlerFilename = handlerFilename.replace(/\.app$/, '');
 				}
 				customMenuItem.setAttribute('label', handlerFilename);
 				if (icon) {
-					customMenuItem.className = 'menuitem-iconic';
+					customMenuItem.classList.add('menuitem-iconic');
 					customMenuItem.setAttribute('image', icon);
 				}
 				else {
-					customMenuItem.className = '';
+					customMenuItem.classList.remove('menuitem-iconic');
 				}
 				customMenuItem.hidden = false;
 				menulist.selectedIndex = 2;

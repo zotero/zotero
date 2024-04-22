@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "log perubahan">
 <!ENTITY zotero.upgrade.changeLogAfterLink "untuk mengetahui hal-hal apa saja yang baru.">
 
-<!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Catatan">
 <!ENTITY zotero.tabs.attachments.label "Lampiran">
-<!ENTITY zotero.tabs.tags.label "Tag">
-<!ENTITY zotero.tabs.related.label "Terkait">
 
 <!ENTITY zotero.toolbar.duplicate.label "Tunjukkan Duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Tunjukkan Item-Item yang Belum Diisikan">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Lihat secaraDaring">
 <!ENTITY zotero.item.copyAsURL "Salin sebagai URL">
 <!ENTITY zotero.item.deletePermanently "Hapus secara permanen...">
 

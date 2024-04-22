@@ -26,11 +26,11 @@
 
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
-<!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отправлен.">
-<!ENTITY zotero.errorReport.submitted "Отчет об ошибке отправлен.">
-<!ENTITY zotero.errorReport.reportID "Номер отчета:">
-<!ENTITY zotero.errorReport.postToForums "Пожалуйста, оставьте сообщение на форуме Zotero (forums.zotero.org), указав этот номер отчета, описание проблемы, и какие шаги нужно предпринять чтобы воспроизвести её.">
-<!ENTITY zotero.errorReport.notReviewed "Отчеты об ошибках не рассматриваются, пока на них не сослались в форуме.">
+<!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчёт об ошибке будет отправлен.">
+<!ENTITY zotero.errorReport.submitted "Отчёт об ошибке отправлен.">
+<!ENTITY zotero.errorReport.reportID "Номер отчёта:">
+<!ENTITY zotero.errorReport.postToForums "Пожалуйста, оставьте сообщение на форуме Zotero (forums.zotero.org), указав этот номер отчёта, описание проблемы, и какие шаги нужно предпринять чтобы воспроизвести её.">
+<!ENTITY zotero.errorReport.notReviewed "Отчёты об ошибках не рассматриваются, пока на них не сослались в форуме.">
 
 <!ENTITY zotero.upgrade.title "Мастер обновления Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Вы установили новую версию Zotero.">
@@ -40,17 +40,14 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Пожалуйста, посмотрите">
 <!ENTITY zotero.upgrade.majorUpgradeLink "инструкцию к обновлению">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "прежде чем продолжить.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Дождитесь окончания процесса обновления, это может занять какое-то время.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Дождитесь окончания процесса обновления. Это займёт некоторое время.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Ваша база данных Zotero была успешно обновлена.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Пожалуйста, посмотрите">
 <!ENTITY zotero.upgrade.changeLogLink "журнал изменений">
 <!ENTITY zotero.upgrade.changeLogAfterLink "чтобы узнать что нового.">
 
-<!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Заметки">
 <!ENTITY zotero.tabs.attachments.label "Вложения">
-<!ENTITY zotero.tabs.tags.label "Теги">
-<!ENTITY zotero.tabs.related.label "Связанные">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показать дубликаты">
 <!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые записи">
@@ -59,7 +56,7 @@
 <!ENTITY zotero.items.itemType "Тип записи">
 <!ENTITY zotero.items.creator_column "Автор">
 <!ENTITY zotero.items.year_column "Год">
-<!ENTITY zotero.items.dateModified_column "Изменен">
+<!ENTITY zotero.items.dateModified_column "Изменён">
 <!ENTITY zotero.items.moreColumns.label "Дополнительные столбцы">
 <!ENTITY zotero.items.restoreColumnOrder.label "Восстановить порядок столбцов">
 
@@ -67,7 +64,7 @@
 <!ENTITY zotero.items.menu.attach.note "Добавить заметку">
 <!ENTITY zotero.items.menu.attach "Добавить вложение">
 <!ENTITY zotero.items.menu.attach.link.uri "Прикрепить ссылку на URI…">
-<!ENTITY zotero.items.menu.attach.file "Вложить сохраненную копию файла…">
+<!ENTITY zotero.items.menu.attach.file "Вложить сохранённую копию файла…">
 <!ENTITY zotero.items.menu.attach.fileLink "Вложить ссылку на файл…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Восстановить в библиотеке">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Как в предложении">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Поменять местами имя и фамилию">
 <!ENTITY zotero.item.creatorTransform.fixCase "Исправить регистр">
-<!ENTITY zotero.item.viewOnline "Просмотреть онлайн">
 <!ENTITY zotero.item.copyAsURL "Скопировать как URL">
 <!ENTITY zotero.item.deletePermanently "Удалить навсегда…">
 
@@ -183,17 +179,17 @@
 <!ENTITY zotero.import.source.file "Файл (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.source.folder "Каталог файлов PDF и прочих">
 <!ENTITY zotero.import.onlineImport "Импорт из сетевого ресурса">
-<!ENTITY zotero.import.importing "Идет импортирование…">
+<!ENTITY zotero.import.importing "Идёт импортирование…">
 <!ENTITY zotero.import.database "База данных">
 <!ENTITY zotero.import.lastModified "Последний раз изменено">
 <!ENTITY zotero.import.size "Размер (объём)">
 <!ENTITY zotero.import.createCollection "Поместить импортированные коллекции и записи в новую коллекцию">
 <!ENTITY zotero.import.fileHandling "Обработка файлов">
-<!ENTITY zotero.import.online.newItemsOnly "Загрузить только новые записи; не обновлять ранее испортированные записи">
+<!ENTITY zotero.import.online.newItemsOnly "Загрузить только новые записи; не обновлять ранее импортированные записи">
 
 <!ENTITY zotero.exportOptions.title "Экспорт…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Настройки преобразователя:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Настройки транслятора:">
 
 <!ENTITY zotero.charset.label "Кодировка символов">
 <!ENTITY zotero.moreEncodings.label "Ещё кодировки">
@@ -229,7 +225,7 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Ссылки, ожидающие обновления, будут выделены в документе">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Отключение обновления библиографии может ускорить вставку цитирования в большие документы. Нажимайте «Обновить», чтобы обновить цитирование вручную.">
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Использовать сокращенные названия журналов MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Использовать сокращённые названия журналов MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поле «Сокращ. журнала» будет проигнорировано.">
 
 <!ENTITY zotero.integration.prefs.exportDocument "Переключиться на другой текстовый редактор…">
@@ -253,16 +249,16 @@
 <!ENTITY zotero.sync.longTagFixer.character "символу">
 <!ENTITY zotero.sync.longTagFixer.characters "символам">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Неотмеченные теги не будут сохранены.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Тег будет удален из всех записей.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Тег будет удалён из всех записей.">
 
 <!ENTITY zotero.merge.title "Разрешение конфликтов">
 <!ENTITY zotero.merge.of "для">
 <!ENTITY zotero.merge.deleted "Удалено">
 
-<!ENTITY zotero.proxy.recognized.title "Прокси определен">
+<!ENTITY zotero.proxy.recognized.title "Прокси определён">
 <!ENTITY zotero.proxy.recognized.warning "Добавляйте только прокси, предоставляемые вашей библиотекой, учебным заведением или корпоративным сайтом.">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Использование других прокси позволит злонамеренным сайтам маскироваться под сайты, которым вы доверяете.">
-<!ENTITY zotero.proxy.recognized.disable.label "Не перенаправлять автоматически запросы через ранее определенные прокси">
+<!ENTITY zotero.proxy.recognized.disable.label "Не перенаправлять автоматически запросы через ранее определённые прокси">
 <!ENTITY zotero.proxy.recognized.ignore.label "Игнорировать">
 
 <!ENTITY zotero.feedSettings.title "Настройки новостных лент">
@@ -271,25 +267,25 @@
 <!ENTITY zotero.feedSettings.title.label "Заголовок:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Обновлять новостную ленту каждые">
 <!ENTITY zotero.feedSettings.refresh.label2 "час(-а)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Удалять непрочтенные записи в новостной ленте старше">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Удалять непрочтённые записи в новостной ленте старше">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "дня(-ей)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Удалять прочтенные записи в новостной ленте старше">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Удалять прочтённые записи в новостной ленте старше">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "дня(-ей)">
 
 <!ENTITY zotero.rtfScan.title "Сканирование RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Отмена">
 <!ENTITY zotero.rtfScan.citation.label "Цитата">
 <!ENTITY zotero.rtfScan.itemName.label "Имя записи">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Неопределенные цитаты">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Неопределённые цитаты">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Неоднозначные цитаты">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Определенные цитаты">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Определённые цитаты">
 <!ENTITY zotero.rtfScan.introPage.label "Введение">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero может автоматически извлекать и переформатировать цитаты, а также вставить библиографию в файл RTF. В настоящее время функция сканирования RTF распознает цитаты в следующих форматах:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero может автоматически извлекать и переформатировать цитаты, а также вставлять библиографию в файл RTF. В настоящее время функция сканирования RTF распознаёт цитаты в следующих форматах:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Чтобы начать, выберите ниже входной файл RTF и выходной файл:">
 <!ENTITY zotero.rtfScan.scanPage.label "Сканирование на наличие цитат">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero сканирует ваш документ на наличие цитат. Пожалуйста, подождите.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Проверить цитированные записи">
-<!ENTITY zotero.rtfScan.citationsPage.description "Пожалуйста, проверьте список распознанных цитат, чтобы убедиться, что Zotero правильно выбрал соответствующие записи. Необходимо принять решение по всем неопределенным или неоднозначным цитатам, прежде чем перейти к следующему шагу.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Пожалуйста, проверьте список распознанных цитат, чтобы убедиться, что Zotero правильно выбрал соответствующие записи. Необходимо принять решение по всем неопределённым или неоднозначным цитатам, прежде чем перейти к следующему шагу.">
 <!ENTITY zotero.rtfScan.stylePage.label "Форматирование документа">
 <!ENTITY zotero.rtfScan.formatPage.label "Форматирование цитат">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero обрабатывает и форматирует ваш файл RTF. Пожалуйста, подождите.">
@@ -314,14 +310,14 @@
 <!ENTITY zotero.pdfReader.firstPage "Первая страница">
 <!ENTITY zotero.pdfReader.lastPage "Последняя страница">
 <!ENTITY zotero.pdfReader.back "Назад">
-<!ENTITY zotero.pdfReader.forward "Вперед">
+<!ENTITY zotero.pdfReader.forward "Вперёд">
 <!ENTITY zotero.pdfReader.handTool "Курсор-«рука»">
 <!ENTITY zotero.pdfReader.verticalScrolling "Страницы по вертикали">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Страницы по горизонтали">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Страницы парами">
 <!ENTITY zotero.pdfReader.noSpreads "Не показывать развороты">
-<!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечетных номеров">
-<!ENTITY zotero.pdfReader.evenSpreads "Развороты с четных номеров">
+<!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечётных номеров">
+<!ENTITY zotero.pdfReader.evenSpreads "Развороты с чётных номеров">
 <!ENTITY zotero.pdfReader.scrolled "Scrolled">
 <!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Увеличить">

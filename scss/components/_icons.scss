@@ -1,21 +1,58 @@
 .icon > svg, .icon > img {
-  width: 16px;
+	width: 16px;
 }
 
 .icon-bg {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  vertical-align: middle;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+	vertical-align: middle;
+}
+
+.icon-css {
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .icon.icon-downchevron {
-  width: 7px !important;
+	width: 7px !important;
 }
 
 .icon {
-  -moz-appearance: none !important;
+	-moz-appearance: none !important;
+}
+
+.icon-20 {
+	width: 20px;
+	height: 20px;
+}
+
+.icon-16 {
+	width: 16px;
+	height: 16px;
+}
+
+.icon-8 {
+	width: 8px;
+	height: 8px;
+}
+
+$-icons: (
+	attachment: 16,
+	chevron-6: 8,
+	filter: 16,
+	note: 16,
+	x-8: 16,
+	chevron-tabs: 20
+);
+
+@each $icon, $size in $-icons {
+	.icon-#{$icon} {
+		fill: var(--fill-secondary);
+		background: url('chrome://zotero/skin/#{$size}/universal/#{$icon}.svg') content-box no-repeat;
+		-moz-context-properties: fill, fill-opacity;
+	}
 }

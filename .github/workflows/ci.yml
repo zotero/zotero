@@ -8,13 +8,13 @@ jobs:
     name: Build, Upload, Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           lfs: true
       
       - name: Install Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           #cache: npm
@@ -31,7 +31,7 @@ jobs:
       
       - name: Cache xulrunner
         id: xulrunner-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: app/xulrunner/firefox-x86_64
           key: xulrunner-${{ hashFiles('app/config.sh', 'app/scripts/fetch_xulrunner') }}
@@ -42,7 +42,7 @@ jobs:
       
       - name: Cache Node modules
         id: node-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: node-modules-${{ hashFiles('package-lock.json') }}
@@ -79,7 +79,7 @@ jobs:
 
       - name: Cache utilities Node modules
         id: utilities-node-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: chrome/content/zotero/xpcom/utilities/node_modules
           key: utilities-node-modules-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}

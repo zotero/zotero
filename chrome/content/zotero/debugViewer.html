@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css">
 		<title>Debug Output</title>
 		<script src="include.js"></script>
 		<script src="debugViewer.js"></script>
@@ -9,7 +10,7 @@
 		<style>
 			body {
 				margin: 0;
-				background: white;
+				background: var(--material-background);
 			}
 			
 			a {
@@ -19,7 +20,8 @@
 			header {
 				position: fixed;
 				top: 0;
-				background: lightgrey;
+				color: var(--fill-primary);
+				background: var(--material-sidepane);
 				display: flex;
 				align-items: center;
 				width: calc(100% - 20px);
@@ -39,7 +41,7 @@
 			}
 			
 			#debug-id {
-				font-weight: bold;
+				font-weight: 600;
 			}
 			
 			#submit-result {
@@ -52,8 +54,8 @@
 			}
 			
 			#submit-error {
-				font-weight: bold;
-				color: red;
+				font-weight: 600;
+				color: var(--accent-red);
 			}
 			
 			#content {
@@ -65,7 +67,7 @@
 			
 			#errors {
 				padding-bottom: 12px;
-				border-bottom: 1px lightgray solid;
+				border-bottom: var(--material-panedivider);
 				white-space: pre-wrap;
 			}
 			
@@ -84,8 +86,8 @@
 				content: attr(data-tooltip);
 				display: none;
 				position: absolute;
-				background: #000;
-				color: #fff;
+				background: var(--color-menu-opaque);
+				color: var(--fill-primary);
 				padding: 4px 8px;
 				font-size: 12px;
 				font-family: sans-serif;
@@ -115,7 +117,7 @@
 				
 				top: 100%;
 				border-width: 0 6px 6px;
-				border-bottom-color: #000;
+				border-bottom-color: var(--color-menu-opaque);
 			}
 			/* Show the tooltip when hovering */
 			[data-tooltip]:hover:before,

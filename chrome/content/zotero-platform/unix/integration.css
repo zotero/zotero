@@ -1,24 +1,12 @@
-body {
-	line-height: 1.5em;
-}
-
-.citation-dialog.search:not([multiline="true"]) {
-	height: 29px !important;
-}
-
-.citation-dialog.search {
-	background: white;
-	padding: 0 2px 0 0;
-	border: 1px solid rgba(0, 0, 0, 0.5);
-	-moz-appearance: textfield;
-}
-
 window.citation-dialog {
 	-moz-appearance: none;
-	padding: 5px;
+	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
 }
 
-#zotero-icon {
-	margin: 0 0 0 2px;
-	-moz-appearance: none;
+window.citation-dialog.note-dialog {
+	background: -moz-linear-gradient(-90deg, rgb(249, 231, 179) 0, rgb(228, 193, 94) 50%, rgb(221, 184, 81) 50%);
+}
+
+.citation-dialog.entry {
+	padding: 10px;
 }

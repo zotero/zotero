@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Výchozí:">
 <!ENTITY zotero.preferences.items "položky">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Nastavení">
 <!ENTITY zotero.preferences.custom "Vlastní...">
 
 <!ENTITY zotero.preferences.prefpane.general "Obecné">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Vypnout Rychlé kopírování, pokud je označeno více než">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citování">
-<!ENTITY zotero.preferences.cite.styles "Styly">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textové procesory">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použít pomocí klasického dialogu &quot;Přidat citaci&quot;">
 <!ENTITY zotero.preferences.styleEditor "Editor stylu">

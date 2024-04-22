@@ -4,19 +4,11 @@
 // MacOS specific
 // --------------------------------------------------
 
-@import "mac/button";
 @import "mac/createParent";
 @import "mac/editable";
-@import "mac/mainWindow";
-@import "mac/search";
 @import "mac/tabBar";
-@import "mac/tag-selector";
-@import "mac/virtualized-table";
-@import "mac/collection-tree";
-@import "mac/item-tree";
+@import "mac/tabbox";
+@import "mac/titleBar";
+@import "mac/menupopup";
 
 // Elements
-
-@import "mac/elements/attachmentBox";
-@import "mac/elements/itemBox";
-@import "mac/elements/quickSearchTextbox";

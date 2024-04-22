@@ -25,7 +25,6 @@
 
 "use strict";
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero/config.js");
 
 var React = require('react');
@@ -94,20 +93,12 @@ Zotero_Preferences.Sync = {
 	},
 
 
-	credentialsChange: function (event) {
+	credentialsChange: function (_event) {
 		var username = document.getElementById('sync-username-textbox');
 		var password = document.getElementById('sync-password');
-
 		var syncAuthButton = document.getElementById('sync-auth-button');
-
-		syncAuthButton.setAttribute('disabled', 'true');
-
-		// When using backspace, the value is not updated until after the keypress event
-		setTimeout(function() {
-			if (username.value.length && password.value.length) {
-				syncAuthButton.setAttribute('disabled', 'false');
-			}
-		});
+		
+		syncAuthButton.setAttribute('disabled', !(username.value.length && password.value.length));
 	},
 	
 	
@@ -146,11 +137,7 @@ Zotero_Preferences.Sync = {
 		}
 		catch (e) {
 			setTimeout(function () {
-				Zotero.alert(
-					window,
-					Zotero.getString('general.error'),
-					e.message
-				);
+				Zotero.Sync.Runner.alert(e);
 			});
 			throw e;
 		}
@@ -225,7 +212,7 @@ Zotero_Preferences.Sync = {
 			);
 			if (index == 0) {
 				if (check.value) {
-					var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
+					var resetDataDirFile = PathUtils.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
 					yield Zotero.Sync.Runner.deleteAPIKey();
@@ -278,7 +265,7 @@ Zotero_Preferences.Sync = {
 				label: "zotero.preferences.sync.librariesToSync.sync",
 				fixedWidth: true,
 				// TODO: Specify in ems?
-				width: '45'
+				width: '50'
 			},
 			{
 				dataKey: "name",
@@ -424,8 +411,6 @@ Zotero_Preferences.Sync = {
 		
 		document.getElementById('storage-user-download-mode').disabled = !enabled;
 		this.updateStorageTerms();
-		
-		window.sizeToContent();
 	}),
 	
 	
@@ -458,7 +443,7 @@ Zotero_Preferences.Sync = {
 	
 	onStorageSettingsChange: Zotero.Promise.coroutine(function* () {
 		// Clean URL
-		Zotero.Prefs.set('sync.storage.url', Zotero.Prefs.get('sync.storage.url')
+		Zotero.Prefs.set('sync.storage.url', Zotero.Prefs.get('sync.storage.url').trim()
 				.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''));
 		
 		var oldProtocol = Zotero.Prefs.get('sync.storage.protocol');
@@ -490,8 +475,7 @@ Zotero_Preferences.Sync = {
 			var sql = "SELECT COUNT(*) FROM settings "
 				+ "WHERE setting='storage' AND key='zfsPurge' AND value='user'";
 			if (!Zotero.DB.valueQueryAsync(sql)) {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+				let ps = Services.prompt;
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 					+ ps.BUTTON_DELAY_ENABLE;
@@ -765,7 +749,7 @@ Zotero_Preferences.Sync = {
 							Zotero.DB.skipBackup = true;
 							
 							await Zotero.File.putContentsAsync(
-								OS.Path.join(Zotero.DataDirectory.dir, 'restore-from-server'),
+								PathUtils.join(Zotero.DataDirectory.dir, 'restore-from-server'),
 								''
 							);
 							

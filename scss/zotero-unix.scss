@@ -4,21 +4,14 @@
 // Linux specific
 // --------------------------------------------------
 
-@import "linux/about";
-@import "linux/collection-tree";
 @import "linux/createParent";
 @import "linux/editable";
-@import "linux/errorReport";
 @import "linux/feedSettings";
-@import "linux/item-tree";
+@import "linux/menu";
 @import "linux/menupopup";
-@import "linux/search";
-@import "linux/tagsBox";
-@import "linux/tagSelector";
-@import "linux/virtualized-table";
+@import "linux/tabBar";
+@import "linux/titleBar";
 
 // Elements
 
 @import "linux/elements/itemBox";
-@import "linux/elements/noteEditor";
-@import "linux/elements/quickSearchTextbox";

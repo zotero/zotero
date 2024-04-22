@@ -23,9 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
-var Zotero_CSL_Editor = new function() {
+var Zotero_CSL_Editor = new function () {
 	let monaco, editor;
 
 	this.init = init;
@@ -33,6 +33,8 @@ var Zotero_CSL_Editor = new function() {
 
 	async function init() {
 		await Zotero.Schema.schemaUpdatePromise;
+
+		const isDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
 		
 		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
@@ -65,7 +67,7 @@ var Zotero_CSL_Editor = new function() {
 		let editorWin = document.getElementById("zotero-csl-editor-iframe").contentWindow;
 		let { monaco: _monaco, editor: _editor } = await editorWin.loadMonaco({
 			language: 'xml',
-			theme: 'vs-light'
+			theme: isDarkMQL.matches ? 'vs-dark' : 'vs-light'
 		});
 		monaco = _monaco;
 		editor = _editor;
@@ -78,9 +80,14 @@ var Zotero_CSL_Editor = new function() {
 			// Call asynchronously, see note in Zotero.Styles
 			window.setTimeout(this.onStyleSelected.bind(this, currentStyle.styleID), 1);
 		}
+
+		isDarkMQL.addEventListener("change", (ev) => {
+			monaco.editor.setTheme(ev.matches ? 'vs-dark' : 'vs-light');
+			this.refresh();
+		});
 	}
 	
-	this.onStyleSelected = function(styleID) {
+	this.onStyleSelected = function (styleID) {
 		Zotero.Prefs.set('export.lastStyle', styleID);
 		let style = Zotero.Styles.get(styleID);
 		Zotero.Styles.updateLocaleList(
@@ -91,11 +98,11 @@ var Zotero_CSL_Editor = new function() {
 		
 		loadCSL(style.styleID);
 		this.refresh();
-	}
+	};
 	
-	this.refresh = function() {
+	this.refresh = function () {
 		this.generateBibliography(this.loadStyleFromEditor());
-	}
+	};
 
 	this.refreshDebounced = Zotero.Utilities.debounce(this.refresh, 250);
 	
@@ -104,7 +111,7 @@ var Zotero_CSL_Editor = new function() {
 		var fp = new FilePicker();
 		fp.init(window, Zotero.getString('styles.editor.save'), fp.modeSave);
 		fp.appendFilter("Citation Style Language", "*.csl");
-		//get the filename from the id; we could consider doing even more here like creating the id from filename. 
+		//get the filename from the id; we could consider doing even more here like creating the id from filename.
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(style, 'text/xml');
 		var filename = doc.getElementsByTagName("id");
@@ -128,22 +135,20 @@ var Zotero_CSL_Editor = new function() {
 		document.getElementById('zotero-csl-list').value = cslID;
 	}
 	
-	this.loadStyleFromEditor = function() {
+	this.loadStyleFromEditor = function () {
 		var styleObject;
 		try {
 			styleObject = new Zotero.Style(
 				editor.getValue()
 			);
-		} catch(e) {
-			document.getElementById('zotero-csl-preview-box')
-				.contentDocument.documentElement.innerHTML = '<div>'
-					+ Zotero.getString('styles.editor.warning.parseError')
-					+ '</div><div>' + e + '</div>';
+		}
+		catch (e) {
+			this.updateIframe(Zotero.getString('styles.editor.warning.parseError') + '<div>' + e + '</div>', 'error');
 			throw e;
 		}
 		
 		return styleObject;
-	}
+	};
 	
 	this.onStyleModified = function () {
 		let xml = editor.getValue();
@@ -165,17 +170,12 @@ var Zotero_CSL_Editor = new function() {
 			Zotero.Prefs.get('export.lastLocale')
 		);
 		Zotero_CSL_Editor.generateBibliography(styleObject);
-	}
+	};
 	
-	this.generateBibliography = function(style) {
-		var iframe = document.getElementById('zotero-csl-preview-box');
-		
+	this.generateBibliography = function (style) {
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length == 0) {
-			iframe.contentDocument.documentElement.innerHTML =
-				'<html><head><title></title></head><body><p style="color: red">'
-				+ Zotero.getString('styles.editor.warning.noItems')
-				+ '</p></body></html>';
+			this.updateIframe(Zotero.getString('styles.editor.warning.noItems'), 'warning');
 			return;
 		}
 		
@@ -183,8 +183,9 @@ var Zotero_CSL_Editor = new function() {
 		var styleEngine;
 		try {
 			styleEngine = style.getCiteProc(style.locale || selectedLocale, 'html');
-		} catch(e) {
-			iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.parseError') + '</div><div>'+e+'</div>';
+		}
+		catch (e) {
+			this.updateIframe(Zotero.getString('styles.editor.warning.parseError') + '<div>' + e + '</div>');
 			throw e;
 		}
 		
@@ -197,8 +198,8 @@ var Zotero_CSL_Editor = new function() {
 		citation.citationItems = [];
 		citation.properties = {};
 		citation.properties.noteIndex = 1;
-		for (var i = 0, ilen = items.length; i < ilen; i += 1) {
-			citation.citationItems.push({id:itemIds[i]});
+		for (let i = 0, ilen = items.length; i < ilen; i += 1) {
+			citation.citationItems.push({ id: itemIds[i] });
 		}
 
 		// Generate single citations
@@ -207,7 +208,7 @@ var Zotero_CSL_Editor = new function() {
 		var loc = document.getElementById('zotero-csl-page-type');
 		var pos = document.getElementById('zotero-ref-position').selectedItem.value;
 		var citations = '<h3>' + Zotero.getString('styles.editor.output.individualCitations') + '</h3>';
-		for (var i=0; i<citation.citationItems.length; i++) {
+		for (let i = 0; i < citation.citationItems.length; i++) {
 			citation.citationItems[i]['suppress-author'] = author;
 			if (search.value !== '') {
 				citation.citationItems[i].locator = search.value;
@@ -219,29 +220,29 @@ var Zotero_CSL_Editor = new function() {
 				citation.citationItems[i]["near-note"] = true;
 			}
 			else {
-				citation.citationItems[i].position = parseInt(pos, 10);
+				citation.citationItems[i].position = parseInt(pos);
 			}
 			var subcitation = [citation.citationItems[i]];
 			citations += styleEngine.makeCitationCluster(subcitation) + '<br />';
 		}
 		
 		try {
-			var multCitations = '<hr><h3>' + Zotero.getString('styles.editor.output.singleCitation') + '</h3>' +
-				styleEngine.previewCitationCluster(citation, [], [], "html");
+			var multCitations = '<hr><h3>' + Zotero.getString('styles.editor.output.singleCitation') + '</h3>'
+				+ styleEngine.previewCitationCluster(citation, [], [], "html");
 
 			// Generate bibliography
 			styleEngine.updateItems(itemIds);
-			var bibliography = '<hr/><h3>' + Zotero.getString('styles.bibliography') + '</h3>' + 
-				Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
-
-			iframe.contentDocument.documentElement.innerHTML = 
-				'<div>' + citations + multCitations + bibliography + '</div>';
-		} catch(e) {
-				iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.renderError') + '</div><div>'+e+'</div>';
-				throw e;
+			var bibliography = '<hr/><h3>' + Zotero.getString('styles.bibliography') + '</h3>'
+				+ Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
+			
+			this.updateIframe(citations + multCitations + bibliography);
+		}
+		catch (e) {
+			this.updateIframe(Zotero.getString('styles.editor.warning.renderError') + '<div>' + e + '</div>', 'error');
+			throw e;
 		}
 		styleEngine.free();
-	}
+	};
 
 	this.updateMarkers = function (rawErrors) {
 		let model = editor.getModel();
@@ -263,5 +264,22 @@ var Zotero_CSL_Editor = new function() {
 			};
 		}).filter(Boolean);
 		monaco.editor.setModelMarkers(model, 'csl-validator', markers);
+	};
+
+	this.updateIframe = function (content, containerClass = 'preview') {
+		const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		let iframe = document.getElementById('zotero-csl-preview-box');
+		iframe.contentDocument.documentElement.innerHTML = `<html>
+		<head>
+			<title></title>
+			<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css">
+			<style>
+				html {
+					color-scheme: ${isDarkMode ? "dark" : "light"};
+				}
+			</style>
+		</head>
+		<body id="csl-edit-preview"><div class="${containerClass} zotero-dialog">${content}</div></body>
+		</html>`;
 	};
 }();

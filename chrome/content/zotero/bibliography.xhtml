@@ -1,19 +1,24 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
+	persist="screenX screenY width height sizemode"
+	id="bibliography-window"
+	class="bibliography-window"
 	title="&zotero.bibliography.title;"
+	drawintitlebar-platforms="mac"
 	onload="Zotero_File_Interface_Bibliography.init()">
 <dialog
 	buttons="cancel,accept"
 	id="zotero-bibliography">
 
 	<script src="include.js"/>
+	<script src="titlebar.js"/>
 	<script src="bibliography.js"/>
 	
 	<vbox id="zotero-bibliography-container">

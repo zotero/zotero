@@ -25,7 +25,7 @@
 
 Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
@@ -315,7 +315,6 @@ class EditorInstance {
 		let win = Zotero.getMainWindow();
 		if (win) {
 			win.ZoteroPane.selectItems(ids);
-			win.Zotero_Tabs.select('zotero-pane');
 			win.focus();
 		}
 	}
@@ -689,21 +688,27 @@ class EditorInstance {
 		let { id, type, data } = subscription;
 		if (type === 'image') {
 			let { attachmentKey } = data;
-			let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
-			
-			// Note: Images aren't visible in merge dialog because:
-			// - Attachments aren't downloaded at the time
-			// - We are checking if attachments belong to the current note
-			
-			if (item.parentID === this._item.id) {
-				if (await item.getFilePathAsync()) {
-					let src = await this._getDataURL(item);
-					this._postMessage({ action: 'notifySubscription', id, data: { src } });
+			let n = 0;
+			// For now wait up to 60 seconds, as there is no point to wait for very long sync to finish
+			while (n++ < 60) {
+				let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
+				// Attachment item (not the file) might not be synced at the time
+				if (!item && Zotero.Sync.Runner.syncInProgress) {
+					await Zotero.Promise.delay(1000);
+					continue;
 				}
-				else {
-					await Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
-					// this._postMessage({ action: 'notifySubscription', id, data: { src: 'error' } });
+				// Check if the attachment is actually the child
+				if (item.parentID === this._item.id) {
+					if (await item.getFilePathAsync()) {
+						let src = await this._getDataURL(item);
+						this._postMessage({ action: 'notifySubscription', id, data: { src } });
+					}
+					else {
+						await Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
+						// this._postMessage({ action: 'notifySubscription', id, data: { src: 'error' } });
+					}
 				}
+				break;
 			}
 		}
 	}
@@ -908,6 +913,8 @@ class EditorInstance {
 	}
 
 	_getSpellChecker() {
+		// Fix cannot access dead object error
+		if (Components.utils.isDeadWrapper(this._iframeWindow)) return null;
 		if (!this._spellChecker) {
 			let editingSession = this._iframeWindow.docShell.editingSession;
 			this._spellChecker = new InlineSpellChecker(
@@ -1040,9 +1047,8 @@ class EditorInstance {
 		/**
 		 * Citation editing functions and properties accessible to quickFormat.js and addCitationDialog.js
 		 */
-		let CI = function (citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
+		let CI = function (citation) {
 			this.citation = citation;
-			this.sortable = sortable;
 			this.filterLibraryIDs = filterLibraryIDs;
 			this.disableClassicDialog = true;
 			
@@ -1238,11 +1244,7 @@ class EditorInstance {
 		let citation = new Citation();
 		citation.citationItems = citationData.citationItems;
 		citation.properties = citationData.properties;
-		let styleID = Zotero.Prefs.get('export.lastStyle');
-		let locale = Zotero.Prefs.get('export.lastLocale');
-		let csl = Zotero.Styles.get(styleID).getCiteProc(locale);
-		var io = new CI(citation, csl.opt.sort_citations);
-
+		var io = new CI(citation);
 
 		var allOptions = 'chrome,centerscreen';
 		// without this, Firefox gets raised with our windows under Compiz
@@ -1634,9 +1636,7 @@ class EditorInstanceUtilities {
 			else if (authors.length === 2) {
 				let a = authors[0].family || authors[0].literal;
 				let b = authors[1].family || authors[1].literal;
-				// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
-				// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
-				str = Zotero.getString('general.andJoiner', [`\u2068${a}\u2069`, `\u2068${b}\u2069`]);
+				str = Zotero.getString('general.andJoiner', [a, b]);
 			}
 			else if (authors.length >= 3) {
 				str = (authors[0].family || authors[0].literal) + ' ' + Zotero.getString('general.etAl');

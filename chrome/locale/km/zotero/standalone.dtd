@@ -63,11 +63,7 @@
 <!ENTITY addons.label "កម្មវិធីកម្ជាប់បន្ថែម">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "អប្បបរមានីយកម្ម">
 <!ENTITY bringAllToFront.label "នាំយកទាំងអស់មកខាងមុខ">
-<!ENTITY zoomWindow.label "ពង្រួម">
-<!ENTITY windowMenu.label "វីនដូយ៏">
 
 <!ENTITY helpMenu.label "ជំនួយ">
 <!ENTITY helpMenu.accesskey "H">

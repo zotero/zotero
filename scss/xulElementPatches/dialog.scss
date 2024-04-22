@@ -1,0 +1,5 @@
+// Without this any richlistboxes within the dialog element will expand vertically
+// beyond the limits of the dialog
+vbox {
+	min-height: 0;
+}

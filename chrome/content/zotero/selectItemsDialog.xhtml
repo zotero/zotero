@@ -1,27 +1,27 @@
 ﻿<?xml version="1.0"?>
 <!--
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Copyright © 2009 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2009 Center for History and New Media
+	George Mason University, Fairfax, Virginia, USA
+	http://zotero.org
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
@@ -38,43 +38,34 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	onload="doLoad();"
 	onunload="doUnload();"
-	width="600"
-	height="450"
 	persist="screenX screenY width height"
-	style="display: flex"
+	class="zotero-dialog"
 >
-	<dialog
-		orient="vertical"
-		buttons="cancel,accept"
-		style="padding: 2em"
-	>
-		<script>
-			var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
-			
-			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+<dialog
+	id="select-items-dialog"
+	orient="vertical"
+	buttons="cancel,accept"
+>
+<script>
+	var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+	// Custom elements
+	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
+</script>
 
-			Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
-			
-			// Custom elements
-			Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
-		</script>
-
-		<vbox id="zotero-select-items-container" flex="1">
-
-		<hbox align="center" pack="end">
-			<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
-		</hbox>
-
-		<hbox flex="1">
-			<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 200px">
-				<html:div id="zotero-collections-tree"></html:div>
-			</vbox>
-
-			<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
-				<html:div id="zotero-items-tree"></html:div>
-			</hbox>
-		</hbox>
-
+<vbox id="zotero-select-items-container" flex="1">
+	<hbox id="search-toolbar">
+		<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
+	</hbox>
+	<hbox id="collections-items-container">
+		<vbox id="zotero-collections-tree-container" class="virtualized-table-container">
+			<html:div id="zotero-collections-tree"></html:div>
 		</vbox>
-	</dialog>
+		<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
+			<html:div id="zotero-items-tree"></html:div>
+		</hbox>
+	</hbox>
+</vbox>
+</dialog>
 </window>

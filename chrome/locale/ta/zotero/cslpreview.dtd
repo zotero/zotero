@@ -1,0 +1,9 @@
+<!ENTITY styles.preview "சோட்டெரோ பாணி முன்னோட்டம்">
+
+<!ENTITY styles.preview.citationFormat "மேற்கோள் வடிவம்:">
+<!ENTITY styles.preview.citationFormat.all "அனைத்தும்">
+<!ENTITY styles.preview.citationFormat.author "நூலாசிரியர்">
+<!ENTITY styles.preview.citationFormat.authorDate "நூலாசிரியர்-தேதி">
+<!ENTITY styles.preview.citationFormat.label "சிட்டை">
+<!ENTITY styles.preview.citationFormat.note "குறிப்பு">
+<!ENTITY styles.preview.citationFormat.numeric "எண்வகை">

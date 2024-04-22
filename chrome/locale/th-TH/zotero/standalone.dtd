@@ -63,11 +63,7 @@
 <!ENTITY addons.label "โปรแกรมเสริม">
 <!ENTITY developer.label "Developer">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "ย่อ">
 <!ENTITY bringAllToFront.label "นำมาไว้ด้านหน้า">
-<!ENTITY zoomWindow.label "ซูม">
-<!ENTITY windowMenu.label "หน้าต่าง">
 
 <!ENTITY helpMenu.label "วิธีใช้">
 <!ENTITY helpMenu.accesskey "H">

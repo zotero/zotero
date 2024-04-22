@@ -1,3 +1,5 @@
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+
 chai.use(chaiAsPromised);
 
 // Useful "constants"
@@ -18,6 +20,42 @@ function waitForDOMEvent(target, event, capture) {
 	}
 	target.addEventListener(event, func, capture);
 	return deferred.promise;
+}
+
+/**
+ * Waits for a DOM element's attribute(s) to change.
+ * @param {HTMLElement} target DOM element
+ * @param {string | string[]} attributes array of attributes to watch
+ * @param {(newValue, oldValue) => boolean} callback called whenever attributes changes. return true to stop waiting
+ */
+async function waitForDOMAttributes(target, attributes, callback) {
+	if (typeof attributes === "string") {
+		attributes = [attributes];
+	}
+	let deferred = Zotero.Promise.defer();
+	function handleMutation(mutations) {
+		for (let mutation of mutations) {
+			if (mutation.type === 'attributes') {
+				let oldValue = mutation.oldValue;
+				let newValue = mutation.target.value;
+				if (callback(newValue, oldValue)) {
+					observer.disconnect();
+					deferred.resolve();
+					return;
+				}
+			}
+		}
+	}
+	
+	let observer = new MutationObserver(handleMutation);
+	observer.observe(target, {
+		attributes: true,
+		attributeFilter: attributes,
+		attributeOldValue: true,
+	});
+
+	await deferred.promise;
+	observer.disconnect();
 }
 
 async function waitForRecognizer() {
@@ -541,37 +579,6 @@ async function getPromiseError(promise) {
 }
 
 /**
- * Init paths for PDF tools and data
- */
-function initPDFToolsPath() {
-	let pdfConvertedFileName = 'pdftotext';
-	let pdfInfoFileName = 'pdfinfo';
-	
-	if (Zotero.isWin) {
-		pdfConvertedFileName += '-win.exe';
-		pdfInfoFileName += '-win.exe';
-	}
-	else if (Zotero.isMac) {
-		pdfConvertedFileName += '-mac';
-		pdfInfoFileName += '-mac';
-	}
-	else {
-		let cpu = Zotero.platform.split(' ')[1];
-		pdfConvertedFileName += '-linux-' + cpu;
-		pdfInfoFileName += '-linux-' + cpu;
-	}
-	
-	let pdfToolsPath = OS.Path.join(Zotero.Profile.dir, 'pdftools');
-	let pdfConverterPath = OS.Path.join(pdfToolsPath, pdfConvertedFileName);
-	let pdfInfoPath = OS.Path.join(pdfToolsPath, pdfInfoFileName);
-	let pdfDataPath = OS.Path.join(pdfToolsPath, 'poppler-data');
-	
-	Zotero.FullText.setPDFConverterPath(pdfConverterPath);
-	Zotero.FullText.setPDFInfoPath(pdfInfoPath);
-	Zotero.FullText.setPDFDataPath(pdfDataPath);
-}
-
-/**
  * Returns the nsIFile corresponding to the test data directory
  * (i.e., test/tests/data)
  */
@@ -594,14 +601,13 @@ function getTestDataUrl(path) {
  * Returns an absolute path to an empty temporary directory
  */
 var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
-	Components.utils.import("resource://gre/modules/osfile.jsm");
 	let path,
 		attempts = 3,
 		zoteroTmpDirPath = Zotero.getTempDirectory().path;
 	while (attempts--) {
-		path = OS.Path.join(zoteroTmpDirPath, Zotero.Utilities.randomString());
+		path = PathUtils.join(zoteroTmpDirPath, Zotero.Utilities.randomString());
 		try {
-			yield OS.File.makeDir(path, { ignoreExisting: false });
+			yield IOUtils.makeDirectory(path, { ignoreExisting: false });
 			break;
 		} catch (e) {
 			if (!attempts) throw e; // Throw on last attempt
@@ -648,15 +654,13 @@ async function resetDB(options = {}) {
 			// Otherwise swap in the initial copy we made of the DB, or an alternative non-zip file
 			// if given
 			else {
-				await OS.File.copy(options.dbFile || db + '-test-template', db);
+				await IOUtils.copy(options.dbFile || db + '-test-template', db);
 			}
 			_defaultGroup = null;
 		},
-		false,
 		options
 	);
 	await Zotero.Schema.schemaUpdatePromise;
-	initPDFToolsPath();
 }
 
 /**
@@ -1011,7 +1015,7 @@ async function createAnnotation(type, parentItem, options = {}) {
 async function createEmbeddedImage(parentItem, options = {}) {
 	var attachment = await Zotero.Attachments.importEmbeddedImage({
 		blob: await File.createFromFileName(
-			OS.Path.join(getTestDataDirectory().path, 'test.png')
+			PathUtils.join(getTestDataDirectory().path, 'test.png')
 		),
 		parentItemID: parentItem.id
 	});
@@ -1024,7 +1028,7 @@ async function createEmbeddedImage(parentItem, options = {}) {
 
 
 async function getImageBlob() {
-	var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+	var path = PathUtils.join(getTestDataDirectory().path, 'test.png');
 	var imageData = await Zotero.File.getBinaryContentsAsync(path);
 	var array = new Uint8Array(imageData.length);
 	for (let i = 0; i < imageData.length; i++) {
@@ -1108,5 +1112,6 @@ async function startHTTPServer(port = null) {
 			await Zotero.Promise.delay(10);
 		}
 	}
-	return { httpd, port };
+	var baseURL = `http://localhost:${port}/`
+	return { httpd, port, baseURL };
 }

@@ -46,11 +46,8 @@
 <!ENTITY zotero.upgrade.changeLogLink "дневника на промените">
 <!ENTITY zotero.upgrade.changeLogAfterLink "за да видите какво беше актуализирано и какво е новото.">
 
-<!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Бележки">
 <!ENTITY zotero.tabs.attachments.label "Прикачени файлове">
-<!ENTITY zotero.tabs.tags.label "Маркери">
-<!ENTITY zotero.tabs.related.label "Свързани">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показване на дупликатите">
 <!ENTITY zotero.collections.showUnfiledItems "Показване на непопълнените записи">
@@ -114,7 +111,6 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Първа главна буква">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
-<!ENTITY zotero.item.viewOnline "Разглеждане онлайн">
 <!ENTITY zotero.item.copyAsURL "Копирай като URL">
 <!ENTITY zotero.item.deletePermanently "Изтриване окончателно...">
 

@@ -1,5 +1,4 @@
 new function() {
-Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero-unit/httpd.js");
 
 const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');
@@ -189,6 +188,42 @@ describe("Zotero.Translate", function() {
 				delete savedItem.key;
 			}
 			assert.deepEqual(savedItems, trueItems, "saved items match inputs");
+		});
+		
+		it("should set shortTitle by truncating before first colon or after first question mark", async function () {
+			let mapping = {
+				'A title: a subtitle': 'A title',
+				'A title: a subtitle: a second subtitle': 'A title',
+				'Does this have a subtitle? Yes': 'Does this have a subtitle?',
+				'Does this have a subtitle? Yes: an investigation': 'Does this have a subtitle?',
+			};
+			
+			let items = await saveItemsThroughTranslator('web', Object.keys(mapping).map(title => ({
+				itemType: 'book',
+				title
+			})));
+			for (let item of items) {
+				assert.equal(item.getField('shortTitle'), mapping[item.getField('title')]);
+			}
+		});
+
+		it("should close supported tags when setting shortTitle", async function () {
+			let mapping = {
+				'Review of <i>Conflict in a Buddhist Society: Tibet under the Dalai Lamas</i>': 'Review of <i>Conflict in a Buddhist Society</i>',
+				'Fearing Fear: <i>The War of the Worlds</i> and Disaster Coverage': 'Fearing Fear',
+				'Review of <span class="nocase">ibn Battuta\'s Tuḥfat an-Nuẓẓār: The Origins of the Travelogue</span>': 'Review of <span class="nocase">ibn Battuta\'s Tuḥfat an-Nuẓẓār</span>',
+				'Low text <sup><b>and high, bold text:</b></sup> More text': 'Low text <sup><b>and high, bold text</b></sup>',
+				'<marquee>This is my <font color=red>AWESOME</font> website:</marquee>': '<marquee>This is my <font color=red>AWESOME</font> website',
+				'<i><marquee>Italic AND marquee? It\'s more likely than you think</marquee></i>': '<i><marquee>Italic AND marquee?</i>',
+			};
+
+			let items = await saveItemsThroughTranslator('web', Object.keys(mapping).map(title => ({
+				itemType: 'book',
+				title
+			})));
+			for (let item of items) {
+				assert.equal(item.getField('shortTitle'), mapping[item.getField('title')]);
+			}
 		});
 
 		it('should accept deprecated SQL accessDates', function* () {
@@ -689,8 +724,9 @@ describe("Zotero.Translate", function() {
 		});
 
 		it('web translators should save attachment from browser document', function* () {
-			let browser = yield HiddenBrowser.create("http://127.0.0.1:23119/test/translate/test.html");
-			let doc = yield HiddenBrowser.getDocument(browser);
+			let browser = new HiddenBrowser();
+			yield browser.load("http://127.0.0.1:23119/test/translate/test.html");
+			let doc = yield browser.getDocument();
 
 			let translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
@@ -719,7 +755,7 @@ describe("Zotero.Translate", function() {
 			assert.equal(snapshot.attachmentContentType, "text/html");
 			checkTestTags(snapshot, true);
 
-			HiddenBrowser.destroy(browser);
+			browser.destroy();
 		});
 		
 		it('web translators should save attachment from non-browser document', function* () {
@@ -858,6 +894,54 @@ describe("Zotero.Translate", function() {
 			assert.deepEqual([{tag: 'owl'}, {tag: 'tag'}], items[0].getTags());
 			
 			Zotero.Translators.get.restore();
+		});
+		
+		describe("#setExtra()", function () {
+			it("should set extra field", async function () {
+				let translator = buildDummyTranslator(1, 
+					String.raw`function doImport() {
+						var item = new Zotero.Item();
+						item.itemType = "book";
+						item.title = "The Ultimate Owl Guide";
+						item.setExtra("Key 1", "Value 1");
+						item.extra += "\nRandom junk";
+						item.setExtra("Key 2", "Value 2");
+						item.complete();
+					}`
+				);
+				let translate = new Zotero.Translate.Import();
+				translate.setTranslator(translator);
+				translate.setString("");
+				let items = await translate.translate();
+				assert.lengthOf(items, 1);
+				let [item] = items;
+				assert.equal(item.getField("extra"), "Key 1: Value 1\nRandom junk\nKey 2: Value 2");
+				assert.isUndefined(item.setExtra);
+			});
+			
+			it("should overwrite field if already present", async function () {
+				let translator = buildDummyTranslator(1,
+					String.raw`function doImport() {
+						var item = new Zotero.Item();
+						item.itemType = "book";
+						item.title = "The Ultimate Owl Guide";
+						item.extra = "Random junk\nKey 1: Value 1.1";
+						item.setExtra("Key 1", "Value 1.2");
+						item.extra += "\nRandom junk";
+						item.setExtra("Key 2", "Value 2");
+						item.setExtra("Key 1", "Value 1.3");
+						item.complete();
+					}`
+				);
+				let translate = new Zotero.Translate.Import();
+				translate.setTranslator(translator);
+				translate.setString("");
+				let items = await translate.translate();
+				assert.lengthOf(items, 1);
+				let [item] = items;
+				assert.equal(item.getField("extra"), "Random junk\nKey 1: Value 1.3\nRandom junk\nKey 2: Value 2");
+				assert.isUndefined(item.setExtra);
+			});
 		});
 	});
 	

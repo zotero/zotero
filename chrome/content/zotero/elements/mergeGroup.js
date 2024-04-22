@@ -51,6 +51,18 @@
 			this._leftPane = this._id('left-pane');
 			this._rightPane = this._id('right-pane');
 			this._mergePane = this._id('merge-pane');
+			
+			// Select pane with left/right arrow key
+			this.addEventListener('keypress', (event) => {
+				if (event.key == "ArrowRight" && !this._rightPane.hasAttribute("selected")) {
+					this.choosePane(this._rightPane);
+					this.rightPane.groupbox.focus();
+				}
+				else if (event.key == "ArrowLeft" && !this._leftPane.hasAttribute("selected")) {
+					this.choosePane(this._leftPane);
+					this._leftPane.groupbox.focus();
+				}
+			});
 		}
 		
 		get data() {
@@ -267,12 +279,12 @@
 			this.append(document.importNode(this.content, true));
 			
 			this.parent = document.querySelector('merge-group');
+			this.isLeftPane = this.id == 'left-pane';
+			this.isRightPane = this.id == 'right-pane';
 			this.isMergePane = this.id == 'merge-pane';
 			
 			if (!this.isMergePane) {
-				this.box.onclick = function () {
-					this.parent.choosePane(this);
-				}.bind(this);
+				this.groupbox.onclick = this.click.bind(this);
 			}
 		}
 		
@@ -280,7 +292,7 @@
 			return this.parent.type;
 		}
 		
-		get box() {
+		get groupbox() {
 			return this.querySelector('groupbox');
 		}
 		
@@ -326,7 +338,7 @@
 			var button = this._class('choose-button');
 			button.label = Zotero.getString('sync.conflict.chooseThisVersion');
 			if (this.showButton) {
-				button.onclick = () => this.parent.choosePane(this);
+				button.onclick = this.click.bind(this);
 				button.style.visibility = 'visible';
 			}
 			else {
@@ -403,6 +415,17 @@
 			objbox.setAttribute("flex", "1");
 			objbox.mode = this.type == 'file' ? 'filemerge' : 'merge';
 			
+			// Keyboard accessibility
+			objbox.preventFocus = true;
+			if (!this.isMergePane) {
+				this.groupbox.setAttribute('tabindex', 0);
+				this.groupbox.addEventListener('keypress', (event) => {
+					if (event.key == " ") {
+						this.click();
+					}
+				});
+			}
+			
 			// Store JSON
 			this._data = val;
 			
@@ -428,7 +451,7 @@
 		}
 		
 		click() {
-			this.box.click();
+			this.parent.choosePane(this);
 		}
 		
 		_class(className) {

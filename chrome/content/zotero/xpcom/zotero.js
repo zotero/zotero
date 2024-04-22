@@ -27,15 +27,17 @@
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
+var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 	.getService(Components.interfaces.nsIOSFileConstantsService)
 	.init();
 
+const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetters(globalThis, {
 	AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
+	AppConstants: "resource://gre/modules/AppConstants.jsm",
 });
-
+const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
 /*
@@ -237,20 +239,22 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
 			   .getService(Components.interfaces.nsIAppShellService)
 			   .hiddenDOMWindow;
-		this.platform = win.navigator.platform;
-		this.isMac = this.platform.substr(0, 3) == "Mac";
-		this.isWin = (this.platform.substr(0, 3) == "Win");
-		this.isLinux = (this.platform.substr(0, 5) == "Linux");
-		this.oscpu = win.navigator.oscpu;
+		var os = Services.appinfo.OS;
+		this.isMac = os == 'Darwin';
+		this.isWin = os == 'WINNT';
+		this.isLinux = os == 'Linux';
+		
+		// aarch64, x86_64, x86
+		this.arch = Services.appinfo.XPCOMABI.split('-')[0];
 		
 		// Browser
 		Zotero.browser = "g";
 		
-		if (this.isWin) {
-			let branch = Services.prefs.getBranch("toolkit.startup.");
-			if (branch.getIntPref('recent_crashes', 0) > 2) {
-				branch.clearUserPref('recent_crashes');
-			}
+		// TEMP: Disable automatic safe mode until we can figure out why some shutdowns are
+		// counting as crashes
+		var branch = Services.prefs.getBranch("toolkit.startup.");
+		if (branch.getIntPref('recent_crashes', 0) > 2) {
+			branch.clearUserPref('recent_crashes');
 		}
 		
 		Zotero.Intl.init();
@@ -275,7 +279,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		catch (e) {
 			// Zotero dir not found
-			if ((e instanceof OS.File.Error && e.becauseNoSuchFile) || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
+			if (e.name == 'NotFoundError') {
 				let foundInDefault = false;
 				try {
 					foundInDefault = (await OS.File.exists(Zotero.DataDirectory.defaultDir))
@@ -303,9 +307,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						]
 					)
 					: Zotero.getString('dataDir.notFound', Zotero.clientName);
-				_startupErrorHandler = function() {
-					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-							createInstance(Components.interfaces.nsIPromptService);
+				_startupErrorHandler = async function() {
+					var ps = Services.prompt;
 					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
 						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
@@ -329,7 +332,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						}
 						// Locate data directory
 						else if (index == 2) {
-							Zotero.DataDirectory.choose(true);
+							await Zotero.DataDirectory.choose(true);
 						}
 
 					}
@@ -354,7 +357,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						}
 						// Locate data directory
 						else if (index == 2) {
-							Zotero.DataDirectory.choose(true);
+							await Zotero.DataDirectory.choose(true);
 						}
 					}
 				}
@@ -416,6 +419,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 		Zotero.Standalone.init();
 		await Zotero.initComplete();
+		// Ingest command line arguments that were not handled due to late command line handler registration.
+		Zotero.CommandLineIngester.ingest();
 	};
 	
 	/**
@@ -428,11 +433,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		delete this.startupError;
 		this.initialized = true;
 		this.initializationDeferred.resolve();
-		
-		if(Zotero.isConnector) {
-			Zotero.Repo.init();
-			Zotero.locked = false;
-		}
 		
 		if(!Zotero.isFirstLoadThisSession) {
 			// trigger zotero-reloaded event
@@ -556,8 +556,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			// Require >=2.1b3 database to ensure proper locking
 			let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
 			if (dbSystemVersion > 0 && dbSystemVersion < 31) {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.createInstance(Components.interfaces.nsIPromptService);
+				let ps = Services.prompt;
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
@@ -633,8 +632,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 							ZOTERO_CONFIG.DOMAIN_NAME);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
-						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService);
+						var ps = Services.prompt;
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
@@ -654,7 +652,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						
 						// "Check for Update" button
 						if (index === 0) {
-							Zotero.openCheckForUpdatesWindow();
+							Zotero.openCheckForUpdatesWindow({ modal: true });
 						}
 						// Load More Info page
 						else if (index == 2) {
@@ -676,6 +674,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				throw e;
 			}
 			
+			const { ZoteroProtocolHandler } = ChromeUtils.import(
+				`chrome://zotero/content/ZoteroProtocolHandler.jsm`
+			);
+			ZoteroProtocolHandler.init();
+
+			const { ZoteroAutoComplete } = ChromeUtils.import(
+				`chrome://zotero/content/zotero-autocomplete.js`
+			);
+			ZoteroAutoComplete.init();
+
 			yield Zotero.Users.init();
 			yield Zotero.Libraries.init();
 			
@@ -780,8 +788,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			let dbfile = Zotero.DataDirectory.getDatabase();
 
 			// Test write access on Zotero data directory
-			if (!Zotero.File.pathToFile(OS.Path.dirname(dbfile)).isWritable()) {
-				var msg = 'Cannot write to ' + OS.Path.dirname(dbfile) + '/';
+			if (!Zotero.File.pathToFile(PathUtils.parent(dbfile)).isWritable()) {
+				var msg = 'Cannot write to ' + PathUtils.parent(dbfile) + '/';
 			}
 			// Test write access on Zotero database
 			else if (!Zotero.File.pathToFile(dbfile).isWritable()) {
@@ -854,20 +862,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return true;
 	}
 	
-	
-	/**
-	 * Called when the DB has been released by another Zotero process to perform necessary 
-	 * initialization steps
-	 */
-	this.onDBLockReleased = function() {
-		if(Zotero.isConnector) {
-			// if DB lock is released, switch out of connector mode
-			switchConnectorMode(false);
-		} else if(_waitingForDBLock) {
-			// if waiting for DB lock and we get it, continue init
-			_waitingForDBLock = false;
-		}
-	}
 	
 	this.shutdown = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Shutting down Zotero");
@@ -975,16 +969,26 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	this.openMainWindow = function () {
 		var chromeURI = AppConstants.BROWSER_CHROME_URL;
-		var flags = "chrome,all,dialog=no";
+		var flags = "chrome,all,dialog=no,resizable=yes";
 		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher);
 		ww.openWindow(null, chromeURI, '_blank', flags, null);
 	}
 	
 	
-	this.openCheckForUpdatesWindow = function () {
-		Services.ww.openWindow(null, 'chrome://zotero/content/update/updates.xhtml',
-			'updateChecker', 'chrome,centerscreen,modal', null);
+	this.openCheckForUpdatesWindow = function ({ modal } = {}) {
+		let win = Services.wm.getMostRecentWindow('Update:Wizard');
+		if (win) {
+			win.focus();
+		}
+		else {
+			let flags = 'chrome,centerscreen';
+			if (modal) {
+				flags += ',modal';
+			}
+			Services.ww.openWindow(null, 'chrome://zotero/content/update/updates.xhtml',
+				'updateChecker', flags, null);
+		}
 	};
 	
 	
@@ -998,6 +1002,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			file.launch();
 		}
 		catch (e) {
+			// macOS only: if there's no associated application, launch() will throw, but
+			// the OS will show a dialog asking the user to choose an application. We don't
+			// want to show the Firefox dialog in that case.
+			if (Zotero.isMac && file.exists()) {
+				return;
+			}
+			
 			Zotero.debug(e, 2);
 			Zotero.debug("launch() not supported -- trying fallback executable", 2);
 			
@@ -1013,18 +1024,19 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			catch (e) {
 				Zotero.debug(e);
-				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
+				Zotero.debug("Launching via executable failed -- passing to loadURI()");
 				
 				// If nsIFile.launch() isn't available and the fallback
 				// executable doesn't exist, we just let the Firefox external
 				// helper app window handle it
-				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-								.getService(Components.interfaces.nsIFileProtocolHandler);
-				var uri = nsIFPH.newFileURI(file);
+				var uri = Services.io.newFileURI(file);
 				
 				var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
 								getService(Components.interfaces.nsIExternalProtocolService);
-				nsIEPS.loadUrl(uri);
+				nsIEPS.loadURI(
+					uri,
+					Services.scriptSecurityManager.getSystemPrincipal(),
+				);
 			}
 		}
 	};
@@ -1128,6 +1140,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @param {String} uri
 	 * @param {Object} [options]
 	 * @param {Function} [options.onLoad] - Function to run once URI is loaded; passed the loaded document
+	 * @param {Object} [options.cookieSandbox] - Attach a cookie sandbox to the browser
 	 * @param {Boolean} [options.allowJavaScript] - Set to false to disable JavaScript
 	 */
 	this.openInViewer = function (uri, options) {
@@ -1140,7 +1153,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		for (let existingWin of viewerWins) {
 			if (existingWin.viewerOriginalURI === uri) {
 				existingWin.focus();
-				return;
+				return existingWin;
 			}
 		}
 		let ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
@@ -1172,6 +1185,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			};
 			win.addEventListener("load", func);
 		}
+		return win;
 	};
 	
 	
@@ -1257,9 +1271,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 */
 	this.alert = function (window, title, msg) {
 		this.debug(`Alert:\n\n${msg}`);
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		ps.alert(window, title, msg);
+		Services.prompt.alert(window, title, msg);
 	}
 	
 	
@@ -1376,7 +1388,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (Zotero.isMac) {
 			try {
 				return "macOS "
-					+ (await Zotero.Utilities.Internal.subprocess('sw_vers', ['-productVersion'])).trim();
+					+ (await Zotero.Utilities.Internal.subprocess('/usr/bin/sw_vers', ['-productVersion'])).trim();
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -1925,7 +1937,11 @@ Zotero.VersionHeader = {
 		
 		// Default UA (not a faked UA from the connector
 		if (pos != -1) {
-			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`
+			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`;
+			// To fix cloudflare bot detection. rv frozen to avoid some websites
+			// detecting us as IE11. See https://bugzilla.mozilla.org/show_bug.cgi?id=1806690
+			// For some reason we are note getting this from the Firefox base.
+			ua = ua.replace('rv:115', 'rv:109');
 		}
 		
 		return ua;

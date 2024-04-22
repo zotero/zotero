@@ -32,8 +32,7 @@ describe("Advanced Search", function () {
 		
 		// Run search and wait for results
 		var o = searchWin.ZoteroAdvancedSearch;
-		var deferred = Zotero.Promise.defer();
-		o.search();
+		yield o.search();
 		var iv = o.itemsView;
 		yield iv.waitForLoad();
 		
@@ -44,7 +43,7 @@ describe("Advanced Search", function () {
 		
 		searchWin.close();
 		
-		item.eraseTx();
+		yield item.eraseTx();
 	});
 	
 	describe("Conditions", function () {

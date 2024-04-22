@@ -26,7 +26,7 @@
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 import ItemTree from 'zotero/itemTree';
-import { getColumnDefinitionsByDataKey } from 'zotero/itemTreeColumns'
+import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 var ZoteroAdvancedSearch = new function() {
@@ -45,7 +45,7 @@ var ZoteroAdvancedSearch = new function() {
 		
 		// Set font size from pref
 		var sbc = document.getElementById('zotero-search-box-container');
-		Zotero.setFontSize(sbc);
+		Zotero.UIProperties.registerRoot(sbc);
 		
 		_searchBox.onLibraryChange = this.onLibraryChange;
 		var io = window.arguments[0];
@@ -56,11 +56,18 @@ var ZoteroAdvancedSearch = new function() {
 		});
 		
 		var elem = document.getElementById('zotero-items-tree');
+		const columns = COLUMNS.map((column) => {
+			column = Object.assign({}, column);
+			column.hidden = !['title', 'firstCreator'].includes(column.dataKey);
+			return column;
+		});
 		this.itemsView = await ItemTree.init(elem, {
 			id: "advanced-search",
 			dragAndDrop: true,
+			persistColumns: true,
+			columnPicker: true,
 			onActivate: this.onItemActivate.bind(this),
-			columns: getColumnDefinitionsByDataKey(["title", "firstCreator"]),
+			columns,
 		});
 
 		// A minimal implementation of Zotero.CollectionTreeRow
@@ -119,7 +126,7 @@ var ZoteroAdvancedSearch = new function() {
 			isTrash: () => false
 		};
 		
-		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		return this.itemsView.changeCollectionTreeRow(collectionTreeRow);
 	}
 	
 	
@@ -138,8 +145,7 @@ var ZoteroAdvancedSearch = new function() {
 	this.save = Zotero.Promise.coroutine(function* () {
 		_searchBox.updateSearch();
 		
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var libraryID = _searchBox.search.libraryID;
 		

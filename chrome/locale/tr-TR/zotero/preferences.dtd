@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Varsayılan:">
 <!ENTITY zotero.preferences.items "Eser">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Ayarlar">
 <!ENTITY zotero.preferences.custom "Özel...">
 
 <!ENTITY zotero.preferences.prefpane.general "Genel">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Bu kadardan daha fazlası sürüklendiğinde Çabuk Kopyalamayı devre dışı bırak:">
 
 <!ENTITY zotero.preferences.prefpane.cite "Alıntı Yap">
-<!ENTITY zotero.preferences.cite.styles "Stiller">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Alıntı Ekleme İletişim Kutusunu kullan">
 <!ENTITY zotero.preferences.styleEditor "Stil Düzenleyicisi">

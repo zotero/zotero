@@ -3,9 +3,9 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 
 <!DOCTYPE window [
-	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
@@ -22,7 +22,12 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 >
-	<html:link rel="localization" href="browser/menubar.ftl"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+		<html:link rel="localization" href="zotero.ftl" />
+	</linkset>
 
 	<script type="application/javascript">
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -53,10 +58,10 @@
 
 		<!--WINDOW-->
 		<command id="minimizeWindow"
-				 label="&minimizeWindow.label;"
+				 data-l10n-id="window-minimize-command"
 				 oncommand="window.minimize();" />
 		<command id="zoomWindow"
-				 label="&zoomWindow.label;"
+				 data-l10n-id="window-zoom-command"
 				 oncommand="zoomWindow();" />
 	</commandset>
 	
@@ -65,8 +70,9 @@
 		<key id="key_forward"/>
 		<key id="key_minimizeWindow"
 			 command="minimizeWindow"
-			 key="&minimizeWindow.key;"
-			 modifiers="accel"/>
+			 data-l10n-id="window-minimize-shortcut"
+			 modifiers="accel"
+			 internal="true"/>
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 	</keyset>
 
@@ -92,8 +98,8 @@
 		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 			<menupopup id="menu_FilePopup">
 				<!-- TODO: Localize -->
-				<menuitem class="menu-type-reader pdf" label="Save As…" oncommand="reader.export()"/>
-				<menuitem label="Print" oncommand="reader.print()"/>
+				<menuitem class="menu-type-reader pdf" label="&zotero.general.saveAs;" oncommand="reader.export()"/>
+				<menuitem data-l10n-id="menu-print" oncommand="reader.print()"/>
 				<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="reader.showInLibrary()"/>
 				<menuseparator/>
 				<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
@@ -270,6 +276,14 @@
 					label="&zotero.pdfReader.splitVertically;"
 					oncommand="reader.toggleVerticalSplit()"
 				/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+					id="view-menuitem-use-dark-mode-for-content"
+					class="menu-type-reader"
+					type="checkbox"
+					data-l10n-id="reader-use-dark-mode-for-content"
+					oncommand="Zotero.Prefs.set('reader.contentDarkMode', !Zotero.Prefs.get('reader.contentDarkMode'))"
+				/>
 			</menupopup>
 		</menu>
 		<menu
@@ -307,25 +321,11 @@
 			</menupopup>
 		</menu>
 		<menu id="windowMenu"
-			  label="&windowMenu.label;"
-			  datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
-			  onpopupshowing="macWindowMenuDidShow();"
-			  onpopuphidden="macWindowMenuDidHide();"
-			  hidden="false">
-			<template>
-				<rule>
-					<menupopup>
-						<menuitem uri="rdf:*"
-								  label="rdf:http://home.netscape.com/NC-rdf#Name"
-								  type="radio"
-								  name="windowList"
-								  oncommand="ShowWindowFromResource(event.target)"/>
-					</menupopup>
-				</rule>
-			</template>
+				data-l10n-id="menu-window-menu">
 			<menupopup id="windowPopup">
-				<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
-				<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+				<menuseparator/>
+				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow"/>
 				<!-- decomment when "BringAllToFront" is implemented
                     <menuseparator/>
                     <menuitem label="&bringAllToFront.label;" disabled="true"/> -->
@@ -335,7 +335,7 @@
 	</menubar>
 
 	<hbox flex="1">
-		<vbox id="zotero-reader" flex="3">
+		<vbox id="zotero-reader" flex="1">
 			<browser id="reader"
 					 tooltip="iframeTooltip"
 					 type="content"

@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Oletus:">
 <!ENTITY zotero.preferences.items "nimikkeet">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Asetukset">
 <!ENTITY zotero.preferences.custom "Oma asetus...">
 
 <!ENTITY zotero.preferences.prefpane.general "Yleistä">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Estä pikakopiointi raahattaessa yli ">
 
 <!ENTITY zotero.preferences.prefpane.cite "Viitteet">
-<!ENTITY zotero.preferences.cite.styles "Tyylit">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstinkäsittelyohjelmat">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää viite&quot; -dialogia">
 <!ENTITY zotero.preferences.styleEditor "Tyylieditori">

@@ -29,13 +29,8 @@ var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm")
 var { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
 var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/ContentDOMReference.jsm");
 
-import FilePicker from 'zotero/modules/filePicker';
-
-var Zotero = Components.classes["@zotero.org/Zotero;1"]
-				// Currently uses only nsISupports
-				//.getService(Components.interfaces.chnmIZoteroService).
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 // Fix JSON stringify 2028/2029 "bug"
 // Borrowed from http://stackoverflow.com/questions/16686687/json-stringify-and-u2028-u2029-check
@@ -58,7 +53,8 @@ function fix2028(str) {
 }
 
 var Scaffold = new function () {
-	var _browser, _frames = [], _document;
+	var _browser;
+	var _cookieSandbox;
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
@@ -83,15 +79,8 @@ var Scaffold = new function () {
 
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
-		_document = document;
-
-		if (!Zotero.isMac) {
-			// Hack to fix Windows/Linux toolbar
-			let toolbar = document.getElementById('zotero-toolbar');
-			toolbar.className = 'toolbar-scaffold-small';
-		}
-		
 		_browser = document.getElementById('browser');
+		_cookieSandbox = new Zotero.CookieSandbox(_browser);
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
 			document.getElementById("browser-url").value = data.url;
@@ -103,7 +92,7 @@ var Scaffold = new function () {
 		browserUrl.addEventListener('keydown', function (e) {
 			if (e.key == 'Enter') {
 				Zotero.debug('Scaffold: Loading URL in browser: ' + browserUrl.value);
-				_browser.loadURI(browserUrl.value, {
+				_browser.loadURI(Services.io.newURI(browserUrl.value), {
 					triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
 				});
 			}
@@ -165,7 +154,7 @@ var Scaffold = new function () {
 		this.initTestsEditor();
 
 		// Set font size from general pref
-		Zotero.setFontSize(document.getElementById('scaffold-pane'));
+		Zotero.UIProperties.registerRoot(document.getElementById('scaffold-pane'));
 
 		// Set font size of code editor
 		var size = Zotero.Prefs.get("scaffold.fontSize");
@@ -242,7 +231,7 @@ var Scaffold = new function () {
 		if (await fp.show() != fp.returnOK) {
 			return false;
 		}
-		var path = OS.Path.normalize(fp.file);
+		var path = PathUtils.normalize(fp.file);
 		if (oldPath == path) {
 			return false;
 		}
@@ -282,6 +271,8 @@ var Scaffold = new function () {
 				_lastModifiedTime = modifiedTime;
 			}
 		}
+		
+		_updateTitle();
 	};
 
 	this.initImportEditor = function () {
@@ -305,7 +296,7 @@ var Scaffold = new function () {
 		monaco.languages.registerCompletionItemProvider('javascript', this.createCompletionProvider(monaco, editor));
 
 		let tsLib = await Zotero.File.getContentsAsync(
-			OS.Path.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
+			PathUtils.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
 		let tsLibPath = 'ts:filename/index.d.ts';
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(tsLib, tsLibPath);
 		// this would allow peeking:
@@ -332,7 +323,8 @@ var Scaffold = new function () {
 		});
 
 		editor.updateOptions({
-			links: false
+			links: false,
+			stickyScroll: { enabled: false }
 		});
 
 		monaco.languages.registerCodeLensProvider('json', this.createTestCodeLensProvider(monaco, editor));
@@ -644,6 +636,7 @@ var Scaffold = new function () {
 
 		document.getElementById('textbox-label').focus();
 		_showTab('metadata');
+		_updateTitle();
 	};
 
 	/*
@@ -658,7 +651,7 @@ var Scaffold = new function () {
 			io.translatorProvider = _translatorProvider;
 			io.url = io.rootUrl = _browser.currentURI.spec;
 			window.openDialog("chrome://scaffold/content/load.xhtml",
-				"_blank", "chrome,modal", io);
+				"_blank", "chrome,modal,resizable=no", io);
 			translator = io.dataOut;
 		}
 		else {
@@ -703,6 +696,22 @@ var Scaffold = new function () {
 		// Then go to line 1
 		_editors.code.setPosition({ lineNumber: 1, column: 1 });
 		
+		// Set Test Input editor language based on translator metadata
+		let language = 'plaintext';
+		if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.import) {
+			if (translator.target.includes('json')) {
+				language = 'json';
+			}
+			else if (translator.target.includes('xml')) {
+				language = 'xml';
+			}
+		}
+		else if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.search) {
+			language = 'json';
+		}
+		_editors.importGlobal.editor.setModelLanguage(_editors.import.getModel(), language);
+		_editors.import.setPosition({ lineNumber: 1, column: 1 });
+		
 		// Reset configOptions and displayOptions before loading
 		document.getElementById('textbox-configOptions').value = '';
 		document.getElementById('textbox-displayOptions').value = '';
@@ -734,6 +743,7 @@ var Scaffold = new function () {
 		
 		Zotero.Prefs.set('scaffold.lastTranslatorID', translator.translatorID);
 		
+		_updateTitle();
 		return true;
 	};
 
@@ -927,6 +937,7 @@ var Scaffold = new function () {
 				//newWeb, scrapeEM, scrapeRIS, scrapeBibTeX, scrapeMARC
 				//These names in the XUL file have to match the file names in template folder.
 				let value = Zotero.File.getContentsFromURL(`chrome://scaffold/content/templates/${template}.js`);
+				value = value.replace('$$YEAR$$', new Date().getFullYear());
 				let cursorOffset = value.indexOf('$$CURSOR$$');
 				value = value.replace('$$CURSOR$$', '');
 
@@ -1000,7 +1011,7 @@ var Scaffold = new function () {
 		let translate;
 		let isRemoteWeb = false;
 		if (functionToRun == "detectWeb" || functionToRun == "doWeb") {
-			translate = new RemoteTranslate();
+			translate = new RemoteTranslate({ disableErrorReporting: true });
 			isRemoteWeb = true;
 			if (!_testTargetRegex(input)) {
 				_logOutput("Target did not match " + _getCurrentURI(input));
@@ -1157,13 +1168,14 @@ var Scaffold = new function () {
 	 * logs item output
 	 */
 	function _myItemDone(obj, item) {
+		delete item.id;
 		if (Array.isArray(item.attachments)) {
 			for (let attachment of item.attachments) {
 				if (attachment.document) {
-					attachment.document = '[object Document]';
 					attachment.mimeType = 'text/html';
+					attachment.url = attachment.document.location?.href;
+					delete attachment.document;
 				}
-				delete attachment.url;
 				delete attachment.complete;
 			}
 		}
@@ -1703,7 +1715,7 @@ var Scaffold = new function () {
 		let input = await _getInput(type);
 
 		if (type == "web") {
-			let translate = new RemoteTranslate();
+			let translate = new RemoteTranslate({ disableErrorReporting: true });
 			try {
 				await translate.setBrowser(_browser);
 				await translate.setTranslatorProvider(_translatorProvider);
@@ -1748,7 +1760,7 @@ var Scaffold = new function () {
 			let hbox = document.createXULElement('hbox');
 			hbox.append(elem);
 			if (flex !== undefined) hbox.setAttribute('flex', flex);
-			if (width !== undefined) hbox.setAttribute('width', width);
+			if (width !== undefined) hbox.style.width = width + 'px';
 			return hbox;
 		}
 
@@ -1772,7 +1784,7 @@ var Scaffold = new function () {
 		let oldStatuses = {};
 		for (let i = 0; i < count; i++) {
 			let item = listBox.getItemAtIndex(i);
-			let [, statusCell] = item.firstElementChild.children;
+			let [, statusCell] = item.children;
 			oldStatuses[item.dataset.testString] = statusCell.getAttribute('value');
 		}
 
@@ -1787,24 +1799,18 @@ var Scaffold = new function () {
 
 			item.innerHTML = ''; // clear children/content if reusing
 
-			let hbox = document.createXULElement('hbox');
-			hbox.setAttribute('flex', 1);
-			hbox.setAttribute('align', 'center');
-
 			let input = document.createXULElement('label');
-			input.value = getTestLabel(test);
-			hbox.appendChild(wrapWithHBox(input, { flex: 1 }));
+			input.append(getTestLabel(test));
+			item.appendChild(wrapWithHBox(input, { flex: 1 }));
 
 			let status = document.createXULElement('label');
-			status.value = oldStatuses[testString] || 'Not run';
-			hbox.appendChild(wrapWithHBox(status, { width: 150 }));
+			status.append(oldStatuses[testString] || 'Not run');
+			item.appendChild(wrapWithHBox(status, { width: 150 }));
 
 			let defer = document.createXULElement('checkbox');
 			defer.checked = test.defer;
 			defer.disabled = true;
-			hbox.appendChild(wrapWithHBox(defer, { width: 30 }));
-
-			item.appendChild(hbox);
+			item.appendChild(wrapWithHBox(defer, { width: 30 }));
 
 			item.dataset.testString = testString;
 			item.dataset.testType = test.type;
@@ -1892,7 +1898,7 @@ var Scaffold = new function () {
 			Zotero.launchURL(url);
 		}
 		else {
-			_browser.loadURI(url, {
+			_browser.loadURI(Services.io.newURI(url), {
 				triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
 			});
 			_showTab('browser');
@@ -1915,6 +1921,8 @@ var Scaffold = new function () {
 			testsByType[test.type].push(test);
 		}
 
+		let rememberCookies = document.getElementById('checkbox-remember-cookies').checked;
+
 		for (let [type, testsOfType] of Object.entries(testsByType)) {
 			if (testsOfType.length) {
 				let tester = new Zotero_TranslatorTester(
@@ -1923,6 +1931,12 @@ var Scaffold = new function () {
 					_debug,
 					_translatorProvider
 				);
+				if (rememberCookies) {
+					tester.setCookieSandbox(_cookieSandbox);
+				}
+				else {
+					tester.setCookieSandbox(new Zotero.CookieSandbox());
+				}
 				tester.setTests(testsOfType);
 				tester.runTests(callback);
 			}
@@ -2025,12 +2039,6 @@ var Scaffold = new function () {
 		this.testsToUpdate = tests.slice();
 		this.numTestsTotal = this.testsToUpdate.length;
 		this.newTests = [];
-		this.tester = new Zotero_TranslatorTester(
-			_getTranslatorFromPane(),
-			"web",
-			_debug,
-			_translatorProvider
-		);
 	};
 	
 	TestUpdater.prototype.updateTests = function (testDoneCallback, doneCallback) {
@@ -2053,11 +2061,12 @@ var Scaffold = new function () {
 			_logOutput("Loading web page from " + test.url);
 			
 			const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
-			let browser;
+			let browser = new HiddenBrowser({
+				docShell: { allowMetaRedirects: true }
+			});
 			try {
-				browser = await HiddenBrowser.create(test.url, {
-					requireSuccessfulStatus: true,
-					docShell: { allowMetaRedirects: true }
+				await browser.load(test.url, {
+					requireSuccessfulStatus: true
 				});
 
 				if (test.defer) {
@@ -2074,7 +2083,7 @@ var Scaffold = new function () {
 					_logOutput("Page URL differs from test. Will be updated. " + browser.currentURI.spec);
 				}
 
-				let translate = new RemoteTranslate();
+				let translate = new RemoteTranslate({ disableErrorReporting: true });
 				try {
 					await translate.setBrowser(browser);
 					await translate.setTranslatorProvider(_translatorProvider);
@@ -2082,8 +2091,13 @@ var Scaffold = new function () {
 					translate.setHandler("debug", _debug);
 					translate.setHandler("error", _error);
 					translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
+					
 					let newTest = await translate.newTest();
 					newTest = _sanitizeItemsInTest(newTest);
+					if (test.defer) {
+						newTest.defer = true;
+					}
+					
 					this.newTests.push(newTest);
 					this.testDoneCallback(newTest);
 					this._updateTests();
@@ -2099,7 +2113,7 @@ var Scaffold = new function () {
 				this._updateTests();
 			}
 			finally {
-				if (browser) HiddenBrowser.destroy(browser);
+				if (browser) browser.destroy();
 			}
 		}
 		else {
@@ -2214,7 +2228,7 @@ var Scaffold = new function () {
 	}
 
 	function getDefaultESLintPath() {
-		return OS.Path.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'teslint');
+		return PathUtils.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'teslint');
 	}
 
 	async function getESLintPath() {
@@ -2224,7 +2238,7 @@ var Scaffold = new function () {
 
 		let eslintPath = getDefaultESLintPath();
 
-		while (!await OS.File.exists(eslintPath)) {
+		while (!await IOUtils.exists(eslintPath)) {
 			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
@@ -2263,7 +2277,7 @@ var Scaffold = new function () {
 		try {
 			let proc = await Subprocess.call({
 				command: eslintPath,
-				arguments: ['-o', '-', '--', translatorPath],
+				arguments: ['--format', 'json', '--', translatorPath],
 			});
 			let lintOutput = '';
 			let chunk;
@@ -2319,6 +2333,47 @@ var Scaffold = new function () {
 			return activeElement.id.substring(7);
 		}
 		return null;
+	}
+	
+	async function _getGitBranchName() {
+		let gitPath = await Subprocess.pathSearch('git');
+		if (!gitPath) return null;
+		
+		let dir = Scaffold_Translators.getDirectory();
+		if (!dir) return null;
+		
+		let proc = await Subprocess.call({
+			command: gitPath,
+			arguments: ['rev-parse', '--abbrev-ref', 'HEAD'],
+			workdir: dir,
+		});
+		let output = '';
+		let chunk;
+		while ((chunk = await proc.stdout.readString())) {
+			output += chunk;
+		}
+		return output.trim();
+	}
+	
+	async function _updateTitle() {
+		let title = 'Scaffold';
+
+		let label = document.getElementById('textbox-label').value;
+		if (label) {
+			title += ' - ' + label;
+		}
+		
+		try {
+			let branch = await _getGitBranchName();
+			if (branch) {
+				title += ' (' + branch + ')';
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		
+		document.title = title;
 	}
 };
 

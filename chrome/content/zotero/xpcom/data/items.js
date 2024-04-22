@@ -1350,6 +1350,11 @@ Zotero.Items = function() {
 				currentWord += codePoint.toLowerCase();
 			}
 		}
+		
+		// Add remaining word, if any
+		if (currentWord.length > 3) {
+			freqs.set(currentWord, (freqs.get(currentWord) || 0) + 1);
+		}
 
 		// Break ties in locale order.
 		return [...freqs.keys()]

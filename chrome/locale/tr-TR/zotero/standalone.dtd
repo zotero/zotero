@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Eklentiler">
 <!ENTITY developer.label "Geliştirici">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Küçült">
 <!ENTITY bringAllToFront.label "Hepsini En Öne Getir">
-<!ENTITY zoomWindow.label "Yakınlaştır">
-<!ENTITY windowMenu.label "Pencere">
 
 <!ENTITY helpMenu.label "Yardım">
 <!ENTITY helpMenu.accesskey "H">

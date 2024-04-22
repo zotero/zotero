@@ -23,7 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+
+const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
@@ -40,7 +42,7 @@ class ReaderInstance {
 		this._iframeWindow = null;
 		this._title = '';
 		this._isReaderInitialized = false;
-		this._showItemPaneToggle = false;
+		this._showContextPaneToggle = false;
 		this._initPromise = new Promise((resolve, reject) => {
 			this._resolveInitPromise = resolve;
 			this._rejectInitPromise = reject;
@@ -48,11 +50,9 @@ class ReaderInstance {
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
 
-		switch (this._item.attachmentContentType) {
-			case 'application/pdf': this._type = 'pdf'; break;
-			case 'application/epub+zip': this._type = 'epub'; break;
-			case 'text/html': this._type = 'snapshot'; break;
-			default: throw new Error('Unsupported attachment type');
+		this._type = this._item.attachmentReaderType;
+		if (!this._type) {
+			throw new Error('Unsupported attachment type');
 		}
 
 		return new Proxy(this, {
@@ -93,7 +93,7 @@ class ReaderInstance {
 	}
 
 	getSecondViewState() {
-		let state = this._iframeWindow.wrappedJSObject.getSecondViewState();
+		let state = this._iframeWindow?.wrappedJSObject?.getSecondViewState?.();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
 	}
 
@@ -185,6 +185,23 @@ class ReaderInstance {
 			}
 		};
 
+		this._iframeWindow.addEventListener('customEvent', (event) => {
+			let data = event.detail.wrappedJSObject;
+			let append = data.append;
+			data.append = (...args) => {
+				append(...Components.utils.cloneInto(args, this._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
+			};
+			data.reader = this;
+			Zotero.Reader._dispatchEvent(data);
+		});
+
+		this._blockingObserver = new BlockingObserver({
+			shouldBlock(uri) {
+				return uri.scheme === 'http' || uri.scheme === 'https';
+			}
+		});
+		this._blockingObserver.register(this._iframe);
+
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
 			data,
@@ -194,7 +211,7 @@ class ReaderInstance {
 			location,
 			readOnly: this._isReadOnly(),
 			authorName: this._item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
-			showItemPaneToggle: this._showItemPaneToggle,
+			showContextPaneToggle: this._showContextPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
@@ -205,6 +222,7 @@ class ReaderInstance {
 				...Zotero.Intl.getPrefixedStrings('pdfReader.')
 			},
 			showAnnotations: true,
+			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -213,7 +231,15 @@ class ReaderInstance {
 			onAddToNote: (annotations) => {
 				this._addToNote(annotations);
 			},
-			onSaveAnnotations: async (annotations) => {
+			onSaveAnnotations: async (annotations, callback) => {
+				// Reader iframe will wait for this function to finish to make sure there
+				// aren't simultaneous transaction waiting to modify the same annotation item.
+				// Although simultaneous changes are still possible from different reader instances,
+				// but unlikely to be a problem.
+				// It's best to test that by running the code below in Run JavaScript tool:
+				// await Zotero.DB.executeTransaction(async function () {
+				//     await Zotero.Promise.delay(15000);
+				// });
 				let attachment = Zotero.Items.get(this.itemID);
 				let notifierQueue = new Zotero.Notifier.Queue();
 				try {
@@ -256,6 +282,9 @@ class ReaderInstance {
 					throw e;
 				}
 				finally {
+					// Reader iframe doesn't have permissions to wait for onSaveAnnotations
+					// promise, therefore using callback to inform when saving finishes
+					callback();
 					await Zotero.Notifier.commit(notifierQueue);
 				}
 			},
@@ -319,21 +348,13 @@ class ReaderInstance {
 				}
 			},
 			onToggleSidebar: (open) => {
-				if (this._onToggleSidebar) {
-					this._onToggleSidebar(open);
+				if (this._onToggleSidebarCallback) {
+					this._onToggleSidebarCallback(open);
 				}
 			},
 			onChangeSidebarWidth: (width) => {
-				if (this._onChangeSidebarWidth) {
-					this._onChangeSidebarWidth(width);
-				}
-			},
-			onFocusSplitButton: () => {
-				if (this instanceof ReaderTab) {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.document.getElementById('zotero-tb-toggle-item-pane').focus();
-					}
+				if (this._onChangeSidebarWidthCallback) {
+					this._onChangeSidebarWidthCallback(width);
 				}
 			},
 			onFocusContextPane: () => {
@@ -494,7 +515,30 @@ class ReaderInstance {
 					await this.reload();
 					this._internalReader.unfreeze();
 				}
-			}
+			},
+			onToggleContextPane: () => {
+				Zotero.debug('toggle context pane')
+				let win = Zotero.getMainWindow();
+				win.ZoteroContextPane.togglePane();
+			},
+			onToolbarShiftTab: () => {
+				// Shift-tab from the toolbar focuses the sync button
+				let win = Zotero.getMainWindow();
+				win.document.getElementById("zotero-tb-sync").focus();
+			},
+			onIframeTab: () => {
+				// Tab after the last tabstop will focus the contextPane
+				let win = Zotero.getMainWindow();
+				let focused = win.ZoteroContextPane.focus();
+				// If context pane wasn't focused (e.g. it's collapsed), focus the tab bar
+				if (!focused) {
+					win.Zotero_Tabs.moveFocus("current");
+				}
+			},
+			onSetZoom: (iframe, zoom) => {
+				iframe.browsingContext.textZoom = 1;
+				iframe.browsingContext.fullZoom = zoom;
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
@@ -505,6 +549,7 @@ class ReaderInstance {
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
+			Zotero.Prefs.registerObserver('reader.contentDarkMode', this._handleContentDarkModeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleFontFamilyChange),
 		];
 
@@ -521,11 +566,8 @@ class ReaderInstance {
 		if (fileSize > ARRAYBUFFER_MAX_LENGTH) {
 			throw new Error(`The file "${path}" is too large`);
 		}
-		let buf = await OS.File.read(path, {});
-		let baseURI = `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`;
 		return {
-			buf,
-			baseURI
+			url: `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`
 		};
 	}
 
@@ -534,6 +576,9 @@ class ReaderInstance {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		}
 		this._flushState();
+		if (this._blockingObserver) {
+			this._blockingObserver.unregister(this._iframe);
+		}
 	}
 
 	get itemID() {
@@ -614,7 +659,7 @@ class ReaderInstance {
 		// this._postMessage({ action: 'focusLastToolbarButton' });
 	}
 
-	tabToolbar(reverse) {
+	tabToolbar(_reverse) {
 		// this._postMessage({ action: 'tabToolbar', reverse });
 		// Avoid toolbar find button being focused for a short moment
 		setTimeout(() => this._iframeWindow.focus());
@@ -700,7 +745,6 @@ class ReaderInstance {
 			let item = Zotero.Items.get(this._item.id);
 			let id = item.parentID || item.id;
 			win.ZoteroPane.selectItems([id]);
-			win.Zotero_Tabs.select('zotero-pane');
 			win.focus();
 		}
 	}
@@ -833,6 +877,10 @@ class ReaderInstance {
 		await this.updateTitle();
 	};
 
+	_handleContentDarkModeChange = () => {
+		this._internalReader.useDarkModeForContent(Zotero.Prefs.get('reader.contentDarkMode'));
+	};
+
 	_handleFontFamilyChange = () => {
 		this._internalReader.setFontFamily(Zotero.Prefs.get('reader.ebookFontFamily'));
 	};
@@ -849,6 +897,7 @@ class ReaderInstance {
 			}
 			return new this._iframeWindow.Blob([u8arr], { type: mime });
 		}
+		return undefined;
 	}
 
 	_getColorIcon(color, selected) {
@@ -865,8 +914,6 @@ class ReaderInstance {
 			}
 		});
 		menupopup.className = 'tags-popup';
-		menupopup.style.font = 'inherit';
-		menupopup.style.minWidth = '300px';
 		menupopup.setAttribute('ignorekeys', true);
 		let tagsbox = new (this._window.customElements.get('tags-box'));
 		menupopup.appendChild(tagsbox);
@@ -875,12 +922,15 @@ class ReaderInstance {
 		let rect = this._iframe.getBoundingClientRect();
 		x += rect.left;
 		y += rect.top;
-		setTimeout(() => menupopup.openPopup(null, 'before_start', x, y, true));
-		tagsbox.mode = 'edit';
+		tagsbox.editable = true;
 		tagsbox.item = item;
-		if (tagsbox.mode == 'edit' && tagsbox.count == 0) {
-			tagsbox.newTag();
-		}
+		tagsbox.render();
+		menupopup.openPopup(null, 'before_start', x, y, true);
+		setTimeout(() => {
+			if (tagsbox.count == 0) {
+				tagsbox.newTag();
+			}
+		});
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
@@ -985,9 +1035,9 @@ class ReaderTab extends ReaderInstance {
 		this._sidebarWidth = options.sidebarWidth;
 		this._sidebarOpen = options.sidebarOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
-		this._showItemPaneToggle = true;
-		this._onToggleSidebar = options.onToggleSidebar;
-		this._onChangeSidebarWidth = options.onChangeSidebarWidth;
+		this._showContextPaneToggle = true;
+		this._onToggleSidebarCallback = options.onToggleSidebar;
+		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
 			id: options.tabID,
@@ -1015,6 +1065,7 @@ class ReaderTab extends ReaderInstance {
 		this._tabContainer.appendChild(this._popupset);
 		
 		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.addEventListener('pointerdown', this._handlePointerDown);
 		this._window.addEventListener('pointerup', this._handlePointerUp);
 
 		this._iframe.setAttribute('tooltip', 'html-tooltip');
@@ -1024,6 +1075,7 @@ class ReaderTab extends ReaderInstance {
 	
 	close() {
 		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.removeEventListener('pointerdown', this._handlePointerDown);
 		this._window.removeEventListener('pointerup', this._handlePointerUp);
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
@@ -1038,35 +1090,45 @@ class ReaderTab extends ReaderInstance {
 		}
 	};
 
+	// We don't want to send fake pointerup event, if pointerdown and pointerup was in the same iframe
+	_handlePointerDown = (event) => {
+		if (this._window.Zotero_Tabs.selectedID === this.tabID
+			&& event.target.closest('#outerContainer')) {
+			this._pointerDownWindow = event.target.ownerDocument.defaultView;
+		}
+	};
+
 	// This is a nonsense work-around to trigger mouseup and pointerup
 	// events in PDF reader iframe when mouse up happens over another iframe
 	// i.e. note-editor. There should be a better way to solve this
 	_handlePointerUp = (event) => {
 		try {
+			var _window = event.target.ownerDocument.defaultView;
 			if (this._window.Zotero_Tabs.selectedID === this.tabID
-				&& this._iframeWindow
-				&& event.target
-				&& event.target.closest
-				&& !event.target.closest('#outerContainer')) {
-				let evt = new this._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
-				this._iframeWindow.dispatchEvent(evt);
+				// If the event isn't inside a reader PDF.js iframe, or isn't the same iframe (if using split view)
+				&& (!event.target.closest('#outerContainer') || this._pointerDownWindow !== _window)
+				&& this._pointerDownWindow
+			) {
+				let evt = new this._internalReader._primaryView._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
+				this._internalReader._primaryView._iframeWindow.dispatchEvent(evt);
+				this._internalReader._secondaryView?._iframeWindow.dispatchEvent(evt);
 				if (evt.defaultPrevented) {
 					event.preventDefault();
 					return;
 				}
-				if (evt.clickEventPrevented()) {
+				if (evt.clickEventPrevented && evt.clickEventPrevented()) {
 					event.preventClickEvent();
 				}
-
-				evt = new this._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
-				this._iframeWindow.dispatchEvent(evt);
+				evt = new this._internalReader._primaryView._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
+				this._internalReader._primaryView._iframeWindow.dispatchEvent(evt);
+				this._internalReader._secondaryView?._iframeWindow.dispatchEvent(evt);
 				if (evt.defaultPrevented) {
 					event.preventDefault();
 				}
 			}
+			this._pointerDownWindow = null;
 		}
 		catch (e) {
-			// TODO: Find a better solution for this or the whole method
 			if (!e.message.includes("can't access dead object")) {
 				Zotero.logError(e);
 			}
@@ -1079,7 +1141,10 @@ class ReaderTab extends ReaderInstance {
 
 	_addToNote(annotations) {
 		annotations = annotations.map(x => ({ ...x, attachmentItemID: this._item.id }));
-		let noteEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
+		if (!this._window.ZoteroContextPane) {
+			return;
+		}
+		let noteEditor = this._window.ZoteroContextPane.activeEditor;
 		if (!noteEditor) {
 			return;
 		}
@@ -1134,7 +1199,7 @@ class ReaderWindow extends ReaderInstance {
 			'.menu-type-reader.pdf, .menu-type-reader.epub, .menu-type-reader.snapshot'
 		).forEach(el => el.hidden = true);
 		this._window.document.querySelectorAll('.menu-type-reader.' + subtype).forEach(el => el.hidden = false);
-	};
+	}
 
 	close() {
 		this.uninit();
@@ -1167,6 +1232,8 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this._internalReader.splitType === 'vertical');
 		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this._internalReader.splitType === 'horizontal');
+		this._window.document.getElementById('view-menuitem-use-dark-mode-for-content').setAttribute('checked', Zotero.Prefs.get('reader.contentDarkMode'));
+		this._window.document.getElementById('view-menuitem-use-dark-mode-for-content').setAttribute('disabled', !this._window.matchMedia('(prefers-color-scheme: dark)').matches);
 	}
 
 	_onGoMenuOpen() {
@@ -1201,6 +1268,271 @@ class ReaderWindow extends ReaderInstance {
 }
 
 
+class ReaderPreview extends ReaderInstance {
+	// TODO: implement these inside reader after redesign is done there
+	static CSS = {
+		global: `
+		#split-view, .split-view {
+			top: 0 !important;
+			inset-inline-start: 0 !important;
+		}
+		#reader-ui {
+			display: none !important;
+		}`,
+		pdf: `
+		#mainContainer {
+			/* Hide left-side vertical line */
+			margin-inline-start: -1px;
+		}
+		#viewerContainer {
+			overflow: hidden;
+		}
+		.pdfViewer {
+			padding: 6px 0px;
+		}
+		.pdfViewer .page {
+			border-radius: 5px;
+			box-shadow: none;
+		}
+		.pdfViewer .page::before {
+			content: "";
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			border-radius: 5px;
+		}
+		@media (prefers-color-scheme: light) {
+			#viewerContainer {
+				background: #f2f2f2;
+			}
+			.pdfViewer .page::before {
+				box-shadow: inset 0 0 0px 1px #0000001a;
+			}
+		}
+		@media (prefers-color-scheme: dark) {
+			#viewerContainer {
+				background: #303030;
+			}
+			.pdfViewer .page::before {
+				box-shadow: inset 0 0 0px 1px #ffffff1f;
+			}
+		}`,
+		epub: `
+		body.flow-mode-paginated {
+			margin: 8px !important;
+		}
+		body.flow-mode-paginated > .sections {
+			min-height: calc(100vh - 16px);
+			max-height: calc(100vh - 16px);
+		}
+		body.flow-mode-paginated > .sections.spread-mode-odd {
+			column-width: calc(50vw - 16px);
+		}
+		body.flow-mode-paginated replaced-body img, body.flow-mode-paginated replaced-body svg,
+		body.flow-mode-paginated replaced-body audio, body.flow-mode-paginated replaced-body video {
+			max-width: calc(50vw - 16px) !important;
+			max-height: calc(100vh - 16px) !important;
+		}
+		body.flow-mode-paginated replaced-body .table-like {
+			max-height: calc(100vh - 16px);
+		}
+		`,
+		snapshot: `
+		html {
+			pointer-events: none !important;
+			user-select: none !important;
+			min-width: 1024px;
+			transform: scale(var(--win-scale));
+			transform-origin: 0 0;
+			overflow-x: hidden;
+		}
+		
+		body {
+			overflow-y: visible;
+		}`
+	};
+
+	constructor(options) {
+		super(options);
+		this._iframe = options.iframe;
+		this._iframeWindow = this._iframe.contentWindow;
+		this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+	}
+
+	async _open({ state, location, secondViewState }) {
+		let success;
+		try {
+			success = await super._open({ state, location, secondViewState });
+
+			this._injectCSS(this._iframeWindow.document, ReaderPreview.CSS.global);
+
+			let ready = await this._waitForInternalReader();
+			if (!ready) {
+				return false;
+			}
+
+			let win = this._internalReader._primaryView._iframeWindow;
+			if (this._type === "snapshot") {
+				win.addEventListener(
+					"resize", this.updateSnapshotAttr);
+				this.updateSnapshotAttr();
+			}
+			else if (this._type === "pdf") {
+				let viewer = win?.PDFViewerApplication?.pdfViewer;
+				let t = 0;
+				while (!viewer?.firstPagePromise && t < 100) {
+					t++;
+					await Zotero.Promise.delay(10);
+					viewer = win?.PDFViewerApplication?.pdfViewer;
+				}
+				await viewer?.firstPagePromise;
+				win.addEventListener("resize", this.updatePDFAttr);
+				this.updatePDFAttr();
+			}
+			else if (this._type === "epub") {
+				this.updateEPUBAttr();
+			}
+
+			this._injectCSS(
+				win.document,
+				ReaderPreview.CSS[this._type]
+			);
+
+			return success;
+		}
+		catch (e) {
+			Zotero.warn(`Failed to load preview for attachment ${this._item?.libraryID}/${this._item?.key}: ${String(e)}`);
+			this._item = null;
+			return false;
+		}
+	}
+
+	uninit() {
+		if (this._type === "snapshot") {
+			this._internalReader?._primaryView?._iframeWindow.removeEventListener(
+				"resize", this.updateSnapshotAttr);
+		}
+		else if (this._type === "pdf") {
+			this._internalReader?._primaryView?._iframeWindow.removeEventListener(
+				"resize", this.updatePDFAttr);
+		}
+		super.uninit();
+	}
+
+	/**
+	 * Goto previous/next page
+	 * @param {"prev" | "next"} type goto previous or next page
+	 * @returns {void}
+	 */
+	goto(type) {
+		if (type === "prev") {
+			this._internalReader.navigateToPreviousPage();
+		}
+		else {
+			this._internalReader.navigateToNextPage();
+		}
+	}
+
+	/**
+	 * Check if can goto previous/next page
+	 * @param {"prev" | "next"} type goto previous or next page
+	 * @returns {boolean}
+	 */
+	canGoto(type) {
+		if (type === "prev") {
+			return this._internalReader?._state?.primaryViewStats?.canNavigateToPreviousPage;
+		}
+		else {
+			return this._internalReader?._state?.primaryViewStats?.canNavigateToNextPage;
+		}
+	}
+
+	_isReadOnly() {
+		return true;
+	}
+
+	async _getState() {
+		if (this._type === "pdf") {
+			return { pageIndex: 0, scale: "page-height", scrollMode: 0, spreadMode: 0 };
+		}
+		else if (this._type === "epub") {
+			return Object.assign(await super._getState(), {
+				scale: 1,
+				flowMode: "paginated",
+				spreadMode: 0
+			});
+		}
+		else if (this._type === "snapshot") {
+			return { scale: 1, scrollYPercent: 0 };
+		}
+		return super._getState();
+	}
+
+	async _setState() {}
+
+	updateTitle() {}
+
+	_injectCSS(doc, content) {
+		if (!content) {
+			return;
+		}
+		let style = doc.createElement("style");
+		style.textContent = content;
+		doc.head.appendChild(style);
+	}
+
+	updateSnapshotAttr = () => {
+		let win = this._internalReader?._primaryView?._iframeWindow;
+		let root = win?.document?.documentElement;
+		root?.style.setProperty('--win-scale', String(this._iframe.getBoundingClientRect().width / 1024));
+	};
+
+	updateEPUBAttr() {
+		let view = this._internalReader?._primaryView;
+		let currentSize = parseFloat(
+			view._iframeWindow?.getComputedStyle(view?._iframeDocument?.documentElement).fontSize);
+		let scale = 12 / currentSize;
+		view?._setScale(scale);
+	}
+
+	updatePDFAttr = () => {
+		this._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfViewer.currentScaleValue = 'page-height';
+	};
+
+	getPageWidthHeightRatio() {
+		if (this._type !== 'pdf') {
+			return NaN;
+		}
+		try {
+			let viewport = this._internalReader?._primaryView?._iframeWindow
+				?.PDFViewerApplication?.pdfViewer._pages[0].viewport;
+			return viewport?.width / viewport?.height;
+		}
+		catch (e) {
+			return NaN;
+		}
+	}
+
+	async _waitForInternalReader() {
+		let n = 0;
+		try {
+			while (!this._internalReader?._primaryView?._iframeWindow) {
+				if (n >= 500) {
+					return false;
+				}
+				await Zotero.Promise.delay(10);
+				n++;
+			}
+			await this._internalReader._primaryView.initializedPromise;
+			return true;
+		}
+		catch (e) {
+			return false;
+		}
+	}
+}
+
+
 class Reader {
 	constructor() {
 		this._sidebarWidth = 240;
@@ -1208,6 +1540,7 @@ class Reader {
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
 		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'reader');
+		this._registeredListeners = [];
 		this.onChangeSidebarWidth = null;
 		this.onToggleSidebar = null;
 
@@ -1218,6 +1551,62 @@ class Reader {
 			}
 			this._setSidebarState();
 		}, 500);
+
+		Zotero.Plugins.addObserver({
+			shutdown: ({ id: pluginID }) => {
+				this._unregisterEventListenerByPluginID(pluginID);
+			}
+		});
+	}
+
+	_dispatchEvent(event) {
+		for (let listener of this._registeredListeners) {
+			if (listener.type === event.type) {
+				listener.handler(event);
+			}
+		}
+	}
+
+	/**
+	 * Inject DOM nodes to reader UI parts:
+	 * - renderTextSelectionPopup
+	 * - renderSidebarAnnotationHeader
+	 * - renderToolbar
+	 *
+	 * Zotero.Reader.registerEventListener('renderTextSelectionPopup', (event) => {
+	 * 	let { reader, doc, params, append } = event;
+	 * 	let container = doc.createElement('div');
+	 * 	container.append('Loading…');
+	 * 	append(container);
+	 * 	setTimeout(() => container.replaceChildren('Translated text: ' + params.annotation.text), 1000);
+	 * });
+	 *
+	 *
+	 * Add options to context menus:
+	 * - createColorContextMenu
+	 * - createViewContextMenu
+	 * - createAnnotationContextMenu
+	 * - createThumbnailContextMenu
+	 * - createSelectorContextMenu
+	 *
+	 * Zotero.Reader.registerEventListener('createAnnotationContextMenu', (event) => {
+	 * 	let { reader, params, append } = event;
+	 * 	append({
+	 * 		label: 'Test',
+	 * 		onCommand(){ reader._iframeWindow.alert('Selected annotations: ' + params.ids.join(', ')); }
+	 * 	});
+	 * });
+	 */
+	registerEventListener(type, handler, pluginID = undefined) {
+		this._registeredListeners.push({ pluginID, type, handler });
+	}
+
+	unregisterEventListener(type, handler) {
+		this._registeredListeners = this._registeredListeners.filter(x => x.type === type && x.handler === handler);
+	}
+
+	_unregisterEventListenerByPluginID(pluginID) {
+		this._registeredListeners = this._registeredListeners.filter(x => x.pluginID !== pluginID);
 	}
 	
 	getSidebarWidth() {
@@ -1325,14 +1714,16 @@ class Reader {
 						}
 					}
 					else {
-						let annotationItems = item.getAnnotations();
-						reader.annotationItemIDs = annotationItems.map(x => x.id);
-						let affectedAnnotations = annotationItems.filter(({ id }) => (
-							ids.includes(id)
-							&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
-						));
-						if (affectedAnnotations.length) {
-							reader.setAnnotations(affectedAnnotations);
+						if (['add', 'modify'].includes(event)) {
+							let annotationItems = item.getAnnotations();
+							reader.annotationItemIDs = annotationItems.map(x => x.id);
+							let affectedAnnotations = annotationItems.filter(({ id }) => (
+								ids.includes(id)
+								&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
+							));
+							if (affectedAnnotations.length) {
+								reader.setAnnotations(affectedAnnotations);
+							}
 						}
 						// Update title if the PDF attachment or the parent item changes
 						if (ids.includes(reader.itemID) || ids.includes(item.parentItemID)) {
@@ -1378,16 +1769,15 @@ class Reader {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
-
+		let win = Zotero.getMainWindow();
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
 		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {
-			let win = Zotero.getMainWindow();
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
 					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return;
+					return undefined;
 				}
 			}
 		}
@@ -1455,9 +1845,31 @@ class Reader {
 			this._readers.push(reader);
 		}
 		
-		if (!openInBackground) {
+		if (!openInBackground
+			&& !win.Zotero_Tabs.focusOptions.keepTabFocused) {
+			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
+		return reader;
+	}
+
+	async openPreview(itemID, iframe) {
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+
+		let item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw new Error('Item does not exist');
+		}
+
+		let reader = new ReaderPreview({
+			item,
+			sidebarWidth: 0,
+			sidebarOpen: false,
+			bottomPlaceholderHeight: 0,
+			iframe,
+		});
 		return reader;
 	}
 

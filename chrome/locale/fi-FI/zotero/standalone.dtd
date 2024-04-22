@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Lisäosat">
 <!ENTITY developer.label "Kehittäjätyökalut">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Pienennä">
 <!ENTITY bringAllToFront.label "Tuo kaikki eteen">
-<!ENTITY zoomWindow.label "Lähennä">
-<!ENTITY windowMenu.label "Ikkuna">
 
 <!ENTITY helpMenu.label "Ohje">
 <!ENTITY helpMenu.accesskey "H">

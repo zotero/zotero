@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Numatyta:">
 <!ENTITY zotero.preferences.items "įrašai">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Nuostatos">
 <!ENTITY zotero.preferences.custom "Savitas...">
 
 <!ENTITY zotero.preferences.prefpane.general "Bendrosios">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Neleisti greitai kopijuoti, jei tempiama daugiau kaip">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citavimas">
-<!ENTITY zotero.preferences.cite.styles "Stiliai">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstų rengyklės">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Naudoti klasikinį citatų įdėjimo langą">
 <!ENTITY zotero.preferences.styleEditor "Stilių rengyklė">

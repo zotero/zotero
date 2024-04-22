@@ -26,12 +26,59 @@
 
 "use strict";
 
+
 {
-	class AttachmentBox extends XULElement {
+	class AttachmentBox extends ItemPaneSectionElementBase {
+		content = MozXULElement.parseXULToFragment(`
+			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
+				<html:div class="body">
+					<attachment-preview id="attachment-preview" tabindex="0" data-l10n-id="attachment-preview"/>
+					<html:div style="display: grid;">
+						<label id="url" is="zotero-text-link" crop="end" tabindex="0"
+							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
+					</html:div>
+					<html:div class="metadata-table">
+						<html:div id="fileNameRow" class="meta-row">
+							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
+							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" nowrap="true" tight="true"/></html:div>
+						</html:div>
+						<html:div id="accessedRow" class="meta-row">
+							<html:div class="meta-label"><html:label id="accessed-label" class="key" data-l10n-id="attachment-info-accessed"/></html:div>
+							<html:div class="meta-data"><editable-text id="accessed" aria-labelledby="accessed-label" nowrap="true" tight="true" readonly="true"/></html:div>
+						</html:div>
+						<html:div id="pagesRow" class="meta-row">
+							<html:div class="meta-label"><html:label id="pages-label" class="key" data-l10n-id="attachment-info-pages"/></html:div>
+							<html:div class="meta-data"><editable-text id="pages" aria-labelledby="pages-label" nowrap="true" tight="true" readonly="true"/></html:div>
+						</html:div>
+						<html:div id="dateModifiedRow" class="meta-row" hidden="true" >
+							<html:div class="meta-label"><html:label id="dateModified-label" class="key" data-l10n-id="attachment-info-modified"/></html:div>
+							<html:div class="meta-data"><editable-text id="dateModified" aria-labelledby="dateModified-label" nowrap="true" tight="true" readonly="true"/></html:div>
+						</html:div>
+						<html:div id="indexStatusRow" class="meta-row">
+							<html:div class="meta-label"><html:label id="index-status-label" class="key" data-l10n-id="attachment-info-index"/></html:div>
+							<html:div class="meta-data">
+								<html:label id="index-status"/>
+								<toolbarbutton id="reindex" tabindex="0" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
+							</html:div>
+						</html:div>
+					</html:div>
+					<html:div id="note-container">
+						<note-editor id="attachment-note-editor" notitle="1" flex="1"/>
+						<button id="note-button" data-l10n-id="attachment-info-convert-note"/>
+					</html:div>
+					<button id="select-button" hidden="true"/>
+					<popupset>
+						<menupopup id="url-menu">
+							<menuitem id="url-menuitem-copy"/>
+						</menupopup>
+					</popupset>
+				</html:div>
+			</collapsible-section>
+		`);
+
 		constructor() {
 			super();
 
-			this.editable = false;
 			this.clickableLink = false;
 			this.displayButton = false;
 			this.displayNote = false;
@@ -43,52 +90,12 @@
 
 			this._item = null;
 
-			this.content = MozXULElement.parseXULToFragment(`
-				<vbox id="attachment-box" flex="1" orient="vertical"
-						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-						xmlns:html="http://www.w3.org/1999/xhtml">
-					<vbox id="metadata">
-						<label id="title"/>
-						<label id="url" crop="end"
-							ondragstart="var dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
-						<html:table>
-							<html:tr id="fileNameRow">
-								<html:td><label id="fileName-label"/></html:td>
-								<html:td><label id="fileName" crop="end"/></html:td>
-							</html:tr>
-							<html:tr id="accessedRow">
-								<html:td><label id="accessed-label"/></html:td>
-								<html:td><label id="accessed"/></html:td>
-							</html:tr>
-							<html:tr id="pagesRow">
-								<html:td><label id="pages-label"/></html:td>
-								<html:td><label id="pages"/></html:td>
-							</html:tr>
-							<html:tr id="dateModifiedRow" hidden="true">
-								<html:td><label id="dateModified-label"/></html:td>
-								<html:td><label id="dateModified"/></html:td>
-							</html:tr>
-							<html:tr id="indexStatusRow">
-								<html:td><label id="index-status-label"/></html:td>
-								<html:td><hbox>
-									<label id="index-status"/>
-									<image id="reindex" onclick="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
-								</hbox></html:td>
-							</html:tr>
-						</html:table>
-					</vbox>
-					
-					<note-editor id="attachment-note-editor" notitle="1" flex="1"/>
-					
-					<button id="select-button" hidden="true"/>
-					
-					<popupset>
-						<menupopup id="url-menu">
-							<menuitem id="url-menuitem-copy"/>
-						</menupopup>
-					</popupset>
-				</vbox>
-			`, ['chrome://zotero/locale/zotero.dtd']);
+			this._section = null;
+			this._preview = null;
+
+			this._isRendering = false;
+			
+			this._isEditingFilename = false;
 		}
 
 		get mode() {
@@ -98,7 +105,6 @@
 		set mode(val) {
 			Zotero.debug("Setting mode to '" + val + "'");
 					
-			this.editable = false;
 			this.synchronous = false;
 			this.displayURL = false;
 			this.displayFileName = false;
@@ -108,7 +114,6 @@
 			this.displayDateModified = false;
 			this.displayIndexed = false;
 			this.displayNote = false;
-			this.displayNoteIfEmpty = false;
 			
 			switch (val) {
 				case 'view':
@@ -123,7 +128,6 @@
 					break;
 				
 				case 'edit':
-					this.editable = true;
 					this.displayURL = true;
 					this.displayFileName = true;
 					this.clickableLink = true;
@@ -131,7 +135,6 @@
 					this.displayPages = true;
 					this.displayIndexed = true;
 					this.displayNote = true;
-					this.displayNoteIfEmpty = true;
 					this.displayDateModified = true;
 					break;
 				
@@ -146,13 +149,11 @@
 				
 				case 'mergeedit':
 					this.synchronous = true;
-					this.editable = true;
 					this.displayURL = true;
 					this.displayFileName = true;
 					this.displayAccessed = true;
 					this.displayNote = true;
 					// Notes aren't currently editable in mergeedit pane
-					this.displayNoteIfEmpty = false;
 					this.displayDateModified = true;
 					break;
 				
@@ -168,7 +169,36 @@
 			}
 			
 			this._mode = val;
-			this.querySelector('#attachment-box').setAttribute('mode', val);
+
+			this._editable = ["edit", "mergeedit"].includes(this._mode);
+		}
+
+		get editable() {
+			return this._editable;
+		}
+
+		set editable(editable) {
+			// TODO: Replace `mode` with `editable`?
+			this.mode = editable ? "edit" : "view";
+			// Use the current `_editable` set by `mode`
+			super.editable = this._editable;
+		}
+
+		get usePreview() {
+			return this.hasAttribute('data-use-preview');
+		}
+
+		set usePreview(val) {
+			this.toggleAttribute('data-use-preview', val);
+		}
+
+		get tabType() {
+			return this._tabType;
+		}
+
+		set tabType(tabType) {
+			super.tabType = tabType;
+			if (tabType == "reader") this.usePreview = false;
 		}
 
 		get item() {
@@ -179,22 +209,38 @@
 			if (!(val instanceof Zotero.Item)) {
 				throw new Error("'item' must be a Zotero.Item");
 			}
-			this._item = val;
-			this.refresh();
+			if (val.isAttachment()) {
+				this._item = val;
+				this.hidden = false;
+				this._preview.disableResize = false;
+			}
+			else {
+				this.hidden = true;
+				this._preview.disableResize = true;
+			}
 		}
 
-		connectedCallback() {
-			this.appendChild(document.importNode(this.content, true));
-
-			// For the time being, use a silly little popup
-			this._id('title').addEventListener('click', () => {
-				if (this.editable) {
-					this.editTitle();
-				}
-			});
+		init() {
+			this.initCollapsibleSection();
 
 			this._id('url').addEventListener('contextmenu', (event) => {
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
+			});
+
+			let fileName = this._id("fileName");
+			fileName.addEventListener('focus', () => {
+				this._isEditingFilename = true;
+			});
+			fileName.addEventListener('blur', () => {
+				this.editFileName(fileName.value);
+				this._isEditingFilename = false;
+			});
+
+			this._preview = this._id("attachment-preview");
+
+			let noteButton = this._id('note-button');
+			noteButton.addEventListener("command", () => {
+				this.convertAttachmentNote();
 			});
 
 			let copyMenuitem = this._id('url-menuitem-copy');
@@ -204,139 +250,126 @@
 			});
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
+
+			// Work around the reindex toolbarbutton not wanting to properly receive focus on tab.
+			// Make <image> focusable. On focus of the image, bounce the focus to the toolbarbutton.
+			// Temporarily remove tabindex from the <image> so that the focus can move past the
+			// reindex button
+			let reindexButton = this._id("indexStatusRow").querySelector(".meta-data toolbarbutton");
+			if (reindexButton) {
+				reindexButton.addEventListener("focusin", function (e) {
+					if (e.target.tagName == "image") {
+						reindexButton.focus();
+						reindexButton.querySelector("image").removeAttribute("tabindex");
+					}
+				});
+				reindexButton.addEventListener("blur", function (_) {
+					setTimeout(() => {
+						if (document.activeElement !== reindexButton) {
+							reindexButton.querySelector("image").setAttribute("tabindex", "0");
+						}
+					});
+				});
+			}
+			// Prevents the button from getting stuck in active state
+			reindexButton.addEventListener("keydown", (e) => {
+				if (e.key == " ") {
+					e.preventDefault();
+					reindexButton.click();
+				}
+			});
+
+			for (let label of this.querySelectorAll(".meta-label")) {
+				// Prevent default focus/blur behavior - we implement our own below
+				label.addEventListener("mousedown", event => event.preventDefault());
+				label.addEventListener("click", this._handleMetaLabelClick);
+			}
 		}
 
-		disconnectedCallback() {
+		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			this.replaceChildren();
 		}
 
-		notify(event, type, ids, extraData) {
+		notify(event, _type, ids, _extraData) {
 			if (event != 'modify' || !this.item || !this.item.id) return;
 			for (let id of ids) {
 				if (id != this.item.id) {
 					continue;
 				}
 				
-				var noteEditor = this._id('attachment-note-editor');
-				if (extraData
-						&& extraData[id]
-						&& extraData[id].noteEditorID
-						&& extraData[id].noteEditorID == noteEditor.instanceID) {
-					//Zotero.debug("Skipping notification from current attachment note field");
-					continue;
-				}
-				
-				this.refresh();
+				this._forceRenderAll();
 				break;
 			}
 		}
 
-		refresh() {
+		async asyncRender() {
+			if (!this.item) return;
+			if (this._isRendering) return;
+			if (!this._section.open) return;
+			if (this._isAlreadyRendered("async")) return;
+
 			Zotero.debug('Refreshing attachment box');
-			
-			var title = this._id('title');
-			var fileNameRow = this._id('fileNameRow');
-			var urlField = this._id('url');
-			var accessed = this._id('accessedRow');
-			var pagesRow = this._id('pagesRow');
-			var dateModifiedRow = this._id('dateModifiedRow');
-			var indexStatusRow = this._id('indexStatusRow');
-			var selectButton = this._id('select-button');
-			
-			// DEBUG: this is annoying -- we really want to use an abstracted
-			// version of createValueElement() from itemPane.js
-			// (ideally in an XBL binding)
-			
-			// Wrap title to multiple lines if necessary
-			while (title.hasChildNodes()) {
-				title.removeChild(title.firstChild);
-			}
-			var val = this.item.getField('title');
-			
-			if (typeof val != 'string') {
-				val += "";
+			this._isRendering = true;
+			// Cancel editing filename when refreshing
+			this._isEditingFilename = false;
+
+			if (this.usePreview) {
+				this._preview.item = this.item;
+				this._preview.render();
 			}
 			
-			var firstSpace = val.indexOf(" ");
-			// Crop long uninterrupted text, and use value attribute for empty field
-			if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29 || val === "") {
-				title.setAttribute('crop', 'end');
-				title.setAttribute('value', val);
+			let fileNameRow = this._id('fileNameRow');
+			let urlField = this._id('url');
+			let accessed = this._id('accessedRow');
+			let pagesRow = this._id('pagesRow');
+			let dateModifiedRow = this._id('dateModifiedRow');
+			let indexStatusRow = this._id('indexStatusRow');
+			let selectButton = this._id('select-button');
+
+			let fileExists = this._item.isFileAttachment() && await this._item.fileExists();
+			let isImportedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+			let isLinkedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
+			
+			// URL
+			if (this.displayURL && (isImportedURL || isLinkedURL)) {
+				let urlSpec = this.item.getField('url');
+				urlField.setAttribute('value', urlSpec);
+				urlField.href = urlSpec;
+				if (!this.clickableLink) {
+					urlField.noClick = true;
+				}
+				urlField.hidden = false;
 			}
-			// Create a <description> element, essentially
 			else {
-				title.removeAttribute('value');
-				title.appendChild(document.createTextNode(val));
+				urlField.hidden = true;
 			}
 			
-			if (this.editable) {
-				title.className = 'zotero-clicky';
-			}
-			
-			var isImportedURL = this.item.attachmentLinkMode ==
-									Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-			
-			// Metadata for URL's
-			if (this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL
-					|| isImportedURL) {
-				// URL
-				if (this.displayURL) {
-					var urlSpec = this.item.getField('url');
-					urlField.setAttribute('value', urlSpec);
-					urlField.setAttribute('tooltiptext', urlSpec);
-					urlField.setAttribute('hidden', false);
-					if (this.clickableLink) {
-						urlField.onclick = function (event) {
-							if (event.button == 0) {
-								ZoteroPane_Local.loadURI(this.value, event);
-							}
-						};
-						urlField.className = 'zotero-text-link';
-					}
-					else {
-						urlField.className = '';
-					}
-					urlField.hidden = false;
-				}
-				else {
-					urlField.hidden = true;
-				}
-				
-				// Access date
-				if (this.displayAccessed) {
-					this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')
-						+ Zotero.getString('punctuation.colon');
-					let val = this.item.getField('accessDate');
-					if (val) {
-						val = Zotero.Date.sqlToDate(val, true);
-					}
-					if (val) {
-						this._id("accessed").value = val.toLocaleString();
-						accessed.hidden = false;
-					}
-					else {
-						accessed.hidden = true;
-					}
+			// Access date
+			if (this.displayAccessed && (isImportedURL || isLinkedURL)) {
+				let itemAccessDate = this.item.getField('accessDate');
+				if (itemAccessDate) {
+					itemAccessDate = Zotero.Date.sqlToDate(itemAccessDate, true);
+					this._id("accessed").value = itemAccessDate.toLocaleString();
+					accessed.hidden = false;
 				}
 				else {
 					accessed.hidden = true;
 				}
 			}
-			// Metadata for files
 			else {
-				urlField.hidden = true;
 				accessed.hidden = true;
 			}
 			
-			if (this.item.attachmentLinkMode
-						!= Zotero.Attachments.LINK_MODE_LINKED_URL
-					&& this.displayFileName) {
-				var fileName = this.item.attachmentFilename;
+			if (this.displayFileName && !isLinkedURL) {
+				let fileName = "";
+				try {
+					fileName = this.item.attachmentFilename;
+				}
+				catch (e) {
+					Zotero.warn("Error getting attachment filename: " + e);
+				}
 				
 				if (fileName) {
-					this._id("fileName-label").value = Zotero.getString('pane.item.attachments.filename')
-						+ Zotero.getString('punctuation.colon');
 					this._id("fileName").value = fileName;
 					fileNameRow.hidden = false;
 				}
@@ -347,17 +380,16 @@
 			else {
 				fileNameRow.hidden = true;
 			}
-			
+			this._id("fileName").toggleAttribute("readonly", (!this.editable || !fileExists));
+
 			// Page count
-			if (this.displayPages) {
+			if (this.displayPages && this._item.isPDFAttachment()) {
 				Zotero.Fulltext.getPages(this.item.id)
 				.then(function (pages) {
 					if (!this.item) return;
 					
 					pages = pages ? pages.total : null;
 					if (pages) {
-						this._id("pages-label").value = Zotero.getString('itemFields.pages')
-							+ Zotero.getString('punctuation.colon');
 						this._id("pages").value = pages;
 						pagesRow.hidden = false;
 					}
@@ -370,9 +402,7 @@
 				pagesRow.hidden = true;
 			}
 			
-			if (this.displayDateModified) {
-				this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')
-					+ Zotero.getString('punctuation.colon');
+			if (this.displayDateModified && fileExists && !this._item.isWebAttachment()) {
 				// Conflict resolution uses a modal window, so promises won't work, but
 				// the sync process passes in the file mod time as dateModified
 				if (this.synchronous) {
@@ -398,38 +428,25 @@
 			}
 			
 			// Full-text index information
-			if (this.displayIndexed) {
+			if (this.displayIndexed && fileExists && await Zotero.FullText.canIndex(this.item)) {
 				this.updateItemIndexedState()
-				.then(function () {
-					if (!this.item) return;
-					indexStatusRow.hidden = false;
-				}.bind(this));
+					.then(function () {
+						if (!this.item) return;
+						indexStatusRow.hidden = false;
+					}.bind(this));
 			}
 			else {
 				indexStatusRow.hidden = true;
 			}
 			
-			var noteEditor = this._id('attachment-note-editor');
-			
-			if (this.displayNote && (this.displayNoteIfEmpty || this.item.note != '')) {
-				noteEditor.linksOnTop = true;
-				noteEditor.hidden = false;
-				
-				// Don't make note editable (at least for now)
-				if (this.mode == 'merge' || this.mode == 'mergeedit') {
-					noteEditor.mode = 'merge';
-					noteEditor.displayButton = false;
-				}
-				else {
-					noteEditor.mode = this.mode;
-				}
-				noteEditor.parent = null;
-				noteEditor.item = this.item;
+			// Make the image of the reindex toolbarbutton focusable because for some reason the
+			// actual toolbarbutton does not receive focus on tab
+			let reindexButton = indexStatusRow.querySelector("toolbarbutton");
+			if (document.activeElement !== reindexButton) {
+				reindexButton.querySelector("image").setAttribute("tabindex", "0");
 			}
-			else {
-				noteEditor.hidden = true;
-			}
-			noteEditor.viewMode = 'library';
+
+			this.initAttachmentNoteEditor();
 			
 			if (this.displayButton) {
 				selectButton.label = this.buttonCaption;
@@ -440,104 +457,7 @@
 			else {
 				selectButton.hidden = true;
 			}
-		}
-
-		async editTitle() {
-			var item = this.item;
-			var oldTitle = item.getField('title');
-			
-			var nsIPS = Services.prompt;
-			
-			var newTitle = { value: oldTitle };
-			var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
-			
-			while (true) {
-				// Don't show "Rename associated file" option for
-				// linked URLs
-				if (item.attachmentLinkMode ==
-						Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					var result = nsIPS.prompt(
-						window,
-						'',
-						Zotero.getString('pane.item.attachments.rename.title'),
-						newTitle,
-						null,
-						{}
-					);
-					
-					// If they hit cancel or left it blank
-					if (!result || !newTitle.value) {
-						return;
-					}
-					
-					break;
-				}
-				
-				var result = nsIPS.prompt(
-					window,
-					'',
-					Zotero.getString('pane.item.attachments.rename.title'),
-					newTitle,
-					Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
-					checkState
-				);
-
-				// If they hit cancel or left it blank
-				if (!result || !newTitle.value) {
-					return;
-				}
-				
-				Zotero.Prefs.set('lastRenameAssociatedFile', checkState.value);
-				
-				// Rename associated file
-				if (checkState.value) {
-					var newFilename = newTitle.value.trim();
-					if (newFilename.search(/\.\w{1,10}$/) == -1) {
-						// User did not specify extension. Use current
-						var oldExt = item.getFilename().match(/\.\w{1,10}$/);
-						if (oldExt) newFilename += oldExt[0];
-					}
-					var renamed = await item.renameAttachmentFile(newFilename);
-					if (renamed == -1) {
-						var confirmed = nsIPS.confirm(
-							window,
-							'',
-							newFilename + ' exists. Overwrite existing file?'
-						);
-						if (!confirmed) {
-							// If they said not to overwrite existing file,
-							// start again
-							continue;
-						}
-						
-						// Force overwrite, but make sure we check that this doesn't fail
-						renamed = await item.renameAttachmentFile(newFilename, true);
-					}
-					
-					if (renamed == -2) {
-						nsIPS.alert(
-							window,
-							Zotero.getString('general.error'),
-							Zotero.getString('pane.item.attachments.rename.error')
-						);
-						return;
-					}
-					else if (!renamed) {
-						nsIPS.alert(
-							window,
-							Zotero.getString('pane.item.attachments.fileNotFound.title'),
-							Zotero.getString('pane.item.attachments.fileNotFound.text1')
-						);
-					}
-				}
-				
-				break;
-			}
-			
-			if (newTitle.value != oldTitle) {
-				item.setField('title', newTitle.value);
-				await item.saveTx();
-			}
+			this._isRendering = false;
 		}
 
 		onViewClick(event) {
@@ -550,13 +470,13 @@
 
 		updateItemIndexedState() {
 			return (async () => {
-				var indexStatus = this._id('index-status');
-				var reindexButton = this._id('reindex');
+				let indexStatus = this._id('index-status');
+				let reindexButton = this._id('reindex');
 				
-				var status = await Zotero.Fulltext.getIndexedState(this.item);
+				let status = await Zotero.Fulltext.getIndexedState(this.item);
 				if (!this.item) return;
 				
-				var str = 'fulltext.indexState.';
+				let str = 'fulltext.indexState.';
 				switch (status) {
 					case Zotero.Fulltext.INDEX_STATE_UNAVAILABLE:
 						str += 'unavailable';
@@ -574,15 +494,13 @@
 						str = 'general.yes';
 						break;
 				}
-				this._id("index-status-label").value = Zotero.getString('fulltext.indexState.indexed')
-					+ Zotero.getString('punctuation.colon');
-				indexStatus.value = Zotero.getString(str);
+				indexStatus.textContent = Zotero.getString(str);
 				
 				// Reindex button tooltip (string stored in zotero.properties)
-				var str = Zotero.getString('pane.items.menu.reindexItem');
+				str = Zotero.getString('pane.items.menu.reindexItem');
 				reindexButton.setAttribute('tooltiptext', str);
 				
-				var show = false;
+				let show = false;
 				if (this.editable) {
 					show = await Zotero.Fulltext.canReindex(this.item);
 					if (!this.item) return;
@@ -596,6 +514,146 @@
 				}
 			})();
 		}
+
+		async editFileName(newFilename) {
+			if (!this._isEditingFilename) {
+				return;
+			}
+			let item = this.item;
+			// Rename associated file
+			let nsIPS = Services.prompt;
+			let getExtension = function (filename) {
+				const extRegex = /\.\w{1,10}$/;
+				if (extRegex.test(filename)) {
+					return filename.match(extRegex)[0];
+				}
+				return "";
+			};
+			newFilename = newFilename.trim();
+			let oldFilename = item.getFilename();
+			if (oldFilename === newFilename) {
+				return;
+			}
+			// Don't allow empty filename
+			if (!newFilename) {
+				this._forceRenderAll();
+				return;
+			}
+			let newExt = getExtension(newFilename);
+			let oldExt = getExtension(oldFilename);
+			if (!newExt && oldExt) {
+				// User did not specify extension. Use current
+				newFilename += oldExt;
+				newExt = oldExt;
+			}
+			if (newExt !== oldExt && oldExt) {
+				// User changed extension. Confirm
+				let index = Zotero.Prompt.confirm({
+					window,
+					title: Zotero.getString('general.warning'),
+					text: Zotero.getString('pane.item.attachments.rename.confirmExtChange.text1', [oldExt, newExt])
+						+ "\n\n"
+						+ Zotero.getString('pane.item.attachments.rename.confirmExtChange.text2', Zotero.appName),
+					button0: Zotero.getString('pane.item.attachments.rename.confirmExtChange.keep', oldExt),
+					button1: Zotero.getString('pane.item.attachments.rename.confirmExtChange.change', newExt),
+				});
+				if (index == 0) {
+					newFilename = newFilename.replace(/\.\w{1,10}$/, oldExt);
+				}
+			}
+			let renamed = await item.renameAttachmentFile(newFilename);
+			if (renamed == -1) {
+				let confirmed = nsIPS.confirm(
+					window,
+					'',
+					newFilename + ' exists. Overwrite existing file?'
+				);
+				if (!confirmed) {
+					// If they said not to overwrite existing file,
+					// do nothing
+					return;
+				}
+				
+				// Force overwrite, but make sure we check that this doesn't fail
+				renamed = await item.renameAttachmentFile(newFilename, true);
+			}
+			
+			if (renamed == -2) {
+				nsIPS.alert(
+					window,
+					Zotero.getString('general.error'),
+					Zotero.getString('pane.item.attachments.rename.error')
+				);
+			}
+			else if (!renamed) {
+				nsIPS.alert(
+					window,
+					Zotero.getString('pane.item.attachments.fileNotFound.title'),
+					Zotero.getString('pane.item.attachments.fileNotFound.text1')
+				);
+			}
+			this._forceRenderAll();
+		}
+
+		initAttachmentNoteEditor() {
+			let noteContainer = this._id('note-container');
+			let noteButton = this._id('note-button');
+			let noteEditor = this._id('attachment-note-editor');
+
+			if (!this.displayNote || this.item.note === '') {
+				noteContainer.hidden = true;
+				noteEditor.hidden = true;
+				noteButton.hidden = true;
+				return;
+			}
+
+			noteContainer.hidden = false;
+			noteButton.hidden = this.mode !== 'edit';
+			noteButton.setAttribute("data-l10n-args", `{"type": "${this.item.parentItem ? "child" : "standalone"}"}`);
+			noteEditor.hidden = false;
+			
+			// Don't make note editable (at least for now)
+			if (this.mode == 'merge' || this.mode == 'mergeedit') {
+				noteEditor.mode = 'merge';
+				noteEditor.displayButton = false;
+			}
+			else {
+				// Force read-only
+				noteEditor.mode = "view";
+			}
+			noteEditor.parent = null;
+			noteEditor.item = this.item;
+
+			noteEditor.viewMode = 'library';
+
+			// Force hide note editor tags & related
+			noteEditor._id('links-container').hidden = true;
+		}
+
+		async convertAttachmentNote() {
+			if (!this.item.note || this.mode !== "edit") {
+				return;
+			}
+			let newNote = new Zotero.Item('note');
+			newNote.libraryID = this.item.libraryID;
+			newNote.parentID = this.item.parentID;
+			newNote.setNote(this.item.note);
+			await newNote.saveTx();
+			this.item.setNote("");
+			await this.item.saveTx();
+		}
+
+		_handleMetaLabelClick = (event) => {
+			event.preventDefault();
+			
+			let labelWrapper = event.target.closest(".meta-label");
+			if (labelWrapper.nextSibling.contains(document.activeElement)) {
+				document.activeElement.blur();
+			}
+			else if (!labelWrapper.nextSibling.firstChild.readOnly) {
+				labelWrapper.nextSibling.firstChild.focus();
+			}
+		};
 
 		_id(id) {
 			return this.querySelector(`#${id}`);

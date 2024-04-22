@@ -1,4 +1,6 @@
 .import-wizard {
+	min-width: 600px;
+	min-height: 400px;
 	font-size: 12px;
 
 	radiogroup {
@@ -152,10 +154,11 @@
 
 	#mendeley-online-login-feedback {
 		text-align: center;
+		white-space: pre-wrap;
 		font-size: 13px;
 		margin-top: 1.3em;
-		color: red;
-		font-weight: bold;
+		color: var(--accent-orange);
+		font-weight: 600;
 	}
 
 	#import-progress {

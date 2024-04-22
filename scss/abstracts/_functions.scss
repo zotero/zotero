@@ -1,4 +1,54 @@
 //
 // Functions
 // --------------------------------------------------
+@use "sass:string";
 
+@function str-replace($string, $search, $replace: '') {
+    $index: str-index($string, $search);
+
+    @if $index {
+        @return str-slice($string, 1, $index - 1)+$replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
+    }
+
+    @return $string;
+}
+
+@function capitalize($string) {
+    @return to-upper-case(str-slice($string, 1, 1))+str-slice($string, 2);
+}
+
+@function camelCase($string) {
+    $string: quote(#{$string});
+    $progress: $string;
+    $result: "";
+
+    @while str-length($progress)>0 {
+        $char: str-slice($progress, 1, 1);
+
+        @if $char =="-" {
+            $progress: capitalize(str-slice($progress, 2, 2)) + str-slice($progress, 3);
+        }
+
+        @else {
+            $result: $result + $char;
+            $progress: str-slice($progress, 2);
+        }
+    }
+
+    @return $result;
+}
+
+@function another-side($side) {
+    @if $side == "bottom" {
+        @return "top";
+    }
+    @else if $side == "top" {
+        @return "bottom";
+    }
+    @else if $side == "left" {
+        @return "right";
+    }
+    @else if $side == "right" {
+        @return "left";
+    }
+}

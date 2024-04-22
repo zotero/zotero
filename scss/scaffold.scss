@@ -1,0 +1,177 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "themes/light";
+@import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
+
+$scaffold-toolbarbutton-icons: (
+		load: 'folder-open',
+		save: 'save',
+		saveToZotero: 'save-to-zotero',
+		detect: 'run-detect',
+		do: 'run-do',
+		template: 'plus'
+);
+
+@each $cls, $icon in $scaffold-toolbarbutton-icons {
+	#tb-#{$cls} {
+		@include svgicon-menu($icon, "universal", "20");
+	}
+};
+
+.menubar-container {
+	display: flex;
+	background: var(--material-sidepane);
+	border-bottom: var(--material-panedivider);
+
+	#main-menubar {
+		pointer-events: all;
+	}
+}
+
+#zotero-toolbar {
+	@media not (-moz-platform: macos) {
+		appearance: none;
+		background: var(--material-sidepane);
+	}
+	border-bottom: var(--material-panedivider);
+
+	toolbarbutton {
+		width: 28px;
+		height: 28px;
+		padding: 0 4px;
+		margin: 0 4px;
+		
+		.toolbarbutton-menu-dropmarker {
+			margin-inline-start: 4px;
+		}
+	}
+	
+	toolbarseparator {
+		appearance: none;
+		width: 1px;
+		height: 20px;
+		background-color: var(--fill-quinary);
+	}
+}
+
+#metadata-grid {
+	flex: 1;
+	display: grid;
+	align-content: start;
+	align-items: center;
+	grid-template-columns: max-content 1fr;
+}
+
+#metadata-grid > label:nth-child(2n + 1) {
+	justify-self: right;
+}
+
+.button-row {
+	display: grid;
+	grid-template-columns: 1fr max-content;
+}
+
+#metadata-bottom-row {
+	display: flex;
+	align-items: center;
+}
+
+#metadata-bottom-row #textbox-minVersion {
+	margin-right: auto;
+}
+
+#hbox-testFrame {
+	-moz-box-align: center;
+}
+
+richlistbox {
+	min-width: 200px;
+
+	richlistitem {
+		align-items: center;
+
+		> hbox {
+			display: block;
+		}
+	}
+}
+
+#zotero-toolbar toolbarseparator {
+	height: 18px;
+}
+
+browser,
+#appcontent
+{
+	background: var(--material-toolbar);
+}
+
+#appcontent {
+	padding: 16px;
+}
+
+vbox > splitter {
+	cursor: row-resize;
+}
+
+#left-tabbox {
+	flex: 1;
+	min-width: 500px;
+	margin: 5px;
+	overflow: clip;
+	
+	tabpanel {
+		display: flex;
+		width: 100%;
+		min-width: 0;
+	}
+}
+
+#checkboxes-translatorType {
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}
+
+#tabpanel-metadata label:first-child {
+	text-align: right;
+}
+
+#right-pane {
+	min-width: 350px;
+	margin: -16px -16px -16px 0px;
+	border-left: var(--material-panedivider);
+
+	#output {
+		width: 100%;
+		height: 100%;
+		background: var(--material-background);
+		outline: none;
+		border: 0;
+	}
+}
+
+#scaffold-load {
+	#listbox {
+		height: 300px;
+	}
+}
+
+#testing-listbox-container {
+	flex: 1;
+}
+
+#editor-tests {
+	flex: 2;
+}

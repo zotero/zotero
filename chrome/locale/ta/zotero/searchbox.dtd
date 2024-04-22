@@ -1,0 +1,25 @@
+<!ENTITY zotero.search.name "பெயர்:">
+
+<!ENTITY zotero.search.searchInLibrary "நூலகத்தில் தேடு:">
+
+<!ENTITY zotero.search.joinMode.prefix "பொருத்துக">
+<!ENTITY zotero.search.joinMode.any "ஏதேனும்">
+<!ENTITY zotero.search.joinMode.all "அனைத்தும்">
+<!ENTITY zotero.search.joinMode.suffix "பின்வருவனவற்றில்:">
+
+<!ENTITY zotero.search.recursive.label "துணைக் தொகுப்பைத் தேடுங்கள்">
+<!ENTITY zotero.search.noChildren "உயர்மட்ட உருப்படிகளை மட்டுமே காட்டு">
+<!ENTITY zotero.search.includeParentsAndChildren "பொருந்தக்கூடிய பொருட்களின் பெற்றோர் மற்றும் குழந்தை உருப்படிகளைச் சேர்க்கவும்">
+
+<!ENTITY zotero.search.textModes.phrase "சொற்றொடர்">
+<!ENTITY zotero.search.textModes.phraseBinary "சொற்றொடர் (இரும கோப்புகளை உள்ளடக்கியது)">
+<!ENTITY zotero.search.textModes.regexp "வழக்கவெளி">
+<!ENTITY zotero.search.textModes.regexpCS "வழக்கவெளி (வழக்கு-உணர்திறன்)">
+
+<!ENTITY zotero.search.date.units.days "நாட்களில்">
+<!ENTITY zotero.search.date.units.months "மாதங்கள்">
+<!ENTITY zotero.search.date.units.years "ஆண்டுகள்">
+
+<!ENTITY zotero.search.search "தேடல்">
+<!ENTITY zotero.search.clear "அழி">
+<!ENTITY zotero.search.saveSearch "தேடலைச் சேமி">

@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -100,7 +106,7 @@ menu-file-print =
     .label = Друкувати…
     .accesskey = к
 menu-file-import-from-another-browser =
-    .label = Імпорт даних з іншого браузера…
+    .label = Імпортувати з іншого браузера…
     .accesskey = І
 menu-file-go-offline =
     .label = Працювати автономно
@@ -141,6 +147,8 @@ menu-view-history-button =
     .label = Історія
 menu-view-synced-tabs-sidebar =
     .label = Синхронізовані вкладки
+menu-view-megalist-sidebar =
+    .label = Паролі
 menu-view-full-zoom =
     .label = Масштаб
     .accesskey = ш
@@ -221,8 +229,9 @@ menu-history-undo-menu =
     .label = Недавно закриті вкладки
 menu-history-undo-window-menu =
     .label = Недавно закриті вікна
-menu-history-reopen-all-tabs = Знову відкрити всі вкладки
-menu-history-reopen-all-windows = Знову відкрити всі вікна
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Шукати в історії
 
 ## Bookmarks Menu
 
@@ -231,14 +240,13 @@ menu-bookmarks-menu =
     .accesskey = З
 menu-bookmarks-manage =
     .label = Керувати закладками
-menu-bookmark-current-tab =
-    .label = Додати цю вкладку до закладок
-menu-bookmark-edit =
-    .label = Редагувати цю закладку
 menu-bookmark-tab =
     .label = Додати цю вкладку до закладок…
 menu-edit-bookmark =
     .label = Редагувати цю закладку…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Шукати закладки
 menu-bookmarks-all-tabs =
     .label = Додати до закладок усі вкладки…
 menu-bookmarks-toolbar =
@@ -291,8 +299,8 @@ menu-settings =
            *[other] ш
         }
 menu-tools-layout-debugger =
-    .label = Зневаджувач шаблона
-    .accesskey = ш
+    .label = Налагоджувач макета
+    .accesskey = м
 
 ## Window Menu
 
@@ -332,6 +340,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Вимкнути режим усунення проблем
     .accesskey = В
+menu-help-switch-device =
+    .label = Перехід на новий пристрій
+    .accesskey = х
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -340,3 +351,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Це не шахрайський сайт…
     .accesskey = н
+menu-report-broken-site =
+    .label = Повідомити про пошкоджений сайт

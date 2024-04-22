@@ -1,0 +1,157 @@
+// Prevent window background overflows window border
+#main-window {
+	background-color: initial;
+}
+
+// Prevent background flicker
+#browser {
+	background: var(--material-tabbar);
+}
+
+#titlebar {
+	height: var(--tab-min-height);
+	flex-direction: row;
+	-moz-box-pack: center;
+	pointer-events: none;
+	-moz-appearance: -moz-window-titlebar;
+}
+
+#zotero-title-bar {
+	border-top: 1px solid var(--toolbar-field-border-color);
+}
+
+#toolbar-menubar {
+	pointer-events: none;
+	visibility: visible;
+	// space for 30*30 icon
+	margin: 0 8px;
+	height: var(--tab-min-height);
+	appearance: none;
+	flex: 1;
+	color: CaptionText;
+}
+
+#toolbar-menubar:-moz-window-inactive {
+	color: InactiveCaptionText;
+}
+
+#menubar-items {
+	pointer-events: all;
+	-moz-window-dragging: drag;
+}
+
+#main-menubar {
+	height: var(--tab-min-height);
+}
+
+.titlebar-buttonbox {
+	pointer-events: all;
+	margin: 0 10px;
+}
+
+.titlebar-button {
+	position: static;
+	// Fix KDE rendering bug
+	z-index: 1;
+}
+
+.titlebar-icon-container {
+	display: none;
+}
+
+// Following rules from https://searchfox.org/mozilla-central/source/browser/themes/linux/browser.css
+
+/* The button box must appear on top of the navigator-toolbox in order for
+ * click and hover mouse events to work properly for the button in the restored
+ * window state. Otherwise, elements in the navigator-toolbox, like the menubar,
+ * can swallow those events. */
+.titlebar-buttonbox {
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	height: var(--tab-min-height);
+}
+
+/* Render titlebar command buttons according to system config.
+ * Use full scale icons here as the Gtk+ does. */
+.titlebar-min {
+	appearance: auto;
+	-moz-default-appearance: -moz-window-button-minimize;
+	order: env(-moz-gtk-csd-minimize-button-position);
+}
+.titlebar-max {
+	appearance: auto;
+	-moz-default-appearance: -moz-window-button-maximize;
+	order: env(-moz-gtk-csd-maximize-button-position);
+}
+.titlebar-restore {
+	appearance: auto;
+	-moz-default-appearance: -moz-window-button-restore;
+	order: env(-moz-gtk-csd-maximize-button-position);
+}
+.titlebar-close {
+	appearance: auto;
+	-moz-default-appearance: -moz-window-button-close;
+	order: env(-moz-gtk-csd-close-button-position);
+}
+
+/* When using lightweight themes, use our own buttons since native ones might
+ * assume a native background in order to be visible. */
+.titlebar-button:-moz-lwtheme {
+	appearance: none;
+	border-radius: 100%;
+}
+.titlebar-button > .toolbarbutton-icon:-moz-lwtheme {
+	padding: 6px;
+	-moz-context-properties: stroke;
+	stroke: currentColor;
+}
+.titlebar-min:-moz-lwtheme {
+	list-style-image: url(chrome://browser/skin/window-controls/minimize.svg);
+}
+.titlebar-max:-moz-lwtheme {
+	list-style-image: url(chrome://browser/skin/window-controls/maximize.svg);
+}
+.titlebar-restore:-moz-lwtheme {
+	list-style-image: url(chrome://browser/skin/window-controls/restore.svg);
+}
+.titlebar-close:-moz-lwtheme {
+	list-style-image: url(chrome://browser/skin/window-controls/close.svg);
+}
+.titlebar-button:-moz-lwtheme:hover {
+	background-color: color-mix(in srgb, currentColor 12%, transparent);
+}
+.titlebar-button:-moz-lwtheme:hover:active {
+	background-color: color-mix(in srgb, currentColor 20%, transparent);
+}
+.titlebar-close:-moz-lwtheme:hover {
+	background-color: #d70022;
+	color: white;
+}
+.titlebar-close:-moz-lwtheme:hover:active {
+	background-color: #ff0039;
+}
+
+@media (not (-moz-gtk-csd-minimize-button)) {
+	.titlebar-min {
+	display: none;
+	}
+}
+@media (not (-moz-gtk-csd-maximize-button)) {
+	.titlebar-restore,
+	.titlebar-max {
+	display: none;
+	}
+}
+@media (not (-moz-gtk-csd-close-button)) {
+	.titlebar-close {
+	display: none;
+	}
+}
+
+@media (-moz-gtk-csd-reversed-placement) {
+	.titlebar-buttonbox {
+		order: -1;
+		margin-right: 0;
+	}
+}

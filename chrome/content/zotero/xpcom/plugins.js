@@ -157,14 +157,19 @@ Zotero.Plugins = new function () {
 		
 		scopes.set(addon.id, scope);
 		
-		var uri = addon.getResourceURI().spec + 'bootstrap.js';
-		Services.scriptloader.loadSubScriptWithOptions(
-			uri,
-			{
-				target: scope,
-				ignoreCache: true
-			}
-		);
+		try {
+			let uri = addon.getResourceURI().spec + 'bootstrap.js';
+			Services.scriptloader.loadSubScriptWithOptions(
+				uri,
+				{
+					target: scope,
+					ignoreCache: true
+				}
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	

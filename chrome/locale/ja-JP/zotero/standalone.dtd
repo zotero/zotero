@@ -63,11 +63,7 @@
 <!ENTITY addons.label "アドオン">
 <!ENTITY developer.label "開発者">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "しまう">
 <!ENTITY bringAllToFront.label "すべてを前面に">
-<!ENTITY zoomWindow.label "拡大">
-<!ENTITY windowMenu.label "ウインドウ">
 
 <!ENTITY helpMenu.label "ヘルプ">
 <!ENTITY helpMenu.accesskey "H">

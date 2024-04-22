@@ -32,16 +32,16 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
+	id="edit-bibliography-dialog"
+	class="contain-richlistbox"
 	orient="vertical"
 	title="&zotero.integration.editBibliography.title;"
-	width="750" height="450"
 	onload="Zotero_Bibliography_Dialog.load();"
 	onclose="Zotero_Bibliography_Dialog.close();"
 	onunload="doUnload();"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	persist="screenX screenY width height"
-	resizable="true">
+	persist="screenX screenY width height">
 <dialog
 	id="zotero-edit-bibliography-dialog"
 	buttons="extra1,extra2,accept,cancel" buttonpack="end">
@@ -51,46 +51,40 @@
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+
 		Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/editBibliographyDialog.js", this);
-
-		// Custom elements
-		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/quickSearchTextbox.js", this);
 	</script>
 	
 	<vbox id="zotero-select-items-container" flex="1">
-		<vbox flex="1">
-			<hbox flex="1">
-				<vbox align="stretch" flex="1">
-					<hbox align="center" pack="end">
-						<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
-					</hbox>
-					<hbox flex="1" style="margin-top: 5px">
-						<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 150px">
-							<html:div id="zotero-collections-tree" class="edit-bibl"></html:div>
-						</vbox>
-
-						<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
-							<html:div id="zotero-items-tree"></html:div>
-						</hbox>
-					</hbox>
-				</vbox>
-						
-				<hbox id="source-list">
-					<vbox align="center" pack="center" id="citation-buttons">
-						<toolbarbutton id="add" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true"/>
-						<toolbarbutton id="remove" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true"/>
-					</vbox>
-					<vbox>
-						<label value="&zotero.integration.references.label;"/>
-						<richlistbox id="item-list" flex="1" align="stretch" seltype="multiple"
-							style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"
-							onchanged="Zotero_Bibliography_Dialog.textChanged()"/>
-					</vbox>
+		<hbox flex="1">
+			<vbox align="stretch" flex="1">
+				<hbox align="center" pack="end">
+					<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
 				</hbox>
-			</hbox>
-		</vbox>
+				<hbox flex="1" style="margin-top: 5px">
+					<vbox id="zotero-collections-tree-container" class="virtualized-table-container">
+						<html:div id="zotero-collections-tree" class="edit-bibl"></html:div>
+					</vbox>
+					<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
+						<html:div id="zotero-items-tree"></html:div>
+					</hbox>
+				</hbox>
+			</vbox>
+					
+			<vbox align="center" pack="center" id="citation-buttons">
+				<toolbarbutton id="add" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true"/>
+				<toolbarbutton id="remove" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true"/>
+			</vbox>
+			<vbox>
+				<label value="&zotero.integration.references.label;"/>
+				<richlistbox id="item-list" flex="1" align="stretch" seltype="multiple"
+							 style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"
+							 onchanged="Zotero_Bibliography_Dialog.textChanged()"/>
+			</vbox>
+		</hbox>
 		
 		<iframe id="editor" src="simpleEditor.html" flex="1" type="content" remote="false" maychangeremoteness="false"/>
 		<description id="zotero-editor-warning" style="margin: 9px 1px 0">&zotero.citation.editorWarning.label;</description>

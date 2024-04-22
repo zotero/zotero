@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -207,8 +213,6 @@ menu-history-undo-menu =
     .label = File închise recent
 menu-history-undo-window-menu =
     .label = Ferestre închise recent
-menu-history-reopen-all-tabs = Redeschide toate filele
-menu-history-reopen-all-windows = Redeschise toate ferestrele
 
 ## Bookmarks Menu
 
@@ -217,10 +221,6 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = Gestionează marcajele
-menu-bookmark-current-tab =
-    .label = Marchează fila actuală
-menu-bookmark-edit =
-    .label = Editează acest marcaj
 menu-bookmark-tab =
     .label = Marchează fila actuală…
 menu-bookmarks-all-tabs =
@@ -316,6 +316,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Oprește modul de depanare
     .accesskey = M
+menu-help-switch-device =
+    .label = Comutarea pe un dispozitiv nou
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -324,3 +327,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Nu este un site înșelător…
     .accesskey = d
+menu-report-broken-site =
+    .label = Raportează un site nefuncțional

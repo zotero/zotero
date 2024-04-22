@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -150,7 +156,7 @@ menu-view-full-zoom-reduce =
     .label = Redueix
     .accesskey = d
 menu-view-full-zoom-actual-size =
-    .label = Mida Real
+    .label = Mida real
     .accesskey = M
 menu-view-full-zoom-toggle =
     .label = Amplia només el text
@@ -209,7 +215,7 @@ menu-history =
 menu-history-show-all-history =
     .label = Mostra tot l'historial
 menu-history-clear-recent-history =
-    .label = Neteja l'historial recent…
+    .label = Esborra l'historial recent…
 menu-history-synced-tabs =
     .label = Pestanyes sincronitzades
 menu-history-restore-last-session =
@@ -220,8 +226,9 @@ menu-history-undo-menu =
     .label = Pestanyes tancades recentment
 menu-history-undo-window-menu =
     .label = Finestres tancades recentment
-menu-history-reopen-all-tabs = Torna a obrir totes les pestanyes
-menu-history-reopen-all-windows = Torna a obrir totes les finestres
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Cerca en l'historial
 
 ## Bookmarks Menu
 
@@ -230,14 +237,13 @@ menu-bookmarks-menu =
     .accesskey = r
 menu-bookmarks-manage =
     .label = Gestiona les adreces d'interès
-menu-bookmark-current-tab =
-    .label = Afegeix la pestanya actual a les adreces d'interès
-menu-bookmark-edit =
-    .label = Edita aquesta adreça d'interès
 menu-bookmark-tab =
     .label = Afegeix la pestanya actual a les adreces d'interès…
 menu-edit-bookmark =
     .label = Edita aquesta adreça d'interès…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Cerca en les adreces d'interès
 menu-bookmarks-all-tabs =
     .label = Afegeix-hi totes les pestanyes…
 menu-bookmarks-toolbar =
@@ -331,6 +337,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Desactiva el mode de resolució de problemes
     .accesskey = m
+menu-help-switch-device =
+    .label = Canvia a un dispositiu nou
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -339,3 +348,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = No és cap lloc enganyós…
     .accesskey = N
+menu-report-broken-site =
+    .label = Informeu sobre un lloc que no funciona

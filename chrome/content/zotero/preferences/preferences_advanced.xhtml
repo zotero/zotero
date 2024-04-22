@@ -25,8 +25,6 @@
 
 <vbox id="zotero-prefpane-advanced" onload="Zotero_Preferences.Advanced.init()">
 	<vbox class="main-section" id="zotero-prefpane-advanced-general-tab">
-		<html:h1>&zotero.preferences.prefpane.general;</html:h1>
-
 		<groupbox id="zotero-prefpane-advanced-miscellaneous">
 			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
@@ -38,6 +36,16 @@
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 		</groupbox>
+
+		<groupbox>
+			<label><html:h2 data-l10n-id="preferences-advanced-language-and-region-title"/></label>
+
+			<checkbox
+				data-l10n-id="preferences-advanced-enable-bidi-ui"
+				preference="bidi.browser.ui"
+				native="true"
+			/>
+		</groupbox>
 	</vbox>
 	
 	<vbox class="main-section">
@@ -46,9 +54,8 @@
 		<groupbox>
 			<label><html:h2>&zotero.preferences.attachmentBaseDir.caption;</html:h2></label>
 			
-			<!-- This doesn't wrap without an explicit width -->
 			<vbox>
-				<description style="width: 45em;">&zotero.preferences.attachmentBaseDir.message;</description>
+				<description>&zotero.preferences.attachmentBaseDir.message;</description>
 			</vbox>
 			
 			<hbox align="center">
@@ -81,9 +88,9 @@
 				<hbox>
 					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
 					<html:input type="text" id="data-dir-path" preference="extensions.zotero.dataDir"
-						readonly="true" style="-moz-box-flex: 1;"/>
+						readonly="true" style="flex: 1"/>
 					<button label="&zotero.preferences.dataDir.choose;"
-						oncommand="return Zotero_Preferences.Advanced.chooseDataDir(event)"/>
+						oncommand="return Zotero_Preferences.Advanced.chooseDataDir()"/>
 				</hbox>
 			</radiogroup>
 			

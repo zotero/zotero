@@ -99,16 +99,13 @@ Zotero.defineProperty(Zotero.Search.prototype, '_canHaveParent', {
 
 Zotero.defineProperty(Zotero.Search.prototype, 'treeViewID', {
 	get: function () {
-		return "S" + this.id
+		return "S" + this.id;
 	}
 });
 
 Zotero.defineProperty(Zotero.Search.prototype, 'treeViewImage', {
 	get: function () {
-		if (Zotero.isMac) {
-			return `chrome://zotero-platform/content/treesource-search${Zotero.hiDPISuffix}.png`;
-		}
-		return "chrome://zotero/skin/treesource-search" + Zotero.hiDPISuffix + ".png";
+		return "chrome://zotero/skin/16/universal/saved-search.svg";
 	}
 });
 

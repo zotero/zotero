@@ -1,0 +1,59 @@
+note-row {
+	display: flex;
+	flex-direction: column;
+	
+	border-radius: 5px;
+	border: 1px solid var(--color-quinary-on-sidepane);
+	background: var(--material-background);
+
+	&:active {
+		background-color: var(--accent-blue10);
+	}
+
+	.head, .body {
+		padding: 2px 8px;
+		
+		@include comfortable {
+			padding-block: 4px;
+		}
+	}
+	
+	.head {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		border-bottom: 1px solid var(--fill-quinary);
+		
+		.icon {
+			flex-shrink: 0;
+		}
+		
+		.parent-title {
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+			color: var(--fill-secondary);
+		}
+	}
+	
+	.body {
+		display: flex;
+		flex-direction: column;
+		
+		@include comfortable {
+			gap: 2px;
+		}
+		
+		.note-title {
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+			font-weight: 600;
+		}
+		
+		.note-date {
+			float: right;
+			color: var(--fill-secondary);
+		}
+	}
+}

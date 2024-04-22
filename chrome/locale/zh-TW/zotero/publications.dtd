@@ -1,19 +1,19 @@
 <!ENTITY zotero.publications.my_publications "我的著作">
 
-<!ENTITY zotero.publications.intro "您所新增到我的著作中的項目將於 zotero.org 上您的個人頁面中顯示。如果您選擇加入附件檔案，這些檔案將以您所指定的許可協議下公開使人存取，請真的僅新增您的著作，並僅加入您所擁有著作權且願意分享的檔案。">
-<!ENTITY zotero.publications.include.checkbox.files "包括檔案">
-<!ENTITY zotero.publications.include.checkbox.notes "包括筆記">
+<!ENTITY zotero.publications.intro "您所新增到我的著作中的項目將在 zotero.org 上您的個人頁面中顯示。如果您選擇包含附件檔案，這些檔案將在您所指定的許可協議下開放存取。請僅新增您自己創作的著作，並僅加入您所擁有著作權且願意分享的檔案。">
+<!ENTITY zotero.publications.include.checkbox.files "包含檔案">
+<!ENTITY zotero.publications.include.checkbox.notes "包含筆記">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "您可以隨時從「我的著作」文獻集中調整所要的顯示。">
 
 <!ENTITY zotero.publications.sharing.title "選擇您分享著作的方式">
-<!ENTITY zotero.publications.sharing.text "您可以保留您對您作品的所有權利，可以在創用CC授權協議下授權，也可以將其專用於公共領域。在所有狀況下，這些著作都可以透過zotero.org公開取得。">
+<!ENTITY zotero.publications.sharing.text "您可以保留您對您作品的所有權利，可以在創用CC授權協議下授權，也可以將其貢獻到公共領域。在所有狀況下，這些著作都可以透過zotero.org公開取得。">
 <!ENTITY zotero.publications.sharing.prompt "您想允許您的著作被分享給他人嗎？">
-<!ENTITY zotero.publications.sharing.cc "是的，基於創用 CC 授權協議">
-<!ENTITY zotero.publications.sharing.cc0 "是的，並將我的著作放入公有領域">
-<!ENTITY zotero.publications.sharing.reserved "不，只在 zotero.org 公開我的著作">
+<!ENTITY zotero.publications.sharing.cc "是的，基於創用CC授權協議">
+<!ENTITY zotero.publications.sharing.cc0 "是的，並將我的著作放入公共領域">
+<!ENTITY zotero.publications.sharing.reserved "不，只在zotero.org公開我的著作">
 
-<!ENTITY zotero.publications.chooseLicense.title "選擇創用 CC 授權協議">
-<!ENTITY zotero.publications.chooseLicense.text "創用 CC 授權協議允許他人複製與散布您的著作，只要他們適當地表明原始貢獻者，在授權協議中提供連結，並且指明是否做過異動。附帶條件可如下指定。">
+<!ENTITY zotero.publications.chooseLicense.title "選擇創用CC授權協議">
+<!ENTITY zotero.publications.chooseLicense.text "創用CC授權協議允許他人複製與散布您的著作，只要他們適當地表明原始貢獻者，在授權協議中提供連結，並且指明是否做過異動。附帶條件可於下方指定。">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "是否允許分享基於您著作的改編作品呢？">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "是的，只要如同他人分享的那樣">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "是的，只要他人以同樣的方式分享">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "允許您的著作被作為商業用途嗎？">

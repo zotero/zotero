@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 var Zotero_Bibliography_Dialog = new function () {
 	var bibEditInterface;
 	var _lastSelectedItemID = false;
@@ -57,13 +59,13 @@ var Zotero_Bibliography_Dialog = new function () {
 		window.addEventListener('dialogcancel', () => Zotero_Bibliography_Dialog.close());
 
 		_editor = document.querySelector('#editor').contentWindow.editor;
+		
+		// load (from selectItemsDialog.js)
+		await doLoad();
 
 		if (!io.itemTreeID) {
 			io.itemTreeID = "edit-bib-select-item-dialog";
 		}
-		
-		// load (from selectItemsDialog.js)
-		await doLoad();
 		
 		// load bibliography entries
 		_loadItems();
@@ -155,8 +157,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Clears all customizations
 	 */
 	this.revertAll = function() {
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var out = {};
 		var regenerate = promptService.confirmEx(
@@ -179,8 +180,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Clears customizations to selected entry
 	 */
 	this.revert = function() {
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
+		var promptService = Services.prompt;
 		
 		var out = {};
 		var regenerate = promptService.confirmEx(
@@ -212,8 +212,7 @@ var Zotero_Bibliography_Dialog = new function () {
 			isCited |= bibEditInterface.isCited(itemID);
 		}
 		if(isCited) {			
-			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-											.getService(Components.interfaces.nsIPromptService);
+			var promptService = Services.prompt;
 			
 			var out = {};
 			var regenerate = promptService.confirmEx(
@@ -325,8 +324,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		for(var i=0; i<items.length; i++) {
 			var itemNode = document.createXULElement("richlistitem");
 			itemNode.setAttribute("value", i);
-			let image = document.createXULElement('image');
-			image.src = items[i].getImageSrc();
+			let image = getCSSItemTypeIcon(items[i].getItemTypeIconName());
 			itemNode.append(image);
 			itemNode.append(items[i].getDisplayTitle());
 			itemNode.setAttribute("class", "listitem-iconic");

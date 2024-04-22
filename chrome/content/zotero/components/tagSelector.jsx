@@ -29,7 +29,7 @@ const React = require('react');
 const PropTypes = require('prop-types');
 const TagList = require('./tagSelector/tagSelectorList');
 const { Button } = require('./button');
-const { IconTagSelectorMenu } = require('./icons');
+const { CSSIcon } = require('./icons');
 const Search = require('./search');
 
 class TagSelector extends React.PureComponent {
@@ -41,26 +41,32 @@ class TagSelector extends React.PureComponent {
 					tags={this.props.tags}
 					dragObserver={this.props.dragObserver}
 					onSelect={this.props.onSelect}
+					onKeyDown={this.props.onKeyDown}
 					onTagContext={this.props.onTagContext}
 					loaded={this.props.loaded}
 					width={this.props.width}
 					height={this.props.height}
 					fontSize={this.props.fontSize}
+					lineHeight={this.props.lineHeight}
+					uiDensity={this.props.uiDensity}
 				/>
-				<div className="tag-selector-filter-container">
-					<Search
-						ref={this.props.searchBoxRef}
-						value={this.props.searchString}
-						onSearch={this.props.onSearch}
-						className="tag-selector-filter"
-					/>
-					<Button
-						icon={<IconTagSelectorMenu />}
-						title="zotero.toolbar.actions.label"
-						className="tag-selector-actions"
-						isMenu
-						onMouseDown={ev => this.props.onSettings(ev)}
-					/>
+				<div className="tag-selector-filter-pane">
+					<div className="tag-selector-filter-container">
+						<Search
+							ref={this.props.searchBoxRef}
+							value={this.props.searchString}
+							onSearch={this.props.onSearch}
+							className="tag-selector-filter"
+							data-l10n-id="tagselector-search"
+						/>
+						<Button
+							icon={<CSSIcon name="filter" className="icon-16" />}
+							title="zotero.toolbar.actions.label"
+							className="tag-selector-actions"
+							isMenu
+							onClick={ev => this.props.onSettings(ev)}
+						/>
+					</div>
 				</div>
 			</div>
 		);
@@ -83,11 +89,14 @@ TagSelector.propTypes = {
 		onDrop: PropTypes.func
 	}),
 	onSelect: PropTypes.func,
+	onKeyDown: PropTypes.func,
 	onTagContext: PropTypes.func,
 	loaded: PropTypes.bool,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	fontSize: PropTypes.number.isRequired,
+	lineHeight: PropTypes.number.isRequired,
+	uiDensity: PropTypes.string.isRequired,
 	
 	// Search
 	searchBoxRef: PropTypes.object,

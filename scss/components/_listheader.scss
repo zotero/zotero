@@ -1,0 +1,56 @@
+/* Adapted from Mozilla common-shared.css */
+/* https://searchfox.org/mozilla-central/rev/2f5ed7b7244172d46f538051250b14fb4d8f1a5f/toolkit/themes/shared/in-content/common-shared.css */
+
+select[size][multiple],
+listheader,
+richlistbox {
+	appearance: none;
+	margin-inline: 0;
+	background: var(--material-background);
+	border: var(--material-panedivider);
+}
+
+treecol {
+	appearance: none;
+	border: none;
+
+    background: transparent;
+
+    &:hover {
+        background: var(--material-mix-quinary);
+    }
+
+    &:hover:active {
+        background: var(--material-mix-quarternary);
+    }
+}
+
+listheader + richlistbox {
+	margin-top: 0;
+	border-top: none;
+}
+
+select[size][multiple] > option,
+treechildren::-moz-tree-row {
+	padding: 0.3em;
+	margin: 0;
+	border: none;
+	background-image: none;
+}
+
+richlistitem hbox {
+	overflow: hidden;
+}
+
+richlistitem[selected] menulist:focus-visible {
+	outline-offset: -2px;
+}
+
+richlistbox[disabled] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+dialog richlistbox > richlistitem[disabled] {
+	font-weight: 600;
+}

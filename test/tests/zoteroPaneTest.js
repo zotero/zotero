@@ -18,21 +18,19 @@ describe("ZoteroPane", function() {
 	describe("#newItem", function () {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textboxes = itemBox.querySelectorAll('input, textarea');
-			assert.lengthOf(textboxes, 1);
-			assert.equal(textboxes[0].getAttribute('fieldname'), 'title');
-			textboxes[0].blur();
+			let title = doc.getElementById('zotero-item-pane-header').querySelector("editable-text");
+			assert.equal(doc.activeElement.getAttribute("aria-label"), title.getAttribute("aria-label"));
+			title.blur();
 			yield Zotero.Promise.delay(1);
 		})
 		
 		it("should save an entered value when New Item is used", function* () {
 			var value = "Test";
 			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textbox = itemBox.querySelector('textarea');
-			textbox.value = value;
-			yield itemBox.blurOpenField();
+			let header = doc.getElementById('zotero-item-pane-header');
+			let title = header.querySelector("editable-text");
+			title.value = value;
+			yield header.save();
 			item = yield Zotero.Items.getAsync(item.id);
 			assert.equal(item.getField('title'), value);
 		})
@@ -59,7 +57,11 @@ describe("ZoteroPane", function() {
 	
 	describe("#newCollection()", function () {
 		it("should create a collection", function* () {
-			var promise = waitForDialog();
+			var promise = waitForDialog(
+				null,
+				'accept',
+				'chrome://zotero/content/newCollectionDialog.xhtml'
+			);
 			var id = yield zp.newCollection();
 			yield promise;
 			var collection = Zotero.Collections.get(id);
@@ -317,6 +319,29 @@ describe("ZoteroPane", function() {
 		it("should download an attachment on-demand in at-sync-time mode", function* () {
 			Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);
 			yield downloadOnDemand();
+		});
+		
+		it("should update a PDF with a blank MIME type", async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			// Can't use contentType argument to importFileAttachment() because blank string is ignored
+			attachment.attachmentContentType = '';
+			await attachment.saveTx();
+			await zp.viewAttachment(attachment.id);
+			assert.equal(attachment.attachmentContentType, 'application/pdf');
+		});
+		
+		it("should update an EPUB with an 'application/epub' MIME type", async function () {
+			let attachment = await importFileAttachment('stub.epub', { contentType: 'application/epub' });
+			assert.equal(attachment.attachmentContentType, 'application/epub');
+			await zp.viewAttachment(attachment.id);
+			assert.equal(attachment.attachmentContentType, 'application/epub+zip');
+		});
+		
+		it("should update an EPUB with an 'application/octet-stream' MIME type", async function () {
+			let attachment = await importFileAttachment('stub.epub', { contentType: 'application/octet-stream' });
+			assert.equal(attachment.attachmentContentType, 'application/octet-stream');
+			await zp.viewAttachment(attachment.id);
+			assert.equal(attachment.attachmentContentType, 'application/epub+zip');
 		});
 	})
 	
@@ -1409,19 +1434,21 @@ describe("ZoteroPane", function() {
 
 			let dialogStub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 				.returns('one');
-			let existsSpy = sinon.spy(OS.File, 'exists');
+			// No longer works with IOUtils
+			//let existsSpy = sinon.spy(IOUtils, 'exists');
 			await zp.checkForLinkedFilesToRelink(attachment);
 			assert.ok(dialogStub.calledOnce);
 			assert.ok(dialogStub.calledWith(attachment, sinon.match.string, 0));
-			assert.ok(existsSpy.calledWith(OS.Path.join(labdSubdir, 'test.pdf')));
-			assert.notOk(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf'))); // Should never get there
+			//Zotero.debug(existsSpy.calledWith(OS.Path.join(labdSubdir, 'test.pdf')));
+			//assert.ok(existsSpy.calledWith(OS.Path.join(labdSubdir, 'test.pdf')));
+			//assert.notOk(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf'))); // Should never get there
 
 			await assert.eventually.isTrue(attachment.fileExists());
 			assert.equal(attachment.getFilePath(), labdFile);
 			assert.equal(attachment.attachmentPath, 'attachments:subdir/test.pdf');
 
 			dialogStub.restore();
-			existsSpy.restore();
+			//existsSpy.restore();
 		});
 
 		it("should handle Windows paths", async function () {
@@ -1460,6 +1487,126 @@ describe("ZoteroPane", function() {
 			}
 
 			stub.restore();
+		});
+	});
+	
+	describe("#focus()", function () {
+		before(async function () {
+			var collection = new Zotero.Collection;
+			collection.name = "Focus Test";
+			await collection.saveTx();
+			// Make sure there is a tag
+			var item = new Zotero.Item('newspaperArticle');
+			item.setCollections([collection.id]);
+			await item.setTags(["Tag"]);
+			await item.saveTx({
+				skipSelect: true
+			});
+			await waitForItemsLoad(win);
+			await zp.collectionsView.selectLibrary(userLibraryID);
+		});
+
+		var tab = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			shiftKey: false,
+			bubbles: true
+		});
+
+		var shiftTab = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			shiftKey: true,
+			bubbles: true
+		});
+
+		var rightArrow = new KeyboardEvent('keydown', {
+			key: 'ArrowRight',
+			bubbles: true
+		});
+		var leftArrow = new KeyboardEvent('keydown', {
+			key: 'ArrowLeft',
+			bubbles: true
+		});
+
+		// Focus sequence for Zotero Pane
+		let sequence = [
+			"zotero-tb-search-dropmarker",
+			"zotero-tb-add",
+			"tag-selector-actions",
+			"search-input",
+			"tag-selector-item",
+			"collection-tree",
+			"zotero-collections-search",
+			"zotero-tb-collection-add",
+			"zotero-tb-sync",
+			"zotero-tb-tabs-menu"
+		];
+		it("should shift-tab across the zotero pane", async function () {
+			let searchBox = doc.getElementById('zotero-tb-search-textbox');
+			searchBox.focus();
+
+			for (let id of sequence) {
+				doc.activeElement.dispatchEvent(shiftTab);
+				// Wait for collection search to be revealed
+				if (id === "zotero-collections-search") {
+					await Zotero.Promise.delay(250);
+				}
+				// Some elements don't have id, so use classes to verify they're focused
+				if (doc.activeElement.id) {
+					assert.equal(doc.activeElement.id, id);
+				}
+				else {
+					let clases = [...doc.activeElement.classList];
+					assert.include(clases, id);
+				}
+				// Wait for collection search to be hidden for subsequent tests
+				if (id === "zotero-tb-collection-add") {
+					await Zotero.Promise.delay(50);
+				}
+			}
+			doc.activeElement.dispatchEvent(shiftTab);
+			assert.equal(doc.activeElement.className, "tab selected");
+
+			doc.activeElement.dispatchEvent(shiftTab);
+			assert.equal(doc.activeElement.id, "item-tree-main-default");
+		});
+
+		it("should tab across the zotero pane", async function () {
+			win.Zotero_Tabs.moveFocus("current");
+			sequence.reverse();
+			for (let id of sequence) {
+				doc.activeElement.dispatchEvent(tab);
+				// Wait for collection search to be revealed
+				if (id === "zotero-collections-search") {
+					await Zotero.Promise.delay(250);
+				}
+				// Some elements don't have id, so use classes to verify they're focused
+				if (doc.activeElement.id) {
+					assert.equal(doc.activeElement.id, id);
+				}
+				else {
+					let clases = [...doc.activeElement.classList];
+					assert.include(clases, id);
+				}
+			}
+		});
+
+		it("should navigate toolbarbuttons with arrows", async function () {
+			let addItem = doc.getElementById('zotero-tb-add');
+			addItem.focus();
+			
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-attachment-add");
+			doc.activeElement.dispatchEvent(rightArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-note-add");
+
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-attachment-add");
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-lookup");
+			doc.activeElement.dispatchEvent(leftArrow);
+			assert.equal(doc.activeElement.id, "zotero-tb-add");
 		});
 	});
 })

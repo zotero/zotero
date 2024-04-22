@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!--
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2020 Corporation for Digital Scholarship
+					 Vienna, Virginia, USA
+					http://zotero.org
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	id="new-collection-dialog"
+	class="zotero-dialog"
+	data-l10n-id="new-collection-dialog"
+	data-l10n-attrs="title"
+	width="350"
+	drawintitlebar-platforms="mac"
+	onload="Zotero_New_Collection_Dialog._handleLoad()"
+>
+	<script>
+		const { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
+		Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/titlebar.js', this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/newCollectionDialog.js', this);
+	</script>
+	
+	<linkset>
+		<html:link rel="localization" href="branding/brand.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+	</linkset>
+
+	<dialog
+		buttons="cancel,accept"
+		data-l10n-id="new-collection-dialog"
+		data-l10n-attrs="buttonlabelaccept"
+	>
+		<vbox>
+			<label data-l10n-id="new-collection-name" control="name"/>
+			<html:input id="name"/>
+		</vbox>
+		
+		<vbox>
+			<label data-l10n-id="new-collection-create-in" control="create-in"/>
+			<menulist id="create-in" native="true">
+				<menupopup id="zotero-new-collection-menu" />
+			</menulist>
+		</vbox>
+	</dialog>
+</window>

@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Nhà phát triển">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Thu nhỏ">
 <!ENTITY bringAllToFront.label "Đưa tất cả ra phía trước">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Cửa sổ">
 
 <!ENTITY helpMenu.label "Giúp đỡ">
 <!ENTITY helpMenu.accesskey "H">

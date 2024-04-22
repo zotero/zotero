@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "За замовчуванням:">
 <!ENTITY zotero.preferences.items "документа">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Налаштування">
 <!ENTITY zotero.preferences.custom "Користувацька...">
 
 <!ENTITY zotero.preferences.prefpane.general "Загальні">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Включити швидке копіювання при перетаскуванні більш ніж">
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитування">
-<!ENTITY zotero.preferences.cite.styles "Стилі">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстові редактори">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Використовувати стандартний спосіб Додавання цитат">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">

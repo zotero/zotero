@@ -144,7 +144,10 @@ var Zotero_Lookup = new function () {
 		);
 
 		if (newItems.length) {
+			// Send the focus to the item tree after the popup closes
+			ZoteroPane.lastFocusedElement = null;
 			document.getElementById("zotero-lookup-panel").hidePopup();
+			document.getElementById("item-tree-main-default").focus();
 		}
 		return false;
 	};
@@ -177,24 +180,6 @@ var Zotero_Lookup = new function () {
 		}
 		else {
 			this._button = null;
-		}
-	}
-	
-	
-	/**
-	 * Focuses the field
-	 */
-	this.onShowing = function (event) {
-		// Ignore context menu
-		if (event.originalTarget.id != 'zotero-lookup-panel') return;
-		
-		document.getElementById("zotero-lookup-panel").style.padding = "10px";
-		
-		// Resize arrow box to fit content
-		if (Zotero.isMac) {
-			let panel = document.getElementById("zotero-lookup-panel");
-			let box = panel.firstChild;
-			panel.sizeTo(box.scrollWidth, box.scrollHeight);
 		}
 	}
 	
@@ -276,13 +261,6 @@ var Zotero_Lookup = new function () {
 
 		mlTxtBox.rows = on ? 5 : 1;
 		mlButtons.hidden = !on;
-
-		// Resize arrow box to fit content -- also done in onShowing()
-		if(Zotero.isMac) {
-			var panel = document.getElementById("zotero-lookup-panel");
-			var box = panel.firstChild;
-			panel.sizeTo(box.scrollWidth, box.scrollHeight);
-		}
 
 		return mlTxtBox;
 	};

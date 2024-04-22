@@ -1,0 +1,70 @@
+attachments-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+
+	.head {
+		.togglePreview {
+			display: none;
+		}
+	
+		&:hover {
+			.togglePreview {
+				display: unset;
+			}
+		}
+	}
+
+	&[data-use-preview] {
+		.togglePreview {
+			@include svgicon-menu('preview-hide', 'universal', '16');
+		}
+	}
+
+	&:not([data-use-preview]),
+	& > collapsible-section[empty] {
+		attachment-preview {
+			visibility: hidden;
+			display: none;
+		}
+
+		.togglePreview {
+			@include svgicon-menu('preview-show', 'universal', '16');
+		}
+	}
+	
+	& > collapsible-section > .body {
+		display: flex;
+		flex-direction: column;
+
+		attachment-preview {
+			opacity: 1;
+	
+			&[data-preview-status=fail] {
+				display: none;
+				opacity: 0;
+	
+				.icon {
+					opacity: 0;
+				}
+			}
+	
+			&[data-preview-status=loading] {
+				opacity: 0;
+			}
+		}
+
+		.attachments-container {
+			padding-left: 12px;
+			display: flex;
+			flex-direction: column;
+
+			@include comfortable {
+				gap: 4px;
+			}
+		}
+	}
+}

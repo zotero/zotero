@@ -26,6 +26,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css" type="text/css"?>
@@ -39,29 +40,24 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
-	onkeypress="Zotero_QuickFormat.onKeyPress(event)"
+	onkeypress="Zotero_QuickFormat.onWindowKeyPress(event)"
 	onunload="Zotero_QuickFormat.onUnload()">
 	
 	<script src="../include.js"/>
-	<script src="windowDraggingUtils.js" type="text/javascript"/>
 	<script src="quickFormat.js" type="text/javascript"/>
 	<script src="insertNoteDialog.js" type="text/javascript"/>
 
+	<linkset>
+		<html:link rel="localization" href="zotero.ftl"/>
+	</linkset>
+	
 	<box orient="horizontal" class="citation-dialog entry">
 		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
-			<hbox class="citation-dialog search" flex="1" align="start">
+			<hbox class="citation-dialog main" flex="1" align="start">
 				<hbox flex="1">
-					<iframe
-						class="citation-dialog iframe"
-						ondragstart="event.stopPropagation()"
-						src="citationDialogIframe.html"
-						tabindex="1"
-						flex="1"
-						type="content"
-						remote="false"
-						maychangeremoteness="false"/>
-					<vbox class="citation-dialog spinner" style="visibility: hidden">
-						<image class="zotero-spinner-16"/>
+					<html:div flex="1" spellcheck="false" class="citation-dialog editor insert-note" role="application"></html:div>
+					<vbox class="citation-dialog icons end">
+						<image class="icon zotero-spinner-16"/>
 					</vbox>
 				</hbox>
 			</hbox>
@@ -69,7 +65,9 @@
 		</deck>
 	</box>
 	<panel class="citation-dialog reference-panel" noautofocus="true" norestorefocus="true"
-		   height="0" width="0">
+		   height="0" width="0" flip="none">
 		<richlistbox class="citation-dialog reference-list" flex="1"/>
 	</panel>
+	<html:div id="input-description" class="aria-hidden" role="tooltip" data-l10n-id="insert-note-aria-input"></html:div>
+	<html:div id="item-description" class="aria-hidden" role="tooltip" data-l10n-id="insert-note-aria-item"></html:div>
 </window>

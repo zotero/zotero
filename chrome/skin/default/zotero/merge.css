@@ -47,7 +47,7 @@ wizard > deck {
 
 #zotero-step-count label:first-child {
 	margin-left: 0;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 #zotero-step-count label {
@@ -56,7 +56,7 @@ wizard > deck {
 
 #zotero-step-count label:last-child {
 	margin-right: 1em;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 
@@ -80,7 +80,7 @@ merge-pane groupbox {
 merge-pane[selected=true] h2,
 merge-pane[selected=true] attachment-box #title {
 	color: red;
-	font-weight: bold;
+	font-weight: 600;
 	text-decoration: underline;
 }
 
@@ -89,11 +89,13 @@ merge-group:not([mergetype="note"]) #right-pane:active h2,
 merge-group:not([mergetype="note"]) #left-pane:active attachment-box #title,
 merge-group:not([mergetype="note"]) #right-pane:active attachment-box #title {
 	color: red;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 #left-pane:hover:not([selected=true]) h2,
-#right-pane:hover:not([selected=true]) h2 {
+#left-pane groupbox:focus:not([selected=true]) h2,
+#right-pane:hover:not([selected=true]) h2,
+#right-pane groupbox:focus:not([selected=true]) h2 {
 	text-decoration: underline;
 }
 
@@ -102,7 +104,7 @@ merge-pane .parent-row {
 }
 
 merge-pane .parent-row span {
-	font-weight: bold;
+	font-weight: 600;
 }
 
 merge-pane .delete-box {

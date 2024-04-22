@@ -1,0 +1,64 @@
+.zotero-item-pane-message-box description {
+	padding: 0 2em;
+	color: var(--fill-tertiary);
+}
+
+.zotero-item-pane-content > groupbox, .zotero-item-pane-content > groupbox > .groupbox-body
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.zotero-item-pane-content {
+	min-height: 0;
+	flex: 1;
+	min-width: $min-width-item-pane;
+	/* Need a min height to prevent layout issues in stacked mode */
+	min-height: 168px;
+	background: var(--material-sidepane);
+}
+
+.zotero-view-item-container {
+	display: flex;
+	flex-direction: row;
+	height: auto;
+}
+
+.zotero-view-item-main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	background: var(--material-sidepane);
+}
+
+.zotero-view-item {
+	position: relative;
+	flex: 1;
+	overflow-y: scroll;
+	padding: 0 8px;
+	overflow-anchor: none; /* Work around tags box causing scroll to jump - figure this out */
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+	display: flex;
+	flex-direction: column;
+	gap: 1px; /* Need gap for intersection computing */
+}
+
+.zotero-view-item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: var(--min-scroll-height);
+	pointer-events: none;
+}
+
+.zotero-view-item > * {
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.zotero-view-item > vbox
+{
+	margin-left: 5px;
+}

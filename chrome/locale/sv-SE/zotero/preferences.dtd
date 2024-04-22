@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Standardvärde:">
 <!ENTITY zotero.preferences.items "källor">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Inställningar">
 <!ENTITY zotero.preferences.custom "Anpassad...">
 
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Stäng av snabbkopiering om fler än ... filer är markerade.">
 
 <!ENTITY zotero.preferences.prefpane.cite "Källhänvisa">
-<!ENTITY zotero.preferences.cite.styles "Stilar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ordbehandlare">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Använd äldre dialogruta för att lägga till nya källor">
 <!ENTITY zotero.preferences.styleEditor "Stilredigerare">

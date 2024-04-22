@@ -72,8 +72,7 @@ Zotero.Sync.Data.Utilities = {
 			throw new Error("Unsupported library type " + libraryType);
 		}
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 			+ ps.BUTTON_DELAY_ENABLE;

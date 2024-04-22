@@ -61,8 +61,6 @@
 <!ENTITY scaffold.metadata.priority.default				"100">
 
 <!ENTITY scaffold.load.title							"Open Translator">
-<!ENTITY scaffold.load.label.label						"Label">
-<!ENTITY scaffold.load.creator.label					"Creator">
 
 <!ENTITY scaffold.editor.external.label					"Use external editor">
 
@@ -74,6 +72,7 @@
 <!ENTITY scaffold.testing.delete						"Delete">
 <!ENTITY scaffold.testing.run							"Run">
 <!ENTITY scaffold.testing.update						"Run and Update">
+<!ENTITY scaffold.testing.rememberCookies				"Remember cookies">
 <!ENTITY scaffold.testing.create.web					"Create Web Test">
 <!ENTITY scaffold.testing.create.import					"Create Import Test">
 <!ENTITY scaffold.testing.create.search					"Create Search Test">

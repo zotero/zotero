@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import { getCSSItemTypeIcon } from 'components/icons';
+
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Zotero_Citation_Dialog = new function () {
@@ -73,15 +75,19 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	this.load = Zotero.Promise.coroutine(function* () {
 		// make sure we are visible
-		window.setTimeout(function() {
-			var screenX = window.screenX;
-			var screenY = window.screenY;
-			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
-			var yRange = [window.screen.availTop, window.screen.height-window.outerHeight];
+		window.setTimeout(async function () {
+			let screenX = window.screenX, screenY = window.screenY, i = 5;
+			while (!screenX && i--) {
+				await new Promise(resolve => window.requestAnimationFrame(resolve));
+				screenX = window.screenX;
+				screenY = window.screenY;
+			}
+			var xRange = [window.screen.availLeft, window.screen.left + window.screen.width - window.outerWidth];
+			var yRange = [window.screen.availTop, window.screen.top + window.screen.height - window.outerHeight];
 			if(screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
 				var targetX = Math.max(Math.min(screenX, xRange[1]), xRange[0]);
 				var targetY = Math.max(Math.min(screenY, yRange[1]), yRange[0]);
-				Zotero.debug("Moving window to "+targetX+", "+targetY);
+				Zotero.debug(`Moving window to ${targetX}, ${targetY}`);
 				window.moveTo(targetX, targetY);
 			}
 		}, 0);
@@ -534,8 +540,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(_autoRegeneratePref == -1) {
 			if(focusShifted) {	// only ask after onchange event; oninput is too
 								// frequent for this to be worthwhile
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-												.getService(Components.interfaces.nsIPromptService);
+				var promptService = Services.prompt;
 				
 				var saveBehavior = { value: false };
 				var regenerate = promptService.confirmEx(
@@ -607,8 +612,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(isCustom) {	
 			var citation = _editor.getContent(true);
 			if(Zotero.Utilities.trim(citation) == "") {				
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService);
+				var promptService = Services.prompt;
 				var insert = promptService.confirm(window,
 					Zotero.getString("integration.emptyCitationWarning.title"),
 					Zotero.getString("integration.emptyCitationWarning.body"));
@@ -831,8 +835,7 @@ var Zotero_Citation_Dialog = new function () {
 		}
 
 		itemNode.setAttribute("value", itemDataID);
-		let image = document.createXULElement('image');
-		image.src = item.getImageSrc();
+		let image = getCSSItemTypeIcon(item.getItemTypeIconName());
 		itemNode.append(image);
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.append(item.getDisplayTitle());

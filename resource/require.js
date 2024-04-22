@@ -93,6 +93,8 @@ var require = (function() {
 		clearTimeout: win.clearTimeout,
 		requestAnimationFrame: win.setTimeout,
 		cancelAnimationFrame: win.clearTimeout,
+		IOUtils: IOUtils,
+		PathUtils: PathUtils,
 		TextEncoder: TextEncoder,
 		TextDecoder: TextDecoder,
 	};
@@ -104,9 +106,6 @@ var require = (function() {
 			'containers/': 'chrome://zotero/content/containers/',
 			'components/': 'chrome://zotero/content/components/',
 			'zotero/': 'chrome://zotero/content/',
-			// TEMP until plugins updated
-			// TODO: Possible to show a deprecation warning?
-			'zotero/filePicker': 'chrome://zotero/content/modules/filePicker',
 		},
 		globals
 	});

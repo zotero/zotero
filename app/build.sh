@@ -54,6 +54,19 @@ function cleanup {
 }
 trap cleanup EXIT
 
+function replace_line {
+	pattern=$1
+	replacement=$2
+	file=$3
+	
+	if egrep -q "$pattern" "$file"; then
+		perl -pi -e "s/$pattern/$replacement/" "$file"
+	else
+		echo "$pattern" not found in "$file" -- aborting 2>&1
+		exit 1
+	fi
+}
+
 function abspath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
@@ -213,21 +226,26 @@ cd "$app_dir"
 # Copy 'browser' files from Firefox
 #
 # omni.ja is left uncompressed within the Firefox application files by fetch_xulrunner
+#
+# TEMP: Also extract .hyf hyphenation files from the outer (still compressed) omni.ja
+# This works around https://bugzilla.mozilla.org/show_bug.cgi?id=1772900
 set +e
 if [ $BUILD_MAC == 1 ]; then
 	cp -Rp "$MAC_RUNTIME_PATH"/Contents/Resources/browser/omni "$app_dir"
+	unzip -qj "$MAC_RUNTIME_PATH"/Contents/Resources/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
 elif [ $BUILD_WIN == 1 ]; then
 	# Non-arch-specific files, so just use 64-bit version
 	cp -Rp "${WIN_RUNTIME_PATH_PREFIX}win-x64"/browser/omni "$app_dir"
+	unzip -qj "${WIN_RUNTIME_PATH_PREFIX}win-x64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
 elif [ $BUILD_LINUX == 1 ]; then
 	# Non-arch-specific files, so just use 64-bit version
 	cp -Rp "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/browser/omni "$app_dir"
+	unzip -qj "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
 fi
 set -e
 cd $omni_dir
 # Move some Firefox files that would be overwritten out of the way
 mv chrome.manifest chrome.manifest-fx
-mv components components-fx
 mv defaults defaults-fx
 
 # Extract Zotero files
@@ -242,14 +260,6 @@ else
 	fi
 	rsync -a $rsync_params "$SOURCE_DIR/" ./
 fi
-
-#
-# Merge preserved files from Firefox
-#
-# components
-mv components/* components-fx
-rmdir components
-mv components-fx components
 
 mv defaults defaults-z
 mv defaults-fx defaults
@@ -349,7 +359,11 @@ for locale in `ls chrome/locale/`; do
 	cp chrome/locale/$locale/zotero/mozilla/wizard.ftl localization/$locale/toolkit/global
 	
 	mkdir -p localization/$locale/browser
+	cp chrome/locale/$locale/zotero/mozilla/browserSets.ftl localization/$locale/browser
 	cp chrome/locale/$locale/zotero/mozilla/menubar.ftl localization/$locale/browser
+	
+	mkdir -p localization/$locale/devtools/client
+	cp chrome/locale/$locale/zotero/mozilla/toolbox.ftl localization/$locale/devtools/client
 	
 	# TEMP: Until we've created zotero.ftl in all locales
 	touch chrome/locale/$locale/zotero/zotero.ftl
@@ -359,6 +373,11 @@ done
 # Add to chrome manifest
 echo "" >> chrome.manifest
 cat "$CALLDIR/assets/chrome.manifest" >> chrome.manifest
+
+replace_line 'handle: function bch_handle\(cmdLine\) {' 'handle: function bch_handle(cmdLine) {
+  \/\/ TEST_OPTIONS_PLACEHOLDER
+  ' modules/BrowserContentHandler.sys.mjs
+export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets/commandLineHandler.js"; $replacement = <$fh>; close $fh; } s/\/\/ TEST_OPTIONS_PLACEHOLDER/$replacement/' modules/BrowserContentHandler.sys.mjs
 
 # Move test files to root directory
 if [ $include_tests -eq 1 ]; then
@@ -449,10 +468,6 @@ cp "$CALLDIR/assets/updater.ini" "$base_dir"
 # Adjust chrome.manifest
 #perl -pi -e 's^(chrome|resource)/^jar:zotero.jar\!/$1/^g' "$BUILD_DIR/zotero/chrome.manifest"
 
-# Copy icons
-mkdir "$base_dir/chrome"
-cp -R "$CALLDIR/assets/icons" "$base_dir/chrome/icons"
-
 # Copy application.ini and modify
 cp "$CALLDIR/assets/application.ini" "$app_dir/application.ini"
 perl -pi -e "s/\{\{VERSION}}/$VERSION/" "$app_dir/application.ini"
@@ -483,8 +498,8 @@ if [ $BUILD_MAC == 1 ]; then
 	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/zotero"
 	chmod 755 "$CONTENTSDIR/MacOS/zotero"
 
-	# TEMP: Modified versions of some Firefox components for Big Sur, placed in xulrunner/MacOS
-	#cp "$MAC_RUNTIME_PATH/../MacOS/"{libc++.1.dylib,libnss3.dylib,XUL} "$CONTENTSDIR/MacOS/"
+	# TEMP: Custom version of XUL with some backported Mozilla bug fixes
+	cp "$MAC_RUNTIME_PATH/../MacOS/XUL" "$CONTENTSDIR/MacOS/"
 
 	# Use our own updater, because Mozilla's requires updates signed by Mozilla
 	cd "$CONTENTSDIR/MacOS"
@@ -627,7 +642,7 @@ if [ $BUILD_WIN == 1 ]; then
 	
 	fi
 	
-	for arch in "win32" "win-x64"; do
+	for arch in win32 win-x64 win-aarch64; do
 		echo "Building Zotero_$arch"
 		
 		runtime_path="${WIN_RUNTIME_PATH_PREFIX}${arch}"
@@ -639,11 +654,6 @@ if [ $BUILD_WIN == 1 ]; then
 		# Copy relevant assets from Firefox
 		cp -R "$runtime_path"/!(application.ini|browser|defaults|devtools-files|crashreporter*|firefox.exe|maintenanceservice*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
-		# Copy vcruntime140_1.dll
-		if [ $arch = "win-x64" ]; then
-			cp "$CALLDIR/xulrunner/vc-$arch/vcruntime140_1.dll" "$APPDIR"
-		fi
-		
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
 		check_lfs_file "$CALLDIR/win/zotero.exe.tar.xz"
@@ -666,13 +676,7 @@ if [ $BUILD_WIN == 1 ]; then
 		
 		# Sign updater
 		if [ $SIGN -eq 1 ]; then
-			"`cygpath -u \"$SIGNTOOL\"`" \
-				sign /n "$SIGNTOOL_CERT_SUBJECT" \
-				/d "$SIGNATURE_DESC Updater" \
-				/fd SHA256 \
-				/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-				/td SHA256 \
-				"`cygpath -w \"$APPDIR/updater.exe\"`"
+			"$CALLDIR/win/codesign" "$APPDIR/updater.exe" "$SIGNATURE_DESC Updater"
 		fi
 		
 		# Copy app files
@@ -704,10 +708,16 @@ if [ $BUILD_WIN == 1 ]; then
 		cp -RH "$CALLDIR/modules/zotero-word-for-windows-integration/install" "$APPDIR/integration/word-for-windows"
 		if [ $arch = 'win32' ]; then
 			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll"
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll"
 		elif [ $arch = 'win-x64' ]; then
 			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll" \
 				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
-		fi	
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll"
+		elif [ $arch = 'win-aarch64' ]; then
+			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll" \
+				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll"
+		fi
 		
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
@@ -722,18 +732,15 @@ if [ $BUILD_WIN == 1 ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				elif [ "$arch" = "win-x64" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
+				elif [ "$arch" = "win-aarch64" ]; then
+					# TODO
+					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				fi
 
 				mv "$BUILD_DIR/win_installer/helper.exe" "$APPDIR/uninstall"
 
 				if [ $SIGN -eq 1 ]; then
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC Uninstaller" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$APPDIR/uninstall/helper.exe\"`"
+					"$CALLDIR/win/codesign" "$APPDIR/uninstall/helper.exe" "$SIGNATURE_DESC Uninstaller"
 					sleep $SIGNTOOL_DELAY
 				fi
 				
@@ -742,18 +749,12 @@ if [ $BUILD_WIN == 1 ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_win32_setup.exe"
 				elif [ "$arch" = "win-x64" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_x64_setup.exe"
+				elif [ "$arch" = "win-aarch64" ]; then
+					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_aarch64_setup.exe"
 				fi
 				
 				if [ $SIGN -eq 1 ]; then
-					# Sign zotero.exe
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC" \
-						/du "$SIGNATURE_URL" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$APPDIR/zotero.exe\"`"
+					"$CALLDIR/win/codesign" "$APPDIR/zotero.exe" "$SIGNATURE_DESC"
 					sleep $SIGNTOOL_DELAY
 				fi
 				
@@ -768,19 +769,15 @@ if [ $BUILD_WIN == 1 ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				elif [ "$arch" = "win-x64" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
+				elif [ "$arch" = "win-aarch64" ]; then
+					# TODO
+					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				fi
 
 				mv "$BUILD_DIR/win_installer/setup.exe" "$INSTALLER_STAGE_DIR"
 
 				if [ $SIGN == 1 ]; then
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC Setup" \
-						/du "$SIGNATURE_URL" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$INSTALLER_STAGE_DIR/setup.exe\"`"
+					"$CALLDIR/win/codesign" "$INSTALLER_STAGE_DIR/setup.exe" "$SIGNATURE_DESC Setup"
 					sleep $SIGNTOOL_DELAY
 				fi
 				
@@ -794,14 +791,7 @@ if [ $BUILD_WIN == 1 ]; then
 				
 				# Sign installer .exe
 				if [ $SIGN == 1 ]; then
-					"`cygpath -u \"$SIGNTOOL\"`" \
-						sign /n "$SIGNTOOL_CERT_SUBJECT" \
-						/d "$SIGNATURE_DESC Setup" \
-						/du "$SIGNATURE_URL" \
-						/fd SHA256 \
-						/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-						/td SHA256 \
-						"`cygpath -w \"$INSTALLER_PATH\"`"
+					"$CALLDIR/win/codesign" "$INSTALLER_PATH" "$SIGNATURE_DESC Installer"
 				fi
 				
 				chmod 755 "$INSTALLER_PATH"
@@ -856,6 +846,12 @@ if [ $BUILD_LINUX == 1 ]; then
 		# Add word processor plug-ins
 		mkdir "$APPDIR/integration"
 		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration/install" "$APPDIR/integration/libreoffice"
+		
+		# Copy icons
+		cp "$CALLDIR/linux/icons/icon32.png" "$APPDIR/icons/"
+		cp "$CALLDIR/linux/icons/icon64.png" "$APPDIR/icons/"
+		cp "$CALLDIR/linux/icons/icon128.png" "$APPDIR/icons/"
+		cp "$CALLDIR/linux/icons/symbolic.svg" "$APPDIR/icons/"
 		
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;

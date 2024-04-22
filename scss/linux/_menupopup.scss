@@ -1,5 +1,17 @@
-menupopup, panel {
-	--panel-padding-block: 0;
-	--panel-border-radius: 2px;
-	--panel-border-color: ActiveBorder;
+menupopup, panel, #search-mode-popup {
+	--panel-padding-block: initial;
+	--panel-border-color: initial;
+	--panel-border-radius: 3px;
+}
+
+menupopup {
+	menu {
+		menupopup {
+			margin-top: -4px;
+		}
+	}
+}
+
+:is(panel, menupopup)::part(content) {
+	padding: 3px 0;
 }

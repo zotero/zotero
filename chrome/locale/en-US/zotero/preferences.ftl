@@ -24,3 +24,15 @@ preferences-reader-open-snapshots-using = Open snapshots using
 preferences-reader-open-in-new-window =
     .label = Open files in new windows instead of tabs
 preferences-reader-ebook-font = Ebook font:
+
+preferences-color-scheme = Color Scheme:
+preferences-color-scheme-auto =
+    .label = Automatic
+preferences-color-scheme-light =
+    .label = Light
+preferences-color-scheme-dark =
+    .label = Dark
+
+preferences-advanced-language-and-region-title = Language and Region
+preferences-advanced-enable-bidi-ui =
+    .label = Enable bidirectional text editing utilities

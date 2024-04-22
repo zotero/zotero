@@ -71,6 +71,12 @@ const TEMPLATE_VERSIONS = {
 
 const MENDELEY_URI_RE = /^http:\/\/www\.mendeley\.com\/documents\/\?uuid=(.*)/;
 
+const PLUGIN_PATHS = {
+	LibreOffice: 'chrome://zotero-libreoffice-integration-components/content/zoteroLibreOfficeIntegration.mjs',
+	WinWord: 'chrome://zotero-winword-integration/content/zoteroWinWordIntegration.mjs',
+	MacWord: 'chrome://zotero-macword-integration/content/zoteroMacWordIntegration.mjs'
+};
+
 
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
@@ -85,20 +91,21 @@ Zotero.Integration = new function() {
 	 */
 	this.init = function () {
 		if (Zotero.test) return;
-		let classNames = ["@zotero.org/Zotero/integration/initializer?agent=LibreOffice;1"];
+		let entryPoints = [PLUGIN_PATHS.LibreOffice];
 		if (Zotero.isMac) {
-			classNames.push("@zotero.org/Zotero/integration/installer?agent=MacWord;1")
-		} else if (Zotero.isWindows) {
-			classNames.push("@zotero.org/Zotero/integration/initializer?agent=WinWord;1");
+			entryPoints.push(PLUGIN_PATHS.MacWord);
 		}
-		for (let className of classNames) {
+		else if (Zotero.isWindows) {
+			entryPoints.push(PLUGIN_PATHS.WinWord);
+		}
+		for (let entryPoint of entryPoints) {
 			try {
-				Components.classes[className]
-					.getService(Components.interfaces.nsISupports);
+				const { init } = ChromeUtils.importESModule(entryPoint);
+				init();
 			}
 			catch (e) {
 				Zotero.logError(e);
-			}	
+			}
 		}
 	}
 	
@@ -147,8 +154,7 @@ Zotero.Integration = new function() {
 			
 			// can attempt to delete on OS X
 			try {
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
+				let promptService = Services.prompt;
 				var deletePipe = promptService.confirm(null, Zotero.getString("integration.error.title"), Zotero.getString("integration.error.deletePipe"));
 				if(!deletePipe) return false;
 				let escapedFifoFile = pipe.path.replace("'", "'\\''");
@@ -219,26 +225,23 @@ Zotero.Integration = new function() {
 		}
 	});
 	
-	this.getApplication = function(agent, command, docId) {
+	this.getApplication = function (agent, command, docId) {
 		if (agent == 'http') {
 			return new Zotero.HTTPIntegrationClient.Application();
 		}
 		// Try to load the appropriate Zotero component; otherwise display an error
-		var component
 		try {
-			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
-			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
-			try {
-				return Components.classes[componentClass]
-					.getService(Components.interfaces.zoteroIntegrationApplication);
-			} catch (e) {
-				return Components.classes[componentClass]
-					.getService(Components.interfaces.nsISupports).wrappedJSObject;
-			}
-		} catch(e) {
+			// Replace MacWord2016 and MacWord16 with just MacWord.
+			agent = agent.startsWith('MacWord') ? 'MacWord' : agent;
+			var entryPoint = PLUGIN_PATHS[agent];
+			Zotero.debug("Integration: Instantiating "+agent+" plugin handler for command "+command+(docId ? " with doc "+docId : ""));
+			const { Application } = ChromeUtils.importESModule(entryPoint);
+			return new Application();
+		}
+		catch (e) {
 			throw new Zotero.Exception.Alert("integration.error.notInstalled",
 				[], "integration.error.title");
-		}	
+		}
 	};
 	
 	/**
@@ -309,15 +312,25 @@ Zotero.Integration = new function() {
 		finally {
 			var diff = ((new Date()).getTime() - startTime)/1000;
 			Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} complete in ${diff}s`)
+		
+			if (Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
+				var oldWindow = Zotero.Integration.currentWindow;
+				oldWindow.close();
+				await Zotero.Promise.delay(50);
+			}
+
+			if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
+				Zotero.Integration.currentSession.progressBar.hide();
+				await Zotero.Promise.delay(50);
+			}
+			
 			if (document) {
 				try {
 					await document.cleanup();
 					await document.activate();
 					
 					// Call complete function if one exists
-					if (document.wrappedJSObject && document.wrappedJSObject.complete) {
-						document.wrappedJSObject.complete();
-					} else if (document.complete) {
+					if (document.complete) {
 						await document.complete();
 					}
 				} catch(e) {
@@ -325,18 +338,6 @@ Zotero.Integration = new function() {
 				}
 			}
 			
-			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
-				var oldWindow = Zotero.Integration.currentWindow;
-				Zotero.Promise.delay(100).then(function() {
-					oldWindow.close();
-				});
-			}
-
-			if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
-				Zotero.Promise.delay(5).then(function() {
-					Zotero.Integration.currentSession.progressBar.hide();
-				});
-			}
 			// This technically shouldn't be necessary since we call document.activate(),
 			// but http integration plugins may not have OS level access to windows to be
 			// able to activate themselves. E.g. Google Docs on Safari.
@@ -2902,10 +2903,10 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 				// for update from Zotero 2.1 or earlier
 				if (citationItem.uri) {
 					if (Array.isArray(citationItem.uris)) {
-						citationItem.uris.push(citationItem.uri);
+						citationItems.uris = citationItem.uris.concat(citationItem.uri);
 					}
 					else {
-						citationItem.uris = [citationItem.uri];
+						citationItem.uris = citationItem.uri;
 					}
 					delete citationItem.uri;
 				}

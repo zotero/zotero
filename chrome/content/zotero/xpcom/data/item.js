@@ -1914,7 +1914,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		if (!parentItem.isFileAttachment()) {
 			throw new Error("Annotation parent must be a file attachment");
 		}
-		if (!['application/pdf', 'application/epub+zip', 'text/html'].includes(parentItem.attachmentContentType)) {
+		if (!parentItem.attachmentReaderType) {
 			throw new Error("Annotation parent must be a PDF, EPUB, or HTML snapshot");
 		}
 		let type = this._getLatestField('annotationType');
@@ -2434,6 +2434,20 @@ Zotero.Item.prototype.isEPUBAttachment = function () {
 	return this.isFileAttachment() && this.attachmentContentType == 'application/epub+zip';
 };
 
+/**
+ * @return {Boolean} - Returns true if item is a stored or linked image attachment
+ */
+Zotero.Item.prototype.isImageAttachment = function () {
+	return this.isFileAttachment() && this.attachmentContentType.startsWith('image/');
+};
+
+/**
+ * @return {Boolean} - Returns true if item is a stored or linked video attachment
+ */
+Zotero.Item.prototype.isVideoAttachment = function () {
+	return this.isFileAttachment() && this.attachmentContentType.startsWith('video/');
+};
+
 
 /**
  * Returns number of child attachments of item
@@ -2680,6 +2694,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 		return file.path;
 	}
 	
+	// NOTE: Test for platform slashes before changing to IOUtils.exists()
 	if (!(yield OS.File.exists(path))) {
 		Zotero.debug("Attachment file '" + path + "' not found", 2);
 		this._updateAttachmentStates(false);
@@ -2729,7 +2744,13 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 		Zotero.logError(`Attachment parent ${this.libraryID}/${parentKey} doesn't exist`);
 		return;
 	}
-	item.clearBestAttachmentState();
+
+	if (!this.deleted && item._bestAttachmentState?.key && this.key === item._bestAttachmentState.key) {
+		item._bestAttachmentState.exists = exists;
+	}
+	else {
+		item.clearBestAttachmentState();
+	}
 };
 
 
@@ -2783,7 +2804,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 	}
 	
 	try {
-		let origName = OS.Path.basename(origPath);
+		let origName = PathUtils.filename(origPath);
 		if (this.isStoredFileAttachment()) {
 			var origModDate = (await OS.File.stat(origPath)).lastModificationDate;
 		}
@@ -2812,7 +2833,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		if (newName === false) {
 			return -1;
 		}
-		let destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
+		let destPath = OS.Path.join(PathUtils.parent(origPath), newName);
 		
 		await this.relinkAttachmentFile(destPath);
 		
@@ -2860,7 +2881,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		throw new Error('Cannot relink linked URL');
 	}
 	
-	var fileName = OS.Path.basename(path);
+	var fileName = PathUtils.filename(path);
 	if (fileName.endsWith(".lnk")) {
 		throw new Error("Cannot relink to Windows shortcut");
 	}
@@ -2873,7 +2894,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	// If selected file isn't in the attachment's storage directory,
 	// copy it in and use that one instead
 	var storageDir = Zotero.Attachments.getStorageDirectory(this).path;
-	if (this.isStoredFileAttachment() && OS.Path.dirname(path) != storageDir) {
+	if (this.isStoredFileAttachment() && PathUtils.parent(path) != storageDir) {
 		newPath = OS.Path.join(storageDir, newName);
 		
 		// If file with same name already exists in the storage directory,
@@ -2907,16 +2928,18 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		}
 	}
 	else {
-		newPath = OS.Path.join(OS.Path.dirname(path), newName);
+		newPath = OS.Path.join(PathUtils.parent(path), newName);
 		
 		// Rename file to filtered name if necessary
 		if (fileName != newName) {
 			Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
 			try {
-				yield OS.File.move(path, newPath, { noOverwrite: true });
+				yield IOUtils.move(path, newPath, { noOverwrite: true });
 			}
 			catch (e) {
-				if (e instanceof OS.File.Error && e.becauseExists && fileName.normalize() == newName) {
+				if (DOMException.isInstance(e)
+						&& e.name == 'NoModificationAllowedError'
+						&& fileName.normalize() == newName) {
 					// Ignore normalization differences that the filesystem ignores
 				}
 				else {
@@ -3083,6 +3106,25 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentContentType', {
 });
 
 
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentReaderType', {
+	get() {
+		if (!this.isFileAttachment()) {
+			return undefined;
+		}
+		switch (this.attachmentContentType) {
+			case 'application/pdf':
+				return 'pdf';
+			case 'application/epub+zip':
+				return 'epub';
+			case 'text/html':
+				return 'snapshot';
+			default:
+				return undefined;
+		}
+	}
+});
+
+
 Zotero.Item.prototype.getAttachmentCharset = function() {
 	Zotero.debug("getAttachmentCharset() deprecated -- use .attachmentCharset");
 	return this.attachmentCharset;
@@ -3148,7 +3190,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (prefixedPath) {
 			return prefixedPath[1].split('/').pop();
 		}
-		return OS.Path.basename(path);
+		return PathUtils.filename(path);
 	},
 	set: function (val) {
 		if (!this.isAttachment()) {
@@ -3226,7 +3268,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 				if (!val.startsWith(storagePath)) {
 					throw new Error("Imported file path must be within storage directory");
 				}
-				val = 'storage:' + OS.Path.basename(val);
+				val = 'storage:' + PathUtils.filename(val);
 			}
 		}
 		
@@ -3701,7 +3743,11 @@ Zotero.Item.prototype.getBestAttachment = Zotero.Promise.coroutine(function* () 
 		throw ("getBestAttachment() can only be called on regular items");
 	}
 	var attachments = yield this.getBestAttachments();
-	return attachments ? attachments[0] : false;
+	let bestAttachment = attachments ? attachments[0] : false;
+	if (bestAttachment) {
+		this._bestAttachmentState = { key: bestAttachment.key, ...(this._bestAttachmentState || {}) };
+	}
+	return bestAttachment;
 });
 
 
@@ -3735,11 +3781,11 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 /**
  * Return state of best attachment (or this item if it's a standalone attachment)
  *
- * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'other')
+ * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'epub'|'image'|'video'|'other')
  *     and boolean 'exists'
  */
 Zotero.Item.prototype.getBestAttachmentState = async function () {
-	if (this._bestAttachmentState !== null) {
+	if (this._bestAttachmentState !== null && this._bestAttachmentState.type) {
 		return this._bestAttachmentState;
 	}
 	var item = this.isAttachment() && this.isTopLevelItem()
@@ -3757,11 +3803,21 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	else if (item.isSnapshotAttachment()) {
 		type = 'snapshot';
 	}
+	else if (item.isEPUBAttachment()) {
+		type = 'epub';
+	}
+	else if (item.isImageAttachment()) {
+		type = 'image';
+	}
+	else if (item.isVideoAttachment()) {
+		type = 'video';
+	}
 	else {
 		type = 'other';
 	}
 	var exists = await item.fileExists();
-	return this._bestAttachmentState = { type, exists };
+	let key = item.key;
+	return this._bestAttachmentState = { type, exists, key };
 };
 
 
@@ -4349,34 +4405,52 @@ Zotero.DataObject.prototype.setPublications = Zotero.Promise.coroutine(function*
 
 
 Zotero.Item.prototype.getImageSrc = function() {
+	let itemType = this.getItemTypeIconName();
+	return Zotero.ItemTypes.getImageSrc(itemType);
+}
+
+
+Zotero.Item.prototype.getItemTypeIconName = function (skipLinkMode = false) {
 	var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	if (itemType == 'attachment') {
 		var linkMode = this.attachmentLinkMode;
-		
-		if (this.attachmentContentType == 'application/pdf' && this.isFileAttachment()) {
-			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				itemType += '-pdf-link';
+		if (this.isPDFAttachment()) {
+			if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				itemType += 'PDFLink';
 			}
 			else {
-				itemType += '-pdf';
+				itemType += 'PDF';
 			}
 		}
-		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-			itemType += "-file";
+		else if (this.isEPUBAttachment()) {
+			if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				itemType += 'EPUBLink';
+			}
+			else {
+				itemType += 'EPUB';
+			}
 		}
-		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			itemType += "-link";
+		else if (this.isImageAttachment()) {
+			itemType += linkMode == (!skipLinkMode && Zotero.Attachments.LINK_MODE_LINKED_FILE) ? 'ImageLink' : 'Image';
+		}
+		else if (this.isVideoAttachment()) {
+			itemType += linkMode == (!skipLinkMode && Zotero.Attachments.LINK_MODE_LINKED_FILE) ? 'VideoLink' : 'Video';
+		}
+		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+			itemType += "File";
+		}
+		else if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			itemType += "Link";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-			itemType += "-snapshot";
+			itemType += "Snapshot";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			itemType += "-web-link";
+			itemType += "WebLink";
 		}
 	}
-	
-	return Zotero.ItemTypes.getImageSrc(itemType);
-}
+	return itemType;
+};
 
 
 Zotero.Item.prototype.getTagColors = function () {

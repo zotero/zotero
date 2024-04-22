@@ -125,8 +125,7 @@ var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, 
 		}
 
 		tags.forEach((tag) => {
-			const li = document.createElement('richlistitem');
-			const div = document.createElement('div');
+			const li = document.createXULElement('richlistitem');
 			const checkbox = document.createElement('input');
 			checkbox.type = 'checkbox';
 			checkbox.checked = true;
@@ -134,11 +133,9 @@ var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, 
 			const label = document.createElement('label');
 			label.setAttribute('for', 'tag-' + tag);
 			label.textContent = tag;
-			// Don't toggle checkbox for single-click on label
 			
-			div.appendChild(checkbox);
-			div.appendChild(label);
-			li.appendChild(div);
+			li.appendChild(checkbox);
+			li.appendChild(label);
 			this.listbox.append(li);
 		});
 		

@@ -82,7 +82,7 @@
 }
 
 .timeline-event-bubble-title {
-    font-weight: bold;
+    font-weight: 600;
     border-bottom: 1px solid #888;
     margin-bottom: 0.5em;
 }

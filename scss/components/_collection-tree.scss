@@ -1,3 +1,22 @@
+$icons: (
+	collection, duplicates, feed, feed-error, feed-library, feed-updating, groups, library,
+	library-group, publications, trash-full, trash, unfiled, retracted, search,
+);
+
+@each $icon in $icons {
+	.icon-css.icon-#{$icon} {
+		@include focus-states using ($color) {
+			@include svgicon($icon, $color, "16", "collection-tree");
+		}
+	}
+}
+
+#zotero-collections-pane {
+	min-width: $min-width-collections-pane;
+	width: $min-width-collections-pane;
+	background: var(--material-sidepane);
+}
+
 #zotero-collections-tree-container {
 	height: 5.2em;
 }
@@ -5,10 +24,37 @@
 #zotero-collections-tree {
 	width: 100%;
 
+	#main-window & {
+		// virtualized-table has a default background (--material-background)
+		// which is what we want in most places, including dialogs that include
+		// #zotero-collections-tree, however main window collection tree is an
+		// exception
+		background: transparent;
+	}
+
 	.virtualized-table {
 		overflow-y: auto;
 		flex: 1 0;
 		text-overflow: ellipsis;
+
+		.row {
+			.icon-css:not(.twisty) {
+				width: 16px;
+				height: 16px;
+			}
+	
+			@each $icon in $icons {
+				.icon-css.icon-#{$icon} {
+					@include focus-states using ($color) {
+						@include svgicon($icon, $color, "16", "collection-tree");
+					}
+				}
+			}
+		}
+	}
+
+	.virtualized-table-body {
+		padding: 0 8px 8px;
 	}
 
 	.cell.primary {
@@ -23,7 +69,7 @@
 			flex-shrink: 1;
 			text-overflow: ellipsis;
 			overflow: hidden;
-			margin-left: 6px;
+			margin-left: 4px;
 		}
 
 		input.cell-text {

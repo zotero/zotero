@@ -56,23 +56,18 @@ Zotero.Dictionaries = new function () {
 		if (!(await OS.File.exists(dictionariesDir))) {
 			return;
 		}
-		let iterator = new OS.File.DirectoryIterator(dictionariesDir);
-		try {
-			await iterator.forEach(async function (entry) {
-				if (entry.name.startsWith('.')) {
-					return;
-				}
-				try {
-					let dir = OS.Path.join(dictionariesDir, entry.name);
-					await _loadDirectory(dir);
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-			});
-		}
-		finally {
-			iterator.close();
+		
+		for (let path of await IOUtils.getChildren(dictionariesDir)) {
+			let filename = PathUtils.filename(path);
+			if (filename.startsWith('.')) {
+				continue;
+			}
+			try {
+				await _loadDirectory(path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 	};
 
@@ -136,18 +131,11 @@ Zotero.Dictionaries = new function () {
 			}
 
 			zipReader.close();
-			await OS.File.remove(xpiPath);
+			zipReader = null;
+			Cu.forceGC();
 			await _loadDirectory(dir);
 		}
 		catch (e) {
-			try {
-				if (await OS.File.exists(xpiPath)) {
-					await OS.File.remove(xpiPath);
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
 			try {
 				if (await OS.File.exists(dir)) {
 					await OS.File.removeDir(dir);
@@ -157,6 +145,19 @@ Zotero.Dictionaries = new function () {
 				Zotero.logError(e);
 			}
 			throw e;
+		}
+		finally {
+			// Remove the downloaded file from the temp path
+			// Note: In same cases, on Windows, it can't be removed
+			// because something is keeping it open
+			try {
+				if (await OS.File.exists(xpiPath)) {
+					await OS.File.remove(xpiPath);
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 	};
 

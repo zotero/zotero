@@ -5,7 +5,6 @@
 <!ENTITY zotero.preferences.default "Padrão:">
 <!ENTITY zotero.preferences.items "itens">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Configurações">
 <!ENTITY zotero.preferences.custom "Personalizar...">
 
 <!ENTITY zotero.preferences.prefpane.general "Geral">
@@ -123,7 +122,6 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desabilitar cópia rápida ao arrastar mais do que">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citação">
-<!ENTITY zotero.preferences.cite.styles "Estilos">
 <!ENTITY zotero.preferences.cite.wordProcessors "Processadores de texto">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utilizar a caixa de diálogo de adição de citação clássica">
 <!ENTITY zotero.preferences.styleEditor "Editor de estilo">

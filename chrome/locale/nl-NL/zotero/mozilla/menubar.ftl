@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -140,6 +146,8 @@ menu-view-history-button =
     .label = Geschiedenis
 menu-view-synced-tabs-sidebar =
     .label = Gesynchroniseerde tabbladen
+menu-view-megalist-sidebar =
+    .label = Wachtwoorden
 menu-view-full-zoom =
     .label = Zoomen
     .accesskey = o
@@ -220,8 +228,9 @@ menu-history-undo-menu =
     .label = Onlangs gesloten tabbladen
 menu-history-undo-window-menu =
     .label = Onlangs gesloten vensters
-menu-history-reopen-all-tabs = Alle tabbladen opnieuw openen
-menu-history-reopen-all-windows = Alle vensters opnieuw openen
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Geschiedenis doorzoeken
 
 ## Bookmarks Menu
 
@@ -230,14 +239,13 @@ menu-bookmarks-menu =
     .accesskey = a
 menu-bookmarks-manage =
     .label = Bladwijzers beheren
-menu-bookmark-current-tab =
-    .label = Bladwijzer voor huidige tabblad maken
-menu-bookmark-edit =
-    .label = Deze bladwijzer bewerken
 menu-bookmark-tab =
     .label = Bladwijzer voor huidige tabblad maken…
 menu-edit-bookmark =
     .label = Deze bladwijzer bewerken…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Bladwijzers doorzoeken
 menu-bookmarks-all-tabs =
     .label = Bladwijzer voor alle tabbladen maken…
 menu-bookmarks-toolbar =
@@ -331,6 +339,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Probleemoplossingsmodus uitschakelen
     .accesskey = m
+menu-help-switch-device =
+    .label = Wisselen naar een nieuw apparaat
+    .accesskey = u
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -339,3 +350,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = Dit is geen misleidende website…
     .accesskey = m
+menu-report-broken-site =
+    .label = Niet-werkende website melden

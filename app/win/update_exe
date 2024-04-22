@@ -17,19 +17,22 @@ if [[ -z "${1:-}" ]]; then
 fi
 version=$1
 
-for arch in win32 win-x64; do
-	if [ $arch = "win-x64" ]; then
+for arch in win32 win-x64 win-aarch64; do
+	if [ $arch = "win32" ]; then
+		zip="firefox-115.5.0.en-US.$arch.zip"
+	elif [ $arch = "win-x64" ]; then
 		zip="firefox-$version.en-US.win64.zip"
-	else
-		zip="firefox-$version.en-US.$arch.zip"
+	elif [ $arch = "win-aarch64" ]; then
+		zip="firefox-$version.en-US.win64-aarch64.zip"
 	fi
 	if [ ! -f "$zip" ]; then
 		echo "$zip not found" >&2
 		exit 1
 	fi
 	rm -f firefox-$arch.exe
-	unzip -oj $zip firefox/firefox.exe
+	unzip -oj $zip firefox/firefox.exe firefox/updater.exe
 	mv firefox.exe firefox-$arch.exe
+	mv updater.exe updater-$arch.exe
 
 	$rh -open VersionInfo1.rc -save VersionInfo1.res -action compile
 
@@ -42,6 +45,7 @@ for arch in win32 win-x64; do
 	rm VersionInfo1.res
 done
 
-tar -Jcv zotero_win32.exe zotero_win-x64.exe > zotero.exe.tar.xz
+tar -Jcv zotero_win32.exe zotero_win-x64.exe zotero_win-aarch64.exe > zotero.exe.tar.xz
+tar -Jcv updater-win32.exe updater-win-x64.exe updater-win-aarch64.exe > updater.exe.tar.xz
 
-rm firefox-win*.exe zotero_win*.exe
+rm firefox-win*.exe updater-win*.exe zotero_win*.exe

@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -139,6 +145,8 @@ menu-view-history-button =
     .label = 历史
 menu-view-synced-tabs-sidebar =
     .label = 受同步的标签页
+menu-view-megalist-sidebar =
+    .label = 密码
 menu-view-full-zoom =
     .label = 缩放
     .accesskey = Z
@@ -219,8 +227,9 @@ menu-history-undo-menu =
     .label = 最近关闭的标签页
 menu-history-undo-window-menu =
     .label = 最近关闭的窗口
-menu-history-reopen-all-tabs = 重新打开所有标签页
-menu-history-reopen-all-windows = 重新打开所有窗口
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = 搜索历史记录
 
 ## Bookmarks Menu
 
@@ -229,14 +238,13 @@ menu-bookmarks-menu =
     .accesskey = B
 menu-bookmarks-manage =
     .label = 管理书签
-menu-bookmark-current-tab =
-    .label = 将当前标签页加入书签
-menu-bookmark-edit =
-    .label = 编辑此书签
 menu-bookmark-tab =
     .label = 将当前标签页加入书签…
 menu-edit-bookmark =
     .label = 编辑此书签…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = 搜索书签
 menu-bookmarks-all-tabs =
     .label = 将所有标签页加入书签…
 menu-bookmarks-toolbar =
@@ -330,6 +338,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = 关闭故障排除模式
     .accesskey = M
+menu-help-switch-device =
+    .label = 转入新设备
+    .accesskey = N
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -338,3 +349,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = 这不是诈骗网站…
     .accesskey = d
+menu-report-broken-site =
+    .label = 反馈网站问题

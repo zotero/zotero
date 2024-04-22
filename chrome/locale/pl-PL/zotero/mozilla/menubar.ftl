@@ -9,6 +9,12 @@
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
+
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
@@ -141,6 +147,8 @@ menu-view-history-button =
     .label = Historia
 menu-view-synced-tabs-sidebar =
     .label = Karty z innych urządzeń
+menu-view-megalist-sidebar =
+    .label = Hasła
 menu-view-full-zoom =
     .label = Powiększenie
     .accesskey = w
@@ -221,8 +229,9 @@ menu-history-undo-menu =
     .label = Ostatnio zamknięte karty
 menu-history-undo-window-menu =
     .label = Ostatnio zamknięte okna
-menu-history-reopen-all-tabs = Przywróć wszystkie karty
-menu-history-reopen-all-windows = Przywróć wszystkie okna
+# "Search" is a verb, as in "Search in History"
+menu-history-search =
+    .label = Szukaj w historii
 
 ## Bookmarks Menu
 
@@ -231,14 +240,13 @@ menu-bookmarks-menu =
     .accesskey = Z
 menu-bookmarks-manage =
     .label = Zarządzaj zakładkami
-menu-bookmark-current-tab =
-    .label = Dodaj zakładkę do tej karty
-menu-bookmark-edit =
-    .label = Edytuj tę zakładkę
 menu-bookmark-tab =
     .label = Dodaj zakładkę do tej karty…
 menu-edit-bookmark =
     .label = Edytuj tę zakładkę…
+# "Search" is a verb, as in "Search in bookmarks"
+menu-bookmarks-search =
+    .label = Szukaj w zakładkach
 menu-bookmarks-all-tabs =
     .label = Dodaj zakładki do wszystkich kart…
 menu-bookmarks-toolbar =
@@ -332,6 +340,9 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Wyłącz tryb rozwiązywania problemów
     .accesskey = t
+menu-help-switch-device =
+    .label = Przechodzenie na nowe urządzenie
+    .accesskey = P
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
@@ -340,3 +351,5 @@ menu-help-report-deceptive-site =
 menu-help-not-deceptive =
     .label = To nie jest oszustwo…
     .accesskey = n
+menu-report-broken-site =
+    .label = Zgłoś niepoprawnie działającą stronę

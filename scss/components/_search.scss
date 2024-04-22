@@ -1,17 +1,76 @@
 .search {
 	position: relative;
 	min-width: 40px;
+	height: 36px;
+
+	input {
+		background-color: var(--material-background);
+		border-radius: 5px;
+		// Overwrite input style on Windows
+		border: var(--material-border-quinary) !important;
+		color: var(--fill-primary);
+		flex: 1 0;
+		margin: 6px 0px;
+		min-width: 40px;
+		padding: 3px 7px;
+	
+		&::placeholder {
+			color: var(--fill-tertiary);
+			opacity: 1.0;
+		}
+	
+		@media not (-moz-platform: windows) {
+			@include focus-ring;
+		}
+	}
+
+	.search-cancel-button {
+		position: absolute;
+		inset-inline-end: 0;
+		width: 14px;
+		height: 14px;
+		padding-inline: 5px 8px;
+		padding-block: 5px;
+		margin-inline: 0 4px;
+		margin-block: 6px;
+		cursor: default;
+		background: url(resource://gre-resources/searchfield-cancel.svg) no-repeat center/contain;
+		background-size: unset;
+	}
 }
 
-.search input {
-	flex: 1 0;
-	font-size: 1em;
-	min-width: 40px;
-	padding-left: 4px;
+search-textbox {
+	appearance: none;
+	background: var(--material-background);
+	border-radius: 5px;
+	border: var(--material-border-quinary);
+	color: var(--fill-primary);
+	padding: 0;
+	padding-inline-end: 6px;
+
+	&::placeholder {
+		color: var(--fill-tertiary);
+		opacity: 1.0;
+	}
+
+	@media not (-moz-platform: windows) {
+		@include focus-ring(false, focus);
+	}
 }
 
-.search .search-cancel-button {
-	position: absolute;
-	right: 6px;
-	cursor: default;
+:is(search-textbox)::part(search-sign),
+:is(search-textbox)::part(search-icon) {
+	@include svgicon-menu("magnifier", "universal", "16");
+	color: var(--fill-secondary);
+	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+	// Use explicit left/right padding here because this element is flipped in RTL (see below)
+	padding: 6px 4px 6px 6px;
+	margin: 0px;
+	width: auto; // override fx115 default width
+	display: block; // override fx115 display:none on macOS
+}
+
+:is(search-textbox):-moz-locale-dir(rtl)::part(search-sign),
+:is(search-textbox):-moz-locale-dir(rtl)::part(search-icon) {
+	transform: scaleX(-1);
 }

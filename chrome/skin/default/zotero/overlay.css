@@ -1,14 +1,5 @@
-#zotero-pane
-{
-	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
-	overflow: hidden;
-}
-
-#zotero-collections-pane
-{
-	min-width: 150px;
-	width: 250px;
-}
+/*
+TODO: Replace with SVG
 
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment, pie)
 {
@@ -147,6 +138,7 @@
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie62) { -moz-image-region: rect(32px, 1984px, 64px, 1952px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie63) { -moz-image-region: rect(32px, 2016px, 64px, 1984px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie64) { -moz-image-region: rect(32px, 2048px, 64px, 2016px); }
+*/
 
 .items-tree-message {
 	display: flex;
@@ -182,97 +174,41 @@
 	text-decoration: underline;
 }
 
-#zotero-item-pane
-{
-	width: 338px;
-	min-width: 338px;
+/*
+	Fx115: make panes occupy all available width/height after layout switch
+	or splitter expand/collapse.
+	The splitter element stores state in the style attribute's width/height
+	properties, and if we remove them, the splitter breaks. So we override
+	them here with !important.
+*/
+#zotero-layout-switcher[orient="horizontal"] :is(#zotero-items-pane-container, #zotero-item-pane) {
+	height: auto !important;
 }
 
-#zotero-layout-switcher
-{
-	min-width: 560px;
-	height: 0;
+#zotero-layout-switcher[orient="horizontal"] #zotero-items-pane-container {
+	width: auto !important;
 }
 
-.toolbar {
-	height: 32px !important; /* Hard-code this to fix toolbar icon compression on Linux */
-	margin: 0;
-	padding: 0;
-	min-width: 1px;
+#zotero-layout-switcher[orient="vertical"],
+#zotero-layout-switcher[orient="vertical"] :is(#zotero-items-pane-container, #zotero-item-pane) {
+	width: auto !important;
+}
+
+/* 
+	Fix to odd fx115 behavior that gives an un-collapsed pane the initial width of min-width + last width
+*/
+#zotero-collections-pane[collapsed=true] {
+	min-width: 0px !important;
+	width: 0px !important;
 }
 
 #zotero-pane toolbarseparator {
 	height:24px;
 }
 
-#zotero-collections-toolbar {
-	margin-inline-end: 10px; /* Set to width of splitter for visual aesthetics */
-	padding-inline-start: 2px;
-}
-
-#zotero-items-toolbar {
-	margin-inline-end: 10px;
-}
-
-.zotero-tb-button {
-	-moz-user-focus: normal;
-	padding-left: 5px;
-	padding-right: 5px;
-	margin-right: 2px;
-	margin-left: 2px;
-}
-
-.zotero-tb-button:first-child {
-	margin-inline-start: 0 !important;
-}
-
-.zotero-tb-button:last-child {
-	margin-inline-end: 0 !important;
-}
-
-.zotero-tb-button[type="menu"] {
-	padding-inline-start: 3px;
-	padding-inline-end: 3px;
-	margin-inline-start: 4px;
-	margin-inline-end: 2px;
-}
-
-.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
-	-moz-default-appearance: none;
-	background-image: url("chrome://zotero/skin/searchbar-dropmarker.png");
-	width: 7px;
-	height: 4px;
-	background-repeat: no-repeat;
-	background-size: 100%;
-}
-
-.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker::part(icon) {
-	display: none;
-}
-
-.zotero-tb-button:hover:active {
-	mix-blend-mode: multiply;
-}
-
 .zotero-button-clear-image {
   list-style-image: none
 }
-
-#zotero-tb-collection-add
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
-}
-
-.zotero-menuitem-new-feed
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-feed-add.png');
-}
-
-#zotero-tb-library-add-menu
-{
-	list-style-image: url('chrome://zotero/skin/library_add.png');
-}
-
 
 #zotero-collections-tree, #zotero-items-tree, #zotero-item-pane > groupbox
 {
@@ -280,21 +216,16 @@
 	padding: 0;
 }
 
-
-#zotero-tb-add
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-item-add.png');
-}
-
-#zotero-tb-lookup
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
-}
-
 #zotero-lookup-textbox {
 	margin: 4px;
 	padding: 2px;
-	-moz-box-flex: 1;
+	overflow-x: hidden; /* Fixes a glitch that renders an extra row */
+}
+
+#zotero-lookup-panel {
+	min-height: 100px;
+	min-width: 500px;
+	padding: 10px;
 }
 
 #zotero-lookup-multiline-progress
@@ -302,198 +233,9 @@
 	height: 2em;
 }
 
-#zotero-tb-item-from-page
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-item-from-page.png');
-}
-
 #zotero-lookup-multiline-progress
 {
 	height: 2em;
-}
-
-/*
-#zotero-tb-link-page
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-link-add.png');
-}
-
-#zotero-tb-snapshot-page
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-snapshot-add.png');
-}
-*/
-
-#zotero-tb-attachment-add
-{
-	list-style-image: url('chrome://zotero/skin/attach.png');
-}
-
-#zotero-tb-note-add
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-note-add.png');
-}
-
-#zotero-menuitem-note
-{
-	list-style-image: url('chrome://zotero/skin/treeitem-note.png');
-}
-
-.zotero-menuitem-new-saved-search
-{
-	list-style-image: url('chrome://zotero/skin/treesource-search.png');
-}
-
-.zotero-menuitem-show-duplicates
-{
-	list-style-image: url('chrome://zotero/skin/treesource-duplicates.png');
-}
-
-.zotero-menuitem-show-unfiled
-{
-	list-style-image: url('chrome://zotero/skin/treesource-unfiled.png');
-}
-
-.zotero-menuitem-show-retracted {
-	list-style-image: url('chrome://zotero/skin/cross.png');
-}
-
-.zotero-menuitem-sync {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
-}
-
-.zotero-menuitem-new-collection
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
-}
-
-.zotero-menuitem-edit-collection
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-collection-edit.png');
-}
-
-.zotero-menuitem-edit-feed
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-feed-edit.png');
-}
-
-.zotero-menuitem-refresh-feed
-{
-	list-style-image: url('chrome://zotero/skin/arrow_refresh.png');
-}
-
-.zotero-menuitem-delete-collection, .zotero-menuitem-remove-items {
-	list-style-image: url('chrome://zotero/skin/toolbar-collection-delete.png');
-}
-
-.zotero-menuitem-show-in-library
-{
-	list-style-image: url('chrome://zotero/skin/treesource-library.png');
-}
-
-.zotero-menuitem-move-to-trash
-{
-	list-style-image: url('chrome://zotero/skin/treesource-trash-full.png');
-}
-
-.zotero-menuitem-delete-from-lib
-{
-	list-style-image: url('chrome://zotero/skin/cross-script.png');
-}
-
-.zotero-menuitem-attach-note
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-note-add.png');
-}
-
-.zotero-menuitem-attach
-{
-	list-style-image: url('chrome://zotero/skin/attach.png');
-}
-
-.zotero-menuitem-attachments-file
-{
-	list-style-image: url('chrome://zotero/skin/treeitem.png');
-}
-
-.zotero-menuitem-attachments-link
-{
-	list-style-image: url('chrome://zotero/skin/treeitem-attachment-link.png');
-}
-
-.zotero-menuitem-attachments-web-link
-{
-	list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link.png');
-}
-
-.zotero-menuitem-find-pdf {
-	list-style-image: url('chrome://zotero/skin/treeitem-attachment-pdf.png');
-}
-
-.zotero-menuitem-duplicate-item
-{
-	list-style-image: url('chrome://zotero/skin/arrow-split-090.png');
-}
-
-.zotero-menuitem-merge-items
-{
-	list-style-image: url('chrome://zotero/skin/arrow-join-090.png');
-}
-
-.zotero-menuitem-export
-{
-	list-style-image: url('chrome://zotero/skin/arrow-curve-090-left.png');
-}
-
-.zotero-menuitem-restore-to-library
-{
-	list-style-image: url('chrome://zotero/skin/lifebuoy.png');
-}
-
-.zotero-menuitem-create-bibliography
-{
-	list-style-image: url('chrome://zotero/skin/edit-list-order.png');
-}
-
-.zotero-menuitem-create-report
-{
-	list-style-image: url('chrome://zotero/skin/treeitem-report.png');
-}
-
-.zotero-menuitem-retrieve-metadata
-{
-	list-style-image: url('chrome://zotero/skin/puzzle-arrow.png');
-}
-
-.zotero-menuitem-reindex
-{
-	list-style-image: url('chrome://zotero/skin/document-search-result.png');
-}
-
-.zotero-menuitem-create-parent
-{
-	list-style-image: url('chrome://zotero/skin/page_white_add.png');
-}
-
-.zotero-menuitem-rename-from-parent
-{
-	list-style-image: url('chrome://zotero/skin/bookmark-pencil.png');
-}
-
-#zotero-tb-advanced-search
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
-}
-
-#zotero-tb-locate
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
-}
-
-#zotero-tb-sync-stop
-{
-	list-style-image: url(chrome://zotero/skin/control_stop_blue.png);
-	margin-inline-end: 0;
 }
 
 #zotero-tb-sync-progress
@@ -511,7 +253,7 @@
 /* Library names */
 #zotero-tb-sync-progress-tooltip rows > label
 {
-	font-weight: bold;
+	font-weight: 600;
 	margin-top: 8px;
 }
 
@@ -521,27 +263,6 @@
 	text-align: right;
 }
 
-#zotero-tb-pq-recognize {
-	list-style-image: url(chrome://zotero/skin/pdf-search.png);
-}
-
-#zotero-tb-pq-recognize .toolbarbutton-icon {
-	width: 18px;
-	margin-top: 1px;
-}
-
-/* Sync error icon */
-#zotero-tb-sync-error {
-	list-style-image: url(chrome://zotero/skin/error.png);
-}
-
-#zotero-tb-sync-error[state=warning] {
-	list-style-image: url(chrome://zotero/skin/warning.png);
-}
-
-#zotero-tb-sync-error[state=upgrade] {
-	list-style-image: url(chrome://zotero/skin/bell_error.png);
-}
 
 /* Sync error panel */
 #zotero-sync-error-panel, #zotero-sync-reminder-panel {
@@ -550,7 +271,7 @@
 
 #zotero-sync-error-panel .error-header, #zotero-sync-reminder-panel .header {
 	font-size: 14px;
-	font-weight: bold;
+	font-weight: 600;
 	margin-bottom: 1em;
 	-moz-user-select: text;
 	cursor: text
@@ -558,7 +279,7 @@
 
 .zotero-sync-error-panel-library-name {
 	font-size: 12px;
-	font-weight: bold;
+	font-weight: 600;
 	margin-left: 0;
 	margin-bottom: 1.1em;
 }
@@ -572,27 +293,7 @@
 	-moz-box-pack: end;
 }
 
-#zotero-tb-sync {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
-	margin-inline-start: -6px;
-	margin-inline-end: -2px;
-	padding-inline-end: 6px;
-}
-
-#zotero-tb-sync .toolbarbutton-icon {
-	max-width: 28px;
-}
-
-#zotero-tb-sync[status=animate] {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
-}
-
-#zotero-tb-sync-status, #zotero-tb-sync-last-sync
-{
-	color: gray;
-}
-
-#zotero-toolbar
+.zotero-toolbar
 {
 	visibility: visible !important;
 	display: inherit !important;
@@ -602,7 +303,8 @@
 	z-index: 2;
 	left: 0;
 	right: 0;
-	background-color: #ececec;
+	color: var(--fill-primary);
+	background-color: var(--material-background);
 	position: fixed;
 	height: 100%;
 	display: flex;
@@ -627,22 +329,12 @@
 	height: 16px;
 }
 
-.zotero-box-label {
-	margin-inline-start: 3px !important;
-}
-
-#item-box-container {
-	display: flex;
-	min-width: 0;
-	min-height: 0;
-}
-
 #retracted-items-banner, #sync-reminder-banner {
 	display: flex;
 	justify-content: center;
 	background: #d93425;
 	line-height: 2.2em;
-	font-weight: bold;
+	font-weight: 600;
 	color: white;
 	font-size: 13.5px;
 	text-align: center;
@@ -756,45 +448,4 @@
 
 .split-menu-button .split-menu-button-dropmarker {
 	margin-inline: 5px;
-}
-
-
-/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.25dppx) {
-	.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker  { background-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }
-	#zotero-tb-collection-add { list-style-image: url('chrome://zotero/skin/toolbar-collection-add@2x.png'); }
-	.zotero-menuitem-new-feed { list-style-image: url('chrome://zotero/skin/toolbar-feed-add@2x.png'); }
-	#zotero-tb-library-add-menu { list-style-image: url('chrome://zotero/skin/library_add@2x.png'); }
-	#zotero-tb-add { list-style-image: url('chrome://zotero/skin/toolbar-item-add@2x.png'); }
-	#zotero-tb-lookup { list-style-image: url('chrome://zotero/skin/toolbar-lookup@2x.png'); }
-	#zotero-tb-attachment-add { list-style-image: url('chrome://zotero/skin/attach@2x.png'); }
-	#zotero-tb-note-add { list-style-image: url('chrome://zotero/skin/toolbar-note-add@2x.png'); }
-	#zotero-menuitem-note { list-style-image: url('chrome://zotero/skin/treeitem-note@2x.png'); }
-	.zotero-menuitem-new-saved-search { list-style-image: url('chrome://zotero/skin/treesource-search@2x.png'); }
-	.zotero-menuitem-show-duplicates { list-style-image: url('chrome://zotero/skin/treesource-duplicates@2x.png'); }
-	.zotero-menuitem-show-unfiled { list-style-image: url('chrome://zotero/skin/treesource-unfiled@2x.png'); }
-	.zotero-menuitem-show-retracted  { list-style-image: url('chrome://zotero/skin/cross@2x.png'); }
-	.zotero-menuitem-sync  { list-style-image: url(chrome://zotero/skin/arrow_rotate_static@2x.png); }
-	.zotero-menuitem-new-collection { list-style-image: url('chrome://zotero/skin/toolbar-collection-add@2x.png'); }
-	.zotero-menuitem-edit-collection { list-style-image: url('chrome://zotero/skin/toolbar-collection-edit@2x.png'); }
-	.zotero-menuitem-edit-feed { list-style-image: url('chrome://zotero/skin/toolbar-feed-edit@2x.png'); }
-	.zotero-menuitem-refresh-feed { list-style-image: url('chrome://zotero/skin/arrow_refresh@2x.png'); }
-	.zotero-menuitem-delete-collection, .zotero-menuitem-remove-items  { list-style-image: url('chrome://zotero/skin/toolbar-collection-delete@2x.png'); }
-	.zotero-menuitem-show-in-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
-	.zotero-menuitem-move-to-trash { list-style-image: url('chrome://zotero/skin/treesource-trash-full@2x.png'); }
-	.zotero-menuitem-attach-note { list-style-image: url('chrome://zotero/skin/toolbar-note-add@2x.png'); }
-	.zotero-menuitem-attach { list-style-image: url('chrome://zotero/skin/attach@2x.png'); }
-	.zotero-menuitem-attachments-file { list-style-image: url('chrome://zotero/skin/treeitem@2x.png'); }
-	.zotero-menuitem-attachments-link { list-style-image: url('chrome://zotero/skin/treeitem-attachment-link@2x.png'); }
-	.zotero-menuitem-attachments-web-link { list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link@2x.png'); }
-	.zotero-menuitem-find-pdf  { list-style-image: url('chrome://zotero/skin/treeitem-attachment-pdf@2x.png'); }
-	.zotero-menuitem-create-report { list-style-image: url('chrome://zotero/skin/treeitem-report@2x.png'); }
-	#zotero-tb-advanced-search { list-style-image: url('chrome://zotero/skin/toolbar-advanced-search@2x.png'); }
-	#zotero-tb-locate { list-style-image: url('chrome://zotero/skin/toolbar-go-arrow@2x.png'); }
-	#zotero-tb-sync-stop { list-style-image: url(chrome://zotero/skin/control_stop_blue@2x.png); }
-	#zotero-tb-pq-recognize  { list-style-image: url(chrome://zotero/skin/pdf-search@2x.png); }
-	#zotero-tb-sync-error  { list-style-image: url(chrome://zotero/skin/error@2x.png); }
-	#zotero-tb-sync-error[state=warning]  { list-style-image: url(chrome://zotero/skin/warning@2x.png); }
-	#zotero-tb-sync  { list-style-image: url(chrome://zotero/skin/arrow_rotate_static@2x.png); }
-	#zotero-tb-sync[status=animate]  { list-style-image: url(chrome://zotero/skin/arrow_rotate_animated@2x.png); }
 }

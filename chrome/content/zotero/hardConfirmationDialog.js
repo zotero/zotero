@@ -31,7 +31,7 @@ Zotero.HardConfirmationDialog = {
 
 		this.io = window.arguments[0];
 		
-		Zotero.setFontSize(document.documentElement);
+		Zotero.UIProperties.registerRoot(document.documentElement);
 		var dialog = document.getElementById('commonDialog');
 		var vbox = document.getElementById('infoContainer');
 		var sep = vbox.firstChild;

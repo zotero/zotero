@@ -11,11 +11,16 @@
 	title="&zotero.feedSettings.title;" buttons="cancel,accept"
 	buttonlabelaccept="&zotero.feedSettings.saveButton.label;"
 	id="zotero-feed-settings"
+	drawintitlebar-platforms="mac"
 	onload="Zotero_Feed_Settings.init()">
 <dialog>
-	<script src="include.js"/>
-	<script src="chrome://zotero/content/customElements.js"/>
-	<script src="feedSettings.js"/>
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/feedSettings.js", this);
+	</script>
 	
 	<html:div class="form-grid">
 		<hbox align="center">
@@ -23,12 +28,12 @@
 		</hbox>
 		<html:input id="feed-url"
 				oninput="Zotero_Feed_Settings.invalidateURL();Zotero_Feed_Settings.validateURL()"
-				autofocus="true" style="width: 30em; max-width: 30em; -moz-box-flex: 1;"/>
+				autofocus="true" style="width: 30em; max-width: 30em;"/>
 
 		<hbox align="center">
 			<label value="&zotero.feedSettings.title.label;" control="feed-title"/>
 		</hbox>
-		<html:input id="feed-title" style="-moz-box-flex: 1;"/>
+		<html:input id="feed-title" style="max-width: 30em;" />
 	</html:div>
 	<vbox id="advanced-options" class="zotero-advanced-options">
 		<hbox onclick="Zotero_Feed_Settings.toggleAdvancedOptions()"  class="zotero-advanced-options-label">

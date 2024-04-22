@@ -63,11 +63,7 @@
 <!ENTITY addons.label "Extensões">
 <!ENTITY developer.label "Desenvolvedor">
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimizar">
 <!ENTITY bringAllToFront.label "Trazer tudo para a frente">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Janela">
 
 <!ENTITY helpMenu.label "Ajuda">
 <!ENTITY helpMenu.accesskey "H">

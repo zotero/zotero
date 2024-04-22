@@ -61,6 +61,7 @@ def main():
         ["sl", "https://addons.mozilla.org/en-US/firefox/addon/slovenski-jezik-language-pa/", "sl-SI"],
         ["sr", "https://addons.mozilla.org/en-US/firefox/addon/%D1%81%D1%80%D0%BF%D1%81%D0%BA%D0%B8-sr-language-pack/", "sr-RS"],
         ["sv-SE", "https://addons.mozilla.org/en-US/firefox/addon/svenska-se-language-pack/", "sv-SE"],
+        ["ta", "https://addons.mozilla.org/en-US/firefox/addon/tamil-language-pack-1/", "ta"],
         ["th", "https://addons.mozilla.org/en-US/firefox/addon/thai-language-pack/", "th-TH"],
         ["tr", "https://addons.mozilla.org/en-US/firefox/addon/t%C3%BCrk%C3%A7e-tr-language-pack/", "tr-TR"],
         ["uk", "https://addons.mozilla.org/en-US/firefox/addon/ukrainian-language-pack/", "uk-UA"],
@@ -73,7 +74,7 @@ def main():
     entries = [
         #"chrome/{0}/locale/{0}/global/dateFormat.properties",
         #"chrome/{0}/locale/{0}/mozapps/update/updates.properties",
-        "chrome/{0}/locale/{0}/global/editMenuOverlay.dtd",
+        #"chrome/{0}/locale/{0}/global/editMenuOverlay.dtd",
         {
             "file": "chrome/{0}/locale/{0}/global/intl.properties",
             "grep_patterns": [
@@ -81,7 +82,9 @@ def main():
                 "^intl.accept_languages"
             ]
         },
+        "browser/localization/{0}/browser/browserSets.ftl",
         "browser/localization/{0}/browser/menubar.ftl",
+        "browser/localization/{0}/devtools/client/toolbox.ftl",
         "localization/{0}/toolkit/global/textActions.ftl",
         "localization/{0}/toolkit/global/wizard.ftl"
     ]
@@ -124,7 +127,7 @@ def main():
             
             html = str(response.read(), 'utf-8')
             xpi_url = json.loads(
-                '"' + re.match('.*(https:[^"]+\.xpi)', html, flags=re.DOTALL).group(1) + '"'
+                '"' + re.match('.*(https:[^"]+\\.xpi)', html, flags=re.DOTALL).group(1) + '"'
             )
             file_name = xpi_url.split("/")[-1]
             pack_file = os.path.join(pack_dir, file_name)

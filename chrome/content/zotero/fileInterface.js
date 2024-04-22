@@ -23,9 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
-import FilePicker from 'zotero/modules/filePicker';
+var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import { ImportCitaviAnnotatons } from 'zotero/import/citavi';
 
 /****Zotero_File_Exporter****
@@ -280,8 +279,8 @@ var Zotero_File_Interface = new function() {
 					let str = Components.classes['@mozilla.org/supports-string;1']
 						.createInstance(Components.interfaces.nsISupportsString);
 					str.data = text;
-					transferable.addDataFlavor('text/unicode');
-					transferable.setTransferData('text/unicode', str, text.length * 2);
+					transferable.addDataFlavor('text/plain');
+					transferable.setTransferData('text/plain', str, text.length * 2);
 
 					// Add HTML
 					str = Components.classes['@mozilla.org/supports-string;1']
@@ -321,15 +320,15 @@ var Zotero_File_Interface = new function() {
 		Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 			.getService(Components.interfaces.nsIOSFileConstantsService)
 			.init();
-		var path = OS.Constants.Path.homeDir;
+		var path = FileUtils.getDir('Home', []).path;
 		if (Zotero.isMac) {
-			path = OS.Path.join(path, 'Library', 'Application Support', 'Mendeley Desktop');
+			path = PathUtils.join(path, ['Library', 'Application Support', 'Mendeley Desktop']);
 		}
 		else if (Zotero.isWin) {
-			path = OS.Path.join(path, 'AppData', 'Local', 'Mendeley Ltd', 'Mendeley Desktop');
+			path = PathUtils.join(path, ['AppData', 'Local', 'Mendeley Ltd', 'Mendeley Desktop']);
 		}
 		else if (Zotero.isLinux) {
-			path = OS.Path.join(path, '.local', 'share', 'data', 'Mendeley Ltd.', 'Mendeley Desktop');
+			path = PathUtils.join(path, ['.local', 'share', 'data', 'Mendeley Ltd.', 'Mendeley Desktop']);
 		}
 		else {
 			throw new Error("Invalid platform");
@@ -391,7 +390,7 @@ var Zotero_File_Interface = new function() {
 		args.wrappedJSObject = args;
 		
 		Services.ww.openWindow(null, "chrome://zotero/content/import/importWizard.xhtml",
-			"importFile", "chrome,dialog=yes,centerscreen,width=600,height=400,modal", args);
+			"importFile", "chrome,dialog=yes,centerscreen,modal", args);
 	};
 	
 	
@@ -503,10 +502,9 @@ var Zotero_File_Interface = new function() {
 	 * Imports from clipboard
 	 */
 	this.importFromClipboard = Zotero.Promise.coroutine(function* () {
-		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
+		var str = Zotero.Utilities.Internal.getClipboard("text/plain");
 		if(!str) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
+			var ps = Services.prompt;
 			ps.alert(
 				null,
 				Zotero.getString('general.error'),
@@ -564,8 +562,7 @@ var Zotero_File_Interface = new function() {
 				yield onBeforeImport(false);
 			}
 			
-			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
+			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 			let index = ps.confirmEx(
@@ -635,7 +632,7 @@ var Zotero_File_Interface = new function() {
 			progressWin.changeHeadline(Zotero.getString('fileInterface.importing'));
 			let icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
 			progress = new progressWin.ItemProgress(
-				icon, translation.path ? OS.Path.basename(translation.path) : translators[0].label
+				icon, translation.path ? PathUtils.filename(translation.path) : translators[0].label
 			);
 			progressWin.show();
 			
@@ -826,8 +823,8 @@ var Zotero_File_Interface = new function() {
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = output;
-		transferable.addDataFlavor("text/unicode");
-		transferable.setTransferData("text/unicode", str, output.length * 2);
+		transferable.addDataFlavor("text/plain");
+		transferable.setTransferData("text/plain", str, output.length * 2);
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		
@@ -920,8 +917,12 @@ var Zotero_File_Interface = new function() {
 			}
 			
 			browser.addEventListener("pageshow", listener, false);
-			browser.loadURIWithFlags("data:text/html;charset=utf-8,"+encodeURI(bibliography),
-				Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, "utf-8", null);
+			browser.loadURI(
+				Services.io.newURI("data:text/html;charset=utf-8," + encodeURI(bibliography)),
+				{
+					flags: Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY
+				}
+			);
 		} else if(io.method == "save-as-html") {
 			let fStream = await _saveBibliography(name, "HTML");
 			

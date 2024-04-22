@@ -28,38 +28,38 @@
  *
  * @constructor
  * @param {browser} [browser] Hidden browser object
- * @param {String|nsIURI} uri URI of page to manage cookies for (cookies for domains that are not 
+ * @param {String|nsIURI} uri URI of page to manage cookies for (cookies for domains that are not
  *                     subdomains of this URI are ignored)
  * @param {String} cookieData Cookies with which to initiate the sandbox
  * @param {String} userAgent User agent to use for sandboxed requests
  */
-Zotero.CookieSandbox = function(browser, uri, cookieData, userAgent) {
-	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
-		getService(Components.interfaces.nsIObserverService);
-	
-	if(uri instanceof Components.interfaces.nsIURI) {
-		this.URI = uri;
-	} else {
-		this.URI = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService)
-			.newURI(uri, null, null);
-	}
-	
+Zotero.CookieSandbox = function (browser, uri, cookieData, userAgent) {
 	this._cookies = {};
-	if(cookieData) {
+	if (cookieData) {
+		let URI;
+		if (uri instanceof Components.interfaces.nsIURI) {
+			URI = uri;
+		} else {
+			URI = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService)
+				.newURI(uri, null, null);
+		}
 		var splitCookies = cookieData.split(/;\s*/);
 		for (let cookie of splitCookies) {
-			this.setCookie(cookie, this.URI.host);
+			this.setCookie(cookie, URI.host);
 		}
 	}
 	
-	if(userAgent) this.userAgent = userAgent;
-	
+	if (userAgent) this.userAgent = userAgent;
+
+	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
+	getService(Components.interfaces.nsIObserverService);
+
 	Zotero.CookieSandbox.Observer.register();
-	if(browser) {
+	if (browser) {
 		this.attachToBrowser(browser);
 	}
-}
+};
 
 /**
  * Normalizes the host string: lower-case, remove leading period, some more cleanup
@@ -91,6 +91,12 @@ Zotero.CookieSandbox.generateCookieString = function(cookies) {
 }
 
 Zotero.CookieSandbox.prototype = {
+	clone() {
+		let clone = new Zotero.CookieSandbox();
+		clone._cookies = Zotero.Utilities.deepCopy(this._cookies);
+		clone.userAgent = this.userAgent;
+		return clone;
+	},
 	/**
 	 * Adds cookies to this CookieSandbox based on a cookie header
 	 * @param {String} cookieString;
@@ -164,8 +170,7 @@ Zotero.CookieSandbox.prototype = {
 	 * @param {nsIInterfaceRequestor} ir
 	 */
 	"attachToInterfaceRequestor": function(ir) {
-		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.push(Cu.getWeakReference(ir));
-		Zotero.CookieSandbox.Observer.trackedInterfaceRequestorSandboxes.push(this);
+		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.set(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor), this);
 	},
 	
 	/**
@@ -276,21 +281,19 @@ Zotero.CookieSandbox.prototype = {
  * nsIObserver implementation for adding, clearing, and slurping cookies
  */
 Zotero.CookieSandbox.Observer = new function() {
-	const observeredTopics = ["http-on-examine-response", "http-on-modify-request", "quit-application"];
+	const observeredTopics = ["http-on-examine-response", "http-on-modify-request"];
 	
 	var observerService = Components.classes["@mozilla.org/observer-service;1"].
 			getService(Components.interfaces.nsIObserverService),
 		observing = false;
+	this.trackedBrowsers = new WeakMap();
+	this.trackedInterfaceRequestors = new WeakMap();
 	
 	/**
 	 * Registers cookie manager and observer, if necessary
 	 */
-	this.register = function(CookieSandbox) {
-		this.trackedBrowsers = new WeakMap();
-		this.trackedInterfaceRequestors = [];
-		this.trackedInterfaceRequestorSandboxes = [];
-		
-		if(!observing) {
+	this.register = function () {
+		if (!observing) {
 			Zotero.debug("CookieSandbox: Registering observers");
 			for (let topic of observeredTopics) observerService.addObserver(this, topic, false);
 			observing = true;
@@ -300,62 +303,51 @@ Zotero.CookieSandbox.Observer = new function() {
 	/**
 	 * Implements nsIObserver to watch for new cookies and to add sandboxed cookies
 	 */
-	this.observe = function(channel, topic) {
+	this.observe = function (channel, topic) {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-		var trackedBy, tested, browser, callbacks,
+		var trackedBy, tested, browser,
 			channelURI = channel.URI.hostPort,
 			notificationCallbacks = channel.notificationCallbacks;
 		
+		// Zotero.debug(`CookieSandbox: Observing ${topic} at ${channelURI}`, 5);
+		
 		// try the notification callbacks
-		if(notificationCallbacks) {
-			for(var i=0; i<this.trackedInterfaceRequestors.length; i++) {
-				// Interface requestors are stored as weak references, so we have to see
-				// if they still point to something
-				var ir = this.trackedInterfaceRequestors[i].get();
-				if(!ir) {
-					// The interface requestor is gone, so remove it from the list
-					this.trackedInterfaceRequestors.splice(i, 1);
-					this.trackedInterfaceRequestorSandboxes.splice(i, 1);
-					i--;
-				} else {
-					let tracked = ir === notificationCallbacks;
-					try {
-						tracked = ir === notificationCallbacks.getInterface(Ci.nsIWebBrowserPersist);
-					} catch (e) { }
-					
-					if (tracked) {
-						// We are tracking this interface requestor
-						trackedBy = this.trackedInterfaceRequestorSandboxes[i];
-						break;
-					}
-				}
-			}
-			
-			if(trackedBy) {
+		if (notificationCallbacks) {
+			trackedBy = this.trackedInterfaceRequestors.get(notificationCallbacks);
+			if (trackedBy) {
 				tested = true;
-			} else {
+			}
+			else {
 				// try the browser
 				try {
 					browser = notificationCallbacks.getInterface(Ci.nsILoadContext).topFrameElement;
-				} catch(e) {}
-				if(browser) {
+				}
+				catch (e) {}
+				if (browser) {
 					tested = true;
+					// Zotero.debug(`CookieSandbox: Directly found the browser ${browser.browserId} for ${channelURI}`, 5);
 					trackedBy = this.trackedBrowsers.get(browser);
-				} else {
+				}
+				else {
 					// try the document for the load group
 					try {
 						browser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
 							.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
-					} catch(e) {}
-					if(browser) {
+					}
+					catch (e) {}
+					if (browser) {
 						tested = true;
+						// Zotero.debug(`CookieSandbox: Found the browser via doc of load group for ${channelURI}`, 5);
 						trackedBy = this.trackedBrowsers.get(browser);
-					} else {
+					}
+					else {
 						// try getting as an XHR or nsIWBP
 						try {
 							notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+							// Zotero.debug(`CookieSandbox: Found the browser via XHR or nsIWBP for ${channelURI}`, 5);
 							tested = true;
-						} catch(e) {}
+						}
+						catch (e) {}
 					}
 				}
 			}
