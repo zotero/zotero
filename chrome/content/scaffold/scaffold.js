@@ -651,7 +651,7 @@ var Scaffold = new function () {
 			io.translatorProvider = _translatorProvider;
 			io.url = io.rootUrl = _browser.currentURI.spec;
 			window.openDialog("chrome://scaffold/content/load.xhtml",
-				"_blank", "chrome,modal,resizable=no", io);
+				"_blank", "chrome,centerscreen,modal,resizable=no", io);
 			translator = io.dataOut;
 		}
 		else {
