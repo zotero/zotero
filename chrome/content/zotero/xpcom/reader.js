@@ -1425,8 +1425,7 @@ class ReaderPreview extends ReaderInstance {
 	}
 
 	_isReadOnly() {
-		// updateAnnotations is only allowed in editable reader
-		return false;
+		return true;
 	}
 
 	async _getState() {
