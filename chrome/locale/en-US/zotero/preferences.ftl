@@ -41,11 +41,3 @@ preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
-
-preferences-plus-btn =
-    .aria-label = { general-add  }
-    .label = +
-
-preferences-minus-btn =
-    .aria-label = { general-remove }
-    .label = -

@@ -96,9 +96,8 @@
 			<button disabled="true" id="quickCopy-edit" label="&zotero.general.edit;"
 				onclick="if (!this.disabled) Zotero_Preferences.Export.showQuickCopySiteEditor(true)"/>
 			<spacer flex="1"/>
-			<button disabled="true" id="quickCopy-delete" label="-" data-l10n-id="preferences-minus-btn" onclick="if (!this.disabled) Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
-			<button label="+" data-l10n-id="preferences-plus-btn"
-				onclick="Zotero_Preferences.Export.showQuickCopySiteEditor()">+</button>
+			<button disabled="true" id="quickCopy-delete" label="-" onclick="if (!this.disabled) Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
+			<button label="+" id="quickCopy-add" onclick="Zotero_Preferences.Export.showQuickCopySiteEditor()"></button>
 		</hbox>
 		
 		<hbox align="center">
