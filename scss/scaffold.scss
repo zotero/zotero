@@ -31,6 +31,7 @@ $scaffold-toolbarbutton-icons: (
 
 #scaffold {
 	min-height: 600px;
+	@include contain-richlistbox;
 }
 
 .menubar-container {
@@ -178,4 +179,5 @@ vbox > splitter {
 
 #editor-tests {
 	flex: 2;
+	margin-top: 3px;
 }

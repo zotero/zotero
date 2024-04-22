@@ -308,3 +308,12 @@
 	--material-border-quinary: 1px solid var(--fill-quinary);
 	--material-border-quarternary: 1px solid var(--fill-quarternary);
 }
+
+@mixin contain-richlistbox {
+	// richlistbox elements are crazy and will expand beyond the window size
+	// unless all/most elements in the hierarchy that contain that
+	// richlistbox have a min-height: 0 set
+	vbox, hbox {
+		min-height: 0;
+	}
+}
