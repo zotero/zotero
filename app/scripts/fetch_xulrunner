@@ -429,9 +429,9 @@ if [ $BUILD_MAC == 1 ]; then
 			
 			# Verify hash
 			if [[ "`uname`" = "Darwin" ]]; then
-				shasum=sha256sum
-			else
 				shasum=shasum
+			else
+				shasum=sha256sum
 			fi
 			echo
 			echo "$custom_components_hash_mac  MacOS.tar.xz" | $shasum -c -
