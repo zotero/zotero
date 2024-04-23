@@ -479,6 +479,8 @@ quickformat-aria-input = Citation item search input. Type to search for an item 
 quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
+quickformat-locator-type = Locator type:
+quickformat-locator-value = Locator value:
 
 quicksearch-mode =
     .aria-label = Quick Search mode
