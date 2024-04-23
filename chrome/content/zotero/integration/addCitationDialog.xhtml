@@ -111,15 +111,12 @@
 			</vbox>
 			<separator flex="4"/>
 			<vbox flex="1">
-				<hbox align="center">
-					<label data-l10n-id="quickformat-locator-type" control="label"></label>
-					<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="0" native="true">
+				<hbox align="stretch">
+					<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="0" native="true" data-l10n-id="quickformat-locator-type">
 						<menupopup id="locator-type-popup"/>
 					</menulist>
-				</hbox>
-				<hbox align="center">
-					<label data-l10n-id="quickformat-locator-value" control="locator"></label>
-					<html:input oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="0"/>
+					<label id="locator_input_label" data-l10n-id="quickformat-locator-value" hidden="true"></label>
+					<html:input aria-labelledby="label locator_input_label" oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"  onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="0"/>
 				</hbox>
 				<separator style="height: 2px" flex="1"/>
 				<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="0" native="true"/>
