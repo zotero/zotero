@@ -96,14 +96,14 @@
 		<hbox align="stretch" style="margin-top: 8px">
 			<vbox flex="1">
 				<hbox align="center">
-					<label value="&zotero.citation.prefix.label;"/>
-					<html:input type="text" class="fix" id="prefix" tabindex="3"
+					<label value="&zotero.citation.prefix.label;" control="prefix"/>
+					<html:input type="text" class="fix" id="prefix" tabindex="0"
 								oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
 								onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
 				</hbox>
 				<hbox align="center">
-					<label value="&zotero.citation.suffix.label;"/>
-					<html:input type="text" class="fix" id="suffix" tabindex="4"
+					<label value="&zotero.citation.suffix.label;" control="suffix"/>
+					<html:input type="text" class="fix" id="suffix" tabindex="0"
 								oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
 								onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
 				</hbox>
@@ -111,14 +111,18 @@
 			</vbox>
 			<separator flex="4"/>
 			<vbox flex="1">
-				<hbox align="stretch">
-					<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5" native="true">
+				<hbox align="center">
+					<label data-l10n-id="quickformat-locator-type" control="label"></label>
+					<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="0" native="true">
 						<menupopup id="locator-type-popup"/>
 					</menulist>
-					<html:input oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2"/>
+				</hbox>
+				<hbox align="center">
+					<label data-l10n-id="quickformat-locator-value" control="locator"></label>
+					<html:input oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="0"/>
 				</hbox>
 				<separator style="height: 2px" flex="1"/>
-				<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6" native="true"/>
+				<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="0" native="true"/>
 			</vbox>
 		</hbox>
 

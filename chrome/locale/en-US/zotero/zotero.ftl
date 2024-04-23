@@ -482,6 +482,8 @@ quickformat-aria-input = Type to search for an item to include in this citation.
 quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
 quickformat-accept = 
     .tooltiptext = Save edits to this citation
+quickformat-locator-type = Locator type:
+quickformat-locator-value = Locator value:
 
 insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
 insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
