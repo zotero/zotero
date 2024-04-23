@@ -1717,16 +1717,15 @@ var Zotero_QuickFormat = new function () {
 		let { lastBubble, startOfTheLine } = getLastBubbleBeforePoint(clickX, clickY);
 		// If click happened right before another input, focus that input
 		// instead of adding another one. There may be a br node on the way, so we have to check
-		// more than just the next node.
-		if (lastBubble) {
-			let nextNode = lastBubble.nextElementSibling;
-			while (nextNode && !nextNode.classList.contains("bubble")) {
-				if (isInput(nextNode)) {
-					nextNode.focus();
-					return;
-				}
-				nextNode = nextNode.nextElementSibling;
+		// more than just the next node. If there is no lastBubble and there is an input
+		// at the start of the editor, focus it.
+		let nextNode = lastBubble ? lastBubble.nextElementSibling : editor.firstChild;
+		while (nextNode && !nextNode.classList.contains("bubble")) {
+			if (isInput(nextNode)) {
+				nextNode.focus();
+				return;
 			}
+			nextNode = nextNode.nextElementSibling;
 		}
 		let newInput = _createInputField();
 		let currentInput = _getCurrentInput() || _lastFocusedInput;
