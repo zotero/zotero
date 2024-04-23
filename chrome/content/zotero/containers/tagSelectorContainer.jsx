@@ -86,7 +86,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	isTagListEmpty() {
-		this.tagListRef.current.isEmpty();
+		return this.tagListRef.current.isEmpty();
 	}
 
 	componentDidCatch(error, info) {
@@ -107,6 +107,12 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			this.tagListRef.current.scrollToTop();
 			this.prevTreeViewID = this.collectionTreeRow.id;
 		}
+	}
+
+	getSnapshotBeforeUpdate(_) {
+		// Clear the focused tag's record if the props change
+		this.tagListRef.current.clearRecordedFocusedTag();
+		return null;
 	}
 	
 	// Update trigger #1 (triggered by ZoteroPane)

@@ -349,7 +349,6 @@ class TagList extends React.PureComponent {
 			if (tagCount < this.prevTagCount - 1) {
 				this.scrollToTopOnNextUpdate = true;
 			}
-			this.clearRecordedFocusedTag();
 			this.prevTagCount = tagCount;
 			this.updatePositions();
 			tagList = (
