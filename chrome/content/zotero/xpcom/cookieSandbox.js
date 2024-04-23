@@ -170,7 +170,10 @@ Zotero.CookieSandbox.prototype = {
 	 * @param {nsIInterfaceRequestor} ir
 	 */
 	"attachToInterfaceRequestor": function(ir) {
-		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.set(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor), this);
+		if (typeof ir.QueryInterface === 'function') {
+			ir = ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor);
+		}
+		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.set(ir, this);
 	},
 	
 	/**
