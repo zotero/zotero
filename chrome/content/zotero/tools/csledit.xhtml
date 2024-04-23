@@ -41,19 +41,24 @@
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="csledit.js"/>
 	
+	<linkset>
+		<html:link rel="localization" href="zotero.ftl"/>
+	</linkset>
+
 	<vbox flex="1">
 		<vbox class="csl-edit-toolbars">
 			<hbox class="csl-edit-toolbar">
 				<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Editor.refresh()"/>
 				<button id="zotero-csl-save" label="&zotero.general.saveAs;" oncommand="Zotero_CSL_Editor.save()"/>
 				<html:div class="divider" />
-				<menulist id="zotero-csl-page-type" oncommand="Zotero_CSL_Editor.refresh()" native="true" />
+				<menulist id="zotero-csl-page-type" oncommand="Zotero_CSL_Editor.refresh()" native="true" data-l10n-id="styleEditor-locatorType"/>
 				<label value=":" />
-				<html:input size="5" id="preview-pages" oninput="Zotero_CSL_Editor.refreshDebounced()"/>
+				<label id="locator-input" data-l10n-id="styleEditor-locatorInput" hidden="true"/>
+				<html:input size="5" id="preview-pages" oninput="Zotero_CSL_Editor.refreshDebounced()" aria-labelledby="zotero-csl-page-type locator-input"/>
 				<html:div class="divider" />
 				<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" native="true" />
 				<html:div class="divider" />
-				<label value="&styles.editor.citePosition;" />
+				<label value="&styles.editor.citePosition;" control="zotero-ref-position"/>
 				<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()" native="true">
 					<menupopup>
 						<menuitem label="first" value="0"/>
@@ -65,16 +70,19 @@
 				</menulist>
 			</hbox>
 			<hbox class="csl-edit-toolbar">
+				<label data-l10n-id="styleEditor-citationStyle" control="zotero-csl-list"/>
 				<menulist id="zotero-csl-list" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)" native="true"/>
+				<html:div class="divider" />
+				<label data-l10n-id="styleEditor-locale" control="locale-menu"/>
 				<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.refresh()" native="true" />
 			</hbox>
 		</vbox>
 		<iframe id="zotero-csl-editor-iframe" src="chrome://scaffold/content/monaco/monaco.html" flex="1"
-			onmousedown="this.focus()"/>
+			onmousedown="this.focus()" data-l10n-id="styleEditor-editor"/>
 		<splitter id="csledit-splitter" collapse="before" persist="state" orient="vertical">
 			<grippy/>
 		</splitter>
-		<iframe id="zotero-csl-preview-box" flex="1" overflow="auto" type="content"/>
+		<iframe id="zotero-csl-preview-box" flex="1" overflow="auto" type="content" data-l10n-id="styleEditor-preview"/>
 	</vbox>
 	
 	<keyset>
