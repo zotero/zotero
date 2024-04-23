@@ -7,6 +7,7 @@ return-or-enter =
 
 general-remove = Remove
 general-add = Add
+general-help = Help
 
 menu-print =
     .label = { general-print }
@@ -242,10 +243,10 @@ rtfScan-complete-page =
 
 rtfScan-complete-page-description = Your document has now been scanned and processed. Please ensure that it is formatted correctly.
 
-runJS-title = Run Javascript
-runJS-editor-label = Javascript code editor
+runJS-title = Run JavaScript
+runJS-editor-label = Code:
 runJS-run = Run
-runJS-help = Help
+runJS-help = { general-help }
 runJS-result = {
     $type ->
         [async] Return value:
