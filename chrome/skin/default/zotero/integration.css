@@ -263,6 +263,7 @@ richlistitem[selected="true"] {
 .citation-dialog.reference-list {
 	margin: 0;
 	padding: 0;
+	max-height: 100%;
 	-moz-user-focus: ignore;
 }
 
