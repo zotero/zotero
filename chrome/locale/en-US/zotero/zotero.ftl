@@ -16,6 +16,9 @@ general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 
+citation-style-label = Citation Style:
+language-label = Language:
+
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -276,8 +279,8 @@ runJS-run-async = Run as async function
 
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = Citation Style:
-bibliography-locale-label = Language:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = Advanced Options
 bibliography-outputMode-label = Output Mode:
@@ -310,6 +313,16 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor = 
+    .aria-label = Style editor
+styleEditor-preview = 
+    .aria-label = Preview
 
 integration-prefs-displayAs-label = Display Citations As:
 integration-prefs-footnotes = 
