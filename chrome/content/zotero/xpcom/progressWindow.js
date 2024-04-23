@@ -45,6 +45,9 @@ Zotero.ProgressWindowSet = new function() {
 	}
 	
 	
+	/**
+	 * @progressWin {Window} - DOM Window
+	 */
 	function tile(progressWin) {
 		var parent = progressWin.opener;
 		var y_sub = null;
@@ -477,9 +480,6 @@ Zotero.ProgressWindow = function(options = {}) {
 	}
 	
 	function _move() {
-		// sizeToContent() fails in FF3 with multiple lines
-		// if we don't change the height
-		_progressWindow.outerHeight = _progressWindow.outerHeight + 1;
 		_progressWindow.sizeToContent();
 		Zotero.ProgressWindowSet.tile(_progressWindow);
 	}
