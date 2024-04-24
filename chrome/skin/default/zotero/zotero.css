@@ -42,15 +42,6 @@ label.zotero-text-link {
 	font-weight: 600;
 }
 
-#zotero-progress-box
-{
-	border: 2px solid #7a0000;
-	margin: 0;
-	min-height: 50px;
-	width: 250px;
-	padding: 3px 0 3px 0;
-}
-
 #zotero-progress-text-headline
 {
 	font-weight: 600;
@@ -84,16 +75,6 @@ label.zotero-text-link {
 {
 	width: 210px;
 	margin-left: 5px;
-}
-
-#zotero-progress-box description
-{
-	width: 220px;
-}
-
-#zotero-progress-box description label
-{
-	margin: 0;
 }
 
 .zotero-scrape-popup-library
