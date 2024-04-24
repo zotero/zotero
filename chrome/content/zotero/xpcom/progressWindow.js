@@ -154,7 +154,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	/**
 	 * Changes the "headline" shown at the top of the progress window
 	 */
-	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(text, icon, postText) {
+	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(text, cssIconKey, postText) {
 		var doc = _progressWindow.document,
 			headline = doc.getElementById("zotero-progress-text-headline");
 		while(headline.hasChildNodes()) headline.removeChild(headline.firstChild);
@@ -164,18 +164,19 @@ Zotero.ProgressWindow = function(options = {}) {
 		preNode.setAttribute("crop", "end");
 		headline.appendChild(preNode);
 		
-		if(icon) {
-			var img = doc.createXULElement("image");
-			img.width = 16;
-			img.height = 16;
-			img.setAttribute("src", icon);
-			headline.appendChild(img);
+		if(cssIconKey) {
+			// No getCSSIcon() without a window context
+			let iconEl = doc.createElement('span');
+			iconEl.classList.add('icon');
+			iconEl.classList.add('icon-16');
+			iconEl.classList.add('icon-css');
+			iconEl.classList.add(`icon-${cssIconKey}`);
+			headline.appendChild(iconEl);
 		}
 		
 		if(postText) {
 			var postNode = doc.createXULElement("label");
-			postNode.style.marginLeft = 0;
-			postNode.setAttribute("value", " "+postText);
+			postNode.setAttribute("value", postText);
 			postNode.setAttribute("crop", "end");
 			postNode.setAttribute("flex", "1");
 			headline.appendChild(postNode);
@@ -406,9 +407,11 @@ Zotero.ProgressWindow = function(options = {}) {
 			name = Zotero.getString("pane.collections.library");
 		}
 		
-		self.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-			"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
-			name+"\u2026");
+		self.changeHeadline(
+			Zotero.getString("ingester.scrapingTo"),
+			collection ? 'collection' : 'library',
+			name + "\u2026"
+		);
 	};
 	
 	this.Translation.doneHandler = function(obj, returnValue) {		
