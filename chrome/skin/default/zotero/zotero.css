@@ -1,20 +1,3 @@
-/* Font sizes */
-*[zoteroFontSize=medium] treechildren::-moz-tree-row
-{
-	height: 1.5em;
-}
-
-*[zoteroFontSize=large] treechildren::-moz-tree-row, *[zoteroFontSize=x-large] treechildren::-moz-tree-row
-{
-	height: 1.5em;
-}
-
-*[zoteroFontSize=large] .treecol-text, *[zoteroFontSize=x-large] .treecol-text
-{
-	margin:0;
-	padding:0;
-}
-
 groupbox > label > h2, groupbox > * > label > h2 {
 	font-size: 14px;
 	margin-top: 1em;
@@ -48,11 +31,6 @@ label.zotero-text-link {
 	margin-bottom: 2px;
 }
 
-.zotero-progress-icon-headline {
-	width: 16px;
-	height: 16px;
-}
-
 .zotero-progress-item-icon
 {
 	width: 16px;
@@ -77,30 +55,10 @@ label.zotero-text-link {
 	margin-left: 5px;
 }
 
-.zotero-scrape-popup-library
-{
-	list-style-image: url('chrome://zotero/skin/treesource-library.png');
-}
-
-.zotero-scrape-popup-collection
-{
-	list-style-image: url('chrome://zotero/skin/treesource-collection.png');
-}
-
 .zotero-warning {
   font-weight: 600;
   font-size: 1.25em;
   margin-bottom: 1em;
-}
-
-.zotero-small-progress-indicator {
-	list-style-image: url(chrome://global/skin/icons/notloading_16.png);
-	margin-left: -2px;
-	margin-right: -2px;
-}
-
-.zotero-small-progress-indicator[status=animate] {
-	list-style-image: url(chrome://global/skin/icons/loading_16.png);
 }
 
 #zotero-note-window {
@@ -168,11 +126,4 @@ zoterosearch .menulist-icon {
 .form-grid {
 	display: grid;
 	grid-template-columns: max-content 1fr;
-}
-
-
-/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.25dppx) {
-	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
-	.zotero-scrape-popup-collection { list-style-image: url('chrome://zotero/skin/treesource-collection@2x.png'); }
 }
