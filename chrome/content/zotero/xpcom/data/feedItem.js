@@ -245,7 +245,7 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 			Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url') + 
 				' -- cloning item instead', 2);
 			let item = await this.clone(libraryID, collectionID, browser);
-			progressWindow.Translation.itemDoneHandler()(null, null, item);
+			progressWindow.Translation.itemDoneHandler()(null, item, null);
 			progressWindow.Translation.doneHandler(null, true);
 			return;
 		}
@@ -257,7 +257,7 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 			}).then(items => items ? items[0] : false);
 			if (!result) {
 				let item = await this.clone(libraryID, collectionID, browser);
-				progressWindow.Translation.itemDoneHandler()(null, null, item);
+				progressWindow.Translation.itemDoneHandler()(null, item, null);
 				progressWindow.Translation.doneHandler(null, true);
 				return;
 			}
