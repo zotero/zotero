@@ -83,7 +83,7 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 	};
 	
 	function _onWindowLoaded() {
-		var rootElement = _progressWindow.document.getElementById('zotero-progress-box');
+		var rootElement = _progressWindow.document.getElementById('progress-queue-root');
 		Zotero.UIProperties.registerRoot(rootElement);
 		
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');

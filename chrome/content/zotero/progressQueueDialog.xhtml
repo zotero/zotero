@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/progressQueueDialog.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -11,15 +12,15 @@
 	style="display: flex;">
 	<script src="include.js"></script>
 	<script src="progressQueueDialog.js"/>
-	<vbox id="zotero-progress-box" style="padding:10px" flex="1">
+	<vbox id="progress-queue-root" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
-			<html:progress id="progress-indicator" max="100" style="flex: 1;"/>
+			<html:progress id="progress-indicator" max="100"/>
 			<button id="cancel-button" label="&zotero.general.cancel;"/>
 			<button id="minimize-button" label="&zotero.general.minimize;"/>
 			<button id="close-button" label="&zotero.general.close;"/>
 		</hbox>
-		<hbox class="virtualized-table-container" flex="1" height="200px">
+		<hbox class="virtualized-table-container" flex="1">
 			<html:div id="tree"/>
 		</hbox>
 	</vbox>
