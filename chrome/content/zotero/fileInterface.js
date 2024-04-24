@@ -630,10 +630,10 @@ var Zotero_File_Interface = new function() {
 				closeOnClick: false
 			});
 			progressWin.changeHeadline(Zotero.getString('fileInterface.importing'));
-			let icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
 			progress = new progressWin.ItemProgress(
-				icon, translation.path ? PathUtils.filename(translation.path) : translators[0].label
+				null, translation.path ? PathUtils.filename(translation.path) : translators[0].label
 			);
+			progress.setItemTypeAndIcon(null, 'unfiled');
 			progressWin.show();
 			
 			translation.setHandler("itemDone",  function () {
@@ -683,15 +683,13 @@ var Zotero_File_Interface = new function() {
 		// Show popup on completion
 		if (showProgressWindow) {
 			progressWin.changeHeadline(Zotero.getString('fileInterface.importComplete'));
-			let icon;
 			if (numItems == 1) {
-				icon = translation.newItems[0].getImageSrc();
+				progress.setItemTypeAndIcon(translation.newItems[0].getItemTypeIconName());
 			}
 			else {
-				icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
+				progress.setItemTypeAndIcon(null, 'unfiled');
 			}
 			let text = Zotero.getString(`fileInterface.itemsWereImported`, numItems, numItems);
-			progress.setIcon(icon);
 			progress.setText(text);
 			// For synchronous translators, which don't update progress
 			progress.setProgress(100);
