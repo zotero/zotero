@@ -435,7 +435,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		_attachmentsMap = _attachmentsMap || new WeakMap();
 		return function(obj, dbItem, item) {
 			self.show();
-			var itemProgress = new self.ItemProgress(dbItem.getItemTypeIconName(), item.title);
+			var itemProgress = new self.ItemProgress(dbItem?.getItemTypeIconName() ?? item.itemType, item.title);
 			itemProgress.setProgress(100);
 			for(let attachment of item.attachments) {
 				// Create unsaved item to get icon
