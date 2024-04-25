@@ -1626,7 +1626,7 @@ describe("Zotero.Item", function () {
 			});
 
 			it("should recognize a strikeout annotation", async function () {
-				let attachment = await importFileAttachment('duplicatesMerge_annotated_2.pdf');
+				let attachment = await importFileAttachment('duplicatesMerge_annotated_3.pdf');
 				assert.isTrue(await attachment.hasEmbeddedAnnotations());
 			});
 

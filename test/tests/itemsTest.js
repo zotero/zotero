@@ -934,6 +934,16 @@ describe("Zotero.Items", function () {
 			let item2 = item1.clone();
 			await item2.saveTx();
 			let attachment2 = await importFileAttachment('duplicatesMerge_annotated_2.pdf', { parentID: item2.id });
+			
+			// Import external annotations non-destructively
+			await Zotero.PDFWorker.import(attachment1.id, true);
+			await Zotero.PDFWorker.import(attachment2.id, true);
+
+			assert.lengthOf(attachment1.getAnnotations(), 1);
+			assert.lengthOf(attachment2.getAnnotations(), 1);
+			assert.isTrue(attachment1.getAnnotations()[0].annotationIsExternal);
+			assert.isTrue(attachment2.getAnnotations()[0].annotationIsExternal);
+			assert.isTrue(await attachment2.hasEmbeddedAnnotations()); // Unsupported attachment remains embedded
 
 			await Zotero.Items.merge(item1, [item2]);
 
@@ -943,6 +953,47 @@ describe("Zotero.Items", function () {
 			assert.isTrue(item2.deleted);
 			assert.isFalse(attachment2.deleted);
 			assert.equal(attachment2.parentItemID, item1.id);
+			
+			assert.lengthOf(attachment1.getAnnotations(), 1);
+			assert.lengthOf(attachment2.getAnnotations(), 1);
+			assert.isTrue(attachment1.getAnnotations()[0].annotationIsExternal);
+			assert.isTrue(attachment2.getAnnotations()[0].annotationIsExternal);
+		});
+		
+		it("should merge imported annotations into PDF with remaining unimported annotations", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importFileAttachment('duplicatesMerge_annotated_1.pdf', { parentID: item1.id });
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importFileAttachment('duplicatesMerge_annotated_2.pdf', { parentID: item2.id });
+
+			// Import external annotations non-destructively
+			await Zotero.PDFWorker.import(attachment1.id, true);
+			await Zotero.PDFWorker.import(attachment2.id, true);
+
+			assert.isTrue(attachment1.getAnnotations()[0].annotationIsExternal);
+			assert.isTrue(attachment2.getAnnotations()[0].annotationIsExternal);
+
+			// Import external annotations *destructively*
+			await Zotero.PDFWorker.import(attachment1.id, true, '', true);
+			await Zotero.PDFWorker.import(attachment2.id, true, '', true);
+
+			assert.lengthOf(attachment1.getAnnotations(), 1);
+			assert.lengthOf(attachment2.getAnnotations(), 1);
+			assert.isFalse(attachment1.getAnnotations()[0].annotationIsExternal);
+			assert.isFalse(attachment2.getAnnotations()[0].annotationIsExternal);
+			assert.isTrue(await attachment2.hasEmbeddedAnnotations()); // Unsupported annotation remains embedded
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isTrue(attachment1.deleted);
+			assert.isFalse(attachment2.deleted);
+
+			assert.lengthOf(attachment1.getAnnotations(), 0);
+			assert.lengthOf(attachment2.getAnnotations(), 2);
+			assert.isFalse(attachment2.getAnnotations()[0].annotationIsExternal);
+			assert.isFalse(attachment2.getAnnotations()[1].annotationIsExternal);
 		});
 
 		it("should merge a non-master PDF without embedded annotations into a master PDF with embedded annotations", async function () {

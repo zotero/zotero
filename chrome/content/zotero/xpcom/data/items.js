@@ -959,20 +959,10 @@ Zotero.Items = function() {
 			let annotations = fromItem.getAnnotations(includeTrashed);
 			for (let annotation of annotations) {
 				if (annotation.annotationIsExternal) {
-					await annotation.erase();
 					continue;
 				}
 				annotation.parentItemID = toItem.id;
 				await annotation.save({ skipEditCheck });
-			}
-		}
-		
-		if (toItem.isFileAttachment()) {
-			let annotations = toItem.getAnnotations(includeTrashed);
-			for (let annotation of annotations) {
-				if (annotation.annotationIsExternal) {
-					await annotation.erase();
-				}
 			}
 		}
 		
