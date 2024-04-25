@@ -35,14 +35,6 @@ Zotero_Preferences.Export = {
 		this.updateQuickCopyInstructions();
 		await this.populateQuickCopyList();
 		await this.populateNoteQuickCopyList();
-		// Fluent removes the label attribute during localization. This is the least hacky way
-		// to manually add localized aria-properties without having to re-add the +/- labels
-		document.l10n.formatValues(['general-add', 'general-remove'])
-			.then((res) => {
-				let [add, remove] = res;
-				document.querySelector("#quickCopy-delete").setAttribute('aria-label', remove);
-				document.querySelector("#quickCopy-add").setAttribute('aria-label', add);
-			});
 	},
 	
 	
