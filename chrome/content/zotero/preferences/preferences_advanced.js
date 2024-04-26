@@ -50,18 +50,6 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('baseAttachmentPath').addEventListener('syncfrompreference',
 			() => Zotero_Preferences.Attachment_Base_Directory.updateUI());
 		
-		document.getElementById('data-dir').addEventListener('syncfrompreference', (event) => {
-			event.target.value = this.onDataDirLoad();
-		});
-
-		document.getElementById('data-dir').addEventListener('synctopreference', () => {
-			this.onDataDirUpdate();
-		});
-
-		document.getElementById('data-dir-path').addEventListener('syncfrompreference', (event) => {
-			event.target.value = this.getDataDirPath();
-		});
-		
 		this.onDataDirLoad();
 
 		document.getElementById('fulltext-rebuildIndex').setAttribute('label',
@@ -350,64 +338,46 @@ Zotero_Preferences.Advanced = {
 	
 	
 	onDataDirLoad: function () {
-		var useDataDir = Zotero.Prefs.get('useDataDir');
-		var dataDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
 		var currentDir = Zotero.DataDirectory.dir;
-		var defaultDataDir = Zotero.DataDirectory.defaultDir;
 		
 		if (Zotero.forceDataDir) {
 			document.getElementById('command-line-data-dir-path').textContent = currentDir;
 			document.getElementById('command-line-data-dir').hidden = false;
-			document.getElementById('data-dir').hidden = true;
 		}
 		
-		// Change "Use profile directory" label to home directory location unless using profile dir
-		if (useDataDir || currentDir == defaultDataDir) {
-			document.getElementById('default-data-dir').setAttribute(
-				'label', Zotero.getString('dataDir.default', Zotero.DataDirectory.defaultDir)
-			);
-		}
-		
-		// Don't show custom data dir as in-use if set to the default
-		if (dataDir == defaultDataDir) {
-			useDataDir = false;
-		}
-		
-		document.getElementById('data-dir-path').setAttribute('disabled', !useDataDir);
 		document.getElementById('migrate-data-dir').setAttribute(
 			'hidden', !Zotero.DataDirectory.canMigrate()
 		);
-		
-		return useDataDir;
+
+		let revertToDefaultDir = document.getElementById("reset-data-dir");
+		revertToDefaultDir.hidden = this._usingDefaultDataDir();
+		revertToDefaultDir.setAttribute('data-l10n-args', `{"tooltiptext": "${Zotero.DataDirectory.defaultDir}"}`);
+		this.setDataDirInput();
 	},
 	
 	
-	onDataDirUpdate: Zotero.Promise.coroutine(function* (forceNew) {
-		var radiogroup = document.getElementById('data-dir');
-		var newUseDataDir = radiogroup.selectedIndex == 1;
-		
-		if (!forceNew && newUseDataDir && !this._usingDefaultDataDir()) {
-			return;
-		}
+	dataDirUpdate: Zotero.Promise.coroutine(function* (isCustomSelection) {
+		if (!isCustomSelection && this._usingDefaultDataDir()) return;
 		
 		// This call shows a filepicker if needed, forces a restart if required, and does nothing if
 		// cancel was pressed or value hasn't changed
 		yield Zotero.DataDirectory.choose(
 			true,
-			!newUseDataDir,
+			!isCustomSelection,
 			() => Zotero.launchURL('https://www.zotero.org/support/zotero_data')
 		);
-		radiogroup.selectedIndex = this._usingDefaultDataDir() ? 0 : 1;
 	}),
 	
 	
-	chooseDataDir: function() {
-		let radiogroup = document.getElementById('data-dir');
-		if (radiogroup.selectedIndex == 0) {
-			radiogroup.selectedIndex = 1;
+	setDataDirInput: async function () {
+		var filefield = document.getElementById('data-dir-path');
+		var path = Zotero.Prefs.get('dataDir');
+		if (path && await IOUtils.exists(path)) {
+			filefield.style.backgroundImage = 'url(moz-icon://' + Zotero.File.pathToFileURI(path) + '?size=16)';
+			filefield.value = path;
 		}
 		else {
-			this.onDataDirUpdate(true);
+			filefield.value = '';
 		}
 	},
 	
