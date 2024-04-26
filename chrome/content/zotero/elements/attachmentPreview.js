@@ -217,6 +217,8 @@
 			if (!this.initialized && itemID === this._renderingItemID) {
 				return;
 			}
+			// For tests
+			this._renderDeferred = Zotero.Promise.defer();
 			this._renderingItemID = itemID;
 			let success = false;
 			if (this.isValidType && await this._item.fileExists()) {
@@ -236,6 +238,7 @@
 			if (this._renderingItemID === itemID) {
 				this._renderingItemID = null;
 			}
+			this._renderDeferred?.resolve();
 		}
 
 		async discard(force = false) {
@@ -270,6 +273,7 @@
 			this._id("preview")?.after(this.nextPreview);
 			this.setPreviewStatus("loading");
 			this._isDiscarding = false;
+			this._renderDeferred?.resolve();
 		}
 
 		async openAttachment(event) {

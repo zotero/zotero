@@ -358,6 +358,7 @@ describe("Item pane", function () {
 			if (!success) {
 				Zotero.debug("Attachments Box wait for preview time out");
 			}
+			await attachmentsBox._preview._renderDeferred?.promise;
 			return success;
 		}
 
