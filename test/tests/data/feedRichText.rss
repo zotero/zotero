@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- Lifted from http://cyber.law.harvard.edu/rss/examples/rss2sample.xml -->
-<rss version="2.0">
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
    <channel>
       <title>Liftoff News</title>
       <link>http://liftoff.msfc.nasa.gov/</link>
@@ -25,6 +25,14 @@
          <description>The proposed &lt;b&gt;VASIMR&lt;/b&gt; engine would do that.</description>
          <pubDate>Tue, 27 May 2003 08:37:32 GMT</pubDate>
          <guid>http://liftoff.msfc.nasa.gov/2003/05/27.html#item571</guid>
+      </item>
+      <item>
+         <title>This item has content</title>
+         <link>https://onlinelibrary.wiley.com/journal/27314375?af=R</link>
+         <description>This description has no tags in it.</description>
+         <content:encoded>This content has &lt;blink&gt;tags&lt;/blink&gt; in it.</content:encoded>
+         <pubDate>Tue, 23 Apr 2024 00:38:38 -0700</pubDate>
+         <guid>10.1002/dro2.121</guid>
       </item>
    </channel>
 </rss>

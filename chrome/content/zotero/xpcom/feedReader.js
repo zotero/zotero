@@ -416,23 +416,23 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 			
 	if (feedEntry.title) item.title = Zotero.FeedReader._getRichText(feedEntry.title, 'title');
 	
-	if (feedEntry.summary) {
-		let summaryFragment = feedEntry.summary.createDocumentFragment();
-		if (summaryFragment.querySelectorAll('body').length === 1) {
-			summaryFragment.replaceChildren(...summaryFragment.querySelector('body').childNodes);
+	if (feedEntry.content || feedEntry.summary) {
+		let abstractFragment = (feedEntry.content || feedEntry.summary).createDocumentFragment();
+		if (abstractFragment.querySelectorAll('body').length === 1) {
+			abstractFragment.replaceChildren(...abstractFragment.querySelector('body').childNodes);
 		}
-		item.abstractNote = new XMLSerializer().serializeToString(summaryFragment);
-		
-		if (!item.title) {
-			// We will probably have to trim this, so let's use plain text to
-			// avoid splitting inside some markup
-			let title = Zotero.Utilities.trimInternal(feedEntry.summary.plainText());
-			let splitAt = title.lastIndexOf(' ', 50);
-			if (splitAt == -1) splitAt = 50;
-			
-			item.title = title.substr(0, splitAt);
-			if (splitAt <= title.length) item.title += '...';
-		}
+		item.abstractNote = new XMLSerializer().serializeToString(abstractFragment);
+	}
+
+	if (feedEntry.summary && !item.title) {
+		// We will probably have to trim this, so let's use plain text to
+		// avoid splitting inside some markup
+		let title = Zotero.Utilities.trimInternal(feedEntry.summary.plainText());
+		let splitAt = title.lastIndexOf(' ', 50);
+		if (splitAt == -1) splitAt = 50;
+
+		item.title = title.substr(0, splitAt);
+		if (splitAt <= title.length) item.title += '...';
 	}
 	
 	if (feedEntry.link) item.url = feedEntry.link.href;
