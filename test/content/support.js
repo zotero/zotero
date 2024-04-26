@@ -384,6 +384,30 @@ async function delay(ms) {
 	return Zotero.Promise.delay(ms);
 }
 
+async function waitForFrame() {
+	return waitNoLongerThan(new Promise((resolve) => {
+		requestAnimationFrame(resolve);
+	}), 30);
+}
+
+async function waitForFrames(n) {
+	for (let i = 0; i < n; i++) {
+		await waitForFrame();
+	}
+}
+
+async function waitNoLongerThan(promise, ms = 1000) {
+	return Promise.race([
+		promise,
+		Zotero.Promise.delay(ms)
+	]);
+}
+
+async function waitForScrollToPane(itemDetails, paneID) {
+	itemDetails.scrollToPane(paneID, "instant");
+	// Wait for some frames or up to 150ms to ensure the pane is visible
+	await waitForFrames(5);
+}
 
 function clickOnItemsRow(win, itemsView, row) {
 	itemsView._treebox.scrollToRow(row);
@@ -1115,3 +1139,4 @@ async function startHTTPServer(port = null) {
 	var baseURL = `http://localhost:${port}/`
 	return { httpd, port, baseURL };
 }
+

@@ -70,7 +70,9 @@
 
 		set usePreview(val) {
 			this.toggleAttribute('data-use-preview', val);
-			this.updatePreview();
+			if (this.item) {
+				this.updatePreview();
+			}
 		}
 
 		init() {
@@ -83,11 +85,17 @@
 			this._addPopup.id = '';
 			this.querySelector('popupset').append(this._addPopup);
 			
+			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 			this._preview = this.querySelector('attachment-preview');
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentsBox');
 
 			this._section._contextMenu.addEventListener('popupshowing', this._handleContextMenu, { once: true });
+
+			// For tests
+			this._asyncRendering = false;
+			// Indicate if the preview should update, can be none | initial | final
+			this._renderStage = "none";
 		}
 
 		destroy() {
@@ -96,16 +104,13 @@
 		}
 
 		notify(action, type, ids) {
-			if (ids.includes(this._item?.id)) {
-				this._resetRenderedFlags();
-			}
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
 				this.updatePreview();
 
 				let attachments = Zotero.Items.get((this._attachmentIDs).filter(id => ids.includes(id)));
-				if (attachments.length === 0) {
+				if (attachments.length === 0 && action !== "delete") {
 					return;
 				}
 				if (action == 'add') {
@@ -154,12 +159,15 @@
 		render() {
 			if (!this._item) return;
 			if (this._isAlreadyRendered()) return;
+			this._renderStage = "initial";
 			this.updateCount();
 		}
 
 		async asyncRender() {
 			if (!this._item) return;
 			if (this._isAlreadyRendered("async")) return;
+			this._renderStage = "final";
+			this._asyncRendering = true;
 			
 			await this._updateAttachmentIDs();
 
@@ -169,7 +177,8 @@
 			for (let attachment of itemAttachments) {
 				this.addRow(attachment);
 			}
-			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
+			await this.updatePreview();
+			this._asyncRendering = false;
 		}
 		
 		updateCount() {
@@ -178,16 +187,21 @@
 		}
 
 		async updatePreview() {
+			// Skip if asyncRender is not finished/executed, which means the box is invisible
+			// The box will be rendered when it becomes visible
+			if (this._renderStage !== "final") {
+				return;
+			}
+			let attachment = await this._getPreviewAttachment();
+			this.toggleAttribute('data-use-preview', !!attachment && Zotero.Prefs.get('showAttachmentPreview'));
+			if (!attachment) {
+				return;
+			}
 			if (!this.usePreview
 				// Skip only when the section is manually collapsed (when there's attachment),
 				// This is necessary to ensure the rendering of the first added attachment
 				// because the section is force-collapsed if no attachment.
 				|| (this._attachmentIDs.length && !this._section.open)) {
-				return;
-			}
-			let attachment = await this._getPreviewAttachment();
-			if (!attachment) {
-				this.toggleAttribute('data-use-preview', false);
 				return;
 			}
 			this._preview.item = attachment;

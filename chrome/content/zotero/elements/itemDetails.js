@@ -223,6 +223,8 @@
 			let item = this.item;
 			Zotero.debug('Viewing item');
 			this._isRendering = true;
+			// For tests
+			this._renderDeferred = Zotero.Promise.defer();
 
 			this.renderCustomSections();
 
@@ -269,6 +271,7 @@
 			if (this.item.id == item.id) {
 				this._isRendering = false;
 			}
+			this._renderDeferred?.resolve();
 		}
 
 		renderCustomSections() {
