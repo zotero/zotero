@@ -11,6 +11,10 @@
 
 @import "base/base";
 
+html {
+	color-scheme: light dark;
+}
+
 html, body {
 	background: var(--material-sidepane);
 	overflow: clip;
