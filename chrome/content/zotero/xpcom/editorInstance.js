@@ -1305,7 +1305,7 @@ class EditorInstance {
 			if (annotation.annotationType === 'image'
 				&& !await Zotero.Annotations.hasCacheImage(annotation)) {
 				try {
-					await Zotero.PDFRenderer.renderAttachmentAnnotations(annotation.parentID);
+					await Zotero.PDFWorker.renderAttachmentAnnotations(annotation.parentID);
 				}
 				catch (e) {
 					Zotero.debug(e);

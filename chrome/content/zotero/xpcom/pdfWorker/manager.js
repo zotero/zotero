@@ -26,7 +26,6 @@
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
 const CMAPS_URL = 'resource://zotero/reader/pdf/web/cmaps/';
 const STANDARD_FONTS_URL = 'resource://zotero/reader/pdf/web/standard_fonts/';
-const RENDERER_URL = 'resource://zotero/pdf-renderer/renderer.html';
 
 class PDFWorker {
 	constructor() {
@@ -128,6 +127,21 @@ class PDFWorker {
 				catch (e) {
 					Zotero.debug('Failed to fetch standard font data:');
 					Zotero.debug(e);
+				}
+				try {
+					if (message.action === 'SaveRenderedAnnotation') {
+						let { libraryID, annotationKey, buf } = message.data;
+						let annotationItem = Zotero.Items.getByLibraryAndKey(libraryID, annotationKey);
+						let win = Zotero.getMainWindow();
+						let blob = new win.Blob([new Uint8Array(buf)]);
+						await Zotero.Annotations.saveCacheImage(annotationItem, blob);
+						await Zotero.Notifier.trigger('modify', 'item', [annotationItem.id]);
+						respData = true;
+					}
+				}
+				catch (e) {
+					Zotero.debug('Failed to save rendered annotation:');
+					Zotero.logError(e);
 				}
 				this._worker.postMessage({ responseID: event.data.id, data: respData });
 			}
@@ -690,6 +704,59 @@ class PDFWorker {
 		}, isPriority);
 	}
 
+	async renderAttachmentAnnotations(itemID, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+			let t = new Date();
+
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
+			}
+
+			let annotations = [];
+			for (let annotation of attachment.getAnnotations()) {
+				if (['image', 'ink'].includes(annotation.annotationType)
+					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+					annotations.push({
+						id: annotation.key,
+						color: annotation.annotationColor,
+						position: JSON.parse(annotation.annotationPosition)
+					});
+				}
+			}
+			if (!annotations.length) {
+				return 0;
+			}
+
+			Zotero.debug(`Rendering ${annotations.length} annotation(s) for attachment ${attachment.key}`);
+
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+
+			let { libraryID } = attachment;
+
+			try {
+				var result = await this._query('renderAnnotations', { libraryID, buf, annotations, password }, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'renderAnnotations' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			Zotero.debug(`Rendered ${annotations.length} PDF annotation(s) ${attachment.libraryKey} in ${new Date() - t} ms`);
+
+			return result;
+		}, isPriority);
+	}
+
 	/**
 	 * Determine whether the PDF has any embedded annotations
 	 *
@@ -733,185 +800,3 @@ class PDFWorker {
 }
 
 Zotero.PDFWorker = new PDFWorker();
-
-
-// PDF Renderer
-class PDFRenderer {
-	constructor() {
-		this._browser = null;
-		this._lastPromiseID = 0;
-		this._waitingPromises = {};
-		this._queue = [];
-		this._processingQueue = false;
-	}
-
-	async _processQueue() {
-		await this._init();
-		if (this._processingQueue) {
-			return;
-		}
-		this._processingQueue = true;
-		let item;
-		while ((item = this._queue.shift())) {
-			if (item) {
-				let [fn, resolve, reject] = item;
-				try {
-					resolve(await fn());
-				}
-				catch (e) {
-					reject(e);
-				}
-			}
-		}
-		this._processingQueue = false;
-	}
-
-	async _enqueue(fn, isPriority) {
-		return new Promise((resolve, reject) => {
-			if (isPriority) {
-				this._queue.unshift([fn, resolve, reject]);
-			}
-			else {
-				this._queue.push([fn, resolve, reject]);
-			}
-			this._processQueue();
-		});
-	}
-
-	async _query(action, data, transfer) {
-		return new Promise((resolve, reject) => {
-			this._lastPromiseID++;
-			this._waitingPromises[this._lastPromiseID] = { resolve, reject };
-			this._browser.contentWindow.postMessage({
-				id: this._lastPromiseID,
-				action,
-				data
-			}, this._browser.contentWindow.origin, transfer);
-		});
-	}
-
-	async _init() {
-		if (this._browser) return;
-		return new Promise((resolve) => {
-			this._browser = Zotero.Browser.createHiddenBrowser();
-			let doc = this._browser.ownerDocument;
-			let container = doc.createXULElement('hbox');
-			container.style.position = 'fixed';
-			container.style.zIndex = '-1';
-			container.append(this._browser);
-			doc.documentElement.append(container);
-			this._browser.style.width = '1px';
-			this._browser.style.height = '1px';
-			this._browser.addEventListener('DOMContentLoaded', (event) => {
-				if (this._browser.contentWindow.location.href === 'about:blank') return;
-				this._browser.contentWindow.addEventListener('message', _handleMessage);
-			});
-			this._browser.loadURI(Services.io.newURI(RENDERER_URL));
-
-			let _handleMessage = async (event) => {
-				if (event.source !== this._browser.contentWindow) {
-					return;
-				}
-				let message = event.data;
-				if (message.responseID) {
-					let { resolve, reject } = this._waitingPromises[message.responseID];
-					delete this._waitingPromises[message.responseID];
-					if (message.data) {
-						resolve(message.data);
-					}
-					else {
-						let err = new Error(message.error.message);
-						Object.assign(err, message.error);
-						reject(err);
-					}
-					return;
-				}
-				
-				if (message.action === 'initialized') {
-					this._browser.contentWindow.postMessage(
-						{ responseID: message.id, data: {} },
-						this._browser.contentWindow.origin
-					);
-					resolve();
-				}
-				else if (message.action === 'renderedAnnotation') {
-					let { id, image } = message.data.annotation;
-					
-					try {
-						let item = await Zotero.Items.getAsync(id);
-						let win = Zotero.getMainWindow();
-						let blob = new win.Blob([new Uint8Array(image)]);
-						await Zotero.Annotations.saveCacheImage(item, blob);
-						await Zotero.Notifier.trigger('modify', 'item', [item.id]);
-					} catch (e) {
-						Zotero.logError(e);
-					}
-
-					this._browser.contentWindow.postMessage(
-						{ responseID: message.id, data: {} },
-						this._browser.contentWindow.origin
-					);
-				}
-			};
-		});
-	}
-
-	/**
-	 * Render missing image annotation images for attachment
-	 *
-	 * @param {Integer} itemID Attachment item id
-	 * @param {Boolean} [isPriority]
-	 * @returns {Promise<Integer>}
-	 */
-	async renderAttachmentAnnotations(itemID, isPriority) {
-		return this._enqueue(async () => {
-			let attachment = await Zotero.Items.getAsync(itemID);
-			let annotations = [];
-			for (let annotation of attachment.getAnnotations()) {
-				if (['image', 'ink'].includes(annotation.annotationType)
-					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
-					annotations.push({
-						id: annotation.id,
-						color: annotation.annotationColor,
-						position: JSON.parse(annotation.annotationPosition)
-					});
-				}
-			}
-			if (!annotations.length) {
-				return 0;
-			}
-			let path = await attachment.getFilePathAsync();
-			let buf = await IOUtils.read(path);
-			buf = new Uint8Array(buf).buffer;
-			return this._query('renderAnnotations', { buf, annotations }, [buf]);
-		}, isPriority);
-	}
-
-	/**
-	 * Render image annotation image
-	 *
-	 * @param {Integer} itemID Attachment item id
-	 * @param {Boolean} [isPriority]
-	 * @returns {Promise<Boolean>}
-	 */
-	async renderAnnotation(itemID, isPriority) {
-		return this._enqueue(async () => {
-			let annotation = await Zotero.Items.getAsync(itemID);
-			if (await Zotero.Annotations.hasCacheImage(annotation)) {
-				return false;
-			}
-			let attachment = await Zotero.Items.getAsync(annotation.parentID);
-			let path = await attachment.getFilePathAsync();
-			let buf = await IOUtils.read(path);
-			buf = new Uint8Array(buf).buffer;
-			let annotations = [{
-				id: annotation.id,
-				color: annotation.annotationColor,
-				position: JSON.parse(annotation.annotationPosition)
-			}];
-			return !!await this._query('renderAnnotations', { buf, annotations }, [buf]);
-		}, isPriority);
-	}
-}
-
-Zotero.PDFRenderer = new PDFRenderer();
