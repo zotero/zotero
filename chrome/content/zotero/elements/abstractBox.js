@@ -126,13 +126,14 @@
 		}
 		
 		async _renderFeedItem() {
-			let abstract = this.item.getField('abstractNote');
+			let url = this.item.library.url;
+			let html = this.item.getField('abstractNote');
 			this._abstractField.hidden = true;
 			this._feedAbstractBrowser.hidden = false;
-			this._section.summary = Zotero.Utilities.cleanTags(abstract);
+			this._section.summary = Zotero.Utilities.cleanTags(html);
 			
 			let actor = this._feedAbstractBrowser.browsingContext.currentWindowGlobal.getActor('FeedAbstract');
-			await actor.sendQuery('setContent', abstract);
+			await actor.sendQuery('setContent', { url, html });
 		}
 		
 		_renderRegularItem() {
