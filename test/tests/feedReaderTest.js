@@ -217,6 +217,18 @@ describe("Zotero.FeedReader", function () {
 			assert.equal(item.title, "Embedded <b>tags</b>");
 		});
 
+		it('should use content as abstractNote when available', async () => {
+			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
+			await fr.process();
+			const itemIterator = new fr.ItemIterator();
+			let item;
+			for (let i = 0; i < 3; i++) {
+				item = await itemIterator.next().value;
+			}
+
+			assert.include(item.abstractNote, '<blink');
+		});
+
 		it('should parse HTML fields', async () => {
 			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
 			await fr.process();
@@ -227,7 +239,6 @@ describe("Zotero.FeedReader", function () {
 				item = await itemIterator.next().value;
 			}
 
-			// The entry description is XHTML, so tags are removed there.
 			assert.equal(item.abstractNote, 'The proposed <b xmlns="http://www.w3.org/1999/xhtml">VASIMR</b> engine would do that.');
 		});
 
