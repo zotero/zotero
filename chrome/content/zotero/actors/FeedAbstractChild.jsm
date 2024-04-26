@@ -10,10 +10,13 @@ class FeedAbstractChild extends JSWindowActorChild {
 		this._stylesheetPromise = this.sendQuery('getStylesheet');
 	}
 	
-	async receiveMessage({ name, data }) {
+	async receiveMessage({ name, data: { url, html } }) {
 		switch (name) {
 			case "setContent": {
-				this.document.documentElement.innerHTML = data;
+				let base = this.document.createElement("base");
+				base.href = url;
+				this.document.head.replaceChildren(base);
+				this.document.body.innerHTML = html;
 				break;
 			}
 		}
