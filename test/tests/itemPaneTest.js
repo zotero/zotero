@@ -356,9 +356,19 @@ describe("Item pane", function () {
 			let success = await waitForCallback(
 				() => attachmentsBox._asyncRenderItemID && !attachmentsBox._asyncRendering);
 			if (!success) {
-				Zotero.debug("Attachments Box wait for preview time out");
+				Zotero.debug("Attachments Box wait for render time out");
 			}
 			await attachmentsBox._preview._renderDeferred?.promise;
+			return success;
+		}
+
+		async function waitForPreviewReader(attachmentsBox) {
+			await waitForRender(attachmentsBox);
+			let success = await waitForCallback(
+				() => attachmentsBox._preview._reader);
+			if (!success) {
+				Zotero.debug("Attachments Box wait for preview reader time out");
+			}
 			return success;
 		}
 
@@ -553,6 +563,7 @@ describe("Item pane", function () {
 				file,
 				parentItemID: item.id
 			});
+			await waitForPreviewReader(attachmentsBox);
 			await Zotero.Promise.delay(100);
 			// PDF preview
 			assert.isTrue(isPreviewDisplayed(attachmentsBox));
@@ -681,6 +692,7 @@ describe("Item pane", function () {
 
 			await itemDetails._renderDeferred.promise;
 			await waitForRender(attachmentsBox);
+			await waitForPreviewReader(attachmentsBox);
 
 			assert.isFalse(attachmentsBox.hidden);
 			let readerAnnotation
@@ -707,6 +719,7 @@ describe("Item pane", function () {
 			// Select item with attachment (no annotation)
 			await itemDetails._renderDeferred.promise;
 			await waitForRender(attachmentsBox);
+			await waitForPreviewReader(attachmentsBox);
 
 			assert.isFalse(attachmentsBox.hidden);
 			readerAnnotation
@@ -733,6 +746,7 @@ describe("Item pane", function () {
 			await ZoteroPane.selectItem(item1.id);
 			await itemDetails._renderDeferred.promise;
 			await waitForRender(attachmentsBox);
+			await waitForPreviewReader(attachmentsBox);
 
 			assert.isFalse(attachmentsBox.hidden);
 			readerAnnotation
