@@ -3186,7 +3186,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (!path) {
 			return '';
 		}
-		var prefixedPath = path.match(/^(?:attachments|storage):(.*)$/);
+		// Include /s (DOTALL) to handle \u2028 (line separator) and \u2029 (paragraph separator),
+		// which we're now stripping in File.getValidFileName() but didn't previously
+		// https://forums.zotero.org/discussion/114025/pdf-files-renaming-casuing-syncing-issue
+		var prefixedPath = path.match(/^(?:attachments|storage):(.*)$/s);
 		if (prefixedPath) {
 			return prefixedPath[1].split('/').pop();
 		}

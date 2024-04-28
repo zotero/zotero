@@ -1290,6 +1290,8 @@ Zotero.File = new function(){
 		fileName = fileName.replace(/[\u2000-\u200A]/g, ' ');
 		// Replace zero-width spaces
 		fileName = fileName.replace(/[\u200B-\u200E]/g, '');
+		// Replace line and paragraph separators
+		fileName = fileName.replace(/[\u2028-\u2029]/g, ' ');
 		if (!skipXML) {
 			// Strip characters not valid in XML, since they won't sync and they're probably unwanted
 			fileName = fileName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');

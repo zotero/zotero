@@ -1069,6 +1069,20 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getFilePath(), file.path);
 		});
 		
+		it("should handle line and paragraph separators in filenames", async function () {
+			var filename = "Line 1\u2028Line 2\u2029Line 3.txt";
+			
+			var item = await createDataObject('item');
+			
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.parentID = item.id;
+			attachment.attachmentFilename = filename;
+			await attachment.saveTx();
+			
+			assert.equal(attachment.attachmentFilename, filename);
+		});
+		
 		it("should get a filename for a base-dir-relative file", function () {
 			var dir = getTestDataDirectory().path;
 			Zotero.Prefs.set('saveRelativeAttachmentPath', true)
