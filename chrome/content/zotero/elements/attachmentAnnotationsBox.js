@@ -88,15 +88,19 @@
 		}
 
 		render() {
+			this._annotationItems = this.item.getAnnotations();
+			this.updateCount();
+		}
+
+		async asyncRender() {
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
 			if (this._isAlreadyRendered()) return;
 
-			this._annotationItems = this.item.getAnnotations();
-			let count = this.updateCount();
+			await Zotero.PDFWorker.renderAttachmentAnnotations(this.item.id);
 
 			this._body.replaceChildren();
 
-			if (!this._section.open || count === 0) {
+			if (!this._section.open || this._annotationItems.length === 0) {
 				return;
 			}
 
