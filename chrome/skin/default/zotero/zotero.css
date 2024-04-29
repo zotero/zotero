@@ -38,9 +38,9 @@ label.zotero-text-link {
 
 .zotero-progress-item-hbox
 {
-	padding-left: 5px;
-	margin-top: 0;
-	margin-bottom: 0;
+	padding-inline-start: 5px;
+	padding-block: 2px;
+	margin-block: 0;
 }
 
 .zotero-progress-item-hbox[parent]
@@ -51,7 +51,8 @@ label.zotero-text-link {
 .zotero-progress-item-label
 {
 	width: 210px;
-	margin-left: 5px;
+	margin-inline: 5px 0;
+	margin-block: 0;
 }
 
 .zotero-warning {
