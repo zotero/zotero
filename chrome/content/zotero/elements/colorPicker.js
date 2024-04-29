@@ -177,7 +177,7 @@
 				let tile = document.createElement('button');
 				tile.setAttribute('aria-label', colorLabels[i]);
 				tile.classList.add('grid-tile');
-				tile.style.backgroundColor = color;
+				tile.style.background = color;
 				
 				tile.addEventListener('click', () => {
 					this.color = color;
