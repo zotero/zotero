@@ -63,6 +63,13 @@ menupopup {
 	}
 }
 
+// Overwrite menulist rules
+menulist > menupopup > menuitem::after,
+menulist > menupopup > menuitem::before {
+	content: none;
+	padding-inline: 0;
+}
+
 // Modified based on rules from https://searchfox.org/mozilla-esr102/source/browser/base/content/browser.css
 
 /* On Mac, use the properties "-moz-window-transform" and "-moz-window-opacity"

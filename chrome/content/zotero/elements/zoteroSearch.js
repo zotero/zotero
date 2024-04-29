@@ -50,8 +50,8 @@
 						<label value="&zotero.search.joinMode.prefix;"/>
 						<menulist id="joinModeMenu" oncommand="this.closest('zoterosearch').updateJoinMode();" native="true">
 							<menupopup>
-								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
-								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+								<menuitem label="&zotero.search.joinMode.any;" value="any" type="radio"/>
+								<menuitem label="&zotero.search.joinMode.all;" value="all" type="radio" selected="true"/>
 							</menupopup>
 						</menulist>
 						<label value="&zotero.search.joinMode.suffix;"/>
@@ -261,10 +261,11 @@
 			
 			// Build operator menu
 			for (let operator of operators) {
-				operatorsList.appendItem(
+				let menuitem = operatorsList.appendItem(
 					Zotero.getString('searchOperator.' + operator),
 					operator
 				);
+				menuitem.setAttribute('type', 'radio');
 			}
 			
 			// Build conditions menu
@@ -277,12 +278,14 @@
 					var menuitem = document.createXULElement('menuitem');
 					menuitem.setAttribute('label', condition.localized);
 					menuitem.setAttribute('value', condition.name);
+					menuitem.setAttribute('type', 'radio');
 					moreConditionsMenu.before(menuitem);
 				}
 				else {
 					var menuitem = moreConditionsMenu.appendItem(
 						condition.localized, condition.name
 					);
+					menuitem.setAttribute('type', 'radio');
 				}
 				
 				var baseFields = null;
@@ -412,6 +415,8 @@
 				}
 			}
 			operatorsList.selectedIndex = selectThis;
+			// Setting `selected` does not change `checked`. Should explicitly set it.
+			operatorsList.selectedItem.setAttribute('checked', true);
 			
 			// Generate drop-down menu instead of textbox for certain conditions
 			switch (conditionName) {
@@ -552,6 +557,7 @@
 				if (row.image) {
 					menuitem.className = 'menuitem-iconic';
 					menuitem.setAttribute('image', row.image);
+					menuitem.setAttribute('type', 'radio');
 				}
 			}
 			valueMenu.selectedIndex = 0;
@@ -909,9 +915,9 @@
 				<html:input class="input"/>
 				<menulist class="age-list" native="true">
 					<menupopup>
-						<menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
-						<menuitem label="&zotero.search.date.units.months;" value="months"/>
-						<menuitem label="&zotero.search.date.units.years;" value="years"/>
+						<menuitem label="&zotero.search.date.units.days;" value="days" type="radio" selected="true"/>
+						<menuitem label="&zotero.search.date.units.months;" value="months" type="radio"/>
+						<menuitem label="&zotero.search.date.units.years;" value="years" type="radio"/>
 					</menupopup>
 				</menulist>
 			</html:div>
@@ -942,6 +948,8 @@
 				}
 			}
 			menulist.selectedIndex = selectThis;
+			// Setting `selected` does not change `checked`. Should explicitly set it.
+			menulist.selectedItem.setAttribute('checked', true);
 		}
 	}
 	customElements.define("zoterosearchagefield", ZoteroSearchAgeField);
