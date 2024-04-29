@@ -58,6 +58,7 @@ var Scaffold = new function () {
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
 	var _needRebuildTranslatorSuggestions = true;
+	var _tabClicked = false;
 
 	this.browser = () => _browser;
 	
@@ -97,6 +98,11 @@ var Scaffold = new function () {
 		});
 
 		document.getElementById('tabpanels').addEventListener('select', event => Scaffold.handleTabSelect(event));
+		document.getElementById('tabs').addEventListener('mousedown', (event) => {
+			// Record if tab selection will happen due to a mouse click vs keyboard nav.
+			if (event.clientX === 0 && event.clientY === 0) return;
+			_tabClicked = true;
+		}, true);
 		
 		let lastTranslatorID = Zotero.Prefs.get('scaffold.lastTranslatorID');
 		if (lastTranslatorID) {
@@ -860,6 +866,8 @@ var Scaffold = new function () {
 			case 'import':
 			case 'code':
 			case 'tests':
+				// Keep focus on tab during keyboard navigation
+				if (!_tabClicked) break;
 				// the select event's default behavior is to focus the selected tab.
 				// we don't want to prevent *all* of the event's default behavior,
 				// but we do want to focus the editor instead of the tab.
@@ -870,8 +878,16 @@ var Scaffold = new function () {
 					_editors[tab].focus();
 				}, 10);
 				break;
+			default:
+				// With a screen reader active, focus may not shift from selected tab
+				// to the first focusable input. Explicitly force it if a tab was clicked.
+				if (!_tabClicked) break;
+				setTimeout(() => {
+					Services.focus.moveFocus(window, document.getElementById('tabs').selectedItem, Services.focus.MOVEFOCUS_FORWARD, 0);
+				}, 10);
 		}
 
+		_tabClicked = false;
 		let codeTabBroadcaster = document.getElementById('code-tab-only');
 		if (tab == 'code') {
 			codeTabBroadcaster.removeAttribute('disabled');
