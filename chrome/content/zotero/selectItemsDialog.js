@@ -68,10 +68,12 @@ var doLoad = async function () {
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
+	const filterLibraryIDs = false || io.filterLibraryIDs;
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
 		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),
+		filterLibraryIDs,
+		hideSources: ['duplicates', 'trash', 'feeds']
 	});
-	collectionsView.hideSources = ['duplicates', 'trash', 'feeds'];
 
 	await collectionsView.makeVisible();
 

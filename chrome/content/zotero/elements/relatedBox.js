@@ -137,7 +137,13 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._section.empty = false;
 			this._section.open = true;
 
-			let io = { dataIn: null, dataOut: null, deferred: Zotero.Promise.defer(), itemTreeID: 'related-box-select-item-dialog' };
+			let io = {
+				dataIn: null,
+				dataOut: null,
+				deferred: Zotero.Promise.defer(),
+				itemTreeID: 'related-box-select-item-dialog',
+				filterLibraryIDs: [this._item.libraryID]
+			};
 			window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 				'chrome,dialog=no,centerscreen,resizable=yes', io);
 

@@ -27,10 +27,10 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
-const { TreeSelectionStub } = VirtualizedTable;
 const { getCSSIcon } = require('components/icons');
 const { getDragTargetOrient } = require('components/utils');
-const { Cc, Ci, Cu } = require('chrome');
+const { noop } = require("./components/utils");
+const PropTypes = require("prop-types");
 
 const CHILD_INDENT = 16;
 
@@ -47,12 +47,27 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		Zotero.debug('React CollectionTree initialized');
 		return ref;
 	}
-	
+
+	static defaultProps = {
+		dragAndDrop: false,
+		filterLibraryIDs: false,
+		hideSources: [],
+		onContextMenu: noop,
+	};
+
+	static propTypes = {
+		onSelectionChange: PropTypes.func.isRequired,
+		
+		dragAndDrop: PropTypes.bool,
+		filterLibraryIDs: PropTypes.array,
+		hideSources: PropTypes.array,
+		onContextMenu: PropTypes.func,
+	};
+
 	constructor(props) {
 		super(props);
 		this.itemTreeView = null;
 		this.itemToSelect = null;
-		this.hideSources = [];
 
 		this.type = 'collection';
 		this.name = "CollectionTree";
@@ -471,7 +486,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		try {
 			Zotero.debug("Refreshing collections pane");
 			
-			if (this.hideSources.indexOf('duplicates') == -1) {
+			if (this.props.hideSources.indexOf('duplicates') == -1) {
 				this._virtualCollectionLibraries.duplicates =
 					Zotero.Prefs.getVirtualCollectionState('duplicates');
 			}
@@ -529,7 +544,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			};
 			feedsIncluded = this._includedInTree(feeds);
-			if (this.hideSources.indexOf('feeds') == -1 && Zotero.Feeds.haveFeeds() && feedsIncluded) {
+			if (this.props.hideSources.indexOf('feeds') == -1 && Zotero.Feeds.haveFeeds() && feedsIncluded) {
 				if (groupsIncluded || libraryIncluded) {
 					newRows.splice(added++, 0,
 						new Zotero.CollectionTreeRow(this, 'separator', false),
@@ -2261,11 +2276,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return !treeRow.ref.hasCollections()
 					&& !treeRow.ref.hasSearches()
 					// Duplicate Items not shown
-					&& (this.hideSources.indexOf('duplicates') != -1
+					&& (this.props.hideSources.indexOf('duplicates') != -1
 						|| this._virtualCollectionLibraries.duplicates[libraryID] === false)
 					// Unfiled Items not shown
 					&& this._virtualCollectionLibraries.unfiled[libraryID] === false
-					&& this.hideSources.indexOf('trash') != -1;
+					&& this.props.hideSources.indexOf('trash') != -1;
 		}
 		if (treeRow.isCollection()) {
 			return !treeRow.ref.hasChildCollections();
@@ -2687,10 +2702,25 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return this._filterResultsCache[objectID];
 	}
 
-	// A shortcut to call this._matchesFilter to check if a given object should be present
-	// in collectionTree or not
+	/**
+	 * Returns true if the object should be included in the tree because:
+	 * 	1. It matches the searchbox filter OR
+	 * 	2. Its children match the searchbox filter AND
+	 * 	3. It is allowed by filter prop
+	 * @param {Collection|Search|Library|Group} object - Object to check
+	 * @param {Bool} resetCache - Ignore and reset existing cache value for that object
+	 * @returns {boolean} Whether the object should be included in the tree
+	 */
 	_includedInTree(object, resetCache) {
-		let { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(object, resetCache);
+		const notACollection = (object.libraryID === undefined || object.libraryID === -1) && !object.updateFeed;
+		const treeHasFilterProp = Array.isArray(this.props.filterLibraryIDs) && this.props.filterLibraryIDs;
+		const isAllowedByPropFilter = notACollection || !treeHasFilterProp
+			|| this.props.filterLibraryIDs.includes(object.libraryID)
+		;
+		
+		if (!isAllowedByPropFilter) return false;
+
+		const { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(object, resetCache);
 		return matchesFilter || hasChildMatchingFilter;
 	}
 
@@ -2711,13 +2741,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (isLibrary) {
 			var savedSearches = await Zotero.Searches.getAll(libraryID);
 			// Virtual collections default to showing if not explicitly hidden
-			var showDuplicates = this.hideSources.indexOf('duplicates') == -1
+			var showDuplicates = this.props.hideSources.indexOf('duplicates') == -1
 					&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 			var showUnfiled = this._virtualCollectionLibraries.unfiled[libraryID] !== false;
 			var showRetracted = this._virtualCollectionLibraries.retracted[libraryID] !== false
 				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 			var showPublications = libraryID == Zotero.Libraries.userLibraryID;
-			var showTrash = this.hideSources.indexOf('trash') == -1;
+			var showTrash = this.props.hideSources.indexOf('trash') == -1;
 		}
 		else {
 			var savedSearches = [];
