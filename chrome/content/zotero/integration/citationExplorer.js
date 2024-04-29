@@ -127,22 +127,24 @@ window.ZoteroDocumentCitations = {
 		
 		// init VirtualizedTable
 		if (!citationList) {
-			let virtualizedTable = <VirtualizedTable
-				id="citation-list"
-				ref={ref => citationList = ref}
-				multiSelect={true}
-				getRowCount={() => this._renderedCitationRows.length}
-				showHeader={true}
-				staticColumns={true}
-				columns={citationColumns}
-				renderItem={makeRowRenderer(index => this._renderedCitationRows[index])}
-				onActivate={this.onCitationActivate.bind(this)}
-				onSelectionChange={this.onCitationSelectionChange.bind(this)}
-				getRowString={index => this._renderedCitationRows[index].title}
-			/>;
-			
-			let domElem = document.querySelector('#citation-list');
-			await new Promise(resolve => ReactDOM.render(virtualizedTable, domElem, resolve));
+			await new Promise((resolve) => {
+				ReactDOM.createRoot(document.querySelector('#citation-list')).render(<VirtualizedTable
+					id="citation-list"
+					ref={(ref) => {
+						citationList = ref;
+						resolve();
+					}}
+					multiSelect={true}
+					getRowCount={() => this._renderedCitationRows.length}
+					showHeader={true}
+					staticColumns={true}
+					columns={citationColumns}
+					renderItem={makeRowRenderer(index => this._renderedCitationRows[index])}
+					onActivate={this.onCitationActivate.bind(this)}
+					onSelectionChange={this.onCitationSelectionChange.bind(this)}
+					getRowString={index => this._renderedCitationRows[index].title}
+				/>);
+			});
 		}
 		citationList.invalidate();
 	},
