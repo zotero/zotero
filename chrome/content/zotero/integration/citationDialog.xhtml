@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+	Copyright © 2024 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+					http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<!DOCTYPE html SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<html
+	id="citation-dialog"
+	class="vbox flex"
+	persist="screenX screenY width height sizemode"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	drawintitlebar="true"
+	resizable="false">
+	<head>
+		<title>&zotero.integration.quickFormatDialog.title;</title>
+		<link rel="localization" href="zotero.ftl"/>
+		<link rel="stylesheet" href="chrome://global/skin/global.css" />
+		<link rel="stylesheet" href="chrome://zotero/skin/zotero.css" />
+		<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css" />
+		<script src="../include.js"/>
+		<script src="../customElements.js"/>
+		<script src="citationDialog.js"/>
+	</head>
+	<body class="vbox flex">
+		<div id="search-area" class="layout">
+			<div id="search-row" class="hbox">
+				<div id="z-icon"></div>
+				<xul:bubble-input class="flex" placeholder="Type to search, or add selected and open items"/>
+				<xul:button id="mode-button" class="icon icon-css icon-citation-dialog-library"/>
+				<xul:button id="settings-button" class="icon icon-css icon-citation-dialog-library"/>
+			</div>
+			<div id="notification" style="display: none;"></div>
+		</div>
+		
+		<div id="list-layout" class="layout">
+			<div id="list-selected-items"></div>
+			<div id="list-open-items"></div>
+			<div id="list-cited-items"></div>
+			<div id="list-found-items"></div>
+		</div>
+		
+		<div id="library-layout" class="layout" style="display: none;">
+			<div id="library-other-items" class="hbox">
+				<div id="library-selected-items"></div>
+				<div id="library-open-items"></div>
+				<div id="library-cited-items"></div>
+			</div>
+			<div id="library-trees">
+				
+			</div>
+		</div>
+	</body>
+</html>
