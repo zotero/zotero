@@ -46,6 +46,14 @@
 
 		_searchModePopup = null;
 
+		get value() {
+			return this.searchTextbox.value;
+		}
+
+		set value(val) {
+			this.searchTextbox.value = val;
+		}
+
 		connectedCallback() {
 			let content = document.importNode(this.content, true);
 			this.append(content);
