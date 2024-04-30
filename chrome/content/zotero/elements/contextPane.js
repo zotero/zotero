@@ -170,9 +170,6 @@
 				this._sidenav.hidden = true;
 			}
 			else if (Zotero_Tabs.selectedType == 'reader') {
-				let currentNoteContext = this._getCurrentNotesContext();
-				currentNoteContext?._cacheViewType();
-
 				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 				this._handleReaderReady(reader);
 			
@@ -218,15 +215,7 @@
 			}
 
 			let currentNoteContext = this._getCurrentNotesContext();
-			let tabNotesDeck = currentNoteContext.querySelector('.zotero-context-pane-tab-notes-deck');
-			let selectedIndex = Array.from(tabNotesDeck.children).findIndex(x => x.getAttribute('data-tab-id') == reader.tabID);
-			if (selectedIndex != -1) {
-				tabNotesDeck.setAttribute('selectedIndex', selectedIndex);
-				currentNoteContext.mode = "childNote";
-			}
-			else {
-				currentNoteContext._restoreViewType();
-			}
+			currentNoteContext.switchToTab(reader.tabID);
 		}
 
 		_getCurrentNotesContext() {

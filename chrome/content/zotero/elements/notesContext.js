@@ -44,12 +44,21 @@
 					</vbox>
 				</vbox>
 				<vbox class="zotero-context-note-container context-note-standalone">
-					<vbox class="zotero-context-pane-editor-parent-line"></vbox>
+					<vbox class="zotero-context-pane-editor-parent-line">
+						<html:div class="parent-title-container">
+							<toolbarbutton class="zotero-tb-note-return"></toolbarbutton>
+							<html:div class="parent-title"></html:div>
+						</html:div>
+					</vbox>
 					<html:div class="divider"></html:div>
-					<note-editor class="zotero-context-pane-pinned-note" flex="1"></note-editor>
 				</vbox>
 				<vbox class="zotero-context-note-container context-note-child">
-					<vbox class="zotero-context-pane-editor-parent-line"></vbox>
+					<vbox class="zotero-context-pane-editor-parent-line">
+						<html:div class="parent-title-container">
+							<toolbarbutton class="zotero-tb-note-return"></toolbarbutton>
+							<html:div class="parent-title"></html:div>
+						</html:div>
+					</vbox>
 					<html:div class="divider"></html:div>
 					<deck class="zotero-context-pane-tab-notes-deck" flex="1"></deck>
 				</vbox>	
@@ -128,18 +137,17 @@
 
 		init() {
 			this.node = this.querySelector(".context-node");
-			this.editor = this.querySelector(".zotero-context-pane-pinned-note");
 			this.notesList = this.querySelector("context-notes-list");
+			this.standaloneNoteContainer = this.querySelector('.context-note-standalone');
+			this.tabNotesDeck = this.querySelector('.zotero-context-pane-tab-notes-deck');
 			this.input = this.querySelector("search-textbox");
 			this.input.addEventListener('command', () => {
 				this.notesList.expanded = false;
 				this._updateNotesList();
 			});
 
-			this._preventViewTypeCache = false;
-			this._cachedViewType = "";
-
 			this._initNotesList();
+			this._initNoteEditor();
 		}
 
 		focus() {
@@ -191,6 +199,11 @@
 				popup.onclick = this._handleAddStandaloneNotePopupClick;
 				popup.openPopup(event.detail.button, 'after_end');
 			});
+		}
+
+		_initNoteEditor() {
+			this.querySelectorAll(".zotero-tb-note-return").forEach(
+				btn => btn.addEventListener("command", this._handleNoteEditorReturn));
 		}
 
 		async _createNoteFromAnnotations(child) {
@@ -247,7 +260,18 @@
 		_getCurrentEditor() {
 			let splitter = ZoteroContextPane.splitter;
 			if (splitter.getAttribute('state') == 'collapsed' || ZoteroContextPane.context.mode != "notes") return null;
-			return this.node.selectedPanel.querySelector('note-editor');
+			switch (this.mode) {
+				case "childNote": {
+					return this.tabNotesDeck.selectedPanel.querySelector("note-editor");
+				}
+				case "standaloneNote": {
+					return this.standaloneEditor;
+				}
+				case "notesList":
+				default: {
+					return null;
+				}
+			}
 		}
 
 		_getCurrentAttachment() {
@@ -259,8 +283,6 @@
 		}
 
 		_setPinnedNote(item) {
-			let { editor, node } = this;
-
 			let isChild = false;
 			let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 			if (reader) {
@@ -270,64 +292,80 @@
 				}
 			}
 
-			let tabNotesDeck = this.querySelector('.zotero-context-pane-tab-notes-deck');
-			let parentTitleContainer;
-			let vbox;
+			let editor;
+
 			if (isChild) {
-				vbox = document.createXULElement('vbox');
+				let vbox = document.createXULElement('vbox');
 				vbox.setAttribute('data-tab-id', Zotero_Tabs.selectedID);
 				vbox.style.display = 'flex';
 
 				editor = new (customElements.get('note-editor'));
 				editor.style.flex = "1";
+
 				vbox.append(editor);
 
-				tabNotesDeck.append(vbox);
-
-				editor.mode = this.editable ? 'edit' : 'view';
-				editor.item = item;
-				editor.parentItem = null;
+				this.tabNotesDeck.append(vbox);
 
 				this.mode = "childNote";
-				tabNotesDeck.setAttribute('selectedIndex', tabNotesDeck.children.length - 1);
-
-				parentTitleContainer = this.querySelector('.context-note-child > .zotero-context-pane-editor-parent-line');
+				this.tabNotesDeck.selectedIndex = this.tabNotesDeck.children.length - 1;
 			}
 			else {
-				this.mode = "standaloneNote";
-				editor.mode = this.editable ? 'edit' : 'view';
-				editor.item = item;
-				editor.parentItem = null;
+				// Try to reuse existing editor
+				if (this.standaloneEditor) {
+					editor = this.standaloneEditor;
+				}
+				else {
+					editor = new (customElements.get('note-editor'));
+					editor.classList.add("zotero-context-pane-pinned-note");
+					editor.style.flex = "1";
 
-				parentTitleContainer = node.querySelector('.context-note-standalone > .zotero-context-pane-editor-parent-line');
+					this.standaloneNoteContainer.append(editor);
+					this.standaloneEditor = editor;
+				}
+				this.mode = "standaloneNote";
 			}
 
+			editor.mode = this.editable ? 'edit' : 'view';
+			editor.item = item;
+			editor.parentItem = null;
 			editor.focus();
 
-			let parentItem = item.parentItem;
-			let container = document.createElement('div');
-			container.classList.add("parent-title-container");
-			let returnBtn = document.createXULElement("toolbarbutton");
-			returnBtn.classList.add("zotero-tb-note-return");
-			returnBtn.addEventListener("command", () => {
-				// Immediately save note content before vbox with note-editor iframe is destroyed below
-				editor.saveSync();
-				ZoteroContextPane.context.mode = "notes";
-				this.mode = "notesList";
-				vbox?.remove();
-				ZoteroContextPane.updateAddToNote();
-				this._preventViewTypeCache = true;
-			});
-			let title = document.createElement('div');
-			title.className = 'parent-title';
-			title.textContent = parentItem?.getDisplayTitle() || '';
-			container.append(returnBtn, title);
-			parentTitleContainer.replaceChildren(container);
+			this.updatePinnedNoteTitle();
 			ZoteroContextPane.updateAddToNote();
+		}
+
+		updatePinnedNoteTitle() {
+			let item = this._getCurrentEditor()?.item;
+			let title = this.selectedPanel?.querySelector('.parent-title');
+			let parentItem = item.parentItem;
+			title.textContent = parentItem?.getDisplayTitle() || '';
 		}
 
 		updateNotesListFromCache() {
 			this._updateNotesList(true);
+		}
+
+
+		switchToTab(tabID) {
+			if (ZoteroContextPane.context.mode !== "notes") {
+				return;
+			}
+			// Use childNote if find one
+			let childNoteContainer = this.tabNotesDeck.querySelector(`:scope > [data-tab-id=${tabID}]`);
+			if (childNoteContainer) {
+				this.tabNotesDeck.selectedPanel = childNoteContainer;
+				this.mode = "childNote";
+				this.updatePinnedNoteTitle();
+			}
+			// Use standalone note if find one
+			else if (this.standaloneEditor) {
+				this.mode = "standaloneNote";
+			}
+			// Otherwise, show notes list
+			else {
+				this.mode = "notesList";
+			}
+			ZoteroContextPane.updateAddToNote();
 		}
 
 		async _updateNotesList(useCached) {
@@ -419,19 +457,6 @@
 			}));
 		}
 
-		_cacheViewType() {
-			if (ZoteroContextPane.context.mode == "notes"
-				&& this.mode != "childNote" && !this._preventViewTypeCache) {
-				this._cachedViewType = this.mode;
-			}
-			this._preventViewTypeCache = false;
-		}
-
-		_restoreViewType() {
-			this.mode = this._cachedViewType || "notesList";
-			this._cachedViewType = "";
-		}
-
 		_handleListPopupClick(id, event) {
 			switch (event.originalTarget.id) {
 				case 'context-pane-list-show-in-library':
@@ -487,6 +512,31 @@
 
 				default:
 			}
+		};
+
+		_handleNoteEditorReturn = () => {
+			let editor = this._getCurrentEditor();
+			// Immediately save note content before vbox with note-editor iframe is destroyed below
+			editor.saveSync();
+			ZoteroContextPane.context.mode = "notes";
+
+			switch (this.mode) {
+				case "childNote": {
+					this.tabNotesDeck.selectedPanel?.remove();
+					break;
+				}
+				case "standaloneNote": {
+					this.standaloneEditor?.remove();
+					this.standaloneEditor = undefined;
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+
+			this.mode = "notesList";
+			ZoteroContextPane.updateAddToNote();
 		};
 	}
 	customElements.define("notes-context", NotesContext);
