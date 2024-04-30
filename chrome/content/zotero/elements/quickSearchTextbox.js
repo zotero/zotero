@@ -87,7 +87,6 @@
 			dropmarkerShadow.append(s1, s2, dropmarker);
 
 			let searchBox = document.createXULElement("search-textbox");
-			searchBox.inputField.setAttribute("data-l10n-id", "quicksearch-input");
 			searchBox.id = "zotero-tb-search-textbox";
 			this.searchTextbox = searchBox;
 			
@@ -153,9 +152,7 @@
 
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
-			this.searchTextbox.placeholder = this._searchModes[mode];
-			// Have the placeholder announced by screen readers after the label for additional context
-			this.searchTextbox.inputField.setAttribute("aria-description", this.searchTextbox.placeholder);
+			document.l10n.setAttributes(this.searchTextbox.inputField, "quicksearch-input", { placeholder: this._searchModes[mode] });
 		}
 
 		_id(id) {
