@@ -420,11 +420,11 @@ var ZoteroPane = new function()
 							return document.getElementById('zotero-tb-add');
 						}
 						// If tag selector is collapsed, go to "New item" button, otherwise focus tag selector
-						let firstNonDisabledTag = tagSelector.querySelector('.tag-selector-item:not(.disabled)');
-						if (firstNonDisabledTag) {
-							return firstNonDisabledTag;
+						if (ZoteroPane.tagSelector.isTagListEmpty()) {
+							return tagSelector.querySelector(".search-input");
 						}
-						return tagSelector.querySelector(".search-input");
+						ZoteroPane.tagSelector.focusTagList();
+						return null;
 					},
 					Escape: clearCollectionSearch
 				}
@@ -446,11 +446,11 @@ var ZoteroPane = new function()
 				'search-input': {
 					Tab: () => tagSelector.querySelector('.tag-selector-actions'),
 					ShiftTab: () => {
-						let firstNonDisabledTag = tagSelector.querySelector('.tag-selector-item:not(.disabled)');
-						if (firstNonDisabledTag) {
-							return firstNonDisabledTag;
+						if (ZoteroPane.tagSelector.isTagListEmpty()) {
+							return document.getElementById("collection-tree");
 						}
-						return document.getElementById("collection-tree");
+						ZoteroPane.tagSelector.focusTagList();
+						return null;
 					},
 				},
 				'tag-selector-item': {
