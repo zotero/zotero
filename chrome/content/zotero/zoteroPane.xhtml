@@ -191,7 +191,20 @@
 		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
 	
-	<keyset id="sortSubmenuKeys"/>
+	<keyset id="sortSubmenuKeys">
+		<!-- Attributes are set in initItemsTree(), but these don't work on Windows if they're
+		     created in JS -->
+		<key id="key_sortCol0"/>
+		<key id="key_sortCol1"/>
+		<key id="key_sortCol2"/>
+		<key id="key_sortCol3"/>
+		<key id="key_sortCol4"/>
+		<key id="key_sortCol5"/>
+		<key id="key_sortCol6"/>
+		<key id="key_sortCol7"/>
+		<key id="key_sortCol8"/>
+		<key id="key_sortCol9"/>
+	</keyset>
 	
 	<vbox id="titlebar">
 		<hbox class="titlebar-icon-container">
