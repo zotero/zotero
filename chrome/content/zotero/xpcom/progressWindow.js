@@ -154,7 +154,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	/**
 	 * Changes the "headline" shown at the top of the progress window
 	 */
-	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(text, icon, postText) {
+	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(text, cssIconKey, postText) {
 		var doc = _progressWindow.document,
 			headline = doc.getElementById("zotero-progress-text-headline");
 		while(headline.hasChildNodes()) headline.removeChild(headline.firstChild);
@@ -164,18 +164,19 @@ Zotero.ProgressWindow = function(options = {}) {
 		preNode.setAttribute("crop", "end");
 		headline.appendChild(preNode);
 		
-		if(icon) {
-			var img = doc.createXULElement("image");
-			img.width = 16;
-			img.height = 16;
-			img.setAttribute("src", icon);
-			headline.appendChild(img);
+		if(cssIconKey) {
+			// No getCSSIcon() without a window context
+			let iconEl = doc.createElement('span');
+			iconEl.classList.add('icon');
+			iconEl.classList.add('icon-16');
+			iconEl.classList.add('icon-css');
+			iconEl.classList.add(`icon-${cssIconKey}`);
+			headline.appendChild(iconEl);
 		}
 		
 		if(postText) {
 			var postNode = doc.createXULElement("label");
-			postNode.style.marginLeft = 0;
-			postNode.setAttribute("value", " "+postText);
+			postNode.setAttribute("value", postText);
 			postNode.setAttribute("crop", "end");
 			postNode.setAttribute("flex", "1");
 			headline.appendChild(postNode);
@@ -281,16 +282,14 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * Creates a new object representing a line in the progressWindow. This is the OO
 	 * version of addLines() above.
 	 */
-	this.ItemProgress = _deferUntilWindowLoad(function(iconSrc, text, parentItemProgress) {
+	this.ItemProgress = _deferUntilWindowLoad(function(itemType, text, parentItemProgress) {
 		this.setText(text);
 		
 		this._image = _progressWindow.document.createXULElement("hbox");
-		this._image.setAttribute("class", "zotero-progress-item-icon");
 		this._image.setAttribute("flex", 0);
-		this._image.style.width = "16px";
-		this._image.style.backgroundRepeat = "no-repeat";
-		this._image.style.backgroundSize = "auto 16px";
-		this.setIcon(iconSrc);
+		if (itemType) {
+			this.setItemTypeAndIcon(itemType);
+		}
 		
 		this._hbox = _progressWindow.document.createXULElement("hbox");
 		this._hbox.setAttribute("class", "zotero-progress-item-hbox");
@@ -326,13 +325,17 @@ Zotero.ProgressWindow = function(options = {}) {
 	this.ItemProgress.prototype.setProgress = _deferUntilWindowLoad(function(percent) {
 		if(percent != 0 && percent != 100) {
 			// Indication of partial progress, so we will use the circular indicator
-			var nArcs = 20;			
+			var nArcs = 20;
+			this._image.className = "";
+			this._image.style.width = "16px";
+			this._image.style.backgroundRepeat = "no-repeat";
+			this._image.style.backgroundSize = "auto 16px";
 			this._image.style.backgroundImage = "url('chrome://zotero/skin/progress_arcs.png')";
 			this._image.style.backgroundPosition = "-"+(Math.round(percent/100*nArcs)*16)+"px 0";
 			this._hbox.style.opacity = percent/200+.5;
 		} else if(percent == 100) {
-			this._image.style.backgroundImage = "url('"+this._iconSrc+"')";
-			this._image.style.backgroundPosition = "";
+			this._image.className = this._iconClassName;
+			this._image.style = "";
 			this._hbox.style.opacity = "1";
 			this._hbox.style.filter = "";
 		}
@@ -340,12 +343,14 @@ Zotero.ProgressWindow = function(options = {}) {
 	
 	/**
 	 * Sets the icon for this item.
-	 * @param {String} iconSrc
+	 * @param {String} [itemType]
+	 * @param {String} [cssIcon]
 	 */
-	this.ItemProgress.prototype.setIcon = _deferUntilWindowLoad(function(iconSrc) {
-		this._image.style.backgroundImage = "url('"+iconSrc+"')";
-		this._image.style.backgroundPosition = "";
-		this._iconSrc = iconSrc;
+	this.ItemProgress.prototype.setItemTypeAndIcon = _deferUntilWindowLoad(function(itemType, cssIcon = 'item-type') {
+		// No getCSSItemTypeIcon() without a window context
+		this._image.className = this._iconClassName = `icon icon-16 icon-css icon-${cssIcon}`;
+		this._image.dataset.itemType = itemType;
+		this._image.style = "";
 	});
 	
 	this.ItemProgress.prototype.setText = _deferUntilWindowLoad(function (text) {
@@ -406,9 +411,11 @@ Zotero.ProgressWindow = function(options = {}) {
 			name = Zotero.getString("pane.collections.library");
 		}
 		
-		self.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-			"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
-			name+"\u2026");
+		self.changeHeadline(
+			Zotero.getString("ingester.scrapingTo"),
+			collection ? 'collection' : 'library',
+			name + "\u2026"
+		);
 	};
 	
 	this.Translation.doneHandler = function(obj, returnValue) {		
@@ -428,30 +435,19 @@ Zotero.ProgressWindow = function(options = {}) {
 		_attachmentsMap = _attachmentsMap || new WeakMap();
 		return function(obj, dbItem, item) {
 			self.show();
-			var itemProgress = new self.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
-				item.title);
+			var itemProgress = new self.ItemProgress(dbItem?.getItemTypeIconName() ?? item.itemType, item.title);
 			itemProgress.setProgress(100);
-			for(var i=0; i<item.attachments.length; i++) {
-				var attachment = item.attachments[i];
+			for(let attachment of item.attachments) {
+				// Create unsaved item to get icon
+				let attachmentItem = new Zotero.Item('attachment');
+				attachmentItem.attachmentContentType = attachment.mimeType;
+				if (attachment.linkMode) {
+					attachmentItem.attachmentLinkMode = attachment.linkMode;
+				}
 				_attachmentsMap.set(attachment,
 					new self.ItemProgress(
-						Zotero.Utilities.Internal.determineAttachmentIcon(attachment),
+						attachmentItem.getItemTypeIconName(),
 						attachment.title, itemProgress));
-			}
-		}
-	};
-	
-	this.Translation.attachmentProgressHandler = function(_attachmentsMap) {
-		_attachmentsMap = _attachmentsMap || new WeakMap();
-		return function(obj, attachment, progress, error) {
-			var itemProgress = _attachmentsMap.get(attachment);
-			if(progress === false) {
-				itemProgress.setError();
-			} else {
-				itemProgress.setProgress(progress);
-				if(progress === 100) {
-					itemProgress.setIcon(Zotero.Utilities.Internal.determineAttachmentIcon(attachment));
-				}
 			}
 		}
 	};

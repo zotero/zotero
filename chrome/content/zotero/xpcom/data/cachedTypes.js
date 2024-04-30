@@ -504,7 +504,7 @@ Zotero.ItemTypes = new function() {
 			case 'tvBroadcast':
 			case 'videoRecording':
 			case 'webpage':
-				itemType = itemType.replace(/([A-Z])/g, '-$1').toLowerCase();
+				itemType = itemType.replace(/(?<=^|[^A-Z])([A-Z])/g, '-$1').toLowerCase();
 				return "chrome://zotero/skin/item-type/16/" + (isDark ? 'dark' : 'light') + "/" + itemType + suffix + ".svg";
 		}
 
