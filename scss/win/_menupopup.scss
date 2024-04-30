@@ -42,3 +42,10 @@ menupopup {
 		list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
 	}
 }
+
+
+menulist > menupopup > menuitem > .menu-iconic-left,
+menulist > menupopup > menucaption > .menu-iconic-left,
+menulist > menupopup > menu > .menu-iconic-left {
+	display: unset;
+}
