@@ -492,3 +492,5 @@ quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
     .aria-label = Quick Search
+    .placeholder = { $placeholder }
+    .aria-description = { $placeholder }
