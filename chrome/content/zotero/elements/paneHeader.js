@@ -51,8 +51,6 @@
 			<html:div class="custom-head"/>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
-		showInFeeds = true;
-		
 		_item = null;
 		
 		_titleFieldID = null;
