@@ -121,7 +121,9 @@
 					Zotero.Prefs.set("search.quicksearch-mode", mode);
 					this.updateMode();
 
-					this.dispatchEvent(new Event('command'));
+					if (this.value) {
+						this.dispatchEvent(new Event('command'));
+					}
 				});
 
 				popup.append(item);
