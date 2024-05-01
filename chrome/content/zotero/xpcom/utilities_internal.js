@@ -1548,6 +1548,7 @@ Zotero.Utilities.Internal = {
 			let menuitem = menulist.ownerDocument.createXULElement('menuitem');
 			menuitem.value = library.libraryID;
 			menuitem.setAttribute('label', library.name);
+			menuitem.setAttribute('type', 'radio');
 			menuitem.setAttribute('data-editable', library.editable ? 'true' : 'false');
 			menuitem.setAttribute('data-filesEditable', library.filesEditable ? 'true' : 'false');
 			menupopup.appendChild(menuitem);

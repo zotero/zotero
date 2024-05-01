@@ -554,10 +554,10 @@
 			
 			for (let row of rows) {
 				let menuitem = valueMenu.appendItem(row.name, row.value);
+				menuitem.setAttribute('type', 'radio');
 				if (row.image) {
 					menuitem.className = 'menuitem-iconic';
 					menuitem.setAttribute('image', row.image);
-					menuitem.setAttribute('type', 'radio');
 				}
 			}
 			valueMenu.selectedIndex = 0;
