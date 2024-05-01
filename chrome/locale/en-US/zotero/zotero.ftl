@@ -507,3 +507,5 @@ item-pane-header-titleCreatorYear =
     .label = Title, Creator, Year
 item-pane-header-bibEntry =
     .label = Bibliography Entry
+item-pane-header-more-options =
+    .label = More Options…

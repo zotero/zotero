@@ -349,6 +349,15 @@
 				});
 				menupopup.append(menuitem);
 			}
+			
+			menupopup.append(document.createXULElement('menuseparator'));
+			
+			let moreOptionsMenuitem = document.createXULElement('menuitem');
+			moreOptionsMenuitem.setAttribute('data-l10n-id', 'item-pane-header-more-options');
+			moreOptionsMenuitem.addEventListener('command', () => {
+				Zotero.Utilities.Internal.openPreferences('general');
+			});
+			menupopup.append(moreOptionsMenuitem);
 		}
 
 		renderCustomHead(callback) {
