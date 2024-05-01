@@ -39,8 +39,12 @@
 			<html:div class="bib-entry" />
 			
 			<popupset>
-				<menupopup class="bib-entry-menu">
+				<menupopup class="secondary-popup">
 					<menuitem data-l10n-id="text-action-copy" />
+					<menuseparator />
+					<menu data-l10n-id="item-pane-header-view-as">
+						<menupopup class="view-as-popup" />
+					</menu>
 				</menupopup>
 			</popupset>
 			
@@ -80,6 +84,16 @@
 			this.bibEntry = this.querySelector('.bib-entry');
 			this.bibEntry.attachShadow({ mode: 'open' });
 			
+			// Context menu for non-editable information (creator/year and bib entry)
+			this.secondaryPopup = this.querySelector('.secondary-popup');
+			this.secondaryPopup.firstElementChild.addEventListener('command', () => this._handleSecondaryCopy());
+			
+			this.creatorYear.addEventListener('contextmenu', (event) => {
+				if (this.item) {
+					this.secondaryPopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
+				}
+			});
+			
 			this.bibEntryContent = document.createElement('div');
 			this.bibEntryContent.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
 			this.bibEntryContent.addEventListener('click', (event) => {
@@ -90,13 +104,13 @@
 			});
 			this.bibEntryContent.addEventListener('contextmenu', (event) => {
 				if (this._item && Zotero.Styles.initialized()) {
-					this.bibEntryMenu.openPopupAtScreen(event.screenX, event.screenY, true);
+					this.secondaryPopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
 				}
 			});
 			this.bibEntry.shadowRoot.append(this.bibEntryContent);
 			
-			this.bibEntryMenu = this.querySelector('.bib-entry-menu');
-			this.bibEntryMenu.firstElementChild.addEventListener('command', () => this._handleCopyBibEntry());
+			this.viewAsPopup = this.querySelector('.view-as-popup');
+			this.viewAsPopup.addEventListener('popupshowing', () => this._buildViewAsMenu(this.viewAsPopup));
 			
 			this._bibEntryCache = new LRUCache();
 			
@@ -112,6 +126,17 @@
 						this._setTransformedValue(newValue);
 					},
 				});
+				
+				menupopup.append(document.createXULElement('menuseparator'));
+				
+				let viewAsMenu = document.createXULElement('menu');
+				viewAsMenu.setAttribute('data-l10n-id', 'item-pane-header-view-as');
+				viewAsMenu.setAttribute('type', 'menu');
+				let viewAsPopup = document.createXULElement('menupopup');
+				this._buildViewAsMenu(viewAsPopup);
+				viewAsMenu.append(viewAsPopup);
+				menupopup.append(viewAsMenu);
+				
 				this.ownerDocument.querySelector('popupset').append(menupopup);
 				menupopup.addEventListener('popuphidden', () => menupopup.remove());
 				menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
@@ -296,14 +321,36 @@
 			return true;
 		}
 		
-		_handleCopyBibEntry() {
-			Zotero_File_Interface.copyItemsToClipboard(
-				[this._item],
-				Zotero.Prefs.get('itemPaneHeader.bibEntry.style'),
-				Zotero.Prefs.get('itemPaneHeader.bibEntry.locale'),
-				false,
-				false
-			);
+		_handleSecondaryCopy() {
+			let selectedMode = Zotero.Prefs.get('itemPaneHeader');
+			if (selectedMode === 'titleCreatorYear') {
+				Zotero.Utilities.Internal.copyTextToClipboard(this.creatorYear.textContent);
+			}
+			else if (selectedMode === 'bibEntry') {
+				Zotero_File_Interface.copyItemsToClipboard(
+					[this._item],
+					Zotero.Prefs.get('itemPaneHeader.bibEntry.style'),
+					Zotero.Prefs.get('itemPaneHeader.bibEntry.locale'),
+					false,
+					false
+				);
+			}
+		}
+		
+		_buildViewAsMenu(menupopup) {
+			menupopup.replaceChildren();
+			
+			let selectedMode = Zotero.Prefs.get('itemPaneHeader');
+			for (let headerMode of ['title', 'titleCreatorYear', 'bibEntry']) {
+				let menuitem = document.createXULElement('menuitem');
+				menuitem.setAttribute('data-l10n-id', 'item-pane-header-' + headerMode);
+				menuitem.setAttribute('type', 'radio');
+				menuitem.setAttribute('checked', headerMode === selectedMode);
+				menuitem.addEventListener('command', () => {
+					Zotero.Prefs.set('itemPaneHeader', headerMode);
+				});
+				menupopup.append(menuitem);
+			}
 		}
 
 		renderCustomHead(callback) {

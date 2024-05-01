@@ -496,3 +496,14 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+
+item-pane-header-view-as =
+    .label = View As
+item-pane-header-none =
+    .label = None
+item-pane-header-title =
+    .label = Title
+item-pane-header-titleCreatorYear =
+    .label = Title, Creator, Year
+item-pane-header-bibEntry =
+    .label = Bibliography Entry
