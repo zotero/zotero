@@ -753,8 +753,13 @@
 			
 			// Creator rows
 			
-			// Place, in order of preference, after type or at beginning
-			let field = this._infoTable.querySelector('[fieldname="itemType"]');
+			// Place, in order of preference, after title, after type,
+			// or at beginning
+			var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
+			var field = this._infoTable.querySelector(`[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"]`);
+			if (!field) {
+				field = this._infoTable.querySelector('[fieldName="itemType"]');
+			}
 			if (field) {
 				this._beforeRow = field.parentNode.nextSibling;
 			}
