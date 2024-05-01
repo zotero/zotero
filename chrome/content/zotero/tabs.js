@@ -979,10 +979,60 @@ var Zotero_Tabs = new function () {
 		let menuFilter = document.getElementById('zotero-tabs-menu-filter');
 		menuFilter.value = "";
 		this._tabsMenuFilter = "";
+		this.tabsMenuList.closest("panel").style.removeProperty('max-height');
 	};
 
 	this.handleTabsMenuShown = function (_) {
 		focusTabsMenuEntry(0);
+	};
+
+	this.handleTabsMenuShowing = function (_) {
+		this.refreshTabsMenuList();
+
+		// Make sure that if the menu is very long, there is a small
+		// gap left between the top/bottom of the menu and the edge of the screen
+		let valuesAreWithinMargin = (valueOne, valueTwo, margin) => {
+			return Math.abs(valueOne - valueTwo) <= margin;
+		};
+		let panel = document.getElementById("zotero-tabs-menu-panel");
+		let panelRect = panel.getBoundingClientRect();
+		const gapBeforeScreenEdge = 25;
+		let absoluteTabsMenuTop = window.screenY - panelRect.height + panelRect.bottom;
+		let absoluteTabsMenuBottom = window.screenY + panelRect.height + panelRect.top;
+
+		// On windows, getBoundingClientRect does not give us correct top and bottom values
+		// until popupshown, so instead use the anchor's position
+		if (Zotero.isWin) {
+			let anchor = document.getElementById("zotero-tb-tabs-menu");
+			let anchorRect = anchor.getBoundingClientRect();
+			absoluteTabsMenuTop = window.screenY - panelRect.height + anchorRect.top;
+			absoluteTabsMenuBottom = window.screenY + panelRect.height + anchorRect.bottom;
+		}
+		// screen.availTop is not always right on Linux, so ignore it
+		let availableTop = Zotero.isLinux ? 0 : screen.availTop;
+
+		// Check if the end of the tabs menu is close to the edge of the screen
+		let atTopScreenEdge = valuesAreWithinMargin(absoluteTabsMenuTop, availableTop, gapBeforeScreenEdge);
+		let atBottomScreenEdge = valuesAreWithinMargin(absoluteTabsMenuBottom, screen.availHeight + availableTop, gapBeforeScreenEdge);
+
+		let gap;
+		// Limit max height of the menu to leave the specified gap till the screen's edge.
+		// Due to screen.availTop behavior on linux, the menu can go outside of what is supposed
+		// to be the available screen area, so special treatment for those edge cases.
+		if (atTopScreenEdge || (Zotero.isLinux && absoluteTabsMenuTop < 0)) {
+			gap = gapBeforeScreenEdge - (absoluteTabsMenuTop - availableTop);
+		}
+		if (atBottomScreenEdge || (Zotero.isLinux && absoluteTabsMenuBottom > screen.availHeight)) {
+			gap = gapBeforeScreenEdge - (screen.availHeight + availableTop - absoluteTabsMenuBottom);
+		}
+		if (gap) {
+			panel.style.maxHeight = `${panelRect.height - gap}px`;
+		}
+		// Try to scroll selected tab into the center
+		let selectedTab = this.tabsMenuList.querySelector(".selected");
+		if (selectedTab) {
+			selectedTab.scrollIntoView({ block: 'center' });
+		}
 	};
 
 	/**
