@@ -1,6 +1,10 @@
-// skip React Button element
-button:not(.btn, [type=checkbox], [type=radio]),
-input:is([type=button], [type=submit]) {
+// Use :where to reset specificity to 0
+// https://css-tricks.com/using-the-specificity-of-where-as-a-css-reset/
+:where(
+	// skip React Button element
+	button:not(.btn, [type=checkbox], [type=radio]),
+	input:is([type=button], [type=submit])
+) {
 	@include windows-form-element;
 
 	padding: 4px 11px 6px 11px;
