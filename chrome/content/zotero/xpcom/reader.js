@@ -162,29 +162,6 @@ class ReaderInstance {
 
 		await this._waitForReader();
 
-		// A custom print function to work around Zotero 7 printing issues
-		this._iframeWindow.wrappedJSObject.zoteroPrint = async () => {
-			let win = Zotero.getMainWindow();
-			if (win) {
-				let { PrintUtils } = win;
-				let settings = PrintUtils.getPrintSettings("", false);
-				let doPrint = await PrintUtils.handleSystemPrintDialog(
-					this._iframeWindow.browsingContext.topChromeWindow, false, settings
-				);
-				if (doPrint) {
-					this._iframeWindow.browsingContext.print(settings);
-					// An ugly hack to close the browser window that has a static clone
-					// of the content that is being printed. Without this, the window
-					// will be open while transferring the content into system print queue,
-					// which can take time for large PDF files
-					let win = Services.wm.getMostRecentWindow("navigator:browser");
-					if (win?.document?.getElementById('statuspanel')) {
-						win.close();
-					}
-				}
-			}
-		};
-
 		this._iframeWindow.addEventListener('customEvent', (event) => {
 			let data = event.detail.wrappedJSObject;
 			let append = data.append;
