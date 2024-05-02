@@ -64,6 +64,8 @@ var ZoteroPane = new function()
 
 	const modifierIsNotShift = ev => ev.getModifierState("Meta") || ev.getModifierState("Alt")
 	|| ev.getModifierState("Control") || ev.getModifierState("OS");
+	
+	const TAB_NUMBER_CODE_RE = /^(?:Numpad|Digit)([0-9])$/;
 
 	var self = this,
 		_loaded = false, _madeVisible = false,
@@ -984,24 +986,28 @@ var ZoteroPane = new function()
 		// Jump to tab N (or to the last tab if there are less than N tabs)
 		// CmdOrCtrl-9 is specially defined to jump to the last tab no matter how many there are.
 		if (cmdOrCtrlOnly) {
-			switch (event.key) {
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-					Zotero_Tabs.jump(parseInt(event.key) - 1);
-					event.preventDefault();
-					event.stopPropagation();
-					return;
-				case '9':
-					Zotero_Tabs.selectLast();
-					event.preventDefault();
-					event.stopPropagation();
-					return;
+			let tabNumberMatch = event.code.match(TAB_NUMBER_CODE_RE);
+			if (tabNumberMatch) {
+				let tabNumber = tabNumberMatch[1];
+				switch (tabNumber) {
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+						Zotero_Tabs.jump(parseInt(tabNumber) - 1);
+						event.preventDefault();
+						event.stopPropagation();
+						return;
+					case '9':
+						Zotero_Tabs.selectLast();
+						event.preventDefault();
+						event.stopPropagation();
+						return;
+				}
 			}
 		}
 	}
