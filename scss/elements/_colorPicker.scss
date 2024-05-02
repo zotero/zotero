@@ -27,7 +27,10 @@ color-picker {
 
 	.grid-tile, .grid-tile:hover {
 		appearance: none;
+		height: auto;
 		border: 0;
+		margin: 0;
+		padding: 0;
 	}
 
 	.grid-tile[selected="true"] {
