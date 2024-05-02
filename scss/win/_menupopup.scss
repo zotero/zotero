@@ -41,11 +41,40 @@ menupopup {
 	menuitem:is([checked="true"]):is([type="radio"]) > .menu-iconic-left {
 		list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
 	}
-}
 
+	menulist {
+		menupopup {
+			menu, menuitem {
+				.menu-iconic-left {
+					display: flex;
+				}
+			}
 
-menulist > menupopup > menuitem > .menu-iconic-left,
-menulist > menupopup > menucaption > .menu-iconic-left,
-menulist > menupopup > menu > .menu-iconic-left {
-	display: unset;
+			menu:not([icon], .menu-iconic),
+			menuitem:not([checked="true"], [icon], .menuitem-iconic) {
+				padding-inline-start: 36px;
+			}
+			menuitem {
+				.menu-iconic-icon {
+					display: none;
+				}
+			}
+			menuitem[selected="true"] {
+				padding-inline-start: 12px !important;
+		
+				& > .menu-iconic-left {
+					-moz-context-properties: fill, fill-opacity;
+					fill: currentColor;
+					fill-opacity: var(--menu-icon-opacity);
+					list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
+					width: 16px;
+					margin-inline-end: 8px;
+		
+					& > .menu-iconic-icon {
+						display: initial;
+					}
+				}
+			}
+		}
+	}
 }

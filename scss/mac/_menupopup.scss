@@ -35,6 +35,7 @@ menupopup {
 		}
 	}
 
+	menulist > &,
 	&[needsgutter] {
 		menu, menuitem {
 			padding-left: 20px;
