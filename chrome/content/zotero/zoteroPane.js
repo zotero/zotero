@@ -1628,7 +1628,7 @@ var ZoteroPane = new function()
 			let sortSubmenuKeys = document.getElementById('sortSubmenuKeys');
 			for (let i = 0; i < 10; i++) {
 				let key = sortSubmenuKeys.children[i];
-				key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'accel alt');
+				key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'alt');
 				key.setAttribute('key', (i + 1) % 10);
 				key.addEventListener('command', () => ZoteroPane.itemsView.toggleSort(i, true));
 			}
