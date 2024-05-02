@@ -161,6 +161,7 @@ var Zotero_Tabs = new function () {
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
+				refocusReader={this.refocusReader.bind(this)}
 			/>,
 			document.getElementById('tab-bar-container'),
 			() => {
@@ -568,6 +569,18 @@ var Zotero_Tabs = new function () {
 	this.selectLast = function () {
 		this.select(this._tabs[this._tabs.length - 1].id);
 	};
+
+	/**
+	 * Return focus into the reader of the selected tab.
+	 * Required to move focus from the tab into the reader after drag.
+	 */
+	this.refocusReader = function () {
+		var reader = Zotero.Reader.getByTabID(this._selectedID);
+		if (!reader) return;
+		setTimeout(() => {
+			reader.focus();
+		}, 100);
+	}
 
 	/**
 	 * Moves focus to a tab in the specified direction.
