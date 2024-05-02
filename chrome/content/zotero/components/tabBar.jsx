@@ -128,6 +128,8 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 		props.onTabSelect(id);
 		event.stopPropagation();
+		// Prevents focus from sticking to the actual tab on windows
+		event.preventDefault();
 	}
 
 	function handleTabClick(event, id) {
