@@ -34,3 +34,16 @@ ChromeUtils.registerWindowActor("FeedAbstract", {
 	},
 	messageManagerGroups: ["feedAbstract"]
 });
+
+ChromeUtils.registerWindowActor("ZoteroPrint", {
+	parent: {
+		moduleURI: "chrome://zotero/content/actors/ZoteroPrintParent.jsm"
+	},
+	child: {
+		moduleURI: "chrome://zotero/content/actors/ZoteroPrintChild.jsm",
+		events: {
+			pageshow: {}
+		}
+	}
+});
+
