@@ -27,6 +27,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import { ImportCitaviAnnotatons } from 'zotero/import/citavi';
 
+XPCOMUtils.defineLazyModuleGetters(globalThis, {
+	HiddenBrowser: 'chrome://zotero/content/HiddenBrowser.jsm',
+});
+
 /****Zotero_File_Exporter****
  **
  * A class to handle exporting of items, collections, or the entire library
@@ -881,46 +885,23 @@ var Zotero_File_Interface = new function() {
 		}
 		
 		if(io.method == "print") {
-			// printable bibliography, using a hidden browser
-			var browser = Zotero.Browser.createHiddenBrowser(window);
-			
-			var listener = function() {
-				if(browser.contentDocument.location.href == "about:blank") return;
-				browser.removeEventListener("pageshow", listener, false);
-				
-				// this is kinda nasty, but we have to temporarily modify the user's
-				// settings to eliminate the header and footer. the other way to do
-				// this would be to attempt to print with an embedded browser, but
-				// it's not even clear how to attempt to create one
-				var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-								  getService(Components.interfaces.nsIPrefBranch);
-				var prefsToClear = ["print.print_headerleft", "print.print_headercenter", 
-									"print.print_headerright", "print.print_footerleft", 
-									"print.print_footercenter", "print.print_footerright"];
-				var oldPrefs = [];
-				for(var i in prefsToClear) {
-					oldPrefs[i] = prefService.getCharPref(prefsToClear[i]);
-					prefService.setCharPref(prefsToClear[i], "");
-				}
-				
-				// print
-				browser.contentWindow.print();
-				
-				// set the prefs back
-				for(var i in prefsToClear) {
-					prefService.setCharPref(prefsToClear[i], oldPrefs[i]);
-				}
-				
-				// TODO can't delete hidden browser object here or else print will fail...
-			}
-			
-			browser.addEventListener("pageshow", listener, false);
-			browser.loadURI(
-				Services.io.newURI("data:text/html;charset=utf-8," + encodeURI(bibliography)),
-				{
-					flags: Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY
-				}
+			let browser = new HiddenBrowser({
+				useHiddenFrame: false
+			});
+			await browser.load(
+				"data:text/html;charset=utf-8," + encodeURIComponent(bibliography)
 			);
+			await browser.print({
+				overrideSettings: {
+					headerStrLeft: "",
+					headerStrCenter: "",
+					headerStrRight: "",
+					footerStrLeft: "",
+					footerStrCenter: "",
+					footerStrRight: "",
+				}
+			});
+			browser.destroy();
 		} else if(io.method == "save-as-html") {
 			let fStream = await _saveBibliography(name, "HTML");
 			
