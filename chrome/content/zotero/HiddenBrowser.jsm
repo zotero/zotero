@@ -53,23 +53,41 @@ class HiddenBrowser {
 	 * @param {Boolean} [options.allowJavaScript]
 	 * @param {Object} [options.docShell] Fields to set on Browser.docShell
 	 * @param {Boolean} [options.blockRemoteResources] Block all remote (non-file:) resources
+	 * @param {Boolean} [options.useHiddenFrame=true] Use a hidden frame to create the browser.
+	 * 		Must be set to false if intending to call print().
 	 * @param {Zotero.CookieSandbox} [options.cookieSandbox]
 	 */
 	constructor(options = {}) {
-		var frame = new HiddenFrame();
+		this._destroyed = false;
 		this._createdPromise = (async () => {
-			var windowlessBrowser = await frame.get();
-			windowlessBrowser.browsingContext.allowJavascript = options.allowJavaScript !== false;
-			windowlessBrowser.docShell.allowImages = false;
-			if (options.docShell) {
-				Object.assign(windowlessBrowser.docShell, options.docShell);
+			let doc;
+			if (options.useHiddenFrame !== false) {
+				var frame = new HiddenFrame();
+				this._frame = frame;
+
+				var windowlessBrowser = await frame.get();
+				windowlessBrowser.browsingContext.allowJavascript = options.allowJavaScript !== false;
+				windowlessBrowser.docShell.allowImages = false;
+				if (options.docShell) {
+					Object.assign(windowlessBrowser.docShell, options.docShell);
+				}
+				doc = windowlessBrowser.document;
 			}
-			var doc = windowlessBrowser.document;
+			else {
+				doc = Zotero.getMainWindow()?.document;
+				if (!doc) {
+					throw new Error("HiddenBrowser with useHiddenFrame: false requires the main window to be open");
+				}
+				if ('allowJavaScript' in options || 'docShell' in options) {
+					throw new Error("allowJavaScript and docShell options are only supported with useHiddenFrame: true");
+				}
+			}
 			var browser = doc.createXULElement("browser");
 			browser.setAttribute("type", "content");
 			browser.setAttribute("remote", "true");
 			browser.setAttribute('maychangeremoteness', 'true');
 			browser.setAttribute("disableglobalhistory", "true");
+			browser.style.display = "none";
 			doc.documentElement.appendChild(browser);
 			
 			if (options.cookieSandbox) {
@@ -80,7 +98,7 @@ class HiddenBrowser {
 				let weakBrowser = new WeakRef(browser);
 				setTimeout(() => {
 					let browser = weakBrowser.deref();
-					if (browser && this._frame) {
+					if (browser) {
 						Zotero.debug('Browser object still alive after 60 seconds - memory leak?');
 						Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
 					}
@@ -99,7 +117,6 @@ class HiddenBrowser {
 			this._browser = browser;
 		})();
 
-		this._frame = frame;
 		return new Proxy(this, {
 			get(target, prop) {
 				if (prop in target) {
@@ -252,13 +269,31 @@ class HiddenBrowser {
 		return actor.sendQuery('snapshot');
 	}
 
-	destroy() {
+	/**
+	 * @param {Object} [options]
+	 * @returns {Promise<void>}
+	 */
+	print(options) {
 		if (this._frame) {
+			throw new Error("Printing is not supported with useHiddenFrame: true");
+		}
+		let actor = this.browsingContext.currentWindowGlobal.getActor("ZoteroPrint");
+		return actor.zoteroPrint(options);
+	}
+
+	destroy() {
+		if (!this._destroyed) {
+			this._destroyed = true;
 			(async () => {
 				await this._createdPromise;
 				this._blockingObserver?.unregister(this._browser);
-				this._frame.destroy();
-				this._frame = null;
+				if (this._frame) {
+					this._frame.destroy();
+					this._frame = null;
+				}
+				else {
+					this._browser.remove();
+				}
 				Zotero.debug("Deleted hidden browser");
 			})();
 		}
