@@ -222,8 +222,10 @@ rtfScan-output-file = Output File
 zotero-file-none-selected =
     .value = No file selected
 
-zotero-file-choose =
-    .label = Choose File…
+rtfScan-file-choose-input =
+    .label = Choose input file
+rtfScan-file-choose-output =
+    .label = Choose output file
 
 rtfScan-intro-page = 
     .label = Introduction
