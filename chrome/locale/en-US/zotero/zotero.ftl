@@ -529,3 +529,16 @@ first-run-guidance-quickFormat = Type a title, author, and/or year to search for
     You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
 
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+
+search-remove-btn =
+    .tooltiptext = { general-remove }
+search-add-btn =
+    .tooltiptext = { general-add }
+search-conditions-menu-aria-label =
+    .aria-label = Search conditions menu
+    .label = { $label }
+search-operators-menu-aria-label =
+    .aria-label = Search operator menu
+    .label = { $label }
+search-condition-input =
+    .aria-label = Condition
