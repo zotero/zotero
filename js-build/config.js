@@ -128,6 +128,7 @@ const scssFiles = [
 const ftlFileBaseNames = [
 	'zotero',
 	'preferences',
+	'scaffold',
 ];
 
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
