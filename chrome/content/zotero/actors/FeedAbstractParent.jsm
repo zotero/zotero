@@ -8,7 +8,7 @@ class FeedAbstractParent extends JSWindowActorParent {
 	async receiveMessage({ name, data }) {
 		switch (name) {
 			case "getStylesheet": {
-				return Zotero.File.getResource('chrome://zotero/skin/feedAbstract.css');
+				return Zotero.File.getResourceAsync('chrome://zotero/skin/feedAbstract.css');
 			}
 			
 			case "resize": {
