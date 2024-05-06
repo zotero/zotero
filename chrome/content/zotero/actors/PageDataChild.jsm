@@ -31,17 +31,18 @@ class PageDataChild extends JSWindowActorChild {
 			
 			case "channelInfo": {
 				let docShell = this.contentWindow.docShell;
-				let channel = (docShell.currentDocumentChannel || docShell.failedChannel)
-					?.QueryInterface(Ci.nsIHttpChannel);
-				if (channel) {
-					return {
-						responseStatus: channel.responseStatus,
-						responseStatusText: channel.responseStatusText
-					};
+				try {
+					let channel = (docShell.currentDocumentChannel || docShell.failedChannel)
+						?.QueryInterface(Ci.nsIHttpChannel);
+					if (channel) {
+						return {
+							responseStatus: channel.responseStatus,
+							responseStatusText: channel.responseStatusText
+						};
+					}
 				}
-				else {
-					return null;
-				}
+				catch (e) {}
+				return null;
 			}
 		}
 	}
