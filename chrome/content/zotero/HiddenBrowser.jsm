@@ -127,38 +127,51 @@ class HiddenBrowser {
 	 */
 	async load(source, options) {
 		await this._createdPromise;
-		let url;
+		let uri;
 		if (/^(file|https?|chrome|resource|blob|data):/.test(source)) {
-			url = source;
+			uri = source;
 		}
 		// Convert string path to file: URL
 		else {
-			url = Zotero.File.pathToFileURI(source);
+			uri = Zotero.File.pathToFileURI(source);
 		}
 			
-		Zotero.debug(`Loading ${url} in hidden browser`);
+		Zotero.debug(`Loading ${uri} in hidden browser`);
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
-		const principal = Services.scriptSecurityManager.getSystemPrincipal();
 		try {
-			await new Promise((resolve, reject) => {
+			// Figure out whether the browser should be remote. We actually
+			// perform the load in PageDataChild, but remoteness changes
+			// need to happen here.
+			let oa = E10SUtils.predictOriginAttributes({ browser: this });
+			let remoteType = E10SUtils.getRemoteTypeForURI(
+				uri,
+				true,
+				false,
+				E10SUtils.DEFAULT_REMOTE_TYPE,
+				null,
+				oa
+			);
+			if (this.remoteType !== remoteType) {
+				// The following functions need to be called on the <browser> directly,
+				// not through our proxy (aka 'this')
+				if (remoteType === E10SUtils.NOT_REMOTE) {
+					this._browser.removeAttribute("remote");
+					this._browser.removeAttribute("remoteType");
+				}
+				else {
+					this._browser.setAttribute("remote", "true");
+					this._browser.setAttribute("remoteType", remoteType);
+				}
+				this._browser.changeRemoteness({ remoteType });
+				this._browser.construct();
+			}
+
+			let loadCompletePromise = new Promise((resolve, reject) => {
 				// Avoid a hang if page is never loaded for some reason
 				setTimeout(function () {
 					reject(new Error("Page never loaded in hidden browser"));
 				}, 5000);
 				
-				let oa = E10SUtils.predictOriginAttributes({ browser: this });
-				let loadURIOptions = {
-					triggeringPrincipal: principal,
-					remoteType: E10SUtils.getRemoteTypeForURI(
-						url,
-						true,
-						false,
-						E10SUtils.DEFAULT_REMOTE_TYPE,
-						null,
-						oa
-					)
-				};
-				this.loadURI(Services.io.newURI(url), loadURIOptions);
 				let { webProgress } = this;
 				
 				let progressListener = {
@@ -172,7 +185,7 @@ class HiddenBrowser {
 							return;
 						}
 						// Ignore the initial about:blank, unless about:blank is requested
-						if (location.spec == "about:blank" && url != "about:blank") {
+						if (location.spec == "about:blank" && uri != "about:blank") {
 							return;
 						}
 						progressListeners.delete(progressListener);
@@ -191,6 +204,14 @@ class HiddenBrowser {
 					Ci.nsIWebProgress.NOTIFY_LOCATION
 				);
 			});
+
+			let loadURISuccess = await this.browsingContext.currentWindowGlobal.getActor("PageData")
+				.sendQuery("loadURI", { uri });
+			if (!loadURISuccess) {
+				Zotero.logError(new Error("Load failed"));
+				return false;
+			}
+			await loadCompletePromise;
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -201,15 +222,15 @@ class HiddenBrowser {
 			let { channelInfo } = await this.getPageData(['channelInfo']);
 			if (channelInfo && (channelInfo.responseStatus < 200 || channelInfo.responseStatus >= 400)) {
 				let response = `${channelInfo.responseStatus} ${channelInfo.responseStatusText}`;
-				Zotero.debug(`HiddenBrowser.load: ${url} failed with ${response}`, 2);
+				Zotero.debug(`HiddenBrowser.load: ${uri} failed with ${response}`, 2);
 				// HiddenBrowser will never get returned so we need to clean it up here
 				this.destroy()
 				throw new Zotero.HTTP.UnexpectedStatusException(
 					{
 						status: channelInfo.responseStatus
 					},
-					url,
-					`Invalid response ${response} for ${url}`
+					uri,
+					`Invalid response ${response} for ${uri}`
 				);
 			}
 		}
