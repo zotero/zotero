@@ -182,6 +182,9 @@
 		}
 		
 		updateCount() {
+			if (!this._item?.isRegularItem()) {
+				return;
+			}
 			let count = this._item.numAttachments(this.inTrash);
 			this._section.setCount(count);
 		}
