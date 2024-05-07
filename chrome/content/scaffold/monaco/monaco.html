@@ -62,6 +62,8 @@
 					detectIndentation: false,
 					...params
 				});
+				
+				editor.getModel().setEOL(monaco.editor.EndOfLineSequence.LF);
 
 				window.onresize = function () {
 					editor.layout();
