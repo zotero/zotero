@@ -115,7 +115,7 @@ describe("ConcurrentCaller", function () {
 			var finished = 0;
 			var failed = false;
 			
-			var ids1 = {"1": 100, "2": 45, "3": 80};
+			var ids1 = {"1": 100, "2": 45, "3": 200};
 			var ids2 = {"4": 1, "5": 1};
 			var makeFunc = function (id, delay) {
 				return Zotero.Promise.coroutine(function* () {
