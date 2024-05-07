@@ -54,7 +54,6 @@ function fix2028(str) {
 
 var Scaffold = new function () {
 	var _browser;
-	var _cookieSandbox;
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
@@ -80,7 +79,6 @@ var Scaffold = new function () {
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
 		_browser = document.getElementById('browser');
-		_cookieSandbox = new Zotero.CookieSandbox(_browser);
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
 			document.getElementById("browser-url").value = data.url;
@@ -1932,10 +1930,7 @@ var Scaffold = new function () {
 					_debug,
 					_translatorProvider
 				);
-				if (rememberCookies) {
-					tester.setCookieSandbox(_cookieSandbox);
-				}
-				else {
+				if (!rememberCookies) {
 					tester.setCookieSandbox(new Zotero.CookieSandbox());
 				}
 				tester.setTests(testsOfType);
