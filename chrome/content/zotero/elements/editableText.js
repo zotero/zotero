@@ -193,6 +193,14 @@
 				input.addEventListener('mousedown', this._handleMouseDown);
 				input.addEventListener('dragover', this._handleDragOver);
 				input.addEventListener('drop', this._handleDrop);
+				if (autocompleteEnabled) {
+					// Even through this may run multiple times on editable-text, the listener
+					// is added only once because we pass the reference to the same exact function.
+					this.addEventListener('keydown', this._captureAutocompleteKeydown, true);
+				}
+				else {
+					this.removeEventListener('keydown', this._captureAutocompleteKeydown, true);
+				}
 				
 				let focused = this.focused;
 				let selectionStart = this._input?.selectionStart;
@@ -333,16 +341,35 @@
 			if (event.key === 'Enter') {
 				if (this.multiline === event.shiftKey) {
 					event.preventDefault();
-					this.dispatchEvent(new CustomEvent('escape_enter'));
 					this._input.blur();
+				}
+				// Do not let out shift-enter event on multiline, since it should never do
+				// anything but add a linebreak to textarea
+				if (this.multiline && !event.shiftKey) {
+					event.stopPropagation();
 				}
 			}
 			else if (event.key === 'Escape') {
-				this.dispatchEvent(new CustomEvent('escape_enter'));
 				let initialValue = this._input.dataset.initialValue ?? '';
 				this.setAttribute('value', initialValue);
 				this._input.value = initialValue;
 				this._input.blur();
+			}
+		};
+
+		_captureAutocompleteKeydown = (event) => {
+			// On Enter or Escape, mozilla stops propagation of the event which may interfere with out handling
+			// of the focus. E.g. the event should be allowed to reach itemDetails from itemBox so that focus
+			// can be moved to the itemTree or the reader.
+			// https://searchfox.org/mozilla-central/source/toolkit/content/widgets/autocomplete-input.js#564
+			// To avoid it, capture Enter and Escape keydown events and handle them without stopping propagation.
+			if (this._input.autocomplete !== "on" || !["Enter", "Escape"].includes(event.key)) return;
+			event.preventDefault();
+			if (event.key == "Enter") {
+				this._input.handleEnter();
+			}
+			else if (event.key == "Escape") {
+				this._input.mController.handleEscape();
 			}
 		};
 		

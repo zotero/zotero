@@ -334,27 +334,6 @@
 				event.stopPropagation();
 			};
 
-			// Tab/Shift-Tab from section header through header buttons
-			if (event.key === "Tab") {
-				let nextBtn;
-				if (tgt.classList.contains("head") && event.shiftKey) {
-					return;
-				}
-				if (tgt.classList.contains("head")) {
-					nextBtn = this._head.querySelector("toolbarbutton");
-				}
-				else {
-					nextBtn = event.shiftKey ? tgt.previousElementSibling : tgt.nextElementSibling;
-				}
-				
-				if (nextBtn?.tagName == "popupset") {
-					nextBtn = this._head;
-				}
-				if (nextBtn) {
-					nextBtn.focus();
-					stopEvent();
-				}
-			}
 			if (event.target.tagName === "toolbarbutton") {
 				// No actions on right/left on header buttons
 				if (["ArrowRight", "ArrowLeft"].includes(event.key)) {

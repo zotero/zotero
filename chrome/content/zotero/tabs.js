@@ -768,31 +768,7 @@ var Zotero_Tabs = new function () {
 				Services.focus.MOVEFOCUS_BACKWARD, 0);
 			return;
 		}
-		// If no item is selected, focus items list.
-		if (ZoteroPane.itemPane.mode == "message") {
-			document.getElementById("item-tree-main-default").focus();
-			return;
-		}
-		let selected = ZoteroPane.getSelectedItems();
-		// If the selected collection row is duplicates, just focus on the
-		// itemTree until the merge pane is keyboard accessible
-		// If multiple items selected, focus on itemTree as well.
-		let collectionRow = ZoteroPane.collectionsView.selectedTreeRow;
-		if (collectionRow.isDuplicates() || selected.length !== 1) {
-			document.getElementById("item-tree-main-default").focus();
-			return;
-		}
-		// Special treatment for notes and attachments in itemPane
-		selected = selected[0];
-		if (selected.isNote()) {
-			document.getElementById("zotero-note-editor").focus();
-			return;
-		}
-		if (selected.isAttachment()) {
-			document.getElementById("attachment-note-editor").focus();
-			return;
-		}
-		// For regular items, focus the last field
+		// Focus the last field of itemPane
 		// We do that by moving focus backwards from the element following the pane, because Services.focus doesn't
 		// support MOVEFOCUS_LAST on subtrees
 		Services.focus.moveFocus(window, document.getElementById("zotero-context-splitter"),

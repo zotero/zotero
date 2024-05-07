@@ -123,13 +123,6 @@
 	row-gap: 2px;
 	width: inherit;
 
-	.show-on-hover {
-		visibility: hidden;
-		&.no-display {
-			display: none;
-		}
-	}
-
 	.meta-row {
 		display: grid;
 		grid-template-columns: subgrid;
@@ -139,14 +132,15 @@
 			display: none;
 		}	
 
-		// On hover of the meta-row, reveal all hidden icons
-		// unless there's .noHover class which keeps everything hidden
-		&:not(.noHover):hover .show-on-hover,
-		&:focus-within .show-on-hover {
-			visibility: visible;
-			display: revert;
+		&:not(:hover):not(:focus-within) .show-on-hover,
+		&.noHover .show-on-hover {
+			clip-path: inset(50%);
+			&.no-display {
+				width: 0;
+				height: 0;
+				padding: 0;
+			}
 		}
-	
 		.meta-data {
 			width: 0;
 			min-width: 100%;

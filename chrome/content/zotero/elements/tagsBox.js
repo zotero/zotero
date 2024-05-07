@@ -327,6 +327,11 @@
 				if (!row.parentElement) {
 					return;
 				}
+				// Do not propagate event to itemDetails that would send focus to itemTree or reader
+				// because a new empty row will be created and focused in saveTag
+				if (row.getAttribute("isNew")) {
+					event.stopPropagation();
+				}
 				let blurOnly = false;
 				let focusField = false;
 
@@ -347,13 +352,6 @@
 				}
 				if (focusField) {
 					focusField.focus();
-				}
-				// Return focus to items pane
-				else {
-					var tree = document.getElementById('zotero-items-tree');
-					if (tree) {
-						tree.focus();
-					}
 				}
 			}
 		};
