@@ -51,7 +51,6 @@
 			this._tabIndexMaxFields = 0;
 			this._initialVisibleCreators = 5;
 			this._draggedCreator = false;
-			this._ztabindex = 0;
 			this._selectField = null;
 		}
 
@@ -116,7 +115,6 @@
 				);
 				typeBox.setAttribute('typeid', typeID);
 				
-				this._lastTabIndex = -1;
 				this.modifyCreator(index, fields);
 				if (this.saveOnEdit) {
 					await this.blurOpenField();
@@ -226,6 +224,23 @@
 				() => Zotero.Utilities.Internal.copyTextToClipboard(this._linkMenu.dataset.link)
 			);
 
+			// Save the last focused element, so that the focus can go back to it if
+			// the table is refreshed
+			this._infoTable.addEventListener("focusin", (e) => {
+				let target = e.target.closest("[fieldname], [tabindex], [focusable]");
+				if (target?.id) {
+					this._selectField = target.id;
+				}
+			});
+
+			// If the focus leaves the itemBox, clear the last focused element
+			this._infoTable.addEventListener("focusout", (e) => {
+				let destination = e.relatedTarget;
+				if (destination && !this._infoTable.contains(destination)) {
+					this._selectField = null;
+				}
+			});
+
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 			Zotero.Prefs.registerObserver('fontSize', () => {
 				this._forceRenderAll();
@@ -327,7 +342,6 @@
 			}
 			
 			this._item = val;
-			this._lastTabIndex = null;
 			this.scrollToTop();
 		}
 		
@@ -457,14 +471,6 @@
 				if (id != this.item.id) {
 					continue;
 				}
-				let activeArea = this.getFocusedTextArea();
-				// Re-select currently active area after refresh.
-				if (activeArea) {
-					this._selectField = activeArea.getAttribute("fieldname");
-				}
-				if (document.activeElement == this.itemTypeMenu) {
-					this._selectField = "item-type-menu";
-				}
 				this._forceRenderAll();
 				break;
 			}
@@ -484,8 +490,6 @@
 
 			if (this._isAlreadyRendered()) return;
 
-			// Init tab index to begin after all creator rows
-			this._ztabindex = this._tabIndexMinCreators * (this.item.numCreators() || 1);
 			delete this._linkMenu.dataset.link;
 			
 			//
@@ -499,12 +503,6 @@
 			this.addItemTypeMenu();
 			this.updateItemTypeMenuSelection();
 			this.itemTypeMenu.disabled = !this.showTypeMenu;
-			// Re-focus item type menu if it was focused before refresh
-			if (this._selectField == "item-type-menu") {
-				Services.focus.setFocus(this.itemTypeMenu, Services.focus.FLAG_SHOWRING);
-				this._selectField = null;
-				this._lastTabIndex = null;
-			}
 			var fieldNames = [];
 			
 			// Manual field order
@@ -653,7 +651,6 @@
 					if (!(Zotero.ItemFields.isLong(fieldName) || Zotero.ItemFields.isMultiline(fieldName))) {
 						optionsButton.classList.add("no-display");
 					}
-					optionsButton.setAttribute("ztabindex", ++this._ztabindex);
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					// eslint-disable-next-line no-loop-func
 					let triggerPopup = (e) => {
@@ -672,20 +669,14 @@
 					};
 					// Same popup triggered for right-click and options button click
 					optionsButton.addEventListener("click", triggerPopup);
-					optionsButton.addEventListener('keypress', event => this.handleKeyPress(event));
 					rowData.appendChild(optionsButton);
 					rowData.oncontextmenu = triggerPopup;
 				}
 
 				this.addDynamicRow(rowLabel, rowData);
 				
-				if (fieldName && this._selectField == fieldName) {
-					valueElement.focus();
-					this._selectField = null;
-				}
-				
 				// In field merge mode, add a button to switch field versions
-				else if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
+				if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
 					var button = document.createXULElement("toolbarbutton");
 					button.className = 'zotero-field-version-button zotero-clicky-merge';
 					button.setAttribute('type', 'menu');
@@ -715,13 +706,11 @@
 					rowData.appendChild(button);
 				}
 			}
-			this._tabIndexMaxFields = this._ztabindex; // Save the last tab index
 			
 			//
 			// Creators
 			//
 			
-			this._ztabindex = 1; // Reset tab index to 1, since creators go before other fields
 			// Creator type menu
 			if (this.editable) {
 				while (this._creatorTypeMenu.hasChildNodes()) {
@@ -825,10 +814,6 @@
 				this.disableCreatorAddButtons();
 			}
 			
-			// Move to next or previous field if (shift-)tab was pressed
-			if (this._lastTabIndex && this._lastTabIndex != -1) {
-				this._focusNextField(this._lastTabIndex);
-			}
 			
 			if (this._showCreatorTypeGuidance) {
 				let creatorTypeLabels = this.querySelectorAll(".creator-type-label");
@@ -866,11 +851,20 @@
 					}
 				});
 			}
-			this._refreshed = true;
-			// Add tabindex=0 to all focusable element
-			this.querySelectorAll("[ztabindex]").forEach((node) => {
-				node.setAttribute("tabindex", 0);
+			// Add tabindex=0 to toolbarbuttons
+			this.querySelectorAll("toolbarbutton").forEach((btn) => {
+				if (!btn.getAttribute('tabindex')) {
+					btn.setAttribute("tabindex", 0);
+				}
 			});
+
+			// Set focus on the last focused field
+			if (this._selectField) {
+				let refocusField = this.querySelector(`#${this._selectField}`);
+				if (refocusField) {
+					refocusField.focus();
+				}
+			}
 			// Make sure that any opened popup closes
 			this.querySelectorAll("menupopup").forEach((popup) => {
 				popup.hidePopup();
@@ -896,23 +890,17 @@
 			else {
 				var menulist = document.createXULElement("menulist", { is: "menulist-item-types" });
 				menulist.id = "item-type-menu";
-				menulist.className = "zotero-clicky";
+				menulist.className = "zotero-clicky keyboard-clickable";
 				menulist.addEventListener('command', (event) => {
 					this.changeTypeTo(event.target.value, menulist);
 				});
 				menulist.addEventListener('focus', () => {
 					this.ensureElementIsVisible(menulist);
 				});
-				menulist.addEventListener('keypress', (event) => {
-					if (event.keyCode == event.DOM_VK_TAB) {
-						this.handleKeyPress(event);
-					}
-				});
 				menulist.setAttribute("aria-labelledby", "itembox-field-itemType-label");
 				this.itemTypeMenu = menulist;
 				rowData.appendChild(menulist);
 			}
-			this.itemTypeMenu.setAttribute('ztabindex', '1');
 			this.itemTypeMenu.disabled = !this.showTypeMenu;
 			row.appendChild(labelWrapper);
 			row.appendChild(rowData);
@@ -968,7 +956,9 @@
 			let grippy = document.createXULElement('toolbarbutton');
 			
 			labelWrapper.className = 'creator-type-label';
+			labelWrapper.setAttribute("tabindex", 0);
 			grippy.className = "zotero-clicky zotero-clicky-grippy show-on-hover";
+			grippy.setAttribute('tabindex', -1);
 			rowLabel.appendChild(grippy);
 			
 			if (this.editable) {
@@ -989,7 +979,7 @@
 
 			labelWrapper.setAttribute('role', 'button');
 			labelWrapper.setAttribute('aria-describedby', 'creator-type-label-inner');
-			labelWrapper.setAttribute('ztabindex', ++this._ztabindex);
+			labelWrapper.setAttribute('id', `creator-${rowIndex}-label`);
 
 			// If not editable or only 1 creator row, hide grippy
 			if (!this.editable || this.item.numCreators() < 2) {
@@ -1016,7 +1006,6 @@
 				this.createValueElement(
 					lastName,
 					fieldName,
-					++this._ztabindex
 				)
 			);
 			
@@ -1026,7 +1015,6 @@
 				this.createValueElement(
 					firstName,
 					fieldName,
-					++this._ztabindex
 				)
 			);
 			firstNameElem.placeholder = this._defaultFirstName;
@@ -1039,7 +1027,7 @@
 			// Minus (-) button
 			var removeButton = document.createXULElement('toolbarbutton');
 			removeButton.setAttribute("class", "zotero-clicky zotero-clicky-minus show-on-hover no-display");
-			removeButton.setAttribute('ztabindex', ++this._ztabindex);
+			removeButton.setAttribute('id', `creator-${rowIndex}-remove`);
 			removeButton.setAttribute('tooltiptext', Zotero.getString('general.delete'));
 			// If default first row, don't let user remove it
 			if (defaultRow || !this.editable) {
@@ -1055,7 +1043,7 @@
 			// Plus (+) button
 			var addButton = document.createXULElement('toolbarbutton');
 			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus show-on-hover no-display");
-			addButton.setAttribute('ztabindex', ++this._ztabindex);
+			addButton.setAttribute('id', `creator-${rowIndex}-add`);
 			addButton.setAttribute('tooltiptext', Zotero.getString('general.create'));
 			// If row isn't saved, don't let user add more
 			if (unsaved || !this.editable) {
@@ -1073,7 +1061,7 @@
 				this.disableButton(optionsButton);
 			}
 			optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover no-display";
-			optionsButton.setAttribute('ztabindex', ++this._ztabindex);
+			optionsButton.setAttribute('id', `creator-${rowIndex}-options`);
 			optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 			let triggerPopup = (e) => {
 				document.popupNode = firstlast;
@@ -1088,14 +1076,6 @@
 			if (this.editable) {
 				optionsButton.addEventListener("click", triggerPopup);
 				rowData.oncontextmenu = triggerPopup;
-			}
-
-			if (!this.preventFocus) {
-				for (const domEl of [labelWrapper, removeButton, addButton, optionsButton]) {
-					domEl.setAttribute('tabindex', '0');
-					domEl.addEventListener('keypress', this.handleKeyPress.bind(this));
-					domEl.addEventListener('focusin', this.updateLastFocused.bind(this));
-				}
 			}
 			
 			this._creatorCount++;
@@ -1173,6 +1153,8 @@
 			this.addAutocompleteToElement(lastNameElem);
 			this.addAutocompleteToElement(firstNameElem);
 
+			row.addEventListener("keydown", e => this.handleCreatorRowKeyPresses(e));
+			lastNameElem.addEventListener("paste", e => this.handleCreatorPaste(e));
 			// Focus new rows
 			if (unsaved && !defaultRow) {
 				lastNameElem.focus();
@@ -1186,7 +1168,7 @@
 			var rowData = document.createElement('div');
 			rowData.className = "meta-data";
 			rowData.id = 'more-creators-label';
-			rowData.setAttribute("ztabindex", ++this._ztabindex);
+			rowData.setAttribute("tabindex", 0);
 			rowData.addEventListener('click', () => {
 				this._displayAllCreators = true;
 				this._forceRenderAll();
@@ -1248,10 +1230,6 @@
 				delete lastName.style.width;
 				delete lastName.style.maxWidth;
 				
-				// Remove firstname field from tabindex
-				tab = parseInt(firstName.getAttribute('ztabindex'));
-				firstName.setAttribute('ztabindex', -1);
-				
 				// Hide first name field and prepend to last name field
 				firstName.hidden = true;
 				
@@ -1264,13 +1242,6 @@
 				}
 				// Clear first name value after it was moved to the full name field
 				firstName.value = "";
-				
-				// If one of the creator fields is open, leave it open after swap
-				let activeField = this.getFocusedTextArea();
-				if (activeField == firstName || activeField == lastName) {
-					this._lastTabIndex = parseInt(lastName.getAttribute('ztabindex'));
-					this._tabDirection = false;
-				}
 			}
 			// Switch to two-field mode
 			else {
@@ -1278,9 +1249,6 @@
 				lastName.setAttribute('fieldMode', '0');
 
 				lastName.placeholder = this._defaultLastName;
-				// Add firstname field to tabindex
-				tab = parseInt(lastName.getAttribute('ztabindex'));
-				firstName.setAttribute('ztabindex', tab + 1);
 				
 				if (!initial) {
 					// Move all but last word to first name field and show it
@@ -1455,8 +1423,6 @@
 			let openLink = document.createXULElement("toolbarbutton");
 			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover no-display";
 			openLink.addEventListener("click", event => ZoteroPane.loadURI(value, event));
-			openLink.addEventListener('keypress', event => this.handleKeyPress(event));
-			openLink.setAttribute("ztabindex", ++this._ztabindex);
 			openLink.setAttribute('data-l10n-id', "item-button-view-online");
 			return openLink;
 		}
@@ -1485,23 +1451,15 @@
 			if (this._fieldIsClickable(fieldName)) {
 				valueElement.addEventListener("focus", e => this.showEditor(e.target));
 				valueElement.addEventListener("blur", e => this.hideEditor(e.target));
-				valueElement.addEventListener("escape_enter", (_) => {
-					setTimeout(() => {
-						document.getElementById('item-tree-main-default').focus();
-					});
-				});
 			}
 			else {
 				valueElement.setAttribute('readonly', true);
 			}
 
-			valueElement.setAttribute('ztabindex', ++this._ztabindex);
 			valueElement.setAttribute('id', `itembox-field-value-${fieldName}`);
 			valueElement.setAttribute('fieldname', fieldName);
 			valueElement.setAttribute('tight', true);
 
-			valueElement.addEventListener("focus", e => this.updateLastFocused(e));
-			valueElement.addEventListener("keypress", e => this.handleKeyPress(e));
 			switch (fieldName) {
 				case 'itemType':
 					valueElement.setAttribute('itemTypeID', valueText);
@@ -1557,10 +1515,15 @@
 			return valueElement;
 		}
 		
-		async removeCreator(index, labelToDelete) {
+		async removeCreator(index, creatorRow) {
+			// Move focus to another creator row
+			if (creatorRow.contains(document.activeElement)) {
+				let nextCreatorIndex = index ? index - 1 : 0;
+				this._selectField = `itembox-field-value-creator-${nextCreatorIndex}-lastName`;
+			}
 			// If unsaved row, just remove element
 			if (!this.item.hasCreatorAt(index)) {
-				labelToDelete.parentNode.removeChild(labelToDelete);
+				creatorRow.remove();
 				
 				// Enable the "+" button on the previous row
 				var elems = this._infoTable.getElementsByClassName('zotero-clicky-plus');
@@ -1569,6 +1532,7 @@
 				this._enablePlusButton(button, creatorFields.creatorTypeID, creatorFields.fieldMode);
 				
 				this._creatorCount--;
+				this.querySelector(`#${this._selectField}`)?.focus();
 				return;
 			}
 			await this.blurOpenField();
@@ -1682,81 +1646,6 @@
 				elem.addEventListener('change', () => {
 					this.handleCreatorAutoCompleteSelect(elem, true);
 				});
-				
-				if (creatorField == 'lastName') {
-					elem.addEventListener('paste', (event) => {
-						let lastName = event.clipboardData.getData('text').trim();
-						// Handle \n\r and \n delimited entries and a single line containing a tab
-						var rawNameArray = lastName.split(/\r\n?|\n/);
-						if (rawNameArray.length > 1 || rawNameArray[0].includes('\t')) {
-							// Pasting multiple authors; first make sure we prevent normal paste behavior
-							event.preventDefault();
-							
-							// Save tab direction and add creator flags since they are reset in the
-							// process of adding multiple authors
-							var tabDirectionBuffer = this._tabDirection;
-							var addCreatorRowBuffer = this._addCreatorRow;
-							var tabIndexBuffer = this._lastTabIndex;
-							this._tabDirection = false;
-							this._addCreatorRow = false;
-
-							// Filter out bad names
-							var nameArray = rawNameArray.filter(name => name);
-
-							// If not adding names at the end of the creator list, make new creator
-							// entries and then shift down existing creators.
-							var initNumCreators = this.item.numCreators();
-							var creatorsToShift = initNumCreators - creatorIndex;
-							if (creatorsToShift > 0) {
-								// Add extra creators with dummy values
-								for (let i = 0; i < nameArray.length; i++) {
-									this.modifyCreator(i + initNumCreators, {
-										firstName: '',
-										lastName: '',
-										fieldMode: 0,
-										creatorTypeID
-									});
-								}
-
-								// Shift existing creators
-								for (let i = initNumCreators - 1; i >= creatorIndex; i--) {
-									let shiftedCreatorData = this.item.getCreator(i);
-									this.item.setCreator(nameArray.length + i, shiftedCreatorData);
-								}
-							}
-
-							let currentIndex = creatorIndex;
-							let newCreator = { creatorTypeID };
-							// Add the creators in lastNameArray one at a time
-							for (let tempName of nameArray) {
-								// Check for tab to determine creator name format
-								newCreator.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
-								if (newCreator.fieldMode == 0) {
-									newCreator.lastName = tempName.split('\t')[0];
-									newCreator.firstName = tempName.split('\t')[1];
-								}
-								else {
-									newCreator.lastName = tempName;
-									newCreator.firstName = '';
-								}
-								this.modifyCreator(currentIndex, newCreator);
-								currentIndex++;
-							}
-							this._tabDirection = tabDirectionBuffer;
-							this._addCreatorRow = (creatorsToShift == 0) ? addCreatorRowBuffer : false;
-							if (this._tabDirection == 1) {
-								this._lastTabIndex = tabIndexBuffer + 2 * (nameArray.length - 1);
-								if (newCreator.fieldMode == 0) {
-									this._lastTabIndex++;
-								}
-							}
-							
-							if (this.saveOnEdit) {
-								this.item.saveTx();
-							}
-						}
-					});
-				}
 			}
 			elem.autocomplete = {
 				completeSelectedIndex: true,
@@ -1803,11 +1692,6 @@
 				var [_field, creatorIndex, creatorField]
 					= textbox.getAttribute('fieldname').split('-');
 				
-				if (stayFocused) {
-					this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex'));
-					this._tabDirection = false;
-				}
-				
 				var creator = Zotero.Creators.get(creatorID);
 				
 				var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
@@ -1844,93 +1728,107 @@
 			// Otherwise let the autocomplete popup handle matters
 		}
 		
-		handleKeyPress(event) {
-			var target = event.target;
-			if ((event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === ' ')
-				&& target.classList.contains('zotero-clicky')) {
-				event.preventDefault();
-				target.click();
+		// Handle Shift-Enter on creator input field
+		handleCreatorRowKeyPresses(event) {
+			let target = event.target.closest("editable-text");
+			if (!target) return;
 
-				setTimeout(() => {
-					this._creatorTypeMenu.dispatchEvent(
-						new KeyboardEvent("keydown", { key: 'ArrowDown', keyCode: 40, charCode: 0 })
-					);
-				}, 0);
-				return;
+			if (event.key == "Enter" && event.shiftKey) {
+				event.stopPropagation();
+				console.log("Target ", target);
+				// Value has changed - focus empty creator row at the bottom
+				if (target.initialValue != target.value) {
+					this._addCreatorRow = true;
+					this.blurOpenField();
+					return;
+				}
+				// Value hasn't changed
+				Zotero.debug("Value hasn't changed");
+				let row = target.closest('.meta-row');
+				// Next row is a creator - focus that
+				let nextRow = row.nextSibling;
+				if (nextRow.querySelector(".creator-type-value")) {
+					nextRow.querySelector("editable-text").focus();
+					return;
+				}
+				// Next row is a "More creators" label - click that
+				let moreCreators = nextRow.querySelector("#more-creators-label");
+				if (moreCreators) {
+					moreCreators.click();
+					this._selectField = `itembox-field-value-creator-${this._creatorCount}-lastName`;
+				}
+				var creatorFields = this.getCreatorFields(row);
+				// Do nothing from the last empty row
+				if (creatorFields.lastName == "" && creatorFields.firstName == "") return;
+				this.addCreatorRow(false, creatorFields.creatorTypeID, true);
+				this._selectField = `itembox-field-value-creator-${this._creatorCount - 1}-lastName`;
 			}
+		}
 
-			let tree;
-			switch (event.key) {
-				case "Enter":
-					var valueField = target.closest("editable-text");
-					if (!valueField) {
-						return;
+		// Handle adding multiple creator rows via paste
+		handleCreatorPaste(event) {
+			let target = event.target.closest('editable-text');
+			var fieldName = target.getAttribute('fieldname');
+			let creatorTypeID = parseInt(
+				target.closest('.meta-row').querySelector('.meta-label').getAttribute('typeid')
+			);
+			var [field, creatorIndex, creatorField] = fieldName.split('-');
+			let lastName = event.clipboardData.getData('text').trim();
+			// Handle \n\r and \n delimited entries and a single line containing a tab
+			var rawNameArray = lastName.split(/\r\n?|\n/);
+			if (rawNameArray.length > 1 || rawNameArray[0].includes('\t')) {
+				// Pasting multiple authors; first make sure we prevent normal paste behavior
+				event.preventDefault();
+
+				// Filter out bad names
+				var nameArray = rawNameArray.filter(name => name);
+
+				// If not adding names at the end of the creator list, make new creator
+				// entries and then shift down existing creators.
+				var initNumCreators = this.item.numCreators();
+				var creatorsToShift = initNumCreators - creatorIndex;
+				if (creatorsToShift > 0) {
+					// Add extra creators with dummy values
+					for (let i = 0; i < nameArray.length; i++) {
+						this.modifyCreator(i + initNumCreators, {
+							firstName: '',
+							lastName: '',
+							fieldMode: 0,
+							creatorTypeID
+						});
 					}
-					var fieldname = valueField.getAttribute('fieldname');
-					// Use shift-enter as the save action for the larger fields
-					if (Zotero.ItemFields.isMultiline(fieldname) && !event.shiftKey) {
-						return;
+
+					// Shift existing creators
+					for (let i = initNumCreators - 1; i >= creatorIndex; i--) {
+						let shiftedCreatorData = this.item.getCreator(i);
+						this.item.setCreator(nameArray.length + i, shiftedCreatorData);
 					}
-					
-					// Shift-enter adds new creator row
-					if (fieldname.indexOf('creator-') == 0 && event.shiftKey) {
-						// Value hasn't changed
-						if (valueField.initialValue == valueField.value) {
-							Zotero.debug("Value hasn't changed");
-							let row = target.closest('.meta-row');
-							// If + button is disabled, just focus next creator row
-							if (row.querySelector(".zotero-clicky-plus").disabled) {
-								let moreCreators = row.nextSibling.querySelector("#more-creators-label");
-								if (moreCreators) {
-									moreCreators.click();
-								}
-								else {
-									row.nextSibling.querySelector("editable-text").focus();
-								}
-							}
-							else {
-								var creatorFields = this.getCreatorFields(row);
-								this.addCreatorRow(false, creatorFields.creatorTypeID, true);
-							}
-						}
-						// Value has changed
-						else {
-							this._tabDirection = 1;
-							this._addCreatorRow = true;
-							this.blurOpenField();
-						}
-					}
-					
-					return;
-					
-				case "Escape":
-					
-					// Return focus to items pane
-					tree = document.getElementById('item-tree-main-default');
-					if (tree) {
-						tree.focus();
-					}
-					
-					return;
-					
-				case "Tab":
-					this.updateLastFocused(event);
-					if (event.shiftKey) {
-						// Shift-tab from the item type
-						if (this._lastTabIndex === 1) {
-							return;
-						}
-						event.preventDefault();
-						event.stopPropagation();
-						this._focusNextField(this._lastTabIndex, true);
+				}
+
+				let currentIndex = creatorIndex;
+				let newCreator = { creatorTypeID };
+				// Add the creators in lastNameArray one at a time
+				for (let tempName of nameArray) {
+					// Check for tab to determine creator name format
+					newCreator.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
+					if (newCreator.fieldMode == 0) {
+						newCreator.lastName = tempName.split('\t')[0];
+						newCreator.firstName = tempName.split('\t')[1];
 					}
 					else {
-						let focused = this._focusNextField(++this._lastTabIndex);
-						if (focused) {
-							event.preventDefault();
-							event.stopPropagation();
-						}
+						newCreator.lastName = tempName;
+						newCreator.firstName = '';
 					}
+					this.modifyCreator(currentIndex, newCreator);
+					currentIndex++;
+				}
+				// Select the last field added
+				this._selectField = `itembox-field-value-creator-${currentIndex}-lastName`;
+				this._addCreatorRow = (creatorsToShift == 0);
+				
+				if (this.saveOnEdit) {
+					this.item.saveTx();
+				}
 			}
 		}
 		
@@ -1945,8 +1843,6 @@
 			}
 			
 			Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
-			
-			this._lastTabIndex = -1;
 			
 			// Prevent autocomplete breakage in Firefox 3
 			if (textbox.mController) {
@@ -2188,7 +2084,6 @@
 					return;
 				}
 				this._draggedCreator = true;
-				this._lastTabIndex = null;
 				// Due to some kind of drag-drop API issue,
 				// after creator is dropped, the hover effect often stays at
 				// the row's old location. To workaround that, set noHover class to block all
@@ -2283,9 +2178,7 @@
 		}
 		
 		focusField(fieldName) {
-			let field = this.querySelector(`editable-text[fieldname="${fieldName}"]`);
-			if (!field) return false;
-			return this._focusNextField(field.getAttribute('ztabindex'));
+			this.querySelector(`editable-text[fieldname="${fieldName}"]`)?.focus();
 		}
 
 		getTitleField() {
@@ -2299,84 +2192,6 @@
 				return input.closest('editable-text');
 			}
 			return null;
-		}
-		
-		/**
-		 * Advance the field focus forward or backward
-		 *
-		 * Note: We're basically replicating the built-in tabindex functionality,
-		 * which doesn't work well with the weird label/textbox stuff we're doing.
-		 * (The textbox being tabbed away from is deleted before the blur()
-		 * completes, so it doesn't know where it's supposed to go next.)
-		 */
-		_focusNextField(tabindex, back) {
-			var box = this._infoTable;
-			tabindex = parseInt(tabindex);
-			
-			// Get all fields with ztabindex attributes
-			var tabbableFields = box.querySelectorAll('*[ztabindex]:not([disabled=true])');
-			
-			if (!tabbableFields.length) {
-				Zotero.debug("No tabbable fields found");
-				return false;
-			}
-			
-			var next;
-			if (back) {
-				Zotero.debug('Looking for previous tabindex before ' + tabindex, 4);
-				for (let i = tabbableFields.length - 1; i >= 0; i--) {
-					let field = tabbableFields[i];
-					let tabIndexHere = parseInt(field.getAttribute('ztabindex'));
-					if (tabIndexHere !== -1 && tabIndexHere < tabindex) {
-						next = tabbableFields[i];
-						break;
-					}
-				}
-			}
-			else {
-				Zotero.debug('Looking for tabindex ' + tabindex, 4);
-				for (var pos = 0; pos < tabbableFields.length; pos++) {
-					let field = tabbableFields[pos];
-					let tabIndexHere = parseInt(field.getAttribute('ztabindex'));
-					if (tabIndexHere !== -1 && tabIndexHere >= tabindex) {
-						next = tabbableFields[pos];
-						break;
-					}
-				}
-			}
-			if (!next) {
-				Zotero.debug("Next field not found");
-				return false;
-			}
-			
-			// Ensure the node is visible
-			next.style.visibility = "visible";
-			next.style.display = "block";
-			next.focus();
-			
-			next.style.removeProperty("visibility");
-			next.style.removeProperty("display");
-			// 1) next.parentNode is always null for some reason
-			// 2) For some reason it's necessary to scroll to the next element when
-			// moving forward for the target element to be fully in view
-			let visElem;
-			if (!back && tabbableFields[pos + 1]) {
-				Zotero.debug("Scrolling to next field");
-				visElem = tabbableFields[pos + 1];
-			}
-			else {
-				visElem = next;
-			}
-			this.ensureElementIsVisible(visElem);
-			
-			return true;
-		}
-
-		updateLastFocused(ev) {
-			let ztabindex = parseInt(ev.target.getAttribute('ztabindex'));
-			if (ztabindex) {
-				this._lastTabIndex = ztabindex;
-			}
 		}
 		
 		async blurOpenField() {

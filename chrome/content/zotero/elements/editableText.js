@@ -333,12 +333,15 @@
 			if (event.key === 'Enter') {
 				if (this.multiline === event.shiftKey) {
 					event.preventDefault();
-					this.dispatchEvent(new CustomEvent('escape_enter'));
 					this._input.blur();
+				}
+				// Do not let out shift-enter event on multiline, since it should never do
+				// anything but add a linebreak to textarea
+				if (this.multiline && !event.shiftKey) {
+					event.stopPropagation();
 				}
 			}
 			else if (event.key === 'Escape') {
-				this.dispatchEvent(new CustomEvent('escape_enter'));
 				let initialValue = this._input.dataset.initialValue ?? '';
 				this.setAttribute('value', initialValue);
 				this._input.value = initialValue;
