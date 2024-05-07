@@ -1894,7 +1894,7 @@ var Scaffold = new function () {
 	this.openURL = function (openExternally) {
 		var listbox = document.getElementById("testing-listbox");
 		var item = listbox.selectedItems[0];
-		var url = item.getElementsByTagName("label")[0].getAttribute("value");
+		var url = item.getElementsByTagName("label")[0].textContent;
 		if (openExternally) {
 			Zotero.launchURL(url);
 		}
