@@ -1019,6 +1019,7 @@ describe("Item pane", function () {
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(box);
 			assert.isFalse(box.hidden);
+			await Zotero.Promise.delay(100);
 			assert.isTrue(isPreviewDisplayed(box));
 
 			// Standalone attachment: show
@@ -1027,6 +1028,7 @@ describe("Item pane", function () {
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(box);
 			assert.isFalse(box.hidden);
+			await Zotero.Promise.delay(100);
 			assert.isTrue(isPreviewDisplayed(box));
 		});
 
