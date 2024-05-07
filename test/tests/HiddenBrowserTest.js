@@ -60,6 +60,81 @@ describe("HiddenBrowser", function() {
 			assert.isTrue(pngRequested);
 		});
 	});
+
+	describe("#load()", function () {
+		var httpd;
+		var port = 16213;
+		var baseURL = `http://127.0.0.1:${port}/`;
+		
+		async function testNoDownload(path) {
+			let browser = new HiddenBrowser({ blockRemoteResources: false });
+			await browser._createdPromise;
+
+			let listener;
+			let successPromise = new Promise((resolve) => {
+				listener = {
+					QueryInterface: ChromeUtils.generateQI(["nsIWebProgressListener", "nsISupportsWeakReference"]),
+					onStateChange(webProgress, req, flags, status) {
+						req.QueryInterface(Ci.nsIChannel);
+						// https://searchfox.org/mozilla-central/rev/729361e481cf63c8d2b5617a6ff589f53e302520/docshell/test/chrome/test_allowContentRetargeting.html#58-65
+						if (flags & Ci.nsIWebProgressListener.STATE_STOP && req.URI.filePath === '/' + path) {
+							resolve(Components.isSuccessCode(status));
+						}
+					}
+				};
+				browser.webProgress.addProgressListener(listener, Ci.nsIWebProgress.NOTIFY_STATE_ALL);
+			});
+
+			// Don't await load - it'll just time out
+			browser.load(baseURL + path);
+			assert.isFalse(await successPromise);
+			assert.isNotNull(listener);
+			browser.destroy();
+		}
+
+		before(function () {
+			Cu.import("resource://zotero-unit/httpd.js");
+			httpd = new HttpServer();
+			httpd.start(port);
+
+			httpd.registerPathHandler(
+				'/download.dat',
+				{
+					handle: function (request, response) {
+						response.setHeader('Content-Type', 'application/octet-stream', false);
+						response.setStatusLine(null, 200, 'OK');
+						response.write('');
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				'/download.html',
+				{
+					handle: function (request, response) {
+						response.setHeader('Content-Disposition', 'attachment', false);
+						response.setStatusLine(null, 200, 'OK');
+						response.write('');
+					}
+				}
+			);
+
+			// Don't show file picker on download - prevents tests from hanging on failure
+			Zotero.Prefs.set('browser.download.useDownloadDir', true, true);
+		});
+
+		after(async function () {
+			await new Promise(resolve => httpd.stop(resolve));
+			Zotero.Prefs.clear('browser.download.useDownloadDir', true);
+		});
+
+		it("should not download a binary file", async function () {
+			await testNoDownload('download.dat');
+		});
+
+		it("should not download an HTML file served with Content-Disposition: attachment", async function () {
+			await testNoDownload('download.html');
+		});
+	});
 	
 	describe("#getPageData()", function () {
 		it("should handle local UTF-8 HTML file", async function () {
