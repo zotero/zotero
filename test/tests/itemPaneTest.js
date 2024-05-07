@@ -1,5 +1,30 @@
 describe("Item pane", function () {
 	var win, doc, ZoteroPane, Zotero_Tabs, ZoteroContextPane, itemsView;
+
+	async function waitForPreviewBoxRender(box) {
+		let success = await waitForCallback(
+			() => box._asyncRenderItemID && !box._asyncRendering);
+		if (!success) {
+			Zotero.debug("Wait for box render time out");
+		}
+		await box._preview._renderDeferred?.promise;
+		return success;
+	}
+
+	async function waitForPreviewBoxReader(box) {
+		await waitForPreviewBoxRender(box);
+		let success = await waitForCallback(
+			() => box._preview._reader);
+		if (!success) {
+			Zotero.debug("Wait for box preview reader time out");
+		}
+		return success;
+	}
+
+	function isPreviewDisplayed(box) {
+		return !!(box._preview.hasPreview
+			&& win.getComputedStyle(box._preview).display !== "none");
+	}
 	
 	before(function* () {
 		win = yield loadZoteroPane();
@@ -349,33 +374,8 @@ describe("Item pane", function () {
 		});
 	});
 
-	describe("Attachments Box", function () {
+	describe("Attachments pane", function () {
 		let paneID = "attachments";
-		
-		async function waitForRender(attachmentsBox) {
-			let success = await waitForCallback(
-				() => attachmentsBox._asyncRenderItemID && !attachmentsBox._asyncRendering);
-			if (!success) {
-				Zotero.debug("Attachments Box wait for render time out");
-			}
-			await attachmentsBox._preview._renderDeferred?.promise;
-			return success;
-		}
-
-		async function waitForPreviewReader(attachmentsBox) {
-			await waitForRender(attachmentsBox);
-			let success = await waitForCallback(
-				() => attachmentsBox._preview._reader);
-			if (!success) {
-				Zotero.debug("Attachments Box wait for preview reader time out");
-			}
-			return success;
-		}
-
-		function isPreviewDisplayed(attachmentsBox) {
-			return !!(attachmentsBox._preview.hasPreview
-				&& win.getComputedStyle(attachmentsBox._preview).display !== "none");
-		}
 
 		beforeEach(function () {
 			Zotero.Prefs.set("panes.attachments.open", true);
@@ -383,7 +383,7 @@ describe("Item pane", function () {
 			Zotero_Tabs.select("zotero-pane");
 		});
 
-		it("should show attachments box in library for regular item", async function () {
+		it("should show attachments pane in library for regular item", async function () {
 			// Regular item: show
 			let attachmentsBox = ZoteroPane.itemPane._itemDetails.getPane(paneID);
 			let item = new Zotero.Item('book');
@@ -407,7 +407,7 @@ describe("Item pane", function () {
 			assert.isTrue(attachmentsBox.hidden);
 		});
 
-		it("should not show attachments box preview in reader best-matched attachment item", async function () {
+		it("should not show attachments pane preview in reader best-matched attachment item", async function () {
 			let item = new Zotero.Item('book');
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
@@ -427,7 +427,7 @@ describe("Item pane", function () {
 			assert.isFalse(isPreviewDisplayed(attachmentsBox));
 		});
 
-		it("should not show attachments box in reader standalone attachment item", async function () {
+		it("should not show attachments pane in reader standalone attachment item", async function () {
 			let attachment = await importFileAttachment('test.pdf');
 			await ZoteroPane.viewItems([attachment]);
 			let tabID = Zotero_Tabs.selectedID;
@@ -436,7 +436,7 @@ describe("Item pane", function () {
 			assert.isTrue(attachmentsBox.hidden);
 		});
 
-		it("should show attachments box preview in reader non-best-matched attachment item", async function () {
+		it("should show attachments pane preview in reader non-best-matched attachment item", async function () {
 			let item = new Zotero.Item('book');
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
@@ -461,11 +461,11 @@ describe("Item pane", function () {
 			assert.isFalse(attachmentsBox.hidden);
 
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox);
 			assert.isTrue(isPreviewDisplayed(attachmentsBox));
 		});
 
-		it("should not render attachments box preview when show preview is disabled", async function () {
+		it("should not render attachments pane preview when show preview is disabled", async function () {
 			Zotero.Prefs.set("showAttachmentPreview", false);
 
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
@@ -480,7 +480,7 @@ describe("Item pane", function () {
 			assert.isFalse(isPreviewDisplayed(attachmentsBox));
 		});
 
-		it("should only render after attachments box becomes visible", async function () {
+		it("should only render after attachments pane becomes visible", async function () {
 			// Resize to very small height to ensure the attachment box is not in view
 			let height = doc.documentElement.clientHeight;
 			win.resizeTo(null, 100);
@@ -508,7 +508,7 @@ describe("Item pane", function () {
 			assert.isFalse(isPreviewDisplayed(attachmentsBox));
 
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox);
 			assert.isTrue(itemDetails.isPaneVisible(paneID));
 			assert.equal(attachmentsBox._syncRenderItemID, item.id);
 			assert.equal(attachmentsBox._asyncRenderItemID, item.id);
@@ -518,7 +518,7 @@ describe("Item pane", function () {
 			win.resizeTo(null, height);
 		});
 
-		it("should update attachments box when attachments changed", async function () {
+		it("should update attachments pane when attachments changed", async function () {
 			// https://forums.zotero.org/discussion/113632/zotero-7-beta-pdf-attachment-preview-and-annotations-not-refreshed-after-adding-annotations
 
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
@@ -534,7 +534,7 @@ describe("Item pane", function () {
 			await item.saveTx();
 
 			await ZoteroPane.selectItem(item.id);
-			assert.isTrue(await waitForRender(attachmentsBox));
+			assert.isTrue(await waitForPreviewBoxRender(attachmentsBox));
 			// No preview
 			assert.isFalse(isPreviewDisplayed(attachmentsBox));
 			// No row
@@ -549,7 +549,7 @@ describe("Item pane", function () {
 			});
 			await ZoteroPane.selectItem(item.id);
 			await itemDetails._renderDeferred.promise;
-			await waitForRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox);
 			// Image preview for item with image attachment
 			assert.isTrue(isPreviewDisplayed(attachmentsBox));
 			assert.equal(preview.previewType, "image");
@@ -563,7 +563,7 @@ describe("Item pane", function () {
 				file,
 				parentItemID: item.id
 			});
-			await waitForPreviewReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox);
 			await Zotero.Promise.delay(100);
 			// PDF preview
 			assert.isTrue(isPreviewDisplayed(attachmentsBox));
@@ -618,7 +618,7 @@ describe("Item pane", function () {
 			itemDetails.pinnedPane = "";
 		});
 
-		it("should keep attachments box preview status after switching tab", async function () {
+		it("should keep attachments pane preview status after switching tab", async function () {
 			// https://forums.zotero.org/discussion/113658/zotero-7-beta-preview-appearing-in-the-item-pane-of-the-pdf-tab
 
 			let item = new Zotero.Item('book');
@@ -671,7 +671,7 @@ describe("Item pane", function () {
 		 * AttachmentsBox serves as a good example since it involves both sync and async rendering.
 		 * If this test fails, it is not recommended to add timeouts as a quick fix.
 		 */
-		it("should keep attachments box status after changing selection", async function () {
+		it("should keep attachments pane status after changing selection", async function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentsBox = itemDetails.getPane(paneID);
 			let preview = attachmentsBox._preview;
@@ -691,8 +691,7 @@ describe("Item pane", function () {
 			let annotation = await createAnnotation('highlight', attachment1);
 
 			await itemDetails._renderDeferred.promise;
-			await waitForRender(attachmentsBox);
-			await waitForPreviewReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox);
 
 			assert.isFalse(attachmentsBox.hidden);
 			let readerAnnotation
@@ -718,8 +717,7 @@ describe("Item pane", function () {
 
 			// Select item with attachment (no annotation)
 			await itemDetails._renderDeferred.promise;
-			await waitForRender(attachmentsBox);
-			await waitForPreviewReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox);
 
 			assert.isFalse(attachmentsBox.hidden);
 			readerAnnotation
@@ -745,8 +743,7 @@ describe("Item pane", function () {
 			// Again, select item with attachment (1 annotation)
 			await ZoteroPane.selectItem(item1.id);
 			await itemDetails._renderDeferred.promise;
-			await waitForRender(attachmentsBox);
-			await waitForPreviewReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox);
 
 			assert.isFalse(attachmentsBox.hidden);
 			readerAnnotation
@@ -779,7 +776,7 @@ describe("Item pane", function () {
 
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox);
 
 			let attachmentRow = attachmentsBox.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
 			attachmentRow._attachmentButton.click();
@@ -805,7 +802,7 @@ describe("Item pane", function () {
 
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox);
 
 			let attachmentRow = attachmentsBox.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
 			attachmentRow._annotationButton.click();
@@ -814,7 +811,7 @@ describe("Item pane", function () {
 			assert.equal(ZoteroPane.getSelectedItems(true)[0], attachment.id);
 		});
 
-		it("should open attachment on double-clicking attachments box preview", async function () {
+		it("should open attachment on double-clicking attachments pane preview", async function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentsBox = itemDetails.getPane(paneID);
 			let preview = attachmentsBox._preview;
@@ -830,7 +827,7 @@ describe("Item pane", function () {
 
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox);
 
 			let event = new MouseEvent('dblclick', {
 				bubbles: true,
@@ -960,6 +957,8 @@ describe("Item pane", function () {
 	
 	
 	describe("Attachment pane", function () {
+		let paneID = "attachment-info";
+
 		it("should refresh on file rename", async function () {
 			let file = getTestDataDirectory();
 			file.append('test.png');
@@ -997,6 +996,93 @@ describe("Item pane", function () {
 			
 			await promise;
 			assert.equal(label.value, newTitle);
+		});
+
+		it("should show attachment pane in library for attachment item", async function () {
+			// Regular item: hide
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let box = itemDetails.getPane(paneID);
+			let item = new Zotero.Item('book');
+			await item.saveTx();
+			await ZoteroPane.selectItem(item.id);
+			await waitForScrollToPane(itemDetails, paneID);
+			assert.isTrue(box.hidden);
+
+			// Child attachment: show
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: item.id
+			});
+			await ZoteroPane.selectItem(attachment.id);
+			await waitForScrollToPane(itemDetails, paneID);
+			await waitForPreviewBoxReader(box);
+			assert.isFalse(box.hidden);
+			assert.isTrue(isPreviewDisplayed(box));
+
+			// Standalone attachment: show
+			let attachment1 = await importFileAttachment('test.pdf');
+			await ZoteroPane.selectItem(attachment1.id);
+			await waitForScrollToPane(itemDetails, paneID);
+			await waitForPreviewBoxReader(box);
+			assert.isFalse(box.hidden);
+			assert.isTrue(isPreviewDisplayed(box));
+		});
+
+		it("should show attachment pane without preview in reader for standalone attachment item", async function () {
+			// Attachment item with parent item: hide
+			let item = new Zotero.Item('book');
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			await item.saveTx();
+			let attachment = await Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: item.id
+			});
+			await ZoteroPane.viewItems([attachment]);
+			let tabID = Zotero_Tabs.selectedID;
+			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
+			let box = itemDetails.getPane(paneID);
+			assert.isTrue(box.hidden);
+
+			// Standalone attachment item: show
+			attachment = await importFileAttachment('test.pdf');
+			await ZoteroPane.viewItems([attachment]);
+			tabID = Zotero_Tabs.selectedID;
+			itemDetails = ZoteroContextPane.context._getItemContext(tabID);
+			box = itemDetails.getPane(paneID);
+			assert.isFalse(box.hidden);
+
+			await waitForScrollToPane(itemDetails, paneID);
+			// No preview
+			assert.isFalse(isPreviewDisplayed(box));
+		});
+
+		it("should only show attachment note container when exists", async function () {
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let box = itemDetails.getPane(paneID);
+			let noteContainer = box._id("note-container");
+			let noteEditor = box._id('attachment-note-editor');
+
+			// Hide note container by default
+			let attachment = await importFileAttachment('test.pdf');
+			await ZoteroPane.selectItem(attachment.id);
+			await itemDetails._renderDeferred.promise;
+			await waitForScrollToPane(itemDetails, paneID);
+			await waitForPreviewBoxRender(box);
+			assert.isTrue(noteContainer.hidden);
+
+			// Add attachment note
+			let itemModifyPromise = waitForItemEvent("modify");
+			attachment.setNote("<h1>TEST</h1>");
+			await attachment.saveTx();
+			await itemModifyPromise;
+			await waitForPreviewBoxRender(box);
+			// Should show note container
+			assert.isFalse(noteContainer.hidden);
+			// Should be readonly
+			assert.equal(noteEditor.mode, "view");
 		});
 	});
 	

@@ -93,7 +93,7 @@
 			this._section = null;
 			this._preview = null;
 
-			this._isRendering = false;
+			this._asyncRendering = false;
 			
 			this._isEditingFilename = false;
 		}
@@ -304,12 +304,12 @@
 
 		async asyncRender() {
 			if (!this.item) return;
-			if (this._isRendering) return;
+			if (this._asyncRendering) return;
 			if (!this._section.open) return;
 			if (this._isAlreadyRendered("async")) return;
 
 			Zotero.debug('Refreshing attachment box');
-			this._isRendering = true;
+			this._asyncRendering = true;
 			// Cancel editing filename when refreshing
 			this._isEditingFilename = false;
 
@@ -457,7 +457,7 @@
 			else {
 				selectButton.hidden = true;
 			}
-			this._isRendering = false;
+			this._asyncRendering = false;
 		}
 
 		onViewClick(event) {

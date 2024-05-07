@@ -249,7 +249,7 @@
 			if (this._isDiscarding) {
 				return;
 			}
-			if (!force && this.isVisible) {
+			if (!force && (this.isVisible || !this._reader)) {
 				return;
 			}
 			this._isDiscarding = true;
