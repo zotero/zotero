@@ -21,6 +21,7 @@ tabbox {
 			background: var(--tabbox-tab-background);
 			border-block: 1px solid var(--fill-quinary);
 			border-inline: 1px solid var(--tabbox-tab-background);
+			color-scheme: light dark;
 
 			&:first-of-type {
 				border-top-left-radius: 4px;
