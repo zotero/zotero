@@ -1953,14 +1953,14 @@ var Scaffold = new function () {
 		if (!items || items.length == 0) return; // No action if nothing selected
 		var tests = [];
 		for (let item of items) {
-			item.getElementsByTagName("label")[1].setAttribute("value", "Running");
+			item.getElementsByTagName("label")[1].textContent = "Running";
 			var test = JSON.parse(item.dataset.testString);
 			test["ui-item"] = ContentDOMReference.get(item);
 			tests.push(test);
 		}
 
 		this.runTests(tests, (obj, test, status, message) => {
-			ContentDOMReference.resolve(test["ui-item"]).getElementsByTagName("label")[1].setAttribute("value", message);
+			ContentDOMReference.resolve(test["ui-item"]).getElementsByTagName("label")[1].textContent = message;
 		});
 	};
 
@@ -1984,7 +1984,7 @@ var Scaffold = new function () {
 		var itemIndices = items.map(item => listbox.getIndexOfItem(item));
 		var tests = [];
 		for (let item of items) {
-			item.getElementsByTagName("label")[1].setAttribute("value", "Updating");
+			item.getElementsByTagName("label")[1].textContent = "Updating";
 			var test = JSON.parse(item.dataset.testString);
 			tests.push(test);
 		}
@@ -2002,7 +2002,7 @@ var Scaffold = new function () {
 				else {
 					message = "Update failed";
 				}
-				items[testsDone].getElementsByTagName("label")[1].setAttribute("value", message);
+				items[testsDone].getElementsByTagName("label")[1].textContent = message;
 				testsDone++;
 			});
 
