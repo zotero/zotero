@@ -579,7 +579,7 @@ var Zotero_Tabs = new function () {
 		if (!reader) return;
 		setTimeout(() => {
 			reader.focus();
-		}, 100);
+		});
 	}
 
 	/**
