@@ -442,10 +442,10 @@
 								label.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 								
 								var openURLMenuItem = this._id('zotero-doi-menu-view-online');
-								openURLMenuItem.addEventListener('command', event => ZoteroPane_Local.loadURI(doi, event));
+								openURLMenuItem.oncommand = event => ZoteroPane_Local.loadURI(doi, event);
 								
 								var copyMenuItem = this._id('zotero-doi-menu-copy');
-								copyMenuItem.addEventListener('command', () => Zotero.Utilities.Internal.copyTextToClipboard(doi));
+								copyMenuItem.oncommand = () => Zotero.Utilities.Internal.copyTextToClipboard(doi);
 							}
 						}
 						else if (fieldName == 'abstractNote') {
