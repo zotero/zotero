@@ -139,12 +139,26 @@ Zotero.Utilities.Internal = {
 	
 	/**
 	 * @param {nsIFile|String} file  File or file path
-	 * @param {Boolean} [base64=FALSE]  Return as base-64-encoded string
-	 *                                  rather than hex string
 	 */
-	md5Async: async function (file, base64) {
+	md5Async: async function (file) {
 		function toHexString(charCode) {
 			return ("0" + charCode.toString(16)).slice(-2);
+		}
+		
+		var file = Zotero.File.pathToFile(file);
+		try {
+			let { size } = await IOUtils.stat(file.path);
+			if (size === 0) {
+				// MD5 for empty string
+				return "d41d8cd98f00b204e9800998ecf8427e";
+			}
+		}
+		catch (e) {
+			// Return false for missing files
+			if (e.name == "NotFoundError") {
+				return false;
+			}
+			throw e;
 		}
 		
 		var ch = Components.classes["@mozilla.org/security/hash;1"]
@@ -156,12 +170,8 @@ Zotero.Utilities.Internal = {
 				.createInstance(Ci.nsIFileInputStream);
 			is.init(Zotero.File.pathToFile(file), -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF);
 			ch.updateFromStream(is, -1);
-			let hash = ch.finish(base64);
-			// Base64
-			if (base64) {
-				return hash;
-			}
-			// Hex string
+			// Get binary string and convert to hex string
+			let hash = ch.finish(false);
 			let hexStr = "";
 			for (let i = 0; i < hash.length; i++) {
 				hexStr += toHexString(hash.charCodeAt(i));

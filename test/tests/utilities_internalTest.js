@@ -44,6 +44,24 @@ describe("Zotero.Utilities.Internal", function () {
 			
 			yield OS.File.remove(file);
 		});
+		
+		it("should return false for a nonexistent file", async function () {
+			var tmpDir = Zotero.getTempDirectory().path;
+			var file = OS.Path.join(tmpDir, 'nonexistent-asawefaweoihafa');
+			await assert.eventually.isFalse(ZUI.md5Async(file));
+		});
+		
+		it("should return hash for an empty file", async function () {
+			const emptyHash = 'd41d8cd98f00b204e9800998ecf8427e';
+			
+			var tmpDir = Zotero.getTempDirectory().path;
+			var file = OS.Path.join(tmpDir, 'empty-file');
+			await IOUtils.write(file, new Uint8Array());
+			
+			await assert.eventually.equal(ZUI.md5Async(file), emptyHash);
+			
+			await IOUtils.remove(file);
+		});
 	})
 	
 	
