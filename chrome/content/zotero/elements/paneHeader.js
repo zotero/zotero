@@ -355,7 +355,7 @@
 			let moreOptionsMenuitem = document.createXULElement('menuitem');
 			moreOptionsMenuitem.setAttribute('data-l10n-id', 'item-pane-header-more-options');
 			moreOptionsMenuitem.addEventListener('command', () => {
-				Zotero.Utilities.Internal.openPreferences('general');
+				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-general');
 			});
 			menupopup.append(moreOptionsMenuitem);
 		}
