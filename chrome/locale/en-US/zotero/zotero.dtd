@@ -52,7 +52,6 @@
 
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems			"Show Unfiled Items">
-<!ENTITY zotero.collections.showRecentlyReadItems		"Show Recently Read">
 <!ENTITY zotero.collections.showRetractedItems        "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType							"Item Type">

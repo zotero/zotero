@@ -66,6 +66,8 @@ zotero-tabs-menu-close-button =
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 
+collections-menu-show-recently-read =
+    .label = Show Recently Read
 collections-menu-rename-collection =
     .label = Rename Collection
 collections-menu-edit-saved-search =
