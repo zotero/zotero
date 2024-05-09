@@ -240,7 +240,6 @@
 				if (this._titleFieldID) {
 					this.titleField.placeholder = Zotero.ItemFields.getLocalizedString(this._titleFieldID);
 				}
-				this.titleField.toggleAttribute('tight', headerMode === 'titleCreatorYear');
 				this.title.hidden = false;
 			}
 			
@@ -254,9 +253,19 @@
 				if (year) {
 					creatorYearString += ` (${year})`;
 				}
-				this.creatorYear.textContent = creatorYearString;
-				this.creatorYear.hidden = false;
+				
+				if (creatorYearString) {
+					this.creatorYear.textContent = creatorYearString;
+					this.creatorYear.hidden = false;
+				}
+				else {
+					this.creatorYear.hidden = true;
+				}
 			}
+
+			// Make title field padding tighter if creator/year is visible below it
+			this.titleField.toggleAttribute('tight',
+				headerMode === 'titleCreatorYear' && !this.creatorYear.hidden);
 		}
 		
 		_renderBibEntry() {
