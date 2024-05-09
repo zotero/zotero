@@ -145,8 +145,17 @@ Zotero_Preferences.General = {
 
 		this._updateItemPaneHeaderStyleUI();
 		pane.addEventListener('showing', () => this._updateItemPaneHeaderStyleUI());
-		headerMenu.addEventListener('command', () => this._updateItemPaneHeaderStyleUI());
-		styleMenu.addEventListener('command', () => this._updateItemPaneHeaderStyleUI());
+		
+		// menulists stop responding to clicks if we replace their items while
+		// they're closing. Yield back to the event loop before updating to
+		// avoid this.
+		let updateUI = () => {
+			setTimeout(() => {
+				this._updateItemPaneHeaderStyleUI();
+			});
+		};
+		headerMenu.addEventListener('command', updateUI);
+		styleMenu.addEventListener('command', updateUI);
 	},
 	
 	_updateItemPaneHeaderStyleUI: Zotero.Utilities.Internal.serial(async function () {
