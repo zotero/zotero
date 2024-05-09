@@ -1306,7 +1306,7 @@ var ZoteroPane = new function()
 						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
 						let itemBox = document.getElementById('zotero-editpane-item-box');
 						// If the info pane is collapsed, focus the title in the header
-						if (!itemBox._section.open) {
+						if (!itemBox.isSectionOpen) {
 							document.querySelector("#zotero-item-pane-header editable-text").focus();
 							return;
 						}
