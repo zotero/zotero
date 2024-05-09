@@ -1305,6 +1305,11 @@ var ZoteroPane = new function()
 						var type = mru ? mru.split(',')[0] : 'book';
 						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
 						let itemBox = document.getElementById('zotero-editpane-item-box');
+						// If the info pane is collapsed, focus the title in the header
+						if (!itemBox._section.open) {
+							document.querySelector("#zotero-item-pane-header editable-text").focus();
+							return;
+						}
 						var menu = itemBox.itemTypeMenu;
 						// If the new item's type is changed immediately, update the MRU
 						var handleTypeChange = function () {
