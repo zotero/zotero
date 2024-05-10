@@ -1304,12 +1304,9 @@ var ZoteroPane = new function()
 						var mru = Zotero.Prefs.get('newItemTypeMRU');
 						var type = mru ? mru.split(',')[0] : 'book';
 						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
-						// If the info pane is collapsed, focus the first focusable itemPane component
 						let itemBox = document.getElementById('zotero-editpane-item-box');
-						if (!itemBox.open) {
-							Services.focus.moveFocus(window, ZoteroPane.itemPane, Services.focus.MOVEFOCUS_FORWARD, 0);
-							return;
-						}
+						// Ensure itemBox is opened
+						itemBox.open = true;
 						var menu = itemBox.itemTypeMenu;
 						// If the new item's type is changed immediately, update the MRU
 						var handleTypeChange = function () {
