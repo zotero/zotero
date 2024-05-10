@@ -755,13 +755,12 @@
 			
 			// Place, in order of preference, after title, after type,
 			// or at beginning
-			var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
-			var field = this._infoTable.querySelector(`[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"]`);
+			var field = this.getTitleField();
 			if (!field) {
 				field = this._infoTable.querySelector('[fieldName="itemType"]');
 			}
 			if (field) {
-				this._beforeRow = field.parentNode.nextSibling;
+				this._beforeRow = field.closest(".meta-row");
 			}
 			else {
 				this._beforeRow = this._infoTable.firstChild;
@@ -2287,6 +2286,11 @@
 			let field = this.querySelector(`editable-text[fieldname="${fieldName}"]`);
 			if (!field) return false;
 			return this._focusNextField(field.getAttribute('ztabindex'));
+		}
+
+		getTitleField() {
+			var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
+			return this._infoTable.querySelector(`[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"][ztabindex]`);
 		}
 
 		getFocusedTextArea() {

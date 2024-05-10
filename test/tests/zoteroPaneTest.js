@@ -18,9 +18,8 @@ describe("ZoteroPane", function() {
 	describe("#newItem", function () {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
-			let title = doc.getElementById('zotero-item-pane-header').querySelector("editable-text");
-			assert.equal(doc.activeElement.getAttribute("aria-label"), title.getAttribute("aria-label"));
-			title.blur();
+			assert.equal(doc.activeElement.closest("editable-text").id, "itembox-field-value-title");
+			doc.activeElement.blur();
 			yield Zotero.Promise.delay(1);
 		})
 		
