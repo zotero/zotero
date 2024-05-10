@@ -44,6 +44,39 @@
 					<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
 				</menulist>
 			</hbox>
+
+			<hbox align="center">
+				<label data-l10n-id="preferences-item-pane-header"/>
+				<menulist id="item-pane-header-menulist" preference="extensions.zotero.itemPaneHeader" native="true">
+					<menupopup>
+						<menuitem data-l10n-id="item-pane-header-none" value="none"/>
+						<menuitem data-l10n-id="item-pane-header-title" value="title"/>
+						<menuitem data-l10n-id="item-pane-header-titleCreatorYear" value="titleCreatorYear"/>
+						<menuitem data-l10n-id="item-pane-header-bibEntry" value="bibEntry"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+
+			<vbox id="item-pane-header-bib-entry-options" class="indented-pref">
+				<hbox align="center">
+					<label data-l10n-id="preferences-item-pane-header-style"/>
+					<menulist
+							id="item-pane-header-style-menu"
+							preference="extensions.zotero.itemPaneHeader.bibEntry.style"
+							native="true"
+							flex="1"
+					><menupopup/></menulist>
+				</hbox>
+
+				<hbox align="center">
+					<label data-l10n-id="preferences-item-pane-header-locale"/>
+					<menulist
+							id="item-pane-header-locale-menu"
+							preference="extensions.zotero.itemPaneHeader.bibEntry.locale"
+							native="true"
+					><menupopup/></menulist>
+				</hbox>
+			</vbox>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">

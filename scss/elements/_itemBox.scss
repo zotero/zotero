@@ -14,6 +14,10 @@ item-box {
 
 	#info-table {
 		@include meta-table;
+		
+		.meta-row .zotero-field-version-button {
+			padding: 3px;
+		}
 	}
 
 	.creator-type-label, #more-creators-label {
@@ -167,12 +171,6 @@ item-box {
 		padding-inline-end: 1px !important;
 		white-space: nowrap;
 		align-self: center;
-	}
-
-	/* Merge pane in duplicates view */
-	.zotero-field-version-button {
-		margin: 0;
-		padding: 0;
 	}
 
 	/*

@@ -33,6 +33,11 @@ preferences-color-scheme-light =
 preferences-color-scheme-dark =
     .label = Dark
 
+preferences-item-pane-header = Item Pane Header:
+preferences-item-pane-header-style = Header Citation Style:
+preferences-item-pane-header-locale = Header Language:
+preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
+
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities

@@ -53,6 +53,7 @@ Zotero_Preferences.General = {
 		}
 		
 		this.refreshLocale();
+		this._initItemPaneHeaderUI();
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 		this._initEbookFontFamilyMenu();
@@ -136,6 +137,83 @@ Zotero_Preferences.General = {
 			Zotero.Utilities.Internal.quitZotero(true);
 		}
 	},
+
+	_initItemPaneHeaderUI() {
+		let pane = document.querySelector('#zotero-prefpane-general');
+		let headerMenu = document.querySelector('#item-pane-header-menulist');
+		let styleMenu = document.querySelector('#item-pane-header-style-menu');
+
+		this._updateItemPaneHeaderStyleUI();
+		pane.addEventListener('showing', () => this._updateItemPaneHeaderStyleUI());
+		
+		// menulists stop responding to clicks if we replace their items while
+		// they're closing. Yield back to the event loop before updating to
+		// avoid this.
+		let updateUI = () => {
+			setTimeout(() => {
+				this._updateItemPaneHeaderStyleUI();
+			});
+		};
+		headerMenu.addEventListener('command', updateUI);
+		styleMenu.addEventListener('command', updateUI);
+	},
+	
+	_updateItemPaneHeaderStyleUI: Zotero.Utilities.Internal.serial(async function () {
+		let optionsContainer = document.querySelector('#item-pane-header-bib-entry-options');
+		let styleMenu = document.querySelector('#item-pane-header-style-menu');
+		let localeMenu = document.querySelector('#item-pane-header-locale-menu');
+
+		optionsContainer.hidden = Zotero.Prefs.get('itemPaneHeader') !== 'bibEntry';
+		if (optionsContainer.hidden) {
+			return;
+		}
+		
+		if (!Zotero.Styles.initialized()) {
+			let menus = [styleMenu, localeMenu];
+			for (let menu of menus) {
+				menu.selectedItem = null;
+				menu.setAttribute('label', Zotero.getString('general.loading'));
+				menu.disabled = true;
+			}
+			await Zotero.Styles.init();
+			for (let menu of menus) {
+				menu.disabled = false;
+			}
+		}
+
+		let currentStyle = Zotero.Styles.get(styleMenu.value);
+		let currentLocale = Zotero.Prefs.get('itemPaneHeader.bibEntry.locale');
+
+		styleMenu.menupopup.replaceChildren();
+		for (let style of Zotero.Styles.getVisible()) {
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.label = style.title;
+			menuitem.value = style.styleID;
+			styleMenu.menupopup.append(menuitem);
+		}
+		
+		if (currentStyle) {
+			if (currentStyle.styleID !== styleMenu.value) {
+				// Style has been renamed
+				styleMenu.value = currentStyle.styleID;
+			}
+
+			if (!localeMenu.menupopup.childElementCount) {
+				Zotero.Styles.populateLocaleList(localeMenu);
+			}
+			Zotero.Styles.updateLocaleList(localeMenu, currentStyle, currentLocale);
+		}
+		else {
+			// Style is unknown/removed - show placeholder
+			let shortName = styleMenu.value.replace('http://www.zotero.org/styles/', '');
+			let missingLabel = await document.l10n.formatValue(
+				'preferences-item-pane-header-missing-style',
+				{ shortName }
+			);
+			styleMenu.selectedItem = null;
+			styleMenu.setAttribute('label', missingLabel);
+		}
+	}),
 	
 	updateAutoRenameFilesUI: function () {
 		setTimeout(() => {

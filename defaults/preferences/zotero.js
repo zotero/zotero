@@ -74,6 +74,9 @@ pref("extensions.zotero.sortCreatorAsString", false);
 
 pref("extensions.zotero.uiDensity", "comfortable");
 
+pref("extensions.zotero.itemPaneHeader", "title");
+pref("extensions.zotero.itemPaneHeader.bibEntry.style", "http://www.zotero.org/styles/apa");
+pref("extensions.zotero.itemPaneHeader.bibEntry.locale", "");
 
 //Tag Selector
 pref("extensions.zotero.tagSelector.showAutomatic", true);

@@ -507,7 +507,6 @@ Zotero.Styles = new function() {
 	 * Populate menulist with locales
 	 * 
 	 * @param {xul:menulist} menulist
-	 * @return {Promise}
 	 */
 	this.populateLocaleList = function (menulist) {
 		if (!_initialized) {

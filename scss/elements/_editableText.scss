@@ -1,11 +1,17 @@
 @include comfortable {
 	--editable-text-padding-inline: 4px;
 	--editable-text-padding-block: 4px;
+	
+	--editable-text-tight-padding-inline: 4px;
+	--editable-text-tight-padding-block: 2px;
 }
 
 @include compact {
 	--editable-text-padding-inline: 4px;
 	--editable-text-padding-block: 1px;
+	
+	--editable-text-tight-padding-inline: 3px;
+	--editable-text-tight-padding-block: 1px;
 }
 
 editable-text {
@@ -14,15 +20,8 @@ editable-text {
 	--max-visible-lines: 1;
 
 	&[tight] {
-		@include comfortable {
-			--editable-text-padding-inline: 4px;
-			--editable-text-padding-block: 2px;
-		}
-		
-		@include compact {
-			--editable-text-padding-inline: 3px;
-			--editable-text-padding-block: 1px;
-		}
+		--editable-text-padding-inline: var(--editable-text-tight-padding-inline);
+		--editable-text-padding-block: var(--editable-text-tight-padding-block);
 	}
 
 	// Fun auto-sizing approach from CSSTricks:

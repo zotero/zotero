@@ -1,46 +1,44 @@
 pane-header {
-	display: flex;
+	&:not([hidden]) {
+		display: flex;
+	}
 	flex-direction: column;
-	align-items: flex-start;
-	padding: 6px 8px;
-	gap: 6px;
+	align-items: stretch;
+	padding: 8px;
 	border-bottom: 1px solid var(--fill-quinary);
 	
-	.head {
-		display: flex;
-		align-self: stretch;
-		gap: 4px;
+	max-height: 25%;
+	overflow-y: auto;
+	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+	scrollbar-gutter: stable;
+
+	.title {
+		margin-top: calc(0px - var(--editable-text-padding-block));
+		flex: 1 1 0;
+		font-weight: 600;
+		line-height: 1.333;
 		
-		.title {
-			align-self: center;
-			margin-top: calc(0px - var(--editable-text-padding-block));
-			padding: 2px 0px 1px 0px;
-			flex: 1 1 0;
-			font-weight: 600;
-			line-height: 1.333;
-			
-			editable-text {
-				flex: 1;
-			}
-		}
-		
-		.menu-button {
-			align-self: start;
-		}
-		
-		.menu-button toolbarbutton {
-			@include svgicon-menu("go-to", "universal", "20");
+		editable-text {
+			flex: 1;
 		}
 	}
 	
-	.menu-button {
-		align-self: start;
+	.creator-year {
+		color: var(--fill-secondary);
 	}
 	
-	.menu-button toolbarbutton {
-		@include svgicon-menu("go-to", "universal", "20");
-		--width-focus-border: 2px;
-		@include focus-ring;
+	.bib-entry {
+		line-height: 1.5;
+		
+		&.loading {
+			color: var(--fill-secondary);
+		}
+	}
+	
+	.creator-year, .bib-entry {
+		// Set padding to match editable-text in tight mode, plus 1px for border
+		padding-inline: calc(var(--editable-text-tight-padding-inline) + 1px);
+		overflow-wrap: anywhere;
 	}
 
 	.custom-head {

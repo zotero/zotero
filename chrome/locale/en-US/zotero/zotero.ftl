@@ -114,6 +114,8 @@ item-button-view-online =
 
 itembox-button-options =
     .tooltiptext = Open Context Menu
+itembox-button-merge =
+    .aria-label = Select Version
 
 reader-use-dark-mode-for-content =
     .label = Use Dark Mode for Content
@@ -494,3 +496,16 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+
+item-pane-header-view-as =
+    .label = View As
+item-pane-header-none =
+    .label = None
+item-pane-header-title =
+    .label = Title
+item-pane-header-titleCreatorYear =
+    .label = Title, Creator, Year
+item-pane-header-bibEntry =
+    .label = Bibliography Entry
+item-pane-header-more-options =
+    .label = More Options
