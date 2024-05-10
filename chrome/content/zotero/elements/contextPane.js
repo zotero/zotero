@@ -97,33 +97,35 @@
 
 		_handleItemUpdate(action, type, ids, extraData) {
 			// Update, remove or re-create item panes
-			for (let itemDetails of Array.from(this._itemPaneDeck.children)) {
-				let item = itemDetails.item;
-				let tabID = itemDetails.dataset.tabId;
-				if (!item) {
-					this._removeItemContext(tabID);
-				}
-				else if (item.parentID != itemDetails.parentID) {
-					this._removeItemContext(tabID);
-					this._addItemContext(tabID, item.itemID);
+			if (action === 'modify') {
+				for (let itemDetails of Array.from(this._itemPaneDeck.children)) {
+					let tabID = itemDetails.tabID;
+					let item = Zotero.Items.get(Zotero_Tabs._getTab(tabID)?.tab.data.itemID);
+					if ((item.parentID || itemDetails.parentID)
+						&& item.parentID !== itemDetails.parentID) {
+						this._removeItemContext(tabID);
+						this._addItemContext(tabID, item.itemID);
+					}
 				}
 			}
 
 			// Update notes lists for affected libraries
-			let libraryIDs = [];
-			for (let id of ids) {
-				let item = Zotero.Items.get(id);
-				if (item && (item.isNote() || item.isRegularItem())) {
-					libraryIDs.push(item.libraryID);
+			if (['add', 'delete', 'modify'].includes(action)) {
+				let libraryIDs = [];
+				for (let id of ids) {
+					let item = Zotero.Items.get(id);
+					if (item && (item.isNote() || item.isRegularItem())) {
+						libraryIDs.push(item.libraryID);
+					}
+					else if (action == 'delete') {
+						libraryIDs.push(extraData[id].libraryID);
+					}
 				}
-				else if (action == 'delete') {
-					libraryIDs.push(extraData[id].libraryID);
-				}
-			}
-			for (let context of Array.from(this._notesPaneDeck.children)) {
-				if (libraryIDs.includes(context.libraryID)) {
-					context.affectedIDs = new Set([...context.affectedIDs, ...ids]);
-					context.update();
+				for (let context of Array.from(this._notesPaneDeck.children)) {
+					if (libraryIDs.includes(context.libraryID)) {
+						context.affectedIDs = new Set([...context.affectedIDs, ...ids]);
+						context.update();
+					}
 				}
 			}
 		}
