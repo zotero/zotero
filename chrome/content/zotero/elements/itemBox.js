@@ -47,8 +47,6 @@
 			this._editableFields = [];
 			this._fieldAlternatives = {};
 			this._fieldOrder = [];
-			this._tabIndexMinCreators = 100;
-			this._tabIndexMaxFields = 0;
 			this._initialVisibleCreators = 5;
 			this._draggedCreator = false;
 			this._selectField = null;
@@ -767,11 +765,6 @@
 				for (let i = 0; i < max; i++) {
 					let data = this.item.getCreator(i);
 					this.addCreatorRow(data, data.creatorTypeID);
-					
-					// Display "+" button on all but last row
-					if (i == max - 2) {
-						this.disableCreatorAddButtons();
-					}
 				}
 				if (this._draggedCreator) {
 					this._draggedCreator = false;
@@ -791,8 +784,6 @@
 				// Additional creators not displayed
 				if (num > max) {
 					this.addMoreCreatorsRow(num - max);
-					
-					this.disableCreatorAddButtons();
 				}
 				else {
 					// If we didn't start with creators truncated,
@@ -804,14 +795,12 @@
 					if (this._addCreatorRow) {
 						this.addCreatorRow(false, this.item.getCreator(max - 1).creatorTypeID, true);
 						this._addCreatorRow = false;
-						this.disableCreatorAddButtons();
 					}
 				}
 			}
 			else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
 				// Add default row
 				this.addCreatorRow(false, false, true, true);
-				this.disableCreatorAddButtons();
 			}
 			
 			
@@ -851,12 +840,8 @@
 					}
 				});
 			}
-			// Add tabindex=0 to toolbarbuttons
-			this.querySelectorAll("toolbarbutton").forEach((btn) => {
-				if (!btn.getAttribute('tabindex')) {
-					btn.setAttribute("tabindex", 0);
-				}
-			});
+
+			this._ensureButtonsFocusable();
 
 			// Set focus on the last focused field
 			if (this._selectField) {
@@ -1029,15 +1014,7 @@
 			removeButton.setAttribute("class", "zotero-clicky zotero-clicky-minus show-on-hover no-display");
 			removeButton.setAttribute('id', `creator-${rowIndex}-remove`);
 			removeButton.setAttribute('tooltiptext', Zotero.getString('general.delete'));
-			// If default first row, don't let user remove it
-			if (defaultRow || !this.editable) {
-				this.disableButton(removeButton);
-			}
-			else {
-				removeButton.addEventListener("click", () => {
-					this.removeCreator(rowIndex, rowData.parentNode);
-				});
-			}
+			removeButton.addEventListener("command", () => this.removeCreator(rowIndex, rowData.parentNode));
 			rowData.appendChild(removeButton);
 			
 			// Plus (+) button
@@ -1045,20 +1022,14 @@
 			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus show-on-hover no-display");
 			addButton.setAttribute('id', `creator-${rowIndex}-add`);
 			addButton.setAttribute('tooltiptext', Zotero.getString('general.create'));
-			// If row isn't saved, don't let user add more
-			if (unsaved || !this.editable) {
-				this.disableButton(addButton);
-			}
-			else {
-				this._enablePlusButton(addButton, typeID, fieldMode);
-			}
+			addButton.addEventListener("command", () => this.addCreatorRow(null, typeID, true));
 			rowData.appendChild(addButton);
 
 			// Options button that opens creator transform menu
 			let optionsButton = document.createXULElement("toolbarbutton");
 			if (!this.editable) {
 				optionsButton.style.visibility = "hidden";
-				this.disableButton(optionsButton);
+				optionsButton.disabled = true;
 			}
 			optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover no-display";
 			optionsButton.setAttribute('id', `creator-${rowIndex}-options`);
@@ -1074,20 +1045,18 @@
 			rowData.appendChild(optionsButton);
 			
 			if (this.editable) {
-				optionsButton.addEventListener("click", triggerPopup);
+				optionsButton.addEventListener("command", triggerPopup);
 				rowData.oncontextmenu = triggerPopup;
 			}
 			
 			this._creatorCount++;
 			
-			if (!this.editable) {
-				removeButton.hidden = true;
-				addButton.hidden = true;
-				optionsButton.hidden = true;
-			}
 			
 			let row = this.addDynamicRow(rowLabel, rowData, true);
 
+			this._updateCreatorButtonsStatus();
+			this._ensureButtonsFocusable();
+			
 			/**
 			 * Events handling creator drag-drop reordering
 			 */
@@ -1394,26 +1363,15 @@
 			return false;
 		}
 		
-		disableButton(button) {
-			button.setAttribute('disabled', true);
-			button.setAttribute('onclick', false);
+		// Toolbarbuttons required tabindex=0 to be properly focusable via tab
+		_ensureButtonsFocusable() {
+			this.querySelectorAll("toolbarbutton").forEach((btn) => {
+				if (!btn.getAttribute('tabindex')) {
+					btn.setAttribute("tabindex", 0);
+				}
+			});
 		}
-		
-		_enablePlusButton(button, creatorTypeID, _fieldMode) {
-			button.removeAttribute('disabled');
-			button.onclick = () => {
-				this.disableButton(button);
-				this.addCreatorRow(null, creatorTypeID, true);
-			};
-		}
-		
-		disableCreatorAddButtons() {
-			// Disable the "+" button on all creator rows
-			var elems = this._infoTable.getElementsByClassName('zotero-clicky-plus');
-			for (let elem of elems) {
-				this.disableButton(elem);
-			}
-		}
+
 		
 		createOpenLinkIcon(value) {
 			// In duplicates/trash mode return nothing
@@ -1525,14 +1483,9 @@
 			if (!this.item.hasCreatorAt(index)) {
 				creatorRow.remove();
 				
-				// Enable the "+" button on the previous row
-				var elems = this._infoTable.getElementsByClassName('zotero-clicky-plus');
-				var button = elems[elems.length - 1];
-				var creatorFields = this.getCreatorFields(button.closest('.meta-row'));
-				this._enablePlusButton(button, creatorFields.creatorTypeID, creatorFields.fieldMode);
-				
 				this._creatorCount--;
 				this.querySelector(`#${this._selectField}`)?.focus();
+				this._updateCreatorButtonsStatus();
 				return;
 			}
 			await this.blurOpenField();
@@ -1977,6 +1930,30 @@
 			}
 		}
 		
+
+		// Make sure that irrelevant creators +/- buttons are disabled
+		_updateCreatorButtonsStatus() {
+			let creatorValues = [...this.querySelectorAll(".creator-type-value")];
+			let row;
+			for (let creatorValue of creatorValues) {
+				row = creatorValue.closest(".meta-row");
+				let { lastName, firstName } = this.getCreatorFields(row);
+				let isEmpty = lastName == "" && firstName == "";
+				let isNextRowCreator = row.nextSibling.querySelector(".creator-type-value");
+				let isDefaultEmptyRow = isEmpty && creatorValues.length == 1;
+		
+				if (!this.editable) {
+					row.querySelector(".zotero-clicky-plus").hidden = true;
+					row.querySelector(".zotero-clicky-minus").hidden = true;
+					row.querySelector(".zotero-clicky-options").hidden = true;
+					return;
+				}
+
+				row.querySelector(".zotero-clicky-plus").disabled = isEmpty || isNextRowCreator;
+				row.querySelector(".zotero-clicky-minus").disabled = isDefaultEmptyRow;
+			}
+		}
+
 		getCreatorFields(row) {
 			var typeID = row.querySelector('[typeid]').getAttribute('typeid');
 			var [label1, label2] = row.querySelectorAll('editable-text');
