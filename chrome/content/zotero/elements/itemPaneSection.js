@@ -52,6 +52,10 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		this.setAttribute('tabType', tabType);
 	}
 	
+	get open() {
+		return this._section?.open || false;
+	}
+	
 	connectedCallback() {
 		super.connectedCallback();
 		if (!this.render && !this.asyncRender) {
