@@ -95,22 +95,6 @@ item-pane-sidenav {
 			stroke: map.get($item-pane-sections, "notes");
 		}
 		
-		// Expand/Collapse button
-		&[data-action="toggle-collapse"] {
-			list-style-image: url("chrome://zotero/skin/itempane/20/collapse.svg");
-			
-			&.collapsed {
-				list-style-image: url("chrome://zotero/skin/itempane/20/expand.svg");
-			}
-
-			&:-moz-locale-dir(rtl) {
-				transform: scaleX(-1);
-			}
-
-			fill: var(--fill-secondary);
-			stroke: var(--fill-secondary);
-		}
-		
 		// Locate button
 		&[data-action="locate"] {
 			@include svgicon-menu("go-to", "universal", "20");
@@ -127,10 +111,6 @@ item-pane-sidenav {
 			stroke: var(--fill-secondary);
 			-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
 		}
-	}
-	
-	&.stacked toolbarbutton[data-pane="toggle-collapse"] {
-		transform: rotate(90deg);
 	}
 	
 	&:not(.stacked) > .divider {
