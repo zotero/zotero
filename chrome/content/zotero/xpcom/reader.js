@@ -892,7 +892,7 @@ class ReaderInstance {
 		});
 		menupopup.className = 'tags-popup';
 		menupopup.setAttribute('ignorekeys', true);
-		let tagsbox = new (this._window.customElements.get('tags-box'));
+		let tagsbox = this._window.document.createXULElement('tags-box');
 		menupopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
 		this._popupset.appendChild(menupopup);

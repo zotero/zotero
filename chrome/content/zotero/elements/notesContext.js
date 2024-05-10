@@ -299,7 +299,7 @@
 				vbox.setAttribute('data-tab-id', Zotero_Tabs.selectedID);
 				vbox.style.display = 'flex';
 
-				editor = new (customElements.get('note-editor'));
+				editor = document.createXULElement('note-editor');
 				editor.style.flex = "1";
 
 				vbox.append(editor);
@@ -315,7 +315,7 @@
 					editor = this.standaloneEditor;
 				}
 				else {
-					editor = new (customElements.get('note-editor'));
+					editor = document.createXULElement('note-editor');
 					editor.classList.add("zotero-context-pane-pinned-note");
 					editor.style.flex = "1";
 

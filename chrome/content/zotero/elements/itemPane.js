@@ -347,7 +347,7 @@
 				ZoteroPane.toggleSelectedItemsRead();
 			});
 
-			let addToButton = new (customElements.get('split-menu-button'));
+			let addToButton = document.createElement("button", { is: "split-menu-button" });
 			addToButton.id = "zotero-feed-item-addTo-button";
 			addToButton.setAttribute("popup", "zotero-item-addTo-menu");
 			addToButton.addEventListener("command", () => this.translateSelectedItems());

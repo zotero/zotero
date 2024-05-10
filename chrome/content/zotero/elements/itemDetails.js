@@ -284,7 +284,7 @@
 					onInit, onDestroy, onItemChange, onRender, onAsyncRender, onToggle,
 					sectionButtons } = section;
 				if (currentPaneIDs.includes(paneID)) continue;
-				let elem = new (customElements.get("item-pane-custom-section"));
+				let elem = document.createXULElement("item-pane-custom-section");
 				elem.dataset.sidenavOptions = JSON.stringify(sidenav || {});
 				elem.paneID = paneID;
 				elem.bodyXHTML = bodyXHTML;
