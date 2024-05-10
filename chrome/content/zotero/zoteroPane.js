@@ -1305,11 +1305,8 @@ var ZoteroPane = new function()
 						var type = mru ? mru.split(',')[0] : 'book';
 						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
 						let itemBox = document.getElementById('zotero-editpane-item-box');
-						// If the info pane is collapsed, focus the title in the header
-						if (!itemBox.open) {
-							document.querySelector("#zotero-item-pane-header editable-text").focus();
-							return;
-						}
+						// Ensure itemBox is opened
+						itemBox.open = true;
 						var menu = itemBox.itemTypeMenu;
 						// If the new item's type is changed immediately, update the MRU
 						var handleTypeChange = function () {
@@ -1320,9 +1317,6 @@ var ZoteroPane = new function()
 						var removeTypeChangeHandler = function () {
 							itemBox.removeHandler('itemtypechange', handleTypeChange);
 							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
-							// Focus the title field after menu closes
-							let title = document.querySelector("#zotero-item-pane-header").querySelector("editable-text");
-							title.focus();
 						};
 						itemBox.addHandler('itemtypechange', handleTypeChange);
 						itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
@@ -1452,8 +1446,11 @@ var ZoteroPane = new function()
 		if (manual) {
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
+			let itemBox = ZoteroPane.itemPane.querySelector("item-box");
+			// Make sure the item box is opened
+			itemBox.open = true;
 			// Focus the title field
-			document.getElementById('zotero-item-pane-header').querySelector("editable-text").focus();
+			itemBox.getTitleField().focus();
 		}
 		
 		return Zotero.Items.getAsync(itemID);

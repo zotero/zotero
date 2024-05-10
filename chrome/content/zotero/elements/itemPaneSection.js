@@ -56,6 +56,12 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		return this._section?.open || false;
 	}
 	
+	set open(val) {
+		if (this._section) {
+			this._section.open = val;
+		}
+	}
+	
 	connectedCallback() {
 		super.connectedCallback();
 		if (!this.render && !this.asyncRender) {
