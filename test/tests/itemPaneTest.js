@@ -143,6 +143,16 @@ describe("Item pane", function () {
 	});
 	
 	describe("Info pane", function () {
+		it("should place Title after Item Type and before creators", async function () {
+			var item = await createDataObject('item');
+			var itemPane = win.ZoteroPane.itemPane;
+			var fields = [...itemPane.querySelectorAll('.meta-label')]
+				.map(x => x.getAttribute('fieldname'));
+			assert.equal(fields[0], 'itemType');
+			assert.equal(fields[1], 'title');
+			assert.isTrue(fields[2].startsWith('creator'));
+		});
+		
 		it("should refresh on item update", function* () {
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
