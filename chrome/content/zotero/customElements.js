@@ -33,43 +33,55 @@ Services.scriptloader.loadSubScript("chrome://global/content/customElements.js",
 Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSection.js', this);
 
-// Load our custom elements
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreview.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentPreviewBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextPane.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/duplicatesMergePane.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/guidancePanel.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemDetails.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPane.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemMessagePane.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/mergeGroup.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/menulistItemTypes.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteEditor.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/notesBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/quickSearchTextbox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/relatedBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/shadowAutocompleteInput.js', this);
-Services.scriptloader.loadSubScript("chrome://zotero/content/elements/splitMenuButton.js", this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/tagsBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/textLink.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/zoteroSearch.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/paneHeader.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/editableText.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSidenav.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/abstractBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/collapsibleSection.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentsBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentRow.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentAnnotationsBox.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/annotationRow.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/contextNotesList.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteRow.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/notesContext.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/librariesCollectionsBox.js', this);
-
 {
+	// https://searchfox.org/mozilla-central/rev/8e885f04a0a4ff6d64ea59741c10d9b8e45d9ff8/toolkit/content/customElements.js#826-832
+	for (let [tag, script] of [
+		['attachment-box', 'chrome://zotero/content/elements/attachmentBox.js'],
+		['attachment-preview', 'chrome://zotero/content/elements/attachmentPreview.js'],
+		['attachment-preview-box', 'chrome://zotero/content/elements/attachmentPreviewBox.js'],
+		['context-pane', 'chrome://zotero/content/elements/contextPane.js'],
+		['duplicates-merge-pane', 'chrome://zotero/content/elements/duplicatesMergePane.js'],
+		['guidance-panel', 'chrome://zotero/content/elements/guidancePanel.js'],
+		['item-box', 'chrome://zotero/content/elements/itemBox.js'],
+		['item-details', 'chrome://zotero/content/elements/itemDetails.js'],
+		['item-pane', 'chrome://zotero/content/elements/itemPane.js'],
+		['item-message-pane', 'chrome://zotero/content/elements/itemMessagePane.js'],
+		['merge-group', 'chrome://zotero/content/elements/mergeGroup.js'],
+		['menulist-item-types', 'chrome://zotero/content/elements/menulistItemTypes.js'],
+		['note-editor', 'chrome://zotero/content/elements/noteEditor.js'],
+		['notes-box', 'chrome://zotero/content/elements/notesBox.js'],
+		['quick-search-textbox', 'chrome://zotero/content/elements/quickSearchTextbox.js'],
+		['related-box', 'chrome://zotero/content/elements/relatedBox.js'],
+		['shadow-autocomplete-input', 'chrome://zotero/content/elements/shadowAutocompleteInput.js'],
+		['split-menu-button', 'chrome://zotero/content/elements/splitMenuButton.js'],
+		['tags-box', 'chrome://zotero/content/elements/tagsBox.js'],
+		['zotero-text-link', 'chrome://zotero/content/elements/textLink.js'],
+		['zoterosearch', 'chrome://zotero/content/elements/zoteroSearch.js'],
+		['zoterosearchcondition', 'chrome://zotero/content/elements/zoteroSearch.js'],
+		['zoterosearchtextbox', 'chrome://zotero/content/elements/zoteroSearch.js'],
+		['zoterosearchagefield', 'chrome://zotero/content/elements/zoteroSearch.js'],
+		['pane-header', 'chrome://zotero/content/elements/paneHeader.js'],
+		['editable-text', 'chrome://zotero/content/elements/editableText.js'],
+		['item-pane-sidenav', 'chrome://zotero/content/elements/itemPaneSidenav.js'],
+		['abstract-box', 'chrome://zotero/content/elements/abstractBox.js'],
+		['collapsible-section', 'chrome://zotero/content/elements/collapsibleSection.js'],
+		['attachments-box', 'chrome://zotero/content/elements/attachmentsBox.js'],
+		['attachment-row', 'chrome://zotero/content/elements/attachmentRow.js'],
+		['attachment-annotations-box', 'chrome://zotero/content/elements/attachmentAnnotationsBox.js'],
+		['annotation-row', 'chrome://zotero/content/elements/annotationRow.js'],
+		['context-notes-list', 'chrome://zotero/content/elements/contextNotesList.js'],
+		['note-row', 'chrome://zotero/content/elements/noteRow.js'],
+		['notes-context', 'chrome://zotero/content/elements/notesContext.js'],
+		['libraries-collections-box', 'chrome://zotero/content/elements/librariesCollectionsBox.js'],
+	]) {
+		customElements.setElementCreationCallback(tag, () => {
+			Services.scriptloader.loadSubScript(script, window);
+			if (!customElements.get(tag)) {
+				throw new Error(`${script} failed to define <${tag}>`);
+			}
+		});
+	}
+	
 	// Fix missing property bug that breaks arrow key navigation between <tab>s
 	let MozTabPrototype = customElements.get('tab').prototype;
 	if (!MozTabPrototype.hasOwnProperty('container')) {

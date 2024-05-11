@@ -235,7 +235,7 @@
 		}
 
 		_addNotesContext(libraryID) {
-			let context = new (customElements.get("notes-context"));
+			let context = document.createXULElement("notes-context");
 			this._notesPaneDeck.append(context);
 			context.libraryID = libraryID;
 			return context;
