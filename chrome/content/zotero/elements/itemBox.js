@@ -760,7 +760,7 @@
 				field = this._infoTable.querySelector('[fieldName="itemType"]');
 			}
 			if (field) {
-				this._beforeRow = field.closest(".meta-row");
+				this._beforeRow = field.closest(".meta-row").nextSibling;
 			}
 			else {
 				this._beforeRow = this._infoTable.firstChild;
