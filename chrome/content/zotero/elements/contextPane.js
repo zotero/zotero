@@ -203,7 +203,11 @@
 					|| !document.activeElement.closest('.context-node iframe[id="editor-view"]'))) {
 				if (!Zotero_Tabs.focusOptions?.keepTabFocused) {
 					// Do not move focus to the reader during keyboard navigation
-					reader.focus();
+					setTimeout(() => {
+						// Timeout to make sure focus does not stick to the tab
+						// after click on windows
+						reader.focus();
+					});
 				}
 			}
 			
