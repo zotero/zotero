@@ -2284,7 +2284,7 @@
 		}
 		
 		focusField(fieldName) {
-			let field = this.querySelector(`[fieldname="${fieldName}"][ztabindex]`);
+			let field = this.querySelector(`editable-text[fieldname="${fieldName}"]`);
 			if (!field) return false;
 			return this._focusNextField(field.getAttribute('ztabindex'));
 		}
