@@ -2290,7 +2290,7 @@
 
 		getTitleField() {
 			var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
-			return this._infoTable.querySelector(`[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"][ztabindex]`);
+			return this._infoTable.querySelector(`editable-text[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"]`);
 		}
 
 		getFocusedTextArea() {
