@@ -509,3 +509,20 @@ item-pane-header-bibEntry =
     .label = Bibliography Entry
 item-pane-header-more-options =
     .label = More Options
+
+item-pane-message-items-selected = { $count ->
+                                             [one] { $count } item selected
+                                            *[other] { $count } items selected
+                                    }
+item-pane-message-collections-selected = { $count ->
+                                             [one] { $count } collection selected
+                                            *[other] { $count } collections selected
+                                         }
+item-pane-message-searches-selected = { $count ->
+                                          [one] { $count } search selected
+                                         *[other] { $count } searches selected
+                                      }
+item-pane-message-objects-selected = { $count ->
+                                          [one] { $count } object selected
+                                         *[other] { $count } objects selected
+                                      }

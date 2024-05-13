@@ -2813,10 +2813,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		let itemTypeAriaLabel;
 		try {
-			if (item.isSearch() || item.isCollection()) {
-				// Special treatment for trashed collections or searches since they are not an actual
-				// item and do not have an item type
-				itemTypeAriaLabel = Zotero.getString(`pane.collections.deleted${item._ObjectType}Aria`) + '.';
+			// Special treatment for trashed collections or searches since they are not an actual
+			// item and do not have an item type
+			if (item.isSearch()) {
+				itemTypeAriaLabel = Zotero.getString('searchConditions.collection') + '.';
+			}
+			else if (item.isCollection()) {
+				itemTypeAriaLabel = Zotero.getString('searchConditions.savedSearch') + '.';
 			}
 			else {
 				var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
@@ -3823,20 +3826,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getIcon(index) {
 		var item = this.getRow(index).ref;
 		
-		// TEMP
+		// Non-item objects that can be appear in the trash
 		if (item.isCollection() || item.isSearch()) {
-			let iconClsName;
+			let icon;
 			if (item.isCollection()) {
-				iconClsName = "IconTreeitemCollection";
+				icon = getCSSIcon('collection');
 			}
-			if (item.isSearch()) {
-				iconClsName = "IconTreeitemSearch";
+			else if (item.isSearch()) {
+				icon = getCSSIcon('search');
 			}
-			var icon = getDOMElement(iconClsName);
-			if (!icon) {
-				Zotero.debug('Could not find tree icon for "' + itemType + '"');
-				return document.createElement('span');
-			}
+			icon.classList.add('icon-item-type');
 			return icon;
 		}
 		
