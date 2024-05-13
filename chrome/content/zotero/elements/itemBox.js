@@ -1604,7 +1604,8 @@
 				completeSelectedIndex: true,
 				ignoreBlurWhileSearching: false,
 				search: 'zotero',
-				searchParam: JSON.stringify(params)
+				searchParam: JSON.stringify(params),
+				popup: 'PopupAutoComplete'
 			};
 		}
 		
