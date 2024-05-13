@@ -18,6 +18,7 @@ describe("Item pane", function () {
 		if (!success) {
 			Zotero.debug("Wait for box preview reader time out");
 		}
+		await box._preview._reader._initPromise;
 		return success;
 	}
 
