@@ -963,6 +963,16 @@ describe("Item pane", function () {
 	describe("Attachment pane", function () {
 		let paneID = "attachment-info";
 
+		beforeEach(function () {
+			Zotero.Prefs.set("panes.attachment-info.open", true);
+			Zotero.Prefs.set("showAttachmentPreview", true);
+			Zotero_Tabs.select("zotero-pane");
+		});
+
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+		});
+
 		it("should refresh on file rename", async function () {
 			let file = getTestDataDirectory();
 			file.append('test.png');
