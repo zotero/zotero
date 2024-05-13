@@ -224,19 +224,30 @@
 			// Display label in the middle of the item pane
 			else {
 				if (count) {
-					if (count == 1) {
-						let item = this.data[0];
-						// If a collection or search is selected, it must be in the trash.
-						if (item.isCollection()) {
-							let subcollectionsCount = item.getDescendents(false, 'collection', true).length;
-							msg = Zotero.getString('pane.collections.deletedCollection', subcollectionsCount);
+					let key;
+					// In the trash, we have to check the object type
+					if (this.collectionTreeRow.isTrash()) {
+						let obj = this.data[0];
+						if (this.data.every(x => x.isCollection())) {
+							key = 'item-pane-message-collections-selected';
 						}
-						else if (item.isSearch()) {
-							msg = Zotero.getString('pane.collections.deletedSearch');
+						else if (this.data.every(x => x.isSearch())) {
+							key = 'item-pane-message-searches-selected';
+						}
+						else if (this.data.every(x => x.isItem())) {
+							key = 'item-pane-message-items-selected';
+						}
+						else {
+							key = 'item-pane-message-objects-selected';
 						}
 					}
-					
-					msg = Zotero.getString('pane.item.selected.multiple', count);
+					else {
+						key = 'item-pane-message-items-selected';
+					}
+					// TODO: Add mechanism for this to setItemPaneMessage()
+					let elem = document.createXULElement('description');
+					document.l10n.setAttributes(elem, key, { count });
+					msg = elem;
 				}
 				else {
 					let rowCount = this.itemsView.rowCount;

@@ -691,7 +691,7 @@ Zotero.Collection.prototype.trash = Zotero.Promise.coroutine(function* (env) {
 });
 
 /**
-* Completely erases the collection and it's descendants.
+* Completely erase the collection and its descendants.
 **/
 Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();

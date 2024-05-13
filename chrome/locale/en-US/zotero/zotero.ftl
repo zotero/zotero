@@ -535,6 +535,24 @@ item-pane-header-bibEntry =
 item-pane-header-more-options =
     .label = More Options
 
+item-pane-message-items-selected = { $count ->
+                                             [one] { $count } item selected
+                                            *[other] { $count } items selected
+                                    }
+item-pane-message-collections-selected = { $count ->
+                                             [one] { $count } collection selected
+                                            *[other] { $count } collections selected
+                                         }
+item-pane-message-searches-selected = { $count ->
+                                          [one] { $count } search selected
+                                         *[other] { $count } searches selected
+                                      }
+item-pane-message-objects-selected = { $count ->
+                                          [one] { $count } object selected
+                                         *[other] { $count } objects selected
+                                     }
+
+
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 
 architecture-win32-warning-message = { -app-name } is running in 32-bit mode on a 64-bit version of Windows. { -app-name } will run more efficiently in 64-bit mode.

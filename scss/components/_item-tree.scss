@@ -274,6 +274,12 @@ $-attachmentIcons: (
 	attachment-video
 );
 
+// Non-item objects that can appear in the trash
+$-trashableObjectIcons: (
+	"collection",
+	"search"
+);
+
 .icon-item-type {
 	width: 16px;
 	height: 16px;
@@ -322,6 +328,12 @@ $-attachmentIcons: (
 			.icon-attachment-type[data-item-type=#{$itemType}] {
 				@include svgicon($itemAttachmentIcon, $color, "12", "item-type", false);
 				background-origin: content-box;
+			}
+		}
+		
+		@each $icon in $-trashableObjectIcons {
+			.icon-css.icon-#{$icon} {
+				@include svgicon($icon, $color, "16", "collection-tree");
 			}
 		}
 	}
