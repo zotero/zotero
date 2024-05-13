@@ -383,6 +383,10 @@ describe("Item pane", function () {
 			Zotero_Tabs.select("zotero-pane");
 		});
 
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+		});
+
 		it("should show attachments pane in library for regular item", async function () {
 			// Regular item: show
 			let attachmentsBox = ZoteroPane.itemPane._itemDetails.getPane(paneID);
