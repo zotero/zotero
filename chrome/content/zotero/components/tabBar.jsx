@@ -111,15 +111,8 @@ const TabBar = forwardRef(function (props, ref) {
 	
 	function handleTabMouseDown(event, id) {
 		// Don't select tab if it'll be closed with middle button click on mouse up
-		if (event.button === 1) {
-			return;
-		}
-		if (event.button === 2) {
-			let { screenX, screenY } = event;
-			// Popup gets immediately closed without this
-			setTimeout(() => {
-				props.onContextMenu(screenX, screenY, id);
-			}, 0);
+		// or on right-click
+		if ([1, 2].includes(event.button)) {
 			return;
 		}
 		
@@ -128,6 +121,14 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 		props.onTabSelect(id);
 		event.stopPropagation();
+	}
+
+	function handleContextMenu(event, id) {
+		let { screenX, screenY } = event;
+		// Popup gets immediately closed without this
+		setTimeout(() => {
+			props.onContextMenu(screenX, screenY, id);
+		});
 	}
 
 	function handleTabClick(event, id) {
@@ -270,6 +271,7 @@ const TabBar = forwardRef(function (props, ref) {
 				className={cx('tab', { selected, dragging: dragging && id === dragIDRef.current })}
 				draggable={true}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
+				onContextMenu={(event) => handleContextMenu(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
 				onAuxClick={(event) => handleTabClick(event, id)}
 				onDragStart={(event) => handleDragStart(event, id, index)}

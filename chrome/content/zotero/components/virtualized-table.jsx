@@ -718,16 +718,18 @@ class VirtualizedTable extends React.Component {
 	
 	_handleMouseDown = async (e, index) => {
 		const modifierClick = e.shiftKey || e.ctrlKey || e.metaKey;
-		if (e.button == 2) {
-			if (!modifierClick && !this.selection.isSelected(index)) {
-				this._onSelection(index, false, false);
-			}
-			this.props.onItemContextMenu(e, e.screenX, e.screenY);
-		}
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention
 		if (!modifierClick && !this.selection.isSelected(index)) {
 			this._onSelection(index, false, false);
 		}
+		this.focus();
+	}
+
+	_handleContextMenu = async (e, index) => {
+		if (!this.selection.isSelected(index)) {
+			this._onSelection(index, false, false);
+		}
+		this.props.onItemContextMenu(e, e.screenX, e.screenY);
 		this.focus();
 	}
 	
@@ -1148,6 +1150,7 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dragstart', e => this._onDragStart(e, index), { passive: true });
 			node.addEventListener('dragend', e => this._onDragEnd(e, index), { passive: true });
 			node.addEventListener('mousedown', e => this._handleMouseDown(e, index), { passive: true });
+			node.addEventListener('contextmenu', e => this._handleContextMenu(e, index), { passive: true });
 			node.addEventListener('mouseup', e => this._handleMouseUp(e, index), { passive: true });
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
