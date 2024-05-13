@@ -59,6 +59,13 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		this._tabType = tabType;
 		this.setAttribute('tabType', tabType);
 	}
+
+	_syncRenderPending = false;
+
+	_asyncRenderPending = false;
+
+	/** Controlled by parent element */
+	skipRender = false;
 	
 	get open() {
 		return this._section?.open || false;
@@ -105,11 +112,25 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	 */
 	_isAlreadyRendered(type = "sync") {
 		let key = `_${type}RenderItemID`;
-		let cachedFlag = this[key];
-		if (cachedFlag && this.item?.id == cachedFlag) {
+		let pendingKey = `_${type}RenderPending`;
+
+		let renderFlag = this[key];
+		let pendingFlag = this[pendingKey];
+
+		let isRendered = renderFlag && this.item?.id == renderFlag;
+		if (this.skipRender) {
+			if (!isRendered) {
+				this[pendingKey] = true;
+			}
+			// Skip render
+			return true;
+		}
+
+		if (!pendingFlag && renderFlag && this.item?.id == renderFlag) {
 			return true;
 		}
 		this[key] = this.item.id;
+		this[pendingKey] = false;
 		return false;
 	}
 
@@ -120,7 +141,11 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	}
 
 	async _forceRenderAll() {
-		if (this.hidden) return;
+		if (this.hidden || this.skipRender) {
+			this._syncRenderPending = true;
+			this._asyncRenderPending = true;
+			return;
+		}
 		this._resetRenderedFlags();
 		if (this.render) this.render();
 		if (this.asyncRender) await this.asyncRender();
