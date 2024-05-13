@@ -178,6 +178,18 @@
 			this.forceUpdateSideNav();
 		}
 
+		get skipRender() {
+			return this._skipRender;
+		}
+
+		set skipRender(val) {
+			this._skipRender = val;
+			let panes = this.getPanes();
+			for (let pane of [this._header, ...panes]) {
+				pane.skipRender = val;
+			}
+		}
+
 		static get observedAttributes() {
 			return ['pinnedPane'];
 		}
@@ -198,12 +210,18 @@
 			});
 			this._initIntersectionObserver();
 
-			this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'itempane'], 'ItemDetails');
+			this._unregisterID = Zotero.Notifier.registerObserver(
+				this, ['item', 'itempane', 'tab'], 'ItemDetails');
 
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
 
 			this._lastUpdateCustomSection = 0;
+
+			// If true, will render on tab select
+			this._pendingRender = false;
+			// If true, will skip render
+			this._skipRender = false;
 		}
 
 		destroy() {
@@ -220,6 +238,13 @@
 			if (!this.initialized || !this.item) {
 				return;
 			}
+
+			if (this.skipRender) {
+				this._pendingRender = true;
+				return;
+			}
+			this._pendingRender = false;
+
 			let item = this.item;
 			Zotero.debug('Viewing item');
 			this._isRendering = true;
@@ -317,6 +342,9 @@
 						elem.registerSectionButton(buttonOptions);
 					}
 				}
+				if (this._pendingRender) {
+					elem.pendingRender = true;
+				}
 				this._paneParent.append(elem);
 				elem.setL10nID(header.l10nID);
 				elem.setL10nArgs(header.l10nArgs);
@@ -333,12 +361,16 @@
 			this._header.renderCustomHead(callback);
 		}
 
-		notify = async (action, type, _ids, _extraData) => {
+		notify = async (action, type, ids, _extraData) => {
 			if (action == 'refresh' && this.item) {
 				if (type == 'itempane') {
 					this.renderCustomSections();
 				}
 				await this.render();
+			}
+
+			if (action == 'select' && type == 'tab') {
+				this._handleTabSelect(ids);
 			}
 		};
 
@@ -596,6 +628,17 @@
 				});
 			}
 		};
+
+		_handleTabSelect(tabIDs) {
+			if (!this.tabID || typeof Zotero_Tabs === 'undefined') {
+				return;
+			}
+			let isTabSelected = tabIDs.includes(this.tabID);
+			this.skipRender = !isTabSelected;
+			if (isTabSelected && this._pendingRender) {
+				this.render();
+			}
+		}
 	}
 
 	customElements.define("item-details", ItemDetails);
