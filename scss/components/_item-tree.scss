@@ -15,6 +15,10 @@
 		padding: 4px 8px 8px;
 	}
 
+	.virtualized-table-body {
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+	}
+
 	.virtualized-table-header {
 		padding-inline-start: 8px;
 		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
