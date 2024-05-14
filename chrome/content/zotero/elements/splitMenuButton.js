@@ -113,8 +113,6 @@
 		}
 		
 		get contentFragment() {
-			// Zotero.hiDPI[Suffix] may not have been initialized yet, so calculate it ourselves
-			let hiDPISuffix = window.devicePixelRatio > 1 ? '@2x' : '';
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
 					<html:div anonid="button-image-and-text-box">
@@ -123,7 +121,7 @@
 					</html:div>
 					<html:div anonid="dropmarker-separator"/>
 					<html:div anonid="dropmarker-box">
-						<image src="chrome://zotero/skin/searchbar-dropmarker${hiDPISuffix}.png" width="7" height="4" class="split-menu-button-dropmarker"/>
+						<image src="chrome://zotero/skin/8/universal/chevron-8.svg" class="split-menu-button-dropmarker"/>
 					</html:div>
 				`),
 				true
