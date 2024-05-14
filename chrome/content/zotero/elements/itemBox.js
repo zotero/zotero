@@ -500,7 +500,6 @@
 			// Item type menu
 			this.addItemTypeMenu();
 			this.updateItemTypeMenuSelection();
-			this.itemTypeMenu.disabled = !this.showTypeMenu;
 			var fieldNames = [];
 			
 			// Manual field order
@@ -882,11 +881,20 @@
 				menulist.addEventListener('focus', () => {
 					this.ensureElementIsVisible(menulist);
 				});
+				// This is instead of setting disabled=true so that the menu is not excluded
+				// from tab navigation. For <input>s, we just set readonly=true but it is not
+				// a valid property for menulist.
+				menulist.addEventListener("popupshowing", (e) => {
+					if (!this._editable) {
+						e.preventDefault();
+						e.stopPropagation();
+					}
+				});
 				menulist.setAttribute("aria-labelledby", "itembox-field-itemType-label");
 				this.itemTypeMenu = menulist;
 				rowData.appendChild(menulist);
 			}
-			this.itemTypeMenu.disabled = !this.showTypeMenu;
+			this.itemTypeMenu.setAttribute("aria-disabled", !this._editable);
 			row.appendChild(labelWrapper);
 			row.appendChild(rowData);
 			this._infoTable.appendChild(row);
