@@ -1145,12 +1145,12 @@ describe("Item pane", function () {
 				item.isRead = true;
 				yield item.saveTx();
 				
-				let button = doc.getElementById('zotero-feed-item-toggleRead-button');
+				let button = doc.querySelector('.zotero-feed-item-toggleRead-button');
 				
 				assert.equal(button.label, Zotero.getString('pane.item.markAsUnread'));
 				yield item.toggleRead(false);
 				// Button is re-created
-				button = doc.getElementById('zotero-feed-item-toggleRead-button');
+				button = doc.querySelector('.zotero-feed-item-toggleRead-button');
 				assert.equal(button.label, Zotero.getString('pane.item.markAsRead'));
 			});
 		});

@@ -336,13 +336,13 @@
 			let { doc, append } = data;
 
 			let toggleReadButton = doc.createXULElement("button");
-			toggleReadButton.id = "zotero-feed-item-toggleRead-button";
+			toggleReadButton.classList.add("zotero-feed-item-toggleRead-button");
 			toggleReadButton.addEventListener("command", () => {
 				ZoteroPane.toggleSelectedItemsRead();
 			});
 
 			let addToButton = document.createElement("button", { is: "split-menu-button" });
-			addToButton.id = "zotero-feed-item-addTo-button";
+			addToButton.classList.add("zotero-feed-item-addTo-button");
 			addToButton.setAttribute("popup", "zotero-item-addTo-menu");
 			addToButton.addEventListener("command", () => this.translateSelectedItems());
 
@@ -364,7 +364,7 @@
 		}
 
 		setReadLabel(isRead) {
-			var elem = this.getCurrentPane().querySelector('#zotero-feed-item-toggleRead-button');
+			var elem = this.getCurrentPane().querySelector('.zotero-feed-item-toggleRead-button');
 			var label = Zotero.getString('pane.item.' + (isRead ? 'markAsUnread' : 'markAsRead'));
 			elem.label = label;
 	
@@ -435,7 +435,7 @@
 		setTranslateButton() {
 			if (!this._translationTarget) return;
 			var label = Zotero.getString('pane.item.addTo', this._translationTarget.name);
-			var elem = this.getCurrentPane().querySelector('#zotero-feed-item-addTo-button');
+			var elem = this.getCurrentPane().querySelector('.zotero-feed-item-addTo-button');
 			elem.label = label;
 	
 			var key = Zotero.Keys.getKeyForCommand('saveToZotero');
