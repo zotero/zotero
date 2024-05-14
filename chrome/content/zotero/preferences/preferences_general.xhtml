@@ -83,17 +83,23 @@
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
 			<vbox>
-				<checkbox label="&zotero.preferences.downloadAssociatedFiles;"
-					preference="extensions.zotero.downloadAssociatedFiles"
-					native="true"
-				/>
+				<label data-l10n-id="preferences-attachment-type-intro"/>
+				<tree
+						id="attachment-type-priority-tree"
+						rows="3"
+						hidecolumnpicker="true"
+						editable="true"
+						seltype="single"
+				>
+					<treechildren flex="1"/>
+					<treecols>
+						<treecol id="attachment-type-grippy" editable="true" sortable="false" hideheader="true"/>
+						<treecol id="attachment-type-enabled" type="checkbox" editable="true" sortable="false" data-l10n-id="preferences-attachment-type-enabled"/>
+						<treecol id="attachment-type-label" flex="1" primary="true" sortable="false" data-l10n-id="preferences-attachment-type-label"/>
+					</treecols>
+				</tree>
 				<checkbox data-l10n-id="preferences-auto-recognize-files"
 					preference="extensions.zotero.autoRecognizeFiles"
-					native="true"
-				/>
-				<checkbox id="automaticSnapshots-checkbox"
-					label="&zotero.preferences.automaticSnapshots;"
-					preference="extensions.zotero.automaticSnapshots"
 					native="true"
 				/>
 			</vbox>

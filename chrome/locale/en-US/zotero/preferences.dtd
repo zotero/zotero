@@ -11,8 +11,6 @@
 
 <!ENTITY zotero.preferences.interface				"Interface">
 <!ENTITY zotero.preferences.fileHandling				"File Handling">
-<!ENTITY zotero.preferences.automaticSnapshots			"Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles		"Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked  "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">

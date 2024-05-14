@@ -65,8 +65,8 @@ class RemoteTranslate {
 		// Make only relevant prefs available
 		// https://github.com/zotero/zotero-connectors/blob/d5f025de9b4f513535cbf4639c6b59bf115d790d/src/common/zotero.js#L264-L265
 		let prefs = this._getPrefs([
-			'downloadAssociatedFiles',
-			'automaticSnapshots',
+			'automaticAttachmentTypes',
+			'automaticAttachmentTypes.order',
 			'reportTranslationFailure',
 			'capitalizeTitles',
 			'translators.',
