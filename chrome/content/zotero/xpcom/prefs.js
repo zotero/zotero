@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 10;
+		var toVersion = 11;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -133,6 +133,10 @@ Zotero.Prefs = new function() {
 					
 					case 10:
 						// Used internally
+						break;
+					
+					case 11:
+						await Zotero.LocateManager.migrateEngines();
 						break;
 				}
 			}

@@ -49,6 +49,11 @@ Zotero.LocateManager = new function() {
 		catch (e) {
 			Zotero.logError(e);
 		}
+		
+		if (this._needsMigration) {
+			this._needsMigration = false;
+			await this.migrateEngines();
+		}
 	}
 	
 	/**
@@ -148,6 +153,28 @@ Zotero.LocateManager = new function() {
 		// reload icons for default locate engines
 		for (let engine of this.getEngines()) engine._updateIcon();
 	}
+	
+	this.migrateEngines = async function () {
+		if (!_locateEngines) {
+			this._needsMigration = true;
+			return;
+		}
+		
+		for (let engine of this.getEngines()) {
+			try {
+				if (engine.name === 'CrossRef Lookup') {
+					this.removeEngine(engine);
+				}
+				else if (engine.name === 'Google Scholar Search') {
+					engine.name = 'Google Scholar';
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		_serializeLocateEngines();
+	};
 	
 	/**
 	 * Writes the engines to disk; called from the nsITimer spawned by _serializeLocateEngines
@@ -452,7 +479,7 @@ Zotero.LocateManager = new function() {
 				"image/vnd.microsoft.icon": "ico"
 			};
 			
-			if (!this._iconSourceURI.startsWith('http') && !this._iconSourceURI.startsWith('https')) {
+			if (!this._iconSourceURI.startsWith('http:') && !this._iconSourceURI.startsWith('https:') && !this._iconSourceURI.startsWith('chrome:')) {
 				return;
 			}
 			
