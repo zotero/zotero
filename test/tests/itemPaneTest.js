@@ -5,18 +5,18 @@ describe("Item pane", function () {
 		let success = await waitForCallback(
 			() => box._asyncRenderItemID && !box._asyncRendering);
 		if (!success) {
-			Zotero.debug("Wait for box render time out");
+			throw new Error("Wait for box render time out");
 		}
 		await box._preview._renderDeferred?.promise;
 		return success;
 	}
 
-	async function waitForPreviewBoxReader(box) {
+	async function waitForPreviewBoxReader(box, itemID) {
 		await waitForPreviewBoxRender(box);
 		let success = await waitForCallback(
-			() => box._preview._reader);
+			() => box._preview._reader?.itemID == itemID, 100, 3000);
 		if (!success) {
-			Zotero.debug("Wait for box preview reader time out");
+			throw new Error("Wait for box preview reader time out");
 		}
 		await box._preview._reader._initPromise;
 		return success;
@@ -568,7 +568,7 @@ describe("Item pane", function () {
 				file,
 				parentItemID: item.id
 			});
-			await waitForPreviewBoxReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
 			await Zotero.Promise.delay(100);
 			// PDF preview
 			assert.isTrue(isPreviewDisplayed(attachmentsBox));
@@ -696,7 +696,7 @@ describe("Item pane", function () {
 			let annotation = await createAnnotation('highlight', attachment1);
 
 			await itemDetails._renderDeferred.promise;
-			await waitForPreviewBoxReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
 			assert.isFalse(attachmentsBox.hidden);
 			let readerAnnotation
@@ -722,7 +722,7 @@ describe("Item pane", function () {
 
 			// Select item with attachment (no annotation)
 			await itemDetails._renderDeferred.promise;
-			await waitForPreviewBoxReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
 
 			assert.isFalse(attachmentsBox.hidden);
 			readerAnnotation
@@ -748,7 +748,7 @@ describe("Item pane", function () {
 			// Again, select item with attachment (1 annotation)
 			await ZoteroPane.selectItem(item1.id);
 			await itemDetails._renderDeferred.promise;
-			await waitForPreviewBoxReader(attachmentsBox);
+			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
 			assert.isFalse(attachmentsBox.hidden);
 			readerAnnotation
@@ -1032,7 +1032,7 @@ describe("Item pane", function () {
 			});
 			await ZoteroPane.selectItem(attachment.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxReader(box);
+			await waitForPreviewBoxReader(box, attachment.id);
 			assert.isFalse(box.hidden);
 			await Zotero.Promise.delay(100);
 			assert.isTrue(isPreviewDisplayed(box));
@@ -1041,7 +1041,7 @@ describe("Item pane", function () {
 			let attachment1 = await importFileAttachment('test.pdf');
 			await ZoteroPane.selectItem(attachment1.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxReader(box);
+			await waitForPreviewBoxReader(box, attachment1.id);
 			assert.isFalse(box.hidden);
 			await Zotero.Promise.delay(100);
 			assert.isTrue(isPreviewDisplayed(box));
