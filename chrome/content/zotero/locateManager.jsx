@@ -134,8 +134,8 @@ function deleteLocateEngine() {
 /**
  * Restores Default Locate Engines
  **/
-function restoreDefaultLocateEngines() {
-	Zotero.LocateManager.restoreDefaultEngines();
+async function restoreDefaultLocateEngines() {
+	await Zotero.LocateManager.restoreDefaultEngines();
 	engines = Zotero.LocateManager.getEngines();
 	updateTree();
 }
