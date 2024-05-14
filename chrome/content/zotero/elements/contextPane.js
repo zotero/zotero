@@ -317,7 +317,7 @@
 	
 			if (splitter.getAttribute('state') != 'collapsed') {
 				if (this.mode == "item") {
-					let header = this._itemPaneDeck.selectedPanel.querySelector("pane-header editable-text");
+					let header = this._itemPaneDeck.selectedPanel.querySelector("item-pane-header editable-text");
 					header.focus();
 					return true;
 				}

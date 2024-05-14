@@ -63,18 +63,18 @@ describe("Item pane", function () {
 		it("should be hidden when set to None mode", async function () {
 			Zotero.Prefs.set('itemPaneHeader', 'none');
 			await createDataObject('item', itemData);
-			assert.isTrue(doc.querySelector('pane-header').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header').hidden);
 		});
 		
 		it("should show title when set to Title mode", async function () {
 			Zotero.Prefs.set('itemPaneHeader', 'title');
 			let item = await createDataObject('item', itemData);
 			
-			assert.isFalse(doc.querySelector('pane-header .title').hidden);
-			assert.isTrue(doc.querySelector('pane-header .creator-year').hidden);
-			assert.isTrue(doc.querySelector('pane-header .bib-entry').hidden);
+			assert.isFalse(doc.querySelector('item-pane-header .title').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header .creator-year').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header .bib-entry').hidden);
 			
-			assert.equal(doc.querySelector('pane-header .title editable-text').value, item.getField('title'));
+			assert.equal(doc.querySelector('item-pane-header .title editable-text').value, item.getField('title'));
 		});
 		
 		it("should show title/creator/year when set to Title/Creator/Year mode", async function () {
@@ -83,12 +83,12 @@ describe("Item pane", function () {
 			item.setField('date', '1962-05-01');
 			await item.saveTx();
 			
-			assert.isTrue(doc.querySelector('pane-header .bib-entry').hidden);
-			assert.isFalse(doc.querySelector('pane-header .title').hidden);
-			assert.isFalse(doc.querySelector('pane-header .creator-year').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header .bib-entry').hidden);
+			assert.isFalse(doc.querySelector('item-pane-header .title').hidden);
+			assert.isFalse(doc.querySelector('item-pane-header .creator-year').hidden);
 			
-			assert.equal(doc.querySelector('pane-header .title editable-text').value, item.getField('title'));
-			let creatorYearText = doc.querySelector('pane-header .creator-year').textContent;
+			assert.equal(doc.querySelector('item-pane-header .title editable-text').value, item.getField('title'));
+			let creatorYearText = doc.querySelector('item-pane-header .creator-year').textContent;
 			assert.include(creatorYearText, 'Hyde');
 			assert.include(creatorYearText, '1962');
 		});
@@ -98,11 +98,11 @@ describe("Item pane", function () {
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			await createDataObject('item', itemData);
 
-			assert.isFalse(doc.querySelector('pane-header .bib-entry').hidden);
-			assert.isTrue(doc.querySelector('pane-header .title').hidden);
-			assert.isTrue(doc.querySelector('pane-header .creator-year').hidden);
+			assert.isFalse(doc.querySelector('item-pane-header .bib-entry').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header .title').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header .creator-year').hidden);
 
-			let bibEntry = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild.textContent;
+			let bibEntry = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild.textContent;
 			assert.equal(bibEntry.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
 		});
 
@@ -111,7 +111,7 @@ describe("Item pane", function () {
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			let item = await createDataObject('item', itemData);
 			
-			let bibEntryElem = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild;
+			let bibEntryElem = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild;
 			
 			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
 			
@@ -139,7 +139,7 @@ describe("Item pane", function () {
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			await createDataObject('item', itemData);
 
-			let bibEntryElem = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild;
+			let bibEntryElem = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild;
 			
 			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
 			
@@ -152,7 +152,7 @@ describe("Item pane", function () {
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			await createDataObject('item', itemData);
 
-			let bibEntryElem = doc.querySelector('pane-header .bib-entry').shadowRoot.firstElementChild;
+			let bibEntryElem = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild;
 
 			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
 
@@ -165,9 +165,9 @@ describe("Item pane", function () {
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/an-id-that-does-not-match-any-citation-style');
 			await createDataObject('item', itemData);
 
-			assert.isTrue(doc.querySelector('pane-header .bib-entry').hidden);
-			assert.isFalse(doc.querySelector('pane-header .title').hidden);
-			assert.isFalse(doc.querySelector('pane-header .creator-year').hidden);
+			assert.isTrue(doc.querySelector('item-pane-header .bib-entry').hidden);
+			assert.isFalse(doc.querySelector('item-pane-header .title').hidden);
+			assert.isFalse(doc.querySelector('item-pane-header .creator-year').hidden);
 		});
 	});
 	

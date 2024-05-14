@@ -381,7 +381,7 @@
 			});
 		}
 	}
-	customElements.define("pane-header", ItemPaneHeader);
+	customElements.define("item-pane-header", ItemPaneHeader);
 	
 	/**
 	 * Simple LRU cache that stores bibliography entries for the 100 most recently viewed items.
