@@ -254,18 +254,11 @@
 		 * Display buttons at top of item pane depending on context
 		 */
 		updateItemPaneButtons() {
-			let container;
+			let container = this.getCurrentPane();
+
 			if (!this.data.length) {
+				container.renderCustomHead();
 				return;
-			}
-			else if (this.data.length > 1) {
-				container = this._messagePane;
-			}
-			else if (this.data[0].isNote()) {
-				container = this._noteEditor;
-			}
-			else {
-				container = this._itemDetails;
 			}
 			
 			// My Publications buttons
@@ -303,7 +296,7 @@
 		renderPublicationsHead(data) {
 			let { doc, append } = data;
 			let button = doc.createXULElement("button");
-			button.id = 'zotero-item-pane-my-publications-button';
+			button.classList.add('item-pane-my-publications-button');
 
 			let hiddenItemsSelected = this.data.some(item => !item.inPublications);
 			let str, onclick;
@@ -323,14 +316,14 @@
 		renderTrashHead(data) {
 			let { doc, append } = data;
 			let restoreButton = doc.createXULElement("button");
-			restoreButton.id = "zotero-item-restore-button";
+			restoreButton.classList.add("item-restore-button");
 			restoreButton.dataset.l10nId = "menu-restoreToLibrary";
 			restoreButton.addEventListener("command", () => {
 				ZoteroPane.restoreSelectedItems();
 			});
 
 			let deleteButton = doc.createXULElement("button");
-			deleteButton.id = "zotero-item-delete-button";
+			deleteButton.classList.add("item-delete-button");
 			deleteButton.dataset.l10nId = "menu-deletePermanently";
 			deleteButton.addEventListener("command", () => {
 				ZoteroPane.deleteSelectedItems();
@@ -343,13 +336,13 @@
 			let { doc, append } = data;
 
 			let toggleReadButton = doc.createXULElement("button");
-			toggleReadButton.id = "zotero-feed-item-toggleRead-button";
+			toggleReadButton.classList.add("feed-item-toggleRead-button");
 			toggleReadButton.addEventListener("command", () => {
 				ZoteroPane.toggleSelectedItemsRead();
 			});
 
 			let addToButton = document.createElement("button", { is: "split-menu-button" });
-			addToButton.id = "zotero-feed-item-addTo-button";
+			addToButton.classList.add("feed-item-addTo-button");
 			addToButton.setAttribute("popup", "zotero-item-addTo-menu");
 			addToButton.addEventListener("command", () => this.translateSelectedItems());
 
@@ -371,7 +364,7 @@
 		}
 
 		setReadLabel(isRead) {
-			var elem = document.getElementById('zotero-feed-item-toggleRead-button');
+			var elem = this.getCurrentPane().querySelector('.feed-item-toggleRead-button');
 			var label = Zotero.getString('pane.item.' + (isRead ? 'markAsUnread' : 'markAsRead'));
 			elem.label = label;
 	
@@ -389,7 +382,7 @@
 		}
 		
 		buildTranslateSelectContextMenu(event) {
-			var menu = document.getElementById('zotero-item-addTo-menu');
+			var menu = document.querySelector('#zotero-item-addTo-menu');
 			// Don't trigger rebuilding on nested popupmenu open/close
 			if (event.target != menu) {
 				return;
@@ -442,7 +435,7 @@
 		setTranslateButton() {
 			if (!this._translationTarget) return;
 			var label = Zotero.getString('pane.item.addTo', this._translationTarget.name);
-			var elem = document.getElementById('zotero-feed-item-addTo-button');
+			var elem = this.getCurrentPane().querySelector('.feed-item-addTo-button');
 			elem.label = label;
 	
 			var key = Zotero.Keys.getKeyForCommand('saveToZotero');
@@ -459,6 +452,28 @@
 			this._translationTarget = translationTarget;
 			Zotero.Prefs.set('feeds.lastTranslationTarget', translationTarget.treeViewID);
 			this.setTranslateButton();
+		}
+
+		getCurrentPane(mode = undefined) {
+			if (!mode) {
+				// Guess a mode from the current data
+				if (!this.data.length || this.data.length > 1) {
+					mode = "message";
+				}
+				else if (this.data[0].isNote()) {
+					mode = "note";
+				}
+				else {
+					mode = "item";
+				}
+			}
+			let map = {
+				message: "_messagePane",
+				item: "_itemDetails",
+				note: "_noteEditor",
+				duplicates: "_duplicatesPane",
+			};
+			return this[map[mode]];
 		}
 
 		static get observedAttributes() {
