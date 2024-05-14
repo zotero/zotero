@@ -254,18 +254,11 @@
 		 * Display buttons at top of item pane depending on context
 		 */
 		updateItemPaneButtons() {
-			let container;
+			let container = this.getCurrentPane();
+
 			if (!this.data.length) {
+				container.renderCustomHead();
 				return;
-			}
-			else if (this.data.length > 1) {
-				container = this._messagePane;
-			}
-			else if (this.data[0].isNote()) {
-				container = this._noteEditor;
-			}
-			else {
-				container = this._itemDetails;
 			}
 			
 			// My Publications buttons
@@ -371,7 +364,7 @@
 		}
 
 		setReadLabel(isRead) {
-			var elem = document.getElementById('zotero-feed-item-toggleRead-button');
+			var elem = this.getCurrentPane().querySelector('#zotero-feed-item-toggleRead-button');
 			var label = Zotero.getString('pane.item.' + (isRead ? 'markAsUnread' : 'markAsRead'));
 			elem.label = label;
 	
@@ -389,7 +382,7 @@
 		}
 		
 		buildTranslateSelectContextMenu(event) {
-			var menu = document.getElementById('zotero-item-addTo-menu');
+			var menu = document.querySelector('#zotero-item-addTo-menu');
 			// Don't trigger rebuilding on nested popupmenu open/close
 			if (event.target != menu) {
 				return;
@@ -442,7 +435,7 @@
 		setTranslateButton() {
 			if (!this._translationTarget) return;
 			var label = Zotero.getString('pane.item.addTo', this._translationTarget.name);
-			var elem = document.getElementById('zotero-feed-item-addTo-button');
+			var elem = this.getCurrentPane().querySelector('#zotero-feed-item-addTo-button');
 			elem.label = label;
 	
 			var key = Zotero.Keys.getKeyForCommand('saveToZotero');
@@ -459,6 +452,28 @@
 			this._translationTarget = translationTarget;
 			Zotero.Prefs.set('feeds.lastTranslationTarget', translationTarget.treeViewID);
 			this.setTranslateButton();
+		}
+
+		getCurrentPane(mode = undefined) {
+			if (!mode) {
+				// Guess a mode from the current data
+				if (!this.data.length || this.data.length > 1) {
+					mode = "message";
+				}
+				else if (this.data[0].isNote()) {
+					mode = "note";
+				}
+				else {
+					mode = "item";
+				}
+			}
+			let map = {
+				message: "_messagePane",
+				item: "_itemDetails",
+				note: "_noteEditor",
+				duplicates: "_duplicatesPane",
+			};
+			return this[map[mode]];
 		}
 
 		static get observedAttributes() {
