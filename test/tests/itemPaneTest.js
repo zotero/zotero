@@ -7,7 +7,7 @@ describe("Item pane", function () {
 		if (!success) {
 			throw new Error("Wait for box render time out");
 		}
-		await box._preview._renderDeferred?.promise;
+		await box._preview._renderPromise;
 		return success;
 	}
 
@@ -553,7 +553,7 @@ describe("Item pane", function () {
 				parentItemID: item.id
 			});
 			await ZoteroPane.selectItem(item.id);
-			await itemDetails._renderDeferred.promise;
+			await itemDetails._renderPromise;
 			await waitForPreviewBoxRender(attachmentsBox);
 			// Image preview for item with image attachment
 			assert.isTrue(isPreviewDisplayed(attachmentsBox));
@@ -695,7 +695,7 @@ describe("Item pane", function () {
 			});
 			let annotation = await createAnnotation('highlight', attachment1);
 
-			await itemDetails._renderDeferred.promise;
+			await itemDetails._renderPromise;
 			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
 			assert.isFalse(attachmentsBox.hidden);
@@ -721,7 +721,7 @@ describe("Item pane", function () {
 			});
 
 			// Select item with attachment (no annotation)
-			await itemDetails._renderDeferred.promise;
+			await itemDetails._renderPromise;
 			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
 
 			assert.isFalse(attachmentsBox.hidden);
@@ -740,14 +740,14 @@ describe("Item pane", function () {
 			await item3.saveTx();
 
 			// Select item without attachment
-			await itemDetails._renderDeferred.promise;
+			await itemDetails._renderPromise;
 
 			assert.isFalse(attachmentsBox.hidden);
 			assert.equal(attachmentsBox.querySelectorAll("attachment-row").length, 0);
 
 			// Again, select item with attachment (1 annotation)
 			await ZoteroPane.selectItem(item1.id);
-			await itemDetails._renderDeferred.promise;
+			await itemDetails._renderPromise;
 			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
 			assert.isFalse(attachmentsBox.hidden);
@@ -1085,7 +1085,7 @@ describe("Item pane", function () {
 			// Hide note container by default
 			let attachment = await importFileAttachment('test.pdf');
 			await ZoteroPane.selectItem(attachment.id);
-			await itemDetails._renderDeferred.promise;
+			await itemDetails._renderPromise;
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxRender(box);
 			assert.isTrue(noteContainer.hidden);

@@ -218,7 +218,13 @@
 				return;
 			}
 			// For tests
-			this._renderDeferred = Zotero.Promise.defer();
+			let resolve;
+			if (Zotero.test) {
+				this._renderPromise = new Promise(r => resolve = r);
+				// Expose `resolve` for `this.discard`
+				this._renderPromise.resolve = resolve;
+			}
+
 			this._renderingItemID = itemID;
 			let success = false;
 			if (this.isValidType && await this._item.fileExists()) {
@@ -238,7 +244,9 @@
 			if (this._renderingItemID === itemID) {
 				this._renderingItemID = null;
 			}
-			this._renderDeferred?.resolve();
+			if (Zotero.test) {
+				resolve();
+			}
 		}
 
 		async discard(force = false) {
@@ -273,7 +281,7 @@
 			this._id("preview")?.after(this.nextPreview);
 			this.setPreviewStatus("loading");
 			this._isDiscarding = false;
-			this._renderDeferred?.resolve();
+			this._renderPromise?.resolve();
 		}
 
 		async openAttachment(event) {
