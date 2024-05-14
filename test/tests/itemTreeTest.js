@@ -856,7 +856,7 @@ describe("Zotero.ItemTree", function() {
 				yield itemsView.selectItem(attachment.id);
 				yield Zotero.Promise.delay();
 				
-				var box = win.document.getElementById('zotero-item-pane-my-publications-button');
+				var box = zp.itemPane.getCurrentPane().querySelector('.item-pane-my-publications-button');
 				assert.isFalse(box.hidden);
 			});
 			
@@ -872,7 +872,7 @@ describe("Zotero.ItemTree", function() {
 				
 				yield itemsView.selectItem(attachment.id);
 				
-				var box = win.document.getElementById('zotero-item-pane-my-publications-button');
+				var box = zp.itemPane.getCurrentPane().querySelector('.item-pane-my-publications-button');
 				// box is not created if it shouldn't show
 				assert.isNull(box);
 			});
