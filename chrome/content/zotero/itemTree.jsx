@@ -255,7 +255,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (row.level == 0) {
 					// A top-level attachment moved into a parent. Don't copy, it will be added
 					// via this loop for the parent item.
-					if (row.ref.parentID) {
+					if (row.ref.parentID && row.ref.isItem()) {
 						continue;
 					}
 					let isSearchParent = newSearchParentIDs.has(row.ref.treeViewID);
