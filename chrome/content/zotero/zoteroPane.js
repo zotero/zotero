@@ -2147,7 +2147,7 @@ var ZoteroPane = new function()
 		await original.saveTx({ skipDateModifiedUpdate: true });
 		await duplicate.saveTx();
 		
-		document.getElementById('zotero-editpane-item-box').focusField('title');
+		ZoteroPane.itemPane.querySelector("item-box").getTitleField().focus();
 		return duplicate;
 	};
 	
