@@ -234,7 +234,7 @@
 			// If the focus leaves the itemBox, clear the last focused element
 			this._infoTable.addEventListener("focusout", (e) => {
 				let destination = e.relatedTarget;
-				if (destination && !this._infoTable.contains(destination)) {
+				if (!(destination && this._infoTable.contains(destination))) {
 					this._selectField = null;
 				}
 			});
@@ -1593,11 +1593,11 @@
 				// https://searchfox.org/mozilla-central/rev/2d678a843ceab81e43f7ffb83212197dc10e944a/toolkit/content/widgets/autocomplete-input.js#372
 				// https://searchfox.org/mozilla-central/rev/2d678a843ceab81e43f7ffb83212197dc10e944a/browser/components/search/content/searchbar.js#791
 				elem.onTextEntered = () => {
-					this.handleCreatorAutoCompleteSelect(elem, true);
+					this.handleCreatorAutoCompleteSelect(elem);
 				};
 				// Tab/Shift-Tab
 				elem.addEventListener('change', () => {
-					this.handleCreatorAutoCompleteSelect(elem, true);
+					this.handleCreatorAutoCompleteSelect(elem);
 				});
 			}
 			elem.autocomplete = {
@@ -1605,7 +1605,7 @@
 				ignoreBlurWhileSearching: false,
 				search: 'zotero',
 				searchParam: JSON.stringify(params),
-				popup: 'PopupAutoComplete'
+				popup: 'PopupAutoComplete',
 			};
 		}
 		
@@ -1614,7 +1614,7 @@
 		 * Save a multiple-field selection for the creator autocomplete
 		 * (e.g. "Shakespeare, William")
 		 */
-		handleCreatorAutoCompleteSelect(textbox, stayFocused) {
+		handleCreatorAutoCompleteSelect(textbox) {
 			let inputField = textbox.querySelector("input");
 			if (!inputField) {
 				return;
@@ -1634,7 +1634,7 @@
 			if (!id) {
 				return;
 			}
-			
+
 			var [creatorID, numFields] = id.split('-');
 			
 			// If result uses two fields, save both

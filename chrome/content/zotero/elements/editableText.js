@@ -193,6 +193,9 @@
 				input.addEventListener('mousedown', this._handleMouseDown);
 				input.addEventListener('dragover', this._handleDragOver);
 				input.addEventListener('drop', this._handleDrop);
+				if (autocompleteEnabled) {
+					this.addEventListener('keydown', this._captureAutocompleteEnter, true);
+				}
 				
 				let focused = this.focused;
 				let selectionStart = this._input?.selectionStart;
@@ -347,6 +350,17 @@
 				this._input.value = initialValue;
 				this._input.blur();
 			}
+		};
+
+		_captureAutocompleteEnter = (event) => {
+			// On Enter, mozilla stops propagation of the event which may interfere with out handling
+			// of the focus. E.g. the event should be allowed to reach itemDetails from itemBox so that focus
+			// can be moved to the itemTree or the reader.
+			// https://searchfox.org/mozilla-central/source/toolkit/content/widgets/autocomplete-input.js#564
+			// To avoid it, capture Enter keypress event and handle it without stopping its propagation.
+			if (this._input.autocomplete !== "on" || event.key !== "Enter") return;
+			event.preventDefault();
+			this._input.handleEnter();
 		};
 		
 		_handleMouseDown = (event) => {

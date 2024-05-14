@@ -199,7 +199,7 @@
 			this._header = this.querySelector('#zotero-item-pane-header');
 			this._paneParent = this.querySelector('#zotero-view-item');
 
-			this._container.addEventListener("keydown", this._handleKeypress);
+			this._container.addEventListener("keydown", this._handleKeydown);
 			this._paneParent.addEventListener('scroll', this._handleContainerScroll);
 
 			this._paneHiddenOb = new MutationObserver(this._handlePaneStatus);
@@ -225,7 +225,7 @@
 		}
 
 		destroy() {
-			this._container.removeEventListener("keypress", this._handleKeypress);
+			this._container.removeEventListener("keydown", this._handleKeydown);
 			this._paneParent.removeEventListener('scroll', this._handleContainerScroll);
 
 			this._paneHiddenOb.disconnect();
@@ -535,7 +535,7 @@
 		};
 
 		// Keyboard navigation within the itemPane. Also handles contextPane keyboard nav
-		_handleKeypress = (event) => {
+		_handleKeydown = (event) => {
 			let stopEvent = () => {
 				event.preventDefault();
 				event.stopPropagation();
@@ -553,7 +553,7 @@
 				return;
 			}
 			// On Escape/Enter on editable-text, return focus to the item tree or reader
-			if (event.key == "Escape" || (event.key == "Enter" && event.target.closest('editable-text'))) {
+			if (event.key == "Escape" || (event.key == "Enter" && event.target.classList.contains('input'))) {
 				if (isLibraryTab) {
 					document.getElementById('item-tree-main-default').focus();
 				}
