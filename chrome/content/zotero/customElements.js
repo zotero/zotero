@@ -60,7 +60,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 		['zoterosearchcondition', 'chrome://zotero/content/elements/zoteroSearch.js'],
 		['zoterosearchtextbox', 'chrome://zotero/content/elements/zoteroSearch.js'],
 		['zoterosearchagefield', 'chrome://zotero/content/elements/zoteroSearch.js'],
-		['pane-header', 'chrome://zotero/content/elements/paneHeader.js'],
+		['pane-header', 'chrome://zotero/content/elements/itemPaneHeader.js'],
 		['editable-text', 'chrome://zotero/content/elements/editableText.js'],
 		['item-pane-sidenav', 'chrome://zotero/content/elements/itemPaneSidenav.js'],
 		['abstract-box', 'chrome://zotero/content/elements/abstractBox.js'],

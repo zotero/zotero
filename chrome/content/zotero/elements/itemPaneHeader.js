@@ -28,7 +28,7 @@
 {
 	let htmlDoc = document.implementation.createHTMLDocument();
 	
-	class PaneHeader extends ItemPaneSectionElementBase {
+	class ItemPaneHeader extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="title">
 				<editable-text />
@@ -381,7 +381,7 @@
 			});
 		}
 	}
-	customElements.define("pane-header", PaneHeader);
+	customElements.define("pane-header", ItemPaneHeader);
 	
 	/**
 	 * Simple LRU cache that stores bibliography entries for the 100 most recently viewed items.
