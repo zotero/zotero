@@ -157,8 +157,9 @@ const ZoteroStandalone = new function() {
 	};
 
 	this.onFileMenuOpen = function () {
-		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+		
+		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		if (reader) {
 			let item = Zotero.Items.get(reader.itemID);
 			let library = Zotero.Libraries.get(item.libraryID);
@@ -175,14 +176,20 @@ const ZoteroStandalone = new function() {
 			}
 		}
 		
+		let showFileMenuitem = document.getElementById('menu_showFile');
+		let numFiles = ZoteroPane.getSelectedItems()
+			.filter(item => ZoteroPane.canShowItemInFilesystem(item))
+			.length;
+		showFileMenuitem.disabled = !numFiles;
+		document.l10n.setArgs(showFileMenuitem, {
+			count: numFiles
+		});
+
 		// TEMP: Quick implementation
 		try {
 			let menuitem = document.getElementById('menu_export_files');
-			let sep = menuitem.nextSibling;
-			
-			let zp = Zotero.getActiveZoteroPane();
-			if (zp && !reader) {
-				let numFiles = zp.getSelectedItems().reduce((num, item) => {
+			if (!reader) {
+				let numFiles = ZoteroPane.getSelectedItems().reduce((num, item) => {
 					if (item.isPDFAttachment()) {
 						return num + 1;
 					}
@@ -193,19 +200,16 @@ const ZoteroStandalone = new function() {
 				}, 0);
 				if (numFiles) {
 					menuitem.hidden = false;
-					sep.hidden = false;
 					menuitem.label = Zotero.getString(
 						'pane.items.menu.exportPDF' + (numFiles == 1 ? '' : '.multiple')
 					);
 				}
 				else {
 					menuitem.hidden = true;
-					sep.hidden = true;
 				}
 			}
 			else {
 				menuitem.hidden = true;
-				sep.hidden = true;
 			}
 		}
 		catch (e) {

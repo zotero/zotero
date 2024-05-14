@@ -4901,6 +4901,31 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.canShowItemInFilesystem = function (item) {
+		return (item.isRegularItem() && item.numFileAttachments()) || item.isFileAttachment();
+	};
+	
+	
+	this.showItemsInFilesystem = async function (items = this.getSelectedItems()) {
+		let attachments = (await Promise.all(
+			items.map((item) => {
+				if (item.isRegularItem()) {
+					return item.getBestAttachment();
+				}
+				else if (item.isFileAttachment()) {
+					return item;
+				}
+				else {
+					return null;
+				}
+			})
+		)).filter(Boolean);
+		for (let attachment of attachments) {
+			await this.showAttachmentInFilesystem(attachment.id);
+		}
+	};
+	
+	
 	this.showAttachmentInFilesystem = async function (itemID, noLocateOnMissing) {
 		var attachment = await Zotero.Items.getAsync(itemID)
 		if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) return;
