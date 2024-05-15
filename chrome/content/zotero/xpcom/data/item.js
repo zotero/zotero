@@ -2461,6 +2461,20 @@ Zotero.Item.prototype.numAttachments = function (includeTrashed) {
 }
 
 
+/**
+ * Returns the number of file attachments of an item
+ *
+ * @return <Integer>
+ */
+Zotero.Item.prototype.numFileAttachments = function () {
+	this._requireData('childItems');
+	return this.getAttachments()
+		.map(itemID => Zotero.Items.get(itemID))
+		.filter(item => item.isFileAttachment())
+		.length;
+};
+
+
 Zotero.Item.prototype.numNonHTMLFileAttachments = function () {
 	this._requireData('childItems');
 	return this.getAttachments()
