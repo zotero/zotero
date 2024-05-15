@@ -14,7 +14,6 @@ menu-show-file =
     .label = { PLATFORM() ->
         [macos] Show in Finder
         *[other] { $count ->
-            [0] Show File
             [one] Show File
             *[other] Show Files
         }

@@ -602,15 +602,15 @@ var Zotero_LocateMenu = new function() {
 		this.className = "zotero-menuitem-show-file";
 		this.hideInToolbar = true;
 		this.l10nId = "menu-show-file";
-		this.l10nArgs = { count: 0 };
+		this.l10nArgs = { count: 1 };
 		
 		this.canHandleItem = function (item) {
 			return ZoteroPane.canShowItemInFilesystem(item);
 		};
 		
 		this.updateMenuItem = function (items) {
-			let count = items.filter(item => ZoteroPane.canShowItemInFilesystem(item))
-				.length;
+			// We only care about showing 1 or many
+			let count = Zotero.Items.numDistinctFileAttachmentsForLabel(items) > 1 ? 2 : 1;
 			this.l10nArgs = { count };
 		};
 		

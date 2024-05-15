@@ -176,28 +176,25 @@ const ZoteroStandalone = new function() {
 			}
 		}
 		
+		let selectedItems = ZoteroPane.getSelectedItems();
+		
 		let showFileMenuitem = document.getElementById('menu_showFile');
-		let numFiles = ZoteroPane.getSelectedItems()
-			.filter(item => ZoteroPane.canShowItemInFilesystem(item))
-			.length;
+		let numFiles = Zotero.Items.numDistinctFileAttachmentsForLabel(selectedItems);
 		showFileMenuitem.disabled = !numFiles;
 		document.l10n.setArgs(showFileMenuitem, {
-			count: numFiles
+			// We only care about showing 1 or many
+			count: numFiles > 1 ? 2 : 1
 		});
 
 		// TEMP: Quick implementation
 		try {
 			let menuitem = document.getElementById('menu_export_files');
+			// Library tab
 			if (!reader) {
-				let numFiles = ZoteroPane.getSelectedItems().reduce((num, item) => {
-					if (item.isPDFAttachment()) {
-						return num + 1;
-					}
-					if (item.isRegularItem()) {
-						return num + item.numPDFAttachments();
-					}
-					return num;
-				}, 0);
+				let numFiles = Zotero.Items.numDistinctFileAttachmentsForLabel(
+					selectedItems,
+					item => item.isPDFAttachment()
+				);
 				if (numFiles) {
 					menuitem.hidden = false;
 					menuitem.label = Zotero.getString(
@@ -208,6 +205,7 @@ const ZoteroStandalone = new function() {
 					menuitem.hidden = true;
 				}
 			}
+			// Reader tab
 			else {
 				menuitem.hidden = true;
 			}
