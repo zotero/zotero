@@ -1326,7 +1326,7 @@ describe("Zotero.Items", function () {
 	
 	
 	describe("#numDistinctFileAttachmentsForLabel()", function () {
-		it("should count parent item and best attachment as one item when best-attachment state is cached", async function () {
+		it("should return an approximate count of attachment files for the selected items", async function () {
 			var item1 = await createDataObject('item');
 			var attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
 			var attachment2 = await importFileAttachment('test.png', { parentItemID: item1.id });
@@ -1342,6 +1342,8 @@ describe("Zotero.Items", function () {
 			await zp.selectItems([item1.id]);
 			assert.equal(getNum(), 1);
 			await zp.selectItems([item1.id, attachment1.id]);
+			// Make sure the best-attachment state is uncached
+			item1._bestAttachmentState = null;
 			// Should count parent item and best attachment as two item when uncached
 			assert.equal(getNum(), 2);
 			await zp.selectItems([item1.id, attachment1.id, attachment2.id]);
