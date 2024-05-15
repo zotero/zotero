@@ -1324,6 +1324,43 @@ describe("Zotero.Items", function () {
 		});
 	});
 	
+	
+	describe("#numDistinctFileAttachmentsForLabel()", function () {
+		it("should count parent item and best attachment as one item when best-attachment state is cached", async function () {
+			var item1 = await createDataObject('item');
+			var attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			var attachment2 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			
+			function getNum() {
+				return Zotero.Items.numDistinctFileAttachmentsForLabel(zp.getSelectedItems());
+			}
+			
+			zp.itemsView.selection.clearSelection();
+			assert.equal(getNum(), 0);
+			
+			// Uncached best-attachment state
+			await zp.selectItems([item1.id]);
+			assert.equal(getNum(), 1);
+			await zp.selectItems([item1.id, attachment1.id]);
+			// Should count parent item and best attachment as two item when uncached
+			assert.equal(getNum(), 2);
+			await zp.selectItems([item1.id, attachment1.id, attachment2.id]);
+			// Max is 2
+			assert.equal(getNum(), 2);
+			
+			await item1.getBestAttachment();
+			
+			// Cached best-attachment state
+			await zp.selectItems([item1.id]);
+			assert.equal(getNum(), 1);
+			await zp.selectItems([item1.id, attachment1.id]);
+			// Should count parent item and best attachment as one item when cached
+			assert.equal(getNum(), 1);
+			await zp.selectItems([item1.id, attachment1.id, attachment2.id]);
+			assert.equal(getNum(), 2);
+		});
+	});
+	
 	describe("#_loadChildItems()", function () {
 		it("should mark child items as loaded for an attachment", async function () {
 			var attachment = await importPDFAttachment();

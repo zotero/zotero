@@ -1829,6 +1829,61 @@ Zotero.Items = function() {
 	};
 	
 	
+	/**
+	 * Returns a rough count (0, 1, or 2) of the number of file attachments implied by the passed
+	 * array of items (which can include both parent and child items) in order to display a menu
+	 * label (e.g., "Show File" or "Show Files")
+	 *
+	 * @param {[Zotero.Item]}
+	 * @param {Function} filter - An additional filter function to run on file attachment items to
+	 *     determine if they qualify
+	 * @return {Integer} - 0, 1, or 2, where 2 means >1
+	 */
+	this.numDistinctFileAttachmentsForLabel = function (items, filter = item => item.isFileAttachment()) {
+		const MAX_ITEMS = 2;
+		var num = 0;
+		var foundKey;
+		for (let item of items) {
+			if (item.isRegularItem()) {
+				// Ideally we want to avoid counting a parent item and its primary attachment as
+				// multiple files, but getBestAttachment() is asynchronous and we need to do this
+				// synchronously, so try to use the cached best-attachment state
+				let { key } = item.getBestAttachmentStateCached();
+				if (key) {
+					if (foundKey) {
+						if (key == foundKey) {
+							continue;
+						}
+						return MAX_ITEMS;
+					}
+					foundKey = key;
+					num++;
+				}
+				// If we don't have a cached primary attachment, the best we can do is count the
+				// parent item if it has any file attachments. Since we're not recording the actual
+				// attachment being counted, this might result in returning MAX_ITEMS even if only
+				// the parent item and primary attachment are selected.
+				else if (item.getAttachments().map(itemID => Zotero.Items.get(itemID)).some(filter)) {
+					foundKey = item.key;
+					num++;
+				}
+			}
+			else if (filter(item)) {
+				if (foundKey) {
+					if (item.key == foundKey) {
+						continue;
+					}
+					// More than 1 attachment found
+					return MAX_ITEMS;
+				}
+				foundKey = item.key;
+				num++;
+			}
+		}
+		return num;
+	};
+	
+	
 	/*
 	 * Generate SQL to retrieve firstCreator field
 	 *
