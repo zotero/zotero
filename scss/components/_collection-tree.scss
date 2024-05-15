@@ -56,6 +56,7 @@ $icons: (
 
 	.virtualized-table-body {
 		padding: 0 8px 8px;
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 	}
 
 	.cell.primary {
