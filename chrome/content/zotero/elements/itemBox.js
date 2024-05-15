@@ -948,7 +948,7 @@
 			let labelWrapper = document.createElement('div');
 			let grippy = document.createXULElement('toolbarbutton');
 			
-			labelWrapper.className = 'creator-type-label';
+			labelWrapper.className = 'creator-type-label keyboard-clickable';
 			labelWrapper.setAttribute("tabindex", 0);
 			grippy.className = "zotero-clicky zotero-clicky-grippy show-on-hover";
 			grippy.setAttribute('tabindex', -1);
