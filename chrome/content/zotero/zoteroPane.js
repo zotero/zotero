@@ -4902,8 +4902,7 @@ var ZoteroPane = new function()
 	
 	
 	this.canShowItemInFilesystem = function (item) {
-		return item.isRegularItem() && item.numAttachments()
-			|| item.isAttachment() && item.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL;
+		return (item.isRegularItem() && item.numFileAttachments()) || item.isFileAttachment();
 	};
 	
 	
@@ -4913,7 +4912,7 @@ var ZoteroPane = new function()
 				if (item.isRegularItem()) {
 					return item.getBestAttachment();
 				}
-				else if (item.isAttachment() && item.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				else if (item.isFileAttachment()) {
 					return item;
 				}
 				else {
