@@ -40,7 +40,7 @@ Zotero.Item = function(itemTypeOrID) {
 	this._itemTypeID = null;
 	this._createdByUserID = null;
 	this._lastModifiedByUserID = null;
-	this._firstCreator = null;
+	this._firstCreatorCache = null;
 	this._sortCreator = null;
 	this._attachmentCharset = null;
 	this._attachmentLinkMode = null;
@@ -165,7 +165,23 @@ Zotero.defineProperty(Zotero.Item.prototype, 'topLevelItem', {
 });
 
 Zotero.defineProperty(Zotero.Item.prototype, 'firstCreator', {
-	get: function() { return this._firstCreator; }
+	get() {
+		let nameFormat = Zotero.Prefs.get('firstCreator.nameFormat');
+		let maxNames = Zotero.Prefs.get('firstCreator.maxNames');
+		if (this._firstCreatorCache === null
+				|| this._firstCreatorCache.nameFormat !== nameFormat
+				|| this._firstCreatorCache.maxNames !== maxNames) {
+			this._firstCreatorCache = {
+				nameFormat,
+				maxNames,
+				firstCreator: Zotero.Items.getFirstCreatorFromData(this.itemTypeID, this.getCreators(), {
+					nameFormat,
+					maxNames,
+				}),
+			};
+		}
+		return this._firstCreatorCache.firstCreator;
+	}
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'sortCreator', {
 	get: function() { return this._sortCreator; }
@@ -235,21 +251,21 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	this._requireData('primaryData');
 	
 	// TODO: Add sortCreator
-	if (field === 'firstCreator' && !this._id) {
-		// Hack to get a firstCreator for an unsaved item
-		let creatorsData = this.getCreators(true);
-		return Zotero.Items.getFirstCreatorFromData(this.itemTypeID, creatorsData,
-			{ omitBidiIsolates: !!unformatted });
-	} else if (field === 'id' || this.ObjectsClass.isPrimaryField(field)) {
-		var privField = '_' + field;
-		let value = this[privField];
+	if (field === 'firstCreator') {
+		let value = this.firstCreator;
 		// Bidi isolates
-		if (unformatted && field === 'firstCreator') {
+		if (unformatted) {
 			value = value.replace(/[\u2068\u2069]/g, '');
 		}
+		return value;
+	}
+	else if (field === 'id' || this.ObjectsClass.isPrimaryField(field)) {
+		var privField = '_' + field;
+		let value = this[privField];
 		//Zotero.debug('Returning ' + (value ? value : '') + ' (typeof ' + typeof value + ')');
 		return value;
-	} else if (field == 'year') {
+	}
+	else if (field == 'year') {
 		return this.getField('date', true, true).substr(0,4);
 	}
 	
@@ -1514,6 +1530,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				]
 			);
 		}
+		this._firstCreatorCache = null;
 	}
 	
 	// Parent item (DB update is done below after collection removals)

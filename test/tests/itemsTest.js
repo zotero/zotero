@@ -1104,6 +1104,11 @@ describe("Zotero.Items", function () {
 	})
 	
 	describe("#getFirstCreatorFromData()", function () {
+		let defaultOptions = {
+			nameFormat: 'last',
+			maxNames: 2,
+		};
+		
 		it("should handle single eligible creator", function* () {
 			for (let creatorType of ['author', 'editor', 'contributor']) {
 				assert.equal(
@@ -1116,7 +1121,8 @@ describe("Zotero.Items", function () {
 								lastName: 'B',
 								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
 							}
-						]
+						],
+						defaultOptions
 					),
 					'B',
 					creatorType
@@ -1135,7 +1141,8 @@ describe("Zotero.Items", function () {
 							lastName: 'B',
 							creatorTypeID: Zotero.CreatorTypes.getID('translator')
 						}
-					]
+					],
+					defaultOptions
 				),
 				''
 			);
@@ -1159,7 +1166,8 @@ describe("Zotero.Items", function () {
 								lastName: 'D',
 								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
 							}
-						]
+						],
+						defaultOptions
 					),
 					'D',
 					creatorType
@@ -1185,7 +1193,8 @@ describe("Zotero.Items", function () {
 								lastName: 'D',
 								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
 							}
-						]
+						],
+						defaultOptions
 					),
 					Zotero.getString(
 						'general.andJoiner',
@@ -1220,7 +1229,8 @@ describe("Zotero.Items", function () {
 								lastName: 'F',
 								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
 							}
-						]
+						],
+						defaultOptions
 					),
 					'B ' + Zotero.getString('general.etAl'),
 					creatorType
@@ -1258,7 +1268,8 @@ describe("Zotero.Items", function () {
 								lastName: 'H',
 								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
 							}
-						]
+						],
+						defaultOptions
 					),
 					Zotero.getString(
 						'general.andJoiner',

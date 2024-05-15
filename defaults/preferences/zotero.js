@@ -78,6 +78,9 @@ pref("extensions.zotero.itemPaneHeader", "title");
 pref("extensions.zotero.itemPaneHeader.bibEntry.style", "http://www.zotero.org/styles/apa");
 pref("extensions.zotero.itemPaneHeader.bibEntry.locale", "");
 
+pref("extensions.zotero.firstCreator.nameFormat", "last");
+pref("extensions.zotero.firstCreator.maxNames", "2");
+
 //Tag Selector
 pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);

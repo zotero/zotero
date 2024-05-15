@@ -53,7 +53,6 @@ Zotero.Items = function() {
 				createdByUserID: "createdByUserID",
 				lastModifiedByUserID: "lastModifiedByUserID",
 				
-				firstCreator: _getFirstCreatorSQL(),
 				sortCreator: _getSortCreatorSQL(),
 				
 				deleted: "DI.itemID IS NOT NULL AS deleted",
@@ -1737,26 +1736,74 @@ Zotero.Items = function() {
 	};
 	
 	
+	this.FIRST_CREATOR_DISPLAY_PREFS = ['firstCreator.nameFormat', 'firstCreator.maxNames'];
+	
+	
+	// A regex matching strings whose letter characters are all in a set of
+	// scripts known not to use spaces/commas to separate name components.
+	// This is a very incomplete list.
+	const NO_NAME_JOINER_RE = /^[\P{Letter}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}]+$/u;
+	
+	const listFormat = new Intl.ListFormat(Zotero.locale, {
+		style: 'long'
+	});
+	
+	let nameFormatterCache;
+	function getNameFormatter(nameFormat) {
+		if (nameFormatterCache
+				&& nameFormatterCache.nameFormat === nameFormat) {
+			return nameFormatterCache.nameFormatter;
+		}
+		
+		let nameFormatter;
+		switch (nameFormat) {
+			case 'firstLast':
+				nameFormatter = (data) => {
+					let joiner = NO_NAME_JOINER_RE.test(data.lastName) || NO_NAME_JOINER_RE.test(data.firstName)
+						? ''
+						: ' ';
+					return ((data.firstName || '') + joiner + (data.lastName || '')).trim();
+				};
+				break;
+			case 'lastFirst':
+				nameFormatter = (data) => {
+					let joiner = NO_NAME_JOINER_RE.test(data.lastName) || NO_NAME_JOINER_RE.test(data.firstName)
+						? ''
+						: Zotero.getString('punctuation.comma') + ' ';
+					return (
+						(data.lastName ? data.lastName + joiner : '')
+						+ (data.firstName || '')
+					).trim();
+				};
+				break;
+			case 'last':
+			default:
+				nameFormatter = data => (
+					data.lastName || ''
+				);
+				break;
+		}
+		nameFormatterCache = {
+			nameFormat,
+			nameFormatter,
+		};
+		return nameFormatter;
+	}
+
 	/**
 	 * Return a firstCreator string from internal creators data (from Zotero.Item::getCreators()).
 	 *
-	 * Used in Zotero.Item::getField() for unsaved items
-	 *
 	 * @param {Integer} itemTypeID
 	 * @param {Object} creatorData
-	 * @param {Object} [options]
+	 * @param {Object} options
+	 * @param {String} options.nameFormat
+	 * @param {Number} options.maxNames
 	 * @param {Boolean} [options.omitBidiIsolates]
 	 * @return {String}
 	 */
 	this.getFirstCreatorFromData = function (itemTypeID, creatorsData, options) {
-		if (!options) {
-			options = {
-				omitBidiIsolates: false
-			};
-		}
-		
 		if (creatorsData.length === 0) {
-			return "";
+			return '';
 		}
 		
 		var validCreatorTypes = [
@@ -1764,31 +1811,32 @@ Zotero.Items = function() {
 			Zotero.CreatorTypes.getID('editor'),
 			Zotero.CreatorTypes.getID('contributor')
 		];
-	
-		for (let creatorTypeID of validCreatorTypes) {
-			let matches = creatorsData.filter(data => data.creatorTypeID == creatorTypeID)
-			if (!matches.length) {
-				continue;
-			}
-			if (matches.length === 1) {
-				return matches[0].lastName;
-			}
-			if (matches.length === 2) {
-				let a = matches[0];
-				let b = matches[1];
-				let args = options.omitBidiIsolates
-					? [a.lastName, b.lastName]
+		
+		let firstTypeWithMatches = validCreatorTypes.find(creatorTypeID => creatorsData.some(data => data.creatorTypeID == creatorTypeID));
+		if (!firstTypeWithMatches) {
+			return '';
+		}
+		let matches = creatorsData.filter(data => data.creatorTypeID == firstTypeWithMatches);
+		
+		let nameFormatter = getNameFormatter(options.nameFormat);
+		if (options.maxNames <= 0 || matches.length <= options.maxNames) {
+			if (matches.length > 1 && !options.omitBidiIsolates) {
+				for (let data of matches) {
 					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
 					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
-					: [`\u2068${a.lastName}\u2069`, `\u2068${b.lastName}\u2069`];
-				return Zotero.getString('general.andJoiner', args);
+					if (data.lastName) {
+						data.lastName = `\u2068${data.lastName}\u2069`;
+					}
+					if (data.firstName) {
+						data.firstName = `\u2068${data.firstName}\u2069`;
+					}
+				}
 			}
-			if (matches.length >= 3) {
-				return matches[0].lastName + " " + Zotero.getString('general.etAl');
-			}
+			return listFormat.format(matches.map(nameFormatter));
 		}
-		
-		return "";
+		else {
+			return nameFormatter(matches[0]) + ' ' + Zotero.getString('general.etAl');
+		}
 	};
 	
 	
@@ -1882,135 +1930,6 @@ Zotero.Items = function() {
 		}
 		return num;
 	};
-	
-	
-	/*
-	 * Generate SQL to retrieve firstCreator field
-	 *
-	 * Why do we do this entirely in SQL? Because we're crazy. Crazy like foxes.
-	 */
-	var _firstCreatorSQL = '';
-	function _getFirstCreatorSQL() {
-		if (_firstCreatorSQL) {
-			return _firstCreatorSQL;
-		}
-		
-		var editorCreatorTypeID = Zotero.CreatorTypes.getID('editor');
-		var contributorCreatorTypeID = Zotero.CreatorTypes.getID('contributor');
-		
-		/* This whole block is to get the firstCreator */
-		var localizedAnd = Zotero.getString('general.andJoiner').replace(/%S/g, '%s');
-		var localizedEtAl = Zotero.getString('general.etAl');
-		var sql = "COALESCE(" +
-			// First try for primary creator types
-			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators IC " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1" +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1" +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT PRINTF(" +
-					`'${localizedAnd}'` +
-					", " +
-					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
-					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
-					"LEFT JOIN itemTypeCreatorTypes ITCT " +
-					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
-					"LEFT JOIN itemTypeCreatorTypes ITCT " +
-					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
-				")" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " + 
-			") " +
-			"END, " +
-			
-			// Then try editors
-			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT PRINTF(" +
-					`'${localizedAnd}'` +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1)" +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1,1) " +
-				")" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " +
-			") " +
-			"END, " +
-			
-			// Then try contributors
-			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT PRINTF(" +
-					`'${localizedAnd}'` +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1)" +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1,1) " +
-				")" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " + 
-			") " +
-			"END" +
-		") AS firstCreator";
-		
-		_firstCreatorSQL = sql;
-		return sql;
-	}
 	
 	
 	/*

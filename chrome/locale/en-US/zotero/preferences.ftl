@@ -38,6 +38,21 @@ preferences-item-pane-header-style = Header Citation Style:
 preferences-item-pane-header-locale = Header Language:
 preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
 
+preferences-first-creator-name-format = Creator Name Format:
+preferences-first-creator-name-format-last =
+    .label = Last
+preferences-first-creator-name-format-last-first =
+    .label = Last, First
+preferences-first-creator-name-format-first-last =
+    .label = First Last
+preferences-first-creator-max-names = Switch to “et al.”:
+preferences-first-creator-max-names-option =
+    .label = { $max ->
+        [0] Never
+        [1] After { $max } creator
+        *[other] After { $max } creators
+    }
+
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
