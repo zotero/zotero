@@ -691,7 +691,7 @@ var Scaffold = new function () {
 		if (testStart !== -1 && testEnd !== -1) fixedCode = fixedCode.substr(0, testStart) + fixedCode.substr(testEnd + 23);
 		
 		// Convert whitespace to tabs
-		_editors.code.setValue(normalizeWhitespace(fixedCode));
+		_editors.code.setValue(normalizeWhitespace(fixedCode.trimEnd()));
 		// Then go to line 1
 		_editors.code.setPosition({ lineNumber: 1, column: 1 });
 		
@@ -813,7 +813,7 @@ var Scaffold = new function () {
 		var tests = _editors.tests.getValue().trim();
 		if (!tests || tests == '[]') tests = '[\n]'; // eslint wants a line break between the brackets
 
-		code += '/** BEGIN TEST CASES **/\nvar testCases = ' + tests + '\n/** END TEST CASES **/';
+		code = code.trimEnd() + '\n\n/** BEGIN TEST CASES **/\nvar testCases = ' + tests + '\n/** END TEST CASES **/';
 
 		var metadata = _getMetadataObject();
 		if (metadata.label === "Untitled") {
