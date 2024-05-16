@@ -1,0 +1,76 @@
+wizardpage {
+	overflow: hidden;
+	min-width: 780px;
+	min-height: 300px;
+}
+
+merge-group {
+	display: flex;
+	overflow: auto;
+
+	merge-pane {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		max-height: 0;
+		min-width: 250px;
+
+		& groupbox {
+			flex: 1;
+		}
+
+		&[selected=true] h2,
+		&[selected=true] attachment-box #title {
+			color: red;
+			font-weight: 600;
+			text-decoration: underline;
+		}
+
+		.parent-row {
+			margin: 7px 5px;
+
+			span {
+				font-weight: 600;
+			}
+		}
+
+		.delete-box {
+			min-width: 15em;
+		}
+	}
+
+	&:not([mergetype="note"]) {
+		#left-pane:active h2,
+		#right-pane:active h2,
+		#left-pane:active attachment-box #title,
+		#right-pane:active attachment-box #title {
+			color: red;
+			font-weight: 600;
+		}
+	}
+
+	#left-pane:hover:not([selected=true]) h2,
+	#left-pane groupbox:focus:not([selected=true]) h2,
+	#right-pane:hover:not([selected=true]) h2,
+	#right-pane groupbox:focus:not([selected=true]) h2 {
+		text-decoration: underline;
+	}
+}
+
+#resolve-all {
+	font-size: 1.1em;
+}
+
+#zotero-step-count label:first-child {
+	margin-left: 0;
+	font-weight: 600;
+}
+
+#zotero-step-count label {
+	font-size: 1.1em;
+}
+
+#zotero-step-count label:last-child {
+	margin-right: 1em;
+	font-weight: 600;
+}

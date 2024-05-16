@@ -340,7 +340,7 @@ var Zotero_Merge_Window = new function () {
 		}
 		
 		msg = Zotero.getString('sync.conflict.' + msg, buttonName)
-		document.getElementById('zotero-merge-instructions').value = msg;
+		document.getElementById('zotero-merge-instructions').textContent = msg;
 	}
 	
 	

@@ -454,6 +454,8 @@
 			}
 			else {
 				objbox.item = item;
+				objbox.render && objbox.render();
+				objbox.asyncRender && objbox.asyncRender();
 			}
 		}
 		

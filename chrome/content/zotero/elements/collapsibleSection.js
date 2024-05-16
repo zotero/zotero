@@ -282,10 +282,15 @@
 		}
 		
 		_saveOpenState() {
+			if (this._disableCachingOpenState) return;
 			Zotero.Prefs.set(`panes.${this.dataset.pane}.open`, this.open);
 		}
 		
 		_restoreOpenState() {
+			if (this._disableCachingOpenState) {
+				this.open = true;
+				return;
+			}
 			this._restoringOpenState = true;
 			this.open = Zotero.Prefs.get(`panes.${this.dataset.pane}.open`) ?? true;
 			this._restoringOpenState = false;
@@ -304,7 +309,11 @@
 		}
 		
 		get _disableCollapsing() {
-			return !!this.closest('panel, menupopup');
+			return !!this.closest('panel, menupopup, merge-pane');
+		}
+
+		get _disableCachingOpenState() {
+			return !!this.closest('merge-pane');
 		}
 
 		_handleClick = (event) => {
