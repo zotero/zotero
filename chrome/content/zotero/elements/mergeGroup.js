@@ -68,6 +68,7 @@
 		get data() {
 			return this._data;
 		}
+
 		set data(val) {
 			this._data = val;
 			this.refresh();
@@ -80,6 +81,7 @@
 		get type() {
 			return this._type;
 		}
+
 		set type(val) {
 			switch (val) {
 				case 'item':
@@ -90,7 +92,7 @@
 					break;
 				
 				default:
-					throw new Error(`Unsupported merge object type '${type}'`);
+					throw new Error(`Unsupported merge object type '${val}'`);
 			}
 			
 			this._type = val;
@@ -100,9 +102,11 @@
 		set leftCaption(val) {
 			this._leftPane.caption = val;
 		}
+
 		set rightCaption(val) {
 			this._rightPane.caption = val;
 		}
+
 		set mergeCaption(val) {
 			this._mergePane.caption = val;
 		}
@@ -110,9 +114,11 @@
 		get leftPane() {
 			return this._leftPane;
 		}
+
 		get rightPane() {
 			return this._rightPane;
 		}
+
 		get mergePane() {
 			return this._mergePane;
 		}
@@ -124,7 +130,7 @@
 			
 			// Check for note or attachment
 			this.type = this._getTypeFromObject(
-				this._data.left.deleted ?  this._data.right : this._data.left
+				this._data.left.deleted ? this._data.right : this._data.left
 			);
 			
 			var showButton = this.type != 'item';
@@ -206,13 +212,12 @@
 		
 		choosePane(pane) {
 			Zotero.debug(new Error().stack);
+			let otherPane;
 			if (pane.id == 'left-pane') {
-				var position = 'left';
-				var otherPane = this._rightPane;
+				otherPane = this._rightPane;
 			}
 			else {
-				var position = 'right';
-				var otherPane = this._leftPane;
+				otherPane = this._leftPane;
 			}
 			
 			pane.removeAttribute("selected");
@@ -315,6 +320,7 @@
 		get deleted() {
 			return this._deleted;
 		}
+		
 		set deleted(val) {
 			this._deleted = val;
 			
@@ -332,6 +338,7 @@
 		get data() {
 			return this._data;
 		}
+
 		set data(val) {
 			this._data = val;
 			
@@ -365,7 +372,6 @@
 					break;
 				
 				case 'note':
-					var type = Zotero.Libraries.get(this.libraryID).libraryType;
 					elementName = 'note-editor';
 					break;
 				
@@ -377,11 +383,12 @@
 					throw new Error("Object type '" + this.type + "' not supported");
 			}
 			
+			let objbox;
 			if (elementName == 'div') {
-				var objbox = document.createElement(elementName);
+				objbox = document.createElement(elementName);
 			}
 			else {
-				var objbox = document.createXULElement(elementName);
+				objbox = document.createXULElement(elementName);
 			}
 			
 			var parentRow = this._class('parent-row');
