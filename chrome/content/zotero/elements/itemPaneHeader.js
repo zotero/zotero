@@ -179,7 +179,7 @@
 		}
 		
 		async blurOpenField() {
-			if (this.titleField?.matches(':focus-within')) {
+			if (this.titleField.focused) {
 				this.titleField.blur();
 				await this.save();
 			}
