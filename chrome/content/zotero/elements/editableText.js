@@ -316,16 +316,19 @@
 				this._ignoredWindowInactiveBlur = true;
 				return;
 			}
-			this._ignoredWindowInactiveBlur = false;
-
-			this.dispatchEvent(new Event('blur'));
-			this.classList.remove("focused");
-			this._input.scrollLeft = 0;
-			this._input.setSelectionRange(0, 0);
-			this.removeAttribute("mousedown");
-			delete this._input.dataset.initialValue;
+			this._resetStateAfterBlur();
 		};
 		
+		_resetStateAfterBlur() {
+			this._ignoredWindowInactiveBlur = false;
+			this.dispatchEvent(new Event('blur'));
+			this.classList.remove('focused');
+			this._input.scrollLeft = 0;
+			this._input.setSelectionRange(0, 0);
+			this.removeAttribute('mousedown');
+			delete this._input.dataset.initialValue;
+		}
+
 		_handleKeyDown = (event) => {
 			if (event.key === 'Enter') {
 				if (this.multiline === event.shiftKey) {
@@ -390,6 +393,10 @@
 		
 		blur() {
 			this._input?.blur();
+			
+			// This is a programmatic blur, so reset our state even if the
+			// window is inactive
+			this._resetStateAfterBlur();
 		}
 		
 		get focused() {
