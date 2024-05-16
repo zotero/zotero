@@ -1,6 +1,6 @@
 wizardpage {
 	overflow: hidden;
-	min-width: 762px;
+	min-width: 780px;
 	min-height: 300px;
 }
 
@@ -13,7 +13,7 @@ merge-group {
 		display: flex;
 		flex-direction: column;
 		max-height: 0;
-		min-width: 26em;
+		min-width: 250px;
 
 		& groupbox {
 			flex: 1;

@@ -34,7 +34,8 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		onload="Zotero_Merge_Window.init()"
-		width="820" height="500"
+		drawintitlebar-platforms="mac"
+		style="min-width: 830px; min-height: 500px;"
 >
 	<wizard id="merge-window" title="">
 		<linkset>
@@ -45,6 +46,7 @@
 			var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/components/annotation.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/merge.js", this);
 		</script>
