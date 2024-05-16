@@ -8,16 +8,14 @@ return-or-enter =
 general-remove = Remove
 general-add = Add
 
+menu-file-show-in-finder =
+    .label = Show in Finder
+menu-file-show-file =
+    .label = Show File
+menu-file-show-files =
+    .label = Show Files
 menu-print =
     .label = { general-print }
-menu-show-file =
-    .label = { PLATFORM() ->
-        [macos] Show in Finder
-        *[other] { $count ->
-            [one] Show File
-            *[other] Show Files
-        }
-    }
 
 menu-density =
     .label = Density

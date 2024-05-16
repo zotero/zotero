@@ -179,12 +179,16 @@ const ZoteroStandalone = new function() {
 		let selectedItems = ZoteroPane.getSelectedItems();
 		
 		let showFileMenuitem = document.getElementById('menu_showFile');
+		let showFileLabel = "";
 		let numFiles = Zotero.Items.numDistinctFileAttachmentsForLabel(selectedItems);
+		if (Zotero.isMac) {
+			showFileLabel = "menu-file-show-in-finder";
+		}
+		else {
+			showFileLabel = numFiles > 1 ? 'menu-file-show-files' : 'menu-file-show-file';
+		}
+		document.l10n.setAttributes(showFileMenuitem, showFileLabel);
 		showFileMenuitem.disabled = !numFiles;
-		document.l10n.setArgs(showFileMenuitem, {
-			// We only care about showing 1 or many
-			count: numFiles > 1 ? 2 : 1
-		});
 
 		// TEMP: Quick implementation
 		try {

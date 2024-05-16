@@ -601,17 +601,20 @@ var Zotero_LocateMenu = new function() {
 	ViewOptions.showFile = new function() {
 		this.className = "zotero-menuitem-show-file";
 		this.hideInToolbar = true;
-		this.l10nId = "menu-show-file";
-		this.l10nArgs = { count: 1 };
 		
 		this.canHandleItem = function (item) {
 			return ZoteroPane.canShowItemInFilesystem(item);
 		};
 		
 		this.updateMenuItem = function (items) {
-			// We only care about showing 1 or many
-			let count = Zotero.Items.numDistinctFileAttachmentsForLabel(items) > 1 ? 2 : 1;
-			this.l10nArgs = { count };
+			if (Zotero.isMac) {
+				this.l10nId = 'menu-file-show-in-finder';
+			}
+			else {
+				// We only care about showing 1 or many
+				let count = Zotero.Items.numDistinctFileAttachmentsForLabel(items) > 1 ? 2 : 1;
+				this.l10nId = count > 1 ? 'menu-file-show-files' : 'menu-file-show-file';
+			}
 		};
 		
 		this.handleItems = async function (items) {
