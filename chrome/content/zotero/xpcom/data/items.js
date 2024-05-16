@@ -1873,11 +1873,13 @@ Zotero.Items = function() {
 					if (item.key == foundKey) {
 						continue;
 					}
-					// More than 1 attachment found
 					return MAX_ITEMS;
 				}
 				foundKey = item.key;
 				num++;
+			}
+			if (num >= MAX_ITEMS) {
+				break;
 			}
 		}
 		return num;
