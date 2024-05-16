@@ -133,9 +133,11 @@
 		set autocomplete(val) {
 			if (val) {
 				this.setAttribute('autocomplete', JSON.stringify(val));
+				this.addEventListener('keydown', this._captureAutocompleteKeydown, true);
 			}
 			else {
 				this.removeAttribute('autocomplete');
+				this.removeEventListener('keydown', this._captureAutocompleteKeydown, true);
 			}
 		}
 		
@@ -193,9 +195,6 @@
 				input.addEventListener('mousedown', this._handleMouseDown);
 				input.addEventListener('dragover', this._handleDragOver);
 				input.addEventListener('drop', this._handleDrop);
-				if (autocompleteEnabled) {
-					this.addEventListener('keydown', this._captureAutocompleteKeydown, true);
-				}
 				
 				let focused = this.focused;
 				let selectionStart = this._input?.selectionStart;
