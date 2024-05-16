@@ -33,6 +33,10 @@
 	}
 	
 	class ItemTypeMenuList extends customElements.get("menulist") {
+		constructor() {
+			super();
+		}
+		
 		connectedCallback() {
 			super.connectedCallback();
 			
@@ -61,8 +65,7 @@
 			for (let i = 0; i < itemTypes.length; i++) {
 				let name = itemTypes[i].name;
 				if (name != 'attachment' && name != 'note' && name != 'annotation') {
-					let menuitem = this.appendItem(itemTypes[i].localized, itemTypes[i].id);
-					menuitem.setAttribute('type', 'radio');
+					this.appendItem(itemTypes[i].localized, itemTypes[i].id);
 				}
 			}
 			
