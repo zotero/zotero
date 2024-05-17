@@ -1834,7 +1834,7 @@ Zotero.Items = function() {
 	 * array of items (which can include both parent and child items) in order to display a menu
 	 * label (e.g., "Show File" or "Show Files")
 	 *
-	 * @param {[Zotero.Item]}
+	 * @param {[Zotero.Item]} items
 	 * @param {Function} filter - An additional filter function to run on file attachment items to
 	 *     determine if they qualify
 	 * @return {Integer} - 0, 1, or 2, where 2 means >1
@@ -1849,7 +1849,8 @@ Zotero.Items = function() {
 				// multiple files, but getBestAttachment() is asynchronous and we need to do this
 				// synchronously, so try to use the cached best-attachment state
 				let { key } = item.getBestAttachmentStateCached();
-				if (key) {
+				let bestAttachment = key && Zotero.Items.getByLibraryAndKey(item.libraryID, key);
+				if (bestAttachment && filter(bestAttachment)) {
 					if (foundKey) {
 						if (key == foundKey) {
 							continue;
