@@ -50,8 +50,8 @@
 						<label value="&zotero.search.joinMode.prefix;"/>
 						<menulist id="joinModeMenu" oncommand="this.closest('zoterosearch').updateJoinMode();" native="true">
 							<menupopup>
-								<menuitem label="&zotero.search.joinMode.any;" value="any" type="radio"/>
-								<menuitem label="&zotero.search.joinMode.all;" value="all" type="radio" selected="true"/>
+								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
+								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
 							</menupopup>
 						</menulist>
 						<label value="&zotero.search.joinMode.suffix;"/>
@@ -261,11 +261,10 @@
 			
 			// Build operator menu
 			for (let operator of operators) {
-				let menuitem = operatorsList.appendItem(
+				operatorsList.appendItem(
 					Zotero.getString('searchOperator.' + operator),
 					operator
 				);
-				menuitem.setAttribute('type', 'radio');
 			}
 			
 			// Build conditions menu
@@ -274,18 +273,17 @@
 			var conditions = Zotero.SearchConditions.getStandardConditions();
 			
 			for (let condition of conditions) {
+				let menuitem;
 				if (this.isPrimaryCondition(condition.name)) {
-					var menuitem = document.createXULElement('menuitem');
+					menuitem = document.createXULElement('menuitem');
 					menuitem.setAttribute('label', condition.localized);
 					menuitem.setAttribute('value', condition.name);
-					menuitem.setAttribute('type', 'radio');
 					moreConditionsMenu.before(menuitem);
 				}
 				else {
-					var menuitem = moreConditionsMenu.appendItem(
+					menuitem = moreConditionsMenu.appendItem(
 						condition.localized, condition.name
 					);
-					menuitem.setAttribute('type', 'radio');
 				}
 				
 				var baseFields = null;
@@ -554,7 +552,6 @@
 			
 			for (let row of rows) {
 				let menuitem = valueMenu.appendItem(row.name, row.value);
-				menuitem.setAttribute('type', 'radio');
 				if (row.image) {
 					menuitem.className = 'menuitem-iconic';
 					menuitem.setAttribute('image', row.image);
@@ -915,9 +912,9 @@
 				<html:input class="input"/>
 				<menulist class="age-list" native="true">
 					<menupopup>
-						<menuitem label="&zotero.search.date.units.days;" value="days" type="radio" selected="true"/>
-						<menuitem label="&zotero.search.date.units.months;" value="months" type="radio"/>
-						<menuitem label="&zotero.search.date.units.years;" value="years" type="radio"/>
+						<menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
+						<menuitem label="&zotero.search.date.units.months;" value="months"/>
+						<menuitem label="&zotero.search.date.units.years;" value="years"/>
 					</menupopup>
 				</menulist>
 			</html:div>
