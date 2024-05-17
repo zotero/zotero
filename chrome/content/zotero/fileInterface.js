@@ -27,6 +27,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import { ImportCitaviAnnotatons } from 'zotero/import/citavi';
 
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetters(globalThis, {
 	HiddenBrowser: 'chrome://zotero/content/HiddenBrowser.jsm',
 });
