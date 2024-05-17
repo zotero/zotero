@@ -677,7 +677,8 @@
 					var button = document.createXULElement("toolbarbutton");
 					button.className = 'zotero-field-version-button zotero-clicky-merge';
 					button.setAttribute('type', 'menu');
-					button.setAttribute('data-l10n-id', 'itembox-button-merge');
+					let fieldLocalName = rowLabel.querySelector("label")?.textContent;
+					document.l10n.setAttributes(button, 'itembox-button-merge', { field: fieldLocalName || "" });
 					
 					var popup = button.appendChild(document.createXULElement("menupopup"));
 					
