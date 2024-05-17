@@ -10,7 +10,6 @@ item-pane-header {
 	max-height: 25%;
 	overflow-y: auto;
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
-	scrollbar-gutter: stable;
 
 	.title {
 		margin-top: calc(0px - var(--editable-text-padding-block));
