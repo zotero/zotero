@@ -393,7 +393,8 @@ Zotero.ItemFields = new function() {
 		var fields = [
 			'title',
 			...this.getTypeFieldsFromBase('title', true),
-			'bookTitle'
+			'publicationTitle',
+			...this.getTypeFieldsFromBase('publicationTitle', true),
 		];
 		return fields.indexOf(field) != -1;
 	}
