@@ -133,11 +133,9 @@
 		set autocomplete(val) {
 			if (val) {
 				this.setAttribute('autocomplete', JSON.stringify(val));
-				this.addEventListener('keydown', this._captureAutocompleteKeydown, true);
 			}
 			else {
 				this.removeAttribute('autocomplete');
-				this.removeEventListener('keydown', this._captureAutocompleteKeydown, true);
 			}
 		}
 		
@@ -195,6 +193,14 @@
 				input.addEventListener('mousedown', this._handleMouseDown);
 				input.addEventListener('dragover', this._handleDragOver);
 				input.addEventListener('drop', this._handleDrop);
+				if (autocompleteEnabled) {
+					// Even through this may run multiple times on editable-text, the listener
+					// is added only once because we pass the reference to the same exact function.
+					this.addEventListener('keydown', this._captureAutocompleteKeydown, true);
+				}
+				else {
+					this.removeEventListener('keydown', this._captureAutocompleteKeydown, true);
+				}
 				
 				let focused = this.focused;
 				let selectionStart = this._input?.selectionStart;
