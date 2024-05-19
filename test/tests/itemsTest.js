@@ -1361,6 +1361,17 @@ describe("Zotero.Items", function () {
 			await zp.selectItems([item1.id, attachment1.id, attachment2.id]);
 			assert.equal(getNum(), 2);
 		});
+		
+		it("should return 0 for a parent item with a non-PDF attachment when passed `item.isPDFAttachment()` as a filter", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
+			
+			var numFiles = Zotero.Items.numDistinctFileAttachmentsForLabel(
+				[item],
+				item => item.isPDFAttachment()
+			);
+			assert.equal(numFiles, 0);
+		});
 	});
 	
 	describe("#_loadChildItems()", function () {
