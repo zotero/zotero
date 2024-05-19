@@ -1362,7 +1362,7 @@ describe("Zotero.Items", function () {
 			assert.equal(getNum(), 2);
 		});
 		
-		it("should return 0 for a parent item with a non-PDF attachment when passed `item.isPDFAttachment()` as a filter", async function () {
+		it("should return 0 for a parent item with a non-PDF file attachment when passed `item.isPDFAttachment()` as a filter", async function () {
 			var item = await createDataObject('item');
 			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
 			
