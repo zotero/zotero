@@ -1255,20 +1255,15 @@
 				firstName.sizeToContent();
 				lastName.sizeToContent();
 				this.modifyCreator(rowIndex, fields);
-				if (this.saveOnEdit) {
-					let activeField = this.getFocusedTextArea();
-					if (activeField !== null && activeField !== firstName && activeField !== lastName) {
-						this.blurOpenField();
-					}
-					else {
-						this.item.saveTx();
-					}
-				}
-				else {
-					// If the creator is saved, autocomplete will be set in refresh()
-					// Otherwise, we'll reset it here.
+				// For empty unsaved creator rows, update their autocomplete setting so that
+				// e.g fullnames are not suggested after switch to first-last name mode.
+				// Otherwise, just save the item and appropriate autocomplete modes will be set in render()
+				if (row.querySelector("[unsaved=true]")) {
 					this.addAutocompleteToElement(firstName);
 					this.addAutocompleteToElement(lastName);
+				}
+				else {
+					this.item.saveTx();
 				}
 			}
 		}
