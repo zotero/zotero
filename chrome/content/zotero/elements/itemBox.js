@@ -746,10 +746,10 @@
 				field = this._infoTable.querySelector('[fieldName="itemType"]');
 			}
 			if (field) {
-				this._beforeRow = field.closest(".meta-row").nextSibling;
+				this._firstRowBeforeCreators = field.closest(".meta-row").nextSibling;
 			}
 			else {
-				this._beforeRow = this._infoTable.firstChild;
+				this._firstRowBeforeCreators = this._infoTable.firstChild;
 			}
 			
 			this._creatorCount = 0;
@@ -763,7 +763,7 @@
 				}
 				for (let i = 0; i < max; i++) {
 					let data = this.item.getCreator(i);
-					this.addCreatorRow(data, data.creatorTypeID);
+					this.addCreatorRow(data, data.creatorTypeID, false);
 				}
 				if (this._draggedCreator) {
 					this._draggedCreator = false;
@@ -799,7 +799,7 @@
 			}
 			else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
 				// Add default row
-				this.addCreatorRow(false, false, true, true);
+				this.addCreatorRow(false, false, false);
 			}
 			
 			
@@ -910,8 +910,14 @@
 			
 			row.appendChild(label);
 			row.appendChild(value);
+			
+			// Special treatment for creator rows if beforeElement is not specified
+			if (!beforeElement && row.querySelector(".creator-type-value, #more-creators-label")) {
+				beforeElement = this._firstRowBeforeCreators;
+			}
+
 			if (beforeElement) {
-				this._infoTable.insertBefore(row, this._beforeRow);
+				this._infoTable.insertBefore(row, beforeElement);
 			}
 			else {
 				this._infoTable.appendChild(row);
@@ -920,7 +926,7 @@
 			return row;
 		}
 		
-		addCreatorRow(creatorData, creatorTypeIDOrName, unsaved, defaultRow) {
+		addCreatorRow(creatorData, creatorTypeIDOrName, unsaved, before) {
 			// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
 			// may need need to be adjusted if this DOM structure changes
 
@@ -974,8 +980,8 @@
 			labelWrapper.setAttribute('aria-describedby', 'creator-type-label-inner');
 			labelWrapper.setAttribute('id', `creator-${rowIndex}-label`);
 
-			// If not editable or only 1 creator row, hide grippy
-			if (!this.editable || this.item.numCreators() < 2) {
+			// If not editable or only 1 creator row or a row is unsaved, hide grippy
+			if (!this.editable || this.item.numCreators() < 2 || unsaved) {
 				grippy.classList.add("single-creator-grippy");
 				grippy.setAttribute('disabled', true);
 			}
@@ -1030,7 +1036,11 @@
 			addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus show-on-hover no-display");
 			addButton.setAttribute('id', `creator-${rowIndex}-add`);
 			addButton.setAttribute('tooltiptext', Zotero.getString('general.create'));
-			addButton.addEventListener("command", () => this.addCreatorRow(null, typeID, true));
+			addButton.addEventListener("command", (e) => {
+				// + button adds a creator row after the row that was clicked
+				let nextRow = e.target.closest(".meta-row").nextElementSibling;
+				this.addCreatorRow(null, typeID, true, nextRow);
+			});
 			rowData.appendChild(addButton);
 
 			// Options button that opens creator transform menu
@@ -1059,10 +1069,14 @@
 			
 			this._creatorCount++;
 			
-			
-			let row = this.addDynamicRow(rowLabel, rowData, true);
+			// Delete existing unsaved creator row if any
+			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
+			if (unsavedCreatorData) {
+				unsavedCreatorData.closest(".meta-row").remove();
+			}
 
-			this._updateCreatorButtonsStatus();
+			let row = this.addDynamicRow(rowLabel, rowData, before);
+
 			this._ensureButtonsFocusable();
 			
 			/**
@@ -1132,10 +1146,14 @@
 
 			row.addEventListener("keydown", e => this.handleCreatorRowKeyDown(e));
 			lastNameElem.addEventListener("paste", e => this.handleCreatorPaste(e));
-			// Focus new rows
-			if (unsaved && !defaultRow) {
+			// Focus unsaved empty creator row
+			if (unsaved) {
+				rowData.setAttribute("unsaved", true);
 				lastNameElem.focus();
 			}
+			// Refresh creator buttons status, e.g. to disable + button of a row that just added
+			// a new creator
+			this._updateCreatorButtonsStatus();
 		}
 		
 		addMoreCreatorsRow(num) {
@@ -1158,7 +1176,7 @@
 			});
 			rowData.textContent = Zotero.getString('general.numMore', num);
 			
-			this.addDynamicRow(rowLabel, rowData, true);
+			this.addDynamicRow(rowLabel, rowData);
 		}
 		
 		addDateRow(field, value) {
@@ -1198,7 +1216,6 @@
 			var lastName = creatorNameBox.firstChild;
 			var firstName = creatorNameBox.lastChild;
 
-			let tab;
 			// Switch to single-field mode
 			if (fieldMode == 1) {
 				creatorNameBox.setAttribute('switch-mode-label', Zotero.getString('pane.item.switchFieldMode.two'));
@@ -1718,7 +1735,6 @@
 				// Do nothing from the last empty row
 				if (creatorFields.lastName == "" && creatorFields.firstName == "") return;
 				this.addCreatorRow(false, creatorFields.creatorTypeID, true);
-				this._selectField = `itembox-field-value-creator-${this._creatorCount - 1}-lastName`;
 			}
 		}
 
@@ -1943,7 +1959,7 @@
 				row = creatorValue.closest(".meta-row");
 				let { lastName, firstName } = this.getCreatorFields(row);
 				let isEmpty = lastName == "" && firstName == "";
-				let isNextRowCreator = row.nextSibling.querySelector(".creator-type-value");
+				let isNextRowUnsavedCreator = row.nextSibling?.querySelector(".creator-type-value[unsaved=true]");
 				let isDefaultEmptyRow = isEmpty && creatorValues.length == 1;
 		
 				if (!this.editable) {
@@ -1953,7 +1969,7 @@
 					return;
 				}
 
-				row.querySelector(".zotero-clicky-plus").disabled = isEmpty || isNextRowCreator;
+				row.querySelector(".zotero-clicky-plus").disabled = isEmpty || isNextRowUnsavedCreator;
 				row.querySelector(".zotero-clicky-minus").disabled = isDefaultEmptyRow;
 			}
 		}
@@ -1962,11 +1978,22 @@
 			var typeID = row.querySelector('[typeid]').getAttribute('typeid');
 			var [label1, label2] = row.querySelectorAll('editable-text');
 			var fieldMode = row.querySelector('[fieldMode]')?.getAttribute('fieldMode');
+			var unsavedIndex = null;
+			// Fetch positioning of a newly added unsaved row. It will be the index of
+			// this creator after the item is saved
+			if (row.querySelector("[unsaved=true]")) {
+				let previousRow = row.previousSibling;
+				unsavedIndex = 0;
+				if (previousRow.querySelector(".creator-type-value")) {
+					unsavedIndex = 1 + parseInt(previousRow.querySelector(".creator-type-label").id.split('-')[1]);
+				}
+			}
 			var fields = {
 				lastName: label1.value,
 				firstName: label2.value,
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
+				unsavedIndex: unsavedIndex,
 			};
 			
 			return fields;
@@ -1984,6 +2011,12 @@
 					return false;
 				}
 				return this.item.removeCreator(index);
+			}
+			// If this is a newly added row and there is an unsaved index,
+			// shift all creators and update all indices.
+			if (fields.unsavedIndex) {
+				// Skip saving in this call to avoid extra re-rendering
+				this.moveCreator(index, null, fields.unsavedIndex, true);
 			}
 
 			return this.item.setCreator(index, fields);
@@ -2106,7 +2139,7 @@
 		/**
 		 * @return {Promise}
 		 */
-		moveCreator(index, dir, newIndex) {
+		moveCreator(index, dir, newIndex, skipSave) {
 			return Zotero.spawn(function* () {
 				yield this.blurOpenField();
 				if (index == 0 && dir == 'up') {
@@ -2152,7 +2185,7 @@
 					}
 					this.item.setCreator(i, creators[i]);
 				}
-				if (this.saveOnEdit) {
+				if (this.saveOnEdit && !skipSave) {
 					this.item.saveTx();
 				}
 			}, this);
