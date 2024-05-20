@@ -1638,7 +1638,11 @@ var ZoteroPane = new function()
 				let key = sortSubmenuKeys.children[i];
 				key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'alt');
 				key.setAttribute('key', (i + 1) % 10);
-				key.addEventListener('command', () => ZoteroPane.itemsView.toggleSort(i, true));
+				key.addEventListener('command', () => {
+					if (Zotero_Tabs.selectedType === 'library') {
+						ZoteroPane.itemsView.toggleSort(i, true);
+					}
+				});
 			}
 		}
 		catch (e) {
