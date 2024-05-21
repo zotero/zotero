@@ -514,10 +514,10 @@ Zotero_Preferences.General = {
 			this._treeElem.addEventListener('dragstart', this._handleDragStart.bind(this));
 			this._treeElem.addEventListener('keydown', this._handleKeyDown.bind(this));
 			
-			this._automaticAttachmentTypes = Zotero.Prefs.get('automaticAttachmentTypes').split(',');
+			this._automaticAttachmentTypes = new Set(Zotero.Prefs.get('automaticAttachmentTypes').split(','));
 			this._automaticAttachmentTypesOrder = Zotero.Prefs.get('automaticAttachmentTypes.order').split(',');
 			
-			if (this._automaticAttachmentTypes.some(type => !this.ALL_TYPES.has(type))
+			if (Array.from(this._automaticAttachmentTypes).some(type => !this.ALL_TYPES.has(type))
 					|| this._automaticAttachmentTypesOrder.length != this.ALL_TYPES.size
 					|| this._automaticAttachmentTypesOrder.some(type => !this.ALL_TYPES.has(type))) {
 				this._reset();
@@ -527,7 +527,7 @@ Zotero_Preferences.General = {
 		_reset() {
 			Zotero.Prefs.clear('automaticAttachmentTypes');
 			Zotero.Prefs.clear('automaticAttachmentTypes.order');
-			this._automaticAttachmentTypes = Zotero.Prefs.get('automaticAttachmentTypes').split(',');
+			this._automaticAttachmentTypes = new Set(Zotero.Prefs.get('automaticAttachmentTypes').split(','));
 			this._automaticAttachmentTypesOrder = Zotero.Prefs.get('automaticAttachmentTypes.order').split(',');
 			this._treeElem.invalidate();
 		},
@@ -544,30 +544,25 @@ Zotero_Preferences.General = {
 		},
 
 		_isTypeEnabled(type) {
-			return this._automaticAttachmentTypes.includes(type);
+			return this._automaticAttachmentTypes.has(type);
 		},
 
 		_setTypeEnabled(type, enabled) {
 			if (enabled) {
-				if (!this._automaticAttachmentTypes.includes(type)) {
-					this._automaticAttachmentTypes.push(type);
-				}
+				this._automaticAttachmentTypes.add(type);
 			}
 			else {
-				let index = this._automaticAttachmentTypes.indexOf(type);
-				if (index !== -1) {
-					this._automaticAttachmentTypes.splice(index, 1);
-				}
+				this._automaticAttachmentTypes.delete(type);
 			}
 			this._save();
 		},
 		
 		_save() {
-			this._automaticAttachmentTypes.sort((a, b) => {
+			let automaticAttachmentTypes = Array.from(this._automaticAttachmentTypes).sort((a, b) => {
 				return this._automaticAttachmentTypesOrder.indexOf(a) - this._automaticAttachmentTypesOrder.indexOf(b);
 			});
 			
-			Zotero.Prefs.set('automaticAttachmentTypes', Array.from(this._automaticAttachmentTypes).join(','));
+			Zotero.Prefs.set('automaticAttachmentTypes', automaticAttachmentTypes.join(','));
 			Zotero.Prefs.set('automaticAttachmentTypes.order', this._automaticAttachmentTypesOrder.join(','));
 			this.tree.invalidate();
 		},
