@@ -186,7 +186,7 @@ TODO: Replace with SVG
 }
 
 #zotero-layout-switcher[orient="horizontal"] #zotero-items-pane-container {
-	width: auto !important;
+	width: 0 !important;
 }
 
 #zotero-layout-switcher[orient="vertical"],
