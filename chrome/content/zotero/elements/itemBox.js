@@ -1130,7 +1130,7 @@
 			this.addAutocompleteToElement(lastNameElem);
 			this.addAutocompleteToElement(firstNameElem);
 
-			row.addEventListener("keydown", e => this.handleCreatorRowKeyPresses(e));
+			row.addEventListener("keydown", e => this.handleCreatorRowKeyDown(e));
 			lastNameElem.addEventListener("paste", e => this.handleCreatorPaste(e));
 			// Focus new rows
 			if (unsaved && !defaultRow) {
@@ -1691,7 +1691,7 @@
 		}
 		
 		// Handle Shift-Enter on creator input field
-		handleCreatorRowKeyPresses(event) {
+		handleCreatorRowKeyDown(event) {
 			let target = event.target.closest("editable-text");
 			if (!target) return;
 
