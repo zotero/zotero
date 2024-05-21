@@ -210,7 +210,8 @@ export let OS = {
 				isSymLink: true, // Supposedly was broken in Firefox
 				size: info.size,
 				lastAccessDate: new Date(info.lastAccessed),
-				lastModificationDate: new Date(info.lastModified)
+				lastModificationDate: new Date(info.lastModified),
+				unixMode: !isWin ? info.permissions : undefined,
 			};
 		},
 		
