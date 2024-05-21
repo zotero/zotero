@@ -1,6 +1,8 @@
 //
 // Compatibility shims from the Mozilla codebase
 //
+const isWin = Services.appinfo.OS == 'WINNT';
+
 export let OS = {
 	Constants: {
 		Path: {
@@ -184,7 +186,7 @@ export let OS = {
 		
 		setPermissions: async function (path, { unixMode, winAttributes } = {}) {
 			await IOUtils.setPermissions(path, unixMode);
-			if (winAttributes && Zotero.isWin) {
+			if (winAttributes && isWin) {
 				let { readOnly, hidden, system } = winAttributes;
 				await IOUtils.setWindowsAttributes(path, { readOnly, hidden, system });
 			}
