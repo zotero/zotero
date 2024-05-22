@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns="http://purl.org/rss/1.0/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:cc="http://web.resource.org/cc/"
+ xmlns:prism="http://prismstandard.org/namespaces/basic/2.0/"
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:admin="http://webns.net/mvcb/"
+ xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel rdf:about="https://www.mdpi.com/rss/journal/fluids">
+		<title>Fluids</title>
+		<description>Latest open access articles published in Fluids at https://www.mdpi.com/journal/fluids</description>
+		<link>https://www.mdpi.com/journal/fluids</link>
+		<admin:generatorAgent rdf:resource="https://www.mdpi.com/journal/fluids"/>
+		<admin:errorReportsTo rdf:resource="mailto:support@mdpi.com"/>
+		<dc:publisher>MDPI</dc:publisher>
+		<dc:language>en</dc:language>
+		<dc:rights>Creative Commons Attribution (CC-BY)</dc:rights>
+						<prism:copyright>MDPI</prism:copyright>
+		<prism:rightsAgent>support@mdpi.com</prism:rightsAgent>
+		<image rdf:resource="https://pub.mdpi-res.com/img/design/mdpi-pub-logo.png?13cf3b5bd783e021?1716292923"/>
+				<items>
+			<rdf:Seq>
+            				<rdf:li rdf:resource="https://www.mdpi.com/2311-5521/9/6/120" />
+                    	</rdf:Seq>
+		</items>
+				<cc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/" />
+	</channel>
+
+        <item rdf:about="https://www.mdpi.com/2311-5521/9/6/120">
+
+	<title>Fluids, Vol. 9, Pages 120: Environmental Hydraulics, Turbulence, and Sediment Transport, Second Edition</title>
+	<link>https://www.mdpi.com/2311-5521/9/6/120</link>
+	<description>Within river systems, the process of bed-forming is intricate, dynamic and is shaped by different factors [...]</description>
+	<pubDate>2024-05-22</pubDate>
+
+	<content:encoded><![CDATA[
+	Abstract
+	]]></content:encoded>
+
+	<dc:title>Environmental Hydraulics, Turbulence, and Sediment Transport, Second Edition</dc:title>
+			<dc:creator>Jaan H. Pu</dc:creator>
+			<dc:creator>Manish Pandey</dc:creator>
+			<dc:creator>Prashanth Reddy Hanmaiahgari</dc:creator>
+		<dc:identifier>doi: 10.3390/fluids9060120</dc:identifier>
+	<dc:source>Fluids</dc:source>
+	<dc:date>2024-05-22</dc:date>
+
+	<prism:publicationName>Fluids</prism:publicationName>
+	<prism:publicationDate>2024-05-22</prism:publicationDate>
+	<prism:volume>9</prism:volume>
+	<prism:number>6</prism:number>
+	<prism:section>Editorial</prism:section>
+	<prism:startingPage>120</prism:startingPage>
+		<prism:doi>10.3390/fluids9060120</prism:doi>
+	<prism:url>https://www.mdpi.com/2311-5521/9/6/120</prism:url>
+	
+	<cc:license rdf:resource="CC BY 4.0"/>
+</item>
+</rdf:RDF>

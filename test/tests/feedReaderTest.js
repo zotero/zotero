@@ -32,6 +32,7 @@ describe("Zotero.FeedReader", function () {
 	
 	var richTextRSSFeedURL = getTestDataUrl("feedRichText.rss");
 	var cdataRSSFeedURL = getTestDataUrl("feedCDATA.rss");
+	var articleMetadataRSSFeedURL = getTestDataUrl("feedArticleMetadata.rss");
 	var atomFeedURL = getTestDataUrl("feed.atom");
 	var mediaFeedURL = getTestDataUrl("feedMedia.xml");
 	
@@ -157,6 +158,7 @@ describe("Zotero.FeedReader", function () {
 				publicationTitle: 'Publication',
 				ISSN: '0000-0000',
 				publisher: 'Publisher',
+				section: 'Article',
 				rights: '©2016 Published by Publisher',
 				language: 'en',
 				itemType: 'journalArticle',
@@ -164,6 +166,38 @@ describe("Zotero.FeedReader", function () {
 			};
 		
 			let fr = new Zotero.FeedReader(detailedRSSFeedURL);
+			yield fr.process();
+			let itemIterator = new fr.ItemIterator();
+			let item = yield itemIterator.next().value;
+			assert.deepEqual(item, expected);
+		});
+		
+		it('should parse items correctly for an RSS feed with journal article metadata', function* () {
+			let expected = {
+				guid: 'https://www.mdpi.com/2311-5521/9/6/120',
+				title: 'Environmental Hydraulics, Turbulence, and Sediment Transport, Second Edition',
+				abstractNote: 'Abstract',
+				url: 'https://www.mdpi.com/2311-5521/9/6/120',
+				creators: [
+					{ firstName: 'Jaan H.', lastName: 'Pu', creatorType: 'author' },
+					{ firstName: 'Manish', lastName: 'Pandey', creatorType: 'author' },
+					{ firstName: 'Prashanth Reddy', lastName: 'Hanmaiahgari', creatorType: 'author' }
+				],
+				date: '2024-05-22',
+				publicationTitle: 'Fluids',
+				pages: '120',
+				DOI: '10.3390/fluids9060120',
+				volume: '9',
+				issue: '6',
+				section: 'Editorial',
+				publisher: 'MDPI',
+				rights: 'MDPI',
+				language: 'en',
+				itemType: 'journalArticle',
+				enclosedItems: []
+			};
+		
+			let fr = new Zotero.FeedReader(articleMetadataRSSFeedURL);
 			yield fr.process();
 			let itemIterator = new fr.ItemIterator();
 			let item = yield itemIterator.next().value;
