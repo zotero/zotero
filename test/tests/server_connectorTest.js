@@ -271,7 +271,7 @@ describe("Connector Server", function () {
 		});
 		
 		it("shouldn't return an attachment that isn't being saved", async function () {
-			Zotero.Prefs.set('extensions.zotero.automaticAttachmentTypes', 'pdf,epub'); // No HTML
+			Zotero.Prefs.set('automaticAttachmentTypes', 'pdf,epub'); // No HTML
 			
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);
