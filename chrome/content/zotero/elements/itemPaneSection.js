@@ -59,6 +59,14 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		this._tabType = tabType;
 		this.setAttribute('tabType', tabType);
 	}
+	
+	get collectionTreeRow() {
+		return this._collectionTreeRow;
+	}
+	
+	set collectionTreeRow(collectionTreeRow) {
+		this._collectionTreeRow = collectionTreeRow;
+	}
 
 	_syncRenderPending = false;
 
@@ -106,6 +114,10 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		await this._forceRenderAll();
 	};
 
+	get _renderDependencies() {
+		return [this._tabID, this._item?.id];
+	}
+
 	/**
 	 * @param {"sync" | "async"} [type]
 	 * @returns {boolean}
@@ -117,7 +129,9 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		let renderFlag = this[key];
 		let pendingFlag = this[pendingKey];
 
-		let isRendered = renderFlag && this.item?.id == renderFlag;
+		let newFlag = this._renderDependencies.join('_');
+
+		let isRendered = renderFlag && newFlag === renderFlag;
 		if (this.skipRender) {
 			if (!isRendered) {
 				this[pendingKey] = true;
@@ -126,10 +140,10 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			return true;
 		}
 
-		if (!pendingFlag && renderFlag && this.item?.id == renderFlag) {
+		if (!pendingFlag && renderFlag && newFlag === renderFlag) {
 			return true;
 		}
-		this[key] = this.item.id;
+		this[key] = newFlag;
 		this[pendingKey] = false;
 		return false;
 	}

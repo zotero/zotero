@@ -60,6 +60,10 @@ import { getCSSIcon } from 'components/icons';
 			this._linkedItems = [];
 		}
 
+		get _renderDependencies() {
+			return [...super._renderDependencies, this.collectionTreeRow?.id];
+		}
+
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'librariesCollectionsBox');
 			this._body = this.querySelector('.body');
