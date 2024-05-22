@@ -325,11 +325,11 @@
 				return;
 			}
 			this._resetStateAfterBlur();
+			this.dispatchEvent(new Event('blur'));
 		};
 		
 		_resetStateAfterBlur() {
 			this._ignoredWindowInactiveBlur = false;
-			this.dispatchEvent(new Event('blur'));
 			this.classList.remove('focused');
 			this._input.scrollLeft = 0;
 			this._input.setSelectionRange(0, 0);

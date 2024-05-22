@@ -115,7 +115,6 @@
 				
 				this.modifyCreator(index, fields);
 				if (this.saveOnEdit) {
-					await this.blurOpenField();
 					await this.item.saveTx();
 				}
 			});
@@ -226,6 +225,15 @@
 			// the table is refreshed
 			this._infoTable.addEventListener("focusin", (e) => {
 				let target = e.target.closest("[fieldname], [tabindex], [focusable]");
+				// Special treatment for unsaved creator rows. When they are just added, their ids
+				// do not correspond to their positioning to avoid shifting all creators in case new row is not saved.
+				// So, use the index that this row will occupy after saving.
+				let maybeRow = target.closest(".meta-row");
+				if (maybeRow?.querySelector(".creator-type-value[unsaved=true]")) {
+					let { unsavedIndex } = this.getCreatorFields(maybeRow);
+					this._selectField = (target?.id || "").replace(/\d+/g, unsavedIndex);
+					return;
+				}
 				if (target?.id) {
 					this._selectField = target.id;
 				}
@@ -1304,7 +1312,6 @@
 			}
 			
 			if (this.saveOnEdit) {
-				await this.blurOpenField();
 				await this.item.saveTx();
 			}
 			
@@ -1362,8 +1369,6 @@
 				this.item.setType(itemTypeID);
 				
 				if (this.saveOnEdit) {
-					// See note in transformText()
-					await this.blurOpenField();
 					await this.item.saveTx();
 				}
 				else {
@@ -1497,6 +1502,12 @@
 			// Move focus to another creator row
 			if (creatorRow.contains(document.activeElement)) {
 				let nextCreatorIndex = index ? index - 1 : 0;
+				// If there is an unsaved index for a just-added empty creator row,
+				// focus the creator row before it.
+				let { unsavedIndex } = this.getCreatorFields(creatorRow);
+				if (unsavedIndex !== null) {
+					nextCreatorIndex = unsavedIndex ? unsavedIndex - 1 : 0;
+				}
 				this._selectField = `itembox-field-value-creator-${nextCreatorIndex}-lastName`;
 			}
 			// If unsaved row, just remove element
@@ -1508,7 +1519,6 @@
 				this._updateCreatorButtonsStatus();
 				return;
 			}
-			await this.blurOpenField();
 			this.item.removeCreator(index);
 			await this.item.saveTx();
 		}
@@ -1709,7 +1719,6 @@
 
 			if (event.key == "Enter" && event.shiftKey) {
 				event.stopPropagation();
-				console.log("Target ", target);
 				// Value has changed - focus empty creator row at the bottom
 				if (target.initialValue != target.value) {
 					this._addCreatorRow = true;
@@ -1943,9 +1952,6 @@
 			}
 
 			if (this.saveOnEdit) {
-				// If a field is open, blur it, which will trigger a save and cause
-				// the saveTx() to be a no-op
-				await this.blurOpenField();
 				await this.item.saveTx();
 			}
 		}
@@ -2012,24 +2018,20 @@
 				}
 				return this.item.removeCreator(index);
 			}
+			this.item.setCreator(index, fields);
 			// If this is a newly added row and there is an unsaved index,
 			// shift all creators and update all indices.
 			if (fields.unsavedIndex) {
 				// Skip saving in this call to avoid extra re-rendering
 				this.moveCreator(index, null, fields.unsavedIndex, true);
 			}
-
-			return this.item.setCreator(index, fields);
+			return true;
 		}
 		
 		/**
 		 * @return {Promise}
 		 */
 		async swapNames(_event) {
-			if (this.saveOnEdit) {
-				await this.blurOpenField();
-			}
-			
 			var row = document.popupNode.closest('.meta-row');
 			var typeBox = row.querySelector('[fieldname]');
 			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -2064,9 +2066,6 @@
 			var fields = this.getCreatorFields(row);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
-				// If a field is open, blur it, which will trigger a save and cause
-				// the saveTx() to be a no-op
-				await this.blurOpenField();
 				await this.item.saveTx();
 			}
 		}
@@ -2136,59 +2135,53 @@
 			};
 		}
 
-		/**
-		 * @return {Promise}
-		 */
 		moveCreator(index, dir, newIndex, skipSave) {
-			return Zotero.spawn(function* () {
-				yield this.blurOpenField();
-				if (index == 0 && dir == 'up') {
-					Zotero.debug("Can't move up creator 0");
-					return;
-				}
-				else if (index + 1 == this.item.numCreators() && dir == 'down') {
-					Zotero.debug("Can't move down last creator");
-					return;
-				}
-				else if (newIndex && index == newIndex) {
-					return;
-				}
+			if (index == 0 && dir == 'up') {
+				Zotero.debug("Can't move up creator 0");
+				return;
+			}
+			else if (index + 1 == this.item.numCreators() && dir == 'down') {
+				Zotero.debug("Can't move down last creator");
+				return;
+			}
+			else if (newIndex && index == newIndex) {
+				return;
+			}
 
-				if (!newIndex) {
-					switch (dir) {
-						case 'top':
-							newIndex = 0;
-							break;
-						
-						case 'up':
-							newIndex = index - 1;
-							break;
-						
-						case 'down':
-							newIndex = index + 2; // Insert after the desired element
-							break;
-					}
-				}
-				let creator = this.item.getCreator(index);
-				let creators = this.item.getCreators();
-				// Insert creator
-				creators.splice(newIndex, 0, creator);
-				// Remove creator from old location
-				creators.splice(newIndex < index ? index + 1 : index, 1);
-				// Determine range where indices need to be updated
-				let startUpdateIndex = Math.min(index, newIndex);
-				let endUpdateIndex = Math.max(index, newIndex);
-				// Shift indices of affected creators
-				for (let i = startUpdateIndex; i <= endUpdateIndex; i++) {
-					if (!creators[i]) {
+			if (!newIndex) {
+				switch (dir) {
+					case 'top':
+						newIndex = 0;
 						break;
-					}
-					this.item.setCreator(i, creators[i]);
+					
+					case 'up':
+						newIndex = index - 1;
+						break;
+					
+					case 'down':
+						newIndex = index + 2; // Insert after the desired element
+						break;
 				}
-				if (this.saveOnEdit && !skipSave) {
-					this.item.saveTx();
+			}
+			let creator = this.item.getCreator(index);
+			let creators = this.item.getCreators();
+			// Insert creator
+			creators.splice(newIndex, 0, creator);
+			// Remove creator from old location
+			creators.splice(newIndex < index ? index + 1 : index, 1);
+			// Determine range where indices need to be updated
+			let startUpdateIndex = Math.min(index, newIndex);
+			let endUpdateIndex = Math.max(index, newIndex);
+			// Shift indices of affected creators
+			for (let i = startUpdateIndex; i <= endUpdateIndex; i++) {
+				if (!creators[i]) {
+					break;
 				}
-			}, this);
+				this.item.setCreator(i, creators[i]);
+			}
+			if (this.saveOnEdit && !skipSave) {
+				this.item.saveTx();
+			}
 		}
 		
 		focusField(fieldName) {
@@ -2208,7 +2201,7 @@
 			return null;
 		}
 		
-		async blurOpenField() {
+		blurOpenField() {
 			var activeField = this.getFocusedTextArea();
 			if (!activeField) {
 				return false;
