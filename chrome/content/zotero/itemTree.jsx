@@ -1835,7 +1835,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	getSortField() {
 		if (this.collectionTreeRow.isFeedsOrFeed()) {
-			return 'id';
+            return 'date';
 		}
 		var column = this._sortedColumn;
 		if (!column) {

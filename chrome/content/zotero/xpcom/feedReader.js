@@ -68,6 +68,13 @@ Zotero.FeedReader = function (url) {
 		info.subtitle = feed.subtitle ? feed.subtitle.plainText() : '';
 		
 		if (feed.updated) info.updated = new Date(feed.updated);
+
+        let infoDate = Zotero.FeedReader._getFeedField(feed, 'lastBuildDate', 'dc') 
+            || Zotero.FeedReader._getFeedField(feed, 'lastBuildDate') 
+            || Zotero.FeedReader._getFeedField(feed, 'date', 'dc') 
+            || Zotero.FeedReader._getFeedField(feed, 'date');
+        if (infoDate) info.date = infoDate;
+
 		
 		// categories: MDN says "not yet implemented"
 		
@@ -458,7 +465,8 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 		// DEBUG: Why not get these from the feedEntry?
 		|| Zotero.FeedReader._getFeedField(feedEntry, 'pubDate') // RSS
 		|| Zotero.FeedReader._getFeedField(feedEntry, 'updated', 'atom') // Atom
-		|| Zotero.FeedReader._getFeedField(feedEntry, 'published', 'atom'); // Atom
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'published', 'atom') // Atom
+        || feedInfo.date; // If no date found, use date from feed info
 		
 	
 	if (date) item.date = date;
