@@ -84,6 +84,6 @@ $menu-icons: (
 #zotero-new-collection-menu {
 	image {
 		-moz-context-properties: fill, fill-opacity;
-		fill: var(--fill-secondary);
+		fill: currentColor;
 	}
 }
