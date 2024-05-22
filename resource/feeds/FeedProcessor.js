@@ -103,6 +103,10 @@ var gNamespaces = {
 	"http://www.w3.org/XML/1998/namespace": "xml",
 	"http://search.yahoo.com/mrss/": "media",
 	"http://search.yahoo.com/mrss": "media",
+	"http://prismstandard.org/namespaces/1.2/basic/": "prism",
+	"http://prismstandard.org/namespaces/basic/2.0/": "prism",
+	"http://prismstandard.org/namespaces/basic/3.0/": "prism",
+	"https://prismdb.takanakahiko.me/prism-schema.ttl#": "prism",
 };
 
 // We allow a very small set of namespaces in XHTML content,
@@ -147,7 +151,7 @@ Feed.TYPE_VIDEO = 4;
 
 Feed.prototype = {
 	searchLists: {
-		title: ["title", "rss1:title", "atom03:title", "atom:title"],
+		title: ["title", "rss1:title", "atom03:title", "atom:title", "dc:title"],
 		subtitle: [
 			"description",
 			"dc:description",
@@ -155,6 +159,7 @@ Feed.prototype = {
 			"atom03:tagline",
 			"atom:subtitle",
 		],
+		pubTitle: ["pubTitle", "dc:source", "prism:publicationName"],
 		items: ["items", "atom03_entries", "entries"],
 		id: ["atom:id", "rdf:about"],
 		generator: ["generator"],
@@ -162,12 +167,19 @@ Feed.prototype = {
 		contributors: ["contributors"],
 		link: [["link", strToURI], ["rss1:link", strToURI]],
 		categories: ["categories", "dc:subject"],
-		rights: ["atom03:rights", "atom:rights"],
+		rights: [
+			"dc:rights",
+			"atom03:rights",
+			"atom:rights",
+			"copyright",
+			"prism:copyright",
+		],
 		cloud: ["cloud"],
 		image: ["image", "rss1:image", "atom:logo"],
 		textInput: ["textInput", "rss1:textinput"],
 		skipDays: ["skipDays"],
 		skipHours: ["skipHours"],
+		ttl: ["ttl"],
 		updated: [
 			"pubDate",
 			"lastBuildDate",
@@ -176,6 +188,10 @@ Feed.prototype = {
 			"dcterms:modified",
 			"atom:updated",
 		],
+		issn: ["prism:issn"],
+		isbn: ["isbn", "prism:isbn"],
+		language: ["language", "dc:language"],
+		publisher: ["dc:publisher"],
 	},
 	
 	normalize: function () {
@@ -185,10 +201,6 @@ Feed.prototype = {
 		}
 		if (this.skipHours) {
 			this.skipHours = this.skipHours.hours;
-		}
-		
-		if (this.updated) {
-			this.updated = dateParse(this.updated);
 		}
 		
 		// Assign Atom link if needed
@@ -341,7 +353,7 @@ Entry.prototype = {
 	mediaContent: null,
 	
 	searchLists: {
-		title: ["title", "rss1:title", "atom03:title", "atom:title"],
+		title: ["title", "rss1:title", "atom03:title", "atom:title", "dc:title"],
 		link: [["link", strToURI], ["rss1:link", strToURI]],
 		id: [
 			["guid", makePropGetter("guid")],
@@ -359,15 +371,46 @@ Entry.prototype = {
 			"atom:summary",
 		],
 		content: ["content:encoded", "atom03:content", "atom:content"],
-		rights: ["atom03:rights", "atom:rights"],
-		published: ["pubDate", "atom03:issued", "dcterms:issued", "atom:published"],
+		rights: [
+			"dc:rights",
+			"atom03:rights",
+			"atom:rights",
+			"copyright",
+			"prism:copyright",
+		],
+		published: [
+			"dc:date",
+			"pubDate",
+			"atom03:issued",
+			"dcterms:issued",
+			"atom:published",
+			"prism:publicationDate",
+		],
 		updated: [
 			"pubDate",
 			"atom03:modified",
 			"dc:date",
 			"dcterms:modified",
 			"atom:updated",
+			"prism:modificationDate",
 		],
+		pubTitle: ["pubTitle", "dc:source", "prism:publicationName"],
+		pubType: ["pubType"],
+		startPage: ["startPage", "prism:startingPage"],
+		endPage: ["endPage", "prism:endingPage"],
+		pageRange: ["prism:pageRange"],
+		issn: ["prism:issn"],
+		isbn: ["isbn", "prism:isbn"],
+		identifier: [
+			"dc:identifier",
+			"prism:doi",
+		],
+		publisher: ["dc:publisher"],
+		language: ["language", "dc:language"],
+		volume: ["prism:volume"],
+		issue: ["prism:number"],
+		section: ["prism:section"],
+		url: ["prism:url"],
 	},
 	
 	normalize: function () {
@@ -393,13 +436,6 @@ Entry.prototype = {
 			if (guid && isPermaLink) {
 				this.link = strToURI(guid.guid);
 			}
-		}
-		
-		if (this.updated) {
-			this.updated = dateParse(this.updated);
-		}
-		if (this.published) {
-			this.published = dateParse(this.published);
 		}
 		
 		this._resetBagMembersToRawText([
@@ -742,24 +778,6 @@ function rssAuthor(s, author) {
 	return author;
 }
 
-/**
- * Tries parsing a string through the JavaScript Date object.
- * @param aDateString
- *        A string that is supposedly an RFC822 or RFC3339 date.
- * @return A Date.toUTCString, or null if the string can't be parsed.
- */
-function dateParse(aDateString) {
-	let dateString = aDateString.trim();
-	// Without bug 682781 fixed, JS won't parse an RFC822 date with a Z for the
-	// timezone, so convert to -00:00 which works for any date format.
-	dateString = dateString.replace(/z$/i, "-00:00");
-	let date = new Date(dateString);
-	if (!isNaN(date)) {
-		return date.toUTCString();
-	}
-	return null;
-}
-
 const XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 // The XHTMLHandler handles inline XHTML found in things like atom:summary
@@ -988,7 +1006,8 @@ function FeedProcessor() {
 		"atom03:title": "text",
 		"atom03:tagline": "text",
 		"atom03:summary": "text",
-		"atom03:content": "text"
+		"atom03:content": "text",
+		"dc:title": "text",
 	};
 	this._stack = [];
 	
