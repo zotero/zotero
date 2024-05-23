@@ -528,6 +528,11 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
  * Convert HTML-formatted text to Zotero-compatible formatting
  */
 Zotero.FeedReader._getRichText = function (feedText, field) {
+	if (typeof feedText === 'string') {
+		// FIXME: Don't expose TextConstructs on Feed/Entry objects so this bug can't happen
+		Zotero.debug(`FeedReader: Field ${field} was a string instead of a TextConstruct. Update the _textConstructs map.`);
+		return feedText;
+	}
 	let domFragment = feedText.createDocumentFragment();
 	return Zotero.Utilities.trimInternal(domFragment.textContent);
 };

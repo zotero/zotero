@@ -1008,6 +1008,10 @@ function FeedProcessor() {
 		"atom03:summary": "text",
 		"atom03:content": "text",
 		"dc:title": "text",
+		"dc:rights": "text",
+		"atom03:rights": "text",
+		"copyright": "text",
+		"prism:copyright": "text",
 	};
 	this._stack = [];
 	
