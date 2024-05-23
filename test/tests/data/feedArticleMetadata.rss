@@ -56,5 +56,6 @@
 	<prism:url>https://www.mdpi.com/2311-5521/9/6/120</prism:url>
 	
 	<cc:license rdf:resource="CC BY 4.0"/>
+	<dc:rights>Creative Commons Attribution (CC-BY)</dc:rights>
 </item>
 </rdf:RDF>

@@ -82,7 +82,7 @@ Zotero.FeedReader = function (url) {
 		if (publisher) info.publisher = publisher;
 		
 		let rights = feed.rights;
-		if (rights) info.rights = rights;
+		if (rights) info.rights = rights.plainText();
 		
 		let issn = feed.issn;
 		if (issn) info.ISSN = issn;
@@ -488,9 +488,6 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 	
 	let publisher = feedEntry.publisher;
 	if (publisher) item.publisher = publisher;
-	
-	let rights = feedEntry.rights;
-	if (rights) item.rights = rights;
 	
 	let language = feedEntry.language;
 	if (language) item.language = language;
