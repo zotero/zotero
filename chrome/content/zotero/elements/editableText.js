@@ -324,8 +324,8 @@
 				this._ignoredWindowInactiveBlur = true;
 				return;
 			}
-			this._resetStateAfterBlur();
 			this.dispatchEvent(new Event('blur'));
+			this._resetStateAfterBlur();
 		};
 		
 		_resetStateAfterBlur() {
