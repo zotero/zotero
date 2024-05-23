@@ -2169,6 +2169,11 @@
 		}
 
 		_saveFieldFocus() {
+			// If we've already set _selectField, abort
+			if (this._selectField) {
+				return;
+			}
+			
 			let activeElement = document.activeElement;
 			if (!this._infoTable.contains(activeElement)) {
 				return;
@@ -2188,12 +2193,6 @@
 				fieldID = field.id;
 			}
 			else {
-				return;
-			}
-
-			// If we'd already set _selectField to this field, abort - we don't want to
-			// overwrite the saved selection
-			if (fieldID === this._selectField) {
 				return;
 			}
 
@@ -2220,6 +2219,7 @@
 			if (!this._selectField) {
 				return;
 			}
+			
 			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}`);
 			if (!refocusField) {
 				return;
@@ -2232,6 +2232,9 @@
 					input.setSelectionRange(...this._selectFieldSelection);
 				}
 			}
+			
+			this._selectField = null;
+			this._selectFieldSelection = null;
 		}
 
 		getTitleField() {
