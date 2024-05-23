@@ -24,6 +24,12 @@
 */
 
 {
+	class PreviewRenderAbortError extends Error {
+		constructor() {
+			super("AttachmentPreview render aborted");
+		}
+	}
+
 	class AttachmentPreview extends ItemPaneSectionElementBase {
 		static fileTypeMap = {
 			// TODO: support video and audio
@@ -42,11 +48,52 @@
 			this._previewInitializePromise = Zotero.Promise.defer();
 			this._nextPreviewInitializePromise = Zotero.Promise.defer();
 
-			this._renderingItemID = null;
+			/**
+			 * The most recent task to be processed
+			 * @type {Object}
+			 * @property {string} type
+			 * @property {Object} data
+			 * @property {number} data.itemID
+			 * @property {string} data.previewType
+			 */
+			this._lastTask = null;
 
-			this._isDiscardPlanned = false;
+			/**
+			 * The ID of the last item that was rendered
+			 * @type {number}
+			 */
+			this._lastRenderID = null;
+
+			/**
+			 * Whether a task is currently awaiting to be processed
+			 * @type {boolean}
+			 */
+			this._isWaitingForTask = false;
+
+			/**
+			 * Whether a task is currently being processed
+			 * @type {boolean}
+			 */
+			this._isProcessingTask = false;
+
+			/**
+			 * Whether a render task is currently being processed
+			 * @type {boolean}
+			 */
+			this._isRendering = false;
+
+			/**
+			 * Whether a discard task is currently being processed
+			 * @type {boolean}
+			 */
 			this._isDiscarding = false;
-			this._failedCount = 0;
+
+			/**
+			 * Whether the current preview reader is initialized by `Zotero.Reader.openPreview`.
+			 * When the previous reader rendering task is aborted before initialization,
+			 * reuse the reader; otherwise must discard the old reader first.
+			 */
+			this._isReaderInitialized = false;
 
 			this._resizeOb = new ResizeObserver(this._handleResize.bind(this));
 		}
@@ -207,59 +254,182 @@
 			}
 			if (this.isMediaType) {
 				if (["refresh", "modify"].includes(event) && ids.includes(this.item.id)) {
-					this.discard().then(() => this.render());
+					this.render();
 				}
 			}
 		}
 
+		/**
+		 * Queue a render task
+		 * Immediately update the `_lastTask` property and wait for the current task to finish
+		 * before processing the new task. This is to prevent multiple tasks from being processed
+		 * at the same time. Only the most recent task will be processed.
+		 * @returns {Promise<void>}
+		 */
 		async render() {
-			let itemID = this._item?.id;
-			if (!this.initialized && itemID === this._renderingItemID) {
+			this._lastTask = {
+				type: "render",
+				uid: `${Date.now()}-${Math.random()}`,
+				data: {
+					itemID: this._item?.id,
+					previewType: this.previewType
+				}
+			};
+			this._debug(`Queue render task, itemID: ${this._item?.id}, previewType: ${this.previewType}`);
+			await this._processTask();
+		}
+
+		/**
+		 * Queue a discard task
+		 */
+		async discard() {
+			this._lastTask = {
+				type: "discard",
+				uid: `${Date.now()}-${Math.random()}`,
+			};
+			this._debug(`Queue discard task`);
+			await this._processTask();
+		}
+
+		/**
+		 * Process the most recent task
+		 * @returns {Promise<void>}
+		 */
+		async _processTask() {
+			if (!this.initialized || !this._lastTask || this._isWaitingForTask) {
+				this._debug("No task to process or already waiting for a processing task");
 				return;
-			}
-			// For tests
-			let resolve;
-			if (Zotero.test) {
-				this._renderPromise = new Promise(r => resolve = r);
-				// Expose `resolve` for `this.discard`
-				this._renderPromise.resolve = resolve;
 			}
 
-			this._renderingItemID = itemID;
-			let success = false;
-			if (this.isValidType && await this._item.fileExists()) {
-				if (this.isReaderType) {
-					success = await this._renderReader();
-				}
-				else if (this.isMediaType) {
-					success = await this._renderMedia();
-				}
+			this._isWaitingForTask = true;
+
+			// Wait for the current render/discard to finish
+			let i = 0;
+			while (i < 300 && (this._isRendering || this._isDiscarding || this._isProcessingTask)) {
+				await Zotero.Promise.delay(10);
+				i++;
 			}
-			if (itemID !== this._item?.id) {
+
+			this._debug("Current task finished, processing new task");
+
+			let task = this._lastTask;
+			if (!task) {
+				this._debug("No task to process");
+				this._isWaitingForTask = false;
 				return;
 			}
-			this._updateWidthHeightRatio();
-			this.setAttribute("data-preview-type", this.previewType);
-			this.setPreviewStatus(success ? "success" : "fail");
-			if (this._renderingItemID === itemID) {
-				this._renderingItemID = null;
+
+			let uid = task.uid;
+			
+			this._isWaitingForTask = false;
+			this._isProcessingTask = true;
+
+			// If no new task was queued while processing, clear the last task
+			if (this._lastTask.uid === uid) {
+				this._debug("Clear last task");
+				this._lastTask = null;
 			}
-			if (Zotero.test) {
-				resolve();
+
+			this._debug(`Processing task ${task.type} (${uid})`);
+
+			switch (task.type) {
+				case "render":
+					await Promise.race([this._processRender(task.data), Zotero.Promise.delay(3000)]);
+					break;
+				case "discard":
+					await Promise.race([this._processDiscard(task.data), Zotero.Promise.delay(3000)]);
+					break;
+			}
+			
+			this._isProcessingTask = false;
+			// Force reset flag anyway to avoid blocking following tasks
+			this._isRendering = false;
+			this._isDiscarding = false;
+
+			this._debug(`Task ${task.type} (${uid}) processed`);
+		}
+
+		/**
+		 * Render the preview for the given item
+		 * First discard the current preview and then render the new preview
+		 * The render task will be aborted if the item changes before the task is finished
+		 * @returns {Promise<void>}
+		 */
+		async _processRender({ itemID, previewType }) {
+			if (this._lastRenderID === itemID && this.hasPreview) {
+				this._debug(`Item ${itemID} already rendered`);
+				return;
+			}
+
+			this._debug(`Rendering item ${itemID}, previewType: ${previewType}`);
+
+			this._isRendering = true;
+			let success = false;
+
+			try {
+				// Discard the current preview.
+				await this._processDiscard();
+
+				this._debug(`Discard finished, rendering item ${itemID}`);
+	
+				this._tryAbortRender(itemID);
+	
+				let item = Zotero.Items.get(itemID);
+				if (previewType !== "file" && await item.fileExists()) {
+					if (this.isReaderType) {
+						success = await this._renderReader(itemID);
+					}
+					else if (this.isMediaType) {
+						success = await this._renderMedia(itemID);
+					}
+				}
+				
+				this._tryAbortRender(itemID);
+	
+				this._updateWidthHeightRatio();
+				this.setAttribute("data-preview-type", this.previewType);
+	
+				this._lastRenderID = itemID;
+
+				this._debug(`Render not aborted, item ${itemID}`);
+			}
+			catch (e) {
+				if (!(e instanceof PreviewRenderAbortError)) {
+					this.setPreviewStatus("fail");
+					this._debug(`Render failed: item ${itemID}, ${e}`);
+					throw e;
+				}
+			}
+			finally {
+				this.setPreviewStatus(success ? "success" : "fail");
+				this._isRendering = false;
+
+				this._debug(`Render processed, item ${itemID} ${success ? "succeeded" : "failed"}`);
 			}
 		}
 
-		async discard(force = false) {
-			if (!this.initialized) {
+		/**
+		 * @throws {PreviewRenderAbortError}
+		 * @param {number} itemID
+		 */
+		_tryAbortRender(itemID) {
+			if (itemID !== this._item?.id) {
+				throw new PreviewRenderAbortError();
+			}
+		}
+
+		/**
+		 * Discard the current preview if it exists and is initialized
+		 * @returns {Promise<void>}
+		 */
+		async _processDiscard() {
+			if (!this._isReaderInitialized && !this._lastRenderID) {
+				this._debug("No preview to discard");
 				return;
 			}
-			this._isDiscardPlanned = false;
-			if (this._isDiscarding) {
-				return;
-			}
-			if (!force && (this.isVisible || !this._reader)) {
-				return;
-			}
+
+			this._debug("Discard preview");
+
 			this._isDiscarding = true;
 			if (this._reader) {
 				let _reader = this._reader;
@@ -275,13 +445,23 @@
 			if (nextPreview) {
 				nextPreview.id = "preview";
 			}
+			this._debug("Preview discarded");
+
 			// Preload a new next-preview
 			await this._nextPreviewInitializePromise.promise;
 			this._nextPreviewInitializePromise = Zotero.Promise.defer();
+
+			this._debug("Next preview initialized");
+
 			this._id("preview")?.after(this.nextPreview);
 			this.setPreviewStatus("loading");
+
+			// Clean up after discarding
 			this._isDiscarding = false;
-			this._renderPromise?.resolve();
+			this._lastRenderID = null;
+			this._isReaderInitialized = false;
+
+			this._debug("Discard processed");
 		}
 
 		async openAttachment(event) {
@@ -352,43 +532,45 @@
 			}
 		}
 
-		async _renderReader() {
+		/**
+		 * Render the reader for the given item
+		 * @throws {PreviewRenderAbortError}
+		 * @param {number} itemID
+		 */
+		async _renderReader(itemID) {
 			this.setPreviewStatus("loading");
 			// This only need to be awaited during first load
 			await this._previewInitializePromise.promise;
 			// This should be awaited in the following refreshes
 			await this._nextPreviewInitializePromise.promise;
+
+			this._tryAbortRender(itemID);
+
 			let prev = this._id("prev");
 			let next = this._id("next");
 			prev && (prev.disabled = true);
 			next && (next.disabled = true);
 			let success = false;
-			if (this._reader?._item?.id !== this._item?.id) {
-				await this.discard(true);
-				this._reader = await Zotero.Reader.openPreview(this._item.id, this._id("preview"));
-				success = await this._reader._open({});
-				// Retry 3 times if failed
-				if (!success && this._failedCount < 3) {
-					this._nextPreviewInitializePromise.resolve();
-					this._failedCount++;
-					// If failed on half-way of initialization, discard it
-					this.discard(true);
-					setTimeout(() => {
-						// Try to re-render later
-						this.render();
-					}, 500);
-				}
-			}
-			else {
-				success = true;
-			}
-			if (success) this._failedCount = 0;
+			let preview = this._id("preview");
+
+			this._debug(`Loading preview render for item id ${itemID}, iframe is ${preview}`);
+
+			// The reader will be initialized if the operation is not aborted before this point
+			// and we'll need to discard the reader even if the operation is not finished
+			this._isReaderInitialized = true;
+			this._reader = await Zotero.Reader.openPreview(itemID, preview);
+
+			this._tryAbortRender(itemID);
+
+			success = await this._reader._open({});
+			
 			prev && (prev.disabled = true);
 			next && (next.disabled = false);
 			return success;
 		}
 
 		async _renderMedia() {
+			this.setPreviewStatus("loading");
 			let mediaLoadPromise = new Zotero.Promise.defer();
 			let mediaID = `${this.previewType}-preview`;
 			let media = this._id(mediaID);
@@ -464,6 +646,11 @@
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
+		}
+
+		_debug(message, ...args) {
+			if (!Zotero.test) return;
+			Zotero.debug(`[AttachmentPreview] ${message}`, ...args);
 		}
 	}
 

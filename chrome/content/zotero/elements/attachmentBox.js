@@ -291,15 +291,10 @@
 		}
 
 		notify(event, _type, ids, _extraData) {
-			if (event != 'modify' || !this.item || !this.item.id) return;
-			for (let id of ids) {
-				if (id != this.item.id) {
-					continue;
-				}
-				
-				this._forceRenderAll();
-				break;
-			}
+			if (event != 'modify' || !this.item?.id || !ids.includes(this.item.id)) return;
+			
+			// Wait for the render finish and then refresh
+			this._waitForRender(this._forceRenderAll.bind(this));
 		}
 
 		async asyncRender() {
@@ -312,11 +307,6 @@
 			this._asyncRendering = true;
 			// Cancel editing filename when refreshing
 			this._isEditingFilename = false;
-
-			if (this.usePreview) {
-				this._preview.item = this.item;
-				this._preview.render();
-			}
 			
 			let fileNameRow = this._id('fileNameRow');
 			let urlField = this._id('url');
@@ -457,6 +447,12 @@
 			else {
 				selectButton.hidden = true;
 			}
+
+			if (this.usePreview) {
+				this._preview.item = this.item;
+				await this._preview.render();
+			}
+
 			this._asyncRendering = false;
 		}
 
@@ -657,6 +653,27 @@
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
+		}
+
+		async _waitForRender(callback) {
+			let resolve, reject;
+			Promise.race([new Promise(((res, rej) => {
+				resolve = res;
+				reject = rej;
+			})), Zotero.Promise.delay(3000)]).then(() => callback());
+			let i = 0;
+			let finished = false;
+			// Wait for render to finish
+			while (i < 100) {
+				if (!this._asyncRendering) {
+					finished = true;
+					break;
+				}
+				await Zotero.Promise.delay(10);
+				i++;
+			}
+			if (finished) resolve();
+			else reject(new Error("AttachmentBox#_waitForRender timeout"));
 		}
 	}
 
