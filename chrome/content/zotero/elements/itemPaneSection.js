@@ -126,12 +126,11 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		let key = `_${type}RenderItemID`;
 		let pendingKey = `_${type}RenderPending`;
 
-		let renderFlag = this[key];
-		let pendingFlag = this[pendingKey];
+		let oldDependencies = this[key];
+		let newDependencies = this._renderDependencies;
 
-		let newFlag = this._renderDependencies.join('_');
-
-		let isRendered = renderFlag && newFlag === renderFlag;
+		let isPending = this[pendingKey];
+		let isRendered = Zotero.Utilities.arrayEquals(oldDependencies, newDependencies);
 		if (this.skipRender) {
 			if (!isRendered) {
 				this[pendingKey] = true;
@@ -140,10 +139,10 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			return true;
 		}
 
-		if (!pendingFlag && renderFlag && newFlag === renderFlag) {
+		if (!isPending && isRendered) {
 			return true;
 		}
-		this[key] = newFlag;
+		this[key] = newDependencies;
 		this[pendingKey] = false;
 		return false;
 	}
