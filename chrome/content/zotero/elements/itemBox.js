@@ -2233,8 +2233,7 @@
 				}
 			}
 			
-			this._selectField = null;
-			this._selectFieldSelection = null;
+			this._clearSavedFieldFocus();
 		}
 
 		getTitleField() {
