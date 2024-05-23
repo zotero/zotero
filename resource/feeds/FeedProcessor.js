@@ -168,11 +168,11 @@ Feed.prototype = {
 		link: [["link", strToURI], ["rss1:link", strToURI]],
 		categories: ["categories", "dc:subject"],
 		rights: [
+			"prism:copyright",
 			"dc:rights",
 			"atom03:rights",
 			"atom:rights",
 			"copyright",
-			"prism:copyright",
 		],
 		cloud: ["cloud"],
 		image: ["image", "rss1:image", "atom:logo"],
@@ -372,11 +372,11 @@ Entry.prototype = {
 		],
 		content: ["content:encoded", "atom03:content", "atom:content"],
 		rights: [
+			"prism:copyright",
 			"dc:rights",
 			"atom03:rights",
 			"atom:rights",
 			"copyright",
-			"prism:copyright",
 		],
 		published: [
 			"dc:date",

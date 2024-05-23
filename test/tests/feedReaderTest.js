@@ -191,7 +191,7 @@ describe("Zotero.FeedReader", function () {
 				issue: '6',
 				section: 'Editorial',
 				publisher: 'MDPI',
-				rights: 'MDPI',
+				rights: 'Creative Commons Attribution (CC-BY)',
 				language: 'en',
 				itemType: 'journalArticle',
 				enclosedItems: []
