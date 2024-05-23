@@ -51,9 +51,14 @@ item-pane-header {
 		}
 
 		button {
-			height: 26px;
+			height: 24px;
 			margin: 0;
 			flex-grow: 1;
 		}
+	}
+
+	&.no-header:not(.has-custom-head) {
+		padding: 0;
+		border: none;
 	}
 }

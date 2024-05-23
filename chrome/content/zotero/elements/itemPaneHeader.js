@@ -68,8 +68,6 @@
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
 			this._prefsObserverIDs = [
 				Zotero.Prefs.registerObserver('itemPaneHeader', () => {
-					// TEMP?: _forceRenderAll() doesn't do anything if the section is hidden, so un-hide first
-					this.hidden = false;
 					this._forceRenderAll();
 				}),
 				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.style', () => this._forceRenderAll()),
@@ -196,15 +194,16 @@
 				headerMode = 'title';
 			}
 			
-			if (headerMode === 'none') {
-				this.hidden = true;
-				return;
-			}
-			
-			this.hidden = false;
 			this.title.hidden = true;
 			this.creatorYear.hidden = true;
 			this.bibEntry.hidden = true;
+
+			if (headerMode === 'none') {
+				this.classList.add('no-header');
+				return;
+			}
+
+			this.classList.remove('no-header');
 			
 			if (headerMode === 'bibEntry') {
 				if (!Zotero.Styles.initialized()) {
@@ -379,6 +378,7 @@
 				doc: document,
 				append,
 			});
+			this.classList.toggle('has-custom-head', customHead.innerHTML);
 		}
 	}
 	customElements.define("item-pane-header", ItemPaneHeader);
