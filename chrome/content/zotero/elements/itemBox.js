@@ -222,52 +222,11 @@
 				() => Zotero.Utilities.Internal.copyTextToClipboard(this._linkMenu.dataset.link)
 			);
 
-			// Save the last focused element, so that the focus can go back to it if
-			// the table is refreshed
-			this._infoTable.addEventListener("focusin", (e) => {
-				let target = e.target.closest("[fieldname], [tabindex], [focusable]");
-				let fieldID;
-				// Special treatment for unsaved creator rows. When they are just added, their ids
-				// do not correspond to their positioning to avoid shifting all creators in case new row is not saved.
-				// So, use the index that this row will occupy after saving.
-				let maybeRow = target.closest(".meta-row");
-				if (maybeRow?.querySelector(".creator-type-value[unsaved=true]")) {
-					let { unsavedIndex } = this.getCreatorFields(maybeRow);
-					fieldID = (target?.id || "").replace(/\d+/g, unsavedIndex);
-				}
-				else if (target?.id) {
-					fieldID = target.id;
-				}
-				else {
-					return;
-				}
-				
-				// If we'd already set _selectField to this field, abort - we don't want to
-				// overwrite the saved selection
-				if (fieldID === this._selectField) {
-					return;
-				}
-				
-				// Save the field ID
-				this._selectField = fieldID;
-				
-				// Save selection inside inputs
-				let targetInput = e.target.closest("input, textarea");
-				if (targetInput) {
-					this._selectFieldSelection = [
-						targetInput.selectionStart,
-						targetInput.selectionEnd,
-						targetInput.selectionDirection,
-					];
-				}
-			});
-
 			// If the focus leaves the itemBox, clear the last focused element
 			this._infoTable.addEventListener("focusout", (e) => {
 				let destination = e.relatedTarget;
 				if (!(destination && this._infoTable.contains(destination))) {
-					this._selectField = null;
-					this._selectFieldSelection = null;
+					this._clearSavedFieldFocus();
 				}
 			});
 
@@ -519,6 +478,8 @@
 			this.updateRetracted();
 
 			if (this._isAlreadyRendered()) return;
+			
+			this._saveFieldFocus();
 
 			delete this._linkMenu.dataset.link;
 			
@@ -875,7 +836,7 @@
 			this._ensureButtonsFocusable();
 
 			// Set focus on the last focused field
-			this._refocusLastField();
+			this._restoreFieldFocus();
 			// Make sure that any opened popup closes
 			this.querySelectorAll("menupopup").forEach((popup) => {
 				popup.hidePopup();
@@ -1534,7 +1495,7 @@
 				creatorRow.remove();
 				
 				this._creatorCount--;
-				this._refocusLastField();
+				this._restoreFieldFocus();
 				this._updateCreatorButtonsStatus();
 				return;
 			}
@@ -2207,7 +2168,55 @@
 			this.querySelector(`editable-text[fieldname="${fieldName}"]`)?.focus();
 		}
 
-		_refocusLastField() {
+		_saveFieldFocus() {
+			let activeElement = document.activeElement;
+			if (!this._infoTable.contains(activeElement)) {
+				return;
+			}
+			
+			let field = activeElement.closest("[fieldname], [tabindex], [focusable]");
+			let fieldID;
+			// Special treatment for unsaved creator rows. When they are just added, their ids
+			// do not correspond to their positioning to avoid shifting all creators in case new row is not saved.
+			// So, use the index that this row will occupy after saving.
+			let maybeRow = field.closest(".meta-row");
+			if (maybeRow?.querySelector(".creator-type-value[unsaved=true]")) {
+				let { unsavedIndex } = this.getCreatorFields(maybeRow);
+				fieldID = (field?.id || "").replace(/\d+/g, unsavedIndex);
+			}
+			else if (field?.id) {
+				fieldID = field.id;
+			}
+			else {
+				return;
+			}
+
+			// If we'd already set _selectField to this field, abort - we don't want to
+			// overwrite the saved selection
+			if (fieldID === this._selectField) {
+				return;
+			}
+
+			// Save the field ID
+			this._selectField = fieldID;
+
+			// Save selection inside inputs
+			let targetInput = activeElement.closest("input, textarea");
+			if (targetInput) {
+				this._selectFieldSelection = [
+					targetInput.selectionStart,
+					targetInput.selectionEnd,
+					targetInput.selectionDirection,
+				];
+			}
+		}
+		
+		_clearSavedFieldFocus() {
+			this._selectField = null;
+			this._selectFieldSelection = null;
+		}
+
+		_restoreFieldFocus() {
 			if (!this._selectField) {
 				return;
 			}
