@@ -47,3 +47,5 @@ preferences-quickCopy-plus =
 preferences-quickCopy-minus =
     .aria-label = { general-remove }
     .label = { $label }
+preferences-general-locate-resolver = Resolver
+preferences-general-locate-base-url = Base URL
