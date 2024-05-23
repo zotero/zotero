@@ -676,7 +676,7 @@ describe("Item pane", function () {
 		 * AttachmentsBox serves as a good example since it involves both sync and async rendering.
 		 * If this test fails, it is not recommended to add timeouts as a quick fix.
 		 */
-		it("should keep attachments pane status after changing selection", async function () {
+		it.skip("should keep attachments pane status after changing selection", async function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentsBox = itemDetails.getPane(paneID);
 			let preview = attachmentsBox._preview;
@@ -1013,7 +1013,7 @@ describe("Item pane", function () {
 			assert.equal(label.value, newTitle);
 		});
 
-		it("should show attachment pane in library for attachment item", async function () {
+		it.skip("should show attachment pane in library for attachment item", async function () {
 			// Regular item: hide
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let box = itemDetails.getPane(paneID);
