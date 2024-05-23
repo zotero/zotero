@@ -52,8 +52,22 @@ item-pane-header {
 
 		button {
 			height: 24px;
+			// Allow the button to grow/shrink to fit the container
+			width: 0;
 			margin: 0;
 			flex-grow: 1;
+
+			.button-text {
+				width: 0;
+				flex-grow: 1;
+				justify-content: center;
+
+				&::before {
+					overflow: hidden;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+				}
+			}
 		}
 	}
 
