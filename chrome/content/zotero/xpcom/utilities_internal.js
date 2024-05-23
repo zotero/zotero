@@ -2926,7 +2926,7 @@ Zotero.Utilities.Internal.OpenURL = {
 	resolve: function (item) {
 		var co = Zotero.OpenURL.createContextObject(
 			item.toJSON(),
-			Zotero.Prefs.get("openURL.version")
+			"1.0"
 		);
 		if (co) {
 			let base = Zotero.Prefs.get("openURL.resolver");

@@ -425,20 +425,17 @@ Zotero_Preferences.General = {
 		var openURLMenu = document.getElementById('openurl-menu');
 		
 		var openURLServerField = document.getElementById('openURLServerField');
-		var openURLVersionMenu = document.getElementById('openURLVersionMenu');
 		
 		// If "Custom" selected, clear URL field
 		if (event.target.value == "custom") {
 			Zotero.Prefs.clear('openURL.name');
 			Zotero.Prefs.set('openURL.resolver', '');
-			Zotero.Prefs.clear('openURL.version');
 			openURLServerField.value = '';
 			openURLServerField.focus();
 		}
 		else {
 			Zotero.Prefs.set('openURL.name', openURLServerField.value = event.target.label);
 			Zotero.Prefs.set('openURL.resolver', openURLServerField.value = event.target.value);
-			Zotero.Prefs.set('openURL.version', openURLVersionMenu.value = "1.0");
 		}
 		
 		openURLMenu.firstChild.hidePopup();
