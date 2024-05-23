@@ -50,6 +50,7 @@
 			this._initialVisibleCreators = 5;
 			this._draggedCreator = false;
 			this._selectField = null;
+			this._selectFieldSelection = null;
 		}
 
 		get content() {
@@ -225,17 +226,39 @@
 			// the table is refreshed
 			this._infoTable.addEventListener("focusin", (e) => {
 				let target = e.target.closest("[fieldname], [tabindex], [focusable]");
+				let fieldID;
 				// Special treatment for unsaved creator rows. When they are just added, their ids
 				// do not correspond to their positioning to avoid shifting all creators in case new row is not saved.
 				// So, use the index that this row will occupy after saving.
 				let maybeRow = target.closest(".meta-row");
 				if (maybeRow?.querySelector(".creator-type-value[unsaved=true]")) {
 					let { unsavedIndex } = this.getCreatorFields(maybeRow);
-					this._selectField = (target?.id || "").replace(/\d+/g, unsavedIndex);
+					fieldID = (target?.id || "").replace(/\d+/g, unsavedIndex);
+				}
+				else if (target?.id) {
+					fieldID = target.id;
+				}
+				else {
 					return;
 				}
-				if (target?.id) {
-					this._selectField = target.id;
+				
+				// If we'd already set _selectField to this field, abort - we don't want to
+				// overwrite the saved selection
+				if (fieldID === this._selectField) {
+					return;
+				}
+				
+				// Save the field ID
+				this._selectField = fieldID;
+				
+				// Save selection inside inputs
+				let targetInput = e.target.closest("input, textarea");
+				if (targetInput) {
+					this._selectFieldSelection = [
+						targetInput.selectionStart,
+						targetInput.selectionEnd,
+						targetInput.selectionDirection,
+					];
 				}
 			});
 
@@ -244,6 +267,7 @@
 				let destination = e.relatedTarget;
 				if (!(destination && this._infoTable.contains(destination))) {
 					this._selectField = null;
+					this._selectFieldSelection = null;
 				}
 			});
 
@@ -851,12 +875,7 @@
 			this._ensureButtonsFocusable();
 
 			// Set focus on the last focused field
-			if (this._selectField) {
-				let refocusField = this.querySelector(`#${this._selectField}`);
-				if (refocusField) {
-					refocusField.focus();
-				}
-			}
+			this._refocusLastField();
 			// Make sure that any opened popup closes
 			this.querySelectorAll("menupopup").forEach((popup) => {
 				popup.hidePopup();
@@ -1515,7 +1534,7 @@
 				creatorRow.remove();
 				
 				this._creatorCount--;
-				this.querySelector(`#${this._selectField}`)?.focus();
+				this._refocusLastField();
 				this._updateCreatorButtonsStatus();
 				return;
 			}
@@ -2186,6 +2205,24 @@
 		
 		focusField(fieldName) {
 			this.querySelector(`editable-text[fieldname="${fieldName}"]`)?.focus();
+		}
+
+		_refocusLastField() {
+			if (!this._selectField) {
+				return;
+			}
+			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}`);
+			if (!refocusField) {
+				return;
+			}
+			refocusField.focus();
+			
+			if (this._selectFieldSelection) {
+				let input = refocusField.querySelector("input, textarea");
+				if (input) {
+					input.setSelectionRange(...this._selectFieldSelection);
+				}
+			}
 		}
 
 		getTitleField() {
