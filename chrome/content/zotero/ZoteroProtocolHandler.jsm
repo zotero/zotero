@@ -107,7 +107,7 @@ function ZoteroProtocolHandler() {
 						.slice(params.groupID !== undefined ? 4 : 3)
 						.filter(Boolean);
 					if (resourcePathParts.length) {
-						if (!item.isSnapshotAttachment()) {
+						if (item.attachmentReaderType !== 'snapshot') {
 							return this._errorChannel(`Item for ${uriPath} is not a snapshot attachment -- cannot access resources`);
 						}
 						
