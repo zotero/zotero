@@ -1380,7 +1380,7 @@
 		
 		createOpenLinkIcon(value) {
 			// In duplicates/trash mode return nothing
-			if (!this.editable) {
+			if (!(this.editable || this.item.isFeedItem)) {
 				return null;
 			}
 			let openLink = document.createXULElement("toolbarbutton");
