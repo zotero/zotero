@@ -834,6 +834,7 @@
 			}
 
 			this._ensureButtonsFocusable();
+			this._updateCreatorButtonsStatus();
 
 			// Set focus on the last focused field
 			this._restoreFieldFocus();
@@ -1952,7 +1953,7 @@
 					row.querySelector(".zotero-clicky-plus").hidden = true;
 					row.querySelector(".zotero-clicky-minus").hidden = true;
 					row.querySelector(".zotero-clicky-options").hidden = true;
-					return;
+					continue;
 				}
 
 				row.querySelector(".zotero-clicky-plus").disabled = isEmpty || isNextRowUnsavedCreator;
