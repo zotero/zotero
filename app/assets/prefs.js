@@ -10,9 +10,6 @@ pref("network.prefetch-next", false);
 // Let operations run as long as necessary
 pref("dom.max_chrome_script_run_time", 0);
 
-// .dotm Word plugin VBA uses this to find the running Zotero instance
-pref("ui.window_class_override", "ZoteroWindowClass");
-
 pref("intl.locale.requested", '');
 pref("intl.regional_prefs.use_os_locales", false);
 
