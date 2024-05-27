@@ -7,6 +7,7 @@ return-or-enter =
 
 general-remove = Remove
 general-add = Add
+general-remind-me-later = Remind Me Later
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -515,3 +516,7 @@ item-pane-header-bibEntry =
     .label = Bibliography Entry
 item-pane-header-more-options =
     .label = More Options
+
+
+architecture-win32-warning-message = { -app-name } is running in 32-bit mode on a 64-bit version of Windows. { -app-name } will run more efficiently in 64-bit mode.
+architecture-warning-action = Download 64-bit { -app-name }

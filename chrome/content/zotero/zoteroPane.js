@@ -625,6 +625,7 @@ var ZoteroPane = new function()
 		
 		setTimeout(function () {
 			ZoteroPane.showRetractionBanner();
+			ZoteroPane.showArchitectureWarning();
 			ZoteroPane.initSyncReminders(true);
 		});
 		
@@ -6027,7 +6028,41 @@ var ZoteroPane = new function()
 			this.hideRetractionBanner();
 		}
 	};
-	
+
+	this.showArchitectureWarning = async function () {
+		const remindInterval = 60 * 60 * 24 * 30;
+		const isWow64 = (await Services.sysinfo.processInfo).isWow64;
+		const is32bitBuild = Zotero.arch === 'x86';
+		const lastDisplayed = Zotero.Prefs.get('architecture.warning.lastDisplayed') ?? 0;
+		
+		if (lastDisplayed > Math.round(Date.now() / 1000) - remindInterval) {
+			return;
+		}
+
+		if (Zotero.isWin && isWow64 && is32bitBuild) {
+			let panel = document.getElementById('architecture-warning-container');
+			let action = document.getElementById('architecture-warning-action');
+			let close = document.getElementById('architecture-warning-close');
+			let remind = document.getElementById('architecture-warning-remind');
+			
+			panel.removeAttribute('collapsed');
+			action.onclick = function () {
+				Zotero.launchURL('https://www.zotero.org/download/');
+			};
+			close.onclick = function () {
+				this.hideArchitectureWarning();
+			}.bind(this);
+			remind.onclick = function () {
+				Zotero.Prefs.set(`architecture.warning.lastDisplayed`, Math.round(Date.now() / 1000));
+				this.hideArchitectureWarning();
+			}.bind(this);
+		}
+	};
+
+	this.hideArchitectureWarning = function () {
+		document.getElementById('architecture-warning-container').setAttribute('collapsed', true);
+	};
+
 	
 	/**
 	 * Sets the layout to either a three-vertical-pane layout and a layout where itemsPane is above itemPane
