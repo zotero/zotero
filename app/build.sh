@@ -642,7 +642,7 @@ if [ $BUILD_WIN == 1 ]; then
 	
 	fi
 	
-	for arch in win32 win-x64 win-aarch64; do
+	for arch in win32 win-x64 win-arm64; do
 		echo "Building Zotero_$arch"
 		
 		runtime_path="${WIN_RUNTIME_PATH_PREFIX}${arch}"
@@ -652,7 +652,10 @@ if [ $BUILD_WIN == 1 ]; then
 		mkdir "$APPDIR"
 		
 		# Copy relevant assets from Firefox
-		cp -R "$runtime_path"/!(application.ini|browser|defaults|devtools-files|crashreporter*|firefox.exe|maintenanceservice*|precomplete|removed-files|uninstall|update*) "$APPDIR"
+		#
+		# 'i686' is a huge directory containing x86 versions of xul.dll and other files in
+		# Firefox ARM64 builds for use with the EME DRM plugins
+		cp -R "$runtime_path"/!(application.ini|browser|defaults|devtools-files|crashreporter*|firefox.exe|i686|maintenanceservice*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
@@ -716,7 +719,7 @@ if [ $BUILD_WIN == 1 ]; then
 			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll" \
 				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
 			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll"
-		elif [ $arch = 'win-aarch64' ]; then
+		elif [ $arch = 'win-arm64' ]; then
 			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_ARM64.dll" \
 				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
 			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll"
@@ -733,10 +736,7 @@ if [ $BUILD_WIN == 1 ]; then
 				# Build uninstaller
 				if [ "$arch" = "win32" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
-				elif [ "$arch" = "win-x64" ]; then
-					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
-				elif [ "$arch" = "win-aarch64" ]; then
-					# TODO
+				elif [[ "$arch" = "win-x64" ]] || [[ "$arch" = "win-arm64" ]]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				fi
 
@@ -752,8 +752,8 @@ if [ $BUILD_WIN == 1 ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_win32_setup.exe"
 				elif [ "$arch" = "win-x64" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_x64_setup.exe"
-				elif [ "$arch" = "win-aarch64" ]; then
-					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_aarch64_setup.exe"
+				elif [ "$arch" = "win-arm64" ]; then
+					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_arm64_setup.exe"
 				fi
 				
 				if [ $SIGN -eq 1 ]; then
@@ -770,10 +770,7 @@ if [ $BUILD_WIN == 1 ]; then
 				# Build and sign setup.exe
 				if [ "$arch" = "win32" ]; then	
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
-				elif [ "$arch" = "win-x64" ]; then
-					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
-				elif [ "$arch" = "win-aarch64" ]; then
-					# TODO
+				elif [[ "$arch" = "win-x64" ]] || [[ "$arch" = "win-arm64" ]]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				fi
 

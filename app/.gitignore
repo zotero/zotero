@@ -9,3 +9,4 @@ xulrunner
 win/resource_hacker
 win/firefox-*.win32.zip
 win/firefox-*.win64.zip
+win/firefox-*.win64-aarch64.zip

@@ -17,12 +17,12 @@ if [[ -z "${1:-}" ]]; then
 fi
 version=$1
 
-for arch in win32 win-x64 win-aarch64; do
+for arch in win32 win-x64 win-arm64; do
 	if [ $arch = "win32" ]; then
 		zip="firefox-115.5.0.en-US.$arch.zip"
 	elif [ $arch = "win-x64" ]; then
 		zip="firefox-$version.en-US.win64.zip"
-	elif [ $arch = "win-aarch64" ]; then
+	elif [ $arch = "win-arm64" ]; then
 		zip="firefox-$version.en-US.win64-aarch64.zip"
 	fi
 	if [ ! -f "$zip" ]; then
@@ -56,7 +56,7 @@ for arch in win32 win-x64 win-aarch64; do
 	
 done
 
-tar -Jcv zotero_win32.exe zotero_win-x64.exe zotero_win-aarch64.exe > zotero.exe.tar.xz
-tar -Jcv updater-win32.exe updater-win-x64.exe updater-win-aarch64.exe > updater.exe.tar.xz
+tar -Jcv zotero_win32.exe zotero_win-x64.exe zotero_win-arm64.exe > zotero.exe.tar.xz
+tar -Jcv updater-win32.exe updater-win-x64.exe updater-win-arm64.exe > updater.exe.tar.xz
 
 rm firefox-win*.exe updater-win*.exe zotero_win*.exe

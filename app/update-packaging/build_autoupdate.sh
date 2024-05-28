@@ -138,7 +138,8 @@ for version in "$FROM" "$TO"; do
 	
 	MAC_ARCHIVE="Zotero-${version}.dmg"
 	WIN32_ARCHIVE="Zotero-${version}_win32.zip"
-	WIN64_ARCHIVE="Zotero-${version}_win-x64.zip"
+	WIN_X64_ARCHIVE="Zotero-${version}_win-x64.zip"
+	WIN_ARM64_ARCHIVE="Zotero-${version}_win-arm64.zip"
 	LINUX_X86_ARCHIVE="Zotero-${version}_linux-i686.tar.bz2"
 	LINUX_X86_64_ARCHIVE="Zotero-${version}_linux-x86_64.tar.bz2"
 	
@@ -147,14 +148,17 @@ for version in "$FROM" "$TO"; do
 		mkdir "$CACHE_DIR"
 	fi
 	
-	for archive in "$MAC_ARCHIVE" "$WIN32_ARCHIVE" "$WIN64_ARCHIVE" "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE"; do
+	for archive in "$MAC_ARCHIVE" "$WIN32_ARCHIVE" "$WIN_X64_ARCHIVE" "$WIN_ARM64_ARCHIVE" "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE"; do
 		if [[ $archive = "$MAC_ARCHIVE" ]] && [[ $BUILD_MAC != 1 ]]; then
 			continue
 		fi
 		if [[ $archive = "$WIN32_ARCHIVE" ]] && [[ $BUILD_WIN != 1 ]]; then
 			continue
 		fi
-		if [[ $archive = "$WIN64_ARCHIVE" ]] && [[ $BUILD_WIN != 1 ]]; then
+		if [[ $archive = "$WIN_X64_ARCHIVE" ]] && [[ $BUILD_WIN != 1 ]]; then
+			continue
+		fi
+		if [[ $archive = "$WIN_ARM64_ARCHIVE" ]] && [[ $BUILD_WIN != 1 ]]; then
 			continue
 		fi
 		if [[ $archive = "$LINUX_X86_ARCHIVE" ]] && [[ $BUILD_LINUX != 1 ]]; then
@@ -227,14 +231,14 @@ for version in "$FROM" "$TO"; do
 	
 	# Unpack Windows zips
 	if [ $BUILD_WIN == 1 ]; then
-		if [[ -f "$WIN32_ARCHIVE" ]] && [[ -f "$WIN64_ARCHIVE" ]]; then
-			for build in "$WIN32_ARCHIVE" "$WIN64_ARCHIVE"; do
+		if [[ -f "$WIN32_ARCHIVE" ]] && [[ -f "$WIN_X64_ARCHIVE" ]] && [[ -f "$WIN_ARM64_ARCHIVE" ]]; then
+			for build in "$WIN32_ARCHIVE" "$WIN_X64_ARCHIVE" "$WIN_ARM64_ARCHIVE"; do
 				unzip -q "$build"
 				rm "$build"
 			done
 			INCREMENTALS_FOUND=1
 		else
-			echo "$WIN32_ARCHIVE and/or $WIN64_ARCHIVE not found"
+			echo "$WIN32_ARCHIVE/$WIN_X64_ARCHIVE/$WIN_ARM64_ARCHIVE not found"
 		fi
 	fi
 	
@@ -259,17 +263,17 @@ export MOZ_PRODUCT_VERSION="$TO"
 export MAR_CHANNEL_ID="$CHANNEL"
 
 CHANGES_MADE=0
-for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
+for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64"; do
 	if [[ $build == "mac" ]]; then
 		if [[ $BUILD_MAC == 0 ]]; then
 			continue
 		fi
 		dir="Zotero.app"
 	else
-		if [[ $build == "win32" ]] || [[ $build == "win-x64" ]] && [[ $BUILD_WIN == 0 ]]; then
+		if ([[ $build == "win32" ]] || [[ $build == "win-x64" ]] || [[ $build == "win-arm64" ]]) && [[ $BUILD_WIN == 0 ]]; then
 			continue
 		fi
-		if [[ $build == "linux-i686" ]] || [[ $build == "linux-x86_64" ]] && [[ $BUILD_LINUX == 0 ]]; then
+		if ([[ $build == "linux-i686" ]] || [[ $build == "linux-x86_64" ]]) && [[ $BUILD_LINUX == 0 ]]; then
 			continue
 		fi
 		dir="Zotero_$build"
