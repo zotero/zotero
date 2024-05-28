@@ -299,11 +299,15 @@ for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64"; do
 		echo "Building full $build update for $TO"
 		"$SCRIPT_DIR/make_full_update.sh" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$UPDATE_STAGE_DIR/$TO/$dir"
 		CHANGES_MADE=1
-		
-		# Make a bzip version of all complete patches for serving to <7.0 builds. We can stop this
-		# once we do a waterfall build that all older versions get updated to.
-		echo "Building bzip2 version of full $build update for $TO"
-		"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$DIST_DIR/Zotero-${TO}-full_bz_${build}.mar"
+			
+		# Make a bzip version of all complete patches for serving to <7.0 builds. Don't bother with
+		# architectures that didn't exist in Z6.
+		#
+		# We can stop this once we do a waterfall build that all older versions get updated to.
+		if [[ $build != "win-x64" ]] && [[ $build != "win-arm64" ]]; then
+			echo "Building bzip2 version of full $build update for $TO"
+			"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$DIST_DIR/Zotero-${TO}-full_bz_${build}.mar"
+		fi
 	fi
 done
 
