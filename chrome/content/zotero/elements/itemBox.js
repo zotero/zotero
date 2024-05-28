@@ -227,10 +227,23 @@
 			);
 
 			// If the focus leaves the itemBox, clear the last focused element
+			// and potentially delete unsaved creator row
 			this._infoTable.addEventListener("focusout", (e) => {
 				let destination = e.relatedTarget;
 				if (!(destination && this._infoTable.contains(destination))) {
 					this._clearSavedFieldFocus();
+				}
+				if (!destination) return;
+				let unsavedCreatorData = this.querySelector(".creator-type-value[unsaved=true]");
+				if (!unsavedCreatorData) return;
+				// Delete empty unsaved creator row if the focus lands on an input outside of unsaved creator
+				// row or if the focus is completely outside of the item pane.
+				let focusedInputOutOfCreatorRow = ["input", "textarea"].includes(destination.tagName) && !unsavedCreatorData?.contains(destination);
+				let focusOutOfItemPane = !this.closest("item-details").contains(destination);
+				let { firstName, lastName } = this.getCreatorFields(unsavedCreatorData.parentNode);
+				let isUnsavedCreatorEmpty = firstName == "" && lastName == "";
+				if (isUnsavedCreatorEmpty && (focusedInputOutOfCreatorRow || focusOutOfItemPane)) {
+					this.removeUnsavedCreatorRow();
 				}
 			});
 
@@ -1068,10 +1081,7 @@
 			this._creatorCount++;
 			
 			// Delete existing unsaved creator row if any
-			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
-			if (unsavedCreatorData) {
-				unsavedCreatorData.closest(".meta-row").remove();
-			}
+			this.removeUnsavedCreatorRow();
 
 			let row = this.addDynamicRow(rowLabel, rowData, before);
 
@@ -1513,6 +1523,15 @@
 			await this.item.saveTx();
 		}
 		
+		removeUnsavedCreatorRow() {
+			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
+			if (unsavedCreatorData) {
+				unsavedCreatorData.closest(".meta-row").remove();
+				this._creatorCount--;
+				this._updateCreatorButtonsStatus();
+			}
+		}
+		
 		dateTimeFromUTC(valueText) {
 			if (valueText) {
 				var date = Zotero.Date.sqlToDate(valueText, true);
@@ -1712,6 +1731,7 @@
 			let target = event.target.closest("editable-text");
 			if (!target) return;
 
+			let row = target.closest('.meta-row');
 			// Handle Shift-Enter on creator input field
 			if (event.key == "Enter" && event.shiftKey) {
 				event.stopPropagation();
@@ -1723,7 +1743,6 @@
 				}
 				// Value hasn't changed
 				Zotero.debug("Value hasn't changed");
-				let row = target.closest('.meta-row');
 				// Next row is a creator - focus that
 				let nextRow = row.nextSibling;
 				if (nextRow.querySelector(".creator-type-value")) {
@@ -1740,6 +1759,12 @@
 				// Do nothing from the last empty row
 				if (creatorFields.lastName == "" && creatorFields.firstName == "") return;
 				this.addCreatorRow(false, creatorFields.creatorTypeID, true);
+			}
+			if (event.key == "Escape" && row.querySelector(".creator-type-value[unsaved=true]")) {
+				// Escape on an unsaved row deletes it and focuses previous creator
+				event.stopPropagation();
+				row.previousElementSibling.querySelector("editable-text").focus();
+				this.removeUnsavedCreatorRow();
 			}
 		}
 
