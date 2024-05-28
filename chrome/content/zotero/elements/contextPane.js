@@ -171,7 +171,7 @@
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (Zotero_Tabs.selectedType == 'reader') {
+			else if (Zotero_Tabs.selectedType.includes('reader')) {
 				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 				this._handleReaderReady(reader);
 			
@@ -305,9 +305,8 @@
 			itemDetails.sidenav = this._sidenav;
 			if (previousPinnedPane) itemDetails.pinnedPane = previousPinnedPane;
 	
-			// `unloaded` tabs are never selected and shouldn't be rendered on creation.
-			// Use `includes` here for forward compatibility.
-			if (!tabType.includes("unloaded")) {
+			// Make sure that the context pane of the selected tab is rendered
+			if (tabID == Zotero_Tabs.selectedID) {
 				this._selectItemContext(tabID);
 			}
 		}

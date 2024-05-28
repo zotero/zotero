@@ -108,7 +108,9 @@ var Zotero_Tabs = new function () {
 					icon = <CSSItemTypeIcon itemType={item.getItemTypeIconName(true)} className="tab-icon" />;
 				}
 				catch (e) {
-					// item might not yet be loaded, we will get the icon on the next update
+					// item might not yet be loaded, we will get the right icon on the next update
+					// but until then use a default placeholder
+					icon = <CSSItemTypeIcon className="tab-icon" />;
 				}
 			}
 
@@ -199,25 +201,13 @@ var Zotero_Tabs = new function () {
 			}
 			else if (tab.type === 'reader') {
 				if (Zotero.Items.exists(tab.data.itemID)) {
-					if (tab.selected) {
-						Zotero.Reader.open(tab.data.itemID,
-							null,
-							{
-								title: tab.title,
-								tabIndex: i,
-								openInBackground: !tab.selected,
-								secondViewState: tab.data.secondViewState
-							}
-						);
-					}
-					else {
-						this.add({
-							type: 'reader-unloaded',
-							title: tab.title,
-							index: i,
-							data: tab.data
-						});
-					}
+					this.add({
+						type: 'reader-unloaded',
+						title: tab.title,
+						index: i,
+						data: tab.data,
+						select: tab.selected
+					});
 				}
 			}
 		}
@@ -462,7 +452,11 @@ var Zotero_Tabs = new function () {
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 		if (tab.type === 'reader-unloaded') {
-			this.close(tab.id);
+			// Make sure the loading message is displayed - it will be removed by reader
+			// when it is loaded
+			ZoteroContextPane.showLoadingMessage(true);
+			// Open reader in this unloaded tab. Once the reader instance is created,
+			// the tab's type will be changed for just "reader"
 			Zotero.Reader.open(tab.data.itemID, options && options.location, {
 				tabID: tab.id,
 				title: tab.title,
@@ -471,7 +465,6 @@ var Zotero_Tabs = new function () {
 				secondViewState: tab.data.secondViewState,
 				preventJumpback: true
 			});
-			return;
 		}
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
@@ -531,6 +524,13 @@ var Zotero_Tabs = new function () {
 			index: tabIndex,
 			data: tab.data
 		});
+	};
+	
+	// Mark a tab as loaded
+	this.markAsLoaded = function (id) {
+		let { tab } = this._getTab(id);
+		if (!tab) return;
+		tab.type = "reader";
 	};
 
 	this.unloadUnusedTabs = function () {
