@@ -655,7 +655,7 @@ if [ $BUILD_WIN == 1 ]; then
 		#
 		# 'i686' is a huge directory containing x86 versions of xul.dll and other files in
 		# Firefox ARM64 builds for use with the EME DRM plugins
-		cp -R "$runtime_path"/!(application.ini|browser|defaults|devtools-files|crashreporter*|firefox.exe|i686|maintenanceservice*|precomplete|removed-files|uninstall|update*) "$APPDIR"
+		cp -R "$runtime_path"/!(application.ini|browser|crashreporter*|default-browser-agent.exe|defaultagent*|defaults|devtools-files|firefox*|i686|maintenanceservice*|minidump-analyzer.exe|pingsender.exe|private_browsing*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
