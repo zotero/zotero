@@ -60,8 +60,15 @@ if [ -z "$VERSION" ]; then
 	exit 1
 fi
 
+# Enforce signing unless a test build
+if [ "$CHANNEL" != "test" ]; then
+	SIGN="-e"
+else
+	SIGN=""
+fi
+
 # Build Zotero
-"$ROOT_DIR/build.sh" -d "$SOURCE_DIR" -p $PLATFORMS -c $CHANNEL -e
+"$ROOT_DIR/build.sh" -d "$SOURCE_DIR" -p $PLATFORMS -c $CHANNEL $SIGN
 
 BUILD_ID=`cat "$DIST_DIR/build_id"`
 if [ -z "$BUILD_ID" ]; then
