@@ -192,7 +192,7 @@
 		async updatePreview() {
 			// Skip if asyncRender is not finished/executed, which means the box is invisible
 			// The box will be rendered when it becomes visible
-			if (this._renderStage !== "final") {
+			if (!this.initialized || this._renderStage !== "final") {
 				return;
 			}
 			let attachment = await this._getPreviewAttachment();

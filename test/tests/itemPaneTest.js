@@ -2,24 +2,27 @@ describe("Item pane", function () {
 	var win, doc, ZoteroPane, Zotero_Tabs, ZoteroContextPane, itemsView;
 
 	async function waitForPreviewBoxRender(box) {
-		let success = await waitForCallback(
-			() => box._asyncRenderItemID && !box._asyncRendering);
-		if (!success) {
-			throw new Error("Wait for box render time out");
+		let res = await waitForCallback(
+			() => box._asyncRenderItemID && !box._asyncRendering,
+			100, 3);
+		if (res instanceof Error) {
+			throw res;
 		}
-		await box._preview._renderPromise;
-		return success;
+		return true;
 	}
 
 	async function waitForPreviewBoxReader(box, itemID) {
+		let preview = box._preview;
 		await waitForPreviewBoxRender(box);
-		let success = await waitForCallback(
-			() => box._preview._reader?.itemID == itemID, 100, 3000);
-		if (!success) {
-			throw new Error("Wait for box preview reader time out");
+		let res = await waitForCallback(
+			() => preview._reader?.itemID == itemID
+				&& !preview._isProcessingTask && !preview._lastTask
+			, 100, 3);
+		if (res instanceof Error) {
+			throw res;
 		}
-		await box._preview._reader._initPromise;
-		return success;
+		await preview._reader._initPromise;
+		return true;
 	}
 
 	function isPreviewDisplayed(box) {
@@ -386,6 +389,7 @@ describe("Item pane", function () {
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
+			Zotero_Tabs.closeAll();
 		});
 
 		it("should show attachments pane in library for regular item", async function () {
@@ -676,7 +680,7 @@ describe("Item pane", function () {
 		 * AttachmentsBox serves as a good example since it involves both sync and async rendering.
 		 * If this test fails, it is not recommended to add timeouts as a quick fix.
 		 */
-		it.skip("should keep attachments pane status after changing selection", async function () {
+		it("should keep attachments pane status after changing selection", async function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentsBox = itemDetails.getPane(paneID);
 			let preview = attachmentsBox._preview;
@@ -845,6 +849,60 @@ describe("Item pane", function () {
 			// Should open attachment
 			assert.equal(reader.itemID, attachment.id);
 		});
+
+		it("should render preview robustly after making dense calls to render and discard", async function () {
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentsBox = itemDetails.getPane(paneID);
+			let preview = attachmentsBox._preview;
+
+			// Pin the pane to avoid always scrolling to the section
+			itemDetails.pinnedPane = paneID;
+
+			// item with attachment
+			let item1 = new Zotero.Item('book');
+			await item1.saveTx();
+			let file1 = getTestDataDirectory();
+			file1.append('test.pdf');
+			let attachment1 = await Zotero.Attachments.importFromFile({
+				file: file1,
+				parentItemID: item1.id
+			});
+
+			let item2 = new Zotero.Item('book');
+			await item2.saveTx();
+			let file2 = getTestDataDirectory();
+			file2.append('test.pdf');
+			let attachment2 = await Zotero.Attachments.importFromFile({
+				file: file2,
+				parentItemID: item2.id
+			});
+
+			let selectionMap = [item1.id, item2.id];
+			// Repeat render/discard multiple times
+			for (let i = 0; i < 10; i++) {
+				await ZoteroPane.selectItem(selectionMap[i % 2]);
+
+				// No await, since the render/discard may be triggered at any time in actual usage
+				preview.discard();
+				preview.render();
+			}
+
+			// Wait for the last render/discard task to finish
+			await waitForCallback(() => !preview._isRendering && !preview._isDiscarding
+				&& !preview._isProcessingTask && !preview._isWaitingForTask
+				&& !preview._lastTask);
+
+			// Should be able to render the correct preview
+			await ZoteroPane.selectItem(item1.id);
+			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
+			assert.isTrue(isPreviewDisplayed(attachmentsBox));
+
+			await ZoteroPane.selectItem(item2.id);
+			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
+			assert.isTrue(isPreviewDisplayed(attachmentsBox));
+
+			itemDetails.pinnedPane = "";
+		});
 	});
 	
 	
@@ -972,6 +1030,7 @@ describe("Item pane", function () {
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
+			Zotero_Tabs.closeAll();
 		});
 
 		it("should refresh on file rename", async function () {
@@ -1002,9 +1061,12 @@ describe("Item pane", function () {
 
 			let paneHeader = doc.getElementById('zotero-item-pane-header');
 			let label = paneHeader.titleField;
-			let promise = waitForDOMAttributes(label, 'value', (newValue) => {
-				return newValue === newTitle;
-			});
+			let promise = Promise.all([
+				waitForDOMAttributes(label, 'value', (newValue) => {
+					return newValue === newTitle;
+				}),
+				waitForItemEvent('modify')
+			]);
 
 			item.setField('title', newTitle);
 			await item.saveTx();
@@ -1013,7 +1075,7 @@ describe("Item pane", function () {
 			assert.equal(label.value, newTitle);
 		});
 
-		it.skip("should show attachment pane in library for attachment item", async function () {
+		it("should show attachment pane in library for attachment item", async function () {
 			// Regular item: hide
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let box = itemDetails.getPane(paneID);
