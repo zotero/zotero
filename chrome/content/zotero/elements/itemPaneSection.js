@@ -123,8 +123,9 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	 * @returns {boolean}
 	 */
 	_isAlreadyRendered(type = "sync") {
-		let key = `_${type}RenderItemID`;
+		let key = `_${type}RenderDependencies`;
 		let pendingKey = `_${type}RenderPending`;
+		let itemIDKey = `_${type}RenderItemID`;
 
 		let oldDependencies = this[key];
 		let newDependencies = this._renderDependencies;
@@ -144,6 +145,7 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		}
 		this[key] = newDependencies;
 		this[pendingKey] = false;
+		this[itemIDKey] = this.item?.id;
 		return false;
 	}
 
