@@ -659,7 +659,12 @@ if [ $BUILD_WIN == 1 ]; then
 		check_lfs_file "$CALLDIR/win/zotero.exe.tar.xz"
 		tar xf "$CALLDIR/win/zotero.exe.tar.xz" --to-stdout zotero_$arch.exe > "$APPDIR/zotero.exe"
 		
-		# Update .exe version number (only possible on Windows)
+		# Use our own updater, because Mozilla's requires updates signed by Mozilla
+		check_lfs_file "$CALLDIR/win/updater.exe.tar.xz"
+		tar xf "$CALLDIR/win/updater.exe.tar.xz" --to-stdout updater-$arch.exe > "$APPDIR/updater.exe"
+		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
+		
+		# Update .exe version numbers (only possible on Windows)
 		if [ $WIN_NATIVE == 1 ]; then
 			# FileVersion is limited to four integers, so it won't be properly updated for non-release
 			# builds (e.g., we'll show 5.0.97.0 for 5.0.97-beta.37). ProductVersion will be the full
@@ -667,12 +672,10 @@ if [ $BUILD_WIN == 1 ]; then
 			rcedit "`cygpath -w \"$APPDIR/zotero.exe\"`" \
 				--set-file-version "$VERSION_NUMERIC" \
 				--set-product-version "$VERSION"
+			rcedit "`cygpath -w \"$APPDIR/updater.exe\"`" \
+				--set-file-version "$VERSION_NUMERIC" \
+				--set-product-version "$VERSION"
 		fi
-		
-		# Use our own updater, because Mozilla's requires updates signed by Mozilla
-		check_lfs_file "$CALLDIR/win/updater.exe.tar.xz"
-		tar xf "$CALLDIR/win/updater.exe.tar.xz" --to-stdout updater-$arch.exe > "$APPDIR/updater.exe"
-		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
 		
 		# Sign updater
 		if [ $SIGN -eq 1 ]; then

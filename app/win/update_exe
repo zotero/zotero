@@ -35,14 +35,25 @@ for arch in win32 win-x64 win-aarch64; do
 	mv updater.exe updater-$arch.exe
 
 	$rh -open VersionInfo1.rc -save VersionInfo1.res -action compile
+	$rh -open VersionInfo1-updater.rc -save VersionInfo1-updater.res -action compile
 
 	config=`cat resource-hacker-config.txt`
 	config_file="resource-hacker-config-$arch.txt"
 	echo "${config//\{\{ARCH\}\}/$arch}" > $config_file
 	$rh -script $config_file
 	rm $config_file
-
+	
+	config=`cat resource-hacker-config-updater.txt`
+	config_file="resource-hacker-config-updater-$arch.txt"
+	echo "${config//\{\{ARCH\}\}/$arch}" > $config_file
+	$rh -script $config_file
+	rm $config_file
+	mv updater-$arch-new.exe updater-$arch.exe
+	
 	rm VersionInfo1.res
+	rm VersionInfo1-updater.res
+	
+	
 done
 
 tar -Jcv zotero_win32.exe zotero_win-x64.exe zotero_win-aarch64.exe > zotero.exe.tar.xz

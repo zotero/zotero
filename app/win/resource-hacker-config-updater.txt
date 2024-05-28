@@ -1,0 +1,7 @@
+[FILENAMES]
+Open=updater-{{ARCH}}.exe
+Save=updater-{{ARCH}}-new.exe
+Log=CONSOLE
+[COMMANDS]
+-delete VERSIONINFO,1
+-addoverwrite VersionInfo1-updater.res, VERSIONINFO,1,
