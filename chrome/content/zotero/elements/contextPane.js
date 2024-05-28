@@ -195,9 +195,6 @@
 			if (!reader) {
 				return;
 			}
-			ZoteroContextPane.showLoadingMessage(true);
-			await reader._initPromise;
-			ZoteroContextPane.showLoadingMessage(false);
 			// Focus reader pages view if context pane note editor is not selected
 			if (Zotero_Tabs.selectedID == reader.tabID
 				&& !Zotero_Tabs.isTabsMenuVisible()

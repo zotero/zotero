@@ -519,8 +519,6 @@ class ReaderInstance {
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
-		// Ensure that if there was a loading message displayed, it is now hidden
-		this._window.ZoteroContextPane?.showLoadingMessage(false);
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
 

@@ -452,19 +452,22 @@ var Zotero_Tabs = new function () {
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 		if (tab.type === 'reader-unloaded') {
-			// Make sure the loading message is displayed - it will be removed by reader
-			// when it is loaded
+			// Make sure the loading message is displayed first.
+			// Then, open reader and hide the loading message once it has loaded.
 			ZoteroContextPane.showLoadingMessage(true);
-			// Open reader in this unloaded tab. Once the reader instance is created,
-			// the tab's type will be changed for just "reader"
-			Zotero.Reader.open(tab.data.itemID, options && options.location, {
-				tabID: tab.id,
-				title: tab.title,
-				tabIndex,
-				allowDuplicate: true,
-				secondViewState: tab.data.secondViewState,
-				preventJumpback: true
-			});
+			let hideMessageWhenReaderLoaded = async () => {
+				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
+					tabID: tab.id,
+					title: tab.title,
+					tabIndex,
+					allowDuplicate: true,
+					secondViewState: tab.data.secondViewState,
+					preventJumpback: true
+				});
+				await reader._initPromise;
+				ZoteroContextPane.showLoadingMessage(false);
+			};
+			hideMessageWhenReaderLoaded();
 		}
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
