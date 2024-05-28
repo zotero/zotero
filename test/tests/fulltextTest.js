@@ -155,9 +155,7 @@ describe("Zotero.FullText", function () {
 			toSync.push({
 				item: pdfAttachment,
 				content: "Zotero [zoh-TAIR-oh] is a free, easy-to-use tool to help you collect, "
-					// pdf-worker handles whitespace differently than pdftotext
-					//+ "organize, cite, and share your research sources.\n\n",
-					+ "organize, cite, and share\nyour research sources.\n\n",
+					+ "organize, cite, and share your research sources.",
 				indexedChars: 0,
 				indexedPages: 1
 			});
