@@ -151,7 +151,9 @@ class ItemPaneSectionElementBase extends XULElementBase {
 
 	_resetRenderedFlags() {
 		// Clear cached flags to allow re-rendering
+		delete this._syncRenderDependencies;
 		delete this._syncRenderItemID;
+		delete this._asyncRenderDependencies;
 		delete this._asyncRenderItemID;
 	}
 
