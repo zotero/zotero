@@ -26,6 +26,8 @@ item-pane-header {
 		}
 
 		.title-head {
+			align-self: stretch;
+
 			.title {
 				margin-top: calc(0px - var(--editable-text-padding-block));
 				flex: 1 1 0;
