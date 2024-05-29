@@ -1,13 +1,13 @@
 @mixin windows-form-element-base {
 	appearance: none;
 	padding: 0;
-	border: solid 1px transparent;
+	border: 1px solid transparent !important;
 	border-radius: 3px;
 
 	background-origin: border-box;
 	background-clip: padding-box, padding-box, border-box;
 	// Overwrite default background color
-	background-color: unset;
+	background-color: unset !important;
 	// Simulate linear-gradient border with border-radius using background-image
 
 	@include light-dark(--color-form-element-background, var(--color-background70), var(--fill-quinary));
