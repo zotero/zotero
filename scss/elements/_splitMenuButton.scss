@@ -18,6 +18,9 @@
 		height: 16px;
 		flex-shrink: 0;
 		margin-inline-end: 8px;
+		color: var(--split-button-icon-color);
+		fill: currentColor;
+		-moz-context-properties: fill,fill-opacity;
 	}
 
 	& [anonid="button-text"] {
