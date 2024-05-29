@@ -6047,7 +6047,10 @@ var ZoteroPane = new function()
 			
 			panel.removeAttribute('collapsed');
 			action.onclick = function () {
-				Zotero.launchURL('https://www.zotero.org/download/');
+				let url = Zotero.isBetaBuild
+					? 'https://www.zotero.org/support/beta_builds'
+					: 'https://www.zotero.org/download/';
+				Zotero.launchURL(url);
 			};
 			close.onclick = function () {
 				this.hideArchitectureWarning();
