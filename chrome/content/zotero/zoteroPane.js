@@ -511,7 +511,7 @@ var ZoteroPane = new function()
 		// Show warning in toolbar for 'dev' channel builds and troubleshooting mode
 		try {
 			let afterElement = 'zotero-tb-tabs-menu';
-			let isDevBuild = Zotero.version.includes('-dev');
+			let isDevBuild = Zotero.isDevBuild;
 			let isSafeMode = Services.appinfo.inSafeMode;
 			// Uncomment to test
 			//isDevBuild = true;
