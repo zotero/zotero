@@ -518,6 +518,8 @@ describe("Item pane", function () {
 
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxRender(attachmentsBox);
+			// TEMP: wait for a bit to ensure the preview is rendered?
+			await Zotero.Promise.delay(100);
 			assert.isTrue(itemDetails.isPaneVisible(paneID));
 			assert.equal(attachmentsBox._syncRenderItemID, item.id);
 			assert.equal(attachmentsBox._asyncRenderItemID, item.id);
