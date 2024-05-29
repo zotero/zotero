@@ -337,6 +337,7 @@
 
 			let toggleReadButton = doc.createXULElement("button");
 			toggleReadButton.classList.add("feed-item-toggleRead-button");
+			toggleReadButton.classList.add("fixed-width-button");
 			toggleReadButton.addEventListener("command", () => {
 				ZoteroPane.toggleSelectedItemsRead();
 			});

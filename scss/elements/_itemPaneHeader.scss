@@ -67,11 +67,17 @@ item-pane-header {
 			}
 
 			button {
-				height: 24px;
 				// Allow the button to grow/shrink to fit the container
 				width: 0;
 				margin: 0;
 				flex-grow: 1;
+
+				padding: 2px 6px;
+	
+				@media (-moz-platform: macos) {
+					height: 24px;
+					padding: 2px 2px;
+				}
 
 				.button-text {
 					width: 0;
@@ -82,6 +88,15 @@ item-pane-header {
 						overflow: hidden;
 						white-space: nowrap;
 						text-overflow: ellipsis;
+					}
+				}
+
+				&:is(.fixed-width-button) {
+					width: auto;
+					flex-grow: 0;
+
+					.button-text {
+						width: auto;
 					}
 				}
 			}
