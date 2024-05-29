@@ -30,14 +30,20 @@
 	
 	class ItemPaneHeader extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="title">
-				<editable-text />
+			<html:div class="head-container">
+				<html:div class="title-head">
+					<html:div class="title">
+						<editable-text />
+					</html:div>
+					
+					<html:div class="creator-year"></html:div>
+					
+					<html:div class="bib-entry"></html:div>
+				</html:div>
+
+				<html:div class="custom-head"></html:div>
 			</html:div>
-			
-			<html:div class="creator-year" />
-			
-			<html:div class="bib-entry" />
-			
+
 			<popupset>
 				<menupopup class="secondary-popup">
 					<menuitem data-l10n-id="text-action-copy" />
@@ -47,8 +53,6 @@
 					</menu>
 				</menupopup>
 			</popupset>
-			
-			<html:div class="custom-head"/>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
 		_item = null;
@@ -199,11 +203,11 @@
 			this.bibEntry.hidden = true;
 
 			if (headerMode === 'none') {
-				this.classList.add('no-header');
+				this.classList.add('no-title-head');
 				return;
 			}
 
-			this.classList.remove('no-header');
+			this.classList.remove('no-title-head');
 			
 			if (headerMode === 'bibEntry') {
 				if (!Zotero.Styles.initialized()) {
