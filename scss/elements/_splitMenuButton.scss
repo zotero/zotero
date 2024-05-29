@@ -2,6 +2,7 @@
 	display: flex;
 	align-items: center;
 	padding-right: 0;
+	gap: 6px;
 
 	& [anonid="button-image-and-text-box"] {
 		flex: 1;
@@ -32,12 +33,15 @@
 	}
 
 	& [anonid="dropmarker-separator"] {
-		height: calc(100% - 5px);
-		border-inline-start: 1px solid #aaa;
-		margin: 0 2px 0 4px;
+		height: calc(100% - 2px);
+		border-inline-start: 1px solid var(--fill-quinary);
 	}
 
 	& .split-menu-button-dropmarker {
-		margin-inline: 5px;
+		padding: 0;
+		margin: 0;
+		color: var(--fill-secondary);
+		fill: currentColor;
+		-moz-context-properties: fill,fill-opacity;
 	}
 }
