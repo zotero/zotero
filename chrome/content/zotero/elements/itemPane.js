@@ -154,6 +154,7 @@
 			this._itemDetails.tabID = "zotero-pane";
 			this._itemDetails.tabType = "library";
 			this._itemDetails.item = item;
+			this._itemDetails.collectionTreeRow = this.collectionTreeRow;
 
 			if (this.hasAttribute("collapsed")) {
 				return true;

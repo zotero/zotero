@@ -59,6 +59,14 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		this._tabType = tabType;
 		this.setAttribute('tabType', tabType);
 	}
+	
+	get collectionTreeRow() {
+		return this._collectionTreeRow;
+	}
+	
+	set collectionTreeRow(collectionTreeRow) {
+		this._collectionTreeRow = collectionTreeRow;
+	}
 
 	_syncRenderPending = false;
 
@@ -106,18 +114,24 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		await this._forceRenderAll();
 	};
 
+	get _renderDependencies() {
+		return [this._tabID, this._item?.id];
+	}
+
 	/**
 	 * @param {"sync" | "async"} [type]
 	 * @returns {boolean}
 	 */
 	_isAlreadyRendered(type = "sync") {
-		let key = `_${type}RenderItemID`;
+		let key = `_${type}RenderDependencies`;
 		let pendingKey = `_${type}RenderPending`;
+		let itemIDKey = `_${type}RenderItemID`;
 
-		let renderFlag = this[key];
-		let pendingFlag = this[pendingKey];
+		let oldDependencies = this[key];
+		let newDependencies = this._renderDependencies;
 
-		let isRendered = renderFlag && this.item?.id == renderFlag;
+		let isPending = this[pendingKey];
+		let isRendered = Zotero.Utilities.arrayEquals(oldDependencies, newDependencies);
 		if (this.skipRender) {
 			if (!isRendered) {
 				this[pendingKey] = true;
@@ -126,17 +140,20 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			return true;
 		}
 
-		if (!pendingFlag && renderFlag && this.item?.id == renderFlag) {
+		if (!isPending && isRendered) {
 			return true;
 		}
-		this[key] = this.item.id;
+		this[key] = newDependencies;
 		this[pendingKey] = false;
+		this[itemIDKey] = this.item?.id;
 		return false;
 	}
 
 	_resetRenderedFlags() {
 		// Clear cached flags to allow re-rendering
+		delete this._syncRenderDependencies;
 		delete this._syncRenderItemID;
+		delete this._asyncRenderDependencies;
 		delete this._asyncRenderItemID;
 	}
 

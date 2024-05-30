@@ -99,6 +99,10 @@
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 		
+		get _renderDependencies() {
+			return [...super._renderDependencies, this.collectionTreeRow?.id];
+		}
+		
 		init() {
 			this.initCollapsibleSection();
 			this._creatorTypeMenu.addEventListener('command', async (event) => {

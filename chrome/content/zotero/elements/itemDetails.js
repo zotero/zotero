@@ -115,6 +115,14 @@
 		set tabType(tabType) {
 			this._tabType = tabType;
 		}
+		
+		get collectionTreeRow() {
+			return this._collectionTreeRow;
+		}
+		
+		set collectionTreeRow(collectionTreeRow) {
+			this._collectionTreeRow = collectionTreeRow;
+		}
 
 		get pinnedPane() {
 			return this.getAttribute('pinnedPane');
@@ -262,6 +270,7 @@
 				box.tabID = this.tabID;
 				box.tabType = this.tabType;
 				box.item = item;
+				box.collectionTreeRow = this.collectionTreeRow;
 				// Execute sync render immediately
 				if (!box.hidden && box.render) {
 					if (box.render) {
