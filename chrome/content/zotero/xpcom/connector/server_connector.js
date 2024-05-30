@@ -760,7 +760,6 @@ Zotero.Server.Connector.SaveItems.prototype = {
 					requestData,
 					function (jsonItems, items) {
 						session.addItems(items);
-						let singleFile = false;
 						// Only return the properties the connector needs
 						jsonItems = jsonItems.map((item) => {
 							let o = {
@@ -772,9 +771,6 @@ Zotero.Server.Connector.SaveItems.prototype = {
 							};
 							if (item.attachments) {
 								o.attachments = item.attachments.map((attachment) => {
-									if (attachment.singleFile) {
-										singleFile = true;
-									}
 									return {
 										id: session.id + '_' + attachment.id, // TODO: Remove prefix
 										title: attachment.title,
@@ -785,7 +781,7 @@ Zotero.Server.Connector.SaveItems.prototype = {
 							};
 							return o;
 						});
-						resolve([201, "application/json", JSON.stringify({ items: jsonItems, singleFile: singleFile })]);
+						resolve([201, "application/json", JSON.stringify({ items: jsonItems })]);
 					}
 				)
 				// Add items to session once all attachments have been saved
@@ -912,12 +908,18 @@ Zotero.Server.Connector.SaveItems.prototype = {
 }
 
 /**
- * Saves a snapshot to the DB
+ * Attaches a singlefile attachment to an item saved with /saveItems or /saveSnapshot
+ * If data.snapshotContent is empty, it means the save failed in the Connector
+ * And we fallback to saving in Zotero
  *
  * Accepts:
- *		uri - The URI of the page to be saved
- *		html - document.innerHTML or equivalent
+ * 		sessionID
+ * 		snapshotContent
+ *		url - The URI of the page to be saved
+ * 		title
  *		cookie - document.cookie or equivalent
+ *		detailedCookies
+ * 		proxy
  * Returns:
  *		Nothing (200 OK response)
  */
@@ -937,21 +939,6 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 		// Retrieve payload
 		let data = requestData.data;
 
-		// For a brief while the connector used SingleFileZ to save web pages, but we
-		// switched to using SingleFile. If the user is using that connector, the request
-		// will be multipart, which results in an array being passed in. In that case we
-		// want to mark this a legacySnapshot so we can ignore the snapshot content we have
-		// been given and save our own. This results in a double save, which takes a long
-		// time and is not ideal, but hopefully with auto-update of extensions it will be
-		// not be in use for many people for long.
-		let legacySnapshot = false;
-		if (Array.isArray(data)) {
-			legacySnapshot = true;
-			data = JSON.parse(Zotero.Utilities.Internal.decodeUTF8(
-				requestData.data.find(e => e.params.name === "payload").body
-			));
-		}
-
 		if (!data.sessionID) {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
 		}
@@ -962,47 +949,7 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
 		}
 
-		let snapshotContent;
-		if (legacySnapshot) {
-			// Retrieve our snapshot content inside a hidden browser
-			let cookieSandbox = data.uri
-				? new Zotero.CookieSandbox(
-					null,
-					data.uri,
-					data.detailedCookies ? "" : data.cookie || "",
-					requestData.headers["User-Agent"]
-				)
-				: null;
-			if (cookieSandbox && data.detailedCookies) {
-				cookieSandbox.addCookiesFromHeader(data.detailedCookies);
-			}
-
-			// Get the URL from the first pending attachment
-			if (!session.pendingAttachments.length) {
-				session.savingDone = true;
-
-				return [200, 'text/plain', 'Legacy snapshot has no pending attachments.'];
-			}
-
-			let url = session.pendingAttachments[0][1].url;
-
-			let browser = new HiddenBrowser({
-				docShell: {
-					allowImages: true
-				},
-				cookieSandbox,
-			});
-			await browser.load(url, { requireSuccessfulStatus: true });
-			try {
-				snapshotContent = await browser.snapshot();
-			}
-			finally {
-				browser.destroy();
-			}
-		}
-		else {
-			snapshotContent = data.snapshotContent;
-		}
+		let snapshotContent = data.snapshotContent;
 
 		if (!snapshotContent) {
 			// Connector SingleFile has failed so if we re-save attachments (via
@@ -1081,7 +1028,8 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 };
 
 /**
- * Saves a snapshot to the DB
+ * Either creates a webpage item or a PDF/EPUB top-level item in Zotero
+ * Called by the Connector when no translators are detected on the page
  *
  * Accepts:
  *		uri - The URI of the page to be saved
@@ -1350,53 +1298,6 @@ Zotero.Server.Connector.DelaySync.prototype = {
 	init: function (requestData) {
 		Zotero.Sync.Runner.delaySync(10000);
 		return 204;
-	}
-};
-
-/**
- * Gets progress for an attachment that is currently being saved
- *
- * Accepts:
- *      Array of attachment IDs returned by savePage, saveItems, or saveSnapshot
- * Returns:
- *      200 response code with current progress in body. Progress is either a number
- *      between 0 and 100 or "false" to indicate that saving failed.
- */
-Zotero.Server.Connector.Progress = function() {};
-Zotero.Server.Endpoints["/connector/attachmentProgress"] = Zotero.Server.Connector.Progress;
-Zotero.Server.Connector.Progress.prototype = {
-	supportedMethods: ["POST"],
-	supportedDataTypes: ["application/json"],
-	permitBookmarklet: true,
-	
-	/**
-	 * @param {String} data POST data or GET query string
-	 * @param {Function} sendResponseCallback function to send HTTP response
-	 */
-	init: function(data, sendResponseCallback) {
-		sendResponseCallback(
-			200,
-			"application/json",
-			JSON.stringify(
-				data.map((id) => {
-					var [sessionID, progressID] = id.split('_');
-					var session = Zotero.Server.Connector.SessionManager.get(sessionID);
-					var items = session.getAllProgress();
-					for (let item of items) {
-						for (let attachment of item.attachments) {
-							// TODO: Change to progressID instead of id once we stop prepending
-							// the sessionID to support older connector versions
-							if (attachment.id == progressID) {
-								// TODO: Remove
-								return attachment.progress == -1 ? false : attachment.progress;
-								//return attachment.progress;
-							}
-						}
-					}
-					return null;
-				})
-			)
-		);
 	}
 };
 
