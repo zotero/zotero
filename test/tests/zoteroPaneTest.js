@@ -1501,6 +1501,13 @@ describe("ZoteroPane", function() {
 			await item.saveTx({
 				skipSelect: true
 			});
+			// Make sure there is more than one tab so that the tabs menu is focusable
+			if (win.Zotero_Tabs.numTabs == 1) {
+				let attachment = await importFileAttachment('test.pdf');
+				await attachment.saveTx();
+				await zp.viewAttachment(attachment.id);
+				win.Zotero_Tabs.select('zotero-pane');
+			}
 			await waitForItemsLoad(win);
 			await zp.collectionsView.selectLibrary(userLibraryID);
 		});
