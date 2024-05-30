@@ -64,6 +64,12 @@ item-pane-header {
 			align-self: stretch;
 			gap: 8px;
 
+			@media (-moz-platform: macos) {
+				// The extent of the button is about 2px wider than its optical width
+				// need to compensate for that
+				gap: 4px;
+			}
+
 			&:empty {
 				display: none;
 			}
@@ -75,10 +81,14 @@ item-pane-header {
 				flex-grow: 1;
 
 				padding: 2px 6px;
-	
+
 				@media (-moz-platform: macos) {
 					height: 24px;
-					padding: 2px 2px;
+					padding: 3px 0px 1px 0px;
+
+					&:is(.split-menu-button) {
+						padding: 3px 2px 1px 3px;
+					}
 				}
 
 				.button-text {

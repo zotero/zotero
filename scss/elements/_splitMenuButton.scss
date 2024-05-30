@@ -8,7 +8,7 @@
 		flex: 1;
 		display: flex;
 		align-items: center;
-		justify-content: left;
+		justify-content: center;
 		// Allow the button to grow/shrink to fit the container
 		width: 0;
 	}
@@ -17,7 +17,7 @@
 		width: 16px;
 		height: 16px;
 		flex-shrink: 0;
-		margin-inline-end: 8px;
+		margin-inline-end: 4px;
 		color: var(--split-button-icon-color);
 		fill: currentColor;
 		-moz-context-properties: fill,fill-opacity;
