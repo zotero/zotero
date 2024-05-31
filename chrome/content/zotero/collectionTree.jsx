@@ -373,6 +373,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			label = document.createElement('input');
 			label.className = 'cell-text';
 			label.setAttribute("size", 5);
+			label.toggleAttribute("no-windows-native", true);
 			label.value = treeRow.editingName;
 			label.addEventListener('input', e => this.handleEditingChange(e, index));
 			label.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
