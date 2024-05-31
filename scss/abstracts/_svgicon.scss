@@ -1,12 +1,8 @@
 @mixin svgicon($icon, $color, $size: "16", $prefix: false, $has2x: false, $light-dark: false) {
-    background:
-        -make-icon-background($icon, $color, $size, $prefix, $has2x) no-repeat center/contain,
-        
-        // Invisible backgrounds to preload all variants:
-        -make-icon-background($icon, 'white', $size, $prefix, $has2x) center/0,
-        -make-icon-background($icon, 'light', $size, $prefix, $has2x) center/0,
-        -make-icon-background($icon, 'dark', $size, $prefix, $has2x) center/0;
     @if ($color == 'universal') {
+        background:
+            -make-icon-background($icon, $color, $size, $prefix, $has2x) no-repeat center/contain;
+        
         @if ($light-dark) {
             @include light-dark(fill, nth($light-dark, 1), nth($light-dark, 2));
         }
@@ -14,6 +10,15 @@
             fill: currentColor;
         }
         -moz-context-properties: fill, fill-opacity;
+    }
+    @else {
+        background:
+            -make-icon-background($icon, $color, $size, $prefix, $has2x) no-repeat center/contain,
+
+            // Invisible backgrounds to preload all variants:
+            -make-icon-background($icon, 'white', $size, $prefix, $has2x) center/0,
+            -make-icon-background($icon, 'light', $size, $prefix, $has2x) center/0,
+            -make-icon-background($icon, 'dark', $size, $prefix, $has2x) center/0;
     }
 }
 
