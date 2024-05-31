@@ -1004,7 +1004,7 @@ describe("Zotero.ItemTree", function() {
 		
 		// Serve a PDF to test URL dragging
 		before(function () {
-			Components.utils.import("resource://zotero-unit/httpd.js");
+			var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
 			httpd = new HttpServer();
 			httpd.start(port);
 			var file = getTestDataDirectory();
