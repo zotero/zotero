@@ -110,7 +110,6 @@ Zotero.Server.Connector = {
 		return { library, collection, editable };
 	}
 };
-Zotero.Server.Connector.Data = {};
 
 Zotero.Server.Connector.SessionManager = {
 	_sessions: new Map(),
