@@ -221,6 +221,8 @@ XPCOMUtils.defineLazyModuleGetters(ZoteroContext.prototype, {
  * components may not have yet been initialized.
  */
 function makeZoteroContext() {
+	var subscriptLoader = Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader);
+	
 	if(zContext) {
 		// Swap out old zContext
 		var oldzContext = zContext;
@@ -232,9 +234,10 @@ function makeZoteroContext() {
 	} else {
 		zContext = new ZoteroContext();
 		zContext.Zotero = function() {};
+
+		// Override Date prototype to follow Zotero configured locale #3880
+		subscriptLoader.loadSubScript("chrome://zotero/content/dateOverrides.js");
 	}
-	
-	var subscriptLoader = Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader);
 	
 	// Load zotero.js first
 	subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFilesAll[0] + ".js", zContext, 'utf-8');
