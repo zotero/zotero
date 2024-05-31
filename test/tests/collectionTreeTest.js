@@ -1385,7 +1385,7 @@ describe("Zotero.CollectionTree", function() {
 
 
 		describe("with feed items", function () {
-			Components.utils.import("resource://zotero-unit/httpd.js");
+			var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");;
 			
 			const httpdPort = 16214;
 			var httpd;

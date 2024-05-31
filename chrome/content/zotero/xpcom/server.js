@@ -23,6 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
+var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");
+Components.utils.import("resource://gre/modules/NetUtil.jsm");
+
 Zotero.Server = new function() {
 	var _onlineObserverRegistered, serv;
 	this.responseCodes = {

@@ -823,7 +823,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
-			// Use httpd.js instead of sinon so we get a real nsIURL with a channel
+			// Use HTTPD.jsm instead of sinon so we get a real nsIURL with a channel
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure
@@ -849,7 +849,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		
 		it("should show an error for a 404 for the parent directory", function* () {
-				// Use httpd.js instead of sinon so we get a real nsIURL with a channel
+				// Use HTTPD.jsm instead of sinon so we get a real nsIURL with a channel
 			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
@@ -937,7 +937,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
-			// Use httpd.js instead of sinon so we get a real nsIURL with a channel
+			// Use HTTPD.jsm instead of sinon so we get a real nsIURL with a channel
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure

@@ -1177,7 +1177,8 @@ async function startHTTPServer(port = null) {
 	if (!port) {
 		port = httpdServerPort;
 	}
-	Components.utils.import("resource://zotero-unit/httpd.js");
+
+	var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");;
 	var httpd = new HttpServer();
 	while (true) {
 		try {
