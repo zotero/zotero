@@ -1,7 +1,7 @@
 "use strict";
 
 describe("Connector Server", function () {
-	Components.utils.import("resource://zotero-unit/httpd.js");
+	var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
 	var win, connectorServerPath, testServerPath, httpd;
 	var testServerPort = 16213;
 	var snapshotHTML = "<html><head><title>Title</title><body>Body</body></html>";
