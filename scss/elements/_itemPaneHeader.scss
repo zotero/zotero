@@ -103,9 +103,9 @@ item-pane-header {
 					}
 				}
 
-				&:is(.fixed-width-button) {
+				&:is(.no-shrink-button) {
 					width: auto;
-					flex-grow: 0;
+					flex-shrink: 0;
 
 					.button-text {
 						width: auto;
