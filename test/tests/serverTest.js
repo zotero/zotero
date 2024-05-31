@@ -1,7 +1,6 @@
 "use strict";
 
 describe("Zotero.Server", function () {
-	Components.utils.import("resource://zotero-unit/httpd.js");
 	var serverPath;
 	
 	before(function* () {
