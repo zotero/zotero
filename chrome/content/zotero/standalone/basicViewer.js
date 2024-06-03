@@ -68,14 +68,6 @@ window.addEventListener("keypress", function (event) {
 	}
 });
 
-// Handle <label class="text-link />
-window.addEventListener("click", function (event) {
-	if (event.originalTarget.localName == 'label'
-			&& event.originalTarget.classList.contains('text-link')) {
-		Zotero.launchURL(event.originalTarget.getAttribute('href'));
-	}
-});
-
 window.addEventListener('dragover', (e) => {
 	// Prevent default to allow drop (e.g. to allow dropping an XPI on the Add-ons window)
 	e.preventDefault();
