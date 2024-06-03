@@ -76,7 +76,7 @@
 		 * @param {DOMElement} [options.forEl] Anchor node
 		 * @param {Boolean} [options.force] Show even if already shown
 		 */
-		show(options) {
+		async show(options) {
 			Components.utils.import("resource://gre/modules/Services.jsm");
 			if (!Zotero.Prefs.get("firstRunGuidance")) return;
 			
@@ -112,7 +112,7 @@
 			
 			if (!useLastText) {
 				if (!text) {
-					text = Zotero.getString("firstRunGuidance." + about);
+					text = await document.l10n.formatValue("first-run-guidance-" + about);
 				}
 				text = text.split("\n");
 				var descriptionNode = document.querySelector('.panel-text');

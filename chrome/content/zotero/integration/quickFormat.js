@@ -85,12 +85,6 @@ var Zotero_QuickFormat = new function () {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
 
-			// Include a different key combo in message on Mac
-			if(Zotero.isMac) {
-				var qf = document.querySelector('.citation-dialog.guidance');
-				qf && qf.setAttribute('about', qf.getAttribute('about') + "Mac");
-			}
-			
 			dialog = document.querySelector(".citation-dialog.entry");
 			editor = document.querySelector(".citation-dialog.editor");
 			_resizeEditor();
