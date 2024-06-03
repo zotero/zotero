@@ -15,12 +15,22 @@ p {
 	line-height: 1.5em;
 }
 
-a:link, a:visited {
+a:any-link {
 	color: #900;
 }
 
 a:hover, a:active {
 	color: #777;
+}
+
+@media (prefers-color-scheme: dark) {
+	a:any-link {
+		color: #f00;
+	}
+
+	a:hover, a:active {
+		color: #999;
+	}
 }
 
 
