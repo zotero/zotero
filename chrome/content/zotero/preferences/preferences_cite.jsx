@@ -144,21 +144,7 @@ Zotero_Preferences.Cite = {
 	
 	
 	openStylesPage: function () {
-		Zotero.openInViewer("https://www.zotero.org/styles/", {
-			onLoad(doc) {
-				// Hide header, intro paragraph, Link, and Source
-				//
-				// (The first two aren't sent to the client normally, but hide anyway in case they are.)
-				var style = doc.createElement('style');
-				style.type = 'text/css';
-				style.innerHTML = 'h1, #intro, .style-individual-link, .style-view-source { display: none !important; }'
-					// TEMP: Default UA styles that aren't being included in Firefox 60 for some reason
-					+ 'html { background: #fff; }'
-					+ 'a { color: rgb(0, 0, 238) !important; text-decoration: underline; }'
-					+ 'a:active { color: rgb(238, 0, 0) !important; }';
-				doc.getElementsByTagName('head')[0].appendChild(style);
-			}
-		});
+		Zotero.openInViewer("https://www.zotero.org/styles/");
 	},
 	
 	
