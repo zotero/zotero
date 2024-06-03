@@ -29,7 +29,6 @@ ChromeUtils.registerWindowActor("FeedAbstract", {
 		moduleURI: "chrome://zotero/content/actors/FeedAbstractChild.jsm",
 		events: {
 			DOMDocElementInserted: {},
-			click: {},
 		}
 	},
 	messageManagerGroups: ["feedAbstract"]
@@ -45,5 +44,18 @@ ChromeUtils.registerWindowActor("ZoteroPrint", {
 			pageshow: {}
 		}
 	}
+});
+
+ChromeUtils.registerWindowActor("ExternalLinkHandler", {
+	parent: {
+		moduleURI: "chrome://zotero/content/actors/ExternalLinkHandlerParent.jsm",
+	},
+	child: {
+		moduleURI: "chrome://zotero/content/actors/ExternalLinkHandlerChild.jsm",
+		events: {
+			click: {},
+		}
+	},
+	messageManagerGroups: ["feedAbstract", "basicViewer"]
 });
 
