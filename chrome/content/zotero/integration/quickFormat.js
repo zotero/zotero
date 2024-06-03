@@ -1343,7 +1343,7 @@ var Zotero_QuickFormat = new function () {
 		// to position references panel properly
 		let dialogBottom = dialog.getBoundingClientRect().bottom;
 		let panelTop = referencePanel.getBoundingClientRect().top;
-		if (Math.abs(dialogBottom - panelTop) > 5) {
+		if (Math.abs(dialogBottom - panelTop) > 5 && referencePanel.state == "open") {
 			referencePanel.hidePopup();
 			// Skip a tick, otherwise the panel may just remain open where it was
 			setTimeout(_openReferencePanel);
