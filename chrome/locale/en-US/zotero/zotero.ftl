@@ -467,8 +467,7 @@ attachment-info-convert-note =
             [child] Item
             *[unknown] New
     } Note
-    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note
-    by migrating it to a separate note.
+    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
 
 attachment-preview-placeholder = No attachment to preview
 
