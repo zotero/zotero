@@ -108,6 +108,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			50
 		);
 		
+		this._prefsUnregisterIDs = Zotero.Items.FIRST_CREATOR_DISPLAY_PREFS
+			.map(pref => Zotero.Prefs.registerObserver(pref, this._handleFirstCreatorDisplayPrefChange));
+		
 		this._itemsPaneMessage = null;
 		
 		this._columnsId = null;
@@ -122,6 +125,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
+		for (let id of this._prefsUnregisterIDs) {
+			Zotero.Prefs.unregisterObserver(id);
+		}
 		this._writeColumnPrefsToFile(true);
 	}
 
@@ -3202,6 +3208,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		return this._rowCache[itemID] = row;
+	}
+	
+	_handleFirstCreatorDisplayPrefChange = () => {
+		this._rowCache = {};
+		this.tree.invalidate();
 	}
 
 	_getColumnPrefs = () => {

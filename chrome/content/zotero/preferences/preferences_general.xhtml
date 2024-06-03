@@ -77,6 +77,31 @@
 					><menupopup/></menulist>
 				</hbox>
 			</vbox>
+
+			<hbox align="center">
+				<label data-l10n-id="preferences-first-creator-name-format"/>
+				<menulist id="first-creator-name-format-menulist" preference="extensions.zotero.firstCreator.nameFormat" native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-first-creator-name-format-last" value="last"/>
+						<menuitem data-l10n-id="preferences-first-creator-name-format-last-first" value="lastFirst"/>
+						<menuitem data-l10n-id="preferences-first-creator-name-format-first-last" value="firstLast"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+
+			<hbox align="center" class="indented-pref">
+				<label control="first-creator-max-names" data-l10n-id="preferences-first-creator-max-names"/>
+				<menulist id="first-creator-max-names-menulist" preference="extensions.zotero.firstCreator.maxNames" native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-first-creator-max-names-option" data-l10n-args='{ "max": 0 }' value="0"/>
+						<menuitem data-l10n-id="preferences-first-creator-max-names-option" data-l10n-args='{ "max": 1 }' value="1"/>
+						<menuitem data-l10n-id="preferences-first-creator-max-names-option" data-l10n-args='{ "max": 2 }' value="2"/>
+						<menuitem data-l10n-id="preferences-first-creator-max-names-option" data-l10n-args='{ "max": 3 }' value="3"/>
+						<menuitem data-l10n-id="preferences-first-creator-max-names-option" data-l10n-args='{ "max": 4 }' value="4"/>
+						<menuitem data-l10n-id="preferences-first-creator-max-names-option" data-l10n-args='{ "max": 5 }' value="5"/>
+					</menupopup>
+				</menulist>
+			</hbox>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">

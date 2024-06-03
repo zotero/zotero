@@ -66,15 +66,18 @@
 
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
-			this._prefsObserverIDs = [
-				Zotero.Prefs.registerObserver('itemPaneHeader', () => {
-					// TEMP?: _forceRenderAll() doesn't do anything if the section is hidden, so un-hide first
-					this.hidden = false;
-					this._forceRenderAll();
-				}),
-				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.style', () => this._forceRenderAll()),
-				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.locale', () => this._forceRenderAll()),
+			
+			let prefs = [
+				'itemPaneHeader',
+				'itemPaneHeader.bibEntry.style',
+				'itemPaneHeader.bibEntry.locale',
+				...Zotero.Items.FIRST_CREATOR_DISPLAY_PREFS,
 			];
+			this._prefsObserverIDs = prefs.map(pref => Zotero.Prefs.registerObserver(pref, () => {
+				// TEMP?: _forceRenderAll() doesn't do anything if the section is hidden, so un-hide first
+				this.hidden = false;
+				this._forceRenderAll();
+			}));
 			
 			this.title = this.querySelector('.title');
 			this.titleField = this.title.querySelector('editable-text');
