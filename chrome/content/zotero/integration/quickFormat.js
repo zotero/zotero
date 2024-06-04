@@ -150,15 +150,8 @@ var Zotero_QuickFormat = new function () {
 			});
 			referenceBox.addEventListener("click", (e) => {
 				let item = e.target.closest("richlistitem");
-				if (!item || e.button !== 0) return;
-				// Prevent selecting separator with CMD/Ctrl-Click
-				if (item.disabled) {
-					// Clear selection on header click
-					referenceBox.clearSelection();
-					referenceBox.currentIndex = 0;
-					e.preventDefault();
-					return;
-				}
+				if (!item || e.button !== 0 || item.disabled) return;
+
 				let mouseMultiSelect = e.shiftKey || (Zotero.isMac && e.metaKey) || (!Zotero.isMac && e.ctrlKey);
 				let multipleSelected = referenceBox.selectedCount > 1;
 				let isItemSelected = [...referenceBox.selectedItems].findIndex(node => node == item) !== -1;
@@ -1782,12 +1775,6 @@ var Zotero_QuickFormat = new function () {
 
 	function _onQuickSearchClick(event) {
 		if (qfGuidance) qfGuidance.hide();
-		if (!event.target.classList.contains("editor")) {
-			// On click of border outside of the editor, clear multi-select
-			referenceBox.currentIndex = 0;
-			referenceBox.clearSelection();
-			return;
-		}
 		let clickX = event.clientX;
 		let clickY = event.clientY;
 		let { lastBubble, startOfTheLine } = getLastBubbleBeforePoint(clickX, clickY);
