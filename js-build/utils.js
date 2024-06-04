@@ -30,7 +30,7 @@ function onProgress(sourcefile, outfile, operation) {
 	if ('isError' in global && global.isError) {
 		return;
 	}
-	if (NODE_ENV == 'debug') {
+	if (NODE_ENV === 'debug' && outfile) {
 		console.log(`${colors.blue(`[${operation}]`)} ${sourcefile} -> ${outfile}`);
 	}
 	else {
