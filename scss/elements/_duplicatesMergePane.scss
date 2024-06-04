@@ -3,6 +3,7 @@ duplicates-merge-pane {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 	}
 
 	padding-top: 9px;
@@ -19,15 +20,14 @@ duplicates-merge-pane {
 		}
 	}
 
-	#zotero-duplicates-merge-field-select {
-		margin-bottom: 9px;
-	}
-
 	#zotero-duplicates-merge-item-box-container {
 		flex: 1;
 		padding-inline: 8px;
 		overflow-y: scroll;
-		border-top: var(--material-border-quinary);
+
+		#zotero-duplicates-merge-item-box {
+			border-top: var(--material-border-quinary);
+		}
 
 		collapsible-section > .head {
 			display: none;

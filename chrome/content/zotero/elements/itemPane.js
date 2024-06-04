@@ -545,6 +545,7 @@
 				}
 				case "duplicates": {
 					this._deck.selectedIndex = 3;
+					this.removeAttribute("collapsed");
 					break;
 				}
 			}
