@@ -164,6 +164,10 @@ var Zotero_QuickFormat = new function () {
 					Zotero_QuickFormat._bubbleizeSelected();
 					return;
 				}
+				// Make sure there is a selected item when shift-click is handled
+				if (referenceBox.selectedIndex < 1) {
+					_selectFirstReference();
+				}
 				// Shift-click can end up selecting disabled separator, so make sure it's removed
 				setTimeout(() => {
 					let selectedSeparators = [...document.querySelectorAll("richlistitem[disabled='true'][selected='true']")];
