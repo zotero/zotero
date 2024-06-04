@@ -2,7 +2,6 @@ body {
 	font: 12pt "Times New Roman", Times, Georgia, serif;
 	margin: 0;
 	width: auto;
-	color: black;
 }
 
 /* Page Breaks (page-break-inside only recognized by Opera) */
@@ -22,6 +21,6 @@ h2 {
 }
 
 a {
-	color: #000;
+	color: inherit;
 	text-decoration: none;
 }

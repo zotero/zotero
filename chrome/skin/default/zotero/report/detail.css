@@ -1,5 +1,8 @@
 body {
-	background: white;
+	color-scheme: light dark;
+	/* These should be the defaults, but just in case: */
+	background: Canvas;
+	color: CanvasText;
 }
 
 a {
