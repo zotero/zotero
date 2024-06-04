@@ -338,6 +338,7 @@
 
 			let toggleReadButton = doc.createXULElement("button");
 			toggleReadButton.classList.add("feed-item-toggleRead-button");
+			toggleReadButton.classList.add("no-shrink-button");
 			toggleReadButton.addEventListener("command", () => {
 				ZoteroPane.toggleSelectedItemsRead();
 			});
@@ -447,6 +448,12 @@
 				+ key + ')';
 			elem.title = tooltip;
 			elem.image = this._translationTarget.treeViewImage;
+
+			// Set button width to take up the free width when the text is too long
+			// to prevent another button from growing
+			// 6px button padding + 16px icon + 4 px gap + ${textWidth} + 6px gap
+			// + 1px separator + 6px gap + 8px dropdown arrow + 6px button padding
+			elem.style.flexBasis = `${elem.querySelector(`[anonid="button-text"]`).scrollWidth + 53}px`;
 		}
 	
 		setTranslationTarget(translationTarget) {

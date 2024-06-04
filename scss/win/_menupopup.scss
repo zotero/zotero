@@ -12,6 +12,8 @@ menupopup {
 		margin-left: 4px;
 		margin-right: 4px;
 		border-radius: 4px;
+		fill: currentColor;
+		-moz-context-properties: fill,fill-opacity;
 		&[_moz-menuactive="true"] {
 			background: var(--fill-quinary);
 		}

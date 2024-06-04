@@ -30,14 +30,20 @@
 	
 	class ItemPaneHeader extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="title">
-				<editable-text />
+			<html:div class="head-container">
+				<html:div class="title-head">
+					<html:div class="title">
+						<editable-text />
+					</html:div>
+					
+					<html:div class="creator-year"></html:div>
+					
+					<html:div class="bib-entry"></html:div>
+				</html:div>
+
+				<html:div class="custom-head"></html:div>
 			</html:div>
-			
-			<html:div class="creator-year" />
-			
-			<html:div class="bib-entry" />
-			
+
 			<popupset>
 				<menupopup class="secondary-popup">
 					<menuitem data-l10n-id="text-action-copy" />
@@ -47,8 +53,6 @@
 					</menu>
 				</menupopup>
 			</popupset>
-			
-			<html:div class="custom-head"/>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 		
 		_item = null;
@@ -68,8 +72,6 @@
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
 			this._prefsObserverIDs = [
 				Zotero.Prefs.registerObserver('itemPaneHeader', () => {
-					// TEMP?: _forceRenderAll() doesn't do anything if the section is hidden, so un-hide first
-					this.hidden = false;
 					this._forceRenderAll();
 				}),
 				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.style', () => this._forceRenderAll()),
@@ -196,15 +198,16 @@
 				headerMode = 'title';
 			}
 			
-			if (headerMode === 'none') {
-				this.hidden = true;
-				return;
-			}
-			
-			this.hidden = false;
 			this.title.hidden = true;
 			this.creatorYear.hidden = true;
 			this.bibEntry.hidden = true;
+
+			if (headerMode === 'none') {
+				this.classList.add('no-title-head');
+				return;
+			}
+
+			this.classList.remove('no-title-head');
 			
 			if (headerMode === 'bibEntry') {
 				if (!Zotero.Styles.initialized()) {
@@ -379,6 +382,7 @@
 				doc: document,
 				append,
 			});
+			this.classList.toggle('has-custom-head', customHead.innerHTML);
 		}
 	}
 	customElements.define("item-pane-header", ItemPaneHeader);

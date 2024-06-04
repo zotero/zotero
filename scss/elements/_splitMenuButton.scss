@@ -1,0 +1,50 @@
+.split-menu-button {
+	display: flex;
+	align-items: center;
+	padding-right: 0;
+	gap: 6px;
+
+	& [anonid="button-image-and-text-box"] {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		// Allow the button to grow/shrink to fit the container
+		width: 0;
+	}
+
+	& [anonid="button-image"] {
+		width: 16px;
+		height: 16px;
+		flex-shrink: 0;
+		margin-inline-end: 4px;
+		color: var(--split-button-icon-color);
+		fill: currentColor;
+		-moz-context-properties: fill,fill-opacity;
+	}
+
+	& [anonid="button-text"] {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	& [anonid="dropmarker-box"] {
+		display: flex;
+		align-items: center;
+		overflow: hidden;
+	}
+
+	& [anonid="dropmarker-separator"] {
+		height: calc(100% - 2px);
+		border-inline-start: 1px solid var(--fill-quinary);
+	}
+
+	& .split-menu-button-dropmarker {
+		padding: 0;
+		margin: 0;
+		color: var(--fill-secondary);
+		fill: currentColor;
+		-moz-context-properties: fill,fill-opacity;
+	}
+}

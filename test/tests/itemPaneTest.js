@@ -66,7 +66,23 @@ describe("Item pane", function () {
 		it("should be hidden when set to None mode", async function () {
 			Zotero.Prefs.set('itemPaneHeader', 'none');
 			await createDataObject('item', itemData);
-			assert.isTrue(doc.querySelector('item-pane-header').hidden);
+			assert.equal(doc.querySelector('item-pane-header').clientHeight, 0);
+		});
+
+		it("should show custom header elements when set to None mode", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'none');
+
+			// Use feed item toggle button as an example
+			let feed = await createFeed();
+			await selectLibrary(win, feed.libraryID);
+			await waitForItemsLoad(win);
+
+			var item = await createDataObject('feedItem', { libraryID: feed.libraryID });
+			await ZoteroPane.selectItem(item.id);
+			let feedButton = ZoteroPane.itemPane._itemDetails.querySelector('.feed-item-toggleRead-button');
+			assert.exists(feedButton);
+
+			await selectLibrary(win);
 		});
 		
 		it("should show title when set to Title mode", async function () {

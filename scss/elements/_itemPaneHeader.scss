@@ -11,49 +11,118 @@ item-pane-header {
 	overflow-y: auto;
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 
-	.title {
-		margin-top: calc(0px - var(--editable-text-padding-block));
-		flex: 1 1 0;
-		font-weight: 600;
-		line-height: 1.333;
-		
-		editable-text {
-			flex: 1;
-		}
-	}
-	
-	.creator-year {
-		color: var(--fill-secondary);
-	}
-	
-	.bib-entry {
-		line-height: 1.5;
-		
-		&.loading {
-			color: var(--fill-secondary);
-		}
-	}
-	
-	.creator-year, .bib-entry {
-		// Set padding to match editable-text in tight mode, plus 1px for border
-		padding-inline: calc(var(--editable-text-tight-padding-inline) + 1px);
-		overflow-wrap: anywhere;
-	}
-
-	.custom-head {
+	.head-container {
 		display: flex;
-		flex-direction: row;
-		align-self: stretch;
-		gap: 6px;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
 
-		&:empty {
-			display: none;
+		@include compact {
+			gap: 4px;
 		}
 
-		button {
-			height: 26px;
-			margin: 0;
-			flex-grow: 1;
+		@include comfortable {
+			gap: 8px;
+		}
+
+		.title-head {
+			align-self: stretch;
+
+			.title {
+				margin-top: calc(0px - var(--editable-text-padding-block));
+				flex: 1 1 0;
+				font-weight: 600;
+				line-height: 1.333;
+				
+				editable-text {
+					flex: 1;
+				}
+			}
+			
+			.creator-year {
+				color: var(--fill-secondary);
+			}
+			
+			.bib-entry {
+				line-height: 1.5;
+				
+				&.loading {
+					color: var(--fill-secondary);
+				}
+			}
+			
+			.creator-year, .bib-entry {
+				// Set padding to match editable-text in tight mode, plus 1px for border
+				padding-inline: calc(var(--editable-text-tight-padding-inline) + 1px);
+				overflow-wrap: anywhere;
+			}
+		}
+
+		.custom-head {
+			display: flex;
+			flex-direction: row;
+			align-self: stretch;
+			gap: 8px;
+
+			@media (-moz-platform: macos) {
+				// The extent of the button is about 2px wider than its optical width
+				// need to compensate for that
+				gap: 4px;
+			}
+
+			&:empty {
+				display: none;
+			}
+
+			button {
+				// Allow the button to grow/shrink to fit the container
+				width: 0;
+				margin: 0;
+				flex-grow: 1;
+
+				padding: 2px 6px;
+
+				@media (-moz-platform: macos) {
+					height: 24px;
+					padding: 3px 0px 1px 0px;
+
+					&:is(.split-menu-button) {
+						padding: 3px 2px 1px 3px;
+					}
+				}
+
+				.button-text {
+					width: 0;
+					flex-grow: 1;
+					justify-content: center;
+
+					&::before {
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;
+					}
+				}
+
+				&:is(.no-shrink-button) {
+					width: auto;
+					flex-shrink: 0;
+
+					.button-text {
+						width: auto;
+					}
+				}
+			}
+		}
+	}
+
+	&.no-title-head {
+		&:not(.has-custom-head) {
+			padding: 0;
+			border: none;
+		}
+
+		.title-head {
+			display: none;
 		}
 	}
 }
