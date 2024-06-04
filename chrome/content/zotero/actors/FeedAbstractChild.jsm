@@ -31,26 +31,12 @@ class FeedAbstractChild extends JSWindowActorChild {
 				await this._sendResize();
 				break;
 			}
-			
-			case "click": {
-				// Prevent default click behavior (link opening, form submission,
-				// and so on) in all cases; open links externally
-				event.preventDefault();
-				if (event.button === 0 && event.target.localName === 'a' && event.target.href) {
-					await this._sendLaunchURL(event.target.href);
-				}
-				break;
-			}
 		}
 	}
 	
 	async _sendResize() {
 		let root = this._getResizeRoot();
 		await this.sendAsyncMessage("resize", { offsetWidth: root.offsetWidth, offsetHeight: root.offsetHeight });
-	}
-	
-	async _sendLaunchURL(url) {
-		await this.sendAsyncMessage("launchURL", url);
 	}
 	
 	_getResizeRoot() {

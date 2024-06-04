@@ -15,11 +15,6 @@ class FeedAbstractParent extends JSWindowActorParent {
 				this._resizeBrowser(data.offsetHeight);
 				return;
 			}
-			
-			case "launchURL": {
-				Zotero.launchURL(data);
-				return;
-			}
 		}
 	}
 	
