@@ -895,12 +895,14 @@ function ZoteroProtocolHandler() {
 				return;
 			}
 			
-			var zp = Zotero.getActiveZoteroPane();
+			var win = Zotero.getMainWindow();
+			var zp = win?.ZoteroPane;
 			if (!zp) {
 				// TEMP
 				throw new Error("Pane not open");
 			}
 			
+			win.Zotero_Tabs.select('zotero-pane');
 			if (params.objectType == 'collection') {
 				return zp.collectionsView.selectCollection(results[0].id);
 			}
