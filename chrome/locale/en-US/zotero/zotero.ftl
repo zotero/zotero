@@ -521,10 +521,10 @@ item-pane-header-more-options =
 architecture-win32-warning-message = { -app-name } is running in 32-bit mode on a 64-bit version of Windows. { -app-name } will run more efficiently in 64-bit mode.
 architecture-warning-action = Download 64-bit { -app-name }
 
-first-run-guidance-quickFormat = Type a title or author to search for a reference.
-    After you've made your selection, click the bubble to add page numbers, prefixes, or suffixes.
-    You can also do that by selecting a bubble via ← → and pressing ↓ or space.
-    You can include a page number along with your search terms (e.g. "Book title p.10") to add it directly.
-    You can edit citations directly in the word processor document.
+first-run-guidance-quickFormat = Type a title, author, and/or year to search for a reference.
+    
+    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    
+    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
 
-first-run-guidance-authorMenu = Zotero lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
