@@ -547,8 +547,8 @@
 				this.querySelector('#value-date-age').hidden = true;
 			}
 			var conditionsMenu = this.querySelector('#conditionsmenu');
-			document.l10n.setAttributes(conditionsMenu, 'search-conditions-menu-aria-label', { label: conditionsMenu.label });
-			document.l10n.setAttributes(operatorsList, 'search-operators-menu-aria-label', { label: operatorsList.label });
+			document.l10n.setAttributes(conditionsMenu, 'search-conditions-menu', { label: conditionsMenu.label });
+			document.l10n.setAttributes(operatorsList, 'search-operators-menu', { label: operatorsList.label });
 		}
 
 		createValueMenu(rows) {
