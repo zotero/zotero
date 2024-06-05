@@ -138,8 +138,8 @@ import { getCSSIcon } from 'components/icons';
 				row.append(remove);
 			}
 			
-			let isCurrent = Zotero_Tabs.selectedType === 'library'
-				&& ZoteroPane.collectionsView.selectedTreeRow?.id == obj.treeViewID;
+			let isCurrent = this.tabType === 'library'
+				&& this.collectionTreeRow?.id == obj.treeViewID;
 			box.classList.toggle('current', isCurrent);
 
 			// Disable clicky if this is a context row or we're already in the library/collection it points to
