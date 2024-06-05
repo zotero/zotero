@@ -549,6 +549,10 @@
 			var conditionsMenu = this.querySelector('#conditionsmenu');
 			document.l10n.setAttributes(conditionsMenu, 'search-conditions-menu', { label: conditionsMenu.label });
 			document.l10n.setAttributes(operatorsList, 'search-operators-menu', { label: operatorsList.label });
+			var valueMenu = this.querySelector("#valuemenu");
+			if (!valueMenu.hidden) {
+				document.l10n.setAttributes(valueMenu, 'search-condition-input', { label: valueMenu.label });
+			}
 		}
 
 		createValueMenu(rows) {

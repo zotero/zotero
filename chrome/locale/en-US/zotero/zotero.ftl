@@ -542,3 +542,4 @@ search-operators-menu =
     .label = { $label }
 search-condition-input =
     .aria-label = Value
+    .label = { $label }
