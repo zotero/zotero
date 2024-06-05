@@ -5,6 +5,9 @@ guidance-panel {
 		align-items: center;
 		font-size: 1.1em;
 		padding: 8px 0;
+		@media (-moz-platform: linux) {
+			padding: 8px;
+		}
 	}
 	
 	#nav-buttons {
