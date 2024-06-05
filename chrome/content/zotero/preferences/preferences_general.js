@@ -44,13 +44,15 @@ Zotero_Preferences.General = {
 			menuitem.setAttribute('label', Zotero.appName);
 		}
 
-		// Set OpenURL resolver drop-down to last-known name
+		// Set OpenURL resolver drop-down to last-known name or "custom" placeholder
+		let resolverName = Zotero.getString("general.custom");
 		if (Zotero.Prefs.get('openURL.resolver')) {
 			let name = Zotero.Prefs.get('openURL.name');
 			if (name) {
-				document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', name);
+				resolverName = name;
 			}
 		}
+		document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', resolverName);
 		
 		this.refreshLocale();
 		this._initItemPaneHeaderUI();
