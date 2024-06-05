@@ -219,13 +219,11 @@ rtfScan-introPage-description2 = To get started, select an RTF input file and an
 rtfScan-input-file = Input File
 rtfScan-output-file = Output File
 
-zotero-file-none-selected =
-    .value = No file selected
-
-rtfScan-file-choose-input =
-    .label = Choose input file
-rtfScan-file-choose-output =
-    .label = Choose output file
+rtfScan-no-file-selected = No file selected
+rtfScan-choose-input-file =
+    .label = Choose Input File...
+rtfScan-choose-output-file =
+    .label = Choose Output File...
 
 rtfScan-intro-page = 
     .label = Introduction
