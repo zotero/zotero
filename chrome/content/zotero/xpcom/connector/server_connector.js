@@ -1696,10 +1696,16 @@ Zotero.Server.Connector.Ping.prototype = {
 				Zotero.QuickCopy.lastActiveURL = req.data.activeURL;
 			}
 			let translatorsHash = await Zotero.Translators.getTranslatorsHash();
+			let automaticAttachmentTypes = Zotero.Prefs.get('automaticAttachmentTypes');
+			let automaticAttachmentTypesOrder = Zotero.Prefs.get('automaticAttachmentTypes.order');
+			// For compatibility with old connectors
+			let automaticSnapshots = Zotero.Utilities.shouldSaveAttachmentOfType('html');
 			
 			let response = {
 				prefs: {
-					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
+					automaticAttachmentTypes,
+					automaticAttachmentTypesOrder,
+					automaticSnapshots,
 					googleDocsAddNoteEnabled: true,
 					translatorsHash
 				}

@@ -4393,15 +4393,17 @@ var ZoteroPane = new function()
 	/**
 	 * @param	{Document}			doc
 	 * @param	{String|Integer}	[itemType='webpage']	Item type id or name
-	 * @param	{Boolean}			[saveSnapshot]			Force saving or non-saving of a snapshot,
-	 *														regardless of automaticSnapshots pref
 	 * @return {Promise<Zotero.Item>|false}
 	 */
-	this.addItemFromDocument = Zotero.Promise.coroutine(function* (doc, itemType, saveSnapshot, row) {
+	this.addItemFromDocument = Zotero.Promise.coroutine(function* (doc, itemType, row) {
+		if (arguments.length === 4) {
+			Zotero.debug("addItemFromDocument no longer takes 'saveSnapshot' -- update your code");
+			row = arguments[3];
+		}
+
 		_showPageSaveStatus(doc.title);
 		
-		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
-		saveSnapshot = saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'));
+		let saveSnapshot = Zotero.Utilities.shouldSaveAttachmentOfType('html');
 		
 		// TODO: this, needless to say, is a temporary hack
 		if (itemType == 'temporaryPDFHack') {
@@ -4516,7 +4518,12 @@ var ZoteroPane = new function()
 	/**
 	 * @return {Zotero.Item|false} - The saved item, or false if item can't be saved
 	 */
-	this.addItemFromURL = Zotero.Promise.coroutine(function* (url, itemType, saveSnapshot, row) {
+	this.addItemFromURL = Zotero.Promise.coroutine(function* (url, itemType, row) {
+		if (arguments.length === 4) {
+			Zotero.debug("addItemFromURL no longer takes 'saveSnapshot' -- update your code");
+			row = arguments[3];
+		}
+		
 		url = Zotero.Utilities.Internal.resolveIntermediateURL(url);
 		
 		let [mimeType, hasNativeHandler] = yield Zotero.MIME.getMIMETypeFromURL(url);
@@ -4526,7 +4533,7 @@ var ZoteroPane = new function()
 			var deferred = Zotero.Promise.defer();
 			
 			var processor = function (doc) {
-				return ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
+				return ZoteroPane_Local.addItemFromDocument(doc, itemType, row)
 				.then(function (item) {
 					deferred.resolve(item)
 				});
@@ -4606,8 +4613,7 @@ var ZoteroPane = new function()
 			var item = yield ZoteroPane_Local.newItem(itemType, {}, row)
 			var filesEditable = Zotero.Libraries.get(item.libraryID).filesEditable;
 			
-			// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
-			if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
+			if (Zotero.Utilities.shouldSaveAttachmentOfType('html')) {
 				var link = false;
 				
 				if (link) {

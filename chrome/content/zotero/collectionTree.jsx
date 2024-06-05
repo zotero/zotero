@@ -2211,7 +2211,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				
 					// Still string, so remote URL
 					if (typeof file == 'string') {
-						window.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', null, row); // TODO: don't do this
+						window.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', row); // TODO: don't do this
 						continue;
 					}
 					

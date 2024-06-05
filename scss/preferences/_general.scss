@@ -22,6 +22,58 @@
 	min-width: 12em;
 }
 
+#attachment-type-priority-tree {
+	appearance: none;
+	background: transparent;
+	padding-inline: 8px;
+	
+	--grab-cursor: grab;
+	
+	&:active {
+		--grab-cursor: grabbing;
+	}
+	
+	> treechildren {
+		&::-moz-tree-row {
+			border-radius: 5px;
+		}
+
+		&::-moz-tree-cell(attachment-type-grippy),
+		&::-moz-tree-image(attachment-type-grippy) {
+			cursor: var(--grab-cursor);
+		}
+
+		&::-moz-tree-image(attachment-type-grippy) {
+			@include svgicon-menu("grip", "universal", "16");
+		}
+
+		&::-moz-tree-image(attachment-type-enabled) {
+			list-style-image: url("chrome://global/skin/icons/close.svg");
+		}
+
+		&::-moz-tree-image(attachment-type-enabled, checked) {
+			list-style-image: url("chrome://global/skin/icons/check.svg");
+		}
+
+		&::-moz-tree-image(attachment-type-label) {
+			display: none;
+		}
+	}
+
+	treecol {
+		font-weight: 600;
+	}
+
+	#attachment-type-grippy, #attachment-type-enabled {
+		min-width: 26px;
+	}
+	
+	#attachment-type-label {
+		// Match 20px padding on the cell text - not sure where that comes from
+		padding-inline: 20px;
+	}
+}
+
 @media (-moz-platform: windows) {
 	button, menulist, radio, checkbox, input {
 		margin-block: 4px;

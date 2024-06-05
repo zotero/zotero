@@ -1,6 +1,16 @@
 preferences-window =
     .title = { -app-name } Settings
 
+preferences-attachment-type-intro = { -app-name } can automatically download and attach files to items. You can choose which files types you want. Attachments further up in the list will be preferred when multiple types are available.
+preferences-attachment-type-tree =
+    .aria-description = Attachment type priorities. Press Space to toggle. Press { PLATFORM() ->
+        [macos] Option
+        *[other] Alt
+    }-Shift-Up or Down to move an item up or down.
+preferences-attachment-type-enabled =
+    .label = Enabled
+preferences-attachment-type-label =
+    .label = Type
 preferences-auto-recognize-files =
     .label = Automatically retrieve metadata for PDFs and ebooks
 

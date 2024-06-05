@@ -271,7 +271,7 @@ describe("Connector Server", function () {
 		});
 		
 		it("shouldn't return an attachment that isn't being saved", async function () {
-			Zotero.Prefs.set('automaticSnapshots', false);
+			Zotero.Prefs.set('automaticAttachmentTypes', 'pdf,epub'); // No HTML
 			
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);
@@ -306,7 +306,7 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			Zotero.Prefs.clear('automaticSnapshots');
+			Zotero.Prefs.clear('automaticAttachmentTypes');
 			
 			assert.equal(req.status, 201);
 			assert.lengthOf(req.response.items, 1);

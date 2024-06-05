@@ -57,6 +57,7 @@ Zotero_Preferences.General = {
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 		this._initEbookFontFamilyMenu();
+		this.AttachmentTypePriorityTree.init();
 	},
 
 	_getAutomaticLocaleMenuLabel: function () {
@@ -501,5 +502,160 @@ Zotero_Preferences.General = {
 			menuitem.style.fontFamily = `'${font.replace(/'/g, "\\'")}'`;
 			popup.append(menuitem);
 		}
+	},
+	
+	// Based on Mozilla's EngineView: https://searchfox.org/mozilla-central/rev/ee2ad260c25310a9fbf96031de05bbc0e94394cc/browser/components/preferences/search.js#826
+	AttachmentTypePriorityTree: {
+		ALL_TYPES: new Set(['pdf', 'epub', 'html']),
+		
+		init() {
+			this._treeElem = document.querySelector('#attachment-type-priority-tree');
+			this._treeElem.view = this;
+			this._treeElem.addEventListener('dragstart', this._handleDragStart.bind(this));
+			this._treeElem.addEventListener('keydown', this._handleKeyDown.bind(this));
+			
+			this._automaticAttachmentTypes = new Set(Zotero.Prefs.get('automaticAttachmentTypes').split(','));
+			this._automaticAttachmentTypesOrder = Zotero.Prefs.get('automaticAttachmentTypes.order').split(',');
+			
+			if (Array.from(this._automaticAttachmentTypes).some(type => !this.ALL_TYPES.has(type))
+					|| this._automaticAttachmentTypesOrder.length != this.ALL_TYPES.size
+					|| this._automaticAttachmentTypesOrder.some(type => !this.ALL_TYPES.has(type))) {
+				this._reset();
+			}
+		},
+		
+		_reset() {
+			Zotero.Prefs.clear('automaticAttachmentTypes');
+			Zotero.Prefs.clear('automaticAttachmentTypes.order');
+			this._automaticAttachmentTypes = new Set(Zotero.Prefs.get('automaticAttachmentTypes').split(','));
+			this._automaticAttachmentTypesOrder = Zotero.Prefs.get('automaticAttachmentTypes.order').split(',');
+			this._treeElem.invalidate();
+		},
+		
+		_getTypeByPriority(priority) {
+			return this._automaticAttachmentTypesOrder[priority];
+		},
+
+		_setTypePriority(type, priority) {
+			let oldIndex = this._automaticAttachmentTypesOrder.indexOf(type);
+			this._automaticAttachmentTypesOrder.splice(oldIndex, 1);
+			this._automaticAttachmentTypesOrder.splice(priority, 0, type);
+			this._save();
+		},
+
+		_isTypeEnabled(type) {
+			return this._automaticAttachmentTypes.has(type);
+		},
+
+		_setTypeEnabled(type, enabled) {
+			if (enabled) {
+				this._automaticAttachmentTypes.add(type);
+			}
+			else {
+				this._automaticAttachmentTypes.delete(type);
+			}
+			this._save();
+		},
+		
+		_save() {
+			let automaticAttachmentTypes = Array.from(this._automaticAttachmentTypes).sort((a, b) => {
+				return this._automaticAttachmentTypesOrder.indexOf(a) - this._automaticAttachmentTypesOrder.indexOf(b);
+			});
+			
+			Zotero.Prefs.set('automaticAttachmentTypes', automaticAttachmentTypes.join(','));
+			Zotero.Prefs.set('automaticAttachmentTypes.order', this._automaticAttachmentTypesOrder.join(','));
+			this.tree.invalidate();
+		},
+
+		setTree(tree) {
+			this.tree = tree;
+		},
+		
+		get rowCount() {
+			return this.ALL_TYPES.size;
+		},
+		
+		getCellText(index, column) {
+			if (column.id === 'attachment-type-label') {
+				return this._getTypeByPriority(index).toUpperCase();
+			}
+			return '';
+		},
+
+		getCellValue(index, column) {
+			if (column.id === 'attachment-type-enabled') {
+				return this._isTypeEnabled(this._getTypeByPriority(index));
+			}
+			return undefined;
+		},
+		
+		setCellValue(index, column, value) {
+			if (column.id === 'attachment-type-enabled') {
+				this._setTypeEnabled(this._getTypeByPriority(index), value === 'true');
+			}
+		},
+
+		canDrop() {
+			return true;
+		},
+		
+		drop(dropIndex, orientation, dataTransfer) {
+			let type = dataTransfer.getData('zotero/attachment-type');
+			let sourceIndex = this._automaticAttachmentTypesOrder.indexOf(type);
+			if (dropIndex === sourceIndex) {
+				return;
+			}
+			else if (dropIndex > sourceIndex) {
+				if (orientation === Ci.nsITreeView.DROP_BEFORE) {
+					dropIndex--;
+				}
+			}
+			else if (orientation === Ci.nsITreeView.DROP_AFTER) {
+				dropIndex++;
+			}
+
+			this.selection.select(dropIndex);
+			this._setTypePriority(type, dropIndex);
+		},
+
+		isEditable(index, column) {
+			return column.id === 'attachment-type-enabled';
+		},
+		
+		isContainer() {
+			return false;
+		},
+
+		_handleDragStart(event) {
+			if (event.target.localName !== 'treechildren') {
+				return;
+			}
+
+			let cell = this._treeElem.getCellAt(event.clientX, event.clientY);
+			event.dataTransfer.setData('zotero/attachment-type', this._getTypeByPriority(cell.row));
+			event.dataTransfer.effectAllowed = 'move';
+		},
+
+		_handleKeyDown(event) {
+			if (event.key === ' ') {
+				event.preventDefault();
+				
+				let type = this._getTypeByPriority(this.selection.currentIndex);
+				if (type) {
+					this._setTypeEnabled(type, !this._isTypeEnabled(type));
+				}
+			}
+			else if (event.altKey && event.shiftKey && ['ArrowUp', 'ArrowDown'].includes(event.key)) {
+				event.preventDefault();
+				
+				let type = this._getTypeByPriority(this.selection.currentIndex);
+				let index = this._automaticAttachmentTypesOrder.indexOf(type);
+				let newIndex = index + (event.key === 'ArrowUp' ? -1 : 1);
+				if (newIndex >= 0 && newIndex < this._automaticAttachmentTypesOrder.length) {
+					this._setTypePriority(type, newIndex);
+					this.selection.select(newIndex);
+				}
+			}
+		},
 	},
 }

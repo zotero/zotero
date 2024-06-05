@@ -96,13 +96,17 @@ Zotero.Translate.ItemSaver.prototype = {
 		var jsonByItem = new Map();
 		
 		await Zotero.DB.executeTransaction(async function () {
-			for (let jsonItem of jsonItems) {
+			jsonItems = Zotero.Utilities.filterAttachmentsToSave(jsonItems.map((jsonItem) => {
 				jsonItem = Object.assign({}, jsonItem);
-				
+				// Type defaults to "webpage"
+				jsonItem.itemType = jsonItem.itemType || "webpage";
+				return jsonItem;
+			}));
+			
+			for (let jsonItem of jsonItems) {
 				let item;
 				let itemID;
-				// Type defaults to "webpage"
-				let type = jsonItem.itemType || "webpage";
+				let type = jsonItem.itemType;
 				
 				// Handle notes differently
 				if (type == "note") {
@@ -110,10 +114,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 				// Handle standalone attachments differently
 				else if (type == "attachment") {
-					if (this._canSaveAttachment(jsonItem)) {
-						standaloneAttachments.push(jsonItem);
-						attachmentCallback(jsonItem, 0);
-					}
+					standaloneAttachments.push(jsonItem);
+					attachmentCallback(jsonItem, 0);
 					continue;
 				}
 				else {
@@ -151,16 +153,25 @@ Zotero.Translate.ItemSaver.prototype = {
 
 					// handle attachments
 					if (jsonItem.attachments) {
+						switch (this.attachmentMode) {
+							case Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD:
+								Zotero.debug('Translate: Filtering attachments due to ATTACHMENT_MODE_DOWNLOAD');
+								jsonItem.attachments = Zotero.Utilities.filterAttachmentsToSave(jsonItem.attachments);
+								break;
+								
+							case Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE:
+								Zotero.debug('Translate: Ignoring attachments due to ATTACHMENT_MODE_IGNORE');
+								jsonItem.attachments = [];
+								break;
+								
+							// ATTACHMENT_MODE_FILE: Keep all attachments returned by the translator
+						}
+						
 						let attachmentsToSave = [];
 						let foundPrimaryPDF = false;
 						for (let jsonAttachment of jsonItem.attachments) {
-							if (!this._canSaveAttachment(jsonAttachment)) {
-								continue;
-							}
-							
 							// The first PDF is the primary one. If that one fails to download,
 							// we might check for an open-access PDF below.
-							let isPrimaryPDF = false;
 							if (jsonAttachment.mimeType == 'application/pdf' && !foundPrimaryPDF) {
 								jsonAttachment.isPrimaryPDF = true;
 								foundPrimaryPDF = true;
@@ -209,7 +220,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		//
 		// TODO: Separate pref?
 		var shouldDownloadOAPDF = this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD
-				&& Zotero.Prefs.get('downloadAssociatedFiles');
+				&& Zotero.Utilities.shouldSaveAttachmentOfType('pdf');
 		var openAccessPDFURLs = new Map();
 		if (shouldDownloadOAPDF) {
 			for (let item of items) {
@@ -475,40 +486,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			delete newItem[field];
 		}
 		return newItem;
-	},
-	
-	
-	_canSaveAttachment: function (attachment) {
-		// Always save link attachments
-		var isLink = Zotero.MIME.isWebPageType(attachment.mimeType)
-			// .snapshot coming from most translators, .linkMode coming from RDF
-			&& (attachment.snapshot === false || attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL);
-		if (isLink || this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
-			if (!attachment.url && !attachment.document) {
-				Zotero.debug("Translate: Not adding attachment: no URL specified");
-				return false;
-			}
-			if (attachment.snapshot !== false) {
-				if (attachment.document || Zotero.MIME.isWebPageType(attachment.mimeType)) {
-					if (!Zotero.Prefs.get("automaticSnapshots")) {
-						Zotero.debug("Translate: Not adding attachment: automatic snapshots are disabled");
-						return false;
-					}
-				}
-				else {
-					if (!Zotero.Prefs.get("downloadAssociatedFiles")) {
-						Zotero.debug("Translate: Not adding attachment: automatic file attachments are disabled");
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-		else if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE) {
-			return true;
-		}
-		Zotero.debug('Translate: Ignoring attachment due to ATTACHMENT_MODE_IGNORE');
-		return false;
 	},
 	
 	

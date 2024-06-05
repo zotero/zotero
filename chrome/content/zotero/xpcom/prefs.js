@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 11;
+		var toVersion = 12;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -138,6 +138,20 @@ Zotero.Prefs = new function() {
 					case 11:
 						await Zotero.LocateManager.migrateEngines();
 						break;
+					
+					case 12: {
+						let enabledTypes = [];
+						if (this.get('downloadAssociatedFiles')) {
+							enabledTypes.push('pdf', 'epub');
+						}
+						if (this.get('automaticSnapshots')) {
+							enabledTypes.push('html');
+						}
+						this.set('automaticAttachmentTypes', enabledTypes.join(','));
+						this.clear('downloadAssociatedFiles');
+						this.clear('automaticSnapshots');
+						break;
+					}
 				}
 			}
 			this.set('prefVersion', toVersion);
