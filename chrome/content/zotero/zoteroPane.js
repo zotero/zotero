@@ -1504,7 +1504,7 @@ var ZoteroPane = new function()
 		);
 		
 		var io = { name, libraryID, parentCollectionID };
-		window.openDialog("chrome://zotero/content/newCollectionDialog.xhtml",
+		Zotero.openDialog("chrome://zotero/content/newCollectionDialog.xhtml",
 			"_blank", "chrome,modal,centerscreen,resizable=no", io);
 		var dataOut = io.dataOut;
 		if (!dataOut) {
@@ -1545,7 +1545,7 @@ var ZoteroPane = new function()
 	
 	this.newFeedFromURL = Zotero.Promise.coroutine(function* () {
 		let data = {};
-		window.openDialog('chrome://zotero/content/feedSettings.xhtml',
+		Zotero.openDialog('chrome://zotero/content/feedSettings.xhtml',
 			null, 'centerscreen, modal', data);
 		if (!data.cancelled) {
 			let feed = new Zotero.Feed();
@@ -1583,7 +1583,7 @@ var ZoteroPane = new function()
 		);
 		
 		var io = { dataIn: { search: s, name }, dataOut: null };
-		window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
+		Zotero.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
 		if (!io.dataOut) {
 			return false;
 		}
@@ -1614,7 +1614,7 @@ var ZoteroPane = new function()
 		s.addCondition('title', 'contains', '');
 		
 		var io = {dataIn: {search: s}, dataOut: null};
-		window.openDialog('chrome://zotero/content/advancedSearch.xhtml', '', 'chrome,dialog=no,centerscreen', io);
+		Zotero.openDialog('chrome://zotero/content/advancedSearch.xhtml', '', 'chrome,dialog=no,centerscreen', io);
 	};
 
 	this.initItemsTree = async function () {
@@ -2517,7 +2517,7 @@ var ZoteroPane = new function()
 					},
 					dataOut: null
 				};
-				window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
+				Zotero.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
 				if (io.dataOut) {
 					row.ref.fromJSON(io.dataOut.json);
 					yield row.ref.saveTx();
@@ -2556,7 +2556,7 @@ var ZoteroPane = new function()
 			cleanupUnreadAfter: feed.cleanupUnreadAfter
 		};
 		
-		window.openDialog('chrome://zotero/content/feedSettings.xhtml',
+		Zotero.openDialog('chrome://zotero/content/feedSettings.xhtml',
 			null, 'centerscreen, modal', data);
 		if (data.cancelled) return;
 		
@@ -4219,7 +4219,7 @@ var ZoteroPane = new function()
 		}
 		
 		var io = { itemID: itemID, collectionID: col, parentItemKey: parentKey };
-		window.openDialog('chrome://zotero/content/note.xhtml', name, 'chrome,resizable,centerscreen,dialog=false', io);
+		Zotero.openDialog('chrome://zotero/content/note.xhtml', name, 'chrome,resizable,centerscreen,dialog=false', io);
 	}
 	
 	
@@ -4243,7 +4243,7 @@ var ZoteroPane = new function()
 		}
 		
 		var io = {};
-		window.openDialog('chrome://zotero/content/attachLink.xhtml',
+		Zotero.openDialog('chrome://zotero/content/attachLink.xhtml',
 			'zotero-attach-uri-dialog', 'centerscreen, modal', io);
 		if (!io.out) return;
 		return Zotero.Attachments.linkFromURL({
@@ -5006,7 +5006,7 @@ var ZoteroPane = new function()
 			}
 		}
 		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
-		window.openDialog('chrome://zotero/content/publicationsDialog.xhtml','','chrome,modal', io);
+		Zotero.openDialog('chrome://zotero/content/publicationsDialog.xhtml','','chrome,modal', io);
 		return io.keepRights !== undefined ? io : false;
 	};
 	
@@ -5260,7 +5260,7 @@ var ZoteroPane = new function()
 			}
 
 			let io = { dataIn: { item }, dataOut: null };
-			window.openDialog('chrome://zotero/content/createParentDialog.xhtml', '', 'chrome,modal,centerscreen', io);
+			Zotero.openDialog('chrome://zotero/content/createParentDialog.xhtml', '', 'chrome,modal,centerscreen', io);
 			if (!io.dataOut) {
 				return false;
 			}
@@ -6279,7 +6279,7 @@ var ZoteroPane = new function()
 	 * Opens the about dialog
 	 */
 	this.openAboutDialog = function() {
-		window.openDialog('chrome://zotero/content/about.xhtml', 'about', 'chrome,centerscreen');
+		Zotero.openDialog('chrome://zotero/content/about.xhtml', 'about', 'chrome,centerscreen');
 	}
 	
 	/**

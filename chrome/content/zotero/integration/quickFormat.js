@@ -2232,9 +2232,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	this.onClassicViewCommand = function(event) {
 		_updateCitationObject();
-		var newWindow = window.newWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xhtml',
+		var newWindow = window.newWindow = Zotero.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xhtml',
 			'', 'chrome,centerscreen,resizable', io);
 		newWindow.addEventListener("focus", function() {
 			newWindow.removeEventListener("focus", arguments.callee, true);

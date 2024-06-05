@@ -973,6 +973,41 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			.getService(Components.interfaces.nsIWindowWatcher);
 		ww.openWindow(null, chromeURI, '_blank', flags, null);
 	}
+
+	/**
+	 * JAWS screen reader does not handle windows and dialogs that do not have
+	 * MozillaWindowClass. To worka round it, we pass dialog=no as a parameter to
+	 * all new windows or dialogs opened on Windows.
+	 * That way, they have MozillaWindowClass instead of default MozillaDialogClass.
+	 * @param {string} features - comma separated features to open window or dialog
+	 * @returns features with added dialog=no
+	 */
+	this._setWinDialogFeatures = (features) => {
+		let paramArray = features.split(",");
+		let dialogParamIndex = paramArray.findIndex(param => param.includes("dialog"));
+		if (dialogParamIndex !== -1) {
+			paramArray.splice(dialogParamIndex, 1);
+		}
+		paramArray.push("dialog=no");
+		paramArray.push("resizable=no");
+		return paramArray.join(",");
+	}
+	this.openDialog = (uri, name, features, args) => {
+		if (Zotero.isWin) {
+			features = this._setWinDialogFeatures(features);
+		}
+		let ww = this.getMainWindow();
+		ww.openDialog(uri, name, features, args);
+	}
+	
+	this.openWindow = (parent, uri, name, features, args) => {
+		if (Zotero.isWin) {
+			features = this._setWinDialogFeatures(features);
+		}
+		return Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(parent, uri, name, features, args);
+	}
 	
 	
 	this.openCheckForUpdatesWindow = function ({ modal } = {}) {
