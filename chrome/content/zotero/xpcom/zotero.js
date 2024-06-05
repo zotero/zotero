@@ -985,11 +985,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this._setWinDialogFeatures = (features) => {
 		let paramArray = features.split(",");
 		let dialogParamIndex = paramArray.findIndex(param => param.includes("dialog"));
+		// If there already exists a dialog parameter, remove it to avoid dulicates
 		if (dialogParamIndex !== -1) {
 			paramArray.splice(dialogParamIndex, 1);
 		}
+		// If there is no dialog parameter and resizable feature is not specified,
+		// set resizable=no to make sure windows remain unresizable
+		else if (!features.includes("resizable")) {
+			paramArray.push("resizable=no");
+		}
 		paramArray.push("dialog=no");
-		paramArray.push("resizable=no");
 		return paramArray.join(",");
 	}
 	this.openDialog = (uri, name, features, args) => {
@@ -1004,6 +1009,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (Zotero.isWin) {
 			features = this._setWinDialogFeatures(features);
 		}
+		console.log(features);
 		return Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.openWindow(parent, uri, name, features, args);
