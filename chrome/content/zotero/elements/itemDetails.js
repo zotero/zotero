@@ -134,12 +134,13 @@
 				this._pendingPinnedPane = val;
 				val = '';
 			}
-			this.setAttribute('pinnedPane', val);
+			this.setAttribute('pinnedPane', val || '');
 			if (val) {
 				this._pendingPinnedPane = '';
 				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getEnabledPane(val));
 			}
 			this.sidenav.updatePaneStatus(val);
+			this._savePinnedPane();
 		}
 
 		get _minScrollHeight() {
@@ -218,8 +219,9 @@
 			});
 			this._initIntersectionObserver();
 
-			this._unregisterID = Zotero.Notifier.registerObserver(
+			this._notifierID = Zotero.Notifier.registerObserver(
 				this, ['item', 'itempane', 'tab'], 'ItemDetails');
+			this._prefsObserverID = Zotero.Prefs.registerObserver('pinnedPane', this._restorePinnedPane.bind(this));
 
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
@@ -239,7 +241,8 @@
 			this._paneHiddenOb.disconnect();
 			this._intersectionOb.disconnect();
 
-			Zotero.Notifier.unregisterObserver(this._unregisterID);
+			Zotero.Notifier.unregisterObserver(this._notifierID);
+			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		}
 
 		async render() {
@@ -263,6 +266,7 @@
 			}
 
 			this.renderCustomSections();
+			this._restorePinnedPane();
 
 			let panes = this.getPanes();
 			for (let box of [this._header, ...panes]) {
@@ -641,6 +645,29 @@
 			this.skipRender = !isTabSelected;
 			if (isTabSelected && this._pendingRender) {
 				this.render();
+			}
+		}
+
+		_savePinnedPane() {
+			if (this.tabType !== 'library') {
+				return;
+			}
+			let pinnedPane = this.pinnedPane;
+			if (pinnedPane) {
+				Zotero.Prefs.set('pinnedPane', pinnedPane);
+			}
+			else {
+				Zotero.Prefs.clear('pinnedPane');
+			}
+		}
+
+		_restorePinnedPane() {
+			if (this.tabType !== 'library') {
+				return;
+			}
+			let pinnedPane = Zotero.Prefs.get('pinnedPane') || '';
+			if (this.pinnedPane !== pinnedPane) {
+				this.pinnedPane = pinnedPane;
 			}
 		}
 	}
