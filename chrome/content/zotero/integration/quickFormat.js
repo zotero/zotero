@@ -165,7 +165,7 @@ var Zotero_QuickFormat = new function () {
 					return;
 				}
 				// Make sure there is a selected item when shift-click is handled
-				if (referenceBox.selectedIndex < 1) {
+				if (e.shiftKey && referenceBox.selectedCount < 1) {
 					_selectFirstReference();
 				}
 				// Shift-click can end up selecting disabled separator, so make sure it's removed
