@@ -168,7 +168,7 @@
 				this.render();
 			});
 			
-			this._notifierID = Zotero.Prefs.registerObserver(`panes.${this.dataset.pane}.open`, this._restoreOpenState.bind(this));
+			this._prefsObserverID = Zotero.Prefs.registerObserver(`panes.${this.dataset.pane}.open`, this._restoreOpenState.bind(this));
 			
 			if (this.hasAttribute('data-l10n-id') && !this.hasAttribute('data-l10n-args')) {
 				this.setAttribute('data-l10n-args', JSON.stringify({ count: 0 }));
@@ -278,16 +278,16 @@
 			this._head.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
 			
-			Zotero.Prefs.unregisterObserver(this._notifierID);
+			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		}
 		
 		_saveOpenState() {
-			if (this._disableCachingOpenState) return;
+			if (this._disableSavingOpenState) return;
 			Zotero.Prefs.set(`panes.${this.dataset.pane}.open`, this.open);
 		}
 		
 		_restoreOpenState() {
-			if (this._disableCachingOpenState) {
+			if (this._disableSavingOpenState) {
 				this.open = true;
 				return;
 			}
@@ -312,7 +312,7 @@
 			return !!this.closest('panel, menupopup, merge-pane');
 		}
 
-		get _disableCachingOpenState() {
+		get _disableSavingOpenState() {
 			return !!this.closest('merge-pane');
 		}
 
