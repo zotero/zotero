@@ -323,10 +323,6 @@ class TagList extends React.PureComponent {
 			return node.previousElementSibling;
 		};
 		let nextOne = nextTag(document.activeElement);
-		// Skip disabled tags, unless all tags are explicitly set to be displayed
-		while (!Zotero.Prefs.get('tagSelector.displayAllTags') && nextOne && nextOne.classList.contains("disabled")) {
-			nextOne = nextTag(nextOne);
-		}
 		if (nextOne) {
 			nextOne.focus();
 		}
