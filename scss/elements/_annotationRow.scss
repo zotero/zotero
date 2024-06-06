@@ -35,6 +35,7 @@ annotation-row {
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 9;
 			overflow: hidden;
+			overflow-wrap: anywhere;
 		}
 		
 		.quote {
