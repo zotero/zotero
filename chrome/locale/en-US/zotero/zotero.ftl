@@ -8,7 +8,7 @@ return-or-enter =
 general-remove = Remove
 general-add = Add
 general-remind-me-later = Remind Me Later
-general-choose-file =  Choose File…
+general-choose-file = Choose File…
 
 menu-file-show-in-finder =
     .label = Show in Finder
