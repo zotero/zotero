@@ -17,7 +17,18 @@
 }
 
 #noteQuickCopy-wrapper {
-	justify-content: center;
+	margin-left: 30px;
+	@media (-moz-platform: windows) {
+		margin-left: 45px;
+	}
+	@media (-moz-platform: linux) {
+		margin-left: 25px;
+	}
+}
+
+#noteQuickCopy-markdown-options > label,
+#noteQuickCopy-html-options > label{
+	margin-inline-end: 8px;
 }
 
 #noteQuickCopy-format-options hbox {
