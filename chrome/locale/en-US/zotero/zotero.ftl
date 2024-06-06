@@ -8,6 +8,7 @@ return-or-enter =
 general-remove = Remove
 general-add = Add
 general-remind-me-later = Remind Me Later
+general-choose-file =  Choose File…
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -221,10 +222,10 @@ rtfScan-output-file = Output File
 
 rtfScan-no-file-selected = No file selected
 rtfScan-choose-input-file =
-    .label = Choose File…
+    .label = { general-choose-file }
     .aria-label = Choose Input File
 rtfScan-choose-output-file =
-    .label = Choose File…
+    .label = { general-choose-file }
     .aria-label = Choose Output File
 
 rtfScan-intro-page = 
