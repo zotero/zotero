@@ -170,7 +170,7 @@
 		<groupbox>
 			<hbox>
 				<hbox align="center">
-					<label value="&zotero.preferences.feeds.sorting.label;"/>
+					<label value="&zotero.preferences.feeds.sorting.label;" control="feed-sort"/>
 					<menulist id="feed-sort" preference="extensions.zotero.feeds.sortAscending" native="true">
 						<menupopup>
 							<menuitem label="&zotero.preferences.feeds.sorting.newest;" value="false"/>
@@ -185,23 +185,26 @@
 			<label><html:h2>&zotero.preferences.feeds.feedDefaults;</html:h2></label>
 			<hbox>
 				<hbox align="center">
-					<label value="&zotero.feedSettings.refresh.label1;"/>
-					<html:input class="html-input" type="number" min="1" step="1" size="3" data-preference="feeds.defaultTTL"/>
-					<label value="&zotero.feedSettings.refresh.label2;"/>
+					<label id="zotero-prefpane-feeds-refresh-label1" value="&zotero.feedSettings.refresh.label1;"/>
+					<html:input class="html-input" type="number" min="1" step="1" size="3" data-preference="feeds.defaultTTL"
+						aria-labelledby="zotero-prefpane-feeds-refresh-label1 zotero-prefpane-feeds-refresh-label2"/>
+					<label id="zotero-prefpane-feeds-refresh-label2" value="&zotero.feedSettings.refresh.label2;"/>
 				</hbox>
 			</hbox>
 			<hbox>
 				<hbox align="center">
-					<label value="&zotero.feedSettings.cleanupReadAfter.label1;"/>
-					<html:input class="html-input" type="number" min="1" step="1" size="2" data-preference="feeds.defaultCleanupUnreadAfter"/>
-					<label value="&zotero.feedSettings.cleanupReadAfter.label2;"/>
+					<label id="zotero-prefpane-feeds-readAfter-label1" value="&zotero.feedSettings.cleanupReadAfter.label1;"/>
+					<html:input class="html-input" type="number" min="1" step="1" size="2" data-preference="feeds.defaultCleanupUnreadAfter"
+						aria-labelledby="zotero-prefpane-feeds-readAfter-label1 zotero-prefpane-feeds-readAfter-label2"/>
+					<label id="zotero-prefpane-feeds-readAfter-label2" value="&zotero.feedSettings.cleanupReadAfter.label2;"/>
 				</hbox>
 			</hbox>
 			<hbox>
 				<hbox align="center">
-					<label value="&zotero.feedSettings.cleanupUnreadAfter.label1;"/>
-					<html:input class="html-input" type="number" min="1" step="1" size="2" data-preference="feeds.defaultCleanupReadAfter"/>
-					<label value="&zotero.feedSettings.cleanupUnreadAfter.label2;"/>
+					<label id="zotero-prefpane-feeds-unreadAfter-label1" value="&zotero.feedSettings.cleanupUnreadAfter.label1;"/>
+					<html:input class="html-input" type="number" min="1" step="1" size="2" data-preference="feeds.defaultCleanupReadAfter"
+						aria-labelledby="zotero-prefpane-feeds-unreadAfter-label1 zotero-prefpane-feeds-unreadAfter-label2"/>
+					<label id="zotero-prefpane-feeds-unreadAfter-label2" value="&zotero.feedSettings.cleanupUnreadAfter.label2;"/>
 				</hbox>
 			</hbox>
 		</groupbox>
@@ -223,16 +226,16 @@
 			<separator/>
 			
 			<html:div class="pref-row">
-				<html:label>&zotero.preferences.fulltext.textMaxLength;</html:label>
-				<html:input type="text" size="10" preference="extensions.zotero.fulltext.textMaxLength"/>
+				<html:label for="fulltext-maxLength">&zotero.preferences.fulltext.textMaxLength;</html:label>
+				<html:input id="fulltext-maxLength" type="text" size="10" preference="extensions.zotero.fulltext.textMaxLength"/>
 				<html:label>(&zotero.preferences.default; 500000)</html:label>
 			</html:div>
 	
 			<separator class="thin"/>
 	
 			<html:div class="pref-row">
-				<html:label>&zotero.preferences.fulltext.pdfMaxPages;</html:label>
-				<html:input type="text" size="5" preference="extensions.zotero.fulltext.pdfMaxPages"/>
+				<html:label for="fulltext-pdfMaxPages">&zotero.preferences.fulltext.pdfMaxPages;</html:label>
+				<html:input id="fulltext-pdfMaxPages" type="text" size="5" preference="extensions.zotero.fulltext.pdfMaxPages"/>
 				<html:label>(&zotero.preferences.default; 100)</html:label>
 			</html:div>
 		</groupbox>

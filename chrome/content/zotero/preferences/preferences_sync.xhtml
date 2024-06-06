@@ -112,6 +112,7 @@
                             native="true"/>
                     <menulist id="storage-protocol" class="storage-personal"
                             style="margin-left: .5em"
+                            aria-label="&zotero.preferences.sync.fileSyncing.myLibrary;"
                             preference="extensions.zotero.sync.storage.protocol"
                             oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"
                             native="true">
@@ -127,7 +128,7 @@
                     <box style="background: black; opacity:.03"/>
     
                     <grid class="form-grid">
-                        <label value="&zotero.preferences.sync.fileSyncing.url;"/>
+                        <label control="storage-url-prefix" value="&zotero.preferences.sync.fileSyncing.url;"/>
                         <hbox>
                             <menulist id="storage-url-prefix"
                                     preference="extensions.zotero.sync.storage.scheme"
@@ -140,13 +141,14 @@
                             </menulist>
                             <label value="://"/>
                             <html:input id="storage-url" style="flex: 1;"
+                                aria-label="&zotero.preferences.sync.fileSyncing.url;"
                                 preference="extensions.zotero.sync.storage.url"
                                 onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                 onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                             <label value="/zotero/"/>
                         </hbox>
     
-                        <label value="&zotero.preferences.sync.username;"/>
+                        <label control="storage-username" value="&zotero.preferences.sync.username;"/>
                         <hbox>
                             <html:input id="storage-username"
                                 preference="extensions.zotero.sync.storage.username"
@@ -154,7 +156,7 @@
                                 onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                         </hbox>
     
-                        <label value="&zotero.preferences.sync.password;"/>
+                        <label control="storage-password" value="&zotero.preferences.sync.password;"/>
                         <hbox>
                             <html:input id="storage-password" type="password"
                                 onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
@@ -174,7 +176,7 @@
                 </stack>
 
                 <hbox class="storage-settings-download-options" align="center">
-                    <label value="&zotero.preferences.sync.fileSyncing.download;"/>
+                    <label control="storage-user-download-mode" value="&zotero.preferences.sync.fileSyncing.download;"/>
                     <menulist id="storage-user-download-mode"
                             class="storage-mode"
                             preference="extensions.zotero.sync.storage.downloadMode.personal"
@@ -196,7 +198,7 @@
                         native="true"/>
 
                 <hbox class="storage-settings-download-options" align="center">
-                    <label value="&zotero.preferences.sync.fileSyncing.download;"/>
+                    <label control="storage-groups-download-mode" value="&zotero.preferences.sync.fileSyncing.download;"/>
                     <menulist id="storage-groups-download-mode"
                             class="storage-mode"
                             preference="extensions.zotero.sync.storage.downloadMode.groups"
