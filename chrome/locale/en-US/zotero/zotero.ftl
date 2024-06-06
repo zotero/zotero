@@ -221,9 +221,11 @@ rtfScan-output-file = Output File
 
 rtfScan-no-file-selected = No file selected
 rtfScan-choose-input-file =
-    .label = Choose Input File...
+    .label = Choose File…
+    .aria-label = Choose Input File
 rtfScan-choose-output-file =
-    .label = Choose Output File...
+    .label = Choose File…
+    .aria-label = Choose Output File
 
 rtfScan-intro-page = 
     .label = Introduction
