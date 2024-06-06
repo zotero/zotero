@@ -244,8 +244,8 @@
 					<menupopup/>
 				</menulist>
 				<zoterosearchagefield id="value-date-age" class="value-date-age" hidden="true"/>
-				<toolbarbutton id="remove" tabindex="0" data-l10n-id="search-remove-btn" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
-				<toolbarbutton id="add" tabindex="0" data-l10n-id="search-add-btn" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
+				<toolbarbutton id="remove" tabindex="0" data-l10n-id="advanced-search-remove-btn" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
+				<toolbarbutton id="add" tabindex="0" data-l10n-id="advanced-search-add-btn" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
 			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
@@ -547,11 +547,11 @@
 				this.querySelector('#value-date-age').hidden = true;
 			}
 			var conditionsMenu = this.querySelector('#conditionsmenu');
-			document.l10n.setAttributes(conditionsMenu, 'search-conditions-menu', { label: conditionsMenu.label });
-			document.l10n.setAttributes(operatorsList, 'search-operators-menu', { label: operatorsList.label });
+			document.l10n.setAttributes(conditionsMenu, 'advanced-search-conditions-menu', { label: conditionsMenu.label });
+			document.l10n.setAttributes(operatorsList, 'advanced-search-operators-menu', { label: operatorsList.label });
 			var valueMenu = this.querySelector("#valuemenu");
 			if (!valueMenu.hidden) {
-				document.l10n.setAttributes(valueMenu, 'search-condition-input', { label: valueMenu.label });
+				document.l10n.setAttributes(valueMenu, 'advanced-search-condition-input', { label: valueMenu.label });
 			}
 		}
 
@@ -791,7 +791,7 @@
 					autocompletepopup="search-autocomplete-popup"
 					timeout="250"
 					type="search"
-					data-l10n-id="search-condition-input"
+					data-l10n-id="advanced-search-condition-input"
 					/>
 				
 				<xul:toolbarbutton

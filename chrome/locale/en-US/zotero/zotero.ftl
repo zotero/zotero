@@ -530,16 +530,16 @@ first-run-guidance-quickFormat = Type a title, author, and/or year to search for
 
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 
-search-remove-btn =
+advanced-search-remove-btn =
     .tooltiptext = { general-remove }
-search-add-btn =
+advanced-search-add-btn =
     .tooltiptext = { general-add }
-search-conditions-menu =
+advanced-search-conditions-menu =
     .aria-label = Search condition
     .label = { $label }
-search-operators-menu =
+advanced-search-operators-menu =
     .aria-label = Operator
     .label = { $label }
-search-condition-input =
+advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
