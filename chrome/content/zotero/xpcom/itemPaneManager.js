@@ -69,7 +69,9 @@
  * @property {string} paneID - Unique pane ID
  * @property {string} pluginID - Set plugin ID to auto remove section when plugin is disabled/removed
  * @property {SectionL10n & SectionIcon} header - Header options. Icon should be 16*16 and `label` need to be localized
- * @property {SectionL10n & SectionIcon} sidenav - Sidenav options. Icon should be 20*20 and `tooltiptext` need to be localized
+ * @property {SectionL10n & SectionIcon & { showByDefault?: boolean }} sidenav
+ * Sidenav options. Icon should be 20*20 and `tooltiptext` need to be localized
+ * `showByDefault` indicates the button should always show in sidenav's default status, e.g. no/multiple item selected.
  * @property {string} [bodyXHTML] - Pane body's innerHTML, default to XUL namespace
  * @property {(props: SectionInitHookArgs) => void} [onInit]
  * Lifecycle hook called when section is initialized.
