@@ -45,10 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest		"Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults			"Feed Defaults">
 
-<!ENTITY zotero.preferences.openurl.choose            "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.server				"Resolver:">
-<!ENTITY zotero.preferences.openurl.version				"Version:">
-
 <!ENTITY zotero.preferences.prefpane.sync							"Sync">
 <!ENTITY zotero.preferences.sync.username							"Username:">
 <!ENTITY zotero.preferences.sync.password							"Password:">
