@@ -645,10 +645,11 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 		this.wizard.canAdvance = newCanAdvance;
 	},
 
-	updatePath() {
+	async updatePath() {
 		this.wizard.canAdvance = this.inputFile && this.outputFile;
-		document.getElementById('input-path').value = this.inputFile ? this.inputFile.path : '';
-		document.getElementById('output-path').value = this.outputFile ? this.outputFile.path : '';
+		let noFileSelectedLabel = await document.l10n.formatValue("rtfScan-no-file-selected");
+		document.getElementById('input-path').value = this.inputFile ? this.inputFile.path : noFileSelectedLabel;
+		document.getElementById('output-path').value = this.outputFile ? this.outputFile.path : noFileSelectedLabel;
 	},
 
 	insertRows(newRows, beforeRow) {

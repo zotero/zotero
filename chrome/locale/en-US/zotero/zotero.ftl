@@ -8,6 +8,7 @@ return-or-enter =
 general-remove = Remove
 general-add = Add
 general-remind-me-later = Remind Me Later
+general-choose-file = Choose File…
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -219,11 +220,13 @@ rtfScan-introPage-description2 = To get started, select an RTF input file and an
 rtfScan-input-file = Input File
 rtfScan-output-file = Output File
 
-zotero-file-none-selected =
-    .value = No file selected
-
-zotero-file-choose =
-    .label = Choose File…
+rtfScan-no-file-selected = No file selected
+rtfScan-choose-input-file =
+    .label = { general-choose-file }
+    .aria-label = Choose Input File
+rtfScan-choose-output-file =
+    .label = { general-choose-file }
+    .aria-label = Choose Output File
 
 rtfScan-intro-page = 
     .label = Introduction
