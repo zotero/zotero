@@ -44,11 +44,13 @@ libraries-collections-box {
 
 			toolbarbutton {
 				margin-inline-start: auto;
-				visibility: hidden;
 				border-radius: 2px;
+				& > image {
+					visibility: hidden;
+				}
 			}
 
-			&:is(:hover, :focus-within) toolbarbutton {
+			&:is(:hover, :focus-within) toolbarbutton > image {
 				visibility: visible;
 			}
 		}

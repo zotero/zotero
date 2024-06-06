@@ -189,9 +189,9 @@
 
 			if (this.editable) {
 				var remove = document.createXULElement("toolbarbutton");
-				remove.setAttribute('value', '-');
 				remove.setAttribute('class', 'zotero-clicky zotero-clicky-minus');
-				remove.setAttribute('tabindex', -1);
+				remove.setAttribute('tabindex', 0);
+				remove.setAttribute("data-l10n-id", 'section-button-remove');
 			}
 
 			var row = document.createElement("div");
