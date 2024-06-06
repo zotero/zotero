@@ -526,9 +526,8 @@ Zotero.FileTypes = new function() {
 	/**
 	 * @return {Promise<Integer>} fileTypeID
 	 */
-	this.getIDFromMIMEType = function (mimeType) {
-		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes "
-			+ "WHERE ? LIKE mimeType || '%'";
+	this.getIDFromMIMEType = async function (mimeType) {
+		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes WHERE mimeType = ?";
 		return Zotero.DB.valueQueryAsync(sql, [mimeType]);
 	};
 }
