@@ -30,15 +30,6 @@ editable-text {
 	display: grid;
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 	
-	span {
-		visibility: hidden;
-		margin: 0;
-		border: 1px solid transparent;
-		width: fit-content;
-		white-space: pre;
-		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
-	}
-	
 	&:not([nowrap])::after {
 		content: attr(value) ' ';
 		visibility: hidden;
