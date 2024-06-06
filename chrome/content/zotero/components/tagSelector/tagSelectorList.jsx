@@ -229,7 +229,7 @@ class TagList extends React.PureComponent {
 	}
 
 	isEmpty() {
-		return !this.tagSelectorList().querySelector('.tag-selector-item:not(.disabled)');
+		return this.props.tags.length == 0;
 	}
 
 	clearRecordedFocusedTag() {
@@ -238,13 +238,20 @@ class TagList extends React.PureComponent {
 	}
 
 	// Focus the last focused tag from the list. If there is none, focus the first
-	// non-disabled tag.
+	// non-disabled tag. If there are no enabled tags, focus the first visible tag.
 	async focus() {
-		if (this.focusedTagIndex === null) {
-			let enabledTag = this.tagSelectorList().querySelector('.tag-selector-item:not(.disabled)');
-			if (!enabledTag) return;
-			enabledTag.focus();
+		if (this.isEmpty()) {
+			document.querySelector('.tag-selector-list').focus();
 			return;
+		}
+		if (this.focusedTagIndex === null) {
+			let enabledTagIndex = this.props.tags.findIndex(tag => !tag.disabled);
+			if (enabledTagIndex !== -1) {
+				this.focusedTagIndex = enabledTagIndex;
+			}
+			else {
+				this.focusedTagIndex = 0;
+			}
 		}
 		let tagRefocused = this.refocusTag();
 		if (tagRefocused) return;
@@ -316,10 +323,6 @@ class TagList extends React.PureComponent {
 			return node.previousElementSibling;
 		};
 		let nextOne = nextTag(document.activeElement);
-		// Skip disabled tags
-		while (nextOne && nextOne.classList.contains("disabled")) {
-			nextOne = nextTag(nextOne);
-		}
 		if (nextOne) {
 			nextOne.focus();
 		}
