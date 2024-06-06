@@ -1695,13 +1695,15 @@ Zotero.Server.Connector.Ping.prototype = {
 				//Zotero.debug("Setting active URL to " + req.data.activeURL);
 				Zotero.QuickCopy.lastActiveURL = req.data.activeURL;
 			}
-			let translatorsHash = await Zotero.Translators.getTranslatorsHash();
+			let translatorsHash = await Zotero.Translators.getTranslatorsHash(false);
+			let sortedTranslatorHash = await Zotero.Translators.getTranslatorsHash(true);
 			
 			let response = {
 				prefs: {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
 					googleDocsAddNoteEnabled: true,
-					translatorsHash
+					translatorsHash,
+					sortedTranslatorHash
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {

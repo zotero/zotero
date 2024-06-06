@@ -40,6 +40,7 @@ Zotero.Translators = new function() {
 	this.TRANSLATOR_ID_RDF = '5e3ad958-ac79-463d-812b-a86a9235c28f';
 	
 	this._translatorsHash = null;
+	this._sortedTranslatorHash = null;
 	
 	/**
 	 * Initializes translator cache, loading all translator metadata into memory
@@ -269,6 +270,7 @@ Zotero.Translators = new function() {
 	this.reinit = async function (options = {}) {
 		await this.init(Object.assign({}, options, { reinit: true }));
 		this._translatorsHash = null;
+		this._sortedTranslatorHash = null;
 		await Zotero.QuickCopy.init();
 	};
 	
@@ -333,16 +335,20 @@ Zotero.Translators = new function() {
 	/**
 	 * Gets a hash of all translators (to check whether Connector needs an update)
 	 */
-	this.getTranslatorsHash = async function () {
-		if (this._translatorsHash) return this._translatorsHash;
+	this.getTranslatorsHash = async function (sorted) {
+		let prop = sorted ? "_sortedTranslatorHash" : "_translatorsHash";
+		if (this[prop]) return this[prop];
 		await this.init();
-		const translators = await this.getAll();
+		let translators = await this.getAll();
+		if (sorted) {
+			translators.sort((a, b) => a.translatorID.localeCompare(b.translatorID));
+		}
 		let hashString = "";
 		for (let translator of translators) {
 			hashString += `${translator.translatorID}:${translator.lastUpdated},`;
 		}
-		this._translatorsHash = Zotero.Utilities.Internal.md5(hashString);
-		return this._translatorsHash;
+		this[prop] = Zotero.Utilities.Internal.md5(hashString);
+		return this[prop];
 	};
 	
 	/**
