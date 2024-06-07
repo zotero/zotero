@@ -630,22 +630,30 @@ var Zotero_LocateMenu = new function() {
 	ViewOptions._libraryLookup = new function() {
 		this.className = "zotero-menuitem-library-lookup";
 		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
-		this.handleItems = Zotero.Promise.method(function (items, event) {
+		this.handleItems = async function (items, event) {
 			// If no resolver configured, show error
 			if (!Zotero.Prefs.get('openURL.resolver')) {
+				let paneName = Zotero.Intl.strings['zotero.preferences.prefpane.general'];
+				let [noResolverStr, openSettingsStr] = await document.l10n.formatValues(
+					[
+						{ id: 'locate-library-lookup-no-resolver', args: { pane: paneName } },
+						{ id: 'general-open-settings' }
+					]
+				);
 				let ps = Services.prompt;
 				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 				let index = ps.confirmEx(
 					null,
 					Zotero.getString('locate.libraryLookup.noResolver.title'),
-					Zotero.getString('locate.libraryLookup.noResolver.text', Zotero.appName),
+					noResolverStr,
 					buttonFlags,
-					Zotero.getString('general.openPreferences'),
+					openSettingsStr,
 					null, null, null, {}
 				);
 				if (index == 0) {
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-advanced');
+					// TODO: Scroll to Locate
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-general');
 				}
 				return;
 			}
@@ -656,6 +664,6 @@ var Zotero_LocateMenu = new function() {
 				if(url) urls.push(url);
 			}
 			ZoteroPane_Local.loadURI(urls, event);
-		});
+		};
 	};
 }
