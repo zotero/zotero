@@ -669,15 +669,15 @@
 
 				this.addDynamicRow(rowLabel, rowData);
 				
+				let button, popup;
 				// In field merge mode, add a button to switch field versions
 				if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
-					var button = document.createXULElement("toolbarbutton");
+					button = document.createXULElement("toolbarbutton");
 					button.className = 'zotero-field-version-button zotero-clicky-merge';
-					button.setAttribute('type', 'menu');
 					let fieldLocalName = rowLabel.querySelector("label")?.textContent;
 					document.l10n.setAttributes(button, 'itembox-button-merge', { field: fieldLocalName || "" });
 					
-					var popup = button.appendChild(document.createXULElement("menupopup"));
+					popup = button.appendChild(document.createXULElement("menupopup"));
 					
 					for (let v of this._fieldAlternatives[fieldName]) {
 						let menuitem = document.createXULElement("menuitem");
@@ -697,6 +697,10 @@
 						});
 						popup.appendChild(menuitem);
 					}
+
+					button.addEventListener("click", (e) => {
+						this.handlePopupOpening(e, popup);
+					});
 					
 					rowData.appendChild(button);
 				}

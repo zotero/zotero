@@ -37,12 +37,13 @@
 				</hbox>
 			</groupbox>
 			
-			<groupbox flex="1">
-				<description id="zotero-duplicates-merge-field-select">&zotero.duplicatesMerge.fieldSelect;</description>
-				<vbox id="zotero-duplicates-merge-item-box-container" flex="1">
-					<item-box id="zotero-duplicates-merge-item-box" flex="1"/>
-				</vbox>
+			<groupbox id="zotero-duplicates-merge-field-select">
+				<description>&zotero.duplicatesMerge.fieldSelect;</description>
 			</groupbox>
+
+			<vbox id="zotero-duplicates-merge-item-box-container">
+				<item-box id="zotero-duplicates-merge-item-box"/>
+			</vbox>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 
 		init() {
