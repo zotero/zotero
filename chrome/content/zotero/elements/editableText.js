@@ -46,6 +46,17 @@
 			'max-lines'
 		];
 		
+		static get _canvas() {
+			// OffscreenCanvas returns incorrect results here
+			// Use a <canvas> that we don't actually add to the DOM
+			let canvas = document.createElement('canvas');
+			// Replace the getter with a value
+			Object.defineProperty(this, '_canvas', {
+				value: canvas
+			});
+			return canvas;
+		}
+		
 		get noWrap() {
 			return this.hasAttribute('nowrap');
 		}
@@ -151,13 +162,11 @@
 		}
 		
 		sizeToContent = () => {
-			// Add a temp span, fetch its width with current paddings and set max-width based on that
-			let span = document.createElement("span");
-			span.innerText = this.value || this.placeholder;
-			this.append(span);
-			let size = span.getBoundingClientRect();
-			this.style['max-width'] = `calc(${size.width}px)`;
-			this.querySelector("span").remove();
+			let context = this.constructor._canvas.getContext('2d');
+			let { font, paddingLeft, paddingRight, borderLeftWidth, borderRightWidth } = getComputedStyle(this._input);
+			context.font = font;
+			let text = this.value || this.placeholder;
+			this.style.maxWidth = `calc(${context.measureText(text).width}px + ${paddingLeft} + ${paddingRight} + ${borderLeftWidth} + ${borderRightWidth})`;
 		};
 		
 		attributeChangedCallback() {
