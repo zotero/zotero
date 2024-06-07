@@ -38,17 +38,15 @@ preferences-item-pane-header-style = Header Citation Style:
 preferences-item-pane-header-locale = Header Language:
 preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
 
-preferences-advanced-language-and-region-title = Language and Region
-preferences-advanced-enable-bidi-ui =
-    .label = Enable bidirectional text editing utilities
+preferences-locate-resolver = Resolver
+preferences-locate-base-url = Base URL
+
+preferences-quickCopy-minus =
+    .aria-label = { general-minus }
+    .label = { $label }
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-quickCopy-minus =
-    .aria-label = { general-remove }
-    .label = { $label }
-preferences-locate-resolver = Resolver
-preferences-locate-base-url = Base URL
 
 preferences-styleManager-delete-button =
     .tooltiptext = Delete the selected style
@@ -56,3 +54,7 @@ preferences-styleManager-delete-button =
 preferences-styleManager-add-button =
     .tooltiptext = Add a style from a file
     .label = { $label }
+
+preferences-advanced-language-and-region-title = Language and Region
+preferences-advanced-enable-bidi-ui =
+    .label = Enable bidirectional text editing utilities
