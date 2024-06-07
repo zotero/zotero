@@ -162,6 +162,21 @@ var Zotero_QuickFormat = new function () {
 				if (e.shiftKey && referenceBox.selectedCount < 1) {
 					_selectFirstReference();
 				}
+				// Shift-Click selects a range starting from _selectionStart
+				// https://searchfox.org/mozilla-central/source/toolkit/content/widgets/richlistbox.js#469
+				// which is not be always correct after selecting and un-selecting items
+				// with a few cmd/ctrl-clicks. To achieve a more consistent behavior, reset _selectionStart
+				// to be the first or last selected node, depending on which item is clicked.
+				let allItems = [...referenceBox.childNodes];
+				let firstSelectedIndex = allItems.findIndex(node => node == referenceBox.querySelector("[selected=true]"));
+				let clickedItemIndex = allItems.findIndex(node => node == item);
+				let allSelected = [...referenceBox.querySelectorAll("[selected=true]")];
+				if (clickedItemIndex < firstSelectedIndex) {
+					referenceBox._selectionStart = allSelected[allSelected.length - 1];
+				}
+				else {
+					referenceBox._selectionStart = allSelected[0];
+				}
 				// Shift-click can end up selecting disabled separator, so make sure it's removed
 				setTimeout(() => {
 					let selectedSeparators = [...document.querySelectorAll("richlistitem[disabled='true'][selected='true']")];
@@ -1773,6 +1788,7 @@ var Zotero_QuickFormat = new function () {
 
 	function _onQuickSearchClick(event) {
 		if (qfGuidance) qfGuidance.hide();
+		if (!event.target.classList.contains("editor")) return;
 		let clickX = event.clientX;
 		let clickY = event.clientY;
 		let { lastBubble, startOfTheLine } = getLastBubbleBeforePoint(clickX, clickY);
