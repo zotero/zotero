@@ -37,9 +37,12 @@
 				<label is="zotero-text-link"
 						value="&zotero.preferences.export.getAdditionalStyles;" flex="1"
 						onclick="Zotero_Preferences.Cite.openStylesPage(); event.preventDefault()"/>
-				<button disabled="true" id="styleManager-delete" data-l10n-id="preferences-minus-btn"
-					oncommand="Zotero_Preferences.Cite.deleteStyle()"/>
-				<button data-l10n-id="preferences-plus-btn" oncommand="Zotero_Preferences.Cite.addStyle()"/>
+				<button id="styleManager-delete"
+					data-l10n-id="preferences-styleManager-delete-button" data-l10n-args='{"label":"-"}'
+					oncommand="Zotero_Preferences.Cite.deleteStyle()"
+					disabled="true"/>
+				<button data-l10n-id="preferences-styleManager-add-button" data-l10n-args='{"label":"+"}'
+					oncommand="Zotero_Preferences.Cite.addStyle()"/>
 			</hbox>
 		</groupbox>
 		

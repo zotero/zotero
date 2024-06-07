@@ -49,3 +49,10 @@ preferences-quickCopy-minus =
     .label = { $label }
 preferences-locate-resolver = Resolver
 preferences-locate-base-url = Base URL
+
+preferences-styleManager-delete-button =
+    .tooltiptext = Delete the selected style
+    .label = { $label }
+preferences-styleManager-add-button =
+    .tooltiptext = Add a style from a file
+    .label = { $label }
