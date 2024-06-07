@@ -53,38 +53,22 @@
 		
 		<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
 		<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;" native="true"/>
-		
-		<table id="noteQuickCopy-format-options"
-				xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-				hidden="hidden">
-			<tbody id="noteQuickCopy-markdown-options">
-				<tr>
-					<th>
-						<xul:label/>
-					</th>
-					<td>
-						<xul:checkbox id="noteQuickCopy-markdown-includeAppLinks"
-								oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
-								native="true"/>
-					</td>
-				</tr>
-			</tbody>
-
-			<tbody id="noteQuickCopy-html-options">
-				<tr>
-					<th>
-						<xul:label/>
-					</th>
-					<td>
-						<xul:checkbox id="noteQuickCopy-html-includeAppLinks"
-								oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
-								native="true"/>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		
+		<box id="noteQuickCopy-wrapper">
+			<vbox id="noteQuickCopy-format-options" hidden="true" align="center">
+				<hbox id="noteQuickCopy-markdown-options" align="center">
+					<label control="noteQuickCopy-markdown-includeAppLinks"></label>
+					<checkbox id="noteQuickCopy-markdown-includeAppLinks"
+						oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
+						native="true"/>
+				</hbox>
+				<hbox id="noteQuickCopy-html-options" align="center">
+					<label control="noteQuickCopy-html-includeAppLinks"></label>
+					<checkbox id="noteQuickCopy-html-includeAppLinks"
+						oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
+						native="true"/>
+				</hbox>
+			</vbox>
+		</box>
 		<separator/>
 		
 		<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
