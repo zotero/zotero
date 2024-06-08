@@ -36,7 +36,7 @@
 		false
 	);
 
-	class ItemBox extends ItemPaneSectionElementBase {
+	class InfoBox extends ItemPaneSectionElementBase {
 		constructor() {
 			super();
 			
@@ -69,7 +69,7 @@
 			return MozXULElement.parseXULToFragment(`
 				<collapsible-section data-l10n-id="section-info" data-pane="info" style="width:100%">
 					<html:div class="body">
-						<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
+						<div id="info-box" xmlns="http://www.w3.org/1999/xhtml">
 							<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 								<menupopup id="creator-type-menu" position="after_start"/>
 								<menupopup id="zotero-creator-transform-menu">
@@ -1650,7 +1650,7 @@
 
 		addAutocompleteToElement(elem) {
 			var fieldName = elem.getAttribute('fieldname');
-			var [field, creatorIndex, creatorField] = fieldName.split('-');
+			var [field, _creatorIndex, _creatorField] = fieldName.split('-');
 			if (elem.getAttribute("readonly") || !(field == 'creator' || Zotero.ItemFields.isAutocompleteField(fieldName))) {
 				return;
 			}
@@ -2525,5 +2525,5 @@
 			return this.querySelector(`#${id}`);
 		}
 	}
-	customElements.define("item-box", ItemBox);
+	customElements.define("info-box", InfoBox);
 }
