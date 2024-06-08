@@ -126,6 +126,8 @@ itembox-button-options =
 itembox-button-merge =
     .aria-label = Select version of { $field } field
 
+create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+
 reader-use-dark-mode-for-content =
     .label = Use Dark Mode for Content
 

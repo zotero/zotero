@@ -43,13 +43,13 @@ function CreateParent({ loading, item, toggleAccept }) {
 
 	return (
 		<div className="create-parent-container">
-			<span className="title">
+			<div className="title">
 				{ item.attachmentFilename }
-			</span>
+			</div>
+			<p className="intro" data-l10n-id="create-parent-intro"/>
 			<div className="body">
 				<input
 					id="parent-item-identifier"
-					placeholder={ Zotero.getString('createParent.prompt') }
 					size="50"
 					disabled={ loading }
 					onChange={ handleInput }

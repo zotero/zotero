@@ -23,7 +23,7 @@
 	buttondisabledaccept="true"
 	buttonlabelextra2="&zotero.createParent.button.manual;"
 	buttonlabelaccept="&zotero.createParent.title;"
-	style="padding:20px 15px;width:400px;">
+	style="padding: 20px 15px; min-width: 500px">
 
 	<script src="chrome://global/content/globalOverlay.js"/>
 	<script src="chrome://global/content/editMenuOverlay.js"/>
@@ -33,7 +33,9 @@
 	<script src="lookup.js"/>
 	<script src="createParentDialog.js"/>
 	<script src="components/createParent/createParent.js"/>
-
+	
+	<html:link rel="localization" href="zotero.ftl"/>
+	
 	<vbox id="zotero-create-parent-container" flex="1">
 		<html:div id="create-parent" />
 	</vbox>

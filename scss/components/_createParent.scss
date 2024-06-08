@@ -2,16 +2,25 @@
 	.title {
 		font-size: 1.4em;
 		font-weight: 700;
+		// Let the dialog get a little wider if the title is long
+		max-width: 550px;
 	}
-
+	
+	.intro {
+		// Text is added asynchonously, so set a height for dialog auto-sizing
+		min-height: 1em;
+		margin-bottom: .5em;
+	}
+	
 	.body {
-		margin: 1em 0;
 		position: relative;
 		display: flex;
+		margin-bottom: 1em;
 
 		input {
 			flex: 1;
 			font-size: 14px;
+			margin-left: 0;
 		}
 		
 		.downloadProgress {
