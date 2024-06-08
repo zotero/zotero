@@ -41,8 +41,8 @@
 				<description>&zotero.duplicatesMerge.fieldSelect;</description>
 			</groupbox>
 
-			<vbox id="zotero-duplicates-merge-item-box-container">
-				<item-box id="zotero-duplicates-merge-item-box"/>
+			<vbox id="zotero-duplicates-merge-info-box-container">
+				<info-box id="zotero-duplicates-merge-info-box"/>
 			</vbox>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 
@@ -110,7 +110,7 @@
 			
 			let button = document.getElementById('zotero-duplicates-merge-button');
 			let versionSelect = document.getElementById('zotero-duplicates-merge-version-select');
-			let itembox = document.getElementById('zotero-duplicates-merge-item-box');
+			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
 			let fieldSelect = document.getElementById('zotero-duplicates-merge-field-select');
 			
 			let alternatives = oldestItem.multiDiff(otherItems, this._ignoreFields);
@@ -148,7 +148,7 @@
 		}
 		
 		setMaster(pos) {
-			let itembox = document.getElementById('zotero-duplicates-merge-item-box');
+			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
 			itembox.mode = 'fieldmerge';
 			
 			this._otherItems = this._items.concat();
@@ -173,7 +173,7 @@
 		}
 		
 		async merge() {
-			let itembox = document.getElementById('zotero-duplicates-merge-item-box');
+			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
 			Zotero.CollectionTreeCache.clear();
 			// Update master item with any field alternatives from the item box
 			let json = this._masterItem.toJSON();
