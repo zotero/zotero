@@ -17,14 +17,6 @@ tree {
 	padding-left: 0.05em;
 }
 
-.zotero-editpane-item-box > scrollbox, .zotero-view-item > tabpanel > vbox, 
-#zotero-editpane-tags > scrollbox, .zotero-editpane-related {
-	padding-top: 5px;
-}
-
-#zotero-editpane-tags > scrollbox {
-	padding-left: 5px;
-}
 
 /* 
 	Default scrollbar displays up/down arrows even 

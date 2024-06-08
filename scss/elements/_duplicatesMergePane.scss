@@ -1,5 +1,5 @@
 duplicates-merge-pane {
-	&, #zotero-duplicates-merge-version-select, #zotero-duplicates-merge-item-box-container {
+	&, #zotero-duplicates-merge-version-select, #zotero-duplicates-merge-info-box-container {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
@@ -20,12 +20,12 @@ duplicates-merge-pane {
 		}
 	}
 
-	#zotero-duplicates-merge-item-box-container {
+	#zotero-duplicates-merge-info-box-container {
 		flex: 1;
 		padding-inline: 8px;
 		overflow-y: scroll;
 
-		#zotero-duplicates-merge-item-box {
+		#zotero-duplicates-merge-info-box {
 			border-top: var(--material-border-quinary);
 		}
 

@@ -50,7 +50,7 @@
 					<item-pane-header id="zotero-item-pane-header" />
 					
 					<html:div id="zotero-view-item" class="zotero-view-item" tabindex="0">
-						<item-box id="zotero-editpane-item-box" data-pane="info"/>
+						<info-box id="zotero-editpane-info-box" data-pane="info"/>
 						
 						<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract" data-pane="abstract"/>
 
