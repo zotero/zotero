@@ -318,11 +318,11 @@
 		}
 
 		renderCustomSections() {
-			let lastUpdate = Zotero.ItemPaneManager.getUpdateTime();
+			let lastUpdate = Zotero.ItemPaneManager.customSectionUpdateTime;
 			if (this._lastUpdateCustomSection == lastUpdate) return;
 			this._lastUpdateCustomSection = lastUpdate;
 
-			let targetPanes = Zotero.ItemPaneManager.getCustomSections();
+			let targetPanes = Zotero.ItemPaneManager.customSections;
 			let currentPaneElements = this.getCustomPanes();
 			// Remove
 			for (let elem of currentPaneElements) {
