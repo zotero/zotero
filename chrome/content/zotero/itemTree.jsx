@@ -2955,7 +2955,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// Pass document to renderCell so that it can create elements
 				cell = column.renderCell.apply(this, [...arguments, document]);
 				// Ensure that renderCell returns an Element
-				if (!(cell instanceof Element)) {
+				if (!(cell instanceof window.Element)) {
+					cell = null;
 					throw new Error('renderCell must return an Element');
 				}
 			}

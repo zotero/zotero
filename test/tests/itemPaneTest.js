@@ -296,7 +296,12 @@ describe("Item pane", function () {
 			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var label = itemBox.querySelector('#itembox-field-value-creator-0-lastName');
 			var firstlast = label.closest('.creator-type-value');
-			firstlast.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, button: 2 }));
+			var menupopup = itemBox.querySelector('#zotero-creator-transform-menu');
+			// Fake a right-click
+			doc.popupNode = firstlast;
+			menupopup.openPopup(
+				firstlast, "after_start", 0, 0, true, false, new MouseEvent('click', { button: 2 })
+			);
 			
 			var menuitem = doc.getElementById('creator-transform-swap-names');
 			assert.isTrue(menuitem.hidden);
@@ -443,7 +448,7 @@ describe("Item pane", function () {
 			let promise = waitForItemEvent('modify');
 			item.saveTx();
 			await promise;
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			let creatorLastName = itemBox.querySelector(".creator-type-value editable-text");
 			creatorLastName.focus();
 			// Dispatch shift-Enter event
@@ -473,7 +478,7 @@ describe("Item pane", function () {
 			let promise = waitForItemEvent('modify');
 			item.saveTx();
 			await promise;
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			let creatorLastName = itemBox.querySelector(".creator-type-value editable-text");
 			creatorLastName.focus();
 			// Dispatch shift-Enter event
@@ -511,7 +516,7 @@ describe("Item pane", function () {
 			item.setCreators(creatorsArr);
 			item.saveTx();
 			await waitForItemEvent('modify');
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			let moreCreatorsLabel = itemBox.querySelector("#more-creators-label");
 			let lastVisibleCreator = moreCreatorsLabel.closest(".meta-row").previousElementSibling;
 			let lastVisibleCreatorsPosition = itemBox.getCreatorFields(lastVisibleCreator).position;
@@ -548,7 +553,7 @@ describe("Item pane", function () {
 			item.setCreators(creatorsArr);
 			item.saveTx();
 			await waitForItemEvent('modify');
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			// Add a new empty creator row
 			itemBox.querySelector(".zotero-clicky-plus").click();
 			await Zotero.Promise.delay();
@@ -581,7 +586,7 @@ describe("Item pane", function () {
 			let modifyPromise = waitForItemEvent('modify');
 			item.saveTx();
 			await modifyPromise;
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			// Click on the button to switch type to dual
 			let switchTypeBtn = itemBox.querySelector(".zotero-clicky-switch-type");
 			assert.equal(switchTypeBtn.getAttribute("type"), "single");
