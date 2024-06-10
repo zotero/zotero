@@ -23,7 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { E10SUtils } = ChromeUtils.import("resource://gre/modules/E10SUtils.jsm");
 var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm");
 var { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");

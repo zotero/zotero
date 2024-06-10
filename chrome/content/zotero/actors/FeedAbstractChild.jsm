@@ -1,7 +1,5 @@
 var EXPORTED_SYMBOLS = ["FeedAbstractChild"];
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 class FeedAbstractChild extends JSWindowActorChild {
 	_stylesheet;
 	

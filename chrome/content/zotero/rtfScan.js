@@ -5,7 +5,6 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
 import VirtualizedTable from 'components/virtualized-table';
 import { getCSSIcon } from 'components/icons';
 
-var { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
 
 function _generateItem(citationString, itemName, action) {

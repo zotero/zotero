@@ -35,7 +35,6 @@ ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
 XPCOMUtils.defineLazyModuleGetters(this, {
 	E10SUtils: "resource://gre/modules/E10SUtils.jsm",
 	HiddenFrame: "resource://gre/modules/HiddenFrame.jsm",
-	Services: "resource://gre/modules/Services.jsm",
 	setTimeout: "resource://gre/modules/Timer.jsm",
 });
 ChromeUtils.defineESModuleGetters(this, {

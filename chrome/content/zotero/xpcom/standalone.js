@@ -22,7 +22,6 @@
     
     ***** END LICENSE BLOCK *****
 */
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero.Standalone = new function() {
 	/**

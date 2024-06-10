@@ -1,5 +1,3 @@
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 /**
  * @param {Document} doc
  * @returns {Element | null}

@@ -22,7 +22,6 @@
     
     ***** END LICENSE BLOCK *****
 */
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Zotero_ProgressBar = new function () {
 	var initialized, io;

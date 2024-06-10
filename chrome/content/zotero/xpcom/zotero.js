@@ -26,7 +26,6 @@
 // Commonly used imports accessible anywhere
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
 var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");

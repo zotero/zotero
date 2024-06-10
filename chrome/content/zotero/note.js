@@ -24,7 +24,6 @@
 */
 
 // Auto-suggester fails without this
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 let noteEditor;
 let notifierUnregisterID;

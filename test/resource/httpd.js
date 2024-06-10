@@ -49,7 +49,6 @@ var DEBUG = false; // non-const *only* so tweakable in server tests
 /** True if debugging output should be timestamped. */
 var DEBUG_TIMESTAMP = false; // non-const so tweakable in server tests
 
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { AppConstants } = ChromeUtils.import(
   "resource://gre/modules/AppConstants.jsm"
 );

@@ -1,4 +1,3 @@
-Components.utils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
 var { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");

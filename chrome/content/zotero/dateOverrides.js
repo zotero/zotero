@@ -1,5 +1,4 @@
 /* eslint-disable no-extend-native */
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 let originalToLocaleString = Date.prototype.toLocaleString;
 Date.prototype.toLocaleString = function (locales, options) {

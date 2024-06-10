@@ -23,8 +23,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 Zotero.Prompt = {
 	BUTTON_TITLE_OK: Services.prompt.BUTTON_TITLE_OK,
 	BUTTON_TITLE_CANCEL: Services.prompt.BUTTON_TITLE_CANCEL,

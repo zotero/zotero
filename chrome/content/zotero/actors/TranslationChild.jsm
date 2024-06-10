@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = ["TranslationChild"];
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 const TRANSLATE_SCRIPT_PATHS = [
 	'src/zotero.js',
