@@ -25,16 +25,33 @@
 
 "use strict";
 
-Zotero.Notifier = new function(){
+Zotero.Notifier = new function () {
 	// Options that apply to an entire event, not a specific object
 	this.EVENT_LEVEL_OPTIONS = ['autoSyncDelay', 'skipAutoSync'];
 	
 	var _observers = {};
 	var _types = [
-		'collection', 'search', 'share', 'share-items', 'item', 'file',
-		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash',
-		'bucket', 'relation', 'feed', 'feedItem', 'sync', 'api-key', 'tab',
-		'itemtree', 'itempane'
+		'collection',
+		'search',
+		'share',
+		'share-items',
+		'item',
+		'file',
+		'collection-item',
+		'item-tag',
+		'tag',
+		'setting',
+		'group',
+		'trash',
+		'bucket',
+		'relation',
+		'feed',
+		'feedItem',
+		'sync',
+		'api-key',
+		'tab',
+		'itemtree',
+		'itempane'
 	];
 	var _transactionID = false;
 	var _queue = {};
@@ -48,11 +65,11 @@ Zotero.Notifier = new function(){
 	 * @returns {string}
 	 */
 	this.registerObserver = function (ref, types, id, priority) {
-		if (types){
+		if (types) {
 			types = Zotero.flattenArguments(types);
 			
-			for (var i=0; i<types.length; i++){
-				if (_types.indexOf(types[i]) == -1){
+			for (var i = 0; i < types.length; i++) {
+				if (_types.indexOf(types[i]) == -1) {
 					throw new Error("Invalid type '" + types[i] + "'");
 				}
 			}
@@ -62,7 +79,7 @@ Zotero.Notifier = new function(){
 		var tries = 10;
 		do {
 			// Increase the hash length if we can't find a unique key
-			if (!tries){
+			if (!tries) {
 				len++;
 				tries = 10;
 			}
@@ -84,12 +101,12 @@ Zotero.Notifier = new function(){
 			priority: priority || false
 		};
 		return hash;
-	}
+	};
 	
 	this.unregisterObserver = function (id) {
 		Zotero.debug("Unregistering notifier observer in notifier with id '" + id + "'", 4);
 		delete _observers[id];
-	}
+	};
 	
 	
 	/**
@@ -185,7 +202,7 @@ Zotero.Notifier = new function(){
 		}
 		
 		_mergeEvent(queue, event, type, ids, extraData);
-	}
+	};
 	
 	
 	function _mergeEvent(queue, event, type, ids, extraData) {
@@ -296,7 +313,7 @@ Zotero.Notifier = new function(){
 	 */
 	this.begin = function (transactionID = true) {
 		_transactionID = transactionID;
-	}
+	};
 	
 	
 	/**
@@ -307,12 +324,13 @@ Zotero.Notifier = new function(){
 	 * @param {String} [transactionID]
 	 */
 	this.commit = Zotero.Promise.coroutine(function* (queues, transactionID = true) {
+		let queue;
 		if (queues) {
 			if (!Array.isArray(queues)) {
 				queues = [queues];
 			}
 			
-			var queue = {};
+			queue = {};
 			for (let { _queue: q, options } of queues) {
 				for (let type in q) {
 					for (let event in q[type]) {
@@ -337,7 +355,7 @@ Zotero.Notifier = new function(){
 		}
 		// Use default queue
 		else {
-			var queue = _queue;
+			queue = _queue;
 		}
 		
 		var runQueue = [];
@@ -350,7 +368,7 @@ Zotero.Notifier = new function(){
 				if (posA == -1) posA = 100;
 				if (posB == -1) posB = 100;
 				return posA - posB;
-			}
+			};
 		};
 		
 		var typeOrder = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
@@ -439,8 +457,8 @@ Zotero.Notifier = new function(){
 		//Zotero.debug("Resetting notifier event queue");
 		_queue = {};
 		_transactionID = false;
-	}
-}
+	};
+};
 
 
 Zotero.Notifier.Queue = function (options = {}) {
