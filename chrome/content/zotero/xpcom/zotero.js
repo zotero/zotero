@@ -28,9 +28,6 @@ Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/Services.jsm");
 var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
-Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
-	.getService(Components.interfaces.nsIOSFileConstantsService)
-	.init();
 
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetters(globalThis, {

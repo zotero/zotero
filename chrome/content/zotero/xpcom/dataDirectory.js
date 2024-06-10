@@ -356,9 +356,12 @@ Zotero.DataDirectory = {
 			yield Zotero.File.createDirectoryIfMissingAsync(dataDir);
 		}
 		catch (e) {
+			// TEMP: OS.Constants.Win.ERROR_ACCESS_DENIED no longer available, but we should
+			// switch to IOUtils anyway
+			const WIN_ERROR_ACCESS_DENIED = 5;
 			if (e instanceof OS.File.Error
-					&& (('unixErrno' in e && e.unixErrno == OS.Constants.libc.EACCES)
-						|| ('winLastError' in e && e.winLastError == OS.Constants.Win.ERROR_ACCESS_DENIED))) {
+					&& (('unixErrno' in e && e.unixErrno == ChromeUtils.getLibcConstants().EACCES)
+						|| ('winLastError' in e && e.winLastError == WIN_ERROR_ACCESS_DENIED))) {
 				Zotero.restarting = true;
 				let isDefaultDir = dataDir == Zotero.DataDirectory.defaultDir;
 				let ps = Services.prompt;
@@ -675,11 +678,8 @@ Zotero.DataDirectory = {
 		} catch(e) {
 			yield OS.File.remove(tmpFile);
 			
-			Components.classes["@mozilla.org/net/osfileconstantsservice;1"].
-				getService(Components.interfaces.nsIOSFileConstantsService).
-				init();	
 			if (e instanceof OS.File.Error) {
-				if (e.unixErrno != undefined && e.unixErrno == OS.Constants.libc.EXDEV) {
+				if (e.unixErrno != undefined && e.unixErrno == ChromeUtils.getLibcConstants().EXDEV) {
 					return true;
 				}
 				// ERROR_NOT_SAME_DEVICE is undefined
