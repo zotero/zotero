@@ -61,9 +61,6 @@ var Zotero_CSL_Preview = new function () {
 			// XXX needs its own string really for the title!
 			var str = '<div>';
 			for (let style of styles) {
-				if (style.source) {
-					continue;
-				}
 				Zotero.debug("Generate bibliography for " + style.title);
 				let bib;
 				let err = false;
