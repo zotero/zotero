@@ -403,7 +403,7 @@
 				);
 			}
 			
-			this.updateSubmenuCheckboxes(conditionsMenu);
+			this.updateMenuCheckboxesRecursive(conditionsMenu, this.selectedCondition);
 			
 			// Display appropriate operators for condition
 			var selectThis;
@@ -411,7 +411,7 @@
 			{
 				var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
 				var hidden = !operators[val];
-				operatorsList.firstChild.childNodes[i].toggleAttribute('hidden', hidden);
+				operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
 				if (!hidden && (selectThis == null || this.selectedOperator == val))
 				{
 					selectThis = i;
@@ -420,6 +420,7 @@
 			operatorsList.selectedIndex = selectThis;
 			// Setting `selected` does not change `checked`. Should explicitly set it.
 			operatorsList.selectedItem.setAttribute('checked', true);
+			this.updateMenuCheckboxesRecursive(operatorsList, operatorsList.selectedItem.getAttribute('value'));
 			
 			// Generate drop-down menu instead of textbox for certain conditions
 			switch (conditionName) {
@@ -553,6 +554,7 @@
 			if (!valueMenu.hidden) {
 				document.l10n.setAttributes(valueMenu, 'advanced-search-condition-input', { label: valueMenu.label });
 			}
+			this.updateMenuCheckboxesRecursive(operatorsList, operatorsList.selectedItem.getAttribute('value'));
 		}
 
 		createValueMenu(rows) {
@@ -690,11 +692,11 @@
 			}
 		}
 
-		updateSubmenuCheckboxes(menu) {
+		updateMenuCheckboxesRecursive(menu, value) {
 			for (let i = 0; i < menu.itemCount; i++) {
 				let item = menu.getItemAtIndex(i);
 				if (item.localName == 'menuitem') {
-					if (item.getAttribute('value') == this.selectedCondition) {
+					if (item.getAttribute('value') == value) {
 						item.setAttribute('checked', true);
 					}
 					else {
@@ -702,7 +704,7 @@
 					}
 				}
 				else {
-					this.updateSubmenuCheckboxes(item);
+					this.updateMenuCheckboxesRecursive(item, value);
 				}
 			}
 		}
