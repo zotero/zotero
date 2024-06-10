@@ -252,8 +252,46 @@ class ItemPaneSectionManagerIntl extends PluginAPIBase {
 }
 
 
+class ItemPaneInfoRowManagerIntl extends PluginAPIBase {
+	constructor() {
+		super();
+		this._Zotero = Zotero;
+		this.config = {
+			APIName: "ItemPaneInfoRowAPI",
+			mainKeyName: "rowID",
+			notifyType: "infobox",
+			optionTypeDefinition: {
+				rowID: "string",
+				pluginID: "string",
+				label: {
+					type: "object",
+					children: {
+						l10nID: "string",
+					}
+				},
+				position: {
+					type: "string",
+					optional: true,
+				},
+				onGetData: "function",
+				onSetData: {
+					type: "function",
+					optional: true,
+				},
+				onItemChange: {
+					type: "function",
+					optional: true,
+				},
+			},
+		};
+	}
+}
+
+
 class ItemPaneManager {
 	_sectionManager = new ItemPaneSectionManagerIntl();
+
+	_infoRowManager = new ItemPaneInfoRowManagerIntl();
 
 	registerSection(options) {
 		return this._sectionManager.register(options);
@@ -269,6 +307,22 @@ class ItemPaneManager {
 
 	get customSections() {
 		return this._sectionManager.options;
+	}
+
+	registerInfoRow(options) {
+		return this._infoRowManager.register(options);
+	}
+
+	unregisterInfoRow(rowID) {
+		return this._infoRowManager.unregister(rowID);
+	}
+
+	get customInfoRowUpdateTime() {
+		return this._infoRowManager.updateTime;
+	}
+
+	get customInfoRows() {
+		return this._infoRowManager.options;
 	}
 }
 
