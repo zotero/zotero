@@ -105,7 +105,7 @@ export let OS = {
 			catch (e) {
 				// Broken symlink
 				if (e.name == 'InvalidAccessError') {
-					if (/Could not create directory because the target file(.+) exists and is not a directory/.test(e.message)) {
+					if (/Could not create directory (.+): file exists and is not a directory/.test(e.message)) {
 						let osFileError = new OS.File.Error(e.message);
 						osFileError.becauseExists = true;
 						throw osFileError;
