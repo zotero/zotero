@@ -977,10 +977,10 @@ function ZoteroProtocolHandler() {
 		this.owner = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(this.URI);
 		this._isPending = true;
 		
-		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-			createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-		converter.charset = "UTF-8";
-		this._stream = converter.convertToInputStream(data);
+		this._stream = Cc["@mozilla.org/io/string-input-stream;1"]
+			.createInstance(Ci.nsIStringInputStream);
+		this._stream.setUTF8Data(data);
+		
 		this.contentLength = this._stream.available();
 	}
 	
@@ -1462,10 +1462,10 @@ AsyncChannel.prototype = {
 				
 				listenerWrapper.onStartRequest(this);
 				
-				let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-					.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-				converter.charset = "UTF-8";
-				let inputStream = converter.convertToInputStream(data);
+				let inputStream = Cc["@mozilla.org/io/string-input-stream;1"]
+					.createInstance(Ci.nsIStringInputStream);
+				inputStream.setUTF8Data(data);
+				
 				listenerWrapper.onDataAvailable(this, inputStream, 0, inputStream.available());
 				
 				listenerWrapper.onStopRequest(this, this.status);
