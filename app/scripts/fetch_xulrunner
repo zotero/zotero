@@ -61,6 +61,14 @@ if [[ $BUILD_MAC == 0 ]] && [[ $BUILD_WIN == 0 ]] && [[ $BUILD_LINUX == 0 ]]; th
 	usage
 fi
 
+function check_line {
+	pattern=$1
+	if ! egrep -q "$pattern" "$file"; then
+		echo "$pattern" not found in "$file" -- aborting 2>&1
+		exit 1
+	fi
+}
+
 function replace_line {
 	pattern=$1
 	replacement=$2
