@@ -140,7 +140,7 @@ class ReaderInstance {
 		}
 	}
 
-	async _open({ state, location, secondViewState }) {
+	async _open({ state, location, secondViewState, preview }) {
 		// Set `ReaderTab` title as fast as possible
 		this.updateTitle();
 
@@ -187,6 +187,7 @@ class ReaderInstance {
 			secondaryViewState: secondViewState,
 			location,
 			readOnly: this._isReadOnly(),
+			preview,
 			authorName: this._item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
 			showContextPaneToggle: this._showContextPaneToggle,
 			sidebarWidth: this._sidebarWidth,
@@ -1339,7 +1340,7 @@ class ReaderPreview extends ReaderInstance {
 	async _open({ state, location, secondViewState }) {
 		let success;
 		try {
-			success = await super._open({ state, location, secondViewState });
+			success = await super._open({ state, location, secondViewState, preview: true });
 
 			this._injectCSS(this._iframeWindow.document, ReaderPreview.CSS.global);
 
