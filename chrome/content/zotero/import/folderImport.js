@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = ["Zotero_Import_Folder"]; // eslint-disable-line no-unused-vars
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 
 // matches "*" and "?" wildcards of a glob pattern, case-insensitive

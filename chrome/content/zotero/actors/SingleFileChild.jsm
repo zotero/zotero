@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = ["SingleFileChild"];
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 class SingleFileChild extends JSWindowActorChild {
 	async receiveMessage(message) {

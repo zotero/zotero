@@ -32,7 +32,6 @@ var EXPORTED_SYMBOLS = ["ZoteroPluginInstaller"];
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { setTimeout } = ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs");
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 var installationInProgress = false;
 

@@ -160,7 +160,6 @@ const xpcomFilesLocal = [
 ];
 
 Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 
 var instanceID = (new Date()).getTime();

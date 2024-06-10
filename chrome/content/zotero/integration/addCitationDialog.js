@@ -25,7 +25,6 @@
 
 import { getCSSItemTypeIcon } from 'components/icons';
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Zotero_Citation_Dialog = new function () {
 	// Array value [0] is property name.

@@ -30,7 +30,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ProgressQueueTable from 'components/progressQueueTable';
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
 const { directAuth } = mendeleyAPIUtils;
 

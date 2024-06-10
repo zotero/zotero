@@ -22,7 +22,6 @@
     
     ***** END LICENSE BLOCK *****
 */
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 
 var Zotero_QuickFormat = new function () {
