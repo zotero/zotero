@@ -322,9 +322,6 @@ var Zotero_File_Interface = new function() {
 	
 	
 	this.getMendeleyDirectory = function () {
-		Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
-			.getService(Components.interfaces.nsIOSFileConstantsService)
-			.init();
 		var path = FileUtils.getDir('Home', []).path;
 		if (Zotero.isMac) {
 			path = PathUtils.join(path, ['Library', 'Application Support', 'Mendeley Desktop']);
