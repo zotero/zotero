@@ -30,7 +30,6 @@ Zotero.Styles = new function() {
 	
 	var _renamedStyles = null;
 	
-	Components.utils.import("resource://gre/modules/Services.jsm");
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
 	this.xsltProcessor = null;
@@ -440,7 +439,6 @@ Zotero.Styles = new function() {
 			
 			// If validation fails on a different style, we ask the user if s/he really
 			// wants to install it
-			Components.utils.import("resource://gre/modules/Services.jsm");
 			var shouldInstall = Services.prompt.confirmEx(null,
 				Zotero.getString('styles.install.title'),
 				Zotero.getString('styles.validationWarning', [origin, Zotero.appName]),

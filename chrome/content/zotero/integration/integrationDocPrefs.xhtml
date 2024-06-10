@@ -44,7 +44,6 @@
 		buttons="accept,cancel,help"
 		onclose="document.documentElement.cancelDialog(); event.preventDefault(); event.stopPropagation();">
 		<script>
-			var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 			Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);

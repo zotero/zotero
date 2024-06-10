@@ -23,7 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import { ImportCitaviAnnotatons } from 'zotero/import/citavi';
 

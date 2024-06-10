@@ -35,7 +35,6 @@ const BOMs = {
 }
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero.Translate.DOMWrapper = new function() {
 	var Cu = Components.utils;

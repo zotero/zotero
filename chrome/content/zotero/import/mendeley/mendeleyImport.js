@@ -2,7 +2,6 @@
 /* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false, PathUtils: false */
 var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"]; //eslint-disable-line no-unused-vars
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyOnlineMappings.js");

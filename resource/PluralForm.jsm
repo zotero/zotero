@@ -4,7 +4,6 @@
 
 var EXPORTED_SYMBOLS = ["PluralForm"];
 
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
  * This module provides the PluralForm object which contains a method to figure

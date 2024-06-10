@@ -77,7 +77,6 @@
 		 * @param {Boolean} [options.force] Show even if already shown
 		 */
 		async show(options) {
-			Components.utils.import("resource://gre/modules/Services.jsm");
 			if (!Zotero.Prefs.get("firstRunGuidance")) return;
 			
 			options = options || {};

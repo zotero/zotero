@@ -45,7 +45,6 @@
 		</hbox>
 	</vbox>
 	<script>
-        var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
         var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
         Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		window.addEventListener("DOMContentLoaded", () => window.sizeToContent())

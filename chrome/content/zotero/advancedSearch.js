@@ -24,7 +24,6 @@
 */
 
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 import ItemTree from 'zotero/itemTree';
 import { COLUMNS } from 'zotero/itemTreeColumns';
 

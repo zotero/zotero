@@ -23,7 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ProgressQueueTable from 'components/progressQueueTable';

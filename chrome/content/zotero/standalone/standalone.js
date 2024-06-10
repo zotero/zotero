@@ -23,7 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 /**
  * This object contains the various functions for the interface

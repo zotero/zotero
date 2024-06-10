@@ -123,7 +123,6 @@ Zotero.Exception.Alert.prototype = {
 	 * @param {DOMWindow} window The window to which the error should be attached
 	 */
 	"present":function(window) {
-		Components.utils.import("resource://gre/modules/Services.jsm");
 		try {
 			Services.prompt.alert(window || null, this.title, this.message);
 		} catch(e) {
