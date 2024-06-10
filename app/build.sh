@@ -386,7 +386,7 @@ replace_line 'handle: function bch_handle\(cmdLine\) {' 'handle: function bch_ha
   \/\/ TEST_OPTIONS_PLACEHOLDER
   ' modules/BrowserContentHandler.sys.mjs
 # prevent color scheme getting reset to 'light' during printing
-replace_line 'new LightweightThemeConsumer\(document\);' '\/\/new LightweightThemeConsumer\(document\);'  chrome/browser/content/browser/browser.js
+replace_line 'new LightweightThemeConsumer\(document\);' '\/\/new LightweightThemeConsumer\(document\);'  chrome/browser/content/browser/browser-init.js
 export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets/commandLineHandler.js"; $replacement = <$fh>; close $fh; } s/\/\/ TEST_OPTIONS_PLACEHOLDER/$replacement/' modules/BrowserContentHandler.sys.mjs
 
 # Move test files to root directory
@@ -509,7 +509,9 @@ if [ $BUILD_MAC == 1 ]; then
 	chmod 755 "$CONTENTSDIR/MacOS/zotero"
 
 	# TEMP: Custom version of XUL with some backported Mozilla bug fixes
-	cp "$MAC_RUNTIME_PATH/../MacOS/XUL" "$CONTENTSDIR/MacOS/"
+	if [ -n "$custom_components_hash_mac" ]; then
+		cp "$MAC_RUNTIME_PATH/../MacOS/XUL" "$CONTENTSDIR/MacOS/"
+	fi
 
 	# Use our own updater, because Mozilla's requires updates signed by Mozilla
 	cd "$CONTENTSDIR/MacOS"

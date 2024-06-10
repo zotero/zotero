@@ -219,19 +219,19 @@ function modify_omni {
     }' modules/Extension.sys.mjs
     
 	# Use applications.zotero instead of applications.gecko
-	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.jsm
+	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.sys.mjs
 	replace_line 'manifest.applications\?.gecko' 'manifest.applications?.zotero' modules/Extension.sys.mjs
 	
 	# When installing addon, use app version instead of toolkit version for targetApplication
-	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/XPIInstall.jsm
+	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/XPIInstall.sys.mjs
 	
 	# Accept zotero@chnm.gmu.edu for target application to allow Zotero 6 plugins to remain
 	# installed in Zotero 7
-	replace_line "if \(targetApp.id == Services.appinfo.ID\) \{" "if (targetApp.id == 'zotero\@chnm.gmu.edu') targetApp.id = '$APP_ID'; if (targetApp.id == Services.appinfo.ID) {" modules/addons/XPIDatabase.jsm
+	replace_line "if \(targetApp.id == Services.appinfo.ID\) \{" "if (targetApp.id == 'zotero\@chnm.gmu.edu') targetApp.id = '$APP_ID'; if (targetApp.id == Services.appinfo.ID) {" modules/addons/XPIDatabase.sys.mjs
 	
 	# TEMP: Skip addons without ids until we figure out what's going on with the default theme.
 	# This fixes plugin updating and other things.
-	replace_line 'return addons;' 'return addons.filter(addon => addon.id);' modules/addons/XPIDatabase.jsm
+	replace_line 'return addons;' 'return addons.filter(addon => addon.id);' modules/addons/XPIDatabase.sys.mjs
 	
 	# For updates, look for applications.zotero instead of applications.gecko in manifest.json and
 	# use the app id and version for strict_min_version/strict_max_version comparisons
@@ -245,10 +245,10 @@ function modify_omni {
 	
 	# Prevent automatic installation of default theme
 	# (chrome/toolkit/content/mozapps/extensions/default-theme, removed above)
-	replace_line 'this.maybeInstallBuiltinAddon\(' 'if (false) this.maybeInstallBuiltinAddon(' modules/addons/XPIProvider.jsm
+	replace_line 'this.maybeInstallBuiltinAddon\(' 'if (false) this.maybeInstallBuiltinAddon(' modules/addons/XPIProvider.sys.mjs
 	
 	# Don't log a warning when checking 'distribution/extensions' for addons
-	replace_line 'logger.warn\(`Checking' 'logger.debug(`Checking' modules/addons/XPIProvider.jsm
+	replace_line 'logger.warn\(`Checking' 'logger.debug(`Checking' modules/addons/XPIProvider.sys.mjs
 	
 	# Allow addon installation by bypassing confirmation dialogs. If we want a confirmation dialog,
 	# we need to either add gXPInstallObserver from browser-addons.js [1][2] or provide our own with
@@ -257,7 +257,7 @@ function modify_omni {
 	# [1] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/browser/base/content/browser.js#1902-1923
 	# [2] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/browser/base/content/browser-addons.js#201
 	# [3] https://searchfox.org/mozilla-esr102/rev/5a6d529652045050c5cdedc0558238949b113741/toolkit/mozapps/extensions/AddonManager.sys.mjs#3114-3124
-	replace_line 'if \(info.addon.userPermissions\) \{' 'if (false) {' modules/AddonManager.sys.mjs
+	replace_line 'if \(info.addon.installPermissions\) \{' 'if (false) {' modules/AddonManager.sys.mjs
 	replace_line '\} else if \(info.addon.sitePermissions\) \{' '} else if (false) {' modules/AddonManager.sys.mjs
 	replace_line '\} else if \(requireConfirm\) \{' '} else if (false) {' modules/AddonManager.sys.mjs
 	
@@ -271,9 +271,9 @@ function modify_omni {
 	replace_line 'listener\[aMethod\].apply\(listener, aArgs\);' \
 		'let maybePromise = listener[aMethod].apply(listener, aArgs);
 		if (maybePromise && maybePromise.then) await maybePromise;' modules/AddonManager.sys.mjs
-	replace_line 'AddonManagerPrivate.callAddonListeners' 'await AddonManagerPrivate.callAddonListeners' modules/addons/XPIInstall.jsm
-	replace_line 'let uninstall = \(\) => \{' 'let uninstall = async () => {' modules/addons/XPIInstall.jsm
-	replace_line 'cancelUninstallAddon\(aAddon\)' 'async cancelUninstallAddon(aAddon)' modules/addons/XPIInstall.jsm
+	replace_line 'AddonManagerPrivate.callAddonListeners' 'await AddonManagerPrivate.callAddonListeners' modules/addons/XPIInstall.sys.mjs
+	replace_line 'let uninstall = \(\) => \{' 'let uninstall = async () => {' modules/addons/XPIInstall.sys.mjs
+	replace_line 'cancelUninstallAddon\(aAddon\)' 'async cancelUninstallAddon(aAddon)' modules/addons/XPIInstall.sys.mjs
 	
 	# No idea why this is necessary, but without it initialization fails with "TypeError: "constructor" is read-only"
 	replace_line 'LoginStore.prototype.constructor = LoginStore;' '\/\/LoginStore.prototype.constructor = LoginStore;' modules/LoginStore.sys.mjs
@@ -358,9 +358,12 @@ function modify_omni {
 	replace_line 'id=\"commonDialogWindow\"' \
 		'id=\"commonDialogWindow\" class=\"zotero-dialog\" drawintitlebar-platforms=\"mac\"' \
 		chrome/toolkit/content/global/commonDialog.xhtml
-	replace_line '<\?xml-stylesheet href=\"chrome:\/\/global\/skin\/commonDialog.css\" type=\"text\/css\"\?>' \
-		'<\?xml-stylesheet href=\"chrome:\/\/global\/skin\/commonDialog.css\" type=\"text\/css\"\?>
-		<\?xml-stylesheet href=\"chrome:\/\/zotero-platform\/content\/zotero.css\" type=\"text\/css\"\?>' \
+	# commonDialog.css link is split across multiple lines, so we have to do a weird substitution,
+	# so check the one-line global.css to make sure the format hasn't changed
+	check_line '<html:link rel="stylesheet" href="chrome:\/\/global\/skin\/global.css" \/>'
+	replace_line 'chrome:\/\/global\/skin\/commonDialog.css"' \
+		'chrome:\/\/global\/skin\/commonDialog.css"\/>
+		<html:link rel="stylesheet" href="chrome:\/\/zotero-platform\/content\/zotero.css"' \
 		chrome/toolkit/content/global/commonDialog.xhtml
 	# commonDialog.xhtml can be opened via Services.prompt in the Profile Manager, so check for a profile first
 	replace_line '<script>' \
@@ -387,10 +390,6 @@ function modify_omni {
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
 	
-	# Show Services menu on input fields
-	# (JS part of https://hg.mozilla.org/mozilla-central/rev/defc298879844981e7c1817f13e3fc2caf84f148 for input boxes)
-	replace_line '<menupopup class="textbox-contextmenu">' '<menupopup class="textbox-contextmenu" showservicesmenu="true">' chrome/toolkit/content/global/elements/moz-input-box.js
-    
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
 	cd ..
