@@ -82,11 +82,7 @@ Zotero.Utilities.Internal = {
 		let ch = Components.classes["@mozilla.org/security/hash;1"]
 			.createInstance(Components.interfaces.nsICryptoHash);
 		if (typeof strOrFile == 'string') {
-			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-				.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-			converter.charset = "UTF-8";
-			var result = {};
-			var data = converter.convertToByteArray(strOrFile, result);
+			let data = new TextEncoder().encode(strOrFile);
 			ch.init(ch.MD5);
 			ch.update(data, data.length);
 		}
@@ -200,11 +196,7 @@ Zotero.Utilities.Internal = {
 	  * @return	{String}
 	  */
 	sha1: function (str) {
-		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-			.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-		converter.charset = "UTF-8";
-		var result = {};
-		var data = converter.convertToByteArray(str, result);
+		var data = new TextEncoder().encode(str);
 		var ch = Components.classes["@mozilla.org/security/hash;1"]
 			.createInstance(Components.interfaces.nsICryptoHash);
 		ch.init(ch.SHA1);
@@ -226,10 +218,9 @@ Zotero.Utilities.Internal = {
 		var deferred = Zotero.Promise.defer();
 		
 		// Get input stream from POST data
-		var unicodeConverter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-			.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-		unicodeConverter.charset = "UTF-8";
-		var is = unicodeConverter.convertToInputStream(data);
+		var is = Cc["@mozilla.org/io/string-input-stream;1"]
+			.createInstance(Ci.nsIStringInputStream);
+		is.setUTF8Data(data);
 		
 		// Initialize stream converter
 		var converter = Components.classes["@mozilla.org/streamconv;1?from=uncompressed&to=gzip"]
