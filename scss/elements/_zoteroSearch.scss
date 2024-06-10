@@ -1,6 +1,6 @@
 zoterosearch {
 	#search-box > hbox, #search-box > groupbox {
-		margin-left: 6px;
+		margin: 0 6px;
 	}
 
 	groupbox {
@@ -39,6 +39,14 @@ zoterosearch {
 		.valuefield, .valuemenu, .value-date-age {
 			flex: 1;
 		}
+	}
+
+	#libraryMenu {
+		flex: 1;
+	}
+
+	#joinModeMenu {
+		min-width: 100px;
 	}
 	
 	#operatorsmenu {

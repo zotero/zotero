@@ -58,7 +58,7 @@ var ZoteroAdvancedSearch = new function() {
 		var elem = document.getElementById('zotero-items-tree');
 		const columns = COLUMNS.map((column) => {
 			column = Object.assign({}, column);
-			column.hidden = !['title', 'firstCreator'].includes(column.dataKey);
+			column.hidden = !['title', 'firstCreator', 'year', 'hasAttachment'].includes(column.dataKey);
 			return column;
 		});
 		this.itemsView = await ItemTree.init(elem, {
