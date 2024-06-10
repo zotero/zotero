@@ -118,15 +118,10 @@ function goBuildEditContextMenu() {
         popup = document.documentElement.lastElementChild.firstElementChild;
     }
     
-    try {
-        let menuitemSwitchTextDirection = popup.querySelector("[command='cmd_switchTextDirection']");
-        let showSwitchTextDirection = Services.prefs.getBoolPref("bidi.browser.ui", false);
-        menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
-        menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
-    }
-    catch (e) {
-        // Not worth failing over Services.jsm not being imported in a utility window
-    }
+	let menuitemSwitchTextDirection = popup.querySelector("[command='cmd_switchTextDirection']");
+	let showSwitchTextDirection = Services.prefs.getBoolPref("bidi.browser.ui", false);
+	menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
+	menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
     
     return popup;
 }
