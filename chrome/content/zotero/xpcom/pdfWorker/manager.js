@@ -197,7 +197,7 @@ class PDFWorker {
 					comment: (item.annotationComment || '').replace(/<\/?(i|b|sub|sup)>/g, ''),
 					color: item.annotationColor,
 					position: JSON.parse(item.annotationPosition),
-					dateModified: item.dateModified,
+					dateModified: Zotero.Date.sqlToISO8601(item.dateModified),
 					tags: item.getTags().map(x => x.tag)
 				});
 			}
