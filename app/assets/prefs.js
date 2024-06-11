@@ -94,6 +94,9 @@ pref("extensions.update.url", "");
 // Don't try to load the "Get Add-ons" tab on first load of Add-ons window
 pref("extensions.ui.lastCategory", "addons://list/extension");
 
+// Don't show "Using experimental APIs requires a privileged add-on" warning
+pref("extensions.experiments.enabled", true);
+
 // Not set on Windows in Firefox anymore since it's a per-installation pref,
 // but we override that in fetch_xulrunner
 pref("app.update.auto", true);
