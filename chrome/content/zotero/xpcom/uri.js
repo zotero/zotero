@@ -366,6 +366,8 @@ Zotero.URI = new function () {
 	};
 
 	/**
+	 * TODO: Use getLibraryWebURL() once #2893 is merged to get functional URLs
+	 *
 	 * @param {String} uri
 	 */
 	this.toWebURL = function (uri) {
