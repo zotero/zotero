@@ -51,7 +51,8 @@ Zotero.Notifier = new function () {
 		'api-key',
 		'tab',
 		'itemtree',
-		'itempane'
+		'itempane',
+		'infobox',
 	];
 	var _transactionID = false;
 	var _queue = {};
