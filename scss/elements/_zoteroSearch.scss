@@ -42,11 +42,15 @@ zoterosearch {
 	}
 
 	#joinModeMenu {
-		min-width: 100px;
+		min-width: 60px;
+	}
+	
+	#conditionsmenu {
+		min-width: 15em;
 	}
 	
 	#operatorsmenu {
-		width: 15em;
+		min-width: 13em;
 	}
 
 	#condition-tooltips tooltip
