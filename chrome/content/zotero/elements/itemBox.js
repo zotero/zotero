@@ -226,24 +226,20 @@
 				() => Zotero.Utilities.Internal.copyTextToClipboard(this._linkMenu.dataset.link)
 			);
 
-			// If the focus leaves the itemBox, clear the last focused element
-			// and potentially delete unsaved creator row
-			this._infoTable.addEventListener("focusout", (e) => {
-				let destination = e.relatedTarget;
-				if (!(destination && this._infoTable.contains(destination))) {
+			this._infoTable.addEventListener("focusout", async (_) => {
+				await Zotero.Promise.delay();
+				// If the focus leaves the itemBox, clear the last focused element
+				let focused = document.activeElement;
+				if (!this._infoTable.contains(focused)) {
 					this._clearSavedFieldFocus();
 				}
-				if (!destination) return;
-				let unsavedCreatorData = this.querySelector(".creator-type-value[unsaved=true]");
-				if (!unsavedCreatorData) return;
-				// Delete empty unsaved creator row if the focus lands on an input outside of unsaved creator
-				// row or if the focus is completely outside of the item pane.
-				let focusedInputOutOfCreatorRow = ["input", "textarea"].includes(destination.tagName) && !unsavedCreatorData?.contains(destination);
-				let focusOutOfItemPane = !this.closest("item-details").contains(destination);
-				let { firstName, lastName } = this.getCreatorFields(unsavedCreatorData.parentNode);
-				let isUnsavedCreatorEmpty = firstName == "" && lastName == "";
-				if (isUnsavedCreatorEmpty && (focusedInputOutOfCreatorRow || focusOutOfItemPane)) {
-					this.removeUnsavedCreatorRow();
+				// If user moves focus outside of empty unsaved creator row, remove it.
+				let unsavedCreatorRow = this.querySelector(".creator-type-value[unsaved=true]")?.closest(".meta-row");
+				// But not if these parent components receive focus which happens when menus are opened
+				if (["zotero-view-item", "main-window"].includes(focused.id) || !unsavedCreatorRow) return;
+				let focusLeftUnsavedCreatorRow = !unsavedCreatorRow.contains(focused);
+				if (focusLeftUnsavedCreatorRow) {
+					this.removeUnsavedCreatorRow(true);
 				}
 			});
 
@@ -1529,13 +1525,16 @@
 			await this.item.saveTx();
 		}
 		
-		removeUnsavedCreatorRow() {
+		removeUnsavedCreatorRow(onlyIfEmpty = false) {
 			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
-			if (unsavedCreatorData) {
-				unsavedCreatorData.closest(".meta-row").remove();
-				this._creatorCount--;
-				this._updateCreatorButtonsStatus();
-			}
+			if (!unsavedCreatorData) return;
+			let { firstName, lastName } = this.getCreatorFields(unsavedCreatorData.parentNode);
+			let isEmpty = firstName == "" && lastName == "";
+			if (onlyIfEmpty && !isEmpty) return;
+			
+			unsavedCreatorData.closest(".meta-row").remove();
+			this._creatorCount--;
+			this._updateCreatorButtonsStatus();
 		}
 		
 		dateTimeFromUTC(valueText) {
