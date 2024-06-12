@@ -84,6 +84,14 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			this._section.open = val;
 		}
 	}
+
+	get notCollapsible() {
+		return this._section.notCollapsible;
+	}
+
+	set notCollapsible(val) {
+		this._section.notCollapsible = !!val;
+	}
 	
 	connectedCallback() {
 		super.connectedCallback();

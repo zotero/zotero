@@ -887,10 +887,15 @@ class ReaderInstance {
 	}
 
 	_openTagsPopup(item, x, y) {
-		let menupopup = this._window.document.createXULElement('menupopup');
+		let menupopup = this._window.document.createXULElement('panel');
 		menupopup.addEventListener('popuphidden', function (event) {
 			if (event.target === menupopup) {
 				menupopup.remove();
+			}
+		});
+		menupopup.addEventListener('keydown', function (event) {
+			if (event.key == "Escape") {
+				menupopup.hidePopup();
 			}
 		});
 		menupopup.className = 'tags-popup';
@@ -905,12 +910,19 @@ class ReaderInstance {
 		tagsbox.editable = true;
 		tagsbox.item = item;
 		tagsbox.render();
-		menupopup.openPopup(null, 'before_start', x, y, true);
-		setTimeout(() => {
+		menupopup.shadowRoot.firstChild.style = "--panel-background: none !important;";
+		menupopup.addEventListener("popupshown", (_) => {
+			// Ensure tagsbox is open
+			tagsbox.open = true;
 			if (tagsbox.count == 0) {
 				tagsbox.newTag();
 			}
+			else {
+				tagsbox.querySelector("editable-text").focus();
+			}
+			tagsbox.notCollapsible = true;
 		});
+		menupopup.openPopup(null, 'before_start', x, y, true);
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
