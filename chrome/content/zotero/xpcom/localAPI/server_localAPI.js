@@ -601,6 +601,7 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		Zotero.debug('Executing local API search');
 		Zotero.debug(search.toJSON());
 		// Searches sometimes return duplicate IDs; de-duplicate first
+		// TODO: Fix in search.js
 		let uniqueResultIDs = [...new Set(await search.search())];
 		let items = await Zotero.Items.getAsync(uniqueResultIDs);
 		
