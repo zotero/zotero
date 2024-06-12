@@ -1177,6 +1177,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			// Create an attachment response with storage metadata
 			var item = new Zotero.Item('attachment');
+			item.libraryID = Zotero.Libraries.userLibraryID;
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentFilename = 'test.txt';
 			item.attachmentContentType = 'text/plain';
