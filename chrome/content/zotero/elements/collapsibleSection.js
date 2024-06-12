@@ -43,7 +43,7 @@
 		set open(newOpen) {
 			newOpen = !!newOpen;
 			let oldOpen = this.open;
-			if (oldOpen === newOpen || this.empty) return;
+			if (oldOpen === newOpen || this.empty || !this.collapsible) return;
 			this.render();
 			
 			// Force open before getting scrollHeight, so we get the right value
@@ -104,6 +104,19 @@
 		
 		set summary(val) {
 			this.setAttribute('summary', val);
+		}
+		
+		get collapsible() {
+			return !this.getAttribute("no-collapse");
+		}
+
+		set collapsible(val) {
+			if (val) {
+				this.removeAttribute('no-collapse');
+			}
+			else {
+				this.setAttribute('no-collapse', val);
+			}
 		}
 		
 		static get observedAttributes() {

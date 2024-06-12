@@ -342,6 +342,18 @@
 					focusField.focus();
 				}
 			}
+			else if (event.key == "Tab" && !event.shiftKey) {
+				// On tab from the last empty tag row, the minus icon will be focused
+				// and the row will be immediately removed in this.saveTag, so focus will be lost.
+				// To avoid that, on tab from the last tag input that is empty, focus the next
+				// element after the tag row.
+				let allTags = [...this.querySelectorAll(".row")];
+				let isLastTag = target.closest(".row") == allTags[allTags.length - 1];
+				if (isLastTag && !target.closest("editable-text").value.length) {
+					Services.focus.moveFocus(window, target.closest(".row").lastChild, Services.focus.MOVEFOCUS_FORWARD, 0);
+					event.preventDefault();
+				}
+			}
 		};
 
 		// Intercept paste, check for newlines, and convert textbox

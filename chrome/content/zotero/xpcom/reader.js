@@ -896,30 +896,43 @@ class ReaderInstance {
 	}
 
 	_openTagsPopup(item, x, y) {
-		let menupopup = this._window.document.createXULElement('menupopup');
-		menupopup.addEventListener('popuphidden', function (event) {
-			if (event.target === menupopup) {
-				menupopup.remove();
+		let tagsPopup = this._window.document.createXULElement('panel');
+		tagsPopup.addEventListener('popuphidden', function (event) {
+			if (event.target === tagsPopup) {
+				tagsPopup.remove();
 			}
 		});
-		menupopup.className = 'tags-popup';
-		menupopup.setAttribute('ignorekeys', true);
+		tagsPopup.addEventListener('keydown', function (event) {
+			if (event.key == "Escape") {
+				tagsPopup.hidePopup();
+			}
+		});
+		tagsPopup.className = 'tags-popup';
 		let tagsbox = this._window.document.createXULElement('tags-box');
-		menupopup.appendChild(tagsbox);
+		tagsPopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
-		this._popupset.appendChild(menupopup);
+		this._popupset.appendChild(tagsPopup);
 		let rect = this._iframe.getBoundingClientRect();
 		x += rect.left;
 		y += rect.top;
 		tagsbox.editable = true;
 		tagsbox.item = item;
 		tagsbox.render();
-		menupopup.openPopup(null, 'before_start', x, y, true);
-		setTimeout(() => {
+		// remove unnecessary tabstop from the section header
+		tagsbox.querySelector(".head").removeAttribute("tabindex");
+		tagsPopup.addEventListener("popupshown", (_) => {
+			// Ensure tagsbox is open
+			tagsbox.open = true;
 			if (tagsbox.count == 0) {
 				tagsbox.newTag();
 			}
+			else {
+				// Focus + button
+				Services.focus.setFocus(tagsbox.querySelector("toolbarbutton"), Services.focus.FLAG_NOSHOWRING);
+			}
+			tagsbox.collapsible = false;
 		});
+		tagsPopup.openPopup(null, 'before_start', x, y, true);
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
