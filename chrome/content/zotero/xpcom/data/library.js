@@ -682,7 +682,7 @@ Zotero.Library.prototype.toResponseJSON = function (options = {}) {
 	let uri = Zotero.URI.getLibraryURI(this.libraryID);
 	return {
 		type: this.libraryType,
-		id: this.id,
+		id: this.libraryTypeID,
 		name: this.name,
 		links: {
 			self: {
