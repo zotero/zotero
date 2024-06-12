@@ -136,7 +136,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
 	get: function () {
 		switch (this._libraryType) {
 		case 'user':
-			return Zotero.Users.getCurrentUserID();
+			return Zotero.Users.getCurrentUserID() || 0;
 		
 		case 'group':
 			return Zotero.Groups.getGroupIDFromLibraryID(this._libraryID);
@@ -689,10 +689,10 @@ Zotero.Library.prototype.toResponseJSON = function (options = {}) {
 				href: Zotero.URI.toAPIURL(uri, options.apiURL),
 				type: 'application/json'
 			},
-			alternate: {
+			alternate: Zotero.Users.getCurrentUserID() ? {
 				href: Zotero.URI.toWebURL(uri),
 				type: 'text/html'
-			}
+			} : undefined
 		}
 	};
 };
