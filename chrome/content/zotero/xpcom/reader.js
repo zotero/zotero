@@ -899,7 +899,6 @@ class ReaderInstance {
 			}
 		});
 		menupopup.className = 'tags-popup';
-		menupopup.setAttribute('ignorekeys', true);
 		let tagsbox = this._window.document.createXULElement('tags-box');
 		menupopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
@@ -910,7 +909,6 @@ class ReaderInstance {
 		tagsbox.editable = true;
 		tagsbox.item = item;
 		tagsbox.render();
-		menupopup.shadowRoot.firstChild.style = "--panel-background: none !important;";
 		menupopup.addEventListener("popupshown", (_) => {
 			// Ensure tagsbox is open
 			tagsbox.open = true;
