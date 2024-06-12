@@ -648,6 +648,37 @@ describe("Zotero.Search", function() {
 				});
 			});
 		});
+
+		describe("Infinite loop check", function () {
+			it("should detect a loop caused by a 'savedSearch' condition", async function () {
+				let item = await createDataObject('item', { setTitle: true });
+
+				let search1 = new Zotero.Search();
+				search1.libraryID = Zotero.Libraries.userLibraryID;
+				search1.name = "A";
+				search1.addCondition('title', 'contains', item.title);
+				await search1.saveTx();
+
+				let search2 = new Zotero.Search();
+				search2.libraryID = Zotero.Libraries.userLibraryID;
+				search2.name = "B";
+				search2.addCondition('savedSearch', 'is', search1.key);
+				await search2.saveTx();
+
+				search1.addCondition('savedSearch', 'is', search2.key);
+				await search1.saveTx();
+
+				// Make sure query is rebuilt after we start spying
+				search1._sql = search2._sql = null;
+
+				let logErrorSpy = sinon.spy(Zotero, 'logError');
+				await search1.search();
+				assert.isTrue(logErrorSpy.calledWith(
+					sinon.match(e => e.message && e.message.includes('Search condition leads to loop'))
+				));
+				logErrorSpy.restore();
+			});
+		});
 	});
 	
 	describe("#deleted", function () {
