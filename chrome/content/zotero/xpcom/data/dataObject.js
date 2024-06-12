@@ -1335,10 +1335,10 @@ Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
 				href: Zotero.URI.toAPIURL(uri, options.apiURL),
 				type: 'application/json'
 			},
-			alternate: {
+			alternate: Zotero.Users.getCurrentUserID() ? {
 				href: Zotero.URI.toWebURL(uri),
 				type: 'text/html'
-			}
+			} : undefined
 		},
 		meta: {},
 		data: this.toJSON(options)

@@ -101,7 +101,12 @@ class LocalAPIEndpoint {
 		if (userID !== undefined
 				&& userID != 0
 				&& userID != Zotero.Users.getCurrentUserID()) {
-			return this.makeResponse(400, 'text/plain', 'Only data for the logged-in user is available locally - use userID 0');
+			let suffix = "";
+			let currentUserID = Zotero.Users.getCurrentUserID();
+			if (currentUserID) {
+				suffix += " or " + currentUserID;
+			}
+			return this.makeResponse(400, 'text/plain', 'Only data for the logged-in user is available locally -- use userID 0' + suffix);
 		}
 
 		requestData.libraryID = requestData.pathParams.groupID
@@ -273,10 +278,11 @@ class LocalAPIEndpoint {
 			}
 		}
 
-		// alternate: cut off '/api/', replace userID 0 with current user's ID
-		links.alternate = ZOTERO_CONFIG.WWW_BASE_URL
-			+ requestData.pathname.substring(5)
+		// alternate: only include if logged in, cut off '/api/', replace userID 0 with current userID
+		if (Zotero.Users.getCurrentUserID()) {
+			links.alternate = ZOTERO_CONFIG.WWW_BASE_URL + requestData.pathname.substring(5)
 				.replace('users/0/', `users/${Zotero.Users.getCurrentUserID()}/`);
+		}
 		
 		return links;
 	}

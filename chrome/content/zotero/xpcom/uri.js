@@ -359,7 +359,10 @@ Zotero.URI = new function () {
 		if (!apiURL) {
 			apiURL = ZOTERO_CONFIG.API_URL;
 		}
-		return uri.replace(ZOTERO_CONFIG.BASE_URI, apiURL);
+		return uri
+			.replace(ZOTERO_CONFIG.BASE_URI, apiURL)
+			// Replace local user key with users/0
+			.replace(/(http:\/\/localhost:\d+\/api\/users)\/local\/\w+/, '$1/0');
 	};
 
 	/**

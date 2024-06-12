@@ -253,10 +253,10 @@ Zotero.Tags = new function() {
 						href: Zotero.URI.toAPIURL(uri),
 						type: 'application/json'
 					},
-					alternate: {
+					alternate: Zotero.Users.getCurrentUserID() ? {
 						href: uri, // No toWebURL - match dataserver behavior
 						type: 'text/html'
-					}
+					} : undefined
 				},
 				meta: {
 					type: tag.type || 0,
