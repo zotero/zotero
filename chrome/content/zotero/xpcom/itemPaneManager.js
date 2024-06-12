@@ -255,7 +255,6 @@ class ItemPaneSectionManagerIntl extends PluginAPIBase {
 class ItemPaneInfoRowManagerIntl extends PluginAPIBase {
 	constructor() {
 		super();
-		this._Zotero = Zotero;
 		this.config = {
 			APIName: "ItemPaneInfoRowAPI",
 			mainKeyName: "rowID",
@@ -271,6 +270,25 @@ class ItemPaneInfoRowManagerIntl extends PluginAPIBase {
 				},
 				position: {
 					type: "string",
+					optional: true,
+					checkHook: (val) => {
+						if (typeof val !== "undefined"
+							&& !["start", "afterCreators", "end"].includes(val)) {
+							return `"position" must be "start", "afterCreators", or "end", got ${val}`;
+						}
+						return true;
+					}
+				},
+				multiline: {
+					type: "boolean",
+					optional: true,
+				},
+				nowrap: {
+					type: "boolean",
+					optional: true,
+				},
+				editable: {
+					type: "boolean",
 					optional: true,
 				},
 				onGetData: "function",
@@ -323,6 +341,14 @@ class ItemPaneManager {
 
 	get customInfoRows() {
 		return this._infoRowManager.options;
+	}
+
+	getInfoRowHook(rowID, type) {
+		let option = this._infoRowManager._optionsCache[rowID];
+		if (!option) {
+			return undefined;
+		}
+		return option[type];
 	}
 }
 
