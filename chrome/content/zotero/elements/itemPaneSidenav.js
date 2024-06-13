@@ -210,13 +210,13 @@
 			}
 
 			this.addEventListener('click', this.handleButtonClick);
-			
+			this.addEventListener('keydown', this.handleKeyDown);
 			// Set up action toolbarbuttons
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-action]')) {
 				let action = toolbarbutton.dataset.action;
 				
 				if (action === 'locate') {
-					toolbarbutton.addEventListener('mousedown', async (event) => {
+					toolbarbutton.addEventListener('click', async (event) => {
 						if (event.button !== 0 || toolbarbutton.open) {
 							return;
 						}
@@ -236,6 +236,10 @@
 			this.querySelector('.zotero-menuitem-unpin').addEventListener('command', () => {
 				this.pinnedPane = null;
 			});
+			// Make toolbarbuttons focusable
+			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
+				toolbarbutton.setAttribute("tabindex", 0);
+			}
 		}
 
 		destroy() {
@@ -373,6 +377,33 @@
 				this.render();
 			}
 		}
+
+		handleKeyDown = (event) => {
+			if (event.key == "Tab" && !event.shiftKey) {
+				// Wrap focus around to the tab bar
+				Services.focus.moveFocus(window, document.getElementById("zotero-title-bar"), Services.focus.MOVEFOCUS_FORWARD, 0);
+				event.preventDefault();
+			}
+			if (event.key == "Tab" && event.shiftKey) {
+				// Return focus to item pane
+				Services.focus.moveFocus(window, this, Services.focus.MOVEFOCUS_BACKWARD, 0);
+				event.preventDefault();
+			}
+			if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+				// Up/Down arrow navigation
+				let direction = event.key == "ArrowUp" ? Services.focus.MOVEFOCUS_BACKWARD : Services.focus.MOVEFOCUS_FORWARD;
+				let focused = Services.focus.moveFocus(window, event.target, direction, Services.focus.FLAG_BYKEY);
+				// If focus was moved outside of the sidenav (e.g. on arrowUp from the first button), bring it back
+				if (!this.contains(focused)) {
+					Services.focus.setFocus(event.target, Services.focus.FLAG_BYKEY);
+				}
+				event.preventDefault();
+			}
+			if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
+				// Do nothing no arrow right/left
+				event.preventDefault();
+			}
+		};
 
 		handleButtonClick = (event) => {
 			let toolbarbutton = event.target;
