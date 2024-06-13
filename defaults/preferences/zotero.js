@@ -144,6 +144,7 @@ pref("extensions.zotero.integration.dontPromptMendeleyImport", false);
 // Connector settings
 pref("extensions.zotero.httpServer.enabled", true);
 pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
+pref("extensions.zotero.httpServer.localAPI.enabled", false);
 
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);

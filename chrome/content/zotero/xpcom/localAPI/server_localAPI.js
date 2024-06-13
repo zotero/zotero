@@ -87,6 +87,10 @@ const exportFormats = new Map([
  */
 class LocalAPIEndpoint {
 	async init(requestData) {
+		if (!Zotero.Prefs.get('httpServer.localAPI.enabled')) {
+			return this.makeResponse(403, 'text/plain', 'Local API is not enabled');
+		}
+		
 		let apiVersion = parseInt(
 			requestData.headers['Zotero-API-Version']
 				|| requestData.searchParams.get('v')
