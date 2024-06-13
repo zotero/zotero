@@ -887,19 +887,19 @@
 			this._ensureButtonsFocusable();
 			this._updateCreatorButtonsStatus();
 
-			// Set focus on the last focused field
-			this._restoreFieldFocus();
-			// Make sure that any opened popup closes
-			this.querySelectorAll("menupopup").forEach((popup) => {
-				popup.hidePopup();
-			});
-
 			this.restoreCustomRowElements();
 
 			// Update custom row data
 			for (let rowElem of this._infoTable.querySelectorAll('.meta-row[data-custom-row-id]')) {
 				this.updateCustomRowData(rowElem);
 			}
+
+			// Set focus on the last focused field
+			this._restoreFieldFocus();
+			// Make sure that any opened popup closes
+			this.querySelectorAll("menupopup").forEach((popup) => {
+				popup.hidePopup();
+			});
 		}
 
 		renderCustomRows() {
@@ -957,7 +957,8 @@
 				dataElem.classList.add("meta-data");
 
 				let valueElem = document.createXULElement("editable-text");
-				valueElem.className = "value";
+				valueElem.id = `itembox-custom-row-${row.rowID}-value`;
+				valueElem.classList.add("value", "custom-row-value");
 
 				if (row.multiline) {
 					valueElem.setAttribute('multiline', true);
@@ -2504,7 +2505,7 @@
 				return;
 			}
 			
-			let field = activeElement.closest("[fieldname], [tabindex], [focusable]");
+			let field = activeElement.closest("[fieldname], [tabindex], [focusable], .custom-row-value");
 			let fieldID;
 			// Special treatment for creator rows. When an unsaved row is just added, creator rows ids
 			// do not correspond to their positioning to avoid shifting all creators in case new row is not saved.
