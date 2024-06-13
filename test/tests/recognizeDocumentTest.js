@@ -72,6 +72,12 @@ describe("Document Recognition", function() {
 				attachment.attachmentFilename,
 				Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
 			);
+			
+			// The title should have changed
+			assert.equal(
+				attachment.getField('title'),
+				'PDF'
+			);
 		});
 		
 		it("should recognize a PDF by arXiv ID", async function () {
@@ -101,6 +107,12 @@ describe("Document Recognition", function() {
 			while (progressWindow.document.getElementById("label").value != completeStr) {
 				await Zotero.Promise.delay(20);
 			}
+
+			// The title should have changed
+			assert.equal(
+				attachment.getField('title'),
+				'PDF'
+			);
 		});
 		
 		it("should put new item in same collection", async function () {
@@ -264,6 +276,12 @@ describe("Document Recognition", function() {
 				attachment.attachmentFilename,
 				Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
 			);
+
+			// The title should have changed
+			assert.equal(
+				attachment.getField('title'),
+				'PDF'
+			);
 		});
 		
 		it("shouldn't rename a linked file attachment using parent metadata if pref disabled", async function () {
@@ -299,6 +317,12 @@ describe("Document Recognition", function() {
 			
 			// The file should not have been renamed
 			assert.equal(attachment.attachmentFilename, 'test.pdf');
+
+			// The title should have changed
+			assert.equal(
+				attachment.getField('title'),
+				'PDF'
+			);
 		});
 	});
 
@@ -352,6 +376,12 @@ describe("Document Recognition", function() {
 				Zotero.Attachments.getFileBaseNameFromItem(item) + '.epub'
 			);
 
+			// The title should have changed
+			assert.equal(
+				attachment.getField('title'),
+				'EPUB'
+			);
+
 			translateStub.restore();
 		});
 
@@ -386,6 +416,12 @@ describe("Document Recognition", function() {
 			assert.equal(
 				attachment.attachmentFilename,
 				Zotero.Attachments.getFileBaseNameFromItem(item) + '.epub'
+			);
+
+			// The title should have changed
+			assert.equal(
+				attachment.getField('title'),
+				'EPUB'
 			);
 		});
 
