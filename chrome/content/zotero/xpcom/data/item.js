@@ -2488,12 +2488,17 @@ Zotero.Item.prototype.numNonHTMLFileAttachments = function () {
 };
 
 
-Zotero.Item.prototype.numPDFAttachments = function () {
+Zotero.Item.prototype.numFileAttachmentsWithContentType = function (contentType) {
 	this._requireData('childItems');
 	return this.getAttachments()
 		.map(itemID => Zotero.Items.get(itemID))
-		.filter(item => item.isFileAttachment() && item.attachmentContentType == 'application/pdf')
+		.filter(item => item.isFileAttachment() && item.attachmentContentType == contentType)
 		.length;
+};
+
+
+Zotero.Item.prototype.numPDFAttachments = function () {
+	return this.numFileAttachmentsWithContentType('application/pdf');
 };
 
 
@@ -3856,6 +3861,40 @@ Zotero.Item.prototype.getBestAttachmentStateCached = function () {
 Zotero.Item.prototype.clearBestAttachmentState = function () {
 	this._bestAttachmentState = null;
 }
+
+
+Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
+	switch (this.attachmentContentType) {
+		case 'application/pdf':
+			return 'PDF';
+		case 'application/epub+zip':
+			return 'EPUB';
+		case 'text/html':
+			return 'HTML';
+		default:
+			return null;
+	}
+};
+
+
+Zotero.Item.prototype.setFirstAttachmentTitle = function () {
+	if (!this.isAttachment()) {
+		throw new Error("setFirstAttachmentTitle() can only be called on attachment items");
+	}
+	if (!this.isFileAttachment() || !this.parentItemID) {
+		return;
+	}
+	let isFirstOfType = this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1;
+	if (!isFirstOfType) {
+		return;
+	}
+	let defaultTitle = this._getDefaultTitleForAttachmentContentType();
+	if (defaultTitle === null) {
+		// Keep existing title
+		return;
+	}
+	this.setField('title', defaultTitle);
+};
 
 
 ////////////////////////////////////////////////////////

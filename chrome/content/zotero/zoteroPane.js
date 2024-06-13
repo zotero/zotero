@@ -4297,18 +4297,23 @@ var ZoteroPane = new function()
 		});
 	});
 	
-	
-	this.addAttachmentFromDialog = async function (link, parentItemID) {
+	/**
+	 * @param {Boolean} [link]
+	 * @param {Number} [parentItemID]
+	 * @param {nsIFile[]} [files] Used instead of showing a file picker - for tests
+	 * @returns {Promise<Zotero.Item[] | null>}
+	 */
+	this.addAttachmentFromDialog = async function (link, parentItemID, files = null) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
-			return;
+			return null;
 		}
 		
 		var collectionTreeRow = this.getCollectionTreeRow();
 		if (link) {
 			if (collectionTreeRow.isWithinGroup()) {
 				Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
-				return;
+				return null;
 			}
 			else if (collectionTreeRow.isPublications()) {
 				Zotero.alert(
@@ -4316,7 +4321,7 @@ var ZoteroPane = new function()
 					Zotero.getString('general.error'),
 					Zotero.getString('publications.error.linkedFilesCannotBeAdded')
 				);
-				return;
+				return null;
 			}
 		}
 		
@@ -4328,15 +4333,17 @@ var ZoteroPane = new function()
 		
 		var libraryID = collectionTreeRow.ref.libraryID;
 		
-		var fp = new FilePicker();
-		fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpenMultiple);
-		fp.appendFilters(fp.filterAll);
-		
-		if (await fp.show() != fp.returnOK) {
-			return;
+		if (!files) {
+			var fp = new FilePicker();
+			fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpenMultiple);
+			fp.appendFilters(fp.filterAll);
+
+			if (await fp.show() != fp.returnOK) {
+				return null;
+			}
+
+			files = fp.files;
 		}
-		
-		var files = fp.files;
 		var addedItems = [];
 		var collection;
 		var fileBaseName;
@@ -4403,6 +4410,13 @@ var ZoteroPane = new function()
 				});
 			}
 			
+			try {
+				item.setFirstAttachmentTitle();
+				await item.saveTx();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 			addedItems.push(item);
 		}
 		
@@ -4410,6 +4424,8 @@ var ZoteroPane = new function()
 		if (!parentItemID) {
 			Zotero.RecognizeDocument.autoRecognizeItems(addedItems);
 		}
+		
+		return addedItems;
 	};
 	
 	
@@ -5324,6 +5340,13 @@ var ZoteroPane = new function()
 				this.createEmptyParent(item);
 			}
 		}
+
+		await Zotero.DB.executeTransaction(async () => {
+			for (let item of items) {
+				item.setFirstAttachmentTitle();
+				await item.save();
+			}
+		});
 	};
 	
 	

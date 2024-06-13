@@ -200,11 +200,9 @@ Zotero.RecognizeDocument = new function () {
 		try {
 			let currentFilename = attachment.attachmentFilename;
 			if (currentFilename != originalFilename) {
-				let renamed = await attachment.renameAttachmentFile(originalFilename);
-				if (renamed) {
-					attachment.setField('title', originalTitle);
-				}
+				await attachment.renameAttachmentFile(originalFilename);
 			}
+			attachment.setField('title', originalTitle);
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -302,11 +300,12 @@ Zotero.RecognizeDocument = new function () {
 			if (result !== true) {
 				throw new Error("Error renaming " + path);
 			}
-			// Rename attachment title
-			attachment.setField('title', newName);
-			await attachment.saveTx();
 		}
 		
+		// Rename attachment title
+		attachment.setFirstAttachmentTitle();
+		await attachment.saveTx();
+
 		try {
 			let win = Zotero.getMainWindow();
 			if (selectParent && win && win.Zotero_Tabs.selectedID == 'zotero-pane') {
