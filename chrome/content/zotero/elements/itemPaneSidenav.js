@@ -28,9 +28,11 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="inherit-flex highlight-notes-inactive">
+			<html:div class="inherit-flex highlight-notes-inactive"
+				tabindex="0" role="tab" aria-labelledby="sidenav-info-btn">
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						id="sidenav-info-btn"
 						disabled="true"
 						data-l10n-id="sidenav-info"
 						data-pane="info"/>
@@ -96,16 +98,19 @@
 			<html:div class="pin-wrapper highlight-notes-active">
 				<toolbarbutton
 					data-l10n-id="sidenav-notes"
-					data-pane="context-notes"/>
+					data-pane="context-notes"
+					tabindex="0"
+					role="tab"/>
 			</html:div>
-			
+
 			<html:div class="divider"/>
 			
 			<html:div class="pin-wrapper">
 				<toolbarbutton
 					tooltiptext="&zotero.toolbar.openURL.label;"
 					type="menu"
-					data-action="locate">
+					data-action="locate"
+					tabindex="0">
 					<menupopup/>
 				</toolbarbutton>
 			</html:div>
@@ -236,10 +241,7 @@
 			this.querySelector('.zotero-menuitem-unpin').addEventListener('command', () => {
 				this.pinnedPane = null;
 			});
-			// Make toolbarbuttons focusable
-			for (let toolbarbutton of this.querySelectorAll('toolbarbutton')) {
-				toolbarbutton.setAttribute("tabindex", 0);
-			}
+			this.setAttribute("role", "tablist");
 		}
 
 		destroy() {
@@ -269,7 +271,7 @@
 					continue;
 				}
 				
-				toolbarbutton.setAttribute('aria-selected', !contextNotesPaneVisible && pane == pinnedPane);
+				toolbarbutton.closest("[role='tab']").setAttribute('aria-selected', !contextNotesPaneVisible);
 				// No need to set `hidden` here, since it's updated by ItemDetails#_handlePaneStatus
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
@@ -402,6 +404,16 @@
 			if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
 				// Do nothing no arrow right/left
 				event.preventDefault();
+			}
+			if ([" ", "Enter"].includes(event.key) && event.target.tagName !== "toolbarbutton") {
+				// Special handling for all combined item pane buttons
+				let firstBtn = event.target.querySelector("toolbarbutton");
+				let clickEvent = new MouseEvent('click', {
+					bubbles: true,
+					cancelable: true,
+					detail: 1
+				});
+				firstBtn.dispatchEvent(clickEvent);
 			}
 		};
 

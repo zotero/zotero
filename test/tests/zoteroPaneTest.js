@@ -1598,8 +1598,8 @@ describe("ZoteroPane", function() {
 			assert.equal(doc.activeElement.className, "tab selected");
 
 			doc.activeElement.dispatchEvent(shiftTab);
-			// Locate button in the sidenav
-			assert.equal(doc.activeElement.dataset.action, "locate");
+			// One of tab buttons in the sidenav
+			assert.equal(doc.activeElement.getAttribute("role"), "tab");
 		});
 
 		it("should tab across the zotero pane", async function () {
