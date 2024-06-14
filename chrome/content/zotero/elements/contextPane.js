@@ -317,8 +317,9 @@
 	
 			if (splitter.getAttribute('state') != 'collapsed') {
 				if (this.mode == "item") {
-					let header = this._itemPaneDeck.selectedPanel.querySelector("item-pane-header editable-text");
-					header.focus();
+					let header = this._itemPaneDeck.selectedPanel.querySelector("item-pane-header");
+					// Focus the first focusable node after header
+					Services.focus.moveFocus(window, header, Services.focus.MOVEFOCUS_FORWARD, 0);
 					return true;
 				}
 				else {
