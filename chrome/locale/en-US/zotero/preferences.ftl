@@ -57,7 +57,7 @@ preferences-styleManager-add-button =
     .label = { $label }
 
 preferences-advanced-enable-local-api =
-    .label = Allow other applications on this computer to access { -app-name } data
+    .label = Allow other applications on this computer to communicate with { -app-name }
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
