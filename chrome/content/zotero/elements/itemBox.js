@@ -151,12 +151,17 @@
 				this._id('creator-transform-switch').setAttribute("label", creatorNameBox.getAttribute("switch-mode-label"));
 			});
 
-			// Ensure no button is forced to stay visible once the menu is cloed
-			this.querySelector('#zotero-creator-transform-menu').addEventListener('popuphidden', (_) => {
-				let row = document.popupNode.closest('.meta-row');
-				for (let node of row.querySelectorAll('toolbarbutton.show-on-hover')) {
-					node.style.removeProperty('visibility');
-					node.style.removeProperty('display');
+			// Ensure no button is forced to stay visible once the menu is closed
+			this.addEventListener('popuphidden', (event) => {
+				for (let node of this.querySelectorAll('.show-without-hover')) {
+					node.classList.remove('show-without-hover');
+					node.classList.add("show-on-hover");
+				}
+				// Some toolbarbuttons get stuck with open=true if popup is
+				// opened via keyboard (e.g. select version btn in merge mode)
+				let popupParent = event.target.parentElement;
+				if (popupParent?.getAttribute("open") == "true") {
+					popupParent.removeAttribute("open");
 				}
 			});
 
@@ -672,7 +677,6 @@
 						this.querySelector('popupset').append(menupopup);
 						menupopup.addEventListener('popuphidden', () => {
 							menupopup.remove();
-							optionsButton.style.visibility = '';
 						});
 						this.handlePopupOpening(e, menupopup);
 					};
@@ -2312,10 +2316,12 @@
 			event.preventDefault();
 			event.stopPropagation();
 			
+			let target = event.target;
 			let isRightClick = event.type == 'contextmenu';
-			if (!isRightClick) {
-				event.target.style.visibility = "visible";
-				event.target.style.display = "revert";
+			// Force button to show regardless of its hover status if applicable
+			if (!isRightClick && target.classList.contains("show-on-hover")) {
+				target.classList.add("show-without-hover");
+				target.classList.remove("show-on-hover");
 			}
 			// On click, we have x/y coordinates so use that
 			// On keyboard click, open it next to the target
