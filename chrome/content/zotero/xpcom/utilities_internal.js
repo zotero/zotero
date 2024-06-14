@@ -1691,55 +1691,42 @@ Zotero.Utilities.Internal = {
 	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
-			Zotero.debug("openPreferences() now takes an 'options' object -- update your code", 2);
-			options = {
-				action: options
-			};
+			throw new Error("openPreferences() now takes an 'options' object -- update your code");
 		}
 		
-		var io = {
+		// If window is already open, focus it
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator("zotero:pref");
+		if (enumerator.hasMoreElements()) {
+			let win = enumerator.getNext();
+			win.focus();
+			if (paneID) {
+				win.Zotero_Preferences.navigateToPane(paneID, { scrollTo: options.scrollTo });
+			}
+			return win;
+		}
+
+		let io = {
 			pane: paneID,
-			tab: options.tab,
-			tabIndex: options.tabIndex,
-			action: options.action
+			scrollTo: options.scrollTo,
 		};
+		let args = [
+			'chrome://zotero/content/preferences/preferences.xhtml',
+			'zotero-prefs',
+			'chrome,titlebar,centerscreen,resizable=yes',
+			io
+		];
 		
-		var win = null;
-		// If window is already open and no special action, just focus it
-		if (!options.action) {
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-				.getService(Components.interfaces.nsIWindowMediator);
-			var enumerator = wm.getEnumerator("zotero:pref");
-			if (enumerator.hasMoreElements()) {
-				win = enumerator.getNext();
-				win.focus();
-				if (paneID) {
-					win.Zotero_Preferences.navigation.value = paneID;
-					
-					// TODO: tab/action
-				}
-			}
+		let mainWindow = Services.wm.getMostRecentWindow("navigator:browser");
+		if (mainWindow) {
+			return mainWindow.openDialog(...args);
 		}
-		if (!win) {
-			let args = [
-				'chrome://zotero/content/preferences/preferences.xhtml',
-				'zotero-prefs',
-				'chrome,titlebar,centerscreen,resizable=yes',
-				io
-			];
-			
-			let win = Services.wm.getMostRecentWindow("navigator:browser");
-			if (win) {
-				win.openDialog(...args);
-			}
-			else {
-				// nsIWindowWatcher needs a wrappedJSObject
-				args[args.length - 1].wrappedJSObject = args[args.length - 1];
-				Services.ww.openWindow(null, ...args);
-			}
+		else {
+			// nsIWindowWatcher needs a wrappedJSObject
+			args[args.length - 1].wrappedJSObject = args[args.length - 1];
+			return Services.ww.openWindow(null, ...args);
 		}
-		
-		return win;
 	},
 	
 	

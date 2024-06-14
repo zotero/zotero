@@ -4002,10 +4002,10 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.openPreferences = function (paneID, action) {
+	this.openPreferences = function (paneID) {
 		Zotero.warn("ZoteroPane.openPreferences() is deprecated"
 			+ " -- use Zotero.Utilities.Internal.openPreferences() instead");
-		Zotero.Utilities.Internal.openPreferences(paneID, { action });
+		Zotero.Utilities.Internal.openPreferences(paneID);
 	}
 	
 	

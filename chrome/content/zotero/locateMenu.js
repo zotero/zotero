@@ -652,8 +652,9 @@ var Zotero_LocateMenu = new function() {
 					null, null, null, {}
 				);
 				if (index == 0) {
-					// TODO: Scroll to Locate
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-general');
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-general', {
+						scrollTo: '#zotero-prefpane-locate-groupbox'
+					});
 				}
 				return;
 			}

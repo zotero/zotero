@@ -207,7 +207,9 @@ Zotero.Integration = new function() {
 		);
 
 		if (index == 0) {
-			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'wordProcessors-tab' });
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', {
+				scrollTo: '#wordProcessors'
+			});
 			return true;
 		}
 
