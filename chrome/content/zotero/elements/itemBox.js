@@ -150,12 +150,11 @@
 				this._id('creator-transform-switch').setAttribute("label", creatorNameBox.getAttribute("switch-mode-label"));
 			});
 
-			// Ensure no button is forced to stay visible once the menu is cloed
-			this.querySelector('#zotero-creator-transform-menu').addEventListener('popuphidden', (_) => {
-				let row = document.popupNode.closest('.meta-row');
-				for (let node of row.querySelectorAll('toolbarbutton.show-on-hover')) {
-					node.style.removeProperty('visibility');
-					node.style.removeProperty('display');
+			// Ensure no button is forced to stay visible once the menu is closed
+			this.addEventListener('popuphidden', (_) => {
+				for (let node of this.querySelectorAll('.show-without-hover')) {
+					node.classList.remove('show-without-hover');
+					node.classList.add("show-on-hover");
 				}
 			});
 
@@ -657,7 +656,6 @@
 						this.querySelector('popupset').append(menupopup);
 						menupopup.addEventListener('popuphidden', () => {
 							menupopup.remove();
-							optionsButton.style.visibility = '';
 						});
 						this.handlePopupOpening(e, menupopup);
 					};
@@ -2273,8 +2271,8 @@
 			
 			let isRightClick = event.type == 'contextmenu';
 			if (!isRightClick) {
-				event.target.style.visibility = "visible";
-				event.target.style.display = "revert";
+				event.target.classList.add("show-without-hover");
+				event.target.classList.remove("show-on-hover");
 			}
 			// On click, we have x/y coordinates so use that
 			// On keyboard click, open it next to the target
