@@ -56,6 +56,8 @@ preferences-styleManager-add-button =
     .tooltiptext = Add a style from a file
     .label = { $label }
 
+preferences-advanced-enable-local-api =
+    .label = Allow other applications on this computer to communicate with { -app-name }
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
