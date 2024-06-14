@@ -118,10 +118,10 @@ var Zotero_Preferences = {
 	async navigateToPane(paneID, { scrollTo } = {}) {
 		let oldPaneID = this.navigation.value;
 		this.navigation.value = paneID;
+		if (oldPaneID !== paneID) {
+			await this.waitForPaneSelect();
+		}
 		if (scrollTo) {
-			if (oldPaneID !== paneID) {
-				await this.waitForPaneSelect();
-			}
 			let elem = this.panes.get(paneID)?.container.querySelector(scrollTo);
 			if (elem) {
 				elem.scrollIntoView({ block: 'start' });
