@@ -606,7 +606,7 @@
 				if ((fieldName == 'url' || fieldName == 'homepage')
 						// Only make plausible HTTP URLs clickable
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
-					openLinkButton = this.createOpenLinkIcon(val);
+					openLinkButton = this.createOpenLinkIcon(val, fieldName);
 					addLinkContextMenu = true;
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -655,6 +655,7 @@
 						optionsButton.classList.add("no-display");
 					}
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
+					optionsButton.id = `itembox-field-${fieldName}-options`;
 					// eslint-disable-next-line no-loop-func
 					let triggerPopup = (e) => {
 						let menupopup = ZoteroPane.buildFieldTransformMenu({
@@ -682,6 +683,7 @@
 				// In field merge mode, add a button to switch field versions
 				if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
 					button = document.createXULElement("toolbarbutton");
+					button.id = `itembox-field-${fieldName}-merge`;
 					button.className = 'zotero-field-version-button zotero-clicky-merge';
 					let fieldLocalName = rowLabel.querySelector("label")?.textContent;
 					document.l10n.setAttributes(button, 'itembox-button-merge', { field: fieldLocalName || "" });
@@ -1400,12 +1402,13 @@
 		}
 
 		
-		createOpenLinkIcon(value) {
+		createOpenLinkIcon(value, fieldName) {
 			// In duplicates/trash mode return nothing
 			if (!(this.editable || this.item.isFeedItem)) {
 				return null;
 			}
 			let openLink = document.createXULElement("toolbarbutton");
+			openLink.id = `itembox-field-${fieldName}-link`;
 			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover no-display";
 			openLink.addEventListener("click", event => ZoteroPane.loadURI(value, event));
 			openLink.setAttribute('data-l10n-id', "item-button-view-online");
