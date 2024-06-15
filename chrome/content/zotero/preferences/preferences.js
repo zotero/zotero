@@ -30,6 +30,8 @@ var Zotero_Preferences = {
 	
 	_firstPaneLoadDeferred: Zotero.Promise.defer(),
 	
+	_paneSelectDeferred: Zotero.Promise.defer(),
+	
 	_observerSymbols: new Map(),
 	
 	_mutationObservers: new Map(),
@@ -66,24 +68,7 @@ var Zotero_Preferences = {
 			io = io.wrappedJSObject || io;
 
 			if (io.pane) {
-				let tabID = io.tab;
-				let tabIndex = io.tabIndex;
-				var pane = this.panes.get(io.pane);
-				this.navigation.value = io.pane;
-				// Select tab within pane by tab id
-				if (tabID !== undefined) {
-					let tab = document.getElementById(tabID);
-					if (tab) {
-						tab.control.selectedItem = tab;
-					}
-				}
-				// Select tab within pane by index
-				else if (tabIndex !== undefined) {
-					let tabBox = pane.container.querySelector('tabbox');
-					if (tabBox) {
-						tabBox.selectedIndex = tabIndex;
-					}
-				}
+				this.navigateToPane(io.pane, { scrollTo: io.scrollTo });
 			}
 		}
 		else if (document.location.hash == "#cite") {
@@ -117,14 +102,31 @@ var Zotero_Preferences = {
 		await this._firstPaneLoadDeferred.promise;
 	},
 
+	waitForPaneSelect: async function () {
+		await this._paneSelectDeferred.promise;
+	},
+
 	/**
 	 * Select a pane in the navigation sidebar, displaying its content.
 	 * Clears the current search and hides all other panes' content.
 	 *
-	 * @param {String} id
+	 * @param {String} paneID
+	 * @param {Object} [options]
+	 * @param {String} [options.scrollTo] Selector to scroll to after displaying the pane
+	 * @returns {Promise<void>}
 	 */
-	navigateToPane(id) {
-		this.navigation.value = id;
+	async navigateToPane(paneID, { scrollTo } = {}) {
+		let oldPaneID = this.navigation.value;
+		this.navigation.value = paneID;
+		if (oldPaneID !== paneID) {
+			await this.waitForPaneSelect();
+		}
+		if (scrollTo) {
+			let elem = this.panes.get(paneID)?.container.querySelector(scrollTo);
+			if (elem) {
+				elem.scrollIntoView({ block: 'start' });
+			}
+		}
 	},
 
 	openHelpLink: function () {
@@ -148,6 +150,10 @@ var Zotero_Preferences = {
 			await this._search('');
 			await this._showPane(paneID);
 			this.content.scrollTop = 0;
+
+			this._paneSelectDeferred.resolve(pane);
+			this._paneSelectDeferred = Zotero.Promise.defer();
+
 			for (let child of this.content.children) {
 				if (child !== this.helpContainer && child !== pane.container) {
 					child.hidden = true;
