@@ -25,13 +25,31 @@
 
 describe("Zotero.BrowserDownload", function () {
 	describe("#downloadPDF()", function () {
+		var http, port, baseURL;
 		var tmpFile = Zotero.getTempDirectory();
 		tmpFile.append('browserDownloadTest.pdf');
 		
+		before(async function () {
+			({ httpd, port } = await startHTTPServer());
+			baseURL = `http://localhost:${port}/`;
+		});
+		
+		after(async function () {
+			await new Promise(resolve => httpd.stop(resolve));
+		});
+		
 		it("#downloadPDF() should download a PDF from a JS redirect page", async function () {
-			this.timeout(65e3);
+			var dir = getTestDataDirectory().path;
+			httpd.registerFile(
+				'/test-pdf-redirect.html',
+				Zotero.File.pathToFile(PathUtils.join(dir, 'test-pdf-redirect.html'))
+			);
+			httpd.registerFile(
+				'/test.pdf',
+				Zotero.File.pathToFile(PathUtils.join(dir, 'test.pdf'))
+			);
 			
-			await Zotero.BrowserDownload.downloadPDF('https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html', tmpFile.path);
+			await Zotero.BrowserDownload.downloadPDF(`${baseURL}test-pdf-redirect.html`, tmpFile.path);
 			
 			var sample = await Zotero.File.getContentsAsync(tmpFile, null, 1000);
 			assert.equal(Zotero.MIME.sniffForMIMEType(sample), 'application/pdf');
