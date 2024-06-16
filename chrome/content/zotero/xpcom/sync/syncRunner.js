@@ -1612,7 +1612,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			if (!buttonText) {
 				buttonText = Zotero.getString('errorReport.reportError');
 				buttonCallback = function () {
-					ZoteroPane.reportErrors();
+					Zotero.getActiveZoteroPane().reportErrors();
 				};
 			}
 			

@@ -4850,7 +4850,7 @@ var ZoteroPane = new function()
 			}
 			catch (e) {
 				// TODO: show error somewhere else
-				Zotero.debug(e, 1);
+				Zotero.logError(e);
 				Zotero.Sync.Runner.alert(e);
 				return;
 			}
