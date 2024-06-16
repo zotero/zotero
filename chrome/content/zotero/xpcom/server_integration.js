@@ -31,8 +31,13 @@ Zotero.Server.Endpoints['/integration/macWordCommand'].prototype = {
 	init: function (data) {
 		// Some dark magic to fix incorrectly encoded unicode characters here
 		// from https://stackoverflow.com/questions/5396560/how-do-i-convert-special-utf-8-chars-to-their-iso-8859-1-equivalent-using-javasc
-		const document = decodeURIComponent(escape(data.query.document));
-		Zotero.Integration.execCommand(data.query.agent, data.query.command, document, data.query.templateVersion);
+		const document = decodeURIComponent(escape(data.searchParams.get('document')));
+		Zotero.Integration.execCommand(
+			data.searchParams.get('agent'),
+			data.searchParams.get('command'),
+			document,
+			data.searchParams.get('templateVersion')
+		);
 		return 200;
 	},
 };
