@@ -4817,7 +4817,10 @@ var ZoteroPane = new function()
 			if (fileExists
 					&& !isLinkedFile
 					&& fileSyncingEnabled
-					&& (item.attachmentSyncState == Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
+					&& ([
+							Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD,
+							Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD
+					].includes(item.attachmentSyncState))) {
 				Zotero.debug("File exists but is queued for download -- re-downloading");
 				redownload = true;
 			}
