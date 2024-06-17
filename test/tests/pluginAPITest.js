@@ -236,7 +236,7 @@ describe("Plugin API", function () {
 			rowID = rowID = await waitForRegister(endOption);
 			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
 
-			assert.notExists(rowElem.nextElementSibling);
+			assert.exists(rowElem.nextElementSibling.querySelector("*[fieldname=dateAdded]"));
 			await waitForUnregister(rowID);
 		});
 

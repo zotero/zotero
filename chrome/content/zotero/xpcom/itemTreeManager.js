@@ -43,7 +43,7 @@ const { COLUMNS: ITEMTREE_COLUMNS } = require("zotero/itemTreeColumns");
  */
 
 
-class ItemTreeColumnManagerIntl extends PluginAPIBase {
+class ItemTreeColumnManagerInternal extends PluginAPIBase {
 	constructor() {
 		super();
 		this.config = {
@@ -163,7 +163,7 @@ class ItemTreeColumnManagerIntl extends PluginAPIBase {
 
 
 class ItemTreeManager {
-	_columnManager = new ItemTreeColumnManagerIntl();
+	_columnManager = new ItemTreeColumnManagerInternal();
 
 	/**
 	 * Register a custom column, must be valid with a unique dataKey.

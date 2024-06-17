@@ -1044,13 +1044,11 @@
 
 		insertCustomRow(rowElem, position = "end") {
 			switch (position) {
-				case "start":
-				{
+				case "start": {
 					this._infoTable.prepend(rowElem);
 					break;
 				}
-				case "afterCreators":
-				{
+				case "afterCreators": {
 					// The `_firstRowBeforeCreators` is actually the first row after creator rows
 					if (this._firstRowBeforeCreators) {
 						this._infoTable.insertBefore(rowElem, this._firstRowBeforeCreators);
@@ -1058,14 +1056,19 @@
 						this._firstRowBeforeCreators = rowElem;
 					}
 					else {
-						this._infoTable.appendChild(rowElem);
+						this._infoTable.append(rowElem);
 					}
 					break;
 				}
 				case "end":
-				default:
-				{
-					this._infoTable.append(rowElem);
+				default: {
+					let dateAddedRow = this._infoTable.querySelector(".meta-label[fieldname=dateAdded]")?.parentElement;
+					if (dateAddedRow) {
+						this._infoTable.insertBefore(rowElem, dateAddedRow);
+					}
+					else {
+						this._infoTable.append(rowElem);
+					}
 					break;
 				}
 			}

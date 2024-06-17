@@ -137,7 +137,7 @@ if (typeof PluginAPIBase === "undefined") {
  */
 
 
-class ItemPaneSectionManagerIntl extends PluginAPIBase {
+class ItemPaneSectionManagerInternal extends PluginAPIBase {
 	constructor() {
 		super();
 		this.config = {
@@ -252,7 +252,7 @@ class ItemPaneSectionManagerIntl extends PluginAPIBase {
 }
 
 
-class ItemPaneInfoRowManagerIntl extends PluginAPIBase {
+class ItemPaneInfoRowManagerInternal extends PluginAPIBase {
 	constructor() {
 		super();
 		this.config = {
@@ -307,9 +307,9 @@ class ItemPaneInfoRowManagerIntl extends PluginAPIBase {
 
 
 class ItemPaneManager {
-	_sectionManager = new ItemPaneSectionManagerIntl();
+	_sectionManager = new ItemPaneSectionManagerInternal();
 
-	_infoRowManager = new ItemPaneInfoRowManagerIntl();
+	_infoRowManager = new ItemPaneInfoRowManagerInternal();
 
 	registerSection(options) {
 		return this._sectionManager.register(options);
