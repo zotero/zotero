@@ -290,24 +290,10 @@
 			var target = event.currentTarget;
 
 			if (event.key === 'Enter') {
-				var multiline = target.multiline;
+				// If tag's input is a multiline field, it must be right after pasting
+				// of multiple tags. Then, Enter adds a new line and shift-Enter will save
+				if (target.multiline && !event.shiftKey) return;
 				var empty = target.value == "";
-				if (event.shiftKey) {
-					if (!multiline) {
-						setTimeout(() => {
-							var val = target.value;
-							if (val !== "") {
-								val += "\n";
-							}
-							this.makeMultiline(target, val);
-						});
-						return;
-					}
-					// Submit
-				}
-				else if (multiline) {
-					return;
-				}
 
 				event.preventDefault();
 
