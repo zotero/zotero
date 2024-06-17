@@ -202,6 +202,7 @@ class ReaderInstance {
 			showAnnotations: true,
 			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
+			hyphenation: Zotero.Prefs.get('reader.ebookHyphenate'),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -527,7 +528,8 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
 			Zotero.Prefs.registerObserver('reader.contentDarkMode', this._handleContentDarkModeChange),
-			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleFontFamilyChange),
+			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
+			Zotero.Prefs.registerObserver('reader.ebookHyphenate', this._handleEbookPrefChange),
 		];
 
 		return true;
@@ -858,8 +860,9 @@ class ReaderInstance {
 		this._internalReader.useDarkModeForContent(Zotero.Prefs.get('reader.contentDarkMode'));
 	};
 
-	_handleFontFamilyChange = () => {
+	_handleEbookPrefChange = () => {
 		this._internalReader.setFontFamily(Zotero.Prefs.get('reader.ebookFontFamily'));
+		this._internalReader.setHyphenate(Zotero.Prefs.get('reader.ebookHyphenate'));
 	};
 
 	_dataURLtoBlob(dataurl) {
