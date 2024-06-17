@@ -30,7 +30,7 @@
 		content = MozXULElement.parseXULToFragment(`
 				<collapsible-section data-l10n-id="section-tags" data-pane="tags" extra-buttons="add">
 					<html:div class="body">
-						<html:div id="rows" class="tags-box-list"/>
+						<html:div id="rows" class="tags-box-list" aria-label="Tags box list"/>
 						<popupset>
 							<tooltip id="html-tooltip" page="true"/>
 							<menupopup id="tags-context-menu">
@@ -301,24 +301,10 @@
 			var target = event.currentTarget;
 
 			if (event.key === 'Enter') {
-				var multiline = target.multiline;
+				// If tag's input is a multiline field, it must be right after pasting
+				// of multiple tags. Then, Enter adds a new line and shift-Enter will save
+				if (target.multiline && !event.shiftKey) return;
 				var empty = target.value == "";
-				if (event.shiftKey) {
-					if (!multiline) {
-						setTimeout(() => {
-							var val = target.value;
-							if (val !== "") {
-								val += "\n";
-							}
-							this.makeMultiline(target, val);
-						});
-						return;
-					}
-					// Submit
-				}
-				else if (multiline) {
-					return;
-				}
 
 				event.preventDefault();
 
