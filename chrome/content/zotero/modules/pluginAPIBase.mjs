@@ -33,7 +33,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
 class PluginAPIBase {
 	_optionsCache = {};
 
-	_lastUpdateTime = 0;
+	_lastUpdateID = "";
 
 	_config = {
 		APIName: "PluginAPIBase",
@@ -44,12 +44,19 @@ class PluginAPIBase {
 		optionTypeDefinition: {},
 	};
 
-	get updateTime() {
-		return this._lastUpdateTime;
+	get updateID() {
+		return this._lastUpdateID;
 	}
 
 	get options() {
 		return Object.values(this._optionsCache).map(opt => Object.assign({}, opt));
+	}
+
+	get data() {
+		return {
+			updateID: this.updateID,
+			options: this.options,
+		};
 	}
 
 	set config(config) {
@@ -217,7 +224,7 @@ class PluginAPIBase {
 	 * Notify the receiver to update
 	 */
 	async _update() {
-		this._lastUpdateTime = new Date().getTime();
+		this._lastUpdateID = `${new Date().getTime()}-${lazy.Zotero.Utilities.randomString()}`;
 		await lazy.Zotero.DB.executeTransaction(async () => {
 			lazy.Zotero.Notifier.queue(
 				this._config.notifyAction,

@@ -319,12 +319,8 @@ class ItemPaneManager {
 		return this._sectionManager.unregister(paneID);
 	}
 
-	get customSectionUpdateTime() {
-		return this._sectionManager.updateTime;
-	}
-
-	get customSections() {
-		return this._sectionManager.options;
+	get customSectionData() {
+		return this._sectionManager.data;
 	}
 
 	registerInfoRow(options) {
@@ -335,12 +331,8 @@ class ItemPaneManager {
 		return this._infoRowManager.unregister(rowID);
 	}
 
-	get customInfoRowUpdateTime() {
-		return this._infoRowManager.updateTime;
-	}
-
-	get customInfoRows() {
-		return this._infoRowManager.options;
+	get customInfoRowData() {
+		return this._infoRowManager.data;
 	}
 
 	getInfoRowHook(rowID, type) {

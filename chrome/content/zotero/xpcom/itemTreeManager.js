@@ -265,8 +265,8 @@ class ItemTreeManager {
 		return dataKeys.map(dataKey => this.unregisterColumn(dataKey));
 	}
 
-	get customColumnUpdateTime() {
-		return this._columnManager.updateTime;
+	get customColumnUpdateID() {
+		return this._columnManager.updateID;
 	}
 
 	/**
