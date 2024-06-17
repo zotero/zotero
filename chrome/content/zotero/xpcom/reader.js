@@ -918,7 +918,7 @@ class ReaderInstance {
 			else {
 				tagsbox.querySelector("editable-text").focus();
 			}
-			tagsbox.notCollapsible = true;
+			tagsbox.collapsible = false;
 		});
 		menupopup.openPopup(null, 'before_start', x, y, true);
 	}
