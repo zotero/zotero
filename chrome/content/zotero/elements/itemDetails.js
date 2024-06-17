@@ -226,7 +226,7 @@
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
 
-			this._lastUpdateCustomSection = 0;
+			this._lastUpdateCustomSection = "";
 
 			// If true, will render on tab select
 			this._pendingRender = false;
@@ -318,11 +318,10 @@
 		}
 
 		renderCustomSections() {
-			let lastUpdate = Zotero.ItemPaneManager.customSectionUpdateTime;
-			if (this._lastUpdateCustomSection == lastUpdate) return;
-			this._lastUpdateCustomSection = lastUpdate;
+			let { options: targetPanes, updateID } = Zotero.ItemPaneManager.customSectionData;
+			if (this._lastUpdateCustomSection == updateID) return;
+			this._lastUpdateCustomSection = updateID;
 
-			let targetPanes = Zotero.ItemPaneManager.customSections;
 			let currentPaneElements = this.getCustomPanes();
 			// Remove
 			for (let elem of currentPaneElements) {

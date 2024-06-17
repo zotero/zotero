@@ -53,7 +53,7 @@
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
 
-			this._lastUpdateCustomRows = 0;
+			this._lastUpdateCustomRows = "";
 			// Keep in sync with itemPaneManager.js
 			this._customRowElemCache = {
 				start: [],
@@ -898,11 +898,9 @@
 		}
 
 		renderCustomRows() {
-			let lastUpdate = Zotero.ItemPaneManager.customInfoRowUpdateTime;
-			if (this._lastUpdateCustomRows == lastUpdate) return;
-			this._lastUpdateCustomRows = lastUpdate;
-
-			let targetRows = Zotero.ItemPaneManager.customInfoRows;
+			let { options: targetRows, updateID } = Zotero.ItemPaneManager.customInfoRowData;
+			if (this._lastUpdateCustomRows == updateID) return;
+			this._lastUpdateCustomRows = updateID;
 
 			// Remove rows that are no longer in the target rows
 			for (let elem of this._infoTable.querySelectorAll('.meta-row[data-custom-row-id]')) {
