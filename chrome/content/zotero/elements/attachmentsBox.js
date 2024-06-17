@@ -113,31 +113,13 @@
 				if (attachments.length === 0 && action !== "delete") {
 					return;
 				}
-				if (action == 'add') {
-					for (let attachment of attachments) {
+				for (let attachment of attachments) {
+					this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`)
+						?.remove();
+					if (action !== 'delete') {
 						this.addRow(attachment);
 					}
 				}
-				// When annotation added to attachment, action=modify
-				// When annotation deleted from attachment, action=refresh
-				else if (action == 'modify' || action == 'refresh') {
-					for (let attachment of attachments) {
-						let row = this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
-						if (row) {
-							row.remove();
-						}
-						this.addRow(attachment);
-					}
-				}
-				else if (action == 'delete') {
-					for (let id of ids) {
-						let row = this.querySelector(`attachment-row[attachment-id="${id}"]`);
-						if (row) {
-							row.remove();
-						}
-					}
-				}
-				
 				this.updateCount();
 			});
 		}
