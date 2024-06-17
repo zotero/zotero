@@ -165,9 +165,9 @@ Zotero.Utilities.Internal = {
 			.createInstance(Components.interfaces.nsICryptoHash);
 		ch.init(ch.MD5);
 		
+		var is = Cc["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Ci.nsIFileInputStream);
 		try {
-			let is = Cc["@mozilla.org/network/file-input-stream;1"]
-				.createInstance(Ci.nsIFileInputStream);
 			is.init(Zotero.File.pathToFile(file), -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF);
 			ch.updateFromStream(is, -1);
 			// Get binary string and convert to hex string
@@ -186,6 +186,9 @@ Zotero.Utilities.Internal = {
 				Zotero.logError(e);
 			}
 			throw e;
+		}
+		finally {
+			is.close();
 		}
 	},
 	
