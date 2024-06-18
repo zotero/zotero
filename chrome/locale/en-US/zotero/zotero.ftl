@@ -516,6 +516,9 @@ expand-all-sections =
 abstract-field =
     .placeholder = Add abstract…
 
+tag-field =
+    .placeholder = Edit tag...
+
 tagselector-search =
     .placeholder = Filter Tags
 
