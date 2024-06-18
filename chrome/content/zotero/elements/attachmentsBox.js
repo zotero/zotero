@@ -112,14 +112,13 @@
 			this._updateAttachmentIDs().then(() => {
 				this.updatePreview();
 
-				let attachments = Zotero.Items.get((this._attachmentIDs).filter(id => ids.includes(id)));
-				if (attachments.length === 0 && action !== "delete") {
-					return;
-				}
-				for (let attachment of attachments) {
-					this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`)
+				for (let id of ids) {
+					this.querySelector(`attachment-row[attachment-id="${id}"]`)
 						?.remove();
-					if (action !== 'delete') {
+				}
+				if (action !== 'delete') {
+					let attachments = Zotero.Items.get(this._attachmentIDs.filter(id => ids.includes(id)));
+					for (let attachment of attachments) {
 						this.addRow(attachment);
 					}
 				}
