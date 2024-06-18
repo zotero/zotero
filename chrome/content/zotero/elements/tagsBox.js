@@ -30,7 +30,7 @@
 		content = MozXULElement.parseXULToFragment(`
 				<collapsible-section data-l10n-id="section-tags" data-pane="tags" extra-buttons="add">
 					<html:div class="body">
-						<html:div id="rows" class="tags-box-list" aria-label="Tags box list"/>
+						<html:div id="rows" class="tags-box-list"/>
 						<popupset>
 							<tooltip id="html-tooltip" page="true"/>
 							<menupopup id="tags-context-menu">

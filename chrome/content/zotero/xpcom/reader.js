@@ -914,7 +914,7 @@ class ReaderInstance {
 				tagsbox.newTag();
 			}
 			else {
-				tagsbox.querySelector("editable-text").focus();
+				Services.focus.setFocus(tagsbox.querySelector(".head"), Services.focus.FLAG_NOSHOWRING);
 			}
 			tagsbox.collapsible = false;
 		});
