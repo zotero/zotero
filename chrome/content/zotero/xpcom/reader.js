@@ -909,6 +909,8 @@ class ReaderInstance {
 		tagsbox.editable = true;
 		tagsbox.item = item;
 		tagsbox.render();
+		// remove unnecessary tabstop from the section header
+		tagsbox.querySelector(".head").removeAttribute("tabindex");
 		menupopup.addEventListener("popupshown", (_) => {
 			// Ensure tagsbox is open
 			tagsbox.open = true;
@@ -916,7 +918,8 @@ class ReaderInstance {
 				tagsbox.newTag();
 			}
 			else {
-				Services.focus.setFocus(tagsbox.querySelector(".head"), Services.focus.FLAG_NOSHOWRING);
+				// Focus + button
+				Services.focus.setFocus(tagsbox.querySelector("toolbarbutton"), Services.focus.FLAG_NOSHOWRING);
 			}
 			tagsbox.collapsible = false;
 		});
