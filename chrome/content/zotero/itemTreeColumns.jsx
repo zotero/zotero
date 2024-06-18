@@ -296,11 +296,11 @@ const COLUMNS = [
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
-		dataKey: "genre",
+		dataKey: "type",
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
 		columnPickerSubMenu: true,
-		label: "itemFields.genre",
+		label: "itemFields.type",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
