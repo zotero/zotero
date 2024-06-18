@@ -123,7 +123,7 @@ item-button-view-online =
     .tooltiptext = {view-online}
 
 itembox-button-options =
-    .tooltiptext = Open Context Menu
+    .tooltiptext = Open context menu
 itembox-button-merge =
     .aria-label = Select version of { $field } field
 
