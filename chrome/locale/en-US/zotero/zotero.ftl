@@ -11,6 +11,7 @@ general-remind-me-later = Remind Me Later
 general-choose-file = Choose File…
 general-open-settings = Open Settings
 general-help = Help
+general-tag = Tag
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -515,6 +516,9 @@ expand-all-sections =
 
 abstract-field =
     .placeholder = Add abstract…
+
+tag-field =
+    .aria-label = { general-tag }
 
 tagselector-search =
     .placeholder = Filter Tags

@@ -264,6 +264,7 @@
 			valueElement.setAttribute('flex', 1);
 			valueElement.setAttribute('nowrap', true);
 			valueElement.setAttribute('tight', true);
+			document.l10n.setAttributes(valueElement, "tag-field");
 			valueElement.className = 'zotero-box-label';
 			valueElement.readOnly = !this.editable;
 			valueElement.value = valueText;
