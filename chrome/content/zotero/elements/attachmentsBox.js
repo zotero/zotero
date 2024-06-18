@@ -104,6 +104,9 @@
 		}
 
 		notify(action, type, ids) {
+			if (!(action === 'add' || action === 'modify' || action === 'refresh' || action === 'delete')) {
+				return;
+			}
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
