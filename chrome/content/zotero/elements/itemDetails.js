@@ -109,11 +109,11 @@
 		}
 
 		get tabType() {
-			return this._tabType;
+			return this.getAttribute('tabType');
 		}
 
 		set tabType(tabType) {
-			this._tabType = tabType;
+			this.setAttribute('tabType', tabType);
 		}
 		
 		get collectionTreeRow() {
