@@ -281,4 +281,17 @@ describe("Local API Server", function () {
 			assert.equal(response[0].meta.numItems, 1);
 		});
 	});
+	
+	describe("/groups/<groupID>", function () {
+		it("should return 404 for unknown group", async function () {
+			let { response } = await apiGet(
+				'/groups/99999999999',
+				{
+					successCodes: [404],
+					responseType: 'text'
+				}
+			);
+			assert.equal(response, "Not found");
+		});
+	});
 });
