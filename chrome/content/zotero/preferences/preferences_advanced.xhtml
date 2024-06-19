@@ -61,15 +61,17 @@
 			</vbox>
 			
 			<hbox align="center">
-				<label value="&zotero.preferences.attachmentBaseDir.basePath;"/>
+				<label id="baseAttachmentPathLabel" value="&zotero.preferences.attachmentBaseDir.basePath;"/>
 				<html:input type="text" id="baseAttachmentPath"
 					preference="extensions.zotero.baseAttachmentPath"
 					readonly="true"
 					flex="1"
-					tabindex="-1"/>
+					tabindex="0"
+					aria-labelledby="baseAttachmentPathLabel"/>
 				<button id="baseAttachmentPathButton"
 					label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
-					oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
+					oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"
+					aria-describedby="baseAttachmentPathLabel"/>
 			</hbox>
 			
 			<hbox>

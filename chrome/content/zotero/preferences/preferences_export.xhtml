@@ -56,22 +56,22 @@
 		<box id="noteQuickCopy-wrapper">
 			<vbox id="noteQuickCopy-format-options" hidden="true" align="center">
 				<hbox id="noteQuickCopy-markdown-options" align="center">
-					<label control="noteQuickCopy-markdown-includeAppLinks"></label>
+					<label id="noteQuickCopy-markdown-includeAppLinks-label"></label>
 					<checkbox id="noteQuickCopy-markdown-includeAppLinks"
 						oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
-						native="true"/>
+						native="true" aria-describedby="noteQuickCopy-markdown-includeAppLinks-label"/>
 				</hbox>
 				<hbox id="noteQuickCopy-html-options" align="center">
-					<label control="noteQuickCopy-html-includeAppLinks"></label>
+					<label id="noteQuickCopy-html-includeAppLinks-label"></label>
 					<checkbox id="noteQuickCopy-html-includeAppLinks"
 						oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
-						native="true"/>
+						native="true" aria-describedby="noteQuickCopy-html-includeAppLinks-label"/>
 				</hbox>
 			</vbox>
 		</box>
 		<separator/>
 		
-		<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
+		<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings-table"/>
 		<hbox class="virtualized-table-container" flex="1">
 			<html:div id="quickCopy-siteSettings"/>
 		</hbox>
