@@ -597,6 +597,9 @@ describe("Item pane", function () {
 			assert.equal(preview.previewType, "pdf");
 			// 2 rows
 			assert.equal(attachmentsBox.querySelectorAll("attachment-row").length, 2);
+			// Simulate an extra 'add' event on the attachment - still 2 rows
+			attachmentsBox.notify('add', 'item', [attachment2.id]);
+			assert.equal(attachmentsBox.querySelectorAll("attachment-row").length, 2);
 
 			// Created annotations should be update in preview and attachment row
 			let annotation = await createAnnotation('highlight', attachment2);

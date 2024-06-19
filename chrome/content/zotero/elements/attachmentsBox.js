@@ -104,40 +104,24 @@
 		}
 
 		notify(action, type, ids) {
+			if (!(action === 'add' || action === 'modify' || action === 'refresh' || action === 'delete')) {
+				return;
+			}
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
 				this.updatePreview();
 
-				let attachments = Zotero.Items.get((this._attachmentIDs).filter(id => ids.includes(id)));
-				if (attachments.length === 0 && action !== "delete") {
-					return;
+				for (let id of ids) {
+					this.querySelector(`attachment-row[attachment-id="${id}"]`)
+						?.remove();
 				}
-				if (action == 'add') {
+				if (action !== 'delete') {
+					let attachments = Zotero.Items.get(this._attachmentIDs.filter(id => ids.includes(id)));
 					for (let attachment of attachments) {
 						this.addRow(attachment);
 					}
 				}
-				// When annotation added to attachment, action=modify
-				// When annotation deleted from attachment, action=refresh
-				else if (action == 'modify' || action == 'refresh') {
-					for (let attachment of attachments) {
-						let row = this.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
-						if (row) {
-							row.remove();
-						}
-						this.addRow(attachment);
-					}
-				}
-				else if (action == 'delete') {
-					for (let id of ids) {
-						let row = this.querySelector(`attachment-row[attachment-id="${id}"]`);
-						if (row) {
-							row.remove();
-						}
-					}
-				}
-				
 				this.updateCount();
 			});
 		}
