@@ -1702,11 +1702,17 @@
 			// Otherwise let the autocomplete popup handle matters
 		}
 		
-		// Handle Shift-Enter on creator input field
 		handleCreatorRowKeyDown(event) {
+			// Open creator type menu on arrowUp/Down as if it is a menulist
+			if (event.target.classList.contains("creator-type-label")
+					&& ["ArrowDown", "ArrowUp"].includes(event.key)) {
+				event.target.click();
+				return;
+			}
 			let target = event.target.closest("editable-text");
 			if (!target) return;
 
+			// Handle Shift-Enter on creator input field
 			if (event.key == "Enter" && event.shiftKey) {
 				event.stopPropagation();
 				// Value has changed - focus empty creator row at the bottom
