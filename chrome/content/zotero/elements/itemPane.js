@@ -30,7 +30,7 @@
 			<deck id="zotero-item-pane-content" class="zotero-item-pane-content" selectedIndex="0" flex="1">
 				<item-message-pane id="zotero-item-message" />
 				
-				<item-details id="zotero-item-details" />
+				<item-details id="zotero-item-details" tabType="library"/>
 				
 				<note-editor id="zotero-note-editor" flex="1" notitle="1"
 					previousfocus="zotero-items-tree" />
