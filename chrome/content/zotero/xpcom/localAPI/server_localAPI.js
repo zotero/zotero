@@ -117,6 +117,12 @@ class LocalAPIEndpoint {
 			? Zotero.Groups.getLibraryIDFromGroupID(parseInt(requestData.pathParams.groupID))
 			: Zotero.Libraries.userLibraryID;
 		
+		let library = Zotero.Libraries.get(requestData.libraryID);
+		if (!library.getDataLoaded('item')) {
+			Zotero.debug("Waiting for items to load for library " + library.libraryID);
+			await library.waitForDataLoad('item');
+		}
+		
 		let response = await this.run(requestData);
 		if (response.data) {
 			let dataIsArray = Array.isArray(response.data);
