@@ -520,7 +520,6 @@ class ReaderInstance {
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
-
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
 
@@ -1017,19 +1016,28 @@ class ReaderTab extends ReaderInstance {
 		this._onToggleSidebarCallback = options.onToggleSidebar;
 		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
-		let { id, container } = this._window.Zotero_Tabs.add({
-			id: options.tabID,
-			type: 'reader',
-			title: options.title || '',
-			index: options.index,
-			data: {
-				itemID: this._item.id
-			},
-			select: !options.background,
-			preventJumpback: options.preventJumpback
-		});
-		this.tabID = id;
-		this._tabContainer = container;
+		let existingTabID = this._window.Zotero_Tabs.getTabIDByItemID(this._item.id);
+		// If an unloaded tab for this item already exists, load the reader in it.
+		// Otherwise, create a new tab
+		if (existingTabID) {
+			this.tabID = existingTabID;
+			this._tabContainer = this._window.document.getElementById(existingTabID);
+		}
+		else {
+			let { id, container } = this._window.Zotero_Tabs.add({
+				id: options.tabID,
+				type: 'reader',
+				title: options.title || '',
+				index: options.index,
+				data: {
+					itemID: this._item.id
+				},
+				select: !options.background,
+				preventJumpback: options.preventJumpback
+			});
+			this.tabID = id;
+			this._tabContainer = container;
+		}
 		
 		this._iframe = this._window.document.createXULElement('browser');
 		this._iframe.setAttribute('class', 'reader');
@@ -1737,6 +1745,9 @@ class Reader {
 	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
+		let win = Zotero.getMainWindow();
+		// Change tab's type from "unloaded-reader" to "reader"
+		win.Zotero_Tabs.markAsLoaded(tabID);
 		await library.waitForDataLoad('item');
 
 		let item = Zotero.Items.get(itemID);
@@ -1747,7 +1758,6 @@ class Reader {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
-		let win = Zotero.getMainWindow();
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
 		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {

@@ -108,7 +108,9 @@ var Zotero_Tabs = new function () {
 					icon = <CSSItemTypeIcon itemType={item.getItemTypeIconName(true)} className="tab-icon" />;
 				}
 				catch (e) {
-					// item might not yet be loaded, we will get the icon on the next update
+					// item might not yet be loaded, we will get the right icon on the next update
+					// but until then use a default placeholder
+					icon = <CSSItemTypeIcon className="tab-icon" />;
 				}
 			}
 
@@ -199,25 +201,13 @@ var Zotero_Tabs = new function () {
 			}
 			else if (tab.type === 'reader') {
 				if (Zotero.Items.exists(tab.data.itemID)) {
-					if (tab.selected) {
-						Zotero.Reader.open(tab.data.itemID,
-							null,
-							{
-								title: tab.title,
-								tabIndex: i,
-								openInBackground: !tab.selected,
-								secondViewState: tab.data.secondViewState
-							}
-						);
-					}
-					else {
-						this.add({
-							type: 'reader-unloaded',
-							title: tab.title,
-							index: i,
-							data: tab.data
-						});
-					}
+					this.add({
+						type: 'reader-unloaded',
+						title: tab.title,
+						index: i,
+						data: tab.data,
+						select: tab.selected
+					});
 				}
 			}
 		}
@@ -462,16 +452,22 @@ var Zotero_Tabs = new function () {
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 		if (tab.type === 'reader-unloaded') {
-			this.close(tab.id);
-			Zotero.Reader.open(tab.data.itemID, options && options.location, {
-				tabID: tab.id,
-				title: tab.title,
-				tabIndex,
-				allowDuplicate: true,
-				secondViewState: tab.data.secondViewState,
-				preventJumpback: true
-			});
-			return;
+			// Make sure the loading message is displayed first.
+			// Then, open reader and hide the loading message once it has loaded.
+			ZoteroContextPane.showLoadingMessage(true);
+			let hideMessageWhenReaderLoaded = async () => {
+				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
+					tabID: tab.id,
+					title: tab.title,
+					tabIndex,
+					allowDuplicate: true,
+					secondViewState: tab.data.secondViewState,
+					preventJumpback: true
+				});
+				await reader._initPromise;
+				ZoteroContextPane.showLoadingMessage(false);
+			};
+			hideMessageWhenReaderLoaded();
 		}
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
@@ -531,6 +527,13 @@ var Zotero_Tabs = new function () {
 			index: tabIndex,
 			data: tab.data
 		});
+	};
+	
+	// Mark a tab as loaded
+	this.markAsLoaded = function (id) {
+		let { tab } = this._getTab(id);
+		if (!tab) return;
+		tab.type = "reader";
 	};
 
 	this.unloadUnusedTabs = function () {
