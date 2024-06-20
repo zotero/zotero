@@ -43,7 +43,7 @@ const ZoteroStandalone = new function() {
 	];
 	
 	//const NOTE_FONT_SIZES = ["11", "12", "13", "14", "18", "24", "36", "48", "64", "72", "96"];
-	const NOTE_FONT_SIZE_DEFAULT = "12";
+	const NOTE_FONT_SIZE_DEFAULT = "14";
 
 	Object.defineProperty(this, 'currentReader', {
 		get: () => Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)
