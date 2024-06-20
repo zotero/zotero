@@ -708,8 +708,8 @@ Zotero.Server.Endpoints["/api/groups/:groupID/searches/:searchKey/items"] = Zote
 Zotero.Server.LocalAPI.Item = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
 
-	run({ pathParams, libraryID }) {
-		let item = Zotero.Items.getByLibraryAndKey(libraryID, pathParams.itemKey);
+	async run({ pathParams, libraryID }) {
+		let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, pathParams.itemKey);
 		if (!item) return _404;
 		return { data: item };
 	}
@@ -721,8 +721,8 @@ Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey"] = Zotero.Server.L
 Zotero.Server.LocalAPI.ItemFile = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
 
-	run({ pathname, pathParams, libraryID }) {
-		let item = Zotero.Items.getByLibraryAndKey(libraryID, pathParams.itemKey);
+	async run({ pathname, pathParams, libraryID }) {
+		let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, pathParams.itemKey);
 		if (!item) return _404;
 		if (!item.isFileAttachment()) {
 			return [400, 'text/plain', `Not a file attachment: ${item.key}`];
