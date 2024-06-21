@@ -226,11 +226,20 @@
 				() => Zotero.Utilities.Internal.copyTextToClipboard(this._linkMenu.dataset.link)
 			);
 
-			// If the focus leaves the itemBox, clear the last focused element
-			this._infoTable.addEventListener("focusout", (e) => {
-				let destination = e.relatedTarget;
-				if (!(destination && this._infoTable.contains(destination))) {
+			this._infoTable.addEventListener("focusout", async (_) => {
+				await Zotero.Promise.delay();
+				// If the focus leaves the itemBox, clear the last focused element
+				let focused = document.activeElement;
+				if (!this._infoTable.contains(focused)) {
 					this._clearSavedFieldFocus();
+				}
+				// If user moves focus outside of empty unsaved creator row, remove it.
+				let unsavedCreatorRow = this.querySelector(".creator-type-value[unsaved=true]")?.closest(".meta-row");
+				// But not if these parent components receive focus which happens when menus are opened
+				if (["zotero-view-item", "main-window"].includes(focused.id) || !unsavedCreatorRow) return;
+				let focusLeftUnsavedCreatorRow = !unsavedCreatorRow.contains(focused);
+				if (focusLeftUnsavedCreatorRow) {
+					this.removeUnsavedCreatorRow(true);
 				}
 			});
 
@@ -597,7 +606,7 @@
 				if ((fieldName == 'url' || fieldName == 'homepage')
 						// Only make plausible HTTP URLs clickable
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
-					openLinkButton = this.createOpenLinkIcon(val);
+					openLinkButton = this.createOpenLinkIcon(val, fieldName);
 					addLinkContextMenu = true;
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -646,6 +655,7 @@
 						optionsButton.classList.add("no-display");
 					}
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
+					optionsButton.id = `itembox-field-${fieldName}-options`;
 					// eslint-disable-next-line no-loop-func
 					let triggerPopup = (e) => {
 						let menupopup = ZoteroPane.buildFieldTransformMenu({
@@ -673,6 +683,7 @@
 				// In field merge mode, add a button to switch field versions
 				if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
 					button = document.createXULElement("toolbarbutton");
+					button.id = `itembox-field-${fieldName}-merge`;
 					button.className = 'zotero-field-version-button zotero-clicky-merge';
 					let fieldLocalName = rowLabel.querySelector("label")?.textContent;
 					document.l10n.setAttributes(button, 'itembox-button-merge', { field: fieldLocalName || "" });
@@ -793,8 +804,11 @@
 					// immediately hidden
 					this._displayAllCreators = true;
 					
-					if (this._addCreatorRow) {
-						this.addCreatorRow(false, this.item.getCreator(max - 1).creatorTypeID, true);
+					if (this._addCreatorRow !== false) {
+						// Insert an empty creator row in a specified location
+						let beforeCreator = this.querySelector(`#itembox-field-value-creator-${this._addCreatorRow}-lastName`);
+						let beforeRow = beforeCreator?.closest(".meta-row") || null;
+						this.addCreatorRow(false, this.item.getCreator(max - 1).creatorTypeID, true, beforeRow);
 						this._addCreatorRow = false;
 					}
 				}
@@ -1037,6 +1051,14 @@
 			addButton.addEventListener("command", (e) => {
 				// + button adds a creator row after the row that was clicked
 				let nextRow = e.target.closest(".meta-row").nextElementSibling;
+				// If the next row is a "show more creators" row, display all creators
+				// before adding an empty creator row
+				let moreCreatorsLabel = nextRow.querySelector("#more-creators-label");
+				if (moreCreatorsLabel) {
+					this._addCreatorRow = rowIndex + 1;
+					moreCreatorsLabel.click();
+					return;
+				}
 				this.addCreatorRow(null, typeID, true, nextRow);
 			});
 			rowData.appendChild(addButton);
@@ -1068,10 +1090,7 @@
 			this._creatorCount++;
 			
 			// Delete existing unsaved creator row if any
-			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
-			if (unsavedCreatorData) {
-				unsavedCreatorData.closest(".meta-row").remove();
-			}
+			this.removeUnsavedCreatorRow();
 
 			let row = this.addDynamicRow(rowLabel, rowData, before);
 
@@ -1264,22 +1283,17 @@
 				Zotero.Prefs.set('lastCreatorFieldMode', fieldMode);
 			}
 			
+			// Update autocomplete settings to ensure the correct options are suggested
+			this.addAutocompleteToElement(firstName);
+			this.addAutocompleteToElement(lastName);
+
 			if (!initial) {
 				var fields = this.getCreatorFields(row);
 				fields.fieldMode = fieldMode;
 				firstName.sizeToContent();
 				lastName.sizeToContent();
 				this.modifyCreator(rowIndex, fields);
-				// For empty unsaved creator rows, update their autocomplete setting so that
-				// e.g fullnames are not suggested after switch to first-last name mode.
-				// Otherwise, just save the item and appropriate autocomplete modes will be set in render()
-				if (row.querySelector("[unsaved=true]")) {
-					this.addAutocompleteToElement(firstName);
-					this.addAutocompleteToElement(lastName);
-				}
-				else {
-					this.item.saveTx();
-				}
+				this.item.saveTx();
 			}
 		}
 		
@@ -1388,12 +1402,13 @@
 		}
 
 		
-		createOpenLinkIcon(value) {
+		createOpenLinkIcon(value, fieldName) {
 			// In duplicates/trash mode return nothing
 			if (!(this.editable || this.item.isFeedItem)) {
 				return null;
 			}
 			let openLink = document.createXULElement("toolbarbutton");
+			openLink.id = `itembox-field-${fieldName}-link`;
 			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover no-display";
 			openLink.addEventListener("click", event => ZoteroPane.loadURI(value, event));
 			openLink.setAttribute('data-l10n-id', "item-button-view-online");
@@ -1494,9 +1509,9 @@
 				let nextCreatorIndex = index ? index - 1 : 0;
 				// If there is an unsaved index for a just-added empty creator row,
 				// focus the creator row before it.
-				let { unsavedIndex } = this.getCreatorFields(creatorRow);
-				if (unsavedIndex !== null) {
-					nextCreatorIndex = unsavedIndex ? unsavedIndex - 1 : 0;
+				let { position, isUnsaved } = this.getCreatorFields(creatorRow);
+				if (isUnsaved) {
+					nextCreatorIndex = position ? position - 1 : 0;
 				}
 				this._selectField = `itembox-field-value-creator-${nextCreatorIndex}-lastName`;
 			}
@@ -1511,6 +1526,18 @@
 			}
 			this.item.removeCreator(index);
 			await this.item.saveTx();
+		}
+		
+		removeUnsavedCreatorRow(onlyIfEmpty = false) {
+			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
+			if (!unsavedCreatorData) return;
+			let { firstName, lastName } = this.getCreatorFields(unsavedCreatorData.parentNode);
+			let isEmpty = firstName == "" && lastName == "";
+			if (onlyIfEmpty && !isEmpty) return;
+			
+			unsavedCreatorData.closest(".meta-row").remove();
+			this._creatorCount--;
+			this._updateCreatorButtonsStatus();
 		}
 		
 		dateTimeFromUTC(valueText) {
@@ -1712,45 +1739,50 @@
 			let target = event.target.closest("editable-text");
 			if (!target) return;
 
+			let row = target.closest('.meta-row');
 			// Handle Shift-Enter on creator input field
 			if (event.key == "Enter" && event.shiftKey) {
 				event.stopPropagation();
 				// Value has changed - focus empty creator row at the bottom
 				if (target.initialValue != target.value) {
-					this._addCreatorRow = true;
+					this._addCreatorRow = this.item.numCreators();
+					this._displayAllCreators = true;
 					this.blurOpenField();
 					return;
 				}
 				// Value hasn't changed
 				Zotero.debug("Value hasn't changed");
-				let row = target.closest('.meta-row');
 				// Next row is a creator - focus that
 				let nextRow = row.nextSibling;
 				if (nextRow.querySelector(".creator-type-value")) {
 					nextRow.querySelector("editable-text").focus();
 					return;
 				}
-				// Next row is a "More creators" label - click that
+				// Next row is a "More creators" label - click that and focus the next creator row
 				let moreCreators = nextRow.querySelector("#more-creators-label");
 				if (moreCreators) {
-					moreCreators.click();
 					this._selectField = `itembox-field-value-creator-${this._creatorCount}-lastName`;
+					moreCreators.click();
+					return;
 				}
 				var creatorFields = this.getCreatorFields(row);
 				// Do nothing from the last empty row
 				if (creatorFields.lastName == "" && creatorFields.firstName == "") return;
 				this.addCreatorRow(false, creatorFields.creatorTypeID, true);
 			}
+			if (event.key == "Escape" && row.querySelector(".creator-type-value[unsaved=true]")) {
+				// Escape on an unsaved row deletes it and focuses previous creator
+				event.stopPropagation();
+				row.previousElementSibling.querySelector("editable-text").focus();
+				this.removeUnsavedCreatorRow();
+			}
 		}
 
 		// Handle adding multiple creator rows via paste
 		handleCreatorPaste(event) {
-			let target = event.target.closest('editable-text');
-			var fieldName = target.getAttribute('fieldname');
-			let creatorTypeID = parseInt(
-				target.closest('.meta-row').querySelector('.meta-label').getAttribute('typeid')
-			);
-			var [field, creatorIndex, creatorField] = fieldName.split('-');
+			let row = event.target.closest(".meta-row");
+			let { creatorTypeID, position } = this.getCreatorFields(row);
+
 			let lastName = event.clipboardData.getData('text').trim();
 			// Handle \n\r and \n delimited entries and a single line containing a tab
 			var rawNameArray = lastName.split(/\r\n?|\n/);
@@ -1761,29 +1793,8 @@
 				// Filter out bad names
 				var nameArray = rawNameArray.filter(name => name);
 
-				// If not adding names at the end of the creator list, make new creator
-				// entries and then shift down existing creators.
-				var initNumCreators = this.item.numCreators();
-				var creatorsToShift = initNumCreators - creatorIndex;
-				if (creatorsToShift > 0) {
-					// Add extra creators with dummy values
-					for (let i = 0; i < nameArray.length; i++) {
-						this.modifyCreator(i + initNumCreators, {
-							firstName: '',
-							lastName: '',
-							fieldMode: 0,
-							creatorTypeID
-						});
-					}
-
-					// Shift existing creators
-					for (let i = initNumCreators - 1; i >= creatorIndex; i--) {
-						let shiftedCreatorData = this.item.getCreator(i);
-						this.item.setCreator(nameArray.length + i, shiftedCreatorData);
-					}
-				}
-
-				let currentIndex = creatorIndex;
+				let insertFrom = this.item.numCreators();
+				let moveTo = position;
 				let newCreator = { creatorTypeID };
 				// Add the creators in lastNameArray one at a time
 				for (let tempName of nameArray) {
@@ -1797,12 +1808,14 @@
 						newCreator.lastName = tempName;
 						newCreator.firstName = '';
 					}
-					this.modifyCreator(currentIndex, newCreator);
-					currentIndex++;
+					newCreator.isUnsaved = true;
+					newCreator.position = moveTo;
+					this.modifyCreator(insertFrom, newCreator);
+					insertFrom++;
+					moveTo++;
 				}
 				// Select the last field added
-				this._selectField = `itembox-field-value-creator-${currentIndex}-lastName`;
-				this._addCreatorRow = (creatorsToShift == 0);
+				this._selectField = `itembox-field-value-creator-${newCreator.position}-lastName`;
 				
 				if (this.saveOnEdit) {
 					this.item.saveTx();
@@ -1980,22 +1993,21 @@
 			var typeID = row.querySelector('[typeid]').getAttribute('typeid');
 			var [label1, label2] = row.querySelectorAll('editable-text');
 			var fieldMode = row.querySelector('[fieldMode]')?.getAttribute('fieldMode');
-			var unsavedIndex = null;
-			// Fetch positioning of a newly added unsaved row. It will be the index of
-			// this creator after the item is saved
-			if (row.querySelector("[unsaved=true]")) {
-				let previousRow = row.previousSibling;
-				unsavedIndex = 0;
-				if (previousRow.querySelector(".creator-type-value")) {
-					unsavedIndex = 1 + parseInt(previousRow.querySelector(".creator-type-label").id.split('-')[1]);
-				}
+			let isUnsavedRow = !!row.querySelector("[unsaved=true]");
+			// Calculate the index this row will occupy after the new row (if it exists) is saved.
+			// This is used for focus management.
+			let creatorsData = [...this.querySelectorAll(".creator-type-value")];
+			let position = creatorsData.findIndex(node => node.parentNode == row);
+			if (position == -1) {
+				position = null;
 			}
 			var fields = {
 				lastName: label1.value,
 				firstName: label2.value,
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
-				unsavedIndex: unsavedIndex,
+				position: position,
+				isUnsaved: isUnsavedRow
 			};
 			
 			return fields;
@@ -2017,9 +2029,9 @@
 			this.item.setCreator(index, fields);
 			// If this is a newly added row and there is an unsaved index,
 			// shift all creators and update all indices.
-			if (fields.unsavedIndex) {
+			if (fields.isUnsaved) {
 				// Skip saving in this call to avoid extra re-rendering
-				this.moveCreator(index, null, fields.unsavedIndex, true);
+				this.moveCreator(index, null, fields.position, true);
 			}
 			return true;
 		}
@@ -2197,13 +2209,13 @@
 			
 			let field = activeElement.closest("[fieldname], [tabindex], [focusable]");
 			let fieldID;
-			// Special treatment for unsaved creator rows. When they are just added, their ids
+			// Special treatment for creator rows. When an unsaved row is just added, creator rows ids
 			// do not correspond to their positioning to avoid shifting all creators in case new row is not saved.
 			// So, use the index that this row will occupy after saving.
 			let maybeRow = field.closest(".meta-row");
-			if (maybeRow?.querySelector(".creator-type-value[unsaved=true]")) {
-				let { unsavedIndex } = this.getCreatorFields(maybeRow);
-				fieldID = (field?.id || "").replace(/\d+/g, unsavedIndex);
+			if (maybeRow?.querySelector(".creator-type-value")) {
+				let { position } = this.getCreatorFields(maybeRow);
+				fieldID = (field?.id || "").replace(/\d+/g, position);
 			}
 			else if (field?.id) {
 				fieldID = field.id;
