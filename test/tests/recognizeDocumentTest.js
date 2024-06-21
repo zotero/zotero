@@ -311,7 +311,6 @@ describe("Document Recognition", function() {
 						itemType: 'book',
 						title: 'The Mania of the Nations on the Planet Mars: ISBN Database Edition',
 						ISBN: isbn,
-						attachments: [],
 						tags: []
 					}];
 				});
@@ -398,7 +397,6 @@ describe("Document Recognition", function() {
 						itemType: 'book',
 						title: 'The Mania of the Nations on the Planet Mars: Bad Metadata Edition',
 						ISBN: isbnWrong, // Wrong ISBN
-						attachments: [],
 						tags: []
 					}];
 				});
@@ -471,7 +469,6 @@ describe("Document Recognition", function() {
 						itemType: 'book',
 						title: 'Building the American Republic, Volume 1, Library Catalog Edition',
 						ISBN: isbn,
-						attachments: [],
 						tags: []
 					}];
 				});
@@ -512,7 +509,6 @@ describe("Document Recognition", function() {
 						itemType: 'book',
 						title: 'Building the American Republic, Volume 1, Library Catalog Edition',
 						ISBN: isbn,
-						attachments: [],
 						tags: []
 					}];
 				});
@@ -540,6 +536,103 @@ describe("Document Recognition", function() {
 			assert.lengthOf(modifiedIDs, 2);
 
 			translateStub.restore();
+		});
+	});
+
+	describe("canUnrecognize()", function () {
+		async function getRecognizedItem() {
+			let search;
+			let itemJSON = {
+				itemType: 'book',
+				title: 'The Mania of the Nations on the Planet Mars',
+				ISBN: '9780656173822',
+				tags: []
+			};
+			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
+				.callsFake(async function () {
+					search = this.search;
+					return [itemJSON];
+				});
+
+			let testDir = getTestDataDirectory();
+			testDir.append('recognizeEPUB_test_ISBN.epub');
+			await Zotero.Attachments.importFromFile({
+				file: testDir,
+			});
+
+			win.ZoteroPane.recognizeSelected();
+
+			let addedIDs = await waitForItemEvent('add');
+			await waitForItemEvent('modify');
+
+			// Wait for status to show as complete
+			var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xhtml")[0];
+			var completeStr = Zotero.getString("general.finished");
+			while (progressWindow.document.getElementById("label").value != completeStr) {
+				await Zotero.Promise.delay(20);
+			}
+
+			assert.isTrue(translateStub.calledOnce);
+			assert.ok(search);
+			assert.lengthOf(addedIDs, 1);
+			
+			translateStub.restore();
+			return Zotero.Items.get(addedIDs[0]);
+		}
+		
+		it("should return true for a recognized item with one attachment", async function () {
+			let item = await getRecognizedItem();
+			assert.equal(item.numAttachments(), 1);
+			assert.equal(item.numNotes(), 0);
+			assert.isTrue(Zotero.RecognizeDocument.canUnrecognize(item));
+		});
+
+		it("should return false for a recognized item with one trashed attachment", async function () {
+			let item = await getRecognizedItem();
+			assert.equal(item.numAttachments(), 1);
+			assert.equal(item.numNotes(), 0);
+			let attachment = Zotero.Items.get(item.getAttachments()[0]);
+			attachment.deleted = true;
+			await attachment.saveTx();
+			assert.equal(item.numAttachments(), 0);
+			assert.equal(item.numNotes(), 0);
+			assert.isFalse(Zotero.RecognizeDocument.canUnrecognize(item));
+		});
+
+		it("should return true for a recognized item with one attachment and a note", async function () {
+			let item = await getRecognizedItem();
+			
+			assert.equal(item.numAttachments(), 1);
+			
+			// Let's pretend this was adding during translation
+			let note = new Zotero.Item('note');
+			note.setNote('This is a note');
+			note.parentItemID = item.id;
+			await note.saveTx();
+			
+			assert.equal(item.numNotes(), 1);
+			
+			assert.isTrue(Zotero.RecognizeDocument.canUnrecognize(item));
+		});
+
+		it("should return false for a recognized item with one attachment and a modified note", async function () {
+			let item = await getRecognizedItem();
+
+			assert.equal(item.numAttachments(), 1);
+
+			// Let's pretend this was adding during translation
+			let note = new Zotero.Item('note');
+			note.setNote('This is a note');
+			note.parentItemID = item.id;
+			await note.saveTx();
+			
+			await Zotero.Promise.delay(1200);
+			note.setNote('This is a modified note');
+			await note.saveTx();
+
+			assert.equal(item.numNotes(), 1);
+
+			assert.isFalse(Zotero.RecognizeDocument.canUnrecognize(item));
 		});
 	});
 });
