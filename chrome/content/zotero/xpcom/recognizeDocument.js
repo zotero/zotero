@@ -27,6 +27,7 @@ Zotero.RecognizeDocument = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
 	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
+	const NOTE_EDIT_THRESHOLD = 1000;
 	const EPUB_MAX_SECTIONS = 5;
 	
 	let _newItems = new WeakMap();
@@ -169,8 +170,7 @@ Zotero.RecognizeDocument = new function () {
 		if (!dateModified
 				|| Zotero.Date.sqlToDate(dateModified, true) < new Date() - UNRECOGNIZE_TIMEOUT
 				|| item.dateModified != dateModified
-				|| item.numAttachments(true) != 1
-				|| item.numChildren(true) != 1) {
+				|| item.numAttachments(true) != 1) {
 			_newItems.delete(item);
 			return false;
 		}
@@ -178,6 +178,13 @@ Zotero.RecognizeDocument = new function () {
 		// Child attachment must be not be in trash and must be a PDF or EPUB
 		var attachments = Zotero.Items.get(item.getAttachments());
 		if (!attachments.length || (!attachments[0].isPDFAttachment() && !attachments[0].isEPUBAttachment())) {
+			_newItems.delete(item);
+			return false;
+		}
+		
+		// Notes must have been modified within one second of the item
+		var notes = Zotero.Items.get(item.getNotes());
+		if (notes.some(note => note.dateModified > dateModified + NOTE_EDIT_THRESHOLD)) {
 			_newItems.delete(item);
 			return false;
 		}
