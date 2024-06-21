@@ -628,8 +628,8 @@ Zotero.RecognizeDocument = new function () {
 					});
 					if (searchItemJSON) {
 						if (search.ISBN && searchItemJSON?.ISBN?.split(' ')
-							.map(resolvedISBN => Zotero.Utilities.cleanISBN(resolvedISBN))
-							.includes(search.ISBN)) {
+								.map(resolvedISBN => Zotero.Utilities.cleanISBN(resolvedISBN))
+								.includes(search.ISBN)) {
 							Zotero.debug('RecognizeDocument: Using ISBN search result');
 							itemJSON = searchItemJSON;
 						}
@@ -637,7 +637,8 @@ Zotero.RecognizeDocument = new function () {
 							Zotero.debug(`RecognizeDocument: ISBN mismatch (was ${search.ISBN}, got ${searchItemJSON.ISBN})`);
 						}
 					}
-				} catch (e) {
+				}
+				catch (e) {
 					Zotero.debug('RecognizeDocument: Error while resolving ISBN: ' + e);
 				}
 			}
