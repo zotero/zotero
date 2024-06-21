@@ -43,7 +43,7 @@ preferences-locate-resolver = Resolver:
 preferences-locate-base-url = Base URL:
 
 preferences-quickCopy-minus =
-    .aria-label = { general-minus }
+    .aria-label = { general-remove }
     .label = { $label }
 preferences-quickCopy-plus =
     .aria-label = { general-add }
