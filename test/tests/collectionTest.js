@@ -285,6 +285,22 @@ describe("Zotero.Collection", function() {
 			assert.lengthOf(childCollections, 0);
 		})
 		
+		it("should not include collections in trash by default", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id, deleted: true });
+			
+			var childCollections = collection1.getChildCollections();
+			assert.lengthOf(childCollections, 0);
+		});
+		
+		it("should include collections in trash if includeTrashed=true", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id, deleted: true });
+			
+			var childCollections = collection1.getChildCollections(false, true);
+			assert.lengthOf(childCollections, 1);
+		});
+		
 		it("should not include collections that have been deleted", function* () {
 			var collection1 = yield createDataObject('collection');
 			var collection2 = yield createDataObject('collection', { parentID: collection1.id });

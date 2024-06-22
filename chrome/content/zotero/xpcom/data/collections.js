@@ -65,10 +65,11 @@ Zotero.Collections = function() {
 	 *
 	 * @param {Integer} libraryID
 	 * @param {Boolean} [recursive=false]
+	 * @param {Boolean} [includeTrashed=false]
 	 * @return {Zotero.Collection[]}
 	 */
-	this.getByLibrary = function (libraryID, recursive) {
-		return _getByContainer(libraryID, null, recursive);
+	this.getByLibrary = function (libraryID, recursive, includeTrashed) {
+		return _getByContainer(libraryID, null, recursive, includeTrashed);
 	}
 	
 	
@@ -77,23 +78,24 @@ Zotero.Collections = function() {
 	 *
 	 * @param {Integer} parentCollectionID
 	 * @param {Boolean} [recursive=false]
+	 * @param {Boolean} [includeTrashed=false]
 	 * @return {Zotero.Collection[]}
 	 */
-	this.getByParent = function (parentCollectionID, recursive) {
-		return _getByContainer(null, parentCollectionID, recursive);
+	this.getByParent = function (parentCollectionID, recursive, includeTrashed) {
+		return _getByContainer(null, parentCollectionID, recursive, includeTrashed);
 	}
 	
 	
-	var _getByContainer = function (libraryID, parentID, recursive) {
+	var _getByContainer = function (libraryID, parentID, recursive, includeTrashed) {
 		let children = [];
 		
 		if (parentID) {
 			let parent = Zotero.Collections.get(parentID);
-			children = parent.getChildCollections();
+			children = parent.getChildCollections(false, includeTrashed);
 		} else if (libraryID) {
 			for (let id in this._objectCache) {
 				let c = this._objectCache[id];
-				if (c.libraryID == libraryID && !c.parentKey) {
+				if (c.libraryID == libraryID && !c.parentKey && (includeTrashed || !c.deleted)) {
 					c.level = 0;
 					children.push(c);
 				}
@@ -116,7 +118,7 @@ Zotero.Collections = function() {
 			var obj = children[i];
 			toReturn.push(obj);
 			
-			var descendants = obj.getDescendents(false, 'collection');
+			var descendants = obj.getDescendents(false, 'collection', includeTrashed);
 			for (let d of descendants) {
 				var obj2 = this.get(d.id);
 				if (!obj2) {

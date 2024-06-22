@@ -194,18 +194,24 @@ Zotero.Collection.prototype.hasChildItems = function() {
  * Returns subcollections of this collection
  *
  * @param {Boolean} [asIDs=false] Return as collectionIDs
+ * @param {Boolean} [includeTrashed=false] - Include collections in the trash
  * @return {Zotero.Collection[]|Integer[]}
  */
-Zotero.Collection.prototype.getChildCollections = function (asIDs) {
+Zotero.Collection.prototype.getChildCollections = function (asIDs, includeTrashed) {
 	this._requireData('childCollections');
+	
+	var collections = [...this._childCollections].map(id => this.ObjectsClass.get(id));
+	if (!includeTrashed) {
+		collections = collections.filter(c => !c.deleted);
+	}
 	
 	// Return collectionIDs
 	if (asIDs) {
-		return [...this._childCollections.values()];
+		return collections.map(c => c.id);
 	}
 	
 	// Return Zotero.Collection objects
-	return Array.from(this._childCollections).map(id => this.ObjectsClass.get(id));
+	return collections;
 }
 
 
@@ -216,7 +222,7 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
  * @param	{Boolean}	includeDeleted	Include items in Trash
  * @return {Zotero.Item[]|Integer[]} - Array of Zotero.Item instances or itemIDs
  */
-Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
+Zotero.Collection.prototype.getChildItems = function (asIDs, includeTrashed) {
 	this._requireData('childItems');
 	
 	if (this._childItems.size == 0) {
@@ -227,7 +233,7 @@ Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 	var childItems = [];
 	for (let itemID of this._childItems) {
 		let item = this.ChildObjects.get(itemID);
-		if (includeDeleted || !item.deleted) {
+		if (includeTrashed || !item.deleted) {
 			childItems.push(item);
 		}
 	}
@@ -840,11 +846,11 @@ Zotero.Collection.prototype.toJSON = function (options = {}) {
  * @param	{Boolean}	[nested=false]		Return multidimensional array with 'children'
  *											nodes instead of flat array
  * @param	{String}	[type]				'item', 'collection', or NULL for both
- * @param	{Boolean}	[includeDeletedItems=false]		Include items in Trash
+ * @param	{Boolean}	[includeTrashed=false]		Include collections and items in Trash
  * @return	{Object[]} - An array of objects with 'id', 'key', 'type' ('item' or 'collection'),
  *     'parent', and, if collection, 'name' and the nesting 'level'
  */
-Zotero.Collection.prototype.getDescendents = function (nested, type, includeDeletedItems, level) {
+Zotero.Collection.prototype.getDescendents = function (nested, type, includeTrashed, level) {
 	if (!this.id) {
 		throw new Error('Cannot be called on an unsaved item');
 	}
@@ -863,7 +869,7 @@ Zotero.Collection.prototype.getDescendents = function (nested, type, includeDele
 		}
 	}
 	
-	var collections = Zotero.Collections.getByParent(this.id);
+	var collections = Zotero.Collections.getByParent(this.id, false, includeTrashed);
 	var children = collections.map(c => ({
 		id: c.id,
 		name: c.name,
@@ -871,7 +877,7 @@ Zotero.Collection.prototype.getDescendents = function (nested, type, includeDele
 		key: c.key
 	}));
 	if (!type || type == 'item') {
-		let items = this.getChildItems(false, includeDeletedItems);
+		let items = this.getChildItems(false, includeTrashed);
 		children = children.concat(items.map(i => ({
 			id: i.id,
 			name: null,
@@ -902,7 +908,7 @@ Zotero.Collection.prototype.getDescendents = function (nested, type, includeDele
 				
 				let child = this.ObjectsClass.get(children[i].id);
 				let descendents = child.getDescendents(
-					nested, type, includeDeletedItems, level + 1
+					nested, type, includeTrashed, level + 1
 				);
 				
 				if (nested) {

@@ -48,6 +48,24 @@ describe("Zotero.Collections", function () {
 			assert.equal(cols[5].level, 1);
 			assert.equal(cols[6].level, 0);
 		})
+		
+		it("should not include collections in trash", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var col = await createDataObject('collection', { deleted: true });
+			var cols = Zotero.Collections.getByLibrary(libraryID);
+			assert.notInclude(cols.map(c => c.id), col.id);
+		});
+		
+		it("should not include collections in trash in recursive mode", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var col1 = await createDataObject('collection');
+			var col2 = await createDataObject('collection', { parentID: col1.id, deleted: true });
+			var col3 = await createDataObject('collection', { parentID: col2.id });
+			var col4 = await createDataObject('collection', { parentID: col1.id });
+			var col5 = await createDataObject('collection', { parentID: col4.id, deleted: true });
+			var cols = Zotero.Collections.getByLibrary(libraryID, true);
+			assert.notIncludeMembers(cols.map(c => c.id), [col2.id, col3.id, col5.id]);
+		});
 	})
 	
 	describe("#getByParent()", function () {
