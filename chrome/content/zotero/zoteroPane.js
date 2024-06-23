@@ -47,7 +47,6 @@ var ZoteroPane = new function()
 	this.handleKeyDown = handleKeyDown;
 	this.captureKeyDown = captureKeyDown;
 	this.handleKeyUp = handleKeyUp;
-	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.handleKeyPress = handleKeyPress;
 	this.getSelectedCollection = getSelectedCollection;
 	this.getSelectedSavedSearch = getSelectedSavedSearch;
@@ -1102,7 +1101,7 @@ var ZoteroPane = new function()
 					createInstance(Components.interfaces.nsITimer);
 				// {} implements nsITimerCallback
 				this.highlightTimer.initWithCallback({
-					notify: ZoteroPane_Local.setHighlightedRowsCallback
+					notify: () => this._setHighlightedRowsCallback()
 				}, 225, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 			}
 			// If anything but Ctlr/Options was pressed, most likely a different shortcut using Ctlr/Options
@@ -1227,26 +1226,40 @@ var ZoteroPane = new function()
 	 * Highlights collections containing selected items on Ctrl (Win) or
 	 * Option/Alt (Mac/Linux) press
 	 */
-	function setHighlightedRowsCallback() {
-		var itemIDs = ZoteroPane_Local.getSelectedItems(true);
-		// If no items or an unreasonable number, don't try
-		if (!itemIDs || !itemIDs.length || itemIDs.length > 100) return;
+	this._setHighlightedRowsCallback = async function () {
+		var objects = this.getSelectedObjects();
 		
-		Zotero.Promise.coroutine(function* () {
-			var collectionIDs = yield Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
-			var ids = collectionIDs.map(id => "C" + id);
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			var allInPublications = Zotero.Items.get(itemIDs).every((item) => {
-				return item.libraryID == userLibraryID && item.inPublications;
-			})
-			if (allInPublications) {
-				ids.push("P" + Zotero.Libraries.userLibraryID);
+		// If no items or an unreasonable number, don't try
+		if (!objects.length || objects.length > 100) return;
+		
+		var collections = objects.filter(o => o.isCollection());
+		var items = objects.filter(o => o.isItem());
+		
+		// Get parent collections of collections
+		var toHighlight = [];
+		for (let collection of collections) {
+			if (collection.parentID) {
+				toHighlight.push(collection.parentID);
 			}
-			if (ids.length) {
-				ZoteroPane_Local.collectionsView.setHighlightedRows(ids);
-			}
-		})();
-	}
+		}
+		// Get collections containing items
+		toHighlight.push(...await Zotero.Collections.getCollectionsContainingItems(
+			items.map(x => x.id),
+			true
+		));
+		var treeViewIDs = toHighlight.map(id => 'C' + id);
+		var userLibraryID = Zotero.Libraries.userLibraryID;
+		// If no collections selected and every item is in My Publications, highlight that
+		var allInPublications = !collections.length && items.every((item) => {
+			return item.libraryID == userLibraryID && item.inPublications;
+		});
+		if (allInPublications) {
+			treeViewIDs.push("P" + Zotero.Libraries.userLibraryID);
+		}
+		if (treeViewIDs.length) {
+			await this.collectionsView.setHighlightedRows(treeViewIDs);
+		}
+	};
 	
 	
 	function handleKeyPress(event) {
@@ -1916,7 +1929,7 @@ var ZoteroPane = new function()
 				return false;
 			}
 			
-			var selectedItems = this.itemsView.getSelectedItems();
+			var selectedItems = this.itemsView.getSelectedObjects();
 			
 			// Display buttons at top of item pane depending on context. This needs to run even if the
 			// selection hasn't changed, because the selected items might have been modified.
@@ -2383,7 +2396,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 
-		return this.getSelectedItems().some(item => item.deleted);
+		return this.getSelectedObjects().some(o => o.deleted);
 	};
 	
 	
@@ -2391,12 +2404,12 @@ var ZoteroPane = new function()
 	 * @return {Promise}
 	 */
 	this.restoreSelectedItems = async function () {
-		let selectedIDs = this.getSelectedItems(true);
-		if (!selectedIDs.length) {
+		let selectedObjects = this.getSelectedObjects();
+		if (!selectedObjects.length) {
 			return;
 		}
 
-		let isSelected = itemOrID => (itemOrID.treeViewID ? selectedIDs.includes(itemOrID.treeViewID) : selectedIDs.includes(itemOrID));
+		let isSelected = object => selectedObjects.includes(object);
 
 		await Zotero.DB.executeTransaction(async () => {
 			for (let row = 0; row < this.itemsView.rowCount; row++) {
@@ -2406,7 +2419,7 @@ var ZoteroPane = new function()
 				}
 
 				let parent = this.itemsView.getRow(row).ref;
-				let children = [];
+				let childIDs = [];
 				let subcollections = [];
 				if (parent.isCollection()) {
 					// If the restored item is a collection, restore its subcollections too
@@ -2415,17 +2428,22 @@ var ZoteroPane = new function()
 					}
 				}
 				else {
-					if (!parent.isNote()) children.push(...parent.getNotes(true));
-					if (!parent.isAttachment()) children.push(...parent.getAttachments(true));
+					if (!parent.isNote()) {
+						childIDs.push(...parent.getNotes(true));
+					}
+					if (!parent.isAttachment()) {
+						childIDs.push(...parent.getAttachments(true));
+					}
 				}
+				let childItems = Zotero.Items.get(childIDs);
 				if (isSelected(parent)) {
 					if (parent.deleted) {
 						parent.deleted = false;
 						await parent.save();
 					}
 
-					let noneSelected = !children.some(isSelected);
-					let allChildren = Zotero.Items.get(children).concat(Zotero.Collections.get(subcollections));
+					let noneSelected = !childItems.some(isSelected);
+					let allChildren = childItems.concat(Zotero.Collections.get(subcollections));
 					for (let child of allChildren) {
 						if ((noneSelected || isSelected(child)) && child.deleted) {
 							child.deleted = false;
@@ -2434,7 +2452,7 @@ var ZoteroPane = new function()
 					}
 				}
 				else {
-					for (let child of Zotero.Items.get(children)) {
+					for (let child of childItems) {
 						if (isSelected(child) && child.deleted) {
 							child.deleted = false;
 							await child.save();
@@ -2994,7 +3012,13 @@ var ZoteroPane = new function()
 		return this.collectionsView.getSelectedGroup(asID);
 	}
 	
-		
+	
+	this.getSelectedObjects = function () {
+		if (!this.itemsView) return [];
+		return this.itemsView.getSelectedObjects();
+	};
+	
+	
 	/*
 	 * Return an array of Item objects for selected items
 	 *

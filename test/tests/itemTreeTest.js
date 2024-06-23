@@ -1544,4 +1544,27 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(OS.Path.basename(path), originalFileName);
 		});
 	});
+	
+	
+	describe("#_restoreSelection()", function () {
+		it("should reselect collection in trash", async function () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			var collection = await createDataObject('collection', { deleted: true });
+			var item = await createDataObject('item', { deleted: true });
+			await cv.selectByID("T" + userLibraryID);
+			await waitForItemsLoad(win);
+			
+			var collectionRow = zp.itemsView.getRowIndexByID(collection.treeViewID)
+			var itemRow = zp.itemsView.getRowIndexByID(item.id)
+			zp.itemsView.selection.toggleSelect(collectionRow);
+			zp.itemsView.selection.toggleSelect(itemRow);
+			
+			var selection = zp.itemsView.getSelectedObjects();
+			assert.lengthOf(selection, 2);
+			zp.itemsView.selection.clearSelection();
+			assert.lengthOf(zp.itemsView.getSelectedObjects(), 0);
+			zp.itemsView._restoreSelection(selection);
+			assert.lengthOf(zp.itemsView.getSelectedObjects(), 2);
+		});
+	});
 })

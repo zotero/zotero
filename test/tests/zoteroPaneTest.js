@@ -15,6 +15,31 @@ describe("ZoteroPane", function() {
 		win.close();
 	});
 	
+	describe("#_setHighlightedRowsCallback()", function () {
+		it("should highlight parent collection of collection in trash", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id, deleted: true });
+			
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await waitForItemsLoad(win);
+			
+			var row = zp.itemsView.getRowIndexByID(collection2.treeViewID);
+			zp.itemsView.selection.select(row);
+			
+			var spy = sinon.spy(zp.collectionsView, 'setHighlightedRows');
+			await zp._setHighlightedRowsCallback();
+			
+			assert.sameMembers(spy.getCall(0).args[0], ['C1']);
+			var rows = win.document.querySelectorAll('.highlighted');
+			assert.lengthOf(rows, 1);
+			
+			zp.collectionsView.setHighlightedRows();
+			
+			spy.restore();
+		});
+	});
+	
 	describe("#newItem", function () {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);

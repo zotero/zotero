@@ -440,7 +440,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var refreshed = false;
 		var sort = false;
 
-		var savedSelection = this.getSelectedItems(true);
+		var savedSelection = this.getSelectedObjects();
 		var previousFirstSelectedRow = this._rowMap[
 			// 'collection-item' ids are in the form <collectionID>-<itemID>
 			// 'item' events are just integers
@@ -467,7 +467,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 			// If refreshing a single item, clear caches and then deselect and reselect row
-			else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
+			else if (savedSelection.length == 1 && savedSelection[0].id == ids[0]) {
 				let id = ids[0];
 				let row = this._rowMap[id];
 				delete this._rowCache[id];
@@ -802,7 +802,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// If single item is selected and was modified
 			else if (action == 'modify' && ids.length == 1 &&
-				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
+				savedSelection.length == 1 && savedSelection[0].id == ids[0]) {
 				if (activeWindow) {
 					await this.selectItem(ids[0]);
 					reselect = true;
@@ -818,7 +818,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						|| action == 'trash'
 						|| action == 'delete'
 						|| action == 'removeDuplicatesMaster')
-					&& savedSelection.some(id => this.getRowIndexByID(id) === false)) {
+					&& savedSelection.some(o => this.getRowIndexByID(o.id) === false)) {
 					// In duplicates view, select the next set on delete
 					if (collectionTreeRow.isDuplicates()) {
 						if (this._rows[previousFirstSelectedRow]) {
@@ -1087,7 +1087,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this.selection) {
 			this.selection.selectEventsSuppressed = true;
 		}
-		const selection = this.getSelectedItems(true);
+		const selection = this.getSelectedObjects();
 		await this.refresh();
 		clearItemsPaneMessage && this.clearItemsPaneMessage();
 		await new Promise((resolve) => {
@@ -1451,7 +1451,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return collation.compareString(1, fieldA, fieldB);
 		}
 		
-		var savedSelection = this.getSelectedItems(true);
+		var savedSelection = this.getSelectedObjects();
 		
 		// Save open state and close containers before sorting
 		var openItemIDs = this._saveOpenState(true);
@@ -1586,7 +1586,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 		if (!skipRowMapRefresh) {
-			var savedSelection = this.getSelectedItems(true);
+			var savedSelection = this.getSelectedObjects();
 		}
 
 		var count = 0;
@@ -1650,7 +1650,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		var savedSelection = this.getSelectedItems(true);
+		var savedSelection = this.getSelectedObjects();
 		for (var i=0; i<this.rowCount; i++) {
 			var id = this.getRow(i).ref.id;
 			if (searchParentIDs.has(id) && this.isContainer(i) && !this.isContainerOpen(i)) {
@@ -1663,7 +1663,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	expandAllRows() {
 		this.selection.selectEventsSuppressed = true;
-		var selectedItems = this.getSelectedItems(true);
+		var selectedItems = this.getSelectedObjects();
 		for (var i=0; i<this.rowCount; i++) {
 			if (this.isContainer(i) && !this.isContainerOpen(i)) {
 				this.toggleOpenState(i, true);
@@ -1678,7 +1678,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	collapseAllRows() {
 		this.selection.selectEventsSuppressed = true;
-		const selectedItems = this.getSelectedItems(true);
+		const selectedItems = this.getSelectedObjects();
 		for (var i=0; i<this.rowCount; i++) {
 			if (this.isContainer(i)) {
 				this._closeContainer(i, true);
@@ -1693,7 +1693,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	expandSelectedRows() {
 		this.selection.selectEventsSuppressed = true;
-		const selectedItems = this.getSelectedItems(true);
+		const selectedItems = this.getSelectedObjects();
 		// Reverse sort so we don't mess up indices of subsequent
 		// items when expanding
 		const indices = Array.from(this.selection.selected).sort((a, b) => b - a);
@@ -1711,7 +1711,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	collapseSelectedRows() {
 		this.selection.selectEventsSuppressed = true;
-		const selectedItems = this.getSelectedItems(true);
+		const selectedItems = this.getSelectedObjects();
 		// Reverse sort and so we don't mess up indices of subsequent
 		// items when collapsing
 		const indices = Array.from(this.selection.selected).sort((a, b) => b - a);
@@ -1825,21 +1825,27 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 	
-	getSelectedItems(asIDs) {
-		var items = this.selection ? Array.from(this.selection.selected) : [];
-		items = items.filter(index => index < this._rows.length);
+	/**
+	 * Get selected objects, including collections and searches in the trash
+	 */
+	getSelectedObjects() {
+		var indexes = this.selection ? Array.from(this.selection.selected) : [];
+		indexes = indexes.filter(index => index < this._rows.length);
 		try {
-			if (asIDs) return items.map(index => this.getRow(index).ref.treeViewID);
-			return items.map(index => this.getRow(index).ref);
-		} catch (e) {
-			Zotero.debug(items);
+			return indexes.map(index => this.getRow(index).ref);
+		}
+		catch (e) {
+			Zotero.debug(indexes);
 			throw e;
 		}
 	}
 	
-	saveSelection() {
-		Zotero.debug("ItemTree::saveSelection() is deprecated -- use getSelectedItems(true)");
-		return this.getSelectedItems(true);
+	/**
+	 * Get selected items, omitting collections and searches in the trash
+	 */
+	getSelectedItems(asIDs) {
+		var items = this.getSelectedObjects().filter(x => x.isItem());
+		return asIDs ? items.map(x => x.id) : items;
 	}
 	
 	/**
@@ -3127,7 +3133,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.isContainerOpen(index)) return;
 
 		if (!skipRowMapRefresh) {
-			var savedSelection = this.getSelectedItems(true);
+			var savedSelection = this.getSelectedObjects();
 		}
 
 		var count = 0;
@@ -3663,12 +3669,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}).bind(this);
 		try {
 			for (let i = 0; i < selection.length; i++) {
-				if (this._rowMap[selection[i]] != null) {
-					toggleSelect(selection[i]);
+				if (this._rowMap[selection[i].treeViewID] != null) {
+					toggleSelect(selection[i].treeViewID);
 				}
 				// Try the parent
 				else {
-					var item = Zotero.Items.get(selection[i]);
+					let item = selection[i];
 					if (!item) {
 						continue;
 					}
@@ -3682,7 +3688,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						if (expandCollapsedParents) {
 							await this._closeContainer(this._rowMap[parent]);
 							await this.toggleOpenState(this._rowMap[parent]);
-							toggleSelect(selection[i]);
+							toggleSelect(selection[i].treeViewID);
 						}
 						else {
 							!this.selection.isSelected(this._rowMap[parent]) &&
