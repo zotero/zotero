@@ -873,7 +873,7 @@ describe("ZoteroPane", function() {
 			assert.isTrue(item.deleted);
 		});
 		
-		it("should move saved search trash without prompt for modified Delete", async function () {
+		it("should move saved search item to trash without prompt for modified Delete", async function () {
 			var search = await createDataObject('search');
 			var title = [...Object.values(search.conditions)]
 				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
