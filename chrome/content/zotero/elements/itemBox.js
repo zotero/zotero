@@ -51,6 +51,7 @@
 			this._draggedCreator = false;
 			this._selectField = null;
 			this._selectFieldSelection = null;
+			this._addCreatorRow = false;
 		}
 
 		get content() {
