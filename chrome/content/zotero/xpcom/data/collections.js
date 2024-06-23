@@ -142,6 +142,7 @@ Zotero.Collections = function() {
 	
 	
 	this.getCollectionsContainingItems = function (itemIDs, asIDs) {
+		if (!itemIDs.length) return [];
 		var sql = "SELECT collectionID FROM collections WHERE ";
 		var sqlParams = [];
 		for (let id of itemIDs) {
