@@ -67,7 +67,9 @@ var Zotero_CSL_Editor = new function () {
 		let editorWin = document.getElementById("zotero-csl-editor-iframe").contentWindow;
 		let { monaco: _monaco, editor: _editor } = await editorWin.loadMonaco({
 			language: 'xml',
-			theme: isDarkMQL.matches ? 'vs-dark' : 'vs-light'
+			theme: isDarkMQL.matches ? 'vs-dark' : 'vs-light',
+			insertSpaces: true,
+			tabSize: 2,
 		});
 		monaco = _monaco;
 		editor = _editor;
