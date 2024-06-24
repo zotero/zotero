@@ -107,7 +107,7 @@ describe("Connector Server", function () {
 		// TODO: Test cookies
 		it("should save a translated item to the current selected collection", function* () {
 			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+			yield select(win, collection);
 			
 			var body = {
 				items: [
@@ -178,8 +178,7 @@ describe("Connector Server", function () {
 			var group = yield createGroup({
 				editable: false
 			});
-			yield selectLibrary(win, group.libraryID);
-			yield waitForItemsLoad(win);
+			yield select(win, group);
 			
 			var body = {
 				items: [
@@ -370,7 +369,7 @@ describe("Connector Server", function () {
 			
 			it("should download a translated PDF", async function () {
 				var collection = await createDataObject('collection');
-				await waitForItemsLoad(win);
+				await select(win, collection);
 				
 				var sessionID = Zotero.Utilities.randomString();
 				
@@ -513,7 +512,7 @@ describe("Connector Server", function () {
 			
 			it("should download open-access PDF if no PDF provided", async function () {
 				var collection = await createDataObject('collection');
-				await waitForItemsLoad(win);
+				await select(win, collection);
 				
 				var sessionID = Zotero.Utilities.randomString();
 				
@@ -605,7 +604,7 @@ describe("Connector Server", function () {
 			
 			it("should download open-access PDF if a translated PDF fails", async function () {
 				var collection = await createDataObject('collection');
-				await waitForItemsLoad(win);
+				await select(win, collection);
 				
 				var sessionID = Zotero.Utilities.randomString();
 				
@@ -761,7 +760,7 @@ describe("Connector Server", function () {
 	describe("/connector/saveSingleFile", function () {
 		it("should save a webpage item with /saveSnapshot", async function () {
 			var collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection);
 
 			// Promise for item save
 			let promise = waitForItemEvent('add');
@@ -837,7 +836,7 @@ describe("Connector Server", function () {
 
 		it("should save a webpage item with /saveItems", async function () {
 			let collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection);
 
 			let title = Zotero.Utilities.randomString();
 			let sessionID = Zotero.Utilities.randomString();
@@ -930,7 +929,7 @@ describe("Connector Server", function () {
 		it("should override SingleFileZ from old connector in /saveSnapshot", async function () {
 			Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			var collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection);
 
 			// Promise for item save
 			let promise = waitForItemEvent('add');
@@ -1023,7 +1022,7 @@ describe("Connector Server", function () {
 
 		it("should override SingleFileZ from old connector in /saveItems", async function () {
 			let collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection);
 
 			let prefix = '/' + Zotero.Utilities.randomString() + '/';
 			let uri = OS.Path.join(getTestDataDirectory().path, 'snapshot');
@@ -1132,7 +1131,7 @@ describe("Connector Server", function () {
 
 		it("should handle race condition with /saveItems", async function () {
 			let collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection);
 
 			let pdfURL = testServerPath + '/pdf';
 			let nonOADOI = '10.2222/bcde';
@@ -1296,7 +1295,7 @@ describe("Connector Server", function () {
 	describe("/connector/saveSnapshot", function () {
 		it("should save a webpage item and snapshot to the current selected collection", function* () {
 			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+			yield select(win, collection);
 
 			// saveSnapshot saves parent and child before returning
 			var ids1, ids2;
@@ -1344,7 +1343,7 @@ describe("Connector Server", function () {
 		
 		it("should save a PDF to the current selected collection and retrieve metadata", async function () {
 			var collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection);
 			
 			var file = getTestDataDirectory();
 			file.append('test.pdf');
@@ -1408,8 +1407,7 @@ describe("Connector Server", function () {
 			var group = yield createGroup({
 				editable: false
 			});
-			yield selectLibrary(win, group.libraryID);
-			yield waitForItemsLoad(win);
+			yield select(win, group);
 			
 			var promise = waitForItemEvent('add');
 			var reqPromise = Zotero.HTTP.request(
@@ -1497,7 +1495,7 @@ describe("Connector Server", function () {
 		it("should update collections and tags of item saved via /saveItems", async function () {
 			var collection1 = await createDataObject('collection');
 			var collection2 = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection2);
 			
 			var sessionID = Zotero.Utilities.randomString();
 			var body = {
@@ -1581,7 +1579,7 @@ describe("Connector Server", function () {
 			
 			var collection1 = await createDataObject('collection');
 			var collection2 = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection2);
 			
 			var file = getTestDataDirectory();
 			file.append('test.pdf');
@@ -1637,7 +1635,7 @@ describe("Connector Server", function () {
 			
 			var collection1 = await createDataObject('collection');
 			var collection2 = await createDataObject('collection');
-			await waitForItemsLoad(win);
+			await select(win, collection2);
 			
 			// saveSnapshot saves parent and child before returning
 			var ids1, ids2;
@@ -2585,9 +2583,9 @@ describe("Connector Server", function () {
 			assert.equal(req.status, 403);
 		});
 		
-		it('should import resources (BibTeX) into selected collection', function* () {
-			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+		it('should import resources (BibTeX) into selected collection', async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
 			
 			var resource = `@book{test1,
   title={Test1},
@@ -2598,7 +2596,7 @@ describe("Connector Server", function () {
 }`;
 			
 			var addedItemIDsPromise = waitForItemEvent('add');
-			var req = yield Zotero.HTTP.request(
+			var req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
 				{
@@ -2612,19 +2610,18 @@ describe("Connector Server", function () {
 			assert.equal(req.status, 201);
 			assert.equal(JSON.parse(req.responseText)[0].title, 'Test1');
 			
-			let itemIDs = yield addedItemIDsPromise;
+			let itemIDs = await addedItemIDsPromise;
 			assert.isTrue(collection.hasItem(itemIDs[0]));
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.sameDeepMembers(item.getTags(), [{ tag: 'A', type: 1 }, { tag: 'B', type: 1 }]);
 		});
 		
 		
-		it('should switch to My Library if read-only library is selected', function* () {
-			var group = yield createGroup({
+		it('should switch to My Library if read-only library is selected', async function () {
+			var group = await createGroup({
 				editable: false
 			});
-			yield selectLibrary(win, group.libraryID);
-			yield waitForItemsLoad(win);
+			await select(win, group);
 			
 			var resource = `@book{test1,
   title={Test1},
@@ -2634,7 +2631,7 @@ describe("Connector Server", function () {
 }`;
 			
 			var addedItemIDsPromise = waitForItemEvent('add');
-			var req = yield Zotero.HTTP.request(
+			var req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
 				{
@@ -2653,7 +2650,7 @@ describe("Connector Server", function () {
 				Zotero.Libraries.userLibraryID
 			);
 			
-			let itemIDs = yield addedItemIDsPromise;
+			let itemIDs = await addedItemIDsPromise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
 		});

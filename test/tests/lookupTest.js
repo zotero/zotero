@@ -66,7 +66,7 @@ describe("Add Item by Identifier", function() {
 		this.timeout(20000);
 		
 		var col = yield createDataObject('collection');
-		yield waitForItemsLoad(win);
+		yield select(win, col);
 		
 		// Initial translator
 		var ids = yield lookupIdentifier(win, "10.4103/0976-500X.85940");

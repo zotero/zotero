@@ -71,6 +71,7 @@ describe("ZoteroPane", function() {
 		
 		it("should create a standalone note within a collection and select it", function* () {
 			var collection = yield createDataObject('collection');
+			yield selectCollection(win, collection);
 			var noteID = yield zp.newNote(false, false, "Test");
 			assert.equal(zp.collectionsView.getSelectedCollection(), collection);
 			var selected = zp.itemsView.getSelectedItems(true);
@@ -460,6 +461,7 @@ describe("ZoteroPane", function() {
 	describe("#createStandaloneNoteFromAnnotationsFromSelected()", function () {
 		it("should create a single standalone note for all child attachments of selected regular items", async function () {
 			var collection = await createDataObject('collection');
+			await selectCollection(win, collection);
 			var item1 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
 			var item2 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
 			var attachment1 = await importPDFAttachment(item1);
@@ -503,6 +505,7 @@ describe("ZoteroPane", function() {
 		
 		it("should create a single standalone note for all selected attachments", async function () {
 			var collection = await createDataObject('collection');
+			await selectCollection(win, collection);
 			var item1 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
 			var item2 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
 			var attachment1 = await importPDFAttachment(item1);
@@ -846,7 +849,7 @@ describe("ZoteroPane", function() {
 				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
 			var item = await createDataObject('item', { title });
 			
-			await waitForItemsLoad(win);
+			await selectSearch(win, search);
 			var iv = zp.itemsView;
 			
 			var selected = iv.selectItem(item.id);
@@ -883,7 +886,7 @@ describe("ZoteroPane", function() {
 				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
 			var item = await createDataObject('item', { title });
 			
-			await waitForItemsLoad(win);
+			await selectSearch(win, search);
 			var iv = zp.itemsView;
 			
 			var selected = iv.selectItem(item.id);
@@ -920,10 +923,8 @@ describe("ZoteroPane", function() {
 			let collection1 = await createDataObject('collection');
 			let collection2 = await createDataObject('collection', { parentID: collection1.id });
 			let item = await createDataObject('item', { collections: [collection2.id] });
-			assert.ok(await zp.collectionsView.selectCollection(collection1.id));
 
-			await waitForItemsLoad(win);
-
+			await selectCollection(win, collection1);
 			let iv = zp.itemsView;
 			assert.ok(await iv.selectItem(item.id));
 
@@ -947,6 +948,7 @@ describe("ZoteroPane", function() {
 	describe("#deleteSelectedCollection()", function () {
 		it("should move collection to trash but not descendant items by default", function* () {
 			var collection = yield createDataObject('collection');
+			yield selectCollection(win, collection);
 			var item = yield createDataObject('item', { collections: [collection.id] });
 			var promise = waitForDialog();
 			yield zp.deleteSelectedCollection();
@@ -957,6 +959,7 @@ describe("ZoteroPane", function() {
 		
 		it("should move to trash collection and descendant items when deleteItems=true", function* () {
 			var collection = yield createDataObject('collection');
+			yield selectCollection(win, collection);
 			var item = yield createDataObject('item', { collections: [collection.id] });
 			var promise = waitForDialog();
 			yield zp.deleteSelectedCollection(true);
@@ -1112,6 +1115,7 @@ describe("ZoteroPane", function() {
 	describe("#editSelectedCollection()", function () {
 		it("should edit a saved search", function* () {
 			var search = yield createDataObject('search');
+			yield selectSearch(win, search);
 			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
@@ -1129,6 +1133,7 @@ describe("ZoteroPane", function() {
 		it("should edit a saved search in a group", function* () {
 			var group = yield getGroup();
 			var search = yield createDataObject('search', { libraryID: group.libraryID });
+			yield selectSearch(win, search);
 			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(

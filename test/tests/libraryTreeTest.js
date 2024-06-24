@@ -18,21 +18,21 @@ describe("Zotero.LibraryTree", function() {
 	});
 	
 	describe("#getRowIndexByID()", function () {
-		it("should return the row index of an item", function* () {
-			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
-			var item = yield createDataObject('item', { collections: [collection.id] });
+		it("should return the row index of an item", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			var item = await createDataObject('item', { collections: [collection.id] });
 			var view = zp.itemsView;
 			assert.strictEqual(view.getRowIndexByID(item.treeViewID), 0);
 		});
 	});
 	
 	describe("#_removeRow()", function () {
-		it("should remove the last row", function* () {
-			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
-			yield createDataObject('item', { collections: [collection.id] });
-			yield createDataObject('item', { collections: [collection.id] });
+		it("should remove the last row", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			await createDataObject('item', { collections: [collection.id] });
+			await createDataObject('item', { collections: [collection.id] });
 			
 			var view = zp.itemsView;
 			var treeViewID = view.getRow(1).id;

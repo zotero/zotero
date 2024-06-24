@@ -606,11 +606,14 @@ function createUnsavedDataObject(objectType, params = {}) {
 	return obj;
 }
 
-var createDataObject = Zotero.Promise.coroutine(function* (objectType, params = {}, saveOptions) {
+async function createDataObject(objectType, params = {}, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
-	yield obj.saveTx(saveOptions);
+	var options = {
+		skipSelect: (objectType == 'item' || objectType == 'feedItem') ? false : true
+	};
+	await obj.saveTx(Object.assign(options, saveOptions));
 	return obj;
-});
+}
 
 function getNameProperty(objectType) {
 	return objectType == 'item' ? 'title' : 'name';

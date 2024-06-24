@@ -117,6 +117,7 @@ describe("Zotero.CollectionTree", function() {
 			col1 = yield createDataObject('collection');
 			col2 = yield createDataObject('collection', { parentID: col1.id });
 			col3 = yield createDataObject('collection', { parentID: col2.id });
+			yield select(win, col3);
 		});
 		
 		it("should open a library and respect stored container state", function* () {
@@ -158,9 +159,8 @@ describe("Zotero.CollectionTree", function() {
 			var col4 = yield createDataObject('collection', { libraryID, parentID: col1.id });
 			var col5 = yield createDataObject('collection', { libraryID, parentID: col4.id });
 			
-			// Close everything
-			yield Zotero.Promise.all([col4, col1, group]
-				.map(o => cv.toggleOpenState(cv.getRowIndexByID(o.treeViewID), false)));
+			// Close group
+			cv.toggleOpenState(cv.getRowIndexByID(group.treeViewID), false);
 			
 			yield cv.expandLibrary(libraryID);
 			
@@ -175,11 +175,7 @@ describe("Zotero.CollectionTree", function() {
 	describe("#expandToCollection()", function () {
 		it("should expand a collection to a subcollection", function* () {
 			var collection1 = yield createDataObject('collection');
-			var collection2 = createUnsavedDataObject('collection');
-			collection2.parentID = collection1.id;
-			yield collection2.saveTx({
-				skipSelect: true
-			});
+			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
 			var row = cv.getRowIndexByID("C" + collection1.id);
 			assert.isFalse(cv.isContainerOpen(row));
 			
@@ -397,6 +393,7 @@ describe("Zotero.CollectionTree", function() {
 					var o2 = await createDataObject(objectType, { name: ran + "BBB" });
 					var o3 = await createDataObject(objectType, { name: ran + "CCC" });
 					
+					await cv.selectByID(o3.treeViewID);
 					assert.equal(zp.getCollectionTreeRow().ref.id, o3.id);
 					
 					o1.deleted = true;
@@ -503,6 +500,7 @@ describe("Zotero.CollectionTree", function() {
 			var c3 = yield createDataObject('collection', { name: "3", parentID: c1.id });
 			var c4 = yield createDataObject('collection', { name: "4", parentID: c3.id });
 			var c5 = yield createDataObject('collection', { name: "5", parentID: c1.id });
+			yield select(win, c4);
 			
 			assert.equal(cv.getRowIndexByID(c1.treeViewID), rootRow + 1);
 			
@@ -593,9 +591,10 @@ describe("Zotero.CollectionTree", function() {
 			var group = yield createGroup();
 			yield createDataObject('collection', { libraryID: group.libraryID });
 			var c = yield createDataObject('collection', { libraryID: group.libraryID });
-			yield createDataObject('collection', { libraryID: group.libraryID, parentID: c.id });
+			var c2 = yield createDataObject('collection', { libraryID: group.libraryID, parentID: c.id });
 			yield createDataObject('collection', { libraryID: group.libraryID });
 			yield createDataObject('collection', { libraryID: group.libraryID });
+			yield select(win, c2);
 			
 			// Group, collections, Duplicates, Unfiled, and trash
 			assert.equal(cv._rows.length, originalRowCount + 9);
@@ -762,9 +761,9 @@ describe("Zotero.CollectionTree", function() {
 		});
 		
 		describe("with items", function () {
-			it("should add an item to a collection", function* () {
-				var collection = yield createDataObject('collection', false, { skipSelect: true });
-				var item = yield createDataObject('item', false, { skipSelect: true });
+			it("should add an item to a collection", async function () {
+				var collection = await createDataObject('collection');
+				var item = await createDataObject('item', false, { skipSelect: true });
 				
 				// Add observer to wait for collection add
 				var deferred = Zotero.Promise.defer();
@@ -779,12 +778,11 @@ describe("Zotero.CollectionTree", function() {
 					}
 				}, 'collection-item', 'test');
 				
-				yield onDrop('item', 'C' + collection.id, [item.id], deferred.promise);
+				await onDrop('item', 'C' + collection.id, [item.id], deferred.promise);
 				
 				Zotero.Notifier.unregisterObserver(observerID);
 				
-				yield cv.selectCollection(collection.id);
-				yield waitForItemsLoad(win);
+				await select(win, collection.id);
 				
 				var itemsView = win.ZoteroPane.itemsView;
 				assert.equal(itemsView.rowCount, 1);
@@ -794,8 +792,8 @@ describe("Zotero.CollectionTree", function() {
 			
 			it("should move an item from one collection to another", function* () {
 				var collection1 = yield createDataObject('collection');
-				yield waitForItemsLoad(win);
-				var collection2 = yield createDataObject('collection', false, { skipSelect: true });
+				yield select(win, collection1);
+				var collection2 = yield createDataObject('collection');
 				var item = yield createDataObject('item', { collections: [collection1.id] });
 				
 				// Add observer to wait for collection add
@@ -820,8 +818,7 @@ describe("Zotero.CollectionTree", function() {
 				// Source collection should be empty
 				assert.equal(zp.itemsView.rowCount, 0);
 				
-				yield cv.selectCollection(collection2.id);
-				yield waitForItemsLoad(win);
+				yield select(win, collection2);
 				
 				// Target collection should have item
 				assert.equal(zp.itemsView.rowCount, 1);
@@ -1154,15 +1151,18 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(cv.getRow(newColIndex4).level, cv.getRow(newColIndex1).level);
 			})
 			                                                                                         
-			it("should move a subcollection and its subcollection down under another collection", function* () {
-				var collectionA = yield createDataObject('collection', { name: "A" }, { skipSelect: true });
-				var collectionB = yield createDataObject('collection', { name: "B", parentKey: collectionA.key });
-				var collectionC = yield createDataObject('collection', { name: "C", parentKey: collectionB.key });
-				var collectionD = yield createDataObject('collection', { name: "D" }, { skipSelect: true });
-				var collectionE = yield createDataObject('collection', { name: "E" }, { skipSelect: true });
-				var collectionF = yield createDataObject('collection', { name: "F" }, { skipSelect: true });
-				var collectionG = yield createDataObject('collection', { name: "G", parentKey: collectionD.key });
-				var collectionH = yield createDataObject('collection', { name: "H", parentKey: collectionG.key });
+			it("should move a subcollection and its subcollection down under another collection", async function () {
+				var collectionA = await createDataObject('collection', { name: "A" });
+				var collectionB = await createDataObject('collection', { name: "B", parentKey: collectionA.key });
+				var collectionC = await createDataObject('collection', { name: "C", parentKey: collectionB.key });
+				var collectionD = await createDataObject('collection', { name: "D" });
+				var collectionE = await createDataObject('collection', { name: "E" });
+				var collectionF = await createDataObject('collection', { name: "F" });
+				var collectionG = await createDataObject('collection', { name: "G", parentKey: collectionD.key });
+				var collectionH = await createDataObject('collection', { name: "H", parentKey: collectionG.key });
+				
+				await cv.expandToCollection(collectionC.id);
+				await cv.expandToCollection(collectionH.id);
 				
 				var colIndexA = cv.getRowIndexByID('C' + collectionA.id);
 				var colIndexB = cv.getRowIndexByID('C' + collectionB.id);
@@ -1173,7 +1173,7 @@ describe("Zotero.CollectionTree", function() {
 				var colIndexG = cv.getRowIndexByID('C' + collectionG.id);
 				var colIndexH = cv.getRowIndexByID('C' + collectionH.id);
 				
-				yield cv.selectCollection(collectionG.id);                                                 
+				await select(win, collectionG);
 				
 				// Add observer to wait for collection add
 				var deferred = Zotero.Promise.defer();                                                                          
@@ -1187,7 +1187,7 @@ describe("Zotero.CollectionTree", function() {
 					}
 				}, 'collection', 'test');
 				
-				yield onDrop(
+				await onDrop(
 					'collection',
 					{
 						row: colIndexE,
@@ -1216,17 +1216,20 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(newColIndexG, newColIndexH - 1);
 				
 				// TODO: Check deeper subcollection open states
-			})
+			});
+			
+			it("should move a subcollection and its subcollection up under another collection", async function () {
+				var collectionA = await createDataObject('collection', { name: "A" });
+				var collectionB = await createDataObject('collection', { name: "B", parentKey: collectionA.key });
+				var collectionC = await createDataObject('collection', { name: "C", parentKey: collectionB.key });
+				var collectionD = await createDataObject('collection', { name: "D" });
+				var collectionE = await createDataObject('collection', { name: "E" });
+				var collectionF = await createDataObject('collection', { name: "F" });
+				var collectionG = await createDataObject('collection', { name: "G", parentKey: collectionE.key });
+				var collectionH = await createDataObject('collection', { name: "H", parentKey: collectionG.key });
 				
-			it("should move a subcollection and its subcollection up under another collection", function* () {
-				var collectionA = yield createDataObject('collection', { name: "A" }, { skipSelect: true });
-				var collectionB = yield createDataObject('collection', { name: "B", parentKey: collectionA.key });
-				var collectionC = yield createDataObject('collection', { name: "C", parentKey: collectionB.key });
-				var collectionD = yield createDataObject('collection', { name: "D" }, { skipSelect: true });
-				var collectionE = yield createDataObject('collection', { name: "E" }, { skipSelect: true });
-				var collectionF = yield createDataObject('collection', { name: "F" }, { skipSelect: true });
-				var collectionG = yield createDataObject('collection', { name: "G", parentKey: collectionE.key });
-				var collectionH = yield createDataObject('collection', { name: "H", parentKey: collectionG.key });
+				await cv.expandToCollection(collectionC.id);
+				await cv.expandToCollection(collectionH.id);
 				
 				var colIndexA = cv.getRowIndexByID('C' + collectionA.id);
 				var colIndexB = cv.getRowIndexByID('C' + collectionB.id);
@@ -1237,7 +1240,7 @@ describe("Zotero.CollectionTree", function() {
 				var colIndexG = cv.getRowIndexByID('C' + collectionG.id);
 				var colIndexH = cv.getRowIndexByID('C' + collectionH.id);
 				
-				yield cv.selectCollection(collectionG.id);
+				await cv.selectCollection(collectionG.id);
 				
 				// Add observer to wait for collection add
 				var deferred = Zotero.Promise.defer();
@@ -1251,7 +1254,7 @@ describe("Zotero.CollectionTree", function() {
 					}
 				}, 'collection', 'test');
 				
-				yield onDrop(
+				await onDrop(
 					'collection',
 					{
 						row: colIndexD,
@@ -1280,12 +1283,12 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(newColIndexG, newColIndexH - 1);
 				
 				// TODO: Check deeper subcollection open states
-			})
+			});
 			
 			it("should copy a collection and its subcollection to another library", async function () {
 				var group = await createGroup();
 				
-				var collectionA = await createDataObject('collection', { name: "A" }, { skipSelect: true });
+				var collectionA = await createDataObject('collection', { name: "A" });
 				var collectionB = await createDataObject('collection', { name: "B", parentKey: collectionA.key });
 				var itemA = await createDataObject('item', { collections: [collectionA.key] }, { skipSelect: true });
 				var itemB = await createDataObject('item', { collections: [collectionB.key] }, { skipSelect: true });
@@ -1338,8 +1341,7 @@ describe("Zotero.CollectionTree", function() {
 				
 				var group2 = await createGroup();
 				
-				await cv.selectCollection(collection.id);
-				await waitForItemsLoad(win);
+				await select(win, collection);
 				
 				await onDrop('collection', 'L' + group2.libraryID, [collection.id]);
 				
@@ -1403,8 +1405,7 @@ describe("Zotero.CollectionTree", function() {
 					assert.equal(item.id, ids[0]);
 				});
 				
-				yield cv.selectCollection(collection.id);
-				yield waitForItemsLoad(win);
+				yield select(win, collection);
 				
 				var itemsView = win.ZoteroPane.itemsView;
 				assert.equal(itemsView.rowCount, 1);

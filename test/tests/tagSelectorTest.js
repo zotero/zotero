@@ -60,6 +60,7 @@ describe("Tag Selector", function () {
 	
 	it("should sort colored tags by assigned number key", async function () {
 		var collection = await createDataObject('collection');
+		await select(win, collection);
 		
 		await Zotero.Tags.setColor(libraryID, "B", '#AAAAAA', 1);
 		await Zotero.Tags.setColor(libraryID, "A", '#BBBBBB', 2);
@@ -77,6 +78,7 @@ describe("Tag Selector", function () {
 	
 	it('should not display duplicate tags when automatic and manual tag with same name exists', async function () {
 		var collection = await createDataObject('collection');
+		await select(win, collection);
 		var item1 = createUnsavedDataObject('item', { collections: [collection.id] });
 		item1.setTags([{
 			tag: "A",
@@ -97,6 +99,7 @@ describe("Tag Selector", function () {
 	
 	it("should show tags from annotations for attachments in scope", async function () {
 		var collection = await createDataObject('collection');
+		await select(win, collection);
 		var item = await createDataObject('item', { collections: [collection.id] });
 		var attachment = await importPDFAttachment(item);
 		var annotation = await createAnnotation('highlight', attachment);
@@ -113,6 +116,7 @@ describe("Tag Selector", function () {
 	describe("#handleSearch()", function () {
 		it("should filter to tags matching the search", function* () {
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			var item = createUnsavedDataObject('item', { collections: [collection.id] });
 			item.setTags(['a', 'b', 'c']);
 			var promise = waitForTagSelector(win);
@@ -138,6 +142,7 @@ describe("Tag Selector", function () {
 	describe("#handleTagSelected()", function () {
 		it("should remove tags not on matching items on tag click", function* () {
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			var item1 = createUnsavedDataObject('item', { collections: [collection.id] });
 			item1.setTags([
 				{
@@ -185,6 +190,7 @@ describe("Tag Selector", function () {
 			var tag3 = 'C ' + Zotero.Utilities.randomString();
 			
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			var item1 = createUnsavedDataObject('item');
 			item1.setTags([tag1]);
 			var item2 = createUnsavedDataObject('item', { collections: [collection.id] });
@@ -264,6 +270,7 @@ describe("Tag Selector", function () {
 			// Add collection
 			promise = waitForTagSelector(win);
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			yield promise;
 			
 			// Tag selector should be empty in new collection
@@ -293,6 +300,7 @@ describe("Tag Selector", function () {
 			// Add collection
 			var promise = waitForTagSelector(win);
 			var collection = await createDataObject('collection');
+			await select(win, collection);
 			await promise;
 			
 			var elems = getColoredTagElements();
@@ -396,6 +404,7 @@ describe("Tag Selector", function () {
 			// Add collection
 			promise = waitForTagSelector(win);
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			yield promise;
 			
 			// Tag selector should be empty in new collection
@@ -464,6 +473,7 @@ describe("Tag Selector", function () {
 			// Add collection
 			var promise = waitForTagSelector(win);
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			yield promise;
 			
 			// Add item with tag to collection
@@ -494,6 +504,7 @@ describe("Tag Selector", function () {
 			// Add collection
 			var promise = waitForTagSelector(win);
 			var collection = yield createDataObject('collection');
+			yield select(win, collection);
 			yield promise;
 			
 			// Add item with tag to collection
@@ -533,6 +544,7 @@ describe("Tag Selector", function () {
 			
 			promise = waitForTagSelector(win);
 			var collection = await createDataObject('collection');
+			await select(win, collection);
 			await promise;
 			
 			// Add item with tag to collection

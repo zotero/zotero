@@ -461,7 +461,7 @@ describe("Zotero.ItemTree", function() {
 		
 		it("should reselect the same row when an item is removed", function* () {
 			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+			yield selectCollection(win, collection);
 			itemsView = zp.itemsView;
 			
 			var items = [];
@@ -559,7 +559,7 @@ describe("Zotero.ItemTree", function() {
 		
 		it.skip("should keep first visible selected item in position when other items are added with skipSelect", function* () {
 			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+			yield select(win, collection);
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
@@ -615,7 +615,7 @@ describe("Zotero.ItemTree", function() {
 		
 		it("shouldn't scroll items list if at top when other items are added with skipSelect", function* () {
 			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+			yield select(win, collection);
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
@@ -663,23 +663,24 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(treebox.getFirstVisibleRow(), 0);
 		});
 		
-		it("should update search results when items are added", function* () {
-			var search = yield createDataObject('search');
-			var title = search.getConditions()[0].value;
-			
-			yield waitForItemsLoad(win);
+		it("should update search results when items are added", async function () {
+			var search = await createDataObject('search');
+			await select(win, search);
 			assert.equal(zp.itemsView.rowCount, 0);
 			
-			// Add an item matching search
-			var item = yield createDataObject('item', { title });
+			var title = search.getConditions()[0].value;
 			
-			yield waitForItemsLoad(win);
+			// Add an item matching search
+			var item = await createDataObject('item', { title });
+			
+			await waitForItemsLoad(win);
 			assert.equal(zp.itemsView.rowCount, 1);
 			assert.equal(zp.itemsView.getRowIndexByID(item.id), 0);
 		});
 		
 		it("should re-sort search results when an item is modified", async function () {
 			var search = await createDataObject('search');
+			await select(win, search);
 			itemsView = zp.itemsView;
 			var title = search.getConditions()[0].value;
 			
@@ -726,7 +727,7 @@ describe("Zotero.ItemTree", function() {
 			});
 			yield search.saveTx();
 			
-			yield waitForItemsLoad(win);
+			yield select(win, search);
 			
 			// Add an item that doesn't match search
 			var item = yield createDataObject('item', { title: title2 });

@@ -42,11 +42,7 @@ describe("Document Recognition", function() {
 			// Import the PDF
 			var testdir = getTestDataDirectory();
 			testdir.append("recognizePDF_test_DOI.pdf");
-			var collection = await createDataObject('collection');
-			var attachment = await Zotero.Attachments.importFromFile({
-				file: testdir,
-				collections: [collection.id]
-			});
+			var attachment = await Zotero.Attachments.importFromFile({ file: testdir });
 			
 			win.ZoteroPane.recognizeSelected();
 			
@@ -78,9 +74,7 @@ describe("Document Recognition", function() {
 			// Import the PDF
 			var testdir = getTestDataDirectory();
 			testdir.append("recognizePDF_test_arXiv.pdf");
-			var attachment = await Zotero.Attachments.importFromFile({
-				file: testdir
-			});
+			var attachment = await Zotero.Attachments.importFromFile({ file: testdir });
 			
 			// Recognize the PDF
 			win.ZoteroPane.recognizeSelected();
@@ -108,6 +102,7 @@ describe("Document Recognition", function() {
 			var testdir = getTestDataDirectory();
 			testdir.append("recognizePDF_test_arXiv.pdf");
 			var collection = await createDataObject('collection');
+			await select(win, collection);
 			var attachment = await Zotero.Attachments.importFromFile({
 				file: testdir,
 				collections: [collection.id]
@@ -139,6 +134,7 @@ describe("Document Recognition", function() {
 			testdir.append("recognizePDF_test_arXiv.pdf");
 			var group = await getGroup();
 			var collection = await createDataObject('collection', { libraryID: group.libraryID });
+			await select(win, collection);
 			var attachment = await Zotero.Attachments.importFromFile({
 				libraryID: group.libraryID,
 				file: testdir,
@@ -171,6 +167,7 @@ describe("Document Recognition", function() {
 			testdir.append("recognizePDF_test_ISBN.pdf");
 			var group = await getGroup();
 			var collection = await createDataObject('collection', { libraryID: group.libraryID });
+			await select(win, collection);
 			var attachment = await Zotero.Attachments.importFromFile({
 				libraryID: group.libraryID,
 				file: testdir,
@@ -202,6 +199,7 @@ describe("Document Recognition", function() {
 			testdir.append("recognizePDF_test_title.pdf");
 			var group = await getGroup();
 			var collection = await createDataObject('collection', { libraryID: group.libraryID });
+			await select(win, collection);
 			var attachment = await Zotero.Attachments.importFromFile({
 				libraryID: group.libraryID,
 				file: testdir,
@@ -318,11 +316,7 @@ describe("Document Recognition", function() {
 
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_ISBN.epub');
-			let collection = await createDataObject('collection');
-			let attachment = await Zotero.Attachments.importFromFile({
-				file: testDir,
-				collections: [collection.id]
-			});
+			let attachment = await Zotero.Attachments.importFromFile({ file: testDir });
 
 			win.ZoteroPane.recognizeSelected();
 
@@ -356,11 +350,7 @@ describe("Document Recognition", function() {
 		it("should recognize an EPUB without an ISBN and rename the file", async function () {
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_DC.epub');
-			let collection = await createDataObject('collection');
-			let attachment = await Zotero.Attachments.importFromFile({
-				file: testDir,
-				collections: [collection.id]
-			});
+			let attachment = await Zotero.Attachments.importFromFile({ file: testDir });
 
 			win.ZoteroPane.recognizeSelected();
 
@@ -405,11 +395,7 @@ describe("Document Recognition", function() {
 
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_ISBN.epub');
-			let collection = await createDataObject('collection');
-			await Zotero.Attachments.importFromFile({
-				file: testDir,
-				collections: [collection.id]
-			});
+			await Zotero.Attachments.importFromFile({ file: testDir });
 
 			win.ZoteroPane.recognizeSelected();
 
@@ -438,11 +424,7 @@ describe("Document Recognition", function() {
 
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_ISBN.epub');
-			let collection = await createDataObject('collection');
-			let attachment = await Zotero.Attachments.importFromFile({
-				file: testDir,
-				collections: [collection.id]
-			});
+			let attachment = await Zotero.Attachments.importFromFile({ file: testDir });
 
 			win.ZoteroPane.recognizeSelected();
 
@@ -478,11 +460,7 @@ describe("Document Recognition", function() {
 
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_copyright_page.epub');
-			let collection = await createDataObject('collection');
-			await Zotero.Attachments.importFromFile({
-				file: testDir,
-				collections: [collection.id]
-			});
+			await Zotero.Attachments.importFromFile({ file: testDir });
 
 			win.ZoteroPane.recognizeSelected();
 
@@ -519,11 +497,7 @@ describe("Document Recognition", function() {
 
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_content.epub');
-			let collection = await createDataObject('collection');
-			await Zotero.Attachments.importFromFile({
-				file: testDir,
-				collections: [collection.id]
-			});
+			await Zotero.Attachments.importFromFile({ file: testDir });
 
 			win.ZoteroPane.recognizeSelected();
 
