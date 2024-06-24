@@ -375,6 +375,14 @@ function waitForNotifierEvent(event, type) {
 }
 
 /**
+ * Hang tests for manual inspection
+ */
+async function pause(thisObj) {
+	thisObj.timeout(100000000);
+	await Zotero.Promise.delay(100000000);
+}
+
+/**
  * Looks for windows with a specific URL.
  */
 function getWindows(uri) {
