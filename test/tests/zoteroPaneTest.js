@@ -28,7 +28,7 @@ describe("ZoteroPane", function() {
 			var spy = sinon.spy(zp.collectionsView, 'setHighlightedRows');
 			await zp._setHighlightedRowsCallback();
 			
-			assert.sameMembers(spy.getCall(0).args[0], ['C1']);
+			assert.sameMembers(spy.getCall(0).args[0], [collection1.treeViewID]);
 			var rows = win.document.querySelectorAll('.highlighted');
 			assert.lengthOf(rows, 1);
 			
