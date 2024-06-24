@@ -46,7 +46,7 @@ describe("Zotero_File_Interface", function() {
     
     it("should import RIS into selected collection", async function () {
 		var collection = await createDataObject('collection');
-		await selectCollection(win, collection);
+		await select(win, collection);
 		
         var testFile = OS.Path.join(getTestDataDirectory().path, 'book_and_child_note.ris');
         await win.Zotero_File_Interface.importFile({
