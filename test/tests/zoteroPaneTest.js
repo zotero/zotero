@@ -758,6 +758,10 @@ describe("ZoteroPane", function() {
 	describe("#deleteSelectedItems()", function () {
 		const DELETE_KEY_CODE = 46;
 		
+		afterEach(async function () {
+			await selectLibrary(win);
+		});
+		
 		it("should remove an item from My Publications", function* () {
 			var item = createUnsavedDataObject('item');
 			item.inPublications = true;
