@@ -1443,7 +1443,6 @@ describe("Connector Server", function () {
 	describe("/connector/savePage", function() {
 		before(async function () {
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 		});
 		
 		it("should return 500 if no translator available for page", function* () {
@@ -1690,7 +1689,6 @@ describe("Connector Server", function () {
 			let addItemsSpy = sinon.spy(Zotero.Server.Connector.SaveSession.prototype, 'addItems');
 			var group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 			
 			var sessionID = Zotero.Utilities.randomString();
 			var body = {
@@ -1806,7 +1804,6 @@ describe("Connector Server", function () {
 		it("should move item saved via /saveSnapshot to another library", async function () {
 			var group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 			var sessionID = Zotero.Utilities.randomString();
 			
 			// saveSnapshot saves parent and child before returning
@@ -1889,7 +1886,6 @@ describe("Connector Server", function () {
 		it("should save item saved via /saveSnapshot and /saveSingleFile to another library", async function () {
 			let group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 			let sessionID = Zotero.Utilities.randomString();
 
 			// Wait for /saveSnapshot and /saveSingleFile to items
@@ -2017,7 +2013,6 @@ describe("Connector Server", function () {
 		it("should resave item saved via /saveSnapshot and /saveSingleFile when moved to filesEditable library", async function () {
 			let group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 			let sessionID = Zotero.Utilities.randomString();
 
 			// Wait for /saveSnapshot to save parent item
@@ -2139,7 +2134,6 @@ describe("Connector Server", function () {
 		it("should save item saved via /saveItems and /saveSingleFile to another library", async function () {
 			let group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 			let sessionID = Zotero.Utilities.randomString();
 
 			// Wait for /saveItems and /saveSingleFile to items
@@ -2286,7 +2280,6 @@ describe("Connector Server", function () {
 		it("should save item saved via /saveItems and /saveSingleFile when moved to filesEditable library", async function () {
 			let group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
-			await waitForItemsLoad(win);
 			let sessionID = Zotero.Utilities.randomString();
 
 			// Wait for /saveItems to save parent item
