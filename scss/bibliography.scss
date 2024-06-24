@@ -18,10 +18,6 @@ style-configurator {
 	--style-configurator-gap: 16px;
 }
 
-radiogroup {
-	gap: 16px;
-}
-
 checkbox, radio {
 	gap: 6px;
 	margin: 0;
@@ -60,11 +56,11 @@ dialog
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 16px;
+	gap: 8px;
 
 	radiogroup {
 		flex-direction: row;
-		gap: 16px;
+		gap: 8px;
 	}
 }
 
@@ -101,12 +97,5 @@ dialog
 	.advanced-body {
 		padding: 0 0 0 16px;
 		gap: 8px;
-
-		.advanced-row.disabled {
-			color: var(--fill-quarternary);
-			.row-description {
-				color: var(--fill-quarternary);
-			}
-		}
 	}
 }

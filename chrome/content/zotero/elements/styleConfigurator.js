@@ -38,7 +38,9 @@
 
 		set value(val) {
 			if (!this.values.includes(val)) return;
-			this.querySelector('#style-list').value = val;
+			let styleList = this.querySelector('#style-list');
+			styleList.value = val;
+			styleList.selectedItem.scrollIntoView();
 		}
 
 		get value() {

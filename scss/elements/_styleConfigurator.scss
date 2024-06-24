@@ -39,10 +39,6 @@ style-configurator {
 		}
 	}
 	
-	label[for="style-selector"] {
-		margin: var(--style-configurator-label-margin, 0 $space-min 0 0);
-	}
-	
 	.style-selector-wrapper {
 		margin: var(--style-configurator-style-field-margin, 0);
 	}
@@ -50,19 +46,19 @@ style-configurator {
 	.locale-selector-wrapper {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--style-configurator-locale-gap, 8px);
 	}
 	
 	.display-as-wrapper {
 		display: flex;
 		flex-direction: row;
-		gap: 16px;
+		gap: var(--style-configurator-display-as-wrapper-gap, 8px);
 
 		radiogroup {
 			margin: 0;
 			display: flex;
 			flex-direction: row;
-			gap: 16px;
+			gap: var(--style-configurator-display-as-wrapper-gap, 8px);
 		}
 		
 		radio {

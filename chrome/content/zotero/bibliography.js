@@ -99,8 +99,6 @@ window.Zotero_File_Interface_Bibliography = new function () {
 			i++;
 		}
 
-		this.updateWindowSize();
-
 		// Select supplied style and locale
 		if (_io.style) {
 			styleConfigurator.style = _io.style;
@@ -124,6 +122,8 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		this.initBibWindow();
 
 		this.initDocPrefsWindow();
+
+		setTimeout(() => this.updateWindowSize(), 0);
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
@@ -221,22 +221,20 @@ window.Zotero_File_Interface_Bibliography = new function () {
 
 	this.onDocPrefsWindowStyleChange = function (style) {
 		if (windowType !== "docPrefs") return;
+
 		let isNote = style.class == "note";
-			
 		// update status of formatUsing box based on style class
-		let formatUsingBookmarks = document.querySelector("#formatUsingBookmarks");
-		if (formatUsingBookmarks) {
-			if (isNote) formatUsingBookmarks.checked = false;
-			formatUsingBookmarks.disabled = isNote;
-			document.querySelector("#formatUsing-container").classList.toggle("disabled", isNote);
-		}
+		if (isNote) document.querySelector("#formatUsingBookmarks").checked = false;
+		document.querySelector("#formatUsing-container").hidden = isNote;
 		
 		let usesAbbreviation = style.usesAbbreviation;
-		let automaticJournalAbbreviations = document.querySelector("#automaticJournalAbbreviations");
-		if (automaticJournalAbbreviations) {
-			automaticJournalAbbreviations.disabled = !usesAbbreviation;
-			document.querySelector("#automaticJournalAbbreviations-container").classList.toggle("disabled", !usesAbbreviation);
-		}
+		document.querySelector("#automaticJournalAbbreviations-container").hidden = !usesAbbreviation;
+
+		let advancedOptions = document.querySelector(".advanced-options");
+		let hasEnabledOption
+			= !!Array.from(advancedOptions.querySelector(".advanced-body").childNodes)
+				.find(elem => !elem.hidden);
+		advancedOptions.hidden = !hasEnabledOption;
 	};
 
 	this.acceptSelection = function () {
