@@ -278,8 +278,8 @@ async function select(win, object) {
 
 async function selectLibrary(win, libraryOrID = Zotero.Libraries.userLibraryID) {
 	var libraryID = libraryOrID instanceof Zotero.Library ? libraryOrID.libraryID : libraryOrID;
-	yield win.ZoteroPane.collectionsView.selectLibrary(libraryID);
-	yield waitForItemsLoad(win);
+	await win.ZoteroPane.collectionsView.selectLibrary(libraryID);
+	await waitForItemsLoad(win);
 }
 
 async function selectCollection(win, collectionOrID) {
