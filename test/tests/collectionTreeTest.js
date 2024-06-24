@@ -790,7 +790,7 @@ describe("Zotero.CollectionTree", function() {
 				
 				Zotero.Notifier.unregisterObserver(observerID);
 				
-				await select(win, collection.id);
+				await select(win, collection);
 				
 				var itemsView = win.ZoteroPane.itemsView;
 				assert.equal(itemsView.rowCount, 1);
