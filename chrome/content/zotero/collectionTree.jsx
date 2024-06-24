@@ -663,7 +663,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return this.selectByID('C' + id);
 	}
 
-	selectSearch(id) {
+	async selectSearch(id) {
 		return this.selectByID('S' + id);
 	}
 	
