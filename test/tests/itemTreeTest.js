@@ -759,15 +759,12 @@ describe("Zotero.ItemTree", function() {
 		});
 		
 		describe("Trash", function () {
-			var one, two, three;
 			it("should remove untrashed parent item when last trashed child is deleted", function* () {
-				var userLibraryID = Zotero.Libraries.userLibraryID;
 				var item = yield createDataObject('item');
 				var note = yield createDataObject(
 					'item', { itemType: 'note', parentID: item.id, deleted: true }
 				);
-				yield cv.selectByID("T" + userLibraryID);
-				yield waitForItemsLoad(win);
+				yield selectTrash(win);
 				assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
 				var promise = waitForDialog();
 				yield zp.emptyTrash();
@@ -779,65 +776,57 @@ describe("Zotero.ItemTree", function() {
 			});
 
 			it("should show only top-most trashed collection", async function() {
-				var userLibraryID = Zotero.Libraries.userLibraryID;
-				var ran = Zotero.Utilities.randomString();
-				var objectType = "collection";
-				one = await createDataObject(objectType, { name: ran + "_DELETE_ONE" });
-				two = await createDataObject(objectType, { name: ran + "_DELETE_TWO", parentID: one.id });
-				three = await createDataObject(objectType, { name: ran + "_DELETE_THREE", parentID: two.id });
-
-				one.deleted = true;
-				await one.saveTx();
+				var c1 = await createDataObject('collection', { deleted: true });
+				var c2 = await createDataObject('collection', { parentID: c1.id });
+				var c3 = await createDataObject('collection', { parentID: c2.id });
 
 				// Go to trash
-				await zp.collectionsView.selectByID("T" + userLibraryID);
-				await waitForItemsLoad(win);
+				await selectTrash(win);
 
 				// Make sure only top-level collection shows
-				assert.isNumber(itemsView.getRowIndexByID(one.treeViewID));
-				assert.isFalse(itemsView.getRowIndexByID(two.treeViewID));
-				assert.isFalse(itemsView.getRowIndexByID(three.treeViewID));
+				assert.isNumber(itemsView.getRowIndexByID(c1.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(c2.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(c3.treeViewID));
 			})
 
 			it("should restore all subcollections when parent is restored", async function() {
-				var userLibraryID = Zotero.Libraries.userLibraryID;
+				var c1 = await createDataObject('collection', { deleted: true });
+				var c2 = await createDataObject('collection', { parentID: c1.id });
+				var c3 = await createDataObject('collection', { parentID: c2.id });
+				
 				// Go to trash
-				await zp.collectionsView.selectByID("T" + userLibraryID);
-				await waitForItemsLoad(win);
+				await selectTrash(win);
 
 				// Restore
-				await itemsView.selectItem(one.treeViewID);
+				await itemsView.selectItem(c1.treeViewID);
 				await zp.restoreSelectedItems();
 				
 				// Make sure it's gone from trash
-				assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
-				assert.isFalse(zp.itemsView.getRowIndexByID(two.treeViewID));
-				assert.isFalse(zp.itemsView.getRowIndexByID(three.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(c1.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(c2.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(c3.treeViewID));
 
 				// Make sure it shows up back in collectionTree
-				assert.isNumber(zp.collectionsView.getRowIndexByID(one.treeViewID));
+				assert.isNumber(zp.collectionsView.getRowIndexByID(c1.treeViewID));
 			})
 
 			for (let objectType of ['collection', 'search']) {
 				it(`should remove ${objectType} from trash on delete`, async function (){
-					var userLibraryID = Zotero.Libraries.userLibraryID;
-					var ran = Zotero.Utilities.randomString();
-					one = await createDataObject(objectType, { name: ran + "_DELETE_ONE", deleted: true });
-					two = await createDataObject(objectType, { name: ran + "_DELETE_TWO", deleted: true  });
-					three = await createDataObject(objectType, { name: ran + "_DELETE_THREE", deleted: true  });
+					var o1 = await createDataObject(objectType, { deleted: true });
+					var o2 = await createDataObject(objectType, { deleted: true  });
+					var o3 = await createDataObject(objectType, { deleted: true  });
 
 					// Go to trash
-					await zp.collectionsView.selectByID("T" + userLibraryID);
-					await waitForItemsLoad(win);
+					await selectTrash(win);
 
 					// Permanently delete
-					await itemsView.selectItems([one.treeViewID, two.treeViewID, three.treeViewID]);
+					await itemsView.selectItems([o1.treeViewID, o2.treeViewID, o3.treeViewID]);
 					await itemsView.deleteSelection();
 
 					// Make sure it's gone from trash
-					assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
-					assert.isFalse(zp.itemsView.getRowIndexByID(two.treeViewID));
-					assert.isFalse(zp.itemsView.getRowIndexByID(three.treeViewID));
+					assert.isFalse(zp.itemsView.getRowIndexByID(o1.treeViewID));
+					assert.isFalse(zp.itemsView.getRowIndexByID(o2.treeViewID));
+					assert.isFalse(zp.itemsView.getRowIndexByID(o3.treeViewID));
 				})
 			}
 		});

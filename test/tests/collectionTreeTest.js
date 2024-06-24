@@ -209,39 +209,41 @@ describe("Zotero.CollectionTree", function() {
 	})
 	
 	describe("Trash for collections/searches", function () {
-		var one, two, three;
 		for (let objectType of ['collection', 'search']) {
 			it(`should remove deleted ${objectType} from collectionTree`, async function () {
-				var ran = Zotero.Utilities.randomString();
-				one = await createDataObject(objectType, { name: ran + "_DELETE_ONE" });
-				two = await createDataObject(objectType, { name: ran + "_DELETE_TWO" });
-				three = await createDataObject(objectType, { name: ran + "_DELETE_THREE" });
+				var o1 = await createDataObject(objectType);
+				var o2 = await createDataObject(objectType);
+				var o3 = await createDataObject(objectType);
 				
 				// Move them to trash
-				one.deleted = true;
-				two.deleted = true;
-				three.deleted = true;
-				await one.saveTx();
-				await two.saveTx();
-				await three.saveTx();
+				o1.deleted = true;
+				o2.deleted = true;
+				o3.deleted = true;
+				await o1.saveTx();
+				await o2.saveTx();
+				await o3.saveTx();
 
 				// Make sure they're gone from collectionTree
-				assert.isFalse(cv.getRowIndexByID(one.treeViewID));
-				assert.isFalse(cv.getRowIndexByID(two.treeViewID));
-				assert.isFalse(cv.getRowIndexByID(three.treeViewID));
-			})
+				assert.isFalse(cv.getRowIndexByID(o1.treeViewID));
+				assert.isFalse(cv.getRowIndexByID(o2.treeViewID));
+				assert.isFalse(cv.getRowIndexByID(o3.treeViewID));
+			});
+			
 			it(`should put restored ${objectType} back into collectionTree`, async function () {
-				await cv.selectByID("T" + userLibraryID);
-				await waitForItemsLoad(win);
+				var o1 = await createDataObject(objectType, { deleted: true });
+				var o2 = await createDataObject(objectType, { deleted: true });
+				var o3 = await createDataObject(objectType, { deleted: true });
+				
+				await selectTrash(win);
 
 				// Restore
 				await Zotero.DB.executeTransaction(async function () {
-					one.deleted = false;
-					two.deleted = false;
-					three.deleted = false;
-					await one.save({ skipSelect: true });
-					await two.save({ skipSelect: true });
-					await three.save({ skipSelect: true });
+					o1.deleted = false;
+					o2.deleted = false;
+					o3.deleted = false;
+					await o1.save();
+					await o2.save();
+					await o3.save();
 				});
 
 				// Check if trash is still selected
@@ -249,60 +251,66 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(cv.selection.focused, trashRow);
 
 				// Check if restored entries are back in collectionTree
-				assert.isNumber(cv.getRowIndexByID(one.treeViewID));
-				assert.isNumber(cv.getRowIndexByID(two.treeViewID));
-				assert.isNumber(cv.getRowIndexByID(three.treeViewID));
+				assert.isNumber(cv.getRowIndexByID(o1.treeViewID));
+				assert.isNumber(cv.getRowIndexByID(o2.treeViewID));
+				assert.isNumber(cv.getRowIndexByID(o3.treeViewID));
 				// Make sure it's all gone from trash
-				assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
-				assert.isFalse(zp.itemsView.getRowIndexByID(two.treeViewID));
-				assert.isFalse(zp.itemsView.getRowIndexByID(three.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(o1.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(o2.treeViewID));
+				assert.isFalse(zp.itemsView.getRowIndexByID(o3.treeViewID));
 			});
 		}
 
-		it(`should delete subcollections when parent is deleted`, async function () {
-			var ran = Zotero.Utilities.randomString();
-			one = await createDataObject('collection', { name: ran + "_DELETE_ONE" });
-			two = await createDataObject('collection', { name: ran + "_DELETE_TWO", parentID: one.id });
-			three = await createDataObject('collection', { name: ran + "_DELETE_THREE", parentID: two.id });
+		it("should delete subcollections when parent is deleted", async function () {
+			var c1 = await createDataObject('collection');
+			var c2 = await createDataObject('collection', { parentID: c1.id });
+			var c3 = await createDataObject('collection', { parentID: c2.id });
 			
+			// Expand to bottom
+			await select(win, c3);
 			// Select top parent
-			cv.selection.select(cv.getRowIndexByID(one.treeViewID));
+			await select(win, c1);
 			// Move parent to trash
 			await cv.deleteSelection();
 
 			// Make sure they're gone from collectionTree
-			assert.isFalse(cv.getRowIndexByID(one.treeViewID));
-			assert.isFalse(cv.getRowIndexByID(two.treeViewID));
-			assert.isFalse(cv.getRowIndexByID(three.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(c1.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(c2.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(c3.treeViewID));
 		})
 
-		it(`should restore deleted subcollections with parent`, async function () {
-			await cv.selectByID("T" + userLibraryID);
-
+		it("should restore deleted subcollections with parent", async function () {
+			var c1 = await createDataObject('collection', { deleted: true });
+			var c2 = await createDataObject('collection', { parentID: c1.id });
+			var c3 = await createDataObject('collection', { parentID: c2.id });
+			
+			await selectTrash(win);
+			
 			// Restore items
-			await waitForItemsLoad(win);
-			zp.itemsView.selectItem(one.treeViewID);
+			zp.itemsView.selectItem(c1.treeViewID);
 			await zp.restoreSelectedItems();
-
+			
 			// Check if trash is still selected
 			let trashRow = cv.getRowIndexByID("T" + userLibraryID);
 			assert.equal(cv.selection.focused, trashRow);
-
+			
 			// Check if restored collections are back in collectionTree
-			let parentRowIndex = cv.getRowIndexByID(one.treeViewID);
+			let parentRowIndex = cv.getRowIndexByID(c1.treeViewID);
 			await cv.toggleOpenState(parentRowIndex);
 			assert.equal(cv.getRow(parentRowIndex).level, 1);
-			await Zotero.Promise.delay(5000);
-			let middleRowIndex = cv.getRowIndexByID(two.treeViewID);
+			
+			let middleRowIndex = cv.getRowIndexByID(c2.treeViewID);
+			await cv.toggleOpenState(middleRowIndex);
 			assert.equal(cv.getRow(middleRowIndex).level, 2);
-			let bottomRowindex = cv.getRowIndexByID(three.treeViewID);
-			assert.equal(cv.getRow(bottomRowindex).level, 3);
-
-			await waitForItemsLoad(win);
-			//Make sure they're gone from trash
-			assert.isFalse(zp.itemsView.getRowIndexByID(one.treeViewID));
+			
+			let bottomRowIndex = cv.getRowIndexByID(c3.treeViewID);
+			assert.equal(cv.getRow(bottomRowIndex).level, 3);
+			
+			// Make sure they're gone from trash
+			assert.isFalse(zp.itemsView.getRowIndexByID(c1.treeViewID));
 		});
 	});
+	
 	describe("#notify()", function () {
 		it("should select a new collection", function* () {
 			// Create collection
