@@ -20,9 +20,7 @@ describe("ZoteroPane", function() {
 			var collection1 = await createDataObject('collection');
 			var collection2 = await createDataObject('collection', { parentID: collection1.id, deleted: true });
 			
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			await zp.collectionsView.selectByID('T' + userLibraryID);
-			await waitForItemsLoad(win);
+			await selectTrash(win);
 			
 			var row = zp.itemsView.getRowIndexByID(collection2.treeViewID);
 			zp.itemsView.selection.select(row);
@@ -34,9 +32,11 @@ describe("ZoteroPane", function() {
 			var rows = win.document.querySelectorAll('.highlighted');
 			assert.lengthOf(rows, 1);
 			
-			zp.collectionsView.setHighlightedRows();
+			await zp.collectionsView.setHighlightedRows();
 			
 			spy.restore();
+			// Switch back to library to avoid breaking other tests
+			await selectLibrary(win);
 		});
 	});
 	
