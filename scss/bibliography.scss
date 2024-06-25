@@ -23,6 +23,24 @@ checkbox, radio {
 	margin: 0;
 }
 
+checkbox {
+	.checkbox-check[native] {
+		margin-inline: 0;
+	}
+}
+
+radio {
+	.radio-check {
+		margin-inline: 0;
+	}
+
+	.radio-label-box {
+		.radio-icon {
+			display: none;
+		}
+	}
+}
+
 button {
 	margin: 0;
 }
@@ -47,7 +65,7 @@ dialog
 
 .row-description
 {
-	padding: 0 0 0 20px;
+	padding: 0 0 0 17px;
 	font-size: .8em;
 	color: var(--fill-secondary);
 }

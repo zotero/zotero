@@ -155,7 +155,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 
 	this.initDocPrefsWindow = function () {
 		if (windowType !== "docPrefs") return;
-		this.toggleAdvancedOptions(!Zotero.Prefs.get("export.advanceOptionsOpened"));
+		this.toggleAdvancedOptions(true);
 		document.querySelector(".advanced-header").addEventListener("click", () => this.toggleAdvancedOptions());
 
 		if (_io.useEndnotes == 1) {
@@ -168,7 +168,9 @@ window.Zotero_File_Interface_Bibliography = new function () {
 				document.getElementById("bookmarks-file-format-notice").dataset.l10nArgs = '{"show": "true"}';
 			}
 			else {
-				document.getElementById("formatUsing-container").style.display = "none";
+				let formatUsing = document.getElementById("formatUsing-container");
+				formatUsing.hidden = true;
+				formatUsing.toggleAttribute("always-hidden", true);
 				_io.fieldType = _io.primaryFieldType;
 			}
 		}
@@ -188,6 +190,8 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		}
 
 		document.querySelector("#exportDocument")?.addEventListener("command", this.exportDocument.bind(this));
+
+		this.onDocPrefsWindowStyleChange(Zotero.Styles.get(styleConfigurator.style));
 	};
 	
 	this.openHelpLink = function () {
@@ -225,7 +229,10 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		let isNote = style.class == "note";
 		// update status of formatUsing box based on style class
 		if (isNote) document.querySelector("#formatUsingBookmarks").checked = false;
-		document.querySelector("#formatUsing-container").hidden = isNote;
+		let formatUsing = document.querySelector("#formatUsing-container");
+		if (!formatUsing.hasAttribute("always-hidden")) {
+			formatUsing.hidden = isNote;
+		}
 		
 		let usesAbbreviation = style.usesAbbreviation;
 		document.querySelector("#automaticJournalAbbreviations-container").hidden = !usesAbbreviation;
@@ -234,6 +241,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		let hasEnabledOption
 			= !!Array.from(advancedOptions.querySelector(".advanced-body").childNodes)
 				.find(elem => !elem.hidden);
+		console.trace(hasEnabledOption);
 		advancedOptions.hidden = !hasEnabledOption;
 	};
 
@@ -325,12 +333,11 @@ window.Zotero_File_Interface_Bibliography = new function () {
 	this.toggleAdvancedOptions = function (collapsed = undefined) {
 		let header = document.querySelector(".advanced-header");
 		if (typeof collapsed === "undefined") {
-			collapsed = header.classList.contains("collapsed");
+			collapsed = !header.classList.contains("collapsed");
 		}
-		document.querySelector(".advanced-body").hidden = !collapsed;
-		header.classList.toggle("collapsed", !collapsed);
+		document.querySelector(".advanced-body").hidden = collapsed;
+		header.classList.toggle("collapsed", collapsed);
 		this.updateWindowSize();
-		Zotero.Prefs.set("export.advanceOptionsOpened", !collapsed);
 	};
 
 	/**
