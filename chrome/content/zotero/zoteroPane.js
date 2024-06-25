@@ -475,17 +475,26 @@ var ZoteroPane = new function()
 		// When the item type menupopup from itemBoxshows,
 		// hide the focus ring around the currently focused element
 		document.addEventListener("popupshowing", (e) => {
-			if (e.target.tagName == "menupopup" && e.target.parentNode.id == "item-type-menu") {
+			let popup = e.originalTarget;
+			if (popup.tagName == "menupopup" && popup.parentNode.id == "item-type-menu") {
 				document.activeElement.style.setProperty('--width-focus-border', '0');
 				document.activeElement.classList.add("hidden-focus");
+			}
+
+			// Clear whatever semantics <menuseparator> has so that they are not counted
+			// as interactable items when the menuitem count is announced by screen readers
+			let separators = [...popup.querySelectorAll("menuseparator")];
+			for (let separator of separators) {
+				separator.setAttribute("role", "presentation");
 			}
 		});
 
 		// When a panel popup hides, refocus the previous element
 		// When a menupopup hides, stop hiding the focus-ring
 		document.addEventListener("popuphiding", (e) => {
-			if (ZoteroPane.lastFocusedElement && e.target.tagName == "panel"
-					&& document.activeElement && e.target.contains(document.activeElement)) {
+			let popup = e.originalTarget;
+			if (ZoteroPane.lastFocusedElement && popup.tagName == "panel"
+					&& document.activeElement && popup.contains(document.activeElement)) {
 				ZoteroPane.lastFocusedElement.focus();
 			}
 			let noFocus = [...document.querySelectorAll(".hidden-focus")];
@@ -493,6 +502,24 @@ var ZoteroPane = new function()
 				node.style.removeProperty('--width-focus-border');
 				node.classList.remove("hidden-focus");
 			}
+			// When <menupoppup> goes away, a screen reader may not be aware that the menu is not showing
+			// and its cursor will be trapped inside the invisible menu which makes the reader stop working.
+			// This behavior is consistent on macOS voiceover, though VPAT review indicated this can
+			// happen with JAWS/NVDA as well.
+			// As a workaround, delete the popup from DOM and immediately insert it back.
+			// This forces the screen readers to go back to the focused element.
+			if (popup.tagName !== "menupopup") return;
+			let menuParent = popup.parentNode;
+			let nextSibling = popup.nextSibling;
+			popup.remove();
+			setTimeout(() => {
+				if (nextSibling) {
+					menuParent.insertBefore(popup, nextSibling);
+				}
+				else {
+					menuParent.appendChild(popup);
+				}
+			});
 		});
 	}
 
