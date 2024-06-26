@@ -87,16 +87,34 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 			if (this._item) {
 				let relatedKeys = this._item.relatedItems;
-				for (let i = 0; i < relatedKeys.length; i++) {
-					let key = relatedKeys[i];
-					let relatedItem = Zotero.Items.getByLibraryAndKey(
-						this._item.libraryID, key
-					);
-					if (!relatedItem) {
+				
+				let relatedItems = relatedKeys.map((key) => {
+					let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, key);
+					if (!item) {
 						Zotero.debug(`Related item ${this._item.libraryID}/${key} not found `
 							+ `for item ${this._item.libraryKey}`, 2);
-						continue;
 					}
+					return item;
+				});
+				
+				// Sort by display title
+				var collation = Zotero.getLocaleCollation();
+				var titles = new Map();
+				function getTitle(item) {
+					var title = titles.get(item.id);
+					if (title === undefined) {
+						title = Zotero.Items.getSortTitle(item.getDisplayTitle());
+						titles.set(item.id, title);
+					}
+					return title;
+				}
+				relatedItems.sort((a, b) => {
+					var titleA = getTitle(a);
+					var titleB = getTitle(b);
+					return collation.compareString(1, titleA, titleB);
+				});
+				
+				for (let relatedItem of relatedItems) {
 					let id = relatedItem.id;
 
 					let row = document.createElement('div');

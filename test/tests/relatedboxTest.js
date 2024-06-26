@@ -12,6 +12,48 @@ describe("Related Box", function () {
 		win.close();
 	})
 	
+	async function relateItems(...items) {
+		for (let i = 0; i < items.length; i++) {
+			for (let j = i + 1; j < items.length; j++) {
+				items[i].addRelatedItem(items[j]);
+				items[j].addRelatedItem(items[i]);
+			}
+		}
+		for (let item of items) {
+			await item.saveTx();
+		}
+	}
+	
+	it("should sort by title", async function () {
+		var title1 = 'cccccc';
+		var title2 = 'aaaaaa';
+		var title3 = 'bbbbbb';
+		var item0 = await createDataObject('item');
+		var item1 = await createDataObject('item', { title: title1 });
+		var item2 = await createDataObject('item', { title: title2 });
+		var item3 = await createDataObject('item', { title: title3 });
+		
+		await relateItems(item0, item1, item2, item3);
+		
+		await win.ZoteroPane.selectItem(item0.id);
+		
+		var relatedbox = doc.getElementById('zotero-editpane-related');
+		
+		// Wait for relations list to populate
+		do {
+			await Zotero.Promise.delay(50);
+		}
+		while (!relatedbox.querySelectorAll('.row').length);
+		
+		var html = relatedbox.querySelector('.body').innerHTML;
+		var pos1 = html.indexOf(title1);
+		var pos2 = html.indexOf(title2);
+		var pos3 = html.indexOf(title3);
+		assert.isAbove(pos2, 0);
+		assert.isAbove(pos3, pos2)
+		assert.isAbove(pos1, pos3)
+	});
+	
 	it("should update if a related item is renamed", async function () {
 		var title1 = 'aaaaaa';
 		var title2 = 'bbbbbb';
