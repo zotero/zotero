@@ -1016,7 +1016,7 @@ class ReaderTab extends ReaderInstance {
 		this._onToggleSidebarCallback = options.onToggleSidebar;
 		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
-		let existingTabID = this._window.Zotero_Tabs.getTabIDByItemID(this._item.id);
+		let existingTabID = options.tabID;
 		// If an unloaded tab for this item already exists, load the reader in it.
 		// Otherwise, create a new tab
 		if (existingTabID) {
