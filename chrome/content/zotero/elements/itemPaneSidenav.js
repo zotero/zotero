@@ -187,7 +187,7 @@
 		}
 		
 		isPanePinnable(id) {
-			return id !== 'info' && id !== 'context-all-notes' && id !== 'context-item-notes';
+			return id !== 'info' && id !== 'context-notes' && id !== 'context-all-notes' && id !== 'context-item-notes';
 		}
 		
 		init() {
