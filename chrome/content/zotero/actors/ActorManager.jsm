@@ -43,7 +43,8 @@ ChromeUtils.registerWindowActor("ZoteroPrint", {
 		events: {
 			pageshow: {}
 		}
-	}
+	},
+	allFrames: true
 });
 
 ChromeUtils.registerWindowActor("ExternalLinkHandler", {
