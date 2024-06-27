@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Ældste elementer først">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Standarder for nyhedsstrøm">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Tilpasset...">
-<!ENTITY zotero.preferences.openurl.server "&quot;Resolver&quot;:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
 <!ENTITY zotero.preferences.sync.username "Brugernavn:">
 <!ENTITY zotero.preferences.sync.password "Adgangskode:">

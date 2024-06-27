@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Les plus anciens documents en premier">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paramètres par défaut des flux">
 
-<!ENTITY zotero.preferences.openurl.choose "Choisir un résolveur...">
-<!ENTITY zotero.preferences.openurl.custom "Personnaliser…">
-<!ENTITY zotero.preferences.openurl.server "Résolveur de liens :">
-<!ENTITY zotero.preferences.openurl.version "Version :">
-
 <!ENTITY zotero.preferences.prefpane.sync "Synchronisation">
 <!ENTITY zotero.preferences.sync.username "Nom d'utilisateur :">
 <!ENTITY zotero.preferences.sync.password "Mot de passe :">

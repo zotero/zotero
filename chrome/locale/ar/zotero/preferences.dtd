@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "العناصر الأقدم أولاً">
 <!ENTITY zotero.preferences.feeds.feedDefaults "افتراضيات التلقيم">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "تخصيص...">
-<!ENTITY zotero.preferences.openurl.server "رابط المقرر:">
-<!ENTITY zotero.preferences.openurl.version "الإصدار:">
-
 <!ENTITY zotero.preferences.prefpane.sync "التزامن">
 <!ENTITY zotero.preferences.sync.username "اسم المستخدم:">
 <!ENTITY zotero.preferences.sync.password "كلمة المرور:">

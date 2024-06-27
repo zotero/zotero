@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
-<!ENTITY zotero.preferences.openurl.server "Lahendaja:">
-<!ENTITY zotero.preferences.openurl.version "Versioon:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sünkroonimine">
 <!ENTITY zotero.preferences.sync.username "Kasutajanimi:">
 <!ENTITY zotero.preferences.sync.password "Salasõna:">

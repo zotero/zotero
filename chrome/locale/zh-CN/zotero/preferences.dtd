@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "最早条目在先">
 <!ENTITY zotero.preferences.feeds.feedDefaults "订阅默认">
 
-<!ENTITY zotero.preferences.openurl.choose "选择一个解析器…">
-<!ENTITY zotero.preferences.openurl.custom "自定义…">
-<!ENTITY zotero.preferences.openurl.server "解析器:">
-<!ENTITY zotero.preferences.openurl.version "版本:">
-
 <!ENTITY zotero.preferences.prefpane.sync "同步">
 <!ENTITY zotero.preferences.sync.username "用户名:">
 <!ENTITY zotero.preferences.sync.password "密码:">

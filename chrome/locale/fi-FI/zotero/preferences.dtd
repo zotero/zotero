@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Vanhimmat ensin">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Syötteen oletukset">
 
-<!ENTITY zotero.preferences.openurl.choose "Valitse sivutulkki...">
-<!ENTITY zotero.preferences.openurl.custom "Oma asetus...">
-<!ENTITY zotero.preferences.openurl.server "Palvelin:">
-<!ENTITY zotero.preferences.openurl.version "Versio:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Synkronointi">
 <!ENTITY zotero.preferences.sync.username "Käyttäjätunnus:">
 <!ENTITY zotero.preferences.sync.password "Salasana:">

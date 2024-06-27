@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "פריטים ישנים תחילה">
 <!ENTITY zotero.preferences.feeds.feedDefaults "ברירות המחדל של ערוץ העדכונים">
 
-<!ENTITY zotero.preferences.openurl.choose "בחירת מפענח…">
-<!ENTITY zotero.preferences.openurl.custom "התאמה אישית…">
-<!ENTITY zotero.preferences.openurl.server "מפענח">
-<!ENTITY zotero.preferences.openurl.version "גירסה:">
-
 <!ENTITY zotero.preferences.prefpane.sync "סנכרון">
 <!ENTITY zotero.preferences.sync.username "שם משתמש:">
 <!ENTITY zotero.preferences.sync.password "סיסמה:">

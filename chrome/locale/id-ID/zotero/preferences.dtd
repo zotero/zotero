@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Item terlama terlebih dahulu">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Umpan Default">
 
-<!ENTITY zotero.preferences.openurl.choose "Pilih resolver...">
-<!ENTITY zotero.preferences.openurl.custom "Kustom...">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Versi:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronisasi">
 <!ENTITY zotero.preferences.sync.username "Nama pengguna:">
 <!ENTITY zotero.preferences.sync.password "Password:">

@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Πρώτα τα παλαιότερα στοιχεία">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Εξ ορισμού Ροή">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Προσαρμογή....">
-<!ENTITY zotero.preferences.openurl.server "Διακομιστή resolver:">
-<!ENTITY zotero.preferences.openurl.version "Έκδοσης:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Συγχρονισμός">
 <!ENTITY zotero.preferences.sync.username "Όνομα χρήστη:">
 <!ENTITY zotero.preferences.sync.password "Κωδικός:">

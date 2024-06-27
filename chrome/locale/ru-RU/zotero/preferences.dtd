@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Сначала старые записи">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Настройки новостной ленты по умолчанию">
 
-<!ENTITY zotero.preferences.openurl.choose "Выберите обработчик адресов…">
-<!ENTITY zotero.preferences.openurl.custom "Особый…">
-<!ENTITY zotero.preferences.openurl.server "Сервер:">
-<!ENTITY zotero.preferences.openurl.version "Версия:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Синхронизация">
 <!ENTITY zotero.preferences.sync.username "Имя пользователя:">
 <!ENTITY zotero.preferences.sync.password "Пароль:">

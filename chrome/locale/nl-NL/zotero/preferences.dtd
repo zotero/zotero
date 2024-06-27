@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oudste items eerst">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed standaardwaarden">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Aangepast...">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Versie:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Synchroniseren">
 <!ENTITY zotero.preferences.sync.username "Gebruikersnaam:">
 <!ENTITY zotero.preferences.sync.password "Wachtwoord:">

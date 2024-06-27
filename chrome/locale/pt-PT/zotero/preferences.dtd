@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Primeiro os itens mais antigos">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Valores por Omissão do Feed">
 
-<!ENTITY zotero.preferences.openurl.choose "Escolha um solucionador...">
-<!ENTITY zotero.preferences.openurl.custom "Personalizado…">
-<!ENTITY zotero.preferences.openurl.server "Resolvedor:">
-<!ENTITY zotero.preferences.openurl.version "Versão:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sincronização">
 <!ENTITY zotero.preferences.sync.username "Nome de utilizador:">
 <!ENTITY zotero.preferences.sync.password "Palavra-passe:">

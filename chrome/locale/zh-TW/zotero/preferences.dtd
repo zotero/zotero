@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "舊的項目在前">
 <!ENTITY zotero.preferences.feeds.feedDefaults "預設新聞來源">
 
-<!ENTITY zotero.preferences.openurl.choose "選擇解析器……">
-<!ENTITY zotero.preferences.openurl.custom "自訂……">
-<!ENTITY zotero.preferences.openurl.server "解析器：">
-<!ENTITY zotero.preferences.openurl.version "版本：">
-
 <!ENTITY zotero.preferences.prefpane.sync "同步">
 <!ENTITY zotero.preferences.sync.username "使用者名稱：">
 <!ENTITY zotero.preferences.sync.password "密碼：">

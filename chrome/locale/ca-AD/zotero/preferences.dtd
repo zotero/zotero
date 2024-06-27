@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Els elements més antics primer">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paràmetres per defecte dels canals">
 
-<!ENTITY zotero.preferences.openurl.choose "Trieu un resolutor:">
-<!ENTITY zotero.preferences.openurl.custom "Personalitza…">
-<!ENTITY zotero.preferences.openurl.server "Resolutor:">
-<!ENTITY zotero.preferences.openurl.version "Versió:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sincronitza">
 <!ENTITY zotero.preferences.sync.username "Nom d'usuari">
 <!ENTITY zotero.preferences.sync.password "Contrasenya">

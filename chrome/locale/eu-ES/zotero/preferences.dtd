@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementu zaharrenak lehenengo">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Jarioen lehenetsitakoak">
 
-<!ENTITY zotero.preferences.openurl.choose "Aukeratu ebazle bat...">
-<!ENTITY zotero.preferences.openurl.custom "Pertsonalizatua...">
-<!ENTITY zotero.preferences.openurl.server "Ebazlea:">
-<!ENTITY zotero.preferences.openurl.version "Bertsioa:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronizatu">
 <!ENTITY zotero.preferences.sync.username "Erabiltzailea:">
 <!ENTITY zotero.preferences.sync.password "Pasahitza:">

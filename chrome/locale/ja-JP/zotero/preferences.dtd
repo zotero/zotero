@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "最古のアイテムを最初に表示">
 <!ENTITY zotero.preferences.feeds.feedDefaults "デフォルトのフィード">
 
-<!ENTITY zotero.preferences.openurl.choose "リゾルバの選択...">
-<!ENTITY zotero.preferences.openurl.custom "カスタム...">
-<!ENTITY zotero.preferences.openurl.server "リンク・リゾルバ:">
-<!ENTITY zotero.preferences.openurl.version "バージョン:">
-
 <!ENTITY zotero.preferences.prefpane.sync "同期">
 <!ENTITY zotero.preferences.sync.username "ユーザー名:">
 <!ENTITY zotero.preferences.sync.password "パスワード:">

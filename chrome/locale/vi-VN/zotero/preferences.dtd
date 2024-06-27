@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Mục cũ nhất trước">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed mặc định">
 
-<!ENTITY zotero.preferences.openurl.choose "Chọn một bộ phân giải...">
-<!ENTITY zotero.preferences.openurl.custom "Tùy chỉnh...">
-<!ENTITY zotero.preferences.openurl.server "Bộ phân giải:">
-<!ENTITY zotero.preferences.openurl.version "Phiên bản:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Đồng bộ">
 <!ENTITY zotero.preferences.sync.username "Tên người dùng:">
 <!ENTITY zotero.preferences.sync.password "Mật khẩu:">

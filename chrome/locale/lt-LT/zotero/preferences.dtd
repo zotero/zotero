@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Seniausi pradžioje">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Numatytosios kanalų parinktys">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Savitas...">
-<!ENTITY zotero.preferences.openurl.server "Sprendiklis:">
-<!ENTITY zotero.preferences.openurl.version "Versija:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sinchronizavimas">
 <!ENTITY zotero.preferences.sync.username "Naudotojo vardas:">
 <!ENTITY zotero.preferences.sync.password "Slaptažodis:">

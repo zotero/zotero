@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elstu atriði fyrst">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Sjálfgefnar stillingar streymis">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Sérsniðið…">
-<!ENTITY zotero.preferences.openurl.server "Auðkennir:">
-<!ENTITY zotero.preferences.openurl.version "Útgáfa:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Samhæfa">
 <!ENTITY zotero.preferences.sync.username "Notandanafn:">
 <!ENTITY zotero.preferences.sync.password "Lykilorð:">

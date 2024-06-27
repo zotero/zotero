@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "முதலில் பழைய உருப்படிகள்">
 <!ENTITY zotero.preferences.feeds.feedDefaults "ஊட்டம் இயல்புநிலைகள்">
 
-<!ENTITY zotero.preferences.openurl.choose "ஒரு தீர்வியைத் தேர்வுசெய்க…">
-<!ENTITY zotero.preferences.openurl.custom "வழக்கம்…">
-<!ENTITY zotero.preferences.openurl.server "தீர்வி:">
-<!ENTITY zotero.preferences.openurl.version "பதிப்பு:">
-
 <!ENTITY zotero.preferences.prefpane.sync "ஒத்திசைவு">
 <!ENTITY zotero.preferences.sync.username "பயனர்பெயர்:">
 <!ENTITY zotero.preferences.sync.password "கடவுச்சொல்:">

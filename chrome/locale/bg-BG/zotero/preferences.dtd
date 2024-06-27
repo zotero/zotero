@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Първо най-старите записи">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Настройки по подразбиране на емисиите">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Персонализирани...">
-<!ENTITY zotero.preferences.openurl.server "Разрешаващ сървър - &quot;резолвър&quot; :">
-<!ENTITY zotero.preferences.openurl.version "Версия:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Синхронизиране">
 <!ENTITY zotero.preferences.sync.username "Потребителско име:">
 <!ENTITY zotero.preferences.sync.password "Парола:">

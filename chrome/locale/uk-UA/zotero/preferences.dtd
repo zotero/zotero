@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Спочатку старі записи">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Знчення за замовчуванням стрічки">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Користувацька...">
-<!ENTITY zotero.preferences.openurl.server "Сервер">
-<!ENTITY zotero.preferences.openurl.version "Версія">
-
 <!ENTITY zotero.preferences.prefpane.sync "Синхронізація">
 <!ENTITY zotero.preferences.sync.username "Ім'я користувача:">
 <!ENTITY zotero.preferences.sync.password "Пароль:">

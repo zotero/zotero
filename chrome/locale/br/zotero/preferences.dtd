@@ -45,11 +45,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "An elfennoù koshañ da gentañ">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Arventennoù dre-ziouer ar froudoù">
 
-<!ENTITY zotero.preferences.openurl.choose "Dibab un diskoulmer...">
-<!ENTITY zotero.preferences.openurl.custom "Personelaat...">
-<!ENTITY zotero.preferences.openurl.server "Diskoulmer:">
-<!ENTITY zotero.preferences.openurl.version "Stumm:">
-
 <!ENTITY zotero.preferences.prefpane.sync "Sinkro">
 <!ENTITY zotero.preferences.sync.username "Anv-implijer:">
 <!ENTITY zotero.preferences.sync.password "Ger-tremen:">
