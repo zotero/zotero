@@ -926,6 +926,55 @@ describe("Item pane", function () {
 		});
 	});
 	
+	describe("Libraries pane", function () {
+		let paneID = "libraries-collections";
+
+		beforeEach(function () {
+			Zotero.Prefs.set("panes.libraries-collections.open", true);
+			Zotero_Tabs.select("zotero-pane");
+		});
+
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+			Zotero_Tabs.closeAll();
+		});
+
+		it("should scroll to pinned pane after selection move from note to item", async function () {
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let pane = itemDetails.getPane(paneID);
+
+			let item = new Zotero.Item('book');
+			await item.saveTx();
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			await Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: item.id
+			});
+
+			let note = new Zotero.Item('note');
+			await note.saveTx();
+
+			await ZoteroPane.selectItem(item.id);
+			await waitForScrollToPane(itemDetails, paneID);
+
+			itemDetails.pinnedPane = paneID;
+
+			await ZoteroPane.selectItem(note.id);
+
+			await Zotero.Promise.delay(200);
+
+			await ZoteroPane.selectItem(item.id);
+			await waitForScrollToPane(itemDetails, paneID);
+
+			// Should scroll to pinned pane
+			assert.isTrue(
+				Math.abs(pane.getBoundingClientRect().top - pane.parentElement.getBoundingClientRect().top) < 3
+			);
+
+			itemDetails.pinnedPane = "";
+		});
+	});
 	
 	describe("Notes pane", function () {
 		it("should refresh on child note change", function* () {

@@ -268,6 +268,10 @@
 			this.renderCustomSections();
 			this._restorePinnedPane();
 
+			// Unobserve intersection to prevent unwanted rendering.
+			// Checking flags in _handleIntersection does not work, since the callback may be delayed
+			this.getPanes().forEach(elem => this._intersectionOb.unobserve(elem));
+
 			let panes = this.getPanes();
 			for (let box of [this._header, ...panes]) {
 				box.editable = this.editable;
@@ -282,6 +286,10 @@
 					}
 				}
 			}
+
+			// Wait to make sure the visibility and height are updated
+			let promise = new Promise(resolve => setTimeout(resolve, 0));
+			await promise;
 
 			let pinnedPaneElem = this.getEnabledPane(this.pinnedPane);
 			let pinnedIndex = panes.indexOf(pinnedPaneElem);
@@ -315,6 +323,8 @@
 			if (Zotero.test) {
 				resolve();
 			}
+
+			this.getPanes().forEach(elem => this._intersectionOb.observe(elem));
 		}
 
 		renderCustomSections() {
@@ -460,6 +470,14 @@
 			}
 			pane.scrollIntoView({ block: 'start', behavior });
 			pane.focus();
+			
+			// Check if the pane is actually scrolled to
+			let promise = new Promise(resolve => setTimeout(resolve, 0));
+			await promise;
+			if (Math.abs(pane.getBoundingClientRect().top - pane.parentElement.getBoundingClientRect().top) > 3) {
+				// If not, try again
+				await this.scrollToPane(paneID, behavior);
+			}
 			return scrollPromise;
 		}
 		
