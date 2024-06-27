@@ -171,10 +171,10 @@
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (Zotero_Tabs.selectedType.includes('reader')) {
+			else if (Zotero_Tabs.selectedType == 'reader') {
 				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 				this._handleReaderReady(reader);
-			
+				this._setupNotesContext();
 				_contextPaneSplitter.setAttribute('hidden', false);
 
 				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
@@ -189,6 +189,19 @@
 
 			this._selectItemContext(ids[0]);
 			ZoteroContextPane.update();
+		}
+
+		async _setupNotesContext() {
+			let selectedTab = Zotero_Tabs.getState().find(tab => tab.selected);
+			if (!selectedTab || !selectedTab.data.itemID) return;
+			let attachment = await Zotero.Items.getAsync(selectedTab.data.itemID);
+			if (attachment) {
+				this._selectNotesContext(attachment.libraryID);
+				let notesContext = this._getNotesContext(attachment.libraryID);
+				notesContext.updateNotesListFromCache();
+			}
+			let currentNoteContext = this._getCurrentNotesContext();
+			currentNoteContext.switchToTab(Zotero_Tabs.selectedID);
 		}
 
 		async _handleReaderReady(reader) {
@@ -210,15 +223,6 @@
 				}
 			}
 			
-			let attachment = await Zotero.Items.getAsync(reader.itemID);
-			if (attachment) {
-				this._selectNotesContext(attachment.libraryID);
-				let notesContext = this._getNotesContext(attachment.libraryID);
-				notesContext.updateNotesListFromCache();
-			}
-
-			let currentNoteContext = this._getCurrentNotesContext();
-			currentNoteContext.switchToTab(reader.tabID);
 		}
 
 		_getCurrentNotesContext() {
