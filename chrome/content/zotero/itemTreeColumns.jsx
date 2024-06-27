@@ -35,6 +35,7 @@ const Icons = require('components/icons');
  * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree. If ["*"], enabled in all trees.
  * @property {string[]} [defaultIn] - Will be deprecated. Types of trees the column is default in. Can be [default, feed];
  * @property {string[]} [disabledIn] - Will be deprecated. Types of trees where the column is not available
+ * @property {boolean} [dependsOnChildren=false] - Set to true if the column depends on child item data (e.g. numNotes, lastRead)
  * @property {boolean} [sortReverse=false] - Default: false. Set to true to reverse the sort order
  * @property {number} [flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
  * @property {string} [width] - A column width instead of flex ratio. See above.
@@ -62,7 +63,7 @@ const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
-		defaultIn: ["default", "feeds", "feed"],
+		defaultIn: ["default", "feeds", "feed", "recentlyRead"],
 		label: "itemFields.title",
 		showInColumnPicker: false,
 		flex: 4,
@@ -70,7 +71,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "firstCreator",
-		defaultIn: ["default", "feeds", "feed"],
+		defaultIn: ["default", "feeds", "feed", "recentlyRead"],
 		label: "zotero.items.creator_column",
 		showInColumnPicker: true,
 		flex: 1,
@@ -185,6 +186,16 @@ const COLUMNS = [
 		showInColumnPicker: true,
 		label: "zotero.items.dateModified_column",
 		flex: 1,
+		zoteroPersist: ["width", "hidden", "sortDirection"]
+	},
+	{
+		dataKey: "lastRead",
+		defaultSort: -1,
+		defaultIn: ["recentlyRead"],
+		disabledIn: ["feeds", "feed"],
+		dependsOnChildren: true,
+		label: "pane.items.columns.lastRead",
+		flex: 2,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
@@ -335,6 +346,7 @@ const COLUMNS = [
 		defaultIn: ["default"],
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
+		dependsOnChildren: true,
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
@@ -346,6 +358,7 @@ const COLUMNS = [
 		dataKey: "numNotes",
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
+		dependsOnChildren: true,
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
 		width: "26",

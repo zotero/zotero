@@ -56,6 +56,9 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 		case 'unfiled':
 			return 'U' + this.ref.libraryID;
 		
+		case 'recentlyRead':
+			return 'Y' + this.ref.libraryID;
+		
 		case 'retracted':
 			return 'R' + this.ref.libraryID;
 		
@@ -107,6 +110,10 @@ Zotero.CollectionTreeRow.prototype.isDuplicates = function () {
 
 Zotero.CollectionTreeRow.prototype.isUnfiled = function () {
 	return this.type == 'unfiled';
+}
+
+Zotero.CollectionTreeRow.prototype.isRecentlyRead = function () {
+	return this.type == 'recentlyRead';
 }
 
 Zotero.CollectionTreeRow.prototype.isRetracted = function () {
@@ -187,7 +194,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;
-	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRetracted()) {
+	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRecentlyRead() || this.isRetracted()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
@@ -210,7 +217,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 	if (this.isGroup()) {
 		return this.ref.filesEditable;
 	}
-	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRetracted()) {
+	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRecentlyRead() || this.isRetracted()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
@@ -223,7 +230,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 });
 
 
-Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed', 'feeds': 'feeds'};
+Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed', 'feeds': 'feeds', 'recentlyRead': 'recentlyRead'};
 
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('visibilityGroup', function() {
@@ -500,6 +507,10 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
 	if (this.tags && this.tags.size) {
 		return true;
 	}
+}
+
+Zotero.CollectionTreeRow.prototype.isSortable = function () {
+	return !this.isFeedsOrFeed() && !this.isRecentlyRead();
 }
 
 Zotero.CollectionTreeCache = {

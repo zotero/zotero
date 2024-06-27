@@ -50,6 +50,7 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentSyncedModificationTime = null;
 	this._attachmentSyncedHash = null;
 	this._attachmentLastProcessedModificationTime = null;
+	this._attachmentLastRead = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -361,6 +362,7 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'attachmentSyncedModificationTime':
 			case 'attachmentSyncedHash':
 			case 'attachmentLastProcessedModificationTime':
+			case 'attachmentLastRead':
 			case 'createdByUserID':
 			case 'lastModifiedByUserID':
 				break;
@@ -1853,13 +1855,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let sql = "";
 		let cols = [
 			'parentItemID', 'linkMode', 'contentType', 'charsetID', 'path', 'syncState',
-			'storageModTime', 'storageHash', 'lastProcessedModificationTime'
+			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'lastRead'
 		];
 		// TODO: Replace with UPSERT after SQLite 3.24.0
 		if (isNew) {
 			sql = "INSERT INTO itemAttachments "
 				+ "(itemID, " + cols.join(", ") + ") "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 		}
 		else {
 			sql = "UPDATE itemAttachments SET " + cols.join("=?, ") + "=? WHERE itemID=?";
@@ -1874,6 +1876,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let storageModTime = this.attachmentSyncedModificationTime;
 		let storageHash = this.attachmentSyncedHash;
 		let lastProcessedModificationTime = this.attachmentLastProcessedModificationTime;
+		let lastRead = this.attachmentLastRead;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1889,6 +1892,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
+			lastRead || null,
 		];
 		if (isNew) {
 			params.unshift(itemID);
@@ -1901,6 +1905,17 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		// Clear cached child attachments of the parent
 		if (!isNew && parentItemID) {
 			reloadParentChildItems[parentItemID] = true;
+		}
+		
+		// Save attachmentLastRead to a synced setting if this is a group item
+		if (libraryType == 'group' && lastRead !== undefined) {
+			let id = this._getLastReadSettingKey();
+			if (lastRead === null) {
+				yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
+			}
+			else {
+				yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, lastRead);
+			}
 		}
 	}
 	
@@ -3427,6 +3442,49 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedHash', {
 });
 
 
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastRead', {
+	get() {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		return this._attachmentLastRead;
+	},
+	
+	set(val) {
+		if (!this.isAttachment()) {
+			throw new Error('attachmentLastRead can only be set for attachment items');
+		}
+		if (!this.libraryID) {
+			throw new Error('Item not in library');
+		}
+		if (this.libraryID != Zotero.Libraries.userLibraryID && !this.library.isGroup) {
+			throw new Error('attachmentLastRead can only be set on items in My Library and groups');
+		}
+
+		if (val !== null && typeof val != 'number') {
+			throw new Error('attachmentLastRead must be a number');
+		}
+		if (val != parseInt(val)) {
+			throw new Error('attachmentLastRead must be an integer timestamp in seconds');
+		}
+
+		let lastReadItem = Zotero.Items.get(this.library.lastReadItemInSession);
+		if (!lastReadItem || lastReadItem.attachmentLastRead < val) {
+			this.library.lastReadItemInSession = this.id;
+		}
+		
+		if (val == this._attachmentLastRead) {
+			return;
+		}
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData = {};
+		}
+		this._changed.attachmentData.lastRead = true;
+		this._attachmentLastRead = val;
+	}
+});
+
+
 //
 // PDF attachment properties
 //
@@ -3507,20 +3565,22 @@ Zotero.Item.prototype.setAttachmentLastPageIndex = async function (val) {
 	
 	var id = this._getLastPageIndexSettingKey();
 	if (val === null) {
-		return Zotero.SyncedSettings.clear(id);
+		return Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 	}
 	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, val);
 };
 
 
 /**
- * Get the key for the item's pageIndex synced setting
+ * Get the key for a synced setting related to this item
  *
- * E.g., 'lastPageIndex_u_ABCD2345' or 'lastPageIndex_g123_ABCD2345'
+ * @param {String} prefix
+ * @param {Boolean} [ignoreInvalid=false]
+ * @return {String | false}
  */
-Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid) {
-	var library = Zotero.Libraries.get(this.libraryID);
-	var id = 'lastPageIndex_';
+Zotero.Item.prototype._getSettingKey = function (prefix, ignoreInvalid = false) {
+	var library = this.library;
+	var id = prefix + '_';
 	switch (library.libraryType) {
 		case 'user':
 			id += 'u';
@@ -3531,7 +3591,7 @@ Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid) {
 			break;
 		
 		default:
-			var msg = `Can't get last page index key for ${library.libraryType} item`;
+			var msg = `Can't get ${prefix} key for ${library.libraryType} item`;
 			if (ignoreInvalid) {
 				Zotero.logError(msg);
 				return false;
@@ -3540,6 +3600,42 @@ Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid) {
 	}
 	id += "_" + this.key;
 	return id;
+};
+
+
+/**
+ * Get the key for the item's lastPageIndex synced setting
+ *
+ * E.g., 'lastPageIndex_u_ABCD2345' or 'lastPageIndex_g123_ABCD2345'
+ *
+ * @param {Boolean} [ignoreInvalid=false]
+ * @return {String | false}
+ */
+Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid = false) {
+	return this._getSettingKey('lastPageIndex', ignoreInvalid);
+};
+
+
+/**
+ * Get the key for the item's lastRead synced setting
+ *
+ * E.g., 'lastRead_g123_ABCD2345' in a group library.
+ * If this item is in a non-group library and ignoreInvalid isn't true, throws.
+ *
+ * @param {Boolean} [ignoreInvalid=false]
+ * @return {String | false}
+ */
+Zotero.Item.prototype._getLastReadSettingKey = function (ignoreInvalid = false) {
+	let library = this.library;
+	if (!ignoreInvalid && !library.isGroup) {
+		let error = new Error(`Can't get lastRead key for ${library.libraryType} item`);
+		if (ignoreInvalid) {
+			Zotero.logError(error);
+			return false;
+		}
+		throw error;
+	}
+	return this._getSettingKey('lastRead', ignoreInvalid);
 };
 
 
@@ -3856,6 +3952,22 @@ Zotero.Item.prototype.getBestAttachmentStateCached = function () {
 Zotero.Item.prototype.clearBestAttachmentState = function () {
 	this._bestAttachmentState = null;
 }
+
+
+Zotero.Item.prototype.getItemLastRead = function () {
+	if (this.isAttachment()) {
+		return this.attachmentLastRead;
+	}
+	else {
+		let max = null;
+		for (let attachment of Zotero.Items.get(this.getAttachments(false))) {
+			if (!max || attachment.attachmentLastRead > max) {
+				max = attachment.attachmentLastRead;
+			}
+		}
+		return max;
+	}
+};
 
 
 ////////////////////////////////////////////////////////
@@ -5094,6 +5206,22 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			this[field] = val;
 			break;
 		
+		case 'lastRead':
+			if (this.libraryID != Zotero.Libraries.userLibraryID) {
+				Zotero.logError(`Discarding invalid ${field} '${val}' for item ${this.libraryKey} (not in user library)`);
+				continue;
+			}
+			if (val) {
+				let i = parseInt(val);
+				if (!Number.isInteger(i)) {
+					Zotero.logError(`Discarding invalid ${field} '${val}' for item ${this.libraryKey}`);
+					continue;
+				}
+				val = i;
+			}
+			this.attachmentLastRead = val;
+			break;
+		
 		case 'creators':
 			//this.setCreators(json.creators.concat(extraCreators), options);
 			this.setCreators(json.creators, options);
@@ -5380,6 +5508,10 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			}
 			else if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 				obj.filename = this.attachmentFilename;
+			}
+			
+			if (this.libraryID == Zotero.Libraries.userLibraryID && this.attachmentLastRead) {
+				obj.lastRead = this.attachmentLastRead;
 			}
 			
 			if (this.isStoredFileAttachment() && !options.skipStorageProperties) {

@@ -1457,22 +1457,23 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						break;
 				}
 				
-				if (!skipOperators){
+				if (!skipOperators) {
 					// Special handling for date fields
 					//
 					// Note: We assume full datetimes are already UTC and don't
 					// need to be handled specially
-					if ((condition['name']=='dateAdded' ||
-							condition['name']=='dateModified' ||
-							condition['name']=='datefield') &&
-							!Zotero.Date.isSQLDateTime(condition['value'])){
+					if ((condition.name == 'dateAdded'
+							|| condition.name == 'dateModified'
+							|| condition.name == 'lastRead'
+							|| condition.name == 'datefield')
+							&& !Zotero.Date.isSQLDateTime(condition.value)) {
 						
 						// TODO: document these flags
 						var parseDate = null;
 						var alt = null;
 						var useFreeform = null;
 						
-						switch (condition['operator']){
+						switch (condition.operator) {
 							case 'is':
 							case 'isNot':
 								var parseDate = true;
@@ -1499,7 +1500,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 								break;
 								
 							default:
-								throw ('Invalid date field operator in search');
+								throw new Error('Invalid date field operator in search');
 						}
 						
 						// Convert stored UTC dates to localtime
@@ -1507,14 +1508,20 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						// It'd be nice not to deal with time zones here at all,
 						// but otherwise searching for the date part of a field
 						// stored as UTC that wraps midnight would be unsuccessful
-						if (condition['name']=='dateAdded' ||
-								condition['name']=='dateModified' ||
-								condition['alias']=='accessDate'){
-							condSQL += "DATE(" + condition['field'] + ", 'localtime')";
+						//
+						// lastRead is a UNIX timestamp in seconds, so we need to
+						// explicitly pass 'unixepoch'
+						if (condition.name == 'lastRead') {
+							condSQL += "DATE(" + condition.field + ", 'unixepoch', 'localtime')";
+						}
+						else if (condition.name == 'dateAdded'
+									|| condition.name == 'dateModified'
+									|| condition.alias == 'accessDate') {
+							condSQL += "DATE(" + condition.field + ", 'localtime')";
 						}
 						// Only use first (SQL) part of multipart dates
 						else {
-							condSQL += "SUBSTR(" + condition['field'] + ", 1, 10)";
+							condSQL += "SUBSTR(" + condition.field + ", 1, 10)";
 						}
 						
 						if (parseDate){

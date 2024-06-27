@@ -731,15 +731,21 @@ class ReaderInstance {
 	async _setState(state) {
 		let item = Zotero.Items.get(this._item.id);
 		if (item) {
+			let lastPageIndex;
 			if (this._type === 'pdf') {
-				item.setAttachmentLastPageIndex(state.pageIndex);
+				lastPageIndex = state.pageIndex;
 			}
 			else if (this._type === 'epub') {
-				item.setAttachmentLastPageIndex(state.cfi);
+				lastPageIndex = state.cfi;
 			}
 			else if (this._type === 'snapshot') {
-				item.setAttachmentLastPageIndex(state.scrollYPercent);
+				lastPageIndex = state.scrollYPercent;
 			}
+			else {
+				throw new Error('Unknown reader type: ' + this._type);
+			}
+			let pageChanged = item.getAttachmentLastPageIndex() != lastPageIndex;
+			item.setAttachmentLastPageIndex(lastPageIndex);
 			let file = Zotero.Attachments.getStorageDirectory(item);
 			if (!await OS.File.exists(file.path)) {
 				await Zotero.Attachments.createDirectoryForItem(item);
@@ -767,6 +773,10 @@ class ReaderInstance {
 				await IOUtils.writeJSON(path, state);
 			};
 			this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
+
+			if (pageChanged) {
+				Zotero.Notifier.trigger('pageChange', 'file', item.id);
+			}
 		}
 	}
 	
