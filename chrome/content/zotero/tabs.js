@@ -532,8 +532,10 @@ var Zotero_Tabs = new function () {
 	// Mark a tab as loaded
 	this.markAsLoaded = function (id) {
 		let { tab } = this._getTab(id);
-		if (!tab) return;
+		if (!tab || tab.type == "reader") return;
+		let prevType = tab.type;
 		tab.type = "reader";
+		Zotero.Notifier.trigger("load", "tab", [id], { [id]: Object.assign({}, tab, { prevType }) }, true);
 	};
 
 	this.unloadUnusedTabs = function () {
@@ -583,7 +585,7 @@ var Zotero_Tabs = new function () {
 		setTimeout(() => {
 			reader.focus();
 		});
-	}
+	};
 
 	/**
 	 * Moves focus to a tab in the specified direction.

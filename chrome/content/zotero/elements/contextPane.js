@@ -90,7 +90,7 @@
 				this._handleTabClose(action, type, ids, extraData);
 				return;
 			}
-			if (type == 'tab' && action == 'select') {
+			if (type == 'tab' && ["select", "load"].includes(action)) {
 				this._handleTabSelect(action, type, ids, extraData);
 			}
 		}
@@ -158,7 +158,7 @@
 			});
 		}
 
-		_handleTabSelect(action, type, ids) {
+		async _handleTabSelect(action, type, ids) {
 			// TEMP: move these variables to ZoteroContextPane
 			let _contextPaneSplitter = ZoteroContextPane.splitter;
 			let _contextPane = document.getElementById('zotero-context-pane');
@@ -270,7 +270,7 @@
 			}
 		}
 	
-		async _addItemContext(tabID, itemID, tabType = "") {
+		async _addItemContext(tabID, itemID, _tabType = "") {
 			let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 			let library = Zotero.Libraries.get(libraryID);
 			await library.waitForDataLoad('item');
