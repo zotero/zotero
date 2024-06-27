@@ -1807,7 +1807,7 @@ Zotero.Server.Connector.Request.prototype = {
 					'Unsupported URL'
 				];
 			}
-
+			Zotero.debug(`${JSON.stringify(req.headers)}`, 1);
 			if (!req.headers['User-Agent'] || !req.headers['User-Agent'].startsWith('Mozilla/')) {
 				return [400, 'text/plain', 'Unsupported User-Agent'];
 			}
