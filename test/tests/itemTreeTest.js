@@ -33,6 +33,21 @@ describe("Zotero.ItemTree", function() {
 		assert.isFalse(itemsView.getRowIndexByID(itemID));
 	});
 	
+	it("shouldn't show items in subcollections in trash when recursiveCollections=true", async function () {
+		Zotero.Prefs.set('recursiveCollections', true);
+		var c1 = await createDataObject('collection');
+		var c2 = await createDataObject('collection', { parentID: c1.id });
+		var c3 = await createDataObject('collection', { parentID: c1.id, deleted: true });
+		var item1 = await createDataObject('item', { collections: [c2.id] });
+		var item2 = await createDataObject('item', { collections: [c3.id] });
+		
+		await select(win, c1);
+		// item2 is in a deleted collection and shouldn't be shown
+		assert.sameMembers(zp.itemsView._rows.map(x => x.id), [item1.id]);
+		
+		Zotero.Prefs.clear('recursiveCollections');
+	});
+	
 	describe("when performing a quick search", function () {
 		let quicksearch;
 		
