@@ -602,11 +602,6 @@
 				let openLinkButton;
 				let link = val;
 				let addLinkContextMenu = false;
-				// Hidden open-link button just for focus management. If it is supposed to
-				// be visible, it will be overriden below
-				if (['url', 'homepage', 'DOI'].includes(fieldName)) {
-					openLinkButton = this.createOpenLinkIcon(null, fieldName);
-				}
 				// TEMP - NSF (homepage)
 				if ((fieldName == 'url' || fieldName == 'homepage')
 						// Only make plausible HTTP URLs clickable
@@ -629,6 +624,10 @@
 						link = doi;
 						addLinkContextMenu = true;
 					}
+				}
+				// Hidden open-link button just for focus management
+				else if (['url', 'homepage', 'DOI'].includes(fieldName)) {
+					openLinkButton = this.createOpenLinkIcon(null, fieldName);
 				}
 				let rowData = document.createElement('div');
 				rowData.className = "meta-data";
