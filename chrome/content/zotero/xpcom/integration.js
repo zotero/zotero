@@ -329,7 +329,9 @@ Zotero.Integration = new function() {
 			if (document) {
 				try {
 					await document.cleanup();
-					await document.activate();
+					if (!Zotero.Integration.currentSession._dontActivateDocument) {
+						await document.activate();
+					}
 					
 					// Call complete function if one exists
 					if (document.complete) {
@@ -956,6 +958,7 @@ Zotero.Integration.Session = function(doc, app) {
 	this.primaryFieldType = app.primaryFieldType;
 	this.secondaryFieldType = app.secondaryFieldType;
 	this.outputFormat = app.outputFormat || 'rtf';
+	this._dontActivateDocument = false;
 	this._sessionUpToDate = false;
 	this._app = app;
 
@@ -1889,6 +1892,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = async function (showImportExp
 	}
 	
 	if (!io.style || !io.fieldType) {
+		this._dontActivateDocument = io.dontActivateDocument;
 		throw new Zotero.Exception.UserCancelled("document preferences window");
 	}
 	

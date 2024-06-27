@@ -324,6 +324,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	
 	
 	this.manageStyles = function () {
+		_io.dontActivateDocument = true;
 		document.querySelector('dialog').cancelDialog();
 		var win = Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', {
 			scrollTo: '#styles'
