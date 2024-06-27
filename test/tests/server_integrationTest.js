@@ -25,8 +25,9 @@ describe("MacOS Integration Server", function () {
 				);
 				
 				assert.isTrue(stub.calledOnce);
-				assert.isTrue(stub.firstCall.calledWithExactly('httpTest', 'httpTestCommand', 'docName', '-1'));
-			} finally {
+				assert.deepEqual(stub.firstCall.args, ['httpTest', 'httpTestCommand', 'docName', '-1']);
+			}
+			finally {
 				stub.restore();
 			}
 		});

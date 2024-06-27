@@ -1,5 +1,7 @@
 "use strict";
 
+Components.utils.import("resource://gre/modules/NetUtil.jsm");
+
 describe("Zotero.Server", function () {
 	var serverPath;
 	
@@ -287,6 +289,51 @@ describe("Zotero.Server", function () {
 					assert.equal(req.status, 204);
 				});
 			});
+			describe("application/octet-stream", function () {
+				it('should provide a stream', async function () {
+					let called = false;
+					let endpoint = "/test/" + Zotero.Utilities.randomString();
+					let file = getTestDataDirectory();
+					file.append('test.pdf');
+					let contents = await Zotero.File.getBinaryContentsAsync(file);
+
+					Zotero.Server.Endpoints[endpoint] = function () {};
+					Zotero.Server.Endpoints[endpoint].prototype = {
+						supportedMethods: ["POST"],
+						supportedDataTypes: ["application/octet-stream"],
+
+						init: function (options) {
+							called = true;
+							assert.isObject(options);
+							assert.property(options.headers, "Content-Type");
+							assert(options.headers["Content-Type"].startsWith("application/octet-stream"));
+							assert.equal(options.headers['content-disposition'], "attachment; filename=\"test.pdf\"");
+							assert.isFunction(options.data.available);
+							let data = NetUtil.readInputStreamToString(options.data, options.headers['content-length']);
+							assert.equal(data, contents);
+
+							return 204;
+						}
+					};
+
+					let pdf = await File.createFromFileName(OS.Path.join(getTestDataDirectory().path, 'test.pdf'));
+
+					let req = await Zotero.HTTP.request(
+						"POST",
+						serverPath + endpoint,
+						{
+							headers: {
+								"Content-Type": "application/octet-stream",
+								"Content-Disposition": "attachment; filename=\"test.pdf\""
+							},
+							body: pdf
+						}
+					);
+
+					assert.ok(called);
+					assert.equal(req.status, 204);
+				});
+			});
 		});
-	})
+	});
 });
