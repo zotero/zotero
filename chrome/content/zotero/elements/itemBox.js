@@ -620,7 +620,7 @@
 								.replace(/\?/g, '%3f')
 								.replace(/%/g, '%25')
 								.replace(/"/g, '%22');
-						openLinkButton = this.createOpenLinkIcon(doi);
+						openLinkButton = this.createOpenLinkIcon(doi, fieldName);
 						link = doi;
 						addLinkContextMenu = true;
 					}
