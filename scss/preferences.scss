@@ -226,7 +226,7 @@ window[windowtype="zotero:pref"] {
    min-width: 600px;
 }
 
-label {
+label:not([is=zotero-text-link]) {
 	/* Apply XUL label styles to all labels */
 	margin-block: 1px 2px;
 	margin-inline: 6px 5px;
@@ -259,8 +259,9 @@ menulist[disabled="true"] {
 }
 
 /* Links within messages */
-description label[class=zotero-text-link], label[class=zotero-text-link]
-{
+description label[class=zotero-text-link],
+label[class=zotero-text-link],
+label[is=zotero-text-link] {
 	margin: 0;
 }
 
