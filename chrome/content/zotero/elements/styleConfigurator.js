@@ -40,7 +40,7 @@
 			if (!this.values.includes(val)) return;
 			let styleList = this.querySelector('#style-list');
 			styleList.value = val;
-			styleList.selectedItem.scrollIntoView();
+			this._scrollToSelected();
 		}
 
 		get value() {
@@ -73,6 +73,16 @@
 				event.initEvent("select", true, true);
 				this.dispatchEvent(event);
 			});
+		}
+
+		_scrollToSelected() {
+			let list = this.querySelector('#style-list');
+			let containerRect = list.getBoundingClientRect();
+			let rowRect = list.selectedItem.getBoundingClientRect();
+			let topDistance = rowRect.top - containerRect.top;
+			let bottomDistance = containerRect.bottom - rowRect.bottom;
+			let toScroll = (topDistance - bottomDistance) / 2;
+			list.scrollTo({ top: list.scrollTop + toScroll });
 		}
 	}
 
