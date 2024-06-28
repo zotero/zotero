@@ -158,21 +158,23 @@
 			});
 		}
 
-		async _handleTabSelect(action, type, ids) {
+		async _handleTabSelect(action, type, ids, extraData) {
 			// TEMP: move these variables to ZoteroContextPane
 			let _contextPaneSplitter = ZoteroContextPane.splitter;
 			let _contextPane = document.getElementById('zotero-context-pane');
+			let tabID = ids[0];
+			let tabType = extraData[tabID].type;
 			// It seems that changing `hidden` or `collapsed` values might
 			// be related with significant slow down when there are too many
 			// DOM nodes (i.e. 10k notes)
-			if (Zotero_Tabs.selectedType == 'library') {
+			if (tabType == 'library') {
 				_contextPaneSplitter.setAttribute('hidden', true);
 				_contextPane.setAttribute('collapsed', true);
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (Zotero_Tabs.selectedType == 'reader') {
-				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			else if (tabType == 'reader') {
+				let reader = Zotero.Reader.getByTabID(tabID);
 				this._handleReaderReady(reader);
 				this._setupNotesContext();
 				_contextPaneSplitter.setAttribute('hidden', false);
@@ -187,7 +189,7 @@
 				this._sidenav.hidden = false;
 			}
 
-			this._selectItemContext(ids[0]);
+			this._selectItemContext(tabID);
 			ZoteroContextPane.update();
 		}
 
