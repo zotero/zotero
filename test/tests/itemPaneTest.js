@@ -939,32 +939,25 @@ describe("Item pane", function () {
 			Zotero_Tabs.closeAll();
 		});
 
-		it("should scroll to pinned pane after selection move from note to item", async function () {
+		it("should scroll to pinned pane after selection moves from note to item", async function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let pane = itemDetails.getPane(paneID);
 
-			let item = new Zotero.Item('book');
-			await item.saveTx();
-			let file = getTestDataDirectory();
-			file.append('test.pdf');
-			await Zotero.Attachments.importFromFile({
-				file,
-				parentItemID: item.id
-			});
+			let item = await createDataObject('item');
+			await importPDFAttachment(item);
 
-			let note = new Zotero.Item('note');
-			await note.saveTx();
+			let note = await createDataObject('item', { itemType: 'note' });
 
-			await ZoteroPane.selectItem(item.id);
+			await select(win, item);
 			await waitForScrollToPane(itemDetails, paneID);
 
 			itemDetails.pinnedPane = paneID;
 
-			await ZoteroPane.selectItem(note.id);
+			await select(win, note);
 
-			await Zotero.Promise.delay(200);
+			await Zotero.Promise.delay(10);
 
-			await ZoteroPane.selectItem(item.id);
+			await select(win, item);
 			await waitForScrollToPane(itemDetails, paneID);
 
 			// Should scroll to pinned pane
