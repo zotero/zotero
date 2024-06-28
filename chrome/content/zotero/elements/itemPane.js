@@ -494,7 +494,7 @@
 				// Guess a mode from the current data
 				// No/multiple objects are selected OR selected object is a trashed collection/search
 				if (!this.data.length || this.data.length > 1
-					||this.data.every(obj => obj instanceof Zotero.Collection || obj instanceof Zotero.Search)) {
+					|| this.data[0] instanceof Zotero.Collection || this.data[0] instanceof Zotero.Search) {
 					mode = "message";
 				}
 				else if (this.data[0].isNote()) {
