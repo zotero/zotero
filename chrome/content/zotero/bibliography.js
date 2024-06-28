@@ -192,6 +192,14 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		document.querySelector("#exportDocument")?.addEventListener("command", this.exportDocument.bind(this));
 
 		this.onDocPrefsWindowStyleChange(Zotero.Styles.get(styleConfigurator.style));
+
+		// If any advanced options are checked, expand the advanced options section
+		let hasCheckedAdvancedOption
+			= !!Array.from(document.querySelectorAll(".advanced-checkbox"))
+				.find(elem => elem.checked);
+		if (hasCheckedAdvancedOption) {
+			this.toggleAdvancedOptions(false);
+		}
 	};
 	
 	this.openHelpLink = function () {
@@ -241,7 +249,6 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		let hasEnabledOption
 			= !!Array.from(advancedOptions.querySelector(".advanced-body").childNodes)
 				.find(elem => !elem.hidden);
-		console.trace(hasEnabledOption);
 		advancedOptions.hidden = !hasEnabledOption;
 	};
 
