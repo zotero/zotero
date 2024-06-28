@@ -1215,6 +1215,34 @@ describe("Item pane", function () {
 	
 	describe("Feed buttons", function() {
 		describe("Mark as Read/Unread", function() {
+			it("should change an item from unread to read", async function () {
+				var feed = await createFeed();
+				await select(win, feed);
+				
+				var item = await createDataObject('feedItem', { libraryID: feed.libraryID });
+				
+				// Skip timed mark-as-read
+				var stub = sinon.stub(win.ZoteroPane, 'startItemReadTimeout');
+				await select(win, item);
+				
+				// Click "Mark as Read"
+				var promise = waitForItemEvent('modify');
+				var button = ZoteroPane.itemPane.getCurrentPane().querySelector('.feed-item-toggleRead-button');
+				assert.equal(button.label, Zotero.getString('pane.item.markAsRead'));
+				assert.isFalse(item.isRead);
+				button.click();
+				var ids = await promise;
+				
+				assert.sameMembers(ids, [item.id]);
+				assert.isTrue(item.isRead);
+				// Button is re-created
+				button = ZoteroPane.itemPane.getCurrentPane().querySelector('.feed-item-toggleRead-button');
+				assert.equal(button.label, Zotero.getString('pane.item.markAsUnread'));
+				
+				stub.restore();
+			});
+			
+			
 			it("should update label when state of an item changes", function* () {
 				let feed = yield createFeed();
 				yield selectLibrary(win, feed.libraryID);

@@ -224,7 +224,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
 			// Remove notes and attachments if necessary
 			if (this.regularOnly) {
-				newSearchItems = newSearchItems.filter(item => item.isCollection() || item.isRegularItem());
+				newSearchItems = newSearchItems.filter((item) => {
+					return item instanceof Zotero.Collection
+						|| item instanceof Zotero.Search
+						|| item.isRegularItem();
+				});
 			}
 			let newSearchItemIDs = new Set(newSearchItems.map(item => item.id));
 			// Find the items that aren't yet in the tree
@@ -255,7 +259,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (row.level == 0) {
 					// A top-level attachment moved into a parent. Don't copy, it will be added
 					// via this loop for the parent item.
-					if (row.ref.parentID && row.ref.isItem()) {
+					if (row.ref instanceof Zotero.Item && row.ref.parentID) {
 						continue;
 					}
 					let isSearchParent = newSearchParentIDs.has(row.ref.treeViewID);
@@ -1761,22 +1765,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._refreshRowMap();
 			this.tree.invalidate();
 
-			// Create an array of selected items
-			var ids = Array.from(this.selection.selected).filter(index => this.getRow(index).ref.isItem()).map(index => this.getRow(index).id);
+			let selectedObjects = [...this.selection.selected].map(index => this.getRow(index).ref);
+			let selectedItems = selectedObjects.filter(o => o instanceof Zotero.Item);
+			let selectedItemIDs = selectedItems.map(o => o.id);
 
-			var collectionTreeRow = this.collectionTreeRow;
+			let collectionTreeRow = this.collectionTreeRow;
 
 			if (collectionTreeRow.isBucket()) {
 				collectionTreeRow.ref.deleteItems(ids);
 			}
-			if (collectionTreeRow.isTrash()) {
-				let selectedObjects = Array.from(this.selection.selected).map(index => this.getRow(index).ref);
+			else if (collectionTreeRow.isTrash()) {
 				let [trashedCollectionIDs, trashedSearches] = [[], []];
 				for (let obj of selectedObjects) {
-					if (obj.isCollection()) {
+					if (obj instanceof Zotero.Collection) {
 						trashedCollectionIDs.push(obj.id);
 					}
-					if (obj.isSearch()) {
+					if (obj instanceof Zotero.Search) {
 						trashedSearches.push(obj.id);
 					}
 				}
@@ -1786,8 +1790,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (trashedSearches.length > 0) {
 					await Zotero.Searches.erase(trashedSearches);
 				}
-				if (ids.length > 0) {
-					await Zotero.Items.erase(ids);
+				if (selectedItemIDs.length > 0) {
+					await Zotero.Items.erase(selectedItemIDs);
 				}
 			}
 			else if (collectionTreeRow.isLibrary(true)
@@ -1796,7 +1800,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					|| collectionTreeRow.isRetracted()
 					|| collectionTreeRow.isDuplicates()
 					|| force) {
-				await Zotero.Items.trashTx(ids);
+				await Zotero.Items.trashTx(selectedItemIDs);
 			}
 			else if (collectionTreeRow.isCollection()) {
 				let collectionIDs = [collectionTreeRow.ref.id];
@@ -1805,8 +1809,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 
 				await Zotero.DB.executeTransaction(async () => {
-					for (let itemID of ids) {
-						let item = Zotero.Items.get(itemID);
+					for (let item of selectedItems) {
 						for (let collectionID of collectionIDs) {
 							item.removeFromCollection(collectionID);
 						}
@@ -1817,7 +1820,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				});
 			}
 			else if (collectionTreeRow.isPublications()) {
-				await Zotero.Items.removeFromPublications(ids.map(id => Zotero.Items.get(id)));
+				await Zotero.Items.removeFromPublications(selectedItems);
 			}
 		}
 		finally {
@@ -1844,7 +1847,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Get selected items, omitting collections and searches in the trash
 	 */
 	getSelectedItems(asIDs) {
-		var items = this.getSelectedObjects().filter(x => x.isItem());
+		var items = this.getSelectedObjects().filter(o => o instanceof Zotero.Item);
 		return asIDs ? items.map(x => x.id) : items;
 	}
 	
@@ -2821,10 +2824,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		try {
 			// Special treatment for trashed collections or searches since they are not an actual
 			// item and do not have an item type
-			if (item.isSearch()) {
+			if (item instanceof Zotero.Collection) {
 				itemTypeAriaLabel = Zotero.getString('searchConditions.collection') + '.';
 			}
-			else if (item.isCollection()) {
+			else if (item instanceof Zotero.Search) {
 				itemTypeAriaLabel = Zotero.getString('searchConditions.savedSearch') + '.';
 			}
 			else {
@@ -3181,10 +3184,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return this._rowCache[itemID];
 		}
 		
-		let row = {};
+		let row = {
+			// Not a collection or search in the trash
+			isItem: treeRow.ref instanceof Zotero.Item
+		};
 		
 		// Mark items not matching search as context rows, displayed in gray
-		if (this._searchMode && !this._searchItemIDs.has(itemID) && treeRow.ref.isItem()) {
+		if (row.isItem && this._searchMode && !this._searchItemIDs.has(itemID)) {
 			row.contextRow = true;
 		}
 		
@@ -3201,7 +3207,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			row.unread = true;
 		}
 		
-		if (!(treeRow.ref.isCollection() || treeRow.ref.isSearch())) {
+		if (!(treeRow.ref instanceof Zotero.Collection || treeRow.ref instanceof Zotero.Search)) {
 			row.itemType = Zotero.ItemTypes.getLocalizedString(treeRow.ref.itemTypeID);
 		}
 		// Year column is just date field truncated
@@ -3257,7 +3263,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			row[key] = val;
 		}
-		row.isItem = treeRow.ref.isItem();
 		return this._rowCache[itemID] = row;
 	}
 
@@ -3833,12 +3838,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var item = this.getRow(index).ref;
 		
 		// Non-item objects that can be appear in the trash
-		if (item.isCollection() || item.isSearch()) {
+		if (item instanceof Zotero.Collection || item instanceof Zotero.Search) {
 			let icon;
-			if (item.isCollection()) {
+			if (item instanceof Zotero.Collection) {
 				icon = getCSSIcon('collection');
 			}
-			else if (item.isSearch()) {
+			else if (item instanceof Zotero.Search) {
 				icon = getCSSIcon('search');
 			}
 			icon.classList.add('icon-item-type');

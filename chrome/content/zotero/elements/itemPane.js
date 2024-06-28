@@ -113,7 +113,7 @@
 				let item = this.data[0];
 				
 				// If a collection or search is selected, it must be in the trash.
-				if (item.isCollection() || item.isSearch()) {
+				if (item instanceof Zotero.Collection || item instanceof Zotero.Search) {
 					renderStatus = this.renderMessage();
 				}
 				else if (item.isNote()) {
@@ -228,13 +228,13 @@
 					// In the trash, we have to check the object type
 					if (this.collectionTreeRow.isTrash()) {
 						let obj = this.data[0];
-						if (this.data.every(x => x.isCollection())) {
+						if (this.data.every(x => x instanceof Zotero.Collection)) {
 							key = 'item-pane-message-collections-selected';
 						}
-						else if (this.data.every(x => x.isSearch())) {
+						else if (this.data.every(x => x instanceof Zotero.Search)) {
 							key = 'item-pane-message-searches-selected';
 						}
-						else if (this.data.every(x => x.isItem())) {
+						else if (this.data.every(x => x instanceof Zotero.Item)) {
 							key = 'item-pane-message-items-selected';
 						}
 						else {

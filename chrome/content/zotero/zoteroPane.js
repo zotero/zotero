@@ -1232,8 +1232,8 @@ var ZoteroPane = new function()
 		// If no items or an unreasonable number, don't try
 		if (!objects.length || objects.length > 100) return;
 		
-		var collections = objects.filter(o => o.isCollection());
-		var items = objects.filter(o => o.isItem());
+		var collections = objects.filter(o => o instanceof Zotero.Collection);
+		var items = objects.filter(o => o instanceof Zotero.Item);
 		
 		// Get parent collections of collections
 		var toHighlight = [];
@@ -2421,7 +2421,7 @@ var ZoteroPane = new function()
 				let parent = this.itemsView.getRow(row).ref;
 				let childIDs = [];
 				let subcollections = [];
-				if (parent.isCollection()) {
+				if (parent instanceof Zotero.Collection) {
 					// If the restored item is a collection, restore its subcollections too
 					if (isSelected(parent)) {
 						subcollections = parent.getDescendents(false, 'collection', true).map(col => col.id);
@@ -3924,7 +3924,7 @@ var ZoteroPane = new function()
 			menu.childNodes[m.showInLibrary].setAttribute('label', Zotero.getString('general.showInLibrary'));
 		}
 		// For collections and search, only keep restore/delete options
-		if (items.some(item => item.isCollection() || item.isSearch())) {
+		if (items.some(item => item instanceof Zotero.Collection || item instanceof Zotero.Search)) {
 			for (let option of options) {
 				if (!['restoreToLibrary', 'deleteFromLibrary'].includes(option)) {
 					show.delete(m[option]);

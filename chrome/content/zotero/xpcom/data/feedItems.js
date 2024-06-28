@@ -133,6 +133,10 @@ Zotero.FeedItems = new Proxy(function() {
 			
 			ids = [ids];
 		}
+		if (!ids.length) {
+			throw new Error("No ids passed");
+		}
+		
 		let items = yield this.getAsync(ids);
 		
 		if (state == undefined) {

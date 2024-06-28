@@ -905,8 +905,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							await this._addSortedRow('collection', id);
 							await this.selectByID(currentTreeRow.id);
 							// Invalidate parent in case it's become non-empty
-							let parentRow = this.getRowIndexByID("C" + collection.parentID);
-							if (parentRow !== false) {
+							if (collection.parentID) {
+								let parentRow = this.getRowIndexByID("C" + collection.parentID);
 								this.tree.invalidateRow(parentRow);
 							}
 						}

@@ -734,9 +734,6 @@ Zotero.DataObjectUtilities = {
 	 * Most of these are overriden by Zotero.Item.
 	 */
 	itemTreeMockProperties: {
-		isCollection: function () {
-			return this._ObjectType == "Collection";
-		},
 		isAnnotation: () => false,
 		isNote: () => false,
 		numNotes: () => 0,
@@ -744,16 +741,10 @@ Zotero.DataObjectUtilities = {
 		numAttachments: () => false,
 		getColoredTags: () => false,
 		isRegularItem: () => false, // Should be false to prevent items dropped into deleted searches
-		isSearch: function () {
-			return this._ObjectType == "Search";
-		},
 		getNotes: () => [],
 		getAttachments: () => [],
 		isFileAttachment: () => false,
 		isTopLevelItem: () => false,
-		isItem: function () {
-			return this._ObjectType == "Item";
-		},
 		getField: function (field, _) {
 			return this['_' + field] || "";
 		},
