@@ -3558,7 +3558,7 @@ var ZoteroPane = new function()
 			show.add(m.loadReport);
 		}
 		
-		var items = this.getSelectedItems();
+		var items = this.getSelectedObjects();
 		
 		if (items.length > 0) {
 			// Multiple items selected
