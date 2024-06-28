@@ -26,3 +26,10 @@ window:root .zotero-window {
 window:root .zotero-dialog {
 	@include zotero-dialog();
 }
+
+// Dialogs (e.g. the integration doc prefs window) has 20px padding on MacOS
+window:root dialog.zotero-dialog-window {
+	@media (-moz-platform: macos) {
+		padding: 20px;
+	}
+}
