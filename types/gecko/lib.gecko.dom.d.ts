@@ -6,7 +6,6 @@
  * manually updating this file is *not* required (but doesn't hurt either).
  */
 
-/// <reference no-default-lib="true" />
 /// <reference types="gecko" />
 /// <reference lib="es2023" />
 

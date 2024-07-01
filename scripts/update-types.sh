@@ -18,4 +18,5 @@ dir_listing=$(curl -fs "$DIR_REMOTE")
 filenames=$(cut -d ' ' -f 3 <<< "$dir_listing")
 for filename in $filenames; do
 	curl -f "$DIR_REMOTE/$filename" > "$DIR_LOCAL/$filename"
+	sed -i '' '/^\/\/\/ <reference no-default-lib="true" \/>/d' "$DIR_LOCAL/$filename"
 done
