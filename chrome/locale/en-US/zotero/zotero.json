@@ -1,4 +1,139 @@
 {
+	"general-print": {
+		"string": "Print"
+	},
+	"return-or-enter": {
+		"string": "{PLATFORM(), select, macos {Return} other {Enter}}"
+	},
+	"general-remove": {
+		"string": "Remove"
+	},
+	"general-add": {
+		"string": "Add"
+	},
+	"general-remind-me-later": {
+		"string": "Remind Me Later"
+	},
+	"general-choose-file": {
+		"string": "Choose File…"
+	},
+	"general-open-settings": {
+		"string": "Open Settings"
+	},
+	"general-help": {
+		"string": "Help"
+	},
+	"menu-file-show-in-finder.label": {
+		"string": "Show in Finder"
+	},
+	"menu-file-show-file.label": {
+		"string": "Show File"
+	},
+	"menu-file-show-files.label": {
+		"string": "Show Files"
+	},
+	"menu-density.label": {
+		"string": "Density"
+	},
+	"add-attachment": {
+		"string": "Add Attachment"
+	},
+	"new-note": {
+		"string": "New Note"
+	},
+	"menu-add-by-identifier.label": {
+		"string": "Add by Identifier…"
+	},
+	"menu-add-standalone-file-attachment.label": {
+		"string": "Add File…"
+	},
+	"menu-add-standalone-linked-file-attachment.label": {
+		"string": "Add Link to File…"
+	},
+	"menu-add-child-file-attachment.label": {
+		"string": "Attach File…"
+	},
+	"menu-add-child-linked-file-attachment.label": {
+		"string": "Attach Link to File…"
+	},
+	"menu-add-child-linked-url-attachment.label": {
+		"string": "Attach Web Link…"
+	},
+	"menu-new-standalone-note.label": {
+		"string": "New Standalone Note"
+	},
+	"menu-new-item-note.label": {
+		"string": "New Item Note"
+	},
+	"menu-restoreToLibrary.label": {
+		"string": "Restore to Library"
+	},
+	"menu-deletePermanently.label": {
+		"string": "Delete Permanently…"
+	},
+	"menu-tools-plugins.label": {
+		"string": "Plugins"
+	},
+	"zotero-toolbar-tabs-menu.tooltiptext": {
+		"string": "List all tabs"
+	},
+	"filter-collections": {
+		"string": "Filter Collections"
+	},
+	"zotero-tabs-menu-filter.placeholder": {
+		"string": "Search Tabs"
+	},
+	"zotero-tabs-menu-close-button.title": {
+		"string": "Close Tab"
+	},
+	"collections-menu-rename-collection.label": {
+		"string": "Rename Collection"
+	},
+	"collections-menu-edit-saved-search.label": {
+		"string": "Edit Saved Search"
+	},
+	"item-creator-moveDown.label": {
+		"string": "Move Down"
+	},
+	"item-creator-moveToTop.label": {
+		"string": "Move to Top"
+	},
+	"item-creator-moveUp.label": {
+		"string": "Move Up"
+	},
+	"item-menu-viewAttachment.label": {
+		"string": "Open {numAttachments, plural, one {{attachmentType, select, pdf {PDF} epub {EPUB} snapshot {Snapshot} other {Attachment}}} other {{attachmentType, select, pdf {PDFs} epub {EPUBs} snapshot {Snapshots} other {Attachments}}}} {openIn, select, tab {in New Tab} window {in New Window} other {}}"
+	},
+	"item-menu-add-file.label": {
+		"string": "File"
+	},
+	"item-menu-add-linked-file.label": {
+		"string": "Linked File"
+	},
+	"item-menu-add-url.label": {
+		"string": "Web Link"
+	},
+	"view-online": {
+		"string": "View Online"
+	},
+	"itembox-button-options.tooltiptext": {
+		"string": "Open context menu"
+	},
+	"itembox-button-merge.aria-label": {
+		"string": "Select version of { field } field"
+	},
+	"create-parent-intro": {
+		"string": "Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:"
+	},
+	"reader-use-dark-mode-for-content.label": {
+		"string": "Use Dark Mode for Content"
+	},
+	"update-updates-found-intro-minor": {
+		"string": "An update for { app-name } is available:"
+	},
+	"update-updates-found-desc": {
+		"string": "It is recommended that you apply this update as soon as possible."
+	},
 	"import-window.title": {
 		"string": "Import"
 	},
@@ -42,13 +177,13 @@
 		"string": "File Handling"
 	},
 	"import-file-handling-store.label": {
-		"string": "Copy files to the { -app-name } storage folder"
+		"string": "Copy files to the { app-name } storage folder"
 	},
 	"import-file-handling-link.label": {
 		"string": "Link to files in original location"
 	},
 	"import-fileHandling-description": {
-		"string": "Linked files cannot be synced by { -app-name }."
+		"string": "Linked files cannot be synced by { app-name }."
 	},
 	"import-online-new.label": {
 		"string": "Download new items only; don’t update previously imported items"
@@ -81,13 +216,13 @@
 		"string": "An error occurred importing the selected file with “{ translator }”. Please ensure that the file is valid and try again."
 	},
 	"import-online-intro": {
-		"string": "In the next step you will be asked to log in to { targetAppOnline } and grant { -app-name } access. This is necessary to import your { targetApp } library into { -app-name }."
+		"string": "In the next step you will be asked to log in to { targetAppOnline } and grant { app-name } access. This is necessary to import your { targetApp } library into { app-name }."
 	},
 	"import-online-intro2": {
-		"string": "{ -app-name } will never see or store your { targetApp } password."
+		"string": "{ app-name } will never see or store your { targetApp } password."
 	},
 	"import-online-form-intro": {
-		"string": "Please enter your credentials to log in to { targetAppOnline }. This is necessary to import your { targetApp } library into { -app-name }."
+		"string": "Please enter your credentials to log in to { targetAppOnline }. This is necessary to import your { targetApp } library into { app-name }."
 	},
 	"import-online-wrong-credentials": {
 		"string": "Login to { targetApp } failed. Please re-enter credentials and try again."
@@ -101,6 +236,12 @@
 	"import-online-relink-kb": {
 		"string": "More Information"
 	},
+	"import-online-connection-error": {
+		"string": "{ app-name } could not connect to { targetApp }. Please check your internet connection and try again."
+	},
+	"items-table-cell-notes.aria-label": {
+		"string": "{count, plural, one {{ count } Note} other {{ count } Notes}}"
+	},
 	"report-error.label": {
 		"string": "Report Error…"
 	},
@@ -108,7 +249,7 @@
 		"string": "RTF Scan"
 	},
 	"rtfScan-introPage-description": {
-		"string": "{ -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below."
+		"string": "{ app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below."
 	},
 	"rtfScan-introPage-description2": {
 		"string": "To get started, select an RTF input file and an output file below:"
@@ -119,11 +260,14 @@
 	"rtfScan-output-file": {
 		"string": "Output File"
 	},
-	"zotero-file-none-selected.value": {
+	"rtfScan-no-file-selected": {
 		"string": "No file selected"
 	},
-	"zotero-file-choose.label": {
-		"string": "Choose File…"
+	"rtfScan-choose-input-file.aria-label": {
+		"string": "Choose Input File"
+	},
+	"rtfScan-choose-output-file.aria-label": {
+		"string": "Choose Output File"
 	},
 	"rtfScan-intro-page.label": {
 		"string": "Introduction"
@@ -132,13 +276,13 @@
 		"string": "Scanning for Citations"
 	},
 	"rtfScan-scanPage-description": {
-		"string": "{ -app-name } is scanning your document for citations. Please be patient."
+		"string": "{ app-name } is scanning your document for citations. Please be patient."
 	},
 	"rtfScan-citations-page.label": {
 		"string": "Verify Cited Items"
 	},
 	"rtfScan-citations-page-description": {
-		"string": "Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step."
+		"string": "Please review the list of recognized citations below to ensure that { app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step."
 	},
 	"rtfScan-style-page.label": {
 		"string": "Document Formatting"
@@ -147,7 +291,7 @@
 		"string": "Formatting Citations"
 	},
 	"rtfScan-format-page-description": {
-		"string": "{ -app-name } is processing and formatting your RTF file. Please be patient."
+		"string": "{ app-name } is processing and formatting your RTF file. Please be patient."
 	},
 	"rtfScan-complete-page.label": {
 		"string": "RTF Scan Complete"
@@ -155,11 +299,74 @@
 	"rtfScan-complete-page-description": {
 		"string": "Your document has now been scanned and processed. Please ensure that it is formatted correctly."
 	},
+	"runJS-title": {
+		"string": "Run JavaScript"
+	},
+	"runJS-editor-label": {
+		"string": "Code:"
+	},
+	"runJS-run": {
+		"string": "Run"
+	},
+	"runJS-result": {
+		"string": "{type, select, async {Return value:} other {Result:}}"
+	},
+	"runJS-run-async": {
+		"string": "Run as async function"
+	},
+	"bibliography-window.title": {
+		"string": "{ app-name } - Create Citation/Bibliography"
+	},
 	"bibliography-style-label": {
 		"string": "Citation Style:"
 	},
 	"bibliography-locale-label": {
 		"string": "Language:"
+	},
+	"bibliography-displayAs-label": {
+		"string": "Display citations as:"
+	},
+	"bibliography-advancedOptions-label": {
+		"string": "Advanced Options"
+	},
+	"bibliography-outputMode-label": {
+		"string": "Output Mode:"
+	},
+	"bibliography-outputMode-citations.label": {
+		"string": "{type, select, citation {Citations} note {Notes} other {Citations}}"
+	},
+	"bibliography-outputMode-bibliography.label": {
+		"string": "Bibliography"
+	},
+	"bibliography-outputMethod-label": {
+		"string": "Output Method:"
+	},
+	"bibliography-outputMethod-saveAsRTF.label": {
+		"string": "Save as RTF"
+	},
+	"bibliography-outputMethod-saveAsHTML.label": {
+		"string": "Save as HTML"
+	},
+	"bibliography-outputMethod-copyToClipboard.label": {
+		"string": "Copy to Clipboard"
+	},
+	"bibliography-outputMethod-print.label": {
+		"string": "Print"
+	},
+	"bibliography-manageStyles-label": {
+		"string": "Manage Styles…"
+	},
+	"integration-docPrefs-window.title": {
+		"string": "{ app-name } - Document Preferences"
+	},
+	"integration-addEditCitation-window.title": {
+		"string": "{ app-name } - Add/Edit Citation"
+	},
+	"integration-editBibliography-window.title": {
+		"string": "{ app-name } - Edit Bibliography"
+	},
+	"integration-quickFormatDialog-window.title": {
+		"string": "{ app-name } - Quick Format Citation"
 	},
 	"integration-prefs-displayAs-label": {
 		"string": "Display Citations As:"
@@ -169,6 +376,33 @@
 	},
 	"integration-prefs-endnotes.label": {
 		"string": "Endnotes"
+	},
+	"integration-prefs-bookmarks.label": {
+		"string": "Store citation as bookmarks"
+	},
+	"integration-prefs-bookmarks-description": {
+		"string": "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes."
+	},
+	"integration-prefs-bookmarks-formatNotice": {
+		"string": "{show, select, true {The document must be saved as .doc or .docx.} other {}}"
+	},
+	"integration-prefs-automaticCitationUpdates.label": {
+		"string": "Automatically update citations"
+	},
+	"integration-prefs-automaticCitationUpdates.tooltip": {
+		"string": "Citations with pending updates will be highlighted in the document"
+	},
+	"integration-prefs-automaticCitationUpdates-description": {
+		"string": "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually."
+	},
+	"integration-prefs-automaticJournalAbbeviations.label": {
+		"string": "Use MEDLINE journal abbreviations"
+	},
+	"integration-prefs-automaticJournalAbbeviations-description": {
+		"string": "The “Journal Abbr” field will be ignored."
+	},
+	"integration-prefs-exportDocument.label": {
+		"string": "Switch to a Different Word Processor…"
 	},
 	"publications-intro-page.label": {
 		"string": "My Publications"
@@ -280,5 +514,335 @@
 	},
 	"licenses-cc0-more-info": {
 		"string": "Be sure you have read the Creative Commons <a data-l10n-name=\"license-considerations\">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work."
+	},
+	"restart-in-troubleshooting-mode-menuitem.label": {
+		"string": "Restart in Troubleshooting Mode…"
+	},
+	"restart-in-troubleshooting-mode-menuitem.accesskey": {
+		"string": "T"
+	},
+	"restart-in-troubleshooting-mode-dialog-title": {
+		"string": "Restart in Troubleshooting Mode"
+	},
+	"restart-in-troubleshooting-mode-dialog-description": {
+		"string": "{ app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled."
+	},
+	"menu-ui-density.label": {
+		"string": "Density"
+	},
+	"menu-ui-density-comfortable.label": {
+		"string": "Comfortable"
+	},
+	"menu-ui-density-compact.label": {
+		"string": "Compact"
+	},
+	"pane-info": {
+		"string": "Info"
+	},
+	"pane-abstract": {
+		"string": "Abstract"
+	},
+	"pane-attachments": {
+		"string": "Attachments"
+	},
+	"pane-notes": {
+		"string": "Notes"
+	},
+	"pane-libraries-collections": {
+		"string": "Libraries and Collections"
+	},
+	"pane-tags": {
+		"string": "Tags"
+	},
+	"pane-related": {
+		"string": "Related"
+	},
+	"pane-attachment-info": {
+		"string": "Attachment Info"
+	},
+	"pane-attachment-preview": {
+		"string": "Preview"
+	},
+	"pane-attachment-annotations": {
+		"string": "Annotations"
+	},
+	"pane-header-attachment-associated.label": {
+		"string": "Rename associated file"
+	},
+	"section-attachments.label": {
+		"string": "{count, plural, one {{ count } Attachment} other {{ count } Attachments}}"
+	},
+	"section-attachments-annotations.label": {
+		"string": "{count, plural, one {{ count } Annotation} other {{ count } Annotations}}"
+	},
+	"section-notes.label": {
+		"string": "{count, plural, one {{ count } Note} other {{ count } Notes}}"
+	},
+	"section-tags.label": {
+		"string": "{count, plural, one {{ count } Tag} other {{ count } Tags}}"
+	},
+	"section-related.label": {
+		"string": "{ count } Related"
+	},
+	"section-button-expand.tooltiptext": {
+		"string": "Expand section"
+	},
+	"section-button-collapse.tooltiptext": {
+		"string": "Collapse section"
+	},
+	"annotations-count": {
+		"string": "{count, plural, one {{ count } Annotation} other {{ count } Annotations}}"
+	},
+	"pin-section.label": {
+		"string": "Pin Section"
+	},
+	"unpin-section.label": {
+		"string": "Unpin Section"
+	},
+	"collapse-other-sections.label": {
+		"string": "Collapse Other Sections"
+	},
+	"expand-all-sections.label": {
+		"string": "Expand All Sections"
+	},
+	"abstract-field.placeholder": {
+		"string": "Add abstract…"
+	},
+	"tagselector-search.placeholder": {
+		"string": "Filter Tags"
+	},
+	"context-notes-search.placeholder": {
+		"string": "Search Notes"
+	},
+	"new-collection-dialog.title": {
+		"string": "New Collection"
+	},
+	"new-collection-dialog.buttonlabelaccept": {
+		"string": "Create Collection"
+	},
+	"new-collection-name": {
+		"string": "Name:"
+	},
+	"new-collection-create-in": {
+		"string": "Create in:"
+	},
+	"attachment-info-filename": {
+		"string": "Filename"
+	},
+	"attachment-info-accessed": {
+		"string": "Accessed"
+	},
+	"attachment-info-pages": {
+		"string": "Pages"
+	},
+	"attachment-info-modified": {
+		"string": "Modified"
+	},
+	"attachment-info-index": {
+		"string": "Indexed"
+	},
+	"attachment-info-convert-note.label": {
+		"string": "Migrate to {type, select, standalone {Standalone} child {Item} unknown {New}} Note"
+	},
+	"attachment-info-convert-note.tooltiptext": {
+		"string": "Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note."
+	},
+	"attachment-preview-placeholder": {
+		"string": "No attachment to preview"
+	},
+	"toggle-preview.label": {
+		"string": "{type, select, open {Hide} collapsed {Show} unknown {Toggle}} Attachment Preview"
+	},
+	"quickformat-general-instructions": {
+		"string": "Use Left/Right Arrow to navigate the items of this citation. {dialogMenu, select, active {Press Shift-Tab to focus the dialog's menu.} other {}} Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog."
+	},
+	"quickformat-aria-bubble": {
+		"string": "This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }"
+	},
+	"quickformat-aria-input": {
+		"string": "Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }"
+	},
+	"quickformat-aria-item": {
+		"string": "Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field."
+	},
+	"quickformat-accept.tooltiptext": {
+		"string": "Save edits to this citation"
+	},
+	"quickformat-locator-type.aria-label": {
+		"string": "Locator type"
+	},
+	"quickformat-locator-value": {
+		"string": "Locator"
+	},
+	"quickformat-citation-options.tooltiptext": {
+		"string": "Show citation options"
+	},
+	"insert-note-aria-input": {
+		"string": "Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog."
+	},
+	"insert-note-aria-item": {
+		"string": "Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog."
+	},
+	"quicksearch-mode.aria-label": {
+		"string": "Quick Search mode"
+	},
+	"quicksearch-input.aria-label": {
+		"string": "Quick Search"
+	},
+	"item-pane-header-view-as.label": {
+		"string": "View As"
+	},
+	"item-pane-header-none.label": {
+		"string": "None"
+	},
+	"item-pane-header-title.label": {
+		"string": "Title"
+	},
+	"item-pane-header-titleCreatorYear.label": {
+		"string": "Title, Creator, Year"
+	},
+	"item-pane-header-bibEntry.label": {
+		"string": "Bibliography Entry"
+	},
+	"item-pane-header-more-options.label": {
+		"string": "More Options"
+	},
+	"item-pane-message-items-selected": {
+		"string": "{count, plural, one {{ count } item selected} other {{ count } items selected}}"
+	},
+	"item-pane-message-collections-selected": {
+		"string": "{count, plural, one {{ count } collection selected} other {{ count } collections selected}}"
+	},
+	"item-pane-message-searches-selected": {
+		"string": "{count, plural, one {{ count } search selected} other {{ count } searches selected}}"
+	},
+	"item-pane-message-objects-selected": {
+		"string": "{count, plural, one {{ count } object selected} other {{ count } objects selected}}"
+	},
+	"locate-library-lookup-no-resolver": {
+		"string": "You must choose a resolver from the { pane } pane of the { app-name } settings."
+	},
+	"architecture-win32-warning-message": {
+		"string": "{ app-name } is running in 32-bit mode on a 64-bit version of Windows. { app-name } will run more efficiently in 64-bit mode."
+	},
+	"architecture-warning-action": {
+		"string": "Download 64-bit { app-name }"
+	},
+	"first-run-guidance-quickFormat": {
+		"string": "Type a title, author, and/or year to search for a reference.\n\nAfter you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.\n\nYou can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }."
+	},
+	"first-run-guidance-authorMenu": {
+		"string": "{ app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu."
+	},
+	"advanced-search-conditions-menu.aria-label": {
+		"string": "Search condition"
+	},
+	"advanced-search-operators-menu.aria-label": {
+		"string": "Operator"
+	},
+	"advanced-search-condition-input.aria-label": {
+		"string": "Value"
+	},
+	"preferences-window.title": {
+		"string": "{ app-name } Settings"
+	},
+	"preferences-auto-recognize-files.label": {
+		"string": "Automatically retrieve metadata for PDFs and ebooks"
+	},
+	"preferences-file-renaming-title": {
+		"string": "File Renaming"
+	},
+	"preferences-file-renaming-intro": {
+		"string": "{ app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well."
+	},
+	"preferences-file-renaming-auto-rename-files.label": {
+		"string": "Automatically rename locally added files"
+	},
+	"preferences-file-renaming-customize-button.label": {
+		"string": "Customize Filename Format…"
+	},
+	"preferences-file-renaming-format-title": {
+		"string": "Filename Format"
+	},
+	"preferences-file-renaming-format-instructions": {
+		"string": "You can customize the filename pattern { app-name } uses to rename attachment files from parent metadata."
+	},
+	"preferences-file-renaming-format-instructions-example": {
+		"string": "For example, “{ example }” in this template will be replaced with the title of the parent item, truncated at 50 characters."
+	},
+	"preferences-file-renaming-format-instructions-more": {
+		"string": "See the <label data-l10n-name=\"file-renaming-format-help-link\">documentation</label> for more information."
+	},
+	"preferences-file-renaming-format-template": {
+		"string": "Filename Template:"
+	},
+	"preferences-file-renaming-format-preview": {
+		"string": "Preview:"
+	},
+	"preferences-reader-title": {
+		"string": "Reader"
+	},
+	"preferences-reader-open-epubs-using": {
+		"string": "Open EPUBs using"
+	},
+	"preferences-reader-open-snapshots-using": {
+		"string": "Open snapshots using"
+	},
+	"preferences-reader-open-in-new-window.label": {
+		"string": "Open files in new windows instead of tabs"
+	},
+	"preferences-reader-ebook-font": {
+		"string": "Ebook font:"
+	},
+	"preferences-reader-ebook-hyphenate.label": {
+		"string": "Enable automatic hyphenation"
+	},
+	"preferences-color-scheme": {
+		"string": "Color Scheme:"
+	},
+	"preferences-color-scheme-auto.label": {
+		"string": "Automatic"
+	},
+	"preferences-color-scheme-light.label": {
+		"string": "Light"
+	},
+	"preferences-color-scheme-dark.label": {
+		"string": "Dark"
+	},
+	"preferences-item-pane-header": {
+		"string": "Item Pane Header:"
+	},
+	"preferences-item-pane-header-style": {
+		"string": "Header Citation Style:"
+	},
+	"preferences-item-pane-header-locale": {
+		"string": "Header Language:"
+	},
+	"preferences-item-pane-header-missing-style": {
+		"string": "Missing style: <{ shortName }>"
+	},
+	"preferences-locate-library-lookup-intro": {
+		"string": "Library Lookup can find a resource online using your library’s OpenURL resolver."
+	},
+	"preferences-locate-resolver": {
+		"string": "Resolver:"
+	},
+	"preferences-locate-base-url": {
+		"string": "Base URL:"
+	},
+	"preferences-styleManager-delete-button.tooltiptext": {
+		"string": "Delete the selected style"
+	},
+	"preferences-styleManager-add-button.tooltiptext": {
+		"string": "Add a style from a file"
+	},
+	"preferences-advanced-enable-local-api.label": {
+		"string": "Allow other applications on this computer to communicate with { app-name }"
+	},
+	"preferences-advanced-language-and-region-title": {
+		"string": "Language and Region"
+	},
+	"preferences-advanced-enable-bidi-ui.label": {
+		"string": "Enable bidirectional text editing utilities"
 	}
 }
