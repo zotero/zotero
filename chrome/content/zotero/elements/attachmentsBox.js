@@ -34,7 +34,13 @@
 					<html:div class="attachments-container"></html:div>
 				</html:div>
 			</collapsible-section>
-			<popupset/>
+			<popupset>
+				<menupopup class="add-popup">
+					<menuitem data-l10n-id="item-menu-add-file" />
+					<menuitem data-l10n-id="item-menu-add-linked-file" />
+					<menuitem data-l10n-id="item-menu-add-url" />
+				</menupopup>
+			</popupset>
 		`);
 
 		_attachmentIDs = [];
@@ -81,9 +87,23 @@
 
 			this._attachments = this.querySelector('.attachments-container');
 			
-			this._addPopup = document.getElementById('zotero-add-attachment-popup').cloneNode(true);
-			this._addPopup.id = '';
-			this.querySelector('popupset').append(this._addPopup);
+			this._addPopup = this.querySelector('.add-popup');
+			
+			let [addFile, addLink, addWebLink] = this._addPopup.children;
+			this._addPopup.addEventListener('popupshowing', () => {
+				let canAddAny = this.item?.isRegularItem() && this.item.library.editable;
+				addFile.disabled = addLink.disabled = !(canAddAny && this.item.library.filesEditable);
+				addWebLink.disabled = !canAddAny;
+			});
+			addFile.addEventListener('command', () => {
+				ZoteroPane.addAttachmentFromDialog(false, this.item.id);
+			});
+			addLink.addEventListener('command', () => {
+				ZoteroPane.addAttachmentFromDialog(true, this.item.id);
+			});
+			addWebLink.addEventListener('command', () => {
+				ZoteroPane.addAttachmentFromURI(true, this.item.id);
+			});
 			
 			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 			this._preview = this.querySelector('attachment-preview');
@@ -207,7 +227,6 @@
 
 		_handleAdd = (event) => {
 			this._section.open = true;
-			ZoteroPane.updateAddAttachmentMenu(this._addPopup);
 			this._addPopup.openPopup(event.detail.button, 'after_end');
 		};
 
