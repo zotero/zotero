@@ -105,7 +105,29 @@ describe("Advanced Preferences", function () {
 				assert.isFalse(Zotero.Prefs.get('saveRelativeAttachmentPath'));
 				
 				assert.equal(attachment.attachmentPath, file.path);
-			})
+			});
+			
+			it("should ignore attachment with relative path already within new base directory", async function () {
+				var file = getTestDataDirectory();
+				file.append('test.png');
+				file = file.path;
+				
+				var attachment = await Zotero.Attachments.linkFromFile({ file });
+				assert.equal(attachment.attachmentPath, file);
+				
+				var basePath = getTestDataDirectory().path;
+				await setBaseDirectory(basePath);
+				
+				var newBasePath = await getTempDirectory();
+				await IOUtils.copy(file, PathUtils.joinRelative(newBasePath, 'test.png'));
+				
+				await setBaseDirectory(newBasePath);
+				
+				assert.equal(
+					attachment.attachmentPath,
+					Zotero.Attachments.BASE_PATH_PLACEHOLDER + 'test.png'
+				);
+			});
 		})
 	})
 })
