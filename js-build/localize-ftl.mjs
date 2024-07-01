@@ -75,11 +75,17 @@ async function getFTL() {
 				}
 			}
 
-			const ftl = JSONToFtl(Object.fromEntries(translated), baseFTL);
-			const outFtlPath = join(getLocaleDir(locale), sourceFileBaseName + '.ftl');
-			await fs.outputFile(outFtlPath, ftl);
-			onProgress(`${locale}/${sourceFileBaseName}.ftl`, null, 'localize');
-			count++;
+			try {
+				const ftl = JSONToFtl(Object.fromEntries(translated), baseFTL);
+				const outFtlPath = join(getLocaleDir(locale), sourceFileBaseName + '.ftl');
+				await fs.outputFile(outFtlPath, ftl);
+				onProgress(`${locale}/${sourceFileBaseName}.ftl`, null, 'localize');
+				count++;
+			}
+			catch (e) {
+				e.message = `Failed to localize "${locale}": ${e.message}`;
+				throw e;
+			}
 		}
 	}
 	
