@@ -185,9 +185,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			this.setSyncStatus(Zotero.getString('sync.status.preparing'));
 			
-			// Purge deleted objects so they don't cause sync errors (e.g., long tags)
-			yield Zotero.purgeDataObjects(true);
-			
 			let client = this.getAPIClient({ apiKey });
 			let keyInfo = yield this.checkAccess(client, options);
 			
