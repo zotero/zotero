@@ -34,72 +34,53 @@
 	id="integration-doc-prefs"
 	class="bibliography-window"
 	persist="screenX screenY width height sizemode"
-	title="&zotero.integration.docPrefs.title;"
+	data-l10n-id="integration-docPrefs-window"
 	onload="Zotero_File_Interface_Bibliography.init();"
 	>
 	<dialog
 		id="zotero-doc-prefs-dialog"
+		class="zotero-dialog-window"
 		orient="vertical"
 		buttons="accept,cancel,help"
-		ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
-		ondialoghelp="Zotero_File_Interface_Bibliography.openHelpLink();"
 		onclose="document.documentElement.cancelDialog(); event.preventDefault(); event.stopPropagation();">
-		
-		<script src="../include.js"/>
-		<script src="../bibliography.js"/>
-		<vbox id="zotero-bibliography-container">
-			<groupbox>
-				<label><html:h2>&zotero.bibliography.style.label;</html:h2></label>
-				<richlistbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
-				<hbox align="right">
-					<label id="manage-styles" class="text-link"
-						onclick="Zotero_File_Interface_Bibliography.manageStyles()">&zotero.bibliography.manageStyles;</label>
-				</hbox>
-			</groupbox>
-			
-			<groupbox id="locale-box">
-				<hbox align="center">
-					<label><html:h2>&zotero.bibliography.locale.label;</html:h2></label>
-					<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.selectedItem.value)" native="true"/>
-				</hbox>
-			</groupbox>
-			
-			<groupbox id="displayAs-groupbox">
-				<label><html:h2>&zotero.integration.prefs.displayAs.label;</html:h2></label>
-				<radiogroup id="displayAs" orient="horizontal">
-					<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>
-					<radio id="endnotes" label="&zotero.integration.prefs.endnotes.label;"/>
-				</radiogroup>
-			</groupbox>
-			
-			<groupbox id="formatUsing-groupbox">
-				<label><html:h2>&zotero.integration.prefs.formatUsing.label;</html:h2></label>
-				
-				<radiogroup id="formatUsing" orient="vertical">
-					<radio id="fields" selected="true"/>
-					<label class="radioDescription" id="fields-caption"/>
-					<label class="radioDescription" id="fields-file-format-notice"/>
-					<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
-					<description class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</description>
-					<description class="radioDescription" id="bookmarks-file-format-notice"/>
-				</radiogroup>
-			</groupbox>
+		<script>
+			var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+			Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/bibliography.js", this);
+		</script>
+		<html:link rel="localization" href="zotero.ftl"/>
 
-			<vbox class="pref-vbox" id="automaticJournalAbbreviations-vbox">
-				<checkbox id="automaticJournalAbbreviations-checkbox" label="&zotero.integration.prefs.automaticJournalAbbeviations.label;" native="true"/>
-				<description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
+		<vbox id="zotero-bibliography-container">
+			<style-configurator id="style-configurator" />
+
+			<vbox id="automaticCitationUpdates-vbox">
+				<checkbox id="automaticCitationUpdates-checkbox" data-l10n-id="integration-prefs-automaticCitationUpdates" native="true"/>
+				<description class="row-description" data-l10n-id="integration-prefs-automaticCitationUpdates-description"></description>
 			</vbox>
-			
-			<vbox id="advanced-settings" hidden="false">
-				<vbox id="automaticCitationUpdates-vbox">
-					<checkbox id="automaticCitationUpdates-checkbox" label="&zotero.integration.prefs.automaticCitationUpdates.label;" tooltiptext="&zotero.integration.prefs.automaticCitationUpdates.tooltip;" native="true"/>
-					<description class="radioDescription">&zotero.integration.prefs.automaticCitationUpdates.description;</description>
-				</vbox>
-				<hbox id="exportImport" hidden="true">
-					<button label="&zotero.integration.prefs.exportDocument;" oncommand="Zotero_File_Interface_Bibliography.exportDocument()"/>
+
+			<hbox id="exportImport" hidden="true">
+				<button id="exportDocument" data-l10n-id="integration-prefs-exportDocument" />
+			</hbox>
+
+			<vbox class="advanced-options">
+				<hbox class="advanced-header">
+					<html:span class="advanced-header-icon"></html:span>
+					<html:div data-l10n-id="bibliography-advancedOptions-label"></html:div>
 				</hbox>
+				<vbox class="advanced-body">
+					<vbox class="advanced-row" id="formatUsing-container">
+						<checkbox id="formatUsingBookmarks" class="advanced-checkbox" data-l10n-id="integration-prefs-bookmarks" native="true"/>
+						<label class="row-description" id="bookmarks-caption" data-l10n-id="integration-prefs-bookmarks-description"></label>
+						<label class="row-description" id="bookmarks-file-format-notice" data-l10n-id="integration-prefs-bookmarks-formatNotice"/>
+					</vbox>
+					<vbox class="advanced-row" id="automaticJournalAbbreviations-container">
+						<checkbox id="automaticJournalAbbreviations" class="advanced-checkbox" data-l10n-id="integration-prefs-automaticJournalAbbeviations" native="true"/>
+						<description class="row-description" data-l10n-id="integration-prefs-automaticJournalAbbeviations-description"></description>
+					</vbox>
+				</vbox>
 			</vbox>
-			
 		</vbox>
 	</dialog>
 </window>

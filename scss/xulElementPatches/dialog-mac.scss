@@ -1,0 +1,29 @@
+// Override/enhance mozilla <dialog> styles on Windows. See customElements.js
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+@import "../abstracts/variables";
+@import "../abstracts/functions";
+@import "../abstracts/mixins";
+@import "../abstracts/placeholders";
+@import "../abstracts/utilities";
+@import "../abstracts/split-button";
+@import "../abstracts/svgicon";
+
+@import "../themes/light";
+@import "../themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "../base/base";
+
+
+.dialog-button-box {
+	gap: 8px;
+	margin-top: 16px;
+
+	button {
+		margin: 0;
+	}
+}

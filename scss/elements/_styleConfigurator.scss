@@ -8,8 +8,10 @@ style-configurator {
 		gap: var(--style-configurator-gap, 24px);
 	}
 
-	.locale-selector-label {
-		margin: var(--style-configurator-locale-selector-label-margin, 0 8px 0 0);
+	.style-list-container {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
 	
 	style-selector {
@@ -37,10 +39,6 @@ style-configurator {
 		}
 	}
 	
-	label[for="style-selector"] {
-		margin: var(--style-configurator-label-margin, 0 $space-min 0 0);
-	}
-	
 	.style-selector-wrapper {
 		margin: var(--style-configurator-style-field-margin, 0);
 	}
@@ -48,21 +46,30 @@ style-configurator {
 	.locale-selector-wrapper {
 		display: flex;
 		align-items: center;
+		gap: var(--style-configurator-locale-gap, 8px);
 	}
 	
 	.display-as-wrapper {
+		display: flex;
+		flex-direction: row;
+		gap: var(--style-configurator-display-as-wrapper-gap, 8px);
+
 		radiogroup {
 			margin: 0;
 			display: flex;
 			flex-direction: row;
+			gap: var(--style-configurator-display-as-wrapper-gap, 8px);
 		}
 		
 		radio {
 			margin: 0;
+			gap: 6px;
 		}
-		
-		radio + radio {
-			margin-left: var(--style-configurator-radio-margin-left, 16px);
+	}
+
+	&:not([show-manage-styles]) {
+		#manage-styles {
+			display: none;
 		}
 	}
 }
@@ -70,6 +77,6 @@ style-configurator {
 locale-selector {
 	menulist {
 		min-width: 200px;
+		margin: 0;
 	}
 }
-

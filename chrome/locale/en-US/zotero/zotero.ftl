@@ -269,14 +269,65 @@ runJS-result = {
 }
 runJS-run-async = Run as async function
 
+bibliography-window =
+    .title = { -app-name } - Create Citation/Bibliography
 bibliography-style-label = Citation Style:
 bibliography-locale-label = Language:
+bibliography-displayAs-label = Display citations as:
+bibliography-advancedOptions-label = Advanced Options
+bibliography-outputMode-label = Output Mode:
+bibliography-outputMode-citations =
+    .label = {
+        $type ->
+            [citation] Citations
+            [note] Notes
+            *[other] Citations
+    }
+bibliography-outputMode-bibliography =
+    .label = Bibliography
+bibliography-outputMethod-label = Output Method:
+bibliography-outputMethod-saveAsRTF =
+    .label = Save as RTF
+bibliography-outputMethod-saveAsHTML =
+    .label = Save as HTML
+bibliography-outputMethod-copyToClipboard =
+    .label = Copy to Clipboard
+bibliography-outputMethod-print =
+    .label = Print
+bibliography-manageStyles-label = Manage Styles…
+
+
+integration-docPrefs-window =
+    .title = { -app-name } - Document Preferences
+integration-addEditCitation-window =
+    .title = { -app-name } - Add/Edit Citation
+integration-editBibliography-window =
+    .title = { -app-name } - Edit Bibliography
+integration-quickFormatDialog-window =
+    .title = { -app-name } - Quick Format Citation
 
 integration-prefs-displayAs-label = Display Citations As:
 integration-prefs-footnotes = 
     .label = Footnotes
 integration-prefs-endnotes =
     .label = Endnotes
+integration-prefs-bookmarks =
+    .label = Store citation as bookmarks
+integration-prefs-bookmarks-description = Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.
+integration-prefs-bookmarks-formatNotice = {
+    $show ->
+        [true] The document must be saved as .doc or .docx.
+        *[other] {""}
+}
+integration-prefs-automaticCitationUpdates =
+    .label = Automatically update citations
+    .tooltip = Citations with pending updates will be highlighted in the document
+integration-prefs-automaticCitationUpdates-description = Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.
+integration-prefs-automaticJournalAbbeviations =
+    .label = Use MEDLINE journal abbreviations
+integration-prefs-automaticJournalAbbeviations-description = The “Journal Abbr” field will be ignored.
+integration-prefs-exportDocument =
+    .label = Switch to a Different Word Processor…
 
 
 publications-intro-page =

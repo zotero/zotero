@@ -10,46 +10,39 @@
 	persist="screenX screenY width height sizemode"
 	id="bibliography-window"
 	class="bibliography-window"
-	title="&zotero.bibliography.title;"
+	data-l10n-id="bibliography-window"
 	drawintitlebar-platforms="mac"
 	onload="Zotero_File_Interface_Bibliography.init()">
 <dialog
 	buttons="cancel,accept"
+	class="zotero-dialog-window"
 	id="zotero-bibliography">
-
-	<script src="include.js"/>
-	<script src="titlebar.js"/>
-	<script src="bibliography.js"/>
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/bibliography.js", this);
+	</script>
+	<html:link rel="localization" href="zotero.ftl"/>
 	
 	<vbox id="zotero-bibliography-container">
-		<groupbox>
-			<label><html:h2>&zotero.bibliography.style.label;</html:h2></label>
-			<richlistbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
-			<hbox pack="end">
-				<label id="manage-styles" class="text-link"
-					onclick="Zotero_File_Interface_Bibliography.manageStyles()">&zotero.bibliography.manageStyles;</label>
-			</hbox>
-		</groupbox>
-		<groupbox id="locale-box">
-			<hbox align="center">
-				<label><html:h2>&zotero.bibliography.locale.label;</html:h2></label>
-				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.selectedItem.value)" native="true"/>
-			</hbox>
-		</groupbox>
-		<groupbox>
-			<label><html:h2>&zotero.bibliography.outputMode;</html:h2></label>
+		<style-configurator id="style-configurator" />
+		<groupbox class="radio-row">
+			<html:label data-l10n-id="bibliography-outputMode-label"></html:label>
 			<radiogroup id="output-mode-radio">
-				<radio id="citations"/>
-				<radio id="bibliography" label="&zotero.bibliography.bibliography;"/>
+				<radio id="citations" data-l10n-id="bibliography-outputMode-citations"/>
+				<radio id="bibliography" data-l10n-id="bibliography-outputMode-bibliography"/>
 			</radiogroup>
 		</groupbox>
-		<groupbox>
-			<label><html:h2>&zotero.bibliography.outputMethod;</html:h2></label>
+		<groupbox class="radio-col">
+			<html:label data-l10n-id="bibliography-outputMethod-label"></html:label>
 			<radiogroup id="output-method-radio">
-				<radio id="save-as-rtf" label="&zotero.bibliography.saveAsRTF.label;"/>
-				<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
-				<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>
-				<radio id="print" label="&zotero.bibliography.print.label;"/>
+				<radio id="save-as-rtf" data-l10n-id="bibliography-outputMethod-saveAsRTF"/>
+				<radio id="save-as-html" data-l10n-id="bibliography-outputMethod-saveAsHTML"/>
+				<radio id="copy-to-clipboard" data-l10n-id="bibliography-outputMethod-copyToClipboard"/>
+				<radio id="print"  data-l10n-id="bibliography-outputMethod-print"/>
 			</radiogroup>
 		</groupbox>
 	</vbox>

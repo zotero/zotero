@@ -1,0 +1,120 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "themes/light";
+@import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
+
+style-configurator {
+	--style-configurator-gap: 16px;
+}
+
+checkbox, radio {
+	gap: 6px;
+	margin: 0;
+}
+
+checkbox {
+	.checkbox-check[native] {
+		margin-inline: 0;
+	}
+}
+
+radio {
+	.radio-check {
+		margin-inline: 0;
+	}
+
+	.radio-label-box {
+		.radio-icon {
+			display: none;
+		}
+	}
+}
+
+button {
+	margin: 0;
+}
+
+.bibliography-window
+{
+	min-width: 575px;
+}
+
+dialog
+{
+	max-width: 100vw;
+}
+
+#zotero-bibliography-container {
+	gap: 16px;
+}
+
+#manage-styles {
+	text-decoration: none;
+}
+
+.row-description
+{
+	padding: 0 0 0 23px;
+	margin: 0;
+	font-size: .8em;
+	color: var(--fill-secondary);
+}
+
+.radio-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+
+	radiogroup {
+		flex-direction: row;
+		gap: 8px;
+	}
+}
+
+.radio-col {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	radiogroup {
+		flex-direction: column;
+		gap: 8px;
+	}
+}
+
+.advanced-options {
+	gap: 8px;
+
+	.advanced-header {
+		gap: 8px;
+
+		.advanced-header-icon {
+			width: 8px;
+			transition: transform .125s ease;
+			transform: rotate(0deg);
+
+			@include svgicon("chevron-8", "universal", "8");
+		}
+
+		&.collapsed .advanced-header-icon {
+			transform: rotate(-90deg);
+		}
+	}
+
+	.advanced-body {
+		padding: 0 0 0 16px;
+		gap: 8px;
+	}
+}

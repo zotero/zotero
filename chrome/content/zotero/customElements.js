@@ -192,10 +192,16 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 				element: "dialog",
 				// The `attachShadow` are cleared in <dialog>, we need to monkey-patch after `connectedCallback`.
 				patchedFunction: "connectedCallback",
-				filename: "wizard-dialog"
 			}
 		],
-		mac: [],
+		mac: [
+			"wizard",
+			{
+				element: "dialog",
+				// The `attachShadow` are cleared in <dialog>, we need to monkey-patch after `connectedCallback`.
+				patchedFunction: "connectedCallback",
+			}
+		],
 		linux: [],
 	};
 	for (let [key, configs] of Object.entries(InjectCSSConfig)) {

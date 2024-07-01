@@ -23,8 +23,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-/* global XULElementBase: false */
-
 {
 	class StyleSelector extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
@@ -33,17 +31,24 @@
 				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 			>
 				<div>
-					<xul:richlistbox id="style-list" tabindex="0" />
+					<xul:richlistbox id="style-list" class="theme-listbox" tabindex="0" />
 				</div>
 			</div>
 		`);
 
 		set value(val) {
-			this.querySelector('#style-list').value = val;
+			if (!this.values.includes(val)) return;
+			let styleList = this.querySelector('#style-list');
+			styleList.value = val;
+			this._scrollToSelected();
 		}
 
 		get value() {
 			return this.querySelector('#style-list').value;
+		}
+
+		get values() {
+			return Array.from(this.querySelectorAll('#style-list richlistitem')).map(elem => elem.value);
 		}
 
 		async init() {
@@ -69,6 +74,16 @@
 				this.dispatchEvent(event);
 			});
 		}
+
+		_scrollToSelected() {
+			let list = this.querySelector('#style-list');
+			let containerRect = list.getBoundingClientRect();
+			let rowRect = list.selectedItem.getBoundingClientRect();
+			let topDistance = rowRect.top - containerRect.top;
+			let bottomDistance = containerRect.bottom - rowRect.bottom;
+			let toScroll = (topDistance - bottomDistance) / 2;
+			list.scrollTo({ top: list.scrollTop + toScroll });
+		}
 	}
 
 	class LocaleSelector extends XULElementBase {
@@ -86,6 +101,7 @@
 		`);
 
 		get value() {
+			if (this.localeListEl.disabled) return undefined;
 			return this.localeListEl.value;
 		}
 
@@ -154,9 +170,12 @@
 				xmlns="http://www.w3.org/1999/xhtml"
 				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 			>
-				<label for="style-selector" data-l10n-id="bibliography-style-label" />
-				<div class="style-selector-wrapper">
-					<xul:style-selector id="style-selector" value="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}" />
+				<div class="style-list-container">
+					<label for="style-selector" data-l10n-id="bibliography-style-label" />
+					<div class="style-selector-wrapper">
+						<xul:style-selector id="style-selector" value="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}" />
+					</div>
+					<label id="manage-styles" class="text-link" data-l10n-id="bibliography-manageStyles-label"></label>
 				</div>
 				<div class="locale-selector-wrapper">
 					<label for="locale-selector" class="locale-selector-label" data-l10n-id="bibliography-locale-label" />
@@ -167,6 +186,7 @@
 					/>
 				</div>
 				<div class="display-as-wrapper">
+					<label for="style-selector" data-l10n-id="bibliography-displayAs-label" />
 					<xul:radiogroup id="display-as">
 						<xul:radio value="footnotes" data-l10n-id="integration-prefs-footnotes" selected="true" />
 						<xul:radio value="endnotes" data-l10n-id="integration-prefs-endnotes" />
@@ -182,6 +202,10 @@
 
 		get style() {
 			return this.querySelector('#style-selector').value;
+		}
+
+		get styles() {
+			return this.querySelector('#style-selector').values;
 		}
 
 		set locale(val) {
@@ -207,20 +231,40 @@
 			this.querySelector('#style-selector').addEventListener('select', (_event) => {
 				this.handleStyleChanged(_event.target.value);
 
-				const event = document.createEvent("Events");
-				event.initEvent("select", true, true);
-				this.dispatchEvent(event);
+				const event = new CustomEvent("select", {
+					detail: {
+						type: "style",
+					},
+					bubbles: true,
+					cancelable: true
+				});
+				this.dispatchEvent(event,);
 			});
 
 			this.querySelector('#locale-selector').addEventListener('select', (_event) => {
-				const event = document.createEvent("Events");
-				event.initEvent("select", true, true);
+				const event = new CustomEvent("select", {
+					detail: {
+						type: "locale",
+					},
+					bubbles: true,
+					cancelable: true
+				});
 				this.dispatchEvent(event);
 			});
 
 			this.querySelector('#display-as').addEventListener('select', (_event) => {
-				const event = document.createEvent("Events");
-				event.initEvent("select", true, true);
+				const event = new CustomEvent("select", {
+					detail: {
+						type: "displayAs",
+					},
+					bubbles: true,
+					cancelable: true
+				});
+				this.dispatchEvent(event);
+			});
+
+			this.querySelector('#manage-styles').addEventListener('click', (_e) => {
+				const event = new CustomEvent("manage-styles");
 				this.dispatchEvent(event);
 			});
 		}
@@ -229,7 +273,9 @@
 			this.querySelector('#locale-selector').style = style;
 			const styleData = style ? Zotero.Styles.get(style) : null;
 			const isNoteStyle = (styleData || {}).class === 'note';
-			this.querySelector('.display-as-wrapper').style.display = isNoteStyle ? '' : 'none';
+			const noMultipleNotes = this.hasAttribute('no-multi-notes');
+			this.querySelector('.display-as-wrapper').style.display
+				= (isNoteStyle && !noMultipleNotes) ? '' : 'none';
 		}
 	}
 
