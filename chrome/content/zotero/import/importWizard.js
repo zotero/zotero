@@ -62,20 +62,14 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 	async init() {
 		const { mendeleyCode, libraryID, pageID, relinkOnly } = window.arguments[0].wrappedJSObject ?? {};
-
+		
 		this.libraryID = libraryID;
-
-		const predicateID = Zotero.RelationPredicates.getID('mendeleyDB:documentUUID');
-		if (predicateID) {
-			const relSQL = 'SELECT ROWID FROM itemRelations WHERE predicateID = ? LIMIT 1';
-			this.mendeleyHasPreviouslyImported = !!(await Zotero.DB.valueQueryAsync(relSQL, predicateID));
-		}
-
-		const extensions = await Zotero.getInstalledExtensions();
-		this.isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
-		this.mendeleyImporterVersion = parseInt((await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")) || 0);
-
 		this.wizard = document.getElementById('import-wizard');
+
+		// disable "continue" button until everything is ready
+		this.wizard.canAdvance = false;
+
+		// install event handlers
 		this.wizard.getPageById('page-start')
 			.addEventListener('pageadvanced', this.onImportSourceAdvance.bind(this));
 		this.wizard.getPageById('page-mendeley-online-intro')
@@ -118,17 +112,31 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.addEventListener('pageshow', this.updateFocus.bind(this));
 		this.wizard.addEventListener('wizardcancel', this.onCancel.bind(this));
 
-		const shouldCreateCollection = await this.getShouldCreateCollection();
-		document.getElementById('create-collection').checked = shouldCreateCollection;
-
 		// wizard.shadowRoot content isn't exposed to our css
 		this.wizard.shadowRoot
 			.querySelector('.wizard-header-label').style.fontSize = '16px';
+		
+		// Run async checks. This should be near instantaneous in most cases (unless the DB is busy). See #4300
+		const predicateID = Zotero.RelationPredicates.getID('mendeleyDB:documentUUID');
+		if (predicateID) {
+			const relSQL = 'SELECT ROWID FROM itemRelations WHERE predicateID = ? LIMIT 1';
+			this.mendeleyHasPreviouslyImported = !!(await Zotero.DB.valueQueryAsync(relSQL, predicateID));
+		}
+
+		const extensions = await Zotero.getInstalledExtensions();
+		this.isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
+		this.mendeleyImporterVersion = parseInt((await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")) || 0);
+
+		const shouldCreateCollection = await this.getShouldCreateCollection();
+		document.getElementById('create-collection').checked = shouldCreateCollection;
 
 		if (relinkOnly) {
 			document.getElementById('relink-only-checkbox').checked = true;
 			this.onRelinkOnlyChange();
 		}
+
+		// Re-enable "continue" button, now that everything is ready
+		this.wizard.canAdvance = true;
 
 		if (pageID) {
 			this.wizard.goTo(pageID);
