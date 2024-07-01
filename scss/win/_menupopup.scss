@@ -55,12 +55,12 @@ menupopup {
 			menu:not([icon], .menu-iconic),
 			menuitem:not([checked="true"], [icon], .menuitem-iconic) {
 				padding-inline-start: 36px;
-			}
-			menuitem {
+
 				.menu-iconic-icon {
 					display: none;
 				}
 			}
+
 			menuitem[selected="true"] {
 				padding-inline-start: 12px !important;
 		
