@@ -623,6 +623,8 @@ Zotero_Preferences.Attachment_Base_Directory = {
 				let storedPath = attachment.attachmentPath;
 				if (storedPath.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
 					relPath = storedPath.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length);
+					// Use platform-specific slashes, which PathUtils.joinRelative() requires below
+					relPath = Zotero.Attachments.fixPathSlashes(relPath);
 				}
 			}
 			catch (e) {
