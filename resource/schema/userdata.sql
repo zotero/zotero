@@ -1,4 +1,4 @@
--- 122
+-- 123
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -186,6 +186,7 @@ CREATE TABLE itemData (
     FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
 CREATE INDEX itemData_fieldID ON itemData(fieldID);
+CREATE INDEX itemData_valueID ON itemData(valueID);
 
 -- Note data for note and attachment items
 CREATE TABLE itemNotes (

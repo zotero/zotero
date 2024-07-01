@@ -3455,8 +3455,9 @@ Zotero.Schema = new function(){
 				await Zotero.DB.queryAsync("REPLACE INTO fileTypeMIMETypes VALUES(8, 'application/epub')");
 			}
 			
-			// TEMP: When adding 123, check whether IA.authorName fix in items.js::_loadAnnotations()
-			// can be updated due to update steps being indempodent
+			else if (i == 123) {
+				await Zotero.DB.queryAsync("CREATE INDEX itemData_valueID ON itemData(valueID)");
+			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
