@@ -637,6 +637,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			// don't touch the attachment, since it will continue to work
 			if (relPath) {
 				if (yield IOUtils.exists(PathUtils.joinRelative(basePath, relPath))) {
+					Zotero.debug(`${relPath} found within new base path -- skipping`);
 					numNewAttachments++;
 					continue;
 				}
