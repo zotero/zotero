@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "Alt Dermelerdeki Eserleri Göster">
 <!ENTITY fontSize.label "Yazı Tipi Boyutu">
 <!ENTITY noteFontSize.label "Not Yazı Tipi Boyutu">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Sütunlar">
+<!ENTITY sortBy.label "göre sırala">
 
 <!ENTITY toolsMenu.label "Araçlar">
 <!ENTITY toolsMenu.accesskey "T">

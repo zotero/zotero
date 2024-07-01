@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Не показывать развороты">
 <!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечётных номеров">
 <!ENTITY zotero.pdfReader.evenSpreads "Развороты с чётных номеров">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "С прокруткой">
+<!ENTITY zotero.pdfReader.paginated "Постранично">
 <!ENTITY zotero.pdfReader.zoomIn "Увеличить">
 <!ENTITY zotero.pdfReader.zoomOut "Уменьшить">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Масштаб 100&#37;">
 <!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
 <!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">
 <!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">

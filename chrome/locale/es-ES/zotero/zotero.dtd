@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Vista de libro">
 <!ENTITY zotero.pdfReader.oddSpreads "Vista de libro impar">
 <!ENTITY zotero.pdfReader.evenSpreads "Vista de libro par">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Desplazado">
+<!ENTITY zotero.pdfReader.paginated "Paginado">
 <!ENTITY zotero.pdfReader.zoomIn "Ampliar zum">
 <!ENTITY zotero.pdfReader.zoomOut "Reducir zum">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Restablecer zum">
 <!ENTITY zotero.pdfReader.zoomAuto "Redimensionar automáticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zum a ancho de página">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Ampliar a alto de página">

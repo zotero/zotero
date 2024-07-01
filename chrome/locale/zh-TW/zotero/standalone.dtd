@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "顯示子文獻集的項目">
 <!ENTITY fontSize.label "字型大小">
 <!ENTITY noteFontSize.label "筆記字型大小">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "直欄">
+<!ENTITY sortBy.label "排序方式">
 
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">

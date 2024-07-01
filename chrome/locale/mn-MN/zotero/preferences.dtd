@@ -1,20 +1,20 @@
-<!ENTITY zotero.preferences.title "Zotero Preferences">
+<!ENTITY zotero.preferences.title "Зотерогийн давуу эрх">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "Тусламж">
 
-<!ENTITY zotero.preferences.default "Default:">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.default "Өгөгдөл:">
+<!ENTITY zotero.preferences.items "зүйлүүд">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Захиалгат…">
 
-<!ENTITY zotero.preferences.prefpane.general "General">
+<!ENTITY zotero.preferences.prefpane.general "Нэгдсэн">
 
-<!ENTITY zotero.preferences.interface "Interface">
-<!ENTITY zotero.preferences.fileHandling "File Handling">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.interface "Интерфэйс">
+<!ENTITY zotero.preferences.fileHandling "Картын сангийн удирдлага">
+<!ENTITY zotero.preferences.automaticSnapshots "Вэб хуудсуудаас зүйл үүсгэх үед автоматаар агшин зуурын зураг авах">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Зүйлүүдийг хадгалахдаа холбосон PDF болон бусад файлуудыг автоматаар хавсаргана">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Холбогдсон файлын нэрийг өөрчлөх">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF файлуудыг нээнэ үү">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">

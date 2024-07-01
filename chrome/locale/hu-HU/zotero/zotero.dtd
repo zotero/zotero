@@ -136,7 +136,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Szín kiválasztása…">
 <!ENTITY zotero.tagSelector.renameTag "Címke átnevezése...">
 <!ENTITY zotero.tagSelector.deleteTag "Címke törlése...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Feldarabolás…">
 
 <!ENTITY zotero.tagColorChooser.title "Válassza ki a címke színét és a pozíciót.">
 <!ENTITY zotero.tagColorChooser.color "Szín:">
@@ -319,10 +319,10 @@
 <!ENTITY zotero.pdfReader.oddSpreads "Oldalak összetapasztása: páratlan">
 <!ENTITY zotero.pdfReader.evenSpreads "Oldalak összetapasztása: páros">
 <!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.paginated "Oldalszámozás">
 <!ENTITY zotero.pdfReader.zoomIn "Nagyítás">
 <!ENTITY zotero.pdfReader.zoomOut "Kicsinyítés">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Nagyítás visszaállítása">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatikus átméretezés">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Nagyítás oldalszélességre">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Teljes oldal">

@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Birleştirme">
 <!ENTITY zotero.pdfReader.oddSpreads "Tek Numaralı">
 <!ENTITY zotero.pdfReader.evenSpreads "Çift Numaralı">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Kaydırmalı">
+<!ENTITY zotero.pdfReader.paginated "Sayfalanmış">
 <!ENTITY zotero.pdfReader.zoomIn "Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomOut "Uzaklaştır">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Yakınlaştırmayı Sıfırla">
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Sayfa Yüksekliğine Yakınlaştır">

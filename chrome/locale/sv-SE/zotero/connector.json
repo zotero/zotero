@@ -56,6 +56,9 @@
   "upgradeApp": {
     "message": "Uppgradera $1"
   },
+  "firstRun_acceptButton": {
+    "message": "Jag förstår"
+  },
   "error_connection_isAppRunning": {
     "message": "Körs $1?"
   },

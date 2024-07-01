@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "인용 복사">
 <!ENTITY copyBibliographyCmd.label "서지 복사">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "노트 복사">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "페이지 방향 바꾸기">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -42,7 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "이동">
 
 <!ENTITY viewMenu.label "보기">
 <!ENTITY viewMenu.accesskey "V">
@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "하위 컬렉션 항목 표시">
 <!ENTITY fontSize.label "글꼴 크기">
 <!ENTITY noteFontSize.label "노트 글꼴 크기">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "열">
+<!ENTITY sortBy.label "정렬 기준">
 
 <!ENTITY toolsMenu.label "도구">
 <!ENTITY toolsMenu.accesskey "T">

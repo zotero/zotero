@@ -1,95 +1,95 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "Давуу эрх...">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Services">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
-<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
+<!ENTITY servicesMenuMac.label "Үйлчилгээ">
+<!ENTITY hideThisAppCmdMac.label "Нуух &брэндийнБогиноНэр;">
+<!ENTITY hideThisAppCmdMac.commandkey "Х">
+<!ENTITY hideOtherAppsCmdMac.label "Бусдыг нуух">
+<!ENTITY hideOtherAppsCmdMac.commandkey "Х">
+<!ENTITY showAllAppsCmdMac.label "Бүгдийг харуулах">
+<!ENTITY quitApplicationCmdMac.label "Зотерог хаах">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.label "Хавтас">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Хадгалах...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Хуудасны тохиргоо...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Хэвлэх...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.label "Хаах">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY manageAttachments.label "Удирдлагын хавсралтууд">
+<!ENTITY convertToStored.label "Холбогдсон файлуудыг хадгалсан файл руу хөрвүүлэх…">
+<!ENTITY importCmd.label "оруулах…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
-<!ENTITY quitApplicationCmdWin.label "Exit">
+<!ENTITY importFromClipboardCmd.label "Түр санах ойноос оруулах/импортлох/">
+<!ENTITY quitApplicationCmdWin.label "Гарах">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
+<!ENTITY quitApplicationCmd.label "Гаргах">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyCitationCmd.label "Эшлэлийг хуулах">
+<!ENTITY copyBibliographyCmd.label "Номзүйг хуулах">
+<!ENTITY copyNoteCmd.label "Тэмдэглэлийг хуулах">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "Хуудасны чиглэлийг солих">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "Бичвэрийн чиглэлийг солих">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Яв">
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Үзэх">
+<!ENTITY viewMenu.accesskey "В">
+<!ENTITY layout.label "Бүдүүвч">
+<!ENTITY standardView.label "Стандарт харагдац">
+<!ENTITY stackedView.label "Давхардсан харагдац">
+<!ENTITY collectionsPane.label "Түүврийн жагсаалт">
+<!ENTITY itemPane.label "Зүйлийн жагсаалт">
+<!ENTITY tagSelector.label "Тааг сонгох">
+<!ENTITY recursiveCollections.label "Дэд цуглуулгын зүйлсийг харуулах">
+<!ENTITY fontSize.label "Үсгийн хэмжээ">
+<!ENTITY noteFontSize.label "Тайлбар үсгийн хэмжээ">
 <!ENTITY columns.label "Columns">
 <!ENTITY sortBy.label "Sort By">
 
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "Хэрэгслүүд">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Хөтөч холбогчийг суулгана уу?">
 <!ENTITY installConnector.accesskey "C">
-<!ENTITY addons.label "Add-ons">
-<!ENTITY developer.label "Developer">
+<!ENTITY addons.label "Нэмэлтүүд">
+<!ENTITY developer.label "Хөгжүүлэгч">
 
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Бүгдийг эхэнд авчир">
 
-<!ENTITY helpMenu.label "Help">
+<!ENTITY helpMenu.label "Тусламж">
 <!ENTITY helpMenu.accesskey "H">
-<!ENTITY helpMenuWin.label "Help">
+<!ENTITY helpMenuWin.label "Тусламж">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "Тухай &Богино нэр:">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
-<!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
-<!ENTITY helpFeedbackPage.accesskey "F">
+<!ENTITY productHelp.label "Дэмжлэг ба баримт">
+<!ENTITY productHelp.accesskey "Д">
+<!ENTITY helpTroubleshootingInfo.label "Мэдээллийг илрүүлэх">
+<!ENTITY helpTroubleshootingInfo.accesskey "Т">
+<!ENTITY helpFeedbackPage.label "Хэлэлцүүлгийн форум">
+<!ENTITY helpFeedbackPage.accesskey "Ф">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
-<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpReportErrors.label "Алдаа оноог тайл...">
+<!ENTITY helpReportErrors.accesskey "Р">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
-<!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.label "Гаралтын бүртгэлийг устгах">
+<!ENTITY debugOutputLogging.accesskey "Л">
+<!ENTITY debugOutputLogging.submit "Гаралтыг оруулах">
+<!ENTITY debugOutputLogging.view "Гаралтыг Харах">
+<!ENTITY debugOutputLogging.clear "Гаралтыг Цэвэрлэ">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Бүртгэлийг идэвхжүүлсэн үед дахин эхлүүлнэ үү…">
 
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "Шинэчлэлтүүдийг шалгах…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

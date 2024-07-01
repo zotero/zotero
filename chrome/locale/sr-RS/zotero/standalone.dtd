@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Копирај цитат">
 <!ENTITY copyBibliographyCmd.label "Копирај библиографију">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Копирај белешку">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Промени смер странице">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -42,7 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Иди">
 
 <!ENTITY viewMenu.label "Преглед">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +60,7 @@
 
 <!ENTITY toolsMenu.label "Алати">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Инсталирај програм за повезивање са разгледачем">
+<!ENTITY installConnector.label "Инсталирај повезивање са прегледачем">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Додаци">
 <!ENTITY developer.label "Програмер">

@@ -6,7 +6,7 @@
 <!ENTITY zotero.developers "개발자:">
 <!ENTITY zotero.alumni "역대 참여자:">
 <!ENTITY zotero.about.localizations "지역화 담당자:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
+<!ENTITY zotero.about.additionalSoftware "타사 소프트웨어:">
 <!ENTITY zotero.thanks "감사드릴 분들:">
 <!ENTITY zotero.about.close "닫기">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Zotero 프로젝트에 기여한 분들">

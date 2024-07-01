@@ -55,12 +55,12 @@
 <!ENTITY recursiveCollections.label "Vis elementer fra under-samlinger">
 <!ENTITY fontSize.label "Skriftstørrelse">
 <!ENTITY noteFontSize.label "Skriftstørrelse for notat">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Kolonner">
+<!ENTITY sortBy.label "Sorter etter">
 
 <!ENTITY toolsMenu.label "Verktøy">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Innstaller Tilknytter for nettleser">
+<!ENTITY installConnector.label "Innstaller tilknytter for nettleser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillegg">
 <!ENTITY developer.label "Utvikler">
@@ -78,7 +78,7 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informasjon for feilsøking">
 <!ENTITY helpTroubleshootingInfo.accesskey "I">
-<!ENTITY helpFeedbackPage.label "Diskusjonsforumer">
+<!ENTITY helpFeedbackPage.label "Diskusjonsforum">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Rapporter feil...">

@@ -1,5 +1,5 @@
 <!ENTITY preferencesCmdMac.label "首选项…">
-<!ENTITY preferencesCmdMac.commandkey ",">
+<!ENTITY preferencesCmdMac.commandkey "，">
 <!ENTITY servicesMenuMac.label "服务">
 <!ENTITY hideThisAppCmdMac.label "隐藏 &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "显示子分类中的条目">
 <!ENTITY fontSize.label "字体大小">
 <!ENTITY noteFontSize.label "笔记字体大小">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "直欄">
+<!ENTITY sortBy.label "排序方式">
 
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">

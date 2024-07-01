@@ -1,51 +1,51 @@
 <!ENTITY preferencesCmdMac.label "விருப்பத்தேர்வுகள்…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "சேவைகள்">
-<!ENTITY hideThisAppCmdMac.label "மறை &amp; பிராண்ட்சிறு பெயர்;">
-<!ENTITY hideThisAppCmdMac.commandkey "எச்">
+<!ENTITY hideThisAppCmdMac.label "மறை &amp; வியாபாரக்குறிசிறுபெயர்;">
+<!ENTITY hideThisAppCmdMac.commandkey "க">
 <!ENTITY hideOtherAppsCmdMac.label "மற்றவை மறை">
-<!ENTITY hideOtherAppsCmdMac.commandkey "எச்">
+<!ENTITY hideOtherAppsCmdMac.commandkey "க">
 <!ENTITY showAllAppsCmdMac.label "அனைத்தையும் காட்டு">
 <!ENTITY quitApplicationCmdMac.label "சோட்டெரோவை விட்டு வெளியேறு">
-<!ENTITY quitApplicationCmdMac.key "கே">
+<!ENTITY quitApplicationCmdMac.key "ஆ">
 
 <!ENTITY fileMenu.label "கோப்பு">
-<!ENTITY fileMenu.accesskey "எப்">
+<!ENTITY fileMenu.accesskey "ஃ">
 <!ENTITY saveCmd.label "சேமி…">
-<!ENTITY saveCmd.key "எச்">
-<!ENTITY saveCmd.accesskey "எ">
+<!ENTITY saveCmd.key "இ">
+<!ENTITY saveCmd.accesskey "அ">
 <!ENTITY pageSetupCmd.label "பக்கம் அமைப்பு…">
-<!ENTITY pageSetupCmd.accesskey "உ">
+<!ENTITY pageSetupCmd.accesskey "ற">
 <!ENTITY printCmd.label "அச்சிடுக…">
-<!ENTITY printCmd.key "பி">
-<!ENTITY printCmd.accesskey "பி">
+<!ENTITY printCmd.key "ண">
+<!ENTITY printCmd.accesskey "ண">
 <!ENTITY closeCmd.label "மூடு">
-<!ENTITY closeCmd.key "டபல்யு">
-<!ENTITY closeCmd.accesskey "சி">
+<!ENTITY closeCmd.key "ஈ">
+<!ENTITY closeCmd.accesskey "ஒ">
 <!ENTITY manageAttachments.label "இணைப்புகளை நிர்வகிக்கவும்">
 <!ENTITY convertToStored.label "இணைக்கப்பட்ட கோப்புகளை சேமிக்கப்பட்ட கோப்புகளாக மாற்றவும்…">
 <!ENTITY importCmd.label "இறக்குமதி…">
-<!ENTITY importCmd.key "நான்">
+<!ENTITY importCmd.key "ன">
 <!ENTITY importFromClipboardCmd.label "இடைநிலைப்பலகையிலிருந்து இறக்குமதி">
 <!ENTITY quitApplicationCmdWin.label "வெளியேறு">
-<!ENTITY quitApplicationCmdWin.accesskey "ஃச்">
+<!ENTITY quitApplicationCmdWin.accesskey "ஓ">
 <!ENTITY quitApplicationCmd.label "வெளியேறு">
-<!ENTITY quitApplicationCmd.accesskey "கே">
+<!ENTITY quitApplicationCmd.accesskey "ஆ">
 
-<!ENTITY copyCitationCmd.label "மேற்கோள் நகல்">
+<!ENTITY copyCitationCmd.label "மேற்கோள் நகலெடு">
 <!ENTITY copyBibliographyCmd.label "நூலியல் நகலெடு">
-<!ENTITY copyNoteCmd.label "குறிப்பு நகல்">
+<!ENTITY copyNoteCmd.label "குறிப்பு நகலெடு">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "பக்க திசையை மாற்றவும்">
-<!ENTITY bidiSwitchPageDirectionItem.accesskey "சி">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "எ">
 <!ENTITY bidiSwitchTextDirectionItem.label "உரை திசையை மாற்றவும்">
-<!ENTITY bidiSwitchTextDirectionItem.accesskey "டபல்யு">
-<!ENTITY bidiSwitchTextDirectionItem.commandkey "ஃச்">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "ஈ">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "ஓ">
 
 <!ENTITY goMenu.label "போ">
 
 <!ENTITY viewMenu.label "பார்வை">
-<!ENTITY viewMenu.accesskey "வி">
+<!ENTITY viewMenu.accesskey "வ">
 <!ENTITY layout.label "மனையமைவு">
 <!ENTITY standardView.label "நிலையான பார்வை">
 <!ENTITY stackedView.label "அடுக்கப்பட்ட பார்வை">
@@ -59,37 +59,37 @@
 <!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "கருவிகள்">
-<!ENTITY toolsMenu.accesskey "டி">
+<!ENTITY toolsMenu.accesskey "ஏ">
 <!ENTITY installConnector.label "உலாவி இணைப்பியை நிறுவவும்">
-<!ENTITY installConnector.accesskey "சி">
+<!ENTITY installConnector.accesskey "ஒ">
 <!ENTITY addons.label "துணை நிரல்கள்">
 <!ENTITY developer.label "உருவாக்குநர்">
 
 <!ENTITY bringAllToFront.label "அனைத்தையும் முன்னால் கொண்டு வாருங்கள்">
 
 <!ENTITY helpMenu.label "உதவி">
-<!ENTITY helpMenu.accesskey "எச்">
+<!ENTITY helpMenu.accesskey "க">
 <!ENTITY helpMenuWin.label "உதவி">
-<!ENTITY helpMenuWin.accesskey "எச்">
+<!ENTITY helpMenuWin.accesskey "க">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "பற்றி &amp; பிராண்ட்சிறு பெயர்;">
-<!ENTITY aboutProduct.accesskey "எ">
+<!ENTITY aboutProduct.label "பற்றி &amp; வியாபாரக்குறிசிறுபெயர்;">
+<!ENTITY aboutProduct.accesskey "அ">
 <!ENTITY productHelp.label "உதவி மற்றும் ஆவணங்கள்">
-<!ENTITY productHelp.accesskey "டி">
-<!ENTITY helpTroubleshootingInfo.label "பிரச்சினைகளுக்கு தீர்வளிக்கும் தகவல்கள்">
-<!ENTITY helpTroubleshootingInfo.accesskey "டி">
+<!ENTITY productHelp.accesskey "உ">
+<!ENTITY helpTroubleshootingInfo.label "பிரச்சினைகளுக்குத் தீர்வளிக்கும் தகவல்கள்">
+<!ENTITY helpTroubleshootingInfo.accesskey "ஏ">
 <!ENTITY helpFeedbackPage.label "கலந்துரையாடல் மன்றங்கள்">
-<!ENTITY helpFeedbackPage.accesskey "எப்">
+<!ENTITY helpFeedbackPage.accesskey "ஃ">
 
 <!ENTITY helpReportErrors.label "பிழைகளைப் புகாரளி…">
-<!ENTITY helpReportErrors.accesskey "ஆர்">
+<!ENTITY helpReportErrors.accesskey "ஐ">
 
 <!ENTITY debugOutputLogging.label "பிழை வெளியீட்டு பதிவு">
-<!ENTITY debugOutputLogging.accesskey "எல்">
+<!ENTITY debugOutputLogging.accesskey "த">
 <!ENTITY debugOutputLogging.submit "வெளியீட்டை சமர்ப்பி">
 <!ENTITY debugOutputLogging.view "வெளியீட்டைக் காண்க">
 <!ENTITY debugOutputLogging.clear "வெளியீட்டை அழி">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "பதிவுசெய்தல் இயக்கப்பட்டவுடன் மறுதொடக்கம் செய்…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "பதிவுசெய்தல் இயக்கப்பட்டு மறுதொடக்கம் செய்…">
 
 <!ENTITY helpCheckForUpdates.label "புதுப்பிப்புகளை சரிபார்…">
-<!ENTITY helpCheckForUpdates.accesskey "உ">
+<!ENTITY helpCheckForUpdates.accesskey "ற">

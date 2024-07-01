@@ -9,8 +9,8 @@
 <!ENTITY quitApplicationCmdMac.label "Baigti darbą su Zotero">
 <!ENTITY quitApplicationCmdMac.key "B">
 
-<!ENTITY fileMenu.label "Failas">
-<!ENTITY fileMenu.accesskey "F">
+<!ENTITY fileMenu.label "Rinkmena">
+<!ENTITY fileMenu.accesskey "R">
 <!ENTITY saveCmd.label "Įrašyti...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "r">
@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopijuoti citatą">
 <!ENTITY copyBibliographyCmd.label "Kopijuoti bibliografiją">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopijuoti pastabą">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Keisti puslapio kryptį">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "p">
@@ -42,10 +42,10 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "e">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Eiti">
 
 <!ENTITY viewMenu.label "Rodymas">
-<!ENTITY viewMenu.accesskey "V">
+<!ENTITY viewMenu.accesskey "d">
 <!ENTITY layout.label "Išdėstymas">
 <!ENTITY standardView.label "Įprastas rodymas">
 <!ENTITY stackedView.label "Straipsnio informacija apačioje">
@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "Rodyti įrašus iš poaplankių">
 <!ENTITY fontSize.label "Šrifto dydis">
 <!ENTITY noteFontSize.label "Pastabos šrifto dydis">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Stulpeliai">
+<!ENTITY sortBy.label "Rikiuoti pagal">
 
 <!ENTITY toolsMenu.label "Priemonės">
 <!ENTITY toolsMenu.accesskey "P">
@@ -85,7 +85,7 @@
 <!ENTITY helpReportErrors.accesskey "r">
 
 <!ENTITY debugOutputLogging.label "Derinimo pranešimų išvedimas">
-<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.accesskey "D">
 <!ENTITY debugOutputLogging.submit "Siųsti išvedimą">
 <!ENTITY debugOutputLogging.view "Rodyti išvedimą">
 <!ENTITY debugOutputLogging.clear "Išvalyti išvedimą">

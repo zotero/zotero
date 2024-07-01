@@ -66,13 +66,13 @@
     "message": "$1 er deaktivert på utvidelsessider"
   },
   "appConnector": {
-    "message": "$1 Tilknytter"
+    "message": "$1 tilknytter"
   },
   "upgradeApp": {
     "message": "Oppgrader $1"
   },
   "firstRun_title": {
-    "message": "Du har installert $1 Tilknytter!"
+    "message": "Du har installert $1 tilknytter!"
   },
   "firstRun_text1": {
     "message": "$1 Tilknytter gjør deg i stand til å <a href=\"$2\"> lagre elementer til $1 </a> fra nettleseren din med et enkelt klikk."
@@ -96,13 +96,13 @@
     "message": "Aktiver Lagre til nettbiblioteket"
   },
   "reports_report_submitted": {
-    "message": "Feilrapporten din er levert.\n\nRapport ID: $1\n\nLegg igjen en melding på Zotero forumene med denne rapport ID-en, en beskrivelse av problemet, og nødvendige steg for å gjenskape problemet.\n\nFeilrapporter blir ikke gjennomfått hvis de følges av en melding på forumene."
+    "message": "Feilrapporten din er levert.\n\nRapport ID: $1\n\nLegg igjen en melding på Zotero foruma med denne rapport ID-en, en beskrivelse av problemet, og nødvendige steg for å gjenskape problemet.\n\nFeilrapporter blir ikke gjennomfått hvis de følges av en melding på foruma."
   },
   "reports_debug_output_submitted": {
     "message": "Utdata fra feilsøket ditt er levert.\n\nDebug ID er $1."
   },
   "reports_submission_failed": {
-    "message": "En feil skjedde under levering av rapporten din.\n\n$1\n\nSjekk internettforbindelsen din. Hvis problemet vedvarer, skriv en melding på Zotero forumene."
+    "message": "En feil skjedde under levering av rapporten din.\n\n$1\n\nSjekk internettforbindelsen din. Hvis problemet vedvarer, skriv en melding på Zotero foruma."
   },
   "integration_error_clientUpgrade": {
     "message": "Web-basert henvisning krever $1 eller senere."

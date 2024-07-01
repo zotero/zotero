@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "Näytä alakokoelmien nimikkeet">
 <!ENTITY fontSize.label "Fonttikoko">
 <!ENTITY noteFontSize.label "Muistiinpanojen fonttikoko">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Sarakkeet">
+<!ENTITY sortBy.label "Lajittele">
 
 <!ENTITY toolsMenu.label "Työkalut">
 <!ENTITY toolsMenu.accesskey "T">

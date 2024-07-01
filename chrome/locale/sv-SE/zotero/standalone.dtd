@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopiera referens">
 <!ENTITY copyBibliographyCmd.label "Kopiera källförteckning">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopiera anteckning">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Växla sidans läge">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

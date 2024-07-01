@@ -53,7 +53,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">
 <!ENTITY zotero.collections.showRetractedItems "철회된 항목 표시">
 
-<!ENTITY zotero.items.itemType "항목 형식">
+<!ENTITY zotero.items.itemType "항목 종류">
 <!ENTITY zotero.items.creator_column "창작자">
 <!ENTITY zotero.items.year_column "연도">
 <!ENTITY zotero.items.dateModified_column "변경일">
@@ -109,8 +109,8 @@
 <!ENTITY zotero.item.textTransform "글자 변형">
 <!ENTITY zotero.item.textTransform.titlecase "글차 첫머리는 대문자">
 <!ENTITY zotero.item.textTransform.sentencecase "문장 첫머리는 대문자">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "이름/성 맞바꾸기">
+<!ENTITY zotero.item.creatorTransform.fixCase "대소문자 교정">
 <!ENTITY zotero.item.copyAsURL "URL로 복사">
 <!ENTITY zotero.item.deletePermanently "완전히 삭제...">
 
@@ -132,11 +132,11 @@
 <!ENTITY zotero.tagSelector.showAutomatic "자동 표시">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "이 라이브러리 내 모든 태그 표시">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "이 라이브러리의 자동 태그 삭제...">
-<!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
+<!ENTITY zotero.tagSelector.clearAll "모두 선택 해제">
 <!ENTITY zotero.tagSelector.assignColor "색상 지정...">
 <!ENTITY zotero.tagSelector.renameTag "태그 이름 변경...">
 <!ENTITY zotero.tagSelector.deleteTag "태그 지우기...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "나누기...">
 
 <!ENTITY zotero.tagColorChooser.title "태그 색상 및 위치 선택">
 <!ENTITY zotero.tagColorChooser.color "색상:">
@@ -144,11 +144,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "색상 설정">
 <!ENTITY zotero.tagColorChooser.removeColor "색상 제거">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "라이브러리에 추가할 ISBN, DOI, PMID, arXiv ID, 또는 ADS Bibcode를 입력하세요:">
 <!ENTITY zotero.lookup.button.search "검색">
 
 <!ENTITY zotero.createParent.title "상위 항목 생성">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.button.manual "수동 입력">
 
 <!ENTITY zotero.selectitems.title "항목 선택">
 <!ENTITY zotero.selectitems.intro.label "라이브러리에 추가하고 싶은 항목 선택">
@@ -156,7 +156,7 @@
 <!ENTITY zotero.selectitems.select.label "확인">
 
 <!ENTITY zotero.bibliography.title "참조 문헌 목록 생성">
-<!ENTITY zotero.bibliography.style.label "인용 형식:">
+<!ENTITY zotero.bibliography.style.label "인용 스타일:">
 <!ENTITY zotero.bibliography.manageStyles "스타일 관리...">
 <!ENTITY zotero.bibliography.locale.label "언어:">
 <!ENTITY zotero.bibliography.outputMode "출력 방식:">
@@ -170,25 +170,25 @@
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">
 <!ENTITY zotero.integration.addEditCitation.title "인용 추가/편집">
 <!ENTITY zotero.integration.editBibliography.title "참고문헌 목록 편집">
-<!ENTITY zotero.integration.quickFormatDialog.title "빠른 인용 형식">
+<!ENTITY zotero.integration.quickFormatDialog.title "빠른 인용 양식">
 
 <!ENTITY zotero.progress.title "진행">
 
 <!ENTITY zotero.import "불러오기">
 <!ENTITY zotero.import.whereToImportFrom "어디서 불러올까요?">
 <!ENTITY zotero.import.source.file "파일 (BiBTeX, RIS, Zotero RDF 등)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "PDF 또는 다른 파일이 있는 폴더">
+<!ENTITY zotero.import.onlineImport "온라인으로 가져오기">
 <!ENTITY zotero.import.importing "불러오는 중...">
 <!ENTITY zotero.import.database "데이터베이스">
 <!ENTITY zotero.import.lastModified "마지막 수정 시간">
 <!ENTITY zotero.import.size "크기">
 <!ENTITY zotero.import.createCollection "컬렉션 및 항목을 새 컬렉션으로 불러오기">
 <!ENTITY zotero.import.fileHandling "파일 처리 방법">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "새 항목만 다운로드; 이전에 가져온 항목을 업데이트하지 않기">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
-<!ENTITY zotero.exportOptions.format.label "형식:">
+<!ENTITY zotero.exportOptions.format.label "양식:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "중계기 옵션">
 
 <!ENTITY zotero.charset.label "문자 인코딩">
@@ -196,10 +196,10 @@
 
 <!ENTITY zotero.citation.keepSorted.label "원본 정렬 유지">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "저자 숨김">
 <!ENTITY zotero.citation.prefix.label "접두사:">
 <!ENTITY zotero.citation.suffix.label "접미사:">
-<!ENTITY zotero.citation.editorWarning.label "경고: 편집기에서 인용 문구를 직접 수정하면, 더 이상 데이터베이스나 인용 형식에 대한 변경 사항이 반영되지 않습니다.">
+<!ENTITY zotero.citation.editorWarning.label "경고: 편집기에서 인용 문구를 직접 수정하면, 더 이상 데이터베이스나 인용 스타일에 대한 변경 사항이 반영되지 않습니다.">
 
 <!ENTITY zotero.richText.italic.label "이탤릭">
 <!ENTITY zotero.richText.bold.label "굵게">
@@ -280,17 +280,17 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "모호한 인용">
 <!ENTITY zotero.rtfScan.mappedCitations.label "문헌확인된 인용">
 <!ENTITY zotero.rtfScan.introPage.label "소개">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero가 자동적으로 인용을 인식하여 참고문헌 목록을 작성하고 이를 RTF 파일에 삽입합니다. RTF 스캔 기능은 현재 다음 형식으로 된 인용을 인식할 수 있습니다 : ">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero가 인용을 자동으로 인식하여 다시 꾸미고 참고문헌 목록을 RTF 파일에 삽입합니다. RTF 스캔 기능은 현재 다음 형식으로 작성된 인용을 인식할 수 있습니다:">
 <!ENTITY zotero.rtfScan.introPage.description2 "시작하려면, 입력할 RTF 파일과 출력할 RTF 파일을 선택하세요 : ">
 <!ENTITY zotero.rtfScan.scanPage.label "인용 스캔중">
 <!ENTITY zotero.rtfScan.scanPage.description "인용 조사를 위해 문서 스캔 중 입니다. 잠시만 기다려주십시오.">
 <!ENTITY zotero.rtfScan.citationsPage.label "인용된 항목 확인">
 <!ENTITY zotero.rtfScan.citationsPage.description "다음의 인식된 인용 목록을 검토하여 Zotero가 상응하는 항목을 정확하게 선택했는지 확인하세요. 애매하거나 올바르지 않은 인용이 있으면 다음 단계로 넘어가기 전에 반드시 바르게 수정해야 합니다.">
-<!ENTITY zotero.rtfScan.stylePage.label "문서 형식 정하기">
-<!ENTITY zotero.rtfScan.formatPage.label "인용 형식 정하는 중">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero가 RTF 파일을 처리하고 형식화하는 중입니다. 잠시 기다려 주십시오.">
+<!ENTITY zotero.rtfScan.stylePage.label "문서 양식">
+<!ENTITY zotero.rtfScan.formatPage.label "인용 서식 적용 중">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero가 RTF 파일을 처리하고 양식을 적용하는 중입니다. 잠시 기다려 주십시오.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 스캔 완료">
-<!ENTITY zotero.rtfScan.completePage.description "이제 문서가 스캔되어 처리되었습니다. 문서 형식이 올바른지 확인하여 주십시오.">
+<!ENTITY zotero.rtfScan.completePage.description "이제 문서가 스캔되어 처리되었습니다. 문서 양식이 올바른지 확인하여 주십시오.">
 <!ENTITY zotero.rtfScan.inputFile.label "입력 파일">
 <!ENTITY zotero.rtfScan.outputFile.label "출력 파일">
 
@@ -301,33 +301,33 @@
 <!ENTITY zotero.attachLink.label.link "링크:">
 <!ENTITY zotero.attachLink.label.title "제목:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "항목 노트 추가">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "주석에서 항목 노트 추가">
+<!ENTITY zotero.context.addStandaloneNote "독립 노트 추가">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "주석에서 독립 노트 추가">
+<!ENTITY zotero.context.editInWindow "새 창에서 편집">
 
 <!ENTITY zotero.pdfReader.firstPage "첫 페이지">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.lastPage "마지막 페이지">
+<!ENTITY zotero.pdfReader.back "뒤로">
+<!ENTITY zotero.pdfReader.forward "앞으로">
+<!ENTITY zotero.pdfReader.handTool "손 도구">
+<!ENTITY zotero.pdfReader.verticalScrolling "세로 방향으로 스크롤">
+<!ENTITY zotero.pdfReader.horizontalScrolling "가로 방향으로 스크롤">
+<!ENTITY zotero.pdfReader.wrappedScrolling "화면 채워서 스크롤">
+<!ENTITY zotero.pdfReader.noSpreads "한 페이지씩 보기">
+<!ENTITY zotero.pdfReader.oddSpreads "홀수 기준 펼쳐보기">
+<!ENTITY zotero.pdfReader.evenSpreads "짝수 기준 펼쳐보기">
+<!ENTITY zotero.pdfReader.scrolled "스크롤해서 보기">
+<!ENTITY zotero.pdfReader.paginated "페이지 단위 보기">
+<!ENTITY zotero.pdfReader.zoomIn "확대">
+<!ENTITY zotero.pdfReader.zoomOut "축소">
+<!ENTITY zotero.pdfReader.zoomReset "확대/축소 초기화">
+<!ENTITY zotero.pdfReader.zoomAuto "크기 자동 조정">
+<!ENTITY zotero.pdfReader.zoomPageWidth "페이지 너비에 맞춤">
+<!ENTITY zotero.pdfReader.zoomPageHeight "페이지 높이에 맞춤">
+<!ENTITY zotero.pdfReader.splitVertically "수직 분할">
+<!ENTITY zotero.pdfReader.splitHorizontally "수평 분할">
+<!ENTITY zotero.pdfReader.transferFromPDF "주석 가져오기...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "왼쪽으로 페이지 회전">
+<!ENTITY zotero.pdfReader.rotatePageRight "오른쪽으로 페이지 회전">

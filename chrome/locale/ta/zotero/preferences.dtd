@@ -49,8 +49,8 @@
 <!ENTITY zotero.preferences.sync.username "பயனர்பெயர்:">
 <!ENTITY zotero.preferences.sync.password "கடவுச்சொல்:">
 <!ENTITY zotero.preferences.sync.syncServer "தரவு ஒத்திசைவு">
-<!ENTITY zotero.preferences.sync.setUpSync "ஒத்திசைவை அமைக்கவும்">
-<!ENTITY zotero.preferences.sync.unlinkAccount "கணக்கை துண்டிக்கவும்…">
+<!ENTITY zotero.preferences.sync.setUpSync "ஒத்திசைவை அமை">
+<!ENTITY zotero.preferences.sync.unlinkAccount "கணக்கைத் துண்டி…">
 <!ENTITY zotero.preferences.sync.createAccount "கணக்கை உருவாக்கு">
 <!ENTITY zotero.preferences.sync.lostPassword "கடவுச்சொல் இழந்ததா?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "தானாக ஒத்திசை">
@@ -64,7 +64,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "கோப்புகளைப் பதிவிறக்கவும்">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "ஒத்திசைவு நேரத்தில்">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "தேவைக்கு ஏற்ப">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "சேவையகத்தை சரிபார்க்கவும்">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "சேவையகத்தைச் சரிபார்">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "சோட்டெரோ சேமிப்பகத்தைப் பயன்படுத்துவதன் மூலம், அதன் கட்டுப்பாட்டுக்கு நீங்கள் ஒப்புக்கொள்கிறீர்கள்">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "விதிமுறைகள் மற்றும் நிபந்தனைகள்">
 <!ENTITY zotero.preferences.sync.librariesToSync "ஒத்திசைக்க நூலகங்கள்">
@@ -93,7 +93,7 @@
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "குறியிடப்பட்ட:">
 <!ENTITY zotero.preferences.search.indexStats.partial "பகுதி:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "ஒருங்கிணைக்கப்படாதது:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "குறியிடப்படாதது:">
 <!ENTITY zotero.preferences.search.indexStats.words "சொற்கள்:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "ஒரு கோப்பிற்கு குறியீட்டுக்கு அதிகபட்ச எழுத்துக்கள்:">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.preferences.quickCopy.caption "விரைவான நகல்">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "உருப்படி வடிவம்:">
 <!ENTITY zotero.preferences.quickCopy.noteFormat "குறிப்பு வடிவம்:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "உஉகுமொ ஆக நகலெடுக்கவும்">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "உஉகுமொ ஆக நகலெடு">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "தளம் சார்ந்த அமைப்புகள்:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "தளம்/பாதை">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(எ.கா., wikipedia.org)">
@@ -154,12 +154,12 @@
 <!ENTITY zotero.preferences.proxies.scheme "திட்டம்">
 
 <!ENTITY zotero.preferences.proxies.multiSite "பல தளங்கள்">
-<!ENTITY zotero.preferences.proxies.autoAssociate "புதிய புரவலன்களை தானாக இணைக்கவும்">
+<!ENTITY zotero.preferences.proxies.autoAssociate "புதிய புரவலன்களை தானாக இணை">
 <!ENTITY zotero.preferences.proxies.variables "உங்கள் பதிலாள் திட்டத்தில் பின்வரும் மாறிகளைப் பயன்படுத்தலாம்:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - பதிலாள் தளத்தின் புரவலன்பெயர் (எ.கா., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - பதிலாள் பக்கத்தின் பாதை முன் சாய்வுகோடு தவிர (எ.கா., பற்றி/அட்டவணை.html)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - பதிலாள் பக்கத்தின் பாதை முன் சாய்வுகோடு தவிர (எ.கா., பற்றி/அட்டவணை.உஉகுமொ)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - அடைவு பாதை (எ.கா., பற்றி/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - கோப்பு பெயர் (i.n., அட்டவணை.html)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - கோப்புப் பெயர் (i.n., அட்டவணை.உஉகுமொ)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - எந்த சரம்">
 
 <!ENTITY zotero.preferences.prefpane.advanced "மேம்பட்ட">

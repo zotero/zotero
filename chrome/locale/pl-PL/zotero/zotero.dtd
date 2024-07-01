@@ -322,7 +322,7 @@
 <!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Powiększ">
 <!ENTITY zotero.pdfReader.zoomOut "Zmniejsz">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Przywróć powiększenie">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Powiększ do szerokości strony">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Powiększ do wysokości strony">

@@ -47,6 +47,9 @@
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Probleme cu depanarea translatorului"
   },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limite acces site"
+  },
   "progressWindow_error_fallback": {
     "message": "A apărut o eroare la salvarea cu $1. Se încearcă în schimb salvarea folosind $2."
   },
@@ -62,6 +65,18 @@
   "upgradeApp": {
     "message": "Actualizare $1"
   },
+  "firstRun_title": {
+    "message": "Ați instalat conectorul $1!"
+  },
+  "firstRun_text1": {
+    "message": "Conectorul $1 îți permite <a href=\"$2\">să salvezi itemi în $1</a> din browserul tău, cu un singur click."
+  },
+  "firstRun_text2": {
+    "message": "Dacă nu o ai deja, <a href=\"$2\">descarcă</a> aplicația $1 pentru cea mai bună experiență."
+  },
+  "firstRun_acceptButton": {
+    "message": "Am înțeles"
+  },
   "error_connection_isAppRunning": {
     "message": "$1 rulează?"
   },
@@ -73,6 +88,15 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Activează salvarea la biblioteca online"
+  },
+  "reports_report_submitted": {
+    "message": "Raportul de eroare a fost trimis.\n\nID-ul raportului: $1\n\nVă rugăm să postați un mesaj pe forumurile Zotero cu acest ID al raportului, o descriere a problemei și orice măsuri necesare pentru a o reproduce.\n\nRapoartele de eroare nu sunt revizuite decât dacă sunt menționate în forumuri."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Rezultatul de depanare a fost trimis.\n\nID-ul de depanare este $1."
+  },
+  "reports_submission_failed": {
+    "message": "S-a produs o eroare la trimiterea raportului dumneavoastră.\n\n$1\n\nVă rugăm să vă verificați conexiunea la internet. Dacă problema persistă, postați un mesaj pe forumurile Zotero."
   },
   "integration_error_clientUpgrade": {
     "message": "Citarea bazată pe web are nevoie de $1 sau mai recent."
@@ -94,6 +118,27 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Integrarea $1 nu este valabilă la editarea fișierelor Microsoft Word .docx direct în Google Docs. Alege Fișier → Salvare ca Google Docs pentru a activa această funcționalitate.<br/><br/>Dacă vrei să transferi un document Word cu $1 citări în Google Docs, vezi <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Mutarea documentelor între procesoarele de text</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Citatele documentului sunt editate de un alt $1 utilizator. Vă rugăm să încercați din nou mai târziu."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 blochează documentul pentru a împiedica mai mulți utilizatori să editeze citatele în același timp. Editarea simultană a citărilor în document poate duce la coruperea citărilor sau a documentului. Anumite circumstanțe imprevizibile, cum ar fi defecțiunile de rețea, pot duce la blocarea permanentă a documentului dumneavoastră. Dacă credeți că acest lucru s-a întâmplat, puteți anula blocarea.<br/><br/>Doriți să anulați blocarea documentului?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Contul Google pe care l-ați selectat nu are permisiunea de a edita acest document. Vă rugăm să încercați din nou și asigurați-vă că ați ales contul cu acces la editare."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Afișează citările nelegate $1 "
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Citația pe care încercați să o editați a fost dezlegată din $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Relegare citare"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Aceste citări au devenit <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">dezlegate de $1</a>. Va trebui să le relegăm înainte ca acestea să se actualizeze sau să apară în bibliografie."
   },
   "general_saveTo": {
     "message": "Salvează în $1"

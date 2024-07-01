@@ -1,11 +1,11 @@
 <!ENTITY zotero.version "نسخه">
 <!ENTITY zotero.whatsNew "چه خبر؟">
 <!ENTITY zotero.createdby "محصولی از:">
-<!ENTITY zotero.director "مدیر">
+<!ENTITY zotero.director "مدیر:">
 <!ENTITY zotero.directors "مدیران:">
 <!ENTITY zotero.developers "توسعه‌دهندگان:">
-<!ENTITY zotero.alumni "فارغ‌التحصیلان:">
-<!ENTITY zotero.about.localizations "محلی‌سازی:">
+<!ENTITY zotero.alumni "دانش‌آموختگان:">
+<!ENTITY zotero.about.localizations "بومی‌سازی:">
 <!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
 <!ENTITY zotero.thanks "تشکر ویژه از:">
 <!ENTITY zotero.about.close "بستن">

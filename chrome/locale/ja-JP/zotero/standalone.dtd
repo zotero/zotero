@@ -55,7 +55,7 @@
 <!ENTITY recursiveCollections.label "サブコレクションからアイテムを表示">
 <!ENTITY fontSize.label "フォントサイズ">
 <!ENTITY noteFontSize.label "メモのフォントサイズ">
-<!ENTITY columns.label "Columns">
+<!ENTITY columns.label "コラム">
 <!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "ツール">

@@ -39,7 +39,7 @@
     "message": "標籤(可用逗號分隔)"
   },
   "progressWindow_error_translation": {
-    "message": "儲存此項目時出錯。參閱 $1 以獲得更多資訊。"
+    "message": "儲存此項目時出現錯誤。參閱 $1 以獲得更多資訊。"
   },
   "progressWindow_error_siteAccessLimitsError": {
     "message": "儲存此項目時出現錯誤。$1可能限制了您單次可儲存項目的數量。參閱$2來獲得更多資訊。"
@@ -99,46 +99,46 @@
     "message": "您的錯誤報告已送出。\n\n報告 ID: $1\n\n請在Zotero論壇發文，文章內容請包含此報告ID、描述發生的問題以及任何可重現問題的步驟。\n\n不會處理未於論壇發文的錯誤報告。"
   },
   "reports_debug_output_submitted": {
-    "message": "您的debug輸出結果已送出。Debug ID是 $1。"
+    "message": "您的Debug輸出結果已送出。\n\nDebug ID是 $1。"
   },
   "reports_submission_failed": {
     "message": "提交報告時發生錯誤。\n\n$1\n\n請檢查您的網路連線。如果錯誤重複出現，請在Zotero論壇發文。"
   },
   "integration_error_clientUpgrade": {
-    "message": "引用網站資料庫的文獻，需要 $1 或更新的版本。"
+    "message": "以網頁為本的引用方式需要 $1 或更新的版本。"
   },
   "integration_error_connection": {
-    "message": "$1 無法與 $2 桌面應用程式溝通。$2 一定得開啟，才能引用網站資料庫的文獻。"
+    "message": "$1 無法與 $2 桌面應用程式通訊。$2 須要在開啟的狀態，才能使用以網頁為本的引用方式。"
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "此文件包含有效的 Zotero 引文，此引文將於下載的副本中顯示為 zotero.org 連結"
+    "message": "此文件包含現行的 Zotero 引文，此引文將於下載的副本中顯示為 zotero.org 連結"
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
     "message": "為了要生成較為適合分享的版本，從檔案選單中選擇<b>複製……</b>，在新文件中從Zotero選單中選擇<b>未連結引文</b>，然後下載未連結版本。保留原始連結文件以防你有需要做任何後續的變動。"
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
-    "message": "無論如何都下載已連結的版本"
+    "message": "無論如何都下載所連結的版本"
   },
   "integration_googleDocs_updating": {
     "message": "$1正在更新您的文件。"
   },
   "integration_googleDocs_docxAlert": {
-    "message": "在 Google Docs中直接編輯 Microsoft Word .docx 檔案時，若$1元件無法使用。選擇檔案 → 儲存為 Google Docs 來啟用此功能。<br/><br/>如果你想將具有$1引用的 Word 文件轉換為Google Docs 時，請參閱<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文件編輯器移動文件</a>。"
+    "message": "在 Google Docs中直接編輯 Microsoft Word .docx 檔案時，$1整合元件無法使用。選擇檔案 → 儲存為 Google Docs 來啟用此功能。<br/><br/>如果你想將具有$1引用的 Word 文件傳送到Google Docs 時，請參閱<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文件編輯器之間移動文件</a>。"
   },
   "integration_googleDocs_documentLocked": {
-    "message": "此文件的引文正被另一個$1使用者編輯。請稍後再試。"
+    "message": "此文件的引文正被另一個$1使用者所編輯中。請稍後再試。"
   },
   "integration_googleDocs_documentLocked_moreInfo": {
-    "message": "$1鎖定了您的文件來避免多位使用者同時編輯引文。目前文件中的引文編輯可能會導致引文或文件損壞。例如網路錯誤之類無法預測的狀況可能會讓您的文件持續被鎖定。如果您確定這種狀況發生，您可以解除鎖定狀態。<br/><br/>您想要解除文件鎖定狀態嗎？"
+    "message": "$1鎖定了您的文件來避免多位使用者同時編輯引文。同時編輯文件中的引文可能會導致引文或文件的損壞。例如網路錯誤之類無法預見的狀況可能會讓您的文件被永久鎖定。如果您確定這種狀況發生，您可以跨越這個鎖定。<br/><br/>您想要跨越這個文件鎖定嗎？"
   },
   "integration_googleDocs_documentPermissionError": {
-    "message": "您所選擇的Google帳號沒有編輯該文件的權限。請再試一次，並確保您所選擇的帳號有編輯權限。"
+    "message": "您所選擇的Google帳號沒有編輯這個文件的權限。請再試一次，並確定您所選擇的帳號有編輯的權限。"
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "顯示未連結的 $1 引文"
   },
   "integration_googleDocs_orphanedCitations_alert": {
-    "message": "您正在編輯的引文已經從 $1斷開連結。"
+    "message": "您正嘗試要編輯的引文已經從 $1斷開連結。"
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
     "message": "重新連結引文"

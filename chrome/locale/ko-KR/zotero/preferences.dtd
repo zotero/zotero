@@ -9,9 +9,9 @@
 
 <!ENTITY zotero.preferences.prefpane.general "일반">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "인터페이스">
 <!ENTITY zotero.preferences.fileHandling "파일 관리">
-<!ENTITY zotero.preferences.automaticSnapshots "웹 페이지  항목을 생성할 때 자동으로 스냅샷 저장">
+<!ENTITY zotero.preferences.automaticSnapshots "웹 페이지에서 항목을 생성할 때 자동으로 스냅샷 저장">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 연관된 PDF 및 다른 파일을 자동으로 첨부">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "링크한 파일 이름 바꾸기">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF 파일을 열 앱">
@@ -22,20 +22,20 @@
 <!ENTITY zotero.preferences.updateNow "지금 업데이트">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
 <!ENTITY zotero.preferences.parseRISRefer "다운로드한 BibTeX/RIS/Refer 파일에 Zotero 사용">
-<!ENTITY zotero.preferences.automaticTags "핵심어와 주제어가 첨부된 항목 저장시 자동으로 태그 생성">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "휴지통에서 자동 삭제되는 시점 : 휴지통으로 이동 후">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "일 경과">
+<!ENTITY zotero.preferences.automaticTags "키워드와 제목으로 태그 자동 지정">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "휴지통으로 이동 후 ">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "일이 지나면 자동으로 삭제">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "탭 제목 표시">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "저자 - 연도 - 제목">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "제목 - 저자 - 연도">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "파일 이름">
 
 <!ENTITY zotero.preferences.groups "그룹">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "라이브러리 간 항목 복사시 포함 대상 :">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "라이브러리간 항목을 복사할 때 포함할 대상:">
 <!ENTITY zotero.preferences.groups.childNotes "하위 노트들">
 <!ENTITY zotero.preferences.groups.childFiles "하위 스냅샷 및 들여온 파일들">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "주석">
 <!ENTITY zotero.preferences.groups.childLinks "하위 링크들">
 <!ENTITY zotero.preferences.groups.tags "태그">
 
@@ -65,7 +65,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "동기화할 때">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "필요할 때">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "서버 검증">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero 스토리지 이용시 다음 약관에 동의하는 것으로 간주합니다: ">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero 저장소 이용 시 다음 약관에 동의하는 것으로 간주합니다: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "이용 약관">
 <!ENTITY zotero.preferences.sync.librariesToSync "동기화할 라이브러리">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "라이브러리 선택...">
@@ -74,21 +74,21 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "다음 작업은 특이하고 특수한 상황에만 제한적으로 적용되어야 합니다. 일반적인 문제 해결에는 사용하지 마십시오. 많은 경우, 재설정이 또 다른 문제를 일으킬 수 있습니다. ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "동기화 초기화 옵션">
 <!ENTITY zotero.preferences.sync.reset.warning3 "추가정보.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 재설정">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 초기화">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "로컬 데이터와 원격 데이터 병합. 기존 동기화 기록 무시">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "온라인 라이브러리에서 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "로컬 Zotero 데이터를 온라인 라이브러리 데이터로 덮어씁니다">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "온라인 라이브러리 교체">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "온라인 라이브러리를 로컬 Zotero 데이터로 덮어씁니다">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 초기화">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 첨부 파일을 저장소 서비스의 파일과 비교합니다">
-<!ENTITY zotero.preferences.sync.reset "재설정">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
-<!ENTITY zotero.preferences.sync.reset.button "재설정...">
+<!ENTITY zotero.preferences.sync.reset "초기화">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "초기화 옵션 표시...">
+<!ENTITY zotero.preferences.sync.reset.button "초기화...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "검색">
-<!ENTITY zotero.preferences.search.fulltextCache "전문(全文) 캐쉬">
+<!ENTITY zotero.preferences.search.fulltextCache "전문(全文) 캐시">
 <!ENTITY zotero.preferences.search.indexStats "색인 상태">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "색인됨:">
@@ -101,18 +101,18 @@
 
 <!ENTITY zotero.preferences.prefpane.export "내보내기">
 
-<!ENTITY zotero.preferences.citationOptions.caption "인용 선택사항">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "참조 내 신문 기사의 URL포함">
+<!ENTITY zotero.preferences.citationOptions.caption "인용 옵션">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "종이로 출판된 논문의 URL을 인용문에 포함">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "이 기능을 선택하지 않으면, 페이지 범위가 지정되지 않은 저널, 잡지, 신문 기사 인용문에 대해서만 URL을 넣습니다.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "항목 서식:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "노트 서식:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML로 복사">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "사이트별 설정:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(예. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "형식">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "서식">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "언어">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "다음 항목 이상을 끌어넣을 경우 빠른 복사 동작 안함:">
 
@@ -168,7 +168,7 @@
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "고급 설정">
 
-<!ENTITY zotero.preferences.prefpane.locate "위치">
+<!ENTITY zotero.preferences.prefpane.locate "찾기">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article 검색 엔진 메니저">
 <!ENTITY zotero.preferences.locate.description "설명">
 <!ENTITY zotero.preferences.locate.name "이름">
@@ -176,11 +176,11 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "기본값 복원">
 
 <!ENTITY zotero.preferences.charset "문자 인코딩">
-<!ENTITY zotero.preferences.charset.importCharset "문자 인코딩 들여오기">
+<!ENTITY zotero.preferences.charset.importCharset "가져오기 시 문자 인코딩">
 <!ENTITY zotero.preferences.charset.displayExportOption "내보내기 실행시 문자 인코딩 옵션 보이기">
 
 <!ENTITY zotero.preferences.dataDir "저장 위치">
-<!ENTITY zotero.preferences.dataDir.useProfile "Firefox 프로필 디렉토리 이용">
+<!ENTITY zotero.preferences.dataDir.useProfile "프로필 디렉토리 이용">
 <!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">
 <!ENTITY zotero.preferences.dataDir.choose "선택...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(명령줄을 통해 지정됨)">

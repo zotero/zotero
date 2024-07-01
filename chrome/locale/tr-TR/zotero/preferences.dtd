@@ -14,7 +14,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratırken sayfanın anlık görüntüsünü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkili PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Bağlantılanmış dosyaları yeniden adlandır">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF dosyalarını bu ile Aç:">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF dosyalarını bununla Aç:">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem Varsayılanı">
 
 <!ENTITY zotero.preferences.miscellaneous "Diğer Ayarlar">

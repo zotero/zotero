@@ -36,7 +36,7 @@
     "message": "Zapisywanie do"
   },
   "progressWindow_tagPlaceholder": {
-    "message": "Znaczniki (oddzielone przecinkami)"
+    "message": "Etykiety (oddzielone przecinkami)"
   },
   "progressWindow_error_translation": {
     "message": "Podczas zapisu tego elementu wystąpił błąd. Aby uzyskać więcej informacji zobacz $1."

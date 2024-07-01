@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "Einträge aus Untersammlung anzeigen">
 <!ENTITY fontSize.label "Schriftgröße">
 <!ENTITY noteFontSize.label "Schriftgröße Notizen">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Spalten">
+<!ENTITY sortBy.label "Sortieren nach">
 
 <!ENTITY toolsMenu.label "Werkzeuge">
 <!ENTITY toolsMenu.accesskey "W">

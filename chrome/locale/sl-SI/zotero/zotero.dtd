@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Ni tiska na razprtih zaporednih straneh">
 <!ENTITY zotero.pdfReader.oddSpreads "Tisk na sodih razprtih zaporednih straneh">
 <!ENTITY zotero.pdfReader.evenSpreads "Tisk na sodih razprtih zaporednih straneh">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Drsano">
+<!ENTITY zotero.pdfReader.paginated "Paginirano">
 <!ENTITY zotero.pdfReader.zoomIn "Približaj">
 <!ENTITY zotero.pdfReader.zoomOut "Oddalji">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Ponastavi povečavo">
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">

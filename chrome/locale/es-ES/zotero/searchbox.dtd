@@ -7,7 +7,7 @@
 <!ENTITY zotero.search.joinMode.all "todos">
 <!ENTITY zotero.search.joinMode.suffix "de los siguientes:">
 
-<!ENTITY zotero.search.recursive.label "Buscar en subcolecciones">
+<!ENTITY zotero.search.recursive.label "Buscar subcolecciones">
 <!ENTITY zotero.search.noChildren "Mostrar sólo los elementos de primer nivel">
 <!ENTITY zotero.search.includeParentsAndChildren "Incluir los elementos contenedores y subordinados de los elementos encontrados">
 

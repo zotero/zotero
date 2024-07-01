@@ -297,7 +297,7 @@
 <!ENTITY zotero.file.choose.label "選擇檔案……">
 <!ENTITY zotero.file.noneSelected.label "未選擇任何檔案">
 
-<!ENTITY zotero.attachLink.title "附加連結到 URI……">
+<!ENTITY zotero.attachLink.title "附加到URI的連結……">
 <!ENTITY zotero.attachLink.label.link "連結：">
 <!ENTITY zotero.attachLink.label.title "標題：">
 
@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "無展開頁">
 <!ENTITY zotero.pdfReader.oddSpreads "奇數展開頁">
 <!ENTITY zotero.pdfReader.evenSpreads "偶數展開頁">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "捲動的">
+<!ENTITY zotero.pdfReader.paginated "頁碼標註的">
 <!ENTITY zotero.pdfReader.zoomIn "放大">
 <!ENTITY zotero.pdfReader.zoomOut "縮小">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "重設縮放">
 <!ENTITY zotero.pdfReader.zoomAuto "自動調整大小">
 <!ENTITY zotero.pdfReader.zoomPageWidth "縮放至頁面寬度">
 <!ENTITY zotero.pdfReader.zoomPageHeight "縮放到頁面高度">

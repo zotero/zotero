@@ -29,8 +29,8 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Vent mens feilrapporten blir levert.">
 <!ENTITY zotero.errorReport.submitted "Feilrapporten er levert.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
-<!ENTITY zotero.errorReport.postToForums "Legg igjen en melding i Zotero-forumene (forums.zotero.org) med denne rapport-IDen, en beskrivelse av problemet og nødvendige steg for å reprodusere problemet.">
-<!ENTITY zotero.errorReport.notReviewed "Feilrapporter blir ikke kommentert, dersom problemet ikke henvises til i forumene.">
+<!ENTITY zotero.errorReport.postToForums "Legg igjen en melding i Zotero-foruma (forums.zotero.org) med denne rapport-IDen, en beskrivelse av problemet og nødvendige steg for å reprodusere problemet.">
+<!ENTITY zotero.errorReport.notReviewed "Feilrapporter blir ikke kommentert, dersom problemet ikke henvises til i foruma.">
 
 <!ENTITY zotero.upgrade.title "Zotero oppgraderingsveiviser">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du ha installert en ny versjon av Zotero.">
@@ -285,7 +285,7 @@
 <!ENTITY zotero.rtfScan.scanPage.label "Skanner etter henvisninger">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero ser gjennom ditt dokumentet etter henvisninger. Vær tålmodig.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Bekreft elementer henvist til">
-<!ENTITY zotero.rtfScan.citationsPage.description "Undersøk listen med gjenkjente henvisninger nedenfor for å forsikre deg om at Zotero har valgt de korresponderende elementene korrekt. Ikke kartlagte eller tvetydige henvisninger må bli løst før du går videre til neste steg.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Undersøk listen med gjenkjente henvisninger nedenfor for å forsikre deg om at Zotero har valgt de korresponderende elementene korrekt. Ikke kartlagte eller tvetydige henvisninger må bli løst før du går videre til neste trinn.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokument formatering">
 <!ENTITY zotero.rtfScan.formatPage.label "Formaterer henvisninger">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero setter sammen og formaterer RTF-fila di. ">
@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Ingen tosidig visning">
 <!ENTITY zotero.pdfReader.oddSpreads "Oddetallssider mot hverandre">
 <!ENTITY zotero.pdfReader.evenSpreads "Partallssider mot hverandre">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Scrollet">
+<!ENTITY zotero.pdfReader.paginated "Paginert">
 <!ENTITY zotero.pdfReader.zoomIn "Zoom inn">
 <!ENTITY zotero.pdfReader.zoomOut "Zoom ut">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Tilbakestill zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Endre størrelse automatisk">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom til sidebredde">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidehøyde">

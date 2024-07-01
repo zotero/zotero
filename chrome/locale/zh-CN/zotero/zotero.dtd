@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "无分布">
 <!ENTITY zotero.pdfReader.oddSpreads "奇数分布">
 <!ENTITY zotero.pdfReader.evenSpreads "偶数分布">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "捲動的">
+<!ENTITY zotero.pdfReader.paginated "頁碼標註的">
 <!ENTITY zotero.pdfReader.zoomIn "放大">
 <!ENTITY zotero.pdfReader.zoomOut "缩小">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "重設縮放">
 <!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
 <!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
 <!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">

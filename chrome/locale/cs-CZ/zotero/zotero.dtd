@@ -109,8 +109,8 @@
 <!ENTITY zotero.item.textTransform "Převést text">
 <!ENTITY zotero.item.textTransform.titlecase "Velká Písmena">
 <!ENTITY zotero.item.textTransform.sentencecase "Velké první písmeno">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Zaměnit První/Poslední">
+<!ENTITY zotero.item.creatorTransform.fixCase "Opravit kapitalizaci">
 <!ENTITY zotero.item.copyAsURL "Kopírovat jako URL">
 <!ENTITY zotero.item.deletePermanently "Definitivně smazat...">
 
@@ -136,7 +136,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Nastavit barvu...">
 <!ENTITY zotero.tagSelector.renameTag "Přejmenovat štítek...">
 <!ENTITY zotero.tagSelector.deleteTag "Smazat štítek...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Rozdělit...">
 
 <!ENTITY zotero.tagColorChooser.title "Zvolit barvu a pozici:">
 <!ENTITY zotero.tagColorChooser.color "Barva:">
@@ -144,11 +144,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "Nastavit barvu">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstranit barvu">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Vložit ISBNs, DOIs, PMIDs, arXiv IDs, nebo ADS Bibcodes pro přidání do vaší knihovny:">
 <!ENTITY zotero.lookup.button.search "Hledat">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Vytvořit rodičovskou položku">
+<!ENTITY zotero.createParent.button.manual "Ruční zadání">
 
 <!ENTITY zotero.selectitems.title "Označit položky">
 <!ENTITY zotero.selectitems.intro.label "Označte položky, které byste rádi přidali do Vaší knihovny">
@@ -177,7 +177,7 @@
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "Odkud chcete importovat?">
 <!ENTITY zotero.import.source.file "Soubor (BibTeX, RIS, Zotero RDF, atd.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.source.folder "Složka PDF či jiných souborů">
 <!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importuje...">
 <!ENTITY zotero.import.database "Databáze">
@@ -185,7 +185,7 @@
 <!ENTITY zotero.import.size "Velikost">
 <!ENTITY zotero.import.createCollection "Umístit importované kolekce a položky do nové kolekce">
 <!ENTITY zotero.import.fileHandling "Zpracování souborů">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Stáhnout pouze nové položky; neaktulizovat dříve importované položky">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
@@ -301,31 +301,31 @@
 <!ENTITY zotero.attachLink.label.link "Odkaz:">
 <!ENTITY zotero.attachLink.label.title "Název:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Přidat poznámku položky">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Přidat poznámku položky z anotací">
+<!ENTITY zotero.context.addStandaloneNote "Přidat samostatnou poznámku">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Přidat samostatnou poznámku z anotací">
+<!ENTITY zotero.context.editInWindow "Upravit v samostatném okně">
 
 <!ENTITY zotero.pdfReader.firstPage "První strana">
 <!ENTITY zotero.pdfReader.lastPage "Poslední stránka">
 <!ENTITY zotero.pdfReader.back "Zpátky">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.forward "Dopředu">
+<!ENTITY zotero.pdfReader.handTool "Nástroj ručička">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertikální posouvání">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontální posouvání">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Postupné posouvání">
+<!ENTITY zotero.pdfReader.noSpreads "Zobrazení na jednu stránku">
+<!ENTITY zotero.pdfReader.oddSpreads "Zobrazení na dvou stránkách od strany 1">
+<!ENTITY zotero.pdfReader.evenSpreads "Zobrazení na dvou stránkách od strany 2">
+<!ENTITY zotero.pdfReader.scrolled "Posunuto">
+<!ENTITY zotero.pdfReader.paginated "Očíslováno">
 <!ENTITY zotero.pdfReader.zoomIn "Přiblížit">
 <!ENTITY zotero.pdfReader.zoomOut "Oddálit">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.zoomReset "Resetovat přiblížení">
+<!ENTITY zotero.pdfReader.zoomAuto "Automaticky změnit velikost">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Přiblížit podle šířky stránky">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Přiblížit podle výšky stránky">
 <!ENTITY zotero.pdfReader.splitVertically "Rozdělit vertikálně">
 <!ENTITY zotero.pdfReader.splitHorizontally "Rozdělit horizontálně">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importovat anotace">

@@ -42,7 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Provést">
 
 <!ENTITY viewMenu.label "Zobrazení">
 <!ENTITY viewMenu.accesskey "V">

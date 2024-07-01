@@ -2,6 +2,12 @@
   "general_more": {
     "message": "Mere ..."
   },
+  "general_moreInfo": {
+    "message": "Mere information..."
+  },
+  "general_needHelp": {
+    "message": "Brug for hjælp?"
+  },
   "general_done": {
     "message": "Færdig"
   },
@@ -20,8 +26,11 @@
   "general_cancel": {
     "message": "Annullér"
   },
+  "general_pleaseWait": {
+    "message": "Vent venligst..."
+  },
   "general_copyToClipboard": {
-    "message": "Kopiér til udklipsholderen"
+    "message": "Kopier til udklipsholderen"
   },
   "progressWindow_savingTo": {
     "message": "Gemmer i"
@@ -50,6 +59,12 @@
   "upgradeApp": {
     "message": "Opgradér $1"
   },
+  "firstRun_title": {
+    "message": "Du har installeret $1-forbindelseskomponenten."
+  },
+  "firstRun_acceptButton": {
+    "message": "Forstået"
+  },
   "error_connection_isAppRunning": {
     "message": "Kører $1?"
   },
@@ -76,6 +91,9 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Download linket version alligevel"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 opdaterer dit dokument."
   },
   "general_saveTo": {
     "message": "Gem i $1"

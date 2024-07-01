@@ -2,6 +2,12 @@
   "general_more": {
     "message": "kita..."
   },
+  "general_moreInfo": {
+    "message": "Daugiau info..."
+  },
+  "general_needHelp": {
+    "message": "Reikia pagalbos?"
+  },
   "general_done": {
     "message": "Atlikta"
   },
@@ -35,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Klaida įrašant. Daugiau informacijos rasite $1."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Išsaugant šį įrašą įvyko klaida. $1 gali riboti įrašų skaičių, kurį galite išsaugoti vienu metu. Daugiau informacijos rasite $2."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Transliatoriaus problemų sprendimas"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Svetainės prieigos apribojimai"
   },
   "progressWindow_error_fallback": {
     "message": "Klaida įrašant su „$1“. Bandoma įrašyti su „$2“."
@@ -53,6 +65,18 @@
   "upgradeApp": {
     "message": "Atnaujinti $1"
   },
+  "firstRun_title": {
+    "message": "Jūs įdiegėte $1 jungtį!"
+  },
+  "firstRun_text1": {
+    "message": "$1 jungtis leidžia jums <a href=\"$2\">saugoti įrašus į $1</a> tiesiai iš naršyklės vienu paspaudimu."
+  },
+  "firstRun_text2": {
+    "message": "Jei dar to nepadarėte, <a href=\"$2\">atsisiųskite</a> atskirą $1 programą sklandžiausiam darbui."
+  },
+  "firstRun_acceptButton": {
+    "message": "Supratau"
+  },
   "error_connection_isAppRunning": {
     "message": "Ar paleista „$1“?"
   },
@@ -65,6 +89,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Įgalinti įrašymą į internetinę biblioteką"
   },
+  "reports_report_submitted": {
+    "message": "Jūsų klaidos pranešimas išsiųstas.\n\nPranešimo ID: $1\n\nPrašome paskelbti žinutę Zotero forume su šio pranešimo ID, problemos aprašymu ir visais žingsniais, reikalingais jos atkartojimui.\n\nKlaidos pranešimai peržiūrimi tik jei paminimi forume."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Jūsų derinimo išvestis išsiųsta.\n\nDerinimo ID yra $1."
+  },
+  "reports_submission_failed": {
+    "message": "Įvyko klaida išsiunčiant jūsų ataskaitą.\n\n$1\n\nPatikrinkite savo interneto ryšį. Jei problema išlieka, parašykite žinutę į Zotero forumą."
+  },
   "integration_error_clientUpgrade": {
     "message": "Žiniatinklio pagrindu veikiančiam citavimui reikia $1 arba naujesnės versijos."
   },
@@ -74,11 +107,38 @@
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Šiame dokumente yra aktyvių Zotero citavimų, kurie parsisiųstoje kopijoje atrodys tarsi nuorodos į zotero.org."
   },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Norėdami sukurti tinkamą versiją bendradarbiavimui, pasirinkite <b>Sukurti kopiją...</b> iš Failo meniu, naujame dokumente pasirinkite iš Zotero meniu pasirinkite <b>Atsieti citatas</b>  ir tada atsisiųskite atsietą versiją. Laikykite šį pradinį susietą dokumentą ateičiai, jei kartais prireiktų tolesnių pakeitimų."
+  },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Vis tiek parsisiųsti susietą versiją"
   },
   "integration_googleDocs_updating": {
     "message": "$1 atnaujina jūsų dokumentą."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 integracija nėra galima, kai tiesiogiai redaguojate „Microsoft Word .docx“ rinkmenas per „Google Docs“. Norėdami įgalinti šią funkciją, pasirinkite Failas → Įrašyti kaip „Google Docs“.<br/><br/>Jei norite perkelti „Word“ dokumentą su $1 citatomis į „Google Docs“, žr. <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Dokumentų perkėlimas tarp teksto rengyklių</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Dokumento citatas redaguoja kitas naudotojas $1. Bandykite dar kartą vėliau."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 užrakina jūsų dokumentą, kad būtų neleistų keliems naudotojams tuo pačiu metu redaguoti citatas. Jei dokumente vienu metu keli asmenys redaguoja citatas, tuomet gali būti sugadintas citavimas ar net visas dokumentas. Dėl tam tikrų nenumatytų aplinkybių, pvz., tinklo gedimų, jūsų dokumentas gali likti visam laikui užrakintas. Jei manote, kad taip nutiko, galite atšaukti užraktą.<br/><br/>Ar norėtumėte atrakinti dokumentą?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Pasirinkta Google paskyra neturi prieigos redaguoti šio dokumento. Bandykite dar kartą ir įsitikinkite, kad pasirinkote paskyrą, turinčią redagavimo teises."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Rodyti nesusietas $1 citatas"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Citata, kurią bandote redaguoti, jau atsieta nuo $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Susieti citatą"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Šios citatos yra <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">atsietos nuo $1</a>. Jums reikės jas vėl susieti tam, kad jos naujintųsi ir pasirodytų literatūros sąraše."
   },
   "general_saveTo": {
     "message": "Įrašyti į „$1“"

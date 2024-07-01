@@ -64,8 +64,8 @@
 <!ENTITY zotero.items.menu.attach.note "Įtraukti pastabą">
 <!ENTITY zotero.items.menu.attach "Įtraukti priedą">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
-<!ENTITY zotero.items.menu.attach.file "Pridėti turimo failo kopiją...">
-<!ENTITY zotero.items.menu.attach.fileLink "Pridėti nuorodą iki failo...">
+<!ENTITY zotero.items.menu.attach.file "Pridėti turimo rinkmenos kopiją...">
+<!ENTITY zotero.items.menu.attach.fileLink "Pridėti nuorodą iki rinkmenos...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Atkurti į biblioteką">
 <!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
@@ -105,12 +105,12 @@
 <!ENTITY zotero.toolbar.feeds.edit "Keisti naujienų kanalo parinktis...">
 
 <!ENTITY zotero.item.add "Pridėti">
-<!ENTITY zotero.item.attachment.file.show "Atverti failo aplanką">
+<!ENTITY zotero.item.attachment.file.show "Atverti rinkmenos aplanką">
 <!ENTITY zotero.item.textTransform "Teksto trasformavimas">
 <!ENTITY zotero.item.textTransform.titlecase "Pavadinimo raidžių lygis">
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
+<!ENTITY zotero.item.creatorTransform.fixCase "Taisyti raidžių dydį">
 <!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
 <!ENTITY zotero.item.deletePermanently "Pašalinti negrįžtamai...">
 
@@ -120,8 +120,8 @@
 <!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
 <!ENTITY zotero.toolbar.note.child "Nauja įrašo pastaba">
 <!ENTITY zotero.toolbar.lookup "Paieška pagal identifikatorių...">
-<!ENTITY zotero.toolbar.attachment.linked "Nuoroda iki failo...">
-<!ENTITY zotero.toolbar.attachment.add "Patalpinti failo kopiją...">
+<!ENTITY zotero.toolbar.attachment.linked "Nuoroda iki rinkmenos...">
+<!ENTITY zotero.toolbar.attachment.add "Patalpinti rinkmenos kopiją...">
 <!ENTITY zotero.toolbar.attachment.weblink "Įrašyti nuorodą į šį puslapį">
 <!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio tinklalapio momentinę kopiją">
 <!ENTITY zotero.toolbar.context.item "Įrašas">
@@ -136,7 +136,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Priskirti spalvą:">
 <!ENTITY zotero.tagSelector.renameTag "Pervadinti gairę...">
 <!ENTITY zotero.tagSelector.deleteTag "Šalinti gairę...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Skaidyti...">
 
 <!ENTITY zotero.tagColorChooser.title "Pasirinkite gairės spalvą ir padėtį">
 <!ENTITY zotero.tagColorChooser.color "Spalva:">
@@ -144,11 +144,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "Naudoti spalvą">
 <!ENTITY zotero.tagColorChooser.removeColor "Pašalinti spalvą">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Įveskite ISBN, DOI, PMID, arXiv ID arba ADS bibkodus, kuriuos norite įtraukti į savo biblioteką:">
 <!ENTITY zotero.lookup.button.search "Ieškoti">
 
 <!ENTITY zotero.createParent.title "Sukurti aukštesnio lygio įrašą">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.button.manual "Įrašyti ranka">
 
 <!ENTITY zotero.selectitems.title "Pasirinkti įrašus">
 <!ENTITY zotero.selectitems.intro.label "Pasirinkite norimus įtraukti į bilioteką įrašus">
@@ -177,15 +177,15 @@
 <!ENTITY zotero.import "Importavimas">
 <!ENTITY zotero.import.whereToImportFrom "Iš kur norėtumėte importuoti?">
 <!ENTITY zotero.import.source.file "iš rinkmenos (BibTeX, RIS, Zotero RDF ar kt.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "PDF ir kitų rinkmenų katalogas">
+<!ENTITY zotero.import.onlineImport "nuotolinis importavimas">
 <!ENTITY zotero.import.importing "Importuojama...">
 <!ENTITY zotero.import.database "iš duombazės">
 <!ENTITY zotero.import.lastModified "Paskiausiai pakeista">
 <!ENTITY zotero.import.size "Dydis">
 <!ENTITY zotero.import.createCollection "Importuotą rinkinį ir įrašus patalpinti naujame rinkinyje">
 <!ENTITY zotero.import.fileHandling "Rinkmenų tvarkymas">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Parsisiųsti tik naujus įrašus; neatnaujinti anksčiau importuotųjų">
 
 <!ENTITY zotero.exportOptions.title "Eksportuoti...">
 <!ENTITY zotero.exportOptions.format.label "Formatas:">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Šaltinius automatiškai rikiuoti">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Praleisti autorių">
 <!ENTITY zotero.citation.prefix.label "Priešdėlis:">
 <!ENTITY zotero.citation.suffix.label "Priesaga:">
 <!ENTITY zotero.citation.editorWarning.label "Įspėjimas: jei pakeisite citavimą tekstų rengyklėje, jis nebebus atnaujinamas pagal jūsiškę duomenų bazę ar citavimo stilių.">
@@ -291,43 +291,43 @@
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero apdoroja ir formatuoja RTF dokumentą. Palaukite.">
 <!ENTITY zotero.rtfScan.completePage.label "Raiškiojo teksto formato dokumentų peržvelgimas baigtas">
 <!ENTITY zotero.rtfScan.completePage.description "Jūsiškis dokumentas peržvelgtas ir apdorotas. Pažiūrėkite, ar jis tinkamai suformatuotas.">
-<!ENTITY zotero.rtfScan.inputFile.label "Įvedimo failas">
-<!ENTITY zotero.rtfScan.outputFile.label "Išvedimo failas">
+<!ENTITY zotero.rtfScan.inputFile.label "Įvedimo rinkmena">
+<!ENTITY zotero.rtfScan.outputFile.label "Išvedimo rinkmena">
 
-<!ENTITY zotero.file.choose.label "Failo pasirinkimas...">
-<!ENTITY zotero.file.noneSelected.label "Nepasirinkote failo">
+<!ENTITY zotero.file.choose.label "Rinkmenos pasirinkimas...">
+<!ENTITY zotero.file.noneSelected.label "Nepasirinkote rinkmenos">
 
 <!ENTITY zotero.attachLink.title "Įtraukti nuorodą (URI)">
 <!ENTITY zotero.attachLink.label.link "Nuoroda:">
 <!ENTITY zotero.attachLink.label.title "Pavadinimas">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Pridėti įrašo pastabą">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Pridėti įrašo pastabą iš anotacijų">
+<!ENTITY zotero.context.addStandaloneNote "Pridėti nesusietą pastabą">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Pridėti nesusietą pastabą iš anotacijų">
+<!ENTITY zotero.context.editInWindow "Redaguoti atskirame lange">
 
 <!ENTITY zotero.pdfReader.firstPage "Pirmas puslapis">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.lastPage "Paskutinis puslapis">
+<!ENTITY zotero.pdfReader.back "Atgal">
+<!ENTITY zotero.pdfReader.forward "Toliau">
+<!ENTITY zotero.pdfReader.handTool "Naršyti">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertikali slinktis">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Gulsčia sklinktis">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Lanksti slinktis">
+<!ENTITY zotero.pdfReader.noSpreads "Be atlankos">
+<!ENTITY zotero.pdfReader.oddSpreads "Atverstinis nelyginis">
+<!ENTITY zotero.pdfReader.evenSpreads "Atverstinis lyginis">
+<!ENTITY zotero.pdfReader.scrolled "Vientisas slenkamas">
+<!ENTITY zotero.pdfReader.paginated "Puslapiuotas">
+<!ENTITY zotero.pdfReader.zoomIn "Priartinti">
+<!ENTITY zotero.pdfReader.zoomOut "Atitolinti">
+<!ENTITY zotero.pdfReader.zoomReset "Numatytasis mastelis">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatinis įtalpinimas">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Įtalpinti puslapio plotį">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Įtalpinti puslapio aukštį">
+<!ENTITY zotero.pdfReader.splitVertically "Skaidyti stačiai">
+<!ENTITY zotero.pdfReader.splitHorizontally "Skaidyti gulsčiai">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importuoti anotacijas...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Pasukti kairėn">
+<!ENTITY zotero.pdfReader.rotatePageRight "Pasukti dešinėn">

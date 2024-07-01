@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Сучеље">
 <!ENTITY zotero.preferences.fileHandling "Рад са датотекама">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
@@ -20,22 +20,22 @@
 <!ENTITY zotero.preferences.miscellaneous "Остале поставке">
 <!ENTITY zotero.preferences.autoUpdate "Аутоматски потражи нова ажурирања превода и стилова">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
-<!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
+<!ENTITY zotero.preferences.reportTranslationFailure "Пријави неисправне преводиоце странице">
 <!ENTITY zotero.preferences.parseRISRefer "Користи Зотеро за преузимање BibTeX/RIS/Refer датотека">
 <!ENTITY zotero.preferences.automaticTags "Самостално стави назнаку на ставке са кључним речима и насловом субјекта">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Уклони ставке из смећа које су обрисане пре">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дана">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
-<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Прикажи језичке као">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "аутор – година – наслов">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "наслов – аутор – година">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "име датотеке">
 
 <!ENTITY zotero.preferences.groups "Групе">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Приликом копирања ставке у другу библиотеку задржи:">
 <!ENTITY zotero.preferences.groups.childNotes "подбелешке">
 <!ENTITY zotero.preferences.groups.childFiles "приложене фотке и увезене датотеке">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "напомене">
 <!ENTITY zotero.preferences.groups.childLinks "приложене везе">
 <!ENTITY zotero.preferences.groups.tags "ознаке">
 
@@ -72,19 +72,19 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Усклади">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Библиотека">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Следеће радње служе само у ретким, спецфичним околностима и не треба их користити за свакодневно тражење грешака у програму. Оне ће у многим случајевима само изазвати додатне проблеме. Погледајте страницу">
-<!ENTITY zotero.preferences.sync.reset.warning2 "о поновном постављању усклађивања">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Опције за поништавање усклађивања">
 <!ENTITY zotero.preferences.sync.reset.warning3 "за више података.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Поништи историју усклађивања податка">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Споји локалне податке са подацима на серверу, занемарујући историју усклађивања.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Врати податке из библиотеке на мрежи">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Преписује Зотерове локалне податке онима који се налазе у билиотеци на интернету.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Преписује Зотерове локалне податке библиотеком која се налази на интернету.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Замени мрежну библиотеку овом">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Преписује податке који се налазе у билиотеци на интернету Зотеровим локалним подацима са овог рачунара.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Упореди све приложене датотеке са онима на остави">
-<!ENTITY zotero.preferences.sync.reset "Враћање података">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
-<!ENTITY zotero.preferences.sync.reset.button "Врати…">
+<!ENTITY zotero.preferences.sync.reset "Поново постави">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Опције поновног постављања…">
+<!ENTITY zotero.preferences.sync.reset.button "Поново постави…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Претражи">
@@ -106,8 +106,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Када је ова опција искључена, Zoterо ће ставити УРЛе при цитирању чланака из журнала, магазина и новина само ако чланак нема наведен опсег страница.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Брзо копирање">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Формат ставке:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Формат белешке:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Копирај као ХТМЛ">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Поставке нарочите за веб место:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путања">
@@ -116,7 +116,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Језик">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Онемогући Брзо копирање када се превуче више од">
 
-<!ENTITY zotero.preferences.prefpane.cite "Цитат">
+<!ENTITY zotero.preferences.prefpane.cite "Цитати">
 <!ENTITY zotero.preferences.cite.wordProcessors "Програм за уређивање текста">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Користи класични прозорчић за цитирање">
 <!ENTITY zotero.preferences.styleEditor "Уредник стилова">
@@ -168,11 +168,11 @@
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Напредна подешавања">
 
-<!ENTITY zotero.preferences.prefpane.locate "Лоцирај">
+<!ENTITY zotero.preferences.prefpane.locate "Пронађи">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Управник позадинским програмима за претрагу научних радова">
 <!ENTITY zotero.preferences.locate.description "Опис">
 <!ENTITY zotero.preferences.locate.name "Назив">
-<!ENTITY zotero.preferences.locate.addDescription "За додавање позадинских програма за претрагу научних радова који нису на списку, посетите жељени претраживач у вашем веб прегледнику и изаберите „Додај“ унутар одговарајућег Зотеровог менија.">
+<!ENTITY zotero.preferences.locate.addDescription "Да додате позадински програм за претрагу научних радова који није на списку, посетите жељени претраживач у вашем веб прегледачу и изаберите „Додај“ унутар одговарајућег Зотеровог менија.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Врати подразумевано">
 
 <!ENTITY zotero.preferences.charset "Кодирање знакова">
@@ -187,7 +187,7 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Прикажи директоријум података">
 <!ENTITY zotero.preferences.dataDir.migrate "Премести на нову подразумевану локацију…">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Основни директоријум за повезане прилоге">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Основни директоријум за прилоге">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Зотеро ће користити релативне путање за приложене датотеке унутар основног директоријума, што омогућава приступ датотекама на различитим рачунарима док год је структура основног директоријума иста.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Основни директоријум:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Изабери…">

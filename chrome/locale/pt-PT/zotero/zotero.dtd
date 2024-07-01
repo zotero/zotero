@@ -110,7 +110,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas Iniciais de Título">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúsculas Iniciais de Frase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverter primeiro/último">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.fixCase "Corrigir maiúsculas/minúsculas">
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Remover Permanentemente…">
 
@@ -319,10 +319,10 @@
 <!ENTITY zotero.pdfReader.oddSpreads "Espalham-se Ímpares">
 <!ENTITY zotero.pdfReader.evenSpreads "Espalham-se Pares">
 <!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.paginated "Paginado">
 <!ENTITY zotero.pdfReader.zoomIn "Ampliar">
 <!ENTITY zotero.pdfReader.zoomOut "Reduzir">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Redefinir zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Redimensionar Automaticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Ampliar à Largura da Página">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Ampliar à Altura da Página">

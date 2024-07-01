@@ -3,11 +3,11 @@
 <!ENTITY zotero.createdby "Бичсэн:">
 <!ENTITY zotero.director "Лавлах:">
 <!ENTITY zotero.directors "Лавлахууд:">
-<!ENTITY zotero.developers "Developers:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
-<!ENTITY zotero.thanks "Special Thanks:">
+<!ENTITY zotero.developers "Хөгжүүлэгчид:">
+<!ENTITY zotero.alumni "Төгсөгч:">
+<!ENTITY zotero.about.localizations "Нутагшуулах:">
+<!ENTITY zotero.about.additionalSoftware "Гуравдагч талын програм хангамж:">
+<!ENTITY zotero.thanks "Онцгой талархал:">
 <!ENTITY zotero.about.close "Хаах">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Илүү нэр дурдах &amp; Батламжлах">
+<!ENTITY zotero.citationProcessing "Иш татах &amp; Номзүйн боловсруулалт">

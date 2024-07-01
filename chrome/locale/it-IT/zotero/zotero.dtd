@@ -63,8 +63,8 @@
 <!ENTITY zotero.items.menu.showInLibrary "Mostra nella biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Aggiungi nota">
 <!ENTITY zotero.items.menu.attach "Aggiungi un allegato">
-<!ENTITY zotero.items.menu.attach.link.uri "Allega un collegamento all'URI…">
-<!ENTITY zotero.items.menu.attach.file "Allega una copia archiviata del file…">
+<!ENTITY zotero.items.menu.attach.link.uri "Allega collegamento all'URI…">
+<!ENTITY zotero.items.menu.attach.file "Allega una copia del file…">
 <!ENTITY zotero.items.menu.attach.fileLink "Allega collegamento al file...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Ripristina nella biblioteca">
@@ -170,7 +170,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Preferenze del documento">
 <!ENTITY zotero.integration.addEditCitation.title "Aggiungi o modifica citazione">
 <!ENTITY zotero.integration.editBibliography.title "Modifica bibliografia">
-<!ENTITY zotero.integration.quickFormatDialog.title "Formattazione veloce della citazione">
+<!ENTITY zotero.integration.quickFormatDialog.title "Citazione veloce">
 
 <!ENTITY zotero.progress.title "Avanzamento">
 
@@ -213,7 +213,7 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label "Evidenzia il testo">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Rimuovi evidenziazione">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "Visualizza citazioni come:">
+<!ENTITY zotero.integration.prefs.displayAs.label "Mostra citazioni come:">
 <!ENTITY zotero.integration.prefs.footnotes.label "Note a piè di pagina">
 <!ENTITY zotero.integration.prefs.endnotes.label "Note finali">
 
@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Nessuna disposizione">
 <!ENTITY zotero.pdfReader.oddSpreads "Disponi pagina dispari e pagina pari">
 <!ENTITY zotero.pdfReader.evenSpreads "Disponi pagina pari e pagina dispari">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Scorrimento">
+<!ENTITY zotero.pdfReader.paginated "Impaginato">
 <!ENTITY zotero.pdfReader.zoomIn "Zoom avanti">
 <!ENTITY zotero.pdfReader.zoomOut "Zoom indietro">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Ripristina zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Ridimensiona automaticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Adatta alla larghezza della pagina">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Adatta all'altezza della pagina">

@@ -22,7 +22,7 @@
 <!ENTITY closeCmd.label "Tanca">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Gestiona les adjuncions">
+<!ENTITY manageAttachments.label "Gestiona els fitxers adjunts">
 <!ENTITY convertToStored.label "Converteix els fitxers enllaçats a fitxers emmagatzemats…">
 <!ENTITY importCmd.label "Importa…">
 <!ENTITY importCmd.key "I">
@@ -55,8 +55,8 @@
 <!ENTITY recursiveCollections.label "Mostra elements de les subcol·leccions">
 <!ENTITY fontSize.label "Mida de la lletra">
 <!ENTITY noteFontSize.label "Mida de lletra de les notes">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Columnes">
+<!ENTITY sortBy.label "Ordena per">
 
 <!ENTITY toolsMenu.label "Eines">
 <!ENTITY toolsMenu.accesskey "n">
@@ -81,7 +81,7 @@
 <!ENTITY helpFeedbackPage.label "Fòrums de debat">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Informa d'errors…">
+<!ENTITY helpReportErrors.label "Informa dels errors…">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Registre de sortida de la depuració">

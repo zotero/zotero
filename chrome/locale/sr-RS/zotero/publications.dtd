@@ -1,9 +1,9 @@
-<!ENTITY zotero.publications.my_publications "Моје публикације">
+<!ENTITY zotero.publications.my_publications "Моје објаве">
 
-<!ENTITY zotero.publications.intro "Ставке које сте додали у Моје публикације ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који одредите. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.">
+<!ENTITY zotero.publications.intro "Ставке које сте додали у Моје објаве ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који изаберете. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.">
 <!ENTITY zotero.publications.include.checkbox.files "Укључи датотеке">
 <!ENTITY zotero.publications.include.checkbox.notes "Укључи белешке">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "Можете подесити шта се овде приказује ако одете на Збирка мојих публикација.">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Можете подесити шта се овде приказује ако одете у збирку Моје објаве.">
 
 <!ENTITY zotero.publications.sharing.title "Изаберите како ћете делити ваш рад са другима">
 <!ENTITY zotero.publications.sharing.text "Можете задржати сва права над својим радом, поставити слободну лиценцу или доделити јавни домен. У свим случајевима ће рад бити јавно доступан на страници zotero.org.">

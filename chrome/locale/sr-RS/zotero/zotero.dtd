@@ -22,7 +22,7 @@
 <!ENTITY zotero.general.other "Остало…">
 <!ENTITY zotero.general.bigger "Веће">
 <!ENTITY zotero.general.smaller "Мање">
-<!ENTITY zotero.general.reset "Врати">
+<!ENTITY zotero.general.reset "Поново постави">
 
 
 <!ENTITY zotero.errorReport.title "Пријављивање грешака у Зотеру">
@@ -109,8 +109,8 @@
 <!ENTITY zotero.item.textTransform "Преобликуј текст">
 <!ENTITY zotero.item.textTransform.titlecase "Величина слова у наслову">
 <!ENTITY zotero.item.textTransform.sentencecase "Величина слова у реченици">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Замени првог/последњег">
+<!ENTITY zotero.item.creatorTransform.fixCase "Исправи величину слова">
 <!ENTITY zotero.item.copyAsURL "Копирај као адресу">
 <!ENTITY zotero.item.deletePermanently "Трајно изриши…">
 
@@ -136,7 +136,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Додели боју…">
 <!ENTITY zotero.tagSelector.renameTag "Преименуј ознаку…">
 <!ENTITY zotero.tagSelector.deleteTag "Избриши ознаку…">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Подели…">
 
 <!ENTITY zotero.tagColorChooser.title "Одаберите боју и место ознаке">
 <!ENTITY zotero.tagColorChooser.color "Боја:">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Постави боју">
 <!ENTITY zotero.tagColorChooser.removeColor "Уклони боју">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Унесите ИСБН, ДОИ, ПМИД, арХив ИБ, или АДС бибкод да додате у библиотеку:">
 <!ENTITY zotero.lookup.button.search "Претрага">
 
 <!ENTITY zotero.createParent.title "Направи родитељску ставку">
@@ -177,15 +177,15 @@
 <!ENTITY zotero.import "Увези">
 <!ENTITY zotero.import.whereToImportFrom "Одакле желите да увезете?">
 <!ENTITY zotero.import.source.file "Из датотеке (BibTeX, RIS, Зотеров RDF…)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "Фасцикла са ПДФ-овима или другим датотекама">
+<!ENTITY zotero.import.onlineImport "увоз са мреже">
 <!ENTITY zotero.import.importing "Увозим…">
 <!ENTITY zotero.import.database "База података">
 <!ENTITY zotero.import.lastModified "Последња измена">
 <!ENTITY zotero.import.size "Величина">
 <!ENTITY zotero.import.createCollection "Постави увезене збирке и ставке у нову збирку">
 <!ENTITY zotero.import.fileHandling "Рад са датотекама">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Преузми само нове ставке; не ажурирај претходно увезене ставке">
 
 <!ENTITY zotero.exportOptions.title "Извоз…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Држи изворе поређане">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Прескочи аутора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суфикс:">
 <!ENTITY zotero.citation.editorWarning.label "Упозорење: Цитат неће пратити измене које направите у вашој бази података уколико га директно измените у програму за уређивање текста.">
@@ -225,7 +225,7 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Цитати који чекају на ажурирање ће бити истакнути унутар документа">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Онемогућавање ажурирања може убрзати уметање цитата када радите са великим документима. Увек можете кликните на „Освежи“ како би ручно ажурурати цитате.">
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Користи скраћенице часописа из MEDLINE-а">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Користи скраћенице часописа из Медлајна">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поље „Скраћеница часописа“ ће бити занемарено.">
 
 <!ENTITY zotero.integration.prefs.exportDocument "Пребаците се на други програм за обраду текста…">
@@ -308,26 +308,26 @@
 <!ENTITY zotero.context.editInWindow "Уреди у засебном прозору">
 
 <!ENTITY zotero.pdfReader.firstPage "Прва страница">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.lastPage "Последња страница">
 <!ENTITY zotero.pdfReader.back "Назад">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.forward "Следећа">
+<!ENTITY zotero.pdfReader.handTool "Ручни алати">
+<!ENTITY zotero.pdfReader.verticalScrolling "Усправно листање">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Водоравно листање">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Непрекидно листање">
+<!ENTITY zotero.pdfReader.noSpreads "Без проширења">
+<!ENTITY zotero.pdfReader.oddSpreads "Прошири непарне">
+<!ENTITY zotero.pdfReader.evenSpreads "Прошири парне">
+<!ENTITY zotero.pdfReader.scrolled "Листање">
+<!ENTITY zotero.pdfReader.paginated "По страницама">
+<!ENTITY zotero.pdfReader.zoomIn "Увећај">
+<!ENTITY zotero.pdfReader.zoomOut "Умањи">
+<!ENTITY zotero.pdfReader.zoomReset "Поништи увећање">
+<!ENTITY zotero.pdfReader.zoomAuto "Сам промени величину">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Уклопи висину странице">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Уклопи ширину странице">
+<!ENTITY zotero.pdfReader.splitVertically "Подели усправно">
+<!ENTITY zotero.pdfReader.splitHorizontally "Подели водоравно">
+<!ENTITY zotero.pdfReader.transferFromPDF "Увези напомене…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Ротирај страницу улево">
+<!ENTITY zotero.pdfReader.rotatePageRight "Ротирај страницу удесно">

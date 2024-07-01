@@ -41,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Při ukládání této položky došlo k chybě. Pro další informace otevřete  $1."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Při ukládání této položky došlo k chybě. $1 může omezit počet položek, které můžete uložit najednou. Další informace naleznete v $2."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Řešení problémů s překladem"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limity přístupu k umístění"
   },
   "progressWindow_error_fallback": {
     "message": "Při ukládání pomocí $1 došlo k chybě.  Pokous o uložení pomocí $2."
@@ -59,6 +65,15 @@
   "upgradeApp": {
     "message": "Aktualizovat $1"
   },
+  "firstRun_title": {
+    "message": "Nainstalovali jste $1 konektor!"
+  },
+  "firstRun_text1": {
+    "message": "$1 konektor vám umožňuje <a href=\"$2\">ukládat položky do $1</a> z vašeho prohlížeče s jedním kliknutím."
+  },
+  "firstRun_text2": {
+    "message": "Pokud jste tak ještě neučinili, <a href=\"$2\">stáhněte si</a>samostatnou $1 aplikaci pro nejsnažší užívání."
+  },
   "firstRun_acceptButton": {
     "message": "Hotovo"
   },
@@ -74,6 +89,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Umožnit ukládání do Online knihovny"
   },
+  "reports_report_submitted": {
+    "message": "Vaše chybové hlášení bylo odesláno.\n\nID hlášení: $1\n\nNapište prosím zprávu do fóra Zotero s ID tohoto hlášení, popisem problému a případnými kroky potřebnými k jeho reprodukci.\n\nChybová hlášení nejsou přezkoumávána, pokud na ně není odkazováno ve fóru."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Váš ladící výstup byl odeslán.\n\nID ladícího výstupu je $1."
+  },
+  "reports_submission_failed": {
+    "message": "Při odesílání zprávy došlo k chybě.\n\n$1\n\nZkontrolujte prosím své internetové připojení. Pokud problém přetrvává, napište zprávu do fóra Zotero."
+  },
   "integration_error_clientUpgrade": {
     "message": "Citování na webu vyžaduje $1 či novější."
   },
@@ -88,6 +112,33 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Přesto stáhnout propojenou verzi"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 aktualizuje váš dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1integrace není k dispozici při úpravách souborů Microsoft Word .docx přímo v Dokumentech Google. Chcete-li tuto funkci povolit, zvolte Soubor → Uložit jako Dokumenty Google.<br/><br/>Chcete-li přenést dokument aplikace Word s$1citacemi do Dokumentů Google, přečtěte si<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Přesouvání dokumentů mezi textovými procesory</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Citace dokumentu upravuje jiný $1 uživatel. Zkuste to prosím později."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1uzamkne dokument a zabrání tak souběžným úpravám citací více uživateli. Souběžné úpravy citací v dokumentu mohou vést k poškození citací nebo dokumentu. Některé nepředvídatelné okolnosti, například selhání sítě, mohou vést k trvalému uzamčení vašeho dokumentu. Pokud se domníváte, že k tomu došlo, můžete zámek zrušit.<br/><br/>Chcete zrušit uzamčení dokumentu?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Vybraný účet Google nemá oprávnění k úpravám tohoto dokumentu. Zkuste to prosím znovu a nezapomeňte vybrat účet s oprávněním k úpravám."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Ukázat odpojené $1 citace"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Citace kterou se snažíte upravit byla odpojena od $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Znovu propojit citaci"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Tyto citace se <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">odpojily z $1</a>. Než se aktualizují nebo zobrazí v bibliografii, budete je muset znovu propojit."
   },
   "general_saveTo": {
     "message": "Uložit do $1"

@@ -318,11 +318,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Ilman aukeamia">
 <!ENTITY zotero.pdfReader.oddSpreads "Pariton sivu vasemmalla">
 <!ENTITY zotero.pdfReader.evenSpreads "Parillinen sivu vasemmalla">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Vieritettävä">
+<!ENTITY zotero.pdfReader.paginated "Sivutettu">
 <!ENTITY zotero.pdfReader.zoomIn "Lähennä">
 <!ENTITY zotero.pdfReader.zoomOut "Loitonna">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Resetoi zoomaus">
 <!ENTITY zotero.pdfReader.zoomAuto "Säädä kokoa automaattisesti">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Koko sivun leveys">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Koko sivun korkeus">

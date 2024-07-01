@@ -33,11 +33,11 @@
 
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Al copiar elementos entre bibliotecas, incluir:">
-<!ENTITY zotero.preferences.groups.childNotes "notas subordinadas">
-<!ENTITY zotero.preferences.groups.childFiles "capturas subordinadas y archivos importados">
-<!ENTITY zotero.preferences.groups.annotations "Anotaciones">
-<!ENTITY zotero.preferences.groups.childLinks "enlaces subordinados">
-<!ENTITY zotero.preferences.groups.tags "etiquetas">
+<!ENTITY zotero.preferences.groups.childNotes "Notas subordinadas">
+<!ENTITY zotero.preferences.groups.childFiles "Capturas subordinadas y archivos importados">
+<!ENTITY zotero.preferences.groups.annotations "anotaciones">
+<!ENTITY zotero.preferences.groups.childLinks "Enlaces subordinados">
+<!ENTITY zotero.preferences.groups.tags "Etiquetas">
 
 <!ENTITY zotero.preferences.feeds "Canales">
 <!ENTITY zotero.preferences.feeds.sorting.label "Ordenación:">
