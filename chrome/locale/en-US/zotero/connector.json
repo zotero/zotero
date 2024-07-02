@@ -26,8 +26,17 @@
 	"general_warning": {
 		"message": "Warning"
 	},
+	"general_ok": {
+		"message": "OK"
+	},
 	"general_cancel": {
 		"message": "Cancel"
+	},
+	"general_selectAll": {
+		"message": "Select All"
+	},
+	"general_deselectAll": {
+		"message": "Deselect All"
 	},
 	"general_pleaseWait": {
 		"message": "Please wait…"
@@ -36,11 +45,69 @@
 		"message": "Copy to Clipboard"
 	},
 	
+	"itemType_pdf": {
+		"message": "PDF attachment"
+	},
+	"itemType_epub": {
+		"message": "EPUB attachment"
+	},
+	"itemType_snapshot": {
+		"message": "Snapshot"
+	},
+	"itemType_note": {
+		"message": "Note"
+	},
+	"itemType_link": {
+		"message": "Web link"
+	},
+	"itemType_attachment": {
+		"message": "Attachment"
+	},
+	
 	"progressWindow_savingTo": {
 		"message": "Saving to"
 	},
+	"progressWindow_detailsBtnView": {
+		"message": "View details"
+	},
+	"progressWindow_detailsBtnHide": {
+		"message": "Hide details"
+	},
+	"progressWindow_collectionSelector": {
+		"message": "Target collection selector"
+	},
+	"progressWindow_savingItems": {
+		"message": "Saving $1 items. $2"
+	},
+	"progressWindow_savingItem": {
+		"message": "Saving item $1"
+	},
+	"progressWindow_saveItem": {
+		"message": "Item $1: $2"
+	},
+	"progressWindow_downloadComplete": {
+		"message": "Saved $1"
+	},
+	"progressWindow_downloadCompletePlural": {
+		"message": "Saved $1 for item $2"
+	},
+	"progressWindow_downloadFailed": {
+		"message": "Failed download of $1"
+	},
+	"progressWindow_downloadFailedPlural": {
+		"message": "Failed download of $1 for item $2"
+	},
+	"progressWindow_allDone": {
+		"message": "Saving is complete. The dialog will close now."
+	},
+	"progressWindow_alreadySaved": {
+		"message": "Items from this webpage have already been saved."
+	},
 	"progressWindow_tagPlaceholder": {
 		"message": "Tags (separated by commas)"
+	},
+	"progressWindow_filterPlaceholder": {
+		"message": "Filter Collections"
 	},
 	"progressWindow_error_translation": {
 		"message": "An error occurred while saving this item. See $1 for more information."
@@ -67,6 +134,20 @@
 		"message": "latest version"
 	},
 	
+	"itemSelector_title": {
+		"message": "Select which items you’d like to add to your library:"
+	},
+	
+	"extensionIsDisabled": {
+		"message": "$1 Connector is not available on this page"
+	},
+	"extensionIsDisabled_fileURL": {
+		"message": "$1 Connector is not available on file URLs"
+	},
+	"extensionIsDisabled_extensionPage": {
+		"message": "$1 Connector is not available on extension pages"
+	},
+	
 	"appConnector": {
 		"message": "$1 Connector"
 	},
@@ -81,7 +162,7 @@
 		"message": "The $1 Connector enables you to <a href=\"$2\">save items to $1</a> from your browser in a single click."
 	},
 	"firstRun_text2": {
-		"message": "If you haven’t yet, <a href=\"$2\">download</a> the standalone $1 application for the best experience."
+		"message": "If you haven’t yet, <a href=\"$2\">download</a> the $1 application for the best experience."
 	},
 	"firstRun_acceptButton": {
 		"message": "Got it",
@@ -144,6 +225,9 @@
 	"integration_googleDocs_documentLocked_moreInfo": {
 		"message": "$1 locks your document to prevent multiple users from editing citations at the same time. Concurrent citation editing in the document may lead to citation or document corruption. Certain unforeseeable circumstances, such as network failures, may lead to your document becoming permanently locked. If you believe this has happened, you can override the lock.<br/><br/>Would you like to override the document lock?"
 	},
+	"integration_googleDocs_authScopeError": {
+		"message": "$1 needs permission to edit your Google Docs documents in order to insert citations. Please try again, and be sure to allow $1 to see, edit, create, and delete your Google Docs documents."
+	},
 	"integration_googleDocs_documentPermissionError": {
 		"message": "The Google account you selected does not have permission to edit this document. Please try again, and be sure to choose the account with editing access."
 	},
@@ -159,5 +243,18 @@
 	},
 	"integration_googleDocs_orphanedCitations_disclaimer": {
 		"message": "These citations have become <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">unlinked from $1</a>. You will need to relink them before they will update or appear in your bibliography."
+	},
+	
+	"copyUnproxiedLink": {
+		"message": "Copy Unproxied Link"
+	},
+	"copyUnproxiedPageURL": {
+		"message": "Copy Unproxied Page URL"
+	},
+	"reloadViaProxy": {
+		"message": "Reload via Proxy"
+	},
+	"reloadVia": {
+		"message": "Reload via $1"
 	}
 }
