@@ -29,8 +29,10 @@ $icons: (
 		// virtualized-table has a default background (--material-background)
 		// which is what we want in most places, including dialogs that include
 		// #zotero-collections-tree, however main window collection tree is an
-		// exception
-		background: transparent;
+		// exception.
+		// Same applies to .row below, which needs to have a background-color set
+		// to something opaque to support expand/collapse animation.
+		background: var(--material-sidepane);
 	}
 
 	.virtualized-table {
@@ -39,6 +41,14 @@ $icons: (
 		text-overflow: ellipsis;
 
 		.row {
+			&:not(.highlighted):not(.selected):not([role=none]) {
+				background: var(--material-background);
+				
+				#main-window & {
+					background: var(--material-sidepane);
+				}
+			}
+
 			.icon-css:not(.twisty) {
 				width: 16px;
 				height: 16px;
