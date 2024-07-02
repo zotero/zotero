@@ -487,7 +487,6 @@
 			// If not, scroll again
 			if (Math.abs(pane.getBoundingClientRect().top
 				- pane.parentElement.getBoundingClientRect().top) > scrollPositionThreshold) {
-				// pane.scrollIntoView({ block: 'start', behavior: 'instant' });
 				await this.scrollToPane(paneID, behavior, retryTimes + 1);
 			}
 			return scrollPromise;
