@@ -3,6 +3,7 @@
 // --------------------------------------------------
 #zotero-tag-selector-container {
 	display: flex;
+	min-height: 100px;
 }
 
 #zotero-tag-selector-container[collapsed=true] {
@@ -10,7 +11,6 @@
 }
 
 #zotero-tag-selector {
-	min-height: 100px;
 	width: 100%;
 	display: flex;
 	height: 100%;
@@ -28,7 +28,7 @@
 	justify-content: space-between;
 	display: flex;
 	overflow: hidden;
-	height: 100px;
+	height: 163px; // 200 - height of filter pane
 }
 
 .tag-selector-list-container > div {
