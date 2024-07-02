@@ -281,7 +281,7 @@
 									/>
 								</menupopup>
 							</menu>
-							<menuseparator/>
+							<menuseparator class="menu-type-library"/>
 							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
 									command="cmd_zotero_newCollection"/>
 							<menu id="menu_libraryAdd"
@@ -305,7 +305,7 @@
 								label="&zotero.pdfReader.transferFromPDF;"
 								oncommand="ZoteroStandalone.currentReader.transferFromPDF()"
 							/>
-							<menuseparator class="menu-type-reader"/>
+							<menuseparator class="menu-type-reader pdf"/>
 							<menuitem id="menu_export_file" class="menu-type-reader pdf"
 									label="&zotero.general.saveAs;"
 									oncommand="ZoteroStandalone.currentReader.export()"/>
@@ -491,7 +491,7 @@
 								label="&zotero.pdfReader.paginated;"
 								oncommand="ZoteroStandalone.currentReader.flowMode = 'paginated'"
 							/>
-							<menuseparator class="menu-type-reader"/>
+							<menuseparator class="menu-type-reader pdf epub"/>
 							<menuitem
 								id="view-menuitem-zoom-in"
 								class="menu-type-reader"
@@ -654,7 +654,7 @@
 								  onpopupshowing="ZoteroPane_Local.onSortPopupShowing(event)">
 								<menupopup/>
 							</menu>
-							<menuseparator/>
+							<menuseparator class="menu-type-library"/>
 							<menuitem id="view-menuitem-recursive-collections"
 								class="menu-type-library"
 								label="&recursiveCollections.label;"
