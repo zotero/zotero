@@ -1,12 +1,7 @@
-menupopup.tags-popup {
+.tags-popup {
 	font: inherit;
 	min-width: 300px;
-	padding-inline: 8px;
-
-	@media (-moz-platform: windows) {
-		& > tags-box {
-			// padding-inline does not work on Windows
-			margin-inline: 8px;
-		}
+	& > tags-box {
+		padding-inline: 8px;
 	}
 }

@@ -276,6 +276,8 @@
 			valueElement.setAttribute('flex', 1);
 			valueElement.setAttribute('nowrap', true);
 			valueElement.setAttribute('tight', true);
+			document.l10n.setAttributes(valueElement, "tag-field");
+			valueElement.dataset.l10nAttrs = "placeholder";
 			valueElement.className = 'zotero-box-label';
 			valueElement.readOnly = !this.editable;
 			valueElement.value = valueText;
@@ -301,24 +303,10 @@
 			var target = event.currentTarget;
 
 			if (event.key === 'Enter') {
-				var multiline = target.multiline;
+				// If tag's input is a multiline field, it must be right after pasting
+				// of multiple tags. Then, Enter adds a new line and shift-Enter will save
+				if (target.multiline && !event.shiftKey) return;
 				var empty = target.value == "";
-				if (event.shiftKey) {
-					if (!multiline) {
-						setTimeout(() => {
-							var val = target.value;
-							if (val !== "") {
-								val += "\n";
-							}
-							this.makeMultiline(target, val);
-						});
-						return;
-					}
-					// Submit
-				}
-				else if (multiline) {
-					return;
-				}
 
 				event.preventDefault();
 
@@ -352,6 +340,18 @@
 				}
 				if (focusField) {
 					focusField.focus();
+				}
+			}
+			else if (event.key == "Tab" && !event.shiftKey) {
+				// On tab from the last empty tag row, the minus icon will be focused
+				// and the row will be immediately removed in this.saveTag, so focus will be lost.
+				// To avoid that, on tab from the last tag input that is empty, focus the next
+				// element after the tag row.
+				let allTags = [...this.querySelectorAll(".row")];
+				let isLastTag = target.closest(".row") == allTags[allTags.length - 1];
+				if (isLastTag && !target.closest("editable-text").value.length) {
+					Services.focus.moveFocus(window, target.closest(".row").lastChild, Services.focus.MOVEFOCUS_FORWARD, 0);
+					event.preventDefault();
 				}
 			}
 		};
