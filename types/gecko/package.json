@@ -1,0 +1,26 @@
+{
+  "name": "@types/gecko",
+  "version": "1.0.0",
+  "description": "TypeScript definitions for gecko dom and xpcom.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mozilla/gecko-dev.git"
+  },
+  "keywords": [
+    "dom",
+    "gecko",
+    "mozilla",
+    "types",
+    "typescript",
+    "webidl",
+    "xpcom"
+  ],
+  "author": "Tomislav Jovanovic",
+  "license": "MPL-2.0",
+  "types": "./index.d.ts",
+  "bugs": {
+    "url": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Developer+Infrastructure&component=Lint+and+Formatting"
+  },
+  "homepage": "https://firefox-source-docs.mozilla.org/code-quality/",
+  "private": true
+}
