@@ -179,8 +179,7 @@
 			document.l10n.formatValue(`pane-${this.dataset.pane}`)
 				.then((res) => {
 					this._paneName = res;
-				})
-				.catch((_) => {}); // sanity check as it should never happen
+				});
 		}
 		
 		_buildContextMenu() {
