@@ -94,6 +94,17 @@ Zotero.Translate.ItemSaver.prototype = {
 		var standaloneAttachments = [];
 		var childAttachments = [];
 		var jsonByItem = new Map();
+		var oldToNewIDs = new Map();
+
+		function saveID(jsonItem, item) {
+			if (jsonItem.itemID) {
+				let oldID = '' + jsonItem.itemID;
+				if (oldID.includes('#')) {
+					oldID = oldID.substring(oldID.lastIndexOf('#'));
+				}
+				oldToNewIDs.set(oldID, item.id);
+			}
+		}
 		
 		await Zotero.DB.executeTransaction(async function () {
 			for (let jsonItem of jsonItems) {
@@ -166,7 +177,9 @@ Zotero.Translate.ItemSaver.prototype = {
 								foundPrimaryPDF = true;
 							}
 							attachmentsToSave.push(jsonAttachment);
-							attachmentCallback(jsonAttachment, 0);
+							if (attachmentCallback) {
+								attachmentCallback(jsonAttachment, 0);
+							}
 							if (jsonAttachment.singleFile) {
 								// SingleFile attachments are saved in 'saveSingleFile'
 								// connector endpoint
@@ -187,6 +200,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Add to new item list
 				items.push(item);
 				jsonByItem.set(item, jsonItem);
+				saveID(jsonItem, item);
 			}
 		}.bind(this));
 
@@ -199,6 +213,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			let item = await this._saveAttachment(jsonItem, null, attachmentCallback);
 			if (item) {
 				items.push(item);
+				saveID(jsonItem, item);
 			}
 		}
 		
@@ -255,11 +270,16 @@ Zotero.Translate.ItemSaver.prototype = {
 					if (progress === false && attachment.isPrimaryPDF && shouldDownloadOAPDF) {
 						return;
 					}
-					attachmentCallback(...arguments);
+					if (attachmentCallback) {
+						attachmentCallback(...arguments);
+					}
 				}
 			);
-			if (attachment && jsonAttachment.isPrimaryPDF) {
-				itemIDsWithPDFAttachments.add(parentItemID);
+			if (attachment) {
+				if (jsonAttachment.isPrimaryPDF) {
+					itemIDsWithPDFAttachments.add(parentItemID);
+				}
+				saveID(jsonAttachment, attachment);
 			}
 		}
 		
@@ -350,6 +370,21 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 			}
 		}
+
+		await Zotero.DB.executeTransaction(async () => {
+			for (let item of items) {
+				if (item.isNote()) {
+					Zotero.Notes.postImportTransform(item, oldToNewIDs);
+					await item.save();
+				}
+				else {
+					for (let note of Zotero.Items.get(item.getNotes())) {
+						Zotero.Notes.postImportTransform(note, oldToNewIDs);
+						await note.save();
+					}
+				}
+			}
+		});
 		
 		return items;
 	},

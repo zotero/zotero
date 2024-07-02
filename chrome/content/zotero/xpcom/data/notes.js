@@ -126,6 +126,34 @@ Zotero.Notes = new function() {
 		this.replaceAllItemKeys(item, new Map([[fromItemKey, toItemKey]]));
 	};
 
+	/**
+	 * Transform a newly imported note, replacing templates of the form
+	 * 		{_z_itemURI:SOME_ITEM_ID}
+	 * with item URIs.
+	 *
+	 * @param {Zotero.Item} noteItem The note item to transform
+	 * @param {Map<String, Number>} idMap A map associating values that can
+	 * 		appear after the colon in templates with item IDs.
+	 */
+	this.postImportTransform = function (noteItem, idMap) {
+		let note = noteItem.getNote();
+		note = note.replace(/{_z_itemURI:([^}]+)}/g, (_, id) => {
+			if (!idMap.has(id)) {
+				Zotero.debug('Discarding item ID template without corresponding map entry: ' + id);
+				return '';
+			}
+
+			let newItem = Zotero.Items.get(idMap.get(id));
+			if (!newItem) {
+				Zotero.debug('Discarding item ID template that maps to missing item: ' + id);
+				return '';
+			}
+
+			return Zotero.URI.getItemURI(newItem);
+		});
+		noteItem.setNote(note);
+	};
+
 	this.getExportableNote = async function(item) {
 		if (!item.isNote()) {
 			throw new Error('Item is not a note');
