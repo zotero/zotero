@@ -29,12 +29,13 @@
 		inset-inline-end: 0;
 		width: 14px;
 		height: 14px;
-		padding-inline: 5px 8px;
-		padding-block: 5px;
-		margin-inline: 0 4px;
-		margin-block: 6px;
+		align-self: center;
+		margin-inline-end: 6px;
+		@media (-moz-platform: windows) {
+			margin-top: 2px;
+		}
 		cursor: default;
-		background: url(resource://gre-resources/searchfield-cancel.svg) no-repeat center/contain;
+		background: url(resource://content-accessible/searchfield-cancel.svg) no-repeat center/contain;
 		background-size: unset;
 	}
 }
