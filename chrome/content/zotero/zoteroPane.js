@@ -1056,11 +1056,11 @@ var ZoteroPane = new function()
 		if ([" ", "Enter"].includes(event.key)
 			&& (["button", "toolbarbutton"].includes(tgt.tagName)
 				|| tgt.classList.contains("keyboard-clickable"))) {
-			if (event.target.querySelector("menupopup")) {
+			event.target.click();
+			// Some menus have a history of not opening on programmatic click
+			// If event.target.click above worked, this will be a noop.
+			if (event.target.menupopup) {
 				event.target.open = true;
-			}
-			else {
-				event.target.click();
 			}
 			event.preventDefault();
 			event.stopPropagation();
