@@ -442,9 +442,7 @@ Zotero.Integration = new function() {
 		if(Zotero.isLinux) allOptions += ',dialog=no';
 		if(options) allOptions += ','+options;
 		
-		var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(null, url, '', allOptions, (io ? io : null));
+		var window = Zotero.openWindow(null, url, '', allOptions, (io ? io : null));
 		Zotero.Integration.currentWindow = window;
 		Zotero.Utilities.Internal.activate(window);
 		
