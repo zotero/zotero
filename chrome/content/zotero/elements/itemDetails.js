@@ -282,14 +282,15 @@
 				// Execute sync render immediately
 				if (!box.hidden && box.render) {
 					if (box.render) {
-						box.render();
+						try {
+							box.render();
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
 					}
 				}
 			}
-
-			// Wait to make sure the visibility and height are updated
-			let promise = new Promise(resolve => setTimeout(resolve, 0));
-			await promise;
 
 			let pinnedPaneElem = this.getEnabledPane(this.pinnedPane);
 			let pinnedIndex = panes.indexOf(pinnedPaneElem);
@@ -297,7 +298,7 @@
 			this._paneParent.style.paddingBottom = '';
 			if (pinnedPaneElem) {
 				let paneID = pinnedPaneElem.dataset.pane;
-				this.scrollToPane(paneID, 'instant');
+				await this.scrollToPane(paneID, 'instant');
 				this.pinnedPane = paneID;
 			}
 			else {
@@ -315,7 +316,12 @@
 				if (!this.isPaneVisible(box.dataset.pane)) {
 					continue;
 				}
-				await waitNoLongerThan(box.asyncRender(), 500);
+				try {
+					await waitNoLongerThan(box.asyncRender(), 500);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			if (this.item.id == item.id) {
 				this._isRendering = false;
@@ -447,7 +453,7 @@
 			this.getPanes().forEach(elem => this._sidenav.updatePaneStatus(elem.dataset.pane));
 		}
 
-		async scrollToPane(paneID, behavior = 'smooth') {
+		async scrollToPane(paneID, behavior = 'smooth', retryTimes = 0) {
 			let pane = this.getEnabledPane(paneID);
 			if (!pane) return null;
 
@@ -472,11 +478,17 @@
 			pane.focus();
 			
 			// Check if the pane is actually scrolled to
-			let promise = new Promise(resolve => setTimeout(resolve, 0));
-			await promise;
-			if (Math.abs(pane.getBoundingClientRect().top - pane.parentElement.getBoundingClientRect().top) > 3) {
-				// If not, try again
-				await this.scrollToPane(paneID, behavior);
+			let scrollPositionThreshold = 3;
+			let maxScrollAttempts = 3;
+			if (retryTimes >= maxScrollAttempts) {
+				return scrollPromise;
+			}
+			await Zotero.Promise.delay(0);
+			// If not, scroll again
+			if (Math.abs(pane.getBoundingClientRect().top
+				- pane.parentElement.getBoundingClientRect().top) > scrollPositionThreshold) {
+				// pane.scrollIntoView({ block: 'start', behavior: 'instant' });
+				await this.scrollToPane(paneID, behavior, retryTimes + 1);
 			}
 			return scrollPromise;
 		}
@@ -641,8 +653,13 @@
 					if (needsCheckVisibility && !this.isPaneVisible(paneElem.dataset.pane)) {
 						return;
 					}
-					if (paneElem.render) paneElem.render();
-					if (paneElem.asyncRender) await paneElem.asyncRender();
+					try {
+						if (paneElem.render) paneElem.render();
+						if (paneElem.asyncRender) await paneElem.asyncRender();
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				});
 			}
 			if (needsDiscard.length > 0) {
@@ -650,7 +667,12 @@
 					if (needsCheckVisibility && this.isPaneVisible(paneElem.dataset.pane)) {
 						return;
 					}
-					if (paneElem.discard) paneElem.discard();
+					try {
+						if (paneElem.discard) paneElem.discard();
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				});
 			}
 		};
