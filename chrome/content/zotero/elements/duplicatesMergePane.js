@@ -139,6 +139,8 @@
 			button.label = Zotero.getString('pane.item.duplicates.mergeItems', (otherItems.length + 1));
 			versionSelect.hidden = fieldSelect.hidden = !alternatives;
 			itembox.hiddenFields = alternatives ? [] : ['dateAdded', 'dateModified'];
+			// Since the header of the collapsible section is hidden, the section has to be opened
+			itembox.open = true;
 			
 			this.setMaster(0);
 			
