@@ -50,7 +50,7 @@
 					<item-pane-header id="zotero-item-pane-header" />
 					
 					<html:div id="zotero-view-item" class="zotero-view-item" tabindex="0">
-						<item-box id="zotero-editpane-item-box" data-pane="info"/>
+						<info-box id="zotero-editpane-info-box" data-pane="info"/>
 						
 						<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract" data-pane="abstract"/>
 
@@ -226,7 +226,7 @@
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
 
-			this._lastUpdateCustomSection = 0;
+			this._lastUpdateCustomSection = "";
 
 			// If true, will render on tab select
 			this._pendingRender = false;
@@ -318,11 +318,10 @@
 		}
 
 		renderCustomSections() {
-			let lastUpdate = Zotero.ItemPaneManager.getUpdateTime();
-			if (this._lastUpdateCustomSection == lastUpdate) return;
-			this._lastUpdateCustomSection = lastUpdate;
+			let { options: targetPanes, updateID } = Zotero.ItemPaneManager.customSectionData;
+			if (this._lastUpdateCustomSection == updateID) return;
+			this._lastUpdateCustomSection = updateID;
 
-			let targetPanes = Zotero.ItemPaneManager.getCustomSections();
 			let currentPaneElements = this.getCustomPanes();
 			// Remove
 			for (let elem of currentPaneElements) {
