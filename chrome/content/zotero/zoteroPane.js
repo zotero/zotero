@@ -1050,11 +1050,17 @@ var ZoteroPane = new function()
 		if ([" ", "Enter"].includes(event.key)
 			&& (["button", "toolbarbutton"].includes(tgt.tagName)
 				|| tgt.classList.contains("keyboard-clickable"))) {
+			// Dispatch click event on a button
+			let clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true,
+				detail: 1
+			});
+			event.target.dispatchEvent(clickEvent);
+			// Many menus are not triggered via 'click', so open them manually.
+			// If the menu was opened after click, this will be a noop.
 			if (event.target.querySelector("menupopup")) {
 				event.target.open = true;
-			}
-			else {
-				event.target.click();
 			}
 			event.preventDefault();
 			event.stopPropagation();
