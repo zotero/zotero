@@ -46,15 +46,28 @@
 			'max-lines'
 		];
 		
-		static get _canvas() {
-			// OffscreenCanvas returns incorrect results here
-			// Use a <canvas> that we don't actually add to the DOM
-			let canvas = document.createElement('canvas');
-			// Replace the getter with a value
-			Object.defineProperty(this, '_canvas', {
-				value: canvas
+		static get _textMeasurementSpan() {
+			// Create our hidden span in the hiddenDOMWindow, because any calls to
+			// getBoundingClientRect(), offsetWidth, scrollWidth, etc. on an element
+			// in this document from sizeToContent() will, bizarrely, cause things
+			// in the metadata table to overlap
+			// TODO: Revisit after next Fx platform upgrade
+			let doc = Services.appShell.hiddenDOMWindow.document;
+			let span = doc.createElement('span');
+			span.style.position = 'absolute';
+			span.style.visibility = 'hidden';
+			span.style.whiteSpace = 'pre';
+			doc.documentElement.append(span);
+
+			window.addEventListener('unload', () => {
+				span.remove();
 			});
-			return canvas;
+
+			// Replace the getter with a value
+			Object.defineProperty(this, '_textMeasurementSpan', {
+				value: span
+			});
+			return span;
 		}
 		
 		get noWrap() {
@@ -162,11 +175,11 @@
 		}
 		
 		sizeToContent = () => {
-			let context = this.constructor._canvas.getContext('2d');
+			let span = this.constructor._textMeasurementSpan;
 			let { font, paddingLeft, paddingRight, borderLeftWidth, borderRightWidth } = getComputedStyle(this._input);
-			context.font = font;
-			let text = this.value || this.placeholder;
-			this.style.maxWidth = `calc(${context.measureText(text).width}px + ${paddingLeft} + ${paddingRight} + ${borderLeftWidth} + ${borderRightWidth})`;
+			span.style.font = font;
+			span.textContent = this.value || this.placeholder;
+			this.style.maxWidth = `calc(${span.getBoundingClientRect().width}px + ${paddingLeft} + ${paddingRight} + ${borderLeftWidth} + ${borderRightWidth})`;
 		};
 		
 		attributeChangedCallback() {
