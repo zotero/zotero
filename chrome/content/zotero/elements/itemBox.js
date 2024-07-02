@@ -2269,10 +2269,12 @@
 			event.preventDefault();
 			event.stopPropagation();
 			
+			let target = event.target;
 			let isRightClick = event.type == 'contextmenu';
-			if (!isRightClick) {
-				event.target.classList.add("show-without-hover");
-				event.target.classList.remove("show-on-hover");
+			// Force button to show regardless of its hover status if applicable
+			if (!isRightClick && target.classList.contains("show-on-hover")) {
+				target.classList.add("show-without-hover");
+				target.classList.remove("show-on-hover");
 			}
 			// On click, we have x/y coordinates so use that
 			// On keyboard click, open it next to the target
