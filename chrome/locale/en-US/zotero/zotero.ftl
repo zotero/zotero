@@ -60,6 +60,12 @@ menu-tools-plugins =
 
 main-window-command =
     .label = { -app-name }
+menu-primary-attachment =
+    .label = {
+        $type ->
+            [unset] Unset
+            *[set] Set
+    } as Primary Attachment
 
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
