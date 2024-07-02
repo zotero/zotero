@@ -151,10 +151,16 @@
 			});
 
 			// Ensure no button is forced to stay visible once the menu is closed
-			this.addEventListener('popuphidden', (_) => {
+			this.addEventListener('popuphidden', (event) => {
 				for (let node of this.querySelectorAll('.show-without-hover')) {
 					node.classList.remove('show-without-hover');
 					node.classList.add("show-on-hover");
+				}
+				// Some toolbarbuttons get stuck with open=true if popup is
+				// opened via keyboard (e.g. select version btn in merge mode)
+				let popupParent = event.target.parentElement;
+				if (popupParent?.getAttribute("open") == "true") {
+					popupParent.removeAttribute("open");
 				}
 			});
 
