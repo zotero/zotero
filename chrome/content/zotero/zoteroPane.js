@@ -6333,6 +6333,7 @@ var ZoteroPane = new function()
 		}
 		tooltip.setAttribute("label", triggerNode.getAttribute("dynamic-tooltiptext"));
 	};
+
 	/**
 	 * Opens the about dialog
 	 */
