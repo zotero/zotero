@@ -446,13 +446,6 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	};
 	
 	
-	var parseStreamToDocument = async function (stream, type) {
-		var parser = new DOMParser();
-		var doc = await Zotero.File.getContentsAsync(stream);
-		return parser.parseFromString(doc, type);
-	};
-	
-	
 	/**
 	 * @param {Integer[]|Integer} items - One or more itemIDs
 	 * @param {Object} [options]
