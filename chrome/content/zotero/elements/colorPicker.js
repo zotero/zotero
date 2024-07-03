@@ -26,10 +26,6 @@
 "use strict";
 
 {
-	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
-
 	class ColorPicker extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<vbox>
@@ -57,9 +53,15 @@
 			}
 			else {
 				return [
-					'#FF6666', '#FF8C19', '#999999',
-					'#5FB236', '#009980', '#2EA8E5',
-					'#576DD9', '#A28AE5', '#A6507B'
+					'#FF6666',
+					'#FF8C19',
+					'#999999',
+					'#5FB236',
+					'#009980',
+					'#2EA8E5',
+					'#576DD9',
+					'#A28AE5',
+					'#A6507B'
 				];
 			}
 		}
@@ -89,9 +91,15 @@
 					Zotero.debug('WARNING: <color-picker> CE: Set color-labels when setting colors');
 				}
 				return [
-					'general.red', 'general.orange', 'general.gray',
-					'general.green', 'general.teal', 'general.blue',
-					'general.purple', 'general.violet', 'general.maroon'
+					'general.red',
+					'general.orange',
+					'general.gray',
+					'general.green',
+					'general.teal',
+					'general.blue',
+					'general.purple',
+					'general.violet',
+					'general.maroon'
 				].map(label => Zotero.getString(label));
 			}
 		}
@@ -177,6 +185,8 @@
 				let tile = document.createElement('button');
 				tile.setAttribute('aria-label', colorLabels[i]);
 				tile.classList.add('grid-tile');
+				// Disable our custom button styling on Windows
+				tile.classList.add('btn');
 				tile.style.background = color;
 				
 				tile.addEventListener('click', () => {
