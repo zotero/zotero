@@ -394,6 +394,74 @@ describe("Item pane", function () {
 		});
 	});
 
+	describe("Libraries and collections pane", function () {
+		var item, collectionParent, collectionChild, section;
+
+		// Fresh setup of an item belonging to 2 collections - parent and child - for each test
+		beforeEach(async function () {
+			collectionParent = await createDataObject('collection');
+			collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+			item = await createDataObject('item', { collections: [collectionParent.id, collectionChild.id] });
+			await ZoteroPane.selectItem(item.id);
+			section = ZoteroPane.itemPane._itemDetails.getPane("libraries-collections");
+		});
+		
+		it("should update collection's name after rename", async function () {
+			collectionChild.name = "Updated collection name";
+			collectionChild.saveTx();
+
+			await waitForNotifierEvent('modify', 'collection');
+
+			let collectionRow = section.querySelector(`.row[data-id="C${collectionChild.id}"]`);
+			assert.equal(collectionRow.innerText, collectionChild.name);
+		});
+
+		it("should remove collection that has been trashed", async function () {
+			collectionChild.deleted = true;
+			collectionChild.saveTx();
+
+			await waitForNotifierEvent('trash', 'collection');
+
+			let rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
+			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`]);
+		});
+
+		it("should bring back collection restored from trash", async function () {
+			collectionChild.deleted = true;
+			collectionChild.saveTx();
+
+			await waitForNotifierEvent('trash', 'collection');
+
+			// Make sure the collection is actually gone
+			let rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
+			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`]);
+
+			// Restore the collection from trash
+			collectionChild.deleted = false;
+			collectionChild.saveTx();
+
+			await waitForNotifierEvent('modify', 'collection');
+
+			// The collection row should appear again
+			rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
+			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`, `C${collectionChild.id}`]);
+		});
+
+		it("should not display trashed collections after reload", async function () {
+			collectionChild.deleted = true;
+			collectionChild.saveTx();
+
+			await waitForNotifierEvent('trash', 'collection');
+
+			// Reload the item's data from DB and re-render the section to simulate loading on startup
+			await Zotero.Items.get(item.id).reload(null, true);
+			section._forceRenderAll();
+
+			let rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
+			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`]);
+		});
+	});
+
 	describe("Attachments pane", function () {
 		let paneID = "attachments";
 
