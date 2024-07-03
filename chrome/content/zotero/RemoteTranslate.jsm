@@ -172,6 +172,10 @@ class RemoteTranslate {
 		let items = [];
 		try {
 			let jsonItems = await actor.sendQuery("translate", { translator: this._translator, id: this._id });
+			if (jsonItems === null) {
+				Zotero.debug('RemoteTranslate: translate query returned null');
+				return null;
+			}
 			if (options.libraryID !== false) {
 				let itemsLeftToSave = jsonItems.length;
 				let attachmentsInProgress = new Set();
