@@ -82,10 +82,11 @@ var Zotero_LocateMenu = new function() {
 			}
 		}
 		
-		var menuitem = document.createXULElement("menuitem");
 		menuitem = _createMenuItem(Zotero.getString("locate.manageLocateEngines"), "zotero-manage-locate-menu");
 		menuitem.addEventListener("command", _openLocateEngineManager, false);
 		locateMenu.appendChild(menuitem);
+		
+		await document.l10n.translateFragment(locateMenu);
 	}
 	
 	/**
@@ -118,6 +119,8 @@ var Zotero_LocateMenu = new function() {
 			submenu.appendChild(submenuPopup);
 			menu.appendChild(submenu);
 		}*/
+		
+		yield document.l10n.translateFragment(menu);
 	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
