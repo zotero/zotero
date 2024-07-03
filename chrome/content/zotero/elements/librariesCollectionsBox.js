@@ -85,7 +85,7 @@ import { getCSSIcon } from 'components/icons';
 			}
 			
 			if (["modify", "trash"].includes(action) && type == "collection") {
-				let isRelevantCollection = ids.findIndex(id => Zotero.Collections.get(id).hasItem(this._item)) !== -1;
+				let isRelevantCollection = ids.some(id => Zotero.Collections.get(id).hasItem(this._item));
 				if (isRelevantCollection) {
 					this._forceRenderAll();
 				}
