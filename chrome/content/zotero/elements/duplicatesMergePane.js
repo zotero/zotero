@@ -27,7 +27,7 @@
 	class DuplicatesMergePane extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<groupbox>
-				<button id="zotero-duplicates-merge-button" />
+				<button id="zotero-duplicates-merge-button" data-l10n-id="item-pane-duplicates-merge-items" />
 			</groupbox>
 			
 			<groupbox id="zotero-duplicates-merge-version-select">
@@ -84,7 +84,7 @@
 					if (itemTypeID != item.itemTypeID) {
 						let msg;
 						if (displayNumItemsOnTypeError) {
-							msg = Zotero.getString('pane.item.selected.multiple', items.length);
+							msg = { l10nId: 'item-pane-message-items-selected', l10nArgs: { count: items.length } };
 						}
 						else {
 							msg = Zotero.getString('pane.item.duplicates.onlySameItemType');
@@ -136,7 +136,7 @@
 				}, 0);
 			}
 			
-			button.label = Zotero.getString('pane.item.duplicates.mergeItems', (otherItems.length + 1));
+			document.l10n.setArgs(button, { count: otherItems.length + 1 });
 			versionSelect.hidden = fieldSelect.hidden = !alternatives;
 			itembox.hiddenFields = alternatives ? [] : ['dateAdded', 'dateModified'];
 			// Since the header of the collapsible section is hidden, the section has to be opened

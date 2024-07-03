@@ -202,7 +202,7 @@
 						msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
 					}
 					else {
-						msg = Zotero.getString('pane.item.selected.zero');
+						msg = { l10nId: 'item-pane-message-items-selected', l10nArgs: { count: 0 } };
 					}
 					this.setItemPaneMessage(msg);
 				}
@@ -227,7 +227,6 @@
 					let key;
 					// In the trash, we have to check the object type
 					if (this.collectionTreeRow.isTrash()) {
-						let _obj = this.data[0];
 						if (this.data.every(x => x instanceof Zotero.Collection)) {
 							key = 'item-pane-message-collections-selected';
 						}
@@ -244,26 +243,11 @@
 					else {
 						key = 'item-pane-message-items-selected';
 					}
-					// TODO: Add mechanism for this to setItemPaneMessage()
-					let elem = document.createXULElement('description');
-					document.l10n.setAttributes(elem, key, { count });
-					msg = elem;
+					msg = { l10nId: key, l10nArgs: { count } };
 				}
 				else {
-					let rowCount = this.itemsView.rowCount;
-					let str = 'pane.item.unselected.';
-					switch (rowCount) {
-						case 0:
-							str += 'zero';
-							break;
-						case 1:
-							str += 'singular';
-							break;
-						default:
-							str += 'plural';
-							break;
-					}
-					msg = Zotero.getString(str, [rowCount]);
+					let count = this.itemsView.rowCount;
+					msg = { l10nId: 'item-pane-message-unselected', l10nArgs: { count } };
 				}
 				
 				this.setItemPaneMessage(msg);

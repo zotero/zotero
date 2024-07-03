@@ -37,8 +37,8 @@
 		}
 
 		render(content) {
-			this._messageBox.textContent = '';
 			if (typeof content == 'string') {
+				this._messageBox.replaceChildren();
 				let contentParts = content.split("\n\n");
 				for (let part of contentParts) {
 					let desc = document.createXULElement('description');
@@ -46,8 +46,18 @@
 					this._messageBox.appendChild(desc);
 				}
 			}
+			else if (typeof content === 'object' && 'l10nId' in content) {
+				let { l10nId, l10nArgs } = content;
+				if (this._messageBox.firstElementChild?.localName === 'description') {
+					this._messageBox.replaceChildren(this._messageBox.firstElementChild);
+				}
+				else {
+					this._messageBox.replaceChildren(document.createXULElement('description'));
+				}
+				document.l10n.setAttributes(this._messageBox.firstElementChild, l10nId, l10nArgs);
+			}
 			else {
-				this._messageBox.appendChild(content);
+				this._messageBox.replaceChildren(content);
 			}
 		}
 
