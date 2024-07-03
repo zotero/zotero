@@ -357,8 +357,8 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 
 			// Add restored collection back into item's _collections cache
 			this.getChildItems(false, true).forEach((item) => {
-				const collectionNotCached = item._collections.filter(c => c != this.id).length == 0;
-				if (collectionNotCached) {
+				let collectionCached = item._collections.includes(this.id);
+				if (!collectionCached) {
 					item._collections.push(this.id);
 				}
 			});
