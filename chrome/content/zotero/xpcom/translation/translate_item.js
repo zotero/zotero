@@ -76,6 +76,10 @@ Zotero.Translate.ItemSaver = function(options) {
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE = 0;
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD = 1;
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
+Zotero.Translate.ItemSaver.PRIMARY_ATTACHMENT_TYPES = new Set([
+	'application/pdf',
+	'application/epub+zip',
+]);
 
 Zotero.Translate.ItemSaver.prototype = {
 	/**
@@ -152,18 +156,18 @@ Zotero.Translate.ItemSaver.prototype = {
 					// handle attachments
 					if (jsonItem.attachments) {
 						let attachmentsToSave = [];
-						let foundPrimaryPDF = false;
+						let foundPrimary = false;
 						for (let jsonAttachment of jsonItem.attachments) {
 							if (!this._canSaveAttachment(jsonAttachment)) {
 								continue;
 							}
 							
-							// The first PDF is the primary one. If that one fails to download,
+							// The first PDF/EPUB is the primary one. If that one fails to download,
 							// we might check for an open-access PDF below.
-							let isPrimaryPDF = false;
-							if (jsonAttachment.mimeType == 'application/pdf' && !foundPrimaryPDF) {
-								jsonAttachment.isPrimaryPDF = true;
-								foundPrimaryPDF = true;
+							if (Zotero.Translate.ItemSaver.PRIMARY_ATTACHMENT_TYPES.has(jsonAttachment.mimeType)
+									&& !foundPrimary) {
+								jsonAttachment.isPrimary = true;
+								foundPrimary = true;
 							}
 							attachmentsToSave.push(jsonAttachment);
 							attachmentCallback(jsonAttachment, 0);
@@ -217,7 +221,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				
 				// Skip items with translated PDF attachments
 				if (jsonItem.attachments
-						&& jsonItem.attachments.some(x => x.mimeType == 'application/pdf')) {
+						&& jsonItem.attachments.some(x => Zotero.Translate.ItemSaver.PRIMARY_ATTACHMENT_TYPES.has(x.mimeType))) {
 					continue;
 				}
 				
@@ -245,21 +249,21 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		// Save translated child attachments, and keep track of whether the save was successful
-		var itemIDsWithPDFAttachments = new Set();
+		var itemIDsWithPrimaryAttachments = new Set();
 		for (let [jsonAttachment, parentItemID] of childAttachments) {
 			let attachment = await this._saveAttachment(
 				jsonAttachment,
 				parentItemID,
 				function (attachment, progress, error) {
 					// Don't cancel failed primary PDFs until we've tried other methods
-					if (progress === false && attachment.isPrimaryPDF && shouldDownloadOAPDF) {
+					if (progress === false && attachment.isPrimary && shouldDownloadOAPDF) {
 						return;
 					}
 					attachmentCallback(...arguments);
 				}
 			);
-			if (attachment && jsonAttachment.isPrimaryPDF) {
-				itemIDsWithPDFAttachments.add(parentItemID);
+			if (attachment && jsonAttachment.isPrimary) {
+				itemIDsWithPrimaryAttachments.add(parentItemID);
 			}
 		}
 		
@@ -267,16 +271,18 @@ Zotero.Translate.ItemSaver.prototype = {
 		// one or there was but it failed, look for another PDF (if enabled)
 		if (shouldDownloadOAPDF) {
 			for (let item of items) {
-				// Already have a PDF from translation
-				if (itemIDsWithPDFAttachments.has(item.id)) {
+				// Already have a primary attachment from translation
+				if (itemIDsWithPrimaryAttachments.has(item.id)) {
 					continue;
 				}
 				
 				let jsonItem = jsonByItem.get(item);
 				// Reuse the existing status line if there is one. This could be a failed
 				// translator attachment or a possible OA PDF found above.
+				// Explicitly check that the attachment is a PDF, not just any primary type,
+				// since we're reusing it for a PDF attachment.
 				let jsonAttachment = jsonItem.attachments && jsonItem.attachments.find(
-					x => x.mimeType == 'application/pdf' && x.isPrimaryPDF
+					x => x.mimeType == 'application/pdf' && x.isPrimary
 				);
 				
 				// If no translated, no OA, and no custom, don't show a line
@@ -383,7 +389,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			parent: parentID,
 			title,
 			mimeType: 'application/pdf',
-			isPrimaryPDF: true
+			isPrimary: true
 		};
 	},
 	
