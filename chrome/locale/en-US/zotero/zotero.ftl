@@ -585,6 +585,7 @@ item-pane-header-more-options =
     .label = More Options
 
 item-pane-message-items-selected = { $count ->
+                                             [0] No items selected
                                              [one] { $count } item selected
                                             *[other] { $count } items selected
                                     }
