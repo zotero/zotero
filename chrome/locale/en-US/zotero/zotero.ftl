@@ -602,7 +602,7 @@ item-pane-message-objects-selected = { $count ->
                                      }
 
 item-pane-message-unselected = { $count ->
-    [zero] No items in this view
+    [0] No items in this view
     [one] { $count } item in this view
    *[other] { $count } items in this view
 }
