@@ -39,7 +39,7 @@ const TranslationManager = new class {
 	
 	removeHandler(id, name, handler) {
 		this._registeredRemoteTranslates.get(id).handlers[name]
-			= this._registeredRemoteTranslates.get(id).handlers[name].filter(h => h !== handler);
+			= this._registeredRemoteTranslates.get(id).handlers[name]?.filter(h => h !== handler);
 	}
 
 	clearHandlers(id, name) {
