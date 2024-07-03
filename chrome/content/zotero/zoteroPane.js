@@ -6322,6 +6322,18 @@ var ZoteroPane = new function()
 		}
 	};
 	
+	// Set the label of the dynamic tooltip. Can be used when we cannot set .tooltiptext
+	// property, e.g. if we don't want the tooltip to be announced by screenreaders.
+	this.setDynamicTooltip = function (event) {
+		let tooltip = event.target;
+		let triggerNode = tooltip.triggerNode;
+		if (!triggerNode || !triggerNode.getAttribute("dynamic-tooltiptext")) {
+			event.preventDefault();
+			return;
+		}
+		tooltip.setAttribute("label", triggerNode.getAttribute("dynamic-tooltiptext"));
+	};
+
 	/**
 	 * Opens the about dialog
 	 */

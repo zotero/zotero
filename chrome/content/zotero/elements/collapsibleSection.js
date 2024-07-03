@@ -157,6 +157,8 @@
 			let twisty = document.createXULElement('toolbarbutton');
 			twisty.className = 'twisty';
 			twisty.setAttribute("tabindex", "0");
+			twisty.setAttribute("tooltip", "dynamic-tooltip");
+			twisty.setAttribute("data-l10n-attrs", "dynamic-tooltiptext");
 			this._head.append(twisty);
 			
 			this._buildExtraButtons();
@@ -173,6 +175,11 @@
 			if (this.hasAttribute('data-l10n-id') && !this.hasAttribute('data-l10n-args')) {
 				this.setAttribute('data-l10n-args', JSON.stringify({ count: 0 }));
 			}
+			// Fetch the localized value of the current pane which is used to set aria-properties
+			document.l10n.formatValue(`pane-${this.dataset.pane}`)
+				.then((res) => {
+					this._paneName = res;
+				});
 		}
 		
 		_buildContextMenu() {
@@ -409,8 +416,9 @@
 			this._head.setAttribute("aria-label", this.label);
 			this._title.textContent = this.label;
 			this._summary.textContent = this.summary;
-			this._head.querySelector('.twisty').hidden = this._disableCollapsing;
-			this._head.querySelector('.twisty').setAttribute('data-l10n-id', `section-button-${this.open ? "collapse" : "expand"}`);
+			let twisty = this._head.querySelector('.twisty');
+			twisty.hidden = this._disableCollapsing;
+			document.l10n.setAttributes(twisty, `section-button-${this.open ? "collapse" : "expand"}`, { section: this._paneName || "" });
 		}
 	}
 	customElements.define("collapsible-section", CollapsibleSection);
