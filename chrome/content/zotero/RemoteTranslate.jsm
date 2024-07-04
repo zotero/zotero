@@ -187,6 +187,7 @@ class RemoteTranslate {
 					forceTagType: 1,
 					referrer: this._browser.currentURI.spec,
 					// proxy: unimplemented in the client
+					localizeAttachmentTitles: true
 				});
 				
 				let invokeDoneHandlersIfDone = () => {
