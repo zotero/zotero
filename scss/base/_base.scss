@@ -14,7 +14,7 @@
 	@media (-moz-platform: macos) {
 		--color-accent: SelectedItem;
 		--color-accent-text: SelectedItemText;
-		--color-focus-border: color-mix(in srgb, var(--color-accent) 50%, transparent);
+		--color-focus-border: -moz-mac-focusring;
 		--width-focus-border: 3px;
 	}
 	@media (-moz-platform: linux) {
