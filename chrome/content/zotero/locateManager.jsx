@@ -51,6 +51,7 @@ function init() {
 			onColumnSort={null}
 			disableFontSizeScaling={true}
 			getRowString={index => getRowData(index).name}
+			onSelectionChange={handleSelectionChange}
 			onActivate={handleActivate}
 		/>
 	);
@@ -78,6 +79,10 @@ function getRowData(index) {
 function updateTree() {
 	if (!tree) return;
 	tree.forceUpdate(tree.invalidate);
+}
+
+function handleSelectionChange(selection) {
+	document.getElementById('locateManager-delete').disabled = selection.count == 0;
 }
 
 function handleActivate(event, indices) {
@@ -119,15 +124,17 @@ function toggleLocateEngines() {
 
 /**
  * Deletes selected Locate Engines from the locate pane
+ *
+ * TODO: Limit to custom engines?
  **/
 function deleteLocateEngine() {
 	engines.forEach((engine, index) => {
 		if (tree.selection.isSelected(index)) {
-			Zotero.LocateManager.removeLocateEngine(engine);
+			Zotero.LocateManager.removeEngine(engine);
 		}
 	});
-
 	tree.selection.clearSelection();
+	engines = Zotero.LocateManager.getEngines();
 	updateTree();
 }
 

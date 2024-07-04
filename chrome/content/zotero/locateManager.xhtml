@@ -62,10 +62,10 @@
 			<hbox align="center">
 				<hbox pack="start" flex="1">
 					<button label="Toggle" onclick="toggleLocateEngines()" flex="1"/>
-					<button id="locateManager-restoreDefaults" label="&zotero.preferences.locate.restoreDefaults;" onclick="restoreDefaultLocateEngines()" flex="1"/>
+					<button id="locateManager-restoreDefaults" label="&zotero.preferences.locate.restoreDefaults;" oncommand="restoreDefaultLocateEngines()" flex="1"/>
 				</hbox>
 				<hbox pack="end" flex="2">
-					<button disabled="true" id="locateManager-delete" label="-" onclick="deleteLocateEngine()" flex="0.5"/>
+					<button disabled="true" id="locateManager-delete" label="-" oncommand="deleteLocateEngine()" flex="0.5"/>
 				</hbox>
 			</hbox>
 
