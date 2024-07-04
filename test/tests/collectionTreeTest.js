@@ -1109,6 +1109,82 @@ describe("Zotero.CollectionTree", function() {
 				
 				assert.isTrue(droppedItem.deleted);
 			})
+
+			it("should copy related item relations unprompted when all related items are dragged", async function () {
+				let item1 = await createDataObject('item');
+				let item2 = await createDataObject('item');
+				item1.addRelatedItem(item2);
+				item2.addRelatedItem(item1);
+				await item1.saveTx();
+				await item2.saveTx();
+				let group = await createGroup();
+				
+				await cv.selectLibrary(group.libraryID);
+				await waitForItemsLoad(win);
+				
+				await onDrop('item', 'L' + group.libraryID, [item1.id, item2.id]);
+				
+				let groupItem1 = await item1.getLinkedItem(group.libraryID);
+				let groupItem2 = await item2.getLinkedItem(group.libraryID);
+				assert.ok(groupItem1);
+				assert.ok(groupItem2);
+
+				assert.include(groupItem1.relatedItems, groupItem2.key);
+				assert.include(groupItem2.relatedItems, groupItem1.key);
+				
+				await group.eraseTx();
+			});
+
+			it("should prompt when a related item is excluded and copy all when user selects Yes", async function () {
+				let item1 = await createDataObject('item');
+				let item2 = await createDataObject('item');
+				item1.addRelatedItem(item2);
+				item2.addRelatedItem(item1);
+				await item1.saveTx();
+				await item2.saveTx();
+				let group = await createGroup();
+				
+				await cv.selectLibrary(group.libraryID);
+				await waitForItemsLoad(win);
+				
+				let dialog = waitForDialog(null, 'accept');
+				let drop = onDrop('item', 'L' + group.libraryID, [item1.id]);
+				await Promise.all([dialog, drop]);
+				
+				let groupItem1 = await item1.getLinkedItem(group.libraryID);
+				let groupItem2 = await item2.getLinkedItem(group.libraryID);
+				assert.ok(groupItem1);
+				assert.ok(groupItem2);
+				assert.include(groupItem1.relatedItems, groupItem2.key);
+				assert.include(groupItem2.relatedItems, groupItem1.key);
+
+				await group.eraseTx();
+			});
+
+			it("should prompt when a related item is excluded and not copy when user selects No", async function () {
+				let item1 = await createDataObject('item');
+				let item2 = await createDataObject('item');
+				item1.addRelatedItem(item2);
+				item2.addRelatedItem(item1);
+				await item1.saveTx();
+				await item2.saveTx();
+				let group = await createGroup();
+				
+				await cv.selectLibrary(group.libraryID);
+				await waitForItemsLoad(win);
+				
+				let dialog = waitForDialog(null, 'cancel');
+				let drop = onDrop('item', 'L' + group.libraryID, [item1.id]);
+				await Promise.all([dialog, drop]);
+				
+				let groupItem1 = await item1.getLinkedItem(group.libraryID);
+				let groupItem2 = await item2.getLinkedItem(group.libraryID);
+				assert.ok(groupItem1);
+				assert.notOk(groupItem2);
+				assert.isEmpty(groupItem1.relatedItems);
+
+				await group.eraseTx();
+			});
 		})
 		
 		

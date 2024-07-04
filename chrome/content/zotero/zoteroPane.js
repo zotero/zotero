@@ -5056,6 +5056,35 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/publicationsDialog.xhtml','','chrome,modal', io);
 		return io.keepRights !== undefined ? io : false;
 	};
+
+
+	this.showCopyRelatedPrompt = function (items, targetCollectionName) {
+		let originalKeys = new Set(items.map(item => item.key));
+		let newKeys = new Set();
+		for (let item of items) {
+			for (let key of item.relatedItems) {
+				if (!originalKeys.has(key)) {
+					newKeys.add(key);
+				}
+			}
+		}
+
+		if (!newKeys.size) {
+			return newKeys;
+		}
+
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_1_DEFAULT + ps.STD_YES_NO_BUTTONS;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('pane.collections.copyRelatedItems.title'),
+			Zotero.getString('pane.collections.copyRelatedItems.text', [newKeys.size, targetCollectionName], newKeys.size),
+			buttonFlags,
+			null, null, null, null, {}
+		);
+
+		return index === 0 && newKeys;
+	};
 	
 	
 	/**

@@ -1951,7 +1951,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					}
 				}
 			}
-			
+
 			return newItemID;
 		};
 		
@@ -2065,7 +2065,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					// No transaction, because most time is spent traversing urls
 					promises.push(item.translate(targetLibraryID, targetCollectionID))
 				}
-				return Zotero.Promise.all(promises);	
+				return Zotero.Promise.all(promises);
 			}
 			
 			if (targetTreeRow.isPublications()) {
@@ -2087,7 +2087,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			let newIDs = [];
 			let toMove = [];
 			// TODO: support items coming from different sources?
-			let sameLibrary = items[0].libraryID == targetLibraryID
+			let sameLibrary = items[0].libraryID == targetLibraryID;
 			
 			for (let item of items) {
 				if (!item.isTopLevelItem()) {
@@ -2103,6 +2103,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			
 			if (!sameLibrary) {
+				let relatedKeys = window.ZoteroPane.showCopyRelatedPrompt(items, Zotero.Libraries.get(targetLibraryID).name);
+				if (relatedKeys) {
+					let relatedItems = (await Promise.all(
+						[...relatedKeys].map(key => Zotero.Items.getByLibraryAndKeyAsync(items[0].libraryID, key))
+					)).filter(Boolean);
+					items.push(...relatedItems);
+					newItems.push(...relatedItems);
+				}
+
 				let toReconcile = [];
 				
 				await Zotero.Utilities.Internal.forEachChunkAsync(
@@ -2111,7 +2120,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					function (chunk) {
 						return Zotero.DB.executeTransaction(async function () {
 							for (let item of chunk) {
-								var id = await copyItem(item, targetLibraryID, copyOptions)
+								var id = await copyItem(item, targetLibraryID, copyOptions);
 								// Standalone attachments might not get copied
 								if (!id) {
 									continue;
@@ -2154,6 +2163,28 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						for (let obj of io.dataOut) {
 							await obj.ref.save();
 						}
+					});
+				}
+
+				if (relatedKeys) {
+					await Zotero.DB.executeTransaction(async () => {
+						let savePromises = [];
+						for (let [i, oldItem] of items.entries()) {
+							if (!oldItem.relatedItems.length) continue;
+							let newItem = Zotero.Items.get(newIDs[i]);
+							for (let oldRelatedKey of oldItem.relatedItems) {
+								let newRelatedID = newIDs[items.findIndex(item => item.key === oldRelatedKey)];
+								if (newRelatedID) {
+									newItem.addRelation(Zotero.Relations.relatedItemPredicate,
+										Zotero.URI.getItemURI(Zotero.Items.get(newRelatedID)));
+									savePromises.push(newItem.save());
+								}
+								else {
+									Zotero.debug(`No match for related item ${oldRelatedKey} of ${oldItem.key}`);
+								}
+							}
+						}
+						await Promise.all(savePromises);
 					});
 				}
 			}
