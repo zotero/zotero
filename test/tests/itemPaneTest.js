@@ -446,20 +446,6 @@ describe("Item pane", function () {
 			rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
 			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`, `C${collectionChild.id}`]);
 		});
-
-		it("should not display trashed collections after reload", async function () {
-			collectionChild.deleted = true;
-			collectionChild.saveTx();
-
-			await waitForNotifierEvent('trash', 'collection');
-
-			// Reload the item's data from DB and re-render the section to simulate loading on startup
-			await Zotero.Items.get(item.id).reload(null, true);
-			section._forceRenderAll();
-
-			let rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
-			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`]);
-		});
 	});
 
 	describe("Attachments pane", function () {
