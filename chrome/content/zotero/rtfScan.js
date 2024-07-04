@@ -81,7 +81,7 @@ function _matchesItemCreator(creator, itemCreator) {
 const columns = [
 	{ dataKey: 'rtf', label: "zotero.rtfScan.citation.label", primary: true, flex: 4 },
 	{ dataKey: 'item', label: "zotero.rtfScan.itemName.label", flex: 5 },
-	{ dataKey: 'action', label: "", fixedWidth: true, width: "26px" },
+	{ dataKey: 'action', label: "", fixedWidth: true, width: "32px" },
 ];
 
 const BIBLIOGRAPHY_PLACEHOLDER = "\\{Bibliography\\}";
@@ -315,9 +315,14 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 		this.tree.invalidate();
 	},
 
-	onActionMouseUp(event, index) {
+	onAction(ev, index) {
 		let row = this.rows[index];
-		if (!row.parent) return;
+		const isTriggerEvent = ev.type === 'mouseup' || (ev.type === 'keydown' && (ev.key === 'Enter' || ev.key === ' '));
+		
+		if (!isTriggerEvent || !row.parent) {
+			return;
+		}
+		
 		let level = this.getRowLevel(row);
 		if (level == 2) {		// ambiguous citation item
 			let parentIndex = this.rowMap[row.parent.id];
@@ -719,10 +724,12 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 					twisty.classList.add("spacer-twisty");
 				}
 
+				twisty.style.marginLeft = `${20 * this.getRowLevel(row)}px`;
+
 				let textSpan = document.createElement('span');
 				textSpan.className = "cell-text";
 				textSpan.innerText = row[column.dataKey] || "";
-				textSpan.style.paddingLeft = (5 + 20 * this.getRowLevel(row)) + 'px';
+				textSpan.style.paddingLeft = '5px';
 
 				let span = document.createElement('span');
 				span.className = `cell primary ${column.className}`;
@@ -734,10 +741,14 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 				let span = document.createElement('span');
 				span.className = `cell action ${column.className}`;
 				if (row.parent) {
-					let icon = getCSSIcon(row.action ? 'document-accept' : 'document-missing');
+					let button = document.createElement('button');
+					let icon = getCSSIcon(row.action ? 'document-accept' : 'link');
 					icon.classList.add('icon-16');
-					span.appendChild(icon);
-					span.addEventListener('mouseup', e => this.onActionMouseUp(e, index), { passive: true });
+					button.appendChild(icon);
+					button.addEventListener('mouseup', e => this.onAction(e, index), { passive: true });
+					button.addEventListener('keydown', e => this.onAction(e, index), { passive: true });
+					button.dataset.l10nId = row.action ? 'rtfScan-action-accept-match' : 'rtfScan-action-find-match';
+					span.appendChild(button);
 					span.style.pointerEvents = 'auto';
 				}
 

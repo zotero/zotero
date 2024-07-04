@@ -1,94 +1,147 @@
 .rtfscan-wizard {
 	min-width: 700px;
 	min-height: 550px;
-	
+
 	wizardpage {
 		display: flex;
 		flex-direction: column;
-
+		overflow: visible; // prevents focus ring from being clipped
+		
 		> div {
 			display: block;
 		}
 	}
-
+	
 	p {
 		display: inline;
 	}
+	
+	.file-inputs {
+		margin-top: 1em;
+		display: grid;
+		grid-template-columns: [label] fit-content(20%) [input] auto [button] fit-content(33%);
+		gap: 10px 5px;
+		align-items: center;
 
-	.example, .page-start-1, .page-start-2, .file-input-label {
+		
+		input {
+			width: 100%;
+		}
+		
+		label, input {
+			margin: 0;
+		}
+
+		@media (-moz-platform: macos) {
+			button {
+				margin: 0;
+			}
+		}
+	}
+	
+	.example, .page-start-1, .page-start-2 {
 		display: block;
 	}
-
+	
 	.example {
 		line-height: 1.5em
 	}
-
+	
 	.page-start-1 {
 		margin-bottom: 1em;
 	}
-
+	
 	.page-start-2 {
 		margin-top: 1em;
 	}
-
-	.file-input-label {
-		margin: 1em $space-xs $space-min;
-	}
-
-	.file-input-container {
-		display: flex;
-		margin: auto $space-min auto;
-		padding: .5em;
-
-		> input {
-			flex: 1 0 auto;
-		}
-
-		> button {
-			flex: 0 1 auto;
-			margin-left: 1em;
-		}
-	}
-
-	.citations-page-description {
-		margin-bottom: 1em;
-	}
-
+	
 	.citations-page > .wizard-body {
 		display: flex;
 		flex-direction: column;
 	}
-
+	
 	.table-container {
 		display: flex;
-		height: 0;
 		flex-direction: column;
 		flex: 1 0 auto;
 		margin-top: 1.5em;
 
-		>div {
+		.virtualized-table {
+			.row {
+				&.odd:not(.selected) {
+					background-color: var(--material-stripe);
+				}
+			
+				&.even:not(.selected) {
+					background-color: var(--material-background);
+				}
+			}
+		}
+		
+		#tree {
 			display: flex;
 			flex: 1 0 auto;
 			background: var(--material-background70);
 			overflow: hidden;
 			position: relative;
+			height: 0;
 		}
-
+		
 		.virtualized-table-body {
 			display: flex;
-
+			
 			.windowed-list {
 				flex: 1 0 auto;
 			}
 		}
-	}
 
-	$-icons: (document-accept, document-missing);
-	@each $icon in $-icons {
-		.icon-css.icon-#{$icon} {
-			@include focus-states using ($color) {
-				@include svgicon($icon, $color, "16");
+		.cell.action > button {
+			@include focus-ring(true);
+			appearance: none;
+			background: transparent;
+			border: none;
+			width: 19px;
+			height: 19px;
+			padding: 0;
+			margin: 1px;
+
+			&:hover {
+				background-color: var(--fill-quinary);
 			}
 		}
 	}
+	
+	$-icons: (document-accept, link);
+	@each $icon in $-icons {
+		.icon-css.icon-#{$icon} {
+			@include svgicon($icon, "universal", "16");
+			@include focus-states using ($color) {
+				@if $color =="white" {
+					fill: var(--accent-white);
+				}
+				@else {
+					fill: var(--fill-secondary);
+				}
+			}
+		}
+	}
+	
+	@media (-moz-platform: macos) {
+		
+		// override to make it a bit taller
+		--style-configurator-richlistitem-max-height: 300px;
+
+		input {
+			@include focus-ring;
+			background-color: var(--material-background);
+			border-radius: 5px;
+			border: var(--material-border-quinary) !important;
+			color: var(--fill-primary);
+			box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.20);
+			padding-left: 7px;
+			padding-right: 7px;
+		}
+	}
 }
+
+				
