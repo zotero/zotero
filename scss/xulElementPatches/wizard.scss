@@ -25,6 +25,11 @@
         .wizard-buttons-btm {
             padding-left: 0;
             padding-right: 0;
+            padding-bottom: 0;
+
+            button {
+                margin-bottom: 0;
+            }
 
             button:nth-child(1 of :not([hidden=true])) {
                 margin-left: 0;

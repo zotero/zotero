@@ -220,11 +220,11 @@ report-error =
 rtfScan-wizard =
     .title = RTF Scan
 
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. The RTF Scan feature currently supports citations in variations upon the following formats:
 rtfScan-introPage-description2 = To get started, select an RTF input file and an output file below:
 
-rtfScan-input-file = Input File
-rtfScan-output-file = Output File
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 
 rtfScan-no-file-selected = No file selected
 rtfScan-choose-input-file =
@@ -259,6 +259,11 @@ rtfScan-complete-page =
     .label = RTF Scan Complete
 
 rtfScan-complete-page-description = Your document has now been scanned and processed. Please ensure that it is formatted correctly.
+rtfScan-action-find-match =
+    .title = Select matching item
+
+rtfScan-action-accept-match =
+    .title = Accept this match
 
 runJS-title = Run JavaScript
 runJS-editor-label = Code:

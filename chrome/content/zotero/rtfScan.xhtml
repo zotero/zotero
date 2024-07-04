@@ -34,19 +34,14 @@
 				<span class="example">{Jones, 2005; Smith, 2009}</span>
 				<span class="page-start-2" data-l10n-id="rtfScan-introPage-description2" />
 			</div>
-			<div>
+			<div class="file-inputs">
 				<label control="input-path" class="file-input-label" data-l10n-id="rtfScan-input-file" />
-				<div class="file-input-container">
-					<html:input type="text" id="input-path" readonly="true"/>
-					<button id="choose-input-file" data-l10n-id="rtfScan-choose-input-file" />
-				</div>
-			</div>
-			<div>
+				<div><html:input native="true" type="text" id="input-path" readonly="true"/></div>
+				<button id="choose-input-file" data-l10n-id="rtfScan-choose-input-file" />
+				
 				<label control="output-path" class="file-input-label" data-l10n-id="rtfScan-output-file" />
-				<div class="file-input-container">
-					<html:input type="text" id="output-path" readonly="true"/>
-					<button id="choose-output-file" data-l10n-id="rtfScan-choose-output-file" />
-				</div>
+				<div><html:input native="true" type="text" id="output-path" readonly="true"/></div>
+				<button id="choose-output-file" data-l10n-id="rtfScan-choose-output-file" />
 			</div>
 		</wizardpage>
 		<wizardpage pageid="scan-page" data-l10n-id="rtfScan-scan-page" >
