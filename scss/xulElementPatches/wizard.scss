@@ -3,12 +3,10 @@
 @namespace html url("http://www.w3.org/1999/xhtml");
 
 :host(:not(.specificity)) {
-    padding: 24px;
-    font-size: 12px;
+    padding: 20px;
 }
 
 :not(.specificity) {
-
     .wizard-header-box-1 {
         background: var(--material-sidepane);
     }
@@ -19,6 +17,23 @@
 
     .wizard-header-label {
         margin-inline-start: 0;
+    }
+
+    // on macos, align buttons with content
+    // https: //github.com/zotero/zotero/issues/4322#issuecomment-2207032862
+    @media (-moz-platform: macos) {
+        .wizard-buttons-btm {
+            padding-left: 0;
+            padding-right: 0;
+
+            button:nth-child(1 of :not([hidden=true])) {
+                margin-left: 0;
+            }
+
+            button:nth-last-child(1 of :not([hidden=true])) {
+                margin-right: 0;
+            }
+        }
     }
 }
 
