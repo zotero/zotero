@@ -174,8 +174,7 @@
 				this._sidenav.hidden = true;
 			}
 			else if (tabType == 'reader') {
-				let reader = Zotero.Reader.getByTabID(tabID);
-				this._handleReaderReady(reader);
+				this._handleReaderReady(tabID);
 				this._setupNotesContext(tabID);
 				_contextPaneSplitter.setAttribute('hidden', false);
 
@@ -207,7 +206,8 @@
 			currentNoteContext.switchToTab(Zotero_Tabs.selectedID);
 		}
 
-		async _handleReaderReady(reader) {
+		async _handleReaderReady(tabID) {
+			let reader = Zotero.Reader.getByTabID(tabID);
 			if (!reader) {
 				return;
 			}
