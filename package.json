@@ -23,9 +23,9 @@
     "classnames": "^2.2.6",
     "monaco-editor": "^0.47.0",
     "prop-types": "^15.8.0",
-    "react": "^17.0.2",
+    "react": "^18.3.1",
     "react-autosuggest": "^10.1.0",
-    "react-dom": "^17.0.2",
+    "react-dom": "^18.3.1",
     "react-intl": "^3.4.0",
     "react-select": "^3.0.8",
     "url": "^0.11.0"
