@@ -99,18 +99,18 @@ var Zotero_Tabs = new function () {
 				let index = ZoteroPane.collectionsView?.selection?.focused;
 				if (typeof index !== 'undefined' && ZoteroPane.collectionsView.getRow(index)) {
 					let iconName = ZoteroPane.collectionsView.getIconName(index);
-					icon = <CSSIcon name={iconName} className="tab-icon" />;
+					icon = { isItemType: false, icon: iconName };
 				}
 			}
 			else if (tab.data?.itemID) {
 				try {
 					let item = Zotero.Items.get(tab.data.itemID);
-					icon = <CSSItemTypeIcon itemType={item.getItemTypeIconName(true)} className="tab-icon" />;
+					icon = { isItemType: true, icon: item.getItemTypeIconName(true) };
 				}
 				catch (e) {
 					// item might not yet be loaded, we will get the right icon on the next update
 					// but until then use a default placeholder
-					icon = <CSSItemTypeIcon className="tab-icon" />;
+					icon = { isItemType: true, icon: null };
 				}
 			}
 
@@ -119,7 +119,7 @@ var Zotero_Tabs = new function () {
 				type: tab.type,
 				title: tab.title,
 				selected: tab.id == this._selectedID,
-				icon,
+				...icon,
 			};
 		}));
 		// Disable File > Close menuitem if multiple tabs are open
