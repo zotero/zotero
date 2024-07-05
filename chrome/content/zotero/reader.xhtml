@@ -147,7 +147,7 @@
 				/>
 			</menupopup>
 		</menu>
-		<menu label="View" onpopupshowing="onViewMenuOpen()">
+		<menu label="View" accesskey="&viewMenu.accesskey;" onpopupshowing="onViewMenuOpen()">
 			<menupopup>
 				<!--
 				To make presentation mode work it's necessary to set
@@ -290,6 +290,7 @@
 			id="go-menu"
 			class="menu-type-reader"
 			label="&goMenu.label;"
+			accesskey="&goMenu.accesskey;"
 			onpopupshowing="onGoMenuOpen()"
 		>
 			<menupopup id="menu_goPopup">

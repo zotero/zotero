@@ -47,6 +47,7 @@
 
 <!--GO MENU-->
 <!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.accesskey "G">
 
 <!--VIEW MENU-->
 <!ENTITY viewMenu.label                 "View">
