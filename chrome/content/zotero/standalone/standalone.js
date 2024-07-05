@@ -57,7 +57,7 @@ const ZoteroStandalone = new function() {
 		this._notifierID = Zotero.Notifier.registerObserver(
 			{
 				notify: async (action, type, ids, extraData) => {
-					if (action == 'select') {
+					if (['select', 'load'].includes(action)) {
 						// Reader doesn't have tabID yet
 						setTimeout(async () => {
 							// Item and other things might not be loaded yet when reopening tabs
