@@ -65,7 +65,7 @@ import { getCSSIcon } from 'components/icons';
 		}
 
 		init() {
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'librariesCollectionsBox');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'collection'], 'librariesCollectionsBox');
 			this._body = this.querySelector('.body');
 			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
@@ -77,10 +77,18 @@ import { getCSSIcon } from 'components/icons';
 		}
 
 		notify(action, type, ids) {
+			if (!this._item) return;
 			if (action == 'modify'
-					&& this._item
+					&& type == "item"
 					&& (ids.includes(this._item.id) || this._linkedItems.some(item => ids.includes(item.id)))) {
 				this._forceRenderAll();
+			}
+			
+			if (["modify", "trash"].includes(action) && type == "collection") {
+				let isRelevantCollection = ids.some(id => Zotero.Collections.get(id).hasItem(this._item));
+				if (isRelevantCollection) {
+					this._forceRenderAll();
+				}
 			}
 		}
 		
