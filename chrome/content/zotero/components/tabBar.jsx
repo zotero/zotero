@@ -25,11 +25,68 @@
 
 'use strict';
 
-import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, useLayoutEffect } from 'react';
+import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, useLayoutEffect, memo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import cx from 'classnames';
-const { CSSIcon } = require('./icons');
+const { CSSIcon, CSSItemTypeIcon } = require('./icons');
 
 const SCROLL_ARROW_SCROLL_BY = 222;
+
+const Tab = memo((props) => {
+	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title } = props;
+
+	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
+	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
+	const handleTabClick = useCallback(event => onTabClick(event, id), [onTabClick, id]);
+	const handleDragStart = useCallback(event => onDragStart(event, id, index), [onDragStart, id, index]);
+	const handleTabClose = useCallback(event => onTabClose(event, id), [onTabClose, id]);
+	
+	return (
+		<div
+			key={id}
+			data-id={id}
+			className={cx('tab', { selected, dragging: isBeingDragged })}
+			draggable={true}
+			onMouseDown={handleTabMouseDown}
+			onContextMenu={handleContextMenu}
+			onClick={handleTabClick}
+			onAuxClick={handleTabClick}
+			onDragStart={handleDragStart}
+			onDragEnd={onDragEnd}
+			tabIndex="-1"
+		>
+			{ isItemType
+				? <CSSItemTypeIcon itemType={icon} className="tab-icon" />
+				: <CSSIcon name={icon} className="tab-icon" />
+			}
+			<div className="tab-name" title={title}>{title}</div>
+			<div
+				className="tab-close"
+				onClick={handleTabClose}
+			>
+				<CSSIcon name="x-8" className="icon-16" />
+			</div>
+		</div>
+	);
+});
+
+Tab.displayName = 'Tab';
+Tab.propTypes = {
+	icon: PropTypes.string,
+	id: PropTypes.string.isRequired,
+	index: PropTypes.number.isRequired,
+	isBeingDragged: PropTypes.bool.isRequired,
+	isItemType: PropTypes.bool,
+	onContextMenu: PropTypes.func.isRequired,
+	onDragEnd: PropTypes.func.isRequired,
+	onDragStart: PropTypes.func.isRequired,
+	onTabClick: PropTypes.func.isRequired,
+	onTabClose: PropTypes.func.isRequired,
+	onTabMouseDown: PropTypes.func.isRequired,
+	selected: PropTypes.bool.isRequired,
+	title: PropTypes.string.isRequired
+};
+
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
@@ -109,7 +166,7 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 	}
 	
-	function handleTabMouseDown(event, id) {
+	const handleTabMouseDown = useCallback((event, id) => {
 		// Don't select tab if it'll be closed with middle button click on mouse up
 		// or on right-click
 		if ([1, 2].includes(event.button)) {
@@ -121,23 +178,23 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 		props.onTabSelect(id);
 		event.stopPropagation();
-	}
+	}, [props.onTabSelect]);
 
-	function handleContextMenu(event, id) {
+	const handleContextMenu = useCallback((event, id) => {
 		let { screenX, screenY } = event;
 		// Popup gets immediately closed without this
 		setTimeout(() => {
 			props.onContextMenu(screenX, screenY, id);
 		});
-	}
+	}, [props.onContextMenu]);
 
-	function handleTabClick(event, id) {
+	const handleTabClick = useCallback((event, id) => {
 		if (event.button === 1) {
 			props.onTabClose(id);
 		}
-	}
+	}, [props.onTabClose]);
 
-	function handleDragStart(event, id, index) {
+	const handleDragStart = useCallback((event, id, index) => {
 		// Library tab is not draggable
 		if (index === 0) {
 			event.preventDefault();
@@ -157,14 +214,14 @@ const TabBar = forwardRef(function (props, ref) {
 		setDragging(true);
 		// Store the current tab id
 		dragIDRef.current = id;
-	}
+	}, []);
 	
-	function handleDragEnd() {
+	const handleDragEnd = useCallback(() => {
 		setDragging(false);
 		props.refocusReader();
-	}
+	}, [props.refocusReader]);
 
-	function handleTabBarDragOver(event) {
+	const handleTabBarDragOver = useCallback((event) => {
 		event.preventDefault();
 		event.dataTransfer.dropEffect = 'move';
 		// Throttle
@@ -220,15 +277,15 @@ const TabBar = forwardRef(function (props, ref) {
 			props.onTabMove(dragIDRef.current, index);
 		}
 		mouseMoveWaitUntil.current = Date.now() + 20;
-	}
+	}, [props.onTabMove]);
 
-	function handleTabClose(event, id) {
+	const handleTabClose = useCallback((event, id) => {
 		props.onTabClose(id);
 		event.stopPropagation();
-	}
+	}, [props.onTabClose]);
 	
 
-	function handleWheel(event) {
+	const handleWheel = useCallback((event) => {
 		// Normalize wheel speed
 		let x = event.deltaX || event.deltaY;
 		if (x && event.deltaMode) {
@@ -242,54 +299,27 @@ const TabBar = forwardRef(function (props, ref) {
 		window.requestAnimationFrame(() => {
 			tabsRef.current.scrollLeft += x;
 		});
-	}
+	}, []);
 
-	function handleClickScrollStart() {
+	const handleClickScrollStart = useCallback(() => {
 		tabsRef.current.scrollTo({
 			left: tabsRef.current.scrollLeft - (SCROLL_ARROW_SCROLL_BY * (Zotero.rtl ? -1 : 1)),
 			behavior: 'smooth'
 		});
-	}
+	}, []);
 
-	function handleClickScrollEnd() {
+	const handleClickScrollEnd = useCallback(() => {
 		tabsRef.current.scrollTo({
 			left: tabsRef.current.scrollLeft + (SCROLL_ARROW_SCROLL_BY * (Zotero.rtl ? -1 : 1)),
 			behavior: 'smooth'
 		});
-	}
+	}, []);
 
 	// Prevent maximizing/minimizing window
-	function handleScrollArrowDoubleClick(event) {
+	const handleScrollArrowDoubleClick = useCallback((event) => {
 		event.preventDefault();
-	}
+	}, []);
 
-	function renderTab({ id, title, selected, icon }, index) {
-		return (
-			<div
-				key={id}
-				data-id={id}
-				className={cx('tab', { selected, dragging: dragging && id === dragIDRef.current })}
-				draggable={true}
-				onMouseDown={(event) => handleTabMouseDown(event, id)}
-				onContextMenu={(event) => handleContextMenu(event, id)}
-				onClick={(event) => handleTabClick(event, id)}
-				onAuxClick={(event) => handleTabClick(event, id)}
-				onDragStart={(event) => handleDragStart(event, id, index)}
-				onDragEnd={handleDragEnd}
-				tabIndex="-1"
-			>
-				{icon}
-				<div className="tab-name" title={title}>{title}</div>
-				<div
-					className="tab-close"
-					onClick={(event) => handleTabClose(event, id)}
-				>
-					<CSSIcon name="x-8" className="icon-16" />
-				</div>
-			</div>
-		);
-	}
-	
 	return (
 		<div>
 			<div
@@ -301,7 +331,20 @@ const TabBar = forwardRef(function (props, ref) {
 					<div
 						className="tabs"
 					>
-						{tabs.length ? renderTab(tabs[0], 0) : null}
+						{tabs.length
+							? <Tab
+								{ ...tabs[0] }
+								key={tabs[0].id}
+								index={0}
+								isBeingDragged={ false }
+								onContextMenu={ handleContextMenu}
+								onDragEnd={ handleDragEnd }
+								onDragStart={ handleDragStart}
+								onTabClick={ handleTabClick}
+								onTabClose={ handleTabClose}
+								onTabMouseDown = { handleTabMouseDown }
+							/>
+							: null}
 					</div>
 				</div>
 				<div
@@ -324,7 +367,18 @@ const TabBar = forwardRef(function (props, ref) {
 						onScroll={updateScrollArrows}
 						dir={Zotero.dir}
 					>
-						{tabs.map((tab, index) => renderTab(tab, index))}
+						{tabs.map((tab, index) => <Tab
+							{...tab}
+							key={tab.id}
+							index={index}
+							isBeingDragged={dragging && dragIDRef.current === tab.id}
+							onContextMenu={handleContextMenu}
+							onDragEnd={handleDragEnd}
+							onDragStart={handleDragStart}
+							onTabClick={handleTabClick}
+							onTabClose={handleTabClose}
+							onTabMouseDown={handleTabMouseDown}
+						/>)}
 					</div>
 				</div>
 				<div
@@ -345,5 +399,28 @@ const TabBar = forwardRef(function (props, ref) {
 });
 
 TabBar.displayName = 'TabBar';
+
+TabBar.propTypes = {
+	onTabSelect: PropTypes.func.isRequired,
+	onTabClose: PropTypes.func.isRequired,
+	onTabMove: PropTypes.func.isRequired,
+	refocusReader: PropTypes.func.isRequired,
+	onContextMenu: PropTypes.func.isRequired,
+	tabs: PropTypes.arrayOf(
+		PropTypes.shape({
+			icon: PropTypes.element.isRequired,
+			id: PropTypes.string.isRequired,
+			index: PropTypes.number.isRequired,
+			isBeingDragged: PropTypes.bool.isRequired,
+			onContextMenu: PropTypes.func.isRequired,
+			onDragEnd: PropTypes.func.isRequired,
+			onDragStart: PropTypes.func.isRequired,
+			onTabClick: PropTypes.func.isRequired,
+			onTabMouseDown: PropTypes.func.isRequired,
+			selected: PropTypes.bool.isRequired,
+			title: PropTypes.string.isRequired
+		})
+	).isRequired
+};
 
 export default TabBar;
