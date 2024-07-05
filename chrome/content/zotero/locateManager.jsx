@@ -39,23 +39,27 @@ const columns = [
 function init() {
 	engines = Zotero.LocateManager.getEngines();
 	const domEl = document.querySelector('#locateManager-tree');
-	let elem = (
-		<VirtualizedTable
-			getRowCount={() => engines.length}
-			id="locateManager-table"
-			ref={ref => tree = ref}
-			renderItem={VirtualizedTable.makeRowRenderer(getRowData)}
-			showHeader={true}
-			multiSelect={true}
-			columns={columns}
-			onColumnSort={null}
-			disableFontSizeScaling={true}
-			getRowString={index => getRowData(index).name}
-			onSelectionChange={handleSelectionChange}
-			onActivate={handleActivate}
-		/>
-	);
-	return new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
+	return new Promise((resolve) => {
+		ReactDOM.createRoot(domEl).render(
+			<VirtualizedTable
+				getRowCount={() => engines.length}
+				id="locateManager-table"
+				ref={(ref) => {
+					tree = ref;
+					resolve();
+				}}
+				renderItem={VirtualizedTable.makeRowRenderer(getRowData)}
+				showHeader={true}
+				multiSelect={true}
+				columns={columns}
+				onColumnSort={null}
+				disableFontSizeScaling={true}
+				getRowString={index => getRowData(index).name}
+				onSelectionChange={handleSelectionChange}
+				onActivate={handleActivate}
+			/>
+		);
+	});
 }
 
 function getRowData(index) {

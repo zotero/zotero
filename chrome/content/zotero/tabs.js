@@ -165,7 +165,7 @@ var Zotero_Tabs = new function () {
 	};
 
 	this.init = function () {
-		ReactDOM.render(
+		ReactDOM.createRoot(document.getElementById('tab-bar-container')).render(
 			<TabBar
 				ref={this._tabBarRef}
 				onTabSelect={this.select.bind(this)}
@@ -173,11 +173,8 @@ var Zotero_Tabs = new function () {
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
 				refocusReader={this.refocusReader.bind(this)}
-			/>,
-			document.getElementById('tab-bar-container'),
-			() => {
-				this._update();
-			}
+				onLoad={this._update.bind(this)}
+			/>
 		);
 	};
 

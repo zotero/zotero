@@ -169,9 +169,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		
 		if (this.folder && !showReportErrorButton) {
 			doneQueueContainer.style.display = 'flex';
-			ReactDOM.render(
-				<ProgressQueueTable progressQueue={ Zotero.ProgressQueues.get('recognize') } />,
-				doneQueue
+			ReactDOM.createRoot(doneQueue).render(
+				<ProgressQueueTable progressQueue={ Zotero.ProgressQueues.get('recognize') } />
 			);
 		}
 		else {
@@ -381,9 +380,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		const progressQueue = document.getElementById('progress-queue');
 		if (this.folder) {
 			progressQueueContainer.style.display = 'flex';
-			ReactDOM.render(
-				<ProgressQueueTable progressQueue={Zotero.ProgressQueues.get('recognize')} />,
-				progressQueue
+			ReactDOM.createRoot(progressQueue).render(
+				<ProgressQueueTable progressQueue={Zotero.ProgressQueues.get('recognize')} />
 			);
 		}
 		else {

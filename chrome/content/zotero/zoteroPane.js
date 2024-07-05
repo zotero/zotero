@@ -1688,11 +1688,11 @@ var ZoteroPane = new function()
 		}
 	};
 
-	this.initTagSelector = function () {
+	this.initTagSelector = async function () {
 		try {
 			var container = document.getElementById('zotero-tag-selector-container');
 			if (!container.hasAttribute('collapsed') || container.getAttribute('collapsed') == 'false') {
-				this.tagSelector = Zotero.TagSelector.init(
+				this.tagSelector = await Zotero.TagSelector.init(
 					document.getElementById('zotero-tag-selector'),
 					{
 						container: 'zotero-tag-selector-container',

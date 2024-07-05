@@ -485,23 +485,27 @@ Zotero_Preferences.Export = {
 				this.updateQuickCopySiteButtons();
 			};
 			
-			let elem = (
-				<VirtualizedTable
-					getRowCount={() => this._rows.length}
-					id="quickCopy-siteSettings-table"
-					ref={ref => this._tree = ref}
-					renderItem={makeRowRenderer(index => this._rows[index])}
-					showHeader={true}
-					columns={columns}
-					staticColumns={true}
-					disableFontSizeScaling={true}
-					onSelectionChange={handleSelectionChange}
-					onKeyDown={handleKeyDown}
-					getRowString={index => this._rows[index].domain}
-					onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor(true)}
-				/>
-			);
-			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("quickCopy-siteSettings"), resolve));
+			await new Promise((resolve) => {
+				ReactDOM.createRoot(document.getElementById("quickCopy-siteSettings")).render(
+					<VirtualizedTable
+						getRowCount={() => this._rows.length}
+						id="quickCopy-siteSettings-table"
+						ref={(ref) => {
+							this._tree = ref;
+							resolve();
+						}}
+						renderItem={makeRowRenderer(index => this._rows[index])}
+						showHeader={true}
+						columns={columns}
+						staticColumns={true}
+						disableFontSizeScaling={true}
+						onSelectionChange={handleSelectionChange}
+						onKeyDown={handleKeyDown}
+						getRowString={index => this._rows[index].domain}
+						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor(true)}
+					/>
+				);
+			});
 		} else {
 			this._tree.invalidate();
 		}

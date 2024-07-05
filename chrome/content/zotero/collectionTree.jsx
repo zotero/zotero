@@ -39,11 +39,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		Zotero.debug("Initializing React CollectionTree");
 		var ref;
 		opts.domEl = domEl;
-		let elem = (
-			<CollectionTree ref={c => ref = c } {...opts} />
-		);
-		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
-
+		await new Promise(resolve => {
+			ReactDOM.createRoot(domEl).render(<CollectionTree ref={(c) => { ref = c; resolve()} } {...opts } />)
+		});
 		Zotero.debug('React CollectionTree initialized');
 		return ref;
 	}

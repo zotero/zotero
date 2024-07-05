@@ -37,13 +37,11 @@ function _init() {
 	
 	const domEl = document.querySelector('#tree');
 	
-	ReactDOM.render(
+	ReactDOM.createRoot(domEl).render(
 		<ProgressQueueTable
 			onActivate={ _handleActivate }
 			progressQueue={ _progressQueue }
-		/>,
-		domEl
-	);
+		/>);
 }
 	
 /**

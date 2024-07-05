@@ -31,7 +31,7 @@ const ReactDOM = require('react-dom');
 
 function init() {
 	let div = document.querySelector('div');
-	ReactDOM.render(<DataGeneratorForm/>, div);
+	ReactDOM.createRoot(div).render(<DataGeneratorForm/>);
 }
 
 class DataGeneratorForm extends React.Component {
@@ -42,6 +42,10 @@ class DataGeneratorForm extends React.Component {
 			chunkSize: 50,
 			numCollections: 1000
 		};
+	}
+
+	componentDidMount() {
+		window.sizeToContent();
 	}
 
 	render() {

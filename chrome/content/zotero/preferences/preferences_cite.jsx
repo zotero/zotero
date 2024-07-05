@@ -104,25 +104,28 @@ Zotero_Preferences.Cite = {
 					return false;
 				}
 			};
-			let elem = (
-				<VirtualizedTable
-					getRowCount={() => this.styles.length}
-					id="styleManager-table"
-					ref={ref => this._tree = ref}
-					renderItem={makeRowRenderer(index => this.styles[index])}
-					showHeader={true}
-					multiSelect={true}
-					columns={columns}
-					staticColumns={true}
-					disableFontSizeScaling={true}
-					onSelectionChange={selection => document.getElementById('styleManager-delete').disabled = !selection.count}
-					onKeyDown={handleKeyDown}
-					getRowString={index => this.styles[index].title}
-				/>
-			);
 
-			let styleManager = document.getElementById("styleManager");
-			await new Promise(resolve => ReactDOM.render(elem, styleManager, resolve));
+			await new Promise((resolve) => {
+				ReactDOM.createRoot(document.getElementById("styleManager")).render(
+					<VirtualizedTable
+						getRowCount={() => this.styles.length}
+						id="styleManager-table"
+						ref={(ref) => {
+							this._tree = ref;
+							resolve();
+						}}
+						renderItem={makeRowRenderer(index => this.styles[index])}
+						showHeader={true}
+						multiSelect={true}
+						columns={columns}
+						staticColumns={true}
+						disableFontSizeScaling={true}
+						onSelectionChange={selection => document.getElementById('styleManager-delete').disabled = !selection.count}
+						onKeyDown={handleKeyDown}
+						getRowString={index => this.styles[index].title}
+					/>
+				);
+			});
 
 			// Fix style manager showing partially blank until scrolled
 			setTimeout(() => this._tree.invalidate());
