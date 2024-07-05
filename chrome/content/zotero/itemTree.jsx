@@ -31,7 +31,7 @@ const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
-const { getDOMElement, getCSSIcon, getCSSItemTypeIcon } = Icons;
+const { getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
 const { Cc, Ci, Cu, ChromeUtils } = require('chrome');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
@@ -2794,8 +2794,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let retracted = "";
 		let retractedAriaLabel = "";
 		if (Zotero.Retractions.isRetracted(item)) {
-			retracted = getDOMElement('IconCross');
-			console.log(retracted);
+			retracted = getCSSIcon("IconCross");
 			retracted.classList.add("retracted");
 			retractedAriaLabel = Zotero.getString('retraction.banner');
 		}
@@ -2915,7 +2914,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			//else if (type == 'none') {
 			//	if (item.getField('url') || item.getField('DOI')) {
-			//		icon = getDOMElement('IconLink');
+			//		icon = getCSSIcon('IconLink');
 			//		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
 			//		icon.classList.add('cell-icon');
 			//	}

@@ -30,7 +30,6 @@ Components.utils.import("resource://zotero/config.js");
 var React = require('react');
 var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
-var { getDOMElement } = require('components/icons');
 var { renderCell } = VirtualizedTable;
 
 Zotero_Preferences.Sync = {

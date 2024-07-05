@@ -24,7 +24,7 @@
 */
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { getDOMElement } from 'components/icons';
+import { getCSSIcon } from 'components/icons';
 
 import VirtualizedTable, { renderCell } from 'components/virtualized-table';
 import { nextHTMLID, noop } from './utils';
@@ -32,13 +32,13 @@ import { nextHTMLID, noop } from './utils';
 
 function getImageByStatus(status) {
 	if (status === Zotero.ProgressQueue.ROW_PROCESSING) {
-		return getDOMElement('IconArrowRefresh');
+		return getCSSIcon('IconArrowRefresh');
 	}
 	else if (status === Zotero.ProgressQueue.ROW_FAILED) {
-		return getDOMElement('IconCross');
+		return getCSSIcon('IconCross');
 	}
 	else if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
-		return getDOMElement('IconTick');
+		return getCSSIcon('IconTick');
 	}
 	return document.createElement('span');
 }
