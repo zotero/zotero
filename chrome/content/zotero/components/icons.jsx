@@ -1,8 +1,6 @@
 'use strict';
 
 const React = require('react');
-const { renderToStaticMarkup } = require('react-dom-server');
-const { PureComponent } = React;
 const { element, string, object } = require('prop-types');
 
 const Icon = (props) => {
@@ -51,6 +49,8 @@ CSSItemTypeIcon.propTypes = {
 
 module.exports = { Icon, CSSIcon, CSSItemTypeIcon };
 
+// Icons cache for a few remaining png icons till they are replaced
+let legacyIconsCache = {};
 
 function i(name, svgOrSrc, hasHiDPI = true) {
 	if (typeof svgOrSrc == 'string' && hasHiDPI && window.devicePixelRatio >= 1.25) {
@@ -59,99 +59,15 @@ function i(name, svgOrSrc, hasHiDPI = true) {
 		parts[parts.length - 2] = parts[parts.length - 2] + '@2x';
 		svgOrSrc = parts.join('.');
 	}
-
-	const icon = class extends PureComponent {
-		render() {
-			let props = Object.assign({}, this.props);
-			props.name = name.toLowerCase();
-			
-			if (typeof svgOrSrc == 'string') {
-				if (!("style" in props)) props.style = {};
-				props.style.backgroundImage = `url(${svgOrSrc})`;
-				props.className = props.className || "";
-				props.className += " icon-bg";
-				// We use css background-image.
-				// This is a performance optimization for fast-scrolling trees.
-				// If we use img elements they are slow to render
-				// and produce pop-in when fast-scrolling.
-				return (
-					<Icon {...props} />
-				);
-			}
-
-			return (
-				<Icon {...props}>{svgOrSrc}</Icon>
-			)
-		}
-	}
-
-	icon.propTypes = {
-		className: string
-	}
-
-	icon.displayName = `Icon${name}`
-
-	module.exports[icon.displayName] = icon
+	legacyIconsCache[`Icon${name}`] = svgOrSrc;
 }
 
 /* eslint-disable max-len */
 
-
-i('Twisty', (
-	/* This Source Code Form is subject to the terms of the Mozilla Public
-	 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
-	 * You can obtain one at http://mozilla.org/MPL/2.0/. */
-	<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-		<path d="M8 13.4c-.5 0-.9-.2-1.2-.6L.4 5.2C0 4.7-.1 4.3.2 3.7S1 3 1.6 3h12.8c.6 0 1.2.1 1.4.7.3.6.2 1.1-.2 1.6l-6.4 7.6c-.3.4-.7.5-1.2.5z"/>
-	</svg>
-));
 i('Cross', "chrome://zotero/skin/cross.png");
 i('Tick', "chrome://zotero/skin/tick.png");
 i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
 
-if (Zotero.isMac) {
-	i('Twisty', (
-		/* This Source Code Form is subject to the terms of the Mozilla Public
-		 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
-		 * You can obtain one at http://mozilla.org/MPL/2.0/. */
-		<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-			<polyline points="3 4 12 4 7.5 12"/>
-		</svg>
-	));
-}
-
-if (Zotero.isWin) {
-	i('Twisty', (
-		/* This Source Code Form is subject to the terms of the Mozilla Public
-		 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
-		 * You can obtain one at http://mozilla.org/MPL/2.0/. */
-		<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1792 1792">
-			<path d="M1395 736q0 13-10 23l-466 466q-10 10-23 10t-23-10l-466-466q-10-10-10-23t10-23l50-50q10-10 23-10t23 10l393 393 393-393q10-10 23-10t23 10l50 50q10 10 10 23z"/>
-		</svg>
-	));
-}
-
-let domElementCache = {};
-
-/**
- * Returns a DOM element for the icon class
- *
- * To be used in itemTree where rendering is done without react
- * for performance reasons
- * @param {String} icon
- * @returns {Element}
- */
-module.exports.getDOMElement = function (icon) {
-	if (domElementCache[icon]) return domElementCache[icon].cloneNode(true);
-	if (!module.exports[icon]) {
-		Zotero.debug(`Attempting to get non-existant icon ${icon}`);
-		return "";
-	}
-	let div = document.createElement('div');
-	div.innerHTML = renderToStaticMarkup(React.createElement(module.exports[icon]));
-	domElementCache[icon] = div.firstChild;
-	return domElementCache[icon].cloneNode(true);
-};
 
 let cssIconsCache = new Map();
 
@@ -161,6 +77,11 @@ module.exports.getCSSIcon = function (key) {
 		iconEl.classList.add('icon');
 		iconEl.classList.add('icon-css');
 		iconEl.classList.add(`icon-${key}`);
+		// Temporarily set background image for a few remaining png icons
+		if (legacyIconsCache[key]) {
+			iconEl.style.backgroundImage = `url(${legacyIconsCache[key]})`;
+			iconEl.classList.add("icon-bg");
+		}
 		cssIconsCache.set(key, iconEl);
 	}
 

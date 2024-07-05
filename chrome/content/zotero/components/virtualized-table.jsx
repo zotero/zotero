@@ -30,7 +30,7 @@ const PropTypes = require('prop-types');
 const cx = require('classnames');
 const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
-const { CSSIcon, getDOMElement } = require('components/icons');
+const { CSSIcon, getCSSIcon } = require('components/icons');
 const { Zotero_Tooltip } = require('./tooltip');
 
 const TYPING_TIMEOUT = 1000;
@@ -1751,7 +1751,7 @@ function renderCheckboxCell(index, data, column, dir = null) {
 	span.setAttribute('role', 'checkbox');
 	span.setAttribute('aria-checked', data);
 	if (data) {
-		span.appendChild(getDOMElement('IconTick'));
+		span.appendChild(getCSSIcon('IconTick'));
 	}
 	return span;
 }
