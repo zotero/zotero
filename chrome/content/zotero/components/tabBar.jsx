@@ -34,7 +34,7 @@ const SCROLL_ARROW_SCROLL_BY = 222;
 
 const Tab = memo((props) => {
 	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title } = props;
-
+	
 	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
 	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
 	const handleTabClick = useCallback(event => onTabClick(event, id), [onTabClick, id]);
@@ -104,14 +104,18 @@ const TabBar = forwardRef(function (props, ref) {
 	useImperativeHandle(ref, () => ({ setTabs }));
 
 	useEffect(() => {
-		let handleResize = () => updateScrollArrows();
+		let handleResize = Zotero.Utilities.throttle(() => {
+			updateScrollArrows();
+			updateOverflowing();
+		}, 300, { leading: false });
 		window.addEventListener('resize', handleResize);
 		return () => {
 			window.removeEventListener('resize', handleResize);
 		};
 	}, []);
 
-	useLayoutEffect(() => updateScrollArrows());
+	useLayoutEffect(updateScrollArrows);
+	useLayoutEffect(updateOverflowing, [tabs]);
 
 	// Use offsetLeft and offsetWidth to calculate and translate tab X position
 	useLayoutEffect(() => {
@@ -164,6 +168,12 @@ const TabBar = forwardRef(function (props, ref) {
 		else {
 			tabsInnerContainerRef.current.classList.remove('scrollable');
 		}
+	}
+
+	function updateOverflowing() {
+		tabsInnerContainerRef.current.querySelectorAll('.tab-name').forEach((tabNameDOM) => {
+			tabNameDOM.classList.toggle('overflowing', tabNameDOM.scrollWidth > tabNameDOM.clientWidth);
+		});
 	}
 	
 	const handleTabMouseDown = useCallback((event, id) => {

@@ -206,12 +206,14 @@
 		text-align: start;
 		white-space: nowrap;
 
-		&:dir(ltr) {
-			mask-image: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px);
-		}
+		&.overflowing {
+			&:dir(ltr) {
+				mask-image: linear-gradient(to left, transparent 0px, var(--fill-primary) 20px);
+			}
 
-		&:dir(rtl) {
-			mask-image: linear-gradient(to right, transparent 0px, var(--fill-primary) 20px);
+			&:dir(rtl) {
+				mask-image: linear-gradient(to right, transparent 0px, var(--fill-primary) 20px);
+			}
 		}
 	}
 
