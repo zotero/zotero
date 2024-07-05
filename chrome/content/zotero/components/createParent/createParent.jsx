@@ -25,12 +25,17 @@
 
 'use strict';
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
 function CreateParent({ loading, item, toggleAccept }) {
+	// With React 18, this is required for the window's dialog to be properly sized
+	useEffect(() => {
+		window.sizeToContent();
+	});
+
 	// When the input has/does not have characters toggle the accept button on the dialog
 	const handleInput = (e) => {
 		if (e.target.value.trim() !== '') {
@@ -81,5 +86,5 @@ Zotero.CreateParent.destroy = (domEl) => {
 
 
 Zotero.CreateParent.render = (domEl, props) => {
-	ReactDOM.render(<CreateParent { ...props } />, domEl);
+	ReactDOM.createRoot(domEl).render(<CreateParent { ...props } />);
 };

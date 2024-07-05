@@ -857,13 +857,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		return this.state.showAutomatic;
 	}
 	
-	static init(domEl, opts) {
+	static async init(domEl, opts) {
 		var ref;
-		let elem = (
-			<TagSelectorContainer ref={c => ref = c } {...opts} />
-		);
-		ReactDOM.render(elem, domEl);
-		ref.domEl = domEl;
+		await new Promise((resolve) => {
+			ReactDOM.createRoot(domEl).render(<TagSelectorContainer ref={(c) => {
+				ref = c;
+				resolve();
+			} } {...opts} />);
+		});
 		return ref;
 	}
 	

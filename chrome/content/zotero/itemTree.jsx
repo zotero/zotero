@@ -50,10 +50,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		Zotero.debug(`Initializing React ItemTree ${opts.id}`);
 		var ref;
 		opts.domEl = domEl;
-		let elem = (
-			<ItemTree ref={c => ref = c } {...opts} />
-		);
-		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
+		await new Promise((resolve) => {
+			ReactDOM.createRoot(domEl).render(<ItemTree ref={(c) => {
+				ref = c;
+				resolve();
+			} } {...opts} />);
+		});
 		
 		Zotero.debug(`React ItemTree ${opts.id} initialized`);
 		return ref;
@@ -2793,6 +2795,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let retractedAriaLabel = "";
 		if (Zotero.Retractions.isRetracted(item)) {
 			retracted = getDOMElement('IconCross');
+			console.log(retracted);
 			retracted.classList.add("retracted");
 			retractedAriaLabel = Zotero.getString('retraction.banner');
 		}

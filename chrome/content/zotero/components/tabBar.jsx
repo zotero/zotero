@@ -109,6 +109,7 @@ const TabBar = forwardRef(function (props, ref) {
 			updateOverflowing();
 		}, 300, { leading: false });
 		window.addEventListener('resize', handleResize);
+		props.onLoad();
 		return () => {
 			window.removeEventListener('resize', handleResize);
 		};

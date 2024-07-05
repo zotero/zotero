@@ -145,7 +145,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 			.getElementById('choose-output-file')
 			.addEventListener('click', this.onChooseOutputFile.bind(this));
 
-		ReactDOM.render((
+		ReactDOM.createRoot(document.getElementById('tree')).render((
 			<VirtualizedTable
 				getRowCount={() => this.rows.length}
 				id="rtfScan-table"
@@ -156,7 +156,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 				containerWidth={document.getElementById('tree').clientWidth}
 				disableFontSizeScaling={true}
 			/>
-		), document.getElementById('tree'));
+		));
 
 		const lastInputFile = Zotero.Prefs.get("rtfScan.lastInputFile");
 		if (lastInputFile) {
