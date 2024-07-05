@@ -93,6 +93,9 @@ Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
 Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
 	get: function () { return this.getConditions(); }
 });
+Zotero.defineProperty(Zotero.Search.prototype, 'scope', {
+	get: function() { return this._scope; }
+});
 Zotero.defineProperty(Zotero.Search.prototype, '_canHaveParent', {
 	value: false
 });
