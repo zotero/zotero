@@ -7,8 +7,10 @@ describe("Local API Server", function () {
 	let subcollection;
 	let collectionItem1;
 	let collectionItem2;
+	let collectionItem3;
 	let subcollectionItem;
 	let subcollectionAttachment;
+	let subcollectionAnnotation;
 	let allItems;
 	
 	function apiGet(endpoint, options = {}) {
@@ -30,15 +32,36 @@ describe("Local API Server", function () {
 
 		collection = await createDataObject('collection', { setTitle: true });
 		subcollection = await createDataObject('collection', { setTitle: true, parentID: collection.id });
-		collectionItem1 = await createDataObject('item', { setTitle: true, collections: [collection.id], itemType: 'bookSection' });
+		collectionItem1 = await createDataObject('item', {
+			setTitle: true,
+			collections: [collection.id],
+			itemType: 'bookSection',
+			tags: ['another tag'],
+		});
 		collectionItem1.setCreators([{ firstName: 'A', lastName: 'Person', creatorType: 'author' }]);
 		collectionItem1.saveTx();
-		collectionItem2 = await createDataObject('item', { setTitle: true, collections: [collection.id], tags: ['some tag'] });
+		collectionItem2 = await createDataObject('item', {
+			setTitle: true,
+			collections: [collection.id],
+			tags: ['some tag'],
+		});
 		collectionItem2.setCreators([{ firstName: 'A', lastName: 'Zerson', creatorType: 'author' }]);
 		collectionItem2.saveTx();
-		subcollectionItem = await createDataObject('item', { setTitle: true, collections: [subcollection.id] });
+		collectionItem3 = await createDataObject('item', {
+			setTitle: true,
+			collections: [collection.id],
+			itemType: 'journalArticle',
+			tags: ['another tag', 'a third tag'],
+		});
+		collectionItem3.setCreators([{ firstName: 'B', lastName: 'XYZ', creatorType: 'author' }]);
+		collectionItem3.saveTx();
+		subcollectionItem = await createDataObject('item', {
+			setTitle: true,
+			collections: [subcollection.id],
+		});
 		subcollectionAttachment = await importPDFAttachment(subcollectionItem);
-		allItems = [collectionItem1, collectionItem2, subcollectionItem, subcollectionAttachment];
+		subcollectionAnnotation = await createAnnotation('highlight', subcollectionAttachment);
+		allItems = [collectionItem1, collectionItem2, collectionItem3, subcollectionItem, subcollectionAttachment, subcollectionAnnotation];
 	});
 
 	describe("/", function () {
@@ -73,7 +96,7 @@ describe("Local API Server", function () {
 			
 			assert.equal(col.data.name, collection.name);
 			assert.equal(col.meta.numCollections, 1);
-			assert.equal(col.meta.numItems, 2);
+			assert.equal(col.meta.numItems, 3);
 
 			assert.equal(subcol.data.name, subcollection.name);
 			assert.equal(subcol.meta.numCollections, 0);
@@ -99,6 +122,14 @@ describe("Local API Server", function () {
 				assert.equal(response.data.parentCollection, collection.key);
 				assert.include(response.links.up.href, collection.key);
 			});
+
+			describe("/items", function () {
+				it("should not include annotations", async function () {
+					let { response } = await apiGet(`/users/0/collections/${subcollection.key}/items`);
+					assert.isArray(response);
+					assert.sameMembers(response.map(item => item.key), [subcollectionItem.key, subcollectionAttachment.key]);
+				});
+			});
 		});
 	});
 
@@ -106,14 +137,14 @@ describe("Local API Server", function () {
 		it("should return all items", async function () {
 			let { response } = await apiGet('/users/0/items');
 			assert.isArray(response);
-			assert.lengthOf(response, 4);
+			assert.lengthOf(response, allItems.length);
 		});
 
 		describe("/top", function () {
 			it("should return top-level items", async function () {
 				let { response } = await apiGet('/users/0/items/top');
 				assert.isArray(response);
-				assert.sameMembers(response.map(item => item.key), [collectionItem1.key, collectionItem2.key, subcollectionItem.key]);
+				assert.sameMembers(response.map(item => item.key), [collectionItem1.key, collectionItem2.key, collectionItem3.key, subcollectionItem.key]);
 			});
 		});
 
@@ -170,10 +201,17 @@ describe("Local API Server", function () {
 				assert.isTrue(response.every(item => item.data.itemType == 'book'));
 			});
 			
+			it("should match annotations", async function () {
+				let { response } = await apiGet('/users/0/items?itemType=annotation');
+				assert.lengthOf(response, 1);
+				assert.equal(response[0].key, subcollectionAnnotation.key);
+				assert.equal(response[0].data.annotationComment, subcollectionAnnotation.annotationComment);
+			});
+			
 			it("should be able to be negated", async function () {
 				let { response } = await apiGet('/users/0/items?itemType=-book');
-				assert.lengthOf(response, 2);
-				assert.isTrue(response.every(item => item.data.itemType == 'bookSection' || item.data.itemType == 'attachment'));
+				assert.lengthOf(response, 3);
+				assert.isTrue(response.every(item => item.data.itemType != 'book'));
 			});
 
 			it("should support OR combinations", async function () {
@@ -190,12 +228,22 @@ describe("Local API Server", function () {
 
 			it("should be able to be negated", async function () {
 				let { response } = await apiGet('/users/0/items?tag=-some tag');
-				assert.lengthOf(response, 3);
+				assert.lengthOf(response, 4);
 			});
 
 			it("should be able to be combined with ?itemType", async function () {
 				let { response } = await apiGet('/users/0/items?itemType=book&tag=some tag');
 				assert.lengthOf(response, 1);
+			});
+			
+			it("should support OR combinations", async function () {
+				let { response } = await apiGet('/users/0/items?tag=some tag || another tag');
+				assert.lengthOf(response, 3);
+			});
+			
+			it("should support OR and NOT combinations", async function () {
+				let { response } = await apiGet('/users/0/items?tag=some tag || another tag&tag=-a third tag');
+				assert.lengthOf(response, 2);
 			});
 		});
 
@@ -295,9 +343,9 @@ describe("Local API Server", function () {
 	describe("<userOrGroupPrefix>/tags", function () {
 		it("should return all tags in the library", async function () {
 			let { response } = await apiGet('/users/0/tags');
-			assert.lengthOf(response, 1);
-			assert.equal(response[0].tag, 'some tag');
-			assert.equal(response[0].meta.numItems, 1);
+			assert.lengthOf(response, 3);
+			assert.sameMembers(response.map(tag => tag.tag), ['some tag', 'another tag', 'a third tag']);
+			assert.equal(response.find(tag => tag.tag === 'some tag').meta.numItems, 1);
 		});
 	});
 
