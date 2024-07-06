@@ -64,7 +64,7 @@
 					.replace(/^American Sociological Association/, "American Sociological Association (ASA)");
 				
 				styleListEl.appendChild(MozXULElement.parseXULToFragment(`
-					<richlistitem value="${value}">${label}</richlistitem>
+					<richlistitem value="${value}">${Zotero.Utilities.htmlSpecialChars(label)}</richlistitem>
 				`));
 			});
 			this.value = this.getAttribute('value');
