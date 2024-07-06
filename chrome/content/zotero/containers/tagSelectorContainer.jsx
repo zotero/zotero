@@ -860,7 +860,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	static async init(domEl, opts) {
 		var ref;
 		await new Promise((resolve) => {
-			ReactDOM.createRoot(domEl).render(<TagSelectorContainer ref={(c) => {
+			let root = ReactDOM.createRoot(domEl);
+			opts.root = root;
+			root.render(<TagSelectorContainer ref={(c) => {
 				ref = c;
 				resolve();
 			} } {...opts} />);
@@ -870,7 +872,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	
 	uninit() {
 		this._uninitialized = true;
-		ReactDOM.unmountComponentAtNode(this.domEl);
+		this.props.root.unmount();
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	}
@@ -878,6 +880,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	static propTypes = {
 		container: PropTypes.string.isRequired,
 		onSelection: PropTypes.func.isRequired,
+		root: PropTypes.object,
 	};
 };
 
