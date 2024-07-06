@@ -474,7 +474,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 			Zotero.debug("Mapped to " + ids);
 			this.citationItemIDs[citationString] = ids;
 
-			if (!ids) {	// no mapping found
+			if (!ids.length) {	// no mapping found
 				let row = _generateItem(citationString, "");
 				row.parent = unmappedRow;
 				this.insertRows(row, this.rowMap.ambiguous);
