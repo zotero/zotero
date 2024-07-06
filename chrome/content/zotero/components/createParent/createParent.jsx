@@ -80,11 +80,12 @@ CreateParent.propTypes = {
 Zotero.CreateParent = memo(CreateParent);
 
 
-Zotero.CreateParent.destroy = (domEl) => {
-	ReactDOM.unmountComponentAtNode(domEl);
+Zotero.CreateParent.destroy = () => {
+	Zotero.CreateParent.root.unmount();
 };
 
 
 Zotero.CreateParent.render = (domEl, props) => {
-	ReactDOM.createRoot(domEl).render(<CreateParent { ...props } />);
+	Zotero.CreateParent.root = ReactDOM.createRoot(domEl);
+	Zotero.CreateParent.root.render(<CreateParent { ...props } />);
 };
