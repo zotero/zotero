@@ -52,7 +52,6 @@ $scaffold-toolbarbutton-icons: (
 	border-bottom: var(--material-panedivider);
 
 	toolbarbutton {
-		width: 28px;
 		height: 28px;
 		padding: 0 4px;
 		margin: 0 4px;
@@ -102,6 +101,7 @@ $scaffold-toolbarbutton-icons: (
 
 richlistbox {
 	min-width: 200px;
+	margin-block: 0;
 
 	richlistitem {
 		align-items: center;
@@ -173,11 +173,41 @@ vbox > splitter {
 	}
 }
 
-#testing-listbox-container {
+#testing-container {
 	flex: 1;
+	max-width: 100%;
+	gap: 8px;
+
+	button,
+	checkbox {
+		margin-block: 0;
+	}
+
+	#testing-listbox-container {
+		flex: 1;
+	}
+
+	#editor-tests {
+		flex: 2;
+	}
 }
 
-#editor-tests {
-	flex: 2;
-	margin-top: 3px;
+#browser-container {
+	flex: 1;
+	gap: 8px;
+
+	button,
+	label,
+	input {
+		margin-block: 0;
+	}
+}
+
+#import-container {
+	flex: 1;
+	gap: 8px;
+
+	button {
+		margin-block: 0;
+	}
 }
