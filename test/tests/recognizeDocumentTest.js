@@ -70,7 +70,7 @@ describe("Document Recognition", function() {
 			// The title should have changed
 			assert.equal(
 				attachment.getField('title'),
-				'PDF'
+				Zotero.getString('fileTypes.pdf')
 			);
 		});
 		
@@ -103,7 +103,7 @@ describe("Document Recognition", function() {
 			// The title should have changed
 			assert.equal(
 				attachment.getField('title'),
-				'PDF'
+				Zotero.getString('fileTypes.pdf')
 			);
 		});
 		
@@ -276,7 +276,7 @@ describe("Document Recognition", function() {
 			// The title should have changed
 			assert.equal(
 				attachment.getField('title'),
-				'PDF'
+				Zotero.getString('fileTypes.pdf')
 			);
 		});
 		
@@ -317,7 +317,7 @@ describe("Document Recognition", function() {
 			// The title should have changed
 			assert.equal(
 				attachment.getField('title'),
-				'PDF'
+				Zotero.getString('fileTypes.pdf')
 			);
 		});
 	});
@@ -370,7 +370,7 @@ describe("Document Recognition", function() {
 			// The title should have changed
 			assert.equal(
 				attachment.getField('title'),
-				'EPUB'
+				Zotero.getString('fileTypes.ebook')
 			);
 
 			translateStub.restore();
@@ -408,7 +408,7 @@ describe("Document Recognition", function() {
 			// The title should have changed
 			assert.equal(
 				attachment.getField('title'),
-				'EPUB'
+				Zotero.getString('fileTypes.ebook')
 			);
 		});
 
