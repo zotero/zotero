@@ -609,7 +609,10 @@ item-pane-message-unselected = { $count ->
 }
 
 item-pane-duplicates-merge-items =
-    .label = Merge { $count } items
+    .label = { $count ->
+         [one] Merge { $count } item
+        *[other] Merge { $count } items
+     }
 
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 
