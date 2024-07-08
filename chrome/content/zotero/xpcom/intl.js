@@ -75,6 +75,8 @@ Zotero.Intl = new function () {
 		// Set the locale direction to Zotero.dir
 		Zotero.dir = Zotero.Locale.defaultScriptDirection(Zotero.locale);
 		Zotero.rtl = (Zotero.dir === 'rtl');
+		Zotero.arrowPreviousKey = Zotero.rtl ? 'ArrowRight' : 'ArrowLeft';
+		Zotero.arrowNextKey = Zotero.rtl ? 'ArrowLeft' : 'ArrowRight';
 		
 		this.strings = {};
 		const intlFiles = ['zotero.dtd', 'preferences.dtd', 'mozilla/editMenuOverlay.dtd'];
