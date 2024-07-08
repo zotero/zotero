@@ -79,6 +79,11 @@ collapsible-section {
 	&[open]:not([empty]) > .head {
 		toolbarbutton.twisty .toolbarbutton-icon {
 			transform: rotate(-180deg);
+			
+			&:-moz-locale-dir(rtl) {
+				// Make the animation run in the opposite direction in RTL locales
+				transform: rotate(180deg);
+			}
 		}
 		
 		.title-box .summary {
