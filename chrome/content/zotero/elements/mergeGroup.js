@@ -54,11 +54,11 @@
 			
 			// Select pane with left/right arrow key
 			this.addEventListener('keypress', (event) => {
-				if (event.key == "ArrowRight" && !this._rightPane.hasAttribute("selected")) {
+				if (event.key == Zotero.arrowNextKey && !this._rightPane.hasAttribute("selected")) {
 					this.choosePane(this._rightPane);
 					this.rightPane.groupbox.focus();
 				}
-				else if (event.key == "ArrowLeft" && !this._leftPane.hasAttribute("selected")) {
+				else if (event.key == Zotero.arrowPreviousKey && !this._leftPane.hasAttribute("selected")) {
 					this.choosePane(this._leftPane);
 					this._leftPane.groupbox.focus();
 				}

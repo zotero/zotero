@@ -587,8 +587,8 @@ var Zotero_Tabs = new function () {
 
 	/**
 	 * Moves focus to a tab in the specified direction.
-	 * @param {String} direction. "first", "last", "left", "right", or "current"
-	 * If document.activeElement is a tab, "left" or "right" direction moves focus from that tab.
+	 * @param {String} direction. "first", "last", "previous", "next", or "current"
+	 * If document.activeElement is a tab, "previous" or "next" direction moves focus from that tab.
 	 * Otherwise, focus is moved in the given direction from the currently selected tab.
 	 */
 	this.moveFocus = function (direction) {
@@ -615,10 +615,10 @@ var Zotero_Tabs = new function () {
 			}
 	
 			switch (direction) {
-				case "left":
+				case "previous":
 					tabIndexToFocus = focusedTabIndex > 0 ? focusedTabIndex - 1 : null;
 					break;
-				case "right":
+				case "next":
 					tabIndexToFocus = focusedTabIndex < this._tabs.length - 1 ? focusedTabIndex + 1 : null;
 					break;
 				default:

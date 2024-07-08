@@ -630,7 +630,7 @@ class VirtualizedTable extends React.Component {
 		if (shiftSelect || moveFocused) return;
 		
 		switch (e.key) {
-		case "ArrowLeft":
+		case Zotero.arrowPreviousKey:
 			const parentIndex = this.props.getParentIndex(this.selection.focused);
 			if (this.props.isContainer(this.selection.focused)
 					&& !this.props.isContainerEmpty(this.selection.focused)
@@ -642,7 +642,7 @@ class VirtualizedTable extends React.Component {
 			}
 			break;
 
-		case "ArrowRight":
+		case Zotero.arrowNextKey:
 			if (this.props.isContainer(this.selection.focused)
 					&& !this.props.isContainerEmpty(this.selection.focused)) {
 				if (!this.props.isContainerOpen(this.selection.focused)) {

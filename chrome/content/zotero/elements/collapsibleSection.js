@@ -353,10 +353,10 @@
 				}
 			}
 			// Space/Enter toggle section open/closed.
-			// ArrowLeft/ArrowRight on actual header will close/open
+			// ArrowLeft/ArrowRight on actual header will close/open (depending on locale direction)
 			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key)) {
 				stopEvent();
-				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == "ArrowRight");
+				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == Zotero.arrowNextKey);
 				event.target.focus();
 			}
 			if (["ArrowUp", "ArrowDown"].includes(event.key)) {
