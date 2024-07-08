@@ -78,7 +78,7 @@ $scaffold-toolbarbutton-icons: (
 }
 
 #metadata-grid > label:nth-child(2n + 1) {
-	justify-self: right;
+	justify-self: inline-end;
 }
 
 .button-row {
@@ -92,7 +92,7 @@ $scaffold-toolbarbutton-icons: (
 }
 
 #metadata-bottom-row #textbox-minVersion {
-	margin-right: auto;
+	margin-inline-end: auto;
 }
 
 #hbox-testFrame {
@@ -150,13 +150,14 @@ vbox > splitter {
 }
 
 #tabpanel-metadata label:first-child {
-	text-align: right;
+	text-align: inline-end;
 }
 
 #right-pane {
 	min-width: 350px;
-	margin: -16px -16px -16px 0px;
-	border-left: var(--material-panedivider);
+	margin: -16px;
+	margin-inline-start: 0;
+	border-inline-start: var(--material-panedivider);
 
 	#output {
 		width: 100%;
