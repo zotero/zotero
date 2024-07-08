@@ -40,11 +40,11 @@ var Zotero_Preferences = {
 		this.navigation = document.getElementById('prefs-navigation');
 		this.content = document.getElementById('prefs-content');
 		this.helpContainer = document.getElementById('prefs-help-container');
+		this.searchField = document.getElementById('prefs-search');
 
 		this.navigation.addEventListener('mouseover', event => this._handleNavigationMouseOver(event));
 		this.navigation.addEventListener('select', () => this._handleNavigationSelect());
-		document.getElementById('prefs-search').addEventListener('command',
-			event => this._search(event.target.value));
+		this.searchField.addEventListener('command', () => this._search(this.searchField.value));
 		
 		document.getElementById('prefs-subpane-back-button').addEventListener('command', () => {
 			let parent = this.panes.get(this.navigation.value).parent;
@@ -53,7 +53,7 @@ var Zotero_Preferences = {
 			}
 		});
 
-		document.getElementById('prefs-search').focus();
+		this.searchField.focus();
 		
 		Zotero.PreferencePanes.builtInPanes.forEach(pane => this._addPane(pane));
 		if (Zotero.PreferencePanes.pluginPanes.length) {
@@ -146,7 +146,7 @@ var Zotero_Preferences = {
 		let paneID = this.navigation.value;
 		if (paneID) {
 			let pane = this.panes.get(paneID);
-			document.getElementById('prefs-search').value = '';
+			this.searchField.value = '';
 			await this._search('');
 			
 			await this._loadPane(paneID);
