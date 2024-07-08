@@ -89,6 +89,10 @@ attachment-preview {
 				background-color: rgba(0,0,0,0.2);
 			}
 		}
+		
+		&:-moz-locale-dir(rtl) {
+			transform: scaleX(-1);
+		}
 	}
 
 	.btn-prev {
