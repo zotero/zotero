@@ -160,7 +160,7 @@
 			this._itemDetails.item = item;
 			this._itemDetails.collectionTreeRow = this.collectionTreeRow;
 
-			if (this.hasAttribute("collapsed")) {
+			if (this.getAttribute("collapsed") == "true") {
 				return true;
 			}
 
@@ -227,7 +227,7 @@
 					let key;
 					// In the trash, we have to check the object type
 					if (this.collectionTreeRow.isTrash()) {
-						let obj = this.data[0];
+						let _obj = this.data[0];
 						if (this.data.every(x => x instanceof Zotero.Collection)) {
 							key = 'item-pane-message-collections-selected';
 						}
