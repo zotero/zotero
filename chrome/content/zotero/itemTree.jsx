@@ -910,7 +910,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Handle arrow keys specially on multiple selection, since
 		// otherwise the tree just applies it to the last-selected row
 		if (this.selection.count > 1 && ["ArrowLeft", "ArrowRight"].includes(event.key)) {
-			if (event.key == "ArrowRight") {
+			if (event.key == Zotero.arrowNextKey) {
 				this.expandSelectedRows();
 			}
 			else {

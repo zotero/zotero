@@ -195,10 +195,10 @@
 				});
 				tile.addEventListener('keydown', (event) => {
 					switch (event.key) {
-						case 'ArrowLeft':
+						case Zotero.arrowPreviousKey:
 							(tile.previousElementSibling || tile.parentElement.lastElementChild).focus();
 							break;
-						case 'ArrowRight':
+						case Zotero.arrowNextKey:
 							(tile.nextElementSibling || tile.parentElement.firstElementChild).focus();
 							break;
 						case 'ArrowUp': {

@@ -519,8 +519,8 @@
 			}
 			else if (this.isPaginatedType && ["ArrowLeft", "ArrowRight"].includes(e.key)) {
 				let gotoType = {
-					ArrowLeft: "prev",
-					ArrowRight: "next"
+					[Zotero.arrowPreviousKey]: "prev",
+					[Zotero.arrowNextKey]: "next"
 				};
 				this.goto(gotoType[e.key]);
 				stopEvent = true;

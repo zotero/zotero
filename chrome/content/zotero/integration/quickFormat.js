@@ -133,11 +133,11 @@ var Zotero_QuickFormat = new function () {
 					}
 				}
 				// Right/Left arrow will hide ref panel and move focus to the previour/next element
-				else if ("ArrowLeft" == event.key) {
+				else if (event.key == Zotero.arrowPreviousKey) {
 					_lastFocusedInput.focus();
 					moveFocusBack(_lastFocusedInput);
 				}
-				else if ("ArrowRight" == event.key) {
+				else if (event.key == Zotero.arrowNextKey) {
 					_lastFocusedInput.focus();
 					moveFocusForward(_lastFocusedInput);
 				}
@@ -1879,13 +1879,13 @@ var Zotero_QuickFormat = new function () {
 			Zotero_QuickFormat._bubbleizeSelected();
 		}
 		else if (["ArrowLeft", "ArrowRight"].includes(event.key) && !event.shiftKey) {
-			// On arrow left from the beginning of the input, move to previous bubble
-			if (event.key === "ArrowLeft" && this.selectionStart === 0) {
+			// On arrow left (right in RTL) from the beginning of the input, move to previous bubble
+			if (event.key === Zotero.arrowPreviousKey && this.selectionStart === 0) {
 				moveFocusBack(this);
 				event.preventDefault();
 			}
-			// On arrow right from the end of the input, move to next bubble
-			else if (event.key === "ArrowRight" && this.selectionStart === this.value.length) {
+			// On arrow right (left in RTL) from the end of the input, move to next bubble
+			else if (event.key === Zotero.arrowNextKey && this.selectionStart === this.value.length) {
 				moveFocusForward(this);
 				event.preventDefault();
 			}
@@ -1940,7 +1940,7 @@ var Zotero_QuickFormat = new function () {
 			event.preventDefault();
 			let newInput = _createInputField();
 			
-			if (["ArrowLeft"].includes(event.key)) {
+			if (event.key === Zotero.arrowPreviousKey) {
 				if (isInput(this.previousElementSibling)) {
 					moveFocusBack(this);
 				}
@@ -1949,7 +1949,7 @@ var Zotero_QuickFormat = new function () {
 					newInput.focus();
 				}
 			}
-			else if (["ArrowRight"].includes(event.key)) {
+			else if (event.key === Zotero.arrowNextKey) {
 				if (isInput(this.nextElementSibling)) {
 					moveFocusForward(this);
 				}
@@ -1965,13 +1965,13 @@ var Zotero_QuickFormat = new function () {
 			let findNextBubble = () => {
 				let node = event.target;
 				do {
-					node = event.key == "ArrowLeft" ? node.previousElementSibling : node.nextElementSibling;
+					node = event.key == Zotero.arrowPreviousKey ? node.previousElementSibling : node.nextElementSibling;
 				} while (node && !(node.classList.contains("bubble") || node.classList.contains("zotero-bubble-input")));
 				return node;
 			};
 			let nextBubble = findNextBubble();
 			if (nextBubble) {
-				if (event.key == "ArrowLeft") {
+				if (event.key === Zotero.arrowPreviousKey) {
 					nextBubble.before(this);
 				}
 				else {
