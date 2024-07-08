@@ -98,6 +98,10 @@ item-pane-sidenav {
 		// Locate button
 		&[data-action="locate"] {
 			@include svgicon-menu("go-to", "universal", "20");
+			
+			&:-moz-locale-dir(rtl) {
+				transform: scaleX(-1);
+			}
 		}
 
 		&[custom] {
