@@ -19,7 +19,7 @@ richlistcheckbox[selected="true"] {
 
 richlistbox:where(:focus) > richlistcheckbox[selected="true"] {
 	background-color: var(--color-accent);
-	color: SelectedItemText;
+	color: var(--color-accent-text);
 }
 
 richlistbox[seltype="multiple"]:focus > richlistcheckbox[current="true"],

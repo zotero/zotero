@@ -134,7 +134,7 @@
 
 		&.selected:not(.highlighted) {
 			background-color: var(--color-accent);
-			color: #fff;
+			color: var(--color-accent-text);
 
 			@include state(".virtualized-table:not(:focus-within)") {
 				color: var(--fill-primary);
