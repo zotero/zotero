@@ -3866,11 +3866,11 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
 	switch (this.attachmentContentType) {
 		case 'application/pdf':
-			return 'PDF';
+			return Zotero.getString('fileTypes.pdf');
 		case 'application/epub+zip':
-			return 'EPUB';
+			return Zotero.getString('fileTypes.ebook');
 		case 'text/html':
-			return 'HTML';
+			return Zotero.getString('fileTypes.webpage');
 		default:
 			return null;
 	}
