@@ -148,6 +148,13 @@ var Zotero_Preferences = {
 			let pane = this.panes.get(paneID);
 			document.getElementById('prefs-search').value = '';
 			await this._search('');
+			
+			await this._loadPane(paneID);
+			if (this.navigation.value !== paneID) {
+				// User navigated away from this pane while it was loading
+				return;
+			}
+			
 			await this._showPane(paneID);
 			this.content.scrollTop = 0;
 
@@ -323,16 +330,14 @@ var Zotero_Preferences = {
 
 	/**
 	 * Display a pane's content, alongside any other panes already showing.
-	 * If the pane is not yet loaded, it will be loaded first.
-	 *
+	 * Pane must be loaded (#_loadPane()).
 	 * @param {String} id
-	 * @return {Promise<void>}
 	 */
-	async _showPane(id) {
-		await this._loadPane(id);
-
+	_showPane(id) {
 		let pane = this.panes.get(id);
-
+		if (!pane.loaded) {
+			throw new Error(`Pane '${id}' not loaded`);
+		}
 		pane.container.hidden = false;
 		for (let child of pane.container.children) {
 			let event = new Event('showing');
@@ -629,6 +634,7 @@ ${str}
 				pane.container.hidden = true;
 			}
 			else {
+				await this._loadPane(id);
 				await this._showPane(id);
 			}
 		}
