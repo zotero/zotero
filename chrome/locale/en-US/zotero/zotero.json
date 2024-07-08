@@ -584,11 +584,17 @@
 	"section-related.label": {
 		"string": "{ count } Related"
 	},
-	"section-button-expand.tooltiptext": {
+	"section-button-expand.dynamic-tooltiptext": {
 		"string": "Expand section"
 	},
-	"section-button-collapse.tooltiptext": {
+	"section-button-expand.label": {
+		"string": "Expand { section } section"
+	},
+	"section-button-collapse.dynamic-tooltiptext": {
 		"string": "Collapse section"
+	},
+	"section-button-collapse.label": {
+		"string": "Collapse { section } section"
 	},
 	"annotations-count": {
 		"string": "{count, plural, one {{ count } Annotation} other {{ count } Annotations}}"
