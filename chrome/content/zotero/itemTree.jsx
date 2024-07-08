@@ -2496,13 +2496,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 
 					if (item) {
-						try {
-							item.setFirstAttachmentTitle();
-							await item.saveTx();
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
+						item.setFirstAttachmentTitle();
+						await item.saveTx();
 						addedItems.push(item);
 					}
 				}
