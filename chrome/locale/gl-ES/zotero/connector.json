@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Advertencia"
   },
+  "general_ok": {
+    "message": "Aceptar"
+  },
   "general_cancel": {
     "message": "Cancelar"
+  },
+  "general_selectAll": {
+    "message": "Escoller todo"
+  },
+  "general_deselectAll": {
+    "message": "Desmarcar todo"
   },
   "general_pleaseWait": {
     "message": "Agarde...."
   },
   "general_copyToClipboard": {
     "message": "Copiar no portaretallos"
+  },
+  "itemType_note": {
+    "message": "Nota"
+  },
+  "itemType_attachment": {
+    "message": "Anexo"
   },
   "progressWindow_savingTo": {
     "message": "Gardando en"

@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Μετάβαση">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Προβολή">
 <!ENTITY viewMenu.accesskey "V">

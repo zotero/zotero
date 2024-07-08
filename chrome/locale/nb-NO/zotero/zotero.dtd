@@ -318,8 +318,8 @@
 <!ENTITY zotero.pdfReader.noSpreads "Ingen tosidig visning">
 <!ENTITY zotero.pdfReader.oddSpreads "Oddetallssider mot hverandre">
 <!ENTITY zotero.pdfReader.evenSpreads "Partallssider mot hverandre">
-<!ENTITY zotero.pdfReader.scrolled "Scrollet">
-<!ENTITY zotero.pdfReader.paginated "Paginert">
+<!ENTITY zotero.pdfReader.scrolled "Kontinuerlig">
+<!ENTITY zotero.pdfReader.paginated "Enkeltsider">
 <!ENTITY zotero.pdfReader.zoomIn "Zoom inn">
 <!ENTITY zotero.pdfReader.zoomOut "Zoom ut">
 <!ENTITY zotero.pdfReader.zoomReset "Tilbakestill zoom">

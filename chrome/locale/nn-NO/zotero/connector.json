@@ -17,11 +17,26 @@
   "general_warning": {
     "message": "Åtvaring"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Avbryt"
   },
+  "general_selectAll": {
+    "message": "Merk alt"
+  },
+  "general_deselectAll": {
+    "message": "Fjern merking"
+  },
   "general_copyToClipboard": {
     "message": "Kopier til utklippstavle"
+  },
+  "itemType_note": {
+    "message": "Notat"
+  },
+  "itemType_attachment": {
+    "message": "Vedlegg"
   },
   "progressWindow_savingTo": {
     "message": "Lagrar til"

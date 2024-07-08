@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Advertencia"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Cancelar"
+  },
+  "general_selectAll": {
+    "message": "Seleccionar todo"
+  },
+  "general_deselectAll": {
+    "message": "Deseleccionar todo"
   },
   "general_pleaseWait": {
     "message": "Por favor, espere..."
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "Copiar al portapapeles"
   },
+  "itemType_pdf": {
+    "message": "PDF adjunto"
+  },
+  "itemType_epub": {
+    "message": "EPUB adjunto"
+  },
+  "itemType_snapshot": {
+    "message": "Instantánea"
+  },
+  "itemType_note": {
+    "message": "Nota"
+  },
+  "itemType_link": {
+    "message": "Enlace web"
+  },
+  "itemType_attachment": {
+    "message": "Adjunto"
+  },
   "progressWindow_savingTo": {
     "message": "Guardando a"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Ver detalles"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Ocultar detalles"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Selector de colección de destino"
+  },
+  "progressWindow_savingItems": {
+    "message": "Guardando $1 elementos. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Guardando elemento $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Elemento $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Guardado $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Guardado $1 para el elemento $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Fallo en la descarga de $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Fallo en la descarga de $1 para el elemento $2"
+  },
+  "progressWindow_allDone": {
+    "message": "El proceso de guardado ha finalizado. El cuadro de diálogo se cerrará ahora."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Los elementos de esta página web ya se han guardado."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por comas)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtrar colecciones"
   },
   "progressWindow_error_translation": {
     "message": "Ocurrió un error mientras se guardaba este elemento. Véase $1 para más información."
@@ -59,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versión"
   },
+  "itemSelector_title": {
+    "message": "Seleccione los elementos que desea añadir a su biblioteca:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 está desactivado"
+    "message": "El conector de $1 no está disponible en esta página"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "El conector de $1 no está disponible en las URL de archivos"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1está desactivado en las páginas de extensión"
+    "message": "El conector de $1 no está disponible en las páginas de extensión"
   },
   "appConnector": {
     "message": "Conector de $1"
@@ -78,7 +150,7 @@
     "message": "El conector$1le permite <a href=\"$2\">guardar elementos a $1</a> desde su navegador con un solo clic."
   },
   "firstRun_text2": {
-    "message": "Si aún no la tiene, <a href=\"$2\">descargue</a> la aplicación $1 independiente para una mejor experiencia."
+    "message": "Si aún no lo ha hecho, <a href=\"$2\">descargue</a> la aplicación  $1 para la mejor experiencia."
   },
   "firstRun_acceptButton": {
     "message": "Entendido"
@@ -130,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 bloquea el documento para evitar que varios usuarios editen las citas al mismo tiempo. La edición simultánea de citas en el documento puede provocar la corrupción de las citas o del documento. Ciertas circunstancias imprevisibles, como los fallos de la red, pueden hacer que su documento se bloquee permanentemente. Si cree que esto ha ocurrido, puede anular el bloqueo.<br/><br/>¿Desea anular el bloqueo del documento?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 necesita permiso para editar sus documentos de Google Docs a fin de insertar citas. Por favor, inténtelo de nuevo y asegúrese de dar permisos $1 para ver, editar, crear y borrar sus documentos de Google Docs."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "La cuenta de Google que eligió no tiene permiso para editar este documento. Por favor, inténtelo de nuevo y asegúrese de elegir una cuenta con acceso de edición."

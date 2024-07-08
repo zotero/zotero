@@ -109,8 +109,8 @@
 <!ENTITY zotero.item.textTransform "התמרת טקסט">
 <!ENTITY zotero.item.textTransform.titlecase "מצב רישיות כותרת">
 <!ENTITY zotero.item.textTransform.sentencecase "מצב רישיות משפט">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "החלפת ראשון/אחרון">
+<!ENTITY zotero.item.creatorTransform.fixCase "תיקון מצב רישיות">
 <!ENTITY zotero.item.copyAsURL "העתקה ככתובת">
 <!ENTITY zotero.item.deletePermanently "מחיקה לצמיתות…">
 
@@ -136,7 +136,7 @@
 <!ENTITY zotero.tagSelector.assignColor "הקצאת צבע…">
 <!ENTITY zotero.tagSelector.renameTag "שינוי שם תגית…">
 <!ENTITY zotero.tagSelector.deleteTag "מחיקת תגית…">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "פיצול…">
 
 <!ENTITY zotero.tagColorChooser.title "בחירת צבע ומיקום תגית">
 <!ENTITY zotero.tagColorChooser.color "צבע:">
@@ -177,7 +177,7 @@
 <!ENTITY zotero.import "ייבוא">
 <!ENTITY zotero.import.whereToImportFrom "מאיפה לייבא?">
 <!ENTITY zotero.import.source.file "קובץ (BibTeX,‏ RIS,‏ Zotero RDF וכו׳)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.source.folder "תיקיית PDFים וקבצים אחרים">
 <!ENTITY zotero.import.onlineImport "ייבוא מקוון">
 <!ENTITY zotero.import.importing "מתבצע ייבוא…">
 <!ENTITY zotero.import.database "מסד נתונים">
@@ -185,7 +185,7 @@
 <!ENTITY zotero.import.size "גודל">
 <!ENTITY zotero.import.createCollection "העברת האוספים והפריטים המיובאים לאוסף חדש">
 <!ENTITY zotero.import.fileHandling "טיפול בקבצים">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "הורדת פריטים חדשים בלבד, לא לעדכן את הפריטים שיובאו קודם לכן">
 
 <!ENTITY zotero.exportOptions.title "ייצוא…">
 <!ENTITY zotero.exportOptions.format.label "עיצוב:">
@@ -318,16 +318,16 @@
 <!ENTITY zotero.pdfReader.noSpreads "ללא התפשטות">
 <!ENTITY zotero.pdfReader.oddSpreads "התפשטות אי־זוגיים">
 <!ENTITY zotero.pdfReader.evenSpreads "התפשטות זוגיים">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "נגלל">
+<!ENTITY zotero.pdfReader.paginated "חלוקה לעמודים">
 <!ENTITY zotero.pdfReader.zoomIn "התקרבות">
 <!ENTITY zotero.pdfReader.zoomOut "התרחקות">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "איפוס תקריב">
 <!ENTITY zotero.pdfReader.zoomAuto "שינוי גודל אוטומטי">
 <!ENTITY zotero.pdfReader.zoomPageWidth "התאמת התקריב לרוחב העמוד">
 <!ENTITY zotero.pdfReader.zoomPageHeight "התאמת התקריב לגובה העמוד">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "פיצול אנכי">
+<!ENTITY zotero.pdfReader.splitHorizontally "פיצול אופקי">
 <!ENTITY zotero.pdfReader.transferFromPDF "ייבוא הסברים…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePageLeft "סיבוב העמוד שמאלה">
+<!ENTITY zotero.pdfReader.rotatePageRight "סיבוב העמוד ימינה">

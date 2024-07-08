@@ -1,7 +1,7 @@
 general-print = Stampa
 return-or-enter =
     { PLATFORM() ->
-        [macos] Return
+        [macos] Invio
        *[other] Invio
     }
 general-remove = Rimuovi
@@ -399,9 +399,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Espandi sezione
+    .dynamic-tooltiptext = Espandi sezione
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Comprimi sezione
+    .dynamic-tooltiptext = Comprimi sezione
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
         [one] { $count } Annotazione

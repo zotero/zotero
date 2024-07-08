@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "אזהרה"
   },
+  "general_ok": {
+    "message": "אישור"
+  },
   "general_cancel": {
     "message": "ביטול"
+  },
+  "general_selectAll": {
+    "message": "לבחור בהכול"
+  },
+  "general_deselectAll": {
+    "message": "ביטול בחירה"
   },
   "general_pleaseWait": {
     "message": "נא להמתין…"
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "העתקה ללוח הגזירים"
   },
+  "itemType_pdf": {
+    "message": "צרופת PDF"
+  },
+  "itemType_epub": {
+    "message": "צרופת EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "תמונת מצב"
+  },
+  "itemType_note": {
+    "message": "הערה"
+  },
+  "itemType_link": {
+    "message": "קישור אתר"
+  },
+  "itemType_attachment": {
+    "message": "קובץ מצורף"
+  },
   "progressWindow_savingTo": {
     "message": "שמירה בשם"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "הצגת פרטים"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "הסתרת פרטים"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "בורר אוסף יעד"
+  },
+  "progressWindow_savingItems": {
+    "message": "נשמרים $1 פריטים. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "הפריט $1 נשמר"
+  },
+  "progressWindow_saveItem": {
+    "message": "הפריט $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 נשמר"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "$1 נשמר לפריט $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "ההורדה של $1 נכשלה"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "ההורדה של $1 לפריט $2  נכשלה"
+  },
+  "progressWindow_allDone": {
+    "message": "השמירה הושלמה. החלונית תיסגר עכשיו."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "פריטים מהאתר הזה כבר נשמרו."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "תגיות (מופרדות בפסיקים)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "סינון אוספים"
   },
   "progressWindow_error_translation": {
     "message": "קרתה שגיאה בשמירת הפריט. למידע נוסף: $1."
@@ -58,6 +124,9 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "גירסה אחרונה"
+  },
+  "itemSelector_title": {
+    "message": "נא לבחור אילו פריטים להוסיף לספריה שלך:"
   },
   "appConnector": {
     "message": "מגשר $1"

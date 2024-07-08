@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Upozornenie"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Zrušiť"
+  },
+  "general_selectAll": {
+    "message": "Vybrať všetko"
+  },
+  "general_deselectAll": {
+    "message": "Odznačiť všetky"
   },
   "general_pleaseWait": {
     "message": "Počkajte, prosím..."
   },
   "general_copyToClipboard": {
     "message": "Skopírovať do schránky"
+  },
+  "itemType_note": {
+    "message": "Poznámka"
+  },
+  "itemType_attachment": {
+    "message": "Príloha"
   },
   "progressWindow_savingTo": {
     "message": "Ukladá sa do"

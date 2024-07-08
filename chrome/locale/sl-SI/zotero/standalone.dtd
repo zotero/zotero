@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "b">
 
 <!ENTITY goMenu.label "Pojdi">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Pogled">
 <!ENTITY viewMenu.accesskey "g">

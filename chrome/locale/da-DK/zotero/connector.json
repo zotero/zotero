@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Advarsel"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Annullér"
+  },
+  "general_selectAll": {
+    "message": "Vælg alle"
+  },
+  "general_deselectAll": {
+    "message": "Fravælg alle"
   },
   "general_pleaseWait": {
     "message": "Vent venligst..."
   },
   "general_copyToClipboard": {
     "message": "Kopier til udklipsholderen"
+  },
+  "itemType_note": {
+    "message": "Note"
+  },
+  "itemType_attachment": {
+    "message": "Vedhæftning"
   },
   "progressWindow_savingTo": {
     "message": "Gemmer i"

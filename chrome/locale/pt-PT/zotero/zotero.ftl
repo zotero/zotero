@@ -399,9 +399,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Expandir seção
+    .dynamic-tooltiptext = Expandir seção
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Comprimir seção
+    .dynamic-tooltiptext = Comprimir seção
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
         [one] { $count } anotação

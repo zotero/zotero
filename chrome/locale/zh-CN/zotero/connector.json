@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "警告"
   },
+  "general_ok": {
+    "message": "确定"
+  },
   "general_cancel": {
     "message": "取消"
+  },
+  "general_selectAll": {
+    "message": "全选"
+  },
+  "general_deselectAll": {
+    "message": "取消全选"
   },
   "general_pleaseWait": {
     "message": "请稍候…"
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "复制到剪贴板"
   },
+  "itemType_pdf": {
+    "message": "PDF 附件"
+  },
+  "itemType_epub": {
+    "message": "EPUB 附件"
+  },
+  "itemType_snapshot": {
+    "message": "网页快照"
+  },
+  "itemType_note": {
+    "message": "笔记"
+  },
+  "itemType_link": {
+    "message": "网络链接"
+  },
+  "itemType_attachment": {
+    "message": "附件"
+  },
   "progressWindow_savingTo": {
     "message": "保存到"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "查看详情"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "隐藏详情"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "目标分类选择器"
+  },
+  "progressWindow_savingItems": {
+    "message": "正在保存$1个条目。$2"
+  },
+  "progressWindow_savingItem": {
+    "message": "正在保存条目 $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "条目$1：$2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "已保存$1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "已为条目 $2 保存 $1"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "$1 下载失败"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "为条目 $2 下载 $1 失败"
+  },
+  "progressWindow_allDone": {
+    "message": "保存完成。将关闭对话框。"
+  },
+  "progressWindow_alreadySaved": {
+    "message": "此网页上的条目已经保存。"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "标签 (用逗号分隔)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "筛选分类"
   },
   "progressWindow_error_translation": {
     "message": "保存此条目时发生错误。查看 $1 获取更多信息。"
@@ -59,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "最新版本"
   },
+  "itemSelector_title": {
+    "message": "选择您想要添加到库中的条目："
+  },
   "extensionIsDisabled": {
-    "message": "$1 已停用"
+    "message": "$1 Connectot 在此页面上不可用"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Connector 在文件 URLs 上不可用"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 已于扩展页面中停用"
+    "message": "$1 Connector 在扩展页面上不可用"
   },
   "appConnector": {
     "message": "$1 连接器"
@@ -78,7 +150,7 @@
     "message": "有了 $1 连接器，您就可以从浏览器中单击来<a href=\"$2\">保存条目到 $1</a>。"
   },
   "firstRun_text2": {
-    "message": "建议您<a href=\"$2\">下载</a>桌面版 $1 应用来获得最佳体验。"
+    "message": "如果您还没有，请<a href=\"$2\">下载</a>$1应用以获得最佳体验。"
   },
   "firstRun_acceptButton": {
     "message": "明白"
@@ -114,7 +186,7 @@
     "message": "此文档包含有效的 Zotero 引注，该引注将在下载的副本中显示为 zotero.org 链接"
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制…</b>，在新文档中从 Zotero 菜单中选择<b>未链接引注</b>，然后下载未链接版本。保留原始的已链接文档以备需要进一步更改。"
+    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制…</b>，在新文档中从 Zotero 菜单中选择<b>取消链接引注</b>，然后下载取消链接的版本。保留原始的已链接文档以备需要进一步更改。"
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "坚持下载有链接版本"
@@ -130,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 锁定了您的文档以避免多名用户同时编辑参考文献。同时编辑文档中的参考文献可能导致参考文献或文档的损坏。网络故障等某些无法预见的情况可能会导致您的文档被持续锁定。如果您确信当前情况属异常误判，您可以忽略此锁定。<br/><br/>是否忽略文档锁定？"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 需要获取编辑您的 Google Docs 文档的权限才能插入引注。请重试，并确保允许$1查看、编辑、创建和删除您的 Google Docs 文档。"
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "您所选择的 Google 账户没有编辑该文档的权限。请重试，确保所选的账号有编辑权限。"

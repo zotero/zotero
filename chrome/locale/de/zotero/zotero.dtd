@@ -144,7 +144,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Farbe zuweisen">
 <!ENTITY zotero.tagColorChooser.removeColor "Farbe entfernen">
 
-<!ENTITY zotero.lookup.description "Geben Sie ISBNs, DOIs, PMIDs, arXiv IDs oder ADS Bibcodes ein, um diese zu Ihrer Bibliothek hinzuzufügen:">
+<!ENTITY zotero.lookup.description "ISBNs, DOIs, PMIDs, arXiv IDs oder ADS Bibcodes eingeben, um zur Bibliothek hinzuzufügen:">
 <!ENTITY zotero.lookup.button.search "Suche">
 
 <!ENTITY zotero.createParent.title "Übergeordneten Eintrag erstellen">

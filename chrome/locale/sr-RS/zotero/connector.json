@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Упозорење"
   },
+  "general_ok": {
+    "message": "У реду"
+  },
   "general_cancel": {
     "message": "Откажи"
+  },
+  "general_selectAll": {
+    "message": "Изабери све"
+  },
+  "general_deselectAll": {
+    "message": "Поништи избор"
   },
   "general_pleaseWait": {
     "message": "Сачекајте…"
   },
   "general_copyToClipboard": {
     "message": "Копирај у оставу"
+  },
+  "itemType_note": {
+    "message": "Белешка"
+  },
+  "itemType_attachment": {
+    "message": "Прилог"
   },
   "progressWindow_savingTo": {
     "message": "Чувам у"

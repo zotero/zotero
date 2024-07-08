@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "警告"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "キャンセル"
+  },
+  "general_selectAll": {
+    "message": "すべてを選択"
+  },
+  "general_deselectAll": {
+    "message": "選択をすべて解除"
   },
   "general_pleaseWait": {
     "message": "しばらくお待ちください..."
   },
   "general_copyToClipboard": {
     "message": "クリップボードにコピー"
+  },
+  "itemType_note": {
+    "message": "ノート"
+  },
+  "itemType_attachment": {
+    "message": "添付ファイル"
   },
   "progressWindow_savingTo": {
     "message": "保存先は"

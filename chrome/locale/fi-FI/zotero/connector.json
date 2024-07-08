@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Varoitus"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Peruuta"
+  },
+  "general_selectAll": {
+    "message": "Valitse kaikki"
+  },
+  "general_deselectAll": {
+    "message": "Poista kaikki valinnat"
   },
   "general_pleaseWait": {
     "message": "Odota..."
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "Kopioi leikepöydälle"
   },
+  "itemType_pdf": {
+    "message": "PDF-liite"
+  },
+  "itemType_epub": {
+    "message": "EPUB-liite"
+  },
+  "itemType_snapshot": {
+    "message": "Tilannekuva"
+  },
+  "itemType_note": {
+    "message": "Muistiinpano"
+  },
+  "itemType_link": {
+    "message": "Verkkolinkki"
+  },
+  "itemType_attachment": {
+    "message": "Liite"
+  },
   "progressWindow_savingTo": {
     "message": "Tallennetaan kokoelmaan"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Näytä yksityiskohdat"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Piilota yksityiskohdat"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Kokoelman valinta"
+  },
+  "progressWindow_savingItems": {
+    "message": "Tallennetaan $1 nimikettä. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Tallennetaan kohde $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Nimike $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Tallennettu $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Tallennettu $1 nimikkeelle $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "$1 lataaminen epäonnistui"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "$1 lataaminen epäonnistui nimikkeelle $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Tallennus on valmis. Valintaikkuna sulkeutuu nyt."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Nimikkeet tältä verkkosivulta on jo tallennettu."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Avainsanat (pilkulla eroteltuna)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Suodata kokoelmia"
   },
   "progressWindow_error_translation": {
     "message": "Nimikkeen tallentamisessa tapahtui virhe. Katso $1, jos haluat lisätietoja."
@@ -59,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "tuorein versio"
   },
+  "itemSelector_title": {
+    "message": "Valitse mitkä nimikkeet haluat lisätä kirjastoosi:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 on kytketty pois käytöstä"
+    "message": "$1 Connector ei ole saatavilla tälle sivulle"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Connector ei ole käytettävissä tiedosto-URL:lle"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 on kytketty pois käytöstä lisäsivuilla"
+    "message": "$1 Connector ei ole saatavilla laajennussivuilla"
   },
   "appConnector": {
     "message": "$1Connector"
@@ -78,7 +150,7 @@
     "message": "$1 Connector mahdollistaa <a href=\"$2\">nimikkeiden tallentamisen $1on</a> selaimestasi yhdellä klikkauksella."
   },
   "firstRun_text2": {
-    "message": "Jos et ole vielä tehnyt sitä, <a href=\"$2\">lataa</a> $1n työpöytäversio saavuttaaksesi parhaan käyttökokemuksen."
+    "message": "Jos et vielä ole, <a href=\"$2\">download</a>  $1-sovellus niin saat parhaan käyttökokemuksen."
   },
   "firstRun_acceptButton": {
     "message": "Selvä"
@@ -130,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 lukitsee asiakirjasi, jotta useampi käyttäjä ei voi vahingossa muokata viitteitä samaan aikaan. Samanaikainen viitteiden muokkaus saattaisi johtaa viitteen tai asiakirjan vaurioitumiseen. Tietyt tapahtumat, kuten verkkoyhteyden katkeaminen, voivat johtaa tilanteeseen, jossa asiakirjan lukitus jää epätarkoituksenmukaisesti päälle. Jos uskot että näin on tapahtunut nyt, voit ohittaa lukituksen. <br/><br/> Haluatko ohittaa asiakirjan lukituksen?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 tarvitsee luvan Google Docs -asiakirjojen muokkaamiseen, jotta voit lisätä viitteitä. Yritä uudelleen, ja varmista että $1 saa nähdä, muokata, luoda ja poistaa Google Docs -asiakirjojasi."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "Valitsemallasi Google-tilillä ei ole oikeuksia muokata tätä asiakirjaa. Yritä uudelleen ja varmista, että tilillä on muokkausoikeudet."

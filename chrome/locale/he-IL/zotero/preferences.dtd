@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "כללי">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "מנשק">
 <!ENTITY zotero.preferences.fileHandling "טיפול בקבצים">
 <!ENTITY zotero.preferences.automaticSnapshots "ללכוד תמונת מצב אוטומטית בעת יצירת פריטים מאתרים">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "לצרף אוטומטית PDFים וקבצים אחרים משויכים בעת שמירת פריטים">
@@ -26,9 +26,9 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "להסיר אוטומטית פריטים מהאשפה שנמחקו לפני למעלה מ־">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ימים">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "הצגת לשוניות בתור">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "יוצר/ת - שנה - כותרת">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "כותרת - יוצר/ת - שנה">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "שם קובץ">
 
 <!ENTITY zotero.preferences.groups "קבוצות">
@@ -83,7 +83,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "איפוס היסטוריית סנכרון קבצים">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "השוואת כל קובצי הצרופות עם שירות האחסון">
 <!ENTITY zotero.preferences.sync.reset "איפוס">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "הצגת אפשרויות איפוס…">
 <!ENTITY zotero.preferences.sync.reset.button "איפוס…">
 
 

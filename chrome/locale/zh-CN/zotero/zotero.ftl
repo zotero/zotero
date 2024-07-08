@@ -112,8 +112,8 @@ itembox-button-merge =
     .aria-label = 选择 { $field } 字段的版本
 create-parent-intro = 输入一个 DOI, ISBN, PMID, arXiv ID, 或 ADS Bibcode 來识别这个文件：
 reader-use-dark-mode-for-content =
-    .label = 內容使用深色模式
-update-updates-found-intro-minor = { -app-name } 存在更新：
+    .label = 使用深色模式显示文档内容
+update-updates-found-intro-minor = { -app-name } 有可用更新：
 update-updates-found-desc = 建议尽快更新。
 import-window =
     .title = 导入
@@ -122,7 +122,7 @@ import-online-intro-title = 介绍
 import-source-file =
     .label = 文件（BibTeX，RIS，Zotero RDF等）
 import-source-folder =
-    .label = 一个存放PDF或者其它文件的文件夹
+    .label = 一个存放PDF等文件的文件夹
 import-source-online =
     .label = { $targetApp } 在线导入
 import-options = 选项
@@ -228,9 +228,9 @@ bibliography-outputMode-label = 输出模式:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] 引注
+            [note] 笔记
+           *[other] 引注
         }
 bibliography-outputMode-bibliography =
     .label = 参考文献表
@@ -389,9 +389,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = 展开此栏
+    .dynamic-tooltiptext = 展开此栏
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = 折叠此栏
+    .dynamic-tooltiptext = 折叠此栏
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
        *[other] { $count } 个注释
@@ -452,7 +454,7 @@ attachment-info-convert-note =
             [child] 条目
            *[unknow] 新
         }笔记
-    .tooltiptext = 已不再支持向附件添加注释，但您可以将其迁移到单独的注释后编辑此注释。
+    .tooltiptext = 已不再支持向附件添加笔记，但您可以将其迁移到单独的笔记后进行编辑。
 attachment-preview-placeholder = 无可预览的附件
 toggle-preview =
     .label =

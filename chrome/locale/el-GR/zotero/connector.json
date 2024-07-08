@@ -17,14 +17,29 @@
   "general_warning": {
     "message": "Προειδοποίηση"
   },
+  "general_ok": {
+    "message": "ΟΚ"
+  },
   "general_cancel": {
     "message": "Άκυρο"
+  },
+  "general_selectAll": {
+    "message": "Επιλογή όλων"
+  },
+  "general_deselectAll": {
+    "message": "Αποεπιλογή όλων"
   },
   "general_pleaseWait": {
     "message": "Παρακαλώ περιμένετε..."
   },
   "general_copyToClipboard": {
     "message": "Αντιγραφή στο Πρόχειρο"
+  },
+  "itemType_note": {
+    "message": "Σημείωση"
+  },
+  "itemType_attachment": {
+    "message": "Συνημμένο"
   },
   "progressWindow_savingTo": {
     "message": "Αποθήκευση σε"

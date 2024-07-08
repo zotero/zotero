@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Opozorilo"
   },
+  "general_ok": {
+    "message": "V redu"
+  },
   "general_cancel": {
     "message": "Prekliči"
+  },
+  "general_selectAll": {
+    "message": "Izberi vse"
+  },
+  "general_deselectAll": {
+    "message": "Ne izberi ničesar"
   },
   "general_pleaseWait": {
     "message": "Počakajte trenutek ..."
   },
   "general_copyToClipboard": {
     "message": "Kopiraj na odložišče"
+  },
+  "itemType_note": {
+    "message": "Opomba"
+  },
+  "itemType_attachment": {
+    "message": "Priponka"
   },
   "progressWindow_savingTo": {
     "message": "Shranjevanje v"

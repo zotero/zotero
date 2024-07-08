@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Git">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Görünüm">
 <!ENTITY viewMenu.accesskey "V">

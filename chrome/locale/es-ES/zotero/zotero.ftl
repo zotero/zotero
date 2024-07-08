@@ -75,24 +75,24 @@ item-creator-moveUp =
     .label = Subir
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        Abrir { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Snapshot
-                   *[other] Attachment
+                    [snapshot] instantánea
+                   *[other] adjunto
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] Snapshots
-                   *[other] Attachments
+                    [snapshot] instantáneas
+                   *[other] adjuntos
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] en nueva pestaña
+            [window] en nueva ventana
            *[other] { "" }
         }
 item-menu-add-file =
@@ -216,8 +216,8 @@ runJS-run = Ejecutar
 runJS-help = { general-help }
 runJS-result =
     { $type ->
-        [async] Return value:
-       *[other] Result:
+        [async] Valor de retorno:
+       *[other] Resultado:
     }
 runJS-run-async = Ejecutar como función asíncrona
 bibliography-window =
@@ -230,9 +230,9 @@ bibliography-outputMode-label = Modo de salida:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] Citaciones
+            [note] Notas
+           *[other] Citaciones
         }
 bibliography-outputMode-bibliography =
     .label = Bibliografí­a
@@ -399,9 +399,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Ampliar sección
+    .dynamic-tooltiptext = Ampliar sección
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Contraer sección
+    .dynamic-tooltiptext = Contraer sección
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
         [one] { $count } Anotación
@@ -459,20 +461,20 @@ attachment-info-modified = Modificado
 attachment-info-index = Indexado
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
-            [standalone] Standalone
-            [child] Item
-           *[unknown] New
-        } Note
+        Migrar a nota { $type ->
+            [standalone] independiente
+            [child] elemento
+           *[unknown] nuevo
+        }
     .tooltiptext = Ya no es posible añadir notas a los archivos adjuntos, pero puedes editar esta nota migrándola a una nota independiente.
 attachment-preview-placeholder = No hay archivos adjuntos para la vista previa
 toggle-preview =
     .label =
         { $type ->
-            [open] Hide
-            [collapsed] Show
-           *[unknown] Toggle
-        } Attachment Preview
+            [open] Ocultar
+            [collapsed] Mostrar
+           *[unknown] Alternar
+        } vista previa del archivo adjunto
 quickformat-general-instructions =
     Use las flechas izquierda/derecha para navegar por los elementos de esta cita. { $dialogMenu ->
         [active] Pulse Mayúsculas-Tabulador para enfocar el menú de diálogo.

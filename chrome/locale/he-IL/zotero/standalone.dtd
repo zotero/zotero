@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "ק">
 
 <!ENTITY goMenu.label "קדימה">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "תצוגה">
 <!ENTITY viewMenu.accesskey "ת">
@@ -55,8 +56,8 @@
 <!ENTITY recursiveCollections.label "הצגת פריטים מתת־אוספים">
 <!ENTITY fontSize.label "גודל גופן">
 <!ENTITY noteFontSize.label "גודל גופן הערה">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "עמודות">
+<!ENTITY sortBy.label "מיון לפי">
 
 <!ENTITY toolsMenu.label "כלים">
 <!ENTITY toolsMenu.accesskey "כ">

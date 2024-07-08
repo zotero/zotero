@@ -17,14 +17,29 @@
   "general_warning": {
     "message": "Waarschuwing"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Annuleren"
+  },
+  "general_selectAll": {
+    "message": "Alles selecteren"
+  },
+  "general_deselectAll": {
+    "message": "Niets selecteren"
   },
   "general_pleaseWait": {
     "message": "Wachten a.u.b."
   },
   "general_copyToClipboard": {
     "message": "Kopieer naar klembord"
+  },
+  "itemType_note": {
+    "message": "Notitie"
+  },
+  "itemType_attachment": {
+    "message": "Bijlage"
   },
   "progressWindow_savingTo": {
     "message": "Opslaan in"

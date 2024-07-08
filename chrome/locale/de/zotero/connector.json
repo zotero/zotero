@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Warnung"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Abbrechen"
+  },
+  "general_selectAll": {
+    "message": "Alle auswählen"
+  },
+  "general_deselectAll": {
+    "message": "Alle abwählen"
   },
   "general_pleaseWait": {
     "message": "Bitte warten Sie..."
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "In die Zwischenablage kopieren"
   },
+  "itemType_pdf": {
+    "message": "PDF-Anhang"
+  },
+  "itemType_epub": {
+    "message": "EPUB-Anhang"
+  },
+  "itemType_snapshot": {
+    "message": "Schnappschuss"
+  },
+  "itemType_note": {
+    "message": "Fußnote"
+  },
+  "itemType_link": {
+    "message": "Weblink"
+  },
+  "itemType_attachment": {
+    "message": "Anhang"
+  },
   "progressWindow_savingTo": {
     "message": "Speichern nach"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Details anzeigen"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Details verbergen"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Auswahl der Zielsammlung"
+  },
+  "progressWindow_savingItems": {
+    "message": "$1 Einträge werden gespeichert. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Eintrag $1 wird gespeichert"
+  },
+  "progressWindow_saveItem": {
+    "message": "Eintrag $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 gespeichert"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "$1 für Eintrag $2 gespeichert"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Download von $1 fehlgeschlagen"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Download von $1 für den Eintrag $2 fehlgeschlagen"
+  },
+  "progressWindow_allDone": {
+    "message": "Das Speichern ist abgeschlossen. Dieser Dialog wird sich nun schließen."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Einträge von dieser Website wurden bereits gespeichert."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Tags (getrennt durch Kommas)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Sammlungen filtern"
   },
   "progressWindow_error_translation": {
     "message": "Ein Fehler ist aufgetreten beim Versuch, diesen Eintrag zu speichern. Siehe $1 für weitere Informationen."
@@ -59,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "neueste Version"
   },
+  "itemSelector_title": {
+    "message": "Auswählen, welche Artikel zu Ihrer Bibliothek hinzugefügt werden sollen:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 ist deaktiviert"
+    "message": "$1-Connector ist auf dieser Seite nicht verfügbar"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1-Connector ist für Datei-URLs nicht verfügbar"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 ist auf Erweiterungsseiten deaktiviert."
+    "message": "$1-Connector ist auf Erweiterungsseiten nicht verfügbar"
   },
   "appConnector": {
     "message": "$1 Erweiterung"
@@ -130,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 sperrt Ihr Dokument, um zu verhindern, dass mehrere Nutzer gleichzeitig Zitationen bearbeiten. Das gleichzeitige gemeinsame Bearbeiten kann zu Fehlern in Zitationen oder Beschädigungen des Dokuments führen. Bestimmte unvorhersehbare Umstände wie Netzwerkprobleme können dazu führen, dass Ihr Dokument dauerhaft gesperrt ist. Wenn Sie glauben, dass das der Fall ist, können Sie die Sperre entfernen.<br/><br/>Möchten Sie die Dokumentensperre aufheben?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 benötigt die Berechtigung, Google-Docs-Dokumente zu bearbeiten um dort Zitationen einzufügen. Bitte versuchen Sie es erneut und stellen Sie sicher, $1 zu erlauben, ihre Google-Docs-Dokumente anzusehen, zu bearbeiten, zu erstellen und zu löschen."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "Das Google-Konto, das Sie gewählt haben, ist nicht berechtigt, dieses Dokument zu bearbeiten. Versuchen Sie es noch einmal und stellen Sie sicher, dass Sie ein Konto mit Bearbeitungserlaubnis ausgewählt haben."

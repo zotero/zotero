@@ -2,6 +2,9 @@
   "general_more": {
     "message": "بیشتر..."
   },
+  "general_moreInfo": {
+    "message": "اطلاعات بیشنر..."
+  },
   "general_done": {
     "message": "انجام شد"
   },
@@ -14,11 +17,32 @@
   "general_warning": {
     "message": "اخطار"
   },
+  "general_ok": {
+    "message": "تایید"
+  },
   "general_cancel": {
     "message": "انصراف"
   },
+  "general_selectAll": {
+    "message": "انتخاب همه"
+  },
+  "general_deselectAll": {
+    "message": "انتخاب هیچ‌کدام"
+  },
   "general_copyToClipboard": {
     "message": "رونوشت به حافظه"
+  },
+  "itemType_pdf": {
+    "message": "پیوست PDF"
+  },
+  "itemType_epub": {
+    "message": "پیوست EPUB"
+  },
+  "itemType_note": {
+    "message": "یادداشت"
+  },
+  "itemType_attachment": {
+    "message": "پیوست"
   },
   "progressWindow_savingTo": {
     "message": "ذخیره در"

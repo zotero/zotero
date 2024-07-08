@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Ugrás">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Nézet">
 <!ENTITY viewMenu.accesskey "V">

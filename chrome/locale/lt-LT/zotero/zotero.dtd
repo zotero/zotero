@@ -151,7 +151,7 @@
 <!ENTITY zotero.createParent.button.manual "Įrašyti ranka">
 
 <!ENTITY zotero.selectitems.title "Pasirinkti įrašus">
-<!ENTITY zotero.selectitems.intro.label "Pasirinkite norimus įtraukti į bilioteką įrašus">
+<!ENTITY zotero.selectitems.intro.label "Pasirinkite įrašus, norimus įtraukti į biblioteką">
 <!ENTITY zotero.selectitems.cancel.label "Atšaukti">
 <!ENTITY zotero.selectitems.select.label "Gerai">
 

@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Įspėjimas"
   },
+  "general_ok": {
+    "message": "Gerai"
+  },
   "general_cancel": {
     "message": "Atsisakyti"
+  },
+  "general_selectAll": {
+    "message": "Pažymėti viską"
+  },
+  "general_deselectAll": {
+    "message": "Nieko nežymėti"
   },
   "general_pleaseWait": {
     "message": "Palaukite..."
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "Kopijuoti į iškarpinę"
   },
+  "itemType_pdf": {
+    "message": "PDF priedas"
+  },
+  "itemType_epub": {
+    "message": "EPUB priedas"
+  },
+  "itemType_snapshot": {
+    "message": "Momentinė kopija"
+  },
+  "itemType_note": {
+    "message": "Pastaba"
+  },
+  "itemType_link": {
+    "message": "Žiniatinklio nuoroda"
+  },
+  "itemType_attachment": {
+    "message": "Priedas"
+  },
   "progressWindow_savingTo": {
     "message": "Įrašoma į"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Rodyti išsamiau"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Nerodyti išsamiai"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Paskirties rinkinio pasirinkimas"
+  },
+  "progressWindow_savingItems": {
+    "message": "Išsaugomi įrašai: $1. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Išsaugomas įrašas $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Įrašas $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 įrašytas"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Įrašui $2 išsaugota: $1"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Nepavyko parsisiųsti $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Nepavyko parsisiųsti $1 dėl įrašo $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Saugojimas užbaigtas. Galite užverti langą."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Šio žiniatinklio puslapio įrašai jau išsaugoti."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Gairės (atskirtos kableliais)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Rinkinių atranka"
   },
   "progressWindow_error_translation": {
     "message": "Klaida įrašant. Daugiau informacijos rasite $1."
@@ -59,20 +125,32 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "naujausios versijos"
   },
+  "itemSelector_title": {
+    "message": "Pasirinkite įrašus, norimus įtraukti į biblioteką:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 papildinys naršyklei neprieinamas šiame puslapyje"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 papildinys naršyklei neprieinamas pagal rinkmenos URL"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 papildinys naršyklei neprieinamas papildinių puslapiuose"
+  },
   "appConnector": {
-    "message": "$1 papildinys"
+    "message": "$1 papildinys naršyklei"
   },
   "upgradeApp": {
     "message": "Atnaujinti $1"
   },
   "firstRun_title": {
-    "message": "Jūs įdiegėte $1 jungtį!"
+    "message": "Jūs įdiegėte $1 papildinį naršyklei!"
   },
   "firstRun_text1": {
-    "message": "$1 jungtis leidžia jums <a href=\"$2\">saugoti įrašus į $1</a> tiesiai iš naršyklės vienu paspaudimu."
+    "message": "$1 papildinys leidžia jums <a href=\"$2\">saugoti įrašus į $1</a> tiesiai iš naršyklės vienu paspaudimu."
   },
   "firstRun_text2": {
-    "message": "Jei dar to nepadarėte, <a href=\"$2\">atsisiųskite</a> atskirą $1 programą sklandžiausiam darbui."
+    "message": "Jei dar neturite, <a href=\"$2\">parsisiųskite</a> $1 programą patogesniam darbui."
   },
   "firstRun_acceptButton": {
     "message": "Supratau"
@@ -125,6 +203,9 @@
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 užrakina jūsų dokumentą, kad būtų neleistų keliems naudotojams tuo pačiu metu redaguoti citatas. Jei dokumente vienu metu keli asmenys redaguoja citatas, tuomet gali būti sugadintas citavimas ar net visas dokumentas. Dėl tam tikrų nenumatytų aplinkybių, pvz., tinklo gedimų, jūsų dokumentas gali likti visam laikui užrakintas. Jei manote, kad taip nutiko, galite atšaukti užraktą.<br/><br/>Ar norėtumėte atrakinti dokumentą?"
   },
+  "integration_googleDocs_authScopeError": {
+    "message": "Norint įterpti citatas, $1 programai reikia leidimo keisti Google Docs dokumentus. Bandykite iš naujo ir įsitikinkite, kad suteikėte $1 programai leidimą peržiūrėti, keisti, kurti ir šalinti Google Docs dokumentus."
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "Pasirinkta Google paskyra neturi prieigos redaguoti šio dokumento. Bandykite dar kartą ir įsitikinkite, kad pasirinkote paskyrą, turinčią redagavimo teises."
   },
@@ -139,6 +220,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Šios citatos yra <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">atsietos nuo $1</a>. Jums reikės jas vėl susieti tam, kad jos naujintųsi ir pasirodytų literatūros sąraše."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopijuoti nuorodą be įgaliotojo serverio"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopijuoti puslapio URL be įgaliotojo serverio"
+  },
+  "reloadViaProxy": {
+    "message": "Iš naujo įkelti per įgaliotąjį serverį"
+  },
+  "reloadVia": {
+    "message": "Iš naujo įkelti per $1 "
   },
   "general_saveTo": {
     "message": "Įrašyti į „$1“"

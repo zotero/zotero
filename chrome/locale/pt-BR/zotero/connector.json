@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Aviso"
   },
+  "general_ok": {
+    "message": "Ok"
+  },
   "general_cancel": {
     "message": "Cancelar"
+  },
+  "general_selectAll": {
+    "message": "Select All"
+  },
+  "general_deselectAll": {
+    "message": "Desmarcar todas"
   },
   "general_pleaseWait": {
     "message": "Por favor, espere..."
@@ -32,11 +41,20 @@
   "general_copyToClipboard": {
     "message": "Copiar para a área de transferência"
   },
+  "itemType_note": {
+    "message": "Nota"
+  },
+  "itemType_attachment": {
+    "message": "Anexo"
+  },
   "progressWindow_savingTo": {
     "message": "Salvando em"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por vírgula)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtrar Coleções"
   },
   "progressWindow_error_translation": {
     "message": "Ocorreu um erro ao salvar esse item. Veja $1para mais detalhes."

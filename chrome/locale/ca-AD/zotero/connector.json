@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Avís"
   },
+  "general_ok": {
+    "message": "D'acord"
+  },
   "general_cancel": {
     "message": "Cancel·la"
+  },
+  "general_selectAll": {
+    "message": "Selecciona-ho tot"
+  },
+  "general_deselectAll": {
+    "message": "Anul·la la selecció"
   },
   "general_pleaseWait": {
     "message": "Si us plau, espereu..."
@@ -32,11 +41,20 @@
   "general_copyToClipboard": {
     "message": "Copia al portaretalls"
   },
+  "itemType_note": {
+    "message": "Nota"
+  },
+  "itemType_attachment": {
+    "message": "Adjunció"
+  },
   "progressWindow_savingTo": {
     "message": "S'està desant a"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetes (separades per comes)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtra les col·leccions"
   },
   "progressWindow_error_translation": {
     "message": "S'ha produït un error desar l'element. Vegeu $1 per a més informació. "

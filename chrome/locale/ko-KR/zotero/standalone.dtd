@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "이동">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "보기">
 <!ENTITY viewMenu.accesskey "V">

@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "前往">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "查看">
 <!ENTITY viewMenu.accesskey "V">
@@ -55,14 +56,14 @@
 <!ENTITY recursiveCollections.label "显示子分类中的条目">
 <!ENTITY fontSize.label "字体大小">
 <!ENTITY noteFontSize.label "笔记字体大小">
-<!ENTITY columns.label "直欄">
+<!ENTITY columns.label "列">
 <!ENTITY sortBy.label "排序方式">
 
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "安装浏览器扩展">
 <!ENTITY installConnector.accesskey "C">
-<!ENTITY addons.label "附加组件">
+<!ENTITY addons.label "插件">
 <!ENTITY developer.label "开发者">
 
 <!ENTITY bringAllToFront.label "前端显示">

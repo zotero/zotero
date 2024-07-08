@@ -17,11 +17,26 @@
   "general_warning": {
     "message": "Попередження"
   },
+  "general_ok": {
+    "message": "Гаразд"
+  },
   "general_cancel": {
     "message": "Відмінити"
   },
+  "general_selectAll": {
+    "message": "Вибрати все"
+  },
+  "general_deselectAll": {
+    "message": "Відмінити вибір"
+  },
   "general_copyToClipboard": {
     "message": "Скопіювати в буфер обміну"
+  },
+  "itemType_note": {
+    "message": "Примітка"
+  },
+  "itemType_attachment": {
+    "message": "Вкладення"
   },
   "progressWindow_savingTo": {
     "message": "Збереження в"

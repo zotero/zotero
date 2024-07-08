@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Uyarı"
   },
+  "general_ok": {
+    "message": "Tamam"
+  },
   "general_cancel": {
     "message": "İptal Et"
+  },
+  "general_selectAll": {
+    "message": "Tümünü Seç"
+  },
+  "general_deselectAll": {
+    "message": "Hiçbirini Seçme"
   },
   "general_pleaseWait": {
     "message": "Lütfen bekleyin..."
@@ -32,8 +41,35 @@
   "general_copyToClipboard": {
     "message": "Panoya Kopyala"
   },
+  "itemType_pdf": {
+    "message": "PDF Ek"
+  },
+  "itemType_epub": {
+    "message": "EPUB ek"
+  },
+  "itemType_snapshot": {
+    "message": "Anlık Görüntü"
+  },
+  "itemType_note": {
+    "message": "Not"
+  },
+  "itemType_link": {
+    "message": "Web bağlantı"
+  },
+  "itemType_attachment": {
+    "message": "Ek"
+  },
   "progressWindow_savingTo": {
     "message": "Buraya Kaydediyor"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Ayrıntıları göster"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Ayrıntıları gizle"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Hedef derme seçicisi"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiketler (virgüllerle ayrılmış)"

@@ -220,18 +220,18 @@ runJS-result =
     }
 runJS-run-async = Kjør som asynkron funksjon
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - Opprett henvisning/bibliografi
 bibliography-style-label = Henvisningsstil:
 bibliography-locale-label = Språk:
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Vis henvisninger som:
 bibliography-advancedOptions-label = Avanserte valg
 bibliography-outputMode-label = Utdata modus:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] Henvisninger
+            [note] Notater
+           *[other] Henvisninger
         }
 bibliography-outputMode-bibliography =
     .label = Bibliografi
@@ -246,24 +246,24 @@ bibliography-outputMethod-print =
     .label = Skriv ut
 bibliography-manageStyles-label = Behandle stiler…
 integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
+    .title = { -app-name } - Innstillinger for dokument
 integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
+    .title = { -app-name } - Legg til/rediger henvisning
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - Rediger bibliografi
 integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
+    .title = { -app-name } - Hurtigformater henvisning
 integration-prefs-displayAs-label = Vis henvisninger som:
 integration-prefs-footnotes =
     .label = Fotnoter
 integration-prefs-endnotes =
     .label = Sluttnoter
 integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
+    .label = Lagre henvisninger som bokmerker
 integration-prefs-bookmarks-description = Bokmerker kan bli delt mellom Word og LibreOffice, men kan forårsake feil dersom de blir endret ved en tilfeldighet og kan ikke settes inn i fotnoter.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] The document must be saved as .doc or .docx.
+        [true] Dokumentet må lagres som .doc eller .docx.
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
@@ -394,9 +394,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Utvid seksjon
+    .dynamic-tooltiptext = Utvid seksjon
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Skjul seksjon
+    .dynamic-tooltiptext = Skjul seksjon
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
         [one] { $count } Merknad

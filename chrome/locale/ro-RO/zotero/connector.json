@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Avertisment"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Renunță"
+  },
+  "general_selectAll": {
+    "message": "Selectează tot"
+  },
+  "general_deselectAll": {
+    "message": "Deselectează totul"
   },
   "general_pleaseWait": {
     "message": "Te rog să aștepți…"
   },
   "general_copyToClipboard": {
     "message": "Copiere în clipboard"
+  },
+  "itemType_note": {
+    "message": "Notă"
+  },
+  "itemType_attachment": {
+    "message": "Anexă"
   },
   "progressWindow_savingTo": {
     "message": "Se salvează în"

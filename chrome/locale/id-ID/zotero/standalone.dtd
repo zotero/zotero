@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Pergi">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Lihat">
 <!ENTITY viewMenu.accesskey "V">

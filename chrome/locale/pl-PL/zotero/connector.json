@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Ostrzeżenie"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Anuluj"
+  },
+  "general_selectAll": {
+    "message": "Zaznacz wszystko"
+  },
+  "general_deselectAll": {
+    "message": "Odznacz wszystkie"
   },
   "general_pleaseWait": {
     "message": "Proszę czekać..."
@@ -32,11 +41,59 @@
   "general_copyToClipboard": {
     "message": "Kopiuj do schowka"
   },
+  "itemType_pdf": {
+    "message": "Załącznik PDF"
+  },
+  "itemType_epub": {
+    "message": "Załącznik EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "Zrzut ekranu"
+  },
+  "itemType_note": {
+    "message": "Notatka"
+  },
+  "itemType_link": {
+    "message": "Odsyłacz"
+  },
+  "itemType_attachment": {
+    "message": "Załącznik"
+  },
   "progressWindow_savingTo": {
     "message": "Zapisywanie do"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Pokaż szczegóły"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Ukryj szczegóły"
+  },
+  "progressWindow_savingItem": {
+    "message": "Zapisywanie elementu $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Element $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Zapisano $1"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Pobieranie $1 nie powiodło się"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Pobieranie $1 dla elementu $2 nie powiodło się"
+  },
+  "progressWindow_allDone": {
+    "message": "Wszystko zapisano. Okno zostanie teraz zamknięte."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Elementy z tej strony internetowej zostały zapisane."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Etykiety (oddzielone przecinkami)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtruj kolekcje"
   },
   "progressWindow_error_translation": {
     "message": "Podczas zapisu tego elementu wystąpił błąd. Aby uzyskać więcej informacji zobacz $1."
@@ -59,11 +116,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "ostatnia wersja"
   },
+  "itemSelector_title": {
+    "message": "Wybierz elementy, które chcesz dodać do twojej biblioteki:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 jest wyłączony"
+    "message": "Łącznik $1 nie jest dostępny na tej stronie"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "Łącznik $1 nie jest dostępny w odsyłaczach do pliku"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 jest wyłączony w rozszerzeniach"
+    "message": "Łącznik $1 nie jest dostępny w rozszerzeniach"
   },
   "appConnector": {
     "message": "Łącznik $1"
@@ -78,7 +141,7 @@
     "message": "$1 Connector umożliwia ci <a href=\"$2\">zapisywanie elementów do $1</a> z twojej przeglądarki tylko jednym kliknięciem."
   },
   "firstRun_text2": {
-    "message": "Jeśli jeszcze nie próbowałeś(aś), <a href=\"$2\">pobierz</a> samodzielną aplikację $1."
+    "message": "Polecamy <a href=\"$2\">pobrać</a> aplikację $1 dla wyższego komfortu użytkowania."
   },
   "firstRun_acceptButton": {
     "message": "Rozumiem"
@@ -130,6 +193,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 blokuje dokument, aby uniemożliwić wielu użytkownikom edycję cytatów w tym samym czasie. Jednoczesna edycja cytatów w dokumencie może prowadzić do uszkodzenia dokumentu lub cytowań. Pewne nieprzewidywalne okoliczności, takie jak awarie sieci, mogą spowodować trwałe zablokowanie dokumentu. Jeśli uważasz, że tak się stało, możesz obejść blokadę. <br/><br/>Czy chcesz ominąć blokadę dokumentu?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "Aby móc wstawiać cytowania, $1 potrzebuje praw dostępu do edycji twoich Dokumentów Google. Proszę, spróbuj ponownie i upewnij się, że udzielono $1 dostępu do edycji, tworzenia i usuwania twoich Dokumentów Google."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "Konto Google, które zostało wybrane, nie ma dostępu do edycji tego dokumentu. Proszę, spróbuj ponownie i upewnij się, że wybrano konto z dostępem do edycji."

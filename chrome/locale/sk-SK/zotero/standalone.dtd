@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Zobraziť">
 <!ENTITY viewMenu.accesskey "V">

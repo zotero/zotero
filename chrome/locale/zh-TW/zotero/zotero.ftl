@@ -228,9 +228,9 @@ bibliography-outputMode-label = 輸出模式:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] 引注
+            [note] 笔记
+           *[other] 引注
         }
 bibliography-outputMode-bibliography =
     .label = 参考文献表
@@ -389,9 +389,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = 展开此区域
+    .dynamic-tooltiptext = 展开此区域
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = 折叠此区域
+    .dynamic-tooltiptext = 折叠此区域
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
        *[other] { $count } 個標註

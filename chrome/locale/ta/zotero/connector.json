@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "எச்சரிக்கை"
   },
+  "general_ok": {
+    "message": "சரி"
+  },
   "general_cancel": {
     "message": "ரத்துசெய்"
+  },
+  "general_selectAll": {
+    "message": "அனைத்தையும் தெரிவுசெய்"
+  },
+  "general_deselectAll": {
+    "message": "அனைத்து தெரிவுகளையும் நிராகரி"
   },
   "general_pleaseWait": {
     "message": "தயவுசெய்து காத்திருங்கள்…"
   },
   "general_copyToClipboard": {
     "message": "இடைநிலைப்பலகைக்கு நகலெடு"
+  },
+  "itemType_note": {
+    "message": "குறிப்பு"
+  },
+  "itemType_attachment": {
+    "message": "இணைப்பு"
   },
   "progressWindow_savingTo": {
     "message": "இங்குச் சேமி"

@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Внимание"
   },
+  "general_ok": {
+    "message": "ОК"
+  },
   "general_cancel": {
     "message": "Отменить"
+  },
+  "general_selectAll": {
+    "message": "Выбрать все"
+  },
+  "general_deselectAll": {
+    "message": "Отменить выбор всего"
   },
   "general_pleaseWait": {
     "message": "Пожалуйста, подождите…"
   },
   "general_copyToClipboard": {
     "message": "Скопировать в буфер обмена"
+  },
+  "itemType_note": {
+    "message": "Заметка"
+  },
+  "itemType_attachment": {
+    "message": "Вложение"
   },
   "progressWindow_savingTo": {
     "message": "Сохранение в"

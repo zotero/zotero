@@ -20,14 +20,29 @@
   "general_warning": {
     "message": "Varning"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Avbryt"
+  },
+  "general_selectAll": {
+    "message": "Markera allt"
+  },
+  "general_deselectAll": {
+    "message": "Avmarkera alla"
   },
   "general_pleaseWait": {
     "message": "Vänta…"
   },
   "general_copyToClipboard": {
     "message": "Kopiera till urklipp"
+  },
+  "itemType_note": {
+    "message": "Anteckning"
+  },
+  "itemType_attachment": {
+    "message": "Bilaga"
   },
   "progressWindow_savingTo": {
     "message": "Spara till"

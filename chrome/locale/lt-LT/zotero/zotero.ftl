@@ -2,7 +2,7 @@ general-print = Spausdinti
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
-       *[other] Enter
+       *[other] Įvesti
     }
 general-remove = Pašalinti
 general-add = Pridėti
@@ -19,7 +19,7 @@ menu-file-show-files =
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = Tankumas
 add-attachment = Įtraukti priedą
 new-note = Nauja pastaba
 menu-add-by-identifier =
@@ -75,24 +75,24 @@ item-creator-moveUp =
     .label = Kelti aukštyn
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        Atverti { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Snapshot
-                   *[other] Attachment
+                    [snapshot] momentinę kopiją
+                   *[other] priedą
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
-                    [snapshot] Snapshots
-                   *[other] Attachments
+                    [pdf] PDF
+                    [epub] EPUB
+                    [snapshot] momentines kopijas
+                   *[other] priedus
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] naujoje kortelėje
+            [window] naujame lange
            *[other] { "" }
         }
 item-menu-add-file =
@@ -109,7 +109,7 @@ item-button-view-online =
 itembox-button-options =
     .tooltiptext = Atverti kontekstinį meniu
 itembox-button-merge =
-    .aria-label = Select version of { $field } field
+    .aria-label = Pasirinkite lauko „{ $field }“ atmainą
 create-parent-intro = Įveskite šios rinkmenos DOI, ISBN, PMID, arXiv ID arba ADS bibkodą:
 reader-use-dark-mode-for-content =
     .label = Tamsus turinio apipavidalinimas
@@ -124,13 +124,13 @@ import-source-file =
 import-source-folder =
     .label = PDF ir kitų rinkmenų katalogas
 import-source-online =
-    .label = { $targetApp } online import
+    .label = Internetinis imporatavimas į { $targetApp }
 import-options = Parinktys
 import-importing = Importuojama...
 import-create-collection =
     .label = Importuotą rinkinį ir įrašus patalpinti naujame rinkinyje
 import-recreate-structure =
-    .label = Recreate folder structure as collections
+    .label = Aplankų struktūrą atkurti kaip rinkinius
 import-fileTypes-header = Importuotinų rinkmenų tipai:
 import-fileTypes-pdf =
     .label = PDF
@@ -138,10 +138,10 @@ import-fileTypes-other =
     .placeholder = Kitos importuotinos rinkmenos pagal šabloną atskiriant kableliu (pvz., *.jpg, *.png)
 import-file-handling = Rinkmenų tvarkymas
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = Kopijuoti rinkmenas į  { -app-name } saugyklos aplanką
 import-file-handling-link =
     .label = Sukurti nuorodas į esamas vietas
-import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+import-fileHandling-description = { -app-name } negali sinchronizuoti susietųjų rinkmenų.
 import-online-new =
     .label = Parsisiųsti tik naujus įrašus; neatnaujinti anksčiau importuotųjų
 import-mendeley-username = Naudotojo vardas
@@ -151,27 +151,27 @@ file-interface-import-error = Klaida bandant importuoti pasirinktas rinkmenas. �
 file-interface-import-complete = Importavimas baigtas
 file-interface-items-were-imported =
     { $numItems ->
-        [0] No items were imported
-        [one] One item was imported
-       *[other] { $numItems } items were imported
+        [0] Nebuvo ką importuoti
+        [one] Importuotas vienas įrašas
+       *[other] Importuota įrašų: { $numItems } 
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
-        [0] No items were relinked
-        [one] One item was relinked
-       *[other] { $numRelinked } items were relinked
+        [0] Nebuvo iš naujo susietų
+        [one] Iš naujo susietas vienas įrašas
+       *[other] Iš naujo susieta įrašų: { $numRelinked } 
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
-file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
-import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
-import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-mendeley-encrypted = Nepavyksta nuskaityti Mendeley duombazės, galbūt ji užšifruota. Daugiau informacijos rasite straipsnelyje <a data-l10n-name="mendeley-import-kb">Kaip importuoti Mendeley biblioteką į Zotero?</a>.
+file-interface-import-error-translator = Klaida importuojant pasirinktą rinkmeną su „{ $translator }“. Įsitikinkite, kad rinkmena yra tinkama ir bandykite iš naujo.
+import-online-intro = Kitame žingsnyje prašysime prisijungti prie { $targetAppOnline } paskyros ir suteikti prieigą programai { -app-name } . Tai būtina norint importuoti biblioteką iš { $targetApp } į { -app-name }.
+import-online-intro2 = { -app-name } niekada nematys ir nesaugos jūsų { $targetApp } slaptažodžio.
+import-online-form-intro = Įveskite prisijungimo prie { $targetAppOnline } paskyros duomenis. Tai būtina norint importuoti biblioteką iš { $targetApp } į { -app-name }.
+import-online-wrong-credentials = Nepavyko prisijungti prie { $targetApp }. Iš naujo įveskite prisijungimo duomenis ir bandykite vėl.
+import-online-blocked-by-plugin = Importavimo negalima tęsti, jei veikia { $plugin }. Prašome išjungti šį papildinį, tada bandykite iš naujo.
 import-online-relink-only =
-    .label = Relink Mendeley Desktop citations
+    .label = Iš naujo susieti Mendeley Desktop citatas
 import-online-relink-kb = Daugiau informacijos
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name } negali prisijungti { $targetApp }. Prašome patikrinti  interneto ryšį ir bandykite vėl.
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -184,7 +184,7 @@ report-error =
     .label = Pranešti apie klaidą...
 rtfScan-wizard =
     .title = RTF peržvelgimas
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } gali automatiškai ištraukti ir pertvarkyti citatų formatą, taip pat įterpti literatūros sąrašą į RTF rinkmenas. Norėdami pradėti, žemiau pasirinkite RTF rinkmeną.
 rtfScan-introPage-description2 = Norėdami pradėti,  įvedimui pasirinkite RTF dokumentą ir dokumentą išvedimui:
 rtfScan-input-file = Įvedimo rinkmena
 rtfScan-output-file = Išvedimo rinkmena
@@ -199,15 +199,15 @@ rtfScan-intro-page =
     .label = Įvadas
 rtfScan-scan-page =
     .label = Peržvlgiame citavimus
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } ieško citatų jūsų dokumente. Kantriai palaukite.
 rtfScan-citations-page =
     .label = Tikrinti cituotus įrašus
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = Peržiūrėkite atpažintų citatų sąrašą ir įsitikinkite, kad { -app-name } teisingai parinko atitinkamus įrašus. Būtinai išspręskite nesusietas arba dviprasmiškas citatas prieš eidami prie kito žingsnio.
 rtfScan-style-page =
     .label = Dokumento formatavimas
 rtfScan-format-page =
     .label = Formatuojame citavimus
-rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name } apdoroja ir formatuoja jūsų RTF rinkmeną. Būkite kantrūs.
 rtfScan-complete-page =
     .label = Raiškiojo teksto formato dokumentų peržvelgimas baigtas
 rtfScan-complete-page-description = Jūsiškis dokumentas peržvelgtas ir apdorotas. Pažiūrėkite, ar jis tinkamai suformatuotas.
@@ -217,23 +217,23 @@ runJS-run = Vykdyti
 runJS-help = { general-help }
 runJS-result =
     { $type ->
-        [async] Return value:
-       *[other] Result:
+        [async] Grąžinta reikšmė:
+       *[other] Rezultatas:
     }
-runJS-run-async = Run as async function
+runJS-run-async = Vykdyti kaip nesinchronizuotą funkciją
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - Sukurti citatą / literatūros sąrašą
 bibliography-style-label = Citavimo stilius:
 bibliography-locale-label = Kalba:
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Citavimo rodymo pavidalas:
 bibliography-advancedOptions-label = Kitos parinktys
 bibliography-outputMode-label = Išvedimo veiksena:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] citatos
+            [note] pastabos
+           *[other] citatos
         }
 bibliography-outputMode-bibliography =
     .label = Bibliografija
@@ -248,24 +248,24 @@ bibliography-outputMethod-print =
     .label = Spausdinti
 bibliography-manageStyles-label = Tvarkyti stilius...
 integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
+    .title = { -app-name } - Dokumento parinktys
 integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
+    .title = { -app-name } - Pridėti/keisti citatą
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - Keisti literatūros sąrašą
 integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
+    .title = { -app-name } - Greitasis citatų formatavimas
 integration-prefs-displayAs-label = Citavimo rodymo pavidalas:
 integration-prefs-footnotes =
     .label = Išnaša
 integration-prefs-endnotes =
     .label = Galinė išnaša
 integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
+    .label = Citatas saugoti kaip žymeles
 integration-prefs-bookmarks-description = Žymelės išlaikomos tiek „Word“, tiek „LibreOffice“ programose, tačiau netyčia jas pakeitus, gali atsirasti klaidų. Žymelių negalite įterpti į išnašas ar galines išnašas.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] The document must be saved as .doc or .docx.
+        [true] Dokumentą reikia įrašyti .doc arba .docx formatu.
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
@@ -320,25 +320,25 @@ publications-choose-license-commercial-prompt = Leisti jūsų darbus naudoti kom
 publications-buttons-add-to-my-publications =
     .label = Pridėti prie „Nuosavų publikacijų“
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = Toliau: platinimas
 publications-buttons-next-choose-license =
     .label = pasirinkti licenciją
-licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
+licenses-cc-0 = CC0 1.0 universalus viešas priskyrimas
 licenses-cc-by = CC BY 4.0 tarptautinė licencija: priskyrimas
 licenses-cc-by-nd = CC BY-ND 4.0 tarptautinė licencija: priskyrimas, jokių išvestinių darbų
 licenses-cc-by-sa = CC BY-SA 4.0 tarptautinė licencija: priskyrimas, analogiškas platinimas
 licenses-cc-by-nc = CC BY-NC 4.0 tarptautinė licencija: priskyrimas, nekomercinis platinimas
 licenses-cc-by-nc-nd = CC BY-NC-ND 4.0 tarptautinė licencija: priskyrimas, nekomercinis platinimas, jokių išvestinių darbų
 licenses-cc-by-nc-sa = CC BY-NC-SA 4.0 tarptautinė licencija: priskyrimas, nekomercinis, analogiškas platinimas
-licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
-licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+licenses-cc-more-info = Prieš platindami darbą pagal CC licenciją, perskaitykite „Creative Commons“ <a data-l10n-name="license-considerations">licencijos davėjams svarbias aplinkybes</a>. Atminkite, kad pasirinktos licencijos negalėsite atšaukti, net jei vėliau pasirinksite kitokias sąlygas ar apskritai nustosite platinti dokumentą.
+licenses-cc0-more-info = Prieš platindami darbą pagal CC0 licenciją, perskaitykite „Creative Commons“ <a data-l10n-name="license-considerations">CC0 D.U.K.</a>. Atminkite, kad sprendimo, jog darbas bus viešas, negalėsite pakeisti, net jei vėliau pasirinksite kitokias sąlygas ar apskritai nustosite platinti dokumentą.
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Paleisti gedimų nustatymo veiksenoje...
     .accesskey = I
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
-restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
+restart-in-troubleshooting-mode-dialog-title = Paleisti gedimų nustatymo veiksenoje
+restart-in-troubleshooting-mode-dialog-description = { -app-name } pasileis iš naujo išjungus visus papildinius. Įgalinus gedimų nustatymo veikseną, kai kurios galimybės gali neveikti tinkamai.
 menu-ui-density =
-    .label = Density
+    .label = Tankumas
 menu-ui-density-comfortable =
     .label = Patogus
 menu-ui-density-compact =
@@ -362,16 +362,20 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } priedas
+            [few] { $count } priedai
+            [many] { $count } priedų
+           *[other] { $count } priedas
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [one] { $count } anotacija
+            [few] { $count } anotacijos
+            [many] { $count } anotacijų
+           *[other] { $count } anotacija
         }
 section-notes =
     .label =
@@ -386,11 +390,13 @@ section-libraries-collections =
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } gairė
+            [few] { $count } gairės
+            [many] { $count } gairių
+           *[other] { $count } gairė
         }
 section-related =
-    .label = { $count } Related
+    .label = Susijusių: { $count }
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -398,13 +404,17 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Expand section
+    .dynamic-tooltiptext = Expand section
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Collapse section
+    .dynamic-tooltiptext = Collapse section
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
-       *[other] { $count } Annotations
+        [one] { $count } anotacija
+        [few] { $count } anotacijos
+        [many] { $count } anotacijų
+       *[other] { $count } anotacija
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -457,30 +467,30 @@ attachment-info-modified = Pakeista
 attachment-info-index = Suindeksuota
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
-            [standalone] Standalone
-            [child] Item
-           *[unknown] New
-        } Note
+        Pereiti į { $type ->
+            [standalone] paskirą
+            [child] įrašo
+           *[unknown] naują
+        } pastabą
     .tooltiptext = Pastabų pridėjimas prie priedų nebepalaikomas, tačiau galite redaguoti šią pastabą perkeldami ją kaip atskirą pastabą.
 attachment-preview-placeholder = Nėra peržiūrėtinų priedų
 toggle-preview =
     .label =
         { $type ->
-            [open] Hide
-            [collapsed] Show
-           *[unknown] Toggle
-        } Attachment Preview
+            [open] Slėpti
+            [collapsed] Rodyti
+           *[unknown] Perjungti
+        } priedą
 quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
+    Norėdami pereiti per šio citavimo įrašus, judėkite rodyklių klavišais kairėn ir dešinėn. { $dialogMenu ->
+        [active] Norėdami pereiti į lango meniu, spauskite Lyg2+Tab.
        *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
+    } Norėdami patvirtinti šio citavimo pakeitimus, spauskite { return-or-enter }. Jei atmesti keitimus, spauskite grįžties (Gr, angl. Esc) klavišą.
+quickformat-aria-bubble = Šis įrašas įtrauktas į citavimą. Norėdami jį pataisyti, spauskite tarpo klavišą. { quickformat-general-instructions }
+quickformat-aria-input = Norėdami įtraukti citatą, pradėkite vesti tarsi įrašo paiešką. Norėdami naršyti paieškos rezultatus, spauskite Tab. { quickformat-general-instructions }
+quickformat-aria-item = Paspaudę { return-or-enter } pridėsite šį įrašą prie citavimo. Norėdami grįžti į paieškos lauką, spauskite Tab.
 quickformat-accept =
-    .tooltiptext = Save edits to this citation
+    .tooltiptext = Išsaugoti šio citavimo pakeitimus
 quickformat-locator-type =
     .aria-label = Locator type
 quickformat-locator-value = Locator
@@ -527,15 +537,15 @@ item-pane-message-objects-selected =
        *[other] { $count } objects selected
     }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = { -app-name } is running in 32-bit mode on a 64-bit version of Windows. { -app-name } will run more efficiently in 64-bit mode.
-architecture-warning-action = Download 64-bit { -app-name }
+architecture-win32-warning-message = { -app-name } paleista 32 bitų veiksenoje 64 bitų Windows sistemoje. { -app-name } veiks veiksmingiau 64 bitų veiksenoje.
+architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
 first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
+    Įveskite pavadinimą, autorių ir (arba) metus ir ieškokite informacijos šaltinio.
     
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Išsirinkę šaltinius, spustelėkite burbuliuką arba pažymėkite jį klaviatūra ir paspauskite ↓/ tarpą norėdami pamatyti citavimo parinktis, pavyzdžiui, puslapio numerį, priešdėlį ir priesagą.
     
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
-first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+    Taip pat galite tiesiogiai pridėti puslapio numerį, įvesdami jį kartu su paieškos žodžiais arba įrašydami jį po burbulu ir paspausdami { return-or-enter }.
+first-run-guidance-authorMenu = { -app-name } leidžia jums dar nurodyti sudarytojus (redaktorius) ir vertėjus. Per šį meniu galite pasirinkto vaidmenį žmogaus, kuris šiuo metu nurodytas esąs autorius, pakeisti į sudarytojo arba vertėjo vaidmenį.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =

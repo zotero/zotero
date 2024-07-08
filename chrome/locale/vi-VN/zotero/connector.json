@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Cảnh báo"
   },
+  "general_ok": {
+    "message": "Đồng ý"
+  },
   "general_cancel": {
     "message": "Hủy"
+  },
+  "general_selectAll": {
+    "message": "Chạn tất cả"
+  },
+  "general_deselectAll": {
+    "message": "Bỏ chọn tất cả"
   },
   "general_pleaseWait": {
     "message": "Xin chờ..."
   },
   "general_copyToClipboard": {
     "message": "Sao chép vào Clipboard"
+  },
+  "itemType_note": {
+    "message": "Ghi chép"
+  },
+  "itemType_attachment": {
+    "message": "Phần đính kèm"
   },
   "progressWindow_savingTo": {
     "message": "Lưu vào"

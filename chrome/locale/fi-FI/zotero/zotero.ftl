@@ -394,9 +394,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Laajenna osa
+    .dynamic-tooltiptext = Laajenna osa
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Kutista osa
+    .dynamic-tooltiptext = Kutista osa
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
         [one] { $count } huomautus

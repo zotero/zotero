@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Advarsel"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Avbryt"
+  },
+  "general_selectAll": {
+    "message": "Velg alle"
+  },
+  "general_deselectAll": {
+    "message": "Opphev valg av alle"
   },
   "general_pleaseWait": {
     "message": "Vennligst vent…"
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "Kopier til utklippstavle"
   },
+  "itemType_pdf": {
+    "message": "PDF vedlegg"
+  },
+  "itemType_epub": {
+    "message": "EPUB vedlegg"
+  },
+  "itemType_snapshot": {
+    "message": "Øyeblikksbilde"
+  },
+  "itemType_note": {
+    "message": "Note"
+  },
+  "itemType_link": {
+    "message": "Nettlenke"
+  },
+  "itemType_attachment": {
+    "message": "Vedlegg"
+  },
   "progressWindow_savingTo": {
     "message": "Lagrer til"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Vis detaljer"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Skjul detaljer"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Målsamlingsvelger"
+  },
+  "progressWindow_savingItems": {
+    "message": "Lagrer $1 elementer. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Lagrer element $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Element $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Lagret $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Lagret $1 for element $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Mislykket nedlasting av $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Mislykket nedlasting av $1 for element $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Lagringen er fullført. Dialogboksen lukkes nå."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Elementer fra denne nettsiden er allerede lagret."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Emneord (adskilt med komma)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtrer samlinger"
   },
   "progressWindow_error_translation": {
     "message": "En feil oppstod under lagring av dette elementet. Se $1 for mer informasjon."
@@ -59,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "siste versjon"
   },
+  "itemSelector_title": {
+    "message": "Velg hvilke elementer du vil legge til i biblioteket ditt:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 er deaktivert"
+    "message": "$1 Tilknytter er ikke tilgjengelig på denne siden"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Tilknytter er ikke tilgjengelig på fil-URL-er"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 er deaktivert på utvidelsessider"
+    "message": "$1  Tilknytter er ikke tilgjengelig på utvidelsessider"
   },
   "appConnector": {
     "message": "$1 tilknytter"
@@ -75,10 +147,10 @@
     "message": "Du har installert $1 tilknytter!"
   },
   "firstRun_text1": {
-    "message": "$1 Tilknytter gjør deg i stand til å <a href=\"$2\"> lagre elementer til $1 </a> fra nettleseren din med et enkelt klikk."
+    "message": "$1 tilknytter gjør deg i stand til å <a href=\"$2\"> lagre elementer til $1 </a> fra nettleseren din med et enkelt klikk."
   },
   "firstRun_text2": {
-    "message": "Hvis du ikke har gjort det enda, <a href=\"$2\">last ned</a> den frittstående $1 applikasjonen for den beste opplevelsen."
+    "message": "Hvis du ikke har gjort det ennå, <a href=\"$2\">bør du laste ned</a> $1-programmet for å få den beste opplevelsen."
   },
   "firstRun_acceptButton": {
     "message": "Har det"
@@ -114,7 +186,7 @@
     "message": "Dette dokumentet inneholder aktive Zotero henvisninger som vil vises som zotero.org koblinger i en nedlastet kopi."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "For å lage en versjon som er egnet for deling, velg <b>Make a copy…</b>fra File-menyen, velg deretter<b>Unlink Citations</b> fra Zotero-menyen i det nye dokumentet, og last deretter ned versjonen med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
+    "message": "For å lage en versjon som er egnet for deling, velg <b>Lag en kopi…</b> fra Fil-menyen, velg deretter <b>Unlink citations...</b> fra Zotero-menyen i det nye dokumentet, og last deretter ned versjonen med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Last uansett ned versjon med koblinger"
@@ -130,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 låser dokumentet ditt for å forhindre at flere brukere redigerer henvisningene på samme tid. Samtidig redigering av henvisninger i dokumentet kan føre til at henvisninger eller dokument blir ødelagt. Visse uforutsigbare omstendigheter, for eksempel nettverksfeil, kan føre til at dokumentet ditt blir permanent låst. Hvis du tror dette har skjedd, kan du overstyre låsingen.<br/><br/>Vil du overstyre låsingen av dokumentet?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 trenger tillatelse til å redigere Google Dokumenter-dokumentene dine for å kunne sette inn henvisninger. Prøv igjen, og sørg for å tillate $1 å se, redigere, opprette og slette Google Dolumenter-dokumentene dine."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "Googlekontoen du har valgt har ikke rettigheter til å redigere dette dokumentet. Vennligst prøv igjen og forsikre deg om at du har valgt en konto med redigeringstilgang."

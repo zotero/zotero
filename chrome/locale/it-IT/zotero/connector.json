@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Attenzione"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Annulla"
+  },
+  "general_selectAll": {
+    "message": "Seleziona tutto"
+  },
+  "general_deselectAll": {
+    "message": "Deseleziona tutti"
   },
   "general_pleaseWait": {
     "message": "Ti preghiamo di attendere…"
@@ -32,11 +41,68 @@
   "general_copyToClipboard": {
     "message": "Copia negli appunti"
   },
+  "itemType_pdf": {
+    "message": "Allegato PDF"
+  },
+  "itemType_epub": {
+    "message": "Allegato EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "Pagina web"
+  },
+  "itemType_note": {
+    "message": "Nota"
+  },
+  "itemType_link": {
+    "message": "Link web"
+  },
+  "itemType_attachment": {
+    "message": "Allegato"
+  },
   "progressWindow_savingTo": {
     "message": "Salva in"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Mostra dettagli"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Nascondi dettagli"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Selettore collezione di destinazione"
+  },
+  "progressWindow_savingItems": {
+    "message": "Salvataggio $1 elementi. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Salvataggio elemento $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Elemento $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 salvato"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "$1 salvato per l'elemento $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Download di $1 fallito"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Download di $1 fallito per l'elemento $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Salvataggio completato. Questa schermata verrà chiusa."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Gli elementi di questa pagina web sono già salvati."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Tag (separati da virgole)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtra collezioni"
   },
   "progressWindow_error_translation": {
     "message": "Si è verificato un errore durante il salvataggio di questo elemento. Consulta $1 per ulteriori informazioni."
@@ -59,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "ultima versione"
   },
+  "itemSelector_title": {
+    "message": "Seleziona gli elementi da aggiungere alla propria biblioteca:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 è disabilitato"
+    "message": "$1 Connector non è disponibile in questa pagina"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Connector non è disponibile negli URL di file"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 è disabilitato nella pagina delle estensioni"
+    "message": "$1 Connector non è disponibile nelle pagine delle estensioni"
   },
   "appConnector": {
     "message": "$1 Connector"
@@ -78,7 +150,7 @@
     "message": "$1 Connector ti consente di <a href=\"$2\"> salvare gli elementi su $1</a> dal tuo browser in un solo click."
   },
   "firstRun_text2": {
-    "message": "Se non lo hai ancora fatto, <a href=\"$2\">scarica</a> l'applicazione $1 standalone per migliorare la tua esperienza."
+    "message": "Se non l'hai ancora fatto, <a href=\"$2\">scarica</a> l'applicazione $1 per un'esperienza d'uso ottimale."
   },
   "firstRun_acceptButton": {
     "message": "Ho capito"
@@ -130,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 blocca il tuo documento per impedire a più utenti di modificare le citazioni nello stesso momento. La modifica simultanea delle citazioni nel documento può danneggiare le citazioni o il documento. Alcune circostanze imprevedibili, come i guasti di rete, possono portare al blocco permanente del tuo documento. Se credi che sia successo questo, puoi annullare il blocco. <br/><br/>Vuoi annullare il blocco del documento?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 richiede di essere abilitato alla  modifica in Google Documenti per poter inserire citazioni. Si prega di riprovare, e assicurarsi di aver abilitato $1 all'accesso, modifica, creazione ed eliminazione di documenti in Google Documenti."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "L'account Google che hai selezionato non ha il permesso di modificare questo documento. Per favore riprova e assicurati di scegliere un account con permessi di editor."

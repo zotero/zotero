@@ -43,6 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Avansează">
+<!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "Vizualizare">
 <!ENTITY viewMenu.accesskey "V">

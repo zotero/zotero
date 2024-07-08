@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Kemenn-diwall"
   },
+  "general_ok": {
+    "message": "Mat eo"
+  },
   "general_cancel": {
     "message": "Nullañ"
+  },
+  "general_selectAll": {
+    "message": "Diuzañ pep-tra"
+  },
+  "general_deselectAll": {
+    "message": "Diziuzañ pep-tra"
   },
   "general_pleaseWait": {
     "message": "Gortozit mar plij..."
   },
   "general_copyToClipboard": {
     "message": "Eilañ er golver"
+  },
+  "itemType_note": {
+    "message": "Notenn"
+  },
+  "itemType_attachment": {
+    "message": "Pezh-stag"
   },
   "progressWindow_savingTo": {
     "message": "Enrollañ e-barzh"

@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "경고"
   },
+  "general_ok": {
+    "message": "확인"
+  },
   "general_cancel": {
     "message": "취소"
+  },
+  "general_selectAll": {
+    "message": "모두 선택"
+  },
+  "general_deselectAll": {
+    "message": "모두 선택 해제"
   },
   "general_pleaseWait": {
     "message": "잠시 기다려주세요..."
   },
   "general_copyToClipboard": {
     "message": "클립보드로 복사"
+  },
+  "itemType_note": {
+    "message": "노트"
+  },
+  "itemType_attachment": {
+    "message": "첨부"
   },
   "progressWindow_savingTo": {
     "message": "저장 위치"

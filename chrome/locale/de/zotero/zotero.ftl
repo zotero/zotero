@@ -100,7 +100,7 @@ item-menu-add-file =
 item-menu-add-linked-file =
     .label = Verlinkte Datei
 item-menu-add-url =
-    .label = Web Link
+    .label = Weblink
 view-online = Online anzeigen
 item-menu-option-view-online =
     .label = { view-online }
@@ -135,7 +135,7 @@ import-fileTypes-header = Dateitypen, die importiert werden sollen:
 import-fileTypes-pdf =
     .label = PDFs
 import-fileTypes-other =
-    .placeholder = Andere Dateien nach Vorlage, durch Komma getrennt (z.B. *.jpg, *.png)
+    .placeholder = Andere Dateien nach Muster, durch Komma getrennt (z.B. *.jpg, *.png)
 import-file-handling = Dateiverarbeitung
 import-file-handling-store =
     .label = Dateien in den  { -app-name }-Speicherordner kopieren
@@ -220,18 +220,18 @@ runJS-result =
     }
 runJS-run-async = Als async-Funktion ausführen
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - Zitation/Bibliographie erstellen
 bibliography-style-label = Zitierstil:
 bibliography-locale-label = Sprache:
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Literaturangaben anzeigen als:
 bibliography-advancedOptions-label = Erweiterte Einstellungen
 bibliography-outputMode-label = Ausgabemodus:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] Zitationen
+            [note] Notizen
+           *[other] Zitationen
         }
 bibliography-outputMode-bibliography =
     .label = Bibliografie
@@ -246,24 +246,24 @@ bibliography-outputMethod-print =
     .label = Drucken
 bibliography-manageStyles-label = Stile verwalten...
 integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
+    .title = { -app-name } - Dokumenteinstellungen
 integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
+    .title = { -app-name } - Zitation hinzufügen/bearbeiten
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - Literaturverzeichnis bearbeiten
 integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
+    .title = { -app-name } - Schnellformatierung Zitation
 integration-prefs-displayAs-label = Literaturangaben anzeigen als:
 integration-prefs-footnotes =
     .label = Fußnoten
 integration-prefs-endnotes =
     .label = Endnoten
 integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
+    .label = Zitation als Lesezeichen speichern
 integration-prefs-bookmarks-description = Lesezeichen können zwischen Microsoft Word und OpenOffice.org geteilt werden, aber dies ist fehleranfällig falls diese versehentlich verändert werden und können nicht als Fußnoten benutzt werden.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] The document must be saved as .doc or .docx.
+        [true] Das Dokument muss als .doc oder .docx gespeichert werden
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
@@ -394,9 +394,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .tooltiptext = Abschnitt ausklappen
+    .dynamic-tooltiptext = Abschnitt ausklappen
+    .label = Expand { $section } section
 section-button-collapse =
-    .tooltiptext = Abschnitt einklappen
+    .dynamic-tooltiptext = Abschnitt einklappen
+    .label = Collapse { $section } section
 annotations-count =
     { $count ->
         [one] { $count } Anmerkung ausgewählt.

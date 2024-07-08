@@ -17,11 +17,26 @@
   "general_warning": {
     "message": "Предупреждение"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Отказ"
   },
+  "general_selectAll": {
+    "message": "Избор на всички"
+  },
+  "general_deselectAll": {
+    "message": "Отмаркиране на всички"
+  },
   "general_copyToClipboard": {
     "message": "Копиране в клипборда"
+  },
+  "itemType_note": {
+    "message": "Note"
+  },
+  "itemType_attachment": {
+    "message": "Приложение"
   },
   "progressWindow_savingTo": {
     "message": "Записване в"

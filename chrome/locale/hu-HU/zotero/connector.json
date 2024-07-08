@@ -23,14 +23,29 @@
   "general_warning": {
     "message": "Figyelmeztetés"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Mégse"
+  },
+  "general_selectAll": {
+    "message": "Mindet kijelöli"
+  },
+  "general_deselectAll": {
+    "message": "Összes címke kiválasztásának megszüntetése"
   },
   "general_pleaseWait": {
     "message": "Kérem várjon…"
   },
   "general_copyToClipboard": {
     "message": "Másolás a vágólapra"
+  },
+  "itemType_note": {
+    "message": "Jegyzet"
+  },
+  "itemType_attachment": {
+    "message": "Csatolmány"
   },
   "progressWindow_savingTo": {
     "message": "Mentés"

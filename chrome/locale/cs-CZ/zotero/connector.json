@@ -23,8 +23,17 @@
   "general_warning": {
     "message": "Varování"
   },
+  "general_ok": {
+    "message": "OK"
+  },
   "general_cancel": {
     "message": "Zrušit"
+  },
+  "general_selectAll": {
+    "message": "Vybrat vše"
+  },
+  "general_deselectAll": {
+    "message": "Zrušit výběr všech"
   },
   "general_pleaseWait": {
     "message": "Čekejte prosím..."
@@ -32,11 +41,20 @@
   "general_copyToClipboard": {
     "message": "Kopírovat do schránky"
   },
+  "itemType_note": {
+    "message": "Poznámka"
+  },
+  "itemType_attachment": {
+    "message": "Příloha"
+  },
   "progressWindow_savingTo": {
     "message": "Ukládám do"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Štítky (oddělené mezerami)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtrovat kolekce"
   },
   "progressWindow_error_translation": {
     "message": "Při ukládání této položky došlo k chybě. Pro další informace otevřete  $1."
