@@ -4261,11 +4261,21 @@ Zotero.Item.prototype.removeAllTags = function() {
 /**
  * Gets the collections the item is in
  *
+ * @param {Boolean} includeTrashed Include trashed collections
  * @return {Array<Integer>}  An array of collectionIDs for all collections the item belongs to
  */
-Zotero.Item.prototype.getCollections = function () {
+Zotero.Item.prototype.getCollections = function (includeTrashed) {
 	this._requireData('collections');
-	return this._collections.concat();
+	if (includeTrashed) return this._collections.concat();
+
+	let collections = this._collections.filter((id) => {
+		var col = Zotero.Collections.get(id);
+		if (!col) {
+			throw new Error("Collection " + id + " not found for item " + this.libraryKey);
+		}
+		return !col.deleted;
+	});
+	return collections.concat();
 };
 
 

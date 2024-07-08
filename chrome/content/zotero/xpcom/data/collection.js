@@ -347,21 +347,6 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		else {
 			let sql = "DELETE FROM deletedCollections WHERE collectionID=?";
 
-			// Subcollection is restored from trash - add it back into the object cache
-			if (this.parentKey) {
-				let parent = Zotero.Collections.getIDFromLibraryAndKey(this.libraryID, this.parentKey);
-				Zotero.DB.addCurrentCallback("commit", function () {
-					this.ObjectsClass.registerChildCollection(parent, this.id);
-				}.bind(this));
-			}
-
-			// Add restored collection back into item's _collections cache
-			this.getChildItems(false, true).forEach((item) => {
-				let collectionCached = item._collections.includes(this.id);
-				if (!collectionCached) {
-					item._collections.push(this.id);
-				}
-			});
 			yield Zotero.DB.queryAsync(sql, collectionID);
 		}
 		
@@ -616,7 +601,6 @@ Zotero.Collection.prototype.trash = Zotero.Promise.coroutine(function* (env) {
 	var libraryHasTrash = Zotero.Libraries.hasTrash(this.libraryID);
 	
 	var del = [];
-	var itemsToUpdate = [];
 	for(var i=0, len=descendents.length; i<len; i++) {
 		// Descendent collections
 		if (descendents[i].type == 'collection') {
@@ -641,10 +625,6 @@ Zotero.Collection.prototype.trash = Zotero.Promise.coroutine(function* (env) {
 				del.push(descendents[i].id);
 			}
 			
-			// If item isn't being removed or is just moving to the trash, mark for update
-			if (!env.options.deleteItems || libraryHasTrash) {
-				itemsToUpdate.push(descendents[i].id);
-			}
 		}
 	}
 	if (del.length) {
@@ -678,21 +658,12 @@ Zotero.Collection.prototype.trash = Zotero.Promise.coroutine(function* (env) {
 	if (env.isNew) {
 		return;
 	}
-	env.deletedObjectIDs = collections;
 	
 	// Reload collection data to show/restore deleted collections from trash
 	for (let collectionID of collections) {
 		let collection = Zotero.Collections.get(collectionID);
 		yield collection.loadDataType('primaryData', true);
 		yield collection.loadDataType('childCollections', true);
-	}
-	// Update collection cache for descendant items
-	if (itemsToUpdate.length) {
-		let deletedCollections = new Set(env.deletedObjectIDs);
-		itemsToUpdate.forEach((itemID) => {
-			let item = Zotero.Items.get(itemID);
-			item._collections = item._collections.filter(c => !deletedCollections.has(c));
-		});
 	}
 });
 
@@ -707,10 +678,13 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	}
 	
 	var collections = [this.id];
-	var descendents = this.getDescendents(false, null, true)
+	var descendents = this.getDescendents(false, null, true);
+	collections = descendents
 		.filter(d => d.type == 'collection')
-		.map(c => c.id);
-	collections = collections.concat(descendents);
+		.map(c => c.id).concat(collections);
+
+	// Make sure all descendant collections will be unloaded in this._finalizeErase()
+	env.deletedObjectIDs = collections;
 
 	yield Zotero.Utilities.Internal.forEachChunkAsync(
 		collections,
@@ -741,6 +715,14 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 			this.ObjectsClass.unregisterChildCollection(parentCollectionID, this.id);
 		}.bind(this));
 	}
+	
+	// Remove erased collection from collection cache of descendant items
+	var itemsToUpdate = descendents.filter(d => d.type == 'item').map(c => c.id);
+	let deletedCollections = new Set(collections);
+	itemsToUpdate.forEach((itemID) => {
+		let item = Zotero.Items.get(itemID);
+		item._collections = item._collections.filter(c => !deletedCollections.has(c));
+	});
 });
 
 Zotero.Collection.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {

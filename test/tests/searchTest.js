@@ -582,6 +582,25 @@ describe("Zotero.Search", function() {
 					assert.include(matches, item1.id);
 					assert.notInclude(matches, item2.id);
 				});
+				it("should include items belonging only to trashed collections", async function () {
+					var collection = await createDataObject('collection');
+					var item = await createDataObject('item', { collections: [collection.id] });
+					
+					var s = new Zotero.Search;
+					s.libraryID = Zotero.Libraries.userLibraryID;
+					s.addCondition('unfiled', 'true');
+
+					// item belonging to a non-trashed collection is not unfiled
+					var matches = await s.search();
+					assert.notInclude(matches, item.id);
+
+					collection.deleted = true;
+					await collection.saveTx();
+
+					// item that only belongs to a trashed collection is unfiled
+					matches = await s.search();
+					assert.include(matches, item.id);
+				});
 			});
 			
 			describe("Quick search", function () {
