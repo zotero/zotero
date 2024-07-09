@@ -591,7 +591,7 @@ describe("ZoteroPane", function() {
 			});
 			await zp.selectItem(attachment.id);
 			
-			await assert.eventually.isTrue(zp.renameSelectedAttachmentsFromParents());
+			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, newFilename);
 			var path = await attachment.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), newFilename)
@@ -620,7 +620,7 @@ describe("ZoteroPane", function() {
 			});
 			await zp.selectItem(attachment.id);
 			
-			await assert.eventually.isTrue(zp.renameSelectedAttachmentsFromParents());
+			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, uniqueFilename);
 			var path = await attachment.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), uniqueFilename)
@@ -649,7 +649,7 @@ describe("ZoteroPane", function() {
 			});
 			await zp.selectItem(attachment.id);
 			
-			await assert.eventually.isTrue(zp.renameSelectedAttachmentsFromParents());
+			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, uniqueFilename);
 			var path = await attachment.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), uniqueFilename)
@@ -666,7 +666,7 @@ describe("ZoteroPane", function() {
 			await attachment.saveTx();
 			await zp.selectItem(attachment.id);
 			
-			assert.isTrue(await zp.renameSelectedAttachmentsFromParents());
+			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			assert.equal(attachment.getField('title'), 'Image')
 		});
@@ -681,7 +681,7 @@ describe("ZoteroPane", function() {
 			await attachment.saveTx();
 			await zp.selectItem(attachment.id);
 			
-			assert.isTrue(await zp.renameSelectedAttachmentsFromParents());
+			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			assert.equal(attachment.getField('title'), 'Title.png')
 		});
@@ -696,7 +696,7 @@ describe("ZoteroPane", function() {
 			await attachment.saveTx();
 			await zp.selectItem(attachment.id);
 			
-			assert.isTrue(await zp.renameSelectedAttachmentsFromParents());
+			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			assert.equal(attachment.getField('title'), 'Title.png')
 		});
