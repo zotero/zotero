@@ -117,7 +117,7 @@
 /* Titlebar */
 
 .titlebar-buttonbox {
-	right: 0px;
+	inset-inline-end: 0px;
 	position: absolute;
 	height: var(--tab-min-height);
 	appearance: none;

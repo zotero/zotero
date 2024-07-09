@@ -1,5 +1,10 @@
 #titlebar {
 	margin-bottom: calc(0px - var(--tab-min-height));
+
+	.titlebar-buttonbox {
+		// Fix RTL alignment
+		width: fit-content;
+	}
 }
 
 .menubar-container {
