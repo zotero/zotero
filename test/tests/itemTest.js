@@ -696,6 +696,46 @@ describe("Zotero.Item", function () {
 	})
 	
 	
+	describe("#getCollections()", function () {
+		it("shouldn't include collections in the trash", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [collection1.id, collection2.id] });
+			
+			assert.sameMembers(item.getCollections(), [collection1.id, collection2.id]);
+			
+			collection1.deleted = true;
+			await collection1.saveTx();
+			
+			assert.sameMembers(item.getCollections(), [collection2.id]);
+			
+			// Simulate a restart
+			await Zotero.Items.get(item.id).reload(null, true);
+			
+			// Make sure the deleted collection is not back in item's cache
+			assert.sameMembers(item.getCollections(), [collection2.id]);
+		});
+		
+		it("should include collections in the trash if includeTrashed=true", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [collection1.id, collection2.id] });
+			
+			assert.sameMembers(item.getCollections(true), [collection1.id, collection2.id]);
+			
+			collection1.deleted = true;
+			await collection1.saveTx();
+			
+			assert.sameMembers(item.getCollections(true), [collection1.id, collection2.id]);
+			
+			// Simulate a restart
+			await Zotero.Items.get(item.id).reload(null, true);
+			
+			assert.sameMembers(item.getCollections(true), [collection1.id, collection2.id]);
+		});
+	});
+	
+	
 	describe("#setCollections()", function () {
 		it("should add a collection with an all-numeric key", async function () {
 			var col = new Zotero.Collection();
