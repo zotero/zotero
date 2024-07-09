@@ -131,7 +131,7 @@ describe("ZoteroPane", function() {
 			// Unselected, with no items in view
 			assert.equal(
 				doc.getElementById('zotero-item-pane-message-box').textContent,
-				Zotero.getString('pane.item.unselected.zero', 0)
+				yield doc.l10n.formatValue('item-pane-message-unselected', { count: 0 })
 			);
 			
 			// Unselected, with one item in view
@@ -142,7 +142,7 @@ describe("ZoteroPane", function() {
 			});
 			assert.equal(
 				doc.getElementById('zotero-item-pane-message-box').textContent,
-				Zotero.getString('pane.item.unselected.singular', 1)
+				yield doc.l10n.formatValue('item-pane-message-unselected', { count: 1 })
 			);
 			
 			// Unselected, with multiple items in view
@@ -153,7 +153,7 @@ describe("ZoteroPane", function() {
 			});
 			assert.equal(
 				doc.getElementById('zotero-item-pane-message-box').textContent,
-				Zotero.getString('pane.item.unselected.plural', 2)
+				yield doc.l10n.formatValue('item-pane-message-unselected', { count: 2 })
 			);
 			
 			// Multiple items selected

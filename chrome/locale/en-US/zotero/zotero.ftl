@@ -585,6 +585,7 @@ item-pane-header-more-options =
     .label = More Options
 
 item-pane-message-items-selected = { $count ->
+                                             [0] No items selected
                                              [one] { $count } item selected
                                             *[other] { $count } items selected
                                     }
@@ -601,6 +602,17 @@ item-pane-message-objects-selected = { $count ->
                                          *[other] { $count } objects selected
                                      }
 
+item-pane-message-unselected = { $count ->
+    [0] No items in this view
+    [one] { $count } item in this view
+   *[other] { $count } items in this view
+}
+
+item-pane-duplicates-merge-items =
+    .label = { $count ->
+         [one] Merge { $count } item
+        *[other] Merge { $count } items
+     }
 
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 

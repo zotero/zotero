@@ -50,9 +50,11 @@ var Zotero_LocateMenu = new function() {
 			if(availableEngines.length) {
 				Zotero_LocateMenu.addLocateEngines(locateMenu, availableEngines, null, true);
 			}
-		} else {
+		}
+		else {
 			// add "no items selected"
-			menuitem = _createMenuItem(Zotero.getString("pane.item.selected.zero"), "no-items-selected");
+			menuitem = document.createXULElement("menuitem");
+			document.l10n.setAttributes(menuitem, "item-pane-message-items-selected", { count: 0 });
 			locateMenu.appendChild(menuitem);
 			menuitem.disabled = true;
 		}
