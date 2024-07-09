@@ -194,17 +194,17 @@
 			let autocompleteParams = this.autocomplete;
 			let autocompleteEnabled = !this.multiline && !!autocompleteParams;
 			if (!this._input
-					|| (this._input.constructor.name === 'AutocompleteInput') !== autocompleteEnabled
+					|| (this._input.hasAttribute('autocomplete')) !== autocompleteEnabled
 					|| this._input.tagName !== (this.noWrap ? 'input' : 'textarea')) {
 				let input;
+				let inputTagName = this.noWrap ? 'input' : 'textarea';
 				if (autocompleteEnabled) {
-					input = document.createElement('input', { is: 'autocomplete-input' });
-					input.type = 'autocomplete';
+					input = document.createElement(inputTagName, { is: `autocomplete-${inputTagName}` });
 				}
 				else {
-					input = this.noWrap ? document.createElement('input') : document.createElement('textarea');
-					input.rows = 1;
+					input = document.createElement(inputTagName);
 				}
+				input.rows = 1;
 				input.classList.add('input');
 				input.toggleAttribute("no-windows-native", true);
 				input.addEventListener('input', this._handleInput);
