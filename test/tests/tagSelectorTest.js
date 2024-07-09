@@ -310,6 +310,7 @@ describe("Tag Selector", function () {
 			await Zotero.Tags.setColor(libraryID, tag2, '#BBBBBB', 2);
 			await Zotero.Tags.setColor(libraryID, tag3, '#CCCCCC', 3);
 			
+			await waitForTagSelector(win);
 			// Colored tags should appear initially as disabled
 			elems = getColoredTagElements();
 			assert.lengthOf(elems, 3);
@@ -402,10 +403,9 @@ describe("Tag Selector", function () {
 			var promise, tagSelector;
 			
 			// Add collection
-			promise = waitForTagSelector(win);
 			var collection = yield createDataObject('collection');
 			yield select(win, collection);
-			yield promise;
+			yield waitForTagSelector(win);
 			
 			// Tag selector should be empty in new collection
 			assert.equal(getRegularTags().length, 0);
@@ -435,9 +435,8 @@ describe("Tag Selector", function () {
 			var tagElems = tagSelectorElem.querySelectorAll('.tag-selector-item');
 			var count = tagElems.length;
 
-			var promise = waitForTagSelector(win);
 			yield Zotero.Tags.setColor(libraryID, "Top", '#AAAAAA');
-			yield promise;
+			yield waitForTagSelector(win);
 
 			tagElems = tagSelectorElem.querySelectorAll('.tag-selector-item');
 			assert.equal(tagElems.length, count + 1);
@@ -707,14 +706,13 @@ describe("Tag Selector", function () {
 			yield Zotero.Tags.setColor(libraryID, oldTag, "#F3F3F3");
 			yield promise;
 			
-			promise = waitForTagSelector(win);
 			waitForDialog(function (dialogWindow, dialog) {
 				dialogWindow.document.getElementById('loginTextbox').value = newTag;
 				dialog.acceptDialog();
 			});
 			tagSelector.contextTag = {name: oldTag};
 			yield tagSelector.openRenamePrompt();
-			yield promise;
+			yield waitForTagSelector(win);;
 			
 			var tags = getColoredTags();
 			assert.notInclude(tags, oldTag);

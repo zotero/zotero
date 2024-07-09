@@ -22,7 +22,9 @@ describe("Advanced Search", function () {
 		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
 		zp.openAdvancedSearchWindow();
 		var searchWin = yield promise;
-		
+		// After upgrading to react 18, at this point the onload listener has
+		// not finished running yet, so an extra tick needs to be skipped
+		yield Zotero.Promise.delay();
 		// Add condition
 		var searchBox = searchWin.document.getElementById('zotero-search-box');
 		
