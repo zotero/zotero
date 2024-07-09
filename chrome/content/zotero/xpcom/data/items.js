@@ -797,8 +797,7 @@ Zotero.Items = function() {
 	this._loadCollections = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
 		var sql = "SELECT itemID, collectionID FROM items "
 			+ "LEFT JOIN collectionItems USING (itemID) "
-			+ "LEFT JOIN deletedCollections USING (collectionID) "
-			+ "WHERE deletedCollections.collectionID IS NULL AND libraryID=?" + idSQL;
+			+ "WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
 		
 		var lastItemID;
