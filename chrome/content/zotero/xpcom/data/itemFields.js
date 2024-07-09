@@ -38,6 +38,7 @@ Zotero.ItemFields = new function() {
 	var _typeFieldIDsByBase = {};
 	var _typeFieldNamesByBase = {};
 	var _baseFieldIDsByTypeAndField = {};
+	var _autocompleteFields = null;
 	
 	// Privileged methods
 	this.getName = getName;
@@ -353,35 +354,36 @@ Zotero.ItemFields = new function() {
 			return false;
 		}
 		
-		var autoCompleteFields = [
-			'journalAbbreviation',
-			'series',
-			'seriesTitle',
-			'seriesText',
-			'libraryCatalog',
-			'callNumber',
-			'archive',
-			'archiveLocation',
-			'language',
-			'programmingLanguage',
-			'rights',
-			
-			// TEMP - NSF
-			'programDirector',
-			'institution',
-			'discipline'
-		];
-		
-		// Add the type-specific versions of these base fields
-		var baseACFields = ['publisher', 'publicationTitle', 'type', 'medium', 'place'];
-		autoCompleteFields = autoCompleteFields.concat(baseACFields);
-		
-		for (var i=0; i<baseACFields.length; i++) {
-			var add = Zotero.ItemFields.getTypeFieldsFromBase(baseACFields[i], true)
-			autoCompleteFields = autoCompleteFields.concat(add);
+		if (!_autocompleteFields) {
+			_autocompleteFields = new Set([
+				'journalAbbreviation',
+				'series',
+				'seriesTitle',
+				'seriesText',
+				'libraryCatalog',
+				'callNumber',
+				'archive',
+				'archiveLocation',
+				'language',
+				'programmingLanguage',
+				'rights',
+
+				// TEMP - NSF
+				'programDirector',
+				'institution',
+				'discipline'
+			]);
+
+			// Add the type-specific versions of base fields
+			for (let baseField of ['publisher', 'publicationTitle', 'type', 'medium', 'place']) {
+				_autocompleteFields.add(baseField);
+				for (let typeField of Zotero.ItemFields.getTypeFieldsFromBase(baseField, true)) {
+					_autocompleteFields.add(typeField);
+				}
+			}
 		}
 		
-		return autoCompleteFields.includes(fieldName);
+		return _autocompleteFields.has(fieldName);
 	}
 	
 	
