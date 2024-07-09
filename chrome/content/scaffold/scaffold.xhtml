@@ -467,7 +467,7 @@
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
-						<vbox flex="1" style="max-width: 100%;">
+						<vbox id="testing-container">
 							<vbox id="testing-listbox-container">
 								<keyset>
 									<key id="key-delete-tests" observes="validate-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
@@ -487,27 +487,27 @@
 									onselect="Scaffold.handleTestSelect(event)"
 									context="testing-context-menu"
 								/>
-								<hbox>
-									<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
-									<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
-									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the test definitions with the latest data" oncommand="Scaffold.updateSelectedTests()"/>
-
-									<hbox flex="1" pack="end">
-										<checkbox
-											id="checkbox-remember-cookies"
-											label="&scaffold.testing.rememberCookies;"
-											native="true"
-											checked="true"
-										/>
-									</hbox>
-								</hbox>
 							</vbox>
+							<hbox id="testing-buttons">
+								<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
+								<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
+								<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the test definitions with the latest data" oncommand="Scaffold.updateSelectedTests()"/>
+
+								<hbox flex="1" pack="end">
+									<checkbox
+										id="checkbox-remember-cookies"
+										label="&scaffold.testing.rememberCookies;"
+										native="true"
+										checked="true"
+									/>
+								</hbox>
+							</hbox>
 							<iframe src="monaco/monaco.html" id="editor-tests" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 					<tabpanel>
-						<vbox flex="1">
-							<hbox align="center">
+						<vbox id="browser-container">
+							<hbox id="browser-url-container" align="center">
 								<label control="browser-url" value="&scaffold.tabUrl.label;"/>
 								<html:input id="browser-url" style="flex: 1;"/>
 								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
@@ -524,8 +524,8 @@
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-import">
-						<vbox flex="1">
-							<hbox align="right">
+						<vbox id="import-container">
+							<hbox id="import-buttons" align="right">
 								<button observes="validate-tests" label="&scaffold.testing.create.import;" tooltiptext="Create a new test from the current import data" oncommand="Scaffold.saveTestFromCurrent('import')" />
 								<button observes="validate-tests" label="&scaffold.testing.create.search;" tooltiptext="Create a new test from the current search data" oncommand="Scaffold.saveTestFromCurrent('search')" />
 							</hbox>

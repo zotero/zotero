@@ -4,45 +4,60 @@ tabbox {
 			appearance: none;
 			// Since the tab with opacity is weird, we just use hard-coded colors
 			@include light-dark(background, #ededed, #343434);
-			box-shadow:
+			--tabbox-tab-shadow:
 				0px 2px 2px -2px var(--fill-quarternary) inset,
 				0px -2px 2px -2px var(--fill-quarternary) inset,
 				0px 4px 4px -4px var(--fill-quinary) inset,
 				0px -4px 4px -4px var(--fill-quinary) inset;
+			--tabbox-tab-shadow-left:
+				2px 0px 2px -2px var(--fill-quarternary) inset,
+				4px 0px 4px -4px var(--fill-quinary) inset;
+			--tabbox-tab-shadow-right:
+				-2px 0px 2px -2px var(--fill-quarternary) inset,
+				-4px 0px 4px -4px var(--fill-quinary) inset;
+			
+			box-shadow: var(--tabbox-tab-shadow);
 
 			&::before {
 				content: "";
-				position: absolute;
 				height: 14px;
 				top: 5px;
 				border-left: 1px solid var(--fill-quarternary);
 			}
 
 			&:first-of-type {
-				border-top-left-radius: 5px;
-				border-bottom-left-radius: 5px;
-				box-shadow:
-					0px 2px 2px -2px var(--fill-quarternary) inset,
-					0px -2px 2px -2px var(--fill-quarternary) inset,
-					0px 4px 4px -4px var(--fill-quinary) inset,
-					0px -4px 4px -4px var(--fill-quinary) inset,
-					2px 0px 2px -2px var(--fill-quarternary) inset,
-					4px 0px 4px -4px var(--fill-quinary) inset;
+				border-start-start-radius: 6px;
+				border-end-start-radius: 6px;
+				
 				&::before {
 					display: none;
+				}
+
+				&:-moz-locale-dir(ltr) {
+					box-shadow:
+						var(--tabbox-tab-shadow),
+						var(--tabbox-tab-shadow-left);
+				}
+				&:-moz-locale-dir(rtl) {
+					box-shadow:
+						var(--tabbox-tab-shadow),
+						var(--tabbox-tab-shadow-right);
 				}
 			}
 
 			&:last-of-type {
-				border-top-right-radius: 5px;
-				border-bottom-right-radius: 5px;
-				box-shadow:
-					0px 2px 2px -2px var(--fill-quarternary) inset,
-					0px -2px 2px -2px var(--fill-quarternary) inset,
-					0px 4px 4px -4px var(--fill-quinary) inset,
-					0px -4px 4px -4px var(--fill-quinary) inset,
-					-2px 0px 2px -2px var(--fill-quarternary) inset,
-					-4px 0px 4px -4px var(--fill-quinary) inset;
+				border-start-end-radius: 6px;
+				border-end-end-radius: 6px;
+				&:-moz-locale-dir(ltr) {
+					box-shadow:
+						var(--tabbox-tab-shadow),
+						var(--tabbox-tab-shadow-right);
+				}
+				&:-moz-locale-dir(rtl) {
+					box-shadow:
+						var(--tabbox-tab-shadow),
+						var(--tabbox-tab-shadow-left);
+				}
 			}
 
 			&[visuallyselected=true] {
@@ -53,12 +68,12 @@ tabbox {
 
 				& + tab {
 					&::before {
-						display: none;
+						border-color: transparent;
 					}
 				}
 
 				&::before {
-					display: none;
+					border-color: transparent;
 				}
 
 				.tab-middle {
@@ -68,6 +83,8 @@ tabbox {
 						0px 1px 0.75px 0px var(--fill-quinary),
 						0px 0.25px 0.25px 0px var(--color-border);;
 					border: 0.5px solid var(--fill-senary);
+					padding: 0.5px 6px 0.5px;
+					margin: 0px -0.5px 1px -0.5px;
 				}
 			}
 		}

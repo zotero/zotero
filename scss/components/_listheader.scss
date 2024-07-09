@@ -10,24 +10,43 @@ richlistbox {
 	border: var(--material-panedivider);
 }
 
-treecol {
-	appearance: none;
-	border: none;
+listheader {
+	treecol {
+		appearance: none;
+		border: none;
+		background: transparent;
+		padding: 0;
+		
+		.treecol-text {
+			padding: 0 4px;
+			margin: 1px 6px 2px 5px !important;
+		}
 
-    background: transparent;
+		&::after {
+			content: "";
+			display: block;
+			height: 100%;
+			width: 1px;
+			background: linear-gradient(var(--fill-quarternary), var(--fill-quarternary)) no-repeat center/1px 66.666667%;
+		}
 
-    &:hover {
-        background: var(--material-mix-quinary);
-    }
-
-    &:hover:active {
-        background: var(--material-mix-quarternary);
-    }
+		&:last-of-type::after {
+			display: none;
+		}
+	
+		&:hover {
+			background: var(--material-mix-quinary);
+		}
+	
+		&:hover:active {
+			background: var(--material-mix-quarternary);
+		}
+	}
 }
 
 listheader + richlistbox {
 	margin-top: 0;
-	border-top: none;
+	border-top: none !important;
 }
 
 select[size][multiple] > option,

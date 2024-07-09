@@ -1,6 +1,8 @@
 richlistbox.theme-listbox {
 	background: var(--material-background);
 	border: var(--material-panedivider);
+	// Prevent horizontal scrollbar on Windows
+	overflow-x: hidden;
 
 	richlistitem {
 		--listitem-selectedBackground: var(--tag-gray);
@@ -23,11 +25,12 @@ richlistitem {
 	padding: 0.2em 0.4em;
 }
 
-richlistitem, richlistitem > * {
+richlistitem, richlistitem * {
 	// Prevent word cut-off with double-byte characters
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	width: 100%;
 }
 
 richlistcheckbox[selected=true] {
