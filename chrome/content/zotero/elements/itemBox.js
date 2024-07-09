@@ -2103,7 +2103,7 @@
 				}
 				// The creator row is dropped before a non-creator row, meaning it's moved below
 				// all other creators
-				else if (!beforeCreatorField.includes("creator-")) {
+				else if (!beforeCreatorField.startsWith("creator-")) {
 					beforeCreatorIndex = this.item.numCreators();
 				}
 				// Creator row is placed before another creator
@@ -2261,7 +2261,7 @@
 			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}:not([disabled="true"])`);
 			// For creator rows, if a focusable node with desired id does not exist, try to focus 
 			// the same component from the last available creator row
-			if (!refocusField && this._selectField.includes("creator")) {
+			if (!refocusField && this._selectField.startsWith("creator-")) {
 				let maybeLastCreatorID = this._selectField.replace(/\d+/g, Math.max(this._creatorCount - 1, 0));
 				refocusField = this.querySelector(`#${CSS.escape(maybeLastCreatorID)}`);
 			}
