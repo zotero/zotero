@@ -1145,8 +1145,8 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	
 	if (unfiled) {
 		sql += " AND (itemID NOT IN ("
-			// Include items that only belong to trashed collections
-			+ "SELECT itemID FROM collectionItems LEFT JOIN deletedCollections USING (collectionID) WHERE deletedCollections.collectionID IS NULL "
+			// Exclude items that belong to non-trashed collections
+			+ "SELECT itemID FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM deletedCollections) "
 			// Exclude children
 			+ "UNION SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
 			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL "
