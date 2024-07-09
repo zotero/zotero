@@ -116,6 +116,9 @@
 	"view-online": {
 		"string": "View Online"
 	},
+	"file-renaming-file-renamed-to": {
+		"string": "File renamed to { filename }"
+	},
 	"itembox-button-options.tooltiptext": {
 		"string": "Open context menu"
 	},
@@ -714,7 +717,7 @@
 		"string": "More Options"
 	},
 	"item-pane-message-items-selected": {
-		"string": "{count, plural, one {{ count } item selected} other {{ count } items selected}}"
+		"string": "{count, plural, =0 {No items selected} one {{ count } item selected} other {{ count } items selected}}"
 	},
 	"item-pane-message-collections-selected": {
 		"string": "{count, plural, one {{ count } collection selected} other {{ count } collections selected}}"
@@ -724,6 +727,12 @@
 	},
 	"item-pane-message-objects-selected": {
 		"string": "{count, plural, one {{ count } object selected} other {{ count } objects selected}}"
+	},
+	"item-pane-message-unselected": {
+		"string": "{count, plural, =0 {No items in this view} one {{ count } item in this view} other {{ count } items in this view}}"
+	},
+	"item-pane-duplicates-merge-items.label": {
+		"string": "{count, plural, one {Merge { count } item} other {Merge { count } items}}"
 	},
 	"locate-library-lookup-no-resolver": {
 		"string": "You must choose a resolver from the { pane } pane of the { app-name } settings."
