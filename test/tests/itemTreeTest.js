@@ -1331,9 +1331,7 @@ describe("Zotero.ItemTree", function() {
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			var title = item.getField('title');
 			var path = await item.getFilePathAsync();
-			assert.equal(title, parentTitle + '.pdf');
 			assert.equal(OS.Path.basename(path), parentTitle + '.pdf');
 		});
 		
@@ -1378,9 +1376,7 @@ describe("Zotero.ItemTree", function() {
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			var title = item.getField('title');
 			var path = await item.getFilePathAsync();
-			assert.equal(title, parentTitle + '.pdf');
 			assert.equal(OS.Path.basename(path), parentTitle + '.pdf');
 		});
 		
@@ -1425,9 +1421,7 @@ describe("Zotero.ItemTree", function() {
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			var title = item.getField('title');
 			var path = await item.getFilePathAsync();
-			assert.equal(title, 'empty.pdf');
 			assert.equal(OS.Path.basename(path), 'empty.pdf');
 		});
 		
@@ -1464,10 +1458,8 @@ describe("Zotero.ItemTree", function() {
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			var title = item.getField('title');
 			var path = await item.getFilePathAsync();
 			// Should match original filename, not parent title
-			assert.equal(title, originalFileName);
 			assert.equal(OS.Path.basename(path), originalFileName);
 		});
 		
@@ -1506,9 +1498,7 @@ describe("Zotero.ItemTree", function() {
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			var title = item.getField('title');
 			var path = await item.getFilePathAsync();
-			assert.equal(title, originalFileName);
 			assert.equal(OS.Path.basename(path), originalFileName);
 		});
 		
@@ -1543,10 +1533,55 @@ describe("Zotero.ItemTree", function() {
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			var title = item.getField('title');
 			var path = await item.getFilePathAsync();
-			assert.equal(title, originalFileName);
 			assert.equal(OS.Path.basename(path), originalFileName);
+		});
+
+		it("should set an automatic title on the first file attachment of each supported type", async function () {
+			let view = zp.itemsView;
+			let parentItem = await createDataObject('item');
+			let parentRow = view.getRowIndexByID(parentItem.id);
+
+			// Add a link attachment, which won't affect renaming
+			await Zotero.Attachments.linkFromURL({
+				url: 'https://example.com/',
+				parentItemID: parentItem.id,
+			});
+
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+
+			let dataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'application/x-moz-file';
+					}
+				},
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+
+			let promise = waitForItemEvent('add');
+			drop(parentRow, 0, dataTransfer);
+
+			// Add a PDF attachment, which will be renamed
+			let pdfAttachment1 = Zotero.Items.get((await promise)[0]);
+			assert.equal(pdfAttachment1.parentItemID, parentItem.id);
+			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('fileTypes.pdf'));
+
+			promise = waitForItemEvent('add');
+			drop(parentRow, 0, dataTransfer);
+
+			// Add a second, which won't
+			let pdfAttachment2 = Zotero.Items.get((await promise)[0]);
+			assert.equal(pdfAttachment2.parentItemID, parentItem.id);
+			assert.equal(pdfAttachment2.getField('title'), 'test.pdf');
 		});
 	});
 	
