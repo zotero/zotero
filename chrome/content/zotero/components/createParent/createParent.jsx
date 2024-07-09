@@ -34,7 +34,7 @@ function CreateParent({ loading, item, toggleAccept }) {
 	// With React 18, this is required for the window's dialog to be properly sized
 	useEffect(() => {
 		window.sizeToContent();
-	});
+	}, []);
 
 	// When the input has/does not have characters toggle the accept button on the dialog
 	const handleInput = (e) => {
