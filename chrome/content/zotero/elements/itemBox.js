@@ -1506,7 +1506,7 @@
 			else {
 				valueElement.style.textAlign = 'left';
 			}
-			if (!isLong && !fieldName.includes("creator")) {
+			if (!fieldName.startsWith('creator-')) {
 				// autocomplete for creator names is added in addCreatorRow
 				this.addAutocompleteToElement(valueElement);
 			}
