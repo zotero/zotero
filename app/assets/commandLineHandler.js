@@ -45,7 +45,7 @@ if (processTestOptions) {
 	TestOptions.tests = cmdLine.handleFlagWithParam("test", false);
 	TestOptions.noquit = cmdLine.handleFlag("noquit", false);
 	TestOptions.makeTestData = cmdLine.handleFlag("makeTestData", false);
-	TestOptions.noquit = !TestOptions.makeTestData && this.noquit;
+	TestOptions.noquit = !TestOptions.makeTestData && TestOptions.noquit;
 	TestOptions.runTests = !TestOptions.makeTestData;
 	TestOptions.bail = cmdLine.handleFlag("bail", false);
 	TestOptions.startAt = cmdLine.handleFlagWithParam("startAtTestFile", false);
