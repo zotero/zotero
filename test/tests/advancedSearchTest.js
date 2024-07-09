@@ -19,12 +19,14 @@ describe("Advanced Search", function () {
 	it("should perform a search", function* () {
 		var item = yield createDataObject('item', { setTitle: true });
 		
-		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
+		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml', async (win) => {
+			// Wait for the itemsView to be initialized in the onload listener of the window
+			while (!win.ZoteroAdvancedSearch.itemsView) {
+				await Zotero.Promise.delay(5);
+			}
+		});
 		zp.openAdvancedSearchWindow();
 		var searchWin = yield promise;
-		// After upgrading to react 18, at this point the onload listener has
-		// not finished running yet, so an extra tick needs to be skipped
-		yield Zotero.Promise.delay();
 		// Add condition
 		var searchBox = searchWin.document.getElementById('zotero-search-box');
 		
