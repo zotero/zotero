@@ -671,7 +671,7 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.getField('title'), 'Image')
 		});
 		
-		it("should change attachment title if the same as filename", async function () {
+		it("should not change attachment title even if the same as filename", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setField('title', 'Title');
 			await item.saveTx();
@@ -683,10 +683,10 @@ describe("ZoteroPane", function() {
 			
 			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
-			assert.equal(attachment.getField('title'), 'Title.png')
+			assert.equal(attachment.getField('title'), 'test.png')
 		});
 		
-		it("should change attachment title if the same as filename without extension", async function () {
+		it("should change attachment title even if the same as filename without extension", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setField('title', 'Title');
 			await item.saveTx();
@@ -698,7 +698,7 @@ describe("ZoteroPane", function() {
 			
 			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
-			assert.equal(attachment.getField('title'), 'Title.png')
+			assert.equal(attachment.getField('title'), 'test')
 		});
 	});
 	

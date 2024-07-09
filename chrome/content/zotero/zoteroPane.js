@@ -5666,19 +5666,11 @@ var ZoteroPane = new function()
 			if (ext) {
 				newName = newName + ext[0];
 			}
-			let origFilenameNoExt = origFilename.replace(extRE, '')
 			
 			var renamed = await item.renameAttachmentFile(newName, false, true);
 			if (renamed !== true) {
 				Zotero.debug("Could not rename file (" + renamed + ")");
 				continue;
-			}
-			
-			// If the attachment title matched the filename, change it now
-			let origTitle = item.getField('title');
-			if (origTitle == origFilename || origTitle == origFilenameNoExt) {
-				item.setField('title', newName);
-				await item.saveTx();
 			}
 			
 			let str = await document.l10n.formatValue('file-renaming-file-renamed-to', { filename: newName });
