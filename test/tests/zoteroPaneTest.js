@@ -1660,19 +1660,19 @@ describe("ZoteroPane", function() {
 				parentItemID: parentItem.id,
 			});
 			
-			// Add a PDF attachment, which will be renamed
+			// Add a PDF attachment, which will get a default title
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
 			let [pdfAttachment1] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
 			assert.equal(parentItem.getAttachments().length, 2);
 			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('fileTypes.pdf'));
 			
-			// Add a second, which won't
+			// Add a second, which will get a title based on its filename
 			let [pdfAttachment2] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
 			assert.equal(parentItem.getAttachments().length, 3);
-			assert.equal(pdfAttachment2.getField('title'), 'test.pdf');
+			assert.equal(pdfAttachment2.getField('title'), 'test');
 			
-			// Add an EPUB attachment, which will be renamed
+			// Add an EPUB attachment, which will get a default title
 			file = getTestDataDirectory();
 			file.append('stub.epub');
 			let [epubAttachment] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);

@@ -303,7 +303,7 @@ Zotero.RecognizeDocument = new function () {
 		}
 		
 		// Rename attachment title
-		attachment.setFirstAttachmentTitle();
+		attachment.setAutoAttachmentTitle();
 		await attachment.saveTx();
 
 		try {

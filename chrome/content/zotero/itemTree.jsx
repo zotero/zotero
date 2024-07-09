@@ -2496,7 +2496,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 
 					if (item) {
-						item.setFirstAttachmentTitle();
+						item.setAutoAttachmentTitle();
 						await item.saveTx();
 						addedItems.push(item);
 					}

@@ -4411,7 +4411,7 @@ var ZoteroPane = new function()
 			}
 			
 			try {
-				item.setFirstAttachmentTitle();
+				item.setAutoAttachmentTitle();
 				await item.saveTx();
 			}
 			catch (e) {
@@ -5343,7 +5343,7 @@ var ZoteroPane = new function()
 
 		await Zotero.DB.executeTransaction(async () => {
 			for (let item of items) {
-				item.setFirstAttachmentTitle();
+				item.setAutoAttachmentTitle();
 				await item.save();
 			}
 		});
