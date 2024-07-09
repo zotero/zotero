@@ -33,12 +33,12 @@ tabbox {
 					display: none;
 				}
 
-				[dir=ltr] & {
+				&:-moz-locale-dir(ltr) {
 					box-shadow:
 						var(--tabbox-tab-shadow),
 						var(--tabbox-tab-shadow-left);
 				}
-				[dir=rtl] & {
+				&:-moz-locale-dir(rtl) {
 					box-shadow:
 						var(--tabbox-tab-shadow),
 						var(--tabbox-tab-shadow-right);
@@ -48,12 +48,12 @@ tabbox {
 			&:last-of-type {
 				border-start-end-radius: 6px;
 				border-end-end-radius: 6px;
-				[dir=ltr] & {
+				&:-moz-locale-dir(ltr) {
 					box-shadow:
 						var(--tabbox-tab-shadow),
 						var(--tabbox-tab-shadow-right);
 				}
-				[dir=rtl] & {
+				&:-moz-locale-dir(rtl) {
 					box-shadow:
 						var(--tabbox-tab-shadow),
 						var(--tabbox-tab-shadow-left);
@@ -68,12 +68,12 @@ tabbox {
 
 				& + tab {
 					&::before {
-						display: none;
+						border-color: transparent;
 					}
 				}
 
 				&::before {
-					display: none;
+					border-color: transparent;
 				}
 
 				.tab-middle {
@@ -83,16 +83,8 @@ tabbox {
 						0px 1px 0.75px 0px var(--fill-quinary),
 						0px 0.25px 0.25px 0px var(--color-border);;
 					border: 0.5px solid var(--fill-senary);
-					margin-bottom: 1px;
-					padding: 0px 6px 1px;
-				}
-
-				&:first-of-type > .tab-middle {
-					margin-inline-start: -1px;
-				}
-
-				&:last-of-type > .tab-middle {
-					margin-inline-end: -1px;
+					padding: 0.5px 6px 0.5px;
+					margin: 0px -0.5px 1px -0.5px;
 				}
 			}
 		}
