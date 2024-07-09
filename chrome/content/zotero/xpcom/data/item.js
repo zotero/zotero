@@ -4266,16 +4266,16 @@ Zotero.Item.prototype.removeAllTags = function() {
  */
 Zotero.Item.prototype.getCollections = function (includeTrashed) {
 	this._requireData('collections');
-	if (includeTrashed) return this._collections.concat();
-
-	let collections = this._collections.filter((id) => {
+	if (includeTrashed) {
+		return this._collections.concat();
+	}
+	return this._collections.filter((id) => {
 		var col = Zotero.Collections.get(id);
 		if (!col) {
 			throw new Error("Collection " + id + " not found for item " + this.libraryKey);
 		}
 		return !col.deleted;
 	});
-	return collections.concat();
 };
 
 
