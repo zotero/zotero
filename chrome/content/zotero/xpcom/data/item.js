@@ -3877,23 +3877,34 @@ Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
 };
 
 
-Zotero.Item.prototype.setFirstAttachmentTitle = function () {
+Zotero.Item.prototype.setAutoAttachmentTitle = function () {
 	if (!this.isAttachment()) {
-		throw new Error("setFirstAttachmentTitle() can only be called on attachment items");
+		throw new Error("setAutoAttachmentTitle() can only be called on attachment items");
 	}
 	if (!this.isFileAttachment() || !this.parentItemID) {
 		return;
 	}
+	
+	// If this is the only attachment of its type on the parent item, give it
+	// a default title ("PDF", "Webpage", etc.)
 	let isFirstOfType = this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1;
-	if (!isFirstOfType) {
-		return;
+	if (isFirstOfType) {
+		let defaultTitle = this._getDefaultTitleForAttachmentContentType();
+		if (defaultTitle !== null) {
+			this.setField('title', defaultTitle);
+			return;
+		}
 	}
-	let defaultTitle = this._getDefaultTitleForAttachmentContentType();
-	if (defaultTitle === null) {
-		// Keep existing title
-		return;
+	
+	// If this isn't the only attachment of its type or we don't have a default
+	// title for this type, name it after its filename, minus the extension
+	let filename = this.attachmentFilename;
+	if (filename) {
+		let title = filename.replace(/\.[^.]+$/, '');
+		if (title) {
+			this.setField('title', title);
+		}
 	}
-	this.setField('title', defaultTitle);
 };
 
 

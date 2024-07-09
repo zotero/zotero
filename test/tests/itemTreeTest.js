@@ -1570,7 +1570,7 @@ describe("Zotero.ItemTree", function() {
 			let promise = waitForItemEvent('add');
 			drop(parentRow, 0, dataTransfer);
 
-			// Add a PDF attachment, which will be renamed
+			// Add a PDF attachment, which will get a default title
 			let pdfAttachment1 = Zotero.Items.get((await promise)[0]);
 			assert.equal(pdfAttachment1.parentItemID, parentItem.id);
 			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('fileTypes.pdf'));
@@ -1578,10 +1578,10 @@ describe("Zotero.ItemTree", function() {
 			promise = waitForItemEvent('add');
 			drop(parentRow, 0, dataTransfer);
 
-			// Add a second, which won't
+			// Add a second, which will get a title based on its filename
 			let pdfAttachment2 = Zotero.Items.get((await promise)[0]);
 			assert.equal(pdfAttachment2.parentItemID, parentItem.id);
-			assert.equal(pdfAttachment2.getField('title'), 'test.pdf');
+			assert.equal(pdfAttachment2.getField('title'), 'test');
 		});
 	});
 	
