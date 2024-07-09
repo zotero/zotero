@@ -5640,6 +5640,9 @@ var ZoteroPane = new function()
 		}
 		
 		var items = this.getSelectedItems();
+		if (!items.length) return;
+		
+		var progressWin = new Zotero.ProgressWindow();
 		
 		for (var i=0; i<items.length; i++) {
 			var item = items[i];
@@ -5677,9 +5680,13 @@ var ZoteroPane = new function()
 				item.setField('title', newName);
 				await item.saveTx();
 			}
+			
+			let str = await document.l10n.formatValue('file-renaming-file-renamed-to', { filename: newName });
+			progressWin.addLines(str, item.getItemTypeIconName());
+			progressWin.show();
 		}
 		
-		return true;
+		progressWin.startCloseTimer(4000);
 	};
 	
 	

@@ -122,6 +122,8 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = {view-online}
 
+file-renaming-file-renamed-to = File renamed to { $filename }
+
 itembox-button-options =
     .tooltiptext = Open context menu
 itembox-button-merge =
