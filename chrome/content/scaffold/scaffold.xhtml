@@ -488,7 +488,7 @@
 									context="testing-context-menu"
 								/>
 							</vbox>
-							<hbox>
+							<hbox id="testing-buttons">
 								<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
 								<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
 								<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the test definitions with the latest data" oncommand="Scaffold.updateSelectedTests()"/>
@@ -507,7 +507,7 @@
 					</tabpanel>
 					<tabpanel>
 						<vbox id="browser-container">
-							<hbox align="center">
+							<hbox id="browser-url-container" align="center">
 								<label control="browser-url" value="&scaffold.tabUrl.label;"/>
 								<html:input id="browser-url" style="flex: 1;"/>
 								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
@@ -525,7 +525,7 @@
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-import">
 						<vbox id="import-container">
-							<hbox align="right">
+							<hbox id="import-buttons" align="right">
 								<button observes="validate-tests" label="&scaffold.testing.create.import;" tooltiptext="Create a new test from the current import data" oncommand="Scaffold.saveTestFromCurrent('import')" />
 								<button observes="validate-tests" label="&scaffold.testing.create.search;" tooltiptext="Create a new test from the current search data" oncommand="Scaffold.saveTestFromCurrent('search')" />
 							</hbox>

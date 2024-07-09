@@ -64,56 +64,9 @@ $scaffold-toolbarbutton-icons: (
 	toolbarseparator {
 		appearance: none;
 		width: 1px;
-		height: 20px;
+		height: 18px;
 		background-color: var(--fill-quinary);
 	}
-}
-
-#metadata-grid {
-	flex: 1;
-	display: grid;
-	align-content: start;
-	align-items: center;
-	grid-template-columns: max-content 1fr;
-}
-
-#metadata-grid > label:nth-child(2n + 1) {
-	justify-self: inline-end;
-}
-
-.button-row {
-	display: grid;
-	grid-template-columns: 1fr max-content;
-}
-
-#metadata-bottom-row {
-	display: flex;
-	align-items: center;
-}
-
-#metadata-bottom-row #textbox-minVersion {
-	margin-inline-end: auto;
-}
-
-#hbox-testFrame {
-	-moz-box-align: center;
-}
-
-richlistbox {
-	min-width: 200px;
-	margin-block: 0;
-
-	richlistitem {
-		align-items: center;
-
-		> hbox {
-			display: block;
-		}
-	}
-}
-
-#zotero-toolbar toolbarseparator {
-	height: 18px;
 }
 
 browser,
@@ -124,10 +77,6 @@ browser,
 
 #appcontent {
 	padding: 16px;
-}
-
-vbox > splitter {
-	cursor: row-resize;
 }
 
 #left-tabbox {
@@ -141,16 +90,6 @@ vbox > splitter {
 		width: 100%;
 		min-width: 0;
 	}
-}
-
-#checkboxes-translatorType {
-	display: flex;
-	flex-direction: row;
-	gap: 10px;
-}
-
-#tabpanel-metadata label:first-child {
-	text-align: inline-end;
 }
 
 #right-pane {
@@ -168,9 +107,48 @@ vbox > splitter {
 	}
 }
 
-#scaffold-load {
-	#listbox {
-		height: 300px;
+#metadata-grid {
+	flex: 1;
+	display: grid;
+	align-content: start;
+	align-items: center;
+	grid-template-columns: max-content 1fr;
+	gap: 8px;
+
+	label,
+	button,
+	input {
+		margin: 0;
+	}
+
+	& > label:nth-child(2n + 1) {
+		justify-self: inline-end;
+	}
+
+	label:first-child {
+		text-align: inline-end;
+	}
+
+	.button-row {
+		display: grid;
+		grid-template-columns: 1fr max-content;
+		gap: 8px;
+	}
+
+	#metadata-bottom-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	
+		#textbox-minVersion {
+			margin-inline-end: auto;
+		}
+	}
+
+	#checkboxes-translatorType {
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
 	}
 }
 
@@ -179,9 +157,26 @@ vbox > splitter {
 	max-width: 100%;
 	gap: 8px;
 
-	button,
-	checkbox {
+	richlistbox {
+		min-width: 200px;
 		margin-block: 0;
+	
+		richlistitem {
+			align-items: center;
+	
+			> hbox {
+				display: block;
+			}
+		}
+	}
+
+	#testing-buttons {
+		gap: 8px;
+
+		button,
+		checkbox {
+			margin: 0;
+		}
 	}
 
 	#testing-listbox-container {
@@ -197,18 +192,26 @@ vbox > splitter {
 	flex: 1;
 	gap: 8px;
 
-	button,
-	label,
-	input {
-		margin-block: 0;
-	}
+	#browser-url-container {
+		gap: 8px;
+
+		button,
+		label,
+		input {
+			margin: 0;
+		}
+	}	
 }
 
 #import-container {
 	flex: 1;
 	gap: 8px;
 
-	button {
-		margin-block: 0;
+	#import-buttons {
+		gap: 8px;
+
+		button {
+			margin: 0;
+		}
 	}
 }

@@ -1,7 +1,8 @@
 richlistbox.theme-listbox {
 	background: var(--material-background);
 	border: var(--material-panedivider);
-	overflow: hidden;
+	// Prevent horizontal scrollbar on Windows
+	overflow-x: hidden;
 
 	richlistitem {
 		--listitem-selectedBackground: var(--tag-gray);
