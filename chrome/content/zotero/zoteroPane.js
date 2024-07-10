@@ -4416,13 +4416,6 @@ var ZoteroPane = new function()
 				});
 			}
 			
-			try {
-				item.setAutoAttachmentTitle();
-				await item.saveTx();
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
 			addedItems.push(item);
 		}
 		
@@ -5343,7 +5336,7 @@ var ZoteroPane = new function()
 			}
 			// If they clicked manual entry then make a dummy parent
 			else {
-				this.createEmptyParent(item);
+				await this.createEmptyParent(item);
 			}
 		}
 
@@ -5560,11 +5553,19 @@ var ZoteroPane = new function()
 				var parent = new Zotero.Item('document');
 			}
 			parent.libraryID = item.libraryID;
-			parent.setField('title', item.getField('title'));
+			
+			let title = item.getField('title');
+			// If the attachment was named after its filename, remove the extension
+			if (title === item.attachmentFilename) {
+				title = title.replace(/\.[^.]+$/, '');
+			}
+			parent.setField('title', title);
+			
 			if (item.isWebAttachment()) {
 				parent.setField('accessDate', item.getField('accessDate'));
 				parent.setField('url', item.getField('url'));
 			}
+			
 			let itemID = await parent.save();
 			item.parentID = itemID;
 			await item.save();
