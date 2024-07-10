@@ -7,7 +7,7 @@ richlistbox.theme-listbox {
 	richlistitem {
 		--listitem-selectedBackground: var(--tag-gray);
 		--listitem-selectedFocusCurrentBackground: var(--color-accent);
-		--listitem-selectedTextColor: var(--accent-white);
+		--listitem-selectedTextColor: var(--color-accent-text);
 		--listitem-selectedBorder: transparent;
 		--listitem-selectedBottomBorder: transparent;
 		--listitem-selectedCurrentBorder: transparent;

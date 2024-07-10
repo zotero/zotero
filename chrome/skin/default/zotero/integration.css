@@ -192,7 +192,7 @@
 }
 
 .citation-dialog.editor::selection {
-	color: white;
+	color: var(--color-accent-text);
 	background: var(--color-accent);
 }
 
