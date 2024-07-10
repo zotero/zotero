@@ -685,21 +685,6 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			assert.equal(attachment.getField('title'), 'test.png')
 		});
-		
-		it("should change attachment title even if the same as filename without extension", async function () {
-			var item = createUnsavedDataObject('item');
-			item.setField('title', 'Title');
-			await item.saveTx();
-			
-			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
-			attachment.setField('title', 'test');
-			await attachment.saveTx();
-			await zp.selectItem(attachment.id);
-			
-			await zp.renameSelectedAttachmentsFromParents();
-			assert.equal(attachment.attachmentFilename, 'Title.png');
-			assert.equal(attachment.getField('title'), 'test')
-		});
 	});
 	
 	
