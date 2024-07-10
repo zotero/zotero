@@ -106,6 +106,8 @@
 .citation-dialog.info > label {
 	margin: 0;
 	padding: 0;
+	width: auto !important;
+	white-space: pre;
 }
 
 .citation-dialog .zotero-bubble-input {
