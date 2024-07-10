@@ -414,7 +414,7 @@ describe("Create a note from annotations from multiple items and attachments", f
 		let annotation2 = await createAnnotation('highlight', attachment);
 		annotations.push(annotation2);
 		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
-		assert.equal(note.note.split('test.pdf').length - 1, 1);
+		assert.equal(note.note.split('test').length - 1, 1);
 		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
 		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
 	});
@@ -429,7 +429,7 @@ describe("Create a note from annotations from multiple items and attachments", f
 		let annotation2 = await createAnnotation('highlight', attachment2);
 		annotations.push(annotation2);
 		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
-		assert.equal(note.note.split('test.pdf').length - 1, 2);
+		assert.equal(note.note.split('test').length - 1, 2);
 		assert.equal(note.note.split('>' + item.getField('title') + '<').length - 1, 0);
 		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
 		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
@@ -446,7 +446,7 @@ describe("Create a note from annotations from multiple items and attachments", f
 		let annotation2 = await createAnnotation('highlight', attachment2);
 		annotations.push(annotation2);
 		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
-		assert.equal(note.note.split('test.pdf').length - 1, 0);
+		assert.equal(note.note.split('test').length - 1, 0);
 		assert.equal(note.note.split('>' + item1.getField('title') + '<').length - 1, 1);
 		assert.equal(note.note.split('>' + item2.getField('title') + '<').length - 1, 1);
 		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
@@ -470,7 +470,7 @@ describe("Create a note from annotations from multiple items and attachments", f
 		annotations.push(annotation4);
 		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
 		Zotero.debug(note.note);
-		assert.equal(note.note.split('test.pdf').length - 1, 2);
+		assert.equal(note.note.split('test').length - 1, 2);
 		assert.equal(note.note.split('>' + item1.getField('title') + '<').length - 1, 1);
 		assert.equal(note.note.split('>' + item2.getField('title') + '<').length - 1, 1);
 		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
