@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = Archivo renombrado a { $filename }
 itembox-button-options =
     .tooltiptext = Abrir menú contextual
 itembox-button-merge =
@@ -400,10 +401,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Ampliar sección
-    .label = Expand { $section } section
+    .label = Expandir { $section }  sección
 section-button-collapse =
     .dynamic-tooltiptext = Contraer sección
-    .label = Collapse { $section } section
+    .label = Contraer { $section } sección
 annotations-count =
     { $count ->
         [one] { $count } Anotación
@@ -512,8 +513,8 @@ item-pane-header-more-options =
     .label = Más opciones
 item-pane-message-items-selected =
     { $count ->
+        [0] Sin elementos seleccionados
         [one] { $count } elemento seleccionado
-        [many] { $count } elementos seleccionados
        *[other] { $count } elementos seleccionados
     }
 item-pane-message-collections-selected =
@@ -534,6 +535,19 @@ item-pane-message-objects-selected =
         [many] { $count } objetos seleccionados
        *[other] { $count } objetos seleccionados
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] No hay elementos en esta vista
+        [one] { $count } elemento en esta vista
+       *[other] { $count } elementos en esta vista
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Fusionar { $count } elemento
+            [many] Fusionar { $count } elementos
+           *[other] Fusionar { $count } elementos
+        }
 locate-library-lookup-no-resolver = Debe elegir un sistema de resolución en el panel { $pane } de los ajustes de { -app-name }.
 architecture-win32-warning-message = { -app-name } se ejecuta en modo de 32 bits en una versión de 64 bits de Windows. { -app-name } se ejecutará de forma más eficiente en modo de 64 bits.
 architecture-warning-action = Descargar { -app-name } de 64-bit

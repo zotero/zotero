@@ -47,7 +47,7 @@ menu-restoreToLibrary =
 menu-deletePermanently =
     .label = 永久刪除……
 menu-tools-plugins =
-    .label = 外掛
+    .label = 附加元件
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -66,16 +66,16 @@ toolbar-add-attachment =
 collections-menu-rename-collection =
     .label = 重命名文獻集
 collections-menu-edit-saved-search =
-    .label = 編輯存留搜尋
+    .label = 編輯儲存的搜尋結果
 item-creator-moveDown =
-    .label = 往下移
+    .label = 移至尾端
 item-creator-moveToTop =
     .label = 移至頂端
 item-creator-moveUp =
     .label = 往上移
 item-menu-viewAttachment =
     .label =
-        打開 { $numAttachments ->
+        開啟 { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
@@ -106,11 +106,12 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = 檔案重命名為 { $filename }
 itembox-button-options =
     .tooltiptext = 打開上下文選單
 itembox-button-merge =
     .aria-label = 選擇 { $field } 欄位的版本
-create-parent-intro = 輸入一個 DOI, ISBN, PMID, arXiv ID, 或 ADS Bibcode 來識別這個檔案：
+create-parent-intro = 輸入一個 DOI, ISBN, PMID, arXiv ID, 或 ADS 參照碼 來辨識這個檔案：
 reader-use-dark-mode-for-content =
     .label = 內容使用深色模式
 update-updates-found-intro-minor = 有一個 { -app-name } 的更新：
@@ -135,12 +136,12 @@ import-fileTypes-header = 要匯入的檔案型別：
 import-fileTypes-pdf =
     .label = PDF
 import-fileTypes-other =
-    .placeholder = 依式樣的其他檔案，以逗號分隔（例如，*.jpg,*.png）
+    .placeholder = 依一定模式的其他檔案，以逗號分隔（例如，*.jpg,*.png）
 import-file-handling = 檔案處理中
 import-file-handling-store =
     .label = 將檔案複製到 { -app-name } 儲存資料夾
 import-file-handling-link =
-    .label = 在初始位置連結檔案
+    .label = 在原始位置連結檔案
 import-fileHandling-description = 連結的檔案不能被 { -app-name } 所同步。
 import-online-new =
     .label = 僅下載新項目；不更新之前匯入的項目
@@ -151,27 +152,27 @@ file-interface-import-error = 嘗試匯入所選的檔案時發生了錯誤。�
 file-interface-import-complete = 匯入完成
 file-interface-items-were-imported =
     { $numItems ->
-        [0] 没有导入任何条目
-        [one] 已导入 1 个条目
-       *[other] 已导入 { $numItems } 个条目
+        [0] 沒有匯入任何項目
+        [one] 已匯入1個項目
+       *[other] 已匯入 { $numItems } 個項目
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
-        [0] 没有重新链接任何条目
-        [one] 已重新链接 1 个条目
-       *[other] 已重新链接 { $numRelinked } 个条目
+        [0] 沒有重新連結任何項目
+        [one] 已重新連結1個項目
+       *[other] 已重新連結 { $numRelinked } 個項目
     }
-import-mendeley-encrypted = 无法读取所选的 Mendeley 数据库，可能是因为它已加密。请参阅<a data-l10n-name="mendeley-import-kb">如何将 Mendeley 库导入 Zotero？</a>了解更多信息。
-file-interface-import-error-translator = 使用“{ $translator }”导入所选文件时发生错误。请确保该文件有效，然后重试。
-import-online-intro = 在下一步中，您需要登录 { $targetAppOnline } 并授予 { -app-name } 访问权限。这是将您的 { $targetApp } 库导入到 { -app-name } 所必需的。
-import-online-intro2 = { -app-name } 永远不会知道或存储您的 { $targetApp } 密码。
-import-online-form-intro = 请输入您登录 { $targetAppOnline } 的凭据。这是将您的 { $targetApp } 库导入到 { -app-name } 所必需的。
-import-online-wrong-credentials = 登录 { $targetApp } 失败。请重新输入凭据并重试。
-import-online-blocked-by-plugin = 安装了 { $plugin } 后导入无法继续。请禁用此插件并重试。
+import-mendeley-encrypted = 無法讀取所選的 Mendeley 資料庫，可能是因為它已加密。請參閱<a data-l10n-name="mendeley-import-kb">如何將 Mendeley 文獻庫匯入 Zotero？</a>來了解更多資訊。
+file-interface-import-error-translator = 使用“{ $translator }”匯入所選檔案時發生錯誤。請確保該檔案有效，然後重試。
+import-online-intro = 在下一步中，您需要登入 { $targetAppOnline } 並授權 { -app-name } 存取。這是匯入您的 { $targetApp } 文獻庫到 { -app-name } 的必要步驟。
+import-online-intro2 = { -app-name } 不會觀看或儲存您的 { $targetApp } 密碼。
+import-online-form-intro = 請輸入您的驗證資訊來登入 { $targetAppOnline } 。這對匯入您的 { $targetApp } 文獻庫到 { -app-name } 中視必要的。
+import-online-wrong-credentials = 登入 { $targetApp } 失敗。請重新輸入驗證資訊，然後再試一次。
+import-online-blocked-by-plugin = 在 { $plugin } 裝著的時候無法繼續匯入，請停用這個附加元件，然後再試一次。
 import-online-relink-only =
     .label = 重新連結Mendeley桌面應用程式引文
 import-online-relink-kb = 更多資訊
-import-online-connection-error = { -app-name } 无法连接到 { $targetApp }。请检查您的网络连接并重试。
+import-online-connection-error = { -app-name } 無法連結到 { $targetApp }。請檢查您的網路連線後再試一次。
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -181,25 +182,25 @@ report-error =
     .label = 回報錯誤…
 rtfScan-wizard =
     .title = RTF 掃描
-rtfScan-introPage-description = { -app-name } 可以自动提取和重新格式化引注，并将参考文献表插入 RTF 文件中。首先，请选择下面的 RTF 文件。
+rtfScan-introPage-description = { -app-name } 能自動取出並重新格式化引用文獻，並將參考書目插入 RTF 檔中。若要開始，請於下方選擇RTF檔。
 rtfScan-introPage-description2 = 要開始的話，在下方選一個 RTF 輸入檔及一個輸出檔：
 rtfScan-input-file = 輸入檔案
 rtfScan-output-file = 輸出檔案
 rtfScan-no-file-selected = 未選擇任何檔案
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = 选择输入文件
+    .aria-label = 選擇輸入檔案
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = 选择输出文件
+    .aria-label = 選擇輸出檔案
 rtfScan-intro-page =
     .label = 說明
 rtfScan-scan-page =
-    .label = 掃描引用文獻
-rtfScan-scanPage-description = { -app-name } 正在扫描您的文档以查找引文。请耐心等待。
+    .label = 掃描參考文獻
+rtfScan-scanPage-description = { -app-name } 在掃描文件中的引用文獻。請耐心等候。
 rtfScan-citations-page =
     .label = 查證引用的項目
-rtfScan-citations-page-description = 请核查下面的已识别引文列表，以确保 { -app-name } 正确选择了相应的条目。在继续下一步之前，必须解决任何未映射或不明确的引用。
+rtfScan-citations-page-description = 請參閱下列辨識出的引用文獻來確定 { -app-name } 正確的選出了相關的項目。在進到下一步前所有無對應或是不明的引用文獻都須被解決。
 rtfScan-style-page =
     .label = 文件格式化
 rtfScan-format-page =
@@ -219,21 +220,21 @@ runJS-result =
     }
 runJS-run-async = 作為非同步函數執行
 bibliography-window =
-    .title = { -app-name } - 创建引注/参考文献表
+    .title = { -app-name } - 建立引用/參考文獻表
 bibliography-style-label = 引用文獻樣式:
 bibliography-locale-label = 語言：
-bibliography-displayAs-label = 引注显示为:
+bibliography-displayAs-label = 將引用文獻顯示為:
 bibliography-advancedOptions-label = 進階選項
 bibliography-outputMode-label = 輸出模式:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] 引注
-            [note] 笔记
-           *[other] 引注
+            [citation] 引用文獻
+            [note] 筆記
+           *[other] 引用文獻
         }
 bibliography-outputMode-bibliography =
-    .label = 参考文献表
+    .label = 參考文獻表
 bibliography-outputMethod-label = 輸出方法:
 bibliography-outputMethod-saveAsRTF =
     .label = 存成 RTF 檔
@@ -245,24 +246,24 @@ bibliography-outputMethod-print =
     .label = 列印
 bibliography-manageStyles-label = 管理樣式……
 integration-docPrefs-window =
-    .title = { -app-name } - 文档首选项
+    .title = { -app-name } - 文件偏好設定
 integration-addEditCitation-window =
-    .title = { -app-name } - 添加/编辑引注
+    .title = { -app-name } - 新增/編輯引用文獻
 integration-editBibliography-window =
-    .title = { -app-name } - 编辑参考文献表
+    .title = { -app-name } - 編輯參考文獻表
 integration-quickFormatDialog-window =
-    .title = { -app-name } - 快速格式化引注
-integration-prefs-displayAs-label = 引注显示为:
+    .title = { -app-name } - 快速格式化引用文獻
+integration-prefs-displayAs-label = 將引用文獻顯示為:
 integration-prefs-footnotes =
     .label = 頁末註
 integration-prefs-endnotes =
     .label = 文末註
 integration-prefs-bookmarks =
-    .label = 引注存储为书签
+    .label = 引用文獻儲存為書籤
 integration-prefs-bookmarks-description = 在 Word 及 LibreOffice中書籤皆可相互分享，但也可能因為修改意外而產生錯誤；而且啟用此項時，引用文獻無法插入於頁末註或文末註中。
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] 必须将该文档保存为 .doc 或 .docx 格式。
+        [true] 必須將該文件儲存為 .doc 或 .docx 格式。
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
@@ -309,7 +310,7 @@ publications-choose-license-yes =
     .accesskey = Y
 publications-choose-license-no =
     .label = 不用
-    .accesskey = 无
+    .accesskey = N
 publications-choose-license-sharealike =
     .label = 是的，只要他人以同樣的方式分享
     .accesskey = S
@@ -327,13 +328,13 @@ licenses-cc-by-sa = 創用CC 署名-相同方式分享 4.0 國際協議
 licenses-cc-by-nc = 創用CC 署名-非商業性使用 4.0 國際協議
 licenses-cc-by-nc-nd = 創用CC 署名-非商業性使用-禁止改作 4.0 國際協議
 licenses-cc-by-nc-sa = 創用CC 署名-非商業性使用-相同方式分享 4.0 國際協議
-licenses-cc-more-info = 在将您的作品以知识共享协议许可之前，请确保您已阅读 <a data-l10n-name="license-considerations">许可方注意事项</a>。请注意，即使您后来选择不同的条款或停止发布作品，您所申请的许可也无法撤销。
-licenses-cc0-more-info = 在将 CC0 应用于您的作品之前，请确保您已阅读知识共享 <a data-l10n-name="license-considerations">CC0 常见问题解答</a>。请注意，将您的作品奉献给公共领域是不可逆转的，即使您后来选择不同的条款或停止发布该作品。
+licenses-cc-more-info = 在使用創用CC<a data-l10n-name="license-considerations">許可方注意事項</a>發布作品前，請確保您已閱讀協議。注意，您一旦採用此協議就無法將其撤銷，即便您後來又選擇了其他條款或取消發布此作品。
+licenses-cc0-more-info = 在使用創用CC0 <a data-l10n-name="license-considerations">CC0 FAQ</a>發布作品前，請確保您已閱讀協議。注意，您一旦將作品發佈到了公有領域，就無法撤回決定，即便您後來又選擇了其他條款或取消發布此作品。
 restart-in-troubleshooting-mode-menuitem =
-    .label = 以故障排除模式重启...
+    .label = 以除錯模式重新啟動……
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = 以故障排除模式重启
-restart-in-troubleshooting-mode-dialog-description =  { -app-name } 将重新启动并禁用所有插件。启用故障排除模式时，某些功能可能无法正常工作。
+restart-in-troubleshooting-mode-dialog-title = 以除錯模式重新啟動
+restart-in-troubleshooting-mode-dialog-description =  { -app-name } 將重新啟動並停用所有附加元件。啟用除錯模式時，某些功能可能無法正確運作。
 menu-ui-density =
     .label = 密度
 menu-ui-density-comfortable =
@@ -389,11 +390,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .dynamic-tooltiptext = 展开此区域
-    .label = Expand { $section } section
+    .dynamic-tooltiptext = 展開此章節
+    .label = 展開 { $section } 章節
 section-button-collapse =
-    .dynamic-tooltiptext = 折叠此区域
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = 摺疊此章節
+    .label = 摺疊 { $section } 章節
 annotations-count =
     { $count ->
        *[other] { $count } 個標註
@@ -424,112 +425,125 @@ sidenav-tags =
 sidenav-related =
     .tooltiptext = { pane-related }
 pin-section =
-    .label = 固定此区域
+    .label = 固定此章節
 unpin-section =
-    .label = 取消固定此区域
+    .label = 取消固定此章節
 collapse-other-sections =
-    .label = 折叠其他栏
+    .label = 摺疊其他章節
 expand-all-sections =
-    .label = 展开所有栏
+    .label = 展開所有章節
 abstract-field =
-    .placeholder = 添加摘要...
+    .placeholder = 新增摘要……
 tagselector-search =
-    .placeholder = 筛选标签
+    .placeholder = 篩選標籤
 context-notes-search =
-    .placeholder = 搜索笔记
+    .placeholder = 搜尋筆記
 new-collection-dialog =
     .title = 新增文獻集
-    .buttonlabelaccept = 创建分类
+    .buttonlabelaccept = 建立文獻集
 new-collection-name = 名稱：
-new-collection-create-in = 创建到：
+new-collection-create-in = 建立到：
 attachment-info-filename = 檔名
 attachment-info-accessed = 取用
 attachment-info-pages = 頁
 attachment-info-modified = 修改日期
-attachment-info-index = 索引
+attachment-info-index = 已建立索引
 attachment-info-convert-note =
     .label =
-        迁移到{ $type ->
-            [standalone] 独立
-            [child] 条目
+        遷移到{ $type ->
+            [standalone] 獨立
+            [child] 項目
            *[unknow] 新
-        }笔记
-    .tooltiptext = 已不再支持向附件添加注释，但您可以将其迁移到单独的注释后编辑此注释。
-attachment-preview-placeholder = 无可预览的附件
+        }筆記
+    .tooltiptext = 已不再支援對附件新增筆記，但您可以將其遷移到單獨的筆記後編輯此筆記。
+attachment-preview-placeholder = 沒有可預覽的附件
 toggle-preview =
     .label =
         { $type ->
-            [open] 隐藏
-            [collapsed] 显示
-           *[unknown] 切换
-        }附件预览
+            [open] 隱藏
+            [collapsed] 顯示
+           *[unknown] 切換
+        }附件預覽
 quickformat-general-instructions =
-    使用左/右箭头浏览此引注的条目。{ $dialogMenu ->
-        [active] 按 Shift-Tab 聚焦到对话框菜单。
+    使用左/右方向鍵切換此引用文獻的項目。{ $dialogMenu ->
+        [active] 按 Shift+Tab 聚焦到對話框選單。
        *[other] { "" }
-    } 按 { return-or-enter } 保存对此引注的编辑。按 Esc 键放弃更改并关闭对话框。
-quickformat-aria-bubble = 该条目已包含在引注中。按空格键自定义条目。 { quickformat-general-instructions }
-quickformat-aria-input = 键入以搜索需要引用的条目。按 T​​ab 转到搜索结果。  { quickformat-general-instructions }
-quickformat-aria-item = 按 { return-or-enter } 将此条目添加到引注中。按 T​​ab 返回搜索字段。
+    } 按 { return-or-enter } 儲存對此引用文獻的編輯。按 Esc 鍵放棄更改並關閉對話框。
+quickformat-aria-bubble = 該項目已飽含在引用文獻中。按空白鍵自定義項目。 { quickformat-general-instructions }
+quickformat-aria-input = 輸入以搜尋需要引用的項目。按 T​​ab 切換到搜尋結果。  { quickformat-general-instructions }
+quickformat-aria-item = 按 { return-or-enter } 將此項目新增到引用文獻中。按 T​​ab 回到搜尋欄位。
 quickformat-accept =
-    .tooltiptext = 保存对此引注的编辑
+    .tooltiptext = 儲存對此引用文獻的編輯
 quickformat-locator-type =
-    .aria-label = 定位符类别
+    .aria-label = 定位符類別
 quickformat-locator-value = 定位符
 quickformat-citation-options =
-    .tooltiptext = 显示引注选项
-insert-note-aria-input = 键入以搜索笔记。按 T​​ab 转到结果列表。按 Esc 键关闭对话框。
-insert-note-aria-item = 按 { return-or-enter } 选择此笔记。按 T​​ab 返回搜索字段。按 Esc 键关闭对话框。
+    .tooltiptext = 顯示引用文獻選項
+insert-note-aria-input = 輸入以搜尋筆記。按 T​​ab 切換到結果清單。按 Esc 鍵關閉對話框。
+insert-note-aria-item = 按 { return-or-enter } 選擇此筆記。按 T​​ab 會到搜尋欄位。按 Esc 鍵關閉對話框。
 quicksearch-mode =
-    .aria-label = 快速搜索模式
+    .aria-label = 快速搜尋模式
 quicksearch-input =
     .aria-label = 快速搜尋
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = 显示为
+    .label = 顯示為
 item-pane-header-none =
     .label = 無
 item-pane-header-title =
     .label = 標題
 item-pane-header-titleCreatorYear =
-    .label = 標題，作者，年
+    .label = 標題，創作者，年
 item-pane-header-bibEntry =
-    .label = 参考文献表条目
+    .label = 參考文獻表條目
 item-pane-header-more-options =
-    .label = 更多选项
+    .label = 更多選項
 item-pane-message-items-selected =
     { $count ->
-       *[other] 已选择 { $count } 个条目
+        [0] 沒有選擇任何項目
+        [one] 已選擇{ $count } 個項目
+       *[other] 已選擇{ $count } 個項目
     }
 item-pane-message-collections-selected =
     { $count ->
-       *[other] 已选择 { $count } 个分类
+       *[other] 已選擇 { $count } 個文獻集
     }
 item-pane-message-searches-selected =
     { $count ->
-       *[other] 已选择 { $count } 个搜索结果
+       *[other] 已選擇 { $count } 個搜尋結果
     }
 item-pane-message-objects-selected =
     { $count ->
-       *[other] 已选择 { $count } 个对象
+       *[other] 已選擇 { $count } 個物件
     }
-locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
-architecture-win32-warning-message = { -app-name } 目前在 64 位版本的 Windows 上以 32 位模式运行。 { -app-name } 在 64 位模式下运行效率更高。
-architecture-warning-action = 下载 64 位版本的 { -app-name }
+item-pane-message-unselected =
+    { $count ->
+        [0] 沒有任何項目
+        [one] { $count } 個項目
+       *[other] { $count } 個項目
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+           *[other] 合併 { $count } 個項目
+        }
+locate-library-lookup-no-resolver = 您必須從 { -app-name } 偏好設定的 { $pane } 窗格中選擇一個解析器。
+architecture-win32-warning-message = { -app-name } 目前在64位元版本的Windows上以32位元模式執行。 { -app-name } 在64位元模式下執行效率更高。
+architecture-warning-action = 下載64位元版本的 { -app-name }
 first-run-guidance-quickFormat =
-    输入标题、作者和/或年份来搜索参考文献。
+    輸入標題、作者和/或年份來搜尋參考文獻。
     
-    选择条目后，可以单击气泡或使用键盘按下 ↓/空格键，显示页码、前缀和后缀等引注选项。
+    選擇項目後，可以點擊氣泡或利用鍵盤按下 ↓/空白建，顯示頁碼、前綴和後綴等引用文獻選項。
     
-    您也可以直接添加页码，方法是在搜索词中包含页码，或在气泡后输入页码并按下 { return-or-enter } 键。
-first-run-guidance-authorMenu = { -app-name } 也允许您指定“编辑”和“译者”。您可以从此菜单中选择，将“作者”更改为“编辑”或“译者”。
+    您也可以直接新增頁碼，於搜尋詞語中包含頁碼，或在氣泡後輸入頁碼並按下 { return-or-enter } 鍵即可。
+first-run-guidance-authorMenu = { -app-name } 也允許您指定編輯與譯者。您可以從此選單中選擇，將作者更改為編輯或譯者。
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
     .tooltiptext = { general-add }
 advanced-search-conditions-menu =
-    .aria-label = 搜索条件
+    .aria-label = 搜尋條件
     .label = { $label }
 advanced-search-operators-menu =
     .aria-label = 操作符

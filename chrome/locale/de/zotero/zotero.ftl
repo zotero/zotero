@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = Datei als { $filename } umbenannt
 itembox-button-options =
     .tooltiptext = Kontextmenü öffnen
 itembox-button-merge =
@@ -395,10 +396,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Abschnitt ausklappen
-    .label = Expand { $section } section
+    .label = { $section }-Abschnitt ausklappen
 section-button-collapse =
     .dynamic-tooltiptext = Abschnitt einklappen
-    .label = Collapse { $section } section
+    .label = { $section }-Abschnitt einklappen
 annotations-count =
     { $count ->
         [one] { $count } Anmerkung ausgewählt.
@@ -506,7 +507,8 @@ item-pane-header-more-options =
     .label = Mehr Optionen
 item-pane-message-items-selected =
     { $count ->
-        [one] { $count } Einträge ausgewählt
+        [0] Kein EIntrag ausgewählt
+        [one] { $count } Eintrag ausgewählt
        *[other] { $count } Einträge ausgewählt
     }
 item-pane-message-collections-selected =
@@ -524,6 +526,18 @@ item-pane-message-objects-selected =
         [one] { $count } Objekt ausgewählt
        *[other] { $count } Objekte ausgewählt
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] Keine Einträge in dieser Ansicht
+        [one] { $count } Eintrag in dieser Ansicht
+       *[other] { $count } Einträge in dieser Ansicht
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] { $count } Eintrag zusammenführen
+           *[other] { $count } Einträge zusammenführen
+        }
 locate-library-lookup-no-resolver = Sie müssen in den { -app-name }-Einstellungen unter { $pane } einen Resolver auswählen.
 architecture-win32-warning-message = { -app-name } wird aktuell im 32-Bit-Modus auf einer 64-Bit-Version von Windows ausgeführt. { -app-name } wird im 64-Bit-Modus effizienter laufen.
 architecture-warning-action = 64-Bit { -app-name }-Version herunterladen

@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Abrir menu de contexto
 itembox-button-merge =
@@ -512,9 +513,9 @@ item-pane-header-more-options =
     .label = Mais opções
 item-pane-message-items-selected =
     { $count ->
-        [one] { $count } item selecionado
-        [many] { $count } itens selecionados
-       *[other] { $count } itens selecionados
+        [0] No items selected
+        [one] { $count } item selected
+       *[other] { $count } items selected
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -534,6 +535,18 @@ item-pane-message-objects-selected =
         [many] { $count } objetos selecionados
        *[other] { $count } objetos selecionados
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] No items in this view
+        [one] { $count } item in this view
+       *[other] { $count } items in this view
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Merge { $count } item
+           *[other] Merge { $count } items
+        }
 locate-library-lookup-no-resolver = Você deve escolher um resolvedor a partir do painel { $pane } nas configurações do { -app-name } .
 architecture-win32-warning-message = { -app-name } está rodando no modo 32-bit em um Windows de versão 64-bit. { -app-name } será mais eficiente se rodar no modo 64-bit.
 architecture-warning-action = Baixar { -app-name } 64-bit 

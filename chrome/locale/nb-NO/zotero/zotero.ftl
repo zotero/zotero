@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = Fil endret navn til { $filename }
 itembox-button-options =
     .tooltiptext = Åpne kontekstmenyen
 itembox-button-merge =
@@ -395,10 +396,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Utvid seksjon
-    .label = Expand { $section } section
+    .label = Utvid { $section } seksjon
 section-button-collapse =
     .dynamic-tooltiptext = Skjul seksjon
-    .label = Collapse { $section } section
+    .label = Skjul { $section } seksjon
 annotations-count =
     { $count ->
         [one] { $count } Merknad
@@ -506,8 +507,9 @@ item-pane-header-more-options =
     .label = Flere valg
 item-pane-message-items-selected =
     { $count ->
-        [one] { $count } valgte elementer
-       *[other] { $count } valgte elementer
+        [0] Ingen elementer valgt
+        [one] { $count } element valgt
+       *[other] { $count } elementer valgt
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -524,6 +526,18 @@ item-pane-message-objects-selected =
         [one] { $count } valgte objekter
        *[other] { $count } valgte objekter
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] Ingen elementer i denne visningen
+        [one] { $count } element i denne visningen
+       *[other] { $count } elementer i denne visningen
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Slå sammen { $count } elementer
+           *[other] Slå sammen { $count } elementer
+        }
 locate-library-lookup-no-resolver = Du må velge en lenketjener fra { $pane }-ruten i { -app-name }-innstillingene.
 architecture-win32-warning-message = { -app-name } kjører i 32-biters modus på en 64-biters versjon av Windows. { -app-name } vil kjøre mer effektivt i 64-biters modus.
 architecture-warning-action = Last ned 64-bit { -app-name }

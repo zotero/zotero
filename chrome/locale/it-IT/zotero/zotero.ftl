@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = Il file è stato rinominato in { $filename }
 itembox-button-options =
     .tooltiptext = Apri menu contestuale
 itembox-button-merge =
@@ -400,10 +401,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Espandi sezione
-    .label = Expand { $section } section
+    .label = Espandi la sezione { $section }
 section-button-collapse =
     .dynamic-tooltiptext = Comprimi sezione
-    .label = Collapse { $section } section
+    .label = Comprimi la sezione { $section }
 annotations-count =
     { $count ->
         [one] { $count } Annotazione
@@ -512,8 +513,8 @@ item-pane-header-more-options =
     .label = Altre opzioni
 item-pane-message-items-selected =
     { $count ->
+        [0] Nessun elemento selezionato
         [one] { $count } elemento selezionato
-        [many] { $count } elementi selezionati
        *[other] { $count } elementi selezionati
     }
 item-pane-message-collections-selected =
@@ -534,6 +535,19 @@ item-pane-message-objects-selected =
         [many] { $count } oggetti selezionati
        *[other] { $count } oggetti selezionati
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] Nessun elemento in questa schermata
+        [one] { $count } elemento in questa schermata
+       *[other] { $count } elementi in questa schermata
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Unisci { $count } elemento
+            [many] Unisci { $count } elementi
+           *[other] Unisci { $count } elementi
+        }
 locate-library-lookup-no-resolver = È necessario selezionare un resolver dal pannello { $pane } delle impostazioni di { -app-name }.
 architecture-win32-warning-message = { -app-name } è in esecuzione a 32-bit in una versione di Windows a 64-bit. { -app-name } sarà molto più efficiente con la versione a 64-bit.
 architecture-warning-action = Scarica { -app-name } a 64-bit

@@ -23,19 +23,19 @@ menu-density =
 add-attachment = Ajouter une pièce jointe
 new-note = Nouvelle note
 menu-add-by-identifier =
-    .label = Ajouter par identifiant...
+    .label = Ajouter par un identifiant…
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Ajouter un fichier...
+    .label = Ajouter un fichier…
 menu-add-standalone-linked-file-attachment =
-    .label = Ajouter un lien vers un fichier...
+    .label = Ajouter un lien vers un fichier…
 menu-add-child-file-attachment =
-    .label = Joindre un fichier...
+    .label = Joindre un fichier…
 menu-add-child-linked-file-attachment =
     .label = Joindre un lien vers un fichier…
 menu-add-child-linked-url-attachment =
-    .label = Ajouter un lien Web...
+    .label = Ajouter un lien Web…
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -51,7 +51,7 @@ menu-tools-plugins =
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
-    .tooltiptext = Liste des onglets
+    .tooltiptext = Lister tous les onglets
 filter-collections = Filtrer les collections
 zotero-collections-search =
     .placeholder = { filter-collections }
@@ -66,7 +66,7 @@ toolbar-add-attachment =
 collections-menu-rename-collection =
     .label = Renommer la collection
 collections-menu-edit-saved-search =
-    .label = Éditer la recherche enregistrée
+    .label = Modifier la recherche enregistrée
 item-creator-moveDown =
     .label = Descendre
 item-creator-moveToTop =
@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Ouvrir le menu contextuel
 itembox-button-merge =
@@ -183,7 +184,7 @@ report-error =
     .label = Signaler l'erreur…
 rtfScan-wizard =
     .title = Analyse d'un fichier RTF
-rtfScan-introPage-description = { -app-name } peut automatiquement extraire et reformater les citations et insérer une bibliographie dans les fichiers RTF. Pour démarrer, choisissez un fichier RTF ci-dessous.
+rtfScan-introPage-description = { -app-name } peut automatiquement extraire et remettre en forme les citations et insérer une bibliographie dans les fichiers RTF. Pour démarrer, choisissez un fichier RTF ci-dessous.
 rtfScan-introPage-description2 = Pour démarrer, sélectionnez un fichier RTF en lecture et un fichier de sortie ci-dessous :
 rtfScan-input-file = Fichier en lecture
 rtfScan-output-file = Fichier de sortie
@@ -278,7 +279,7 @@ integration-prefs-exportDocument =
     .label = Passer à un autre logiciel de traitement de texte…
 publications-intro-page =
     .label = Mes publications
-publications-intro = Les documents que vous ajoutez dans Mes publications seront publiés dans votre profil sur zotero.org. Si vous choisissez d'inclure les fichiers attachés, ceux-ci seront rendus publics sous la licence que vous spécifiez. N'ajoutez que des travaux que vous avez créés vous-mêmes et n'incluez que les fichiers attachés que vous osez et voulez distribuer.
+publications-intro = Les documents que vous ajoutez dans Mes publications seront publiés dans votre profil sur zotero.org. Si vous choisissez d'inclure des fichiers attachés, ces derniers seront rendus publics sous la licence que vous spécifiez. N'ajoutez que des travaux que vous avez créés vous-mêmes et n'ajoutez des fichiers que si vous avez le droit de les distribuer publiquement et seulement si vous le souhaitez.
 publications-include-checkbox-files =
     .label = Inclure les fichiers
 publications-include-checkbox-notes =
@@ -322,17 +323,17 @@ publications-buttons-next-sharing =
     .label = Suivant : partager
 publications-buttons-next-choose-license =
     .label = Choisir une licence
-licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
+licenses-cc-0 = Versement au domaine public en vertu de CC0 1.0 Universel. 
 licenses-cc-by = Licence Creative Commons Attribution 4.0 International
 licenses-cc-by-nd = Licence Creative Commons Attribution - Pas de modification 4.0 International
 licenses-cc-by-sa = Licence Creative Commons Attribution - Partage dans les mêmes conditions 4.0 International
 licenses-cc-by-nc = Licence Creative Commons Attribution - Pas d’utilisation commerciale 4.0 International
 licenses-cc-by-nc-nd = Licence Creative Commons Attribution - Pas d’utilisation commerciale - Pas de modification 4.0 International
 licenses-cc-by-nc-sa = Licence Creative Commons Attribution - Pas d’utilisation commerciale - Partage dans les mêmes conditions 4.0 International
-licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
-licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+licenses-cc-more-info = Assurez-vous d'avoir lu les <a data-l10n-name="license-considerations">Avertissements à l’attention des donneurs de licence</a> de Creative Commons avant de placer votre œuvre sous une licence CC. Notez que la licence que vous appliquez ne peut être révoquée, même si vous choisissez ultérieurement des conditions différentes ou si vous cessez de publier l'œuvre.
+licenses-cc0-more-info = Assurez-vous d'avoir lu la <a data-l10n-name="license-considerations">FAQ CC0</a> de Creative Commons avant de placer votre travail sous la licence CC0. Veuillez noter que placer votre travail dans le domaine public est irréversible, même si vous choisissez plus tard des conditions différentes ou si vous cessez la publication de ce travail.
 restart-in-troubleshooting-mode-menuitem =
-    .label = Redémarrer en mode dépannage...
+    .label = Redémarrer en mode dépannage…
     .accesskey = i
 restart-in-troubleshooting-mode-dialog-title = Redémarrer en mode dépannage
 restart-in-troubleshooting-mode-dialog-description = { -app-name } va redémarrer avec toutes les extensions désactivées. Quelques fonctionnalités pourraient ne pas répondre correctement tant que le mode dépannage est activé.
@@ -400,10 +401,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Développer la section
-    .label = Expand { $section } section
+    .label = Développer la section { $section } 
 section-button-collapse =
     .dynamic-tooltiptext = Réduire la section
-    .label = Collapse { $section } section
+    .label = Réduire la section { $section } 
 annotations-count =
     { $count ->
         [one] { $count } annotation
@@ -444,7 +445,7 @@ collapse-other-sections =
 expand-all-sections =
     .label = Développer toutes les sections
 abstract-field =
-    .placeholder = Ajouter un résumé...
+    .placeholder = Ajouter un résumé…
 tagselector-search =
     .placeholder = Filtrer les marqueurs
 context-notes-search =
@@ -453,7 +454,7 @@ new-collection-dialog =
     .title = Nouvelle collection
     .buttonlabelaccept = Créer une collection
 new-collection-name = Nom :
-new-collection-create-in = Create in:
+new-collection-create-in = Créer dans :
 attachment-info-filename = Nom du fichier
 attachment-info-accessed = Date de consultation
 attachment-info-pages = Pages
@@ -466,7 +467,7 @@ attachment-info-convert-note =
             [child] Item
            *[unknown] New
         } Note
-    .tooltiptext = L'ajout de notes à une pièce jointe n'est plus supporté, mais vous pouvez éditer cette note en la convertissant en une note séparée.
+    .tooltiptext = L'ajout de notes à une pièce jointe n'est plus pris en charge, mais vous pouvez modifier cette note en la convertissant en une note séparée.
 attachment-preview-placeholder = Aucune pièce jointe à prévisualiser
 toggle-preview =
     .label =
@@ -481,7 +482,7 @@ quickformat-general-instructions =
        *[other] { "" }
     } Appuyez sur { return-or-enter } pour enregistrer les modifications de cette citation. Appuyez sur Échap pour annuler les modifications et fermer la fenêtre.
 quickformat-aria-bubble = Ce document est inclus dans la citation. Appuyez sur la barre d'espace pour personnaliser ce document. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
+quickformat-aria-input = Commencez la saisie pour rechercher un document à ajouter dans cette citation. Appuyez sur "Tabulation" pour naviguer dans la liste des résultats de recherche. { quickformat-general-instructions }
 quickformat-aria-item = Appuyez sur { return-or-enter } pour ajouter ce document à la citation. Appuyez sur Tab pour revenir au champ de recherche. 
 quickformat-accept =
     .tooltiptext = Enregistrer les modifications de cette citation
@@ -490,7 +491,7 @@ quickformat-locator-type =
 quickformat-locator-value = Localisateur
 quickformat-citation-options =
     .tooltiptext = Afficher les options de citation
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
+insert-note-aria-input = Commencez la saisie pour chercher une note. Appuyez sur Tab pour naviguer dans la liste des résultats de recherche. Appuyez sur Échap pour fermer la boîte de dialogue.
 insert-note-aria-item = Appuyez sur { return-or-enter } pour sélectionner cette note. Appuyez sur Tab pour revenir au champ de recherche. Appuyez sur Échap pour fermer cette fenêtre.
 quicksearch-mode =
     .aria-label = Mode de recherche rapide
@@ -512,9 +513,9 @@ item-pane-header-more-options =
     .label = Plus d'options
 item-pane-message-items-selected =
     { $count ->
-        [one] { $count } document sélectionné
-        [many] { $count } documents sélectionnés
-       *[other] { $count } documents sélectionnés
+        [0] No items selected
+        [one] { $count } item selected
+       *[other] { $count } items selected
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -534,6 +535,18 @@ item-pane-message-objects-selected =
         [many] { $count } objets sélectionnés
        *[other] { $count } objets sélectionnés
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] No items in this view
+        [one] { $count } item in this view
+       *[other] { $count } items in this view
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Merge { $count } item
+           *[other] Merge { $count } items
+        }
 locate-library-lookup-no-resolver = Vous devez choisir un résolveur dans le panneau { $pane } des préférences { -app-name }
 architecture-win32-warning-message = Vous utilisez { -app-name } en mode 32-bit sur une version 64-bit de Windows. { -app-name } s'exécutera plus efficacement en mode 64-bit.
 architecture-warning-action = Télécharger { -app-name } version 64-bit

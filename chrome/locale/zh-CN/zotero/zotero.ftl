@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = 打开上下文菜单
 itembox-button-merge =
@@ -390,10 +391,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = 展开此栏
-    .label = Expand { $section } section
+    .label = 展开 { $section } 栏
 section-button-collapse =
     .dynamic-tooltiptext = 折叠此栏
-    .label = Collapse { $section } section
+    .label = 折叠 { $section } 栏
 annotations-count =
     { $count ->
        *[other] { $count } 个注释
@@ -500,7 +501,9 @@ item-pane-header-more-options =
     .label = 更多选项
 item-pane-message-items-selected =
     { $count ->
-       *[other] 已选择 { $count } 个条目
+        [0] No items selected
+        [one] { $count } item selected
+       *[other] { $count } items selected
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -514,6 +517,18 @@ item-pane-message-objects-selected =
     { $count ->
        *[other] 已选择 { $count } 个对象
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] No items in this view
+        [one] { $count } item in this view
+       *[other] { $count } items in this view
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Merge { $count } item
+           *[other] Merge { $count } items
+        }
 locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
 architecture-win32-warning-message = { -app-name } 目前在 64 位版本的 Windows 上以 32 位模式运行。 { -app-name } 在 64 位模式下运行效率更高。
 architecture-warning-action = 下载 64 位版本的 { -app-name }

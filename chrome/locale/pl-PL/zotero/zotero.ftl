@@ -35,13 +35,13 @@ menu-add-child-file-attachment =
 menu-add-child-linked-file-attachment =
     .label = Dołącz odnośnik do pliku...
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = Dodaj link do zasobu...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
     .label = Nowa osobna notatka
 menu-new-item-note =
-    .label = New Item Note
+    .label = Nowa notatka do elementu
 menu-restoreToLibrary =
     .label = Przywróć do biblioteki
 menu-deletePermanently =
@@ -98,14 +98,15 @@ item-menu-viewAttachment =
 item-menu-add-file =
     .label = Plik
 item-menu-add-linked-file =
-    .label = Linked File
+    .label = Odnośnik do pliku
 item-menu-add-url =
-    .label = Web Link
+    .label = Odnośnik do zasobu internetowego
 view-online = Pokaż online
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Otwórz menu kontekstowe
 itembox-button-merge =
@@ -169,7 +170,7 @@ import-online-form-intro = Please enter your credentials to log in to { $targetA
 import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
 import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
 import-online-relink-only =
-    .label = Relink Mendeley Desktop citations
+    .label = Zlinkuj ponownie cytowania Mendeley Desktop
 import-online-relink-kb = Więcej informacji
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
 items-table-cell-notes =
@@ -189,10 +190,10 @@ rtfScan-output-file = Plik wyjściowy
 rtfScan-no-file-selected = Nie wybrano pliku
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = Wybierz plik wejściowy
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = Wybierz plik wyjściowy
 rtfScan-intro-page =
     .label = Wstęp
 rtfScan-scan-page =
@@ -218,12 +219,12 @@ runJS-result =
         [async] Return value:
        *[other] Result:
     }
-runJS-run-async = Run as async function
+runJS-run-async = Uruchom jako funkcję async
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
 bibliography-style-label = Styl cytowania:
 bibliography-locale-label = Język:
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Wyświetl cytowania jako:
 bibliography-advancedOptions-label = Zaawansowane ustawienia
 bibliography-outputMode-label = Tryb wyjścia:
 bibliography-outputMode-citations =
@@ -259,7 +260,7 @@ integration-prefs-footnotes =
 integration-prefs-endnotes =
     .label = Przypisy końcowe
 integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
+    .label = Zapisz cytowanie jako zakładki
 integration-prefs-bookmarks-description = Zakładki mogą być współdzielone między edytorami Word i LibreOffice Writer, ale w razie ich przypadkowej modyfikacji mogą wystąpić błędy i nie mogą być one wstawiane do przypisów dolnych.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
@@ -318,7 +319,7 @@ publications-choose-license-commercial-prompt = Czy zezwolić na komercyjne uży
 publications-buttons-add-to-my-publications =
     .label = Dodaj do Moich publikacji
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = Następne: Współdzielenie
 publications-buttons-next-choose-license =
     .label = Wybierz licencję
 licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
@@ -331,9 +332,9 @@ licenses-cc-by-nc-sa = Licencja Creative Commons Uznanie Autorstwa-Użycie nieko
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Uruchom ponownie w trybie rozwiązywania problemów...
     .accesskey = N
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
+restart-in-troubleshooting-mode-dialog-title = Uruchom ponownie w trybie rozwiązywania problemów
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
     .label = Gęstość
@@ -348,7 +349,7 @@ pane-notes = Notatki
 pane-libraries-collections = Biblioteki i kolekcje
 pane-tags = Etykiety
 pane-related = Powiązane
-pane-attachment-info = Attachment Info
+pane-attachment-info = Informacja o załącznikach
 pane-attachment-preview = Podgląd
 pane-attachment-annotations = Adnotacje
 pane-header-attachment-associated =
@@ -434,15 +435,15 @@ pin-section =
 unpin-section =
     .label = Odepnij sekcję
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Zwiń inne sekcje
 expand-all-sections =
-    .label = Expand All Sections
+    .label = Rozwiń wszystkie sekcje
 abstract-field =
     .placeholder = Dodaj streszczenie...
 tagselector-search =
     .placeholder = Filtruj etykiety
 context-notes-search =
-    .placeholder = Search Notes
+    .placeholder = Przeszukaj notatki
 new-collection-dialog =
     .title = Nowa kolekcja
     .buttonlabelaccept = Utwórz kolekcję
@@ -487,13 +488,13 @@ quickformat-citation-options =
 insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
 insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
 quicksearch-mode =
-    .aria-label = Quick Search mode
+    .aria-label = Tryb szybkiego wyszukiwania
 quicksearch-input =
     .aria-label = Szybkie wyszukiwanie
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Wyświetl jako
 item-pane-header-none =
     .label = Brak
 item-pane-header-title =
@@ -503,9 +504,10 @@ item-pane-header-titleCreatorYear =
 item-pane-header-bibEntry =
     .label = Wpis bibliograficzny
 item-pane-header-more-options =
-    .label = More Options
+    .label = Więcej opcji
 item-pane-message-items-selected =
     { $count ->
+        [0] No items selected
         [one] { $count } item selected
        *[other] { $count } items selected
     }
@@ -524,6 +526,18 @@ item-pane-message-objects-selected =
         [one] { $count } object selected
        *[other] { $count } objects selected
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] No items in this view
+        [one] { $count } item in this view
+       *[other] { $count } items in this view
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Merge { $count } item
+           *[other] Merge { $count } items
+        }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = { -app-name } jest uruchomiony w trybie 32-bitowym na 64-bitowej wersji systemu Windows. { -app-name } będzie działać wydajniej w trybie 64-bitowym.
 architecture-warning-action = Pobierz wersję 64-bitową { -app-name }

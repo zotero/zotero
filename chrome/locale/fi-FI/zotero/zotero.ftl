@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = Tiedoston uusi nimi on nyt { $filename }
 itembox-button-options =
     .tooltiptext = Avaa kontekstivalikko
 itembox-button-merge =
@@ -395,10 +396,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Laajenna osa
-    .label = Expand { $section } section
+    .label = Laajenna osio { $section }
 section-button-collapse =
     .dynamic-tooltiptext = Kutista osa
-    .label = Collapse { $section } section
+    .label = Kutista osio { $section }
 annotations-count =
     { $count ->
         [one] { $count } huomautus
@@ -506,6 +507,7 @@ item-pane-header-more-options =
     .label = Lisää vaihtoehtoja
 item-pane-message-items-selected =
     { $count ->
+        [0] Ei valittuja nimikkeitä
         [one] { $count } nimike valittu
        *[other] { $count } nimikettä valittu
     }
@@ -524,6 +526,18 @@ item-pane-message-objects-selected =
         [one] { $count } kohde valittu
        *[other] { $count } kohdetta valittu
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] Ei nimikkeitä tässä näkymässä
+        [one] { $count } nimike tässä näkymässä
+       *[other] { $count } nimikettä tässä näkymässä
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Yhdistä { $count } kohde
+           *[other] Yhdistä { $count } kohdetta
+        }
 locate-library-lookup-no-resolver = Sinun täytyy valita hakutyökalu { -app-name }n asetusten { $pane }-ruudusta.
 architecture-win32-warning-message = { -app-name } on käynnissä 32-bittisessä tilassa 64-bitisessä Windowsissa. { -app-name } toimii paremmin 64-bittisessä tilassa.
 architecture-warning-action = Lataa 64-bittinen { -app-name }

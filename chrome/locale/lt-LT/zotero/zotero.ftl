@@ -106,6 +106,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
+file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Atverti kontekstinį meniu
 itembox-button-merge =
@@ -518,6 +519,7 @@ item-pane-header-more-options =
     .label = Daugiau parinkčių
 item-pane-message-items-selected =
     { $count ->
+        [0] No items selected
         [one] { $count } item selected
        *[other] { $count } items selected
     }
@@ -536,6 +538,18 @@ item-pane-message-objects-selected =
         [one] { $count } object selected
        *[other] { $count } objects selected
     }
+item-pane-message-unselected =
+    { $count ->
+        [0] No items in this view
+        [one] { $count } item in this view
+       *[other] { $count } items in this view
+    }
+item-pane-duplicates-merge-items =
+    .label =
+        { $count ->
+            [one] Merge { $count } item
+           *[other] Merge { $count } items
+        }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = { -app-name } paleista 32 bitų veiksenoje 64 bitų Windows sistemoje. { -app-name } veiks veiksmingiau 64 bitų veiksenoje.
 architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
