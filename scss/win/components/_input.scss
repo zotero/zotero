@@ -15,19 +15,19 @@
 	background-clip: border-box, padding-box;
 	@media (prefers-color-scheme: light) {
 		border: 1px solid var(--fill-quinary);
-		border-bottom-color: var(--accent-blue);
+		border-bottom-color: var(--color-accent);
 		background-color: unset;
 		background-image:
-			linear-gradient(to top, var(--accent-blue) 2px, transparent 2px 100%),
+			linear-gradient(to top, var(--color-accent) 2px, transparent 2px 100%),
 			linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3));
 	}
 
 	@media (prefers-color-scheme: dark) {
 		border: 1px solid var(--fill-quinary);
-		border-bottom-color: var(--accent-blue);
+		border-bottom-color: var(--color-accent);
 		background-color: unset;
 		background-image:
-			linear-gradient(to top, var(--accent-blue) 2px, transparent 2px 100%),
+			linear-gradient(to top, var(--color-accent) 2px, transparent 2px 100%),
 			linear-gradient(var(--fill-senary), var(--fill-senary));
 	}
 }
@@ -95,7 +95,7 @@ textarea:not([no-windows-native]) {
 		}	
 
 		&::selection {
-			background-color: var(--accent-blue);
+			background-color: var(--color-accent);
 			color: var(--accent-white);
 		}
 

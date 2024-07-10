@@ -1,0 +1,6 @@
+.text-link,
+.zotero-text-link,
+a {
+	// Overwrite the -moz-nativehyperlinktext to respect the accent color
+	color: var(--color-accent) !important;
+}
