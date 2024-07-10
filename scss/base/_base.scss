@@ -17,7 +17,7 @@
 	}
 	@media (-moz-platform: linux) {
 		--color-accent: SelectedItem;
-		--color-focus-border: -moz-accent-color;
+		--color-focus-border: var(--color-accent);
 		--width-focus-border: 2px;
 	}
 	// Only used on Windows
