@@ -50,6 +50,9 @@ async function babelWorker(ev) {
 			// automatic batching https://react.dev/blog/2022/03/08/react-18-upgrade-guide#automatic-batching
 			// which causes less frequent re-rendering and lagginess on scroll of components such as tag selector
 			let onScrollSetStateChunkRegex = /(_this\.state\.isScrolling\s*\|\|\s*isScrollingChange\(!0\),\s*)(_this\.setState\s*\(\s*\{[^}]*\}\s*\))/;
+			if (!onScrollSetStateChunkRegex.test(transformed)) {
+				throw new Error(`Could not find line "_this.state.isScrolling || isScrollingChange(!0), _this.setState({" in react-virtualized for a patch to laggy scrolling.`);
+			}
 			transformed = transformed.replace(onScrollSetStateChunkRegex, (_, p1, p2) => {
 				return `${p1}ReactDOM.flushSync(() => ${p2.trim()})`;
 			});
