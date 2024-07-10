@@ -550,7 +550,9 @@ describe("Document Recognition", function() {
 	});
 
 	describe("canUnrecognize()", function () {
-		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
+		before(function () {
+			if (Zotero.automatedTest) this.skip(); // TODO: Mock services
+		});
 		
 		async function getRecognizedItem() {
 			let search;
