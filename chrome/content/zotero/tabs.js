@@ -208,7 +208,7 @@ var Zotero_Tabs = new function () {
 			if (tab.type === 'library') {
 				this.rename('zotero-pane', tab.title);
 				// At first, library tab is added without the icon data. We set it here once we know what it is
-				var libraryTab = this._getTab('zotero-pane');
+				let libraryTab = this._getTab('zotero-pane');
 				libraryTab.tab.data = tab.data || {};
 			}
 			else if (tab.type === 'reader') {
