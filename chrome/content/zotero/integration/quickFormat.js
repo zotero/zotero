@@ -1709,11 +1709,11 @@ var Zotero_QuickFormat = new function () {
 		return node.classList.contains("zotero-bubble-input");
 	}
 
-	function isCursorAtInputsStart(input) {
+	function isCursorAtInputStart(input) {
 		return Zotero.rtl ? input.selectionStart == input.value.length : input.selectionStart == 0;
 	}
 
-	function isCursorAtInputsEnd(input) {
+	function isCursorAtInputEnd(input) {
 		return Zotero.rtl ? input.selectionStart == 0 : input.selectionStart == input.value.length;
 	}
 
@@ -1892,12 +1892,12 @@ var Zotero_QuickFormat = new function () {
 		}
 		else if (["ArrowLeft", "ArrowRight"].includes(event.key) && !event.shiftKey) {
 			// On arrow left (right in RTL) from the beginning of the input, move to previous bubble
-			if (event.key === Zotero.arrowPreviousKey && isCursorAtInputsStart(this)) {
+			if (event.key === Zotero.arrowPreviousKey && isCursorAtInputStart(this)) {
 				moveFocusBack(this);
 				event.preventDefault();
 			}
 			// On arrow right (left in RTL) from the end of the input, move to next bubble
-			else if (event.key === Zotero.arrowNextKey && isCursorAtInputsEnd(this)) {
+			else if (event.key === Zotero.arrowNextKey && isCursorAtInputEnd(this)) {
 				moveFocusForward(this);
 				event.preventDefault();
 			}
@@ -2046,7 +2046,7 @@ var Zotero_QuickFormat = new function () {
 		// On Home from the beginning of the input, create and focus input in the beginning
 		// If there is an input in the beginning already, just focus it
 		else if (event.key === "Home"
-			&& (!focusedInput || (isCursorAtInputsStart(focusedInput) && focusedInput.previousElementSibling))) {
+			&& (!focusedInput || (isCursorAtInputStart(focusedInput) && focusedInput.previousElementSibling))) {
 			let input;
 			if (isInput(editor.firstChild)) {
 				input = editor.firstChild;
@@ -2060,7 +2060,7 @@ var Zotero_QuickFormat = new function () {
 		// On End from the beginning of the input, create and focus input in the end.
 		// If there is an input in the end already, just focus it
 		else if (event.key === "End"
-			&& (!focusedInput || (isCursorAtInputsEnd(focusedInput) && focusedInput.nextElementSibling))) {
+			&& (!focusedInput || (isCursorAtInputEnd(focusedInput) && focusedInput.nextElementSibling))) {
 			let input;
 			if (isInput(editor.childNodes[editor.childNodes.length - 1])) {
 				input = editor.childNodes[editor.childNodes.length - 1];
