@@ -2185,7 +2185,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				yield Zotero.Attachments.linkFromFile({"file":file}), // Standalone link to file
 				yield Zotero.Attachments.importFromFile({"file":file, "parentItemID":item.id}), // Attached stored file
 				yield Zotero.Attachments.linkFromFile({"file":file, "parentItemID":item.id}), // Attached link to file
-				yield Zotero.Attachments.linkFromURL({"url":'http://example.com', "parentItemID":item.id, "contentType":'application/pdf', "title":'empty.pdf'}) // Attached link to URL
+				yield Zotero.Attachments.linkFromURL({"url":'http://example.com', "parentItemID":item.id, "contentType":'application/pdf', "title":'empty'}) // Attached link to URL
 			];
 			
 			yield Zotero.DB.executeTransaction(async function () {
@@ -2293,7 +2293,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 					
 					// Set fields
 					assert.equal(attachment.itemType, 'attachment', prefix + 'itemType is correct' + suffix);
-					assert.equal(attachment.title, 'empty.pdf', prefix + 'title is correct' + suffix);
+					assert.include([Zotero.getString('fileTypes.pdf'), 'empty'], attachment.title, prefix + 'title is correct' + suffix);
 					assert.equal(attachment.url, 'http://example.com', prefix + 'url is correct' + suffix);
 					assert.equal(attachment.note, 'note', prefix + 'note is correct' + suffix);
 					
@@ -2325,10 +2325,10 @@ describe("Zotero.Translate.ItemGetter", function() {
 						assert.isString(attachment.localPath, prefix + 'localPath is set' + suffix);
 						let attachmentFile = Zotero.File.pathToFile(attachment.localPath);
 						assert.isTrue(attachmentFile.exists(), prefix + 'localPath points to a file' + suffix);
-						assert.isTrue(attachmentFile.equals(attachments[j].getFile()), prefix + 'localPath points to the correct file' + suffix);
+						assert.equal(attachmentFile.spec, zoteroItem.getFile().spec, prefix + 'localPath points to the correct file' + suffix);
 						
 						assert.equal(attachment.filename, 'empty.pdf', prefix + 'filename is correct' + suffix);
-						assert.equal(attachment.defaultPath, 'files/' + attachments[j].id + '/' + attachment.filename, prefix + 'defaultPath is correct' + suffix);
+						assert.equal(attachment.defaultPath, 'files/' + zoteroItem.id + '/' + attachment.filename, prefix + 'defaultPath is correct' + suffix);
 						
 						// saveFile function
 						assert.isFunction(attachment.saveFile, prefix + 'has saveFile function' + suffix);

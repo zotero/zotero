@@ -391,7 +391,7 @@ describe("ZoteroPane", function() {
 			var doc = dp.parseFromString(note.getNote(), 'text/html');
 			assert.sameMembers(
 				[...doc.querySelectorAll('h3')].map(x => x.textContent),
-				[attachment1.attachmentFilename, attachment2.attachmentFilename]
+				[attachment1.getField('title'), attachment2.getField('title')]
 			);
 			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 2);
 			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
@@ -415,7 +415,7 @@ describe("ZoteroPane", function() {
 			var doc = dp.parseFromString(note.getNote(), 'text/html');
 			assert.sameMembers(
 				[...doc.querySelectorAll('h3')].map(x => x.textContent),
-				[attachment1.attachmentFilename, attachment2.attachmentFilename]
+				[attachment1.getField('title'), attachment2.getField('title')]
 			);
 			// No item titles
 			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 0);
@@ -493,10 +493,10 @@ describe("ZoteroPane", function() {
 			assert.sameMembers(
 				[...doc.querySelectorAll('h3')].map(x => x.textContent),
 				[
-					attachment1.attachmentFilename,
-					attachment2.attachmentFilename,
-					attachment3.attachmentFilename,
-					attachment4.attachmentFilename
+					attachment1.getField('title'),
+					attachment2.getField('title'),
+					attachment3.getField('title'),
+					attachment4.getField('title')
 				]
 			);
 			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 4);
