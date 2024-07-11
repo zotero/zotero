@@ -1054,7 +1054,7 @@ var ZoteroPane = new function()
 			event.target.click();
 			// Some menus have a history of not opening on programmatic click
 			// If event.target.click above worked, this will be a noop.
-			if (event.target.querySelector("menupopup")) {
+			if (event.target.menupopup) {
 				event.target.open = true;
 			}
 			event.preventDefault();
