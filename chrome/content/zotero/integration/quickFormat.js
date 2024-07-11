@@ -346,6 +346,7 @@ var Zotero_QuickFormat = new function () {
 		let newInput = document.createElement("input");
 		newInput.className = "zotero-bubble-input";
 		newInput.setAttribute("aria-describedby", "input-description");
+		newInput.setAttribute("dir", Zotero.rtl ? "rtl" : "auto");
 		newInput.addEventListener("input", (_) => {
 			_resetSearchTimer();
 			// Expand/shrink the input field to match the width of content
@@ -1708,6 +1709,14 @@ var Zotero_QuickFormat = new function () {
 		return node.classList.contains("zotero-bubble-input");
 	}
 
+	function isCursorAtInputStart(input) {
+		return Zotero.rtl ? input.selectionStart == input.value.length : input.selectionStart == 0;
+	}
+
+	function isCursorAtInputEnd(input) {
+		return Zotero.rtl ? input.selectionStart == 0 : input.selectionStart == input.value.length;
+	}
+
 	// Check if the editor has only one child node: the non-removable input
 	function isEditorCleared() {
 		return editor.childElementCount == 1 && editor.firstChild.classList.contains("zotero-bubble-input");
@@ -1758,12 +1767,15 @@ var Zotero_QuickFormat = new function () {
 		let bubbles = getAllBubbles();
 		let lastBubble = null;
 		let startOfTheLine = false;
+		let isClickAfterBubble = (clickX, bubbleRect) => {
+			return Zotero.rtl ? clickX < bubbleRect.left : clickX > bubbleRect.right;
+		};
 		for (let i = 0; i < bubbles.length; i++) {
 			let rect = bubbles[i].getBoundingClientRect();
 			// If within the vertical range of a bubble
 			if (y >= rect.top && y <= rect.bottom) {
-				// If the click is to the right of a bubble, it becomes a candidate
-				if (x > rect.right) {
+				// If the click is after the bubble, it becomes a candidate
+				if (isClickAfterBubble(x, rect)) {
 					lastBubble = i;
 				}
 				// Otherwise, stop and return the last bubble we saw if any
@@ -1880,12 +1892,12 @@ var Zotero_QuickFormat = new function () {
 		}
 		else if (["ArrowLeft", "ArrowRight"].includes(event.key) && !event.shiftKey) {
 			// On arrow left (right in RTL) from the beginning of the input, move to previous bubble
-			if (event.key === Zotero.arrowPreviousKey && this.selectionStart === 0) {
+			if (event.key === Zotero.arrowPreviousKey && isCursorAtInputStart(this)) {
 				moveFocusBack(this);
 				event.preventDefault();
 			}
 			// On arrow right (left in RTL) from the end of the input, move to next bubble
-			else if (event.key === Zotero.arrowNextKey && this.selectionStart === this.value.length) {
+			else if (event.key === Zotero.arrowNextKey && isCursorAtInputEnd(this)) {
 				moveFocusForward(this);
 				event.preventDefault();
 			}
@@ -1895,8 +1907,9 @@ var Zotero_QuickFormat = new function () {
 			event.preventDefault();
 			// Backspace/Delete from the beginning of an input will delete the previous bubble.
 			// If there are two inputs next to each other as a result, they are merged
-			if (this.previousElementSibling) {
-				_deleteBubble(this.previousElementSibling);
+			let toDelete = Zotero.rtl ? this.nextElementSibling : this.previousElementSibling;
+			if (toDelete) {
+				_deleteBubble(toDelete);
 				_combineNeighboringInputs();
 			}
 			// Rerun search to update opened documents section if needed
@@ -2033,7 +2046,7 @@ var Zotero_QuickFormat = new function () {
 		// On Home from the beginning of the input, create and focus input in the beginning
 		// If there is an input in the beginning already, just focus it
 		else if (event.key === "Home"
-			&& (!focusedInput || (focusedInput.selectionStart === 0 && focusedInput.previousElementSibling))) {
+			&& (!focusedInput || (isCursorAtInputStart(focusedInput) && focusedInput.previousElementSibling))) {
 			let input;
 			if (isInput(editor.firstChild)) {
 				input = editor.firstChild;
@@ -2047,7 +2060,7 @@ var Zotero_QuickFormat = new function () {
 		// On End from the beginning of the input, create and focus input in the end.
 		// If there is an input in the end already, just focus it
 		else if (event.key === "End"
-			&& (!focusedInput || (focusedInput.selectionStart === focusedInput.value.length && focusedInput.nextElementSibling))) {
+			&& (!focusedInput || (isCursorAtInputEnd(focusedInput) && focusedInput.nextElementSibling))) {
 			let input;
 			if (isInput(editor.childNodes[editor.childNodes.length - 1])) {
 				input = editor.childNodes[editor.childNodes.length - 1];
