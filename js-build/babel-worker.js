@@ -51,7 +51,7 @@ async function babelWorker(ev) {
 			// which causes less frequent re-rendering and lagginess on scroll of components such as tag selector
 			let onScrollSetStateChunkRegex = /(_this\.state\.isScrolling\s*\|\|\s*isScrollingChange\(!0\),\s*)(_this\.setState\s*\(\s*\{[^}]*\}\s*\))/;
 			if (!onScrollSetStateChunkRegex.test(transformed)) {
-				throw new Error(`Could not find line "_this.state.isScrolling || isScrollingChange(!0), _this.setState({" in react-virtualized for a patch to laggy scrolling.`);
+				throw new Error(`"_this.state.isScrolling || isScrollingChange(!0), _this.setState({" not found in react-virtualized`);
 			}
 			transformed = transformed.replace(onScrollSetStateChunkRegex, (_, p1, p2) => {
 				return `${p1}ReactDOM.flushSync(() => ${p2.trim()})`;
