@@ -1730,7 +1730,7 @@ Zotero.Attachments = new function () {
 		try {
 			tmpDir = (await this.createTemporaryStorageDirectory()).path;
 			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.pdf');
-			let { url, props } = await this.downloadFirstAvailableFile(
+			let { title, url, props } = await this.downloadFirstAvailableFile(
 				urlResolvers,
 				tmpFile,
 				{
@@ -1746,7 +1746,7 @@ Zotero.Attachments = new function () {
 					directory: tmpDir,
 					libraryID: item.libraryID,
 					filename: PathUtils.filename(tmpFile),
-					title: _getPDFTitleFromVersion(props.articleVersion),
+					title: title || _getPDFTitleFromVersion(props.articleVersion),
 					url,
 					contentType: 'application/pdf',
 					parentItemID: item.id
@@ -1807,8 +1807,8 @@ Zotero.Attachments = new function () {
 	 * @param {Function} [options.onAfterRequest] - Function that runs after a request
 	 * @param {Function} [options.onRequestError] - Function that runs when a request fails.
 	 *     Return true to retry request and false to skip.
-	 * @return {Object|false} - Object with successful 'url' and 'props' from the associated urlResolver,
-	 *     or false if no file could be downloaded
+	 * @return {Object|false} - Object with successful 'title' (when available from translator), 'url', and 'props'
+	 *    from the associated urlResolver, or false if no file could be downloaded
 	 */
 	this.downloadFirstAvailableFile = async function (urlResolvers, path, options) {
 		const maxURLs = 6;
@@ -1883,7 +1883,6 @@ Zotero.Attachments = new function () {
 			
 			let url = urlResolver.url;
 			let pageURL = urlResolver.pageURL;
-			let fromPage = false;
 			
 			// Force URLs to HTTPS. If a request fails because of that, too bad.
 			if (!Zotero.test) {
@@ -1938,6 +1937,7 @@ Zotero.Attachments = new function () {
 			// If URL wasn't available or failed, try to get a URL from a page
 			if (pageURL) {
 				url = null;
+				let title = null;
 				let responseURL;
 				try {
 					Zotero.debug(`Looking for PDF on ${pageURL}`);
@@ -2073,7 +2073,7 @@ Zotero.Attachments = new function () {
 					}
 					// Otherwise translate the Document we parsed above
 					else if (doc) {
-						url = await Zotero.Utilities.Internal.getPDFFromDocument(doc);
+						({ title, url } = await Zotero.Utilities.Internal.getPDFFromDocument(doc));
 					}
 				}
 				catch (e) {
@@ -2100,7 +2100,7 @@ Zotero.Attachments = new function () {
 						await beforeRequest(url);
 						await this.downloadFile(url, path, downloadOptions);
 						afterRequest(url);
-						return { url, props: urlResolver };
+						return { title, url, props: urlResolver };
 					}
 					catch (e) {
 						Zotero.debug(`Error downloading ${url}: ${e}\n\n${e.stack}`);
