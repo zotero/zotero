@@ -46,6 +46,16 @@ async function babelWorker(ev) {
 			transformed = contents.replace('scrollDiv = document.createElement("div")', 'scrollDiv = document.createElementNS("http://www.w3.org/1999/xhtml", "div")')
 				.replace('document.body.appendChild(scrollDiv)', 'document.documentElement.appendChild(scrollDiv)')
 				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');
+			// React 18: wrap setState in onScroll handler with ReactDOM.flushSync to avoid
+			// automatic batching https://react.dev/blog/2022/03/08/react-18-upgrade-guide#automatic-batching
+			// which causes less frequent re-rendering and lagginess on scroll of components such as tag selector
+			let onScrollSetStateChunkRegex = /(_this\.state\.isScrolling\s*\|\|\s*isScrollingChange\(!0\),\s*)(_this\.setState\s*\(\s*\{[^}]*\}\s*\))/;
+			if (!onScrollSetStateChunkRegex.test(transformed)) {
+				throw new Error(`"_this.state.isScrolling || isScrollingChange(!0), _this.setState({" not found in react-virtualized`);
+			}
+			transformed = transformed.replace(onScrollSetStateChunkRegex, (_, p1, p2) => {
+				return `${p1}ReactDOM.flushSync(() => ${p2.trim()})`;
+			});
 		}
 		// Patch single-file
 		else if (sourcefile === 'resource/SingleFile/lib/single-file.js') {
