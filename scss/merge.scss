@@ -55,6 +55,12 @@ merge-group {
 	#right-pane groupbox:focus:not([selected=true]) h2 {
 		text-decoration: underline;
 	}
+
+	editable-text .input:read-only {
+		--width-focus-border: 0px !important;
+		--width-focus-outer-border: 0px !important;
+		background: transparent !important;
+	}
 }
 
 #resolve-all {
