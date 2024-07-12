@@ -46,11 +46,11 @@ zoterosearch {
 	}
 	
 	#conditionsmenu {
-		min-width: 15em;
+		width: 15em;
 	}
 	
-	#operatorsmenu {
-		min-width: 13em;
+	#operatorsmenu, #valuemenu, #valuefield, .search-in-the-last {
+		width: 12em;
 	}
 
 	#condition-tooltips tooltip
