@@ -54,7 +54,7 @@ async function babelWorker(ev) {
 				throw new Error(`"_this.state.isScrolling || isScrollingChange(!0), _this.setState({" not found in react-virtualized`);
 			}
 			transformed = transformed.replace(onScrollSetStateChunkRegex, (_, p1, p2) => {
-				return `${p1}ReactDOM.flushSync(() => ${p2.trim()})`;
+				return `${p1}ReactDOM.flushSync(() => ${p2})`;
 			});
 		}
 		// Patch single-file
