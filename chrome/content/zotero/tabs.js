@@ -96,9 +96,6 @@ var Zotero_Tabs = new function () {
 	this._update = function () {
 		// Go through all tabs and try to save their icons to tab.data
 		for (let tab of this._tabs) {
-			// If the icon was earlier cached, skip this tab
-			if (tab.data.icon) continue;
-
 			// Find the icon for the library tab
 			if (tab.id === 'zotero-pane') {
 				let index = ZoteroPane.collectionsView?.selection?.focused;
@@ -107,7 +104,7 @@ var Zotero_Tabs = new function () {
 					tab.data.icon = iconName;
 				}
 			}
-			else {
+			else if (!tab.data.icon) {
 				// Try to fetch the icon for the reader tab
 				try {
 					let item = Zotero.Items.get(tab.data.itemID);
@@ -115,8 +112,6 @@ var Zotero_Tabs = new function () {
 				}
 				catch (e) {
 					// item might not yet be loaded, we will get the right icon on the next update
-					// but until then use a default placeholder
-					tab.data.icon = null;
 				}
 			}
 		}
