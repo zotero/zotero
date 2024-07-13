@@ -25,7 +25,9 @@ richlistitem {
 	padding: 0.2em 0.4em;
 }
 
-richlistitem, richlistitem * {
+richlistitem,
+richlistitem > *,
+richlistitem label {
 	// Prevent word cut-off with double-byte characters
 	overflow: hidden;
 	white-space: nowrap;
