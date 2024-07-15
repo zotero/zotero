@@ -222,6 +222,7 @@ pref("extensions.zotero.scaffold.eslint.enabled", true);
 pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
 
 // Reader
+pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");
 pref("extensions.zotero.reader.contentDarkMode", true);
 pref("extensions.zotero.reader.ebookFontFamily", "Georgia, serif");
 pref("extensions.zotero.reader.ebookHyphenate", true);

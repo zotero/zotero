@@ -200,6 +200,7 @@ class ReaderInstance {
 				...Zotero.Intl.getPrefixedStrings('pdfReader.')
 			},
 			showAnnotations: true,
+			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
 			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			hyphenation: Zotero.Prefs.get('reader.ebookHyphenate'),
@@ -518,6 +519,9 @@ class ReaderInstance {
 				iframe.browsingContext.textZoom = 1;
 				iframe.browsingContext.fullZoom = zoom;
 			},
+			onTextSelectionAnnotationModeChange: (mode) => {
+				Zotero.Prefs.set('reader.textSelectionAnnotationMode', mode);
+			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
@@ -527,6 +531,7 @@ class ReaderInstance {
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
+			Zotero.Prefs.registerObserver('reader.textSelectionAnnotationMode', this._handleTextSelectionAnnotationModeChange),
 			Zotero.Prefs.registerObserver('reader.contentDarkMode', this._handleContentDarkModeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.ebookHyphenate', this._handleEbookPrefChange),
@@ -854,6 +859,10 @@ class ReaderInstance {
 
 	_handleTabTitlePrefChange = async () => {
 		await this.updateTitle();
+	};
+
+	_handleTextSelectionAnnotationModeChange = () => {
+		this._internalReader.setTextSelectionAnnotationMode(Zotero.Prefs.get('reader.textSelectionAnnotationMode'));
 	};
 
 	_handleContentDarkModeChange = () => {
