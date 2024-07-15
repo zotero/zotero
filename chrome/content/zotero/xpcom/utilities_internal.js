@@ -1336,7 +1336,7 @@ Zotero.Utilities.Internal = {
 	 * @param {doc} Document
 	 * @return {{ title: string, url: string } | false} - PDF attachment title and URL, or false if none found
 	 */
-	getPDFFromDocument: async function (doc) {
+	getFileFromDocument: async function (doc) {
 		let translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
 		var translators = await translate.getTranslators();
@@ -1354,11 +1354,21 @@ Zotero.Utilities.Internal = {
 			return false;
 		}
 		for (let attachment of newItems[0].attachments) {
-			if (attachment.mimeType == 'application/pdf') {
-				return { title: attachment.title, url: attachment.url };
+			if (Zotero.Attachments.FIND_AVAILABLE_FILE_TYPES.includes(attachment.mimeType)) {
+				return {
+					title: attachment.title,
+					mimeType: attachment.mimeType,
+					url: attachment.url
+				};
 			}
 		}
 		return false;
+	},
+	
+	
+	getPDFFromDocument(doc) {
+		Zotero.debug('Zotero.Utilities.Internal.getPDFFromDocument() is deprecated -- use getFileFromDocument()');
+		return this.getFileFromDocument(doc);
 	},
 	
 	

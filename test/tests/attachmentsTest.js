@@ -609,7 +609,7 @@ describe("Zotero.Attachments", function() {
 		});
 	});
 	
-	describe("Find Available PDF", function () {
+	describe("Find Full Text", function () {
 		var doiPrefix = 'https://doi.org/';
 		var doi1 = '10.1111/abcd';
 		var doi2 = '10.2222/bcde';
@@ -627,6 +627,7 @@ describe("Zotero.Attachments", function() {
 		var pageURL8 = 'http://website2/article8';
 		var pageURL9 = 'http://website/article9';
 		var pageURL10 = 'http://website/refresh';
+		var pageURL11 = 'http://website/book';
 		
 		var httpd;
 		var port = 16213;
@@ -634,6 +635,9 @@ describe("Zotero.Attachments", function() {
 		var pdfPath = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
 		var pdfURL = `${baseURL}article1/pdf`;
 		var pdfSize;
+		var epubPath = OS.Path.join(getTestDataDirectory().path, 'stub.epub');
+		var epubURL = `${baseURL}article11/epub`;
+		var epubSize;
 		var requestStub;
 		var requestStubCallTimes = [];
 		var return429 = true;
@@ -713,6 +717,7 @@ describe("Zotero.Attachments", function() {
 					// DOI 6 redirects to page 8, which is on a different domain and has a PDF
 					[doiPrefix + doi6, pageURL8, true],
 					[pageURL8, pageURL8, true],
+					[pageURL11, epubURL, false],
 					
 					// Redirect loop
 					['http://website/redirect_loop1', 'http://website/redirect_loop2', false],
@@ -857,6 +862,7 @@ describe("Zotero.Attachments", function() {
 			});
 			
 			pdfSize = await OS.File.stat(pdfPath).size;
+			epubSize = await OS.File.stat(epubPath).size;
 			
 			Zotero.Prefs.clear('findPDFs.resolvers');
 		});
@@ -864,8 +870,12 @@ describe("Zotero.Attachments", function() {
 		beforeEach(async function () {
 			({ httpd } = await startHTTPServer(port));
 			httpd.registerFile(
-				pdfURL.substr(baseURL.length - 1),
-				Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.pdf'))
+				pdfURL.substring(baseURL.length - 1),
+				Zotero.File.pathToFile(pdfPath)
+			);
+			httpd.registerFile(
+				epubURL.substring(baseURL.length - 1),
+				Zotero.File.pathToFile(epubPath)
 			);
 			
 			// Generate a page with a relative PDF URL
@@ -897,7 +907,7 @@ describe("Zotero.Attachments", function() {
 			Zotero.Prefs.clear('findPDFs.resolvers');
 			
 			// Close progress dialog after each run
-			var queue = Zotero.ProgressQueues.get('findPDF');
+			var queue = Zotero.ProgressQueues.get('findFile');
 			if (queue) {
 				queue.getDialog().close();
 			}
@@ -913,7 +923,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('title', 'Test');
 			item.setField('DOI', doi);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 2);
 			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
@@ -931,7 +941,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('title', 'Test');
 			item.setField('DOI', doi);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 1);
 			assert.isTrue(requestStub.calledWith('GET', 'https://doi.org/' + doi));
@@ -949,7 +959,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('title', 'Test');
 			item.setField('extra', 'DOI: ' + doi);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 2);
 			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
@@ -967,7 +977,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('title', 'Test');
 			item.setField('url', url);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 1);
 			assert.isTrue(requestStub.calledWith('GET', url));
@@ -979,13 +989,33 @@ describe("Zotero.Attachments", function() {
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 		
+		it("should add an EPUB from a URL with a redirect", async function () {
+			var url = pageURL11;
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setField('title', 'Test');
+			item.setField('url', url);
+			await item.saveTx();
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
+			assert.equal(requestStub.callCount, 2);
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', url));
+			call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', epubURL));
+			assert.ok(attachment);
+			var json = attachment.toJSON();
+			assert.equal(json.url, epubURL);
+			assert.equal(json.contentType, 'application/epub+zip');
+			assert.equal(json.filename, 'Test.epub');
+			assert.equal(await OS.File.stat(attachment.getFilePath()).size, epubSize);
+		});
+		
 		it("should add an OA PDF from a direct URL", async function () {
 			var doi = doi2;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
 			item.setField('DOI', doi);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 3);
 			var call1 = requestStub.getCall(0);
@@ -1009,7 +1039,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('title', 'Test');
 			item.setField('DOI', doi);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 4);
 			// Check the DOI (and get nothing)
@@ -1039,7 +1069,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('DOI', doi);
 			item.setField('url', pageURL4);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 3);
 			var call = requestStub.getCall(0);
@@ -1065,7 +1095,7 @@ describe("Zotero.Attachments", function() {
 			item2.setField('url', url2);
 			await item2.saveTx();
 			
-			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
+			var attachments = await Zotero.Attachments.addAvailableFiles([item1, item2]);
 			
 			assert.equal(requestStub.callCount, 2);
 			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 998);
@@ -1096,7 +1126,7 @@ describe("Zotero.Attachments", function() {
 			item3.setField('url', url3);
 			await item3.saveTx();
 			
-			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2, item3]);
+			var attachments = await Zotero.Attachments.addAvailableFiles([item1, item2, item3]);
 			
 			assert.equal(requestStub.callCount, 6);
 			assert.equal(requestStub.getCall(0).args[1], doiPrefix + doi1);
@@ -1130,7 +1160,7 @@ describe("Zotero.Attachments", function() {
 			item2.setField('url', url2);
 			await item2.saveTx();
 			
-			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
+			var attachments = await Zotero.Attachments.addAvailableFiles([item1, item2]);
 			
 			assert.equal(requestStub.callCount, 3);
 			assert.equal(requestStub.getCall(0).args[1], pageURL9);
@@ -1148,7 +1178,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('title', 'Test');
 			item.setField('url', url);
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 2);
 			assert.equal(requestStub.getCall(0).args[1], pageURL10)
@@ -1165,7 +1195,7 @@ describe("Zotero.Attachments", function() {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('url', 'http://website/redirect_loop1');
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			assert.isFalse(attachment);
 			assert.equal(requestStub.callCount, 7);
 		});
@@ -1174,7 +1204,7 @@ describe("Zotero.Attachments", function() {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('url', 'http://website/too_many_redirects1');
 			await item.saveTx();
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			assert.isFalse(attachment);
 			assert.equal(requestStub.callCount, 10);
 		});
@@ -1196,7 +1226,7 @@ describe("Zotero.Attachments", function() {
 			}];
 			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
 			
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 4);
 			var call = requestStub.getCall(0);
@@ -1234,7 +1264,7 @@ describe("Zotero.Attachments", function() {
 			}];
 			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
 			
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 4);
 			var call = requestStub.getCall(0);
@@ -1270,7 +1300,7 @@ describe("Zotero.Attachments", function() {
 			}];
 			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
 			
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 4);
 			var call = requestStub.getCall(0);
@@ -1310,7 +1340,7 @@ describe("Zotero.Attachments", function() {
 			}];
 			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
 			
-			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
 			assert.equal(requestStub.callCount, 5);
 			var call = requestStub.getCall(0);

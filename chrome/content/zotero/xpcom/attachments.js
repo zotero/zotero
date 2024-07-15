@@ -35,8 +35,10 @@ Zotero.Attachments = new function () {
 	
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
-	var _findPDFQueue = [];
-	var _findPDFQueuePromise = null;
+	this.FIND_AVAILABLE_FILE_TYPES = ['application/pdf', 'application/epub+zip'];
+	
+	var _findFileQueue = [];
+	var _findFileQueuePromise = null;
 	
 	var self = this;
 	
@@ -605,7 +607,7 @@ Zotero.Attachments = new function () {
 					{
 						cookieSandbox,
 						referrer,
-						isPDF: contentType == 'application/pdf',
+						enforceFileType: Zotero.Attachments.FIND_AVAILABLE_FILE_TYPES.includes(contentType),
 						shouldDisplayCaptcha: true
 					}
 				);
@@ -1090,13 +1092,13 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options]
 	 * @param {Object} [options.cookieSandbox]
 	 * @param {String} [options.referrer]
-	 * @param {Boolean} [options.isPDF] - Delete file if not PDF
+	 * @param {Boolean} [options.enforceFileType] - Delete file if not one of SUPPORTED_FILE_TYPES
 	 * @param {Boolean} [options.shouldDisplayCaptcha]
 	 */
 	this.downloadFile = async function (url, path, options = {}) {
 		Zotero.debug(`Downloading file from ${url}`);
 		
-		let enforcingPDF = false;
+		let enforcingFileType = false;
 		try {
 			await new Zotero.Promise(function (resolve) {
 				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
@@ -1113,9 +1115,9 @@ Zotero.Attachments = new function () {
 				Zotero.Utilities.Internal.saveURI(wbp, url, path, headers);
 			});
 			
-			if (options.isPDF) {
-				enforcingPDF = true;
-				await _enforcePDF(path);
+			if (options.enforceFileType) {
+				enforcingFileType = true;
+				await _enforceFileType(path);
 			}
 		}
 		catch (e) {
@@ -1127,7 +1129,7 @@ Zotero.Attachments = new function () {
 			}
 			// Custom handling for PDFs that are bot-guarded
 			// via a JS-redirect
-			if (enforcingPDF && e instanceof this.InvalidPDFException) {
+			if (enforcingFileType && e instanceof this.InvalidPDFException) {
 				if (Zotero.BrowserDownload.shouldAttemptDownloadViaBrowser(url)) {
 					return Zotero.BrowserDownload.downloadPDF(url, path, options);
 				}
@@ -1137,12 +1139,12 @@ Zotero.Attachments = new function () {
 	};
 	
 	/**
-	 * Make sure a file is a PDF
+	 * Make sure a file is a type we want
 	 */
-	async function _enforcePDF(path) {
+	async function _enforceFileType(path) {
 		var sample = await Zotero.File.getContentsAsync(path, null, 1000);
-		if (Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
-			Zotero.debug("Downloaded PDF was not a PDF", 2);
+		if (!Zotero.Attachments.FIND_AVAILABLE_FILE_TYPES.includes(Zotero.MIME.sniffForMIMEType(sample))) {
+			Zotero.debug("Downloaded file was not a supported type", 2);
 			if (Zotero.Debug.enabled) {
 				Zotero.debug(
 					Zotero.Utilities.ellipsize(
@@ -1160,29 +1162,35 @@ Zotero.Attachments = new function () {
 	
 	
 	this.InvalidPDFException = function() {
-		this.message = "Downloaded PDF was not a PDF";
+		this.message = "Downloaded file was not a supported type (PDF or EPUB)";
 		this.stack = new Error().stack;
 	};
 	this.InvalidPDFException.prototype = Object.create(Error.prototype);
 	
 	
-	this.canFindPDFForItem = function (item) {
+	this.canFindFileForItem = function (item) {
 		return item.isRegularItem()
 			&& !item.isFeedItem
 			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI'))
-			&& item.numPDFAttachments() == 0;
+			&& this.FIND_AVAILABLE_FILE_TYPES.every(type => item.numFileAttachmentsWithContentType(type) == 0);
+	};
+
+
+	this.canFindPDFForItem = function (item) {
+		Zotero.debug('Zotero.Attachments.canFindPDFForItem() is deprecated -- use canFindFileForItem()');
+		return this.canFindFileForItem(item);
 	};
 	
 	
 	/**
-	 * Get the PDF resolvers that can be used for a given item based on the available fields
+	 * Get the file resolvers that can be used for a given item based on the available fields
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String[]} [methods=['doi', 'url', 'oa', 'custom']]
 	 * @param {Boolean} [automatic=false] - Only include custom resolvers with `automatic: true`
 	 * @return {Object[]} - An array of urlResolvers (see downloadFirstAvailableFile())
 	 */
-	this.getPDFResolvers = function (item, methods, automatic) {
+	this.getFileResolvers = function (item, methods, automatic) {
 		if (!methods) {
 			methods = ['doi', 'url', 'oa', 'custom'];
 		}
@@ -1242,7 +1250,7 @@ Zotero.Attachments = new function () {
 				}
 			}
 			catch (e) {
-				Zotero.debug("Error parsing custom PDF resolvers", 2);
+				Zotero.debug("Error parsing custom file resolvers", 2);
 				Zotero.debug(e, 2);
 			}
 			if (customResolvers) {
@@ -1294,7 +1302,7 @@ Zotero.Attachments = new function () {
 							url = url.replace(/\{doi}/, doi);
 							
 							resolvers.push(async function () {
-								Zotero.debug(`Looking for PDFs for ${doi} via ${name}`);
+								Zotero.debug(`Looking for files for ${doi} via ${name}`);
 								
 								var req = await Zotero.HTTP.request(
 									method.toUpperCase(),
@@ -1368,7 +1376,7 @@ Zotero.Attachments = new function () {
 							});
 						}
 						catch (e) {
-							Zotero.debug("Error parsing PDF resolver", 2);
+							Zotero.debug("Error parsing file resolver", 2);
 							Zotero.debug(e, 2);
 							Zotero.debug(resolver, 2);
 						}
@@ -1381,17 +1389,23 @@ Zotero.Attachments = new function () {
 	};
 	
 	
+	this.getPDFResolvers = function (item, methods) {
+		Zotero.debug('Zotero.Attachments.getPDFResolvers() is deprecated -- use getFileResolvers()');
+		return this.getFileResolvers(item, methods);
+	};
+	
+	
 	/**
-	 * Look for available PDFs for items and add as attachments
+	 * Look for available files for items and add as attachments
 	 *
 	 * @param {Zotero.Item[]} items
 	 * @param {Object} [options]
-	 * @param {String[]} [options.methods] - See getPDFResolvers()
+	 * @param {String[]} [options.methods] - See getFileResolvers()
 	 * @param {Number} [options.sameDomainRequestDelay=1000] - Minimum number of milliseconds
 	 *     between requests to the same domain (used in tests)
 	 * @return {Promise}
 	 */
-	this.addAvailablePDFs = async function (items, options = {}) {
+	this.addAvailableFiles = async function (items, options = {}) {
 		const MAX_CONSECUTIVE_DOMAIN_FAILURES = 5;
 		const SAME_DOMAIN_REQUEST_DELAY = options.sameDomainRequestDelay || 1000;
 		var queue;
@@ -1409,33 +1423,33 @@ Zotero.Attachments = new function () {
 			return domainInfo;
 		}
 		
-		var progressQueue = Zotero.ProgressQueues.get('findPDF');
+		var progressQueue = Zotero.ProgressQueues.get('findFile');
 		if (!progressQueue) {
 			progressQueue = Zotero.ProgressQueues.create({
-				id: 'findPDF',
-				title: 'pane.items.menu.findAvailablePDF.multiple',
+				id: 'findFile',
+				title: 'pane.items.menu.findAvailableFile',
 				columns: [
 					'general.item',
-					'general.pdf'
+					'attachment.fullText'
 				]
 			});
 			progressQueue.addListener('cancel', () => queue = []);
 		}
 
-		queue = _findPDFQueue;
+		queue = _findFileQueue;
 		
 		for (let item of items) {
 			// Skip items that aren't eligible. This is sort of weird, because it means some
 			// selected items just don't appear in the list, but there are several different reasons
-			// why items might not be eligible (non-regular items, no URL or DOI, already has a PDF)
-			// and listing each one seems a little unnecessary.
-			if (!this.canFindPDFForItem(item)) {
+			// why items might not be eligible (non-regular items, no URL or DOI, already has a
+			// full-text attachment) and listing each one seems a little unnecessary.
+			if (!this.canFindFileForItem(item)) {
 				continue;
 			}
 			
 			let entry = {
 				item,
-				urlResolvers: this.getPDFResolvers(item, options.methods),
+				urlResolvers: this.getFileResolvers(item, options.methods),
 				domain: null,
 				continuation: null,
 				processing: false,
@@ -1460,14 +1474,14 @@ Zotero.Attachments = new function () {
 			progressQueue.addRow(item);
 		}
 		
-		// If no eligible items, just show a popup saying no PDFs were found
+		// If no eligible items, just show a popup saying no files were found
 		if (!queue.length) {
 			let progressWin = new Zotero.ProgressWindow();
-			let title = Zotero.getString('pane.items.menu.findAvailablePDF.multiple');
+			let title = Zotero.getString('pane.items.menu.findAvailableFile');
 			progressWin.changeHeadline(title);
 			let itemProgress = new progressWin.ItemProgress(
 				'attachmentPDF',
-				Zotero.getString('findPDF.noPDFsFound')
+				Zotero.getString('findPDF.noFilesFound')
 			);
 			progressWin.show();
 			itemProgress.setProgress(100);
@@ -1480,12 +1494,12 @@ Zotero.Attachments = new function () {
 		dialog.open();
 		
 		// If queue was already in progress, just wait for it to finish
-		if (_findPDFQueuePromise) {
-			return _findPDFQueuePromise;
+		if (_findFileQueuePromise) {
+			return _findFileQueuePromise;
 		}
 		
 		var queueResolve;
-		_findPDFQueuePromise = new Zotero.Promise((resolve) => {
+		_findFileQueuePromise = new Zotero.Promise((resolve) => {
 			queueResolve = resolve;
 		});
 		
@@ -1537,7 +1551,7 @@ Zotero.Attachments = new function () {
 				}
 				
 				// Currently filtered out above
-				/*if (!this.canFindPDFForItem(current.item)) {
+				/*if (!this.canFindFileForItem(current.item)) {
 					current.result = false;
 					progressQueue.updateRow(
 						current.item.id,
@@ -1551,7 +1565,7 @@ Zotero.Attachments = new function () {
 				current.processing = true;
 				
 				// Process item
-				this.addPDFFromURLs(
+				this.addFileFromURLs(
 					current.item,
 					current.urlResolvers,
 					{
@@ -1664,7 +1678,7 @@ Zotero.Attachments = new function () {
 							: Zotero.ProgressQueue.ROW_FAILED,
 						attachment
 							? attachment.getField('title')
-							: Zotero.getString('findPDF.noPDFFound')
+							: Zotero.getString('findPDF.noFileFound')
 					);
 				})
 				.catch((e) => {
@@ -1687,17 +1701,23 @@ Zotero.Attachments = new function () {
 			processNextItem();
 		});
 		
-		var numPDFs = queue.reduce((accumulator, currentValue) => {
+		var numFiles = queue.reduce((accumulator, currentValue) => {
 			return accumulator + (currentValue.result ? 1 : 0);
 		}, 0);
 		dialog.setStatus(
-			numPDFs
-				? Zotero.getString('findPDF.pdfsAdded', numPDFs, numPDFs)
-				: Zotero.getString('findPDF.noPDFsFound')
+			numFiles
+				? Zotero.getString('findPDF.filesAdded', numFiles, numFiles)
+				: Zotero.getString('findPDF.noFilesFound')
 		);
-		_findPDFQueue = [];
+		_findFileQueue = [];
 		queueResolve();
-		_findPDFQueuePromise = null;
+		_findFileQueuePromise = null;
+	};
+	
+	
+	this.addAvailablePDFs = function (items, options) {
+		Zotero.debug('Zotero.Attachments.addAvailablePDFs() is deprecated -- use addAvailableFiles()');
+		return this.addAvailableFiles(items, options);
 	};
 	
 	
@@ -1714,14 +1734,20 @@ Zotero.Attachments = new function () {
 	 * @param {String[]} [options.methods] - See getPDFResolvers()
 	 * @return {Zotero.Item|false} - New Zotero.Item, or false if unsuccessful
 	 */
-	this.addAvailablePDF = async function (item, options = {}) {
-		Zotero.debug("Looking for available PDFs");
-		return this.addPDFFromURLs(item, this.getPDFResolvers(item, options.methods));
+	this.addAvailableFile = async function (item, options = {}) {
+		Zotero.debug("Looking for available files");
+		return this.addFileFromURLs(item, this.getFileResolvers(item, options.methods));
+	};
+	
+	
+	this.addAvailablePDF = function (item, options) {
+		Zotero.debug('Zotero.Attachments.addAvailablePDF() is deprecated -- use addAvailableFile()');
+		return this.addAvailableFile(item, options);
 	};
 	
 	
 	/**
-	 * Try to add a PDF to an item from a set of URL resolvers
+	 * Try to add a file attachment to an item from a set of URL resolvers
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {(String|Object|Function)[]} urlResolvers - See downloadFirstAvailableFile()
@@ -1730,19 +1756,19 @@ Zotero.Attachments = new function () {
 	 *     is started, taking the access method name as an argument
 	 * @return {Zotero.Item|false} - New Zotero.Item, or false if unsuccessful
 	 */
-	this.addPDFFromURLs = async function (item, urlResolvers, options = {}) {
+	this.addFileFromURLs = async function (item, urlResolvers, options = {}) {
 		var fileBaseName = this.getFileBaseNameFromItem(item);
 		var tmpDir;
 		var tmpFile;
 		var attachmentItem = false;
 		try {
 			tmpDir = (await this.createTemporaryStorageDirectory()).path;
-			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.pdf');
-			let { title, url, props } = await this.downloadFirstAvailableFile(
+			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.tmp');
+			let { title, mimeType, url, props } = await this.downloadFirstAvailableFile(
 				urlResolvers,
 				tmpFile,
 				{
-					isPDF: true,
+					enforceFileType: true,
 					shouldDisplayCaptcha: true,
 					onAccessMethodStart: options.onAccessMethodStart,
 					onBeforeRequest: options.onBeforeRequest,
@@ -1750,13 +1776,21 @@ Zotero.Attachments = new function () {
 				}
 			);
 			if (url) {
+				if (!mimeType) {
+					mimeType = await Zotero.MIME.getMIMETypeFromFile(tmpFile);
+				}
+				if (!this.FIND_AVAILABLE_FILE_TYPES.includes(mimeType)) {
+					throw new Error(`Resolved file is unsupported type ${mimeType}`);
+				}
+				let filename = fileBaseName + '.' + (Zotero.MIME.getPrimaryExtension(mimeType) || 'dat');
+				await IOUtils.move(tmpFile, PathUtils.join(tmpDir, filename));
 				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
 					directory: tmpDir,
 					libraryID: item.libraryID,
-					filename: PathUtils.filename(tmpFile),
-					title: title || _getPDFTitleFromVersion(props.articleVersion),
+					filename,
+					title: title || _getTitleFromVersion(props.articleVersion),
 					url,
-					contentType: 'application/pdf',
+					contentType: mimeType,
 					parentItemID: item.id
 				});
 			}
@@ -1775,7 +1809,13 @@ Zotero.Attachments = new function () {
 	};
 	
 	
-	function _getPDFTitleFromVersion(version) {
+	this.addPDFFromURLs = function (item, urlResolvers, options) {
+		Zotero.debug('Zotero.Attachments.addPDFFromURLs() is deprecated -- use addFileFromURLs()');
+		return this.addFileFromURLs(item, urlResolvers, options);
+	};
+	
+	
+	function _getTitleFromVersion(version) {
 		var str;
 		
 		switch (version) {
@@ -1805,7 +1845,7 @@ Zotero.Attachments = new function () {
 	 *
 	 * @param {(String|Object|Function)[]} urlResolvers - An array of URLs, objects, or functions
 	 *    that return arrays of objects. Objects should contain 'url' and/or 'pageURL' (the latter
-	 *    being a webpage that might contain a translatable PDF link), 'accessMethod' (which will
+	 *    being a webpage that might contain a translatable file link), 'accessMethod' (which will
 	 *    be displayed in the save popup), and an optional 'articleVersion' ('submittedVersion',
 	 *    'acceptedVersion', or 'publishedVersion'). Functions that return promises are waited for,
 	 *    and functions aren't called unless a file hasn't yet been found from an earlier entry.
@@ -1815,8 +1855,8 @@ Zotero.Attachments = new function () {
 	 * @param {Function} [options.onAfterRequest] - Function that runs after a request
 	 * @param {Function} [options.onRequestError] - Function that runs when a request fails.
 	 *     Return true to retry request and false to skip.
-	 * @return {Object|false} - Object with successful 'title' (when available from translator), 'url', and 'props'
-	 *    from the associated urlResolver, or false if no file could be downloaded
+	 * @return {Object|false} - Object with successful 'title' and 'mimeType' (when available from translator), 'url',
+	 *    and 'props' from the associated urlResolver, or false if no file could be downloaded
 	 */
 	this.downloadFirstAvailableFile = async function (urlResolvers, path, options) {
 		const maxURLs = 6;
@@ -1900,7 +1940,7 @@ Zotero.Attachments = new function () {
 			
 			// Ignore URLs we've already tried
 			if (url && isTriedURL(url)) {
-				Zotero.debug(`PDF at ${url} was already tried -- skipping`);
+				Zotero.debug(`File at ${url} was already tried -- skipping`);
 				url = null;
 			}
 			if (pageURL && isTriedURL(pageURL)) {
@@ -1946,9 +1986,10 @@ Zotero.Attachments = new function () {
 			if (pageURL) {
 				url = null;
 				let title = null;
+				let mimeType = null;
 				let responseURL;
 				try {
-					Zotero.debug(`Looking for PDF on ${pageURL}`);
+					Zotero.debug(`Looking for file on ${pageURL}`);
 					
 					let redirects = 0;
 					let nextURL = pageURL;
@@ -2060,7 +2101,7 @@ Zotero.Attachments = new function () {
 						// use redirects plus cookies for IP-based authentication [1]. The downside
 						// is that we might follow the same set of redirects more than once, but we
 						// won't process the final page multiple times, and if a publisher URL does
-						// redirect that's hopefully a decent indication that a PDF will be found
+						// redirect that's hopefully a decent indication that a file will be found
 						// the first time around.
 						//
 						// [1] https://forums.zotero.org/discussion/81182
@@ -2072,31 +2113,31 @@ Zotero.Attachments = new function () {
 						continue;
 					}
 					
-					// If DOI resolves directly to a PDF, save it to disk
-					if (contentType && contentType.startsWith('application/pdf')) {
-						Zotero.debug("URL resolves directly to PDF");
+					// If DOI resolves directly to a file, save it to disk
+					if (contentType && this.FIND_AVAILABLE_FILE_TYPES.some(type => contentType.startsWith(type))) {
+						Zotero.debug("URL resolves directly to file");
 						await Zotero.File.putContentsAsync(path, blob);
-						await _enforcePDF(path);
+						await _enforceFileType(path);
 						return { url: responseURL, props: urlResolver };
 					}
 					// Otherwise translate the Document we parsed above
 					else if (doc) {
-						({ title, url } = await Zotero.Utilities.Internal.getPDFFromDocument(doc));
+						({ title, mimeType, url } = await Zotero.Utilities.Internal.getFileFromDocument(doc));
 					}
 				}
 				catch (e) {
-					Zotero.debug(`Error getting PDF from ${pageURL}: ${e}\n\n${e.stack}`);
+					Zotero.debug(`Error getting file from ${pageURL}: ${e}\n\n${e.stack}`);
 					continue;
 				}
 				if (!url) {
-					Zotero.debug(`No PDF found on ${responseURL || pageURL}`);
+					Zotero.debug(`No file found on ${responseURL || pageURL}`);
 					continue;
 				}
 				if (isTriedURL(url)) {
-					Zotero.debug(`PDF at ${url} was already tried -- skipping`);
+					Zotero.debug(`File at ${url} was already tried -- skipping`);
 					continue;
 				}
-				// Don't try this PDF URL again
+				// Don't try this file URL again
 				addTriedURL(url);
 				
 				// Use the page we loaded as the referrer
@@ -2108,7 +2149,7 @@ Zotero.Attachments = new function () {
 						await beforeRequest(url);
 						await this.downloadFile(url, path, downloadOptions);
 						afterRequest(url);
-						return { title, url, props: urlResolver };
+						return { title, mimeType, url, props: urlResolver };
 					}
 					catch (e) {
 						Zotero.debug(`Error downloading ${url}: ${e}\n\n${e.stack}`);

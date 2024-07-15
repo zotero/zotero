@@ -3499,7 +3499,7 @@ var ZoteroPane = new function()
 			'createNoteFromAnnotations',
 			'addAttachments',
 			'sep2',
-			'findPDF',
+			'findFile',
 			'sep3',
 			'toggleRead',
 			'addToCollection',
@@ -3659,7 +3659,7 @@ var ZoteroPane = new function()
 					}
 					
 					if (items.some(item => item.isRegularItem())) {
-						show.add(m.findPDF);
+						show.add(m.findFile);
 						show.add(m.sep3);
 					}
 				}
@@ -3747,11 +3747,11 @@ var ZoteroPane = new function()
 						menuitem.setAttribute('label', Zotero.getString(str));
 					}
 					
-					if (Zotero.Attachments.canFindPDFForItem(item)) {
-						show.add(m.findPDF);
+					if (Zotero.Attachments.canFindFileForItem(item)) {
+						show.add(m.findFile);
 						show.add(m.sep3);
 						if (!collectionTreeRow.filesEditable) {
-							disable.add(m.findPDF);
+							disable.add(m.findFile);
 						}
 					}
 					
@@ -3939,7 +3939,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Set labels, plural if necessary
-		menu.childNodes[m.findPDF].setAttribute('label', Zotero.getString('pane.items.menu.findAvailablePDF' + multiple));
+		menu.childNodes[m.findFile].setAttribute('label', Zotero.getString('pane.items.menu.findAvailableFile'));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete'));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString(`pane.items.menu.export${noteExport ? 'Note' : ''}` + multiple));
@@ -4428,12 +4428,12 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.findPDFForSelectedItems = async function () {
+	this.findFilesForSelectedItems = async function () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		await Zotero.Attachments.addAvailablePDFs(this.getSelectedItems());
+		await Zotero.Attachments.addAvailableFiles(this.getSelectedItems());
 	};
 	
 	
