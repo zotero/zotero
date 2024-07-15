@@ -887,22 +887,22 @@ class ReaderInstance {
 	}
 
 	_openTagsPopup(item, x, y) {
-		let menupopup = this._window.document.createXULElement('panel');
-		menupopup.addEventListener('popuphidden', function (event) {
-			if (event.target === menupopup) {
-				menupopup.remove();
+		let tagsPopup = this._window.document.createXULElement('panel');
+		tagsPopup.addEventListener('popuphidden', function (event) {
+			if (event.target === tagsPopup) {
+				tagsPopup.remove();
 			}
 		});
-		menupopup.addEventListener('keydown', function (event) {
+		tagsPopup.addEventListener('keydown', function (event) {
 			if (event.key == "Escape") {
-				menupopup.hidePopup();
+				tagsPopup.hidePopup();
 			}
 		});
-		menupopup.className = 'tags-popup';
+		tagsPopup.className = 'tags-popup';
 		let tagsbox = this._window.document.createXULElement('tags-box');
-		menupopup.appendChild(tagsbox);
+		tagsPopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
-		this._popupset.appendChild(menupopup);
+		this._popupset.appendChild(tagsPopup);
 		let rect = this._iframe.getBoundingClientRect();
 		x += rect.left;
 		y += rect.top;
@@ -911,7 +911,7 @@ class ReaderInstance {
 		tagsbox.render();
 		// remove unnecessary tabstop from the section header
 		tagsbox.querySelector(".head").removeAttribute("tabindex");
-		menupopup.addEventListener("popupshown", (_) => {
+		tagsPopup.addEventListener("popupshown", (_) => {
 			// Ensure tagsbox is open
 			tagsbox.open = true;
 			if (tagsbox.count == 0) {
@@ -923,7 +923,7 @@ class ReaderInstance {
 			}
 			tagsbox.collapsible = false;
 		});
-		menupopup.openPopup(null, 'before_start', x, y, true);
+		tagsPopup.openPopup(null, 'before_start', x, y, true);
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
