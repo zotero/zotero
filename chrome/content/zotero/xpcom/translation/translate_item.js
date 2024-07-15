@@ -305,7 +305,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					// No translated, no OA, just potential custom, so create a status line
 					if (!jsonAttachment) {
 						jsonAttachment = this._makeJSONAttachment(
-							jsonItem.id, Zotero.getString('findPDF.searchingForAvailablePDFs')
+							jsonItem.id, Zotero.getString('findPDF.searchingForAvailableFiles')
 						);
 					}
 				}
@@ -330,7 +330,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				
 				let attachment;
 				try {
-					attachment = await Zotero.Attachments.addPDFFromURLs(
+					attachment = await Zotero.Attachments.addFileFromURLs(
 						item,
 						resolvers,
 						{

@@ -60,7 +60,12 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		if (_progressWindow) {
 			let label = _progressWindow.document.getElementById("label");
 			if (label) {
-				label.value = msg;
+				if (typeof msg === 'object' && 'l10nId' in msg) {
+					_progressWindow.document.l10n.setAttributes(label, msg.l10nId, msg.l10nArgs);
+				}
+				else {
+					label.value = msg;
+				}
 			}
 		}
 	};

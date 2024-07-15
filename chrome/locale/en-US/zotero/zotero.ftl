@@ -651,3 +651,8 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+
+find-pdf-files-added = { $count ->
+    [one] { $count } file added
+    *[other] { $count } files added
+}
