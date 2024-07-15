@@ -140,22 +140,10 @@
 
 			var tags = this.item.getTags();
 
-			// Sort tags alphabetically
-			var collation = Zotero.getLocaleCollation();
-			tags.sort((a, b) => {
-				let aTag = a.tag;
-				let bTag = b.tag;
-				let aHasColor = this._tagColors.has(aTag);
-				let bHasColor = this._tagColors.has(bTag);
-				// Sort colored tags to the top
-				if (aHasColor && !bHasColor) {
-					return -1;
-				}
-				if (!aHasColor && bHasColor) {
-					return 1;
-				}
-				return collation.compareString(1, aTag, bTag);
-			});
+
+			// Sort tags alphabetically with colored tags at the top followed by emoji tags
+			tags.sort((a, b) => Zotero.Tags.compareTagsOrder(this.item.libraryID, a.tag, b.tag));
+			
 
 			for (let i = 0; i < tags.length; i++) {
 				this.addDynamicRow(tags[i], i + 1);
@@ -523,24 +511,18 @@
 			row = this.addDynamicRow(tagData, false, true);
 			var elem = row.getElementsByAttribute('fieldname', 'tag')[0];
 
-			// Move row to appropriate place, alphabetically
-			var collation = Zotero.getLocaleCollation();
-			var tagEditables = rowsElement.getElementsByAttribute('fieldname', 'tag');
-
-			var inserted = false;
-			for (let editable of tagEditables) {
-				// Sort tags without colors below tags with colors
-				if (!color && this._tagColors.has(editable.value)
-						|| editable.value && collation.compareString(1, tagName, editable.value) > 0) {
-					continue;
-				}
-
-				rowsElement.insertBefore(row, editable.parentNode);
-				inserted = true;
-				break;
+			// Construct what the array of tags would be if this tag was a part of it
+			let newTagsArray = this.item.getTags();
+			newTagsArray.push({ tag: tagName, color: color || null });
+			// Sort it with the colored tags on top, followed by emoji tags, followed by everything else
+			newTagsArray.sort((a, b) => Zotero.Tags.compareTagsOrder(this._item.libraryID, a.tag, b.tag));
+			// Find where the new tag should be placed and insert it there
+			let newTagIndex = newTagsArray.findIndex(tag => tag.tag == tagName);
+			if (newTagIndex < rowsElement.childNodes.length) {
+				rowsElement.insertBefore(row, rowsElement.childNodes[newTagIndex]);
 			}
-			if (!inserted) {
-				rowsElement.appendChild(row);
+			else {
+				rowsElement.append(row);
 			}
 
 			this.updateCount(this.count + 1);

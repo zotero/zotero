@@ -396,10 +396,9 @@ Zotero.Utilities.Internal = {
 		return s;
 	},
 	
-	isOnlyEmoji: function (str) {
-		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and see if anything's left
-		const re = /\p{Extended_Pictographic}|\u200D|\uFE0F/gu;
-		return !str.replace(re, '');
+	containsEmoji: function (str) {
+		let re = /\p{Extended_Pictographic}/gu;
+		return !!str.match(re);
 	},
 
 	includesEmoji: function (str) {

@@ -710,6 +710,10 @@ Zotero.Tags = new function() {
 			else {
 				tagColors.splice(position, 0, newObj);
 			}
+			_libraryColorsByName[libraryID].set(name, {
+				color: color,
+				position: position
+			});
 		}
 		
 		if (tagColors.length) {
@@ -991,7 +995,35 @@ Zotero.Tags = new function() {
 			ctx.fill();
 		}
 	}
-	
+
+	// Return the first sequence of emojis from a string
+	this.extractEmojiForItemsList = function (str) {
+		// Split by anything that is not an emoji, Zero Width Joiner, or Variation Selector-16
+		// And return first continuous span of emojis
+		let re = /[^\p{Extended_Pictographic}\u200D\uFE0F]+/gu;
+		return str.split(re).filter(Boolean)[0] || null;
+	};
+
+	// Used as parameter for .sort() method on an array of tags
+	// Orders colored tags first by their position
+	// Then order tags with emojis alphabetically.
+	// Then order all remaining tags alphabetically
+	this.compareTagsOrder = function (libraryID, tagA, tagB) {
+		var collation = Zotero.getLocaleCollation();
+		let tagColors = this.getColors(libraryID);
+		let colorForA = tagColors.get(tagA);
+		let colorForB = tagColors.get(tagB);
+		if (colorForA && !colorForB) return -1;
+		if (!colorForA && colorForB) return 1;
+		if (colorForA && colorForB) {
+			return colorForA.position - colorForB.position;
+		}
+		let emojiForA = Zotero.Utilities.Internal.containsEmoji(tagA);
+		let emojiForB = Zotero.Utilities.Internal.containsEmoji(tagB);
+		if (emojiForA && !emojiForB) return -1;
+		if (!emojiForA && emojiForB) return 1;
+		return collation.compareString(1, tagA, tagB);
+	};
 	
 	/**
 	 * Compare two API JSON tag objects

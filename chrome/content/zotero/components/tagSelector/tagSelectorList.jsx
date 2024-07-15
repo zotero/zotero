@@ -125,7 +125,7 @@ class TagList extends React.PureComponent {
 				forceNewLine = true;
 			}
 			// size of the colored dot + space between the dot and the tag name always sums up to fontSize (e.g., 8px + 3px at 11px fontSize)
-			const tagColorWidth = (tag.color && !Zotero.Utilities.Internal.isOnlyEmoji(tag.name)) ? this.props.fontSize : 0;
+			const tagColorWidth = (tag.color && !Zotero.Utilities.Internal.containsEmoji(tag.name)) ? this.props.fontSize : 0;
 			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight + tagColorWidth;
 			// If first row or cell fits, add to current row
 			if (!forceNewLine && (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingRight - this.scrollbarWidth)))) {
@@ -175,7 +175,7 @@ class TagList extends React.PureComponent {
 		if (tag.disabled) {
 			className += ' disabled';
 		}
-		if (Zotero.Utilities.Internal.isOnlyEmoji(tag.name)) {
+		if (Zotero.Utilities.Internal.containsEmoji(tag.name)) {
 			className += ' emoji';
 		}
 		
