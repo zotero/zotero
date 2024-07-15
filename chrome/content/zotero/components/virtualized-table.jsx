@@ -811,6 +811,11 @@ class VirtualizedTable extends React.Component {
 		else {
 			return;
 		}
+		// Set aria-activedescendant on table container in case if render() is not called after selection change
+		let selected = this._jsWindow?.getElementByIndex(this.selection.focused);
+		if (selected) {
+			selected.closest(".virtualized-table").setAttribute("aria-activedescendant", selected.id);
+		}
 
 		this.scrollToRow(index);
 	}
@@ -1771,6 +1776,7 @@ function makeRowRenderer(getRowData) {
 		div.classList.toggle('selected', selection.isSelected(index));
 		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
+		let ariaLabel = "";
 		
 		if (columns.length) {
 			for (let column of columns) {
@@ -1782,12 +1788,18 @@ function makeRowRenderer(getRowData) {
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
+				let columnName = column.label;
+				if (column.label in Zotero.Intl.strings) {
+					columnName = Zotero.getString(column.label);
+				}
+				ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
 			}
 		}
 		else {
 			div.appendChild(renderCell(index, rowData));
 		}
 
+		div.setAttribute("aria-label", ariaLabel);
 		return div;
 	};
 }
