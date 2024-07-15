@@ -97,7 +97,12 @@ Zotero.Attachments = new function () {
 				else if (libraryID) {
 					attachmentItem.libraryID = libraryID;
 				}
-				attachmentItem.setField('title', title != undefined ? title : newName);
+				// If we have an explicit title, set it now
+				// Otherwise do it below once we've set the other attachment properties
+				// and can generate a title via setAutoAttachmentTitle()
+				if (title != undefined) {
+					attachmentItem.setField('title', title);
+				}
 				attachmentItem.parentID = parentItemID;
 				attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
 				if (collections) {
@@ -130,6 +135,9 @@ Zotero.Attachments = new function () {
 					attachmentItem.attachmentCharset = charset;
 				}
 				attachmentItem.attachmentPath = newFile.path;
+				if (title == undefined) {
+					attachmentItem.setAutoAttachmentTitle();
+				}
 				await attachmentItem.save(saveOptions);
 			}.bind(this));
 			try {
@@ -187,7 +195,7 @@ Zotero.Attachments = new function () {
 		
 		var item = yield _addToDB({
 			file,
-			title: title != undefined ? title : file.leafName,
+			title,
 			linkMode: this.LINK_MODE_LINKED_FILE,
 			contentType,
 			charset,
@@ -2873,7 +2881,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} options
 	 * @param {nsIFile|String} [file]
 	 * @param {String} [url]
-	 * @param {String} title
+	 * @param {String} [title]
 	 * @param {Number} linkMode
 	 * @param {String} contentType
 	 * @param {String} [charset]
@@ -2904,7 +2912,6 @@ Zotero.Attachments = new function () {
 				}
 				attachmentItem.libraryID = parentLibraryID;
 			}
-			attachmentItem.setField('title', title);
 			if (linkMode == self.LINK_MODE_IMPORTED_URL || linkMode == self.LINK_MODE_LINKED_URL) {
 				attachmentItem.setField('url', url);
 				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -2921,6 +2928,14 @@ Zotero.Attachments = new function () {
 			if (collections) {
 				attachmentItem.setCollections(collections);
 			}
+
+			if (title == undefined) {
+				attachmentItem.setAutoAttachmentTitle();
+			}
+			else {
+				attachmentItem.setField('title', title);
+			}
+
 			await attachmentItem.save(saveOptions);
 			
 			return attachmentItem;

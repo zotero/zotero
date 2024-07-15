@@ -3881,13 +3881,14 @@ Zotero.Item.prototype.setAutoAttachmentTitle = function () {
 	if (!this.isAttachment()) {
 		throw new Error("setAutoAttachmentTitle() can only be called on attachment items");
 	}
-	if (!this.isFileAttachment() || !this.parentItemID) {
+	if (!this.isFileAttachment()) {
 		return;
 	}
 	
 	// If this is the only attachment of its type on the parent item, give it
 	// a default title ("PDF", "Webpage", etc.)
-	let isFirstOfType = this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1;
+	let isFirstOfType = this.parentItemID
+		&& this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1;
 	if (isFirstOfType) {
 		let defaultTitle = this._getDefaultTitleForAttachmentContentType();
 		if (defaultTitle !== null) {

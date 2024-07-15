@@ -1003,9 +1003,11 @@ function importFileAttachment(filename, options = {}) {
 	let importOptions = {
 		file,
 		parentItemID: options.parentID,
-		title: options.title
 	};
 	Object.assign(importOptions, options);
+	// Override default behavior - don't set title based on type,
+	// just use extension-less leafName
+	importOptions.title ??= file.leafName.replace(/\.[^.]+$/, '');
 	return Zotero.Attachments.importFromFile(importOptions);
 }
 

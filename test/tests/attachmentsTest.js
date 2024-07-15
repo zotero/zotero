@@ -92,6 +92,28 @@ describe("Zotero.Attachments", function() {
 			// Clean up
 			yield Zotero.Items.erase(item.id);
 		});
+
+		it("should set a top-level item's title to the filename, minus its extension", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: file,
+			});
+			assert.equal(attachment.getField('title'), 'test');
+			await attachment.eraseTx();
+		});
+
+		it("should set a child item's title to the filename, minus its extension", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let parent = await createDataObject('item');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: parent.id,
+			});
+			assert.equal(attachment.getField('title'), Zotero.getString('fileTypes.pdf'));
+			await parent.eraseTx();
+		});
 	})
 	
 	describe("#linkFromFile()", function () {
@@ -111,6 +133,28 @@ describe("Zotero.Attachments", function() {
 		it.skip("should throw an error for a non-user library", function* () {
 			// Should create a group library for use by all tests
 		})
+
+		it("should set a top-level item's title to the filename, minus its extension", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.linkFromFile({
+				file: file,
+			});
+			assert.equal(attachment.getField('title'), 'test');
+			await attachment.eraseTx();
+		});
+
+		it("should set a child item's title to the filename, minus its extension", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let parent = await createDataObject('item');
+			let attachment = await Zotero.Attachments.linkFromFile({
+				file: file,
+				parentItemID: parent.id,
+			});
+			assert.equal(attachment.getField('title'), Zotero.getString('fileTypes.pdf'));
+			await parent.eraseTx();
+		});
 	})
 	
 	
