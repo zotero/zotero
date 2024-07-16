@@ -1868,7 +1868,15 @@ Zotero.Attachments = new function () {
 		// Don't try the same normalized URL more than once
 		var triedURLs = new Set();
 		function normalizeURL(url) {
-			return url.replace(/\?.*/, '');
+			url = new URL(url);
+			for (let param of Array.from(url.searchParams.keys())) {
+				// Keep 'download' param for Atypon
+				if (param !== 'download') {
+					url.searchParams.delete(param);
+				}
+			}
+			url.searchParams.sort();
+			return url.toString();
 		}
 		function isTriedURL(url) {
 			return triedURLs.has(normalizeURL(url));
