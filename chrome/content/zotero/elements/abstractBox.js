@@ -73,7 +73,7 @@
 			this.initCollapsibleSection();
 
 			this._abstractField = this.querySelector('editable-text');
-			this._abstractField.addEventListener('change', () => this.save());
+			this._abstractField.addEventListener('blur', () => this.save());
 			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
 			
 			this._feedAbstractBrowser = this.querySelector('browser');

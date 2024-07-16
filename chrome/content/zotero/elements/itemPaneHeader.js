@@ -114,7 +114,7 @@
 			
 			this._bibEntryCache = new LRUCache();
 			
-			this.titleField.addEventListener('change', () => this.save());
+			this.titleField.addEventListener('blur', () => this.save());
 			this.titleField.ariaLabel = Zotero.getString('itemFields.title');
 			this.titleField.addEventListener('contextmenu', (event) => {
 				if (!this._item) return;
