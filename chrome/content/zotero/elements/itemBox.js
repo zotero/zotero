@@ -610,15 +610,15 @@
 				rowLabel.className = "meta-label";
 				rowLabel.setAttribute('fieldname', fieldName);
 				
-				let valueElement = this.createValueElement(
+				let valueElement = this.createFieldValueElement(
 					val, fieldName
 				);
 				
 				if (fieldName) {
-					let label = document.createElement('label');
-					label.className = 'key';
-					label.textContent = Zotero.ItemFields.getLocalizedString(fieldName);
-					label.setAttribute("id", `itembox-field-${fieldName}-label`);
+					let label = this.createLabelElement({
+						text: Zotero.ItemFields.getLocalizedString(fieldName),
+						id: `itembox-field-${fieldName}-label`,
+					});
 					rowLabel.appendChild(label);
 					valueElement.setAttribute('aria-labelledby', label.id);
 				}
@@ -854,35 +854,6 @@
 				});
 				this._showCreatorTypeGuidance = false;
 			}
-			
-			// On click of the label, toggle the focus of the value field
-			for (let label of this.querySelectorAll(".meta-label > label")) {
-				if (!this.editable) {
-					break;
-				}
-				
-				label.addEventListener('mousedown', (event) => {
-					// Prevent default focus/blur behavior - we implement our own below
-					event.preventDefault();
-				});
-				
-				label.addEventListener('click', (event) => {
-					event.preventDefault();
-					
-					let labelWrapper = label.closest(".meta-label");
-					if (labelWrapper.nextSibling.contains(document.activeElement)) {
-						document.activeElement.blur();
-					}
-					else {
-						let valueField = labelWrapper.nextSibling.firstChild;
-						if (valueField.id === "item-type-menu") {
-							valueField.querySelector("menupopup").openPopup();
-							return;
-						}
-						labelWrapper.nextSibling.firstChild.focus();
-					}
-				});
-			}
 
 			this._ensureButtonsFocusable();
 			this._updateCreatorButtonsStatus();
@@ -926,89 +897,30 @@
 				let labelElem = document.createElement("div");
 				labelElem.classList.add("meta-label");
 
-				let label = document.createElement("label");
 				let labelID = `itembox-custom-row-${row.rowID}-label`;
-				label.id = labelID;
-				label.classList.add("key");
+				let label = this.createLabelElement({
+					id: labelID,
+					text: row.label.text,
+				});
 				label.dataset.l10nId = row.label.l10nID;
-
-				label.addEventListener('mousedown', (event) => {
-					// Prevent default focus/blur behavior - we implement our own below
-					event.preventDefault();
-				});
-				
-				label.addEventListener('click', (event) => {
-					event.preventDefault();
-					
-					let labelWrapper = label.closest(".meta-label");
-					if (labelWrapper.nextSibling.contains(document.activeElement)) {
-						document.activeElement.blur();
-					}
-					else {
-						labelWrapper.nextSibling.firstChild.focus();
-					}
-				});
 
 				labelElem.appendChild(label);
 
 				let dataElem = document.createElement("div");
 				dataElem.classList.add("meta-data");
 
-				let valueElem = document.createXULElement("editable-text");
-				valueElem.id = `itembox-custom-row-${row.rowID}-value`;
-				valueElem.classList.add("value", "custom-row-value");
-
-				if (row.multiline) {
-					valueElem.setAttribute('multiline', true);
-				}
-				else if (row.nowrap) {
-					// Usual fields occupy all available space and keep info on one line
-					valueElem.setAttribute("nowrap", true);
-				}
-
-				if (typeof row.editable == "boolean") {
-					let editable = row.editable;
-					if (!this.editable) editable = false;
-					valueElem.toggleAttribute("readonly", !editable);
-				}
-				
-				valueElem.addEventListener("focus", () => {
-					if (row.multiline) {
-						valueElem.setAttribute("min-lines", 6);
+				let editable = row.editable ?? true;
+				if (!this.editable) editable = false;
+				let valueElem = this.createValueElement({
+					id: `itembox-custom-row-${row.rowID}-value`,
+					classList: ["custom-row-value"],
+					isMultiline: row.multiline,
+					isLong: !row.nowrap,
+					editable,
+					attributes: {
+						"aria-labelledby": labelID
 					}
 				});
-				valueElem.addEventListener("blur", () => {
-					if (row.multiline) {
-						valueElem.setAttribute("min-lines", 1);
-					}
-					let onSetData = Zotero.ItemPaneManager.getInfoRowHook(row.rowID, "onSetData");
-					if (onSetData) {
-						try {
-							onSetData({
-								rowID: row.rowID,
-								item: this.item,
-								tabType: this.tabType,
-								editable: this.editable,
-								value: valueElem.value
-							});
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
-					}
-				});
-	
-				valueElem.setAttribute('tight', true);
-				
-				// Regardless, align the text in the label consistently, following the locale's direction
-				if (Zotero.rtl) {
-					valueElem.style.textAlign = 'right';
-				}
-				else {
-					valueElem.style.textAlign = 'left';
-				}
-
-				valueElem.setAttribute("aria-labelledby", labelID);
 
 				dataElem.appendChild(valueElem);
 
@@ -1143,10 +1055,10 @@
 			var labelWrapper = document.createElement('div');
 			labelWrapper.className = "meta-label";
 			labelWrapper.setAttribute("fieldname", "itemType");
-			var label = document.createElement("label");
-			label.className = "key";
-			label.id = "itembox-field-itemType-label";
-			label.innerText = Zotero.getString("zotero.items.itemType");
+			var label = this.createLabelElement({
+				id: "itembox-field-itemType-label",
+				text: Zotero.getString("zotero.items.itemType")
+			});
 			labelWrapper.appendChild(label);
 			var rowData = document.createElement('div');
 			rowData.className = "meta-data";
@@ -1271,10 +1183,10 @@
 			}
 
 			rowLabel.appendChild(labelWrapper);
-			var label = document.createElement("label");
-			label.setAttribute('id', 'creator-type-label-inner');
-			label.className = 'key';
-			label.textContent = Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID));
+			let label = this.createLabelElement({
+				id: 'creator-type-label-inner',
+				text: Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID))
+			});
 			labelWrapper.appendChild(label);
 			
 			var rowData = document.createElement("div");
@@ -1286,7 +1198,7 @@
 			
 			var fieldName = 'creator-' + rowIndex + '-lastName';
 			var lastNameElem = firstlast.appendChild(
-				this.createValueElement(
+				this.createFieldValueElement(
 					lastName,
 					fieldName,
 				)
@@ -1295,7 +1207,7 @@
 			lastNameElem.placeholder = this._defaultLastName;
 			fieldName = 'creator-' + rowIndex + '-firstName';
 			var firstNameElem = firstlast.appendChild(
-				this.createValueElement(
+				this.createFieldValueElement(
 					firstName,
 					fieldName,
 				)
@@ -1495,16 +1407,16 @@
 			var rowLabel = document.createElement("div");
 			rowLabel.className = "meta-label";
 			rowLabel.setAttribute("fieldname", field);
-			var label = document.createElement('label');
-			label.className = 'key';
-			label.textContent = Zotero.ItemFields.getLocalizedString(field);
-			label.setAttribute("id", `itembox-field-${field}-label`);
+			let label = this.createLabelElement({
+				text: Zotero.ItemFields.getLocalizedString(field),
+				id: `itembox-field-${field}-label`
+			});
 			rowLabel.appendChild(label);
 			
 			var rowData = document.createElement('div');
 			rowData.className = "meta-data date-box";
 			
-			var elem = this.createValueElement(
+			var elem = this.createFieldValueElement(
 				Zotero.Date.multipartToStr(value),
 				field
 			);
@@ -1716,18 +1628,46 @@
 			return openLink;
 		}
 
-		createValueElement(valueText, fieldName) {
-			valueText += '';
-
-			if (fieldName) {
-				var fieldID = Zotero.ItemFields.getID(fieldName);
+		createLabelElement({ text, id, attributes, classList }) {
+			let label = document.createElement('label');
+			label.classList.add('key', ...classList || []);
+			if (text) label.textContent = text;
+			if (id) label.id = id;
+			if (attributes) {
+				for (let [key, value] of Object.entries(attributes)) {
+					label.setAttribute(key, value);
+				}
 			}
-			
-			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
-			let isLong = Zotero.ItemFields.isLong(fieldName);
-			
-			var valueElement = document.createXULElement("editable-text");
-			valueElement.className = 'value';
+			// On click of the label, toggle the focus of the value field
+			if (this.editable) {
+				label.addEventListener('mousedown', (event) => {
+					// Prevent default focus/blur behavior - we implement our own below
+					event.preventDefault();
+				});
+				
+				label.addEventListener('click', (event) => {
+					event.preventDefault();
+					
+					let labelWrapper = label.closest(".meta-label");
+					if (labelWrapper.nextSibling.contains(document.activeElement)) {
+						document.activeElement.blur();
+					}
+					else {
+						let valueField = labelWrapper.nextSibling.firstChild;
+						if (valueField.id === "item-type-menu") {
+							valueField.querySelector("menupopup").openPopup();
+							return;
+						}
+						labelWrapper.nextSibling.firstChild.focus();
+					}
+				});
+			}
+			return label;
+		}
+
+		createValueElement({ isMultiline, isLong, editable, text, tooltipText, id, attributes, classList } = {}) {
+			let valueElement = document.createXULElement("editable-text");
+			valueElement.classList.add('value', ...classList || []);
 			if (isMultiline) {
 				valueElement.setAttribute('multiline', true);
 			}
@@ -1735,9 +1675,7 @@
 				// Usual fields occupy all available space and keep info on one line
 				valueElement.setAttribute("nowrap", true);
 			}
-			
-
-			if (this._fieldIsClickable(fieldName)) {
+			if (editable) {
 				valueElement.addEventListener("focus", e => this.showEditor(e.target));
 				valueElement.addEventListener("blur", e => this.hideEditor(e.target));
 			}
@@ -1745,13 +1683,51 @@
 				valueElement.setAttribute('readonly', true);
 			}
 
-			valueElement.setAttribute('id', `itembox-field-value-${fieldName}`);
-			valueElement.setAttribute('fieldname', fieldName);
+			if (id) valueElement.id = id;
+			if (tooltipText) valueElement.tooltipText = tooltipText;
+			if (attributes) {
+				for (let [key, value] of Object.entries(attributes)) {
+					valueElement.setAttribute(key, value);
+				}
+			}
 			valueElement.setAttribute('tight', true);
+
+			valueElement.value = text;
+			if (text) {
+				valueElement.dir = 'auto';
+			}
+			// If not, assume it follows the locale's direction
+			else {
+				valueElement.dir = Zotero.dir;
+			}
+			
+			// Regardless, align the text in the label consistently, following the locale's direction
+			if (Zotero.rtl) {
+				valueElement.style.textAlign = 'right';
+			}
+			else {
+				valueElement.style.textAlign = 'left';
+			}
+			return valueElement;
+		}
+
+		createFieldValueElement(valueText, fieldName) {
+			valueText += '';
+
+			if (fieldName) {
+				var fieldID = Zotero.ItemFields.getID(fieldName);
+			}
+
+			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
+			let isLong = Zotero.ItemFields.isLong(fieldName);
+
+			let attributes = {
+				fieldname: fieldName,
+			};
 
 			switch (fieldName) {
 				case 'itemType':
-					valueElement.setAttribute('itemTypeID', valueText);
+					attributes.itemTypeID = valueText;
 					valueText = Zotero.ItemTypes.getLocalizedString(valueText);
 					break;
 				
@@ -1770,15 +1746,24 @@
 					break;
 			}
 			
+			let tooltipText;
 			if (fieldID) {
 				// Display the SQL date as a tooltip for date fields
 				// TEMP - filingDate
 				if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || fieldName == 'filingDate') {
-					valueElement.tooltipText = Zotero.Date.multipartToSQL(this.item.getField(fieldName, true));
+					tooltipText = Zotero.Date.multipartToSQL(this.item.getField(fieldName, true));
 				}
 			}
 			
-			valueElement.value = valueText;
+			let valueElement = this.createValueElement({
+				isMultiline,
+				isLong,
+				editable: this._fieldIsClickable(fieldName),
+				text: valueText,
+				tooltipText,
+				id: `itembox-field-value-${fieldName}`,
+				attributes
+			});
 
 			if (lazy.BIDI_BROWSER_UI) {
 				// Attempt to guess text direction automatically
@@ -1863,13 +1848,25 @@
 		}
 
 		async showEditor(elem) {
-			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
+			let isCustomRow = elem.classList.contains("custom-row-value");
+
 			var fieldName = elem.getAttribute('fieldname');
+			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
+			if (isCustomRow) {
+				isMultiline = elem.hasAttribute("multiline");
+			}
 
 			// Multiline field will be at least 6 lines
-			if (Zotero.ItemFields.isMultiline(fieldName)) {
+			if (isMultiline) {
 				elem.setAttribute("min-lines", 6);
 			}
+
+			if (isCustomRow) {
+				return;
+			}
+
+			Zotero.debug(`Showing editor for ${fieldName}`);
+
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			let value;
 			if (field == 'creator') {
@@ -2126,20 +2123,54 @@
 			if (this.ignoreBlur || !textbox) {
 				return;
 			}
+
+			var fieldName = textbox.getAttribute('fieldname');
+
+			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
+			let isCustomRow = textbox.classList.contains("custom-row-value");
+
+			if (isCustomRow) {
+				isMultiline = textbox.hasAttribute("multiline");
+			}
+
+			if (isMultiline) {
+				textbox.setAttribute("min-lines", 1);
+			}
+
+			if (isCustomRow) {
+				let rowID = textbox.closest(".meta-row").dataset.customRowId;
+				let onSetData = Zotero.ItemPaneManager.getInfoRowHook(rowID, "onSetData");
+				if (onSetData) {
+					try {
+						onSetData({
+							rowID,
+							item: this.item,
+							tabType: this.tabType,
+							editable: this.editable,
+							value: textbox.value
+						});
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+
+				return;
+			}
+
 			// Handle cases where creator autocomplete doesn't trigger
 			// the textentered and change events handled in showEditor
-			if (textbox.getAttribute('fieldname').startsWith('creator-')) {
+			if (fieldName.startsWith('creator-')) {
 				this.handleCreatorAutoCompleteSelect(textbox);
 			}
-			
-			Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
+
+			Zotero.debug(`Hiding editor for ${fieldName}`);
 			
 			// Prevent autocomplete breakage in Firefox 3
 			if (textbox.mController) {
 				textbox.mController.input = null;
 			}
 			
-			var fieldName = textbox.getAttribute('fieldname');
 			
 			// Multiline fields go back to occupying as much space as needed
 			if (Zotero.ItemFields.isMultiline(fieldName)) {
