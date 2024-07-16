@@ -1334,7 +1334,7 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
-		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection, itemSpaces;
+		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection, itemSpaces, itemSuffixes, itemKeepDashes;
 
 		before(() => {
 			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
@@ -1376,6 +1376,12 @@ describe("Zotero.Attachments", function() {
 			itemBookSection = createUnsavedDataObject('item', { title: 'Book Section', itemType: 'bookSection' });
 			itemBookSection.setField('bookTitle', 'Book Title');
 			itemSpaces = createUnsavedDataObject('item', { title: ' Spaces! ', itemType: 'book' });
+			itemSuffixes = createUnsavedDataObject('item', { title: '-Suffixes-', itemType: 'book' });
+			itemSuffixes.setField('date', "1999-07-15");
+			itemKeepDashes = createUnsavedDataObject('item', { title: 'keep--dashes', itemType: 'journalArticle' });
+			itemKeepDashes.setField('publicationTitle', "keep");
+			itemKeepDashes.setField('issue', 'dashes');
+			itemKeepDashes.setField('date', "1999-07-15");
 		});
 
 		
@@ -1616,6 +1622,43 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemBookSection, ' {{ bookTitle case="snake" }} '),
 				'book_title'
+			);
+		});
+
+		it("should suppress suffixes where they would create a repeat character", function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ title suffix="-" }}{{ year prefix="-" }}'),
+				'Lorem Ipsum-1975'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemSuffixes, '{{ title prefix="-" suffix="-" }}{{ year }}'),
+				'-Suffixes-1999'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemSuffixes, '{{ title suffix="-" }}{{ year prefix="-" }}'),
+				'-Suffixes-1999'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemKeepDashes, '{{ title suffix="-" }}{{ year prefix="-" }}'),
+				'keep--dashes-1999'
+			);
+			// keep--dashes is a title and should be kept unchanged but "keep" and "dashes" are fields
+			// separated by prefixes and suffixes where repeated characters should be suppressed
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemKeepDashes, '{{ title suffix="-" }}{{ publicationTitle suffix="-" }}{{ issue prefix="-" }}'),
+				'keep--dashes-keep-dashes'
+			);
+			// keep--dashes is provided as literal part of the template and should be kept unchanged
+			// but "keep" and "dashes" are fields separated by prefixes and suffixes where repeated
+			// characters should be suppressed. Finally "keep--dashes" title is appended at the end
+			// which should also be kept as is.
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemKeepDashes, 'keep--dashes-{{ publicationTitle prefix="-" suffix="-" }}{{ issue prefix="-" suffix="-" }}-keep--dashes-{{ publicationTitle suffix="-" }}test{{ title prefix="-" }}'),
+				'keep--dashes-keep-dashes-keep--dashes-keep-test-keep--dashes'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemSuffixes, '{{ title prefix="/" suffix="\\" }}{{ year }}'),
+				'-Suffixes-1999'
 			);
 		});
 

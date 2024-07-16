@@ -2152,6 +2152,9 @@ Zotero.Attachments = new function () {
 			formatString = Zotero.Prefs.get('attachmentRenameTemplate');
 		}
 
+		let chunks = [];
+		let protectedLiterals = new Set();
+
 		formatString = formatString.trim();
 
 		const getSlicedCreatorsOfType = (creatorType, slice) => {
@@ -2190,18 +2193,45 @@ Zotero.Attachments = new function () {
 			if (value === '' || value === null || typeof value === 'undefined') {
 				return '';
 			}
+
+			if (prefix === '\\' || prefix === '/') {
+				prefix = '';
+			}
+
+			if (suffix === '\\' || suffix === '/') {
+				suffix = '';
+			}
+
+			if (protectedLiterals.size > 0) {
+				// escape protected literals in the format string with \
+				value = value.replace(
+					new RegExp(`(${Array.from(protectedLiterals.keys()).join('|')})`, 'g'),
+					'\\$1//'
+				);
+			}
+
 			if (truncate) {
 				value = value.substr(0, truncate);
 			}
 
 			value = value.trim();
+			let rawValue = value;
 
-			if (prefix) {
+			let affixed = false;
+
+			if (prefix && !value.startsWith(prefix)) {
 				value = prefix + value;
+				affixed = true;
 			}
-			if (suffix) {
+			if (suffix && !value.endsWith(suffix)) {
 				value += suffix;
+				affixed = true;
 			}
+
+			if (affixed) {
+				chunks.push({ value, rawValue, suffix, prefix });
+			}
+
 			switch (textCase) {
 				case 'upper':
 					value = value.toUpperCase();
@@ -2297,10 +2327,44 @@ Zotero.Attachments = new function () {
 
 		const vars = { ...fields, ...creatorFields, firstCreator, itemType, year };
 
-		formatString = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
-		formatString = Zotero.Utilities.cleanTags(formatString);
-		formatString = Zotero.File.getValidFileName(formatString);
-		return formatString;
+
+		// Final name is generated twice. In the first pass we collect all affixed values and determine protected literals.
+		// This is done in order to remove repeated suffixes, except if these appear in the value or the format string itself.
+		// See "should suppress suffixes where they would create a repeat character" test for edge cases.
+		let formatted = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
+		
+		let replacePairs = new Map();
+		for (let chunk of chunks) {
+			if (chunk.suffix && formatted.includes(`${chunk.rawValue}${chunk.suffix}${chunk.suffix}`)) {
+				protectedLiterals.add(`${chunk.rawValue}${chunk.suffix}${chunk.suffix}`);
+				replacePairs.set(`${chunk.rawValue}${chunk.suffix}${chunk.suffix}`, `${chunk.rawValue}${chunk.suffix}`);
+			}
+			if (chunk.prefix && formatted.includes(`${chunk.prefix}${chunk.prefix}${chunk.rawValue}`)) {
+				protectedLiterals.add(`${chunk.prefix}${chunk.prefix}${chunk.rawValue}`);
+				replacePairs.set(`${chunk.prefix}${chunk.prefix}${chunk.rawValue}`, `${chunk.prefix}${chunk.rawValue}`);
+			}
+		}
+
+		// Use "/" and "\" as escape characters for protected literals. We need two different escape chars for edge cases.
+		// Both escape chars are invalid in file names and thus removed from the final string by `getValidFileName`
+		if (protectedLiterals.size > 0) {
+			formatString = formatString.replace(
+				new RegExp(`(${Array.from(protectedLiterals.keys()).join('|')})`, 'g'),
+				'\\$1//'
+			);
+		}
+
+		formatted = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
+		if (replacePairs.size > 0) {
+			formatted = formatted.replace(
+				new RegExp(`(${Array.from(replacePairs.keys()).map(replace => `(?<!\\\\)${replace}(?!//)`).join('|')})`, 'g'),
+				match => replacePairs.get(match)
+			);
+		}
+		
+		formatted = Zotero.Utilities.cleanTags(formatted);
+		formatted = Zotero.File.getValidFileName(formatted);
+		return formatted;
 	};
 	
 	
