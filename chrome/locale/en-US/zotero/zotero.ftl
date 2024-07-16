@@ -517,7 +517,7 @@ abstract-field =
     .placeholder = Add abstract…
 
 tag-field =
-    .placeholder = Edit tag...
+    .aria-label = Tag
 
 tagselector-search =
     .placeholder = Filter Tags
