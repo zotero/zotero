@@ -220,8 +220,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 		}
-		// Update aria-activedescendant on the tree
-		this.forceUpdate();
 		if (shouldDebounce) {
 			this._onSelectionChangeDebounced();
 		}
