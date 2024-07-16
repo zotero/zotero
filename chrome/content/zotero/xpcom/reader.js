@@ -521,6 +521,18 @@ class ReaderInstance {
 			},
 			onTextSelectionAnnotationModeChange: (mode) => {
 				Zotero.Prefs.set('reader.textSelectionAnnotationMode', mode);
+			},
+			onBringReaderToFront: (bring) => {
+				// Temporary bring reader iframe to front to make sure popups and context menus
+				// aren't overlapped by contextPane, in Stacked View mode
+				if (bring) {
+					if (Zotero.Prefs.get('layout') === 'stacked') {
+						this._iframe.parentElement.style.zIndex = 1;
+					}
+				}
+				else {
+					this._iframe.parentElement.style.zIndex = 'unset';
+				}
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 
@@ -1068,6 +1080,7 @@ class ReaderTab extends ReaderInstance {
 		this._iframe.setAttribute('class', 'reader');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
+		this._iframe.setAttribute('transparent', 'true');
 		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
