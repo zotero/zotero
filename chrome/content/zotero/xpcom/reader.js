@@ -909,16 +909,32 @@ class ReaderInstance {
 
 	_openTagsPopup(item, x, y) {
 		let tagsPopup = this._window.document.createXULElement('panel');
-		tagsPopup.addEventListener('popuphidden', function (event) {
+		// <panel> completely takes over Escape keydown event, by attaching a capturing keydown
+		// listener to document which just closes the popup. It leads to unwanted edits being saved.
+		// Attach our own listener to this._window.document to properly handle Escape on editted tags
+		let handleKeyDown = (event) => {
+			if (event.key !== "Escape") return;
+			let focusedTag = tagsPopup.querySelector("editable-text.focused");
+			if (focusedTag) {
+				if (focusedTag.closest("[isNew]")) {
+					// remove newly added tag
+					focusedTag.closest(".row").remove();
+				}
+				else {
+					// or reset to initial value if the tag is not new
+					focusedTag.value = focusedTag.initialValue;
+				}
+			}
+			// now that all tags values are set, close the popup
+			tagsPopup.hidePopup();
+		};
+		tagsPopup.addEventListener('popuphidden', (event) => {
 			if (event.target === tagsPopup) {
 				tagsPopup.remove();
 			}
+			this._window.document.removeEventListener("keydown", handleKeyDown, true);
 		});
-		tagsPopup.addEventListener('keydown', function (event) {
-			if (event.key == "Escape") {
-				tagsPopup.hidePopup();
-			}
-		});
+		this._window.document.addEventListener("keydown", handleKeyDown, true);
 		tagsPopup.className = 'tags-popup';
 		let tagsbox = this._window.document.createXULElement('tags-box');
 		tagsPopup.appendChild(tagsbox);
