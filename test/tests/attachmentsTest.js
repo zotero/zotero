@@ -1650,7 +1650,7 @@ describe("Zotero.Attachments", function() {
 			);
 			// keep--dashes is provided as literal part of the template and should be kept unchanged
 			// but "keep" and "dashes" are fields separated by prefixes and suffixes where repeated
-			// characters should be suppressed. Finally "keep--dashes" title is appeneded at the end
+			// characters should be suppressed. Finally "keep--dashes" title is appended at the end
 			// which should also be kept as is.
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemKeepDashes, 'keep--dashes-{{ publicationTitle prefix="-" suffix="-" }}{{ issue prefix="-" suffix="-" }}-keep--dashes-{{ publicationTitle suffix="-" }}test{{ title prefix="-" }}'),
