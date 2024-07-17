@@ -43,6 +43,8 @@ function doLoad()
 	document.getElementById('search-name').value = io.dataIn.name;
 
 	document.addEventListener('dialogaccept', doAccept);
+	// Focus the first focusable node in the dialog
+	Services.focus.moveFocus(window, sbc, Services.focus.MOVEFOCUS_FORWARD, 0);
 }
 
 function doUnload()
