@@ -256,6 +256,7 @@ class TreeSelection {
 	_updateTree(shouldDebounce) {
 		if (!this.selectEventsSuppressed && this._tree.props.onSelectionChange) {
 			this._tree.props.onSelectionChange(this, shouldDebounce);
+			this._tree._setAriaAciveDescendant();
 		}
 	}
 
@@ -1281,12 +1282,6 @@ class VirtualizedTable extends React.Component {
 		if (this.props.role == 'treegrid') {
 			props['aria-readonly'] = true;
 		}
-		if (this.selection.count > 0) {
-			const elem = this._jsWindow && this._jsWindow.getElementByIndex(this.selection.focused);
-			if (elem) {
-				props['aria-activedescendant'] = elem.id;
-			}
-		}
 		let jsWindowProps = {
 			id: this._jsWindowID,
 			className: "virtualized-table-body",
@@ -1433,6 +1428,15 @@ class VirtualizedTable extends React.Component {
 		this.invalidate();
 		this._columns = new Columns(this);
 		await new Promise((resolve) => {this.forceUpdate(resolve)});
+	}
+	
+	// Set aria-activedescendant on table container
+	_setAriaAciveDescendant() {
+		if (!this.selection.focused) return;
+		let selected = this._jsWindow?.getElementByIndex(this.selection.focused);
+		if (selected) {
+			selected.closest(".virtualized-table").setAttribute("aria-activedescendant", selected.id);
+		}
 	}
 }
 
@@ -1771,6 +1775,7 @@ function makeRowRenderer(getRowData) {
 		div.classList.toggle('selected', selection.isSelected(index));
 		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
+		let ariaLabel = "";
 		
 		if (columns.length) {
 			for (let column of columns) {
@@ -1782,12 +1787,18 @@ function makeRowRenderer(getRowData) {
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
+				let columnName = column.label;
+				if (column.label in Zotero.Intl.strings) {
+					columnName = Zotero.getString(column.label);
+				}
+				ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
 			}
 		}
 		else {
 			div.appendChild(renderCell(index, rowData));
 		}
 
+		div.setAttribute("aria-label", ariaLabel);
 		return div;
 	};
 }
