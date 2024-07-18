@@ -5,36 +5,65 @@
 }
 
 #select-items-dialog {
-    padding: 2em;
+    padding: 0;
+    appearance: none;
+    background: var(--material-background);
+
+    #collections-items-container {
+        flex: 1 1 auto;
+    }
 
     #zotero-select-items-container {
         display: flex;
         flex-direction: column;
-        gap: 8px;
     }
 
     #zotero-collections-tree-container {
         min-width: 200px;
 		min-height: 100%;
+        padding: 16px 8px; // Collection tree table already has 8px inline padding
+        background: var(--material-sidepane);
+        border-inline-end: var(--material-panedivider);
+    }
+
+    #zotero-collections-tree {
+        background: var(--material-sidepane);
     }
 
 	#zotero-items-pane-content {
-		min-height: 100%;
+        // Please do not become infinitely tall
+		min-height: 0;
+        flex: 1;
+        flex-basis: 0;
 	}
+
+    #search-toolbar, .dialog-button-box {
+        padding: 16px;
+    }
 
     #search-toolbar {
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
-    }
-
-    #search-toolbar {
         flex: 0 0 auto;
     }
 
-    #collections-items-container {
-        flex: 1 1 auto;
-        margin-bottom: 8px;
+    #zotero-items-pane-content, .dialog-button-box {
+        border-top: var(--material-border-quarternary);
+    }
+    
+    // Draggable areas:
+    #zotero-collections-tree-container,
+    #search-toolbar,
+    .dialog-button-box {
+        -moz-window-dragging: drag;
+    }
+
+    // Non-draggable sub-areas:
+    #zotero-collections-tree-container .windowed-list,
+    #search-toolbar quick-search-textbox,
+    .dialog-button-box button {
+        -moz-window-dragging: no-drag;
     }
 }
 

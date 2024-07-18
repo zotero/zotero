@@ -30,6 +30,7 @@ var itemsView;
 var collectionsView;
 var loaded;
 var io;
+const isSelectItemsDialog = !!document.querySelector('#zotero-select-items-dialog');
 const isEditBibliographyDialog = !!document.querySelector('#zotero-edit-bibliography-dialog');
 const isAddEditItemsDialog = !!document.querySelector('#zotero-add-citation-dialog');
 
@@ -38,6 +39,18 @@ const isAddEditItemsDialog = !!document.querySelector('#zotero-add-citation-dial
  * io - used for input/output (dataOut is list of item IDs)
  */
 var doLoad = async function () {
+	// Move the dialog button box into the items pane
+	let itemsContainer = document.getElementById('zotero-items-tree-container');
+	// TEMP: Only if we're in the redesigned Select Items dialog, not the
+	// classic Add Citation dialog, or the Edit Bibliography dialog
+	// (until we redesign that too)
+	if (isSelectItemsDialog) {
+		let buttonBox = document.querySelector('dialog')
+			.shadowRoot
+			.querySelector('.dialog-button-box');
+		itemsContainer.append(buttonBox);
+	}
+	
 	// Set font size from pref
 	var sbc = document.getElementById('zotero-select-items-container');
 	Zotero.UIProperties.registerRoot(sbc);

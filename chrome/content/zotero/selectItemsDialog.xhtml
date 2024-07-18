@@ -40,6 +40,7 @@
 	onunload="doUnload();"
 	persist="screenX screenY width height"
 	class="zotero-dialog"
+	chromemargin="0,0,0,0"
 >
 <dialog
 	id="select-items-dialog"
@@ -55,16 +56,18 @@
 </script>
 
 <vbox id="zotero-select-items-container" flex="1">
-	<hbox id="search-toolbar">
-		<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
-	</hbox>
 	<hbox id="collections-items-container">
 		<vbox id="zotero-collections-tree-container" class="virtualized-table-container">
-			<html:div id="zotero-collections-tree"></html:div>
+			<html:div id="zotero-collections-tree"/>
 		</vbox>
-		<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
-			<html:div id="zotero-items-tree"></html:div>
-		</hbox>
+		<vbox id="zotero-items-tree-container" flex="1">
+			<hbox id="search-toolbar">
+				<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
+			</hbox>
+			<hbox id="zotero-items-pane-content" class="virtualized-table-container">
+				<html:div id="zotero-items-tree"/>
+			</hbox>
+		</vbox>
 	</hbox>
 </vbox>
 </dialog>
