@@ -1,4 +1,4 @@
-menupopup, panel, #search-mode-popup {
+menupopup, panel:not(#autoscroller), #search-mode-popup {
 	--panel-border-radius: 8px;
 	--panel-background: var(--material-toolbar);
 	--menuitem-hover-background-color: var(--fill-quinary);
