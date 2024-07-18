@@ -147,6 +147,7 @@
 	padding: 4px 1px;
 	column-gap: 4px;
 	-moz-window-dragging: drag;
+	scroll-padding: 2px; // ensures a tab is scrolled into view without cutoff borders
 
 	.pinned-tabs & {
 		padding: 4px 0;

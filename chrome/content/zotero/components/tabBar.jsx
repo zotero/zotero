@@ -115,6 +115,13 @@ const TabBar = forwardRef(function (props, ref) {
 		};
 	}, []);
 
+	useEffect(() => {
+		// Scroll selected tab into view
+		let selectedTabNode = tabsInnerContainerRef.current.querySelector(".tab.selected");
+		if (!selectedTabNode || dragging) return;
+		selectedTabNode.scrollIntoView({ behavior: 'smooth' });
+	}, [tabs]);
+
 	useLayoutEffect(updateScrollArrows);
 	useLayoutEffect(updateOverflowing, [tabs]);
 
@@ -414,6 +421,7 @@ TabBar.displayName = 'TabBar';
 TabBar.propTypes = {
 	onTabSelect: PropTypes.func.isRequired,
 	onTabClose: PropTypes.func.isRequired,
+	onLoad: PropTypes.func.isRequired,
 	onTabMove: PropTypes.func.isRequired,
 	refocusReader: PropTypes.func.isRequired,
 	onContextMenu: PropTypes.func.isRequired,
