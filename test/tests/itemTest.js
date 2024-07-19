@@ -1505,6 +1505,7 @@ describe("Zotero.Item", function () {
 				var a = new Zotero.Item('annotation');
 				a.annotationType = 'highlight';
 				assert.doesNotThrow(() => a.annotationType = 'highlight');
+				assert.doesNotThrow(() => a.annotationType = 'underline');
 				assert.throws(() => a.annotationType = 'note');
 			});
 		});
