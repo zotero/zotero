@@ -1,4 +1,4 @@
-:is(panel)::part(content) {
+:is(panel):not(#autoscroller)::part(content) {
 	--panel-background: var(--material-toolbar);
 }
 
