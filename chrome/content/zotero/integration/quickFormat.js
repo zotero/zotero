@@ -1438,6 +1438,9 @@ var Zotero_QuickFormat = new function () {
 		// Try to make the panel appear right in the center on windows
 		let leftMargin = Zotero.isWin ? 5 : 15;
 		referencePanel.openPopup(dialog, "after_start", leftMargin, 0, false, false, null);
+		// Initially, panel has an opacity of 0.9 to not display the shadow behind it but we override
+		// it upon the first opening for the panel to not look transparent on windows
+		referencePanel.style.opacity = "1";
 	}
 	
 	/**
