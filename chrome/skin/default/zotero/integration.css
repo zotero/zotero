@@ -353,12 +353,16 @@ richlistitem[selected="true"] {
 
 .zotero-simpleEditor-button {
 	background-color: transparent;
-	border: none;
+	border: 1px solid transparent;
 	cursor: pointer;
 	height: 30px;
 	outline: 0;
 	width: 30px;
 	vertical-align: bottom;
+}
+
+.zotero-simpleEditor-button:focus-visible {
+	border: 1px solid #598bec;
 }
 
 .zotero-simpleEditor-button-selected {

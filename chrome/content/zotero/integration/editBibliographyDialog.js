@@ -118,6 +118,13 @@ var Zotero_Bibliography_Dialog = new function () {
 		_updatePreview();
 	}
 	
+	// When reference list is focused and nothing is selected, select the first item
+	this.listItemFocused = function () {
+		if (!_itemList.selectedItems.length) {
+			_itemList.selectedIndex = 0;
+		}
+	};
+
 	/**
 	 * Called when an item in the reference list is clicked
 	 */
