@@ -326,8 +326,8 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Διαχωρισμός Κάθετα">
+<!ENTITY zotero.pdfReader.splitHorizontally "Διαχωρισμός Οριζόντια">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
 <!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">

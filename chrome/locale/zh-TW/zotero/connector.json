@@ -48,13 +48,13 @@
     "message": "EPUB 附件"
   },
   "itemType_snapshot": {
-    "message": "网页快照"
+    "message": "網頁快照"
   },
   "itemType_note": {
     "message": "筆記"
   },
   "itemType_link": {
-    "message": "网络链接"
+    "message": "網頁連結"
   },
   "itemType_attachment": {
     "message": "附件檔"
@@ -63,40 +63,40 @@
     "message": "儲存至……"
   },
   "progressWindow_detailsBtnView": {
-    "message": "查看详情"
+    "message": "查看詳情"
   },
   "progressWindow_detailsBtnHide": {
-    "message": "隐藏详情"
+    "message": "隱藏詳情"
   },
   "progressWindow_collectionSelector": {
-    "message": "目标分类选择器"
+    "message": "目標文獻集選擇器"
   },
   "progressWindow_savingItems": {
-    "message": "正在保存$1个条目。$2"
+    "message": "正在儲存$1個項目。$2"
   },
   "progressWindow_savingItem": {
-    "message": "正在保存条目$1"
+    "message": "正在儲存項目$1"
   },
   "progressWindow_saveItem": {
-    "message": "条目$1：$2"
+    "message": "項目$1：$2"
   },
   "progressWindow_downloadComplete": {
-    "message": "已保存$1"
+    "message": "已儲存$1"
   },
   "progressWindow_downloadCompletePlural": {
-    "message": "已为条目$2保存$1"
+    "message": "已為項目$2儲存$1"
   },
   "progressWindow_downloadFailed": {
-    "message": "$1 下载失败"
+    "message": "$1 下載失敗"
   },
   "progressWindow_downloadFailedPlural": {
-    "message": "为条目 $2 下载 $1 失败"
+    "message": "為項目 $2 下載 $1 失敗"
   },
   "progressWindow_allDone": {
-    "message": "保存完成。将关闭对话框。"
+    "message": "儲存完成。將關閉對話框。"
   },
   "progressWindow_alreadySaved": {
-    "message": "此网页上的条目已经保存。"
+    "message": "此網頁上的項目已經保存。"
   },
   "progressWindow_tagPlaceholder": {
     "message": "標籤(可用逗號分隔)"
@@ -126,16 +126,16 @@
     "message": "最新版本"
   },
   "itemSelector_title": {
-    "message": "选择您想要添加到库中的条目："
+    "message": "選擇您想要新增到文獻庫的項目："
   },
   "extensionIsDisabled": {
-    "message": "$1 Connectot 在此页面上不可用"
+    "message": "$1 Connector在此頁面無法使用"
   },
   "extensionIsDisabled_fileURL": {
-    "message": "$1 Connector 在文件 URLs 上不可用"
+    "message": "$1 Connector 在文件 URLs 上無法使用"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 Connector 在扩展页面上不可用"
+    "message": "$1 Connector 在擴充套件頁面無法使用"
   },
   "appConnector": {
     "message": "$1 Connector"
@@ -150,7 +150,7 @@
     "message": "$1Connector能夠在您的瀏覽器中利用單次點擊<a href=\"$2\">儲存項目到$1</a>。"
   },
   "firstRun_text2": {
-    "message": "如果您还没有，请<a href=\"$2\">下载</a>$1应用以获得最佳体验。"
+    "message": "如果您還沒下載，請<a href=\"$2\">下載</a>$1應用程式以獲得最佳體驗。"
   },
   "firstRun_acceptButton": {
     "message": "明白了"
@@ -204,7 +204,7 @@
     "message": "$1鎖定了您的文件來避免多位使用者同時編輯引文。同時編輯文件中的引文可能會導致引文或文件的損壞。例如網路錯誤之類無法預見的狀況可能會讓您的文件被永久鎖定。如果您確定這種狀況發生，您可以跨越這個鎖定。<br/><br/>您想要跨越這個文件鎖定嗎？"
   },
   "integration_googleDocs_authScopeError": {
-    "message": "$1 需要获取编辑您的 Google Docs 文档的权限才能插入引注。请重试，并确保允许$1查看、编辑、创建和删除您的 Google Docs 文档。"
+    "message": "$1 需要取得編輯您的Google文件中文件的權限才能插入參考文獻。請重試，並確保允許$1查看、編輯、與刪除您的Google文件中文件。"
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "您所選擇的Google帳號沒有編輯這個文件的權限。請再試一次，並確定您所選擇的帳號有編輯的權限。"

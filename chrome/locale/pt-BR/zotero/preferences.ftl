@@ -1,5 +1,5 @@
 preferences-window =
-    .title = Configurações do { -app-name } 
+    .title = Configurações do { -app-name }
 preferences-auto-recognize-files =
     .label = Extrair metadados de PDFs e e-books automaticamente
 preferences-file-renaming-title = Renomeação do arquivo

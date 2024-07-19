@@ -96,7 +96,7 @@
     "message": "Saugojimas užbaigtas. Galite užverti langą."
   },
   "progressWindow_alreadySaved": {
-    "message": "Šio žiniatinklio puslapio įrašai jau išsaugoti."
+    "message": "Šio tinklalapio įrašai jau išsaugoti."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Gairės (atskirtos kableliais)"
@@ -177,10 +177,10 @@
     "message": "Įvyko klaida išsiunčiant jūsų ataskaitą.\n\n$1\n\nPatikrinkite savo interneto ryšį. Jei problema išlieka, parašykite žinutę į Zotero forumą."
   },
   "integration_error_clientUpgrade": {
-    "message": "Žiniatinklio pagrindu veikiančiam citavimui reikia $1 arba naujesnės versijos."
+    "message": "Saityno pagrindu veikiančiam citavimui reikia $1 arba naujesnės versijos."
   },
   "integration_error_connection": {
-    "message": "„$1“ nepajėgia pasiekti „$2“ darbalaukio programos. Norint naudotis žiniatinklio pagrindu veikiančiu citavimu, „$2“ vis tiek turi būti atverta."
+    "message": "„$1“ nepajėgia pasiekti „$2“ darbalaukio programos. Norint naudotis saityno pagrindu veikiančiu citavimu, „$2“ vis tiek turi būti atverta."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Šiame dokumente yra aktyvių Zotero citavimų, kurie parsisiųstoje kopijoje atrodys tarsi nuorodos į zotero.org."

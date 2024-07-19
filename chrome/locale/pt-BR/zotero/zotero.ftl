@@ -10,6 +10,7 @@ general-remind-me-later = Lembrar-me Mais Tarde
 general-choose-file = Selecionar arquivo...
 general-open-settings = Abrir Configurações
 general-help = Ajuda
+general-tag = Tag
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -110,7 +111,7 @@ file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Abrir menu de contexto
 itembox-button-merge =
-    .aria-label = Selecionar versão do campo { $field } 
+    .aria-label = Selecionar versão do campo { $field }
 create-parent-intro = Insira um DOI, ISBN, PMID, arXiv ID, ou ADS Bibcode para identificar este arquivo:
 reader-use-dark-mode-for-content =
     .label = Usar modo escuro para o conteúdo
@@ -125,7 +126,7 @@ import-source-file =
 import-source-folder =
     .label = Uma pasta de PDFs ou outros arquivos
 import-source-online =
-    .label = Importação on-line a partir de { $targetApp } 
+    .label = Importação on-line a partir de { $targetApp }
 import-options = Opções
 import-importing = Importando...
 import-create-collection =
@@ -139,7 +140,7 @@ import-fileTypes-other =
     .placeholder = Outros padrões de arquivos, separados por vírgula (ex.: *.jpg,*.png)
 import-file-handling = Manipulação de arquivo
 import-file-handling-store =
-    .label = Copiar arquivos para a pasta de armazenamento do { -app-name } 
+    .label = Copiar arquivos para a pasta de armazenamento do { -app-name }
 import-file-handling-link =
     .label = Link para arquivos na localização original
 import-fileHandling-description = Arquivos linkados não podem ser sincronizados pelo { -app-name }.
@@ -183,7 +184,7 @@ items-table-cell-notes =
 report-error =
     .label = Relatar erro...
 rtfScan-wizard =
-    .title = Vasculhar RTF 
+    .title = Vasculhar RTF
 rtfScan-introPage-description = { -app-name } pode extrair e reformatar citações automaticamente e inserir bibliografia em arquivos RTF. Para começar, selecione um arquivo RTF abaixo.
 rtfScan-introPage-description2 = Para começar, selecione um arquivo RTF de entrada e um arquivo de saída abaixo:
 rtfScan-input-file = Arquivo de entrada
@@ -211,6 +212,10 @@ rtfScan-format-page-description = { -app-name } está processando e formatando s
 rtfScan-complete-page =
     .label = A análise do RTF foi concluída
 rtfScan-complete-page-description = Seu documento foi vasculhado e processado. Por favor, certifique-se de que ele está formatado corretamente.
+rtfScan-action-find-match =
+    .title = Select matching item
+rtfScan-action-accept-match =
+    .title = Accept this match
 runJS-title = Executar JavaScript
 runJS-editor-label = Código:
 runJS-run = Executar
@@ -446,6 +451,8 @@ expand-all-sections =
     .label = Expandir todas seções
 abstract-field =
     .placeholder = Adicionar resumo...
+tag-field =
+    .aria-label = { general-tag }
 tagselector-search =
     .placeholder = Filtrar etiquetas
 context-notes-search =
@@ -466,7 +473,7 @@ attachment-info-convert-note =
             [standalone] isolada
             [child] filha
            *[unknown] nova
-        } 
+        }
     .tooltiptext = Adicionar notas nos anexos não é mais permitido, mas você pode editar esta nota transformando em uma nota separada.
 attachment-preview-placeholder = Sem anexo para visualizar
 toggle-preview =
@@ -549,7 +556,7 @@ item-pane-duplicates-merge-items =
         }
 locate-library-lookup-no-resolver = Você deve escolher um resolvedor a partir do painel { $pane } nas configurações do { -app-name } .
 architecture-win32-warning-message = { -app-name } está rodando no modo 32-bit em um Windows de versão 64-bit. { -app-name } será mais eficiente se rodar no modo 64-bit.
-architecture-warning-action = Baixar { -app-name } 64-bit 
+architecture-warning-action = Baixar { -app-name } 64-bit
 first-run-guidance-quickFormat =
     Digitar um título, autor e/ou um ano para buscar uma referência.
     

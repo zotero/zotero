@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nom :">
 
-<!ENTITY zotero.search.searchInLibrary "Chercher dans la bibliothèque :">
+<!ENTITY zotero.search.searchInLibrary "Rechercher dans la bibliothèque :">
 
 <!ENTITY zotero.search.joinMode.prefix "Correspond">
 <!ENTITY zotero.search.joinMode.any "au moins à une">

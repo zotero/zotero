@@ -51,7 +51,7 @@
     "message": "Øyeblikksbilde"
   },
   "itemType_note": {
-    "message": "Note"
+    "message": "Notat"
   },
   "itemType_link": {
     "message": "Nettlenke"
@@ -132,10 +132,10 @@
     "message": "$1 Tilknytter er ikke tilgjengelig på denne siden"
   },
   "extensionIsDisabled_fileURL": {
-    "message": "$1 Tilknytter er ikke tilgjengelig på fil-URL-er"
+    "message": "$1 tilknytter er ikke tilgjengelig på fil-URL-er"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1  Tilknytter er ikke tilgjengelig på utvidelsessider"
+    "message": "$1  tilknytter er ikke tilgjengelig på utvidelsessider"
   },
   "appConnector": {
     "message": "$1 tilknytter"

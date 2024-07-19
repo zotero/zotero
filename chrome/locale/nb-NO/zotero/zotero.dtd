@@ -63,9 +63,9 @@
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
-<!ENTITY zotero.items.menu.attach.link.uri "Legg til lenke til URI…">
-<!ENTITY zotero.items.menu.attach.file "Legg til lagret kopi av fil...">
-<!ENTITY zotero.items.menu.attach.fileLink "Legg til lenke til fil...">
+<!ENTITY zotero.items.menu.attach.link.uri "Legg ved lenke til URI…">
+<!ENTITY zotero.items.menu.attach.file "Legg ved lagret kopi av fil...">
+<!ENTITY zotero.items.menu.attach.fileLink "Legg ved lenke til fil...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
@@ -241,14 +241,14 @@
 <!ENTITY zotero.sync.storage.downloads "Nedlastinger:">
 <!ENTITY zotero.sync.storage.uploads "Opplastinger:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Følgende emneord i ditt Zotero bibliotek er for langt til å kunne synkroniseres med server">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Følgende emneord i Zotero-biblioteket ditt er for lang til å synkroniseres med serveren:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserte emneord må være kortere enn 256 tegn.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan enten dele emneordet i flere emneord, endre det manuelt for å gjøre det kortere, eller slette det.">
 <!ENTITY zotero.sync.longTagFixer.split "Del">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Del ved">
 <!ENTITY zotero.sync.longTagFixer.character "tegn">
 <!ENTITY zotero.sync.longTagFixer.characters "tegn">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Umerkede emneord vil ikke bli lagret.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Emneord som ikke er merket av, blir ikke lagret.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Emneordet vil bli slettet fra alle elementer.">
 
 <!ENTITY zotero.merge.title "Konflikthåndtering">
@@ -297,7 +297,7 @@
 <!ENTITY zotero.file.choose.label "Velg fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil valgt">
 
-<!ENTITY zotero.attachLink.title "Legg til lenke til URI">
+<!ENTITY zotero.attachLink.title "Legg ved lenke til URI">
 <!ENTITY zotero.attachLink.label.link "Lenke:">
 <!ENTITY zotero.attachLink.label.title "Tittel:">
 

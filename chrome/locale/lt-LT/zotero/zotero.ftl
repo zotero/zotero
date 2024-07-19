@@ -10,6 +10,7 @@ general-remind-me-later = Priminti vėliau
 general-choose-file = Rinkmenos pasirinkimas...
 general-open-settings = Atverti nuostatas
 general-help = Žinynas
+general-tag = Tag
 menu-file-show-in-finder =
     .label = Rodyti ieškyklėje
 menu-file-show-file =
@@ -154,13 +155,13 @@ file-interface-items-were-imported =
     { $numItems ->
         [0] Nebuvo ką importuoti
         [one] Importuotas vienas įrašas
-       *[other] Importuota įrašų: { $numItems } 
+       *[other] Importuota įrašų: { $numItems }
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
         [0] Nebuvo iš naujo susietų
         [one] Iš naujo susietas vienas įrašas
-       *[other] Iš naujo susieta įrašų: { $numRelinked } 
+       *[other] Iš naujo susieta įrašų: { $numRelinked }
     }
 import-mendeley-encrypted = Nepavyksta nuskaityti Mendeley duombazės, galbūt ji užšifruota. Daugiau informacijos rasite straipsnelyje <a data-l10n-name="mendeley-import-kb">Kaip importuoti Mendeley biblioteką į Zotero?</a>.
 file-interface-import-error-translator = Klaida importuojant pasirinktą rinkmeną su „{ $translator }“. Įsitikinkite, kad rinkmena yra tinkama ir bandykite iš naujo.
@@ -212,6 +213,10 @@ rtfScan-format-page-description = { -app-name } apdoroja ir formatuoja jūsų RT
 rtfScan-complete-page =
     .label = Raiškiojo teksto formato dokumentų peržvelgimas baigtas
 rtfScan-complete-page-description = Jūsiškis dokumentas peržvelgtas ir apdorotas. Pažiūrėkite, ar jis tinkamai suformatuotas.
+rtfScan-action-find-match =
+    .title = Select matching item
+rtfScan-action-accept-match =
+    .title = Accept this match
 runJS-title = Paleisti JavaScript
 runJS-editor-label = Kodas:
 runJS-run = Vykdyti
@@ -452,6 +457,8 @@ expand-all-sections =
     .label = Expand All Sections
 abstract-field =
     .placeholder = Pridėti santrauką...
+tag-field =
+    .aria-label = { general-tag }
 tagselector-search =
     .placeholder = Atrinkti gaires
 context-notes-search =

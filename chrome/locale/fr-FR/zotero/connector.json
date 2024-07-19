@@ -71,6 +71,9 @@
   "progressWindow_collectionSelector": {
     "message": "Sélecteur de la collection de destination"
   },
+  "progressWindow_savingItems": {
+    "message": "Enregistrement de $1 documents. $2"
+  },
   "progressWindow_savingItem": {
     "message": "Enregistrement du document $1"
   },
@@ -80,11 +83,20 @@
   "progressWindow_downloadComplete": {
     "message": "$1 enregistré"
   },
+  "progressWindow_downloadCompletePlural": {
+    "message": " $1 enregistré pour le document $2"
+  },
   "progressWindow_downloadFailed": {
     "message": "Echec du téléchargement de $1"
   },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Échec du téléchargement de $1 pour le document $2"
+  },
   "progressWindow_allDone": {
     "message": "Enregistrement terminé. La fenêtre va maintenant se refermer."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Des documents ont déjà été enregistrés depuis cette page web."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Marqueurs (séparés par des virgules)"

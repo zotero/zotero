@@ -12,7 +12,7 @@
 <!ENTITY zotero.preferences.interface "Grensesnitt">
 <!ENTITY zotero.preferences.fileHandling "Filbehandling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta øyeblikksbilde automatisk når du oppretter elementer fra nettsider">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre tilknyttede PDF-filer og andre filer når du lagrer elementer">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisk lagre tilknyttede PDF-filer og andre filer når du lagrer elementer">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Gi nytt navn til lenkede filer">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Åpne PDF-er ved hjelp av">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Standardprogram">
@@ -37,7 +37,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "Underordnede øyblikksbilder og importerte filer">
 <!ENTITY zotero.preferences.groups.annotations "Merknader">
 <!ENTITY zotero.preferences.groups.childLinks "Underordnede lenker">
-<!ENTITY zotero.preferences.groups.tags "Emneord">
+<!ENTITY zotero.preferences.groups.tags "emneord">
 
 <!ENTITY zotero.preferences.feeds "Nyhetsstrømmer">
 <!ENTITY zotero.preferences.feeds.sorting.label "Sortering:">

@@ -10,6 +10,7 @@ general-remind-me-later = Minn meg på det senere
 general-choose-file = Velg fil...
 general-open-settings = Åpne innstillinger
 general-help = Hjelp
+general-tag = Tag
 menu-file-show-in-finder =
     .label = Vis i Finder
 menu-file-show-file =
@@ -210,6 +211,10 @@ rtfScan-format-page-description = { -app-name } behandler og formaterer RTF-file
 rtfScan-complete-page =
     .label = RTF skann komplett
 rtfScan-complete-page-description = Zotero har nå gått gjennom dokumentet ditt. Sjekk at det er korrekt formatert.
+rtfScan-action-find-match =
+    .title = Select matching item
+rtfScan-action-accept-match =
+    .title = Accept this match
 runJS-title = Kjør JavaScript
 runJS-editor-label = Kode:
 runJS-run = Kjør
@@ -384,7 +389,7 @@ section-tags =
     .label =
         { $count ->
             [one] { $count } Emneord
-           *[other] { $count } 
+           *[other] { $count }
         }
 section-related =
     .label = { $count } Relatert
@@ -440,6 +445,8 @@ expand-all-sections =
     .label = Utvid alle seksjoner
 abstract-field =
     .placeholder = Legg til abstrakt ...
+tag-field =
+    .aria-label = { general-tag }
 tagselector-search =
     .placeholder = Filtrer emneord
 context-notes-search =
