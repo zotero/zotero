@@ -3947,8 +3947,10 @@ for (let name of ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel',
 			switch (name) {
 				case 'type': {
 					let currentType = this._getLatestField('annotationType');
-					if (currentType && currentType != value) {
-						throw new Error("Cannot change annotation type");
+					if (currentType && currentType != value
+						&& (!['highlight', 'underline'].includes(value)
+							|| !['highlight', 'underline'].includes(currentType))) {
+						throw new Error("Only changes between highlight and underline annotation types are permitted");
 					}
 					if (!['highlight', 'underline', 'note', 'text', 'image', 'ink'].includes(value)) {
 						let e = new Error(`Unknown annotation type '${value}'`);
