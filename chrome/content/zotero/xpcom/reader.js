@@ -911,7 +911,7 @@ class ReaderInstance {
 		let tagsPopup = this._window.document.createXULElement('panel');
 		// <panel> completely takes over Escape keydown event, by attaching a capturing keydown
 		// listener to document which just closes the popup. It leads to unwanted edits being saved.
-		// Attach our own listener to this._window.document to properly handle Escape on editted tags
+		// Attach our own listener to this._window.document to properly handle Escape on edited tags
 		let handleKeyDown = (event) => {
 			if (event.key !== "Escape") return;
 			let focusedTag = tagsPopup.querySelector("editable-text.focused");
@@ -925,7 +925,7 @@ class ReaderInstance {
 					focusedTag.value = focusedTag.initialValue;
 				}
 			}
-			// now that all tags values are set, close the popup
+			// now that all tags values are reset, close the popup
 			tagsPopup.hidePopup();
 		};
 		tagsPopup.addEventListener('popuphidden', (event) => {
