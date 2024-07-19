@@ -40,11 +40,11 @@ function doLoad()
 	var searchBox = document.getElementById('search-box');
 	searchBox.groups = io.dataIn.groups;
 	searchBox.search = io.dataIn.search;
-	document.getElementById('search-name').value = io.dataIn.name;
+	let searchName = document.getElementById('search-name');
+	searchName.value = io.dataIn.name;
+	searchName.setSelectionRange(0, searchName.value.length, "backward");
 
 	document.addEventListener('dialogaccept', doAccept);
-	// Focus the first focusable node in the dialog
-	Services.focus.moveFocus(window, sbc, Services.focus.MOVEFOCUS_FORWARD, 0);
 }
 
 function doUnload()
