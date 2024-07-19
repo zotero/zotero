@@ -91,13 +91,18 @@
 		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
 		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
-	
-	<!-- TODO: Localize -->
+
 	<tooltip id="iframeTooltip" page="true"/>
 	<menubar>
 		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 			<menupopup id="menu_FilePopup">
-				<!-- TODO: Localize -->
+				<menuitem
+						id="menu_transferFromPDF"
+						class="menu-type-reader pdf"
+						label="&zotero.pdfReader.transferFromPDF;"
+						oncommand="reader.transferFromPDF()"
+				/>
+				<menuseparator class="menu-type-reader pdf"/>
 				<menuitem class="menu-type-reader pdf" label="&zotero.general.saveAs;" oncommand="reader.export()"/>
 				<menuitem data-l10n-id="menu-print" oncommand="reader.print()"/>
 				<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="reader.showInLibrary()"/>
