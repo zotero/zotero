@@ -1833,7 +1833,7 @@ class Reader {
 				}
 			});
 			this._readers.push(reader);
-			// Change tab's type from "unloaded-reader" to "reader" after reader loaded
+			// Change tab's type from "reader-unloaded" to "reader" after reader loaded
 			win.Zotero_Tabs.markAsLoaded(tabID);
 		}
 		
