@@ -241,7 +241,7 @@
 	font-size: 12px;
 	font: -moz-field;
 	-moz-user-focus: ignore;
-	color: rgb(87, 87, 87);
+	color: var(--fill-secondary);
 }
 
 richlistitem[selected="true"] {
