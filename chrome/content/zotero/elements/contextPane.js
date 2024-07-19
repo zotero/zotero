@@ -90,7 +90,7 @@
 				this._handleTabClose(action, type, ids, extraData);
 				return;
 			}
-			if (type == 'tab' && action == 'select') {
+			if (type == 'tab' && ["select", "load"].includes(action)) {
 				this._handleTabSelect(action, type, ids, extraData);
 			}
 		}
@@ -158,23 +158,24 @@
 			});
 		}
 
-		_handleTabSelect(action, type, ids) {
+		async _handleTabSelect(action, type, ids, extraData) {
 			// TEMP: move these variables to ZoteroContextPane
 			let _contextPaneSplitter = ZoteroContextPane.splitter;
 			let _contextPane = document.getElementById('zotero-context-pane');
+			let tabID = ids[0];
+			let tabType = extraData[tabID].type;
 			// It seems that changing `hidden` or `collapsed` values might
 			// be related with significant slow down when there are too many
 			// DOM nodes (i.e. 10k notes)
-			if (Zotero_Tabs.selectedType == 'library') {
+			if (tabType == 'library') {
 				_contextPaneSplitter.setAttribute('hidden', true);
 				_contextPane.setAttribute('collapsed', true);
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (Zotero_Tabs.selectedType.includes('reader')) {
-				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-				this._handleReaderReady(reader);
-			
+			else if (tabType == 'reader') {
+				this._handleReaderReady(tabID);
+				this._setupNotesContext(tabID);
 				_contextPaneSplitter.setAttribute('hidden', false);
 
 				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
@@ -187,11 +188,26 @@
 				this._sidenav.hidden = false;
 			}
 
-			this._selectItemContext(ids[0]);
+			this._selectItemContext(tabID);
 			ZoteroContextPane.update();
 		}
 
-		async _handleReaderReady(reader) {
+		async _setupNotesContext(tabID) {
+			let { tab } = Zotero_Tabs._getTab(tabID);
+			if (!tab || !tab.data.itemID) return;
+			let attachment = await Zotero.Items.getAsync(tab.data.itemID);
+			if (attachment) {
+				this._selectNotesContext(attachment.libraryID);
+				let notesContext = this._getNotesContext(attachment.libraryID);
+				notesContext.updateNotesListFromCache();
+			}
+			let currentNoteContext = this._getCurrentNotesContext();
+			// Always switch to the current selected tab, since the selection might have changed
+			currentNoteContext.switchToTab(Zotero_Tabs.selectedID);
+		}
+
+		async _handleReaderReady(tabID) {
+			let reader = Zotero.Reader.getByTabID(tabID);
 			if (!reader) {
 				return;
 			}
@@ -209,16 +225,6 @@
 					});
 				}
 			}
-			
-			let attachment = await Zotero.Items.getAsync(reader.itemID);
-			if (attachment) {
-				this._selectNotesContext(attachment.libraryID);
-				let notesContext = this._getNotesContext(attachment.libraryID);
-				notesContext.updateNotesListFromCache();
-			}
-
-			let currentNoteContext = this._getCurrentNotesContext();
-			currentNoteContext.switchToTab(reader.tabID);
 		}
 
 		_getCurrentNotesContext() {
@@ -270,7 +276,7 @@
 			}
 		}
 	
-		async _addItemContext(tabID, itemID, tabType = "") {
+		async _addItemContext(tabID, itemID, _tabType = "") {
 			let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 			let library = Zotero.Libraries.get(libraryID);
 			await library.waitForDataLoad('item');

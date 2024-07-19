@@ -497,7 +497,7 @@ class ReaderInstance {
 				}
 			},
 			onToggleContextPane: () => {
-				Zotero.debug('toggle context pane')
+				Zotero.debug('toggle context pane');
 				let win = Zotero.getMainWindow();
 				win.ZoteroContextPane.togglePane();
 			},
@@ -1800,8 +1800,7 @@ class Reader {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
 		let win = Zotero.getMainWindow();
-		// Change tab's type from "unloaded-reader" to "reader"
-		win.Zotero_Tabs.markAsLoaded(tabID);
+
 		await library.waitForDataLoad('item');
 
 		let item = Zotero.Items.get(itemID);
@@ -1885,6 +1884,8 @@ class Reader {
 				}
 			});
 			this._readers.push(reader);
+			// Change tab's type from "reader-unloaded" to "reader" after reader loaded
+			win.Zotero_Tabs.markAsLoaded(tabID);
 		}
 		
 		if (!openInBackground
