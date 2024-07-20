@@ -328,6 +328,12 @@ if [ $DEVTOOLS -eq 1 ]; then
 	if [ $UPDATE_CHANNEL != "beta" ]; then
 		echo 'pref("devtools.debugger.prompt-connection", false);' >> $prefs_file
 	fi
+	
+	# Use 'zotero' instead of 'zotero-bin' when passing -jsdebugger flag on Linux, since we need
+	# that to pass application.ini
+	replace_line 'let command = Services.dirsvc.get\("XREExeF", Ci.nsIFile\).path;' \
+		'let command = Services.dirsvc.get("XREExeF", Ci.nsIFile).path; command = command.replace("zotero-bin", "zotero");' \
+		chrome/devtools/modules/devtools/client/framework/browser-toolbox/Launcher.sys.mjs
 fi
 
 # 5.0.96.3 / 5.0.97-beta.37+ddc7be75c
