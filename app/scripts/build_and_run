@@ -63,7 +63,7 @@ if [ $SKIP_BUNDLED_FILES -eq 1 ]; then
 	PARAMS="$PARAMS -ZoteroSkipBundledFiles"
 fi
 if [ $DEBUGGER -eq 1 ]; then
-	PARAMS="$PARAMS -debugger"
+	PARAMS="$PARAMS -jsdebugger"
 fi
 
 if [ "`uname`" = "Darwin" ]; then

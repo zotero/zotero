@@ -324,7 +324,6 @@ if [ $DEVTOOLS -eq 1 ]; then
 	echo >> $prefs_file
 	echo "// Dev Tools" >> $prefs_file
 	echo 'pref("devtools.debugger.remote-enabled", true);' >> $prefs_file
-	echo 'pref("devtools.debugger.remote-port", 6100);' >> $prefs_file
 	if [ $UPDATE_CHANNEL != "beta" ]; then
 		echo 'pref("devtools.debugger.prompt-connection", false);' >> $prefs_file
 	fi
