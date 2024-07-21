@@ -7,7 +7,7 @@
 /* import-globals-from ../../../content/contentAreaUtils.js */
 
 /* globals DownloadUtils, Services, AUSTLMY */
-const { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 const { DownloadUtils } = ChromeUtils.import(
 	"resource://gre/modules/DownloadUtils.jsm"
