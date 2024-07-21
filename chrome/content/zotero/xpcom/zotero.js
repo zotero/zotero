@@ -734,9 +734,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Dictionaries.init();
 			Zotero.Reader.init();
 			
-			// Migrate fields from Extra that can be moved to item fields after a schema update
-			yield Zotero.Schema.migrateExtraFields();
-			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
 			yield Zotero.Promise.each(
@@ -749,6 +746,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					}
 				})()
 			);
+			
+			// Migrate fields from Extra that can be moved to item fields after a schema update
+			yield Zotero.Schema.migrateExtraFields();
 			
 			Zotero.Items.startEmptyTrashTimer();
 			
