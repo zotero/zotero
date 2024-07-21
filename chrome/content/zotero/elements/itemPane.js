@@ -134,7 +134,7 @@
 
 		notify(action, type) {
 			if (type == 'item' && action == 'modify') {
-				if (this.collectionTreeRow.isFeedsOrFeed()) {
+				if (this.collectionTreeRow && this.collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();
 				}
 			}
