@@ -42,7 +42,7 @@ function doLoad()
 	searchBox.search = io.dataIn.search;
 	let searchName = document.getElementById('search-name');
 	searchName.value = io.dataIn.name;
-	searchName.setSelectionRange(0, searchName.value.length, "backward");
+	searchName.select();
 
 	document.addEventListener('dialogaccept', doAccept);
 }
