@@ -631,8 +631,6 @@
 			}
 			
 			this.onConditionSelected(menu.value);
-			
-			this.querySelector('#conditionsmenu').focus();
 		}
 
 		updateSearch() {

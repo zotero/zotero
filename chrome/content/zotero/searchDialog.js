@@ -40,7 +40,9 @@ function doLoad()
 	var searchBox = document.getElementById('search-box');
 	searchBox.groups = io.dataIn.groups;
 	searchBox.search = io.dataIn.search;
-	document.getElementById('search-name').value = io.dataIn.name;
+	let searchName = document.getElementById('search-name');
+	searchName.value = io.dataIn.name;
+	searchName.select();
 
 	document.addEventListener('dialogaccept', doAccept);
 }

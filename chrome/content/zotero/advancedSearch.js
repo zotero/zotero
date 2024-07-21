@@ -90,6 +90,8 @@ var ZoteroAdvancedSearch = new function() {
 		};
 
 		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		// Focus the first field in the window
+		Services.focus.moveFocus(window, null, Services.focus.MOVEFOCUS_FORWARD, 0);
 	}
 	
 	this.onUnload = function () {
