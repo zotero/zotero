@@ -371,7 +371,7 @@ try {
 					if (index == 0) {
 						Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 							.getService(Components.interfaces.nsIWindowWatcher)
-							.openWindow(null, 'chrome://mozapps/content/update/updates.xhtml',
+							.openWindow(null, 'chrome://zotero/content/update/updates.xhtml',
 								'updateChecker', 'chrome,centerscreen,modal', null);
 					}
 				}
