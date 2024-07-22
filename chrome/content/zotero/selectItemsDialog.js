@@ -51,6 +51,9 @@ var doLoad = async function () {
 		itemsContainer.append(buttonBox);
 	}
 	
+	let searchBar = document.getElementById('zotero-tb-search');
+	searchBar.searchTextbox.select();
+
 	// Set font size from pref
 	var sbc = document.getElementById('zotero-select-items-container');
 	Zotero.UIProperties.registerRoot(sbc);
