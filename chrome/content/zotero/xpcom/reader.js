@@ -1215,6 +1215,7 @@ class ReaderWindow extends ReaderInstance {
 		this._window.addEventListener('DOMContentLoaded', (event) => {
 			if (event.target === this._window.document) {
 				this._popupset = this._window.document.getElementById('zotero-reader-popupset');
+				this._window.onFileMenuOpen = this._onFileMenuOpen.bind(this);
 				this._window.onGoMenuOpen = this._onGoMenuOpen.bind(this);
 				this._window.onViewMenuOpen = this._onViewMenuOpen.bind(this);
 				this._window.reader = this;
@@ -1249,6 +1250,22 @@ class ReaderWindow extends ReaderInstance {
 
 	_setTitleValue(title) {
 		this._window.document.title = title;
+	}
+
+	_onFileMenuOpen() {
+		let item = Zotero.Items.get(this._item.id);
+		let library = Zotero.Libraries.get(item.libraryID);
+		if (item
+			&& library.filesEditable
+			&& library.editable
+			&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
+			let annotations = item.getAnnotations();
+			let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
+			this._window.document.getElementById('menu_transferFromPDF').setAttribute('disabled', !canTransferFromPDF);
+		}
+		else {
+			this._window.document.getElementById('menu_transferFromPDF').setAttribute('disabled', true);
+		}
 	}
 
 	_onViewMenuOpen() {
