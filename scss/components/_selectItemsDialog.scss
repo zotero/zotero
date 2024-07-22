@@ -1,6 +1,6 @@
 #zotero-select-items-dialog {
     display: flex;
-    min-width: 600px;
+    min-width: 800px;
     min-height: 450px;
 }
 
@@ -21,7 +21,7 @@
     #zotero-collections-tree-container {
         min-width: 200px;
 		min-height: 100%;
-        padding: 16px 8px; // Collection tree table already has 8px inline padding
+        padding: 16px 0;
         background: var(--material-sidepane);
         border-inline-end: var(--material-panedivider);
     }
@@ -46,6 +46,14 @@
         flex-direction: row;
         justify-content: flex-end;
         flex: 0 0 auto;
+    }
+    
+    .dialog-button-box {
+        gap: 8px;
+        
+        button {
+            margin: 0;
+        }
     }
 
     #zotero-items-pane-content, .dialog-button-box {
