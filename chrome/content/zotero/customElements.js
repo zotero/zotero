@@ -114,6 +114,15 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 				);
 				this.toggleAttribute("needsgutter", haveCheckableChild);
 
+				// Clear whatever aria semantics the separator has so it is not counted when
+				// voiceover lists how many menuitems a menu has.
+				let clearSeparatorAriaSemantics = () => {
+					for (let separator of [...this.querySelectorAll("menuseparator")]) {
+						separator.setAttribute("role", "presentation");
+					}
+				};
+				clearSeparatorAriaSemantics();
+
 				/**
 				 * Add fade animation to the popup
 				 * animate="false" will disable the animation
@@ -162,6 +171,28 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 						this.removeAttribute("animate");
 						this.hidePopup();
 					}, 200);
+				});
+
+				this.addEventListener("popupshowing", clearSeparatorAriaSemantics);
+
+				// If a menu closes with voiceover cursor in it, the cursor gets stuck in no-longer-visible
+				// menu and voiceover will be quiet until it is restarted. As a workaround, remove the menu
+				// from DOM to force voiceover to move its cursor and insert it back after a small delay;
+				this.addEventListener("popuphidden", (e) => {
+					if (this !== e.target || this.parentNode?.closest("menupopup")) {
+						return;
+					}
+					let parent = this.parentNode;
+					let sibling = this.nextSibling;
+					this.remove();
+					setTimeout(() => {
+						if (sibling) {
+							parent.insertBefore(this, sibling);
+						}
+						else {
+							parent.appendChild(this);
+						}
+					});
 				});
 
 				// This event is triggered after clicking the menu and before popuphiding
