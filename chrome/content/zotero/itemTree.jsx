@@ -69,6 +69,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
+		multiselect: true
 	};
 
 	static propTypes = {
@@ -82,6 +83,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: PropTypes.func,
 		onActivate: PropTypes.func,
 		emptyMessage: PropTypes.string,
+		multiselect: PropTypes.bool,
 	};
 	
 	constructor(props) {
@@ -1014,7 +1016,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					containerWidth: this.domEl.clientWidth,
 					firstColumnExtraWidth: 28, // 16px for twisty + 16px for icon - 8px column padding + 4px margin
 
-					multiSelect: true,
+					multiSelect: this.props.multiselect,
 
 					onSelectionChange: this._handleSelectionChange,
 					isSelectable: this.isSelectable,

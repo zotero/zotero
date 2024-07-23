@@ -83,7 +83,8 @@ var doLoad = async function () {
 		dragAndDrop: false,
 		persistColumns: true,
 		columnPicker: true,
-		emptyMessage: Zotero.getString('pane.items.loading')
+		emptyMessage: Zotero.getString('pane.items.loading'),
+		multiselect: !io.singleSelection
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
@@ -168,6 +169,12 @@ function onSearch()
 function onItemSelected()
 {
 	itemsView.runListeners('select');
+	if (io.onlyRegularItems) {
+		// Disable "accept" button if not a top level item is selected
+		let selected = itemsView.getSelectedItems();
+		let acceptBtn = document.querySelector("dialog").getButton("accept");
+		acceptBtn.disabled = (selected && !selected.every(item => item.isRegularItem()));
+	}
 }
 
 function doAccept() {
