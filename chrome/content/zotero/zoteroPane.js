@@ -3504,6 +3504,7 @@ var ZoteroPane = new function()
 			'findFile',
 			'sep3',
 			'toggleRead',
+			'changeParentItem',
 			'addToCollection',
 			'removeItems',
 			'duplicateAndConvert',
@@ -3940,6 +3941,11 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		// Update parent item of notes/attachments
+		if (items.every(item => !item.isRegularItem())) {
+			show.add(m.changeParentItem);
+		}
+
 		// Set labels, plural if necessary
 		menu.childNodes[m.findFile].setAttribute('label', Zotero.getString('pane.items.menu.findAvailableFile'));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
@@ -4944,6 +4950,44 @@ var ZoteroPane = new function()
 	};
 	
 	
+	/**
+	 * Update the parent of the selected items.
+	 * Essentially an alternative to drag-droping a child item between top level items in itemTree
+	 * that is mainly needed for accessibility.
+	*/
+	this.changeParentItem = async function () {
+		let selectedItems = this.getSelectedItems();
+		// Only applies when selected items are not top level items
+		if (selectedItems.some(item => item.isRegularItem())) return;
+
+		let libraryID = this.getSelectedLibraryID();
+		let io = {
+			dataIn: null,
+			dataOut: null,
+			deferred: Zotero.Promise.defer(),
+			itemTreeID: 'change-parent-item-select-item-dialog',
+			filterLibraryIDs: [libraryID],
+			singleSelection: true,
+			onlyRegularItems: true
+		};
+		// The new parent needs to be selected in the dialog
+		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
+			'chrome,dialog=no,centerscreen,resizable=yes', io);
+
+		await io.deferred.promise;
+		if (!io.dataOut?.length) return;
+
+		let newParentItem = await Zotero.Items.getAsync(io.dataOut);
+		
+		if (!newParentItem.length) return;
+
+		for (let [index, item] of selectedItems.entries()) {
+			item.parentID = newParentItem[0].id;
+			let isLast = index == selectedItems.length - 1;
+			// Skip all notifiers until the last item to avoid refreshing itemTree multiple times
+			await item.saveTx({ skipSelect: true, skipNotifier: !isLast });
+		}
+	};
 	/**
 	 * @deprecated
 	 */

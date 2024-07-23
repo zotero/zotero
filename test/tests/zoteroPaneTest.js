@@ -1736,4 +1736,36 @@ describe("ZoteroPane", function() {
 			Zotero.Prefs.clear('autoRenameFiles.linked');
 		});
 	});
+	describe("#changeParentItem", function () {
+		it("should update the parent of selected items", async function() {
+			// One item has 2 children and the other one - none
+			let oldParent = await createDataObject('item');
+			let newParent = await createDataObject('item');
+			var attachment = await importPDFAttachment(oldParent);
+			var note = await createDataObject('item', { itemType: 'note', parentID: oldParent.id });
+			// Select child items
+			await zp.selectItems([attachment.id, note.id]);
+			// Open the dialog to select new parent and wait for it to load
+			let windowPromise = waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
+			zp.changeParentItem();
+			var selectWin = await windowPromise;
+			do {
+				await Zotero.Promise.delay(50);
+			}
+			while (!selectWin.loaded);
+			await selectWin.itemsView.waitForLoad();
+			// Select new parent to move note and attachment into
+			await selectWin.itemsView.selectItem(newParent.id);
+			var modifyPromise = waitForItemEvent('modify');
+			selectWin.document.querySelector('dialog').acceptDialog();
+
+			await modifyPromise;
+			// Make sure the new parent now has the note and attachment
+			assert.include(newParent.getNotes(), note.id);
+			assert.include(newParent.getAttachments(), attachment.id);
+			// And the old parent does not
+			assert.notInclude(oldParent.getNotes(), note.id);
+			assert.notInclude(oldParent.getAttachments(), attachment.id);
+		});
+	});
 })
