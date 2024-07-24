@@ -268,6 +268,10 @@
 			this.renderCustomSections();
 			this._restorePinnedPane();
 
+			// Unobserve intersection to prevent unwanted rendering.
+			// Checking flags in _handleIntersection does not work, since the callback may be delayed
+			this.getPanes().forEach(elem => this._intersectionOb.unobserve(elem));
+
 			let panes = this.getPanes();
 			for (let box of [this._header, ...panes]) {
 				box.editable = this.editable;
@@ -278,7 +282,12 @@
 				// Execute sync render immediately
 				if (!box.hidden && box.render) {
 					if (box.render) {
-						box.render();
+						try {
+							box.render();
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
 					}
 				}
 			}
@@ -289,7 +298,7 @@
 			this._paneParent.style.paddingBottom = '';
 			if (pinnedPaneElem) {
 				let paneID = pinnedPaneElem.dataset.pane;
-				this.scrollToPane(paneID, 'instant');
+				await this.scrollToPane(paneID, 'instant');
 				this.pinnedPane = paneID;
 			}
 			else {
@@ -307,7 +316,12 @@
 				if (!this.isPaneVisible(box.dataset.pane)) {
 					continue;
 				}
-				await waitNoLongerThan(box.asyncRender(), 500);
+				try {
+					await waitNoLongerThan(box.asyncRender(), 500);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			if (this.item.id == item.id) {
 				this._isRendering = false;
@@ -315,6 +329,8 @@
 			if (Zotero.test) {
 				resolve();
 			}
+
+			this.getPanes().forEach(elem => this._intersectionOb.observe(elem));
 		}
 
 		renderCustomSections() {
@@ -437,7 +453,7 @@
 			this.getPanes().forEach(elem => this._sidenav.updatePaneStatus(elem.dataset.pane));
 		}
 
-		async scrollToPane(paneID, behavior = 'smooth') {
+		async scrollToPane(paneID, behavior = 'smooth', retryTimes = 0) {
 			let pane = this.getEnabledPane(paneID);
 			if (!pane) return null;
 
@@ -460,6 +476,19 @@
 			}
 			pane.scrollIntoView({ block: 'start', behavior });
 			pane.focus();
+			
+			// Check if the pane is actually scrolled to
+			let scrollPositionThreshold = 3;
+			let maxScrollAttempts = 3;
+			if (retryTimes >= maxScrollAttempts) {
+				return scrollPromise;
+			}
+			await Zotero.Promise.delay(0);
+			// If not, scroll again
+			if (Math.abs(pane.getBoundingClientRect().top
+				- pane.parentElement.getBoundingClientRect().top) > scrollPositionThreshold) {
+				await this.scrollToPane(paneID, behavior, retryTimes + 1);
+			}
 			return scrollPromise;
 		}
 		
@@ -623,8 +652,13 @@
 					if (needsCheckVisibility && !this.isPaneVisible(paneElem.dataset.pane)) {
 						return;
 					}
-					if (paneElem.render) paneElem.render();
-					if (paneElem.asyncRender) await paneElem.asyncRender();
+					try {
+						if (paneElem.render) paneElem.render();
+						if (paneElem.asyncRender) await paneElem.asyncRender();
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				});
 			}
 			if (needsDiscard.length > 0) {
@@ -632,7 +666,12 @@
 					if (needsCheckVisibility && this.isPaneVisible(paneElem.dataset.pane)) {
 						return;
 					}
-					if (paneElem.discard) paneElem.discard();
+					try {
+						if (paneElem.discard) paneElem.discard();
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				});
 			}
 		};
