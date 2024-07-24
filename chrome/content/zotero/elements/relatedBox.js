@@ -95,7 +95,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 							+ `for item ${this._item.libraryKey}`, 2);
 					}
 					return item;
-				});
+				}).filter(Boolean);
 				
 				// Sort by display title
 				var collation = Zotero.getLocaleCollation();
