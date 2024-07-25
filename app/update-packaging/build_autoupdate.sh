@@ -277,8 +277,6 @@ for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64"; do
 			continue
 		fi
 		dir="Zotero_$build"
-		touch "$UPDATE_STAGE_DIR/$TO/$dir/precomplete"
-		cp "$SCRIPT_DIR/removed-files_$build" "$UPDATE_STAGE_DIR/$TO/$dir/removed-files"
 	fi
 	if [[ $BUILD_INCREMENTAL == 1 ]] && [[ -d "$UPDATE_STAGE_DIR/$FROM/$dir" ]]; then
 		echo
