@@ -422,12 +422,16 @@ ${str}
 		elem.dispatchEvent(new Event('syncfrompreference'));
 	},
 
-	_syncToPrefOnModify(event) {
-		if (event.currentTarget.getAttribute('preference')) {
-			let value = this._useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
-			event.currentTarget.dispatchEvent(new Event('synctopreference'));
-			Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
+	_syncToPrefOnModify(elem, preference) {
+		let value;
+		if (this._useChecked(elem)) {
+			value = elem.checked;
 		}
+		else {
+			value = elem.value;
+		}
+		elem.dispatchEvent(new Event('synctopreference'));
+		Zotero.Prefs.set(preference, value, true);
 	},
 
 	/**
@@ -494,13 +498,14 @@ ${str}
 				this._mutationObservers.set(elem, mutationObserver);
 			}
 
-			elem.addEventListener('command', this._syncToPrefOnModify.bind(this));
-			elem.addEventListener('input', this._syncToPrefOnModify.bind(this));
-			elem.addEventListener('change', this._syncToPrefOnModify.bind(this));
+			let syncToPref = () => this._syncToPrefOnModify(elem, preference);
+			elem.addEventListener('command', syncToPref);
+			elem.addEventListener('input', syncToPref);
+			elem.addEventListener('change', syncToPref);
 
 			// Set timeout before populating the value so the pane can add listeners first
 			return new Promise(resolve => setTimeout(() => {
-				this._syncFromPref(elem, elem.getAttribute('preference'), true);
+				this._syncFromPref(elem, preference, true);
 				resolve();
 			}));
 		};
