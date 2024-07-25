@@ -19,14 +19,15 @@ describe("Create Bibliography Dialog", function () {
 		var deferred = Zotero.Promise.defer();
 		var called = false;
 		waitForWindow("chrome://zotero/content/bibliography.xhtml", function (dialog) {
-			waitForWindow("chrome://zotero/content/preferences/preferences.xhtml", function (window) {
+			waitForWindow("chrome://zotero/content/browser_wrapper.xhtml", function (window) {
+				let browser = window.document.querySelector("browser");
 				// Wait for switch to Cite pane
 				(async function () {
 					do {
 						Zotero.debug("Checking for pane");
 						await Zotero.Promise.delay(5);
 					}
-					while (!window.document.querySelector('[value=zotero-prefpane-cite]').selected);
+					while (!browser.getAttribute("src") && !browser.contentDocument.querySelector('[value=zotero-prefpane-cite]')?.selected);
 					called = true;
 					window.close();
 					deferred.resolve();
