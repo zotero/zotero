@@ -60,6 +60,9 @@ var doLoad = async function () {
 				onItemSelected();
 			}
 		},
+		onActivate: () => {
+			document.querySelector('dialog').acceptDialog();
+		},
 		id: io.itemTreeID || "select-items-dialog",
 		dragAndDrop: false,
 		persistColumns: true,
