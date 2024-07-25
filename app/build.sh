@@ -547,6 +547,7 @@ if [ $BUILD_MAC == 1 ]; then
 	if [[ $SIGN == 1 ]] && [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
 		mkdir "$APPDIR/Contents/PlugIns"
 		cp -R $SAFARI_APPEX "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
+		rm -rf "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources/safari/test/"
 	fi
 	
 	# Copy over removed-files and make a precomplete file
