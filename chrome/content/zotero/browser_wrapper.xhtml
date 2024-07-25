@@ -8,32 +8,39 @@
 		width="800"
 		height="600"
 		style="display: flex;">
-	
-	<browser style="width:100%;height:100%"/>
-
 	<script>
-		let browser = document.querySelector("browser");
-		
-		browser.addEventListener("DOMContentLoaded", (e) => {
-			if (!browser.getAttribute("src")) return;
-			// When the content of browser is loaded, pass over arguments and copy its title
-			browser.contentWindow.arguments = window.arguments;
-			document.title = browser.contentDocument.title;
-			// Set the same min-width/min-height as the browser's content
-			let dialogStyle = browser.contentWindow.getComputedStyle(browser.contentDocument.querySelector("window"));
-			if (dialogStyle.getPropertyValue("min-width")) {
-				document.querySelector("window").style.minWidth = dialogStyle.getPropertyValue("min-width");
+		var init = (url, options) => {
+			let browser = document.createXULElement("browser");
+			if (!options.noType) {
+				browser.setAttribute("type", "content");
 			}
-			if (dialogStyle.getPropertyValue("min-height")) {
-				document.querySelector("window").style.minHeight = dialogStyle.getPropertyValue("min-height");
-			}
-		}, true);
-		// Without it, the window won't close if the browser contains a dialog
-		browser.addEventListener("dialogaccept", (e) => {
-			window.close();
-		});
-		browser.addEventListener("dialogcancel", (e) => {
-			window.close();
-		});
+			browser.style = "width: 100%;height: 100%";
+
+			browser.addEventListener("DOMContentLoaded", (e) => {
+				if (!browser.getAttribute("src")) return;
+				// When the content of browser is loaded, pass over arguments and copy its title
+				browser.contentWindow.arguments = window.arguments;
+				document.title = browser.contentDocument.title;
+				// Set the same min-width/min-height as the browser's content
+				let dialogStyle = browser.contentWindow.getComputedStyle(browser.contentDocument.querySelector("window"));
+				if (dialogStyle.getPropertyValue("min-width")) {
+					document.querySelector("window").style.minWidth = dialogStyle.getPropertyValue("min-width");
+				}
+				if (dialogStyle.getPropertyValue("min-height")) {
+					document.querySelector("window").style.minHeight = dialogStyle.getPropertyValue("min-height");
+				}
+			}, true);
+			// Without it, the window won't close if the browser contains a dialog
+			browser.addEventListener("dialogaccept", (e) => {
+				window.close();
+			});
+			browser.addEventListener("dialogcancel", (e) => {
+				window.close();
+			});
+
+			document.querySelector("window").append(browser);
+			browser.setAttribute("src", url);
+		}
+		window.init = init;
 	</script>
 </window>

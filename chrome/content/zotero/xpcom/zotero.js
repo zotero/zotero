@@ -973,20 +973,25 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			.getService(Components.interfaces.nsIWindowWatcher);
 		ww.openWindow(null, chromeURI, '_blank', flags, null);
 	}
-	// In works - one function to open a dialog inside of a window's <browser>
-	this.openWindowInWrapper = function (_, name, link, params, io) {
-		let args = [...arguments];
+	// Open a dialog or window inside of the browser wrapper for better screen readers' access
+	this.openWindowInBrowserWrapper = function (url, name, options, io, additionalConfig = {}) {
 		let wrapperUrl = 'chrome://zotero/content/browser_wrapper.xhtml';
+		let args = [wrapperUrl, name, options, io];
 		
-		let url = args[1];
-		args[1] = wrapperUrl;
-		args[args.length - 1].wrappedJSObject = args[args.length - 1];
-		let win = Services.ww.openWindow(...args);
-		
-		win.addEventListener("load", (e) => {
-			win.document.querySelector("browser").setAttribute("src", url);
+		let mainWindow = Services.wm.getMostRecentWindow("navigator:browser");
+		let openedWin;
+		if (mainWindow) {
+			openedWin = mainWindow.openDialog(...args);
+		}
+		else {
+			// nsIWindowWatcher needs a wrappedJSObject
+			args[args.length - 1].wrappedJSObject = args[args.length - 1];
+			openedWin = Services.ww.openWindow(null, ...args);
+		}
+		openedWin.addEventListener("load", (_) => {
+			openedWin.init(url, additionalConfig);
 		});
-		return win;
+		return openedWin;
 	};
 	
 	
