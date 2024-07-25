@@ -886,7 +886,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		
 		# Copy over removed-files and make a precomplete file
 		pushd "$APPDIR"
-		cp "$CALLDIR/update-packaging/removed-files_$arch" removed-files
+		cp "$CALLDIR/update-packaging/removed-files_linux-$arch" removed-files
 		python3 "$CALLDIR/scripts/createprecomplete.py"
 		if [ ! -s precomplete ]; then
 			echo "precomplete file not created -- aborting" 2>&1
