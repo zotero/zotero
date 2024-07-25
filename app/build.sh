@@ -583,7 +583,7 @@ if [ $BUILD_MAC == 1 ]; then
 		if [ -d "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex" ]; then
 			echo
 			# Extract entitlements, which differ from parent app
-			/usr/bin/codesign -d --entitlements :"$BUILD_DIR/safari-entitlements.plist" $SAFARI_APPEX
+			/usr/bin/codesign -d --entitlements "$BUILD_DIR/safari-entitlements.plist" --xml "$SAFARI_APPEX"
 			
 			# Add suffix to appex bundle identifier
 			if [ $UPDATE_CHANNEL == "beta" ] || [ $UPDATE_CHANNEL == "dev" ] || [ $UPDATE_CHANNEL == "source" ]; then
