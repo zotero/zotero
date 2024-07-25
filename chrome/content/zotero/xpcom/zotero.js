@@ -973,6 +973,21 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			.getService(Components.interfaces.nsIWindowWatcher);
 		ww.openWindow(null, chromeURI, '_blank', flags, null);
 	}
+	// In works - one function to open a dialog inside of a window's <browser>
+	this.openWindowInWrapper = function (_, name, link, params, io) {
+		let args = [...arguments];
+		let wrapperUrl = 'chrome://zotero/content/browser_wrapper.xhtml';
+		
+		let url = args[1];
+		args[1] = wrapperUrl;
+		args[args.length - 1].wrappedJSObject = args[args.length - 1];
+		let win = Services.ww.openWindow(...args);
+		
+		win.addEventListener("load", (e) => {
+			win.document.querySelector("browser").setAttribute("src", url);
+		});
+		return win;
+	};
 	
 	
 	this.openCheckForUpdatesWindow = function ({ modal } = {}) {

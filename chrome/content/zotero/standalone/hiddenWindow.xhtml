@@ -69,13 +69,16 @@
 				win.focus();
 			}
 			else {
-				Services.ww.openWindow(
+				let win = Services.ww.openWindow(
 					null,
-					'chrome://zotero/content/preferences/preferences.xhtml',
+					'chrome://zotero/content/browser_wrapper.xhtml',
 					'zotero-prefs',
 					'chrome,titlebar,centerscreen,resizable=yes',
 					null
 				);
+				win.addEventListener("load", (e) => {
+					win.document.querySelector("browser").setAttribute("src", 'chrome://zotero/content/preferences/preferences.xhtml');
+				});
 			}
 		}
 	</script>

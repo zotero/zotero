@@ -1714,21 +1714,26 @@ Zotero.Utilities.Internal = {
 			scrollTo: options.scrollTo,
 		};
 		let args = [
-			'chrome://zotero/content/preferences/preferences.xhtml',
+			'chrome://zotero/content/browser_wrapper.xhtml',
 			'zotero-prefs',
 			'chrome,titlebar,centerscreen,resizable=yes',
 			io
 		];
 		
 		let mainWindow = Services.wm.getMostRecentWindow("navigator:browser");
+		let openedWin;
 		if (mainWindow) {
-			return mainWindow.openDialog(...args);
+			openedWin = mainWindow.openDialog(...args);
 		}
 		else {
 			// nsIWindowWatcher needs a wrappedJSObject
 			args[args.length - 1].wrappedJSObject = args[args.length - 1];
-			return Services.ww.openWindow(null, ...args);
+			openedWin = Services.ww.openWindow(null, ...args);
 		}
+		openedWin.addEventListener("load", (_) => {
+			openedWin.document.querySelector("browser").setAttribute("src", 'chrome://zotero/content/preferences/preferences.xhtml');
+		});
+		return openedWin;
 	},
 	
 	
