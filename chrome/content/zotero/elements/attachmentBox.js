@@ -317,6 +317,7 @@
 			let selectButton = this._id('select-button');
 
 			let fileExists = this._item.isFileAttachment() && await this._item.fileExists();
+			let isMerge = ["merge", "mergeedit", "filemerge"].includes(this.mode);
 			let isImportedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			let isLinkedURL = this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
 			
@@ -392,7 +393,7 @@
 				pagesRow.hidden = true;
 			}
 			
-			if (this.displayDateModified && fileExists && !this._item.isWebAttachment()) {
+			if (this.displayDateModified && (fileExists || isMerge) && !this._item.isWebAttachment()) {
 				// Conflict resolution uses a modal window, so promises won't work, but
 				// the sync process passes in the file mod time as dateModified
 				if (this.synchronous) {

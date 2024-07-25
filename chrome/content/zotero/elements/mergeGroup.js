@@ -142,7 +142,6 @@
 			this._mergePane.libraryID = this.libraryID;
 			this._leftPane.data = this._data.left;
 			this._rightPane.data = this._data.right;
-			this._mergePane.data = this._data.merge;
 			
 			if (this._data.selected == 'left') {
 				this.choosePane(this._leftPane);
