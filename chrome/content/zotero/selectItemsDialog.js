@@ -172,8 +172,8 @@ function onItemSelected()
 	if (io.onlyRegularItems) {
 		// Disable "accept" button if not a top level item is selected
 		let selected = itemsView.getSelectedItems();
-		let acceptBtn = document.querySelector("dialog").getButton("accept");
-		acceptBtn.disabled = (selected && !selected.every(item => item.isRegularItem()));
+		let disableAccept = (selected && !selected.every(item => item.isRegularItem()));
+		document.querySelector("dialog").setAttribute("buttondisabledaccept", disableAccept);
 	}
 }
 
