@@ -8,6 +8,15 @@ preferences-file-renaming-title = File Renaming
 preferences-file-renaming-intro = { -app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well.
 preferences-file-renaming-auto-rename-files =
     .label = Automatically rename locally added files
+preferences-file-renaming-file-types = Rename files of these types:
+preferences-file-renaming-file-type-pdf =
+    .label = PDF
+preferences-file-renaming-file-type-epub =
+    .label = EPUB
+preferences-file-renaming-file-type-image =
+    .label = Image
+preferences-file-renaming-file-type-audio =
+    .label = Audio
 preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
 

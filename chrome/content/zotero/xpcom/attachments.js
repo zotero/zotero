@@ -580,7 +580,7 @@ Zotero.Attachments = new function () {
 		// Save using remote web browser persist
 		var externalHandlerImport = async function (contentType) {
 			// Rename attachment
-			if (renameIfAllowedType && !fileBaseName && this.getRenamedFileTypes().includes(contentType)) {
+			if (renameIfAllowedType && !fileBaseName && this.isRenameAllowedForType(contentType)) {
 				let parentItem = Zotero.Items.get(parentItemID);
 				fileBaseName = this.getFileBaseNameFromItem(parentItem);
 			}
@@ -2443,24 +2443,38 @@ Zotero.Attachments = new function () {
 	}
 	
 	
-	this.getRenamedFileTypes = function () {
+	this.isRenameAllowedForType = function (contentType) {
+		let typePrefixes;
 		try {
-			var types = Zotero.Prefs.get('autoRenameFiles.fileTypes');
-			return types ? types.split(',') : [];
+			typePrefixes = (Zotero.Prefs.get('autoRenameFiles.fileTypes') || '')
+				.split(',');
 		}
 		catch (e) {
-			return [];
+			typePrefixes = [];
 		}
+
+		return typePrefixes.some(prefix => contentType.startsWith(prefix));
+	};
+	
+	
+	/**
+	 * @deprecated
+	 */
+	this.getRenamedFileTypes = function () {
+		Zotero.debug('Zotero.Attachments.getRenamedFileTypes() is deprecated -- use isRenameAllowedForType()');
+		return Zotero.Prefs.get('autoRenameFiles.fileTypes')
+			.split(',')
+			// Don't include prefixes
+			.filter(type => /.+\/.+/.test(type));
 	};
 	
 	
 	this.getRenamedFileBaseNameIfAllowedType = async function (parentItem, file) {
-		var types = this.getRenamedFileTypes();
 		var contentType = file.endsWith('.pdf')
 			// Don't bother reading file if there's a .pdf extension
 			? 'application/pdf'
 			: await Zotero.MIME.getMIMETypeFromFile(file);
-		if (!types.includes(contentType)) {
+		if (!this.isRenameAllowedForType(contentType)) {
 			return false;
 		}
 		return this.getFileBaseNameFromItem(parentItem);
