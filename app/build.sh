@@ -541,11 +541,23 @@ if [ $BUILD_MAC == 1 ]; then
 	# Delete extraneous files
 	find "$CONTENTSDIR" -depth -type d -name .git -exec rm -rf {} \;
 	find "$CONTENTSDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
-
-	# Copy over removed-files and make a precomplete file here since it needs to be stable for the
-	# signature. This is done in build_autocomplete.sh for other platforms.
-	cp "$CALLDIR/update-packaging/removed-files_mac" "$CONTENTSDIR/Resources/removed-files"
-	touch "$CONTENTSDIR/Resources/precomplete"
+	
+	# Add Safari App Extension -- this depends on signing but needs to be done before generating
+	# the precomplete file
+	if [[ $SIGN == 1 ]] && [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
+		mkdir "$APPDIR/Contents/PlugIns"
+		cp -R $SAFARI_APPEX "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
+	fi
+	
+	# Copy over removed-files and make a precomplete file
+	pushd "$CONTENTSDIR/Resources/"
+	cp "$CALLDIR/update-packaging/removed-files_mac" removed-files
+	python3 "$CALLDIR/scripts/createprecomplete.py"
+	if [ ! -s precomplete ]; then
+		echo "precomplete file not created -- aborting" 2>&1
+		exit 1
+	fi
+	popd
 	
 	# Sign
 	if [ $SIGN == 1 ]; then
@@ -565,15 +577,14 @@ if [ $BUILD_MAC == 1 ]; then
 		find "$APPDIR/Contents" -name '*.app' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/zotero"
 		
-		# Bundle and sign Safari App Extension
+		# Sign Safari App Extension
 		#
 		# Even though it's signed by Xcode, we sign it again to make sure it matches the parent app signature
-		if [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
+		if [ -d "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex" ]; then
 			echo
 			# Extract entitlements, which differ from parent app
 			/usr/bin/codesign -d --entitlements :"$BUILD_DIR/safari-entitlements.plist" $SAFARI_APPEX
-			mkdir "$APPDIR/Contents/PlugIns"
-			cp -R $SAFARI_APPEX "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
+			
 			# Add suffix to appex bundle identifier
 			if [ $UPDATE_CHANNEL == "beta" ] || [ $UPDATE_CHANNEL == "dev" ] || [ $UPDATE_CHANNEL == "source" ]; then
 				perl -pi -e "s/org\.zotero\.SafariExtensionApp\.SafariExtension/org.zotero.SafariExtensionApp.SafariExtension-$UPDATE_CHANNEL/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
@@ -735,6 +746,16 @@ if [ $BUILD_WIN == 1 ]; then
 		find "$APPDIR" \( -name .DS_Store -or -name '.git*' -or -name '.travis.yml' -or -name update.rdf -or -name '*.bak' \) -exec rm -f {} \;
 		find "$APPDIR" \( -name '*.exe' -or -name '*.dll' \) -exec chmod 755 {} \;
 		
+		# Copy over removed-files and make a precomplete file
+		pushd "$APPDIR"
+		cp "$CALLDIR/update-packaging/removed-files_$arch" removed-files
+		python3 "$CALLDIR/scripts/createprecomplete.py"
+		if [ ! -s precomplete ]; then
+			echo "precomplete file not created -- aborting" 2>&1
+			exit 1
+		fi
+		popd
+		
 		if [ $PACKAGE -eq 1 ]; then
 			if [ $WIN_NATIVE -eq 1 ]; then
 				echo "Creating Windows installer"
@@ -861,6 +882,16 @@ if [ $BUILD_LINUX == 1 ]; then
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
 		find "$APPDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
+		
+		# Copy over removed-files and make a precomplete file
+		pushd "$APPDIR"
+		cp "$CALLDIR/update-packaging/removed-files_$arch" removed-files
+		python3 "$CALLDIR/scripts/createprecomplete.py"
+		if [ ! -s precomplete ]; then
+			echo "precomplete file not created -- aborting" 2>&1
+			exit 1
+		fi
+		popd
 		
 		if [ $PACKAGE == 1 ]; then
 			# Create tar
