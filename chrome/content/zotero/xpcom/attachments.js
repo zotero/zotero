@@ -1712,7 +1712,7 @@ Zotero.Attachments = new function () {
 		}, 0);
 		dialog.setStatus(
 			numFiles
-				? Zotero.getString('findPDF.filesAdded', numFiles, numFiles)
+				? { l10nId: 'find-pdf-files-added', l10nArgs: { count: numFiles } }
 				: Zotero.getString('findPDF.noFilesFound')
 		);
 		_findFileQueue = [];
