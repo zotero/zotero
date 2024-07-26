@@ -17,6 +17,8 @@ preferences-file-renaming-file-type-image =
     .label = { file-type-image }
 preferences-file-renaming-file-type-audio =
     .label = { file-type-audio }
+preferences-file-renaming-file-type-video =
+    .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
 
