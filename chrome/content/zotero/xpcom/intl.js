@@ -28,6 +28,7 @@ Zotero.Intl = new function () {
 	let intlProps;
 	let pluralFormGet;
 	let pluralFormNumForms;
+	let ftl;
 
 	// Get settings from language pack (extracted by zotero-build/locale/merge_mozilla_files)
 	this.init = function () {
@@ -88,6 +89,14 @@ Zotero.Intl = new function () {
 				this.strings[regexpResult[1]] = regexpResult[2];
 			}
 		}
+		
+		// Provide synchronous access to Fluent strings for getString()
+		ftl = new Localization([
+			'zotero.ftl',
+			// More FTL files can be hardcoded here, or added later with
+			// Zotero.ftl.addResourceIds(['...'])
+		], true);
+		Zotero.ftl = ftl;
 	};
 
 
@@ -108,11 +117,17 @@ Zotero.Intl = new function () {
 				}
 				l10n = bundle.formatStringFromName(name, params, params.length);
 			}
-			else if (this.strings[name]) {
-				return this.strings[name];
-			}
 			else {
-				l10n = bundle.GetStringFromName(name);
+				let ftlString = ftl.formatValueSync(name);
+				if (ftlString) {
+					return ftlString;
+				}
+				else if (this.strings[name]) {
+					return this.strings[name];
+				}
+				else {
+					l10n = bundle.GetStringFromName(name);
+				}
 			}
 			if (num !== undefined) {
 				let availableForms = l10n.split(/;/);
