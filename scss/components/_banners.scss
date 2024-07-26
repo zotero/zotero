@@ -20,7 +20,6 @@
 #post-upgrade-banner {
 	background: var(--accent-blue30);
 	color: var(--fill-primary);
-	align-items: center;
 	gap: 8px;
 	padding: 8px 12px;
 
@@ -30,11 +29,19 @@
 		cursor: pointer;
 	}
 	
+	#post-upgrade-centered {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 8px;
+		flex: 1;
+	}
+
 	#post-upgrade-buttons {
-		position: absolute;
-		inset-inline-end: 12px;
 		display: flex;
 		gap: 8px;
+		margin-inline-start: auto;
 		
 		button {
 			margin: 0;
