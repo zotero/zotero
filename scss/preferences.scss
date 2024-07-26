@@ -17,6 +17,21 @@
 
 @import "base/base";
 
+// Components
+// --------------------------------------------------
+
+@import "components/button";
+@import "components/icons";
+@import "components/listheader";
+@import "components/menu";
+@import "components/richlistbox";
+@import "components/search";
+@import "components/spinner";
+@import "components/titleBar";
+@import "components/textLink";
+@import "components/virtualized-table";
+@import "components/window";
+
 // Panes
 // --------------------------------------------------
 
@@ -96,6 +111,7 @@
 		padding: 1em;
 		border-radius: 5px;
 		align-items: center;
+		gap: 6px;
 		font-size: 1.1em;
 		transition: background-color 0.2s ease;
 		-moz-context-properties: fill, fill-opacity;
@@ -132,6 +148,10 @@
 	margin-inline-start: 20px;
 	@include svgicon-menu("chevron", "universal", "20");
 	rotate: 90deg;
+	
+	.toolbarbutton-text {
+		display: none;
+	}
 }
 
 #prefs-help-container {
@@ -140,7 +160,7 @@
 }
 
 h1 {
-	margin: 0 6px 12px 6px;
+	margin: 0 0 12px 0;
 	font-size: 17px;
 	font-weight: 400;
 }
@@ -226,10 +246,13 @@ window[windowtype="zotero:pref"] {
    min-width: 600px;
 }
 
-label:not([is=zotero-text-link]) {
-	/* Apply XUL label styles to all labels */
+label:not([is=zotero-text-link], .button-text, .checkbox-label, .radio-label) {
 	margin-block: 1px 2px;
-	margin-inline: 6px 5px;
+	margin-inline: 0 5px;
+}
+
+description {
+	 margin-inline: 0;
 }
 
 description, label, checkbox {
@@ -282,4 +305,12 @@ label[is=zotero-text-link] {
 
 button {
 	flex-shrink: 0;
+}
+
+radiogroup {
+	margin-bottom: 4px;
+}
+
+radio, checkbox {
+	margin-block: 4px;
 }
