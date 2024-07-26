@@ -55,10 +55,10 @@ Zotero.Plugins = new function () {
 		// if getAllAddons() hasn't been called, so use getAllAddons() and do the checks ourselves
 		var addons = await AddonManager.getAllAddons();
 		for (let addon of addons) {
-			if (addon.type != 'extension' || !addon.isActive) continue;
+			if (addon.type != 'extension') continue;
 			let blockedReason = shouldBlockPlugin(addon);
-			if (blockedReason) {
-				return;
+			if (blockedReason || !addon.isActive) {
+				continue;
 			}
 			addonVersions.set(addon.id, addon.version);
 			_loadScope(addon);
