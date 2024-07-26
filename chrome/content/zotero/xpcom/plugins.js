@@ -404,7 +404,7 @@ Zotero.Plugins = new function () {
 			versionRanges: [{
 				maxVersion: "4.5.99"
 			}],
-			reason: "This plugin, up to version 4.6.0, violates Zotero's plugin policies by severely break user interface.",
+			reason: "Versions of this plugin prior to version 4.6.0 break the Zotero user interface.",
 		}
 	};
 	function getBlockedPlugins() {
