@@ -20,6 +20,7 @@
 #post-upgrade-banner {
 	background: var(--accent-blue30);
 	color: var(--fill-primary);
+	flex-wrap: wrap;
 	gap: 8px;
 	padding: 8px 12px;
 
@@ -35,11 +36,12 @@
 		justify-content: center;
 		flex-wrap: wrap;
 		gap: 8px;
-		flex: 1;
+		flex: 1 auto;
 	}
 
 	#post-upgrade-buttons {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 8px;
 		margin-inline-start: auto;
 	}
