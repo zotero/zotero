@@ -24,7 +24,7 @@
 -->
 <vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
 	<vbox class="main-section">
-		<groupbox>
+		<vbox class="section">
 			<label><html:h2>&zotero.preferences.interface;</html:h2></label>
 		
 			<hbox align="center">
@@ -78,9 +78,9 @@
 					><menupopup/></menulist>
 				</hbox>
 			</vbox>
-		</groupbox>
+		</vbox>
 		
-		<groupbox id="zotero-prefpane-file-handling-groupbox">
+		<vbox class="section" id="zotero-prefpane-file-handling-groupbox">
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
 			<vbox>
@@ -99,13 +99,13 @@
 				/>
 			</vbox>
 		
-		</groupbox>
+		</vbox>
 		
-		<groupbox id="zotero-prefpane-file-renaming-groupbox">
+		<vbox id="zotero-prefpane-file-renaming-groupbox"  class="section" aria-describedby="preferences-file-renaming-intro">
 			<label><html:h2 data-l10n-id="preferences-file-renaming-title"/></label>
 			
 			<vbox align="start">
-				<label data-l10n-id="preferences-file-renaming-intro"/>
+				<label id="preferences-file-renaming-intro" data-l10n-id="preferences-file-renaming-intro"/>
 				<separator class="thin"/>
 				<checkbox data-l10n-id="preferences-file-renaming-auto-rename-files"
 					preference="extensions.zotero.autoRenameFiles"
@@ -122,9 +122,9 @@
 					oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"
 				/>
 			</vbox>
-		</groupbox>
+		</vbox>
 		
-		<groupbox id="zotero-prefpane-reader-groupbox">
+		<vbox class="section" id="zotero-prefpane-reader-groupbox">
 			<label><html:h2 data-l10n-id="preferences-reader-title"/></label>
 			
 			<vbox class="fileHandler-menus">
@@ -196,12 +196,12 @@
 				data-l10n-id="preferences-reader-ebook-hyphenate"
 				native="true"
 			/>
-		</groupbox>
+		</vbox>
 		
-		<groupbox id="zotero-prefpane-locate-groupbox">
+		<vbox class="section" id="zotero-prefpane-locate-groupbox" aria-describedby="preferences-locate-library-lookup-intro">
 			<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
 			
-			<label data-l10n-id="preferences-locate-library-lookup-intro"/>
+			<label id="preferences-locate-library-lookup-intro" data-l10n-id="preferences-locate-library-lookup-intro"/>
 			<separator class="thin"/>
 			
 			<hbox align="center">
@@ -225,9 +225,9 @@
 				/>
 			</hbox>
 			
-		</groupbox>
+		</vbox>
 		
-		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
+		<vbox class="section" id="zotero-prefpane-miscellaneous-groupbox">
 			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
 			<checkbox label="&zotero.preferences.automaticTags;" preference="extensions.zotero.automaticTags" native="true"/>
@@ -236,19 +236,19 @@
 				<html:input aria-labelledby="trashAutoEmpty-label1 trashAutoEmpty-label2" type="text" size="2" preference="extensions.zotero.trashAutoEmptyDays"/>
 				<label id="trashAutoEmpty-label2" value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
 			</hbox>
-		</groupbox>
+		</vbox>
 
-		<groupbox>
+		<vbox class="section">
 			<label><html:h2>&zotero.preferences.groups;</html:h2></label>
 
-			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
+			<label id="preferences-whenCopyingInclude" value="&zotero.preferences.groups.whenCopyingInclude;"/>
 			<vbox style="margin-left: 2em">
-				<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
-				<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
-				<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
-				<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
-				<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
+				<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true" aria-describedby="preferences-whenCopyingInclude"/>
+				<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true" aria-describedby="preferences-whenCopyingInclude"/>
+				<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true" aria-describedby="preferences-whenCopyingInclude"/>
+				<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true" aria-describedby="preferences-whenCopyingInclude"/>
+				<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true" aria-describedby="preferences-whenCopyingInclude"/>
 			</vbox>
-		</groupbox>
+		</vbox>
 	</vbox>
 </vbox>

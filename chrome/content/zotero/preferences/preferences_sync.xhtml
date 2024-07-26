@@ -25,7 +25,7 @@
 <vbox id="zotero-prefpane-sync" onload="Zotero_Preferences.Sync.init()">
     <vbox class="main-section">
         <vbox id="sync-unauthorized">
-            <groupbox>
+            <vbox class="section">
                 <label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
 
                 <hbox>
@@ -62,11 +62,11 @@
                         <label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
                     </vbox>
                 </hbox>
-            </groupbox>
+            </vbox>
         </vbox>
 
         <vbox id="sync-authorized" hidden="true">
-            <groupbox>
+            <vbox class="section">
                 <label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
 
                 <html:div class="form-grid">
@@ -74,7 +74,8 @@
                     <hbox>
                         <label id="sync-username" value="Username"/>
                         <button label="&zotero.preferences.sync.unlinkAccount;"
-                                oncommand="Zotero_Preferences.Sync.unlinkAccount()"/>
+                                oncommand="Zotero_Preferences.Sync.unlinkAccount()"
+								aria-describedby="sync-username"/>
                     </hbox>
 
                     <box/>
@@ -99,9 +100,9 @@
                     <label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
                 </html:div>
 
-            </groupbox>
+            </vbox>
 
-            <groupbox id="storage-settings">
+            <vbox class="section" id="storage-settings">
                 <label><html:h2>&zotero.preferences.sync.fileSyncing;</html:h2></label>
 
                 <!-- My Library -->
@@ -215,12 +216,12 @@
 
                 <vbox id="storage-terms">
                     <hbox style="margin-top: .4em; display: block" align="center">
-                        <label>&zotero.preferences.sync.fileSyncing.tos1;</label>
-                        <label is="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+                        <label id="terms-label">&zotero.preferences.sync.fileSyncing.tos1;</label>
+                        <label is="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;" aria-describedby="terms-label"/>
                         <label>&zotero.preferences.period;</label>
                     </hbox>
                 </vbox>
-            </groupbox>
+            </vbox>
         </vbox>
     </vbox>
 
