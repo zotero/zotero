@@ -1176,8 +1176,11 @@ Zotero.Attachments = new function () {
 	};
 
 
+	/**
+	 * @deprecated Use canFindFileForItem()
+	 */
 	this.canFindPDFForItem = function (item) {
-		Zotero.debug('Zotero.Attachments.canFindPDFForItem() is deprecated -- use canFindFileForItem()');
+		Zotero.warn('Zotero.Attachments.canFindPDFForItem() is deprecated -- use canFindFileForItem()');
 		return this.canFindFileForItem(item);
 	};
 	
@@ -1389,8 +1392,11 @@ Zotero.Attachments = new function () {
 	};
 	
 	
+	/**
+	 * @deprecated Use getFileResolvers()
+	 */
 	this.getPDFResolvers = function (item, methods) {
-		Zotero.debug('Zotero.Attachments.getPDFResolvers() is deprecated -- use getFileResolvers()');
+		Zotero.warn('Zotero.Attachments.getPDFResolvers() is deprecated -- use getFileResolvers()');
 		return this.getFileResolvers(item, methods);
 	};
 	
@@ -1715,8 +1721,11 @@ Zotero.Attachments = new function () {
 	};
 	
 	
+	/**
+	 * @deprecated Use addAvailableFiles()
+	 */
 	this.addAvailablePDFs = function (items, options) {
-		Zotero.debug('Zotero.Attachments.addAvailablePDFs() is deprecated -- use addAvailableFiles()');
+		Zotero.warn('Zotero.Attachments.addAvailablePDFs() is deprecated -- use addAvailableFiles()');
 		return this.addAvailableFiles(items, options);
 	};
 	
@@ -1740,8 +1749,11 @@ Zotero.Attachments = new function () {
 	};
 	
 	
+	/**
+	 * @deprecated Use addAvailableFile()
+	 */
 	this.addAvailablePDF = function (item, options) {
-		Zotero.debug('Zotero.Attachments.addAvailablePDF() is deprecated -- use addAvailableFile()');
+		Zotero.warn('Zotero.Attachments.addAvailablePDF() is deprecated -- use addAvailableFile()');
 		return this.addAvailableFile(item, options);
 	};
 	
@@ -1809,8 +1821,11 @@ Zotero.Attachments = new function () {
 	};
 	
 	
+	/**
+	 * @deprecated Use addFileFromURLs()
+	 */
 	this.addPDFFromURLs = function (item, urlResolvers, options) {
-		Zotero.debug('Zotero.Attachments.addPDFFromURLs() is deprecated -- use addFileFromURLs()');
+		Zotero.warn('Zotero.Attachments.addPDFFromURLs() is deprecated -- use addFileFromURLs()');
 		return this.addFileFromURLs(item, urlResolvers, options);
 	};
 	
@@ -2177,7 +2192,7 @@ Zotero.Attachments = new function () {
 	 * @deprecated Use Zotero.Utilities.cleanURL instead
 	 */
 	this.cleanAttachmentURI = function (uri, tryHttp) {
-		Zotero.debug("Zotero.Attachments.cleanAttachmentURI() is deprecated -- use Zotero.Utilities.cleanURL");
+		Zotero.warn("Zotero.Attachments.cleanAttachmentURI() is deprecated -- use Zotero.Utilities.cleanURL");
 		return Zotero.Utilities.cleanURL(uri, tryHttp);
 	}
 	
