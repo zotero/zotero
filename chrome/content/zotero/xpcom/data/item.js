@@ -3877,6 +3877,15 @@ Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
 	if (contentType === 'text/html') {
 		return Zotero.getString('file-type-webpage');
 	}
+	if (contentType.startsWith('image/')) {
+		return Zotero.getString('file-type-image');
+	}
+	if (contentType.startsWith('audio/')) {
+		return Zotero.getString('file-type-audio');
+	}
+	if (contentType.startsWith('video/')) {
+		return Zotero.getString('file-type-video');
+	}
 	return null;
 };
 
