@@ -10,13 +10,13 @@ preferences-file-renaming-auto-rename-files =
     .label = Automatically rename locally added files
 preferences-file-renaming-file-types = Rename files of these types:
 preferences-file-renaming-file-type-pdf =
-    .label = PDF
+    .label = { file-type-pdf }
 preferences-file-renaming-file-type-epub =
-    .label = EPUB
+    .label = { file-type-ebook }
 preferences-file-renaming-file-type-image =
-    .label = Image
+    .label = { file-type-image }
 preferences-file-renaming-file-type-audio =
-    .label = Audio
+    .label = { file-type-audio }
 preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
 
