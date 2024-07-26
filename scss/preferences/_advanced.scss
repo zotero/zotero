@@ -69,3 +69,12 @@
 {
 	text-align: end;
 }
+
+#updateButton, #fulltext-clearIndex {
+	margin-inline-start: 6px;
+}
+
+#db-maintenance-options {
+	display: flex;
+	gap: 6px;
+}

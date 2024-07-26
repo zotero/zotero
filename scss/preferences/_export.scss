@@ -16,6 +16,10 @@
 	min-height: 1.5em; /* Fix collapse on Windows */
 }
 
+#quickCopy-delete {
+	margin-inline-end: 6px;
+}
+
 #noteQuickCopy-wrapper {
 	margin-left: 30px;
 	@media (-moz-platform: windows) {

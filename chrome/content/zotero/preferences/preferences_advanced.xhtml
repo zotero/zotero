@@ -89,7 +89,7 @@
 			<radiogroup id="data-dir"
 					preference="extensions.zotero.useDataDir">
 				<radio id="default-data-dir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
-				<hbox>
+				<hbox align="center">
 					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
 					<html:input type="text" id="data-dir-path" preference="extensions.zotero.dataDir"
 						readonly="true" style="flex: 1"/>
@@ -114,7 +114,7 @@
 		<groupbox>
 			<label><html:h2>&zotero.preferences.dbMaintenance;</html:h2></label>
 			
-			<hbox style="display: block">
+			<hbox id="db-maintenance-options">
 				<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
 					oncommand="Zotero_Preferences.Advanced.runIntegrityCheck(this)"/>
 				<button id="reset-translators-button"
