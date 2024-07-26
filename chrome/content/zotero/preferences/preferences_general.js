@@ -218,7 +218,7 @@ Zotero_Preferences.General = {
 	}),
 	
 	setAutoRenameFileTypes: function () {
-		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-vbox');
+		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
 		let enabledTypes = new Set(Zotero.Prefs.get('autoRenameFiles.fileTypes').split(','));
 		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
 			if (checkbox.checked) {
@@ -236,7 +236,7 @@ Zotero_Preferences.General = {
 			document.getElementById('rename-linked-files').disabled = !Zotero.Prefs.get('autoRenameFiles');
 		});
 		
-		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-vbox');
+		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
 		let enabledTypes = Zotero.Prefs.get('autoRenameFiles.fileTypes').split(',');
 		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
 			checkbox.checked = enabledTypes.includes(checkbox.dataset.contentType);
