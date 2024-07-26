@@ -21,5 +21,6 @@ groupbox > label > h2, groupbox > * > label > h2, caption {
 
 .help-button {
 	appearance: auto;
-	-moz-default-appearance: -moz-mac-help-button;	
+	-moz-default-appearance: -moz-mac-help-button;
+	min-width: 0;
 }
