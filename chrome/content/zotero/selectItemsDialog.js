@@ -104,7 +104,9 @@ var doLoad = async function () {
 
 	document.addEventListener('dialogaccept', doAccept);
 	
-	setTabOrder();
+	if (isSelectItemsDialog) {
+		setTabOrder();
+	}
 	
 	// Used in tests
 	loaded = true;
@@ -167,7 +169,7 @@ function setTabOrder() {
 	document.querySelector("#zotero-tb-search-dropmarker").shadowRoot.getElementById("zotero-tb-search-menu-button").setAttribute("tabindex", 1);
 	document.querySelector("#zotero-tb-search-textbox").shadowRoot.querySelector("input").setAttribute("tabindex", 2);
 	document.querySelector("#collection-tree").setAttribute("tabindex", 3);
-	document.querySelector("#item-tree-related-box-select-item-dialog-default").setAttribute("tabindex", 4);
+	document.querySelector("#zotero-items-tree .virtualized-table").setAttribute("tabindex", 4);
 	document.querySelector("button[dlgtype='cancel'").setAttribute("tabindex", 5);
 	document.querySelector("button[dlgtype='accept'").setAttribute("tabindex", 6);
 }
