@@ -659,3 +659,12 @@ find-pdf-files-added = { $count ->
 
 select-items-dialog =
     .buttonlabelaccept = Select
+
+file-type-webpage = Webpage
+file-type-image = Image
+file-type-pdf = PDF
+file-type-audio = Audio
+file-type-video = Video
+file-type-presentation = Presentation
+file-type-document = Document
+file-type-ebook = Ebook

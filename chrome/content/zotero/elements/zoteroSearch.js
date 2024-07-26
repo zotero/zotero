@@ -476,7 +476,7 @@
 				
 				case 'fileTypeID':
 					var rows = Zotero.FileTypes.getTypes().map(type => ({
-						name: Zotero.getString('fileTypes.' + type.name),
+						name: Zotero.getString('file-type-' + type.name),
 						value: type.id
 					}));
 					

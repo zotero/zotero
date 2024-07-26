@@ -2293,7 +2293,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 					
 					// Set fields
 					assert.equal(attachment.itemType, 'attachment', prefix + 'itemType is correct' + suffix);
-					assert.include([Zotero.getString('fileTypes.pdf'), 'empty'], attachment.title, prefix + 'title is correct' + suffix);
+					assert.include([Zotero.getString('file-type-pdf'), 'empty'], attachment.title, prefix + 'title is correct' + suffix);
 					assert.equal(attachment.url, 'http://example.com', prefix + 'url is correct' + suffix);
 					assert.equal(attachment.note, 'note', prefix + 'note is correct' + suffix);
 					

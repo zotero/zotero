@@ -150,7 +150,7 @@ class EditorInstance {
 			let fp = new FilePicker();
 			fp.init(this._iframeWindow, Zotero.getString('noteEditor.saveImageAs'), fp.modeSave);
 			fp.appendFilters(fp.filterImages);
-			fp.defaultString = Zotero.getString('fileTypes.image').toLowerCase() + '.' + ext;
+			fp.defaultString = Zotero.getString('file-type-image').toLowerCase() + '.' + ext;
 			let rv = await fp.show();
 			if (rv === fp.returnOK || rv === fp.returnReplace) {
 				let outputPath = fp.file;

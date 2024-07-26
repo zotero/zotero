@@ -451,7 +451,7 @@ class ReaderInstance {
 					let fp = new FilePicker();
 					fp.init(this._iframeWindow, Zotero.getString('pdfReader.saveImageAs'), fp.modeSave);
 					fp.appendFilter("PNG", "*.png");
-					fp.defaultString = Zotero.getString('fileTypes.image').toLowerCase() + '.png';
+					fp.defaultString = Zotero.getString('file-type-image').toLowerCase() + '.png';
 					let rv = await fp.show();
 					if (rv === fp.returnOK || rv === fp.returnReplace) {
 						let outputPath = fp.file;

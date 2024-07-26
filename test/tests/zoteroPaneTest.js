@@ -1650,7 +1650,7 @@ describe("ZoteroPane", function() {
 			file.append('test.pdf');
 			let [pdfAttachment1] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
 			assert.equal(parentItem.getAttachments().length, 2);
-			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('fileTypes.pdf'));
+			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('file-type-pdf'));
 			
 			// Add a second, which will get a title based on its filename
 			let [pdfAttachment2] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
@@ -1662,7 +1662,7 @@ describe("ZoteroPane", function() {
 			file.append('stub.epub');
 			let [epubAttachment] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
 			assert.equal(parentItem.getAttachments().length, 4);
-			assert.equal(epubAttachment.getField('title'), Zotero.getString('fileTypes.ebook'));
+			assert.equal(epubAttachment.getField('title'), Zotero.getString('file-type-ebook'));
 		});
 	});
 })
