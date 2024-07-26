@@ -110,8 +110,11 @@ var doLoad = async function () {
 		document.querySelector("#zotero-tb-search").searchTextbox.inputField.setAttribute("tabindex", 2);
 		document.querySelector("#collection-tree").setAttribute("tabindex", 3);
 		document.querySelector("#zotero-items-tree .virtualized-table").setAttribute("tabindex", 4);
-		document.querySelector("button[dlgtype='cancel'").setAttribute("tabindex", 5);
-		document.querySelector("button[dlgtype='accept'").setAttribute("tabindex", 6);
+		// On windows, buttons are in a different order than on mac, so set tabindex accordingly
+		let nextButtonTabindex = 5;
+		for (let button of [...document.querySelectorAll("button[dlgtype]:not([hidden])")]) {
+			button.setAttribute("tabindex", nextButtonTabindex++);
+		}
 	}
 	
 	// Used in tests
