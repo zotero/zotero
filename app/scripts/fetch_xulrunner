@@ -173,11 +173,19 @@ function modify_omni {
 	fi
 	
 	# Remove unwanted files
-	rm modules/FxAccounts*
+	pushd modules
+	rm Bookmarks*
+	rm FxAccounts*
+	echo '' > PartitioningExceptionListService.sys.mjs
+	rm Places*
+	echo '' > PlacesExpiration.sys.mjs
+	echo '' > PlacesFrecencyRecalculator.sys.mjs
+	rm -rf services-settings/*
+	touch services-settings/remote-settings.sys.mjs
 	# Causes a startup error -- try an empty file or a shim instead?
-	#rm modules/Telemetry*
-	rm modules/URLDecorationAnnotationsService.sys.mjs
-	rm -rf modules/services-*
+	#rm Telemetry*
+	rm URLDecorationAnnotationsService.sys.mjs
+	popd
 	
 	# Clear most WebExtension manifest properties
 	replace_line 'manifest = normalized.value;' 'manifest = normalized.value;
