@@ -90,7 +90,7 @@ collections-menu-edit-saved-search =
 collections-menu-move-collection =
     .label = Change Parent
 collections-menu-move-collection-other-library =
-    .label = Other Collections (As Copy)
+    .label = Other Libraries (As Copy)
 
 item-creator-moveDown =
     .label = Move Down
