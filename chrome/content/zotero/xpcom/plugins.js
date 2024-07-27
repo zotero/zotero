@@ -26,6 +26,10 @@
 
 Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+	var lazy = {};
+	XPCOMUtils.defineLazyModuleGetters(lazy, {
+		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.jsm",
+	});
 	var scopes = new Map();
 	var observers = new Set();
 	var addonVersions = new Map();
@@ -51,7 +55,11 @@ Zotero.Plugins = new function () {
 		// if getAllAddons() hasn't been called, so use getAllAddons() and do the checks ourselves
 		var addons = await AddonManager.getAllAddons();
 		for (let addon of addons) {
-			if (addon.type != 'extension' || !addon.isActive) continue;
+			if (addon.type != 'extension') continue;
+			let blockedReason = shouldBlockPlugin(addon);
+			if (blockedReason || !addon.isActive) {
+				continue;
+			}
 			addonVersions.set(addon.id, addon.version);
 			_loadScope(addon);
 			setDefaultPrefs(addon);
@@ -183,6 +191,11 @@ Zotero.Plugins = new function () {
 			let id = addon.id;
 			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} `
 				+ `version ${addon.version} with reason ${_getReasonName(reason)}`);
+
+			if (addon.softDisabled) {
+				Zotero.debug(`Skipping bootstrap method '${method}' for disabled plugin ${id}`);
+				return;
+			}
 			
 			let scope = scopes.get(id);
 			
@@ -384,7 +397,64 @@ Zotero.Plugins = new function () {
 			: REASONS.ADDON_DOWNGRADE;
 	}
 	
-	
+
+	// TODO: Get blocking list from server
+	const BLOCKED_PLUGINS = {
+		"zoterostyle@polygon.org": {
+			versionRanges: [{
+				maxVersion: "4.5.99"
+			}],
+			reason: "Versions of this plugin prior to version 4.6.0 break the Zotero user interface.",
+		}
+	};
+	function getBlockedPlugins() {
+		return BLOCKED_PLUGINS;
+	}
+
+
+	function shouldBlockPlugin(addon) {
+		let blockedPlugins = getBlockedPlugins();
+		let id = addon.id;
+		let version = addon.version;
+		let blockedReason = false;
+		if (blockedPlugins[id]) {
+			for (let blockedVersion of blockedPlugins[id].versionRanges) {
+				if (typeof blockedVersion === "string") {
+					if (blockedVersion === "*" || blockedVersion === version) {
+						blockedReason = blockedPlugins[id].reason;
+						break;
+					}
+					continue;
+				}
+				else {
+					let { minVersion, maxVersion } = blockedVersion;
+					if ((!minVersion || Zotero.Utilities.semverCompare(version, minVersion) >= 0)
+						&& (!maxVersion || Zotero.Utilities.semverCompare(version, maxVersion) <= 0)) {
+						blockedReason = blockedPlugins[id].reason;
+						break;
+					}
+				}
+			}
+		}
+		if (blockedReason) {
+			Zotero.warn(`Blocking plugin ${addon.id}: ${blockedReason}`);
+		}
+		setPluginBlocked(addon, !!blockedReason);
+		return blockedReason;
+	}
+
+
+	async function setPluginBlocked(addon, block = true) {
+		const addonInternal = addon.__AddonInternal__;
+		addonInternal.blocklistState = block
+			? Services.blocklist.STATE_BLOCKED
+			: Services.blocklist.STATE_NOT_BLOCKED;
+		await lazy.XPIDatabase.updateAddonDisabledState(addonInternal, {
+			softDisabled: block,
+		});
+	}
+
+
 	/**
 	 * Add an observer to be notified of lifecycle events on all plugins.
 	 *
@@ -436,13 +506,18 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Installed plugin " + addon.id);
-			
+
 			// Determine if this is a new install, an upgrade, or a downgrade
 			let previousVersion = addonVersions.get(addon.id);
 			let reason = previousVersion
 				? getVersionChangeReason(previousVersion, addon.version)
 				: REASONS.ADDON_INSTALL;
 			addonVersions.set(addon.id, addon.version);
+
+			let blockedReason = shouldBlockPlugin(addon);
+			if (blockedReason) {
+				return;
+			}
 			
 			_loadScope(addon);
 			setDefaultPrefs(addon);
@@ -497,6 +572,12 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Cancelled uninstallation of plugin " + addon.id);
 			this.uninstalling.delete(addon.id);
+
+			let blockedReason = shouldBlockPlugin(addon);
+			if (blockedReason) {
+				return;
+			}
+			
 			await _callMethod(addon, 'install', REASONS.ADDON_INSTALL);
 			if (addon.isActive) {
 				setDefaultPrefs(addon);
