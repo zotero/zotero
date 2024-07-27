@@ -2557,6 +2557,54 @@ var ItemTree = class ItemTree extends LibraryTree {
 				var parentCollectionID = collectionTreeRow.ref.id;
 			}
 
+			// Check extensions of the dropped files to see if all files can be imported using translators
+			// NOTE: this adds some noticable lag if translators haven't been detected yet
+			let translation = new Zotero.Translate.Import();
+			let translators = await translation.getTranslators();
+			let translatorsExtensions = new Set(translators.map(translator => translator.target));
+
+			const canAllBeTranslated = !data.some((file) => {
+				// check for any file that is either a string or not a file that can be translated.
+				// Only if none is found we can assume that all files can be translated and show the prompt dialog.
+				return (typeof file === 'string') || !translatorsExtensions.has(Zotero.File.getExtension(file));
+			});
+			
+			if (canAllBeTranslated && orient != 0) {
+				let [title, text, button0, button1, button2] = await document.l10n.formatValues([
+					{ id: 'import-dropped-files-dialog-title', args: { count: data.length } },
+					{ id: 'import-dropped-files-dialog-description', args: { count: data.length } },
+					'import-dropped-files-dialog-confirm',
+					{ id: 'import-dropped-files-dialog-reject', args: { count: data.length } },
+					'general-cancel'
+				]);
+
+				const promptResult = Zotero.Prompt.confirm({ window, title, text, button0, button1, button2 });
+
+				if (promptResult === 0) {
+					// user asked to import the files
+					let mainWindow = Zotero.getMainWindow();
+					let importOK = true;
+					for (let file of data) {
+						try {
+							mainWindow.Zotero_File_Interface.importFile({
+								file,
+								createNewCollection: false
+							});
+						}
+						catch (e) {
+							importOK = false;
+							Zotero.logError(e);
+						}
+					}
+					return importOK;
+				}
+				else if (promptResult === 2) {
+					// user cancelled the operation
+					return false;
+				}
+				// else: user asked to add as attachments continue below
+			}
+
 			let addedItems = [];
 			var notifierQueue = new Zotero.Notifier.Queue;
 			try {
