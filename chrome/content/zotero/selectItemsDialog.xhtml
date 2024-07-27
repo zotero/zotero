@@ -46,6 +46,8 @@
 	id="select-items-dialog"
 	orient="vertical"
 	buttons="cancel,accept"
+	data-l10n-id="select-items-dialog"
+	data-l10n-attrs="buttonlabelaccept"
 >
 <script>
 	var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -54,6 +56,10 @@
 	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
 </script>
+
+<linkset>
+	<html:link rel="localization" href="zotero.ftl" />
+</linkset>
 
 <vbox id="zotero-select-items-container" flex="1">
 	<hbox id="collections-items-container">

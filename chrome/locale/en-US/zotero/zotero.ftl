@@ -656,3 +656,6 @@ find-pdf-files-added = { $count ->
     [one] { $count } file added
     *[other] { $count } files added
 }
+
+select-items-dialog =
+    .buttonlabelaccept = Select
