@@ -5665,7 +5665,7 @@ var ZoteroPane = new function()
 			
 			let parentItemID = item.parentItemID;
 			let parentItem = await Zotero.Items.getAsync(parentItemID);
-			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
+			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: item.getField('title') });
 			
 			let extRE = /\.[^\.]+$/;
 			let origFilename = PathUtils.split(file).pop();

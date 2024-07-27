@@ -582,7 +582,7 @@ Zotero.Attachments = new function () {
 			// Rename attachment
 			if (renameIfAllowedType && !fileBaseName && this.isRenameAllowedForType(contentType)) {
 				let parentItem = Zotero.Items.get(parentItemID);
-				fileBaseName = this.getFileBaseNameFromItem(parentItem);
+				fileBaseName = this.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
 			}
 			if (fileBaseName) {
 				let ext = this._getExtensionFromURL(url, contentType);
@@ -1769,13 +1769,12 @@ Zotero.Attachments = new function () {
 	 * @return {Zotero.Item|false} - New Zotero.Item, or false if unsuccessful
 	 */
 	this.addFileFromURLs = async function (item, urlResolvers, options = {}) {
-		var fileBaseName = this.getFileBaseNameFromItem(item);
 		var tmpDir;
 		var tmpFile;
 		var attachmentItem = false;
 		try {
 			tmpDir = (await this.createTemporaryStorageDirectory()).path;
-			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.tmp');
+			tmpFile = OS.Path.join(tmpDir, 'file.tmp');
 			let { title, mimeType, url, props } = await this.downloadFirstAvailableFile(
 				urlResolvers,
 				tmpFile,
@@ -1794,13 +1793,15 @@ Zotero.Attachments = new function () {
 				if (!this.FIND_AVAILABLE_FILE_TYPES.includes(mimeType)) {
 					throw new Error(`Resolved file is unsupported type ${mimeType}`);
 				}
-				let filename = fileBaseName + '.' + (Zotero.MIME.getPrimaryExtension(mimeType) || 'dat');
-				await IOUtils.move(tmpFile, PathUtils.join(tmpDir, filename));
+				title = title || _getTitleFromVersion(props.articleVersion);
+				let fileBaseName = this.getFileBaseNameFromItem(item, { attachmentTitle: title });
+				let ext = Zotero.MIME.getPrimaryExtension(mimeType) || 'dat';
+				let filename = await Zotero.File.rename(tmpFile, `${fileBaseName}.${ext}`);
 				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
 					directory: tmpDir,
 					libraryID: item.libraryID,
 					filename,
-					title: title || _getTitleFromVersion(props.articleVersion),
+					title,
 					url,
 					contentType: mimeType,
 					parentItemID: item.id
@@ -2207,10 +2208,16 @@ Zotero.Attachments = new function () {
 	 * @param {Zotero.Item} item
 	 * @param {String} formatString
 	 */
-	this.getFileBaseNameFromItem = function (item, formatString) {
+	this.getFileBaseNameFromItem = function (item, options = {}) {
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
+		if (typeof options === 'string') {
+			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments(item, options)");
+			options = { formatString: options };
+		}
+
+		let { formatString = null, attachmentTitle = '' } = options;
 
 		if (!formatString) {
 			formatString = Zotero.Prefs.get('attachmentRenameTemplate');
@@ -2219,7 +2226,7 @@ Zotero.Attachments = new function () {
 		let chunks = [];
 		let protectedLiterals = new Set();
 
-		formatString = formatString.trim();
+		formatString = formatString.replace(/\r?\n|\r/g, "").trim();
 
 		const getSlicedCreatorsOfType = (creatorType, slice) => {
 			let creatorTypeIDs;
@@ -2253,7 +2260,7 @@ Zotero.Attachments = new function () {
 		};
 
 
-		const common = (value, { truncate = false, prefix = '', suffix = '', replaceFrom = '', replaceTo = '', regexOpts = '', case: textCase = '' } = {}) => {
+		const common = (value, { start = false, truncate = false, prefix = '', suffix = '', match = '', replaceFrom = '', replaceTo = '', regexOpts = 'i', case: textCase = '' } = {}) => {
 			if (value === '' || value === null || typeof value === 'undefined') {
 				return '';
 			}
@@ -2266,6 +2273,17 @@ Zotero.Attachments = new function () {
 				suffix = '';
 			}
 
+			// match overrides all other options and returns immediately
+			if (match) {
+				try {
+					let matchResult = value.match(new RegExp(match, regexOpts));
+					return matchResult ? matchResult[0] : '';
+				}
+				catch (_e) {
+					return '';
+				}
+			}
+
 			if (protectedLiterals.size > 0) {
 				// escape protected literals in the format string with \
 				value = value.replace(
@@ -2274,8 +2292,12 @@ Zotero.Attachments = new function () {
 				);
 			}
 
+			if (start) {
+				value = value.substring(start);
+			}
+
 			if (truncate) {
-				value = value.substr(0, truncate);
+				value = value.substring(0, truncate);
 			}
 
 			value = value.trim();
@@ -2284,7 +2306,12 @@ Zotero.Attachments = new function () {
 			let affixed = false;
 
 			if (replaceFrom) {
-				value = value.replace(new RegExp(replaceFrom, regexOpts), replaceTo);
+				try {
+					value = value.replace(new RegExp(replaceFrom, regexOpts), replaceTo);
+				}
+				catch (_e) {
+					// ignore
+				}
 			}
 			if (prefix && !value.startsWith(prefix)) {
 				value = prefix + value;
@@ -2313,9 +2340,11 @@ Zotero.Attachments = new function () {
 					value = Zotero.Utilities.capitalizeTitle(value, true);
 					break;
 				case 'hyphen':
+					value = value.replace(/\s+-/g, '-').replace(/-\s+/g, '-');
 					value = value.toLowerCase().replace(/\s+/g, '-');
 					break;
 				case 'snake':
+					value = value.replace(/\s+_/g, '_').replace(/_\s+/g, '_');
 					value = value.toLowerCase().replace(/\s+/g, '_');
 					break;
 				case 'camel':
@@ -2392,8 +2421,9 @@ Zotero.Attachments = new function () {
 			item.getField('firstCreator', true, true), args
 		);
 
-		const vars = { ...fields, ...creatorFields, firstCreator, itemType, year };
+		const attachmentTitleFn = args => common(attachmentTitle ?? '', args);
 
+		const vars = { ...fields, ...creatorFields, attachmentTitle: attachmentTitleFn, firstCreator, itemType, year };
 
 		// Final name is generated twice. In the first pass we collect all affixed values and determine protected literals.
 		// This is done in order to remove repeated suffixes, except if these appear in the value or the format string itself.
@@ -2480,7 +2510,7 @@ Zotero.Attachments = new function () {
 		if (!this.isRenameAllowedForType(contentType)) {
 			return false;
 		}
-		return this.getFileBaseNameFromItem(parentItem);
+		return this.getFileBaseNameFromItem(parentItem, { attachmentTitle: PathUtils.filename(file) });
 	}
 	
 	

@@ -901,7 +901,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		let fileBaseName;
 		if (parentItemID) {
 			let parentItem = yield Zotero.Items.getAsync(parentItemID);
-			fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
+			fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
 		}
 		
 		attachment.linkMode = "imported_url";
