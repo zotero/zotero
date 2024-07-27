@@ -1354,10 +1354,31 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * Get versions, platform, etc.
 	 */
 	this.getSystemInfo = async function () {
+		var version = Zotero.version + ' (';
+		
+		var arch = Zotero.arch;
+		if (arch == 'aarch64') {
+			arch = 'ARM64';
+		}
+		else if (arch == 'x86_64') {
+			arch = 'x64';
+		}
+		version += arch;
+		
+		if (Zotero.isWin) {
+			let info = await Services.sysinfo.processInfo;
+			if (info.isWowARM64) {
+				version += " on ARM64";
+			}
+			else if (info.isWow64) {
+				version += " on x64";
+			}
+		}
+		version += ')';
+		
 		var info = {
 			appName: Services.appinfo.name,
-			version: Zotero.version
-				+ (!Zotero.isMac && !Services.appinfo.is64Bit ? ' (32-bit)' : ''),
+			version,
 			os: await this.getOSVersion(),
 			locale: Zotero.locale,
 		};
