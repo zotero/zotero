@@ -88,7 +88,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Edit Saved Search
 collections-menu-move-collection =
-    .label = Move to another collection
+    .label = Change Parent
+collections-menu-move-collection-other-library =
+    .label = Other Collections (As Copy)
 
 item-creator-moveDown =
     .label = Move Down

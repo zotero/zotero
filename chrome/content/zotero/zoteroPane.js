@@ -4031,13 +4031,49 @@ var ZoteroPane = new function()
 		popup.replaceChildren();
 
 		let selected = this.getSelectedCollection();
+		
+		// Build menus for each top-level collection of this library
+		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		for (let col of collections) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				col,
+				popup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.moveToCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				
+				(target) => {
+					// can't move collection into itself, its parent or its children
+					return selected == target
+						|| selected.parentKey == target.key
+						|| selected.hasDescendent('collection', target.id);
+				}
+			);
+			popup.append(menuItem);
+		}
+		// Fetch all libraries but the current one
+		let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed || lib.id == this.getSelectedLibraryID()));
+		if (libraries.length == 0) return;
+		// If they exist, create a separate menu for them to indicate that the collection
+		// is copied into those
+		let separator = document.createXULElement("menuseparator");
+		popup.appendChild(separator);
 
-		let libraries = Zotero.Libraries.getAll();
+		let otherLibrariesMenu = document.createXULElement("menu");
+		document.l10n.setAttributes(otherLibrariesMenu, "collections-menu-move-collection-other-library");
+		popup.appendChild(otherLibrariesMenu);
+		let otherLibrariesPopup = document.createXULElement("menupopup");
+		otherLibrariesMenu.appendChild(otherLibrariesPopup);
+		
+		// Build menus for additional libraries
 		for (let lib of libraries) {
-			if (lib instanceof Zotero.Feed) continue;
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				lib,
-				popup,
+				otherLibrariesPopup,
 				null,
 				(event, collection) => {
 					if (event.target.tagName == 'menuitem') {
@@ -4057,9 +4093,8 @@ var ZoteroPane = new function()
 						|| selected.parentKey == target.key
 						|| selected.hasDescendent('collection', target.id);
 				}
-					
 			);
-			popup.append(menuItem);
+			otherLibrariesPopup.append(menuItem);
 		}
 	};
 
