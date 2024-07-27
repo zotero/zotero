@@ -668,3 +668,8 @@ file-type-video = Video
 file-type-presentation = Presentation
 file-type-document = Document
 file-type-ebook = Ebook
+
+import-dropped-files-dialog-title = Import Dropped Files
+import-dropped-files-dialog-description = Would you like { -app-name } to import the dropped files or add them as attachments?
+import-dropped-files-dialog-confirm = Import
+import-dropped-files-dialog-reject = Create Attachments

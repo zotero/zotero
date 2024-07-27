@@ -2376,6 +2376,53 @@ var ItemTree = class ItemTree extends LibraryTree {
 				var parentCollectionID = collectionTreeRow.ref.id;
 			}
 
+			// Check extensions of the dropped files to see if all files can be imported using translators
+			// NOTE: this adds some noticable lag if translators haven't been detected yet
+			let translation = new Zotero.Translate.Import();
+			let translators = await translation.getTranslators();
+			let translatorsExtensions = new Set(translators.map(translator => translator.target));
+
+			const canAllBeTranslated = !data.some((file) => {
+				// check for any file that is either a string or not a file that can be translated.
+				// Only if none is found we can assume that all files can be translated and show the prompt dialog.
+				return (typeof file === 'string') || !translatorsExtensions.has(Zotero.File.getExtension(file));
+			});
+
+
+			if (canAllBeTranslated) {
+				let [title, text, button0, button1] = await document.l10n.formatValues([
+					'import-dropped-files-dialog-title',
+					'import-dropped-files-dialog-description',
+					'import-dropped-files-dialog-confirm',
+					'import-dropped-files-dialog-reject'
+				]);
+
+				if (Zotero.Prompt.confirm({
+					window,
+					title,
+					text,
+					button0,
+					button1,
+				}) === 0) {
+					// user asked to import the files
+					let mainWindow = Zotero.getMainWindow();
+					let importOK = true;
+					for (let file of data) {
+						try {
+							mainWindow.Zotero_File_Interface.importFile({
+								file,
+								createNewCollection: false
+							});
+						}
+						catch (e) {
+							importOK = false;
+							Zotero.logError(e);
+						}
+					}
+					return importOK;
+				}
+			}
+
 			let addedItems = [];
 			var notifierQueue = new Zotero.Notifier.Queue;
 			try {
