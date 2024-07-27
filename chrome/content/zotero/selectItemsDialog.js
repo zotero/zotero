@@ -105,7 +105,7 @@ var doLoad = async function () {
 	document.addEventListener('dialogaccept', doAccept);
 	
 	if (isSelectItemsDialog) {
-		// Set proper tab order. It is only needed in selectItemsDialog - other dialogs' focus order is correct
+		// Set proper tab order. It is only needed in selectItemsDialog -- other dialogs' focus order is correct
 		document.querySelector("#zotero-tb-search").searchModePopup.parentNode.setAttribute("tabindex", 1);
 		document.querySelector("#zotero-tb-search").searchTextbox.inputField.setAttribute("tabindex", 2);
 		document.querySelector("#collection-tree").setAttribute("tabindex", 3);
