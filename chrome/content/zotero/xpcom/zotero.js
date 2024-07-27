@@ -1378,7 +1378,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * Return OS and OS version
 	 *
 	 * "macOS 13.3.1"
-	 * "Windows 10.0 22000"
+	 * "Windows 10.0 19043"
+	 * "Windows 11 22000"
 	 * "Linux 5.4.0-148-generic #165-Ubuntu SMP Tue Apr 18 08:53:12 UTC 2023"
 	 *
 	 * @return {String}
@@ -1393,9 +1394,18 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				Zotero.logError(e);
 			}
 		}
-		return (Zotero.isWin ? "Windows" : Services.sysinfo.getProperty("name"))
-			+ " " + Services.sysinfo.getProperty("version")
-			+ " " + Services.sysinfo.getProperty("build");
+		
+		var name = Services.sysinfo.getProperty("name");
+		var version = Services.sysinfo.getProperty("version");
+		var build = Services.sysinfo.getProperty("build");
+		if (Zotero.isWin) {
+			name = "Windows";
+			// Builds above 22000 are Windows 11
+			if (build >= 22000) {
+				version = 11;
+			}
+		}
+		return name + " " + version + " " + build;
 	};
 	
 	
