@@ -116,6 +116,40 @@
 					preference="extensions.zotero.autoRenameFiles.linked"
 					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"
 				/>
+
+				<label data-l10n-id="preferences-file-renaming-file-types"/>
+				<hbox
+					id="zotero-prefpane-file-renaming-file-types-box"
+					class="indented-pref"
+					oncommand="Zotero_Preferences.General.setAutoRenameFileTypes()"
+				>
+					<checkbox
+						data-l10n-id="preferences-file-renaming-file-type-pdf"
+						data-content-type="application/pdf"
+						native="true"
+					/>
+					<checkbox
+						data-l10n-id="preferences-file-renaming-file-type-epub"
+						data-content-type="application/epub+zip"
+						native="true"
+					/>
+					<checkbox
+						data-l10n-id="preferences-file-renaming-file-type-image"
+						data-content-type="image/"
+						native="true"
+					/>
+					<checkbox
+						data-l10n-id="preferences-file-renaming-file-type-audio"
+						data-content-type="audio/"
+						native="true"
+					/>
+					<checkbox
+						data-l10n-id="preferences-file-renaming-file-type-video"
+						data-content-type="video/"
+						native="true"
+					/>
+				</hbox>
+
 				<button id="file-renaming-button"
 					data-l10n-id="preferences-file-renaming-customize-button"
 					data-search-strings="preferences-file-renaming-format-title, preferences-file-renaming-format-template"

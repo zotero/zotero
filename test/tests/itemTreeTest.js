@@ -1573,7 +1573,7 @@ describe("Zotero.ItemTree", function() {
 			// Add a PDF attachment, which will get a default title
 			let pdfAttachment1 = Zotero.Items.get((await promise)[0]);
 			assert.equal(pdfAttachment1.parentItemID, parentItem.id);
-			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('fileTypes.pdf'));
+			assert.equal(pdfAttachment1.getField('title'), Zotero.getString('file-type-pdf'));
 
 			promise = waitForItemEvent('add');
 			drop(parentRow, 0, dataTransfer);

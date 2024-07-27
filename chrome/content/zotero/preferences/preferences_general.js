@@ -217,10 +217,30 @@ Zotero_Preferences.General = {
 		}
 	}),
 	
+	setAutoRenameFileTypes: function () {
+		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
+		let enabledTypes = new Set(Zotero.Prefs.get('autoRenameFiles.fileTypes').split(','));
+		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
+			if (checkbox.checked) {
+				enabledTypes.add(checkbox.dataset.contentType);
+			}
+			else {
+				enabledTypes.delete(checkbox.dataset.contentType);
+			}
+		}
+		Zotero.Prefs.set('autoRenameFiles.fileTypes', [...enabledTypes].join(','));
+	},
+	
 	updateAutoRenameFilesUI: function () {
 		setTimeout(() => {
 			document.getElementById('rename-linked-files').disabled = !Zotero.Prefs.get('autoRenameFiles');
 		});
+		
+		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
+		let enabledTypes = Zotero.Prefs.get('autoRenameFiles.fileTypes').split(',');
+		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
+			checkbox.checked = enabledTypes.includes(checkbox.dataset.contentType);
+		}
 	},
 	
 	//

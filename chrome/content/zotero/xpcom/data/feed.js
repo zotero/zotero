@@ -499,7 +499,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	for (let attachment of attachmentsToAdd) {
 		if (attachment.url.indexOf('pdf') != -1 || attachment.contentType.indexOf('pdf') != -1) {
 			attachment.parentItemID = attachment.parentItem.id;
-			attachment.title = Zotero.getString('fileTypes.pdf');
+			attachment.title = Zotero.getString('file-type-pdf');
 			yield Zotero.Attachments.linkFromURL(attachment);
 		}
 	}

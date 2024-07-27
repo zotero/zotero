@@ -3864,16 +3864,29 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 
 
 Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
-	switch (this.attachmentContentType) {
-		case 'application/pdf':
-			return Zotero.getString('fileTypes.pdf');
-		case 'application/epub+zip':
-			return Zotero.getString('fileTypes.ebook');
-		case 'text/html':
-			return Zotero.getString('fileTypes.webpage');
-		default:
-			return null;
+	let contentType = this.attachmentContentType;
+	if (!contentType) {
+		return null;
 	}
+	if (contentType === 'application/pdf') {
+		return Zotero.getString('file-type-pdf');
+	}
+	if (contentType === 'application/epub+zip') {
+		return Zotero.getString('file-type-ebook');
+	}
+	if (contentType === 'text/html') {
+		return Zotero.getString('file-type-webpage');
+	}
+	if (contentType.startsWith('image/')) {
+		return Zotero.getString('file-type-image');
+	}
+	if (contentType.startsWith('audio/')) {
+		return Zotero.getString('file-type-audio');
+	}
+	if (contentType.startsWith('video/')) {
+		return Zotero.getString('file-type-video');
+	}
+	return null;
 };
 
 
