@@ -23,6 +23,12 @@
 	"general-help": {
 		"string": "Help"
 	},
+	"general-tag": {
+		"string": "Tag"
+	},
+	"general-done": {
+		"string": "Done"
+	},
 	"menu-file-show-in-finder.label": {
 		"string": "Show in Finder"
 	},
@@ -252,16 +258,16 @@
 		"string": "RTF Scan"
 	},
 	"rtfScan-introPage-description": {
-		"string": "{ app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below."
+		"string": "{ app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:"
 	},
 	"rtfScan-introPage-description2": {
 		"string": "To get started, select an RTF input file and an output file below:"
 	},
 	"rtfScan-input-file": {
-		"string": "Input File"
+		"string": "Input File:"
 	},
 	"rtfScan-output-file": {
-		"string": "Output File"
+		"string": "Output File:"
 	},
 	"rtfScan-no-file-selected": {
 		"string": "No file selected"
@@ -301,6 +307,12 @@
 	},
 	"rtfScan-complete-page-description": {
 		"string": "Your document has now been scanned and processed. Please ensure that it is formatted correctly."
+	},
+	"rtfScan-action-find-match.title": {
+		"string": "Select matching item"
+	},
+	"rtfScan-action-accept-match.title": {
+		"string": "Accept this match"
 	},
 	"runJS-title": {
 		"string": "Run JavaScript"
@@ -758,6 +770,42 @@
 	"advanced-search-condition-input.aria-label": {
 		"string": "Value"
 	},
+	"find-pdf-files-added": {
+		"string": "{count, plural, one {{ count } file added} other {{ count } files added}}"
+	},
+	"select-items-dialog.buttonlabelaccept": {
+		"string": "Select"
+	},
+	"file-type-webpage": {
+		"string": "Webpage"
+	},
+	"file-type-image": {
+		"string": "Image"
+	},
+	"file-type-pdf": {
+		"string": "PDF"
+	},
+	"file-type-audio": {
+		"string": "Audio"
+	},
+	"file-type-video": {
+		"string": "Video"
+	},
+	"file-type-presentation": {
+		"string": "Presentation"
+	},
+	"file-type-document": {
+		"string": "Document"
+	},
+	"file-type-ebook": {
+		"string": "Ebook"
+	},
+	"post-upgrade-message": {
+		"string": "Learn about the <a data-l10n-name=\"new-features-link\">new features in { app-name } { version }</a>"
+	},
+	"post-upgrade-density": {
+		"string": "Choose your preferred layout density:"
+	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
 	},
@@ -772,6 +820,9 @@
 	},
 	"preferences-file-renaming-auto-rename-files.label": {
 		"string": "Automatically rename locally added files"
+	},
+	"preferences-file-renaming-file-types": {
+		"string": "Rename files of these types:"
 	},
 	"preferences-file-renaming-customize-button.label": {
 		"string": "Customize Filename Format…"
