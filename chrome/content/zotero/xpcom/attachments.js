@@ -2213,7 +2213,7 @@ Zotero.Attachments = new function () {
 			throw new Error("'item' must be a Zotero.Item");
 		}
 		if (typeof options === 'string') {
-			Zotero.debug("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments(item, options)");
+			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments(item, options)");
 			options = { formatString: options };
 		}
 
