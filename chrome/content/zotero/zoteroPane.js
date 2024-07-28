@@ -6146,7 +6146,7 @@ var ZoteroPane = new function()
 
 	
 	this.showPostUpgradeBanner = function () {
-		if (Zotero.isDevBuild || Zotero.Prefs.get('firstRunGuidanceShown.z7Banner')) {
+		if (Zotero.isBetaBuild || Zotero.Prefs.get('firstRunGuidanceShown.z7Banner')) {
 			return;
 		}
 		document.getElementById('post-upgrade-container').removeAttribute('collapsed');
