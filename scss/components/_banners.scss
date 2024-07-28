@@ -38,7 +38,11 @@
 		gap: 8px;
 		flex: 1 auto;
 	}
-
+	
+	#post-upgrade-new-features-link {
+		font-weight: bold;
+	}
+	
 	#post-upgrade-buttons {
 		display: flex;
 		flex-wrap: wrap;
