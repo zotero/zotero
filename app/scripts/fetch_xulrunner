@@ -319,6 +319,11 @@ function modify_omni {
 		'<label target="_blank" class="text-link" dir="ltr"><\/label>' \
 		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
 	
+	# TODO: Use our own strings, but for now fix the bundled English ones
+	replace_line 'Manage Your Extensions' 'Manage Your Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
+	replace_line '= Extensions' '= Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
+	replace_line 'Add-on' 'Plugin' localization/en-US/toolkit/about/aboutAddons.ftl
+	
 	# Hide Recommendations tab in sidebar and recommendations in main pane
 	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' chrome/toolkit/content/mozapps/extensions/aboutaddonsCommon.js
 	replace_line 'pref\("extensions.htmlaboutaddons.recommendations.enabled".+' 'pref("extensions.htmlaboutaddons.recommendations.enabled", false);' greprefs.js
