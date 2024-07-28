@@ -2276,7 +2276,6 @@ Zotero.Attachments = new function () {
 			// match overrides all other options and returns immediately
 			if (match) {
 				try {
-					console.log(`Matching ${value} with ${match}: ${value.match(new RegExp(match, regexOpts))}`);
 					let matchResult = value.match(new RegExp(match, regexOpts));
 					return matchResult ? matchResult[0] : '';
 				}
