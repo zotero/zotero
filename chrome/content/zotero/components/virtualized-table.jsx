@@ -1432,7 +1432,7 @@ class VirtualizedTable extends React.Component {
 	
 	// Set aria-activedescendant on table container
 	_setAriaAciveDescendant() {
-		if (!this.selection.focused) return;
+		if (!this.selection.count) return;
 		let selected = this._jsWindow?.getElementByIndex(this.selection.focused);
 		if (selected) {
 			selected.closest(".virtualized-table").setAttribute("aria-activedescendant", selected.id);
