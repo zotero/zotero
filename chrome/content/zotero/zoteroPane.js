@@ -5667,6 +5667,7 @@ var ZoteroPane = new function()
 			
 			let parentItemID = item.parentItemID;
 			let parentItem = await Zotero.Items.getAsync(parentItemID);
+			var oldBaseName = item.attachmentFilename.replace(/\.[^.]+$/, '');
 			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: item.getField('title') });
 			
 			let extRE = /\.[^\.]+$/;
@@ -5680,6 +5681,11 @@ var ZoteroPane = new function()
 			if (renamed !== true) {
 				Zotero.debug("Could not rename file (" + renamed + ")");
 				continue;
+			}
+			
+			if (item.getField('title') === oldBaseName) {
+				item.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+				await item.saveTx();
 			}
 			
 			let str = await document.l10n.formatValue('file-renaming-file-renamed-to', { filename: newName });
