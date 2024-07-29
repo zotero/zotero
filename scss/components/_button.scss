@@ -39,7 +39,7 @@ button {
 	}
 }
 
-// Zero-priority default margins/paddings for button elements on macOS:
+// Default margins/paddings for button elements on macOS:
 
 :is(button, toolbarbutton) .button-text {
 	@media (-moz-platform: macos) {
@@ -58,7 +58,6 @@ radiogroup {
 radio, checkbox {
 	@media (-moz-platform: macos) {
 		margin: 0;
-		margin-inline-start: -2px;
 		gap: 6px;
 	}
 }
@@ -68,7 +67,12 @@ checkbox :is(.checkbox-check, .checkbox-check[checked], .checkbox-icon, .checkbo
 	@media (-moz-platform: macos) {
 		margin: 0;
 		
-		// Can't break this out into a separate rule because of specificity
+		// Can't break these out into separate rules because of specificity:
+
+		&:is(.radio-check, .checkbox-check) {
+			margin-inline-start: -2px;
+		}
+
 		&:is(.checkbox-label) {
 			margin-top: -1px;
 		}
