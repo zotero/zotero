@@ -152,7 +152,7 @@ describe("Zotero.Attachments", function() {
 				file: file,
 				parentItemID: parent.id,
 			});
-			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
+			assert.equal(attachment.getField('title'), 'test');
 			await parent.eraseTx();
 		});
 	})
