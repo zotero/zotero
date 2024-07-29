@@ -84,7 +84,7 @@ var doLoad = async function () {
 		persistColumns: true,
 		columnPicker: true,
 		emptyMessage: Zotero.getString('pane.items.loading'),
-		multiselect: !io.singleSelection
+		multiSelect: !io.singleSelection
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
