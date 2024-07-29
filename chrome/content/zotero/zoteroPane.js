@@ -3942,7 +3942,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Update parent item of notes/attachments
-		if (items.every(item => !item.isRegularItem())) {
+		if (items.every(item => item.isNote() || item.isAttachment())) {
 			show.add(m.changeParentItem);
 		}
 
@@ -4981,12 +4981,12 @@ var ZoteroPane = new function()
 		
 		if (!newParentItem.length) return;
 
-		for (let [index, item] of selectedItems.entries()) {
-			item.parentID = newParentItem[0].id;
-			let isLast = index == selectedItems.length - 1;
-			// Skip all notifiers until the last item to avoid refreshing itemTree multiple times
-			await item.saveTx({ skipSelect: true, skipNotifier: !isLast });
-		}
+		await Zotero.DB.executeTransaction(async () => {
+			for (let item of selectedItems) {
+				item.parentID = newParentItem[0].id;
+				await item.save({ skipSelect: true });
+			}
+		});
 	};
 	/**
 	 * @deprecated
