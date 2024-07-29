@@ -173,7 +173,9 @@ function onItemSelected()
 		// Disable "accept" button if not a top level item is selected
 		let selected = itemsView.getSelectedItems();
 		let disableAccept = (selected && !selected.every(item => item.isRegularItem()));
-		document.querySelector("dialog").setAttribute("buttondisabledaccept", disableAccept);
+		// Temp. Disable the button directly only as long as we move the button box in doLoad().
+		// Then, we should set buttondisabledaccept attribute on the dialog
+		document.querySelector("dialog button[dlgtype='accept']").setAttribute("disabled", disableAccept);
 	}
 }
 
