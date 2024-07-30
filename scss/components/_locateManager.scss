@@ -1,4 +1,6 @@
 #zotero-locate-manager-prefs {
+	@include macOS-normalize-controls;
+	
 	#button-bar, #button-bar > hbox {
 		display: flex;
 		gap: 6px;
