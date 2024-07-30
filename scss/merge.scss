@@ -6,7 +6,8 @@ wizardpage {
 
 merge-group {
 	display: flex;
-	overflow: auto;
+	overflow: hidden auto;
+	gap: 8px;
 
 	merge-pane {
 		flex: 1;
@@ -36,6 +37,10 @@ merge-group {
 
 		.delete-box {
 			min-width: 15em;
+		}
+
+		collapsible-section {
+			border-bottom: none !important;
 		}
 	}
 
