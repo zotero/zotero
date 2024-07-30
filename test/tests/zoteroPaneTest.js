@@ -671,16 +671,16 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.getField('title'), 'Title');
 		});
 		
-		it("should change attachment title if the previously set to the file basename by setAutoAttachmentTitle()", async function () {
+		it("should change attachment title if previously set to the file basename by setAutoAttachmentTitle()", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setField('title', 'Title');
 			await item.saveTx();
 			
 			var attachment = await importFileAttachment('test.png', {
 				parentItemID: item.id,
-				// Use default setAutoAttachmentTitle() behavior - isn't going to be
-				// renamed because autoRenameFiles.fileTypes doesn't match image/,
-				// so the title becomes the filename minus extension, i.e., test
+				// Use default setAutoAttachmentTitle() behavior -- the file isn't going to be
+				// renamed because autoRenameFiles.fileTypes doesn't match image/, so the title
+				// becomes the filename minus extension, i.e., "test"
 				title: undefined
 			});
 			assert.equal(attachment.getField('title'), 'test');
