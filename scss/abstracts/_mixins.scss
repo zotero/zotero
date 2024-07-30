@@ -227,6 +227,48 @@
 		}
 	}
 }
+
+// Normalize margins/paddings for form controls on macOS
+@mixin macOS-normalize-controls {
+	:is(button, toolbarbutton) .button-text {
+		@media (-moz-platform: macos) {
+			margin-block: 1px 0;
+			margin-inline: 3px;
+		}
+	}
+
+	radiogroup {
+		@media (-moz-platform: macos) {
+			margin: 0;
+			column-gap: 8px;
+		}
+	}
+
+	radio, checkbox {
+		@media (-moz-platform: macos) {
+			margin: 0;
+			gap: 6px;
+		}
+	}
+
+	radio :is(.radio-check, .radio-check[checked], .radio-icon, .radio-label),
+	checkbox :is(.checkbox-check, .checkbox-check[checked], .checkbox-icon, .checkbox-label) {
+		@media (-moz-platform: macos) {
+			margin: 0;
+
+			// Can't break these out into separate rules because of specificity:
+
+			&:is(.radio-check, .checkbox-check) {
+				margin-inline-start: -2px;
+			}
+
+			&:is(.checkbox-label) {
+				margin-top: -1px;
+			}
+		}
+	}
+}
+
 /*
 	This mixin replaces the default focus-rings - those are platform-specific, do not show up on some
 	components (e.g. toolbarbutton) and sometimes are too wide (e.g. around textfield on macOS).

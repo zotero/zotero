@@ -43,6 +43,8 @@
 @import "preferences/cite";
 @import "preferences/advanced";
 
+@include macOS-normalize-controls;
+
 #zotero-prefs {
 	min-width: 800px;
 	min-height: 600px;

@@ -1,4 +1,6 @@
 #post-upgrade-banner, #retracted-items-banner, #sync-reminder-banner {
+	@include macOS-normalize-controls;
+
 	display: flex;
 	justify-content: center;
 	text-align: center;
