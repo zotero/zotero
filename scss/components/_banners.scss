@@ -22,7 +22,7 @@
 	color: var(--fill-primary);
 	flex-wrap: wrap;
 	gap: 8px;
-	padding: 8px 12px;
+	padding: 6px 8px;
 
 	.link {
 		color: var(--accent-blue);
@@ -48,6 +48,12 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		margin-inline-start: auto;
+
+		@media (-moz-platform: windows) {
+			button {
+				height: 24px;
+			}
+		}
 	}
 }
 
