@@ -682,7 +682,6 @@ if [ $BUILD_WIN == 1 ]; then
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
 		check_lfs_file "$CALLDIR/win/updater.exe.tar.xz"
 		tar xf "$CALLDIR/win/updater.exe.tar.xz" --to-stdout updater-$arch.exe > "$APPDIR/updater.exe"
-		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
 		
 		# Update .exe version numbers (only possible on Windows)
 		if [ $WIN_NATIVE == 1 ]; then
@@ -708,6 +707,8 @@ if [ $BUILD_WIN == 1 ]; then
 		
 		# Copy in common files
 		rsync -a "$COMMON_APPDIR/" "$APPDIR/"
+		
+		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
 		
 		# Add devtools
 		#if [ $DEVTOOLS -eq 1 ]; then
