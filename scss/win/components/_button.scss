@@ -1,14 +1,14 @@
 // Use :where to reset specificity to 0
 // https://css-tricks.com/using-the-specificity-of-where-as-a-css-reset/
+
+// skip React Button element
 :where(
-	// skip React Button element
 	button:not(.btn, [type=checkbox], [type=radio]),
 	input:is([type=button], [type=submit])
 ) {
 	@include windows-form-element;
 
-	padding: 4px 11px 6px 11px;
-	margin-top: 2px;
+	padding: 4px 11px 6px 11px !important;
 
 	&[default] {
 		color: var(--accent-white);
