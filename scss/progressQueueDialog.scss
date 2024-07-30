@@ -1,10 +1,19 @@
+@import 'abstracts/mixins';
+
+@include macOS-normalize-controls;
+
 #progress-queue-root {
 	min-height: 0;
 	padding: 10px;
 }
 
+#progress-container {
+	padding-bottom: 6px;
+}
+
 #progress-indicator {
 	flex: 1;
+	margin-inline-end: 6px;
 }
 
 .virtualized-table-container {
