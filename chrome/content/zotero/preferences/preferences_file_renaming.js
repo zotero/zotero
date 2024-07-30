@@ -31,6 +31,7 @@ Zotero_Preferences.FileRenaming = {
 		this.inputRef = document.getElementById('file-renaming-format-template');
 		this.updatePreview();
 		this.inputRef.addEventListener('input', this.updatePreview.bind(this));
+		this.inputRef.addEventListener('blur', this.handleInputBlur.bind(this));
 
 		this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
 		this._updatePreview = this.updatePreview.bind(this);
@@ -60,11 +61,20 @@ Zotero_Preferences.FileRenaming = {
 		return null;
 	},
 
-	async updatePreview() {
+	updatePreview() {
 		const [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), this.defaultExt, ''];
-		const formatString = document.getElementById('file-renaming-format-template').value;
+		const formatString = this.inputRef.value;
 		const preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
 		document.getElementById('file-renaming-format-preview').innerText = `${preview}.${ext}`;
+	},
+
+	handleInputBlur() {
+		const formatString = this.inputRef.value;
+		const prefKey = this.inputRef.getAttribute('preference');
+		if (formatString.replace(/\s/g, '') === '') {
+			Zotero.Prefs.clear(prefKey, true);
+			this.updatePreview();
+		}
 	},
 
 	makeMockItem() {
