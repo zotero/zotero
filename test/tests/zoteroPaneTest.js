@@ -1671,4 +1671,50 @@ describe("ZoteroPane", function() {
 			assert.equal(epubAttachment.getField('title'), Zotero.getString('file-type-ebook'));
 		});
 	});
+
+	describe("#createParentItemsFromSelected()", function () {
+		async function createParent() {
+			let parent;
+			let dialogPromise = waitForDialog(async (win) => {
+				parent = await createDataObject('item', { title: 'Book Title' });
+				win.io.dataOut = { parent };
+				win.close();
+			}, false, 'chrome://zotero/content/createParentDialog.xhtml');
+			let createParentPromise = zp.createParentItemsFromSelected();
+			await dialogPromise;
+			await createParentPromise;
+			return parent;
+		}
+		
+		it("should rename the attachment and set an automatic title", async function () {
+			let attachment = await importPDFAttachment({
+				title: 'Attachment title',
+			});
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+			
+			let parent = await createParent();
+			assert.equal(attachment.parentItem, parent);
+			assert.equal(attachment.attachmentFilename, 'Book Title.pdf');
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
+		});
+
+		it("should not rename a linked attachment or set an automatic title when linked file renaming disabled", async function () {
+			Zotero.Prefs.set('autoRenameFiles.linked', false);
+			
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.linkFromFile({
+				file,
+				title: 'Attachment title'
+			});
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+
+			let parent = await createParent();
+			assert.equal(attachment.parentItem, parent);
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+			assert.equal(attachment.getField('title'), 'Attachment title');
+			
+			Zotero.Prefs.clear('autoRenameFiles.linked');
+		});
+	});
 })
