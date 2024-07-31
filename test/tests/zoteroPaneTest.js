@@ -662,28 +662,34 @@ describe("ZoteroPane", function() {
 			await item.saveTx();
 			
 			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
-			attachment.setField('title', 'Image');
+			attachment.setField('title', 'Title');
 			await attachment.saveTx();
 			await zp.selectItem(attachment.id);
 			
 			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
-			assert.equal(attachment.getField('title'), 'Image')
+			assert.equal(attachment.getField('title'), 'Title');
 		});
 		
-		it("should not change attachment title even if the same as filename", async function () {
+		it("should change attachment title if previously set to the file basename by setAutoAttachmentTitle()", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setField('title', 'Title');
 			await item.saveTx();
 			
-			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
-			attachment.setField('title', 'test.png');
-			await attachment.saveTx();
+			var attachment = await importFileAttachment('test.png', {
+				parentItemID: item.id,
+				// Use default setAutoAttachmentTitle() behavior -- the file isn't going to be
+				// renamed because autoRenameFiles.fileTypes doesn't match image/, so the title
+				// becomes the filename minus extension, i.e., "test"
+				title: undefined
+			});
+			assert.equal(attachment.getField('title'), 'test');
 			await zp.selectItem(attachment.id);
 			
 			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, 'Title.png');
-			assert.equal(attachment.getField('title'), 'test.png')
+			// After a manual rename, the title becomes the default for this type
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-image'));
 		});
 	});
 	
