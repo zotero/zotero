@@ -681,7 +681,7 @@ describe("ZoteroPane", function() {
 				// Use default setAutoAttachmentTitle() behavior -- the file isn't going to be
 				// renamed because autoRenameFiles.fileTypes doesn't match image/, so the title
 				// becomes the filename minus extension, i.e., "test"
-				title: undefined
+				title: null
 			});
 			assert.equal(attachment.getField('title'), 'test');
 			await zp.selectItem(attachment.id);

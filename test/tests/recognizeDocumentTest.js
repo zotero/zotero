@@ -314,10 +314,10 @@ describe("Document Recognition", function() {
 			// The file should not have been renamed
 			assert.equal(attachment.attachmentFilename, 'test.pdf');
 
-			// The title should have changed
+			// The title should not have changed
 			assert.equal(
 				attachment.getField('title'),
-				Zotero.getString('file-type-pdf')
+				'test'
 			);
 		});
 	});
