@@ -2615,7 +2615,7 @@ Zotero.Item.prototype.getFilePath = function () {
  * @return {Promise<String|false>} - A promise for either the absolute path of the attachment
  *                                   or false for invalid paths or if the file doesn't exist
  */
-Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
+Zotero.Item.prototype.getFilePathAsync = async function () {
 	if (!this.isAttachment()) {
 		throw new Error("getFilePathAsync() can only be called on attachment items");
 	}
@@ -2657,7 +2657,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 			OS.Path.normalize(Zotero.Attachments.getStorageDirectory(this).path), path
 		);
 		
-		if (!(yield OS.File.exists(path))) {
+		if (!(await OS.File.exists(path))) {
 			Zotero.debug("Attachment file '" + path + "' not found", 2);
 			this._updateAttachmentStates(false);
 			return false;
@@ -2675,7 +2675,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 			this._updateAttachmentStates(false);
 			return false;
 		}
-		if (!(yield OS.File.exists(path))) {
+		if (!(await OS.File.exists(path))) {
 			Zotero.debug("Attachment file '" + path + "' not found", 2);
 			this._updateAttachmentStates(false);
 			return false;
@@ -2701,12 +2701,12 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 		}
 		
 		// If valid, convert this to a regular string
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			"UPDATE itemAttachments SET path=? WHERE itemID=?",
 			[file.leafName, this._id]
 		);
 		
-		if (!(yield OS.File.exists(file.path))) {
+		if (!(await OS.File.exists(file.path))) {
 			Zotero.debug("Attachment file '" + file.path + "' not found", 2);
 			this._updateAttachmentStates(false);
 			return false;
@@ -2718,7 +2718,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	}
 	
 	// NOTE: Test for platform slashes before changing to IOUtils.exists()
-	if (!(yield OS.File.exists(path))) {
+	if (!(await OS.File.exists(path))) {
 		Zotero.debug("Attachment file '" + path + "' not found", 2);
 		this._updateAttachmentStates(false);
 		return false;
@@ -2727,7 +2727,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	this._updateAttachmentStates(true);
 	
 	return path;
-});
+};
 
 
 /**
@@ -2786,7 +2786,7 @@ Zotero.Item.prototype.getFilename = function () {
 /**
  * Asynchronous check for file existence
  */
-Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
+Zotero.Item.prototype.fileExists = async function () {
 	if (!this.isAttachment()) {
 		throw new Error("Zotero.Item.fileExists() can only be called on attachment items");
 	}
@@ -2794,9 +2794,14 @@ Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
 	if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		throw new Error("Zotero.Item.fileExists() cannot be called on link attachments");
 	}
+
+	// Allow unsaved items to be checked, used by conflict-resolution window
+	if (!this.key) {
+		return false;
+	}
 	
-	return !!(yield this.getFilePathAsync());
-});
+	return !!(await this.getFilePathAsync());
+};
 
 
 /**
