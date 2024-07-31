@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import ReactDOM from "react-dom";
+
 {
 	class MergeGroup extends XULElement {
 		constructor() {
@@ -292,6 +294,12 @@
 			}
 		}
 		
+		disconnectedCallback() {
+			if (this._objboxRoot) {
+				this._objboxRoot.unmount();
+			}
+		}
+		
 		get type() {
 			return this.parent.type;
 		}
@@ -448,7 +456,8 @@
 			if (item.isAnnotation()) {
 				Zotero.Annotations.toJSON(item)
 				.then((data) => {
-					Zotero.AnnotationBox.render(objbox, { data });
+					this._objboxRoot = ReactDOM.createRoot(objbox);
+					Zotero.AnnotationBox.render(this._objboxRoot, { data });
 				});
 			}
 			else {
