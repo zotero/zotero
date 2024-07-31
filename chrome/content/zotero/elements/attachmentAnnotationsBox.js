@@ -96,8 +96,6 @@
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
 			if (this._isAlreadyRendered()) return;
 
-			await Zotero.PDFWorker.renderAttachmentAnnotations(this.item.id);
-
 			this._body.replaceChildren();
 
 			if (!this._section.open || this._annotationItems.length === 0) {
@@ -106,6 +104,16 @@
 
 			this.hidden = false;
 			for (let annotation of this._annotationItems) {
+				if (annotation.annotationType === 'image'
+					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+					try {
+						await Zotero.PDFWorker.renderAttachmentAnnotations(annotation.parentID);
+					}
+					catch (e) {
+						Zotero.debug(e);
+						throw e;
+					}
+				}
 				this.addRow(annotation);
 			}
 		}
