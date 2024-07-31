@@ -10,7 +10,8 @@ general-remind-me-later = Lembrar-me Mais Tarde
 general-choose-file = Escolher Arquivo...
 general-open-settings = Abrir Configurações
 general-help = Ajuda
-general-tag = Tag
+general-tag = Etiqueta
+general-done = Feito
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -111,7 +112,7 @@ file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Abrir menu de contexto
 itembox-button-merge =
-    .aria-label = Selecionar versão do campo { $field }
+    .aria-label = Selecionar versão do campo { $field } 
 create-parent-intro = Insira um DOI, ISBN, PMID, arXiv ID, ou ADS Bibcode para identificar este arquivo:
 reader-use-dark-mode-for-content =
     .label = Usar modo escuro para o conteúdo
@@ -126,7 +127,7 @@ import-source-file =
 import-source-folder =
     .label = Uma pasta de PDFs ou outros arquivos
 import-source-online =
-    .label = Importação on-line a partir de { $targetApp }
+    .label = Importação on-line a partir de { $targetApp } 
 import-options = Opções
 import-importing = A importar...
 import-create-collection =
@@ -140,7 +141,7 @@ import-fileTypes-other =
     .placeholder = Outros padrões de arquivos, separados por vírgula (ex.: *.jpg,*.png)
 import-file-handling = Manipulação de Ficheiros
 import-file-handling-store =
-    .label = Copiar arquivos para a pasta de armazenamento do { -app-name }
+    .label = Copiar arquivos para a pasta de armazenamento do { -app-name } 
 import-file-handling-link =
     .label = Ligar a arquivos na localização original
 import-fileHandling-description = Arquivos linkados não podem ser sincronizados pelo { -app-name }.
@@ -185,10 +186,10 @@ report-error =
     .label = Reportar Erro...
 rtfScan-wizard =
     .title = Processar RTF
-rtfScan-introPage-description = { -app-name } pode extrair e reformatar citações automaticamente e inserir bibliografia em arquivos RTF. Para começar, selecione um arquivo RTF abaixo.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Para começar, seleccione abaixo um arquivo RTF de entrada bem como um arquivo RTF de saída:
-rtfScan-input-file = Arquivo de Entrada
-rtfScan-output-file = Arquivo de Saída
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Nenhum arquivo escolhido
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -473,7 +474,7 @@ attachment-info-convert-note =
             [standalone] isolada
             [child] filha
            *[unknown] nova
-        }
+        } 
     .tooltiptext = Adicionar notas nos anexos não é mais permitido, mas você pode editar esta nota transformando em uma nota separada.
 attachment-preview-placeholder = Sem anexo para visualizar
 toggle-preview =
@@ -556,7 +557,7 @@ item-pane-duplicates-merge-items =
         }
 locate-library-lookup-no-resolver = Você deve escolher um resolvedor a partir do painel { $pane } nas configurações do { -app-name } .
 architecture-win32-warning-message = { -app-name } está rodando no modo 32-bit em um Windows de versão 64-bit. { -app-name } será mais eficiente se rodar no modo 64-bit.
-architecture-warning-action = Baixar { -app-name } 64-bit
+architecture-warning-action = Baixar { -app-name } 64-bit 
 first-run-guidance-quickFormat =
     Digitar um título, autor e/ou um ano para buscar uma referência.
     
@@ -577,3 +578,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valor
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Imagem
+file-type-pdf = PDF
+file-type-audio = Áudio
+file-type-video = Vídeo
+file-type-presentation = Apresentação
+file-type-document = Documento
+file-type-ebook = e-book
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

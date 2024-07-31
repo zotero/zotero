@@ -10,7 +10,8 @@ general-remind-me-later = பின்னர் நினைவூட்டு
 general-choose-file = கோப்பை தேர்ந்தெடு…
 general-open-settings = Open Settings
 general-help = உதவி
-general-tag = Tag
+general-tag = குறிச்சொல்
+general-done = முடிந்தது
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = பிழையைப் புகாரளி…
 rtfScan-wizard =
     .title = உஉவ வருடல்
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = தொடங்க, ஒரு உஉவ உள்ளீட்டு கோப்பு மற்றும் கீழே உள்ள வெளியீட்டு கோப்பைத் தேர்ந்தெடுக்கவும்:
-rtfScan-input-file = உள்ளீட்டு கோப்பு
-rtfScan-output-file = வெளியீட்டு கோப்பு
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = எந்த கோப்பும் தேர்வு செய்ய படவில்லை
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = படம்
+file-type-pdf = எஆவ
+file-type-audio = ஒலி
+file-type-video = நிகழ்படம்
+file-type-presentation = விளக்கக்காட்சி
+file-type-document = ஆவணம்
+file-type-ebook = மின்புத்தகம்
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

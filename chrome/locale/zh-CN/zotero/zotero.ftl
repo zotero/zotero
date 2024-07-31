@@ -10,7 +10,8 @@ general-remind-me-later = 稍后提醒我
 general-choose-file = 选择文件…
 general-open-settings = 打开设置
 general-help = 帮助
-general-tag = Tag
+general-tag = 标签
+general-done = 完成
 menu-file-show-in-finder =
     .label = 在访达中显示
 menu-file-show-file =
@@ -107,7 +108,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = 文件已重命名为 { $filename }
 itembox-button-options =
     .tooltiptext = 打开上下文菜单
 itembox-button-merge =
@@ -143,7 +144,7 @@ import-file-handling-store =
     .label = 将文件复制到 { -app-name } 存储文件夹
 import-file-handling-link =
     .label = 在初始位置链接到文件
-import-fileHandling-description = { -app-name } 无法同步链接的文件。
+import-fileHandling-description =  { -app-name } 无法同步链接的文件。
 import-online-new =
     .label = 仅下载新条目，不更新之前已导入的条目
 import-mendeley-username = 用户名
@@ -183,10 +184,10 @@ report-error =
     .label = 报告软件缺陷…
 rtfScan-wizard =
     .title = RTF 扫描
-rtfScan-introPage-description = { -app-name } 可以自动提取和重新格式化引注，并将参考文献表插入 RTF 文件中。首先，请选择下面的 RTF 文件。
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = 如要开始，请选择 RTF 输入文件和输出文件：
-rtfScan-input-file = 输入文件
-rtfScan-output-file = 输出文件
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = 未选定文件
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -339,7 +340,7 @@ restart-in-troubleshooting-mode-menuitem =
     .label = 以故障排除模式重启...
     .accesskey = T
 restart-in-troubleshooting-mode-dialog-title = 以故障排除模式重启
-restart-in-troubleshooting-mode-dialog-description = { -app-name } 将重新启动并禁用所有插件。启用故障排除模式时，某些功能可能无法正常工作。
+restart-in-troubleshooting-mode-dialog-description =  { -app-name } 将重新启动并禁用所有插件。启用故障排除模式时，某些功能可能无法正常工作。
 menu-ui-density =
     .label = 密度
 menu-ui-density-comfortable =
@@ -508,9 +509,9 @@ item-pane-header-more-options =
     .label = 更多选项
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] 未选择条目
+        [one] 已选择 { $count } 个条目
+       *[other] 已选择 { $count } 个条目
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -526,15 +527,14 @@ item-pane-message-objects-selected =
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] 此视图中没有条目
+        [one] 此视图中有 { $count } 个条目
+       *[other] 此视图中有 { $count } 个条目
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+           *[other] 合并 { $count } 个条目
         }
 locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
 architecture-win32-warning-message = { -app-name } 目前在 64 位版本的 Windows 上以 32 位模式运行。 { -app-name } 在 64 位模式下运行效率更高。
@@ -559,3 +559,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = 值
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = 网页
+file-type-image = 图片
+file-type-pdf = PDF
+file-type-audio = 音频
+file-type-video = 视频
+file-type-presentation = 演示文档
+file-type-document = 文档
+file-type-ebook = 电子书
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

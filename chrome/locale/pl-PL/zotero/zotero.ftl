@@ -10,7 +10,8 @@ general-remind-me-later = Przypomnij mi później
 general-choose-file = Wybierz plik...
 general-open-settings = Otwórz ustawienia
 general-help = Pomoc
-general-tag = Tag
+general-tag = Etykieta
+general-done = Zrobione
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = Zgłoś błąd...
 rtfScan-wizard =
     .title = Skanowanie pliku RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Aby rozpocząć, wybierz poniżej plik wejściowy w formacie RTF oraz plik wyjściowy:
-rtfScan-input-file = Plik wejściowy
-rtfScan-output-file = Plik wyjściowy
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Nie wybrano pliku
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Wartość
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Obraz
+file-type-pdf = PDF
+file-type-audio = Dźwięk
+file-type-video = Wideo
+file-type-presentation = Prezentacja
+file-type-document = Dokument
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

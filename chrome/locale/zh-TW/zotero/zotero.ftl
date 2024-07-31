@@ -10,7 +10,8 @@ general-remind-me-later = 稍後提醒我
 general-choose-file = 選擇檔案……
 general-open-settings = 打開設定
 general-help = 說明
-general-tag = Tag
+general-tag = 標籤
+general-done = 完成
 menu-file-show-in-finder =
     .label = 在搜尋器中顯示
 menu-file-show-file =
@@ -183,10 +184,10 @@ report-error =
     .label = 回報錯誤…
 rtfScan-wizard =
     .title = RTF 掃描
-rtfScan-introPage-description = { -app-name } 能自動取出並重新格式化引用文獻，並將參考書目插入 RTF 檔中。若要開始，請於下方選擇RTF檔。
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = 要開始的話，在下方選一個 RTF 輸入檔及一個輸出檔：
-rtfScan-input-file = 輸入檔案
-rtfScan-output-file = 輸出檔案
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = 未選擇任何檔案
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -339,7 +340,7 @@ restart-in-troubleshooting-mode-menuitem =
     .label = 以除錯模式重新啟動……
     .accesskey = T
 restart-in-troubleshooting-mode-dialog-title = 以除錯模式重新啟動
-restart-in-troubleshooting-mode-dialog-description = { -app-name } 將重新啟動並停用所有附加元件。啟用除錯模式時，某些功能可能無法正確運作。
+restart-in-troubleshooting-mode-dialog-description =  { -app-name } 將重新啟動並停用所有附加元件。啟用除錯模式時，某些功能可能無法正確運作。
 menu-ui-density =
     .label = 密度
 menu-ui-density-comfortable =
@@ -558,3 +559,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = 值
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = 網頁
+file-type-image = 圖片
+file-type-pdf = PDF
+file-type-audio = 音訊
+file-type-video = 視訊
+file-type-presentation = 簡報
+file-type-document = 文件
+file-type-ebook = 電子書
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

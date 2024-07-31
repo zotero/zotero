@@ -10,7 +10,8 @@ general-remind-me-later = Me le rappeler plus tard
 general-choose-file = Sélectionnez un fichier…
 general-open-settings = Ouvrir les paramètres
 general-help = ?
-general-tag = Tag
+general-tag = Marqueur
+general-done = Terminé
 menu-file-show-in-finder =
     .label = Afficher dans le gestionnaire de fichiers
 menu-file-show-file =
@@ -28,7 +29,7 @@ menu-add-by-identifier =
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Ajouter un fichier…
+    .label = Ajouter un fichier...
 menu-add-standalone-linked-file-attachment =
     .label = Ajouter un lien vers un fichier…
 menu-add-child-file-attachment =
@@ -107,7 +108,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Fichier renommé en { $filename }
 itembox-button-options =
     .tooltiptext = Ouvrir le menu contextuel
 itembox-button-merge =
@@ -185,10 +186,10 @@ report-error =
     .label = Signaler l'erreur…
 rtfScan-wizard =
     .title = Analyse d'un fichier RTF
-rtfScan-introPage-description = { -app-name } peut automatiquement extraire et remettre en forme les citations et insérer une bibliographie dans les fichiers RTF. Pour démarrer, choisissez un fichier RTF ci-dessous.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Pour démarrer, sélectionnez un fichier RTF en lecture et un fichier de sortie ci-dessous :
-rtfScan-input-file = Fichier en lecture
-rtfScan-output-file = Fichier de sortie
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Aucun fichier sélectionné
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -328,7 +329,7 @@ publications-buttons-next-sharing =
     .label = Suivant : partager
 publications-buttons-next-choose-license =
     .label = Choisir une licence
-licenses-cc-0 = Versement au domaine public en vertu de CC0 1.0 Universel.
+licenses-cc-0 = Versement au domaine public en vertu de CC0 1.0 Universel. 
 licenses-cc-by = Licence Creative Commons Attribution 4.0 International
 licenses-cc-by-nd = Licence Creative Commons Attribution - Pas de modification 4.0 International
 licenses-cc-by-sa = Licence Creative Commons Attribution - Partage dans les mêmes conditions 4.0 International
@@ -406,10 +407,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Développer la section
-    .label = Développer la section { $section }
+    .label = Développer la section { $section } 
 section-button-collapse =
     .dynamic-tooltiptext = Réduire la section
-    .label = Réduire la section { $section }
+    .label = Réduire la section { $section } 
 annotations-count =
     { $count ->
         [one] { $count } annotation
@@ -469,11 +470,11 @@ attachment-info-modified = Modifié le
 attachment-info-index = Indexé
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
-            [standalone] Standalone
-            [child] Item
-           *[unknown] New
-        } Note
+        Convertir en { $type ->
+            [standalone] note indépendante
+            [child] note fille
+           *[unknown] nouvelle note
+        }
     .tooltiptext = L'ajout de notes à une pièce jointe n'est plus pris en charge, mais vous pouvez modifier cette note en la convertissant en une note séparée.
 attachment-preview-placeholder = Aucune pièce jointe à prévisualiser
 toggle-preview =
@@ -490,7 +491,7 @@ quickformat-general-instructions =
     } Appuyez sur { return-or-enter } pour enregistrer les modifications de cette citation. Appuyez sur Échap pour annuler les modifications et fermer la fenêtre.
 quickformat-aria-bubble = Ce document est inclus dans la citation. Appuyez sur la barre d'espace pour personnaliser ce document. { quickformat-general-instructions }
 quickformat-aria-input = Commencez la saisie pour rechercher un document à ajouter dans cette citation. Appuyez sur "Tabulation" pour naviguer dans la liste des résultats de recherche. { quickformat-general-instructions }
-quickformat-aria-item = Appuyez sur { return-or-enter } pour ajouter ce document à la citation. Appuyez sur Tab pour revenir au champ de recherche.
+quickformat-aria-item = Appuyez sur { return-or-enter } pour ajouter ce document à la citation. Appuyez sur Tab pour revenir au champ de recherche. 
 quickformat-accept =
     .tooltiptext = Enregistrer les modifications de cette citation
 quickformat-locator-type =
@@ -520,9 +521,9 @@ item-pane-header-more-options =
     .label = Plus d'options
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] Aucun document sélectionné
+        [one] { $count }  document sélectionné
+       *[other] { $count }  documents sélectionnés
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -544,15 +545,16 @@ item-pane-message-objects-selected =
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] Aucun document dans cette vue
+        [one] { $count } document dans cette vue
+       *[other] { $count } documents dans cette vue
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] Fusionner { $count } document
+            [many] Fusionner { $count } documents
+           *[other] Fusionner { $count } documents
         }
 locate-library-lookup-no-resolver = Vous devez choisir un résolveur dans le panneau { $pane } des préférences { -app-name }
 architecture-win32-warning-message = Vous utilisez { -app-name } en mode 32-bit sur une version 64-bit de Windows. { -app-name } s'exécutera plus efficacement en mode 64-bit.
@@ -577,3 +579,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valeur
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Page web
+file-type-image = Image
+file-type-pdf = PDF
+file-type-audio = Audio
+file-type-video = Vidéo
+file-type-presentation = Présentation
+file-type-document = Document
+file-type-ebook = Livre numérique
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

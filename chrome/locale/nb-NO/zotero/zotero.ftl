@@ -7,10 +7,11 @@ return-or-enter =
 general-remove = Fjern
 general-add = Legg til
 general-remind-me-later = Minn meg på det senere
-general-choose-file = Velg fil...
+general-choose-file = Velg fil…
 general-open-settings = Åpne innstillinger
 general-help = Hjelp
-general-tag = Tag
+general-tag = Emneord
+general-done = Ferdig
 menu-file-show-in-finder =
     .label = Vis i Finder
 menu-file-show-file =
@@ -24,19 +25,19 @@ menu-density =
 add-attachment = Legg til vedlegg
 new-note = Nytt notat
 menu-add-by-identifier =
-    .label = Legg til ved hjelp av identifikator...
+    .label = Legg til ved hjelp av identifikator…
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
     .label = Legg til fil…
 menu-add-standalone-linked-file-attachment =
-    .label = Legg til lenke til fil...
+    .label = Legg til lenke til fil…
 menu-add-child-file-attachment =
-    .label = Legg til fil...
+    .label = Legg ved fil…
 menu-add-child-linked-file-attachment =
-    .label = Legg til lenke til fil...
+    .label = Legg ved lenke til fil…
 menu-add-child-linked-url-attachment =
-    .label = Legg ved nettlenke
+    .label = Legg ved nettlenke…
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -171,7 +172,7 @@ import-online-form-intro = Vennligst skriv inn påloggingsinformasjonen din for 
 import-online-wrong-credentials = Innlogging til { $targetApp } mislyktes. Vennligst skriv inn påloggingsinformasjonen på nytt og prøv igjen.
 import-online-blocked-by-plugin = Importen kan ikke fortsette med { $plugin } installert. Deaktiver denne programtillegget og prøv på nytt.
 import-online-relink-only =
-    .label = Koble sammen Mendeley Desktop henvisninger
+    .label = Koble sammen igjen Mendeley Desktop henvisninger
 import-online-relink-kb = Mer informasjon
 import-online-connection-error = { -app-name } kunne ikke koble til { $targetApp }. Kontroller Internett-tilkoblingen din og prøv igjen.
 items-table-cell-notes =
@@ -181,13 +182,13 @@ items-table-cell-notes =
            *[other] { $count } Notater
         }
 report-error =
-    .label = Rapporter feil...
+    .label = Rapporter feil…
 rtfScan-wizard =
     .title = RTF skann
-rtfScan-introPage-description = { -app-name } kan automatisk trekke ut og omformatere henvisninger og sette inn en bibliografi i RTF-filer. Velg en RTF-fil nedenfor for å komme i gang.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = For å komme i gang, velg en RTF inndata fil og en utdata fil nedenfor:
-rtfScan-input-file = Inndata fil
-rtfScan-output-file = Utdata fil
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Ingen fil valgt
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -338,7 +339,7 @@ licenses-cc-more-info = Sørg for at du har lest Creative Commons <a data-l10n-n
 licenses-cc0-more-info = Sørg for at du har lest Creative Commons  <a data-l10n-name="license-considerations">CC0 FAQ</a> før du dediserer verket ditt under CC0 vilkårene. Vær oppmerksom på at det er irreversibelt å dedisere verket ditt til det fri, selv om du senere velger andre vilkår eller slutter å publisere verket.
 restart-in-troubleshooting-mode-menuitem =
     .label = Start på nytt i feilsøkingsmodus…
-    .accesskey = I
+    .accesskey = T
 restart-in-troubleshooting-mode-dialog-title = Start på nytt i feilsøkingsmodus
 restart-in-troubleshooting-mode-dialog-description = { -app-name } vil starte på nytt med alle programtillegg deaktivert. Det kan hende at enkelte funksjoner ikke fungerer som de skal når feilsøkingsmodus er aktivert.
 menu-ui-density =
@@ -366,33 +367,33 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Vedlegg
-           *[other] { $count } Vedlegg
+            [one] { $count } vedlegg
+           *[other] { $count } vedlegg
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Merknad
-           *[other] { $count } Merknad
+            [one] { $count } merknad
+           *[other] { $count } merknader
         }
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Notat
-           *[other] { $count } Notater
+            [one] { $count } notat
+           *[other] { $count } notater
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Emneord
-           *[other] { $count }
+            [one] { $count } emneord
+           *[other] { $count } emneord
         }
 section-related =
-    .label = { $count } Relatert
+    .label = { $count } relatert
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -407,8 +408,8 @@ section-button-collapse =
     .label = Skjul { $section } seksjon
 annotations-count =
     { $count ->
-        [one] { $count } Merknad
-       *[other] { $count } Merknad
+        [one] { $count } merknad
+       *[other] { $count } merknader
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -444,7 +445,7 @@ collapse-other-sections =
 expand-all-sections =
     .label = Utvid alle seksjoner
 abstract-field =
-    .placeholder = Legg til abstrakt ...
+    .placeholder = Legg til abstrakt…
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
@@ -520,7 +521,7 @@ item-pane-message-items-selected =
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } samlinger valgt
+        [one] { $count } samling valgt
        *[other] { $count } samlinger valgt
     }
 item-pane-message-searches-selected =
@@ -530,7 +531,7 @@ item-pane-message-searches-selected =
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } valgte objekter
+        [one] { $count } valgt objekt
        *[other] { $count } valgte objekter
     }
 item-pane-message-unselected =
@@ -542,7 +543,7 @@ item-pane-message-unselected =
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Slå sammen { $count } elementer
+            [one] Slå sammen { $count } element
            *[other] Slå sammen { $count } elementer
         }
 locate-library-lookup-no-resolver = Du må velge en lenketjener fra { $pane }-ruten i { -app-name }-innstillingene.
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Verdi
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Nettside
+file-type-image = Bilde
+file-type-pdf = PDF
+file-type-audio = Lyd
+file-type-video = Video
+file-type-presentation = Presentasjon
+file-type-document = Dokument
+file-type-ebook = E-bok
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

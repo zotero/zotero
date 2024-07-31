@@ -35,7 +35,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kopijuojant elementus tarp bibliotekų, įtraukti:">
 <!ENTITY zotero.preferences.groups.childNotes "įrašams priklausančias pastabas">
 <!ENTITY zotero.preferences.groups.childFiles "įrašams priklausančias tinklalapių momentines kopijas ir importuotas rinkmenas">
-<!ENTITY zotero.preferences.groups.annotations "anotacijos">
+<!ENTITY zotero.preferences.groups.annotations "anotacijas">
 <!ENTITY zotero.preferences.groups.childLinks "įrašams priklausančias nuorodas">
 <!ENTITY zotero.preferences.groups.tags "gaires">
 

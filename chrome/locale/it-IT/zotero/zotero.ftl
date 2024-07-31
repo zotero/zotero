@@ -11,6 +11,7 @@ general-choose-file = Scegli il file…
 general-open-settings = Apri impostazioni
 general-help = Aiuto
 general-tag = Tag
+general-done = Fatto
 menu-file-show-in-finder =
     .label = Mostra nel Finder
 menu-file-show-file =
@@ -185,10 +186,10 @@ report-error =
     .label = Segnala un errore…
 rtfScan-wizard =
     .title = Scansione RTF
-rtfScan-introPage-description = { -app-name } è in grado di estrarre e riformattare automaticamente le citazioni e inserire una bibliografia nei file RTF. Per iniziare, seleziona un file RTF e un file di destinazione qui sotto.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Per iniziare, seleziona un file RTF e un file di destinazione qui sotto:
-rtfScan-input-file = File di origine
-rtfScan-output-file = File di destinazione
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Nessun file selezionato
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -578,3 +579,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valore
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Pagina web
+file-type-image = Immagine
+file-type-pdf = PDF
+file-type-audio = File audio
+file-type-video = File video
+file-type-presentation = Presentazione
+file-type-document = Documento
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

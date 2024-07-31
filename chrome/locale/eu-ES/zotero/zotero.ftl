@@ -10,7 +10,8 @@ general-remind-me-later = Geroago gogorarazi
 general-choose-file = Fitxategia aukeratu...
 general-open-settings = Open Settings
 general-help = Laguntza
-general-tag = Tag
+general-tag = Etiketa
+general-done = Egina
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = Errore-txostena...
 rtfScan-wizard =
     .title = RTF eskaneatzea
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Hasteko, aukeratu RTF sarrera eta irteera fitxategiak behean:
-rtfScan-input-file = Sarrera fitxategia
-rtfScan-output-file = Irteera fitxategia
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Ez dago hautatutako fitxategirik
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -309,7 +310,7 @@ publications-sharing-cc0 =
     .label = Bai, domeinu publikoan
 publications-license-page =
     .label = Hautatu Creative Commons lizentzia bat
-publications-choose-license-text = Creative Commons lizentzia batek zure lana kopiatu eta birbanatzeko ahalbidetzen ditu besteak, beti ere iturria behar bezala aitortu, lizentzia estekatu eta aldaketarik ote duen adierazten badute. Baldintza gehigarriak beherago zehaztu daitezke.
+publications-choose-license-text = Creative Commons lizentzia batek zure lana kopiatu eta birbanatzeko ahalbidetzen ditu besteak, beti ere iturria behar bezala aitortu, lizentzia estekatu eta aldaketarik ote duen adierazten badute. Baldintza gehigarriak beherago zehaztu daitezke. 
 publications-choose-license-adaptations-prompt = Zure lanaren moldaketak partekatzea baimendu nahi al duzu?
 publications-choose-license-yes =
     .label = Bai
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Irudia
+file-type-pdf = PDF
+file-type-audio = Audioa
+file-type-video = Bideoa
+file-type-presentation = Aurkezpen
+file-type-document = Dokumentua
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

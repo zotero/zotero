@@ -10,7 +10,8 @@ general-remind-me-later = Acórdamo despois
 general-choose-file = Escoller ficheiro...
 general-open-settings = Abrir axustes
 general-help = Axuda
-general-tag = Tag
+general-tag = Etiqueta
+general-done = Feito
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = Informar dun erro ...
 rtfScan-wizard =
     .title = Esculcar RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Para comezar escolla abaixo un ficheiro RTF de entrada e un ficheiro de saída:
-rtfScan-input-file = Ficheiro de entrada
-rtfScan-output-file = Ficheiro de saída
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Ningún ficheiro seleccionado
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -278,7 +279,7 @@ integration-prefs-automaticCitationUpdates =
 integration-prefs-automaticCitationUpdates-description = Desactivar as actualizacións pode acelerar a introdución de citas nos documentos grandes. Preme en refrescar para actualizar as citas de xeito manual.
 integration-prefs-automaticJournalAbbeviations =
     .label = Empregar as abreviaturas de MEDLINE
-integration-prefs-automaticJournalAbbeviations-description = O campo «Abrv. Xornal» hase ignorar.
+integration-prefs-automaticJournalAbbeviations-description = O campo «Abrv. Xornal» hase ignorar. 
 integration-prefs-exportDocument =
     .label = Mudar a outro editor de textos...
 publications-intro-page =
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valor
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Imaxe
+file-type-pdf = PDF
+file-type-audio = Son
+file-type-video = Vídeo
+file-type-presentation = Presentación
+file-type-document = Documento
+file-type-ebook = Libro electrónico
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

@@ -10,7 +10,8 @@ general-remind-me-later = Remind Me Later
 general-choose-file = Välj fil...
 general-open-settings = Open Settings
 general-help = Hjälp
-general-tag = Tag
+general-tag = Etikett
+general-done = Klar
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = Rapportera felet...
 rtfScan-wizard =
     .title = RTF skanning
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Välj en RTF-fil nedan att ladda in och en att spara till:
-rtfScan-input-file = Infil
-rtfScan-output-file = Utfil
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Ingen fil vald
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -302,7 +303,7 @@ publications-sharing-keep-rights-field-where-available =
 publications-sharing-text = Du kan reservera alla rättigheter till det verk, licensiera det enligt en Creative Commons-licens eller överlämna det som allmän egendom (public domain). I samtliga fall kommer verket att vara tillgängligt för allmänheten via zotero.org.
 publications-sharing-prompt = Medger du att ditt verk delas med andra?
 publications-sharing-reserved =
-    .label = Nej, publicera mitt verk endast på zotero.org
+    .label = Nej, publicera mitt verk endast på zotero.org 
 publications-sharing-cc =
     .label = Ja, med Creative Commns-licens
 publications-sharing-cc0 =
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Bild
+file-type-pdf = PDF
+file-type-audio = Ljud
+file-type-video = Video
+file-type-presentation = Presentation
+file-type-document = Dokument
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

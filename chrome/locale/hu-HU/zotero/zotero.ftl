@@ -10,7 +10,8 @@ general-remind-me-later = Emlékeztessen később
 general-choose-file = Choose File...
 general-open-settings = Open Settings
 general-help = Súgó
-general-tag = Tag
+general-tag = Címke
+general-done = Rendben
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = Hiba bejelentése...
 rtfScan-wizard =
     .title = RTF átvizsgálása…
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = A kezdéshez, válasszon egy RTF bemeneti fájlt és egy kimenti fájlt alább:
-rtfScan-input-file = Bemeneti fájl
-rtfScan-output-file = Kimeneti fájl
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Nincs fájl kiválasztva
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -580,3 +581,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Kép
+file-type-pdf = PDF
+file-type-audio = Hang
+file-type-video = Videó
+file-type-presentation = Előadás
+file-type-document = Dokumentum
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

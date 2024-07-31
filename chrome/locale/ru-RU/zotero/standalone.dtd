@@ -56,8 +56,8 @@
 <!ENTITY recursiveCollections.label "Показывать записи из вложенных коллекций">
 <!ENTITY fontSize.label "Размер шрифта">
 <!ENTITY noteFontSize.label "Размер шрифта заметок">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Колонки">
+<!ENTITY sortBy.label "Сортировать по">
 
 <!ENTITY toolsMenu.label "Инструменты">
 <!ENTITY toolsMenu.accesskey "T">

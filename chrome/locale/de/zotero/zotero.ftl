@@ -11,6 +11,7 @@ general-choose-file = Datei auswählen...
 general-open-settings = Einstellungen öffnen
 general-help = Hilfe
 general-tag = Tag
+general-done = Erledigt
 menu-file-show-in-finder =
     .label = In Finder anzeigen
 menu-file-show-file =
@@ -163,7 +164,7 @@ file-interface-items-were-relinked =
         [one] Ein Eintrag wurde erneut verknüpft
        *[other] { $numRelinked } Einträge wurden erneut verknüpft
     }
-import-mendeley-encrypted = Die ausgewählte Mendeley-Datenbank kann nicht gelesen werden, wahrscheinlich weil sie verschlüsselt ist. Lesen Sie <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero? (Englisch)</a> für mehr Informationen.
+import-mendeley-encrypted = Die ausgewählte Mendeley-Datenbank kann nicht gelesen werden, wahrscheinlich weil sie verschlüsselt ist. Lesen Sie <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero? (Englisch)</a> für mehr Informationen. 
 file-interface-import-error-translator = Beim Importieren der ausgewählten Datei mit „{ $translator }“ ist ein Fehler aufgetreten. Bitte überprüfen Sie, ob die Datei korrekt ist, und versuchen Sie es erneut.
 import-online-intro = Im nächsten Schritt werden Sie gebeten, sich in { $targetAppOnline } einzuloggen und { -app-name } Zugriff zu gewähren. Dies ist notwendig, um Ihre { $targetApp }-Bibliothek in { -app-name } zu importieren.
 import-online-intro2 = { -app-name } wird ihr { $targetApp }-Passwort niemals sehen oder speichern.
@@ -184,10 +185,10 @@ report-error =
     .label = Fehler melden...
 rtfScan-wizard =
     .title = RTF-Scan
-rtfScan-introPage-description = { -app-name } Kann automatisch Zitationen aus einer RTF-Datei extrahieren, neu formatieren und eine Bibliographie erstellen. Wählen Sie unten eine RTF-Datei aus, um den Prozess zu beginnen.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Als ersten Schritt wählen Sie eine RTF-Datei als Input und eine Output-Datei aus:
-rtfScan-input-file = Input-Datei
-rtfScan-output-file = Output-Datei
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Keine Datei ausgewählt
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -476,7 +477,7 @@ toggle-preview =
             [open] verstecken
             [collapsed] anzeigen
            *[unknown] umschalten
-        }
+        } 
 quickformat-general-instructions =
     Die Pfeiltasten verwenden, um zwischen den Einträgen in dieser Zitation zu navigieren. { $dialogMenu ->
         [active] Shift+Tab drücken, um das Menü des Dialogs zu fokussieren
@@ -493,7 +494,7 @@ quickformat-locator-value = Fundstelle
 quickformat-citation-options =
     .tooltiptext = Zitations-Optionen anzeigen
 insert-note-aria-input = Tippen um eine Notiz zu finden. Tab drücken, um in der Ergebnisliste zu navigieren. Escape drücken, um den Dialog zu schließen.
-insert-note-aria-item = { return-or-enter } drücken, um diese Notiz auszuwählen. Tab drücken, um zurück ins Suchfeld zu wechseln. Escape, um den Dialog zu schließen.
+insert-note-aria-item =  { return-or-enter } drücken, um diese Notiz auszuwählen. Tab drücken, um zurück ins Suchfeld zu wechseln. Escape, um den Dialog zu schließen.
 quicksearch-mode =
     .aria-label = Schnellsuche-Modus
 quicksearch-input =
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Wert
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webseite
+file-type-image = Bild
+file-type-pdf = PDF
+file-type-audio = Audio
+file-type-video = Video
+file-type-presentation = Vortrag
+file-type-document = Dokument
+file-type-ebook = eBook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

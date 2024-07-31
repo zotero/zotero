@@ -10,7 +10,8 @@ general-remind-me-later = Remind Me Later
 general-choose-file = Виберіть файл...
 general-open-settings = Open Settings
 general-help = Допомога
-general-tag = Tag
+general-tag = Тег
+general-done = Готово
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = Повідомити про помилку...
 rtfScan-wizard =
     .title = Сканування RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Щоб почати, виберіть нижче вхідний файл RTF та вихідний файл:
-rtfScan-input-file = Вхідний файл
-rtfScan-output-file = Вихідний файл
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = Файл не вибрано
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = Зображення
+file-type-pdf = PDF
+file-type-audio = Аудіо
+file-type-video = Відео
+file-type-presentation = Презентація
+file-type-document = Документ
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

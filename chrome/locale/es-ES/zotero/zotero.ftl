@@ -10,7 +10,8 @@ general-remind-me-later = Recuérdamelo más tarde
 general-choose-file = Elegir archivo...
 general-open-settings = Abrir ajustes
 general-help = Ayuda
-general-tag = Tag
+general-tag = Etiqueta
+general-done = Hecho
 menu-file-show-in-finder =
     .label = Mostrar en el buscador
 menu-file-show-file =
@@ -185,10 +186,10 @@ report-error =
     .label = Informar de errores...
 rtfScan-wizard =
     .title = Escaneo RTF
-rtfScan-introPage-description = { -app-name } puede extraer y reformatear automáticamente citas e insertar una bibliografía en archivos RTF. Para empezar, elija un archivo RTF a continuación.
+rtfScan-introPage-description = { -app-name } puede extraer y reformatear automáticamente citas e insertar una bibliografía en archivos RTF. Actualmente admite citas en variaciones de los siguientes formatos:
 rtfScan-introPage-description2 = Para comenzar, seleccione a continuación un archivo de entrada RTF y un archivo de salida:
-rtfScan-input-file = Archivo de entrada
-rtfScan-output-file = Archivo de salida
+rtfScan-input-file = Archivo de entrada:
+rtfScan-output-file = Archivo de salida:
 rtfScan-no-file-selected = Ningún archivo seleccionado
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -213,9 +214,9 @@ rtfScan-complete-page =
     .label = Escaneado RTF completado
 rtfScan-complete-page-description = Su documento ha sido escaneado y procesado. Por favor, asegúrese de que esté formateado correctamente.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Seleccione el elemento correspondiente
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = Aceptar esta coincidencia
 runJS-title = Ejecutar JavaScript
 runJS-editor-label = Código:
 runJS-run = Ejecutar
@@ -578,3 +579,25 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valor
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } archivo añadido
+        [many] { $count } archivos añadidos
+       *[other] { $count } archivos añadidos
+    }
+select-items-dialog =
+    .buttonlabelaccept = Seleccionar
+file-type-webpage = Página web
+file-type-image = Imagen
+file-type-pdf = PDF
+file-type-audio = Sonido
+file-type-video = Vídeo
+file-type-presentation = Presentación
+file-type-document = Documento
+file-type-ebook = Libro electrónico
+post-upgrade-message = Más información sobre las <a data-l10n-name="new-features-link">nuevas funciones de en { -app-name } { $version }</a>
+post-upgrade-density = Elija la densidad de diseño que prefiera:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

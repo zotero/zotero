@@ -10,7 +10,8 @@ general-remind-me-later = Remind Me Later
 general-choose-file = เลือกแฟ้ม...
 general-open-settings = Open Settings
 general-help = วิธีใช้
-general-tag = Tag
+general-tag = แท็ก
+general-done = Done
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -184,10 +185,10 @@ report-error =
     .label = รายงานความผิดพลาด...
 rtfScan-wizard =
     .title = กราดตรวจ RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = เริ่มโดยเลือกแฟ้มข้อมูล RTF เพื่อนำเข้าและแฟ้มข้อมูลสำหรับส่งออก:
-rtfScan-input-file = แฟ้มนำเข้า
-rtfScan-output-file = แฟ้มส่งออก
+rtfScan-input-file = Input File:
+rtfScan-output-file = Output File:
 rtfScan-no-file-selected = ไม่มีการเลือกแฟ้ม
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -568,3 +569,24 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] { $count } file added
+       *[other] { $count } files added
+    }
+select-items-dialog =
+    .buttonlabelaccept = Select
+file-type-webpage = Webpage
+file-type-image = ภาพ
+file-type-pdf = PDF
+file-type-audio = เสียง
+file-type-video = วีดิทัศน์
+file-type-presentation = การนำเสนอ
+file-type-document = Document
+file-type-ebook = Ebook
+post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-density = Choose your preferred layout density:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }

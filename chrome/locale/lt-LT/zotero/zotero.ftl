@@ -10,7 +10,8 @@ general-remind-me-later = Priminti vėliau
 general-choose-file = Rinkmenos pasirinkimas...
 general-open-settings = Atverti nuostatas
 general-help = Žinynas
-general-tag = Tag
+general-tag = Gairė
+general-done = Atlikta
 menu-file-show-in-finder =
     .label = Rodyti ieškyklėje
 menu-file-show-file =
@@ -36,7 +37,7 @@ menu-add-child-file-attachment =
 menu-add-child-linked-file-attachment =
     .label = Pridėti nuorodą iki rinkmenos...
 menu-add-child-linked-url-attachment =
-    .label = Pridėti žiniatinklio nuorodą...
+    .label = Pridėti tinklalapio nuorodą...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -59,7 +60,7 @@ zotero-collections-search =
 zotero-collections-search-btn =
     .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
-    .placeholder = Paieškų kortelės
+    .placeholder = Kortelių paieška
 zotero-tabs-menu-close-button =
     .title = Užverti kortelę
 toolbar-add-attachment =
@@ -101,13 +102,13 @@ item-menu-add-file =
 item-menu-add-linked-file =
     .label = Susieta rinkmena
 item-menu-add-url =
-    .label = Žiniatinklio nuoroda
+    .label = Tinklalapio nuoroda
 view-online = Atverti tinklalapį
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Rinkmena pervadinta į { $filename }
 itembox-button-options =
     .tooltiptext = Atverti kontekstinį meniu
 itembox-button-merge =
@@ -155,13 +156,13 @@ file-interface-items-were-imported =
     { $numItems ->
         [0] Nebuvo ką importuoti
         [one] Importuotas vienas įrašas
-       *[other] Importuota įrašų: { $numItems }
+       *[other] Importuota įrašų: { $numItems } 
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
         [0] Nebuvo iš naujo susietų
         [one] Iš naujo susietas vienas įrašas
-       *[other] Iš naujo susieta įrašų: { $numRelinked }
+       *[other] Iš naujo susieta įrašų: { $numRelinked } 
     }
 import-mendeley-encrypted = Nepavyksta nuskaityti Mendeley duombazės, galbūt ji užšifruota. Daugiau informacijos rasite straipsnelyje <a data-l10n-name="mendeley-import-kb">Kaip importuoti Mendeley biblioteką į Zotero?</a>.
 file-interface-import-error-translator = Klaida importuojant pasirinktą rinkmeną su „{ $translator }“. Įsitikinkite, kad rinkmena yra tinkama ir bandykite iš naujo.
@@ -186,10 +187,10 @@ report-error =
     .label = Pranešti apie klaidą...
 rtfScan-wizard =
     .title = RTF peržvelgimas
-rtfScan-introPage-description = { -app-name } gali automatiškai ištraukti ir pertvarkyti citatų formatą, taip pat įterpti literatūros sąrašą į RTF rinkmenas. Norėdami pradėti, žemiau pasirinkite RTF rinkmeną.
+rtfScan-introPage-description = { -app-name } gali automatiškai aptikti citavimus, pakeisti jų formatą ir įterpti bibliografiją į raiškiojo teksto formato (RTF) dokumentus. Palaikomi įvairiausi citavimo formatai:
 rtfScan-introPage-description2 = Norėdami pradėti,  įvedimui pasirinkite RTF dokumentą ir dokumentą išvedimui:
-rtfScan-input-file = Įvedimo rinkmena
-rtfScan-output-file = Išvedimo rinkmena
+rtfScan-input-file = Įvedimo rinkmena:
+rtfScan-output-file = Išvedimo rinkmena:
 rtfScan-no-file-selected = Nepasirinkote rinkmenos
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -214,9 +215,9 @@ rtfScan-complete-page =
     .label = Raiškiojo teksto formato dokumentų peržvelgimas baigtas
 rtfScan-complete-page-description = Jūsiškis dokumentas peržvelgtas ir apdorotas. Pažiūrėkite, ar jis tinkamai suformatuotas.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Pasirinkti atitinkantį įrašą
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = Patvirtinti šį atitikmenį
 runJS-title = Paleisti JavaScript
 runJS-editor-label = Kodas:
 runJS-run = Vykdyti
@@ -410,11 +411,11 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .dynamic-tooltiptext = Expand section
-    .label = Expand { $section } section
+    .dynamic-tooltiptext = Išskleisti lauką
+    .label = Išskleisti lauką „{ $section }“
 section-button-collapse =
-    .dynamic-tooltiptext = Collapse section
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = Suskleisti lauką
+    .label = Suskleisti lauką „{ $section }“
 annotations-count =
     { $count ->
         [one] { $count } anotacija
@@ -448,13 +449,13 @@ sidenav-tags =
 sidenav-related =
     .tooltiptext = { pane-related }
 pin-section =
-    .label = Pin Section
+    .label = Prisegti lauką
 unpin-section =
-    .label = Unpin Section
+    .label = Atsegti lauką
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Suskleisti kitus laukus
 expand-all-sections =
-    .label = Expand All Sections
+    .label = Išskleisti visus laukus
 abstract-field =
     .placeholder = Pridėti santrauką...
 tag-field =
@@ -500,12 +501,12 @@ quickformat-aria-item = Paspaudę { return-or-enter } pridėsite šį įrašą p
 quickformat-accept =
     .tooltiptext = Išsaugoti šio citavimo pakeitimus
 quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
+    .aria-label = Ieškiklio tipas
+quickformat-locator-value = Ieškiklis
 quickformat-citation-options =
     .tooltiptext = Rodyti citavimo parinktis
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+insert-note-aria-input = Norėdami ieškoti pastabos, tiesiog rašykite čia. Pereiti per rezultatus galėsite naudodami Tab. Norėdami užverti, spauskite Gr(įžties) klavišą.
+insert-note-aria-item = Norėdami pasirinkti šią pastabą, spauskite { return-or-enter }. Paspaudę Tab grįšite į paieškos lauką. Norėdami užverti, spauskite Gr(įžties) klavišą.
 quicksearch-mode =
     .aria-label = Greitosios paieškos veiksena
 quicksearch-input =
@@ -532,32 +533,42 @@ item-pane-message-items-selected =
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [one] Pasirinktas { $count } rinkinys
+        [few] Pasirinkti { $count } rinkiniai
+        [many] Pasirinkta { $count } rinkinių
+       *[other] Pasirinktas { $count } rinkinys
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [one] Pasirinkta { $count } paieška
+        [few] Pasirinktos { $count } paieškos
+        [many] Pasirinkta { $count } paieškų
+       *[other] Pasirinkta { $count } paieška
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [one] Pasirinktas { $count } objektas
+        [few] Pasirinkti { $count } objektai
+        [many] Pasirinkta { $count } objektų
+       *[other] Pasirinktas { $count } objektas
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] Šiame rodinyje įrašų nėra
+        [one] { $count } įrašas šiame rodinyje
+        [few] { $count } įrašai šiame rodinyje
+        [many] { $count } įrašų šiame rodinyje
+       *[other] { $count } įrašas šiame rodinyje
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] Apjungti { $count } įrašą
+            [few] Apjungti { $count } įrašus
+            [many] Apjungti { $count } įrašų
+           *[other] Apjungti { $count } įrašus
         }
-locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
+locate-library-lookup-no-resolver = Jums reikia { -app-name } nuostatų { $pane } skydelyje pasirinkti sprendiklį.
 architecture-win32-warning-message = { -app-name } paleista 32 bitų veiksenoje 64 bitų Windows sistemoje. { -app-name } veiks veiksmingiau 64 bitų veiksenoje.
 architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
 first-run-guidance-quickFormat =
@@ -575,8 +586,31 @@ advanced-search-conditions-menu =
     .aria-label = Paieškos sąlyga
     .label = { $label }
 advanced-search-operators-menu =
-    .aria-label = Operator
+    .aria-label = Operatorius
     .label = { $label }
 advanced-search-condition-input =
     .aria-label = Reikšmė
     .label = { $label }
+find-pdf-files-added =
+    { $count ->
+        [one] Pridėta { $count } rinkmena
+        [few] Pridėta { $count } rinkmenos
+        [many] Pridėta { $count } rinkmenų
+       *[other] Pridėta { $count } rinkmena
+    }
+select-items-dialog =
+    .buttonlabelaccept = Pasirinkti
+file-type-webpage = Tinklalapis
+file-type-image = paveikslą
+file-type-pdf = PDF
+file-type-audio = Garsas
+file-type-video = Vaizdas
+file-type-presentation = Pateiktis
+file-type-document = Dokumentas
+file-type-ebook = El. knyga
+post-upgrade-message = Sužinokite apie <a data-l10n-name="new-features-link">naujas { -app-name } { $version } galimybes</a>
+post-upgrade-density = Pasirinkite pageidaujamą išdėstymo tankumą:
+post-upgrade-remind-me-later =
+    .label = { general-remind-me-later }
+post-upgrade-done =
+    .label = { general-done }
