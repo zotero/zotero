@@ -1005,9 +1005,12 @@ function importFileAttachment(filename, options = {}) {
 		parentItemID: options.parentID,
 	};
 	Object.assign(importOptions, options);
-	// Override default behavior - don't set title based on type,
-	// just use extension-less leafName
-	if (!('title' in importOptions)) {
+	// If the caller didn't pass anything as title (null counts as something),
+	// override default Zotero.Attachments.importFromFile() behavior - don't
+	// set the title based on the attachment type and existing attachments,
+	// just use the extension-less leafName. Makes titles deterministic and not
+	// dependent on existing attachments, which is better for tests.
+	if (importOptions.title === undefined) {
 		importOptions.title = file.leafName.replace(/\.[^.]+$/, '');
 	}
 	return Zotero.Attachments.importFromFile(importOptions);
