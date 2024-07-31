@@ -2794,6 +2794,11 @@ Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
 	if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		throw new Error("Zotero.Item.fileExists() cannot be called on link attachments");
 	}
+
+	// Allow unsaved items to be checked, used by conflict-resolution window
+	if (!this.key) {
+		return false;
+	}
 	
 	return !!(yield this.getFilePathAsync());
 });
