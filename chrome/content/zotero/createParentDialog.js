@@ -25,8 +25,11 @@
 
 "use strict";
 
+import ReactDOM from "react-dom";
+
 var io;
 let createParent;
+let root;
 
 function toggleAccept(enabled) {
 	document.querySelector('dialog').getButton("accept").disabled = !enabled;
@@ -40,7 +43,8 @@ function doLoad() {
 	io = window.arguments[0];
 
 	createParent = document.getElementById('create-parent');
-	Zotero.CreateParent.render(createParent, {
+	root = ReactDOM.createRoot(createParent);
+	Zotero.CreateParent.render(root, {
 		loading: false,
 		item: io.dataIn.item,
 		toggleAccept
@@ -54,7 +58,7 @@ function doLoad() {
 }
 
 function doUnload() {
-	Zotero.CreateParent.destroy(createParent);
+	root.unmount();
 }
 
 async function doAccept() {
@@ -65,7 +69,7 @@ async function doAccept() {
 		childItem,
 		(on) => {
 			// Render react again with correct loading value
-			Zotero.CreateParent.render(createParent, {
+			Zotero.CreateParent.render(root, {
 				loading: on,
 				item: childItem,
 				toggleAccept
