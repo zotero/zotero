@@ -527,9 +527,11 @@ item-pane-header-more-options =
     .label = Daugiau parinkčių
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] Nepasirinktas nei vienas
+        [one] Pasirinktas { $count } įrašas
+        [few] Pasirinkti { $count } įrašai
+        [many] Pasirinkta { $count } įrašų
+       *[other] Pasirinktas { $count } įrašas
     }
 item-pane-message-collections-selected =
     { $count ->

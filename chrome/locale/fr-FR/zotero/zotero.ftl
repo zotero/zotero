@@ -329,7 +329,7 @@ publications-buttons-next-sharing =
     .label = Suivant : partager
 publications-buttons-next-choose-license =
     .label = Choisir une licence
-licenses-cc-0 = Versement au domaine public en vertu de CC0 1.0 Universel. 
+licenses-cc-0 = Versement au domaine public en vertu de CC0 1.0 Universel.
 licenses-cc-by = Licence Creative Commons Attribution 4.0 International
 licenses-cc-by-nd = Licence Creative Commons Attribution - Pas de modification 4.0 International
 licenses-cc-by-sa = Licence Creative Commons Attribution - Partage dans les mêmes conditions 4.0 International
@@ -407,10 +407,10 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Développer la section
-    .label = Développer la section { $section } 
+    .label = Développer la section { $section }
 section-button-collapse =
     .dynamic-tooltiptext = Réduire la section
-    .label = Réduire la section { $section } 
+    .label = Réduire la section { $section }
 annotations-count =
     { $count ->
         [one] { $count } annotation
@@ -491,7 +491,7 @@ quickformat-general-instructions =
     } Appuyez sur { return-or-enter } pour enregistrer les modifications de cette citation. Appuyez sur Échap pour annuler les modifications et fermer la fenêtre.
 quickformat-aria-bubble = Ce document est inclus dans la citation. Appuyez sur la barre d'espace pour personnaliser ce document. { quickformat-general-instructions }
 quickformat-aria-input = Commencez la saisie pour rechercher un document à ajouter dans cette citation. Appuyez sur "Tabulation" pour naviguer dans la liste des résultats de recherche. { quickformat-general-instructions }
-quickformat-aria-item = Appuyez sur { return-or-enter } pour ajouter ce document à la citation. Appuyez sur Tab pour revenir au champ de recherche. 
+quickformat-aria-item = Appuyez sur { return-or-enter } pour ajouter ce document à la citation. Appuyez sur Tab pour revenir au champ de recherche.
 quickformat-accept =
     .tooltiptext = Enregistrer les modifications de cette citation
 quickformat-locator-type =

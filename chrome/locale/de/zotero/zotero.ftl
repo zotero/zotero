@@ -164,7 +164,7 @@ file-interface-items-were-relinked =
         [one] Ein Eintrag wurde erneut verknüpft
        *[other] { $numRelinked } Einträge wurden erneut verknüpft
     }
-import-mendeley-encrypted = Die ausgewählte Mendeley-Datenbank kann nicht gelesen werden, wahrscheinlich weil sie verschlüsselt ist. Lesen Sie <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero? (Englisch)</a> für mehr Informationen. 
+import-mendeley-encrypted = Die ausgewählte Mendeley-Datenbank kann nicht gelesen werden, wahrscheinlich weil sie verschlüsselt ist. Lesen Sie <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero? (Englisch)</a> für mehr Informationen.
 file-interface-import-error-translator = Beim Importieren der ausgewählten Datei mit „{ $translator }“ ist ein Fehler aufgetreten. Bitte überprüfen Sie, ob die Datei korrekt ist, und versuchen Sie es erneut.
 import-online-intro = Im nächsten Schritt werden Sie gebeten, sich in { $targetAppOnline } einzuloggen und { -app-name } Zugriff zu gewähren. Dies ist notwendig, um Ihre { $targetApp }-Bibliothek in { -app-name } zu importieren.
 import-online-intro2 = { -app-name } wird ihr { $targetApp }-Passwort niemals sehen oder speichern.
@@ -477,7 +477,7 @@ toggle-preview =
             [open] verstecken
             [collapsed] anzeigen
            *[unknown] umschalten
-        } 
+        }
 quickformat-general-instructions =
     Die Pfeiltasten verwenden, um zwischen den Einträgen in dieser Zitation zu navigieren. { $dialogMenu ->
         [active] Shift+Tab drücken, um das Menü des Dialogs zu fokussieren
@@ -494,7 +494,7 @@ quickformat-locator-value = Fundstelle
 quickformat-citation-options =
     .tooltiptext = Zitations-Optionen anzeigen
 insert-note-aria-input = Tippen um eine Notiz zu finden. Tab drücken, um in der Ergebnisliste zu navigieren. Escape drücken, um den Dialog zu schließen.
-insert-note-aria-item =  { return-or-enter } drücken, um diese Notiz auszuwählen. Tab drücken, um zurück ins Suchfeld zu wechseln. Escape, um den Dialog zu schließen.
+insert-note-aria-item = { return-or-enter } drücken, um diese Notiz auszuwählen. Tab drücken, um zurück ins Suchfeld zu wechseln. Escape, um den Dialog zu schließen.
 quicksearch-mode =
     .aria-label = Schnellsuche-Modus
 quicksearch-input =
