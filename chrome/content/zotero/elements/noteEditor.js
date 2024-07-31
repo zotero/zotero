@@ -50,7 +50,6 @@
 					</div>
 				</box>
 				<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-					<tooltip id="html-tooltip" page="true"/>
 					<menupopup id="editor-menu"/>					
 				</popupset>
 			`, ['chrome://zotero/locale/zotero.dtd']);

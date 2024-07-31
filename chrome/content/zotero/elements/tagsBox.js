@@ -32,7 +32,6 @@
 					<html:div class="body">
 						<html:div id="rows" class="tags-box-list"/>
 						<popupset>
-							<tooltip id="html-tooltip" page="true"/>
 							<menupopup id="tags-context-menu">
 								<menuitem id="remove-all-item-tags" label="&zotero.item.tags.removeAll;"/>
 							</menupopup>
