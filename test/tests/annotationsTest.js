@@ -420,6 +420,7 @@ describe("Create a note from annotations from multiple items and attachments", f
 	});
 
 	it("should create a note from multiple PDF files containing single annotation", async function () {
+		Zotero.Debug.init(1);
 		let annotations = [];
 		let item = await createDataObject('item', { setTitle: true });
 		let attachment1 = await importPDFAttachment(item);
@@ -429,6 +430,8 @@ describe("Create a note from annotations from multiple items and attachments", f
 		let annotation2 = await createAnnotation('highlight', attachment2);
 		annotations.push(annotation2);
 		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
+		Zotero.debug('=-=-=-=');
+		Zotero.debug(note.note);
 		assert.equal(note.note.split('test').length - 1, 2);
 		assert.equal(note.note.split('>' + item.getField('title') + '<').length - 1, 0);
 		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
