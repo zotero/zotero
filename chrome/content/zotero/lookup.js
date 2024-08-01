@@ -160,18 +160,16 @@ var Zotero_Lookup = new function () {
 			button = document.getElementById("zotero-tb-lookup");
 		}
 		panel.openPopup(button, "after_start", 0, 0, false, false);
-	}
+	};
 	
-	this.onFocusOut = function(event) {
+	this.onFocusOut = function (event) {
+		// If the lookup popup was triggered by the lookup button,
+		// we want to return there on focus out. So we check
+		// (1) that we came from a button and (2) that
+		// event.relatedTarget === null, i.e. that the user hasn't used
+		// the mouse or keyboard to select something, and focus is leaving
+		// the popup because the popup was hidden/dismissed.
 
-		/*
-			if the lookup popup was triggered by the lookup button,
-			we want to return there on focus out. So we check 
-			(1) that we came from a button and (2) that
-			event.relatedTarget === null, i.e. that the user hasn't used
-			the mouse or keyboard to select something, and focus is leaving
-			the popup because the popup was hidden/dismissed.
-		*/
 		if (this._button && event.relatedTarget === null) {
 			event.preventDefault();
 			event.stopPropagation();
@@ -181,7 +179,7 @@ var Zotero_Lookup = new function () {
 		else {
 			this._button = null;
 		}
-	}
+	};
 	
 	
 	/**
@@ -192,7 +190,7 @@ var Zotero_Lookup = new function () {
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
 		this.getActivePanel().querySelector('textarea').focus();
-	}
+	};
 	
 	
 	/**
@@ -207,14 +205,14 @@ var Zotero_Lookup = new function () {
 		
 		// Revert to single-line when closing
 		this.setMultiline(false);
-	}
+	};
 	
 	
 	this.getActivePanel = function() {
 		var mlPanel = document.getElementById("zotero-lookup-multiline");
 		if (mlPanel.hidden) return document.getElementById("zotero-lookup-singleLine");
 		return mlPanel;
-	}
+	};
 	
 	
 	this.handleToolbarButtonMouseDown = function (event) {
@@ -223,7 +221,7 @@ var Zotero_Lookup = new function () {
 			event.preventDefault();
 			return;
 		}
-		this.showPanel(button)
+		this.showPanel(button);
 	};
 	
 	
@@ -235,17 +233,19 @@ var Zotero_Lookup = new function () {
 		//use enter to start search, shift+enter to insert a new line. Flipped in multiline mode
 		var multiline = textBox.rows > 1;
 		var search = multiline ? event.shiftKey : !event.shiftKey;
-		if(keyCode === 13 || keyCode === 14) {
-			if(search) {
+		if (keyCode === 13 || keyCode === 14) {
+			if (search) {
 				Zotero_Lookup.accept(textBox);
 				event.preventDefault();
-			} else if(!multiline) {	// switch to multiline
+			}
+			else if (!multiline) {	// switch to multiline
 				Zotero_Lookup.setMultiline(true);
 			}
-		} else if(keyCode == event.DOM_VK_ESCAPE) {
+		}
+		else if (keyCode == event.DOM_VK_ESCAPE) {
 			document.getElementById("zotero-lookup-panel").hidePopup();
 		}
-	}
+	};
 	
 	
 	this.onInput = function (event, textBox) {
@@ -279,4 +279,4 @@ var Zotero_Lookup = new function () {
 		}
 		p.hidden = !on;
 	};
-}
+};
