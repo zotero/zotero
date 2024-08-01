@@ -159,7 +159,7 @@ var Zotero_Lookup = new function () {
 		if (!button) {
 			button = document.getElementById("zotero-tb-lookup");
 		}
-		panel.openPopup(button, "after_start", 16, -2, false, false);
+		panel.openPopup(button, "after_start", 0, 0, false, false);
 	}
 	
 	this.onFocusOut = function(event) {
