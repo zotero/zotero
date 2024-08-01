@@ -9,8 +9,6 @@
     "chrome/content/zotero/xpcom/citeproc.js",
     "chrome/content/ace/*",
     "chrome/content/scaffold/templates/*",
-    "resource/react.js",
-    "resource/react-dom.js",
     "resource/react-virtualized.js",
     "test/resource/*.js"
   ],

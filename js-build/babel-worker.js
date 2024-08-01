@@ -30,19 +30,8 @@ async function babelWorker(ev) {
 
 	try {
 		let contents = await fs.readFile(sourcefile, 'utf8');
-		// Patch react
-		if (comparePaths(sourcefile, 'resource/react.js')) {
-			transformed = contents.replace('instanceof Error', '.constructor.name == "Error"')
-		}
-		// Patch react-dom
-		else if (comparePaths(sourcefile, 'resource/react-dom.js')) {
-			transformed = contents.replace(/ ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(HTML_NAMESPACE, $1)')
-				.replace('element instanceof win.HTMLIFrameElement',
-					'typeof element != "undefined" && element.tagName.toLowerCase() == "iframe"')
-				.replace("isInputEventSupported = false", 'isInputEventSupported = true');
-		}
 		// Patch react-virtualized
-		else if (comparePaths(sourcefile, 'resource/react-virtualized.js')) {
+		if (comparePaths(sourcefile, 'resource/react-virtualized.js')) {
 			transformed = contents.replace('scrollDiv = document.createElement("div")', 'scrollDiv = document.createElementNS("http://www.w3.org/1999/xhtml", "div")')
 				.replace('document.body.appendChild(scrollDiv)', 'document.documentElement.appendChild(scrollDiv)')
 				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');

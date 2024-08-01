@@ -26,14 +26,12 @@ const copyDirs = [
 // list of files from root folder to symlink
 const symlinkFiles = [
 	'chrome.manifest',
-	// React needs to be patched by babel-worker.js, so symlink all files in resource/ except for
-	// those. Babel transpilation for React is still disabled in .babelrc.
+	// react-virtualized needs to be patched by babel-worker.js, so symlink all files in resource/ except for
+	// those. Babel transpilation is still disabled in .babelrc.
 	'resource/**/*',
-	'!resource/react.js',
-	'!resource/react-dom.js',
 	'!resource/react-virtualized.js',
 	// Only include dist directory of singleFile
-	// Also do a little bit of manipulation similar to React
+	// Also do a little bit of manipulation similar to react-virtualized
 	'!resource/SingleFile/**/*',
 	'resource/SingleFile/lib/**/*',
 	'!resource/SingleFile/lib/single-file.js',
@@ -116,9 +114,7 @@ const jsFiles = [
 	`{${dirs.join(',')}}/**/*.jsx`,
 	`!{${symlinkDirs.concat(copyDirs).join(',')}}/**/*.js`,
 	`!{${symlinkDirs.concat(copyDirs).join(',')}}/**/*.jsx`,
-	// Special handling for React -- see note above
-	'resource/react.js',
-	'resource/react-dom.js',
+	// Special handling for react-virtualized and others -- see note above
 	'resource/react-virtualized.js',
 	'resource/SingleFile/lib/single-file.js',
 	'resource/citeproc_rs_wasm.js',
