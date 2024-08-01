@@ -136,7 +136,9 @@
 		}
 
 		_handleTabClose(action, type, ids) {
-			this._removeItemContext(ids[0]);
+			for (let id of ids) {
+				this._removeItemContext(id);
+			}
 			if (Zotero_Tabs.deck.children.length == 1) {
 				Array.from(this._notesPaneDeck.children).forEach(x => x.notesList.expanded = false);
 			}
