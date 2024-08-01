@@ -56,12 +56,13 @@ function CreateParent({ loading, item, toggleAccept }) {
 				<input
 					id="parent-item-identifier"
 					size="50"
-					disabled={ loading }
-					onChange={ handleInput }
+					autoFocus={true}
+					disabled={loading}
+					onChange={handleInput}
 				/>
 				<div
 					mode="undetermined"
-					className={ cx('downloadProgress', { hidden: !loading }) }
+					className={cx('downloadProgress', { hidden: !loading })}
 				>
 					<div className="progress-bar"></div>
 				</div>
