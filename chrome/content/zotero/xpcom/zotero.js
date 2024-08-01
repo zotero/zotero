@@ -1350,7 +1350,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 
 	this.isWin64EmulatedOnArm = function () {
-		if (!Services.sysinfo.getProperty("name").match(/Windows/)) {
+		if (!this.isWin) {
 			return false;
 		}
 
@@ -1359,7 +1359,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			return false;
 		}
 
-		if (Zotero.arch !== "x86_64") {
+		if (this.arch !== "x86_64") {
 			// We only check if x86_64 build is running on ARM
 			return false;
 		}
