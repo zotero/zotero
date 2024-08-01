@@ -219,7 +219,11 @@ Zotero_Preferences.General = {
 	
 	setAutoRenameFileTypes: function () {
 		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
-		let enabledTypes = new Set(Zotero.Prefs.get('autoRenameFiles.fileTypes').split(','));
+		let enabledTypes = new Set(
+			Zotero.Prefs.get('autoRenameFiles.fileTypes')
+				.split(',')
+				.filter(Boolean)
+		);
 		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
 			if (checkbox.checked) {
 				enabledTypes.add(checkbox.dataset.contentType);
