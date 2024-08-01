@@ -1,4 +1,4 @@
-#post-upgrade-banner, #retracted-items-banner, #sync-reminder-banner {
+#post-upgrade-banner, #retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner {
 	@include macOS-normalize-controls;
 
 	display: flex;
@@ -60,7 +60,7 @@
 	}
 }
 
-#retracted-items-banner, #sync-reminder-banner {
+#retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner {
 	line-height: 2.2em;
 	font-size: 13.5px;
 	padding: 0 2em;
@@ -108,5 +108,26 @@
 		&:active {
 			color: #4b4b4b;
 		}
+	}
+}
+
+#architecture-warning-container {
+	background-color: var(--accent-red);
+	color: white;
+
+	.message {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+
+	a {
+		border: none;
+		color: inherit;
+		margin: 0;
+		padding: 0 .5em;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 }

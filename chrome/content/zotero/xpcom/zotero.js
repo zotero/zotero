@@ -43,7 +43,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 /*
  * Core functions
  */
- (function(){
+ (function() {
 	// Privileged (public) methods
 	this.getStorageDirectory = getStorageDirectory;
 	this.debug = debug;
@@ -1348,7 +1348,49 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		return errors;
 	}
-	
+
+	this.isWin64EmulatedOnArm = function () {
+		if (!this.isWin) {
+			return false;
+		}
+
+		if (Services.sysinfo.getProperty("build") < 22000) {
+			// GetMachineTypeAttributes is only available on Windows 11 and later
+			return false;
+		}
+
+		if (this.arch !== "x86_64") {
+			// We only check if x86_64 build is running on ARM
+			return false;
+		}
+
+		// https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ne-processthreadsapi-machine_attributes
+		const userEnabled = 0x00000001;
+
+		let { ctypes } = ChromeUtils.importESModule(
+			"resource://gre/modules/ctypes.sys.mjs"
+		);
+		try {
+			// https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getmachinetypeattributes
+			let kernel32 = ctypes.open("Kernel32");
+			let getMachineTypeAttributesC = kernel32.declare(
+				"GetMachineTypeAttributes",
+				ctypes.winapi_abi,
+				ctypes.int,
+				ctypes.unsigned_short,
+				ctypes.int.ptr
+			);
+			let aa64 = 0xaa64;
+			let output = ctypes.int();
+			getMachineTypeAttributesC(aa64, output.address());
+			kernel32.close();
+			return !!(output.value & userEnabled);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+	}
 	
 	/**
 	 * Get versions, platform, etc.
@@ -1367,7 +1409,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		if (Zotero.isWin) {
 			let info = await Services.sysinfo.processInfo;
-			if (info.isWowARM64) {
+			if (info.isWowARM64 || this.isWin64EmulatedOnArm()) {
 				version += " on ARM64";
 			}
 			else if (info.isWow64) {

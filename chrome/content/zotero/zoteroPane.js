@@ -6115,19 +6115,30 @@ var ZoteroPane = new function()
 
 	this.showArchitectureWarning = async function () {
 		const remindInterval = 60 * 60 * 24 * 30;
-		const isWow64 = (await Services.sysinfo.processInfo).isWow64;
-		const is32bitBuild = Zotero.arch === 'x86';
 		const lastDisplayed = Zotero.Prefs.get('architecture.warning.lastDisplayed') ?? 0;
 		
 		if (lastDisplayed > Math.round(Date.now() / 1000) - remindInterval) {
 			return;
 		}
-
-		if (Zotero.isWin && isWow64 && is32bitBuild) {
+		
+		const isWow64 = (await Services.sysinfo.processInfo).isWow64;
+		const isX64OnArm = Zotero.isWin64EmulatedOnArm();
+		
+		if (Zotero.isWin && (isWow64 || isX64OnArm)) {
 			let panel = document.getElementById('architecture-warning-container');
 			let action = document.getElementById('architecture-warning-action');
 			let close = document.getElementById('architecture-warning-close');
 			let remind = document.getElementById('architecture-warning-remind');
+			let message = document.getElementById('architecture-warning-message');
+
+			if (isWow64) {
+				message.dataset.l10nId = 'architecture-win32-warning-message';
+				action.dataset.l10nId = 'architecture-warning-action';
+			}
+			else if (isX64OnArm) {
+				message.dataset.l10nId = 'architecture-x64-on-arm64-message';
+				action.dataset.l10nId = 'architecture-x64-on-arm64-action';
+			}
 			
 			panel.removeAttribute('collapsed');
 			action.onclick = function () {
