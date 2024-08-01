@@ -83,7 +83,8 @@ var doLoad = async function () {
 		dragAndDrop: false,
 		persistColumns: true,
 		columnPicker: true,
-		emptyMessage: Zotero.getString('pane.items.loading')
+		emptyMessage: Zotero.getString('pane.items.loading'),
+		multiSelect: !io.singleSelection
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
@@ -168,6 +169,14 @@ function onSearch()
 function onItemSelected()
 {
 	itemsView.runListeners('select');
+	if (io.onlyRegularItems) {
+		// Disable "accept" button if not a top level item is selected
+		let selected = itemsView.getSelectedItems();
+		let disableAccept = (selected && !selected.every(item => item.isRegularItem()));
+		// Temp. Disable the button directly only as long as we move the button box in doLoad().
+		// Then, we should set buttondisabledaccept attribute on the dialog
+		document.querySelector("dialog button[dlgtype='accept']").setAttribute("disabled", disableAccept);
+	}
 }
 
 function doAccept() {

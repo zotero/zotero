@@ -117,6 +117,8 @@ item-menu-add-linked-file =
      .label = Linked File
 item-menu-add-url =
      .label = Web Link
+item-menu-change-parent-item =
+     .label = Move to Parent
 
 view-online = View Online
 item-menu-option-view-online =
