@@ -1386,7 +1386,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			kernel32.close();
 			return !!(output.value & userEnabled);
 		}
-		catch (ex) {
+		catch (e) {
+			Zotero.logError(e);
 			return false;
 		}
 	}

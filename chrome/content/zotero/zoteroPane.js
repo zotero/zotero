@@ -6115,14 +6115,15 @@ var ZoteroPane = new function()
 
 	this.showArchitectureWarning = async function () {
 		const remindInterval = 60 * 60 * 24 * 30;
-		const isWow64 = (await Services.sysinfo.processInfo).isWow64;
-		const isX64OnArm = Zotero.isWin64EmulatedOnArm();
 		const lastDisplayed = Zotero.Prefs.get('architecture.warning.lastDisplayed') ?? 0;
 		
 		if (lastDisplayed > Math.round(Date.now() / 1000) - remindInterval) {
 			return;
 		}
-
+		
+		const isWow64 = (await Services.sysinfo.processInfo).isWow64;
+		const isX64OnArm = Zotero.isWin64EmulatedOnArm();
+		
 		if (Zotero.isWin && (isWow64 || isX64OnArm)) {
 			let panel = document.getElementById('architecture-warning-container');
 			let action = document.getElementById('architecture-warning-action');
