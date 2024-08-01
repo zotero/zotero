@@ -106,15 +106,14 @@
 			let imageAnnotationRendered = false;
 			for (let annotation of this._annotationItems) {
 				if (!imageAnnotationRendered
-					&& annotation.annotationType === 'image'
-					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+						&& annotation.annotationType === 'image'
+						&& !await Zotero.Annotations.hasCacheImage(annotation)) {
 					try {
 						await Zotero.PDFWorker.renderAttachmentAnnotations(annotation.parentID);
 						imageAnnotationRendered = true;
 					}
 					catch (e) {
-						Zotero.debug(e);
-						throw e;
+						Zotero.logError(e);
 					}
 				}
 				this.addRow(annotation);
