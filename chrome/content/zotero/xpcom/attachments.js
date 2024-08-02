@@ -2503,6 +2503,12 @@ Zotero.Attachments = new function () {
 	};
 	
 	
+	this.shouldAutoRenameAttachment = function (attachment) {
+		return Zotero.Attachments.shouldAutoRenameFile(attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)
+			&& Zotero.Attachments.isRenameAllowedForType(attachment.attachmentContentType);
+	};
+	
+	
 	this.getRenamedFileBaseNameIfAllowedType = async function (parentItem, file) {
 		var contentType = file.endsWith('.pdf')
 			// Don't bother reading file if there's a .pdf extension
