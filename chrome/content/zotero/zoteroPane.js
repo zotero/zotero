@@ -5342,12 +5342,24 @@ var ZoteroPane = new function()
 			}
 		}
 
-		await Zotero.DB.executeTransaction(async () => {
-			for (let item of items) {
-				item.setAutoAttachmentTitle();
-				await item.save();
+		for (let item of items) {
+			if (Zotero.Attachments.shouldAutoRenameFile(item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
+				let path = item.getFilePath();
+				if (!path) {
+					Zotero.debug('No path for attachment ' + item.key);
+					continue;
+				}
+				let ext = Zotero.File.getExtension(path);
+				let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(item.parentItem, { attachmentTitle: item.getField('title') });
+				let newName = fileBaseName + (ext ? '.' + ext : '');
+				let result = await item.renameAttachmentFile(newName, false, true);
+				if (result !== true) {
+					throw new Error('Error renaming ' + path);
+				}
+				item.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+				await item.saveTx();
 			}
-		});
+		}
 	};
 	
 	
