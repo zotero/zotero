@@ -238,7 +238,7 @@ describe("Document Recognition", function() {
 		
 		it("should rename a linked file attachment using parent metadata if no existing file attachments and pref enabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', true);
-			var itemTitle = Zotero.Utilities.randomString();;
+			var itemTitle = Zotero.Utilities.randomString();
 			Zotero.RecognizeDocument.recognizeStub = async function () {
 				return createDataObject('item', { title: itemTitle });
 			};
@@ -279,10 +279,44 @@ describe("Document Recognition", function() {
 				Zotero.getString('file-type-pdf')
 			);
 		});
-		
+
+		it("shouldn't rename or change the title of a file attachment with a disabled type", async function () {
+			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'x-nonexistent/type');
+			
+			var itemTitle = Zotero.Utilities.randomString();
+			Zotero.RecognizeDocument.recognizeStub = async function () {
+				return createDataObject('item', { title: itemTitle });
+			};
+
+			var attachment = await importPDFAttachment();
+			assert.equal(attachment.getField('title'), 'test');
+
+			win.ZoteroPane.recognizeSelected();
+
+			var addedIDs = await waitForItemEvent("add");
+			var modifiedIDs = await waitForItemEvent("modify");
+			assert.lengthOf(addedIDs, 1);
+			var item = Zotero.Items.get(addedIDs[0]);
+			assert.equal(item.getField("title"), itemTitle);
+			assert.lengthOf(modifiedIDs, 2);
+
+			// Wait for status to show as complete
+			var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xhtml")[0];
+			var completeStr = Zotero.getString("general.finished");
+			while (progressWindow.document.getElementById("label").value != completeStr) {
+				await Zotero.Promise.delay(20);
+			}
+
+			// The file should not have been renamed
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+
+			// The title should not have changed
+			assert.equal(attachment.getField('title'), 'test');
+		});
+
 		it("shouldn't rename a linked file attachment using parent metadata if pref disabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', false);
-			var itemTitle = Zotero.Utilities.randomString();;
+			var itemTitle = Zotero.Utilities.randomString();
 			Zotero.RecognizeDocument.recognizeStub = async function () {
 				return createDataObject('item', { title: itemTitle });
 			};
