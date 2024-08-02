@@ -1,1 +1,1 @@
-../node_modules/react-intl/dist/react-intl.js
+../node_modules/react-intl/dist/react-intl.min.js
