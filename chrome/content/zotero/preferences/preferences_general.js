@@ -236,15 +236,15 @@ Zotero_Preferences.General = {
 	},
 	
 	updateAutoRenameFilesUI: function () {
-		setTimeout(() => {
-			document.getElementById('rename-linked-files').disabled = !Zotero.Prefs.get('autoRenameFiles');
-		});
+		let disabled = !Zotero.Prefs.get('autoRenameFiles');
 		
 		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
 		let enabledTypes = Zotero.Prefs.get('autoRenameFiles.fileTypes').split(',');
 		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
 			checkbox.checked = enabledTypes.includes(checkbox.dataset.contentType);
+			checkbox.disabled = disabled;
 		}
+		document.getElementById('rename-linked-files').disabled = disabled;
 	},
 	
 	//
