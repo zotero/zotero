@@ -292,7 +292,7 @@ Zotero.RecognizeDocument = new function () {
 		var originalFilename = PathUtils.filename(path);
 		
 		// Rename attachment file to match new metadata
-		if (Zotero.Attachments.shouldAutoRenameFile(attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
+		if (Zotero.Attachments.shouldAutoRenameAttachment(attachment)) {
 			let ext = Zotero.File.getExtension(path);
 			let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: originalTitle });
 			let newName = fileBaseName + (ext ? '.' + ext : '');
@@ -300,11 +300,9 @@ Zotero.RecognizeDocument = new function () {
 			if (result !== true) {
 				throw new Error("Error renaming " + path);
 			}
+			attachment.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+			await attachment.saveTx();
 		}
-		
-		// Rename attachment title
-		attachment.setAutoAttachmentTitle();
-		await attachment.saveTx();
 
 		try {
 			let win = Zotero.getMainWindow();

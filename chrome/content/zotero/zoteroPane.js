@@ -5343,7 +5343,7 @@ var ZoteroPane = new function()
 		}
 
 		for (let item of items) {
-			if (Zotero.Attachments.shouldAutoRenameFile(item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
+			if (Zotero.Attachments.shouldAutoRenameAttachment(item)) {
 				let path = item.getFilePath();
 				if (!path) {
 					Zotero.debug('No path for attachment ' + item.key);

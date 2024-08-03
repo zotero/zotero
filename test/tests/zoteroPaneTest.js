@@ -1698,7 +1698,26 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
 		});
 
-		it("should not rename a linked attachment or set an automatic title when linked file renaming disabled", async function () {
+		it("shouldn't rename or change the title of an attachment with a disabled type", async function () {
+			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'x-nonexistent/type');
+
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.linkFromFile({
+				file,
+				title: 'Attachment title'
+			});
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+
+			let parent = await createParent();
+			assert.equal(attachment.parentItem, parent);
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+			assert.equal(attachment.getField('title'), 'Attachment title');
+
+			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
+		});
+
+		it("shouldn't rename a linked attachment or set an automatic title when linked file renaming disabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', false);
 			
 			let file = getTestDataDirectory();
