@@ -184,10 +184,10 @@ report-error =
     .label = 报告软件缺陷…
 rtfScan-wizard =
     .title = RTF 扫描
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } 可以自动提取和重新格式化引注，并将参考文献表插入 RTF 文件中。目前它支持以下格式的引注：
 rtfScan-introPage-description2 = 如要开始，请选择 RTF 输入文件和输出文件：
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = 输入文件：
+rtfScan-output-file = 输出文件：
 rtfScan-no-file-selected = 未选定文件
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -212,9 +212,9 @@ rtfScan-complete-page =
     .label = RTF 扫描完成
 rtfScan-complete-page-description = 文档处理完成, 请确保格式正确.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = 选择匹配的条目
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = 接受这次匹配
 runJS-title = 执行 JavaScript
 runJS-editor-label = 代码：
 runJS-run = 执行
@@ -539,6 +539,8 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
 architecture-win32-warning-message = { -app-name } 目前在 64 位版本的 Windows 上以 32 位模式运行。 { -app-name } 在 64 位模式下运行效率更高。
 architecture-warning-action = 下载 64 位版本的 { -app-name }
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     输入标题、作者和/或年份来搜索参考文献。
     
@@ -561,11 +563,10 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+       *[other] 已添加 { $count } 个文件
     }
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = 选择
 file-type-webpage = 网页
 file-type-image = 图片
 file-type-pdf = PDF
@@ -574,8 +575,8 @@ file-type-video = 视频
 file-type-presentation = 演示文档
 file-type-document = 文档
 file-type-ebook = 电子书
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = 了解 <a data-l10n-name="new-features-link">{ -app-name } { $version } 的新特性</a>
+post-upgrade-density = 选择你喜欢的布局密度：
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =

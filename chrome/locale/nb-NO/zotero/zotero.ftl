@@ -187,8 +187,8 @@ rtfScan-wizard =
     .title = RTF skann
 rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = For å komme i gang, velg en RTF inndata fil og en utdata fil nedenfor:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Inndata fil:
+rtfScan-output-file = Utdata fil:
 rtfScan-no-file-selected = Ingen fil valgt
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -549,6 +549,8 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = Du må velge en lenketjener fra { $pane }-ruten i { -app-name }-innstillingene.
 architecture-win32-warning-message = { -app-name } kjører i 32-biters modus på en 64-biters versjon av Windows. { -app-name } vil kjøre mer effektivt i 64-biters modus.
 architecture-warning-action = Last ned 64-bit { -app-name }
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Skriv inn tittel, forfatter og/eller årstall for å søke etter en referanse.
     
@@ -575,7 +577,7 @@ find-pdf-files-added =
        *[other] { $count } files added
     }
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Velg
 file-type-webpage = Nettside
 file-type-image = Bilde
 file-type-pdf = PDF

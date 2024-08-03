@@ -549,6 +549,8 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = Sie müssen in den { -app-name }-Einstellungen unter { $pane } einen Resolver auswählen.
 architecture-win32-warning-message = { -app-name } wird aktuell im 32-Bit-Modus auf einer 64-Bit-Version von Windows ausgeführt. { -app-name } wird im 64-Bit-Modus effizienter laufen.
 architecture-warning-action = 64-Bit { -app-name }-Version herunterladen
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Einen Titel, Autor und/oder ein Jahr eintippen, um nach einer Literaturangabe zu suchen.
     

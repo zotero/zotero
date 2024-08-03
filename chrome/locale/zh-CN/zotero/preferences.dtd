@@ -59,7 +59,7 @@
 <!ENTITY zotero.preferences.sync.about "关于同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "文件同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "网址:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "“我的文献”附件同步方式：">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "“我的文库”附件同步方式：">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero 云存储同步群组文献库中的附件">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "下载文件">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "在同步时">

@@ -29,11 +29,11 @@ menu-add-by-identifier =
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Add File…
+    .label = Fájl hozzáadása...
 menu-add-standalone-linked-file-attachment =
     .label = Add Link to File…
 menu-add-child-file-attachment =
-    .label = Attach File…
+    .label = Fájl csatolása...
 menu-add-child-linked-file-attachment =
     .label = Fájlra mutató hivatkozás csatolása
 menu-add-child-linked-url-attachment =
@@ -62,7 +62,7 @@ zotero-collections-search-btn =
 zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
-    .title = Close Tab
+    .title = Fül bezárása
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -136,7 +136,7 @@ import-recreate-structure =
     .label = Recreate folder structure as collections
 import-fileTypes-header = File Types to Import:
 import-fileTypes-pdf =
-    .label = PDFs
+    .label = PDF-ek
 import-fileTypes-other =
     .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
 import-file-handling = Fájlkezelés
@@ -178,8 +178,8 @@ import-online-connection-error = { -app-name } could not connect to { $targetApp
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } Jegyzet
+           *[other] { $count } Jegyzetek
         }
 report-error =
     .label = Hiba bejelentése...
@@ -216,7 +216,7 @@ rtfScan-action-find-match =
     .title = Select matching item
 rtfScan-action-accept-match =
     .title = Accept this match
-runJS-title = Run JavaScript
+runJS-title = JavaScript futtatása
 runJS-editor-label = Code:
 runJS-run = Run
 runJS-help = { general-help }
@@ -253,11 +253,11 @@ bibliography-outputMethod-print =
     .label = Nyomtatás
 bibliography-manageStyles-label = Stílusok kezelése…
 integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
+    .title = { -app-name } - Dokumentum beállításai
 integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
+    .title = { -app-name } - Hivatkozás hozzáadása/szerkesztése
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - Bibliográfia szerkesztése
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
 integration-prefs-displayAs-label = Hivatkozások megjelenítése:
@@ -368,7 +368,7 @@ pane-libraries-collections = Libraries and Collections
 pane-tags = Címkék
 pane-related = Kapcsolatok
 pane-attachment-info = Attachment Info
-pane-attachment-preview = Preview
+pane-attachment-preview = Előnézet
 pane-attachment-annotations = Jegyzetek
 pane-header-attachment-associated =
     .label = Kapcsolódó fájl átnevezése
@@ -379,7 +379,7 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
+            [one] { $count } Mellékletek
            *[other] { $count } Attachments
         }
 section-attachment-preview =
@@ -393,8 +393,8 @@ section-attachments-annotations =
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } Jegyzet
+           *[other] { $count } Jegyzetek
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
@@ -560,7 +560,9 @@ item-pane-duplicates-merge-items =
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = { -app-name } is running in 32-bit mode on a 64-bit version of Windows. { -app-name } will run more efficiently in 64-bit mode.
-architecture-warning-action = Download 64-bit { -app-name }
+architecture-warning-action = 64 bites változat letöltése { -app-name }
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Type a title, author, and/or year to search for a reference.
     
@@ -579,7 +581,7 @@ advanced-search-operators-menu =
     .aria-label = Operator
     .label = { $label }
 advanced-search-condition-input =
-    .aria-label = Value
+    .aria-label = Érték
     .label = { $label }
 find-pdf-files-added =
     { $count ->
@@ -588,7 +590,7 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
-file-type-webpage = Webpage
+file-type-webpage = Weboldal
 file-type-image = Kép
 file-type-pdf = PDF
 file-type-audio = Hang

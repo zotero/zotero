@@ -41,6 +41,15 @@
   "general_copyToClipboard": {
     "message": "Másolás a vágólapra"
   },
+  "itemType_pdf": {
+    "message": "PDF melléklet"
+  },
+  "itemType_epub": {
+    "message": "EPUB melléklet"
+  },
+  "itemType_snapshot": {
+    "message": "Képernyőkép"
+  },
   "itemType_note": {
     "message": "Jegyzet"
   },
@@ -49,6 +58,12 @@
   },
   "progressWindow_savingTo": {
     "message": "Mentés"
+  },
+  "progressWindow_saveItem": {
+    "message": "Elem $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 mentve"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Címkék (vesszővel elválasztva)"
@@ -82,9 +97,6 @@
   },
   "firstRun_text1": {
     "message": "A $1 Connector lehetővé teszi, hogy egyetlen kattintással <a href=\"$2\">elemeket mentsen a $1</a> böngészőből."
-  },
-  "firstRun_text2": {
-    "message": "Ha még nem tette meg, <a href=\"$2\">töltse</a> le a standalone $1 alkalmazást a legjobb élményért."
   },
   "firstRun_acceptButton": {
     "message": "Értem"

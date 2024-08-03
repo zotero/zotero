@@ -47,7 +47,7 @@
 
 <!ENTITY viewMenu.label "Aspetto">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Disposizione">
+<!ENTITY layout.label "Layout">
 <!ENTITY standardView.label "Vista standard">
 <!ENTITY stackedView.label "Vista impilata">
 <!ENTITY collectionsPane.label "Riquadro delle collezioni">

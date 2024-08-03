@@ -186,10 +186,10 @@ report-error =
     .label = Segnala un errore…
 rtfScan-wizard =
     .title = Scansione RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } può estrarre e riformattare automaticamente le citazioni e inserire una bibliografia in un file RTF. Al momento supporta citazioni in varianti di uno di questi formati:
 rtfScan-introPage-description2 = Per iniziare, seleziona un file RTF e un file di destinazione qui sotto:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = File di origine:
+rtfScan-output-file = File di destinazione:
 rtfScan-no-file-selected = Nessun file selezionato
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -214,9 +214,9 @@ rtfScan-complete-page =
     .label = Elaborazione RTF completata.
 rtfScan-complete-page-description = Il tuo documento è stato elaborato. Per favore assicurati che sia stato formattato correttamente.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Seleziona un elemento corrispondente
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = Accetta questa corrispondenza
 runJS-title = Esegui JavaScript
 runJS-editor-label = Codice:
 runJS-run = Esegui
@@ -559,6 +559,8 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = È necessario selezionare un resolver dal pannello { $pane } delle impostazioni di { -app-name }.
 architecture-win32-warning-message = { -app-name } è in esecuzione a 32-bit in una versione di Windows a 64-bit. { -app-name } sarà molto più efficiente con la versione a 64-bit.
 architecture-warning-action = Scarica { -app-name } a 64-bit
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Digita un titolo, un autore e/o un anno per cercare un riferimento.
     
@@ -581,11 +583,12 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } file aggiunto
+        [many] { $count } file aggiunti
+       *[other] { $count } file aggiunti
     }
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Seleziona
 file-type-webpage = Pagina web
 file-type-image = Immagine
 file-type-pdf = PDF
@@ -594,8 +597,8 @@ file-type-video = File video
 file-type-presentation = Presentazione
 file-type-document = Documento
 file-type-ebook = Ebook
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = Scopri le  <a data-l10n-name="new-features-link">nuove  funzioni in { -app-name } { $version }</a>
+post-upgrade-density = Scegli la densità del layout che preferisci:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =

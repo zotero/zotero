@@ -56,7 +56,7 @@
 <!ENTITY recursiveCollections.label "Elemek megjelenítése az algyűjteményekből">
 <!ENTITY fontSize.label "Betűméret">
 <!ENTITY noteFontSize.label "Jegyzet betűmérete">
-<!ENTITY columns.label "Columns">
+<!ENTITY columns.label "Oszlopok">
 <!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Eszközök">

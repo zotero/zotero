@@ -549,6 +549,8 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = Sinun täytyy valita hakutyökalu { -app-name }n asetusten { $pane }-ruudusta.
 architecture-win32-warning-message = { -app-name } on käynnissä 32-bittisessä tilassa 64-bitisessä Windowsissa. { -app-name } toimii paremmin 64-bittisessä tilassa.
 architecture-warning-action = Lataa 64-bittinen { -app-name }
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Hae lähdettä kirjoittamalla otsikko, tekijä tai vuosi.
     

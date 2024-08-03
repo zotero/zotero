@@ -156,13 +156,13 @@ file-interface-items-were-imported =
     { $numItems ->
         [0] Nebuvo ką importuoti
         [one] Importuotas vienas įrašas
-       *[other] Importuota įrašų: { $numItems } 
+       *[other] Importuota įrašų: { $numItems }
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
         [0] Nebuvo iš naujo susietų
         [one] Iš naujo susietas vienas įrašas
-       *[other] Iš naujo susieta įrašų: { $numRelinked } 
+       *[other] Iš naujo susieta įrašų: { $numRelinked }
     }
 import-mendeley-encrypted = Nepavyksta nuskaityti Mendeley duombazės, galbūt ji užšifruota. Daugiau informacijos rasite straipsnelyje <a data-l10n-name="mendeley-import-kb">Kaip importuoti Mendeley biblioteką į Zotero?</a>.
 file-interface-import-error-translator = Klaida importuojant pasirinktą rinkmeną su „{ $translator }“. Įsitikinkite, kad rinkmena yra tinkama ir bandykite iš naujo.
@@ -573,6 +573,8 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = Jums reikia { -app-name } nuostatų { $pane } skydelyje pasirinkti sprendiklį.
 architecture-win32-warning-message = { -app-name } paleista 32 bitų veiksenoje 64 bitų Windows sistemoje. { -app-name } veiks veiksmingiau 64 bitų veiksenoje.
 architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
+architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
+architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Įveskite pavadinimą, autorių ir (arba) metus ir ieškokite informacijos šaltinio.
     
