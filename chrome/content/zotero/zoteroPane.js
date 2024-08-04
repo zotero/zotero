@@ -407,7 +407,7 @@ var ZoteroPane = new function()
 					ShiftTab: () => {
 						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
 					},
-					Tab: () => document.getElementById('item-tree-main-default')
+					Tab: () => itemTree.querySelector(".virtualized-table")
 				},
 				'zotero-tb-search-dropmarker': {
 					ArrowNext: () => null,
