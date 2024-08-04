@@ -1346,7 +1346,7 @@ class VirtualizedTable extends React.Component {
 		if (!this.props.disableFontSizeScaling) {
 			rowHeight *= Zotero.Prefs.get('fontSize');
 		}
-		rowHeight += Zotero.Prefs.get('uiDensity') === 'comfortable' ? 10 : 5;
+		rowHeight += Zotero.Prefs.get('uiDensity') === 'comfortable' ? 11 : 5;
 
 		// @TODO: Check row height across platforms and remove commented code below
 		// padding
