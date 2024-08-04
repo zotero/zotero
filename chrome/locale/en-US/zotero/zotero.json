@@ -750,10 +750,16 @@
 		"string": "You must choose a resolver from the { pane } pane of the { app-name } settings."
 	},
 	"architecture-win32-warning-message": {
-		"string": "{ app-name } is running in 32-bit mode on a 64-bit version of Windows. { app-name } will run more efficiently in 64-bit mode."
+		"string": "Switch to 64-bit { app-name } for the best performance. Your data won’t be affected."
 	},
 	"architecture-warning-action": {
 		"string": "Download 64-bit { app-name }"
+	},
+	"architecture-x64-on-arm64-message": {
+		"string": "{ app-name } is running in emulated mode. A native version of { app-name } will run more efficiently."
+	},
+	"architecture-x64-on-arm64-action": {
+		"string": "Download { app-name } for ARM64"
 	},
 	"first-run-guidance-quickFormat": {
 		"string": "Type a title, author, and/or year to search for a reference.\n\nAfter you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.\n\nYou can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }."
