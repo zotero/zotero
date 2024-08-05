@@ -14,10 +14,15 @@ quick-search-textbox {
 	:is(search-textbox)::part(search-icon) {
 		@include svgicon-menu("magnifier", "universal", "16");
 		color: var(--fill-secondary);
-		// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+		// right: 4px gap + 2px padding + 8px dropmarker width + 4px padding
+		// left, top, and bottom: 5px padding (6px on Figma, including 1px search-textbox border)
 		// Use explicit left/right padding here because this element is flipped in RTL (see _search.scss)
-		padding: 6px 14px 6px 6px;
+		padding: 5px 18px 5px 5px;
 		margin: 0;
+	}
+
+	:is(search-textbox)::part(search-input) {
+		padding: 0;
 	}
 }
 
@@ -33,9 +38,9 @@ quick-search-textbox {
 	width: 36px;
 	height: 28px;
 	min-height: 28px;
-	// 6px padding + 16px icon width + 2px padding
 	padding-block: 0;
-	padding-inline: 24px 4px;
+	// inline-start: 6px padding + 16px icon width + 2px padding - 1px outer border
+	padding-inline: 23px 4px !important;
 	margin: 0;
 	border: 0;
 	border-radius: 5px;
