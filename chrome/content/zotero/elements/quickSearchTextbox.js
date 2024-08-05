@@ -88,6 +88,8 @@
 
 			let searchBox = document.createXULElement("search-textbox");
 			searchBox.id = "zotero-tb-search-textbox";
+			// Enable applying styles to the input field
+			searchBox.inputField.setAttribute("part", "search-input");
 			this.searchTextbox = searchBox;
 			
 			wrapper.appendChild(dropmarkerHost);
@@ -110,6 +112,7 @@
 
 			let popup = document.createXULElement('menupopup');
 			popup.id = "search-mode-popup";
+			popup.toggleAttribute("needsgutter", true);
 
 			for (let [mode, label] of Object.entries(this._searchModes)) {
 				let item = document.createXULElement('menuitem');
