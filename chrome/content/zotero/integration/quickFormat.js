@@ -928,13 +928,10 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _buildItemDescription(item, infoHbox) {
 		var nodes = [];
-		var str = "";
-
 		// Add a red label to retracted items
 		if (Zotero.Retractions.isRetracted(item)) {
-			var label = document.createXULElement("label");
-			label.setAttribute("value", Zotero.getString("retraction.banner"));
-			label.setAttribute("crop", "end");
+			let label = document.createElement("span");
+			label.textContent = Zotero.getString("retraction.banner");
 			label.style.color = 'red';
 			label.style['margin-inline-end'] = '5px';
 			infoHbox.appendChild(label);
@@ -942,14 +939,16 @@ var Zotero_QuickFormat = new function () {
 		if (item.isNote()) {
 			var date = Zotero.Date.sqlToDate(item.dateModified, true);
 			date = Zotero.Date.toFriendlyDate(date);
-			str += date;
+			infoHbox.textContent = date;
 			
 			var text = item.note;
 			text = Zotero.Utilities.unescapeHTML(text);
 			text = text.trim();
 			text = text.slice(0, 500);
 			var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
-			if (parts[1]) str += " " + parts[1];
+			if (parts[1]) {
+				infoHbox.textContent += ` ${parts[1]}.`;
+			}
 		}
 		else {
 			var author, authorDate = "";
@@ -963,9 +962,8 @@ var Zotero_QuickFormat = new function () {
 			
 			var publicationTitle = item.getField("publicationTitle", false, true);
 			if(publicationTitle) {
-				var label = document.createXULElement("label");
-				label.setAttribute("value", publicationTitle);
-				label.setAttribute("crop", "end");
+				let label = document.createElement("span");
+				label.textContent = publicationTitle;
 				label.style.fontStyle = "italic";
 				nodes.push(label);
 			}
@@ -992,28 +990,31 @@ var Zotero_QuickFormat = new function () {
 			for(var i=0, n=nodes.length; i<n; i++) {
 				var node = nodes[i];
 
-				if(i != 0) str += ", ";
-
-				if(typeof node === "object") {
-					var label = document.createXULElement("label");
-					label.setAttribute("value", str);
-					label.setAttribute("crop", "end");
-					infoHbox.appendChild(label);
+				if (i != 0) {
+					// add comma between pieces
+					let comma = document.createElement("span");
+					comma.textContent = ", ";
+					infoHbox.appendChild(comma);
+				}
+				
+				if (typeof node === "object") {
+					// if this is a node, just insert it
 					infoHbox.appendChild(node);
-					str = "";
-				} else {
-					str += node;
+				}
+				else {
+					// if this is a piece of text, insert <span> with it
+					let wrapper = document.createElement("span");
+					wrapper.textContent = node;
+					infoHbox.appendChild(wrapper);
 				}
 			}
-
-			if(nodes.length && (!str.length || str[str.length-1] !== ".")) str += ".";	
 		}
-		
-		var label = document.createXULElement("label");
-		label.setAttribute("value", str);
-		label.setAttribute("crop", "end");
-		label.setAttribute("flex", "1");
-		infoHbox.appendChild(label);
+		// if there is no period in the end, insert it
+		if (infoHbox.textContent.length && infoHbox.textContent[infoHbox.textContent.length - 1] !== ".") {
+			let period = document.createElement("span");
+			period.textContent = ".";
+			infoHbox.appendChild(period);
+		}
 	}
 	
 	/**
@@ -1029,6 +1030,13 @@ var Zotero_QuickFormat = new function () {
 		var infoNode = document.createXULElement("hbox");
 		infoNode.setAttribute("class", "citation-dialog info");
 		_buildItemDescription(item, infoNode);
+		// if description is empty, insert an empty placeholder to ensure identical row heights
+		if (!infoNode.textContent.length) {
+			let placeholder = document.createElement("span");
+			placeholder.textContent = " ";
+			placeholder.style.hidden = true;
+			infoNode.appendChild(placeholder);
+		}
 		
 		// add to rich list item
 		var rll = document.createXULElement("richlistitem");
@@ -1550,9 +1558,6 @@ var Zotero_QuickFormat = new function () {
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
 		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
 		_buildItemDescription(item, panelInfo);
-		// Aria label for the info panel to be visible to the screen readers
-		let description = Array.from(panelInfo.childNodes).map(label => label.value).join(".");
-		panelInfo.setAttribute('aria-label', description);
 		panelLibraryLink.hidden = !item.id;
 		if(item.id) {
 			var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
