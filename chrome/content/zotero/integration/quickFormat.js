@@ -1010,7 +1010,7 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 		// if there is no comma in the end, insert it
-		if (infoHbox.textContent[infoHbox.textContent.length - 1] !== ".") {
+		if (infoHbox.textContent.length && infoHbox.textContent[infoHbox.textContent.length - 1] !== ".") {
 			let period = document.createElement("span");
 			period.textContent = ".";
 			infoHbox.appendChild(period);
@@ -1030,6 +1030,13 @@ var Zotero_QuickFormat = new function () {
 		var infoNode = document.createXULElement("hbox");
 		infoNode.setAttribute("class", "citation-dialog info");
 		_buildItemDescription(item, infoNode);
+		// if description is empty, insert an empty placeholder to ensure identical row heights
+		if (!infoNode.textContent.length) {
+			let placeholder = document.createElement("span");
+			placeholder.textContent = " ";
+			placeholder.style.hidden = true;
+			infoNode.appendChild(placeholder);
+		}
 		
 		// add to rich list item
 		var rll = document.createXULElement("richlistitem");
