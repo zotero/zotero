@@ -248,6 +248,11 @@
 				}
 			}
 			this._input.readOnly = this.readOnly;
+			// Voiceover does not announce text as readonly. aria-readonly gets ignored as well.
+			// aria-disabled is the only found working property - it announced the text as "dimmed"
+			if (Zotero.isMac) {
+				this._input.setAttribute("aria-disabled", this.readOnly);
+			}
 			this._input.placeholder = this.placeholder;
 
 			if (this._input.tagName == "textarea") {
