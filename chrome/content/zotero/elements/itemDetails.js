@@ -568,7 +568,7 @@
 			// On Escape/Enter on editable-text, return focus to the item tree or reader
 			if (event.key == "Escape" || (event.key == "Enter" && event.target.classList.contains('input'))) {
 				if (isLibraryTab) {
-					document.getElementById('item-tree-main-default').focus();
+					document.querySelector('#zotero-items-tree .virtualized-table').focus();
 				}
 				else {
 					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
