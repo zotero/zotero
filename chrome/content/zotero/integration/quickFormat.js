@@ -1009,7 +1009,7 @@ var Zotero_QuickFormat = new function () {
 				}
 			}
 		}
-		// if there is no comma in the end, insert it
+		// if there is no period in the end, insert it
 		if (infoHbox.textContent.length && infoHbox.textContent[infoHbox.textContent.length - 1] !== ".") {
 			let period = document.createElement("span");
 			period.textContent = ".";
