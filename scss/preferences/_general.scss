@@ -33,3 +33,12 @@
 		margin-block: 4px;
 	}
 }
+
+// "Custom" option of OpenURL resolver is initially selected for better keyboard
+// navigation on Windows, but we don't want to display the checkmark in that
+// case. Only show checkmark if "checked=true".
+#zotero-prefpane-general #openurl-menu {
+	menuitem:is([selected="true"]):not([checked="true"])::before {
+		visibility: hidden;
+	}
+}

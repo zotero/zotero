@@ -343,19 +343,50 @@ Zotero_Preferences.General = {
 		if (event.target.id != 'openurl-primary-popup') {
 			return;
 		}
+		var openURLMenu = document.getElementById('openurl-menu');
+		let openURLMenuFirstItem = openURLMenu.menupopup.firstChild;
 		if (!this._openURLResolvers) {
-			let menupopup = document.getElementById('openurl-primary-popup');
-			menupopup.firstChild.setAttribute('label', Zotero.getString('general.loading'));
+			openURLMenuFirstItem.setAttribute('label', Zotero.getString('general.loading'));
 			try {
 				this._openURLResolvers = await Zotero.Utilities.Internal.OpenURL.getResolvers();
 			}
 			catch (e) {
 				Zotero.logError(e);
-				menupopup.firstChild.setAttribute('label', "Error loading resolvers");
+				openURLMenu.menupopup.firstChild.setAttribute('label', "Error loading resolvers");
 				return;
 			}
 		}
+		// Set top-most item to "Custom" once the menu appears
+		openURLMenuFirstItem.setAttribute('label', Zotero.getString('general.custom'));
+		openURLMenuFirstItem.setAttribute('value', 'custom');
 		this.updateOpenURLResolversMenu();
+	},
+	
+	handleOpenURLPopupHidden(event) {
+		if (event.target.id != 'openurl-primary-popup') {
+			return;
+		}
+		// Clear the menu so that on Windows arrowUp/Down does not select an invalid
+		// top-level entry (e.g. North America)
+		this.emptyOpenURLMenu();
+		// Set the proper values on the first item to be displayed when dropdown closes
+		let firstItem = document.getElementById('openurl-menu').menupopup.firstChild;
+		if (Zotero.Prefs.get('openURL.resolver')) {
+			firstItem.setAttribute("value", Zotero.Prefs.get('openURL.resolver'));
+		}
+		if (Zotero.Prefs.get('openURL.name')) {
+			firstItem.setAttribute("label", Zotero.Prefs.get('openURL.name'));
+		}
+		// Ensures that arrow keys will navigate the menu in case of subsequent opening on windows
+		document.getElementById('openurl-menu').selectedItem = firstItem;
+	},
+
+	// Clear all menus, except for the top-most "Custom" menuitem. That item is selected
+	// when menu opens and, if removed while still selected, keyboard navigation may break.
+	emptyOpenURLMenu() {
+		var openURLMenu = document.getElementById('openurl-menu');
+		var menupopup = openURLMenu.firstChild;
+		while (menupopup.childNodes.length > 1) menupopup.removeChild(menupopup.lastChild);
 	},
 	
 	
@@ -369,13 +400,8 @@ Zotero_Preferences.General = {
 		
 		var openURLMenu = document.getElementById('openurl-menu');
 		var menupopup = openURLMenu.firstChild;
-		menupopup.innerHTML = '';
-		
-		var customMenuItem = document.createXULElement('menuitem');
-		customMenuItem.setAttribute('label', Zotero.getString('general.custom'));
-		customMenuItem.setAttribute('value', 'custom');
-		customMenuItem.setAttribute('type', 'checkbox');
-		menupopup.appendChild(customMenuItem);
+		let firstItem = menupopup.firstChild;
+		this.emptyOpenURLMenu();
 		
 		menupopup.appendChild(document.createXULElement('menuseparator'));
 		
@@ -429,11 +455,12 @@ Zotero_Preferences.General = {
 			openURLMenu.setAttribute('label', selectedName);
 			// If we found a match, update stored name
 			Zotero.Prefs.set('openURL.name', selectedName);
+			firstItem.setAttribute('checked', false);
 		}
 		// Custom
 		else {
 			openURLMenu.setAttribute('label', Zotero.getString('general.custom'));
-			customMenuItem.setAttribute('checked', true);
+			firstItem.setAttribute('checked', true);
 			Zotero.Prefs.clear('openURL.name');
 		}
 	},
@@ -463,18 +490,14 @@ Zotero_Preferences.General = {
 			Zotero.Prefs.set('openURL.name', openURLServerField.value = event.target.label);
 			Zotero.Prefs.set('openURL.resolver', openURLServerField.value = event.target.value);
 		}
-		
-		openURLMenu.firstChild.hidePopup();
-		
-		setTimeout(() => {
-			this.updateOpenURLResolversMenu();
-		});
 	},
 	
 	onOpenURLCustomized: function () {
-		setTimeout(() => {
-			this.updateOpenURLResolversMenu();
-		});
+		// Change resolver preference to "custom"
+		let firstItem = document.getElementById('openurl-menu').menupopup.firstChild;
+		firstItem.setAttribute('label', Zotero.getString('general.custom'));
+		firstItem.setAttribute('value', 'custom');
+		Zotero.Prefs.clear('openURL.name');
 	},
 
 	EBOOK_FONT_STACKS: {
