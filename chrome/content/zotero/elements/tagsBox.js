@@ -296,6 +296,13 @@
 
 				event.preventDefault();
 
+				// Shift-Enter on a tag will add and focus an empty tag row at the bottom
+				if (event.shiftKey) {
+					event.stopPropagation();
+					this.addNew();
+					return;
+				}
+
 				var row = target.parentElement;
 				// Not sure why this can happen, but if the event fires on an unmounted node, just ignore it
 				if (!row.parentElement) {
@@ -449,7 +456,6 @@
 
 				tags.forEach(tag => this.item.addTag(tag));
 				await this.item.saveTx();
-				this._forceRenderAll();
 			}
 			// Single tag at end
 			else {

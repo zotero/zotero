@@ -16,7 +16,7 @@ describe("Item Tags Box", function () {
 	
 	
 	describe("Tag Editing", function () {
-		it("should update tag when pressing Enter in textbox", async function () {
+		before(async () => {
 			if (!doc.hasFocus()) {
 				// editable-text behavior relies on focus, so we first need to bring the window to the front.
 				// Not required on all platforms. In some cases (e.g. Linux), the window is at the front from the start.
@@ -28,7 +28,8 @@ describe("Item Tags Box", function () {
 				Zotero.Utilities.Internal.activate(win);
 				await activatePromise;
 			}
-			
+		});
+		it("should update tag when pressing Enter in textbox", async function () {
 			var tag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
 			
@@ -58,6 +59,41 @@ describe("Item Tags Box", function () {
 			rows = tagsbox.querySelectorAll('.row editable-text');
 			assert.equal(rows[0].value, newTag);
 			assert.equal(rows.length, 1);
+		});
+
+		it("should focus a new empty tag on Shift-Enter in textbox", async function () {
+			var tag = Zotero.Utilities.randomString();
+			var updatedTag = Zotero.Utilities.randomString();
+			
+			await createDataObject('item', { tags: [{ tag }] });
+			var tagsbox = doc.querySelector('#zotero-editpane-tags');
+			var rows = tagsbox.querySelectorAll('.row editable-text');
+			assert.equal(rows.length, 1);
+			
+			var firstRow = rows[0];
+			firstRow.focus();
+			firstRow.ref.value = updatedTag;
+			firstRow.ref.dispatchEvent(new Event('input'));
+			
+			// Press Shift-Enter in textbox
+			var shiftEnter = new KeyboardEvent('keydown', {
+				key: "Enter",
+				shiftKey: true
+			});
+			let promise = waitForItemEvent('modify');
+			firstRow.dispatchEvent(shiftEnter);
+			await promise;
+			rows = tagsbox.querySelectorAll('.row editable-text');
+			assert.equal(rows[0].value, updatedTag);
+			assert.equal(rows.length, 1);
+			// Wait for new tag to get focused
+			let waited = 0;
+			while (doc.activeElement.tagName == "window" && waited < 1000) {
+				waited += 1;
+				await Zotero.Promise.delay(10);
+			}
+			// New empty tag should have focus
+			assert.exists(doc.activeElement.closest("[isNew]"));
 		});
 	});
 	
