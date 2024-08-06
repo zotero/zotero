@@ -4,6 +4,7 @@ richlistbox {
 	// Prevent horizontal scrollbar on Windows
 	overflow-x: hidden;
 
+	// Following rules from https://searchfox.org/mozilla-central/source/toolkit/themes/windows/global/richlistbox.css
 	richlistitem {
 		--listitem-selectedBackground: var(--color-quarternary-on-sidepane);;
 		--listitem-selectedFocusCurrentBackground: var(--color-accent);
@@ -75,6 +76,7 @@ richlistbox {
 			}
 		}
 
+		// Add focus ring to richlistbox if the richlistbox is multi-select
 		&[seltype="multiple"] > richlistitem {
 			&[selected="true"][current="true"] {
 				outline: var(--default-focusring);
