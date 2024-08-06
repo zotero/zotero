@@ -1,0 +1,29 @@
+#zotero-feed-settings {
+	.zotero-advanced-options > .zotero-advanced-options-label {
+		@include focus-ring;
+		
+		appearance: none;
+		border: none;
+		outline: none;
+		background: transparent;
+		padding: 0;
+	}
+
+	.zotero-advanced-options > .zotero-advanced-options-label > .toolbarbutton-menu-dropmarker {
+		transform: rotate(270deg);
+	}
+
+	.zotero-advanced-options[state=open] > .zotero-advanced-options-label > .toolbarbutton-menu-dropmarker {
+		transform: none;
+	}
+
+	.html-input {
+		width: 50px;
+		text-align: right;
+	}
+
+	#advanced-options-togglable hbox {
+		display: flex;
+		align-items: center;
+	}
+}

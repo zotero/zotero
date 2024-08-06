@@ -36,12 +36,12 @@
 		<html:input id="feed-title" style="max-width: 30em;" />
 	</html:div>
 	<vbox id="advanced-options" class="zotero-advanced-options">
-		<hbox onclick="Zotero_Feed_Settings.toggleAdvancedOptions()"  class="zotero-advanced-options-label">
-			<toolbarbutton class="toolbarbutton-menu-dropmarker"/>
+		<button oncommand="Zotero_Feed_Settings.toggleAdvancedOptions()" class="zotero-advanced-options-label">
+			<dropmarker type="menu" class="toolbarbutton-menu-dropmarker"/>
 			<hbox align="center">
 				<label value="&zotero.general.advancedOptions.label;"/>
 			</hbox>
-		</hbox>
+		</button>
 		<vbox id="advanced-options-togglable">
 			<hbox align="center">
 				<label value="&zotero.feedSettings.refresh.label1;" control="feed-ttl"/>

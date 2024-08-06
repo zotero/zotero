@@ -97,28 +97,6 @@ zoterosearch .menulist-icon {
 	max-width: 29.5em;
 }
 
-.zotero-advanced-options > .zotero-advanced-options-label > .toolbarbutton-menu-dropmarker {
-	transform: rotate(270deg);
-}
-
-.zotero-advanced-options[state=open] > .zotero-advanced-options-label > .toolbarbutton-menu-dropmarker {
-	transform: none;
-}
-
-#zotero-feed-settings grid hbox:first-child {
-	-moz-box-pack: end;
-}
-
-#zotero-feed-settings .html-input {
-	width: 50px;
-	text-align: right;
-}
-
-#zotero-feed-settings #advanced-options-togglable hbox {
-	display: flex;
-	align-items: center;
-}
-
 #zotero-edit-bibliography-dialog #item-list .listcell-icon {
 	max-width: 16px;
 }
