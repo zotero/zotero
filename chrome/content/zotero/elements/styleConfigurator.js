@@ -31,7 +31,7 @@
 				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 			>
 				<div>
-					<xul:richlistbox id="style-list" class="theme-listbox" tabindex="0" />
+					<xul:richlistbox id="style-list" tabindex="0" />
 				</div>
 			</div>
 		`);
