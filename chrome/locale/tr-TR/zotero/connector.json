@@ -42,10 +42,10 @@
     "message": "Panoya Kopyala"
   },
   "itemType_pdf": {
-    "message": "PDF Ek"
+    "message": "PDF Eki"
   },
   "itemType_epub": {
-    "message": "EPUB ek"
+    "message": "EPUB eki"
   },
   "itemType_snapshot": {
     "message": "Anlık Görüntü"
@@ -54,7 +54,7 @@
     "message": "Not"
   },
   "itemType_link": {
-    "message": "Web bağlantı"
+    "message": "Web bağlantısı"
   },
   "itemType_attachment": {
     "message": "Ek"
@@ -95,12 +95,6 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "son sürüme"
   },
-  "extensionIsDisabled": {
-    "message": "$1 devre dışı"
-  },
-  "extensionIsDisabled_extensionPage": {
-    "message": "$1, Uzantılar sayfasında devre dışı"
-  },
   "appConnector": {
     "message": "$1 Bağlayıcısı"
   },
@@ -112,9 +106,6 @@
   },
   "firstRun_text1": {
     "message": "$1 Bağlayıcısı, tarayıcınızda tek bir tıklama ile <a href=\"$2\">eserleri $1 içinde kaydetmenizi</a> sağlar."
-  },
-  "firstRun_text2": {
-    "message": "Eğer hala yapmadıysanız, en iyi deneyim için $1 uygulamasını <a href=\"$2\">indiriniz</a>."
   },
   "firstRun_acceptButton": {
     "message": "Tamam"

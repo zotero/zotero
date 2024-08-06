@@ -537,7 +537,7 @@ item-pane-duplicates-merge-items =
            *[other] 合併 { $count } 個項目
         }
 locate-library-lookup-no-resolver = 您必須從 { -app-name } 偏好設定的 { $pane } 窗格中選擇一個解析器。
-architecture-win32-warning-message = { -app-name } 目前在64位元版本的Windows上以32位元模式執行。 { -app-name } 在64位元模式下執行效率更高。
+architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
 architecture-warning-action = 下載64位元版本的 { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64

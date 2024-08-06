@@ -185,10 +185,10 @@ report-error =
     .label = Fehler melden...
 rtfScan-wizard =
     .title = RTF-Scan
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } kann Zitationen automatisch extrahieren und neu formatieren und ein Literaturverzeichnis in RTF-Dateien einfügen. Das RTF-Scan-Modul unterstützt im Moment Zitationen in Variationen der folgenden Formate:
 rtfScan-introPage-description2 = Als ersten Schritt wählen Sie eine RTF-Datei als Input und eine Output-Datei aus:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Input-Datei:
+rtfScan-output-file = Output-Datei:
 rtfScan-no-file-selected = Keine Datei ausgewählt
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -213,9 +213,9 @@ rtfScan-complete-page =
     .label = RTF-Scan abgeschlossen
 rtfScan-complete-page-description = Ihr Dokument wurde gescannt und bearbeitet. Bitte überprüfen Sie, ob es korrekt formatiert wurde.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Zugehörigen Eintrag auswählen
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = Diesen Treffer annehmen
 runJS-title = JavaScript ausführen
 runJS-editor-label = Code:
 runJS-run = Ausführen
@@ -547,10 +547,10 @@ item-pane-duplicates-merge-items =
            *[other] { $count } Einträge zusammenführen
         }
 locate-library-lookup-no-resolver = Sie müssen in den { -app-name }-Einstellungen unter { $pane } einen Resolver auswählen.
-architecture-win32-warning-message = { -app-name } wird aktuell im 32-Bit-Modus auf einer 64-Bit-Version von Windows ausgeführt. { -app-name } wird im 64-Bit-Modus effizienter laufen.
+architecture-win32-warning-message = Für die beste Leistung zur 64-Bit-Version von { -app-name } wechseln. Ihre Daten werden dadurch nicht verändert.
 architecture-warning-action = 64-Bit { -app-name }-Version herunterladen
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = { -app-name } wird aktuell im emulierten Modus ausgeführt. Eine native Version von { -app-name } wird effizienter laufen.
+architecture-x64-on-arm64-action = { -app-name } für ARM64 herunterladen
 first-run-guidance-quickFormat =
     Einen Titel, Autor und/oder ein Jahr eintippen, um nach einer Literaturangabe zu suchen.
     
@@ -573,11 +573,11 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } Datei hinzugefügt
+       *[other] { $count } Dateien hinzugefügt
     }
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Auswählen
 file-type-webpage = Webseite
 file-type-image = Bild
 file-type-pdf = PDF
@@ -586,8 +586,8 @@ file-type-video = Video
 file-type-presentation = Vortrag
 file-type-document = Dokument
 file-type-ebook = eBook
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = Etwas über die <a data-l10n-name="new-features-link">neuen Funktionen in { -app-name } { $version }</a> lernen
+post-upgrade-density = Wählen Sie die gewünschte Layout-Dichte:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =

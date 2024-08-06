@@ -571,7 +571,7 @@ item-pane-duplicates-merge-items =
            *[other] Apjungti { $count } įrašus
         }
 locate-library-lookup-no-resolver = Jums reikia { -app-name } nuostatų { $pane } skydelyje pasirinkti sprendiklį.
-architecture-win32-warning-message = { -app-name } paleista 32 bitų veiksenoje 64 bitų Windows sistemoje. { -app-name } veiks veiksmingiau 64 bitų veiksenoje.
+architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
 architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64

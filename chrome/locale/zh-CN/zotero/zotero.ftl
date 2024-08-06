@@ -537,10 +537,10 @@ item-pane-duplicates-merge-items =
            *[other] 合并 { $count } 个条目
         }
 locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
-architecture-win32-warning-message = { -app-name } 目前在 64 位版本的 Windows 上以 32 位模式运行。 { -app-name } 在 64 位模式下运行效率更高。
+architecture-win32-warning-message = 切换到 64-bit { -app-name } 以获得最佳性能。你的数据不受影响。
 architecture-warning-action = 下载 64 位版本的 { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = 当前 { -app-name } 与此平台不兼容，请使用原生版本的 { -app-name } 以获得最佳性能。
+architecture-x64-on-arm64-action = 下载适配 ARM64 的 { -app-name }
 first-run-guidance-quickFormat =
     输入标题、作者和/或年份来搜索参考文献。
     

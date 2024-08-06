@@ -50,8 +50,8 @@
 <!ENTITY layout.label "布局">
 <!ENTITY standardView.label "标准视图">
 <!ENTITY stackedView.label "堆叠视图">
-<!ENTITY collectionsPane.label "分类面板">
-<!ENTITY itemPane.label "条目面板">
+<!ENTITY collectionsPane.label "分类窗格">
+<!ENTITY itemPane.label "条目窗格">
 <!ENTITY tagSelector.label "标签选择器">
 <!ENTITY recursiveCollections.label "显示子分类中的条目">
 <!ENTITY fontSize.label "字体大小">

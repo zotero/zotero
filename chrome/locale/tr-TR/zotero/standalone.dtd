@@ -57,7 +57,7 @@
 <!ENTITY fontSize.label "Yazı Tipi Boyutu">
 <!ENTITY noteFontSize.label "Not Yazı Tipi Boyutu">
 <!ENTITY columns.label "Sütunlar">
-<!ENTITY sortBy.label "göre sırala">
+<!ENTITY sortBy.label "Bunlara Göre Sırala">
 
 <!ENTITY toolsMenu.label "Araçlar">
 <!ENTITY toolsMenu.accesskey "T">

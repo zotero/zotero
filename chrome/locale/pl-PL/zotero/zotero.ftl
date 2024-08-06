@@ -547,7 +547,7 @@ item-pane-duplicates-merge-items =
            *[other] Merge { $count } items
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = { -app-name } jest uruchomiony w trybie 32-bitowym na 64-bitowej wersji systemu Windows. { -app-name } będzie działać wydajniej w trybie 64-bitowym.
+architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
 architecture-warning-action = Pobierz wersję 64-bitową { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64

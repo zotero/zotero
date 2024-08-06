@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.keys.newNote "Yeni Not Oluştur">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Tüm Besleme Eserlerini Okunmuş/Okunmamış İşaretle">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Alıntılarını Panoya Kopyala">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçili Eserleri Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan İçeri Aktar">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler, Zotero tekrar başlatıldıktan sonra etkinleşir">
 

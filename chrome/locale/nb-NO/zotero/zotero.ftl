@@ -547,7 +547,7 @@ item-pane-duplicates-merge-items =
            *[other] Slå sammen { $count } elementer
         }
 locate-library-lookup-no-resolver = Du må velge en lenketjener fra { $pane }-ruten i { -app-name }-innstillingene.
-architecture-win32-warning-message = { -app-name } kjører i 32-biters modus på en 64-biters versjon av Windows. { -app-name } vil kjøre mer effektivt i 64-biters modus.
+architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
 architecture-warning-action = Last ned 64-bit { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64

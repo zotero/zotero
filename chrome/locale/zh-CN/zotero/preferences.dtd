@@ -14,7 +14,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "从网页创建条目时自动抓取网页快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其他文件">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF 打开方式：">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "保存到 Zotero (地址栏图标)">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦文献库面板">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦文库窗格">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜索">
 <!ENTITY zotero.preferences.keys.newItem "新建条目">
 <!ENTITY zotero.preferences.keys.newNote "新建笔记">

@@ -557,10 +557,10 @@ item-pane-duplicates-merge-items =
            *[other] Fusionar { $count } elementos
         }
 locate-library-lookup-no-resolver = Debe elegir un sistema de resolución en el panel { $pane } de los ajustes de { -app-name }.
-architecture-win32-warning-message = { -app-name } se ejecuta en modo de 32 bits en una versión de 64 bits de Windows. { -app-name } se ejecutará de forma más eficiente en modo de 64 bits.
+architecture-win32-warning-message = Cambie a { -app-name } de 64 bits para obtener el mejor rendimiento. Sus datos no se verán afectados.
 architecture-warning-action = Descargar { -app-name } de 64-bit
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = { -app-name } se está ejecutando en modo emulado. Una versión nativa de { -app-name } se ejecutará de forma más eficiente.
+architecture-x64-on-arm64-action = Descargar { -app-name } para ARM64
 first-run-guidance-quickFormat =
     Escriba un título, autor o año para buscar una referencia.
     
