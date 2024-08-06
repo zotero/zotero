@@ -13,6 +13,7 @@ general-open-settings = Open Settings
 general-help = Help
 general-tag = Tag
 general-done = Done
+general-back = Go Back
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -526,6 +527,8 @@ tagselector-search =
 
 context-notes-search =
     .placeholder = Search Notes
+context-notes-return-button =
+    .aria-label = { general-back }
 
 new-collection-dialog =
     .title = New Collection

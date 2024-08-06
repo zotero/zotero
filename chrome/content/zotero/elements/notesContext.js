@@ -46,7 +46,7 @@
 				<vbox class="zotero-context-note-container context-note-standalone">
 					<vbox class="zotero-context-pane-editor-parent-line">
 						<html:div class="parent-title-container">
-							<toolbarbutton class="zotero-tb-note-return"></toolbarbutton>
+							<toolbarbutton class="zotero-tb-note-return" tabindex="0" data-l10n-id="context-notes-return-button"></toolbarbutton>
 							<html:div class="parent-title"></html:div>
 						</html:div>
 					</vbox>
@@ -55,7 +55,7 @@
 				<vbox class="zotero-context-note-container context-note-child">
 					<vbox class="zotero-context-pane-editor-parent-line">
 						<html:div class="parent-title-container">
-							<toolbarbutton class="zotero-tb-note-return"></toolbarbutton>
+							<toolbarbutton class="zotero-tb-note-return" tabindex="0" data-l10n-id="context-notes-return-button"></toolbarbutton>
 							<html:div class="parent-title"></html:div>
 						</html:div>
 					</vbox>
