@@ -20,6 +20,7 @@ richlistbox {
 		--listitem-selectedFocusCurrentBottomBorder: transparent;
 
 		padding: 0.2em 0.4em;
+		align-items: center;
 
 		@include compact {
 			height: 22px;
