@@ -366,7 +366,7 @@ Zotero_Preferences.General = {
 		if (event.target.id != 'openurl-primary-popup') {
 			return;
 		}
-		// Clear the menu so that on windows arrowUp/Down does not select an invalid
+		// Clear the menu so that on Windows arrowUp/Down does not select an invalid
 		// top-level entry (e.g. North America)
 		this.emptyOpenUrlMenu();
 		// Set the proper values on the first item to be displayed when dropdown closes
