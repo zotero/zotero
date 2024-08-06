@@ -69,6 +69,7 @@ var ZoteroAdvancedSearch = new function() {
 			onActivate: this.onItemActivate.bind(this),
 			columns,
 		});
+		document.querySelector("item-tree-menu-bar").init(this.itemsView);
 
 		// A minimal implementation of Zotero.CollectionTreeRow
 		var collectionTreeRow = {
