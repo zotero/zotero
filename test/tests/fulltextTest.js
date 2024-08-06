@@ -66,6 +66,15 @@ describe("Zotero.FullText", function () {
 				);
 			})
 
+			it("should skip indexing of an EPUB if fulltext.textMaxLength is 0", function* () {
+				Zotero.Prefs.set('fulltext.textMaxLength', 0);
+				var item = yield importFileAttachment('recognizeEPUB_test_content.epub');
+				assert.equal(
+					(yield Zotero.Fulltext.getIndexedState(item)),
+					Zotero.Fulltext.INDEX_STATE_UNINDEXED
+				);
+			});
+
 			describe("Indexing with HiddenBrowser", () => {
 				it("should index attachment as its attachmentContentType when supported", async function () {
 					// Firefox would normally load this as text/x-shellscript, but we detect text/plain

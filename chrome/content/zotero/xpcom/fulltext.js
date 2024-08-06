@@ -412,6 +412,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		const { EPUB } = ChromeUtils.import('chrome://zotero/content/EPUB.jsm');
 		
 		let maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+		if (maxLength === 0) {
+			return false;
+		}
 		let item = await Zotero.Items.getAsync(itemID);
 		let epub = new EPUB(filePath);
 		
