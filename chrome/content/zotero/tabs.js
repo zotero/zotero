@@ -758,9 +758,17 @@ var Zotero_Tabs = new function () {
 				Services.focus.MOVEFOCUS_FORWARD, 0);
 			return;
 		}
-		// Focus the first focusable button of item pane sidenav in library pane
-		Services.focus.moveFocus(window, document.getElementById("zotero-view-item-sidenav"),
-			Services.focus.MOVEFOCUS_FORWARD, 0);
+		let itemSideNav = document.getElementById("zotero-view-item-sidenav");
+		if (itemSideNav.hidden) {
+			// If sidenav is hidden, focus the last focusable element of item pane
+			Services.focus.moveFocus(window, document.getElementById("zotero-context-splitter"),
+				Services.focus.MOVEFOCUS_BACKWARD, 0);
+		}
+		else {
+			// Focus the first focusable button of item pane sidenav
+			Services.focus.moveFocus(window, document.getElementById("zotero-view-item-sidenav"),
+				Services.focus.MOVEFOCUS_FORWARD, 0);
+		}
 	};
 
 	/**
