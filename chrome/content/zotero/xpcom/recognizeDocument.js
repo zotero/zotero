@@ -624,14 +624,15 @@ Zotero.RecognizeDocument = new function () {
 						saveAttachments: false
 					});
 					if (searchItemJSON) {
-						if (search.ISBN && searchItemJSON?.ISBN?.split(' ')
+						itemJSON = searchItemJSON;
+						if (search.ISBN && searchItemJSON.ISBN && !searchItemJSON.ISBN.split(' ')
 								.map(resolvedISBN => Zotero.Utilities.cleanISBN(resolvedISBN))
 								.includes(search.ISBN)) {
-							Zotero.debug('RecognizeDocument: Using ISBN search result');
-							itemJSON = searchItemJSON;
+							Zotero.debug(`RecognizeDocument: ISBN mismatch (was ${search.ISBN}, got ${searchItemJSON.ISBN})`);
+							itemJSON = null;
 						}
 						else {
-							Zotero.debug(`RecognizeDocument: ISBN mismatch (was ${search.ISBN}, got ${searchItemJSON.ISBN})`);
+							Zotero.debug('RecognizeDocument: Using search result');
 						}
 					}
 				}
