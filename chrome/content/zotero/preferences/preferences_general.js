@@ -368,7 +368,7 @@ Zotero_Preferences.General = {
 		}
 		// Clear the menu so that on Windows arrowUp/Down does not select an invalid
 		// top-level entry (e.g. North America)
-		this.emptyOpenUrlMenu();
+		this.emptyOpenURLMenu();
 		// Set the proper values on the first item to be displayed when dropdown closes
 		let firstItem = document.getElementById('openurl-menu').menupopup.firstChild;
 		if (Zotero.Prefs.get('openURL.resolver')) {
@@ -383,7 +383,7 @@ Zotero_Preferences.General = {
 
 	// Clear all menus, except for the top-most "Custom" menuitem. That item is selected
 	// when menu opens and, if removed while still selected, keyboard navigation may break.
-	emptyOpenUrlMenu() {
+	emptyOpenURLMenu() {
 		var openURLMenu = document.getElementById('openurl-menu');
 		var menupopup = openURLMenu.firstChild;
 		while (menupopup.childNodes.length > 1) menupopup.removeChild(menupopup.lastChild);
@@ -401,7 +401,7 @@ Zotero_Preferences.General = {
 		var openURLMenu = document.getElementById('openurl-menu');
 		var menupopup = openURLMenu.firstChild;
 		let firstItem = menupopup.firstChild;
-		this.emptyOpenUrlMenu();
+		this.emptyOpenURLMenu();
 		
 		menupopup.appendChild(document.createXULElement('menuseparator'));
 		
