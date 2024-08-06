@@ -63,6 +63,8 @@
 <!ENTITY noteFontSize.label             "Note Font Size">
 <!ENTITY columns.label                  "Columns">
 <!ENTITY sortBy.label                   "Sort By">
+<!ENTITY moveColumnRight.label          "Move Column to the Right">
+<!ENTITY moveColumnLeft.label           "Move Column to the Left">
 
 <!--TOOLS MENU-->
 <!ENTITY toolsMenu.label           "Tools"> 

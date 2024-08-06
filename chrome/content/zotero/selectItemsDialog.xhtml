@@ -42,13 +42,6 @@
 	class="zotero-dialog"
 	drawintitlebar="true"
 >
-<dialog
-	id="select-items-dialog"
-	orient="vertical"
-	buttons="cancel,accept"
-	data-l10n-id="select-items-dialog"
-	data-l10n-attrs="buttonlabelaccept"
->
 <script>
 	var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
 	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
@@ -56,6 +49,12 @@
 	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
 </script>
+<item-tree-menu-bar/>
+<dialog
+	id="select-items-dialog"
+	orient="vertical"
+	buttons="cancel,accept"
+>
 
 <linkset>
 	<html:link rel="localization" href="zotero.ftl" />
