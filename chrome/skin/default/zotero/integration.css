@@ -303,7 +303,7 @@ richlistitem[selected="true"] {
 
 #citation-properties:is(panel, menupopup)::part(content) {
 	padding: 10px;
-	max-width: 300px;
+	max-width: 450px;
 }
 
 #citation-properties #suppress-author {
