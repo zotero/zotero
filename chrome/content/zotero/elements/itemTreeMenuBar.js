@@ -28,7 +28,7 @@
 {
 	class ItemTreeMenuBar extends XULElement {
 		// Menu bar containing View options for manipulating the itemTree table
-		// (View > Columns, Sort By, Move Column to the Right/Left).
+		// (View > Columns, Sort By, Move Column).
 		// Should be added to non-main windows or dialogs containing an itemTree
 		// to expose the functionality of table manipulation to keyboard users.
 		// On Windows or Linux, this menubar appears on Alt keypress.
@@ -63,16 +63,11 @@
 							label="&sortBy.label;">
 							<menupopup/>
 						</menu>
-						<menu id="column-move-right-submenu"
+						<menu id="column-move-submenu"
 							class="menu-type-library"
-							label="&moveColumnRight.label;">
+							label="&moveColumn.label;">
 							<menupopup/>
 						</menu>
-						<menu id="column-move-left-submenu"
-							class="menu-type-library"
-							label="&moveColumnLeft.label;">
-						<menupopup/>
-					</menu>
 					</menupopup>
 				</menu>
 			</menubar>

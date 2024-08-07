@@ -2691,33 +2691,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 			});
 	}
 
-	buildColumnMoverMenu(menupopup, moveRight) {
+	buildColumnMoverMenu(menupopup) {
 		let columns = this._getColumns();
 		let menuitem;
-		let columnsAdded = false;
 		for (let i = 0; i < columns.length; i++) {
 			let column = columns[i];
 			if (column.hidden) continue;
-			// skip first column if moving to the left
-			if (!columnsAdded && !moveRight) {
-				columnsAdded = true;
-				continue;
-			}
 			let label = formatColumnName(column);
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', label);
 			menuitem.setAttribute('colindex', i);
-			// swap the column with its nearest visible column in selected direction
+			// swap the column with its next nearest visible column
 			menuitem.addEventListener('command', () => {
 				let nextIndex = columns.findIndex((col, index) => index > i && !col.hidden);
-				let previousIndex = columns.findLastIndex((col, index) => index < i && !col.hidden);
-				this.tree._columns.setOrder(i, moveRight ? nextIndex + 1 : previousIndex);
+				this.tree._columns.setOrder(i, nextIndex + 1);
 			});
 			menupopup.appendChild(menuitem);
-		}
-		// remove last column if moving to the right
-		if (moveRight) {
-			menuitem.remove();
 		}
 	}
 
