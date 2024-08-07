@@ -87,8 +87,8 @@ item-menu-viewAttachment =
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDF-er
-                    [epub] EPUB-er
+                    [pdf] PDF-filer
+                    [epub] EPUB-filer
                     [snapshot] Øyeblikksbilder
                    *[other] Vedlegg
                 }
@@ -170,7 +170,7 @@ import-online-intro = I neste trinn blir du bedt om å logge inn på { $targetAp
 import-online-intro2 = { -app-name } vil aldri se eller lagre passordet ditt { $targetApp }.
 import-online-form-intro = Vennligst skriv inn påloggingsinformasjonen din for å logge på { $targetAppOnline }. Dette er nødvendig for å importere { $targetApp }-biblioteket ditt til { -app-name }.
 import-online-wrong-credentials = Innlogging til { $targetApp } mislyktes. Vennligst skriv inn påloggingsinformasjonen på nytt og prøv igjen.
-import-online-blocked-by-plugin = Importen kan ikke fortsette med { $plugin } installert. Deaktiver denne programtillegget og prøv på nytt.
+import-online-blocked-by-plugin = Importen kan ikke fortsette med { $plugin } installert. Deaktiver denne program-tillegget og prøv på nytt.
 import-online-relink-only =
     .label = Koble sammen igjen Mendeley Desktop henvisninger
 import-online-relink-kb = Mer informasjon
@@ -185,10 +185,10 @@ report-error =
     .label = Rapporter feil…
 rtfScan-wizard =
     .title = RTF skann
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
-rtfScan-introPage-description2 = For å komme i gang, velg en RTF inndata fil og en utdata fil nedenfor:
-rtfScan-input-file = Inndata fil:
-rtfScan-output-file = Utdata fil:
+rtfScan-introPage-description = { -app-name } kan automatisk trekke ut og omformatere henvisninger og sette inn en bibliografi i RTF-filer. Programmet støtter for øyeblikket henvisninger i varianter av følgende formater:
+rtfScan-introPage-description2 = For å komme i gang, velg en RTF inndatafil og en utdatafil nedenfor:
+rtfScan-input-file = Inndatafil:
+rtfScan-output-file = Utdatafil:
 rtfScan-no-file-selected = Ingen fil valgt
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -213,9 +213,9 @@ rtfScan-complete-page =
     .label = RTF skann komplett
 rtfScan-complete-page-description = Zotero har nå gått gjennom dokumentet ditt. Sjekk at det er korrekt formatert.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Velg matchende element
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = Godta dette treffet
 runJS-title = Kjør JavaScript
 runJS-editor-label = Kode:
 runJS-run = Kjør
@@ -357,7 +357,7 @@ pane-tags = Emneord
 pane-related = Relatert
 pane-attachment-info = Vedleggsinformasjon
 pane-attachment-preview = Forhåndsvisning
-pane-attachment-annotations = Merknader
+pane-attachment-annotations = Markeringer
 pane-header-attachment-associated =
     .label = Gi nytt navn til tilknyttet fil
 section-info =
@@ -375,8 +375,8 @@ section-attachment-preview =
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } merknad
-           *[other] { $count } merknader
+            [one] { $count } markering
+           *[other] { $count } markeringer
         }
 section-notes =
     .label =
@@ -408,8 +408,8 @@ section-button-collapse =
     .label = Skjul { $section } seksjon
 annotations-count =
     { $count ->
-        [one] { $count } merknad
-       *[other] { $count } merknader
+        [one] { $count } markering
+       *[other] { $count } markeringer
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -547,10 +547,10 @@ item-pane-duplicates-merge-items =
            *[other] Slå sammen { $count } elementer
         }
 locate-library-lookup-no-resolver = Du må velge en lenketjener fra { $pane }-ruten i { -app-name }-innstillingene.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
+architecture-win32-warning-message = Bytt til 64-bit { -app-name } for å få best mulig ytelse. Dataene dine vil ikke bli påvirket.
 architecture-warning-action = Last ned 64-bit { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = { -app-name } kjører i emulert modus. En plattformavhengig versjon av { -app-name } vil kjøre mer effektivt.
+architecture-x64-on-arm64-action = Last ned { -app-name } for ARM64
 first-run-guidance-quickFormat =
     Skriv inn tittel, forfatter og/eller årstall for å søke etter en referanse.
     
@@ -573,8 +573,8 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } fil lagt til
+       *[other] { $count } filer lagt til
     }
 select-items-dialog =
     .buttonlabelaccept = Velg
@@ -586,8 +586,8 @@ file-type-video = Video
 file-type-presentation = Presentasjon
 file-type-document = Dokument
 file-type-ebook = E-bok
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = Lær om de <a data-l10n-name="new-features-link">nye funksjonene i { -app-name } { $version }</a>
+post-upgrade-density = Velg ønsket tetthet på oppsettet:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =

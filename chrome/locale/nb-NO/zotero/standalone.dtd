@@ -47,7 +47,7 @@
 
 <!ENTITY viewMenu.label "Vis">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Utforming">
+<!ENTITY layout.label "Oppsett">
 <!ENTITY standardView.label "Standardvisning">
 <!ENTITY stackedView.label "Stablet visning">
 <!ENTITY collectionsPane.label "Rute for samlinger">

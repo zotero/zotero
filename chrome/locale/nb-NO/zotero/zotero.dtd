@@ -207,9 +207,9 @@
 <!ENTITY zotero.richText.superscript.label "Hevet skrift">
 <!ENTITY zotero.richText.subscript.label "Senket skrift">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Legg til merknad">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Skjul alle merknader">
-<!ENTITY zotero.annotate.toolbar.expand.label "Vis alle merknader">
+<!ENTITY zotero.annotate.toolbar.add.label "Legg til markering">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Skjul alle markeringer">
+<!ENTITY zotero.annotate.toolbar.expand.label "Vis alle markeringer">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Merk tekst">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Fjern merking av tekst">
 
@@ -281,7 +281,7 @@
 <!ENTITY zotero.rtfScan.mappedCitations.label "Tilordnede henvisninger">
 <!ENTITY zotero.rtfScan.introPage.label "Introduksjon">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisk hente ut og reformatere henvisninger og sette inn en bibliografi i RTF filer. RTF skann støtter for øyeblikket henvisninger i variasjoner av følgende formater:">
-<!ENTITY zotero.rtfScan.introPage.description2 "For å komme i gang, velg en RTF inndata fil og en utdata fil nedenfor:">
+<!ENTITY zotero.rtfScan.introPage.description2 "For å komme i gang, velg en RTF inndatafil og en utdatafil nedenfor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Skanner etter henvisninger">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero ser gjennom ditt dokumentet etter henvisninger. Vær tålmodig.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Bekreft elementer henvist til">
@@ -291,8 +291,8 @@
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero setter sammen og formaterer RTF-fila di. ">
 <!ENTITY zotero.rtfScan.completePage.label "RTF skann komplett">
 <!ENTITY zotero.rtfScan.completePage.description "Zotero har nå gått gjennom dokumentet ditt. Sjekk at det er korrekt formatert.">
-<!ENTITY zotero.rtfScan.inputFile.label "Inndata fil">
-<!ENTITY zotero.rtfScan.outputFile.label "Utdata fil">
+<!ENTITY zotero.rtfScan.inputFile.label "Inndatafil">
+<!ENTITY zotero.rtfScan.outputFile.label "Utdatafil">
 
 <!ENTITY zotero.file.choose.label "Velg fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil valgt">
@@ -302,9 +302,9 @@
 <!ENTITY zotero.attachLink.label.title "Tittel:">
 
 <!ENTITY zotero.context.addChildNote "Legg til notat til element">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Legg til notat til element fra merknader">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Legg til notat til element fra markeringer">
 <!ENTITY zotero.context.addStandaloneNote "Legg til enkeltstående notat">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Legg til enkeltstående notat fra merknader">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Legg til enkeltstående notat fra markeringer">
 <!ENTITY zotero.context.editInWindow "Rediger i separat vindu">
 
 <!ENTITY zotero.pdfReader.firstPage "Første side">
@@ -328,6 +328,6 @@
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidehøyde">
 <!ENTITY zotero.pdfReader.splitVertically "Del vertikalt">
 <!ENTITY zotero.pdfReader.splitHorizontally "Del horisontalt">
-<!ENTITY zotero.pdfReader.transferFromPDF "Importer merknader…">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importer markeringer…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Roter siden til venstre">
 <!ENTITY zotero.pdfReader.rotatePageRight "Roter siden til høyre">
