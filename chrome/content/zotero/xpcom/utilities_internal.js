@@ -1723,10 +1723,9 @@ Zotero.Utilities.Internal = {
 				menuPopup.children[i].setAttribute('key', 'key_sortCol' + i);
 			}
 		}
-		else if (menuID == "column-move-right-submenu" || menuID == "column-move-left-submenu") {
-			// View > Move Column to the Right/Left
-			let moveRight = menuID === "column-move-right-submenu";
-			itemsView?.buildColumnMoverMenu(menuPopup, moveRight);
+		else if (menuID == "column-move-submenu") {
+			// View > Move Column
+			itemsView?.buildColumnMoverMenu(menuPopup);
 		}
 	},
 
