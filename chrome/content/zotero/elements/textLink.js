@@ -9,11 +9,16 @@
 					this.open(event);
 				}
 			}, true);
+			this.addEventListener('keypress', (event) => {
+				if (event.key == 'Enter' || event.key == ' ') {
+					event.preventDefault();
+					this.click();
+				}
+			});
 		}
 
 		connectedCallback() {
 			this.classList.add('zotero-text-link');
-			this.classList.add('keyboard-clickable');
 			this.setAttribute('role', 'link');
 		}
 
