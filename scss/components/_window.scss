@@ -33,3 +33,10 @@ window:root dialog.zotero-dialog-window {
 		padding: 20px;
 	}
 }
+
+window:root[tabsintitlebar] {
+	@media (-moz-platform: linux) {
+		// Fix background overflow on Linux when no native titlebar
+		background: transparent;
+	}
+}
