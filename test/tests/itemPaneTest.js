@@ -205,7 +205,7 @@ describe("Item pane", function () {
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, '');
 			
@@ -230,7 +230,7 @@ describe("Item pane", function () {
 			]);
 			await item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var lastName = itemBox.querySelector('#itembox-field-value-creator-0-lastName');
 			var parent = lastName.closest(".creator-type-value");
 			assert.property(parent, 'oncontextmenu');
@@ -262,7 +262,7 @@ describe("Item pane", function () {
 			]);
 			await item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var label = itemBox.querySelector('#itembox-field-value-creator-0-lastName');
 			var firstlast = label.closest('.creator-type-value');
 			firstlast.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, button: 2 }));
@@ -289,7 +289,7 @@ describe("Item pane", function () {
 			]);
 			await item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			// Move One to the last spot
 			itemBox.moveCreator(0, null, 3);
 			await waitForItemEvent('modify');
@@ -333,7 +333,7 @@ describe("Item pane", function () {
 			]);
 			var id = yield item.saveTx();
 			
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var label = itemBox.querySelector('[fieldname="place"]');
 			label.click();
 			var textbox = itemBox.querySelector('[fieldname="place"]');
@@ -356,7 +356,7 @@ describe("Item pane", function () {
 		it("should accept 'now' for Accessed", async function () {
 			var item = await createDataObject('item');
 			
-			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var textbox = itemBox.querySelector('[fieldname="accessDate"]');
 			textbox.value = 'now';
 			// Blur events don't necessarily trigger if window doesn't have focus
@@ -382,7 +382,7 @@ describe("Item pane", function () {
 			]);
 			await item.saveTx();
 			
-			let itemBox = doc.getElementById('zotero-editpane-item-box');
+			let itemBox = doc.getElementById('zotero-editpane-info-box');
 
 			itemBox.querySelector('[fieldname="creator-0-lastName"]').click();
 			itemBox.hideEditor(itemBox.querySelector('input[fieldname="creator-0-lastName"]'));
