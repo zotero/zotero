@@ -87,7 +87,6 @@ var doLoad = async function () {
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
-	document.querySelector("item-tree-menu-bar").init(itemsView);
 	const filterLibraryIDs = false || io.filterLibraryIDs;
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
 		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),

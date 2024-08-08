@@ -44,21 +44,21 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	persist="screenX screenY width height">
-<script>
-	var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
-	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
-
-	// Custom elements
-	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
-
-	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
-	Services.scriptloader.loadSubScript("chrome://zotero/content/integration/addCitationDialog.js", this);
-</script>
-<item-tree-menu-bar/>
 <dialog
 	id="zotero-add-citation-dialog"
 	buttons="extra1,extra2,accept,cancel">
+	
+	<script>
+		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/addCitationDialog.js", this);
+	</script>
 
 
 	<vbox id="zotero-select-items-container" flex="1">
