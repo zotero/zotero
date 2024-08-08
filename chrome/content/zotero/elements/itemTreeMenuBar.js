@@ -95,6 +95,10 @@
 						document.getElementById("main-menubar").focus();
 					}
 				}, true);
+				// Hide menubar when it is no longer active
+				document.addEventListener("DOMMenuBarInactive", (_) => {
+					this.hidden = true;
+				});
 			}
 		}
 	}
