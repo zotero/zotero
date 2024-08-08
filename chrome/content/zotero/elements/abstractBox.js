@@ -35,7 +35,6 @@
 			<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
 				<html:div class="body">
 					<editable-text multiline="true" data-l10n-id="abstract-field" data-l10n-attrs="placeholder" />
-					<browser type="content" remote="true" messagemanagergroup="feedAbstract" hidden="true" />
 				</html:div>
 			</collapsible-section>
 		`);
@@ -75,10 +74,6 @@
 			this._abstractField = this.querySelector('editable-text');
 			this._abstractField.addEventListener('blur', () => this.save());
 			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
-			
-			this._feedAbstractBrowser = this.querySelector('browser');
-			this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
-
 			this.render();
 		}
 
@@ -126,10 +121,10 @@
 		}
 		
 		async _renderFeedItem() {
+			await this._ensureFeedAbstractBrowserExists();
 			let url = this.item.library.url;
 			let html = this.item.getField('abstractNote');
 			this._abstractField.hidden = true;
-			this._feedAbstractBrowser.hidden = false;
 			this._section.summary = Zotero.Utilities.cleanTags(html);
 			
 			let actor = this._feedAbstractBrowser.browsingContext.currentWindowGlobal.getActor('FeedAbstract');
@@ -137,9 +132,10 @@
 		}
 		
 		_renderRegularItem() {
+			this._discardFeedAbstractBrowser();
+
 			let abstract = this.item.getField('abstractNote');
 			this._abstractField.hidden = false;
-			this._feedAbstractBrowser.hidden = true;
 			this._section.summary = abstract;
 			// If focused, update the value that will be restored on Escape;
 			// otherwise, update the displayed value
@@ -151,6 +147,47 @@
 			}
 			this._abstractField.readOnly = !this.editable;
 			this._abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));
+		}
+
+		async _ensureFeedAbstractBrowserExists() {
+			if (!this._feedAbstractBrowser) {
+				// dynamically create a browser element to avoid spawning a process for every tab (#4530)
+				this._feedAbstractBrowser = document.createXULElement("browser");
+				this._feedAbstractBrowser.setAttribute("type", "content");
+				this._feedAbstractBrowser.setAttribute("remote", "true");
+				this._feedAbstractBrowser.setAttribute("messagemanagergroup", "feedAbstract");
+				this.querySelector('.body').appendChild(this._feedAbstractBrowser);
+				this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
+				let webProgress = this._feedAbstractBrowser.browsingContext.webProgress;
+
+				return new Promise((resolve) => {
+					let progressListener = {
+						onStateChange(_progressData, _requestData, stateFlags) {
+							if (stateFlags & Ci.nsIWebProgressListener.STATE_STOP) {
+								webProgress.removeProgressListener(progressListener);
+								resolve();
+							}
+						},
+						QueryInterface: ChromeUtils.generateQI([
+							"nsIWebProgressListener",
+							"nsISupportsWeakReference"
+						])
+					};
+					
+					webProgress.addProgressListener(
+						progressListener,
+						Ci.nsIWebProgress.NOTIFY_STATE_ALL
+					);
+				});
+			}
+			return Promise.resolve();
+		}
+
+		_discardFeedAbstractBrowser() {
+			if (this._feedAbstractBrowser) {
+				this._feedAbstractBrowser.remove();
+				this._feedAbstractBrowser = null;
+			}
 		}
 	}
 	customElements.define("abstract-box", AbstractBox);
