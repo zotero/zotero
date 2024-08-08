@@ -54,6 +54,8 @@
 		display: none;
 		box-shadow: none;
 		z-index: 1;
+		// Fix single click on arrow not working
+		-moz-window-dragging: no-drag;
 
 		> button {
 			width: auto;
