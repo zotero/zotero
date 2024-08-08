@@ -52,7 +52,7 @@
 			this._selectField = null;
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
-			this._switchedTypeOfCreator = null;
+			this._switchedModeOfCreator = null;
 		}
 
 		get content() {
@@ -1045,7 +1045,7 @@
 			switchCreatorModeButton.setAttribute('id', `creator-${rowIndex}-switchType`);
 			switchCreatorModeButton.addEventListener("command", () => {
 				// Record that this creator is being updated. It is used to avoid flickering during re-render
-				this._switchedTypeOfCreator = rowIndex;
+				this._switchedModeOfCreator = rowIndex;
 				let fieldMode = parseInt(lastNameElem.getAttribute("fieldMode"));
 				this.switchCreatorMode(row, fieldMode == 1 ? 0 : 1, false, true, rowIndex);
 			});
@@ -1112,9 +1112,9 @@
 			// and then immediately disappearing when the css rule kicks in if the row is hovered.
 			// Instead, mark it with ".show-without-hover" to just display buttons and add "show-on-hover" back
 			// on the next tick, which looks less jumpy.
-			if (this._switchedTypeOfCreator == rowIndex) {
+			if (this._switchedModeOfCreator == rowIndex) {
 				this._swapClasses([...rowData.querySelectorAll(".show-on-hover")], "show-on-hover", "show-without-hover");
-				this._switchedTypeOfCreator = null;
+				this._switchedModeOfCreator = null;
 				setTimeout(() => {
 					this._swapClasses([...rowData.querySelectorAll(".show-without-hover")], "show-without-hover", "show-on-hover");
 				});
