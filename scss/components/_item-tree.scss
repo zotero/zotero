@@ -111,19 +111,20 @@
 			.icon-item-type + .colored-tag-swatches {
 				margin-left: 4px;
 			}
+
+			.emoji + .emoji,
+			.emoji + .colored-tag-swatches,
+			.colored-tag-swatches + .emoji {
+				margin-left: 4px;
+
+				:root:-moz-locale-dir(rtl) & {
+					margin-left: 0;
+					margin-right: 4px;
+				}
+			}
 			
 			.tag-swatch {
 				display: inline-block;
-
-				&.emoji + .emoji,
-				&.emoji + .colored-tag-swatches {
-					margin-left: 4px;
-					
-					:root:-moz-locale-dir(rtl) & {
-						margin-left: 0;
-						margin-right: 4px;
-					}
-				}
 
 				&.colored {
 					-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
