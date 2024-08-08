@@ -59,6 +59,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		Zotero.debug(`Initializing React ItemTree ${opts.id}`);
 		var ref;
 		opts.domEl = domEl;
+		let itemTreeMenuBar = null;
+		// Add a menubar with View options to manipulate the table (only if a menubar doesn't already exist in .xhtml)
+		if (!document.querySelector("menubar")) {
+			itemTreeMenuBar = document.createXULElement("item-tree-menu-bar");
+			let win = document.querySelector("window");
+			win.insertBefore(itemTreeMenuBar, win.firstChild);
+		}
 		await new Promise((resolve) => {
 			ReactDOM.createRoot(domEl).render(<ItemTree ref={(c) => {
 				ref = c;
@@ -66,6 +73,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			} } {...opts} />);
 		});
 		
+		if (itemTreeMenuBar) {
+			itemTreeMenuBar.init(ref);
+		}
 		Zotero.debug(`React ItemTree ${opts.id} initialized`);
 		return ref;
 	}
