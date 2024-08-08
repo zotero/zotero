@@ -26,6 +26,16 @@
 "use strict";
 
 {
+	const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+	const lazy = {};
+	XPCOMUtils.defineLazyPreferenceGetter(
+		lazy,
+		"BIDI_BROWSER_UI",
+		"bidi.browser.ui",
+		false
+	);
+
 	class EditableText extends XULElementBase {
 		_input;
 		
@@ -43,7 +53,8 @@
 			'nowrap',
 			'autocomplete',
 			'min-lines',
-			'max-lines'
+			'max-lines',
+			'dir'
 		];
 		
 		static get _textMeasurementSpan() {
@@ -128,8 +139,8 @@
 		}
 		
 		set value(value) {
-			this.setAttribute('value', value || '');
 			this.resetTextDirection();
+			this.setAttribute('value', value || '');
 		}
 		
 		get initialValue() {
@@ -163,15 +174,21 @@
 			}
 		}
 		
+		get dir() {
+			return this.getAttribute('dir');
+		}
+		
+		set dir(dir) {
+			this.setAttribute('dir', dir);
+		}
+		
 		get ref() {
 			return this._input;
 		}
 
 		resetTextDirection() {
 			this._textDirection = null;
-			if (this._input) {
-				this._input.dir = null;
-			}
+			this._input?.removeAttribute('dir');
 		}
 		
 		sizeToContent = () => {
@@ -297,13 +314,32 @@
 			}
 
 			// Set text direction automatically if user has enabled bidi utilities
-			if ((!this._input.dir || this._input.dir === 'auto') && Zotero.Prefs.get('bidi.browser.ui', true)) {
-				if (!this._textDirection) {
-					this._textDirection = window.windowUtils.getDirectionFromText(this._input.value) === Ci.nsIDOMWindowUtils.DIRECTION_RTL
-						? 'rtl'
-						: 'ltr';
+			if ((!this._input.dir || this._input.dir === 'auto') && lazy.BIDI_BROWSER_UI) {
+				// If we haven't already guessed (or been given) a direction,
+				// see if we can guess from the text
+				if (!this.dir) {
+					switch (window.windowUtils.getDirectionFromText(this._input.value)) {
+						case Ci.nsIDOMWindowUtils.DIRECTION_RTL:
+							this.dir = 'rtl';
+							break;
+						case Ci.nsIDOMWindowUtils.DIRECTION_LTR:
+							this.dir = 'ltr';
+							break;
+						case Ci.nsIDOMWindowUtils.DIRECTION_NOT_SET:
+						default:
+							this.dir = 'auto';
+							break;
+					}
 				}
-				this._input.dir = this._textDirection;
+				// If all we have is 'auto' but the input has no text, use the
+				// app locale
+				if (this.dir === 'auto' && !this._input.value) {
+					this._input.dir = Zotero.dir;
+				}
+				// Otherwise, use the direction we guessed/were given
+				else {
+					this._input.dir = this.dir;
+				}
 			}
 		}
 		

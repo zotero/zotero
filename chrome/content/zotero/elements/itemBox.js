@@ -26,6 +26,16 @@
 "use strict";
 
 {
+	const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+	const lazy = {};
+	XPCOMUtils.defineLazyPreferenceGetter(
+		lazy,
+		"BIDI_BROWSER_UI",
+		"bidi.browser.ui",
+		false
+	);
+
 	class ItemBox extends ItemPaneSectionElementBase {
 		constructor() {
 			super();
@@ -1512,17 +1522,15 @@
 			
 			valueElement.value = valueText;
 
-			// Attempt to make bidi things work automatically:
-			// If we have text to work off of, let the layout engine try to guess the text direction
-			if (valueText) {
-				valueElement.dir = 'auto';
-			}
-			// If not, assume it follows the locale's direction
-			else {
-				valueElement.dir = Zotero.dir;
+			if (lazy.BIDI_BROWSER_UI) {
+				// Attempt to guess text direction automatically
+				let language = this.item.getField('language');
+				valueElement.dir = Zotero.ItemFields.getDirection(
+					this.item.itemTypeID, fieldName, language
+				);
 			}
 			
-			// Regardless, align the text in the label consistently, following the locale's direction
+			// Regardless, align the text in unfocused fields consistently, following the locale's direction
 			if (Zotero.rtl) {
 				valueElement.style.textAlign = 'right';
 			}

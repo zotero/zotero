@@ -35,6 +35,15 @@ const { getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
 const { Cc, Ci, Cu, ChromeUtils } = require('chrome');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
+const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+const lazy = {};
+XPCOMUtils.defineLazyPreferenceGetter(
+	lazy,
+	"BIDI_BROWSER_UI",
+	"bidi.browser.ui",
+	false
+);
 
 /**
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
@@ -2851,7 +2860,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 		textSpan.className = "cell-text";
-		textSpan.dir = 'auto';
+		if (lazy.BIDI_BROWSER_UI) {
+			textSpan.dir = Zotero.ItemFields.getDirection(
+				item.itemTypeID, column.dataKey, item.getField('language')
+			);
+		}
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
 		if (Zotero.Prefs.get('ui.tagsAfterTitle')) {
