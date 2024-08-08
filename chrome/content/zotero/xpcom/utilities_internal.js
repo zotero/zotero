@@ -1701,52 +1701,6 @@ Zotero.Utilities.Internal = {
 		return menu;
 	},
 
-	// Show View > Columns, Sort By and Move Column menus for windows that have an itemTree
-	handleItemTreeMenuShowing: function (event, menuID, itemsView) {
-		let document = event.target.ownerDocument;
-		let menuPopup = document.getElementById(menuID).menupopup;
-		if (event.target !== menuPopup) {
-			return;
-		}
-		menuPopup.replaceChildren();
-		if (menuID == "column-picker-submenu") {
-			// View > Columns
-			itemsView?.buildColumnPickerMenu(menuPopup);
-		}
-		else if (menuID == "sort-submenu") {
-			// View > Sort By
-			itemsView?.buildSortMenu(menuPopup);
-			for (let i = 0; i < 10; i++) {
-				if (!menuPopup.children[i]) {
-					break;
-				}
-				menuPopup.children[i].setAttribute('key', 'key_sortCol' + i);
-			}
-		}
-		else if (menuID == "column-move-submenu") {
-			// View > Move Column
-			itemsView?.buildColumnMoverMenu(menuPopup);
-		}
-	},
-
-	// Set the access keys for menuitems to sort the itemTree
-	setItemTreeSortKeys(window, itemsView, condition) {
-		let sortSubmenuKeys = window.document.getElementById('sortSubmenuKeys');
-		if (!condition) {
-			condition = () => true;
-		}
-		for (let i = 0; i < 10; i++) {
-			let key = sortSubmenuKeys.children[i];
-			key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'alt');
-			key.setAttribute('key', (i + 1) % 10);
-			key.addEventListener('command', () => {
-				if (condition()) {
-					itemsView.toggleSort(i, true);
-				}
-			});
-		}
-	},
-	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
 			throw new Error("openPreferences() now takes an 'options' object -- update your code");

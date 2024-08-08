@@ -1655,7 +1655,7 @@ var ZoteroPane = new function()
 			ZoteroPane.itemsView.onRefresh.addListener(() => ZoteroPane.setTagScope());
 			ZoteroPane.itemsView.waitForLoad().then(() => Zotero.uiIsReady());
 
-			Zotero.Utilities.Internal.setItemTreeSortKeys(window, ZoteroPane.itemsView, () => Zotero_Tabs.selectedType === 'library');
+			ItemTreeMenuBar.setItemTreeSortKeys(ZoteroPane.itemsView);
 		}
 		catch (e) {
 			Zotero.logError(e);

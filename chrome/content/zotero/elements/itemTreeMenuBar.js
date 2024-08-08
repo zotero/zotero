@@ -23,85 +23,128 @@
     ***** END LICENSE BLOCK *****
 */
 
-"use strict";
 
-{
-	class ItemTreeMenuBar extends XULElement {
-		// Menu bar containing View options for manipulating the itemTree table
-		// (View > Columns, Sort By, Move Column).
-		// Should be added to non-main windows or dialogs containing an itemTree
-		// to expose the functionality of table manipulation to keyboard users.
-		// On Windows or Linux, this menubar appears on Alt keypress.
-		constructor() {
-			super();
+class ItemTreeMenuBar extends XULElement {
+	// Menu bar containing View options for manipulating the itemTree table
+	// (View > Columns, Sort By, Move Column).
+	// Added to windows without a menubar by ItemTree.init()
+	// to expose the functionality of table manipulation to keyboard users.
+	// On Windows or Linux, this menubar appears on Alt keypress.
+	constructor() {
+		super();
+		this._inactiveTimeout = null;
 
-			this.content = MozXULElement.parseXULToFragment(`
-			<keyset id="sortSubmenuKeys">
-				<key id="key_sortCol0"/>
-				<key id="key_sortCol1"/>
-				<key id="key_sortCol2"/>
-				<key id="key_sortCol3"/>
-				<key id="key_sortCol4"/>
-				<key id="key_sortCol5"/>
-				<key id="key_sortCol6"/>
-				<key id="key_sortCol7"/>
-				<key id="key_sortCol8"/>
-				<key id="key_sortCol9"/>
-			</keyset>
-			<menubar id="main-menubar">
-				<menu id="view-menu"
-					label="&viewMenu.label;"
-					accesskey="&viewMenu.accesskey;">
-					<menupopup id="menu_viewPopup">
-						<menu id="column-picker-submenu"
-							class="menu-type-library"
-							label="&columns.label;">
-							<menupopup/>
-						</menu>
-						<menu id="sort-submenu"
-							class="menu-type-library"
-							label="&sortBy.label;">
-							<menupopup/>
-						</menu>
-						<menu id="column-move-submenu"
-							class="menu-type-library"
-							label="&moveColumn.label;">
-							<menupopup/>
-						</menu>
-					</menupopup>
-				</menu>
-			</menubar>
-		`, ['chrome://zotero/locale/standalone.dtd']);
+		this.content = MozXULElement.parseXULToFragment(`
+		<keyset id="sortSubmenuKeys">
+			<key id="key_sortCol0"/>
+			<key id="key_sortCol1"/>
+			<key id="key_sortCol2"/>
+			<key id="key_sortCol3"/>
+			<key id="key_sortCol4"/>
+			<key id="key_sortCol5"/>
+			<key id="key_sortCol6"/>
+			<key id="key_sortCol7"/>
+			<key id="key_sortCol8"/>
+			<key id="key_sortCol9"/>
+		</keyset>
+		<menubar id="main-menubar">
+			<menu id="view-menu"
+				label="&viewMenu.label;"
+				accesskey="&viewMenu.accesskey;">
+				<menupopup id="menu_viewPopup">
+					<menu id="column-picker-submenu"
+						class="menu-type-library"
+						label="&columns.label;">
+						<menupopup/>
+					</menu>
+					<menu id="sort-submenu"
+						class="menu-type-library"
+						label="&sortBy.label;">
+						<menupopup/>
+					</menu>
+				</menupopup>
+			</menu>
+		</menubar>
+	`, ['chrome://zotero/locale/standalone.dtd']);
+	}
+
+
+	connectedCallback() {
+		this.append(document.importNode(this.content, true));
+		this.hidden = true;
+	}
+
+	// Show View > Columns, Sort By menus for windows that have an itemTree
+	static handleItemTreeMenuShowing(event, menu, itemsView) {
+		if (event.target !== menu.menupopup) {
+			return;
 		}
-
-
-		connectedCallback() {
-			this.append(document.importNode(this.content, true));
-			this.hidden = true;
+		menu.menupopup.replaceChildren();
+		if (menu.id == "column-picker-submenu") {
+			// View > Columns
+			itemsView.buildColumnPickerMenu(menu.menupopup);
 		}
-
-		init(itemTree) {
-			Zotero.Utilities.Internal.setItemTreeSortKeys(window, itemTree);
-			for (let menu of [...this.querySelectorAll(".menu-type-library")]) {
-				menu.addEventListener("popupshowing", (event) => {
-					Zotero.Utilities.Internal.handleItemTreeMenuShowing(event, menu.id, itemTree);
-				});
-			}
-			if (!Zotero.isMac) {
-				// On windows and linux, display and focus menubar on Alt keypress
-				document.addEventListener("keydown", (event) => {
-					if (event.key == "Alt") {
-						this.hidden = !this.hidden;
-						document.getElementById("main-menubar").focus();
-					}
-				}, true);
-				// Hide menubar when it is no longer active
-				document.addEventListener("DOMMenuBarInactive", (_) => {
-					this.hidden = true;
-				});
+		else if (menu.id == "sort-submenu") {
+			// View > Sort By
+			itemsView.buildSortMenu(menu.menupopup);
+			for (let i = 0; i < 10; i++) {
+				if (!menu.menupopup.children[i]) {
+					break;
+				}
+				menu.menupopup.children[i].setAttribute('key', 'key_sortCol' + i);
 			}
 		}
 	}
-	
-	customElements.define("item-tree-menu-bar", ItemTreeMenuBar);
+
+	// Set the access keys for menuitems to sort the itemTree
+	static setItemTreeSortKeys(itemsView) {
+		let sortSubmenuKeys = document.getElementById('sortSubmenuKeys');
+		for (let i = 0; i < 10; i++) {
+			let key = sortSubmenuKeys.children[i];
+			key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'alt');
+			key.setAttribute('key', (i + 1) % 10);
+			key.addEventListener('command', () => {
+				if (!window.Zotero_Tabs || window.Zotero_Tabs.selectedType == 'library') {
+					itemsView.toggleSort(i, true);
+				}
+			});
+		}
+	}
+
+	init(itemTree) {
+		this.constructor.setItemTreeSortKeys(itemTree);
+		for (let menu of [...this.querySelectorAll(".menu-type-library")]) {
+			menu.addEventListener("popupshowing", (event) => {
+				this.constructor.handleItemTreeMenuShowing(event, menu, itemTree);
+			});
+		}
+		if (!Zotero.isMac) {
+			// On windows and linux, display and focus menubar on Alt keypress
+			document.addEventListener("keydown", (event) => {
+				if (event.key == "Alt") {
+					this.hidden = !this.hidden;
+					document.getElementById("main-menubar").focus();
+				}
+			}, true);
+			// Hide menubar on click or tab away. If a selected menu is clicked, it will
+			// fire DOMMenuBarInactive event first followed by DOMMenuBarActive.
+			// Listen to both events and hide inactive menu after delay if it is not cancelled.
+			// https://searchfox.org/mozilla-central/source/browser/base/content/browser-customization.js#165
+			document.addEventListener("DOMMenuBarInactive", (_) => {
+				this._inactiveTimeout = setTimeout(() => {
+					this._inactiveTimeout = null;
+					this.hidden = true;
+				});
+			});
+			document.addEventListener("DOMMenuBarActive", (_) => {
+				if (this._inactiveTimeout) {
+					clearTimeout(this._inactiveTimeout);
+					this._inactiveTimeout = null;
+				}
+				this.hidden = false;
+			});
+		}
+	}
 }
+
+customElements.define("item-tree-menu-bar", ItemTreeMenuBar);
