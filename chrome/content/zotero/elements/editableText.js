@@ -43,6 +43,8 @@
 		
 		_ignoredWindowInactiveBlur = false;
 		
+		_focusMousedownEvent = false;
+		
 		static observedAttributes = [
 			'multiline',
 			'readonly',
@@ -365,12 +367,23 @@
 				return;
 			}
 
+			let valueBeforeFocus = this.value;
 			this.dispatchEvent(new CustomEvent('focus'));
+			let valueAfterFocus = this.value;
 			this.classList.add("focused");
+			
 			// Select all text if focused via keyboard
-			if (!this.getAttribute("mousedown")) {
-				this._input.setSelectionRange(0, this._input.value.length, "backward");
+			if (!this._focusMousedownEvent) {
+				this.select();
 			}
+			// Fix the cursor position if value or text alignment changed on mouse focus
+			else if (valueBeforeFocus !== valueAfterFocus || getComputedStyle(this._input).direction !== Zotero.dir) {
+				let pos = document.caretPositionFromPoint(this._focusMousedownEvent.clientX, this._focusMousedownEvent.clientY);
+				if (pos.offsetNode === this._input) {
+					this._input.selectionStart = this._input.selectionEnd = pos.offset;
+				}
+			}
+
 			if (!('initialValue' in this._input.dataset)) {
 				this._input.dataset.initialValue = this._input.value;
 			}
@@ -388,10 +401,10 @@
 		
 		_resetStateAfterBlur() {
 			this._ignoredWindowInactiveBlur = false;
+			this._focusMousedownEvent = null;
 			this.classList.remove('focused');
 			this._input.scrollLeft = 0;
 			this._input.setSelectionRange(0, 0);
-			this.removeAttribute('mousedown');
 			delete this._input.dataset.initialValue;
 		}
 
@@ -432,10 +445,12 @@
 		};
 		
 		_handleMouseDown = (event) => {
-			this.setAttribute("mousedown", true);
 			// Prevent a right-click from focusing the input when unfocused
 			if (event.button === 2 && document.activeElement !== this._input) {
 				event.preventDefault();
+			}
+			else {
+				this._focusMousedownEvent = event;
 			}
 		};
 		
@@ -486,6 +501,10 @@
 		
 		get focused() {
 			return this._input && document.activeElement === this._input;
+		}
+		
+		select() {
+			this._input.setSelectionRange(0, this._input.value.length, "backward");
 		}
 	}
 	customElements.define("editable-text", EditableText);
