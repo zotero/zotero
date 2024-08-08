@@ -4,22 +4,7 @@ richlistbox {
 	// Prevent horizontal scrollbar on Windows
 	overflow-x: hidden;
 
-	// Following rules from https://searchfox.org/mozilla-central/source/toolkit/themes/windows/global/richlistbox.css
 	richlistitem {
-		--listitem-selectedBackground: var(--color-quarternary-on-sidepane);;
-		--listitem-selectedFocusCurrentBackground: var(--color-accent);
-		--listitem-selectedTextColor: var(--color-accent-text);
-		--listitem-selectedBorder: transparent;
-		--listitem-selectedBottomBorder: transparent;
-		--listitem-selectedCurrentBorder: transparent;
-		--listitem-selectedFocusBorder: transparent;
-		--listitem-selectedFocusBottomBorder: transparent;
-		--listitem-selectedFocusCurrentBorder: transparent;
-		--listitem-selectedFocusBackground: var(--color-accent);
-		--listitem-selectedFocusColor: var(--accent-white);
-		--listitem-selectedColor: var(--accent-white);
-		--listitem-selectedFocusCurrentBottomBorder: transparent;
-
 		padding: 0.2em 0.4em;
 		align-items: center;
 
@@ -41,38 +26,19 @@ richlistbox {
 			width: 100%;
 		}
 
+		// Selected but not focused
 		&[selected="true"] {
-			border-top-color: var(--listitem-selectedBorder);
-			border-inline-color: var(--listitem-selectedBorder);
-			border-bottom-color: var(--listitem-selectedBottomBorder);
-			background-image: var(--listitem-selectedImage);
-			background-color: var(--listitem-selectedBackground);
-			color: var(--listitem-selectedTextColor);
+			background-color: var(--color-quarternary-on-sidepane);
+			color: var(--color-accent-text);
 		}
 	}
 
 	&:focus {
 		& > richlistitem {
+			// Selected and focused
 			&[selected="true"] {
-				border-top-color: var(--listitem-selectedFocusBorder);
-				border-inline-color: var(--listitem-selectedFocusBorder);
-				border-bottom-color: var(--listitem-selectedFocusBottomBorder);
-				background-image: var(--listitem-selectedFocusImage);
-				background-color: var(--listitem-selectedFocusBackground);
-				color: var(--listitem-selectedTextColor);
-			}
-
-			&[current="true"] {
-				border-color: var(--listitem-selectedCurrentBorder);
-				outline: none;
-			}
-
-			&[selected="true"][current="true"] {
-				border-top-color: var(--listitem-selectedFocusCurrentBorder);
-				border-inline-color: var(--listitem-selectedFocusCurrentBorder);
-				border-bottom-color: var(--listitem-selectedFocusCurrentBottomBorder);
-				background-color: var(--listitem-selectedFocusCurrentBackground);
-				outline: none;
+				background-color: var(--color-accent);
+				color: var(--color-accent-text);
 			}
 		}
 
