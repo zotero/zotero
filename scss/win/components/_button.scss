@@ -1,14 +1,14 @@
-// Use :where to reset specificity to 0
+// Use :is to give the sub-selectors 0 specificity, allowing the whole thing to be
+// overridden by anything with element-selector specificity or higher
 // https://css-tricks.com/using-the-specificity-of-where-as-a-css-reset/
-
-// skip React Button element
-:where(
-	button:not(.btn, [type=checkbox], [type=radio]),
-	input:is([type=button], [type=submit])
+:is(
+	// skip React Button element
+	button:where(:not(.btn, [type=checkbox], [type=radio])),
+	input:where([type=button], [type=submit])
 ) {
 	@include windows-form-element;
 
-	padding: 4px 11px 6px 11px !important;
+	padding: 4px 11px 6px 11px;
 
 	&[default] {
 		color: var(--accent-white);
