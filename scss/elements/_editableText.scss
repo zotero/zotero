@@ -93,6 +93,7 @@ editable-text {
 		&:read-only, &:not(:focus) {
 			appearance: none;
 			background: transparent;
+			text-align: inherit;
 		}
 		
 		&:hover:not(:read-only, :focus) {

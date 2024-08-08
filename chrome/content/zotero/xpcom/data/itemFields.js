@@ -419,6 +419,75 @@ Zotero.ItemFields = new function() {
 	
 	
 	/**
+	 * Guess the text direction of a field, using the item's language field if available.
+	 *
+	 * @param {string | number} field
+	 * @param {string} [itemLanguage]
+	 * @returns {'auto' | 'ltr' | 'rtl'}
+	 */
+	this.getDirection = function (field, itemLanguage) {
+		field = this.getName(field) || field;
+		switch (field) {
+			// Certain fields containing IDs, numbers, and data: always LTR
+			case 'ISBN':
+			case 'ISSN':
+			case 'DOI':
+			case 'url':
+			case 'callNumber':
+			case 'volume':
+			case 'numberOfVolumes':
+			case 'issue':
+			case 'runningTime':
+			case 'billNumber':
+			case 'number':
+			case 'versionNumber':
+			case 'documentNumber':
+			case 'patentNumber':
+			case 'applicationNumber':
+			case 'priorityNumbers':
+			case 'episodeNumber':
+			case 'reportNumber':
+			case 'codeNumber':
+			case 'publicLawNumber':
+			case 'archiveID':
+			case 'codePages':
+			case 'pages':
+			case 'numPages':
+			case 'seriesNumber':
+			case 'edition':
+			case 'identifier':
+			case 'citationKey':
+			case 'language':
+			case 'extra':
+				return 'ltr';
+			// Primary fields: follow app locale
+			case 'dateAdded':
+			case 'dateModified':
+			case 'accessDate':
+				return Zotero.dir;
+			// Everything else: guess based on the language if we have one; otherwise auto
+			default:
+				if (itemLanguage) {
+					let languageCode = Zotero.Utilities.Item.languageToISO6391(itemLanguage);
+					try {
+						let locale = new Intl.Locale(languageCode).maximize();
+						// https://www.w3.org/International/questions/qa-scripts#directions
+						// TODO: Remove this once Fx supports Intl.Locale#getTextInfo()
+						if (['Adlm', 'Arab', 'Aran', 'Rohg', 'Hebr', 'Mand', 'Mend', 'Nkoo', 'Hung', 'Samr', 'Syrc', 'Thaa', 'Yezi']
+								.includes(locale.script)) {
+							return 'rtl';
+						}
+					}
+					catch (e) {
+					}
+					return 'ltr';
+				}
+				return 'auto';
+		}
+	};
+
+
+	/**
 	* Check whether a field is valid, throwing an exception if not
 	* (since it should never actually happen)
 	**/
