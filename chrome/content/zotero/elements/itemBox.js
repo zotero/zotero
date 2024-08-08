@@ -52,6 +52,7 @@
 			this._selectField = null;
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
+			this._switchedModeOfCreator = null;
 		}
 
 		get content() {
@@ -64,7 +65,6 @@
 								<menupopup id="zotero-creator-transform-menu">
 									<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
 									<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.fixCase;"/>
-									<menuitem id="creator-transform-switch"/>
 									<menuseparator id="zotero-creator-move-sep"/>
 									<menuitem id="zotero-creator-move-to-top" class="zotero-creator-move" data-l10n-id="item-creator-moveToTop"/>
 									<menuitem id="zotero-creator-move-up" class="zotero-creator-move" data-l10n-id="item-creator-moveUp"/>
@@ -147,8 +147,6 @@
 				this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
 				this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
 				this._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);
-				var creatorNameBox = row.getElementsByClassName("creator-name-box")[0];
-				this._id('creator-transform-switch').setAttribute("label", creatorNameBox.getAttribute("switch-mode-label"));
 			});
 
 			// Ensure no button is forced to stay visible once the menu is closed
@@ -186,13 +184,6 @@
 							break;
 					}
 					this.moveCreator(index, dir);
-				}
-				else if (event.explicitOriginalTarget.id == "creator-transform-switch") {
-					// Switch creator field mode action
-					var creatorNameBox = row.getElementsByClassName("creator-name-box")[0];
-					var lastName = creatorNameBox.firstChild;
-					let fieldMode = parseInt(lastName.getAttribute("fieldMode"));
-					this.switchCreatorMode(row, fieldMode == 1 ? 0 : 1, false, true, index);
 				}
 			});
 
@@ -1047,6 +1038,18 @@
 			}
 			
 			rowData.appendChild(firstlast);
+
+			// Switch creator type button
+			var switchCreatorModeButton = document.createXULElement('toolbarbutton');
+			switchCreatorModeButton.setAttribute("class", "zotero-clicky zotero-clicky-switch-type show-on-hover no-display");
+			switchCreatorModeButton.setAttribute('id', `creator-${rowIndex}-switchType`);
+			switchCreatorModeButton.addEventListener("command", () => {
+				// Record that this creator is being updated. It is used to avoid flickering during re-render
+				this._switchedModeOfCreator = rowIndex;
+				let fieldMode = parseInt(lastNameElem.getAttribute("fieldMode"));
+				this.switchCreatorMode(row, fieldMode == 1 ? 0 : 1, false, true, rowIndex);
+			});
+			rowData.appendChild(switchCreatorModeButton);
 			
 			// Minus (-) button
 			var removeButton = document.createXULElement('toolbarbutton');
@@ -1094,7 +1097,7 @@
 				this.handlePopupOpening(e, menupopup);
 			};
 			rowData.appendChild(optionsButton);
-			
+
 			if (this.editable) {
 				optionsButton.addEventListener("command", triggerPopup);
 				rowData.oncontextmenu = triggerPopup;
@@ -1105,6 +1108,17 @@
 			// Delete existing unsaved creator row if any
 			this.removeUnsavedCreatorRow();
 
+			// If this creator row's type was just switched, remove ".show-on-hover" to avoid buttons appearing
+			// and then immediately disappearing when the css rule kicks in if the row is hovered.
+			// Instead, mark it with ".show-without-hover" to just display buttons and add "show-on-hover" back
+			// on the next tick, which looks less jumpy.
+			if (this._switchedModeOfCreator == rowIndex) {
+				this._swapClasses([...rowData.querySelectorAll(".show-on-hover")], "show-on-hover", "show-without-hover");
+				this._switchedModeOfCreator = null;
+				setTimeout(() => {
+					this._swapClasses([...rowData.querySelectorAll(".show-without-hover")], "show-without-hover", "show-on-hover");
+				});
+			}
 			let row = this.addDynamicRow(rowLabel, rowData, before);
 
 			this._ensureButtonsFocusable();
@@ -1243,12 +1257,15 @@
 		switchCreatorMode(row, fieldMode, initial, updatePref, rowIndex) {
 			// Change if button position changes
 			var creatorNameBox = row.querySelector(".creator-name-box");
+			let switchTypeBtn = row.querySelector(".zotero-clicky-switch-type");
 			var lastName = creatorNameBox.firstChild;
 			var firstName = creatorNameBox.lastChild;
 
 			// Switch to single-field mode
 			if (fieldMode == 1) {
 				creatorNameBox.setAttribute('switch-mode-label', Zotero.getString('pane.item.switchFieldMode.two'));
+				switchTypeBtn.setAttribute("type", "single");
+				switchTypeBtn.setAttribute("tooltiptext", Zotero.getString('pane.item.switchFieldMode.two'));
 				lastName.setAttribute('fieldMode', '1');
 				lastName.placeholder = this._defaultFullName;
 				delete lastName.style.width;
@@ -1270,6 +1287,8 @@
 			// Switch to two-field mode
 			else {
 				creatorNameBox.setAttribute('switch-mode-label', Zotero.getString('pane.item.switchFieldMode.one'));
+				switchTypeBtn.setAttribute("type", "dual");
+				switchTypeBtn.setAttribute("tooltiptext", Zotero.getString('pane.item.switchFieldMode.one'));
 				lastName.setAttribute('fieldMode', '0');
 
 				lastName.placeholder = this._defaultLastName;
@@ -2334,6 +2353,13 @@
 			}
 			else {
 				popup.openPopup(event.target);
+			}
+		}
+
+		_swapClasses(nodes, classToRemove, classToAdd) {
+			for (let node of nodes) {
+				node.classList.add(classToAdd);
+				node.classList.remove(classToRemove);
 			}
 		}
 		

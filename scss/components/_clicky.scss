@@ -64,6 +64,16 @@
 	color: var(--fill-secondary);
 }
 
+.zotero-clicky-switch-type[type=single] {
+	@include svgicon-menu("input-single", "universal", "16");
+	margin: 0;
+}
+
+.zotero-clicky-switch-type[type=dual] {
+	@include svgicon-menu("input-dual", "universal", "16");
+	margin: 0;
+}
+
 .zotero-clicky-preview-control {
 	@include svgicon-menu("preview-show", "universal", "16");
 	&[data-show-preview] {
