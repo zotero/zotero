@@ -1,10 +1,10 @@
 window.citation-dialog {
 	-moz-appearance: none;
-	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
+	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%) !important;
 }
 
 window.citation-dialog.note-dialog {
-	background: -moz-linear-gradient(-90deg, rgb(249, 231, 179) 0, rgb(228, 193, 94) 50%, rgb(221, 184, 81) 50%);
+	background: -moz-linear-gradient(-90deg, rgb(249, 231, 179) 0, rgb(228, 193, 94) 50%, rgb(221, 184, 81) 50%) !important;
 }
 
 .citation-dialog.entry {
