@@ -221,7 +221,7 @@
 				let action = toolbarbutton.dataset.action;
 				
 				if (action === 'locate') {
-					toolbarbutton.addEventListener('click', async (event) => {
+					toolbarbutton.addEventListener('mousedown', async (event) => {
 						if (event.button !== 0 || toolbarbutton.open) {
 							return;
 						}
