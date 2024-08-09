@@ -1254,9 +1254,7 @@ class EditorInstance {
 		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 			? 'popup' : 'alwaysRaised') + ',resizable=false,centerscreen';
 
-		win = that._quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
-		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xhtml', '', mode, {
+		win = that._quickFormatWindow = Zotero.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xhtml', '', mode, {
 			wrappedJSObject: io
 		});
 	}
