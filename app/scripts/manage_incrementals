@@ -84,6 +84,8 @@ if [ "$VERSION" ]; then
 elif [ "$NUM_VERSIONS" -gt 0 ]; then
 	# TEMP: Don't include 6.0 versions
 	#tail -n $NUM_VERSIONS "$INCR_PATH"
+	set +e
 	tail -n $NUM_VERSIONS "$INCR_PATH" | grep -v '^6\.0'
+	set -e
 fi
 rm "$INCR_PATH"
