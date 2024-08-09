@@ -1072,6 +1072,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		this.selection.clearSelection();
 		this.selection.focused = 0;
+		this._cachedBestAttachmentStates = false;
+
 		await this.refresh();
 		if (Zotero.CollectionTreeCache.error) {
 			return this.setItemsPaneMessage(Zotero.getString('pane.items.loadError'));
@@ -1291,11 +1293,26 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var order = this.getSortDirection(sortFields);
 		var collation = Zotero.getLocaleCollation();
 		var sortCreatorAsString = Zotero.Prefs.get('sortCreatorAsString');
-		
+
 		Zotero.debug(`Sorting items list by ${sortFields.join(", ")} ${order == 1 ? "ascending" : "descending"} `
 			+ (itemIDs && itemIDs.length
 				? `for ${itemIDs.length} ` + Zotero.Utilities.pluralize(itemIDs.length, ['item', 'items'])
 				: ""));
+
+		if (sortFields.includes('hasAttachment')) {
+			Zotero.debug("Caching best attachment states");
+			if (!this._cachedBestAttachmentStates) {
+				let t = new Date();
+				for (let i = 0; i < this._rows.length; i++) {
+					let item = this.getRow(i).ref;
+					if (this._canGetBestAttachmentState(item)) {
+						await item.getBestAttachmentState();
+					}
+				}
+				Zotero.debug("Cached best attachment states in " + (new Date - t) + " ms");
+				this._cachedBestAttachmentStates = true;
+			}
+		}
 		
 		// Set whether rows with empty values should sort at the beginning
 		var emptyFirst = {
@@ -3725,20 +3742,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_handleColumnSort = async (index, sortDirection) => {
 		let columnSettings = this._getColumnPrefs();
 		let column = this._getColumn(index);
-		if (column.dataKey == 'hasAttachment') {
-			Zotero.debug("Caching best attachment states");
-			if (!this._cachedBestAttachmentStates) {
-				let t = new Date();
-				for (let i = 0; i < this._rows.length; i++) {
-					let item = this.getRow(i).ref;
-					if (this._canGetBestAttachmentState(item)) {
-						await item.getBestAttachmentState();
-					}
-				}
-				Zotero.debug("Cached best attachment states in " + (new Date - t) + " ms");
-				this._cachedBestAttachmentStates = true;
-			}
-		}
 		if (this._sortedColumn && this._sortedColumn.dataKey == column.dataKey) {
 			this._sortedColumn.sortDirection = sortDirection;
 			if (columnSettings[column.dataKey]) {
