@@ -23,27 +23,32 @@ richlistbox:where(:focus) > richlistcheckbox[selected="true"] {
 }
 
 richlistbox[seltype="multiple"]:focus > richlistcheckbox[current="true"],
-richlistbox.theme-listbox:focus > richlistcheckbox[current="true"] {
+richlistbox:focus > richlistcheckbox[current="true"] {
 	outline: var(--default-focusring);
 	outline-color: var(--color-accent);
 	outline-offset: calc(-1 * var(--default-focusring-width));
 }
 
 richlistbox[seltype="multiple"]:focus > richlistcheckbox[current="true"][selected="true"],
-richlistbox.theme-listbox:focus > richlistcheckbox[current="true"][selected="true"] {
+richlistbox:focus > richlistcheckbox[current="true"][selected="true"] {
 	outline-color: #F3D982; /* TODO: find a suitable system color */
 }
 
-richlistbox.theme-listbox:not(:focus) > richlistcheckbox[selected="true"] {
+richlistbox:not(:focus) > richlistcheckbox[selected="true"] {
 	background-color: -moz-cellhighlight;
 	color: -moz-cellhighlighttext;
 }
 
-richlistbox.theme-listbox > richlistcheckbox > label {
+richlistbox > richlistcheckbox > label {
 	margin: 0px;
 	padding-top: 0px;
 	padding-bottom: 1px;
 	padding-inline-start: 4px;
 	padding-inline-end: 0px;
 	white-space: nowrap;
+}
+
+richlistcheckbox[selected=true] {
+	background-color: -moz-cellhighlight;
+	color: -moz-cellhighlighttext;	
 }

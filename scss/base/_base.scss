@@ -3,6 +3,7 @@
 	font-size: 13px;
 	font-style: normal;
 	line-height: 1.3333333333;
+	--default-focusring-width: 1px;
 	@media (-moz-platform: windows) {
 		--color-accent: var(--accent-blue);
 		--color-accent-text: #fff;
