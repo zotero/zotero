@@ -110,6 +110,7 @@
 	text-overflow: ellipsis;
 	white-space: pre;
 	box-sizing: border-box;
+	color: var(--fill-primary);
 
 	@include comfortable {
 		padding: 2px 4px;
@@ -122,6 +123,7 @@
 	}
 
 	&.selected {
+		color: var(--color-background);
 		background-color: var(--fill-secondary);
 
 		&:hover {
@@ -177,13 +179,5 @@
 	&.dragged-over {
 		color: var(--color-background);
 		background-color: var(--fill-secondary);
-	}
-
-	span {
-		color: var(--fill-primary);
-
-		@include state('.tag-selector-item.selected') {
-			color: var(--color-background);
-		}
 	}
 }

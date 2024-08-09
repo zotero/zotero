@@ -213,7 +213,6 @@ class TagList extends React.PureComponent {
 		}
 		
 		if (tag.color) {
-			props.style.color = tag.color;
 			props['data-color'] = tag.color.toLowerCase();
 		}
 		
