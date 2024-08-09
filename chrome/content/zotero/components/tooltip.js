@@ -36,12 +36,14 @@ var Zotero_Tooltip = new function () {
 	var timeoutID;
 	var x;
 	var y;
+	var skip = false;
 	
 	/**
 	 * Start tracking the mouse and show a tooltip after it stops
 	 */
 	this.start = function (tooltipText) {
 		window.addEventListener('mousemove', handleMouseMove);
+		window.addEventListener('mousedown', handleMouseDown);
 		text = tooltipText;
 	};
 	
@@ -50,13 +52,27 @@ var Zotero_Tooltip = new function () {
 	 */
 	this.stop = function () {
 		window.removeEventListener('mousemove', handleMouseMove);
+		window.removeEventListener('mousedown', handleMouseDown);
 		clearTimeout(timeoutID);
 		// Mozilla hides the tooltip as soon as the mouse leaves the element, which is also different
 		// from macOS behavior
 		hidePopup();
 	};
+
+	// On click, hide current tooltip and do not show a new one for
+	// a bit to avoid a race condition when a tooltip might still appear
+	// if the click occurent right after the mouse stopped moving
+	function handleMouseDown() {
+		skip = true;
+		Zotero_Tooltip.stop();
+		setTimeout(() => {
+			skip = false;
+		}, MOUSE_STOP_DELAY * 2);
+	}
 	
 	function handleMouseMove(event) {
+		// Do nothing if any mouse key is being pressed
+		if (event.buttons) return;
 		if (timeoutID) {
 			clearTimeout(timeoutID);
 		}
@@ -66,6 +82,7 @@ var Zotero_Tooltip = new function () {
 	}
 	
 	function handleMouseStop() {
+		if (skip) return;
 		var tooltipElem = document.getElementById('fake-tooltip');
 		// Create the fake tooltip if it does not exist
 		if (!tooltipElem) {
