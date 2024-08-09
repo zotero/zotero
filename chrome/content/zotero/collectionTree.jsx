@@ -424,16 +424,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 		}
 
-		// since row has been re-rendered, if it has been toggled open/close, we need to force twisty animation
-		if (this._lastToggleOpenStateIndex === index) {
-			let twisty = div.querySelector('.twisty');
-			if (twisty) {
-				twisty.classList.toggle('open', !this.isContainerOpen(index));
-				setTimeout(() => {
-					twisty.classList.toggle('open', this.isContainerOpen(index));
-				}, 0);
-			}
-		}
+		this._animateExpandCollapse(index, div);
 
 		return div;
 	}
@@ -1181,10 +1172,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	toggleOpenState = async (index) => {
 		if (this.isContainerEmpty(index)) return;
 
-		this._lastToggleOpenStateIndex = index;
+		// cleanup after ongoing animations, if any is running
+		this._animation?.callback?.();
+
 		if (this.isContainerOpen(index)) {
 			await this._closeContainer(index);
-			this._lastToggleOpenStateIndex = null;
 			return;
 		}
 
@@ -1202,8 +1194,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._rows[index].isOpen = true;
 		this._refreshRowMap();
 		this._saveOpenStates();
+		this._animation = {
+			index, count, isOpen: true,
+			callback: () => {
+				this._animation = null;
+			}
+		};
 		this.tree.invalidate(index);
-		this._lastToggleOpenStateIndex = null;
 	}
 
 	/**
@@ -2300,24 +2297,44 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return treeRow && !(treeRow.isSeparator() || treeRow.isHeader());
 	}
 
-	_closeContainer(row, skipMap) {
-		if (!this.isContainerOpen(row) || this.isContainerEmpty(row)) return;
+	_closeContainer(index, skipRowMapRefresh) {
+		if (!this.isContainerOpen(index) || this.isContainerEmpty(index)) return;
 		
 		this.selection.selectEventsSuppressed = true;
-		
-		var level = this.getLevel(row);
-		var nextRow = row + 1;
-		
+
+		var count = 0;
+		var level = this.getLevel(index);
+		let rowsToRemove = [];
+
 		// Remove child rows
-		while ((nextRow < this._rows.length) && (this.getLevel(nextRow) > level)) {
-			this._removeRow(nextRow, true);
+		for (let i = 1; i < this._rows.length; i++) {
+			if (index + i >= this._rows.length || this.getLevel(index + i) <= level) {
+				break;
+			}
+			rowsToRemove.push(index + i);
+			count++;
 		}
 		this.selection.selectEventsSuppressed = false;
 		
-		this._rows[row].isOpen = false;
-		this._refreshRowMap();
-		this._saveOpenStates();
-		this.tree.invalidate();
+		this._rows[index].isOpen = false;
+
+		if (skipRowMapRefresh) {
+			this._removeRows(rowsToRemove);
+		}
+		else {
+			this._animation = {
+				index, count, isOpen: false,
+				callback: async () => {
+					this._animation = null; // ensure animation is cleared before next render
+					this._removeRows(rowsToRemove);
+					await this._refreshPromise;
+					this._saveOpenStates();
+					this.tree.invalidate();
+				}
+			};
+
+			this.tree.invalidate();
+		}
 	}
 	
 	_getIcon(index) {
