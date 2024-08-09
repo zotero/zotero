@@ -26,12 +26,24 @@
 "use strict";
 
 {
+	const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+	const lazy = {};
+	XPCOMUtils.defineLazyPreferenceGetter(
+		lazy,
+		"BIDI_BROWSER_UI",
+		"bidi.browser.ui",
+		false
+	);
+
 	class EditableText extends XULElementBase {
 		_input;
 		
 		_textDirection = null;
 		
 		_ignoredWindowInactiveBlur = false;
+		
+		_focusMousedownEvent = false;
 		
 		static observedAttributes = [
 			'multiline',
@@ -43,7 +55,8 @@
 			'nowrap',
 			'autocomplete',
 			'min-lines',
-			'max-lines'
+			'max-lines',
+			'dir'
 		];
 		
 		static get _textMeasurementSpan() {
@@ -128,8 +141,8 @@
 		}
 		
 		set value(value) {
-			this.setAttribute('value', value || '');
 			this.resetTextDirection();
+			this.setAttribute('value', value || '');
 		}
 		
 		get initialValue() {
@@ -163,15 +176,21 @@
 			}
 		}
 		
+		get dir() {
+			return this.getAttribute('dir');
+		}
+		
+		set dir(dir) {
+			this.setAttribute('dir', dir);
+		}
+		
 		get ref() {
 			return this._input;
 		}
 
 		resetTextDirection() {
 			this._textDirection = null;
-			if (this._input) {
-				this._input.dir = null;
-			}
+			this._input?.removeAttribute('dir');
 		}
 		
 		sizeToContent = () => {
@@ -297,13 +316,32 @@
 			}
 
 			// Set text direction automatically if user has enabled bidi utilities
-			if ((!this._input.dir || this._input.dir === 'auto') && Zotero.Prefs.get('bidi.browser.ui', true)) {
-				if (!this._textDirection) {
-					this._textDirection = window.windowUtils.getDirectionFromText(this._input.value) === Ci.nsIDOMWindowUtils.DIRECTION_RTL
-						? 'rtl'
-						: 'ltr';
+			if ((!this._input.dir || this._input.dir === 'auto') && lazy.BIDI_BROWSER_UI) {
+				// If we haven't already guessed (or been given) a direction,
+				// see if we can guess from the text
+				if (!this.dir) {
+					switch (window.windowUtils.getDirectionFromText(this._input.value)) {
+						case Ci.nsIDOMWindowUtils.DIRECTION_RTL:
+							this.dir = 'rtl';
+							break;
+						case Ci.nsIDOMWindowUtils.DIRECTION_LTR:
+							this.dir = 'ltr';
+							break;
+						case Ci.nsIDOMWindowUtils.DIRECTION_NOT_SET:
+						default:
+							this.dir = 'auto';
+							break;
+					}
 				}
-				this._input.dir = this._textDirection;
+				// If all we have is 'auto' but the input has no text, use the
+				// app locale
+				if (this.dir === 'auto' && !this._input.value) {
+					this._input.dir = Zotero.dir;
+				}
+				// Otherwise, use the direction we guessed/were given
+				else {
+					this._input.dir = this.dir;
+				}
 			}
 		}
 		
@@ -329,12 +367,23 @@
 				return;
 			}
 
+			let valueBeforeFocus = this.value;
 			this.dispatchEvent(new CustomEvent('focus'));
+			let valueAfterFocus = this.value;
 			this.classList.add("focused");
+			
 			// Select all text if focused via keyboard
-			if (!this.getAttribute("mousedown")) {
-				this._input.setSelectionRange(0, this._input.value.length, "backward");
+			if (!this._focusMousedownEvent) {
+				this.select();
 			}
+			// Fix the cursor position if value or text alignment changed on mouse focus
+			else if (valueBeforeFocus !== valueAfterFocus || getComputedStyle(this._input).direction !== Zotero.dir) {
+				let pos = document.caretPositionFromPoint(this._focusMousedownEvent.clientX, this._focusMousedownEvent.clientY);
+				if (pos.offsetNode === this._input) {
+					this._input.selectionStart = this._input.selectionEnd = pos.offset;
+				}
+			}
+
 			if (!('initialValue' in this._input.dataset)) {
 				this._input.dataset.initialValue = this._input.value;
 			}
@@ -352,10 +401,10 @@
 		
 		_resetStateAfterBlur() {
 			this._ignoredWindowInactiveBlur = false;
+			this._focusMousedownEvent = null;
 			this.classList.remove('focused');
 			this._input.scrollLeft = 0;
 			this._input.setSelectionRange(0, 0);
-			this.removeAttribute('mousedown');
 			delete this._input.dataset.initialValue;
 		}
 
@@ -396,10 +445,12 @@
 		};
 		
 		_handleMouseDown = (event) => {
-			this.setAttribute("mousedown", true);
 			// Prevent a right-click from focusing the input when unfocused
 			if (event.button === 2 && document.activeElement !== this._input) {
 				event.preventDefault();
+			}
+			else {
+				this._focusMousedownEvent = event;
 			}
 		};
 		
@@ -450,6 +501,10 @@
 		
 		get focused() {
 			return this._input && document.activeElement === this._input;
+		}
+		
+		select() {
+			this._input.setSelectionRange(0, this._input.value.length, "backward");
 		}
 	}
 	customElements.define("editable-text", EditableText);
