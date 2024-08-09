@@ -114,11 +114,13 @@ do
 	echo "$INCREMENTALS"
 	echo
 	
-	for from in $INCREMENTALS; do
-		echo "Building incremental update for $platform_name from $from to $VERSION"
-		"$ROOT_DIR/update-packaging/build_autoupdate.sh" -i "$from" -c "$CHANNEL" -p ${PLATFORMS:i:1} -l $VERSION
-		echo
-	done
+	if [ -n "$INCREMENTALS" ]; then
+		for from in $INCREMENTALS; do
+			echo "Building incremental update for $platform_name from $from to $VERSION"
+			"$ROOT_DIR/update-packaging/build_autoupdate.sh" -i "$from" -c "$CHANNEL" -p ${PLATFORMS:i:1} -l $VERSION
+			echo
+		done
+	fi
 done
 
 # Upload builds to S3
