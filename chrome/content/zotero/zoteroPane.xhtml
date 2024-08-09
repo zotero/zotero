@@ -908,6 +908,10 @@
 			<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
 			<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
 			<menuitem class="zotero-menuitem-edit-collection"/>
+			<menu class="menu-iconic zotero-menuitem-move-collection">
+				<menupopup id="zotero-move-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddCollectionToCollectionMenu(event)">
+				</menupopup>
+			</menu>
 			<menuitem class="zotero-menuitem-duplicate-collection"/>
 			<menuitem class="zotero-menuitem-mark-read-feed"/>
 			<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
@@ -962,7 +966,7 @@
 			<menuseparator/>
 			<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
 			<menu class="menu-iconic zotero-menuitem-add-to-collection">
-				<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
+				<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddItemToCollectionMenu(event)">
 					<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
 					<menuseparator id="zotero-add-to-collection-separator"/>
 				</menupopup>

@@ -2565,6 +2565,45 @@ var ZoteroPane = new function()
 		}
 	});
 
+	// Move selected collection to specified target collection.
+	// If target is in a different library, this collections is copied over.
+	// Essentially, a replication of drag-drop mechanism of collections from CollectionTree.onDrop.
+	this.moveToCollection = async (target) => {
+		let selected = this.getSelectedCollection();
+		if (!selected) return;
+		
+		if (target.libraryID == selected.libraryID) {
+			// Target is in the same library - just update parent of the collection
+			selected.parentID = target.id;
+			await selected.saveTx();
+		}
+		else {
+			// Target is in another library - copy the collection over
+			let targetTreeRowID = `L${target.libraryID}`;
+			if (target instanceof Zotero.Collection) {
+				targetTreeRowID = `C${target.id}`;
+				// Make sure the row is actually visible
+				await ZoteroPane.collectionsView.expandToCollection(target.id);
+			}
+			let targetTreeRowIndex = ZoteroPane.collectionsView.getRowIndexByID(targetTreeRowID);
+			let targetTreeRow = ZoteroPane.collectionsView.getRow(targetTreeRowIndex);
+			let copyOptions = {
+				tags: Zotero.Prefs.get('groups.copyTags'),
+				childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+				childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+				childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+				annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+			};
+			ZoteroPane.collectionsView.executeCollectionCopy({
+				collection: selected,
+				targetCollectionID: target.id,
+				targetLibraryID: target.libraryID,
+				targetTreeRow,
+				copyOptions
+			});
+		}
+	};
+
 	this.toggleSelectedItemsRead = Zotero.Promise.coroutine(function* () {
 		yield Zotero.FeedItems.toggleReadByID(this.getSelectedItems(true));
 	});
@@ -3180,6 +3219,10 @@ var ZoteroPane = new function()
 			oncommand: () => this.editSelectedCollection()
 		},
 		{
+			id: "moveToCollection",
+			oncommand: () => this.moveToCollection()
+		},
+		{
 			id: "duplicate",
 			oncommand: () => this.duplicateSelectedCollection()
 		},
@@ -3297,6 +3340,7 @@ var ZoteroPane = new function()
 				'newSubcollection',
 				'sep2',
 				'editSelectedCollection',
+				'moveToCollection',
 				'deleteCollection',
 				'deleteCollectionAndItems',
 				'sep3',
@@ -3316,6 +3360,7 @@ var ZoteroPane = new function()
 			
 			// Adjust labels
 			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-rename-collection');
+			document.l10n.setAttributes(m.moveToCollection, 'collections-menu-move-collection');
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collection'));
 			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collectionAndItems'));
@@ -3972,7 +4017,82 @@ var ZoteroPane = new function()
 	});
 
 
-	this.buildAddToCollectionMenu = function (event) {
+	// Build a menu to move or copy a collection into another collection and library.
+	// Alternative to dropping collection into another collection or group
+	this.buildAddCollectionToCollectionMenu = function (event) {
+		if (event.target !== event.currentTarget) return;
+		let popup = event.target;
+		popup.replaceChildren();
+
+		let selected = this.getSelectedCollection();
+		
+		// Build menus for each top-level collection of this library
+		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		for (let col of collections) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				col,
+				popup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.moveToCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				
+				(target) => {
+					// can't move collection into itself, its parent or its children
+					return selected == target
+						|| selected.parentKey == target.key
+						|| selected.hasDescendent('collection', target.id);
+				}
+			);
+			popup.append(menuItem);
+		}
+		// Fetch all libraries but the current one
+		let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed || lib.id == this.getSelectedLibraryID()));
+		if (libraries.length == 0) return;
+		// If they exist, create a separate menu for them to indicate that the collection
+		// is copied into those
+		let separator = document.createXULElement("menuseparator");
+		popup.appendChild(separator);
+
+		let otherLibrariesMenu = document.createXULElement("menu");
+		document.l10n.setAttributes(otherLibrariesMenu, "collections-menu-move-collection-other-library");
+		popup.appendChild(otherLibrariesMenu);
+		let otherLibrariesPopup = document.createXULElement("menupopup");
+		otherLibrariesMenu.appendChild(otherLibrariesPopup);
+		
+		// Build menus for additional libraries
+		for (let lib of libraries) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				lib,
+				otherLibrariesPopup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.moveToCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				
+				(target) => {
+					// can't move top-level collection into the library it already belongs to
+					if (target instanceof Zotero.Library) {
+						let libraryCollections = Zotero.Collections.getByLibrary(target.libraryID);
+						return libraryCollections.some(col => col == selected);
+					}
+					// can't move collection into itself, its parent or its children
+					return selected == target
+						|| selected.parentKey == target.key
+						|| selected.hasDescendent('collection', target.id);
+				}
+			);
+			otherLibrariesPopup.append(menuItem);
+		}
+	};
+
+	this.buildAddItemToCollectionMenu = function (event) {
 		if (event.target !== event.currentTarget) return;
 
 		let popup = event.target;
