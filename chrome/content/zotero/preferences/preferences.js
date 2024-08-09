@@ -326,6 +326,7 @@ var Zotero_Preferences = {
 		};
 		pane.loadPromise = rest();
 		await pane.loadPromise;
+		this._makeSectionsAriaAccessible(id);
 	},
 
 	/**
@@ -858,5 +859,32 @@ ${str}
 	openURL: function (url) {
 		Zotero.warn("Zotero_Preferences.openURL() is deprecated -- use Zotero.launchURL()");
 		Zotero.launchURL(url);
+	},
+
+	// Make sections focusable with aria-labels as the closest header.
+	// This is a workaround for JAWS to announce section titles and textual
+	// information.
+	_makeSectionsAriaAccessible: function (sectionID) {
+		for (let section of document.querySelectorAll(".section,.main-section")) {
+			let isMain = section.classList.contains("main-section");
+			let header = section.querySelector(isMain ? "h1" : "h2");
+			if (!header) continue;
+			section.setAttribute("tabindex", 0);
+			section.setAttribute("aria-label", header.textContent);
+		}
+		if (sectionID == "zotero-prefpane-cite") {
+			// Special treatment for integration sections because they are constructed by showPreferences of plugin installers
+			for (let groupBox of document.querySelectorAll("#zotero-macword-integration, #zotero-libreoffice-integration, #zotero-winword-integration")) {
+				groupBox.classList.add("section");
+				groupBox.setAttribute("tabindex", 0);
+				let header = groupBox.querySelector("h2");
+				header.setAttribute('id', groupBox.id + '_header');
+				let wordProcessorInfo = groupBox.querySelector("description");
+				wordProcessorInfo.setAttribute('id', groupBox.id + '_info');
+				// Screen readers ignore aria-describedby on groupboxes, so use set aria-labelledby
+				// even though it sounds a bit odd.
+				groupBox.setAttribute("aria-labelledby", `${groupBox.id + '_header'} ${groupBox.id + '_info'}`);
+			}
+		}
 	}
 };

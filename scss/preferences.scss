@@ -182,18 +182,24 @@ h1 {
 	}
 }
 
-groupbox > label > h2, groupbox > * > label > h2 {
-	border-bottom: none;
-	font-size: 15px;
-	font-weight: 600;
+.section, .main-section {
+	@include focus-ring;
+	border-radius: 5px;
 }
 
-groupbox:first-of-type label > h2 {
+.section > label > h2, .section > * > label > h2 {
+	border-bottom: none;
+	font-size: 14px;
+	font-weight: 600;
+	margin-bottom: 0.3em;
+}
+
+.section:first-of-type label > h2 {
 	margin-top: .5em !important;
 }
 
 /* Space out sections */
-groupbox:not(:first-of-type) label > h2 {
+.section:not(:first-of-type) label > h2 {
 	margin-top: 2em !important;
 }
 

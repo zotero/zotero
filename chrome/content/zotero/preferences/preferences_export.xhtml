@@ -24,7 +24,7 @@
 -->
 
 <vbox id="zotero-prefpane-export" onload="event.waitUntil(Zotero_Preferences.Export.init())">	
-	<groupbox id="zotero-prefpane-export-groupbox">
+	<vbox class="section" id="zotero-prefpane-export-groupbox" aria-describedby="quickCopy-instructions quickCopy-citationInstructions">
 		<vbox>
 			<label><html:h2>&zotero.preferences.quickCopy.caption;</html:h2></label>
 		</vbox>
@@ -89,5 +89,5 @@
 			<html:input aria-labelledby="zotero-prefpane-quickcopy-draglimit-label1 zotero-prefpane-quickcopy-draglimit-label2" type="text" preference="extensions.zotero.export.quickCopy.dragLimit" size="3"/>
 			<label id="zotero-prefpane-quickcopy-draglimit-label2" value="&zotero.preferences.items;" flex="1"/>
 		</hbox>
-	</groupbox>
+	</vbox>
 </vbox>
