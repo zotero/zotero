@@ -245,7 +245,7 @@ span.zotero-bubble-input {
 	font-size: 12px;
 	font: -moz-field;
 	-moz-user-focus: ignore;
-	color: gray;
+	color: var(--fill-secondary);
 }
 
 richlistitem[selected="true"] {
