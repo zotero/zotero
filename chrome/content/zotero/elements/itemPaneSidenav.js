@@ -29,7 +29,7 @@
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="inherit-flex highlight-notes-inactive"
-				tabindex="0" role="tab" aria-labelledby="sidenav-info-btn">
+				tabindex="0" role="tab" data-l10n-id="sidenav-main-btn-grouping">
 				<html:div class="pin-wrapper">
 					<toolbarbutton
 						id="sidenav-info-btn"

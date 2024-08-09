@@ -505,6 +505,8 @@ sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =
     .tooltiptext = { pane-related }
+sidenav-main-btn-grouping =
+    .aria-label = Item Details
 
 pin-section =
     .label = Pin Section
