@@ -74,3 +74,6 @@ preferences-advanced-enable-local-api =
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
+preferences-advanced-reset-data-dir =
+    .label =  Restore to default location
+    .tooltiptext = { $tooltiptext }
