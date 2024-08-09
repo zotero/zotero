@@ -242,6 +242,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 					: newSearchItems.filter(item => !!item.parentItemID).map(item => item.parentItemID)
 			);
 			this._searchParentIDs = newSearchParentIDs;
+			
+			let t1 = Date.now();
+			await Promise.all(newSearchItems
+				.filter(i => this._canGetBestAttachmentState(i))
+				.map(i => i.getBestAttachmentState(false))
+			);
+			Zotero.debug(`Got best attachment states in ${Date.now() - t1} ms`);
+			
 			newSearchItems = new Set(newSearchItems);
 			
 			var newCellTextCache = {};
@@ -2910,7 +2918,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
 				
-				if (!exists) {
+				if (exists === false) {
 					icon.classList.add('icon-missing-file');
 				}
 			}
