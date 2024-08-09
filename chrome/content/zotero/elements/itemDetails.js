@@ -375,11 +375,13 @@
 		}
 
 		notify = async (action, type, ids, _extraData) => {
-			if (action == 'refresh' && this.item) {
+			if (action == 'refresh') {
 				if (type == 'itempane') {
 					this.renderCustomSections();
 				}
-				await this.render();
+				if (this.item) {
+					await this.render();
+				}
 			}
 
 			if (action == 'select' && type == 'tab') {
