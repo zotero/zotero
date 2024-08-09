@@ -13,6 +13,7 @@ general-open-settings = Open Settings
 general-help = Help
 general-tag = Tag
 general-done = Done
+general-back = Go Back
 
 menu-file-show-in-finder =
     .label = Show in Finder
@@ -504,6 +505,8 @@ sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =
     .tooltiptext = { pane-related }
+sidenav-main-btn-grouping =
+    .aria-label = Item Details
 
 pin-section =
     .label = Pin Section
@@ -526,6 +529,8 @@ tagselector-search =
 
 context-notes-search =
     .placeholder = Search Notes
+context-notes-return-button =
+    .aria-label = { general-back }
 
 new-collection-dialog =
     .title = New Collection
