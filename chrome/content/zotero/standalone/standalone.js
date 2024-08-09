@@ -269,21 +269,34 @@ const ZoteroStandalone = new function() {
 	
 	this.onManageAttachmentsMenuOpen = function () {
 		// Convert Linked Files to Stored Files
-		var active = false;
+		var convertToStoredActive = false;
+		// Mark attachment as primary
+		var setAsPrimaryActive = false;
 		try {
 			let zp = Zotero.getActiveZoteroPane();
 			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
+				convertToStoredActive = !!zp.getSelectedItems().filter((item) => {
 					return item.isLinkedFileAttachment()
 						|| (item.isRegularItem()
 							&& item.getAttachments()
 								.map(id => Zotero.Items.get(id))
 								.some(att => att.isLinkedFileAttachment()));
 				}).length;
+
+				let selectedItems = zp.getSelectedItems();
+				if (selectedItems.length === 1 && selectedItems[0].isFileAttachment() && selectedItems[0].parentID) {
+					let parent = Zotero.Items.get(selectedItems[0].parentID);
+					let existingPrimaryAttachmentRelation = parent.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+					let isSelectedPrimaryAttachment = existingPrimaryAttachmentRelation === selectedItems[0].key;
+					setAsPrimaryActive = true;
+					let primaryAttachmentMenu = document.getElementById("menuitem-set-primary-attachment");
+					primaryAttachmentMenu.dataset.l10nArgs = `{ "type": "${isSelectedPrimaryAttachment ? "unset" : "set"}" }`;
+				}
 			}
 		}
 		catch (e) {}
-		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', active);
+		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', convertToStoredActive);
+		this.updateMenuItemEnabled('menuitem-set-primary-attachment', setAsPrimaryActive);
 	};
 	
 	
