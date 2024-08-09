@@ -50,6 +50,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		Zotero.debug(`Initializing React ItemTree ${opts.id}`);
 		var ref;
 		opts.domEl = domEl;
+		let itemTreeMenuBar = null;
+		// Add a menubar with View options to manipulate the table (only if a menubar doesn't already exist in .xhtml)
+		if (!document.querySelector("menubar")) {
+			itemTreeMenuBar = document.createXULElement("item-tree-menu-bar");
+			document.documentElement.prepend(itemTreeMenuBar);
+		}
 		await new Promise((resolve) => {
 			ReactDOM.createRoot(domEl).render(<ItemTree ref={(c) => {
 				ref = c;
@@ -57,6 +63,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			} } {...opts} />);
 		});
 		
+		if (itemTreeMenuBar) {
+			itemTreeMenuBar.init(ref);
+		}
 		Zotero.debug(`React ItemTree ${opts.id} initialized`);
 		return ref;
 	}
@@ -2660,6 +2669,43 @@ var ItemTree = class ItemTree extends LibraryTree {
 		menuitem.setAttribute('anonid', prefix + 'restore-order');
 		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
 		menupopup.appendChild(menuitem);
+
+
+		sep = document.createXULElement('menuseparator');
+		menupopup.appendChild(sep);
+
+		//
+		// Move Column Back
+		//
+		let moveColumnMenu = document.createXULElement('menu');
+		moveColumnMenu.setAttribute('label', Zotero.getString('zotero.items.moveColumn.label'));
+		moveColumnMenu.setAttribute('anonid', prefix + 'move-column');
+		let moveColumnPopup = document.createXULElement('menupopup');
+		moveColumnPopup.setAttribute('anonid', prefix + 'move-column-popup');
+		moveColumnMenu.appendChild(moveColumnPopup);
+		menupopup.appendChild(moveColumnMenu);
+
+		let firstColumn = true;
+		// Only list visible columns
+		for (let i = 0; i < columns.length; i++) {
+			let column = columns[i];
+			if (column.hidden) continue;
+			// Skip first column (since there is nowhere to move it)
+			if (firstColumn) {
+				firstColumn = false;
+				continue;
+			}
+			let label = formatColumnName(column);
+			menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute('label', label);
+			menuitem.setAttribute('colindex', i);
+			// Swap the column with its previous visible neighbor
+			menuitem.addEventListener('command', () => {
+				let previousIndex = columns.findLastIndex((col, index) => index < i && !col.hidden);
+				this.tree._columns.setOrder(i, previousIndex);
+			});
+			moveColumnPopup.appendChild(menuitem);
+		}
 	}
 
 	buildSortMenu(menupopup) {
