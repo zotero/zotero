@@ -3,9 +3,8 @@ menupopup {
 	--panel-padding: 5px 0;
 	menu, menuitem {
 		appearance: none;
-		margin-left: 5px;
-		margin-right: 5px;
-		padding: 3px 10px 3px 10px;
+		margin-inline: 5px;
+		padding: 3px 10px;
 		border-radius: 4px;
 
 		&[_moz-menuactive] {
@@ -38,19 +37,18 @@ menupopup {
 	menulist > &,
 	&[needsgutter] {
 		menu, menuitem {
-			padding-left: 20px;
+			padding-inline-start: 20px;
 
 			// Add padding here so that it won't look weird when the customElement.js is not yet loaded
 			&:is([checked="true"], [selected="true"]) {
-				padding-left: 6px;
+				padding-inline-start: 6px;
 			}
 		}
 	}
 
 	menuseparator {
 		appearance: none;
-		margin-left: 15px;
-		margin-right: 15px;
+		margin-inline: 15px;
 		border-bottom: 1px solid;
 		padding-bottom: 0px;
 		@include light-dark(border-color, rgba(170, 170, 170, 0.5), rgba(100, 100, 100, 0.5));
@@ -60,7 +58,7 @@ menupopup {
 		appearance: none;
 		@include svgicon-menu("chevron-8", "universal", "8");
 		rotate: -90deg;
-		margin-inline-end: 0px;
+		margin-inline-end: 0;
 	}
 }
 
