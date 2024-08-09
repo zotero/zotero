@@ -93,6 +93,9 @@ Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
 Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
 	get: function() { return this.getConditions(); }
 });
+Zotero.defineProperty(Zotero.Search.prototype, 'scope', {
+	get: function() { return this._scope; }
+});
 Zotero.defineProperty(Zotero.Search.prototype, '_canHaveParent', {
 	value: false
 });
@@ -425,9 +428,13 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 /*
  * Sets scope of search to the results of the passed Search object
  */
-Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
+Zotero.Search.prototype.setScope = function (searchObj, includeChildren, includeAnnotations) {
+	if (includeAnnotations && !includeChildren) {
+		throw new Error("includeAnnotations cannot be true without includeChildren");
+	}
 	this._scope = searchObj;
 	this._scopeIncludeChildren = includeChildren;
+	this._scopeIncludeAnnotations = includeAnnotations;
 }
 
 
@@ -618,6 +625,10 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
 				+ "itemID IN (SELECT itemID FROM itemNotes"
 				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))";
+				if (this._scopeIncludeAnnotations) {
+					sql += " OR itemID IN (SELECT itemID FROM itemAnnotations"
+					+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))";
+				}
 			}
 			sql += ")";
 			
@@ -953,11 +964,6 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._requireData('conditions');
 	
-	// TEMP: Match parent attachment for annotation matches
-	// var sql = 'SELECT itemID FROM items';
-	var sql = "SELECT COALESCE(IA.parentItemID, itemID) AS itemID FROM items "
-		+ "LEFT JOIN itemAnnotations IA USING (itemID)";
-	
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
 	var anySQL = '';
@@ -1030,6 +1036,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				
 				case 'includeChildren':
 					var includeChildren = condition.operator == 'true';
+					continue;
+				
+				case 'includeAnnotations':
+					var includeAnnotations = condition.operator == 'true';
 					continue;
 				
 				case 'unfiled':
@@ -1108,6 +1118,15 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 		}
 	}
 	
+	var sql;
+	if (includeAnnotations) {
+		sql = 'SELECT itemID FROM items';
+	}
+	else {
+		sql = "SELECT COALESCE(IA.parentItemID, itemID) AS itemID FROM items "
+			+ "LEFT JOIN itemAnnotations IA USING (itemID)";
+	}
+
 	// Exclude deleted items (and their child items) by default, unless includeDeleted is true
 	if (includeDeleted) {
 		sql += " WHERE 1";
@@ -1211,16 +1230,24 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					}
 					
 					switch (condition.name) {
-						// TEMP: Match parent attachments of matching annotations
 						case 'tag':
-							condSQL += "SELECT COALESCE(IAnT.parentItemID, itemID) FROM itemTags "
-								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
+							if (includeAnnotations) {
+								condSQL += "SELECT itemID FROM itemTags WHERE (";
+							}
+							else {
+								condSQL += "SELECT COALESCE(IAnT.parentItemID, itemID) FROM itemTags "
+									+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
+							}
 							break;
 						
-						// TEMP: Match parent attachments of matching annotations
 						case 'annotationText':
 						case 'annotationComment':
-							condSQL += `SELECT parentItemID FROM ${condition.table} WHERE (`
+							if (includeAnnotations) {
+								condSQL += `SELECT itemID FROM ${condition.table} WHERE (`;
+							}
+							else {
+								condSQL += `SELECT parentItemID FROM ${condition.table} WHERE (`;
+							}
 							break;
 							
 						default:
@@ -1802,12 +1829,16 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 		
 		// Add on quicksearch conditions
 		if (quicksearchSQLSet) {
-			// TEMP: Match parent attachments for annotations
-			//sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
-			sql = "SELECT COALESCE(IAn.parentItemID, itemID) AS itemID FROM items "
-				+ "LEFT JOIN itemAnnotations IAn USING (itemID) "
-				+ "WHERE itemID IN (" + sql + ") "
-				+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
+			if (includeAnnotations) {
+				sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
+					+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
+			}
+			else {
+				sql = "SELECT COALESCE(IAn.parentItemID, itemID) AS itemID FROM items "
+					+ "LEFT JOIN itemAnnotations IAn USING (itemID) "
+					+ "WHERE itemID IN (" + sql + ") "
+					+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
+			}
 			
 			for (var k=0; k<quicksearchParamsSet.length; k++) {
 				sqlParams = sqlParams.concat(quicksearchParamsSet[k]);

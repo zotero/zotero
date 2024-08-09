@@ -243,34 +243,38 @@ describe("Zotero.Search", function() {
 			});
 			
 			describe("tag", function () {
-				// TEMP
-				it("should match parent attachments for annotation tags", async function () {
+				it("should respect includeAnnotations for annotation tags", async function () {
 					var attachment = await importPDFAttachment();
 					var annotation = await createAnnotation('highlight', attachment);
 					var tag = Zotero.Utilities.randomString();
 					annotation.addTag(tag);
 					await annotation.saveTx();
 					
-					var s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('tag', 'is', tag);
-					var matches = await s.search();
-					assert.sameMembers(matches, [attachment.id]);
+					for (let includeAnnotations of [true, false]) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('tag', 'is', tag);
+						s.addCondition('includeAnnotations', String(includeAnnotations));
+						var matches = await s.search();
+						assert.sameMembers(matches, [includeAnnotations ? annotation.id : attachment.id]);
+					}
 				});
 				
-				// TEMP
-				it("shouldn't match parent attachments with annotations for 'tag' 'is not' condition", async function () {
+				it("should respect includeAnnotations for 'tag' 'is not' condition", async function () {
 					var attachment = await importPDFAttachment();
-					await createAnnotation('highlight', attachment);
+					var annotation = await createAnnotation('highlight', attachment);
 					var tag = Zotero.Utilities.randomString();
 					attachment.addTag(tag);
 					await attachment.saveTx();
-					
-					var s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('tag', 'isNot', tag);
-					var matches = await s.search();
-					assert.notInclude(matches, attachment.id);
+
+					for (let includeAnnotations of [true, false]) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('tag', 'isNot', tag);
+						s.addCondition('includeAnnotations', String(includeAnnotations));
+						var matches = await s.search();
+						assert.notInclude(matches, includeAnnotations ? annotation.id : attachment.id);
+					}
 				});
 			});
 			
@@ -421,14 +425,16 @@ describe("Zotero.Search", function() {
 					var attachment = await importPDFAttachment();
 					var annotation = await createAnnotation('highlight', attachment);
 					var str = annotation.annotationText.substr(0, 7);
-					
-					var s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('joinMode', 'any');
-					s.addCondition('annotationText', 'contains', str);
-					var matches = await s.search();
-					// TEMP: Match parent attachment
-					assert.sameMembers(matches, [attachment.id]);
+
+					for (let includeAnnotations of [true, false]) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('joinMode', 'any');
+						s.addCondition('annotationText', 'contains', str);
+						s.addCondition('includeAnnotations', String(includeAnnotations));
+						var matches = await s.search();
+						assert.sameMembers(matches, [includeAnnotations ? annotation.id : attachment.id]);
+					}
 				});
 			});
 			
@@ -437,14 +443,16 @@ describe("Zotero.Search", function() {
 					var attachment = await importPDFAttachment();
 					var annotation = await createAnnotation('note', attachment);
 					var str = annotation.annotationComment.substr(0, 7);
-					
-					var s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('joinMode', 'any');
-					s.addCondition('annotationComment', 'contains', str);
-					var matches = await s.search();
-					// TEMP: Match parent attachment
-					assert.sameMembers(matches, [attachment.id]);
+
+					for (let includeAnnotations of [true, false]) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('joinMode', 'any');
+						s.addCondition('annotationComment', 'contains', str);
+						s.addCondition('includeAnnotations', String(includeAnnotations));
+						var matches = await s.search();
+						assert.sameMembers(matches, [includeAnnotations ? annotation.id : attachment.id]);
+					}
 				});
 			});
 			
@@ -605,19 +613,21 @@ describe("Zotero.Search", function() {
 			
 			describe("Quick search", function () {
 				describe("All Fields & Tags", function () {
-					it("should match parent attachment for annotation tag", async function () {
+					it("should respect includeAnnotations for annotation tag", async function () {
 						var attachment = await importPDFAttachment();
 						var annotation = await createAnnotation('highlight', attachment);
 						var tag = Zotero.Utilities.randomString();
 						annotation.addTag(tag);
 						await annotation.saveTx();
-						
-						var s = new Zotero.Search();
-						s.libraryID = userLibraryID;
-						s.addCondition('quicksearch-fields', 'contains', tag);
-						var matches = await s.search();
-						// TEMP: Match parent attachment
-						assert.sameMembers(matches, [attachment.id]);
+
+						for (let includeAnnotations of [true, false]) {
+							var s = new Zotero.Search();
+							s.libraryID = userLibraryID;
+							s.addCondition('quicksearch-fields', 'contains', tag);
+							s.addCondition('includeAnnotations', String(includeAnnotations));
+							var matches = await s.search();
+							assert.sameMembers(matches, [includeAnnotations ? annotation.id : attachment.id]);
+						}
 					});
 				})
 				
@@ -626,13 +636,15 @@ describe("Zotero.Search", function() {
 						var attachment = await importPDFAttachment();
 						var annotation = await createAnnotation('highlight', attachment);
 						var comment = annotation.annotationComment;
-						
-						var s = new Zotero.Search();
-						s.libraryID = userLibraryID;
-						s.addCondition('quicksearch-everything', 'contains', comment);
-						var matches = await s.search();
-						// TEMP: Match parent attachment
-						assert.sameMembers(matches, [attachment.id]);
+
+						for (let includeAnnotations of [true, false]) {
+							var s = new Zotero.Search();
+							s.libraryID = userLibraryID;
+							s.addCondition('quicksearch-everything', 'contains', comment);
+							s.addCondition('includeAnnotations', String(includeAnnotations));
+							var matches = await s.search();
+							assert.sameMembers(matches, [includeAnnotations ? annotation.id : attachment.id]);
+						}
 					});
 				});
 			});
