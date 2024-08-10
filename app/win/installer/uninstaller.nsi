@@ -96,7 +96,7 @@ VIAddVersionKey "OriginalFilename" "helper.exe"
 
 Name "${BrandFullName}"
 OutFile "helper.exe"
-!ifdef HAVE_64BIT_OS
+!ifdef HAVE_64BIT_BUILD
   InstallDir "$PROGRAMFILES64\${BrandFullName}\"
 !else
   InstallDir "$PROGRAMFILES32\${BrandFullName}\"
@@ -594,7 +594,7 @@ Function .onInit
   Reboot
   Quit ; Nothing initialized so no need to call OnEndCommon
 
-  !ifdef HAVE_64BIT_OS
+  !ifdef HAVE_64BIT_BUILD
     SetRegView 64
   !endif
 
@@ -697,7 +697,7 @@ Function un.onInit
   Abort
   ${EndUnless}
 
-  !ifdef HAVE_64BIT_OS
+  !ifdef HAVE_64BIT_BUILD
   SetRegView 64
   !endif
 

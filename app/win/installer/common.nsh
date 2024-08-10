@@ -959,7 +959,7 @@ Var Trash
 
 !define KEY_SET_VALUE 0x0002
 !define KEY_WOW64_64KEY 0x0100
-!ifndef HAVE_64BIT_OS
+!ifndef HAVE_64BIT_BUILD
   !define CREATE_KEY_SAM ${KEY_SET_VALUE}
 !else
   !define CREATE_KEY_SAM ${KEY_SET_VALUE}|${KEY_WOW64_64KEY}
@@ -2118,7 +2118,7 @@ FunctionEnd
         ; Set the registry to the 32 bit registry for 64 bit installations or to
         ; the 64 bit registry for 32 bit installations at the beginning so it can
         ; easily be set back to the correct registry view when finished.
-        !ifdef HAVE_64BIT_OS
+        !ifdef HAVE_64BIT_BUILD
           SetRegView 32
         !else
           SetRegView 64
@@ -2187,7 +2187,7 @@ FunctionEnd
       ${If} ${RunningX64}
       ${AndIf} "$R0" == "false"
         ; Set the registry to the correct view.
-        !ifdef HAVE_64BIT_OS
+        !ifdef HAVE_64BIT_BUILD
           SetRegView 64
         !else
           SetRegView 32
@@ -4150,7 +4150,7 @@ FunctionEnd
       Push $R6
       Push $R5
 
-      !ifdef HAVE_64BIT_OS
+      !ifdef HAVE_64BIT_BUILD
         ${Unless} ${RunningX64}
         ${OrUnless} ${AtLeastWin7}
           MessageBox MB_OK|MB_ICONSTOP "$R9" IDOK
@@ -4199,7 +4199,7 @@ FunctionEnd
             SetSilent silent
             ReadINIStr $R8 $R7 "Install" "InstallDirectoryName"
             ${If} $R8 != ""
-              !ifdef HAVE_64BIT_OS
+              !ifdef HAVE_64BIT_BUILD
                 StrCpy $INSTDIR "$PROGRAMFILES64\$R8"
               !else
                 StrCpy $INSTDIR "$PROGRAMFILES32\$R8"
@@ -4768,7 +4768,7 @@ FunctionEnd
         ${LogMsg} "OS Name    : Unable to detect"
       ${EndIf}
 
-      !ifdef HAVE_64BIT_OS
+      !ifdef HAVE_64BIT_BUILD
         ${LogMsg} "Target CPU : x64"
       !else
         ${LogMsg} "Target CPU : x86"

@@ -105,7 +105,7 @@ VIAddVersionKey "OriginalFilename" "setup.exe"
 
 Name "${BrandFullName}"
 OutFile "setup.exe"
-!ifdef HAVE_64BIT_OS
+!ifdef HAVE_64BIT_BUILD
   InstallDir "$PROGRAMFILES64\${BrandFullName}\"
 !else
   InstallDir "$PROGRAMFILES32\${BrandFullName}\"
@@ -928,7 +928,7 @@ Function .onInit
   StrCpy $R2 "An older version of Zotero is installed. If you continue, the existing version will be removed.$\n$\nYour Zotero data will not be affected."
   Call UninstallOld
 
-  !ifdef HAVE_64BIT_OS
+  !ifdef HAVE_64BIT_BUILD
     SetRegView 32
       StrCpy $R1 "Zotero"
       StrCpy $R2 "A 32-bit version of Zotero is installed. If you continue, it will be replaced with a 64-bit version that offers better performance.$\n$\nYour Zotero data will not be affected."
@@ -936,7 +936,7 @@ Function .onInit
     SetRegView 64
   !endif
   
-  !ifndef HAVE_64BIT_OS
+  !ifndef HAVE_64BIT_BUILD
     ${If} ${RunningX64}
       MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION|MB_DEFBUTTON2 \
         "This installer is for the 32-bit version of Zotero, but you appear to be running a 64-bit version of Windows.$\n$\nFor the best performance, please cancel and download the 64-bit version of Zotero." \

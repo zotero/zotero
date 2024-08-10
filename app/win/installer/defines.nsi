@@ -42,7 +42,7 @@
 
 # ARCH is used when it is necessary to differentiate the x64 registry keys from
 # the x86 registry keys (e.g. the uninstall registry key).
-!ifdef HAVE_64BIT_OS
+!ifdef HAVE_64BIT_BUILD
     !define ARCH "x86"
     !define MinSupportedVer "64-bit Microsoft Windows 7"
 !else
