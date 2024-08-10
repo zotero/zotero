@@ -177,10 +177,10 @@ Function UninstallOld
   enum_uninst_keys:
     EnumRegKey $1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall" $0
     StrCmp $1 "" continue_installation
-    ; $R1 migth be "Zotero Standalone" or "Zotero", registry key name contains version and locale e.g. "Zotero 6.0.0 (x86 en-US)" so:
-    StrLen $3 $R1 ; $3 = length of $R1, e.g. 17 for "Zotero Standalone"
-    StrCpy $2 $1 $3 ; $2 = first $3 characters of $1, i.e. name without version and locale, e.g. "Zotero Standalone"
-    StrCmp $2 $R1 get_uninst_exe ; if the key we found is the one we're looking for (e.g. "Zotero Standalone"), go to get_uninst_exe
+    ; $R1 is "Zotero", registry key name contains version and locale e.g. "Zotero 6.0.0 (x86 en-US)" so:
+    StrLen $3 $R1 ; $3 = length of $R1, e.g. 6 for "Zotero"
+    StrCpy $2 $1 $3 ; $2 = first $3 characters of $1, i.e. name without version and locale, e.g. "Zotero"
+    StrCmp $2 $R1 get_uninst_exe ; if the key we found is the one we're looking for (e.g. "Zotero"), go to get_uninst_exe
     IntOp $0 $0 + 1 
     Goto enum_uninst_keys ; loop through all keys
 
