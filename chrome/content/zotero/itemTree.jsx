@@ -2861,7 +2861,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 		textSpan.className = "cell-text";
 		if (lazy.BIDI_BROWSER_UI) {
-			textSpan.dir = Zotero.ItemFields.getDirection(column.dataKey, item.getField('language'));
+			textSpan.dir = Zotero.ItemFields.getDirection(
+				item.itemTypeID, column.dataKey, item.getField('language')
+			);
 		}
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 

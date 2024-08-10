@@ -421,12 +421,13 @@ Zotero.ItemFields = new function() {
 	/**
 	 * Guess the text direction of a field, using the item's language field if available.
 	 *
+	 * @param {number} itemTypeID
 	 * @param {string | number} field
 	 * @param {string} [itemLanguage]
 	 * @returns {'auto' | 'ltr' | 'rtl'}
 	 */
-	this.getDirection = function (field, itemLanguage) {
-		field = this.getName(field) || field;
+	this.getDirection = function (itemTypeID, field, itemLanguage) {
+		field = this.getName(this.getBaseIDFromTypeAndField(itemTypeID, field) || field);
 		switch (field) {
 			// Certain fields containing IDs, numbers, and data: always LTR
 			case 'ISBN':
@@ -438,24 +439,15 @@ Zotero.ItemFields = new function() {
 			case 'numberOfVolumes':
 			case 'issue':
 			case 'runningTime':
-			case 'billNumber':
 			case 'number':
 			case 'versionNumber':
-			case 'documentNumber':
-			case 'patentNumber':
 			case 'applicationNumber':
 			case 'priorityNumbers':
-			case 'episodeNumber':
-			case 'reportNumber':
 			case 'codeNumber':
-			case 'publicLawNumber':
-			case 'archiveID':
-			case 'codePages':
 			case 'pages':
 			case 'numPages':
 			case 'seriesNumber':
 			case 'edition':
-			case 'identifier':
 			case 'citationKey':
 			case 'language':
 			case 'extra':

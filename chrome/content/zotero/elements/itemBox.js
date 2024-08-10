@@ -1506,7 +1506,9 @@
 			if (lazy.BIDI_BROWSER_UI) {
 				// Attempt to guess text direction automatically
 				let language = this.item.getField('language');
-				valueElement.dir = Zotero.ItemFields.getDirection(fieldName, language);
+				valueElement.dir = Zotero.ItemFields.getDirection(
+					this.item.itemTypeID, fieldName, language
+				);
 			}
 			
 			// Regardless, align the text in unfocused fields consistently, following the locale's direction
