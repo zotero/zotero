@@ -64,6 +64,8 @@ if [ $SKIP_BUNDLED_FILES -eq 1 ]; then
 fi
 if [ $DEBUGGER -eq 1 ]; then
 	PARAMS="$PARAMS -jsdebugger"
+else
+	PARAMS="$PARAMS -jsconsole"
 fi
 
 if [ "`uname`" = "Darwin" ]; then
@@ -77,4 +79,4 @@ else
 	exit 1
 fi
 
-"$APP_ROOT_DIR/staging/$command" $profile -ZoteroDebugText -jsconsole -purgecaches $PARAMS "$@"
+"$APP_ROOT_DIR/staging/$command" $profile -ZoteroDebugText -purgecaches $PARAMS "$@"
