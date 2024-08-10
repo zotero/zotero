@@ -471,6 +471,7 @@ Zotero.ItemFields = new function() {
 						}
 					}
 					catch (e) {
+						Zotero.logError(e);
 					}
 					return 'ltr';
 				}
