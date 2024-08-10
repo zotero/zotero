@@ -1280,6 +1280,7 @@ Var Trash
   ; (not on Windows XP http://support.microsoft.com/kb/282747) so just use it
   ; when installing on an x64 systems even when installing an x86 application.
   ${If} ${RunningX64}
+  ${OrIf} ${IsNativeARM64}
     ${DisableX64FSRedirection}
     ExecWait '"$SYSDIR\regsvr32.exe" /s "${DLL}"'
     ${EnableX64FSRedirection}
@@ -1295,6 +1296,7 @@ Var Trash
   ; (not on Windows XP http://support.microsoft.com/kb/282747) so just use it
   ; when installing on an x64 systems even when installing an x86 application.
   ${If} ${RunningX64}
+  ${OrIf} ${IsNativeARM64}
     ${DisableX64FSRedirection}
     ExecWait '"$SYSDIR\regsvr32.exe" /s /u "${DLL}"'
     ${EnableX64FSRedirection}
@@ -2114,6 +2116,7 @@ FunctionEnd
       StrCpy $R6 0  ; set the counter for the outer loop to 0
 
       ${If} ${RunningX64}
+      ${OrIf} ${IsNativeARM64}
         StrCpy $R0 "false"
         ; Set the registry to the 32 bit registry for 64 bit installations or to
         ; the 64 bit registry for 32 bit installations at the beginning so it can
@@ -2185,6 +2188,7 @@ FunctionEnd
 
       end:
       ${If} ${RunningX64}
+      ${OrIf} ${IsNativeARM64}
       ${AndIf} "$R0" == "false"
         ; Set the registry to the correct view.
         !ifdef HAVE_64BIT_BUILD
@@ -4152,6 +4156,7 @@ FunctionEnd
 
       !ifdef HAVE_64BIT_BUILD
         ${Unless} ${RunningX64}
+        ${OrUnless} ${IsNativeARM64}
         ${OrUnless} ${AtLeastWin7}
           MessageBox MB_OK|MB_ICONSTOP "$R9" IDOK
           ; Nothing initialized so no need to call OnEndCommon
@@ -4768,11 +4773,7 @@ FunctionEnd
         ${LogMsg} "OS Name    : Unable to detect"
       ${EndIf}
 
-      !ifdef HAVE_64BIT_BUILD
-        ${LogMsg} "Target CPU : x64"
-      !else
-        ${LogMsg} "Target CPU : x86"
-      !endif
+      ${LogMsg} "Target CPU : ${ARCH}"
 
       Pop $9
       Pop $R0

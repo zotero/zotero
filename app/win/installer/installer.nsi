@@ -924,6 +924,20 @@ Function .onInit
 
   ${InstallOnInitCommon} "$(WARN_MIN_SUPPORTED_OS_MSG)"
 
+  !ifdef HAVE_64BIT_BUILD
+    ${If} "${ARCH}" == "AArch64"
+      ${IfNot} ${IsNativeARM64}
+        MessageBox MB_OK|MB_ICONSTOP "$(WARN_MIN_SUPPORTED_OS_MSG)" IDOK
+        ; Nothing initialized so no need to call OnEndCommon
+        Quit
+      ${EndIf}
+    ${ElseIfNot} ${RunningX64}
+      MessageBox MB_OK|MB_ICONSTOP "$(WARN_MIN_SUPPORTED_OS_MSG)" IDOK
+      ; Nothing initialized so no need to call OnEndCommon
+      Quit
+    ${EndIf}
+  !endif
+
   StrCpy $R1 "Zotero Standalone"
   StrCpy $R2 "An older version of Zotero is installed. If you continue, the existing version will be removed.$\n$\nYour Zotero data will not be affected."
   Call UninstallOld

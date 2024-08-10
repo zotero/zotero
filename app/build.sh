@@ -764,8 +764,10 @@ if [ $BUILD_WIN == 1 ]; then
 				# Build uninstaller
 				if [ "$arch" = "win32" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
-				elif [[ "$arch" = "win-x64" ]] || [[ "$arch" = "win-arm64" ]]; then
+				elif [ "$arch" = "win-x64" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_BUILD /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
+				elif [ "$arch" = "win-arm64" ]; then
+					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_BUILD /D_ARM64_ /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				fi
 
 				mv "$BUILD_DIR/win_installer/helper.exe" "$APPDIR/uninstall"
@@ -798,8 +800,10 @@ if [ $BUILD_WIN == 1 ]; then
 				# Build and sign setup.exe
 				if [ "$arch" = "win32" ]; then	
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
-				elif [[ "$arch" = "win-x64" ]] || [[ "$arch" = "win-arm64" ]]; then
+				elif [ "$arch" = "win-x64" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_BUILD /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
+				elif [ "$arch" = "win-arm64" ]; then
+					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_BUILD /D_ARM64_ /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				fi
 
 				mv "$BUILD_DIR/win_installer/setup.exe" "$INSTALLER_STAGE_DIR"

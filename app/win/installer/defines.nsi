@@ -43,11 +43,16 @@
 # ARCH is used when it is necessary to differentiate the x64 registry keys from
 # the x86 registry keys (e.g. the uninstall registry key).
 !ifdef HAVE_64BIT_BUILD
-    !define ARCH "x86"
-    !define MinSupportedVer "64-bit Microsoft Windows 7"
-!else
+  !ifdef _ARM64_
+    !define ARCH "AArch64"
+    !define MinSupportedVer "Microsoft Windows 10 for ARM"
+  !else
     !define ARCH "x64"
-    !define MinSupportedVer "Microsoft Windows 7"
+    !define MinSupportedVer "64-bit Microsoft Windows 7"
+  !endif
+!else
+  !define ARCH "x86"
+  !define MinSupportedVer "Microsoft Windows 7"
 !endif
 
 # File details shared by both the installer and uninstaller
