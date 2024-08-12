@@ -37,12 +37,12 @@
 
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
-		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
 		}
 
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	</script>
 
