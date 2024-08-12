@@ -68,7 +68,8 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 
 		notify(event, type, ids, _extraData) {
-			if (['modify', 'delete'].includes(event) && ids.some(id => this._noteIDs.includes(id))) {
+			if (['modify', 'delete'].includes(event)
+					&& ids.some(id => this._item?.id === id || this._noteIDs.includes(id))) {
 				this._forceRenderAll();
 			}
 		}
