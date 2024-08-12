@@ -277,6 +277,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	stopEditing = () => {
 		this._editing = null;
+		this._editingInput = null;
 		// Returning focus to the tree container
 		this.tree.invalidate();
 		this.tree.focus();
@@ -366,24 +367,35 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Editing input
 		div.classList.toggle('editing', treeRow == this._editing);
 		if (treeRow == this._editing) {
-			label = document.createElement('input');
-			label.className = 'cell-text';
-			label.setAttribute("size", 5);
-			label.toggleAttribute("no-windows-native", true);
-			label.value = treeRow.editingName;
-			label.addEventListener('input', e => this.handleEditingChange(e, index));
-			label.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
-			label.addEventListener('mouseup', (e) => e.stopImmediatePropagation());
-			label.addEventListener('dblclick', (e) => e.stopImmediatePropagation());
-			label.addEventListener('blur', async (e) => {
-				await this.commitEditingName();
-				this.stopEditing();
-			});
-			// Feels like a bit of a hack, but it gets the job done
-			setTimeout(() => {
-				label.focus();
-				label.select();
-			});
+			if (this._editingInput
+					&& this._editingInput.dataset.rowId === treeRow.id
+					&& this._editingInput.value === treeRow.editingName) {
+				label = this._editingInput;
+				// Feels like a bit of a hack, but it gets the job done
+				setTimeout(() => {
+					label.focus();
+				});
+			}
+			else {
+				label = this._editingInput = document.createElement('input');
+				label.className = 'cell-text';
+				label.dataset.rowId = treeRow.id;
+				label.setAttribute("size", 5);
+				label.toggleAttribute("no-windows-native", true);
+				label.value = treeRow.editingName;
+				label.addEventListener('input', e => this.handleEditingChange(e, index));
+				label.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
+				label.addEventListener('mouseup', (e) => e.stopImmediatePropagation());
+				label.addEventListener('dblclick', (e) => e.stopImmediatePropagation());
+				label.addEventListener('blur', async (e) => {
+					await this.commitEditingName();
+					this.stopEditing();
+				});
+				setTimeout(() => {
+					label.focus();
+					label.select();
+				});
+			}
 		}
 
 		cell.appendChild(twisty);
@@ -564,6 +576,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			this._rows = newRows;
 			this._refreshRowMap();
+			if (this._editing) {
+				let editingName = this._editing.editingName;
+				let editingIdx = this._rowMap[this._editing.id];
+				if (editingIdx !== undefined) {
+					this._editing = this.getRow(editingIdx);
+					this._editing.editingName = editingName;
+				}
+			}
 		} catch (e) {
 			Zotero.logError(e);
 			window.ZoteroPane.displayErrorMessage();
@@ -776,6 +796,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Actions that can change the selection
 		//
 		var currentTreeRow = this.getRow(this.selection.focused);
+		// Set to true if selectByID()/selectWait() is awaited
+		var skipWait = false;
 		this.selection.selectEventsSuppressed = true;
 		
 		if (action == 'delete') {
@@ -887,6 +909,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							else {
 								await this._addSortedRow('collection', id);
 								await this.selectByID(currentTreeRow.id);
+								skipWait = true;
 								if (reopen) {
 									let newRow = this.getRowIndexByID(rowID);
 									if (!this.isContainerOpen(newRow)) {
@@ -900,6 +923,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						else if (!collection.deleted) {
 							await this._addSortedRow('collection', id);
 							await this.selectByID(currentTreeRow.id);
+							skipWait = true;
 							// Invalidate parent in case it's become non-empty
 							if (collection.parentID) {
 								let parentRow = this.getRowIndexByID("C" + collection.parentID);
@@ -928,6 +952,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							else {
 								await this._addSortedRow('search', id);
 								await this.selectByID(currentTreeRow.id);
+								skipWait = true;
 							}
 						}
 						// If search isn't currently visible and it isn't in the trash (because it was
@@ -935,6 +960,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						else if (!search.deleted) {
 							await this._addSortedRow('search', id);
 							await this.selectByID(currentTreeRow.id);
+							skipWait = true;
 							// Invalidate parent in case it's become non-empty
 							// NOTE: Not currently used, because searches can't yet have parents
 							if (search.parentID) {
@@ -953,6 +979,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					default:
 						await this.reload();
 						await this.selectByID(currentTreeRow.id);
+						skipWait = true;
 						break;
 				}
 			}
@@ -971,13 +998,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						if (selectRow) {
 							if (type == 'collection') {
 								await this.selectByID("C" + id);
+								skipWait = true;
 							}
 							else if (type == 'search') {
 								await this.selectByID("S" + id);
+								skipWait = true;
 							}
 						}
 						else if (addedIndex !== false && addedIndex <= this.selection.focused) {
 							await this.selectWait(this.selection.focused+1);
+							skipWait = true;
 						}
 						
 						break;
@@ -995,6 +1025,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 								? "L" + id
 								: currentTreeRow.id
 						);
+						skipWait = true;
 						break;
 				}
 			}
@@ -1020,7 +1051,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 
 		this.forceUpdate();
-		var promise = this.waitForSelect();
+		// Only wait for select if we didn't already do that above
+		var promise = skipWait ? Promise.resolve() : this.waitForSelect();
 		this.selection.selectEventsSuppressed = false;
 		return promise;
 	}
