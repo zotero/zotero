@@ -355,13 +355,18 @@ Zotero.Integration = new function() {
 	
 	this._handleCommandError = async function (document, session, e) {
 		try {
-			const supportURL = "https://www.zotero.org/support/kb/debugging_broken_documents";
+			let supportURL = "https://www.zotero.org/support/kb/debugging_broken_documents";
 			var displayError;
 			if (e instanceof Zotero.Exception.Alert) {
 				displayError = e.message;
 			}
 			else {
-				if (e.toString().indexOf("ExceptionAlreadyDisplayed") === -1) {
+				if (e.toString().includes("Could not find a running Word instance.")) {
+					displayError = Zotero.getString('integration-error-unable-to-find-winword')
+						+ "\n\n" + Zotero.getString("integration.error.viewTroubleshootingInfo");
+					supportURL = "https://www.zotero.org/support/kb/could_not_find_a_running_word_instance";
+				}
+				else if (e.toString().indexOf("ExceptionAlreadyDisplayed") === -1) {
 					displayError = Zotero.getString("integration.error.generic")
 						+ "\n\n" + Zotero.getString("integration.error.viewTroubleshootingInfo");
 				}
