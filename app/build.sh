@@ -300,6 +300,9 @@ elif [ $BUILD_LINUX == 1 ]; then
 	# Modify platform-specific prefs
 	perl -pi -e 's/pref\("browser\.preferences\.instantApply", false\);/pref\("browser\.preferences\.instantApply", true);/' $prefs_file
 	perl -pi -e 's/%GECKO_VERSION%/'"$GECKO_VERSION_LINUX"'/g' $prefs_file
+	# Auto-scroll is disabled by default on Linux
+	# https://bugzilla.mozilla.org/show_bug.cgi?id=1747208
+	perl -pi -e 's/pref\("general\.autoScroll", false\);/pref\("general.autoScroll", true);/' $prefs_file
 fi
 
 # Clear list of built-in add-ons
