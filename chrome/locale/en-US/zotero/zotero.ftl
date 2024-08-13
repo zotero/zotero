@@ -338,6 +338,7 @@ integration-prefs-automaticJournalAbbeviations-description = The “Journal Abbr
 integration-prefs-exportDocument =
     .label = Switch to a Different Word Processor…
 
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 
 publications-intro-page =
     .label = My Publications

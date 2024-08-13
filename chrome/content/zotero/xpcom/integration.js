@@ -362,7 +362,7 @@ Zotero.Integration = new function() {
 			}
 			else {
 				if (e.toString().includes("Could not find a running Word instance.")) {
-					displayError = Zotero.getString("integration.error.unableToFindWinWord", Zotero.appName)
+					displayError = Zotero.getString('integration-error-unable-to-find-winword')
 						+ "\n\n" + Zotero.getString("integration.error.viewTroubleshootingInfo");
 					supportURL = "https://www.zotero.org/support/kb/could_not_find_a_running_word_instance";
 				}
