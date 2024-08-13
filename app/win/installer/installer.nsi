@@ -606,16 +606,26 @@ FunctionEnd
 Function CheckExistingInstall
   ; If there is a pending file copy from a previous upgrade don't allow
   ; installing until after the system has rebooted.
-  IfFileExists "$INSTDIR\${FileMainEXE}.moz-upgrade" +1 +4
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
+  IfFileExists "$INSTDIR\${FileMainEXE}.moz-upgrade" +1 +5
+  MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +3 IDCANCEL +2
   Reboot
+  Quit
+  RMDir /r $INSTDIR
+
+  IfFileExists "$INSTDIR\${FileMainEXE}.moz-upgrade" +1 +3
+  MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to remove the previous installation. Please delete $INSTDIR and try again."
   Quit
 
   ; If there is a pending file deletion from a previous uninstall don't allow
   ; installing until after the system has rebooted.
-  IfFileExists "$INSTDIR\${FileMainEXE}.moz-delete" +1 +4
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UNINSTALL)" IDNO +2
+  IfFileExists "$INSTDIR\${FileMainEXE}.moz-delete" +1 +5
+  MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UNINSTALL)" IDNO +3 IDCANCEL +2
   Reboot
+  Quit
+  RMDir /r $INSTDIR
+
+  IfFileExists "$INSTDIR\${FileMainEXE}.moz-delete" +1 +3
+  MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to remove the previous installation. Please delete $INSTDIR and try again."
   Quit
 
   ${If} ${FileExists} "$INSTDIR\${FileMainEXE}"
