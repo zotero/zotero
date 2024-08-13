@@ -181,11 +181,6 @@
 				_contextPaneSplitter.setAttribute('hidden', false);
 
 				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
-				// It seems that on heavy load (i.e. syncing) the line below doesn't set the correct value,
-				// therefore we repeat the same operation at the end of JS message queue
-				setTimeout(() => {
-					_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
-				});
 				
 				this._sidenav.hidden = false;
 			}
