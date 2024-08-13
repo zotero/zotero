@@ -724,7 +724,8 @@ const ZoteroStandalone = new function() {
 		}, true);
 
 		// A11y: after a click, check if the panel with plugin details appeared.
-		// If so, delete a misleading role=tabpanel
+		// If so, delete a misleading role=tabpanel because default firefox tabs
+		// ("Details" and "Permissions") are explicitly hidden in fetch_xulrunner
 		doc.addEventListener("click", (_) => {
 			setTimeout(() => {
 				let details = doc.querySelector("#details-deck section[role='tabpanel']");
