@@ -92,6 +92,7 @@ Zotero.Intl = new function () {
 		
 		// Provide synchronous access to Fluent strings for getString()
 		ftl = new Localization([
+			'branding/brand.ftl',
 			'zotero.ftl',
 			// More FTL files can be hardcoded here, or added later with
 			// Zotero.ftl.addResourceIds(['...'])
