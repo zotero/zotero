@@ -715,6 +715,24 @@ const ZoteroStandalone = new function() {
 			);
 			return { remove: result === 0, report: null };
 		};
+		// A11y: when a popup appears, mark which buttons are checked for screen readers
+		doc.addEventListener("shown", (event) => {
+			for (let item of [...event.target.querySelectorAll("panel-item")]) {
+				item.button.setAttribute("role", "menuitemcheckbox");
+				item.button.setAttribute("aria-checked", item.checked);
+			}
+		}, true);
+
+		// A11y: after a click, check if the panel with plugin details appeared.
+		// If so, delete a misleading role=tabpanel because default firefox tabs
+		// ("Details" and "Permissions") are explicitly hidden in fetch_xulrunner
+		doc.addEventListener("click", (_) => {
+			setTimeout(() => {
+				let details = doc.querySelector("#details-deck section[role='tabpanel']");
+				if (!details) return;
+				details.removeAttribute("role");
+			});
+		}, true);
 	}
 	
 	/**
