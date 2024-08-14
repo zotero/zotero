@@ -432,7 +432,7 @@ Zotero.ItemFields = new function() {
 				return Zotero.dir;
 		}
 		
-		var fieldName = this.getName(fieldName);
+		var fieldName = this.getName(field);
 		if (fieldName) {
 			let baseField = this.getBaseIDFromTypeAndField(itemTypeID, fieldName);
 			if (baseField) {
