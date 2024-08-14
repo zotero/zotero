@@ -236,29 +236,23 @@ rtfScan-choose-output-file =
     .label = { general-choose-file }
     .aria-label = Choose Output File
 
-rtfScan-intro-page = 
-    .label = Introduction
+rtfScan-intro-page = Introduction
 
-rtfScan-scan-page =
-    .label = Scanning for Citations
+rtfScan-scan-page = Scanning for Citations
 
 rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
 
-rtfScan-citations-page =
-    .label = Verify Cited Items
+rtfScan-citations-page = Verify Cited Items
 
 rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
 
-rtfScan-style-page =
-    .label = Document Formatting
+rtfScan-style-page = Document Formatting
 
-rtfScan-format-page =
-    .label = Formatting Citations
+rtfScan-format-page = Formatting Citations
 
 rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
 
-rtfScan-complete-page =
-    .label = RTF Scan Complete
+rtfScan-complete-page = RTF Scan Complete
 
 rtfScan-complete-page-description = Your document has now been scanned and processed. Please ensure that it is formatted correctly.
 rtfScan-action-find-match =
@@ -340,8 +334,7 @@ integration-prefs-exportDocument =
 
 integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 
-publications-intro-page =
-    .label = My Publications
+publications-intro-page = My Publications
 
 publications-intro = Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.
 publications-include-checkbox-files =
@@ -355,8 +348,7 @@ publications-intro-authorship =
 publications-intro-authorship-files =
     .label = I created this work and have the rights to distribute included files.
 
-publications-sharing-page =
-    .label = Choose how your work may be shared
+publications-sharing-page = Choose how your work may be shared
 
 publications-sharing-keep-rights-field = 
     .label = Keep the existing Rights field
@@ -371,8 +363,7 @@ publications-sharing-cc =
 publications-sharing-cc0 =
     .label = Yes, and place my work in the public domain
 
-publications-license-page =
-    .label = Choose a Creative Commons license
+publications-license-page = Choose a Creative Commons license
 publications-choose-license-text = A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.
 publications-choose-license-adaptations-prompt = Allow adaptations of your work to be shared?
 

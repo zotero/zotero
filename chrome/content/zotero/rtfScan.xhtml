@@ -5,7 +5,8 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<window data-l10n-id="rtfScan-wizard"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		id="rtfscan-wizard-window"
 		onload="Zotero_RTFScan.init()"
@@ -21,8 +22,8 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	</script>
 	
-	<wizard id="rtfscan-wizard" class="rtfscan-wizard zotero-dialog-window" data-l10n-id="rtfScan-wizard">
-		<wizardpage pageid="page-start" data-l10n-id="rtfScan-intro-page">
+	<wizard id="rtfscan-wizard" class="rtfscan-wizard zotero-dialog-window">
+		<wizardpage pageid="page-start" data-header-label-id="rtfScan-intro-page">
 			<div>
 				<span class="page-start-1" data-l10n-id="rtfScan-introPage-description" />
 				<span class="example">{Smith, 2009}</span>
@@ -44,30 +45,29 @@
 				<button id="choose-output-file" data-l10n-id="rtfScan-choose-output-file" />
 			</div>
 		</wizardpage>
-		<wizardpage pageid="scan-page" data-l10n-id="rtfScan-scan-page" >
+		<wizardpage pageid="scan-page" data-header-label-id="rtfScan-scan-page" >
 			<p data-l10n-id="rtfScan-scanPage-description" />
 			<html:progress id="scan-progress" />
 		</wizardpage>
-		<wizardpage class="citations-page" pageid="citations-page" data-l10n-id="rtfScan-citations-page">
+		<wizardpage class="citations-page" pageid="citations-page" data-header-label-id="rtfScan-citations-page">
 			<p class="citations-page-description" data-l10n-id="rtfScan-citations-page-description" />
 			<div class="table-container">
 				<div id="tree" />
 			</div>
 		</wizardpage>
-		<wizardpage pageid="style-page" data-l10n-id="rtfScan-style-page">
+		<wizardpage pageid="style-page" data-header-label-id="rtfScan-style-page">
 			<div class="style-selector-container">
 				<style-configurator id="style-configurator" />
 			</div>
 		</wizardpage>
-		<wizardpage pageid="format-page" data-l10n-id="rtfScan-format-page">
+		<wizardpage pageid="format-page" data-header-label-id="rtfScan-format-page">
 			<p data-l10n-id="rtfScan-format-page-description" />
 			<html:progress id="format-progress" />
 		</wizardpage>
-		<wizardpage pageid="complete-page" data-l10n-id="rtfScan-complete-page">
+		<wizardpage pageid="complete-page" data-header-label-id="rtfScan-complete-page">
 			<p data-l10n-id="rtfScan-complete-page-description" />
 		</wizardpage>
 	</wizard>
-	<script src="include.js" />
 	<script src="fileInterface.js" />
 	<script src="rtfScan.js" />
 </window>
