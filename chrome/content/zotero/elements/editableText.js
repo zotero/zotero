@@ -39,8 +39,6 @@
 	class EditableText extends XULElementBase {
 		_input;
 		
-		_textDirection = null;
-		
 		_ignoredWindowInactiveBlur = false;
 		
 		_focusMousedownEvent = false;
@@ -141,7 +139,6 @@
 		}
 		
 		set value(value) {
-			this.resetTextDirection();
 			this.setAttribute('value', value || '');
 		}
 		
@@ -188,8 +185,7 @@
 			return this._input;
 		}
 
-		resetTextDirection() {
-			this._textDirection = null;
+		_resetTextDirection() {
 			this._input?.removeAttribute('dir');
 		}
 		
@@ -201,7 +197,10 @@
 			this.style.maxWidth = `calc(${span.getBoundingClientRect().width}px + ${paddingLeft} + ${paddingRight} + ${borderLeftWidth} + ${borderRightWidth})`;
 		};
 		
-		attributeChangedCallback() {
+		attributeChangedCallback(name) {
+			if (name === 'value' || name === 'dir') {
+				this._resetTextDirection();
+			}
 			this.render();
 		}
 
