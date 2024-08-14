@@ -433,13 +433,11 @@ Zotero.ItemFields = new function() {
 		}
 		
 		var fieldName = this.getName(fieldName);
-		if (!fieldName) {
-			return 'auto';
-		}
-		
-		var baseField = this.getBaseIDFromTypeAndField(itemTypeID, fieldName);
-		if (baseField) {
-			fieldName = this.getName(baseField);
+		if (fieldName) {
+			let baseField = this.getBaseIDFromTypeAndField(itemTypeID, fieldName);
+			if (baseField) {
+				fieldName = this.getName(baseField);
+			}
 		}
 		switch (fieldName) {
 			// Certain fields containing IDs, numbers, and data: always LTR
@@ -466,7 +464,8 @@ Zotero.ItemFields = new function() {
 			case 'extra':
 				return 'ltr';
 			
-			// Everything else: guess based on the language if we have one; otherwise auto
+			// Everything else (including false): guess based on the language if we have one;
+			// otherwise auto
 			default:
 				if (itemLanguage) {
 					let languageCode = Zotero.Utilities.Item.languageToISO6391(itemLanguage);
