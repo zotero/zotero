@@ -299,6 +299,7 @@ Zotero.ItemFields = new function() {
 	 * 'audioRecording' and 'label' returns publisher's fieldID
 	 * 'book' and 'publisher' returns publisher's fieldID
 	 * 'audioRecording' and 'runningTime' returns false
+	 * 'note' and 'runningTime' returns false
 	 *
 	 * Accepts names or ids
 	 */
@@ -312,12 +313,8 @@ Zotero.ItemFields = new function() {
 		
 		_fieldCheck(typeField);
 		
-		if (!this.isValidForType(typeFieldID, itemTypeID)) {
-			throw new Error("'" + typeField + "' is not a valid field for '" + itemType + "'");
-		}
-		
 		// If typeField is already a base field, just return that
-		if (this.isBaseField(typeFieldID)) {
+		if (_baseTypeFields[itemTypeID][typeFieldID]) {
 			return typeFieldID;
 		}
 		
