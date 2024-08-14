@@ -44,4 +44,14 @@ describe("Zotero.ItemFields", function () {
 			);
 		});
 	});
+	
+	describe("#getDirection()", function () {
+		it("should return 'auto' for non-field", function () {
+			assert.equal(Zotero.ItemFields.getDirection('book', 'creator-0-lastName', ''), 'auto');
+		});
+		
+		it("should follow app locale for primary field", function () {
+			assert.equal(Zotero.ItemFields.getDirection('book', 'dateAdded', ''), Zotero.dir)
+		});
+	});
 })

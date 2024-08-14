@@ -424,8 +424,24 @@ Zotero.ItemFields = new function() {
 	 * @returns {'auto' | 'ltr' | 'rtl'}
 	 */
 	this.getDirection = function (itemTypeID, field, itemLanguage) {
-		field = this.getName(this.getBaseIDFromTypeAndField(itemTypeID, field) || field);
+		// Primary fields: follow app locale
 		switch (field) {
+			case 'dateAdded':
+			case 'dateModified':
+			case 'accessDate':
+				return Zotero.dir;
+		}
+		
+		var fieldName = this.getName(fieldName);
+		if (!fieldName) {
+			return 'auto';
+		}
+		
+		var baseField = this.getBaseIDFromTypeAndField(itemTypeID, fieldName);
+		if (baseField) {
+			fieldName = this.getName(baseField);
+		}
+		switch (fieldName) {
 			// Certain fields containing IDs, numbers, and data: always LTR
 			case 'ISBN':
 			case 'ISSN':
@@ -449,11 +465,7 @@ Zotero.ItemFields = new function() {
 			case 'language':
 			case 'extra':
 				return 'ltr';
-			// Primary fields: follow app locale
-			case 'dateAdded':
-			case 'dateModified':
-			case 'accessDate':
-				return Zotero.dir;
+			
 			// Everything else: guess based on the language if we have one; otherwise auto
 			default:
 				if (itemLanguage) {
