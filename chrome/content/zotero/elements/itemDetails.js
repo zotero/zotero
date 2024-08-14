@@ -275,11 +275,13 @@
 				box.tabType = this.tabType;
 				box.item = item;
 				box.collectionTreeRow = this.collectionTreeRow;
+				// Discard hidden panes
+				if (box.hidden && box.discard) {
+					box.discard();
+				}
 				// Execute sync render immediately
 				if (!box.hidden && box.render) {
-					if (box.render) {
-						box.render();
-					}
+					box.render();
 				}
 			}
 
@@ -604,7 +606,8 @@
 			let needsDiscard = [];
 			entries.forEach((entry) => {
 				let targetPaneElem = entry.target;
-				if (entry.isIntersecting && targetPaneElem.render) {
+				if (entry.isIntersecting
+						&& (targetPaneElem.render || targetPaneElem.asyncRender)) {
 					needsRefresh.push(targetPaneElem);
 				}
 				else if (targetPaneElem.discard) {

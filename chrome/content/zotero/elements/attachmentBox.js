@@ -79,6 +79,12 @@
 
 		_preview = null;
 
+		_lastPreviewRenderId = "";
+
+		_discardPreviewTimeout = 60000;
+
+		_previewDiscarded = false;
+
 		constructor() {
 			super();
 
@@ -309,7 +315,14 @@
 			if (!this.item) return;
 			if (this._asyncRendering) return;
 			if (!this._section.open) return;
-			if (this._isAlreadyRendered("async")) return;
+			if (this._isAlreadyRendered("async")) {
+				if (this._previewDiscarded) {
+					this._previewDiscarded = false;
+					this.previewElem.render();
+				}
+				this._lastPreviewRenderTime = Date.now();
+				return;
+			}
 
 			Zotero.debug('Refreshing attachment box');
 			this._asyncRendering = true;
@@ -463,6 +476,19 @@
 			}
 
 			this._asyncRendering = false;
+
+			this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
+		}
+
+		discard() {
+			if (!this._preview) return;
+			let lastRenderTime = this._lastPreviewRenderId;
+			setTimeout(() => {
+				if (!this._asyncRendering && this._lastPreviewRenderId === lastRenderTime) {
+					this._preview?.discard();
+					this._previewDiscarded = true;
+				}
+			}, this._discardPreviewTimeout);
 		}
 
 		onViewClick(event) {

@@ -48,6 +48,12 @@
 
 		_preview = null;
 
+		_lastPreviewRenderTime = "";
+
+		_discardPreviewTimeout = 60000;
+
+		_previewDiscarded = false;
+
 		get item() {
 			return this._item;
 		}
@@ -178,7 +184,14 @@
 
 		async asyncRender() {
 			if (!this._item) return;
-			if (this._isAlreadyRendered("async")) return;
+			if (this._isAlreadyRendered("async")) {
+				if (this._previewDiscarded) {
+					this._previewDiscarded = false;
+					this.previewElem.render();
+				}
+				this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
+				return;
+			}
 			this._renderStage = "final";
 			this._asyncRendering = true;
 			
@@ -192,6 +205,17 @@
 			}
 			await this.updatePreview();
 			this._asyncRendering = false;
+		}
+
+		discard() {
+			if (!this._preview) return;
+			let lastRenderTime = this._lastPreviewRenderTime;
+			setTimeout(() => {
+				if (!this._asyncRendering && this._lastPreviewRenderTime === lastRenderTime) {
+					this._preview?.discard();
+					this._previewDiscarded = true;
+				}
+			}, this._discardPreviewTimeout);
 		}
 		
 		updateCount() {
@@ -222,6 +246,7 @@
 			}
 			this.previewElem.item = attachment;
 			await this.previewElem.render();
+			this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
 		}
 
 		async _getPreviewAttachment() {
