@@ -102,28 +102,23 @@
 			}
 			
 			.colored-tag-swatches {
-				direction: ltr;
 				display: flex;
 				
 				:root:-moz-locale-dir(rtl) & {
 					transform: scaleX(-1);
+					flex-direction: row-reverse;
 				}
 			}
 
 			.icon-item-type + .tag-swatch,
 			.icon-item-type + .colored-tag-swatches {
-				margin-left: 4px;
+				margin-inline-start: 4px;
 			}
 
 			.emoji + .emoji,
 			.emoji + .colored-tag-swatches,
 			.colored-tag-swatches + .emoji {
-				margin-left: 4px;
-
-				:root:-moz-locale-dir(rtl) & {
-					margin-left: 0;
-					margin-right: 4px;
-				}
+				margin-inline-start: 4px;
 			}
 			
 			.tag-swatch {
@@ -156,6 +151,7 @@
 					background:
 						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/100%,
 						url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/0;
+					// RTL: Parent is flipped, so margin can always be on logical left
 					margin-left: -0.38461538em;
 
 					@include focus-states using($color) {
