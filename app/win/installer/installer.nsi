@@ -959,7 +959,20 @@ Function .onInit
       Call UninstallOld
     SetRegView 64
   !endif
-  
+
+  !ifdef HAVE_64BIT_BUILD
+    ${If} "${ARCH}" == "x64"
+      ${If} ${IsNativeARM64}
+        MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION|MB_DEFBUTTON2 \
+          "This installer is for the x64 version of Zotero, but you appear to be running an ARM version of Windows.$\n$\nFor the best performance, please cancel and download the ARM version of Zotero for Windows." \
+          /SD IDOK IDOK continue_architecture IDCANCEL cancel_architecture
+          cancel_architecture:
+            Abort
+          continue_architecture:
+      ${EndIf}
+    ${EndIf}
+  !endif
+
   !ifndef HAVE_64BIT_BUILD
     ${If} ${RunningX64}
       MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION|MB_DEFBUTTON2 \
