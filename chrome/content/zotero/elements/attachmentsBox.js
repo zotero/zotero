@@ -30,7 +30,6 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachments" data-pane="attachments" extra-buttons="add">
 				<html:div class="body">
-					<attachment-preview tabindex="0" data-l10n-id="attachment-preview"/>
 					<html:div class="attachments-container"></html:div>
 				</html:div>
 			</collapsible-section>
@@ -45,7 +44,15 @@
 
 		_attachmentIDs = [];
 
+		_body = null;
+
 		_preview = null;
+
+		_lastPreviewRenderTime = "";
+
+		_discardPreviewTimeout = 60000;
+
+		_previewDiscarded = false;
 
 		get item() {
 			return this._item;
@@ -59,7 +66,7 @@
 			super.item = item;
 			let hidden = !item?.isRegularItem() || item?.isFeedItem;
 			this.hidden = hidden;
-			this._preview.disableResize = !!hidden;
+			if (this._preview) this._preview.disableResize = !!hidden;
 		}
 
 		get inTrash() {
@@ -81,9 +88,18 @@
 			}
 		}
 
+		get previewElem() {
+			if (!this._preview) {
+				this._initPreview();
+			}
+			return this._preview;
+		}
+
 		init() {
 			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
+
+			this._body = this.querySelector('.body');
 
 			this._attachments = this.querySelector('.attachments-container');
 			
@@ -106,7 +122,6 @@
 			});
 			
 			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
-			this._preview = this.querySelector('attachment-preview');
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentsBox');
 
@@ -169,7 +184,14 @@
 
 		async asyncRender() {
 			if (!this._item) return;
-			if (this._isAlreadyRendered("async")) return;
+			if (this._isAlreadyRendered("async")) {
+				if (this._previewDiscarded) {
+					this._previewDiscarded = false;
+					this.previewElem.render();
+				}
+				this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
+				return;
+			}
 			this._renderStage = "final";
 			this._asyncRendering = true;
 			
@@ -183,6 +205,17 @@
 			}
 			await this.updatePreview();
 			this._asyncRendering = false;
+		}
+
+		discard() {
+			if (!this._preview) return;
+			let lastRenderTime = this._lastPreviewRenderTime;
+			setTimeout(() => {
+				if (!this._asyncRendering && this._lastPreviewRenderTime === lastRenderTime) {
+					this._preview?.discard();
+					this._previewDiscarded = true;
+				}
+			}, this._discardPreviewTimeout);
 		}
 		
 		updateCount() {
@@ -211,8 +244,9 @@
 				|| (this._attachmentIDs.length && !this._section.open)) {
 				return;
 			}
-			this._preview.item = attachment;
-			await this._preview.render();
+			this.previewElem.item = attachment;
+			await this.previewElem.render();
+			this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
 		}
 
 		async _getPreviewAttachment() {
@@ -223,6 +257,14 @@
 				return null;
 			}
 			return attachment;
+		}
+
+		_initPreview() {
+			this._preview = document.createXULElement('attachment-preview');
+			this._preview.setAttribute('tabindex', '0');
+			this._preview.setAttribute('data-l10n-id', 'attachment-preview');
+			this._body.prepend(this._preview);
+			this._preview.disableResize = !!this.hidden;
 		}
 
 		_handleAdd = (event) => {
@@ -238,7 +280,7 @@
 			menu.dataset.l10nArgs = `{ "type": "${this.usePreview ? "open" : "collapsed"}" }`;
 			
 			if (toOpen) {
-				this._preview.render();
+				this.previewElem.render();
 			}
 		};
 

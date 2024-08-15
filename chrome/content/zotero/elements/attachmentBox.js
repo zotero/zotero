@@ -32,7 +32,6 @@
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
 				<html:div class="body">
-					<attachment-preview id="attachment-preview" tabindex="0" data-l10n-id="attachment-preview"/>
 					<html:div style="display: grid;">
 						<label id="url" is="zotero-text-link" crop="end" tabindex="0"
 							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
@@ -76,6 +75,16 @@
 			</collapsible-section>
 		`);
 
+		_body = null;
+
+		_preview = null;
+
+		_lastPreviewRenderId = "";
+
+		_discardPreviewTimeout = 60000;
+
+		_previewDiscarded = false;
+
 		constructor() {
 			super();
 
@@ -91,7 +100,6 @@
 			this._item = null;
 
 			this._section = null;
-			this._preview = null;
 
 			this._asyncRendering = false;
 			
@@ -212,16 +220,24 @@
 			if (val.isAttachment()) {
 				this._item = val;
 				this.hidden = false;
-				this._preview.disableResize = false;
 			}
 			else {
 				this.hidden = true;
-				this._preview.disableResize = true;
 			}
+			if (this._preview) this._preview.disableResize = !!this.hidden;
+		}
+
+		get previewElem() {
+			if (!this._preview) {
+				this._initPreview();
+			}
+			return this._preview;
 		}
 
 		init() {
 			this.initCollapsibleSection();
+
+			this._body = this.querySelector('.body');
 
 			this._id('url').addEventListener('contextmenu', (event) => {
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
@@ -235,8 +251,6 @@
 				this.editFileName(fileName.value);
 				this._isEditingFilename = false;
 			});
-
-			this._preview = this._id("attachment-preview");
 
 			let noteButton = this._id('note-button');
 			noteButton.addEventListener("command", () => {
@@ -301,7 +315,14 @@
 			if (!this.item) return;
 			if (this._asyncRendering) return;
 			if (!this._section.open) return;
-			if (this._isAlreadyRendered("async")) return;
+			if (this._isAlreadyRendered("async")) {
+				if (this._previewDiscarded) {
+					this._previewDiscarded = false;
+					this.previewElem.render();
+				}
+				this._lastPreviewRenderTime = Date.now();
+				return;
+			}
 
 			Zotero.debug('Refreshing attachment box');
 			this._asyncRendering = true;
@@ -450,11 +471,24 @@
 			}
 
 			if (this.usePreview) {
-				this._preview.item = this.item;
-				await this._preview.render();
+				this.previewElem.item = this.item;
+				await this.previewElem.render();
 			}
 
 			this._asyncRendering = false;
+
+			this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
+		}
+
+		discard() {
+			if (!this._preview) return;
+			let lastRenderTime = this._lastPreviewRenderId;
+			setTimeout(() => {
+				if (!this._asyncRendering && this._lastPreviewRenderId === lastRenderTime) {
+					this._preview?.discard();
+					this._previewDiscarded = true;
+				}
+			}, this._discardPreviewTimeout);
 		}
 
 		onViewClick(event) {
@@ -675,6 +709,14 @@
 			}
 			if (finished) resolve();
 			else reject(new Error("AttachmentBox#_waitForRender timeout"));
+		}
+
+		_initPreview() {
+			this._preview = document.createXULElement('attachment-preview');
+			this._preview.setAttribute('tabindex', '0');
+			this._preview.setAttribute('data-l10n-id', 'attachment-preview');
+			this._body.prepend(this._preview);
+			this._preview.disableResize = !!this.hidden;
 		}
 	}
 
