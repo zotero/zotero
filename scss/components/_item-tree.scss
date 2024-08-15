@@ -103,8 +103,11 @@
 			
 			.colored-tag-swatches {
 				direction: ltr;
-				transform: scaleX(-1);
 				display: flex;
+				
+				:root:-moz-locale-dir(rtl) & {
+					transform: scaleX(-1);
+				}
 			}
 
 			.icon-item-type + .tag-swatch,
