@@ -4154,22 +4154,16 @@ FunctionEnd
       Push $R6
       Push $R5
 
-      !ifdef HAVE_64BIT_BUILD
-        ${Unless} ${RunningX64}
-        ${OrUnless} ${IsNativeARM64}
-        ${OrUnless} ${AtLeastWin7}
+      ; Windows NT 6.0 (Vista/Server 2008) and lower are not supported.
+      ; TODO for Zotero: Change to Win10 with Fx128
+      ${Unless} ${AtLeastWin7}
           MessageBox MB_OK|MB_ICONSTOP "$R9" IDOK
           ; Nothing initialized so no need to call OnEndCommon
           Quit
-        ${EndUnless}
+      ${EndUnless}
 
+      !ifdef HAVE_64BIT_BUILD
         SetRegView 64
-      !else
-        ${Unless} ${AtLeastWin7}
-          MessageBox MB_OK|MB_ICONSTOP "$R9" IDOK
-          ; Nothing initialized so no need to call OnEndCommon
-          Quit
-        ${EndUnless}
       !endif
 
       ${GetParameters} $R8
