@@ -190,6 +190,7 @@ var ZoteroContextPane = new function () {
 			open = false;
 		}
 	
+		_contextPane.setAttribute('collapsed', !open);
 		splitter.setAttribute('state', open ? 'open' : 'collapsed');
 		_update();
 	}
