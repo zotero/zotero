@@ -13,6 +13,7 @@ general-open-settings = Open Settings
 general-help = Help
 general-tag = Tag
 general-done = Done
+general-view-troubleshooting-instructions = View Troubleshooting Instructions
 
 menu-file-show-in-finder =
     .label = Show in Finder
