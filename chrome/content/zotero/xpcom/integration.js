@@ -95,7 +95,7 @@ Zotero.Integration = new function() {
 		if (Zotero.isMac) {
 			entryPoints.push(PLUGIN_PATHS.MacWord);
 		}
-		else if (Zotero.isWindows) {
+		else if (Zotero.isWin) {
 			entryPoints.push(PLUGIN_PATHS.WinWord);
 		}
 		for (let entryPoint of entryPoints) {
