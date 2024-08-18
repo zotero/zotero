@@ -419,6 +419,9 @@
 	"integration-prefs-exportDocument.label": {
 		"string": "Switch to a Different Word Processor…"
 	},
+	"integration-error-unable-to-find-winword": {
+		"string": "{ app-name } could not find a running Word instance."
+	},
 	"publications-intro-page.label": {
 		"string": "My Publications"
 	},
