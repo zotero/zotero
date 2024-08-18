@@ -41,14 +41,38 @@
   "general_copyToClipboard": {
     "message": "Copiar para a Área de Transferência"
   },
+  "itemType_pdf": {
+    "message": "Anexo PDF"
+  },
+  "itemType_epub": {
+    "message": "Anexo EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "Instantâneo"
+  },
   "itemType_note": {
     "message": "Nota"
+  },
+  "itemType_link": {
+    "message": "Ligação web"
   },
   "itemType_attachment": {
     "message": "Anexo"
   },
   "progressWindow_savingTo": {
     "message": "Guardando para"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Ver detalhes"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Ocultar detalhes"
+  },
+  "progressWindow_savingItems": {
+    "message": "A guardar $1 itens. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "A guardar o item $1"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por vírgulas)"
@@ -77,11 +101,11 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versão"
   },
-  "extensionIsDisabled": {
-    "message": "$1 está desabilitado"
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Conector indisponível para URL de ficheiro"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 está desabilitado nas páginas adicionais"
+    "message": "$1 Conector indisponível em páginas de extensões"
   },
   "appConnector": {
     "message": "Conector $1"
@@ -94,9 +118,6 @@
   },
   "firstRun_text1": {
     "message": "O Conector $1 permite-lhe <a href=\"$2\">guardar itens no $1 </a> a partir do seu navegador com um único clique."
-  },
-  "firstRun_text2": {
-    "message": "Se ainda não o fez, <a href=\"$2\">descarregue</a> a aplicação independente $1 para uma melhor experiência."
   },
   "firstRun_acceptButton": {
     "message": "Percebi"

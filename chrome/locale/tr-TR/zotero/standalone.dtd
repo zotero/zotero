@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Ekleri Yönet">
-<!ENTITY convertToStored.label "Bağlantılanmış Dosyaları Depolanmış Dosyalara Dönüştür">
+<!ENTITY convertToStored.label "Bağlantılı Dosyaları Depolanmış Dosyalara Dönüştür">
 <!ENTITY importCmd.label "İçeri Aktar...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Panodan İçeri Aktar">

@@ -178,7 +178,7 @@
 <!ENTITY zotero.import.whereToImportFrom "Nereden içeri aktarmak istiyorsunuz?">
 <!ENTITY zotero.import.source.file "Bir dosya (BibTeX, RIS, Zotero RDF, vb.)">
 <!ENTITY zotero.import.source.folder "PDF'lerin veya diğer dosyaların bulunduğu bir klasör">
-<!ENTITY zotero.import.onlineImport "çevrim içi içe aktarma">
+<!ENTITY zotero.import.onlineImport "çevrimiçi içe aktarma">
 <!ENTITY zotero.import.importing "İçeri aktarılıyor...">
 <!ENTITY zotero.import.database "Veritabanı">
 <!ENTITY zotero.import.lastModified "Son Değiştirilmesi">

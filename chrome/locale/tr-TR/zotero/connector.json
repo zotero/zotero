@@ -71,8 +71,38 @@
   "progressWindow_collectionSelector": {
     "message": "Hedef derme seçicisi"
   },
+  "progressWindow_savingItems": {
+    "message": "$1 eser kaydediyor. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Eser $1 kaydediliyor"
+  },
+  "progressWindow_saveItem": {
+    "message": "Eser $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 kaydedildi"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Eser $2 için $1 kaydedildi"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "$1 indirilmesi başarısız oldu"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Eser $2 için $1 indirilmesi başarısız oldu"
+  },
+  "progressWindow_allDone": {
+    "message": "Kaydetme tamamlandı. İletişim kutusu şimdi kapanacak."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Bu web sayfasındaki eserler daha önce kaydedildi."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Etiketler (virgüllerle ayrılmış)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Dermeleri Filtrele"
   },
   "progressWindow_error_translation": {
     "message": "Bu eseri kaydederken bir hata meydana geldi. Daha fazla bilgi için $1'ye bakınız."
@@ -95,6 +125,18 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "son sürüme"
   },
+  "itemSelector_title": {
+    "message": "Kitaplığınıza eklemek istediğiniz eserleri seçin:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 Bağlayıcısı bu sayfada kullanımda değil"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Bağlayıcısı dosya URL'lerinde kullanımda değil"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 Bağlayıcısı eklenti sayfalarında kullanımda değil"
+  },
   "appConnector": {
     "message": "$1 Bağlayıcısı"
   },
@@ -106,6 +148,9 @@
   },
   "firstRun_text1": {
     "message": "$1 Bağlayıcısı, tarayıcınızda tek bir tıklama ile <a href=\"$2\">eserleri $1 içinde kaydetmenizi</a> sağlar."
+  },
+  "firstRun_text2": {
+    "message": "Eğer hala yapmadıysanız, en iyi deneyim için $1 uygulamasını <a href=\"$2\">indiriniz</a>."
   },
   "firstRun_acceptButton": {
     "message": "Tamam"
@@ -141,7 +186,7 @@
     "message": "Bu belge aktif Zotero alıntıları içermektedir ve bu alıntılar belgenin indirilmiş kopyalarında zotero.org bağlantıları olarak görüneceklerdir."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "Paylaşılmaya uygun bir versiyon üretmek için, önce <b>Kopya yarat...</b>seçeneğini, sonra da <b>Alıntıları Bağlantısızlaştır</b> seçeneğini seçiniz ve sonra bağlantısızlaştırılmış versiyonu indiriniz. Belgenizin bağlantıları içeren asıl versiyonunu, gelecekte değişiklikler yapabilmek için tutunuz."
+    "message": "Paylaşılmaya uygun bir versiyon üretmek için, önce <b>Kopya yarat...</b>seçeneğini, sonra da <b>Alıntıları Bağlantısızlaştır</b> seçeneğini seçiniz ve sonra bağlantısızlaşmış versiyonu indiriniz. Belgenizin bağlantıları içeren asıl versiyonunu, gelecekte değişiklikler yapabilmek için tutunuz."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Yine de Bağlantılı Versiyonu İndir"
@@ -157,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1, birçok kullanıcının aynı anda alıntıları düzenlemesini engellemek için belgeyi kilitlemektedir. Eşzamanlı alıntı düzenlemeler alıntı veya belge bozulmasına neden olabilir. Ağ arızaları gibi bazı öngörülemeyen durumlar, belgenizin kalıcı olarak kilitlenmesine neden olabilir. Eğer bunun olduğuna inanıyorsanız, kilidi geçersiz kılabilirsiniz.<br/><br/>Belgedeki kilidi geçersiz kılmak ister misiniz?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1, alıntı ekleyebilmek için Google Docs belgelerinizi düzenleme iznine sahip olmalıdır. Lütfen tekrar deneyin ve bu sefer $1 uygulamasının Google docs belgelerini görme, düzenleme, yaratma ve silmesine izin verdiğinize emin olunuz."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "Seçtiğiniz Google hesabının bu belgeyi düzenleme izni yok. Lütfen tekrar deneyin ve düzenleme erişimi olan hesabı seçtiğinizden emin olun."

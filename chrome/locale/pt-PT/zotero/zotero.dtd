@@ -318,7 +318,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Não Se Espalham">
 <!ENTITY zotero.pdfReader.oddSpreads "Espalham-se Ímpares">
 <!ENTITY zotero.pdfReader.evenSpreads "Espalham-se Pares">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.scrolled "Percorrido">
 <!ENTITY zotero.pdfReader.paginated "Paginado">
 <!ENTITY zotero.pdfReader.zoomIn "Ampliar">
 <!ENTITY zotero.pdfReader.zoomOut "Reduzir">

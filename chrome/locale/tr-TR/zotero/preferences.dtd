@@ -13,7 +13,7 @@
 <!ENTITY zotero.preferences.fileHandling "Dosya Kullanımı">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratırken sayfanın anlık görüntüsünü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkili PDF ve diğer dosyaları da otomatik olarak ekle">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Bağlantılanmış dosyaları yeniden adlandır">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Bağlantılı dosyaları yeniden adlandır">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF dosyalarını bununla Aç:">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem Varsayılanı">
 
@@ -187,8 +187,8 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
 <!ENTITY zotero.preferences.dataDir.migrate "Yeni Varsayılan Konuma Geç...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılanmış Ek Taban Dizini">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılanmış dosya ekleri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılı Ek Taban Dizini">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılı dosya ekleri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Temel dizin:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Seç...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Mutlak Yollara Geri Döndür...">

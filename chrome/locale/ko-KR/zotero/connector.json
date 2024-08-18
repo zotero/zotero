@@ -41,14 +41,50 @@
   "general_copyToClipboard": {
     "message": "클립보드로 복사"
   },
+  "itemType_pdf": {
+    "message": "PDF 첨부 파일"
+  },
+  "itemType_epub": {
+    "message": "EPUB 첨부 파일"
+  },
+  "itemType_snapshot": {
+    "message": "스냅샷"
+  },
   "itemType_note": {
     "message": "노트"
+  },
+  "itemType_link": {
+    "message": "웹 링크"
   },
   "itemType_attachment": {
     "message": "첨부"
   },
   "progressWindow_savingTo": {
     "message": "저장 위치"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "자세한 정보 보기"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "자세한 정보 숨기기"
+  },
+  "progressWindow_savingItem": {
+    "message": "항목 $1 저장 중"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 저장했습니다"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "항목 $2 중 $1 저장했습니다"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "$1 다운로드에 실패했습니다"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "항목 $2 중 $1 다운로드에 실패했습니다"
+  },
+  "progressWindow_allDone": {
+    "message": "저장 완료되었습니다. 대화상자가 닫힙니다."
   },
   "progressWindow_tagPlaceholder": {
     "message": "태그 (콤마로 구분)"
@@ -74,6 +110,15 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "최신 버전"
   },
+  "extensionIsDisabled": {
+    "message": "$1 중계기를 이 페이지에서 사용할 수 없습니다"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 중계기를 파일 URL에서 사용할 수 없습니다"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 중계기를 확장기능 페이지에서 사용할 수 없습니다"
+  },
   "appConnector": {
     "message": "$1 중계기"
   },
@@ -87,7 +132,7 @@
     "message": "$1 중계기는 브라우저에서 한 번 클릭으로 <a href=\"$2\">항목을 $1에 저장할</a> 수 있게 도와드립니다."
   },
   "firstRun_text2": {
-    "message": "아직 하지 않으셨다면, 최고의 사용자 경험을 위해 $1 단독 애플리케이션을 <a href=\"$2\">다운로드</a>하세요."
+    "message": "아직 하지 않으셨다면, 최고의 사용자 경험을 위해 $1 애플리케이션을 <a href=\"$2\">다운로드</a>하세요."
   },
   "firstRun_acceptButton": {
     "message": "알겠습니다"
@@ -140,6 +185,9 @@
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1: 여러 사용자가 인용문을 동시에 수정하는 일을 방지하기 위해 문서를 잠갔습니다. 문서의 인용문을 동시에 편집하면 인용문 또는 문서가 손상될 수 있습니다. 반면에 네트워크 장애와 같은 예측할 수 없는 상황으로 인해 문서가 영구 잠금 상태가 되었을 수도 있습니다. 이러한 상황이라고 판단되신다면, 문서 잠금을 강제로 해제할 수 있습니다.<br/><br/>문서 잠금을 강제로 해제하시겠습니까?"
   },
+  "integration_googleDocs_authScopeError": {
+    "message": "인용 문구를 추가하려면 $1에 구글 문서앱의 문서를 편집할 권한이 필요합니다. 다시 시도해주시고, $1에 구글 문서앱 문서를 보기, 편집, 만들기, 삭제할 권한이 허용되어있는지 확인해주세요."
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "선택하신 Google 계정은 이 문서를 편집할 권한이 없습니다. 다시 시도하시거나, 편집 권한이 있는 계정을 선택하셨는지 확인하세요."
   },
@@ -154,6 +202,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "선택된 인용문이 <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1에서 연결 해제되어 있습니다</a>. 참고 문헌을 업데이트하거나 표시하려면 다시 연결해야 합니다."
+  },
+  "copyUnproxiedLink": {
+    "message": "프록시 없는 링크 복사"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "프록시 없는 페이지 URL 복사"
+  },
+  "reloadViaProxy": {
+    "message": "프록시를 통해 다시 불러오기"
+  },
+  "reloadVia": {
+    "message": "$1 통해 다시 불러오기"
   },
   "general_saveTo": {
     "message": "저장: $1"
