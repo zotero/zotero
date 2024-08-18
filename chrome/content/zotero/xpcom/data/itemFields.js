@@ -424,7 +424,11 @@ Zotero.ItemFields = new function() {
 	 * @returns {'auto' | 'ltr' | 'rtl'}
 	 */
 	this.getDirection = function (itemTypeID, field, itemLanguage) {
-		// Primary fields: follow app locale
+		// Collection in trash
+		if (!itemTypeID) {
+			return Zotero.dir;
+		}
+		// Date fields: follow app locale
 		switch (field) {
 			case 'dateAdded':
 			case 'dateModified':
