@@ -349,8 +349,8 @@ export let OS = {
 						stack.push(v);
 				}
 			});
-			let string = stack.join("/");
-			return absolute ? "/" + string : string;
+			let string = this.join(...stack);
+			return (!isWin && absolute) ? "/" + string : string;
 		},
 		
 		split: function (path) {
