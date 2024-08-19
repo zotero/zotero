@@ -104,7 +104,7 @@ ZoteroPluginInstaller.prototype = {
 		}
 		installationInProgress = true;
 		try {
-			if (!this._addon.DISABLE_PROGRESS_WINDOW) {
+			if (!this._addon.DISABLE_PROGRESS_WINDOW && !this.failSilently) {
 				this._progressWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 					.getService(Components.interfaces.nsIWindowWatcher)
 					.openWindow(null, "chrome://zotero/content/progressWindow.xhtml", '',
