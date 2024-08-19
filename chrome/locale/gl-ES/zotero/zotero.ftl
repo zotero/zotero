@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = O campo «Abrv. Xornal» hase ignorar.
 integration-prefs-exportDocument =
     .label = Mudar a outro editor de textos...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = As miñas publicacións
 publications-intro = Os elementos que se engaden ás Miñas publicacións móstranse no teu perfil público na páxina de zotero.org. Se escolleu engadir ficheiros anexos, estes van a estar accesibles ao público baixo a licenza que especificase. Engade só aquel traballo que fixeras ti, e só aqueles ficheiros dos cales teñas permiso e queiras distribuílos.
 publications-include-checkbox-files =

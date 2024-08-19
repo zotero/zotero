@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Поље „Скраћеница часописа“ ће бити занемарено.
 integration-prefs-exportDocument =
     .label = Пребаците се на други програм за обраду текста…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Моје објаве
 publications-intro = Ставке које сте додали у Моје објаве ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који изаберете. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.
 publications-include-checkbox-files =

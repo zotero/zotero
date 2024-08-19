@@ -21,11 +21,11 @@ menu-file-show-files =
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = Yoğunluk
 add-attachment = Ek Ekle
 new-note = Yeni Not
 menu-add-by-identifier =
-    .label = Add by Identifier…
+    .label = Tanımlayıcı Kullanarak Ekle
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
@@ -37,7 +37,7 @@ menu-add-child-file-attachment =
 menu-add-child-linked-file-attachment =
     .label = Dosyaya Bağlantı Ekle...
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = Web Bağlantısı Ekle...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -54,7 +54,7 @@ main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
     .tooltiptext = Tüm sekmeleri listele
-filter-collections = Filter Collections
+filter-collections = Dermeleri Filtrele
 zotero-collections-search =
     .placeholder = { filter-collections }
 zotero-collections-search-btn =
@@ -70,53 +70,53 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Kaydedilen Aramayı Düzenle
 item-creator-moveDown =
-    .label = Bir Aşağı İn
+    .label = Bir Aşağı Taşı
 item-creator-moveToTop =
     .label = En Üste Taşı
 item-creator-moveUp =
-    .label = Bir Yukarı Çık
+    .label = Bir Yukarı Taşı
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        { $numAttachments ->
             [one]
                 { $attachmentType ->
-                    [pdf] PDF
-                    [epub] EPUB
-                    [snapshot] Snapshot
-                   *[other] Attachment
+                    [pdf] PDF'i
+                    [epub] EPUB'ı
+                    [snapshot] Anlık Görüntüyü
+                   *[other] Eki
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
-                    [snapshot] Snapshots
-                   *[other] Attachments
+                    [pdf] PDF'i
+                    [epub] EPUB'ı
+                    [snapshot] Anlık Görüntüyü
+                   *[other] Eki
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] Yeni Sekmede
+            [window] Yeni Pencerede
            *[other] { "" }
-        }
+        } Aç
 item-menu-add-file =
     .label = Dosya
 item-menu-add-linked-file =
-    .label = Bağlantılanmış Dosya
+    .label = Bağlantılı Dosya
 item-menu-add-url =
-    .label = Web Link
+    .label = Web bağlantısı
 view-online = Çevrimiçi Göster
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Dosyanın adı buna değiştirildi: { $filename }
 itembox-button-options =
-    .tooltiptext = Open context menu
+    .tooltiptext = Bağlam menüsünü aç
 itembox-button-merge =
-    .aria-label = Select version of { $field } field
-create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+    .aria-label = { $field } alanının versiyonunu seçiniz
+create-parent-intro = Bir DOI, ISBN, PMID, arXiv ID ya da ADS Bibcode değeri girerek bu dosyayı tanımlayınız:
 reader-use-dark-mode-for-content =
-    .label = Use Dark Mode for Content
-update-updates-found-intro-minor = An update for { -app-name } is available:
+    .label = İçerik için Karanlık Modu Kullanın
+update-updates-found-intro-minor = { -app-name } için bir güncelleme var:
 update-updates-found-desc = Bu güncellemeyi mümkün olan en kısa sürede uygulamanız önerilir.
 import-window =
     .title = İçeri Aktar
@@ -127,24 +127,24 @@ import-source-file =
 import-source-folder =
     .label = PDF'lerin veya diğer dosyaların bulunduğu bir klasör
 import-source-online =
-    .label = { $targetApp } online import
+    .label = { $targetApp } uygulamasından çevrimiçi içe aktarma
 import-options = Seçenekler
 import-importing = İçeri aktarılıyor...
 import-create-collection =
     .label = İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir
 import-recreate-structure =
-    .label = Recreate folder structure as collections
-import-fileTypes-header = File Types to Import:
+    .label = Klasör yapısını dermeler olarak yeniden yarat
+import-fileTypes-header = İçeri Aktarılacak Dosya Türleri:
 import-fileTypes-pdf =
     .label = PDF'ler
 import-fileTypes-other =
-    .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
+    .placeholder = Şablona göre diğer dosyalar, virgülle ayrılmış (örn. *.jpg,*.png)
 import-file-handling = Dosyaların İdare Edilmesi
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = Dosyaları { -app-name } depolama klasörüne kopyala
 import-file-handling-link =
     .label = Dosyalara orijinal konumlarında bağlantı kur
-import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+import-fileHandling-description = { -app-name } bağlantılı dosyaları eşitleyemez.
 import-online-new =
     .label = Yalnızca yeni eserleri indir; daha önce içeri aktarılmış olan eserleri güncelleme
 import-mendeley-username = Kullanıcı adı
@@ -154,88 +154,88 @@ file-interface-import-error = Seçilen dosyayı içeri aktarırken bir hata olu�
 file-interface-import-complete = İçeri Aktarma Tamamlandı
 file-interface-items-were-imported =
     { $numItems ->
-        [0] No items were imported
-        [one] One item was imported
-       *[other] { $numItems } items were imported
+        [0] Hiçbir eser içeri aktarılmadı
+        [one] Bir eser içeri aktarıldı
+       *[other] { $numItems } eser içeri aktarıldı
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
-        [0] No items were relinked
-        [one] One item was relinked
-       *[other] { $numRelinked } items were relinked
+        [0] Hiçbir eser yeniden bağlantılanmadı
+        [one] Bir eser yeniden bağlantılandı
+       *[other] { $numRelinked } eser yeniden bağlantılandı
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
-file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
-import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
-import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-mendeley-encrypted = Seçili Mendeley veri tabanı okunamıyor. Bunun olası nedeni veri tabanının şifrelenmiş olmasıdır. Daha çok bilgi için buraya bakınız: <a data-l10n-name="mendeley-import-kb">Bir Mendeley kitaplığını nasıl içeri aktarırım?</a>
+file-interface-import-error-translator = Seçilmiş dosyayı “{ $translator }” ile içeri aktarırken bir hata oluştu. Lütfen dosyanın geçerliliğini kontrol ediniz ve tekrar deneyiniz.
+import-online-intro = Gelecek aşamada, { $targetAppOnline } uygulamasına giriş yapmanız ve { -app-name } uygulamasına erişim vermeniz istenecek. Bu, { $targetApp } kitaplığınızı { -app-name } içine aktarabilmek için gereklidir.
+import-online-intro2 = { -app-name } hiçbir zaman { $targetApp } şifrenizi görmeyecek ve kaydetmeyecektir.
+import-online-form-intro = Lütfen { $targetAppOnline } uygulaması için giriş bilgilerinizi giriniz. Bu, { $targetApp } kitaplığınızı { -app-name } içine aktarmak için gereklidir.
+import-online-wrong-credentials = { $targetApp } için oturum açılamadı. Lütfen giriş bilgilerini tekrar girin ve yeniden deneyin.
+import-online-blocked-by-plugin = { $plugin } kuruluyken içeri aktarma işlemi sürdürülemez. Lütfen bu eklentiyi devre dışı bırakın ve yeniden deneyin.
 import-online-relink-only =
     .label = Mendeley Desktop alıntılarını yeniden bağlantıla
 import-online-relink-kb = Daha Fazla Bilgi
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name }, { $targetApp } uygulamasına bağlanamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } Not
+           *[other] { $count } Not
         }
 report-error =
     .label = Hatayı Bildir...
 rtfScan-wizard =
     .title = RTF Tarama
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } alıntıları otomatik olarak ayıklayıp düzenleyebilir ve RTF dosyalarının içine kaynakça olarak koyabilir. Şu an aşağıdaki biçimlendirme şekillerinde yaratılmış alıntıları desteklemektedir:
 rtfScan-introPage-description2 = Başlamak için, aşağıdan bir RTF girdi dosyası ve bir çıktı dosyası seçiniz:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Okunan Dosya:
+rtfScan-output-file = Çıkan Dosya:
 rtfScan-no-file-selected = Dosya seçilmedi
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = Okunan Dosyayı Seç
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = Çıkacak Dosyayı Seç
 rtfScan-intro-page = Giriş
 rtfScan-scan-page = Alıntılar için Tarama
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name }, belgenizi alıntı bulmak için tarıyor. Lütfen bekleyiniz.
 rtfScan-citations-page = Alıntıların Onaylanması
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = Lütfen aşağıdaki listede tanınan alıntıları { -app-name } uygulamasının doğru eserlerle eşlendirdiğinden emin olunuz. Bir sonraki adıma geçmeden önce eşlenmemiş veya belirsiz alıntılar çözümlenmelidir.
 rtfScan-style-page = Belge Biçimlendirme
 rtfScan-format-page = Alıntı Biçimlendirme
-rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name }, RTF dosyanızı işliyor ve biçimlendiriyor. Lütfen bekleyiniz.
 rtfScan-complete-page = RTF Taraması Tamamlandı
 rtfScan-complete-page-description = Belgenizin taranması ve işlenmesi tamamlandı. Lütfen biçimlendirmesinin doğruluğunu kontrol ediniz.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Eşleşen eseri seçin
 rtfScan-action-accept-match =
-    .title = Accept this match
-runJS-title = Run JavaScript
-runJS-editor-label = Code:
+    .title = Bu eşleşmeyi kabul et
+runJS-title = JavaScript Çalıştır
+runJS-editor-label = Kod:
 runJS-run = Çalıştır
 runJS-help = { general-help }
 runJS-result =
     { $type ->
-        [async] Return value:
-       *[other] Result:
+        [async] Dönüş değeri:
+       *[other] Sonuç:
     }
-runJS-run-async = Run as async function
+runJS-run-async = Asenkron fonksiyon olarak çalıştır
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - Alıntı/Kaynakça Yarat
 bibliography-style-label = Alıntı Stili:
 bibliography-locale-label = Dil:
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Alıntıları böyle göster:
 bibliography-advancedOptions-label = Gelişmiş Seçenekler
 bibliography-outputMode-label = Çıktı Biçimi
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] Alıntılar
+            [note] Notlar
+           *[other] Alıntılar
         }
 bibliography-outputMode-bibliography =
-    .label = Bibliography
+    .label = Kaynakça
 bibliography-outputMethod-label = Çıktı Metodu:
 bibliography-outputMethod-saveAsRTF =
     .label = RTF Olarak Kaydet
@@ -247,24 +247,24 @@ bibliography-outputMethod-print =
     .label = Yazdır
 bibliography-manageStyles-label = Stilleri Yönet...
 integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
+    .title = { -app-name } - Belge Tercihleri
 integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
+    .title = { -app-name } - Alıntı Ekle/Düzenle
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - Kaynakça Düzenle
 integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
-integration-prefs-displayAs-label = Alıntıları Göster:
+    .title = { -app-name } - Alıntıyı Çabuk Biçimle
+integration-prefs-displayAs-label = Alıntıları Böyle Göster:
 integration-prefs-footnotes =
     .label = Dipnot
 integration-prefs-endnotes =
-    .label = Son notlar
+    .label = Sonnot
 integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
+    .label = Alıntıyı yer imleri/işaretleri olarak depola
 integration-prefs-bookmarks-description = Yer imleri Word ve LibreOffice arasında paylaşılabilirler, ama yanlışlıkla değiştirilirlerse hatalara neden olabilirler ve dipnotlara konulamazlar.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] The document must be saved as .doc or .docx.
+        [true] Belge .doc ya da .docx olarak kaydedilmelidir.
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = “Dergi Kısaltması” alanı yok sayılacaktır.
 integration-prefs-exportDocument =
     .label = Başka Bir Sözcük İşlemcisine Geç...
+integration-error-unable-to-find-winword = { -app-name } şu an çalışan bir Word bulamadı.
 publications-intro-page = Yayınlarım
 publications-intro = Yayınlarım'a eklediğiniz eserler zotero.org adresindeki profil sayfanızda gösterilecektir. Eklenti dosyalarını dahil etmeyi seçerseniz, bu dosyalar belirttiğiniz lisans uyarınca halka açık şekilde paylaşılacaktır. Sadece kendi ürettiğiniz eserleri ekleyiniz ve sadece dağıtım hakkına sahip olduğunuz ve paylaşmak istediğiniz dosyaları dahil ediniz.
 publications-include-checkbox-files =
@@ -316,37 +317,37 @@ publications-choose-license-commercial-prompt = Eserinizin ticari kullanımına 
 publications-buttons-add-to-my-publications =
     .label = Yayınlarım'a Ekle
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = Sonraki: Paylaşım
 publications-buttons-next-choose-license =
     .label = Bir Telif Hakkı Lisansı Seç
-licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
+licenses-cc-0 = CC0 1.0 Universal Public Domain Adanması
 licenses-cc-by = Creative Commons Alıntı 4.0 Uluslararası Lisansı
 licenses-cc-by-nd = Creative Commons Alıntı-Türetilemez 4.0 Uluslararası Lisansı
 licenses-cc-by-sa = Creative Commons Alıntı-LisansDevam 4.0 Uluslararası Lisansı
 licenses-cc-by-nc = Creative Commons Alıntı-Gayriticari 4.0 Uluslararası Lisansı
 licenses-cc-by-nc-nd = Creative Commons Alıntı-Gayriticari-Türetilemez eserler 4.0 Uluslararası Lisansı
 licenses-cc-by-nc-sa = Creative Commons Alıntı-Gayriticari-LisansDevam 4.0 Uluslararası Lisansı
-licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
-licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+licenses-cc-more-info = Çalışmanızı CC lisansı altına almadan önce, Creative Commons <a data-l10n-name="license-considerations">Lisansı Verenleri İçin Dikkat Edilecek Hususlar'ı</a> okuduğunuzdan emin olun. Başvurduğunuz lisansın, daha sonra başka şartlar seçseniz veya eserin yayımını durdursanız bile, iptal edilemeyeceğini unutmayın.
+licenses-cc0-more-info = Çalışmanıza CC0 lisansını uygulamadan önce, Creative Commons <a data-l10n-name="license-considerations">CC0 SSS</a> belgesini okuduğunuzdan emin olun. Çalışmanızı kamuya açık alana adamanın, daha sonra başka şartlar seçseniz veya çalışmayı yayınlamayı bıraksanız bile, geri döndürülemez olduğunu lütfen unutmayın.
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Sorun Giderme Modunda Yeniden Başlat...
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
-restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
+restart-in-troubleshooting-mode-dialog-title = Sorun Giderme Modunda Yeniden Başlat
+restart-in-troubleshooting-mode-dialog-description = { -app-name }, tüm eklentileri devre dışı bırakarak yeniden başlayacak. Sorun Giderme Modu etkinken bazı özellikler düzgün çalışmayabilir.
 menu-ui-density =
-    .label = Density
+    .label = Yoğunluk
 menu-ui-density-comfortable =
-    .label = Comfortable
+    .label = Rahat
 menu-ui-density-compact =
-    .label = Compact
+    .label = Sıkıştır
 pane-info = Bilgi
 pane-abstract = Özet
 pane-attachments = Ekler
 pane-notes = Notlar
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = Kitaplıklar ve Dermeler
 pane-tags = Etiketler
 pane-related = İlişkili
-pane-attachment-info = Attachment Info
+pane-attachment-info = Ek Bilgileri
 pane-attachment-preview = Önizleme
 pane-attachment-annotations = Ek Açıklamalar
 pane-header-attachment-associated =
@@ -358,33 +359,33 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } Ek
+           *[other] { $count } Ek
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [one] { $count } Ek Açıklama
+           *[other] { $count } Ek Açıklama
         }
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } Not
+           *[other] { $count } Not
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } Etiket
+           *[other] { $count } Etiket
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } İlişkili
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -393,14 +394,14 @@ section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
     .dynamic-tooltiptext = Bölümü genişlet
-    .label = Expand { $section } section
+    .label = { $section } bölümünü genişlet
 section-button-collapse =
-    .dynamic-tooltiptext = Collapse section
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = Bölümü daralt
+    .label = { $section } bölümünü daralt
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
-       *[other] { $count } Annotations
+        [one] { $count } Ek Açıklama
+       *[other] { $count } Ek Açıklama
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -428,11 +429,11 @@ sidenav-tags =
 sidenav-related =
     .tooltiptext = { pane-related }
 pin-section =
-    .label = Pin Section
+    .label = Bölümü Sabitle
 unpin-section =
-    .label = Unpin Section
+    .label = Bölüm Sabitlemesini Kaldır
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Diğer Bölümleri Daralt
 expand-all-sections =
     .label = Tüm Bölümleri Genişlet
 abstract-field =
@@ -440,14 +441,14 @@ abstract-field =
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = Etiketleri Filtrele
 context-notes-search =
     .placeholder = Notları Ara
 new-collection-dialog =
     .title = Yeni Derme
     .buttonlabelaccept = Derme Oluştur
 new-collection-name = Ad:
-new-collection-create-in = Create in:
+new-collection-create-in = Bunun içinde yarat:
 attachment-info-filename = Dosya adı
 attachment-info-accessed = Erişildi
 attachment-info-pages = Sayfalar
@@ -455,37 +456,37 @@ attachment-info-modified = Değiştirme
 attachment-info-index = İndekslendi
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
-            [standalone] Standalone
-            [child] Item
-           *[unknown] New
-        } Note
-    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
-attachment-preview-placeholder = No attachment to preview
+        { $type ->
+            [standalone] Bağımsız Nota
+            [child] Eser Notuna
+           *[unknown] Yeni Nota
+        } Taşı
+    .tooltiptext = Eklere not eklemek artık desteklenmemektedir. Fakat bu notu ayrı bir nota taşıyarak düzenleyebilirsiniz.
+attachment-preview-placeholder = Önizleyecek bir ek yok
 toggle-preview =
     .label =
-        { $type ->
-            [open] Hide
-            [collapsed] Show
-           *[unknown] Toggle
-        } Attachment Preview
+        Ek Önizlemesini { $type ->
+            [open] Sakla
+            [collapsed] Göster
+           *[unknown] Sakla/Göster
+        }
 quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
+    Bu alıntının eserleri arasında gezinmek için Sol/Sağ Oklarını kullanın. { $dialogMenu ->
+        [active] İletişim kutusunun menüsüne odaklanmak için Shift-Tab tuşlarına basın.
        *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
+    } { return-or-enter } tuşuna basarak bu alıntının düzenlemelerini kaydedin. Escape tuşuna basarak yaptığınız değişiklikleri çöpe atın ve iletişim kutusunu kapatın.
+quickformat-aria-bubble = Bu eser alıntıya dahil edildi. Space tuşuna basarak bu eseri özelleştirebilirsiniz. { quickformat-general-instructions }
+quickformat-aria-input = Bu alıntıya dahil edilecek bir eseri aramak için yazın. Arama sonuçları listesinde gezinmek için Tab tuşuna basın. { quickformat-general-instructions }
+quickformat-aria-item = Bu eseri alıntıya eklemek için { return-or-enter } tuşuna basın. Arama alanına geri dönmek için Tab tuşuna basın.
 quickformat-accept =
-    .tooltiptext = Save edits to this citation
+    .tooltiptext = Bu alıntıya yapılan düzenlemeleri kaydet
 quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
+    .aria-label = Yer bulucu türü
+quickformat-locator-value = Yer bulucu
 quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+    .tooltiptext = Alıntı seçeneklerini göster
+insert-note-aria-input = Bir notu aramak için yazın. Sonuç listesinde gezinmek için Tab tuşuna basın. İletişim kutusunu kapatmak için Escape tuşuna basın.
+insert-note-aria-item = Bu notu seçmek için { return-or-enter } tuşuna basın. Arama alanına geri dönmek için Tab tuşuna basın. İletişim kutusunu kapatmak için Escape tuşuna basın.
 quicksearch-mode =
     .aria-label = Hızlı Arama modu
 quicksearch-input =
@@ -493,7 +494,7 @@ quicksearch-input =
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Bu şekilde görüntüle:
 item-pane-header-none =
     .label = Hiçbiri
 item-pane-header-title =
@@ -503,82 +504,82 @@ item-pane-header-titleCreatorYear =
 item-pane-header-bibEntry =
     .label = Kaynakça Girdisi
 item-pane-header-more-options =
-    .label = More Options
+    .label = Diğer Seçenekler
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] Hiçbir eser seçilmedi
+        [one] { $count } eser seçildi
+       *[other] { $count } eser seçildi
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [one] { $count } derme seçildi
+       *[other] { $count } derme seçildi
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [one] { $count } arama seçildi
+       *[other] { $count } arama seçildi
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [one] { $count } şey seçildi
+       *[other] { $count } şey seçildi
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] Bu görüntüde hiçbir eser yok
+        [one] Bu görüntüde { $count } eser var
+       *[other] Bu görüntüde { $count } eser var
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] { $count } eseri birleştir
+           *[other] { $count } eseri birleştir
         }
-locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
-architecture-warning-action = Download 64-bit { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+locate-library-lookup-no-resolver = { -app-name } ayarlarının { $pane } bölmesinden bir çözümleyicisi seçmelisiniz.
+architecture-win32-warning-message = En iyi performans için 64-bit { -app-name } uygulamasına geçin. Verileriniz etkilenmeyecektir.
+architecture-warning-action = 64-bit { -app-name } uygulamasını indir
+architecture-x64-on-arm64-message = { -app-name } uygulaması emüle edilmiş modda çalışıyor. { -app-name } uygulamasının yerli bir versiyonu daha verimli çalışacaktır.
+architecture-x64-on-arm64-action = ARM64 için yapılmış { -app-name } uygulamasını indir
 first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
+    Bir referans aramak için bir başlık, yazar ve/veya yıl yazın.
     
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Seçiminizi yaptıktan sonra, baloncuğu tıklayın veya klavyeden baloncuğu seçin ve sayfa numarası, önek ve sonek gibi alıntı seçeneklerini göstermek için ↓/Space tuşuna basın.
     
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
-first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+    Ayrıca, bir sayfa numarası doğrudan eklemek için sayfa numarasını arama terimlerinize ekleyebilirsiniz veya baloncuğun ardından sayfa numarasını yazıp { return-or-enter } tuşuna basabilirsiniz.
+first-run-guidance-authorMenu = { -app-name }, editörleri ve çevirmenleri belirtmenize de olanak tanır. Bir yazarı, editöre veya çevirmene dönüştürmeyi bu menüden seçebilirsiniz.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
     .tooltiptext = { general-add }
 advanced-search-conditions-menu =
-    .aria-label = Search condition
+    .aria-label = Arama koşulu
     .label = { $label }
 advanced-search-operators-menu =
-    .aria-label = Operator
+    .aria-label = İşleç
     .label = { $label }
 advanced-search-condition-input =
     .aria-label = Değer
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } dosya eklendi
+       *[other] { $count } dosya eklendi
     }
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Seç
 file-type-webpage = Web sayfası
-file-type-image = Görüntü
+file-type-image = Resim
 file-type-pdf = PDF
 file-type-audio = Ses
 file-type-video = Video
 file-type-presentation = Sunum
 file-type-document = Doküman
 file-type-ebook = E-kitap
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = <a data-l10n-name="new-features-link">{ -app-name } { $version } sürümündeki yeni özellikleri</a>öğrenin
+post-upgrade-density = Tercih ettiğiniz düzen yoğunluğunu seçin:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =

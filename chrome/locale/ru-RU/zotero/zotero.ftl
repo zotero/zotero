@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Поле «Сокращ. журнала» будет проигнорировано.
 integration-prefs-exportDocument =
     .label = Переключиться на другой текстовый редактор…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Мои публикации
 publications-intro = Записи, добавленные в раздел «Мои публикации», будут показаны на странице вашего профиля в zotero.org. Если вы присоединили файлы, они также станут доступны публично под указанной вами лицензией. Добавляйте только ваши собственные работы и размещайте только те файлы, для которых у вас есть разрешение на распространение.
 publications-include-checkbox-files =

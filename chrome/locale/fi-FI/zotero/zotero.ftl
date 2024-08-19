@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Lehden lyhenne -kenttää ei huomioida.
 integration-prefs-exportDocument =
     .label = Vaihda eri tekstinkäsittelyohjelmaan…
+integration-error-unable-to-find-winword = { -app-name } ei löydä käynnissä olevaa Word-sovellusta.
 publications-intro-page = Omat julkaisuni
 publications-intro = Omat julkaisuni -kokoelmaan lisätyt nimikkeet näkyvät profiilisivullasi zotero.org:ssa. Jos päätät sisällyttää liitetiedostot, ne julkaistaan sivulla määrittelemälläsi lisenssillä. Lisää vain julkaisuja jotka olet itse tehnyt ja sisällytä vain tiedostot, joiden levittämiseen sinulla on oikeudet ja joita haluat levittää.
 publications-include-checkbox-files =

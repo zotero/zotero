@@ -63,4 +63,4 @@ preferences-advanced-enable-local-api =
     .label = Tillat andre programmer på denne datamaskinen å kommunisere med { -app-name }
 preferences-advanced-language-and-region-title = Språk og region
 preferences-advanced-enable-bidi-ui =
-    .label = Aktiver verktøy for bidireksjonal tekstredigering
+    .label = Aktiver verktøy for toveis tekstredigering

@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = The “Journal Abbr” field will be ignored.
 integration-prefs-exportDocument =
     .label = Switch to a Different Word Processor…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Các xuất bản của tôi
 publications-intro = Các mục bạn thêm vào Các Xuất bản của tôi sẽ xuất hiện trong trang hồ sơ của bạn trên zotero.org. Nếu bạn chọn gộp các tệp đính kèm, các tệp đó sẽ chuyển thành công cộng theo giấy phép bạn xác định. Chỉ thêm những gì bạn tạo ra và gộp các tệp bạn có quyền phân phối và bạn muốn làm thế.
 publications-include-checkbox-files =

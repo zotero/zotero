@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = "Aldizkariaren labur." eremua baztertua izango da
 integration-prefs-exportDocument =
     .label = Beste testu prozesatzaile batera aldatu...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Nire argitalpenak
 publications-intro = Nire argitalpenak atalean gehitzen dituzun elementuak zure profilean erakutsiko dira zotero.org webgunean. Atxikitako fitxategiak erakustea hautatzen baduzu, publikoki eskuragarri jarriko dira zehazten duzun lizentziarekin. Zuk zeuk sortutako lanak bakarrik gehitu, eta zabaltzeko eskumena daukazun eta zabaldu nahi dituzun fitxategiak gehitu bakarrik.
 publications-include-checkbox-files =

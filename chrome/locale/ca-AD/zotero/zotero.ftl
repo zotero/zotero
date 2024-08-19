@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = S'ignorarà el camp «Journal Abbr».
 integration-prefs-exportDocument =
     .label = Canvia a un processador de textos diferent…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Les meves publicacions
 publications-intro = Els elements que afegiu a «Les meves publicacions» es mostraran en la pàgina de perfil de zotero.org. Si trieu incloure els fitxers adjunts, es posaran disponibles sota la llicència que hi especifiqueu. Només afegiu-hi treballs que hàgiu creat, i només incloeu-hi fitxers que tingueu els drets de distribució i vulgueu compartir.
 publications-include-checkbox-files =

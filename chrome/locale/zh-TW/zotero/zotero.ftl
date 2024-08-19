@@ -275,6 +275,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = 「期刊簡寫」欄會被忽略。
 integration-prefs-exportDocument =
     .label = 切換至另一文件編輯器……
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = 我的著作
 publications-intro = 您所新增到我的著作中的項目將在 zotero.org 上您的個人頁面中顯示。如果您選擇包含附件檔案，這些檔案將在您所指定的許可協議下開放存取。請僅新增您自己創作的著作，並僅加入您所擁有著作權且願意分享的檔案。
 publications-include-checkbox-files =

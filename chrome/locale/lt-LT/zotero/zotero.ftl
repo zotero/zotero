@@ -278,6 +278,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Ignoruosima reikšmė „žurnalo santrumpos“ laukelyje
 integration-prefs-exportDocument =
     .label = Persijungti į kitą raštinės programą...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Nuosavos publikacijos
 publications-intro = „Nuosavose publikacijose“ patalpinti įrašai rodysimi Zotero.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.
 publications-include-checkbox-files =

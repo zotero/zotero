@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = 「雑誌略誌名」のフィールドは無視されます。
 integration-prefs-exportDocument =
     .label = 別のワープロソフトに切り替える...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = 私の出版物
 publications-intro = 「私の出版物」に追加したアイテムは、zotero.org のプロフィールページに表示されます。添付ファイルを含めることを選択した場合、それらは指定したライセンスの下で公開されます。あなた自身が作成した著作物のみを加えてください。また、配布を希望し、かつ配布する権利を持つファイルのみを含めてください。
 publications-include-checkbox-files =

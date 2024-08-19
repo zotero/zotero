@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Feltet “Journal Abbr” vil blive ignoreret.
 integration-prefs-exportDocument =
     .label = Switch to a Different Word Processor…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Mine publikationer
 publications-intro = Elementer, som tilføjes til Mine publikationer, vil vises på din profilside på zotero.org. Vælger du at inkludere vedhæftede filer, vil de være offentligt tilgængelige under den licens, du angiver. Tilføj kun værker, du selv har lavet, og inkludér kun filer, hvis du har rettighederne til at distribuere dem og ønsker at gøre det.
 publications-include-checkbox-files =

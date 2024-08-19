@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Gagnasviðið “Journal Abbr” verður hunsað.
 integration-prefs-exportDocument =
     .label = Switch to a Different Word Processor…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = My Publications
 publications-intro = Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.
 publications-include-checkbox-files =

@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = השדה „Journal Abbr” (קיצורי יומן) לא יעבור עיבוד.
 integration-prefs-exportDocument =
     .label = מעבר למעבד תמלילים אחר…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = הפרסומים שלי
 publications-intro = פריטים שנוספים ל„פרסומים שלי” יופיעו בעמוד הפרופיל שלך ב־zotero.org. אם בחרת לצרף קבצים הם ייחשפו לקהל הרחב בכפוף לרישיון שציינת. יש להוסיף אך ורק יצירה מקורית שלך ולצרף אך ורק קבצים שיש לך זכויות להפיץ ושיש לך רצון בכך.
 publications-include-checkbox-files =

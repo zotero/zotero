@@ -133,7 +133,7 @@ import-importing = Importowanie...
 import-create-collection =
     .label = Umieść zaimportowane kolekcje i elementy w nowej kolekcji
 import-recreate-structure =
-    .label = Utwórz ponownie strukturę katalogów jako kolekcje
+    .label = Odtwórz strukturę katalogów jako kolekcje
 import-fileTypes-header = Typy plików do zaimportowania:
 import-fileTypes-pdf =
     .label = PDFy
@@ -144,7 +144,7 @@ import-file-handling-store =
     .label = Kopiuj pliki do katalogu przechowywania { -app-name }
 import-file-handling-link =
     .label = Odsyłacz do plików w oryginalnej lokalizacji
-import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+import-fileHandling-description = Połączone pliki nie mogą być zsynchronizowane przez { -app-name }.
 import-online-new =
     .label = Pobierz tylko nowe elementy; nie aktualizuj poprzednio zaimportowanych elementów
 import-mendeley-username = Nazwa użytkownika
@@ -164,17 +164,17 @@ file-interface-items-were-relinked =
         [one] One item was relinked
        *[other] { $numRelinked } items were relinked
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
-file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
+import-mendeley-encrypted = Nie można odczytać wybranej bazy danych Mendeley, ponieważ jest zaszyfrowana. Aby uzyskać więcej informacji, zobacz <a data-l10n-name="mendeley-import-kb">Jak zaimportować bibliotekę Mendeley do Zotero?</a>.
+file-interface-import-error-translator = Podczas importowania wybranego pliku z “{ $translator }” pojawił się błąd. Proszę, upewnij się, że ten plik jest poprawny i spróbuj ponownie.
 import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
 import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
 import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-online-wrong-credentials = Logowanie do { $targetApp } nie powiodło się. Proszę, wprowadź dane logowania ponownie i spróbuj jeszcze raz.
+import-online-blocked-by-plugin = Importowanie nie może być kontynuowane z zainstalowaną wtyczką { $plugin }. Proszę, wyłącz tę wtyczkę i spróbuj ponownie.
 import-online-relink-only =
     .label = Zlinkuj ponownie cytowania Mendeley Desktop
 import-online-relink-kb = Więcej informacji
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name } nie może się połączyć z  { $targetApp }. Proszę, sprawdź swoje połączenie internetowe i spróbuj ponownie.
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -187,8 +187,8 @@ rtfScan-wizard =
     .title = Skanowanie pliku RTF
 rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Aby rozpocząć, wybierz poniżej plik wejściowy w formacie RTF oraz plik wyjściowy:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Plik wejściowy:
+rtfScan-output-file = Plik wyjściowy:
 rtfScan-no-file-selected = Nie wybrano pliku
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -198,7 +198,7 @@ rtfScan-choose-output-file =
     .aria-label = Wybierz plik wyjściowy
 rtfScan-intro-page = Wstęp
 rtfScan-scan-page = Skanowanie cytowań
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } skanuje twój dokument w poszukiwaniu cytowań. Prosimy o cierpliwość.
 rtfScan-citations-page = Sprawdzenie cytowanych elementów
 rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
 rtfScan-style-page = Formatowanie dokumentu
@@ -207,9 +207,9 @@ rtfScan-format-page-description = { -app-name } przetwarza i formatuje twój pli
 rtfScan-complete-page = Zakończono skanowanie RTF
 rtfScan-complete-page-description = Twój dokument został przeskanowany i przetworzony. Proszę upewnić się, że jest on poprawnie sformatowany.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Wybierz pasujący element.
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = Zaakceptuj ten wybór
 runJS-title = Uruchom JavaScript
 runJS-editor-label = Kod:
 runJS-run = Uruchom
@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Pole "Skrót czasopisma" będzie ignorowane.
 integration-prefs-exportDocument =
     .label = Przełącz na inny edytor tekstu...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Moje publikacje
 publications-intro = Elementy dodane do Moich Publikacji będą wyświetlone na twojej stronie na zotero.org. Jeśli wybierzesz dołączenie plików, zostaną one upublicznione na określonej przez ciebie licencji. Pamiętaj, by dodać tu tylko te prace, których jesteś autorem oraz tylko te pliki, które masz prawo i chęć udostępnić.
 publications-include-checkbox-files =
@@ -538,10 +539,10 @@ item-pane-duplicates-merge-items =
            *[other] Merge { $count } items
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
+architecture-win32-warning-message = Dla lepszej wydajności zmień { -app-name } na wersję 64-bitową. Twoje dane nie będą naruszone.
 architecture-warning-action = Pobierz wersję 64-bitową { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = { -app-name } jest uruchomiony w trybie emulacji. Wersja natywna { -app-name } będzie działać bardziej wydajnie.
+architecture-x64-on-arm64-action = Pobierz { -app-name } dla ARM64
 first-run-guidance-quickFormat =
     Type a title, author, and/or year to search for a reference.
     

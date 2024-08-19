@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Το πεδίο «Συντομογραφία περιοδικού» θα αγνοηθεί.
 integration-prefs-exportDocument =
     .label = Μετάβαση σε διαφορετικό επεξεργαστή κειμένου ...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Οι Εκδόσεις μου
 publications-intro = Τα στοιχεία που προσθέτετε στις Δημοσιεύσεις μου θα εμφανίζονται στη σελίδα του προφίλ σας στο zotero.org. Αν επιλέξετε να συμπεριλάβετε τα συνημμένα αρχεία, θα είναι διαθέσιμα στο κοινό με την άδεια που καθορίζετε. Προσθέστε μόνο την εργασία που έχετε δημιουργήσει εσείς και συμπεριλάβετε μόνο αρχεία εάν έχετε τα δικαιώματα διανομής και θέλετε να το κάνετε.
 publications-include-checkbox-files =

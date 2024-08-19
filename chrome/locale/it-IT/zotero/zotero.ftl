@@ -277,6 +277,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Il campo "Abbreviazione rivista" sarà ignorato.
 integration-prefs-exportDocument =
     .label = Passa ad un altro programma di scrittura…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Le mie pubblicazioni
 publications-intro = Gli elementi aggiunti a "Le mie pubblicazioni" verranno mostrati sulla tua pagina profilo su zotero.org. Se scegli di includere dei file allegati, questi verranno resi disponibili pubblicamente con la licenza da te specificata. Aggiungi soltanto lavori che tu stesso hai creato e includi i file solo se desideri diffonderli e se sei in possesso dei diritti per farlo.
 publications-include-checkbox-files =

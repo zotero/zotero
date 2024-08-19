@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = A "Journal Abbr" mező figyelmen kívül hagyása
 integration-prefs-exportDocument =
     .label = Váltson egy másik szövegszerkesztőre…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Saját publikációk
 publications-intro = A Saját publikációkhoz hozzáadott elemek megjelennek a zotero.org profiloldalán. Ha úgy dönt, hogy fájlokat is csatol, azokat az ön által megadott licenc alapján nyilvánosan elérhetővé teszi. Csak akkor adjon hozzá munkát, amennyiben ön készítette és csak akkor tartalmazzon fájlokat, ha rendelkezik a terjesztési jogokkal, és ezt meg akarja tenni.
 publications-include-checkbox-files =

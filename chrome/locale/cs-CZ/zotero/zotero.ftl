@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Pole "Zkrácený název časopisu" bude ignorováno
 integration-prefs-exportDocument =
     .label = Přepnout do jiného textového editoru...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Mé publikace
 publications-intro = Položky přidané do Mých publikací budou zobrazeny na stránce vašeho profilu na zotero.org. Pokud zvolíte, že chcete zahrnout připojené soubory, budou tyto soubory veřejně dostupné pod licencí, kterou určíte. Přidávejte pouze díla, která jste sami vytvořili a zahrňte pouze ty připojené soubory, které chcete šířit a máte k tomu oprávnění.
 publications-include-checkbox-files =

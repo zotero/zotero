@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Câmpul „Abrev. revistă” va fi ignorat.
 integration-prefs-exportDocument =
     .label = Schimbă procesorul de texte…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Publicațiile mele
 publications-intro = Itemii pe care îi adaugi în Publicațiile mele vor fi afișați în profilul tău pe zotero.org. Dacă alegi să incluzi fișiere anexate, acestea vor fi disponibile public sub licența pe care o specifici. Adaugă doar ceea ce ai creat tu însuți și adaugă fișiere doar dacă ai drepturile de a le distribui și vrei să o faci.
 publications-include-checkbox-files =

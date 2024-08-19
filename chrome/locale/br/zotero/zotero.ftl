@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Ar vaezienn Zotero "Berradur kelaouenn" a vo graet van outi.
 integration-prefs-exportDocument =
     .label = Tremen d'un treter testennoù all…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Ma Embannadennoù
 publications-intro = Elfennoù da ouzhpennañ D'am Embannadennoù hag a vo diskouezet war pajenn ho profil war zotero.org. Ma tibabit enklozañ restroù-stag, lakaet e vint hegerz en un doare foran dindan al lisañs a vo termenet ganeoc'h. Ouzhpennit labourioù a zo bet krouet ganeoc'h hepken, hag enklozit ar restroù ho peus ar gwir rannañ warno hag ho peus c'hoant d'en ober.
 publications-include-checkbox-files =

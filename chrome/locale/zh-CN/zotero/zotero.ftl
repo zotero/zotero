@@ -275,6 +275,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = “期刊缩写”字段将被忽略。
 integration-prefs-exportDocument =
     .label = 切换到另外一个文稿处理器…
+integration-error-unable-to-find-winword = { -app-name } 没有找到正在运行的 Word 实例。
 publications-intro-page = 我的出版物
 publications-intro = 你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。
 publications-include-checkbox-files =
@@ -530,7 +531,7 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
 architecture-win32-warning-message = 切换到 64-bit { -app-name } 以获得最佳性能。你的数据不受影响。
 architecture-warning-action = 下载 64 位版本的 { -app-name }
-architecture-x64-on-arm64-message = 当前 { -app-name } 与此平台不兼容，请使用原生版本的 { -app-name } 以获得最佳性能。
+architecture-x64-on-arm64-message = { -app-name } 当前平台不兼容，请使用原生版本的 { -app-name } 以获得最佳性能。
 architecture-x64-on-arm64-action = 下载适配 ARM64 的 { -app-name }
 first-run-guidance-quickFormat =
     输入标题、作者和/或年份来搜索参考文献。

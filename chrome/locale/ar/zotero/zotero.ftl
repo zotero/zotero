@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = سيتم تجاهل حقل "اختصار المجلة".
 integration-prefs-exportDocument =
     .label = التبديل إلى معالج نصوص آخر ...
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = منشوراتي
 publications-intro = سيتم عرض العناصر التي تضيفها إلى منشوراتي على صفحة ملفك الشخصي على zotero.org. إذا اخترت تضمين الملفات المرفقة، سيتم إتاحتها للجمهور تحت الرخصة التي تحددها. أضف الأعمال التي ألفتها فقط، و لا تضمن الملفات إلا إن كان لديك الحق في توزيعها وترغب في القيام بذلك.
 publications-include-checkbox-files =

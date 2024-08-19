@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Feltet "Tidsskriftsforkortelse" vil bli ignorert.
 integration-prefs-exportDocument =
     .label = Bytt til en annen tekstbehandler…
+integration-error-unable-to-find-winword = { -app-name } kunne ikke finne en Word-versjon som kjører.
 publications-intro-page = Mine publikasjoner
 publications-intro = Elementer du legger til Mine publikasjoner vil bli vist på din profilside på zotero.org. Hvis du velger å inkludere vedlegg vil de bli gjort offentlig tilgjengelig under lisensen du angir. Legg kun til arbeid du selv har opprettet og inkluder vedlegg kun dersom du har rettighetene til å distribuere de og ønsker å gjøre det.
 publications-include-checkbox-files =

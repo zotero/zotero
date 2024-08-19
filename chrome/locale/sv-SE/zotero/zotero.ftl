@@ -276,6 +276,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Tidskriftsförkortningsfältet kommer att ignoreras.
 integration-prefs-exportDocument =
     .label = Byt till en annan ordbehandlare…
+integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Mina publikationer
 publications-intro = Källor du lägger till i Mina publikationer kommer att visas på din profilsida på zotero.org. Om du väljer att inkludera bifogade filer blir de tillgängliga enligt den licens du anger. Lägg endast till verk som du själv har skapat och bifoga bara filer om du har rätt att dela dem vidare och önskar att göra så.
 publications-include-checkbox-files =
