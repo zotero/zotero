@@ -118,6 +118,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			'itemTreeView',
 			50
 		);
+		this._prefsObserverIDs = [
+			Zotero.Prefs.registerObserver('recursiveCollections', this.refreshAndMaintainSelection.bind(this)),
+			Zotero.Prefs.registerObserver('showAttachmentFilenames', () => {
+				this._rowCache = {};
+				this.tree.invalidate();
+			}),
+		];
 		
 		this._itemsPaneMessage = null;
 		
@@ -133,6 +140,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
+		for (let id of this._prefsObserverIDs) {
+			Zotero.Prefs.unregisterObserver(id);
+		}
 		this._writeColumnPrefsToFile(true);
 	}
 
@@ -3239,7 +3249,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
-		row.title = treeRow.ref.getDisplayTitle();
+		
+		if (treeRow.ref.isFileAttachment()
+				&& !(treeRow.ref.isSnapshotAttachment() && /snapshot/i.test(treeRow.ref.getField('title')))
+				&& Zotero.Prefs.get('showAttachmentFilenames')) {
+			row.title = treeRow.ref.attachmentFilename;
+		}
+		else {
+			row.title = treeRow.ref.getDisplayTitle();
+		}
 		
 		const columns = this.getColumns();
 		for (let col of columns) {
