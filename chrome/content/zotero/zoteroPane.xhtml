@@ -1371,12 +1371,12 @@
 				</box>
 				
 				<stack id="zotero-pane-overlay" flex="1" hidden="true">
-					<box style="background: black; opacity: .3" flex="1"/>
+					<box flex="1"/>
 					
 					<deck id="zotero-pane-overlay-deck" style="display: flex; justify-content: center;">
 						<box id="zotero-pane-progress" flex="1" align="center" pack="center">
-							<box style="background: white; border-radius: 1px; box-shadow: gray 4px 6px 4px; width: 300px; height: 30px;">
-								<vbox id="zotero-pane-progressmeter-container" style="padding:10px" flex="1">
+							<box id="zotero-pane-progress-box">
+								<vbox id="zotero-pane-progressmeter-container" flex="1">
 									<label id="zotero-pane-progress-label"/>
 									<!-- See note in Zotero.showZoteroPaneProgressMeter()
 									<progressmeter id="zotero-pane-progressmeter" mode="undetermined"/> -->

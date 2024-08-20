@@ -23,3 +23,19 @@
 #browser, #zotero-pane-stack, #zotero-trees {
 	min-height: 0;
 }
+
+#zotero-pane-overlay {
+	background: rgba(0,0,0,.3);
+}
+
+#zotero-pane-progress-box {
+	background: var(--color-sidepane);
+	border-radius: 5px;
+	border: var(--color-panedivider);
+	height: 30px;
+	width: 300px;
+}
+
+#zotero-pane-progressmeter-container {
+	padding: 10px;
+}
