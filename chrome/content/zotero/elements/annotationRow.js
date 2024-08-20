@@ -94,7 +94,7 @@
 			if (this._annotation.annotationText) {
 				let text = document.createElement('div');
 				text.classList.add('quote');
-				text.textContent = this._annotation.annotationText;
+				text.innerHTML = this._annotation.annotationText;
 				this._body.append(text);
 			}
 			
@@ -110,6 +110,9 @@
 			this._tags.textContent = tags.map(tag => tag.tag).sort(Zotero.localeCompare).join(Zotero.getString('punctuation.comma') + ' ');
 			
 			this.style.setProperty('--annotation-color', this._annotation.annotationColor);
+			// A11y - make focusable + add screen reader's labels
+			this.setAttribute("tabindex", 0);
+			this.setAttribute("aria-label", this.annotation.getDisplayTitle());
 		}
 	}
 

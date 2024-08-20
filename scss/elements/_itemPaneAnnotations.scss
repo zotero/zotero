@@ -1,0 +1,69 @@
+annotation-items-pane {
+
+	display: flex;
+	flex-direction: column;
+	
+	.custom-head {
+		display: flex;
+		flex-direction: row;
+		align-self: stretch;
+		gap: 8px;
+		padding: 6px 8px;
+		background: var(--material-sidepane);
+		border-bottom: var(--material-panedivider);
+		height: 28px;
+		align-items: center;
+
+		&:empty {
+			display: none;
+		}
+
+		button {
+			height: 26px;
+			margin: 0;
+			@media (-moz-platform: macos) {
+				margin: 0px -2px;
+			}
+			flex-grow: 1;
+		}
+	}
+
+	// Make sure the summary containing name of top-level item is always visible
+	// and titles are cutoff by letter and not by word
+	collapsible-section > .head .title-box .summary {
+		opacity: 1 !important;
+		width: 0;
+		white-space: nowrap;
+		display: inline;
+	}
+
+	// Annotation icon for collapsible section
+	collapsible-section > .head .title::before {
+		content: '';
+		width: 16px;
+		height: 16px;
+		background: icon-url("itempane/16/attachment-annotations.svg") no-repeat center;
+		-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+		fill: var(--tag-purple);
+		stroke: var(--tag-purple);
+	}
+
+	collapsible-section > .body {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		@include comfortable {
+			gap: 8px;
+		}
+	}
+
+	collapsible-section:not(:last-child) {
+		border-bottom: 1px solid var(--fill-quinary);
+	}
+
+	// Do not cut off annotation text and comment
+	annotation-row .body .comment,
+	annotation-row .body .quote {
+		-webkit-line-clamp: inherit !important;
+	}
+}
