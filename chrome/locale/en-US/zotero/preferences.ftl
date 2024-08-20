@@ -34,6 +34,11 @@ preferences-file-renaming-format-instructions-more = See the <label data-l10n-na
 preferences-file-renaming-format-template = Filename Template:
 preferences-file-renaming-format-preview = Preview:
 
+preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-show-filenames =
+    .label = Show attachment filenames in the items list
+
 preferences-reader-title = Reader
 preferences-reader-open-epubs-using = Open EPUBs using
 preferences-reader-open-snapshots-using = Open snapshots using

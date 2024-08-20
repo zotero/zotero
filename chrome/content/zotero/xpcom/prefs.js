@@ -350,9 +350,6 @@ Zotero.Prefs = new function () {
 		["uiDensity", function () {
 			Zotero.UIProperties.setAll();
 		}],
-		["recursiveCollections", function () {
-			Zotero.getActiveZoteroPane().itemsView.refreshAndMaintainSelection();
-		}],
 		[ "layout", function (val) {
 			Zotero.getActiveZoteroPane().updateLayout();
 		}],
