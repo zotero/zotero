@@ -1939,7 +1939,6 @@ class Reader {
 	}
 
 	notify(event, type, ids, extraData) {
-		console.log("Notify reader", event, type, ids);
 		if (type === 'tab') {
 			if (event === 'close') {
 				for (let id of ids) {
