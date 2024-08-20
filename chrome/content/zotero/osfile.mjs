@@ -316,6 +316,59 @@ export let OS = {
 		
 		// From Firefox 102
 		normalize: function (path) {
+			if (Services.appinfo.OS == "WINNT") {
+				let stack = [];
+				
+				if (!path.startsWith("\\\\")) {
+					// Normalize "/" to "\\"
+					path = path.replace(/\//g, "\\");
+				}
+				
+				// Remove the drive (we will put it back at the end)
+				let root = winGetDrive(path);
+				if (root) {
+					path = path.slice(root.length);
+				}
+				
+				// Remember whether we need to restore a leading "\\" or drive name.
+				let absolute = winIsAbsolute(path);
+				
+				// And now, fill |stack| from the components,
+				// popping whenever there is a ".."
+				path.split("\\").forEach(function loop(v) {
+					switch (v) {
+						case "":
+						case ".": // Ignore
+							break;
+						case "..":
+							if (!stack.length) {
+								if (absolute) {
+									throw new Error("Path is ill-formed: attempting to go past root");
+								} else {
+									stack.push("..");
+								}
+							} else if (stack[stack.length - 1] == "..") {
+								stack.push("..");
+							} else {
+								stack.pop();
+							}
+							break;
+						default:
+							stack.push(v);
+					}
+				});
+				
+				// Put everything back together
+				let result = stack.join("\\");
+				if (absolute || root) {
+					result = "\\" + result;
+				}
+				if (root) {
+					result = root + result;
+				}
+				return result;
+			}
+			
 			let stack = [];
 			let absolute;
 			if (path.length >= 0 && path[0] == "/") {
@@ -399,6 +452,11 @@ var winGetDrive = function (path) {
 	let index = path.indexOf(":");
 	if (index <= 0) return null;
 	return path.slice(0, index + 1);
+};
+
+var winIsAbsolute = function (path) {
+	let index = path.indexOf(":");
+	return path.length > index + 1 && path[index + 1] == "\\";
 };
 
 function wrapWrite(func) {
