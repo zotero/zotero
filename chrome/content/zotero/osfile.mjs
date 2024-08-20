@@ -286,6 +286,28 @@ export let OS = {
 		},
 		
 		fromFileURI: function (uri) {
+			if (Services.appinfo.OS == "WINNT") {
+				let url = new URL(uri);
+				if (url.protocol != "file:") {
+					throw new Error("fromFileURI expects a file URI");
+				}
+			
+				// strip leading slash, since Windows paths don't start with one
+				uri = url.pathname.substr(1);
+			
+				let path = decodeURI(uri);
+				// decode a few characters where URL's parsing is overzealous
+				path = path.replace(/%(3b|3f|23)/gi, match => decodeURIComponent(match));
+				path = this.normalize(path);
+			
+				// this.normalize() does not remove the trailing slash if the path
+				// component is a drive letter. eg. 'C:\'' will not get normalized.
+				if (path.endsWith(":\\")) {
+					path = path.substr(0, path.length - 1);
+				}
+				return this.normalize(path);
+			}
+			
 			let url = new URL(uri);
 			if (url.protocol != "file:") {
 				throw new Error("fromFileURI expects a file URI");
