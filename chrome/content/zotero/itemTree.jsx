@@ -2704,96 +2704,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	//
 	// //////////////////////////////////////////////////////////////////////////////
 
-	_titleMarkup = {
-		'<i>': {
-			beginsTag: 'i',
-			inverseStyle: { fontStyle: 'normal' }
-		},
-		'</i>': {
-			endsTag: 'i'
-		},
-		'<b>': {
-			beginsTag: 'b',
-			inverseStyle: { fontWeight: 'normal' }
-		},
-		'</b>': {
-			endsTag: 'b'
-		},
-		'<sub>': {
-			beginsTag: 'sub'
-		},
-		'</sub>': {
-			endsTag: 'sub'
-		},
-		'<sup>': {
-			beginsTag: 'sup'
-		},
-		'</sup>': {
-			endsTag: 'sup'
-		},
-		'<span style="font-variant:small-caps;">': {
-			beginsTag: 'span',
-			style: { fontVariant: 'small-caps' }
-		},
-		'<span class="nocase">': {
-			// No effect in item tree
-			beginsTag: 'span'
-		},
-		'</span>': {
-			endsTag: 'span'
-		}
-	};
-
-	_renderItemTitle(title, targetNode) {
-		let markupStack = [];
-		let nodeStack = [targetNode];
-		let textContent = '';
-
-		for (let token of title.split(/(<[^>]+>)/)) {
-			if (this._titleMarkup.hasOwnProperty(token)) {
-				let markup = this._titleMarkup[token];
-				if (markup.beginsTag) {
-					let node = document.createElement(markup.beginsTag);
-					if (markup.style) {
-						Object.assign(node.style, markup.style);
-					}
-					if (markup.inverseStyle && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
-						Object.assign(node.style, markup.inverseStyle);
-					}
-					markupStack.push({ ...markup, token });
-					nodeStack.push(node);
-					continue;
-				}
-				else if (markup.endsTag && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.endsTag)) {
-					while (markupStack.length) {
-						let discardedMarkup = markupStack.pop();
-						let discardedNode = nodeStack.pop();
-						if (discardedMarkup.beginsTag === markup.endsTag) {
-							nodeStack[nodeStack.length - 1].append(discardedNode);
-							break;
-						}
-						else {
-							nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
-						}
-					}
-
-					continue;
-				}
-			}
-
-			nodeStack[nodeStack.length - 1].append(token);
-			textContent += token;
-		}
-
-		while (markupStack.length) {
-			let discardedMarkup = markupStack.pop();
-			let discardedNode = nodeStack.pop();
-			nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
-		}
-
-		return textContent;
-	}
-
 	_renderPrimaryCell(index, data, column) {
 		let span = document.createElement('span');
 		span.className = `cell ${column.className}`;
@@ -2854,7 +2764,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		let textSpan = document.createElement('span');
-		let textWithFullStop = this._renderItemTitle(data, textSpan);
+		let textWithFullStop = Zotero.Utilities.Internal.renderItemTitle(data, textSpan);
 		if (!textWithFullStop.match(/\.$/)) {
 			textWithFullStop += '.';
 		}

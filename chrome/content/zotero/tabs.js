@@ -121,6 +121,7 @@ var Zotero_Tabs = new function () {
 				id: tab.id,
 				type: tab.type,
 				title: tab.title,
+				renderTitle: tab.type === 'reader' || tab.type === 'reader-unloaded',
 				selected: tab.id == this._selectedID,
 				isItemType: tab.id !== 'zotero-pane',
 				icon: tab.data?.icon || null
@@ -482,7 +483,7 @@ var Zotero_Tabs = new function () {
 		if (tab.id === 'zotero-pane' && (options.keepTabFocused !== true)) {
 			focusZoteroPane();
 		}
-		let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
+		let tabNode = document.querySelector(`#tab-bar-container .tab[data-id="${tab.id}"]`);
 		if (this._focusOptions.keepTabFocused && document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
 			// Keep focus on the currently selected tab during keyboard navigation
 			if (tab.id == 'zotero-pane') {
@@ -619,7 +620,7 @@ var Zotero_Tabs = new function () {
 			const nextTab = this._tabs[tabIndexToFocus];
 			// There may be duplicate tabs - in normal tab array and in pinned tabs
 			// Go through all candidates and try to focus the visible one
-			let candidates = document.querySelectorAll(`[data-id="${nextTab.id}"]`);
+			let candidates = document.querySelectorAll(`#tab-bar-container .tab[data-id="${nextTab.id}"]`);
 			for (let node of candidates) {
 				node.focus();
 				// Visible tab was found and focused

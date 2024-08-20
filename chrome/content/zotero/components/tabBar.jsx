@@ -33,7 +33,7 @@ const { CSSIcon, CSSItemTypeIcon } = require('./icons');
 const SCROLL_ARROW_SCROLL_BY = 222;
 
 const Tab = memo((props) => {
-	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title } = props;
+	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title, renderTitle } = props;
 	
 	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
 	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
@@ -41,6 +41,18 @@ const Tab = memo((props) => {
 	const handleDragStart = useCallback(event => onDragStart(event, id, index), [onDragStart, id, index]);
 	const handleTabClose = useCallback(event => onTabClose(event, id), [onTabClose, id]);
 	
+	let titleText;
+	let titleHTML;
+	if (renderTitle) {
+		let parentElement = document.createElement('div');
+		titleText = Zotero.Utilities.Internal.renderItemTitle(title, parentElement);
+		titleHTML = parentElement.innerHTML;
+	}
+	else {
+		titleText = title;
+		titleHTML = null;
+	}
+
 	return (
 		<div
 			key={id}
@@ -59,7 +71,9 @@ const Tab = memo((props) => {
 				? <CSSItemTypeIcon itemType={icon} className="tab-icon" />
 				: <CSSIcon name={icon} className="tab-icon" />
 			}
-			<div className="tab-name" title={title}>{title}</div>
+			{titleHTML
+				? <div className="tab-name" title={titleText} dangerouslySetInnerHTML={{ __html: titleHTML }}/>
+				: <div className="tab-name" title={titleText}>{titleText}</div>}
 			<div
 				className="tab-close"
 				onClick={handleTabClose}
@@ -84,7 +98,8 @@ Tab.propTypes = {
 	onTabClose: PropTypes.func.isRequired,
 	onTabMouseDown: PropTypes.func.isRequired,
 	selected: PropTypes.bool.isRequired,
-	title: PropTypes.string.isRequired
+	title: PropTypes.string.isRequired,
+	renderTitle: PropTypes.bool,
 };
 
 
