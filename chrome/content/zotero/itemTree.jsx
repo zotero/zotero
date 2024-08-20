@@ -1912,7 +1912,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let collectionTreeRow = this.collectionTreeRow;
 
 			// If all selected items are annotations, for now erase them skipping trash
-			if (selectedItems.every(item => item.isAnnotation())) {
+			if (selectedItems.length && selectedItems.every(item => item.isAnnotation())) {
 				await Zotero.Items.erase(selectedItemIDs);
 			}
 			else if (collectionTreeRow.isBucket()) {
