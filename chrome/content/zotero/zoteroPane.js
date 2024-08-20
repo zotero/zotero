@@ -6325,6 +6325,45 @@ var ZoteroPane = new function () {
 		}
 	};
 	
+	this.normalizeAttachmentTitles = async function () {
+		let result = Zotero.Prompt.confirm({
+			title: Zotero.getString('normalize-attachment-titles-title'),
+			text: Zotero.getString('normalize-attachment-titles-text'),
+			button0: Zotero.getString('general-continue'),
+			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL,
+			button2: Zotero.getString('general.moreInformation'),
+		});
+		if (result == 1) {
+			return;
+		}
+		if (result == 2) {
+			Zotero.launchURL('https://www.zotero.org/support/kb/attachment_title_vs_filename');
+			return;
+		}
+		let attachments = new Set(this.getSelectedItems().flatMap((item) => {
+			if (item.isRegularItem()) {
+				return Zotero.Items.get(item.getAttachments());
+			}
+			if (item.isAttachment()) {
+				return [item];
+			}
+			return [];
+		}));
+		await Zotero.DB.executeTransaction(async () => {
+			for (let attachment of attachments) {
+				if (attachment.getField('title').replace(/\.[^.]+$/, '') !== attachment.attachmentFilename.replace(/\.[^.]+$/, '')) {
+					Zotero.debug(`Skipping attachment with modified title: ${attachment.getField('title')}`);
+					continue;
+				}
+				
+				let forceFirstOfType = !!attachment.parentItemID
+					&& await attachment.parentItem.getBestAttachment() === attachment;
+				attachment.setAutoAttachmentTitle({ forceFirstOfType });
+				await attachment.save();
+			}
+		});
+	};
+	
 	var itemReadTimeout = null;
 	this.startItemReadTimeout = function (feedItemID) {
 		if (itemReadTimeout) {

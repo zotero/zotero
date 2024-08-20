@@ -62,6 +62,7 @@ general-next = Next
 general-learn-more = Learn More
 general-warning = Warning
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Continue
 
 general-red = Red
 general-orange = Orange
@@ -808,3 +809,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text = { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
