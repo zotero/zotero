@@ -41,9 +41,12 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
 	onkeypress="Zotero_QuickFormat.onWindowKeyPress(event)"
-	onunload="Zotero_QuickFormat.onUnload()">
+	onunload="Zotero_QuickFormat.onUnload()"
+	drawintitlebar-platforms="linux,win"
+	no-titlebar-icon="true">
 	
 	<script src="../include.js"/>
+	<script src="../titlebar.js" type="text/javascript"/>
 	<script src="quickFormat.js" type="text/javascript"/>
 	<script src="insertNoteDialog.js" type="text/javascript"/>
 

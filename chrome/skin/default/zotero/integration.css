@@ -366,7 +366,8 @@ panel button .button-text {
 }
 
 window.citation-dialog {
-	width: 600px;
+	max-width: 800px;
+	min-width: 800px;
 }
 
 .aria-hidden {
