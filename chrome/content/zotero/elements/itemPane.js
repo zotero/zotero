@@ -36,6 +36,8 @@
 					previousfocus="zotero-items-tree" />
 				
 				<duplicates-merge-pane id="zotero-duplicates-merge-pane" />
+
+				<annotation-items-pane id="zotero-annotations-pane" />
 			</deck>
 			<item-pane-sidenav id="zotero-view-item-sidenav" class="zotero-view-item-sidenav"/>
 		`);
@@ -45,6 +47,7 @@
 			this._noteEditor = this.querySelector("#zotero-note-editor");
 			this._duplicatesPane = this.querySelector("#zotero-duplicates-merge-pane");
 			this._messagePane = this.querySelector("#zotero-item-message");
+			this._annotationsPane = this.querySelector("#zotero-annotations-pane");
 			this._sidenav = this.querySelector("#zotero-view-item-sidenav");
 			this._deck = this.querySelector("#zotero-item-pane-content");
 
@@ -108,6 +111,10 @@
 			if (!this.data) return false;
 			let hideSidenav = false;
 			let renderStatus = false;
+			// Only annotations selected
+			if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
+				return renderStatus = this.renderAnnotations(this.data);
+			}
 			// Single item selected
 			if (this.data.length == 1) {
 				let item = this.data[0];
@@ -138,6 +145,14 @@
 					this.updateReadLabel();
 				}
 			}
+		}
+
+		renderAnnotations(annotations) {
+			this.mode = "annotations";
+			let annotationsViewer = document.getElementById("zotero-annotations-pane");
+			annotationsViewer.items = annotations;
+			annotationsViewer.render();
+			return true;
 		}
 
 		renderNoteEditor(item) {
@@ -301,6 +316,11 @@
 				this.updateReadLabel();
 				return;
 			}
+			// Create note from annotations button
+			if (this.data.every(item => item.isAnnotation())) {
+				container.renderCustomHead(this.renderAnnotationsHead.bind(this));
+				return;
+			}
 
 			container.renderCustomHead();
 		}
@@ -362,6 +382,21 @@
 			append(toggleReadButton, addToButton);
 
 			this.setTranslateButton();
+		}
+
+		renderAnnotationsHead(data) {
+			let { doc, append } = data;
+			let button = doc.createXULElement("button");
+			button.id = 'zotero-item-pane-note-from-annotations';
+			if (Zotero.Items.getTopLevel(this.data).length == 1) {
+				button.label = Zotero.getString('pane.items.menu.addNoteFromAnnotations');
+				button.addEventListener("command", () => ZoteroPane.addNoteFromAnnotationsFromSelected());
+			}
+			else {
+				button.label = Zotero.getString('pane.items.menu.createNoteFromAnnotations');
+				button.addEventListener("command", () => ZoteroPane.createStandaloneNoteFromAnnotationsFromSelected());
+			}
+			append(button);
 		}
 
 		updateReadLabel() {
@@ -476,8 +511,12 @@
 		getCurrentPane(mode = undefined) {
 			if (!mode) {
 				// Guess a mode from the current data
+				// Only annotation items selected
+				if (this.data.every(item => item.isAnnotation())) {
+					mode = "annotations";
+				}
 				// No/multiple objects are selected OR selected object is a trashed collection/search
-				if (!this.data.length || this.data.length > 1
+				else if (!this.data.length || this.data.length > 1
 					|| this.data[0] instanceof Zotero.Collection || this.data[0] instanceof Zotero.Search) {
 					mode = "message";
 				}
@@ -493,6 +532,7 @@
 				item: "_itemDetails",
 				note: "_noteEditor",
 				duplicates: "_duplicatesPane",
+				annotations: "_annotationsPane"
 			};
 			return this[map[mode]];
 		}
@@ -566,6 +606,10 @@
 				case "duplicates": {
 					this._deck.selectedIndex = 3;
 					this.removeAttribute("collapsed");
+					break;
+				}
+				case "annotations": {
+					this._deck.selectedIndex = 4;
 					break;
 				}
 			}

@@ -29,6 +29,9 @@ $font-size-base:   13px;
 $font-size-h1: 20px;
 $font-size-h2: 16px;
 
+// Font size used in tag selector and annotation rows of itemTree
+$font-size-small: 0.923076923em;
+
 $line-height-base:           1.539;
 $line-height-computed:       ceil($font-size-base * $line-height-base);
 
