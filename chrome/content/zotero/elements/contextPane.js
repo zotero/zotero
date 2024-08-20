@@ -130,10 +130,7 @@
 			}
 		}
 
-		_handleTabAdd(action, type, ids, extraData) {
-			let data = extraData[ids[0]];
-			this._addItemContext(ids[0], data.itemID, data.type);
-		}
+		_handleTabAdd(_action, _type, _ids, _extraData) {}
 
 		_handleTabClose(action, type, ids) {
 			for (let id of ids) {
@@ -183,9 +180,13 @@
 				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
 				
 				this._sidenav.hidden = false;
+
+				let data = Zotero_Tabs._tabs.find(tab => tab.id === ids[0]).data;
+				await this._addItemContext(ids[0], data.itemID, data.type);
+	
+				this._selectItemContext(tabID);
 			}
 
-			this._selectItemContext(tabID);
 			ZoteroContextPane.update();
 		}
 
@@ -274,6 +275,10 @@
 		}
 	
 		async _addItemContext(tabID, itemID, _tabType = "") {
+			if (this._getItemContext(tabID)) {
+				return;
+			}
+
 			let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 			let library = Zotero.Libraries.get(libraryID);
 			await library.waitForDataLoad('item');
