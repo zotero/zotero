@@ -6325,6 +6325,40 @@ var ZoteroPane = new function () {
 		}
 	};
 	
+	this.normalizeAttachmentTitles = async function () {
+		let result = Services.prompt.confirm(
+			null,
+			Zotero.getString('normalize-attachment-titles-title'),
+			Zotero.getString('normalize-attachment-titles-message'),
+		);
+		if (!result) {
+			return;
+		}
+		
+		let attachments = new Set(this.getSelectedItems().flatMap((item) => {
+			if (item.isRegularItem()) {
+				return Zotero.Items.get(item.getAttachments());
+			}
+			if (item.isAttachment()) {
+				return [item];
+			}
+			return [];
+		}));
+		await Zotero.DB.executeTransaction(async () => {
+			for (let attachment of attachments) {
+				if (attachment.getField('title').replace(/\.[^.]+$/, '') !== attachment.attachmentFilename.replace(/\.[^.]+$/, '')) {
+					Zotero.debug(`Skipping attachment with modified title: ${attachment.getField('title')}`);
+					continue;
+				}
+				
+				let forceFirstOfType = !!attachment.parentItemID
+					&& await attachment.parentItem.getBestAttachment() === attachment;
+				attachment.setAutoAttachmentTitle({ forceFirstOfType });
+				await attachment.save();
+			}
+		});
+	};
+	
 	var itemReadTimeout = null;
 	this.startItemReadTimeout = function (feedItemID) {
 		if (itemReadTimeout) {

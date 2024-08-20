@@ -289,21 +289,28 @@ const ZoteroStandalone = new function () {
 	
 	this.onManageAttachmentsMenuOpen = function () {
 		// Convert Linked Files to Stored Files
-		var active = false;
+		var enableConvertToStored = false;
 		try {
-			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
-					return item.isLinkedFileAttachment()
-						|| (item.isRegularItem()
-							&& item.getAttachments()
-								.map(id => Zotero.Items.get(id))
-								.some(att => att.isLinkedFileAttachment()));
-				}).length;
-			}
+			enableConvertToStored = ZoteroPane.getSelectedItems().some((item) => {
+				return item.isLinkedFileAttachment()
+					|| (item.isRegularItem()
+						&& Zotero.Items.get(item.getAttachments())
+							.some(att => att.isLinkedFileAttachment()));
+			});
 		}
 		catch (e) {}
-		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', active);
+		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', enableConvertToStored);
+		
+		var enableNormalizeAttachmentTitles = false;
+		try {
+			enableNormalizeAttachmentTitles = ZoteroPane.getSelectedItems()
+				.some(item => item.isFileAttachment()
+					|| (item.isRegularItem()
+						&& Zotero.Items.get(item.getAttachments())
+							.some(att => att.isFileAttachment())));
+		}
+		catch (e) {}
+		this.updateMenuItemEnabled('file-menuitem-normalize-attachment-titles', enableNormalizeAttachmentTitles);
 	};
 	
 	
@@ -319,6 +326,9 @@ const ZoteroStandalone = new function () {
 		switch (id) {
 			case 'convert-to-stored':
 				ZoteroPane.convertLinkedFilesToStoredFiles();
+				break;
+			case 'normalize-attachment-titles':
+				ZoteroPane.normalizeAttachmentTitles();
 				break;
 		}
 	};

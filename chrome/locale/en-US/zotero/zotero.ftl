@@ -809,3 +809,10 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-message = Older versions of { -app-name }, as well as certain plugins, may have set attachments’ titles based on their filenames unnecessarily. Newly added attachments are titled using an improved set of rules.
+    
+    Update selected attachments to use the new title format? Attachments with custom titles will not be affected.
