@@ -57,7 +57,7 @@
 <!ENTITY fontSize.label "Betűméret">
 <!ENTITY noteFontSize.label "Jegyzet betűmérete">
 <!ENTITY columns.label "Oszlopok">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY sortBy.label "Rendezés">
 
 <!ENTITY toolsMenu.label "Eszközök">
 <!ENTITY toolsMenu.accesskey "E">

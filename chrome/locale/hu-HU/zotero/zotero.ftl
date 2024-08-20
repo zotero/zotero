@@ -551,10 +551,10 @@ item-pane-duplicates-merge-items =
            *[other] Merge { $count } items
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
+architecture-win32-warning-message = Váltson 64 bites { -app-name } rendszerre a legjobb teljesítmény érdekében. Ez nem befolyásolja az adatait.
 architecture-warning-action = 64 bites változat letöltése { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-action = { -app-name } letöltése ARM64-re
 first-run-guidance-quickFormat =
     Type a title, author, and/or year to search for a reference.
     
