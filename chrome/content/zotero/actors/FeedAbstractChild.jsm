@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["FeedAbstractChild"];
 
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 class FeedAbstractChild extends JSWindowActorChild {
 	_stylesheet;
@@ -7,7 +8,12 @@ class FeedAbstractChild extends JSWindowActorChild {
 	_stylesheetPromise;
 	
 	actorCreated() {
-		this._stylesheetPromise = this.sendQuery('getStylesheet');
+		this._stylesheetPromise = this.sendQuery("getStylesheet");
+		Services.prefs.addObserver("extensions.zotero.fontSize", this._setFontSize);
+	}
+	
+	didDestroy() {
+		Services.prefs.removeObserver("extensions.zotero.fontSize", this._setFontSize);
 	}
 	
 	async receiveMessage({ name, data: { url, html } }) {
@@ -17,6 +23,7 @@ class FeedAbstractChild extends JSWindowActorChild {
 				base.href = url;
 				this.document.head.replaceChildren(base);
 				this.document.body.innerHTML = html;
+				this._setFontSize();
 				break;
 			}
 		}
@@ -51,4 +58,9 @@ class FeedAbstractChild extends JSWindowActorChild {
 		
 		this.document.wrappedJSObject.adoptedStyleSheets.push(this._stylesheet);
 	}
+	
+	_setFontSize = () => {
+		let fontSize = Services.prefs.getStringPref("extensions.zotero.fontSize");
+		this.document.body.style.fontSize = fontSize + "rem";
+	};
 }
