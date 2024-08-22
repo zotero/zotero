@@ -1607,4 +1607,23 @@ describe("Zotero.ItemTree", function() {
 			assert.lengthOf(zp.itemsView.getSelectedObjects(), 2);
 		});
 	});
+
+	describe("#_renderPrimaryCell()", function () {
+		before(async function () {
+			await waitForItemsLoad(win);
+		});
+		
+		it("should render citeproc.js HTML", async function () {
+			await createDataObject('item', {
+				title: 'Review of <i>Review of <i>B<sub>oo</sub>k</i> <another-tag/></i>'
+			});
+			let cellText;
+			do {
+				await Zotero.Promise.delay(10);
+				cellText = win.document.querySelector('#zotero-items-tree .row.selected .cell.title .cell-text');
+			}
+			while (!cellText);
+			assert.equal(cellText.innerHTML, 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <i style="font-style: normal;">B<sub>oo</sub>k</i> &lt;another-tag/&gt;</i>');
+		});
+	});
 })
