@@ -1669,23 +1669,6 @@ describe("Zotero.ItemTree", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(inkID));
 		});
 
-		it("should display non-CJK quote segments in italics", async () => {
-			let highlight = await createAnnotation('highlight', attachment);
-			highlight.annotationText = "Test 木";
-			await highlight.saveTx();
-			zp.itemsView.expandAllRows();
-
-			let rowIndex = zp.itemsView.getRowIndexByID(highlight.id);
-			let cellText = win.document.querySelector(`#item-tree-main-default-row-${rowIndex} .cell-text`);
-			assert.equal(cellText.childNodes.length, 2);
-			// Non-CJK string is wrapped in <i>
-			assert.equal(cellText.firstChild.nodeName, "i");
-			assert.equal(cellText.firstChild.textContent, "Test ");
-			// CJK character is left as is
-			assert.equal(cellText.lastChild.nodeName, "#text");
-			assert.equal(cellText.lastChild.textContent, "木");
-		});
-
 		it("should add note from selected annotation rows of the same parent item ", async () => {
 			zp.itemsView.expandAllRows();
 

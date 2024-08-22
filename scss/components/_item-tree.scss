@@ -225,6 +225,8 @@
 			.cell {
 				font-size: $font-size-small;
 				max-width: fit-content;
+				// Do not italicize CJK characters
+				font-synthesis: none;
 				&.title {
 					flex-grow: 1;
 					flex-basis: 0;
@@ -234,6 +236,9 @@
 					}
 					&::after {
 						content: attr(q-mark-close)
+					}
+					.italics {
+						font-style: italic;
 					}
 				}
 				&.annotation-comment {
