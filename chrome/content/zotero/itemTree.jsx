@@ -2764,7 +2764,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		let textSpan = document.createElement('span');
-		let textWithFullStop = Zotero.Utilities.Internal.renderItemTitle(data, textSpan);
+		let textWithFullStop = Zotero.Utilities.Internal.renderItemTitle(data, textSpan, {
+			mode: this.collectionTreeRow.isFeedsOrFeed() ? 'feed' : 'citeproc'
+		});
 		if (!textWithFullStop.match(/\.$/)) {
 			textWithFullStop += '.';
 		}

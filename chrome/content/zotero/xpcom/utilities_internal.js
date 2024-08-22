@@ -2419,13 +2419,37 @@ Zotero.Utilities.Internal = {
 	},
 
 	/**
-	 * Render Citeproc.js HTML-style markup in a title
+	 * Render HTML-style markup in a title to the DOM
 	 *
 	 * @param {string} title
 	 * @param {ParentNode} targetNode
-	 * @returns {string} The non-tag parts of the title
+	 * @param {'citeproc' | 'feed'} [mode='citeproc']
+	 * @returns {string} The plain-text content of the title
 	 */
-	renderItemTitle(title, targetNode) {
+	renderItemTitle(title, targetNode, { mode } = {}) {
+		if (mode === 'feed') {
+			let parserUtils = Cc['@mozilla.org/parserutils;1'].getService(
+				Ci.nsIParserUtils
+			);
+			let frag = parserUtils.parseFragment(
+				title,
+				parserUtils.SanitizerDropForms | parserUtils.SanitizerDropMedia,
+				/* isXML */ false,
+				Services.io.newURI('about:blank'),
+				targetNode
+			);
+			// Make static array of unwanted elements that the sanitizer doesn't deal with
+			let toRemove = Array.from(frag.querySelectorAll('a, area'));
+			for (let elem of toRemove) {
+				elem.replaceWith(...elem.childNodes);
+			}
+			targetNode.append(frag);
+			return targetNode.textContent;
+		}
+		else if (mode && mode !== 'citeproc') {
+			throw new Error(`Invalid mode: ${mode}`);
+		}
+		
 		let doc = targetNode.ownerDocument;
 		
 		let markupStack = [];
