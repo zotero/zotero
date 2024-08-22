@@ -451,7 +451,7 @@ Zotero.Plugins = new function () {
 			));
 		}
 		L10nRegistry.getInstance().registerSources(sources);
-		addonL10nSources.set(addon.id, sources.map(source => source.id));
+		addonL10nSources.set(addon.id, sources.map(source => source.name));
 	}
 	
 	
