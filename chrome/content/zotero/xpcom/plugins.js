@@ -374,7 +374,7 @@ Zotero.Plugins = new function () {
 	
 	
 	/**
-	 * Automatically register l10n sources for enabled plugins.
+	 * Automatically register l10n sources for a plugin.
 	 *
 	 * A Fluent file located at
 	 *   [plugin root]/locale/en-US/make-it-red.ftl
