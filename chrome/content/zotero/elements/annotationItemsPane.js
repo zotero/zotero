@@ -87,17 +87,15 @@
 				// Create a collapsible section for each top-level item if it does not exist yet
 				let section = this.querySelector(`[data-pane="annotations-${parentItem.id}"]`);
 				if (!section) {
-					section = MozXULElement.parseXULToFragment(
-						`<collapsible-section
-							data-l10n-id="section-attachments-annotations"
-							data-pane="annotations-${parentItem.id}"
-							summary="${parentItem.getDisplayTitle()}"
-							data-item-id="${parentItem.id}">
+					section = document.createXULElement("collapsible-section");
+					section.dataset.l10nId = "section-attachments-annotations";
+					section.dataset.pane = `annotations-${parentItem.id}`;
+					section.summary = parentItem.getDisplayTitle();
 
-							<html:div class="body"></html:div>
+					let sectionBody = document.createElement("div");
+					sectionBody.classList.add("body");
 
-						</collapsible-section>`
-					).querySelector("collapsible-section");
+					section.appendChild(sectionBody);
 					this._body.append(section);
 				}
 				document.l10n.setArgs(section, { count: selectedAnnotations.length });
