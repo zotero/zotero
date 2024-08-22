@@ -3232,8 +3232,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let titleRowData = Object.assign({}, columns.find(column => column.dataKey == "title"));
 			titleRowData.className = "title";
 			let title;
+			// Strip html tags from annotation comment and text until the algorithm
+			// for safe rendering of relevant html tags is carried over from the reader
+			let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+			let plainText = parserUtils.convertToPlainText(item.annotationText || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
+			let plainComment = parserUtils.convertToPlainText(item.annotationComment || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
 			if (["highlight", "underline"].includes(item.annotationType)) {
-				title = this._renderCell(index, item.annotationText || "", titleRowData, true);
+				title = this._renderCell(index, plainText, titleRowData, true);
 				let titleCell = title.querySelector(".cell-text");
 				// Quote text is in italics
 				titleCell.classList.add("italics");
@@ -3241,7 +3246,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				titleCell.setAttribute("q-mark-open", Zotero.getString("punctuation.openingQMark"));
 				title.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
 				if (item.annotationComment) {
-					let comment = renderCell(null, item.annotationComment, { className: "annotation-comment" });
+					let comment = renderCell(null, plainComment, { className: "annotation-comment" });
 					div.appendChild(comment);
 				}
 				// only keep default wider spacing if there are CJK characters
@@ -3250,7 +3255,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			else if (item.annotationComment) {
 				// If there is a comment for image, ink, note annotations, use that as the title
-				title = this._renderCell(index, item.annotationComment || "", titleRowData, true);
+				title = this._renderCell(index, plainComment, titleRowData, true);
 			}
 			else {
 				// Catch all - use annotation type as the title
