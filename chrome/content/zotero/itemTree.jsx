@@ -3226,6 +3226,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		// Special treatment for annotation rows whose title and comment do not correspond to existing columns
 		div.classList.toggle("annotation-row", item.isAnnotation());
+		div.classList.remove("tight");
 		if (item.isAnnotation()) {
 			// Use "title" column  as a blueprint to render the first part of annotation row
 			let titleRowData = Object.assign({}, columns.find(column => column.dataKey == "title"));
@@ -3244,7 +3245,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					div.appendChild(comment);
 				}
 				// only keep default wider spacing if there are CJK characters
-				div.classList.toggle("tight", !this._containsCJKCharacters(item.annotationText));
+				let containsCJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(item.annotationText);
+				div.classList.toggle("tight", !containsCJK);
 			}
 			else if (item.annotationComment) {
 				// If there is a comment for image, ink, note annotations, use that as the title
@@ -4072,28 +4074,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			resolve();
 		}));
 	}
-
-	// Check if text quoted in an annotation row contains CJK characters to determine
-	// if it should be italicized or not
-	_containsCJKCharacters = (str) => {
-		let cjkRegexArray = [
-			new RegExp("[\u2E80-\u2EFF]"), // CJK Radicals Supplement
-			new RegExp("[\u3000-\u303F]"), // CJK Symbols and Punctuation
-			new RegExp("[\u3040-\u309F]"), // Hiragana (Japanese)
-			new RegExp("[\u30A0-\u30FF]"), // Katakana (Japanese)
-			new RegExp("[\u1100-\u11FF]"), // Hangul Jamo (Korean)
-			new RegExp("[\u3200-\u32FF]"), // Enclosed CJK Letters and Months
-			new RegExp("[\u3300-\u33FF]"), // CJK Compatibility
-			new RegExp("[\u3400-\u4DBF]"), // CJK Unified Ideographs Extension A
-			new RegExp("[\u4E00-\u9FFF]"), // CJK Unified Ideographs
-			new RegExp("[\uAC00-\uD7AF]"), // Hangul Syllables (Korean)
-			new RegExp("[\uF900-\uFAFF]"), // CJK Compatibility Ideographs
-			new RegExp("[\uFE30-\uFE4F]"), // CJK Compatibility Forms
-			new RegExp("[\u{20000}-\u{2A6DF}]", "u"), // CJK Unified Ideographs Extension B
-			new RegExp("[\u{2F800}-\u{2FA1F}]", "u") // CJK Compatibility Ideographs Supplement
-		];
-		return cjkRegexArray.some(exp => exp.test(str));
-	};
 };
 
 var ItemTreeRow = function(ref, level, isOpen)
