@@ -39,9 +39,10 @@ var Zotero_Feed_Settings = new function() {
 		let cleanURL = Zotero.Utilities.cleanURL(url, true);
 
 		if (cleanURL) {
-			if (/^https?:\/\/[^\/\s]+\/\S/.test(cleanURL)) {
+			if (/^https?:\/\/[^/\s]+\/\S/.test(cleanURL) || Zotero.isSourceBuild && url.startsWith('file:')) {
 				return cleanURL;
-			} else {
+			}
+			else {
 				Zotero.debug(url + " has an unsupported protocol for feeds");
 			}
 		}
