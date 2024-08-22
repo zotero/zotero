@@ -1625,5 +1625,21 @@ describe("Zotero.ItemTree", function() {
 			while (!cellText);
 			assert.equal(cellText.innerHTML, 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <i style="font-style: normal;">B<sub>oo</sub>k</i> &lt;another-tag/&gt;</i>');
 		});
+
+		it("should render feed title HTML", async function () {
+			let feed = await createFeed();
+			await feed.waitForDataLoad('item');
+			await createDataObject('feedItem', {
+				libraryID: feed.libraryID,
+				title: 'Ensuring ∑<sub><em>s</em></sub><em>Y</em><sub><em>s</em></sub> = 1 in transport of species mass fractions'
+			});
+			let cellText;
+			do {
+				await Zotero.Promise.delay(10);
+				cellText = win.document.querySelector('#zotero-items-tree .row .cell.title .cell-text');
+			}
+			while (!cellText);
+			assert.equal(cellText.innerHTML, 'Ensuring ∑<sub xmlns="http://www.w3.org/1999/xhtml"><em>s</em></sub><em xmlns="http://www.w3.org/1999/xhtml">Y</em><sub xmlns="http://www.w3.org/1999/xhtml"><em>s</em></sub> = 1 in transport of species mass fractions');
+		});
 	});
 })
