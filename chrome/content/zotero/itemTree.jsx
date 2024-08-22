@@ -3233,10 +3233,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let title;
 			if (["highlight", "underline"].includes(item.annotationType)) {
 				title = this._renderCell(index, item.annotationText || "", titleRowData, true);
-				// italicize non-CJK parts of the annotation quote
 				let titleCell = title.querySelector(".cell-text");
-				let nodes = Array.from(titleCell.childNodes).flatMap(child => this._italicizeNonCJK(child));
-				titleCell.replaceChildren(...nodes);
+				// Quote text is in italics
+				titleCell.classList.add("italics");
 				// Add quotation marks around the quoted text
 				titleCell.setAttribute("q-mark-open", Zotero.getString("punctuation.openingQMark"));
 				title.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
@@ -4095,54 +4094,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		];
 		return cjkRegexArray.some(exp => exp.test(str));
 	};
-
-
-	/**
-	 * Italicize non-CJK segments of a node from an annotation row by wrapping them in <i> tags.
-	 * @param {Node} node - The input node whose non-CJK characters are italicized.
-	 * @returns {Node[]} resultArr - An array of nodes preserving the original order, with non-CJK text segments italicized.
-	 * If the input node is not a text node, new segments are set as children of the input node, d
-	 * and the returned resultArr contains only the original node.
-	 */
-	_italicizeNonCJK(node) {
-		let str = node.innerHTML || node.textContent;
-		let resultArray = [];
-		let currentItalicizedSegment = document.createElement("i");
-		let currentNonItalicizedSegment = document.createTextNode("");
-	
-		for (let char of str) {
-			// If the character should be italicized, add it to the current italicized segment
-			if (!this._containsCJKCharacters(char)) {
-				currentItalicizedSegment.innerText += char;
-				if (currentNonItalicizedSegment.textContent.length) {
-					resultArray.push(currentNonItalicizedSegment);
-					currentNonItalicizedSegment = document.createTextNode(""); // Reset the non-italicized segment
-				}
-			}
-			else {
-				// If the character should not be italicized, add it to the non-italicized segment
-				currentNonItalicizedSegment.textContent += char;
-				if (currentItalicizedSegment.textContent.length) {
-					resultArray.push(currentItalicizedSegment);
-					currentItalicizedSegment = document.createElement("i"); // Reset the italicized segment
-				}
-			}
-		}
-	
-		// Push any remaining segments to the result array
-		if (currentItalicizedSegment.textContent.length) {
-			resultArray.push(currentItalicizedSegment);
-		}
-		if (currentNonItalicizedSegment.textContent.length) {
-			resultArray.push(currentNonItalicizedSegment);
-		}
-		// If we can, set new segments as children of the original node
-		if (node.nodeName !== "#text") {
-			node.replaceChildren(...resultArray);
-			resultArray = [node];
-		}
-		return resultArray;
-	}
 };
 
 var ItemTreeRow = function(ref, level, isOpen)
