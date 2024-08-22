@@ -94,7 +94,18 @@
 			if (this._annotation.annotationText) {
 				let text = document.createElement('div');
 				text.classList.add('quote');
-				text.innerHTML = this._annotation.annotationText;
+				// Try to sanitize annotation text
+				let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+				let sanitizedHtml = parserUtils.sanitize(this._annotation.annotationText,
+					Ci.nsIParserUtils.SanitizerDropForms | Ci.nsIParserUtils.SanitizerDropMedia);
+				// The content will be wrapped in <body></body>
+				let sanitizedBody = sanitizedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+				if (sanitizedBody) {
+					text.innerHTML = sanitizedBody[0];
+				}
+				else {
+					text.textContent = this._annotation.annotationText;
+				}
 				this._body.append(text);
 			}
 			
