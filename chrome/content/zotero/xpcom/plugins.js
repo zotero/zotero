@@ -464,7 +464,7 @@ Zotero.Plugins = new function () {
 	}
 
 	/**
-	 * Read the contents of a directory in an addon.
+	 * Read the contents of a directory in a plugin.
 	 * https://searchfox.org/mozilla-esr115/rev/7a83be92b8356ea63559bc3623b2b91a43f2ae05/toolkit/components/extensions/Extension.sys.mjs#882
 	 *
 	 * @param {nsIURI} rootURI
