@@ -72,6 +72,10 @@ Zotero_Preferences.Advanced = {
 				+ Zotero.getString('punctuation.ellipsis'));
 		
 		this.updateIndexStats();
+		this.updateLocalAPIUI();
+		document.getElementById('zotero-prefpane-advanced-enable-local-api').addEventListener('synctopreference', () => {
+			this.updateLocalAPIUI();
+		});
 	},
 	
 	
@@ -533,6 +537,35 @@ Zotero_Preferences.Advanced = {
 		finally {
 			buttons.forEach(b => b.disabled = false);
 		}
+	},
+
+	updateLocalAPIUI() {
+		let serverEnabled = Zotero.Prefs.get('httpServer.enabled');
+		let localAPIEnabled = Zotero.Prefs.get('httpServer.localAPI.enabled');
+		
+		let checkbox = document.getElementById('zotero-prefpane-advanced-enable-local-api');
+		let availableMessage = document.getElementById('zotero-prefpane-advanced-local-api-available');
+		let serverDisabledSection = document.getElementById('zotero-prefpane-advanced-server-disabled');
+		
+		if (!serverEnabled) {
+			checkbox.disabled = true;
+			availableMessage.hidden = true;
+			serverDisabledSection.hidden = false;
+			return;
+		}
+		
+		checkbox.disabled = false;
+		availableMessage.hidden = !localAPIEnabled;
+		serverDisabledSection.hidden = true;
+		
+		document.l10n.setArgs(availableMessage, {
+			url: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/api/`
+		});
+	},
+	
+	enableServerForLocalAPI() {
+		Zotero.Prefs.set('httpServer.enabled', true);
+		Zotero.Utilities.Internal.quit(true);
 	}
 };
 

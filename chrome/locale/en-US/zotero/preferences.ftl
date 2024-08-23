@@ -71,6 +71,10 @@ preferences-styleManager-add-button =
 
 preferences-advanced-enable-local-api =
     .label = Allow other applications on this computer to communicate with { -app-name }
+preferences-advanced-local-api-available = Available at <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
+preferences-advanced-server-enable-and-restart =
+    .label = Enable and Restart
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities

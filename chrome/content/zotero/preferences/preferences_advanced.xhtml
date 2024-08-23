@@ -36,7 +36,27 @@
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 			
-			<checkbox data-l10n-id="preferences-advanced-enable-local-api" preference="extensions.zotero.httpServer.localAPI.enabled" native="true"/>
+			<checkbox
+				id="zotero-prefpane-advanced-enable-local-api"
+				data-l10n-id="preferences-advanced-enable-local-api"
+				preference="extensions.zotero.httpServer.localAPI.enabled"
+				native="true"
+			/>
+			<vbox class="indented-pref">
+				<label
+					id="zotero-prefpane-advanced-local-api-available"
+					data-l10n-id="preferences-advanced-local-api-available"
+				>
+					<html:code class="local-api-url" data-l10n-name="url"/>
+				</label>
+				<hbox id="zotero-prefpane-advanced-server-disabled" align="center" hidden="true">
+					<label data-l10n-id="preferences-advanced-server-disabled"/>
+					<button
+						data-l10n-id="preferences-advanced-server-enable-and-restart"
+						oncommand="Zotero_Preferences.Advanced.enableServerForLocalAPI()"
+					/>
+				</hbox>
+			</vbox>
 		</groupbox>
 
 		<groupbox>
