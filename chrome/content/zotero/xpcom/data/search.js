@@ -700,6 +700,10 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				for (let split of splits){
 					s.addCondition('fulltextWord', condition.operator, split);
 				}
+				// If applicable, only search for words within specified scope (e.g. collection)
+				if (this._scope) {
+					s.setScope(this._scope, true);
+				}
 				numSplits = splits.length;
 				let wordMatches = yield s.search();
 				
