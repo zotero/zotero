@@ -430,8 +430,9 @@ ${str}
 		else {
 			value = elem.value;
 		}
-		elem.dispatchEvent(new Event('synctopreference'));
+		elem.dispatchEvent(new Event('beforesynctopreference'));
 		Zotero.Prefs.set(preference, value, true);
+		elem.dispatchEvent(new Event('synctopreference'));
 	},
 
 	/**
