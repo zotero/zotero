@@ -78,3 +78,11 @@
 	display: flex;
 	gap: 6px;
 }
+
+#zotero-prefpane-advanced-server-disabled {
+	color: var(--accent-red);
+	
+	button {
+		margin-inline-start: 6px;
+	}
+}
