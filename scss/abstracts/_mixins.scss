@@ -275,8 +275,8 @@
 	components (e.g. toolbarbutton) and sometimes are too wide (e.g. around textfield on macOS).
 	Box-shadow is used to be able to set the radius.
 */
-@mixin focus-ring($thin: false, $selector: focus-visible) {
-	&:#{$selector} {
+@mixin focus-ring($thin: false, $selector: ":focus-visible") {
+	&#{$selector} {
 		@media (-moz-platform: windows) {
 			outline: var(--color-focus-outer-border) solid var(--width-focus-outer-border);
 			outline-offset: var(--width-focus-border);

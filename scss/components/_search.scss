@@ -55,7 +55,7 @@ search-textbox {
 	}
 
 	@media not (-moz-platform: windows) {
-		@include focus-ring(false, focus);
+		@include focus-ring(false, ":focus");
 	}
 }
 
