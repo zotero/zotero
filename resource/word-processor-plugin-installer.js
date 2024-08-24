@@ -67,10 +67,12 @@ ZoteroPluginInstaller.prototype = {
 		this.debug('Fetching addon info');
 		
 		this._currentPluginVersion = (await Zotero.File.getContentsFromURLAsync(this._addon.VERSION_FILE)).trim();
-		this.debug('Addon info fetched');
 		let lastInstalledVersion = this.prefBranch.getCharPref("version");
 		let lastAttemptedVersion = this.prefBranch.getCharPref("lastAttemptedVersion", "");
 		let lastPluginFileVersion = this._addon.LAST_INSTALLED_FILE_UPDATE;
+		this.debug(`Addon info fetched. version: ${this._currentPluginVersion}, `
+			+ `file version: ${lastPluginFileVersion}, installed version: ${lastInstalledVersion}`
+			+ `attempted: ${lastAttemptedVersion}`);
 		const newVersionSinceLastInstall = Services.vc.compare(lastInstalledVersion, lastPluginFileVersion) < 0;
 		const newVersionSinceLastAttempt = Services.vc.compare(lastAttemptedVersion, lastPluginFileVersion) < 0;
 		const shouldSkipInstallation = this.prefBranch.getBoolPref("skipInstallation");
