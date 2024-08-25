@@ -19,7 +19,7 @@ version=$1
 
 for arch in win32 win-x64 win-arm64; do
 	if [ $arch = "win32" ]; then
-		zip="firefox-115.5.0.en-US.$arch.zip"
+		zip="firefox-$version.en-US.$arch.zip"
 	elif [ $arch = "win-x64" ]; then
 		zip="firefox-$version.en-US.win64.zip"
 	elif [ $arch = "win-arm64" ]; then
