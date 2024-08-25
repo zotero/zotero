@@ -1,8 +1,10 @@
 # Set Z_ARCH=win32 on command line to build and package win32
 if [ "$Z_ARCH" == "win32" ]; then
-	ac_add_options --target=i686-pc-mingw32
+	ac_add_options --target=i686-pc-windows-msvc
 	# https://bugzilla.mozilla.org/show_bug.cgi?id=1804548
 	ac_add_options --without-wasm-sandboxed-libraries
+elif [ "$Z_ARCH" == "aarch64" ]; then
+	ac_add_options --target=aarch64-pc-windows-msvc
 fi
 
 ac_add_options --enable-bootstrap
