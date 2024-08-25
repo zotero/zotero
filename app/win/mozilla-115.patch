@@ -33,6 +33,42 @@ diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
      appDataFile = argv[2];
  
      char appEnv[MAXPATHLEN];
+diff --git a/browser/app/winlauncher/LauncherProcessWin.cpp b/browser/app/winlauncher/LauncherProcessWin.cpp
+--- a/browser/app/winlauncher/LauncherProcessWin.cpp
++++ b/browser/app/winlauncher/LauncherProcessWin.cpp
+@@ -162,17 +162,31 @@ static mozilla::LauncherFlags ProcessCmd
+                         mozilla::CheckArgFlag::None) == mozilla::ARG_FOUND ||
+       mozilla::CheckArg(aArgc, aArgv, "remote-debugging-port", nullptr,
+                         mozilla::CheckArgFlag::None) == mozilla::ARG_FOUND ||
+       mozilla::EnvHasValue("MOZ_AUTOMATION") ||
+       mozilla::EnvHasValue("MOZ_HEADLESS")) {
+     result |= mozilla::LauncherFlags::eWaitForBrowser;
+   }
+ 
+-  if (mozilla::CheckArg(aArgc, aArgv, "no-deelevate") == mozilla::ARG_FOUND) {
++  // Disable deelevation for Zotero
++  //
++  // If people are running as Administrator, or in some cases running with
++  // UAC disabled, Word runs at integrity level High and deelevation drops
++  // Zotero down to Medium, which causes 'Could not find a running Word
++  // instance' errors.
++  //
++  // Even when not running as administrator, the process switch involved in
++  // deelevation also seems to be causing various security software, such as
++  // Cisco Secure Endpoint, to block Zotero from running:
++  // https://forums.zotero.org/discussion/116762
++  //
++  // Disabling deelevation returns us to the behavior of Zotero 6, Word, and
++  // most other programs
++  if (true || mozilla::CheckArg(aArgc, aArgv, "no-deelevate") == mozilla::ARG_FOUND) {
+     result |= mozilla::LauncherFlags::eNoDeelevate;
+   }
+ 
+   if (mozilla::CheckArg(aArgc, aArgv, ATTEMPTING_DEELEVATION_FLAG) ==
+       mozilla::ARG_FOUND) {
+     result |= mozilla::LauncherFlags::eDeelevating;
+   }
+ 
 diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
 --- a/xpcom/build/BinaryPath.h
 +++ b/xpcom/build/BinaryPath.h
