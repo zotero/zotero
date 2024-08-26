@@ -33,6 +33,9 @@ while getopts "rbd" opt; do
 	esac
 done
 
+# Remove options from $@
+shift $((OPTIND-1))
+
 if [ $REBUILD -eq 1 ]; then
 	PARAMS=""
 	if [ $DEBUGGER -eq 1 ]; then
