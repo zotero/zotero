@@ -225,23 +225,28 @@ describe("Zotero.ItemTree", function() {
 			var note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
 			var note2 = await createDataObject('item', { itemType: 'note', parentID: item2.id });
 			var note3 = await createDataObject('item', { itemType: 'note', parentID: item3.id });
+
+			// one of the items has an attachment with annotations
+			var attachment = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item1.id });
+			var highlight = await createAnnotation('highlight', attachment);
+			var underline = await createAnnotation('underline', attachment);
 			
-			var toSelect = [note1.id, note2.id, note3.id];
+			var toSelect = [note1.id, note2.id, note3.id, highlight.id, underline.id];
 			itemsView.collapseAllRows();
 
 			var numSelected = await itemsView.selectItems(toSelect);
-			assert.equal(numSelected, 3);
+			assert.equal(numSelected, 5);
 			var selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 3);
+			assert.lengthOf(selected, 5);
 			assert.sameMembers(selected, toSelect);
 			
 			// Again with the ids given in reverse order
 			itemsView.collapseAllRows();
 			toSelect = toSelect.reverse();
-			var numSelected = await itemsView.selectItems(toSelect);
-			assert.equal(numSelected, 3);
-			var selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 3);
+			numSelected = await itemsView.selectItems(toSelect);
+			assert.equal(numSelected, 5);
+			selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 5);
 			assert.sameMembers(selected, toSelect);
 		});
 	});
