@@ -34,15 +34,6 @@ menupopup {
 		}
 	}
 
-	&:not(:hover) {
-		menu, menuitem {
-			&[_moz-menuactive] {
-				background: transparent;
-				color: inherit;
-			}
-		}
-	}
-
 	menulist > &,
 	&[needsgutter] {
 		menu, menuitem {
