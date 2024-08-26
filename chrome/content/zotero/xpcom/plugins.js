@@ -30,9 +30,16 @@ Zotero.Plugins = new function () {
 	XPCOMUtils.defineLazyModuleGetters(lazy, {
 		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.jsm",
 	});
+	XPCOMUtils.defineLazyServiceGetters(lazy, {
+		aomStartup: [
+			"@mozilla.org/addons/addon-manager-startup;1",
+			"amIAddonManagerStartup",
+		],
+	});
 	var scopes = new Map();
 	var observers = new Set();
 	var addonVersions = new Map();
+	var addonL10nSources = new Map();
 	
 	const REASONS = {
 		APP_STARTUP: 1,
@@ -63,7 +70,7 @@ Zotero.Plugins = new function () {
 			addonVersions.set(addon.id, addon.version);
 			_loadScope(addon);
 			setDefaultPrefs(addon);
-			registerLocales(addon);
+			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
 		}
 		
@@ -366,28 +373,150 @@ Zotero.Plugins = new function () {
 	}
 	
 	
-	// Automatically register l10n sources for enabled plugins.
-	//
-	// A Fluent file located at
-	//   [plugin root]/locale/en-US/make-it-red.ftl
-	// could be included in an XHTML file as
-	//   <link rel="localization" href="make-it-red.ftl"/>
-	//
-	// If a plugin doesn't have a subdirectory for the active locale, en-US strings
-	// will be used as a fallback.
-	function registerLocales(addon) {
-		let source = new L10nFileSource(
-			addon.id,
-			'app',
-			Services.locale.availableLocales,
-			addon.getResourceURI().spec + 'locale/{locale}/',
-		);
-		L10nRegistry.getInstance().registerSources([source]);
+	/**
+	 * Automatically register l10n sources for a plugin.
+	 *
+	 * A Fluent file located at
+	 *   [plugin root]/locale/en-US/make-it-red.ftl
+	 * could be included in an XHTML file as
+	 *   <link rel="localization" href="make-it-red.ftl"/>
+	 *
+	 * Locale subdirectories that match Zotero locales (Services.locale.availableLocales)
+	 * are registered as is. Other locales are aliased to a best-fit Zotero locale.
+	 * For example, Zotero has an 'eu-ES' locale but no 'eu-FR' locale. If a plugin
+	 * included an 'eu-FR' locale instead, 'eu-FR' would be aliased to 'eu-ES',
+	 * and 'eu-FR' strings would show if the user's Zotero locale is 'eu-ES'.
+	 *
+	 * If a plugin doesn't have a locale matching the current Zotero locale, 'en-US'
+	 * is used as a fallback. If it doesn't have an 'en-*' locale, Fluent chooses a
+	 * fallback arbitrarily. For instance, a plugin with only a 'de' locale would
+	 * show German strings even if the user's Zotero locale is 'en-US'.
+	 *
+	 * @param addon
+	 * @returns {Promise<void>}
+	 */
+	async function registerLocales(addon) {
+		let rootURI = addon.getResourceURI();
+		let zoteroLocales = Services.locale.availableLocales;
+		let pluginLocales;
+		try {
+			pluginLocales = await readDirectory(rootURI, 'locale', true);
+			if (!pluginLocales.length) {
+				return;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return;
+		}
+		
+		let matchedLocales = [];
+		let unmatchedLocales = [];
+		for (let pluginLocale of pluginLocales) {
+			(zoteroLocales.includes(pluginLocale) ? matchedLocales : unmatchedLocales)
+				.push(pluginLocale);
+		}
+		
+		let sources = [];
+		// All locales that exactly match a Zotero locale can be registered at once
+		if (matchedLocales.length) {
+			sources.push(new L10nFileSource(
+				addon.id,
+				'app',
+				matchedLocales,
+				// {locale} is replaced with the locale code
+				rootURI.spec + 'locale/{locale}/',
+			));
+		}
+		// Other locales need to be registered individually to create aliases
+		for (let unmatchedLocale of unmatchedLocales) {
+			let resolvedLocale = Zotero.Utilities.Internal.resolveLocale(unmatchedLocale, zoteroLocales);
+			// resolveLocale() returns en-US as a fallback; don't use it unless
+			// the unmatched plugin locale is en-*
+			if (resolvedLocale === 'en-US' && !unmatchedLocale.startsWith('en')) {
+				Zotero.debug(`${addon.id}: No matching locale for ${unmatchedLocale}`);
+				continue;
+			}
+			Zotero.debug(`${addon.id}: Aliasing ${unmatchedLocale} to ${resolvedLocale}`);
+			if (sources.some(source => source.locales.includes(resolvedLocale))) {
+				Zotero.debug(`${addon.id}: ${resolvedLocale} already registered`);
+				continue;
+			}
+			sources.push(new L10nFileSource(
+				addon.id + '-' + unmatchedLocale,
+				'app',
+				[resolvedLocale],
+				// Don't use the {locale} placeholder here - manually specify the aliased locale code
+				rootURI.spec + `locale/${unmatchedLocale}/`,
+			));
+		}
+		L10nRegistry.getInstance().registerSources(sources);
+		addonL10nSources.set(addon.id, sources.map(source => source.name));
 	}
 	
 	
 	function unregisterLocales(addon) {
-		L10nRegistry.getInstance().removeSources([addon.id]);
+		let sources = addonL10nSources.get(addon.id);
+		if (sources) {
+			L10nRegistry.getInstance().removeSources(sources);
+			addonL10nSources.delete(addon.id);
+		}
+	}
+
+	/**
+	 * Read the contents of a directory in a plugin.
+	 * https://searchfox.org/mozilla-esr115/rev/7a83be92b8356ea63559bc3623b2b91a43f2ae05/toolkit/components/extensions/Extension.sys.mjs#882
+	 *
+	 * @param {nsIURI} rootURI
+	 * @param {string} path
+	 * @param {boolean} [directoriesOnly=false]
+	 * @returns {Promise<string[]>}
+	 */
+	async function readDirectory(rootURI, path, directoriesOnly = false) {
+		if (rootURI instanceof Ci.nsIFileURL) {
+			let uri = Services.io.newURI("./" + path, null, rootURI);
+			let fullPath = uri.QueryInterface(Ci.nsIFileURL).file.path;
+
+			let results = [];
+			try {
+				let children = await IOUtils.getChildren(fullPath);
+				for (let child of children) {
+					if (!directoriesOnly || (await IOUtils.stat(child)).type == "directory") {
+						results.push(PathUtils.filename(child));
+					}
+				}
+			}
+			catch (ex) {
+				// Fall-through, return what we have.
+			}
+			return results;
+		}
+
+		rootURI = rootURI.QueryInterface(Ci.nsIJARURI);
+
+		// Append the sub-directory path to the base JAR URI and normalize the
+		// result.
+		let entry = `${rootURI.JAREntry}/${path}/`
+			.replace(/\/\/+/g, "/")
+			.replace(/^\//, "");
+		rootURI = Services.io.newURI(`jar:${rootURI.JARFile.spec}!/${entry}`);
+
+		let results = [];
+		for (let name of lazy.aomStartup.enumerateJARSubtree(rootURI)) {
+			if (!name.startsWith(entry)) {
+				throw new Error("Unexpected ZipReader entry");
+			}
+
+			// The enumerator returns the full path of all entries.
+			// Trim off the leading path, and filter out entries from
+			// subdirectories.
+			name = name.slice(entry.length);
+			if (name && !/\/./.test(name) && (!directoriesOnly || name.endsWith("/"))) {
+				results.push(name.replace("/", ""));
+			}
+		}
+
+		return results;
 	}
 	
 	
@@ -521,7 +650,7 @@ Zotero.Plugins = new function () {
 			
 			_loadScope(addon);
 			setDefaultPrefs(addon);
-			registerLocales(addon);
+			await registerLocales(addon);
 			await _callMethod(addon, 'install', reason);
 			if (addon.isActive) {
 				await _callMethod(addon, 'startup', reason);
@@ -534,7 +663,7 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
 			setDefaultPrefs(addon);
-			registerLocales(addon);
+			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
 		},
 		
@@ -581,7 +710,7 @@ Zotero.Plugins = new function () {
 			await _callMethod(addon, 'install', REASONS.ADDON_INSTALL);
 			if (addon.isActive) {
 				setDefaultPrefs(addon);
-				registerLocales(addon);
+				await registerLocales(addon);
 				await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
 			}
 		}
