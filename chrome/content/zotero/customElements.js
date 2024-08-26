@@ -170,6 +170,37 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 					// Disable the fading animation when the popup is closed by clicking
 					this.setAttribute("animate", "false-once");
 				});
+				
+				// The _moz-menuactive attribute isn't removed from menulist items
+				// when the mouse leaves the menu. On menulists only, replace the attribute
+				// with a marker that will be used to restore the _moz-menuactive attribute
+				// when the mouse reenters the menu.
+				// (We need to manually restore _moz-menuactive because it won't automatically
+				//  be re-added if the mouse exits the menu and then enters again on the same
+				//  item.)
+				this.addEventListener("mouseleave", () => {
+					if (this.parentElement?.localName !== "menulist") {
+						return;
+					}
+					// Only apply to top-level <menuitems>, not sub-<menu>s or nested <menuitem>s,
+					// because those already have the right behavior
+					let activeChild = this.querySelector(":scope > menuitem[_moz-menuactive='true']");
+					if (activeChild) {
+						activeChild.removeAttribute("_moz-menuactive");
+						activeChild.dataset.activeBeforeMouseleave = "true";
+					}
+				});
+				
+				this.addEventListener("mouseover", (event) => {
+					if (this.parentElement?.localName !== "menulist") {
+						return;
+					}
+					let { target } = event;
+					if (target.parentElement === this && target.dataset.activeBeforeMouseleave) {
+						target.setAttribute("_moz-menuactive", "true");
+						delete target.dataset.activeBeforeMouseleave;
+					}
+				});
 			}
 			originalEnsureInitialized.apply(this);
 		};
