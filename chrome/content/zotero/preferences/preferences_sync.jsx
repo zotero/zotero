@@ -119,6 +119,7 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
+	_secmodDeleted: false,
 	linkAccount: Zotero.Promise.coroutine(function* (event) {
 		this.trimUsername();
 		var username = document.getElementById('sync-username-textbox').value;
@@ -135,6 +136,41 @@ Zotero_Preferences.Sync = {
 			var json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
 		}
 		catch (e) {
+			// On "User canceled primary password entry", delete secmod.db and restart
+			//
+			// It seems like this can happen when people have a very old profile directory (e.g.,
+			// from 2013 in 2024)
+			if (e.message.includes("User canceled primary password entry")) {
+				Zotero.logError(e);
+				let profileDir = Zotero.Profile.dir;
+				let secmodPath = PathUtils.join(profileDir, 'secmod.db');
+				if (!this._secmodDeleted && !(yield IOUtils.exists(secmodPath))) {
+					Zotero.debug("secmod.db doesn't exist");
+					setTimeout(function () {
+						Zotero.Sync.Runner.alert(e);
+					});
+					throw e;
+				}
+				Zotero.debug("Deleting secmod.db", 2);
+				yield IOUtils.remove(secmodPath);
+				// Once we've deleted, keep showing the restart message
+				this._secmodDeleted = true;
+				
+				let index = Zotero.Prompt.confirm({
+					title: Zotero.getString('general.restartRequired'),
+					text: "Login information could not be saved.\n\n"
+						+ Zotero.getString('general.pleaseRestartAndTryAgain', Zotero.appName),
+					button0: Zotero.getString('general.restartNow'),
+					button1: Services.prompt.BUTTON_TITLE_CANCEL
+				});
+				
+				if (index == 0) {
+					Zotero.Utilities.Internal.quit(true);
+					return;
+				}
+				return;
+			}
+			
 			setTimeout(function () {
 				Zotero.Sync.Runner.alert(e);
 			});
