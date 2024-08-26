@@ -1171,6 +1171,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						let cleared2 = window.ZoteroPane.tagSelector
 							&& window.ZoteroPane.tagSelector.clearTagSelection();
 						if (cleared1 || cleared2) {
+							console.log("!!!!!");
 							return this.selectItems(ids, true);
 						}
 					}
@@ -1194,7 +1195,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			rowsToSelect.push(row);
 		}
-		
+		console.log("Rows to select ", rowsToSelect)
 		if (!rowsToSelect.length) {
 			return 0;
 		}
@@ -2012,17 +2013,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 			item = Zotero.Items.get(item.parentItemID);
 			toExpand.push(item.id);
 		}
+		if (!this.getRow(this._rowMap[item.id])) return;
 		// Go through ancestors starting from the top-most one
 		// and expand them if needed
 		while (toExpand.length > 0) {
 			let ancestorID = toExpand.pop();
 			let ancestorRow = this._rowMap[ancestorID];
 
-			let nextAncestorID = toExpand[toExpand.length - 1];
-			let nextAncestorRow = this._rowMap[nextAncestorID];
-
-			// If the next ancestor we want is already available, just move one
-			if (this.getRow(nextAncestorRow)) continue;
+			// If the row for the next ancestor already exists, just move one
+			if (toExpand.length > 0) {
+				let nextAncestorID = toExpand[toExpand.length - 1];
+				let nextAncestorRow = this._rowMap[nextAncestorID];
+				if (this.getRow(nextAncestorRow)) continue;
+			}
 			
 			// Close and re-open the ancestor to reveal the next row until
 			// we reach the desired item
