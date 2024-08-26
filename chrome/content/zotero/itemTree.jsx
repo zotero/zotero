@@ -1242,15 +1242,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				continue;
 			}
 			
-			// Get the row of the parent, if there is one
-			let parent = item.parentItemID;
-			let parentRow = parent && this._rowMap[parent];
-			
 			// If row with id isn't visible, check to see if it's hidden under a parent
 			if (row == undefined) {
-				if (!parent || parentRow === undefined) {
-					// No parent -- it's not here
-					
+				await this.expandToItem(id);
+				if (!this._rowMap[id]) {
+					// The row is still not found
 					// Clear the quick search and tag selection and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
 						let cleared1 = await window.ZoteroPane.clearQuicksearch();
@@ -1264,13 +1260,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					Zotero.debug(`Couldn't find row for item ${id} -- not selecting`);
 					continue;
 				}
-				
-				// If parent is already open and we haven't found the item, the child
-				// hasn't yet been added to the view, so close parent to allow refresh
-				await this._closeContainer(parentRow);
-				
-				// Open the parent
-				await this.toggleOpenState(parentRow);
 			}
 			
 			// Since we're opening containers, we still need to reference by id
@@ -2113,6 +2102,36 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		var includeTrashed = this.collectionTreeRow.isTrash();
 		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
+	};
+
+	// Expand all ancestors of the specified item id
+	expandToItem = async (id) => {
+		let item = Zotero.Items.get(id);
+		// Stop if the row already exists of if the item is not found
+		if (this._rowMap[id] || !item) return;
+		let toExpand = [];
+		// Collect all ancestors of the item
+		while (item.parentItemID) {
+			item = Zotero.Items.get(item.parentItemID);
+			toExpand.push(item.id);
+		}
+		// Go through ancestors starting from the top-most one
+		// and expand them if needed
+		while (toExpand.length > 0) {
+			let ancestorID = toExpand.pop();
+			let ancestorRow = this._rowMap[ancestorID];
+
+			let nextAncestorID = toExpand[toExpand.length - 1];
+			let nextAncestorRow = this._rowMap[nextAncestorID];
+
+			// If the next ancestor we want is already available, just move one
+			if (this.getRow(nextAncestorRow)) continue;
+			
+			// Close and re-open the ancestor to reveal the next row until
+			// we reach the desired item
+			await this._closeContainer(ancestorRow);
+			await this.toggleOpenState(ancestorRow);
+		}
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
