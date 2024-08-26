@@ -544,21 +544,21 @@ Zotero_Preferences.Advanced = {
 		let localAPIEnabled = Zotero.Prefs.get('httpServer.localAPI.enabled');
 		
 		let checkbox = document.getElementById('zotero-prefpane-advanced-enable-local-api');
-		let runningMessage = document.getElementById('zotero-prefpane-advanced-local-api-running');
+		let availableMessage = document.getElementById('zotero-prefpane-advanced-local-api-available');
 		let serverDisabledSection = document.getElementById('zotero-prefpane-advanced-server-disabled');
 		
 		if (!serverEnabled) {
 			checkbox.disabled = true;
-			runningMessage.hidden = true;
+			availableMessage.hidden = true;
 			serverDisabledSection.hidden = false;
 			return;
 		}
 		
 		checkbox.disabled = false;
-		runningMessage.hidden = !localAPIEnabled;
+		availableMessage.hidden = !localAPIEnabled;
 		serverDisabledSection.hidden = true;
 		
-		document.l10n.setArgs(runningMessage, {
+		document.l10n.setArgs(availableMessage, {
 			url: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/api/`
 		});
 	},

@@ -71,7 +71,7 @@ preferences-styleManager-add-button =
 
 preferences-advanced-enable-local-api =
     .label = Allow other applications on this computer to communicate with { -app-name }
-preferences-advanced-local-api-running = Running on <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-local-api-available = Available at <code data-l10n-name="url">{ $url }</span>
 preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
 preferences-advanced-server-enable-and-restart =
     .label = Enable and Restart
