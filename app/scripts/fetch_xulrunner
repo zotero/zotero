@@ -239,6 +239,9 @@ function modify_omni {
 	# (chrome/toolkit/content/mozapps/extensions/default-theme, removed above)
 	replace_line 'this.maybeInstallBuiltinAddon\(' 'if (false) this.maybeInstallBuiltinAddon(' modules/addons/XPIProvider.jsm
 	
+	# Don't log a warning when checking 'distribution/extensions' for addons
+	replace_line 'logger.warn\(`Checking' 'logger.debug(`Checking' modules/addons/XPIProvider.jsm
+	
 	# Allow addon installation by bypassing confirmation dialogs. If we want a confirmation dialog,
 	# we need to either add gXPInstallObserver from browser-addons.js [1][2] or provide our own with
 	# Ci.amIWebInstallPrompt [3].
