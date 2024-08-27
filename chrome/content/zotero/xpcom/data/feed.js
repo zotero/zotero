@@ -187,7 +187,7 @@ Zotero.Feed.prototype._set = function (prop, val) {
 				throw new Error(invalidUrlError);
 			}
 			
-			if (uri.scheme !== 'http' && uri.scheme !== 'https') {
+			if (uri.scheme !== 'http' && uri.scheme !== 'https' && !(Zotero.isSourceBuild && uri.scheme === 'file')) {
 				throw new Error(invalidUrlError);
 			}
 			this._previousURL = this.url;
