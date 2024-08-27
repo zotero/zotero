@@ -1249,7 +1249,10 @@ class ReaderWindow extends ReaderInstance {
 	}
 
 	_setTitleValue(title) {
-		this._window.document.title = title;
+		// Tab titles render Citeproc.js markup. There's no good way
+		// to show rich text in a window title, but we can at least
+		// strip the markup.
+		this._window.document.title = Zotero.Utilities.Internal.renderItemTitle(title);
 	}
 
 	_onFileMenuOpen() {
