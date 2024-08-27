@@ -254,6 +254,26 @@ var Zotero_Lookup = new function () {
 		}
 	};
 	
+	this.onContextMenu = function (event, textBox) {
+		event.preventDefault();
+		let menu = goBuildEditContextMenu().cloneNode(true);
+		let pasteMenuitem = menu.querySelector("menuitem[data-action='paste']");
+
+		let pasteAndGoMenuitem = document.createXULElement("menuitem");
+		document.l10n.setAttributes(pasteAndGoMenuitem, "text-action-paste-and-go");
+		pasteAndGoMenuitem.disabled = pasteMenuitem.disabled;
+		pasteAndGoMenuitem.addEventListener("command", () => {
+			pasteMenuitem.doCommand();
+			this.accept(textBox);
+		});
+		pasteMenuitem.after(pasteAndGoMenuitem);
+
+		document.querySelector("popupset").append(menu);
+		menu.addEventListener("popuphiding", () => menu.remove(),
+			{ once: true });
+		menu.openPopupAtScreen(event.screenX, event.screenY, true);
+	};
+	
 	
 	this.setMultiline = function (on) {
 		var mlTxtBox = document.getElementById("zotero-lookup-textbox");
