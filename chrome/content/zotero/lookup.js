@@ -209,9 +209,7 @@ var Zotero_Lookup = new function () {
 	
 	
 	this.getActivePanel = function() {
-		var mlPanel = document.getElementById("zotero-lookup-multiline");
-		if (mlPanel.hidden) return document.getElementById("zotero-lookup-singleLine");
-		return mlPanel;
+		return document.getElementById("zotero-lookup-multiline");
 	};
 	
 	
