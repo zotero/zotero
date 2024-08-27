@@ -26,6 +26,11 @@ radio {
 		border-radius: 8px;
 	}
 
+	.radio-label-box {
+		padding-inline-start: 0;
+		margin-inline-start: 0;
+	}
+
 	@include -make-radio-icon("rest");
 	
 	&:not([disabled]) {
