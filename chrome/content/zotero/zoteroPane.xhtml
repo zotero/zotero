@@ -1223,7 +1223,7 @@
 													class="zotero-tb-button"
 													tooltiptext="&zotero.toolbar.lookup.label;"
 													type="panel"
-													onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"
+													onmousedown="Zotero_Lookup.handleToolbarButtonMouseDown(event)"
 												/>
 												
 												<panel id="zotero-lookup-panel" type="arrow"
