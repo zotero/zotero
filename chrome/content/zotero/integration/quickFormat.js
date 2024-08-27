@@ -291,7 +291,6 @@ var Zotero_QuickFormat = new function () {
 				_updateItemList({ citedItems: [] });
 			});
 			refocusInput();
-			_initWindowDragTracker();
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -1269,46 +1268,6 @@ var Zotero_QuickFormat = new function () {
 		e.preventDefault();
 	}
 
-	/**
-	 * FX115.
-	 * Keep track when the window is being dragged and if so - hide reference panel.
-	 * Reopen it when the window stops being dragged.
-	 * This is to handle the <panel> not following the window as it is moved across the screen.
-	 * -moz-window-drag interferes with mouseup/down events on windows, so this is an alternative
-	 * to those listeners.
-	 */
-	function _initWindowDragTracker() {
-		const CHECK_FREQUENCY = 100;
-		let windowTop = window.screenTop;
-		let windowLeft = window.screenLeft;
-		let checksWithoutMovement = 0;
-		let checkWindowsPosition = () => {
-			// Don't let the counter increase indefinitely
-			if (checksWithoutMovement > 1000000) {
-				checksWithoutMovement = 10;
-			}
-			setTimeout(() => {
-				// If the window's positioning changed, the window is being dragged. Hide the reference panel
-				if (windowTop !== window.screenTop || windowLeft !== window.screenLeft) {
-					referencePanel.hidePopup();
-					windowTop = window.screenTop;
-					windowLeft = window.screenLeft;
-					checksWithoutMovement = 0;
-					checkWindowsPosition();
-					return;
-				}
-				// If the position hasn't changed for a while, make sure the panel is reopened.
-				if (checksWithoutMovement == 2 && isInput(document.activeElement) && referencePanel.state !== "open") {
-					_resizeReferencePanel();
-				}
-				checksWithoutMovement += 1;
-				// Keep checking every once in a while
-				checkWindowsPosition();
-			}, CHECK_FREQUENCY);
-		};
-		checkWindowsPosition();
-	}
-
 	// Set the editor's width so that it fills up all remaining space in the window.
 	// It should be window.width - padding - icon wrappers width. The is needed to be explicitly set
 	// so that the editor's height expands/shrinks vertically without going outside of the
@@ -1341,16 +1300,6 @@ var Zotero_QuickFormat = new function () {
 		// Need to wait a moment for the css change above to take effect (mainly for mac)
 		await Zotero.Promise.delay(5);
 		window.resizeTo(width, height);
-		// If the editor height changes, the panel will remain where it was.
-		// Check if the panel is not next to the dialog, and if so - close and reopen it
-		// to position references panel properly
-		let dialogBottom = dialog.getBoundingClientRect().bottom;
-		let panelTop = referencePanel.getBoundingClientRect().top;
-		if (Math.abs(dialogBottom - panelTop) > 5 && referencePanel.state == "open") {
-			referencePanel.hidePopup();
-			// Skip a tick, otherwise the panel may just remain open where it was
-			setTimeout(_openReferencePanel);
-		}
 		if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
 			document.children[0].setAttribute('drawintitlebar', 'false');
 			document.children[0].setAttribute('drawintitlebar', 'true');
