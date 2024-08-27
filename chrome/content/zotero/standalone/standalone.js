@@ -979,11 +979,17 @@ ZoteroStandalone.DebugOutput = {
 };
 
 
-function toJavaScriptConsole() {
+async function toJavaScriptConsole() {
 	// We need the DevTools' built-in require() for this
 	const { require } = ChromeUtils.import("resource://devtools/shared/loader/Loader.jsm");
 	const { BrowserConsoleManager } = require("resource://devtools/client/webconsole/browser-console-manager.js");
-	BrowserConsoleManager.openBrowserConsoleOrFocus();
+	await BrowserConsoleManager.openBrowserConsoleOrFocus();
+	// Add missing aria labels for the the VPAT review
+	let win = Services.wm.getMostRecentWindow("devtools:webconsole");
+	// X button next to "Filter ouput"
+	win.document.querySelector(".devtools-searchinput-clear").setAttribute("aria-label", "Clear filter");
+	// The actual input line
+	win.document.querySelector(".flexible-output-input textarea").setAttribute("aria-label", "Input line");
 }
 
 function openRunJSWindow() {
