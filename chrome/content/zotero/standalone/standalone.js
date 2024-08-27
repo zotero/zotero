@@ -984,10 +984,8 @@ async function toJavaScriptConsole() {
 	const { require } = ChromeUtils.import("resource://devtools/shared/loader/Loader.jsm");
 	const { BrowserConsoleManager } = require("resource://devtools/client/webconsole/browser-console-manager.js");
 	await BrowserConsoleManager.openBrowserConsoleOrFocus();
-	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
 	// Add missing aria labels for the the VPAT review
-	let win = wm.getMostRecentWindow("devtools:webconsole");
+	let win = Services.wm.getMostRecentWindow("devtools:webconsole");
 	// X button next to "Filter ouput"
 	win.document.querySelector(".devtools-searchinput-clear").setAttribute("aria-label", "Clear filter");
 	// The actual input line
