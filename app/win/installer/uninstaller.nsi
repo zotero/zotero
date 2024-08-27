@@ -564,7 +564,7 @@ Function .onInit
   ; Prevent launching the application when a reboot is required and this
   ; executable is the main application executable
   IfFileExists "$EXEDIR\${FileMainEXE}.moz-upgrade" +1 +4
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE_HELPER)" IDNO +2
   Reboot
   Quit ; Nothing initialized so no need to call OnEndCommon
 
@@ -590,7 +590,7 @@ Function .onInit
   ; Prevent all operations (e.g. set as default, postupdate, etc.) when a
   ; reboot is required and the executable launched is helper.exe
   IfFileExists "$INSTDIR\${FileMainEXE}.moz-upgrade" +1 +4
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE_HELPER)" IDNO +2
   Reboot
   Quit ; Nothing initialized so no need to call OnEndCommon
 
