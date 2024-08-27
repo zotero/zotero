@@ -350,7 +350,7 @@
 	// richlistbox elements are crazy and will expand beyond the window size
 	// unless all/most elements in the hierarchy that contain that
 	// richlistbox have a min-height: 0 set
-	vbox, hbox {
+	vbox, hbox, groupbox {
 		min-height: 0;
 	}
 }

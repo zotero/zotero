@@ -1,5 +1,6 @@
 #zotero-locate-manager-prefs {
 	@include macOS-normalize-controls;
+	@include contain-richlistbox;
 	
 	#button-bar, #button-bar > hbox {
 		display: flex;
