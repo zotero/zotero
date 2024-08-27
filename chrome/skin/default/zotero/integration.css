@@ -222,7 +222,16 @@ span.zotero-bubble-input {
 
 .citation-dialog .accept-button {
 	list-style-image: url("chrome://zotero/skin/20/universal/arrow-right.svg");
-	fill: currentColor;
+	fill: #0000008c; /* hardcoded fill-secondary from light theme */
+}
+
+.citation-dialog .accept-button:hover {
+	background-color: #0000000d; /* hardcoded fill-quinary from light theme */
+}
+
+.zotero-spinner-16 {
+	fill: #0000008c; /* hardcoded fill-secondary from light theme */
+	background: url("chrome://zotero/skin/16/light/loading.svg") no-repeat center/contain;
 }
 
 .citation-dialog.item {
@@ -250,7 +259,7 @@ span.zotero-bubble-input {
 
 richlistitem[selected="true"] {
 	background: Highlight !important;
-	color: HighlightText;
+	color: HighlightText !important;
 }
 
 .citation-dialog.reference-panel {
@@ -366,7 +375,8 @@ panel button .button-text {
 }
 
 window.citation-dialog {
-	width: 600px;
+	max-width: 800px;
+	min-width: 800px;
 }
 
 .aria-hidden {
