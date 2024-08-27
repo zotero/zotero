@@ -561,7 +561,7 @@
 				return "";
 			};
 			newFilename = newFilename.trim();
-			let oldFilename = item.getFilename();
+			let oldFilename = item.attachmentFilename;
 			if (oldFilename === newFilename) {
 				return;
 			}
