@@ -25,7 +25,7 @@
 
 <vbox id="zotero-prefpane-cite" onload="event.waitUntil(Zotero_Preferences.Cite.init())">
 	<vbox class="main-section" id="styles">
-		<groupbox flex="1">
+		<groupbox flex="1" aria-label="&zotero.preferences.cite.styles.styleManager;">
 			<!-- HTML needs to be wrapped in an hbox to isolate from XUL box layout -->
 			<hbox><label control="styleManager-table"><html:h2>&zotero.preferences.cite.styles.styleManager;</html:h2></label></hbox>
 			
@@ -46,17 +46,17 @@
 			</hbox>
 		</groupbox>
 		
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
 			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
 			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true"/>
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="export-citePaperJournalArticleURL"/>
 			<!-- This doesn't wrap without an explicit width, for some reason -->
 			<label id="export-citePaperJournalArticleURL" width="45em">
 				&zotero.preferences.export.citePaperJournalArticleURL.description;
 			</label>
 		</groupbox>
 		
-		<groupbox>
+		<groupbox aria-label="&zotero.general.tools;">
 			<label><html:h2>&zotero.general.tools;</html:h2></label>
 			
 			<hbox>
@@ -69,7 +69,7 @@
 			</hbox>
 		</groupbox>
 	</vbox>
-	<vbox class="main-section" id="wordProcessors">
+	<vbox class="main-section" id="wordProcessors" aria-label="&zotero.preferences.cite.wordProcessors;" role="group">
 		<html:h1>&zotero.preferences.cite.wordProcessors;</html:h1>
 		
 		<vbox id="wordProcessorInstallers"/>

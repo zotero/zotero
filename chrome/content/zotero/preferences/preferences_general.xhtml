@@ -24,7 +24,7 @@
 -->
 <vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
 	<vbox class="main-section">
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.interface;">
 			<label><html:h2>&zotero.preferences.interface;</html:h2></label>
 		
 			<hbox align="center">
@@ -80,7 +80,7 @@
 			</vbox>
 		</groupbox>
 		
-		<groupbox id="zotero-prefpane-file-handling-groupbox">
+		<groupbox id="zotero-prefpane-file-handling-groupbox" aria-label="&zotero.preferences.fileHandling;">
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
 			<vbox>
@@ -101,18 +101,18 @@
 		
 		</groupbox>
 		
-		<groupbox id="zotero-prefpane-file-renaming-groupbox">
-			<label><html:h2 data-l10n-id="preferences-file-renaming-title"/></label>
+		<groupbox id="zotero-prefpane-file-renaming-groupbox" aria-labelledby="preferences-file-renaming-title" aria-describedby="preferences-file-renaming-intro">
+			<label><html:h2 id="preferences-file-renaming-title" data-l10n-id="preferences-file-renaming-title"/></label>
 			
 			<vbox align="start">
-				<label data-l10n-id="preferences-file-renaming-intro"/>
+				<label id="preferences-file-renaming-intro" data-l10n-id="preferences-file-renaming-intro"/>
 				<separator class="thin"/>
 				<checkbox data-l10n-id="preferences-file-renaming-auto-rename-files"
 					preference="extensions.zotero.autoRenameFiles"
 					oncommand="setTimeout(() => Zotero_Preferences.General.updateAutoRenameFilesUI())" native="true"
 				/>
-				<vbox class="indented-pref">
-					<label data-l10n-id="preferences-file-renaming-file-types"/>
+				<vbox class="indented-pref" aria-labelledby="preferences-file-renaming-file-types" role="group">
+					<label id="preferences-file-renaming-file-types" data-l10n-id="preferences-file-renaming-file-types"/>
 					<hbox
 						id="zotero-prefpane-file-renaming-file-types-box"
 						class="indented-pref"
@@ -159,8 +159,8 @@
 			</vbox>
 		</groupbox>
 		
-		<groupbox id="zotero-prefpane-reader-groupbox">
-			<label><html:h2 data-l10n-id="preferences-reader-title"/></label>
+		<groupbox id="zotero-prefpane-reader-groupbox" aria-labelledby="preferences-reader-title">
+			<label><html:h2 id="preferences-reader-title" data-l10n-id="preferences-reader-title"/></label>
 			
 			<vbox class="fileHandler-menus">
 				<label control="fileHandler-pdf">&zotero.preferences.fileHandler.openPDFsUsing;</label>
@@ -233,10 +233,10 @@
 			/>
 		</groupbox>
 		
-		<groupbox id="zotero-prefpane-locate-groupbox">
+		<groupbox id="zotero-prefpane-locate-groupbox" aria-label="&zotero.preferences.prefpane.locate;" aria-describedby="preferences-locate-library-lookup-intro">
 			<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
 			
-			<label data-l10n-id="preferences-locate-library-lookup-intro"/>
+			<label id="preferences-locate-library-lookup-intro" data-l10n-id="preferences-locate-library-lookup-intro"/>
 			<separator class="thin"/>
 			
 			<hbox align="center">
@@ -263,7 +263,7 @@
 			
 		</groupbox>
 		
-		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
+		<groupbox id="zotero-prefpane-miscellaneous-groupbox" aria-label="&zotero.preferences.miscellaneous;">
 			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
 			<checkbox label="&zotero.preferences.automaticTags;" preference="extensions.zotero.automaticTags" native="true"/>
@@ -274,7 +274,7 @@
 			</hbox>
 		</groupbox>
 
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.groups;" aria-description="&zotero.preferences.groups.whenCopyingInclude;">
 			<label><html:h2>&zotero.preferences.groups;</html:h2></label>
 
 			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>

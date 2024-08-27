@@ -25,7 +25,7 @@
 <vbox id="zotero-prefpane-sync" onload="Zotero_Preferences.Sync.init()">
     <vbox class="main-section">
         <vbox id="sync-unauthorized">
-            <groupbox>
+            <groupbox aria-label="&zotero.preferences.sync.syncServer;">
                 <label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
 
                 <hbox>
@@ -66,7 +66,7 @@
         </vbox>
 
         <vbox id="sync-authorized" hidden="true">
-            <groupbox>
+            <groupbox aria-label="&zotero.preferences.sync.syncServer;">
                 <label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
 
                 <html:div class="form-grid">
@@ -74,6 +74,7 @@
                     <hbox>
                         <label id="sync-username" value="Username"/>
                         <button label="&zotero.preferences.sync.unlinkAccount;"
+								aria-describedby="sync-username"
                                 oncommand="Zotero_Preferences.Sync.unlinkAccount()"/>
                     </hbox>
 
@@ -101,7 +102,7 @@
 
             </groupbox>
 
-            <groupbox id="storage-settings">
+            <groupbox id="storage-settings" aria-label="&zotero.preferences.sync.fileSyncing;">
                 <label><html:h2>&zotero.preferences.sync.fileSyncing;</html:h2></label>
 
                 <!-- My Library -->
@@ -215,8 +216,8 @@
 
                 <vbox id="storage-terms">
                     <hbox style="margin-top: .4em; display: block" align="center">
-                        <label>&zotero.preferences.sync.fileSyncing.tos1;</label>
-                        <label is="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+                        <label id="preferences_storage_terms" >&zotero.preferences.sync.fileSyncing.tos1;</label>
+                        <label is="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;" aria-describedby="preferences_storage_terms"/>
                         <label>&zotero.preferences.period;</label>
                     </hbox>
                 </vbox>
@@ -224,7 +225,7 @@
         </vbox>
     </vbox>
 
-    <vbox class="main-section" id="sync-reset" align="start">
+    <vbox class="main-section" id="sync-reset" align="start" aria-label="&zotero.preferences.sync.reset;" role="group">
         <html:h1>&zotero.preferences.sync.reset;</html:h1>
         <button label="&zotero.preferences.sync.reset.showResetOptions;" oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-reset-sync')"
             data-search-strings="
