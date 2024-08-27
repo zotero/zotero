@@ -989,7 +989,7 @@ async function toJavaScriptConsole() {
 	// X button next to "Filter ouput"
 	win.document.querySelector(".devtools-searchinput-clear").setAttribute("aria-label", "Clear filter");
 	// The actual input line
-	win.document.querySelector(".flexible-output-input textarea").setAttribute("aria-label", "Command line input");
+	win.document.querySelector(".flexible-output-input textarea").setAttribute("aria-label", "Input line");
 }
 
 function openRunJSWindow() {
