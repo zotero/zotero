@@ -39,7 +39,7 @@
 					<html:div class="metadata-table">
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
-							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" nowrap="true" tight="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/></html:div>
 						</html:div>
 						<html:div id="accessedRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="accessed-label" class="key" data-l10n-id="attachment-info-accessed"/></html:div>
