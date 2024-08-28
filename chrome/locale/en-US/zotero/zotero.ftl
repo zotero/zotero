@@ -672,5 +672,5 @@ post-upgrade-remind-me-later =
 post-upgrade-done =
     .label = { general-done }
 
-text-action-paste-and-go =
-    .label = Paste and Go
+text-action-paste-and-search =
+    .label = Paste and Search

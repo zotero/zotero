@@ -257,14 +257,14 @@ var Zotero_Lookup = new function () {
 		let menu = goBuildEditContextMenu().cloneNode(true);
 		let pasteMenuitem = menu.querySelector("menuitem[data-action='paste']");
 
-		let pasteAndGoMenuitem = document.createXULElement("menuitem");
-		document.l10n.setAttributes(pasteAndGoMenuitem, "text-action-paste-and-go");
-		pasteAndGoMenuitem.disabled = pasteMenuitem.disabled;
-		pasteAndGoMenuitem.addEventListener("command", () => {
+		let pasteAndSearchMenuitem = document.createXULElement("menuitem");
+		document.l10n.setAttributes(pasteAndSearchMenuitem, "text-action-paste-and-search");
+		pasteAndSearchMenuitem.disabled = pasteMenuitem.disabled;
+		pasteAndSearchMenuitem.addEventListener("command", () => {
 			pasteMenuitem.doCommand();
 			this.accept(textBox);
 		});
-		pasteMenuitem.after(pasteAndGoMenuitem);
+		pasteMenuitem.after(pasteAndSearchMenuitem);
 
 		document.querySelector("popupset").append(menu);
 		menu.addEventListener("popuphiding", () => menu.remove(),
