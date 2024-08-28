@@ -255,13 +255,15 @@ var Zotero_Lookup = new function () {
 	this.onContextMenu = function (event, textBox) {
 		event.preventDefault();
 		let menu = goBuildEditContextMenu().cloneNode(true);
+		goUpdateGlobalEditMenuItems(true);
 		let pasteMenuitem = menu.querySelector("menuitem[data-action='paste']");
+		let pasteCommand = document.getElementById("cmd_paste");
 
 		let pasteAndSearchMenuitem = document.createXULElement("menuitem");
 		document.l10n.setAttributes(pasteAndSearchMenuitem, "text-action-paste-and-search");
-		pasteAndSearchMenuitem.disabled = pasteMenuitem.disabled;
+		pasteAndSearchMenuitem.disabled = pasteCommand.hasAttribute("disabled"); // no 'disabled' property
 		pasteAndSearchMenuitem.addEventListener("command", () => {
-			pasteMenuitem.doCommand();
+			pasteCommand.doCommand();
 			this.accept(textBox);
 		});
 		pasteMenuitem.after(pasteAndSearchMenuitem);
