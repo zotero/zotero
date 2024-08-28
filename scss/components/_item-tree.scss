@@ -169,6 +169,10 @@
 				width: 12px;
 				margin-inline-start: 3px;
 			}
+			
+			.cell-text.filename {
+				font-style: italic;
+			}
 		}
 
 		.cell.no-padding {
