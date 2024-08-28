@@ -53,12 +53,12 @@ Zotero.Prompt = {
 	 *        checkbox when this method is called and the final checked
 	 *        state after this method returns. Either {} or  { value: true/false }.
 	 * - {Number} defaultButton - The index of default button. 0 by default
-	 * - {Boolean} delayButtons - Make the buttons initially disabled and enable them after some period
+	 * - {Boolean} buttonDelay - Make the buttons initially disabled and enable them after some period
 	 *        so that the user doesn't click through the dialog without reading it.
 	 * @returns {Number} The index of the button pressed.
 	 */
 	confirm(options = {}) {
-		let { window: win, title, text, button0, button1, button2, checkLabel, checkbox, defaultButton, delayButtons } = options;
+		let { window: win, title, text, button0, button1, button2, checkLabel, checkbox, defaultButton, buttonDelay, delayButtons } = options;
 		if (!win) win = null;
 		if (!title) throw new Error('`title` is required');
 		if (!text) throw new Error('`text` is required');
@@ -69,7 +69,11 @@ Zotero.Prompt = {
 			throw new Error('`checkLabel` provided without `checkbox` option');
 		}
 		// Skip button delay in CI
-		let flags = (delayButtons && !Zotero.automatedTest) ? Services.prompt.BUTTON_DELAY_ENABLE : 0;
+		if (delayButtons) {
+			Zotero.warn("Zotero.Prompt.confirm() option 'delayButtons' is deprecated -- use 'buttonDelay'");
+			buttonDelay = true;
+		}
+		let flags = (buttonDelay && !Zotero.automatedTest) ? Services.prompt.BUTTON_DELAY_ENABLE : 0;
 		if (typeof button0 == 'number') flags += Services.prompt.BUTTON_POS_0 * button0;
 		else if (typeof button0 == 'string') flags += Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING;
 		if (typeof button1 == 'number') flags += Services.prompt.BUTTON_POS_1 * button1;
