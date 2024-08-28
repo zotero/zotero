@@ -68,7 +68,8 @@ Zotero.Prompt = {
 		if (checkLabel && (!checkbox || typeof checkbox != 'object')) {
 			throw new Error('`checkLabel` provided without `checkbox` option');
 		}
-		let flags = delayButtons ? Services.prompt.BUTTON_DELAY_ENABLE : 0;
+		// Skip button delay in CI
+		let flags = (delayButtons && !Zotero.automatedTest) ? Services.prompt.BUTTON_DELAY_ENABLE : 0;
 		if (typeof button0 == 'number') flags += Services.prompt.BUTTON_POS_0 * button0;
 		else if (typeof button0 == 'string') flags += Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING;
 		if (typeof button1 == 'number') flags += Services.prompt.BUTTON_POS_1 * button1;
