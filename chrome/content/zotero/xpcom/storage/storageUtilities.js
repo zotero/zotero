@@ -83,28 +83,21 @@ Zotero.Sync.Storage.Utilities = {
 					[library.name, ZOTERO_CONFIG.DOMAIN_NAME])
 				+ "\n\n"
 				+ Zotero.getString('sync.error.groupCopyChangedFiles')
-			var button1Text = Zotero.getString('sync.resetGroupFilesAndSync');
-			var button2Text = Zotero.getString('sync.skipGroup');
+			var button0Text = Zotero.getString('sync.resetGroupFilesAndSync');
+			var button1Text = Zotero.getString('sync.skipGroup');
 			break;
 		
 		default:
 			throw new Error("Unsupported library type " + libraryType);
 		}
 		
-		var ps = Services.prompt;
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-			+ ps.BUTTON_DELAY_ENABLE;
-		
-		return ps.confirmEx(
-			win,
-			Zotero.getString('general.permissionDenied'),
-			msg,
-			buttonFlags,
-			button1Text,
-			button2Text,
-			null,
-			null, {}
-		);
+		return Zotero.Prompt.confirm({
+			window: win,
+			title: Zotero.getString('general.permissionDenied'),
+			text: msg,
+			button0: button0Text,
+			button1: button1Text,
+			buttonDelay: true,
+		});
 	}
 }

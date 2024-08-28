@@ -541,12 +541,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			let removedGroups = [];
 			let keptGroups = [];
 			
-			let ps = Services.prompt;
-			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_DELAY_ENABLE;
-			
 			// Prompt for each group
 			//
 			// TODO: Localize
@@ -570,18 +564,16 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				msg += "\n\n" + "Would you like to remove it from this computer or keep it "
 					+ "as a read-only library?";
 				
-				let index = ps.confirmEx(
-					null,
-					"Group Not Found",
-					msg,
-					buttonFlags,
-					"Remove Group",
+				let index = Zotero.Prompt.confirm({
+					title: "Group Not Found",
+					text: msg,
+					button0: "Remove Group",
 					// TODO: Any way to have Esc trigger extra1 instead so it doesn't
 					// have to be in this order?
-					"Cancel Sync",
-					"Keep Group",
-					null, {}
-				);
+					button1: "Cancel Sync",
+					button2: "Keep Group",
+					buttonDelay: true,
+				});
 				
 				if (index == 0) {
 					removedGroups.push(group);

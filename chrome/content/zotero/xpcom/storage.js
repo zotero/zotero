@@ -115,20 +115,14 @@ Zotero.Sync.Storage = new function () {
 			setTimeout(function () {
 				var group = Zotero.Groups.get(e.data.groupID);
 				
-				var ps = Services.prompt;
-				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-								+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-								+ ps.BUTTON_DELAY_ENABLE;
-				var index = ps.confirmEx(
-					null,
-					Zotero.getString('general.warning'),
-					Zotero.getString('sync.storage.error.fileEditingAccessLost', group.name) + "\n\n"
+				var index = Zotero.Prompt.confirm({
+					title: Zotero.getString('general.warning'),
+					text: Zotero.getString('sync.storage.error.fileEditingAccessLost', group.name) + "\n\n"
 						+ Zotero.getString('sync.error.groupWillBeReset') + "\n\n"
 						+ Zotero.getString('sync.error.copyChangedItems'),
-					buttonFlags,
-					Zotero.getString('sync.resetGroupAndSync'),
-					null, null, null, {}
-				);
+					button0: Zotero.getString('sync.resetGroupAndSync'),
+					buttonDelay: true,
+				});
 				
 				if (index == 0) {
 					// TODO: transaction

@@ -513,19 +513,14 @@ Zotero_Preferences.Sync = {
 			var sql = "SELECT COUNT(*) FROM settings "
 				+ "WHERE setting='storage' AND key='zfsPurge' AND value='user'";
 			if (!Zotero.DB.valueQueryAsync(sql)) {
-				let ps = Services.prompt;
-				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-					+ ps.BUTTON_DELAY_ENABLE;
 				var account = Zotero.Sync.Server.username;
-				var index = ps.confirmEx(
-					null,
-					Zotero.getString('zotero.preferences.sync.purgeStorage.title'),
-					Zotero.getString('zotero.preferences.sync.purgeStorage.desc'),
-					buttonFlags,
-					Zotero.getString('zotero.preferences.sync.purgeStorage.confirmButton'),
-					Zotero.getString('zotero.preferences.sync.purgeStorage.cancelButton'), null, null, {}
-				);
+				var index = Zotero.Prompt.confirm({
+					title: Zotero.getString('zotero.preferences.sync.purgeStorage.title'),
+					text: Zotero.getString('zotero.preferences.sync.purgeStorage.desc'),
+					button0: Zotero.getString('zotero.preferences.sync.purgeStorage.confirmButton'),
+					button1: Zotero.getString('zotero.preferences.sync.purgeStorage.cancelButton'),
+					buttonDelay: true,
+				});
 				
 				if (index == 0) {
 					var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
@@ -533,7 +528,7 @@ Zotero_Preferences.Sync = {
 					
 					try {
 						yield Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
-						ps.alert(
+						Services.prompt.alert(
 							null,
 							Zotero.getString("general.success"),
 							"Attachment files from your personal library have been removed from the Zotero servers."
@@ -541,7 +536,7 @@ Zotero_Preferences.Sync = {
 					}
 					catch (e) {
 						Zotero.logError(e);
-						ps.alert(
+						Services.prompt.alert(
 							null,
 							Zotero.getString("general.error"),
 							"An error occurred. Please try again later."
