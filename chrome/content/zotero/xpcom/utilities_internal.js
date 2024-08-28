@@ -2422,41 +2422,44 @@ Zotero.Utilities.Internal = {
 	 * Render Citeproc.js HTML-style markup in a title
 	 *
 	 * @param {string} title
-	 * @param {ParentNode} targetNode
+	 * @param {ParentNode} [targetNode] Node to append rendered title to. If none provided,
+	 * 		the non-tag parts of the title will be returned without rendering anything to the DOM
 	 * @returns {string} The non-tag parts of the title
 	 */
-	renderItemTitle(title, targetNode) {
-		let doc = targetNode.ownerDocument;
-		
+	renderItemTitle(title, targetNode = null) {
 		let markupStack = [];
-		let nodeStack = [targetNode];
+		let nodeStack = targetNode ? [targetNode] : null;
 		let textContent = '';
 
 		for (let token of title.split(/(<[^>]+>)/)) {
 			if (this._titleMarkup.hasOwnProperty(token)) {
 				let markup = this._titleMarkup[token];
 				if (markup.beginsTag) {
-					let node = doc.createElement(markup.beginsTag);
-					if (markup.style) {
-						Object.assign(node.style, markup.style);
-					}
-					if (markup.inverseStyle && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
-						Object.assign(node.style, markup.inverseStyle);
+					if (targetNode) {
+						let node = targetNode.ownerDocument.createElement(markup.beginsTag);
+						if (markup.style) {
+							Object.assign(node.style, markup.style);
+						}
+						if (markup.inverseStyle && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
+							Object.assign(node.style, markup.inverseStyle);
+						}
+						nodeStack.push(node);
 					}
 					markupStack.push({ ...markup, token });
-					nodeStack.push(node);
 					continue;
 				}
 				else if (markup.endsTag && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.endsTag)) {
 					while (markupStack.length) {
 						let discardedMarkup = markupStack.pop();
-						let discardedNode = nodeStack.pop();
-						if (discardedMarkup.beginsTag === markup.endsTag) {
-							nodeStack[nodeStack.length - 1].append(discardedNode);
-							break;
-						}
-						else {
-							nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
+						if (targetNode) {
+							let discardedNode = nodeStack.pop();
+							if (discardedMarkup.beginsTag === markup.endsTag) {
+								nodeStack[nodeStack.length - 1].append(discardedNode);
+								break;
+							}
+							else {
+								nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
+							}
 						}
 					}
 
@@ -2464,14 +2467,18 @@ Zotero.Utilities.Internal = {
 				}
 			}
 
-			nodeStack[nodeStack.length - 1].append(token);
+			if (targetNode) {
+				nodeStack[nodeStack.length - 1].append(token);
+			}
 			textContent += token;
 		}
 
 		while (markupStack.length) {
 			let discardedMarkup = markupStack.pop();
-			let discardedNode = nodeStack.pop();
-			nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
+			if (targetNode) {
+				let discardedNode = nodeStack.pop();
+				nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
+			}
 		}
 
 		return textContent;
