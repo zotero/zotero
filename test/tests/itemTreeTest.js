@@ -1099,13 +1099,6 @@ describe("Zotero.ItemTree", function () {
 	
 	
 	describe("#onDrop()", function () {
-		var httpd;
-		var port = 16213;
-		var baseURL = `http://localhost:${port}/`;
-		var pdfFilename = "test.pdf";
-		var pdfURL = baseURL + pdfFilename;
-		var pdfPath;
-		
 		function drop(index, orient, dataTransfer) {
 			Zotero.DragDrop.currentOrientation = orient;
 			var event = { dataTransfer };
@@ -1131,17 +1124,6 @@ describe("Zotero.ItemTree", function () {
 			return itemsView.onDrop(event, index);
 		}
 		
-		// Serve a PDF to test URL dragging
-		before(function () {
-			var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
-			httpd = new HttpServer();
-			httpd.start(port);
-			var file = getTestDataDirectory();
-			file.append(pdfFilename);
-			pdfPath = file.path;
-			httpd.registerFile("/" + pdfFilename, file);
-		});
-		
 		beforeEach(() => {
 			// Don't run recognize on every file
 			Zotero.Prefs.set('autoRecognizeFiles', false);
@@ -1150,10 +1132,6 @@ describe("Zotero.ItemTree", function () {
 		});
 		
 		after(function* () {
-			var defer = Zotero.Promise.defer();
-			httpd.stop(() => defer.resolve());
-			yield defer.promise;
-			
 			Zotero.Prefs.clear('autoRecognizeFiles');
 			Zotero.Prefs.clear('autoRenameFiles');
 			Zotero.Prefs.clear('autoRenameFiles.linked');
@@ -1256,10 +1234,13 @@ describe("Zotero.ItemTree", function () {
 			);
 		});
 		
-		it("should create a stored top-level attachment when a URL is dragged", async function () {
+		it("should create a stored top-level attachment when a file URI is dragged", async function () {
 			var promise = itemsView.waitForSelect();
+			var pdfFile = getTestDataDirectory();
+			pdfFile.append('test.pdf');
+			var pdfURL = Services.io.newFileURI(pdfFile).spec;
 			
-			drop(0, -1, {
+			await drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
 				types: ['text/x-moz-url'],
@@ -1269,25 +1250,28 @@ describe("Zotero.ItemTree", function () {
 					}
 				},
 				mozItemCount: 1,
-			})
+			});
 
 			await promise;
 			var item = itemsView.getSelectedItems()[0];
-			assert.equal(item.getField('url'), pdfURL);
+			assert.equal(item.getField('url'), '');
 			assert.equal(
-				((await Zotero.File.getBinaryContentsAsync(await item.getFilePathAsync()))),
-				((await Zotero.File.getBinaryContentsAsync(pdfPath)))
+				(await Zotero.File.getBinaryContentsAsync(await item.getFilePathAsync())),
+				(await Zotero.File.getBinaryContentsAsync(pdfFile))
 			);
 		});
 		
-		it("should create a stored child attachment when a URL is dragged", async function () {
+		it("should create a stored child attachment when a file URI is dragged", async function () {
 			var view = zp.itemsView;
 			var parentItem = await createDataObject('item');
 			var parentRow = view.getRowIndexByID(parentItem.id);
 			
 			var promise = waitForItemEvent('add');
+			var pdfFile = getTestDataDirectory();
+			pdfFile.append('test.pdf');
+			var pdfURL = Services.io.newFileURI(pdfFile).spec;
 			
-			drop(parentRow, 0, {
+			await drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
 				types: ['text/x-moz-url'],
@@ -1297,15 +1281,15 @@ describe("Zotero.ItemTree", function () {
 					}
 				},
 				mozItemCount: 1,
-			})
+			});
 			
 			var itemIDs = await promise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.parentItemID, parentItem.id);
-			assert.equal(item.getField('url'), pdfURL);
+			assert.equal(item.getField('url'), '');
 			assert.equal(
-				((await Zotero.File.getBinaryContentsAsync(await item.getFilePathAsync()))),
-				((await Zotero.File.getBinaryContentsAsync(pdfPath)))
+				(await Zotero.File.getBinaryContentsAsync(await item.getFilePathAsync())),
+				(await Zotero.File.getBinaryContentsAsync(pdfFile))
 			);
 		});
 		
@@ -1337,16 +1321,19 @@ describe("Zotero.ItemTree", function () {
 				}
 			);
 			
+			var file = getTestDataDirectory();
+			file.append('test.pdf');
+			
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['text/x-moz-url'],
-				getData: function (type) {
-					if (type == 'text/x-moz-url') {
-						return pdfURL;
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
 			})
 			
 			// Wait for attachment item
@@ -1390,13 +1377,16 @@ describe("Zotero.ItemTree", function () {
 				}
 			);
 			
+			var file = getTestDataDirectory();
+			file.append('test.pdf');
+			
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['text/x-moz-url'],
-				getData: function (type) {
-					if (type == 'text/x-moz-url') {
-						return pdfURL;
+				types: ['application/x-moz-file'],
+				mozGetDataAt: function (type) {
+					if (type == 'application/x-moz-file') {
+						return file;
 					}
 				},
 				mozItemCount: 2,

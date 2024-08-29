@@ -4811,7 +4811,7 @@ var ZoteroPane = new function () {
 			if (delaySetAutoAttachmentTitle) {
 				for (let item of addedItems) {
 					item.setAutoAttachmentTitle();
-					await item.saveTx();
+					await item.saveTx({ notifierQueue });
 				}
 			}
 		}
@@ -4865,82 +4865,6 @@ var ZoteroPane = new function () {
 		
 		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
 		saveSnapshot = saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'));
-		
-		// TODO: this, needless to say, is a temporary hack
-		if (itemType == 'temporaryPDFHack') {
-			itemType = null;
-			var isPDF = false;
-			if (doc.title.indexOf('application/pdf') != -1 || Zotero.Attachments.isPDFJSDocument(doc)
-					|| doc.contentType == 'application/pdf') {
-				isPDF = true;
-			}
-			else {
-				var ios = Components.classes["@mozilla.org/network/io-service;1"].
-							getService(Components.interfaces.nsIIOService);
-				try {
-					var uri = ios.newURI(doc.location, null, null);
-					if (uri.fileName && uri.fileName.match(/pdf$/)) {
-						isPDF = true;
-					}
-				}
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-				}
-			}
-			
-			if (isPDF && saveSnapshot) {
-				//
-				// Duplicate newItem() checks here
-				//
-				if (Zotero.DB.inTransaction()) {
-					await Zotero.DB.waitForTransaction();
-				}
-				
-				// Currently selected row
-				if (row === undefined && this.collectionsView && this.getCollectionTreeRow()) {
-					row = this.collectionsView.selection.focused;
-				}
-				
-				if (row && !this.canEdit(row)) {
-					this.displayCannotEditLibraryMessage();
-					return false;
-				}
-				
-				if (row !== undefined) {
-					var collectionTreeRow = this.collectionsView.getRow(row);
-					var libraryID = collectionTreeRow.ref.libraryID;
-				}
-				else {
-					var libraryID = Zotero.Libraries.userLibraryID;
-					var collectionTreeRow = null;
-				}
-				//
-				//
-				//
-				
-				if (row && !this.canEditFiles(row)) {
-					this.displayCannotEditLibraryFilesMessage();
-					return false;
-				}
-				
-				if (collectionTreeRow && collectionTreeRow.isCollection()) {
-					var collectionID = collectionTreeRow.ref.id;
-				}
-				else {
-					var collectionID = false;
-				}
-				
-				let item = await Zotero.Attachments.importFromDocument({
-					libraryID: libraryID,
-					document: doc,
-					collections: collectionID ? [collectionID] : []
-				});
-				
-				await this.selectItem(item.id);
-				return false;
-			}
-		}
 		
 		// Save web page item by default
 		if (!itemType) {
@@ -5005,63 +4929,6 @@ var ZoteroPane = new function () {
 		}
 		// Otherwise create placeholder item, attach attachment, and update from that
 		else {
-			// TODO: this, needless to say, is a temporary hack
-			if (itemType == 'temporaryPDFHack') {
-				itemType = null;
-				
-				if (mimeType == 'application/pdf') {
-					//
-					// Duplicate newItem() checks here
-					//
-					if (Zotero.DB.inTransaction()) {
-						await Zotero.DB.waitForTransaction();
-					}
-					
-					// Currently selected row
-					if (row === undefined) {
-						row = ZoteroPane_Local.collectionsView.selection.focused;
-					}
-					
-					if (!ZoteroPane_Local.canEdit(row)) {
-						ZoteroPane_Local.displayCannotEditLibraryMessage();
-						return false;
-					}
-					
-					if (row !== undefined) {
-						var collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row);
-						var libraryID = collectionTreeRow.ref.libraryID;
-					}
-					else {
-						var libraryID = Zotero.Libraries.userLibraryID;
-						var collectionTreeRow = null;
-					}
-					//
-					//
-					//
-					
-					if (!ZoteroPane_Local.canEditFiles(row)) {
-						ZoteroPane_Local.displayCannotEditLibraryFilesMessage();
-						return false;
-					}
-					
-					if (collectionTreeRow && collectionTreeRow.isCollection()) {
-						var collectionID = collectionTreeRow.ref.id;
-					}
-					else {
-						var collectionID = false;
-					}
-					
-					let attachmentItem = await Zotero.Attachments.importFromURL({
-						libraryID,
-						url,
-						collections: collectionID ? [collectionID] : undefined,
-						contentType: mimeType
-					});
-					this.selectItem(attachmentItem.id)
-					return attachmentItem;
-				}
-			}
-			
 			if (!itemType) {
 				itemType = 'webpage';
 			}

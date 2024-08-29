@@ -1749,19 +1749,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 				return true;
 			}
-			else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
+			else if (dataType == 'application/x-moz-file') {
 				if (treeRow.isSearch() || treeRow.isPublications()) {
 					return false;
 				}
-				if (dataType == 'application/x-moz-file') {
-					// Don't allow folder drag
-					if (data[0].isDirectory()) {
-						return false;
-					}
-					// Don't allow drop if no permissions
-					if (!treeRow.filesEditable) {
-						return false;
-					}
+				// Don't allow folder drag
+				if (data[0].isDirectory()) {
+					return false;
+				}
+				// Don't allow drop if no permissions
+				if (!treeRow.filesEditable) {
+					return false;
 				}
 				
 				return true;
@@ -2388,9 +2386,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}.bind(this));
 			}
 		}
-		else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
+		else if (dataType == 'application/x-moz-file') {
 			// See note in onDragOver() above
-			if (dataType == 'application/x-moz-file' && Zotero.isMac) {
+			if (Zotero.isMac) {
 				if (event.metaKey) {
 					if (event.altKey) {
 						dropEffect = 'link';
@@ -2415,20 +2413,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			
 			for (var i=0; i<data.length; i++) {
 				var file = data[i];
-
 				let item;
-				if (dataType == 'text/x-moz-url') {
-					var url = data[i];
-				
-					// Still string, so remote URL
-					if (typeof file == 'string') {
-						window.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', null, row); // TODO: don't do this
-						continue;
-					}
-					
-					// Otherwise file, so fall through
-				}
-				
 				if (dropEffect == 'link') {
 					item = await Zotero.Attachments.linkFromFile({
 						file: file,

@@ -2403,7 +2403,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			return false;
 		}
-		else if (dataType == "text/x-moz-url" || dataType == 'application/x-moz-file') {
+		else if (dataType == 'application/x-moz-file') {
 			// Disallow direct drop on a non-regular item (e.g. note)
 			if (rowItem) {
 				if (!rowItem.isRegularItem()) {
@@ -2522,7 +2522,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 		}
-		else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
+		else if (dataType == 'application/x-moz-file') {
 			// Disallow drop into read-only libraries
 			if (!collectionTreeRow.editable) {
 				window.ZoteroPane.displayCannotEditLibraryMessage();
@@ -2530,7 +2530,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			
 			// See note in onDragOver() above
-			if (dataType == 'application/x-moz-file' && Zotero.isMac) {
+			if (Zotero.isMac) {
 				if (event.metaKey) {
 					if (event.altKey) {
 						dropEffect = 'link';
@@ -2580,42 +2580,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let delaySetAutoAttachmentTitle = data.length > 1;
 
 				for (var i=0; i<data.length; i++) {
-					var file = data[i];
-
-					if (dataType == 'text/x-moz-url') {
-						var url = data[i];
-
-						// Still string, so remote URL
-						if (typeof file == 'string') {
-							let item;
-							if (parentItemID) {
-								if (!collectionTreeRow.filesEditable) {
-									window.ZoteroPane.displayCannotEditLibraryFilesMessage();
-									return;
-								}
-								item = await Zotero.Attachments.importFromURL({
-									libraryID: targetLibraryID,
-									url,
-									renameIfAllowedType,
-									parentItemID,
-									saveOptions: {
-										notifierQueue
-									}
-								});
-							}
-							else {
-								item = await window.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
-							}
-							if (item) {
-								addedItems.push(item);
-							}
-							continue;
-						}
-
-						// Otherwise file, so fall through
-					}
-
-					file = file.path;
+					var file = data[i].path;
 
 					// Rename file if it's an allowed type
 					let fileBaseName = false;
@@ -2691,7 +2656,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (delaySetAutoAttachmentTitle) {
 					for (let item of addedItems) {
 						item.setAutoAttachmentTitle();
-						await item.saveTx();
+						await item.saveTx({ notifierQueue });
 					}
 				}
 				// Select children created after drag-drop onto a top-level item
