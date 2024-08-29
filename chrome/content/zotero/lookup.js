@@ -209,9 +209,7 @@ var Zotero_Lookup = new function () {
 	
 	
 	this.getActivePanel = function() {
-		var mlPanel = document.getElementById("zotero-lookup-multiline");
-		if (mlPanel.hidden) return document.getElementById("zotero-lookup-singleLine");
-		return mlPanel;
+		return document.getElementById("zotero-lookup-multiline");
 	};
 	
 	
@@ -252,6 +250,28 @@ var Zotero_Lookup = new function () {
 		if (/[\r\n]/.test(textBox.value)) {
 			this.setMultiline(true);
 		}
+	};
+	
+	this.onContextMenu = function (event, textBox) {
+		event.preventDefault();
+		let menu = goBuildEditContextMenu().cloneNode(true);
+		goUpdateGlobalEditMenuItems(true);
+		let pasteMenuitem = menu.querySelector("menuitem[data-action='paste']");
+		let pasteCommand = document.getElementById("cmd_paste");
+
+		let pasteAndSearchMenuitem = document.createXULElement("menuitem");
+		document.l10n.setAttributes(pasteAndSearchMenuitem, "text-action-paste-and-search");
+		pasteAndSearchMenuitem.disabled = pasteCommand.hasAttribute("disabled"); // no 'disabled' property
+		pasteAndSearchMenuitem.addEventListener("command", () => {
+			pasteCommand.doCommand();
+			this.accept(textBox);
+		});
+		pasteMenuitem.after(pasteAndSearchMenuitem);
+
+		document.querySelector("popupset").append(menu);
+		menu.addEventListener("popuphiding", () => menu.remove(),
+			{ once: true });
+		menu.openPopupAtScreen(event.screenX, event.screenY, true);
 	};
 	
 	

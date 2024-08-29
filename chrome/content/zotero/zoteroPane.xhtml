@@ -1223,7 +1223,7 @@
 													class="zotero-tb-button"
 													tooltiptext="&zotero.toolbar.lookup.label;"
 													type="panel"
-													onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"
+													onmousedown="Zotero_Lookup.handleToolbarButtonMouseDown(event)"
 												/>
 												
 												<panel id="zotero-lookup-panel" type="arrow"
@@ -1238,6 +1238,7 @@
 																id="zotero-lookup-textbox"
 																onkeypress="Zotero_Lookup.onKeyPress(event, this)"
 																oninput="Zotero_Lookup.onInput(event, this)"
+																oncontextmenu="Zotero_Lookup.onContextMenu(event, this)"
 																rows="1"
 																wrap="off"/>
 															<hbox id="zotero-lookup-buttons" align="start" hidden="true">
