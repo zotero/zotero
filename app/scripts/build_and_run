@@ -12,7 +12,8 @@ fi
 REBUILD=0
 SKIP_BUNDLED_FILES=0
 DEBUGGER=0
-while getopts "rbd" opt; do
+QUICK_BUILD=0
+while getopts "rbdq" opt; do
 	case $opt in
 		r)
 			REBUILD=1
@@ -24,6 +25,10 @@ while getopts "rbd" opt; do
 		
 		d)
 			DEBUGGER=1
+			;;
+		
+		q)
+			QUICK_BUILD=1
 			;;
 		
 		\?)
@@ -40,6 +45,9 @@ if [ $REBUILD -eq 1 ]; then
 	PARAMS=""
 	if [ $DEBUGGER -eq 1 ]; then
 		PARAMS="-t"
+	fi
+	if [ $QUICK_BUILD -eq 1 ]; then
+		PARAMS="$PARAMS -q"
 	fi
 	
 	# Check if build watch is running
