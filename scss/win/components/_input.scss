@@ -121,6 +121,6 @@ textarea:not([no-windows-native]) {
 	}
 }
 
-textarea {
+textarea:not([no-windows-native]) {
 	height: unset;
 }
