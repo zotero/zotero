@@ -4725,72 +4725,98 @@ var ZoteroPane = new function () {
 			files = fp.files;
 		}
 		var addedItems = [];
+		var notifierQueue = new Zotero.Notifier.Queue();
 		var collection;
 		var fileBaseName;
-		if (parentItemID) {
-			// If only one item is being added, automatic renaming is enabled, and the parent item
-			// doesn't have any other non-HTML file attachments, rename the file.
-			// This should be kept in sync with itemTreeView::drop().
-			if (files.length == 1 && Zotero.Attachments.shouldAutoRenameFile(link, libraryID)) {
-				let parentItem = Zotero.Items.get(parentItemID);
-				if (!parentItem.numNonHTMLFileAttachments()) {
-					fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
-						parentItem, files[0]
-					);
-				}
-			}
-		}
-		// If not adding to an item, add to the current collection
-		else {
-			collection = this.getSelectedCollection(true);
-		}
 		
-		for (let file of files) {
-			let item;
-			
-			if (link) {
-				// Rename linked file, with unique suffix if necessary
-				try {
-					if (fileBaseName) {
-						let ext = Zotero.File.getExtension(file);
-						let newName = await Zotero.File.rename(
-							file,
-							fileBaseName + (ext ? '.' + ext : ''),
-							{
-								unique: true
-							}
+		try {
+			if (parentItemID) {
+				// If only one item is being added, automatic renaming is enabled, and the parent item
+				// doesn't have any other non-HTML file attachments, rename the file.
+				// This should be kept in sync with itemTreeView::drop().
+				if (files.length == 1 && Zotero.Attachments.shouldAutoRenameFile(link, libraryID)) {
+					let parentItem = Zotero.Items.get(parentItemID);
+					if (!parentItem.numNonHTMLFileAttachments()) {
+						fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
+							parentItem, files[0]
 						);
-						// Update path in case the name was changed to be unique
-						file = PathUtils.join(PathUtils.parent(file), newName);
 					}
 				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-				
-				item = await Zotero.Attachments.linkFromFile({
-					file,
-					parentItemID,
-					collections: collection ? [collection] : undefined
-				});
 			}
+			// If not adding to an item, add to the current collection
 			else {
-				if (file.endsWith(".lnk")) {
-					let win = Services.wm.getMostRecentWindow("navigator:browser");
-					win.ZoteroPane.displayCannotAddShortcutMessage(file);
-					continue;
-				}
-				
-				item = await Zotero.Attachments.importFromFile({
-					file,
-					libraryID,
-					fileBaseName,
-					parentItemID,
-					collections: collection ? [collection] : undefined
-				});
+				collection = this.getSelectedCollection(true);
 			}
-			
-			addedItems.push(item);
+
+			// If we have more than one file, we only want to call setAutoAttachmentTitle()
+			// at the end, once the attachments know whether they have siblings
+			let delaySetAutoAttachmentTitle = files.length > 1;
+
+			for (let file of files) {
+				let item;
+
+				if (link) {
+					// Rename linked file, with unique suffix if necessary
+					try {
+						if (fileBaseName) {
+							let ext = Zotero.File.getExtension(file);
+							let newName = await Zotero.File.rename(
+								file,
+								fileBaseName + (ext ? '.' + ext : ''),
+								{
+									unique: true
+								}
+							);
+							// Update path in case the name was changed to be unique
+							file = PathUtils.join(PathUtils.parent(file), newName);
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+
+					item = await Zotero.Attachments.linkFromFile({
+						file,
+						title: delaySetAutoAttachmentTitle ? '' : undefined,
+						parentItemID,
+						collections: collection ? [collection] : undefined,
+						saveOptions: {
+							notifierQueue
+						},
+					});
+				}
+				else {
+					if (file.endsWith(".lnk")) {
+						let win = Services.wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.displayCannotAddShortcutMessage(file);
+						continue;
+					}
+
+					item = await Zotero.Attachments.importFromFile({
+						file,
+						libraryID,
+						fileBaseName,
+						title: delaySetAutoAttachmentTitle ? '' : undefined,
+						parentItemID,
+						collections: collection ? [collection] : undefined,
+						saveOptions: {
+							notifierQueue
+						},
+					});
+				}
+
+				addedItems.push(item);
+			}
+
+			if (delaySetAutoAttachmentTitle) {
+				for (let item of addedItems) {
+					item.setAutoAttachmentTitle();
+					await item.saveTx();
+				}
+			}
+		}
+		finally {
+			await Zotero.Notifier.commit(notifierQueue);
 		}
 		
 		// Select added child attachments

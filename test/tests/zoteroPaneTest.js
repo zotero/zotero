@@ -1567,7 +1567,26 @@ describe("ZoteroPane", function () {
 			assert.equal(parentItem.getAttachments().length, 4);
 			assert.equal(epubAttachment.getField('title'), Zotero.getString('file-type-ebook'));
 		});
+		
+		it("shouldn't set type-based titles when multiple attachments of the same type are added at once", async function () {
+			let parentItem = await createDataObject('item');
 
+			// Add two PDF attachments at once, which will get titles based on their filenames
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let [pdfAttachment1, pdfAttachment2] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path, file.path]);
+			assert.equal(parentItem.getAttachments().length, 2);
+			assert.equal(pdfAttachment1.getField('title'), 'test');
+			assert.equal(pdfAttachment2.getField('title'), 'test');
+
+			// Add an EPUB attachment, which will get a default title
+			file = getTestDataDirectory();
+			file.append('stub.epub');
+			let [epubAttachment] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
+			assert.equal(parentItem.getAttachments().length, 3);
+			assert.equal(epubAttachment.getField('title'), Zotero.getString('file-type-ebook'));
+		});
+		
 		it("should select added file attachment", async function () {
 			let parentItem = await createDataObject('item');
 			
