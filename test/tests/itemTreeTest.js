@@ -1402,8 +1402,7 @@ describe("Zotero.ItemTree", function () {
 				mozItemCount: 2,
 			})
 			
-			var item1 = Zotero.Items.get((await promise)[0]);
-			var item2 = Zotero.Items.get((await waitForItemEvent('add'))[0]);
+			var [item1, item2] = Zotero.Items.get(await promise);
 			
 			var progressWindow = await recognizerPromise;
 			progressWindow.close();
@@ -1607,6 +1606,7 @@ describe("Zotero.ItemTree", function () {
 			var parentRow = view.getRowIndexByID(parentItem.id);
 			
 			var originalFileName = 'empty.pdf';
+			var originalFilenameWithoutExtension = 'empty';
 			var file = getTestDataDirectory();
 			file.append(originalFileName);
 			
@@ -1629,6 +1629,10 @@ describe("Zotero.ItemTree", function () {
 			assert.equal(item.parentItemID, parentItem.id);
 			var path = await item.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), originalFileName);
+			
+			for (let item of Zotero.Items.get(itemIDs)) {
+				assert.equal(item.getField('title'), originalFilenameWithoutExtension);
+			}
 		});
 
 		it("should set an automatic title on the first file attachment of each supported type", async function () {
