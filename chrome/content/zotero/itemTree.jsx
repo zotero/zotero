@@ -1171,7 +1171,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 						let cleared2 = window.ZoteroPane.tagSelector
 							&& window.ZoteroPane.tagSelector.clearTagSelection();
 						if (cleared1 || cleared2) {
-							console.log("!!!!!");
 							return this.selectItems(ids, true);
 						}
 					}
@@ -1195,7 +1194,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			rowsToSelect.push(row);
 		}
-		console.log("Rows to select ", rowsToSelect)
 		if (!rowsToSelect.length) {
 			return 0;
 		}
