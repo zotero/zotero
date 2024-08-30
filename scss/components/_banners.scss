@@ -39,6 +39,15 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		flex: 1 auto;
+
+		#post-upgrade-density {
+			@media (-moz-platform: windows) {
+				radio {
+					height: 24px;
+					margin: 0;
+				}
+			}
+		}
 	}
 	
 	#post-upgrade-new-features-link {

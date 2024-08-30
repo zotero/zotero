@@ -300,19 +300,80 @@ label[is=zotero-text-link] {
 	}
 }
 
-.pref-row {
-	display: flex;
-	align-items: center;
-}
-
 button {
 	flex-shrink: 0;
 }
 
-radiogroup {
-	margin-bottom: 4px;
+@media (-moz-platform: windows) {
+	// Adjust padding and margin of form elements on Windows
+	// Assumptions:
+	// 1. All radio are in radiogroup
+	// 2. All radiogroup/checkbox are in hbox/vbox/groupbox
+	// 3. Vertical radiogroup are only in vertical layout
+
+	// First and last checkbox in a horizontal layout should not have inline padding and margin
+	hbox > checkbox[native]{
+		&:first-child {
+			padding-inline-start: 0;
+			margin-inline-start: 0;
+		}
+		&:last-child {
+			padding-inline-end: 0;
+			margin-inline-end: 0;
+		}
+	}
+
+	vbox, groupbox {
+		// Checkbox in a vertical layout should not have inline padding and margin
+		& > checkbox[native] {
+			padding-inline: 0;
+			margin-inline: 0;
+		}
+
+		// Button-like elements in a vertical layout should not have inline margin
+		& > button,
+		& > menulist {
+			margin-inline: 0;
+		}
+
+		// Radiogroup in a vertical layout and radio in a horizontal layout
+		// First and last radio should not have inline padding and margin
+		& > radiogroup[orient=horizontal] radio {
+			&:first-child {
+				padding-inline-start: 0;
+				margin-inline-start: 0;
+			}
+			&:last-child {
+				padding-inline-end: 0;
+				margin-inline-end: 0;
+			}
+		}
+
+		// In horizontal layout inside vertical layout
+		// First and last button-like element should not have inline margin
+		& > hbox > :is(button, menulist) {
+			&:first-child {
+				margin-inline-start: 0;
+			}
+			&:last-child {
+				margin-inline-end: 0;
+			}
+		}
+	}
+	
+	// Radio in a vertical layout should not have inline padding and margin
+	radiogroup:not([orient=horizontal]) radio {
+		padding-inline: 0;
+		margin-inline: 0;
+	}
 }
 
-radio, checkbox {
-	margin-block: 4px;
+@media not (-moz-platform: windows) {
+	radiogroup {
+		margin-bottom: 4px;
+	}
+	
+	radio, checkbox {
+		margin-block: 4px;
+	}
 }

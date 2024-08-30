@@ -1,0 +1,74 @@
+@mixin -make-checkbox-icon($state) {
+	& :is(.checkbox-check) {
+		@include focus-states using ($color) {
+			background-image: url('chrome://zotero/skin/win/#{$color}/checkbox-#{$state}.svg');
+	
+			&[checked=true] {
+				background-image: url('chrome://zotero/skin/win/#{$color}/checkbox-selected-#{$state}.svg');
+			}
+		}
+	}
+}
+
+:is(checkbox[native]) {
+	appearance: none;
+	height: 28px;
+	gap: 8px;
+	padding-inline: 4px 8px;
+	border-radius: 4px;
+
+	--checkbox-border-color: transparent;
+	--checkbox-unchecked-bgcolor: transparent;
+	--checkbox-unchecked-hover-bgcolor: transparent;
+	--checkbox-unchecked-active-bgcolor: transparent;
+	--checkbox-checked-border-color: transparent;
+	--checkbox-checked-bgcolor: transparent;
+	--checkbox-checked-color: transparent;
+	--checkbox-checked-hover-bgcolor: transparent;
+	--checkbox-checked-active-bgcolor: transparent;
+
+	.checkbox-check {
+		appearance: none;
+		background-position: center;
+		background-repeat: no-repeat;
+		width: 16px;
+		height: 16px;
+		border-radius: 4px;
+		margin-inline-end: 0px;
+	}
+
+	@include -make-checkbox-icon("rest");
+	
+	&:not([disabled]) {
+		&:hover {
+			@include -make-checkbox-icon("hover");
+		}
+	
+		&:hover:active {
+			@include -make-checkbox-icon("active");
+		}	
+	}
+
+	&:disabled,
+	&[disabled] {
+		@include -make-checkbox-icon("disabled");
+	}
+}
+
+checkbox[native]:focus-visible {
+	& > .checkbox-label-box {
+		outline: none;
+	}
+
+	&:not([disabled]) {
+		&[label] {
+			@include focus-ring(false, "");
+		}
+		
+		&:not([label]) {
+			& :is(.checkbox-check) {
+				@include focus-ring(false, "");
+			}
+		}
+	}
+}

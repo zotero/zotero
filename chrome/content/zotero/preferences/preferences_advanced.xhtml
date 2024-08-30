@@ -28,11 +28,11 @@
 		<groupbox id="zotero-prefpane-advanced-miscellaneous">
 			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
-			<html:div class="pref-row">
+			<hbox align="center">
 				<checkbox label="&zotero.preferences.autoUpdate;" preference="extensions.zotero.automaticScraperUpdates" native="true"/>
-				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
+				<button id="updateButton" label="&zotero.preferences.updateNow;"
 					oncommand="Zotero_Preferences.Advanced.updateTranslators()"/>
-			</html:div>
+			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 			
@@ -249,19 +249,19 @@
 			
 			<separator/>
 			
-			<html:div class="pref-row">
+			<hbox align="center">
 				<html:label for="fulltext-maxLength">&zotero.preferences.fulltext.textMaxLength;</html:label>
 				<html:input id="fulltext-maxLength" type="text" size="10" preference="extensions.zotero.fulltext.textMaxLength"/>
 				<html:label>(&zotero.preferences.default; 500000)</html:label>
-			</html:div>
+			</hbox>
 	
 			<separator class="thin"/>
 	
-			<html:div class="pref-row">
+			<hbox align="center">
 				<html:label for="fulltext-pdfMaxPages">&zotero.preferences.fulltext.pdfMaxPages;</html:label>
 				<html:input id="fulltext-pdfMaxPages" type="text" size="5" preference="extensions.zotero.fulltext.pdfMaxPages"/>
 				<html:label>(&zotero.preferences.default; 100)</html:label>
-			</html:div>
+			</hbox>
 		</groupbox>
 		
 		<groupbox id="fulltext-stats">

@@ -1,0 +1,70 @@
+@mixin -make-radio-icon($state) {
+	& :is(.radio-check) {
+		@include focus-states using ($color) {
+			background-image: url('chrome://zotero/skin/win/#{$color}/radio-#{$state}.svg');
+	
+			&[selected=true] {
+				background-image: url('chrome://zotero/skin/win/#{$color}/radio-selected-#{$state}.svg');
+			}
+		}
+	}
+}
+
+radio {
+	appearance: none;
+	height: 28px;
+	gap: 8px;
+	padding-inline: 4px 8px;
+	border-radius: 4px;
+
+	.radio-check {
+		appearance: none;
+		background-position: center;
+		background-repeat: no-repeat;
+		width: 16px;
+		height: 16px;
+		border-radius: 8px;
+	}
+
+	.radio-label-box {
+		padding-inline-start: 0;
+		margin-inline-start: 0;
+	}
+
+	@include -make-radio-icon("rest");
+	
+	&:not([disabled]) {
+		&:hover {
+			@include -make-radio-icon("hover");
+		}
+	
+		&:hover:active {
+			@include -make-radio-icon("active");
+		}
+	
+		@include focus-ring;
+	}
+
+	&:disabled,
+	&[disabled] {
+		@include -make-radio-icon("disabled");
+	}
+}
+
+radiogroup:focus-visible {
+	& > radio[focused=true]  {
+		& > .radio-label-box {
+			outline: none;
+		}
+		
+		&[label] {
+			@include focus-ring(false, "");
+		}
+		
+		&:not([label]) {
+			& :is(.radio-check) {
+				@include focus-ring(false, "");
+			}
+		}
+	}
+}
