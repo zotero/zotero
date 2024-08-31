@@ -57,6 +57,12 @@ jobs:
         env:
           NODE_OPTIONS: --openssl-legacy-provider
       
+      # Somehow forces dpl v1 to be installed, even though v2 is installed without
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3' # Not needed with a `.ruby-version` or `.tool-versions`
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      
       - name: Upload deployment ZIP
         if: |
           env.ACT != 'true'
@@ -71,6 +77,9 @@ jobs:
           cd build
           zip -r ../build-zip/$GITHUB_SHA.zip *
           cd ..
+          # Once dpl 2 works:
+          #sudo gem install --no-document dpl
+          #dpl s3 --bucket zotero-download --local_dir build-zip --upload_dir ci/client --acl public_read
           sudo gem install --no-document dpl dpl-s3
           dpl --provider=s3 --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true
       
