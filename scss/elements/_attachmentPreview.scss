@@ -9,7 +9,10 @@ attachment-preview {
 	// Suppose it's A4 size
 	--width-height-ratio: 0.7070707071;
 	--min-height: 56px;
-	--max-height: 600px;
+	// This is set in JS
+	--screen-height: 600px;
+	// Use screen available height - 200px (approximately the height of the toolbars)
+	--max-height: calc(max(var(--screen-height) - 200px, 600px));
 	// This is set in JS
 	--preview-width: 400;
 	--preview-height: calc(min(var(--preview-width) / var(--width-height-ratio), var(--max-height)));

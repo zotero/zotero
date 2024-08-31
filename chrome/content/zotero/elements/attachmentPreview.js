@@ -606,6 +606,7 @@
 		_handleResize() {
 			if (this.disableResize) return;
 			this.style.setProperty("--preview-width", `${this.clientWidth}px`);
+			this.style.setProperty("--screen-height", `${window.screen.availHeight}px`);
 		}
 
 		_handleDragStart(event) {
