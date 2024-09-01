@@ -206,10 +206,16 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 		};
 	}
 
-	// inject custom CSS into FF built-in custom elements (currently only <wizard>)
+	// The menulist CE is defined lazily. Create one now to get menulist defined, so we can patch it
+	if (!customElements.get("menulist")) {
+		delete document.createXULElement("menulist");
+	}
+
+	// inject custom CSS into FF built-in custom elements
 	const InjectCSSConfig = {
 		global: [
 			"wizard",
+			"menulist",
 			{
 				element: "dialog",
 				patchedFunction: "connectedCallback"

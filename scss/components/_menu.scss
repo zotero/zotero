@@ -81,9 +81,11 @@ $menu-icons: (
 	@include macOS-hide-menu-icons;
 }
 
-#zotero-new-collection-menu {
-	image {
-		-moz-context-properties: fill, fill-opacity;
+menupopup image {
+	-moz-context-properties: fill, fill-opacity;
+	fill: var(--fill-secondary);
+	
+	@media (-moz-platform: macos) {
 		fill: currentColor;
 	}
 }

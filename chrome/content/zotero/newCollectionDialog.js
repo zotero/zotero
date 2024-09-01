@@ -54,13 +54,6 @@ var Zotero_New_Collection_Dialog = {
 		menupopup.replaceWith(menupopup = document.createXULElement('menupopup'));
 		menupopup.id = id;
 
-		let style = document.createElement('style');
-		style.innerHTML = `image {
-			-moz-context-properties: fill, fill-opacity;
-			fill: var(--fill-secondary);
-		 }`;
-		createInField.shadowRoot.appendChild(style);
-
 		let createdNode = Zotero.Utilities.Internal.createMenuForTarget(
 			Zotero.Libraries.get(this._libraryID),
 			menupopup,
