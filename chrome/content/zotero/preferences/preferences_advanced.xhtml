@@ -25,7 +25,7 @@
 
 <vbox id="zotero-prefpane-advanced" onload="Zotero_Preferences.Advanced.init()">
 	<vbox class="main-section" id="zotero-prefpane-advanced-general-tab">
-		<groupbox id="zotero-prefpane-advanced-miscellaneous">
+		<groupbox id="zotero-prefpane-advanced-miscellaneous" aria-label="&zotero.preferences.miscellaneous;">
 			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
 			<hbox align="center">
@@ -59,8 +59,8 @@
 			</vbox>
 		</groupbox>
 
-		<groupbox>
-			<label><html:h2 data-l10n-id="preferences-advanced-language-and-region-title"/></label>
+		<groupbox aria-labelledby="preferences-advanced-language-and-region-title">
+			<label><html:h2 id="preferences-advanced-language-and-region-title" data-l10n-id="preferences-advanced-language-and-region-title"/></label>
 
 			<checkbox
 				data-l10n-id="preferences-advanced-enable-bidi-ui"
@@ -70,10 +70,10 @@
 		</groupbox>
 	</vbox>
 	
-	<vbox class="main-section">
+	<vbox class="main-section" role="group" aria-label="&zotero.preferences.advanced.filesAndFolders;">
 		<html:h1>&zotero.preferences.advanced.filesAndFolders;</html:h1>
 
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.attachmentBaseDir.caption;" aria-description="&zotero.preferences.attachmentBaseDir.message;">
 			<label><html:h2>&zotero.preferences.attachmentBaseDir.caption;</html:h2></label>
 			
 			<vbox>
@@ -103,7 +103,7 @@
 			
 		</groupbox>
 		
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.dataDir;">
 			<label><html:h2>&zotero.preferences.dataDir;</html:h2></label>
 			
 			<radiogroup id="data-dir"
@@ -131,7 +131,7 @@
 			</hbox>
 		</groupbox>
 		
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.dbMaintenance;">
 			<label><html:h2>&zotero.preferences.dbMaintenance;</html:h2></label>
 			
 			<hbox id="db-maintenance-options">
@@ -147,7 +147,7 @@
 		</groupbox>
 	</vbox>
 
-	<html:div class="main-section" id="zotero-prefpane-advanced-keys-tab">
+	<html:div class="main-section" id="zotero-prefpane-advanced-keys-tab" role="group" aria-label="&zotero.preferences.advanced.keys;">
 		<html:h1>&zotero.preferences.advanced.keys;</html:h1>
 	
 		<html:div id="zotero-keys-grid">
@@ -188,7 +188,7 @@
 		
 		<separator/>
 	</html:div>
-	<vbox class="main-section" id="zotero-prefpane-advanced-feeds-tab">
+	<vbox class="main-section" id="zotero-prefpane-advanced-feeds-tab" role="group" aria-label="&zotero.preferences.feeds;">
 		<html:h1>&zotero.preferences.feeds;</html:h1>
 
 		<groupbox>
@@ -205,7 +205,7 @@
 			</hbox>
 		</groupbox>
 		
-		<groupbox id="zotero-prefpane-advanced-feeds-feedDefaults">
+		<groupbox id="zotero-prefpane-advanced-feeds-feedDefaults" aria-label="&zotero.preferences.feeds.feedDefaults;">
 			<label><html:h2>&zotero.preferences.feeds.feedDefaults;</html:h2></label>
 			<hbox>
 				<hbox align="center">
@@ -234,10 +234,10 @@
 		</groupbox>
 	</vbox>
 
-	<vbox class="main-section">
+	<vbox class="main-section" role="group" aria-label="&zotero.preferences.prefpane.search;">
 		<html:h1>&zotero.preferences.prefpane.search;</html:h1>
 
-		<groupbox>
+		<groupbox aria-label="&zotero.preferences.search.fulltextCache;">
 			<label><html:h2>&zotero.preferences.search.fulltextCache;</html:h2></label>
 			
 			<hbox>
@@ -264,10 +264,10 @@
 			</hbox>
 		</groupbox>
 		
-		<groupbox id="fulltext-stats">
+		<groupbox id="fulltext-stats" tabindex="0" aria-label="&zotero.preferences.search.indexStats;" aria-describedby="fulltext-stats-grid">
 			<label><html:h2>&zotero.preferences.search.indexStats;</html:h2></label>
 			
-			<vbox class="form-grid">
+			<vbox class="form-grid" id="fulltext-stats-grid">
 				<label value="&zotero.preferences.search.indexStats.indexed;"/>
 				<label id="fulltext-stats-indexed"/>
 	
