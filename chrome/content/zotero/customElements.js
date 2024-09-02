@@ -95,6 +95,15 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 		});
 	}
 
+	// Clear whatever aria semantics the separator has so it is not counted when
+	// screen readers list how many menuitems a menu has.
+	document.addEventListener("popupshowing", (event) => {
+		if (event.originalTarget.tagName !== "menupopup") return;
+		for (let separator of [...event.originalTarget.querySelectorAll("menuseparator")]) {
+			separator.setAttribute("role", "presentation");
+		}
+	});
+
 	// Add MacOS menupopup fade animation to menupopups
 	if (Zotero.isMac) {
 		let MozMenuPopupPrototype = customElements.get("menupopup").prototype;
@@ -159,6 +168,19 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 						this.removeAttribute("animate");
 						this.hidePopup();
 					}, 200);
+				});
+
+				// If a menu closes with voiceover cursor in it, the cursor gets stuck in no-longer-visible
+				// menu and voiceover will be quiet until it is restarted. Marking the menu
+				// as aria-hidden for a moment forces voiceover to shift its cursor.
+				this.addEventListener("popuphidden", (e) => {
+					if (this !== e.target || this.parentNode?.closest("menupopup")) {
+						return;
+					}
+					this.setAttribute("aria-hidden", true);
+					setTimeout(() => {
+						this.removeAttribute("aria-hidden");
+					});
 				});
 
 				// This event is triggered after clicking the menu and before popuphiding
