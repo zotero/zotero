@@ -229,7 +229,7 @@ class PDFWorker {
 				throw error;
 			}
 			
-			await IOUtils.write(path || attachmentPath, new Uint8Array(res.buf));
+			await IOUtils.write(path, new Uint8Array(res.buf));
 			
 			if (transfer) {
 				await Zotero.Items.erase(items.map(x => x.id));
