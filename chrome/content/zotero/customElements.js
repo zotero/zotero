@@ -176,22 +176,15 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 				this.addEventListener("popupshowing", clearSeparatorAriaSemantics);
 
 				// If a menu closes with voiceover cursor in it, the cursor gets stuck in no-longer-visible
-				// menu and voiceover will be quiet until it is restarted. As a workaround, remove the menu
-				// from DOM to force voiceover to move its cursor and insert it back after a small delay;
+				// menu and voiceover will be quiet until it is restarted. Marking the menu
+				// as aria-hidden for a moment forces voiceover to shift its cursor.
 				this.addEventListener("popuphidden", (e) => {
 					if (this !== e.target || this.parentNode?.closest("menupopup")) {
 						return;
 					}
-					let parent = this.parentNode;
-					let sibling = this.nextSibling;
-					this.remove();
+					this.setAttribute("aria-hidden", true);
 					setTimeout(() => {
-						if (sibling) {
-							parent.insertBefore(this, sibling);
-						}
-						else {
-							parent.appendChild(this);
-						}
+						this.removeAttribute("aria-hidden");
 					});
 				});
 
