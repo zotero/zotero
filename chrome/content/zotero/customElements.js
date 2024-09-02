@@ -98,6 +98,15 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 		});
 	}
 
+	// Clear whatever aria semantics the separator has so it is not counted when
+	// screen readers list how many menuitems a menu has.
+	document.addEventListener("popupshowing", (event) => {
+		if (event.originalTarget.tagName !== "menupopup") return;
+		for (let separator of [...event.originalTarget.querySelectorAll("menuseparator")]) {
+			separator.setAttribute("role", "presentation");
+		}
+	});
+
 	// Add MacOS menupopup fade animation to menupopups
 	if (Zotero.isMac) {
 		let MozMenuPopupPrototype = customElements.get("menupopup").prototype;
@@ -113,15 +122,6 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 					":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio])"
 				);
 				this.toggleAttribute("needsgutter", haveCheckableChild);
-
-				// Clear whatever aria semantics the separator has so it is not counted when
-				// voiceover lists how many menuitems a menu has.
-				let clearSeparatorAriaSemantics = () => {
-					for (let separator of [...this.querySelectorAll("menuseparator")]) {
-						separator.setAttribute("role", "presentation");
-					}
-				};
-				clearSeparatorAriaSemantics();
 
 				/**
 				 * Add fade animation to the popup
@@ -172,8 +172,6 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSe
 						this.hidePopup();
 					}, 200);
 				});
-
-				this.addEventListener("popupshowing", clearSeparatorAriaSemantics);
 
 				// If a menu closes with voiceover cursor in it, the cursor gets stuck in no-longer-visible
 				// menu and voiceover will be quiet until it is restarted. Marking the menu
