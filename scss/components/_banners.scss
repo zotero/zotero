@@ -1,5 +1,5 @@
-#post-upgrade-banner, #retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner {
-	@include macOS-normalize-controls;
+.banner-container > .banner {
+	@include macOS-normalize-controls;;
 
 	display: flex;
 	justify-content: center;
@@ -12,6 +12,31 @@
 		color: inherit;
 		border: none;
 		margin: 0;
+		padding-inline: 0.5em;
+	}
+	
+	label[is="text-link"].close-link {
+		text-decoration: none;
+		cursor: pointer;
+		font-size: 22px;
+		line-height: 26px;
+		margin-inline-end: -1.2em;
+	}
+	
+	.message {
+		margin-inline-end: .8em;
+	}
+
+	.spacer {
+		flex: 1;
+	}
+
+	.link {
+		padding-inline: 0.5em;
+
+		&:active {
+			color: #4b4b4b;
+		}
 	}
 }
 
@@ -69,28 +94,12 @@
 	}
 }
 
-#retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner {
+#retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner,
+		#mac-word-plugin-install-warning > .banner {
 	line-height: 2.2em;
 	font-size: 13.5px;
 	padding: 0 2em;
 	font-weight: 600;
-
-	.message {
-		margin-inline-end: .8em;
-	}
-
-	.spacer {
-		flex: 1;
-	}
-
-	.close-link {
-		text-decoration: none;
-		position: absolute;
-		cursor: pointer;
-		top: -2px;
-		inset-inline-end: 9px;
-		font-size: 22px;
-	}
 }
 
 #retracted-items-banner {
@@ -106,18 +115,15 @@
 	}
 }
 
+#mac-word-plugin-install-warning {
+	background: #ffea50;
+	border-bottom: #a9a9a9 .5px solid;
+}
+
 #sync-reminder-banner {
 	background: rgb(255, 234, 80);
 	border-bottom: #a9a9a9 .5px solid;
 	color: black;
-
-	.link {
-		padding-inline: 0.5em;
-		
-		&:active {
-			color: #4b4b4b;
-		}
-	}
 }
 
 #architecture-warning-container {

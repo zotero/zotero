@@ -8,6 +8,7 @@ return-or-enter =
 general-remove = Remove
 general-add = Add
 general-remind-me-later = Remind Me Later
+general-dont-ask-again = Don't Ask Again
 general-choose-file = Choose File…
 general-open-settings = Open Settings
 general-help = Help
@@ -674,3 +675,6 @@ post-upgrade-done =
 
 text-action-paste-and-search =
     .label = Paste and Search
+    
+mac-word-plugin-install-message = Zotero requires access to Word data to install the Word plugin.
+mac-word-plugin-install-action = Install Word plugin

@@ -6125,6 +6125,43 @@ var ZoteroPane = new function()
 		}
 	};
 
+	/**
+	 * Shows a Mac Word plugin installation warning (intended to be used with Sequoia and up)
+	 * before the installer displays the "scary" OS prompt to access other application data.
+	 * @returns {Promise<Object>} Object with either install, dismiss or remindLater set to true.
+	 */
+	this.showMacWordPluginInstallWarning = function () {
+		return new Promise((resolve) => {
+			const panel = document.querySelector('#mac-word-plugin-install-warning');
+			const action = panel.querySelector('.link');
+			const close = panel.querySelector('.close-link');
+			const remind = panel.querySelector('.remind-later-link');
+			const dontAskAgain = panel.querySelector('.dont-ask-again-link');
+			
+			panel.removeAttribute('collapsed');
+			action.onclick = () => {
+				this.hideMacWordPluginInstallWarning();
+				resolve({ install: true });
+			};
+			close.onclick = () => {
+				this.hideMacWordPluginInstallWarning();
+				resolve({ dismiss: true });
+			};
+			remind.onclick = () => {
+				this.hideMacWordPluginInstallWarning();
+				resolve({ remindLater: true });
+			};
+			dontAskAgain.onclick = () => {
+				this.hideMacWordPluginInstallWarning();
+				resolve({ dontAskAgain: true });
+			};
+		});
+	};
+	
+	this.hideMacWordPluginInstallWarning = function () {
+		document.querySelector('#mac-word-plugin-install-warning').setAttribute('collapsed', true);
+	};
+
 	this.showArchitectureWarning = async function () {
 		const remindInterval = 60 * 60 * 24 * 30;
 		const lastDisplayed = Zotero.Prefs.get('architecture.warning.lastDisplayed') ?? 0;
