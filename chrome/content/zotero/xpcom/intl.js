@@ -94,12 +94,19 @@ Zotero.Intl = new function () {
 		const intlFiles = ['zotero.dtd', 'preferences.dtd', 'mozilla/editMenuOverlay.dtd'];
 
 		let strings = [];
+		let { documentElement: elem } = new DOMParser().parseFromString('<root></root>', 'application/xml');
 		for (let intlFile of intlFiles) {
 			let localeXML = Zotero.File.getContentsFromURL(`chrome://zotero/locale/${intlFile}`);
 			let regexp = /<!ENTITY ([^\s]+)\s+"([^"]+)/g;
 			let regexpResult;
 			while ((regexpResult = regexp.exec(localeXML))) {
-				strings[regexpResult[1]] = regexpResult[2];
+				let key = regexpResult[1];
+				let value = regexpResult[2];
+				// Resolve XML entities
+				elem.innerHTML = value;
+				value = elem.textContent;
+
+				strings[key] = value;
 			}
 		}
 		return strings;
