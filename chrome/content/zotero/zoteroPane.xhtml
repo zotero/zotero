@@ -1081,8 +1081,8 @@
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
 							
-							<vbox id="post-upgrade-container" collapsed="true" role="status">
-								<html:div id="post-upgrade-banner">
+							<vbox id="post-upgrade-container" class="banner-container" collapsed="true" role="status">
+								<html:div id="post-upgrade-banner" class="banner">
 									<html:div id="post-upgrade-centered">
 										<html:div
 												data-l10n-id="post-upgrade-message"
@@ -1120,8 +1120,8 @@
 								</html:div>
 							</vbox>
 
-							<vbox id="sync-reminder-container" collapsed="true" role="status">
-								<html:div id="sync-reminder-banner">
+							<vbox id="sync-reminder-container" class="banner-container"  collapsed="true" role="status">
+								<html:div id="sync-reminder-banner" class="banner">
 									<html:div id="sync-reminder-message" class="message"/>
 									<html:a id="sync-reminder-action" class="link"/>
 									<html:a id="sync-reminder-learn-more" class="link"/>
@@ -1132,16 +1132,27 @@
 								</html:div>
 							</vbox>
 							
-							<vbox id="retracted-items-container" collapsed="true" role="status">
-								<html:div id="retracted-items-banner">
+							<vbox id="mac-word-plugin-install-warning" class="banner-container" collapsed="true" role="status">
+								<html:div class="banner">
+									<html:div class="message" data-l10n-id="mac-word-plugin-install-message" />
+									<html:a class="link" data-l10n-id="mac-word-plugin-install-action" />
+									<html:div class="spacer" />
+									<label is="text-link" class="remind-later-link" data-l10n-id="general-remind-me-later" />
+									<label is="text-link" class="dont-ask-again-link" data-l10n-id="general-dont-ask-again" />
+									<label is="text-link" class="close-link">×</label>
+								</html:div>
+							</vbox>
+							
+							<vbox id="retracted-items-container" class="banner-container" collapsed="true" role="status">
+								<html:div id="retracted-items-banner" class="banner">
 									<html:div id="retracted-items-message" class="message"/>
 									<label is="text-link" id="retracted-items-link"/>
 									<label is="text-link" id="retracted-items-close" class="close-link">×</label>
 								</html:div>
 							</vbox>
 
-							<vbox id="architecture-warning-container" collapsed="true" role="status">
-								<html:div id="architecture-warning-banner">
+							<vbox id="architecture-warning-container" class="banner-container" collapsed="true" role="status">
+								<html:div id="architecture-warning-banner" class="banner">
 									<html:div id="architecture-warning-message" class="message" data-l10n-id="architecture-win32-warning-message" />
 									<html:a id="architecture-warning-action" data-l10n-id="architecture-warning-action" class="link" />
 									<html:div class="spacer" />
@@ -1149,6 +1160,7 @@
 									<label is="text-link" id="architecture-warning-close" class="close-link">×</label>
 								</html:div>
 							</vbox>
+
 							
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
