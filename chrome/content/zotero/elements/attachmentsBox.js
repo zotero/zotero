@@ -195,15 +195,12 @@
 			this._renderStage = "final";
 			this._asyncRendering = true;
 			
-			await this._updateAttachmentIDs();
+			// Execute sub-tasks concurrently to avoid race condition between different calls
+			await Promise.all([
+				this.updateRows(),
+				this.updatePreview(),
+			]);
 
-			let itemAttachments = Zotero.Items.get(this._attachmentIDs);
-
-			this._attachments.querySelectorAll("attachment-row").forEach(e => e.remove());
-			for (let attachment of itemAttachments) {
-				this.addRow(attachment);
-			}
-			await this.updatePreview();
 			this._asyncRendering = false;
 		}
 
@@ -224,6 +221,17 @@
 			}
 			let count = this._item.numAttachments(this.inTrash);
 			this._section.setCount(count);
+		}
+
+		async updateRows() {
+			await this._updateAttachmentIDs();
+
+			let itemAttachments = Zotero.Items.get(this._attachmentIDs);
+
+			this._attachments.querySelectorAll("attachment-row").forEach(e => e.remove());
+			for (let attachment of itemAttachments) {
+				this.addRow(attachment);
+			}
 		}
 
 		async updatePreview() {
