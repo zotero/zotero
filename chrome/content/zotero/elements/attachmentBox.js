@@ -326,13 +326,12 @@
 
 			Zotero.debug('Refreshing attachment box');
 			this._asyncRendering = true;
-			
-			await this.renderAttachmentInfo();
 
-			if (this.usePreview) {
-				this.previewElem.item = this.item;
-				await this.previewElem.render();
-			}
+			// Execute sub-tasks concurrently to avoid race condition between different calls
+			await Promise.all([
+				this.updateInfo(),
+				this.updatePreview()
+			]);
 
 			this._asyncRendering = false;
 
@@ -358,7 +357,7 @@
 			ZoteroPane_Local.showAttachmentInFilesystem(this.item.id, event.originalTarget, !this.editable);
 		}
 
-		async renderAttachmentInfo() {
+		async updateInfo() {
 			// Cancel editing filename when refreshing
 			this._isEditingFilename = false;
 			
@@ -501,6 +500,13 @@
 			}
 			else {
 				selectButton.hidden = true;
+			}
+		}
+
+		async updatePreview() {
+			if (this.usePreview) {
+				this.previewElem.item = this.item;
+				await this.previewElem.render();
 			}
 		}
 
