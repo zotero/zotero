@@ -48,7 +48,7 @@
 
 		_preview = null;
 
-		_lastPreviewRenderTime = "";
+		_lastPreviewRenderId = "";
 
 		_discardPreviewTimeout = 60000;
 
@@ -189,7 +189,7 @@
 					this._previewDiscarded = false;
 					this.previewElem.render();
 				}
-				this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
+				this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
 				return;
 			}
 			this._renderStage = "final";
@@ -209,9 +209,9 @@
 
 		discard() {
 			if (!this._preview) return;
-			let lastRenderTime = this._lastPreviewRenderTime;
+			let lastPreviewRenderId = this._lastPreviewRenderId;
 			setTimeout(() => {
-				if (!this._asyncRendering && this._lastPreviewRenderTime === lastRenderTime) {
+				if (!this._asyncRendering && this._lastPreviewRenderId === lastPreviewRenderId) {
 					this._preview?.discard();
 					this._previewDiscarded = true;
 				}
@@ -246,7 +246,7 @@
 			}
 			this.previewElem.item = attachment;
 			await this.previewElem.render();
-			this._lastPreviewRenderTime = `${Date.now()}-${Math.random()}`;
+			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
 		}
 
 		async _getPreviewAttachment() {
