@@ -581,6 +581,21 @@ if [ $BUILD_MAC == 1 ]; then
 		find "$APPDIR/Contents" -name '*.app' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/zotero"
 		
+		# Sign .jnilib (Java native shared library) within LibreOffice extension, since notarization
+		# started failing without this. The .jnilib is within a .jar within the .oxt, so we have to
+		# extract both, sign the library, and then update each ZIP.
+		pushd "$BUILD_DIR"
+		mkdir libreoffice-repack
+		cd libreoffice-repack
+		unzip -q "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
+		unzip -q external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
+		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" com/sun/jna/darwin/libjnidispatch.jnilib
+		zip -u external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
+		zip -u "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
+		cd ..
+		rm -rf libreoffice-repack
+		popd
+		
 		# Sign Safari App Extension
 		#
 		# Even though it's signed by Xcode, we sign it again to make sure it matches the parent app signature
