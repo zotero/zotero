@@ -29,6 +29,9 @@
 	"general-done": {
 		"string": "Done"
 	},
+	"general-view-troubleshooting-instructions": {
+		"string": "View Troubleshooting Instructions"
+	},
 	"menu-file-show-in-finder.label": {
 		"string": "Show in Finder"
 	},
@@ -278,31 +281,31 @@
 	"rtfScan-choose-output-file.aria-label": {
 		"string": "Choose Output File"
 	},
-	"rtfScan-intro-page.label": {
+	"rtfScan-intro-page": {
 		"string": "Introduction"
 	},
-	"rtfScan-scan-page.label": {
+	"rtfScan-scan-page": {
 		"string": "Scanning for Citations"
 	},
 	"rtfScan-scanPage-description": {
 		"string": "{ app-name } is scanning your document for citations. Please be patient."
 	},
-	"rtfScan-citations-page.label": {
+	"rtfScan-citations-page": {
 		"string": "Verify Cited Items"
 	},
 	"rtfScan-citations-page-description": {
 		"string": "Please review the list of recognized citations below to ensure that { app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step."
 	},
-	"rtfScan-style-page.label": {
+	"rtfScan-style-page": {
 		"string": "Document Formatting"
 	},
-	"rtfScan-format-page.label": {
+	"rtfScan-format-page": {
 		"string": "Formatting Citations"
 	},
 	"rtfScan-format-page-description": {
 		"string": "{ app-name } is processing and formatting your RTF file. Please be patient."
 	},
-	"rtfScan-complete-page.label": {
+	"rtfScan-complete-page": {
 		"string": "RTF Scan Complete"
 	},
 	"rtfScan-complete-page-description": {
@@ -422,7 +425,7 @@
 	"integration-error-unable-to-find-winword": {
 		"string": "{ app-name } could not find a running Word instance."
 	},
-	"publications-intro-page.label": {
+	"publications-intro-page": {
 		"string": "My Publications"
 	},
 	"publications-intro": {
@@ -443,7 +446,7 @@
 	"publications-intro-authorship-files.label": {
 		"string": "I created this work and have the rights to distribute included files."
 	},
-	"publications-sharing-page.label": {
+	"publications-sharing-page": {
 		"string": "Choose how your work may be shared"
 	},
 	"publications-sharing-keep-rights-field.label": {
@@ -467,7 +470,7 @@
 	"publications-sharing-cc0.label": {
 		"string": "Yes, and place my work in the public domain"
 	},
-	"publications-license-page.label": {
+	"publications-license-page": {
 		"string": "Choose a Creative Commons license"
 	},
 	"publications-choose-license-text": {
@@ -815,8 +818,14 @@
 	"post-upgrade-density": {
 		"string": "Choose your preferred layout density:"
 	},
+	"text-action-paste-and-search.label": {
+		"string": "Paste and Search"
+	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
+	},
+	"preferences-appearance-title": {
+		"string": "Appearance and Language"
 	},
 	"preferences-auto-recognize-files.label": {
 		"string": "Automatically retrieve metadata for PDFs and ebooks"
@@ -914,10 +923,22 @@
 	"preferences-advanced-enable-local-api.label": {
 		"string": "Allow other applications on this computer to communicate with { app-name }"
 	},
+	"preferences-advanced-local-api-available": {
+		"string": "Available at <code data-l10n-name=\"url\">{ url }</span>"
+	},
+	"preferences-advanced-server-disabled": {
+		"string": "The { app-name } HTTP server is disabled."
+	},
+	"preferences-advanced-server-enable-and-restart.label": {
+		"string": "Enable and Restart"
+	},
 	"preferences-advanced-language-and-region-title": {
 		"string": "Language and Region"
 	},
 	"preferences-advanced-enable-bidi-ui.label": {
 		"string": "Enable bidirectional text editing utilities"
+	},
+	"scaffold-translator-output.aria-label": {
+		"string": "Console"
 	}
 }
