@@ -1,6 +1,8 @@
 preferences-window =
     .title = { -app-name } Settings
 
+preferences-appearance-title = Appearance and Language
+
 preferences-auto-recognize-files =
     .label = Automatically retrieve metadata for PDFs and ebooks
 
