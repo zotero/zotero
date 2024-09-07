@@ -566,6 +566,9 @@
 				case "duplicates": {
 					this._deck.selectedIndex = 3;
 					this.removeAttribute("collapsed");
+					if (this.previousElementSibling.localName === "splitter") {
+						this.previousElementSibling.setAttribute("state", "open");
+					}
 					break;
 				}
 			}
