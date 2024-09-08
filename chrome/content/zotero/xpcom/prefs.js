@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 12;
+		var toVersion = 13;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -141,6 +141,12 @@ Zotero.Prefs = new function() {
 					
 					case 12:
 						Zotero.Prefs.set('firstRunGuidanceShown.z7Banner', false);
+						break;
+					
+					// Reset popup pref if changed by plugins
+					// https://github.com/windingwind/zotero-plugin-toolkit/commit/47fc9ddea
+					case 13:
+						Zotero.Prefs.clear('ui.popup.disable_autohide', true);
 						break;
 				}
 			}
