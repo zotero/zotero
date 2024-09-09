@@ -1,6 +1,8 @@
 @use "sass:map";
 
 #zotero-items-pane-container {
+	flex-grow: 1;
+	flex-shrink: 1;
 	min-width: $min-width-items-pane;
 	height: 150px;
 	min-height: $min-height-items-pane;

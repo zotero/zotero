@@ -1,5 +1,7 @@
 #tabs-deck {
 	min-width: $min-width-tabs-deck;
+	flex-grow: 1;
+	flex-shrink: 1;
 
 	& > :not(.deck-selected) {
 		// Hide all sub-trees that are in the invisible tab deck
@@ -11,6 +13,8 @@
 
 #zotero-context-pane {
 	display: flex;
+	flex-grow: 0;
+	flex-shrink: 1;
 	min-width: $min-width-context-pane + $width-sidenav;
 
 	.divider {

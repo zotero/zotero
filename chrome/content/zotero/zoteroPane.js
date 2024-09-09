@@ -6354,13 +6354,31 @@ var ZoteroPane = new function()
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
-		
+
+		let isStackMode = Zotero.Prefs.get('layout') === 'stacked';
+		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
+
+		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
+		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
+		// Keep in sycn with abstracts/variables.scss > $min-width-item-pane
+		const itemPaneMinWidth = (isStackMode || isItemPaneCollapsed) ? 0 : 320;
+		const libraryItemPaneMinWidth = (isStackMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
+		// Keep in sycn with abstracts/variables.scss > $width-sidenav
+		const sideNavMinWidth = isStackMode ? 0 : 37;
+		// Keep in sycn with abstracts/variables.scss > $min-width-items-pane
+		const itemsPaneMinWidth = 370;
+
+		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth;
+
 		// Calculate the heights of the components that aren't able to shrink automatically
 		// when the window is resized
-		let fixedComponentWidth = trees.scrollWidth - itemsPaneContainer.scrollWidth;
 		let fixedComponentHeight = titlebar.scrollHeight + trees.scrollHeight - itemsPaneContainer.scrollHeight;
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
+
+		collectionsPane.style.setProperty(
+			"--max-width-collections-pane",
+			`${window.innerWidth - libraryItemPaneMinWidth - sideNavMinWidth - itemsPaneMinWidth}px`);
 
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
@@ -6380,7 +6398,7 @@ var ZoteroPane = new function()
 		else {
 			collectionSearch.style.removeProperty('max-width');
 		}
-		
+
 		this.handleTagSelectorResize();
 
 		this.itemPane.handleResize();

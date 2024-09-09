@@ -48,6 +48,17 @@ var ZoteroContextPane = new function () {
 			: _contextPaneSplitter)
 	});
 
+	Object.defineProperty(this, 'collapsed', {
+		get: () => {
+			return this.splitter.getAttribute('state') === 'collapsed';
+		},
+		set: (collapsed) => {
+			_contextPane.setAttribute('collapsed', collapsed);
+			this.splitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_update();
+		}
+	});
+
 	this.update = _update;
 
 	this.focus = () => {
@@ -176,6 +187,8 @@ var ZoteroContextPane = new function () {
 		
 		_updatePaneWidth();
 		_updateAddToNote();
+
+		ZoteroPane.updateLayoutConstraints();
 	}
 	
 	function _isLibraryReadOnly(libraryID) {
@@ -183,15 +196,6 @@ var ZoteroContextPane = new function () {
 	}
 
 	function _togglePane() {
-		var splitter = ZoteroContextPane.splitter;
-	
-		var open = true;
-		if (splitter.getAttribute('state') != 'collapsed') {
-			open = false;
-		}
-	
-		_contextPane.setAttribute('collapsed', !open);
-		splitter.setAttribute('state', open ? 'open' : 'collapsed');
-		_update();
+		this.collapsed = !this.collapsed;
 	}
 };
