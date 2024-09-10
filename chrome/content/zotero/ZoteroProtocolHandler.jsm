@@ -1197,7 +1197,7 @@ function ZoteroProtocolHandler() {
 			var location = {};
 			
 			if (page) {
-				location.pageIndex = parseInt(page);
+				location.pageIndex = parseInt(page) - 1;
 			}
 			if (annotation) {
 				location.annotationID = annotation;
