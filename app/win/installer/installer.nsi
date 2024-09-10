@@ -173,10 +173,12 @@ Function UninstallOld
   Push $R1
   Push $R2
   StrCpy $0 0
+  StrCpy $5 "HKLM"
+  SetShellVarContext all
 
   enum_uninst_keys:
-    EnumRegKey $1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall" $0
-    StrCmp $1 "" continue_installation
+    EnumRegKey $1 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall" $0
+    StrCmp $1 "" switch_root_key_or_continue
     ; $R1 is "Zotero", registry key name contains version and locale e.g. "Zotero 6.0.0 (x86 en-US)" so:
     StrLen $3 $R1 ; $3 = length of $R1, e.g. 6 for "Zotero"
     StrCpy $2 $1 $3 ; $2 = first $3 characters of $1, i.e. name without version and locale, e.g. "Zotero"
@@ -184,9 +186,18 @@ Function UninstallOld
     IntOp $0 $0 + 1 
     Goto enum_uninst_keys ; loop through all keys
 
+  switch_root_key_or_continue:
+    # Previous installation was not found in HKLM, switch to HKCU (using SetShellVarContext) and search again
+    # $5 is used to ensure this only happens once
+    StrCmp $5 "HKLM" +1 continue_installation
+    StrCpy $5 "HKCU"
+    StrCpy $0 0
+    SetShellVarContext current
+    Goto enum_uninst_keys
+
   get_uninst_exe:
-    ReadRegStr $2 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "UninstallString"
-    ReadRegStr $3 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "InstallLocation"
+    ReadRegStr $2 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "UninstallString"
+    ReadRegStr $3 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "InstallLocation"
 
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
     $R2 \
@@ -228,6 +239,7 @@ Function UninstallOld
     RMDir /REBOOTOK $3
   continue_installation:
     ; End uninstallation
+    SetShellVarContext current
     Pop $R2
     Pop $R1
 FunctionEnd
