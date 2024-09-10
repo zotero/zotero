@@ -6354,8 +6354,13 @@ var ZoteroPane = new function()
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
+		let layoutModeMenus = [
+			document.getElementById("view-menuitem-standard"),
+			document.getElementById("view-menuitem-stacked"),
+		];
 
 		let isStackMode = Zotero.Prefs.get('layout') === 'stacked';
+		let isTempStackMode = Zotero.Prefs.get('tempStackMode');
 		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
 
 		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
@@ -6375,6 +6380,24 @@ var ZoteroPane = new function()
 		let fixedComponentHeight = titlebar.scrollHeight + trees.scrollHeight - itemsPaneContainer.scrollHeight;
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
+
+		const windowAutoStackMinWidth = 950;
+		if (window.innerWidth < windowAutoStackMinWidth) {
+			// Disable layout mode menus because the standard mode is not available
+			layoutModeMenus.forEach(menu => menu.setAttribute("disabled", "true"));
+			// If the window is too small in standard mode, enter stack mode temporarily
+			if (!isStackMode && !isTempStackMode) {
+				Zotero.Prefs.set('tempStackMode', true);
+				Zotero.Prefs.set('layout', 'stacked');
+			}
+		}
+		else {
+			layoutModeMenus.forEach(menu => menu.removeAttribute("disabled"));
+			if (isTempStackMode) {
+				Zotero.Prefs.clear('tempStackMode');
+				Zotero.Prefs.set('layout', 'standard');
+			}
+		}
 
 		collectionsPane.style.setProperty(
 			"--max-width-collections-pane",
