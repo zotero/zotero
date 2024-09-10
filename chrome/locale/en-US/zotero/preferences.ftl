@@ -66,9 +66,11 @@ preferences-quickCopy-plus =
 
 preferences-styleManager-delete-button =
     .tooltiptext = Delete the selected style
+    .aria-label = { general-remove }
     .label = { $label }
 preferences-styleManager-add-button =
     .tooltiptext = Add a style from a file
+    .aria-label = { general-add }
     .label = { $label }
 
 preferences-advanced-enable-local-api =
