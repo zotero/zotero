@@ -6364,7 +6364,7 @@ var ZoteroPane = new function()
 		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
 
 		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
-		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
+		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 100;
 		// Keep in sycn with abstracts/variables.scss > $min-width-item-pane
 		const itemPaneMinWidth = (isStackMode || isItemPaneCollapsed) ? 0 : 320;
 		const libraryItemPaneMinWidth = (isStackMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
@@ -6409,6 +6409,7 @@ var ZoteroPane = new function()
 			}, 0);
 		}
 
+		// This is important to avoid other panes be pushed out of the window
 		collectionsPane.style.setProperty(
 			"--max-width-collections-pane",
 			`${window.innerWidth - libraryItemPaneMinWidth - sideNavMinWidth - itemsPaneMinWidth}px`);
@@ -6417,19 +6418,6 @@ var ZoteroPane = new function()
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
 		if (ZoteroPane.itemsView) {
 			ZoteroPane.itemsView.updateHeight();
-		}
-		// Temp JS solution to shrink the collection search so that it does not overflow outside
-		// of the collection pane
-		var collectionSearch = document.getElementById("zotero-collections-search");
-		collectionSearch.removeAttribute("data-expanded-width");
-		if (collectionsPaneWidth < 220) {
-			collectionSearch.setAttribute("data-expanded-width", 150);
-			if (collectionSearch.classList.contains("visible")) {
-				collectionSearch.style.maxWidth = "150px";
-			}
-		}
-		else {
-			collectionSearch.style.removeProperty('max-width');
 		}
 
 		this.handleTagSelectorResize();

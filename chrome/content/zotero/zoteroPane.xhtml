@@ -1153,10 +1153,10 @@
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
 									<toolbar id="zotero-toolbar-collection-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
-										<hbox id="zotero-collections-toolbar" align="center" flex="1">
+										<hbox id="zotero-collections-toolbar" align="center">
 											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 											<spacer flex="1"></spacer>
-											<html:div style="display: flex;flex-direction: row;">
+											<html:div style="display: flex;flex-direction: row; flex-grow: 0; flex-shrink: 1; min-width: 0;">
 												<toolbarbutton id="zotero-tb-collections-search" data-l10n-id="zotero-collections-search-btn" tabindex="-1" class="zotero-tb-button"/>
 												<search-textbox
 													id="zotero-collections-search" class="hidden" disabled="true"
