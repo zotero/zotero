@@ -53,8 +53,10 @@ var ZoteroContextPane = new function () {
 			return this.splitter.getAttribute('state') === 'collapsed';
 		},
 		set: (collapsed) => {
-			_contextPane.setAttribute('collapsed', collapsed);
-			this.splitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_contextPane.setAttribute('collapsed', !!collapsed);
+			_contextPaneInner.setAttribute('collapsed', !!collapsed);
+			_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
 			_update();
 		}
 	});
@@ -143,7 +145,6 @@ var ZoteroContextPane = new function () {
 		}
 		if (_isStacked()) {
 			_contextPaneSplitterStacked.setAttribute('hidden', false);
-			_contextPaneSplitter.setAttribute('state', 'open');
 			_contextPaneSplitter.setAttribute('hidden', true);
 			_contextPane.classList.add('stacked');
 			_contextPane.classList.remove('standard');
@@ -160,7 +161,6 @@ var ZoteroContextPane = new function () {
 		else {
 			_contextPaneSplitter.setAttribute('hidden', false);
 			_contextPaneSplitterStacked.setAttribute('hidden', true);
-			_contextPaneSplitterStacked.setAttribute('state', 'open');
 			_contextPane.classList.add('standard');
 			_contextPane.classList.remove('stacked');
 			_readerSidenav.classList.remove('stacked');
