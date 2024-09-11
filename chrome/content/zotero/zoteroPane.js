@@ -6248,9 +6248,15 @@ var ZoteroPane = new function()
 	 */
 	this.unserializePersist = function () {
 		_unserialized = true;
-		var serializedValues = Zotero.Prefs.get("pane.persist");
-		if (!serializedValues) return;
+		var serializedValues = Zotero.Prefs.get("pane.persist") || "{}";
 		serializedValues = JSON.parse(serializedValues);
+
+		// Set default width for collections pane, as its min-width is too small
+		if (!serializedValues["zotero-collections-pane"]) {
+			serializedValues["zotero-collections-pane"] = {
+				width: "200",
+			};
+		}
 		
 		for (var id in serializedValues) {
 			var el = document.getElementById(id);
