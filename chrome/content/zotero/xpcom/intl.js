@@ -135,7 +135,12 @@ Zotero.Intl = new function () {
 				if (ftlString) {
 					return ftlString;
 				}
-				else if (this.strings[name]) {
+				// TEMP: The this.strings check prevents "TypeError: this.strings is undefined"
+				// from an early Zotero.getString() call, but I'm not sure why. this.strings is
+				// set using defineLazyGetter, but lazy doesn't mean asynchronous...
+				//
+				// https://forums.zotero.org/discussion/117812/issue-with-installing-zotero-7
+				else if (this.strings && this.strings[name]) {
 					return this.strings[name];
 				}
 				else {
