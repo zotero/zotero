@@ -12,32 +12,33 @@ general-open-settings = Open Settings
 general-help = Laguntza
 general-tag = Etiketa
 general-done = Egina
+general-view-troubleshooting-instructions = View Troubleshooting Instructions
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
     .label = Erakutsi fitxategia
 menu-file-show-files =
-    .label = Show Files
+    .label = Erakutsi fitxategiak
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = Dentsitatea
 add-attachment = Eranskina gehitu
 new-note = Ohar berria
 menu-add-by-identifier =
-    .label = Add by Identifier…
+    .label = Identifikatzaile bidez gehitu...
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Add File…
+    .label = Gehitu fitxategia...
 menu-add-standalone-linked-file-attachment =
-    .label = Add Link to File…
+    .label = Gehitu fitxategirako esteka...
 menu-add-child-file-attachment =
-    .label = Attach File…
+    .label = Erantsi fitxategia...
 menu-add-child-linked-file-attachment =
     .label = Fitxategi baterako esteka erantsi...
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = Erantsi web esteka...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -49,7 +50,7 @@ menu-restoreToLibrary =
 menu-deletePermanently =
     .label = Betirako ezabatu...
 menu-tools-plugins =
-    .label = Plugins
+    .label = Pulginak
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -335,11 +336,11 @@ restart-in-troubleshooting-mode-menuitem =
 restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
-    .label = Density
+    .label = Dentsitatea
 menu-ui-density-comfortable =
-    .label = Comfortable
+    .label = Erosoa
 menu-ui-density-compact =
-    .label = Compact
+    .label = Trinkoa
 pane-info = Info
 pane-abstract = Laburpena
 pane-attachments = Eranskinak
@@ -347,7 +348,7 @@ pane-notes = Oharrak
 pane-libraries-collections = Libraries and Collections
 pane-tags = Etiketak
 pane-related = Erlazionatutakoak
-pane-attachment-info = Attachment Info
+pane-attachment-info = Eranskinen informazioa
 pane-attachment-preview = Preview
 pane-attachment-annotations = Oharpenak
 pane-header-attachment-associated =
@@ -359,8 +360,8 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] Eranskin { $count }
+           *[other] { $count } eranskin
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
@@ -441,7 +442,7 @@ abstract-field =
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = Iragazi etiketak
 context-notes-search =
     .placeholder = Search Notes
 new-collection-dialog =
@@ -462,7 +463,7 @@ attachment-info-convert-note =
            *[unknown] New
         } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
-attachment-preview-placeholder = No attachment to preview
+attachment-preview-placeholder = Ez dago eranskinik aurreikusteko
 toggle-preview =
     .label =
         { $type ->
@@ -578,9 +579,11 @@ file-type-video = Bideoa
 file-type-presentation = Aurkezpen
 file-type-document = Dokumentua
 file-type-ebook = Ebook
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = Ezagutu <a data-l10n-name="new-features-link">{ -app-name } { $version }ren ezaugarri berriak</a>
+post-upgrade-density = Hautatu diseinuarentzat nahiago duzun dentsitatea:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
+text-action-paste-and-search =
+    .label = Paste and Search

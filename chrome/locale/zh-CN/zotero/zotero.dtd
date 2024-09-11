@@ -177,7 +177,7 @@
 <!ENTITY zotero.import "导入">
 <!ENTITY zotero.import.whereToImportFrom "您想从哪里导入？">
 <!ENTITY zotero.import.source.file "文件（BibTeX，RIS，Zotero RDF等）">
-<!ENTITY zotero.import.source.folder "一个存放PDF或者其它文件的文件夹">
+<!ENTITY zotero.import.source.folder "一个存放 PDF 及其他文件的文件夹">
 <!ENTITY zotero.import.onlineImport "在线导入">
 <!ENTITY zotero.import.importing "导入…">
 <!ENTITY zotero.import.database "数据库">
@@ -318,8 +318,8 @@
 <!ENTITY zotero.pdfReader.noSpreads "无分布">
 <!ENTITY zotero.pdfReader.oddSpreads "奇数分布">
 <!ENTITY zotero.pdfReader.evenSpreads "偶数分布">
-<!ENTITY zotero.pdfReader.scrolled "滚动的">
-<!ENTITY zotero.pdfReader.paginated "分页的">
+<!ENTITY zotero.pdfReader.scrolled "卷轴">
+<!ENTITY zotero.pdfReader.paginated "分页">
 <!ENTITY zotero.pdfReader.zoomIn "放大">
 <!ENTITY zotero.pdfReader.zoomOut "缩小">
 <!ENTITY zotero.pdfReader.zoomReset "重置缩放">

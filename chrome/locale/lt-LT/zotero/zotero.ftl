@@ -12,6 +12,7 @@ general-open-settings = Atverti nuostatas
 general-help = Žinynas
 general-tag = Gairė
 general-done = Atlikta
+general-view-troubleshooting-instructions = Peržiūrėti nesklandumų sprendimo instrukcijas
 menu-file-show-in-finder =
     .label = Rodyti ieškyklėje
 menu-file-show-file =
@@ -278,7 +279,7 @@ integration-prefs-automaticJournalAbbeviations =
 integration-prefs-automaticJournalAbbeviations-description = Ignoruosima reikšmė „žurnalo santrumpos“ laukelyje
 integration-prefs-exportDocument =
     .label = Persijungti į kitą raštinės programą...
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
+integration-error-unable-to-find-winword = { -app-name } negali rasti paleistos Word programos.
 publications-intro-page = Nuosavos publikacijos
 publications-intro = „Nuosavose publikacijose“ patalpinti įrašai rodysimi Zotero.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.
 publications-include-checkbox-files =
@@ -563,10 +564,10 @@ item-pane-duplicates-merge-items =
            *[other] Apjungti { $count } įrašus
         }
 locate-library-lookup-no-resolver = Jums reikia { -app-name } nuostatų { $pane } skydelyje pasirinkti sprendiklį.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
+architecture-win32-warning-message = Didžiausias našumas būtų perėjus prie 64 bitų { -app-name } programos. Jūsų duomenys dėl to nenukentės.
 architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = { -app-name } paleista emuliavimo veiksenoje. Įprasta { -app-name } versija veiktų našiau.
+architecture-x64-on-arm64-action = Parsisiųsti { -app-name } programos ARM64 versiją
 first-run-guidance-quickFormat =
     Įveskite pavadinimą, autorių ir (arba) metus ir ieškokite informacijos šaltinio.
     
@@ -610,3 +611,5 @@ post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
+text-action-paste-and-search =
+    .label = Įdėti ir ieškoti

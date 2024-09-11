@@ -125,7 +125,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Enregistrer le lien vers la page courante">
 <!ENTITY zotero.toolbar.attachment.snapshot "Capturer la page courante">
 <!ENTITY zotero.toolbar.context.item "Document">
-<!ENTITY zotero.toolbar.context.notes "Défilement vertical">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Aucun marqueur à afficher">
 <!ENTITY zotero.tagSelector.loadingTags "Chargement des marqueurs…">

@@ -1,5 +1,6 @@
 preferences-window =
     .title = { -app-name } 設定
+preferences-appearance-title = Appearance and Language
 preferences-auto-recognize-files =
     .label = 自動為 PDF 檔與電子書取得屬性資料
 preferences-file-renaming-title = 文件重新命名
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = 允許此電腦上的其他應用程式與 { -app-name } 通訊
+preferences-advanced-local-api-available = Available at <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
+preferences-advanced-server-enable-and-restart =
+    .label = Enable and Restart
 preferences-advanced-language-and-region-title = 語言與區域
 preferences-advanced-enable-bidi-ui =
     .label = 啟用雙向文字編輯應用程式

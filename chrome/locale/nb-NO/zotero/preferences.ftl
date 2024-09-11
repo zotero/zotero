@@ -1,5 +1,6 @@
 preferences-window =
     .title = { -app-name } Innstillinger
+preferences-appearance-title = Utseende og språk
 preferences-auto-recognize-files =
     .label = Automatisk innhenting av metadata for PDF-filer og e-bøker
 preferences-file-renaming-title = Endre navn på filer
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Tillat andre programmer på denne datamaskinen å kommunisere med { -app-name }
+preferences-advanced-local-api-available = Tilgjengelig på <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = { -app-name } HTTP-serveren er deaktivert.
+preferences-advanced-server-enable-and-restart =
+    .label = Aktiver og start på nytt
 preferences-advanced-language-and-region-title = Språk og region
 preferences-advanced-enable-bidi-ui =
     .label = Aktiver verktøy for toveis tekstredigering

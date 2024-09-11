@@ -12,12 +12,13 @@ general-open-settings = 打开设置
 general-help = 帮助
 general-tag = 标签
 general-done = 完成
+general-view-troubleshooting-instructions = 查看故障排除说明
 menu-file-show-in-finder =
     .label = 在访达中显示
 menu-file-show-file =
     .label = 打开文件目录
 menu-file-show-files =
-    .label = 显示文件
+    .label = 打开文件目录
 menu-print =
     .label = { general-print }
 menu-density =
@@ -68,7 +69,7 @@ toolbar-add-attachment =
 collections-menu-rename-collection =
     .label = 重命名分类
 collections-menu-edit-saved-search =
-    .label = 编辑可存搜索
+    .label = 编辑已保存搜索
 item-creator-moveDown =
     .label = 下移
 item-creator-moveToTop =
@@ -87,8 +88,8 @@ item-menu-viewAttachment =
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
+                    [pdf] PDF
+                    [epub] EPUB
                     [snapshot] 快照
                    *[other] 附件
                 }
@@ -123,9 +124,9 @@ import-window =
 import-where-from = 您想从哪里导入？
 import-online-intro-title = 介绍
 import-source-file =
-    .label = 文件（BibTeX，RIS，Zotero RDF等）
+    .label = 文件（BibTeX、RIS、Zotero RDF 等）
 import-source-folder =
-    .label = 一个存放PDF等文件的文件夹
+    .label = 一个存放 PDF 及其他文件的文件夹
 import-source-online =
     .label = { $targetApp } 在线导入
 import-options = 选项
@@ -139,18 +140,18 @@ import-fileTypes-pdf =
     .label = PDF
 import-fileTypes-other =
     .placeholder = 其他文件模式，以逗号分隔（例如，*.jpg,*.png）
-import-file-handling = 处理文件
+import-file-handling = 文件处理
 import-file-handling-store =
     .label = 将文件复制到 { -app-name } 存储文件夹
 import-file-handling-link =
-    .label = 在初始位置链接到文件
+    .label = 链接到文件的原始位置
 import-fileHandling-description = { -app-name } 无法同步链接的文件。
 import-online-new =
     .label = 仅下载新条目，不更新之前已导入的条目
 import-mendeley-username = 用户名
 import-mendeley-password = 密码
 general-error = 错误
-file-interface-import-error = 试图导入所选文件时发生错误。请确保此文件有效，然后再试一次。
+file-interface-import-error = 导入所选文件时发生错误。请确保此文件有效，然后再试一次。
 file-interface-import-complete = 导入完成
 file-interface-items-were-imported =
     { $numItems ->
@@ -200,11 +201,11 @@ rtfScan-scan-page = 扫描引注
 rtfScan-scanPage-description = { -app-name } 正在扫描您的文档以查找引文。请耐心等待。
 rtfScan-citations-page = 校验已引用的条目
 rtfScan-citations-page-description = 请核查下面的已识别引文列表，以确保 { -app-name } 正确选择了相应的条目。在继续下一步之前，必须解决任何未映射或不明确的引用。
-rtfScan-style-page = 文档格式化中
-rtfScan-format-page = 正在格式化引注
+rtfScan-style-page = 文档格式化
+rtfScan-format-page = 格式化引注
 rtfScan-format-page-description = { -app-name } 正在处理及格式化你的 RTF 文件。请耐心等待。
 rtfScan-complete-page = RTF 扫描完成
-rtfScan-complete-page-description = 文档处理完成, 请确保格式正确.
+rtfScan-complete-page-description = 您的文档扫描和处理完成。请检查确保其格式正确。
 rtfScan-action-find-match =
     .title = 选择匹配的条目
 rtfScan-action-accept-match =
@@ -274,8 +275,8 @@ integration-prefs-automaticJournalAbbeviations =
     .label = 使用 MEDLINE 期刊缩写
 integration-prefs-automaticJournalAbbeviations-description = “期刊缩写”字段将被忽略。
 integration-prefs-exportDocument =
-    .label = 切换到另外一个文稿处理器…
-integration-error-unable-to-find-winword = { -app-name } 没有找到正在运行的 Word 实例。
+    .label = 改用其他的文档编辑软件…
+integration-error-unable-to-find-winword = { -app-name } 没有找到运行中的 Word 程序。
 publications-intro-page = 我的出版物
 publications-intro = 你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。
 publications-include-checkbox-files =
@@ -287,22 +288,22 @@ publications-intro-authorship =
     .label = 是我创作的作品。
 publications-intro-authorship-files =
     .label = 我是作品的作者，并且我有权向大众分发内含的文件。
-publications-sharing-page = 选择你分享论文的方式
+publications-sharing-page = 选择您的作品的分享方式
 publications-sharing-keep-rights-field =
     .label = 保留现有的版权字段
 publications-sharing-keep-rights-field-where-available =
-    .label = 如果可能，保留现有的版权字段
-publications-sharing-text = 您可以保留您作品的所有权利，可以在知识共享许可下获得许可，也可以将其专用于公共领域。在所有情况下，这些作品都可以通过zotero.org公开获得。
+    .label = 尽可能保留现有的版权字段
+publications-sharing-text = 您可以保留对作品的所有权利，可以在知识共享许可下发布，也可以发布于公有领域。在所有情况下，这些作品都可以通过 zotero.org 公开获得。
 publications-sharing-prompt = 您想允许他人共享您的作品吗？
 publications-sharing-reserved =
-    .label = 不，仅在zotero.org上发布我的作品
+    .label = 不，仅允许 zotero.org 发布我的作品
 publications-sharing-cc =
     .label = 是的，使用“知识共享”许可协议
 publications-sharing-cc0 =
-    .label = 是的，将我的工作放在公共领域
+    .label = 是的，将我的作品发布在公有领域
 publications-license-page = 选择一个知识共享许可
-publications-choose-license-text = 创用CC许可允许其他人复制并重新分发您的作品，只要他们提供适当的信誉，提供许可的链接并指出是否进行了更改。可以在下面指定其他条件。
-publications-choose-license-adaptations-prompt = 是否允许分享您的作品的修改版？
+publications-choose-license-text = 知识共享许可协议允许其他人在保持适当声明的前提下复制和重新分发您的作品。可以在下面指定其他条件。
+publications-choose-license-adaptations-prompt = 是否允许分享您的作品的衍生版本？
 publications-choose-license-yes =
     .label = 是
     .accesskey = Y
@@ -310,24 +311,24 @@ publications-choose-license-no =
     .label = 否
     .accesskey = 无
 publications-choose-license-sharealike =
-    .label = 是的，如果其他人也分享同样的
+    .label = 可以，只要其他人以相同协议共享
     .accesskey = S
-publications-choose-license-commercial-prompt = 允许你的工作的商业使用吗？
+publications-choose-license-commercial-prompt = 允许你的作品被商用吗？
 publications-buttons-add-to-my-publications =
     .label = 添加到我的出版物
 publications-buttons-next-sharing =
     .label = 下一步：分享
 publications-buttons-next-choose-license =
     .label = 选择许可协议
-licenses-cc-0 = CC0 1.0 通用公共领域贡献
-licenses-cc-by = 知识共享署名 4.0 国际许可协议
-licenses-cc-by-nd = 知识共享署名-禁止演绎 4.0 国际许可协议
-licenses-cc-by-sa = 知识共享署名-相同方式共享 4.0 国际许可协议
-licenses-cc-by-nc = 知识共享署名-非商业性使用 4.0 国际许可协议
-licenses-cc-by-nc-nd = 知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议
-licenses-cc-by-nc-sa = 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议
-licenses-cc-more-info = 在将您的作品以知识共享协议许可之前，请确保您已阅读 <a data-l10n-name="license-considerations">许可方注意事项</a>。请注意，即使您后来选择不同的条款或停止发布作品，您申应用的许可也无法撤销。
-licenses-cc0-more-info = 在将 CC0 应用于您的作品之前，请确保您已阅读知识共享 <a data-l10n-name="license-considerations">CC0 常见问题解答</a>。请注意，将您的作品奉献给公共领域是不可逆转的，即使您后来选择不同的条款或停止发布该作品。
+licenses-cc-0 = CC0 1.0 通用公有领域贡献
+licenses-cc-by = 知识共享 署名 4.0 国际许可协议
+licenses-cc-by-nd = 知识共享 署名-禁止演绎 4.0 国际许可协议
+licenses-cc-by-sa = 知识共享 署名-相同方式共享 4.0 国际许可协议
+licenses-cc-by-nc = 知识共享 署名-非商业性使用 4.0 国际许可协议
+licenses-cc-by-nc-nd = 知识共享 署名-非商业性使用-禁止演绎 4.0 国际许可协议
+licenses-cc-by-nc-sa = 知识共享 署名-非商业性使用-相同方式共享 4.0 国际许可协议
+licenses-cc-more-info = 在将您的作品以知识共享协议许可之前，请确保您已阅读 <a data-l10n-name="license-considerations">许可方注意事项</a>。请注意，即使您后来选择不同的条款或停止发布作品，您之前允许的许可也无法撤销。
+licenses-cc0-more-info = 在将 CC0 应用于您的作品之前，请确保您已阅读知识共享 <a data-l10n-name="license-considerations">CC0 常见问题解答</a>。请注意，将您的作品贡献到公有领域是不可逆转的，即使您后来选择不同的条款或停止发布该作品。
 restart-in-troubleshooting-mode-menuitem =
     .label = 以故障排除模式重启...
     .accesskey = T
@@ -470,17 +471,17 @@ quickformat-general-instructions =
        *[other] { "" }
     } 按 { return-or-enter } 保存对此引注的编辑。按 Esc 键放弃更改并关闭对话框。
 quickformat-aria-bubble = 该条目已包含在引注中。按空格键自定义条目。 { quickformat-general-instructions }
-quickformat-aria-input = 键入以搜索需要引用的条目。按 T​​ab 转到搜索结果。  { quickformat-general-instructions }
-quickformat-aria-item = 按 { return-or-enter } 将此条目添加到引注中。按 T​​ab 返回搜索字段。
+quickformat-aria-input = 键入以搜索需要引用的条目。按 T​​ab 键转到搜索结果。  { quickformat-general-instructions }
+quickformat-aria-item = 按 { return-or-enter } 将此条目添加到引注中。按 T​​ab 键回到搜索栏。
 quickformat-accept =
     .tooltiptext = 保存对此引注的编辑
 quickformat-locator-type =
-    .aria-label = 定位符类别
+    .aria-label = 定位符类型
 quickformat-locator-value = 定位符
 quickformat-citation-options =
     .tooltiptext = 显示引注选项
-insert-note-aria-input = 键入以搜索笔记。按 T​​ab 转到结果列表。按 Esc 键关闭对话框。
-insert-note-aria-item = 按 { return-or-enter } 选择此笔记。按 T​​ab 返回搜索字段。按 Esc 键关闭对话框。
+insert-note-aria-input = 键入以搜索笔记。按 T​​ab 键转到结果列表。按 Esc 键关闭对话框。
+insert-note-aria-item = 按 { return-or-enter } 选择此笔记。按 T​​ab 键回到搜索栏。按 Esc 键关闭对话框。
 quicksearch-mode =
     .aria-label = 快速搜索模式
 quicksearch-input =
@@ -529,9 +530,9 @@ item-pane-duplicates-merge-items =
            *[other] 合并 { $count } 个条目
         }
 locate-library-lookup-no-resolver = 您必须从 { -app-name } 设置的 { $pane } 窗格中选择解析器。
-architecture-win32-warning-message = 切换到 64-bit { -app-name } 以获得最佳性能。你的数据不受影响。
+architecture-win32-warning-message = 切换到 64 位版本的 { -app-name } 以获得最佳性能。不会影响您的数据。
 architecture-warning-action = 下载 64 位版本的 { -app-name }
-architecture-x64-on-arm64-message = { -app-name } 当前平台不兼容，请使用原生版本的 { -app-name } 以获得最佳性能。
+architecture-x64-on-arm64-message = { -app-name } 目前以模拟模式运行。请使用原生版本的 { -app-name } 以获得最佳性能。
 architecture-x64-on-arm64-action = 下载适配 ARM64 的 { -app-name }
 first-run-guidance-quickFormat =
     输入标题、作者和/或年份来搜索参考文献。
@@ -573,3 +574,5 @@ post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
+text-action-paste-and-search =
+    .label = 粘贴并搜索

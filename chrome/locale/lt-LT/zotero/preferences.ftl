@@ -1,5 +1,6 @@
 preferences-window =
     .title = { -app-name } nuostatos
+preferences-appearance-title = Išvaizda ir kalba
 preferences-auto-recognize-files =
     .label = Automatiškai gauti PDF ir el. knygų metaduomenis
 preferences-file-renaming-title = Rinkmenų pervadinimas
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Leisti kitoms šio kompiuterio programoms sąveikauti su { -app-name }
+preferences-advanced-local-api-available = Rasite <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = { -app-name } HTTP serveris išjungtas.
+preferences-advanced-server-enable-and-restart =
+    .label = Įgalinti ir paleisti iš naujo
 preferences-advanced-language-and-region-title = Kalba ir regonas
 preferences-advanced-enable-bidi-ui =
     .label = Įgalinti abikrypčius teksto redagavimo įrankius

@@ -1,5 +1,6 @@
 preferences-window =
     .title = { -app-name } Settings
+preferences-appearance-title = Appearance and Language
 preferences-auto-recognize-files =
     .label = Automatically retrieve metadata for PDFs and ebooks
 preferences-file-renaming-title = File Renaming
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Allow other applications on this computer to communicate with { -app-name }
+preferences-advanced-local-api-available = Available at <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
+preferences-advanced-server-enable-and-restart =
+    .label = Enable and Restart
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Aktiver verktøy for toveis tekstredigering

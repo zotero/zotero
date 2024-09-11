@@ -41,14 +41,47 @@
   "general_copyToClipboard": {
     "message": "Copia al portaretalls"
   },
+  "itemType_pdf": {
+    "message": "Adjunció PDF"
+  },
+  "itemType_epub": {
+    "message": "Adjunció EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "Caputa de pantalla"
+  },
   "itemType_note": {
     "message": "Nota"
+  },
+  "itemType_link": {
+    "message": "Enllaç web"
   },
   "itemType_attachment": {
     "message": "Adjunció"
   },
   "progressWindow_savingTo": {
     "message": "S'està desant a"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Mostra els detalls"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Amaga els detalls"
+  },
+  "progressWindow_savingItem": {
+    "message": "S'està desant l'element $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Element $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "S'ha desat $1"
+  },
+  "progressWindow_allDone": {
+    "message": "Ja s'ha desat. Tot seguit es tancarà el diàleg."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Els elements de la pàgina web ja s'han desat."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetes (separades per comes)"
@@ -76,6 +109,18 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "darrera versió"
+  },
+  "itemSelector_title": {
+    "message": "Seleccioneu quins elements voleu afegir a la biblioteca:"
+  },
+  "extensionIsDisabled": {
+    "message": "El connector $1 no és disponible en aquesta pàgina"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "El connector $1 no és disponible en els URL de fitxers"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "El connector $1 no és disponible en les pàgines d'extensions"
   },
   "appConnector": {
     "message": "Connector del $1"

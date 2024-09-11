@@ -7,7 +7,7 @@
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.custom "Personnaliser…">
 
-<!ENTITY zotero.preferences.prefpane.general "Générales">
+<!ENTITY zotero.preferences.prefpane.general "Général">
 
 <!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Gestion des fichiers">
@@ -162,7 +162,7 @@
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Le nom du fichier (ex. index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - N'importe quelle chaîne de caractère">
 
-<!ENTITY zotero.preferences.prefpane.advanced "Avancées">
+<!ENTITY zotero.preferences.prefpane.advanced "Avancé">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fichiers et dossiers">
 <!ENTITY zotero.preferences.advanced.keys "Raccourcis clavier">
 

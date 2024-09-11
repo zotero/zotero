@@ -56,8 +56,8 @@
 <!ENTITY recursiveCollections.label "Azpi-bildumatako elementuak erakutsi">
 <!ENTITY fontSize.label "Letra-tamaina">
 <!ENTITY noteFontSize.label "Oharraren letra-tamaina">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Zutabeak">
+<!ENTITY sortBy.label "Hurrenkera">
 
 <!ENTITY toolsMenu.label "Tresnak">
 <!ENTITY toolsMenu.accesskey "T">

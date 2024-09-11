@@ -1,5 +1,6 @@
 preferences-window =
     .title = Ajustes de { -app-name }
+preferences-appearance-title = Apariencia y idioma
 preferences-auto-recognize-files =
     .label = Recuperación automática de metadatos de PDF y libros electrónicos
 preferences-file-renaming-title = Renombrar archivos
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Permitir que otras aplicaciones de este equipo se comuniquen con { -app-name }
+preferences-advanced-local-api-available = Disponible en <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = El servidor HTTP { -app-name } está desactivado.
+preferences-advanced-server-enable-and-restart =
+    .label = Habilitar y reiniciar
 preferences-advanced-language-and-region-title = Idioma y región
 preferences-advanced-enable-bidi-ui =
     .label = Habilitar utilidades bidireccionales de edición de texto

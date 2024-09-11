@@ -81,7 +81,7 @@
     "message": "条目$1：$2"
   },
   "progressWindow_downloadComplete": {
-    "message": "已保存$1"
+    "message": "已保存 $1"
   },
   "progressWindow_downloadCompletePlural": {
     "message": "已为条目 $2 保存 $1"
@@ -96,7 +96,7 @@
     "message": "保存完成。将关闭对话框。"
   },
   "progressWindow_alreadySaved": {
-    "message": "此网页上的条目已经保存。"
+    "message": "已保存此网页上的条目。"
   },
   "progressWindow_tagPlaceholder": {
     "message": "标签 (用逗号分隔)"
@@ -126,13 +126,13 @@
     "message": "最新版本"
   },
   "itemSelector_title": {
-    "message": "选择您想要添加到库中的条目："
+    "message": "选择您想添加到库中的条目："
   },
   "extensionIsDisabled": {
-    "message": "$1 Connectot 在此页面上不可用"
+    "message": "$1 Connector 在此页面上不可用"
   },
   "extensionIsDisabled_fileURL": {
-    "message": "$1 Connector 在文件 URLs 上不可用"
+    "message": "$1 Connector 在文件 URL 上不可用"
   },
   "extensionIsDisabled_extensionPage": {
     "message": "$1 Connector 在扩展页面上不可用"
@@ -168,7 +168,7 @@
     "message": "启用保存到在线文献库"
   },
   "reports_report_submitted": {
-    "message": "已提交您的错误报告。\n\n报告 ID: $1\n\n您需要在 Zetero 论坛中发帖，帖子中附上报告 ID、问题描述、重现问题所需的步骤。\n\n未在论坛中提交的错误报告不会被处理。"
+    "message": "已提交您的错误报告。\n\n报告 ID: $1\n\n您需要在 Zotero 论坛中发帖，帖子中附上报告 ID、问题描述、重现问题所需的步骤。\n\n未在论坛中提交的错误报告不会被处理。"
   },
   "reports_debug_output_submitted": {
     "message": "您的调试输出已提交。Debug ID 为 $1。"
@@ -204,7 +204,7 @@
     "message": "$1 锁定了您的文档以避免多名用户同时编辑参考文献。同时编辑文档中的参考文献可能导致参考文献或文档的损坏。网络故障等某些无法预见的情况可能会导致您的文档被持续锁定。如果您确信当前情况属异常误判，您可以忽略此锁定。<br/><br/>是否忽略文档锁定？"
   },
   "integration_googleDocs_authScopeError": {
-    "message": "$1 需要获取编辑您的 Google Docs 文档的权限才能插入引注。请重试，并确保允许$1查看、编辑、创建和删除您的 Google Docs 文档。"
+    "message": "$1 需要有编辑您的 Google Docs 文档的权限才能插入引注。请重试，确保允许$1查看、编辑、创建和删除您的 Google Docs 文档。"
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "您所选择的 Google 账户没有编辑该文档的权限。请重试，确保所选的账号有编辑权限。"
@@ -222,10 +222,10 @@
     "message": "该引注已<a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">与 $1断开</a>。您需要重新链接，否则参考文献表中的该引注不会更新或出现。"
   },
   "copyUnproxiedLink": {
-    "message": "复制未经代理的链接"
+    "message": "复制不经代理的链接"
   },
   "copyUnproxiedPageURL": {
-    "message": "复制未经代理的页面网址"
+    "message": "复制不经代理的页面网址"
   },
   "reloadViaProxy": {
     "message": "通过代理重新加载"

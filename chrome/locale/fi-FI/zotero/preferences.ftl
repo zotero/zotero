@@ -1,5 +1,6 @@
 preferences-window =
     .title = { -app-name }n asetukset
+preferences-appearance-title = Ulkoasu ja kieli
 preferences-auto-recognize-files =
     .label = Hae metatiedot e-kirjoille ja PDFille automaattisesti
 preferences-file-renaming-title = Tiedoston uudelleennimeäminen
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Salli muiden tämän koneen ohjelmien viestiä { -app-name }n kanssa
+preferences-advanced-local-api-available = Saatavilla osoitteessa <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = Sovelluksen { -app-name } HTTP-palvelin ei ole käytössä.
+preferences-advanced-server-enable-and-restart =
+    .label = Kytke päälle ja käynnistä uudelleen
 preferences-advanced-language-and-region-title = Kieli ja alue
 preferences-advanced-enable-bidi-ui =
     .label = Käytä kaksisuuntaisen tekstin editointiohjelmia

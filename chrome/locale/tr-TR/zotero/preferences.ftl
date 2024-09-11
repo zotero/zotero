@@ -1,5 +1,6 @@
 preferences-window =
     .title = { -app-name } Ayarları
+preferences-appearance-title = Görünüm ve Dil
 preferences-auto-recognize-files =
     .label = PDF'ler ve e-Kitaplar için otomatik olarak üstveri al
 preferences-file-renaming-title = Dosya Yeniden Adlandırılması
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Bu bilgisayardaki diğer uygulamaların { -app-name } ile iletişim kurmasına izin ver
+preferences-advanced-local-api-available = <code data-l10n-name="url">{ $url }</span>adresinde mevcut
+preferences-advanced-server-disabled = { -app-name } HTTP sunucusu devre dışı.
+preferences-advanced-server-enable-and-restart =
+    .label = Etkinleştir ve Yeniden Başlat
 preferences-advanced-language-and-region-title = Dil ve Bölge
 preferences-advanced-enable-bidi-ui =
     .label = Çift yönlü metin düzenleme hizmetlerini etkinleştir

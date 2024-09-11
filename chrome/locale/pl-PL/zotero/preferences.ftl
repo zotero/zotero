@@ -1,12 +1,13 @@
 preferences-window =
     .title = Ustawienia { -app-name }
+preferences-appearance-title = Wygląd i język
 preferences-auto-recognize-files =
     .label = Automatycznie pobieraj metadane dla plików PDF i ebooków
 preferences-file-renaming-title = Zmiana nazw plików
 preferences-file-renaming-intro = { -app-name } automatycznie zmienia nazwy pobranych pików na podstawie danych elementu nadrzędnego (tytuł, autor itd.). Możesz także wybrać zmianę nazw plików dodawanych z twojego komputera.
 preferences-file-renaming-auto-rename-files =
     .label = Automatycznie zmień nazwy lokalnie dodawanych plików
-preferences-file-renaming-file-types = Rename files of these types:
+preferences-file-renaming-file-types = Zmień nazwy plików następujących typów:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
 preferences-file-renaming-file-type-epub =
@@ -61,6 +62,10 @@ preferences-styleManager-add-button =
     .label = { $label }
 preferences-advanced-enable-local-api =
     .label = Zezwól innym aplikacjom na tym komputerze komunikować się z { -app-name }
+preferences-advanced-local-api-available = Dostępny na <code data-l10n-name="url">{ $url }</span>
+preferences-advanced-server-disabled = Serwer HTTP { -app-name } nie jest włączony.
+preferences-advanced-server-enable-and-restart =
+    .label = Włącz i uruchom ponownie
 preferences-advanced-language-and-region-title = Język i region
 preferences-advanced-enable-bidi-ui =
     .label = Włącz narzędzia edytowania tekstu dwukierunkowego
