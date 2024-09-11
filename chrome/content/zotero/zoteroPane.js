@@ -6381,7 +6381,8 @@ var ZoteroPane = new function()
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
 
-		const windowAutoStackMinWidth = 950;
+		let layoutChanged = false;
+		const windowAutoStackMinWidth = 830;
 		if (window.innerWidth < windowAutoStackMinWidth) {
 			// Disable layout mode menus because the standard mode is not available
 			layoutModeMenus.forEach(menu => menu.setAttribute("disabled", "true"));
@@ -6389,6 +6390,7 @@ var ZoteroPane = new function()
 			if (!isStackMode && !isTempStackMode) {
 				Zotero.Prefs.set('tempStackMode', true);
 				Zotero.Prefs.set('layout', 'stacked');
+				layoutChanged = true;
 			}
 		}
 		else {
@@ -6396,7 +6398,15 @@ var ZoteroPane = new function()
 			if (isTempStackMode) {
 				Zotero.Prefs.clear('tempStackMode');
 				Zotero.Prefs.set('layout', 'standard');
+				layoutChanged = true;
 			}
+		}
+
+		if (layoutChanged) {
+			// Compute the layout constraints again after the layout change to avoid weirdness
+			setTimeout(() => {
+				this.updateLayoutConstraints();
+			}, 0);
 		}
 
 		collectionsPane.style.setProperty(
