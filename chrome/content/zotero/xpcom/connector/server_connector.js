@@ -484,9 +484,7 @@ Zotero.Server.Connector.Detect.prototype = {
 		}
 		
 		translators = translators.map(function(translator) {
-			translator = translator.serialize(TRANSLATOR_PASSING_PROPERTIES.concat('proxy'));
-			translator.proxy = translator.proxy ? translator.proxy.toJSON() : null;
-			return translator;
+			return translator.serialize(TRANSLATOR_PASSING_PROPERTIES);
 		});
 		return [200, "application/json", JSON.stringify(translators)];
 	},
