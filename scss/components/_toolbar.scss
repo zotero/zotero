@@ -88,6 +88,12 @@
 	visibility: hidden;
 }
 
+#zotero-collections-toolbar {
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 0;
+}
+
 .zotero-tb-button {
 	-moz-user-focus: normal;
 }

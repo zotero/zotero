@@ -1075,7 +1075,7 @@
 					<div id="zotero-tab-cover" class="hidden" xmlns="http://www.w3.org/1999/xhtml">
 						<label>&zotero.general.loading;</label>
 					</div>
-					<deck id="tabs-deck" flex="1">
+					<deck id="tabs-deck">
 						<vbox id="zotero-pane"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
@@ -1153,10 +1153,10 @@
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
 									<toolbar id="zotero-toolbar-collection-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
-										<hbox id="zotero-collections-toolbar" align="center" flex="1">
+										<hbox id="zotero-collections-toolbar" align="center">
 											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 											<spacer flex="1"></spacer>
-											<html:div style="display: flex;flex-direction: row;">
+											<html:div style="display: flex;flex-direction: row; flex-grow: 0; flex-shrink: 1; min-width: 0;">
 												<toolbarbutton id="zotero-tb-collections-search" data-l10n-id="zotero-collections-search-btn" tabindex="-1" class="zotero-tb-button"/>
 												<search-textbox
 													id="zotero-collections-search" class="hidden" disabled="true"
@@ -1202,8 +1202,8 @@
 									<grippy id="zotero-collections-grippy"/>
 								</splitter>
 								
-								<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient" flex="1">
-									<vbox flex="1" id="zotero-items-pane-container">
+								<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient">
+									<vbox id="zotero-items-pane-container">
 										<toolbar id="zotero-toolbar-item-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
 											<hbox id="zotero-items-toolbar" align="center" flex="1">
 												<toolbarbutton
@@ -1323,7 +1323,7 @@
 									</splitter>
 				
 									<!-- itemPane.xul -->
-									<item-pane id="zotero-item-pane" zotero-persist="width height" flex="0"/>
+									<item-pane id="zotero-item-pane" zotero-persist="width height"/>
 								</box>
 							</hbox>
 						</vbox>
@@ -1344,7 +1344,7 @@
 					</splitter>
 		
 					<!-- contextPane -->
-					<box id="zotero-context-pane" flex="0" collapsed="true" zotero-persist="width">
+					<box id="zotero-context-pane" collapsed="true" zotero-persist="width">
 						<vbox flex="1" style="min-width: 0; min-height: 0;">
 							<box class="stacked-context-placeholder" flex="1"/>
 							<splitter id="zotero-context-splitter-stacked"

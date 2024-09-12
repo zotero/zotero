@@ -13,8 +13,10 @@ $icons: (
 
 #zotero-collections-pane {
 	min-width: $min-width-collections-pane;
+	max-width: var(--max-width-collections-pane);
 	width: $min-width-collections-pane;
-	flex-shrink: 0;
+	flex-grow: 0;
+	flex-shrink: 1;
 	background: var(--material-sidepane);
 }
 

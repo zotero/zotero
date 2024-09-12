@@ -174,29 +174,7 @@ TODO: Replace with SVG
 	text-decoration: underline;
 }
 
-/*
-	Fx115: make panes occupy all available width/height after layout switch
-	or splitter expand/collapse.
-	The splitter element stores state in the style attribute's width/height
-	properties, and if we remove them, the splitter breaks. So we override
-	them here with !important.
-*/
-#zotero-layout-switcher[orient="horizontal"] :is(#zotero-items-pane-container, #zotero-item-pane) {
-	height: auto !important;
-}
 
-#zotero-layout-switcher[orient="horizontal"] #zotero-items-pane-container {
-	width: 0 !important;
-}
-
-#zotero-layout-switcher[orient="vertical"],
-#zotero-layout-switcher[orient="vertical"] :is(#zotero-items-pane-container, #zotero-item-pane) {
-	width: auto !important;
-	/* min-width: 0 is required here to allow the pane to shrink in Stacked view,
-	   but the child #zotero-items-pane sets a larger min-width, and the splitter
-	   follows that instead of this. */
-	min-width: 0 !important;
-}
 
 /* 
 	Fix to odd fx115 behavior that gives an un-collapsed pane the initial width of min-width + last width

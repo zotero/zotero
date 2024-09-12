@@ -48,6 +48,19 @@ var ZoteroContextPane = new function () {
 			: _contextPaneSplitter)
 	});
 
+	Object.defineProperty(this, 'collapsed', {
+		get: () => {
+			return this.splitter.getAttribute('state') === 'collapsed';
+		},
+		set: (collapsed) => {
+			_contextPane.setAttribute('collapsed', !!collapsed);
+			_contextPaneInner.setAttribute('collapsed', !!collapsed);
+			_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_update();
+		}
+	});
+
 	this.update = _update;
 
 	this.focus = () => {
@@ -132,7 +145,6 @@ var ZoteroContextPane = new function () {
 		}
 		if (_isStacked()) {
 			_contextPaneSplitterStacked.setAttribute('hidden', false);
-			_contextPaneSplitter.setAttribute('state', 'open');
 			_contextPaneSplitter.setAttribute('hidden', true);
 			_contextPane.classList.add('stacked');
 			_contextPane.classList.remove('standard');
@@ -149,7 +161,6 @@ var ZoteroContextPane = new function () {
 		else {
 			_contextPaneSplitter.setAttribute('hidden', false);
 			_contextPaneSplitterStacked.setAttribute('hidden', true);
-			_contextPaneSplitterStacked.setAttribute('state', 'open');
 			_contextPane.classList.add('standard');
 			_contextPane.classList.remove('stacked');
 			_readerSidenav.classList.remove('stacked');
@@ -176,6 +187,8 @@ var ZoteroContextPane = new function () {
 		
 		_updatePaneWidth();
 		_updateAddToNote();
+
+		ZoteroPane.updateLayoutConstraints();
 	}
 	
 	function _isLibraryReadOnly(libraryID) {
@@ -183,15 +196,6 @@ var ZoteroContextPane = new function () {
 	}
 
 	function _togglePane() {
-		var splitter = ZoteroContextPane.splitter;
-	
-		var open = true;
-		if (splitter.getAttribute('state') != 'collapsed') {
-			open = false;
-		}
-	
-		_contextPane.setAttribute('collapsed', !open);
-		splitter.setAttribute('state', open ? 'open' : 'collapsed');
-		_update();
+		this.collapsed = !this.collapsed;
 	}
 };

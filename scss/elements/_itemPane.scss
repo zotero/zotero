@@ -1,5 +1,7 @@
 item-pane {
-	min-width: $min-width-item-pane + $width-sidenav;
+	flex-grow: 0;
+	flex-shrink: 1;
+	min-width: var(--width-available-item-pane, $min-width-item-pane + $width-sidenav);
 	min-height: $min-width-item-pane + $width-sidenav;
 
 	&[collapsed="true"] {

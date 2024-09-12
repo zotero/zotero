@@ -6248,8 +6248,7 @@ var ZoteroPane = new function()
 	 */
 	this.unserializePersist = function () {
 		_unserialized = true;
-		var serializedValues = Zotero.Prefs.get("pane.persist");
-		if (!serializedValues) return;
+		var serializedValues = Zotero.Prefs.get("pane.persist") || "{}";
 		serializedValues = JSON.parse(serializedValues);
 		
 		for (var id in serializedValues) {
@@ -6354,33 +6353,73 @@ var ZoteroPane = new function()
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
-		
+		let layoutModeMenus = [
+			document.getElementById("view-menuitem-standard"),
+			document.getElementById("view-menuitem-stacked"),
+		];
+
+		let isStackedMode = Zotero.Prefs.get('layout') === 'stacked';
+		let isTempStackedMode = Zotero.Prefs.get('tempStackedMode');
+		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
+
+		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
+		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
+		// Keep in sycn with abstracts/variables.scss > $min-width-item-pane
+		const itemPaneMinWidth = (isStackedMode || isItemPaneCollapsed) ? 0 : 320;
+		const libraryItemPaneMinWidth = (isStackedMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
+		// Keep in sycn with abstracts/variables.scss > $width-sidenav
+		const sideNavMinWidth = isStackedMode ? 0 : 37;
+		// Keep in sycn with abstracts/variables.scss > $min-width-items-pane
+		const itemsPaneMinWidth = 370;
+
+		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth;
+
 		// Calculate the heights of the components that aren't able to shrink automatically
 		// when the window is resized
-		let fixedComponentWidth = trees.scrollWidth - itemsPaneContainer.scrollWidth;
 		let fixedComponentHeight = titlebar.scrollHeight + trees.scrollHeight - itemsPaneContainer.scrollHeight;
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
+
+		let layoutChanged = false;
+		// Collections pane + items pane + items pane + sidenav + 3px for draggability
+		const windowAutoStackMinWidth = 930;
+		if (window.innerWidth < windowAutoStackMinWidth) {
+			// Disable layout mode menus because the standard mode is not available
+			layoutModeMenus.forEach(menu => menu.setAttribute("disabled", "true"));
+			// If the window is too small in standard mode, enter stack mode temporarily
+			if (!isStackedMode && !isTempStackedMode) {
+				Zotero.Prefs.set('tempStackedMode', true);
+				Zotero.Prefs.set('layout', 'stacked');
+				layoutChanged = true;
+			}
+		}
+		else {
+			layoutModeMenus.forEach(menu => menu.removeAttribute("disabled"));
+			if (isTempStackedMode) {
+				Zotero.Prefs.clear('tempStackedMode');
+				Zotero.Prefs.set('layout', 'standard');
+				layoutChanged = true;
+			}
+		}
+
+		if (layoutChanged) {
+			// Compute the layout constraints again after the layout change to avoid weirdness
+			setTimeout(() => {
+				this.updateLayoutConstraints();
+			}, 0);
+		}
+
+		// This is important to avoid other panes be pushed out of the window
+		collectionsPane.style.setProperty(
+			"--max-width-collections-pane",
+			`${window.innerWidth - libraryItemPaneMinWidth - sideNavMinWidth - itemsPaneMinWidth}px`);
 
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
 		if (ZoteroPane.itemsView) {
 			ZoteroPane.itemsView.updateHeight();
 		}
-		// Temp JS solution to shrink the collection search so that it does not overflow outside
-		// of the collection pane
-		var collectionSearch = document.getElementById("zotero-collections-search");
-		collectionSearch.removeAttribute("data-expanded-width");
-		if (collectionsPaneWidth < 220) {
-			collectionSearch.setAttribute("data-expanded-width", 150);
-			if (collectionSearch.classList.contains("visible")) {
-				collectionSearch.style.maxWidth = "150px";
-			}
-		}
-		else {
-			collectionSearch.style.removeProperty('max-width');
-		}
-		
+
 		this.handleTagSelectorResize();
 
 		this.itemPane.handleResize();
