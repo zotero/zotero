@@ -2656,7 +2656,7 @@ Zotero.Utilities.Internal.activate = new function () {
 				Zotero.Utilities.Internal.executeAppleScript(script);
 			}
 		}
-		else if (!Zotero.isWin && win) {
+		else if (Zotero.isLinux && win) {
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 
 			if (_x11 === false) return;
@@ -2867,6 +2867,13 @@ Zotero.Utilities.Internal.activate = new function () {
 					_X11BringToForeground(win, intervalID);
 				}, 50);
 			}, false);
+		}
+		else if (Zotero.isWin && win) {
+			// Try to focus the window. This is necessary as focusing a node inside
+			// of the window may not necessarily activate the window.
+			win.focus();
+			// If the window is in the background, flash the icon
+			win.getAttention();
 		}
 	};
 };
