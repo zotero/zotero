@@ -439,7 +439,16 @@ Zotero.Integration = new function() {
 	 */
 	this.displayDialog = async function displayDialog(url, options, io) {
 		Zotero.debug(`Integration: Displaying dialog ${url}`);
-		await Zotero.Integration.currentDoc.cleanup();
+		// On macOS (and potentially in the future with Word JS)
+		// we can only run request sequentially (native async field fetching was dropped
+		// with fx102 due to ctypes crashing when passing a callback function) which means
+		// that the webWorker thread is blocked while fetching fields.
+		// We are technically fetching them asynchronously and open the citation dialog
+		// while they are being fetched. However, if we await this cleanup call here
+		// the display of the dialog is blocked until fields are fetched and it is able to run.
+		// So we make sure cleanup is finished before the dialog is closed, but otherwise
+		// we should not delay the dialog display
+		let cleanupPromise = Zotero.Integration.currentDoc.cleanup();
 		Zotero.Integration.currentSession && await Zotero.Integration.currentSession.progressBar.hide(true);
 		
 		var allOptions = 'chrome,centerscreen';
@@ -470,6 +479,7 @@ Zotero.Integration = new function() {
 		window.addEventListener("unload", listener, false);
 
 		await deferred.promise;
+		await cleanupPromise;
 		// We do not want to redisplay the progress bar if this window close
 		// was the final close of the integration command
 		await Zotero.Promise.delay(10);
