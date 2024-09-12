@@ -634,6 +634,28 @@ describe("Zotero.Search", function() {
 						// TEMP: Match parent attachment
 						assert.sameMembers(matches, [attachment.id]);
 					});
+					
+					it("should not include items outside of scope during phrase search", async function () {
+						var col = await createDataObject('collection');
+						fooItem.addToCollection(col.id);
+						await fooItem.saveTx();
+	
+						// Quicksearch from a collection
+						let collectionScope = new Zotero.Search();
+						collectionScope.libraryID = userLibraryID;
+						collectionScope.addCondition('noChildren', 'true');
+						collectionScope.addCondition('collectionID', 'is', col.id);
+						
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						// Phrase search
+						s.addCondition('quicksearch-everything', 'contains', '"foo"');
+						s.setScope(collectionScope, true);
+						var matches = await s.search();
+						// Only the item from the collection is returned
+						assert.equal(matches.length, 1);
+						assert.equal(matches[0], fooItem.id);
+					});
 				});
 			});
 			
