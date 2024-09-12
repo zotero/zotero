@@ -6358,17 +6358,17 @@ var ZoteroPane = new function()
 			document.getElementById("view-menuitem-stacked"),
 		];
 
-		let isStackMode = Zotero.Prefs.get('layout') === 'stacked';
-		let isTempStackMode = Zotero.Prefs.get('tempStackMode');
+		let isStackedMode = Zotero.Prefs.get('layout') === 'stacked';
+		let isTempStackedMode = Zotero.Prefs.get('tempStackedMode');
 		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
 
 		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
 		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
 		// Keep in sycn with abstracts/variables.scss > $min-width-item-pane
-		const itemPaneMinWidth = (isStackMode || isItemPaneCollapsed) ? 0 : 320;
-		const libraryItemPaneMinWidth = (isStackMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
+		const itemPaneMinWidth = (isStackedMode || isItemPaneCollapsed) ? 0 : 320;
+		const libraryItemPaneMinWidth = (isStackedMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
 		// Keep in sycn with abstracts/variables.scss > $width-sidenav
-		const sideNavMinWidth = isStackMode ? 0 : 37;
+		const sideNavMinWidth = isStackedMode ? 0 : 37;
 		// Keep in sycn with abstracts/variables.scss > $min-width-items-pane
 		const itemsPaneMinWidth = 370;
 
@@ -6387,16 +6387,16 @@ var ZoteroPane = new function()
 			// Disable layout mode menus because the standard mode is not available
 			layoutModeMenus.forEach(menu => menu.setAttribute("disabled", "true"));
 			// If the window is too small in standard mode, enter stack mode temporarily
-			if (!isStackMode && !isTempStackMode) {
-				Zotero.Prefs.set('tempStackMode', true);
+			if (!isStackedMode && !isTempStackedMode) {
+				Zotero.Prefs.set('tempStackedMode', true);
 				Zotero.Prefs.set('layout', 'stacked');
 				layoutChanged = true;
 			}
 		}
 		else {
 			layoutModeMenus.forEach(menu => menu.removeAttribute("disabled"));
-			if (isTempStackMode) {
-				Zotero.Prefs.clear('tempStackMode');
+			if (isTempStackedMode) {
+				Zotero.Prefs.clear('tempStackedMode');
 				Zotero.Prefs.set('layout', 'standard');
 				layoutChanged = true;
 			}
