@@ -27,15 +27,16 @@
 		<groupbox aria-labelledby="preferences-appearance-title">
 			<label><html:h2 id="preferences-appearance-title" data-l10n-id="preferences-appearance-title"/></label>
 		
-			<hbox align="center">
-				<label id="color-scheme-label" data-l10n-id="preferences-color-scheme"/>
-				<!-- aria-describedby set on individual radio buttons because voiceover won't announce it if set on radiogroup-->
-				<radiogroup orient="horizontal" id="color-scheme" preference="browser.theme.toolbar-theme">
-					<radio data-l10n-id="preferences-color-scheme-auto" value="2" aria-describedby="color-scheme-label"/>
-					<radio data-l10n-id="preferences-color-scheme-light" value="1" aria-describedby="color-scheme-label"/>
-					<radio data-l10n-id="preferences-color-scheme-dark" value="0" aria-describedby="color-scheme-label"/>
-				</radiogroup>
-			</hbox>
+			<groupbox aria-labelledby="color-scheme-label">
+				<hbox align="center">
+					<label id="color-scheme-label" data-l10n-id="preferences-color-scheme"/>
+					<radiogroup orient="horizontal" id="color-scheme" preference="browser.theme.toolbar-theme">
+						<radio data-l10n-id="preferences-color-scheme-auto" value="2"/>
+						<radio data-l10n-id="preferences-color-scheme-light" value="1"/>
+						<radio data-l10n-id="preferences-color-scheme-dark" value="0"/>
+					</radiogroup>
+				</hbox>
+			</groupbox>
 		
 			<hbox align="center">
 				<label value="&zotero.bibliography.locale.label;" control="locale-menu"/>
@@ -60,7 +61,7 @@
 
 			<vbox id="item-pane-header-bib-entry-options" class="indented-pref">
 				<hbox align="center">
-					<label data-l10n-id="preferences-item-pane-header-style"/>
+					<label data-l10n-id="preferences-item-pane-header-style" control="item-pane-header-style-menu"/>
 					<menulist
 							id="item-pane-header-style-menu"
 							preference="extensions.zotero.itemPaneHeader.bibEntry.style"
@@ -70,7 +71,7 @@
 				</hbox>
 
 				<hbox align="center">
-					<label data-l10n-id="preferences-item-pane-header-locale"/>
+					<label data-l10n-id="preferences-item-pane-header-locale" control="item-pane-header-locale-menu"/>
 					<menulist
 							id="item-pane-header-locale-menu"
 							preference="extensions.zotero.itemPaneHeader.bibEntry.locale"
