@@ -6250,13 +6250,6 @@ var ZoteroPane = new function()
 		_unserialized = true;
 		var serializedValues = Zotero.Prefs.get("pane.persist") || "{}";
 		serializedValues = JSON.parse(serializedValues);
-
-		// Set default width for collections pane, as its min-width is too small
-		if (!serializedValues["zotero-collections-pane"]) {
-			serializedValues["zotero-collections-pane"] = {
-				width: "200",
-			};
-		}
 		
 		for (var id in serializedValues) {
 			var el = document.getElementById(id);
@@ -6370,7 +6363,7 @@ var ZoteroPane = new function()
 		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
 
 		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
-		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 100;
+		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
 		// Keep in sycn with abstracts/variables.scss > $min-width-item-pane
 		const itemPaneMinWidth = (isStackMode || isItemPaneCollapsed) ? 0 : 320;
 		const libraryItemPaneMinWidth = (isStackMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
@@ -6388,7 +6381,8 @@ var ZoteroPane = new function()
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
 
 		let layoutChanged = false;
-		const windowAutoStackMinWidth = 830;
+		// Collections pane + items pane + items pane + sidenav + 3px for draggability
+		const windowAutoStackMinWidth = 930;
 		if (window.innerWidth < windowAutoStackMinWidth) {
 			// Disable layout mode menus because the standard mode is not available
 			layoutModeMenus.forEach(menu => menu.setAttribute("disabled", "true"));
