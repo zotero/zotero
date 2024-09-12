@@ -805,7 +805,7 @@ var Zotero_QuickFormat = new function () {
 		}, options);
 			
 		let { preserveSelection, nCitedItemsFromLibrary } = options;
-		let previousItemID, selectedIndex = 1;
+		let previousItemID, selectedIndex = 0;
 
 		// Do this so we can preserve the selected item after cited items have been loaded
 		if (preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
@@ -904,7 +904,7 @@ var Zotero_QuickFormat = new function () {
 		// Do not select the item in reference panel if the editor
 		// is non-empty and nothing has been typed yet
 		if (selectedIndex > 1 || isEditorCleared() || !isInputEmpty(currentInput)) {
-			referenceBox.selectedIndex = selectedIndex;
+			selectedIndex = _selectItem(selectedIndex);
 		}
 		referenceBox.ensureIndexIsVisible(selectedIndex);
 		// Record the last input used for a search
@@ -1180,7 +1180,21 @@ var Zotero_QuickFormat = new function () {
 			referenceBox.selectedItem = firstItem;
 		}
 		else {
-			referenceBox.selectedIndex = 1;
+			referenceBox.selectedIndex = _selectItem(0);
+		}
+	}
+	
+	// Selects first valid item for index (avoiding headers)
+	function _selectItem(index) {
+		// Slice from index and select first non-header row
+		let firstItem = [...referenceBox.children].slice(index).findIndex(node => !node.hasAttribute('disabled'));
+		if (firstItem != -1) {
+			referenceBox.selectedIndex = index + firstItem;
+			return index + firstItem;
+		}
+		else {
+			referenceBox.selectedIndex = -1;
+			return -1;
 		}
 	}
 	
