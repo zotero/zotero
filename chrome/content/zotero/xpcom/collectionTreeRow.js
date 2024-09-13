@@ -271,6 +271,7 @@ Zotero.CollectionTreeRow.prototype.getChildren = function () {
 
 // Returns the list of deleted collections in the trash.
 // Subcollections of deleted collections are filtered out.
+// Accounts for case-insensitive quickSearch.
 Zotero.CollectionTreeRow.prototype.getTrashedCollections = async function () {
 	if (!this.isTrash()) {
 		return [];
@@ -281,7 +282,15 @@ Zotero.CollectionTreeRow.prototype.getTrashedCollections = async function () {
 	for (let d of deleted) {
 		deletedParents.add(d.key);
 	}
-	return deleted.filter(d => !d.parentKey || !deletedParents.has(d.parentKey));
+	return deleted.filter(d => d.getDisplayTitle().toLowerCase().includes(this.searchText.toLowerCase())
+		&& (!d.parentKey || !deletedParents.has(d.parentKey)));
+};
+
+// Returns the list of deleted searches in the trash.
+// Accounts for case-insensitive quickSearch.
+Zotero.CollectionTreeRow.prototype.getTrashedSearches = async function () {
+	let deleted = await Zotero.Searches.getDeleted(this.ref.libraryID);
+	return deleted.filter(d => d.getDisplayTitle().toLowerCase().includes(this.searchText.toLowerCase()));
 };
 
 
