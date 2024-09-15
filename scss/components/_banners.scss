@@ -3,6 +3,7 @@
 
 	display: flex;
 	justify-content: center;
+	align-items: center;
 	text-align: center;
 	position: relative;
 	white-space: nowrap;
@@ -95,11 +96,15 @@
 }
 
 #retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner,
-		#mac-word-plugin-install-warning > .banner {
+#mac-word-plugin-install-warning {
 	line-height: 2.2em;
 	font-size: 13.5px;
 	padding: 0 2em;
 	font-weight: 600;
+}
+
+#mac-word-plugin-install-warning {
+	padding: 0 1em;
 }
 
 #retracted-items-banner {
@@ -116,8 +121,15 @@
 }
 
 #mac-word-plugin-install-warning {
-	background: #ffea50;
+	background: var(--accent-blue30);
+	color: var(--fill-primary);
+	font-weight: normal;
 	border-bottom: #a9a9a9 .5px solid;
+	line-height: 2.5em;
+}
+
+#mac-word-plugin-install-remind-later {
+	margin-inline-end: .4em;
 }
 
 #sync-reminder-banner {
