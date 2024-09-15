@@ -1135,11 +1135,17 @@
 							<vbox id="mac-word-plugin-install-warning" class="banner-container" collapsed="true" role="status">
 								<html:div class="banner">
 									<html:div class="message" data-l10n-id="mac-word-plugin-install-message" />
-									<html:a class="link" data-l10n-id="mac-word-plugin-install-action" />
+									<button
+										id="mac-word-plugin-install-action"
+										data-l10n-id="mac-word-plugin-install-action-button"
+										default="true"/>
 									<html:div class="spacer" />
-									<label is="text-link" class="remind-later-link" data-l10n-id="general-remind-me-later" />
-									<label is="text-link" class="dont-ask-again-link" data-l10n-id="general-dont-ask-again" />
-									<label is="text-link" class="close-link">×</label>
+									<button
+										id="mac-word-plugin-install-remind-later"
+										data-l10n-id="mac-word-plugin-install-remind-later-button"/>
+									<!-- TODO: Use ftl string -->
+									<button
+										id="mac-word-plugin-install-dont-ask-again"/>
 								</html:div>
 							</vbox>
 							
