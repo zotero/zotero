@@ -6132,20 +6132,18 @@ var ZoteroPane = new function()
 	 */
 	this.showMacWordPluginInstallWarning = function () {
 		return new Promise((resolve) => {
-			const panel = document.querySelector('#mac-word-plugin-install-warning');
-			const action = panel.querySelector('.link');
-			const close = panel.querySelector('.close-link');
-			const remind = panel.querySelector('.remind-later-link');
-			const dontAskAgain = panel.querySelector('.dont-ask-again-link');
+			const panel = document.getElementById('mac-word-plugin-install-warning');
+			const action = document.getElementById('mac-word-plugin-install-action');
+			const remind = document.getElementById('mac-word-plugin-install-remind-later');
+			const dontAskAgain = document.getElementById('mac-word-plugin-install-dont-ask-again');
+			
+			// TODO: Replace with ftl string
+			dontAskAgain.label = Zotero.getString('general.dontAskAgain');
 			
 			panel.removeAttribute('collapsed');
 			action.onclick = () => {
 				this.hideMacWordPluginInstallWarning();
 				resolve({ install: true });
-			};
-			close.onclick = () => {
-				this.hideMacWordPluginInstallWarning();
-				resolve({ dismiss: true });
 			};
 			remind.onclick = () => {
 				this.hideMacWordPluginInstallWarning();
