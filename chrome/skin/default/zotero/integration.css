@@ -391,7 +391,7 @@ window.citation-dialog {
 }
 
 window#add-citation-dialog, window#edit-bibliography-dialog {
-	min-height: 600px;
+	min-height: 450px;
 }
 
 window#add-citation-dialog dialog, window#edit-bibliography-dialog dialog {
