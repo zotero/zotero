@@ -2945,42 +2945,11 @@ describe("Connector Server", function () {
 			let item = win.ZoteroPane.getSelectedItems()[0];
 			assert.equal(item.getDisplayTitle(), "Title!");
 
-			// Cancel the session
-			let cancelReq = await Zotero.HTTP.request(
-				'POST',
-				connectorServerPath + '/connector/cancel',
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ sessionID })
-				}
-			);
-			assert.equal(cancelReq.status, 200);
+			// When /connector/cancel is called and save session is not done,
+			// it will call eraseItemsWhenDone to wait for items to load before deleting them
+			let session = Zotero.Server.Connector.SessionManager.get(sessionID);
+			await session.eraseItemsWhenDone();
 
-			// Cancelled item immediately moved to trash
-			let cancelledItem = await Zotero.Items.getAsync(item.id);
-			assert.isTrue(cancelledItem.deleted);
-			
-			// Wait for everything to finish
-			let isDone = false;
-			do {
-				await Zotero.Promise.delay(100);
-				let checkProgress = await Zotero.HTTP.request(
-					'POST',
-					connectorServerPath + "/connector/sessionProgress",
-					{
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify({ sessionID })
-					}
-				);
-				let data = JSON.parse(checkProgress.response);
-				isDone = data.done;
-			}
-			while (!isDone);
-
-			// To be safe, wait another interval duration from /connector/cancel to ensure the item is erased
-			await Zotero.Promise.delay(150);
 			// The item should be erased in the end
 			let deletedItem = await Zotero.Items.getAsync(item.id);
 			assert.isFalse(deletedItem);

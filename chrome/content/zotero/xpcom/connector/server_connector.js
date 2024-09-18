@@ -414,6 +414,41 @@ Zotero.Server.Connector.SaveSession.prototype.eraseItems = async function () {
 	this._items = new Set();
 };
 
+// Wait for all items to finish saving and delete them after. Used to undo the save session
+// without interfering with the translation or save process.
+Zotero.Server.Connector.SaveSession.prototype.eraseItemsWhenDone = function () {
+	return new Zotero.Promise(async (resolve) => {
+		// If the function was already called before, do nothing
+		if (this.eraseIntervalID) {
+			resolve(false);
+			return;
+		}
+
+		// Trash items so that they immediately leave the current view
+		await this.trashItems();
+	
+		let checkCount = 0;
+		const intervalDelay = 100;
+		const maxMinutes = 3;
+		// Every once in a while, check if saving is done, and when it is - delete all session items
+		this.eraseIntervalID = setInterval(async () => {
+			// In case any additional top-level items are added, make sure they are trashed too
+			await this.trashItems();
+			if (this.isSavingDone()) {
+				await this.eraseItems();
+				clearInterval(this.eraseIntervalID);
+				resolve(true);
+			}
+			// Ensure that even if something goes wrong, the loop breaks after 3 minutes
+			checkCount += 1;
+			if (checkCount > maxMinutes * 60 * 1000 / intervalDelay) {
+				clearInterval(this.eraseIntervalID);
+				resolve(false);
+			}
+		}, intervalDelay);
+	});
+};
+
 // Move all top-level items into trash. Used to cancel initiated saving of items from the connector.
 Zotero.Server.Connector.SaveSession.prototype.trashItems = async function () {
 	let topLevelItems = [...this._items].filter(item => item.isTopLevelItem() && !item.deleted);
@@ -1988,33 +2023,21 @@ Zotero.Server.Connector.Cancel.prototype = {
 			return [200, "application/json", JSON.stringify({ status: "NO_SESSION" })];
 		}
 
-		session.cancelled = true;
-		// If all items have been saved, delete them now
-		if (session.isSavingDone()) {
-			await session.eraseItems();
-			return [200, "application/json", JSON.stringify({ status: "CANCELLED" })];
+		if (session.cancelled) {
+			return [409, "application/json", JSON.stringify({ status: "ALREADY_CANCELLED" })];
 		}
-		
-		// Otherwise, trash them so they go immediately away and begin checking if the saving is finished.
-		// As soon as it is, erase all items from this session.
-		await session.trashItems();
-		let checkCount = 0;
-		const intervalDelay = 100;
-		const maxMinutes = 3;
-		let intervalID = setInterval(async () => {
-			// In case any additional top-level items are added, make sure they are trashed too
-			await session.trashItems();
-			if (session.isSavingDone()) {
-				session.eraseItems();
-				clearInterval(intervalID);
-			}
-			// Ensure that even if something goes wrong, the loop breaks after 3 minutes
-			checkCount += 1;
-			if (checkCount > maxMinutes * 60 * 1000 / intervalDelay) {
-				clearInterval(intervalID);
-			}
-		}, intervalDelay);
 
-		return [200, "application/json", JSON.stringify({ status: "WILL_BE_CANCELLED" })];
+		session.cancelled = true;
+		let allDone = session.isSavingDone();
+		// If all items have been saved, delete them now
+		if (allDone) {
+			await session.eraseItems();
+		}
+		// Otherwise, wait for all items to finish saving and delete them then
+		else {
+			session.eraseItemsWhenDone();
+		}
+
+		return [200, "application/json", JSON.stringify({ status: allDone ? "CANCELLED" : "WILL_CANCEL" })];
 	}
 };
