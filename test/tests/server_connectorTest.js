@@ -2979,6 +2979,8 @@ describe("Connector Server", function () {
 			}
 			while (!isDone);
 
+			// To be safe, wait another interval duration from /connector/cancel to ensure the item is erased
+			await Zotero.Promise.delay(150);
 			// The item should be erased in the end
 			let deletedItem = await Zotero.Items.getAsync(item.id);
 			assert.isFalse(deletedItem);
