@@ -247,7 +247,15 @@
 				}
 				else {
 					let count = this.itemsView.rowCount;
-					msg = { l10nId: 'item-pane-message-unselected', l10nArgs: { count } };
+					if (this.collectionTreeRow.isTrash()
+							&& this.itemsView._rows?.some(
+								x => x.ref instanceof Zotero.Collection || x.ref instanceof Zotero.Search
+							)) {
+						msg = { l10nId: 'item-pane-message-objects-unselected', l10nArgs: { count } };
+					}
+					else {
+						msg = { l10nId: 'item-pane-message-unselected', l10nArgs: { count } };
+					}
 				}
 				
 				this.setItemPaneMessage(msg);
