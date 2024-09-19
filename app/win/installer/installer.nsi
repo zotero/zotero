@@ -236,7 +236,7 @@ Function UninstallOld
     Delete /REBOOTOK "$3\platform.ini"
     Delete /REBOOTOK "$3\precomplete"
     Delete /REBOOTOK "$3\voucher.bin"
-    RMDir /REBOOTOK $3
+    RMDir $3
   continue_installation:
     ; End uninstallation
     SetShellVarContext current
