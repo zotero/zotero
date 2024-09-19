@@ -2946,10 +2946,10 @@ describe("Connector Server", function () {
 			assert.equal(item.getDisplayTitle(), "Title!");
 
 			// When /connector/cancel is called and save session is not done,
-			// it will call eraseItemsWhenDone to wait for items to load before deleting them
-			// so spy on it to await for the method to finish before continuing with the test
+			// it will call a few session methods that we spy on to check for their completion
 			let session = Zotero.Server.Connector.SessionManager.get(sessionID);
 			let eraseItemsWhenDoneSpy = sinon.spy(session, 'eraseItemsWhenDone');
+			let trashItemsSpy = sinon.spy(session, 'trashItems');
 
 			// Cancel the session
 			await Zotero.HTTP.request(
@@ -2960,6 +2960,12 @@ describe("Connector Server", function () {
 					body: JSON.stringify({ sessionID })
 				}
 			);
+
+			// Soon after the /cancel call, the item should be moved into the trash
+			await trashItemsSpy.returnValues[0];
+			session.trashItems.restore();
+
+			assert.isTrue(item.deleted);
 
 			// Wait for the method to complete
 			await eraseItemsWhenDoneSpy.returnValues[0];
