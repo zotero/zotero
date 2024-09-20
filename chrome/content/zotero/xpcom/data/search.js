@@ -848,6 +848,7 @@ Zotero.Search.prototype.fromJSON = function (json, options = {}) {
 			case 'version':
 			case 'name':
 			case 'conditions':
+			case 'deleted':
 				break;
 			
 			default:
