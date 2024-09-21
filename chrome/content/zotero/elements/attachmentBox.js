@@ -77,6 +77,10 @@
 						<menupopup id="url-menu">
 							<menuitem id="url-menuitem-copy"/>
 						</menupopup>
+						<tooltip id="field-help-tooltip" position="before_start" noautohide="true" style="pointer-events: all; margin-block-end: 5px;">
+							<label id="filed-help-label"></label>
+							<label id="field-help-link" class="zotero-text-link" is="zotero-text-link" data-l10n-attrs="href"></label>
+						</tooltip>
 					</popupset>
 				</html:div>
 			</collapsible-section>
@@ -250,18 +254,25 @@
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 
-			this._id("title").addEventListener('blur', () => {
-				this.item.setField('title', this._id('title').value);
+			let title = this._id('title');
+			title.addEventListener('focus', () => {
+				this._showHelpTooltip(title);
+			});
+			title.addEventListener('blur', () => {
+				this.item.setField('title', title.value);
 				this.item.saveTx();
+				this._hideHelpTooltip();
 			});
 
 			let fileName = this._id("fileName");
 			fileName.addEventListener('focus', () => {
 				this._isEditingFilename = true;
+				this._showHelpTooltip(fileName);
 			});
 			fileName.addEventListener('blur', () => {
 				this.editFileName(fileName.value);
 				this._isEditingFilename = false;
+				this._hideHelpTooltip();
 			});
 
 			let noteButton = this._id('note-button');
@@ -742,6 +753,18 @@
 			this._preview.setAttribute('data-l10n-id', 'attachment-preview');
 			this._body.prepend(this._preview);
 			this._preview.disableResize = !!this.hidden;
+		}
+		
+		_showHelpTooltip(element) {
+			let tooltip = this._id('field-help-tooltip');
+			let l10nPrefix = `attachment-info-${element.id == "title" ? "title" : "filename"}-help`;
+			tooltip.querySelector("#filed-help-label").dataset.l10nId = `${l10nPrefix}-label`;
+			tooltip.querySelector("#field-help-link").dataset.l10nId = `${l10nPrefix}-link`;
+			tooltip.openPopup(element, 'before_start', 0, 0, false, false);
+		}
+
+		_hideHelpTooltip() {
+			this._id('field-help-tooltip').hidePopup();
 		}
 	}
 
