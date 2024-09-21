@@ -508,7 +508,14 @@
 			// Hacky way to preventing the focus from going into the actual reader where it can
 			// get stuck. On tab from the preview, try to find the next element and focus it.
 			else if (e.key == "Tab" && !e.shiftKey) {
-				let toFocus = this.nextElementSibling.querySelector('[tabindex="0"]');
+				// For attachment box, if the next focusable element is the url link, which can be hidden
+				// and cause the focus to be stuck. In this case, let the parent element handle the focus.
+				if (this.parentElement?.focusAfterPreview) {
+					this.parentElement.focusAfterPreview();
+					stopEvent = true;
+				}
+				// Do not focus hidden elements, which will stuck the focus
+				let toFocus = this.nextElementSibling.querySelector('[tabindex="0"]:not([hidden])');
 				if (!toFocus && this.nextElementSibling.getAttribute("tabindex") == "0") {
 					toFocus = this.nextElementSibling;
 				}

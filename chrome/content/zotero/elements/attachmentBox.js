@@ -722,6 +722,19 @@
 			}
 		};
 
+		// Hack to take focus away from the attachment preview as the the url link can be hidden
+		// and cause the focus to be stuck. In this case.
+		// See also AttachmentPreview#_handleKeypress
+		focusAfterPreview() {
+			let url = this._id("url");
+			if (!url.hidden) {
+				url.focus();
+				return;
+			}
+			
+			this._id("title").focus();
+		}
+
 		_id(id) {
 			return this.querySelector(`#${id}`);
 		}
