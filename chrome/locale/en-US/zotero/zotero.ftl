@@ -529,6 +529,8 @@ new-collection-create-in = Create in:
 
 attachment-info-title = Title
 attachment-info-filename = Filename
+attachment-info-rename =
+    .tooltiptext = Rename file from parent metadata
 attachment-info-accessed = Accessed
 attachment-info-pages = Pages
 attachment-info-modified = Modified

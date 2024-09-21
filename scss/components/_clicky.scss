@@ -85,3 +85,8 @@
 .zotero-clicky-minus[disabled=true], .zotero-clicky-plus[disabled=true] {
 	opacity: .5;
 }
+
+.zotero-clicky-rename {
+	@include svgicon-menu("rename", "universal", "16");
+	margin: 0;
+}
