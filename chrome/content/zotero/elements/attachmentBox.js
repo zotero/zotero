@@ -39,12 +39,12 @@
 					<html:div class="metadata-table">
 						<html:div id="titleRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="title-label" class="key" data-l10n-id="attachment-info-title"/></html:div>
-							<html:div class="meta-data"><editable-text id="title" aria-labelledby="title-label" tight="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="title" aria-labelledby="title-label filed-help-label" tight="true"/></html:div>
 						</html:div>
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
 							<html:div class="meta-data">
-								<editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/>
+								<editable-text id="fileName" aria-labelledby="fileName-label filed-help-label" tight="true"/>
 								<toolbarbutton id="rename" class="zotero-clicky zotero-clicky-rename show-on-hover" data-l10n-id="attachment-info-rename" tabindex="0" oncommand="ZoteroPane.renameSelectedAttachmentsFromParents()"/>
 							</html:div>
 						</html:div>
