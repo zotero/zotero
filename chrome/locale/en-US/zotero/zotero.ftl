@@ -527,6 +527,7 @@ new-collection-dialog =
 new-collection-name = Name:
 new-collection-create-in = Create in:
 
+attachment-info-title = Title
 attachment-info-filename = Filename
 attachment-info-accessed = Accessed
 attachment-info-pages = Pages

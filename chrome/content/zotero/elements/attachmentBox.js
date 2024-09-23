@@ -37,6 +37,10 @@
 							ondragstart="let dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
 					</html:div>
 					<html:div class="metadata-table">
+						<html:div id="titleRow" class="meta-row">
+							<html:div class="meta-label"><html:label id="title-label" class="key" data-l10n-id="attachment-info-title"/></html:div>
+							<html:div class="meta-data"><editable-text id="title" aria-labelledby="title-label" tight="true"/></html:div>
+						</html:div>
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
 							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/></html:div>
@@ -243,6 +247,11 @@
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 
+			this._id("title").addEventListener('blur', () => {
+				this.item.setField('title', this._id('title').value);
+				this.item.saveTx();
+			});
+
 			let fileName = this._id("fileName");
 			fileName.addEventListener('focus', () => {
 				this._isEditingFilename = true;
@@ -403,6 +412,8 @@
 			else {
 				accessed.hidden = true;
 			}
+
+			this._id("title").value = this.item.getField('title');
 			
 			if (this.displayFileName && !isLinkedURL) {
 				let fileName = "";
