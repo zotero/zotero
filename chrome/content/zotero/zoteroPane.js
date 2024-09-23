@@ -5853,7 +5853,7 @@ var ZoteroPane = new function()
 			}
 			catch (e) {
 				// IOUtils.exists() throws if the path is invalid - suppress that
-				if (e.name === 'NS_ERROR_FILE_UNRECOGNIZED_PATH') {
+				if (e.message.includes('Could not parse path')) {
 					Zotero.debug('Invalid path: ' + correctedPath);
 					continue;
 				}
