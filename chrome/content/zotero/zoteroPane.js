@@ -5845,9 +5845,20 @@ var ZoteroPane = new function()
 		for (let segmentsToDrop = 0; segmentsToDrop < parts.length; segmentsToDrop++) {
 			let correctedPath = join(basePath, ...parts.slice(segmentsToDrop));
 
-			if (!(await IOUtils.exists(correctedPath))) {
-				Zotero.debug('Does not exist: ' + correctedPath);
-				continue;
+			try {
+				if (!(await IOUtils.exists(correctedPath))) {
+					Zotero.debug('Does not exist: ' + correctedPath);
+					continue;
+				}
+			}
+			catch (e) {
+				// IOUtils.exists() throws if the path is invalid - suppress that
+				if (e.name === 'NS_ERROR_FILE_UNRECOGNIZED_PATH') {
+					Zotero.debug('Invalid path: ' + correctedPath);
+					continue;
+				}
+				// Otherwise this could be a meaningful filesystem error, so re-throw
+				throw e;
 			}
 			Zotero.debug('Exists! ' + correctedPath);
 			
