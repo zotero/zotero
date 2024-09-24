@@ -175,7 +175,7 @@
 					<div class="style-selector-wrapper">
 						<xul:style-selector id="style-selector" value="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}" />
 					</div>
-					<label id="manage-styles" class="text-link" data-l10n-id="bibliography-manageStyles-label"></label>
+					<label id="manage-styles" tabindex="0" role="link" class="text-link" data-l10n-id="bibliography-manageStyles-label"></label>
 				</div>
 				<div class="locale-selector-wrapper">
 					<label for="locale-selector" class="locale-selector-label" data-l10n-id="bibliography-locale-label" />
@@ -266,6 +266,14 @@
 			this.querySelector('#manage-styles').addEventListener('click', (_e) => {
 				const event = new CustomEvent("manage-styles");
 				this.dispatchEvent(event);
+			});
+			// Click manage-styles link on space or enter. Otherwise, Enter would submit the dialog
+			// and space would do nothing.
+			this.querySelector('#manage-styles').addEventListener('keypress', (event) => {
+				if (event.key == 'Enter' || event.key == ' ') {
+					event.preventDefault();
+					event.target.click();
+				}
 			});
 		}
 
