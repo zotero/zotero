@@ -1794,11 +1794,16 @@
 				if (row.nextElementSibling.querySelector("#more-creators-label")) {
 					this._displayAllCreators = true;
 				}
-				let { position } = this.getCreatorFields(row);
+				let { position, firstName, lastName } = this.getCreatorFields(row);
+				
+				// If creator name is empty after trimming whitespaces, do nothing. The focus will
+				// remain in the creator row, and it will be deleted on next blur
+				if (!(firstName || lastName)) return;
+			
 				// Add and focus new creator row after current one
 				this._addCreatorRow = position + 1;
 				// Blur current row to save changes if needed, otherwise just re-render
-				if (target.initialValue !== target.value) {
+				if (target.initialValue.trim() !== target.value.trim()) {
 					this.blurOpenField();
 				}
 				else {
@@ -2037,8 +2042,8 @@
 				position = null;
 			}
 			var fields = {
-				lastName: label1.value,
-				firstName: label2.value,
+				lastName: label1.value.trim(),
+				firstName: label2.value.trim(),
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
 				position: position,

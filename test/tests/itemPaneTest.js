@@ -462,6 +462,42 @@ describe("Item pane", function () {
 			assert.equal(position, 1);
 		});
 
+		it("should do nothing on shift-Enter in an empty unsaved row", async function () {
+			var item = await createDataObject('item');
+			item.setCreators([
+				{
+					lastName: "One",
+					creatorType: "author"
+				}
+			]);
+			let promise = waitForItemEvent('modify');
+			item.saveTx();
+			await promise;
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			let creatorLastName = itemBox.querySelector(".creator-type-value editable-text");
+			creatorLastName.focus();
+			// Dispatch shift-Enter event
+			var shiftEnter = new KeyboardEvent('keydown', {
+				key: "Enter",
+				shiftKey: true,
+				bubbles: true
+			});
+			creatorLastName.ref.dispatchEvent(shiftEnter);
+			// Wait a moment for new row to be added
+			await Zotero.Promise.delay();
+			// Make sure an unsaved empty creator row is focused
+			assert.exists(doc.activeElement.closest("[unsaved=true]"));
+			// Mark current creator input
+			doc.activeElement.id = "test_creator_row";
+			// Field with just space should be treated as empty
+			doc.activeElement.value = " ";
+			// Dispatch shift-Enter event again
+			doc.activeElement.dispatchEvent(shiftEnter);
+			// Make sure we're still on the same field
+			await Zotero.Promise.delay();
+			assert.equal(doc.activeElement.id, "test_creator_row");
+		});
+
 		it("should display all creators on shift-Enter on last visible creator", async function () {
 			var item = await createDataObject('item');
 			const creatorsCount = 10;
