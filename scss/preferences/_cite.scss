@@ -22,6 +22,12 @@
 	width: 105px;
 }
 
+/* Get additional styles link should occupy only as much space as needed */
+#styleManager-buttons .zotero-text-link {
+	max-width: fit-content;
+	margin-right: auto;
+}
+
 #openCSLEdit, #styleManager-delete {
 	margin-inline-end: 6px;
 }
