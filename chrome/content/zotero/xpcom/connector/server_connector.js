@@ -1762,7 +1762,8 @@ Zotero.Server.Connector.Ping.prototype = {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
 					googleDocsAddNoteEnabled: true,
 					translatorsHash,
-					sortedTranslatorHash
+					sortedTranslatorHash,
+					supportsSaveCancelling: true
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {
