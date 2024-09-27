@@ -815,14 +815,6 @@
 					// this item, so that added creators aren't
 					// immediately hidden
 					this._displayAllCreators = true;
-					
-					if (this._addCreatorRow !== false) {
-						// Insert an empty creator row in a specified location
-						let beforeCreator = this.querySelector(`#itembox-field-value-creator-${this._addCreatorRow}-lastName`);
-						let beforeRow = beforeCreator?.closest(".meta-row") || null;
-						this.addCreatorRow(false, this.item.getCreator(max - 1).creatorTypeID, true, beforeRow);
-						this._addCreatorRow = false;
-					}
 				}
 			}
 			else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
@@ -873,6 +865,15 @@
 
 			// Set focus on the last focused field
 			this._restoreFieldFocus();
+
+			if (this._addCreatorRow !== false) {
+				// Insert an empty creator row in a specified location
+				let beforeCreator = this.querySelector(`#itembox-field-value-creator-${this._addCreatorRow}-lastName`);
+				let beforeRow = beforeCreator?.closest(".meta-row") || null;
+				this.addCreatorRow(false, this.item.getCreator(max - 1).creatorTypeID, true, beforeRow);
+				this._addCreatorRow = false;
+			}
+
 			// Make sure that any opened popup closes
 			this.querySelectorAll("menupopup").forEach((popup) => {
 				popup.hidePopup();
@@ -971,6 +972,11 @@
 				: this._creatorTypeMenu.childNodes[0].getAttribute('typeid');
 			
 			var rowIndex = this._creatorCount;
+			// if not all creator rows are displayed and an unsaved row is added,
+			// its index should be the length of all creators to avoid overriding an existing creator
+			if (unsaved && this._creatorCount < this.item.numCreators()) {
+				rowIndex = this.item.numCreators();
+			}
 			
 			// Creator label with draggable grippy icon for creator reordering
 			var rowLabel = document.createElement("div");
@@ -1175,10 +1181,10 @@
 			
 			// Set single/double field toggle mode
 			if (fieldMode) {
-				this.switchCreatorMode(rowData.parentNode, 1, true, rowIndex);
+				this.switchCreatorMode(rowData.parentNode, 1, true, false, rowIndex);
 			}
 			else {
-				this.switchCreatorMode(rowData.parentNode, 0, true, rowIndex);
+				this.switchCreatorMode(rowData.parentNode, 0, true, false, rowIndex);
 			}
 			
 			lastNameElem.sizeToContent();
@@ -1781,35 +1787,28 @@
 			if (!target) return;
 
 			let row = target.closest('.meta-row');
-			// Handle Shift-Enter on creator input field
+			// Shift-Enter on creator input field will add and focus a new creator row
 			if (event.key == "Enter" && event.shiftKey) {
 				event.stopPropagation();
-				// Value has changed - focus empty creator row at the bottom
-				if (target.initialValue != target.value) {
-					this._addCreatorRow = this.item.numCreators();
+				// If "More creators" is next, display all creators
+				if (row.nextElementSibling.querySelector("#more-creators-label")) {
 					this._displayAllCreators = true;
+				}
+				let { position, firstName, lastName } = this.getCreatorFields(row);
+				
+				// If creator name is empty after trimming whitespaces, do nothing. The focus will
+				// remain in the creator row, and it will be deleted on next blur
+				if (!(firstName || lastName)) return;
+			
+				// Add and focus new creator row after current one
+				this._addCreatorRow = position + 1;
+				// Blur current row to save changes if needed, otherwise just re-render
+				if (target.initialValue.trim() !== target.value.trim()) {
 					this.blurOpenField();
-					return;
 				}
-				// Value hasn't changed
-				Zotero.debug("Value hasn't changed");
-				// Next row is a creator - focus that
-				let nextRow = row.nextSibling;
-				if (nextRow.querySelector(".creator-type-value")) {
-					nextRow.querySelector("editable-text").focus();
-					return;
+				else {
+					this._forceRenderAll();
 				}
-				// Next row is a "More creators" label - click that and focus the next creator row
-				let moreCreators = nextRow.querySelector("#more-creators-label");
-				if (moreCreators) {
-					this._selectField = `itembox-field-value-creator-${this._creatorCount}-lastName`;
-					moreCreators.click();
-					return;
-				}
-				var creatorFields = this.getCreatorFields(row);
-				// Do nothing from the last empty row
-				if (creatorFields.lastName == "" && creatorFields.firstName == "") return;
-				this.addCreatorRow(false, creatorFields.creatorTypeID, true);
 			}
 			if (event.key == "Escape" && row.querySelector(".creator-type-value[unsaved=true]")) {
 				// Escape on an unsaved row deletes it and focuses previous creator
@@ -2043,8 +2042,8 @@
 				position = null;
 			}
 			var fields = {
-				lastName: label1.value,
-				firstName: label2.value,
+				lastName: label1.value.trim(),
+				firstName: label2.value.trim(),
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
 				position: position,

@@ -209,6 +209,19 @@ describe("Item pane", function () {
 	});
 	
 	describe("Info pane", function () {
+		before(async () => {
+			if (!doc.hasFocus()) {
+				// editable-text behavior relies on focus, so we first need to bring the window to the front.
+				// Not required on all platforms. In some cases (e.g. Linux), the window is at the front from the start.
+				let win = Zotero.getMainWindow();
+				let activatePromise = new Promise(
+					resolve => win.addEventListener('activate', resolve, { once: true })
+				);
+				Zotero.Utilities.Internal.activate();
+				Zotero.Utilities.Internal.activate(win);
+				await activatePromise;
+			}
+		});
 		it("should place Title after Item Type and before creators", async function () {
 			var item = await createDataObject('item');
 			var itemPane = win.ZoteroPane.itemPane;
@@ -409,6 +422,187 @@ describe("Item pane", function () {
 				itemBox.querySelector('[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
 				'1'
 			);
+		});
+
+		it("should add a new empty creator row on shift-Enter", async function () {
+			var item = await createDataObject('item');
+			item.setCreators([
+				{
+					lastName: "One",
+					creatorType: "author"
+				},
+				{
+					lastName: "Two",
+					creatorType: "author"
+				},
+				{
+					lastName: "Three",
+					creatorType: "author"
+				}
+			]);
+			let promise = waitForItemEvent('modify');
+			item.saveTx();
+			await promise;
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			let creatorLastName = itemBox.querySelector(".creator-type-value editable-text");
+			creatorLastName.focus();
+			// Dispatch shift-Enter event
+			var shiftEnter = new KeyboardEvent('keydown', {
+				key: "Enter",
+				shiftKey: true,
+				bubbles: true
+			});
+			creatorLastName.ref.dispatchEvent(shiftEnter);
+			// Wait a moment for new row to be added
+			await Zotero.Promise.delay();
+			// Make sure an unsaved empty creator row is focused
+			assert.exists(doc.activeElement.closest("[unsaved=true]"));
+			// Make sure it is added after the existing row
+			let { position } = itemBox.getCreatorFields(doc.activeElement.closest(".meta-row"));
+			assert.equal(position, 1);
+		});
+
+		it("should do nothing on shift-Enter in an empty unsaved row", async function () {
+			var item = await createDataObject('item');
+			item.setCreators([
+				{
+					lastName: "One",
+					creatorType: "author"
+				}
+			]);
+			let promise = waitForItemEvent('modify');
+			item.saveTx();
+			await promise;
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			let creatorLastName = itemBox.querySelector(".creator-type-value editable-text");
+			creatorLastName.focus();
+			// Dispatch shift-Enter event
+			var shiftEnter = new KeyboardEvent('keydown', {
+				key: "Enter",
+				shiftKey: true,
+				bubbles: true
+			});
+			creatorLastName.ref.dispatchEvent(shiftEnter);
+			// Wait a moment for new row to be added
+			await Zotero.Promise.delay();
+			// Make sure an unsaved empty creator row is focused
+			assert.exists(doc.activeElement.closest("[unsaved=true]"));
+			// Mark current creator input
+			doc.activeElement.id = "test_creator_row";
+			// Field with just space should be treated as empty
+			doc.activeElement.value = " ";
+			// Dispatch shift-Enter event again
+			doc.activeElement.dispatchEvent(shiftEnter);
+			// Make sure we're still on the same field
+			await Zotero.Promise.delay();
+			assert.equal(doc.activeElement.id, "test_creator_row");
+		});
+
+		it("should display all creators on shift-Enter on last visible creator", async function () {
+			var item = await createDataObject('item');
+			const creatorsCount = 10;
+			let creatorsArr = [];
+			let i = 0;
+			// Add many creators so that some of them are not rendered
+			while (i < creatorsCount) {
+				i += 1;
+				creatorsArr.push({ lastName: "Creator " + i, creatorType: "author" });
+			}
+			item.setCreators(creatorsArr);
+			item.saveTx();
+			await waitForItemEvent('modify');
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			let moreCreatorsLabel = itemBox.querySelector("#more-creators-label");
+			let lastVisibleCreator = moreCreatorsLabel.closest(".meta-row").previousElementSibling;
+			let lastVisibleCreatorsPosition = itemBox.getCreatorFields(lastVisibleCreator).position;
+			// Dispatch shift-Enter on the last visible creator row
+			let creatorLastName = lastVisibleCreator.querySelector("editable-text");
+			creatorLastName.focus();
+			var shiftEnter = new KeyboardEvent('keydown', {
+				key: "Enter",
+				shiftKey: true,
+				bubbles: true
+			});
+			creatorLastName.ref.dispatchEvent(shiftEnter);
+			await Zotero.Promise.delay();
+			// Make sure a new creator row is focused
+			assert.exists(doc.activeElement.closest("[unsaved=true]"));
+			// Make sure it is located after the last focused row
+			let { position } = itemBox.getCreatorFields(doc.activeElement.closest(".meta-row"));
+			assert.equal(position, lastVisibleCreatorsPosition + 1);
+			// Make sure all other creator rows were rendered
+			let creators = [...itemBox.querySelectorAll(".creator-type-value")];
+			assert.equal(creators.length, creatorsCount + 1);
+		});
+
+		it("should not delete invisible creators on Escape on unsaved creator", async function () {
+			var item = await createDataObject('item');
+			const creatorsCount = 10;
+			let creatorsArr = [];
+			let i = 0;
+			// Add many creators so that some of them are not rendered
+			while (i < creatorsCount) {
+				i += 1;
+				creatorsArr.push({ lastName: "Creator " + i, creatorType: "author" });
+			}
+			item.setCreators(creatorsArr);
+			item.saveTx();
+			await waitForItemEvent('modify');
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			// Add a new empty creator row
+			itemBox.querySelector(".zotero-clicky-plus").click();
+			await Zotero.Promise.delay();
+			assert.exists(doc.activeElement.closest("[unsaved=true]"));
+			// Press Escape
+			var escape = new KeyboardEvent('keydown', {
+				key: "Escape",
+				bubbles: true
+			});
+			doc.activeElement.dispatchEvent(escape);
+			await Zotero.Promise.delay();
+			// Make sure the creator count has not changed and "More creators" label is still there
+			let creators = [...itemBox.querySelectorAll(".creator-type-value")];
+			assert.exists(itemBox.querySelector("#more-creators-label"));
+			assert.equal(creators.length, itemBox._initialVisibleCreators);
+			assert.equal(item.numCreators(), creatorsCount);
+		});
+
+		it("should switch creator type and update pref", async function () {
+			let item = await createDataObject('item');
+			item.setCreators([
+				{
+					name: "First Last",
+					creatorType: "author",
+					fieldMode: 1
+				}
+			]);
+			// Begin with 'single' creator mode
+			Zotero.Prefs.set('lastCreatorFieldMode', 1);
+			let modifyPromise = waitForItemEvent('modify');
+			item.saveTx();
+			await modifyPromise;
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			// Click on the button to switch type to dual
+			let switchTypeBtn = itemBox.querySelector(".zotero-clicky-switch-type");
+			assert.equal(switchTypeBtn.getAttribute("type"), "single");
+			modifyPromise = waitForItemEvent('modify');
+			switchTypeBtn.click();
+			await modifyPromise;
+			// Make sure the button was updated and the names are displayed in two separate fields
+			switchTypeBtn = itemBox.querySelector(".zotero-clicky-switch-type");
+			assert.equal(switchTypeBtn.getAttribute("type"), "dual");
+			let [lastName, firstName] = [...itemBox.querySelectorAll(".creator-name-box editable-text")];
+			assert.equal(lastName.value, "Last");
+			assert.equal(firstName.value, "First");
+
+			assert.equal(Zotero.Prefs.get('lastCreatorFieldMode'), '0');
+
+			// Make sure if a new row is added, it is of type dual
+			itemBox.querySelector(".zotero-clicky-plus").click();
+			await Zotero.Promise.delay();
+			let newCreatorRow = doc.activeElement.closest(".meta-row");
+			let fieldMode = newCreatorRow.querySelector("editable-text").getAttribute("fieldMode");
+			assert.equal(fieldMode, "0");
 		});
 	});
 
