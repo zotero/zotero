@@ -633,7 +633,7 @@
 					}
 				}
 				// Hidden open-link button just for focus management
-				else if (['url', 'homepage', 'DOI'].includes(fieldName)) {
+				if (['url', 'homepage', 'DOI'].includes(fieldName) && !openLinkButton) {
 					openLinkButton = this.createOpenLinkIcon(null, fieldName);
 				}
 				let rowData = document.createElement('div');
@@ -689,6 +689,24 @@
 					if (!val) optionsButton.hidden = true;
 				}
 
+				// Hide/display toolbarbuttons next to the field for better focus management
+				if (rowData.querySelector("toolbarbutton")) {
+					// As the text field is being editted, hide the toolbarbutton to the right
+					// of the field if the button would not be visible during re-render with such value
+					valueElement.addEventListener("input", this.setBtnVisibilityOnInput);
+					// On tab from the field, display the hidden button if it will be visible
+					// during re-render so that the focus does not skip it
+					valueElement.addEventListener("keypress", (event) => {
+						if (event.key !== "Tab") return;
+						let btn = rowData.querySelector("toolbarbutton.will-appear-on-blur");
+						if (btn) {
+							btn.hidden = false;
+							// .noHover may be added to not have the editable field expand when
+							// the buttons hide, so make sure it's removed as well
+							rowData.closest(".meta-row").classList.remove("noHover");
+						}
+					});
+				}
 				this.addDynamicRow(rowLabel, rowData);
 				
 				let button, popup;
@@ -1646,6 +1664,32 @@
 					}
 				}
 			}
+		}
+
+		// Hide toolbarbutton if typed value makes it so that the button will
+		// not be visible during the next render
+		setBtnVisibilityOnInput(event) {
+			let row = event.target.closest(".meta-row");
+			let editableText = event.target.closest("editable-text");
+			let button = row.querySelector("toolbarbutton");
+			let condition = null;
+			if (button.classList.contains("zotero-clicky-options")) {
+				condition = editableText.value;
+			}
+			else if (button.id.includes("DOI")) {
+				condition = Zotero.Utilities.cleanDOI(editableText.value);
+			}
+			else if (button.classList.contains("zotero-clicky-open-link")) {
+				condition = Zotero.Utilities.isHTTPURL(editableText.value, true);
+			}
+			if (!condition) {
+				// Hide the button so that it keeps occupying space to avoid the field
+				// visible expanding
+				row.classList.add("noHover");
+				button.classList.remove("no-display");
+			}
+			// If the button will be visible, mark it, and it will be made visible on next tab
+			button.classList.toggle("will-appear-on-blur", !!condition);
 		}
 
 		addAutocompleteToElement(elem) {

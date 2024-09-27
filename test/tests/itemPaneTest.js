@@ -209,6 +209,20 @@ describe("Item pane", function () {
 	});
 	
 	describe("Info pane", function () {
+		before(async () => {
+			if (!doc.hasFocus()) {
+				// editable-text behavior relies on focus, so we first need to bring the window to the front.
+				// Not required on all platforms. In some cases (e.g. Linux), the window is at the front from the start.
+				let win = Zotero.getMainWindow();
+				let activatePromise = new Promise(
+					resolve => win.addEventListener('activate', resolve, { once: true })
+				);
+				Zotero.Utilities.Internal.activate();
+				Zotero.Utilities.Internal.activate(win);
+				await activatePromise;
+			}
+		});
+
 		it("should place Title after Item Type and before creators", async function () {
 			var item = await createDataObject('item');
 			var itemPane = win.ZoteroPane.itemPane;
@@ -409,6 +423,23 @@ describe("Item pane", function () {
 				itemBox.querySelector('[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
 				'1'
 			);
+		});
+
+		it("should hide DOI open url button after invalid input", async function () {
+			let item = new Zotero.Item('journalArticle');
+			item.setField("DOI", "10.1088/1748-9326/11/4/048002");
+			await item.saveTx();
+			
+			let itemBox = doc.getElementById('zotero-editpane-item-box');
+
+			let doiField = itemBox.querySelector('editable-text[fieldname="DOI"]');
+			let row = doiField.closest(".meta-row");
+			doiField.focus();
+			doiField.value = "not-a-valid-doi";
+			doiField.dispatchEvent(new Event('input'));
+
+			// rows with noHover class hide the button without changing the amount of space it occupies
+			assert.isTrue(row.classList.contains("noHover"));
 		});
 	});
 
