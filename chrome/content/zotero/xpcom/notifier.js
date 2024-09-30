@@ -127,8 +127,8 @@ Zotero.Notifier = new function(){
 		
 		var order = _getObserverOrder(type);
 		for (let id of order) {
-			//Zotero.debug("Calling notify() with " + event + "/" + type
-			//	+ " on observer with id '" + id + "'", 5);
+			Zotero.debug("Calling notify() with " + event + "/" + type
+				+ " on observer with id '" + id + "'", 5);
 			
 			if (!_observers[id]) {
 				Zotero.debug("Observer no longer exists");

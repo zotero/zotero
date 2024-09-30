@@ -69,11 +69,7 @@ var doLoad = async function () {
 				Zotero_Bibliography_Dialog.treeItemSelected();
 			}
 			else if (isAddEditItemsDialog) {
-				onItemSelected();
 				Zotero_Citation_Dialog.treeItemSelected();
-			}
-			else {
-				onItemSelected();
 			}
 		},
 		onActivate: () => {
@@ -83,13 +79,14 @@ var doLoad = async function () {
 		dragAndDrop: false,
 		persistColumns: true,
 		columnPicker: true,
+		multiSelect: io.multiSelect,
 		emptyMessage: Zotero.getString('pane.items.loading')
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
 	const filterLibraryIDs = false || io.filterLibraryIDs;
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
-		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),
+		onSelectionChange: () => onCollectionSelected(),
 		filterLibraryIDs,
 		hideSources: ['duplicates', 'trash', 'feeds']
 	});
@@ -152,8 +149,6 @@ var onCollectionSelected = async function () {
 	await itemsView.changeCollectionTreeRow(collectionTreeRow);
 	
 	itemsView.clearItemsPaneMessage();
-	
-	collectionsView.runListeners('select');
 };
 
 function onSearch()
@@ -163,11 +158,6 @@ function onSearch()
 		var searchVal = document.getElementById('zotero-tb-search-textbox').value;
 		itemsView.setFilter('search', searchVal);
 	}
-}
-
-function onItemSelected()
-{
-	itemsView.runListeners('select');
 }
 
 function doAccept() {
