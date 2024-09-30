@@ -498,33 +498,35 @@ var Zotero_LocateMenu = new function() {
 		
 		var _getURL = Zotero.Promise.coroutine(function* (item) {
 			// try url field for item and for attachments
-			var urlField = item.getField('url');
-			if(urlField) {
+			var itemURL = item.getField('url');
+			if (itemURL) {
 				var uri;
 				try {
-					uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
-					if(uri && uri.host && uri.scheme !== 'file') return urlField;
-				} catch(e) {};
-			}
-			
-			if(item.isRegularItem()) {
-				var attachments = item.getAttachments();
-				if(attachments) {
-					// look through url fields for non-file:/// attachments
-					for (let attachment of Zotero.Items.get(attachments)) {
-						var urlField = attachment.getField('url');
-						if(urlField) return urlField;
+					uri = Zotero_LocateMenu.ios.newURI(itemURL, null, null);
+					if (uri && uri.host && uri.scheme !== 'file') {
+						return itemURL;
 					}
-					
+				}
+				catch (e) {
 				}
 			}
 			
 			// if no url field, try DOI field
 			var doi = item.getField('DOI');
-			if(doi && typeof doi === "string") {
+			if (doi) {
 				doi = Zotero.Utilities.cleanDOI(doi);
-				if(doi) {
+				if (doi) {
 					return "https://doi.org/" + encodeURIComponent(doi);
+				}
+			}
+			
+			// Try attachment url fields
+			if (item.isRegularItem()) {
+				for (let attachment of Zotero.Items.get(item.getAttachments())) {
+					let attachmentURL = attachment.getField('url');
+					if (attachmentURL) {
+						return attachmentURL;
+					}
 				}
 			}
 			
