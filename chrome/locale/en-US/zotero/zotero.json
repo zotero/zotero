@@ -656,6 +656,9 @@
 	"new-collection-create-in": {
 		"string": "Create in:"
 	},
+	"attachment-info-title": {
+		"string": "Title"
+	},
 	"attachment-info-filename": {
 		"string": "Filename"
 	},
@@ -751,6 +754,9 @@
 	},
 	"item-pane-message-unselected": {
 		"string": "{count, plural, =0 {No items in this view} one {{ count } item in this view} other {{ count } items in this view}}"
+	},
+	"item-pane-message-objects-unselected": {
+		"string": "{count, plural, =0 {No objects in this view} one {{ count } object in this view} other {{ count } objects in this view}}"
 	},
 	"item-pane-duplicates-merge-items.label": {
 		"string": "{count, plural, one {Merge { count } item} other {Merge { count } items}}"
