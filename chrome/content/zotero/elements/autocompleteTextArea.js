@@ -23,6 +23,10 @@
 
       this.popupSelectedIndex = -1;
 
+      this._lastMoveHeight = null;
+
+      this._resizeObserver = new ResizeObserver(() => this.movePopup());
+
       XPCOMUtils.defineLazyPreferenceGetter(
         this,
         "disablePopupAutohide",
@@ -117,6 +121,12 @@
       );
 
       this.valueIsTyped = false;
+
+      this._resizeObserver.observe(this);
+    }
+    
+    disconnectedCallback() {
+      this._resizeObserver.unobserve(this);
     }
 
     get popup() {
@@ -426,6 +436,22 @@
         return;
       }
       this.popup.closePopup();
+      this._lastMoveHeight = null;
+    }
+    
+    movePopup() {
+      let height = this.getBoundingClientRect().height;
+      if (this.popupOpen && height !== this._lastMoveHeight) {
+        // https://searchfox.org/mozilla-central/rev/1b90936792b2c71ef931cb1b8d6baff9d825592e/toolkit/content/widgets/autocomplete-popup.js#282
+        this.popup.moveToAnchor(
+          this.popup.anchorNode,
+          "after_start",
+          0,
+          0,
+          false
+        );
+        this._lastMoveHeight = height;
+      }
     }
 
     showHistoryPopup() {
