@@ -463,6 +463,7 @@ new-collection-dialog =
     .buttonlabelaccept = Sukurti rinkinį
 new-collection-name = Pavadinimas:
 new-collection-create-in = Kur sukurti:
+attachment-info-title = Pavadinimas
 attachment-info-filename = Rinkmenos vardas
 attachment-info-accessed = Žiūrėta
 attachment-info-pages = Puslapiai
@@ -555,6 +556,12 @@ item-pane-message-unselected =
         [few] { $count } įrašai šiame rodinyje
         [many] { $count } įrašų šiame rodinyje
        *[other] { $count } įrašas šiame rodinyje
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No objects in this view
+        [one] { $count } object in this view
+       *[other] { $count } objects in this view
     }
 item-pane-duplicates-merge-items =
     .label =

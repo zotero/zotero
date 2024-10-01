@@ -1,2 +1,2 @@
 scaffold-translator-output =
-    .aria-label = Console
+    .aria-label = Konsole

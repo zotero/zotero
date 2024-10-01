@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Opprett samling
 new-collection-name = Navn:
 new-collection-create-in = Opprett i:
+attachment-info-title = Tittel
 attachment-info-filename = Filnavn
 attachment-info-accessed = Lest
 attachment-info-pages = Sider
@@ -534,6 +535,12 @@ item-pane-message-unselected =
         [one] { $count } element i denne visningen
        *[other] { $count } elementer i denne visningen
     }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] Ingen elementer i denne visningen
+        [one] { $count } element i denne visningen
+       *[other] { $count } elementer i denne visningen
+    }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
@@ -588,9 +595,9 @@ post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
     .label = Lim inn og søk
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+mac-word-plugin-install-message = Zotero trenger tilgang til Word-data for å installere Word-programtillegget.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Installer Word-programtillegget
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =

@@ -13,7 +13,7 @@ general-open-settings = Einstellungen öffnen
 general-help = Hilfe
 general-tag = Tag
 general-done = Erledigt
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
+general-view-troubleshooting-instructions = Anleitung zur Problembehebung anzeigen
 menu-file-show-in-finder =
     .label = In Finder anzeigen
 menu-file-show-file =
@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Sammlung erstellen
 new-collection-name = Name:
 new-collection-create-in = Erstellen in:
+attachment-info-title = Titel
 attachment-info-filename = Dateiname
 attachment-info-accessed = Zugriffsdatum
 attachment-info-pages = Seiten
@@ -534,6 +535,12 @@ item-pane-message-unselected =
         [one] { $count } Eintrag in dieser Ansicht
        *[other] { $count } Einträge in dieser Ansicht
     }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] Kein Objekt in dieser Ansicht
+        [one] { $count } Objekt in dieser Ansicht
+       *[other] { $count } Objekte in dieser Ansicht
+    }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
@@ -587,10 +594,10 @@ post-upgrade-remind-me-later =
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = Einfügen und suchen
+mac-word-plugin-install-message = Zotero muss auf die Daten von Word zugreifen, um das Word-Plugin zu installieren.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Word-Plugin installieren
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =

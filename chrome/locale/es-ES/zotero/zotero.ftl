@@ -457,6 +457,7 @@ new-collection-dialog =
     .buttonlabelaccept = Crear collección
 new-collection-name = Nombre:
 new-collection-create-in = Crear en:
+attachment-info-title = Título
 attachment-info-filename = Nombre de archivo
 attachment-info-accessed = Accedido
 attachment-info-pages = Páginas
@@ -542,6 +543,12 @@ item-pane-message-unselected =
         [0] No hay elementos en esta vista
         [one] { $count } elemento en esta vista
        *[other] { $count } elementos en esta vista
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No hay objetos en esta vista
+        [one] { $count } objeto en esta vista
+       *[other] { $count } objetos en esta vista
     }
 item-pane-duplicates-merge-items =
     .label =

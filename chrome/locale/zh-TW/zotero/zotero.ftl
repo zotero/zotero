@@ -445,6 +445,7 @@ new-collection-dialog =
     .buttonlabelaccept = 建立文獻集
 new-collection-name = 名稱：
 new-collection-create-in = 建立到：
+attachment-info-title = 標題
 attachment-info-filename = 檔名
 attachment-info-accessed = 取用
 attachment-info-pages = 頁
@@ -524,6 +525,12 @@ item-pane-message-unselected =
         [0] 沒有任何項目
         [one] { $count } 個項目
        *[other] { $count } 個項目
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No objects in this view
+        [one] { $count } object in this view
+       *[other] { $count } objects in this view
     }
 item-pane-duplicates-merge-items =
     .label =

@@ -187,7 +187,7 @@ report-error =
     .label = Zgłoś błąd...
 rtfScan-wizard =
     .title = Skanowanie pliku RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } może automatycznie wydobyć i przeformatować cytowania, a następnie wstawić bibliografię do plików RTF. Aktualnie wspierane są następujące formaty w różnych wersjach:
 rtfScan-introPage-description2 = Aby rozpocząć, wybierz poniżej plik wejściowy w formacie RTF oraz plik wyjściowy:
 rtfScan-input-file = Plik wejściowy:
 rtfScan-output-file = Plik wyjściowy:
@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Utwórz kolekcję
 new-collection-name = Nazwa:
 new-collection-create-in = Utwórz w:
+attachment-info-title = Tytuł
 attachment-info-filename = Nazwa pliku
 attachment-info-accessed = Dostęp
 attachment-info-pages = Strony
@@ -477,8 +478,8 @@ quickformat-general-instructions =
         [active] Press Shift-Tab to focus the dialog's menu.
        *[other] { "" }
     } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
+quickformat-aria-bubble = Ten element jest już dołączony do cytowania. Wciśnij spację, aby dostosować ten element. { quickformat-general-instructions }
+quickformat-aria-input = Wpisz coś, aby wyszukać element do dołączenia do tego cytowania. Wciśnij Tab, aby nawigować po liście wyników wyszukiwania. { quickformat-general-instructions }
 quickformat-aria-item = Wciśnij { return-or-enter }, aby dodać ten element do cytowania. Wciśnij Tab, aby powrócić do pola wyszukiwania.
 quickformat-accept =
     .tooltiptext = Zapisz zmiany w tym cytowaniu
@@ -487,8 +488,8 @@ quickformat-locator-type =
 quickformat-locator-value = Locator
 quickformat-citation-options =
     .tooltiptext = Pokaż opcje cytowania
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+insert-note-aria-input = Wpisz coś, aby wyszukać notatkę. Wciśnij Tab, aby nawigować po liście wyników. Wciśnij Escape, aby zamknąć to okno.
+insert-note-aria-item = Wciśnij { return-or-enter }, aby wybrać tę notatkę. Wciśnij Tab, aby powrócić do pola wyszukiwania. Wciśnij Escape, aby zamknąć to okno.
 quicksearch-mode =
     .aria-label = Tryb szybkiego wyszukiwania
 quicksearch-input =
@@ -533,6 +534,12 @@ item-pane-message-unselected =
         [0] No items in this view
         [one] { $count } item in this view
        *[other] { $count } items in this view
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No objects in this view
+        [one] { $count } object in this view
+       *[other] { $count } objects in this view
     }
 item-pane-duplicates-merge-items =
     .label =
@@ -581,16 +588,16 @@ file-type-presentation = Prezentacja
 file-type-document = Dokument
 file-type-ebook = Ebook
 post-upgrade-message = Poznaj <a data-l10n-name="new-features-link">nowe funkcje w { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-density = Wybierz swoją preferowaną gęstość widoku:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
     .label = Wklej i wyszukaj
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+mac-word-plugin-install-message = Do instalacji wtyczki Word wymagany jest dostęp Zotero do danych Word.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Zainstaluj wtyczkę Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =

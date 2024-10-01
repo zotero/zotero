@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Derme Oluştur
 new-collection-name = Ad:
 new-collection-create-in = Bunun içinde yarat:
+attachment-info-title = Başlık
 attachment-info-filename = Dosya adı
 attachment-info-accessed = Erişildi
 attachment-info-pages = Sayfalar
@@ -533,6 +534,12 @@ item-pane-message-unselected =
         [0] Bu görüntüde hiçbir eser yok
         [one] Bu görüntüde { $count } eser var
        *[other] Bu görüntüde { $count } eser var
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] Bu görüntüde hiçbir şey yok
+        [one] Bu görüntüde { $count } şey var
+       *[other] Bu görüntüde { $count } şey var
     }
 item-pane-duplicates-merge-items =
     .label =

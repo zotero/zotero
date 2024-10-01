@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Create Collection
 new-collection-name = Nimi:
 new-collection-create-in = Create in:
+attachment-info-title = Pealkiri
 attachment-info-filename = Faili nimi
 attachment-info-accessed = Vaadatud
 attachment-info-pages = Leheküljed
@@ -533,6 +534,12 @@ item-pane-message-unselected =
         [0] No items in this view
         [one] { $count } item in this view
        *[other] { $count } items in this view
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No objects in this view
+        [one] { $count } object in this view
+       *[other] { $count } objects in this view
     }
 item-pane-duplicates-merge-items =
     .label =

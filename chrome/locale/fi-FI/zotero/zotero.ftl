@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Luo kokoelma
 new-collection-name = Nimi:
 new-collection-create-in = Luo kohteeseen:
+attachment-info-title = Nimi
 attachment-info-filename = Tiedostonimi
 attachment-info-accessed = Viittaus noudettu
 attachment-info-pages = Sivut
@@ -533,6 +534,12 @@ item-pane-message-unselected =
         [0] Ei nimikkeitä tässä näkymässä
         [one] { $count } nimike tässä näkymässä
        *[other] { $count } nimikettä tässä näkymässä
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] Ei kohteita tässä näkymässä
+        [one] { $count } kohde tässä näkymässä
+       *[other] { $count } kohdetta tässä näkymässä
     }
 item-pane-duplicates-merge-items =
     .label =

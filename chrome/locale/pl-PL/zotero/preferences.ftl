@@ -22,7 +22,7 @@ preferences-file-renaming-customize-button =
     .label = Dostosuj format nazwy pliku...
 preferences-file-renaming-format-title = Format nazwy pliku
 preferences-file-renaming-format-instructions = Możesz dostosować wzorzec zmiany nazwy plik, który zostanie użyty przez { -app-name } aby zmienić nazwy plików załączników w taki sposób, aby użyte zostały metadane elementu nadrzędnego.
-preferences-file-renaming-format-instructions-example = For example, “{ $example }” in this template will be replaced with the title of the parent item, truncated at 50 characters.
+preferences-file-renaming-format-instructions-example = Na przykład “{ $example }” w tym szablonie zostanie zastąpione tytułem elementu nadrzędnego, skróconym do 50 znaków.
 preferences-file-renaming-format-instructions-more = Zobacz <label data-l10n-name="file-renaming-format-help-link">dokumentację</label>, aby uzyskać więcej informacji.
 preferences-file-renaming-format-template = Szablon nazwy pliku:
 preferences-file-renaming-format-preview = Podgląd:
@@ -33,7 +33,7 @@ preferences-reader-open-in-new-window =
     .label = Otwieraj pliki w nowych oknach zamiast w kartach
 preferences-reader-ebook-font = Czcionka ebooka:
 preferences-reader-ebook-hyphenate =
-    .label = Enable automatic hyphenation
+    .label = Włącz automatyczne dzielenie wyrazów
 preferences-color-scheme = Tryb kolorów:
 preferences-color-scheme-auto =
     .label = Automatycznie

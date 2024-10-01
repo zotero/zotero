@@ -451,6 +451,7 @@ new-collection-dialog =
     .buttonlabelaccept = Crea una col·lecció
 new-collection-name = Nom:
 new-collection-create-in = Crea a:
+attachment-info-title = Títol
 attachment-info-filename = Nom de fitxer
 attachment-info-accessed = Últim accés
 attachment-info-pages = Nre. de pàgines
@@ -533,6 +534,12 @@ item-pane-message-unselected =
         [0] No items in this view
         [one] { $count } item in this view
        *[other] { $count } items in this view
+    }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No objects in this view
+        [one] { $count } object in this view
+       *[other] { $count } objects in this view
     }
 item-pane-duplicates-merge-items =
     .label =

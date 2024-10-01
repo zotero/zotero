@@ -7,7 +7,7 @@ return-or-enter =
 general-remove = 移除
 general-add = 添加
 general-remind-me-later = 稍后提醒我
-general-dont-ask-again = 不要再提问
+general-dont-ask-again = 不再询问
 general-choose-file = 选择文件…
 general-open-settings = 打开设置
 general-help = 帮助
@@ -445,6 +445,7 @@ new-collection-dialog =
     .buttonlabelaccept = 创建分类
 new-collection-name = 名称:
 new-collection-create-in = 创建到：
+attachment-info-title = 标题
 attachment-info-filename = 文件名
 attachment-info-accessed = 访问时间
 attachment-info-pages = 页
@@ -525,6 +526,12 @@ item-pane-message-unselected =
         [one] 此视图中有 { $count } 个条目
        *[other] 此视图中有 { $count } 个条目
     }
+item-pane-message-objects-unselected =
+    { $count ->
+        [0] No objects in this view
+        [one] { $count } object in this view
+       *[other] { $count } objects in this view
+    }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
@@ -577,9 +584,9 @@ post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
     .label = 粘贴并搜索
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+mac-word-plugin-install-message = Zotero 需要访问 Word 数据才能安装 Word 插件。
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = 安装 Word 插件
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
