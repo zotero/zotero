@@ -206,9 +206,13 @@ var Zotero_Tabs = new function () {
 			}
 			else if (tab.type === 'reader') {
 				if (Zotero.Items.exists(tab.data.itemID)) {
+					// Strip non-printable characters, which can result in DOM syntax errors
+					// ("An invalid or illegal string was specified") -- reproduced with "\u0001"
+					// in a title in session.json
+					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
 					this.add({
 						type: 'reader-unloaded',
-						title: tab.title,
+						title,
 						index: i,
 						data: tab.data,
 						select: tab.selected
