@@ -546,9 +546,9 @@ item-pane-message-unselected =
     }
 item-pane-message-objects-unselected =
     { $count ->
-        [0] No objects in this view
-        [one] { $count } object in this view
-       *[other] { $count } objects in this view
+        [0] Aucun objet dans cette vue
+        [one] { $count } objet dans cette vue
+       *[other] { $count } objets dans cette vue
     }
 item-pane-duplicates-merge-items =
     .label =
