@@ -2189,8 +2189,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 
 					// Don't allow web attachments to be dragged out of parents,
-					// but do allow PDFs for now so they can be recognized
-					if (item.isWebAttachment() && item.attachmentContentType != 'application/pdf') {
+					// except for files that can be recognized
+					if (item.isWebAttachment()
+							// Keep in sync with Zotero.RecognizeDocument.canRecognize()
+							&& !item.isPDFAttachment()
+							&& !item.isEPUBAttachment()) {
 						return false;
 					}
 

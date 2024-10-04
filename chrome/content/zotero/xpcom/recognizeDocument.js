@@ -131,6 +131,7 @@ Zotero.RecognizeDocument = new function () {
 	 */
 	this.canRecognize = function (item) {
 		return item.attachmentContentType
+			// Keep in sync with dragging out of parent in ItemTree::canDropCheck()
 			&& (item.isPDFAttachment() || item.isEPUBAttachment())
 			&& item.isTopLevelItem();
 	};
