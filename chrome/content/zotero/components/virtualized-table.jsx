@@ -256,7 +256,7 @@ class TreeSelection {
 	_updateTree(shouldDebounce) {
 		if (!this.selectEventsSuppressed && this._tree.props.onSelectionChange) {
 			this._tree.props.onSelectionChange(this, shouldDebounce);
-			this._tree._setAriaAciveDescendant();
+			this._tree._setAriaActiveDescendant();
 		}
 	}
 
@@ -1431,11 +1431,11 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	// Set aria-activedescendant on table container
-	_setAriaAciveDescendant() {
+	_setAriaActiveDescendant() {
 		if (!this.selection.count) return;
 		let selected = this._jsWindow?.getElementByIndex(this.selection.focused);
 		if (selected) {
-			selected.closest(".virtualized-table").setAttribute("aria-activedescendant", selected.id);
+			this._topDiv.setAttribute("aria-activedescendant", selected.id);
 		}
 	}
 }
