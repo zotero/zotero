@@ -40,6 +40,72 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (fileQuitItemUnix) fileQuitItemUnix.hidden = true;
 		if (editPreferencesSeparator) editPreferencesSeparator.hidden = true;
 		if (editPreferencesItem) editPreferencesItem.hidden = true;
+
+		// macOS 15 Sequoia has a new system keyboard shortcut, Ctrl-Enter,
+		// that shows a context menu on the focused control. Firefox currently
+		// doesn't handle it very well - it shows a context menu on the element
+		// in the middle of the window, whatever element that may be.
+		// Prevent/retarget these events (but not Ctrl-clicks).
+		let lastPreventedContextMenuTime = 0;
+		document.addEventListener('contextmenu', (event) => {
+			if (!(event.button === 2 && event.buttons === 0 && !event.ctrlKey)) {
+				return;
+			}
+			
+			event.stopPropagation();
+			event.stopImmediatePropagation();
+			event.preventDefault();
+			
+			// We usually get three of these in a row - only act on the first
+			if (event.timeStamp - lastPreventedContextMenuTime < 50) {
+				return;
+			}
+			lastPreventedContextMenuTime = event.timeStamp;
+			
+			let targetElement = document.activeElement;
+			if (!targetElement) {
+				return;
+			}
+			if (targetElement.hasAttribute('aria-activedescendant')) {
+				let activeDescendant = targetElement.querySelector(
+					'#' + CSS.escape(targetElement.getAttribute('aria-activedescendant'))
+				);
+				if (activeDescendant) {
+					targetElement = activeDescendant;
+				}
+			}
+			
+			let [clientX, clientY] = Zotero.Utilities.Internal.getContextMenuPosition(targetElement);
+			let screenX = window.mozInnerScreenX + clientX;
+			let screenY = window.mozInnerScreenY + clientY;
+			
+			// Run in the next tick, because otherwise our rate-limiting above
+			// prevents this from working on form fields (somehow)
+			setTimeout(() => {
+				targetElement.dispatchEvent(new PointerEvent('contextmenu', {
+					bubbles: true,
+					cancelable: true,
+					button: 2,
+					buttons: 2,
+					clientX,
+					clientY,
+					layerX: clientX, // Wrong, but nobody should ever use these
+					layerY: clientY,
+					screenX,
+					screenY,
+				}));
+			});
+		}, { capture: true });
+		
+		// Make sure the Ctrl-Enter isn't handled by listeners further down in
+		// the tree as a regular Enter
+		document.documentElement.addEventListener('keydown', (event) => {
+			if (event.ctrlKey && event.key === 'Enter') {
+				event.stopPropagation();
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+		}, { capture: true });
 	}
 	else {
 		// Set behavior on all non-macOS platforms
