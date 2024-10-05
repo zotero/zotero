@@ -21,7 +21,7 @@
 		cursor: pointer;
 		font-size: 22px;
 		line-height: 26px;
-		margin-inline-end: -1.2em;
+		margin-inline-end: -0.5em;
 	}
 	
 	.message {
@@ -99,12 +99,8 @@
 #mac-word-plugin-install-warning {
 	line-height: 2.2em;
 	font-size: 13.5px;
-	padding: 0 2em;
-	font-weight: 600;
-}
-
-#mac-word-plugin-install-warning {
 	padding: 0 1em;
+	font-weight: 600;
 }
 
 #retracted-items-banner {
