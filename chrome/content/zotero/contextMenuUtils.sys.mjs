@@ -78,23 +78,37 @@ function getContextMenuPosition(targetElement) {
 
 /**
  * @param {Element} targetElement
- * @returns {PointerEvent}
+ * @returns {MouseEvent}
  */
 export function createContextMenuEvent(targetElement) {
 	let { clientX, clientY } = getContextMenuPosition(targetElement);
 	let win = targetElement.ownerGlobal;
 	let screenX = win.mozInnerScreenX + clientX;
 	let screenY = win.mozInnerScreenY + clientY;
-	return new win.PointerEvent('contextmenu', {
-		bubbles: true,
-		cancelable: true,
-		button: 2,
+	// Need to use initNSMouseEvent() to set inputSource, so just construct a
+	// minimal instance first
+	let event = new win.MouseEvent('contextmenu', {
+		// ...Except that doesn't set buttons, only button
 		buttons: 2,
-		clientX,
-		clientY,
-		layerX: clientX, // Wrong, but nobody should ever use these
-		layerY: clientY,
+	});
+	event.initNSMouseEvent(
+		'contextmenu',
+		/* bubbles */ true,
+		/* cancelable */ true,
+		/* view */ win,
+		/* detail */ undefined,
 		screenX,
 		screenY,
-	});
+		clientX,
+		clientY,
+		/* ctrlKey */ false,
+		/* altKey */ false,
+		/* shiftKey */ false,
+		/* metaKey */ false,
+		/* button */ 2,
+		/* relatedTarget */ null,
+		/* pressure */ undefined,
+		win.MouseEvent.MOZ_SOURCE_KEYBOARD,
+	);
+	return event;
 }
