@@ -120,7 +120,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
      .label = Web Link
 item-menu-change-parent-item =
-     .label = Move to Parent
+     .label = Move to Parent Item…
 
 view-online = View Online
 item-menu-option-view-online =
