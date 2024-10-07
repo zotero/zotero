@@ -160,6 +160,10 @@ var Scaffold = new function () {
 		this.initCodeEditor();
 		this.initTestsEditor();
 
+		this.addEditorKeydownHandlers(_editors.import);
+		this.addEditorKeydownHandlers(_editors.code);
+		this.addEditorKeydownHandlers(_editors.tests);
+
 		// Set font size from general pref
 		Zotero.UIProperties.registerRoot(document.getElementById('scaffold-pane'));
 
@@ -194,29 +198,6 @@ var Scaffold = new function () {
 				}
 			});
 		}
-		// Special key handling for the editors
-		let tabbox = document.getElementById("left-tabbox");
-		// On shift-tab from the start of the first line, tab out of the editor.
-		// Use capturing listener, since Shift-Tab keydown events do not leave the editor.
-		document.addEventListener("keydown", (event) => {
-			if (!event.target.ownerDocument.URL.includes("monaco.html")) return;
-			if (event.key == "Tab" && event.shiftKey) {
-				let activeEditor = _editors[_getActiveEditorName()];
-				let position = activeEditor.getPosition();
-				if (position.column == 1 && position.lineNumber == 1) {
-					Services.focus.moveFocus(window, event.target, Services.focus.MOVEFOCUS_BACKWARD, 0);
-					event.preventDefault();
-				}
-			}
-		}, true);
-		// On Escape, focus the selected tab. Use non-capturing listener to not
-		// do anything on Escape events handled by the editor (e.g. to dismiss autocomplete popup)
-		document.addEventListener("keydown", (event) => {
-			if (!event.target.ownerDocument.URL.includes("monaco.html")) return;
-			if (event.key == "Escape") {
-				tabbox.selectedTab.focus();
-			}
-		});
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
@@ -935,6 +916,31 @@ var Scaffold = new function () {
 			openURL.setAttribute('disabled', true);
 		}
 	};
+
+	// Add special keydown handling for the editors
+	this.addEditorKeydownHandlers = function (editor) {
+		let doc = editor.getDomNode().ownerDocument;
+		let tabbox = document.getElementById("left-tabbox");
+		// On shift-tab from the start of the first line, tab out of the editor.
+		// Use capturing listener, since Shift-Tab keydown events do not propagate to the document.
+		doc.addEventListener("keydown", (event) => {
+			if (event.key == "Tab" && event.shiftKey) {
+				let position = editor.getPosition();
+				if (position.column == 1 && position.lineNumber == 1) {
+					Services.focus.moveFocus(window, event.target, Services.focus.MOVEFOCUS_BACKWARD, 0);
+					event.preventDefault();
+				}
+			}
+		}, true);
+		// On Escape, focus the selected tab. Use non-capturing listener to not
+		// do anything on Escape events handled by the editor (e.g. to dismiss autocomplete popup)
+		doc.addEventListener("keydown", (event) => {
+			if (event.key == "Escape") {
+				tabbox.selectedTab.focus();
+			}
+		});
+	};
+
 
 	this.listFieldsForItemType = function (itemType) {
 		var outputObject = {};
