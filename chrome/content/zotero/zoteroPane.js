@@ -4961,6 +4961,22 @@ var ZoteroPane = new function()
 		if (selectedItems.some(item => item.isRegularItem())) return;
 
 		let libraryID = this.getSelectedLibraryID();
+		let shouldMoveToStandaloneAttachment = false;
+		let extraButtons = [];
+		// Keep in sync with Zotero.RecognizeDocument.canRecognize()
+		let canBeMovedOutOfparent = !selectedItems.some(item => item.isWebAttachment() && !item.isPDFAttachment() && !item.isEPUBAttachment());
+		// Add a button to the dialog to make attachments standalone, if applicable
+		if (canBeMovedOutOfparent) {
+			extraButtons = [{
+				type: "extra1",
+				l10nLabel: "select-items-moveToStandaloneAttachment",
+				onclick: function (event) {
+					shouldMoveToStandaloneAttachment = true;
+					let doc = event.target.ownerDocument;
+					doc.querySelector("dialog").acceptDialog();
+				},
+			}];
+		}
 		let io = {
 			dataIn: null,
 			dataOut: null,
@@ -4969,13 +4985,33 @@ var ZoteroPane = new function()
 			filterLibraryIDs: [libraryID],
 			singleSelection: true,
 			onlyRegularItems: true,
-			hideCollections: ['duplicates', 'trash', 'feeds', 'unfiled', 'retracted', 'publications']
+			hideCollections: ['duplicates', 'trash', 'feeds', 'unfiled', 'retracted', 'publications'],
+			extraButtons: extraButtons
 		};
 		// The new parent needs to be selected in the dialog
 		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 			'chrome,dialog=no,centerscreen,resizable=yes', io);
 
 		await io.deferred.promise;
+
+		// If "Move to standalong attachment" is selected, make all attachments top-level items
+		if (shouldMoveToStandaloneAttachment) {
+			await Zotero.DB.executeTransaction(async () => {
+				for (let item of selectedItems) {
+					let parent = Zotero.Items.get(item.parentID);
+					if (parent) {
+						// Place attachment into the same collections as the old parent item
+						for (let collectionID of parent.getCollections()) {
+							item.addToCollection(collectionID);
+						}
+					}
+					// Unlink parent item
+					item.parentID = null;
+					await item.save({ skipSelect: true });
+				}
+			});
+			return;
+		}
 		if (!io.dataOut?.length) return;
 
 		let newParentItem = await Zotero.Items.getAsync(io.dataOut);

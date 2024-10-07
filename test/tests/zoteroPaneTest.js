@@ -1767,5 +1767,35 @@ describe("ZoteroPane", function() {
 			assert.notInclude(oldParent.getNotes(), note.id);
 			assert.notInclude(oldParent.getAttachments(), attachment.id);
 		});
+
+		it("should allow to move attachments to standalone when applicable", async function() {
+			let collection = await createDataObject('collection');
+			let parent = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importPDFAttachment(parent);
+			// Select child item
+			await zp.selectItems([attachment.id]);
+			// Open the dialog
+			let windowPromise = waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
+			zp.changeParentItem();
+			var selectWin = await windowPromise;
+			do {
+				await Zotero.Promise.delay(50);
+			}
+			while (!selectWin.loaded);
+			await selectWin.itemsView.waitForLoad();
+
+			// Button to make attachment standalone should be visible
+			let moveToStandaloneBtn = selectWin.document.querySelector("dialog button[dlgtype=extra1]");
+			assert.isFalse(moveToStandaloneBtn.hidden);
+			// Click it
+			var modifyPromise = waitForItemEvent('modify');
+			moveToStandaloneBtn.click();
+			await modifyPromise;
+
+			// The attachment should have no parent item
+			assert.isFalse(attachment.parentID);
+			// Attachment should belong to the same collection as parent item
+			assert.equal(attachment.getCollections()[0], collection.id);
+		});
 	});
 })

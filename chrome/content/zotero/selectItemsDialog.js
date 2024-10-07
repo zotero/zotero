@@ -118,6 +118,13 @@ var doLoad = async function () {
 			button.setAttribute("tabindex", nextButtonTabindex++);
 		}
 	}
+	// Handle any custom button config that can be passed
+	for (let buttonConfig of io.extraButtons || []) {
+		let button = document.querySelector(`dialog button[dlgtype='${buttonConfig.type}']`);
+		button.hidden = false;
+		document.l10n.setAttributes(button, buttonConfig.l10nLabel);
+		button.addEventListener("click", event => buttonConfig.onclick(event));
+	}
 	
 	// Used in tests
 	loaded = true;
