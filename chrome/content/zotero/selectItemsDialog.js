@@ -89,10 +89,11 @@ var doLoad = async function () {
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
 	const filterLibraryIDs = false || io.filterLibraryIDs;
+	const hideSources = io.hideCollections || ['duplicates', 'trash', 'feeds'];
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
 		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),
 		filterLibraryIDs,
-		hideSources: ['duplicates', 'trash', 'feeds']
+		hideSources
 	});
 
 	await collectionsView.makeVisible();

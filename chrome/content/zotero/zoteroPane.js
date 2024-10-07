@@ -4968,7 +4968,8 @@ var ZoteroPane = new function()
 			itemTreeID: 'change-parent-item-select-item-dialog',
 			filterLibraryIDs: [libraryID],
 			singleSelection: true,
-			onlyRegularItems: true
+			onlyRegularItems: true,
+			hideCollections: ['duplicates', 'trash', 'feeds', 'unfiled', 'retracted', 'publications']
 		};
 		// The new parent needs to be selected in the dialog
 		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
