@@ -620,10 +620,10 @@ TextConstruct.prototype = {
 		}
 		
 		let parserType;
-		if (this.type == "xhtml") {
+		if (this.type == "xhtml" || this.type == "application/xhtml+xml") {
 			parserType = "application/xhtml+xml";
 		}
-		else if (this.type == "html") {
+		else if (this.type == "html" || this.type == "text/html") {
 			parserType = "text/html";
 		}
 		else {
