@@ -82,7 +82,8 @@ browser,
 #left-tabbox {
 	flex: 1;
 	min-width: 500px;
-	margin: 5px;
+	margin: 0 5px 5px 5px;
+	padding-top: 5px; // padding at the top for focus-ring of tabs to not cutoff tabs focusring
 	overflow: clip;
 	
 	tabpanel {
@@ -210,4 +211,10 @@ browser,
 			margin: 0;
 		}
 	}
+}
+
+// show focusring only during keyboard navigation
+#tabs:not([clicked]) tab:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
 }

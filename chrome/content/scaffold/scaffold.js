@@ -58,7 +58,6 @@ var Scaffold = new function () {
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
 	var _needRebuildTranslatorSuggestions = true;
-	var _tabClicked = false;
 
 	this.browser = () => _browser;
 	
@@ -101,8 +100,12 @@ var Scaffold = new function () {
 		document.getElementById('tabs').addEventListener('mousedown', (event) => {
 			// Record if tab selection will happen due to a mouse click vs keyboard nav.
 			if (event.clientX === 0 && event.clientY === 0) return;
-			_tabClicked = true;
+			document.getElementById('tabs').setAttribute("clicked", true);
 		}, true);
+		// Record that click has happened for better focus-ring handling in the stylesheet
+		document.addEventListener("mouseup", (_) => {
+			document.getElementById('tabs').removeAttribute("clicked");
+		});
 		
 		let lastTranslatorID = Zotero.Prefs.get('scaffold.lastTranslatorID');
 		if (lastTranslatorID) {
@@ -191,6 +194,26 @@ var Scaffold = new function () {
 				}
 			});
 		}
+		// Special key handling for the editors
+		document.addEventListener("keydown", (event) => {
+			if (!event.target.ownerDocument.URL.includes("monaco.html")) return;
+			let tabbox = document.getElementById("left-tabbox");
+			// On Escape, focus the selected tab
+			if (event.key == "Escape") {
+				tabbox.selectedTab.focus();
+			}
+			// On shift-tab from the start of the line, tab out of the editor
+			if (event.key == "Tab" && event.shiftKey) {
+				let editorDoc = event.target.ownerDocument;
+				let margin = editorDoc.querySelector(".margin");
+				let cursor = editorDoc.querySelector("textarea.monaco-mouse-cursor-text");
+				// check if cursor is at the same position as the left margin
+				if (margin.style.width == cursor.style.left) {
+					Services.focus.moveFocus(window, event.target, Services.focus.MOVEFOCUS_BACKWARD, 0);
+					event.preventDefault();
+				}
+			}
+		}, true);
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
@@ -860,34 +883,31 @@ var Scaffold = new function () {
 			return;
 		}
 
-		// Focus editor when switching to tab
 		var tab = document.getElementById('tabs').selectedItem.id.match(/^tab-(.+)$/)[1];
-		switch (tab) {
-			case 'import':
-			case 'code':
-			case 'tests':
-				// Keep focus on tab during keyboard navigation
-				if (!_tabClicked) break;
-				// the select event's default behavior is to focus the selected tab.
-				// we don't want to prevent *all* of the event's default behavior,
-				// but we do want to focus the editor instead of the tab.
-				// so this stupid hack waits 10 ms for event processing to finish
-				// before focusing the editor.
-				setTimeout(() => {
-					document.getElementById(`editor-${tab}`).focus();
-					_editors[tab].focus();
-				}, 10);
-				break;
-			default:
-				// With a screen reader active, focus may not shift from selected tab
-				// to the first focusable input. Explicitly force it if a tab was clicked.
-				if (!_tabClicked) break;
-				setTimeout(() => {
-					Services.focus.moveFocus(window, document.getElementById('tabs').selectedItem, Services.focus.MOVEFOCUS_FORWARD, 0);
-				}, 10);
+		let tabPanel = document.getElementById("left-tabbox").selectedPanel;
+		// The select event's default behavior is to focus the selected tab.
+		// we don't want to prevent *all* of the event's default behavior,
+		// but we do want to focus an element inside of tabpanel instead of the tab
+		// (unless tabs are being navigated via keyboard)
+		// so this stupid hack focuses the desired element after skipping a tick
+		if (document.getElementById('tabs').getAttribute("clicked")) {
+			setTimeout(() => {
+				let toFocus = tabPanel.querySelector("[focus-on-tab-select]");
+				if (toFocus) {
+					toFocus.focus();
+					// activate editor that is being focused, if any
+					if (toFocus.src.includes("monaco.html")) {
+						_editors[tab].focus();
+					}
+				}
+				else {
+					// if no specific element set, just tab into the panel
+					setTimeout(() => {
+						Services.focus.moveFocus(window, document.getElementById('tabs').selectedItem, Services.focus.MOVEFOCUS_FORWARD, 0);
+					});
+				}
+			});
 		}
-
-		_tabClicked = false;
 		let codeTabBroadcaster = document.getElementById('code-tab-only');
 		if (tab == 'code') {
 			codeTabBroadcaster.removeAttribute('disabled');
