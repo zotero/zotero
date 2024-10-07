@@ -195,14 +195,11 @@ var Scaffold = new function () {
 			});
 		}
 		// Special key handling for the editors
+		let tabbox = document.getElementById("left-tabbox");
+		// On shift-tab from the start of the first line, tab out of the editor.
+		// Use capturing listener, since Shift-Tab keydown events do not leave the editor.
 		document.addEventListener("keydown", (event) => {
 			if (!event.target.ownerDocument.URL.includes("monaco.html")) return;
-			let tabbox = document.getElementById("left-tabbox");
-			// On Escape, focus the selected tab
-			if (event.key == "Escape") {
-				tabbox.selectedTab.focus();
-			}
-			// On shift-tab from the start of the first line, tab out of the editor
 			if (event.key == "Tab" && event.shiftKey) {
 				let activeEditor = _editors[_getActiveEditorName()];
 				let position = activeEditor.getPosition();
@@ -212,6 +209,14 @@ var Scaffold = new function () {
 				}
 			}
 		}, true);
+		// On Escape, focus the selected tab. Use non-capturing listener to not
+		// do anything on Escape events handled by the editor (e.g. to dismiss autocomplete popup)
+		document.addEventListener("keydown", (event) => {
+			if (!event.target.ownerDocument.URL.includes("monaco.html")) return;
+			if (event.key == "Escape") {
+				tabbox.selectedTab.focus();
+			}
+		});
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
