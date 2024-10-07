@@ -412,10 +412,12 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 	
 	if (feedEntry.content || feedEntry.summary) {
 		let abstractFragment = (feedEntry.content || feedEntry.summary).createDocumentFragment();
-		if (abstractFragment.querySelectorAll('body').length === 1) {
-			abstractFragment.replaceChildren(...abstractFragment.querySelector('body').childNodes);
+		if (abstractFragment) {
+			if (abstractFragment.querySelectorAll('body').length === 1) {
+				abstractFragment.replaceChildren(...abstractFragment.querySelector('body').childNodes);
+			}
+			item.abstractNote = new XMLSerializer().serializeToString(abstractFragment);
 		}
-		item.abstractNote = new XMLSerializer().serializeToString(abstractFragment);
 	}
 
 	if (feedEntry.summary && !item.title) {
@@ -531,6 +533,9 @@ Zotero.FeedReader._getRichText = function (feedText, field) {
 		return feedText;
 	}
 	let domFragment = feedText.createDocumentFragment();
+	if (!domFragment) {
+		return '';
+	}
 	return Zotero.Utilities.trimInternal(domFragment.textContent);
 };
 
