@@ -202,13 +202,11 @@ var Scaffold = new function () {
 			if (event.key == "Escape") {
 				tabbox.selectedTab.focus();
 			}
-			// On shift-tab from the start of the line, tab out of the editor
+			// On shift-tab from the start of the first line, tab out of the editor
 			if (event.key == "Tab" && event.shiftKey) {
-				let editorDoc = event.target.ownerDocument;
-				let margin = editorDoc.querySelector(".margin");
-				let cursor = editorDoc.querySelector("textarea.monaco-mouse-cursor-text");
-				// check if cursor is at the same position as the left margin
-				if (margin.style.width == cursor.style.left) {
+				let activeEditor = _editors[_getActiveEditorName()];
+				let position = activeEditor.getPosition();
+				if (position.column == 1 && position.lineNumber == 1) {
 					Services.focus.moveFocus(window, event.target, Services.focus.MOVEFOCUS_BACKWARD, 0);
 					event.preventDefault();
 				}
