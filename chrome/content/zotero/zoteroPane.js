@@ -2565,7 +2565,8 @@ var ZoteroPane = new function()
 		}
 	});
 
-	// Move selected collection to specified target collection.
+	// Move selected collection to specified target collection or library.
+	// Target has to be in the same library as the currently selected collection.
 	this.moveCollection = async (target) => {
 		let selected = this.getSelectedCollection();
 		if (!selected) return;
@@ -2573,7 +2574,13 @@ var ZoteroPane = new function()
 		if (target.libraryID !== selected.libraryID) {
 			throw new Error("Moving collections is only possible within the same library.");
 		}
-		selected.parentID = target.id;
+		if (target instanceof Zotero.Library) {
+			selected.parentID = null;
+		}
+		else {
+			selected.parentID = target.id;
+		}
+		
 		await selected.saveTx();
 	};
 
@@ -4038,6 +4045,21 @@ var ZoteroPane = new function()
 		popup.replaceChildren();
 
 		let selected = this.getSelectedCollection();
+
+		// Add current library at the top to be able to move collections into it
+		let library = Zotero.Libraries.get(ZoteroPane.getSelectedLibraryID());
+		let libraryMenuItem = document.createXULElement("menuitem");
+		libraryMenuItem.setAttribute("label", library.name);
+		libraryMenuItem.setAttribute("image", library.treeViewImage);
+		libraryMenuItem.setAttribute("value", library.treeViewID);
+		libraryMenuItem.addEventListener("command", (event) => {
+			if (event.target.tagName == 'menuitem') {
+				this.moveCollection(library);
+				event.stopPropagation();
+			}
+		});
+		popup.appendChild(libraryMenuItem);
+		popup.appendChild(document.createXULElement("menuseparator"));
 		
 		// Build menus for each top-level collection of this library
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
@@ -4076,6 +4098,22 @@ var ZoteroPane = new function()
 
 		// If there is only one library, display its collections as top-level menuitems
 		if (topLevelEntries.length == 1) {
+			// Manually add My Library menuitem at the top, so one can still copy into it
+			let myLibrary = topLevelEntries[0];
+			let myLibraryMenuItem = document.createXULElement("menuitem");
+			myLibraryMenuItem.setAttribute("label", myLibrary.name);
+			myLibraryMenuItem.setAttribute("image", myLibrary.treeViewImage);
+			myLibraryMenuItem.setAttribute("value", myLibrary.treeViewID);
+			myLibraryMenuItem.addEventListener("command", (event) => {
+				if (event.target.tagName == 'menuitem') {
+					this.copyCollection(myLibrary);
+					event.stopPropagation();
+				}
+			});
+			popup.appendChild(myLibraryMenuItem);
+			popup.appendChild(document.createXULElement("menuseparator"));
+
+			// Top-level collections used to construct the menus
 			topLevelEntries = Zotero.Collections.getByLibrary(topLevelEntries[0].id);
 		}
 		
