@@ -1151,9 +1151,8 @@ var Scaffold = new function () {
 	/*
 	 * called if an error occurs
 	 */
-	function _error(_obj, _error) {
-		// stub: this handler doesn't actually seem to get called by the current
-		// translation architecture when a translator throws
+	function _error(obj, error) {
+		_logOutput(String(error));
 	}
 
 	/*
