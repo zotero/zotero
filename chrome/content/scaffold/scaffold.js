@@ -565,8 +565,9 @@ var Scaffold = new function () {
 	};
 
 	this.updateModelMarkers = async function () {
+		let modelVersionId = _editors.code.getModel().getVersionId();
 		let output = await runESLint();
-		let markers = eslintOutputToModelMarkers(output);
+		let markers = eslintOutputToModelMarkers(output, modelVersionId);
 		_editors.codeGlobal.editor.setModelMarkers(_editors.code.getModel(), 'eslint', markers);
 	};
 
@@ -2299,7 +2300,7 @@ var Scaffold = new function () {
 		return [];
 	}
 
-	function eslintOutputToModelMarkers(output) {
+	function eslintOutputToModelMarkers(output, modelVersionId) {
 		let result = output[0];
 		if (!result) return [];
 
@@ -2311,7 +2312,8 @@ var Scaffold = new function () {
 			message: message.message,
 			severity: message.severity * 4,
 			source: 'ESLint',
-			code: message.ruleId
+			code: message.ruleId,
+			modelVersionId,
 		}));
 	}
 
