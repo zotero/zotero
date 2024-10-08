@@ -563,10 +563,10 @@ var Scaffold = new function () {
 		};
 	};
 
-	this.updateModelMarkers = function (translatorPath) {
-		runESLint(translatorPath)
-			.then(eslintOutputToModelMarkers)
-			.then(markers => _editors.codeGlobal.editor.setModelMarkers(_editors.code.getModel(), 'eslint', markers));
+	this.updateModelMarkers = async function (translatorPath) {
+		let output = await runESLint(translatorPath);
+		let markers = eslintOutputToModelMarkers(output);
+		_editors.codeGlobal.editor.setModelMarkers(_editors.code.getModel(), 'eslint', markers);
 	};
 
 	this.setFontSize = function (size) {
@@ -1796,7 +1796,7 @@ var Scaffold = new function () {
 				? listBox.getItemAtIndex(testIndex)
 				: document.createXULElement('richlistitem');
 
-			item.innerHTML = ''; // clear children/content if reusing
+			item.replaceChildren();
 
 			let input = document.createXULElement('label');
 			input.append(getTestLabel(test));
@@ -2300,9 +2300,7 @@ var Scaffold = new function () {
 			message: message.message,
 			severity: message.severity * 4,
 			source: 'ESLint',
-			tags: [
-				message.ruleId || '-'
-			]
+			code: message.ruleId
 		}));
 	}
 
