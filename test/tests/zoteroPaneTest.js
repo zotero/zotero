@@ -1796,4 +1796,53 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.getCollections()[0], collection.id);
 		});
 	});
+
+	describe("#copyCollection", function () {
+		it("should copy collection within the same library", async function () {
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+			let collectionDestination = await createDataObject('collection');
+
+			let itemOne = await createDataObject('item', { collections: [collectionParent.id] });
+			let itemTwo = await createDataObject('item', { collections: [collectionChild.id] });
+
+			await zp.collectionsView.selectByID("C" + collectionParent.id);
+
+			await zp.copyCollection(collectionDestination);
+			await waitForNotifierEvent("add", "collection");
+
+			// Newly created collections have the same names as the original ones
+			let collectionNames = collectionDestination.getDescendents(false, 'collection').map(col => col.name);
+			assert.sameMembers(collectionNames, [collectionParent.name, collectionChild.name]);
+
+			// Newly created collections contain the same items
+			let items = collectionDestination.getDescendents(false, 'item').map(item => item.id);
+			assert.sameMembers(items, [itemOne.id, itemTwo.id]);
+		});
+
+		it("should copy collection between libraries", async function () {
+			let groupDestination = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
+
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+
+			let itemOne = await createDataObject('item', { collections: [collectionParent.id] });
+			let itemTwo = await createDataObject('item', { collections: [collectionChild.id] });
+
+			await zp.collectionsView.selectByID("C" + collectionParent.id);
+
+			await zp.copyCollection(groupCollection);
+
+			await waitForNotifierEvent("add", "collection");
+
+			// Newly created collections have the same names as the original ones
+			let collectionNames = groupCollection.getDescendents(false, 'collection').map(col => col.name);
+			assert.sameMembers(collectionNames, [collectionParent.name, collectionChild.name]);
+
+			// Newly created collections also have copies of items
+			let items = groupCollection.getDescendents(false, 'item').map(item => Zotero.Items.get(item.id).getDisplayTitle());
+			assert.sameMembers(items, [itemOne.getDisplayTitle(), itemTwo.getDisplayTitle()]);
+		});
+	});
 })

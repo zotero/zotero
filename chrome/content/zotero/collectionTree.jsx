@@ -1956,7 +1956,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	/**
 	 * Helper function used by executeCollectionCopy to recursively copy collections from one library
-	 * into another.
+	 * into another, or from one collection to another within the same library.
 	 */
 	async _copyCollections({ descendents, parentID, addItems, targetLibraryID, targetTreeRow, copyOptions }) {
 		for (var desc of descendents) {
@@ -1969,8 +1969,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 				var collectionID = await newCollection.save();
 				
-				// Record link
-				await newCollection.addLinkedCollection(c);
+				// Record link only if copying to a different library
+				if (targetLibraryID !== c.libraryID) {
+					await newCollection.addLinkedCollection(c);
+				}
 				
 				// Recursively copy subcollections
 				if (desc.children.length) {
@@ -1980,10 +1982,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			// Items
 			else {
 				var item = await Zotero.Items.getAsync(desc.id);
-				var id = await this._copyItem({ item, targetLibraryID, targetTreeRow, options: copyOptions });
-				// Standalone attachments might not get copied
-				if (!id) {
-					continue;
+				let id = desc.id;
+				// Actually copy items only if moving to another library
+				if (item.libraryID !== targetLibraryID) {
+					id = await this._copyItem({ item, targetLibraryID, targetTreeRow, options: copyOptions });
+					// Standalone attachments might not get copied
+					if (!id) {
+						continue;
+					}
 				}
 				// Mark copied item for adding to collection
 				if (parentID) {

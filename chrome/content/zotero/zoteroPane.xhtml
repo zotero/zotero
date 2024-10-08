@@ -913,7 +913,11 @@
 			<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
 			<menuitem class="zotero-menuitem-edit-collection"/>
 			<menu class="menu-iconic zotero-menuitem-move-collection">
-				<menupopup id="zotero-move-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddCollectionToCollectionMenu(event)">
+				<menupopup id="zotero-move-collection-popup" onpopupshowing="ZoteroPane_Local.buildMoveCollectionMenu(event)">
+				</menupopup>
+			</menu>
+			<menu class="menu-iconic zotero-menuitem-copy-collection">
+				<menupopup id="zotero-copy-collection-popup" onpopupshowing="ZoteroPane_Local.buildCopyCollectionMenu(event)">
 				</menupopup>
 			</menu>
 			<menuitem class="zotero-menuitem-duplicate-collection"/>
