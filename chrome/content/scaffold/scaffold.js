@@ -1754,10 +1754,11 @@ var Scaffold = new function () {
 	 * populate tests pane and url options in browser pane
 	 */
 	this.populateTests = function () {
-		function wrapWithHBox(elem, { flex = undefined, width = undefined } = {}) {
+		function wrapWithHBox(elem, { flex, pack, width } = {}) {
 			let hbox = document.createXULElement('hbox');
 			hbox.append(elem);
 			if (flex !== undefined) hbox.setAttribute('flex', flex);
+			if (pack !== undefined) hbox.setAttribute('pack', pack);
 			if (width !== undefined) hbox.style.width = width + 'px';
 			return hbox;
 		}
@@ -1808,7 +1809,7 @@ var Scaffold = new function () {
 			let defer = document.createXULElement('checkbox');
 			defer.checked = test.defer;
 			defer.disabled = true;
-			item.appendChild(wrapWithHBox(defer, { width: 30 }));
+			item.appendChild(wrapWithHBox(defer, { pack: 'center', width: 75 }));
 
 			item.dataset.testString = testString;
 			item.dataset.testType = test.type;
