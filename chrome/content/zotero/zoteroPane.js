@@ -5349,8 +5349,8 @@ var ZoteroPane = new function()
 					Zotero.debug('No path for attachment ' + item.key);
 					continue;
 				}
-				let ext = Zotero.File.getExtension(path);
 				let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(item.parentItem, { attachmentTitle: item.getField('title') });
+				let ext = Zotero.Attachments.getCorrectFileExension(item);
 				let newName = fileBaseName + (ext ? '.' + ext : '');
 				let result = await item.renameAttachmentFile(newName, false, true);
 				if (result !== true) {
@@ -5680,14 +5680,9 @@ var ZoteroPane = new function()
 			let parentItemID = item.parentItemID;
 			let parentItem = await Zotero.Items.getAsync(parentItemID);
 			var oldBaseName = item.attachmentFilename.replace(/\.[^.]+$/, '');
-			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: item.getField('title') });
-			
-			let extRE = /\.[^\.]+$/;
-			let origFilename = PathUtils.split(file).pop();
-			let ext = origFilename.match(extRE);
-			if (ext) {
-				newName = newName + ext[0];
-			}
+			var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: item.getField('title') });
+			let ext = Zotero.Attachments.getCorrectFileExension(item);
+			let newName = fileBaseName + (ext ? '.' + ext : '');
 			
 			var renamed = await item.renameAttachmentFile(newName, false, true);
 			if (renamed !== true) {
