@@ -32,6 +32,12 @@ var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/Content
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
+var lazy = {};
+ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
+	return Zotero.Utilities.Internal.subprocess(Services.env.get('SHELL'), ['-c', 'echo $PATH'])
+		.then(s => s.trimEnd());
+});
+
 // Fix JSON stringify 2028/2029 "bug"
 // Borrowed from http://stackoverflow.com/questions/16686687/json-stringify-and-u2028-u2029-check
 if (JSON.stringify(["\u2028\u2029"]) !== '["\\u2028\\u2029"]') {
@@ -2228,7 +2234,7 @@ var Scaffold = new function () {
 	}
 
 	function getDefaultESLintPath() {
-		return PathUtils.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'teslint');
+		return PathUtils.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'eslint');
 	}
 
 	async function getESLintPath() {
@@ -2249,7 +2255,7 @@ var Scaffold = new function () {
 				"Zotero uses ESLint to enable code suggestions and error checking, "
 					+ "but it wasn't found in the selected translators directory.\n\n"
 					+ "You can install it from the command line:\n\n"
-					+ `  cd ${Scaffold_Translators.getDirectory()}\n`
+					+ `  cd '${Scaffold_Translators.getDirectory()}'\n`
 					+ "  npm install\n\n",
 				buttonFlags,
 				"Try Again",
@@ -2271,11 +2277,12 @@ var Scaffold = new function () {
 		let eslintPath = await getESLintPath();
 		if (!eslintPath) return [];
 
-		Zotero.debug('Running ESLint');
 		try {
 			let metadata = _getMetadataObject();
 			let code = _getCode();
-			let proc = await Subprocess.call({
+			let translatorString = _translatorProvider.stringify(metadata, code);
+			
+			let subprocessOptions = {
 				command: eslintPath,
 				arguments: [
 					'--format',
@@ -2284,14 +2291,27 @@ var Scaffold = new function () {
 					'--stdin-filename',
 					_translatorProvider.getSavePath(metadata)
 				],
-			});
-			await proc.stdin.write(_translatorProvider.stringify(metadata, code));
+			};
+			
+			// ESLint needs to find node on the PATH, but macOS doesn't forward
+			// the login shell's PATH to GUI processes by default. There's a
+			// launchctl command that fixes it, but we can't expect people
+			// to do that. Pass the login shell's PATH as a workaround.
+			if (Zotero.isMac) {
+				subprocessOptions.environment = { PATH: await lazy.shellPathPromise };
+				subprocessOptions.environmentAppend = true;
+			}
+			
+			let proc = await Subprocess.call(subprocessOptions);
+			
+			await proc.stdin.write(translatorString);
 			await proc.stdin.close();
 			let lintOutput = '';
 			let chunk;
 			while ((chunk = await proc.stdout.readString())) {
 				lintOutput += chunk;
 			}
+			proc.kill(); // Shouldn't be necessary, but make sure we don't leak
 			return JSON.parse(lintOutput);
 		}
 		catch (e) {
