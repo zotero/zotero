@@ -1326,7 +1326,7 @@ var Scaffold = new function () {
 
 		metadata = JSON.stringify(metadata, null, "\t") + ";\n";
 
-		translator.code = metadata + "\n" + _editors.code.getValue();
+		translator.code = metadata + "\n" + _getCode();
 
 		// make sure translator gets run in browser in Zotero >2.1
 		if (Zotero.Translator.RUN_MODE_IN_BROWSER) {
