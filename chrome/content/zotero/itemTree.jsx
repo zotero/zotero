@@ -229,7 +229,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// So that they are displayed among deleted items
 				newSearchItems = newSearchItems
 					.concat(await this.collectionTreeRow.getTrashedCollections())
-					.concat(await Zotero.Searches.getDeleted(this.collectionTreeRow.ref.libraryID));
+					.concat(await this.collectionTreeRow.getTrashedSearches());
 			}
 			// TEMP: Hide annotations
 			newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
