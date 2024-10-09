@@ -58,7 +58,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/editBibliographyDialog.js", this);
 	</script>
 	
-	<vbox id="zotero-select-items-container" flex="1">
+	<vbox id="zotero-select-items-container" flex="1" tabindex="0"  data-l10n-id="integration-editBibliography-wrapper" data-l10n-attrs="aria-description">
 		<hbox flex="1">
 			<vbox align="stretch" flex="1">
 				<hbox align="center" pack="end">
@@ -75,18 +75,19 @@
 			</vbox>
 					
 			<vbox align="center" pack="center" id="citation-buttons">
-				<toolbarbutton id="add" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true"/>
-				<toolbarbutton id="remove" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true"/>
+				<toolbarbutton id="add" data-l10n-id="integration-editBibliography-add-btn" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true" tabindex="0"/>
+				<toolbarbutton id="remove" data-l10n-id="integration-editBibliography-remove-btn" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true" tabindex="0"/>
 			</vbox>
 			<vbox>
-				<label value="&zotero.integration.references.label;"/>
+				<label value="&zotero.integration.references.label;" control="item-list"/>
 				<richlistbox id="item-list" flex="1" align="stretch" seltype="multiple"
 							 style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"
-							 onchanged="Zotero_Bibliography_Dialog.textChanged()"/>
+							 onchanged="Zotero_Bibliography_Dialog.textChanged()"
+							 onfocus="Zotero_Bibliography_Dialog.listItemFocused()"/>
 			</vbox>
 		</hbox>
 		
-		<iframe id="editor" src="simpleEditor.html" flex="1" type="content" remote="false" maychangeremoteness="false"/>
+		<iframe id="editor" src="simpleEditor.html" flex="1" type="content" remote="false" maychangeremoteness="false" data-l10n-id="integration-editBibliography-editor"/>
 		<description id="zotero-editor-warning" style="margin: 9px 1px 0">&zotero.citation.editorWarning.label;</description>
 	</vbox>
 </dialog>

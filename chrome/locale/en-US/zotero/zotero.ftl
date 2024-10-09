@@ -311,6 +311,17 @@ integration-addEditCitation-window =
     .title = { -app-name } - Add/Edit Citation
 integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
+integration-editBibliography-add-btn =
+    .aria-label = { general-add }
+integration-editBibliography-remove-btn =
+    .aria-label = { general-remove }
+integration-editBibliography-editor = 
+    .aria-label = Edit reference
+integration-editBibliography-wrapper =
+    .aria-label = Edit Bibliography Dialog
+    .aria-description = Navigate Collections and Items tables to find additional references and use { general-add } button to include them into the bibliography.
+    You may also select an entry from the list of cited references and use { general-remove } button to exlude it.
+    Use the editor after the references list to edit the exact format in which the reference will be cited.
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
 
