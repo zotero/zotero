@@ -1794,7 +1794,7 @@ var Scaffold = new function () {
 		for (let i = 0; i < count; i++) {
 			let item = listBox.getItemAtIndex(i);
 			let [, statusCell] = item.children;
-			oldStatuses[item.dataset.testString] = statusCell.getAttribute('value');
+			oldStatuses[item.dataset.testString] = statusCell.textContent;
 		}
 
 		let testIndex = 0;
