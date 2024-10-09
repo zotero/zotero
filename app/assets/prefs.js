@@ -155,3 +155,6 @@ pref("media.ffvpx.mp3.enabled", false);
 pref("media.rdd-vpx.enabled", false);
 pref("media.rdd-ffvpx.enabled", false);
 pref("media.utility-ffvpx.enabled", false);
+
+// Allow collectionTree scrolling when Control is highlighting collections on win
+pref("mousewheel.with_control.action", 1);
