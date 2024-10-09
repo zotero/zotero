@@ -1076,10 +1076,11 @@ Zotero.Translate.ItemGetter.prototype = {
 		this.numItems = this._itemsLeft.length;
 	}),
 	
-	exportFiles: function (dir, extension, { includeAnnotations }) {
+	exportFiles: function (dir, extension, { includeAnnotations, passAnnotationsToTranslator }) {
 		// generate directory
 		this._exportFileDirectory = dir.parent.clone();
 		this._includeAnnotations = includeAnnotations;
+		this._passAnnotationsToTranslator = passAnnotationsToTranslator;
 		
 		// delete this file if it exists
 		if(dir.exists()) {
@@ -1109,6 +1110,13 @@ Zotero.Translate.ItemGetter.prototype = {
 		var linkMode = attachment.attachmentLinkMode;
 		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			let includeAnnotations = attachment.isPDFAttachment() && this._includeAnnotations;
+			let passAnnotationsToTranslator = attachment.isPDFAttachment() && this._passAnnotationsToTranslator;
+
+			if (includeAnnotations && passAnnotationsToTranslator) {
+				attachmentArray.annotations = attachment.getAnnotations().map(
+					a => Zotero.Utilities.Internal.itemToExportFormat(a, this.legacy));
+			}
+
 			attachmentArray.localPath = attachment.getFilePath();
 			
 			if(this._exportFileDirectory) {
@@ -1232,7 +1240,7 @@ Zotero.Translate.ItemGetter.prototype = {
 						}
 						// For single files, just copy to the specified location
 						else {
-							if (includeAnnotations) {
+							if (includeAnnotations && !passAnnotationsToTranslator) {
 								// TODO: Make export async
 								try {
 								await Zotero.PDFWorker.export(attachment.id, targetFile.path);
