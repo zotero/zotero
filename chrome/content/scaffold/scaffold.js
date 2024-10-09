@@ -293,6 +293,7 @@ var Scaffold = new function () {
 		monaco.languages.registerCodeLensProvider('javascript', this.createRunCodeLensProvider(monaco, editor));
 		monaco.languages.registerHoverProvider('javascript', this.createHoverProvider(monaco, editor));
 		monaco.languages.registerCompletionItemProvider('javascript', this.createCompletionProvider(monaco, editor));
+		model.onDidChangeContent(() => this.updateModelMarkers());
 
 		let tsLib = await Zotero.File.getContentsAsync(
 			PathUtils.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
@@ -563,9 +564,10 @@ var Scaffold = new function () {
 		};
 	};
 
-	this.updateModelMarkers = async function (translatorPath) {
-		let output = await runESLint(translatorPath);
-		let markers = eslintOutputToModelMarkers(output);
+	this.updateModelMarkers = async function () {
+		let modelVersionId = _editors.code.getModel().getVersionId();
+		let output = await runESLint();
+		let markers = eslintOutputToModelMarkers(output, modelVersionId);
 		_editors.codeGlobal.editor.setModelMarkers(_editors.code.getModel(), 'eslint', markers);
 	};
 
@@ -737,7 +739,6 @@ var Scaffold = new function () {
 			if (mod) type -= mod;
 		}
 
-		this.updateModelMarkers(translator.path);
 		_lastModifiedTime = new Date().getTime();
 		
 		Zotero.Prefs.set('scaffold.lastTranslatorID', translator.translatorID);
@@ -804,24 +805,28 @@ var Scaffold = new function () {
 
 		return metadata;
 	}
-
-	/*
-	 * save translator to database
-	 */
-	this.save = async function (updateZotero) {
+	
+	function _getCode() {
 		var code = _editors.code.getValue();
 		var tests = _editors.tests.getValue().trim();
 		if (!tests || tests == '[]') tests = '[\n]'; // eslint wants a line break between the brackets
 
 		code = code.trimEnd() + '\n\n/** BEGIN TEST CASES **/\nvar testCases = ' + tests + '\n/** END TEST CASES **/';
+		return code;
+	}
 
+	/*
+	 * save translator to database
+	 */
+	this.save = async function (updateZotero) {
 		var metadata = _getMetadataObject();
+		var code = _getCode();
 		if (metadata.label === "Untitled") {
 			_logOutput("Can't save an untitled translator.");
 			return;
 		}
 		
-		var path = await _translatorProvider.save(metadata, code);
+		await _translatorProvider.save(metadata, code);
 		
 		if (updateZotero) {
 			await Zotero.Translators.save(metadata, code);
@@ -830,7 +835,6 @@ var Scaffold = new function () {
 
 		_lastModifiedTime = new Date().getTime();
 
-		this.updateModelMarkers(path);
 		await this.reloadTranslators();
 	};
 
@@ -2263,18 +2267,26 @@ var Scaffold = new function () {
 		return eslintPath;
 	}
 
-	async function runESLint(translatorPath) {
-		if (!translatorPath) return [];
-
+	async function runESLint() {
 		let eslintPath = await getESLintPath();
 		if (!eslintPath) return [];
 
 		Zotero.debug('Running ESLint');
 		try {
+			let metadata = _getMetadataObject();
+			let code = _getCode();
 			let proc = await Subprocess.call({
 				command: eslintPath,
-				arguments: ['--format', 'json', '--', translatorPath],
+				arguments: [
+					'--format',
+					'json',
+					'--stdin',
+					'--stdin-filename',
+					_translatorProvider.getSavePath(metadata)
+				],
 			});
+			await proc.stdin.write(_translatorProvider.stringify(metadata, code));
+			await proc.stdin.close();
 			let lintOutput = '';
 			let chunk;
 			while ((chunk = await proc.stdout.readString())) {
@@ -2288,7 +2300,7 @@ var Scaffold = new function () {
 		return [];
 	}
 
-	function eslintOutputToModelMarkers(output) {
+	function eslintOutputToModelMarkers(output, modelVersionId) {
 		let result = output[0];
 		if (!result) return [];
 
@@ -2300,7 +2312,8 @@ var Scaffold = new function () {
 			message: message.message,
 			severity: message.severity * 4,
 			source: 'ESLint',
-			code: message.ruleId
+			code: message.ruleId,
+			modelVersionId,
 		}));
 	}
 
