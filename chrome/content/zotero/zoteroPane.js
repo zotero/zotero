@@ -4353,72 +4353,98 @@ var ZoteroPane = new function()
 			files = fp.files;
 		}
 		var addedItems = [];
+		var notifierQueue = new Zotero.Notifier.Queue();
 		var collection;
 		var fileBaseName;
-		if (parentItemID) {
-			// If only one item is being added, automatic renaming is enabled, and the parent item
-			// doesn't have any other non-HTML file attachments, rename the file.
-			// This should be kept in sync with itemTreeView::drop().
-			if (files.length == 1 && Zotero.Attachments.shouldAutoRenameFile(link)) {
-				let parentItem = Zotero.Items.get(parentItemID);
-				if (!parentItem.numNonHTMLFileAttachments()) {
-					fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
-						parentItem, files[0]
-					);
-				}
-			}
-		}
-		// If not adding to an item, add to the current collection
-		else {
-			collection = this.getSelectedCollection(true);
-		}
 		
-		for (let file of files) {
-			let item;
-			
-			if (link) {
-				// Rename linked file, with unique suffix if necessary
-				try {
-					if (fileBaseName) {
-						let ext = Zotero.File.getExtension(file);
-						let newName = await Zotero.File.rename(
-							file,
-							fileBaseName + (ext ? '.' + ext : ''),
-							{
-								unique: true
-							}
+		try {
+			if (parentItemID) {
+				// If only one item is being added, automatic renaming is enabled, and the parent item
+				// doesn't have any other non-HTML file attachments, rename the file.
+				// This should be kept in sync with itemTreeView::drop().
+				if (files.length == 1 && Zotero.Attachments.shouldAutoRenameFile(link)) {
+					let parentItem = Zotero.Items.get(parentItemID);
+					if (!parentItem.numNonHTMLFileAttachments()) {
+						fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
+							parentItem, files[0]
 						);
-						// Update path in case the name was changed to be unique
-						file = PathUtils.join(PathUtils.parent(file), newName);
 					}
 				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-				
-				item = await Zotero.Attachments.linkFromFile({
-					file,
-					parentItemID,
-					collections: collection ? [collection] : undefined
-				});
 			}
+			// If not adding to an item, add to the current collection
 			else {
-				if (file.endsWith(".lnk")) {
-					let win = Services.wm.getMostRecentWindow("navigator:browser");
-					win.ZoteroPane.displayCannotAddShortcutMessage(file);
-					continue;
-				}
-				
-				item = await Zotero.Attachments.importFromFile({
-					file,
-					libraryID,
-					fileBaseName,
-					parentItemID,
-					collections: collection ? [collection] : undefined
-				});
+				collection = this.getSelectedCollection(true);
 			}
-			
-			addedItems.push(item);
+
+			// If we have more than one file, we only want to call setAutoAttachmentTitle()
+			// at the end, once the attachments know whether they have siblings
+			let delaySetAutoAttachmentTitle = files.length > 1;
+
+			for (let file of files) {
+				let item;
+
+				if (link) {
+					// Rename linked file, with unique suffix if necessary
+					try {
+						if (fileBaseName) {
+							let ext = Zotero.File.getExtension(file);
+							let newName = await Zotero.File.rename(
+								file,
+								fileBaseName + (ext ? '.' + ext : ''),
+								{
+									unique: true
+								}
+							);
+							// Update path in case the name was changed to be unique
+							file = PathUtils.join(PathUtils.parent(file), newName);
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+
+					item = await Zotero.Attachments.linkFromFile({
+						file,
+						title: delaySetAutoAttachmentTitle ? '' : undefined,
+						parentItemID,
+						collections: collection ? [collection] : undefined,
+						saveOptions: {
+							notifierQueue
+						},
+					});
+				}
+				else {
+					if (file.endsWith(".lnk")) {
+						let win = Services.wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.displayCannotAddShortcutMessage(file);
+						continue;
+					}
+
+					item = await Zotero.Attachments.importFromFile({
+						file,
+						libraryID,
+						fileBaseName,
+						title: delaySetAutoAttachmentTitle ? '' : undefined,
+						parentItemID,
+						collections: collection ? [collection] : undefined,
+						saveOptions: {
+							notifierQueue
+						},
+					});
+				}
+
+				addedItems.push(item);
+			}
+
+			if (delaySetAutoAttachmentTitle) {
+				for (let item of addedItems) {
+					item.setAutoAttachmentTitle();
+					await item.saveTx({ notifierQueue });
+				}
+			}
+		}
+		finally {
+			await Zotero.Notifier.commit(notifierQueue);
 		}
 		
 		// Automatically retrieve metadata for top-level PDFs
@@ -4463,82 +4489,6 @@ var ZoteroPane = new function()
 		
 		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
 		saveSnapshot = saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'));
-		
-		// TODO: this, needless to say, is a temporary hack
-		if (itemType == 'temporaryPDFHack') {
-			itemType = null;
-			var isPDF = false;
-			if (doc.title.indexOf('application/pdf') != -1 || Zotero.Attachments.isPDFJSDocument(doc)
-					|| doc.contentType == 'application/pdf') {
-				isPDF = true;
-			}
-			else {
-				var ios = Components.classes["@mozilla.org/network/io-service;1"].
-							getService(Components.interfaces.nsIIOService);
-				try {
-					var uri = ios.newURI(doc.location, null, null);
-					if (uri.fileName && uri.fileName.match(/pdf$/)) {
-						isPDF = true;
-					}
-				}
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-				}
-			}
-			
-			if (isPDF && saveSnapshot) {
-				//
-				// Duplicate newItem() checks here
-				//
-				if (Zotero.DB.inTransaction()) {
-					yield Zotero.DB.waitForTransaction();
-				}
-				
-				// Currently selected row
-				if (row === undefined && this.collectionsView && this.getCollectionTreeRow()) {
-					row = this.collectionsView.selection.focused;
-				}
-				
-				if (row && !this.canEdit(row)) {
-					this.displayCannotEditLibraryMessage();
-					return false;
-				}
-				
-				if (row !== undefined) {
-					var collectionTreeRow = this.collectionsView.getRow(row);
-					var libraryID = collectionTreeRow.ref.libraryID;
-				}
-				else {
-					var libraryID = Zotero.Libraries.userLibraryID;
-					var collectionTreeRow = null;
-				}
-				//
-				//
-				//
-				
-				if (row && !this.canEditFiles(row)) {
-					this.displayCannotEditLibraryFilesMessage();
-					return false;
-				}
-				
-				if (collectionTreeRow && collectionTreeRow.isCollection()) {
-					var collectionID = collectionTreeRow.ref.id;
-				}
-				else {
-					var collectionID = false;
-				}
-				
-				let item = yield Zotero.Attachments.importFromDocument({
-					libraryID: libraryID,
-					document: doc,
-					collections: collectionID ? [collectionID] : []
-				});
-				
-				yield this.selectItem(item.id);
-				return false;
-			}
-		}
 		
 		// Save web page item by default
 		if (!itemType) {
@@ -4603,63 +4553,6 @@ var ZoteroPane = new function()
 		}
 		// Otherwise create placeholder item, attach attachment, and update from that
 		else {
-			// TODO: this, needless to say, is a temporary hack
-			if (itemType == 'temporaryPDFHack') {
-				itemType = null;
-				
-				if (mimeType == 'application/pdf') {
-					//
-					// Duplicate newItem() checks here
-					//
-					if (Zotero.DB.inTransaction()) {
-						yield Zotero.DB.waitForTransaction();
-					}
-					
-					// Currently selected row
-					if (row === undefined) {
-						row = ZoteroPane_Local.collectionsView.selection.focused;
-					}
-					
-					if (!ZoteroPane_Local.canEdit(row)) {
-						ZoteroPane_Local.displayCannotEditLibraryMessage();
-						return false;
-					}
-					
-					if (row !== undefined) {
-						var collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row);
-						var libraryID = collectionTreeRow.ref.libraryID;
-					}
-					else {
-						var libraryID = Zotero.Libraries.userLibraryID;
-						var collectionTreeRow = null;
-					}
-					//
-					//
-					//
-					
-					if (!ZoteroPane_Local.canEditFiles(row)) {
-						ZoteroPane_Local.displayCannotEditLibraryFilesMessage();
-						return false;
-					}
-					
-					if (collectionTreeRow && collectionTreeRow.isCollection()) {
-						var collectionID = collectionTreeRow.ref.id;
-					}
-					else {
-						var collectionID = false;
-					}
-					
-					let attachmentItem = yield Zotero.Attachments.importFromURL({
-						libraryID,
-						url,
-						collections: collectionID ? [collectionID] : undefined,
-						contentType: mimeType
-					});
-					this.selectItem(attachmentItem.id)
-					return attachmentItem;
-				}
-			}
-			
 			if (!itemType) {
 				itemType = 'webpage';
 			}
