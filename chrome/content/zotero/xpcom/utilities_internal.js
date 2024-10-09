@@ -623,7 +623,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {String} command - The command to run; if no slashes, will search PATH for the command
 	 * @param {String[]} args - An array of arguments to pass to the command
-	 * @return {String}
+	 * @return {Promise<String>}
 	 */
 	subprocess: async function (command, args = []) {
 		// eslint-disable-next-line no-undef
