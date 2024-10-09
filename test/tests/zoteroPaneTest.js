@@ -1845,4 +1845,37 @@ describe("ZoteroPane", function() {
 			assert.sameMembers(items, [itemOne.getDisplayTitle(), itemTwo.getDisplayTitle()]);
 		});
 	});
+	describe("#moveCollection", function () {
+		it("should move collection into another collection of the same library", async function () {
+			let collection = await createDataObject('collection');
+			let collectionDestination = await createDataObject('collection');
+
+			await zp.collectionsView.selectByID("C" + collection.id);
+
+			let promise = waitForNotifierEvent("modify", "collection");
+			await zp.moveCollection(collectionDestination);
+			await promise;
+
+			// Collection was moved into destination collection
+			let collectionChildIDs = collectionDestination.getDescendents(false, 'collection').map(col => col.id);
+			assert.sameMembers(collectionChildIDs, [collection.id]);
+		});
+	});
+	describe("#moveCollection", function () {
+		it("should make collection a top-level collection", async function () {
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+			let library = Zotero.Libraries.get(collectionChild.libraryID);
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			let promise = waitForNotifierEvent("modify", "collection");
+			await zp.moveCollection(library);
+			await promise;
+
+			// Child collection was pulled from under its parent to become a top-level collection
+			let topLevelCollections = Zotero.Collections.getByLibrary(library.id);
+			assert.includeMembers(topLevelCollections, [collectionChild]);
+		});
+	});
 })
