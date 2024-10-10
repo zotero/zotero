@@ -83,15 +83,17 @@ var doLoad = async function () {
 		dragAndDrop: false,
 		persistColumns: true,
 		columnPicker: true,
-		emptyMessage: Zotero.getString('pane.items.loading')
+		emptyMessage: Zotero.getString('pane.items.loading'),
+		multiSelect: !io.singleSelection
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
 	const filterLibraryIDs = false || io.filterLibraryIDs;
+	const hideSources = io.hideCollections || ['duplicates', 'trash', 'feeds'];
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
 		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),
 		filterLibraryIDs,
-		hideSources: ['duplicates', 'trash', 'feeds']
+		hideSources
 	});
 
 	await collectionsView.makeVisible();
@@ -115,6 +117,13 @@ var doLoad = async function () {
 		for (let button of [...document.querySelectorAll("button[dlgtype]:not([hidden])")]) {
 			button.setAttribute("tabindex", nextButtonTabindex++);
 		}
+	}
+	// Handle any custom button config that can be passed
+	for (let buttonConfig of io.extraButtons || []) {
+		let button = document.querySelector(`dialog button[dlgtype='${buttonConfig.type}']`);
+		button.hidden = buttonConfig.isHidden(document);
+		document.l10n.setAttributes(button, buttonConfig.l10nLabel, buttonConfig.l10nArgs || {});
+		button.addEventListener("click", event => buttonConfig.onclick(event));
 	}
 	
 	// Used in tests
@@ -168,6 +177,20 @@ function onSearch()
 function onItemSelected()
 {
 	itemsView.runListeners('select');
+	if (io.onlyRegularItems) {
+		// Disable "accept" button if a top-level item isn't selected
+		let selected = itemsView.getSelectedItems();
+		let disableAccept = (selected && !selected.every(item => item.isRegularItem()));
+		// TEMP: Disable the button directly only as long as we move the button box in doLoad().
+		// Then, we should set buttondisabledaccept attribute on the dialog
+		if (disableAccept) {
+			document.querySelector("dialog button[dlgtype='accept']").setAttribute("disabled", true);
+		}
+		else {
+			// Remove disabled attribute since the stylesheet looks at disabled attribute
+			document.querySelector("dialog button[dlgtype='accept']").removeAttribute("disabled");
+		}
+	}
 }
 
 function doAccept() {

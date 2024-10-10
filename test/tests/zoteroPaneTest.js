@@ -1736,4 +1736,64 @@ describe("ZoteroPane", function() {
 			Zotero.Prefs.clear('autoRenameFiles.linked');
 		});
 	});
+	describe("#changeParentItem", function () {
+		it("should update the parent of selected items", async function() {
+			// One item has 2 children and the other one - none
+			let oldParent = await createDataObject('item');
+			let newParent = await createDataObject('item');
+			var attachment = await importPDFAttachment(oldParent);
+			var note = await createDataObject('item', { itemType: 'note', parentID: oldParent.id });
+			// Select child items
+			await zp.selectItems([attachment.id, note.id]);
+			// Open the dialog to select new parent and wait for it to load
+			waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml', async (selectWin) => {
+				do {
+					await Zotero.Promise.delay(50);
+				}
+				while (!selectWin.loaded);
+				console.log(selectWin);
+				await selectWin.itemsView.waitForLoad();
+				// select item and accept the dialog
+				await selectWin.itemsView.selectItem(newParent.id);
+				selectWin.document.querySelector('dialog').acceptDialog();
+			});
+			zp.changeParentItem();
+
+			await waitForItemEvent('modify');
+			// Make sure the new parent now has the note and attachment
+			assert.include(newParent.getNotes(), note.id);
+			assert.include(newParent.getAttachments(), attachment.id);
+			// And the old parent does not
+			assert.notInclude(oldParent.getNotes(), note.id);
+			assert.notInclude(oldParent.getAttachments(), attachment.id);
+		});
+
+		it("should allow converting attachments to standalone when applicable", async function() {
+			let collection = await createDataObject('collection');
+			let parent = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importPDFAttachment(parent);
+			// Select child item
+			await zp.selectItems([attachment.id]);
+			// Open the dialog to select new parent and wait for it to load
+			waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml', async (selectWin) => {
+				do {
+					await Zotero.Promise.delay(50);
+				}
+				while (!selectWin.loaded);
+				await selectWin.itemsView.waitForLoad();
+				// Button to make attachment standalone should be visible
+				let moveToStandaloneBtn = selectWin.document.querySelector("dialog button[dlgtype=extra1]");
+				assert.isFalse(moveToStandaloneBtn.hidden);
+				moveToStandaloneBtn.click();
+			});
+			zp.changeParentItem();
+
+			await waitForItemEvent('modify');
+
+			// The attachment should have no parent item
+			assert.isFalse(attachment.parentID);
+			// Attachment should belong to the same collection as parent item
+			assert.equal(attachment.getCollections()[0], collection.id);
+		});
+	});
 })

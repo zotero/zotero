@@ -122,6 +122,8 @@ item-menu-add-linked-file =
      .label = Linked File
 item-menu-add-url =
      .label = Web Link
+item-menu-change-parent-item =
+     .label = Change Parent Item…
 
 view-online = View Online
 item-menu-option-view-online =
@@ -676,6 +678,11 @@ find-pdf-files-added = { $count ->
 
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label = { $count ->
+        [one] Convert to Standalone Attachment
+        *[other] Convert to Standalone Attachments
+}
 
 file-type-webpage = Webpage
 file-type-image = Image

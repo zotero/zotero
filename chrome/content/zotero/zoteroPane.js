@@ -3504,6 +3504,7 @@ var ZoteroPane = new function()
 			'findFile',
 			'sep3',
 			'toggleRead',
+			'changeParentItem',
 			'addToCollection',
 			'removeItems',
 			'duplicateAndConvert',
@@ -3940,6 +3941,11 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		// Update parent item of notes/attachments
+		if (items.every(item => item.isNote() || item.isAttachment())) {
+			show.add(m.changeParentItem);
+		}
+
 		// Set labels, plural if necessary
 		menu.childNodes[m.findFile].setAttribute('label', Zotero.getString('pane.items.menu.findAvailableFile'));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
@@ -4944,6 +4950,84 @@ var ZoteroPane = new function()
 	};
 	
 	
+	/**
+	 * Update the parent of the selected items
+	 *
+	 * An accessible alternative to dragging/dropping a child item between top-level items
+	*/
+	this.changeParentItem = async function () {
+		let selectedItems = this.getSelectedItems();
+		// Only applies when selected items are not top level items
+		if (selectedItems.some(item => item.isRegularItem())) return;
+
+		let libraryID = this.getSelectedLibraryID();
+		let shouldConvertToStandaloneAttachment = false;
+		let extraButtons = [];
+		// Keep in sync with Zotero.RecognizeDocument.canRecognize()
+		let canBeMovedOutOfParent = !selectedItems.some(item => item.isWebAttachment() && !item.isPDFAttachment() && !item.isEPUBAttachment());
+		// Add a button to the dialog to make attachments standalone, if applicable
+		if (canBeMovedOutOfParent) {
+			extraButtons = [{
+				type: "extra1",
+				l10nLabel: "select-items-convertToStandaloneAttachment",
+				l10nArgs: { count: selectedItems.length },
+				onclick: function (event) {
+					shouldConvertToStandaloneAttachment = true;
+					let doc = event.target.ownerDocument;
+					// if accept button is disabled, dialog cannot be accepted
+					doc.querySelector("dialog button[dlgtype='accept']").removeAttribute("disabled");
+					doc.querySelector("dialog").acceptDialog();
+				},
+				isHidden: function () {
+					return selectedItems.every(item => !item.parentID);
+				}
+			}];
+		}
+		let io = {
+			dataIn: null,
+			dataOut: null,
+			itemTreeID: 'change-parent-item-select-item-dialog',
+			filterLibraryIDs: [libraryID],
+			singleSelection: true,
+			onlyRegularItems: true,
+			hideCollections: ['duplicates', 'trash', 'feeds', 'unfiled', 'retracted', 'publications'],
+			extraButtons: extraButtons
+		};
+		// The new parent needs to be selected in the dialog
+		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
+			'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
+
+		// If "Convert to Standalone Attachment" is selected, make all attachments top-level items
+		if (shouldConvertToStandaloneAttachment) {
+			await Zotero.DB.executeTransaction(async () => {
+				for (let item of selectedItems) {
+					let parent = Zotero.Items.get(item.parentID);
+					if (parent) {
+						// Place attachment into the same collections as the old parent item
+						for (let collectionID of parent.getCollections()) {
+							item.addToCollection(collectionID);
+						}
+					}
+					// Unlink parent item
+					item.parentID = null;
+					await item.save({ skipSelect: true });
+				}
+			});
+			return;
+		}
+		if (!io.dataOut?.length) return;
+
+		let newParentItem = Zotero.Items.get(io.dataOut);
+		
+		if (!newParentItem.length) return;
+
+		await Zotero.DB.executeTransaction(async () => {
+			for (let item of selectedItems) {
+				item.parentID = newParentItem[0].id;
+				await item.save({ skipSelect: true });
+			}
+		});
+	};
 	/**
 	 * @deprecated
 	 */

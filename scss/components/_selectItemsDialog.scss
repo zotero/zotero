@@ -73,6 +73,19 @@
     .dialog-button-box button {
         -moz-window-dragging: no-drag;
     }
+
+	// Move padding into rows so that draggable collection container does not
+	// expand all the way past the scrollbar and cause dragging the scrollbar
+	// to drag the entire window
+	#zotero-collections-tree-container {
+		.virtualized-table-body {
+			padding-inline-end: 0;
+			.row {
+				padding-inline-end: 8px;
+				width: 183px;
+			}
+		}
+	}
 }
 
 // richlistbox elements are crazy and will expand beyond the window size
