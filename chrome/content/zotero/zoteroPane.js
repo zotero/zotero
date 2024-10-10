@@ -4951,9 +4951,9 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Update the parent of the selected items.
-	 * Essentially an alternative to drag-droping a child item between top level items in itemTree
-	 * that is mainly needed for accessibility.
+	 * Update the parent of the selected items
+	 *
+	 * An accessible alternative to dragging/dropping a child item between top-level items
 	*/
 	this.changeParentItem = async function () {
 		let selectedItems = this.getSelectedItems();
