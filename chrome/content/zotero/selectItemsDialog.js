@@ -183,7 +183,13 @@ function onItemSelected()
 		let disableAccept = (selected && !selected.every(item => item.isRegularItem()));
 		// TEMP: Disable the button directly only as long as we move the button box in doLoad().
 		// Then, we should set buttondisabledaccept attribute on the dialog
-		document.querySelector("dialog button[dlgtype='accept']").setAttribute("disabled", disableAccept);
+		if (disableAccept) {
+			document.querySelector("dialog button[dlgtype='accept']").setAttribute("disabled", true);
+		}
+		else {
+			// Remove disabled attribute since the stylesheet looks at disabled attribute
+			document.querySelector("dialog button[dlgtype='accept']").removeAttribute("disabled");
+		}
 	}
 }
 
