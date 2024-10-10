@@ -1881,8 +1881,6 @@ describe("ZoteroPane", function() {
 			let collectionChildIDs = collectionDestination.getDescendents(false, 'collection').map(col => col.id);
 			assert.sameMembers(collectionChildIDs, [collection.id]);
 		});
-	});
-	describe("#moveCollection", function () {
 		it("should make collection a top-level collection", async function () {
 			let collectionParent = await createDataObject('collection');
 			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
