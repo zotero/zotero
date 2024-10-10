@@ -2607,7 +2607,7 @@ var ZoteroPane = new function()
 		};
 		ZoteroPane.collectionsView.executeCollectionCopy({
 			collection: selected,
-			targetCollectionID: target.id,
+			targetCollectionID: target instanceof Zotero.Collection ? target.id : null,
 			targetLibraryID: target.libraryID,
 			targetTreeRow,
 			copyOptions

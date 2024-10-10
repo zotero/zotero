@@ -1820,6 +1820,27 @@ describe("ZoteroPane", function() {
 			assert.sameMembers(items, [itemOne.id, itemTwo.id]);
 		});
 
+		it("should duplicate top-level collection", async function () {
+			let collection = await createDataObject('collection');
+			let mylibrary = Zotero.Libraries.get(collection.libraryID);
+
+			let itemOne = await createDataObject('item', { collections: [collection.id] });
+
+			await zp.collectionsView.selectByID("C" + collection.id);
+
+			await zp.copyCollection(mylibrary);
+			await waitForNotifierEvent("add", "collection");
+
+			// Find the duplicated collection and make sure it exists
+			let topLevelCollections = Zotero.Collections.getByLibrary(mylibrary.id);
+			let newCollection = topLevelCollections.find(col => col.name == collection.name && collection.id !== col.id);
+			assert.exists(newCollection);
+
+			// Newly created collection contain the same item
+			let items = newCollection.getDescendents(false, 'item').map(item => item.id);
+			assert.sameMembers(items, [itemOne.id]);
+		});
+
 		it("should copy collection between libraries", async function () {
 			let groupDestination = await createGroup();
 			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
