@@ -4970,11 +4970,15 @@ var ZoteroPane = new function()
 			extraButtons = [{
 				type: "extra1",
 				l10nLabel: "select-items-convertToStandaloneAttachment",
+				l10nArgs: { count: selectedItems.length },
 				onclick: function (event) {
 					shouldConvertToStandaloneAttachment = true;
 					let doc = event.target.ownerDocument;
 					doc.querySelector("dialog").acceptDialog();
 				},
+				isHidden: function () {
+					return selectedItems.every(item => !item.parentID);
+				}
 			}];
 		}
 		let io = {
