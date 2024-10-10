@@ -4974,6 +4974,8 @@ var ZoteroPane = new function()
 				onclick: function (event) {
 					shouldConvertToStandaloneAttachment = true;
 					let doc = event.target.ownerDocument;
+					// if accept button is disabled, dialog cannot be accepted
+					doc.querySelector("dialog button[dlgtype='accept']").removeAttribute("disabled");
 					doc.querySelector("dialog").acceptDialog();
 				},
 				isHidden: function () {
