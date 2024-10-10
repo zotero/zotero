@@ -1768,7 +1768,7 @@ describe("ZoteroPane", function() {
 			assert.notInclude(oldParent.getAttachments(), attachment.id);
 		});
 
-		it("should allow to move attachments to standalone when applicable", async function() {
+		it("should allow converting attachments to standalone when applicable", async function() {
 			let collection = await createDataObject('collection');
 			let parent = await createDataObject('item', { collections: [collection.id] });
 			var attachment = await importPDFAttachment(parent);
