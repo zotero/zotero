@@ -468,7 +468,7 @@
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-code">
 						<vbox flex="1">
-							<iframe src="monaco/monaco.html" id="editor-code" flex="1" onmousedown="this.focus()"/>
+							<iframe src="monaco/monaco.html" id="editor-code" focus-on-tab-select="true" flex="1" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
@@ -490,6 +490,7 @@
 									seltype="multiple"
 									onselect="Scaffold.handleTestSelect(event)"
 									context="testing-context-menu"
+									focus-on-tab-select="true"
 								/>
 							</vbox>
 							<hbox id="testing-buttons">
@@ -533,7 +534,7 @@
 								<button observes="validate-tests" label="&scaffold.testing.create.import;" tooltiptext="Create a new test from the current import data" oncommand="Scaffold.saveTestFromCurrent('import')" />
 								<button observes="validate-tests" label="&scaffold.testing.create.search;" tooltiptext="Create a new test from the current search data" oncommand="Scaffold.saveTestFromCurrent('search')" />
 							</hbox>
-							<iframe src="monaco/monaco.html" id="editor-import" flex="1" onmousedown="this.focus()"/>
+							<iframe src="monaco/monaco.html" id="editor-import" flex="1" focus-on-tab-select="true" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 				</tabpanels>
