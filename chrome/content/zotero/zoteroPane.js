@@ -4961,7 +4961,7 @@ var ZoteroPane = new function()
 		if (selectedItems.some(item => item.isRegularItem())) return;
 
 		let libraryID = this.getSelectedLibraryID();
-		let shouldMoveToStandaloneAttachment = false;
+		let shouldConvertToStandaloneAttachment = false;
 		let extraButtons = [];
 		// Keep in sync with Zotero.RecognizeDocument.canRecognize()
 		let canBeMovedOutOfparent = !selectedItems.some(item => item.isWebAttachment() && !item.isPDFAttachment() && !item.isEPUBAttachment());
@@ -4969,9 +4969,9 @@ var ZoteroPane = new function()
 		if (canBeMovedOutOfparent) {
 			extraButtons = [{
 				type: "extra1",
-				l10nLabel: "select-items-moveToStandaloneAttachment",
+				l10nLabel: "select-items-convertToStandaloneAttachment",
 				onclick: function (event) {
-					shouldMoveToStandaloneAttachment = true;
+					shouldConvertToStandaloneAttachment = true;
 					let doc = event.target.ownerDocument;
 					doc.querySelector("dialog").acceptDialog();
 				},
@@ -4994,8 +4994,8 @@ var ZoteroPane = new function()
 
 		await io.deferred.promise;
 
-		// If "Move to standalong attachment" is selected, make all attachments top-level items
-		if (shouldMoveToStandaloneAttachment) {
+		// If "Convert to Standalone Attachment" is selected, make all attachments top-level items
+		if (shouldConvertToStandaloneAttachment) {
 			await Zotero.DB.executeTransaction(async () => {
 				for (let item of selectedItems) {
 					let parent = Zotero.Items.get(item.parentID);

@@ -665,8 +665,8 @@ find-pdf-files-added = { $count ->
 
 select-items-dialog =
     .buttonlabelaccept = Select
-select-items-moveToStandaloneAttachment =
-    .label = Move to Standalone Attachment
+select-items-convertToStandaloneAttachment =
+    .label = Convert to Standalone Attachment
 
 file-type-webpage = Webpage
 file-type-image = Image
