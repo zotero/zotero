@@ -1746,20 +1746,20 @@ describe("ZoteroPane", function() {
 			// Select child items
 			await zp.selectItems([attachment.id, note.id]);
 			// Open the dialog to select new parent and wait for it to load
-			let windowPromise = waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
+			waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml', async (selectWin) => {
+				do {
+					await Zotero.Promise.delay(50);
+				}
+				while (!selectWin.loaded);
+				console.log(selectWin);
+				await selectWin.itemsView.waitForLoad();
+				// select item and accept the dialog
+				await selectWin.itemsView.selectItem(newParent.id);
+				selectWin.document.querySelector('dialog').acceptDialog();
+			});
 			zp.changeParentItem();
-			var selectWin = await windowPromise;
-			do {
-				await Zotero.Promise.delay(50);
-			}
-			while (!selectWin.loaded);
-			await selectWin.itemsView.waitForLoad();
-			// Select new parent to move note and attachment into
-			await selectWin.itemsView.selectItem(newParent.id);
-			var modifyPromise = waitForItemEvent('modify');
-			selectWin.document.querySelector('dialog').acceptDialog();
 
-			await modifyPromise;
+			await waitForItemEvent('modify');
 			// Make sure the new parent now has the note and attachment
 			assert.include(newParent.getNotes(), note.id);
 			assert.include(newParent.getAttachments(), attachment.id);
@@ -1774,23 +1774,21 @@ describe("ZoteroPane", function() {
 			var attachment = await importPDFAttachment(parent);
 			// Select child item
 			await zp.selectItems([attachment.id]);
-			// Open the dialog
-			let windowPromise = waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
+			// Open the dialog to select new parent and wait for it to load
+			waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml', async (selectWin) => {
+				do {
+					await Zotero.Promise.delay(50);
+				}
+				while (!selectWin.loaded);
+				await selectWin.itemsView.waitForLoad();
+				// Button to make attachment standalone should be visible
+				let moveToStandaloneBtn = selectWin.document.querySelector("dialog button[dlgtype=extra1]");
+				assert.isFalse(moveToStandaloneBtn.hidden);
+				moveToStandaloneBtn.click();
+			});
 			zp.changeParentItem();
-			var selectWin = await windowPromise;
-			do {
-				await Zotero.Promise.delay(50);
-			}
-			while (!selectWin.loaded);
-			await selectWin.itemsView.waitForLoad();
 
-			// Button to make attachment standalone should be visible
-			let moveToStandaloneBtn = selectWin.document.querySelector("dialog button[dlgtype=extra1]");
-			assert.isFalse(moveToStandaloneBtn.hidden);
-			// Click it
-			var modifyPromise = waitForItemEvent('modify');
-			moveToStandaloneBtn.click();
-			await modifyPromise;
+			await waitForItemEvent('modify');
 
 			// The attachment should have no parent item
 			assert.isFalse(attachment.parentID);

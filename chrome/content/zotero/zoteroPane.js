@@ -4984,7 +4984,6 @@ var ZoteroPane = new function()
 		let io = {
 			dataIn: null,
 			dataOut: null,
-			deferred: Zotero.Promise.defer(),
 			itemTreeID: 'change-parent-item-select-item-dialog',
 			filterLibraryIDs: [libraryID],
 			singleSelection: true,
@@ -4995,8 +4994,6 @@ var ZoteroPane = new function()
 		// The new parent needs to be selected in the dialog
 		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 			'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
-
-		await io.deferred.promise;
 
 		// If "Convert to Standalone Attachment" is selected, make all attachments top-level items
 		if (shouldConvertToStandaloneAttachment) {
