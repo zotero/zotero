@@ -2468,7 +2468,7 @@ Zotero.Attachments = new function () {
 	 * @returns {String} Current file extension for the attachment, if it appears to be a valid file extension.
 	 *					 Otherwise, attempts to guess the file extension from the attachment's content type.
 	 **/
-	this.getCorrectFileExension = function (attachment) {
+	this.getCorrectFileExtension = function (attachment) {
 		let path = attachment.getFilePath();
 		if (!path) {
 			return '';

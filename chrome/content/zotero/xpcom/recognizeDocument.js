@@ -295,7 +295,7 @@ Zotero.RecognizeDocument = new function () {
 		// Rename attachment file to match new metadata
 		if (Zotero.Attachments.shouldAutoRenameAttachment(attachment)) {
 			let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: originalTitle });
-			let ext = Zotero.Attachments.getCorrectFileExension(attachment);
+			let ext = Zotero.Attachments.getCorrectFileExtension(attachment);
 			let newName = fileBaseName + (ext ? '.' + ext : '');
 			let result = await attachment.renameAttachmentFile(newName, false, true);
 			if (result !== true) {
