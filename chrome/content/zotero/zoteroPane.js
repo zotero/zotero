@@ -4994,7 +4994,7 @@ var ZoteroPane = new function()
 		};
 		// The new parent needs to be selected in the dialog
 		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
-			'chrome,dialog=no,centerscreen,resizable=yes', io);
+			'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
 
 		await io.deferred.promise;
 
