@@ -2777,14 +2777,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var savedSearches = await Zotero.Searches.getAll(libraryID).filter(s => !s.deleted);
 			// Virtual collections default to showing if not explicitly hidden
 			var showDuplicates = this.props.hideSources.indexOf('duplicates') == -1
-					&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
+				&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 			var showUnfiled = this.props.hideSources.indexOf('unfiled') == -1
-					&& this._virtualCollectionLibraries.unfiled?.[libraryID] !== false;
+				&& this._virtualCollectionLibraries.unfiled?.[libraryID] !== false;
 			var showRetracted = this.props.hideSources.indexOf('retracted') == -1
-					&& this._virtualCollectionLibraries.retracted?.[libraryID] !== false
-					&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
+				&& this._virtualCollectionLibraries.retracted?.[libraryID] !== false
+				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 			var showPublications = this.props.hideSources.indexOf('publications') == -1
-					&& libraryID == Zotero.Libraries.userLibraryID;
+				&& libraryID == Zotero.Libraries.userLibraryID;
 			var showTrash = this.props.hideSources.indexOf('trash') == -1;
 		}
 		else {
