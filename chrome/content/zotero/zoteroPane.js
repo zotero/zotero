@@ -4964,9 +4964,9 @@ var ZoteroPane = new function()
 		let shouldConvertToStandaloneAttachment = false;
 		let extraButtons = [];
 		// Keep in sync with Zotero.RecognizeDocument.canRecognize()
-		let canBeMovedOutOfparent = !selectedItems.some(item => item.isWebAttachment() && !item.isPDFAttachment() && !item.isEPUBAttachment());
+		let canBeMovedOutOfParent = !selectedItems.some(item => item.isWebAttachment() && !item.isPDFAttachment() && !item.isEPUBAttachment());
 		// Add a button to the dialog to make attachments standalone, if applicable
-		if (canBeMovedOutOfparent) {
+		if (canBeMovedOutOfParent) {
 			extraButtons = [{
 				type: "extra1",
 				l10nLabel: "select-items-convertToStandaloneAttachment",
@@ -5018,7 +5018,7 @@ var ZoteroPane = new function()
 		}
 		if (!io.dataOut?.length) return;
 
-		let newParentItem = await Zotero.Items.getAsync(io.dataOut);
+		let newParentItem = Zotero.Items.get(io.dataOut);
 		
 		if (!newParentItem.length) return;
 
