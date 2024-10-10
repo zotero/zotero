@@ -2213,7 +2213,7 @@ Zotero.Attachments = new function () {
 			throw new Error("'item' must be a Zotero.Item");
 		}
 		if (typeof options === 'string') {
-			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments(item, options)");
+			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments.getFileBaseNameFromItem(item, options)");
 			options = { formatString: options };
 		}
 
@@ -2463,7 +2463,24 @@ Zotero.Attachments = new function () {
 		formatted = Zotero.File.getValidFileName(formatted);
 		return formatted;
 	};
-	
+
+	/**
+	 * @returns {String} Current file extension for the attachment, if it appears to be a valid file extension.
+	 *					 Otherwise, attempts to guess the file extension from the attachment's content type.
+	 **/
+	this.getCorrectFileExtension = function (attachment) {
+		let path = attachment.getFilePath();
+		if (!path) {
+			return '';
+		}
+		let ext = Zotero.File.getExtension(path);
+		ext = Zotero.File.isLikeExtension(ext) ? ext : '';
+		if (ext === '') {
+			ext = Zotero.MIME.getPrimaryExtension(attachment.attachmentContentType);
+			Zotero.Debug.log(`Attachment "${path}": Invalid or missing extension. Guessing from content type: ${ext}`);
+		}
+		return ext;
+	};
 	
 	this.shouldAutoRenameFile = function (isLink) {
 		if (!Zotero.Prefs.get('autoRenameFiles')) {

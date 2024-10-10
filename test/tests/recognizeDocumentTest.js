@@ -323,6 +323,35 @@ describe("Document Recognition", function() {
 				'test'
 			);
 		});
+
+		it("should use mime-type-derived extension for files with invalid extensions", async function () {
+			if (Zotero.automatedTest) {
+				this.skip(); // TODO: Mock services
+			}
+			this.timeout(30000);
+			let pdfFile = getTestDataDirectory();
+			pdfFile.append('recognizePDF_test_title.pdf');
+			let tmpDir = await getTempDirectory();
+			let tmpFileToImport = OS.Path.join(tmpDir, 'bad name . not an extension');
+			await OS.File.copy(pdfFile.path, tmpFileToImport);
+			var attachment = await Zotero.Attachments.importFromFile({ file: tmpFileToImport });
+
+			win.ZoteroPane.recognizeSelected();
+
+			var addedIDs = await waitForItemEvent("add");
+			var modifiedIDs = await waitForItemEvent("modify");
+			assert.lengthOf(addedIDs, 1);
+			var item = Zotero.Items.get(addedIDs[0]);
+			assert.lengthOf(modifiedIDs, 2);
+
+			await waitForProgressWindow();
+
+			// The file should have been renamed
+			assert.equal(
+				attachment.attachmentFilename,
+				Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
+			);
+		});
 	});
 
 	describe("Ebooks", function () {

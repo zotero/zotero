@@ -629,8 +629,8 @@ describe("ZoteroPane", function() {
 		
 		it("should use unique name for linked file without extension if target name is taken", async function () {
 			var oldFilename = 'old';
-			var newFilename = 'Test';
-			var uniqueFilename = 'Test 2';
+			var newFilename = 'Test.png';
+			var uniqueFilename = 'Test 2.png';
 			var file = getTestDataDirectory();
 			file.append('test.png');
 			var tmpDir = await getTempDirectory();
@@ -652,7 +652,7 @@ describe("ZoteroPane", function() {
 			await zp.renameSelectedAttachmentsFromParents();
 			assert.equal(attachment.attachmentFilename, uniqueFilename);
 			var path = await attachment.getFilePathAsync();
-			assert.equal(OS.Path.basename(path), uniqueFilename)
+			assert.equal(OS.Path.basename(path), uniqueFilename);
 			await OS.File.exists(path);
 		});
 		
@@ -690,6 +690,27 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			// After a manual rename, the title becomes the default for this type
 			assert.equal(attachment.getField('title'), Zotero.getString('file-type-image'));
+		});
+
+		it("should restore an extension when renaming a misnamed file", async function () {
+			let pdfFile = getTestDataDirectory();
+			pdfFile.append('test.pdf');
+			let tmpDir = await getTempDirectory();
+			let tmpFileToImport = OS.Path.join(tmpDir, 'bad name . not an extension');
+			await OS.File.copy(pdfFile.path, tmpFileToImport);
+
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+			
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: tmpFileToImport,
+				parentItemID: item.id
+			});
+
+			await zp.selectItem(attachment.id);
+			await zp.renameSelectedAttachmentsFromParents();
+			assert.equal(attachment.attachmentFilename, 'Title.pdf');
 		});
 	});
 	
