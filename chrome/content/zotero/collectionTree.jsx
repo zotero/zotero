@@ -1976,7 +1976,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				
 				// Recursively copy subcollections
 				if (desc.children.length) {
-					await this._copyCollections({ descendents: desc.children, parentID: collectionID, addItems, targetLibraryID, targetTreeRow, copyOptions });
+					await this._copyCollections({
+						descendents: desc.children,
+						parentID: collectionID,
+						addItems,
+						targetLibraryID,
+						targetTreeRow,
+						copyOptions
+					});
 				}
 			}
 			// Items
@@ -1985,7 +1992,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				let id = desc.id;
 				// Actually copy items only if moving to another library
 				if (item.libraryID !== targetLibraryID) {
-					id = await this._copyItem({ item, targetLibraryID, targetTreeRow, options: copyOptions });
+					id = await this._copyItem({
+						item,
+						targetLibraryID,
+						targetTreeRow,
+						options: copyOptions
+					});
 					// Standalone attachments might not get copied
 					if (!id) {
 						continue;
@@ -2034,7 +2046,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}];
 			
 			var addItems = new Map();
-			await this._copyCollections({ descendents: collections, parentID: targetCollectionID, addItems, targetLibraryID, targetTreeRow, copyOptions });
+			await this._copyCollections({
+				descendents: collections,
+				parentID: targetCollectionID,
+				addItems,
+				targetLibraryID,
+				targetTreeRow,
+				copyOptions
+			});
 			for (let [collectionID, items] of addItems.entries()) {
 				let collection = await Zotero.Collections.getAsync(collectionID);
 				await collection.addItems(items);
@@ -2083,7 +2102,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var droppedCollection = await Zotero.Collections.getAsync(data[0]);
 			// Collection drag between libraries
 			if (targetLibraryID != droppedCollection.libraryID) {
-				await this.executeCollectionCopy({ collection: droppedCollection, targetCollectionID, targetLibraryID, targetTreeRow, copyOptions });
+				await this.executeCollectionCopy({
+					collection: droppedCollection,
+					targetCollectionID,
+					targetLibraryID,
+					targetTreeRow,
+					copyOptions
+				});
 			}
 			// Collection drag within a library
 			else {
@@ -2163,7 +2188,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					function (chunk) {
 						return Zotero.DB.executeTransaction(async () => {
 							for (let item of chunk) {
-								var id = await this._copyItem({ item, targetLibraryID, targetTreeRow, options: copyOptions })
+								var id = await this._copyItem({
+									item,
+									targetLibraryID,
+									targetTreeRow,
+									options: copyOptions
+								});
 								// Standalone attachments might not get copied
 								if (!id) {
 									continue;
