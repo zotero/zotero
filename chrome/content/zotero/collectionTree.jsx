@@ -2029,8 +2029,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	/**
-	 * Copy a given collection into another library. Used for drag-drop of a collection onto a collection
-	 * from another group (or the group itself), as well as for "move to another collection" context menu.
+	 * Copy a given collection into another library, or duplicate it within the same library
+	 *
+	 * Used for drag-and-drop and the "Copy To" context menu option
+	 *
 	 * @param {Zotero.Collection} collection - collection to copy
 	 * @param {String} targetCollectionID - id of the collection to copy to
 	 * @param {String} targetLibraryID - id of the library to copy to
