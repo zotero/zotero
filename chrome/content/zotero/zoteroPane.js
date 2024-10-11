@@ -4133,8 +4133,9 @@ var ZoteroPane = new function()
 				},
 				
 				(target) => {
-					// can't copy collection into itself
-					return selected == target;
+					// can't copy collection into itself or into non-editable groups
+					return selected == target
+						|| (target instanceof Zotero.Group && !target.editable);
 				}
 			);
 			popup.append(menuItem);
