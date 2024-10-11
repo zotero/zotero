@@ -4058,6 +4058,8 @@ var ZoteroPane = new function()
 				event.stopPropagation();
 			}
 		});
+		// Disable for already top-level collections
+		libraryMenuItem.disabled = !selected.parentID;
 		popup.appendChild(libraryMenuItem);
 		popup.appendChild(document.createXULElement("menuseparator"));
 		
