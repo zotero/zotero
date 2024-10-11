@@ -1865,6 +1865,45 @@ describe("ZoteroPane", function() {
 			let items = groupCollection.getDescendents(false, 'item').map(item => Zotero.Items.get(item.id).getDisplayTitle());
 			assert.sameMembers(items, [itemOne.getDisplayTitle(), itemTwo.getDisplayTitle()]);
 		});
+
+		it("should not allow copying between libraries if there is a linked collection", async function () {
+			let groupDestination = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
+
+			let collection = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collection.id });
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			await zp.copyCollection(groupCollection);
+
+			await waitForNotifierEvent("add", "collection");
+
+			// Collection has been copies
+			let groupCollections = groupCollection.getDescendents(false, 'collection');
+			let newCollectionID = groupCollections.find(col => col.name == collectionChild.name).id;
+			let newCollection = Zotero.Collections.get(newCollectionID);
+			assert.exists(newCollection);
+
+			// Right click on the selected collection
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+			zp.buildCopyCollectionMenu({});
+
+			// Delay for menus to get disabled
+			await Zotero.Promise.delay();
+			let groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
+			// Menu of the library with linked collection should be disabled
+			assert.equal(groupMenu.disabled, true);
+
+			// Right click on the parent of the copies collection
+			await zp.collectionsView.selectByID("C" + collection.id);
+			zp.buildCopyCollectionMenu({});
+			// Delay for menus to get disabled
+			await Zotero.Promise.delay();
+			groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
+			// Menu of the library with linked sub-collection should be disabled
+			assert.equal(groupMenu.disabled, true);
+		});
 	});
 	describe("#moveCollection", function () {
 		it("should move collection into another collection of the same library", async function () {

@@ -4091,13 +4091,38 @@ var ZoteroPane = new function()
 
 	this.buildCopyCollectionMenu = function (event) {
 		if (event.target !== event.currentTarget) return;
-		let popup = event.target;
+		let popup = document.getElementById("zotero-copy-collection-popup");
 		popup.replaceChildren();
 		let selected = this.getSelectedCollection();
 
 		// Fetch all libraries
 		let topLevelEntries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
 
+		// Check which libraries have collections linked to the selected collection
+		// and disable their menuitems. Same logic as in CollectionTree.canDropCheckAsync.
+		let linkedCollectionsExist = {};
+		(async () => {
+			for (let library of Zotero.Libraries.getAll()) {
+				if (library.libraryID == selected.libraryID || library instanceof Zotero.Feed) continue;
+				// Check which library has a collection linked to the selected collection
+				let linkedCollection = await selected.getLinkedCollection(library.libraryID, true);
+				linkedCollectionsExist[library.libraryID] = linkedCollection;
+				// Also check which library has collections linked to a subcollection of the selected collection
+				for (let descendent of selected.getDescendents(false, 'collection')) {
+					let subcollection = Zotero.Collections.get(descendent.id);
+					let linkedSubcollection = await subcollection.getLinkedCollection(library.libraryID, true);
+					linkedCollectionsExist[library.libraryID] = linkedSubcollection || linkedCollectionsExist[library.libraryID];
+				}
+			}
+			// Libraries that have linked collections have their menus disabled
+			for (let libraryMenuItem of [...popup.childNodes]) {
+				let menuItemLibID = libraryMenuItem.getAttribute("value").substring(1);
+				if (linkedCollectionsExist[parseInt(menuItemLibID)]) {
+					libraryMenuItem.disabled = true;
+				}
+			}
+		})();
+		
 		// If there is only one library, display its collections as top-level menuitems
 		if (topLevelEntries.length == 1) {
 			// Manually add My Library menuitem at the top, so one can still copy into it
@@ -4135,7 +4160,8 @@ var ZoteroPane = new function()
 				(target) => {
 					// can't copy collection into itself or into non-editable groups
 					return selected == target
-						|| (target instanceof Zotero.Group && !target.editable);
+						|| (target instanceof Zotero.Group && !target.editable)
+						|| linkedCollectionsExist[target.libraryID];
 				}
 			);
 			popup.append(menuItem);
