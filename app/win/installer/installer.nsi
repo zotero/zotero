@@ -236,7 +236,19 @@ Function UninstallOld
     Delete /REBOOTOK "$3\platform.ini"
     Delete /REBOOTOK "$3\precomplete"
     Delete /REBOOTOK "$3\voucher.bin"
-    RMDir $3
+    RMDir /REBOOTOK $3
+
+    ${If} ${FileExists} "$3"
+      # If the directory still exists, check if current user is Admin.
+      # For Admin users, /REBOOTOK works and directory will be removed after reboot
+      # For non-Admin users, we display a message and quit
+      UserInfo::GetAccountType
+      pop $0
+      StrCmp $0 "Admin" continue_installation
+      MessageBox mb_iconstop "The previous installation of Zotero could not be removed. Please manually delete the following folder, and then run the installer again: $\n$\n$3"
+      Quit
+    ${EndIf}
+
   continue_installation:
     ; End uninstallation
     SetShellVarContext current
