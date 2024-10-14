@@ -4102,8 +4102,8 @@ var ZoteroPane = new function()
 		// and disable their menuitems. Same logic as in CollectionTree.canDropCheckAsync.
 		let linkedCollectionsExist = {};
 		(async () => {
-			for (let library of Zotero.Libraries.getAll()) {
-				if (library.libraryID == selected.libraryID || library instanceof Zotero.Feed) continue;
+			for (let library of topLevelEntries) {
+				if (library.libraryID == selected.libraryID) continue;
 				// Check which library has a collection linked to the selected collection
 				let linkedCollection = await selected.getLinkedCollection(library.libraryID, true);
 				linkedCollectionsExist[library.libraryID] = linkedCollection;
@@ -4111,13 +4111,15 @@ var ZoteroPane = new function()
 				for (let descendent of selected.getDescendents(false, 'collection')) {
 					let subcollection = Zotero.Collections.get(descendent.id);
 					let linkedSubcollection = await subcollection.getLinkedCollection(library.libraryID, true);
-					linkedCollectionsExist[library.libraryID] = linkedSubcollection || linkedCollectionsExist[library.libraryID];
+					if (linkedSubcollection) {
+						linkedCollectionsExist[library.libraryID] = true;
+					}
 				}
 			}
 			// Libraries that have linked collections have their menus disabled
 			for (let libraryMenuItem of [...popup.childNodes]) {
 				let menuItemLibID = libraryMenuItem.getAttribute("value").substring(1);
-				if (linkedCollectionsExist[parseInt(menuItemLibID)]) {
+				if (linkedCollectionsExist[menuItemLibID]) {
 					libraryMenuItem.disabled = true;
 				}
 			}
@@ -4160,8 +4162,7 @@ var ZoteroPane = new function()
 				(target) => {
 					// can't copy collection into itself or into non-editable groups
 					return selected == target
-						|| (target instanceof Zotero.Group && !target.editable)
-						|| linkedCollectionsExist[target.libraryID];
+						|| (target instanceof Zotero.Group && !target.editable);
 				}
 			);
 			popup.append(menuItem);
