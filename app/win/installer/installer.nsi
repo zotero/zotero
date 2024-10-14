@@ -245,7 +245,7 @@ Function UninstallOld
       UserInfo::GetAccountType
       pop $0
       StrCmp $0 "Admin" continue_installation
-      MessageBox mb_iconstop "Previous installation of Zotero could not be removed. Please manually remove the following directory, and then run the installer again: $\n$\n$3"
+      MessageBox mb_iconstop "The previous installation of Zotero could not be removed. Please manually delete the following folder, and then run the installer again: $\n$\n$3"
       Quit
     ${EndIf}
 
