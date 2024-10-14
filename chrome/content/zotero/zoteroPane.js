@@ -4112,7 +4112,7 @@ var ZoteroPane = new function()
 					let subcollection = Zotero.Collections.get(descendent.id);
 					let linkedSubcollection = await subcollection.getLinkedCollection(library.libraryID, true);
 					if (linkedSubcollection) {
-						linkedCollectionsExist[library.libraryID] = true;
+						linkedCollectionsExist[library.libraryID] = linkedSubcollection;
 					}
 				}
 			}
