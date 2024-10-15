@@ -10,6 +10,8 @@ pdfReader-noteAnnotation = Note Annotation
 pdfReader-textAnnotation = Text Annotation
 pdfReader-imageAnnotation = Image Annotation
 
+pdfReader-find-in-document = Find in Document
+
 pdfReader-a11yMoveAnnotation = Use the arrow keys to move the annotation.
 pdfReader-a11yEditTextAnnotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ option-or-alt } and use the arrow keys.
 pdfReader-a11yResizeAnnotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
@@ -36,7 +38,7 @@ pdfReader-a11yAnnotationSelected = { $type ->
     *[other] { "" }
 }
 
--pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use “Find in Document” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
 -pdfReader-a11yAnnotationInstruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
 
 pdfReader-toolbar-highlight =
@@ -60,5 +62,5 @@ pdfReader-toolbar-draw =
 
 pdfReader-findInDocumentInput =
     .title = Find
-    .placeholder = Find in Document
+    .placeholder = { pdfReader-find-in-document }
     .aria-description = To turn a search result into a highlight or underline annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
