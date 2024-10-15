@@ -1,10 +1,17 @@
-general-print = Print
+general-key-control = Control
+general-key-shift = Shift
+option-or-alt =
+    { PLATFORM() ->
+        [macos] Option
+        *[other] Alt
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
         *[other] Enter
     }
 
+general-print = Print
 general-remove = Remove
 general-add = Add
 general-remind-me-later = Remind Me Later
