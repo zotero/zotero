@@ -56,8 +56,8 @@
 <!ENTITY recursiveCollections.label "Прикажи ставке из подзбирки">
 <!ENTITY fontSize.label "Величина фонта">
 <!ENTITY noteFontSize.label "Величина фонта за белешке">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Колоне">
+<!ENTITY sortBy.label "Поређај по">
 
 <!ENTITY toolsMenu.label "Алати">
 <!ENTITY toolsMenu.accesskey "T">

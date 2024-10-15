@@ -20,8 +20,8 @@
 <!ENTITY zotero.general.close "Luk">
 <!ENTITY zotero.general.minimize "Minimér">
 <!ENTITY zotero.general.other "Andet...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.bigger "Større">
+<!ENTITY zotero.general.smaller "Mindre">
 <!ENTITY zotero.general.reset "Nulstil">
 
 
@@ -51,7 +51,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Vis ukategoriserede elementer">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Vis tilbagetrukne elementer">
 
 <!ENTITY zotero.items.itemType "Type">
 <!ENTITY zotero.items.creator_column "Ophav">
@@ -109,12 +109,12 @@
 <!ENTITY zotero.item.textTransform "Transformer tekst">
 <!ENTITY zotero.item.textTransform.titlecase "Betydende ord med stort ">
 <!ENTITY zotero.item.textTransform.sentencecase "Første bogstav med stort">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Ombyt fornavn/efternavn">
+<!ENTITY zotero.item.creatorTransform.fixCase "Ret store/små bogstaver">
 <!ENTITY zotero.item.copyAsURL "Kopiér som URL">
 <!ENTITY zotero.item.deletePermanently "Slet permanent...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Fjern alle tags">
 
 <!ENTITY zotero.toolbar.newNote "Ny note">
 <!ENTITY zotero.toolbar.note.standalone "Ny selvstændig note">

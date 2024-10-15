@@ -41,8 +41,20 @@
   "general_copyToClipboard": {
     "message": "Копирај у оставу"
   },
+  "itemType_pdf": {
+    "message": "ПДФ прилог"
+  },
+  "itemType_epub": {
+    "message": "ЕПУБ прилог"
+  },
+  "itemType_snapshot": {
+    "message": "Сличица"
+  },
   "itemType_note": {
     "message": "Белешка"
+  },
+  "itemType_link": {
+    "message": "Веб страница"
   },
   "itemType_attachment": {
     "message": "Прилог"
@@ -50,8 +62,47 @@
   "progressWindow_savingTo": {
     "message": "Чувам у"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Прикажи детаље"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Сакриј детаље"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Изборник циљне збирке"
+  },
+  "progressWindow_savingItems": {
+    "message": "Чувам $1 ставки. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Чувам ставку $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Ставка $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Сачувао сам $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Сачувао сам $1 за ставку $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Није успело преузимање $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Није успело преузимање $1 за ставку $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Чување је завршено. Прозорче ће се сада затворити."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Ставке са ове веб странице су већ сачуване."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Ознаке (раздвојене зарезима)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Филтер збирки"
   },
   "progressWindow_error_translation": {
     "message": "Јавила се грешка приликом чувања ове ставке. Погледајте $1 за више података."
@@ -74,20 +125,32 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "последња верзија"
   },
+  "itemSelector_title": {
+    "message": "Изаберите које ставке желите да додате у вашу збирку:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 повезивач није доступан на овој страници"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 повезивач није доступан за адресе датотека"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 повезивач није доступан за екстензију страница"
+  },
   "appConnector": {
-    "message": "$1 повезивање"
+    "message": "$1 повезивач"
   },
   "upgradeApp": {
     "message": "Надогради $1"
   },
   "firstRun_title": {
-    "message": "Инсталирали сте $1 повезивање!"
+    "message": "Инсталирали сте $1 повезивач!"
   },
   "firstRun_text1": {
-    "message": " $1 повезивање вам омогућава да <a href=\"$2\">сачувате ставке у $1</a> из прегледача интернета на један клик."
+    "message": " $1 повезивач вам омогућава да <a href=\"$2\">сачувате ставке у $1</a> из прегледача интернета на један клик."
   },
   "firstRun_text2": {
-    "message": "Уколико већ нисте, <a href=\"$2\">преузмите</a> самосталну $1 апликацију за најбоље корисничко искуство."
+    "message": "Још увек нисте <a href=\"$2\">преузели</a> $1 апликацију како би имали најбоље искуство."
   },
   "firstRun_acceptButton": {
     "message": "Схватам"
@@ -96,7 +159,7 @@
     "message": "Да ли је $1 покренут?"
   },
   "error_connection_save": {
-    "message": "$1 не може да ступи у везу са $2 програмом за рачунар. Повезивање може да сачува неке странице на ваш $3 налог, али је најбоље да проверите да ли је $2 отворен пре покушаја чувања."
+    "message": "$1 не може да ступи у везу са $2 програмом за рачунар. Повезивач може да сачува неке странице на ваш $3 налог, али је најбоље да проверите да ли је $2 отворен пре покушаја чувања."
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "Можете <a href=\"$1\">преузети $2</a> или <a href=\"$3\">потражити грешку у вези </a> уколико је неопходно."
@@ -140,6 +203,9 @@
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 закључава ваш документ како би онемогућио другим корисницима да уређују цитате у исто време. Истовремено уређивање цитата у документу га може оштетити или обрисати цитате. Неке непредвидиве околности, као што су проблеми на мрежи, могу трајно да закључају ваш документ. Уколико верујете да се то десило, можете заобићи закључавање.<br/><br/>Да ли желите да заобиђете закључавање документа?"
   },
+  "integration_googleDocs_authScopeError": {
+    "message": "За додавање цитати, програму $1 су потребне дозволе да уређује документе у Google Документима. Покушајте поново, али дозволите програму $1 да види, уређује, прави и брише ваше документе у Google Документима."
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "Изабрани Google налог нема дозволе за уређивање овог документа. Покушајте поново и проверите да ли сте изабрали налог који омогућава измене документа."
   },
@@ -154,6 +220,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Ови цитати си постали <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">невезани са $1</a>. Потребно је да их поново повежете пре него што буду ажурирани или приказани унутар ваше библиографије."
+  },
+  "copyUnproxiedLink": {
+    "message": "Копирај везу без проксија"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Копирај адресу странице без проксија"
+  },
+  "reloadViaProxy": {
+    "message": "Поново учитај преко проксија"
+  },
+  "reloadVia": {
+    "message": "Поново учитај преко $1"
   },
   "general_saveTo": {
     "message": "Сачувај у $1"

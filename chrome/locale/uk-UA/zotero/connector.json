@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Більше..."
   },
+  "general_needHelp": {
+    "message": "Потрібна допомога?"
+  },
   "general_done": {
     "message": "Готово"
   },

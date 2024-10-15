@@ -199,4 +199,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置转换器…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式…">
 
-<!ENTITY zotero.preferences.configEditor "编辑器">
+<!ENTITY zotero.preferences.configEditor "设置编辑器">
