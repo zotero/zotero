@@ -6479,6 +6479,7 @@ var ZoteroPane = new function()
 		if (paneStack.hidden) return;
 
 		var titlebar = document.getElementById('zotero-title-bar');
+		var layoutSwitcher = document.getElementById('zotero-layout-switcher');
 		var trees = document.getElementById('zotero-trees');
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
@@ -6530,6 +6531,11 @@ var ZoteroPane = new function()
 				Zotero.Prefs.set('layout', 'standard');
 				layoutChanged = true;
 			}
+		}
+
+		// Ensure that the layout switcher has a width set to avoid item pane jumping
+		if (!layoutSwitcher.style.width) {
+			layoutSwitcher.style.width = layoutSwitcher.getBoundingClientRect().width + 'px';
 		}
 
 		if (layoutChanged) {

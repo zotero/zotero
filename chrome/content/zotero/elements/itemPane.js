@@ -547,10 +547,17 @@
 				let minHeight = 205;
 				let width = this.getAttribute("width");
 				let height = this.getAttribute("height");
-				if (!width || Number(width) < minWidth) this.setAttribute("width", String(minWidth));
+				let isStackedMode = Zotero.Prefs.get("layout") == "stacked";
+				// Don't set width if in stacked mode, it will be auto-resized
+				if (isStackedMode) {
+					this.removeAttribute("width");
+				}
+				else if (!width || Number(width) < minWidth) {
+					this.setAttribute("width", String(minWidth));
+				}
 				if (!height || Number(height) < minHeight) this.setAttribute("height", String(minHeight));
 				// Render item pane after open
-				if ((!width || !height) && this.mode == "item") {
+				if (((!width && !isStackedMode) || !height) && this.mode == "item") {
 					this._itemDetails.render();
 				}
 			}
