@@ -1,9 +1,24 @@
 {
-	"general-print": {
-		"string": "Print"
+	"general-key-control": {
+		"string": "Control"
+	},
+	"general-key-shift": {
+		"string": "Shift"
+	},
+	"general-key-alt": {
+		"string": "Alt"
+	},
+	"general-key-option": {
+		"string": "Option"
+	},
+	"general-key-command": {
+		"string": "Command"
 	},
 	"return-or-enter": {
 		"string": "{PLATFORM(), select, macos {Return} other {Enter}}"
+	},
+	"general-print": {
+		"string": "Print"
 	},
 	"general-remove": {
 		"string": "Remove"
@@ -34,6 +49,12 @@
 	},
 	"general-view-troubleshooting-instructions": {
 		"string": "View Troubleshooting Instructions"
+	},
+	"citation-style-label": {
+		"string": "Citation Style:"
+	},
+	"language-label": {
+		"string": "Language:"
 	},
 	"menu-file-show-in-finder.label": {
 		"string": "Show in Finder"
@@ -104,6 +125,12 @@
 	"collections-menu-edit-saved-search.label": {
 		"string": "Edit Saved Search"
 	},
+	"collections-menu-move-collection.label": {
+		"string": "Move To"
+	},
+	"collections-menu-copy-collection.label": {
+		"string": "Copy To"
+	},
 	"item-creator-moveDown.label": {
 		"string": "Move Down"
 	},
@@ -124,6 +151,9 @@
 	},
 	"item-menu-add-url.label": {
 		"string": "Web Link"
+	},
+	"item-menu-change-parent-item.label": {
+		"string": "Change Parent Item…"
 	},
 	"view-online": {
 		"string": "View Online"
@@ -338,12 +368,6 @@
 	"bibliography-window.title": {
 		"string": "{ app-name } - Create Citation/Bibliography"
 	},
-	"bibliography-style-label": {
-		"string": "Citation Style:"
-	},
-	"bibliography-locale-label": {
-		"string": "Language:"
-	},
 	"bibliography-displayAs-label": {
 		"string": "Display citations as:"
 	},
@@ -388,6 +412,18 @@
 	},
 	"integration-quickFormatDialog-window.title": {
 		"string": "{ app-name } - Quick Format Citation"
+	},
+	"styleEditor-locatorType.aria-label": {
+		"string": "Locator type"
+	},
+	"styleEditor-locatorInput": {
+		"string": "Locator input"
+	},
+	"styleEditor-editor.aria-label": {
+		"string": "Style editor"
+	},
+	"styleEditor-preview.aria-label": {
+		"string": "Preview"
 	},
 	"integration-prefs-displayAs-label": {
 		"string": "Display Citations As:"
@@ -797,6 +833,9 @@
 	"select-items-dialog.buttonlabelaccept": {
 		"string": "Select"
 	},
+	"select-items-convertToStandaloneAttachment.label": {
+		"string": "{count, plural, one {Convert to Standalone Attachment} other {Convert to Standalone Attachments}}"
+	},
 	"file-type-webpage": {
 		"string": "Webpage"
 	},
@@ -955,5 +994,71 @@
 	},
 	"scaffold-translator-output.aria-label": {
 		"string": "Console"
+	},
+	"pdfReader-underlineText": {
+		"string": "Underline Text"
+	},
+	"pdfReader-highlightText": {
+		"string": "Highlight Text"
+	},
+	"pdfReader-addText": {
+		"string": "Add Text"
+	},
+	"pdfReader-selectArea": {
+		"string": "Select Area"
+	},
+	"pdfReader-draw": {
+		"string": "Draw"
+	},
+	"pdfReader-highlightAnnotation": {
+		"string": "Highlight annotation"
+	},
+	"pdfReader-underlineAnnotation": {
+		"string": "Underline annotation"
+	},
+	"pdfReader-noteAnnotation": {
+		"string": "Note Annotation"
+	},
+	"pdfReader-textAnnotation": {
+		"string": "Text Annotation"
+	},
+	"pdfReader-imageAnnotation": {
+		"string": "Image Annotation"
+	},
+	"pdfReader-find-in-document": {
+		"string": "Find in Document"
+	},
+	"pdfReader-a11yMoveAnnotation": {
+		"string": "Use the arrow keys to move the annotation."
+	},
+	"pdfReader-a11yEditTextAnnotation": {
+		"string": "To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ pdfReader-move-annotation-start-key } and use the arrow keys."
+	},
+	"pdfReader-a11yResizeAnnotation": {
+		"string": "To resize the annotation, hold { general-key-shift } and use the arrow keys."
+	},
+	"pdfReader-a11yAnnotationPopupAppeared": {
+		"string": "Use Tab to navigate the annotation popup."
+	},
+	"pdfReader-a11yAnnotationCreated": {
+		"string": "{ type } created."
+	},
+	"pdfReader-a11yAnnotationSelected": {
+		"string": "{ type } selected."
+	},
+	"-pdfReader-a11yTextualAnnotationInstruction": {
+		"string": "To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ number } to turn the search result into an annotation."
+	},
+	"-pdfReader-a11yAnnotationInstruction": {
+		"string": "To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ number }."
+	},
+	"pdfReader-toolbar-draw.aria-description": {
+		"string": "This annotation type cannot be created via the keyboard."
+	},
+	"pdfReader-findInDocumentInput.title": {
+		"string": "Find"
+	},
+	"pdfReader-findInDocumentInput.aria-description": {
+		"string": "To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2."
 	}
 }
