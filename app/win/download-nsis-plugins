@@ -46,6 +46,11 @@ for plugin in $plugins; do
 	curl https://hg.mozilla.org/mozilla-central/raw-file/052d53200cf8/other-licenses/nsis/Plugins/$plugin.dll > $plugin.dll
 done
 
+curl https://nsis.sourceforge.io/mediawiki/images/1/18/NsProcess.zip > NsProcess.zip
+7z e NsProcess.zip "Plugin/nsProcessW.dll"
+mv nsProcessW.dll nsProcess.dll
+rm NsProcess.zip
+
 echo
 echo
 echo "Files downloaded to ./Plugins -- move to ${NSIS_DIR}Plugins"

@@ -59,6 +59,7 @@ Var InstallType
 !insertmacro WordFind
 !insertmacro WordReplace
 
+!include nsProcess.nsh
 ; The following includes are custom.
 !include branding.nsi
 !include defines.nsi
@@ -961,6 +962,21 @@ Function .onInit
       Quit
     ${EndIf}
   !endif
+
+  # Check if Zotero is running. If it is, prompt the user to close Zotero and exit.
+  # For silent installs, kill Zotero and if successful, continue with the install.
+  ${nsProcess::FindProcess} ${FileMainEXE} $R0
+  ${If} $R0 = 0
+    IfSilent +3
+    MessageBox MB_OK|MB_ICONSTOP "Zotero is already running. Please close Zotero before running the installer."
+    Quit
+    ${nsProcess::KillProcess} ${FileMainEXE} $R0
+    Sleep 500
+    ${nsProcess::FindProcess} ${FileMainEXE} $R0
+    ${If} $R0 = 0
+      Quit
+    ${EndIf}
+  ${EndIf}
 
   StrCpy $R1 "Zotero Standalone"
   StrCpy $R2 "An older version of Zotero is installed. If you continue, the existing version will be removed.$\n$\nYour Zotero data will not be affected."
