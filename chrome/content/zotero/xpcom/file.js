@@ -37,7 +37,6 @@ Zotero.File = new function(){
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
-	this.isLikeExtension = isLikeExtension;
 	
 	this.REPLACEMENT_CHARACTER = "\uFFFD";
 	
@@ -85,7 +84,7 @@ Zotero.File = new function(){
 		return pos==-1 ? '' : file.leafName.substr(pos+1);
 	}
 
-	function isLikeExtension(extension) {
+	this.isLikeExtension = function (extension) {
 		return !!extension.match(/^\w{1,10}$/i);
 	}
 	
