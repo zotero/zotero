@@ -12,8 +12,13 @@ pdfReader-imageAnnotation = Image Annotation
 
 pdfReader-find-in-document = Find in Document
 
+pdfReader-move-annotation-start-key =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+        *[other] { general-key-alt }
+    }
 pdfReader-a11yMoveAnnotation = Use the arrow keys to move the annotation.
-pdfReader-a11yEditTextAnnotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ command-or-alt } and use the arrow keys.
+pdfReader-a11yEditTextAnnotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ pdfReader-move-annotation-start-key } and use the arrow keys.
 pdfReader-a11yResizeAnnotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
 pdfReader-a11yAnnotationPopupAppeared = Use Tab to navigate the annotation popup.
 

@@ -1,13 +1,10 @@
 general-key-control = Control
 general-key-shift = Shift
+general-key-alt = Alt
+general-key-command = Command
 option-or-alt =
     { PLATFORM() ->
         [macos] Option
-        *[other] Alt
-    }
-command-or-alt =
-    { PLATFORM() ->
-        [macos] Command
         *[other] Alt
     }
 return-or-enter =
