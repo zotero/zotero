@@ -1796,4 +1796,144 @@ describe("ZoteroPane", function() {
 			assert.equal(attachment.getCollections()[0], collection.id);
 		});
 	});
+
+	describe("#copyCollection", function () {
+		it("should copy collection within the same library", async function () {
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+			let collectionDestination = await createDataObject('collection');
+
+			let itemOne = await createDataObject('item', { collections: [collectionParent.id] });
+			let itemTwo = await createDataObject('item', { collections: [collectionChild.id] });
+
+			await zp.collectionsView.selectByID("C" + collectionParent.id);
+
+			await zp.copyCollection(collectionDestination);
+			await waitForNotifierEvent("add", "collection");
+
+			// Newly created collections have the same names as the original ones
+			let collectionNames = collectionDestination.getDescendents(false, 'collection').map(col => col.name);
+			assert.sameMembers(collectionNames, [collectionParent.name, collectionChild.name]);
+
+			// Newly created collections contain the same items
+			let items = collectionDestination.getDescendents(false, 'item').map(item => item.id);
+			assert.sameMembers(items, [itemOne.id, itemTwo.id]);
+		});
+
+		it("should duplicate top-level collection", async function () {
+			let collection = await createDataObject('collection');
+			let mylibrary = Zotero.Libraries.get(collection.libraryID);
+
+			let itemOne = await createDataObject('item', { collections: [collection.id] });
+
+			await zp.collectionsView.selectByID("C" + collection.id);
+
+			await zp.copyCollection(mylibrary);
+			await waitForNotifierEvent("add", "collection");
+
+			// Find the duplicated collection and make sure it exists
+			let topLevelCollections = Zotero.Collections.getByLibrary(mylibrary.id);
+			let newCollection = topLevelCollections.find(col => col.name == collection.name && collection.id !== col.id);
+			assert.exists(newCollection);
+
+			// Newly created collection contain the same item
+			let items = newCollection.getDescendents(false, 'item').map(item => item.id);
+			assert.sameMembers(items, [itemOne.id]);
+		});
+
+		it("should copy collection between libraries", async function () {
+			let groupDestination = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
+
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+
+			let itemOne = await createDataObject('item', { collections: [collectionParent.id] });
+			let itemTwo = await createDataObject('item', { collections: [collectionChild.id] });
+
+			await zp.collectionsView.selectByID("C" + collectionParent.id);
+
+			await zp.copyCollection(groupCollection);
+
+			await waitForNotifierEvent("add", "collection");
+
+			// Newly created collections have the same names as the original ones
+			let collectionNames = groupCollection.getDescendents(false, 'collection').map(col => col.name);
+			assert.sameMembers(collectionNames, [collectionParent.name, collectionChild.name]);
+
+			// Newly created collections also have copies of items
+			let items = groupCollection.getDescendents(false, 'item').map(item => Zotero.Items.get(item.id).getDisplayTitle());
+			assert.sameMembers(items, [itemOne.getDisplayTitle(), itemTwo.getDisplayTitle()]);
+		});
+
+		it("should not allow copying between libraries if there is a linked collection", async function () {
+			let groupDestination = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
+
+			let collection = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collection.id });
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			await zp.copyCollection(groupCollection);
+
+			await waitForNotifierEvent("add", "collection");
+
+			// Collection has been copies
+			let groupCollections = groupCollection.getDescendents(false, 'collection');
+			let newCollectionID = groupCollections.find(col => col.name == collectionChild.name).id;
+			let newCollection = Zotero.Collections.get(newCollectionID);
+			assert.exists(newCollection);
+
+			// Right click on the selected collection
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+			zp.buildCopyCollectionMenu({});
+
+			// Delay for menus to get disabled
+			await Zotero.Promise.delay();
+			let groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
+			// Menu of the library with linked collection should be disabled
+			assert.equal(groupMenu.disabled, true);
+
+			// Right click on the parent of the copies collection
+			await zp.collectionsView.selectByID("C" + collection.id);
+			zp.buildCopyCollectionMenu({});
+			// Delay for menus to get disabled
+			await Zotero.Promise.delay();
+			groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
+			// Menu of the library with linked sub-collection should be disabled
+			assert.equal(groupMenu.disabled, true);
+		});
+	});
+	describe("#moveCollection", function () {
+		it("should move collection into another collection of the same library", async function () {
+			let collection = await createDataObject('collection');
+			let collectionDestination = await createDataObject('collection');
+
+			await zp.collectionsView.selectByID("C" + collection.id);
+
+			let promise = waitForNotifierEvent("modify", "collection");
+			await zp.moveCollection(collectionDestination);
+			await promise;
+
+			// Collection was moved into destination collection
+			let collectionChildIDs = collectionDestination.getDescendents(false, 'collection').map(col => col.id);
+			assert.sameMembers(collectionChildIDs, [collection.id]);
+		});
+		it("should make collection a top-level collection", async function () {
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+			let library = Zotero.Libraries.get(collectionChild.libraryID);
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			let promise = waitForNotifierEvent("modify", "collection");
+			await zp.moveCollection(library);
+			await promise;
+
+			// Child collection was pulled from under its parent to become a top-level collection
+			let topLevelCollections = Zotero.Collections.getByLibrary(library.id);
+			assert.includeMembers(topLevelCollections, [collectionChild]);
+		});
+	});
 })

@@ -1796,7 +1796,276 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		return true;
 	}
+
+	/**
+	 * Copy a given item into another library. Used when we need to create a copy of a collection
+	 * in another library if collection is drag-dropped into a group it is not a part of.
+	 */
+	async _copyItem({ item, targetLibraryID, targetTreeRow, options }) {
+		// Check if there's already a copy of this item in the library
+		var linkedItem = await item.getLinkedItem(targetLibraryID, true);
+		if (linkedItem) {
+			// If linked item is in the trash, undelete it and remove it from collections
+			// (since it shouldn't be restored to previous collections)
+			if (linkedItem.deleted) {
+				linkedItem.setCollections();
+				linkedItem.deleted = false;
+				await linkedItem.save({
+					skipSelect: true
+				});
+			}
+			return linkedItem.id;
+			
+			/*
+			// TODO: support tags, related, attachments, etc.
+			
+			// Overlay source item fields on unsaved clone of linked item
+			var newItem = item.clone(false, linkedItem.clone(true));
+			newItem.setField('dateAdded', item.dateAdded);
+			newItem.setField('dateModified', item.dateModified);
+			
+			var diff = newItem.diff(linkedItem, false, ["dateAdded", "dateModified"]);
+			if (!diff) {
+				// Check if creators changed
+				var creatorsChanged = false;
+				
+				var creators = item.getCreators();
+				var linkedCreators = linkedItem.getCreators();
+				if (creators.length != linkedCreators.length) {
+					Zotero.debug('Creators have changed');
+					creatorsChanged = true;
+				}
+				else {
+					for (var i=0; i<creators.length; i++) {
+						if (!creators[i].ref.equals(linkedCreators[i].ref)) {
+							Zotero.debug('changed');
+							creatorsChanged = true;
+							break;
+						}
+					}
+				}
+				if (!creatorsChanged) {
+					Zotero.debug("Linked item hasn't changed -- skipping conflict resolution");
+					continue;
+				}
+			}
+			toReconcile.push([newItem, linkedItem]);
+			continue;
+			*/
+		}
+		
+		// Standalone attachment
+		if (item.isAttachment()) {
+			var linkMode = item.attachmentLinkMode;
+			
+			// Skip linked files
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				Zotero.debug("Skipping standalone linked file attachment on drag");
+				return false;
+			}
+			
+			if (!targetTreeRow.filesEditable) {
+				Zotero.debug("Skipping standalone file attachment on drag");
+				return false;
+			}
+			
+			let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+			if (options.annotations) {
+				await Zotero.Items.copyChildItems(item, newAttachment);
+			}
+			
+			return newAttachment.id;
+		}
+		
+		// Create new clone item in target library
+		var newItem = item.clone(targetLibraryID, { skipTags: !options.tags });
+		
+		var newItemID = await newItem.save({
+			skipSelect: true
+		});
+		
+		// Record link
+		await newItem.addLinkedItem(item);
+		
+		if (item.isNote()) {
+			if (Zotero.Libraries.get(newItem.libraryID).filesEditable) {
+				await Zotero.Notes.copyEmbeddedImages(item, newItem);
+			}
+			return newItemID;
+		}
+		
+		// For regular items, add child items if prefs and permissions allow
+		
+		// Child notes
+		if (options.childNotes) {
+			var noteIDs = item.getNotes();
+			var notes = Zotero.Items.get(noteIDs);
+			for (let note of notes) {
+				let newNote = note.clone(targetLibraryID, { skipTags: !options.tags });
+				newNote.parentID = newItemID;
+				await newNote.save({
+					skipSelect: true
+				})
+
+				if (Zotero.Libraries.get(newNote.libraryID).filesEditable) {
+					await Zotero.Notes.copyEmbeddedImages(note, newNote);
+				}
+				await newNote.addLinkedItem(note);
+			}
+		}
+		
+		// Child attachments
+		if (options.childLinks || options.childFileAttachments) {
+			var attachmentIDs = item.getAttachments();
+			var attachments = Zotero.Items.get(attachmentIDs);
+			for (let attachment of attachments) {
+				var linkMode = attachment.attachmentLinkMode;
+				
+				// Skip linked files
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					Zotero.debug("Skipping child linked file attachment on drag");
+					continue;
+				}
+				
+				// Skip imported files if we don't have pref and permissions
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					if (!options.childLinks) {
+						Zotero.debug("Skipping child link attachment on drag");
+						continue;
+					}
+				}
+				else {
+					if (!options.childFileAttachments
+							|| (!targetTreeRow.filesEditable && !targetTreeRow.isPublications())) {
+						Zotero.debug("Skipping child file attachment on drag");
+						continue;
+					}
+				}
+				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
+					attachment, targetLibraryID, newItemID
+				);
+				
+				if (options.annotations) {
+					await Zotero.Items.copyChildItems(attachment, newAttachment);
+				}
+			}
+		}
+		
+		return newItemID;
+	}
 	
+	/**
+	 * Helper function used by executeCollectionCopy to recursively copy collections from one library
+	 * into another, or from one collection to another within the same library.
+	 */
+	async _copyCollections({ descendents, parentID, addItems, targetLibraryID, targetTreeRow, copyOptions }) {
+		for (var desc of descendents) {
+			// Collections
+			if (desc.type == 'collection') {
+				var c = await Zotero.Collections.getAsync(desc.id);
+				let newCollection = c.clone(targetLibraryID);
+				if (parentID) {
+					newCollection.parentID = parentID;
+				}
+				var collectionID = await newCollection.save();
+				
+				// Record link only if copying to a different library
+				if (targetLibraryID !== c.libraryID) {
+					await newCollection.addLinkedCollection(c);
+				}
+				
+				// Recursively copy subcollections
+				if (desc.children.length) {
+					await this._copyCollections({
+						descendents: desc.children,
+						parentID: collectionID,
+						addItems,
+						targetLibraryID,
+						targetTreeRow,
+						copyOptions
+					});
+				}
+			}
+			// Items
+			else {
+				var item = await Zotero.Items.getAsync(desc.id);
+				let id = desc.id;
+				// Actually copy items only if moving to another library
+				if (item.libraryID !== targetLibraryID) {
+					id = await this._copyItem({
+						item,
+						targetLibraryID,
+						targetTreeRow,
+						options: copyOptions
+					});
+					// Standalone attachments might not get copied
+					if (!id) {
+						continue;
+					}
+				}
+				// Mark copied item for adding to collection
+				if (parentID) {
+					let parentItems = addItems.get(parentID);
+					if (!parentItems) {
+						parentItems = [];
+						addItems.set(parentID, parentItems);
+					}
+					
+					// If source item is a top-level non-regular item (which can exist in a
+					// collection) but target item is a child item (which can't), add
+					// target item's parent to collection instead
+					if (!item.isRegularItem()) {
+						let targetItem = await Zotero.Items.getAsync(id);
+						let targetItemParentID = targetItem.parentItemID;
+						if (targetItemParentID) {
+							id = targetItemParentID;
+						}
+					}
+					
+					parentItems.push(id);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Copy a given collection into another library, or duplicate it within the same library
+	 *
+	 * Used for drag-and-drop and the "Copy To" context menu option
+	 *
+	 * @param {Zotero.Collection} collection - collection to copy
+	 * @param {String} targetCollectionID - id of the collection to copy to
+	 * @param {String} targetLibraryID - id of the library to copy to
+	 * @param {Zotero.CollectionTreeRow } targetTreeRow - tree row of the target
+	 * @param {Object} copyOptions - options how to perform the copy - see onDrop for an example
+	*/
+	async executeCollectionCopy({ collection, targetCollectionID, targetLibraryID, targetTreeRow, copyOptions }) {
+		await Zotero.DB.executeTransaction(async () => {
+			var collections = [{
+				id: collection.id,
+				children: collection.getDescendents(true),
+				type: 'collection'
+			}];
+			
+			var addItems = new Map();
+			await this._copyCollections({
+				descendents: collections,
+				parentID: targetCollectionID,
+				addItems,
+				targetLibraryID,
+				targetTreeRow,
+				copyOptions
+			});
+			for (let [collectionID, items] of addItems.entries()) {
+				let collection = await Zotero.Collections.getAsync(collectionID);
+				await collection.addItems(items);
+			}
+			
+			// TODO: add subcollections and subitems, if they don't already exist,
+			// and display a warning if any of the subcollections already exist
+		});
+	}
+
 	async onDrop(event, index) {
 		const treeRow = this.getRow(index);
 		this._dropRow = null;
@@ -1809,7 +2078,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				|| !(await this.canDropCheckAsync(row, orient, dataTransfer))) {
 			return false;
 		}
-		
 		var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 		if (!dragData) {
 			Zotero.debug("No drag data");
@@ -1828,237 +2096,20 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
 			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
 		};
-		var copyItem = async function (item, targetLibraryID, options) {
-			var targetLibraryType = Zotero.Libraries.get(targetLibraryID).libraryType;
-			
-			// Check if there's already a copy of this item in the library
-			var linkedItem = await item.getLinkedItem(targetLibraryID, true);
-			if (linkedItem) {
-				// If linked item is in the trash, undelete it and remove it from collections
-				// (since it shouldn't be restored to previous collections)
-				if (linkedItem.deleted) {
-					linkedItem.setCollections();
-					linkedItem.deleted = false;
-					await linkedItem.save({
-						skipSelect: true
-					});
-				}
-				return linkedItem.id;
-				
-				/*
-				// TODO: support tags, related, attachments, etc.
-				
-				// Overlay source item fields on unsaved clone of linked item
-				var newItem = item.clone(false, linkedItem.clone(true));
-				newItem.setField('dateAdded', item.dateAdded);
-				newItem.setField('dateModified', item.dateModified);
-				
-				var diff = newItem.diff(linkedItem, false, ["dateAdded", "dateModified"]);
-				if (!diff) {
-					// Check if creators changed
-					var creatorsChanged = false;
-					
-					var creators = item.getCreators();
-					var linkedCreators = linkedItem.getCreators();
-					if (creators.length != linkedCreators.length) {
-						Zotero.debug('Creators have changed');
-						creatorsChanged = true;
-					}
-					else {
-						for (var i=0; i<creators.length; i++) {
-							if (!creators[i].ref.equals(linkedCreators[i].ref)) {
-								Zotero.debug('changed');
-								creatorsChanged = true;
-								break;
-							}
-						}
-					}
-					if (!creatorsChanged) {
-						Zotero.debug("Linked item hasn't changed -- skipping conflict resolution");
-						continue;
-					}
-				}
-				toReconcile.push([newItem, linkedItem]);
-				continue;
-				*/
-			}
-			
-			// Standalone attachment
-			if (item.isAttachment()) {
-				var linkMode = item.attachmentLinkMode;
-				
-				// Skip linked files
-				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					Zotero.debug("Skipping standalone linked file attachment on drag");
-					return false;
-				}
-				
-				if (!targetTreeRow.filesEditable) {
-					Zotero.debug("Skipping standalone file attachment on drag");
-					return false;
-				}
-				
-				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
-				if (options.annotations) {
-					await Zotero.Items.copyChildItems(item, newAttachment);
-				}
-				
-				return newAttachment.id;
-			}
-			
-			// Create new clone item in target library
-			var newItem = item.clone(targetLibraryID, { skipTags: !options.tags });
-			
-			var newItemID = await newItem.save({
-				skipSelect: true
-			});
-			
-			// Record link
-			await newItem.addLinkedItem(item);
-			
-			if (item.isNote()) {
-				if (Zotero.Libraries.get(newItem.libraryID).filesEditable) {
-					await Zotero.Notes.copyEmbeddedImages(item, newItem);
-				}
-				return newItemID;
-			}
-			
-			// For regular items, add child items if prefs and permissions allow
-			
-			// Child notes
-			if (options.childNotes) {
-				var noteIDs = item.getNotes();
-				var notes = Zotero.Items.get(noteIDs);
-				for (let note of notes) {
-					let newNote = note.clone(targetLibraryID, { skipTags: !options.tags });
-					newNote.parentID = newItemID;
-					await newNote.save({
-						skipSelect: true
-					})
-
-					if (Zotero.Libraries.get(newNote.libraryID).filesEditable) {
-						await Zotero.Notes.copyEmbeddedImages(note, newNote);
-					}
-					await newNote.addLinkedItem(note);
-				}
-			}
-			
-			// Child attachments
-			if (options.childLinks || options.childFileAttachments) {
-				var attachmentIDs = item.getAttachments();
-				var attachments = Zotero.Items.get(attachmentIDs);
-				for (let attachment of attachments) {
-					var linkMode = attachment.attachmentLinkMode;
-					
-					// Skip linked files
-					if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-						Zotero.debug("Skipping child linked file attachment on drag");
-						continue;
-					}
-					
-					// Skip imported files if we don't have pref and permissions
-					if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-						if (!options.childLinks) {
-							Zotero.debug("Skipping child link attachment on drag");
-							continue;
-						}
-					}
-					else {
-						if (!options.childFileAttachments
-								|| (!targetTreeRow.filesEditable && !targetTreeRow.isPublications())) {
-							Zotero.debug("Skipping child file attachment on drag");
-							continue;
-						}
-					}
-					let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
-						attachment, targetLibraryID, newItemID
-					);
-					
-					if (options.annotations) {
-						await Zotero.Items.copyChildItems(attachment, newAttachment);
-					}
-				}
-			}
-			
-			return newItemID;
-		};
 		
 		var targetLibraryID = targetTreeRow.ref.libraryID;
 		var targetCollectionID = targetTreeRow.isCollection() ? targetTreeRow.ref.id : false;
 		
 		if (dataType == 'zotero/collection') {
 			var droppedCollection = await Zotero.Collections.getAsync(data[0]);
-			
 			// Collection drag between libraries
 			if (targetLibraryID != droppedCollection.libraryID) {
-				await Zotero.DB.executeTransaction(async function () {
-					var copyCollections = async function (descendents, parentID, addItems) {
-						for (var desc of descendents) {
-							// Collections
-							if (desc.type == 'collection') {
-								var c = await Zotero.Collections.getAsync(desc.id);
-								let newCollection = c.clone(targetLibraryID);
-								if (parentID) {
-									newCollection.parentID = parentID;
-								}
-								var collectionID = await newCollection.save();
-								
-								// Record link
-								await newCollection.addLinkedCollection(c);
-								
-								// Recursively copy subcollections
-								if (desc.children.length) {
-									await copyCollections(desc.children, collectionID, addItems);
-								}
-							}
-							// Items
-							else {
-								var item = await Zotero.Items.getAsync(desc.id);
-								var id = await copyItem(item, targetLibraryID, copyOptions);
-								// Standalone attachments might not get copied
-								if (!id) {
-									continue;
-								}
-								// Mark copied item for adding to collection
-								if (parentID) {
-									let parentItems = addItems.get(parentID);
-									if (!parentItems) {
-										parentItems = [];
-										addItems.set(parentID, parentItems);
-									}
-									
-									// If source item is a top-level non-regular item (which can exist in a
-									// collection) but target item is a child item (which can't), add
-									// target item's parent to collection instead
-									if (!item.isRegularItem()) {
-										let targetItem = await Zotero.Items.getAsync(id);
-										let targetItemParentID = targetItem.parentItemID;
-										if (targetItemParentID) {
-											id = targetItemParentID;
-										}
-									}
-									
-									parentItems.push(id);
-								}
-							}
-						}
-					};
-					
-					var collections = [{
-						id: droppedCollection.id,
-						children: droppedCollection.getDescendents(true),
-						type: 'collection'
-					}];
-					
-					var addItems = new Map();
-					await copyCollections(collections, targetCollectionID, addItems);
-					for (let [collectionID, items] of addItems.entries()) {
-						let collection = await Zotero.Collections.getAsync(collectionID);
-						await collection.addItems(items);
-					}
-					
-					// TODO: add subcollections and subitems, if they don't already exist,
-					// and display a warning if any of the subcollections already exist
+				await this.executeCollectionCopy({
+					collection: droppedCollection,
+					targetCollectionID,
+					targetLibraryID,
+					targetTreeRow,
+					copyOptions
 				});
 			}
 			// Collection drag within a library
@@ -2137,9 +2188,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					newItems,
 					100,
 					function (chunk) {
-						return Zotero.DB.executeTransaction(async function () {
+						return Zotero.DB.executeTransaction(async () => {
 							for (let item of chunk) {
-								var id = await copyItem(item, targetLibraryID, copyOptions)
+								var id = await this._copyItem({
+									item,
+									targetLibraryID,
+									targetTreeRow,
+									options: copyOptions
+								});
 								// Standalone attachments might not get copied
 								if (!id) {
 									continue;
@@ -2147,7 +2203,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 								newIDs.push(id);
 							}
 						});
-					}
+					}.bind(this)
 				);
 				
 				if (toReconcile.length) {

@@ -96,6 +96,10 @@ collections-menu-rename-collection =
     .label = Rename Collection
 collections-menu-edit-saved-search =
     .label = Edit Saved Search
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 
 item-creator-moveDown =
     .label = Move Down

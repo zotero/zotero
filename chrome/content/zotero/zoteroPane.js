@@ -2565,6 +2565,55 @@ var ZoteroPane = new function()
 		}
 	});
 
+	// Move selected collection to specified target collection or library.
+	// Target has to be in the same library as the currently selected collection.
+	this.moveCollection = async (target) => {
+		let selected = this.getSelectedCollection();
+		if (!selected) return;
+
+		if (target.libraryID !== selected.libraryID) {
+			throw new Error("Moving collections is only possible within the same library.");
+		}
+		if (target instanceof Zotero.Library) {
+			selected.parentID = null;
+		}
+		else {
+			selected.parentID = target.id;
+		}
+		
+		await selected.saveTx();
+	};
+
+	// Copy selected collection into another collection or library.
+	// Partially, a replication of drag-drop mechanism from CollectionTree.onDrop.
+	this.copyCollection = async (target) => {
+		let selected = this.getSelectedCollection();
+		if (!selected) return;
+
+		let targetTreeRowID = `L${target.libraryID}`;
+		if (target instanceof Zotero.Collection) {
+			targetTreeRowID = `C${target.id}`;
+			// Make sure the row is actually visible
+			await ZoteroPane.collectionsView.expandToCollection(target.id);
+		}
+		let targetTreeRowIndex = ZoteroPane.collectionsView.getRowIndexByID(targetTreeRowID);
+		let targetTreeRow = ZoteroPane.collectionsView.getRow(targetTreeRowIndex);
+		let copyOptions = {
+			tags: Zotero.Prefs.get('groups.copyTags'),
+			childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+			childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+		};
+		ZoteroPane.collectionsView.executeCollectionCopy({
+			collection: selected,
+			targetCollectionID: target instanceof Zotero.Collection ? target.id : null,
+			targetLibraryID: target.libraryID,
+			targetTreeRow,
+			copyOptions
+		});
+	};
+
 	this.toggleSelectedItemsRead = Zotero.Promise.coroutine(function* () {
 		yield Zotero.FeedItems.toggleReadByID(this.getSelectedItems(true));
 	});
@@ -3180,6 +3229,12 @@ var ZoteroPane = new function()
 			oncommand: () => this.editSelectedCollection()
 		},
 		{
+			id: "moveCollection",
+		},
+		{
+			id: "copyCollection"
+		},
+		{
 			id: "duplicate",
 			oncommand: () => this.duplicateSelectedCollection()
 		},
@@ -3297,6 +3352,8 @@ var ZoteroPane = new function()
 				'newSubcollection',
 				'sep2',
 				'editSelectedCollection',
+				'moveCollection',
+				'copyCollection',
 				'deleteCollection',
 				'deleteCollectionAndItems',
 				'sep3',
@@ -3316,6 +3373,8 @@ var ZoteroPane = new function()
 			
 			// Adjust labels
 			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-rename-collection');
+			document.l10n.setAttributes(m.moveCollection, 'collections-menu-move-collection');
+			document.l10n.setAttributes(m.copyCollection, 'collections-menu-copy-collection');
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collection'));
 			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collectionAndItems'));
@@ -3978,7 +4037,139 @@ var ZoteroPane = new function()
 	});
 
 
-	this.buildAddToCollectionMenu = function (event) {
+	// Build a menu to move or copy a collection into another collection and library.
+	// Alternative to dropping collection into another collection or group
+	this.buildMoveCollectionMenu = function (event) {
+		if (event.target !== event.currentTarget) return;
+		let popup = event.target;
+		popup.replaceChildren();
+
+		let selected = this.getSelectedCollection();
+
+		// Add current library at the top to be able to move collections into it
+		let library = Zotero.Libraries.get(ZoteroPane.getSelectedLibraryID());
+		let libraryMenuItem = document.createXULElement("menuitem");
+		libraryMenuItem.setAttribute("label", library.name);
+		libraryMenuItem.setAttribute("image", library.treeViewImage);
+		libraryMenuItem.setAttribute("value", library.treeViewID);
+		libraryMenuItem.addEventListener("command", (event) => {
+			if (event.target.tagName == 'menuitem') {
+				this.moveCollection(library);
+				event.stopPropagation();
+			}
+		});
+		// Disable for already top-level collections
+		libraryMenuItem.disabled = !selected.parentID;
+		popup.appendChild(libraryMenuItem);
+		popup.appendChild(document.createXULElement("menuseparator"));
+		
+		// Build menus for each top-level collection of this library
+		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		for (let col of collections) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				col,
+				popup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.moveCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				
+				(target) => {
+					// can't move collection into itself, its parent or its children
+					return selected == target
+						|| selected.parentKey == target.key
+						|| selected.hasDescendent('collection', target.id);
+				}
+			);
+			popup.append(menuItem);
+		}
+	};
+
+
+	this.buildCopyCollectionMenu = function (event) {
+		if (event.target !== event.currentTarget) return;
+		let popup = document.getElementById("zotero-copy-collection-popup");
+		popup.replaceChildren();
+		let selected = this.getSelectedCollection();
+
+		// Fetch all libraries
+		let topLevelEntries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
+
+		// Check which libraries have collections linked to the selected collection
+		// and disable their menuitems. Same logic as in CollectionTree.canDropCheckAsync.
+		let linkedCollectionsExist = {};
+		(async () => {
+			for (let library of topLevelEntries) {
+				if (library.libraryID == selected.libraryID) continue;
+				// Check which library has a collection linked to the selected collection
+				let linkedCollection = await selected.getLinkedCollection(library.libraryID, true);
+				linkedCollectionsExist[library.libraryID] = linkedCollection;
+				// Also check which library has collections linked to a subcollection of the selected collection
+				for (let descendent of selected.getDescendents(false, 'collection')) {
+					let subcollection = Zotero.Collections.get(descendent.id);
+					let linkedSubcollection = await subcollection.getLinkedCollection(library.libraryID, true);
+					if (linkedSubcollection) {
+						linkedCollectionsExist[library.libraryID] = linkedSubcollection;
+					}
+				}
+			}
+			// Libraries that have linked collections have their menus disabled
+			for (let libraryMenuItem of [...popup.childNodes]) {
+				let menuItemLibID = libraryMenuItem.getAttribute("value").substring(1);
+				if (linkedCollectionsExist[menuItemLibID]) {
+					libraryMenuItem.disabled = true;
+				}
+			}
+		})();
+		
+		// If there is only one library, display its collections as top-level menuitems
+		if (topLevelEntries.length == 1) {
+			// Manually add My Library menuitem at the top, so one can still copy into it
+			let myLibrary = topLevelEntries[0];
+			let myLibraryMenuItem = document.createXULElement("menuitem");
+			myLibraryMenuItem.setAttribute("label", myLibrary.name);
+			myLibraryMenuItem.setAttribute("image", myLibrary.treeViewImage);
+			myLibraryMenuItem.setAttribute("value", myLibrary.treeViewID);
+			myLibraryMenuItem.addEventListener("command", (event) => {
+				if (event.target.tagName == 'menuitem') {
+					this.copyCollection(myLibrary);
+					event.stopPropagation();
+				}
+			});
+			popup.appendChild(myLibraryMenuItem);
+			popup.appendChild(document.createXULElement("menuseparator"));
+
+			// Top-level collections used to construct the menus
+			topLevelEntries = Zotero.Collections.getByLibrary(topLevelEntries[0].id);
+		}
+		
+		// Build menus for all libraries (or collections)
+		for (let obj of topLevelEntries) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				obj,
+				popup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.copyCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				
+				(target) => {
+					// can't copy collection into itself or into non-editable groups
+					return selected == target
+						|| (target instanceof Zotero.Group && !target.editable);
+				}
+			);
+			popup.append(menuItem);
+		}
+	};
+
+	this.buildAddItemToCollectionMenu = function (event) {
 		if (event.target !== event.currentTarget) return;
 
 		let popup = event.target;
