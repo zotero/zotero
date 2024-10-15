@@ -5,6 +5,11 @@ option-or-alt =
         [macos] Option
         *[other] Alt
     }
+command-or-alt =
+    { PLATFORM() ->
+        [macos] Command
+        *[other] Alt
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
