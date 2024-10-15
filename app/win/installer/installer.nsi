@@ -618,19 +618,33 @@ Function AddQuickLaunchShortcut
 FunctionEnd
 
 Function CheckExistingInstall
+  UserInfo::GetAccountType
+  pop $0 ; $0 = "Admin" or "User" or "Guest". This is the account type.
+
   ; If there is a pending file copy from a previous upgrade don't allow
   ; installing until after the system has rebooted.
-  IfFileExists "$INSTDIR\${FileMainEXE}.moz-upgrade" +1 +4
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
-  Reboot
-  Quit
+  ${If} ${FileExists} "$INSTDIR\${FileMainEXE}.moz-upgrade"
+    StrCmp $0 "Admin" +1 +4
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
+    Reboot
+    Quit
+    ; Non-admins cannot depend on files being removed on restart. 
+    ; Our only option is to remove these files and continue with the installation.
+    Delete "$INSTDIR\${FileMainEXE}.moz-upgrade"
+    Delete "$INSTDIR\${FileMainEXE}"
+  ${EndIf}
 
   ; If there is a pending file deletion from a previous uninstall don't allow
   ; installing until after the system has rebooted.
-  IfFileExists "$INSTDIR\${FileMainEXE}.moz-delete" +1 +4
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UNINSTALL)" IDNO +2
-  Reboot
-  Quit
+  ${If} ${FileExists} "$INSTDIR\${FileMainEXE}.moz-delete"
+    StrCmp $0 "Admin" +1 +4
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UNINSTALL)" IDNO +2
+    Reboot
+    Quit
+    ; Non-admins cannot depend on files being removed on restart.
+    Delete "$INSTDIR\${FileMainEXE}.moz-delete"
+    Delete "$INSTDIR\${FileMainEXE}"
+  ${EndIf}
 
   ${If} ${FileExists} "$INSTDIR\${FileMainEXE}"
     ; Disable the next, cancel, and back buttons
