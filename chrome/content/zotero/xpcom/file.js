@@ -83,6 +83,10 @@ Zotero.File = new function(){
 		var pos = file.leafName.lastIndexOf('.');
 		return pos==-1 ? '' : file.leafName.substr(pos+1);
 	}
+
+	this.isLikeExtension = function (extension) {
+		return !!extension.match(/^\w{1,10}$/i);
+	}
 	
 	
 	/**

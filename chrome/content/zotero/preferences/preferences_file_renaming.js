@@ -50,9 +50,8 @@ Zotero_Preferences.FileRenaming = {
 			if (selectedItem.isRegularItem() && !selectedItem.parentKey) {
 				return [selectedItem, this.defaultExt, ''];
 			}
-			if (selectedItem.isFileAttachment()) {
-				let path = selectedItem.getFilePath();
-				let ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
+			if (selectedItem.isFileAttachment() && selectedItem.parentKey) {
+				let ext = Zotero.Attachments.getCorrectFileExtension(selectedItem);
 				let parentItem = Zotero.Items.getByLibraryAndKey(selectedItem.libraryID, selectedItem.parentKey);
 				return [parentItem, ext ?? this.defaultExt, selectedItem.getField('title')];
 			}
