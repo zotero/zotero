@@ -58,7 +58,7 @@
 
 	&[orient="vertical"],
 	&[orient="vertical"] :is(#zotero-items-pane-container, #zotero-item-pane) {
-		width: auto !important;
+		width: -moz-available !important;
 		/* min-width: 0 is required here to allow the pane to shrink in Stacked view,
 		   but the child #zotero-items-pane sets a larger min-width, and the splitter
 		   follows that instead of this. */
