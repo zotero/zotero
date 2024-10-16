@@ -1,76 +1,92 @@
-general-print = Штампај
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Штампај
 general-remove = Уклони
 general-add = Додај
 general-remind-me-later = Подсети ме касније
 general-dont-ask-again = Не питај ме поново
 general-choose-file = Изабери датотеку…
-general-open-settings = Open Settings
+general-open-settings = Отвори подешавања
 general-help = Помоћ
 general-tag = Ознака
 general-done = Готово
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
+general-view-troubleshooting-instructions = Погледај упутства за решавање проблема
+citation-style-label = Стил цитата:
+language-label = Језик:
 menu-file-show-in-finder =
-    .label = Show in Finder
+    .label = Прикажи у претрази
 menu-file-show-file =
     .label = Прикажи датотеку
 menu-file-show-files =
-    .label = Show Files
+    .label = Прикажи датотеке
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = Густина
 add-attachment = Додај прилог
 new-note = Нова белешка
 menu-add-by-identifier =
-    .label = Add by Identifier…
+    .label = Додај на основу идентификатора…
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Add File…
+    .label = Додај датотеку…
 menu-add-standalone-linked-file-attachment =
-    .label = Add Link to File…
+    .label = Додај везу до датотеке…
 menu-add-child-file-attachment =
-    .label = Attach File…
+    .label = Додај датотеку…
 menu-add-child-linked-file-attachment =
     .label = Приложи везу до датотеке…
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = Приложи везу на вебу…
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
     .label = Нова самостална белешка
 menu-new-item-note =
-    .label = New Item Note
+    .label = Белешка о новој ставки
 menu-restoreToLibrary =
     .label = Врати у библиотеку
 menu-deletePermanently =
     .label = Трајно избриши…
 menu-tools-plugins =
-    .label = Plugins
+    .label = Прикључци
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
-    .tooltiptext = List all tabs
-filter-collections = Filter Collections
+    .tooltiptext = Излистај све картице
+filter-collections = Филтер збирки
 zotero-collections-search =
     .placeholder = { filter-collections }
 zotero-collections-search-btn =
     .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
-    .placeholder = Search Tabs
+    .placeholder = Претражи картице
 zotero-tabs-menu-close-button =
-    .title = Close Tab
+    .title = Затвори картицу
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
-    .label = Rename Collection
+    .label = Преименуј збирку
 collections-menu-edit-saved-search =
     .label = Уреди сачувану претрагу
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = Премести доле
 item-creator-moveToTop =
@@ -79,132 +95,135 @@ item-creator-moveUp =
     .label = Премести горе
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        Отвори { $numAttachments ->
             [one]
                 { $attachmentType ->
-                    [pdf] PDF
-                    [epub] EPUB
-                    [snapshot] Snapshot
-                   *[other] Attachment
+                    [pdf] ПДФ датотеку
+                    [epub] ЕПУБ датотеку
+                    [snapshot] сличицу
+                   *[other] прилог
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
-                    [snapshot] Snapshots
-                   *[other] Attachments
+                    [pdf] ПДФ датотеке
+                    [epub] ЕПУБ датотеке
+                    [snapshot] сличице
+                   *[other] прилоге
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] у новој картици
+            [window] у новом прозору
            *[other] { "" }
         }
 item-menu-add-file =
     .label = Датотека
 item-menu-add-linked-file =
-    .label = Linked File
+    .label = Повезана датотека
 item-menu-add-url =
-    .label = Web Link
+    .label = Веза на вебу
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Погледај на мрежи
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Датотека је преименована у { $filename }
 itembox-button-options =
-    .tooltiptext = Open context menu
+    .tooltiptext = Отвори контекстни мени
 itembox-button-merge =
-    .aria-label = Select version of { $field } field
-create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+    .aria-label = Изабери верзију поља { $field }
+create-parent-intro = Унесите ДОИ, ИСБН, ПМИБ, арХиб ИБ или АДС Бибкод за идентификацију ове датотеке:
 reader-use-dark-mode-for-content =
-    .label = Use Dark Mode for Content
-update-updates-found-intro-minor = An update for { -app-name } is available:
-update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+    .label = Тамни режим за садржај
+update-updates-found-intro-minor = Доступно је ажурирање за { -app-name }:
+update-updates-found-desc = Препоручујемо да примените ово ажурирање што пре.
 import-window =
     .title = Увези
 import-where-from = Одакле желите да увезете?
 import-online-intro-title = Увод
 import-source-file =
-    .label = Из датотеке (BibTeX, RIS, Зотеров RDF…)
+    .label = Из датотеке (БибТеКс, РИС, Зотеров РДФ…)
 import-source-folder =
-    .label = Фасцикла са ПДФ-овима или другим датотекама
+    .label = Фасцикла са ПДФ или другим датотекама
 import-source-online =
-    .label = { $targetApp } online import
+    .label = { $targetApp } увоз са мреже
 import-options = Опције
 import-importing = Увозим…
 import-create-collection =
     .label = Постави увезене збирке и ставке у нову збирку
 import-recreate-structure =
-    .label = Recreate folder structure as collections
-import-fileTypes-header = File Types to Import:
+    .label = Поново направи структуру у виду збирки
+import-fileTypes-header = Врсте датотека за увоз:
 import-fileTypes-pdf =
-    .label = PDFs
+    .label = ПДФ-ови
 import-fileTypes-other =
-    .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
+    .placeholder = Отвори датотеке на основу шаблона раздвојеног зарезима (нпр. *.jpg,*.png)
 import-file-handling = Рад са датотекама
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = Копирај датотеке у { -app-name } фасциклу са складиштем
 import-file-handling-link =
-    .label = Link to files in original location
-import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+    .label = Повежи са датотекама на оригиналној локацији
+import-fileHandling-description = Не могу да ускладим повезане датотеке у програму { -app-name }.
 import-online-new =
     .label = Преузми само нове ставке; не ажурирај претходно увезене ставке
 import-mendeley-username = Корисничко име
 import-mendeley-password = Лозинка
 general-error = Грешка
-file-interface-import-error = Грешка при покушају увеза изабране датотеке. Проверите да ли је датотека исправна и покушајте поново.
+file-interface-import-error = Грешка при увозу изабране датотеке. Проверите да ли је датотека исправна и покушајте поново.
 file-interface-import-complete = Увоз је завршен
 file-interface-items-were-imported =
     { $numItems ->
-        [0] No items were imported
-        [one] One item was imported
-       *[other] { $numItems } items were imported
+        [0] Нису увезене ставке
+        [one] Ставка је увезена
+       *[other] Увезених ставки: { $numItems }
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
-        [0] No items were relinked
-        [one] One item was relinked
-       *[other] { $numRelinked } items were relinked
+        [0] Ставке нису поново повезане
+        [one] Ставка је поново повезана
+       *[other] Поново повезаних ставки: { $numRelinked }
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
-file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
-import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
-import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-mendeley-encrypted = Не могу да прочитам изабрану база података из Мендељева, вероватно зато што је шифрована. Погледајте <a data-l10n-name="mendeley-import-kb">Како да увезем библиотеку из Мендељева у Зотеро?</a> за више информација.
+file-interface-import-error-translator = Грешка приликом увоза изабране датотеке преко „{ $translator }“. Проверите да ли је датотека исправна и покушајте поново.
+import-online-intro = У следећем кораку ћете бити позвани да се пријавите на { $targetAppOnline } и дате дозволе за приступ програму { -app-name }. Ово је нопходно да увезете вашу { $targetApp } библиотеку у { -app-name }.
+import-online-intro2 = { -app-name } никада неће видети или чувати вашу { $targetApp } лозинку.
+import-online-form-intro = Унесите ваше податке за пријаву на { $targetAppOnline }. Ово је неопходно да увезете вашу { $targetApp } библиотеку у { -app-name }.
+import-online-wrong-credentials = Није успела пријава у { $targetApp }. Унесите податке за пријаву и покушајте поново.
+import-online-blocked-by-plugin = Увоз не може да се настави ако је прикључак { $plugin } инсталиран. Искључите овај прикључак и покушајте поново.
 import-online-relink-only =
-    .label = Relink Mendeley Desktop citations
+    .label = Поново повежи цитате из Мендељејева
 import-online-relink-kb = Више података
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name } не може да се повеже на { $targetApp }. Проверите везу са интернетом и покушајте поново.
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } белешка
+            [few] { $count } белешке
+           *[other] { $count } белешки
         }
 report-error =
     .label = Грешка у извештају…
 rtfScan-wizard =
-    .title = RTF скенер
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+    .title = РТФ скенер
+rtfScan-introPage-description = { -app-name } може аутоматски да извуче и поново форматира цитате и убаци библиографију у РТФ датотеке. Тренутно подржава цитате у варијантама следећих формата:
 rtfScan-introPage-description2 = За початак отворите РТФ датотеку и изаберите излазну датотеку:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Улазна датотека:
+rtfScan-output-file = Излазна датотека:
 rtfScan-no-file-selected = Није изабрана датотека
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = Изаберите улазну датотеку
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = Изаберите излазну датотеку
 rtfScan-intro-page = Увод
 rtfScan-scan-page = Тражим цитате
 rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
 rtfScan-citations-page = Верификуј цитиране ставке
 rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
-rtfScan-style-page = Форматирање документа
-rtfScan-format-page = Форамтирање цитата
+rtfScan-style-page = Форматирам документ
+rtfScan-format-page = Форматирам цитате
 rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
 rtfScan-complete-page = РТФ скенирање је завршено
 rtfScan-complete-page-description = Ваш документ је скениран и обрађен. Проверите да ли је исправно форматиран.
@@ -224,8 +243,8 @@ runJS-result =
 runJS-run-async = Run as async function
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = Стил цитата:
-bibliography-locale-label = Језик:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = Напредне опције
 bibliography-outputMode-label = Извези као:
@@ -256,11 +275,20 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Preview
 integration-prefs-displayAs-label = Прикажи цитате као:
 integration-prefs-footnotes =
-    .label = Фуснота
+    .label = Фусноте
 integration-prefs-endnotes =
-    .label = Енднота
+    .label = Ендноте
 integration-prefs-bookmarks =
     .label = Store citation as bookmarks
 integration-prefs-bookmarks-description = Обележивачи се могу делити између програма Word и LibreOffice, али могу направити проблеме уколико их случајно промените и не могу бити уметнути као фусноте.
@@ -337,7 +365,7 @@ restart-in-troubleshooting-mode-menuitem =
 restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
-    .label = Density
+    .label = Густина
 menu-ui-density-comfortable =
     .label = Comfortable
 menu-ui-density-compact =
@@ -375,8 +403,9 @@ section-attachments-annotations =
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } белешка
+            [few] { $count } белешке
+           *[other] { $count } белешки
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
@@ -452,10 +481,10 @@ new-collection-dialog =
 new-collection-name = Име:
 new-collection-create-in = Create in:
 attachment-info-title = Наслов
-attachment-info-filename = име датотеке
+attachment-info-filename = Име датотеке
 attachment-info-accessed = Приступљено
 attachment-info-pages = Странице
-attachment-info-modified = Датум измене
+attachment-info-modified = Измењено
 attachment-info-index = Индексирано
 attachment-info-convert-note =
     .label =
@@ -579,6 +608,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Webpage
 file-type-image = Слика
 file-type-pdf = ПДФ

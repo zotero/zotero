@@ -1,9 +1,19 @@
-general-print = 列印
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = 列印
 general-remove = 移除
 general-add = 新增
 general-remind-me-later = 稍後提醒我
@@ -14,6 +24,8 @@ general-help = 說明
 general-tag = 標籤
 general-done = 完成
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+citation-style-label = 引用文獻樣式:
+language-label = 語言：
 menu-file-show-in-finder =
     .label = 在搜尋器中顯示
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = 重命名文獻集
 collections-menu-edit-saved-search =
     .label = 編輯儲存的搜尋結果
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = 移至尾端
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = 連結的檔案
 item-menu-add-url =
     .label = 網頁連結
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = 線上檢視
 item-menu-option-view-online =
     .label = { view-online }
@@ -223,8 +241,8 @@ runJS-result =
 runJS-run-async = 作為非同步函數執行
 bibliography-window =
     .title = { -app-name } - 建立引用/參考文獻表
-bibliography-style-label = 引用文獻樣式:
-bibliography-locale-label = 語言：
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = 將引用文獻顯示為:
 bibliography-advancedOptions-label = 進階選項
 bibliography-outputMode-label = 輸出模式:
@@ -255,6 +273,15 @@ integration-editBibliography-window =
     .title = { -app-name } - 編輯參考文獻表
 integration-quickFormatDialog-window =
     .title = { -app-name } - 快速格式化引用文獻
+styleEditor-locatorType =
+    .aria-label = 定位符類別
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = 預覽
 integration-prefs-displayAs-label = 將引用文獻顯示為:
 integration-prefs-footnotes =
     .label = 頁末註
@@ -569,6 +596,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = 網頁
 file-type-image = 圖片
 file-type-pdf = PDF

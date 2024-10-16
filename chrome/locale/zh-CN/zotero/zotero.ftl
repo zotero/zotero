@@ -1,9 +1,19 @@
-general-print = 打印
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = 打印
 general-remove = 移除
 general-add = 添加
 general-remind-me-later = 稍后提醒我
@@ -14,6 +24,8 @@ general-help = 帮助
 general-tag = 标签
 general-done = 完成
 general-view-troubleshooting-instructions = 查看故障排除说明
+citation-style-label = 参考文献样式:
+language-label = 语言：
 menu-file-show-in-finder =
     .label = 在访达中显示
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = 重命名分类
 collections-menu-edit-saved-search =
     .label = 编辑已保存搜索
+collections-menu-move-collection =
+    .label = 移动到
+collections-menu-copy-collection =
+    .label = 复制到
 item-creator-moveDown =
     .label = 下移
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = 链接的文件
 item-menu-add-url =
     .label = 网页链接
+item-menu-change-parent-item =
+    .label = 改变父条目...
 view-online = 在线查看
 item-menu-option-view-online =
     .label = { view-online }
@@ -115,7 +133,7 @@ itembox-button-options =
     .tooltiptext = 打开上下文菜单
 itembox-button-merge =
     .aria-label = 选择 { $field } 字段的版本
-create-parent-intro = 输入一个 DOI, ISBN, PMID, arXiv ID, 或 ADS Bibcode 來识别这个文件：
+create-parent-intro = 输入一个 DOI, ISBN, PMID, arXiv ID, 或 ADS Bibcode 来识别这个文件：
 reader-use-dark-mode-for-content =
     .label = 使用深色模式显示文档内容
 update-updates-found-intro-minor = { -app-name } 有可用更新：
@@ -223,8 +241,8 @@ runJS-result =
 runJS-run-async = 作为异步函数执行
 bibliography-window =
     .title = { -app-name } - 创建引注/参考文献表
-bibliography-style-label = 参考文献样式:
-bibliography-locale-label = 语言：
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = 引注显示为:
 bibliography-advancedOptions-label = 高级选项
 bibliography-outputMode-label = 输出模式:
@@ -255,6 +273,15 @@ integration-editBibliography-window =
     .title = { -app-name } - 编辑参考文献表
 integration-quickFormatDialog-window =
     .title = { -app-name } - 快速格式化引注
+styleEditor-locatorType =
+    .aria-label = 定位符类型
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = 样式编辑器
+styleEditor-preview =
+    .aria-label = 预览
 integration-prefs-displayAs-label = 引注显示为:
 integration-prefs-footnotes =
     .label = 脚注
@@ -336,7 +363,7 @@ restart-in-troubleshooting-mode-menuitem =
 restart-in-troubleshooting-mode-dialog-title = 以故障排除模式重启
 restart-in-troubleshooting-mode-dialog-description = { -app-name } 将重新启动并禁用所有插件。启用故障排除模式时，某些功能可能无法正常工作。
 menu-ui-density =
-    .label = 密度
+    .label = 紧凑度
 menu-ui-density-comfortable =
     .label = 舒适
 menu-ui-density-compact =
@@ -448,7 +475,7 @@ new-collection-create-in = 创建到：
 attachment-info-title = 标题
 attachment-info-filename = 文件名
 attachment-info-accessed = 访问时间
-attachment-info-pages = 页
+attachment-info-pages = 页数
 attachment-info-modified = 修改日期
 attachment-info-index = 已索引
 attachment-info-convert-note =
@@ -528,9 +555,9 @@ item-pane-message-unselected =
     }
 item-pane-message-objects-unselected =
     { $count ->
-        [0] No objects in this view
-        [one] { $count } object in this view
-       *[other] { $count } objects in this view
+        [0] 此视图中没有对象
+        [one] 此视图中包含 { $count } 个对象
+       *[other] 此视图中包含 { $count } 个对象
     }
 item-pane-duplicates-merge-items =
     .label =
@@ -568,6 +595,11 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = 选择
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+           *[other] 转为独立附件
+        }
 file-type-webpage = 网页
 file-type-image = 图片
 file-type-pdf = PDF

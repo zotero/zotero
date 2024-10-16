@@ -1,9 +1,19 @@
-general-print = Tulosta
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Palauta
        *[other] Syötä
     }
+general-print = Tulosta
 general-remove = Poista
 general-add = Lisää
 general-remind-me-later = Muistuta myöhemmin
@@ -14,6 +24,8 @@ general-help = Ohje
 general-tag = Merkki
 general-done = Valmis
 general-view-troubleshooting-instructions = Katso vianhakuohjeet
+citation-style-label = Viittaustyyli:
+language-label = Kieli:
 menu-file-show-in-finder =
     .label = Näytä Finderissa
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Nimeä kokoelma uudelleen
 collections-menu-edit-saved-search =
     .label = Muokkaa tallennettua hakua
+collections-menu-move-collection =
+    .label = Siirrä kohteeseen
+collections-menu-copy-collection =
+    .label = Kopioi kohteeseen
 item-creator-moveDown =
     .label = Siirrä alas
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Linkitetty tiedosto
 item-menu-add-url =
     .label = Verkko-osoite
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Katso verkossa
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Aja asynkronisena funktiona
 bibliography-window =
     .title = { -app-name } - Luo viite/lähdeluettelo
-bibliography-style-label = Viittaustyyli:
-bibliography-locale-label = Kieli:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Näytä viitteet muodossa:
 bibliography-advancedOptions-label = Lisäasetukset
 bibliography-outputMode-label = Luettelotyyppi:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Muokkaa lähdeluetteloa
 integration-quickFormatDialog-window =
     .title = { -app-name } - Pikamuotoile viite
+styleEditor-locatorType =
+    .aria-label = Täsmenteen tyyppi
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Esikatselu
 integration-prefs-displayAs-label = Näytä sitaatit muodossa:
 integration-prefs-footnotes =
     .label = Alaviitteet
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Valitse
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Verkkosivu
 file-type-image = Kuva
 file-type-pdf = PDF

@@ -1,9 +1,19 @@
-general-print = הדפסה
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = הדפסה
 general-remove = הסרה
 general-add = הוספה
 general-remind-me-later = להזכיר לי אחר כך
@@ -14,6 +24,8 @@ general-help = עזרה
 general-tag = תגית
 general-done = בוצע
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+citation-style-label = סגנון ציטוט:
+language-label = שפה:
 menu-file-show-in-finder =
     .label = הצגה ב־Finder
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = שינוי שם אוסף
 collections-menu-edit-saved-search =
     .label = ערוך חיפושים שמורים
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = הורדה באחד
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = קובץ מקושר
 item-menu-add-url =
     .label = קישור לאתר
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = הצגה באתר
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Run as async function
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = סגנון ציטוט:
-bibliography-locale-label = שפה:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = אפשרויות מתקדמות
 bibliography-outputMode-label = שיטת פלט:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Preview
 integration-prefs-displayAs-label = הצגת ציטוטים בתור:
 integration-prefs-footnotes =
     .label = הערות שוליים
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Webpage
 file-type-image = תמונה
 file-type-pdf = PDF

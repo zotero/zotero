@@ -1,9 +1,19 @@
-general-print = 印刷
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = 印刷
 general-remove = 取り除く
 general-add = 追加
 general-remind-me-later = 後で通知する
@@ -14,6 +24,8 @@ general-help = ヘルプ
 general-tag = タグ
 general-done = 完了
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+citation-style-label = 引用スタイル:
+language-label = 言語:
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Rename Collection
 collections-menu-edit-saved-search =
     .label = 検索式保存を編集する
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = 下へ移動
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Linked File
 item-menu-add-url =
     .label = Web Link
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = オンラインで閲覧する
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Run as async function
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = 引用スタイル:
-bibliography-locale-label = 言語:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = 高度なオプション
 bibliography-outputMode-label = 出力モード:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Preview
 integration-prefs-displayAs-label = 出典表記の出力形式:
 integration-prefs-footnotes =
     .label = 脚注
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Webpage
 file-type-image = 画像
 file-type-pdf = PDF

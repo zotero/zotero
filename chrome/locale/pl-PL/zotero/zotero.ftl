@@ -1,9 +1,19 @@
-general-print = Drukuj
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Drukuj
 general-remove = Usuń
 general-add = Dodaj
 general-remind-me-later = Przypomnij mi później
@@ -14,6 +24,8 @@ general-help = Pomoc
 general-tag = Etykieta
 general-done = Zrobione
 general-view-troubleshooting-instructions = Pokaż instrukcje dla rozwiązywania problemów
+citation-style-label = Styl cytowania:
+language-label = Język:
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Zmień nazwę kolekcji
 collections-menu-edit-saved-search =
     .label = Edytuj wynik wyszukiwania
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = Przenieś w dół
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Odnośnik do pliku
 item-menu-add-url =
     .label = Odnośnik do zasobu internetowego
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Pokaż online
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Uruchom jako funkcję async
 bibliography-window =
     .title = { -app-name } - Utwórz cytowanie/bibliografię
-bibliography-style-label = Styl cytowania:
-bibliography-locale-label = Język:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Wyświetl cytowania jako:
 bibliography-advancedOptions-label = Zaawansowane ustawienia
 bibliography-outputMode-label = Tryb wyjścia:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Edytuj bibliografię
 integration-quickFormatDialog-window =
     .title = { -app-name } - Szybkie formatowanie cytowania
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Podgląd
 integration-prefs-displayAs-label = Wyświetl cytowania jako:
 integration-prefs-footnotes =
     .label = Przypisy dolne
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Wybierz
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Strona internetowa
 file-type-image = Obraz
 file-type-pdf = PDF

@@ -1,9 +1,19 @@
-general-print = Spausdinti
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Įvesti
     }
+general-print = Spausdinti
 general-remove = Pašalinti
 general-add = Pridėti
 general-remind-me-later = Priminti vėliau
@@ -14,6 +24,8 @@ general-help = Žinynas
 general-tag = Gairė
 general-done = Atlikta
 general-view-troubleshooting-instructions = Peržiūrėti nesklandumų sprendimo instrukcijas
+citation-style-label = Citavimo stilius:
+language-label = Kalba:
 menu-file-show-in-finder =
     .label = Rodyti ieškyklėje
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Pervadinti rinkinį
 collections-menu-edit-saved-search =
     .label = Taisyti įsimintąją paiešką
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = Nuleisti žemyn
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Susieta rinkmena
 item-menu-add-url =
     .label = Tinklalapio nuoroda
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Atverti tinklalapį
 item-menu-option-view-online =
     .label = { view-online }
@@ -226,8 +244,8 @@ runJS-result =
 runJS-run-async = Vykdyti kaip nesinchronizuotą funkciją
 bibliography-window =
     .title = { -app-name } - Sukurti citatą / literatūros sąrašą
-bibliography-style-label = Citavimo stilius:
-bibliography-locale-label = Kalba:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Citavimo rodymo pavidalas:
 bibliography-advancedOptions-label = Kitos parinktys
 bibliography-outputMode-label = Išvedimo veiksena:
@@ -258,6 +276,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Keisti literatūros sąrašą
 integration-quickFormatDialog-window =
     .title = { -app-name } - Greitasis citatų formatavimas
+styleEditor-locatorType =
+    .aria-label = Ieškiklio tipas
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Peržiūra
 integration-prefs-displayAs-label = Citavimo rodymo pavidalas:
 integration-prefs-footnotes =
     .label = Išnaša
@@ -605,6 +632,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Pasirinkti
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Tinklalapis
 file-type-image = paveikslą
 file-type-pdf = PDF

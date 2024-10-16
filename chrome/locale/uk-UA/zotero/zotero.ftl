@@ -1,9 +1,19 @@
-general-print = Роздрукувати
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Роздрукувати
 general-remove = Видалити
 general-add = Додати
 general-remind-me-later = Remind Me Later
@@ -14,6 +24,8 @@ general-help = Допомога
 general-tag = Тег
 general-done = Готово
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+citation-style-label = Стиль цитування:
+language-label = Мова:
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Rename Collection
 collections-menu-edit-saved-search =
     .label = Edit Saved Search
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = Перемістити вниз
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Linked File
 item-menu-add-url =
     .label = Web Link
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Дивитись онлайн
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Run as async function
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = Стиль цитування:
-bibliography-locale-label = Мова:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = Розширені налаштування
 bibliography-outputMode-label = Режим вводу:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Preview
 integration-prefs-displayAs-label = Показати цитати як:
 integration-prefs-footnotes =
     .label = Виноски
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Webpage
 file-type-image = Зображення
 file-type-pdf = PDF

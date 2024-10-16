@@ -1,9 +1,19 @@
-general-print = Skriv ut
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Valg
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Skriv ut
 general-remove = Fjern
 general-add = Legg til
 general-remind-me-later = Minn meg på det senere
@@ -14,6 +24,8 @@ general-help = Hjelp
 general-tag = Emneord
 general-done = Ferdig
 general-view-troubleshooting-instructions = Se instruksjoner for feilsøking
+citation-style-label = Henvisningsstil:
+language-label = Språk:
 menu-file-show-in-finder =
     .label = Vis i Finder
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Gi samlingen nytt navn
 collections-menu-edit-saved-search =
     .label = Rediger lagret søk
+collections-menu-move-collection =
+    .label = Flytt til
+collections-menu-copy-collection =
+    .label = Kopier til
 item-creator-moveDown =
     .label = Flytt ned
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Lenket fil
 item-menu-add-url =
     .label = Nettlenke
+item-menu-change-parent-item =
+    .label = Endre overordnet element…
 view-online = Vis på nett
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Kjør som asynkron funksjon
 bibliography-window =
     .title = { -app-name } - Opprett henvisning/bibliografi
-bibliography-style-label = Henvisningsstil:
-bibliography-locale-label = Språk:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Vis henvisninger som:
 bibliography-advancedOptions-label = Avanserte valg
 bibliography-outputMode-label = Utdata modus:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Rediger bibliografi
 integration-quickFormatDialog-window =
     .title = { -app-name } - Hurtigformater henvisning
+styleEditor-locatorType =
+    .aria-label = Type oppslagsmotor
+styleEditor-locatorInput = Inndata for stedsindikator
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Redigeringsprogram for stiler
+styleEditor-preview =
+    .aria-label = Forhåndsvisning
 integration-prefs-displayAs-label = Vis henvisninger som:
 integration-prefs-footnotes =
     .label = Fotnoter
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Velg
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Konverter til enkeltstående markering
+           *[other] Konverter til enkeltstående markeringer
+        }
 file-type-webpage = Nettside
 file-type-image = Bilde
 file-type-pdf = PDF

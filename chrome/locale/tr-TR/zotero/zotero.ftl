@@ -1,9 +1,19 @@
-general-print = Yazdır
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Yazdır
 general-remove = Kaldır
 general-add = Ekle
 general-remind-me-later = Daha Sonra Hatırlat
@@ -14,6 +24,8 @@ general-help = Yardım
 general-tag = Etiket
 general-done = Tamam
 general-view-troubleshooting-instructions = Sorun Giderme Talimatlarını Göster
+citation-style-label = Alıntı Stili:
+language-label = Dil:
 menu-file-show-in-finder =
     .label = Finder'da Göster
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Dermeyi Yeniden Adlandır
 collections-menu-edit-saved-search =
     .label = Kaydedilen Aramayı Düzenle
+collections-menu-move-collection =
+    .label = Taşı
+collections-menu-copy-collection =
+    .label = Kopyala
 item-creator-moveDown =
     .label = Bir Aşağı Taşı
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Bağlantılı Dosya
 item-menu-add-url =
     .label = Web bağlantısı
+item-menu-change-parent-item =
+    .label = Ana Eseri Değiştir...
 view-online = Çevrimiçi Göster
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Asenkron fonksiyon olarak çalıştır
 bibliography-window =
     .title = { -app-name } - Alıntı/Kaynakça Yarat
-bibliography-style-label = Alıntı Stili:
-bibliography-locale-label = Dil:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Alıntıları böyle göster:
 bibliography-advancedOptions-label = Gelişmiş Seçenekler
 bibliography-outputMode-label = Çıktı Biçimi
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Kaynakça Düzenle
 integration-quickFormatDialog-window =
     .title = { -app-name } - Alıntıyı Çabuk Biçimle
+styleEditor-locatorType =
+    .aria-label = Yer bulucu türü
+styleEditor-locatorInput = Yer bulucu girdisi
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Stil Editörü
+styleEditor-preview =
+    .aria-label = Önizleme
 integration-prefs-displayAs-label = Alıntıları Böyle Göster:
 integration-prefs-footnotes =
     .label = Dipnot
@@ -308,10 +335,10 @@ publications-choose-license-text = Bir Creative Commons lisansı, eğer size uyg
 publications-choose-license-adaptations-prompt = Eserinizin uyarlamalarının paylaşılmasına izin veriyor musunuz?
 publications-choose-license-yes =
     .label = Evet
-    .accesskey = Y
+    .accesskey = E
 publications-choose-license-no =
     .label = Hayır
-    .accesskey = N
+    .accesskey = H
 publications-choose-license-sharealike =
     .label = Evet, başkaları da aynı şekilde paylaşacaksa
     .accesskey = S
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Seç
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Bağımsız Eke Dönüştür
+           *[other] Bağımsız Eklere Dönüştür
+        }
 file-type-webpage = Web sayfası
 file-type-image = Resim
 file-type-pdf = PDF

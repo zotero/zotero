@@ -1,9 +1,19 @@
-general-print = Tisknout
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Tisknout
 general-remove = Odstranit
 general-add = Přidat
 general-remind-me-later = Připomenout později
@@ -14,6 +24,8 @@ general-help = Pomoc
 general-tag = Štítek
 general-done = Hotovo
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+citation-style-label = Citační styl:
+language-label = Jazyk:
 menu-file-show-in-finder =
     .label = Zobrazit v hledači
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Přejmenovat kolekci
 collections-menu-edit-saved-search =
     .label = Editovat Uložené hledání
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = Posunout dolů
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Připojený soubot
 item-menu-add-url =
     .label = Webový odkaz
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Zobrazit online
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Run as async function
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = Citační styl:
-bibliography-locale-label = Jazyk:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = Pokročilé možnosti
 bibliography-outputMode-label = Výstupní režim:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Preview
 integration-prefs-displayAs-label = Zobrazit citaci jako:
 integration-prefs-footnotes =
     .label = Poznámky pod čarou
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Webpage
 file-type-image = Obrázek
 file-type-pdf = PDF

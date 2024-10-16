@@ -1,9 +1,19 @@
-general-print = Drucken
+general-key-control = Steuerung
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Befehlstaste
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Drucken
 general-remove = Entfernen
 general-add = Hinzufügen
 general-remind-me-later = Später erinnern
@@ -14,6 +24,8 @@ general-help = Hilfe
 general-tag = Tag
 general-done = Erledigt
 general-view-troubleshooting-instructions = Anleitung zur Problembehebung anzeigen
+citation-style-label = Zitierstil:
+language-label = Sprache:
 menu-file-show-in-finder =
     .label = In Finder anzeigen
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Sammlung umbenennen
 collections-menu-edit-saved-search =
     .label = Gespeicherte Suche bearbeiten
+collections-menu-move-collection =
+    .label = Verschieben nach
+collections-menu-copy-collection =
+    .label = Kopieren nach
 item-creator-moveDown =
     .label = Nach unten verschieben
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Verlinkte Datei
 item-menu-add-url =
     .label = Weblink
+item-menu-change-parent-item =
+    .label = Übergeordneten Eintrag ändern...
 view-online = Online anzeigen
 item-menu-option-view-online =
     .label = { view-online }
@@ -203,7 +221,7 @@ rtfScan-scan-page = Scanne Zitationen
 rtfScan-scanPage-description = { -app-name } scannt Ihr Dokument nach Zitationen. Bitte haben Sie Geduld.
 rtfScan-citations-page = Zitierte Einträge überprüfen
 rtfScan-citations-page-description = Bitte überprüfen Sie die Liste der erkannten Zitationen, um sicher zu stellen, dass { -app-name } die zusammengehörigen Einträge korrekt erkannt hat. Alle nicht zugeordneten oder uneindeutigen Zitationen müssen korrigiert werden, bevor Sie fortfahren.
-rtfScan-style-page = Dokumenten-Formatierung
+rtfScan-style-page = Dokument-Formatierung
 rtfScan-format-page = Formatiere Zitationen
 rtfScan-format-page-description = { -app-name } verarbeitet gerade Ihre RTF-Datei und formatiert sie. Bitte warten Sie.
 rtfScan-complete-page = RTF-Scan abgeschlossen
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Als async-Funktion ausführen
 bibliography-window =
     .title = { -app-name } - Zitation/Bibliographie erstellen
-bibliography-style-label = Zitierstil:
-bibliography-locale-label = Sprache:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Literaturangaben anzeigen als:
 bibliography-advancedOptions-label = Erweiterte Einstellungen
 bibliography-outputMode-label = Ausgabemodus:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Literaturverzeichnis bearbeiten
 integration-quickFormatDialog-window =
     .title = { -app-name } - Schnellformatierung Zitation
+styleEditor-locatorType =
+    .aria-label = Art der Fundstelle
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Zitierstil-Editor
+styleEditor-preview =
+    .aria-label = Vorschau
 integration-prefs-displayAs-label = Literaturangaben anzeigen als:
 integration-prefs-footnotes =
     .label = Fußnoten
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Auswählen
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Zu eigenständigem Anhang umwandeln
+           *[other] Zu eigenständigen Anhängen umwandeln
+        }
 file-type-webpage = Webseite
 file-type-image = Bild
 file-type-pdf = PDF

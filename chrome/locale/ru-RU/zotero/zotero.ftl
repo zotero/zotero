@@ -1,9 +1,19 @@
-general-print = Распечатать
+general-key-control = Control
+general-key-shift = Shift
+general-key-alt = Alt
+general-key-option = Option
+general-key-command = Command
+option-or-alt =
+    { PLATFORM() ->
+        [macos] { general-key-option }
+       *[other] { general-key-alt }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+general-print = Распечатать
 general-remove = Удалить
 general-add = Добавить
 general-remind-me-later = Напомнить позже
@@ -14,6 +24,8 @@ general-help = Справка
 general-tag = Тег
 general-done = Завершено
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+citation-style-label = Стиль цитирования:
+language-label = Язык:
 menu-file-show-in-finder =
     .label = Показать в файловом менеджере
 menu-file-show-file =
@@ -71,6 +83,10 @@ collections-menu-rename-collection =
     .label = Переименовать коллекцию
 collections-menu-edit-saved-search =
     .label = Редактировать сохраненный поиск
+collections-menu-move-collection =
+    .label = Move To
+collections-menu-copy-collection =
+    .label = Copy To
 item-creator-moveDown =
     .label = Переместить вниз
 item-creator-moveToTop =
@@ -105,6 +121,8 @@ item-menu-add-linked-file =
     .label = Связанные файлы
 item-menu-add-url =
     .label = Web-ссылка
+item-menu-change-parent-item =
+    .label = Change Parent Item…
 view-online = Просмотреть онлайн
 item-menu-option-view-online =
     .label = { view-online }
@@ -224,8 +242,8 @@ runJS-result =
 runJS-run-async = Run as async function
 bibliography-window =
     .title = { -app-name } - Create Citation/Bibliography
-bibliography-style-label = Стиль цитирования:
-bibliography-locale-label = Язык:
+bibliography-style-label = { citation-style-label }
+bibliography-locale-label = { language-label }
 bibliography-displayAs-label = Display citations as:
 bibliography-advancedOptions-label = Расширенные настройки
 bibliography-outputMode-label = Режим вывода:
@@ -256,6 +274,15 @@ integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+styleEditor-locatorType =
+    .aria-label = Locator type
+styleEditor-locatorInput = Locator input
+styleEditor-citationStyle = { citation-style-label }
+styleEditor-locale = { language-label }
+styleEditor-editor =
+    .aria-label = Style editor
+styleEditor-preview =
+    .aria-label = Preview
 integration-prefs-displayAs-label = Отобразить цитаты как:
 integration-prefs-footnotes =
     .label = Сноски
@@ -579,6 +606,12 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandaloneAttachment =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Attachment
+           *[other] Convert to Standalone Attachments
+        }
 file-type-webpage = Webpage
 file-type-image = Изображение
 file-type-pdf = PDF
