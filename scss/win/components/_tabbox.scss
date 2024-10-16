@@ -35,8 +35,6 @@ tabbox {
 				border-inline-end: 1px solid var(--fill-quinary);
 			}
 
-			@include focus-ring;
-
 			.tab-middle {
 				outline: none !important;
 				padding: 4px 11px 5px 11px;
@@ -53,6 +51,16 @@ tabbox {
 					padding: 4px 11px 5px 11px;
 					border-radius: 4px;
 				}
+			}
+		}
+
+		// focus-ring if tabbox is not marked as clicked (to avoid blinking)
+		&:not([clicked]) tab:focus-visible {
+			outline: none;
+			// outline should appear around hbox with rounded corners
+			hbox {
+				outline: var(--color-focus-outer-border) solid var(--width-focus-outer-border) !important;
+				z-index: 1;
 			}
 		}
 	}
