@@ -1046,10 +1046,10 @@
 	"pdfReader-a11yAnnotationSelected": {
 		"string": "{ type } selected."
 	},
-	"-pdfReader-a11yTextualAnnotationInstruction": {
+	"pdfReader-a11yTextualAnnotationInstruction": {
 		"string": "To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ number } to turn the search result into an annotation."
 	},
-	"-pdfReader-a11yAnnotationInstruction": {
+	"pdfReader-a11yAnnotationInstruction": {
 		"string": "To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ number }."
 	},
 	"pdfReader-toolbar-draw.aria-description": {
