@@ -581,6 +581,10 @@ class ReaderInstance {
 		return this._item.id;
 	}
 
+	get selectedAnnotationKeys() {
+		return Array.from(this._internalReader._state.selectedAnnotationIDs);
+	}
+
 	async updateTitle() {
 		let type = Zotero.Prefs.get('tabs.title.reader');
 		let item = Zotero.Items.get(this._item.id);

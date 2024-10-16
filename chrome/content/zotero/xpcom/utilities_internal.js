@@ -2542,6 +2542,52 @@ Zotero.Utilities.Internal = {
 		}
 		let clientY = rect.y + (anchorToBottom ? rect.height + 8 : 5);
 		return [clientX, clientY];
+	},
+
+	/**
+	 * Query the API to determine if the passed items all exist remotely.
+	 * If the client is not logged in, the items are assumed not to exist.
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @returns {Promise<Boolean>}
+	 */
+	async checkItemsExistRemotely(items) {
+		// Feed items can't exist remotely, so filter them out first
+		items = items.filter(item => !item.isFeedItem);
+		if (!items.length) {
+			return false;
+		}
+		let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+		if (!apiKey) {
+			return false;
+		}
+		let apiClient = Zotero.Sync.Runner.getAPIClient({ apiKey });
+		
+		// We need to query once per library, so group the items
+		let itemsByLibrary = new Map();
+		for (let item of items) {
+			if (itemsByLibrary.has(item.library)) {
+				itemsByLibrary.get(item.library).push(item);
+			}
+			else {
+				itemsByLibrary.set(item.library, [item]);
+			}
+		}
+		
+		for (let [library, libraryItems] of itemsByLibrary.entries()) {
+			let result = await apiClient.getVersions(
+				library.libraryType,
+				library.libraryTypeID,
+				'item',
+				{ itemKey: libraryItems.map(item => item.key).join(',') }
+			);
+			
+			// Doesn't matter what the versions are for our purposes, just that the items have at some point been synced
+			if (Object.keys(result.versions).length < libraryItems.length) {
+				return false;
+			}
+		}
+		return true;
 	}
 };
 
