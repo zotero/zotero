@@ -2431,9 +2431,10 @@ Zotero.Utilities.Internal = {
 		let nodeStack = targetNode ? [targetNode] : null;
 		let textContent = '';
 
-		// The title may theoretically contains ascii control characters.
-		// Inserting text with them as inner html (e.g. in tabBar.jsx) will throw an error.
-		// To avoid that, filter out control characters 0-31 and character 127 DEL.
+		// Inserting text with ASCII control character as innerHTML (e.g., in tabBar.jsx) can cause
+		// an error, so filter out control characters 0-31 and character 127 DEL
+		//
+		// https://forums.zotero.org/discussion/118779/special-characters-in-item-title-breaks-the-tab-bar
 		title = title.replace(/[\x00-\x1F\x7F]/g, '');
 
 		for (let token of title.split(/(<[^>]+>)/)) {
