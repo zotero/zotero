@@ -213,9 +213,3 @@ browser,
 		}
 	}
 }
-
-// show focusring only during keyboard navigation
-#tabs:not([clicked]) tab:focus-visible {
-	outline: none;
-	box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
-}

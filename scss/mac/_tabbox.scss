@@ -88,6 +88,16 @@ tabbox {
 				}
 			}
 		}
+
+		// focus-ring if tabbox is not marked as clicked (to avoid blinking)
+		&:not([clicked]) tab:focus-visible {
+			outline: none;
+			// box-shadow should appear around hbox with rounded corners
+			hbox {
+				box-shadow: 0 0 0 var(--width-focus-border) -moz-mac-focusring !important;
+				z-index: 1;
+			}
+		}
 	}
 	tabpanels {
 		appearance: none;
