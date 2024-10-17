@@ -74,6 +74,8 @@ menu-deletePermanently =
 
 menu-tools-plugins =
     .label = Plugins
+menu-tools-attachments-convert-embedded-note-to-child =
+    .label = Migrate Embedded Attachment Notes…
 
 main-window-command =
     .label = { -app-name }
