@@ -46,6 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		// doesn't handle it very well - it shows a context menu on the element
 		// in the middle of the window, whatever element that may be.
 		// Prevent/retarget these events (but not Ctrl-clicks).
+		var { getTargetElement, createContextMenuEvent } = ChromeUtils.importESModule("chrome://zotero/content/contextMenuUtils.sys.mjs");
 		let lastPreventedContextMenuTime = 0;
 		document.addEventListener('contextmenu', (event) => {
 			if (!(event.button === 2 && event.buttons === 0 && !event.ctrlKey)) {
@@ -56,45 +57,30 @@ window.addEventListener('DOMContentLoaded', () => {
 			event.stopImmediatePropagation();
 			event.preventDefault();
 			
+			let targetElement = getTargetElement(document);
+			// targetElement may be null here
+			if (targetElement && 'browsingContext' in targetElement) {
+				// Browser or iframe: let SequoiaContextMenuChild handle it
+				targetElement.browsingContext.currentWindowGlobal.getActor('SequoiaContextMenu')
+					.sendAsyncMessage('handleContextMenuEvent');
+				return;
+			}
+			
 			// We usually get three of these in a row - only act on the first
 			if (event.timeStamp - lastPreventedContextMenuTime < 50) {
 				return;
 			}
 			lastPreventedContextMenuTime = event.timeStamp;
 			
-			let targetElement = document.activeElement;
+			// If nothing is focused, we're done
 			if (!targetElement) {
 				return;
 			}
-			if (targetElement.hasAttribute('aria-activedescendant')) {
-				let activeDescendant = targetElement.querySelector(
-					'#' + CSS.escape(targetElement.getAttribute('aria-activedescendant'))
-				);
-				if (activeDescendant) {
-					targetElement = activeDescendant;
-				}
-			}
 			
-			let [clientX, clientY] = Zotero.Utilities.Internal.getContextMenuPosition(targetElement);
-			let screenX = window.mozInnerScreenX + clientX;
-			let screenY = window.mozInnerScreenY + clientY;
-			
+			let contextMenuEvent = createContextMenuEvent(targetElement);
 			// Run in the next tick, because otherwise our rate-limiting above
 			// prevents this from working on form fields (somehow)
-			setTimeout(() => {
-				targetElement.dispatchEvent(new PointerEvent('contextmenu', {
-					bubbles: true,
-					cancelable: true,
-					button: 2,
-					buttons: 2,
-					clientX,
-					clientY,
-					layerX: clientX, // Wrong, but nobody should ever use these
-					layerY: clientY,
-					screenX,
-					screenY,
-				}));
-			});
+			setTimeout(() => targetElement.dispatchEvent(contextMenuEvent));
 		}, { capture: true });
 		
 		// Make sure the Ctrl-Enter isn't handled by listeners further down in

@@ -63,3 +63,17 @@ ChromeUtils.registerWindowActor("ExternalLinkHandler", {
 	messageManagerGroups: ["feedAbstract", "basicViewer"]
 });
 
+// On macOS only, register the Ctrl-Enter handler actor
+// (No access to Zotero object here)
+if (AppConstants.platform === "macosx") {
+	ChromeUtils.registerWindowActor("SequoiaContextMenu", {
+		parent: {
+			moduleURI: "chrome://zotero/content/actors/SequoiaContextMenuParent.jsm",
+		},
+		child: {
+			moduleURI: "chrome://zotero/content/actors/SequoiaContextMenuChild.jsm",
+		},
+		allFrames: true,
+		includeChrome: true
+	});
+}
