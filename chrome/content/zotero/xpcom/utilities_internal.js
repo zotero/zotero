@@ -2431,6 +2431,11 @@ Zotero.Utilities.Internal = {
 		let nodeStack = targetNode ? [targetNode] : null;
 		let textContent = '';
 
+		// The title may theoretically contains ascii control characters.
+		// Inserting text with them as inner html (e.g. in tabBar.jsx) will throw an error.
+		// To avoid that, filter out control characters 0-31 and character 127 DEL.
+		title = title.replace(/[\x00-\x1F\x7F]/g, '');
+
 		for (let token of title.split(/(<[^>]+>)/)) {
 			if (this._titleMarkup.hasOwnProperty(token)) {
 				let markup = this._titleMarkup[token];
