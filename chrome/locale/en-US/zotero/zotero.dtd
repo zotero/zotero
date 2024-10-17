@@ -60,6 +60,7 @@
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
 <!ENTITY zotero.items.moreColumns.label					"More Columns">
 <!ENTITY zotero.items.restoreColumnOrder.label			"Restore Column Order">
+<!ENTITY zotero.items.moveColumn.label					"Move Column Back">
 
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
