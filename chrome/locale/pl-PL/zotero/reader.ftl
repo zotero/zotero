@@ -5,25 +5,25 @@ pdfReader-selectArea = Wybierz obszar
 pdfReader-draw = Rysuj
 pdfReader-highlightAnnotation = Podświetl adnotację
 pdfReader-underlineAnnotation = Podkreśl adnotację
-pdfReader-noteAnnotation = Note Annotation
-pdfReader-textAnnotation = Text Annotation
-pdfReader-imageAnnotation = Image Annotation
+pdfReader-noteAnnotation = Adnotacja notatką
+pdfReader-textAnnotation = Adnotacja tekstowa
+pdfReader-imageAnnotation = Adnotacja obrazem
 pdfReader-find-in-document = Znajdź w dokumencie
 pdfReader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
        *[other] { general-key-alt }
     }
-pdfReader-a11yMoveAnnotation = Use the arrow keys to move the annotation.
+pdfReader-a11yMoveAnnotation = Użyj klawiszy strzałek, aby przenieść adnotację.
 pdfReader-a11yEditTextAnnotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ pdfReader-move-annotation-start-key } and use the arrow keys.
-pdfReader-a11yResizeAnnotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
-pdfReader-a11yAnnotationPopupAppeared = Use Tab to navigate the annotation popup.
+pdfReader-a11yResizeAnnotation = Aby zmienić rozmiar adnotacji, przytrzymaj { general-key-shift } i użyj klawiszy strzałek.
+pdfReader-a11yAnnotationPopupAppeared = Użyj klawisza tabulacji, aby nawigować po dymkach adnotacji.
 pdfReader-a11yAnnotationCreated = { $type } created.
 pdfReader-a11yAnnotationSelected = { $type } selected.
-pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+pdfReader-a11yTextualAnnotationInstruction = Aby tworzyć adnotacje za pomocą klawiatury, najpierw użyj “{ pdfReader-find-in-document }”, aby znaleźć wyrażenie, a następnie wciśnij { general-key-control }-{ option-or-alt }-{ $number } aby zapisać wynik wyszukiwania do adnotacji.
 pdfReader-a11yAnnotationInstruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
 pdfReader-toolbar-draw =
-    .aria-description = This annotation type cannot be created via the keyboard.
+    .aria-description = Ten rodzaj adnotacji nie może być utworzony za pomocą klawiatury.
     .title = { pdfReader-draw }
 pdfReader-findInDocumentInput =
     .title = Znajdź

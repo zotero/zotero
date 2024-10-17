@@ -1,8 +1,8 @@
 general-key-control = Control
-general-key-shift = Shift
+general-key-shift = Mayús
 general-key-alt = Alt
-general-key-option = Option
-general-key-command = Command
+general-key-option = Opción
+general-key-command = Comando
 option-or-alt =
     { PLATFORM() ->
         [macos] { general-key-option }
@@ -84,9 +84,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Modificar la carpeta de búsqueda
 collections-menu-move-collection =
-    .label = Move To
+    .label = Mover a
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Copiar a
 item-creator-moveDown =
     .label = Bajar
 item-creator-moveToTop =
@@ -122,7 +122,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Enlace web
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Cambiar elemento principal...
 view-online = Ver en línea
 item-menu-option-view-online =
     .label = { view-online }
@@ -277,11 +277,11 @@ integration-quickFormatDialog-window =
     .title = { -app-name } - Formato rápido de cita
 styleEditor-locatorType =
     .aria-label = Tipo de localizador
-styleEditor-locatorInput = Locator input
+styleEditor-locatorInput = Entrada del localizador
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = Editor de estilo
 styleEditor-preview =
     .aria-label = Previsualizar
 integration-prefs-displayAs-label = Mostrar citas como:
@@ -620,8 +620,9 @@ select-items-dialog =
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Convertir a archivo adjunto independiente
+            [many] Convertir a archivos adjuntos independientes
+           *[other] Convertir a archivos adjuntos independientes
         }
 file-type-webpage = Página web
 file-type-image = Imagen

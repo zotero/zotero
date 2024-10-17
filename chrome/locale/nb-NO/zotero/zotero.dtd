@@ -207,9 +207,9 @@
 <!ENTITY zotero.richText.superscript.label "Hevet skrift">
 <!ENTITY zotero.richText.subscript.label "Senket skrift">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Legg til markering">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Skjul alle markeringer">
-<!ENTITY zotero.annotate.toolbar.expand.label "Vis alle markeringer">
+<!ENTITY zotero.annotate.toolbar.add.label "Legg til kommentar">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Skjul alle kommentarer">
+<!ENTITY zotero.annotate.toolbar.expand.label "Vis alle kommentarene">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Merk tekst">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Fjern merking av tekst">
 
@@ -222,7 +222,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmerker kan bli delt mellom Word og LibreOffice, men kan forårsake feil dersom de blir endret ved en tilfeldighet og kan ikke settes inn i fotnoter.">
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatisk oppdater henvisninger">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Henvisninger som venter på å bli oppdatert er markert i dokumentet">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Henvisninger som venter på å bli oppdatert er uthevet i dokumentet">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Ved å slå av oppdateringer kan du gjøre innsetting av henvisninger raskere i store dokumenter. Klikk på Oppdater for å oppdatere henvisninger manuelt.">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Bruk MEDLINE forkortelser for tidsskrift">
@@ -302,9 +302,9 @@
 <!ENTITY zotero.attachLink.label.title "Tittel:">
 
 <!ENTITY zotero.context.addChildNote "Legg til notat til element">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Legg til notat til element fra markeringer">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Legg til notat til element fra kommentarer">
 <!ENTITY zotero.context.addStandaloneNote "Legg til enkeltstående notat">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Legg til enkeltstående notat fra markeringer">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Legg til enkeltstående notat fra kommentarer">
 <!ENTITY zotero.context.editInWindow "Rediger i separat vindu">
 
 <!ENTITY zotero.pdfReader.firstPage "Første side">
@@ -328,6 +328,6 @@
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidehøyde">
 <!ENTITY zotero.pdfReader.splitVertically "Del vertikalt">
 <!ENTITY zotero.pdfReader.splitHorizontally "Del horisontalt">
-<!ENTITY zotero.pdfReader.transferFromPDF "Importer markeringer…">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importer kommentarer…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Roter siden til venstre">
 <!ENTITY zotero.pdfReader.rotatePageRight "Roter siden til høyre">

@@ -5,27 +5,27 @@ pdfReader-selectArea = Seleccionar área
 pdfReader-draw = Dibujar
 pdfReader-highlightAnnotation = Resaltar anotación
 pdfReader-underlineAnnotation = Subrayar anotación
-pdfReader-noteAnnotation = Note Annotation
-pdfReader-textAnnotation = Text Annotation
-pdfReader-imageAnnotation = Image Annotation
-pdfReader-find-in-document = Buscar en documento
+pdfReader-noteAnnotation = Anotación de nota
+pdfReader-textAnnotation = Anotación de texto
+pdfReader-imageAnnotation = Anotación de imágenes
+pdfReader-find-in-document = Buscar en el documento
 pdfReader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
        *[other] { general-key-alt }
     }
-pdfReader-a11yMoveAnnotation = Use the arrow keys to move the annotation.
-pdfReader-a11yEditTextAnnotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ pdfReader-move-annotation-start-key } and use the arrow keys.
-pdfReader-a11yResizeAnnotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
-pdfReader-a11yAnnotationPopupAppeared = Use Tab to navigate the annotation popup.
-pdfReader-a11yAnnotationCreated = { $type } created.
-pdfReader-a11yAnnotationSelected = { $type } selected.
-pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
-pdfReader-a11yAnnotationInstruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
+pdfReader-a11yMoveAnnotation = Use las teclas de flecha para mover la anotación.
+pdfReader-a11yEditTextAnnotation = Para mover el final de la anotación de texto, mantenga pulsada { general-key-shift } y use las teclas de flecha izquierda/derecha. Para mover el inicio de la anotación, mantenga pulsado { general-key-shift }-{ pdfReader-move-annotation-start-key } y use las teclas de flecha.
+pdfReader-a11yResizeAnnotation = Para cambiar el tamaño de la anotación, mantenga pulsado  { general-key-shift } y use las teclas de flecha.
+pdfReader-a11yAnnotationPopupAppeared = Use el tabulador para navegar por la ventana emergente de anotaciones.
+pdfReader-a11yAnnotationCreated = { $type } creado.
+pdfReader-a11yAnnotationSelected = { $type } seleccionado.
+pdfReader-a11yTextualAnnotationInstruction = Para anotar texto mediante el teclado, use primero “{ pdfReader-find-in-document }” para localizar la frase y, a continuación, pulse { general-key-control }-{ option-or-alt }-{ $number } para convertir el resultado de la búsqueda en una anotación.
+pdfReader-a11yAnnotationInstruction = Para añadir esta anotación al documento, sitúese en el documento y pulse { general-key-control }-{ option-or-alt }-{ $number }.
 pdfReader-toolbar-draw =
-    .aria-description = This annotation type cannot be created via the keyboard.
+    .aria-description = Este tipo de anotación no puede crearse mediante el teclado.
     .title = { pdfReader-draw }
 pdfReader-findInDocumentInput =
     .title = Buscar
     .placeholder = { pdfReader-find-in-document }
-    .aria-description = To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
+    .aria-description = Para convertir un resultado de búsqueda en una anotación resaltada, pulse  { general-key-control }-{ option-or-alt }-1. Para convertir un resultado de búsqueda en una anotación subrayada, pulse { general-key-control }-{ option-or-alt }-2.

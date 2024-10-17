@@ -298,7 +298,7 @@ integration-prefs-bookmarks-formatNotice =
     }
 integration-prefs-automaticCitationUpdates =
     .label = Automatisk oppdater henvisninger
-    .tooltip = Henvisninger som venter på å bli oppdatert er markert i dokumentet
+    .tooltip = Henvisninger som venter på å bli oppdatert er uthevet i dokumentet
 integration-prefs-automaticCitationUpdates-description = Ved å slå av oppdateringer kan du gjøre innsetting av henvisninger raskere i store dokumenter. Klikk på Oppdater for å oppdatere henvisninger manuelt.
 integration-prefs-automaticJournalAbbeviations =
     .label = Bruk MEDLINE forkortelser for tidsskrift
@@ -378,7 +378,7 @@ pane-tags = Emneord
 pane-related = Relatert
 pane-attachment-info = Vedleggsinformasjon
 pane-attachment-preview = Forhåndsvisning
-pane-attachment-annotations = Markeringer
+pane-attachment-annotations = Kommentarer
 pane-header-attachment-associated =
     .label = Gi nytt navn til tilknyttet fil
 section-info =
@@ -396,8 +396,8 @@ section-attachment-preview =
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } markering
-           *[other] { $count } markeringer
+            [one] { $count } kommentar
+           *[other] { $count } kommentarer
         }
 section-notes =
     .label =
@@ -429,8 +429,8 @@ section-button-collapse =
     .label = Skjul { $section } seksjon
 annotations-count =
     { $count ->
-        [one] { $count } markering
-       *[other] { $count } markeringer
+        [one] { $count } kommentar
+       *[other] { $count } kommentarer
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -609,8 +609,8 @@ select-items-dialog =
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Konverter til enkeltstående markering
-           *[other] Konverter til enkeltstående markeringer
+            [one] Konverter til enkeltstående kommentar
+           *[other] Konverter til enkeltstående kommentarer
         }
 file-type-webpage = Nettside
 file-type-image = Bilde

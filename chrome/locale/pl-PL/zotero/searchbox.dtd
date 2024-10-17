@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.search.recursive.label "Szukaj w podkolekcjach">
 <!ENTITY zotero.search.noChildren "Wyświetl tylko elementy główne">
-<!ENTITY zotero.search.includeParentsAndChildren "Zawiera elementy główne i potomne pasujących elementów">
+<!ENTITY zotero.search.includeParentsAndChildren "Dołącz elementy główne i potomne pasujących elementów">
 
 <!ENTITY zotero.search.textModes.phrase "Fraza">
 <!ENTITY zotero.search.textModes.phraseBinary "Fraza (łącznie z plikami binarnymi)">
