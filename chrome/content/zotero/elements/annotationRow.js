@@ -93,17 +93,23 @@
 				}
 			}
 			
+			// Strip all html tags from comment and text for now until the algorithm for safe
+			// rendering of relevant html tags is carried over from the reader
+			let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+
 			if (this._annotation.annotationText) {
 				let text = document.createElement('div');
 				text.classList.add('quote');
-				text.textContent = this._annotation.annotationText;
+				let plainQuote = parserUtils.convertToPlainText(this._annotation.annotationText, Ci.nsIDocumentEncoder.OutputRaw, 0);
+				text.textContent = plainQuote;
 				this._body.append(text);
 			}
 			
 			if (this._annotation.annotationComment) {
 				let comment = document.createElement('div');
 				comment.classList.add('comment');
-				comment.textContent = this._annotation.annotationComment;
+				let plainComment = parserUtils.convertToPlainText(this._annotation.annotationComment, Ci.nsIDocumentEncoder.OutputRaw, 0);
+				comment.textContent = plainComment;
 				this._body.append(comment);
 			}
 			
@@ -112,6 +118,9 @@
 			this._tags.textContent = tags.map(tag => tag.tag).sort(Zotero.localeCompare).join(Zotero.getString('punctuation.comma') + ' ');
 			
 			this.style.setProperty('--annotation-color', this._annotation.annotationColor);
+			// A11y - make focusable + add screen reader's labels
+			this.setAttribute("tabindex", 0);
+			this.setAttribute("aria-label", this.annotation.getDisplayTitle());
 		}
 	}
 
