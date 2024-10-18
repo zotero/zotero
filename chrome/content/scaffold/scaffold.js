@@ -1197,7 +1197,7 @@ var Scaffold = new function () {
 	 */
 	function _selectItems(obj, itemList) {
 		var io = { dataIn: itemList, dataOut: null };
-		window.openDialog("chrome://zotero/content/ingester/selectitems.xhtml",
+		window.openDialog("chrome://scaffold/content/select.xhtml",
 			"_blank", "chrome,modal,centerscreen,resizable=yes", io);
 
 		return io.dataOut;

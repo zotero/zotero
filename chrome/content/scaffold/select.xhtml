@@ -27,13 +27,14 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/scaffold.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 <window xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	id="zotero-select-item-dialog"
 	class="zotero-dialog"
-	title="&zotero.selectitems.title;" width="400" height="330"
-	persist="width height screenX screenY"
+	title="&zotero.selectitems.title;"
+	persist="width height"
 	drawintitlebar-platforms="mac"
 	onload="Zotero_Ingester_Interface_SelectItems.init()">
 <dialog 
@@ -44,16 +45,15 @@
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/ingester/selectitems.js", this);
+		Services.scriptloader.loadSubScript("chrome://scaffold/content/select.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	</script>
 	
-	<vbox id="zotero-select-items-container" class="zotero-dialog" flex="1">
-		<caption label="&zotero.selectitems.intro.label;" id="zotero-selectitems-intro"/>
+	<vbox id="zotero-select-items-container" flex="1">
 		<box flex="1">
 			<richlistbox id="zotero-selectitems-links" flex="1"></richlistbox>
 		</box>
-		<hbox>
+		<hbox id="zotero-select-items-buttons">
 			<button label="Select All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll()"/>
 			<button label="Deselect All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll(true)"/>
 		</hbox>
