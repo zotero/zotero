@@ -724,3 +724,10 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-message = Older versions of { -app-name }, as well as certain plugins, may have set attachments’ titles based on their filenames unnecessarily. Starting with { -app-name } 7, newly added attachments are titled using an improved set of rules.
+    
+    Update selected attachments to use the new title format? Attachments with custom titles will not be affected.

@@ -3895,7 +3895,7 @@ Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
 };
 
 
-Zotero.Item.prototype.setAutoAttachmentTitle = function ({ ignoreAutoRenamePrefs } = {}) {
+Zotero.Item.prototype.setAutoAttachmentTitle = function ({ ignoreAutoRenamePrefs, forceFirstOfType } = {}) {
 	if (!this.isAttachment()) {
 		throw new Error("setAutoAttachmentTitle() can only be called on attachment items");
 	}
@@ -3905,8 +3905,10 @@ Zotero.Item.prototype.setAutoAttachmentTitle = function ({ ignoreAutoRenamePrefs
 	
 	// If this is the only attachment of its type on the parent item and the
 	// file is being renamed, give it a default title ("PDF", "Webpage", etc.)
-	let isFirstOfType = this.parentItemID
-		&& this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1;
+	let isFirstOfType = forceFirstOfType === undefined
+		? (this.parentItemID
+			&& this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1)
+		: forceFirstOfType;
 	let isBeingRenamed = ignoreAutoRenamePrefs || Zotero.Attachments.shouldAutoRenameAttachment(this);
 	if (isFirstOfType && isBeingRenamed) {
 		let defaultTitle = this._getDefaultTitleForAttachmentContentType();
