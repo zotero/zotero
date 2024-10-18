@@ -24,6 +24,12 @@
 */
 
 
+var PluginAPIBase;
+if (typeof PluginAPIBase === "undefined") {
+	PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/modules/pluginAPIBase.mjs").PluginAPIBase;
+}
+
+
 /**
  * @typedef SectionIcon
  * @type {object}
@@ -131,108 +137,98 @@
  */
 
 
-class ItemPaneManager {
-	_customSections = {};
-
-	_lastUpdateTime = 0;
-
-	/**
-	 * Register a custom section in item pane. All registered sections must be valid, and must have a unique paneID.
-	 * @param {ItemDetailsSectionOptions} options - section data
-	 * @returns {string | false} - The paneID or false if no section were added
-	 */
-	registerSection(options) {
-		let registeredID = this._addSection(options);
-		if (!registeredID) {
-			return false;
-		}
-		this._addPluginShutdownObserver();
-		this._notifyItemPane();
-		return registeredID;
-	}
-
-	/**
-	 * Unregister a custom column.
-	 * @param {string} paneID - The paneID of the section(s) to unregister
-	 * @returns {boolean} true if the column(s) are unregistered
-	 */
-	unregisterSection(paneID) {
-		const success = this._removeSection(paneID);
-		if (!success) {
-			return false;
-		}
-		this._notifyItemPane();
-		return true;
-	}
-
-	getUpdateTime() {
-		return this._lastUpdateTime;
-	}
-
-	/**
-	 * @returns {ItemDetailsSectionOptions[]}
-	 */
-	getCustomSections() {
-		return Object.values(this._customSections).map(opt => Object.assign({}, opt));
-	}
-
-	/**
-	 * @param {ItemDetailsSectionOptions} options
-	 * @returns {string | false}
-	 */
-	_addSection(options) {
-		options = Object.assign({}, options);
-		options.paneID = this._namespacedDataKey(options);
-		if (!this._validateSectionOptions(options)) {
-			return false;
-		}
-		this._customSections[options.paneID] = options;
-		return options.paneID;
-	}
-
-	_removeSection(paneID) {
-		// If any check fails, return check results and do not remove any section
-		if (!this._customSections[paneID]) {
-			Zotero.warn(`ItemPaneManager: Can't remove unknown section '${paneID}'`);
-			return false;
-		}
-		delete this._customSections[paneID];
-		return true;
-	}
-
-	/**
-	 * @param {ItemDetailsSectionOptions} options
-	 * @returns {boolean}
-	 */
-	_validateSectionOptions(options) {
-		let requiredParamsType = {
-			paneID: "string",
-			pluginID: "string",
-			header: (val) => {
-				if (typeof val != "object") {
-					return "ItemPaneManager: 'header' must be object";
-				}
-				if (!val.l10nID || typeof val.l10nID != "string") {
-					return "ItemPaneManager: header.l10nID must be a non-empty string";
-				}
-				if (!val.icon || typeof val.icon != "string") {
-					return "ItemPaneManager: header.icon must be a non-empty string";
-				}
-				return true;
-			},
-			sidenav: (val) => {
-				if (typeof val != "object") {
-					return "ItemPaneManager: 'sidenav' must be object";
-				}
-				if (!val.l10nID || typeof val.l10nID != "string") {
-					return "ItemPaneManager: sidenav.l10nID must be a non-empty string";
-				}
-				if (!val.icon || typeof val.icon != "string") {
-					return "ItemPaneManager: sidenav.icon must be a non-empty string";
-				}
-				return true;
+class ItemPaneSectionManagerInternal extends PluginAPIBase {
+	constructor() {
+		super();
+		this.config = {
+			APIName: "ItemPaneSectionAPI",
+			mainKeyName: "paneID",
+			notifyType: "itempane",
+			optionTypeDefinition: {
+				paneID: "string",
+				pluginID: "string",
+				bodyXHTML: {
+					type: "string",
+					optional: true,
+				},
+				onInit: {
+					type: "function",
+					optional: true,
+				},
+				onDestroy: {
+					type: "function",
+					optional: true,
+				},
+				onItemChange: {
+					type: "function",
+					optional: true,
+				},
+				onRender: "function",
+				onAsyncRender: {
+					type: "function",
+					optional: true,
+				},
+				onToggle: {
+					type: "function",
+					optional: true,
+				},
+				header: {
+					type: "object",
+					children: {
+						l10nID: "string",
+						l10nArgs: {
+							type: "string",
+							optional: true,
+						},
+						icon: "string",
+						darkIcon: {
+							type: "string",
+							optional: true,
+						},
+					}
+				},
+				sidenav: {
+					type: "object",
+					children: {
+						l10nID: "string",
+						l10nArgs: {
+							type: "string",
+							optional: true,
+						},
+						icon: "string",
+						darkIcon: {
+							type: "string",
+							optional: true,
+						},
+					}
+				},
+				sectionButtons: {
+					type: "array",
+					optional: true,
+					children: {
+						type: "string",
+						icon: "string",
+						darkIcon: {
+							type: "string",
+							optional: true,
+						},
+						l10nID: {
+							type: "string",
+							optional: true,
+						},
+						onClick: "function",
+					}
+				},
 			},
 		};
+	}
+
+	_validate(option) {
+		let result = super._validate(option);
+		if (!result) {
+			return false;
+		}
+
 		// Keep in sync with itemDetails.js
 		let builtInPaneIDs = [
 			"info",
@@ -245,94 +241,108 @@ class ItemPaneManager {
 			"tags",
 			"related"
 		];
-		for (let key of Object.keys(requiredParamsType)) {
-			let val = options[key];
-			if (!val) {
-				Zotero.warn(`ItemPaneManager: Section options must have ${key}`);
-				return false;
-			}
-			let requiredType = requiredParamsType[key];
-			if (typeof requiredType == "string" && typeof val != requiredType) {
-				Zotero.warn(`ItemPaneManager: Section option '${key}' must be ${requiredType}, got ${typeof val}`);
-				return false;
-			}
-			if (typeof requiredType == "function") {
-				let result = requiredType(val);
-				if (result !== true) {
-					Zotero.warn(result);
-					return false;
-				}
-			}
-		}
-		if (builtInPaneIDs.includes(options.paneID)) {
-			Zotero.warn(`ItemPaneManager: 'paneID' must not conflict with built-in paneID, got ${options.paneID}`);
+
+		let mainKey = this._getOptionMainKey(option);
+		if (builtInPaneIDs.includes(mainKey)) {
+			this._log(`'paneID' must not conflict with built-in paneID, got ${mainKey}`, "warn");
 			return false;
 		}
-		if (this._customSections[options.paneID]) {
-			Zotero.warn(`ItemPaneManager: 'paneID' must be unique, got ${options.paneID}`);
-			return false;
-		}
-		
 		return true;
 	}
+}
 
-	/**
-	 * Make sure the dataKey is namespaced with the plugin ID
-	 * @param {ItemDetailsSectionOptions} options
-	 * @returns {string}
-	 */
-	_namespacedDataKey(options) {
-		if (options.pluginID && options.paneID) {
-			// Make sure the return value is valid as class name or element id
-			return `${options.pluginID}-${options.paneID}`.replace(/[^a-zA-Z0-9-_]/g, "-");
-		}
-		return options.paneID;
-	}
 
-	async _notifyItemPane() {
-		this._lastUpdateTime = new Date().getTime();
-		await Zotero.DB.executeTransaction(async function () {
-			Zotero.Notifier.queue(
-				'refresh',
-				'itempane',
-				[],
-				{},
-			);
-		});
-	}
-
-	/**
-	 * Unregister all columns registered by a plugin
-	 * @param {string} pluginID - Plugin ID
-	 */
-	async _unregisterSectionByPluginID(pluginID) {
-		let paneIDs = Object.keys(this._customSections).filter(id => this._customSections[id].pluginID == pluginID);
-		if (paneIDs.length === 0) {
-			return;
-		}
-		// Remove the columns one by one
-		// This is to ensure that the columns are removed and not interrupted by any non-existing columns
-		paneIDs.forEach(id => this._removeSection(id));
-		Zotero.debug(`ItemPaneManager: Section for plugin ${pluginID} unregistered due to shutdown`);
-		await this._notifyItemPane();
-	}
-
-	/**
-	 * Ensure that the shutdown observer is added
-	 * @returns {void}
-	 */
-	_addPluginShutdownObserver() {
-		if (this._observerAdded) {
-			return;
-		}
-
-		Zotero.Plugins.addObserver({
-			shutdown: ({ id: pluginID }) => {
-				this._unregisterSectionByPluginID(pluginID);
-			}
-		});
-		this._observerAdded = true;
+class ItemPaneInfoRowManagerInternal extends PluginAPIBase {
+	constructor() {
+		super();
+		this.config = {
+			APIName: "ItemPaneInfoRowAPI",
+			mainKeyName: "rowID",
+			notifyType: "infobox",
+			optionTypeDefinition: {
+				rowID: "string",
+				pluginID: "string",
+				label: {
+					type: "object",
+					children: {
+						l10nID: "string",
+					}
+				},
+				position: {
+					type: "string",
+					optional: true,
+					checkHook: (val) => {
+						if (typeof val !== "undefined"
+							&& !["start", "afterCreators", "end"].includes(val)) {
+							return `"position" must be "start", "afterCreators", or "end", got ${val}`;
+						}
+						return true;
+					}
+				},
+				multiline: {
+					type: "boolean",
+					optional: true,
+				},
+				nowrap: {
+					type: "boolean",
+					optional: true,
+				},
+				editable: {
+					type: "boolean",
+					optional: true,
+				},
+				onGetData: "function",
+				onSetData: {
+					type: "function",
+					optional: true,
+				},
+				onItemChange: {
+					type: "function",
+					optional: true,
+				},
+			},
+		};
 	}
 }
+
+
+class ItemPaneManager {
+	_sectionManager = new ItemPaneSectionManagerInternal();
+
+	_infoRowManager = new ItemPaneInfoRowManagerInternal();
+
+	registerSection(options) {
+		return this._sectionManager.register(options);
+	}
+
+	unregisterSection(paneID) {
+		return this._sectionManager.unregister(paneID);
+	}
+
+	get customSectionData() {
+		return this._sectionManager.data;
+	}
+
+	registerInfoRow(options) {
+		return this._infoRowManager.register(options);
+	}
+
+	unregisterInfoRow(rowID) {
+		return this._infoRowManager.unregister(rowID);
+	}
+
+	get customInfoRowData() {
+		return this._infoRowManager.data;
+	}
+
+	getInfoRowHook(rowID, type) {
+		let option = this._infoRowManager._optionsCache[rowID];
+		if (!option) {
+			return undefined;
+		}
+		return option[type];
+	}
+}
+
 
 Zotero.ItemPaneManager = new ItemPaneManager();

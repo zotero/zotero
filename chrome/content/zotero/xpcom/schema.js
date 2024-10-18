@@ -852,7 +852,7 @@ Zotero.Schema = new function(){
 			var enumerator = Services.wm.getEnumerator("navigator:browser");
 			while (enumerator.hasMoreElements()) {
 				let win = enumerator.getNext();
-				//win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
+				//win.document.getElementById('zotero-editpane-info-box').buildItemTypeMenu();
 			}
 		});
 	}
