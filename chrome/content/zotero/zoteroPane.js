@@ -5158,7 +5158,7 @@ var ZoteroPane = new function()
 		let canBeMovedOutOfParent = !selectedItems.some(item => item.isWebAttachment() && !item.isPDFAttachment() && !item.isEPUBAttachment());
 		// Add a button to the dialog to make items standalone, if applicable
 		if (canBeMovedOutOfParent) {
-			// Determing which label to show. "Convert to standalone attachment(s)/note(s)"
+			// Determine which label to show. "Convert to standalone attachment(s)/note(s)"
 			let allNotes = selectedItems.every(item => item.isNote());
 			let allAttachments = selectedItems.every(item => item.isAttachment());
 			let l10nId = `select-items-convertToStandalone${allNotes ? "Note" : ""}${allAttachments ? "Attachment" : ""}`;
