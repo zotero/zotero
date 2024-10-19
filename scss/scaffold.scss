@@ -34,6 +34,17 @@ $scaffold-toolbarbutton-icons: (
 	@include contain-richlistbox;
 }
 
+#zotero-select-item-dialog {
+	max-width: 400px;
+	max-height: 330px;
+	@include contain-richlistbox;
+}
+
+// Prevent contain-richlistbox from squishing the buttons
+#zotero-select-items-buttons {
+	flex-shrink: 0;
+}
+
 .menubar-container {
 	display: flex;
 	background: var(--material-sidepane);
