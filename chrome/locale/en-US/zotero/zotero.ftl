@@ -692,18 +692,17 @@ find-pdf-files-added = { $count ->
 
 select-items-dialog =
     .buttonlabelaccept = Select
-convert-to-standalone = Convert to Standalone
 select-items-convertToStandalone =
-    .label = { convert-to-standalone }
+    .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label = { $count ->
-        [one] { convert-to-standalone } Attachment
-        *[other] { convert-to-standalone } Attachments
+        [one] Convert to Standalone Attachment
+        *[other] Convert to Standalone Attachments
 }
 select-items-convertToStandaloneNote =
     .label = { $count ->
-        [one] { convert-to-standalone } Note
-        *[other] { convert-to-standalone } Notes
+        [one] Convert to Standalone Note
+        *[other] Convert to Standalone Notes
 }
 
 file-type-webpage = Webpage
