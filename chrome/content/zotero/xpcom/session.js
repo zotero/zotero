@@ -64,13 +64,22 @@ Zotero.Session = new function () {
 			// though if it was triggered by closing a window, ZoteroPane might
 			// be already destroyed at the time
 			let panes = Zotero.getZoteroPanes().map(x => x.getState());
-			let readers = Zotero.Reader.getWindowStates();
-			if (panes.length) {
-				_state.windows = [...readers, ...panes];
+			if (Zotero.Prefs.get('restoreState')) {
+				let readers = Zotero.Reader.getWindowStates();
+				let notes = Zotero.Notes.getWindows().map((win) => {
+					return { type: "note", ...win.arguments[0] };
+				});
+				if (panes.length) {
+					_state.windows = [...readers, ...panes, ...notes];
+				}
+				else if (readers.length || notes.length) {
+					_state.windows = _state.windows.filter(x => x.type != 'reader' && x.type != 'note');
+					_state.windows = [..._state.windows, ...readers, ...notes];
+				}
 			}
-			else if (readers.length) {
-				_state.windows = _state.windows.filter(x => x.type != 'reader');
-				_state.windows = [..._state.windows, ...readers];
+			else {
+				// If restoreState preference is false, save nothing from this session
+				_state = { windows: [] };
 			}
 			let sessionFile = OS.Path.join(Zotero.Profile.dir, SESSION_FILE_NAME);
 			await Zotero.File.putContentsAsync(sessionFile, JSON.stringify(_state));

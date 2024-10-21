@@ -67,6 +67,7 @@ async function onLoad() {
 	
 	noteEditor.focus();
 	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item', 'noteWindow');
+	Zotero.Session.debounceSave();
 }
 
 // If there's an error saving a note, close the window and crash the app
@@ -83,6 +84,7 @@ window.onEditorError = function () {
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
 	noteEditor.saveSync();
+	Zotero.Session.debounceSave();
 }
 
 var NotifyCallback = {

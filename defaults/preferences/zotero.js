@@ -48,6 +48,7 @@ pref("extensions.zotero.firstRunGuidance", true);
 pref("extensions.zotero.firstRunGuidanceShown.z7Banner", true);
 pref("extensions.zotero.showConnectorVersionWarning", true);
 pref("extensions.zotero.reopenPanesOnRestart", true);
+pref("extensions.zotero.restoreState", true);
 
 pref("extensions.zotero.groups.copyChildLinks", true);
 pref("extensions.zotero.groups.copyChildFileAttachments", true);
