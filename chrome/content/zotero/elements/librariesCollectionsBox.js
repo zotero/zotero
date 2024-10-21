@@ -35,7 +35,7 @@ import { getCSSIcon } from 'components/icons';
 			</collapsible-section>
 			
 			<popupset>
-				<menupopup class="add-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
+				<menupopup class="add-popup" onpopupshowing="ZoteroPane_Local.buildAddItemToCollectionMenu(event)">
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
 					<menuseparator/>
 				</menupopup>
