@@ -30,10 +30,10 @@ pdfReader-a11yAnnotationSelected = { $type } selected.
 
 pdfReader-toolbar-highlight =
     .aria-description = { -pdfReader-a11yTextualAnnotationInstruction(number: "1")  }
-    .title = { pdfReader-underlineText }
+    .title = { pdfReader-highlightText }
 pdfReader-toolbar-underline =
     .aria-description = { -pdfReader-a11yTextualAnnotationInstruction(number: "2")  }
-    .title = { pdfReader-highlightText }
+    .title = { pdfReader-underlineText }
 pdfReader-toolbar-note =
     .aria-description = { -pdfReader-a11yAnnotationInstruction(number: "3")  }
     .title = { pdfReader-noteAnnotation }
