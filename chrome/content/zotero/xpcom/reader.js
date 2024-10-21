@@ -1235,7 +1235,7 @@ class ReaderWindow extends ReaderInstance {
 	}
 
 	getSecondViewState() {
-		let { splitSize, splitType, secondaryViewState } = this._state;
+		let { splitSize, splitType, secondaryViewState } = this._internalReader?._state || {};
 		if (!secondaryViewState) return undefined;
 		let secondView = { ...secondaryViewState, splitSize, splitType };
 		return JSON.parse(JSON.stringify(secondView));
