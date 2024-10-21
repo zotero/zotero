@@ -444,6 +444,24 @@ Zotero.Notes = new function() {
 		await item.saveTx({ skipDateModifiedUpdate: true });
 		return true;
 	};
+
+	/**
+	 * Find and return all opened note windows. If itemID is provided, only return the
+	 * window for the specified note.
+	 * @param {Zotero.Item.id} itemID - optional id of a note
+	 * @return {[window]} - array of zotero:note windows
+	 */
+	this.getWindows = function (itemID = null) {
+		var e = Services.wm.getEnumerator('zotero:note');
+		var noteWindows = [];
+		while (e.hasMoreElements()) {
+			var w = e.getNext();
+			if (!itemID || w.winName == `zotero-note-${itemID}`) {
+				noteWindows.push(w);
+			}
+		}
+		return noteWindows;
+	};
 };
 
 if (typeof process === 'object' && process + '' === '[object process]') {
