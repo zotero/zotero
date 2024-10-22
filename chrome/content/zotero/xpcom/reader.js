@@ -1557,6 +1557,7 @@ class ReaderPreview extends ReaderInstance {
 
 	updatePDFAttr = () => {
 		this._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfViewer.currentScaleValue = 'page-height';
+		this._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfViewer.scrollMode = 3;
 	};
 
 	getPageWidthHeightRatio() {
