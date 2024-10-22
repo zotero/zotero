@@ -40,15 +40,6 @@ async function getFTL() {
 		}
 
 		for (let sourceFileBaseName of sourceFileBaseNames) {
-			const ftlFilePath = join(getLocaleDir(locale), sourceFileBaseName + '.ftl');
-			let jsonFromLocalFTL = {};
-			try {
-				const ftl = await fs.readFile(ftlFilePath, 'utf8');
-				jsonFromLocalFTL = ftlToJSON(ftl);
-			}
-			catch (e) {
-				// no local .ftl file
-			}
 			let baseFTL;
 			let jsonFromEnUSFTL = {};
 
@@ -61,8 +52,7 @@ async function getFTL() {
 				throw new Error(`No en-US .ftl file for ${sourceFileBaseName}.ftl`);
 			}
 
-			const mergedSourceJSON = { ...jsonFromEnUSFTL, ...jsonFromLocalFTL };
-			const sourceKeys = Object.keys(mergedSourceJSON);
+			const sourceKeys = Object.keys(jsonFromEnUSFTL);
 			const translated = new Map();
 
 			for (let key of sourceKeys) {
@@ -71,7 +61,7 @@ async function getFTL() {
 					translated.set(key, jsonFromTransifex[key]);
 				}
 				else {
-					translated.set(key, mergedSourceJSON[key]);
+					translated.set(key, jsonFromEnUSFTL[key]);
 				}
 			}
 
