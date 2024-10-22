@@ -1,4 +1,8 @@
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', (event) => {
+	if (event.currentTarget !== event.target) {
+		return;
+	}
+	
 	// Don't need to depend on Zotero object here
 	let isWin = AppConstants.platform == 'win';
 	let isMac = AppConstants.platform == 'macosx';
