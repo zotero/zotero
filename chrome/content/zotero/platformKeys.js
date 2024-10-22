@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', (event) => {
 	if (event.currentTarget !== event.target) {
 		return;
 	}
