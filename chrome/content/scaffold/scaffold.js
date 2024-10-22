@@ -942,13 +942,6 @@ var Scaffold = new function () {
 				}
 			}
 		}, true);
-		// On Escape, focus the selected tab. Use non-capturing listener to not
-		// do anything on Escape events handled by the editor (e.g. to dismiss autocomplete popup)
-		doc.addEventListener("keydown", (event) => {
-			if (event.key == "Escape") {
-				tabbox.selectedTab.focus();
-			}
-		});
 	};
 
 
