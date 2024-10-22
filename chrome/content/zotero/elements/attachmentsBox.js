@@ -139,9 +139,22 @@
 		}
 
 		notify(action, type, ids) {
-			if (!(action === 'add' || action === 'modify' || action === 'refresh' || action === 'delete')) {
+			if (!['add', 'modify', 'refresh', 'delete', 'trash'].includes(action)) {
 				return;
 			}
+
+			// Reset rendered flags when the item or its attachments are modified
+			if (this._syncRenderDependencies) {
+				let renderedItem = Zotero.Items.get(this._syncRenderDependencies[1]);
+				if (renderedItem
+					// Only care about regular items
+					&& renderedItem.isRegularItem()
+					// Check if the item or its attachments are modified
+					&& [renderedItem.id, ...renderedItem.getAttachments()].some(id => ids.includes(id))) {
+					this._resetRenderedFlags();
+				}
+			}
+
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
