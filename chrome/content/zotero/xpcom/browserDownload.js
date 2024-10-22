@@ -28,7 +28,7 @@ const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrow
 Zotero.BrowserDownload = {
 	HANDLED_URLS: {
 		'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html': "html",
-		'://www.sciencedirect.com': ".challenge-form"
+		'://www.sciencedirect.com': "#challenge-form"
 	},
 
 	/**
