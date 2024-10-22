@@ -2053,7 +2053,7 @@ Zotero.DragDrop = {
 			if (dt.types.contains('application/x-moz-file')) {
 				dragData.dataType = 'application/x-moz-file';
 				var files = [];
-				for (var i=0; i<len; i++) {
+				for (var i = 0; i < len; i++) {
 					var file = dt.mozGetDataAt("application/x-moz-file", i);
 					if (!file) {
 						continue;
@@ -2068,15 +2068,11 @@ Zotero.DragDrop = {
 				dragData.data = files;
 			}
 			// This isn't an else because on Linux a link drag contains an empty application/x-moz-file too
-			if (!dragData.data || !dragData.data.length) {
-				if (dt.types.contains('text/x-moz-url')) {
-					dragData.dataType = 'text/x-moz-url';
-					var urls = [];
-					for (var i=0; i<len; i++) {
-						var url = dt.getData("text/x-moz-url").split("\n")[0];
-						urls.push(url);
-					}
-					dragData.data = urls;
+			if ((!dragData.data || !dragData.data.length) && dt.types.contains('text/x-moz-url')) {
+				let uri = Services.io.newURI(dt.getData('text/x-moz-url').split("\n")[0]);
+				if (uri.schemeIs('file')) {
+					dragData.dataType = 'application/x-moz-file';
+					dragData.data = [uri.QueryInterface(Ci.nsIFileURL).file];
 				}
 			}
 		}
