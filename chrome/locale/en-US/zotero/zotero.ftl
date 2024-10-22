@@ -83,6 +83,8 @@ menu-view-columns-move-right =
 
 main-window-command =
     .label = { -app-name }
+main-window-key =
+    .key = L
 
 zotero-toolbar-tabs-menu =
     .tooltiptext = List all tabs
