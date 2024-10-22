@@ -82,3 +82,6 @@ preferences-advanced-server-enable-and-restart =
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
+
+preferences-miscellaneous-restore-state =
+    .label = Reopen windows and tabs on restart

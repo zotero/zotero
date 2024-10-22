@@ -1234,6 +1234,13 @@ class ReaderWindow extends ReaderInstance {
 		this._open({ state: options.state, location: options.location, secondViewState: options.secondViewState });
 	}
 
+	getSecondViewState() {
+		let { splitSize, splitType, secondaryViewState } = this._internalReader?._state || {};
+		if (!secondaryViewState) return undefined;
+		let secondView = { ...secondaryViewState, splitSize, splitType };
+		return JSON.parse(JSON.stringify(secondView));
+	}
+
 	_switchReaderSubtype(subtype) {
 		// Do the same as in standalone.js
 		this._window.document.querySelectorAll(
@@ -1678,7 +1685,7 @@ class Reader {
 		await Zotero.uiReadyPromise;
 		Zotero.Session.state.windows
 			.filter(x => x.type == 'reader' && Zotero.Items.exists(x.itemID))
-			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true, secondViewState: x.secondViewState }));
+			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true, secondViewState: x.secondViewState, allowDuplicate: true }));
 	}
 	
 	_loadSidebarState() {

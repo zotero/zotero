@@ -654,6 +654,21 @@ var ZoteroPane = new function()
 			if (state) {
 				Zotero_Tabs.restoreState(state.tabs);
 			}
+			// Reopen note windows
+			(async () => {
+				let openedNoteWindows = Zotero.Session.state.windows.filter(x => x.type == 'note');
+				for (let { itemID, collectionID, parentItemKey } of openedNoteWindows) {
+					// Wait for the item to be loaded
+					await Zotero.Items.getAsync(itemID);
+					// Wait for the collectionTree to be loaded, since this.canEdit() used in openNoteWindow relies on it.
+					let waitCount = 0;
+					while (!ZoteroPane.collectionsView.getRow(ZoteroPane.collectionsView.selection.focused) && waitCount < 100) {
+						await Zotero.Promise.delay(100);
+						waitCount += 1;
+					}
+					ZoteroPane.openNoteWindow(itemID, collectionID, parentItemKey);
+				}
+			})();
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -4454,9 +4469,9 @@ var ZoteroPane = new function()
 		var name = null;
 		
 		if (itemID) {
-			let w = this.findNoteWindow(itemID);
-			if (w) {
-				w.focus();
+			let w = Zotero.Notes.getWindows(itemID);
+			if (w.length) {
+				w[0].focus();
 				return;
 			}
 			
@@ -4471,18 +4486,6 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/note.xhtml', name, 'chrome,resizable,centerscreen,dialog=false', io);
 	}
 	
-	
-	this.findNoteWindow = function (itemID) {
-		var name = 'zotero-note-' + itemID;
-		var wm = Services.wm;
-		var e = wm.getEnumerator('zotero:note');
-		while (e.hasMoreElements()) {
-			var w = e.getNext();
-			if (w.name == name) {
-				return w;
-			}
-		}
-	};
 	
 	
 	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
