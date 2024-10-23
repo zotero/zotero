@@ -119,7 +119,7 @@ class ItemTreeMenuBar extends XULElement {
 			});
 		}
 		if (!Zotero.isMac) {
-			// On windows and linux, display and focus menubar on Alt keypress
+			// On Windows and Linux, display and focus menubar on Alt keypress
 			document.addEventListener("keydown", (event) => {
 				if (event.key == "Alt") {
 					this.hidden = !this.hidden;
