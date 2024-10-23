@@ -2676,23 +2676,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		menupopup.appendChild(sep);
 
 		//
-		// Restore Default Column Order
-		//
-		let menuitem = document.createXULElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
-		menuitem.setAttribute('anonid', prefix + 'restore-order');
-		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
-		menupopup.appendChild(menuitem);
-
-
-		sep = document.createXULElement('menuseparator');
-		menupopup.appendChild(sep);
-
-		//
 		// Move Column Back
 		//
 		let moveColumnMenu = document.createXULElement('menu');
-		moveColumnMenu.setAttribute('label', Zotero.getString('zotero.items.moveColumn.label'));
+		document.l10n.setAttributes(moveColumnMenu, `menu-view-columns-move-${Zotero.rtl ? "right" : "left"}`);
 		moveColumnMenu.setAttribute('anonid', prefix + 'move-column');
 		let moveColumnPopup = document.createXULElement('menupopup');
 		moveColumnPopup.setAttribute('anonid', prefix + 'move-column-popup');
@@ -2710,7 +2697,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				continue;
 			}
 			let label = formatColumnName(column);
-			menuitem = document.createXULElement('menuitem');
+			let menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', label);
 			menuitem.setAttribute('colindex', i);
 			// Swap the column with its previous visible neighbor
@@ -2720,6 +2707,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 			});
 			moveColumnPopup.appendChild(menuitem);
 		}
+		//
+		// Restore Default Column Order
+		//
+		let menuitem = document.createXULElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
+		menuitem.setAttribute('anonid', prefix + 'restore-order');
+		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
+		menupopup.appendChild(menuitem);
 	}
 
 	buildSortMenu(menupopup) {
