@@ -1254,6 +1254,92 @@ describe("Item pane", function () {
 			win.resizeTo(null, height);
 			attachmentsBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
+
+		it("should update after attachment is trashed or restored", async function () {
+			// https://github.com/zotero/zotero/issues/4770
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentsBox = itemDetails.getPane(paneID);
+
+			let item = await createDataObject('item');
+			let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+
+			function getAttachmentRow() {
+				return attachmentsBox.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
+			}
+
+			await ZoteroPane.selectItem(item.id);
+			await waitForScrollToPane(itemDetails, paneID);
+			await waitForPreviewBoxRender(attachmentsBox);
+
+			// Trash the attachment
+			let trashPromise = waitForNotifierEvent('trash', 'item');
+			await Zotero.Items.trashTx([attachment.id]);
+			await trashPromise;
+
+			// Wait for the attachment row to be hidden
+			await waitForCallback(
+				() => getAttachmentRow().hidden
+				, 100, 3);
+			assert.isTrue(getAttachmentRow().hidden);
+
+			// Restore the attachment
+			let restorePromise = waitForNotifierEvent('modify', 'item');
+			attachment.deleted = false;
+			await attachment.saveTx();
+			await restorePromise;
+
+			// Wait for the attachment row to exist and be visible
+			await waitForCallback(
+				() => getAttachmentRow()?.hidden === false
+				, 100, 3);
+			assert.exists(getAttachmentRow());
+			assert.isFalse(getAttachmentRow().hidden);
+
+			// Trash the attachment again
+			await waitForScrollToPane(itemDetails, paneID);
+			await waitForPreviewBoxRender(attachmentsBox);
+
+			// Trash the attachment again to test the case where the box is already rendered
+			trashPromise = waitForNotifierEvent('trash', 'item');
+			await Zotero.Items.trashTx([attachment.id]);
+			await trashPromise;
+
+			// Wait for the attachment row to be hidden
+			await waitForCallback(
+				() => getAttachmentRow().hidden
+				, 100, 3);
+
+			// Select another non-regular item to ensure the attachments box is not updated by notifier events
+			// At this point, the attachments box still has the attachment row hidden
+			let item2 = await createDataObject('item');
+			let attachment2 = await importFileAttachment('test.pdf', { parentID: item2.id });
+			await ZoteroPane.selectItem(attachment2.id);
+			await waitForPreviewBoxRender(itemDetails.getPane("attachment-info"));
+
+			// Restore the attachment
+			restorePromise = waitForNotifierEvent('modify', 'item');
+			attachment.deleted = false;
+			await attachment.saveTx();
+			await restorePromise;
+
+			// Select the item with the restored attachment
+			await ZoteroPane.selectItem(item.id);
+			await waitForScrollToPane(itemDetails, paneID);
+			await waitForPreviewBoxRender(attachmentsBox);
+
+			// Wait for the attachment row to exist and be visible
+			await waitForCallback(
+				() => {
+					let row = getAttachmentRow();
+					window.console.log(row);
+					return row && !row.hidden;
+				}
+				, 100, 3);
+
+			// Should render the attachment row, as the render dependency is different
+			assert.exists(getAttachmentRow());
+		});
 	});
 	
 	

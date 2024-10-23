@@ -95,6 +95,13 @@
 			return this._preview;
 		}
 
+		get _renderDependencies() {
+			if (this.item?.isRegularItem()) {
+				return [...super._renderDependencies, this.item.getAttachments().join(',')];
+			}
+			return super._renderDependencies;
+		}
+
 		init() {
 			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
@@ -143,18 +150,6 @@
 				return;
 			}
 
-			// Reset rendered flags when the item or its attachments are modified
-			if (this._syncRenderDependencies) {
-				let renderedItem = Zotero.Items.get(this._syncRenderDependencies[1]);
-				if (renderedItem
-					// Only care about regular items
-					&& renderedItem.isRegularItem()
-					// Check if the item or its attachments are modified
-					&& [renderedItem.id, ...renderedItem.getAttachments()].some(id => ids.includes(id))) {
-					this._resetRenderedFlags();
-				}
-			}
-
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
@@ -193,6 +188,8 @@
 			if (this._isAlreadyRendered()) return;
 			this._renderStage = "initial";
 			this.updateCount();
+			// Reset the async render dependencies to allow re-rendering
+			delete this._asyncRenderDependencies;
 		}
 
 		async asyncRender() {
