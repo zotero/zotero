@@ -71,7 +71,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['note-row', 'chrome://zotero/content/elements/noteRow.js'],
 		['notes-context', 'chrome://zotero/content/elements/notesContext.js'],
 		['libraries-collections-box', 'chrome://zotero/content/elements/librariesCollectionsBox.js'],
-		['autocomplete-textarea', 'chrome://zotero/content/elements/autocompleteTextArea.js']
+		['autocomplete-textarea', 'chrome://zotero/content/elements/autocompleteTextArea.js'],
 	]) {
 		customElements.setElementCreationCallback(tag, () => {
 			Services.scriptloader.loadSubScript(script, window);
