@@ -360,7 +360,7 @@ Zotero_Preferences.Advanced = {
 		customDataDir.hidden = !this._usingDefaultDataDir();
 
 		let revertToDefaultDir = document.getElementById("reset-data-dir");
-		let revertToDefaultDirLabel = document.getElementById("default-dara-dir");
+		let revertToDefaultDirLabel = document.getElementById("default-data-dir");
 		revertToDefaultDir.hidden = this._usingDefaultDataDir();
 		revertToDefaultDirLabel.hidden = this._usingDefaultDataDir();
 		document.l10n.setArgs(revertToDefaultDirLabel, { directory: Zotero.DataDirectory.defaultDir });
