@@ -2679,7 +2679,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Move Column Left
 		//
 		let moveColumnMenu = document.createXULElement('menu');
-		document.l10n.setAttributes(moveColumnMenu, `menu-view-columns-move-${Zotero.rtl ? "right" : "left"}`);
+		document.l10n.setAttributes(
+			moveColumnMenu,
+			Zotero.rtl ? 'menu-view-columns-move-right' : 'menu-view-columns-move-left'
+		);
 		moveColumnMenu.setAttribute('anonid', prefix + 'move-column');
 		let moveColumnPopup = document.createXULElement('menupopup');
 		moveColumnPopup.setAttribute('anonid', prefix + 'move-column-popup');
