@@ -52,6 +52,8 @@
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
 		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+		<html:link rel="localization" href="reader.ftl"/>
 	</linkset>
 	
 	<script>
@@ -304,6 +306,12 @@
 								class="menu-type-reader pdf"
 								label="&zotero.pdfReader.transferFromPDF;"
 								oncommand="ZoteroStandalone.currentReader.transferFromPDF()"
+							/>
+							<menuitem
+								id="menu_importFromEPUB"
+								class="menu-type-reader epub"
+								data-l10n-id="pdfReader-import-from-epub"
+								oncommand="ZoteroStandalone.currentReader.importFromEPUB()"
 							/>
 							<menuseparator class="menu-type-reader pdf"/>
 							<menuitem id="menu_export_file" class="menu-type-reader pdf"
