@@ -353,8 +353,8 @@ Zotero_Preferences.Advanced = {
 			'hidden', !Zotero.DataDirectory.canMigrate()
 		);
 
-		let changeDatadir = document.getElementById("change-data-dir");
-		changeDatadir.hidden = this._usingDefaultDataDir();
+		let changeDataDir = document.getElementById("change-data-dir");
+		changeDataDir.hidden = this._usingDefaultDataDir();
 
 		let customDataDir = document.getElementById("custom-data-dir");
 		customDataDir.hidden = !this._usingDefaultDataDir();
