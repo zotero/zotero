@@ -1700,7 +1700,7 @@ Zotero.Utilities.Internal = {
 		elem.appendChild(menu);
 		return menu;
 	},
-
+	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
 			throw new Error("openPreferences() now takes an 'options' object -- update your code");
