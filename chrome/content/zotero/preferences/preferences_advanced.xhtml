@@ -87,6 +87,7 @@
 					readonly="true"
 					flex="1"
 					tabindex="0"
+					class="directory-path"
 					aria-labelledby="baseAttachmentPathLabel"/>
 				<button id="baseAttachmentPathButton"
 					label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
@@ -94,7 +95,7 @@
 					aria-describedby="baseAttachmentPathLabel"/>
 			</hbox>
 			
-			<hbox>
+			<hbox class="preferences-button-group">
 				<button id="resetBasePath"
 					label="&zotero.preferences.attachmentBaseDir.resetBasePath;"
 					oncommand="Zotero_Preferences.Attachment_Base_Directory.clearPath()"
@@ -106,26 +107,29 @@
 		<groupbox aria-label="&zotero.preferences.dataDir;">
 			<label><html:h2>&zotero.preferences.dataDir;</html:h2></label>
 			
-			<radiogroup id="data-dir"
-					preference="extensions.zotero.useDataDir">
-				<radio id="default-data-dir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
-				<hbox align="center">
-					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
-					<html:input type="text" id="data-dir-path" preference="extensions.zotero.dataDir"
-						readonly="true" style="flex: 1"/>
-					<button label="&zotero.preferences.dataDir.choose;"
-						oncommand="return Zotero_Preferences.Advanced.chooseDataDir()"/>
-				</hbox>
-			</radiogroup>
+			<hbox align="center">
+				<label id="dara-dir-label" value="Data directory:" control="data-dir-path"></label>
+				<html:input type="text" id="data-dir-path" preference="extensions.zotero.dataDir"
+					readonly="true" class="directory-path"/>
+				<button id="change-data-dir" label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
+					aria-describedby="dara-dir-label"
+					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(true)"/>
+			</hbox>
 			
 			<vbox id="command-line-data-dir" hidden="true">
 				<description id="command-line-data-dir-path"/>
 				<label value="&zotero.preferences.dataDir.viaCommandLine;"/>
 			</vbox>
 			
-			<hbox>
+			<hbox class="preferences-button-group">
 				<button label="&zotero.preferences.dataDir.reveal;"
 					oncommand="Zotero.DataDirectory.reveal()"/>
+				<button id="custom-data-dir" data-l10n-id="preferences-advanced-custom-data-dir"
+					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(true)"/>
+				<button id="reset-data-dir" data-l10n-id="preferences-advanced-reset-data-dir"
+					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(false)" aria-describedby="default-data-dir"/>
+				<html:input id="default-data-dir" data-l10n-id="preferences-advanced-default-data-dir"
+					data-l10n-attrs="value" readonly="true" class="directory-path"/>
 				<button id="migrate-data-dir" label="&zotero.preferences.dataDir.migrate;"
 					oncommand="Zotero_Preferences.Advanced.migrateDataDirectory()" hidden="true"/>
 			</hbox>

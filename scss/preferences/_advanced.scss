@@ -39,7 +39,7 @@
 	align-items: center;
 }
 
-#baseAttachmentPath {
+.directory-path {
 	padding-inline-start: 24px;
 	/* Background set in JS */
 	background: none;
@@ -48,6 +48,18 @@
 	background-position: center left 4px;
 	appearance: none;
 	border: none;
+}
+
+#default-data-dir {
+	padding-inline-start: 0;
+	margin-inline-start: 0;
+	margin-top: 2px;
+	flex-grow: 1;
+}
+
+.preferences-button-group {
+	gap: 6px;
+	margin-top: 4px;
 }
 
 #zotero-prefpane-advanced-open-buttons {
