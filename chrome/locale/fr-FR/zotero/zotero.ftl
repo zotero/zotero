@@ -1,8 +1,8 @@
-general-key-control = Control
-general-key-shift = Shift
+general-key-control = Ctrl
+general-key-shift = Maj
 general-key-alt = Alt
 general-key-option = Option
-general-key-command = Command
+general-key-command = Commande
 option-or-alt =
     { PLATFORM() ->
         [macos] { general-key-option }
@@ -84,9 +84,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Modifier la recherche enregistrée
 collections-menu-move-collection =
-    .label = Move To
+    .label = Déplacer vers
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Copier vers
 item-creator-moveDown =
     .label = Descendre
 item-creator-moveToTop =
@@ -122,7 +122,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Lien Web
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Changer de document parent…
 view-online = Afficher en ligne
 item-menu-option-view-online =
     .label = { view-online }
@@ -273,15 +273,30 @@ integration-addEditCitation-window =
     .title = { -app-name } - Ajouter/Modifier la citation
 integration-editBibliography-window =
     .title = { -app-name } - Modifier la bibliographie
+integration-editBibliography-add-button =
+    .aria-label = { general-add }
+integration-editBibliography-remove-button =
+    .aria-label = { general-remove }
+integration-editBibliography-editor =
+    .aria-label = Edit reference
+-integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
+-integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
+-integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+integration-editBibliography-wrapper =
+    .aria-label = Edit Bibliography dialog
+    .aria-description =
+        { -integration-editBibliography-include-uncited }
+        { -integration-editBibliography-exclude-cited }
+        { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
     .title = { -app-name } - Mise en forme rapide des citations
 styleEditor-locatorType =
     .aria-label = Type de localisateur
-styleEditor-locatorInput = Locator input
+styleEditor-locatorInput = Saisie du localisateur
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = Éditeur de style
 styleEditor-preview =
     .aria-label = Aperçu
 integration-prefs-displayAs-label = Afficher les citations en tant que :
@@ -617,11 +632,20 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Sélectionner
+select-items-convertToStandalone =
+    .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Convertir en pièce jointe indépendante
+            [many] Convertir en pièces jointes indépendantes
+           *[other] Convertir en pièces jointes indépendantes
+        }
+select-items-convertToStandaloneNote =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Note
+           *[other] Convert to Standalone Notes
         }
 file-type-webpage = Page web
 file-type-image = Image

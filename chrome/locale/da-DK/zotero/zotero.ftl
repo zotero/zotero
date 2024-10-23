@@ -145,7 +145,7 @@ import-online-intro-title = Introduktion
 import-source-file =
     .label = En fil (BibTeX, RIS, Zotero RDF osv.)
 import-source-folder =
-    .label = A folder of PDFs or other files
+    .label = En mappe med PDF'er eller andre filer
 import-source-online =
     .label = { $targetApp } online import
 import-options = Indstillinger
@@ -166,7 +166,7 @@ import-file-handling-link =
     .label = Link til filer på den oprindelige placering
 import-fileHandling-description = Linked files cannot be synced by { -app-name }.
 import-online-new =
-    .label = Download new items only; don’t update previously imported items
+    .label = Download kun nye emner; opdater ikke tidligere importerede emner
 import-mendeley-username = Username
 import-mendeley-password = Password
 general-error = Error
@@ -272,6 +272,21 @@ integration-addEditCitation-window =
     .title = { -app-name } - Add/Edit Citation
 integration-editBibliography-window =
     .title = { -app-name } - Edit Bibliography
+integration-editBibliography-add-button =
+    .aria-label = { general-add }
+integration-editBibliography-remove-button =
+    .aria-label = { general-remove }
+integration-editBibliography-editor =
+    .aria-label = Edit reference
+-integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
+-integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
+-integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+integration-editBibliography-wrapper =
+    .aria-label = Edit Bibliography dialog
+    .aria-description =
+        { -integration-editBibliography-include-uncited }
+        { -integration-editBibliography-exclude-cited }
+        { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
@@ -304,7 +319,7 @@ integration-prefs-automaticJournalAbbeviations =
     .label = Brug MEDLINE's tidsskriftforkortelser
 integration-prefs-automaticJournalAbbeviations-description = Feltet “Journal Abbr” vil blive ignoreret.
 integration-prefs-exportDocument =
-    .label = Switch to a Different Word Processor…
+    .label = Skift til et anden tekstbehandlerprogram…
 integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Mine publikationer
 publications-intro = Elementer, som tilføjes til Mine publikationer, vil vises på din profilside på zotero.org. Vælger du at inkludere vedhæftede filer, vil de være offentligt tilgængelige under den licens, du angiver. Tilføj kun værker, du selv har lavet, og inkludér kun filer, hvis du har rettighederne til at distribuere dem og ønsker at gøre det.
@@ -606,11 +621,19 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandalone =
+    .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
             [one] Convert to Standalone Attachment
            *[other] Convert to Standalone Attachments
+        }
+select-items-convertToStandaloneNote =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Note
+           *[other] Convert to Standalone Notes
         }
 file-type-webpage = Webpage
 file-type-image = Grafik

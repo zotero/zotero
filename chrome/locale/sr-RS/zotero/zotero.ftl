@@ -84,9 +84,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Уреди сачувану претрагу
 collections-menu-move-collection =
-    .label = Move To
+    .label = Премести у
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Копирај у
 item-creator-moveDown =
     .label = Премести доле
 item-creator-moveToTop =
@@ -122,7 +122,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Веза на вебу
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Промени родитељску ставку…
 view-online = Погледај на мрежи
 item-menu-option-view-online =
     .label = { view-online }
@@ -184,13 +184,13 @@ file-interface-items-were-relinked =
         [one] Ставка је поново повезана
        *[other] Поново повезаних ставки: { $numRelinked }
     }
-import-mendeley-encrypted = Не могу да прочитам изабрану база података из Мендељева, вероватно зато што је шифрована. Погледајте <a data-l10n-name="mendeley-import-kb">Како да увезем библиотеку из Мендељева у Зотеро?</a> за више информација.
+import-mendeley-encrypted = Не могу да прочитам изабрану базу података из Мендељејева, вероватно зато што је шифрована. Погледајте <a data-l10n-name="mendeley-import-kb">Како да увезем библиотеку из Мендељејева у Зотеро?</a> за више информација.
 file-interface-import-error-translator = Грешка приликом увоза изабране датотеке преко „{ $translator }“. Проверите да ли је датотека исправна и покушајте поново.
-import-online-intro = У следећем кораку ћете бити позвани да се пријавите на { $targetAppOnline } и дате дозволе за приступ програму { -app-name }. Ово је нопходно да увезете вашу { $targetApp } библиотеку у { -app-name }.
+import-online-intro = У следећем кораку ћемо вас позвати да се пријавите на { $targetAppOnline } и дате дозволе за приступ програму { -app-name }. Ово је нопходно да увезете вашу { $targetApp } библиотеку у { -app-name }.
 import-online-intro2 = { -app-name } никада неће видети или чувати вашу { $targetApp } лозинку.
-import-online-form-intro = Унесите ваше податке за пријаву на { $targetAppOnline }. Ово је неопходно да увезете вашу { $targetApp } библиотеку у { -app-name }.
-import-online-wrong-credentials = Није успела пријава у { $targetApp }. Унесите податке за пријаву и покушајте поново.
-import-online-blocked-by-plugin = Увоз не може да се настави ако је прикључак { $plugin } инсталиран. Искључите овај прикључак и покушајте поново.
+import-online-form-intro = Унесите ваше податке за пријаву на { $targetAppOnline }. Ово је неопходно да увезете { $targetApp } библиотеку у { -app-name }.
+import-online-wrong-credentials = Није успела пријава на { $targetApp }. Унесите податке за пријаву и покушајте поново.
+import-online-blocked-by-plugin = Не можете да наставите увоз док је покренут прикључак { $plugin }. Искључите овај прикључак и покушајте поново.
 import-online-relink-only =
     .label = Поново повежи цитате из Мендељејева
 import-online-relink-kb = Више података
@@ -206,7 +206,7 @@ report-error =
     .label = Грешка у извештају…
 rtfScan-wizard =
     .title = РТФ скенер
-rtfScan-introPage-description = { -app-name } може аутоматски да извуче и поново форматира цитате и убаци библиографију у РТФ датотеке. Тренутно подржава цитате у варијантама следећих формата:
+rtfScan-introPage-description = { -app-name } може аутоматски да извуче, поново форматира цитате и убаци библиографију у РТФ датотеке. Тренутно подржава цитате у варијантама следећих формата:
 rtfScan-introPage-description2 = За початак отворите РТФ датотеку и изаберите излазну датотеку:
 rtfScan-input-file = Улазна датотека:
 rtfScan-output-file = Излазна датотека:
@@ -219,41 +219,41 @@ rtfScan-choose-output-file =
     .aria-label = Изаберите излазну датотеку
 rtfScan-intro-page = Увод
 rtfScan-scan-page = Тражим цитате
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } претражује ваш документ у потрази за цитатима. Будите стрпљиви.
 rtfScan-citations-page = Верификуј цитиране ставке
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = Прегледајте списак препознатих цитата како би проверили да ли је { -app-name } правилно изабрао одговарајуће ставке. Уколико постоје цитати који нису повезани или су чудни, морате их средити пре него што наставите даље.
 rtfScan-style-page = Форматирам документ
 rtfScan-format-page = Форматирам цитате
-rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name } обрађује и форматира вашу РТФ датотеку. Будите стрпљиви.
 rtfScan-complete-page = РТФ скенирање је завршено
 rtfScan-complete-page-description = Ваш документ је скениран и обрађен. Проверите да ли је исправно форматиран.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Изабери ставке које се подударају
 rtfScan-action-accept-match =
-    .title = Accept this match
-runJS-title = Run JavaScript
-runJS-editor-label = Code:
-runJS-run = Run
+    .title = Прихвати ово подударање
+runJS-title = Покрени ЈаваСкрипт
+runJS-editor-label = Код:
+runJS-run = Покрени
 runJS-help = { general-help }
 runJS-result =
     { $type ->
-        [async] Return value:
-       *[other] Result:
+        [async] Враћена вредност:
+       *[other] Резултат:
     }
-runJS-run-async = Run as async function
+runJS-run-async = Покрени као асинхрону функцију
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - прављење цитата/библиографије
 bibliography-style-label = { citation-style-label }
 bibliography-locale-label = { language-label }
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Прикажи цитате као:
 bibliography-advancedOptions-label = Напредне опције
 bibliography-outputMode-label = Извези као:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] Цитате
+            [note] Белешке
+           *[other] Цитате
         }
 bibliography-outputMode-bibliography =
     .label = Библиографију
@@ -268,52 +268,67 @@ bibliography-outputMethod-print =
     .label = Штампај
 bibliography-manageStyles-label = Уреди стилове…
 integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
+    .title = { -app-name } - поставке документа
 integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
+    .title = { -app-name } - додавање/уређивање цитата
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - уређивање библиографије
+integration-editBibliography-add-button =
+    .aria-label = { general-add }
+integration-editBibliography-remove-button =
+    .aria-label = { general-remove }
+integration-editBibliography-editor =
+    .aria-label = Edit reference
+-integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
+-integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
+-integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+integration-editBibliography-wrapper =
+    .aria-label = Edit Bibliography dialog
+    .aria-description =
+        { -integration-editBibliography-include-uncited }
+        { -integration-editBibliography-exclude-cited }
+        { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
+    .title = { -app-name } - брзо форматирање цитата
 styleEditor-locatorType =
-    .aria-label = Locator type
-styleEditor-locatorInput = Locator input
+    .aria-label = Врста локатора
+styleEditor-locatorInput = Унос локатора
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = Уређивач стилова
 styleEditor-preview =
-    .aria-label = Preview
+    .aria-label = Преглед
 integration-prefs-displayAs-label = Прикажи цитате као:
 integration-prefs-footnotes =
     .label = Фусноте
 integration-prefs-endnotes =
     .label = Ендноте
 integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
+    .label = Сачувај цитат у обележиваче
 integration-prefs-bookmarks-description = Обележивачи се могу делити између програма Word и LibreOffice, али могу направити проблеме уколико их случајно промените и не могу бити уметнути као фусноте.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] The document must be saved as .doc or .docx.
+        [true] Морате да сачувате документ као .doc или .docx.
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
     .label = Аутоматски ажурирај цитате
     .tooltip = Цитати који чекају на ажурирање ће бити истакнути унутар документа
-integration-prefs-automaticCitationUpdates-description = Онемогућавање ажурирања може убрзати уметање цитата када радите са великим документима. Увек можете кликните на „Освежи“ како би ручно ажурурати цитате.
+integration-prefs-automaticCitationUpdates-description = Онемогућавањем ажурирања можете убрзати додавање цитата када радите са великим документима. Увек можете кликните на „Освежи“ како би ручно ажурирали цитате.
 integration-prefs-automaticJournalAbbeviations =
     .label = Користи скраћенице часописа из Медлајна
 integration-prefs-automaticJournalAbbeviations-description = Поље „Скраћеница часописа“ ће бити занемарено.
 integration-prefs-exportDocument =
     .label = Пребаците се на други програм за обраду текста…
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
-publications-intro-page = Моје објаве
-publications-intro = Ставке које сте додали у Моје објаве ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који изаберете. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.
+integration-error-unable-to-find-winword = { -app-name } не може да пронађе покренути Word програм.
+publications-intro-page = Моји радови
+publications-intro = Ставке које сте додали у Моји радови ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који изаберете. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.
 publications-include-checkbox-files =
     .label = Укључи датотеке
 publications-include-checkbox-notes =
     .label = Укључи белешке
-publications-include-adjust-at-any-time = Можете подесити шта се овде приказује ако одете у збирку Моје објаве.
+publications-include-adjust-at-any-time = Можете подесити шта се овде приказује ако одете у збирку Моји радови.
 publications-intro-authorship =
     .label = Ја сам аутор овог рада.
 publications-intro-authorship-files =
@@ -322,18 +337,18 @@ publications-sharing-page = Изаберите како ћете делити в
 publications-sharing-keep-rights-field =
     .label = Задржи поље са ауторским правима
 publications-sharing-keep-rights-field-where-available =
-    .label = Задржите постојеће поље са ауторским правима уколико је доступно
-publications-sharing-text = Можете задржати сва права над својим радом, поставити слободну лиценцу или доделити јавни домен. У свим случајевима ће рад бити јавно доступан на страници zotero.org.
+    .label = Задржи постојеће поље са ауторским правима, уколико је доступно
+publications-sharing-text = Можете задржати сва права над својим радом, поделити га под слободном лиценцом или га поделити преко јавног домена. У свим случајевима ће рад бити јавно доступан на страници zotero.org.
 publications-sharing-prompt = Да ли желите да поделите свој рад са осталима?
 publications-sharing-reserved =
     .label = Не, само објави моје податке на zotero.org.
 publications-sharing-cc =
-    .label = Да, под слободном Creative Commons лиценцом
+    .label = Да, под лиценцом Заједничко креативно добро
 publications-sharing-cc0 =
     .label = Да, постави мој рад у јавни домен
-publications-license-page = Изаберите Creative Commons лиценцу
-publications-choose-license-text = Creative Commons лиценца дозвољава другима да копирају и даље деле ваш рад док год је ваша заслуга јасно истакнута, уз давање везе до лиценце и навођење ако је дошло до неких промена. Додатни услови могу бити постављени овде.
-publications-choose-license-adaptations-prompt = Да ли да дозволим дељење измена вашег рада?
+publications-license-page = Изаберите лиценцу Заједничко креативно добро
+publications-choose-license-text = Заједничко креативно добро дозвољава другима да копирају и даље деле ваш рад док год је ваша заслуга јасно истакнута, уз давање везе до лиценце и навођење ако је дошло до неких промена. Додатни услови могу бити постављени овде.
+publications-choose-license-adaptations-prompt = Да ли дозвољавате дељење измена вашег рада?
 publications-choose-license-yes =
     .label = Да
     .accesskey = Y
@@ -345,40 +360,40 @@ publications-choose-license-sharealike =
     .accesskey = S
 publications-choose-license-commercial-prompt = Да ли дозвољавате употребу вашег рада у комерцијалне сврхе?
 publications-buttons-add-to-my-publications =
-    .label = Додај у Моје објаве
+    .label = Додај у Моји радови
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = Следеће: дељење
 publications-buttons-next-choose-license =
     .label = Изаберите лиценцу
-licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
+licenses-cc-0 = CC0 1.0, посвећеност универзалном јавном домену
 licenses-cc-by = Заједничко креативно добро, ауторство, 4.0, интернационална лиценца
 licenses-cc-by-nd = Заједничко креативно добро, ауторство-без измена, 4.0, интернационална лиценца
 licenses-cc-by-sa = Заједничко креативно добро, ауторство-дељење под истим условима, 4.0, интернационална лиценца
 licenses-cc-by-nc = Заједничко креативно добро, ауторство-некомерцијално, 4.0, интернационална лиценца
 licenses-cc-by-nc-nd = Заједничко креативно добро, ауторство-некомерцијално-без измена, 4.0, интернационална лиценца
 licenses-cc-by-nc-sa = Заједничко креативно добро, ауторство-некомерцијално-дељење под истим условима, 4.0, интернационална лиценца
-licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
-licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+licenses-cc-more-info = Прочитајте Заједничко креативно добро, <a data-l10n-name="license-considerations">Разматрања за издаваоце лиценци</a> пре него што поставите рад под CC лиценцом. Уколико примените ову лиценцу, не можете опозвати, чак ни уколико касније изаберете другачије услове или повучете објављени рад.
+licenses-cc0-more-info = Прочитајте Заједничко креативно добро, <a data-l10n-name="license-considerations">CC0 питања и одговори</a> пре него што примените CC0 на ваш рад. Не можете опозвати одлуку да поставите свој рад у на јавни домен, чак ни уколико касније изаберете другачије услове или повучете објављени рад.
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Покрени у режиму за тражење проблема…
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
-restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
+restart-in-troubleshooting-mode-dialog-title = Покрени у режиму за тражење проблема
+restart-in-troubleshooting-mode-dialog-description = { -app-name } ће се поново покренути са искљученим додацима. Неке могућности можда неће радити како треба док је режим за тражење проблема укључен.
 menu-ui-density =
     .label = Густина
 menu-ui-density-comfortable =
-    .label = Comfortable
+    .label = Удобно
 menu-ui-density-compact =
-    .label = Compact
-pane-info = Инфо
+    .label = Збијено
+pane-info = Подаци
 pane-abstract = Сажетак
 pane-attachments = Прилози
 pane-notes = Белешке
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = Библиотеке и збирке
 pane-tags = Ознаке
 pane-related = Сродно
-pane-attachment-info = Attachment Info
-pane-attachment-preview = Preview
+pane-attachment-info = Подаци о прилогу
+pane-attachment-preview = Преглед
 pane-attachment-annotations = Напомене
 pane-header-attachment-associated =
     .label = Преименујте повезану датотеку
@@ -389,16 +404,18 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } прилог
+            [few] { $count } прилога
+           *[other] { $count } прилога
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [one] { $count } белешка
+            [few] { $count } белешке
+           *[other] { $count } белешки
         }
 section-notes =
     .label =
@@ -412,11 +429,12 @@ section-libraries-collections =
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } ознака
+            [few] { $count } ознаке
+           *[other] { $count } ознака
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } повезнице
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -424,15 +442,16 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .dynamic-tooltiptext = Expand section
-    .label = Expand { $section } section
+    .dynamic-tooltiptext = Прошири одељак
+    .label = Прошири одељак { $section }
 section-button-collapse =
-    .dynamic-tooltiptext = Collapse section
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = Скупи одељак
+    .label = Скупи одељак { $section }
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
-       *[other] { $count } Annotations
+        [one] { $count } белешка
+        [few] { $count } белешке
+       *[other] { $count } белешки
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -460,26 +479,26 @@ sidenav-tags =
 sidenav-related =
     .tooltiptext = { pane-related }
 pin-section =
-    .label = Pin Section
+    .label = Закачи одељак
 unpin-section =
-    .label = Unpin Section
+    .label = Откачи одељак
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Скупи друге одељке
 expand-all-sections =
-    .label = Expand All Sections
+    .label = Прошири све одељке
 abstract-field =
-    .placeholder = Add abstract…
+    .placeholder = Додај апстракт…
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = Филтрирај ознаке
 context-notes-search =
-    .placeholder = Search Notes
+    .placeholder = Претражи белешке
 new-collection-dialog =
     .title = Нова збирка
-    .buttonlabelaccept = Create Collection
+    .buttonlabelaccept = Направи одељак
 new-collection-name = Име:
-new-collection-create-in = Create in:
+new-collection-create-in = Направи у:
 attachment-info-title = Наслов
 attachment-info-filename = Име датотеке
 attachment-info-accessed = Приступљено
@@ -488,45 +507,45 @@ attachment-info-modified = Измењено
 attachment-info-index = Индексирано
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
-            [standalone] Standalone
-            [child] Item
-           *[unknown] New
-        } Note
-    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
-attachment-preview-placeholder = No attachment to preview
+        Премести у { $type ->
+            [standalone] самосталну белешку
+            [child] ставку белешке
+           *[unknown] нову белешку
+        }
+    .tooltiptext = Више није подржано додавање белешки и прилога, али можете изменити ову белешку тако што ћете је преместити у засебну белешку.
+attachment-preview-placeholder = Нема прилога за преглед
 toggle-preview =
     .label =
         { $type ->
-            [open] Hide
-            [collapsed] Show
-           *[unknown] Toggle
-        } Attachment Preview
+            [open] Сакриј
+            [collapsed] Прикажи
+           *[unknown] Укључи/искључи
+        } преглед прилога
 quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
+    Користите стрелице за лево/десно да идете кроз ставке овог цитата. { $dialogMenu ->
+        [active] Притисните Shift-Tab за фокус на мени прозорчета.
        *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
+    } Притисните { return-or-enter } да сачувате измене овог цитата. Притисните Escape да занемарите промене и затворите прозорче.
+quickformat-aria-bubble = Ова ставка је укључена у цитирање. Притисните размак да подесите изглед ставке. { quickformat-general-instructions }
+quickformat-aria-input = Откуцајте текст да потражите ставку која ће бити укључена у овај цитат. Притисните Tab да идете кроз списак резултата претраге. { quickformat-general-instructions }
+quickformat-aria-item = Притисните { return-or-enter } да додате ову ставку у цитат. Притисните Tab да идете назад на поље за претрагу.
 quickformat-accept =
-    .tooltiptext = Save edits to this citation
+    .tooltiptext = Сачувај измене овог цитата
 quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
+    .aria-label = Врста локатора
+quickformat-locator-value = Локатор
 quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+    .tooltiptext = Прикажи опције цитата
+insert-note-aria-input = Укуцајте текст за претрагу белешке. Притисните Tab да идете кроз списак резултата. Притисните Escape да затворите овај прозорчић.
+insert-note-aria-item = Притисните { return-or-enter } да изаберете ову белешку. Притисните Tab да се вратите назад на поље за претрагу. Притисните Escape да затворите прозорчић.
 quicksearch-mode =
-    .aria-label = Quick Search mode
+    .aria-label = Режим брзе претраге
 quicksearch-input =
     .aria-label = Брза претрага
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Прегледај као
 item-pane-header-none =
     .label = Ништа
 item-pane-header-title =
@@ -534,51 +553,55 @@ item-pane-header-title =
 item-pane-header-titleCreatorYear =
     .label = Наслов, аутор, година
 item-pane-header-bibEntry =
-    .label = Bibliography Entry
+    .label = Библиографски унос
 item-pane-header-more-options =
-    .label = More Options
+    .label = Више опција
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] Није изабрана ставке
+        [one] Изабрана је { $count } ставка
+       *[other] Изабрано је { $count } ставки
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [one] Изабрана је { $count } збирка
+        [few] Изабране су { $count } збирке
+       *[other] Изабрано је { $count } збирки
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [one] Изабрана је { $count } претрага
+        [few] Изабране су { $count } претраге
+       *[other] Изабрано је { $count } претрага
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [one] Изабран је { $count } објекат
+        [few] Изабрана су { $count } објекта
+       *[other] Изабрано је { $count } објеката
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] Нема ставки у овом прегледу
+        [one] { $count } ставка у овом прегледу
+       *[other] { $count } ставки у овом прегледу
     }
 item-pane-message-objects-unselected =
     { $count ->
-        [0] No objects in this view
-        [one] { $count } object in this view
-       *[other] { $count } objects in this view
+        [0] Нема објеката у овом прегледу
+        [one] { $count } објекат у овом прегледу
+       *[other] { $count } објеката у овом прегледу
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] Споји { $count } ставку
+            [few] Споји { $count } ставке
+           *[other] Споји { $count } ставки
         }
-locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
-architecture-warning-action = Download 64-bit { -app-name }
+locate-library-lookup-no-resolver = Морате да изаберете разрешитеља из површи { $pane } у подешавањима програма { -app-name }.
+architecture-win32-warning-message = Пребаците се на 64-творо битни { -app-name } за бржи рад програма. Ваши подаци неће бити промењени.
+architecture-warning-action = Преузми 64-творо битни { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-quickFormat =
@@ -608,11 +631,19 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandalone =
+    .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
             [one] Convert to Standalone Attachment
            *[other] Convert to Standalone Attachments
+        }
+select-items-convertToStandaloneNote =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Note
+           *[other] Convert to Standalone Notes
         }
 file-type-webpage = Webpage
 file-type-image = Слика

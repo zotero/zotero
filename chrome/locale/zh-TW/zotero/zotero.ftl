@@ -271,6 +271,21 @@ integration-addEditCitation-window =
     .title = { -app-name } - 新增/編輯引用文獻
 integration-editBibliography-window =
     .title = { -app-name } - 編輯參考文獻表
+integration-editBibliography-add-button =
+    .aria-label = { general-add }
+integration-editBibliography-remove-button =
+    .aria-label = { general-remove }
+integration-editBibliography-editor =
+    .aria-label = Edit reference
+-integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
+-integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
+-integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+integration-editBibliography-wrapper =
+    .aria-label = Edit Bibliography dialog
+    .aria-description =
+        { -integration-editBibliography-include-uncited }
+        { -integration-editBibliography-exclude-cited }
+        { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
     .title = { -app-name } - 快速格式化引用文獻
 styleEditor-locatorType =
@@ -596,11 +611,19 @@ find-pdf-files-added =
     }
 select-items-dialog =
     .buttonlabelaccept = Select
+select-items-convertToStandalone =
+    .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
             [one] Convert to Standalone Attachment
            *[other] Convert to Standalone Attachments
+        }
+select-items-convertToStandaloneNote =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Note
+           *[other] Convert to Standalone Notes
         }
 file-type-webpage = 網頁
 file-type-image = 圖片

@@ -23,7 +23,7 @@ general-open-settings = Abrir Configurações
 general-help = Ajuda
 general-tag = Etiqueta
 general-done = Feito
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
+general-view-troubleshooting-instructions = Ver instruções de resolução de problemas
 citation-style-label = Estilo de Citação:
 language-label = Língua:
 menu-file-show-in-finder =
@@ -43,15 +43,15 @@ menu-add-by-identifier =
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Adicionar Arquivo...
+    .label = Adicionar Arquivo…
 menu-add-standalone-linked-file-attachment =
     .label = Adicionar link para Arquivo...
 menu-add-child-file-attachment =
     .label = Anexar Arquivo
 menu-add-child-linked-file-attachment =
-    .label = Anexar Ligação a Arquivo...
+    .label = Anexar Ligação a Arquivo…
 menu-add-child-linked-url-attachment =
-    .label = Anexar link para página...
+    .label = Anexar link para página…
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -84,9 +84,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Editar Procura Guardada
 collections-menu-move-collection =
-    .label = Move To
+    .label = Mover para
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Copiar para
 item-creator-moveDown =
     .label = Mover Para Baixo
 item-creator-moveToTop =
@@ -122,13 +122,13 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Ligação web
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Mudar item pai…
 view-online = Ver em Linha
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Arquivo renomeado para { $filename }
 itembox-button-options =
     .tooltiptext = Abrir menu de contexto
 itembox-button-merge =
@@ -206,7 +206,7 @@ report-error =
     .label = Reportar Erro...
 rtfScan-wizard =
     .title = Processar RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } pode automaticamente extrair e reformatar citações, e inserir uma bibliografia em arquivos RTF. Ele atualmente tem suporte a citações em variações dos seguintes formatos:
 rtfScan-introPage-description2 = Para começar, seleccione abaixo um arquivo RTF de entrada bem como um arquivo RTF de saída:
 rtfScan-input-file = Ficheiro de entrada:
 rtfScan-output-file = Ficheiro de saída:
@@ -273,6 +273,21 @@ integration-addEditCitation-window =
     .title = { -app-name } - Adicionar/Editar citação
 integration-editBibliography-window =
     .title = { -app-name } - Editar bibliografia
+integration-editBibliography-add-button =
+    .aria-label = { general-add }
+integration-editBibliography-remove-button =
+    .aria-label = { general-remove }
+integration-editBibliography-editor =
+    .aria-label = Edit reference
+-integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
+-integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
+-integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+integration-editBibliography-wrapper =
+    .aria-label = Edit Bibliography dialog
+    .aria-description =
+        { -integration-editBibliography-include-uncited }
+        { -integration-editBibliography-exclude-cited }
+        { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
     .title = { -app-name } - Formatação rápida de citação
 styleEditor-locatorType =
@@ -538,7 +553,7 @@ item-pane-header-title =
 item-pane-header-titleCreatorYear =
     .label = Título, Criador, Ano
 item-pane-header-bibEntry =
-    .label = Bibliography Entry
+    .label = Entrada bibliográfica
 item-pane-header-more-options =
     .label = Mais opções
 item-pane-message-items-selected =
@@ -584,7 +599,7 @@ item-pane-duplicates-merge-items =
            *[other] Merge { $count } items
         }
 locate-library-lookup-no-resolver = Você deve escolher um resolvedor a partir do painel { $pane } nas configurações do { -app-name } .
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
+architecture-win32-warning-message = Mude para { -app-name } 64-bit para ter uma performance melhor. Seus dados não serão afetados.
 architecture-warning-action = Baixar { -app-name } 64-bit
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Descarregar { -app-name } para ARM64
@@ -610,16 +625,26 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } arquivo adicionado
+        [many] { $count } arquivos adicionados
+       *[other] { $count } arquivos adicionados
     }
 select-items-dialog =
     .buttonlabelaccept = Selecionar
+select-items-convertToStandalone =
+    .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Converter para anexo isolado
+            [many] Converter para anexos isolados
+           *[other] Converter para anexos isolados
+        }
+select-items-convertToStandaloneNote =
+    .label =
+        { $count ->
+            [one] Convert to Standalone Note
+           *[other] Convert to Standalone Notes
         }
 file-type-webpage = Página web
 file-type-image = Imagem
