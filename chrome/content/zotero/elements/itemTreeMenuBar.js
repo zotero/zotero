@@ -49,17 +49,17 @@ class ItemTreeMenuBar extends XULElement {
 		</keyset>
 		<menubar id="main-menubar">
 			<menu id="view-menu"
-				label="&viewMenu.label;"
-				accesskey="&viewMenu.accesskey;">
+					label="&viewMenu.label;"
+					accesskey="&viewMenu.accesskey;">
 				<menupopup id="menu_viewPopup">
 					<menu id="column-picker-submenu"
-						class="menu-type-library"
-						label="&columns.label;">
+							class="menu-type-library"
+							label="&columns.label;">
 						<menupopup/>
 					</menu>
 					<menu id="sort-submenu"
-						class="menu-type-library"
-						label="&sortBy.label;">
+							class="menu-type-library"
+							label="&sortBy.label;">
 						<menupopup/>
 					</menu>
 				</menupopup>
