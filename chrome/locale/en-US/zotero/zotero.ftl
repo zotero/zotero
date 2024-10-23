@@ -75,6 +75,11 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Plugins
 
+menu-view-columns-move-left =
+    .label = Move Column Left
+menu-view-columns-move-right =
+    .label = Move Column Right
+
 main-window-command =
     .label = { -app-name }
 

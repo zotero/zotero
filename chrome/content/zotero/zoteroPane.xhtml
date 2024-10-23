@@ -645,13 +645,13 @@
 							<menu id="column-picker-submenu"
 								  class="menu-type-library"
 								  label="&columns.label;"
-								  onpopupshowing="ZoteroPane_Local.onColumnPickerPopupShowing(event)">
+								  onpopupshowing="ItemTreeMenuBar.handleItemTreeMenuShowing(event, this, ZoteroPane.itemsView)">
 								<menupopup/>
 							</menu>
 							<menu id="sort-submenu"
 								  class="menu-type-library"
 								  label="&sortBy.label;"
-								  onpopupshowing="ZoteroPane_Local.onSortPopupShowing(event)">
+								  onpopupshowing="ItemTreeMenuBar.handleItemTreeMenuShowing(event, this, ZoteroPane.itemsView)">
 								<menupopup/>
 							</menu>
 							<menuseparator class="menu-type-library"/>

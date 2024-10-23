@@ -29,6 +29,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSection.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMenuBar.js', this);
 
 {
 	// https://searchfox.org/mozilla-central/rev/8e885f04a0a4ff6d64ea59741c10d9b8e45d9ff8/toolkit/content/customElements.js#826-832
