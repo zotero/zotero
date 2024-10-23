@@ -53,8 +53,12 @@
 #default-data-dir {
 	padding-inline-start: 0;
 	margin-inline-start: 0;
-	margin-top: 2px;
 	flex-grow: 1;
+	background: none;
+	border: none;
+	@media (-moz-platform: macos) {
+		margin-top: 2px;
+	}
 }
 
 .preferences-button-group {
