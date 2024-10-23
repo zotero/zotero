@@ -1296,11 +1296,9 @@ describe("Item pane", function () {
 			assert.exists(getAttachmentRow());
 			assert.isFalse(getAttachmentRow().hidden);
 
-			// Trash the attachment again
-			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxRender(attachmentsBox);
-
-			// Trash the attachment again to test the case where the box is already rendered
+			// Basically, our item pane render mechanism will reuse the previous render if the item
+			// is the same. We want to ensure the attachments box is rerendered after
+			// the attachments' trash/restore, even if it's already rendered with the same item.
 			trashPromise = waitForNotifierEvent('trash', 'item');
 			await Zotero.Items.trashTx([attachment.id]);
 			await trashPromise;
@@ -1310,8 +1308,8 @@ describe("Item pane", function () {
 				() => getAttachmentRow().hidden
 				, 100, 3);
 
-			// Select another non-regular item to ensure the attachments box is not updated by notifier events
-			// At this point, the attachments box still has the attachment row hidden
+			// Select another non-regular item to ensure the box is not updated by notifier events
+			// At this point, the box still has the previous render with attachment row hidden
 			let item2 = await createDataObject('item');
 			let attachment2 = await importFileAttachment('test.pdf', { parentID: item2.id });
 			await ZoteroPane.selectItem(attachment2.id);
@@ -1323,7 +1321,7 @@ describe("Item pane", function () {
 			await attachment.saveTx();
 			await restorePromise;
 
-			// Select the item with the restored attachment
+			// Select the item with the restored attachment. A rerender should be triggered
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxRender(attachmentsBox);
