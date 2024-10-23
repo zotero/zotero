@@ -88,4 +88,4 @@ preferences-advanced-custom-data-dir =
     .label = Use Custom Location…
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
-    .aria-label = Default directory
+    .aria-label = Default location
