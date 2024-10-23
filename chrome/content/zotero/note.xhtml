@@ -16,7 +16,8 @@
 	title="&zotero.items.menu.attach.note;"
 	persist="screenX screenY width height"
 	windowtype="zotero:note"
-    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml">
 
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -24,6 +25,10 @@
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
+		if (Zotero.isMac) {
+			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
+		}
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/note.js", this);
@@ -32,7 +37,48 @@
 	<keyset>
 		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
 	</keyset>
-	<command id="cmd_close" oncommand="window.close();"/>
+
+	<commandset>
+		<command id="cmd_close" oncommand="window.close();"/>
+	</commandset>
+
+	<commandset id="macCommandSet"> <!-- was mainCommandSet -->
+		<command id="minimizeWindow"
+				 data-l10n-id="window-minimize-command"
+				 oncommand="window.minimize();" />
+		<command id="zoomWindow"
+				 data-l10n-id="window-zoom-command"
+				 oncommand="zoomWindow();" />
+	</commandset>
+
+	<keyset id="macKeyset">  <!-- was mainKeySet -->
+		<key id="key_minimizeWindow"
+			 command="minimizeWindow"
+			 data-l10n-id="window-minimize-shortcut"
+			 modifiers="accel"
+			 internal="true"/>
+	</keyset>
+
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+	</linkset>
+
+	<menubar id="main-menubar">
+		<!-- Only on macOS -->
+		<menu id="windowMenu"
+			  data-l10n-id="menu-window-menu">
+			<menupopup id="windowPopup">
+				<menuseparator/>
+				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow"/>
+				<!-- decomment when "BringAllToFront" is implemented
+					<menuseparator/>
+					<menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+				<menuseparator id="sep-window-list"/>
+			</menupopup>
+		</menu>
+	</menubar>
 
 	<tooltip id="html-tooltip" page="true"/>
 
