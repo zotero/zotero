@@ -27,6 +27,12 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
 
 const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
 
+const ZipReader = Components.Constructor(
+	"@mozilla.org/libjar/zip-reader;1",
+	"nsIZipReader",
+	"open"
+);
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
@@ -742,37 +748,60 @@ class ReaderInstance {
 		let fp = new FilePicker();
 		fp.init(this._window, Zotero.getString('pdfReader.importFromEPUB.title'), fp.modeOpen);
 		fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
-		if (await fp.show() === fp.returnOK) {
-			let path = fp.file;
-			if (path.endsWith('.epub')) {
-				let koReaderLuaPath = PathUtils.join(path.slice(0, -5) + '.sdr', 'metadata.epub.lua');
-				let calibreMetadataPath = PathUtils.joinRelative(path, 'metadata.opf');
-				if (await IOUtils.exists(koReaderLuaPath)) {
-					path = koReaderLuaPath;
+		if (await fp.show() !== fp.returnOK) {
+			return;
+		}
+		
+		let path = fp.file;
+		if (path.endsWith('.epub')) {
+			let koReaderLuaPath = PathUtils.join(path.slice(0, -5) + '.sdr', 'metadata.epub.lua');
+			let calibreMetadataPath = PathUtils.joinRelative(path, 'metadata.opf');
+			if (await IOUtils.exists(koReaderLuaPath)) {
+				path = koReaderLuaPath;
+			}
+			else if (await IOUtils.exists(calibreMetadataPath)) {
+				path = calibreMetadataPath;
+			}
+		}
+		try {
+			if (path.endsWith('.lua')) {
+				let uint8Array = Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
+				this._internalReader.importAnnotationsFromKOReaderMetadata(uint8Array);
+			}
+			else if (path.endsWith('.opf')) {
+				let json = await Zotero.File.getContentsAsync(path);
+				this._internalReader.importAnnotationsFromCalibreMetadata(json);
+			}
+			else {
+				let epubZip;
+				try {
+					epubZip = new ZipReader(Zotero.File.pathToFile(path));
 				}
-				else if (await IOUtils.exists(calibreMetadataPath)) {
-					path = calibreMetadataPath;
-				}
-				else {
+				catch (e) {
+					Zotero.logError(e);
 					Zotero.alert(this._window, Zotero.getString('general.error'),
-						Zotero.getString('pdfReader.importFromEPUB.noAnnotations1', PathUtils.filename(path))
-							+ '\n\n' + Zotero.getString('pdfReader.importFromEPUB.noAnnotations2'));
+						Zotero.getString('pdfReader.importFromEPUB.zipError', Zotero.appName));
 					return;
 				}
-			}
-			
-			try {
-				if (path.endsWith('.lua')) {
-					let uint8Array = Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
-					this._internalReader.importAnnotationsFromKOReaderMetadata(uint8Array);
+				try {
+					const CALIBRE_BOOKMARKS_PATH = 'META-INF/calibre_bookmarks.txt';
+					if (epubZip.hasEntry(CALIBRE_BOOKMARKS_PATH)) {
+						let json = await Zotero.File.getContentsAsync(epubZip.getInputStream(CALIBRE_BOOKMARKS_PATH));
+						this._internalReader.importAnnotationsFromCalibreMetadata(json);
+					}
+					else {
+						Zotero.alert(this._window, Zotero.getString('general.error'),
+							Zotero.getString('pdfReader.importFromEPUB.noAnnotations1', PathUtils.filename(path))
+								+ '\n\n' + Zotero.getString('pdfReader.importFromEPUB.noAnnotations2'));
+					}
 				}
-				else {
-					this._internalReader.importAnnotationsFromCalibreMetadata();
+				finally {
+					epubZip.close();
 				}
 			}
-			catch (e) {
-				Zotero.alert(this._window, Zotero.getString('general.error'), e.message);
-			}
+		}
+		catch (e) {
+			Zotero.alert(this._window, Zotero.getString('general.error'), e.message);
 		}
 	}
 
