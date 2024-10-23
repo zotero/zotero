@@ -51,3 +51,6 @@ pdfReader-findInDocumentInput =
     .title = Find
     .placeholder = { pdfReader-find-in-document }
     .aria-description = To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
+
+pdfReader-import-from-epub =
+    .label = Import Annotations from KOReader…

@@ -738,6 +738,44 @@ class ReaderInstance {
 		}
 	}
 
+	async importFromEPUB() {
+		let fp = new FilePicker();
+		fp.init(this._window, Zotero.getString('pdfReader.importFromEPUB.title'), fp.modeOpen);
+		fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
+		if (await fp.show() === fp.returnOK) {
+			let path = fp.file;
+			if (path.endsWith('.epub')) {
+				let koReaderLuaPath = PathUtils.join(path.slice(0, -5) + '.sdr', 'metadata.epub.lua');
+				let calibreMetadataPath = PathUtils.joinRelative(path, 'metadata.opf');
+				if (await IOUtils.exists(koReaderLuaPath)) {
+					path = koReaderLuaPath;
+				}
+				else if (await IOUtils.exists(calibreMetadataPath)) {
+					path = calibreMetadataPath;
+				}
+				else {
+					Zotero.alert(this._window, Zotero.getString('general.error'),
+						Zotero.getString('pdfReader.importFromEPUB.noAnnotations1', PathUtils.filename(path))
+							+ '\n\n' + Zotero.getString('pdfReader.importFromEPUB.noAnnotations2'));
+					return;
+				}
+			}
+			
+			try {
+				if (path.endsWith('.lua')) {
+					let uint8Array = Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
+					this._internalReader.importAnnotationsFromKOReaderMetadata(uint8Array);
+				}
+				else {
+					this._internalReader.importAnnotationsFromCalibreMetadata();
+				}
+			}
+			catch (e) {
+				Zotero.alert(this._window, Zotero.getString('general.error'), e.message);
+			}
+		}
+	}
+
 	export() {
 		let zp = Zotero.getActiveZoteroPane();
 		zp.exportPDF(this._item.id);
@@ -1294,16 +1332,22 @@ class ReaderWindow extends ReaderInstance {
 	_onFileMenuOpen() {
 		let item = Zotero.Items.get(this._item.id);
 		let library = Zotero.Libraries.get(item.libraryID);
+		
+		let transferFromPDFMenuitem = this._window.document.getElementById('menu_transferFromPDF');
+		let importFromEPUBMenuitem = this._window.document.getElementById('menu_importFromEPUB');
+		
 		if (item
 			&& library.filesEditable
 			&& library.editable
 			&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 			let annotations = item.getAnnotations();
 			let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
-			this._window.document.getElementById('menu_transferFromPDF').setAttribute('disabled', !canTransferFromPDF);
+			transferFromPDFMenuitem.setAttribute('disabled', !canTransferFromPDF);
+			importFromEPUBMenuitem.setAttribute('disabled', false);
 		}
 		else {
-			this._window.document.getElementById('menu_transferFromPDF').setAttribute('disabled', true);
+			transferFromPDFMenuitem.setAttribute('disabled', true);
+			importFromEPUBMenuitem.setAttribute('disabled', true);
 		}
 	}
 
