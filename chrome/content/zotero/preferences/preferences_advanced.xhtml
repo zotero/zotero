@@ -124,8 +124,12 @@
 			<hbox class="preferences-button-group">
 				<button label="&zotero.preferences.dataDir.reveal;"
 					oncommand="Zotero.DataDirectory.reveal()"/>
+				<button id="custom-data-dir" data-l10n-id="preferences-advanced-custom-data-dir"
+					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(true)"/>
 				<button id="reset-data-dir" data-l10n-id="preferences-advanced-reset-data-dir"
-					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(false)"/>
+					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(false)" aria-describedby="default-dara-dir"/>
+				<html:input id="default-dara-dir" data-l10n-id="preferences-advanced-default-data-dir"
+					data-l10n-attrs="value" readonly="true" class="directory-path"/>
 				<button id="migrate-data-dir" label="&zotero.preferences.dataDir.migrate;"
 					oncommand="Zotero_Preferences.Advanced.migrateDataDirectory()" hidden="true"/>
 			</hbox>

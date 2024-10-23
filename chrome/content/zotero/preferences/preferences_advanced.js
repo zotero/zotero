@@ -353,9 +353,17 @@ Zotero_Preferences.Advanced = {
 			'hidden', !Zotero.DataDirectory.canMigrate()
 		);
 
+		let changeDatadir = document.getElementById("change-data-dir");
+		changeDatadir.hidden = this._usingDefaultDataDir();
+
+		let customDataDir = document.getElementById("custom-data-dir");
+		customDataDir.hidden = !this._usingDefaultDataDir();
+
 		let revertToDefaultDir = document.getElementById("reset-data-dir");
+		let revertToDefaultDirLabel = document.getElementById("default-dara-dir");
 		revertToDefaultDir.hidden = this._usingDefaultDataDir();
-		revertToDefaultDir.setAttribute('data-l10n-args', `{"tooltiptext": "${Zotero.DataDirectory.defaultDir}"}`);
+		revertToDefaultDirLabel.hidden = this._usingDefaultDataDir();
+		document.l10n.setArgs(revertToDefaultDirLabel, { directory: Zotero.DataDirectory.defaultDir });
 		this.setDataDirInput();
 	},
 	

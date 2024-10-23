@@ -439,6 +439,20 @@ Zotero.DataDirectory = {
 		// Clear legacy pref
 		Zotero.Prefs.clear('lastDataDir');
 		Zotero.Prefs.set('useDataDir', true);
+
+		// Update prefs depending on if the new path is default or custom
+		// Currently, leads to breakage if you switch to a custom directory and
+		// then select to go back to default directory. After reload, selected
+		// directory will have " default" appended to it ...
+		// if (path == this.defaultDir) {
+		// 	Zotero.Prefs.set('useDataDir', false);
+		// 	Zotero.Prefs.set('dataDir', "");
+		// }
+		// else {
+		// 	Zotero.Prefs.set('useDataDir', true);
+		// 	Zotero.Prefs.set('dataDir', path);
+		// }
+
 		
 		return path != origPath;
 	},
