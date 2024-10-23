@@ -2676,7 +2676,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		menupopup.appendChild(sep);
 
 		//
-		// Move Column Back
+		// Move Column Left
 		//
 		let moveColumnMenu = document.createXULElement('menu');
 		document.l10n.setAttributes(moveColumnMenu, `menu-view-columns-move-${Zotero.rtl ? "right" : "left"}`);
