@@ -745,63 +745,143 @@ class ReaderInstance {
 	}
 
 	async importFromEPUB() {
-		let fp = new FilePicker();
-		fp.init(this._window, Zotero.getString('pdfReader.importFromEPUB.title'), fp.modeOpen);
-		fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
-		if (await fp.show() !== fp.returnOK) {
-			return;
-		}
+		let getKOReaderInput = async (path) => {
+			// KOReader metadata is never embedded, so we just need to check
+			// ./[basename-without-.epub].sdr/metadata.epub.lua
+			if (path.endsWith('.epub')) {
+				path = PathUtils.join(path.slice(0, -5) + '.sdr', 'metadata.epub.lua');
+			}
+			else if (!path.endsWith('.lua')) {
+				return null;
+			}
+			if (!await IOUtils.exists(path)) {
+				return null;
+			}
+			return Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
+		};
 		
-		let path = fp.file;
-		if (path.endsWith('.epub')) {
-			let koReaderLuaPath = PathUtils.join(path.slice(0, -5) + '.sdr', 'metadata.epub.lua');
-			let calibreMetadataPath = PathUtils.joinRelative(path, 'metadata.opf');
-			if (await IOUtils.exists(koReaderLuaPath)) {
-				path = koReaderLuaPath;
+		let getCalibreInput = async (path) => {
+			let externalPath = PathUtils.filename(path).endsWith('.opf')
+				? path
+				: PathUtils.join(PathUtils.parent(path), 'metadata.opf');
+			if (await IOUtils.exists(externalPath)) {
+				return Zotero.File.getContentsAsync(externalPath);
 			}
-			else if (await IOUtils.exists(calibreMetadataPath)) {
-				path = calibreMetadataPath;
+			if (!path.endsWith('.epub')) {
+				return null;
 			}
-		}
-		try {
-			if (path.endsWith('.lua')) {
-				let uint8Array = Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
-				this._internalReader.importAnnotationsFromKOReaderMetadata(uint8Array);
+			
+			let epubZip;
+			try {
+				epubZip = new ZipReader(Zotero.File.pathToFile(path));
 			}
-			else if (path.endsWith('.opf')) {
-				let json = await Zotero.File.getContentsAsync(path);
-				this._internalReader.importAnnotationsFromCalibreMetadata(json);
+			catch (e) {
+				Zotero.logError(e);
+				return null;
+			}
+			
+			try {
+				const CALIBRE_BOOKMARKS_PATH = 'META-INF/calibre_bookmarks.txt';
+				if (!epubZip.hasEntry(CALIBRE_BOOKMARKS_PATH)) {
+					return null;
+				}
+				// Await before returning for the try-finally
+				return await Zotero.File.getContentsAsync(epubZip.getInputStream(CALIBRE_BOOKMARKS_PATH));
+			}
+			finally {
+				epubZip.close();
+			}
+		};
+		
+		let selectFile = async () => {
+			let fp = new FilePicker();
+			fp.init(this._window, Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'), fp.modeOpen);
+			fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
+			if (await fp.show() !== fp.returnOK) {
+				return null;
+			}
+			return fp.file;
+		};
+		
+		let path = this._item.getFilePath() || await selectFile();
+		while (path) {
+			let koReaderInput;
+			try {
+				koReaderInput = await getKOReaderInput(path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			let calibreInput;
+			try {
+				calibreInput = await getCalibreInput(path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			let koReaderStats = koReaderInput && this._internalReader.getKOReaderAnnotationStats(koReaderInput);
+			let calibreStats = calibreInput && this._internalReader.getCalibreAnnotationStats(calibreInput);
+			let stats = koReaderStats || calibreStats || { count: 0 };
+			
+			if (stats.count) {
+				let ps = Services.prompt;
+				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+					+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+				let index = ps.confirmEx(
+					this._window,
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-text', {
+						count: stats.count,
+						lastModifiedRelative: Zotero.Date.toRelativeDate(stats.lastModified),
+						tool: stats === koReaderStats ? 'KOReader' : 'Calibre',
+					}),
+					buttonFlags,
+					Zotero.getString('general.import'),
+					'',
+					Zotero.getString('pdfReader.importFromEPUB.selectOther'),
+					'', {}
+				);
+				if (index === 0) {
+					try {
+						if (stats === koReaderStats) {
+							this._internalReader.importAnnotationsFromKOReaderMetadata(koReaderInput);
+						}
+						else {
+							this._internalReader.importAnnotationsFromCalibreMetadata(calibreInput);
+						}
+					}
+					catch (e) {
+						Zotero.alert(this._window, Zotero.getString('general.error'), e.message);
+					}
+					break;
+				}
+				else if (index === 1) {
+					break;
+				}
 			}
 			else {
-				let epubZip;
-				try {
-					epubZip = new ZipReader(Zotero.File.pathToFile(path));
-				}
-				catch (e) {
-					Zotero.logError(e);
-					Zotero.alert(this._window, Zotero.getString('general.error'),
-						Zotero.getString('pdfReader.importFromEPUB.zipError', Zotero.appName));
-					return;
-				}
-				try {
-					const CALIBRE_BOOKMARKS_PATH = 'META-INF/calibre_bookmarks.txt';
-					if (epubZip.hasEntry(CALIBRE_BOOKMARKS_PATH)) {
-						let json = await Zotero.File.getContentsAsync(epubZip.getInputStream(CALIBRE_BOOKMARKS_PATH));
-						this._internalReader.importAnnotationsFromCalibreMetadata(json);
-					}
-					else {
-						Zotero.alert(this._window, Zotero.getString('general.error'),
-							Zotero.getString('pdfReader.importFromEPUB.noAnnotations1', PathUtils.filename(path))
-								+ '\n\n' + Zotero.getString('pdfReader.importFromEPUB.noAnnotations2'));
-					}
-				}
-				finally {
-					epubZip.close();
+				let ps = Services.prompt;
+				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+				let index = ps.confirmEx(
+					this._window,
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations', {
+						filename: PathUtils.filename(path)
+					}),
+					buttonFlags,
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
+					'', '', '', {}
+				);
+				if (index === 1) {
+					break;
 				}
 			}
-		}
-		catch (e) {
-			Zotero.alert(this._window, Zotero.getString('general.error'), e.message);
+			
+			path = await selectFile();
 		}
 	}
 
