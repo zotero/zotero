@@ -83,6 +83,7 @@ Zotero.Intl = new function () {
 		ftl = new Localization([
 			'branding/brand.ftl',
 			'zotero.ftl',
+			'reader.ftl',
 			// More FTL files can be hardcoded here, or added later with
 			// Zotero.ftl.addResourceIds(['...'])
 		], true);
