@@ -803,7 +803,12 @@ class ReaderInstance {
 			return fp.file;
 		};
 		
-		let path = this._item.getFilePath() || await selectFile();
+		let path = this._item.getFilePath();
+		let isOpenFile = true;
+		if (!path) {
+			path = await selectFile();
+			isOpenFile = false;
+		}
 		while (path) {
 			let koReaderInput;
 			try {
@@ -866,12 +871,16 @@ class ReaderInstance {
 				let ps = Services.prompt;
 				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+				
+				let message = isOpenFile
+					? Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations-current-file')
+					: Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations-other-file', {
+						filename: PathUtils.filename(path)
+					});
 				let index = ps.confirmEx(
 					this._window,
 					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
-					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations', {
-						filename: PathUtils.filename(path)
-					}),
+					message,
 					buttonFlags,
 					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
 					'', '', '', {}
@@ -882,6 +891,7 @@ class ReaderInstance {
 			}
 			
 			path = await selectFile();
+			isOpenFile = false;
 		}
 	}
 
