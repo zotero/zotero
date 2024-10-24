@@ -841,7 +841,7 @@ class ReaderInstance {
 					buttonFlags,
 					Zotero.getString('general.import'),
 					'',
-					Zotero.getString('pdfReader.importFromEPUB.selectOther'),
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
 					'', {}
 				);
 				if (index === 0) {
