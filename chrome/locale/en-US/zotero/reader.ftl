@@ -69,5 +69,5 @@ pdfReader-import-from-epub-no-annotations-current-file =
 pdfReader-import-from-epub-no-annotations-other-file =
     “{ $filename }” does not appear to contain any KOReader or Calibre annotations.
     
-    If this book has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
+    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
 pdfReader-import-from-epub-select-other = Select Other File…
