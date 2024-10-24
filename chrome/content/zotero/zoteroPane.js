@@ -4172,11 +4172,18 @@ var ZoteroPane = new function()
 	this.buildAddItemToCollectionMenu = function (event) {
 		if (event.target !== event.currentTarget) return;
 
-		let popup = event.target;
-		let separator = popup.querySelector('menuseparator');
-		while (popup.childElementCount > 2) {
-			popup.removeChild(popup.lastElementChild);
-		}
+		let popup = document.getElementById("zotero-add-to-collection-popup");
+		popup.replaceChildren();
+
+		// New Collection
+		let addToCollectionMenuItem = document.createXULElement("menuitem");
+		addToCollectionMenuItem.label = Zotero.getString("zotero.toolbar.newCollection.label");
+		addToCollectionMenuItem.addEventListener("command", (_) => {
+			ZoteroPane.addSelectedItemsToCollection();
+		});
+		let addToCollectionSeparator = document.createXULElement("menuseparator");
+		popup.appendChild(addToCollectionMenuItem);
+		popup.appendChild(addToCollectionSeparator);
 
 		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
@@ -4196,29 +4203,188 @@ var ZoteroPane = new function()
 			popup.append(menuItem);
 		}
 
-		separator.setAttribute('hidden', !collections.length);
+		addToCollectionSeparator.setAttribute('hidden', !collections.length);
+
+		// My Publications
+		let separator = document.createXULElement("menuseparator");
+		popup.append(separator);
+		let myPublicationMenuItem;
+		if (this.getSelectedLibraryID() == Zotero.Libraries.userLibraryID) {
+			myPublicationMenuItem = document.createXULElement("menuitem");
+			myPublicationMenuItem.setAttribute("label", Zotero.getString("pane.collections.publications"));
+			myPublicationMenuItem.addEventListener("command", (_) => {
+				this.addSelectedItemsToMyPublications();
+			});
+			popup.append(myPublicationMenuItem);
+			// Cannot add top-level notes/attachment or items that are already in my publications
+			if (items.some(item => item.isNote() || item.isAttachment() || item.inPublications)) {
+				myPublicationMenuItem.disabled = true;
+			}
+		}
+
+		let otherLibraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed || lib.libraryID == this.getSelectedLibraryID()));
+		if (!otherLibraries.length) {
+			separator.hidden = !myPublicationMenuItem;
+			return;
+		}
+
+		// Add to Another Library
+		let otherLibrariesMenu = document.createXULElement("menu");
+		let otherLibrariesPopup = document.createXULElement("menupopup");
+		otherLibrariesMenu.appendChild(otherLibrariesPopup);
+		document.l10n.setAttributes(otherLibrariesMenu, "item-menu-add-to-another-group");
+		popup.appendChild(otherLibrariesMenu);
+
+		for (let library of otherLibraries) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				library,
+				popup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.addSelectedItemsToCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				target => (target instanceof Zotero.Group && !target.editable)
+			);
+			otherLibrariesPopup.append(menuItem);
+		}
+		// Disable destinations where items cannot be added. Essentially a duplicate of
+		// major parts of CollectionTree.canDropCheck and CollectionTree.canDropCheckAsyns
+		(async () => {
+			for (let library of otherLibraries) {
+				let disableLibraryMenu = true;
+				let objectsForMenuItems = [library, ...Zotero.Collections.getByLibrary(library.libraryID, true)];
+				let linkedItems = {};
+				for (let obj of objectsForMenuItems) {
+					let disableMenuItem = true;
+					for (let item of items) {
+						let movingLinkedFile = item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
+						let linkedItem = linkedItems[item.id] || await item.getLinkedItem(library.libraryID, true);
+
+						// Cannot move an attachment if group's files are not editable
+						// Cannot move linked files into groups either
+						if (item.isAttachment() && (movingLinkedFile || !library.filesEditable)) {
+							continue;
+						}
+
+						// Cannot move an item if a linked item exists and is not top-level
+						if (linkedItem && !linkedItem.deleted && !linkedItem.isTopLevelItem()) {
+							continue;
+						}
+	
+						// Cannot add item into top-level group if it already has a linked item
+						if (obj instanceof Zotero.Library && linkedItem && !linkedItem.deleted) {
+							continue;
+						}
+
+						// Cannot add item into collections that already contain the linked item
+						if (obj instanceof Zotero.Collection && obj.hasItem(linkedItem.id)) {
+							continue;
+						}
+						disableMenuItem = false;
+					}
+					if (disableMenuItem) {
+						let value = obj instanceof Zotero.Library ? `L${obj.libraryID}` : `C${obj.id}`;
+						popup.querySelector(`menuitem[value="${value}"]`).disabled = true;
+						continue;
+					}
+					disableLibraryMenu = false;
+				}
+				
+				if (disableLibraryMenu) {
+					popup.querySelectorAll(`[value="L${library.libraryID}"]`).forEach((menu) => {
+						menu.disabled = true;
+					});
+				}
+			}
+		})();
 	};
 
 
-	this.addSelectedItemsToCollection = async function (collection, createNew = false) {
+	this.addSelectedItemsToCollection = async function (target) {
 		// Get items first because newCollection() will deselect
 		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
 
-		if (createNew) {
-			if (collection) {
-				throw new Error('collection must be null if createNew is true');
-			}
+		if (!target) {
 			// Only allow targets within the current library for now
 			// TODO: Come back to this once we support copying items between libraries from the Add to Collection menu
 			let id = await this.newCollection();
 			if (!id) {
 				return;
 			}
-			collection = Zotero.Collections.get(id);
+			target = Zotero.Collections.get(id);
 		}
 
-		await Zotero.DB.executeTransaction(
-			() => collection.addItems(items.map(item => item.id)));
+		if (!(target instanceof Zotero.Collection || target instanceof Zotero.Library)) {
+			throw Error("Target has to be a library or a collection");
+		}
+
+		let targetTreeRowID = target instanceof Zotero.Library ? `L${target.libraryID}` : `C${target.id}`;
+		let targetTreeRowIndex = ZoteroPane.collectionsView.getRowIndexByID(targetTreeRowID);
+		let targetTreeRow = ZoteroPane.collectionsView.getRow(targetTreeRowIndex);
+
+		let itemIDs = items.map(item => item.id);
+		// Moving between libraries, largely replicated collectionTree onDrop logic
+		if (this.getSelectedLibraryID() !== target.libraryID) {
+			let copyOptions = {
+				tags: Zotero.Prefs.get('groups.copyTags'),
+				childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+				childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+				childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+				annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+			};
+			let copiedItemIDs = [];
+			await Zotero.Utilities.Internal.forEachChunkAsync(
+				items,
+				100,
+				function (chunk) {
+					return Zotero.DB.executeTransaction(async () => {
+						for (let item of chunk) {
+							var id = await ZoteroPane.collectionsView._copyItem({
+								item,
+								targetLibraryID: target.libraryID,
+								targetTreeRow,
+								options: copyOptions
+							});
+							// Standalone attachments might not get copied
+							if (!id) {
+								continue;
+							}
+							copiedItemIDs.push(id);
+						}
+					});
+				}
+			);
+			itemIDs = copiedItemIDs;
+		}
+		if (target instanceof Zotero.Collection) {
+			await Zotero.DB.executeTransaction(async () => {
+				let collection = await Zotero.Collections.getAsync(target.id);
+				await Zotero.Items.getAsync(itemIDs);
+				await collection.addItems(itemIDs);
+			});
+		}
+	};
+
+	this.addSelectedItemsToMyPublications = async function () {
+		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
+		let io = window.ZoteroPane.showPublicationsWizard(items);
+		if (!io) {
+			return;
+		}
+		let copyOptions = {
+			tags: Zotero.Prefs.get('groups.copyTags'),
+			childNotes: io.includeNotes,
+			childLinks: true,
+			childFileAttachments: io.includeFiles,
+			annotations: false,
+			keepRights: io.keepRights,
+			license: io.license,
+			licenseName: io.licenseName
+		};
+		await Zotero.Items.addToPublications(items, copyOptions);
 	};
 
 	

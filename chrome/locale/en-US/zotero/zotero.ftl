@@ -138,6 +138,8 @@ item-menu-add-url =
      .label = Web Link
 item-menu-change-parent-item =
      .label = Change Parent Item…
+item-menu-add-to-another-group =
+     .label = Add to Another Library
 
 view-online = View Online
 item-menu-option-view-online =
