@@ -61,9 +61,13 @@ pdfReader-import-from-epub-prompt-text =
         *[other] { $count } { $tool } annotations
     }, last edited { $lastModifiedRelative }.
     
-    Any annotations that have previously been imported from this ebook will be updated.
-pdfReader-import-from-epub-no-annotations =
-    “{ $filename }” does not appear to have any stored annotations. Currently only annotations saved by KOReader and Calibre are supported.
+    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+pdfReader-import-from-epub-no-annotations-current-file =
+    This ebook does not appear to contain any KOReader or Calibre annotations.
+    
+    If you have another copy in your KOReader or Calibre library, { -app-name } can import annotations from that file.
+pdfReader-import-from-epub-no-annotations-other-file =
+    “{ $filename }” does not appear to contain any KOReader or Calibre annotations.
     
     If this book has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
 pdfReader-import-from-epub-select-other = Select Other File…
