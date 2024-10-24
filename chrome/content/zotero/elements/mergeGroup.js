@@ -370,7 +370,7 @@ import ReactDOM from "react-dom";
 			var elementName;
 			switch (this.type) {
 				case 'item':
-					elementName = 'item-box';
+					elementName = 'info-box';
 					break;
 				
 				case 'attachment':

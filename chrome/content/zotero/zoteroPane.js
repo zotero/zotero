@@ -1326,7 +1326,7 @@ var ZoteroPane = new function()
 						var mru = Zotero.Prefs.get('newItemTypeMRU');
 						var type = mru ? mru.split(',')[0] : 'book';
 						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
-						let itemBox = document.getElementById('zotero-editpane-item-box');
+						let itemBox = document.getElementById('zotero-editpane-info-box');
 						// Ensure itemBox is opened
 						itemBox.open = true;
 						var menu = itemBox.itemTypeMenu;
@@ -1468,7 +1468,7 @@ var ZoteroPane = new function()
 		if (manual) {
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
-			let itemBox = ZoteroPane.itemPane.querySelector("item-box");
+			let itemBox = ZoteroPane.itemPane.querySelector("info-box");
 			// Make sure the item box is opened
 			itemBox.open = true;
 			// Focus the title field
@@ -2159,7 +2159,7 @@ var ZoteroPane = new function()
 		await original.saveTx({ skipDateModifiedUpdate: true });
 		await duplicate.saveTx();
 		
-		ZoteroPane.itemPane.querySelector("item-box").getTitleField().focus();
+		ZoteroPane.itemPane.querySelector("info-box").getTitleField().focus();
 		return duplicate;
 	};
 	

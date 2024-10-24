@@ -40,7 +40,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['context-pane', 'chrome://zotero/content/elements/contextPane.js'],
 		['duplicates-merge-pane', 'chrome://zotero/content/elements/duplicatesMergePane.js'],
 		['guidance-panel', 'chrome://zotero/content/elements/guidancePanel.js'],
-		['item-box', 'chrome://zotero/content/elements/itemBox.js'],
+		// TODO: rename itemBox.js to infoBox.js later to avoid conflict
+		['info-box', 'chrome://zotero/content/elements/itemBox.js'],
 		['item-details', 'chrome://zotero/content/elements/itemDetails.js'],
 		['item-pane', 'chrome://zotero/content/elements/itemPane.js'],
 		['item-message-pane', 'chrome://zotero/content/elements/itemMessagePane.js'],
