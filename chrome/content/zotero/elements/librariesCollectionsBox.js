@@ -235,8 +235,7 @@ import { getCSSIcon } from 'components/icons';
 			if (this._isAlreadyRendered()) return;
 
 			this._body.replaceChildren();
-			
-			for (let item of [this._item]) {
+			for (let item of [this._item, ...this._linkedItems]) {
 				this._addObject(Zotero.Libraries.get(item.libraryID), item);
 				for (let collection of Zotero.Collections.get(item.getCollections())) {
 					this._addObject(collection, item);
