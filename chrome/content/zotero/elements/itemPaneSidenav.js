@@ -29,13 +29,13 @@
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="inherit-flex highlight-notes-inactive">
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-info"
 						data-pane="info"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-abstract"
@@ -47,13 +47,13 @@
 						data-l10n-id="sidenav-attachment-preview"
 						data-pane="attachment-preview"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-attachments"
 						data-pane="attachments"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-notes"
@@ -71,19 +71,19 @@
 						data-l10n-id="sidenav-attachment-annotations"
 						data-pane="attachment-annotations"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-libraries-collections"
 						data-pane="libraries-collections"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-tags"
 						data-pane="tags"/>
 				</html:div>
-				<html:div class="pin-wrapper">
+				<html:div class="pin-wrapper show-by-default">
 					<toolbarbutton
 						disabled="true"
 						data-l10n-id="sidenav-related"
@@ -101,7 +101,7 @@
 			
 			<html:div class="divider"/>
 			
-			<html:div class="pin-wrapper">
+			<html:div class="pin-wrapper show-by-default">
 				<toolbarbutton
 					tooltiptext="&zotero.toolbar.openURL.label;"
 					type="menu"
@@ -297,14 +297,15 @@
 				sidenavOptions = JSON.parse(pane.dataset.sidenavOptions);
 			}
 			catch (e) {}
-			let { icon, darkIcon, l10nID, l10nArgs } = sidenavOptions;
+			let { icon, darkIcon, l10nID, l10nArgs, showByDefault } = sidenavOptions;
 			if (!darkIcon) darkIcon = icon;
 			toolbarbutton = document.createXULElement("toolbarbutton");
 			toolbarbutton.setAttribute("custom", "true");
 			toolbarbutton.dataset.pane = paneID;
 			toolbarbutton.dataset.l10nId = l10nID;
 			toolbarbutton.dataset.l10nArgs = l10nArgs;
-			toolbarbutton.style = `--custom-sidenav-icon-light: url('${icon}'); --custom-sidenav-icon-dark: url('${darkIcon}');`;
+			toolbarbutton.style.setProperty("--custom-sidenav-icon-light", `url('${icon}'`);
+			toolbarbutton.style.setProperty("--custom-sidenav-icon-dark", `url('${darkIcon}'`);
 			toolbarbutton.addEventListener('contextmenu', (event) => {
 				this._contextMenuTarget = paneID;
 				this.querySelector('.zotero-menuitem-pin').hidden = this.pinnedPane == paneID;
@@ -316,6 +317,9 @@
 			let container = document.createElement("div");
 			container.classList.add("pin-wrapper");
 			container.classList.add("pinnable");
+			if (showByDefault) {
+				container.classList.add("show-by-default");
+			}
 			container.append(toolbarbutton);
 			if (this._defaultStatus) toolbarbutton.disabled = true;
 			toolbarbutton.parentElement.hidden = this._defaultStatus || !this.container.getEnabledPane(paneID);
@@ -350,6 +354,7 @@
 
 		toggleDefaultStatus(isDefault) {
 			this._defaultStatus = isDefault;
+			this.classList.toggle("default-status", isDefault);
 			this.renderDefaultStatus();
 		}
 
@@ -357,9 +362,6 @@
 			if (this._defaultStatus) {
 				this.querySelectorAll('toolbarbutton[data-pane]').forEach((elem) => {
 					elem.disabled = true;
-					elem.parentElement.hidden = !(
-						["info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"]
-							.includes(elem.dataset.pane));
 				});
 
 				this.querySelectorAll('toolbarbutton[data-action]').forEach((elem) => {
