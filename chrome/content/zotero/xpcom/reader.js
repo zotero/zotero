@@ -803,7 +803,7 @@ class ReaderInstance {
 			return fp.file;
 		};
 		
-		let path = this._item.getFilePath();
+		let path = await this._item.getFilePathAsync();
 		let isOpenFile = true;
 		if (!path) {
 			path = await selectFile();
