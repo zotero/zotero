@@ -744,7 +744,11 @@ class ReaderInstance {
 		}
 	}
 
-	async importFromEPUB() {
+	/**
+	 * @param {string} [path] For tests: used instead of getFilePathAsync()
+	 * @returns {Promise<void>}
+	 */
+	async importFromEPUB(path = null) {
 		let getKOReaderInput = async (path) => {
 			// KOReader metadata is never embedded, so we just need to check
 			// ./[basename-without-.epub].sdr/metadata.epub.lua
@@ -803,7 +807,7 @@ class ReaderInstance {
 			return fp.file;
 		};
 		
-		let path = await this._item.getFilePathAsync();
+		path ??= await this._item.getFilePathAsync();
 		let isOpenFile = true;
 		if (!path) {
 			path = await selectFile();
