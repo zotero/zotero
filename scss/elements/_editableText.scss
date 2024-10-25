@@ -101,7 +101,7 @@ editable-text {
 			box-shadow: 0 0 0 1px var(--fill-quinary);
 		}
 
-		&:focus {
+		&:focus:not(:read-only) {
 			background: var(--material-background);
 		}
 		
