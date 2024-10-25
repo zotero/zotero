@@ -2927,7 +2927,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		else if (column.renderCell) {
 			try {
-				cell = column.renderCell.apply(this, arguments);
+				// Pass document to renderCell so that it can create elements
+				cell = column.renderCell.apply(this, [...arguments, document]);
 			}
 			catch (e) {
 				Zotero.logError(e);

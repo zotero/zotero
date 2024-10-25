@@ -88,12 +88,14 @@ class ItemTreeManager {
 	 *         // return: the data to display in the column
 	 *         return item.getField('title').split('').reverse().join('');
 	 *     },
-	 *     renderCell: (index, data, column) => {
+	 *     renderCell: (index, data, column, isFirstColumn, doc) => {
 	 *         // index: the index of the row
 	 *         // data: the data to display in the column, return of `dataProvider`
 	 *         // column: the column options
+	 *         // isFirstColumn: true if this is the first column
+	 *         // doc: the document of the item tree
 	 *         // return: the HTML to display in the cell
-	 *         const cell = document.createElement('span');
+	 *         const cell = doc.createElement('span');
 	 *         cell.className = `cell ${column.className}`;
 	 *         cell.textContent = data;
 	 *         cell.style.color = 'red';
