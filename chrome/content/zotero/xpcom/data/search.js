@@ -328,13 +328,12 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 				this.addCondition('field', operator, part.text, false);
 				this.addCondition('tag', operator, part.text, false);
 				this.addCondition('note', operator, part.text, false);
+				this.addCondition('annotationText', operator, part.text, false);
+				this.addCondition('annotationComment', operator, part.text, false);
 			}
 			this.addCondition('creator', operator, part.text, false);
 			
 			if (condition == 'quicksearch-everything') {
-				this.addCondition('annotationText', operator, part.text, false);
-				this.addCondition('annotationComment', operator, part.text, false);
-				
 				if (part.inQuotes) {
 					this.addCondition('fulltextContent', operator, part.text, false);
 				}
