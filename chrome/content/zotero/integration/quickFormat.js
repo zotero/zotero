@@ -352,8 +352,10 @@ var Zotero_QuickFormat = new function () {
 				_openReferencePanel();
 				return;
 			}
-			// Otherwise, run the search if the input is non-empty.
-			if (!isInputEmpty(newInput)) {
+			// Otherwise, run the search if the input is non-empty
+			// or if we are citing notes (in which case, if the input is empty,
+			// most-recently modified notes are displayed)
+			if (!isInputEmpty(newInput) || Zotero_QuickFormat.citingNotes) {
 				_resetSearchTimer();
 			}
 			else {
@@ -700,7 +702,7 @@ var Zotero_QuickFormat = new function () {
 				selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isNote());
 			}
 		}
-		if (!searchString) {
+		if (!searchString && selectedItems.length) {
 			return [selectedItems, []];
 		}
 		else if (!searchResultIDs.length) {
