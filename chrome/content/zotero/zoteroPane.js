@@ -5339,7 +5339,7 @@ var ZoteroPane = new function()
 			}
 		}
 		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
-		window.openDialog('chrome://zotero/content/publicationsDialog.xhtml','','chrome,modal', io);
+		window.openDialog('chrome://zotero/content/publicationsDialog.xhtml', '', 'chrome,modal,centerscreen', io);
 		return io.keepRights !== undefined ? io : false;
 	};
 	
