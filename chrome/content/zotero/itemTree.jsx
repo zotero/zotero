@@ -705,6 +705,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 							sort = id;
 						}
 					}
+					// If a child item is modified and its parent's row is expanded,
+					// collapse and re-open the parent.
+					else {
+						let parentItem = Zotero.Items.get(item.parentItemID);
+						let parentItemRowIndex = this.getRowIndexByID(parentItem.id);
+						if (parentItemRowIndex === false) continue;
+						if (this.isContainerOpen(parentItemRowIndex)) {
+							await this._closeContainer(parentItemRowIndex);
+							await this.toggleOpenState(parentItemRowIndex);
+						}
+					}
 				}
 
 				if (sort && ids.length != 1) {
