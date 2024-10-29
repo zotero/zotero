@@ -64,6 +64,10 @@ menu-deletePermanently =
     .label = Трајно избриши…
 menu-tools-plugins =
     .label = Прикључци
+menu-view-columns-move-left =
+    .label = Move Column Left
+menu-view-columns-move-right =
+    .label = Move Column Right
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -602,14 +606,14 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = Морате да изаберете разрешитеља из површи { $pane } у подешавањима програма { -app-name }.
 architecture-win32-warning-message = Пребаците се на 64-творо битни { -app-name } за бржи рад програма. Ваши подаци неће бити промењени.
 architecture-warning-action = Преузми 64-творо битни { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
+architecture-x64-on-arm64-message = { -app-name } је покренут у кроз емулацију. Нативна верзија програма { -app-name } је много ефикаснија.
+architecture-x64-on-arm64-action = Преузми { -app-name } за АРМ64
 first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
+    Унесите наслов, аутора и/или годину да потражите реферецну.
     
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Након што направите избор, кликните на балончић или изаберите ставку преко тастатуре и притисните ↓/размак да прикажете додатне опције цитата као што су број странице, префикс или суфикс.
     
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
+    Можете додати број странице и директно, тако што га унесете у поље за претрагу или га откуцате након балончића и притиснете { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }

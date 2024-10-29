@@ -131,7 +131,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Indlæser mærker...">
 <!ENTITY zotero.tagSelector.showAutomatic "Vis automatisk">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Vis alle mærker i dette Bibliotek">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Slet automatiske tags i dette bibliotek">
 <!ENTITY zotero.tagSelector.clearAll "Fravælg alle">
 <!ENTITY zotero.tagSelector.assignColor "Tilknyt farve...">
 <!ENTITY zotero.tagSelector.renameTag "Omdøb mærket ...">
@@ -144,11 +144,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "Sæt farve:">
 <!ENTITY zotero.tagColorChooser.removeColor "Fjern farve">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Indtast ISBN'er, DOI'er, PMID'er, eller arXiv ID'er som skal tilføjes til dit bibliotek:">
 <!ENTITY zotero.lookup.button.search "Søg">
 
 <!ENTITY zotero.createParent.title "Opret moder-element">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.button.manual "Manuel indtastning">
 
 <!ENTITY zotero.selectitems.title "Vælg elementer">
 <!ENTITY zotero.selectitems.intro.label "Vælg de elementer, du ønsker at tilføje til dit bibliotek">
@@ -177,7 +177,7 @@
 <!ENTITY zotero.import "Importér">
 <!ENTITY zotero.import.whereToImportFrom "Hvor vil du importere fra?">
 <!ENTITY zotero.import.source.file "En fil (BibTeX, RIS, Zotero RDF osv.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.source.folder "En mappe med PDF'er eller andre filer">
 <!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importerer…">
 <!ENTITY zotero.import.database "Database">
@@ -185,7 +185,7 @@
 <!ENTITY zotero.import.size "Størrelse">
 <!ENTITY zotero.import.createCollection "Placér importerede samlinger og nye elementer i den nye samling">
 <!ENTITY zotero.import.fileHandling "Filhåndtering">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Download kun nye emner; opdater ikke tidligere importerede emner">
 
 <!ENTITY zotero.exportOptions.title "Eksportér...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Sorter kilder">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Udelad forfatter/ophav">
 <!ENTITY zotero.citation.prefix.label "Præfiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
 <!ENTITY zotero.citation.editorWarning.label "Advarsel: hvis du redigerer en reference i editoren vil den ikke længere blive opdateret når der sker ændringer i din database eller reference-typografi.">
@@ -228,14 +228,14 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Brug MEDLINE's tidsskriftforkortelser">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Feltet “Journal Abbr” vil blive ignoreret.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Skift til et anden tekstbehandlerprogram ">
 
 <!ENTITY zotero.integration.showEditor.label "Vis editor">
 <!ENTITY zotero.integration.classicView.label "Klassisk visning">
 
 <!ENTITY zotero.integration.references.label "Referencer i referenceliste">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Stop synkronisering">
 <!ENTITY zotero.sync.error "Synkroniseringsfejl">
 <!ENTITY zotero.sync.storage.progress "Fremdrift:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
@@ -301,33 +301,33 @@
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Tilføj emne note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Til emne note fra Kommentar">
+<!ENTITY zotero.context.addStandaloneNote "Tilføj selvstændig note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Tilføj selvstændig note fra Kommentar">
+<!ENTITY zotero.context.editInWindow "Redigér i nyt vindue">
 
 <!ENTITY zotero.pdfReader.firstPage "Første side">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.lastPage "Sidste side">
+<!ENTITY zotero.pdfReader.back "Tilbage">
+<!ENTITY zotero.pdfReader.forward "Frem">
+<!ENTITY zotero.pdfReader.handTool "Håndværktøj">
+<!ENTITY zotero.pdfReader.verticalScrolling "Lodret rulning">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vandret rulning">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Omløbende rulning">
+<!ENTITY zotero.pdfReader.noSpreads "Ingen opslag">
+<!ENTITY zotero.pdfReader.oddSpreads "Ulige opslag">
+<!ENTITY zotero.pdfReader.evenSpreads "Llige opslag">
+<!ENTITY zotero.pdfReader.scrolled "Rullet">
+<!ENTITY zotero.pdfReader.paginated "Pagineret">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom ind">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom ud">
+<!ENTITY zotero.pdfReader.zoomReset "Reset zoom">
+<!ENTITY zotero.pdfReader.zoomAuto "Tilpas størrelse automatisk">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom til sidens bredde">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidens højde">
+<!ENTITY zotero.pdfReader.splitVertically "Opdel lodret">
+<!ENTITY zotero.pdfReader.splitHorizontally "Opdel vandret">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importer kommentarer…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Roter side til venstre">
+<!ENTITY zotero.pdfReader.rotatePageRight "Roter side til højre">

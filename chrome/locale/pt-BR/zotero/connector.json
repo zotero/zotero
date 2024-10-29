@@ -24,13 +24,13 @@
     "message": "Aviso"
   },
   "general_ok": {
-    "message": "Ok"
+    "message": "OK"
   },
   "general_cancel": {
     "message": "Cancelar"
   },
   "general_selectAll": {
-    "message": "Select All"
+    "message": "Marcar todas"
   },
   "general_deselectAll": {
     "message": "Desmarcar todas"
@@ -68,17 +68,41 @@
   "progressWindow_detailsBtnHide": {
     "message": "Ocultar detalhes"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Seletor de coleção alvo"
+  },
   "progressWindow_savingItems": {
-    "message": "A guardar $1 itens. $2"
+    "message": "Salvando $1 itens. $2"
   },
   "progressWindow_savingItem": {
-    "message": "A guardar o item $1"
+    "message": "Salvando o item $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Item $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 salvo"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Salvo $1 para o item $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Falha ao baixar $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Falha ao baixar $1 para o item $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Salvo com sucesso. A caixa de diálogo irá fechar agora."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Os itens desta página web já foram salvos."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por vírgula)"
   },
   "progressWindow_filterPlaceholder": {
-    "message": "Filtrar Coleções"
+    "message": "Filtrar coleções"
   },
   "progressWindow_error_translation": {
     "message": "Ocorreu um erro ao salvar esse item. Veja $1para mais detalhes."
@@ -101,6 +125,9 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versão"
   },
+  "itemSelector_title": {
+    "message": "Selecione quais itens você gostaria de adicionar à sua biblioteca:"
+  },
   "extensionIsDisabled": {
     "message": "$1 Conector indisponível nesta página"
   },
@@ -117,16 +144,16 @@
     "message": "Atualização $1"
   },
   "firstRun_title": {
-    "message": "Você instalou o Connector $1!"
+    "message": "Você instalou o conector $1!"
   },
   "firstRun_text1": {
-    "message": "O Conector $1 permite que você <a href=\"$2\"> salve itens no $1 </a> a partir do seu navegador com um único clique."
+    "message": "O conector $1 permite que você <a href=\"$2\"> salve itens no $1 </a> a partir do seu navegador com um único clique."
   },
   "firstRun_text2": {
-    "message": "Se você ainda não o fez, <a href=\"$2\">baixe </a> a aplicação $1 standalone para uma melhor experiência."
+    "message": "Se ainda não o fez, <a href=\"$2\">baixe</a> o aplicativo $1 para ter uma melhor experiência."
   },
   "firstRun_acceptButton": {
-    "message": "Percebi"
+    "message": "Entendi"
   },
   "error_connection_isAppRunning": {
     "message": "$1 está rodando?"
@@ -175,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 bloqueia o seu documento para prevenir que múltiplos usuários editem citações ao mesmo tempo. Edição de citação simultânea no documento pode corromper a citação ou o documento. Algumas circunstâncias, como problemas de conexão, podem bloquear seu documento permanentemente. Se você acredita que isso tenha acontecido, você pode sobrepor o bloqueio. <br/><br/>Você gostaria de sobrepor o bloqueio do documento?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 precisa de permissão para editar seus documentos Google Docs a fim de inserir citações. Por favor, tente novamente e certifique-se de permitir que $1 veja, edite, crie e exclua seus documentos Google Docs."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "A conta Google que você selecionou não tem permissão para editar este documento. Por favor, tente novamente e certifique-se de escolher uma conta com permissão de edição"

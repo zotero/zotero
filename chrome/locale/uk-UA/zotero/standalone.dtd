@@ -22,8 +22,8 @@
 <!ENTITY closeCmd.label "Закрити">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Керування вкладеннями">
+<!ENTITY convertToStored.label "Перетворити пов’язані файли на збережені…">
 <!ENTITY importCmd.label "Імпорт...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Імпорт з буферу обміну">
@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Копіювати цитату">
 <!ENTITY copyBibliographyCmd.label "Копіювати список літератури">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Копіювати примітку">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Переключити напрямок сторінки">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

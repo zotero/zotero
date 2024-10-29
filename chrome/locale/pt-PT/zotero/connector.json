@@ -68,11 +68,35 @@
   "progressWindow_detailsBtnHide": {
     "message": "Ocultar detalhes"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Seletor de coleção alvo"
+  },
   "progressWindow_savingItems": {
     "message": "A guardar $1 itens. $2"
   },
   "progressWindow_savingItem": {
     "message": "A guardar o item $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Item $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 salvo"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Salvo $1 para o item $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Falha ao baixar $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Falha ao baixar $1 para o item $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Salvo com sucesso. A caixa de diálogo irá fechar agora."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Os itens desta página web já foram salvos."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por vírgulas)"
@@ -101,6 +125,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versão"
   },
+  "itemSelector_title": {
+    "message": "Selecione quais itens você gostaria de adicionar à sua biblioteca:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 está desabilitado"
+  },
   "extensionIsDisabled_fileURL": {
     "message": "$1 Conector indisponível para URL de ficheiro"
   },
@@ -118,6 +148,9 @@
   },
   "firstRun_text1": {
     "message": "O Conector $1 permite-lhe <a href=\"$2\">guardar itens no $1 </a> a partir do seu navegador com um único clique."
+  },
+  "firstRun_text2": {
+    "message": "Se ainda não o fez, <a href=\"$2\">baixe</a> o aplicativo $1 para ter uma melhor experiência."
   },
   "firstRun_acceptButton": {
     "message": "Percebi"
@@ -169,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 bloqueia o seu documento para prevenir múltiplos utilizadores de editarem citações ao mesmo tempo. A edição de citação em simultâneo no documento pode levar à corrupção da citação ou do documento. Alguns imprevistos, como falhas de rede, podem levar a que o seu documento fique permanentemente bloqueado. Se crê que isto aconteceu, pode sobrepor-se ao bloqueio. <br/><br/>Deseja sobrepor-se o bloqueio do documento?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 precisa de permissão para editar seus documentos Google Docs a fim de inserir citações. Por favor, tente novamente e certifique-se de permitir que $1 veja, edite, crie e exclua seus documentos Google Docs."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "A conta Google que selecionou não tem permissão para editar este documento. Por favor, tente novamente e assegure-se de que escolheu uma conta com acesso à edição"
