@@ -1098,6 +1098,7 @@ class ReaderTab extends ReaderInstance {
 		this._iframe.setAttribute('type', 'content');
 		this._iframe.setAttribute('transparent', 'true');
 		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
+		this._iframe.setAttribute('context', 'textbox-contextmenu');
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
 		
@@ -1107,6 +1108,8 @@ class ReaderTab extends ReaderInstance {
 		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
 		this._window.addEventListener('pointerdown', this._handlePointerDown);
 		this._window.addEventListener('pointerup', this._handlePointerUp);
+
+		this._window.goBuildEditContextMenu();
 
 		this._iframe.setAttribute('tooltip', 'html-tooltip');
 
@@ -1127,6 +1130,19 @@ class ReaderTab extends ReaderInstance {
 			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
 			this._iframeWindow = this._iframe.contentWindow;
 			this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+
+			// Disable text direction switching option because it tries to change direction
+			// for the whole window and crashes it
+			this._iframeWindow.addEventListener('contextmenu', () => {
+				let popup = this._window.goBuildEditContextMenu();
+				this._window.goUpdateGlobalEditMenuItems(true);
+				popup.addEventListener('popupshowing', (e) => {
+					let menuitemSwitchTextDirection = e.target.querySelector("[command='cmd_switchTextDirection']");
+					if (menuitemSwitchTextDirection) {
+						menuitemSwitchTextDirection.hidden = true;
+					}
+				}, { once: true });
+			});
 		}
 	};
 
@@ -1226,6 +1242,18 @@ class ReaderWindow extends ReaderInstance {
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 				this._iframeWindow = this._window.document.getElementById('reader').contentWindow;
 				this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+				this._window.goBuildEditContextMenu();
+				// Disable text direction switching option because it changes direction for the whole window
+				this._iframeWindow.addEventListener('contextmenu', () => {
+					let popup = this._window.goBuildEditContextMenu();
+					this._window.goUpdateGlobalEditMenuItems(true);
+					popup.addEventListener('popupshowing', (e) => {
+						let menuitemSwitchTextDirection = e.target.querySelector("[command='cmd_switchTextDirection']");
+						if (menuitemSwitchTextDirection) {
+							menuitemSwitchTextDirection.hidden = true;
+						}
+					}, { once: true });
+				});
 			}
 
 			this._switchReaderSubtype(this._type);
