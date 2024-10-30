@@ -978,6 +978,23 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.collapseAllRows();
 			return false;
 		}
+		// On arrowUp/down without modifiers in duplicates view, select the entire set
+		else if (this.collectionTreeRow.isDuplicates() && ["ArrowUp", "ArrowDown"].includes(event.key)
+				&& !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+			// Find the first row index before/after the current set
+			let selectedArray = Array.from(this.selection.selected).sort();
+			let nextRowIndex = event.key == "ArrowUp" ? (selectedArray[0] - 1) : (selectedArray[selectedArray.length - 1] + 1);
+			if (nextRowIndex < 0 || nextRowIndex > this._rows.length - 1) return false;
+			// Set that row's item as the next set to select
+			let nextItem = this._rows[nextRowIndex].ref;
+			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(nextItem.id);
+			// Set focus to the first row in the set
+			let itemRows = setItemIDs.map(itemID => this._rowMap[itemID]).sort();
+			this.selection.focused = itemRows[0];
+			
+			this.selectItems(setItemIDs);
+			return false;
+		}
 		return true;
 	}
 
