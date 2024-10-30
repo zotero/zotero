@@ -384,19 +384,10 @@ Zotero.ItemFields = new function() {
 	}
 	
 	
-	/**
-	 * A long field expands into a multiline textbox while editing; newlines are not allowed
-	 */
-	this.isLong = function (field) {
-		field = this.getName(field);
-		var fields = [
-			'title',
-			...this.getTypeFieldsFromBase('title', true),
-			'publicationTitle',
-			...this.getTypeFieldsFromBase('publicationTitle', true),
-		];
-		return fields.indexOf(field) != -1;
-	}
+	this.isLong = function () {
+		Zotero.warn('Zotero.ItemFields.isLong() is deprecated -- update your code');
+		return true;
+	};
 	
 	
 	/**
