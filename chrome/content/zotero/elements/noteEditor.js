@@ -43,7 +43,7 @@
 				<html:div class="custom-head empty"></html:div>
 				<box flex="1" tooltip="html-tooltip" style="display: flex; flex-grow: 1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
-						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content"/>
+						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content" context="textbox-contextmenu"/>
 						<div id="links-container">
 							<links-box id="links-box" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
 						</div>
@@ -89,6 +89,7 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'file'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
+			window.goBuildEditContextMenu();
 		}
 		
 		destroy() {
