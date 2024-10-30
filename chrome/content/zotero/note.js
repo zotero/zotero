@@ -29,6 +29,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 let noteEditor;
 let notifierUnregisterID;
 
+function showInLibrary() {
+	noteEditor._editorInstance._showInLibrary([noteEditor._editorInstance._item.id]);
+}
+
 async function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];

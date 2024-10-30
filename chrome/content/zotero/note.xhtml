@@ -5,7 +5,9 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 
 <!DOCTYPE window [
-	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+		<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
+		<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
 <window
@@ -16,25 +18,130 @@
 	title="&zotero.items.menu.attach.note;"
 	persist="screenX screenY width height"
 	windowtype="zotero:note"
-    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+>
+
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+		<html:link rel="localization" href="zotero.ftl" />
+	</linkset>
 
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
-		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 
+		// Mozilla scripts
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
+		if (Zotero.isMac) {
+			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
+		}
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/note.js", this);
 	</script>
 
-	<keyset>
-		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
+	<commandset id="mainCommandSet">
+		<!--FILE-->
+		<command id="cmd_close" oncommand="window.close();"/>
+	</commandset>
+
+	<keyset id="mainKeyset">
+		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 	</keyset>
-	<command id="cmd_close" oncommand="window.close();"/>
+
+	<keyset id="editMenuKeys">
+		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
+		<!-- l10n and modifiers set in platformKeys.js -->
+		<key id="key_redo" command="cmd_redo"/>
+		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
+		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
+		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
+		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+		<key id="key_selectAll" data-l10n-id="text-action-select-all-shortcut" modifiers="accel" command="cmd_selectAll"/>
+		<key id="key_find" key="&findCmd.key;" modifiers="accel" command="cmd_find"/>
+		<key id="key_findAgain" key="&findAgainCmd.key;" modifiers="accel" command="cmd_findAgain"/>
+		<key id="key_findPrevious" key="&findAgainCmd.key;" modifiers="shift,accel" command="cmd_findPrevious"/>
+		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
+		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
+	</keyset>
 
 	<tooltip id="html-tooltip" page="true"/>
+
+	<menubar>
+		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+			<menupopup id="menu_FilePopup">
+				<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="showInLibrary()"/>
+				<menuseparator/>
+				<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
+						  accesskey="&closeCmd.accesskey;" command="cmd_close"/>
+			</menupopup>
+		</menu>
+
+		<menu id="edit-menu"  data-l10n-id="menu-edit">
+			<menupopup id="menu_EditPopup">
+				<menuitem id="menu_undo"
+						  key="key_undo"
+						  command="cmd_undo" data-l10n-id="text-action-undo"/>
+				<menuitem id="menu_redo"
+						  key="key_redo"
+						  command="cmd_redo" data-l10n-id="text-action-redo"/>
+				<menuseparator/>
+				<menuitem id="menu_cut"
+						  key="key_cut"
+						  command="cmd_cut" data-l10n-id="text-action-cut"/>
+				<menuitem id="menu_copy"
+						  key="key_copy"
+						  command="cmd_copy" data-l10n-id="text-action-copy"/>
+				<menuitem id="menu_paste"
+						  key="key_paste"
+						  command="cmd_paste" data-l10n-id="text-action-paste"/>
+				<menuitem id="menu_delete"
+						  key="key_delete"
+						  command="cmd_delete" data-l10n-id="text-action-delete"/>
+				<menuseparator/>
+				<menuitem id="menu_selectAll"
+						  key="key_selectAll"
+						  command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+			</menupopup>
+		</menu>
+
+		<commandset id="macCommandSet">
+			<command id="minimizeWindow"
+					 data-l10n-id="window-minimize-command"
+					 oncommand="window.minimize();" />
+			<command id="zoomWindow"
+					 data-l10n-id="window-zoom-command"
+					 oncommand="zoomWindow();" />
+		</commandset>
+
+		<keyset id="macKeyset">
+			<key id="key_minimizeWindow"
+				 command="minimizeWindow"
+				 data-l10n-id="window-minimize-shortcut"
+				 modifiers="accel"
+				 internal="true"/>
+		</keyset>
+
+		<menu id="windowMenu"
+			  data-l10n-id="menu-window-menu">
+			<menupopup id="windowPopup">
+				<menuseparator/>
+				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow"/>
+				<!-- decomment when "BringAllToFront" is implemented
+                    <menuseparator/>
+                    <menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+				<menuseparator id="sep-window-list"/>
+			</menupopup>
+		</menu>
+	</menubar>
 
 	<note-editor id="zotero-note-editor" flex="1" onerror="return;onEditorError()"/>
 </window>
