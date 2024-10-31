@@ -113,7 +113,8 @@
 		</menu>
 
 		<menu id="edit-menu"  data-l10n-id="menu-edit">
-			<menupopup id="menu_EditPopup">
+			<!-- goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused -->
+			<menupopup id="menu_EditPopup" onpopupshowing="goUpdateGlobalEditMenuItems(true)">
 				<menuitem id="menu_undo"
 						  key="key_undo"
 						  command="cmd_undo" data-l10n-id="text-action-undo"/>
