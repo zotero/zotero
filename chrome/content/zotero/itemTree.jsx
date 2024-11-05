@@ -2929,12 +2929,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			try {
 				// Pass document to renderCell so that it can create elements
 				cell = column.renderCell.apply(this, [...arguments, document]);
+				// Ensure that renderCell returns an Element
+				if (!(cell instanceof Element)) {
+					throw new Error('renderCell must return an Element');
+				}
 			}
 			catch (e) {
 				Zotero.logError(e);
 			}
 		}
-		else {
+
+		if (!cell) {
 			cell = renderCell.apply(this, arguments);
 			if (column.dataKey === 'numNotes' && data) {
 				cell.dataset.l10nId = 'items-table-cell-notes';
