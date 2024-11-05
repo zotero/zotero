@@ -217,7 +217,12 @@ class ItemTreeManager {
 	getCustomCellData(item, dataKey) {
 		const options = this._customColumns[dataKey];
 		if (options && options.dataProvider) {
-			return options.dataProvider(item, dataKey);
+			try {
+				return options.dataProvider(item, dataKey);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		return "";
 	}
