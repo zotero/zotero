@@ -4,8 +4,8 @@ var EXPORTED_SYMBOLS = ["ZoteroPrintChild"];
 class ZoteroPrintChild extends JSWindowActorChild {
 	actorCreated() {
 		Cu.exportFunction(
-			() => new this.contentWindow.Promise(
-				(resolve, reject) => this._sendZoteroPrint().then(resolve, reject)
+			options => new this.contentWindow.Promise(
+				(resolve, reject) => this._sendZoteroPrint(options).then(resolve, reject)
 			),
 			this.contentWindow,
 			{ defineAs: "zoteroPrint" }
@@ -20,7 +20,7 @@ class ZoteroPrintChild extends JSWindowActorChild {
 		}
 	}
 
-	async _sendZoteroPrint() {
-		await this.sendQuery("zoteroPrint");
+	async _sendZoteroPrint(options) {
+		await this.sendQuery("zoteroPrint", options);
 	}
 }
