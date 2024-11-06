@@ -599,6 +599,9 @@ class ReaderInstance {
 			let unformatted = Zotero.isWin;
 			let creator = parentItem.getField('firstCreator', unformatted);
 			let year = parentItem.getField('year');
+			if (year == '0000') {
+				year = '';
+			}
 			// Only include parent title if primary attachment
 			let title = isPrimaryAttachment ? parentItem.getDisplayTitle() : false;
 			// If creator is missing fall back to titleCreatorYear
