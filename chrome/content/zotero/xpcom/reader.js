@@ -563,7 +563,10 @@ class ReaderInstance {
 			throw new Error(`The file "${path}" is too large`);
 		}
 		return {
-			url: `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`
+			url: `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`,
+			importedFromURL: this._item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_IMPORTED_URL
+				? this._item.getField('url')
+				: undefined,
 		};
 	}
 
