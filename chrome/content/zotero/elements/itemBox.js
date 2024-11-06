@@ -660,11 +660,6 @@
 				|| Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
 					let optionsButton = document.createXULElement("toolbarbutton");
 					optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover";
-					// Options button after single-line fields will not occupy space unless hovered.
-					// This does not apply to multiline fields because it would move textarea on hover.
-					if (!(Zotero.ItemFields.isLong(fieldName) || Zotero.ItemFields.isMultiline(fieldName))) {
-						optionsButton.classList.add("no-display");
-					}
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					optionsButton.id = `itembox-field-${fieldName}-options`;
 					// eslint-disable-next-line no-loop-func
@@ -1457,7 +1452,7 @@
 			}
 			let openLink = document.createXULElement("toolbarbutton");
 			openLink.id = `itembox-field-${fieldName}-link`;
-			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover no-display";
+			openLink.className = "zotero-clicky zotero-clicky-open-link show-on-hover";
 			openLink.addEventListener("click", event => ZoteroPane.loadURI(value, event));
 			openLink.setAttribute('data-l10n-id', "item-button-view-online");
 			if (!value) openLink.hidden = true;
@@ -1472,15 +1467,14 @@
 			}
 			
 			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
-			let isLong = Zotero.ItemFields.isLong(fieldName);
+			let isNoWrap = fieldName.startsWith('creator-');
 			
 			var valueElement = document.createXULElement("editable-text");
 			valueElement.className = 'value';
 			if (isMultiline) {
 				valueElement.setAttribute('multiline', true);
 			}
-			else if (!isLong) {
-				// Usual fields occupy all available space and keep info on one line
+			else if (isNoWrap) {
 				valueElement.setAttribute("nowrap", true);
 			}
 			
