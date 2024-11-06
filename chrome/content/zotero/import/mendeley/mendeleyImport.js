@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop, camelcase */
-/* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false */
+/* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false, PathUtils: false */
 var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"]; //eslint-disable-line no-unused-vars
 
 Components.utils.import("resource://gre/modules/Services.jsm");
@@ -11,7 +11,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/men
 
 const importerVersion = 1;
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
-const { apiFetch, codeAuth, get, getAll } = mendeleyAPIUtils;
+const { apiFetch, codeAuth, get, getAll, obtainReferenceManagerTokenWithRetry } = mendeleyAPIUtils;
 
 const colorMap = new Map();
 colorMap.set('rgb(255, 245, 173)', '#ffd400');
@@ -36,6 +36,7 @@ var Zotero_Import_Mendeley = function () {
 	this.numRelinked = 0;
 	
 	this._tokens = null;
+	this._credentials = null;
 	this._db = null;
 	this._file = null;
 	this._saveOptions = null;
@@ -123,7 +124,8 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		}
 
 		if (this.mendeleyAuth) {
-			this._tokens = this.mendeleyAuth;
+			this._tokens = this.mendeleyAuth.tokens;
+			this._credentials = { username: this.mendeleyAuth.username, password: this.mendeleyAuth.password };
 		}
 		else if (this.mendeleyCode) {
 			this._tokens = await codeAuth(this.mendeleyCode);
@@ -160,9 +162,10 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			: await this._getDocumentsDB(mendeleyGroupID);
 
 		// Update progress to reflect items to import and remaining meta data stages
-		// We arbitrary set progress at approx 4%. We then add 8, one "tick" for each remaining meta data download.
+		// We arbitrary set progress at approx 4%. We then add 8, one "tick" for each remaining meta data download
+		// Finally we arbitrary add 5 "ticks" to represent the number of notes to download. This will be corrected later
 		this._progress = Math.max(Math.floor(0.04 * documents.length), 2);
-		this._progressMax = documents.length + this._progress + 8;
+		this._progressMax = documents.length + this._progress + 8 + 5;
 		// Get various attributes mapped to document ids
 		let urls = this._tokens
 			? await this._getDocumentURLsAPI(documents)
@@ -320,6 +323,28 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			}
 			this._interruptChecker(true);
 		}
+
+		if (this._credentials) {
+			const token = await obtainReferenceManagerTokenWithRetry(this._credentials.username, this._credentials.password);
+			this._progress += 1; // 1 "tick" for the token request, we have 4 more arbitrary progress "ticks" assigned to this task
+			if (token) {
+				this._refManagerToken = {
+					kind: 'referenceManager',
+					accessToken: token,
+					username: this._credentials.username,
+					password: this._credentials.password
+				};
+				const notebooks = await this._getNotebooksAPI();
+				const notes = await Promise.all(notebooks.map(this._translateNotebookToNote, libraryID));
+				console.log({ notes });
+			}
+		}
+		else {
+			// we cannot obtain notes without reference manager credentials
+			this._progress += 5;
+			Zotero.debug("Skipping import of Mendeley notes as no reference manager credentials provided");
+		}
+
 		if (this.newItemsOnly && rootCollectionKey && this.newItems.length === 0) {
 			Zotero.debug(`Mendeley Import detected no new items, removing import collection containing ${this.newCollections.length} collections created during the import`);
 			const rootCollection = await Zotero.Collections.getAsync(options.collections[0]);
@@ -999,6 +1024,57 @@ Zotero_Import_Mendeley.prototype._getProfileDB = async function () {
 	);
 
 	return rows[0];
+};
+
+Zotero_Import_Mendeley.prototype._getNotebooksAPI = async function () {
+	let params = { };
+	let headers = { Accept: 'application/json' };
+	let notebooksMeta = await getAll(this._refManagerToken, 'notes/v1', params, headers, {}, this._interruptChecker);
+	this._progressMax -= 4; // clear the 4 arbitrary progress "ticks" assigned to this task
+	this._progressMax += notebooksMeta.length; // add a progress "tick" for each notebook
+	let notebookPromises = notebooksMeta.map(async (notebookEntryMeta) => {
+		const id = notebookEntryMeta.id;
+		const noteBookEntry = get(this._refManagerToken, `notes/v1/${id}`, params, headers);
+		this._progress += 1;
+		return noteBookEntry;
+	});
+	return Promise.all(notebookPromises);
+};
+
+Zotero_Import_Mendeley.prototype._translateNotebookToNote = async function (mendeleyNotebook, libraryID) {
+	let zoteroNoteBlocks = mendeleyNotebook.blocks.map((block) => {
+		switch (block.type) {
+			case 'freetext':
+				return block.freetext?.text ? `<p>${block.freetext.text}</p>` : '';
+			case 'Annotation': {
+				const source = block.target?.source;
+				const match = source.match(/https:\/\/api\.mendeley\.com\/documents\/([a-f0-9-]+)\/files\/([a-f0-9-]+)\//);
+				const selector = block.target?.selector;
+				if (match && selector) {
+					const documentUUID = match[1];
+					const annotationUUID = match[2];
+					let document = this._getItemByRelation(
+						libraryID,
+						'mendeleyDB:documentUUID',
+						documentUUID
+					) || this._getItemByRelation(
+						libraryID,
+						'mendeleyDB:remoteDocumentUUID',
+						documentUUID
+					);
+					let annotation = this._getItemByRelation(
+						libraryID,
+						'mendeleyDB:annotationUUID',
+						annotationUUID
+					);
+				}
+				break;
+			}
+		}
+		return '';
+	});
+	let note = zoteroNoteBlocks.join('');
+	return note;
 };
 
 /**
