@@ -993,7 +993,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(nextItem.id);
 			this.selection.focused = nextRowIndex;
 			
-			this.selectItems(setItemIDs);
+			this.selectItems(setItemIDs, false, true).then(() => {
+				// make sure the focused row is visible
+				if (!this.tree.rowIsVisible(nextRowIndex)) {
+					this.ensureRowIsVisible(nextRowIndex);
+				}
+			});
+			
 			return false;
 		}
 		return true;
@@ -1152,7 +1158,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return this.selectItems([id], noRecurse);
 	}
 	
-	async selectItems(ids, noRecurse) {
+	async selectItems(ids, noRecurse, noScroll) {
 		if (!ids.length) return 0;
 		
 		// If no row map, we're probably in the process of switching collections,
@@ -1274,8 +1280,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			this.selection.selectEventsSuppressed = false;
 		}
-		
-		this.ensureRowsAreVisible(rowsToSelect);
+		if (!noScroll) {
+			this.ensureRowsAreVisible(rowsToSelect);
+		}
 		
 		return rowsToSelect.length;
 	}
