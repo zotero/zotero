@@ -191,9 +191,9 @@ var Zotero_Tabs = new function () {
 		if (event !== "modify") return;
 		for (let id of ids) {
 			let item = Zotero.Items.get(id);
-			// If a top level item is updated, update all tabs that have its attachments
+			// If a top-level item is updated, update all tabs that have its attachments
 			// Otherwise, just update the tab with the updated attachment
-			let attachmentIDs = item.isAttachment() ? [id] : (item.getAttachments()).flat();
+			let attachmentIDs = item.isAttachment() ? [id] : item.getAttachments();
 			for (let attachmentID of attachmentIDs) {
 				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
 				if (!relevantTabs.length) continue;

@@ -2491,8 +2491,8 @@ Zotero.Utilities.Internal = {
 	},
 
 	/**
-	 * Costruct item title for a given attachment.
-	 * @param itemID - itemID of the attachment to be opened in the reader.
+	 * Construct item title for a given attachment.
+	 * @param {Number} itemID - itemID of the attachment to be opened in the reader.
 	 */
 	async constructItemTitle(itemID) {
 		let type = Zotero.Prefs.get('tabs.title.reader');
