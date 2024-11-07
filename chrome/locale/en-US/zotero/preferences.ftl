@@ -23,6 +23,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
+preferences-file-renaming-remove-diacritics =
+    .label = Remove diacritics from automatically generated filenames
 
 preferences-file-renaming-format-title = Filename Format
 preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.
