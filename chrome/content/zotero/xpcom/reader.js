@@ -502,12 +502,14 @@ class ReaderInstance {
 				win.ZoteroContextPane.togglePane();
 			},
 			onToolbarShiftTab: () => {
-				// Shift-tab from the toolbar focuses the sync button
+				// Shift-tab from the toolbar focuses the sync button (if reader instance is opened in a tab)
+				if (!this.tabID) return;
 				let win = Zotero.getMainWindow();
 				win.document.getElementById("zotero-tb-sync").focus();
 			},
 			onIframeTab: () => {
-				// Tab after the last tabstop will focus the contextPane
+				// Tab after the last tabstop will focus the contextPane (if reader instance is opened in a tab)
+				if (!this.tabID) return;
 				let win = Zotero.getMainWindow();
 				let focused = win.ZoteroContextPane.focus();
 				// If context pane wasn't focused (e.g. it's collapsed), focus the tab bar
