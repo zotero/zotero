@@ -91,7 +91,7 @@ var Zotero_Tabs = new function () {
 	Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
 		for (let tab of this._tabs) {
 			if (!tab.data.itemID) continue;
-			let title = await Zotero.Utilities.Internal.constructItemTitle(tab.data.itemID);
+			let title = await Zotero.Reader.getTabTitle(tab.data.itemID);
 			this.rename(tab.id, title);
 		}
 	});
@@ -198,7 +198,7 @@ var Zotero_Tabs = new function () {
 				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
 				if (!relevantTabs.length) continue;
 				for (let tab of relevantTabs) {
-					let title = await Zotero.Utilities.Internal.constructItemTitle(attachmentID);
+					let title = await Zotero.Reader.getTabTitle(attachmentID);
 					this.rename(tab.id, title);
 				}
 			}
@@ -299,7 +299,7 @@ var Zotero_Tabs = new function () {
 		// and construct it in async manner below.
 		if (!title && data.itemID) {
 			(async () => {
-				title = await Zotero.Utilities.Internal.constructItemTitle(data.itemID);
+				title = await Zotero.Reader.getTabTitle(data.itemID);
 				this.rename(tab.id, title);
 			})();
 		}
