@@ -1961,8 +1961,9 @@ class Reader {
 	}
 	
 	/**
-	 * Construct item title for a given attachment.
-	 * @param {Number} itemID - itemID of the attachment to be opened in the reader.
+	 * Construct title for the reader tab of a given attachment accounting for "Show tabs as" pref
+	 * @param {Number} itemID - itemID of the attachment
+	 * @returns {String} title for the tab of this item
 	 */
 	async getTabTitle(itemID) {
 		let type = Zotero.Prefs.get('tabs.title.reader');
