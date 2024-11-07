@@ -978,6 +978,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.collapseAllRows();
 			return false;
 		}
+		// On arrowUp/down without modifiers in duplicates view, select the entire set
+		else if (this.collectionTreeRow.isDuplicates() && ["ArrowUp", "ArrowDown"].includes(event.key)
+				&& !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+			// Find the first row outside of the current consecutive set of rows
+			let findNextRow = index => (event.key == "ArrowUp" ? index - 1 : index + 1);
+			let nextRowIndex = findNextRow(this.selection.focused);
+			while (this.selection.selected.has(nextRowIndex)) {
+				nextRowIndex = findNextRow(nextRowIndex);
+			}
+			if (nextRowIndex < 0 || nextRowIndex > this._rows.length - 1) return false;
+			// Set that row as focused and select its item as the next set of duplicates
+			let nextItem = this._rows[nextRowIndex].ref;
+			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(nextItem.id);
+			this.selection.focused = nextRowIndex;
+			
+			this.selectItems(setItemIDs);
+			return false;
+		}
 		return true;
 	}
 
