@@ -1,11 +1,12 @@
-/* global setHTTPResponse:false, sinon: false, Zotero_Import_Mendeley: false, HttpServer: false */
+/* global setHTTPResponse:false, sinon: false, Zotero_Import_Mendeley: false, HttpServer: false, createAnnotation: false */
 
 describe('Zotero_Import_Mendeley', function () {
 	var server, httpd, httpdURL, importers;
 
 	const getImporter = () => {
 		const importer = new Zotero_Import_Mendeley();
-		importer.mendeleyAuth = { access_token: 'access_token', refresh_token: 'refresh_token' };// eslint-disable-line camelcase
+		importer.mendeleyAuth = { kind: 'direct', tokens: { accessToken: 'access_token', refreshToken: 'refresh_token' } };
+		importer.skipNotebooks = true;
 		importers.push(importer);
 		return importer;
 	};
@@ -510,6 +511,38 @@ describe('Zotero_Import_Mendeley', function () {
 
 			assert.equal(journalEmptyTags.getField('title'), 'This one has empty tags and keywords');
 			assert.equal(journalEmptyTags.getTags().length, 0);
+		});
+
+		it('should translate a notebook content into Zotero note content', async () => {
+			let item = await createDataObject('item');
+			item.itemType = 'journalArticle';
+			item.title = 'Journal Article';
+			await item.saveTx();
+			
+			let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+			await attachment.saveTx();
+
+			var annotation = await createAnnotation('highlight', attachment);
+			annotation.annotationText = 'Highlight text';
+			annotation.annotationComment = 'Highlight comment';
+			annotation.annotationPageLabel = '57';
+			annotation.addRelation('mendeleyDB:annotationUUID', '84f12446-3b49-4052-bbdc-832d28e1e072');
+			await annotation.saveTx();
+
+			let mendeleyNotebook = JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/notebook.json')
+			);
+			const importer = getImporter();
+			const noteContent = await importer._translateNotebookToNoteContent(Zotero.Libraries.userLibraryID, mendeleyNotebook);
+
+			assert.match(
+				noteContent,
+				/^<h1>TEST<\/h1>\n<p><span class="highlight" data-annotation="((?:(?:%[0-9A-F]{2}|[^<>'" %])+))">“Highlight text”<\/span> <span class="citation" data-citation="((?:(?:%[0-9A-F]{2}|[^<>'" %])+))">\(<span class="citation-item">, p. 57<\/span>\)<\/span> Highlight comment<\/p>\n<p>Lorem Ipsum<\/p>$/i
+			);
+ 
+			await annotation.eraseTx();
+			await attachment.eraseTx();
+			await item.eraseTx();
 		});
 	});
 });
