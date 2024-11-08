@@ -90,6 +90,26 @@ describe("Sync Preferences", function () {
 				assert.equal(doc.getElementById('sync-authorized').getAttribute('hidden'), 'true');
 			});
 			
+			it("should reset the storage controller when unlinking", async function () {
+				await setCredentials("Username", "correctPassword");
+				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				
+				var options = {
+					apiClient: Zotero.Sync.Runner.getAPIClient({ apiKey })
+				};
+				var controller = Zotero.Sync.Runner.getStorageController('zfs', options);
+				var apiKey1 = controller.apiClient.apiKey;
+				
+				await win.Zotero_Preferences.Sync.unlinkAccount(false);
+				await setCredentials("Username", "correctPassword");
+				
+				options = {
+					apiClient: Zotero.Sync.Runner.getAPIClient({ apiKey })
+				};
+				controller = Zotero.Sync.Runner.getStorageController('zfs', options);
+				assert.notEqual(controller.apiClient.apiKey, apiKey1);
+			});
+			
 			it("should not unlink on pressing cancel", function* () {
 				yield setCredentials("Username", "correctPassword");
 				

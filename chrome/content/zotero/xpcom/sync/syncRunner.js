@@ -837,7 +837,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	},
 	
 	
-	// TODO: Call on API key change
 	this.resetStorageController = function (mode) {
 		delete _storageControllers[mode];
 	},
@@ -1672,6 +1671,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 
 	this.deleteAPIKey = Zotero.Promise.coroutine(function* (){
+		this.resetStorageController('zfs');
 		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
 		var client = this.getAPIClient({apiKey});
 		Zotero.Sync.Data.Local.setAPIKey();
