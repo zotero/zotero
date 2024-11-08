@@ -25,28 +25,23 @@
 
 
 /**
- * @typedef SectionIcon
- * @type {object}
+ * @typedef {object} SectionIcon
  * @property {string} icon - Icon URI
  * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`
- * @typedef SectionL10n
- * @type {object}
+ * @typedef {object} SectionL10n
  * @property {string} l10nID - data-l10n-id for localization of section header label
  * @property {string} [l10nArgs] - data-l10n-args for localization
- * @typedef SectionButton
- * @type {object}
+ * @typedef {object} SectionButton
  * @property {string} type - Button type, must be valid DOMString and without ","
  * @property {string} icon - Icon URI
  * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`
  * @property {string} [l10nID] - data-l10n-id for localization of button tooltiptext
  * @property {(props: SectionEventHookArgs) => void} onClick - Button click callback
- * @typedef SectionBasicHookArgs
- * @type {object}
+ * @typedef {object} SectionBasicHookArgs
  * @property {string} paneID - Registered pane id
  * @property {Document} doc - Document of section
  * @property {HTMLDivElement} body - Section body
- * @typedef SectionUIHookArgs
- * @type {object}
+ * @typedef {object} SectionUIHookArgs
  * @property {Zotero.Item} item - Current item
  * @property {string} tabType - Current tab type
  * @property {boolean} editable - Whether the section is in edit mode
@@ -57,19 +52,21 @@
  *
  * See the Abstract section as an example
  * @property {(buttonType: string, options: {disabled?: boolean; hidden?: boolean}) => void} setSectionButtonStatus - Set pane section button status
- * @typedef SectionHookArgs
- * @type {SectionBasicHookArgs & SectionUIHookArgs}
- * @typedef  {SectionHookArgs & { refresh: () => Promise<void> }} SectionInitHookArgs
+ * @typedef {SectionBasicHookArgs & SectionUIHookArgs} SectionHookArgs
+ * @typedef {SectionHookArgs & { refresh: () => Promise<void> }} SectionInitHookArgs
  * A `refresh` is exposed to plugins to allows plugins to refresh the section when necessary,
  * e.g. item modify notifier callback. Note that calling `refresh` during initialization
  * have no effect.
- * @typedef  {SectionHookArgs & { event: Event }} SectionEventHookArgs
- * @typedef ItemDetailsSectionOptions
- * @type {object}
+ * @typedef {SectionHookArgs & { event: Event }} SectionEventHookArgs
+ * @typedef {object} ItemDetailsSectionOptions
  * @property {string} paneID - Unique pane ID
  * @property {string} pluginID - Set plugin ID to auto remove section when plugin is disabled/removed
  * @property {SectionL10n & SectionIcon} header - Header options. Icon should be 16*16 and `label` need to be localized
- * @property {SectionL10n & SectionIcon} sidenav - Sidenav options. Icon should be 20*20 and `tooltiptext` need to be localized
+ * @property {SectionL10n & SectionIcon & { showByDefault?: boolean }} sidenav
+ * Sidenav options. Icon should be 20*20 and `tooltiptext` need to be localized
+ * `showByDefault` determines whether a sidenav button is visible in the sidebar's default state,
+ * such as when no items or multiple items are selected.
+ * If this property is not set or is false, the button will not appear in the default state.
  * @property {string} [bodyXHTML] - Pane body's innerHTML, default to XUL namespace
  * @property {(props: SectionInitHookArgs) => void} [onInit]
  * Lifecycle hook called when section is initialized.

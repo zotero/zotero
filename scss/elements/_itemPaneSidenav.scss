@@ -116,6 +116,16 @@ item-pane-sidenav {
 			-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
 		}
 	}
+
+	&.default-status {
+		.pin-wrapper {
+			display: none;
+
+			&.show-by-default {
+				display: flex;
+			}
+		}
+	}
 	
 	&:not(.stacked) > .divider {
 		width: 20px;
