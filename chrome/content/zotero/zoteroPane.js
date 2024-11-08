@@ -2785,7 +2785,9 @@ var ZoteroPane = new function()
 		}
 		var spinner = document.getElementById('zotero-tb-search-spinner');
 		spinner.setAttribute("status", "animate");
+		spinner.style.visibility = 'visible';
 		yield this.itemsView.setFilter('search', searchVal);
+		spinner.style.removeProperty("visibility");
 		spinner.removeAttribute("status");
 		if (runAdvanced) {
 			this.clearItemsPaneMessage();

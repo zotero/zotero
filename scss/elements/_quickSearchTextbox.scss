@@ -1,10 +1,12 @@
 // | 6px padding | 16px icon width | 2px padding | 8px dropmarker width | 4px padding |
 quick-search-textbox {
-	--search-textbox-width: 172px;
+	--search-textbox-width: 146px;
 	font-size: var(--zotero-font-size);
 	margin-right: 0;
 	width: var(--search-textbox-width);
 	height: 28px;
+	max-width: 300px;
+	flex-grow: 1;
 
 	*[zoteroFontSize=small] {
 		font-size: 11px;
@@ -67,8 +69,16 @@ quick-search-textbox {
 	width: var(--search-textbox-width);
 	height: 28px;
 	z-index: 1;
+	width: 100%;
 }
 
 #zotero-tb-search-spinner {
 	margin: 0 8px;
+	// make sure the spinner always occupies space
+	display: inline;
+	visibility: hidden;
+}
+
+#search-wrapper {
+	width: 100%;
 }
