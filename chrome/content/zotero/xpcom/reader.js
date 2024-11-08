@@ -27,6 +27,12 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
 
 const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
 
+const ZipReader = Components.Constructor(
+	"@mozilla.org/libjar/zip-reader;1",
+	"nsIZipReader",
+	"open"
+);
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
@@ -738,6 +744,161 @@ class ReaderInstance {
 		}
 	}
 
+	/**
+	 * @param {string} [path] For tests: used instead of getFilePathAsync()
+	 * @returns {Promise<void>}
+	 */
+	async importFromEPUB(path = null) {
+		let getKOReaderInput = async (path) => {
+			// KOReader metadata is never embedded, so we just need to check
+			// ./[basename-without-.epub].sdr/metadata.epub.lua
+			if (path.endsWith('.epub')) {
+				path = PathUtils.join(path.slice(0, -5) + '.sdr', 'metadata.epub.lua');
+			}
+			else if (!path.endsWith('.lua')) {
+				return null;
+			}
+			if (!await IOUtils.exists(path)) {
+				return null;
+			}
+			return Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
+		};
+		
+		let getCalibreInput = async (path) => {
+			let externalPath = PathUtils.filename(path).endsWith('.opf')
+				? path
+				: PathUtils.join(PathUtils.parent(path), 'metadata.opf');
+			if (await IOUtils.exists(externalPath)) {
+				return Zotero.File.getContentsAsync(externalPath);
+			}
+			if (!path.endsWith('.epub')) {
+				return null;
+			}
+			
+			let epubZip;
+			try {
+				epubZip = new ZipReader(Zotero.File.pathToFile(path));
+			}
+			catch (e) {
+				Zotero.logError(e);
+				return null;
+			}
+			
+			try {
+				const CALIBRE_BOOKMARKS_PATH = 'META-INF/calibre_bookmarks.txt';
+				if (!epubZip.hasEntry(CALIBRE_BOOKMARKS_PATH)) {
+					return null;
+				}
+				// Await before returning for the try-finally
+				return await Zotero.File.getContentsAsync(epubZip.getInputStream(CALIBRE_BOOKMARKS_PATH));
+			}
+			finally {
+				epubZip.close();
+			}
+		};
+		
+		let selectFile = async () => {
+			let fp = new FilePicker();
+			fp.init(this._window, Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'), fp.modeOpen);
+			fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
+			if (await fp.show() !== fp.returnOK) {
+				return null;
+			}
+			return fp.file;
+		};
+		
+		path ??= await this._item.getFilePathAsync();
+		let isOpenFile = true;
+		if (!path) {
+			path = await selectFile();
+			isOpenFile = false;
+		}
+		while (path) {
+			let koReaderInput;
+			try {
+				koReaderInput = await getKOReaderInput(path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			let calibreInput;
+			try {
+				calibreInput = await getCalibreInput(path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			let koReaderStats = koReaderInput && this._internalReader.getKOReaderAnnotationStats(koReaderInput);
+			let calibreStats = calibreInput && this._internalReader.getCalibreAnnotationStats(calibreInput);
+			let stats = koReaderStats || calibreStats || { count: 0 };
+			
+			if (stats.count) {
+				let ps = Services.prompt;
+				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+					+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+				let index = ps.confirmEx(
+					this._window,
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-text', {
+						count: stats.count,
+						lastModifiedRelative: Zotero.Date.toRelativeDate(stats.lastModified),
+						tool: stats === koReaderStats ? 'KOReader' : 'Calibre',
+					}),
+					buttonFlags,
+					Zotero.getString('general.import'),
+					'',
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
+					'', {}
+				);
+				if (index === 0) {
+					try {
+						if (stats === koReaderStats) {
+							this._internalReader.importAnnotationsFromKOReaderMetadata(koReaderInput);
+						}
+						else {
+							this._internalReader.importAnnotationsFromCalibreMetadata(calibreInput);
+						}
+					}
+					catch (e) {
+						Zotero.alert(this._window, Zotero.getString('general.error'), e.message);
+					}
+					break;
+				}
+				else if (index === 1) {
+					break;
+				}
+			}
+			else {
+				let ps = Services.prompt;
+				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+				
+				let message = isOpenFile
+					? Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations-current-file')
+					: Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations-other-file', {
+						filename: PathUtils.filename(path)
+					});
+				let index = ps.confirmEx(
+					this._window,
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
+					message,
+					buttonFlags,
+					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
+					'', '', '', {}
+				);
+				if (index === 1) {
+					break;
+				}
+			}
+			
+			path = await selectFile();
+			isOpenFile = false;
+		}
+	}
+
 	export() {
 		let zp = Zotero.getActiveZoteroPane();
 		zp.exportPDF(this._item.id);
@@ -1294,16 +1455,22 @@ class ReaderWindow extends ReaderInstance {
 	_onFileMenuOpen() {
 		let item = Zotero.Items.get(this._item.id);
 		let library = Zotero.Libraries.get(item.libraryID);
+		
+		let transferFromPDFMenuitem = this._window.document.getElementById('menu_transferFromPDF');
+		let importFromEPUBMenuitem = this._window.document.getElementById('menu_importFromEPUB');
+		
 		if (item
 			&& library.filesEditable
 			&& library.editable
 			&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 			let annotations = item.getAnnotations();
 			let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
-			this._window.document.getElementById('menu_transferFromPDF').setAttribute('disabled', !canTransferFromPDF);
+			transferFromPDFMenuitem.setAttribute('disabled', !canTransferFromPDF);
+			importFromEPUBMenuitem.setAttribute('disabled', false);
 		}
 		else {
-			this._window.document.getElementById('menu_transferFromPDF').setAttribute('disabled', true);
+			transferFromPDFMenuitem.setAttribute('disabled', true);
+			importFromEPUBMenuitem.setAttribute('disabled', true);
 		}
 	}
 

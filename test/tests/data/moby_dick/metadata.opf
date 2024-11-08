@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+        <dc:identifier opf:scheme="calibre" id="calibre_id">5</dc:identifier>
+        <dc:identifier opf:scheme="uuid" id="uuid_id">595c0491-fcba-4033-9751-d75aa46127f8</dc:identifier>
+        <dc:title>Moby Dick: Or, The Whale</dc:title>
+        <dc:creator opf:file-as="Melville, Herman" opf:role="aut">Herman Melville</dc:creator>
+        <dc:contributor opf:file-as="calibre" opf:role="bkp">calibre (7.4.0) [https://calibre-ebook.com]</dc:contributor>
+        <dc:date>2018-03-27T22:02:30+00:00</dc:date>
+        <dc:description>Captain Ahab, having lost his leg to the white whale Moby Dick, travels the world on a quest for vengeance.</dc:description>
+        <dc:publisher>Standard Ebooks</dc:publisher>
+        <dc:identifier opf:scheme="URL">https://standardebooks.org/ebooks/herman-melville/moby-dick</dc:identifier>
+        <dc:language>eng</dc:language>
+        <dc:subject>Whaling -- Fiction</dc:subject>
+        <dc:subject>Sea stories</dc:subject>
+        <dc:subject>Psychological fiction</dc:subject>
+        <dc:subject>Ship captains -- Fiction</dc:subject>
+        <dc:subject>Adventure stories</dc:subject>
+        <dc:subject>Mentally ill -- Fiction</dc:subject>
+        <dc:subject>Ahab</dc:subject>
+        <dc:subject>Captain (Fictitious character) -- Fiction</dc:subject>
+        <dc:subject>Whales -- Fiction</dc:subject>
+        <dc:subject>Whaling ships -- Fiction</dc:subject>
+        <meta name="calibre:timestamp" content="2024-10-23T12:23:54.020798+00:00"/>
+        <meta name="calibre:title_sort" content="Moby Dick"/>
+        <meta name="calibre:annotation" content="{&quot;format&quot;: &quot;EPUB&quot;, &quot;user_type&quot;: &quot;local&quot;, &quot;user&quot;: &quot;viewer&quot;, &quot;annotation&quot;: {&quot;removed&quot;: true, &quot;timestamp&quot;: &quot;2024-10-23T17:32:22.392Z&quot;, &quot;type&quot;: &quot;highlight&quot;, &quot;uuid&quot;: &quot;GI1I0eS4k9RretvdbyMpCw&quot;}}"/>
+        <meta name="calibre:annotation" content="{&quot;format&quot;: &quot;EPUB&quot;, &quot;user_type&quot;: &quot;local&quot;, &quot;user&quot;: &quot;viewer&quot;, &quot;annotation&quot;: {&quot;end_cfi&quot;: &quot;/2/4/2[extracts-supplied-by-a-sub-sub-librarian]/8[extracts]/14/2/1:139&quot;, &quot;highlighted_text&quot;: &quot;down it goes all incontinently&quot;, &quot;spine_index&quot;: 4, &quot;spine_name&quot;: &quot;epub/text/extracts.xhtml&quot;, &quot;start_cfi&quot;: &quot;/2/4/2[extracts-supplied-by-a-sub-sub-librarian]/8[extracts]/14/2/1:109&quot;, &quot;style&quot;: {&quot;kind&quot;: &quot;decoration&quot;, &quot;type&quot;: &quot;builtin&quot;, &quot;which&quot;: &quot;strikeout&quot;}, &quot;timestamp&quot;: &quot;2024-10-23T18:54:44.546Z&quot;, &quot;toc_family_titles&quot;: [&quot;Extracts&quot;], &quot;type&quot;: &quot;highlight&quot;, &quot;uuid&quot;: &quot;bNUp2TQzi-7bClEbqYM8Iw&quot;}}"/>
+        <meta name="calibre:annotation" content="{&quot;format&quot;: &quot;EPUB&quot;, &quot;user_type&quot;: &quot;local&quot;, &quot;user&quot;: &quot;viewer&quot;, &quot;annotation&quot;: {&quot;end_cfi&quot;: &quot;/2/4/2[extracts-supplied-by-a-sub-sub-librarian]/8[extracts]/20/2/1:66&quot;, &quot;highlighted_text&quot;: &quot;visited this country also with a view of catching horse-whales&quot;, &quot;notes&quot;: &quot;test&quot;, &quot;spine_index&quot;: 4, &quot;spine_name&quot;: &quot;epub/text/extracts.xhtml&quot;, &quot;start_cfi&quot;: &quot;/2/4/2[extracts-supplied-by-a-sub-sub-librarian]/8[extracts]/20/2/1:4&quot;, &quot;style&quot;: {&quot;kind&quot;: &quot;color&quot;, &quot;type&quot;: &quot;builtin&quot;, &quot;which&quot;: &quot;yellow&quot;}, &quot;timestamp&quot;: &quot;2024-10-23T17:33:06.197Z&quot;, &quot;toc_family_titles&quot;: [&quot;Extracts&quot;], &quot;type&quot;: &quot;highlight&quot;, &quot;uuid&quot;: &quot;kWtQxyscZswxIC8CxGaFXw&quot;}}"/>
+    </metadata>
+    <guide>
+        <reference type="cover" title="Cover" href="cover.jpg"/>
+    </guide>
+</package>

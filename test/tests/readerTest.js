@@ -198,5 +198,118 @@ describe("Reader", function () {
 			assert.equal(JSON.parse(annotations.find(x => x.key === inkAnnotation.id).annotationPosition).unknownField, 'test');
 			reader.close();
 		});
+
+		describe("#importFromEPUB()", function () {
+			let bookEpubPath; // The EPUB itself
+			let bookSdrPath; // The KOReader "sidecar" folder
+			let calibreBookmarksPath; // The calibre_bookmarks.txt file (we'll copy this into META_INF for some tests)
+			let metadataOpfPath; // The Calibre metadata.opf file
+
+			let tempPath;
+			let tempBookEpubPath;
+
+			async function waitForReader(reader) {
+				await reader._initPromise;
+				// Shouldn't this just be included in _initPromise?
+				await reader._internalReader._primaryView.initializedPromise;
+			}
+			
+			async function waitForAdds(n) {
+				while (n > 0) {
+					n -= (await waitForItemEvent('add')).length;
+				}
+			}
+			
+			before(function () {
+				bookEpubPath = getTestDataDirectory();
+				bookEpubPath.append('moby_dick');
+				bookEpubPath.append('book.epub');
+				bookEpubPath = bookEpubPath.path;
+				
+				calibreBookmarksPath = getTestDataDirectory();
+				calibreBookmarksPath.append('moby_dick');
+				calibreBookmarksPath.append('calibre_bookmarks.txt');
+				calibreBookmarksPath = calibreBookmarksPath.path;
+
+				metadataOpfPath = getTestDataDirectory();
+				metadataOpfPath.append('moby_dick');
+				metadataOpfPath.append('metadata.opf');
+				metadataOpfPath = metadataOpfPath.path;
+
+				bookSdrPath = getTestDataDirectory();
+				bookSdrPath.append('moby_dick');
+				bookSdrPath.append('book.sdr');
+				bookSdrPath = bookSdrPath.path;
+			});
+			
+			beforeEach(async function () {
+				tempPath = await getTempDirectory();
+				tempBookEpubPath = PathUtils.join(tempPath, 'book.epub');
+				await IOUtils.copy(bookEpubPath, tempBookEpubPath);
+			});
+			
+			it("should import EPUB annotations from KOReader (stored alongside EPUB)", async function () {
+				await IOUtils.copy(bookSdrPath, PathUtils.join(tempPath, 'book.sdr'), { recursive: true });
+				
+				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
+				let reader = await Zotero.Reader.open(attachment.id);
+				await waitForReader(reader);
+				
+				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
+				await reader.importFromEPUB();
+				await donePromise;
+				
+				assert.equal(attachment.getAnnotations().length, 2);
+			});
+			
+			it("should import EPUB annotations from KOReader (stored elsewhere)", async function () {
+				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
+				let reader = await Zotero.Reader.open(attachment.id);
+				await waitForReader(reader);
+
+				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
+				// Import annotations from the *original* EPUB (alongside its book.sdr/metadata.epub.lua)
+				await reader.importFromEPUB(bookEpubPath);
+				await donePromise;
+				
+				assert.equal(attachment.getAnnotations().length, 2);
+			});
+
+			it("should import EPUB annotations from Calibre (stored alongside EPUB)", async function () {
+				await IOUtils.copy(metadataOpfPath, PathUtils.join(tempPath, 'metadata.opf'));
+
+				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
+				let reader = await Zotero.Reader.open(attachment.id);
+				await waitForReader(reader);
+
+				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
+				await reader.importFromEPUB();
+				await donePromise;
+
+				assert.equal(attachment.getAnnotations().length, 2);
+			});
+
+			it("should import EPUB annotations from Calibre (stored within EPUB)", async function () {
+				let zipWriter = Cc['@mozilla.org/zipwriter;1'].createInstance(Ci.nsIZipWriter);
+				zipWriter.open(Zotero.File.pathToFile(tempBookEpubPath), 0x04 /* RDWR */);
+				zipWriter.addEntryFile(
+					'META-INF/calibre_bookmarks.txt',
+					Ci.nsIZipWriter.COMPRESSION_DEFAULT,
+					Zotero.File.pathToFile(calibreBookmarksPath),
+					false,
+				);
+				zipWriter.close();
+				
+				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
+				let reader = await Zotero.Reader.open(attachment.id);
+				await waitForReader(reader);
+
+				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
+				await reader.importFromEPUB();
+				await donePromise;
+
+				assert.equal(attachment.getAnnotations().length, 2);
+			});
+		});
 	});
 });
