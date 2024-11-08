@@ -992,6 +992,58 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 	this._displayTitle = title;
 };
 
+/**
+ * Get title for the reader tab of a given item accounting for "Show tabs as" pref
+ * @param {Number} itemID - itemID of the attachment
+ * @returns {String} title for the tab of this item
+ */
+Zotero.Item.prototype.getTabTitle = async function () {
+	if (!this.isAttachment()) {
+		throw new Error("Can only get tab title for attachments");
+	}
+	let type = Zotero.Prefs.get('tabs.title.reader');
+	let readerTitle = this.getDisplayTitle();
+	let parentItem = this.parentItem;
+	if (type === 'filename') {
+		readerTitle = this.attachmentFilename;
+	}
+	else if (parentItem) {
+		let attachment = await parentItem.getBestAttachment();
+		let isPrimaryAttachment = attachment && attachment.id == this.id;
+		
+		let parts = [];
+		// Windows displays bidi control characters as placeholders in window titles, so strip them
+		// See https://github.com/mozilla-services/screenshots/issues/4863
+		let unformatted = Zotero.isWin;
+		let creator = parentItem.getField('firstCreator', unformatted);
+		let year = parentItem.getField('year');
+		if (year == '0000') {
+			year = '';
+		}
+		// Only include parent title if primary attachment
+		let title = isPrimaryAttachment ? parentItem.getDisplayTitle() : false;
+		// If creator is missing fall back to titleCreatorYear
+		if (type === 'creatorYearTitle' && creator) {
+			parts = [creator, year, title];
+		}
+		else if (type === 'title') {
+			parts = [title];
+		}
+		// If type is titleCreatorYear, or is missing, or another type falls back
+		else {
+			parts = [title, creator, year];
+		}
+		
+		// If not primary attachment, show attachment title first
+		if (!isPrimaryAttachment) {
+			parts.unshift(this.getDisplayTitle());
+		}
+		
+		readerTitle = parts.filter(Boolean).join(' - ');
+	}
+	return readerTitle;
+};
+
 
 /*
  * Returns the number of creators for this item

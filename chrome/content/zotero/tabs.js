@@ -84,6 +84,19 @@ var Zotero_Tabs = new function () {
 	this._tabsMenuFocusedIndex = 0;
 	this._tabsMenuIgnoreMouseover = false;
 
+	// Keep track of item modifications to update the title
+	Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
+
+	// Update the title when pref of title format is changed
+	Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
+		for (let tab of this._tabs) {
+			if (!tab.data.itemID) continue;
+			let item = Zotero.Items.get(tab.data.itemID);
+			let title = await item.getTabTitle();
+			this.rename(tab.id, title);
+		}
+	});
+
 	this._unloadInterval = setInterval(() => {
 		this.unloadUnusedTabs();
 	}, 60000); // Trigger every minute
@@ -174,6 +187,26 @@ var Zotero_Tabs = new function () {
 		);
 	};
 
+	// When an item is modified, update the title accordingly
+	this.notify = async (event, type, ids, _) => {
+		if (event !== "modify") return;
+		for (let id of ids) {
+			let item = Zotero.Items.get(id);
+			// If a top-level item is updated, update all tabs that have its attachments
+			// Otherwise, just update the tab with the updated attachment
+			let attachmentIDs = item.isAttachment() ? [id] : item.getAttachments();
+			for (let attachmentID of attachmentIDs) {
+				let attachment = Zotero.Items.get(attachmentID);
+				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
+				if (!relevantTabs.length) continue;
+				for (let tab of relevantTabs) {
+					let title = await attachment.getTabTitle();
+					this.rename(tab.id, title);
+				}
+			}
+		}
+	};
+
 	this.getState = function () {
 		return this._tabs.map((tab) => {
 			let type = tab.type;
@@ -262,6 +295,16 @@ var Zotero_Tabs = new function () {
 			if (!preventJumpback) {
 				this._prevSelectedID = previousID;
 			}
+		}
+		// When a new tab is opened synchronously by ReaderTab constructor, the title is empty.
+		// However, { id, container } needs to return immediately, so do not wait for the new title
+		// and construct it in async manner below.
+		if (!title && data.itemID) {
+			(async () => {
+				let item = Zotero.Items.get(data.itemID);
+				title = await item.getTabTitle();
+				this.rename(tab.id, title);
+			})();
 		}
 		return { id, container };
 	};

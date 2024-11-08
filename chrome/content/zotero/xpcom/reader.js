@@ -593,49 +593,8 @@ class ReaderInstance {
 	}
 
 	async updateTitle() {
-		let type = Zotero.Prefs.get('tabs.title.reader');
-		let item = Zotero.Items.get(this._item.id);
-		let readerTitle = item.getDisplayTitle();
-		let parentItem = item.parentItem;
-		if (type === 'filename') {
-			readerTitle = item.attachmentFilename;
-		}
-		else if (parentItem) {
-			let attachment = await parentItem.getBestAttachment();
-			let isPrimaryAttachment = attachment && attachment.id == item.id;
-			
-			let parts = [];
-			// Windows displays bidi control characters as placeholders in window titles, so strip them
-			// See https://github.com/mozilla-services/screenshots/issues/4863
-			let unformatted = Zotero.isWin;
-			let creator = parentItem.getField('firstCreator', unformatted);
-			let year = parentItem.getField('year');
-			if (year == '0000') {
-				year = '';
-			}
-			// Only include parent title if primary attachment
-			let title = isPrimaryAttachment ? parentItem.getDisplayTitle() : false;
-			// If creator is missing fall back to titleCreatorYear
-			if (type === 'creatorYearTitle' && creator) {
-				parts = [creator, year, title];
-			}
-			else if (type === 'title') {
-				parts = [title];
-			}
-			// If type is titleCreatorYear, or is missing, or another type falls back
-			else {
-				parts = [title, creator, year];
-			}
-			
-			// If not primary attachment, show attachment title first
-			if (!isPrimaryAttachment) {
-				parts.unshift(item.getDisplayTitle());
-			}
-			
-			readerTitle = parts.filter(Boolean).join(' - ');
-		}
-		this._title = readerTitle;
-		this._setTitleValue(readerTitle);
+		this._title = await this._item.getTabTitle();
+		this._setTitleValue(this._title);
 	}
 
 	async setAnnotations(items) {
@@ -1360,9 +1319,7 @@ class ReaderTab extends ReaderInstance {
 		}
 	};
 
-	_setTitleValue(title) {
-		this._window.Zotero_Tabs.rename(this.tabID, title);
-	}
+	_setTitleValue() {}
 
 	_addToNote(annotations) {
 		annotations = annotations.map(x => ({ ...x, attachmentItemID: this._item.id }));
