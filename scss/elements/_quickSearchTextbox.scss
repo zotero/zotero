@@ -74,6 +74,9 @@ quick-search-textbox {
 
 #zotero-tb-search-spinner {
 	margin: 0 8px;
+	// make sure the spinner always occupies space
+	display: inline;
+	visibility: hidden;
 }
 
 #search-wrapper {

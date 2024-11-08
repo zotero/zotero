@@ -2787,7 +2787,7 @@ var ZoteroPane = new function()
 		spinner.setAttribute("status", "animate");
 		spinner.style.visibility = 'visible';
 		yield this.itemsView.setFilter('search', searchVal);
-		spinner.style.visibility = 'hidden';
+		spinner.style.removeProperty("visibility");
 		spinner.removeAttribute("status");
 		if (runAdvanced) {
 			this.clearItemsPaneMessage();
