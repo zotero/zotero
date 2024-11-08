@@ -15,26 +15,31 @@ describe("Sync Preferences", function () {
 
 	describe("Settings", function () {
 		describe("Data Syncing", function () {
-			var getAPIKeyFromCredentialsStub, deleteAPIKey, indicatorElem;
+			var getAPIKeyFromCredentialsStub, deleteAPIKey, indicatorElem, apiKey, apiResponse;
 
-			var setCredentials = Zotero.Promise.coroutine(function* (username, password) {
+			var setCredentials = Zotero.Promise.coroutine(function* (username, password, isIncorrectPasword) {
 				let usernameElem = doc.getElementById('sync-username-textbox');
 				let passwordElem = doc.getElementById('sync-password');
 				usernameElem.value = username;
 				passwordElem.value = password;
 				
-				// Triggered by `change` event for usernameElem and passwordElem;
+				apiKey = Zotero.Utilities.randomString(24);
+				apiResponse = {
+					key: apiKey,
+					username,
+					userID: 1,
+					access: {}
+				};
+				
+				// Triggered by `change` event for usernameElem and passwordElem
+				if (isIncorrectPasword) {
+					getAPIKeyFromCredentialsStub.resolves(false);
+				}
+				else {
+					getAPIKeyFromCredentialsStub.resolves(apiResponse);
+				}
 				yield win.Zotero_Preferences.Sync.linkAccount();
 			});
-
-			var apiKey = Zotero.Utilities.randomString(24);
-
-			var apiResponse = {
-				key: apiKey,
-				username: "Username",
-				userID: 1,
-				access: {}
-			};
 
 			before(function* () {
 				getAPIKeyFromCredentialsStub = sinon.stub(
@@ -58,7 +63,6 @@ describe("Sync Preferences", function () {
 			});
 
 			it("should set API key and display full controls with correct credentials", function* () {
-				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				yield setCredentials("Username", "correctPassword");
 				
 				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
@@ -67,8 +71,7 @@ describe("Sync Preferences", function () {
 
 
 			it("should display dialog when credentials incorrect", function* () {
-				getAPIKeyFromCredentialsStub.resolves(false);
-				yield setCredentials("Username", "incorrectPassword");
+				yield setCredentials("Username", "incorrectPassword", true);
 
 				assert.isTrue(Zotero.alert.called);
 				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
@@ -77,7 +80,6 @@ describe("Sync Preferences", function () {
 
 
 			it("should delete API key and display auth form when 'Unlink Account' clicked", function* () {
-				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				yield setCredentials("Username", "correctPassword");
 				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 
@@ -89,7 +91,6 @@ describe("Sync Preferences", function () {
 			});
 			
 			it("should not unlink on pressing cancel", function* () {
-				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				yield setCredentials("Username", "correctPassword");
 				
 				waitForDialog(null, 'cancel');
