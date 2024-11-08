@@ -585,7 +585,7 @@ class ReaderInstance {
 	}
 
 	async updateTitle() {
-		this._title = await Zotero.Reader.getTabTitle(this._item.id);
+		this._title = await this._item.getTabTitle();
 		this._setTitleValue(this._title);
 	}
 
@@ -1958,56 +1958,6 @@ class Reader {
 				Zotero.logError(e);
 			}
 		}
-	}
-	
-	/**
-	 * Construct title for the reader tab of a given attachment accounting for "Show tabs as" pref
-	 * @param {Number} itemID - itemID of the attachment
-	 * @returns {String} title for the tab of this item
-	 */
-	async getTabTitle(itemID) {
-		let type = Zotero.Prefs.get('tabs.title.reader');
-		let item = Zotero.Items.get(itemID);
-		let readerTitle = item.getDisplayTitle();
-		let parentItem = item.parentItem;
-		if (type === 'filename') {
-			readerTitle = item.attachmentFilename;
-		}
-		else if (parentItem) {
-			let attachment = await parentItem.getBestAttachment();
-			let isPrimaryAttachment = attachment && attachment.id == item.id;
-			
-			let parts = [];
-			// Windows displays bidi control characters as placeholders in window titles, so strip them
-			// See https://github.com/mozilla-services/screenshots/issues/4863
-			let unformatted = Zotero.isWin;
-			let creator = parentItem.getField('firstCreator', unformatted);
-			let year = parentItem.getField('year');
-			if (year == '0000') {
-				year = '';
-			}
-			// Only include parent title if primary attachment
-			let title = isPrimaryAttachment ? parentItem.getDisplayTitle() : false;
-			// If creator is missing fall back to titleCreatorYear
-			if (type === 'creatorYearTitle' && creator) {
-				parts = [creator, year, title];
-			}
-			else if (type === 'title') {
-				parts = [title];
-			}
-			// If type is titleCreatorYear, or is missing, or another type falls back
-			else {
-				parts = [title, creator, year];
-			}
-			
-			// If not primary attachment, show attachment title first
-			if (!isPrimaryAttachment) {
-				parts.unshift(item.getDisplayTitle());
-			}
-			
-			readerTitle = parts.filter(Boolean).join(' - ');
-		}
-		return readerTitle;
 	}
 }
 

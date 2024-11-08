@@ -91,7 +91,8 @@ var Zotero_Tabs = new function () {
 	Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
 		for (let tab of this._tabs) {
 			if (!tab.data.itemID) continue;
-			let title = await Zotero.Reader.getTabTitle(tab.data.itemID);
+			let item = Zotero.Items.get(tab.data.itemID);
+			let title = await item.getTabTitle();
 			this.rename(tab.id, title);
 		}
 	});
@@ -195,10 +196,11 @@ var Zotero_Tabs = new function () {
 			// Otherwise, just update the tab with the updated attachment
 			let attachmentIDs = item.isAttachment() ? [id] : item.getAttachments();
 			for (let attachmentID of attachmentIDs) {
+				let attachment = Zotero.Items.get(attachmentID);
 				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
 				if (!relevantTabs.length) continue;
 				for (let tab of relevantTabs) {
-					let title = await Zotero.Reader.getTabTitle(attachmentID);
+					let title = await attachment.getTabTitle();
 					this.rename(tab.id, title);
 				}
 			}
@@ -299,7 +301,8 @@ var Zotero_Tabs = new function () {
 		// and construct it in async manner below.
 		if (!title && data.itemID) {
 			(async () => {
-				title = await Zotero.Reader.getTabTitle(data.itemID);
+				let item = Zotero.Items.get(data.itemID);
+				title = await item.getTabTitle();
 				this.rename(tab.id, title);
 			})();
 		}
