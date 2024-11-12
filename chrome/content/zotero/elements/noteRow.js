@@ -60,6 +60,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._noteContent = this.querySelector('.note-content');
 			this._noteDate = this.querySelector('.note-date');
 			this.tabIndex = 0;
+			this.classList.add("keyboard-clickable");
 			this.render();
 		}
 
@@ -74,13 +75,16 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				this._parentTitle.textContent = note.parentTitle;
 				this._noteTitle.hidden = false;
 				this._noteTitle.textContent = note.title;
+				this.setAttribute("aria-description", note.title);
 			}
 			else {
 				this.querySelector('.icon').replaceWith(getCSSItemTypeIcon('note'));
 				this._parentTitle.textContent = note.title;
 				this._noteTitle.hidden = true;
 				this._noteTitle.textContent = '';
+				this.setAttribute("aria-description", note.body);
 			}
+			this.setAttribute("aria-label", this._parentTitle.textContent);
 			this._noteContent.textContent = note.body;
 			this._noteContent.hidden = !note.body;
 			this._noteDate.textContent = note.date;

@@ -798,19 +798,25 @@ var Zotero_Tabs = new function () {
 		popup.openPopupAtScreen(x, y, true);
 	};
 
-	// Used to move focus back to itemTree or contextPane from the tabs.
+	// Used to move focus back or sidenav from the tabs.
 	this.focusWrapAround = function () {
-		// Focus the last field of contextPane when reader is opened
+		// Focus the first focusable button of context pane sidenav when reader is opened
 		if (Zotero_Tabs.selectedIndex > 0) {
 			Services.focus.moveFocus(window, document.getElementById("zotero-context-pane-sidenav"),
-				Services.focus.MOVEFOCUS_BACKWARD, 0);
+				Services.focus.MOVEFOCUS_FORWARD, 0);
 			return;
 		}
-		// Focus the last field of itemPane
-		// We do that by moving focus backwards from the element following the pane, because Services.focus doesn't
-		// support MOVEFOCUS_LAST on subtrees
-		Services.focus.moveFocus(window, document.getElementById("zotero-context-splitter"),
-			Services.focus.MOVEFOCUS_BACKWARD, 0);
+		let itemSideNav = document.getElementById("zotero-view-item-sidenav");
+		if (itemSideNav.hidden) {
+			// If sidenav is hidden, focus the last focusable element of item pane
+			Services.focus.moveFocus(window, document.getElementById("zotero-context-splitter"),
+				Services.focus.MOVEFOCUS_BACKWARD, 0);
+		}
+		else {
+			// Focus the first focusable button of item pane sidenav
+			Services.focus.moveFocus(window, document.getElementById("zotero-view-item-sidenav"),
+				Services.focus.MOVEFOCUS_FORWARD, 0);
+		}
 	};
 
 	/**

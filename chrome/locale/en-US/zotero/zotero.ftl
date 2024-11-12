@@ -25,6 +25,7 @@ general-help = Help
 general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+general-back = Go Back
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -546,6 +547,8 @@ sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =
     .tooltiptext = { pane-related }
+sidenav-main-btn-grouping =
+    .aria-label = Item Details
 
 pin-section =
     .label = Pin Section
@@ -568,6 +571,8 @@ tagselector-search =
 
 context-notes-search =
     .placeholder = Search Notes
+context-notes-return-button =
+    .aria-label = { general-back }
 
 new-collection-dialog =
     .title = New Collection
