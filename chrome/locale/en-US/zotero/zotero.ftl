@@ -25,7 +25,7 @@ general-help = Help
 general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-back = Go Back
+general-go-back = Go Back
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -572,7 +572,7 @@ tagselector-search =
 context-notes-search =
     .placeholder = Search Notes
 context-notes-return-button =
-    .aria-label = { general-back }
+    .aria-label = { general-go-back }
 
 new-collection-dialog =
     .title = New Collection
