@@ -406,19 +406,29 @@
 				// Do nothing on arrow right/left
 				event.preventDefault();
 			}
-			if ([" ", "Enter"].includes(event.key) && event.target === this._buttonContainer) {
-				// Do nothing when the itemDetails is already selected
-				if (this._container.tabType === "library" || !this._contextNotesPaneVisible) {
-					return;
+			if ([" ", "Enter"].includes(event.key)) {
+				// Click the first itemPane button in a group to switch from notes to item details pane
+				if (event.target === this._buttonContainer && this._contextNotesPaneVisible) {
+					let firstBtn = event.target.querySelector("toolbarbutton");
+					let clickEvent = new MouseEvent('click', {
+						bubbles: true,
+						cancelable: true,
+						detail: 1
+					});
+					firstBtn.dispatchEvent(clickEvent);
 				}
-				// Special handling for all combined item pane buttons
-				let firstBtn = event.target.querySelector("toolbarbutton");
-				let clickEvent = new MouseEvent('click', {
-					bubbles: true,
-					cancelable: true,
-					detail: 1
+				setTimeout(() => {
+					let tabFrom;
+					// If notes are visible, tab into them
+					if (this._contextNotesPaneVisible) {
+						tabFrom = this.contextNotesPane;
+					}
+					// Otherwise, tab into the pinned or first collapsible section
+					else {
+						tabFrom = (this.pinnedPane ? this.container.getEnabledPane(this.pinnedPane) : this._container).querySelector("collapsible-section");
+					}
+					Services.focus.moveFocus(window, tabFrom, Services.focus.MOVEFOCUS_FORWARD, 0);
 				});
-				firstBtn.dispatchEvent(clickEvent);
 			}
 		};
 
