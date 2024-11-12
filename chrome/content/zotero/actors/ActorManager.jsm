@@ -77,3 +77,12 @@ if (AppConstants.platform === "macosx") {
 		includeChrome: true
 	});
 }
+
+ChromeUtils.registerWindowActor("MendeleyAuth", {
+	parent: {
+		moduleURI: "chrome://zotero/content/actors/MendeleyAuthParent.jsm"
+	},
+	child: {
+		moduleURI: "chrome://zotero/content/actors/MendeleyAuthChild.jsm"
+	}
+});

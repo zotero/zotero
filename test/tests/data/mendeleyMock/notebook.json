@@ -1,0 +1,78 @@
+{
+	"id": "8041a43b-f740-41ec-be42-a24cc5106d68",
+	"created": "2024-07-09T09:56:04.349Z",
+	"modified": "2024-11-04T13:54:23.050Z",
+	"title": "TEST",
+	"blocks": [
+		{
+			"annotation": {
+				"stylesheet": {
+					"type": "CssStylesheet",
+					"value": ".annotation-color-rgb-250-244-209 { background-color: rgb(250,244,209); }"
+				},
+				"creator": [
+					{
+						"id": "https://www.mendeley.com/",
+						"type": "Software"
+					}
+				],
+				"created": "2024-11-04T13:49:03.274Z",
+				"modified": "2024-11-04T13:49:03.274Z",
+				"id": "https://api.mendeley.com/annotations/v2/84f12446-3b49-4052-bbdc-832d28e1e072",
+				"body": [
+					{
+						"purpose": "highlighting",
+						"format": "application/json",
+						"type": "TextualBody",
+						"value": {
+							"textAttributes": {
+								"entityRanges": [
+									{
+										"offset": 0,
+										"length": 142,
+										"key": 0
+									}
+								]
+							},
+							"text": "Highlighted text"
+						}
+					}
+				],
+				"type": "Annotation",
+				"@context": "http://www.w3.org/ns/anno.jsonld",
+				"target": [
+					{
+						"format": "application/pdf",
+						"selector": [
+							{
+								"exact": "Highlighted text",
+								"type": "TextQuoteSelector"
+							},
+							{
+								"conformsTo": "http://tools.ietf.org/rfc/rfc3778",
+								"type": "FragmentSelector",
+								"value": "page=1&viewrect=47.61420000000004,524.3954,200.42259999999993,-18.536&page=1&viewrect=47.61420000000004,499.6994000000001,249.05580000000003,-17.639999999999986&page=1&viewrect=47.61420000000004,479.6934000000001,228.01519999999994,-17.640000000000043&page=1&viewrect=47.61420000000004,459.68740000000014,133.57120000000003,-17.640000000000043"
+							}
+						],
+						"source": "https://api.mendeley.com/documents/e4a6a49b-8622-3064-abb5-f1f1dac5e02e/files/099d8443-dbc9-6925-78ee-e462db2a28f3/",
+						"styleClass": "annotation-color-rgb-250-244-209"
+					}
+				]
+			},
+			"type": "annotation"
+		},
+		{
+			"freetext": {
+				"format": "application/json",
+				"value": {
+					"textAttributes": {
+						"inlineStyleRanges": [],
+						"entityRanges": []
+					},
+					"text": "Lorem Ipsum"
+				}
+			},
+			"type": "freetext"
+		}
+	]
+}

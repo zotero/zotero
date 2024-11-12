@@ -6,6 +6,9 @@ const MENDELEY_API_URL = 'https://api.mendeley.com';
 const CLIENT_ID = '6';
 const CLIENT_NOT_VERY_SECRET = 'JtSAMzFdwC6RAED3RMZU';
 const USER_AGENT = 'Mendeley Desktop/1.18';
+const API_DATA_TIMEOUT = 60000;
+const API_TOKEN_TIMEOUT = 30000;
+const ACCESS_TOKEN_TIMEOUT = 15000;
 
 const getTokens = async (url, bodyProps, headers = {}, options = {}) => {
 	const body = Object.entries(bodyProps)
@@ -18,9 +21,15 @@ const getTokens = async (url, bodyProps, headers = {}, options = {}) => {
 		headers['User-Agent'] = USER_AGENT;
 	}
 
-	options = { ...options, body, headers, timeout: 30000 };
+	options = { ...options, body, headers, timeout: API_TOKEN_TIMEOUT };
 	const response = await Zotero.HTTP.request('POST', url, options);
-	return JSON.parse(response.responseText);
+	const parsedResponse = JSON.parse(response.responseText);
+	
+	return {
+		kind: Zotero.Prefs.get('import.mendeleyUseOAuth') ? 'oauth' : 'direct',
+		accessToken: parsedResponse.access_token, // eslint-disable-line camelcase
+		refreshToken: parsedResponse.refresh_token // eslint-disable-line camelcase
+	};
 };
 
 const directAuth = async (username, password, headers = {}, options = {}) => {
@@ -33,7 +42,8 @@ const directAuth = async (username, password, headers = {}, options = {}) => {
 		username
 	};
 
-	return getTokens(OAUTH_URL, bodyProps, headers, options);
+	const tokens = await getTokens(OAUTH_URL, bodyProps, headers, options);
+	return { username, password, tokens };
 };
 
 const codeAuth = async (code, headers = {}, options = {}) => {
@@ -77,8 +87,8 @@ const getNextLinkFromResponse = (response) => {
 
 
 const apiFetchUrl = async (tokens, url, headers = {}, options = {}) => {
-	headers = { ...headers, Authorization: `Bearer ${tokens.access_token}` };
-	options = { ...options, headers, timeout: 60000 };
+	headers = { ...headers, Authorization: `Bearer ${tokens.accessToken}` };
+	options = { ...options, headers, timeout: API_DATA_TIMEOUT };
 	const method = 'GET';
 
 	// Run the request. If we see 401 or 403, try to refresh tokens and run the request again
@@ -87,11 +97,18 @@ const apiFetchUrl = async (tokens, url, headers = {}, options = {}) => {
 	}
 	catch (e) {
 		if (e.status === 401 || e.status === 403) {
-			const newTokens = await refreshAuth(tokens.refresh_token);
-			// update tokens in the tokens object and in the header for next request
-			tokens.access_token = newTokens.access_token; // eslint-disable-line camelcase
-			tokens.refresh_token = newTokens.refresh_token; // eslint-disable-line camelcase
-			headers.Authorization = `Bearer ${tokens.access_token}`;
+			if (tokens.kind === 'referenceManager') {
+				const newToken = await obtainReferenceManagerTokenWithRetry(tokens.username, tokens.password);
+				tokens.accessToken = newToken;
+				headers.Authorization = `Bearer ${tokens.accessToken}`;
+			}
+			else {
+				const newTokens = await refreshAuth(tokens.refreshToken);
+				// update tokens in the tokens object and in the header for next request
+				tokens.accessToken = newTokens.accessToken;
+				tokens.refreshToken = newTokens.refreshToken;
+				headers.Authorization = `Bearer ${tokens.accessToken}`;
+			}
 		}
 	}
 
@@ -126,5 +143,100 @@ const getAll = async (tokens, endPoint, params = {}, headers = {}, options = {},
 	return data;
 };
 
-return { codeAuth, directAuth, getNextLinkFromResponse, apiFetch, apiFetchUrl, get, getAll };
+/**
+ * Obtain Reference Manager access token
+ *
+ * This function automates the process of logging into Mendeley Reference Manager and retrieving an
+ * access token. It uses a hidden browser to navigate through the login process and extract the
+ * access token from the cookies once logged in. This token enables access to some features
+ * not available through the normal API token (e.g. notebooks).
+ *
+ * @param {string} login - The login email for the Mendeley account.
+ * @param {string} password - The password for the Mendeley account.
+ * @returns {Promise<string>} - A promise that resolves to the Mendeley access token.
+ * @throws {Error} - Throws an error if login fails, or if the access token cannot be obtained.
+ */
+const obtainReferenceManagerToken = async (login, password) => {
+	let { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+	let cookieSandbox = new Zotero.CookieSandbox({});
+	let browser = new HiddenBrowser({
+		cookieSandbox,
+		docShell: {
+			allowMetaRedirects: true,
+			allowAuth: true,
+		}
+	});
+	await browser._createdPromise;
+
+	return new Promise((resolve, reject) => {
+		let hasEnteredLogin = false;
+		let hasEnteredPassword = false;
+
+		browser.webProgress.addProgressListener({
+			QueryInterface: ChromeUtils.generateQI([Ci.nsIWebProgressListener, Ci.nsISupportsWeakReference]),
+			async onLocationChange() {
+				let url = browser.currentURI.spec;
+				Zotero.debug(`Obtain Mendeley access token, visiting "${url}"`, 5);
+				if (url.startsWith("https://id.elsevier.com/as/authorization.oauth2")) {
+					Zotero.debug("Logging in to Mendeley Reference Manager");
+					if (!hasEnteredLogin) {
+						hasEnteredLogin = await browser.browsingContext.currentWindowGlobal
+							.getActor("MendeleyAuth")
+							.sendQuery("login", { login });
+						Zotero.debug(`hasEnteredLogin: ${hasEnteredLogin}`);
+						if (!hasEnteredLogin) {
+							reject(new Error("Failed to enter login"));
+						}
+					}
+				}
+				else if (url.match(/https:\/\/id.elsevier.com\/as\/(.*?)\/resume\/as/)) {
+					Zotero.debug("Entering password to the Mendeley Reference Manager");
+					if (!hasEnteredPassword) {
+						hasEnteredPassword = await browser.browsingContext.currentWindowGlobal
+							.getActor("MendeleyAuth")
+							.sendQuery("password", { password });
+						Zotero.debug(`hasEnteredPassword: ${hasEnteredPassword}`);
+						if (!hasEnteredPassword) {
+							reject(new Error("Failed to enter password"));
+						}
+					}
+				}
+				else if (url.startsWith("https://www.mendeley.com/reference-manager/library")) {
+					const cookies = cookieSandbox.getCookiesForURI(
+						Services.io.newURI("https://www.mendeley.com/reference-manager/library")
+					);
+					if (!cookies.accessToken) {
+						reject(new Error("Failed to obtain Mendeley access token"));
+					}
+					resolve(cookies.accessToken);
+				}
+				else {
+					Zotero.debug(`Ignoring unexpected URL while obtaining Mendeley access token: ${url}`);
+				}
+			}
+		}, Ci.nsIWebProgress.NOTIFY_LOCATION);
+
+		browser.load("https://www.mendeley.com/sign-in?routeTo=https://www.mendeley.com/reference-manager/library/");
+		Zotero.Promise.delay(ACCESS_TOKEN_TIMEOUT).then(() => {
+			reject(new Error("Timed out while obtaining Mendeley access token"));
+		});
+	});
+};
+
+const obtainReferenceManagerTokenWithRetry = async (login, password, tries = 3) => {
+	for (let i = 0; i < tries; i++) {
+		try {
+			return await obtainReferenceManagerToken(login, password);
+		}
+		catch (e) {
+			if (i === tries - 1) {
+				throw e;
+			}
+			Zotero.debug(`Failed to obtain Reference Manager token on attempt ${i + 1}. Retrying...`);
+		}
+	}
+	return null;
+};
+
+return { codeAuth, directAuth, getNextLinkFromResponse, apiFetch, apiFetchUrl, get, getAll, obtainReferenceManagerToken, obtainReferenceManagerTokenWithRetry };
 })();
