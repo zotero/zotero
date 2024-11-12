@@ -95,6 +95,16 @@
 			return this._preview;
 		}
 
+		get _renderDependencies() {
+			if (this.item?.isRegularItem()) {
+				// Render dependencies are used to determine if a re-render is necessary.
+				// By including the list of attachment IDs as string, we ensure that it
+				// will re-render if attachments are added or removed.
+				return [...super._renderDependencies, this.item.getAttachments().join(',')];
+			}
+			return super._renderDependencies;
+		}
+
 		init() {
 			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
@@ -139,9 +149,10 @@
 		}
 
 		notify(action, type, ids) {
-			if (!(action === 'add' || action === 'modify' || action === 'refresh' || action === 'delete')) {
+			if (!['add', 'modify', 'refresh', 'delete', 'trash'].includes(action)) {
 				return;
 			}
+
 			if (!this._item?.isRegularItem()) return;
 
 			this._updateAttachmentIDs().then(() => {
@@ -180,6 +191,8 @@
 			if (this._isAlreadyRendered()) return;
 			this._renderStage = "initial";
 			this.updateCount();
+			// Reset the async render dependencies to allow re-rendering
+			delete this._asyncRenderDependencies;
 		}
 
 		async asyncRender() {
