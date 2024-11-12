@@ -216,6 +216,7 @@
 
 			this.addEventListener('click', this.handleButtonClick);
 			this.addEventListener('keydown', this.handleKeyDown);
+			this.addEventListener('focusin', this.handleFocusIn);
 			// Set up action toolbarbuttons
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-action]')) {
 				let action = toolbarbutton.dataset.action;
@@ -405,7 +406,11 @@
 				// Do nothing on arrow right/left
 				event.preventDefault();
 			}
-			if ([" ", "Enter"].includes(event.key) && event.target.tagName !== "toolbarbutton") {
+			if ([" ", "Enter"].includes(event.key) && event.target === this._buttonContainer) {
+				// Do nothing when the itemDetails is already selected
+				if (this._container.tabType === "library" || !this._contextNotesPaneVisible) {
+					return;
+				}
 				// Special handling for all combined item pane buttons
 				let firstBtn = event.target.querySelector("toolbarbutton");
 				let clickEvent = new MouseEvent('click', {
@@ -414,6 +419,27 @@
 					detail: 1
 				});
 				firstBtn.dispatchEvent(clickEvent);
+			}
+		};
+
+		/**
+		 * Help screen readers understand the index of focused tab in the sidenav.
+		 * Sidenav has role="tablist", since it can switch between itemDetails and notesContext panes.
+		 * However, it also has Locate (and potentially plugin) buttons. It confuses some screen readers
+		 * and leads them to announce the index of tabs incorrectly. As a workaround, aria-hide all non-tabs
+		 * when a tab is focused and hide tabs when a non-tab is focused.
+		 */
+		handleFocusIn = (event) => {
+			let focusedTab = event.target.getAttribute("role") == "tab";
+			
+			for (let node of [...this.querySelectorAll("[tabindex]")]) {
+				let isTab = node.getAttribute("role") == "tab";
+				if (focusedTab) {
+					node.setAttribute("aria-hidden", !isTab);
+				}
+				else {
+					node.setAttribute("aria-hidden", isTab);
+				}
 			}
 		};
 
