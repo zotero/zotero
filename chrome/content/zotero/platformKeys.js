@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 		if (editPreferencesSeparator) editPreferencesSeparator.hidden = true;
 		if (editPreferencesItem) editPreferencesItem.hidden = true;
 
-		// macOS 15 Sequoia has a new system keyboard shortcut, Ctrl-Enter,
+		// macOS 15 Sequoia has a new system keyboard shortcut, Ctrl-Return,
 		// that shows a context menu on the focused control. Firefox currently
 		// doesn't handle it very well - it shows a context menu on the element
 		// in the middle of the window, whatever element that may be.
