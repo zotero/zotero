@@ -160,6 +160,23 @@ describe("Zotero.ItemTree", function() {
 				assert.equal(itemsView.getRow(1).level, 1);
 			});
 		});
+		
+		it("should not clear quick search after deleting item from collection", async function () {
+			let col = await createDataObject('collection');
+			let item = await createDataObject('item', { title: "test", collections: [col.id] });
+			await zp.collectionsView.selectCollection(col.id);
+			
+			quicksearch.value = "test";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+			
+			await zp.itemsView.selectItems([item.id]);
+			item.removeFromCollection(col.id);
+			await item.saveTx();
+
+			await itemsView._refreshPromise;
+			assert.equal(quicksearch.value, "test");
+		});
 	});
 	
 	describe("#selectItem()", function () {

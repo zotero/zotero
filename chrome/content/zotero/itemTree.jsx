@@ -826,9 +826,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 					reselect = true;
 				}
 			}
-			// If single item is selected and was modified
+			// If a single item is selected, was modified, and is not filtered out,
+			// make sure it's selected
 			else if (action == 'modify' && ids.length == 1 &&
-				savedSelection.length == 1 && savedSelection[0].id == ids[0]) {
+				savedSelection.length == 1 && savedSelection[0].id == ids[0]
+				&& this.getRowIndexByID(ids[0]) !== false) {
 				if (activeWindow) {
 					await this.selectItem(ids[0]);
 					reselect = true;
