@@ -56,6 +56,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
 			if (!(event.button === 2 && event.buttons === 0 && !event.ctrlKey)) {
 				return;
 			}
+			// Two-finger tap (on some machines?) generates an event that looks
+			// identical to the Ctrl-Enter event, except that the Ctrl-Enter event
+			// should always be exactly in the middle of the window.
+			if (event.mozInputSource === MouseEvent.MOZ_SOURCE_MOUSE
+					&& (event.clientX !== Math.floor(window.innerWidth / 2)
+						|| event.clientY !== Math.floor(window.innerHeight / 2))) {
+				return;
+			}
 			
 			event.stopPropagation();
 			event.stopImmediatePropagation();
