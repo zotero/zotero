@@ -1774,4 +1774,25 @@ describe("Item pane", function () {
 			);
 		});
 	});
+
+	describe("Item pane and tabs", function () {
+		it("should switch to the correct pane when switching tabs", async function () {
+			// https://github.com/zotero/zotero/issues/4531#issuecomment-2470874876
+			let attachment = await importFileAttachment('test.pdf');
+			Zotero_Tabs.closeAll();
+			Zotero_Tabs.add({
+				type: 'reader-unloaded',
+				title: "Reader",
+				index: 1,
+				data: {
+					itemID: attachment.id
+				},
+			});
+			Zotero_Tabs.jump(1);
+			Zotero_Tabs.jump(0);
+			await Zotero.Promise.delay(100);
+			// Should not show the context pane for the reader tab
+			assert.isTrue(ZoteroContextPane.splitter.hidden);
+		});
+	});
 });
