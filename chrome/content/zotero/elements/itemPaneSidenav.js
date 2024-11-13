@@ -217,6 +217,7 @@
 			this.addEventListener('click', this.handleButtonClick);
 			this.addEventListener('keydown', this.handleKeyDown);
 			this.addEventListener('focusin', this.handleFocusIn);
+			this.addEventListener('mousedown', this.handleMouseDown);
 			// Set up action toolbarbuttons
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-action]')) {
 				let action = toolbarbutton.dataset.action;
@@ -249,6 +250,7 @@
 			this.removeEventListener('click', this.handleButtonClick);
 			this.removeEventListener('keydown', this.handleKeyDown);
 			this.removeEventListener('focusin', this.handleFocusIn);
+			this.removeEventListener('mousedown', this.handleMouseDown);
 		}
 
 		render() {
@@ -453,6 +455,11 @@
 					node.setAttribute("aria-hidden", isTab);
 				}
 			}
+		};
+
+		// Prevents focus from leaving the currently focused element and landing on the sidenav buttons
+		handleMouseDown = (event) => {
+			event.preventDefault();
 		};
 
 		handleButtonClick = (event) => {
