@@ -117,6 +117,7 @@
 			
 			this.addEventListener('click', this._handleClick);
 			this.addEventListener('contextmenu', this._handleContextMenu);
+			this.addEventListener('keydown', this._handleKeyDown);
 			this.render();
 		}
 		
@@ -180,6 +181,17 @@
 						id: note.id
 					}
 				}));
+			}
+		};
+
+		// ArrowUp/Down navigation between notes
+		_handleKeyDown = (event) => {
+			if (event.target.tagName !== "note-row" && !event.target.classList.contains("more")) return;
+			if (event.key == "ArrowDown") {
+				event.target.nextElementSibling?.focus();
+			}
+			else if (event.key == "ArrowUp") {
+				event.target.previousElementSibling?.focus();
 			}
 		};
 		

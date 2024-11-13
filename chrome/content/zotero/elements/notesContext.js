@@ -46,7 +46,7 @@
 				<vbox class="zotero-context-note-container context-note-standalone">
 					<vbox class="zotero-context-pane-editor-parent-line">
 						<html:div class="parent-title-container">
-							<toolbarbutton class="zotero-tb-note-return"></toolbarbutton>
+							<toolbarbutton class="zotero-tb-note-return" tabindex="0" data-l10n-id="context-notes-return-button"></toolbarbutton>
 							<html:div class="parent-title"></html:div>
 						</html:div>
 					</vbox>
@@ -55,7 +55,7 @@
 				<vbox class="zotero-context-note-container context-note-child">
 					<vbox class="zotero-context-pane-editor-parent-line">
 						<html:div class="parent-title-container">
-							<toolbarbutton class="zotero-tb-note-return"></toolbarbutton>
+							<toolbarbutton class="zotero-tb-note-return" tabindex="0" data-l10n-id="context-notes-return-button"></toolbarbutton>
 							<html:div class="parent-title"></html:div>
 						</html:div>
 					</vbox>
@@ -185,19 +185,23 @@
 					popup.openPopupAtScreen(screenX, screenY, true);
 				}
 			});
+			let addChildNotePopup = document.getElementById('context-pane-add-child-note-button-popup');
+			addChildNotePopup.addEventListener("command", (event) => {
+				this._handleAddChildNotePopupClick(event);
+			});
 			this.notesList.addEventListener('add-child', (event) => {
 				document.getElementById('context-pane-add-child-note').setAttribute('disabled', !this.editable);
 				document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', !this.editable);
-				let popup = document.getElementById('context-pane-add-child-note-button-popup');
-				popup.onclick = this._handleAddChildNotePopupClick;
-				popup.openPopup(event.detail.button, 'after_end');
+				addChildNotePopup.openPopup(event.detail.button, 'after_end');
+			});
+			let addStandaloneNotePopup = document.getElementById('context-pane-add-standalone-note-button-popup');
+			addStandaloneNotePopup.addEventListener("command", (event) => {
+				this._handleAddStandaloneNotePopupClick(event);
 			});
 			this.notesList.addEventListener('add-standalone', (event) => {
 				document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', !this.editable);
 				document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', !this.editable);
-				let popup = document.getElementById('context-pane-add-standalone-note-button-popup');
-				popup.onclick = this._handleAddStandaloneNotePopupClick;
-				popup.openPopup(event.detail.button, 'after_end');
+				addStandaloneNotePopup.openPopup(event.detail.button, 'after_end');
 			});
 		}
 

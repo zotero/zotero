@@ -28,9 +28,11 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="inherit-flex highlight-notes-inactive">
+			<html:div class="inherit-flex highlight-notes-inactive"
+				tabindex="0" role="tab" data-l10n-id="sidenav-main-btn-grouping">
 				<html:div class="pin-wrapper">
 					<toolbarbutton
+						id="sidenav-info-btn"
 						disabled="true"
 						data-l10n-id="sidenav-info"
 						data-pane="info"/>
@@ -96,16 +98,19 @@
 			<html:div class="pin-wrapper highlight-notes-active">
 				<toolbarbutton
 					data-l10n-id="sidenav-notes"
-					data-pane="context-notes"/>
+					data-pane="context-notes"
+					tabindex="0"
+					role="tab"/>
 			</html:div>
-			
+
 			<html:div class="divider"/>
 			
 			<html:div class="pin-wrapper">
 				<toolbarbutton
 					tooltiptext="&zotero.toolbar.openURL.label;"
 					type="menu"
-					data-action="locate">
+					data-action="locate"
+					tabindex="0">
 					<menupopup/>
 				</toolbarbutton>
 			</html:div>
@@ -210,7 +215,9 @@
 			}
 
 			this.addEventListener('click', this.handleButtonClick);
-			
+			this.addEventListener('keydown', this.handleKeyDown);
+			this.addEventListener('focusin', this.handleFocusIn);
+			this.addEventListener('mousedown', this.handleMouseDown);
 			// Set up action toolbarbuttons
 			for (let toolbarbutton of this.querySelectorAll('toolbarbutton[data-action]')) {
 				let action = toolbarbutton.dataset.action;
@@ -236,10 +243,14 @@
 			this.querySelector('.zotero-menuitem-unpin').addEventListener('command', () => {
 				this.pinnedPane = null;
 			});
+			this.setAttribute("role", "tablist");
 		}
 
 		destroy() {
 			this.removeEventListener('click', this.handleButtonClick);
+			this.removeEventListener('keydown', this.handleKeyDown);
+			this.removeEventListener('focusin', this.handleFocusIn);
+			this.removeEventListener('mousedown', this.handleMouseDown);
 		}
 
 		render() {
@@ -265,7 +276,7 @@
 					continue;
 				}
 				
-				toolbarbutton.setAttribute('aria-selected', !contextNotesPaneVisible && pane == pinnedPane);
+				toolbarbutton.closest("[role='tab']").setAttribute('aria-selected', !contextNotesPaneVisible);
 				// No need to set `hidden` here, since it's updated by ItemDetails#_handlePaneStatus
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
@@ -373,6 +384,88 @@
 				this.render();
 			}
 		}
+
+		handleKeyDown = (event) => {
+			if (event.key == "Tab" && !event.shiftKey) {
+				// Wrap focus around to the tab bar
+				Services.focus.moveFocus(window, document.getElementById("zotero-title-bar"), Services.focus.MOVEFOCUS_FORWARD, 0);
+				event.preventDefault();
+			}
+			if (event.key == "Tab" && event.shiftKey) {
+				// Return focus to item pane
+				Services.focus.moveFocus(window, this, Services.focus.MOVEFOCUS_BACKWARD, 0);
+				event.preventDefault();
+			}
+			if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+				// Up/Down arrow navigation
+				let direction = event.key == "ArrowUp" ? Services.focus.MOVEFOCUS_BACKWARD : Services.focus.MOVEFOCUS_FORWARD;
+				let focused = Services.focus.moveFocus(window, event.target, direction, Services.focus.FLAG_BYKEY);
+				// If focus was moved outside of the sidenav (e.g. on arrowUp from the first button), bring it back
+				if (!this.contains(focused)) {
+					Services.focus.setFocus(event.target, Services.focus.FLAG_BYKEY);
+				}
+				event.preventDefault();
+			}
+			if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
+				// Do nothing on arrow right/left
+				event.preventDefault();
+			}
+			if ([" ", "Enter"].includes(event.key)) {
+				// Only handles buttons that change which itemPane deck is visible
+				if (!(event.target == this._buttonContainer || event.target.closest(".highlight-notes-active"))) return;
+				// Click the first itemPane button in a group to switch from notes to item details pane
+				if (event.target === this._buttonContainer && this._contextNotesPaneVisible) {
+					let firstBtn = event.target.querySelector("toolbarbutton");
+					let clickEvent = new MouseEvent('click', {
+						bubbles: true,
+						cancelable: true,
+						detail: 1
+					});
+					firstBtn.dispatchEvent(clickEvent);
+				}
+				setTimeout(() => {
+					// If notes are visible, tab into them
+					if (this._contextNotesPaneVisible) {
+						Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
+					}
+					// Tab into the pinned section if it exists
+					else if (this.pinnedPane) {
+						Services.focus.moveFocus(window, this.container.getEnabledPane(this.pinnedPane),
+							Services.focus.MOVEFOCUS_FORWARD, 0);
+					}
+					// Otherwise, focus the top-level scrollable itemPane
+					else {
+						this._container.querySelector(".zotero-view-item").focus();
+					}
+				});
+			}
+		};
+
+		/**
+		 * Help screen readers understand the index of focused tab in the sidenav.
+		 * Sidenav has role="tablist", since it can switch between itemDetails and notesContext panes.
+		 * However, it also has Locate (and potentially plugin) buttons. It confuses some screen readers
+		 * and leads them to announce the index of tabs incorrectly. As a workaround, aria-hide all non-tabs
+		 * when a tab is focused and hide tabs when a non-tab is focused.
+		 */
+		handleFocusIn = (event) => {
+			let focusedTab = event.target.getAttribute("role") == "tab";
+			
+			for (let node of [...this.querySelectorAll("[tabindex]")]) {
+				let isTab = node.getAttribute("role") == "tab";
+				if (focusedTab) {
+					node.setAttribute("aria-hidden", !isTab);
+				}
+				else {
+					node.setAttribute("aria-hidden", isTab);
+				}
+			}
+		};
+
+		// Prevents focus from leaving the currently focused element and landing on the sidenav buttons
+		handleMouseDown = (event) => {
+			event.preventDefault();
+		};
 
 		handleButtonClick = (event) => {
 			let toolbarbutton = event.target;

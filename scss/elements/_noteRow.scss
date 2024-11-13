@@ -5,6 +5,7 @@ note-row {
 	border-radius: 5px;
 	border: 1px solid var(--color-quinary-on-sidepane);
 	background: var(--material-background);
+	@include focus-ring;
 
 	&:active {
 		background-color: var(--accent-blue10);

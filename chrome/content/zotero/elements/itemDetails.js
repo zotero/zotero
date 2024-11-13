@@ -49,7 +49,7 @@
 				<html:div class="zotero-view-item-main">
 					<item-pane-header id="zotero-item-pane-header" />
 					
-					<html:div id="zotero-view-item" class="zotero-view-item" tabindex="0">
+					<html:div id="zotero-view-item" class="zotero-view-item" tabindex="0" data-l10n-id="item-details-pane">
 						<info-box id="zotero-editpane-info-box" data-pane="info"/>
 						
 						<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract" data-pane="abstract"/>
@@ -555,13 +555,10 @@
 				event.stopPropagation();
 			};
 			let isLibraryTab = Zotero_Tabs.selectedIndex == 0;
-			let sidenav = document.getElementById(
-				isLibraryTab ? 'zotero-view-item-sidenav' : 'zotero-context-pane-sidenav'
-			);
 
 			// Tab from the scrollable area focuses the pinned pane if it exists
-			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && sidenav.pinnedPane) {
-				let pane = sidenav.getPane(sidenav.pinnedPane);
+			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && this.pinnedPane) {
+				let pane = this.getPane(this.pinnedPane);
 				pane.firstChild._head.focus();
 				stopEvent();
 				return;

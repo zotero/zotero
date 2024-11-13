@@ -25,6 +25,7 @@ general-help = Help
 general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
+general-go-back = Go Back
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -458,6 +459,7 @@ menu-ui-density-comfortable =
 menu-ui-density-compact =
     .label = Compact
 
+pane-item-details = Item Details
 pane-info = Info
 pane-abstract = Abstract
 pane-attachments = Attachments
@@ -472,6 +474,8 @@ pane-attachment-annotations = Annotations
 pane-header-attachment-associated =
     .label = Rename associated file
 
+item-details-pane =
+    .aria-label = { pane-item-details }
 section-info =
     .label = { pane-info }
 section-abstract =
@@ -546,6 +550,8 @@ sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =
     .tooltiptext = { pane-related }
+sidenav-main-btn-grouping =
+    .aria-label = { pane-item-details }
 
 pin-section =
     .label = Pin Section
@@ -568,6 +574,8 @@ tagselector-search =
 
 context-notes-search =
     .placeholder = Search Notes
+context-notes-return-button =
+    .aria-label = { general-go-back }
 
 new-collection-dialog =
     .title = New Collection
