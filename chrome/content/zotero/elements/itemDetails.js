@@ -555,13 +555,10 @@
 				event.stopPropagation();
 			};
 			let isLibraryTab = Zotero_Tabs.selectedIndex == 0;
-			let sidenav = document.getElementById(
-				isLibraryTab ? 'zotero-view-item-sidenav' : 'zotero-context-pane-sidenav'
-			);
 
 			// Tab from the scrollable area focuses the pinned pane if it exists
-			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && sidenav.pinnedPane) {
-				let pane = sidenav.getPane(sidenav.pinnedPane);
+			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && this.pinnedPane) {
+				let pane = this.getPane(this.pinnedPane);
 				pane.firstChild._head.focus();
 				stopEvent();
 				return;
