@@ -411,6 +411,8 @@
 				event.preventDefault();
 			}
 			if ([" ", "Enter"].includes(event.key)) {
+				// Only handles buttons that change which itemPane deck is visible
+				if (!(event.target == this._buttonContainer || event.target.closest(".highlight-notes-active"))) return;
 				// Click the first itemPane button in a group to switch from notes to item details pane
 				if (event.target === this._buttonContainer && this._contextNotesPaneVisible) {
 					let firstBtn = event.target.querySelector("toolbarbutton");
@@ -422,16 +424,19 @@
 					firstBtn.dispatchEvent(clickEvent);
 				}
 				setTimeout(() => {
-					let tabFrom;
 					// If notes are visible, tab into them
 					if (this._contextNotesPaneVisible) {
-						tabFrom = this.contextNotesPane;
+						Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
 					}
-					// Otherwise, tab into the pinned or first collapsible section
+					// Tab into the pinned section if it exists
+					else if (this.pinnedPane) {
+						Services.focus.moveFocus(window, this.container.getEnabledPane(this.pinnedPane),
+							Services.focus.MOVEFOCUS_FORWARD, 0);
+					}
+					// Otherwise, focus the top-level scrollable itemPane
 					else {
-						tabFrom = (this.pinnedPane ? this.container.getEnabledPane(this.pinnedPane) : this._container).querySelector("collapsible-section");
+						this._container.querySelector(".zotero-view-item").focus();
 					}
-					Services.focus.moveFocus(window, tabFrom, Services.focus.MOVEFOCUS_FORWARD, 0);
 				});
 			}
 		};
