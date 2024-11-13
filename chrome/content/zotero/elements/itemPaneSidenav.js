@@ -247,6 +247,8 @@
 
 		destroy() {
 			this.removeEventListener('click', this.handleButtonClick);
+			this.removeEventListener('keydown', this.handleKeyDown);
+			this.removeEventListener('focusin', this.handleFocusIn);
 		}
 
 		render() {
