@@ -326,8 +326,10 @@
 					Services.focus.moveFocus(window, header, Services.focus.MOVEFOCUS_FORWARD, 0);
 					return true;
 				}
-				else {
-					this._getCurrentNotesContext()?.focus();
+				else if (this.mode == "notes") {
+					// Tab into the notes pane
+					Services.focus.moveFocus(window, this._getCurrentNotesContext(), Services.focus.MOVEFOCUS_FORWARD, 0);
+					return true;
 				}
 			}
 			return false;
