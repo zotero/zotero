@@ -1522,16 +1522,16 @@ class ReaderPreview extends ReaderInstance {
 			border-radius: 5px;
 		}
 		@media (prefers-color-scheme: light) {
-			#viewerContainer {
-				background: #f2f2f2;
+			body #viewerContainer {
+				background-color: #f2f2f2;
 			}
 			.pdfViewer .page::before {
 				box-shadow: inset 0 0 0px 1px #0000001a;
 			}
 		}
 		@media (prefers-color-scheme: dark) {
-			#viewerContainer {
-				background: #303030;
+			body #viewerContainer {
+				background-color: #303030;
 			}
 			.pdfViewer .page::before {
 				box-shadow: inset 0 0 0px 1px #ffffff1f;
