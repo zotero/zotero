@@ -77,20 +77,29 @@ attachment-preview {
 
 		toolbarbutton {
 			padding: 4px;
-			background-color: rgba(0,0,0,0.5);
-			
+
+			background-color: rgba(0, 0, 0, 0.55);
+			color: #fff;
+
 			&:hover {
-				background-color: rgba(0,0,0,0.4);
+				opacity: 0.75;
 			}
 
 			&:active, &[selected] {
-				background-color: rgba(0,0,0,0.3);
+				opacity: 0.5;
 			}
 
 			&:disabled,
 			&[disabled="true"] {
-				background-color: rgba(0,0,0,0.2);
+				opacity: 0.4;
 			}
+		}
+
+		// The reader can have different themes, we need to adjust the button color
+		// based on the class set by the AttachmentPreview element
+		&.dark toolbarbutton {
+			background-color: rgba(255, 255, 255, 0.55);
+			color: #000;
 		}
 		
 		&:-moz-locale-dir(rtl) {
@@ -99,11 +108,11 @@ attachment-preview {
 	}
 
 	.btn-prev {
-		@include svgicon-menu("arrow-left", "universal", "20", false, false, (#fff, #fff));
+		@include svgicon-menu("arrow-left", "universal", "20");
 	}
 
 	.btn-next {
-		@include svgicon-menu("arrow-right", "universal", "20", false, false, (#fff, #fff));
+		@include svgicon-menu("arrow-right", "universal", "20");
 	}
 
 	.drag-container {

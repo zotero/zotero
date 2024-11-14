@@ -95,6 +95,10 @@
 			 */
 			this._isReaderInitialized = false;
 
+			this._notifierID = null;
+
+			this._prefObserver = null;
+
 			this._resizeOb = new ResizeObserver(this._handleResize.bind(this));
 		}
 
@@ -213,6 +217,8 @@
 			this.addEventListener("keypress", this._handleKeypress);
 			this.setAttribute("data-preview-type", "unknown");
 			this._notifierID = Zotero.Notifier.registerObserver(this, ["item"], "attachmentPreview");
+			this._prefObserver = Zotero.Prefs.registerObserver("reader.contentDarkMode", this._handleContentDarkModeChange);
+			this._handleContentDarkModeChange(Zotero.Prefs.get("reader.contentDarkMode"));
 		}
 
 		destroy() {
@@ -226,6 +232,7 @@
 			this.removeEventListener("focusin", this._handleFocusIn);
 			this.removeEventListener("keypress", this._handleKeypress);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			Zotero.Prefs.unregisterObserver(this._prefObserver);
 		}
 
 		notify(event, type, ids, extraData) {
@@ -644,6 +651,10 @@
 			!scaleRatio && (scaleRatio = defaultSize);
 			this.style.setProperty("--width-height-ratio", scaleRatio);
 		}
+
+		_handleContentDarkModeChange = (useDarkMode) => {
+			this.querySelector(".btn-container").classList.toggle("dark", useDarkMode);
+		};
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
