@@ -1079,7 +1079,12 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
 					// is expanded in addCondition(), but we can't do that with this condition because we don't want
 					// to save the conditions it expands to in the search object
-					conditionsToProcess.push({ condition: 'blockStart' });
+					if (joinMode == 'ALL') {
+						// If joinMode is 'any', do not wrap conditions in quickSearch block so that
+						// they become just a series of OR statements. Otherwise, "Any Field" will
+						// conflict with all other conditions (if multiple conditions are present).
+						conditionsToProcess.push({ condition: 'blockStart' });
+					}
 					conditionsToProcess.push({
 						condition: 'field',
 						operator: condition.operator,
@@ -1104,7 +1109,9 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						value: condition.value,
 						required: false
 					});
-					conditionsToProcess.push({ condition: 'blockEnd' });
+					if (joinMode == 'ALL') {
+						conditionsToProcess.push({ condition: 'blockEnd' });
+					}
 					continue;
 			}
 			
