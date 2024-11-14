@@ -4161,17 +4161,29 @@ var ZoteroPane = new function()
 		}
 	};
 
-	this.buildAddItemToCollectionMenu = function (event) {
+	this.buildAddItemToCollectionMenu = function (event, items = this.getSelectedItems()) {
 		if (event.target !== event.currentTarget) return;
-
 		let popup = event.target;
-		let separator = popup.querySelector('menuseparator');
-		while (popup.childElementCount > 2) {
-			popup.removeChild(popup.lastElementChild);
+
+		items = Zotero.Items.keepTopLevel(items);
+		
+		let newCollectionMenuitem = document.createXULElement('menuitem');
+		document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
+		newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
+		let separator = document.createXULElement('menuseparator');
+		popup.replaceChildren(newCollectionMenuitem, separator);
+		
+		if (!items.length) {
+			separator.hidden = true;
+			return;
 		}
 
-		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
-		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		let libraryID = items[0].libraryID;
+		if (items.some(item => item.libraryID !== libraryID)) {
+			throw new Error('All items must be the same library');
+		}
+		
+		let collections = Zotero.Collections.getByLibrary(libraryID);
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
@@ -4179,7 +4191,7 @@ var ZoteroPane = new function()
 				null,
 				(event, collection) => {
 					if (event.target.tagName == 'menuitem') {
-						this.addSelectedItemsToCollection(collection);
+						this.addItemsToCollection(items, collection);
 						event.stopPropagation();
 					}
 				},
@@ -4188,13 +4200,12 @@ var ZoteroPane = new function()
 			popup.append(menuItem);
 		}
 
-		separator.setAttribute('hidden', !collections.length);
+		separator.hidden = !collections.length;
 	};
 
 
-	this.addSelectedItemsToCollection = async function (collection, createNew = false) {
-		// Get items first because newCollection() will deselect
-		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
+	this.addItemsToCollection = async function (items, collection, createNew = false) {
+		items = Zotero.Items.keepTopLevel(items);
 
 		if (createNew) {
 			if (collection) {
@@ -4211,6 +4222,11 @@ var ZoteroPane = new function()
 
 		await Zotero.DB.executeTransaction(
 			() => collection.addItems(items.map(item => item.id)));
+	};
+
+
+	this.addSelectedItemsToCollection = function (collection, createNew = false) {
+		return this.addItemsToCollection(this.getSelectedItems(), collection, createNew);
 	};
 
 	
