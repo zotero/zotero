@@ -392,8 +392,14 @@
 				event.preventDefault();
 			}
 			if (event.key == "Tab" && event.shiftKey) {
-				// Return focus to item pane
-				Services.focus.moveFocus(window, this, Services.focus.MOVEFOCUS_BACKWARD, 0);
+				if (this._contextNotesPaneVisible) {
+					// Tab into notes pane to focus search bar
+					Services.focus.moveFocus(window, this._contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
+				}
+				else {
+					// Shift-Tab out of sidenav to itemPane
+					Services.focus.moveFocus(window, this, Services.focus.MOVEFOCUS_BACKWARD, 0);
+				}
 				event.preventDefault();
 			}
 			if (["ArrowUp", "ArrowDown"].includes(event.key)) {

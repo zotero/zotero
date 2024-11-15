@@ -185,6 +185,7 @@
 		};
 
 		// ArrowUp/Down navigation between notes
+		// Tab from a note-row focuses sidenav, Shift-Tab from a note focuses the section header
 		_handleKeyDown = (event) => {
 			if (event.target.tagName !== "note-row" && !event.target.classList.contains("more")) return;
 			if (event.key == "ArrowDown") {
@@ -192,6 +193,16 @@
 			}
 			else if (event.key == "ArrowUp") {
 				event.target.previousElementSibling?.focus();
+			}
+			else if (event.key == "Tab" && !event.shiftKey) {
+				Services.focus.moveFocus(window, document.getElementById("zotero-context-pane-sidenav"),
+					Services.focus.MOVEFOCUS_FORWARD, 0);
+				event.preventDefault();
+			}
+			else if (event.key == "Tab" && event.shiftKey) {
+				Services.focus.moveFocus(window, event.target.closest("collapsible-section"),
+					Services.focus.MOVEFOCUS_FORWARD, 0);
+				event.preventDefault();
 			}
 		};
 		
