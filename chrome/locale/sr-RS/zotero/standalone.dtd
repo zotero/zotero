@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Алати">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Инсталирај повезивање са прегледачем">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Додаци">
 <!ENTITY developer.label "Програмер">

@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Orodja">
 <!ENTITY toolsMenu.accesskey "d">
-<!ENTITY installConnector.label "Namesti konektor za brskalnik">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Dodatki">
 <!ENTITY developer.label "Razvijalec">

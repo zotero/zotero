@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "ثبت موصل المتصفح">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "ملحقات">
 <!ENTITY developer.label "المطور">

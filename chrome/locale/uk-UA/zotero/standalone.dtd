@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Інструменти">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Встановити браузерний конектор">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Надбудови">
 <!ENTITY developer.label "Developer">

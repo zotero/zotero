@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Προσθήκη στοιχείου/ων μέσω Ταυτότητας">
 <!ENTITY zotero.toolbar.removeItem.label "Απομάκρυνση στοιχείου...">
 <!ENTITY zotero.toolbar.newLibrary.label "Νέα βιβλιοθήκη">
-<!ENTITY zotero.toolbar.newCollection.label "Νέα συλλογή...">
 <!ENTITY zotero.toolbar.newGroup "Νέα ομάδα...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Νέα δευτερεύουσα συλλογή...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Νέα αποθηκευμένη αναζήτηση...">

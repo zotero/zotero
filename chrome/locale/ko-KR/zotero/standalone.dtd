@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "도구">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "브라우저 중계기 설치">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "확장 기능">
 <!ENTITY developer.label "개발자">

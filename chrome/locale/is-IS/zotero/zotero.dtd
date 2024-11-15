@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Bæta við færslu(m) samkvæmt auðkenni">
 <!ENTITY zotero.toolbar.removeItem.label "Fjarlægja færslu…">
 <!ENTITY zotero.toolbar.newLibrary.label "Nýtt færslusafn">
-<!ENTITY zotero.toolbar.newCollection.label "Nýtt safn…">
 <!ENTITY zotero.toolbar.newGroup "Nýr hópur…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nýtt undirsafn…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ný vistuð leit…">

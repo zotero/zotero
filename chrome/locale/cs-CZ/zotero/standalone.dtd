@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Nainstalovat Konektory do prohlížečů">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplňky">
 <!ENTITY developer.label "Vývojář">

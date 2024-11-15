@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "識別子によってアイテムを追加する">
 <!ENTITY zotero.toolbar.removeItem.label "アイテムを削除...">
 <!ENTITY zotero.toolbar.newLibrary.label "新しいライブラリ">
-<!ENTITY zotero.toolbar.newCollection.label "新規コレクション...">
 <!ENTITY zotero.toolbar.newGroup "新規グループ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "新規サブコレクション...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新規検索条件の保存...">

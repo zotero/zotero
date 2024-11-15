@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "கருவிகள்">
 <!ENTITY toolsMenu.accesskey "ஏ">
-<!ENTITY installConnector.label "உலாவி இணைப்பியை நிறுவவும்">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "ஒ">
 <!ENTITY addons.label "துணை நிரல்கள்">
 <!ENTITY developer.label "உருவாக்குநர்">

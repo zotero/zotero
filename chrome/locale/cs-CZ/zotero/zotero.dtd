@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Přidat položku podle identifikátoru">
 <!ENTITY zotero.toolbar.removeItem.label "Odstranit položku...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nová knihovna">
-<!ENTITY zotero.toolbar.newCollection.label "Nová kolekce...">
 <!ENTITY zotero.toolbar.newGroup "Nová skupina...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nová podkolekce...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nové Uložené hledání...">

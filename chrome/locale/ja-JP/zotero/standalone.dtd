@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "ツール">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "ブラウザ・コネクタをインストールする">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "アドオン">
 <!ENTITY developer.label "開発者">

@@ -41,8 +41,17 @@
   "general_copyToClipboard": {
     "message": "Kopiraj na odložišče"
   },
+  "itemType_pdf": {
+    "message": "Priponka PDF"
+  },
+  "itemType_epub": {
+    "message": "Priponka EPUB"
+  },
   "itemType_note": {
     "message": "Opomba"
+  },
+  "itemType_link": {
+    "message": "Spletna povezava"
   },
   "itemType_attachment": {
     "message": "Priponka"
@@ -50,8 +59,38 @@
   "progressWindow_savingTo": {
     "message": "Shranjevanje v"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Pokaži podrobnosti"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Skrij podrobnosti"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Izbirnik ciljne zbirke"
+  },
+  "progressWindow_savingItems": {
+    "message": "Shranjevanje $1 vnosov. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Shranjevanje vnosa $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Vnos $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Shranjeno: $1"
+  },
+  "progressWindow_allDone": {
+    "message": "Shranjevanje je zaključeno. Pogovorno okno se bo zaprlo."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Vnosi s te spletne strani so že shranjeni."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Značke (ločene z vejicami)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtriraj zbirke"
   },
   "progressWindow_error_translation": {
     "message": "Napaka pri shranjevanju tega vnosa. Glejte $1 za več informacij."

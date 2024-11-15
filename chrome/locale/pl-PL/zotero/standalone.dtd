@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Narzędzia">
 <!ENTITY toolsMenu.accesskey "N">
-<!ENTITY installConnector.label "Zainstaluj łącznik do przeglądarki">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "p">
 <!ENTITY addons.label "Dodatki">
 <!ENTITY developer.label "Programista">

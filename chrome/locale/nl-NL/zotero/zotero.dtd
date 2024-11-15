@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Item(s) toevoegen via identificatiecode">
 <!ENTITY zotero.toolbar.removeItem.label "Item verwijderen…">
 <!ENTITY zotero.toolbar.newLibrary.label "Nieuwe bibliotheek">
-<!ENTITY zotero.toolbar.newCollection.label "Nieuwe verzameling…">
 <!ENTITY zotero.toolbar.newGroup "Nieuwe groep…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nieuwe deelverzameling…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nieuwe bewaarde zoekopdracht…">

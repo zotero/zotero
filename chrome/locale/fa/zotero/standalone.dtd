@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "ابزارها">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "نصب متصل‌کننده مرورگر">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "افزودنی‌ها">
 <!ENTITY developer.label "توسعه‌دهنده">

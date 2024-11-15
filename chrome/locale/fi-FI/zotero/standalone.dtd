@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Työkalut">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Asenna selainlisäosa">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lisäosat">
 <!ENTITY developer.label "Kehittäjätyökalut">

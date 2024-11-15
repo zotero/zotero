@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Elem hozzáadása azonosító alapján">
 <!ENTITY zotero.toolbar.removeItem.label "Elem törlése...">
 <!ENTITY zotero.toolbar.newLibrary.label "Könyvtár létrehozása">
-<!ENTITY zotero.toolbar.newCollection.label "Új gyűjtemény...">
 <!ENTITY zotero.toolbar.newGroup "Új csoport...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Új algyűjtemény...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Új mentett keresés...">

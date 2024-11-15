@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Tilføj element(er) ud fra identifikator">
 <!ENTITY zotero.toolbar.removeItem.label "Fjern ...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nyt bibliotek">
-<!ENTITY zotero.toolbar.newCollection.label "Ny Samling...">
 <!ENTITY zotero.toolbar.newGroup "Ny Gruppe ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny delsamling">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ny gemt Søgning ...">

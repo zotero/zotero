@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Elementua(k) identifikatzaile bidez gehitu">
 <!ENTITY zotero.toolbar.removeItem.label "Elementua kendu...">
 <!ENTITY zotero.toolbar.newLibrary.label "Liburutegi berria...">
-<!ENTITY zotero.toolbar.newCollection.label "Bilduma berria...">
 <!ENTITY zotero.toolbar.newGroup "Talde berria...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Azpi-bilduma berria...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Gordetako bilaketa berria...">

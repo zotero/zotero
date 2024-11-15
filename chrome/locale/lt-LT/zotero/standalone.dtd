@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Priemonės">
 <!ENTITY toolsMenu.accesskey "P">
-<!ENTITY installConnector.label "Įdiegti papildinį naršyklei">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Priedai">
 <!ENTITY developer.label "Programuotojams">

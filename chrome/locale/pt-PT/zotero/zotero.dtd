@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Adicionar Item(s) por Identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Remover Item...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nova Biblioteca">
-<!ENTITY zotero.toolbar.newCollection.label "Nova Colecção...">
 <!ENTITY zotero.toolbar.newGroup "Novo Grupo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova Subcolecção...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova Procura Guardada...">

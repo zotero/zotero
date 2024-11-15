@@ -24,6 +24,7 @@ general-help = Помоћ
 general-tag = Ознака
 general-done = Готово
 general-view-troubleshooting-instructions = Погледај упутства за решавање проблема
+general-go-back = Go Back
 citation-style-label = Стил цитата:
 language-label = Језик:
 menu-file-show-in-finder =
@@ -389,6 +390,7 @@ menu-ui-density-comfortable =
     .label = Удобно
 menu-ui-density-compact =
     .label = Збијено
+pane-item-details = Item Details
 pane-info = Подаци
 pane-abstract = Сажетак
 pane-attachments = Прилози
@@ -401,6 +403,8 @@ pane-attachment-preview = Преглед
 pane-attachment-annotations = Напомене
 pane-header-attachment-associated =
     .label = Преименујте повезану датотеку
+item-details-pane =
+    .aria-label = { pane-item-details }
 section-info =
     .label = { pane-info }
 section-abstract =
@@ -482,6 +486,8 @@ sidenav-tags =
     .tooltiptext = { pane-tags }
 sidenav-related =
     .tooltiptext = { pane-related }
+sidenav-main-btn-grouping =
+    .aria-label = { pane-item-details }
 pin-section =
     .label = Закачи одељак
 unpin-section =
@@ -498,6 +504,13 @@ tagselector-search =
     .placeholder = Филтрирај ознаке
 context-notes-search =
     .placeholder = Претражи белешке
+context-notes-return-button =
+    .aria-label = { general-go-back }
+new-collection = Нова збирка…
+menu-new-collection =
+    .label = { new-collection }
+toolbar-new-collection =
+    .tooltiptext = { new-collection }
 new-collection-dialog =
     .title = Нова збирка
     .buttonlabelaccept = Направи одељак
@@ -588,13 +601,13 @@ item-pane-message-unselected =
     { $count ->
         [0] Нема ставки у овом прегледу
         [one] { $count } ставка у овом прегледу
-       *[other] { $count } ставки у овом прегледу
+       *[other] { $count } ставке у овом прегледу
     }
 item-pane-message-objects-unselected =
     { $count ->
         [0] Нема објеката у овом прегледу
         [one] { $count } објекат у овом прегледу
-       *[other] { $count } објеката у овом прегледу
+       *[other] { $count } објекта у овом прегледу
     }
 item-pane-duplicates-merge-items =
     .label =
@@ -606,7 +619,7 @@ item-pane-duplicates-merge-items =
 locate-library-lookup-no-resolver = Морате да изаберете разрешитеља из површи { $pane } у подешавањима програма { -app-name }.
 architecture-win32-warning-message = Пребаците се на 64-творо битни { -app-name } за бржи рад програма. Ваши подаци неће бити промењени.
 architecture-warning-action = Преузми 64-творо битни { -app-name }
-architecture-x64-on-arm64-message = { -app-name } је покренут у кроз емулацију. Нативна верзија програма { -app-name } је много ефикаснија.
+architecture-x64-on-arm64-message = { -app-name } је покренут у кроз емулацију. Доступна верзија програма { -app-name } за ваш процесор је много ефикаснија.
 architecture-x64-on-arm64-action = Преузми { -app-name } за АРМ64
 first-run-guidance-quickFormat =
     Унесите наслов, аутора и/или годину да потражите реферецну.
@@ -614,34 +627,36 @@ first-run-guidance-quickFormat =
     Након што направите избор, кликните на балончић или изаберите ставку преко тастатуре и притисните ↓/размак да прикажете додатне опције цитата као што су број странице, префикс или суфикс.
     
     Можете додати број странице и директно, тако што га унесете у поље за претрагу или га откуцате након балончића и притиснете { return-or-enter }.
-first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+first-run-guidance-authorMenu = { -app-name } вам дозвољава да унесете уредника и преводиоца. Можете да поставите аутора за уредника или преводиоца из овог менија.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
     .tooltiptext = { general-add }
 advanced-search-conditions-menu =
-    .aria-label = Search condition
+    .aria-label = Услов за претрагу
     .label = { $label }
 advanced-search-operators-menu =
-    .aria-label = Operator
+    .aria-label = Операција
     .label = { $label }
 advanced-search-condition-input =
-    .aria-label = Value
+    .aria-label = Вредност
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } поље је додато
+        [few] { $count } поља су додата
+       *[other] { $count } поља је додато
     }
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Изабери
 select-items-convertToStandalone =
     .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Претвори у самосталне прилоге
+            [few] Претвори у самосталне прилоге
+           *[other] Претвори у самостални прилог
         }
 select-items-convertToStandaloneNote =
     .label =
@@ -649,7 +664,7 @@ select-items-convertToStandaloneNote =
             [one] Convert to Standalone Note
            *[other] Convert to Standalone Notes
         }
-file-type-webpage = Webpage
+file-type-webpage = Веб страница
 file-type-image = Слика
 file-type-pdf = ПДФ
 file-type-audio = Звук
@@ -657,17 +672,17 @@ file-type-video = Видео
 file-type-presentation = Презентација
 file-type-document = Документ
 file-type-ebook = Е-књига
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = Сазнајте више о <a data-l10n-name="new-features-link">новим могућности програма { -app-name } { $version }</a>
+post-upgrade-density = Изаберите жељену густину приказа:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = Убаци и претражи
+mac-word-plugin-install-message = Зотеро треба да приступи подацима програма Word како би инсталирао прикључак за Word.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Инсталирај Word прикључак
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =

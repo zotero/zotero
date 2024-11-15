@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Eines">
 <!ENTITY toolsMenu.accesskey "n">
-<!ENTITY installConnector.label "Instal·la el connector del navegador">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "c">
 <!ENTITY addons.label "Complements">
 <!ENTITY developer.label "Desenvolupament">

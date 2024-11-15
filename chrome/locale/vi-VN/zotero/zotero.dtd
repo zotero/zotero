@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Thêm các mục bằng định danh">
 <!ENTITY zotero.toolbar.removeItem.label "Xóa mục...">
 <!ENTITY zotero.toolbar.newLibrary.label "Thư viện mới">
-<!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
 <!ENTITY zotero.toolbar.newGroup "Nhóm mới...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm mới...">

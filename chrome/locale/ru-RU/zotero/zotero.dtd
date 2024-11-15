@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Добавить запись(-и) по идентификатору">
 <!ENTITY zotero.toolbar.removeItem.label "Удалить запись...">
 <!ENTITY zotero.toolbar.newLibrary.label "Новая библиотека">
-<!ENTITY zotero.toolbar.newCollection.label "Новая коллекция…">
 <!ENTITY zotero.toolbar.newGroup "Новая группа…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Новая вложенная коллекция…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Новый отбор…">

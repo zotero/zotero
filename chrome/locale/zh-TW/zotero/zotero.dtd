@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "依辨識符號加入(可能是複數)項目">
 <!ENTITY zotero.toolbar.removeItem.label "移除項目……">
 <!ENTITY zotero.toolbar.newLibrary.label "新增文獻庫">
-<!ENTITY zotero.toolbar.newCollection.label "新增文獻集……">
 <!ENTITY zotero.toolbar.newGroup "新增群組……">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻集……">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果……">

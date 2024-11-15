@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Инструменти">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Инсталирай браузър добавката Зотеро">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Добавки">
 <!ENTITY developer.label "Developer">

@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "افزودن آیتم‌ با شناسه">
 <!ENTITY zotero.toolbar.removeItem.label "حذف آیتم‌...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library">
-<!ENTITY zotero.toolbar.newCollection.label "مجموعه جدید...">
 <!ENTITY zotero.toolbar.newGroup "گروه جدید...">
 <!ENTITY zotero.toolbar.newSubcollection.label "زیرمجموعه جدید...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "جستجوی ذخیره‌شده جدید...">

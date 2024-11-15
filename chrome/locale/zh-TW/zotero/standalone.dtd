@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "安裝瀏覽器資料庫Connector">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "附加元件">
 <!ENTITY developer.label "開發者">

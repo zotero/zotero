@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Ostilhoù">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Staliañ ar c'hevreer Zotero er merdeer">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lugantoù">
 <!ENTITY developer.label "Diorren">

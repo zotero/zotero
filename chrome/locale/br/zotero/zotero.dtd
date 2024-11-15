@@ -80,7 +80,6 @@
 <!ENTITY zotero.toolbar.lookup.label "Ouzhpennañ (un) elfenn(où) dre e anaouader">
 <!ENTITY zotero.toolbar.removeItem.label "Dilemel an elfenn...">
 <!ENTITY zotero.toolbar.newLibrary.label "Levraoueg nevez">
-<!ENTITY zotero.toolbar.newCollection.label "Dastumadeg nevez...">
 <!ENTITY zotero.toolbar.newGroup "Strollad nevez...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Is-dastumadeg nevez...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Klask enrollet nevez...">
