@@ -284,7 +284,8 @@
 								</menupopup>
 							</menu>
 							<menuseparator class="menu-type-library"/>
-							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
+							<menuitem id="menu_newCollection" class="menu-type-library"
+									data-l10n-id="menu-new-collection"
 									command="cmd_zotero_newCollection"/>
 							<menu id="menu_libraryAdd"
 									class="menu-type-library"
@@ -912,7 +913,7 @@
 			<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
 			<menuitem class="zotero-menuitem-sync"/>
 			<menuseparator/>
-			<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
+			<menuitem class="zotero-menuitem-new-collection" data-l10n-id="menu-new-collection"/>
 			<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
 			<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
 			<menuitem class="zotero-menuitem-refresh-feed"/>
@@ -984,10 +985,7 @@
 			<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-change-top-level-item" data-l10n-id="item-menu-change-parent-item" oncommand="ZoteroPane_Local.changeParentItem();"/>
 			<menu class="menu-iconic zotero-menuitem-add-to-collection">
-				<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddItemToCollectionMenu(event)">
-					<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
-					<menuseparator id="zotero-add-to-collection-separator"/>
-				</menupopup>
+				<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddItemToCollectionMenu(event)"/>
 			</menu>
 			<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-duplicate-and-convert" oncommand="ZoteroPane_Local.duplicateAndConvertSelectedItem();"/>
@@ -1194,7 +1192,7 @@
 								<vbox id="zotero-collections-pane" zotero-persist="width">
 									<toolbar id="zotero-toolbar-collection-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
 										<hbox id="zotero-collections-toolbar" align="center">
-											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" data-l10n-id="toolbar-new-collection" command="cmd_zotero_newCollection"/>
 											<spacer flex="1"></spacer>
 											<html:div style="display: flex;flex-direction: row; flex-grow: 0; flex-shrink: 1; min-width: 0;">
 												<toolbarbutton id="zotero-tb-collections-search" data-l10n-id="zotero-collections-search-btn" tabindex="-1" class="zotero-tb-button"/>

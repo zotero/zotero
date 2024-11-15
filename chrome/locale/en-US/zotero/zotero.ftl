@@ -577,6 +577,12 @@ context-notes-search =
 context-notes-return-button =
     .aria-label = { general-go-back }
 
+new-collection = New Collection…
+menu-new-collection =
+    .label = { new-collection }
+toolbar-new-collection =
+    .tooltiptext = { new-collection }
+
 new-collection-dialog =
     .title = New Collection
     .buttonlabelaccept = Create Collection

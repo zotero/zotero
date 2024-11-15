@@ -35,10 +35,7 @@ import { getCSSIcon } from 'components/icons';
 			</collapsible-section>
 			
 			<popupset>
-				<menupopup class="add-popup" onpopupshowing="ZoteroPane_Local.buildAddItemToCollectionMenu(event)">
-					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
-					<menuseparator/>
-				</menupopup>
+				<menupopup class="add-popup"/>
 			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 
@@ -68,6 +65,10 @@ import { getCSSIcon } from 'components/icons';
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'collection'], 'librariesCollectionsBox');
 			this._body = this.querySelector('.body');
 			this.initCollapsibleSection();
+			this._addPopup = this.querySelector('.add-popup');
+			this._addPopup.addEventListener('popupshowing', (event) => {
+				ZoteroPane.buildAddItemToCollectionMenu(event, [this._item]);
+			});
 			this._section.addEventListener('add', this._handleAdd);
 		}
 
@@ -266,7 +267,7 @@ import { getCSSIcon } from 'components/icons';
 		}
 
 		_handleAdd = (event) => {
-			this.querySelector('.add-popup').openPopupAtScreen(
+			this._addPopup.openPopupAtScreen(
 				event.detail.button.screenX,
 				event.detail.button.screenY,
 				true
