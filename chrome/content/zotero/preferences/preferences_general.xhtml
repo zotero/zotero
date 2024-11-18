@@ -162,7 +162,13 @@
 		
 		<groupbox id="zotero-prefpane-reader-groupbox" aria-labelledby="preferences-reader-title">
 			<label><html:h2 id="preferences-reader-title" data-l10n-id="preferences-reader-title"/></label>
-			
+			<vbox>
+				<checkbox
+					id="auto-disable-tool"
+					data-l10n-id="preferences-reader-auto-disable-tool"
+					native="true"
+				/>
+			</vbox>
 			<vbox class="fileHandler-menus">
 				<label control="fileHandler-pdf">&zotero.preferences.fileHandler.openPDFsUsing;</label>
 				<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
