@@ -158,6 +158,10 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 			return super._validate(option);
 		}
+
+		update() {
+			this._update();
+		}
 	}
 
 
@@ -331,6 +335,10 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				return option.dataProvider(item, dataKey);
 			}
 			return "";
+		}
+
+		updateColumns() {
+			this._columnManager.update();
 		}
 	}
 

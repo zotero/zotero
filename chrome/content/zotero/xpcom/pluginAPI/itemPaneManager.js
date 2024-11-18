@@ -301,6 +301,13 @@
 				},
 			};
 		}
+
+		update(rowID) {
+			if (!this._optionsCache[rowID]) {
+				return;
+			}
+			this._update([rowID]);
+		}
 	}
 
 
@@ -327,6 +334,10 @@
 
 		unregisterInfoRow(rowID) {
 			return this._infoRowManager.unregister(rowID);
+		}
+
+		updateInfoRow(rowID) {
+			return this._infoRowManager.update(rowID);
 		}
 
 		get customInfoRowData() {

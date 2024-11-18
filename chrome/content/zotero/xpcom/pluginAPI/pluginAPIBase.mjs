@@ -322,14 +322,14 @@ class PluginAPIBase {
 	/**
 	 * Notify the receiver to update
 	 */
-	async _update() {
+	async _update(ids = [], extraData = {}) {
 		this._lastUpdateID = `${new Date().getTime()}-${lazy.Zotero.Utilities.randomString()}`;
 		await lazy.Zotero.DB.executeTransaction(async () => {
 			lazy.Zotero.Notifier.queue(
 				this._config.notifyAction,
 				this._config.notifyType,
-				[],
-				{},
+				ids,
+				extraData,
 			);
 		});
 	}
