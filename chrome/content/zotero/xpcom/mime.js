@@ -29,7 +29,7 @@ Zotero.MIME = new function(){
 	this.sniffForBinary = sniffForBinary;
 	this.hasNativeHandler = hasNativeHandler;
 	
-	// Magic numbers
+	// Magic numbers -- see https://en.wikipedia.org/wiki/List_of_file_signatures
 	var _snifferEntries = [
 		["%PDF-", "application/pdf"],
 		["%!PS-Adobe-", 'application/postscript', 0],
@@ -42,12 +42,21 @@ Zotero.MIME = new function(){
 		["<html", 'text/html', 0],
 		["GIF8", 'image/gif', 0],
 		["\u0089PNG", 'image/png', 0],
-		["\u00FF\u00D8", 'image/jpeg', 0],
-		["JFIF", 'image/jpeg'],
+		["\u00FF\u00D8\u00FF\u00DB", "image/jpeg", 0],
+		["\u00FF\u00D8\u00FF\u00E0\u0000\u0010\u004A\u0046\u0049\u0046\u0000\u0001", "image/jpeg", 0],
+		["\u00FF\u00D8\u00FF\u00EE", "image/jpeg", 0],
+		["\u00FF\u00D8\u00FF\u00E1", "image/jpeg", 0],
+		["\u00FF\u00D8\u00FF\u00E0", "image/jpeg", 0],
 		["FLV", "video/x-flv", 0],
 		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0],
 		["SQLite format 3\u0000", "application/x-sqlite3", 0],
 		["mimetypeapplication/epub+zip", "application/epub+zip", 30],
+		// MP3 without ID3 tag or with ID3v1 tag
+		["\U00FF\U00FB", "audio/mpeg", 0],
+		["\U00FF\U00F3", "audio/mpeg", 0],
+		["\U00FF\U00F2", "audio/mpeg", 0],
+		// MP3 with ID3v2 container
+		["ID3", "audio/mpeg", 0],
 	];
 	
 	var _extensions = {
@@ -83,7 +92,12 @@ Zotero.MIME = new function(){
 		'odt': 'application/vnd.oasis.opendocument.text',
 		
 		'pdf': 'application/pdf',
-		'epub': 'application/epub+zip'
+		'epub': 'application/epub+zip',
+		
+		'mp3': 'audio/mpeg',
+		'aac': 'audio/aac',
+		'mp4': 'video/mp4',
+		'mpeg': 'video/mpeg',
 	};
 	
 	var _textTypes = {
