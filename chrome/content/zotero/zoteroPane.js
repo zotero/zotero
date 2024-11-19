@@ -4235,7 +4235,8 @@ var ZoteroPane = new function()
 			myPublicationMenuItem.setAttribute("image", "chrome://zotero/skin/16/universal/publications.svg");
 			popup.append(myPublicationMenuItem);
 			// Cannot add top-level notes/attachment or items that are already in my publications
-			if (items.some(item => !item.canAddToTarget({ libraryID: Zotero.Libraries.userLibraryID, isPublications: true }))) {
+			let myPublicationsRow = this.collectionsView.getRow(this.collectionsView.getRowIndexByID("P1"));
+			if (items.some(item => !item.canAddToTarget(myPublicationsRow))) {
 				myPublicationMenuItem.disabled = true;
 			}
 		}
