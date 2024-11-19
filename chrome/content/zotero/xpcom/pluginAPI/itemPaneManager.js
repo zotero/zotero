@@ -302,11 +302,11 @@
 			};
 		}
 
-		update(rowID) {
+		refresh(rowID) {
 			if (!this._optionsCache[rowID]) {
 				return;
 			}
-			this._update([rowID]);
+			this._refresh([rowID]);
 		}
 	}
 
@@ -336,8 +336,8 @@
 			return this._infoRowManager.unregister(rowID);
 		}
 
-		updateInfoRow(rowID) {
-			return this._infoRowManager.update(rowID);
+		refreshInfoRow(rowID) {
+			return this._infoRowManager.refresh(rowID);
 		}
 
 		get customInfoRowData() {

@@ -159,8 +159,8 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			return super._validate(option);
 		}
 
-		update() {
-			this._update();
+		refresh() {
+			this._refresh();
 		}
 	}
 
@@ -337,8 +337,8 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			return "";
 		}
 
-		updateColumns() {
-			this._columnManager.update();
+		refreshColumns() {
+			this._columnManager.refresh();
 		}
 	}
 
