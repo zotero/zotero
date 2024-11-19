@@ -11,6 +11,7 @@ item-message-pane {
 		background: var(--material-toolbar);
 		border-bottom: var(--material-panedivider);
 		height: 28px;
+		align-items: center;
 
 		&:empty {
 			display: none;
@@ -19,6 +20,9 @@ item-message-pane {
 		button {
 			height: 26px;
 			margin: 0;
+			@media (-moz-platform: macos) {
+				margin: 0px -2px;
+			}
 			flex-grow: 1;
 		}
 	}
