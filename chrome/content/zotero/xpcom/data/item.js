@@ -4477,19 +4477,23 @@ Zotero.Item.prototype.addToCollection = function (collectionIDOrKey) {
 
 /**
  * Check sync conditions for if an item can be added into a given container via drag-drop or via context menu options.
- * @param {Zotero.Collection|Zotero.Library|Object} target - The object to which we check if an item
- * can be added. Must be a collection, a library or a collectionTreeRow.ref object { libraryID, treeViewID }
- * (for "My Publications" pseudo collection).
+ * @param {Zotero.Collection|Zotero.Library|Zotero.CollectionTreeRow} target - The object to which we check if an item
+ * can be added. Must be a collection, a library or a collectionTreeRow.
  * @return {Boolean} result - true if there is no sync condition preventing an item from being added, or false otherwise.
  */
 Zotero.Item.prototype.canAddToTarget = function (target) {
-	let targetGroup = Zotero.Libraries.get(target.libraryID);
-	// Determine if it's a publication based on treeViewID from collectionTreeRow.ref
-	if (target.treeViewID && target.treeViewID[0] === "P") {
-		target.isPublications = true;
+	// If a treeRow is passed, get its ref object (which is what we care about)
+	// and record if it was a "My Publications" row
+	if (target instanceof Zotero.CollectionTreeRow) {
+		let treeRow = target;
+		target = target.ref;
+		if (treeRow.isPublications()) {
+			target.isPublications = true;
+		}
 	}
+	let targetGroup = Zotero.Libraries.get(target.libraryID);
 	if (!targetGroup.editable) return false;
-	// Target has to be a library, a collection, or an object { libraryID: X, isPublications: true }
+	// Target has to be a library, a collection, or "My Publications" row
 	if (!(target instanceof Zotero.Library || target instanceof Zotero.Collection || target.isPublications)) return false;
 	// Cannot move item to top-level library that it already belongs to
 	if (target instanceof Zotero.Library && target.libraryID == this.libraryID) return false;
@@ -4521,16 +4525,18 @@ Zotero.Item.prototype.canAddToTarget = function (target) {
 };
 
 /**
- * Check all (sync and async) conditions for if an item can be added into a given container via drag-drop or via context menu options.
- * @param {Zotero.Collection|Zotero.Library|Object} target - The object to which we check if an item
- * can be added. Must be a collection, a library or a collectionTreeRow.ref object { libraryID, treeViewID }
- * (for "My Publications" pseudo collection).
- * @return {Boolean} result - true if there is nothing preventing an item from being added, or false otherwise.
+ * Check all conditions (sync and async) for if an item can be added into a given container via drag-drop or via context menu options.
+ * @param {Zotero.Collection|Zotero.Library|Zotero.CollectionTreeRow} target - The object to which we check if an item
+ * can be added. Must be a collection, a library or a collectionTreeRow.
+ * @return {Boolean} result - true if there is no condition preventing an item from being added, or false otherwise.
  */
 Zotero.Item.prototype.canAddToTargetAsync = async function (target) {
 	// Check for sync conditions first
 	if (!this.canAddToTarget(target)) return false;
 
+	if (target instanceof Zotero.CollectionTreeRow) {
+		target = target.ref;
+	}
 	let targetGroup = Zotero.Libraries.get(target.libraryID);
 	// Moving item between groups
 	if (target.libraryID !== this.libraryID) {

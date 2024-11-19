@@ -4258,7 +4258,7 @@ var ZoteroPane = new function()
 				{
 					clickAction: (event, collection) => {
 						if (event.target.tagName == 'menuitem') {
-							this.addItemsToCollection(collection);
+							this.addItemsToCollection(items, collection);
 							event.stopPropagation();
 						}
 					},
