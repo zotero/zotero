@@ -59,6 +59,7 @@ Zotero_Preferences.General = {
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 		this._initEbookFontFamilyMenu();
+		this._initAutoDisableToolCheckbox();
 	},
 
 	_getAutomaticLocaleMenuLabel: function () {
@@ -548,4 +549,32 @@ Zotero_Preferences.General = {
 			popup.append(menuitem);
 		}
 	},
+
+	_initAutoDisableToolCheckbox() {
+		let checkbox = document.getElementById('auto-disable-tool');
+		checkbox.addEventListener('command', () => {
+			let value = checkbox.checked;
+			Zotero.Prefs.set('reader.autoDisableTool.note', value);
+			Zotero.Prefs.set('reader.autoDisableTool.text', value);
+			Zotero.Prefs.set('reader.autoDisableTool.image', value);
+			checkbox.querySelector('.checkbox-check').style.opacity = 'unset';
+		});
+
+		let values = [
+			Zotero.Prefs.get('reader.autoDisableTool.note'),
+			Zotero.Prefs.get('reader.autoDisableTool.text'),
+			Zotero.Prefs.get('reader.autoDisableTool.image')
+		];
+		if (values.every(x => x)) {
+			checkbox.checked = true;
+		}
+		else if (values.every(x => !x)) {
+			checkbox.checked = false;
+		}
+		else {
+			checkbox.checked = true;
+			// XUL checkbox doesn't support 'indeterminate' property, therefore making it grayish instead
+			checkbox.querySelector('.checkbox-check').style.opacity = '0.5';
+		}
+	}
 }

@@ -210,6 +210,9 @@ class ReaderInstance {
 			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			hyphenation: Zotero.Prefs.get('reader.ebookHyphenate'),
+			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
+			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
+			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -555,6 +558,9 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.contentDarkMode', this._handleContentDarkModeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.ebookHyphenate', this._handleEbookPrefChange),
+			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
+			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
+			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
 		];
 
 		return true;
@@ -1012,6 +1018,12 @@ class ReaderInstance {
 	_handleEbookPrefChange = () => {
 		this._internalReader.setFontFamily(Zotero.Prefs.get('reader.ebookFontFamily'));
 		this._internalReader.setHyphenate(Zotero.Prefs.get('reader.ebookHyphenate'));
+	};
+
+	_handleAutoDisableToolPrefChange = () => {
+		this._internalReader.setAutoDisableNoteTool(Zotero.Prefs.get('reader.autoDisableTool.note'));
+		this._internalReader.setAutoDisableTextTool(Zotero.Prefs.get('reader.autoDisableTool.text'));
+		this._internalReader.setAutoDisableImageTool(Zotero.Prefs.get('reader.autoDisableTool.image'));
 	};
 
 	_dataURLtoBlob(dataurl) {

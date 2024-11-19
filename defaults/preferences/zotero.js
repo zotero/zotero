@@ -227,6 +227,9 @@ pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");
 pref("extensions.zotero.reader.contentDarkMode", true);
 pref("extensions.zotero.reader.ebookFontFamily", "Georgia, serif");
 pref("extensions.zotero.reader.ebookHyphenate", true);
+pref("extensions.zotero.reader.autoDisableTool.note", true);
+pref("extensions.zotero.reader.autoDisableTool.text", true);
+pref("extensions.zotero.reader.autoDisableTool.image", true);
 
 // Set color scheme to auto by default
 pref("browser.theme.toolbar-theme", 2);
