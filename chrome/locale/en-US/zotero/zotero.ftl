@@ -82,7 +82,7 @@ menu-view-columns-move-right =
     .label = Move Column Right
 
 main-window-command =
-    .label = { -app-name }
+    .label = Library
 main-window-key =
     .key = L
 
