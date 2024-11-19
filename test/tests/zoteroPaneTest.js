@@ -1958,4 +1958,120 @@ describe("ZoteroPane", function() {
 			assert.includeMembers(topLevelCollections, [collectionChild]);
 		});
 	});
+	describe("#addSelectedItemsToCollection", function () {
+		let group;
+
+		before(async () => {
+			group = await createGroup();
+		});
+
+		it("add should add selected item to collection in the same library", async function () {
+			let item = await createDataObject("item");
+			let collection = await createDataObject("collection");
+			await zp.selectItem(item.id);
+
+			await zp.addSelectedItemsToCollection(collection);
+			assert.include(collection.getChildItems(true), item.id);
+		});
+
+		it("add should copy selected item to collection in another library as a linked item", async function () {
+			let item = await createDataObject("item");
+			let collection = await createDataObject("collection", { libraryID: group.libraryID });
+			await zp.selectItem(item.id);
+
+			await zp.addSelectedItemsToCollection(collection);
+
+			// A new item was added to collection and it should be a copy of the original one
+			assert.equal(collection.getChildItems()[0].getDisplayTitle(), item.getDisplayTitle());
+			// It is also marked as a linked item
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.equal(collection.getChildItems()[0].id, linkedItem.id);
+		});
+
+		it("should disable group in 'Add to Collection...' submenu if linked item exists ", async function () {
+			let item = await createDataObject("item");
+			await zp.selectItem(item.id);
+			await zp.addSelectedItemsToCollection(group);
+
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.exists(linkedItem);
+
+			let popup = doc.getElementById("zotero-add-to-collection-popup");
+			await zp.buildAddItemToCollectionMenu({ currentTarget: popup, target: popup });
+			let groupMenuItem = doc.querySelector(`#zotero-add-to-collection-popup menuitem[value="L${group.libraryID}"]`);
+			assert.isTrue(groupMenuItem.disabled);
+		});
+		it("should disable collection in 'Add to Collection...' submenu if linked item belongs to collection ", async function () {
+			let item = await createDataObject("item");
+			// Create two collections in another library
+			let collection = await createDataObject("collection", { libraryID: group.libraryID });
+			let anotherCollection = await createDataObject("collection", { libraryID: group.libraryID });
+			// Add selected item into one of these collections
+			await zp.selectItem(item.id);
+			await zp.addSelectedItemsToCollection(collection);
+
+			// Make sure item was copied
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.exists(linkedItem);
+
+			// Generate the item menu
+			await zp.selectItem(item.id);
+			let popup = doc.getElementById("zotero-add-to-collection-popup");
+			await zp.buildAddItemToCollectionMenu({ currentTarget: popup, target: popup });
+			// Group menuitem is disabled, since there is a linked item in this group
+			let groupMenuItem = doc.querySelector(`#zotero-add-to-collection-popup menuitem[value="L${group.libraryID}"]`);
+			assert.isTrue(groupMenuItem.disabled);
+			// Collection menuitem disabled, since it contains a linked item
+			let collectionMenuItem = doc.querySelector(`#zotero-add-to-collection-popup menuitem[value="C${collection.id}"]`);
+			assert.isTrue(collectionMenuItem.disabled);
+			// Another collection is still enabled, since it does not contain the linked item
+			collectionMenuItem = doc.querySelector(`#zotero-add-to-collection-popup menuitem[value="C${anotherCollection.id}"]`);
+			assert.isFalse(collectionMenuItem.disabled);
+		});
+		it("should disable group in 'Add to Collection...' submenu for attachment if group's files are not editable", async function () {
+			let filesNotEditableGroup = await createGroup({ editable: true, filesEditable: false });
+			await createDataObject("collection", { libraryID: filesNotEditableGroup.libraryID });
+			let item = await importFileAttachment('test.pdf');
+			await zp.selectItem(item.id);
+			let popup = doc.getElementById("zotero-add-to-collection-popup");
+			await zp.buildAddItemToCollectionMenu({ currentTarget: popup, target: popup });
+
+			let groupMenuItem = doc.querySelector(`#zotero-add-to-collection-popup menu[value="L${filesNotEditableGroup.libraryID}"]`);
+			assert.isTrue(groupMenuItem.disabled);
+		});
+		it("should disable menuitems in 'Add to Collection...' only if no item can be moved there", async function () {
+			let itemOne = await createDataObject("item");
+			let itemTwo = await createDataObject("item");
+			let itemThree = await createDataObject("item");
+
+			// Create two collections in another library
+			let collectionOne = await createDataObject("collection", { libraryID: group.libraryID });
+			let collectionTwo = await createDataObject("collection", { libraryID: group.libraryID });
+
+			// Add one item to each collection, and the last item just move into the group
+			await zp.selectItem(itemThree.id);
+			await zp.addSelectedItemsToCollection(group);
+
+			await zp.selectItem(itemOne.id);
+			await zp.addSelectedItemsToCollection(collectionOne);
+
+			await zp.selectItem(itemTwo.id);
+			await zp.addSelectedItemsToCollection(collectionTwo);
+
+			await zp.selectItems([itemOne.id, itemTwo.id, itemThree.id]);
+			// Open up the menu
+			let popup = doc.getElementById("zotero-add-to-collection-popup");
+			await zp.buildAddItemToCollectionMenu({ currentTarget: popup, target: popup });
+
+			let groupMenuItem = popup.querySelector(`menuitem[value="L${group.libraryID}"]`);
+			let colOneMenuItem = popup.querySelector(`menuitem[value="C${collectionOne.id}"]`);
+			let colTwoMenuItem = popup.querySelector(`menuitem[value="C${collectionTwo.id}"]`);
+
+			// All items have linked items in the group, so group menuitem is disabled
+			assert.isTrue(groupMenuItem.disabled);
+			// Collections only have some linked items but not all, so they remain enabled
+			assert.isFalse(colOneMenuItem.disabled);
+			assert.isFalse(colTwoMenuItem.disabled);
+		});
+	});
 })

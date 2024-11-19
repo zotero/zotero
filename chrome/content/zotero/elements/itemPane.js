@@ -426,27 +426,29 @@
 				Zotero.Utilities.Internal.createMenuForTarget(
 					library,
 					menu,
-					target,
-					async (event, libraryOrCollection) => {
-						if (event.target.tagName == 'menu') {
-							// Simulate menuitem flash on OS X
-							if (Zotero.isMac) {
-								event.target.setAttribute('_moz-menuactive', false);
-								await Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', true);
-								await Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', false);
-								await Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', true);
+					{
+						currentTarget: target,
+						clickAction: async (event, libraryOrCollection) => {
+							if (event.target.tagName == 'menu') {
+								// Simulate menuitem flash on OS X
+								if (Zotero.isMac) {
+									event.target.setAttribute('_moz-menuactive', false);
+									await Zotero.Promise.delay(50);
+									event.target.setAttribute('_moz-menuactive', true);
+									await Zotero.Promise.delay(50);
+									event.target.setAttribute('_moz-menuactive', false);
+									await Zotero.Promise.delay(50);
+									event.target.setAttribute('_moz-menuactive', true);
+								}
+								menu.hidePopup();
+								
+								this.setTranslationTarget(libraryOrCollection);
+								event.stopPropagation();
 							}
-							menu.hidePopup();
-							
-							this.setTranslationTarget(libraryOrCollection);
-							event.stopPropagation();
-						}
-						else {
-							this.setTranslationTarget(libraryOrCollection);
-							event.stopPropagation();
+							else {
+								this.setTranslationTarget(libraryOrCollection);
+								event.stopPropagation();
+							}
 						}
 					}
 				);

@@ -4475,6 +4475,77 @@ Zotero.Item.prototype.addToCollection = function (collectionIDOrKey) {
 	this.setCollections(this._collections.concat(collectionID));
 };
 
+/**
+ * Check sync conditions for if an item can be added into a given container via drag-drop or via context menu options.
+ * @param {Zotero.Collection|Zotero.Library|Object} target - The object to which we check if an item
+ * can be added. Must be a collection, a library or a collectionTreeRow.ref object { libraryID, treeViewID }
+ * (for "My Publications" pseudo collection).
+ * @return {Boolean} result - true if there is no sync condition preventing an item from being added, or false otherwise.
+ */
+Zotero.Item.prototype.canAddToContainer = function (target) {
+	let targetGroup = Zotero.Libraries.get(target.libraryID);
+	// Determine if it's a publication based on treeViewID from collectionTreeRow.ref
+	if (target.treeViewID && target.treeViewID[0] === "P") {
+		target.isPublications = true;
+	}
+	if (!targetGroup.editable) return false;
+	// Target has to be a library, a collection, or an object { libraryID: X, isPublications: true }
+	if (!(target instanceof Zotero.Library || target instanceof Zotero.Collection || target.isPublications)) return false;
+	// Cannot move item to top-level library that it already belongs to
+	if (target instanceof Zotero.Library && target.libraryID == this.libraryID) return false;
+	// Cannot move item to a collection it already belongs to
+	if (target instanceof Zotero.Collection && target.hasItem(this)) return false;
+	// Can only move top-level items
+	if (!this.isTopLevelItem()) return false;
+	if (target.isPublications) {
+		// Can only add regular items to "My Publications"
+		if (!this.isRegularItem()) return false;
+
+		// Cannot add feed items to "My Publications"
+		if (this instanceof Zotero.FeedItem) return false;
+
+		// Cannot add item to "My Publications" that is already there
+		if (this.inPublications) return false;
+
+		// Cannot add item to "My Publications" from outside of "My Library"
+		if (this.libraryID !== Zotero.Libraries.userLibraryID) return false;
+	}
+	if (this.isAttachment() && targetGroup.libraryType == 'group') {
+		// Cannot move linked attachments to another group
+		if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) return false;
+
+		// Cannot move an attachment if group's files are not editable
+		if (!targetGroup.filesEditable) return false;
+	}
+	return true;
+};
+
+/**
+ * Check all (sync and async) conditions for if an item can be added into a given container via drag-drop or via context menu options.
+ * @param {Zotero.Collection|Zotero.Library|Object} target - The object to which we check if an item
+ * can be added. Must be a collection, a library or a collectionTreeRow.ref object { libraryID, treeViewID }
+ * (for "My Publications" pseudo collection).
+ * @return {Boolean} result - true if there is nothing preventing an item from being added, or false otherwise.
+ */
+Zotero.Item.prototype.canAddToContainerAsync = async function (target) {
+	// Check for sync conditions first
+	if (!this.canAddToContainer(target)) return false;
+
+	let targetGroup = Zotero.Libraries.get(target.libraryID);
+	// Moving item between groups
+	if (target.libraryID !== this.libraryID) {
+		let linkedItem = await this.getLinkedItem(targetGroup.libraryID, true);
+		// Cannot move an item if a linked item exists and is not top-level
+		if (linkedItem && !linkedItem.deleted && !linkedItem.isTopLevelItem()) return false;
+	
+		// Cannot add item into top-level group if it already has a linked item
+		if (target instanceof Zotero.Library && linkedItem && !linkedItem.deleted) return false;
+	
+		// Cannot add item into collection that already has its linked item
+		if (target instanceof Zotero.Collection && target.hasItem(linkedItem.id)) return false;
+	}
+	return true;
+};
 
 /**
  * Remove this item from a collection

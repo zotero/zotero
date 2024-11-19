@@ -1608,15 +1608,24 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {Library|Collection} libraryOrCollection
 	 * @param {Node<menupopup>} elem Parent element
-	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
-	 * @param {Function} clickAction function to execute on clicking the menuitem.
+	 * @param {Object} options
+	 * @param {Zotero.Library|Zotero.Collection} options.currentTarget Currently selected item (displays as checked)
+	 * @param {Function} options.clickAction function to execute on clicking the menuitem.
 	 * 		Receives the event and libraryOrCollection for given item.
-	 * @param {Function} disabledPred If provided, called on each library/collection
+	 * @param {Function} options.disabledCheck If provided, called on each library/collection
 	 * 		to determine whether disabled
+	 * @param {Boolean} options.alwaysMenuForLibrary If true, will always create a menu for library, even if
+	 * 		there are no child collections
 	 *
 	 * @return {Node<menuitem>|Node<menu>} appended node
 	 */
-	createMenuForTarget: function (libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
+	createMenuForTarget: function (libraryOrCollection, elem, options) {
+		if ('nodeType' in options) {
+			Zotero.warn('createMenuForTarget() now takes an options object -- update your code');
+			let [, , currentTarget, clickAction, disabledCheck] = arguments;
+			options = { currentTarget, clickAction, disabledCheck };
+		}
+		let { currentTarget, clickAction, disabledCheck, alwaysMenuForLibrary } = options;
 		var doc = elem.ownerDocument;
 		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createXULElement('menuitem');
@@ -1662,7 +1671,7 @@ Zotero.Utilities.Internal = {
 			function (event) {
 				clickAction(event, libraryOrCollection);
 			},
-			disabledPred && disabledPred(libraryOrCollection)
+			disabledCheck && disabledCheck(libraryOrCollection)
 		);
 		
 		var collections;
@@ -1673,8 +1682,9 @@ Zotero.Utilities.Internal = {
 			collections = Zotero.Collections.getByLibrary(libraryOrCollection.libraryID);
 		}
 		
-		// If no subcollections, place menuitem for target directly in containing men
-		if (collections.length == 0) {
+		// If no subcollections, place menuitem for target directly in containing menu
+		// unless specified otherwise
+		if (collections.length == 0 && !alwaysMenuForLibrary) {
 			elem.appendChild(menuitem);
 			return menuitem;
 		}
@@ -1693,7 +1703,7 @@ Zotero.Utilities.Internal = {
 		menupopup.appendChild(doc.createXULElement('menuseparator'));
 		for (let collection of collections) {
 			let collectionMenu = this.createMenuForTarget(
-				collection, elem, currentTarget, clickAction, disabledPred
+				collection, elem, { currentTarget, clickAction, disabledCheck }
 			);
 			menupopup.appendChild(collectionMenu);
 		}

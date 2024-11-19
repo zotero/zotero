@@ -514,7 +514,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			libraryIncluded = this._includedInTree({ libraryID: Zotero.Libraries.userLibraryID });
 			if (libraryIncluded) {
 				newRows.splice(added++, 0,
-					new Zotero.CollectionTreeRow(this, 'library', { libraryID: Zotero.Libraries.userLibraryID }));
+					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.get(Zotero.Libraries.userLibraryID)));
 				newRows[0].isOpen = true;
 				added += await this._expandRow(newRows, 0);
 			}
@@ -1580,83 +1580,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				var ids = data;
 				var items = Zotero.Items.get(ids);
 				items = Zotero.Items.keepTopLevel(items);
-				var skip = true;
-				for (let item of items) {
-					// Can only drag top-level items
-					if (!item.isTopLevelItem()) {
-						Zotero.debug("Can't drag child item");
-						return false;
-					}
-					
-					if (treeRow.isWithinGroup() && item.isAttachment()) {
-						// Linked files can't be added to groups
-						if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-							Zotero.debug("Linked files cannot be added to groups");
-							return false;
-						}
-						if (!treeRow.filesEditable) {
-							Zotero.debug("Drop target does not allow files to be edited");
-							return false;
-						}
-						skip = false;
-						continue;
-					}
-					
-					if (treeRow.isPublications()) {
-						if (item.isAttachment() || item.isNote()) {
-							Zotero.debug("Top-level attachments and notes cannot be added to My Publications");
-							return false;
-						}
-						if(item instanceof Zotero.FeedItem) {
-							Zotero.debug("FeedItems cannot be added to My Publications");
-							return false;
-						}
-						if (item.inPublications) {
-							Zotero.debug("Item " + item.id + " already exists in My Publications");
-							continue;
-						}
-						if (treeRow.ref.libraryID != item.libraryID) {
-							Zotero.debug("Cross-library drag to My Publications not allowed");
-							continue;
-						}
-						skip = false;
-						continue;
-					}
-					
-					// Cross-library drag
-					if (treeRow.ref.libraryID != item.libraryID) {
-						// Only allow cross-library drag to root library and collections
-						if (!(treeRow.isLibrary(true) || treeRow.isCollection())) {
-							Zotero.debug("Cross-library drag to non-collection not allowed");
-							return false;
-						}
-						skip = false;
-						continue;
-					}
-					
-					// Intra-library drag
-					
-					// Don't allow drag onto root of same library
-					if (treeRow.isLibrary(true)) {
-						Zotero.debug("Can't drag into same library root");
-						return false;
-					}
-					
-					// Make sure there's at least one item that's not already in this destination
-					if (treeRow.isCollection()) {
-						if (treeRow.ref.hasItem(item.id)) {
-							Zotero.debug("Item " + item.id + " already exists in collection");
-							continue;
-						}
-						skip = false;
-						continue;
-					}
-				}
-				if (skip) {
-					Zotero.debug("Drag skipped");
-					return false;
-				}
-				return true;
+				return items.some(item => item.canAddToContainer(treeRow.ref));
 			}
 			else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 				if (treeRow.isSearch() || treeRow.isPublications()) {
@@ -1723,49 +1647,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			if (dataType == 'zotero/item') {
 				var ids = data;
 				var items = Zotero.Items.get(ids);
-				var skip = true;
-				for (let i=0; i<items.length; i++) {
-					let item = items[i];
-					
-					// Cross-library drag
-					if (treeRow.ref.libraryID != item.libraryID) {
-						let linkedItem = await item.getLinkedItem(treeRow.ref.libraryID, true);
-						if (linkedItem && !linkedItem.deleted) {
-							// For drag to root, skip if linked item exists
-							if (treeRow.isLibrary(true)) {
-								Zotero.debug("Linked item " + linkedItem.key + " already exists "
-									+ "in library " + treeRow.ref.libraryID);
-								continue;
-							}
-							// For drag to collection
-							else if (treeRow.isCollection()) {
-								// skip if linked item is already in it
-								if (treeRow.ref.hasItem(linkedItem.id)) {
-									Zotero.debug("Linked item " + linkedItem.key + " already exists "
-										+ "in collection");
-									continue;
-								}
-								// or if linked item is a child item
-								else if (!linkedItem.isTopLevelItem()) {
-									Zotero.debug("Linked item " + linkedItem.key + " already exists "
-										+ "as child item");
-									continue;
-								}
-							}
-						}
-						skip = false;
-						continue;
-					}
-					
-					// Intra-library drags have already been vetted by canDrop(). This 'break' should be
-					// changed to a 'continue' if any asynchronous checks that stop the drag are added above
-					skip = false;
-					break;
+				for (let item of items) {
+					let canDrop = await item.canAddToContainerAsync(treeRow.ref);
+					if (canDrop) return true;
 				}
-				if (skip) {
-					Zotero.debug("Drag skipped");
-					return false;
-				}
+				return false;
 			}
 			else if (dataType == 'zotero/collection') {
 				let draggedCollectionID = data[0];
