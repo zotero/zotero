@@ -67,7 +67,11 @@ class SAXXMLReader {
 		let charset = response.headers.get("Content-Type")
 			?.match(/charset=([^;]+)/)
 			?.[1];
-		if (!charset) {
+		if (charset) {
+			// Strip surrounding quotes, which are invalid
+			charset = charset.replace(/^["']|["']$/g, '');
+		}
+		else {
 			charset = 'utf-8';
 		}
 		this._data = new TextDecoder(charset).decode(buf);
