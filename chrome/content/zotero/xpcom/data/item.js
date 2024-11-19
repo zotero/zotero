@@ -4482,7 +4482,7 @@ Zotero.Item.prototype.addToCollection = function (collectionIDOrKey) {
  * (for "My Publications" pseudo collection).
  * @return {Boolean} result - true if there is no sync condition preventing an item from being added, or false otherwise.
  */
-Zotero.Item.prototype.canAddToContainer = function (target) {
+Zotero.Item.prototype.canAddToTarget = function (target) {
 	let targetGroup = Zotero.Libraries.get(target.libraryID);
 	// Determine if it's a publication based on treeViewID from collectionTreeRow.ref
 	if (target.treeViewID && target.treeViewID[0] === "P") {
@@ -4527,9 +4527,9 @@ Zotero.Item.prototype.canAddToContainer = function (target) {
  * (for "My Publications" pseudo collection).
  * @return {Boolean} result - true if there is nothing preventing an item from being added, or false otherwise.
  */
-Zotero.Item.prototype.canAddToContainerAsync = async function (target) {
+Zotero.Item.prototype.canAddToTargetAsync = async function (target) {
 	// Check for sync conditions first
-	if (!this.canAddToContainer(target)) return false;
+	if (!this.canAddToTarget(target)) return false;
 
 	let targetGroup = Zotero.Libraries.get(target.libraryID);
 	// Moving item between groups

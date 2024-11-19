@@ -4235,7 +4235,7 @@ var ZoteroPane = new function()
 			myPublicationMenuItem.setAttribute("image", "chrome://zotero/skin/16/universal/publications.svg");
 			popup.append(myPublicationMenuItem);
 			// Cannot add top-level notes/attachment or items that are already in my publications
-			if (items.some(item => !item.canAddToContainer({ libraryID: Zotero.Libraries.userLibraryID, isPublications: true }))) {
+			if (items.some(item => !item.canAddToTarget({ libraryID: Zotero.Libraries.userLibraryID, isPublications: true }))) {
 				myPublicationMenuItem.disabled = true;
 			}
 		}
@@ -4279,7 +4279,7 @@ var ZoteroPane = new function()
 			for (let obj of objectsForMenuItems) {
 				let disableMenuItem = true;
 				for (let item of items) {
-					let canAdd = await item.canAddToContainerAsync(obj);
+					let canAdd = await item.canAddToTargetAsync(obj);
 					if (canAdd) {
 						disableMenuItem = false;
 						break;
