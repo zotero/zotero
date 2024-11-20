@@ -488,7 +488,7 @@
 		//
 		notify(event, type, ids) {
 			if (event == 'refresh' && type == 'infobox' && this.item?.id) {
-				this.renderCustomRows();
+				this.renderCustomRows(ids);
 				return;
 			}
 			if (event == 'modify' && this.item?.id && ids.includes(this.item.id)) {
@@ -863,11 +863,6 @@
 
 			this.restoreCustomRowElements();
 
-			// Update custom row data
-			for (let rowElem of this._infoTable.querySelectorAll('.meta-row[data-custom-row-id]')) {
-				this.updateCustomRowData(rowElem);
-			}
-
 			// Set focus on the last focused field
 			this._restoreFieldFocus();
 			// Make sure that any opened popup closes
@@ -876,8 +871,18 @@
 			});
 		}
 
-		renderCustomRows() {
+		renderCustomRows(rowIDs) {
 			let { options: targetRows, updateID } = Zotero.ItemPaneManager.customInfoRowData;
+			
+			// If rowIDs are provided, always update them
+			if (rowIDs?.length > 0) {
+				for (let rowID of rowIDs) {
+					let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${rowID}"]`);
+					if (!rowElem) continue;
+					this.updateCustomRowData(rowElem);
+				}
+			}
+
 			if (this._lastUpdateCustomRows == updateID) return;
 			this._lastUpdateCustomRows = updateID;
 
@@ -890,8 +895,15 @@
 
 			// Add rows that are in the target rows but not in the current rows
 			for (let row of targetRows) {
-				if (this._infoTable.querySelector(`[data-custom-row-id="${row.rowID}"]`)) continue;
-				let rowElem = document.createElement("div");
+				let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${row.rowID}"]`);
+				if (rowElem) {
+					// If the row is already in the table, and not already updated, update it
+					if (!rowIDs?.includes(row.rowID)) {
+						this.updateCustomRowData(rowElem);
+					}
+					continue;
+				}
+				rowElem = document.createElement("div");
 				rowElem.dataset.customRowId = row.rowID;
 				let position = row.position || "end";
 				rowElem.dataset.position = position;
@@ -933,6 +945,7 @@
 
 				this.updateCustomRowProperty(rowElem);
 
+				// The row is new, always update the data
 				this.updateCustomRowData(rowElem);
 			}
 		}

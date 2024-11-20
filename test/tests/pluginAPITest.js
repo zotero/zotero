@@ -359,6 +359,34 @@ describe("Plugin API", function () {
 
 			await waitForUnregister(rowID);
 		});
+
+		it("should refresh custom row value", async function () {
+			let item = new Zotero.Item('book');
+			await item.saveTx();
+			await ZoteroPane.selectItem(item.id);
+			
+			let rowID = await waitForRegister(defaultOption);
+
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let valueElem = rowElem.querySelector(".value");
+
+			let oldValue = valueElem.value;
+
+			// Since this row does not have `onSetData`, changing value does not do anything
+			// We just want to test if the value can be refreshed by calling `updateInfoRow`
+			let newValue = "TEST CUSTOM ROW EDITED";
+			valueElem.value = newValue;
+
+			let notifyPromise = waitForNotifierEvent("refresh", "infobox");
+
+			// Manually refresh the row
+			Zotero.ItemPaneManager.refreshInfoRow(rowID);
+			await notifyPromise;
+
+			assert.equal(oldValue, valueElem.value);
+
+			await waitForUnregister(rowID);
+		});
 	});
 
 	describe("Item tree custom column", function () {
