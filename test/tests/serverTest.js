@@ -287,7 +287,7 @@ describe("Zotero.Server", function () {
 					assert.equal(req.status, 204);
 				});
 			});
-			describe("application/octet-stream", function () {
+			describe("application/pdf", function () {
 				it('should provide a stream', async function () {
 					let called = false;
 					let endpoint = "/test/" + Zotero.Utilities.randomString();
@@ -298,14 +298,13 @@ describe("Zotero.Server", function () {
 					Zotero.Server.Endpoints[endpoint] = function () {};
 					Zotero.Server.Endpoints[endpoint].prototype = {
 						supportedMethods: ["POST"],
-						supportedDataTypes: ["application/octet-stream"],
+						supportedDataTypes: ["application/pdf"],
 
 						init: function (options) {
 							called = true;
 							assert.isObject(options);
 							assert.property(options.headers, "Content-Type");
-							assert(options.headers["Content-Type"].startsWith("application/octet-stream"));
-							assert.equal(options.headers['content-disposition'], "attachment; filename=\"test.pdf\"");
+							assert(options.headers["Content-Type"].startsWith("application/pdf"));
 							assert.isFunction(options.data.available);
 							let data = NetUtil.readInputStreamToString(options.data, options.headers['content-length']);
 							assert.equal(data, contents);
@@ -321,8 +320,7 @@ describe("Zotero.Server", function () {
 						serverPath + endpoint,
 						{
 							headers: {
-								"Content-Type": "application/octet-stream",
-								"Content-Disposition": "attachment; filename=\"test.pdf\""
+								"Content-Type": "application/pdf",
 							},
 							body: pdf
 						}

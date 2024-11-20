@@ -681,7 +681,7 @@ Zotero.Attachments = new function () {
 	 */
 	this.createURLAttachmentFromTemporaryStorageDirectory = async function (options) {
 		if (!options.directory) throw new Error("'directory' not provided");
-		if (!options.libraryID) throw new Error("'libraryID' not provided");
+		if (!options.libraryID && !options.parentItemID) throw new Error("'libraryID' or 'parentItemID' not provided");
 		if (!options.filename) throw new Error("'filename' not provided");
 		if (!options.url) throw new Error("'directory' not provided");
 		if (!options.contentType) throw new Error("'contentType' not provided");
@@ -977,6 +977,90 @@ Zotero.Attachments = new function () {
 		
 		return attachmentItem;
 	});
+
+	/**
+	 * Save an attachment from a nsIInputStream
+	 *
+	 * @param {Object} options
+	 * @param {String} options.url
+	 * @param {nsIStream} options.stream - Stream with data
+	 * @param {Integer} options.byteCount - Number of bytes in the stream, usually from the
+	 * 										'Content-Length' HTTP header.
+	 * @param {String} options.contentType - Expected content type
+	 * @param {Integer} [options.libraryID] Parent item ID if child attachment
+	 * @param {Integer} [options.parentItemID] Parent item ID if child attachment
+	 * 			Either options.libraryID or options.parentItemID are mandatory
+	 * @param {Array<String|Integer>} [options.collections] Collection ids or keys
+	 * @param {String} [options.title]
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
+	 */
+	this.importFromNetworkStream = async (options) => {
+		if (!options.url) throw new Error("'url' not provided");
+		if (!options.stream) throw new Error("'stream' not provided");
+		if (!options.byteCount) throw new Error("'byteCount' not provided");
+		if (!options.contentType) throw new Error("'contentType' not provided");
+		Zotero.debug("Importing attachment item from network stream");
+
+		let url = options.url;
+		let stream = options.stream;
+		let contentType = options.contentType;
+		let libraryID = options.libraryID;
+		let parentItemID = options.parentItemID;
+		let collections = options.collections;
+		let title = options.title;
+		let saveOptions = options.saveOptions;
+		
+		if (!title) {
+			// TODO Better attachment name
+			title = Zotero.getString('itemFields.attachmentPDF');
+		}
+
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
+		}
+		
+		let tmpDirectory = (await this.createTemporaryStorageDirectory()).path;
+		let destDirectory;
+		let attachmentItem;
+		try {
+			let filename = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
+			let tmpFile = OS.Path.join(tmpDirectory, filename);
+			await Zotero.File.putNetworkStream(tmpFile, stream, options.byteCount);
+
+			attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
+				directory: tmpDirectory,
+				libraryID,
+				parentItemID,
+				title,
+				filename,
+				url,
+				contentType,
+				collections,
+				saveOptions
+			});
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+
+			// Clean up
+			try {
+				if (tmpDirectory) {
+					await OS.File.removeDir(tmpDirectory, { ignoreAbsent: true });
+				}
+				if (destDirectory) {
+					await OS.File.removeDir(destDirectory, { ignoreAbsent: true });
+				}
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+			}
+
+			throw e;
+		}
+
+		return attachmentItem;
+	};
 	
 	
 	/**
