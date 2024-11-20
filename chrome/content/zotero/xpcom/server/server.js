@@ -127,13 +127,19 @@ Zotero.Server.Headers = class {
 				if (typeof name !== 'string') {
 					return Reflect.has(target, name, receiver);
 				}
-				return Reflect.has(target, name.toLowerCase(), receiver);		
+				return Reflect.has(target, name.toLowerCase(), receiver);
 			},
 			set(target, name, value, receiver) {
 				return Reflect.set(target, name.toLowerCase(), value, receiver);
 			}
 		});
 	}
+};
+
+
+Zotero.Server.networkStreamToString = function (stream, length) {
+	let data = NetUtil.readInputStreamToString(stream, length);
+	return Zotero.Utilities.Internal.decodeUTF8(data);
 };
 
 
@@ -159,8 +165,7 @@ Zotero.Server.RequestHandler.prototype._bodyData = function () {
 	let data = null;
 	if (this.bodyLength > 0) {
 		if (PLAIN_TEXT_CONTENT_TYPES.has(this.contentType)) {
-			data = NetUtil.readInputStreamToString(this.request.bodyInputStream, this.bodyLength);
-			data = this.body = Zotero.Utilities.Internal.decodeUTF8(this.body);
+			this.body = data = Zotero.Server.networkStreamToString(this.request.bodyInputStream, this.bodyLength);
 		}
 		else if (this.contentType === 'multipart/form-data') {
 			data = NetUtil.readInputStreamToString(this.request.bodyInputStream, this.bodyLength);
@@ -227,19 +232,23 @@ Zotero.Server.RequestHandler.prototype.handleRequest = async function () {
 	// Tell httpd that we will be constructing our own response
 	// without its custom methods, asynchronously
 	response.seizePower();
-	
+
+	let requestDebug = `${request.method} ${request.path} HTTP/${request.httpVersion}\n`
 	// Parse headers into this.headers with lowercase names
 	this.headers = new Zotero.Server.Headers();
 	for (let { data: name } of request.headers) {
+		requestDebug += `${name}: ${request.getHeader(name)}\n`;
 		this.headers[name.toLowerCase()] = request.getHeader(name);
 	}
+	
+	Zotero.debug(requestDebug, 5);
 	
 	if (this.headers.origin) {
 		this.origin = this.headers.origin;
 	}
 	
 	this.pathname = request.path;
-	this.query = "?" + request.queryString;
+	this.query = request.queryString;
 	
 	// get content-type
 	var contentType = this.headers['content-type'];
@@ -340,7 +349,7 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 			return;
 		}
 		
-		var decodedData = null;
+		var data = null;
 		if (method === 'POST' && this.contentType) {
 			// check that endpoint supports contentType
 			var supportedDataTypes = endpoint.supportedDataTypes;
@@ -353,7 +362,7 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 			// decode content-type post data
 			if (this.contentType === "application/json") {
 				try {
-					decodedData = JSON.parse(postData);
+					data = JSON.parse(postData);
 				}
 				catch(e) {
 					this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
@@ -361,13 +370,13 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 				}
 			}
 			else if (this.contentType === "application/x-www-form-urlencoded") {
-				decodedData = Zotero.Server.decodeQueryString(postData);
+				data = Zotero.Server.decodeQueryString(postData);
 			}
 			else if (postData) {
-				decodedData = postData;
+				data = postData;
 			}
 			else {
-				decodedData = this.request.bodyInputStream;
+				data = this.request.bodyInputStream;
 			}
 		}
 		
@@ -393,9 +402,9 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 				method,
 				pathname: this.pathname,
 				pathParams: this.pathParams,
-				searchParams: new URLSearchParams(this.query ? this.query.substring(1) : ''),
+				searchParams: new URLSearchParams(this.query || ''),
 				headers: this.headers,
-				data: decodedData
+				data
 			});
 			let result;
 			if (maybePromise.then) {
@@ -413,16 +422,16 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 		}
 		// Two-parameter endpoint takes data and a callback
 		else if (endpoint.init.length === 2) {
-			endpoint.init(decodedData, sendResponseCallback);
+			endpoint.init(data, sendResponseCallback);
 		}
 		// Three-parameter endpoint takes a URL, data, and a callback
 		else {
 			var url = {
 				pathname: this.pathname,
-				searchParams: new URLSearchParams(this.query ? this.query.substring(1) : ''),
+				searchParams: new URLSearchParams(this.query || ''),
 				userAgent: this.headers['user-agent']
 			};
-			endpoint.init(url, decodedData, sendResponseCallback);
+			endpoint.init(url, data, sendResponseCallback);
 		}
 	} catch(e) {
 		Zotero.debug(e);

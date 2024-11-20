@@ -110,14 +110,15 @@ Zotero.Server.Connector = {
 		return { library, collection, editable };
 	}
 };
+/*
 
 Zotero.Server.Connector.SessionManager = {
 	_sessions: new Map(),
-	
+
 	get: function (id) {
 		return this._sessions.get(id);
 	},
-	
+
 	create: function (id, action, requestData) {
 		// Legacy connector
 		if (!id) {
@@ -133,12 +134,12 @@ Zotero.Server.Connector.SessionManager = {
 		this.gc();
 		return session;
 	},
-	
+
 	gc: function () {
 		// Delete sessions older than 10 minutes, or older than 1 minute if more than 10 sessions
 		var ttl = this._sessions.size >= 10 ? 60 : 600;
 		var deleteBefore = new Date() - ttl * 1000;
-		
+
 		for (let session of this._sessions) {
 			if (session.created < deleteBefore) {
 				this._session.delete(session.id);
@@ -156,7 +157,7 @@ Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
 	this._action = action;
 	this._requestData = requestData;
 	this._items = new Set();
-	
+
 	this._progressItems = {};
 	this._orderedProgressItems = [];
 };
@@ -171,7 +172,7 @@ Zotero.Server.Connector.SaveSession.prototype.onProgress = function (item, progr
 	if (item.id === null || item.id === undefined) {
 		throw new Error("ID not provided");
 	}
-	
+
 	// Child item
 	if (item.parent) {
 		let progressItem = this._progressItems[item.parent];
@@ -191,7 +192,7 @@ Zotero.Server.Connector.SaveSession.prototype.onProgress = function (item, progr
 		a.progress = progress;
 		return;
 	}
-	
+
 	// Top-level item
 	var o = this._progressItems[item.id];
 	if (!o) {
@@ -239,7 +240,7 @@ Zotero.Server.Connector.SaveSession.prototype.addItems = async function (items) 
 	for (let item of items) {
 		this._items.add(item);
 	}
-	
+
 	// Update the items with the current target data, in case it changed since the save began
 	await this._updateItems(items);
 };
@@ -248,14 +249,14 @@ Zotero.Server.Connector.SaveSession.prototype.remove = function () {
 	delete Zotero.Server.Connector.SessionManager._sessions[this.id];
 }
 
-/**
+/!**
  * Change the target data for this session and update any items that have already been saved
- */
+ *!/
 Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID, tags) {
 	var previousTargetID = this._currentTargetID;
 	this._currentTargetID = targetID;
 	this._currentTags = tags || "";
-	
+
 	// Select new destination in collections pane
 	var zp = Zotero.getActiveZoteroPane();
 	if (zp && zp.collectionsView) {
@@ -265,7 +266,7 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 	else {
 		Zotero.Prefs.set('lastViewedFolder', targetID);
 	}
-	
+
 	// If moving from a non-filesEditable library to a filesEditable library, resave from
 	// original data, since there might be files that weren't saved or were removed
 	if (previousTargetID && previousTargetID != targetID) {
@@ -295,9 +296,9 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 			}
 		}
 	}
-	
+
 	await this._updateItems(this._items);
-	
+
 	// If a single item was saved, select it (or its parent, if it now has one)
 	if (zp && zp.collectionsView && this._items.size == 1) {
 		let item = Array.from(this._items)[0];
@@ -309,25 +310,25 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 	}
 };
 
-/**
+/!**
  * Update the passed items with the current target and tags
- */
+ *!/
 Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async function (items) {
 	if (items.length == 0) {
 		return;
 	}
-	
+
 	var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(this._currentTargetID);
 	var libraryID = library.libraryID;
-	
+
 	var tags = this._currentTags.trim();
-	tags = tags ? tags.split(/\s*,\s*/).filter(x => x) : [];
-	
+	tags = tags ? tags.split(/\s*,\s*!/).filter(x => x) : [];
+
 	Zotero.debug("Updating items for connector save session " + this.id);
-	
+
 	for (let item of items) {
 		let newLibrary = Zotero.Libraries.get(library.libraryID);
-		
+
 		if (item.libraryID != libraryID) {
 			let newItem = await item.moveToLibrary(libraryID);
 			// Check pending attachments and switch parent ID
@@ -340,7 +341,7 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 			this._items.delete(item);
 			this._items.add(newItem);
 		}
-		
+
 		// If the item is now a child item (e.g., from Retrieve Metadata), update the
 		// parent item instead
 		if (!item.isTopLevelItem()) {
@@ -357,7 +358,7 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 		item.setCollections(collection ? [collection.id] : []);
 		await item.saveTx();
 	}
-	
+
 	this._updateRecents();
 });
 
@@ -403,6 +404,7 @@ Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 	}
 };
 
+*/
 
 /**
  * Lists all available translators, including code for translators that should be run on every page
@@ -726,7 +728,7 @@ Zotero.Server.Connector.SaveItems.prototype = {
 	 * Either loads HTML into a hidden browser and initiates translation, or saves items directly
 	 * to the database
 	 */
-	init: Zotero.Promise.coroutine(function* (requestData) {
+	init: async function (requestData) {
 		var data = requestData.data;
 		
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
@@ -741,9 +743,10 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			);
 		}
 		catch (e) {
+			Zotero.debug(e);
 			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
 		}
-		yield session.update(targetID);
+		await session.update(targetID);
 		
 		// Shouldn't happen as long as My Library exists
 		if (!library.editable) {
@@ -751,160 +754,192 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
 		}
 		
-		return new Zotero.Promise((resolve) => {
-			try {
-				this.saveItems(
-					session,
-					targetID,
-					requestData,
-					function (jsonItems, items) {
-						session.addItems(items);
-						// Only return the properties the connector needs
-						jsonItems = jsonItems.map((item) => {
-							let o = {
-								id: item.id,
-								title: item.title,
-								itemType: item.itemType,
-								contentType: item.mimeType,
-								mimeType: item.mimeType, // TODO: Remove
-							};
-							if (item.attachments) {
-								o.attachments = item.attachments.map((attachment) => {
-									return {
-										id: session.id + '_' + attachment.id, // TODO: Remove prefix
-										title: attachment.title,
-										contentType: attachment.contentType,
-										mimeType: attachment.mimeType,  // TODO: Remove
-									};
-								});
-							};
-							return o;
-						});
-						resolve([201, "application/json", JSON.stringify({ items: jsonItems })]);
-					}
-				)
-				// Add items to session once all attachments have been saved
-				.then(function (items) {
-					session.addItems(items);
-				});
-			}
-			catch (e) {
-				Zotero.logError(e);
-				session.remove();
-				resolve(500);
-			}
-		});
-	}),
-	
-	saveItems: async function (session, target, requestData, onTopLevelItemsDone) {
-		var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(target);
-		var data = requestData.data;
-		var cookieSandbox = data.uri
-			? new Zotero.CookieSandbox(
-				null,
-				data.uri,
-				data.detailedCookies ? "" : data.cookie || "",
-				requestData.headers["User-Agent"]
-			)
-			: null;
-		if (cookieSandbox && data.detailedCookies) {
-			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
+		try {
+			await session.saveItems(targetID);
+			return [201, "application/json"];
 		}
-		
-		var id = 1;
-		for (let item of data.items) {
-			if (!item.id) {
-				item.id = id++;
-			}
-			
-			if (item.attachments) {
-				for (let attachment of item.attachments) {
-					attachment.id = id++;
-					attachment.parent = item.id;
-				}
-			}
-			
-			// Add parent item to session progress without attachments, which are added later if
-			// they're saved.
-			let progressItem = Object.assign(
-				{},
-				item,
-				{
-					attachments: []
-				}
-			);
-			session.onProgress(progressItem, 0);
+		catch (e) {
+			Zotero.logError(e);
+			session.remove();
+			return 500;
 		}
-		
-		var proxy = data.proxy && new Zotero.Proxy(data.proxy);
-		
-		// Save items
-		var itemSaver = new Zotero.Translate.ItemSaver({
-			libraryID: library.libraryID,
-			collections: collection ? [collection.id] : undefined,
-			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
-			forceTagType: 1,
-			referrer: data.uri,
-			cookieSandbox,
-			proxy
-		});
-		// This is a bit tricky. When saving items, the callback `onTopLevelItemsDone` will
-		// return the HTTP request to the connector. Then it may spend some time fetching
-		// PDFs. In the meantime, the connector will create a snapshot and send it along to
-		// the `saveSingleFile` endpoint, which quickly adds the data to the session and
-		// then saves the pending attachments, without removing them (we need them in case
-		// the session switches libraries and we need to save again). So the pending
-		// attachments exist and have already been saved by the time this `saveItems`
-		// promise resolves and we continue executing. So we save the number of existing
-		// attachments before that to prevent double saving.
-		let hadPendingAttachments = session.pendingAttachments.length > 0;
-		if (hadPendingAttachments) {
-			// If we have pending attachments then we are saving again by switching to
-			// a `filesEditable` library. So we clear the pendingAttachments since they
-			// get added again right below here in `saveItems`
-			session.pendingAttachments = [];
-		}
-		let items = await itemSaver.saveItems(
-			data.items,
-			function (attachment, progress, error) {
-				session.onProgress(attachment, progress, error);
-			},
-			(itemsJSON, items) => {
-				itemsJSON.forEach(item => session.onProgress(item, 100));
-				if (onTopLevelItemsDone) onTopLevelItemsDone(itemsJSON, items);
-			},
-			function (parentItemID, attachment) {
-				session.pendingAttachments.push([parentItemID, attachment]);
-			}
-		);
-		if (hadPendingAttachments) {
-			// If the session has snapshotContent already (from switching to a `filesEditable` library
-			// then we can save `pendingAttachments` now
-			if (data.snapshotContent) {
-				await itemSaver.saveSnapshotAttachments(
-					session.pendingAttachments,
-					data.snapshotContent,
-					function (attachment, progress, error) {
-						session.onProgress(attachment, progress, error);
-					},
-				);
-			}
-			// This means SingleFile in the Connector failed and we need to just go
-			// ahead and do our fallback save
-			else if (data.singleFile === false) {
-				itemSaver.saveSnapshotAttachments(
-					session.pendingAttachments,
-					false,
-					function (attachment, progress, error) {
-						session.onProgress(attachment, progress, error);
-					},
-				);
-			}
-			// Otherwise we are still waiting for SingleFile in Connector to finish
-		}
-		return items;
-	}
+	},
 }
+
+/**
+ * Gets the top-level item created for a standalone attachment
+ *
+ * Accepts:
+ *		sessionID - A session ID previously passed to /saveItems
+ * Returns:
+ * 		200
+ */
+Zotero.Server.Connector.GetRecognizedItem = function () {};
+Zotero.Server.Endpoints["/connector/getRecognizedItem"] = Zotero.Server.Connector.GetRecognizedItem;
+Zotero.Server.Connector.GetRecognizedItem.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["*"],
+	permitBookmarklet: true,
+
+	init: async function (requestData) {
+		const sessionID = requestData.data.sessionID;
+		if (!sessionID) {
+			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
+		}
+		
+		const session = Zotero.Server.Connector.SessionManager.get(sessionID);
+		if (!session) {
+			Zotero.debug("Can't find session " + sessionID, 1);
+			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
+		}
+		
+		await session.autoRecognizePromise;
+		let item = session.getRecognizedItem();
+		if (!item) {
+			return 204;
+		}
+		let jsonItem = {
+			title: item.getDisplayTitle(),
+			itemType: item.itemType,
+		};
+		return [200, "application/json", JSON.stringify({ ...jsonItem })];
+	}
+};
+
+
+/**
+ * Saves a standalone attachment
+ *
+ * URI params:
+ *		sessionID
+ * Expected headers:
+ * 		X-Metadata:
+ * 			- parentItemID
+ * 			- title
+ * 			- url
+ * Returns:
+ * 		400 - Bad params
+ * 		200 - Non-writable library
+ * 		201 - Created
+ */
+Zotero.Server.Connector.SaveStandaloneAttachment = function () {};
+Zotero.Server.Endpoints["/connector/saveStandaloneAttachment"] = Zotero.Server.Connector.SaveStandaloneAttachment;
+Zotero.Server.Connector.SaveStandaloneAttachment.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["*"],
+	permitBookmarklet: true,
+
+	init: async function (requestData) {
+		// Retrieve payload
+		if (!requestData.headers['X-Metadata']) {
+			return [400, "application/json", JSON.stringify({ error: "METADATA_NOT_PROVIDED" })];
+		}
+		const metadata = JSON.parse(requestData.headers['X-Metadata']);
+
+		const sessionID = metadata.sessionID || requestData.searchParams.get('sessionID');
+		if (!sessionID) {
+			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
+		}
+		var { library, collection } = Zotero.Server.Connector.getSaveTarget();
+		if (!library.filesEditable) {
+			return [200, 'text/plain', 'Library is not editable.'];
+		}
+		var libraryID = library.libraryID;
+		var targetID = collection ? collection.treeViewID : library.treeViewID;
+
+		try {
+			var session = Zotero.Server.Connector.SessionManager.create(
+				sessionID,
+				'saveStandaloneAttachment',
+				requestData
+			);
+		}
+		catch (e) {
+			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
+		}
+		await session.update(targetID);
+
+		// Save standalone attachment from stream
+		let item = await Zotero.Attachments.importFromNetworkStream({
+			url: metadata.url,
+			libraryID,
+			collections: collection ? [collection.id] : undefined,
+			title: metadata.title,
+			contentType: requestData.headers['Content-Type'],
+			stream: requestData.data,
+			byteCount: requestData.headers['Content-Length'],
+		});
+		session.addItem(metadata.url, item);
+		
+		let canRecognize = Zotero.RecognizeDocument.canRecognize(item);
+		if (canRecognize) {
+			// Automatically recognize PDF/EPUB
+			session.autoRecognizePromise = Zotero.RecognizeDocument.autoRecognizeItems([item]);
+		}
+		return [201, "application/json", JSON.stringify({ canRecognize })];
+	}
+};
+
+/**
+ * Attaches an PDF/EPUB attachment to an item saved with /saveItems or /saveSnapshot
+ *
+ * URI params:
+ *		sessionID
+ * Expected headers:
+ * 		X-Metadata:
+ * 			- parentItemID
+ * 			- title
+ * 			- url
+ * Returns:
+ * 		400 - Bad params
+ * 		200 - Non-writable library
+ * 		201 - Created
+ */
+Zotero.Server.Connector.SaveAttachment = function () {};
+Zotero.Server.Endpoints["/connector/saveAttachment"] = Zotero.Server.Connector.SaveAttachment;
+Zotero.Server.Connector.SaveAttachment.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["*"],
+	permitBookmarklet: true,
+
+	init: async function (requestData) {
+		// Retrieve payload
+		if (!requestData.headers['X-Metadata']) {
+			return [400, "application/json", JSON.stringify({ error: "METADATA_NOT_PROVIDED" })];
+		}
+		const metadata = JSON.parse(requestData.headers['X-Metadata']);
+		
+		const sessionID = metadata.sessionID || requestData.searchParams.get('sessionID');
+		if (!sessionID) {
+			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
+		}
+
+		let session = Zotero.Server.Connector.SessionManager.get(sessionID);
+		if (!session) {
+			Zotero.debug("Can't find session " + sessionID, 1);
+			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
+		}
+		
+		let { library } = Zotero.Server.Connector.getSaveTarget();
+		if (!library.filesEditable) {
+			return [200, 'text/plain', 'Library files are not editable.'];
+		}
+
+		// Save attachment based on provided parent id from stream
+		let parentItem = session.getItemByConnectorKey(metadata.parentItemID);
+		await Zotero.Attachments.importFromNetworkStream({
+			url: metadata.url,
+			parentItemID: parentItem.id,
+			title: metadata.title,
+			contentType: requestData.headers['Content-Type'],
+			stream: requestData.data,
+			byteCount: requestData.headers['Content-Length'],
+		});
+
+		return 201;
+	}
+};
+
 
 /**
  * Attaches a singlefile attachment to an item saved with /saveItems or /saveSnapshot
@@ -933,8 +968,6 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 	 * Save SingleFile snapshot to pending attachments
 	 */
 	init: async function (requestData) {
-		const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');
-
 		// Retrieve payload
 		let data = requestData.data;
 
@@ -948,78 +981,33 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
 		}
 
-		let snapshotContent = data.snapshotContent;
-
-		if (!snapshotContent) {
-			// Connector SingleFile has failed so if we re-save attachments (via
-			// updateSession) then we want to inform saveItems and saveSnapshot that they
-			// do not need to use pendingAttachments because those have failed.
-			session._requestData.data.singleFile = false;
-
-			for (let [_parentItemID, attachment] of session.pendingAttachments) {
-				session.onProgress(attachment, false);
-			}
-
-			return [200, 'text/plain', 'No snapshot content attached.'];
-		}
-
-		// Add to session data, in case `saveSnapshot` is called again by the session
-		session.addSnapshotContent(snapshotContent);
-
 		// We do this after adding to session because if we switch to a `filesEditable`
 		// library we need to have access to the snapshotContent.
-		let { library, collection } = Zotero.Server.Connector.getSaveTarget();
+		let { library } = Zotero.Server.Connector.getSaveTarget();
 		if (!library.filesEditable) {
-			session.savingDone = true;
-
-			return [200, 'text/plain', 'Library is not editable.'];
+			return [200, 'text/plain', 'Library files are not editable.'];
 		}
 
-		// Retrieve all items in the session that need a snapshot
+		// We only save the snapshot in single-item cases
 		if (session._action === 'saveSnapshot') {
-			await Zotero.Promise.all(
-				session.pendingAttachments.map((pendingAttachment) => {
-					return Zotero.Attachments.importFromSnapshotContent({
-						title: data.title,
-						url: data.url,
-						parentItemID: pendingAttachment[0],
-						snapshotContent
-					});
-				})
-			);
+			const parentItemID = session.getItemByConnectorKey(data.url).id;
+			// Just saves the snapshot straight up
+			await Zotero.Attachments.importFromSnapshotContent({
+				title: data.title,
+				url: data.url,
+				parentItemID,
+				snapshotContent: data.snapshotContent
+			});
 		}
 		else if (session._action === 'saveItems') {
-			var cookieSandbox = data.uri
-				? new Zotero.CookieSandbox(
-					null,
-					data.uri,
-					data.detailedCookies ? "" : data.cookie || "",
-					requestData.headers["User-Agent"]
-				)
-				: null;
-			if (cookieSandbox && data.detailedCookies) {
-				cookieSandbox.addCookiesFromHeader(data.detailedCookies);
-			}
-
-			let proxy = data.proxy && new Zotero.Proxy(data.proxy);
-
-			let itemSaver = new Zotero.Translate.ItemSaver({
-				libraryID: library.libraryID,
-				collections: collection ? [collection.id] : undefined,
-				attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
-				forceTagType: 1,
-				referrer: data.uri,
-				cookieSandbox,
-				proxy
+			const parentItemID = session.getItemByConnectorKey(data.items[0].id).id;
+			// Deproxifies and does some other attachment preprocessing
+			await session.itemSaver.saveSnapshotAttachments({
+				title: data.title,
+				url: data.url,
+				parentItemID,
+				snapshotContent: data.snapshotContent
 			});
-
-			await itemSaver.saveSnapshotAttachments(
-				session.pendingAttachments,
-				snapshotContent,
-				function (attachment, progress, error) {
-					session.onProgress(attachment, progress, error);
-				},
-			);
 		}
 
 		return 201;
@@ -1027,7 +1015,7 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 };
 
 /**
- * Either creates a webpage item or a PDF/EPUB top-level item in Zotero
+ * Creates a webpage item top-level item in Zotero
  * Called by the Connector when no translators are detected on the page
  *
  * Accepts:
@@ -1050,7 +1038,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	init: async function (requestData) {
 		var data = requestData.data;
 		
-		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		var { library, collection } = Zotero.Server.Connector.getSaveTarget();
 		var targetID = collection ? collection.treeViewID : library.treeViewID;
 		
 		try {
@@ -1061,6 +1049,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			);
 		}
 		catch (e) {
+			Zotero.debug(e);
 			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
 		}
 		await session.update(collection ? collection.treeViewID : library.treeViewID);
@@ -1072,125 +1061,85 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		}
 		
 		try {
-			var item = await this.saveSnapshot(targetID, requestData);
-			await session.addItem(item);
+			await session.saveSnapshot(targetID);
 		}
 		catch (e) {
 			Zotero.logError(e);
 			return 500;
 		}
 		
-		let attachments = [];
-		let hasAttachments = !item.isAttachment() && item.getAttachments().length;
-		if (hasAttachments) {
-			attachments = [{mimeType: "text/html", title: data.title, url: data.url}];
-		}
-		
-		return [201,
-			"application/json",
-			JSON.stringify({ saveSingleFile: !data.skipSnapshot && !data.pdf && data.singleFile, attachments })];
-	},
-	
-	/*
-	 * Perform saving the snapshot
-	 *
-	 * Note: this function signature cannot change because it can also be called by
-	 * updateSession (`Zotero.Server.Connector.SaveSession.prototype.update`).
-	 */
-	saveSnapshot: async function (target, requestData) {
-		var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(target);
-		var libraryID = library.libraryID;
-		var data = requestData.data;
-		
-		var cookieSandbox = data.url
-			? new Zotero.CookieSandbox(
-				null,
-				data.url,
-				data.detailedCookies ? "" : data.cookie || "",
-				requestData.headers["User-Agent"]
-			)
-			: null;
-		if (cookieSandbox && data.detailedCookies) {
-			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
-		}
-		
-		if (data.pdf && library.filesEditable) {
-			let item = await Zotero.Attachments.importFromURL({
-				libraryID,
-				url: data.url,
-				referrer: data.referrer,
-				collections: collection ? [collection.id] : undefined,
-				contentType: "application/pdf",
-				cookieSandbox
-			});
-			
-			// Automatically recognize PDF/EPUB
-			Zotero.RecognizeDocument.autoRecognizeItems([item]);
-			
-			return item;
-		}
-		
-		if (data.html) {
-			var parser = new DOMParser();
-			var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
-			doc = Zotero.HTTP.wrapDocument(doc, data.url);
-			var title = doc.title;
-		} else {
-			title = data.title || data.url;
-		}
-		
-		// Create new webpage item
-		let item = new Zotero.Item("webpage");
-		item.libraryID = libraryID;
-		item.setField("title", title);
-		item.setField("url", data.url);
-		item.setField("accessDate", "CURRENT_TIMESTAMP");
-		if (collection) {
-			item.setCollections([collection.id]);
-		}
-		var itemID = await item.saveTx();
-		
-		// Save snapshot
-		if (!data.skipSnapshot) {
-			// If called from session update, requestData may already have SingleFile data
-			if (library.filesEditable && data.snapshotContent) {
-				await Zotero.Attachments.importFromSnapshotContent({
-					title: data.title,
-					url: data.url,
-					parentItemID: itemID,
-					snapshotContent: data.snapshotContent
-				});
-			}
-			// Otherwise, connector will POST SingleFile data at later time
-			// We want this data regardless of `library.filesEditable` because if we
-			// start on a non-filesEditable library and switch to one, we won't have a
-			// pending attachment
-			else if (data.hasOwnProperty('singleFile')) {
-				let session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
-				session.pendingAttachments = [
-					[itemID, { title: data.title, url: data.url }]
-				];
-			}
-			else if (library.filesEditable) {
-				// Old connector will not use SingleFile so importFromURL now
-				await Zotero.Attachments.importFromURL({
-					libraryID,
-					url: data.url,
-					referrer: data.referrer,
-					title,
-					parentItemID: itemID,
-					contentType: "text/html",
-					cookieSandbox
-				});
-			}
-		}
-		
-		return item;
+		return [201, "application/json"];
 	}
 };
 
+
 /**
+ * Checks if the item has OA attachments (in case PDF saving in connector failed).
+ * Also checks custom resolvers.
  * 
+ * Accepts:
+ *		sessionID - A session ID previously passed to /saveItems
+ *		itemID - The ID of the item to save alternative attachment for
+ */
+Zotero.Server.Connector.HasOAAttachments = function () {};
+Zotero.Server.Endpoints["/connector/hasOAAttachments"] = Zotero.Server.Connector.HasOAAttachments;
+Zotero.Server.Connector.HasOAAttachments.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	init: async function (requestData) {
+		let data = requestData.data;
+		let session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
+		if (!session) {
+			Zotero.debug("Can't find session " + data.sessionID, 1);
+			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
+		}
+		let item = session.getItemByConnectorKey(data.itemID);
+		let resolvers = Zotero.Attachments.getFileResolvers(item, ['oa', 'custom'], true);
+		return [200, "application/json", JSON.stringify(resolvers.length > 0)];
+	}
+}
+
+
+/**
+ * Accepts:
+ *		sessionID - A session ID previously passed to /saveItems
+ *		itemID - The ID of the item to save alternative attachment for
+ *
+ * Returns:
+ * 		400 - Bad params
+ * 		201 - Created and attachment title
+ * 		503 - Failed to save
+ */
+Zotero.Server.Connector.SaveOAAttachment = function () {};
+Zotero.Server.Endpoints["/connector/saveOAAttachment"] = Zotero.Server.Connector.SaveOAAttachment;
+Zotero.Server.Connector.SaveOAAttachment.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	init: async function (requestData) {
+		let data = requestData.data;
+		let session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
+		if (!session) {
+			Zotero.debug("Can't find session " + data.sessionID, 1);
+			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
+		}
+		let item = session.getItemByConnectorKey(data.itemID);
+		let resolvers = Zotero.Attachments.getFileResolvers(item, ['oa', 'custom'], true);
+
+		let attachment = await Zotero.Attachments.addFileFromURLs(item, resolvers);
+
+		if (attachment) {
+			return [201, "text/plain", attachment.getDisplayTitle()];
+		}
+		else {
+			return [503, "text/plain", "Failed to save an attachment"];
+		}
+	}
+}
+
+/**
+ *
  *
  * Accepts:
  *		sessionID - A session ID previously passed to /saveItems
@@ -1238,55 +1187,6 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 	}
 };
 
-Zotero.Server.Connector.SessionProgress = function() {};
-Zotero.Server.Endpoints["/connector/sessionProgress"] = Zotero.Server.Connector.SessionProgress;
-Zotero.Server.Connector.SessionProgress.prototype = {
-	supportedMethods: ["POST"],
-	supportedDataTypes: ["application/json"],
-	permitBookmarklet: true,
-	
-	init: async function (requestData) {
-		var data = requestData.data
-		
-		if (!data.sessionID) {
-			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
-		}
-		
-		var session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
-		if (!session) {
-			Zotero.debug("Can't find session " + data.sessionID, 1);
-			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
-		}
-		
-		return [
-			200,
-			"application/json",
-			JSON.stringify({
-				items: session.getAllProgress()
-					.map((item) => {
-						var newItem = Object.assign({}, item);
-						if (item.attachments) {
-							newItem.attachments = item.attachments.map((attachment) => {
-								return Object.assign(
-									{},
-									attachment,
-									// Prefix id with 'sessionID_'
-									// TODO: Remove this once support for /attachmentProgress is
-									// removed and we stop prefixing the ids in the /saveItems
-									// response
-									{
-										id: session.id + '_' + attachment.id
-									}
-								);
-							});
-						}
-						return newItem;
-					}),
-				done: session.isSavingDone()
-			})
-		];
-	}
-};
 
 Zotero.Server.Connector.DelaySync = function () {};
 Zotero.Server.Endpoints["/connector/delaySync"] = Zotero.Server.Connector.DelaySync;
@@ -1315,8 +1215,12 @@ Zotero.Server.Connector.Import.prototype = {
 	permitBookmarklet: false,
 	
 	init: async function (requestData) {
+		let dataString = requestData.data;
+		if (requestData.data instanceof Ci.nsIInputStream) {
+			dataString = Zotero.Server.networkStreamToString(dataString, requestData.headers['content-length']);
+		}
 		let translate = new Zotero.Translate.Import();
-		translate.setString(requestData.data);
+		translate.setString(dataString);
 		let translators = await translate.getTranslators();
 		if (!translators || !translators.length) {
 			return 400;
@@ -1335,6 +1239,7 @@ Zotero.Server.Connector.Import.prototype = {
 			var session = Zotero.Server.Connector.SessionManager.create(requestData.searchParams.get('session'));
 		}
 		catch (e) {
+			Zotero.debug(e);
 			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
 		}
 		await session.update(collection ? collection.treeViewID : library.treeViewID);
@@ -1348,7 +1253,9 @@ Zotero.Server.Connector.Import.prototype = {
 				skipSelect: false
 			}
 		});
-		session.addItems(items);
+		items.forEach((item, index) => {
+			session.addItem(items[index].id, item);
+		});
 		
 		return [201, "application/json", JSON.stringify(items)];
 	}
@@ -1369,9 +1276,13 @@ Zotero.Server.Connector.InstallStyle.prototype = {
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (requestData) {
+		let dataString = requestData.data;
+		if (requestData.data instanceof Ci.nsIInputStream) {
+			dataString = Zotero.Server.networkStreamToString(dataString, requestData.headers['content-length']);
+		}
 		try {
-			var { styleTitle, styleID } = yield Zotero.Styles.install(
-				requestData.data, requestData.searchParams.get('origin') || null, true
+			var { styleTitle } = yield Zotero.Styles.install(
+				dataString, requestData.searchParams.get('origin') || null, true
 			);
 		} catch (e) {
 			return [400, "text/plain", e.message];
@@ -1409,7 +1320,8 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 }
 
 /**
- * Get selected collection
+ * Returns the full serialized collection tree (excluding non-editable libraries)
+ * and the selected collection tree item.
  *
  * Accepts:
  *		Nothing
@@ -1437,6 +1349,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			libraryID: library.libraryID,
 			libraryName: library.name,
 			libraryEditable: library.editable,
+			filesEditable: library.filesEditable,
 			editable
 		};
 		
@@ -1460,11 +1373,13 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 				{
 					id: library.treeViewID,
 					name: library.name,
+					filesEditable: library.filesEditable,
 					level: 0
 				},
 				...Zotero.Collections.getByLibrary(library.libraryID, true).map(c => ({
 					id: c.treeViewID,
 					name: c.name,
+					filesEditable: library.filesEditable,
 					level: c.level + 1 || 1 // Added by Zotero.Collections._getByContainer()
 				}))
 			);
@@ -1599,6 +1514,8 @@ Zotero.Server.Connector.Ping.prototype = {
 			let response = {
 				prefs: {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
+					downloadAssociatedFiles: Zotero.Prefs.get("downloadAssociatedFiles"),
+					supportsAttachmentUpload: true,
 					googleDocsAddNoteEnabled: true,
 					googleDocsCitationExplorerEnabled: false,
 					translatorsHash,
