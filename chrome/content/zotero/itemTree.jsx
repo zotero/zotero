@@ -711,7 +711,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						let parentItemRowIndex = this.getRowIndexByID(item.parentItemID);
 						if (parentItemRowIndex === false) continue;
 						if (this.isContainerOpen(parentItemRowIndex)) {
-							await this._closeContainer(parentItemRowIndex);
+							this.toggleOpenState(parentItemRowIndex, true);
 							await this.toggleOpenState(parentItemRowIndex);
 						}
 					}
