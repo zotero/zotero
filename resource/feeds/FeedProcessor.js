@@ -1106,6 +1106,9 @@ function FeedProcessor() {
 		"IN_ENTRIES": {
 			"atom:author": new ElementInfo("authors", Person, null, true),
 			"atom:contributor": new ElementInfo("contributors", Person, null, true),
+			"dc:creator": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:author": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:contributor": new ElementInfo("contributors", Person, rssAuthor, true),
 			"atom:link": new ElementInfo("links", null, null, true),
 		},
 		

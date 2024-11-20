@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <link href="http://arxiv.org/api/query?search_query%3Dcat%3Amath.MG%26id_list%3D%26start%3D0%26max_results%3D99" rel="self" type="application/atom+xml"/>
   <title type="html">ArXiv Query: search_query=cat:math.MG&amp;id_list=&amp;start=0&amp;max_results=99</title>
   <id>http://arxiv.org/api/t16YHIbuctl2Omz/1ISTPDEQFkU</id>
@@ -19,6 +19,7 @@
     <author>
       <name>Author2 A. Auth</name>
     </author>
+    <dc:creator>Author3 Z. McAuthorton</dc:creator>
     <arxiv:doi xmlns:arxiv="http://arxiv.org/schemas/atom">10.12345/example</arxiv:doi>
     <link title="doi" href="http://dx.doi.org/10.12345/example" rel="related"/>
     <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">33 pages, 24 Figures</arxiv:comment>

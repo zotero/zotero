@@ -212,7 +212,8 @@ describe("Zotero.FeedReader", function () {
 				url: 'http://www.example.com/item1',
 				creators: [
 					{ firstName: 'Author1 A. T.', lastName: 'Rohtua', creatorType: 'author' },
-					{ firstName: 'Author2 A.', lastName: 'Auth', creatorType: 'author' }
+					{ firstName: 'Author2 A.', lastName: 'Auth', creatorType: 'author' },
+					{ firstName: 'Author3 Z.', lastName: 'McAuthorton', creatorType: 'author' },
 				],
 				// TODO: DOI?
 				date: '2017-10-27T12:27:09Z',
