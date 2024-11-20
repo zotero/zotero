@@ -172,7 +172,13 @@
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (tabType == 'reader') {
+			else if (tabType == 'reader'
+					// The reader tab load event is triggered asynchronously.
+					// If the tab is no longer selected by the time the event is triggered,
+					// we don't need to update the context pane, since it must already be
+					// updated by another select tab event.
+					&& (action === 'select'
+						|| (action === 'load' && Zotero_Tabs.selectedID == tabID))) {
 				this._handleReaderReady(tabID);
 				this._setupNotesContext(tabID);
 				_contextPaneSplitter.setAttribute('hidden', false);
