@@ -716,11 +716,6 @@ if [ $BUILD_WIN == 1 ]; then
 				--set-product-version "$VERSION"
 		fi
 		
-		# Sign updater
-		if [ $SIGN -eq 1 ]; then
-			"$CALLDIR/win/codesign" "$APPDIR/updater.exe" "$SIGNATURE_DESC Updater"
-		fi
-		
 		# Copy app files
 		rsync -a "$base_dir/" "$APPDIR/"
 		#mv "$APPDIR/app/application.ini" "$APPDIR/"
@@ -768,6 +763,17 @@ if [ $BUILD_WIN == 1 ]; then
 		find "$APPDIR" \( -name .DS_Store -or -name '.git*' -or -name '.travis.yml' -or -name update.rdf -or -name '*.bak' \) -exec rm -f {} \;
 		find "$APPDIR" \( -name '*.exe' -or -name '*.dll' \) -exec chmod 755 {} \;
 		
+		if [[ $PACKAGE -eq 1 ]] && [[ $SIGN -eq 1 ]]; then
+			"$CALLDIR/win/codesign" "$APPDIR/zotero.exe" "$SIGNATURE_DESC"
+			sleep $SIGNTOOL_DELAY
+			"$CALLDIR/win/codesign" "$APPDIR/updater.exe" "$SIGNATURE_DESC Updater"
+			sleep $SIGNTOOL_DELAY
+			# Re-sign modified xul.dll
+			"$CALLDIR/win/codesign" "$APPDIR/xul.dll" "$SIGNATURE_DESC"
+			sleep $SIGNTOOL_DELAY
+			"$CALLDIR/win/codesign" "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll" "$SIGNATURE_DESC Word Plugin"
+		fi
+		
 		# Copy over removed-files and make a precomplete file
 		pushd "$APPDIR"
 		cp "$CALLDIR/update-packaging/removed-files_$arch" removed-files
@@ -797,18 +803,12 @@ if [ $BUILD_WIN == 1 ]; then
 					sleep $SIGNTOOL_DELAY
 				fi
 				
-				
 				if [ "$arch" = "win32" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_win32_setup.exe"
 				elif [ "$arch" = "win-x64" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_x64_setup.exe"
 				elif [ "$arch" = "win-arm64" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_arm64_setup.exe"
-				fi
-				
-				if [ $SIGN -eq 1 ]; then
-					"$CALLDIR/win/codesign" "$APPDIR/zotero.exe" "$SIGNATURE_DESC"
-					sleep $SIGNTOOL_DELAY
 				fi
 				
 				# Stage installer

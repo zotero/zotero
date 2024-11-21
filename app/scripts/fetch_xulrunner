@@ -530,6 +530,9 @@ if [ $BUILD_WIN == 1 ]; then
 		to=$(get_utf16_chars "Zotero" 38)
 		perl -pe "s/$from/$to/" < xul.dll > xul.dll.new
 		mv xul.dll.new xul.dll
+		# We re-sign DLL in build.sh, but presumably this file, which is for the Widevine CDM,
+		# isn't vaid anymore
+		rm xul.dll.sig
 		
 		# Check for UTF-16 "Zotero" in DLL
 		#
