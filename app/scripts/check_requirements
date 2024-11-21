@@ -110,7 +110,7 @@ if [ $platform = "w" ]; then
 	fi
 	
 	plugin_path=$(cd "$NSIS_DIR\\Plugins\\x86-unicode" && pwd)
-	plugins="AppAssocReg ApplicationID InvokeShellVerb ShellLink UAC"
+	plugins="AppAssocReg ApplicationID InvokeShellVerb nsProcess ShellLink UAC"
 	echo "Checking for NSIS plugins in $plugin_path"
 	for i in $plugins; do
 		echo -n "  $i.dll: "
