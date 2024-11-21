@@ -1138,13 +1138,10 @@ var ZoteroPane = new function()
 		// Shift-tab from the header into the itemsView.
 		if (Services.focus.activeWindow === window && this.lastKeyPress === "Tab"
 			&& (itemPaneLostFocus || contextPaneLostFocus)) {
+			// event.relatedTarget is null when moving focus in or out of <iframe> or <browser>
+			// so make sure to not refocus tabs when focusing inside of note-editor or reader
 			if (receivingFocus) {
 				Zotero_Tabs.moveFocus("current");
-			}
-			// event.relatedTarget is null when the reader is opened and we need a small
-			// delay otherwise the focus lands within the reader
-			else {
-				setTimeout(() => Zotero_Tabs.moveFocus("current"));
 			}
 			this.lastKeyPress = null;
 		}

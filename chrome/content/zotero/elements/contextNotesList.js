@@ -51,6 +51,8 @@
 		_numVisible = 0;
 		
 		_hasParent = false;
+
+		_lastFocusedNote = null;
 		
 		get notes() {
 			return [...this._itemNotes, ...this._allNotes];
@@ -118,6 +120,7 @@
 			this.addEventListener('click', this._handleClick);
 			this.addEventListener('contextmenu', this._handleContextMenu);
 			this.addEventListener('keydown', this._handleKeyDown);
+			this.addEventListener("focusin", this._handleFocusIn);
 			this.render();
 		}
 		
@@ -152,6 +155,14 @@
 			}
 		}
 		
+		refocusLastFocusedNote() {
+			if (this._lastFocusedNote) {
+				this._lastFocusedNote.focus();
+				return document.activeElement == this._lastFocusedNote;
+			}
+			return false;
+		}
+		
 		_makeRow(note) {
 			let row = document.createXULElement('note-row');
 			row.note = note;
@@ -184,9 +195,23 @@
 			}
 		};
 
+		// Remember which note row was last focused to be able to return focus to it
+		_handleFocusIn = (event) => {
+			if (event.target.tagName !== "note-row" && !event.target.classList.contains("more")) return;
+			this._lastFocusedNote = event.target;
+		};
+
 		// ArrowUp/Down navigation between notes
 		// Tab from a note-row focuses sidenav, Shift-Tab from a note focuses the section header
+		// Tab from twisty icon into the notes list will try to refocus the last focused note
 		_handleKeyDown = (event) => {
+			if (event.key == "Tab" && event.target.classList.contains("twisty")) {
+				let section = event.target.closest("collapsible-section");
+				if (this._lastFocusedNote && section.contains(this._lastFocusedNote)) {
+					this.refocusLastFocusedNote();
+					event.preventDefault();
+				}
+			}
 			if (event.target.tagName !== "note-row" && !event.target.classList.contains("more")) return;
 			if (event.key == "ArrowDown") {
 				event.target.nextElementSibling?.focus();
