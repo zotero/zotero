@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
 		return;
 	}
 	
-	// Don't need to depend on Zotero object here
+	const { AppConstants } = ChromeUtils.importESModule('resource://gre/modules/AppConstants.sys.mjs');
+	
+	// Can't depend on Zotero object in hidden window initialization
 	let isWin = AppConstants.platform == 'win';
 	let isMac = AppConstants.platform == 'macosx';
 
@@ -20,6 +22,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
 	let applicationMenu = document.getElementById('mac_application_menu');
 	let windowMenu = document.getElementById('windowMenu');
 	let macKeyset = document.getElementById('macKeyset');
+	
+	let genericCommandSet = document.createXULElement('commandset');
+	document.documentElement.append(genericCommandSet);
+	let genericKeyset = document.createXULElement('keyset');
+	document.documentElement.append(genericKeyset);
 
 	if (isWin) {
 		// Set behavior on Windows only
@@ -44,6 +51,42 @@ document.addEventListener('DOMContentLoaded', (event) => {
 		if (fileQuitItemUnix) fileQuitItemUnix.hidden = true;
 		if (editPreferencesSeparator) editPreferencesSeparator.hidden = true;
 		if (editPreferencesItem) editPreferencesItem.hidden = true;
+		
+		// Non-main windows: Add Window → Zotero to focus/reopen main window
+		if (windowMenu && window.location.href !== AppConstants.BROWSER_CHROME_URL) {
+			MozXULElement.insertFTLIfNeeded('branding/brand.ftl');
+			MozXULElement.insertFTLIfNeeded('zotero.ftl');
+			
+			let mainWindowCommand = document.createXULElement('command');
+			mainWindowCommand.id = 'cmd_mainWindow';
+			document.l10n.setAttributes(mainWindowCommand, 'main-window-command');
+			mainWindowCommand.addEventListener('command', () => {
+				// Zotero.getMainWindow()
+				let win = Services.wm.getMostRecentWindow("navigator:browser");
+				if (win) {
+					win.focus();
+					return;
+				}
+				
+				// Zotero.openMainWindow()
+				var chromeURI = AppConstants.BROWSER_CHROME_URL;
+				var flags = "chrome,all,dialog=no,resizable=yes";
+				Services.ww.openWindow(null, chromeURI, '_blank', flags, null);
+			});
+			genericCommandSet.append(mainWindowCommand);
+			
+			let mainWindowKey = document.createXULElement('key');
+			mainWindowKey.id = 'key_mainWindow';
+			mainWindowKey.setAttribute('command', mainWindowCommand.id);
+			mainWindowKey.setAttribute('modifiers', 'accel shift');
+			document.l10n.setAttributes(mainWindowKey, 'main-window-key');
+			genericKeyset.append(mainWindowKey);
+
+			let mainWindowItem = document.createXULElement('menuitem');
+			mainWindowItem.setAttribute('command', mainWindowCommand.id);
+			mainWindowItem.setAttribute('key', mainWindowKey.id);
+			windowMenu.menupopup.append(mainWindowItem);
+		}
 
 		// macOS 15 Sequoia has a new system keyboard shortcut, Ctrl-Return,
 		// that shows a context menu on the focused control. Firefox currently
