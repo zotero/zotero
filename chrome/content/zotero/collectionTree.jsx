@@ -1580,7 +1580,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				var ids = data;
 				var items = Zotero.Items.get(ids);
 				items = Zotero.Items.keepTopLevel(items);
-				return items.some(item => item.canAddToTarget(treeRow));
+				return items.some(item => item.canAddToTarget(treeRow, { debug: true }));
 			}
 			else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 				if (treeRow.isSearch() || treeRow.isPublications()) {
@@ -1648,7 +1648,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				var ids = data;
 				var items = Zotero.Items.get(ids);
 				for (let item of items) {
-					let canDrop = await item.canAddToTargetAsync(treeRow);
+					let canDrop = await item.canAddToTargetAsync(treeRow, { debug: true });
 					if (canDrop) return true;
 				}
 				return false;
