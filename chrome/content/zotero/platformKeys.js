@@ -71,9 +71,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 				// Zotero.openMainWindow()
 				var chromeURI = AppConstants.BROWSER_CHROME_URL;
 				var flags = "chrome,all,dialog=no,resizable=yes";
-				var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
-					.getService(Components.interfaces.nsIWindowWatcher);
-				ww.openWindow(null, chromeURI, '_blank', flags, null);
+				Services.ww.openWindow(null, chromeURI, '_blank', flags, null);
 			});
 			genericCommandSet.append(mainWindowCommand);
 			
