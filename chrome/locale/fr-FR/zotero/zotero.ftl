@@ -24,7 +24,7 @@ general-help = ?
 general-tag = Marqueur
 general-done = Terminé
 general-view-troubleshooting-instructions = Afficher les instructions de dépannage
-general-go-back = Go Back
+general-go-back = Revenir en arrière
 citation-style-label = Style de citation :
 language-label = Langue :
 menu-file-show-in-finder =
@@ -66,9 +66,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Extensions
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Déplacer la colonne à gauche
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Déplacer la colonne à droite
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -283,12 +283,12 @@ integration-editBibliography-add-button =
 integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+    .aria-label = Modifier la référence
+-integration-editBibliography-include-uncited = Pour intégrer dans votre bibliographie un document non cité, sélectionnez-le depuis la liste des documents et cliquez sur { general-add }.
+-integration-editBibliography-exclude-cited = Vous pouvez également exclure un document cité en le sélectionnant depuis la liste des documents et en cliquant sur { general-remove }.
+-integration-editBibliography-edit-reference = Pour modifier la mise en forme d'une référence, utilisez l'éditeur de texte.
 integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
+    .aria-label = Fenêtre d'édition de la bibliographie
     .aria-description =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
@@ -390,7 +390,7 @@ menu-ui-density-comfortable =
     .label = Confortable
 menu-ui-density-compact =
     .label = Compact
-pane-item-details = Item Details
+pane-item-details = Détails du document
 pane-info = Info
 pane-abstract = Résumé
 pane-attachments = Fichiers joints
@@ -650,7 +650,7 @@ find-pdf-files-added =
 select-items-dialog =
     .buttonlabelaccept = Sélectionner
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Convertir en document indépendant
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -661,8 +661,9 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Convertir en note indépendante
+            [many] Convertir en notes indépendantes
+           *[other] Convertir en notes indépendantes
         }
 file-type-webpage = Page web
 file-type-image = Image

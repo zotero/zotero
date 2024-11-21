@@ -45,8 +45,8 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = Pour transformer le résultat de recherche en surlignement, appuyer sur { general-key-control }-{ option-or-alt }-1. Pour transformer le résultat de recherche en soulignement, appuyer sur { general-key-control }-{ option-or-alt }-2.
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = Importer les annotations du livre numérique…
+pdfReader-import-from-epub-prompt-title = Importer les annotations du livre numérique
 pdfReader-import-from-epub-prompt-text =
     { -app-name } found { $count ->
         [1] { $count } { $tool } annotation
@@ -55,11 +55,11 @@ pdfReader-import-from-epub-prompt-text =
     
     Any { -app-name } annotations that were previously imported from this ebook will be updated.
 pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Ce livre numérique ne semble pas contenir d'annotations importables.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } peut importer les annotations de livre numérique créées dans Calibre et KOReader.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” ne semble pas contenir d'annotations Calibre ou KOReader.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    Si ce livre numérique a été annoté avec KOReader, essayez de sélectionner directement un fichier “metadata.epub.lua”.
+pdfReader-import-from-epub-select-other = Sélectionner un autre fichier…

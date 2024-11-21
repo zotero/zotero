@@ -24,7 +24,7 @@ general-help = Hjelp
 general-tag = Emneord
 general-done = Ferdig
 general-view-troubleshooting-instructions = Se instruksjoner for feilsøking
-general-go-back = Go Back
+general-go-back = Gå tilbake
 citation-style-label = Henvisningsstil:
 language-label = Språk:
 menu-file-show-in-finder =
@@ -66,9 +66,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Tillegg
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Flytt kolonne til venstre
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Flytt kolonne til høyre
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -282,12 +282,12 @@ integration-editBibliography-add-button =
 integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+    .aria-label = Rediger referanse
+-integration-editBibliography-include-uncited = Hvis du vil inkludere et usitert element i bibliografien, velger du det i listen over elementer og trykker på { general-add }.
+-integration-editBibliography-exclude-cited = Du kan også ekskludere et sitert element ved å velge det fra referanselisten og trykke { general-remove }.
+-integration-editBibliography-edit-reference = For å endre formatering for en referanse, bruk tekstredigerer.
 integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
+    .aria-label = Dialogboks for å rediger bibliografi
     .aria-description =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
@@ -389,7 +389,7 @@ menu-ui-density-comfortable =
     .label = Romslig
 menu-ui-density-compact =
     .label = Kompakt
-pane-item-details = Item Details
+pane-item-details = DEtlajer for element
 pane-info = Info
 pane-abstract = Sammendrag
 pane-attachments = Vedlegg
@@ -639,7 +639,7 @@ find-pdf-files-added =
 select-items-dialog =
     .buttonlabelaccept = Velg
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Konverter til enkeltstående
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -649,8 +649,8 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Konverter til enkeltstående notat
+           *[other] Konverter til enkeltstående notater
         }
 file-type-webpage = Nettside
 file-type-image = Bilde

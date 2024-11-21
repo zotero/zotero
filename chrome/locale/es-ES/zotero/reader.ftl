@@ -45,21 +45,21 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = Para convertir un resultado de búsqueda en una anotación resaltada, pulse  { general-key-control }-{ option-or-alt }-1. Para convertir un resultado de búsqueda en una anotación subrayada, pulse { general-key-control }-{ option-or-alt }-2.
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = Importar anotaciones de libros electrónicos…
+pdfReader-import-from-epub-prompt-title = Importar anotaciones de libros electrónicos
 pdfReader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } encontró { $count ->
+        [1] { $count } { $tool } anotación
+       *[other] { $count } { $tool } anotaciones
+    }, última edición { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Se actualizarán todas las anotaciones { -app-name } que se hayan importado previamente desde este libro electrónico.
 pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Este libro electrónico no parece contener anotaciones importables.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } puede importar anotaciones de libros electrónicos creadas en Calibre y KOReader.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” no parece contener ninguna anotación de Calibre o KOReader.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    Si este libro electrónico ha sido anotado con KOReader, intente seleccionar directamente un archivo «metadata.epub.lua».
+pdfReader-import-from-epub-select-other = Seleccionar otro archivo…

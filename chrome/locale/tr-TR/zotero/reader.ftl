@@ -45,21 +45,21 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = Arama sonucunu bir vurgulanmış ek açıklamaya çevirmek için { general-key-control }-{ option-or-alt }-1 tuşlarına basınız. Arama sonucunu bir altı çizgili ek açıklamaya çevirmek için { general-key-control }-{ option-or-alt }-2 tuşlarına basınız.
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = E-kitap Ek Açıklamalarını İçeri Aktar…
+pdfReader-import-from-epub-prompt-title = E-kitap Ek Açıklamalarını İçeri Aktar
 pdfReader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } { $count ->
+        [1] { $count } { $tool } ek açıklaması
+       *[other] { $count } { $tool } ek açıklaması
+    } buldu, son düzenleme { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Bu e-kitaptan daha önce içeri aktarılmış her { -app-name } ak açıklaması güncellenecektir.
 pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Bu e-kitap içeri aktarılabilecek herhangi bir ek açıklama içermemektedir.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name }, Calibre ve KOReader'da yaratılmış e-kitap ek açıklamalarını içeri aktarabilir.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” dosyasının Calibre veya KOReader ek açıklamaları içerdiği görünmüyor.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    Eğer bu e-kitaba KOReader ile ek açıklamalar eklendiyse, bir “metadata.epub.lua” dosyasını direk olarak seçmeyi deneyin.
+pdfReader-import-from-epub-select-other = Başka Dosya Seç…

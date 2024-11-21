@@ -45,21 +45,21 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = Hvis du vil gjøre et søkeresultat om til en uthevingskommentar, trykker du på { general-key-control }-{ option-or-alt }-1. Hvis du vil gjøre et søkeresultat om til en understrekingskommentar, trykker du på { general-key-control }-{ option-or-alt }-2.
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = Importer E-bok kommentarer…
+pdfReader-import-from-epub-prompt-title = Importer E-bok kommentarer
 pdfReader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } fant { $count ->
+        [1] { $count } { $tool } kommentar
+       *[other] { $count } { $tool } kommentarer
+    }, sist redigert { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Alle { -app-name }-kommentarer som tidligere er importert fra denne e-boken, vil bli oppdatert.
 pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Denne e-boken ser ikke ut til å inneholde noen importerbare kommentarer.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } kan importere e-bok kommentarer som er opprettet i Calibre og KOReader.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” ser ikke ut til å inneholde noen Calibre- eller KOReader-kommentarer.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    Hvis denne e-boken har kommentarer opprettet i KOReader, kan du prøve å velge en "metadata.epub.lua"-fil direkte.
+pdfReader-import-from-epub-select-other = Velg annen fil…

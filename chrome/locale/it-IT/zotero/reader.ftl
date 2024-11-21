@@ -45,21 +45,21 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = Per convertire il risultato di una ricerca in evidenziatura, premi { general-key-control }-{ option-or-alt }-1. Per convertire il risultato in sottolineatura, premi { general-key-control }-{ option-or-alt }-2.
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = Importa annotazioni da Ebook...
+pdfReader-import-from-epub-prompt-title = Importa annotazioni da Ebook
 pdfReader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } ha individuato { $count ->
+        [1] { $count } { $tool } annotazione
+       *[other] { $count } { $tool } annotazioni
+    }, ultima modifica { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Le annotazioni { -app-name } precedentemente importate verranno aggiornate.
 pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Questo ebook non contiene annotazioni importabili.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } può importare annotazioni create in Calibre e KOReader.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” non sembra contenere alcuna annotazione di Calibre o KOReader.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    Se questo file è stato annotato con KOReader, prova a selezionare un file “metadata.epub.lua” manualmente.
+pdfReader-import-from-epub-select-other = Seleziona altro file…

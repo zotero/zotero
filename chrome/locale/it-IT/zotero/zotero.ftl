@@ -24,7 +24,7 @@ general-help = Aiuto
 general-tag = Tag
 general-done = Fatto
 general-view-troubleshooting-instructions = Vedi le istruzioni di risoluzione dei problemi
-general-go-back = Go Back
+general-go-back = Indietro
 citation-style-label = Stile di citazione:
 language-label = Lingua:
 menu-file-show-in-finder =
@@ -66,9 +66,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Plugin
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Sposta colonna a sinistra
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Sposta colonna a destra
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -283,12 +283,12 @@ integration-editBibliography-add-button =
 integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+    .aria-label = Modifica riferimento
+-integration-editBibliography-include-uncited = Per includere un elemento non citato nella bibliografia, selezionalo e premi { general-add }.
+-integration-editBibliography-exclude-cited = Puoi anche escludere un elemento citato selezionandolo nella lista e premendo { general-remove }.
+-integration-editBibliography-edit-reference = Per cambiare la formattazione di un riferimento, usa l'editor di testo.
 integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
+    .aria-label = Finestra di modifica della bibliografia
     .aria-description =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
@@ -390,7 +390,7 @@ menu-ui-density-comfortable =
     .label = Confortevole
 menu-ui-density-compact =
     .label = Compatta
-pane-item-details = Item Details
+pane-item-details = Dettagli dell'elemento
 pane-info = Informazioni
 pane-abstract = Abstract
 pane-attachments = Allegati
@@ -650,7 +650,7 @@ find-pdf-files-added =
 select-items-dialog =
     .buttonlabelaccept = Seleziona
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Converti in indipendente
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -661,8 +661,9 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Converti in nota indipendente
+            [many] Converti in note indipendenti
+           *[other] Converti in note indipendenti
         }
 file-type-webpage = Pagina web
 file-type-image = Immagine

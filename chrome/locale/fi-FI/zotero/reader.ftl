@@ -45,8 +45,8 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = Muuttaaksesi hakutuloksen korostushuomautukseksi, paina { general-key-control }-{ option-or-alt }-1. Muuttaaksesi hakutuloksen alleviivaushuomautukseksi, paina { general-key-control }-{ option-or-alt }-2.
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = Tuo e-kirjan huomautukset...
+pdfReader-import-from-epub-prompt-title = Tuo e-kirjan huomautukset
 pdfReader-import-from-epub-prompt-text =
     { -app-name } found { $count ->
         [1] { $count } { $tool } annotation

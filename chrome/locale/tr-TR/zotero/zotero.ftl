@@ -24,7 +24,7 @@ general-help = Yardım
 general-tag = Etiket
 general-done = Tamam
 general-view-troubleshooting-instructions = Sorun Giderme Talimatlarını Göster
-general-go-back = Go Back
+general-go-back = Geri Git
 citation-style-label = Alıntı Stili:
 language-label = Dil:
 menu-file-show-in-finder =
@@ -66,9 +66,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Eklentiler
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Sütunu Sola Taşı
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Sütunu Sağa Taşı
 main-window-command =
     .label = { -app-name }
 zotero-toolbar-tabs-menu =
@@ -282,12 +282,12 @@ integration-editBibliography-add-button =
 integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+    .aria-label = Kaynağı düzenle
+-integration-editBibliography-include-uncited = Alıntılanmamış bir eseri kaynakçanıza dahil etmek için bu eseri eserler listesinden seçiniz ve { general-add } üzerine basınız.
+-integration-editBibliography-exclude-cited = Alıntılanmış bir eseri kaynakçanızdan çıkarmak için bu eseri kaynaklar listesinden seçiniz ve { general-remove } üzerine basınız.
+-integration-editBibliography-edit-reference = Bir kaynağın biçimleniş şeklini değiştirmek için metin düzenleyiciyi kulanınız.
 integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
+    .aria-label = Kaynakça Düzenleme iletişim kutusu
     .aria-description =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
@@ -389,7 +389,7 @@ menu-ui-density-comfortable =
     .label = Rahat
 menu-ui-density-compact =
     .label = Sıkıştır
-pane-item-details = Item Details
+pane-item-details = Eser Ayrıntıları
 pane-info = Bilgi
 pane-abstract = Özet
 pane-attachments = Ekler
@@ -639,7 +639,7 @@ find-pdf-files-added =
 select-items-dialog =
     .buttonlabelaccept = Seç
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Bağımsız bir Öğeye Dönüştür
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -649,8 +649,8 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Bağımsız Nota Dönüştür
+           *[other] Bağımsız Notlara Dönüştür
         }
 file-type-webpage = Web sayfası
 file-type-image = Resim

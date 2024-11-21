@@ -60,12 +60,12 @@
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşitlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kitaplığımda kullanılan ek dosyalarını bununla eşitle:">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Kitaplık gruplarının ek dosyalarını Zotero deposunu kullanarak eşitle">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Grup kitaplıklarının ek dosyalarını Zotero depolamasını kullanarak eşitle">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Dosyaları bu anlarda indir:">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "Eşitleme anında">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "Gerek duyulduğunda">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Sunucuyu Doğrula">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero deposunu kullandığınızda, bu koşulları kabul etmiş oluyorsunuz:">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero depolamasını kullandığınızda, bu koşulları kabul etmiş oluyorsunuz:">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "Şartlar ve Koşullar">
 <!ENTITY zotero.preferences.sync.librariesToSync "Eşitlenecek Kitaplıklar">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Kitaplıkları Seç...">
