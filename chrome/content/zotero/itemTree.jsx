@@ -705,8 +705,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 							sort = id;
 						}
 					}
-					// If a child item is modified and its parent's row is expanded,
-					// collapse and re-open the parent.
+					// If a trashed child item is restored while its parent's row is expanded,
+					// collapse and re-open the parent to have that child item row added.
 					else {
 						let parentItemRowIndex = this.getRowIndexByID(item.parentItemID);
 						if (parentItemRowIndex === false) continue;
