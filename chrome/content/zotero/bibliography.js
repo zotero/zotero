@@ -32,6 +32,8 @@
 // Class to provide options for bibliography
 // Used by integrationDocPrefs.xhtml and bibliography.xhtml
 
+window.isPristine = true;
+
 window.Zotero_File_Interface_Bibliography = new function () {
 	var _io;
 	
@@ -200,6 +202,11 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		if (hasCheckedAdvancedOption) {
 			this.toggleAdvancedOptions(false);
 		}
+		
+		const checkboxes = document.querySelectorAll('.advanced-checkbox');
+		for (const checkbox of checkboxes) {
+			checkbox.addEventListener('command', _ => window.isPristine = false);
+		}
 	};
 	
 	this.openHelpLink = function () {
@@ -232,6 +239,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 	};
 
 	this.onDocPrefsWindowStyleChange = function (style) {
+		window.isPristine = false;
 		if (windowType !== "docPrefs") return;
 
 		let isNote = style.class == "note";
@@ -358,3 +366,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		}
 	};
 };
+
+window.cancel = () => {
+	window.close();
+}
