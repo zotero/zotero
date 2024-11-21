@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 		if (editPreferencesSeparator) editPreferencesSeparator.hidden = true;
 		if (editPreferencesItem) editPreferencesItem.hidden = true;
 		
-		// Non-main windows: Add Window -> Zotero to focus/reopen main window
+		// Non-main windows: Add Window → Zotero to focus/reopen main window
 		if (windowMenu && window.location.href !== AppConstants.BROWSER_CHROME_URL) {
 			MozXULElement.insertFTLIfNeeded('branding/brand.ftl');
 			MozXULElement.insertFTLIfNeeded('zotero.ftl');
