@@ -32,12 +32,20 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 	/**
-	 * @typedef {import("../../itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
-	 * @typedef {"dataKey" | "label" | "pluginID"} RequiredCustomColumnOptionKeys
-	 * @typedef {Required<Pick<ItemTreeColumnOptions, RequiredCustomColumnOptionKeys>>} RequiredCustomColumnOptionsPartial
-	 * @typedef {Omit<ItemTreeColumnOptions, RequiredCustomColumnOptionKeys>} CustomColumnOptionsPartial
-	 * @typedef {RequiredCustomColumnOptionsPartial & CustomColumnOptionsPartial} ItemTreeCustomColumnOptions
-	 * @typedef {Partial<Omit<ItemTreeCustomColumnOptions, "enabledTreeIDs">>} ItemTreeCustomColumnFilters
+	 * @typedef {function} ItemTreeColumnDataProvider
+	 * @param {Zotero.Item} item - The item to get data from
+	 * @param {string} dataKey - The dataKey of the column
+	 * @returns {string} - The data to display in the column
+	 */
+
+	/**
+	 * @typedef {function} ItemTreeColumnRenderCell
+	 * @param {number} index - The index of the row
+	 * @param {string} data - The data to display in the column
+	 * @param {ItemTreeColumnOptions | {className: string}} column - The column options
+	 * @param {boolean} isFirstColumn - true if this is the first column
+	 * @param {Document} doc - The document of the item tree
+	 * @returns {HTMLElement} - The HTML to display in the cell
 	 */
 
 
@@ -165,6 +173,10 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 	}
 
 
+	/**
+	 * @class
+	 * @classdesc Item tree API manager
+	 */
 	class ItemTreeManager {
 		_columnManager = new ItemTreeColumnManagerInternal();
 
@@ -173,64 +185,30 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 *
 		 * Note that the `dataKey` you use here may be different from the one returned by the function.
 		 * This is because the `dataKey` is prefixed with the `pluginID` to avoid conflicts after the column is registered.
-		 * @param {ItemTreeCustomColumnOptions} option - An option or array of options to register
+		 * @param {Object} option - An option or array of options to register
+		 * @param {string} option.dataKey - Required, see use in ItemTree#_getRowData()
+		 * @param {string} option.label - The column label. Either a string or the id to an i18n string.
+		 * @param {string} option.pluginID - Set plugin ID to auto remove column when plugin is removed.
+		 * @param {string[]} [option.enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree. If ["*"], enabled in all trees.
+		 * @param {string[]} [option.defaultIn] - Will be deprecated. Types of trees the column is default in. Can be [default, feed];
+		 * @param {string[]} [option.disabledIn] - Will be deprecated. Types of trees where the column is not available
+		 * @param {boolean} [option.sortReverse=false] - Default: false. Set to true to reverse the sort order
+		 * @param {number} [option.flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
+		 * @param {string} [option.width] - A column width instead of flex ratio. See above.
+		 * @param {boolean} [option.fixedWidth] - Default: false. Set to true to disable column resizing
+		 * @param {boolean} [option.staticWidth] - Default: false. Set to true to prevent columns from changing width when the width of the tree increases or decreases
+		 * @param {boolean} [option.noPadding] - Set to true for columns with padding disabled in stylesheet
+		 * @param {number} [option.minWidth] - Override the default [20px] column min-width for resizing
+		 * @param {React.Component} [option.iconLabel] - Set an Icon label instead of a text-based one
+		 * @param {string} [option.iconPath] - Set an Icon path, overrides {iconLabel}
+		 * @param {string | React.Component} [option.htmlLabel] - Set an HTML label, overrides {iconLabel} and {label}. Can be a HTML string or a React component.
+		 * @param {boolean} [option.showInColumnPicker=true] - Default: true. Set to true to show in column picker.
+		 * @param {boolean} [option.columnPickerSubMenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
+		 * @param {boolean} [option.primary] - Should only be one column at the time. Title is the primary column
+		 * @param {ItemTreeColumnDataProvider} [option.dataProvider] - Custom data provider that is called when rendering cells
+		 * @param {ItemTreeColumnRenderCell} [option.renderCell] - The cell renderer function
+		 * @param {string[]} [option.zoteroPersist] - Which column properties should be persisted between zotero close
 		 * @returns {string | false} - The dataKey of the added column or false if no column is added
-		 * @example
-		 * A minimal custom column:
-		 * ```js
-		 * // You can unregister the column later with Zotero.ItemTreeManager.unregisterColumn(registeredDataKey);
-		 * const registeredDataKey = Zotero.ItemTreeManager.registerColumn(
-		 * {
-		 *     dataKey: 'rtitle',
-		 *     label: 'Reversed Title',
-		 *     pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
-		 *     dataProvider: (item, dataKey) => {
-		 *         return item.getField('title').split('').reverse().join('');
-		 *     },
-		 * });
-		 * ```
-		 * @example
-		 * A custom column using all available options.
-		 * Note that the column will only be shown in the main item tree.
-		 * ```js
-		 * const registeredDataKey = Zotero.ItemTreeManager.registerColumn(
-		 * {
-		 *     dataKey: 'rtitle',
-		 *     label: 'Reversed Title',
-		 *     enabledTreeIDs: ['main'], // only show in the main item tree
-		 *     sortReverse: true, // sort by increasing order
-		 *     flex: 0, // don't take up all available space
-		 *     width: 100, // assign fixed width in pixels
-		 *     fixedWidth: true, // don't allow user to resize
-		 *     staticWidth: true, // don't allow column to be resized when the tree is resized
-		 *     minWidth: 50, // minimum width in pixels
-		 *     iconPath: 'chrome://zotero/skin/tick.png', // icon to show in the column header
-		 *     htmlLabel: '<span style="color: red;">reversed title</span>', // use HTML in the label. This will override the label and iconPath property
-		 *     showInColumnPicker: true, // show in the column picker
-		 *     columnPickerSubMenu: true, // show in the column picker submenu
-		 *     pluginID: 'make-it-red@zotero.org', // plugin ID, which will be used to unregister the column when the plugin is unloaded
-		 *     dataProvider: (item, dataKey) => {
-		 *         // item: the current item in the row
-		 *         // dataKey: the dataKey of the column
-		 *         // return: the data to display in the column
-		 *         return item.getField('title').split('').reverse().join('');
-		 *     },
-		 *     renderCell: (index, data, column, isFirstColumn, doc) => {
-		 *         // index: the index of the row
-		 *         // data: the data to display in the column, return of `dataProvider`
-		 *         // column: the column options
-		 *         // isFirstColumn: true if this is the first column
-		 *         // doc: the document of the item tree
-		 *         // return: the HTML to display in the cell
-		 *         const cell = doc.createElement('span');
-		 *         cell.className = `cell ${column.className}`;
-		 *         cell.textContent = data;
-		 *         cell.style.color = 'red';
-		 *         return cell;
-		 *     },
-		 *     zoteroPersist: ['width', 'hidden', 'sortDirection'], // persist the column properties
-		 * });
-		 * ```
 		 */
 		registerColumn(option) {
 			return this._columnManager.register(option);
@@ -249,12 +227,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		/**
 		 * Unregister a custom column.
 		 * @param {string} dataKey - The dataKey of the column to unregister
-		 * @returns {boolean} true if the column is unregistered
-		 * @example
-		 * The `registeredDataKey` is returned by the `registerColumn` function.
-		 * ```js
-		 * Zotero.ItemTreeManager.unregisterColumn(registeredDataKey);
-		 * ```
+		 * @returns {boolean} - true if the column was unregistered, false if the column was not found
 		 */
 		unregisterColumn(dataKey) {
 			return this._columnManager.unregister(dataKey);
@@ -274,12 +247,6 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			return this._columnManager.updateID;
 		}
 
-		/**
-		 * Get column(s) that matches the properties of option
-		 * @param {string | string[]} [filterTreeIDs] - The tree IDs to match
-		 * @param {ItemTreeCustomColumnFilters} [options] - An option or array of options to match
-		 * @returns {ItemTreeCustomColumnOptions[]}
-		 */
 		getCustomColumns(filterTreeIDs, options) {
 			const allColumns = this._columnManager.options;
 			if (!filterTreeIDs && !options) {
@@ -314,21 +281,10 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			return filteredColumns;
 		}
 
-		/**
-		 * Check if a column is registered as a custom column
-		 * @param {string} dataKey - The dataKey of the column
-		 * @returns {boolean} true if the column is registered as a custom column
-		 */
 		isCustomColumn(dataKey) {
 			return !!this._columnManager._optionsCache[dataKey];
 		}
 
-		/**
-		 * A centralized data source for custom columns. This is used by the ItemTreeRow to get data.
-		 * @param {Zotero.Item} item - The item to get data from
-		 * @param {string} dataKey - The dataKey of the column
-		 * @returns {string}
-		 */
 		getCustomCellData(item, dataKey) {
 			const option = this._columnManager._optionsCache[dataKey];
 			if (option && option.dataProvider) {
@@ -337,11 +293,19 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			return "";
 		}
 
+		/**
+		 * Refresh the columns in the item tree
+		 * @returns {void}
+		 */
 		refreshColumns() {
 			this._columnManager.refresh();
 		}
 	}
 
 
+	/**
+	 * @memberof Zotero
+	 * @type {ItemTreeManager}
+	 */
 	Zotero.ItemTreeManager = new ItemTreeManager();
 }
