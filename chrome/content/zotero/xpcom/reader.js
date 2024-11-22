@@ -2087,6 +2087,32 @@ class Reader {
 	}
 
 	/**
+	 * @typedef {"renderTextSelectionPopup" | "renderSidebarAnnotationHeader" | "renderToolbar" |
+	 *           "createColorContextMenu" | "createViewContextMenu" | "createAnnotationContextMenu" |
+	 *           "createThumbnailContextMenu" | "createSelectorContextMenu"} ReaderEventType
+	 */
+
+	/**
+	 * @typedef {Object} ReaderEvent
+	 * @property {ReaderInstance} reader - Reader instance
+	 * @property {Document} doc - Document
+	 * @property {Object} params - Event parameters
+	 * @property {function(...Element): void} append - Append function
+	 */
+
+	/**
+	 * @typedef {function} ReaderEventHandler
+	 * @param {ReaderEvent} event - Event
+	 * @returns {void}
+	 */
+
+	/**
+	 * @param {ReaderEventType} type - Event type
+	 * @param {ReaderEventHandler} handler - Event handler
+	 * @param {string} [pluginID] - Plugin ID
+	 * @returns {void}
+	 *
+	 * @example
 	 * Inject DOM nodes to reader UI parts:
 	 * - renderTextSelectionPopup
 	 * - renderSidebarAnnotationHeader
@@ -2098,9 +2124,10 @@ class Reader {
 	 * 	container.append('Loading…');
 	 * 	append(container);
 	 * 	setTimeout(() => container.replaceChildren('Translated text: ' + params.annotation.text), 1000);
-	 * });
+	 * }, 'my-plugin@my-namespace.com');
+	 * ```
 	 *
-	 *
+	 * @example
 	 * Add options to context menus:
 	 * - createColorContextMenu
 	 * - createViewContextMenu
@@ -2114,7 +2141,8 @@ class Reader {
 	 * 		label: 'Test',
 	 * 		onCommand(){ reader._iframeWindow.alert('Selected annotations: ' + params.ids.join(', ')); }
 	 * 	});
-	 * });
+	 * }, 'my-plugin@my-namespace.com');
+	 * ```
 	 */
 	registerEventListener(type, handler, pluginID = undefined) {
 		this._registeredListeners.push({ pluginID, type, handler });
