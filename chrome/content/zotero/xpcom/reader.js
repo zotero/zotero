@@ -2004,6 +2004,10 @@ class ReaderPreview extends ReaderInstance {
 }
 
 
+/**
+ * @class
+ * @classdesc Reader class for managing reader tabs and windows
+ */
 class Reader {
 	constructor() {
 		this._sidebarWidth = 240;
@@ -2040,11 +2044,37 @@ class Reader {
 	}
 
 	/**
+	 * @typedef {"renderTextSelectionPopup" | "renderSidebarAnnotationHeader" | "renderToolbar" |
+	 *           "createColorContextMenu" | "createViewContextMenu" | "createAnnotationContextMenu" |
+	 *           "createThumbnailContextMenu" | "createSelectorContextMenu"} ReaderEventType
+	 */
+
+	/**
+	 * @typedef {Object} ReaderEvent
+	 * @property {ReaderInstance} reader - Reader instance
+	 * @property {Document} doc - Document
+	 * @property {Object} params - Event parameters
+	 * @property {function(...Element): void} append - Append function
+	 */
+
+	/**
+	 * @typedef {function} ReaderEventHandler
+	 * @param {ReaderEvent} event - Event
+	 * @returns {void}
+	 */
+
+	/**
+	 * @param {ReaderEventType} type - Event type
+	 * @param {ReaderEventHandler} handler - Event handler
+	 * @param {string} [pluginID] - Plugin ID
+	 * @returns {void}
+	 *
 	 * Inject DOM nodes to reader UI parts:
 	 * - renderTextSelectionPopup
 	 * - renderSidebarAnnotationHeader
 	 * - renderToolbar
 	 *
+	 * ```javascript
 	 * Zotero.Reader.registerEventListener('renderTextSelectionPopup', (event) => {
 	 * 	let { reader, doc, params, append } = event;
 	 * 	let container = doc.createElement('div');
@@ -2052,6 +2082,7 @@ class Reader {
 	 * 	append(container);
 	 * 	setTimeout(() => container.replaceChildren('Translated text: ' + params.annotation.text), 1000);
 	 * });
+	 * ```
 	 *
 	 *
 	 * Add options to context menus:
@@ -2061,6 +2092,7 @@ class Reader {
 	 * - createThumbnailContextMenu
 	 * - createSelectorContextMenu
 	 *
+	 * ```javascript
 	 * Zotero.Reader.registerEventListener('createAnnotationContextMenu', (event) => {
 	 * 	let { reader, params, append } = event;
 	 * 	append({
@@ -2068,11 +2100,17 @@ class Reader {
 	 * 		onCommand(){ reader._iframeWindow.alert('Selected annotations: ' + params.ids.join(', ')); }
 	 * 	});
 	 * });
+	 * ```
 	 */
 	registerEventListener(type, handler, pluginID = undefined) {
 		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
+	/**
+	 * @param {ReaderEventType} type - Event type
+	 * @param {ReaderEventHandler} handler - Event handler
+	 * @returns {void}
+	 */
 	unregisterEventListener(type, handler) {
 		this._registeredListeners = this._registeredListeners.filter(x => x.type === type && x.handler === handler);
 	}
@@ -2408,5 +2446,15 @@ class Reader {
 	}
 }
 
+
+/**
+ * @namespace Zotero
+ */
+
+
+/**
+ * @memberof Zotero
+ * @type {Reader}
+ */
 Zotero.Reader = new Reader();
 Zotero.addShutdownListener(() => Zotero.Reader.flushAllReaderStates());
