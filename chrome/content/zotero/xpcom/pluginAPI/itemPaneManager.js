@@ -29,6 +29,11 @@
 
 
 	/**
+	 * @namespace Zotero
+	 */
+
+
+	/**
 	 * @typedef {Object} SectionIcon
 	 * @property {string} icon - Icon URI.
 	 * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`.
@@ -436,13 +441,12 @@
 
 
 	/**
-	 * @class
-	 * @classdesc Item pane API manager.
+	 * @memberof Zotero
 	 */
-	class ItemPaneManager {
-		_sectionManager = new ItemPaneSectionManagerInternal();
+	Zotero.ItemPaneManager = {
+		_sectionManager: new ItemPaneSectionManagerInternal(),
 
-		_infoRowManager = new ItemPaneInfoRowManagerInternal();
+		_infoRowManager: new ItemPaneInfoRowManagerInternal(),
 
 		/**
 		 * Register a custom item pane section.
@@ -494,7 +498,7 @@
 		 */
 		registerSection(options) {
 			return this._sectionManager.register(options);
-		}
+		},
 
 		/**
 		 * Unregister a custom item pane section.
@@ -503,11 +507,11 @@
 		 */
 		unregisterSection(paneID) {
 			return this._sectionManager.unregister(paneID);
-		}
+		},
 
 		get customSectionData() {
 			return this._sectionManager.data;
-		}
+		},
 
 		isSectionOrderable(paneID) {
 			let option = this._sectionManager._optionsCache[paneID];
@@ -549,7 +553,7 @@
 		 */
 		registerInfoRow(options) {
 			return this._infoRowManager.register(options);
-		}
+		},
 
 		/**
 		 * Unregister a custom item pane info section row.
@@ -558,7 +562,7 @@
 		 */
 		unregisterInfoRow(rowID) {
 			return this._infoRowManager.unregister(rowID);
-		}
+		},
 
 		/**
 		 * Refresh a custom item pane info section row.
@@ -567,11 +571,11 @@
 		 */
 		refreshInfoRow(rowID) {
 			return this._infoRowManager.refresh(rowID);
-		}
+		},
 
 		get customInfoRowData() {
 			return this._infoRowManager.data;
-		}
+		},
 
 		getInfoRowHook(rowID, type) {
 			let option = this._infoRowManager._optionsCache[rowID];
@@ -579,13 +583,6 @@
 				return undefined;
 			}
 			return option[type];
-		}
-	}
-
-
-	/**
-	 * @memberof Zotero
-	 * @type {ItemPaneManager}
-	 */
-	Zotero.ItemPaneManager = new ItemPaneManager();
+		},
+	};
 }

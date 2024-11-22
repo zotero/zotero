@@ -32,6 +32,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 	/**
+	 * @namespace Zotero
+	 */
+
+
+	/**
 	 * @typedef {function} ItemTreeColumnDataProvider
 	 * @param {Zotero.Item} item - The item to get data from
 	 * @param {string} dataKey - The dataKey of the column
@@ -174,11 +179,10 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 	/**
-	 * @class
-	 * @classdesc Item tree API manager
+	 * @memberof Zotero
 	 */
-	class ItemTreeManager {
-		_columnManager = new ItemTreeColumnManagerInternal();
+	Zotero.ItemTreeManager = {
+		_columnManager: new ItemTreeColumnManagerInternal(),
 
 		/**
 		 * Register a custom column, must be valid with a unique dataKey.
@@ -212,7 +216,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 */
 		registerColumn(option) {
 			return this._columnManager.register(option);
-		}
+		},
 
 		/**
 		 * @deprecated Use `registerColumn` instead.
@@ -222,7 +226,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				options = [options];
 			}
 			return options.map(option => this.registerColumn(option));
-		}
+		},
 
 		/**
 		 * Unregister a custom column.
@@ -231,7 +235,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 */
 		unregisterColumn(dataKey) {
 			return this._columnManager.unregister(dataKey);
-		}
+		},
 
 		/**
 		 * @deprecated Use `unregisterColumn` instead.
@@ -241,11 +245,19 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				dataKeys = [dataKeys];
 			}
 			return dataKeys.map(dataKey => this.unregisterColumn(dataKey));
-		}
+		},
+
+		/**
+		 * Refresh the columns in the item tree
+		 * @returns {void}
+		 */
+		refreshColumns() {
+			this._columnManager.refresh();
+		},
 
 		get customColumnUpdateID() {
 			return this._columnManager.updateID;
-		}
+		},
 
 		getCustomColumns(filterTreeIDs, options) {
 			const allColumns = this._columnManager.options;
@@ -279,11 +291,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				});
 			}
 			return filteredColumns;
-		}
+		},
 
 		isCustomColumn(dataKey) {
 			return !!this._columnManager._optionsCache[dataKey];
-		}
+		},
 
 		getCustomCellData(item, dataKey) {
 			const option = this._columnManager._optionsCache[dataKey];
@@ -291,21 +303,6 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				return option.dataProvider(item, dataKey);
 			}
 			return "";
-		}
-
-		/**
-		 * Refresh the columns in the item tree
-		 * @returns {void}
-		 */
-		refreshColumns() {
-			this._columnManager.refresh();
-		}
-	}
-
-
-	/**
-	 * @memberof Zotero
-	 * @type {ItemTreeManager}
-	 */
-	Zotero.ItemTreeManager = new ItemTreeManager();
+		},
+	};
 }
