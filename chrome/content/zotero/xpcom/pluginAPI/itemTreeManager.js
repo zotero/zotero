@@ -179,6 +179,8 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 	/**
+	 * Manages item tree APIs.
+	 *
 	 * @memberof Zotero
 	 */
 	Zotero.ItemTreeManager = {

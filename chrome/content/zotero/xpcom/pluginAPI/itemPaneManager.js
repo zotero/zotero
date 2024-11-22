@@ -441,6 +441,8 @@
 
 
 	/**
+	 * Manages item pane APIs.
+	 *
 	 * @memberof Zotero
 	 */
 	Zotero.ItemPaneManager = {
