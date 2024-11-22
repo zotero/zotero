@@ -2051,6 +2051,10 @@ class ReaderPreview extends ReaderInstance {
 }
 
 
+/**
+ * @class
+ * @classdesc Reader class for managing reader tabs and windows
+ */
 class Reader {
 	constructor() {
 		this._sidebarWidth = 240;
@@ -2114,10 +2118,12 @@ class Reader {
 	 *
 	 * @example
 	 * Inject DOM nodes to reader UI parts:
+	 *
 	 * - renderTextSelectionPopup
 	 * - renderSidebarAnnotationHeader
 	 * - renderToolbar
 	 *
+	 * ```javascript
 	 * Zotero.Reader.registerEventListener('renderTextSelectionPopup', (event) => {
 	 * 	let { reader, doc, params, append } = event;
 	 * 	let container = doc.createElement('div');
@@ -2129,12 +2135,14 @@ class Reader {
 	 *
 	 * @example
 	 * Add options to context menus:
+	 *
 	 * - createColorContextMenu
 	 * - createViewContextMenu
 	 * - createAnnotationContextMenu
 	 * - createThumbnailContextMenu
 	 * - createSelectorContextMenu
 	 *
+	 * ```javascript
 	 * Zotero.Reader.registerEventListener('createAnnotationContextMenu', (event) => {
 	 * 	let { reader, params, append } = event;
 	 * 	append({
@@ -2148,6 +2156,11 @@ class Reader {
 		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
+	/**
+	 * @param {ReaderEventType} type - Event type
+	 * @param {ReaderEventHandler} handler - Event handler
+	 * @returns {void}
+	 */
 	unregisterEventListener(type, handler) {
 		this._registeredListeners = this._registeredListeners.filter(x => x.type === type && x.handler === handler);
 	}
@@ -2431,5 +2444,15 @@ class Reader {
 	}
 }
 
+
+/**
+ * @namespace Zotero
+ */
+
+
+/**
+ * @memberof Zotero
+ * @type {Reader}
+ */
 Zotero.Reader = new Reader();
 Zotero.addShutdownListener(() => Zotero.Reader.flushAllReaderStates());
