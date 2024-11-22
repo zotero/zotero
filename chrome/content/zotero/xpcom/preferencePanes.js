@@ -118,7 +118,19 @@ Zotero.PreferencePanes = {
 	 * 		relative to the plugin's root
 	 * @param {String} [options.helpURL] If provided, a help button will be displayed under the pane
 	 * 		and the provided URL will open when it is clicked
-	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
+	 * @return {Promise<string>} Resolves to the ID of the pane if successfully added
+	 *
+	 * @example
+	 * Register a pane with a script and stylesheet:
+	 * ```javascript
+	 * Zotero.PreferencePanes.register({
+	 * 	pluginID: 'my-plugin@my-namespace.com',
+	 * 	src: rootURI + 'my-pane.xhtml',
+	 * 	id: 'my-plugin-pane',
+	 * 	scripts: [rootURI + 'my-pane.js'],
+	 * 	stylesheets: [rootURI + 'my-pane.css']
+	 * });
+	 * ```
 	 */
 	register: async function (options) {
 		if (!options.pluginID || !options.src) {
