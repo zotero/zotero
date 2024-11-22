@@ -202,14 +202,16 @@
 		};
 
 		// ArrowUp/Down navigation between notes
-		// Tab from a note-row focuses sidenav, Shift-Tab from a note focuses the section header
+		// Tab from a note-row focuses sidenav, Shift-Tab from a note focuses the twisty of the section header
 		// Tab from twisty icon into the notes list will try to refocus the last focused note
 		_handleKeyDown = (event) => {
-			if (event.key == "Tab" && event.target.classList.contains("twisty")) {
+			if (event.key == "Tab" && !event.shiftKey && event.target.classList.contains("twisty")) {
 				let section = event.target.closest("collapsible-section");
 				if (this._lastFocusedNote && section.contains(this._lastFocusedNote)) {
-					this.refocusLastFocusedNote();
-					event.preventDefault();
+					let refocused = this.refocusLastFocusedNote();
+					if (refocused) {
+						event.preventDefault();
+					}
 				}
 			}
 			if (event.target.tagName !== "note-row" && !event.target.classList.contains("more")) return;
@@ -225,8 +227,7 @@
 				event.preventDefault();
 			}
 			else if (event.key == "Tab" && event.shiftKey) {
-				Services.focus.moveFocus(window, event.target.closest("collapsible-section"),
-					Services.focus.MOVEFOCUS_FORWARD, 0);
+				event.target.closest("collapsible-section").querySelector(".twisty").focus();
 				event.preventDefault();
 			}
 		};
