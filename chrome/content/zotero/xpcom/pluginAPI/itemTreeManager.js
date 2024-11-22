@@ -215,6 +215,63 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 * @param {ItemTreeColumnRenderCell} [option.renderCell] - The cell renderer function
 		 * @param {string[]} [option.zoteroPersist] - Which column properties should be persisted between zotero close
 		 * @returns {string | false} - The dataKey of the added column or false if no column is added
+		 *
+		 * @example
+		 * A minimal custom column:
+		 * ```js
+		 * // You can unregister the column later with Zotero.ItemTreeManager.unregisterColumn(registeredDataKey);
+		 * const registeredDataKey = Zotero.ItemTreeManager.registerColumn(
+		 * {
+		 *     dataKey: 'rtitle',
+		 *     label: 'Reversed Title',
+		 *     pluginID: 'my-plugin@my-namespace.com', // Replace with your plugin ID
+		 *     dataProvider: (item, dataKey) => {
+		 *         return item.getField('title').split('').reverse().join('');
+		 *     },
+		 * });
+		 * ```
+		 * @example
+		 * A custom column using all available options.
+		 * Note that the column will only be shown in the main item tree.
+		 * ```js
+		 * const registeredDataKey = Zotero.ItemTreeManager.registerColumn(
+		 * {
+		 *     dataKey: 'rtitle',
+		 *     label: 'Reversed Title',
+		 *     enabledTreeIDs: ['main'], // only show in the main item tree
+		 *     sortReverse: true, // sort by increasing order
+		 *     flex: 0, // don't take up all available space
+		 *     width: 100, // assign fixed width in pixels
+		 *     fixedWidth: true, // don't allow user to resize
+		 *     staticWidth: true, // don't allow column to be resized when the tree is resized
+		 *     minWidth: 50, // minimum width in pixels
+		 *     iconPath: 'chrome://zotero/skin/tick.png', // icon to show in the column header
+		 *     htmlLabel: '<span style="color: red;">reversed title</span>', // use HTML in the label. This will override the label and iconPath property
+		 *     showInColumnPicker: true, // show in the column picker
+		 *     columnPickerSubMenu: true, // show in the column picker submenu
+		 *     pluginID: 'my-plugin@my-namespace.com', // plugin ID
+		 *     dataProvider: (item, dataKey) => {
+		 *         // item: the current item in the row
+		 *         // dataKey: the dataKey of the column
+		 *         // return: the data to display in the column
+		 *         return item.getField('title').split('').reverse().join('');
+		 *     },
+		 *     renderCell: (index, data, column, isFirstColumn, doc) => {
+		 *         // index: the index of the row
+		 *         // data: the data to display in the column, return of `dataProvider`
+		 *         // column: the column options
+		 *         // isFirstColumn: true if this is the first column
+		 *         // doc: the document of the item tree
+		 *         // return: the HTML to display in the cell
+		 *         const cell = doc.createElement('span');
+		 *         cell.className = `cell ${column.className}`;
+		 *         cell.textContent = data;
+		 *         cell.style.color = 'red';
+		 *         return cell;
+		 *     },
+		 *     zoteroPersist: ['width', 'hidden', 'sortDirection'], // persist the column properties
+		 * });
+		 * ```
 		 */
 		registerColumn(option) {
 			return this._columnManager.register(option);

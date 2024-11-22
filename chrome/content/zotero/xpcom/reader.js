@@ -2069,6 +2069,7 @@ class Reader {
 	 * @param {string} [pluginID] - Plugin ID
 	 * @returns {void}
 	 *
+	 * @example
 	 * Inject DOM nodes to reader UI parts:
 	 * - renderTextSelectionPopup
 	 * - renderSidebarAnnotationHeader
@@ -2081,10 +2082,10 @@ class Reader {
 	 * 	container.append('Loading…');
 	 * 	append(container);
 	 * 	setTimeout(() => container.replaceChildren('Translated text: ' + params.annotation.text), 1000);
-	 * });
+	 * }, 'my-plugin@my-namespace.com');
 	 * ```
 	 *
-	 *
+	 * @example
 	 * Add options to context menus:
 	 * - createColorContextMenu
 	 * - createViewContextMenu
@@ -2099,7 +2100,7 @@ class Reader {
 	 * 		label: 'Test',
 	 * 		onCommand(){ reader._iframeWindow.alert('Selected annotations: ' + params.ids.join(', ')); }
 	 * 	});
-	 * });
+	 * }, 'my-plugin@my-namespace.com');
 	 * ```
 	 */
 	registerEventListener(type, handler, pluginID = undefined) {
