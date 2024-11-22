@@ -4566,7 +4566,7 @@ Zotero.Item.prototype.canAddToTargetAsync = async function (target, options = {}
 		Zotero.debug(message);
 	};
 	// Check for sync conditions first
-	if (!this.canAddToTarget(target)) return false;
+	if (!this.canAddToTarget(target, options)) return false;
 
 	if (target instanceof Zotero.CollectionTreeRow) {
 		target = target.ref;
