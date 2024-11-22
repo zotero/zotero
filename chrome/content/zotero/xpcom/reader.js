@@ -2071,6 +2071,7 @@ class Reader {
 	 *
 	 * @example
 	 * Inject DOM nodes to reader UI parts:
+	 *
 	 * - renderTextSelectionPopup
 	 * - renderSidebarAnnotationHeader
 	 * - renderToolbar
@@ -2087,6 +2088,7 @@ class Reader {
 	 *
 	 * @example
 	 * Add options to context menus:
+	 *
 	 * - createColorContextMenu
 	 * - createViewContextMenu
 	 * - createAnnotationContextMenu
