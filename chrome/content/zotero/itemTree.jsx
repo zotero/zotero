@@ -705,6 +705,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 							sort = id;
 						}
 					}
+					// If a trashed child item is restored while its parent's row is expanded,
+					// collapse and re-open the parent to have that child item row added.
+					else {
+						let parentItemRowIndex = this.getRowIndexByID(item.parentItemID);
+						if (parentItemRowIndex === false) continue;
+						if (this.isContainerOpen(parentItemRowIndex)) {
+							this.toggleOpenState(parentItemRowIndex, true);
+							await this.toggleOpenState(parentItemRowIndex);
+						}
+					}
 				}
 
 				if (sort && ids.length != 1) {
