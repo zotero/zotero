@@ -543,6 +543,7 @@
 		 * 		// Section button will appear in the header
 		 * 	],
 		 * });
+		 * ```
 		 */
 		registerSection(options) {
 			return this._sectionManager.register(options);
@@ -622,6 +623,7 @@
 		 * 		setEnabled(tabType === 'library');
 		 * 	},
 		 * });
+		 * ```
 		 */
 		registerInfoRow(options) {
 			return this._infoRowManager.register(options);

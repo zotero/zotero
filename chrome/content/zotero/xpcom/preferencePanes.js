@@ -138,6 +138,7 @@ Zotero.PreferencePanes = {
 	 * 	scripts: [rootURI + 'my-pane.js'],
 	 * 	stylesheets: [rootURI + 'my-pane.css']
 	 * });
+	 * ```
 	 */
 	register: async function (options) {
 		if (!options.pluginID || !options.src) {

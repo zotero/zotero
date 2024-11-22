@@ -218,7 +218,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 *
 		 * @example
 		 * A minimal custom column:
-		 * ```js
+		 * ```javascript
 		 * // You can unregister the column later with Zotero.ItemTreeManager.unregisterColumn(registeredDataKey);
 		 * const registeredDataKey = Zotero.ItemTreeManager.registerColumn(
 		 * {
@@ -233,7 +233,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 * @example
 		 * A custom column using all available options.
 		 * Note that the column will only be shown in the main item tree.
-		 * ```js
+		 * ```javascript
 		 * const registeredDataKey = Zotero.ItemTreeManager.registerColumn(
 		 * {
 		 *     dataKey: 'rtitle',
