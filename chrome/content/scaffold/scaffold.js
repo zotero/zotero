@@ -583,12 +583,12 @@ var Scaffold = new function () {
 		};
 	};
 
-	this.updateModelMarkers = async function () {
+	this.updateModelMarkers = Zotero.Utilities.debounce(async function () {
 		let modelVersionId = _editors.code.getModel().getVersionId();
 		let output = await runESLint();
 		let markers = eslintOutputToModelMarkers(output, modelVersionId);
 		_editors.codeGlobal.editor.setModelMarkers(_editors.code.getModel(), 'eslint', markers);
-	};
+	}, 200);
 
 	this.setFontSize = function (size) {
 		var sizeWithPX = size + 'px';
@@ -2311,6 +2311,7 @@ var Scaffold = new function () {
 		return eslintPath;
 	}
 
+	let eslintSubprocess = null;
 	async function runESLint() {
 		let eslintPath = await getESLintPath();
 		if (!eslintPath) return [];
@@ -2341,6 +2342,10 @@ var Scaffold = new function () {
 			}
 			
 			let proc = await Subprocess.call(subprocessOptions);
+			if (eslintSubprocess) {
+				eslintSubprocess.kill(0);
+			}
+			eslintSubprocess = proc;
 			
 			await proc.stdin.write(translatorString);
 			await proc.stdin.close();
