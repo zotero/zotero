@@ -81,7 +81,7 @@ class PageDataChild extends JSWindowActorChild {
 		const document = this.document;
 		
 		function readyEnough() {
-			return document.readyState === "complete";
+			return document.readyState === "complete" || document.readyState === "interactive";
 		}
 		
 		if (readyEnough()) {
