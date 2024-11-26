@@ -152,10 +152,7 @@
 
 		focus() {
 			if (this.mode == "notesList") {
-				let refocused = this.notesList.refocusLastFocusedNote();
-				if (!refocused) {
-					this.input.focus();
-				}
+				this.input.focus();
 				return true;
 			}
 			else {

@@ -392,7 +392,7 @@
 			if (event.key == "Tab" && event.shiftKey) {
 				event.preventDefault();
 				if (this._contextNotesPaneVisible && this._contextNotesPane.selectedPanel.mode == "notesList") {
-					let focusHandled = this._contextNotesPane.selectedPanel.focus();
+					let focusHandled = this._contextNotesPane.selectedPanel.notesList.refocusLastFocusedNote();
 					if (focusHandled) return;
 				}
 				// Shift-Tab out of sidenav to itemPane
