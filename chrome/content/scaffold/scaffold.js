@@ -959,10 +959,10 @@ var Scaffold = new function () {
 		var creatorList = Zotero.CreatorTypes.getTypesForItemType(typeID);
 		var creators = [];
 		for (let creatorType of creatorList) {
-			creators.push({ firstName: "", lastName: "", creatorType: creatorType.name, fieldMode: true });
+			creators.push({ firstName: "", lastName: "", creatorType: creatorType.name, fieldMode: 1 });
 		}
 		outputObject.creators = creators;
-		outputObject.attachments = [{ url: "", document: "", title: "", mimeType: "" }];
+		outputObject.attachments = [{ url: "", document: {}, title: "", mimeType: "", snapshot: false }];
 		outputObject.tags = [{ tag: "" }];
 		outputObject.notes = [{ note: "" }];
 		outputObject.seeAlso = [];
