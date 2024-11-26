@@ -102,7 +102,7 @@ var Scaffold = new function () {
 			}
 		});
 
-		document.getElementById('tabpanels').addEventListener('select', event => Scaffold.handleTabSelect(event));
+		document.getElementById('tabpanels').addEventListener('select', event => this.handleTabSelect(event));
 		document.getElementById('tabs').addEventListener('mousedown', (event) => {
 			// Record if tab selection will happen due to a mouse click vs keyboard nav.
 			if (event.clientX === 0 && event.clientY === 0) return;
@@ -877,27 +877,28 @@ var Scaffold = new function () {
 			return;
 		}
 
-		var tab = document.getElementById('tabs').selectedItem.id.match(/^tab-(.+)$/)[1];
-		let tabPanel = document.getElementById("left-tabbox").selectedPanel;
+		var tabs = document.getElementById('tabs');
+		var tab = tabs.selectedItem.id.match(/^tab-(.+)$/)[1];
+		let tabPanel = tabs.tabbox.selectedPanel;
 		// The select event's default behavior is to focus the selected tab.
 		// we don't want to prevent *all* of the event's default behavior,
 		// but we do want to focus an element inside of tabpanel instead of the tab
 		// (unless tabs are being navigated via keyboard)
 		// so this stupid hack focuses the desired element after skipping a tick
-		if (document.getElementById('tabs').getAttribute("clicked")) {
+		if (tabs.hasAttribute('clicked')) {
 			setTimeout(() => {
-				let toFocus = tabPanel.querySelector("[focus-on-tab-select]");
+				let toFocus = tabPanel.querySelector('[focus-on-tab-select]');
 				if (toFocus) {
 					toFocus.focus();
-					// activate editor that is being focused, if any
-					if (toFocus.src.includes("monaco.html")) {
+					// Activate editor that is being focused, if any
+					if (toFocus.id.startsWith('editor-')) {
 						_editors[tab].focus();
 					}
 				}
 				else {
-					// if no specific element set, just tab into the panel
+					// If no specific element set, just tab into the panel
 					setTimeout(() => {
-						Services.focus.moveFocus(window, document.getElementById('tabs').selectedItem, Services.focus.MOVEFOCUS_FORWARD, 0);
+						Services.focus.moveFocus(window, tabs.selectedItem, Services.focus.MOVEFOCUS_FORWARD, 0);
 					});
 				}
 			});
