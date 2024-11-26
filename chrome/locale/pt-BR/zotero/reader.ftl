@@ -3,11 +3,11 @@ pdfReader-highlightText = Realçar texto
 pdfReader-addText = Adicionar texto
 pdfReader-selectArea = Selecionar área
 pdfReader-draw = Desenhar forma livre
-pdfReader-highlightAnnotation = Highlight annotation
-pdfReader-underlineAnnotation = Underline annotation
-pdfReader-noteAnnotation = Note Annotation
-pdfReader-textAnnotation = Text Annotation
-pdfReader-imageAnnotation = Image Annotation
+pdfReader-highlightAnnotation = Destacar anotação
+pdfReader-underlineAnnotation = Sublinhar anotação
+pdfReader-noteAnnotation = Anotar Anotação
+pdfReader-textAnnotation = Anotação em Texto
+pdfReader-imageAnnotation = Anotação de Imagem
 pdfReader-find-in-document = Procure no Documento
 pdfReader-move-annotation-start-key =
     { PLATFORM() ->

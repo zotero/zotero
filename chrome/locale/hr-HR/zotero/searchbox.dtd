@@ -1,25 +1,25 @@
-<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.name "Ime:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Traži u biblioteci:">
 
-<!ENTITY zotero.search.joinMode.prefix "Match">
-<!ENTITY zotero.search.joinMode.any "any">
-<!ENTITY zotero.search.joinMode.all "all">
-<!ENTITY zotero.search.joinMode.suffix "of the following:">
+<!ENTITY zotero.search.joinMode.prefix "Podudaranje">
+<!ENTITY zotero.search.joinMode.any "bilo koji">
+<!ENTITY zotero.search.joinMode.all "svi">
+<!ENTITY zotero.search.joinMode.suffix "od sljedećeg:">
 
-<!ENTITY zotero.search.recursive.label "Search subcollections">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.recursive.label "Pretraživanje podzbirki">
+<!ENTITY zotero.search.noChildren "Prikaži samo stavke najviše razine">
+<!ENTITY zotero.search.includeParentsAndChildren "Uključi roditeljske i podređene stavke podudarnih stavki">
 
-<!ENTITY zotero.search.textModes.phrase "Phrase">
-<!ENTITY zotero.search.textModes.phraseBinary "Phrase (incl. binary files)">
+<!ENTITY zotero.search.textModes.phrase "Fraza">
+<!ENTITY zotero.search.textModes.phraseBinary "Fraza (uključujući binarne datoteke)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (velika i mala slova)">
 
-<!ENTITY zotero.search.date.units.days "days">
-<!ENTITY zotero.search.date.units.months "months">
-<!ENTITY zotero.search.date.units.years "years">
+<!ENTITY zotero.search.date.units.days "dani">
+<!ENTITY zotero.search.date.units.months "mjeseci">
+<!ENTITY zotero.search.date.units.years "godine">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Pretraživanje">
+<!ENTITY zotero.search.clear "Očisti">
+<!ENTITY zotero.search.saveSearch "Spremi pretraživanje">

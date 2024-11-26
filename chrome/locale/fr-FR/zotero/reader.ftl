@@ -48,12 +48,12 @@ pdfReader-import-from-epub =
     .label = Importer les annotations du livre numérique…
 pdfReader-import-from-epub-prompt-title = Importer les annotations du livre numérique
 pdfReader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } a trouvé { $count ->
+        [1] { $count } annotation de { $tool }
+       *[other] { $count } annotations de { $tool }
+    }, dernière édition { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Toutes les annotations { -app-name } précédemment importées de ce livre numérique seront mises à jour.
 pdfReader-import-from-epub-no-annotations-current-file =
     Ce livre numérique ne semble pas contenir d'annotations importables.
     

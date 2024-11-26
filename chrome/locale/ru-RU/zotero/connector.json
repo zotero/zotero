@@ -41,14 +41,41 @@
   "general_copyToClipboard": {
     "message": "Скопировать в буфер обмена"
   },
+  "itemType_pdf": {
+    "message": "PDF вложение"
+  },
+  "itemType_epub": {
+    "message": "EPUB вложение"
+  },
+  "itemType_snapshot": {
+    "message": "Снимок"
+  },
   "itemType_note": {
     "message": "Заметка"
+  },
+  "itemType_link": {
+    "message": "Web-ссылка"
   },
   "itemType_attachment": {
     "message": "Вложение"
   },
   "progressWindow_savingTo": {
     "message": "Сохранение в"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Показать подробности"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Скрыть подробности"
+  },
+  "progressWindow_savingItems": {
+    "message": "Сохранение $1 записей. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Сохранение записи $1"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Сохранен $1"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Теги (через запятую)"
