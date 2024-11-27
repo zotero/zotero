@@ -971,6 +971,19 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	
 	let lastCondition;
 	let conditionsToProcess = Object.values(this._conditions);
+	
+	// If there is a "joinMode" condition, make sure it goes first, since subsequent
+	// conditions may rely on it.
+	// If there is no explicit "joinMode" condition, default to "ALL"
+	var joinMode;
+	let joinModeIndex = conditionsToProcess.findIndex(cond => cond.condition == "joinMode");
+	if (joinModeIndex > 0) {
+		let [joinModeCondition] = conditionsToProcess.splice(joinModeIndex, 1);
+		conditionsToProcess.unshift(joinModeCondition);
+	}
+	else {
+		joinMode = "ALL";
+	}
 	for (let condition of conditionsToProcess) {
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
@@ -1059,7 +1072,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				
 				// Join mode ('any' or 'all')
 				case 'joinMode':
-					var joinMode = condition.operator.toUpperCase();
+					joinMode = condition.operator.toUpperCase();
 					continue;
 				
 				case 'fulltextContent':

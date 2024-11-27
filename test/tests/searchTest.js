@@ -558,6 +558,28 @@ describe("Zotero.Search", function() {
 					var matches = await s.search();
 					assert.sameMembers(matches, [itemOne.id, itemTwo.id]);
 				});
+				it("should return matches for a single 'any field' condition", async function () {
+					var itemOne = await createDataObject('item', { title: "five" });
+					var itemTwo = await createDataObject('item');
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('anyField', 'contains', itemOne.getDisplayTitle());
+					var matches = await s.search();
+					assert.sameMembers(matches, [itemOne.id]);
+				});
+				it("should return matches for two 'any field' condition with joinMode=all", async function () {
+					var itemOne = await createDataObject('item', { title: "six-seven" });
+					var itemTwo = await createDataObject('item', { title: "seven-six" });
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('anyField', 'contains', "six");
+					s.addCondition('anyField', 'contains', "seven");
+					s.addCondition('joinMode', 'all');
+					var matches = await s.search();
+					assert.sameMembers(matches, [itemOne.id, itemTwo.id]);
+				});
 			});
 			
 			describe("savedSearch", function () {
