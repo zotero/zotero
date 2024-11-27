@@ -1,7 +1,299 @@
 #citation-dialog {
 	min-width: 800px;
+	height: 100%;
+	-moz-window-dragging: drag;
+
+	body {
+		height: inherit;
+		margin: 0;
+		color: var(--fill-primary);
+		background: var(--material-background);
+	}
+
+	[hidden] {
+		display: none !important;
+	}
 	
 	.layout {
 		display: contents;
+	}
+
+	#search-row {
+		margin: 5px 10px 5px 0;
+		-moz-window-dragging: no-drag;
+
+		#z-icon-container {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 36px; // same as left margin on .library-other-items
+
+			#z-icon {
+				background-image: url(chrome://zotero/skin/z.svg);
+				width: 16px;
+				height: 16px;
+				pointer-events: all;
+			}
+		}
+
+		#loading-spinner {
+			width: 28px;
+			height: 28px;
+			background-size: 60%;
+			background-repeat: no-repeat;
+			margin-inline: 6px;
+			display: inline-block;
+			visibility: hidden;
+			&[status="animate"] {
+				visibility: visible;
+			}
+		}
+
+		.icon {
+			@include focus-ring;
+			border: none;
+			width: 28px;
+			height: 28px;
+			max-height: 28px;
+			padding: 0;
+			color: var(--fill-secondary);
+			background-size: 60% !important;
+			border-radius: 5px;
+			&:hover:not([disabled]) {
+				background-color: var(--fill-quinary) !important;
+			}
+			&:active:not([disabled]) {
+				background-color: var(--fill-quarternary) !important;
+			}
+		}
+		#mode-button {
+			&[mode="library"] {
+				@include svgicon("dialog-search-library", "universal", "16");
+			}
+			&[mode="list"] {
+				@include svgicon("dialog-search-list", "universal", "16");
+			}
+			margin-inline-end: 12px;
+		}
+		#settings-button {
+			@include svgicon("dialog-options", "universal", "16");
+		}
+	}
+
+	.divider {
+		border-bottom: 1px solid var(--color-panedivider);
+		margin: 0;
+	}
+
+	#library-layout {
+		#library-other-items {
+
+			margin-left: 36px;
+			border-top: 1px solid var(--fill-quinary);
+			padding-top: 8px;
+			margin-inline-end: 10px;
+			overflow-x: scroll;
+
+			.section {
+				.header {
+					color: var(--fill-secondary);
+				}
+		
+				.itemsContainer {
+					flex-direction: row;
+					display: flex;
+		
+					.item {
+						@include focus-ring;
+						height: 42px;
+						flex-shrink: 0;
+						width: 210px;
+						overflow: hidden;
+						white-space: nowrap;
+						margin: 4px 10px 10px 10px;
+						&:first-child {
+							margin-left: 0;
+						}
+						border: 1px solid var(--fill-quarternary);
+						border-radius: 5px;
+						-moz-window-dragging: no-drag;
+		
+						display: flex;
+						flex-direction: column;
+						justify-content: center;
+		
+						cursor: default;
+						padding: 0 4px;
+						line-height: 18px;
+						-moz-user-select: none;
+	
+						&:hover {
+							background-color: var(--fill-quarternary);
+						}
+		
+						.title {
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+		
+						.description {
+							color: var(--fill-secondary);
+							font-size: 12px;
+							line-height: 16px;
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+					}
+				}
+			}
+		}
+		#library-trees {
+			min-height: 0;
+			flex: 1;
+			-moz-window-dragging: no-drag;
+	
+			#collections-tree-container {
+				min-width: 200px;
+				min-height: 100%;
+				border-inline-end: var(--material-panedivider);
+				& > #zotero-collections-tree {
+					background: var(--material-sidepane) !important;
+				}
+			}
+		
+			#item-tree-container {
+				min-height: 100%;
+				flex: 1; /* expand all the way to the right */
+			}
+		}
+	}
+
+	#list-layout {
+		#list-layout-wrapper {
+			-moz-user-select: none;
+			overflow-y: scroll;
+			margin: 0 8px 8px 8px;
+			.section {
+				border-bottom: 1px solid var(--fill-quinary);
+	
+				.header {
+					font-weight: 700;
+					font-size: 13px;
+					color: var(--fill-secondary);
+					margin-inline-start: 8px;
+					padding: 4px 8px;
+				}
+				.item {
+					@include focus-ring;
+					padding: 4px 8px;
+					margin-inline-start: 8px;
+
+					border-radius: 5px;
+					color: var(--fill-primary);
+					-moz-window-dragging: no-drag;
+					cursor: default;
+					&:hover {
+						background-color: var(--fill-quarternary);
+					}
+
+					.icon {
+						margin-top: 1px;
+						margin-inline-end: 4px;
+					}
+					.description {
+						// Needed to have empty item row description to still occupy height
+						white-space: pre;
+					}
+					&.selected {
+						background: var(--accent-blue30);
+					}
+				}
+			}
+		}
+	}
+
+	#popups {
+		panel {
+			padding: 0;
+			.popup {
+				padding: 15px;
+
+			}
+		}
+		.overlay {
+			position: absolute;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+		#settings-popup {
+			top: 35px;
+			right: 5px;
+			width: 200px;
+
+			.title {
+				font-size: 13px;
+				font-weight: 700;
+				padding-bottom: 8px;
+			}
+		}
+		#itemDetails {
+			.popup {
+				width: 400px;
+
+				.details-header {
+					.icon {
+						margin-inline-end: 5px;
+						margin-top: 2px;
+						flex-shrink: 0;
+					}
+				}
+				.details {
+					display: grid;
+					align-items: center;
+					grid-template-columns: max-content 1fr;
+					.details-label {
+						margin-top: auto;
+						margin-bottom: auto;
+						width: min-content;
+						margin-inline-start: auto;
+					}
+				}
+				button.done {
+					float: right;
+					margin-right: 5px;
+					color: white;
+				}
+				button.remove {
+					color: var(--accent-red);
+				}
+			}
+		}
+	}
+
+	.description {
+		color: var(--fill-secondary);
+		font-size: 12px;
+		// add comma between description <span>s
+		span:not(:last-child):not([no-comma])::after {
+			content: ", ";
+		}
+		&.expand-selected {
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.pre-selected-item {
+		border: 1px dotted var(--accent-orange) !important;
+	}
+
+	.aria-hidden {
+		position: absolute;
+		top: -1000px;
+		left: -1000px;
+		visibility: hidden;
 	}
 }

@@ -351,6 +351,30 @@ integration-editBibliography-wrapper =
     { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+integration-citationDialog = Citation Dialog
+integration-citationDialog-section-open = Open Documents ({ $count })
+integration-citationDialog-section-selected = Selected Items ({ $count })
+integration-citationDialog-section-cited = Cited Items ({ $count })
+integration-citationDialog-details-suffix =  Suffix
+integration-citationDialog-details-prefix =  Prefix
+integration-citationDialog-details-suppressAuthor = Suppress Author
+integration-citationDialog-details-remove = { general-remove }
+integration-citationDialog-details-done = { general-done }
+integration-citationDialog-details-showInZotero = Show in Zotero
+integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-btn-settings =
+    .title = { general-open-settings }
+integration-citationDialog-btn-mode =
+    .title = Switch Mode
+integration-citationDialog-onlyInput = 
+    .placeholder = Type to search or add selected and open items
+integration-citationDialog-general-instructions = Use Left/Right Arrow to navigate the items of this citation.
+Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
+integration-citationDialog-aria-bubble = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
+integration-citationDialog-aria-input = Type to search for an item to include in this citation. { integration-citationDialog-general-instructions }
+integration-citationDialog-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
+integration-citationDialog-expand = Expand all
 
 styleEditor-locatorType =
     .aria-label = Locator type
