@@ -431,7 +431,7 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 		if (splitAt <= title.length) item.title += '...';
 	}
 	
-	let url = feedEntry.link?.href || feedEntry.url.plainText();
+	let url = feedEntry.link?.href || feedEntry.url?.plainText();
 	if (url) item.url = url;
 	
 	if (feedEntry.rights) item.rights = Zotero.FeedReader._getRichText(feedEntry.rights, 'rights');
