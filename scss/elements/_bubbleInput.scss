@@ -2,22 +2,13 @@ bubble-input {
 	min-width: 200px;
 	
 	.body {
-		cursor: text;
 		display: flex;
 		flex-flow: row wrap;
 		align-items: center;
-		//margin: 0;
-		font: -moz-field;
-		outline: none;
-		//line-height: 2em;
-		//width: 700px; /* initial editor width - adjusted after dom load */
 		min-height: 28px;
-		font-size: 13px;
-		background: white;
-		color: black;
 		width: 100%;
-		padding-inline: 6px;
-		
+		padding-inline-end: 6px;
+		// to get proper width by getContentWidth in bubbleInput.js
 		span {
 			white-space: pre;
 		}
@@ -27,43 +18,40 @@ bubble-input {
 		outline: none;
 		width: 2px;
 		border: none !important;
-		box-sizing: border-box;
-		height: 15px;
+		height: 22px; // bubble height
 		/* Keep the background and text color unchanged in dark mode */
 		background-color: transparent !important;
-		color: black;
-		//background-image: none !important;
 		padding: 0;
 		margin-inline: -1px;
+		&.full-width {
+			// Same top/bottom margin as for bubbles + 1px for borders
+			margin-top: 4px;
+			margin-bottom: 4px;
+			width: 100% !important;
+		}
 	}
 	
 	.bubble {
+		@include focus-ring;
 		--margin-horizontal: 2px;
-		border-radius: 8px;
-		background-color: #dee7f8;
-		border-style: solid;
-		border-width: 1px;
-		border-color: #a8c0ec;
-		padding: 0 4px;
-		margin: 0 var(--margin-horizontal);
+		height: 22px;
+		border-radius: 5px;
+		border: 1px solid var(--fill-quarternary);
+		padding: 0 8px;
+		margin: 3px var(--margin-horizontal);
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		white-space: nowrap;
-		line-height: normal;
-		color: #000;
 		-moz-user-select: none;
-		cursor: pointer;
-		height: 16px;
-		max-width: -moz-available;
 		position: relative;
 		
-		&:hover {
-			background-color: #bbcef1;
-			border-color: #6d95e0;
+		&:hover:not(.showingDetails) {
+			background-color: var(--fill-quarternary);
 			
 			.cross {
 				display: block;
+				z-index: 2;
 			}
 			
 			.text {
@@ -72,6 +60,10 @@ bubble-input {
 				overflow: hidden;
 				text-overflow: ellipsis;
 			}
+		}
+		&.showingDetails {
+			background-color: var(--fill-quarternary);
+			z-index: 2;
 		}
 		
 		&.drop-before::before, &.drop-after::after {
@@ -100,7 +92,7 @@ bubble-input {
 			display: none;
 			width: 16px;
 			height: 18px;
-			align-self: start;
+			align-self: center;
 		}
 	}
 }

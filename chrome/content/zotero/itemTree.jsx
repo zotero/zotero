@@ -107,7 +107,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
-		multiSelect: true
+		getExtraField: noop
 	};
 
 	static propTypes = {
@@ -124,7 +124,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: PropTypes.func,
 		onActivate: PropTypes.func,
 		emptyMessage: PropTypes.string,
-		multiSelect: PropTypes.bool,
+		getExtraField: PropTypes.func,
 	};
 	
 	constructor(props) {
@@ -3301,7 +3301,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let key = col.dataKey;
 			let val = row[key];
 			if (val === undefined) {
-				val = treeRow.getField(key);
+				let customRowValue = this.props.getExtraField(treeRow.ref, key);
+				if (customRowValue !== undefined) {
+					val = customRowValue;
+				}
+				else {
+					val = treeRow.getField(key);
+				}
 			}
 			
 			switch (key) {

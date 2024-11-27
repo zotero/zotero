@@ -279,6 +279,15 @@ $-trashableObjectIcons: (
 	"collection",
 	"search"
 );
+$-actionIcons: (
+	"plus-circle",
+	"minus-circle"
+);
+
+.icon-action {
+	width: 16px;
+	height: 16px;
+}
 
 .icon-item-type {
 	width: 16px;
@@ -334,6 +343,12 @@ $-trashableObjectIcons: (
 		@each $icon in $-trashableObjectIcons {
 			.icon-css.icon-#{$icon} {
 				@include svgicon($icon, $color, "16", "collection-tree");
+			}
+		}
+
+		@each $icon in $-actionIcons {
+			.icon-css.icon-#{$icon} {
+				@include svgicon($icon, "universal", "16");
 			}
 		}
 	}

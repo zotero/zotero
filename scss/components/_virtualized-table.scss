@@ -132,7 +132,7 @@
 			bottom: -1px;
 		}
 
-		&.selected:not(.highlighted) {
+		&.selected {
 			background-color: var(--color-accent);
 			color: var(--color-accent-text);
 
@@ -142,8 +142,8 @@
 			}
 		}
 
-		&.highlighted {
-			background: var(--accent-highlight);
+		&.highlighted:not(.selected) {
+			background: var(--highlight-color, var(--accent-highlight)) !important;
 		}
 
 		&.unread {
