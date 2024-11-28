@@ -547,18 +547,9 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 			yield this._buildQuery();
 		}
 		
-		// Default to 'all' mode
-		var joinMode = 'all';
-		
 		// Set some variables for conditions to avoid further lookups
 		for (let condition of Object.values(this._conditions)) {
 			switch (condition.condition) {
-				case 'joinMode':
-					if (condition.operator == 'any') {
-						joinMode = 'any';
-					}
-					break;
-				
 				case 'fulltextContent':
 					var fulltextContent = true;
 					break;
@@ -639,7 +630,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		
 		//Zotero.debug('IDs from main search or subsearch: ');
 		//Zotero.debug(ids);
-		//Zotero.debug('Join mode: ' + joinMode);
+		//Zotero.debug('Join mode: ' + this._joinMode);
 		
 		// Filter results with full-text search
 		//
@@ -653,7 +644,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		// If join mode ANY or there's a quicksearch and the main search isn't filtered, return just
 		// the union of (separate full-text word searches filtered by full-text content).
 		var fullTextResults;
-		var joinModeAny = joinMode == 'any' || hasQuicksearch;
+		var joinModeAny = this._joinMode == 'any' || hasQuicksearch;
 		for (let condition of Object.values(this._conditions)) {
 			if (condition.condition != 'fulltextContent') continue;
 			
@@ -971,6 +962,14 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	
 	let lastCondition;
 	let conditionsToProcess = Object.values(this._conditions);
+	
+	// Process joinMode first, since other conditions may depend on it
+	this._joinMode = 'all';
+	var joinModeIndex = conditionsToProcess.findIndex(cond => cond.condition == "joinMode");
+	if (joinModeIndex > -1) {
+		this._joinMode = conditionsToProcess.splice(joinModeIndex, 1)[0].operator;
+	}
+	
 	for (let condition of conditionsToProcess) {
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
@@ -1057,11 +1056,6 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					var recursive = condition.operator == 'true';
 					continue;
 				
-				// Join mode ('any' or 'all')
-				case 'joinMode':
-					var joinMode = condition.operator.toUpperCase();
-					continue;
-				
 				case 'fulltextContent':
 					// Handled in Search.search()
 					continue;
@@ -1079,7 +1073,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
 					// is expanded in addCondition(), but we can't do that with this condition because we don't want
 					// to save the conditions it expands to in the search object
-					if (joinMode == 'ALL') {
+					if (this._joinMode == 'all') {
 						// If joinMode is 'any', do not wrap conditions in quickSearch block so that
 						// they become just a series of OR statements. Otherwise, "Any Field" will
 						// conflict with all other conditions (if multiple conditions are present).
@@ -1109,7 +1103,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						value: condition.value,
 						required: false
 					});
-					if (joinMode == 'ALL') {
+					if (this._joinMode == 'all') {
 						conditionsToProcess.push({ condition: 'blockEnd' });
 					}
 					continue;
@@ -1789,7 +1783,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					qsParams = qsParams.concat(condSQLParams);
 				}
 				// Keep non-required conditions separate if in ANY mode
-				else if (!condition['required'] && joinMode == 'ANY') {
+				else if (!condition.required && this._joinMode == 'any') {
 					anySQL += condSQL + ' OR ';
 					anySQLParams = anySQLParams.concat(condSQLParams);
 				}
