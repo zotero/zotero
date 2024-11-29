@@ -68,7 +68,7 @@ jobs:
           env.ACT != 'true'
           && github.repository == 'zotero/zotero'
           && github.event_name == 'push'
-          && (github.ref == 'refs/heads/main' || endsWith(github.ref, '-hotfix'))
+          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fx128' || endsWith(github.ref, '-hotfix'))
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
