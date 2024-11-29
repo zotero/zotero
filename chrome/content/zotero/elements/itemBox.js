@@ -514,7 +514,13 @@
 
 			delete this._linkMenu.dataset.link;
 
-			this.renderCustomRows();
+			let rowIDs = Array.from(
+				this._infoTable.querySelectorAll(".meta-row[data-custom-row-id]"))
+				.map(
+					row => row.getAttribute("data-custom-row-id")
+				);
+			// Always update existing custom rows
+			this.renderCustomRows(rowIDs);
 
 			// No need to recreate custom rows every time
 			this.cacheCustomRowElements();

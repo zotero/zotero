@@ -387,6 +387,35 @@ describe("Plugin API", function () {
 
 			await waitForUnregister(rowID);
 		});
+
+		it("should render custom row value after item change", async function () {
+			// https://github.com/zotero/zotero/issues/4874
+
+			let item = new Zotero.Item('book');
+			await item.saveTx();
+			await ZoteroPane.selectItem(item.id);
+			
+			let rowID = await waitForRegister(defaultOption);
+
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let valueElem = rowElem.querySelector(".value");
+
+			let value = valueElem.value;
+			assert.equal(`${item.id}`, value);
+
+			initCache("onGetData");
+			let getDataPromise = getCache("onGetData");
+
+			let docItem = new Zotero.Item('document');
+			await docItem.saveTx();
+			await ZoteroPane.selectItem(docItem.id);
+			await getDataPromise;
+
+			value = valueElem.value;
+			assert.equal(`${docItem.id}`, value);
+
+			await waitForUnregister(rowID);
+		});
 	});
 
 	describe("Item tree custom column", function () {
