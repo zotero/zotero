@@ -32,7 +32,7 @@ Zotero.Cite = {
 		"section",
 		"sub-verbo",
 		"table",
-		//"timestamp",
+		"timestamp",
 		"title-locator",
 		"verse",
 		"volume"
