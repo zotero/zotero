@@ -56,8 +56,8 @@ cp x64/$fx_app_name/Contents/MacOS/firefox zotero
 xz zotero
 mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
 
-# TEMP: Copy a unified XUL for now
-cp x64/$fx_app_name/Contents/MacOS/XUL "$APP_ROOT_DIR/mac/XUL"
+# Save a copy of XUL
+#cp x64/$fx_app_name/Contents/MacOS/XUL "$APP_ROOT_DIR/mac/XUL"
 
 # Uncomment to build updater
 #cd x64/$fx_app_name/Contents/MacOS/
