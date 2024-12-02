@@ -1,0 +1,126 @@
+diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
+--- a/browser/app/nsBrowserApp.cpp
++++ b/browser/app/nsBrowserApp.cpp
+@@ -154,19 +154,31 @@ static bool IsArg(const char* arg, const
+ #endif
+ 
+   return false;
+ }
+ 
+ Bootstrap::UniquePtr gBootstrap;
+ 
+ static int do_main(int argc, char* argv[], char* envp[]) {
++  // Allow profile downgrade for Zotero
++  setenv("MOZ_ALLOW_DOWNGRADE", "1", 1);
++  // Don't create dedicated profile (default-esr)
++  setenv("MOZ_LEGACY_PROFILES", "1", 1);
++
+   // Allow firefox.exe to launch XULRunner apps via -app <application.ini>
+   // Note that -app must be the *first* argument.
+-  const char* appDataFile = getenv("XUL_APP_FILE");
++  UniqueFreePtr<char> iniPath = BinaryPath::GetApplicationIni();
++  if (!iniPath) {
++    Output("Couldn't find application.ini.\n");
++    return 255;
++  }
++  char *appDataFile = iniPath.get();
++
++
+   if ((!appDataFile || !*appDataFile) && (argc > 1 && IsArg(argv[1], "app"))) {
+     if (argc == 2) {
+       Output("Incorrect number of arguments passed to -app");
+       return 255;
+     }
+     appDataFile = argv[2];
+ 
+     char appEnv[MAXPATHLEN];
+diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
+--- a/xpcom/build/BinaryPath.h
++++ b/xpcom/build/BinaryPath.h
+@@ -128,16 +128,56 @@ class BinaryPath {
+     } else {
+       rv = NS_ERROR_FAILURE;
+     }
+ 
+     CFRelease(executableURL);
+     return rv;
+   }
+ 
++  static nsresult GetApplicationIni(char aResult[MAXPATHLEN])
++  {
++    // Works even if we're not bundled.
++    CFBundleRef appBundle = CFBundleGetMainBundle();
++    if (!appBundle) {
++      return NS_ERROR_FAILURE;
++    }
++
++    CFURLRef iniURL = CFBundleCopyResourceURL(appBundle, CFSTR("application.ini"),
++                                              NULL, CFSTR("app"));
++    if (!iniURL) {
++      return NS_ERROR_FAILURE;
++    }
++
++    nsresult rv;
++    if (CFURLGetFileSystemRepresentation(iniURL, false, (UInt8*)aResult,
++                                         MAXPATHLEN)) {
++      // Sanitize path in case the app was launched from Terminal via
++      // './firefox' for example.
++      size_t readPos = 0;
++      size_t writePos = 0;
++      while (aResult[readPos] != '\0') {
++        if (aResult[readPos] == '.' && aResult[readPos + 1] == '/') {
++          readPos += 2;
++        } else {
++          aResult[writePos] = aResult[readPos];
++          readPos++;
++          writePos++;
++        }
++      }
++      aResult[writePos] = '\0';
++      rv = NS_OK;
++    } else {
++      rv = NS_ERROR_FAILURE;
++    }
++
++    CFRelease(iniURL);
++    return rv;
++  }
++
+ #elif defined(ANDROID)
+   static nsresult Get(char aResult[MAXPATHLEN]) {
+     // On Android, we use the MOZ_ANDROID_LIBDIR variable that is set by the
+     // Java bootstrap code.
+     const char* libDir = getenv("MOZ_ANDROID_LIBDIR");
+     if (!libDir) {
+       return NS_ERROR_FAILURE;
+     }
+@@ -283,16 +323,29 @@ class BinaryPath {
+     if (NS_FAILED(Get(path))) {
+       return nullptr;
+     }
+     UniqueFreePtr<char> result;
+     result.reset(strdup(path));
+     return result;
+   }
+ 
++#if defined(XP_MACOSX)
++  static UniqueFreePtr<char> GetApplicationIni()
++  {
++    char path[MAXPATHLEN];
++    if (NS_FAILED(GetApplicationIni(path))) {
++      return nullptr;
++    }
++    UniqueFreePtr<char> result;
++    result.reset(strdup(path));
++    return result;
++  }
++#endif
++
+ #ifdef MOZILLA_INTERNAL_API
+   static nsresult GetFile(nsIFile** aResult) {
+     nsCOMPtr<nsIFile> lf;
+ #  ifdef XP_WIN
+     wchar_t exePath[MAXPATHLEN];
+     nsresult rv = GetW(exePath);
+ #  else
+     char exePath[MAXPATHLEN];
