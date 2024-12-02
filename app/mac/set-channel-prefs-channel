@@ -1,0 +1,66 @@
+#!/bin/bash
+# Replace channel in ChannelPrefs, with appropriate null-byte padding
+# 
+# ChannelPrefs.framework needs to be signed, which we can't do during normal source builds, so we
+# use this to replace 'default' in our custom framework with 'source\0' and store that, and then
+# when making real builds we replace 'source\0' with 'release'/'beta'/'dev'/'test' (padded to 7 chars)
+
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
+
+if [ -z "${1:-}" ] || [ -z "${2:-}" ] || [ -z "${3:-}" ]; then
+	echo "Usage: $0 /path/to/ChannelPrefs.framework/ChannelPrefs from_channel to_channel" >&2
+	exit 1
+fi
+binary=$1
+from_channel=$2
+to_channel=$3
+
+if [ ${#to_channel} -gt 7 ]; then
+	echo "Channel length cannot exceed 7 characters -- aborting" >&2
+	exit 1
+fi
+
+if [ $(strings "$binary" | grep -c "$from_channel") -ne 2 ] ; then
+	echo "$from_channel not found twice in ChannelPrefs" >&2
+	echo >&2
+	strings "$binary" >&2
+	exit 1
+fi
+
+original_size=$(wc -c "$binary" | awk '{print $1}')
+
+perl -pi -e '
+	binmode(STDIN);
+	binmode(STDOUT);
+	use bytes;
+	my @channels = qw(release beta dev test source);  # List of valid channels
+	# Channels from Bash
+	my $from_channel = "'"$from_channel"'";
+	my $to_channel = "'"$to_channel"'";
+	if (grep { $_ eq $to_channel } @channels) {
+		# Pad channels with null bytes
+		$from_channel .= "\0" x (7 - length($from_channel));
+		$to_channel .= "\0" x (7 - length($to_channel));
+	} else {
+		die "Unknown update channel: $to_channel\n";
+	}
+	s/$from_channel/$to_channel/g;
+' "$binary"
+
+new_size=$(wc -c "$binary" | awk '{print $1}')
+if [ $original_size -ne $new_size ]; then
+	echo "File size of ChannelPrefs has changed -- aborting" >&2
+	exit 1
+fi
+
+if [ $(strings "$binary" | grep -c "$to_channel") -ne 2 ] ; then
+	echo "$to_channel not found twice in ChannelPrefs" >&2
+	strings "$binary" >&2
+	exit 1
+fi
+
+strings "$binary"
