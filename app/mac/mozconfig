@@ -4,7 +4,7 @@ elif [ "$Z_ARCH" == "aarch64" ]; then
         ac_add_options --target=aarch64-apple-darwin
 fi
 ac_add_options --enable-bootstrap
-ac_add_options --with-macos-sdk=$HOME/tmp/MacOSX13.3.sdk
+ac_add_options --with-macos-sdk=$HOME/tmp/MacOSX14.4.sdk
 
 mk_add_options AUTOCLOBBER=1
 
