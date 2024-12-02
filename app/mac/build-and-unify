@@ -59,6 +59,22 @@ mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
 # Save a copy of XUL
 #cp x64/$fx_app_name/Contents/MacOS/XUL "$APP_ROOT_DIR/mac/XUL"
 
+# Save a copy of ChannelPrefs.framework
+#
+# Frameworks need to be signed, and we can't sign source builds, so store a signed copy with
+# 'default' replaced with 'source'. Deployed builds will then replace 'source' with
+# 'release'/'beta'/'dev'.
+rm -rf "$APP_ROOT_DIR/mac/ChannelPrefs.framework"
+cp -R x64/$fx_app_name/Contents/Frameworks/ChannelPrefs.framework "$APP_ROOT_DIR/mac/ChannelPrefs.framework"
+pushd "$APP_ROOT_DIR/mac"
+./set-channel-prefs-channel ChannelPrefs.framework/ChannelPrefs default source
+security -v unlock-keychain -p "$KEYCHAIN_PASSWORD" ~/Library/Keychains/$KEYCHAIN.keychain-db
+/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" ChannelPrefs.framework
+/usr/bin/codesign -vvvv ChannelPrefs.framework
+tar cfvJ ChannelPrefs.framework.tar.xz ChannelPrefs.framework
+rm -rf ChannelPrefs.framework
+popd
+
 # Uncomment to build updater
 #cd x64/$fx_app_name/Contents/MacOS/
 #"$APP_ROOT_DIR/mac/updater_renamer"

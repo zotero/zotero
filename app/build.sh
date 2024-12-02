@@ -502,7 +502,14 @@ if [ $BUILD_MAC == 1 ]; then
 	mkdir "$CONTENTSDIR/MacOS"
 	cp -r "$MAC_RUNTIME_PATH/Contents/MacOS/"!(firefox|firefox-bin|crashreporter.app|pingsender|updater.app) "$CONTENTSDIR/MacOS"
 	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
-
+	
+	# Add our custom ChannelPrefs.framework and change channel if not a source build
+	mkdir "$CONTENTSDIR/Frameworks"
+	tar xvf "$CALLDIR/mac/ChannelPrefs.framework.tar.xz" -C "$CONTENTSDIR/Frameworks"
+	if [ "$UPDATE_CHANNEL" != "source" ]; then
+		"$CALLDIR/mac/set-channel-prefs-channel" "$CONTENTSDIR/Frameworks/ChannelPrefs.framework/ChannelPrefs" source $UPDATE_CHANNEL
+	fi
+	
 	# Use our own launcher
 	check_lfs_file "$CALLDIR/mac/zotero.xz"
 	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/zotero"
@@ -580,7 +587,8 @@ if [ $BUILD_MAC == 1 ]; then
 		entitlements_file="$CALLDIR/mac/entitlements.xml"
 		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" \
 			"$APPDIR/Contents/MacOS/XUL" \
-			"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater"
+			"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater" \
+			"$APPDIR/Contents/Frameworks/ChannelPrefs.framework"
 		find "$APPDIR/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 		find "$APPDIR/Contents" -name '*.app' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/zotero"
