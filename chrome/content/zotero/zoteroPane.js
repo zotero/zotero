@@ -5659,7 +5659,9 @@ var ZoteroPane = new function()
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		await Zotero.PDFWorker.import(attachment.id, true);
+		if (attachment.isPDFAttachment()) {
+			await Zotero.PDFWorker.import(attachment.id, true);
+		}
 		var annotations = attachment.getAnnotations().filter(x => x.annotationType != 'ink');
 		if (!annotations.length) {
 			return;
@@ -5727,11 +5729,13 @@ var ZoteroPane = new function()
 		
 		var annotations = [];
 		for (let attachment of attachments) {
-			try {
-				await Zotero.PDFWorker.import(attachment.id, true);
-			}
-			catch (e) {
-				Zotero.logError(e);
+			if (attachment.isPDFAttachment()) {
+				try {
+					await Zotero.PDFWorker.import(attachment.id, true);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
 		}
@@ -5823,11 +5827,13 @@ var ZoteroPane = new function()
 				continue;
 			}
 			for (let attachment of attachments) {
-				try {
-					await Zotero.PDFWorker.import(attachment.id, true);
-				}
-				catch (e) {
-					Zotero.logError(e);
+				if (attachment.isPDFAttachment()) {
+					try {
+						await Zotero.PDFWorker.import(attachment.id, true);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				}
 				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
 			}
