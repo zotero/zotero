@@ -48,11 +48,6 @@ Zotero.Cite = {
 	 * @return {String} - Localized string (e.g., 'Livre')
 	 */
 	getLocatorString: function (locator, form = null) {
-		// 'timestamp' not included in CSL locales
-		if (locator == 'timestamp') {
-			return Zotero.getString('citation.locator.timestamp');
-		}
-		
 		// Get the best CSL locale for the current Zotero locale
 		var cslLocale = Zotero.Utilities.Internal.resolveLocale(
 			Zotero.locale,
@@ -84,6 +79,12 @@ Zotero.Cite = {
 		var englishDoc;
 		// Cache all locators for the current locale
 		for (let locator of this.labels) {
+			// 'timestamp' not included in CSL locales
+			if (locator == 'timestamp') {
+				map.set(locator, Zotero.getString('citation.locator.timestamp'));
+				continue;
+			}
+			
 			// Fetch all <term>s - including the short form
 			let terms = [...doc.querySelectorAll(`term[name="${locator}"]`)];
 			if (!terms.length) {
