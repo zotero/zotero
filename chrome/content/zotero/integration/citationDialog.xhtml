@@ -52,9 +52,14 @@
 					<div id="z-icon"></div>
 				</div>
 				<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabstop="1"/>
-				<image id="loading-spinner" class="zotero-spinner-16"/>
-				<button id="mode-button" class="icon icon-css icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" data-tabstop="1" tabindex="-1"/>
-				<button id="settings-button" class="icon icon-css icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" data-tabstop="1" tabindex="-1"/>
+				<div class="hbox top-level-btn-group">
+					<image id="loading-spinner" class="zotero-spinner-16"/>
+					<button id="mode-button" class="icon icon-css icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" data-tabstop="1" tabindex="-1"/>
+					<button id="settings-button" class="icon icon-css icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" data-tabstop="1" tabindex="-1"/>
+					<div class="vertical-divider"></div>
+					<button id="cancel-button" class="icon icon-css icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel" data-tabstop="1" tabindex="-1"/>
+					<button id="accept-button" class="icon icon-css icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept" data-tabstop="1" tabindex="-1"/>
+				</div>
 			</div>
 			<div id="notification" style="display: none;"></div>
 		</div>
@@ -106,7 +111,8 @@
 					<div class="buttons">
 						<button class="remove" data-l10n-id="integration-citationDialog-details-remove"></button>
 						<button class="show" data-l10n-id="integration-citationDialog-details-showInZotero"></button>
-						<button class="done" default="true" data-l10n-id="integration-citationDialog-details-done"></button>
+						<!-- use xul button for native primary style -->
+						<xul:button class="done" default="true" data-l10n-id="integration-citationDialog-details-done"></xul:button>
 					</div>
 				</div>	
 			</xul:panel>
