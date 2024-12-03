@@ -1256,7 +1256,7 @@ class EditorInstance {
 
 		win = that._quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, 'chrome://zotero/content/integration/citationDialog.xhtml', '', mode, {
+		.openWindow(null, 'chrome://zotero/content/integration/citationDialog.xhtml', '', 'chrome,centerscreen', {
 			wrappedJSObject: io
 		});
 	}

@@ -189,6 +189,9 @@ class Layout {
 		});
 		return description;
 	}
+
+	// implemented by layouts
+	updateWindowMinSize() {}
 }
 
 class LibraryLayout extends Layout {
@@ -243,6 +246,13 @@ class LibraryLayout extends Layout {
 		await this.itemsView.refresh();
 		// Redraw the itemTree
 		this.itemsView.tree.invalidate();
+	}
+
+	// Min height of the dialog is bubbleInput + a constant for the library
+	updateWindowMinSize() {
+		const minLibraryHeight = 200;
+		let { height } = _id("bubble-input").getBoundingClientRect();
+		doc.documentElement.style.minHeight = `${minLibraryHeight + height}px`;
 	}
 
 	async _initItemTree() {
@@ -432,11 +442,16 @@ class ListLayout extends Layout {
 		doc.documentElement.style.minWidth = window.innerWidth + "px";
 		// Set max height so the window does not end up being too tall
 		doc.documentElement.style.maxHeight = Math.max(window.innerHeight, 500) + "px";
-		// Small to let fluent to add headers
-		// await Zotero.Promise.delay(10);
 		window.sizeToContent();
 		// Clear all these styles after resizing is done
 		doc.documentElement.style = "";
+		this.updateWindowMinSize();
+	}
+
+	// window min height is the height of bubble-input
+	updateWindowMinSize() {
+		let { height } = _id("bubble-input").getBoundingClientRect();
+		doc.documentElement.style.minHeight = `${height}px`;
 	}
 }
 
@@ -473,6 +488,9 @@ var IOManager = {
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
+		// handle accept/cancel buttons
+		_id("accept-button").addEventListener("click", accept);
+		_id("cancel-button").addEventListener("click", cancel);
 	},
 
 	// switch between list and library modes
@@ -492,6 +510,7 @@ var IOManager = {
 	// pass current items in the citation to bubble-input to have it update the bubbles
 	updateBubbleInput() {
 		_id("bubble-input").refresh(CitationDataManager.items);
+		currentLayout.updateWindowMinSize();
 	},
 
 	async addItemsToCitation(items, { noInputRefocus } = {}) {
@@ -822,4 +841,7 @@ var CitationDataManager = {
 		return null;
 	}
 };
+
+// Top level listeners
 window.addEventListener("load", onLoad);
+window.addEventListener("resize", () => currentLayout.updateWindowMinSize());

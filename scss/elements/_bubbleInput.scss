@@ -1,5 +1,10 @@
 bubble-input {
 	min-width: 200px;
+	-moz-window-dragging: no-drag;
+
+	--bubble-height: 22px;
+	--bubble-horizontal-margin: 2px;
+	--bubble-vertical-margin: 3px;
 	
 	.body {
 		display: flex;
@@ -8,6 +13,9 @@ bubble-input {
 		min-height: 28px;
 		width: 100%;
 		padding-inline-end: 6px;
+		// height is limited to 5.5. rows of bubbles
+		max-height: calc(5.5 * (var(--bubble-height) + (2* var(--bubble-vertical-margin)) + 2px));
+		overflow-y: scroll;
 		// to get proper width by getContentWidth in bubbleInput.js
 		span {
 			white-space: pre;
@@ -33,18 +41,19 @@ bubble-input {
 	
 	.bubble {
 		@include focus-ring;
-		--margin-horizontal: 2px;
-		height: 22px;
+		--bubble-horizontal-margin: 2px;
+		height: var(--bubble-height);
 		border-radius: 5px;
 		border: 1px solid var(--fill-quarternary);
 		padding: 0 8px;
-		margin: 3px var(--margin-horizontal);
+		margin: var(--bubble-vertical-margin) var(--bubble-horizontal-margin);
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		white-space: nowrap;
 		-moz-user-select: none;
 		position: relative;
+		cursor: pointer;
 		
 		&:hover:not(.showingDetails) {
 			background-color: var(--fill-quarternary);
@@ -55,7 +64,6 @@ bubble-input {
 			}
 			
 			.text {
-				margin-right: -16px;
 				mask-image: linear-gradient(to left, transparent 12px, var(--fill-primary) 24px);
 				overflow: hidden;
 				text-overflow: ellipsis;
@@ -75,10 +83,10 @@ bubble-input {
 			position: absolute;
 		}
 		&.drop-before::before {
-			left: calc(-1 * var(--margin-horizontal));
+			left: calc(-1 * var(--bubble-horizontal-margin));
 		}
 		&.drop-after::after {
-			right: calc(-2 * var(--margin-horizontal));
+			right: calc(-2 * var(--bubble-horizontal-margin));
 		}
 		
 		&[selected="true"] {
@@ -90,9 +98,18 @@ bubble-input {
 		.cross {
 			@include svgicon("x-8", "universal", "16");
 			display: none;
-			width: 16px;
+			width: 18px;
 			height: 18px;
 			align-self: center;
+			border-radius: 5px;
+			position: absolute;
+			right: 2px;
+			&:hover {
+				background-color: var(--fill-quarternary);
+			}
+			&:active {
+				background-color: var(--fill-tertiary);
+			}
 		}
 	}
 }
