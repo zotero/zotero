@@ -139,7 +139,7 @@ XPCOMUtils.defineLazyServiceGetter(this, "zipCache",
                                    "@mozilla.org/libjar/zip-reader-cache;1",
                                    "nsIZipReaderCache");
 
-XPCOMUtils.defineLazyGetter(this, "XulApp", () => {
+ChromeUtils.defineLazyGetter(this, "XulApp", () => {
   let xulappURI = module.uri.replace("toolkit/loader.js",
                                      "sdk/system/xul-app.jsm");
   return Cu.import(xulappURI, {});
