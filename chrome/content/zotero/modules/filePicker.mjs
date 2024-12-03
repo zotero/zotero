@@ -48,7 +48,7 @@ export class FilePicker {
 	 * @param {Integer} mode - One of the mode constants, indicating the type of picker to create
 	 */
 	init(parentWindow, title, mode) {
-		this._fp.init(parentWindow, title, mode);
+		this._fp.init(parentWindow.browsingContext, title, mode);
 	};
 	
 	/**
