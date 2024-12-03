@@ -3020,7 +3020,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Restore window if it's in the dock
-		if (window.windowState == Components.interfaces.nsIDOMChromeWindow.STATE_MINIMIZED) {
+		if (window.windowState == window.STATE_MINIMIZED) {
 			window.restore();
 		}
 		
