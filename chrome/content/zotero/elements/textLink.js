@@ -82,7 +82,7 @@
 
 			// otherwise, fall back to opening the anchor directly
 			var win = window;
-			if (window instanceof Components.interfaces.nsIDOMChromeWindow) {
+			if (win.isChromeWindow) {
 				while (win.opener && !win.opener.closed)
 					win = win.opener;
 			}
