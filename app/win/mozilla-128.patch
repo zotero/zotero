@@ -36,7 +36,7 @@ diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
 diff --git a/browser/app/winlauncher/LauncherProcessWin.cpp b/browser/app/winlauncher/LauncherProcessWin.cpp
 --- a/browser/app/winlauncher/LauncherProcessWin.cpp
 +++ b/browser/app/winlauncher/LauncherProcessWin.cpp
-@@ -162,17 +162,31 @@ static mozilla::LauncherFlags ProcessCmd
+@@ -155,17 +155,31 @@ static mozilla::LauncherFlags ProcessCmd
                          mozilla::CheckArgFlag::None) == mozilla::ARG_FOUND ||
        mozilla::CheckArg(aArgc, aArgv, "remote-debugging-port", nullptr,
                          mozilla::CheckArgFlag::None) == mozilla::ARG_FOUND ||

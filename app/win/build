@@ -1,17 +1,17 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$APP_ROOT_DIR/config.sh"
 
-if [ $# -lt 2 ]; then
-	echo "Usage: $0 /path/to/mozilla-unified x86_64|i686" >&2
+if [ -z "${1:-}" ]; then
+	echo "Usage: $0 x64|arm64|686" >&2
 	exit 1
 fi
 
-gecko_path=$1
-arch=$2
+gecko_path=/c/mozilla-source/mozilla-unified
+arch=$1
 
 if [ ! -d "$gecko_path" ]; then
 	echo "$gecko_path is not a directory" >&2
@@ -20,18 +20,23 @@ fi
 
 # Install required Rust version
 rustup toolchain install $RUST_VERSION
-if [[ $arch = "x86_64" ]] || [[ $arch == "i686" ]]; then
-	rustup target add $arch-pc-windows-msvc
+if [ $arch = "x64" ]; then
+	rust_target=x86_64
+elif [ $arch = "arm64" ]; then
+	rust_target=aarch64
+elif [ $arch = "win32" ]; then
+	rust_target=i686
 else
 	echo "Unknown architecture $arch" >&2
 	exit 1
 fi
+rustup target add $rust_target-pc-windows-msvc
 rustup default $RUST_VERSION
 
 cp "$SCRIPT_DIR/mozconfig" "$gecko_path"
 
-if [ $arch = "i686" ]; then
-	export Z_ARCH=win32
+if [[ $arch == "arm64" || $arch == "win32" ]]; then
+	export Z_ARCH=$arch
 fi
 
 cd "$gecko_path"
