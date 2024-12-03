@@ -2122,7 +2122,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					this.setDropEffect(event, "copy");
 				}
 			}
-			else if (event.dataTransfer.types.contains("application/x-moz-file")) {
+			else if (event.dataTransfer.types.includes("application/x-moz-file")) {
 				// As of Aug. 2013 nightlies:
 				//
 				// - Setting the dropEffect only works on Linux and OS X.

@@ -2035,18 +2035,18 @@ Zotero.DragDrop = {
 		
 		var len = firstOnly ? 1 : dt.mozItemCount;
 		
-		if (dt.types.contains('zotero/collection')) {
+		if (dt.types.includes('zotero/collection')) {
 			dragData.dataType = 'zotero/collection';
 			let ids = dt.getData('zotero/collection').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
-		else if (dt.types.contains('zotero/item')) {
+		else if (dt.types.includes('zotero/item')) {
 			dragData.dataType = 'zotero/item';
 			let ids = dt.getData('zotero/item').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
 		else {
-			if (dt.types.contains('application/x-moz-file')) {
+			if (dt.types.includes('application/x-moz-file')) {
 				dragData.dataType = 'application/x-moz-file';
 				var files = [];
 				for (var i=0; i<len; i++) {
@@ -2065,7 +2065,7 @@ Zotero.DragDrop = {
 			}
 			// This isn't an else because on Linux a link drag contains an empty application/x-moz-file too
 			if (!dragData.data || !dragData.data.length) {
-				if (dt.types.contains('text/x-moz-url')) {
+				if (dt.types.includes('text/x-moz-url')) {
 					dragData.dataType = 'text/x-moz-url';
 					var urls = [];
 					for (var i=0; i<len; i++) {
