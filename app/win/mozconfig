@@ -1,9 +1,9 @@
-# Set Z_ARCH=win32 on command line to build and package win32
+# Set Z_ARCH=win32 or Z_ARCH=aarch64 on command line
 if [ "$Z_ARCH" == "win32" ]; then
 	ac_add_options --target=i686-pc-windows-msvc
 	# https://bugzilla.mozilla.org/show_bug.cgi?id=1804548
 	ac_add_options --without-wasm-sandboxed-libraries
-elif [ "$Z_ARCH" == "aarch64" ]; then
+elif [ "$Z_ARCH" == "arm64" ]; then
 	ac_add_options --target=aarch64-pc-windows-msvc
 fi
 
