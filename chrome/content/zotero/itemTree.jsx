@@ -1447,6 +1447,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 			
 			default:
+				let extraField = this.props.getExtraField(row.ref, field);
+				if (extraField !== undefined) return extraField;
 				// Get from row.getField() to allow for custom fields
 				return row.getField(field, false, true);
 			}

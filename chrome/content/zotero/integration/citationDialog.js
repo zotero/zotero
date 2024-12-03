@@ -260,12 +260,12 @@ class LibraryLayout extends Layout {
 		// and add/exclude them on click
 		itemColumns.push({
 			dataKey: 'isAddedToCitation',
-			label: '',
+			label: 'In citation',
+			htmlLabel: '',
 			width: 26,
 			staticWidth: true,
 			fixedWidth: true,
 			showInColumnPicker: false,
-			columnPickerSubMenu: false,
 			renderer: (index, data, column) => {
 				let icon;
 				if (data === true) {
@@ -274,7 +274,7 @@ class LibraryLayout extends Layout {
 				else if (data == false) {
 					icon = getCSSIcon('plus-circle');
 				}
-				else if (data == "N/A") {
+				else if (data === null) {
 					// no icon should be shown when an item cannot be added
 					// (e.g. when citing notes, parent items are displayed but not included)
 					icon = getCSSIcon("");
@@ -284,9 +284,9 @@ class LibraryLayout extends Layout {
 			}
 		});
 		this.itemsView = await ItemTree.init(itemsTree, {
-			id: "main",
+			id: "citationDialog",
 			dragAndDrop: false,
-			persistColumns: false,
+			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: selection => {},
 			regularOnly: !isCitingNotes,
@@ -300,9 +300,9 @@ class LibraryLayout extends Layout {
 			// not a part of actual item properties
 			getExtraField: (item, key) => {
 				if (key == "isAddedToCitation") {
-					if (!(item instanceof Zotero.Item)) return "N/A";
-					if (isCitingNotes && !item.isNote()) return "N/A";
-					if (!isCitingNotes && !item.isRegularItem()) return "N/A";
+					if (!(item instanceof Zotero.Item)) return null;
+					if (isCitingNotes && !item.isNote()) return null;
+					if (!isCitingNotes && !item.isRegularItem()) return null;
 					return CitationDataManager.itemAddedCache.has(item.id);
 				}
 				return undefined;
