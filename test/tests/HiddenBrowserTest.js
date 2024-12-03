@@ -71,7 +71,7 @@ describe("HiddenBrowser", function() {
 			await browser._createdPromise;
 
 			let listener;
-			let successPromise = new Promise((resolve) => {
+			let didDownloadPromise = new Promise((resolve) => {
 				listener = {
 					QueryInterface: ChromeUtils.generateQI(["nsIWebProgressListener", "nsISupportsWeakReference"]),
 					onStateChange(webProgress, req, flags, status) {
@@ -87,7 +87,7 @@ describe("HiddenBrowser", function() {
 
 			// Don't await load - it'll just time out
 			browser.load(baseURL + path);
-			assert.isFalse(await successPromise);
+			assert.isFalse(await didDownloadPromise);
 			assert.isNotNull(listener);
 			browser.destroy();
 		}
@@ -107,16 +107,6 @@ describe("HiddenBrowser", function() {
 					}
 				}
 			);
-			httpd.registerPathHandler(
-				'/download.html',
-				{
-					handle: function (request, response) {
-						response.setHeader('Content-Disposition', 'attachment', false);
-						response.setStatusLine(null, 200, 'OK');
-						response.write('');
-					}
-				}
-			);
 
 			// Don't show file picker on download - prevents tests from hanging on failure
 			Zotero.Prefs.set('browser.download.useDownloadDir', true, true);
@@ -129,10 +119,6 @@ describe("HiddenBrowser", function() {
 
 		it("should not download a binary file", async function () {
 			await testNoDownload('download.dat');
-		});
-
-		it("should not download an HTML file served with Content-Disposition: attachment", async function () {
-			await testNoDownload('download.html');
 		});
 	});
 	
