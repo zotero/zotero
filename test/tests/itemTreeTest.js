@@ -982,7 +982,7 @@ describe("Zotero.ItemTree", function() {
 			var event = { dataTransfer };
 			// On macOS, ItemTree checks modifier keys, not just the dropEffect
 			if (Zotero.isMac
-					&& dataTransfer.types.contains('application/x-moz-file')) {
+					&& dataTransfer.types.includes('application/x-moz-file')) {
 				switch (dataTransfer.dropEffect) {
 					case 'link':
 						event.metaKey = true;
