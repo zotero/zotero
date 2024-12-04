@@ -583,15 +583,16 @@ if [ $BUILD_MAC == 1 ]; then
 		# Clear extended attributes, which can cause codesign to fail
 		/usr/bin/xattr -cr "$APPDIR"
 
-		# Sign app
-		entitlements_file="$CALLDIR/mac/entitlements.xml"
-		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" \
+		# Sign libraries and updater without entitlements
+		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" \
 			"$APPDIR/Contents/MacOS/XUL" \
-			"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater" \
+			"$APPDIR/Contents/MacOS/updater.app" \
 			"$APPDIR/Contents/Frameworks/ChannelPrefs.framework"
-		find "$APPDIR/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
-		find "$APPDIR/Contents" -name '*.app' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
-		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/zotero"
+		find "$APPDIR/Contents" -name '*.dylib' -print0 | xargs -0 /usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID"
+		
+		# Sign bundled apps and main app bundle
+		entitlements_file="$CALLDIR/mac/entitlements.xml"
+		find "$APPDIR/Contents" -name '*.app' -not -name "updater.app" -print0 | xargs -0 /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID"
 		
 		# Sign .jnilib (Java native shared library) within LibreOffice extension, since notarization
 		# started failing without this. The .jnilib is within a .jar within the .oxt, so we have to
@@ -601,7 +602,7 @@ if [ $BUILD_MAC == 1 ]; then
 		cd libreoffice-repack
 		unzip -q "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
 		unzip -q external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
-		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" com/sun/jna/darwin/libjnidispatch.jnilib
+		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" com/sun/jna/darwin/libjnidispatch.jnilib
 		zip -u external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
 		zip -u "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
 		cd ..
