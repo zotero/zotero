@@ -17,6 +17,26 @@
 	.layout {
 		display: contents;
 	}
+	
+	.btn-icon {
+		@include focus-ring;
+		border: none;
+		width: 28px;
+		height: 28px;
+		max-height: 28px;
+		padding: 0;
+		color: var(--fill-secondary);
+		background-size: 60% !important;
+		border-radius: 5px;
+		-moz-window-dragging: no-drag;
+		&:hover:not([disabled]) {
+			cursor: pointer;
+			background-color: var(--fill-quinary) !important;
+		}
+		&:active:not([disabled]) {
+			background-color: var(--fill-quarternary) !important;
+		}
+	}
 
 	#search-row {
 		margin: 5px 10px 5px 0;
@@ -48,45 +68,11 @@
 			}
 		}
 
-		.icon {
-			@include focus-ring;
-			border: none;
-			width: 28px;
-			height: 28px;
-			max-height: 28px;
-			padding: 0;
-			color: var(--fill-secondary);
-			background-size: 60% !important;
-			border-radius: 5px;
-			-moz-window-dragging: no-drag;
-			&:hover:not([disabled]) {
-				cursor: pointer;
-				background-color: var(--fill-quinary) !important;
-			}
-			&:active:not([disabled]) {
-				background-color: var(--fill-quarternary) !important;
-			}
-		}
-		#mode-button {
-			&[mode="library"] {
-				@include svgicon("dialog-search-library", "universal", "16");
-			}
-			&[mode="list"] {
-				@include svgicon("dialog-search-list", "universal", "16");
-			}
-			margin-inline-end: 6px;
-		}
-		#settings-button {
-			@include svgicon("dialog-options", "universal", "16");
-		}
 		#accept-button {
-			@include svgicon("dialog-success", "universal", "16");
-			color: var(--accent-green);
+			@include svgicon("arrow-right", "universal", "20");
 		}
 		#cancel-button {
 			@include svgicon("dialog-cancel", "universal", "16");
-			margin-inline-end: 6px;
-			color: var(--accent-red);
 		}
 	}
 
@@ -188,6 +174,7 @@
 			-moz-user-select: none;
 			overflow-y: scroll;
 			margin: 0 8px 8px 8px;
+			height: 100%;
 			.section {
 				border-bottom: 1px solid var(--fill-quinary);
 	
@@ -224,6 +211,30 @@
 					}
 				}
 			}
+		}
+	}
+
+	#bottom-area-wrapper {
+		border-top: var(--material-panedivider);
+
+		#bottom-btn-group {
+			height: 36px;
+			border-top: 1px solid var(--material-panedivider);
+			align-items: center;
+			#mode-button {
+				&[mode="library"] {
+					@include svgicon("dialog-search-library", "universal", "16");
+				}
+				&[mode="list"] {
+					@include svgicon("dialog-search-list", "universal", "16");
+				}
+				margin-inline-end: 8px;
+			}
+			#settings-button {
+				@include svgicon("dialog-options", "universal", "16");
+				margin-inline-end: 3px;
+			}
+			
 		}
 	}
 
