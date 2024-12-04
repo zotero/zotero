@@ -389,6 +389,10 @@ function modify_omni {
          document.documentElement.appendChild(popupset);
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
+    
+    # Remove non-native text input styles
+    remove_line 'html\|input\:where\([\s\S]+
+\}' chrome/toolkit/skin/classic/global/global-shared.css
 	
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
