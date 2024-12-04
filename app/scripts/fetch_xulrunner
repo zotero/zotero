@@ -310,7 +310,7 @@ function modify_omni {
 	# Hide "Debug Addons" and "Manage Extension Shortcuts"
 	echo 'panel-item[action="debug-addons"], panel-item[action="reset-update-states"] + hr, panel-item[action="manage-shortcuts"] { display: none }' >> $file
 	# Show cursor feedback on plugin homepage links
-	echo '.addon-detail-row-homepage .text-link { cursor: pointer; color: -moz-nativehyperlinktext; }' >> $file
+	echo '.addon-detail-row-homepage .text-link { cursor: pointer; color: LinkText; }' >> $file
 	echo '.addon-detail-row-homepage .text-link:hover { text-decoration: underline; }' >> $file
 	
 	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
