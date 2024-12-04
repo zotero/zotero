@@ -36,12 +36,6 @@
 		}
 	};
 
-	const waitDOMUpdate = async (timeout = 50) => {
-		return new Promise((resolve) => {
-			requestIdleCallback(resolve, { timeout });
-		});
-	};
-
 	const waitNoLongerThan = async (promise, ms = 1000) => {
 		return Promise.race([
 			promise,
@@ -275,11 +269,6 @@
 			this._restorePinnedPane();
 
 			let panes = this.getPanes();
-
-			// Unobserve intersection to prevent unwanted rendering.
-			// Checking flags in _handleIntersection is not reliable because it's async.
-			this._toggleIntersectionObserver(false);
-
 			for (let box of [this._header, ...panes]) {
 				box.editable = this.editable;
 				box.tabID = this.tabID;
@@ -302,7 +291,7 @@
 			this._paneParent.style.paddingBottom = '';
 			if (pinnedPaneElem) {
 				let paneID = pinnedPaneElem.dataset.pane;
-				await this.scrollToPane(paneID, 'instant');
+				this.scrollToPane(paneID, 'instant');
 				this.pinnedPane = paneID;
 			}
 			else {
@@ -321,17 +310,10 @@
 					continue;
 				}
 				await waitNoLongerThan(box.asyncRender(), 500);
-				// Make sure the layout is updated for next isPaneVisible check
-				await waitDOMUpdate();
 			}
-
 			if (this.item.id == item.id) {
 				this._isRendering = false;
 			}
-
-			// Re-enable intersection observer
-			this._toggleIntersectionObserver(true);
-
 			if (Zotero.test) {
 				resolve();
 			}
@@ -457,13 +439,8 @@
 		}
 
 		async scrollToPane(paneID, behavior = 'smooth') {
-			let panes = this.getEnabledPanes();
-			let paneIndex = panes.findIndex(elem => elem.dataset.pane == paneID);
-			let pane = panes[paneIndex];
+			let pane = this.getEnabledPane(paneID);
 			if (!pane) return null;
-
-			// Wait for the next DOM update to make sure the scroll position is updated
-			await waitDOMUpdate();
 
 			let scrollPromise;
 
@@ -472,9 +449,6 @@
 			if (this._collapsed) {
 				return null;
 			}
-
-			// Temporarily disable intersection observer to prevent unwanted rendering
-			this._toggleIntersectionObserver(false);
 
 			// The pane should always be at the very top
 			// If there isn't enough stuff below it for it to be at the top, we add padding
@@ -485,31 +459,9 @@
 				scrollPromise = this._waitForScroll();
 				scrollPromise.then(() => this._disableScrollHandler = false);
 			}
-			else {
-				// Wait for the next DOM update to make sure the height is updated before rendering
-				scrollPromise = waitDOMUpdate();
-			}
 			pane.scrollIntoView({ block: 'start', behavior });
 			pane.focus();
-			await scrollPromise;
-
-			// Check current and following panes for async render
-			for (let i = paneIndex; i < panes.length; i++) {
-				let nextPane = panes[i];
-				// Stop if the pane is not visible anymore
-				if (!this.isPaneVisible(nextPane.dataset.pane)) {
-					break;
-				}
-				if (nextPane.asyncRender) {
-					await nextPane.asyncRender();
-					// Wait for the next DOM update to make sure the layout is updated
-					await waitDOMUpdate();
-				}
-			}
-
-			// Re-enable intersection observer
-			this._toggleIntersectionObserver(true);
-			return true;
+			return scrollPromise;
 		}
 		
 		_makeSpaceForPane(pane) {
@@ -576,17 +528,7 @@
 				this._intersectionOb.disconnect();
 			}
 			this._intersectionOb = new IntersectionObserver(this._handleIntersection);
-			this._toggleIntersectionObserver(true);
-		}
-
-		_toggleIntersectionObserver(enabled) {
-			let panes = this.getPanes();
-			if (enabled) {
-				panes.forEach(elem => this._intersectionOb.observe(elem));
-			}
-			else {
-				panes.forEach(elem => this._intersectionOb.unobserve(elem));
-			}
+			this.getPanes().forEach(elem => this._intersectionOb.observe(elem));
 		}
 
 		_handleContainerScroll = () => {

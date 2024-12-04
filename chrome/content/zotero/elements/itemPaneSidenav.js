@@ -129,6 +129,8 @@
 		
 		_contextMenuTarget = null;
 
+		_disableScrollHandler = false;
+		
 		get container() {
 			return this._container;
 		}
