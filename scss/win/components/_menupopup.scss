@@ -9,8 +9,6 @@ menupopup, panel:not(#autoscroller), #search-mode-popup {
 menupopup {
 	menu, menuitem {
 		appearance: none !important;
-		margin-left: 4px;
-		margin-right: 4px;
 		border-radius: 4px;
 		fill: currentColor;
 		-moz-context-properties: fill,fill-opacity;
@@ -25,8 +23,7 @@ menupopup {
 		}
 	}
 	menuseparator {
-		margin: 4px 0px 4px 0px;
-		border-top: var(--material-border50);
+		--panel-separator-color: var(--color-border50);
 	}
 }
 
