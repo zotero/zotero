@@ -60,6 +60,7 @@ $scaffold-toolbarbutton-icons: (
 		appearance: none;
 		background: var(--material-sidepane);
 	}
+	box-sizing: content-box;
 	border-bottom: var(--material-panedivider);
 
 	toolbarbutton {
