@@ -11,7 +11,7 @@ checkbox, description, groupbox > .groupbox-body, radio, div:not(.license-more-i
 }
 
 a {
-	color: -moz-nativehyperlinktext;
+	color: LinkText;
 	text-decoration: underline;
 }
 

@@ -30,7 +30,7 @@ publications-license-info {
 
     a {
         display: inline;
-        color: var(--license-info-link-color, -moz-nativehyperlinktext);
+        color: var(--license-info-link-color, LinkText);
         text-decoration: var(--license-info-link-decoration, none);
 
         &:hover,

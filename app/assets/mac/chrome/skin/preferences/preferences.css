@@ -194,7 +194,7 @@ caption {
 
 /* styles for the link elements copied from .text-link in global.css */
 .inline-link {
-  color: -moz-nativehyperlinktext;
+  color: LinkText;
   text-decoration: underline;
 }
   
