@@ -6,7 +6,7 @@ groupbox > label > h2, groupbox > * > label > h2 {
 
 label.zotero-text-link {
 	-moz-user-focus: normal;
-	color: -moz-nativehyperlinktext;
+	color: LinkText;
 	text-decoration: underline;
 	border: 1px solid transparent;
 	cursor: pointer;
@@ -14,7 +14,7 @@ label.zotero-text-link {
 
 .text-link {
 	-moz-user-focus: normal;
-	color: -moz-nativehyperlinktext;
+	color: LinkText;
 	text-decoration: underline;
 	border: 1px solid transparent;
 	cursor: pointer;
