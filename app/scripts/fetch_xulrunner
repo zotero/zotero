@@ -95,6 +95,22 @@ function remove_line {
 	fi
 }
 
+function remove_between {
+	start_pattern=$1
+	end_pattern=$2
+	file=$3
+	
+	if egrep -q "$start_pattern" "$file" && egrep -q "$end_pattern" "$file"; then
+		perl -ni -e '
+		if (/'"$start_pattern"'/) { $skip = 1; next; }
+		elsif ($skip && /'"$end_pattern"'/) { $skip = 0; next; }
+		print unless $skip;' "$file"
+	else
+		echo "$start_pattern" and "$end_pattern" not found in "$file" -- aborting 2>&1
+		exit 1
+	fi
+}
+
 function get_utf16_chars {
 	str=$(echo -n "$1" | xxd -p | fold -w 2 | sed -r 's/(.+)/\\\\x{\1}\\\\x{00}/')
 	# Add NUL padding
@@ -391,8 +407,7 @@ function modify_omni {
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
     
     # Remove non-native text input styles
-    remove_line 'html\|input\:where\([\s\S]+
-\}' chrome/toolkit/skin/classic/global/global-shared.css
+    remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
 	
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
