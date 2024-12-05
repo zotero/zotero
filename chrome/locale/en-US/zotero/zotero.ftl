@@ -381,7 +381,7 @@ Press { return-or-enter } to save edits to this citation. Press Escape to discar
 integration-citationDialog-aria-bubble = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
 integration-citationDialog-aria-input = Type to search for an item to include in this citation. { integration-citationDialog-general-instructions }
 integration-citationDialog-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-integration-citationDialog-expand = Expand all
+integration-citationDialog-add-all = Add all
 
 styleEditor-locatorType =
     .aria-label = Locator type
