@@ -1,72 +1,37 @@
 menupopup {
-	color-scheme: auto;
-	--panel-padding: 5px 0;
 	menu, menuitem {
-		appearance: none;
-		margin-inline: 5px;
-		padding: 3px 10px;
 		border-radius: 4px;
-
-		&[_moz-menuactive] {
-			// Try best to match the native menu style
-			@include light-dark(
-				background-color, color-mix(in srgb, -moz-mac-active-menuitem 75%, transparent),
-				color-mix(in srgb, -moz-mac-active-menuitem 90%, transparent)
-			);
-			color: -moz-mac-menutextselect;
-		}
-
-		&:is([checked="true"], [selected="true"]) {
-			appearance: none !important;
-			border-radius: 4px;
-			&::before {
-				content: '\2713';
-				display: inline-block;
-				vertical-align: middle;
-				line-height: 0;
-				width: 14px;
-				margin-inline-start: 0px !important;
-			}
-		}
-
-		&[disabled="true"] {
-			appearance: auto;
-		}
-	}
-
-	menulist > &,
-	&[needsgutter] {
-		menu, menuitem {
-			padding-inline-start: 20px;
-
-			// Add padding here so that it won't look weird when the customElement.js is not yet loaded
-			&:is([checked="true"], [selected="true"]) {
-				padding-inline-start: 6px;
-			}
-		}
 	}
 
 	menuseparator {
-		appearance: none;
-		margin-inline: 15px;
-		border-bottom: 1px solid;
-		padding-bottom: 0px;
-		@include light-dark(border-color, rgba(170, 170, 170, 0.5), rgba(100, 100, 100, 0.5));
-	}
-
-	.menu-right {
-		appearance: none;
-		@include svgicon-menu("chevron-8", "universal", "8");
-		rotate: -90deg;
-		margin-inline-end: 0;
+		--panel-separator-color: light-dark(rgba(170, 170, 170, 0.5), rgba(100, 100, 100, 0.5));
 	}
 }
 
-// Overwrite menulist rules
-menulist > menupopup > menuitem::after,
-menulist > menupopup > menuitem::before {
-	content: none;
-	padding-inline: 0;
+// Inherit from https://searchfox.org/mozilla-esr128/source/toolkit/themes/osx/global/menu.css
+// to override menulist popup rules,
+// because menulist popup is always treated as with gutter on macOS
+menulist > menupopup {
+	& > menu,
+	& > menuitem,
+	& > menucaption {
+		padding-inline-start: 0;
+		
+		
+		&::before {
+			content: '\2713'; /* a checkmark */
+			display: inline-block;
+			vertical-align: middle;
+			line-height: 0;
+			visibility: hidden;
+			padding-inline: 4px;
+			font-weight: bold;
+		}
+
+		&:is([checked="true"], [selected="true"])::before {
+			visibility: inherit;
+		}
+	}
 }
 
 // Modified based on rules from https://searchfox.org/mozilla-esr102/source/browser/base/content/browser.css
