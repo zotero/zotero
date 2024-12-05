@@ -113,6 +113,7 @@ class Layout {
 		for (let { key, group, isLibrary } of SearchHandler.getOrderedSearchResultGroups(citedItems)) {
 			if (canAddNodes <= 0) break;
 			if (isLibrary && this.type == "library") break;
+			let isGroupCollapsible = key == "selected" && group.length > 1;
 			
 			// Construct each section and items
 			let sectionHeader = "";
@@ -122,26 +123,25 @@ class Layout {
 			else {
 				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
 			}
-			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader);
+			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group, this.type == "list");
 			let itemContainer = section.querySelector(".itemsContainer");
 	
 			let items = [];
+			let index = 0;
 			for (let item of group) {
-				let grouppedSelectedItems = key == "selected" && !this.selectedItemsExpanded;
 				// createItemNode implemented by layouts
-				let itemNode = await this.createItemNode(grouppedSelectedItems ? group : [item]);
+				let itemNode = await this.createItemNode(item, isGroupCollapsible ? index : null);
 				itemNode.addEventListener("click", IOManager.handleItemClick);
 				items.push(itemNode);
 				canAddNodes -= 1;
 
 				// Pre-select the item to be added on Enter of an input
 				if (firstItem) {
-					IOManager.markPreSelectedItem(itemNode, grouppedSelectedItems ? group : item);
+					IOManager.markPreSelectedItem(itemNode, item);
 					firstItem = false;
 				}
 				if (canAddNodes <= 0) break;
-
-				if (grouppedSelectedItems) break;
+				index++;
 			}
 			itemContainer.replaceChildren(...items);
 			sections.push(section);
@@ -176,20 +176,6 @@ class Layout {
 		_id("loading-spinner").removeAttribute("status");
 	}
 
-	// Initially, all selected items node are groupped together and clicking on this node
-	// will add all selected items.
-	async generateAddAllSelectedItemsNode() {
-		let description = Helpers.createNode("div", { tabindex: "-1", "data-tabstop": "1" }, "description hbox expand-selected");
-		let content = await doc.l10n.formatValue("integration-citationDialog-expand");
-		description.textContent = content;
-		description.addEventListener("click", (event) => {
-			event.stopPropagation();
-			this.selectedItemsExpanded = true;
-			this.refreshItemsList();
-		});
-		return description;
-	}
-
 	// implemented by layouts
 	updateWindowMinSize() {}
 }
@@ -215,21 +201,20 @@ class LibraryLayout extends Layout {
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
-	async createItemNode(items) {
+	async createItemNode(item, index = null) {
 		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option" }, "item");
-		let ids = items.map(item => item.cslItemID || item.id);
-		itemNode.setAttribute("itemIDs", ids.join(","));
+		let id = item.cslItemID || item.id;
+		itemNode.setAttribute("itemIDs", id);
 		let title = Helpers.createNode("div", {}, "title");
-		let description;
-		if (items.length > 1) {
-			description = await this.generateAddAllSelectedItemsNode();
-		}
-		else {
-			description = Helpers.buildItemDescription(items[0]);
-		}
-		title.textContent = items[0].getDisplayTitle();
+		let description = Helpers.buildItemDescription(item);
+		title.textContent = item.getDisplayTitle();
 
 		itemNode.append(title, description);
+
+		if (index !== null) {
+			itemNode.style.setProperty('--deck-index', index);
+		}
+
 		return itemNode;
 	}
 
@@ -408,24 +393,18 @@ class ListLayout extends Layout {
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
-	async createItemNode(items) {
+	async createItemNode(item) {
 		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option" }, "item hbox");
-		let ids = items.map(item => item.cslItemID || item.id);
-		itemNode.setAttribute("itemIDs", ids.join(","));
+		let id = item.cslItemID || item.id;
+		itemNode.setAttribute("itemIDs", id);
 		let itemInfo = Helpers.createNode("div", {}, "info");
 		let icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
-		let dataTypeLabel = items[0].getItemTypeIconName(true);
+		let dataTypeLabel = item.getItemTypeIconName(true);
 		icon.setAttribute("data-item-type", dataTypeLabel);
 
 		let title = Helpers.createNode("div", {}, "title");
-		let description;
-		if (items.length > 1) {
-			description = await this.generateAddAllSelectedItemsNode();
-		}
-		else {
-			description = Helpers.buildItemDescription(items[0]);
-		}
-		title.textContent = items[0].getDisplayTitle();
+		let description = Helpers.buildItemDescription(item);
+		title.textContent = item.getDisplayTitle();
 
 		itemInfo.append(title, description);
 		itemNode.append(icon, itemInfo);
@@ -437,6 +416,10 @@ class ListLayout extends Layout {
 
 		// Hide the entire list layout if there is not a single item to show
 		_id("list-layout").hidden = !_id("list-layout").querySelector(".section:not([hidden])");
+		// Explicitly set the height of the container so the transition works when container is collapssed
+		for (let container of [..._id("list-layout").querySelectorAll(".itemsContainer")]) {
+			container.style.height = `${container.scrollHeight}px`;
+		}
 		// Set document width to avoid window being stretched horizontally
 		doc.documentElement.style.maxWidth = window.innerWidth + "px";
 		doc.documentElement.style.minWidth = window.innerWidth + "px";
@@ -472,6 +455,8 @@ var IOManager = {
 		doc.addEventListener("move-item", ({ detail: { dialogReferenceID, index } }) => this._moveItem(dialogReferenceID, index));
 		// display details popup for the bubble
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
+		// handle click on "Add all" button above collapsible sections
+		doc.addEventListener("add-all-items", ({ detail: { items } }) => this.addItemsToCitation(items));
 
 		// accept/cancel events emitted by keyboardHandler
 		doc.addEventListener("dialog-accepted", accept);
@@ -568,6 +553,12 @@ var IOManager = {
 
 	handleItemClick(event) {
 		let targetItem = event.target.closest(".item");
+		// on click of a collapsed deck in library mode, just expand the deck
+		let section = targetItem.closest(".section");
+		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {
+			section.classList.toggle("expanded");
+			return;
+		}
 		let isMultiselectable = !!targetItem.closest("[data-multiselectable]");
 		// Cmd/Ctrl + mouseclick toggles selected item node
 		if (isMultiselectable && (Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) {

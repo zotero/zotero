@@ -127,12 +127,36 @@ export class CitationDialogHelpers {
 		return descriptionWrapper;
 	}
 
-	buildItemsSection(id, headerText) {
+	buildItemsSection(id, headerText, isCollapsible, items, initExpanded) {
 		let section = this.createNode("div", { id }, "section");
 		let header = this.createNode("div", {}, "header");
-		header.innerText = headerText;
+		let headerSpan = this.createNode("span", {}, "header-label");
+		headerSpan.innerText = headerText;
+		header.append(headerSpan);
 		let itemContainer = this.createNode("div", { role: "group", "aria-label": headerText }, "itemsContainer");
 		section.append(header, itemContainer);
+
+		if (isCollapsible) {
+			section.classList.add("expandable");
+			if (initExpanded) {
+				section.classList.add("expanded");
+			}
+			section.style.setProperty('--deck-length', items.length);
+			let addAllBtn = this.createNode("span", {}, "add-all");
+			addAllBtn.addEventListener("click", () => {
+				let event = new CustomEvent("add-all-items", {
+					bubbles: true,
+					detail: { items }
+				});
+				this.doc.dispatchEvent(event);
+			});
+			this.doc.l10n.setAttributes(addAllBtn, "integration-citationDialog-add-all");
+			header.append(addAllBtn);
+			
+			headerSpan.addEventListener("click", () => {
+				section.classList.toggle("expanded");
+			});
+		}
 		return section;
 	}
 

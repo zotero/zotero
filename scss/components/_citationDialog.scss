@@ -86,6 +86,14 @@
 		height: 28px;
 	}
 
+	.add-all {
+		font-weight: 400;
+		text-decoration: underline;
+		&:hover {
+			cursor: pointer;
+		}
+	}
+
 	#library-layout {
 		#library-other-items {
 
@@ -94,8 +102,15 @@
 			padding-top: 8px;
 			margin-inline-end: 10px;
 			overflow-x: scroll;
+			scrollbar-width: none;
+
+			--item-width: 210px;
+			--item-padding-horizontal: 4px;
+			--item-margin: 10px;
+			--item-horizontal-size: calc(var(--item-width) + 2*var(--item-padding-horizontal) + 2px);
 
 			.section {
+				margin-inline-end: var(--item-margin);
 				.header {
 					color: var(--fill-secondary);
 				}
@@ -103,18 +118,18 @@
 				.itemsContainer {
 					flex-direction: row;
 					display: flex;
+					margin-bottom: 10px;
+					margin-top: 4px;
+					gap: var(--item-margin);
+					transition: gap 0.2s ease-in-out;
 		
 					.item {
 						@include focus-ring;
 						height: 42px;
 						flex-shrink: 0;
-						width: 210px;
+						width: var(--item-width);
 						overflow: hidden;
 						white-space: nowrap;
-						margin: 4px 10px 10px 10px;
-						&:first-child {
-							margin-left: 0;
-						}
 						border: 1px solid var(--fill-quarternary);
 						border-radius: 5px;
 						-moz-window-dragging: no-drag;
@@ -124,13 +139,15 @@
 						justify-content: center;
 		
 						cursor: default;
-						padding: 0 4px;
+						padding: 0 var(--item-padding-horizontal);
 						line-height: 18px;
 						-moz-user-select: none;
-	
-						&:hover {
-							background-color: var(--fill-quarternary);
-						}
+
+						transform: translateX(0);
+						transition: transform 0.2s ease-in-out;//, margin-inline 0.3s ease-in-out;
+						
+						// color has to be without opacity to the selected items deck
+						background-color: var(--color-background);
 		
 						.title {
 							overflow: hidden;
@@ -143,6 +160,86 @@
 							line-height: 16px;
 							overflow: hidden;
 							text-overflow: ellipsis;
+						}
+					}
+				}
+
+				// handle sections that can be expanded or collapsed
+				&.expandable {
+					transition: width 0.2s ease-in-out;
+					width: calc((var(--item-horizontal-size) + 2*var(--item-margin)) * var(--deck-length));
+
+					// header has underline effect on hover and has an icon before it
+					// indicating current state
+					.header {
+						-moz-window-dragging: no-drag;
+						-moz-user-select: none;
+						width: var(--item-horizontal-size);
+
+						display: flex;
+						justify-content: space-between;
+				
+						.header-label {
+							&:hover {
+								cursor: pointer;
+								text-decoration: underline;
+							}
+							&::before {
+								@include svgicon("expand-horizontal", "universal", "16");
+								width: 16px;
+								height: 16px;
+								display: inline-block;
+								content: "";
+								white-space: pre;
+								margin-inline-end: 3px;
+							}
+						}
+					}
+					&.expanded {
+						.header-label::before {
+							@include svgicon("collapse-horizontal", "universal", "16");
+						}
+					}
+					.item {
+						z-index: calc(var(--deck-length) - var(--deck-index));
+					}
+					// collapsed sections move all items under the top first item
+					&:not(.expanded) {
+						// collapsed deck's width = width of an item + 4px for each item peaking behind the top one (max of 2)
+						width: calc(var(--item-horizontal-size) + 4px * min(2, var(--deck-length)));
+						.itemsContainer {
+							gap: 0;
+						}
+						.item:nth-child(1) {
+							box-shadow: 5px -5px 10px -5px rgba(0,0,0,.1);
+						}
+						// 2nd and 3rd children are moved behind the first item, shrunk slightly and moved a bit to the right
+						// (by 16px and 32px) so their edge peaks out behind the top item
+						.item:nth-child(2) {
+							transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size)) + 16px)) scale(0.9);
+							box-shadow: 5px -5px 10px -5px rgba(0,0,0,.1);
+						}
+						.item:nth-child(3) {
+							transform:  translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size)) + 32px)) scale(0.8);
+							box-shadow: 5px -5px 10px -5px rgba(0,0,0,.1);
+						}
+						// remaining item cards are just hidden behind the top item
+						.item:nth-child(n + 4) {
+							transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size))));
+						}
+					}
+				}
+				// separate items get a hover effect, unless they are in
+				// a collapsed expandable group, in which case the whole group is hovered
+				&:not(.expandable), &.expandable.expanded {
+					.item:hover {
+						background-color: var(--color-quarternary-on-background);
+					}
+				}
+				&.expandable:not(.expanded) {
+					.itemsContainer:hover {
+						.item {
+							background-color: var(--color-quarternary-on-background);
 						}
 					}
 				}
@@ -208,6 +305,52 @@
 					}
 					&.selected {
 						background: var(--accent-blue30);
+					}
+				}
+				&.expandable {
+					// styling for expandable header with a twisty
+					.header {
+						-moz-window-dragging: no-drag;
+						-moz-user-select: none;
+						display: flex;
+						justify-content: space-between;
+
+						.header-label {
+							&:hover {
+								cursor: pointer;
+								text-decoration: underline;
+							}
+							&::before {
+								@include svgicon("chevron-8", "universal", "8");
+								width: 8px;
+								height: 8px;
+								display: inline-block;
+								content: "";
+								white-space: pre;
+								margin-inline-end: 3px;
+
+								transform: rotate(0deg);
+								transform-origin: center;
+								transition: transform 0.2s ease-in-out;
+								vertical-align: middle;
+								margin-bottom: 3px;
+							}
+						}
+					}
+					&.expanded {
+						.header-label::before {
+							transform: rotate(180deg);
+						}
+					}
+					// item container has no height when it is collapsed
+					.itemsContainer {
+						overflow: hidden;
+						transition: height 0.3s ease;
+					}
+					&:not(.expanded) {
+						.itemsContainer {
+							height: 0 !important; // important to override inline height with items displayed
+						}
 					}
 				}
 			}
@@ -303,11 +446,6 @@
 		// add comma between description <span>s
 		span:not(:last-child):not([no-comma])::after {
 			content: ", ";
-		}
-		&.expand-selected {
-			&:hover {
-				text-decoration: underline;
-			}
 		}
 	}
 
