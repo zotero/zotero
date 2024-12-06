@@ -1664,7 +1664,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (!json.username) throw new Error("username not found in key response");
 		if (!json.access) throw new Error("'access' not found in key response");
 
-		Zotero.Sync.Data.Local.setAPIKey(json.key);
+		yield Zotero.Sync.Data.Local.setAPIKey(json.key);
 
 		return json;
 	})
@@ -1674,7 +1674,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		this.resetStorageController('zfs');
 		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
 		var client = this.getAPIClient({apiKey});
-		Zotero.Sync.Data.Local.setAPIKey();
+		yield Zotero.Sync.Data.Local.setAPIKey();
 		yield client.deleteAPIKey();
 	})
 	
