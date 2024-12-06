@@ -724,11 +724,7 @@ describe("Zotero.CollectionTree", function() {
 				dataTransfer: {
 					dropEffect: action,
 					effectAllowed: action,
-					types: {
-						contains: function (type) {
-							return type == `zotero/${objectType}`;
-						}
-					},
+					types: [`zotero/${objectType}`],
 					getData: function (type) {
 						if (type == `zotero/${objectType}`) {
 							return ids.join(",");
@@ -744,19 +740,15 @@ describe("Zotero.CollectionTree", function() {
 		});
 		
 		
-		var canDrop = Zotero.Promise.coroutine(function* (type, targetRowID, ids) {
+		var canDrop = Zotero.Promise.coroutine(function* (objectType, targetRowID, ids) {
 			var row = cv.getRowIndexByID(targetRowID);
 			
 			var dt = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == `zotero/${type}`;
-					}
-				},
+				types: [`zotero/${objectType}`],
 				getData: function (type) {
-					if (type == `zotero/${type}`) {
+					if (type == `zotero/${objectType}`) {
 						return ids.join(",");
 					}
 				}

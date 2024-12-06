@@ -1044,11 +1044,7 @@ describe("Zotero.ItemTree", function() {
 			drop(itemsView.getRowIndexByID(item2.id), 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'zotero/item';
-					}
-				},
+				types: ['zotero/item'],
 				getData: function (type) {
 					if (type == 'zotero/item') {
 						return item3.id + "";
@@ -1082,11 +1078,7 @@ describe("Zotero.ItemTree", function() {
 			drop(itemsView.getRowIndexByID(item1.id), 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'zotero/item';
-					}
-				},
+				types: ['zotero/item'],
 				getData: function (type) {
 					if (type == 'zotero/item') {
 						return item3.id + "";
@@ -1115,11 +1107,7 @@ describe("Zotero.ItemTree", function() {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -1145,11 +1133,7 @@ describe("Zotero.ItemTree", function() {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'text/x-moz-url';
-					}
-				},
+				types: ['text/x-moz-url'],
 				getData: function (type) {
 					if (type == 'text/x-moz-url') {
 						return pdfURL;
@@ -1177,11 +1161,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'text/x-moz-url';
-					}
-				},
+				types: ['text/x-moz-url'],
 				getData: function (type) {
 					if (type == 'text/x-moz-url') {
 						return pdfURL;
@@ -1231,11 +1211,7 @@ describe("Zotero.ItemTree", function() {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'text/x-moz-url';
-					}
-				},
+				types: ['text/x-moz-url'],
 				getData: function (type) {
 					if (type == 'text/x-moz-url') {
 						return pdfURL;
@@ -1288,11 +1264,7 @@ describe("Zotero.ItemTree", function() {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'text/x-moz-url';
-					}
-				},
+				types: ['text/x-moz-url'],
 				getData: function (type) {
 					if (type == 'text/x-moz-url') {
 						return pdfURL;
@@ -1332,11 +1304,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -1377,11 +1345,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'link',
 				effectAllowed: 'link',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -1422,11 +1386,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'link',
 				effectAllowed: 'link',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -1459,11 +1419,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -1499,11 +1455,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -1534,11 +1486,7 @@ describe("Zotero.ItemTree", function() {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 2,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i <= 1) {
@@ -1571,11 +1519,7 @@ describe("Zotero.ItemTree", function() {
 			let dataTransfer = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: {
-					contains: function (type) {
-						return type == 'application/x-moz-file';
-					}
-				},
+				types: ['application/x-moz-file'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
