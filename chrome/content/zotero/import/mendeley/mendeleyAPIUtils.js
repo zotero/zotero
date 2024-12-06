@@ -117,7 +117,7 @@ const apiFetchUrl = async (tokens, url, headers = {}, options = {}) => {
 
 const apiFetch = async (tokens, endPoint, params = {}, headers = {}, options = {}) => {
 	const stringParams = Object.entries(params).map(p => p.join('=')).join('&');
-	const url = MENDELEY_API_URL + '/' + endPoint + '?' + stringParams;
+	const url = `${MENDELEY_API_URL}/${endPoint}${stringParams.length ? '?' + stringParams : ''}`;
 	return apiFetchUrl(tokens, url, headers, options);
 };
 
@@ -183,8 +183,8 @@ const obtainReferenceManagerToken = async (login, password) => {
 						hasEnteredLogin = await browser.browsingContext.currentWindowGlobal
 							.getActor("MendeleyAuth")
 							.sendQuery("login", { login });
-						Zotero.debug(`hasEnteredLogin: ${hasEnteredLogin}`);
 						if (!hasEnteredLogin) {
+							browser.destroy();
 							reject(new Error("Failed to enter login"));
 						}
 					}
@@ -195,8 +195,8 @@ const obtainReferenceManagerToken = async (login, password) => {
 						hasEnteredPassword = await browser.browsingContext.currentWindowGlobal
 							.getActor("MendeleyAuth")
 							.sendQuery("password", { password });
-						Zotero.debug(`hasEnteredPassword: ${hasEnteredPassword}`);
 						if (!hasEnteredPassword) {
+							browser.destroy();
 							reject(new Error("Failed to enter password"));
 						}
 					}
@@ -205,6 +205,7 @@ const obtainReferenceManagerToken = async (login, password) => {
 					const cookies = cookieSandbox.getCookiesForURI(
 						Services.io.newURI("https://www.mendeley.com/reference-manager/library")
 					);
+					browser.destroy();
 					if (!cookies.accessToken) {
 						reject(new Error("Failed to obtain Mendeley access token"));
 					}
@@ -218,6 +219,7 @@ const obtainReferenceManagerToken = async (login, password) => {
 
 		browser.load("https://www.mendeley.com/sign-in?routeTo=https://www.mendeley.com/reference-manager/library/");
 		Zotero.Promise.delay(ACCESS_TOKEN_TIMEOUT).then(() => {
+			browser.destroy();
 			reject(new Error("Timed out while obtaining Mendeley access token"));
 		});
 	});

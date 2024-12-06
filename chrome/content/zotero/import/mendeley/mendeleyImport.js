@@ -38,6 +38,7 @@ var Zotero_Import_Mendeley = function () {
 	
 	this._tokens = null;
 	this._credentials = null;
+	this._refManagerToken = null;
 	this._db = null;
 	this._file = null;
 	this._saveOptions = null;
@@ -327,15 +328,18 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		}
 
 		if (this._credentials && !this.skipNotebooks) {
-			const token = await obtainReferenceManagerTokenWithRetry(this._credentials.username, this._credentials.password);
-			this._progress += 1; // progress one arbitrary "tick" assigned to importing notebooks task, we have 4 more left
-			if (token) {
+			if (!this._refManagerToken) {
+				const token = await obtainReferenceManagerTokenWithRetry(this._credentials.username, this._credentials.password);
 				this._refManagerToken = {
 					kind: 'referenceManager',
 					accessToken: token,
 					username: this._credentials.username,
 					password: this._credentials.password
 				};
+			}
+			
+			this._progress += 1; // progress one arbitrary "tick" assigned to importing notebooks task, we have 4 more left
+			if (this._refManagerToken) {
 				const notebooks = await this._getNotebooksAPI();
 				const notesContent = await Promise.all(notebooks.map(notebook => this._translateNotebookToNoteContent(libraryID, notebook)));
 				this._progress += 1; // progress one arbitrary "tick" assigned to importing notebooks task, we have 1 more left
@@ -353,7 +357,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 
 					const isMappedToExisting = !!existingItem;
 					Zotero.debug(isMappedToExisting ? `Updating existing notebook "${uuid}" -> "${existingItem.key}"` : `Importing new notebook "${uuid}"`, 5);
-					let item = existingItem ?? new Zotero.Item('note');
+					let item = isMappedToExisting ? existingItem : new Zotero.Item('note');
 					item.libraryID = libraryID;
 					item.setNote(noteContent);
 					item.addRelation(predicate, uuid);
@@ -1085,14 +1089,15 @@ Zotero_Import_Mendeley.prototype._translateNotebookToNoteContent = async functio
 							'mendeleyDB:annotationUUID',
 							annotationUUID
 						);
-						
-						let attachmentItem = Zotero.Items.get(annotation.parentID);
-						let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
-						jsonAnnotation.attachmentItemID = attachmentItem.id;
-						jsonAnnotation.id = annotation.key;
+						if (annotation) {
+							let attachmentItem = Zotero.Items.get(annotation.parentID);
+							let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
+							jsonAnnotation.attachmentItemID = attachmentItem.id;
+							jsonAnnotation.id = annotation.key;
 
-						const { html } = Zotero.EditorInstanceUtilities.serializeAnnotations([jsonAnnotation]);
-						return html;
+							const { html } = Zotero.EditorInstanceUtilities.serializeAnnotations([jsonAnnotation]);
+							return html;
+						}
 					}
 				}
 			}
@@ -1744,6 +1749,11 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 					// do not attempt to import annotations for non-PDF files
 					return;
 				}
+
+				// Mendeley produces empty, type-less annotations that confuse the PDF worker
+				annotations = annotations.filter(
+					annotation => ['highlight', 'note', 'image', 'ink', 'underline', 'text'].includes(annotation.type)
+				);
 				
 				let annotationMap = new Map();
 				for (let annotation of annotations) {
@@ -1766,6 +1776,7 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 				for (let annotation of annotations) {
 					// Ignore empty highlights
 					if (annotation.type == 'highlight' && !annotation.text) {
+						Zotero.debug(`Skipping empty highlight with uuid ${annotation.uuid}`, 5);
 						continue;
 					}
 					

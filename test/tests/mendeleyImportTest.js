@@ -3,10 +3,18 @@
 describe('Zotero_Import_Mendeley', function () {
 	var server, httpd, httpdURL, importers;
 
-	const getImporter = () => {
+	const getImporter = ({ importNotes = false } = {}) => {
 		const importer = new Zotero_Import_Mendeley();
 		importer.mendeleyAuth = { kind: 'direct', tokens: { accessToken: 'access_token', refreshToken: 'refresh_token' } };
-		importer.skipNotebooks = true;
+		importer.skipNotebooks = !importNotes;
+		if (importNotes) {
+			importer._refManagerToken = {
+				kind: 'referenceManager',
+				accessToken: 'refman_token',
+				username: 'username',
+				password: 'password'
+			};
+		}
 		importers.push(importer);
 		return importer;
 	};
@@ -14,7 +22,7 @@ describe('Zotero_Import_Mendeley', function () {
 	before(async () => {
 		Components.utils.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
 
-		// real http server is used to deliver an empty pdf so that annotations can be processed during import
+		// A real HTTP server is used to deliver a Bitcoin PDF so that annotations can be processed during import.
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		const port = 16213;
 		httpd = new HttpServer();
@@ -22,7 +30,7 @@ describe('Zotero_Import_Mendeley', function () {
 		httpd.start(port);
 		httpd.registerFile(
 			'/file1.pdf',
-			Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'empty.pdf'))
+			Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'recognizePDF_test_title.pdf'))
 		);
 	});
 
@@ -84,7 +92,7 @@ describe('Zotero_Import_Mendeley', function () {
 
 		setHTTPResponse(server, 'https://api.mendeley.com/', {
 			method: 'GET',
-			url: `profiles/v2/me?`,
+			url: `profiles/v2/me`,
 			status: 200,
 			headers: {},
 			json: JSON.parse(
@@ -104,7 +112,7 @@ describe('Zotero_Import_Mendeley', function () {
 
 		setHTTPResponse(server, 'https://api.mendeley.com/', {
 			method: 'GET',
-			url: `files/19fb5e5b-1a39-4851-b513-d48441a670e1?`,
+			url: `files/19fb5e5b-1a39-4851-b513-d48441a670e1`,
 			status: 200, // ideally would be 303 but mock http doesn't like it
 			headers: {
 				Location: `${httpdURL}/file1.pdf`
@@ -526,7 +534,7 @@ describe('Zotero_Import_Mendeley', function () {
 			annotation.annotationText = 'Highlight text';
 			annotation.annotationComment = 'Highlight comment';
 			annotation.annotationPageLabel = '57';
-			annotation.addRelation('mendeleyDB:annotationUUID', '84f12446-3b49-4052-bbdc-832d28e1e072');
+			annotation.addRelation('mendeleyDB:annotationUUID', '339d0202-d99f-48a2-aa0d-9b0c5631af26');
 			await annotation.saveTx();
 
 			let mendeleyNotebook = JSON.parse(
@@ -543,6 +551,86 @@ describe('Zotero_Import_Mendeley', function () {
 			await annotation.eraseTx();
 			await attachment.eraseTx();
 			await item.eraseTx();
+		});
+
+		it('should import a notebook from Mendeley', async () => {
+			const importer = getImporter({ importNotes: true });
+			
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `notes/v1?limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/notebooks.json')
+				)
+			});
+
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: 'notes/v1/8041a43b-f740-41ec-be42-a24cc5106d68',
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/notebook.json')
+				)
+			});
+
+			await importer.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			const note = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:notebookUUID', '8041a43b-f740-41ec-be42-a24cc5106d68'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.match(
+				note.note,
+				/^<h1>TEST<\/h1>\n<p><span class="highlight" data-annotation="((?:(?:%[0-9A-F]{2}|[^<>'" %])+))">“A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution”<\/span> <span class="citation" data-citation="((?:(?:%[0-9A-F]{2}|[^<>'" %])+))">\(<span class="citation-item">“Item with PDF”, 2005, p. 1<\/span>\)<\/span><\/p>\n<p>Lorem Ipsum<\/p>$/i
+			);
+		});
+
+		it('should handle incorrect annotations', async () => {
+			let annotationsResponse = JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/annotations.json')
+			);
+			delete annotationsResponse.find(a => a.id == '885615a7-170e-4613-af80-0227ea76ae55').type;
+			delete annotationsResponse.find(a => a.id == 'bfbdb972-171d-4b21-8ae6-f156ac9a2b41').color;
+			annotationsResponse.push({ type: 'note', id: 'invalid' });
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `annotations?limit=200`,
+				status: 200,
+				headers: {},
+				json: annotationsResponse
+			});
+
+			const importer = getImporter();
+			await importer.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			const pdf = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:fileHash', 'cc22c6611277df346ff8dc7386ba3880b2bafa15'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			const annotations = await pdf.getAnnotations();
+			// Typeless notes and invalid annotations should be discarded.
+			assert.lengthOf(annotations, 5);
+			assert.lengthOf(await Zotero.Relations.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', '885615a7-170e-4613-af80-0227ea76ae55'), 0);
+			assert.lengthOf(await Zotero.Relations.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', 'invalid'), 0);
+			// Colorless note annotations should have a default colour.
+			const colorlessNote = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', 'bfbdb972-171d-4b21-8ae6-f156ac9a2b41'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			assert.equal(colorlessNote.annotationColor, '#ffd400');
 		});
 	});
 });
