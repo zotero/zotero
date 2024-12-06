@@ -98,7 +98,7 @@ Zotero.Sync.Data.Local = {
 		}
 		else {
 			Zotero.debug("Replacing API key");
-			await Services.logins.modifyLoginAsync(oldLoginInfo, loginInfo);
+			Services.logins.modifyLogin(oldLoginInfo, loginInfo);
 		}
 		Zotero.Notifier.trigger('modify', 'api-key', []);
 	},
