@@ -536,7 +536,7 @@ Zotero_Preferences.Advanced = {
 		serverDisabledSection.hidden = true;
 		
 		document.l10n.setArgs(availableMessage, {
-			url: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/api/`
+			url: `http://localhost:${Zotero.Server.port}/api/`
 		});
 	},
 	
