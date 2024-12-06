@@ -68,17 +68,14 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	setAPIKey: function (apiKey) {
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-			.getService(Components.interfaces.nsILoginManager);
-		
+	setAPIKey: async function (apiKey) {
 		var oldLoginInfo = this._getAPIKeyLoginInfo();
 		
 		// Clear old login
 		if ((!apiKey || apiKey === "")) {
 			if (oldLoginInfo) {
 				Zotero.debug("Clearing old API key");
-				loginManager.removeLogin(oldLoginInfo);
+				Services.logins.removeLogin(oldLoginInfo);
 			}
 			Zotero.Notifier.trigger('delete', 'api-key', []);
 			return;
@@ -97,11 +94,11 @@ Zotero.Sync.Data.Local = {
 		);
 		if (!oldLoginInfo) {
 			Zotero.debug("Setting API key");
-			loginManager.addLogin(loginInfo);
+			await Services.logins.addLoginAsync(loginInfo);
 		}
 		else {
 			Zotero.debug("Replacing API key");
-			loginManager.modifyLogin(oldLoginInfo, loginInfo);
+			await Services.logins.modifyLoginAsync(oldLoginInfo, loginInfo);
 		}
 		Zotero.Notifier.trigger('modify', 'api-key', []);
 	},

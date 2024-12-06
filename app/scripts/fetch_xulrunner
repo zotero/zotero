@@ -291,6 +291,9 @@ function modify_omni {
 	replace_line 'let uninstall = \(\) => \{' 'let uninstall = async () => {' modules/addons/XPIInstall.sys.mjs
 	replace_line 'cancelUninstallAddon\(aAddon\)' 'async cancelUninstallAddon(aAddon)' modules/addons/XPIInstall.sys.mjs
 	
+	# Prevent login manager from trying to load FxAccountsCommon.sys.mjs
+	replace_line 'return login.hostname == lazy.FXA_PWDMGR_HOST;' 'return false;' modules/storage-json.sys.mjs
+	
 	# No idea why this is necessary, but without it initialization fails with "TypeError: "constructor" is read-only"
 	replace_line 'LoginStore.prototype.constructor = LoginStore;' '\/\/LoginStore.prototype.constructor = LoginStore;' modules/LoginStore.sys.mjs
 	#  
