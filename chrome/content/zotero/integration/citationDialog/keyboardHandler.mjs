@@ -129,9 +129,12 @@ export class CitationDialogKeyboardHandler {
 		if (nextGroupIndex < 0) nextGroupIndex = allGroups.length - 1;
 		if (nextGroupIndex > allGroups.length - 1) nextGroupIndex = 0;
 		let nextGroup = allGroups[nextGroupIndex];
-		nextGroup.focus();
-		// if focus changed, stop. otherwise, focus the first focusable node in the group
-		if (this.doc.activeElement !== active) return nextGroup;
+		// try to focus on the next group itself (only if it is marked with tabindex).
+		// tabindex accounts for scrollable containers that become unnecessarily focusable
+		if (nextGroup.getAttribute("tabindex")) {
+			nextGroup.focus();
+			return nextGroup;
+		}
 		let firstFocusable = nextGroup.querySelector("[tabindex]");
 		firstFocusable?.focus();
 		return firstFocusable;
