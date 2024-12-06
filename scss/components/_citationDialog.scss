@@ -167,7 +167,7 @@
 				// handle sections that can be expanded or collapsed
 				&.expandable {
 					transition: width 0.2s ease-in-out;
-					width: calc((var(--item-horizontal-size) + 2*var(--item-margin)) * var(--deck-length));
+					width: calc((var(--item-horizontal-size) * var(--deck-length)) + (var(--item-margin) * (var(--deck-length) - 1)));
 
 					// header has underline effect on hover and has an icon before it
 					// indicating current state
@@ -192,6 +192,7 @@
 								content: "";
 								white-space: pre;
 								margin-inline-end: 3px;
+								vertical-align: bottom;
 							}
 						}
 					}
