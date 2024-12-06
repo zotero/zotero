@@ -234,6 +234,7 @@
 			else if (["ArrowLeft", "ArrowRight"].includes(event.key) && event.shiftKey) {
 				// On Shift-Left/Right swap focused bubble with it's neighbor
 				event.preventDefault();
+				event.stopPropagation();
 				let nextBubble = Utils.findNextClass("bubble", bubble, event.key == Zotero.arrowNextKey);
 				if (nextBubble) {
 					let nextBubbleIndex = [...this._body.querySelectorAll(".bubble")].findIndex(bubble => bubble == nextBubble);
