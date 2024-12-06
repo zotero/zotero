@@ -5,9 +5,7 @@ describe("Zotero.Server", function () {
 	var serverPath;
 	
 	before(function* () {
-		Zotero.Prefs.set("httpServer.enabled", true);
-		Zotero.Server.init();
-		serverPath = 'http://127.0.0.1:' + Zotero.Prefs.get('httpServer.port');
+		serverPath = 'http://127.0.0.1:' + Zotero.Server.port;
 	});
 	
 	describe('DataListener', function() {
