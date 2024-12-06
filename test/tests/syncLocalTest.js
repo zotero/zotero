@@ -5,17 +5,17 @@ describe("Zotero.Sync.Data.Local", function() {
 		it("should get and set an API key", function* () {
 			var apiKey1 = Zotero.Utilities.randomString(24);
 			var apiKey2 = Zotero.Utilities.randomString(24);
-			Zotero.Sync.Data.Local.setAPIKey(apiKey1);
+			yield Zotero.Sync.Data.Local.setAPIKey(apiKey1);
 			yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey1), apiKey1);
-			Zotero.Sync.Data.Local.setAPIKey(apiKey2);
+			yield Zotero.Sync.Data.Local.setAPIKey(apiKey2);
 			yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey2), apiKey2);
 		})
 		
 		
 		it("should clear an API key by setting an empty string", function* () {
 			var apiKey = Zotero.Utilities.randomString(24);
-			Zotero.Sync.Data.Local.setAPIKey(apiKey);
-			Zotero.Sync.Data.Local.setAPIKey("");
+			yield Zotero.Sync.Data.Local.setAPIKey(apiKey);
+			yield Zotero.Sync.Data.Local.setAPIKey("");
 			yield assert.eventually.strictEqual(Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
 		})
 	})
