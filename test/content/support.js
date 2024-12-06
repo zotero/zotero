@@ -446,7 +446,7 @@ async function waitNoLongerThan(promise, ms = 1000) {
 
 async function waitForScrollToPane(itemDetails, paneID) {
 	await itemDetails._renderPromise;
-	itemDetails.scrollToPane(paneID, "instant");
+	await itemDetails.scrollToPane(paneID, "instant");
 	// Wait for some frames or up to 150ms to ensure the pane is visible
 	await waitForFrames(5);
 }
