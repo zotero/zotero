@@ -42,10 +42,19 @@ Zotero.Server = new function() {
 		504:"Gateway Timeout"
 	};
 	
+	Object.defineProperty(this, 'port', {
+		get() {
+			if (!serv) {
+				throw new Error('Server not initialized');
+			}
+			return serv.port;
+		}
+	});
+	
 	/**
 	 * initializes a very rudimentary web server
 	 */
-	this.init = function(port, bindAllAddr, maxConcurrentConnections) {
+	this.init = function(port, bindAllAddr) {
 		if (Zotero.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing HTTP server');
 			_registerOnlineObserver();

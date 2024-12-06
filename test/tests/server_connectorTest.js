@@ -8,7 +8,6 @@ describe("Connector Server", function () {
 	
 	before(function* () {
 		this.timeout(20000);
-		Zotero.Prefs.set("httpServer.enabled", true);
 		yield resetDB({
 			thisArg: this,
 			skipBundledFiles: true
@@ -16,7 +15,7 @@ describe("Connector Server", function () {
 		yield Zotero.Translators.init();
 		
 		win = yield loadZoteroPane();
-		connectorServerPath = 'http://127.0.0.1:' + Zotero.Prefs.get('httpServer.port');
+		connectorServerPath = 'http://127.0.0.1:' + Zotero.Server.port;
 	});
 	
 	beforeEach(function () {
@@ -2689,7 +2688,7 @@ describe("Connector Server", function () {
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
 						method: 'GET',
-						url: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/`
+						url: `http://localhost:${Zotero.Server.port}/`
 					}),
 					successCodes: false
 				}

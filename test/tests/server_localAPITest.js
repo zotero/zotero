@@ -22,8 +22,7 @@ describe("Local API Server", function () {
 	}
 
 	before(async function () {
-		Zotero.Prefs.set('httpServer.enabled', true);
-		apiRoot = 'http://127.0.0.1:' + Zotero.Prefs.get('httpServer.port') + '/api';
+		apiRoot = 'http://127.0.0.1:' + Zotero.Server.port + '/api';
 
 		await resetDB({
 			thisArg: this

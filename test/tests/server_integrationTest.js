@@ -5,14 +5,12 @@ describe("MacOS Integration Server", function () {
 	
 	before(function* () {
 		this.timeout(20000);
-		Zotero.Prefs.set("httpServer.enabled", true);
 		yield resetDB({
 			thisArg: this,
 			skipBundledFiles: true
 		});
 		
-		const serverPort = Zotero.Prefs.get('httpServer.port');
-		serverURL = `http://127.0.0.1:${serverPort}/integration`;
+		serverURL = `http://127.0.0.1:${Zotero.Server.port}/integration`;
 	});
 	
 	describe('/integration/macWordCommand', function () {

@@ -381,7 +381,6 @@ describe("Zotero.Attachments", function() {
 
 		before(async function () {
 			this.timeout(20000);
-			Zotero.Prefs.set("httpServer.enabled", true);
 		});
 
 		beforeEach(async function () {
