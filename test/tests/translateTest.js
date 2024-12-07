@@ -152,7 +152,13 @@ function setupAsyncEndpoints() {
 
 describe("Zotero.Translate", function() {
 	let win;
+	let serverURL
+	let htmlURL;
+	
 	before(function* () {
+		serverURL = `http://127.0.0.1:${Zotero.Server.port}/test/translate/`;
+		htmlURL = serverURL + 'test.html';
+		
 		// TEMP: Fix for slow translator initialization on Linux/Travis
 		this.timeout(20000);
 		yield Zotero.Translators.init();
@@ -683,13 +689,13 @@ describe("Zotero.Translate", function() {
 							"snapshot":false
 						},
 						{
-							"url":"http://127.0.0.1:23119/test/translate/test.html",
+							"url": htmlURL,
 							"title":"Test Snapshot",
 							"note":"attachment 2 note",
 							"tags":TEST_TAGS
 						},
 						{
-							"url":"http://127.0.0.1:23119/test/translate/test.pdf",
+							"url": `${serverURL}test.pdf`,
 							"title":"Test PDF",
 							"note":"attachment 3 note",
 							"tags":TEST_TAGS
@@ -709,14 +715,14 @@ describe("Zotero.Translate", function() {
 			checkTestTags(link, true);
 
 			let snapshot = containedAttachments["Test Snapshot"];
-			assert.equal(snapshot.getField("url"), "http://127.0.0.1:23119/test/translate/test.html");
+			assert.equal(snapshot.getField("url"), htmlURL);
 			assert.equal(snapshot.note, "attachment 2 note");
 			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 			assert.equal(snapshot.attachmentContentType, "text/html");
 			checkTestTags(snapshot, true);
 
 			let pdf = containedAttachments["Test PDF"];
-			assert.equal(pdf.getField("url"), "http://127.0.0.1:23119/test/translate/test.pdf");
+			assert.equal(pdf.getField("url"), `${serverURL}test.pdf`);
 			assert.equal(pdf.note, "attachment 3 note");
 			assert.equal(pdf.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 			assert.equal(pdf.attachmentContentType, "application/pdf");
@@ -725,7 +731,7 @@ describe("Zotero.Translate", function() {
 
 		it('web translators should save attachment from browser document', function* () {
 			let browser = new HiddenBrowser();
-			yield browser.load("http://127.0.0.1:23119/test/translate/test.html");
+			yield browser.load(htmlURL);
 			let doc = yield browser.getDocument();
 
 			let translate = new Zotero.Translate.Web();
@@ -749,7 +755,7 @@ describe("Zotero.Translate", function() {
 			assert.equal(containedAttachments.length, 1);
 
 			let snapshot = containedAttachments[0];
-			assert.equal(snapshot.getField("url"), "http://127.0.0.1:23119/test/translate/test.html");
+			assert.equal(snapshot.getField("url"), htmlURL);
 			assert.equal(snapshot.note, "attachment note");
 			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 			assert.equal(snapshot.attachmentContentType, "text/html");
@@ -760,7 +766,7 @@ describe("Zotero.Translate", function() {
 		
 		it('web translators should save attachment from non-browser document', function* () {
 			return Zotero.HTTP.processDocuments(
-				"http://127.0.0.1:23119/test/translate/test.html",
+				htmlURL,
 				async function (doc) {
 					let translate = new Zotero.Translate.Web();
 					translate.setDocument(doc);
@@ -783,7 +789,7 @@ describe("Zotero.Translate", function() {
 					assert.equal(containedAttachments.length, 1);
 		
 					let snapshot = containedAttachments[0];
-					assert.equal(snapshot.getField("url"), "http://127.0.0.1:23119/test/translate/test.html");
+					assert.equal(snapshot.getField("url"), htmlURL);
 					assert.equal(snapshot.note, "attachment note");
 					assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 					assert.equal(snapshot.attachmentContentType, "text/html");
@@ -800,11 +806,11 @@ describe("Zotero.Translate", function() {
 					"title":"Container Item",
 					"attachments":[
 						{
-							"url":"http://127.0.0.1:23119/test/translate/does_not_exist.html",
+							"url": `${serverURL}does_not_exist.html`,
 							"title":"Non-Existent HTML"
 						},
 						{
-							"url":"http://127.0.0.1:23119/test/translate/does_not_exist.pdf",
+							"url": `${serverURL}does_not_exist.pdf`,
 							"title":"Non-Existent PDF"
 						}
 					]
@@ -825,12 +831,12 @@ describe("Zotero.Translate", function() {
 					"title":"Container Item",
 					"attachments":[
 						{
-							"url":"http://127.0.0.1:23119/test/translate/test.html",
+							"url": htmlURL,
 							"mimeType":"application/pdf",
 							"title":"Test PDF with wrong mime type"
 						},
 						{
-							"url":"http://127.0.0.1:23119/test/translate/test.pdf",
+							"url": `${serverURL}test.pdf`,
 							"mimeType":"application/pdf",
 							"title":"Test PDF",
 							"note":"attachment note",
@@ -847,7 +853,7 @@ describe("Zotero.Translate", function() {
 
 			let pdf = containedAttachments[0];
 			assert.equal(pdf.getField("title"), "Test PDF");
-			assert.equal(pdf.getField("url"), "http://127.0.0.1:23119/test/translate/test.pdf");
+			assert.equal(pdf.getField("url"), `${serverURL}test.pdf`);
 			assert.equal(pdf.note, "attachment note");
 			assert.equal(pdf.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 			checkTestTags(pdf, true);
@@ -947,12 +953,11 @@ describe("Zotero.Translate", function() {
 	
 	
 	describe("#processDocuments()", function () {
-		var url = "http://127.0.0.1:23119/test/translate/test.html";
 		var doc;
 		
 		beforeEach(function* () {
 			// This is the main processDocuments, not the translation sandbox one being tested
-			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
+			doc = (yield Zotero.HTTP.processDocuments(htmlURL, doc => doc))[0];
 		});
 		
 		it("should provide document object", async function () {
@@ -991,14 +996,14 @@ describe("Zotero.Translate", function() {
 			assert.equal(newItems.length, 1);
 			
 			var item = newItems[0];
-			assert.equal(item.getField('url'), url + '?t');
+			assert.equal(item.getField('url'), htmlURL + '?t');
 			assert.include(item.getField('extra'), 'your research sources');
 			
 			var containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 1);
 			
 			var snapshot = containedAttachments[0];
-			assert.equal(snapshot.getField("url"), url + '?t');
+			assert.equal(snapshot.getField("url"), htmlURL + '?t');
 			assert.equal(snapshot.note, "attachment note");
 			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 			assert.equal(snapshot.attachmentContentType, "text/html");
@@ -1041,14 +1046,14 @@ describe("Zotero.Translate", function() {
 			assert.equal(newItems.length, 1);
 			
 			var item = newItems[0];
-			assert.equal(item.getField('url'), url);
+			assert.equal(item.getField('url'), htmlURL);
 			assert.include(item.getField('extra'), 'your research sources');
 			
 			var containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 1);
 			
 			var snapshot = containedAttachments[0];
-			assert.equal(snapshot.getField("url"), url);
+			assert.equal(snapshot.getField("url"), htmlURL);
 			assert.equal(snapshot.note, "attachment note");
 			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
 			assert.equal(snapshot.attachmentContentType, "text/html");
@@ -1058,12 +1063,11 @@ describe("Zotero.Translate", function() {
 	
 	
 	describe("#setTranslatorProvider()", function () {
-		var url = "http://127.0.0.1:23119/test/translate/test.html";
 		var doc;
 		
 		beforeEach(function* () {
 			// This is the main processDocuments, not the translation sandbox one being tested
-			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
+			doc = (yield Zotero.HTTP.processDocuments(htmlURL, doc => doc))[0];
 		});
 		
 		it("should set a custom version of Zotero.Translators", async function () {
@@ -1072,7 +1076,7 @@ describe("Zotero.Translate", function() {
 				translatorID: "e6111720-1f6c-42b0-a487-99b9fa50b8a1",
 				label: "Test",
 				creator: "Creator",
-				target: "^http:\/\/127.0.0.1:23119\/test",
+				target: "^" + serverURL.replace(/\//g, '\\/'),
 				minVersion: "5.0",
 				maxVersion: "",
 				priority: 100,
@@ -1126,7 +1130,7 @@ describe("Zotero.Translate", function() {
 				translatorID: "e6111720-1f6c-42b0-a487-99b9fa50b8a1",
 				label: "Test",
 				creator: "Creator",
-				target: "^http:\/\/127.0.0.1:23119\/test",
+				target: "^" + serverURL.replace(/\//g, '\\/'),
 				minVersion: "5.0",
 				maxVersion: "",
 				priority: 100,
@@ -1348,12 +1352,13 @@ describe("Zotero.Translate", function() {
 	});
 	
 	describe("Async translators", function () {
-		var htmlURL = "http://127.0.0.1:23119/test/translate/test.html";
-		var jsonURL = "http://127.0.0.1:23119/test/translate/test.json";
-		var notFoundURL = "http://127.0.0.1:23119/test/translate/does_not_exist.html"
-		var doc;
+		let jsonURL;
+		let notFoundURL;
+		let doc;
 
 		before(function* () {
+			jsonURL = `${serverURL}test.json`
+			notFoundURL = `${serverURL}does_not_exist.html`;
 			setupAttachmentEndpoints();
 			setupAsyncEndpoints();
 			doc = (yield Zotero.HTTP.processDocuments(htmlURL, doc => doc))[0];
@@ -1364,7 +1369,7 @@ describe("Zotero.Translate", function() {
 				translatorID: "e6111720-1f6c-42b0-a487-99b9fa50b8a1",
 				label: "Test",
 				creator: "Creator",
-				target: "^http:\/\/127.0.0.1:23119\/test",
+				target: "^" + serverURL.replace(/\//g, '\\/'),
 				minVersion: "5.0",
 				maxVersion: "",
 				priority: 100,
