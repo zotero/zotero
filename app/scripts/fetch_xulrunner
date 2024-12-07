@@ -463,6 +463,8 @@ if [ $BUILD_MAC == 1 ]; then
 		set -e
 		hdiutil attach -quiet Firefox.dmg
 		cp -a /Volumes/Firefox/Firefox.app .
+		# Store local copy of unmodified app
+		zip -r "Firefox $GECKO_VERSION.app.zip" Firefox.app
 		hdiutil detach -quiet /Volumes/Firefox
 	fi
 	
@@ -509,13 +511,8 @@ if [ $BUILD_MAC == 1 ]; then
 		exit 1
 	fi
 	
-	if [ ! -e "Firefox $GECKO_VERSION.app.zip" ]; then
-		rm "Firefox.dmg"
-	fi
+	rm -f Firefox.dmg
 	
-	#if [ ! -e "Firefox $GECKO_VERSION MacOS.zip" ]; then
-	#	rm "MacOS.zip"
-	#fi
 	echo $("$SCRIPT_DIR/xulrunner_hash" -p m) > hash-mac
 fi
 
