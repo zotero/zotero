@@ -69,11 +69,7 @@ var doLoad = async function () {
 				Zotero_Bibliography_Dialog.treeItemSelected();
 			}
 			else if (isAddEditItemsDialog) {
-				onItemSelected();
 				Zotero_Citation_Dialog.treeItemSelected();
-			}
-			else {
-				onItemSelected();
 			}
 		},
 		onActivate: () => {
@@ -82,16 +78,17 @@ var doLoad = async function () {
 		id: io.itemTreeID || "select-items-dialog",
 		dragAndDrop: false,
 		persistColumns: true,
+		regularOnly: io.onlyRegularItems,
 		columnPicker: true,
-		emptyMessage: Zotero.getString('pane.items.loading'),
-		multiSelect: !io.singleSelection
+		multiSelect: io.multiSelect,
+		emptyMessage: Zotero.getString('pane.items.loading')
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
 	const filterLibraryIDs = false || io.filterLibraryIDs;
 	const hideSources = io.hideCollections || ['duplicates', 'trash', 'feeds'];
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
-		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),
+		onSelectionChange: () => onCollectionSelected(),
 		filterLibraryIDs,
 		hideSources
 	});
@@ -161,8 +158,6 @@ var onCollectionSelected = async function () {
 	await itemsView.changeCollectionTreeRow(collectionTreeRow);
 	
 	itemsView.clearItemsPaneMessage();
-	
-	collectionsView.runListeners('select');
 };
 
 function onSearch()
@@ -171,25 +166,6 @@ function onSearch()
 	{
 		var searchVal = document.getElementById('zotero-tb-search-textbox').value;
 		itemsView.setFilter('search', searchVal);
-	}
-}
-
-function onItemSelected()
-{
-	itemsView.runListeners('select');
-	if (io.onlyRegularItems) {
-		// Disable "accept" button if a top-level item isn't selected
-		let selected = itemsView.getSelectedItems();
-		let disableAccept = (selected && !selected.every(item => item.isRegularItem()));
-		// TEMP: Disable the button directly only as long as we move the button box in doLoad().
-		// Then, we should set buttondisabledaccept attribute on the dialog
-		if (disableAccept) {
-			document.querySelector("dialog button[dlgtype='accept']").setAttribute("disabled", true);
-		}
-		else {
-			// Remove disabled attribute since the stylesheet looks at disabled attribute
-			document.querySelector("dialog button[dlgtype='accept']").removeAttribute("disabled");
-		}
 	}
 }
 

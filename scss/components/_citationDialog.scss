@@ -1,0 +1,463 @@
+#citation-dialog {
+	min-width: 800px;
+	height: 100%;
+	-moz-window-dragging: drag;
+
+	body {
+		height: inherit;
+		margin: 0;
+		color: var(--fill-primary);
+		background: var(--material-background);
+	}
+
+	[hidden] {
+		display: none !important;
+	}
+	
+	.layout {
+		display: contents;
+	}
+	
+	.btn-icon {
+		@include focus-ring;
+		border: none;
+		width: 28px;
+		height: 28px;
+		max-height: 28px;
+		padding: 0;
+		color: var(--fill-secondary);
+		background-size: 60% !important;
+		border-radius: 5px;
+		-moz-window-dragging: no-drag;
+		&:hover:not([disabled]) {
+			cursor: pointer;
+			background-color: var(--fill-quinary) !important;
+		}
+		&:active:not([disabled]) {
+			background-color: var(--fill-quarternary) !important;
+		}
+	}
+
+	#search-row {
+		margin: 5px 10px 5px 0;
+
+		#z-icon-container {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 36px; // same as left margin on .library-other-items
+
+			#z-icon {
+				background-image: url(chrome://zotero/skin/z.svg);
+				width: 16px;
+				height: 16px;
+				pointer-events: all;
+			}
+		}
+
+		#loading-spinner {
+			width: 28px;
+			height: 28px;
+			background-size: 60%;
+			background-repeat: no-repeat;
+			margin-inline: 6px;
+			display: inline-block;
+			visibility: hidden;
+			&[status="animate"] {
+				visibility: visible;
+			}
+		}
+
+		#accept-button {
+			@include svgicon("arrow-right", "universal", "20");
+		}
+		#cancel-button {
+			@include svgicon("dialog-cancel", "universal", "16");
+		}
+	}
+
+	.divider {
+		border-bottom: 1px solid var(--color-panedivider);
+		margin: 0;
+	}
+	.vertical-divider {
+		border-left: 1px solid var(--color-panedivider);
+		margin-inline: 6px;
+		height: 28px;
+	}
+
+	.add-all {
+		font-weight: 400;
+		text-decoration: underline;
+		&:hover {
+			cursor: pointer;
+		}
+	}
+
+	#library-layout {
+		#library-other-items {
+
+			margin-left: 36px;
+			border-top: 1px solid var(--fill-quinary);
+			padding-top: 8px;
+			margin-inline-end: 10px;
+			overflow-x: scroll;
+			scrollbar-width: none;
+
+			--item-width: 210px;
+			--item-padding-horizontal: 4px;
+			--item-margin: 10px;
+			--item-horizontal-size: calc(var(--item-width) + 2*var(--item-padding-horizontal) + 2px);
+
+			.section {
+				margin-inline-end: var(--item-margin);
+				.header {
+					color: var(--fill-secondary);
+				}
+		
+				.itemsContainer {
+					flex-direction: row;
+					display: flex;
+					margin-bottom: 10px;
+					margin-top: 4px;
+					gap: var(--item-margin);
+					transition: gap 0.2s ease-in-out;
+		
+					.item {
+						@include focus-ring;
+						height: 42px;
+						flex-shrink: 0;
+						width: var(--item-width);
+						overflow: hidden;
+						white-space: nowrap;
+						border: 1px solid var(--fill-quarternary);
+						border-radius: 5px;
+						-moz-window-dragging: no-drag;
+		
+						display: flex;
+						flex-direction: column;
+						justify-content: center;
+		
+						cursor: default;
+						padding: 0 var(--item-padding-horizontal);
+						line-height: 18px;
+						-moz-user-select: none;
+
+						transform: translateX(0);
+						transition: transform 0.2s ease-in-out;//, margin-inline 0.3s ease-in-out;
+						
+						// color has to be without opacity to the selected items deck
+						background-color: var(--color-background);
+		
+						.title {
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+		
+						.description {
+							color: var(--fill-secondary);
+							font-size: 12px;
+							line-height: 16px;
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+					}
+				}
+
+				// handle sections that can be expanded or collapsed
+				&.expandable {
+					transition: width 0.2s ease-in-out;
+					width: calc((var(--item-horizontal-size) * var(--deck-length)) + (var(--item-margin) * (var(--deck-length) - 1)));
+
+					// header has underline effect on hover and has an icon before it
+					// indicating current state
+					.header {
+						-moz-window-dragging: no-drag;
+						-moz-user-select: none;
+						width: var(--item-horizontal-size);
+
+						display: flex;
+						justify-content: space-between;
+				
+						.header-label {
+							&:hover {
+								cursor: pointer;
+								text-decoration: underline;
+							}
+							&::before {
+								@include svgicon("expand-horizontal", "universal", "16");
+								width: 16px;
+								height: 16px;
+								display: inline-block;
+								content: "";
+								white-space: pre;
+								margin-inline-end: 3px;
+								vertical-align: bottom;
+							}
+						}
+					}
+					&.expanded {
+						.header-label::before {
+							@include svgicon("collapse-horizontal", "universal", "16");
+						}
+					}
+					.item {
+						z-index: calc(var(--deck-length) - var(--deck-index));
+					}
+					// collapsed sections move all items under the top first item
+					&:not(.expanded) {
+						// collapsed deck's width = width of an item + 4px for each item peaking behind the top one (max of 2)
+						width: calc(var(--item-horizontal-size) + 4px * min(2, var(--deck-length)));
+						.itemsContainer {
+							gap: 0;
+						}
+						.item:nth-child(1) {
+							box-shadow: 5px -5px 10px -5px rgba(0,0,0,.1);
+						}
+						// 2nd and 3rd children are moved behind the first item, shrunk slightly and moved a bit to the right
+						// (by 16px and 32px) so their edge peaks out behind the top item
+						.item:nth-child(2) {
+							transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size)) + 16px)) scale(0.9);
+							box-shadow: 5px -5px 10px -5px rgba(0,0,0,.1);
+						}
+						.item:nth-child(3) {
+							transform:  translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size)) + 32px)) scale(0.8);
+							box-shadow: 5px -5px 10px -5px rgba(0,0,0,.1);
+						}
+						// remaining item cards are just hidden behind the top item
+						.item:nth-child(n + 4) {
+							transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size))));
+						}
+					}
+				}
+				// separate items get a hover effect, unless they are in
+				// a collapsed expandable group, in which case the whole group is hovered
+				&:not(.expandable), &.expandable.expanded {
+					.item:hover {
+						background-color: var(--color-quarternary-on-background);
+					}
+				}
+				&.expandable:not(.expanded) {
+					.itemsContainer:hover {
+						.item {
+							background-color: var(--color-quarternary-on-background);
+						}
+					}
+				}
+			}
+		}
+		#library-trees {
+			min-height: 0;
+			flex: 1;
+			-moz-window-dragging: no-drag;
+	
+			#collections-tree-container {
+				min-width: 200px;
+				min-height: 100%;
+				border-inline-end: var(--material-panedivider);
+				& > #zotero-collections-tree {
+					background: var(--material-sidepane) !important;
+				}
+			}
+		
+			#item-tree-container {
+				min-height: 100%;
+				flex: 1; /* expand all the way to the right */
+			}
+		}
+	}
+
+	#list-layout {
+		#list-layout-wrapper {
+			-moz-user-select: none;
+			overflow-y: scroll;
+			margin: 0 8px 8px 8px;
+			height: 100%;
+			.section {
+				border-bottom: 1px solid var(--fill-quinary);
+	
+				.header {
+					font-weight: 700;
+					font-size: 13px;
+					color: var(--fill-secondary);
+					margin-inline-start: 8px;
+					padding: 4px 8px;
+				}
+				.item {
+					@include focus-ring;
+					padding: 4px 8px;
+					margin-inline-start: 8px;
+
+					border-radius: 5px;
+					color: var(--fill-primary);
+					-moz-window-dragging: no-drag;
+					cursor: default;
+					&:hover {
+						background-color: var(--fill-quarternary);
+					}
+
+					.icon {
+						margin-top: 1px;
+						margin-inline-end: 4px;
+					}
+					.description {
+						// Needed to have empty item row description to still occupy height
+						white-space: pre;
+					}
+					&.selected {
+						background: var(--accent-blue30);
+					}
+				}
+				&.expandable {
+					// styling for expandable header with a twisty
+					.header {
+						-moz-window-dragging: no-drag;
+						-moz-user-select: none;
+						display: flex;
+						justify-content: space-between;
+
+						.header-label {
+							&:hover {
+								cursor: pointer;
+								text-decoration: underline;
+							}
+							&::before {
+								@include svgicon("chevron-8", "universal", "8");
+								width: 8px;
+								height: 8px;
+								display: inline-block;
+								content: "";
+								white-space: pre;
+								margin-inline-end: 3px;
+
+								transform: rotate(0deg);
+								transform-origin: center;
+								transition: transform 0.2s ease-in-out;
+								vertical-align: middle;
+								margin-bottom: 3px;
+							}
+						}
+					}
+					&.expanded {
+						.header-label::before {
+							transform: rotate(180deg);
+						}
+					}
+					// item container has no height when it is collapsed
+					.itemsContainer {
+						overflow: hidden;
+						transition: height 0.3s ease;
+					}
+					&:not(.expanded) {
+						.itemsContainer {
+							height: 0 !important; // important to override inline height with items displayed
+						}
+					}
+				}
+			}
+		}
+	}
+
+	#bottom-area-wrapper {
+		border-top: var(--material-panedivider);
+
+		#bottom-btn-group {
+			height: 36px;
+			border-top: 1px solid var(--material-panedivider);
+			align-items: center;
+			#mode-button {
+				&[mode="library"] {
+					@include svgicon("dialog-search-library", "universal", "16");
+				}
+				&[mode="list"] {
+					@include svgicon("dialog-search-list", "universal", "16");
+				}
+				margin-inline-end: 8px;
+			}
+			#settings-button {
+				@include svgicon("dialog-options", "universal", "16");
+				margin-inline-end: 3px;
+			}
+			
+		}
+	}
+
+	#popups {
+		panel {
+			padding: 0;
+			.popup {
+				padding: 15px;
+
+			}
+		}
+		.overlay {
+			position: absolute;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+		#settings-popup {
+			top: 35px;
+			right: 5px;
+			width: 200px;
+
+			.title {
+				font-size: 13px;
+				font-weight: 700;
+				padding-bottom: 8px;
+			}
+		}
+		#itemDetails {
+			.popup {
+				width: 400px;
+
+				.details-header {
+					.icon {
+						margin-inline-end: 5px;
+						margin-top: 2px;
+						flex-shrink: 0;
+					}
+				}
+				.details {
+					display: grid;
+					align-items: center;
+					grid-template-columns: max-content 1fr;
+					.details-label {
+						margin-top: auto;
+						margin-bottom: auto;
+						width: min-content;
+						margin-inline-start: auto;
+					}
+				}
+				button.done {
+					float: right;
+					margin-right: 5px;
+				}
+				button.remove {
+					color: var(--accent-red);
+				}
+			}
+		}
+	}
+
+	.description {
+		color: var(--fill-secondary);
+		font-size: 12px;
+		// add comma between description <span>s
+		span:not(:last-child):not([no-comma])::after {
+			content: ", ";
+		}
+	}
+
+	.pre-selected-item {
+		border: 1px dotted var(--accent-orange) !important;
+	}
+
+	.aria-hidden {
+		position: absolute;
+		top: -1000px;
+		left: -1000px;
+		visibility: hidden;
+	}
+}
