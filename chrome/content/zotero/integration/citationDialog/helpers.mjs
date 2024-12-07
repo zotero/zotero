@@ -127,22 +127,19 @@ export class CitationDialogHelpers {
 		return descriptionWrapper;
 	}
 
-	buildItemsSection(id, headerText, isCollapsible, items, initExpanded) {
+	buildItemsSection(id, headerText, isCollapsible, items) {
 		let section = this.createNode("div", { id }, "section");
 		let header = this.createNode("div", {}, "header");
 		let headerSpan = this.createNode("span", {}, "header-label");
 		headerSpan.innerText = headerText;
 		header.append(headerSpan);
-		let itemContainer = this.createNode("div", { role: "group", "aria-label": headerText }, "itemsContainer");
+		let itemContainer = this.createNode("div", { role: "group", "aria-label": headerText, "data-tabstop": 1 }, "itemsContainer");
 		section.append(header, itemContainer);
 
 		if (isCollapsible) {
 			section.classList.add("expandable");
-			if (initExpanded) {
-				section.classList.add("expanded");
-			}
 			section.style.setProperty('--deck-length', items.length);
-			let addAllBtn = this.createNode("span", {}, "add-all");
+			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabstop': 1, 'data-tabindex': 2 }, "add-all");
 			addAllBtn.addEventListener("click", () => {
 				let event = new CustomEvent("add-all-items", {
 					bubbles: true,
@@ -153,8 +150,15 @@ export class CitationDialogHelpers {
 			this.doc.l10n.setAttributes(addAllBtn, "integration-citationDialog-add-all");
 			header.append(addAllBtn);
 			
+			headerSpan.setAttribute("tabindex", -1);
+			headerSpan.setAttribute("data-tabstop", 1);
+			headerSpan.setAttribute("data-tabindex", 1);
 			headerSpan.addEventListener("click", () => {
-				section.classList.toggle("expanded");
+				let event = new CustomEvent("toggle-expand-section", {
+					bubbles: true,
+					detail: { section }
+				});
+				this.doc.dispatchEvent(event);
 			});
 		}
 		return section;

@@ -115,8 +115,25 @@ export class CitationDialogKeyboardHandler {
 	tabToGroup({ forward = true }) {
 		let active = this.doc.activeElement;
 		let currentGroup = active.closest("[data-tabstop]");
+		let tabindexNode = active.closest("[data-tabindex]");
+		let layout = active.closest("#library-layout,list-layout");
+		if (tabindexNode) {
+			let tabindex = parseInt(tabindexNode.dataset.tabindex);
+			let nextIndex = forward ? tabindex + 1 : tabindex - 1;
+			let indexBasedNodes = [...layout.querySelectorAll(`[data-tabindex="${nextIndex}"]`)];
+			let indexBasedNode = indexBasedNodes.find(node => !(node.closest(".expandable:not(.expanded)") && node.classList.contains("item")));
+			if (indexBasedNode) {
+				if (indexBasedNode.getAttribute("tabindex")) {
+					indexBasedNode.focus();
+				}
+				else {
+					indexBasedNode.querySelector("[tabindex]")?.focus();
+				}
+				return indexBasedNode;
+			}
+		}
 		if (!currentGroup) return false;
-		let allGroups = [...this.doc.querySelectorAll("[data-tabstop]")];
+		let allGroups = [...layout.querySelectorAll("[data-tabstop]")];
 		allGroups = allGroups.filter(group => !group.closest("[hidden]") && !group.disabled);
 		let nextGroupIndex = null;
 		for (let i = 0; i < allGroups.length; i++) {
@@ -142,10 +159,10 @@ export class CitationDialogKeyboardHandler {
 
 	moveWithinGroup(forward, multiSelect) {
 		let active = this.doc.activeElement;
-		let currentGroup = active.closest("[data-tabstop]");
+		let currentGroup = active.closest("[data-arrow-nav]");
 		if (!currentGroup) return false;
 		let allFocusableWithinGroup = [...currentGroup.querySelectorAll("[tabindex]")];
-		allFocusableWithinGroup = allFocusableWithinGroup.filter(focusable => focusable.closest("[data-tabstop]") === currentGroup);
+		allFocusableWithinGroup = allFocusableWithinGroup.filter(focusable => focusable.closest("[data-arrow-nav]") === currentGroup);
 		let nextFocusableIndex = null;
 		for (let i = 0; i < allFocusableWithinGroup.length; i++) {
 			if (allFocusableWithinGroup[i] == active) {
@@ -155,6 +172,8 @@ export class CitationDialogKeyboardHandler {
 		}
 		if (nextFocusableIndex === null || nextFocusableIndex < 0 || nextFocusableIndex >= allFocusableWithinGroup.length) return false;
 		let nextNode = allFocusableWithinGroup[nextFocusableIndex];
+		// arrows can navigate only between nodes with the same class
+		if (nextNode.className !== this.doc.activeElement.className) return false;
 		nextNode.focus();
 
 		if (multiSelect) {

@@ -97,7 +97,6 @@ function _id(id) {
 class Layout {
 	constructor(type) {
 		this.type = type;
-		this.selectedItemsExpanded = false;
 	}
 
 	// Re-render the items based on search rersults
@@ -123,7 +122,10 @@ class Layout {
 			else {
 				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
 			}
-			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group, this.type == "list");
+			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group);
+			if (this.type == "list") {
+				IOManager.toggleSectionCollapse(section);
+			}
 			let itemContainer = section.querySelector(".itemsContainer");
 	
 			let items = [];
@@ -202,7 +204,7 @@ class LibraryLayout extends Layout {
 
 	// Create item node for an item group and store item ids in itemIDs attribute
 	async createItemNode(item, index = null) {
-		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option" }, "item");
+		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option", "data-tabindex": 3 }, "item");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemIDs", id);
 		let title = Helpers.createNode("div", {}, "title");
@@ -457,7 +459,9 @@ var IOManager = {
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
 		// handle click on "Add all" button above collapsible sections
 		doc.addEventListener("add-all-items", ({ detail: { items } }) => this.addItemsToCitation(items));
-
+		// expand/collapse item sections
+		doc.addEventListener("toggle-expand-section", ({ detail: { section } }) => this.toggleSectionCollapse(section));
+		
 		// accept/cancel events emitted by keyboardHandler
 		doc.addEventListener("dialog-accepted", accept);
 		doc.addEventListener("dialog-cancelled", cancel);
@@ -556,7 +560,7 @@ var IOManager = {
 		// on click of a collapsed deck in library mode, just expand the deck
 		let section = targetItem.closest(".section");
 		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {
-			section.classList.toggle("expanded");
+			IOManager.toggleSectionCollapse(section);
 			return;
 		}
 		let isMultiselectable = !!targetItem.closest("[data-multiselectable]");
@@ -598,6 +602,10 @@ var IOManager = {
 			}
 		}
 		IOManager.addItemsToCitation(itemsToAdd);
+	},
+
+	toggleSectionCollapse(section) {
+		section.classList.toggle("expanded");
 	},
 
 	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.
