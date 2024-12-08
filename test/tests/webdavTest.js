@@ -645,9 +645,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 							response.setStatusLine(null, 400, "Bad Request");
 							return;
 						}
-						// An XHR should already include Authorization
+						// Authorization used to already be cached here, but that's no longer the
+						// case as of fx128, so send 401
 						if (!request.hasHeader('Authorization')) {
-							response.setStatusLine(null, 400, null);
+							//response.setStatusLine(null, 400, "");
+							response.setStatusLine(null, 401, null);
+							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
 							return;
 						}
 						// Cookie shouldn't be passed
