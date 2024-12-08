@@ -66,7 +66,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		Zotero.Prefs.set("sync.storage.scheme", davScheme);
 		Zotero.Prefs.set("sync.storage.url", davHostPath);
 		Zotero.Prefs.set("sync.storage.username", davUsername);
-		controller.password = davPassword;
+		await controller.setPassword(davPassword);
 		
 		// Set download-on-sync by default
 		Zotero.Sync.Storage.Local.downloadOnSync(
