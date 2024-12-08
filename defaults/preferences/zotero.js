@@ -233,3 +233,6 @@ pref("extensions.zotero.reader.autoDisableTool.image", true);
 
 // Set color scheme to auto by default
 pref("browser.theme.toolbar-theme", 2);
+
+// Need to enable -moz-context-properties for SVG context properties to work
+pref("svg.context-properties.content.enabled", true);
