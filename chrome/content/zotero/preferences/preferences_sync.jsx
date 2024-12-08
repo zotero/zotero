@@ -44,7 +44,7 @@ Zotero_Preferences.Sync = {
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
 		
-		var pass = Zotero.Sync.Runner.getStorageController('webdav').password;
+		var pass = await Zotero.Sync.Runner.getStorageController('webdav').getPassword();
 		if (pass) {
 			document.getElementById('storage-password').value = pass;
 		}
@@ -517,7 +517,7 @@ Zotero_Preferences.Sync = {
 			var password = document.getElementById('storage-password').value;
 			if (username) {
 				// Get a new controller
-				Zotero.Sync.Runner.getStorageController('webdav').password = password;
+				yield Zotero.Sync.Runner.getStorageController('webdav').setPassword(password);
 			}
 		}
 		

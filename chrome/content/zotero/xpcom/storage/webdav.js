@@ -72,19 +72,19 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		return Zotero.Prefs.get('sync.storage.username');
 	},
 	
-	get password() {
+	async getPassword() {
 		var username = this.username;
 		
 		if (!username) {
-			Zotero.debug('Username not set before getting Zotero.Sync.Storage.WebDAV.password');
+			Zotero.debug('Username not set before calling Zotero.Sync.Storage.WebDAV.getPassword()');
 			return '';
 		}
 		
 		Zotero.debug('Getting WebDAV password');
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-								.getService(Components.interfaces.nsILoginManager);
-		
-		var logins = loginManager.findLogins(this._loginManagerHost, null, this._loginManagerRealm);
+		var logins = await Services.logins.searchLoginsAsync({
+			origin: this._loginManagerHost,
+			httpRealm: this._loginManagerRealm,
+		});
 		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username) {
@@ -93,7 +93,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41
-		logins = loginManager.findLogins("chrome://zotero", "", null);
+		logins = await Services.logins.searchLoginsAsync({
+			origin: "chrome://zotero"
+		});
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username
 					&& logins[i].formSubmitURL == "Zotero Storage Server") {
@@ -104,38 +106,41 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		return '';
 	},
 	
-	set password(password) {
+	async setPassword(password) {
 		var username = this.username;
 		if (!username) {
 			Zotero.debug('WebDAV username not set before setting password');
 			return;
 		}
 		
-		if (password == this.password) {
+		if (password == await this.getPassword()) {
 			Zotero.debug("WebDAV password hasn't changed");
 			return;
 		}
 		
 		_cachedCredentials = false;
 		
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins(this._loginManagerHost, null, this._loginManagerRealm);
+		var logins = await Services.logins.searchLoginsAsync({
+			origin: this._loginManagerHost,
+			httpRealm: this._loginManagerRealm
+		});
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing WebDAV passwords');
 			if (logins[i].httpRealm == this._loginManagerRealm) {
-				loginManager.removeLogin(logins[i]);
+				Services.logins.removeLogin(logins[i]);
 			}
 			break;
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41
-		logins = loginManager.findLogins(this._loginManagerHost, "", null);
+		logins = await Services.logins.searchLoginsAsync({
+			origin: this._loginManagerHost
+		});
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing old WebDAV passwords');
 			if (logins[i].formSubmitURL == "Zotero Storage Server") {
 				try {
-					loginManager.removeLogin(logins[i]);
+					Services.logins.removeLogin(logins[i]);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -150,25 +155,29 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				Components.interfaces.nsILoginInfo, "init");
 			var loginInfo = new nsLoginInfo(this._loginManagerHost, null,
 				this._loginManagerRealm, username, password, "", "");
-			loginManager.addLogin(loginInfo);
+			await Services.logins.addLoginAsync(loginInfo);
 		}
 	},
 	
 	get rootURI() {
 		if (!this._rootURI) {
-			this._init();
+			throw new Error("rootURI not set");
 		}
 		return this._rootURI;
 	},
 	
 	get parentURI() {
 		if (!this._parentURI) {
-			this._init();
+			throw new Error("parentURI not set");
 		}
 		return this._parentURI;
 	},
 	
-	_init: function () {
+	_init: async function () {
+		if (this._rootURI) {
+			return;
+		}
+		
 		this._rootURI = false;
 		this._parentURI = false;
 		
@@ -188,7 +197,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		var username = this.username;
-		var password = this.password;
+		var password = await this.getPassword();
 		if (!username) {
 			throw new this.VerificationError("NO_USERNAME");
 		}
@@ -218,6 +227,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	
 	
 	cacheCredentials: Zotero.Promise.coroutine(function* () {
+		yield this._init();
+		
 		if (this._cachedCredentials) {
 			Zotero.debug("WebDAV credentials are already cached");
 			return;
@@ -268,6 +279,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @return {Promise<Zotero.Sync.Storage.Result>}
 	 */
 	downloadFile: Zotero.Promise.coroutine(function* (request) {
+		yield this._init();
+		
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
 		if (!item) {
 			throw new Error("Item '" + request.name + "' not found");
@@ -411,6 +424,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	
 	
 	uploadFile: Zotero.Promise.coroutine(function* (request) {
+		yield this._init();
+		
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
 		var params = {
 			mtime: yield item.attachmentModificationTime,
@@ -610,7 +625,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 */
 	checkServer: Zotero.Promise.coroutine(function* (options = {}) {
 		// Clear URIs
-		this._init();
+		yield this._init();
 		
 		var parentURI = this.parentURI;
 		var uri = this.rootURI;
@@ -944,6 +959,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @param {Integer} libraryID
 	 */
 	purgeDeletedStorageFiles: Zotero.Promise.coroutine(function* (libraryID) {
+		yield this._init();
+		
 		var d = new Date();
 		
 		Zotero.debug("Purging deleted storage files");
@@ -989,6 +1006,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * Delete orphaned storage files older than a week before last sync time
 	 */
 	purgeOrphanedStorageFiles: Zotero.Promise.coroutine(function* () {
+		yield this._init();
+		
 		var d = new Date();
 		const libraryID = Zotero.Libraries.userLibraryID;
 		const library = Zotero.Libraries.get(libraryID);
