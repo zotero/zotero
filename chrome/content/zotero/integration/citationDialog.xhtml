@@ -51,12 +51,12 @@
 				<div id="z-icon-container">
 					<div id="z-icon"></div>
 				</div>
-				<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabstop="1" tabindex="-1"/>
+				<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabindex="10" tabindex="-1"/>
 				<div class="hbox top-level-btn-group">
 					<image id="loading-spinner" class="zotero-spinner-16"/>
-					<button id="cancel-button" class="btn-icon icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel" data-tabstop="1" tabindex="-1"/>
+					<button id="cancel-button" class="btn-icon icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel" data-tabindex="20" tabindex="-1"/>
 					<div class="vertical-divider"></div>
-					<button id="accept-button" class="btn-icon icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept" data-tabstop="1" tabindex="-1"/>
+					<button id="accept-button" class="btn-icon icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept" data-tabindex="30" tabindex="-1"/>
 				</div>
 			</div>
 			<div id="notification" style="display: none;"></div>
@@ -64,18 +64,18 @@
 		
 		<div id="list-layout" class="layout">
 			<div class="divider"></div>
-			<div id="list-layout-wrapper" class="vbox search-items" data-tabstop="1" data-arrow-nav="vertical" data-multiselectable="true" role="listbox" aria-describedby="item-description"></div>
+			<div id="list-layout-wrapper" class="vbox search-items" data-arrow-nav="vertical" data-multiselectable="true" role="listbox" aria-describedby="item-description"></div>
 		</div>
 		
 		<div id="library-layout" class="layout">
-			<div id="library-other-items" class="hbox search-items" data-arrow-nav="horizontal" role="listbox" aria-orientation="horizontal" aria-describedby="item-description"></div>
+			<div id="library-other-items" class="hbox search-items"  data-arrow-nav="horizontal" role="listbox" aria-orientation="horizontal" aria-describedby="item-description"></div>
 			<div class="divider"></div>
 			<div id="library-trees" class="hbox">			
 				<div id="collections-tree-container" class="vbox virtualized-table-container">
-					<div id="zotero-collections-tree" data-tabstop="1" data-tabindex="4"/>
+					<div id="zotero-collections-tree" data-tabindex="50"/>
 				</div>
 				<div id="item-tree-container" class="hbox virtualized-table-container">
-					<div id="zotero-items-tree" data-tabstop="1" style="--highlight-color: var(--accent-blue30);"/>
+					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
 				</div>
 			</div>
 		</div>
@@ -84,8 +84,8 @@
 			<div id="bottom-area-wrapper" class="hbox">
 				<div class="hbox" style="flex:1"></div>
 				<div id="bottom-btn-group" class="hbox">
-					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" data-tabstop="1" tabindex="-1"/>
-					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" data-tabstop="1" tabindex="-1"/>
+					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" data-tabindex="70" tabindex="-1"/>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" data-tabindex="80" tabindex="-1"/>
 				</div>
 			</div>
 		</div>

@@ -112,49 +112,42 @@ export class CitationDialogKeyboardHandler {
 		return handled;
 	}
 
-	tabToGroup({ forward = true }) {
-		let active = this.doc.activeElement;
-		let currentGroup = active.closest("[data-tabstop]");
-		let tabindexNode = active.closest("[data-tabindex]");
-		let layout = active.closest("#library-layout,list-layout");
-		if (tabindexNode) {
-			let tabindex = parseInt(tabindexNode.dataset.tabindex);
-			let nextIndex = forward ? tabindex + 1 : tabindex - 1;
-			let indexBasedNodes = [...layout.querySelectorAll(`[data-tabindex="${nextIndex}"]`)];
-			let indexBasedNode = indexBasedNodes.find(node => !(node.closest(".expandable:not(.expanded)") && node.classList.contains("item")));
-			if (indexBasedNode) {
-				if (indexBasedNode.getAttribute("tabindex")) {
-					indexBasedNode.focus();
-				}
-				else {
-					indexBasedNode.querySelector("[tabindex]")?.focus();
-				}
-				return indexBasedNode;
-			}
+	tabToGroup({ forward = true, startingTabIndex = null }) {
+		let currentTabIndex = startingTabIndex;
+		if (currentTabIndex === null) {
+			let active = this.doc.activeElement;
+			let tabindexNode = active.closest("[data-tabindex]");
+			if (!tabindexNode) return false;
+			currentTabIndex = parseInt(tabindexNode.dataset.tabindex);
 		}
-		if (!currentGroup) return false;
-		let allGroups = [...layout.querySelectorAll("[data-tabstop]")];
-		allGroups = allGroups.filter(group => !group.closest("[hidden]") && !group.disabled);
-		let nextGroupIndex = null;
-		for (let i = 0; i < allGroups.length; i++) {
-			if (allGroups[i] == currentGroup) {
-				nextGroupIndex = forward ? (i + 1) : (i - 1);
+		let tabIndexedNodes = [...this.doc.querySelectorAll("[data-tabindex]")];
+		tabIndexedNodes = tabIndexedNodes.filter(node => (node.getAttribute("tabindex") || node.querySelector("[tabindex]")) && !node.closest("[hidden]") && !node.disabled);
+		tabIndexedNodes = tabIndexedNodes.sort((a, b) => {
+			if (forward) {
+				return parseInt(a.dataset.tabindex) - parseInt(b.dataset.tabindex);
+			}
+			return parseInt(b.dataset.tabindex) - parseInt(a.dataset.tabindex);
+		});
+		let nodeToFocus;
+		for (let node of tabIndexedNodes) {
+			let tabIndex = parseInt(node.dataset.tabindex);
+			if ((forward && tabIndex > currentTabIndex) || (!forward && tabIndex < currentTabIndex)) {
+				nodeToFocus = node;
 				break;
 			}
 		}
-		if (nextGroupIndex === null) return false;
-		if (nextGroupIndex < 0) nextGroupIndex = allGroups.length - 1;
-		if (nextGroupIndex > allGroups.length - 1) nextGroupIndex = 0;
-		let nextGroup = allGroups[nextGroupIndex];
-		// try to focus on the next group itself (only if it is marked with tabindex).
-		// tabindex accounts for scrollable containers that become unnecessarily focusable
-		if (nextGroup.getAttribute("tabindex")) {
-			nextGroup.focus();
-			return nextGroup;
+		if (!nodeToFocus && startingTabIndex === null) {
+			tabIndexedNodes[0].focus();
+			return tabIndexedNodes[0];
 		}
-		let firstFocusable = nextGroup.querySelector("[tabindex]");
-		firstFocusable?.focus();
-		return firstFocusable;
+
+		if (nodeToFocus.getAttribute("tabindex")) {
+			nodeToFocus.focus();
+		}
+		else {
+			nodeToFocus.querySelector("[tabindex]")?.focus();
+		}
+		return nodeToFocus;
 	}
 
 	moveWithinGroup(forward, multiSelect) {
@@ -162,7 +155,6 @@ export class CitationDialogKeyboardHandler {
 		let currentGroup = active.closest("[data-arrow-nav]");
 		if (!currentGroup) return false;
 		let allFocusableWithinGroup = [...currentGroup.querySelectorAll("[tabindex]")];
-		allFocusableWithinGroup = allFocusableWithinGroup.filter(focusable => focusable.closest("[data-arrow-nav]") === currentGroup);
 		let nextFocusableIndex = null;
 		for (let i = 0; i < allFocusableWithinGroup.length; i++) {
 			if (allFocusableWithinGroup[i] == active) {
@@ -172,8 +164,8 @@ export class CitationDialogKeyboardHandler {
 		}
 		if (nextFocusableIndex === null || nextFocusableIndex < 0 || nextFocusableIndex >= allFocusableWithinGroup.length) return false;
 		let nextNode = allFocusableWithinGroup[nextFocusableIndex];
-		// arrows can navigate only between nodes with the same class
-		if (nextNode.className !== this.doc.activeElement.className) return false;
+		// if there is a tab index on a node, next node must have the same tabindex
+		if (active.dataset.tabindex !== nextNode.dataset.tabindex) return false;
 		nextNode.focus();
 
 		if (multiSelect) {
