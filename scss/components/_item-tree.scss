@@ -164,17 +164,18 @@
 				}
 			}
 		}
-
+	
+		.cell.hasAttachment {
+			height: 100%;
+			// Don't show ellipsis
+			text-overflow: unset;
+		}
 	
 		.cell.primary {
 			.retracted {
 				width: 12px;
 				margin-inline-start: 3px;
 			}
-		}
-
-		.cell.no-padding {
-			padding: 0;
 		}
 		
 		.cell.hasAttachment {
@@ -183,11 +184,8 @@
 			display: flex;
 			justify-content: center;
 
-			.cell-text {
-				text-overflow: unset;
-				align-items: center;
-				display: flex;
-				justify-content: center;
+			.icon-treeitemattachmentpdf {
+				background-size: 10px
 			}
 			
 			.icon-missing-file {
@@ -281,6 +279,15 @@ $-trashableObjectIcons: (
 	"collection",
 	"search"
 );
+$-actionIcons: (
+	"plus-circle",
+	"minus-circle"
+);
+
+.icon-action {
+	width: 16px;
+	height: 16px;
+}
 
 .icon-item-type {
 	width: 16px;
@@ -336,6 +343,12 @@ $-trashableObjectIcons: (
 		@each $icon in $-trashableObjectIcons {
 			.icon-css.icon-#{$icon} {
 				@include svgicon($icon, $color, "16", "collection-tree");
+			}
+		}
+
+		@each $icon in $-actionIcons {
+			.icon-css.icon-#{$icon} {
+				@include svgicon($icon, "universal", "16");
 			}
 		}
 	}
