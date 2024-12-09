@@ -288,8 +288,7 @@ class LibraryLayout extends Layout {
 			onSelectionChange: selection => {},
 			regularOnly: !isCitingNotes,
 			onActivate: (event, items) => {
-				// debounec as this can fire more than once on the same double click
-				this._addItemsDebounced(items);
+				IOManager.addItemsToCitation(items, { noInputRefocus: true });
 			},
 			emptyMessage: Zotero.getString('pane.items.loading'),
 			columns: itemColumns,
@@ -383,10 +382,6 @@ class LibraryLayout extends Layout {
 		let selectedIDs = CitationDataManager.items.map(({ zoteroItem }) => zoteroItem.id).filter(id => !!id);
 		this.itemsView.setHighlightedRows(selectedIDs);
 	}
-
-	_addItemsDebounced = Zotero.Utilities.debounce(async (items) => {
-		IOManager.addItemsToCitation(items, { noInputRefocus: true });
-	}, 100);
 }
 
 class ListLayout extends Layout {
