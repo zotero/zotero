@@ -1825,7 +1825,7 @@ describe("ZoteroPane", function () {
 
 			await waitForNotifierEvent("add", "collection");
 
-			// Collection has been copies
+			// Collection has been copied
 			let groupCollections = groupCollection.getDescendents(false, 'collection');
 			let newCollectionID = groupCollections.find(col => col.name == collectionChild.name).id;
 			let newCollection = Zotero.Collections.get(newCollectionID);
@@ -1872,6 +1872,45 @@ describe("ZoteroPane", function () {
 			assert.sameMembers(items, [item.id]);
 			// Copied collection is a top-level collection
 			assert.notOk(newCollection.parentID);
+		});
+		
+		it("should allow copying between libraries if there is a linked collection but it is in trash", async function () {
+			let groupDestination = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
+
+			let collection = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collection.id });
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			await zp.copyCollection(groupCollection);
+
+			await waitForNotifierEvent("add", "collection");
+
+			// Collection has been copied
+			let newCollection = zp.getSelectedCollection();
+			assert.equal(newCollection.libraryID, groupCollection.libraryID);
+			assert.equal(newCollection.name, collectionChild.name);
+
+			// Send new collection to trash
+			newCollection.deleted = true;
+			await newCollection.saveTx();
+
+			// Right click on the selected collection
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+			await zp.buildCopyCollectionMenu({});
+			await Zotero.Promise.delay();
+
+			let groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
+			// Menu of the library with linked collection should be enabled
+			assert.equal(groupMenu.disabled, false);
+
+			// Copy collection again
+			await zp.copyCollection(groupCollection);
+			await waitForNotifierEvent("add", "collection");
+			let anotherNewCollection = zp.getSelectedCollection();
+			// Newly created collection is in the group
+			assert.equal(anotherNewCollection.libraryID, groupCollection.libraryID);
 		});
 	});
 	describe("#moveCollection", function () {
