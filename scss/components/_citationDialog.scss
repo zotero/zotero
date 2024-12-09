@@ -27,6 +27,7 @@
 		padding: 0;
 		color: var(--fill-secondary);
 		background-size: 60% !important;
+		background-repeat: no-repeat;
 		border-radius: 5px;
 		-moz-window-dragging: no-drag;
 		&:hover:not([disabled]) {
