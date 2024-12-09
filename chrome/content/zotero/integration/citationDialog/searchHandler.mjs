@@ -122,10 +122,12 @@ export class CitationDialogSearchHandler {
 		str = str.replace(/ (?:&|and) /g, " ", "g").replace(/^,/, '');
 		str = this._cleanYear(str);
 
+		// If the query is very short, treat it as empty
+		if (str.trim().length < MIN_QUERY_LENGTH) {
+			str = "";
+		}
 		// Do not run the search if the query has not changed
 		if (str === this.lastSearchValue) return;
-		// Do not run the search if there is a query BUT it is very short
-		if (str.trim().length && str.trim().length < MIN_QUERY_LENGTH) return;
 
 		var s = new Zotero.Search();
 		Zotero.Feeds.getAll().forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
