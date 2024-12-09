@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
-
+Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
 	const specifiedLocatorRe = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-–]+) *$/;
@@ -66,10 +66,6 @@ var Zotero_QuickFormat = new function () {
 				document.getElementById('classic-view').hidden = true;
 			}
 			
-			// Only hide chrome on Windows or Mac
-			if(Zotero.isMac) {
-				document.documentElement.setAttribute("drawintitlebar", true);
-			}
 			// Hide chrome on linux
 			if (Zotero.isLinux) {
 				document.documentElement.setAttribute("hidechrome", true);
@@ -1315,10 +1311,6 @@ var Zotero_QuickFormat = new function () {
 		// Need to wait a moment for the css change above to take effect (mainly for mac)
 		await Zotero.Promise.delay(5);
 		window.resizeTo(width, height);
-		if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
-			document.children[0].setAttribute('drawintitlebar', 'false');
-			document.children[0].setAttribute('drawintitlebar', 'true');
-		}
 		// Make sure the window's width cannot be changed by dragging the edge of the window
 		document.documentElement.style.maxHeight = height + "px";
 		document.documentElement.style.minHeight = height + "px";

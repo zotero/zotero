@@ -40,7 +40,7 @@
 	onunload="doUnload();"
 	persist="screenX screenY width height"
 	class="zotero-dialog"
-	drawintitlebar="true"
+	drawintitlebar-platforms="mac,win"
 >
 <dialog
 	id="select-items-dialog"
@@ -54,6 +54,8 @@
 	// Custom elements
 	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
+
+	Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 </script>
 
 <linkset>
