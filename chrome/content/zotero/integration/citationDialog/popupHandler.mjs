@@ -123,7 +123,7 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#itemTitle").textContent = this.item.getDisplayTitle();
 		this._getNode("#itemTitle").after(description);
 		let dataTypeLabel = this.item.getItemTypeIconName(true);
-		this._getNode("#itemDetails").querySelector(".icon").setAttribute("data-item-type", dataTypeLabel);
+		this._getNode("#itemDetails").querySelector(".btn-icon").setAttribute("data-item-type", dataTypeLabel);
 
 		this._getNode("#label").value = this.citationItem.label || "page";
 		this._getNode("#locator").value = this.citationItem.locator || "";
