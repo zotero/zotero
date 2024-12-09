@@ -607,10 +607,10 @@ var IOManager = {
 	toggleSectionCollapse(section, status) {
 		// set desired class
 		if (status == "expanded" && !section.classList.contains("expanded")) {
-			section.classList.remove("expanded");
+			section.classList.add("expanded");
 		}
 		else if (status == "collapsed" && section.classList.contains("expanded")) {
-			section.classList.add("expanded");
+			section.classList.remove("expanded");
 		}
 		else if (!status) {
 			section.classList.toggle("expanded");
