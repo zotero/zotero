@@ -385,7 +385,7 @@ class LibraryLayout extends Layout {
 	}
 
 	_addItemsDebounced = Zotero.Utilities.debounce(async (items) => {
-		IOManager.addItemsToCitation(items);
+		IOManager.addItemsToCitation(items, { noInputRefocus: true });
 	}, 100);
 }
 
