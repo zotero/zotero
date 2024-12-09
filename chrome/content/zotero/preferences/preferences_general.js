@@ -246,6 +246,7 @@ Zotero_Preferences.General = {
 			checkbox.disabled = disabled;
 		}
 		document.getElementById('rename-linked-files').disabled = disabled;
+		document.getElementById('remove-diacritics').disabled = disabled;
 	},
 	
 	//
