@@ -493,6 +493,8 @@ var IOManager = {
 		_id("mode-button").setAttribute("mode", newMode);
 
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
+		// do not show View menubar with itemTree-specific options in list mode
+		doc.querySelector("item-tree-menu-bar").suppressed = currentLayout.type == "list";
 		currentLayout.refreshItemsList();
 	},
 
