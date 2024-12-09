@@ -151,8 +151,17 @@
 			return true;
 		}
 
-		renderItemPane(item) {
+		async renderItemPane(item) {
+			let previousMode = this.mode;
 			this.mode = "item";
+
+			// Fix https://forums.zotero.org/discussion/115450/zotero-7-beta-wrong-vertical-position-in-the-item-pane-after-switching-from-a-note
+			if (previousMode === "note") {
+				// Wait for DOM to update and then trigger item-details render
+				await new Promise((resolve) => {
+					requestIdleCallback(resolve, { timeout: 50 });
+				});
+			}
 			
 			this._itemDetails.editable = this.editable;
 			this._itemDetails.tabID = "zotero-pane";
