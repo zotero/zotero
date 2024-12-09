@@ -94,6 +94,11 @@
 					bubble.after(input);
 				}
 			}
+			// Make sure that all inputs occupy the right width
+			for (let input of [...this.querySelectorAll(".input")]) {
+				let requiredWidth = Utils.getContentWidth(input);
+				input.style = `${requiredWidth}px`;
+			}
 			// Prepend first input
 			if (!this._body.firstChild || !Utils.isInput(this._body.firstChild)) {
 				let input = this._createInputElem();
