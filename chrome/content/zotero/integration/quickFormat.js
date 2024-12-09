@@ -25,6 +25,8 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 
+window.isPristine = true;
+
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
 	const specifiedLocatorRe = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-–]+) *$/;
@@ -494,6 +496,7 @@ var Zotero_QuickFormat = new function () {
 						let input = _getCurrentInput();
 						input.value = "";
 						input.dispatchEvent(new Event('input', { bubbles: true }));
+						window.isPristine = false;
 						return;
 					}
 				}
@@ -1159,6 +1162,7 @@ var Zotero_QuickFormat = new function () {
 			locatorNode = null;
 		}
 		bubble.remove();
+		window.isPristine = false;
 	}
 	
 	/**
@@ -1273,6 +1277,7 @@ var Zotero_QuickFormat = new function () {
 		if (!multipleSelected) {
 			locatorNode = getAllBubbles().filter(bubble => bubble.textContent == lastAddedBubble.textContent)[0];
 		}
+		window.isPristine = false;
 		return true;
 	});
 	
@@ -1563,8 +1568,13 @@ var Zotero_QuickFormat = new function () {
 	this.onUnload = function() {
 		if(accepted) return;
 		accepted = true;
-		io.citation.citationItems = [];
-		io.accept();
+		io.cancel();
+	}
+	
+	this.cancel = function () {
+		accepted = true;
+		io.cancel();
+		window.close();
 	}
 	
 	/**
@@ -1574,10 +1584,7 @@ var Zotero_QuickFormat = new function () {
 		if (accepted || new Date() - _itemPopoverClosed < ESC_ENTER_THROTTLE) return;
 		var keyCode = event.keyCode;
 		if (keyCode === event.DOM_VK_ESCAPE) {
-			accepted = true;
-			io.citation.citationItems = [];
-			io.accept();
-			window.close();
+			this.cancel();
 		}
 		else if (event.key == "Enter") {
 			event.preventDefault();
@@ -2161,6 +2168,7 @@ var Zotero_QuickFormat = new function () {
 		}
 
 		onBubbleDragEnd();
+		window.isPristine = false;
 
 		yield _previewAndSort();
 	});
@@ -2200,6 +2208,7 @@ var Zotero_QuickFormat = new function () {
 	 * Handle changes to citation properties
 	 */
 	this.onCitationPropertiesChanged = function(event) {
+		window.isPristine = false;
 		let citationItem = JSON.parse(panelRefersToBubble.dataset.citationItem || "{}");
 		if(itemPopoverPrefix.value) {
 			citationItem["prefix"] = itemPopoverPrefix.value;
@@ -2386,6 +2395,8 @@ var Zotero_QuickFormat = new function () {
 		this.stopped = true;
 	};
 }
+
+window.cancel = Zotero_QuickFormat.cancel;
 
 window.addEventListener("DOMContentLoaded", Zotero_QuickFormat.onDOMContentLoaded, false);
 window.addEventListener("load", Zotero_QuickFormat.onLoad, false);
