@@ -163,19 +163,9 @@ export class CitationDialogHelpers {
 		return section;
 	}
 
-	// Fetch locator from a string and return an object: { label: string, page: string, onlyLocator: bool}
+	// Extract locator from a string and return an object: { label: string, page: string, onlyLocator: bool}
 	// to identify the locator and pass that info to the dialog
-	fetchLocator(string) {
-		const numberRegex = /^[0-9\-–]+$/;
-		if (numberRegex.test(string)) {
-			return {
-				label: "page",
-				locator: string,
-				onlyLocator: true,
-				fullLocatorString: string
-			};
-		}
-		
+	extractLocator(string) {
 		// Check for different ways of typing the page locator
 		const pageRegex = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-–]+) *$/;
 		let pageLocator = pageRegex.exec(string);

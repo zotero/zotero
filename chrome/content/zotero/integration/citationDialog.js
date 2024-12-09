@@ -517,7 +517,7 @@ var IOManager = {
 		}
 		// If the last input has a locator, add it into the item
 		let input = _id("bubble-input").getCurrentInput();
-		let locator = Helpers.fetchLocator(input.value || "");
+		let locator = Helpers.extractLocator(input.value || "");
 		if (locator) {
 			for (let item of items) {
 				item.label = locator.label;
@@ -632,7 +632,7 @@ var IOManager = {
 	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.
 	// Otherwise, add pre-selected item if any. Otherwise, accept the dialog.
 	_handleInputEnter(input) {
-		let locator = Helpers.fetchLocator(input.value);
+		let locator = Helpers.extractLocator(input.value);
 		let bubble = input.previousElementSibling;
 		let item = CitationDataManager.getItem({ dialogReferenceID: bubble?.getAttribute("dialogReferenceID") });
 		if (item && locator && locator.onlyLocator && bubble) {
@@ -673,7 +673,7 @@ var IOManager = {
 
 	_handleInput({ query, debounce }) {
 		// If there is a locator typed, exclude it from the query
-		let locator = Helpers.fetchLocator(query);
+		let locator = Helpers.extractLocator(query);
 		if (locator) {
 			query = query.replace(locator.fullLocatorString, "");
 		}
