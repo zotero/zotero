@@ -322,7 +322,7 @@ export class CitationDialogSearchHandler {
 		if (!maybeYear) return string;
 
 		let year = parseInt(maybeYear[1]);
-		let stringNoYear = string.substr(0, year.index) + string.substring(year.index + year[0].length);
+		let stringNoYear = string.substr(0, maybeYear.index) + string.substring(maybeYear.index + maybeYear[0].length);
 		if (!year) return stringNoYear;
 		return stringNoYear + " " + year;
 	}
