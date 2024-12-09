@@ -288,7 +288,7 @@ class LibraryLayout extends Layout {
 			onSelectionChange: selection => {},
 			regularOnly: !isCitingNotes,
 			onActivate: (event, items) => {
-				IOManager.addItemsToCitation(items, { noInputRefocus: true });
+				IOManager.toggleAddedItem(items);
 			},
 			emptyMessage: Zotero.getString('pane.items.loading'),
 			columns: itemColumns,
@@ -363,17 +363,7 @@ class LibraryLayout extends Layout {
 		// within the bounding box of the icon
 		if (clientX > iconRect.left && clientX < iconRect.right) {
 			let selectedItem = this.itemsView.getSelectedItems()[0];
-			let inCitation = CitationDataManager.getItem({ zoteroItemID: selectedItem.id });
-			// if the item belongs to a citation, remove it
-			if (inCitation) {
-				CitationDataManager.deleteItem({ zoteroItemID: selectedItem.id });
-				IOManager.updateBubbleInput();
-				this.refreshItemsView();
-			}
-			// otherwise, add it into the citation
-			else {
-				IOManager.addItemsToCitation(selectedItem, { noInputRefocus: true });
-			}
+			IOManager.toggleAddedItem([selectedItem]);
 		}
 	}
 
@@ -536,6 +526,31 @@ var IOManager = {
 		this.updateBubbleInput();
 		if (!noInputRefocus) {
 			_id("bubble-input").refocusInput();
+		}
+	},
+
+	// Every item in the given array is added to the citation if it is not included
+	// and removed if it is.
+	toggleAddedItem(items) {
+		let needBubbleInputRefresh = true;
+		let itemsToAdd = [];
+		for (let item of items) {
+			let inCitation = CitationDataManager.getItem({ zoteroItemID: item.id });
+			if (inCitation) {
+				CitationDataManager.deleteItem({ zoteroItemID: item.id });
+				needBubbleInputRefresh = true;
+			}
+			else {
+				itemsToAdd.push(item);
+			}
+		}
+		if (itemsToAdd.length) {
+			IOManager.addItemsToCitation(itemsToAdd, { noInputRefocus: true });
+			needBubbleInputRefresh = false;
+		}
+		if (needBubbleInputRefresh) {
+			IOManager.updateBubbleInput();
+			currentLayout.refreshItemsView();
 		}
 	},
 
