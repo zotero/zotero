@@ -638,9 +638,8 @@ var IOManager = {
 		if (item && locator && locator.onlyLocator && bubble) {
 			item.citationItem.locator = locator.locator;
 			item.citationItem.label = locator.label;
-			input.remove();
+			input.value = "";
 			this.updateBubbleInput();
-			_id("bubble-input").refocusInput();
 			return;
 		}
 		if (IOManager.preSelectedItem) {
