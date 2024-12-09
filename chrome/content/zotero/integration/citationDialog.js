@@ -123,9 +123,6 @@ class Layout {
 				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
 			}
 			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group);
-			if (this.type == "list") {
-				IOManager.toggleSectionCollapse(section);
-			}
 			let itemContainer = section.querySelector(".itemsContainer");
 	
 			let items = [];
@@ -147,6 +144,9 @@ class Layout {
 			}
 			itemContainer.replaceChildren(...items);
 			sections.push(section);
+			if (isGroupCollapsible) {
+				IOManager.toggleSectionCollapse(section, this.type == "list" ? "expanded" : "collapsed");
+			}
 		}
 		_id(`${this.type}-layout`).querySelector(".search-items").replaceChildren(...sections);
 	}
@@ -204,7 +204,7 @@ class LibraryLayout extends Layout {
 
 	// Create item node for an item group and store item ids in itemIDs attribute
 	async createItemNode(item, index = null) {
-		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option", "data-tabindex": 3 }, "item");
+		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option", "data-tabindex": 40 }, "item");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemIDs", id);
 		let title = Helpers.createNode("div", {}, "title");
@@ -396,7 +396,7 @@ class ListLayout extends Layout {
 
 	// Create item node for an item group and store item ids in itemIDs attribute
 	async createItemNode(item) {
-		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option" }, "item hbox");
+		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option", "data-tabindex": 40 }, "item hbox");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemIDs", id);
 		let itemInfo = Helpers.createNode("div", {}, "info");
@@ -604,8 +604,29 @@ var IOManager = {
 		IOManager.addItemsToCitation(itemsToAdd);
 	},
 
-	toggleSectionCollapse(section) {
-		section.classList.toggle("expanded");
+	toggleSectionCollapse(section, status) {
+		// set desired class
+		if (status == "expanded" && !section.classList.contains("expanded")) {
+			section.classList.remove("expanded");
+		}
+		else if (status == "collapsed" && section.classList.contains("expanded")) {
+			section.classList.add("expanded");
+		}
+		else if (!status) {
+			section.classList.toggle("expanded");
+		}
+		// mark collapsed items as unfocusable
+		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {
+			for (let item of [...section.querySelectorAll(".item")]) {
+				item.removeAttribute("tabindex");
+			}
+		}
+		// when expanded, make them focusable again
+		else {
+			for (let item of [...section.querySelectorAll(".item")]) {
+				item.setAttribute("tabindex", -1);
+			}
+		}
 	},
 
 	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.
