@@ -26,6 +26,7 @@
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 const SEARCH_TIMEOUT = 500;
+const MIN_QUERY_LENGTH = 2;
 
 // Contains all search-related logic. Last search results are stored in SearchHandler.results
 // as the following object: { found: [], cited: [], open: [], selected: []}.
@@ -123,9 +124,8 @@ export class CitationDialogSearchHandler {
 
 		// Do not run the search if the query has not changed
 		if (str === this.lastSearchValue) return;
-		// Do not run the search if there is a query BUT it is very short.
-		// Do run the search if the query is empty (e.g. one typed something and the errased it)
-		if (str.trim().length && str.trim().length < 3) return;
+		// Do not run the search if there is a query BUT it is very short
+		if (str.trim().length && str.trim().length < MIN_QUERY_LENGTH) return;
 
 		var s = new Zotero.Search();
 		Zotero.Feeds.getAll().forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
