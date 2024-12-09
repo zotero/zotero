@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
+
 var Zotero_ProgressBar = new function () {
 	var initialized, io;
 	
@@ -39,13 +41,6 @@ var Zotero_ProgressBar = new function () {
 			
 			if (io.isNote) {
 				document.documentElement.classList.add('note-dialog');
-			}
-			
-			// Only hide chrome on Windows or Mac
-			if(Zotero.isMac) {
-				document.documentElement.setAttribute("drawintitlebar", true);
-			} else if(Zotero.isWin) {
-				document.documentElement.setAttribute("chromemargin", '0,0,15,0');
 			}
 		}
 	};
