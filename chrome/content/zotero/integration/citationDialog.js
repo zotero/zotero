@@ -286,7 +286,7 @@ class LibraryLayout extends Layout {
 			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: () => {
-				this._handleSelectionChange();
+				IOManager.updateSelectedItems();
 			},
 			regularOnly: !isCitingNotes,
 			onActivate: (event, items) => {
@@ -367,20 +367,6 @@ class LibraryLayout extends Layout {
 			let selectedItem = this.itemsView.getSelectedItems()[0];
 			IOManager.toggleAddedItem([selectedItem]);
 		}
-	}
-
-	// Record which items in the citation are currently selected to highlight them
-	_handleSelectionChange() {
-		let selectedItemIDs = new Set(this.itemsView.getSelectedItems().map(item => item.id));
-		for (let itemObj of CitationDataManager.items) {
-			if (selectedItemIDs.has(itemObj.zoteroItem.id)) {
-				itemObj.selected = true;
-			}
-			else {
-				itemObj.selected = false;
-			}
-		}
-		IOManager.updateBubbleInput();
 	}
 
 	// Highlight/de-highlight selected rows
@@ -498,6 +484,11 @@ var IOManager = {
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
 		// do not show View menubar with itemTree-specific options in list mode
 		doc.querySelector("item-tree-menu-bar").suppressed = currentLayout.type == "list";
+		// when switching from library to list, make sure all selected items are de-selected
+		if (currentLayout.type == "list") {
+			libraryLayout.itemsView.selection.clearSelection();
+			IOManager.updateSelectedItems();
+		}
 		currentLayout.refreshItemsList();
 	},
 
@@ -632,6 +623,20 @@ var IOManager = {
 			}
 		}
 		IOManager.addItemsToCitation(itemsToAdd);
+	},
+
+	// record which items in the library itemTree are currently selected to highlight them
+	updateSelectedItems() {
+		let selectedItemIDs = new Set(libraryLayout.itemsView.getSelectedItems().map(item => item.id));
+		for (let itemObj of CitationDataManager.items) {
+			if (selectedItemIDs.has(itemObj.zoteroItem.id)) {
+				itemObj.selected = true;
+			}
+			else {
+				itemObj.selected = false;
+			}
+		}
+		IOManager.updateBubbleInput();
 	},
 
 	toggleSectionCollapse(section, status) {
