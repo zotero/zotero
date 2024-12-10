@@ -45,6 +45,15 @@
 			this.refocusInput();
 		}
 
+		setHeightLock(isFixed) {
+			if (!isFixed) {
+				this.style.removeProperty("height");
+				return;
+			}
+			let { height } = this.getBoundingClientRect();
+			this.style.height = `${height}px`;
+		}
+
 		/**
 		 * Synchronize bubbles with the given citation data. Add bubbles for citation items that
 		 * are not present, remove bubbles whose citation items were removed, rearrange bubbles
@@ -118,6 +127,10 @@
 			// If any two inputs end up next to each other (e.g. after bubble is deleted),
 			// have them merged
 			Utils.combineNeighboringInputs(this._body.firstChild);
+			// if bubble input is scrollable, scroll to the bottom
+			if (this._body.scrollHeight > this._body.clientHeight) {
+				this._body.scrollTop = this._body.scrollHeight;
+			}
 		}
 
 		/**

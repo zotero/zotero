@@ -307,7 +307,9 @@ class LibraryLayout extends Layout {
 			}
 		});
 		// handle icon click to add/remove items
-		itemsTree.addEventListener("mousedown", event => this._handleItemsViewIconClick(event));
+		itemsTree.addEventListener("mousedown", event => this._handleItemsViewRowClick(event));
+		// when focus leaves the itemTree, remove fixed height from bubbleInput
+		itemsTree.addEventListener("focusout", event => this._handleFocusOut(event));
 		this._refreshItemsViewHighlightedRows();
 	}
 	
@@ -354,15 +356,18 @@ class LibraryLayout extends Layout {
 		this.itemsView.clearItemsPaneMessage();
 	}
 
-	// Handle click on +/- icon in itemTree
-	_handleItemsViewIconClick(event) {
+	// Handle click on a row in itemTree
+	_handleItemsViewRowClick(event) {
+		// fix height on bubble input  to make sure that a change in height
+		// does not shift itemTree rows as one is clicking
+		_id("bubble-input").setHeightLock(true);
 		let row = event.target;
 		let { clientX } = event;
 		let plusMinusIcon = row.querySelector(".icon-action");
 		if (!plusMinusIcon) return;
 		let iconRect = plusMinusIcon.getBoundingClientRect();
 		// event.target is the actual row, so check if the click happened
-		// within the bounding box of the icon
+		// within the bounding box of the +/- icon and handle it same as a double click
 		if (clientX > iconRect.left && clientX < iconRect.right) {
 			let selectedItem = this.itemsView.getSelectedItems()[0];
 			IOManager.toggleAddedItem([selectedItem]);
@@ -373,6 +378,15 @@ class LibraryLayout extends Layout {
 	_refreshItemsViewHighlightedRows() {
 		let selectedIDs = CitationDataManager.items.map(({ zoteroItem }) => zoteroItem.id).filter(id => !!id);
 		this.itemsView.setHighlightedRows(selectedIDs);
+	}
+
+	// removec fixed height from bubble-input when focus leaves the itemTree
+	_handleFocusOut() {
+		setTimeout(() => {
+			if (!_id("zotero-items-tree").contains(doc.activeElement)) {
+				_id("bubble-input").setHeightLock(false);
+			}
+		});
 	}
 }
 
