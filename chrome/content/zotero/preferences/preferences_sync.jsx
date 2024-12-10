@@ -37,6 +37,7 @@ Zotero_Preferences.Sync = {
 	noChar: '\uD83D\uDEAB',
 	
 	init: async function () {
+		this.storeLastStorageSettings();
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
@@ -426,7 +427,17 @@ Zotero_Preferences.Sync = {
 			addRow(group.data.name, "G" + group.id, librariesToSkip.indexOf("G" + group.id) == -1);
 		}
 	},
-
+	
+	
+	_lastStorageProtocol: null,
+	_lastStorageURL: null,
+	
+	storeLastStorageSettings: function () {
+		this._lastStorageProtocol = Zotero.Prefs.get('sync.storage.protocol');
+		this._lastStorageURL = Zotero.Prefs.get('sync.storage.url');
+	},
+	
+	
 	updateStorageSettingsUI: Zotero.Promise.coroutine(function* () {
 		this.unverifyStorageServer();
 		
@@ -480,17 +491,19 @@ Zotero_Preferences.Sync = {
 	
 	
 	onStorageSettingsChange: Zotero.Promise.coroutine(function* () {
-		// Clean URL
-		Zotero.Prefs.set('sync.storage.url', Zotero.Prefs.get('sync.storage.url').trim()
-				.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''));
+		var oldProtocol = this._lastStorageProtocol;
+		var oldURL = this._lastStorageURL;
 		
-		var oldProtocol = Zotero.Prefs.get('sync.storage.protocol');
-		
+		// Necessary for pref to update
 		yield Zotero.Promise.delay(1);
-		
 		var newProtocol = Zotero.Prefs.get('sync.storage.protocol');
 		
-		if (oldProtocol != newProtocol) {
+		var newURL = Zotero.Prefs.get('sync.storage.url').trim()
+			// Strip scheme and '/zotero'
+			.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')
+		Zotero.Prefs.set('sync.storage.url', newURL);
+		
+		if (oldProtocol != newProtocol || oldURL != newURL) {
 			yield Zotero.Sync.Storage.Local.resetAllSyncStates(Zotero.Libraries.userLibraryID);
 		}
 		
@@ -547,6 +560,7 @@ Zotero_Preferences.Sync = {
 		}
 		
 		this.updateStorageSettingsUI();
+		this.storeLastStorageSettings();
 	}),
 	
 	
