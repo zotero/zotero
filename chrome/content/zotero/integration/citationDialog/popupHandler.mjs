@@ -34,6 +34,7 @@ export class CitationDialogPopupsHandler {
 		this.citationItem = null;
 		this.discardItemDetailsEdits = false;
 		this.focusBubbleOnClose = false;
+		this.focusBubbleInputOnClose = true;
 
 		this.setupListeners();
 	}
@@ -75,8 +76,15 @@ export class CitationDialogPopupsHandler {
 		// Item details Show in Library btn
 		this._getNode("#itemDetails .show").addEventListener("click", (_) => {
 			this.discardItemDetailsEdits = true;
+			this.focusBubbleInputOnClose = false;
 			this._getNode("#itemDetails").hidePopup();
-			Zotero.Utilities.Internal.showInLibrary(this.item.id);
+			let event = new CustomEvent("show-in-library", {
+				bubbles: true,
+				detail: {
+					itemID: this.item.id
+				}
+			});
+			this.doc.dispatchEvent(event);
 		});
 		this._getNode("#itemDetails .done").addEventListener("click", (_) => {
 			this._getNode("#itemDetails").hidePopup();
@@ -143,7 +151,7 @@ export class CitationDialogPopupsHandler {
 			this.focusBubbleOnClose = false;
 			bubble.focus();
 		}
-		else {
+		else if (this.focusBubbleInputOnClose) {
 			this._getNode("#bubble-input").refocusInput();
 		}
 		if (this.discardItemDetailsEdits) {

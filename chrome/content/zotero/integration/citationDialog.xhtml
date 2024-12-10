@@ -33,7 +33,7 @@
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	drawintitlebar="true"
+	drawintitlebar-platforms="mac,win"
 	resizable="false">
 	<head>
 		<title data-l10n-id="integration-citationDialog"></title>
@@ -44,6 +44,7 @@
 		<script src="../include.js"/>
 		<script src="../customElements.js"/>
 		<script src="citationDialog.js"/>
+		<script src="../titlebar.js" type="text/javascript"/>
 	</head>
 	<body class="vbox flex">
 		<div id="search-area" class="layout">
@@ -119,7 +120,7 @@
 					</div>
 					<div class="buttons">
 						<button class="remove" data-l10n-id="integration-citationDialog-details-remove"></button>
-						<button class="show" data-l10n-id="integration-citationDialog-details-showInZotero"></button>
+						<button class="show" data-l10n-id="integration-citationDialog-details-showInLibrary"></button>
 						<!-- use xul button for native primary style -->
 						<xul:button class="done" default="true" data-l10n-id="integration-citationDialog-details-done"></xul:button>
 					</div>

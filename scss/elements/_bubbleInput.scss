@@ -30,7 +30,7 @@ bubble-input {
 		/* Keep the background and text color unchanged in dark mode */
 		background-color: transparent !important;
 		padding: 0;
-		margin-inline: -1px;
+		margin-inline: 0;
 		&.full-width {
 			// Same top/bottom margin as for bubbles + 1px for borders
 			margin-top: 4px;
