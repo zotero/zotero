@@ -793,7 +793,7 @@ var CitationDataManager = {
 	},
 	
 	// Include specified items into the citation
-	async addItems({ citationItems = [], index = -1 }) {
+	async addItems({ citationItems = [], index = null }) {
 		for (let item of citationItems) {
 			let zoteroItem = this._citationItemToZoteroItem(item);
 			// Add a new ID to our citation item and set the same ID on the bubble
@@ -802,7 +802,7 @@ var CitationDataManager = {
 			let toInsert = { citationItem: item, zoteroItem: zoteroItem, dialogReferenceID };
 			// Cannot add the same item multiple times
 			if (this.items.find(existing => this._areItemsTheSame(existing, toInsert))) continue;
-			if (index !== -1) {
+			if (index !== null) {
 				this.items.splice(index, 0, toInsert);
 				index += 1;
 			}
