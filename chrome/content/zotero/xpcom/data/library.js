@@ -291,10 +291,12 @@ Zotero.Library.prototype._set = function(prop, val) {
 			if (newVal != val) {
 				throw new Error(`${prop} must be an integer (${typeof val} '${val}' given)`);
 			}
+			// Ensure that it is never decreasing, unless it is being set to -1
+			// by Reset File Sync History
+			if (val != -1 && val < this._libraryStorageVersion) {
+				throw new Error(prop + ' cannot decrease');
+			}
 			val = newVal;
-			
-			// Ensure that it is never decreasing
-			if (val < this._libraryStorageVersion) throw new Error(prop + ' cannot decrease');
 			break;
 		
 		case '_libraryLastSync':

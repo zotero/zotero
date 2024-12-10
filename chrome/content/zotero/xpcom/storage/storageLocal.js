@@ -550,6 +550,10 @@ Zotero.Sync.Storage.Local = {
 			}
 			sql = "UPDATE itemAttachments SET syncState=? WHERE itemID IN (" + sql + ")";
 			await Zotero.DB.queryAsync(sql, [this.SYNC_STATE_TO_UPLOAD].concat(params));
+			
+			var library = Zotero.Libraries.get(libraryID);
+			library.storageVersion = -1;
+			await library.save();
 		}.bind(this));
 	},
 	
