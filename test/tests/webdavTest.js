@@ -768,6 +768,50 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			win.close();
 		});
 		
+		it("should show an error for a non-DAV URL", async function () {
+			Zotero.HTTP.mock = null;
+			Zotero.Prefs.set("sync.storage.url", davHostPath);
+			
+			httpd.registerPathHandler(
+				`${davBasePath}zotero/`,
+				{
+					handle: function (request, response) {
+						// Force Basic Auth
+						if (!request.hasHeader('Authorization')) {
+							response.setStatusLine(null, 401, null);
+							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+							return;
+						}
+						response.setStatusLine(null, 200, "OK");
+						response.write("<html><body><p>This is a non-DAV URL.</p></body></html>");
+					}
+				}
+			);
+			
+			// Begin install procedure
+			var win = await loadPrefPane('sync');
+			var button = win.document.getElementById('storage-verify');
+			
+			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
+			var promise1 = waitForDialog(function (dialog) {
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString(
+						'sync.storage.error.webdav.invalidURL',
+						davScheme + '://' + davHostPath + 'zotero/'
+					)
+				);
+			});
+			button.click();
+			await promise1;
+			
+			var promise2 = spy.returnValues[0];
+			spy.restore();
+			await promise2;
+			
+			win.close();
+		});
+		
 		it("should show an error for a 403", function* () {
 			Zotero.HTTP.mock = null;
 			httpd.registerPathHandler(

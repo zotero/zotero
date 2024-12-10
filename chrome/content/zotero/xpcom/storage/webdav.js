@@ -31,10 +31,10 @@ if (!Zotero.Sync.Storage.Mode) {
 Zotero.Sync.Storage.Mode.WebDAV = function (options) {
 	this.options = options;
 	
-	this.VerificationError = function (error, uri) {
+	this.VerificationError = function (error, url) {
 		this.message = `WebDAV verification error (${error})`;
 		this.error = error;
-		this.uri = uri;
+		this.url = url;
 	}
 	this.VerificationError.prototype = Object.create(Error.prototype);
 }
@@ -196,14 +196,23 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			throw new this.VerificationError("NO_PASSWORD");
 		}
 		
-		url = scheme + '://'
+		var spec = scheme + '://'
 			+ encodeURIComponent(username) + ':' + encodeURIComponent(password) + '@'
 			+ url
 			+ (url.endsWith('/') ? '' : '/');
 		
 		var io = Services.io;
-		this._parentURI = io.newURI(url, null, null);
-		this._rootURI = io.newURI(url + "zotero/", null, null);
+		try {
+			this._parentURI = io.newURI(spec, null, null);
+		}
+		catch (e) {
+			if (e.message.includes('NS_ERROR_MALFORMED_URI')) {
+				let displayURL = scheme + '://' + url + (url.endsWith('/') ? '' : '/');
+				throw new this.VerificationError("INVALID_URL", displayURL);
+			}
+			throw e;
+		}
+		this._rootURI = io.newURI(spec + "zotero/", null, null);
 		Zotero.HTTP.CookieBlocker.addURL(this._rootURI.spec);
 	},
 	
@@ -641,7 +650,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		var dav = req.getResponseHeader("DAV");
 		if (dav == null) {
-			throw new this.VerificationError("NOT_DAV", uri);
+			throw new this.VerificationError("NOT_DAV", Zotero.HTTP.getDisplayURI(uri, true).spec);
 		}
 		
 		var headers = { Depth: 0 };
@@ -683,7 +692,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					if (e.status >= 200 && e.status < 300) {
-						throw new this.VerificationError("NONEXISTENT_FILE_NOT_MISSING", uri);
+						throw new this.VerificationError(
+							"NONEXISTENT_FILE_NOT_MISSING",
+							Zotero.HTTP.getDisplayURI(uri, true).spec
+						);
 					}
 				}
 				throw e;
@@ -730,7 +742,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			// This can also be from IIS 6+, which is configured not to serve .prop files.
 			// http://support.microsoft.com/kb/326965
 			else if (req.status == 404) {
-				throw new this.VerificationError("FILE_MISSING_AFTER_UPLOAD", uri);
+				throw new this.VerificationError(
+					"FILE_MISSING_AFTER_UPLOAD",
+					Zotero.HTTP.getDisplayURI(uri, true).spec
+				);
 			}
 		}
 		else if (req.status == 404) {
@@ -751,10 +766,16 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			});
 			
 			if (req.status == 207) {
-				throw new this.VerificationError("ZOTERO_DIR_NOT_FOUND", uri);
+				throw new this.VerificationError(
+					"ZOTERO_DIR_NOT_FOUND",
+					Zotero.HTTP.getDisplayURI(uri, true).spec
+				);
 			}
 			else if (req.status == 404) {
-				throw new this.VerificationError("PARENT_DIR_NOT_FOUND", uri);
+				throw new this.VerificationError(
+					"PARENT_DIR_NOT_FOUND",
+					Zotero.HTTP.getDisplayURI(uri, true).spec
+				);
 			}
 		}
 		
@@ -805,10 +826,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		else if (err instanceof this.VerificationError) {
-			let spec;
-			if (err.uri) {
-				spec = err.uri.scheme + '://' + err.uri.hostPort + err.uri.pathQueryRef;
-			}
 			switch (err.error) {
 				case "NO_URL":
 					errorMsg = Zotero.getString('sync.storage.error.webdav.enterURL');
@@ -822,21 +839,22 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					errorMsg = Zotero.getString('sync.error.enterPassword');
 					break;
 				
+				case "INVALID_URL":
 				case "NOT_DAV":
-					errorMsg = Zotero.getString('sync.storage.error.webdav.invalidURL', spec);
+					errorMsg = Zotero.getString('sync.storage.error.webdav.invalidURL', err.url);
 					break;
 				
 				case "PARENT_DIR_NOT_FOUND":
 					errorTitle = Zotero.getString('sync.storage.error.directoryNotFound');
-					var parentSpec = spec.replace(/zotero\/$/, "");
-					errorMsg = Zotero.getString('sync.storage.error.doesNotExist', parentSpec);
+					var parentURL = err.url.replace(/zotero\/$/, "");
+					errorMsg = Zotero.getString('sync.storage.error.doesNotExist', parentURL);
 					break;
 				
 				case "ZOTERO_DIR_NOT_FOUND":
 					var create = promptService.confirmEx(
 						window,
 						Zotero.getString('sync.storage.error.directoryNotFound'),
-						Zotero.getString('sync.storage.error.doesNotExist', spec) + "\n\n"
+						Zotero.getString('sync.storage.error.doesNotExist', err.url) + "\n\n"
 							+ Zotero.getString('sync.storage.error.createNow'),
 						promptService.BUTTON_POS_0
 							* promptService.BUTTON_TITLE_IS_STRING
