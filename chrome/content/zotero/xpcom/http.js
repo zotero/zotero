@@ -1086,9 +1086,16 @@ Zotero.HTTP = new function() {
 	};
 	
 	
-	this.getDisplayURI = function (uri) {
+	this.getDisplayURI = function (uri, noCredentials) {
 		if (!uri.password) return uri;
-		return uri.mutate().setPassword('********').finalize();
+		uri = uri.mutate();
+		if (noCredentials) {
+			uri.setUserPass('');
+		}
+		else {
+			uri.setPassword('********');
+		}
+		return uri.finalize();
 	}
 	
 	
