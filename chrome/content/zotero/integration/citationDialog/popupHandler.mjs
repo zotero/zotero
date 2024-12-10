@@ -65,7 +65,7 @@ export class CitationDialogPopupsHandler {
 			let event = new CustomEvent("delete-item", {
 				bubbles: true,
 				detail: {
-					dialogReferenceID: this.citationItem.dialogReferenceID
+					dialogReferenceID: this.dialogReferenceID
 				}
 			});
 			this.doc.dispatchEvent(event);
@@ -93,11 +93,12 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#itemDetails").addEventListener("keypress", this.handleItemDetailsKeypress.bind(this));
 	}
 
-	openItemDetails(item, citationItem, itemDescription) {
+	openItemDetails(dialogReferenceID, item, citationItem, itemDescription) {
 		this.item = item;
 		this.citationItem = citationItem;
+		this.dialogReferenceID = dialogReferenceID;
 
-		let bubble = this._getNode(`[dialogReferenceID='${citationItem.dialogReferenceID}']`);
+		let bubble = this._getNode(`[dialogReferenceID='${dialogReferenceID}']`);
 		let bubbleRect = bubble.getBoundingClientRect();
 		let popup = this._getNode("#itemDetails");
 		popup.openPopup(bubble, "after_start", bubble.clientWidth / 2, 0, false, false, null);
@@ -135,7 +136,7 @@ export class CitationDialogPopupsHandler {
 
 	// When item details popup is closed, sync it's data to citationItems
 	handleItemDetailsClosure() {
-		let bubble = this._getNode(`[dialogReferenceID='${this.citationItem.dialogReferenceID}']`);
+		let bubble = this._getNode(`[dialogReferenceID='${this.dialogReferenceID}']`);
 		if (!bubble) return;
 		bubble.classList.remove("showingDetails");
 		if (this.focusBubbleOnClose) {

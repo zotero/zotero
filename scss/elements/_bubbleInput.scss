@@ -70,7 +70,7 @@ bubble-input {
 			}
 		}
 		&.showingDetails {
-			background-color: var(--fill-quarternary);
+			background-color: var(--fill-quarternary) !important;
 			z-index: 2;
 		}
 		
@@ -89,10 +89,8 @@ bubble-input {
 			right: calc(-2 * var(--bubble-horizontal-margin));
 		}
 		
-		&[selected="true"] {
-			border-radius: 8px !important;
-			background-color: #598bec;
-			color: #fff;
+		&.selected {
+			background-color: var(--accent-blue10);
 		}
 
 		.cross {

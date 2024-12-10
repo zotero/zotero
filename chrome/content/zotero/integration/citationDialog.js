@@ -285,7 +285,9 @@ class LibraryLayout extends Layout {
 			dragAndDrop: false,
 			persistColumns: true,
 			columnPicker: true,
-			onSelectionChange: selection => {},
+			onSelectionChange: () => {
+				this._handleSelectionChange();
+			},
 			regularOnly: !isCitingNotes,
 			onActivate: (event, items) => {
 				IOManager.toggleAddedItem(items);
@@ -365,6 +367,20 @@ class LibraryLayout extends Layout {
 			let selectedItem = this.itemsView.getSelectedItems()[0];
 			IOManager.toggleAddedItem([selectedItem]);
 		}
+	}
+
+	// Record which items in the citation are currently selected to highlight them
+	_handleSelectionChange() {
+		let selectedItemIDs = new Set(this.itemsView.getSelectedItems().map(item => item.id));
+		for (let itemObj of CitationDataManager.items) {
+			if (selectedItemIDs.has(itemObj.zoteroItem.id)) {
+				itemObj.selected = true;
+			}
+			else {
+				itemObj.selected = false;
+			}
+		}
+		IOManager.updateBubbleInput();
 	}
 
 	// Highlight/de-highlight selected rows
@@ -680,7 +696,7 @@ var IOManager = {
 
 	_openItemDetailsPopup(dialogReferenceID) {
 		let { zoteroItem, citationItem } = CitationDataManager.getItem({ dialogReferenceID });
-		PopupsHandler.openItemDetails(zoteroItem, citationItem, Helpers.buildItemDescription(zoteroItem));
+		PopupsHandler.openItemDetails(dialogReferenceID, zoteroItem, citationItem, Helpers.buildItemDescription(zoteroItem));
 	},
 
 	_handleInput({ query, debounce }) {
@@ -724,14 +740,14 @@ var CitationDataManager = {
 
 	getItem({ dialogReferenceID, zoteroItemID }) {
 		if (dialogReferenceID) {
-			return this.items.find(item => item.citationItem.dialogReferenceID === dialogReferenceID);
+			return this.items.find(item => item.dialogReferenceID === dialogReferenceID);
 		}
 		return this.items.find(item => item.zoteroItem.id === zoteroItemID);
 	},
 
 	getItemIndex({ dialogReferenceID, zoteroItemID }) {
 		if (dialogReferenceID) {
-			return this.items.findIndex(item => item.citationItem.dialogReferenceID === dialogReferenceID);
+			return this.items.findIndex(item => item.dialogReferenceID === dialogReferenceID);
 		}
 		return this.items.findIndex(item => item.zoteroItem.id === zoteroItemID);
 	},
@@ -748,12 +764,12 @@ var CitationDataManager = {
 	async addItems({ citationItems = [], index = -1 }) {
 		for (let item of citationItems) {
 			let zoteroItem = this._citationItemToZoteroItem(item);
-			let toInsert = { citationItem: item, zoteroItem: zoteroItem };
-			// Cannot add the same item multiple times
-			if (this.items.find(existing => this._areItemsTheSame(existing, toInsert))) continue;
 			// Add a new ID to our citation item and set the same ID on the bubble
 			// so we have a reliable way to identify which bubble refers to which citationItem.
-			item.dialogReferenceID = Zotero.Utilities.randomString(5);
+			let dialogReferenceID = Zotero.Utilities.randomString(5);
+			let toInsert = { citationItem: item, zoteroItem: zoteroItem, dialogReferenceID };
+			// Cannot add the same item multiple times
+			if (this.items.find(existing => this._areItemsTheSame(existing, toInsert))) continue;
 			if (index !== -1) {
 				this.items.splice(index, 0, toInsert);
 				index += 1;
@@ -787,10 +803,8 @@ var CitationDataManager = {
 	updateCitationObject(final = false) {
 		let result = [];
 		for (let item of this.items) {
+			let dialogReferenceID = item.dialogReferenceID;
 			item = item.citationItem;
-			if (final) {
-				delete item.dialogReferenceID;
-			}
 			if (item instanceof Zotero.Item) {
 				let ioResult = { id: item.cslItemID || item.id };
 				if (typeof ioResult.id === "string" && ioResult.id.indexOf("/") !== -1) {
@@ -804,7 +818,7 @@ var CitationDataManager = {
 				ioResult.suffix = item.suffix || null;
 				ioResult['suppress-author'] = item["suppress-author"] || null;
 				if (!final) {
-					ioResult.dialogReferenceID = item.dialogReferenceID;
+					ioResult.dialogReferenceID = dialogReferenceID;
 				}
 				result.push(ioResult);
 			}
@@ -827,8 +841,8 @@ var CitationDataManager = {
 		// sync the order of this.items with io.citation.sortedItems
 		let sortedItems = io.citation.sortedItems.map(entry => entry[1]);
 		for (let item of this.items) {
-			let currentIndex = this.getItemIndex({ dialogReferenceID: item.citationItem.dialogReferenceID });
-			let expectedIndex = sortedItems.findIndex(ioItem => ioItem.dialogReferenceID == item.citationItem.dialogReferenceID);
+			let currentIndex = this.getItemIndex({ dialogReferenceID: item.dialogReferenceID });
+			let expectedIndex = sortedItems.findIndex(ioItem => ioItem.dialogReferenceID == item.dialogReferenceID);
 			if (currentIndex !== expectedIndex) {
 				this.items.splice(currentIndex, 1);
 				this.items.splice(expectedIndex, 0, item);
