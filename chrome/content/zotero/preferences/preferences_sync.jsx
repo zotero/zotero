@@ -499,8 +499,8 @@ Zotero_Preferences.Sync = {
 		var newProtocol = Zotero.Prefs.get('sync.storage.protocol');
 		
 		var newURL = Zotero.Prefs.get('sync.storage.url').trim()
-			// Strip scheme and '/zotero'
-			.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')
+			// Strip scheme, leading '://' or '//' (#3483), and trailing '/zotero'
+			.replace(/(^https?:\/\/|^:?\/\/|\/zotero\/?$|\/$)/g, '')
 		Zotero.Prefs.set('sync.storage.url', newURL);
 		
 		if (oldProtocol != newProtocol || oldURL != newURL) {
