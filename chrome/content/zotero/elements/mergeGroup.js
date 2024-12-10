@@ -212,7 +212,6 @@ import ReactDOM from "react-dom";
 		
 		
 		choosePane(pane) {
-			Zotero.debug(new Error().stack);
 			let otherPane;
 			if (pane.id == 'left-pane') {
 				otherPane = this._rightPane;
