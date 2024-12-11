@@ -679,7 +679,7 @@ var gCheckingPage = {
 			}
 			
 			LOG("gCheckingPage:onPageShow - Update check succeeded");
-			gUpdates.setUpdate(gAUS.selectUpdate(result.updates));
+			gUpdates.setUpdate(await gAUS.selectUpdate(result.updates));
 			if (!gUpdates.update) {
 				LOG("gCheckingPage:onPageShow - result: NO_UPDATES_FOUND");
 				gUpdates.wiz.goTo("noupdatesfound");
