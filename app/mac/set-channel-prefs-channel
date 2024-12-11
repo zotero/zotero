@@ -18,16 +18,18 @@ fi
 binary=$1
 from_channel=$2
 to_channel=$3
+# `strings` has a 4-character minimum by default, but we need 3 for 'dev'
+strings_cmd="strings -n 3"
 
 if [ ${#to_channel} -gt 7 ]; then
 	echo "Channel length cannot exceed 7 characters -- aborting" >&2
 	exit 1
 fi
 
-if [ $(strings "$binary" | grep -c "$from_channel") -ne 2 ] ; then
+if [ $($strings_cmd "$binary" | grep -c "$from_channel") -ne 2 ] ; then
 	echo "$from_channel not found twice in ChannelPrefs" >&2
 	echo >&2
-	strings "$binary" >&2
+	$strings_cmd "$binary" >&2
 	exit 1
 fi
 
@@ -57,10 +59,10 @@ if [ $original_size -ne $new_size ]; then
 	exit 1
 fi
 
-if [ $(strings "$binary" | grep -c "$to_channel") -ne 2 ] ; then
+if [ $($strings_cmd "$binary" | grep -c "$to_channel") -ne 2 ] ; then
 	echo "$to_channel not found twice in ChannelPrefs" >&2
-	strings "$binary" >&2
+	$strings_cmd "$binary" >&2
 	exit 1
 fi
 
-strings "$binary"
+$strings_cmd "$binary"
