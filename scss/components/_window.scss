@@ -14,7 +14,7 @@ body {
 	@include zotero-window();
 }
 
-window:root > dialog {
+window:root > dialog:not(.zotero-dialog-window) {
 	@include zotero-dialog();
 }
 
