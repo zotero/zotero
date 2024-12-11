@@ -97,6 +97,10 @@ const ZoteroStandalone = new function() {
 			document.getElementById('key_copyBibliography')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
 			
+			if (Zotero.isMac) {
+				document.getElementById('menu_openHelp').setAttribute('key', 'key_openHelpMac');
+			}
+			
 			ZoteroStandalone.DebugOutput.init();
 			
 			Zotero.hideZoteroPaneOverlays();
