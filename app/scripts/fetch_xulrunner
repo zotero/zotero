@@ -607,6 +607,8 @@ if [ $BUILD_LINUX == 1 ]; then
 			cp "$archived_file" "firefox-$GECKO_VERSION.tar.bz2"
 		else
 			curl -O "$DOWNLOAD_URL/linux-$arch/en-US/firefox-$GECKO_VERSION.tar.bz2"
+			# Store local copy of unmodified app
+			cp "firefox-$GECKO_VERSION.tar.bz2" "$archived_file"
 		fi
 
 		tar xvf firefox-$GECKO_VERSION.tar.bz2
