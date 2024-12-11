@@ -64,7 +64,12 @@ var gUpdatesFoundPageId;
  *					The string to write to the error console..
  */
 function LOG(module, string) {
-	Zotero.debug("AUS:UI " + module + ":" + string);
+	if (arguments.length == 2) {
+		Zotero.debug("AUS:UI " + module + ":" + string);
+	}
+	else {
+		Zotero.debug("AUS:UI " + string);
+	}
 }
 
 /**
