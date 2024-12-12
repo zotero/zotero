@@ -230,19 +230,12 @@ Zotero.Integration = new function() {
 		if (agent == 'http') {
 			return new Zotero.HTTPIntegrationClient.Application();
 		}
-		// Try to load the appropriate Zotero component; otherwise display an error
-		try {
-			// Replace MacWord2016 and MacWord16 with just MacWord.
-			agent = agent.startsWith('MacWord') ? 'MacWord' : agent;
-			var entryPoint = PLUGIN_PATHS[agent];
-			Zotero.debug("Integration: Instantiating "+agent+" plugin handler for command "+command+(docId ? " with doc "+docId : ""));
-			const { Application } = ChromeUtils.importESModule(entryPoint);
-			return new Application();
-		}
-		catch (e) {
-			throw new Zotero.Exception.Alert("integration.error.notInstalled",
-				[], "integration.error.title");
-		}
+		// Replace MacWord2016 and MacWord16 with just MacWord.
+		agent = agent.startsWith('MacWord') ? 'MacWord' : agent;
+		var entryPoint = PLUGIN_PATHS[agent];
+		Zotero.debug("Integration: Instantiating "+agent+" plugin handler for command "+command+(docId ? " with doc "+docId : ""));
+		const { Application } = ChromeUtils.importESModule(entryPoint);
+		return new Application();
 	};
 	
 	/**
