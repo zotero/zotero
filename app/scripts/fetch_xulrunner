@@ -326,9 +326,9 @@ function modify_omni {
 	echo '.main-heading { margin-top: 2em; }' >> $file
 	# Hide Details/Permissions tabs in addon details so we only show details
 	echo 'addon-details > button-group { display: none !important; }' >> $file
-	# Hide 'Run on sites with restrictions' row and helper message
-	echo '.addon-detail-row-quarantined-domains { display: none !important; }' >> $file
-	echo '.addon-detail-help-row:has([data-l10n-id="addon-detail-quarantined-domains-help"]) { display: none !important; }' >> $file
+	# Hide "Run on sites with restrictions" row and helper message
+	echo '.addon-detail-row-quarantined-domains { display: none; }' >> $file
+	echo '.addon-detail-help-row:has([data-l10n-id="addon-detail-quarantined-domains-help"]) { display: none; }' >> $file
 	# Hide "Debug Addons" and "Manage Extension Shortcuts"
 	echo 'panel-item[action="debug-addons"], panel-item[action="reset-update-states"] + hr, panel-item[action="manage-shortcuts"] { display: none }' >> $file
 	# Show cursor feedback on plugin homepage links
