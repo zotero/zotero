@@ -61,6 +61,6 @@ echo "MAR channel name: $channel"
 echo "Product version: $version"
 
 echo "Creating new MAR"
-$mar -V $version -H $channel -c "$outfile" `find . -type f | sed -E 's/^\.\/(.+)/"\1"/'
+find . -type f -print0 | xargs -0 $mar -V $version -H $channel -c "$outfile"
 echo
 $mar -T "$outfile"
