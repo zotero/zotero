@@ -81,7 +81,6 @@ if [ $# = 0 ]; then
   exit 1
 fi
 
-# channel-prefs.js removed for Zotero
 requested_forced_updates='Contents/MacOS/firefox'
 
 while getopts "hqf:" flag
