@@ -48,18 +48,18 @@ pdfReader-import-from-epub =
     .label = Tuo e-kirjan huomautukset...
 pdfReader-import-from-epub-prompt-title = Tuo e-kirjan huomautukset
 pdfReader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } löysi { $count ->
+        [1] { $count } { $tool } huomautuksen
+       *[other] { $count } { $tool } huomautusta
+    }, muokattu viimeksi { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Kaikki { -app-name }-huomautukset jotka on tuotu aiemmin tästä e-kirjasta päivitetään.
 pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Tämä e-kirja ei vaikuta sisältävän tuotavia huomautuksia.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } voi tuoda e-kirjan huomautukset jotka on luotu  Calibrella tai KOReaderilla.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” ei vaikuta sisältävän Calibrella tai KOReaderilla luotuja huomautuksia.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    Jos tämän e-kirjan huomautukset on tehty KOReaderilla, koita valita “metadata.epub.lua”-tiedosto suoraan.
+pdfReader-import-from-epub-select-other = Valitse toinen tiedosto…

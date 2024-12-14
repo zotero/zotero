@@ -1,96 +1,96 @@
-<!ENTITY preferencesCmdMac.label "Preferences...">
+<!ENTITY preferencesCmdMac.label "Postavke…">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Services">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
+<!ENTITY servicesMenuMac.label "Servisi">
+<!ENTITY hideThisAppCmdMac.label "Sakrij &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
+<!ENTITY hideOtherAppsCmdMac.label "Sakrij ostalo">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
-<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
+<!ENTITY showAllAppsCmdMac.label "Prikaži sve">
+<!ENTITY quitApplicationCmdMac.label "Prekini Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.label "Datoteka">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Spremi…">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Postava stranice…">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Printaj…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.label "Zatvori">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import...">
+<!ENTITY manageAttachments.label "Upravljanje prilozima">
+<!ENTITY convertToStored.label "Pretvori povezane u pohranjene datoteke…">
+<!ENTITY importCmd.label "Uvoz…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
-<!ENTITY quitApplicationCmdWin.label "Exit">
+<!ENTITY importFromClipboardCmd.label "Uvoz iz međuspremnika">
+<!ENTITY quitApplicationCmdWin.label "Izlaz">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
+<!ENTITY quitApplicationCmd.label "Prekid">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyCitationCmd.label "Kopiraj citat">
+<!ENTITY copyBibliographyCmd.label "Kopiraj biblioteku">
+<!ENTITY copyNoteCmd.label "Kopiraj bilješku">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "Promjena smjera stranice">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "Promjena smjera teksta">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Idi">
 <!ENTITY goMenu.accesskey "G">
 
-<!ENTITY viewMenu.label "View">
+<!ENTITY viewMenu.label "Pogled">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY layout.label "Izgled">
+<!ENTITY standardView.label "Standardni pogled">
+<!ENTITY stackedView.label "Složeni prikaz">
+<!ENTITY collectionsPane.label "Okno zbirke">
+<!ENTITY itemPane.label "Okno stavke">
+<!ENTITY tagSelector.label "Odabir oznaka">
+<!ENTITY recursiveCollections.label "Prikaži stavke iz podzbirki">
+<!ENTITY fontSize.label "Veličina slova">
+<!ENTITY noteFontSize.label "Veličina slova bilješke">
+<!ENTITY columns.label "Stupac">
+<!ENTITY sortBy.label "Sortiraj po">
 
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "Alati">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Instalirajte Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
-<!ENTITY addons.label "Add-ons">
-<!ENTITY developer.label "Developer">
+<!ENTITY addons.label "Dodaci">
+<!ENTITY developer.label "Programer">
 
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Dovedite sve naprijed">
 
-<!ENTITY helpMenu.label "Help">
+<!ENTITY helpMenu.label "Pomoć">
 <!ENTITY helpMenu.accesskey "H">
-<!ENTITY helpMenuWin.label "Help">
+<!ENTITY helpMenuWin.label "Pomoć">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "O &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "Potpora i dokumentacija">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "Informacije o rješavanju problema">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Forumi za raspravu">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors...">
+<!ENTITY helpReportErrors.label "Prijavi pogreške…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Zapisivanje izlaza otklanjanja pogrešaka">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Pošalji izlaz">
+<!ENTITY debugOutputLogging.view "Pregled izlaza">
+<!ENTITY debugOutputLogging.clear "Očisti izlaz">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Ponovo pokreni s omogućenim zapisivanjem…">
 
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "Provjera nadopuna…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

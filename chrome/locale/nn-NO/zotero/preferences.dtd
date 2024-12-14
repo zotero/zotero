@@ -5,11 +5,11 @@
 <!ENTITY zotero.preferences.default "Standard:">
 <!ENTITY zotero.preferences.items "items">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Eigendefinert…">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Grensesnitt">
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer element frå nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagra tilknytte PDF-filer og andre filer ved lagring av element">
@@ -29,7 +29,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
-<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filnamn">
 
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ta med når element vert kopierte mellom bibliotek:">
@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Nullstill">
 <!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
-<!ENTITY zotero.preferences.sync.reset.button "Reset…">
+<!ENTITY zotero.preferences.sync.reset.button "Nullstill…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Søk">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Innstillingar">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domene/stig">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(t.d. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Språk">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Slå av rask kopiering når du drar fleire enn">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Tittel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Oppdatert">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Hent fleire stilar…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
