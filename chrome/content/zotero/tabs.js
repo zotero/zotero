@@ -399,7 +399,8 @@ var Zotero_Tabs = new function () {
 						null,
 						{
 							tabIndex: tab.index,
-							openInBackground: true
+							openInBackground: true,
+							allowDuplicate: true
 						}
 					));
 					if (tab.index > maxIndex) {
