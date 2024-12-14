@@ -14,7 +14,7 @@
 <!ENTITY saveCmd.label "Įrašyti...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "r">
-<!ENTITY pageSetupCmd.label "Puslapio nuostatos...">
+<!ENTITY pageSetupCmd.label "Puslapio nuostatos…">
 <!ENTITY pageSetupCmd.accesskey "n">
 <!ENTITY printCmd.label "Spausdinti...">
 <!ENTITY printCmd.key "P">
@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "U">
 <!ENTITY manageAttachments.label "Tvarkyti pridėtas rinkmenas">
-<!ENTITY convertToStored.label "Nuorodas pakeisti tikromis rinkmenomis...">
-<!ENTITY importCmd.label "Importuoti...">
+<!ENTITY convertToStored.label "Nuorodas pakeisti tikromis rinkmenomis…">
+<!ENTITY importCmd.label "Importuoti…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importuoti iškarpinės turinį">
 <!ENTITY quitApplicationCmdWin.label "Išeiti">
@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Priemonės">
 <!ENTITY toolsMenu.accesskey "P">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Įdiegti papildinį naršyklei…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Priedai">
 <!ENTITY developer.label "Programuotojams">
@@ -82,7 +82,7 @@
 <!ENTITY helpFeedbackPage.label "Diskusijų forumai">
 <!ENTITY helpFeedbackPage.accesskey "I">
 
-<!ENTITY helpReportErrors.label "Pranešti apie klaidas...">
+<!ENTITY helpReportErrors.label "Pranešti apie klaidas…">
 <!ENTITY helpReportErrors.accesskey "r">
 
 <!ENTITY debugOutputLogging.label "Derinimo pranešimų išvedimas">
@@ -90,7 +90,7 @@
 <!ENTITY debugOutputLogging.submit "Siųsti išvedimą">
 <!ENTITY debugOutputLogging.view "Rodyti išvedimą">
 <!ENTITY debugOutputLogging.clear "Išvalyti išvedimą">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Paleisti iš naujo įgalinus derinimo pranešimus...">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Paleisti iš naujo įgalinus derinimo pranešimus…">
 
-<!ENTITY helpCheckForUpdates.label "Tikrinti, ar yra atnaujinimų...">
+<!ENTITY helpCheckForUpdates.label "Tikrinti, ar yra atnaujinimų…">
 <!ENTITY helpCheckForUpdates.accesskey "T">

@@ -45,8 +45,8 @@ pdfReader-findInDocumentInput =
     .placeholder = { pdfReader-find-in-document }
     .aria-description = 要将搜索结果转换为高亮注释，请按 { general-key-control }-{ option-or-alt }-1。要将搜索结果转换为下划线注释，请按 { general-key-control }-{ option-or-alt }-2。
 pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = 导入电子书注释…
+pdfReader-import-from-epub-prompt-title = 导入电子书注释
 pdfReader-import-from-epub-prompt-text =
     { -app-name } found { $count ->
         [1] { $count } { $tool } annotation
@@ -62,4 +62,4 @@ pdfReader-import-from-epub-no-annotations-other-file =
     “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
     
     If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+pdfReader-import-from-epub-select-other = 选择其他文件…

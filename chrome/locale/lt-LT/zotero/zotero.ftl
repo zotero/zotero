@@ -1,7 +1,7 @@
-general-key-control = Control
-general-key-shift = Shift
+general-key-control = Vald
+general-key-shift = Lyg2
 general-key-alt = Alt
-general-key-option = Option
+general-key-option = Parinktis
 general-key-command = Command
 option-or-alt =
     { PLATFORM() ->
@@ -24,7 +24,7 @@ general-help = Žinynas
 general-tag = Gairė
 general-done = Atlikta
 general-view-troubleshooting-instructions = Peržiūrėti nesklandumų sprendimo instrukcijas
-general-go-back = Go Back
+general-go-back = Atgal
 citation-style-label = Citavimo stilius:
 language-label = Kalba:
 menu-file-show-in-finder =
@@ -66,9 +66,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Papildiniai
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Perkelti stulpelį kairėn
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Perkelti stulpelį dešinėn
 main-window-command =
     .label = Library
 main-window-key =
@@ -91,9 +91,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Taisyti įsimintąją paiešką
 collections-menu-move-collection =
-    .label = Move To
+    .label = Perkelti į
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Kopijuoti į
 item-creator-moveDown =
     .label = Nuleisti žemyn
 item-creator-moveToTop =
@@ -129,7 +129,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Tinklalapio nuoroda
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Priskirti kitam aukštesniam įrašui…
 view-online = Atverti tinklalapį
 item-menu-option-view-online =
     .label = { view-online }
@@ -286,7 +286,7 @@ integration-editBibliography-add-button =
 integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
-    .aria-label = Edit reference
+    .aria-label = Keisti nuorodą
 -integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
 -integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
 -integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
@@ -304,7 +304,7 @@ styleEditor-locatorInput = Locator input
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = Stilių rengyklė
 styleEditor-preview =
     .aria-label = Peržiūra
 integration-prefs-displayAs-label = Citavimo rodymo pavidalas:
@@ -620,9 +620,11 @@ item-pane-message-unselected =
     }
 item-pane-message-objects-unselected =
     { $count ->
-        [0] No objects in this view
-        [one] { $count } object in this view
-       *[other] { $count } objects in this view
+        [0] Šiame rodinyje objektų nėra
+        [one] { $count } objektas šiame rodinyje
+        [few] { $count } objektai šiame rodinyje
+        [many] { $count } objektų šiame rodinyje
+       *[other] { $count } objektas šiame rodinyje
     }
 item-pane-duplicates-merge-items =
     .label =
@@ -696,9 +698,9 @@ post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
     .label = Įdėti ir ieškoti
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+mac-word-plugin-install-message = Zotero turi galėti prieiti prie „Word“ duomenų tam, kad galėtų įdiegti papildinį „Word“ programai.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Įdiegti papildinį „Word“ programai
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =

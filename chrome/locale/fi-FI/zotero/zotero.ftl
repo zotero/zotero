@@ -285,11 +285,11 @@ integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
     .aria-label = Vuokkaa viitettä
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+-integration-editBibliography-include-uncited = Sisällyttääksesi viittaamattoman nimikkeen lähdeluetteloosi, valitse se nimikelistalta ja paina { general-add }.
+-integration-editBibliography-exclude-cited = Voit myös jättää pois viitatun nimikkeen lähdeluettelosta valitsemalla sen ja painamalla { general-remove }.
+-integration-editBibliography-edit-reference = Muuttaaksesi viitteen muotoilua, käytä tekstieditoria.
 integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
+    .aria-label = Muokkaa lähdeluetteloa -valintaikkuna
     .aria-description =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
@@ -391,7 +391,7 @@ menu-ui-density-comfortable =
     .label = Väljempi
 menu-ui-density-compact =
     .label = Tiivis
-pane-item-details = Item Details
+pane-item-details = Nimikkeen tiedot
 pane-info = Tiedot
 pane-abstract = Tiivistelmä
 pane-attachments = Liitteet
@@ -641,7 +641,7 @@ find-pdf-files-added =
 select-items-dialog =
     .buttonlabelaccept = Valitse
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Muuta erilliseksi
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -651,8 +651,8 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Muuta erilliseksi muistiinpanoksi
+           *[other] Muuta erillisiksi muistiinpanoiksi
         }
 file-type-webpage = Verkkosivu
 file-type-image = Kuva
