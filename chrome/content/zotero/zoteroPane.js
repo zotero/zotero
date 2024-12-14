@@ -6814,13 +6814,14 @@ var ZoteroPane = new function()
 	};
 
 	this.buildFieldTransformMenu = function ({ target, onTransform }) {
+		let doc = target.ownerDocument;
 		let value = target.value;
 		let valueTitleCased = Zotero.Utilities.capitalizeTitle(value.toLowerCase(), true);
 		let valueSentenceCased = Zotero.Utilities.sentenceCase(value);
 
-		let menupopup = document.createXULElement('menupopup');
+		let menupopup = doc.createXULElement('menupopup');
 
-		let titleCase = document.createXULElement('menuitem');
+		let titleCase = doc.createXULElement('menuitem');
 		titleCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.titlecase'));
 		titleCase.addEventListener('command', () => {
 			onTransform(valueTitleCased);
@@ -6828,7 +6829,7 @@ var ZoteroPane = new function()
 		titleCase.disabled = valueTitleCased == value;
 		menupopup.append(titleCase);
 
-		let sentenceCase = document.createXULElement('menuitem');
+		let sentenceCase = doc.createXULElement('menuitem');
 		sentenceCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.sentencecase'));
 		sentenceCase.addEventListener('command', () => {
 			onTransform(valueSentenceCased);
