@@ -26,6 +26,8 @@
 import { getCSSItemTypeIcon } from 'components/icons';
 
 
+window.isPristine = true;
+
 var Zotero_Citation_Dialog = new function () {
 	// Array value [0] is property name.
 	// Array value [1] is default value of property.
@@ -321,6 +323,7 @@ var Zotero_Citation_Dialog = new function () {
 			}
 			_updateAccept();
 			_updatePreview();
+			window.isPristine = false;
 		}
 	}
 	
@@ -380,6 +383,7 @@ var Zotero_Citation_Dialog = new function () {
 		_itemSelected(itemDataID);
 		_updatePreview();
 		_configListPosition(false, (selectedListIndex + direction));
+		window.isPristine = false;
 	}
 
 	function up() {
@@ -394,9 +398,9 @@ var Zotero_Citation_Dialog = new function () {
 	 * Adds an item to the multipleSources list
 	 */
 	this.add = Zotero.Promise.coroutine(function* (first_item) {
-		
 		var pos, len;
 		var items = itemsView.getSelectedItems(); // treeview from xpcom/itemTreeView.js
+		window.isPristine = false;
 		
 		if (!items.length) {
 			yield sortCitation();
@@ -463,6 +467,7 @@ var Zotero_Citation_Dialog = new function () {
 
 		_updateAccept();
 		_updatePreview();
+		window.isPristine = false;
 	}
 	
 	/*
@@ -663,9 +668,7 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function cancel() {
 		if(_accepted) return true;
-		io.citation.citationItems = new Array();
-
-		io.accept();
+		io.cancel();
 		_accepted = true;
 		return true;
 	}
@@ -869,3 +872,5 @@ var Zotero_Citation_Dialog = new function () {
 		Zotero.Utilities.Internal.activate(pane.document.defaultView);
 	}
 }
+
+window.cancel = Zotero_Citation_Dialog.cancel;
