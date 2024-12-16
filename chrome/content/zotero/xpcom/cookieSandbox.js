@@ -343,11 +343,15 @@ Zotero.CookieSandbox.Observer = new function() {
 						// Zotero.debug(`CookieSandbox: Found the browser via doc of load group for ${channelURI}`, 5);
 						trackedBy = this.trackedBrowsers.get(browser);
 					}
+					else if (notificationCallbacks instanceof XMLHttpRequest) {
+						// Zotero.debug(`CookieSandbox: Found the browser via XHR for ${channelURI}`, 5);
+						tested = true;
+					}
 					else {
-						// try getting as an XHR or nsIWBP
+						// try getting as an nsIWBP
 						try {
-							notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
-							// Zotero.debug(`CookieSandbox: Found the browser via XHR or nsIWBP for ${channelURI}`, 5);
+							notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
+							// Zotero.debug(`CookieSandbox: Found the browser via nsIWBP for ${channelURI}`, 5);
 							tested = true;
 						}
 						catch (e) {}
