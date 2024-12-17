@@ -106,7 +106,7 @@
 			let imageAnnotationRendered = false;
 			for (let annotation of this._annotationItems) {
 				if (!imageAnnotationRendered
-						&& annotation.annotationType === 'image'
+						&& ['image', 'ink'].includes(annotation.annotationType)
 						&& !await Zotero.Annotations.hasCacheImage(annotation)) {
 					try {
 						await Zotero.PDFWorker.renderAttachmentAnnotations(annotation.parentID);
