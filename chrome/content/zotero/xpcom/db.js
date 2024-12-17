@@ -1055,11 +1055,7 @@ Zotero.DBConnection.prototype.backupDatabase = async function (suffix, force) {
 			if (DB_LOCK_EXCLUSIVE) {
 				await this.queryAsync("PRAGMA main.locking_mode=NORMAL", false, { inBackup: true });
 			}
-			storageService.backupDatabaseFile(
-				Zotero.File.pathToFile(file),
-				PathUtils.filename(tmpFile),
-				Zotero.File.pathToFile(file).parent
-			);
+			await this._connection.backup(tmpFile);
 		}
 		catch (e) {
 			Zotero.logError(e);
