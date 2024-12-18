@@ -4491,13 +4491,8 @@ var ZoteroPane = new function()
 	
 	
 	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
-		if (Zotero_Tabs.selectedID === 'zotero-pane') {
-			if (!this.canEdit()) {
-				this.displayCannotEditLibraryMessage();
-				return;
-			}
-		}
-		else if (!Zotero.Items.get(itemID).library.editable) {
+		if (Zotero_Tabs.selectedID === 'zotero-pane' && !this.canEdit()
+				|| !Zotero.Items.get(itemID).library.editable) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
