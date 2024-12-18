@@ -200,6 +200,7 @@ function modify_omni {
 	pushd modules
 	rm Bookmarks*
 	rm FxAccounts*
+	echo '' > FingerprintingWebCompatService.sys.mjs
 	echo '' > PartitioningExceptionListService.sys.mjs
 	rm Places*
 	echo '' > PlacesExpiration.sys.mjs
@@ -213,6 +214,9 @@ function modify_omni {
 	pushd chrome/toolkit/content/mozapps/extensions
 	rm -rf default-theme
 	popd
+	
+	# This file loads remote-settings.sys.mjs, but if it's empty Zotero crashes
+	replace_line 'async #init\(\) \{' 'async #init() { if (true) { return; }' modules/URLQueryStrippingListService.sys.mjs
 	
 	# Clear most WebExtension manifest properties
 	replace_line 'manifest = normalized.value;' 'manifest = normalized.value;
