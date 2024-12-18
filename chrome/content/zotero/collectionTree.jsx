@@ -514,7 +514,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			libraryIncluded = this._includedInTree({ libraryID: Zotero.Libraries.userLibraryID });
 			if (libraryIncluded) {
 				newRows.splice(added++, 0,
-					new Zotero.CollectionTreeRow(this, 'library', { libraryID: Zotero.Libraries.userLibraryID }));
+					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.get(Zotero.Libraries.userLibraryID)));
 				newRows[0].isOpen = true;
 				added += await this._expandRow(newRows, 0);
 			}
@@ -1676,27 +1676,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				return true;
 			}
 			else if (dataType == 'zotero/collection') {
-				if (!treeRow.isLibrary(true) && !treeRow.isCollection()) {
-					return false;
-				}
-				
 				let draggedCollectionID = data[0];
 				let draggedCollection = Zotero.Collections.get(draggedCollectionID);
-				
-				// Dragging within same library
-				if (treeRow.ref.libraryID == draggedCollection.libraryID) {
-					// Collections cannot be dropped on themselves
-					if (draggedCollectionID == treeRow.ref.id) {
-						return false;
-					}
-					
-					// Nor in their children
-					if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
-						return false;
-					}
-				}
-				
-				return true;
+				return draggedCollection.canMoveToTarget(treeRow.ref, { debug: true });
 			}
 		}
 		return false;	
@@ -1770,28 +1752,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			else if (dataType == 'zotero/collection') {
 				let draggedCollectionID = data[0];
 				let draggedCollection = Zotero.Collections.get(draggedCollectionID);
-				
-				// Dragging a collection to a different library
-				if (treeRow.ref.libraryID != draggedCollection.libraryID) {
-					// Disallow if linked collection already exists
-					if (await draggedCollection.getLinkedCollection(treeRow.ref.libraryID, true)) {
-						Zotero.debug("Linked collection already exists in library");
-						return false;
-					}
-					
-					let descendents = draggedCollection.getDescendents(false, 'collection');
-					for (let descendent of descendents) {
-						descendent = Zotero.Collections.get(descendent.id);
-						// Disallow if linked collection already exists for any subcollections
-						//
-						// If this is allowed in the future for the root collection,
-						// need to allow drag only to root
-						if (await descendent.getLinkedCollection(treeRow.ref.libraryID, true)) {
-							Zotero.debug("Linked subcollection already exists in library");
-							return false;
-						}
-					}
-				}
+				let canMove = await draggedCollection.canMoveToTargetAsync(treeRow.ref, { debug: true });
+				return canMove;
 			}
 		}
 		return true;
