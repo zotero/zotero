@@ -149,7 +149,7 @@
 			this._abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));
 		}
 
-		async _ensureFeedAbstractBrowserExists() {
+		_ensureFeedAbstractBrowserExists = Zotero.Utilities.Internal.serial(async () => {
 			if (!this._feedAbstractBrowser) {
 				// dynamically create a browser element to avoid spawning a process for every tab (#4530)
 				this._feedAbstractBrowser = document.createXULElement("browser");
@@ -184,7 +184,7 @@
 				});
 			}
 			return Promise.resolve();
-		}
+		});
 
 		_discardFeedAbstractBrowser() {
 			if (this._feedAbstractBrowser) {
