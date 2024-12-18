@@ -2330,6 +2330,7 @@
 					row.querySelector(".zotero-clicky-plus").hidden = true;
 					row.querySelector(".zotero-clicky-minus").hidden = true;
 					row.querySelector(".zotero-clicky-options").hidden = true;
+					row.querySelector(".zotero-clicky-switch-type").hidden = true;
 					continue;
 				}
 
