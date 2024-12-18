@@ -533,17 +533,21 @@ if [ $BUILD_WIN == 1 ]; then
 		rm -rf $xdir
 		mkdir $xdir
 		
-		if [ -e "Firefox Setup $GECKO_VERSION-$arch.exe" ]; then
-			echo "Using Firefox Setup $GECKO_VERSION-$arch.exe"
-			cp "Firefox Setup $GECKO_VERSION-$arch.exe" "Firefox%20Setup%20$GECKO_VERSION.exe"
+		archived_file="Firefox Setup $GECKO_VERSION-$arch.exe"
+		if [ -e "$archived_file" ]; then
+			echo "Using $archived_file"
+			cp "$archived_file" "Firefox%20Setup%20$GECKO_VERSION.exe"
 		else
 			if [ $arch = "win-x64" ]; then
-				curl -O "$DOWNLOAD_URL/win64/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
+				moz_arch=win64
 			elif [ $arch = "win-arm64" ]; then
-				curl -O "$DOWNLOAD_URL/win64-aarch64/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
+				moz_arch=win64-aarch64
 			else
-				curl -O "$DOWNLOAD_URL/$arch/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
+				moz_arch=$arch
 			fi
+			curl -O "$DOWNLOAD_URL/$moz_arch/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
+			# Store local copy of unmodified app
+			cp "Firefox%20Setup%20$GECKO_VERSION.exe" "$archived_file"
 		fi
 		
 		7z x Firefox%20Setup%20$GECKO_VERSION.exe -o$xdir 'core/*'
