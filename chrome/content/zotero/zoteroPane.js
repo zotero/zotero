@@ -4491,7 +4491,13 @@ var ZoteroPane = new function()
 	
 	
 	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
-		if (!this.canEdit()) {
+		if (Zotero_Tabs.selectedID === 'zotero-pane') {
+			if (!this.canEdit()) {
+				this.displayCannotEditLibraryMessage();
+				return;
+			}
+		}
+		else if (!Zotero.Items.get(itemID).library.editable) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -4514,34 +4520,38 @@ var ZoteroPane = new function()
 	 * @returns {Promise<Zotero.Item[] | null>}
 	 */
 	this.addAttachmentFromDialog = async function (link, parentItemID, files = null) {
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
-			return null;
+		var libraryID;
+		if (Zotero_Tabs.selectedID === 'zotero-pane') {
+			let collectionTreeRow = this.getCollectionTreeRow();
+			if (link) {
+				if (collectionTreeRow.isWithinGroup()) {
+					Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
+					return null;
+				}
+				else if (collectionTreeRow.isPublications()) {
+					Zotero.alert(
+						null,
+						Zotero.getString('general.error'),
+						Zotero.getString('publications.error.linkedFilesCannotBeAdded')
+					);
+					return null;
+				}
+			}
+			if (!this.canEdit()) {
+				this.displayCannotEditLibraryMessage();
+				return null;
+			}
+			libraryID = collectionTreeRow.ref.libraryID;
 		}
-		
-		var collectionTreeRow = this.getCollectionTreeRow();
-		if (link) {
-			if (collectionTreeRow.isWithinGroup()) {
-				Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
-				return null;
-			}
-			else if (collectionTreeRow.isPublications()) {
-				Zotero.alert(
-					null,
-					Zotero.getString('general.error'),
-					Zotero.getString('publications.error.linkedFilesCannotBeAdded')
-				);
-				return null;
-			}
+		else {
+			libraryID = Zotero.Items.get(parentItemID).libraryID;
 		}
 		
 		// TODO: disable in menu
-		if (!this.canEditFiles()) {
+		if (!Zotero.Libraries.get(libraryID).filesEditable) {
 			this.displayCannotEditLibraryFilesMessage();
 			return;
 		}
-		
-		var libraryID = collectionTreeRow.ref.libraryID;
 		
 		if (!files) {
 			var fp = new FilePicker();
