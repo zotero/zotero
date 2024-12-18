@@ -154,7 +154,10 @@
 				// dynamically create a browser element to avoid spawning a process for every tab (#4530)
 				this._feedAbstractBrowser = document.createXULElement("browser");
 				this._feedAbstractBrowser.setAttribute("type", "content");
-				this._feedAbstractBrowser.setAttribute("remote", "true");
+				// fx128: about:blank no longer displays content when loaded remotely
+				// TODO: See if we can make this remote again
+				this._feedAbstractBrowser.setAttribute("remote", "false");
+				this._feedAbstractBrowser.setAttribute("maychangeremoteness", "true");
 				this._feedAbstractBrowser.setAttribute("messagemanagergroup", "feedAbstract");
 				this.querySelector('.body').appendChild(this._feedAbstractBrowser);
 				this._feedAbstractBrowser.browsingContext.sandboxFlags |= SANDBOX_ALL_FLAGS;
