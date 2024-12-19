@@ -1,0 +1,115 @@
+bubble-input {
+	min-width: 200px;
+	-moz-window-dragging: no-drag;
+
+	--bubble-height: 22px;
+	--bubble-horizontal-margin: 2px;
+	--bubble-vertical-margin: 3px;
+	
+	.body {
+		display: flex;
+		flex-flow: row wrap;
+		align-items: center;
+		min-height: 28px;
+		width: 100%;
+		padding-inline-end: 6px;
+		// height is limited to 5.5. rows of bubbles
+		max-height: calc(5.5 * (var(--bubble-height) + (2* var(--bubble-vertical-margin)) + 2px));
+		overflow-y: scroll;
+		scrollbar-width: none;
+		// to get proper width by getContentWidth in bubbleInput.js
+		span {
+			white-space: pre;
+		}
+		cursor: text;
+	}
+	
+	input {
+		outline: none;
+		width: 2px;
+		border: none !important;
+		height: 22px; // bubble height
+		/* Keep the background and text color unchanged in dark mode */
+		background-color: transparent !important;
+		padding: 0;
+		margin-inline: 0;
+		&.full-width {
+			// Same top/bottom margin as for bubbles + 1px for borders
+			margin-top: 4px;
+			margin-bottom: 4px;
+			width: 100% !important;
+		}
+	}
+	
+	.bubble {
+		@include focus-ring;
+		--bubble-horizontal-margin: 2px;
+		height: var(--bubble-height);
+		border-radius: 5px;
+		border: 1px solid var(--fill-quarternary);
+		padding: 0 8px;
+		margin: var(--bubble-vertical-margin) var(--bubble-horizontal-margin);
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		white-space: nowrap;
+		-moz-user-select: none;
+		position: relative;
+		cursor: pointer;
+		
+		&:hover:not(.showingDetails) {
+			background-color: var(--fill-quarternary);
+			
+			.cross {
+				display: block;
+				z-index: 2;
+			}
+			
+			.text {
+				mask-image: linear-gradient(to left, transparent 12px, var(--fill-primary) 24px);
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+		&.showingDetails {
+			background-color: var(--fill-quarternary) !important;
+			z-index: 2;
+		}
+		
+		&.drop-before::before, &.drop-after::after {
+			content: "";
+			display: block;
+			margin-left: -1px;
+			height: 14px;
+			border-left: 1px solid var(--fill-primary);
+			position: absolute;
+		}
+		&.drop-before::before {
+			left: calc(-1 * var(--bubble-horizontal-margin));
+		}
+		&.drop-after::after {
+			right: calc(-2 * var(--bubble-horizontal-margin));
+		}
+		
+		&.library-selected {
+			background-color: var(--accent-blue10);
+		}
+
+		.cross {
+			@include svgicon("x-8", "universal", "16");
+			display: none;
+			width: 18px;
+			height: 18px;
+			align-self: center;
+			border-radius: 5px;
+			position: absolute;
+			right: 2px;
+			&:hover {
+				background-color: var(--fill-quarternary);
+			}
+			&:active {
+				background-color: var(--fill-tertiary);
+			}
+		}
+	}
+}

@@ -68,6 +68,17 @@ class ItemTreeMenuBar extends XULElement {
 	`, ['chrome://zotero/locale/standalone.dtd']);
 	}
 
+	get suppressed() {
+		return this.hasAttribute("no-menubar");
+	}
+
+	set suppressed(val) {
+		this.toggleAttribute("no-menubar", !!val);
+		for (let menu of this.querySelectorAll("menu")) {
+			menu.hidden = this.suppressed;
+		}
+	}
+
 
 	connectedCallback() {
 		this.append(document.importNode(this.content, true));
@@ -121,6 +132,8 @@ class ItemTreeMenuBar extends XULElement {
 		if (!Zotero.isMac) {
 			// On Windows and Linux, display and focus menubar on Alt keypress
 			document.addEventListener("keydown", (event) => {
+				// Do nothing if the menubar is set to not appear (e.g. itemTree exists but is hidden)
+				if (this.suppressed) return;
 				if (event.key == "Alt") {
 					this.hidden = !this.hidden;
 					document.getElementById("main-menubar").focus();
