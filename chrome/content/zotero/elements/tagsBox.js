@@ -56,11 +56,15 @@
 				}
 			});
 
+			let menupopup = this._id('tags-context-menu');
 			let removeAllItemTags = this._id('remove-all-item-tags');
-			this._id('remove-all-item-tags').addEventListener('command', this.removeAll);
+			removeAllItemTags.addEventListener('command', this.removeAll);
 			this.querySelector('.body').addEventListener('contextmenu', (event) => {
+				event.preventDefault();
+
+				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('editable-text'));
 				removeAllItemTags.disabled = !this.editable || !this.count;
-				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
+				menupopup.openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 			// Register our observer with priority 101 (after Zotero.Tags) so we get updated tag colors
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item-tag', 'setting'], 'tagsBox', 101);
