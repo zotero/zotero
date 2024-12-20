@@ -3039,9 +3039,18 @@ Zotero.Utilities.Internal.OpenURL = {
 		);
 		if (co) {
 			let base = Zotero.Prefs.get("openURL.resolver");
-			// Add & if there's already a ?
-			let splice = base.indexOf("?") == -1 ? "?" : "&";
-			return base + splice + co;
+			if (!base.endsWith('?')) {
+				if (base.includes('login?url=')) {
+					base += '?';
+				}
+				else if (base.includes('?')) {
+					base += '&';
+				}
+				else {
+					base += '?';
+				}
+			}
+			return base + co;
 		}
 		return false;
 	},

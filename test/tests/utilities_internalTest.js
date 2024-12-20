@@ -738,4 +738,42 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(html, 'yes1yes2 yes3');
 		});
 	});
+	
+	describe("OpenURL", function () {
+		var item;
+		
+		before(async function () {
+			item = await createDataObject('item', { title: 'Foo Bar', date: '2024-12-19' });
+		})
+		
+		after(function () {
+			Zotero.Prefs.clear('openURL.resolver');
+		});
+		
+		describe("#resolve()", function () {
+			it("should add trailing '?' if no query string", async function () {
+				Zotero.Prefs.set("openURL.resolver", "https://resolver.ebsco.com/c/abcdef/result");
+				var url = Zotero.Utilities.Internal.OpenURL.resolve(item);
+				assert.include(url, 'result?url_ver=Z39.88-2004');
+			});
+			
+			it("should add trailing '&' if already a query string", async function () {
+				Zotero.Prefs.set("openURL.resolver", "https://resolver.ebscohost.com/openurl?custid=abcdef&groupid=main&profile=ftf&authtype=ip,uid");
+				var url = Zotero.Utilities.Internal.OpenURL.resolve(item);
+				assert.include(url, 'authtype=ip,uid&url_ver=Z39.88-2004');
+			});
+			
+			it("should add trailing '?' after /login?url=", async function () {
+				Zotero.Prefs.set("openURL.resolver", "https://proxy.school.edu/login?url=https://resolver.ebscohost.com/openurl");
+				var url = Zotero.Utilities.Internal.OpenURL.resolve(item);
+				assert.include(url, 'openurl?url_ver=Z39.88-2004');
+			});
+			
+			it("shouldn't add trailing '?' after /login?url= if URL already ends in '?'", async function () {
+				Zotero.Prefs.set("openURL.resolver", "https://proxy.school.edu/login?url=https://resolver.ebscohost.com/openurl?");
+				var url = Zotero.Utilities.Internal.OpenURL.resolve(item);
+				assert.include(url, 'openurl?url_ver=Z39.88-2004');
+			});
+		});
+	});
 });
