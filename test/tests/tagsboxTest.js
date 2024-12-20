@@ -96,7 +96,7 @@ describe("Item Tags Box", function () {
 			assert.exists(doc.activeElement.closest("[isNew]"));
 		});
 
-		it("should save tag edits when an item is changed", async function () {
+		it("should save tag edits when another item is selected", async function () {
 			let notSelectedItem = await createDataObject('item');
 			var tag = Zotero.Utilities.randomString();
 			var updatedTag = Zotero.Utilities.randomString();
