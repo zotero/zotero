@@ -1640,6 +1640,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.isContainer(index)) {
 			return;
 		}
+		if (this.regularOnly) return;
 
 		this._lastToggleOpenStateIndex = index;
 
