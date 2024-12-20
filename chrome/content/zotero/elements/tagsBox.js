@@ -83,7 +83,7 @@
 				return;
 			}
 			// Blur events do not fire when item is changed by clicking on an itemTree row.
-			// Make sure any changes to the tags get saved before item is upadted.
+			// Make sure any changes to the tags get saved before item is updated.
 			this.blurOpenField();
 			this._item = val;
 		}
