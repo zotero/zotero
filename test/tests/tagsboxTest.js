@@ -95,6 +95,31 @@ describe("Item Tags Box", function () {
 			// New empty tag should have focus
 			assert.exists(doc.activeElement.closest("[isNew]"));
 		});
+
+		it("should save tag edits when another item is selected", async function () {
+			let notSelectedItem = await createDataObject('item');
+			var tag = Zotero.Utilities.randomString();
+			var updatedTag = Zotero.Utilities.randomString();
+			
+			let selectedItem = await createDataObject('item', { tags: [{ tag }] });
+			var tagsbox = doc.querySelector('#zotero-editpane-tags');
+			var rows = tagsbox.querySelectorAll('.row editable-text');
+			assert.equal(rows.length, 1);
+			
+			// type something
+			var firstRow = rows[0];
+			firstRow.focus();
+			firstRow.ref.value = updatedTag;
+			firstRow.ref.dispatchEvent(new Event('input'));
+			
+			// change the item by clicking on another row in itemTree
+			let promise = waitForItemEvent('modify');
+			win.ZoteroPane.selectItem(notSelectedItem.id);
+			// selectedItem should be modified
+			await promise;
+			// make sure that the tag was actually updated
+			assert.equal(selectedItem.getTags()[0].tag, updatedTag);
+		});
 	});
 	
 	
