@@ -479,10 +479,7 @@
 				}
 			}
 			
-			// If we didn't remove the textbox, make it single-line
-			if (textbox.parentElement) {
-				this.makeSingleLine(textbox);
-			}
+			this.makeSingleLine(textbox);
 		};
 
 		newTag() {
