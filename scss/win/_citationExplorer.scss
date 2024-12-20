@@ -1,0 +1,13 @@
+#zotero-citation-explorer-dialog {
+	#citations-label {
+		margin: 3px 0 2px;
+	}
+	
+	tab:focus-visible > .tab-middle {
+		outline: none;
+	}
+	
+	input[type="button"], button {
+	  margin-top: 7px;
+	}
+}

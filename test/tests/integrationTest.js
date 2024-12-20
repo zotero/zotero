@@ -298,7 +298,7 @@ describe("Zotero.Integration", function () {
 	
 	var dialogResults = {
 		addCitationDialog: {},
-		quickFormat: {},
+		citationDialog: {},
 		integrationDocPrefs: {},
 		selectItemsDialog: {},
 		editBibliographyDialog: {}
@@ -331,7 +331,7 @@ describe("Zotero.Integration", function () {
 	
 	function setAddEditItems(items) {
 		if (items.length == undefined) items = [items];
-		dialogResults.quickFormat = async function(dialogName, io) {
+		dialogResults.citationDialog = async function(dialogName, io) {
 			io.citation.citationItems = items.map(function(item) {
 				item = Zotero.Cite.getItem(item.id);
 				return {id: item.id, uris: item.cslURIs, itemData: item.cslItemData};
