@@ -82,6 +82,9 @@
 			if (this._item == val) {
 				return;
 			}
+			// Blur events do not fire when item is changed by clicking on an itemTree row.
+			// Make sure any changes to the tags get saved before item is updated.
+			this.blurOpenField();
 			this._item = val;
 		}
 
@@ -132,7 +135,7 @@
 
 			this._tagColors = Zotero.Tags.getColors(this.item.libraryID);
 			
-			let focusedTag = this._id('rows').querySelector('editable-text:focus')?.value;
+			let focusedTag = this._id('rows').querySelector('editable-text:focus-within')?.value;
 
 			let tagRows = this._id('rows');
 			tagRows.replaceChildren();
