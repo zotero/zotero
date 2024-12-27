@@ -1,0 +1,100 @@
+tabs-menu-panel,
+panel[is=tabs-menu-panel] {
+	&::part(content) {
+		padding: 0;
+		margin: 0;
+	}
+
+	& #zotero-tabs-menu-wrapper {
+		width: 350px;
+		background: var(--material-sidepane);
+		padding: 0;
+		border-radius: 5px;
+		--width-focus-border: 2px;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+
+		& #zotero-tabs-menu-filter {
+			margin: 7px 7px 2px 7px;
+			border-radius: 5px;
+			border: 1px solid transparent;
+			padding-inline-start: 5px !important;
+			padding: 2px;
+		
+			@media not (-moz-platform: windows) {
+				@include focus-ring;
+			}
+		}
+
+		& #zotero-tabs-menu-list {
+			appearance: none;
+			margin: 0;
+			overflow-x: hidden;
+			scrollbar-width: thin;
+			padding: 5px 0;
+		
+			.row {
+				display: flex;
+				padding-inline: 4px;
+			}
+		
+			.zotero-tabs-menu-entry {
+				@include focus-ring;
+				border-radius: 6px;
+				height: 22px;
+				margin: 0;
+				&.close {
+					width: 22px;
+					// Center the icon within the larger box
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					&[hidden] {
+						visibility: hidden;
+					}
+				}
+				&.title {
+					padding: 0;
+					padding-inline-start: 6px;
+					color: unset;
+					// Align label with the icon
+					display: flex;
+					align-items: center;
+					width: 100%;
+					&.selected {
+						font-weight: 600;
+					}
+					label {
+						overflow: hidden;
+						// override default description margins
+						margin-bottom: 0;
+						margin-block-start: 0;
+						// show as much of the description as possible
+						white-space: nowrap;
+						min-width: 280px;
+						text-overflow: ellipsis;
+						// Fx115: make label have the right width
+						max-width: 280px;
+						display: inline-block;
+					}
+					.tab-icon {
+						width: 16px;
+						height: 16px;
+						margin-inline-end: 4px;
+					}
+				}
+				
+				&:hover {
+					background-color: var(--fill-quinary) !important;
+				}
+				&:active {
+					background-color: var(--fill-quarternary) !important;
+				}
+			}
+			#zotero-tabs-menu-dragged {
+				opacity: 0;
+			}	
+		}
+	}
+}
