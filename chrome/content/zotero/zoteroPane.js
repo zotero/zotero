@@ -489,7 +489,9 @@ var ZoteroPane = new function()
 		// When a panel popup hides, refocus the previous element
 		// When a menupopup hides, stop hiding the focus-ring
 		document.addEventListener("popuphiding", (e) => {
-			if (ZoteroPane.lastFocusedElement && e.target.tagName == "panel"
+			if (ZoteroPane.lastFocusedElement
+					&& !Components.utils.isDeadWrapper(ZoteroPane.lastFocusedElement)
+					&& e.target.tagName == "panel"
 					&& document.activeElement && e.target.contains(document.activeElement)) {
 				ZoteroPane.lastFocusedElement.focus();
 			}
@@ -1020,6 +1022,7 @@ var ZoteroPane = new function()
 				}
 			}
 		}
+
 	}
 	
 	/*
