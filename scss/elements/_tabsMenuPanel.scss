@@ -36,62 +36,101 @@ panel[is=tabs-menu-panel] {
 		
 			.row {
 				display: flex;
-				padding-inline: 4px;
-			}
-		
-			.zotero-tabs-menu-entry {
-				@include focus-ring;
 				border-radius: 6px;
-				height: 22px;
-				margin: 0;
-				&.close {
-					width: 22px;
-					// Center the icon within the larger box
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					&[hidden] {
-						visibility: hidden;
+				margin-inline: 6px;
+
+				.close {
+					visibility: hidden;
+				}
+
+				&.selected {
+					background-color: var(--color-accent) !important;
+					color: #fff;
+
+					.close {
+						visibility: visible;
 					}
 				}
-				&.title {
-					padding: 0;
-					padding-inline-start: 6px;
-					color: unset;
-					// Align label with the icon
-					display: flex;
-					align-items: center;
-					width: 100%;
-					&.selected {
-						font-weight: 600;
-					}
-					label {
-						overflow: hidden;
-						// override default description margins
-						margin-bottom: 0;
-						margin-block-start: 0;
-						// show as much of the description as possible
-						white-space: nowrap;
-						min-width: 280px;
-						text-overflow: ellipsis;
-						// Fx115: make label have the right width
-						max-width: 280px;
-						display: inline-block;
-					}
-					.tab-icon {
-						width: 16px;
-						height: 16px;
-						margin-inline-end: 4px;
-					}
-				}
-				
+
 				&:hover {
-					background-color: var(--fill-quinary) !important;
+					.close {
+						visibility: visible;
+					}
 				}
-				&:active {
-					background-color: var(--fill-quarternary) !important;
+
+				.zotero-tabs-menu-entry {
+					// @include focus-ring;
+					border-radius: 6px;
+					height: 22px;
+					margin: 0;
+
+					&:hover,
+					&:focus-visible {
+						background-color: var(--fill-quarternary);
+					}
+
+					&:active {
+						background-color: var(--fill-tertiary);
+					}
+
+					&.close {
+						width: 22px;
+						// Center the icon within the larger box
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						
+						&[hidden] {
+							visibility: hidden;
+						}
+						
+						.icon-x-8 {
+							fill: currentColor;
+						}
+					}
+
+					&.title {
+						padding: 0;
+						padding-inline-start: 6px;
+						color: unset;
+						// Align label with the icon
+						display: flex;
+						align-items: center;
+						width: 100%;
+						&.selected {
+							font-weight: 600;
+						}
+						label {
+							overflow: hidden;
+							// override default description margins
+							margin-bottom: 0;
+							margin-block-start: 0;
+							// show as much of the description as possible
+							white-space: nowrap;
+							min-width: 280px;
+							text-overflow: ellipsis;
+							// Fx115: make label have the right width
+							max-width: 280px;
+							display: inline-block;
+						}
+						.tab-icon {
+							width: 16px;
+							height: 16px;
+							margin-inline-end: 4px;
+						}
+					}
 				}
 			}
+			
+			#zotero-tabs-menu-row-empty {
+				pointer-events: none;
+
+				.zotero-tabs-menu-entry {
+					padding-inline: 8px;
+					color: var(--fill-tertiary);
+				}
+			}
+			
 			#zotero-tabs-menu-dragged {
 				opacity: 0;
 			}	
