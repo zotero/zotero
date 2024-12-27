@@ -852,23 +852,7 @@
 			<toolbarbutton id="zotero-tb-tabs-menu" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-tabs-menu" type="panel"
 				oncommand="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showTabsMenu(this)"/>
 			<div xmlns="http://www.w3.org/1999/xhtml" class="zotero-tb-separator"></div>
-			<panel id="zotero-tabs-menu-panel" type="arrow" 
-					onpopuphiding="Zotero_Tabs.handleTabsMenuHiding(event)"
-					onpopupshowing="Zotero_Tabs.handleTabsMenuShowing(event)"
-					onpopupshown="Zotero_Tabs.handleTabsMenuShown(event)"
-					onkeydown="Zotero_Tabs.handleTabsMenuKeyPress(event)"
-					tabindex="-1"
-					>
-				<vbox id="zotero-tabs-menu-wrapper">
-					<html:input id="zotero-tabs-menu-filter" 
-						oninput="Zotero_Tabs.handleTabsMenuFilterInput(event, this)"
-						onfocus="Zotero_Tabs.resetFocusIndex()"
-						tabindex="0"
-						data-l10n-id="zotero-tabs-menu-filter"
-					/>
-					<vbox id="zotero-tabs-menu-list" tooltip="html-tooltip"></vbox>
-				</vbox>
-			</panel>
+			<panel id="zotero-tabs-menu-panel" type="arrow" is="tabs-menu-panel" tabindex="-1"></panel>
 
 			<hbox id="zotero-pq-buttons">
 			</hbox>

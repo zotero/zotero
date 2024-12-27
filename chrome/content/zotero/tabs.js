@@ -29,7 +29,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 import TabBar from 'components/tabBar';
-import { CSSIcon, CSSItemTypeIcon } from 'components/icons';
 
 // Reduce loaded tabs limit if the system has 8 GB or less memory.
 // TODO: Revise this after upgrading to Zotero 7
@@ -61,10 +60,6 @@ var Zotero_Tabs = new function () {
 		get: () => this._focusOptions
 	});
 
-	Object.defineProperty(this, 'tabsMenuList', {
-		get: () => document.getElementById('zotero-tabs-menu-list')
-	});
-
 	Object.defineProperty(this, 'tabsMenuPanel', {
 		get: () => document.getElementById('zotero-tabs-menu-panel')
 	});
@@ -80,9 +75,6 @@ var Zotero_Tabs = new function () {
 	this._prevSelectedID = null;
 	this._history = [];
 	this._focusOptions = {};
-	this._tabsMenuFilter = "";
-	this._tabsMenuFocusedIndex = 0;
-	this._tabsMenuIgnoreMouseover = false;
 
 	// Keep track of item modifications to update the title
 	Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
@@ -148,16 +140,18 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + Zotero.appName;
-		if (this.isTabsMenuVisible()) {
-			this.refreshTabsMenuList();
+
+		let panel = this.tabsMenuPanel;
+		if (panel.visible) {
+			panel.refreshList();
 			if (document.activeElement.id !== "zotero-tabs-menu-filter") {
-				focusTabsMenuEntry();
+				panel.focusEntry();
 			}
 		}
 		// Disable tabs menu button when no reader tabs are present
 		document.getElementById("zotero-tb-tabs-menu").disabled = this._tabs.length == 1;
 		// Close tabs menu if all tabs are closed
-		if (this._tabs.length == 1 && this.isTabsMenuVisible()) {
+		if (this._tabs.length == 1 && panel.visible) {
 			this.tabsMenuPanel.hidePopup();
 		}
 	};
@@ -820,388 +814,7 @@ var Zotero_Tabs = new function () {
 		}
 	};
 
-	/**
-	 * @param {title} String - Tab's title
-	 * @returns <description> with bold substrings of title matching this._tabsMenuFilter
-	 */
-	let createTabsMenuLabel = (title) => {
-		let desc = document.createElement('label');
-		let regex = new RegExp(`(${Zotero.Utilities.quotemeta(this._tabsMenuFilter)})`, 'gi');
-		let matches = title.matchAll(regex);
-
-		let lastIndex = 0;
-
-		for (let match of matches) {
-			if (match.index > lastIndex) {
-				// Add preceding text
-				desc.appendChild(document.createTextNode(title.substring(lastIndex, match.index)));
-			}
-			// Add matched text wrapped in <b>
-			
-			if (match[0]) {
-				let b = document.createElement('b');
-				b.textContent = match[0];
-				desc.appendChild(b);
-			}
-			lastIndex = match.index + match[0].length;
-		}
-
-		if (lastIndex < title.length) {
-			// Add remaining text
-			desc.appendChild(document.createTextNode(title.substring(lastIndex)));
-		}
-		return desc;
-	};
-
-	this.isTabsMenuVisible = () => {
-		return ['showing', 'open'].includes(this.tabsMenuPanel.state);
-	};
-
-	/**
-	 * Create the list of opened tabs in tabs menu.
-	 */
-	this.refreshTabsMenuList = () => {
-		// Empty existing nodes
-		this.tabsMenuList.replaceChildren();
-		this._tabsMenuFocusedIndex = 0;
-		let index = 1;
-		for (let tab of this._tabs) {
-			// Skip tabs whose title wasn't added yet
-			if (tab.title == "") {
-				continue;
-			}
-			// Filter tabs that do not match the filter
-			if (!tab.title.toLowerCase().includes(this._tabsMenuFilter)) {
-				continue;
-			}
-			// Top-level entry of the opened tabs array
-			let row = document.createElement('div');
-			let rowIndex = this._tabs.findIndex(x => x.id === tab.id);
-			row.classList = "row";
-			row.setAttribute("index", rowIndex);
-			row.setAttribute("draggable", true);
-
-			// Title of the tab
-			let tabName = document.createElement('div');
-			tabName.setAttribute('flex', '1');
-			tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
-			tabName.setAttribute('tabindex', `${index++}`);
-			tabName.setAttribute('aria-label', tab.title);
-			tabName.setAttribute('title', tab.title);
-
-			// Cross button to close a tab
-			let closeButton = document.createElement('div');
-			closeButton.className = "zotero-tabs-menu-entry close";
-			let closeIcon = document.createElement('span');
-			closeIcon.setAttribute('class', 'icon icon-css icon-x-8 icon-16');
-			closeButton.setAttribute('data-l10n-id', 'zotero-tabs-menu-close-button');
-			closeButton.appendChild(closeIcon);
-			closeButton.addEventListener("click", () => {
-				// Keep the focus on the cross at the same spot
-				if (this._tabsMenuFocusedIndex == this.tabsMenuList.childElementCount * 2) {
-					this._tabsMenuFocusedIndex = Math.max(this._tabsMenuFocusedIndex - 2, 0);
-				}
-				this.close(tab.id);
-			});
-
-			// Library tab has no close button
-			if (tab.id == "zotero-pane") {
-				closeButton.hidden = true;
-			}
-
-			closeButton.setAttribute('tabindex', `${index++}`);
-
-			// Item type icon
-			let span = document.createElement("span");
-			span.className = "icon icon-css tab-icon";
-			if (tab.id == 'zotero-pane') {
-				// Determine which icon from the collection view rows to use (same as in _update())
-				let index = ZoteroPane.collectionsView?.selection?.focused;
-				if (typeof index !== 'undefined' && ZoteroPane.collectionsView.getRow(index)) {
-					let iconName = ZoteroPane.collectionsView.getIconName(index);
-					span.classList.add(`icon-${iconName}`);
-				}
-			}
-			else {
-				span.classList.add("icon-item-type");
-				let item = Zotero.Items.get(tab.data.itemID);
-				let dataTypeLabel = item.getItemTypeIconName(true);
-				span.setAttribute("data-item-type", dataTypeLabel);
-			}
-
-			tabName.appendChild(span);
-			// Actual label with bolded substrings matching the filter
-			let tabLabel = createTabsMenuLabel(tab.title, this._tabsMenuFilter);
-			tabName.appendChild(tabLabel);
-
-			// Selected tab is bold
-			if (tab.id == this._selectedID) {
-				tabName.classList.add('selected');
-			}
-			// Onclick, go to selected tab + close popup
-			tabName.addEventListener("click", () => {
-				this.tabsMenuPanel.hidePopup();
-				this.select(tab.id);
-			});
-
-			row.appendChild(tabName);
-			row.appendChild(closeButton);
-	
-			row.addEventListener("dragstart", (e) => {
-				// No drag-drop on the cross button or the library tab
-				if (tab.id == 'zotero-pane' || e.target.classList.contains("close")) {
-					e.preventDefault();
-					e.stopPropagation();
-					return;
-				}
-				e.dataTransfer.setData('zotero/tab', tab.id);
-				setTimeout(() => {
-					row.classList.remove("hover");
-					row.setAttribute("id", "zotero-tabs-menu-dragged");
-				});
-			});
-			
-
-			row.addEventListener('dragover', (e) => {
-				e.preventDefault();
-				let tabId = e.dataTransfer.getData("zotero/tab");
-				if (!tabId || tab.id == "zotero-pane") {
-					return false;
-				}
-				if (row.getAttribute("id") == "zotero-tabs-menu-dragged") {
-					return true;
-				}
-				let placeholder = document.getElementById("zotero-tabs-menu-dragged");
-				if (row.previousSibling?.id == placeholder.id) {
-					// If the placeholder exists before the row, swap the placeholder and the row
-					row.parentNode.insertBefore(row, placeholder);
-					placeholder.setAttribute("index", parseInt(row.getAttribute("index")) + 1);
-				}
-				else {
-					// Insert placeholder before the row
-					row.parentNode.insertBefore(placeholder, row);
-					placeholder.setAttribute("index", parseInt(row.getAttribute("index")));
-				}
-				return false;
-			});
-
-			row.addEventListener('drop', (e) => {
-				let tabId = e.dataTransfer.getData("zotero/tab");
-				let rowIndex = parseInt(row.getAttribute("index"));
-				if (rowIndex == 0) return;
-				this.move(tabId, rowIndex);
-			});
-
-			row.addEventListener('dragend', (_) => {
-				// If this.move() wasn't called, just re-render the menu
-				if (document.getElementById("zotero-tabs-menu-dragged")) {
-					this.refreshTabsMenuList();
-				}
-			});
-			this.tabsMenuList.appendChild(row);
-		}
-	};
-
 	this.showTabsMenu = function (button) {
-		this.tabsMenuPanel.openPopup(button, "after_start", -20, -2, false, false);
-	};
-
-	this.handleTabsMenuHiding = function (event) {
-		if (event.originalTarget.id != 'zotero-tabs-menu-panel') return;
-
-		// Empty out the filter input field
-		let menuFilter = document.getElementById('zotero-tabs-menu-filter');
-		menuFilter.value = "";
-		this._tabsMenuFilter = "";
-		this.tabsMenuList.closest("panel").style.removeProperty('max-height');
-	};
-
-	this.handleTabsMenuShown = function (_) {
-		focusTabsMenuEntry(0);
-	};
-
-	this.handleTabsMenuShowing = function (_) {
-		this.refreshTabsMenuList();
-
-		// Make sure that if the menu is very long, there is a small
-		// gap left between the top/bottom of the menu and the edge of the screen
-		let valuesAreWithinMargin = (valueOne, valueTwo, margin) => {
-			return Math.abs(valueOne - valueTwo) <= margin;
-		};
-		let panel = document.getElementById("zotero-tabs-menu-panel");
-		let panelRect = panel.getBoundingClientRect();
-		const gapBeforeScreenEdge = 25;
-		let absoluteTabsMenuTop = window.screenY - panelRect.height + panelRect.bottom;
-		let absoluteTabsMenuBottom = window.screenY + panelRect.height + panelRect.top;
-
-		// On windows, getBoundingClientRect does not give us correct top and bottom values
-		// until popupshown, so instead use the anchor's position
-		if (Zotero.isWin) {
-			let anchor = document.getElementById("zotero-tb-tabs-menu");
-			let anchorRect = anchor.getBoundingClientRect();
-			absoluteTabsMenuTop = window.screenY - panelRect.height + anchorRect.top;
-			absoluteTabsMenuBottom = window.screenY + panelRect.height + anchorRect.bottom;
-		}
-		// screen.availTop is not always right on Linux, so ignore it
-		let availableTop = Zotero.isLinux ? 0 : screen.availTop;
-
-		// Check if the end of the tabs menu is close to the edge of the screen
-		let atTopScreenEdge = valuesAreWithinMargin(absoluteTabsMenuTop, availableTop, gapBeforeScreenEdge);
-		let atBottomScreenEdge = valuesAreWithinMargin(absoluteTabsMenuBottom, screen.availHeight + availableTop, gapBeforeScreenEdge);
-
-		let gap;
-		// Limit max height of the menu to leave the specified gap till the screen's edge.
-		// Due to screen.availTop behavior on linux, the menu can go outside of what is supposed
-		// to be the available screen area, so special treatment for those edge cases.
-		if (atTopScreenEdge || (Zotero.isLinux && absoluteTabsMenuTop < 0)) {
-			gap = gapBeforeScreenEdge - (absoluteTabsMenuTop - availableTop);
-		}
-		if (atBottomScreenEdge || (Zotero.isLinux && absoluteTabsMenuBottom > screen.availHeight)) {
-			gap = gapBeforeScreenEdge - (screen.availHeight + availableTop - absoluteTabsMenuBottom);
-		}
-		if (gap) {
-			panel.style.maxHeight = `${panelRect.height - gap}px`;
-		}
-		// Try to scroll selected tab into the center
-		let selectedTab = this.tabsMenuList.querySelector(".selected");
-		if (selectedTab) {
-			selectedTab.scrollIntoView({ block: 'center' });
-		}
-	};
-
-	/**
-	 * Record the value of the filter
-	 */
-	this.handleTabsMenuFilterInput = function (_, input) {
-		if (this._tabsMenuFilter == input.value.toLowerCase()) {
-			return;
-		}
-		this._tabsMenuFilter = input.value.toLowerCase();
-		this.refreshTabsMenuList();
-	};
-
-	this.resetFocusIndex = (_) => {
-		this._tabsMenuFocusedIndex = 0;
-	};
-
-
-	/**
-	 * Focus on the element in the tabs menu with [tabindex=tabIndex] if given
-	 * or [tabindex=this._tabsMenuFocusedIndex] otherwise
-	 */
-	let focusTabsMenuEntry = (tabIndex = null) => {
-		tabIndex = tabIndex !== null ? tabIndex : this._tabsMenuFocusedIndex;
-		if (tabIndex === null) {
-			return;
-		}
-		var nextTab = this.tabsMenuList.parentElement.querySelector(`[tabindex="${tabIndex}"]`);
-		if (!nextTab) {
-			return;
-		}
-		this._tabsMenuIgnoreMouseover = true;
-		this._tabsMenuFocusedIndex = tabIndex;
-		let hovered = this.tabsMenuList.querySelector(".hover");
-		if (hovered) {
-			hovered.classList.remove("hover");
-		}
-		nextTab.focus();
-		// For some reason (likely a mozilla bug),
-		// a mouseover event fires at the location where the drag event started after the drop.
-		// To not mark the wrong entry as hovered, ignore mouseover events for a bit after the focus change
-		setTimeout(() => {
-			this._tabsMenuIgnoreMouseover = false;
-		}, 250);
-	};
-
-	/**
-	 * Keyboard navigation within the tabs menu
-	 * - Tab/Shift-Tab moves focus from the input field across tab titles and close buttons
-	 * - Enter from the input field focuses the first tab
-	 * - Enter on a toolbarbutton clicks it
-	 * - ArrowUp/ArrowDown on a toolbarbutton moves focus to the next/previous toolbarbutton of the
-	 *   same type (e.g. arrowDown from title focuses the next title)
-	 * - ArrowUp from the first tab or ArrowDown from the last tab focuses the filter field
-	 * - ArrowDown from the filter field focuses the first tab
-	 * - ArrowUp from the filter field focuses the last tab
-	 * - Home/PageUp focuses the filter field
-	 * - End/PageDown focues the last tab title
-	 * - CMD-f will focus the input field
-	 */
-	this.handleTabsMenuKeyPress = function (event) {
-		let tabindex = this._tabsMenuFocusedIndex;
-		if (event.key == "Tab") {
-			event.preventDefault();
-			let isShift = event.shiftKey;
-			let moveTabIndex = () => tabindex++;
-			if (isShift) {
-				moveTabIndex = () => tabindex--;
-			}
-			moveTabIndex();
-			let candidate = this.tabsMenuList.parentElement.querySelector(`[tabindex="${tabindex}"]`);
-			// If the candidate is hidden (e.g. close button of library tab), skip it
-			if (candidate && candidate.hidden) {
-				moveTabIndex();
-			}
-			focusTabsMenuEntry(tabindex);
-		}
-		else if (["Home", "PageUp"].includes(event.key)) {
-			event.preventDefault();
-			focusTabsMenuEntry(0);
-		}
-		else if (["End", "PageDown"].includes(event.key)) {
-			event.preventDefault();
-			focusTabsMenuEntry(this.tabsMenuList.childElementCount * 2 - 1);
-		}
-		else if (["ArrowUp", "ArrowDown"].includes(event.key)) {
-			event.preventDefault();
-			let isFirstRow = tabindex <= 2 && tabindex > 0;
-			// Step over 1 index to jump over close button, unless we move
-			// from the filter field
-			let step = tabindex == 0 ? 1 : 2;
-			if (event.key == "ArrowDown") {
-				tabindex += step;
-			}
-			else {
-				tabindex -= step;
-			}
-			// If the candidate is a disabled element (e.g. close button of the library tab),
-			// move focus to the element before it
-			let candidate = this.tabsMenuList.parentElement.querySelector(`[tabindex="${tabindex}"]`);
-			if (candidate && candidate.disabled) {
-				tabindex--;
-			}
-			if (tabindex <= 0) {
-				// ArrowUp from the first tab or the first close button focuses the filter field.
-				// ArrowUp from the filter field focuses the last tab
-				if (isFirstRow) {
-					tabindex = 0;
-				}
-				else {
-					tabindex = this.tabsMenuList.childElementCount * 2 - 1;
-				}
-			}
-			// ArrowDown from the bottom focuses the filter field
-			if (tabindex > this.tabsMenuList.childElementCount * 2) {
-				tabindex = 0;
-			}
-			focusTabsMenuEntry(tabindex);
-		}
-		else if (["Enter", " "].includes(event.key)) {
-			event.preventDefault();
-			if (event.target.id == "zotero-tabs-menu-filter") {
-				focusTabsMenuEntry(1);
-				return;
-			}
-			event.target.click();
-		}
-		else if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
-			event.preventDefault();
-			event.stopPropagation();
-		}
-		else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
-			focusTabsMenuEntry(0);
-			event.preventDefault();
-			event.stopPropagation();
-		}
+		this.tabsMenuPanel.show(button);
 	};
 };
