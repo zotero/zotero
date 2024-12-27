@@ -148,12 +148,6 @@ var Zotero_Tabs = new function () {
 				panel.focusEntry();
 			}
 		}
-		// Disable tabs menu button when no reader tabs are present
-		document.getElementById("zotero-tb-tabs-menu").disabled = this._tabs.length == 1;
-		// Close tabs menu if all tabs are closed
-		if (this._tabs.length == 1 && panel.visible) {
-			this.tabsMenuPanel.hidePopup();
-		}
 	};
 
 	this.getTabIDByItemID = function (itemID) {
@@ -814,7 +808,18 @@ var Zotero_Tabs = new function () {
 		}
 	};
 
-	this.showTabsMenu = function (button) {
-		this.tabsMenuPanel.show(button);
+	this.toggleTabsMenu = function (visibility = undefined, button = undefined) {
+		if (visibility === undefined) {
+			visibility = !this.tabsMenuPanel.visible;
+		}
+		if (button === undefined) {
+			button = document.getElementById("zotero-tb-tabs-menu");
+		}
+		if (visibility) {
+			this.tabsMenuPanel.show(button);
+		}
+		else {
+			this.tabsMenuPanel.hidePopup();
+		}
 	};
 };
