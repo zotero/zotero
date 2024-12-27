@@ -33,18 +33,23 @@
 	class TabsMenuPanel extends XULPanelElement {
 		content = MozXULElement.parseXULToFragment(`
 		<vbox id="zotero-tabs-menu-wrapper">
-			<html:input id="zotero-tabs-menu-filter" 
+			<html:input id="zotero-tabs-menu-filter"
 				tabindex="0"
+				role="combobox"
+				aria-expanded="true"
+				aria-owns="zotero-tabs-menu-list"
+				aria-controls="zotero-tabs-menu-list"
 				data-l10n-id="zotero-tabs-menu-filter"
 			/>
-			<vbox id="zotero-tabs-menu-list" tooltip="html-tooltip"></vbox>
-		</vbox>`);
+			<vbox id="zotero-tabs-menu-list"
+				role="listbox"
+				tooltip="html-tooltip"></vbox>
+		</vbox>
+		`);
 		
 		_filterText = "";
 
-		_focusedIndex = 0;
-
-		_ignoreMouseover = false;
+		_selectedIndex = 0;
 
 		_wrapper;
 
@@ -69,9 +74,6 @@
 			this.addEventListener("popupshown", this._handleShown);
 			this.addEventListener("popuphiding", this._handleHiding);
 			this.addEventListener("keydown", this._handleKeydown);
-
-			this._filterInput.addEventListener("input", this._handleFilterInput);
-			this._filterInput.addEventListener("focus", this._handleFilterFocus);
 		}
 
 		destroy() {
@@ -79,9 +81,6 @@
 			this.removeEventListener("popupshown", this._handleShown);
 			this.removeEventListener("popuphiding", this._handleHiding);
 			this.removeEventListener("keydown", this._handleKeydown);
-
-			this._filterInput.removeEventListener("input", this._handleFilterInput);
-			this._filterInput.removeEventListener("focus", this._handleFilterFocus);
 		}
 
 		render() {}
@@ -129,30 +128,61 @@
 			}
 			// Empty existing nodes
 			this._tabsList.replaceChildren();
-			this._focusedIndex = 0;
-			let index = 1;
-			let _tabs = this._handleGetTabs();
-			let selectedTabID = this._handleGetSelectedID();
-			for (let [rowIndex, tab] of _tabs.entries()) {
-				// Skip tabs whose title wasn't added yet
-				if (tab.title == "") {
-					continue;
+			let selectedIndex = null;
+			let index = 0;
+			let validTabs = Zotero_Tabs._tabs.filter(
+				(tab) => {
+					// Skip tabs whose title wasn't added yet
+					return !!tab.title
+					// Filter tabs that do not match the filter
+					&& tab.title.toLowerCase().includes(this._filterText);
 				}
-				// Filter tabs that do not match the filter
-				if (!tab.title.toLowerCase().includes(this._filterText)) {
-					continue;
-				}
+			);
+			let tabsCount = validTabs.length;
+
+			// If no tabs are open, show an empty row with a message
+			if (tabsCount === 0) {
+				let row = document.createElement('div');
+				row.id = "zotero-tabs-menu-row-empty";
+				row.classList.add("row");
+				row.dataset.l10nId = "tabs-menu-row-empty";
+				row.role = "option";
+
+				let tabName = document.createElement('div');
+				tabName.classList.add("zotero-tabs-menu-entry");
+				tabName.setAttribute('tabindex', "-1");
+				tabName.dataset.l10nId = "tabs-menu-row-empty-label";
+				row.appendChild(tabName);
+
+				this._tabsList.appendChild(row);
+
+				this._filterInput.setAttribute("aria-activedescendant", row.id);
+				return;
+			}
+
+			let selectedTabID = Zotero_Tabs.selectedID;
+			for (let tab of validTabs) {
 				// Top-level entry of the opened tabs array
 				let row = document.createElement('div');
 				row.classList = "row";
-				row.setAttribute("index", rowIndex);
+				row.id = `zotero-tabs-menu-row-${tab.id}`;
+				row.dataset.tabId = tab.id;
+				row.setAttribute("index", index);
 				row.setAttribute("draggable", true);
+				row.setAttribute("role", "option");
+				row.dataset.l10nId = "tabs-menu-row";
+				row.dataset.l10nArgs = JSON.stringify({
+					index: index + 1,
+					total: tabsCount,
+					isFirst: index === 0,
+					isLast: index === tabsCount - 1,
+				});
 
 				// Title of the tab
 				let tabName = document.createElement('div');
 				tabName.setAttribute('flex', '1');
 				tabName.setAttribute('class', 'zotero-tabs-menu-entry title');
-				tabName.setAttribute('tabindex', `${index++}`);
+				tabName.setAttribute('tabindex', "-1");
 				tabName.setAttribute('aria-label', tab.title);
 				tabName.setAttribute('title', tab.title);
 
@@ -163,20 +193,14 @@
 				closeIcon.setAttribute('class', 'icon icon-css icon-x-8 icon-16');
 				closeButton.setAttribute('data-l10n-id', 'zotero-tabs-menu-close-button');
 				closeButton.appendChild(closeIcon);
-				closeButton.addEventListener("click", () => {
-					// Keep the focus on the cross at the same spot
-					if (this._focusedIndex == this._tabsList.childElementCount * 2) {
-						this._focusedIndex = Math.max(this._focusedIndex - 2, 0);
-					}
-					this._handleCloseTab(tab.id);
-				});
+				closeButton.addEventListener("click", this._handleCloseClick);
 
 				// Library tab has no close button
 				if (tab.id == "zotero-pane") {
 					closeButton.hidden = true;
 				}
 
-				closeButton.setAttribute('tabindex', `${index++}`);
+				closeButton.setAttribute('tabindex', "0");
 
 				// Item type icon
 				let span = document.createElement("span");
@@ -203,69 +227,27 @@
 
 				// Selected tab is bold
 				if (tab.id == selectedTabID) {
-					tabName.classList.add('selected');
+					selectedIndex = index;
 				}
-				// Onclick, go to selected tab + close popup
-				tabName.addEventListener("click", () => {
-					this.hidePopup();
-					this._handleSelectTab(tab.id);
-				});
+				tabName.addEventListener("click", this._handleTitleClick);
 
 				row.appendChild(tabName);
 				row.appendChild(closeButton);
 		
-				row.addEventListener("dragstart", (e) => {
-					// No drag-drop on the cross button or the library tab
-					if (tab.id == 'zotero-pane' || e.target.classList.contains("close")) {
-						e.preventDefault();
-						e.stopPropagation();
-						return;
-					}
-					e.dataTransfer.setData('zotero/tab', tab.id);
-					setTimeout(() => {
-						row.classList.remove("hover");
-						row.setAttribute("id", "zotero-tabs-menu-dragged");
-					});
-				});
-				
-
-				row.addEventListener('dragover', (e) => {
-					e.preventDefault();
-					let tabId = e.dataTransfer.getData("zotero/tab");
-					if (!tabId || tab.id == "zotero-pane") {
-						return false;
-					}
-					if (row.getAttribute("id") == "zotero-tabs-menu-dragged") {
-						return true;
-					}
-					let placeholder = document.getElementById("zotero-tabs-menu-dragged");
-					if (row.previousSibling?.id == placeholder.id) {
-						// If the placeholder exists before the row, swap the placeholder and the row
-						row.parentNode.insertBefore(row, placeholder);
-						placeholder.setAttribute("index", parseInt(row.getAttribute("index")) + 1);
-					}
-					else {
-						// Insert placeholder before the row
-						row.parentNode.insertBefore(placeholder, row);
-						placeholder.setAttribute("index", parseInt(row.getAttribute("index")));
-					}
-					return false;
-				});
-
-				row.addEventListener('drop', (e) => {
-					let tabId = e.dataTransfer.getData("zotero/tab");
-					let rowIndex = parseInt(row.getAttribute("index"));
-					if (rowIndex == 0) return;
-					this._handleMoveTab(tabId, rowIndex);
-				});
-
-				row.addEventListener('dragend', (_) => {
-					// If this.move() wasn't called, just re-render the menu
-					if (document.getElementById("zotero-tabs-menu-dragged")) {
-						this.refreshList();
-					}
-				});
+				row.addEventListener("dragstart", this._handleRowDragStart);
+				row.addEventListener('dragover', this._handleRowDragOver);
+				row.addEventListener('drop', this._handleRowDrop);
+				row.addEventListener('dragend', this._handleRowDragEnd);
 				this._tabsList.appendChild(row);
+
+				index++;
+			}
+
+			if (selectedIndex !== null) {
+				this._selectRow(selectedIndex);
+			}
+			else {
+				this.moveSelection("first");
 			}
 		}
 
@@ -303,31 +285,83 @@
 		}
 
 		/**
-		 * Focus on the element in the tabs menu with [tabindex=tabIndex] if given
-		 * or [tabindex=this._focusedIndex] otherwise
+		 * Move selection to the tab row in the given direction
+		 * @param {"next" | "prev" | "first" | "last"} type - Direction to move focus
+		 * @returns {void}
 		 */
-		focusEntry(tabIndex = null) {
-			tabIndex = tabIndex !== null ? tabIndex : this._focusedIndex;
-			if (tabIndex === null) {
+		moveSelection(type = "next") {
+			let index = this._selectedIndex;
+			let focusTarget;
+			let tabsCount = this._tabsList.querySelectorAll("[index]").length;
+			switch (type) {
+				case "first":
+					index = 0;
+					break;
+				case "last":
+					index = tabsCount - 1;
+					break;
+				case "next":
+					index++;
+					if (index >= tabsCount) {
+						index = 0;
+					}
+					break;
+				case "prev":
+					index--;
+					if (index < 0) {
+						index = tabsCount - 1;
+					}
+					break;
+				default:
+					throw new Error("Invalid focus type");
+			}
+			focusTarget = this._findClosestAvailableFocusTarget(index, type);
+			if (!focusTarget) {
 				return;
 			}
-			var nextTab = this._wrapper.querySelector(`[tabindex="${tabIndex}"]`);
-			if (!nextTab) {
+			this._selectRow(parseInt(focusTarget.getAttribute("index")));
+		}
+
+		_findClosestAvailableFocusTarget(index, direction) {
+			let target = this._wrapper.querySelector(`[index="${index}"]`);
+			if (!target) {
+				return null;
+			}
+			let getNextElem = () => {
+				if (direction == "next") {
+					return target.nextElementSibling;
+				}
+				return target.previousElementSibling;
+			};
+
+			while (target && target.hasAttribute("index") && target.hidden) {
+				target = getNextElem();
+			}
+			return target;
+		}
+
+		_selectRow(index) {
+			this._selectedIndex = index;
+			let prevRow = this._tabsList.querySelector(".selected");
+			if (prevRow) {
+				prevRow.classList.remove("selected");
+				prevRow.querySelector(".title").setAttribute("tabindex", "-1");
+			}
+			let row = this._tabsList.querySelector(`[index="${index}"]`);
+			if (row) {
+				row.classList.add("selected");
+				row.querySelector(".title").setAttribute("tabindex", "0");
+				this._filterInput.setAttribute("aria-activedescendant", row.id);
+			}
+			this._focusInput();
+		}
+
+
+		_focusInput() {
+			if (document.activeElement == this._filterInput) {
 				return;
 			}
-			this._ignoreMouseover = true;
-			this._focusedIndex = tabIndex;
-			let hovered = this._tabsList.querySelector(".hover");
-			if (hovered) {
-				hovered.classList.remove("hover");
-			}
-			nextTab.focus();
-			// For some reason (likely a mozilla bug),
-			// a mouseover event fires at the location where the drag event started after the drop.
-			// To not mark the wrong entry as hovered, ignore mouseover events for a bit after the focus change
-			setTimeout(() => {
-				this._ignoreMouseover = false;
-			}, 250);
+			this._filterInput.focus();
 		}
 
 		// From XULElementBase
@@ -335,27 +369,9 @@
 			this.disconnectedCallback();
 		};
 
-		_handleGetTabs() {
-			return Zotero_Tabs._tabs;
-		}
+		_handleShowing = (event) => {
+			if (event.originalTarget !== this) return;
 
-		_handleGetSelectedID() {
-			return Zotero_Tabs.selectedID;
-		}
-
-		_handleSelectTab(tabID) {
-			Zotero_Tabs.select(tabID);
-		}
-
-		_handleMoveTab(tabID, index) {
-			Zotero_Tabs.move(tabID, index);
-		}
-
-		_handleCloseTab(tabID) {
-			Zotero_Tabs.close(tabID);
-		}
-
-		_handleShowing = () => {
 			this.refreshList();
 
 			// Make sure that if the menu is very long, there is a small
@@ -401,10 +417,13 @@
 			if (selectedTab) {
 				selectedTab.scrollIntoView({ block: 'center' });
 			}
+
+			this._filterInput.addEventListener("input", this._handleFilterInput);
+			this._filterInput.addEventListener("blur", this._handleFilterBlur);
 		};
 		
 		_handleShown = () => {
-			this.focusEntry(0);
+			this._focusInput();
 		};
 
 		_handleHiding = (event) => {
@@ -414,6 +433,9 @@
 			this._filterInput.value = "";
 			this._filterText = "";
 			this.style.removeProperty('max-height');
+
+			this._filterInput.removeEventListener("input", this._handleFilterInput);
+			this._filterInput.removeEventListener("blur", this._handleFilterBlur);
 		};
 
 		/**
@@ -431,78 +453,33 @@
 		 * - CMD-f will focus the input field
 		 */
 		_handleKeydown = (event) => {
-			let tabindex = this._focusedIndex;
-			if (event.key == "Tab") {
+			if (["Home", "PageUp"].includes(event.key)) {
 				event.preventDefault();
-				let isShift = event.shiftKey;
-				let moveTabIndex = () => tabindex++;
-				if (isShift) {
-					moveTabIndex = () => tabindex--;
-				}
-				moveTabIndex();
-				let candidate = this._wrapper.querySelector(`[tabindex="${tabindex}"]`);
-				// If the candidate is hidden (e.g. close button of library tab), skip it
-				if (candidate && candidate.hidden) {
-					moveTabIndex();
-				}
-				this.focusEntry(tabindex);
-			}
-			else if (["Home", "PageUp"].includes(event.key)) {
-				event.preventDefault();
-				this.focusEntry(0);
+				this.moveSelection("first");
 			}
 			else if (["End", "PageDown"].includes(event.key)) {
 				event.preventDefault();
-				this.focusEntry(this._tabsList.childElementCount * 2 - 1);
+				this.moveSelection("last");
 			}
 			else if (["ArrowUp", "ArrowDown"].includes(event.key)) {
 				event.preventDefault();
-				let isFirstRow = tabindex <= 2 && tabindex > 0;
-				// Step over 1 index to jump over close button, unless we move
-				// from the filter field
-				let step = tabindex == 0 ? 1 : 2;
 				if (event.key == "ArrowDown") {
-					tabindex += step;
+					this.moveSelection("next");
 				}
 				else {
-					tabindex -= step;
+					this.moveSelection("prev");
 				}
-				// If the candidate is a disabled element (e.g. close button of the library tab),
-				// move focus to the element before it
-				let candidate = this._wrapper.querySelector(`[tabindex="${tabindex}"]`);
-				if (candidate && candidate.disabled) {
-					tabindex--;
-				}
-				if (tabindex <= 0) {
-					// ArrowUp from the first tab or the first close button focuses the filter field.
-					// ArrowUp from the filter field focuses the last tab
-					if (isFirstRow) {
-						tabindex = 0;
-					}
-					else {
-						tabindex = this._tabsList.childElementCount * 2 - 1;
-					}
-				}
-				// ArrowDown from the bottom focuses the filter field
-				if (tabindex > this._tabsList.childElementCount * 2) {
-					tabindex = 0;
-				}
-				this.focusEntry(tabindex);
 			}
-			else if (["Enter", " "].includes(event.key)) {
+			else if (event.key === "Enter") {
 				event.preventDefault();
-				if (event.target.id == "zotero-tabs-menu-filter") {
-					this.focusEntry(1);
+				if (event.target.classList.contains("zotero-tabs-menu-entry")) {
+					event.target.click();
 					return;
 				}
-				event.target.click();
-			}
-			else if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
-				event.preventDefault();
-				event.stopPropagation();
+				this._tabsList.querySelector(".selected > .title")?.click();
 			}
 			else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
-				this.focusEntry(0);
+				this.moveSelection("first");
 				event.preventDefault();
 				event.stopPropagation();
 			}
@@ -520,8 +497,97 @@
 			this.refreshList();
 		};
 
-		_handleFilterFocus = () => {
-			this._focusedIndex = 0;
+		_handleFilterBlur = (event) => {
+			setTimeout(() => {
+				let currentTarget = document.activeElement;
+				if (currentTarget.classList.contains("close") || currentTarget.classList.contains("title")) {
+					return;
+				}
+				// If not title or close button, prevent the blur
+				event.preventDefault();
+				event.stopPropagation();
+				this._focusInput();
+			});
+		};
+
+		_handleConfirm() {
+			let selectedTab = this._tabsList.querySelector(".selected");
+			if (selectedTab) {
+				selectedTab.click();
+			}
+		}
+
+		_handleTitleClick = (event) => {
+			let tabID = event.target.closest(".row").dataset.tabId;
+			this.hidePopup();
+			Zotero_Tabs.select(tabID);
+		};
+
+		_handleCloseClick = (event) => {
+			let row = event.target.closest(".row");
+			let tabID = row.dataset.tabId;
+			if (!tabID) {
+				return;
+			}
+			Zotero_Tabs.close(tabID);
+			this._focusInput();
+		};
+
+		_handleRowDragStart = (event) => {
+			let row = event.target.closest(".row");
+			let tabID = row.dataset.tabId;
+			// No drag-drop on the cross button or the library tab
+			if (tabID == 'zotero-pane' || event.target.classList.contains("close")) {
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+			event.dataTransfer.setData('zotero/tab', tabID);
+			setTimeout(() => {
+				// row.classList.remove("hover");
+				row.setAttribute("id", "zotero-tabs-menu-dragged");
+			});
+		};
+
+		_handleRowDragOver = (event) => {
+			let row = event.target.closest(".row");
+			let rowTabId = row.dataset.tabId;
+			event.preventDefault();
+			let tabId = event.dataTransfer.getData("zotero/tab");
+			if (!tabId || rowTabId == "zotero-pane") {
+				return false;
+			}
+			if (row.getAttribute("id") == "zotero-tabs-menu-dragged") {
+				return true;
+			}
+			let placeholder = document.getElementById("zotero-tabs-menu-dragged");
+			if (row.previousSibling?.id == placeholder.id) {
+				// If the placeholder exists before the row, swap the placeholder and the row
+				row.parentNode.insertBefore(row, placeholder);
+				placeholder.setAttribute("index", parseInt(row.getAttribute("index")) + 1);
+			}
+			else {
+				// Insert placeholder before the row
+				row.parentNode.insertBefore(placeholder, row);
+				placeholder.setAttribute("index", parseInt(row.getAttribute("index")));
+			}
+			return false;
+		};
+
+		_handleRowDrop = (event) => {
+			let row = event.target.closest(".row");
+			let tabId = event.dataTransfer.getData("zotero/tab");
+			let rowIndex = parseInt(row.getAttribute("index"));
+			if (rowIndex == 0) return;
+			Zotero_Tabs.move(tabId, rowIndex);
+		};
+
+		_handleRowDragEnd = (_event) => {
+			// If this.move() wasn't called, just re-render the menu
+			if (document.getElementById("zotero-tabs-menu-dragged")) {
+				this.refreshList();
+			}
+			this._focusInput();
 		};
 	}
 
