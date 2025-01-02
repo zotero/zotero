@@ -156,11 +156,11 @@ Zotero.Schema = new function(){
 		
 		// If non-minor userdata upgrade, make backup of database first
 		if (userdata < userdataVersion && !options.minor) {
-			await Zotero.DB.backupDatabase(userdata, true);
+			await Zotero.DB.backUpDatabase({ force: true, suffix: userdata });
 		}
 		// Automatic backup
 		else if (integrityCheckRequired || bundledGlobalSchemaVersionCompare === 1) {
-			await Zotero.DB.backupDatabase(false, true);
+			await Zotero.DB.backUpDatabase({ force: true });
 		}
 		
 		var logLines = [];

@@ -390,4 +390,63 @@ describe("Zotero.DB", function() {
 			assert.isTrue(statements.some(x => x.startsWith('CREATE TABLE items')));
 		});
 	});
+	
+	describe("#backUpDatabase()", function () {
+		var bakFile;
+		var bakFile2;
+		
+		beforeEach(async function () {
+			bakFile = Zotero.DB.path + '.test.bak';
+			bakFile2 = Zotero.DB.path + '.test2.bak';
+			await IOUtils.remove(bakFile);
+			await IOUtils.remove(bakFile2);
+		});
+		
+		afterEach(async function () {
+			await IOUtils.remove(bakFile);
+			await IOUtils.remove(bakFile2);
+		});
+		
+		it("should perform an offline backup", async function () {
+			await Zotero.DB.backUpDatabase({ suffix: 'test' });
+			assert.isTrue(await IOUtils.exists(bakFile));
+			assert.equal(await Zotero.DB.valueQueryAsync("PRAGMA main.locking_mode"), "exclusive");
+		});
+		
+		it("should perform an online backup", async function () {
+			await Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
+			assert.isTrue(await IOUtils.exists(bakFile));
+			assert.equal(await Zotero.DB.valueQueryAsync("PRAGMA main.locking_mode"), "exclusive");
+		});
+		
+		it("shouldn't perform an offline backup if one is already in progress", async function () {
+			var promise = Zotero.DB.backUpDatabase({ suffix: 'test' });
+			var result2 = await Zotero.DB.backUpDatabase({ suffix: 'test2' });
+			var result1 = await promise;
+			assert.isTrue(result1);
+			assert.isTrue(await IOUtils.exists(bakFile));
+			// Return value is true, but file won't exist
+			assert.isTrue(result2);
+			assert.isFalse(await IOUtils.exists(bakFile2));
+		});
+		
+		it("should perform an offline backup if an online backup is already in progress", async function () {
+			var promise = Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
+			var result = await Zotero.DB.backUpDatabase({ suffix: 'test2' });
+			// The online backup fails
+			assert.ok(await getPromiseError(promise));
+			assert.isFalse(await IOUtils.exists(bakFile));
+			assert.isTrue(result);
+			assert.isTrue(await IOUtils.exists(bakFile2));
+		});
+		
+		it("shouldn't perform an online backup if one is already in progress", async function () {
+			var promise = Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
+			var result = await Zotero.DB.backUpDatabase({ suffix: 'test2', online: true });
+			await promise;
+			assert.isFalse(result);
+			assert.isFalse(await IOUtils.exists(bakFile2));
+			assert.isTrue(await IOUtils.exists(bakFile));
+		});
+	});
 });

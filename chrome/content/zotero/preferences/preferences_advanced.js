@@ -202,7 +202,7 @@ Zotero_Preferences.Advanced = {
 					
 					if (index == 0) {
 						// Safety first
-						await Zotero.DB.backupDatabase();
+						await Zotero.DB.backUpDatabase();
 						
 						// Fix the errors
 						await Zotero.Schema.integrityCheck(true);
