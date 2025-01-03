@@ -39,11 +39,14 @@
 					<html:div class="metadata-table">
 						<html:div id="titleRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="title-label" class="key" data-l10n-id="attachment-info-title"/></html:div>
-							<html:div class="meta-data"><editable-text id="title" aria-labelledby="title-label" tight="true"/></html:div>
+							<html:div class="meta-data"><editable-text id="title" aria-labelledby="title-label filed-help-label" tight="true"/></html:div>
 						</html:div>
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
-							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/></html:div>
+							<html:div class="meta-data">
+								<editable-text id="fileName" aria-labelledby="fileName-label filed-help-label" tight="true"/>
+								<toolbarbutton id="rename" class="zotero-clicky zotero-clicky-rename show-on-hover" data-l10n-id="attachment-info-rename" tabindex="0" oncommand="ZoteroPane.renameSelectedAttachmentsFromParents()"/>
+							</html:div>
 						</html:div>
 						<html:div id="accessedRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="accessed-label" class="key" data-l10n-id="attachment-info-accessed"/></html:div>
@@ -74,6 +77,10 @@
 						<menupopup id="url-menu">
 							<menuitem id="url-menuitem-copy"/>
 						</menupopup>
+						<tooltip id="field-help-tooltip" position="before_start" noautohide="true" style="pointer-events: all; margin-block-end: 5px;">
+							<label id="filed-help-label"></label>
+							<label id="field-help-link" class="zotero-text-link" is="zotero-text-link" data-l10n-attrs="href"></label>
+						</tooltip>
 					</popupset>
 				</html:div>
 			</collapsible-section>
@@ -247,18 +254,25 @@
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 
-			this._id("title").addEventListener('blur', () => {
-				this.item.setField('title', this._id('title').value);
+			let title = this._id('title');
+			title.addEventListener('focus', () => {
+				this._showHelpTooltip(title);
+			});
+			title.addEventListener('blur', () => {
+				this.item.setField('title', title.value);
 				this.item.saveTx();
+				this._hideHelpTooltip();
 			});
 
 			let fileName = this._id("fileName");
 			fileName.addEventListener('focus', () => {
 				this._isEditingFilename = true;
+				this._showHelpTooltip(fileName);
 			});
 			fileName.addEventListener('blur', () => {
 				this.editFileName(fileName.value);
 				this._isEditingFilename = false;
+				this._hideHelpTooltip();
 			});
 
 			let noteButton = this._id('note-button');
@@ -708,6 +722,19 @@
 			}
 		};
 
+		// Hack to take focus away from the attachment preview as the the url link can be hidden
+		// and cause the focus to be stuck. In this case.
+		// See also AttachmentPreview#_handleKeypress
+		focusAfterPreview() {
+			let url = this._id("url");
+			if (!url.hidden) {
+				url.focus();
+				return;
+			}
+			
+			this._id("title").focus();
+		}
+
 		_id(id) {
 			return this.querySelector(`#${id}`);
 		}
@@ -739,6 +766,18 @@
 			this._preview.setAttribute('data-l10n-id', 'attachment-preview');
 			this._body.prepend(this._preview);
 			this._preview.disableResize = !!this.hidden;
+		}
+		
+		_showHelpTooltip(element) {
+			let tooltip = this._id('field-help-tooltip');
+			let l10nPrefix = `attachment-info-${element.id == "title" ? "title" : "filename"}-help`;
+			tooltip.querySelector("#filed-help-label").dataset.l10nId = `${l10nPrefix}-label`;
+			tooltip.querySelector("#field-help-link").dataset.l10nId = `${l10nPrefix}-link`;
+			tooltip.openPopup(element, 'before_start', 0, 0, false, false);
+		}
+
+		_hideHelpTooltip() {
+			this._id('field-help-tooltip').hidePopup();
 		}
 	}
 
