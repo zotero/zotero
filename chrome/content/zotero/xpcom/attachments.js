@@ -2348,7 +2348,11 @@ Zotero.Attachments = new function () {
 					value = value.toLowerCase().replace(/\s+/g, '_');
 					break;
 				case 'camel':
-					value = value.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
+					value = value.toLowerCase().replace(/[^\p{L}\d]+(.)/gu, (m, chr) => chr.toUpperCase());
+					break;
+				case 'pascal':
+					value = value.toLowerCase().replace(/[^\p{L}\d]+(.)/gu, (m, chr) => chr.toUpperCase());
+					value = value.slice(0, 1).toUpperCase() + value.slice(1);
 					break;
 			}
 			return value;
