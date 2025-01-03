@@ -929,11 +929,13 @@ Zotero.Utilities.Internal = {
 			}
 
 			// Tags
-			for (let i = 0; i < item.tags.length; i++) {
-				if (!item.tags[i].type) {
-					item.tags[i].type = 0;
+			if (item.tags) {
+				for (let i = 0; i < item.tags.length; i++) {
+					if (!item.tags[i].type) {
+						item.tags[i].type = 0;
+					}
+					// No translator ever used "primary", "fields", or "linkedItems" objects
 				}
-				// No translator ever used "primary", "fields", or "linkedItems" objects
 			}
 
 			// "related" was never used (array of itemIDs)
