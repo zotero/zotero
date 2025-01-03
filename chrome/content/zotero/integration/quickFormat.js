@@ -2278,7 +2278,8 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 		// Arrow up closes the popup
-		if (event.key === "ArrowUp") {
+		// (except on locator type dropdown to allow for default handling)
+		if (event.key === "ArrowUp" && event.target.tagName !== "menulist") {
 			skipInputRefocus = true;
 			itemPopover.hidePopup();
 			return stopEvent();
