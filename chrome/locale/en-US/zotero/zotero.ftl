@@ -766,3 +766,27 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+tabs-menu-row =
+    .aria-description = You are currently on tab { $index } of { $total }.
+    To search for tabs, type the keyword. To jump to the currently selected tab, press Enter.
+    To navigate to the 
+    {
+        $isFirst ->
+            [true] last
+            *[other] previous
+    }
+    tab, press Arrow Up.
+    To navigate to the 
+    {
+        $isLast ->
+            [true] first
+            *[other] next
+    }
+    tab, press Arrow Down.
+    
+tabs-menu-row-empty =
+    .aria-description = The search did not match any tabs. To search for tabs, type the keyword.
+tabs-menu-row-empty-label = No matching tabs
+    .aria-label = No matching tabs
+

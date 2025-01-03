@@ -96,6 +96,7 @@ pref("extensions.zotero.keys.copySelectedItemsToClipboard", "C");
 pref("extensions.zotero.keys.sync", "Y");
 pref("extensions.zotero.keys.toggleAllRead", "R");
 pref("extensions.zotero.keys.toggleRead", "`");
+pref("extensions.zotero.keys.toggleTabsMenu", ";");
 
 pref("extensions.zotero.search.quicksearch-mode", "fields");
 
