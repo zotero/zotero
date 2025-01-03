@@ -416,7 +416,7 @@ function modify_omni {
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
     
-	# Remove aria-autocomplete unnecessarily added to search-textbox to not confuse screen readers
+    # Remove aria-autocomplete unnecessarily added to search-textbox to not confuse screen readers
     remove_line 'this.inputField.setAttribute\("aria-autocomplete' chrome/toolkit/content/global/elements/search-textbox.js
 
     # Remove non-native text input styles
