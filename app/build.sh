@@ -20,6 +20,7 @@
 
 CALLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . "$CALLDIR/config.sh"
+. "$CALLDIR/scripts/utils.sh"
 
 if [ "`uname`" = "Darwin" ]; then
 	MAC_NATIVE=1
@@ -53,19 +54,6 @@ function cleanup {
 	rm -rf $BUILD_DIR
 }
 trap cleanup EXIT
-
-function replace_line {
-	pattern=$1
-	replacement=$2
-	file=$3
-	
-	if egrep -q "$pattern" "$file"; then
-		perl -pi -e "s/$pattern/$replacement/" "$file"
-	else
-		echo "$pattern" not found in "$file" -- aborting 2>&1
-		exit 1
-	fi
-}
 
 function abspath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);

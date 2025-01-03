@@ -5,7 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 ROOT_DIR="$(dirname "$APP_ROOT_DIR")"
 . "$APP_ROOT_DIR/config.sh"
-. "$SCRIPT_DIR/bootstrap.sh"
+. "$SCRIPT_DIR/utils.sh"
 
 cd "$ROOT_DIR"
 

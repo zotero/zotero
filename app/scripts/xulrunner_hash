@@ -36,6 +36,7 @@ else
 fi
 
 xulrunner_content=$(< "$SCRIPT_DIR/fetch_xulrunner")
+xulrunner_content+=$(< "$SCRIPT_DIR/utils.sh")
 xulrunner_content+=$(< "$APP_ROOT_DIR/assets/multilocale.txt")
 xulrunner_gecko_hash=$(echo -n "$GECKO_VERSION - '$xulrunner_content'" | openssl dgst -sha256)
 
