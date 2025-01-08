@@ -890,7 +890,8 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 
 	// Perform noteType or fieldType conversion
 	let fields = yield this._session.getFields();
-	
+
+	const styleHasChanged = oldData.style.styleID != this._session.data.style.styleID;
 	var convertBibliographies = oldData.prefs.fieldType != this._session.data.prefs.fieldType;
 	var convertItems = convertBibliographies
 		|| oldData.prefs.noteType != this._session.data.prefs.noteType;
@@ -923,7 +924,7 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 	this._session._fields = null;
 	this._session.ignoreEmptyBibliography = true;
 
-	if (this._session.data.prefs.delayCitationUpdates && !fieldsToConvert.length) return;
+	if (this._session.data.prefs.delayCitationUpdates && !fieldsToConvert.length && !styleHasChanged) return;
 	
 	yield this._session.updateFromDocument(FORCE_CITATIONS_RESET_TEXT);
 	return this._session.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
