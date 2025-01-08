@@ -84,6 +84,7 @@ def main():
         "browser/localization/{0}/browser/browserSets.ftl",
         "browser/localization/{0}/browser/menubar.ftl",
         "browser/localization/{0}/devtools/client/toolbox.ftl",
+        "localization/{0}/toolkit/global/arrowscrollbox.ftl",
         "localization/{0}/toolkit/global/textActions.ftl",
         "localization/{0}/toolkit/global/wizard.ftl"
     ]

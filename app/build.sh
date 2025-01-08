@@ -351,6 +351,7 @@ for locale in `ls chrome/locale/`; do
 	cp "$CALLDIR/assets/branding/locale/brand.ftl" localization/$locale/branding/brand.ftl
 	
 	mkdir -p localization/$locale/toolkit/global
+	cp chrome/locale/$locale/zotero/mozilla/arrowscrollbox.ftl localization/$locale/toolkit/global
 	cp chrome/locale/$locale/zotero/mozilla/textActions.ftl localization/$locale/toolkit/global
 	cp chrome/locale/$locale/zotero/mozilla/wizard.ftl localization/$locale/toolkit/global
 	
