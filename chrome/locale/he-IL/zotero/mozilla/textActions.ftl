@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 text-action-undo =
     .label = ביטול
     .accesskey = ט
@@ -22,11 +18,9 @@ text-action-copy =
     .accesskey = ת
 text-action-copy-shortcut =
     .key = C
-# This command copies the link, removing additional
-# query parameters used to track users across sites.
-text-action-strip-on-share =
-    .label = העתקה ללא מעקב האתר
-    .accesskey = ה
+text-action-copy-clean-link =
+    .label = העתקת קישור נקי
+    .accesskey = נ
 text-action-paste =
     .label = הדבקה
     .accesskey = ה
@@ -38,6 +32,9 @@ text-action-paste-shortcut =
 text-action-delete =
     .label = מחיקה
     .accesskey = ח
+text-action-reveal-password =
+    .label = הצגת ססמה
+    .accesskey = צ
 text-action-select-all =
     .label = בחירה בהכול
     .accesskey = כ

@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Voorkeuren
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Toon alles
 menu-application-touch-bar =
     .label = Aanraakbalk aanpassen…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] A
            *[other] A
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } afsluiten
 menu-about =
     .label = Over { -brand-shorter-name }
     .accesskey = O
-
-## File Menu
-
 menu-file =
     .label = Bestand
     .accesskey = B
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Nieuw privévenster
     .accesskey = r
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Locatie openen…
 menu-file-open-file =
     .label = Bestand openen…
     .accesskey = o
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -110,9 +78,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Offline werken
     .accesskey = f
-
-## Edit Menu
-
 menu-edit =
     .label = Bewerken
     .accesskey = w
@@ -125,9 +90,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Tekstrichting omkeren
     .accesskey = t
-
-## View Menu
-
 menu-view =
     .label = Beeld
     .accesskey = l
@@ -175,10 +137,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Tekstcodering repareren
     .accesskey = c
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Schermvullende weergave
     .accesskey = S
@@ -188,29 +146,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Volledig scherm
     .accesskey = d
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Lezerweergave openen
     .accesskey = L
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Lezerweergave sluiten
     .accesskey = L
-
-##
-
 menu-view-show-all-tabs =
     .label = Alle tabbladen tonen
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = Paginarichting omkeren
     .accesskey = a
-
-## History Menu
-
 menu-history =
     .label = Geschiedenis
     .accesskey = G
@@ -228,12 +175,8 @@ menu-history-undo-menu =
     .label = Onlangs gesloten tabbladen
 menu-history-undo-window-menu =
     .label = Onlangs gesloten vensters
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Geschiedenis doorzoeken
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Bladwijzers
     .accesskey = a
@@ -243,7 +186,6 @@ menu-bookmark-tab =
     .label = Bladwijzer voor huidige tabblad maken…
 menu-edit-bookmark =
     .label = Deze bladwijzer bewerken…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Bladwijzers doorzoeken
 menu-bookmarks-all-tabs =
@@ -254,9 +196,12 @@ menu-bookmarks-other =
     .label = Andere bladwijzers
 menu-bookmarks-mobile =
     .label = Mobiel-bladwijzers
-
-## Tools Menu
-
+menu-profiles =
+    .label = Profielen
+menu-profiles-manage-profiles =
+    .label = Profielen beheren
+menu-profiles-new-profile =
+    .label = Nieuw profiel
 menu-tools =
     .label = Extra
     .accesskey = x
@@ -300,25 +245,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Lay-out-debugger
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Venster
 menu-window-bring-all-to-front =
     .label = Alles naar voren brengen
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Help
     .accesskey = H
@@ -342,8 +272,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Wisselen naar een nieuw apparaat
     .accesskey = u
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Misleidende website rapporteren…
     .accesskey = M

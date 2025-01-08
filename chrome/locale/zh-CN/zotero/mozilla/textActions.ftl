@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 text-action-undo =
     .label = 撤销
     .accesskey = U
@@ -22,9 +18,7 @@ text-action-copy =
     .accesskey = C
 text-action-copy-shortcut =
     .key = C
-# This command copies the link, removing additional
-# query parameters used to track users across sites.
-text-action-strip-on-share =
+text-action-copy-clean-link =
     .label = 复制无跟踪参数链接
     .accesskey = n
 text-action-paste =
@@ -38,6 +32,9 @@ text-action-paste-shortcut =
 text-action-delete =
     .label = 删除
     .accesskey = D
+text-action-reveal-password =
+    .label = 显示密码
+    .accesskey = v
 text-action-select-all =
     .label = 全选
     .accesskey = A

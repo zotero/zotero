@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = 설정
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = 모두 표시
 menu-application-touch-bar =
     .label = 터치바 사용자 정의…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } 종료
 menu-about =
     .label = { -brand-shorter-name } 정보
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = 파일
     .accesskey = F
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = 새 사생활 보호 창
     .accesskey = W
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = 주소 열기…
 menu-file-open-file =
     .label = 파일 열기…
     .accesskey = O
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = 오프라인으로 작업
     .accesskey = w
-
-## Edit Menu
-
 menu-edit =
     .label = 편집
     .accesskey = E
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = 글자 방향 변경
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = 보기
     .accesskey = V
@@ -174,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = 텍스트 인코딩 복구
     .accesskey = c
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = 전체 화면으로 표시
     .accesskey = F
@@ -187,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = 전체 화면
     .accesskey = F
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = 리더뷰 보기
     .accesskey = R
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = 리더뷰 닫기
     .accesskey = R
-
-##
-
 menu-view-show-all-tabs =
     .label = 모든 탭 표시
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = 페이지 방향 변경
     .accesskey = g
-
-## History Menu
-
 menu-history =
     .label = 기록
     .accesskey = s
@@ -227,12 +174,8 @@ menu-history-undo-menu =
     .label = 최근에 닫은 탭
 menu-history-undo-window-menu =
     .label = 최근에 닫은 창
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = 기록 검색
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = 북마크
     .accesskey = B
@@ -242,7 +185,6 @@ menu-bookmark-tab =
     .label = 현재 탭 북마크…
 menu-edit-bookmark =
     .label = 이 북마크 편집…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = 북마크 검색
 menu-bookmarks-all-tabs =
@@ -253,9 +195,12 @@ menu-bookmarks-other =
     .label = 기타 북마크
 menu-bookmarks-mobile =
     .label = 모바일 북마크
-
-## Tools Menu
-
+menu-profiles =
+    .label = 프로필
+menu-profiles-manage-profiles =
+    .label = 프로필 관리
+menu-profiles-new-profile =
+    .label = 새 프로필
 menu-tools =
     .label = 도구
     .accesskey = T
@@ -299,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = 레이아웃 디버거
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = 창
 menu-window-bring-all-to-front =
     .label = 맨 앞으로
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = 도움말
     .accesskey = H
@@ -341,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = 새 기기로 전환
     .accesskey = N
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = 가짜 사이트 신고…
     .accesskey = D

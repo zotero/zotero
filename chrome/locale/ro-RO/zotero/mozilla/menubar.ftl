@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Preferințe
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Afișează toate
 menu-application-touch-bar =
     .label = Personalizează bara tactilă…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Ieși din { -brand-shorter-name }
 menu-about =
     .label = Despre { -brand-shorter-name }
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = Fișier
     .accesskey = F
@@ -68,9 +41,6 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Fereastră privată nouă
     .accesskey = W
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Deschide locația…
 menu-file-open-file =
@@ -97,9 +67,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Lucrează offline
     .accesskey = k
-
-## Edit Menu
-
 menu-edit =
     .label = Editare
     .accesskey = E
@@ -112,9 +79,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Schimbă direcția textului
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = Vizualizare
     .accesskey = V
@@ -160,10 +124,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Repară codarea de text
     .accesskey = c
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Intră în modul ecran complet
     .accesskey = F
@@ -173,29 +133,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Ecran complet
     .accesskey = F
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Intră în modul de lectură
     .accesskey = R
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Închide modul de lectură
     .accesskey = R
-
-##
-
 menu-view-show-all-tabs =
     .label = Afișează toate filele
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = Schimbă direcția paginii
     .accesskey = D
-
-## History Menu
-
 menu-history =
     .label = Istoric
     .accesskey = s
@@ -213,9 +162,6 @@ menu-history-undo-menu =
     .label = File închise recent
 menu-history-undo-window-menu =
     .label = Ferestre închise recent
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Marcaje
     .accesskey = B
@@ -231,9 +177,6 @@ menu-bookmarks-other =
     .label = Alte marcaje
 menu-bookmarks-mobile =
     .label = Marcaje mobile
-
-## Tools Menu
-
 menu-tools =
     .label = Instrumente
     .accesskey = T
@@ -277,25 +220,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Depanator de așezare în pagină
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Fereastră
 menu-window-bring-all-to-front =
     .label = Adu toate în față
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Ajutor
     .accesskey = H
@@ -319,8 +247,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Comutarea pe un dispozitiv nou
     .accesskey = N
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Raportează site-uri înșelătoare…
     .accesskey = d

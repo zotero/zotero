@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 text-action-undo =
     .label = Angre
     .accesskey = A
@@ -22,11 +18,6 @@ text-action-copy =
     .accesskey = K
 text-action-copy-shortcut =
     .key = C
-# This command copies the link, removing additional
-# query parameters used to track users across sites.
-text-action-strip-on-share =
-    .label = Kopier utan nettstaddsporing
-    .accesskey = p
 text-action-paste =
     .label = Lim inn
     .accesskey = L
@@ -62,3 +53,5 @@ text-action-spell-dictionaries =
     .accesskey = S
 text-action-search-text-box-clear =
     .title = Tøm
+text-action-highlight-selection =
+    .label = Uthev val

@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Tercihler
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Tümünü göster
 menu-application-touch-bar =
     .label = Touch Bar’ı özelleştir…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] k
            *[other] k
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } uygulamasından çık
 menu-about =
     .label = { -brand-shorter-name } hakkında
     .accesskey = h
-
-## File Menu
-
 menu-file =
     .label = Dosya
     .accesskey = D
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Yeni gizli pencere
     .accesskey = n
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Konumu aç…
 menu-file-open-file =
     .label = Dosya aç…
     .accesskey = a
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -110,9 +78,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Çevrimdışı çalış
     .accesskey = d
-
-## Edit Menu
-
 menu-edit =
     .label = Düzen
     .accesskey = z
@@ -125,9 +90,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Metnin yönünü değiştir
     .accesskey = M
-
-## View Menu
-
 menu-view =
     .label = Görünüm
     .accesskey = m
@@ -175,10 +137,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Metin kodlamasını onar
     .accesskey = M
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Tam ekrana geç
     .accesskey = T
@@ -188,29 +146,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Tam ekran
     .accesskey = T
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Okuyucu Görünümü'ne geç
     .accesskey = O
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
-    .label = Okuyucu Görünümü'nü kapat
+    .label = Okuyucu görünümünü kapat
     .accesskey = O
-
-##
-
 menu-view-show-all-tabs =
     .label = Tüm sekmeleri göster
     .accesskey = s
 menu-view-bidi-switch-page-direction =
     .label = Sayfanın yönünü değiştir
     .accesskey = d
-
-## History Menu
-
 menu-history =
     .label = Geçmiş
     .accesskey = G
@@ -228,12 +175,8 @@ menu-history-undo-menu =
     .label = Son kapatılan sekmeler
 menu-history-undo-window-menu =
     .label = Son kapatılan pencereler
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Geçmişte ara
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Yer imleri
     .accesskey = Y
@@ -243,7 +186,6 @@ menu-bookmark-tab =
     .label = Bu sekmeyi yer imlerine ekle…
 menu-edit-bookmark =
     .label = Bu yer imini düzenle…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Yer imlerinde ara
 menu-bookmarks-all-tabs =
@@ -254,9 +196,12 @@ menu-bookmarks-other =
     .label = Diğer yer imleri
 menu-bookmarks-mobile =
     .label = Mobil yer imleri
-
-## Tools Menu
-
+menu-profiles =
+    .label = Profiller
+menu-profiles-manage-profiles =
+    .label = Profilleri yönet
+menu-profiles-new-profile =
+    .label = Yeni profil
 menu-tools =
     .label = Araçlar
     .accesskey = A
@@ -300,25 +245,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Düzen hata ayıklayıcısı
     .accesskey = D
-
-## Window Menu
-
 menu-window-menu =
     .label = Pencere
 menu-window-bring-all-to-front =
     .label = Hepsini ön plana getir
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Yardım
     .accesskey = r
@@ -342,8 +272,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Yeni bir cihaza geçiş
     .accesskey = c
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Aldatıcı siteyi ihbar et…
     .accesskey = A

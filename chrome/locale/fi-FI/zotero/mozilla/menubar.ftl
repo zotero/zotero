@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Asetukset
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Näytä kaikki
 menu-application-touch-bar =
     .label = Muokkaa Touch Baria…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] S
            *[other] S
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Sulje { -brand-shorter-name }
 menu-about =
     .label = Tietoja: { -brand-shorter-name }
     .accesskey = T
-
-## File Menu
-
 menu-file =
     .label = Tiedosto
     .accesskey = T
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Uusi yksityinen ikkuna
     .accesskey = y
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Avaa kohde…
 menu-file-open-file =
     .label = Avaa tiedosto…
     .accesskey = d
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Työskentele yhteydettömässä tilassa
     .accesskey = y
-
-## Edit Menu
-
 menu-edit =
     .label = Muokkaa
     .accesskey = M
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Vaihda tekstin suuntaa
     .accesskey = a
-
-## View Menu
-
 menu-view =
     .label = Näytä
     .accesskey = N
@@ -174,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Korjaa merkistökoodaus
     .accesskey = m
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Siirry koko näytön tilaan
     .accesskey = S
@@ -187,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Koko näytön tila
     .accesskey = K
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Avaa lukunäkymä
     .accesskey = A
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Sulje lukunäkymä
     .accesskey = S
-
-##
-
 menu-view-show-all-tabs =
     .label = Näytä kaikki välilehdet
     .accesskey = N
 menu-view-bidi-switch-page-direction =
     .label = Vaihda sivun suuntaa
     .accesskey = V
-
-## History Menu
-
 menu-history =
     .label = Sivuhistoria
     .accesskey = S
@@ -227,12 +174,8 @@ menu-history-undo-menu =
     .label = Suljetut välilehdet
 menu-history-undo-window-menu =
     .label = Suljetut ikkunat
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Etsi historiasta
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Kirjanmerkit
     .accesskey = K
@@ -242,7 +185,6 @@ menu-bookmark-tab =
     .label = Lisää nykyinen välilehti kirjanmerkkeihin…
 menu-edit-bookmark =
     .label = Muokkaa kirjanmerkkiä…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Etsi kirjanmerkeistä
 menu-bookmarks-all-tabs =
@@ -253,9 +195,12 @@ menu-bookmarks-other =
     .label = Muut kirjanmerkit
 menu-bookmarks-mobile =
     .label = Kannettavan laitteen kirjanmerkit
-
-## Tools Menu
-
+menu-profiles =
+    .label = Profiilit
+menu-profiles-manage-profiles =
+    .label = Hallitse profiileja
+menu-profiles-new-profile =
+    .label = Uusi profiili
 menu-tools =
     .label = Työkalut
     .accesskey = y
@@ -299,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Layout Debugger
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Ikkuna
 menu-window-bring-all-to-front =
     .label = Näytä kaikki
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Ohje
     .accesskey = O
@@ -341,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Uuteen laitteeseen vaihtaminen
     .accesskey = N
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Ilmoita petollinen sivusto…
     .accesskey = p

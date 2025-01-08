@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Tùy chỉnh
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Hiển thị tất cả
 menu-application-touch-bar =
     .label = Tùy chỉnh Touch Bar…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Thoát { -brand-shorter-name }
 menu-about =
     .label = Về { -brand-shorter-name }
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = Tập tin
     .accesskey = F
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Cửa sổ riêng tư mới
     .accesskey = W
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Mở địa chỉ…
 menu-file-open-file =
     .label = Mở tập tin…
     .accesskey = O
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Làm việc ngoại tuyến
     .accesskey = k
-
-## Edit Menu
-
 menu-edit =
     .label = Chỉnh sửa
     .accesskey = E
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Chuyển hướng văn bản
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = Hiển thị
     .accesskey = V
@@ -174,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Sửa chữa mã hóa văn bản
     .accesskey = c
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Vào chế độ toàn màn hình
     .accesskey = F
@@ -187,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Toàn màn hình
     .accesskey = F
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Vào chế độ đọc sách
     .accesskey = R
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Đóng chế độ đọc sách
     .accesskey = R
-
-##
-
 menu-view-show-all-tabs =
     .label = Hiển thị tất cả các thẻ
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = Chuyển hướng trang
     .accesskey = D
-
-## History Menu
-
 menu-history =
     .label = Lịch sử
     .accesskey = s
@@ -227,12 +174,8 @@ menu-history-undo-menu =
     .label = Thẻ mới đóng gần đây
 menu-history-undo-window-menu =
     .label = Các cửa sổ mới đóng
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Tìm kiếm lịch sử
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Dấu trang
     .accesskey = B
@@ -242,7 +185,6 @@ menu-bookmark-tab =
     .label = Đánh dấu thẻ hiện tại…
 menu-edit-bookmark =
     .label = Chỉnh sửa dấu trang này…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Tìm kiếm dấu trang
 menu-bookmarks-all-tabs =
@@ -253,9 +195,12 @@ menu-bookmarks-other =
     .label = Dấu trang khác
 menu-bookmarks-mobile =
     .label = Dấu trang trên di động
-
-## Tools Menu
-
+menu-profiles =
+    .label = Hồ sơ
+menu-profiles-manage-profiles =
+    .label = Quản lý hồ sơ
+menu-profiles-new-profile =
+    .label = Hồ sơ mới
 menu-tools =
     .label = Công cụ
     .accesskey = T
@@ -273,7 +218,7 @@ menu-tools-turn-on-sync2 =
     .accesskey = n
 menu-tools-sync-now =
     .label = Đồng bộ ngay
-    .accesskey = S
+    .accesskey = o
 menu-tools-fxa-re-auth =
     .label = Kết nối lại vào { -brand-product-name }…
     .accesskey = R
@@ -299,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Trình gỡ lỗi bố cục
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Cửa sổ
 menu-window-bring-all-to-front =
     .label = Đưa tất cả ra phía trước
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Trợ giúp
     .accesskey = H
@@ -341,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Chuyển sang một thiết bị mới
     .accesskey = N
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Báo cáo trang lừa đảo…
     .accesskey = c

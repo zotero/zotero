@@ -1,16 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Eelistused
 menu-application-services =
@@ -23,10 +10,6 @@ menu-application-show-all =
     .label = Näita kõiki
 menu-application-touch-bar =
     .label = Kohanda puuteriba…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -38,17 +21,11 @@ menu-quit =
             [windows] j
            *[other] j
         }
-
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Välju { -brand-shorter-name }ist
-
 menu-about =
     .label = { -brand-shorter-name }i teave
     .accesskey = e
-
-## File Menu
-
 menu-file =
     .label = Fail
     .accesskey = F
@@ -64,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Uus privaatne aken
     .accesskey = p
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Ava asukoht…
 menu-file-open-file =
     .label = Ava fail…
     .accesskey = A
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -106,9 +78,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Tööta võrguta
     .accesskey = T
-
-## Edit Menu
-
 menu-edit =
     .label = Redigeerimine
     .accesskey = R
@@ -121,9 +90,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Muuda teksti suunda
     .accesskey = d
-
-## View Menu
-
 menu-view =
     .label = Vaade
     .accesskey = V
@@ -169,10 +135,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Paranda teksti kodeering
     .accesskey = P
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Lülitu täisekraanirežiimi
     .accesskey = t
@@ -182,29 +144,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Täisekraani režiim
     .accesskey = r
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Lülitu lugemisvaatesse
     .accesskey = L
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Sulge lugemisvaade
     .accesskey = S
-
-##
-
 menu-view-show-all-tabs =
     .label = Kuva kõiki kaarte
     .accesskey = K
 menu-view-bidi-switch-page-direction =
     .label = Muuda lehe suunda
     .accesskey = h
-
-## History Menu
-
 menu-history =
     .label = Ajalugu
     .accesskey = A
@@ -222,9 +173,6 @@ menu-history-undo-menu =
     .label = Hiljuti suletud kaardid
 menu-history-undo-window-menu =
     .label = Hiljuti suletud aknad
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Järjehoidjad
     .accesskey = J
@@ -238,9 +186,6 @@ menu-bookmarks-other =
     .label = Muud järjehoidjad
 menu-bookmarks-mobile =
     .label = Mobiilsed järjehoidjad
-
-## Tools Menu
-
 menu-tools =
     .label = Tööriistad
     .accesskey = T
@@ -284,25 +229,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Layout Debugger
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Aken
 menu-window-bring-all-to-front =
     .label = Too kõik ette
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Abi
     .accesskey = b
@@ -323,8 +253,6 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Lülita probleemide lahendamise režiim välja
     .accesskey = d
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Teata veebivõltsingust…
     .accesskey = T

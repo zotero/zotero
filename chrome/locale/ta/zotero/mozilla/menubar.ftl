@@ -1,16 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-services =
     .label = சேவைகள்
 menu-application-hide-this =
@@ -19,10 +6,6 @@ menu-application-hide-other =
     .label = மற்றவற்றை மறை
 menu-application-show-all =
     .label = அனைத்தையும் காட்டு
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -34,17 +17,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
-
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } விட்டு வெளியேறு
-
 menu-about =
     .label = { -brand-shorter-name } பற்றி
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = கோப்பு
     .accesskey = F
@@ -60,9 +37,6 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = புதிய கமுக்க சாளரம்
     .accesskey = W
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = இடத்தைத் திற…
 menu-file-open-file =
@@ -86,9 +60,6 @@ menu-file-print =
 menu-file-go-offline =
     .label = முடக்க நிலை
     .accesskey = k
-
-## Edit Menu
-
 menu-edit =
     .label = தொகு
     .accesskey = E
@@ -98,9 +69,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = உரைத் திசையை மாற்று
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = பார்வை
     .accesskey = V
@@ -137,10 +105,6 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = அடிப்படை பக்கப் பாணி
     .accesskey = B
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = முழுத்திரைக்குச் செல்
     .accesskey = F
@@ -150,29 +114,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = முழுத்திரை
     .accesskey = F
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = வாசிக்கும் முறைக்கு மாறவும்
     .accesskey = R
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = வாசிப்பு தோற்றத்தை மூடு
     .accesskey = R
-
-##
-
 menu-view-show-all-tabs =
     .label = அனைத்து கீற்றுகளையும் காட்டு
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = பக்கத் திசையை மாற்று
     .accesskey = D
-
-## History Menu
-
 menu-history =
     .label = வரலாறு
     .accesskey = s
@@ -190,9 +143,6 @@ menu-history-undo-menu =
     .label = சமீபத்தில் மூடப்பட்ட கீற்றுகள்
 menu-history-undo-window-menu =
     .label = சமீபத்தில் மூடப்பட்ட சாளரங்கள்
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = புத்தகக்குறிகள்
     .accesskey = B
@@ -204,9 +154,6 @@ menu-bookmarks-other =
     .label = இதர புத்தகக்குறிகள்
 menu-bookmarks-mobile =
     .label = கைபேசி புத்தகக்குறிகள்
-
-## Tools Menu
-
 menu-tools =
     .label = கருவிகள்
     .accesskey = T
@@ -225,33 +172,15 @@ menu-tools-page-info =
 menu-tools-layout-debugger =
     .label = வடிவமைப்பு வழுநீக்கி
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = சாளரம்
 menu-window-bring-all-to-front =
     .label = அனைத்தையும் முன்னால் கொண்டுவா
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = உதவி
     .accesskey = H
 menu-help-report-site-issue =
     .label = தள சிக்கலை தெரிவி…
-# Label of the Help menu item. Either this or
-# safeb.palm.notdeceptive.label from
-# phishing-afterload-warning-message.dtd is shown.
 menu-help-report-deceptive-site =
     .label = ஏமாற்று தளத்தைப் புகார் செய்…
     .accesskey = d

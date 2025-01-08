@@ -1,27 +1,14 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Подешавања
 menu-application-services =
     .label = Услуге
 menu-application-hide-this =
     .label =
-        Сакриј { -brand-shorter-name.gender ->
-            [masculine] { -brand-shorter-name(case: "acc") }
-            [feminine] { -brand-shorter-name(case: "acc") }
-            [neuter] { -brand-shorter-name(case: "acc") }
-           *[other] програм { -brand-shorter-name }
+        { -brand-shorter-name.gender ->
+            [masculine] Сакриј { -brand-shorter-name(case: "acc") }
+            [feminine] Сакриј { -brand-shorter-name(case: "acc") }
+            [neuter] Сакриј { -brand-shorter-name(case: "acc") }
+           *[other] Сакриј програм { -brand-shorter-name }
         }
 menu-application-hide-other =
     .label = Сакриј остале
@@ -29,36 +16,26 @@ menu-application-show-all =
     .label = Прикажи све
 menu-application-touch-bar =
     .label = Прилагоди додирну траку…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label = Изађи
     .accesskey = И
-
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label =
-        Изађи из { -brand-shorter-name.gender ->
-            [masculine] { -brand-shorter-name(case: "gen") }
-            [feminine] { -brand-shorter-name(case: "gen") }
-            [neuter] { -brand-shorter-name(case: "gen") }
-           *[other] програма { -brand-shorter-name }
+        { -brand-shorter-name.gender ->
+            [masculine] Изађи из { -brand-shorter-name(case: "gen") }
+            [feminine] Изађи из { -brand-shorter-name(case: "gen") }
+            [neuter] Изађи из { -brand-shorter-name(case: "gen") }
+           *[other] Изађи из програма { -brand-shorter-name }
         }
-
 menu-about =
     .label =
-        О { -brand-shorter-name.gender ->
-            [masculine] { -brand-shorter-name(case: "loc") }
-            [feminine] { -brand-shorter-name(case: "loc") }
-            [neuter] { -brand-shorter-name(case: "loc") }
-           *[other] програму { -brand-shorter-name }
+        { -brand-shorter-name.gender ->
+            [masculine] О { -brand-shorter-name(case: "loc") }
+            [feminine] О { -brand-shorter-name(case: "loc") }
+            [neuter] О { -brand-shorter-name(case: "loc") }
+           *[other] О програму { -brand-shorter-name }
         }
     .accesskey = О
-
-## File Menu
-
 menu-file =
     .label = Датотека
     .accesskey = Д
@@ -74,16 +51,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Нови приватни прозор
     .accesskey = р
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Отвори локацију…
 menu-file-open-file =
     .label = Отвори датотеку…
     .accesskey = О
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -117,9 +89,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Офлајн режим
     .accesskey = ф
-
-## Edit Menu
-
 menu-edit =
     .label = Уређивање
     .accesskey = У
@@ -132,9 +101,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Промени усмерење текста
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = Приказ
     .accesskey = р
@@ -153,6 +119,8 @@ menu-view-history-button =
     .label = Историја
 menu-view-synced-tabs-sidebar =
     .label = Синхронизоване картице
+menu-view-megalist-sidebar =
+    .label = Лозинке
 menu-view-full-zoom =
     .label = Зумирање
     .accesskey = З
@@ -180,10 +148,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Исправи кодни распоред
     .accesskey = И
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Преко целог екрана
     .accesskey = П
@@ -193,29 +157,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Преко целог екрана
     .accesskey = П
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Уђи у приказ читача
     .accesskey = ч
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Затвори приказ читача
     .accesskey = ч
-
-##
-
 menu-view-show-all-tabs =
     .label = Прикажи све картице
     .accesskey = П
 menu-view-bidi-switch-page-direction =
     .label = Промени усмерење странице
     .accesskey = D
-
-## History Menu
-
 menu-history =
     .label = Историја
     .accesskey = И
@@ -233,9 +186,8 @@ menu-history-undo-menu =
     .label = Недавно затворене картице
 menu-history-undo-window-menu =
     .label = Недавно затворени прозори
-
-## Bookmarks Menu
-
+menu-history-search =
+    .label = Претражи историју
 menu-bookmarks-menu =
     .label = Обележивачи
     .accesskey = б
@@ -245,6 +197,8 @@ menu-bookmark-tab =
     .label = Обележи тренутни језичак…
 menu-edit-bookmark =
     .label = Уреди овај обележивач…
+menu-bookmarks-search =
+    .label = Претражи обележиваче
 menu-bookmarks-all-tabs =
     .label = Обележи све картице…
 menu-bookmarks-toolbar =
@@ -253,9 +207,12 @@ menu-bookmarks-other =
     .label = Други обележивачи
 menu-bookmarks-mobile =
     .label = Мобилни обележивачи
-
-## Tools Menu
-
+menu-profiles =
+    .label = Профили
+menu-profiles-manage-profiles =
+    .label = Управљај профилима
+menu-profiles-new-profile =
+    .label = Нови профил
 menu-tools =
     .label = Алатке
     .accesskey = А
@@ -276,12 +233,12 @@ menu-tools-sync-now =
     .accesskey = С
 menu-tools-fxa-re-auth =
     .label =
-        Поново се повежи са { -brand-product-name.gender ->
-            [masculine] { -brand-product-name(case: "ins") }
-            [feminine] { -brand-product-name(case: "ins") }
-            [neuter] { -brand-product-name(case: "ins") }
-           *[other] програмом { -brand-product-name }
-        }…
+        { -brand-product-name.gender ->
+            [masculine] Поново се повежи са { -brand-product-name(case: "ins") }…
+            [feminine] Поново се повежи са { -brand-product-name(case: "ins") }…
+            [neuter] Поново се повежи са { -brand-product-name(case: "ins") }…
+           *[other] Поново се повежи са програмом { -brand-product-name }…
+        }
     .accesskey = П
 menu-tools-browser-tools =
     .label = Алатке прегледача
@@ -301,25 +258,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Исправљач грешака у распореду
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Прозор
 menu-window-bring-all-to-front =
     .label = Стави све напред
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Помоћ
     .accesskey = П
@@ -343,11 +285,11 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Пребацивање на нови уређај
     .accesskey = н
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Пријави обмањујућ сајт…
     .accesskey = б
 menu-help-not-deceptive =
     .label = Ово није обмањујућ сајт…
     .accesskey = б
+menu-report-broken-site =
+    .label = Пријави неисправан сајт

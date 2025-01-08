@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 window-minimize-command =
     .label = Minimizează
 window-zoom-command =
@@ -20,9 +16,6 @@ location-open-shortcut-alt =
     .key = d
 search-focus-shortcut =
     .key = k
-# This shortcut is used in two contexts:
-#   - web search
-#   - find in page
 find-shortcut =
     .key = f
 search-find-again-shortcut =
@@ -31,18 +24,12 @@ search-find-again-shortcut-alt =
     .keycode = VK_F3
 search-find-selection-shortcut =
     .key = e
-# Verify what shortcut for that operation
-# are recommended by the Human Interface Guidelines
-# of each platform for your locale.
 search-focus-shortcut-alt =
     .key =
         { PLATFORM() ->
             [linux] j
            *[other] e
         }
-# Verify what shortcut for that operation
-# are recommended by the Human Interface Guidelines
-# of each platform for your locale.
 downloads-shortcut =
     .key =
         { PLATFORM() ->
@@ -57,11 +44,6 @@ save-page-shortcut =
     .key = s
 page-source-shortcut =
     .key = u
-# This should match the Option+Command keyboard shortcut letter that Safari
-# and Chrome use for "View Source" on macOS. `page-source-shortcut` above
-# is Firefox's official keyboard shortcut shown in the GUI.
-# Safari variant is an alias provided for the convenience of Safari and Chrome
-# users on macOS. See bug 1398988.
 page-source-shortcut-safari =
     .key = u
 page-info-shortcut =
@@ -76,7 +58,6 @@ nav-fwd-shortcut-alt =
     .key = ]
 nav-reload-shortcut =
     .key = r
-# Shortcut available only on macOS.
 nav-stop-shortcut =
     .key = .
 history-show-all-shortcut =
@@ -93,33 +74,16 @@ reader-mode-toggle-shortcut-other =
     .key = R
 picture-in-picture-toggle-shortcut =
     .key = ]
-# Pick the key that is commonly present
-# in your locale keyboards above the
-# `picture-in-picture-toggle-shortcut` key.
 picture-in-picture-toggle-shortcut-alt =
     .key = { "}" }
 bookmark-this-page-shortcut =
     .key = D
-# Verify what shortcut for that operation
-# are recommended by the Human Interface Guidelines
-# of each platform for your locale.
 bookmark-show-library-shortcut =
     .key = O
-# Verify what shortcut for that operation
-# are recommended by the Human Interface Guidelines
-# of each platform for your locale.
 bookmark-show-sidebar-shortcut =
     .key = b
-# Verify what shortcut for that operation
-# are recommended by the Human Interface Guidelines
-# of each platform for your locale.
 bookmark-show-toolbar-shortcut =
     .key = B
-
-## All `-alt*` messages are alternative acceleration keys for zoom.
-## If shift key is needed with your locale popular keyboard for them,
-## you can use these alternative items. Otherwise, their values should be empty.
-
 full-zoom-reduce-shortcut =
     .key = -
 full-zoom-reduce-shortcut-alt-a =
@@ -136,17 +100,10 @@ full-zoom-reset-shortcut =
     .key = 0
 full-zoom-reset-shortcut-alt =
     .key = { "" }
-
-##
-
 bidi-switch-direction-shortcut =
     .key = X
 private-browsing-shortcut =
     .key = P
-
-## The shortcuts below are for Mac specific
-## global menu.
-
 quit-app-shortcut =
     .key = Q
 help-shortcut =

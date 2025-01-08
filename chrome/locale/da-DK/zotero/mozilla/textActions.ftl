@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 text-action-undo =
     .label = Fortryd
     .accesskey = F
@@ -22,10 +18,8 @@ text-action-copy =
     .accesskey = o
 text-action-copy-shortcut =
     .key = C
-# This command copies the link, removing additional
-# query parameters used to track users across sites.
-text-action-strip-on-share =
-    .label = Kopier uden websteds-sporing
+text-action-copy-clean-link =
+    .label = Kopier rent link
     .accesskey = n
 text-action-paste =
     .label = Indsæt
@@ -38,6 +32,9 @@ text-action-paste-shortcut =
 text-action-delete =
     .label = Slet
     .accesskey = S
+text-action-reveal-password =
+    .label = Vis adgangskode
+    .accesskey = V
 text-action-select-all =
     .label = Marker alt
     .accesskey = a

@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = 偏好设置
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = 显示全部
 menu-application-touch-bar =
     .label = 自定义触控栏…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = 退出 { -brand-shorter-name }
 menu-about =
     .label = 关于 { -brand-shorter-name }
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = 文件
     .accesskey = F
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = 新建隐私窗口
     .accesskey = W
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = 打开地址…
 menu-file-open-file =
     .label = 打开文件…
     .accesskey = O
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = 脱机工作
     .accesskey = k
-
-## Edit Menu
-
 menu-edit =
     .label = 编辑
     .accesskey = E
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = 切换文字方向
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = 查看
     .accesskey = V
@@ -144,7 +106,7 @@ menu-view-bookmarks =
 menu-view-history-button =
     .label = 历史
 menu-view-synced-tabs-sidebar =
-    .label = 受同步的标签页
+    .label = 同步的标签页
 menu-view-megalist-sidebar =
     .label = 密码
 menu-view-full-zoom =
@@ -174,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = 修复文字编码
     .accesskey = c
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = 进入全屏
     .accesskey = F
@@ -187,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = 全屏
     .accesskey = F
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = 进入阅读模式
     .accesskey = R
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = 关闭阅读模式
     .accesskey = R
-
-##
-
 menu-view-show-all-tabs =
     .label = 显示所有标签页
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = 切换页面方向
     .accesskey = D
-
-## History Menu
-
 menu-history =
     .label = 历史
     .accesskey = s
@@ -218,7 +165,7 @@ menu-history-show-all-history =
 menu-history-clear-recent-history =
     .label = 清除最近的历史记录…
 menu-history-synced-tabs =
-    .label = 受同步的标签页
+    .label = 同步的标签页
 menu-history-restore-last-session =
     .label = 恢复先前的浏览状态
 menu-history-hidden-tabs =
@@ -227,12 +174,8 @@ menu-history-undo-menu =
     .label = 最近关闭的标签页
 menu-history-undo-window-menu =
     .label = 最近关闭的窗口
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = 搜索历史记录
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = 书签
     .accesskey = B
@@ -242,7 +185,6 @@ menu-bookmark-tab =
     .label = 将当前标签页加入书签…
 menu-edit-bookmark =
     .label = 编辑此书签…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = 搜索书签
 menu-bookmarks-all-tabs =
@@ -253,9 +195,12 @@ menu-bookmarks-other =
     .label = 其他书签
 menu-bookmarks-mobile =
     .label = 移动设备上的书签
-
-## Tools Menu
-
+menu-profiles =
+    .label = 配置文件
+menu-profiles-manage-profiles =
+    .label = 管理配置文件
+menu-profiles-new-profile =
+    .label = 新建配置文件
 menu-tools =
     .label = 工具
     .accesskey = T
@@ -299,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = 布局调试器
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = 窗口
 menu-window-bring-all-to-front =
     .label = 全部前置
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = 帮助
     .accesskey = H
@@ -341,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = 转入新设备
     .accesskey = N
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = 举报诈骗网站…
     .accesskey = D

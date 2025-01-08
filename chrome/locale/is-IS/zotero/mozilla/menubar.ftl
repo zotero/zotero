@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Kjörstillingar
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Sýna allt
 menu-application-touch-bar =
     .label = Sérsníða snertistiku…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] H
            *[other] H
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Hætta í { -brand-shorter-name }
 menu-about =
     .label = Um { -brand-shorter-name }
     .accesskey = U
-
-## File Menu
-
 menu-file =
     .label = Skrá
     .accesskey = S
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Nýr huliðsgluggi
     .accesskey = g
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Opna tengil…
 menu-file-open-file =
     .label = Opna skrá…
     .accesskey = O
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -110,9 +78,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Vinna án nettengingar
     .accesskey = g
-
-## Edit Menu
-
 menu-edit =
     .label = Breyta
     .accesskey = e
@@ -125,9 +90,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Skipta um texta átt
     .accesskey = t
-
-## View Menu
-
 menu-view =
     .label = Skoða
     .accesskey = k
@@ -175,10 +137,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Gera við textakóðun
     .accesskey = G
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Fara í fullan skjá
     .accesskey = F
@@ -188,29 +146,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Fylla skjá
     .accesskey = y
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Fara í lesham
     .accesskey = r
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Loka lesham
     .accesskey = L
-
-##
-
 menu-view-show-all-tabs =
     .label = Sýna alla flipa
     .accesskey = a
 menu-view-bidi-switch-page-direction =
     .label = Skipta um síðu átt
     .accesskey = s
-
-## History Menu
-
 menu-history =
     .label = Ferill
     .accesskey = F
@@ -228,12 +175,8 @@ menu-history-undo-menu =
     .label = Nýlega lokaðir flipar
 menu-history-undo-window-menu =
     .label = Nýlega lokaðir gluggar
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Leita í vafurferli
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Bókamerki
     .accesskey = B
@@ -243,7 +186,6 @@ menu-bookmark-tab =
     .label = Bókamerkja núverandi flipa…
 menu-edit-bookmark =
     .label = Breyta þessu bókamerki…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Leita í bókamerkjum
 menu-bookmarks-all-tabs =
@@ -254,9 +196,12 @@ menu-bookmarks-other =
     .label = Önnur bókamerki
 menu-bookmarks-mobile =
     .label = Bókamerki farsíma
-
-## Tools Menu
-
+menu-profiles =
+    .label = Notkunarsnið
+menu-profiles-manage-profiles =
+    .label = Sýsla með notkunarsnið
+menu-profiles-new-profile =
+    .label = Nýtt notkunarsnið
 menu-tools =
     .label = Verkfæri
     .accesskey = V
@@ -300,25 +245,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Villuleit í útliti
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = Gluggi
 menu-window-bring-all-to-front =
     .label = Endurheimta
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Hjálp
     .accesskey = H
@@ -342,8 +272,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Skipti yfir í nýtt tæki
     .accesskey = n
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Tilkynna svindlsvæði…
     .accesskey = d

@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = העדפות
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = הצגת הכל
 menu-application-touch-bar =
     .label = התאמה אישית של סרגל המגע…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] צ
            *[other] צ
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = יציאה מ־{ -brand-shorter-name }
 menu-about =
     .label = על אודות { -brand-shorter-name }
     .accesskey = א
-
-## File Menu
-
 menu-file =
     .label = קובץ
     .accesskey = ק
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = חלון פרטי חדש
     .accesskey = פ
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = פתיחת מיקום
 menu-file-open-file =
     .label = פתיחת קובץ…
     .accesskey = ק
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = עבודה לא־מקוונת
     .accesskey = ל
-
-## Edit Menu
-
 menu-edit =
     .label = עריכה
     .accesskey = ע
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = היפוך כיוון כתיבה
     .accesskey = כ
-
-## View Menu
-
 menu-view =
     .label = תצוגה
     .accesskey = ת
@@ -174,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = תיקון קידוד טקסט
     .accesskey = ק
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = כניסה למסך מלא
     .accesskey = מ
@@ -187,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = מסך מלא
     .accesskey = ס
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = כניסה לתצוגת קריאה
     .accesskey = ק
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = סגירת תצוגת הקריאה
     .accesskey = ק
-
-##
-
 menu-view-show-all-tabs =
     .label = הצגת כל הלשוניות
     .accesskey = כ
 menu-view-bidi-switch-page-direction =
     .label = הפיכת כיוון דף
     .accesskey = פ
-
-## History Menu
-
 menu-history =
     .label = היסטוריה
     .accesskey = ה
@@ -227,12 +174,8 @@ menu-history-undo-menu =
     .label = לשוניות שנסגרו לאחרונה
 menu-history-undo-window-menu =
     .label = חלונות שנסגרו לאחרונה
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = חיפוש בהיסטוריה
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = סימניות
     .accesskey = ס
@@ -242,7 +185,6 @@ menu-bookmark-tab =
     .label = יצירת סימנייה ללשונית הנוכחית…
 menu-edit-bookmark =
     .label = עריכת סימנייה זו…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = חיפוש בסימניות
 menu-bookmarks-all-tabs =
@@ -253,9 +195,12 @@ menu-bookmarks-other =
     .label = סימניות אחרות
 menu-bookmarks-mobile =
     .label = סימניות מהנייד
-
-## Tools Menu
-
+menu-profiles =
+    .label = פרופילים
+menu-profiles-manage-profiles =
+    .label = ניהול פרופילים
+menu-profiles-new-profile =
+    .label = פרופיל חדש
 menu-tools =
     .label = כלים
     .accesskey = כ
@@ -299,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = ניפוי שגיאות פריסה
     .accesskey = פ
-
-## Window Menu
-
 menu-window-menu =
     .label = חלון
 menu-window-bring-all-to-front =
     .label = הבא הכול לקדמה
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = עזרה
     .accesskey = ז
@@ -341,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = מעבר למכשיר חדש
     .accesskey = מ
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = דיווח על אתר מטעה…
     .accesskey = ד

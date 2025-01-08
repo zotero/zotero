@@ -1,16 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Pengaturan
 menu-application-services =
@@ -23,10 +10,6 @@ menu-application-show-all =
     .label = Tampilkan Semua
 menu-application-touch-bar =
     .label = Ubahsuai Touch Bar…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -38,15 +21,11 @@ menu-quit =
             [windows] K
            *[other] K
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Keluar dari { -brand-shorter-name }
 menu-about =
     .label = Tentang { -brand-shorter-name }
     .accesskey = T
-
-## File Menu
-
 menu-file =
     .label = Berkas
     .accesskey = B
@@ -62,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Jendela Mode Pribadi Baru
     .accesskey = u
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Buka Lokasi…
 menu-file-open-file =
     .label = Buka Berkas…
     .accesskey = B
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -103,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Bekerja Luring
     .accesskey = L
-
-## Edit Menu
-
 menu-edit =
     .label = Edit
     .accesskey = E
@@ -118,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Ubah Arah Teks
     .accesskey = T
-
-## View Menu
-
 menu-view =
     .label = Tampilan
     .accesskey = T
@@ -139,6 +107,8 @@ menu-view-history-button =
     .label = Riwayat
 menu-view-synced-tabs-sidebar =
     .label = Tab yang Disinkronkan
+menu-view-megalist-sidebar =
+    .label = Sandi
 menu-view-full-zoom =
     .label = Perbesaran
     .accesskey = b
@@ -166,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Memperbaiki Pengodean Teks
     .accesskey = k
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Masuk ke Mode Layar Penuh
     .accesskey = P
@@ -179,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Layar Penuh
     .accesskey = P
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Masuk ke Tampilan Baca
     .accesskey = B
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Tutup Tampilan Pembaca
     .accesskey = T
-
-##
-
 menu-view-show-all-tabs =
     .label = Tampilkan Semua Tab
     .accesskey = S
 menu-view-bidi-switch-page-direction =
     .label = Ubah Arah Laman
     .accesskey = A
-
-## History Menu
-
 menu-history =
     .label = Riwayat
     .accesskey = R
@@ -219,9 +174,8 @@ menu-history-undo-menu =
     .label = Tab yang Baru Saja Ditutup
 menu-history-undo-window-menu =
     .label = Jendela yang Baru Saja Ditutup
-
-## Bookmarks Menu
-
+menu-history-search =
+    .label = Riwayat Pencarian
 menu-bookmarks-menu =
     .label = Markah
     .accesskey = M
@@ -231,6 +185,8 @@ menu-bookmark-tab =
     .label = Markahi Tab Saat Ini…
 menu-edit-bookmark =
     .label = Ubah Markah Ini…
+menu-bookmarks-search =
+    .label = Cari Markah
 menu-bookmarks-all-tabs =
     .label = Markahi Semua Tab…
 menu-bookmarks-toolbar =
@@ -239,9 +195,12 @@ menu-bookmarks-other =
     .label = Markah Lain
 menu-bookmarks-mobile =
     .label = Markah Seluler
-
-## Tools Menu
-
+menu-profiles =
+    .label = Profil
+menu-profiles-manage-profiles =
+    .label = Kelola profil
+menu-profiles-new-profile =
+    .label = Profil baru
 menu-tools =
     .label = Alat
     .accesskey = A
@@ -285,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Debugger Tata Letak
     .accesskey = D
-
-## Window Menu
-
 menu-window-menu =
     .label = Jendela
 menu-window-bring-all-to-front =
     .label = Tampilkan Semua ke Latar Depan
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Bantuan
     .accesskey = n
@@ -327,11 +271,11 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Beralih ke Perangkat Baru
     .accesskey = B
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Laporkan Situs Tipuan…
     .accesskey = s
 menu-help-not-deceptive =
     .label = Ini bukan situs tipuan…
     .accesskey = d
+menu-report-broken-site =
+    .label = Laporkan Situs yang Rusak

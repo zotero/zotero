@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 text-action-undo =
     .label = Ångra
     .accesskey = Å
@@ -22,11 +18,9 @@ text-action-copy =
     .accesskey = o
 text-action-copy-shortcut =
     .key = C
-# This command copies the link, removing additional
-# query parameters used to track users across sites.
-text-action-strip-on-share =
-    .label = Kopiera utan webbplatsspårning
-    .accesskey = u
+text-action-copy-clean-link =
+    .label = Kopiera ren länk
+    .accesskey = K
 text-action-paste =
     .label = Klistra in
     .accesskey = l
@@ -38,6 +32,9 @@ text-action-paste-shortcut =
 text-action-delete =
     .label = Ta bort
     .accesskey = T
+text-action-reveal-password =
+    .label = Avslöja lösenord
+    .accesskey = A
 text-action-select-all =
     .label = Markera allt
     .accesskey = a

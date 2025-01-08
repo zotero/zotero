@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Hobespenak
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Erakutsi denak
 menu-application-touch-bar =
     .label = Pertsonalizatu Touch Bar-a…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] I
            *[other] I
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Irten { -brand-shorter-name }(e)tik
 menu-about =
     .label = { -brand-shorter-name }(r)i buruz
     .accesskey = b
-
-## File Menu
-
 menu-file =
     .label = Fitxategia
     .accesskey = F
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Leiho pribatu berria
     .accesskey = h
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Ireki helbidea…
 menu-file-open-file =
     .label = Ireki fitxategia…
     .accesskey = f
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Lan egin lineaz kanpo
     .accesskey = o
-
-## Edit Menu
-
 menu-edit =
     .label = Editatu
     .accesskey = E
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Aldatu testuaren norabidea
     .accesskey = t
-
-## View Menu
-
 menu-view =
     .label = Ikusi
     .accesskey = I
@@ -145,6 +107,8 @@ menu-view-history-button =
     .label = Historia
 menu-view-synced-tabs-sidebar =
     .label = Sinkronizatutako fitxak
+menu-view-megalist-sidebar =
+    .label = Pasahitzak
 menu-view-full-zoom =
     .label = Zooma
     .accesskey = Z
@@ -172,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Konpondu testu-kodeketa
     .accesskey = k
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Sartu pantaila osoan
     .accesskey = o
@@ -185,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Pantaila osoa
     .accesskey = P
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Sartu irakurtzeko ikuspegian
     .accesskey = i
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Irten irakurtzeko ikuspegitik
     .accesskey = I
-
-##
-
 menu-view-show-all-tabs =
     .label = Erakutsi fitxa guztiak
     .accesskey = z
 menu-view-bidi-switch-page-direction =
     .label = Aldatu orriaren norabidea
     .accesskey = n
-
-## History Menu
-
 menu-history =
     .label = Historia
     .accesskey = H
@@ -225,12 +174,8 @@ menu-history-undo-menu =
     .label = Itxitako azken fitxak
 menu-history-undo-window-menu =
     .label = Itxitako azken leihoak
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Bilatu historia
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Laster-markak
     .accesskey = m
@@ -240,7 +185,6 @@ menu-bookmark-tab =
     .label = Egin uneko fitxaren laster-marka…
 menu-edit-bookmark =
     .label = Editatu laster-marka…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Bilatu laster-markak
 menu-bookmarks-all-tabs =
@@ -251,9 +195,12 @@ menu-bookmarks-other =
     .label = Beste laster-markak
 menu-bookmarks-mobile =
     .label = Mugikorreko laster-markak
-
-## Tools Menu
-
+menu-profiles =
+    .label = Profilak
+menu-profiles-manage-profiles =
+    .label = Kudeatu profilak
+menu-profiles-new-profile =
+    .label = Profil berria
 menu-tools =
     .label = Tresnak
     .accesskey = T
@@ -297,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Diseinuaren araztailea
     .accesskey = D
-
-## Window Menu
-
 menu-window-menu =
     .label = Leihoa
 menu-window-bring-all-to-front =
     .label = Ekarri dena aurrera
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Laguntza
     .accesskey = L
@@ -339,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Gailu berri batera aldatzea
     .accesskey = d
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Eman gune iruzurtiaren berri…
     .accesskey = i

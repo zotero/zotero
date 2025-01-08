@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Gwellvezioù
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Diskouez pep tra
 menu-application-touch-bar =
     .label = Personelaat ar varrenn-stok…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] K
            *[other] K
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Kuitaat { -brand-shorter-name }
 menu-about =
     .label = A-zivout { -brand-shorter-name }
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = Restr
     .accesskey = R
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Prenestr merdeiñ prevez nevez
     .accesskey = v
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Digeriñ ul lec'hiadur…
 menu-file-open-file =
     .label = Digeriñ ur restr…
     .accesskey = D
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -113,9 +81,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Labourat ezlinenn
     .accesskey = z
-
-## Edit Menu
-
 menu-edit =
     .label = Embann
     .accesskey = E
@@ -128,9 +93,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Kemmañ tuadur an destenn
     .accesskey = d
-
-## View Menu
-
 menu-view =
     .label = Gwelout
     .accesskey = w
@@ -178,10 +140,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Ratreañ enkodadur an destenn
     .accesskey = k
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Kregiñ ar mod skramm a-bezh
     .accesskey = s
@@ -191,29 +149,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Skramm a-bezh
     .accesskey = S
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Mont er mod lenn
     .accesskey = L
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Serriñ ar mod lenn
     .accesskey = L
-
-##
-
 menu-view-show-all-tabs =
     .label = Diskouez an holl ivinelloù
     .accesskey = a
 menu-view-bidi-switch-page-direction =
     .label = Kemmañ tu ar bajenn
     .accesskey = b
-
-## History Menu
-
 menu-history =
     .label = Roll istor
     .accesskey = l
@@ -231,12 +178,8 @@ menu-history-undo-menu =
     .label = Ivinelloù serret nevez zo
 menu-history-undo-window-menu =
     .label = Prenestroù serret nevez zo
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Klask er roll istor
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Sinedoù
     .accesskey = n
@@ -246,7 +189,6 @@ menu-bookmark-tab =
     .label = Lakaat an ivinell a-vremañ er sinedoù…
 menu-edit-bookmark =
     .label = Embann ar sined-mañ…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Klask er sinedoù
 menu-bookmarks-all-tabs =
@@ -257,9 +199,6 @@ menu-bookmarks-other =
     .label = Sinedoù all
 menu-bookmarks-mobile =
     .label = Sinedoù hezoug
-
-## Tools Menu
-
 menu-tools =
     .label = Ostilhoù
     .accesskey = O
@@ -303,25 +242,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Diveuger ar pajennaozañ
     .accesskey = D
-
-## Window Menu
-
 menu-window-menu =
     .label = Prenestr
 menu-window-bring-all-to-front =
     .label = Lakaat pep tra war ar rakleur
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Skoazell
     .accesskey = S
@@ -345,8 +269,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Tremen war un trevnad nevez
     .accesskey = T
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Danevelliñ ul lec’hienn dagus…
     .accesskey = d

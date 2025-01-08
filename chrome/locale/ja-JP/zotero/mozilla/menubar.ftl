@@ -1,15 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = 設定
 menu-application-services =
@@ -22,10 +10,6 @@ menu-application-show-all =
     .label = すべてを表示
 menu-application-touch-bar =
     .label = タッチバーをカスタマイズ...
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -37,15 +21,11 @@ menu-quit =
             [windows] x
            *[other] Q
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } を終了
 menu-about =
     .label = { -brand-shorter-name } について
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = ファイル
     .accesskey = F
@@ -61,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = 新しいプライベートウィンドウ
     .accesskey = W
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = URL を開く...
 menu-file-open-file =
     .label = ファイルを開く...
     .accesskey = O
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -102,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = オフライン作業
     .accesskey = k
-
-## Edit Menu
-
 menu-edit =
     .label = 編集
     .accesskey = E
@@ -117,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = テキストの記述方向を切り替える
     .accesskey = w
-
-## View Menu
-
 menu-view =
     .label = 表示
     .accesskey = V
@@ -167,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = テキストエンコーディングを修復
     .accesskey = c
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = 全画面表示にする
     .accesskey = F
@@ -180,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = 全画面表示
     .accesskey = F
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = リーダービューで開く
     .accesskey = R
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = リーダービューを閉じる
     .accesskey = R
-
-##
-
 menu-view-show-all-tabs =
     .label = すべてのタブを表示
     .accesskey = A
 menu-view-bidi-switch-page-direction =
     .label = ページの記述方向を切り替える
     .accesskey = D
-
-## History Menu
-
 menu-history =
     .label = 履歴
     .accesskey = s
@@ -220,12 +174,8 @@ menu-history-undo-menu =
     .label = 最近閉じたタブ
 menu-history-undo-window-menu =
     .label = 最近閉じたウィンドウ
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = 履歴を検索
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = ブックマーク
     .accesskey = B
@@ -235,7 +185,6 @@ menu-bookmark-tab =
     .label = 現在のタブをブックマーク...
 menu-edit-bookmark =
     .label = このブックマークを編集...
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = ブックマークを検索
 menu-bookmarks-all-tabs =
@@ -246,9 +195,12 @@ menu-bookmarks-other =
     .label = 他のブックマーク
 menu-bookmarks-mobile =
     .label = モバイルのブックマーク
-
-## Tools Menu
-
+menu-profiles =
+    .label = プロファイル
+menu-profiles-manage-profiles =
+    .label = プロファイルを管理
+menu-profiles-new-profile =
+    .label = 新しいプロファイル
 menu-tools =
     .label = ツール
     .accesskey = T
@@ -292,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = レイアウトデバッガー
     .accesskey = L
-
-## Window Menu
-
 menu-window-menu =
     .label = ウィンドウ
 menu-window-bring-all-to-front =
     .label = すべてを前面に移動
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = ヘルプ
     .accesskey = H
@@ -334,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = 新しい端末に切り替え
     .accesskey = N
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = 詐欺サイトを報告...
     .accesskey = D

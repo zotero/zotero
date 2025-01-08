@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Beállítások
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Mindet mutat
 menu-application-touch-bar =
     .label = Érintősár testreszabása…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] K
            *[other] K
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Kilépés a { -brand-shorter-name }ból
 menu-about =
     .label = A { -brand-shorter-name } névjegye
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = Fájl
     .accesskey = F
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Új privát ablak
     .accesskey = v
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Hely megnyitása…
 menu-file-open-file =
     .label = Fájl megnyitása…
     .accesskey = F
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -110,9 +78,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Kapcsolat nélküli munka
     .accesskey = p
-
-## Edit Menu
-
 menu-edit =
     .label = Szerkesztés
     .accesskey = z
@@ -125,9 +90,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Szöveg irányának átváltása
     .accesskey = z
-
-## View Menu
-
 menu-view =
     .label = Nézet
     .accesskey = N
@@ -175,10 +137,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Szövegkódolás javítása
     .accesskey = k
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Belépés a teljes képernyős módba
     .accesskey = B
@@ -188,29 +146,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Teljes képernyő
     .accesskey = T
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Belépés olvasó nézetbe
     .accesskey = O
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Olvasó nézet bezárása
     .accesskey = O
-
-##
-
 menu-view-show-all-tabs =
     .label = Az összes böngészőlap megjelenítése
     .accesskey = m
 menu-view-bidi-switch-page-direction =
     .label = Oldal irányának átváltása
     .accesskey = l
-
-## History Menu
-
 menu-history =
     .label = Előzmények
     .accesskey = m
@@ -228,12 +175,8 @@ menu-history-undo-menu =
     .label = Nemrég bezárt lapok
 menu-history-undo-window-menu =
     .label = Nemrég bezárt ablakok
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Keresés előzményei
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Könyvjelzők
     .accesskey = K
@@ -243,7 +186,6 @@ menu-bookmark-tab =
     .label = Jelenlegi lap könyvjelzőzése…
 menu-edit-bookmark =
     .label = Könyvjelző szerkesztése…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Könyvjelzők keresése
 menu-bookmarks-all-tabs =
@@ -253,10 +195,13 @@ menu-bookmarks-toolbar =
 menu-bookmarks-other =
     .label = Más könyvjelzők
 menu-bookmarks-mobile =
-    .label = Mobil könyvjelzők
-
-## Tools Menu
-
+    .label = Mobilos könyvjelzők
+menu-profiles =
+    .label = Profilok
+menu-profiles-manage-profiles =
+    .label = Profilok kezelése
+menu-profiles-new-profile =
+    .label = Új profil
 menu-tools =
     .label = Eszközök
     .accesskey = E
@@ -300,25 +245,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Elrendezési hibakereső
     .accesskey = E
-
-## Window Menu
-
 menu-window-menu =
     .label = Ablak
 menu-window-bring-all-to-front =
     .label = Előtérbe hozás
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Súgó
     .accesskey = S
@@ -342,8 +272,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Váltás egy új eszközre
     .accesskey = j
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Félrevezető oldal jelentése…
     .accesskey = F

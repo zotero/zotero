@@ -1,16 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Nuostatos
 menu-application-services =
@@ -23,10 +10,6 @@ menu-application-show-all =
     .label = Rodyti viską
 menu-application-touch-bar =
     .label = Tvarkyti lietimo juostą…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -38,17 +21,11 @@ menu-quit =
             [windows] B
            *[other] B
         }
-
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Baigti „{ -brand-shorter-name }“ darbą
-
 menu-about =
     .label = Apie „{ -brand-shorter-name }“
     .accesskey = A
-
-## File Menu
-
 menu-file =
     .label = Failas
     .accesskey = F
@@ -64,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Naujas privataus naršymo langas
     .accesskey = p
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Atverti adresą…
 menu-file-open-file =
     .label = Atverti…
     .accesskey = A
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -107,9 +79,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Atsijungti nuo tinklo
     .accesskey = t
-
-## Edit Menu
-
 menu-edit =
     .label = Taisa
     .accesskey = T
@@ -122,9 +91,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Pakeisti teksto kryptį
     .accesskey = k
-
-## View Menu
-
 menu-view =
     .label = Rodymas
     .accesskey = R
@@ -170,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Sutvarkyti simbolių koduotę
     .accesskey = k
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Rodyti visame ekrane
     .accesskey = v
@@ -183,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Visas ekranas
     .accesskey = V
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Pereiti į skaitymo rodinį
     .accesskey = s
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Išjungti skaitymo rodinį
     .accesskey = s
-
-##
-
 menu-view-show-all-tabs =
     .label = Rodyti visas korteles
     .accesskey = k
 menu-view-bidi-switch-page-direction =
     .label = Pakeisti puslapio kryptį
     .accesskey = a
-
-## History Menu
-
 menu-history =
     .label = Žurnalas
     .accesskey = u
@@ -223,9 +174,6 @@ menu-history-undo-menu =
     .label = Paskiausiai užvertos kortelės
 menu-history-undo-window-menu =
     .label = Paskiausiai užverti langai
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Adresynas
     .accesskey = A
@@ -243,9 +191,6 @@ menu-bookmarks-other =
     .label = Kiti adresai
 menu-bookmarks-mobile =
     .label = Mobilusis adresynas
-
-## Tools Menu
-
 menu-tools =
     .label = Priemonės
     .accesskey = P
@@ -289,25 +234,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Išdėstymo derintuvė
     .accesskey = d
-
-## Window Menu
-
 menu-window-menu =
     .label = Langas
 menu-window-bring-all-to-front =
     .label = Viską į priekinį planą
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Žinynas
     .accesskey = Ž
@@ -328,8 +258,6 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Išjungti problemų sprendimo veikseną
     .accesskey = m
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Pranešti apie apgaulingą svetainę…
     .accesskey = a

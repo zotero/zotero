@@ -1,16 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Настройки
 menu-application-services =
@@ -23,10 +10,6 @@ menu-application-show-all =
     .label = Показване на всички
 menu-application-touch-bar =
     .label = Настройки на лентата за докосване…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -38,17 +21,11 @@ menu-quit =
             [windows] х
            *[other] х
         }
-
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Изход от { -brand-shorter-name }
-
 menu-about =
     .label = Относно { -brand-shorter-name }
     .accesskey = О
-
-## File Menu
-
 menu-file =
     .label = Файл
     .accesskey = Ф
@@ -64,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Поверителен прозорец
     .accesskey = в
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Отваряне на адрес…
 menu-file-open-file =
     .label = Отваряне…
     .accesskey = о
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -105,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Работа извън мрежата
     .accesskey = Р
-
-## Edit Menu
-
 menu-edit =
     .label = Редактиране
     .accesskey = Р
@@ -120,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Превключване посоката на текста
     .accesskey = р
-
-## View Menu
-
 menu-view =
     .label = Изглед
     .accesskey = И
@@ -131,7 +97,7 @@ menu-view-toolbars-menu =
     .accesskey = и
 menu-view-customize-toolbar2 =
     .label = Приспособяване на лентата…
-    .accesskey = л
+    .accesskey = П
 menu-view-sidebar =
     .label = Странична лента
     .accesskey = С
@@ -141,6 +107,8 @@ menu-view-history-button =
     .label = История
 menu-view-synced-tabs-sidebar =
     .label = Синхронизирани раздели
+menu-view-megalist-sidebar =
+    .label = Пароли
 menu-view-full-zoom =
     .label = Мащабиране
     .accesskey = М
@@ -168,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Поправка на кодировката
     .accesskey = к
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Влизане в режим на цял екран
     .accesskey = ц
@@ -181,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Цял екран
     .accesskey = Ц
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Отваря изгледа за четене
     .accesskey = О
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Затваря изгледа за четене
     .accesskey = З
-
-##
-
 menu-view-show-all-tabs =
     .label = Показване на всички раздели
     .accesskey = д
 menu-view-bidi-switch-page-direction =
     .label = Превключване посоката на страницата
     .accesskey = П
-
-## History Menu
-
 menu-history =
     .label = История
     .accesskey = с
@@ -221,9 +174,8 @@ menu-history-undo-menu =
     .label = Последно затворени раздели
 menu-history-undo-window-menu =
     .label = Последно затворени прозорци
-
-## Bookmarks Menu
-
+menu-history-search =
+    .label = Търсене в историята
 menu-bookmarks-menu =
     .label = Отметки
     .accesskey = О
@@ -233,6 +185,8 @@ menu-bookmark-tab =
     .label = Отмятане на текущия раздел…
 menu-edit-bookmark =
     .label = Промяна на отметка…
+menu-bookmarks-search =
+    .label = Търсене в отметките
 menu-bookmarks-all-tabs =
     .label = Отмятане на всички раздели…
 menu-bookmarks-toolbar =
@@ -241,9 +195,12 @@ menu-bookmarks-other =
     .label = Други отметки
 menu-bookmarks-mobile =
     .label = Мобилни отметки
-
-## Tools Menu
-
+menu-profiles =
+    .label = Профили
+menu-profiles-manage-profiles =
+    .label = Управление на профили
+menu-profiles-new-profile =
+    .label = Нов профил
 menu-tools =
     .label = Инструменти
     .accesskey = н
@@ -287,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Отстраняване на грешки в оформлението
     .accesskey = о
-
-## Window Menu
-
 menu-window-menu =
     .label = Прозорец
 menu-window-bring-all-to-front =
     .label = Извеждане всичко на преден план
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Помощ
     .accesskey = П
@@ -326,11 +268,14 @@ menu-help-enter-troubleshoot-mode2 =
 menu-help-exit-troubleshoot-mode =
     .label = Изкл. режим за отстраняване на неизправности
     .accesskey = м
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
+menu-help-switch-device =
+    .label = Преминаване към ново устройство
+    .accesskey = у
 menu-help-report-deceptive-site =
     .label = Докладване на измамническа страница…
     .accesskey = з
 menu-help-not-deceptive =
     .label = Това не е измамническа страница…
     .accesskey = н
+menu-report-broken-site =
+    .label = Доклад за повредена страница

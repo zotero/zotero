@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Předvolby
 menu-application-services =
@@ -33,14 +14,9 @@ menu-application-show-all =
     .label = Zobrazit vše
 menu-application-touch-bar =
     .label = Nastavit Touch Bar…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label = Ukončit
     .accesskey = k
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label =
         { -brand-shorter-name.case-status ->
@@ -54,9 +30,6 @@ menu-about =
            *[no-cases] O aplikaci { -brand-shorter-name }
         }
     .accesskey = O
-
-## File Menu
-
 menu-file =
     .label = Soubor
     .accesskey = S
@@ -72,16 +45,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Nové anonymní okno
     .accesskey = a
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Otevřít umístění…
 menu-file-open-file =
     .label = Otevřít soubor…
     .accesskey = s
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -115,9 +83,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Pracovat offline
     .accesskey = l
-
-## Edit Menu
-
 menu-edit =
     .label = Úpravy
     .accesskey = a
@@ -130,9 +95,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Změnit směr textu
     .accesskey = r
-
-## View Menu
-
 menu-view =
     .label = Zobrazit
     .accesskey = Z
@@ -180,10 +142,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Opravit znakovou sadu textu
     .accesskey = z
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Spustit režim celé obrazovky
     .accesskey = r
@@ -193,29 +151,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Celá obrazovka
     .accesskey = C
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Zapnout zobrazení čtečky
     .accesskey = Z
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Zavřít zobrazení čtečky
     .accesskey = Z
-
-##
-
 menu-view-show-all-tabs =
     .label = Zobrazit všechny panely
     .accesskey = b
 menu-view-bidi-switch-page-direction =
     .label = Změnit orientaci stránky
     .accesskey = o
-
-## History Menu
-
 menu-history =
     .label = Historie
     .accesskey = H
@@ -233,12 +180,8 @@ menu-history-undo-menu =
     .label = Naposledy zavřené panely
 menu-history-undo-window-menu =
     .label = Naposledy zavřená okna
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Hledat v historii
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Záložky
     .accesskey = o
@@ -248,7 +191,6 @@ menu-bookmark-tab =
     .label = Přidat současný panel do záložek…
 menu-edit-bookmark =
     .label = Upravit záložku…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Hledat v záložkách
 menu-bookmarks-all-tabs =
@@ -259,9 +201,12 @@ menu-bookmarks-other =
     .label = Ostatní záložky
 menu-bookmarks-mobile =
     .label = Záložky z mobilu
-
-## Tools Menu
-
+menu-profiles =
+    .label = Profily
+menu-profiles-manage-profiles =
+    .label = Správa profilů
+menu-profiles-new-profile =
+    .label = Nový profil
 menu-tools =
     .label = Nástroje
     .accesskey = N
@@ -309,25 +254,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Debugger rozložení
     .accesskey = l
-
-## Window Menu
-
 menu-window-menu =
     .label = Okno
 menu-window-bring-all-to-front =
     .label = Přenést vše do popředí
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Nápověda
     .accesskey = v
@@ -351,8 +281,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Přechod na nové zařízení
     .accesskey = n
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Nahlásit klamavou stránku…
     .accesskey = l

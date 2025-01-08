@@ -1,24 +1,5 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
-    .label = การกำหนดลักษณะ
+    .label = ค่าปรับแต่ง
 menu-application-services =
     .label = บริการ
 menu-application-hide-this =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = แสดงทั้งหมด
 menu-application-touch-bar =
     .label = ปรับแต่งแถบสัมผัส…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] อ
            *[other] อ
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = ออกจาก { -brand-shorter-name }
 menu-about =
     .label = เกี่ยวกับ { -brand-shorter-name }
     .accesskey = ก
-
-## File Menu
-
 menu-file =
     .label = ไฟล์
     .accesskey = ฟ
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = หน้าต่างส่วนตัวใหม่
     .accesskey = ส
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = เปิดตำแหน่งที่ตั้ง…
 menu-file-open-file =
     .label = เปิดไฟล์…
     .accesskey = ป
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -109,9 +77,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = ทำงานออฟไลน์
     .accesskey = ฟ
-
-## Edit Menu
-
 menu-edit =
     .label = แก้ไข
     .accesskey = ก
@@ -124,9 +89,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = สลับทิศทางข้อความ
     .accesskey = ล
-
-## View Menu
-
 menu-view =
     .label = มุมมอง
     .accesskey = ม
@@ -174,10 +136,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = ซ่อมแซมรหัสอักขระข้อความ
     .accesskey = ร
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = เข้าสู่ภาพเต็มหน้าจอ
     .accesskey = จ
@@ -187,29 +145,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = เต็มหน้าจอ
     .accesskey = จ
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = เข้าสู่มุมมองผู้อ่าน
     .accesskey = ผ
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = ปิดมุมมองผู้อ่าน
     .accesskey = ผ
-
-##
-
 menu-view-show-all-tabs =
     .label = แสดงแท็บทั้งหมด
     .accesskey = ส
 menu-view-bidi-switch-page-direction =
     .label = สลับทิศทางหน้ากระดาษ
     .accesskey = ส
-
-## History Menu
-
 menu-history =
     .label = ประวัติ
     .accesskey = ป
@@ -227,12 +174,8 @@ menu-history-undo-menu =
     .label = แท็บที่ปิดล่าสุด
 menu-history-undo-window-menu =
     .label = หน้าต่างที่ปิดล่าสุด
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = ค้นหาประวัติ
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = ที่คั่นหน้า
     .accesskey = ท
@@ -242,7 +185,6 @@ menu-bookmark-tab =
     .label = เพิ่มที่คั่นหน้าสำหรับแท็บปัจจุบัน…
 menu-edit-bookmark =
     .label = แก้ไขที่คั่นหน้านี้…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = ค้นหาที่คั่นหน้า
 menu-bookmarks-all-tabs =
@@ -253,9 +195,12 @@ menu-bookmarks-other =
     .label = ที่คั่นหน้าอื่น ๆ
 menu-bookmarks-mobile =
     .label = ที่คั่นหน้าในมือถือ
-
-## Tools Menu
-
+menu-profiles =
+    .label = โปรไฟล์
+menu-profiles-manage-profiles =
+    .label = จัดการโปรไฟล์
+menu-profiles-new-profile =
+    .label = โปรไฟล์ใหม่
 menu-tools =
     .label = เครื่องมือ
     .accesskey = ค
@@ -299,25 +244,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = ตัวดีบั๊กเค้าโครง
     .accesskey = ต
-
-## Window Menu
-
 menu-window-menu =
     .label = หน้าต่าง
 menu-window-bring-all-to-front =
     .label = นำทั้งหมดมาข้างหน้า
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = ช่วยเหลือ
     .accesskey = ช
@@ -341,8 +271,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = การสลับไปยังอุปกรณ์ใหม่
     .accesskey = ม
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = รายงานไซต์หลอกลวง…
     .accesskey = ห

@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 text-action-undo =
     .label = 실행 취소
     .accesskey = U
@@ -22,10 +18,8 @@ text-action-copy =
     .accesskey = C
 text-action-copy-shortcut =
     .key = C
-# This command copies the link, removing additional
-# query parameters used to track users across sites.
-text-action-strip-on-share =
-    .label = 사이트 추적 없이 복사
+text-action-copy-clean-link =
+    .label = 깨끗한 링크 복사
     .accesskey = n
 text-action-paste =
     .label = 붙여넣기
@@ -38,6 +32,9 @@ text-action-paste-shortcut =
 text-action-delete =
     .label = 삭제
     .accesskey = D
+text-action-reveal-password =
+    .label = 비밀번호 표시
+    .accesskey = v
 text-action-select-all =
     .label = 모두 선택
     .accesskey = A

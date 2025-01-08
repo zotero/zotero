@@ -1,22 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
-
-
-# NOTE: For English locales, strings in this file should be in APA-style Title Case.
-# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
-#
-# NOTE: For Engineers, please don't reuse these strings outside of the menubar.
-
-
-## Application Menu (macOS only)
-
 menu-application-preferences =
     .label = Настройки
 menu-application-services =
@@ -29,10 +10,6 @@ menu-application-show-all =
     .label = Показать все
 menu-application-touch-bar =
     .label = Настроить сенсорную панель…
-
-##
-
-# These menu-quit strings are only used on Windows and Linux.
 menu-quit =
     .label =
         { PLATFORM() ->
@@ -44,15 +21,11 @@ menu-quit =
             [windows] х
            *[other] ы
         }
-# This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Завершить { -brand-shorter-name }
 menu-about =
     .label = О { -brand-shorter-name }
     .accesskey = О
-
-## File Menu
-
 menu-file =
     .label = Файл
     .accesskey = Ф
@@ -68,16 +41,11 @@ menu-file-new-window =
 menu-file-new-private-window =
     .label = Новое приватное окно
     .accesskey = е
-# "Open Location" is only displayed on macOS, and only on windows
-# that aren't main browser windows, or when there are no windows
-# but Firefox is still running.
 menu-file-open-location =
     .label = Открыть адрес…
 menu-file-open-file =
     .label = Открыть файл…
     .accesskey = к
-# Variables:
-#  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
@@ -111,9 +79,6 @@ menu-file-import-from-another-browser =
 menu-file-go-offline =
     .label = Работать автономно
     .accesskey = б
-
-## Edit Menu
-
 menu-edit =
     .label = Правка
     .accesskey = П
@@ -126,9 +91,6 @@ menu-edit-find-again =
 menu-edit-bidi-switch-text-direction =
     .label = Переключить направление текста на странице
     .accesskey = т
-
-## View Menu
-
 menu-view =
     .label = Вид
     .accesskey = В
@@ -176,10 +138,6 @@ menu-view-page-basic-style =
 menu-view-repair-text-encoding =
     .label = Исправить кодировку текста
     .accesskey = п
-
-## These should match what Safari and other Apple applications
-## use on macOS.
-
 menu-view-enter-full-screen =
     .label = Перейти в полноэкранный режим
     .accesskey = о
@@ -189,29 +147,18 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Полный экран
     .accesskey = э
-
-## These menu items may use the same accesskey.
-
-# This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
     .label = Перейти в режим чтения
     .accesskey = ч
-# This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
     .label = Закрыть режим чтения
     .accesskey = ч
-
-##
-
 menu-view-show-all-tabs =
     .label = Показать все вкладки
     .accesskey = в
 menu-view-bidi-switch-page-direction =
     .label = Переключить направление текста на странице
     .accesskey = н
-
-## History Menu
-
 menu-history =
     .label = Журнал
     .accesskey = Ж
@@ -229,12 +176,8 @@ menu-history-undo-menu =
     .label = Недавно закрытые вкладки
 menu-history-undo-window-menu =
     .label = Недавно закрытые окна
-# "Search" is a verb, as in "Search in History"
 menu-history-search =
     .label = Поиск в журнале
-
-## Bookmarks Menu
-
 menu-bookmarks-menu =
     .label = Закладки
     .accesskey = З
@@ -244,7 +187,6 @@ menu-bookmark-tab =
     .label = Добавить текущую вкладку в закладки…
 menu-edit-bookmark =
     .label = Изменить эту закладку…
-# "Search" is a verb, as in "Search in bookmarks"
 menu-bookmarks-search =
     .label = Искать в закладках
 menu-bookmarks-all-tabs =
@@ -255,9 +197,12 @@ menu-bookmarks-other =
     .label = Другие закладки
 menu-bookmarks-mobile =
     .label = Мобильные закладки
-
-## Tools Menu
-
+menu-profiles =
+    .label = Профили
+menu-profiles-manage-profiles =
+    .label = Управление профилями
+menu-profiles-new-profile =
+    .label = Новый профиль
 menu-tools =
     .label = Инструменты
     .accesskey = И
@@ -301,25 +246,10 @@ menu-settings =
 menu-tools-layout-debugger =
     .label = Отладчик макета
     .accesskey = л
-
-## Window Menu
-
 menu-window-menu =
     .label = Окно
 menu-window-bring-all-to-front =
     .label = Все окна — на передний план
-
-## Help Menu
-
-
-# NOTE: For Engineers, any additions or changes to Help menu strings should
-# also be reflected in the related strings in appmenu.ftl. Those strings, by
-# convention, will have the same ID as these, but prefixed with "app".
-# Example: appmenu-get-help
-#
-# These strings are duplicated to allow for different casing depending on
-# where the strings appear.
-
 menu-help =
     .label = Справка
     .accesskey = С
@@ -343,8 +273,6 @@ menu-help-exit-troubleshoot-mode =
 menu-help-switch-device =
     .label = Переход на новое устройство
     .accesskey = х
-# Label of the Help menu item. Either this or
-# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Сообщить о поддельном сайте…
     .accesskey = п
