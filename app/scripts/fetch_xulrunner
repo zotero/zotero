@@ -188,7 +188,7 @@ function modify_omni {
       manifest.web_accessible_resources = undefined;
       manifest.experiment_apis = {};
     }' modules/Extension.sys.mjs
-    
+	
 	# Use applications.zotero instead of applications.gecko
 	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.sys.mjs
 	replace_line 'manifest.applications\?.gecko' 'manifest.applications?.zotero' modules/Extension.sys.mjs
@@ -366,12 +366,12 @@ function modify_omni {
          document.documentElement.appendChild(popupset);
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
-    
-    # Remove aria-autocomplete unnecessarily added to search-textbox to not confuse screen readers
-    remove_line 'this.inputField.setAttribute\("aria-autocomplete' chrome/toolkit/content/global/elements/search-textbox.js
+	
+	# Remove aria-autocomplete unnecessarily added to search-textbox to not confuse screen readers
+	remove_line 'this.inputField.setAttribute\("aria-autocomplete' chrome/toolkit/content/global/elements/search-textbox.js
 
-    # Remove non-native text input styles
-    remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
+	# Remove non-native text input styles
+	remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
 	
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
