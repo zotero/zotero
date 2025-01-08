@@ -301,22 +301,31 @@
 	Box-shadow is used to be able to set the radius.
 */
 @mixin focus-ring($thin: false, $selector: ":focus-visible") {
+	@media (-moz-platform: windows) {
+		@include windows-focus-ring($selector);
+	}
+	@media not (-moz-platform: windows) {
+		@include non-windows-focus-ring($thin, $selector);
+	}
+}
+
+@mixin windows-focus-ring($selector: ":focus-visible") {
 	&#{$selector} {
-		@media (-moz-platform: windows) {
-			outline: var(--color-focus-outer-border) solid var(--width-focus-outer-border);
-			outline-offset: var(--width-focus-border);
-			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
-		}
+		outline: var(--color-focus-outer-border) solid var(--width-focus-outer-border);
+		outline-offset: var(--width-focus-border);
+		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+	}
+}
 
-		@media not (-moz-platform: windows) {
-			// fx115: Necessary to hide default focus ring
-			outline: none;
-			box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
+@mixin non-windows-focus-ring($thin: false, $selector: ":focus-visible") {
+	&#{$selector} {
+		// fx115: Necessary to hide default focus ring
+		outline: none;
+		box-shadow: 0 0 0 var(--width-focus-border) var(--color-focus-border);
 
-			@if $thin {
-				--width-focus-border: 1px;
-				--color-focus-border: var(--color-accent);
-			}
+		@if $thin {
+			--width-focus-border: 1px;
+			--color-focus-border: var(--color-accent);
 		}
 	}
 }

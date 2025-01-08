@@ -8,15 +8,16 @@ panel[is=tabs-menu-panel] {
 	& #zotero-tabs-menu-wrapper {
 		width: 350px;
 		background: var(--material-sidepane);
-		padding: 0;
+		padding: 5px;
 		border-radius: 5px;
 		--width-focus-border: 2px;
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
+		gap: 6px;
 
 		& #zotero-tabs-menu-filter {
-			margin: 7px 7px 2px 7px;
+			margin: 0;
 			border-radius: 5px;
 			border: 1px solid transparent;
 			padding-inline-start: 5px !important;
@@ -36,11 +37,19 @@ panel[is=tabs-menu-panel] {
 		
 			.row {
 				display: flex;
-				border-radius: 6px;
-				margin-inline: 6px;
+				border-radius: 5px;
+				padding: 2px 3px 2px 6px;
+				gap: 4px;
+				align-items: center;
+				height: 18px;
 
-				.close {
-					visibility: hidden;
+				&:hover,
+				&:focus-visible {
+					background-color: var(--fill-quinary);
+				}
+
+				&:active {
+					background-color: var(--fill-quarternary);
 				}
 
 				&.selected {
@@ -48,40 +57,55 @@ panel[is=tabs-menu-panel] {
 					color: #fff;
 
 					.close {
-						visibility: visible;
+						&:hover,
+						&:focus-visible {
+							background-color: #ffffff1a;
+						}
+
+						&:active {
+							background-color: #ffffff33;
+						}
 					}
 				}
 
-				&:hover {
-					.close {
-						visibility: visible;
+				&:not(:hover, .selected) {
+					.zotero-tabs-menu-entry.close {
+						display: none;
 					}
 				}
 
 				.zotero-tabs-menu-entry {
 					// @include focus-ring;
-					border-radius: 6px;
-					height: 22px;
+					border-radius: 2px;
+					height: 18px;
 					margin: 0;
 
-					&:hover,
-					&:focus-visible {
-						background-color: var(--fill-quarternary);
-					}
-
-					&:active {
-						background-color: var(--fill-tertiary);
-					}
+					// Use windows-focus-ring on all platforms according to the design
+					--color-focus-outer-border: light-dark(var(--fill-primary), var(--accent-white));
+					--color-focus-border: light-dark(var(--accent-white), #00000080);
+					--width-focus-border: 1px;
+					--width-focus-outer-border: 2px;
+					@include windows-focus-ring;
 
 					&.close {
-						width: 22px;
+						height: 16px;
+						width: 16px;
 						// Center the icon within the larger box
 						display: flex;
 						justify-content: center;
 						align-items: center;
 						
 						&[hidden] {
-							visibility: hidden;
+							display: none;
+						}
+
+						&:hover,
+						&:focus-visible {
+							background-color: var(--fill-quinary);
+						}
+
+						&:active {
+							background-color: var(--fill-quarternary);
 						}
 						
 						.icon-x-8 {
@@ -91,12 +115,15 @@ panel[is=tabs-menu-panel] {
 
 					&.title {
 						padding: 0;
-						padding-inline-start: 6px;
+						// Align the left edge of the row when focused
+						padding-inline-start: 3px;
+  						margin-inline-start: -3px;
 						color: unset;
 						// Align label with the icon
 						display: flex;
 						align-items: center;
 						width: 100%;
+						min-width: 0;
 						&.selected {
 							font-weight: 600;
 						}
@@ -107,16 +134,14 @@ panel[is=tabs-menu-panel] {
 							margin-block-start: 0;
 							// show as much of the description as possible
 							white-space: nowrap;
-							min-width: 280px;
 							text-overflow: ellipsis;
-							// Fx115: make label have the right width
-							max-width: 280px;
 							display: inline-block;
 						}
 						.tab-icon {
 							width: 16px;
 							height: 16px;
 							margin-inline-end: 4px;
+							flex-shrink: 0;
 						}
 					}
 				}
