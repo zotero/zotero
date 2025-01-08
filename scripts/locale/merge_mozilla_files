@@ -32,12 +32,11 @@ def main():
         ["el", "https://addons.mozilla.org/en-US/firefox/addon/greek-gr-language-pack/", "el-GR"],
         ["en-GB", "https://addons.mozilla.org/en-US/firefox/addon/english-gb-language-pack/"],
         ["es-ES", "https://addons.mozilla.org/en-US/firefox/addon/espa%C3%B1ol-espa%C3%B1a-language-pac/"],
-        ["eu", "https://addons.mozilla.org/en-US/firefox/addon/basque-language-pack/", "eu-ES"],
-        ["fr", "https://addons.mozilla.org/en-US/firefox/addon/fran%C3%A7ais-language-pack/", "fr-FR"],
         ["et", "https://addons.mozilla.org/en-US/firefox/addon/eesti-et-keele-pakk/", "et-EE"],
         ["eu", "https://addons.mozilla.org/en-US/firefox/addon/basque-language-pack/", "eu-ES"],
         ["fa", "https://addons.mozilla.org/en-US/firefox/addon/persian-ir-%D9%81%D8%A7%D8%B1%D8%B3%DB%8C-%D8%A7%DB%8C%D8%B1%D8%A7%D9%86-lang/"],
         ["fi", "https://addons.mozilla.org/en-US/firefox/addon/finnish-language-pack/", "fi-FI"],
+        ["fr", "https://addons.mozilla.org/en-US/firefox/addon/fran%C3%A7ais-language-pack/", "fr-FR"],
         ["gl", "https://addons.mozilla.org/en-US/firefox/addon/galician-galiza-language-pack/", "gl-ES"],
         ["he", "https://addons.mozilla.org/en-US/firefox/addon/hebrew-il-language-pack/", "he-IL"],
         ["hr", "https://addons.mozilla.org/en-US/firefox/addon/hrvatski-hr-language-pack/", "hr-HR"],
@@ -157,11 +156,15 @@ def main():
                 formatted_path = entry_path.format(lang)
                 
                 try:
-                    zip_ref.getinfo(formatted_path)
+                    info = zip_ref.getinfo(formatted_path)
                 except KeyError:
                     print("'{0}' not found in {1}".format(formatted_path, pack_file))
                     continue
-                
+
+                if info.file_size == 0:
+                    print("'{0}' is empty in {1}".format(formatted_path, pack_file))
+                    continue
+
                 with zip_ref.open(formatted_path) as source:
                     # Add date formats to JSON object
                     if entry_filename == 'dateFormat.properties':
@@ -235,7 +238,12 @@ def main():
                 os.mkdir(dest_dir)
             source_file = os.path.join(en_locale_dir, entry_filename)
             print("Copying en-US {0} to {1}".format(entry_filename, dest_file))
-            shutil.copyfile(source_file, dest_file)
+            with open(source_file, 'r') as src, open(dest_file, 'w') as dest:
+                for line in src:
+                    stripped_line = line.strip()
+                    # Skip empty lines and comments, in line with Mozilla non-en-US files
+                    if stripped_line and not stripped_line.startswith('#'):
+                        dest.write(line)
     
     print()
     
