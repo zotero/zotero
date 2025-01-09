@@ -718,6 +718,33 @@ describe("Zotero.Sync.Data.Local", function() {
 			}
 		});
 		
+		it("should handle local item becoming child and remote being added to a collection", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var collection = await createDataObject('collection');
+			var parentItem = await createDataObject('item');
+			var childItem = await createDataObject('item', { itemType: 'note' });
+			var data = childItem.toJSON();
+			await Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [data]);
+			
+			// Add to parent locally
+			childItem.parentID = parentItem.id;
+			await childItem.saveTx();
+			
+			// Add to collection remotely
+			data.collections = [collection.key];
+			var json = {
+				key: childItem.key,
+				version: 10,
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			
+			assert.isTrue(collection.hasItem(parentItem));
+		});
+		
 		it("should automatically resolve collection name conflict", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
