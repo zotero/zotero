@@ -933,6 +933,22 @@ Zotero.Sync.Data.Local = {
 									['mtime', 'md5', 'dateAdded', 'dateModified']
 								);
 								
+								// If local object became a child item and remote was added to any
+								// collections, we need to remove the 'collections' changes and add
+								// the parent item to those collections instead
+								if (objectType == 'item'
+										&& !obj.isTopLevelItem()
+										&& (obj.isNote() || obj.isAttachment())) {
+									let collections = result.changes
+										.filter(x => x.field == 'collections' && x.op == 'member-add')
+										.map(x => x.value);
+									if (collections.length) {
+										result.changes = result.changes
+											.filter(x => !(x.field == 'collections' && x.op == 'member-add'));
+										saveOptions.newParentItemCollections = collections;
+									}
+								}
+								
 								// If no changes, just update local version number and mark as synced
 								if (!result.changes.length && !result.conflicts.length) {
 									Zotero.debug("No remote changes to apply to local "
@@ -1541,6 +1557,24 @@ Zotero.Sync.Data.Local = {
 				if (options.isNewObject || options.storageDetailsChanged) {
 					Zotero.Libraries.get(obj.libraryID).storageDownloadNeeded = true;
 				}
+			}
+			
+			// See explanation in processObjectsFromJSON()
+			if (options.newParentItemCollections) {
+				let parentItem = obj.parentItem;
+				for (let c of options.newParentItemCollections) {
+					parentItem.addToCollection(c);
+				}
+				yield parentItem.save({
+					skipEditCheck: true,
+					skipDateModifiedUpdate: true,
+					skipSelect: true,
+					notifierQueue: options.notifierQueue,
+					// Errors are logged elsewhere, so skip in DataObject.save()
+					errorHandler: function (e) {
+						return;
+					}
+				});
 			}
 		}
 		catch (e) {
