@@ -83,8 +83,8 @@ Zotero.RecognizeDocument = new function () {
 					throw new Error();
 				}
 				
-				let res = await _processItem(item);
-				_progressQueue.updateRow(itemID, Zotero.ProgressQueue.ROW_SUCCEEDED, item.getField('title'));
+				let parentItem = await _processItem(item);
+				_progressQueue.updateRow(itemID, Zotero.ProgressQueue.ROW_SUCCEEDED, parentItem.getField('title'));
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -250,7 +250,7 @@ Zotero.RecognizeDocument = new function () {
 	/**
 	 * Processes the item and places it as a children of the new item
 	 * @param itemID
-	 * @return {Promise}
+	 * @return {Promise} A promise that resolves to a newly created, recognized parent item
 	 */
 	async function _processItem(attachment) {
 		// Make sure the attachment still doesn't have a parent
