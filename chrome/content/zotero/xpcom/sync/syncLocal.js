@@ -1031,45 +1031,45 @@ Zotero.Sync.Data.Local = {
 								Zotero.debug(ObjectType + " was deleted locally");
 								
 								switch (objectType) {
-								case 'item':
-									if (jsonData.deleted) {
-										Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
+									case 'item':
+										if (jsonData.deleted) {
+											Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
+											results.push({
+												libraryID,
+												key: objectKey,
+												processed: true
+											});
+											return;
+										}
+										
 										results.push({
 											libraryID,
 											key: objectKey,
-											processed: true
+											processed: false,
+											conflict: true,
+											left: {
+												deleted: true,
+												dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
+											},
+											right: jsonData
 										});
 										return;
-									}
 									
-									results.push({
-										libraryID,
-										key: objectKey,
-										processed: false,
-										conflict: true,
-										left: {
-											deleted: true,
-											dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
-										},
-										right: jsonData
-									});
-									return;
-								
-								// Auto-restore some locally deleted objects that have changed remotely
-								case 'collection':
-								case 'search':
-									Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
-										+ '-- restoring');
-									await this.removeObjectsFromDeleteLog(
-										objectType,
-										libraryID,
-										[objectKey]
-									);
-									restored = true;
-									break;
-								
-								default:
-									throw new Error("Unknown object type '" + objectType + "'");
+									// Auto-restore some locally deleted objects that have changed remotely
+									case 'collection':
+									case 'search':
+										Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
+											+ '-- restoring');
+										await this.removeObjectsFromDeleteLog(
+											objectType,
+											libraryID,
+											[objectKey]
+										);
+										restored = true;
+										break;
+									
+									default:
+										throw new Error("Unknown object type '" + objectType + "'");
 								}
 							}
 							
@@ -1586,39 +1586,39 @@ Zotero.Sync.Data.Local = {
 				// Disregard member additions/deletions for different values
 				if (c1.op.startsWith('member-') && c2.op.startsWith('member-')) {
 					switch (c1.field) {
-					case 'collections':
-						if (c1.value !== c2.value) {
-							continue;
-						}
-						break;
-					
-					case 'tags':
-						if (!Zotero.Tags.equals(c1.value, c2.value)) {
-							// If just a type difference, treat as modify with type 0 if
-							// not type 0 in changeset1
-							if (c1.op == 'member-add' && c2.op == 'member-add'
-									&& c1.value.tag === c2.value.tag) {
-								changeset1.splice(i--, 1);
-								// We're in the inner loop without an incrementor for i, so don't go
-								// below 0
-								if (i < 0) i = 0;
-								changeset2.splice(j--, 1);
-								if (c1.value.type > 0) {
-									changeset2.push({
-										field: "tags",
-										op: "member-remove",
-										value: c1.value
-									});
-									changeset2.push({
-										field: "tags",
-										op: "member-add",
-										value: c2.value
-									});
-								}
+						case 'collections':
+							if (c1.value !== c2.value) {
+								continue;
 							}
-							continue;
-						}
-						break;
+							break;
+						
+						case 'tags':
+							if (!Zotero.Tags.equals(c1.value, c2.value)) {
+								// If just a type difference, treat as modify with type 0 if
+								// not type 0 in changeset1
+								if (c1.op == 'member-add' && c2.op == 'member-add'
+										&& c1.value.tag === c2.value.tag) {
+									changeset1.splice(i--, 1);
+									// We're in the inner loop without an incrementor for i, so don't go
+									// below 0
+									if (i < 0) i = 0;
+									changeset2.splice(j--, 1);
+									if (c1.value.type > 0) {
+										changeset2.push({
+											field: "tags",
+											op: "member-remove",
+											value: c1.value
+										});
+										changeset2.push({
+											field: "tags",
+											op: "member-add",
+											value: c2.value
+										});
+									}
+								}
+								continue;
+							}
+							break;
 					}
 				}
 				

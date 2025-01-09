@@ -608,118 +608,118 @@ Zotero.DataObjectUtilities = {
 			}
 			else if (c.op == 'member-add') {
 				switch (c.field) {
-				case 'collections':
-					if (json[c.field].indexOf(c.value) == -1) {
-						json[c.field].push(c.value);
-					}
-					break;
-				
-				case 'creators':
-					throw new Error("Unimplemented");
-					break;
-				
-				case 'conditions':
-				case 'tags':
-					let found = false;
-					let f = c.field == 'conditions' ? Zotero.SearchConditions : Zotero.Tags;
-					for (let i = 0; i < json[c.field].length; i++) {
-						if (f.equals(json[c.field][i], c.value)) {
-							found = true;
-							break;
+					case 'collections':
+						if (json[c.field].indexOf(c.value) == -1) {
+							json[c.field].push(c.value);
 						}
-					}
-					if (!found) {
-						json[c.field].push(c.value);
-					}
-					break;
+						break;
 					
-				default:
-					throw new Error("Unexpected field '" + c.field + "'");
+					case 'creators':
+						throw new Error("Unimplemented");
+						break;
+					
+					case 'conditions':
+					case 'tags':
+						let found = false;
+						let f = c.field == 'conditions' ? Zotero.SearchConditions : Zotero.Tags;
+						for (let i = 0; i < json[c.field].length; i++) {
+							if (f.equals(json[c.field][i], c.value)) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							json[c.field].push(c.value);
+						}
+						break;
+						
+					default:
+						throw new Error("Unexpected field '" + c.field + "'");
 				}
 			}
 			else if (c.op == 'member-remove') {
 				switch (c.field) {
-				case 'collections':
-					let pos = json[c.field].indexOf(c.value);
-					if (pos == -1) {
-						continue;
-					}
-					json[c.field].splice(pos, 1);
-					break;
-				
-				case 'creators':
-					throw new Error("Unimplemented");
-					break;
-				
-				case 'conditions':
-				case 'tags':
-					let f = c.field == 'conditions' ? Zotero.SearchConditions : Zotero.Tags;
-					for (let i = 0; i < json[c.field].length; i++) {
-						if (f.equals(json[c.field][i], c.value)) {
-							json[c.field].splice(i, 1);
-							break;
+					case 'collections':
+						let pos = json[c.field].indexOf(c.value);
+						if (pos == -1) {
+							continue;
 						}
-					}
-					break;
+						json[c.field].splice(pos, 1);
+						break;
 					
-				default:
-					throw new Error("Unexpected field '" + c.field + "'");
+					case 'creators':
+						throw new Error("Unimplemented");
+						break;
+					
+					case 'conditions':
+					case 'tags':
+						let f = c.field == 'conditions' ? Zotero.SearchConditions : Zotero.Tags;
+						for (let i = 0; i < json[c.field].length; i++) {
+							if (f.equals(json[c.field][i], c.value)) {
+								json[c.field].splice(i, 1);
+								break;
+							}
+						}
+						break;
+						
+					default:
+						throw new Error("Unexpected field '" + c.field + "'");
 				}
 			}
 			else if (c.op == 'property-member-add') {
 				switch (c.field) {
-				case 'relations':
-					let obj = json[c.field];
-					let prop = c.value.key;
-					let val = c.value.value;
-					if (!obj) {
-						obj = json[c.field] = {};
-					}
-					if (!obj[prop]) {
-						obj[prop] = [];
-					}
-					// Convert string to array
-					if (typeof obj[prop] == 'string') {
-						obj[prop] = [obj[prop]];
-					}
-					if (obj[prop].indexOf(val) == -1) {
-						obj[prop].push(val);
-					}
-					break;
-					
-				default:
-					throw new Error("Unexpected field '" + c.field + "'");
+					case 'relations':
+						let obj = json[c.field];
+						let prop = c.value.key;
+						let val = c.value.value;
+						if (!obj) {
+							obj = json[c.field] = {};
+						}
+						if (!obj[prop]) {
+							obj[prop] = [];
+						}
+						// Convert string to array
+						if (typeof obj[prop] == 'string') {
+							obj[prop] = [obj[prop]];
+						}
+						if (obj[prop].indexOf(val) == -1) {
+							obj[prop].push(val);
+						}
+						break;
+						
+					default:
+						throw new Error("Unexpected field '" + c.field + "'");
 				}
 			}
 			else if (c.op == 'property-member-remove') {
 				switch (c.field) {
-				case 'relations':
-					let obj = json[c.field];
-					let prop = c.value.key;
-					let val = c.value.value;
-					if (!obj || !obj[prop]) {
-						continue;
-					}
-					if (typeof obj[prop] == 'string') {
-						// If propetty was the specified string, remove property
-						if (obj[prop] === val) {
+					case 'relations':
+						let obj = json[c.field];
+						let prop = c.value.key;
+						let val = c.value.value;
+						if (!obj || !obj[prop]) {
+							continue;
+						}
+						if (typeof obj[prop] == 'string') {
+							// If propetty was the specified string, remove property
+							if (obj[prop] === val) {
+								delete obj[prop];
+							}
+							continue;
+						}
+						let pos = obj[prop].indexOf(val);
+						if (pos == -1) {
+							continue;
+						}
+						obj[prop].splice(pos, 1);
+						// If no more members in property array, remove property
+						if (obj[prop].length == 0) {
 							delete obj[prop];
 						}
-						continue;
-					}
-					let pos = obj[prop].indexOf(val);
-					if (pos == -1) {
-						continue;
-					}
-					obj[prop].splice(pos, 1);
-					// If no more members in property array, remove property
-					if (obj[prop].length == 0) {
-						delete obj[prop];
-					}
-					break;
-					
-				default:
-					throw new Error("Unexpected field '" + c.field + "'");
+						break;
+						
+					default:
+						throw new Error("Unexpected field '" + c.field + "'");
 				}
 			}
 			else {
