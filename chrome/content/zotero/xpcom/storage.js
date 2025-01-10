@@ -64,7 +64,7 @@ Zotero.Sync.Storage = new function () {
 	 * @param {String} libraryKey
 	 * @param {Number|NULL}
 	 */
-	this.setItemDownloadPercentage = function (libraryKey, percentage) {
+	this.setItemDownloadPercentage = Zotero.Utilities.debounce(function (libraryKey, percentage) {
 		Zotero.debug("Setting image download percentage to " + percentage
 			+ " for item " + libraryKey);
 		
@@ -93,7 +93,7 @@ Zotero.Sync.Storage = new function () {
 			}
 			Zotero.Notifier.trigger('redraw', 'item', parentItem.id, { column: "hasAttachment" });
 		}
-	}
+	}, 100);
 	
 	
 	function error(e) {
