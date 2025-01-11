@@ -64,7 +64,7 @@ Zotero.Sync.Storage = new function () {
 	 * @param {String} libraryKey
 	 * @param {Number|NULL}
 	 */
-	this.setItemDownloadPercentage = Zotero.Utilities.debounce(function (libraryKey, percentage) {
+	this.setItemDownloadPercentage = Zotero.Utilities.throttle(function (libraryKey, percentage) {
 		Zotero.debug("Setting image download percentage to " + percentage
 			+ " for item " + libraryKey);
 		
