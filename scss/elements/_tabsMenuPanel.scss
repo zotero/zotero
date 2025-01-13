@@ -55,6 +55,11 @@ panel[is=tabs-menu-panel] {
 					background-color: var(--color-accent) !important;
 					color: #fff;
 
+					@include state("#zotero-tabs-menu-wrapper:not(:focus-within)") {
+						color: currentColor;
+						background-color: var(--color-quarternary-on-sidepane) !important;
+					}
+
 					.zotero-tabs-menu-entry.close {
 						&:hover,
 						&:focus-visible {
