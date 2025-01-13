@@ -55,7 +55,7 @@ panel[is=tabs-menu-panel] {
 					background-color: var(--color-accent) !important;
 					color: #fff;
 
-					.close {
+					.zotero-tabs-menu-entry.close {
 						&:hover,
 						&:focus-visible {
 							background-color: #ffffff1a;
