@@ -1993,8 +1993,8 @@
 			
 			var id = false;
 			for (let i = 0; i < controller.matchCount; i++) {
-				if (controller.getCommentAt(i) == textbox.value) {
-					id = controller.getLabelAt(i);
+				if (controller.getValueAt(i) == textbox.value) {
+					id = controller.getCommentAt(i);
 					break;
 				}
 			}

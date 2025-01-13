@@ -286,7 +286,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 ZoteroAutoComplete.prototype.updateResult = function (value, id) {
 	Zotero.debug(`Appending autocomplete value '${value}'` + (id ? " (" + id + ")" : ''));
 	// Add to nsIAutoCompleteResult
-	this._result.appendMatch(value, value, null, null, null, id);
+	this._result.appendMatch(value, id, null, null, null, value);
 	// Add to our own list
 	this._results.push(value);
 	// Only update the UI every 10 records
@@ -311,7 +311,7 @@ ZoteroAutoComplete.prototype.updateResults = function (values, ids, ongoing, res
 		if (!this._results.includes(value)) {
 			let id = ids[i] || null;
 			Zotero.debug("Adding autocomplete value '" + value + "'" + (id ? " (" + id + ")" : ""));
-			this._result.appendMatch(value, value, null, null, null, id);
+			this._result.appendMatch(value, id, null, null, null, value);
 			this._results.push(value);
 		}
 		else {
