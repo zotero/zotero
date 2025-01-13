@@ -56,7 +56,7 @@ if [[ -z $PLATFORM ]]; then
 		PLATFORM="l"
 		
 		# If platform not given explicitly, skip 32-bit build if 64-bit system
-		if [ "$(arch)" = "x86_64" ]; then
+		if [ "$(uname -m)" = "x86_64" ]; then
 			export SKIP_32=1
 		fi
 	elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
