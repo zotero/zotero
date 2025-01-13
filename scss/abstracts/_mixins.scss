@@ -70,7 +70,7 @@
 //        by default. See `state` mixin for more details.
 @mixin focus-states(
 	$selectedState: '.row.selected',
-	$focused: '.virtualized-table:focus-within'
+	$focused: '.focus-states-target:focus-within'
 	) {
 	@media (prefers-color-scheme: light) {
 		@content("light");

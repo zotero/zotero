@@ -32,7 +32,7 @@
 	const XULPanelElement = customElements.get("panel");
 	class TabsMenuPanel extends XULPanelElement {
 		content = MozXULElement.parseXULToFragment(`
-		<vbox id="zotero-tabs-menu-wrapper">
+		<vbox id="zotero-tabs-menu-wrapper" class="focus-states-target">
 			<html:input id="zotero-tabs-menu-filter"
 				tabindex="0"
 				role="combobox"

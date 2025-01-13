@@ -390,11 +390,13 @@ $-coloredIcons: (
 	}
 }
 
+// Universal icon rules
 @include focus-states using($color) {
 	@include -icon-item-type-rules($color);
 }
 
-.virtualized-table .row {
+// Selection and focus aware icon rules
+.focus-states-target .row {
 	@include focus-states using($color) {
 		@include -icon-item-type-rules($color);
 
