@@ -172,6 +172,7 @@
 				row.setAttribute("role", "option");
 				row.dataset.l10nId = "tabs-menu-row";
 				row.dataset.l10nArgs = JSON.stringify({
+					title: tab.title,
 					index: index + 1,
 					total: tabsCount,
 					isFirst: index === 0,
@@ -191,7 +192,8 @@
 				closeButton.className = "zotero-tabs-menu-entry close";
 				let closeIcon = document.createElement('span');
 				closeIcon.setAttribute('class', 'icon icon-css icon-x-8 icon-16');
-				closeButton.setAttribute('data-l10n-id', 'zotero-tabs-menu-close-button');
+				closeButton.setAttribute('role', 'button');
+				closeButton.dataset.l10nId = 'zotero-tabs-menu-close-button';
 				closeButton.appendChild(closeIcon);
 				closeButton.addEventListener("click", this._handleCloseClick);
 

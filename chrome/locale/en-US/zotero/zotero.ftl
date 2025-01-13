@@ -747,6 +747,7 @@ tabs-menu-row =
             *[other] next
     }
     tab, press Arrow Down.
+    .aria-label = { $title }
     
 tabs-menu-row-empty =
     .aria-description = The search did not match any tabs. To search for tabs, type the keyword.
