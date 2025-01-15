@@ -2899,6 +2899,85 @@ Zotero.Utilities.Internal.getProcessID = function () {
 };
 
 
+Zotero.Utilities.Internal.Environment = {
+	/**
+	 * Unset an environment variable
+	 *
+	 * Since nsIEnvironment doesn't have an unset method
+	 */
+	unset: function (varName) {
+		Components.utils.import("resource://gre/modules/ctypes.jsm");
+		
+		let lib;
+		let result;
+		let success;
+		// Windows
+		// https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-setenvironmentvariablew
+		if (Zotero.isWin) {
+			lib = ctypes.open("kernel32.dll");
+			let SetEnvironmentVariable = lib.declare(
+				"SetEnvironmentVariableW",
+				ctypes.winapi_abi,
+				ctypes.int, // Return type
+				ctypes.char16_t.ptr, // Argument type: LPCTSTR (variable name)
+				ctypes.char16_t.ptr // Argument type: LPCTSTR (value, NULL to unset)
+			);
+			result = SetEnvironmentVariable(varName, null);
+			success = result != 0; // "If the function succeeds, the return value is nonzero."
+		}
+		// macOS or Linux
+		else {
+			lib = ctypes.open(Zotero.isMac ? "/usr/lib/libSystem.dylib" : "libc.so.6");
+			let unsetenv = lib.declare(
+				"unsetenv",
+				ctypes.default_abi,
+				ctypes.int, // Return type
+				ctypes.char.ptr // Argument type: const char *
+			);
+			result = unsetenv(varName);
+			success = result == 0;
+		}
+		
+		// Check the result
+		if (success) {
+			//Zotero.debug(`Unset environment variable ${varName}`);
+		}
+		else {
+			Zotero.logError(`Failed to unset environment variable ${varName} (${result})`);
+		}
+		
+		lib.close();
+	},
+	
+	/**
+	 * Clear the Mozilla environment variables that we changed in the launcher
+	 *
+	 * Call this before launching another process that might be Firefox so that we don't end up
+	 * using the wrong Firefox profile when launching URLs or PDFs. On Windows, it's not necessary
+	 * to call this when launching URLs, only processes.
+	 *
+	 * https://github.com/zotero/zotero/issues/4981
+	 */
+	clearMozillaVariables: function () {
+		this.unset("MOZ_ALLOW_DOWNGRADE");
+		this.unset("MOZ_LEGACY_PROFILES");
+	},
+	
+	/**
+	 * Re-set the Mozilla environment variables that we changed in the launcher
+	 *
+	 * Call this in a finally() after using unsetMozillaVariables(). This mostly isn't necessary,
+	 * since most new launches of Zotero would use the modified launcher, but a restart on Linux
+	 * skips our shell script where we set these variables.
+	 */
+	restoreMozillaVariables: function () {
+		var env = Cc["@mozilla.org/process/environment;1"].getService(Ci.nsIEnvironment);
+		env.set("MOZ_ALLOW_DOWNGRADE", "1");
+		env.set("MOZ_LEGACY_PROFILES", "1");
+	},
+};
+
+
 /**
  *  Base64 encode / decode
  *  From http://www.webtoolkit.info/

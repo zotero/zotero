@@ -149,12 +149,16 @@ Zotero.FileHandlers = {
 		handler = handler || systemHandler;
 		if (handler) {
 			if (Zotero.isMac) {
+				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 				try {
 					await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', handler, path]);
 					return true;
 				}
 				catch (e) {
 					Zotero.logError(e);
+				}
+				finally {
+					Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
 				}
 			}
 			
@@ -498,8 +502,13 @@ Zotero.FileHandlers = {
 		if (!Zotero.File.pathToFile(command).isExecutable()) {
 			throw new Error(`${command} is not an executable`);
 		}
+		
+		Zotero.Utilities.Internal.Environment.clearMozillaVariables();
+		
 		// Do not await
-		Zotero.Utilities.Internal.exec(command, args);
+		var promise = Zotero.Utilities.Internal.exec(command, args);
+		
+		promise.finally(() => Zotero.Utilities.Internal.Environment.restoreMozillaVariables());
 	},
 };
 
