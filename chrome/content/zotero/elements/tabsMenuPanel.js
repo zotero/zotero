@@ -49,7 +49,9 @@
 		
 		_filterText = "";
 
-		_selectedIndex = 0;
+		_selectedIndex = undefined;
+
+		_skipTitleFocus = true;
 
 		_wrapper;
 
@@ -202,7 +204,7 @@
 					closeButton.hidden = true;
 				}
 
-				closeButton.setAttribute('tabindex', "0");
+				closeButton.setAttribute('tabindex', "-1");
 
 				// Item type icon
 				let span = document.createElement("span");
@@ -293,6 +295,9 @@
 		 */
 		moveSelection(type = "next") {
 			let index = this._selectedIndex;
+			if (index === undefined) {
+				index = 0;
+			}
 			let focusTarget;
 			let tabsCount = this._tabsList.querySelectorAll("[index]").length;
 			switch (type) {
@@ -343,16 +348,22 @@
 		}
 
 		_selectRow(index) {
+			if (this._selectedIndex === index) {
+				return;
+			}
 			this._selectedIndex = index;
+			this._skipTitleFocus = true;
 			let prevRow = this._tabsList.querySelector(".selected");
 			if (prevRow) {
 				prevRow.classList.remove("selected");
 				prevRow.querySelector(".title").setAttribute("tabindex", "-1");
+				prevRow.querySelector(".close").setAttribute("tabindex", "-1");
 			}
 			let row = this._tabsList.querySelector(`[index="${index}"]`);
 			if (row) {
 				row.classList.add("selected");
 				row.querySelector(".title").setAttribute("tabindex", "0");
+				row.querySelector(".close").setAttribute("tabindex", "0");
 				this._filterInput.setAttribute("aria-activedescendant", row.id);
 			}
 			this._focusInput();
@@ -479,6 +490,14 @@
 					return;
 				}
 				this._tabsList.querySelector(".selected > .title")?.click();
+			}
+			else if (event.key === "Tab") {
+				// For the first tabbing after changing selection, skip the title
+				if (event.originalTarget === this._filterInput && this._skipTitleFocus) {
+					event.preventDefault();
+					this._tabsList.querySelector(".selected > .close")?.focus();
+					this._skipTitleFocus = false;
+				}
 			}
 			else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				this.moveSelection("first");
