@@ -49,7 +49,7 @@
 		
 		_filterText = "";
 
-		_selectedIndex = undefined;
+		_selectedIndex = null;
 
 		_skipTitleFocus = true;
 
@@ -128,6 +128,8 @@
 			if (!this.visible) {
 				return;
 			}
+			this._selectedIndex = null;
+
 			// Empty existing nodes
 			this._tabsList.replaceChildren();
 			let selectedIndex = null;
@@ -559,6 +561,12 @@
 			let tabID = row.dataset.tabId;
 			// No drag-drop on the cross button or the library tab
 			if (tabID == 'zotero-pane' || event.target.classList.contains("close")) {
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+			// Prevent drag-drop if the filter is active
+			if (this._filterText) {
 				event.preventDefault();
 				event.stopPropagation();
 				return;
