@@ -51,8 +51,6 @@
 
 		_selectedIndex = null;
 
-		_skipTitleFocus = true;
-
 		_wrapper;
 
 		_tabsList;
@@ -354,17 +352,14 @@
 				return;
 			}
 			this._selectedIndex = index;
-			this._skipTitleFocus = true;
 			let prevRow = this._tabsList.querySelector(".selected");
 			if (prevRow) {
 				prevRow.classList.remove("selected");
-				prevRow.querySelector(".title").setAttribute("tabindex", "-1");
 				prevRow.querySelector(".close").setAttribute("tabindex", "-1");
 			}
 			let row = this._tabsList.querySelector(`[index="${index}"]`);
 			if (row) {
 				row.classList.add("selected");
-				row.querySelector(".title").setAttribute("tabindex", "0");
 				row.querySelector(".close").setAttribute("tabindex", "0");
 				this._filterInput.setAttribute("aria-activedescendant", row.id);
 			}
@@ -492,14 +487,6 @@
 					return;
 				}
 				this._tabsList.querySelector(".selected > .title")?.click();
-			}
-			else if (event.key === "Tab") {
-				// For the first tabbing after changing selection, skip the title
-				if (event.originalTarget === this._filterInput && this._skipTitleFocus) {
-					event.preventDefault();
-					this._tabsList.querySelector(".selected > .close")?.focus();
-					this._skipTitleFocus = false;
-				}
 			}
 			else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				this.moveSelection("first");
