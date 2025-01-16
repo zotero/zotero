@@ -50,8 +50,6 @@ var ZoteroPane = new function()
 	this.handleKeyPress = handleKeyPress;
 	this.getSelectedCollection = getSelectedCollection;
 	this.getSelectedSavedSearch = getSelectedSavedSearch;
-	this.getSelectedItems = getSelectedItems;
-	this.getSortedItems = getSortedItems;
 	this.getSortField = getSortField;
 	this.getSortDirection = getSortDirection;
 	this.setItemsPaneMessage = setItemsPaneMessage;
@@ -2654,21 +2652,10 @@ var ZoteroPane = new function()
 	
 	this.copySelectedItemsToClipboard = function (asCitations) {
 		var items = [];
-		if (Zotero_Tabs.selectedID == 'zotero-pane') {
-			let itemIDs = this.getSelectedItems(true);
-			// Get selected item IDs in the item tree order
-			itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
-			items = Zotero.Items.get(itemIDs);
-		}
-		else {
-			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-			if (reader) {
-				let item = Zotero.Items.get(reader.itemID);
-				if (item.parentItem) {
-					items = [item.parentItem];
-				}
-			}
-		}
+		let itemIDs = this.getSelectedItems(true);
+		// Get selected item IDs in the item tree order
+		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
+		items = Zotero.Items.get(itemIDs);
 		
 		if (!items.length) {
 			return;
@@ -3070,14 +3057,28 @@ var ZoteroPane = new function()
 	 *
 	 * If asIDs is true, return an array of itemIDs instead
 	 */
-	function getSelectedItems(asIDs)
-	{
-		if (!this.itemsView) {
-			return [];
+	this.getSelectedItems = function (asIDs) {
+		switch (Zotero_Tabs.selectedType) {
+			case 'library':
+				if (!this.itemsView) {
+					return [];
+				}
+				return this.itemsView.getSelectedItems(asIDs);
+			case 'reader': {
+				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+				if (reader) {
+					let item = Zotero.Items.get(reader.itemID);
+					if (item.parentItem) {
+						item = item.parentItem;
+					}
+					return asIDs ? [item.id] : [item];
+				}
+				return [];
+			}
+			default:
+				return [];
 		}
-		
-		return this.itemsView.getSelectedItems(asIDs);
-	}
+	};
 	
 
 	/*
@@ -3085,13 +3086,18 @@ var ZoteroPane = new function()
 	 *
 	 * If asIDs is true, return an array of itemIDs instead
 	 */
-	function getSortedItems(asIDs) {
-		if (!this.itemsView) {
-			return [];
+	this.getSortedItems = function (asIDs) {
+		switch (Zotero_Tabs.selectedType) {
+			case 'library':
+				if (!this.itemsView) {
+					return [];
+				}
+				return this.itemsView.getSortedItems(asIDs);
+			default:
+				// ALl non-library tabs: Visible items == "selected" items
+				return this.getSelectedItems(asIDs);
 		}
-		
-		return this.itemsView.getSortedItems(asIDs);
-	}
+	};
 	
 	
 	function getSortField() {
@@ -4491,8 +4497,7 @@ var ZoteroPane = new function()
 	
 	
 	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
-		if (Zotero_Tabs.selectedID === 'zotero-pane' && !this.canEdit()
-				|| !Zotero.Items.get(itemID).library.editable) {
+		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -4516,7 +4521,7 @@ var ZoteroPane = new function()
 	 */
 	this.addAttachmentFromDialog = async function (link, parentItemID, files = null) {
 		var libraryID;
-		if (Zotero_Tabs.selectedID === 'zotero-pane') {
+		if (Zotero_Tabs.selectedType === 'library') {
 			let collectionTreeRow = this.getCollectionTreeRow();
 			if (link) {
 				if (collectionTreeRow.isWithinGroup()) {
@@ -4532,20 +4537,20 @@ var ZoteroPane = new function()
 					return null;
 				}
 			}
-			if (!this.canEdit()) {
-				this.displayCannotEditLibraryMessage();
-				return null;
-			}
 			libraryID = collectionTreeRow.ref.libraryID;
 		}
 		else {
 			libraryID = Zotero.Items.get(parentItemID).libraryID;
 		}
 		
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return null;
+		}
 		// TODO: disable in menu
-		if (!Zotero.Libraries.get(libraryID).filesEditable) {
+		if (!this.canEditFiles()) {
 			this.displayCannotEditLibraryFilesMessage();
-			return;
+			return null;
 		}
 		
 		if (!files) {
@@ -5374,36 +5379,48 @@ var ZoteroPane = new function()
 	/**
 	 * Test if the user can edit the currently selected view
 	 *
-	 * @param	{Integer}	[row]
-	 *
-	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
+	 * @param {Integer} [row] Row index - ignored if not in library tab
+	 * @return {Boolean} TRUE if user can edit, FALSE if not
 	 */
 	this.canEdit = function (row) {
-		// Currently selected row
-		if (row === undefined) {
-			row = this.collectionsView.selection.focused;
+		switch (Zotero_Tabs.selectedType) {
+			case 'library':
+				// Currently selected row
+				if (row === undefined) {
+					row = this.collectionsView.selection.focused;
+				}
+				return this.collectionsView.getRow(row).editable;
+			case 'reader': {
+				let itemID = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)?.itemID;
+				if (!itemID) {
+					throw new Error('Reader tab has no itemID');
+				}
+				return Zotero.Items.get(itemID).library.editable;
+			}
+			default:
+				return false;
 		}
-		
-		var collectionTreeRow = this.collectionsView.getRow(row);
-		return collectionTreeRow.editable;
-	}
+	};
 	
 	
 	/**
 	 * Test if the user can edit the parent library of the selected view
 	 *
-	 * @param	{Integer}	[row]
-	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
+	 * @param {Integer} [row] Row index - ignored if not in library tab
+	 * @return {Boolean} TRUE if user can edit, FALSE if not
 	 */
 	this.canEditLibrary = function (row) {
-		// Currently selected row
-		if (row === undefined) {
-			row = this.collectionsView.selection.focused;
+		switch (Zotero_Tabs.selectedType) {
+			case 'library': // Currently selected row
+				if (row === undefined) {
+					row = this.collectionsView.selection.focused;
+				}
+				return Zotero.Libraries.get(this.collectionsView.getRow(row).ref.libraryID).editable;
+			default:
+				// All non-library tabs: canEditLibrary() == canEdit()
+				return this.canEdit(row);
 		}
-		
-		var collectionTreeRow = this.collectionsView.getRow(row);
-		return Zotero.Libraries.get(collectionTreeRow.ref.libraryID).editable;
-	}
+	};
 	
 	
 	/**
@@ -5414,14 +5431,24 @@ var ZoteroPane = new function()
 	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
 	 */
 	this.canEditFiles = function (row) {
-		// Currently selected row
-		if (row === undefined) {
-			row = this.collectionsView.selection.focused;
+		switch (Zotero_Tabs.selectedType) {
+			case 'library':
+				// Currently selected row
+				if (row === undefined) {
+					row = this.collectionsView.selection.focused;
+				}
+				return this.collectionsView.getRow(row).filesEditable;
+			case 'reader': {
+				let itemID = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)?.itemID;
+				if (!itemID) {
+					throw new Error('Reader tab has no itemID');
+				}
+				return Zotero.Items.get(itemID).library.filesEditable;
+			}
+			default:
+				return false;
 		}
-		
-		var collectionTreeRow = this.collectionsView.getRow(row);
-		return collectionTreeRow.filesEditable;
-	}
+	};
 	
 	
 	this.displayCannotEditLibraryMessage = function () {
