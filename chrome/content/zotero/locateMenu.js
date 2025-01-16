@@ -345,25 +345,13 @@ var Zotero_LocateMenu = new function() {
 	 * Get the first 50 selected items
 	 */
 	function _getSelectedItems() {
-		if (Zotero_Tabs.selectedID == 'zotero-pane') {
-			var allSelectedItems = ZoteroPane_Local.getSelectedItems();
-			var selectedItems = [];
-			while (selectedItems.length < 50 && allSelectedItems.length) {
-				var item = allSelectedItems.shift();
-				if (!item.isNote()) selectedItems.push(item);
-			}
-			return selectedItems;
+		var allSelectedItems = ZoteroPane.getSelectedItems();
+		var selectedItems = [];
+		while (selectedItems.length < 50 && allSelectedItems.length) {
+			var item = allSelectedItems.shift();
+			if (!item.isNote()) selectedItems.push(item);
 		}
-		else {
-			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-			if (reader) {
-				let item = Zotero.Items.get(reader.itemID);
-				if (item.parentItem) {
-					return [item.parentItem];
-				}
-			}
-			return [];
-		}
+		return selectedItems;
 	}
 	
 	var ViewOptions = {};
