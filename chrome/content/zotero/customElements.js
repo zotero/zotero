@@ -138,6 +138,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 					if (this !== e.target) {
 						return;
 					}
+					this.style.removeProperty("pointer-events");
 					// Following the implementation from https://searchfox.org/mozilla-esr102/source/toolkit/content/widgets/menupopup.js
 					let haveCheckableChild = this.querySelector(
 						":scope > menuitem:not([hidden]):is([type=checkbox],[type=radio],[selected],[checked])"
@@ -187,7 +188,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 
 				// This event is triggered after clicking the menu and before popuphiding
 				// where we control whether the fade out animation should run
-				this.addEventListener("command", (e) => {
+				const commandCallback = (e) => {
 					let animateState = this.getAttribute("animate");
 					if (animateState === "false") {
 						return;
@@ -200,8 +201,18 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 					}
 					// Disable the fading animation when the popup is closed by clicking
 					this.setAttribute("animate", "false-once");
-				}, {
+					this.style.pointerEvents = "none";
+				};
+
+				this.addEventListener("command", commandCallback, {
 					capture: true,
+					mozSystemGroup: true,
+				});
+				// Sometimes the `command` event is not triggered, also listen to `click` event
+				// For example, when the menuitem has `command` attribute
+				this.addEventListener("click", commandCallback, {
+					capture: true,
+					mozSystemGroup: true,
 				});
 				
 				// The _moz-menuactive attribute isn't removed from menulist items
