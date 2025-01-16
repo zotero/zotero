@@ -52,6 +52,10 @@ zoterosearch {
 	#operatorsmenu, #valuemenu, #valuefield, .search-in-the-last {
 		width: 12em;
 	}
+	
+	#valuemenu::part(label), #valuemenu menuitem > .menu-iconic-text {
+		white-space: pre;
+	}
 
 	#condition-tooltips tooltip
 	{

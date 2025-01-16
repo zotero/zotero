@@ -441,7 +441,7 @@
 							indent += '- ';
 						}
 						rows.push({
-							name: indent + col.name,
+							name: indent + Zotero.Utilities.trimInternal(col.name),
 							value: 'C' + col.key,
 							image: Zotero.Collection.prototype.treeViewImage
 						});
