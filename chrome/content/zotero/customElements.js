@@ -187,12 +187,21 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 
 				// This event is triggered after clicking the menu and before popuphiding
 				// where we control whether the fade out animation should run
-				this.addEventListener("command", () => {
-					if (this.getAttribute("animate") === "false") {
+				this.addEventListener("command", (e) => {
+					let animateState = this.getAttribute("animate");
+					if (animateState === "false") {
+						return;
+					}
+					// Do not trigger the event if the popup is already closing
+					if (animateState === "false-once") {
+						e.preventDefault();
+						e.stopPropagation();
 						return;
 					}
 					// Disable the fading animation when the popup is closed by clicking
 					this.setAttribute("animate", "false-once");
+				}, {
+					capture: true,
 				});
 				
 				// The _moz-menuactive attribute isn't removed from menulist items
@@ -228,6 +237,23 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 			}
 			originalEnsureInitialized.apply(this);
 		};
+
+		// let originalMenuItemPrototype = customElements.get("menuitem").prototype;
+
+		// let originalConnectedCallback = originalMenuItemPrototype.render;
+		// originalMenuItemPrototype.render = function () {
+		// 	if (!this._zoteroInitialized) {
+		// 		this._zoteroInitialized = true;
+		// 		this.addEventListener("command", (event) => {
+		// 			if (this.closest("menupopup")?.getAttribute("animate") === "false-once") {
+		// 				event.preventDefault();
+		// 				event.stopPropagation();
+		// 			}
+		// 		}, { mozSystemGroup: true });
+		// 	}
+
+		// 	originalConnectedCallback.apply(this);
+		// }
 	}
 
 	// The menulist CE is defined lazily. Create one now to get menulist defined, so we can patch it
