@@ -577,8 +577,6 @@
 			{
 				valueMenu.value = this.value;
 			}
-
-			valueMenu.shadowRoot.querySelector('#label-box > image').style.maxHeight = '16px';
 		}
 
 		initWithParentAndCondition(parent, condition) {

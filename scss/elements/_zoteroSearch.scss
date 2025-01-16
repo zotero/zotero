@@ -53,6 +53,10 @@ zoterosearch {
 		width: 12em;
 	}
 	
+	#valuemenu::part(icon) {
+		max-height: 16px;
+	}
+	
 	#valuemenu::part(label), #valuemenu menuitem > .menu-iconic-text {
 		white-space: pre;
 	}
