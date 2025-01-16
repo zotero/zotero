@@ -1821,11 +1821,6 @@ var Scaffold = new function () {
 			validateTestsBroadcaster.removeAttribute('disabled');
 		}
 
-		let browserURL = document.getElementById("browser-url");
-		let currentURL = browserURL.value;
-		// browserURL.removeAllItems();
-		browserURL.value = currentURL;
-
 		let listBox = document.getElementById("testing-listbox");
 		let count = listBox.getRowCount();
 		let oldStatuses = {};
@@ -1865,10 +1860,6 @@ var Scaffold = new function () {
 			if (testIndex >= count) {
 				listBox.appendChild(item);
 			}
-
-			// if (test.type == 'web') {
-			// 	browserURL.appendItem(test.url);
-			// }
 
 			testIndex++;
 		}
