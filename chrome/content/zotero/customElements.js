@@ -248,23 +248,6 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 			}
 			originalEnsureInitialized.apply(this);
 		};
-
-		// let originalMenuItemPrototype = customElements.get("menuitem").prototype;
-
-		// let originalConnectedCallback = originalMenuItemPrototype.render;
-		// originalMenuItemPrototype.render = function () {
-		// 	if (!this._zoteroInitialized) {
-		// 		this._zoteroInitialized = true;
-		// 		this.addEventListener("command", (event) => {
-		// 			if (this.closest("menupopup")?.getAttribute("animate") === "false-once") {
-		// 				event.preventDefault();
-		// 				event.stopPropagation();
-		// 			}
-		// 		}, { mozSystemGroup: true });
-		// 	}
-
-		// 	originalConnectedCallback.apply(this);
-		// }
 	}
 
 	// The menulist CE is defined lazily. Create one now to get menulist defined, so we can patch it
