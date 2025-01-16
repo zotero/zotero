@@ -1934,7 +1934,7 @@ var ZoteroPane = new function()
 			
 			// Tab selection observer in standalone.js makes sure that
 			// updateQuickCopyCommands is called
-			if (Zotero_Tabs.selectedID == 'zotero-pane') {
+			if (Zotero_Tabs.selectedType == 'library') {
 				this.updateQuickCopyCommands(selectedItems);
 			}
 			
