@@ -560,7 +560,7 @@
 		createValueMenu(rows) {
 			let valueMenu = this.querySelector('#valuemenu');
 
-			while (valueMenu.hasChildNodes()){
+			while (valueMenu.hasChildNodes()) {
 				valueMenu.removeChild(valueMenu.firstChild);
 			}
 			
@@ -573,8 +573,7 @@
 			}
 			valueMenu.selectedIndex = 0;
 			
-			if (this.value)
-			{
+			if (this.value) {
 				valueMenu.value = this.value;
 			}
 		}
