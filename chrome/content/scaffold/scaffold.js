@@ -1851,7 +1851,16 @@ var Scaffold = new function () {
 
 			let defer = document.createXULElement('checkbox');
 			defer.checked = test.defer;
-			defer.disabled = true;
+			defer.setAttribute('native', 'true');
+			defer.addEventListener('command', () => {
+				if (defer.checked) {
+					test.defer = true;
+				}
+				else {
+					delete test.defer;
+				}
+				_writeTestsToPane(tests);
+			});
 			item.appendChild(wrapWithHBox(defer, { pack: 'center', width: 75 }));
 
 			item.dataset.testString = testString;
