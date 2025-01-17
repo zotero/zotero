@@ -414,25 +414,18 @@
 			}
 			if ([" ", "Enter"].includes(event.key)) {
 				// Click on the sidenav toolbarbutton
-				let clickEvent = new MouseEvent('click', {
-					bubbles: true,
-					cancelable: true,
-					detail: 1
-				});
-				event.target.dispatchEvent(clickEvent);
-				// Wait a moment to let the click event above get handled
-				setTimeout(() => {
-					let pane = event.target.dataset.pane;
-					// Tab into the notes pane
-					if (pane == "context-notes") {
-						Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
-					}
-					// Tab into the pane whose sidenav button was clicked
-					else if (event.target.dataset.pane) {
-						let section = this._container.getEnabledPane(pane);
-						Services.focus.moveFocus(window, section, Services.focus.MOVEFOCUS_FORWARD, 0);
-					}
-				});
+				event.target.click();
+				event.stopPropagation();
+				let pane = event.target.dataset.pane;
+				// Tab into the notes pane
+				if (pane == "context-notes") {
+					Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
+				}
+				// Tab into the pane whose sidenav button was clicked
+				else if (event.target.dataset.pane) {
+					let section = this._container.getEnabledPane(pane);
+					Services.focus.moveFocus(window, section, Services.focus.MOVEFOCUS_FORWARD, 0);
+				}
 			}
 		};
 
@@ -482,22 +475,23 @@
 					let pinnable = this.isPanePinnable(pane);
 					let scrollType = this._collapsed ? 'instant' : 'smooth';
 					if (this._collapsed) this._collapsed = false;
-					switch (event.detail) {
-						case 1:
-							if (this._contextNotesPane && this._contextNotesPaneVisible) {
-								this._contextNotesPaneVisible = false;
-								scrollType = 'instant';
-							}
-							this.container.scrollToPane(pane, scrollType);
-							break;
-						case 2:
-							if (this.pinnedPane == pane || !pinnable) {
-								this.pinnedPane = null;
-							}
-							else {
-								this.pinnedPane = pane;
-							}
-							break;
+					// single click via mouse of keypress
+					let isSingledClick = event.detail == 0 || event.detail == 1;
+					let isDoubleClick = event.detail == 2;
+					if (isSingledClick) {
+						if (this._contextNotesPane && this._contextNotesPaneVisible) {
+							this._contextNotesPaneVisible = false;
+							scrollType = 'instant';
+						}
+						this.container.scrollToPane(pane, scrollType);
+					}
+					else if (isDoubleClick) {
+						if (this.pinnedPane == pane || !pinnable) {
+							this.pinnedPane = null;
+						}
+						else {
+							this.pinnedPane = pane;
+						}
 					}
 				}
 			}
