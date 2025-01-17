@@ -1,4 +1,4 @@
-Contents/Frameworks/*
+Contents/Frameworks/XUL.framework/
 Contents/MacOS/Info.plist
 Contents/MacOS/LICENSE
 Contents/MacOS/README.xulrunner
