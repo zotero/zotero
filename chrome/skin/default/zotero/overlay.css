@@ -265,7 +265,9 @@ TODO: Replace with SVG
 }
 
 #zotero-sync-error-panel-buttons {
-	-moz-box-pack: end;
+	margin-top: 1em;
+	justify-content: end;
+	gap: 8px;
 }
 
 .zotero-toolbar

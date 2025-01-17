@@ -1488,7 +1488,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			var content = doc.createXULElement('vbox');
 			var buttons = doc.createXULElement('hbox');
-			buttons.pack = 'end';
+			buttons.id = 'zotero-sync-error-panel-buttons';
 			box.appendChild(label);
 			box.appendChild(content);
 			box.appendChild(buttons);
