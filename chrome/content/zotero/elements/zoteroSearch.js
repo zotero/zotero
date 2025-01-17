@@ -441,7 +441,7 @@
 							indent += '- ';
 						}
 						rows.push({
-							name: indent + col.name,
+							name: indent + Zotero.Utilities.trimInternal(col.name),
 							value: 'C' + col.key,
 							image: Zotero.Collection.prototype.treeViewImage
 						});
@@ -560,7 +560,7 @@
 		createValueMenu(rows) {
 			let valueMenu = this.querySelector('#valuemenu');
 
-			while (valueMenu.hasChildNodes()){
+			while (valueMenu.hasChildNodes()) {
 				valueMenu.removeChild(valueMenu.firstChild);
 			}
 			
@@ -573,12 +573,9 @@
 			}
 			valueMenu.selectedIndex = 0;
 			
-			if (this.value)
-			{
+			if (this.value) {
 				valueMenu.value = this.value;
 			}
-
-			valueMenu.shadowRoot.querySelector('#label-box > image').style.maxHeight = '16px';
 		}
 
 		initWithParentAndCondition(parent, condition) {
