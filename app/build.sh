@@ -376,6 +376,9 @@ replace_line 'handle: function bch_handle\(cmdLine\) {' 'handle: function bch_ha
   ' modules/BrowserContentHandler.sys.mjs
 export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets/commandLineHandler.js"; $replacement = <$fh>; close $fh; } s/\/\/ TEST_OPTIONS_PLACEHOLDER/$replacement/' modules/BrowserContentHandler.sys.mjs
 
+# Don't try to initialize Places, since we've removed its files
+replace_line 'this._placesInitialized = true;' 'if (true) return; this._placesInitialized = true;' modules/BrowserGlue.sys.mjs
+
 # Prevent color scheme getting reset to 'light' during printing
 replace_line 'new LightweightThemeConsumer\(document\);' '\/\/new LightweightThemeConsumer\(document\);'  chrome/browser/content/browser/browser-init.js
 
