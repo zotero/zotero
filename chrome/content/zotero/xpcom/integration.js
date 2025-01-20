@@ -321,7 +321,7 @@ Zotero.Integration = new function() {
 			if (document) {
 				try {
 					await document.cleanup();
-					if (!Zotero.Integration.currentSession._dontActivateDocument) {
+					if (!Zotero.Integration.currentSession?._dontActivateDocument) {
 						await document.activate();
 					}
 					
