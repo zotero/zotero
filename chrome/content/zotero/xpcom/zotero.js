@@ -559,7 +559,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				var index = ps.confirmEx(
 					null,
 					Zotero.getString('dataDir.incompatibleDbVersion.title'),
-					Zotero.getString('dataDir.incompatibleDbVersion.text'),
+					Zotero.getString('dataDir.incompatibleDbVersion.text', Zotero.appName),
 					buttonFlags,
 					Zotero.getString('general.useDefault'),
 					Zotero.getString('dataDir.chooseNewDataDirectory'),
