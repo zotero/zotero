@@ -29,7 +29,7 @@ async function getPDFWorker(signatures) {
 			await exec(
 				`cd ${tmpDir}`
 				+ ` && (test -f ${filename} || curl -f ${url} -o ${filename})`
-				+ ` && unzip -o ${filename} -d ${targetDir}`
+				+ ` && unzip -o ${filename} worker.js -d ${targetDir}`
 			);
 		}
 		catch (e) {
