@@ -47,11 +47,11 @@
 				background: transparent;
 				position: absolute;
 				inset-inline-start: -8px;
-				
+
 				@include state(".first-column:hover") {
 					background: var(--material-mix-quinary);
 				}
-				
+
 				@include state(".first-column.dragging") {
 					background: var(--material-mix-quarternary);
 				}
@@ -67,7 +67,7 @@
 				background: transparent;
 				position: absolute;
 				inset-inline-end: calc(-1 * var(--scrollbar-width, 0px) - 8px);
-		
+
 				@include state(".cell:hover") {
 					background: var(--material-mix-quinary);
 				}
@@ -78,7 +78,7 @@
 			}
 		}
 	}
-	
+
 	.virtualized-table, .drag-image-container {
 		.row {
 			&.odd:not(.selected) {
@@ -102,10 +102,10 @@
 					border-bottom-right-radius: 5px;
 				}
 			}
-			
+
 			.colored-tag-swatches {
 				display: flex;
-				
+
 				:root:-moz-locale-dir(rtl) & {
 					transform: scaleX(-1);
 					flex-direction: row-reverse;
@@ -122,7 +122,7 @@
 			.colored-tag-swatches + .emoji {
 				margin-inline-start: 4px;
 			}
-			
+
 			.tag-swatch {
 				display: inline-block;
 
@@ -149,7 +149,7 @@
 					}
 				}
 
-				&.colored + .colored {
+				&.colored+.colored {
 					background:
 						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/100%,
 						url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/0;
@@ -165,7 +165,7 @@
 			}
 		}
 
-	
+
 		.cell.primary {
 			.retracted {
 				width: 12px;
@@ -176,7 +176,7 @@
 		.cell.no-padding {
 			padding: 0;
 		}
-		
+
 		.cell.hasAttachment {
 			text-overflow: unset;
 			align-items: center;
@@ -189,12 +189,12 @@
 				display: flex;
 				justify-content: center;
 			}
-			
+
 			.icon-missing-file {
 				opacity: 0.4;
 			}
 		}
-		
+
 		.numNotes, .hasAttachment {
 			text-align: center;
 
@@ -204,7 +204,7 @@
 		}
 	}
 }
-	
+
 $-itemTypesIcons: (
 	artwork,
 	attachment-epub,
@@ -282,6 +282,13 @@ $-trashableObjectIcons: (
 	"search"
 );
 
+// Few icons that appear in color in the item tree
+$-coloredIcons: (
+	cross: --accent-red,
+	tick: --accent-green,
+	refresh: --fill-secondary
+);
+
 .icon-item-type {
 	width: 16px;
 	height: 16px;
@@ -327,15 +334,29 @@ $-trashableObjectIcons: (
 
 		@each $itemAttachmentIcon in $-attachmentIcons {
 			$itemType: camelCase(str-replace(str-replace($itemAttachmentIcon, "pdf", "PDF"), "epub", "EPUB"));
+
 			.icon-attachment-type[data-item-type=#{$itemType}] {
 				@include svgicon($itemAttachmentIcon, $color, "12", "item-type", false);
 				background-origin: content-box;
 			}
 		}
-		
+
 		@each $icon in $-trashableObjectIcons {
 			.icon-css.icon-#{$icon} {
 				@include svgicon($icon, $color, "16", "collection-tree");
+			}
+		}
+
+		@each $icon, $colorVar in $-coloredIcons {
+			.icon-#{$icon} {
+				@include svgicon($icon, "universal", "16");
+				@if $color =="white" {
+					fill: var(--accent-white);
+				}
+			
+				@else {
+					fill: var($colorVar);
+				}
 			}
 		}
 	}

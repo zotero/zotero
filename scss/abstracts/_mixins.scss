@@ -34,6 +34,37 @@
 	}
 }
 
+// State mixin
+@mixin state($states...) {
+
+	@each $state in $states {
+		$string: $state;
+
+		@each $token in ">", "+", "~" {
+			$string: str-replace($string, $token, " ");
+		}
+
+		$string: str-replace($string, "  ", " ");
+
+		$selectors: str-parse($string, " ");
+
+		@each $sel in $selectors {
+			@if str-index("#{&}", $sel) !=null {
+				@at-root #{selector-replace(&, $sel, $state)} {
+					@content;
+				}
+			}
+		}
+	}
+}
+
+// Variant mixin (alias)
+@mixin variant($args...) {
+	@include state($args...) {
+		@content;
+	}
+}
+
 // @NOTE: this mixin uses `state` mixin, therefore must be used in a selector nested
 //        underneath selectors listed in arguments, e.g., .virtualized-table .row 
 //        by default. See `state` mixin for more details.

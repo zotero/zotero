@@ -31,28 +31,35 @@ import { nextHTMLID, noop } from './utils';
 
 
 function getImageByStatus(status) {
+	let statusIconName;
+
 	if (status === Zotero.ProgressQueue.ROW_PROCESSING) {
-		return getCSSIcon('IconArrowRefresh');
+		statusIconName = 'refresh';
 	}
 	else if (status === Zotero.ProgressQueue.ROW_FAILED) {
-		return getCSSIcon('IconCross');
+		statusIconName = 'cross';
 	}
 	else if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
-		return getCSSIcon('IconTick');
+		statusIconName = 'tick';
+	} else {
+		return document.createElement('span');
 	}
-	return document.createElement('span');
+
+	const icon = getCSSIcon(statusIconName);
+	icon.classList.add('icon-16');
+	return icon;
 }
 
 const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 	const treeRef = useRef(null);
 	const htmlID = useRef(nextHTMLID());
-	
+
 	const getRowCount = useCallback(() => progressQueue.getTotal(), [progressQueue]);
-	
+
 	const rowToTreeItem = useCallback((index, selection, oldDiv = null, columns) => {
 		let rows = progressQueue.getRows();
 		let row = rows[index];
-		
+
 		let div;
 		if (oldDiv) {
 			div = oldDiv;
@@ -108,16 +115,16 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 			progressQueue.removeListener('rowdeleted', refreshTree);
 		};
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
-	
+
 	return (
 		<VirtualizedTable
-			getRowCount={ getRowCount }
-			ref={ treeRef }
-			id={ htmlID.current + '-progress-queue-table' }
-			renderItem={ rowToTreeItem }
-			showHeader={ true }
-			columns={ tableColumns }
-			onActivate={ onActivate }
+			getRowCount={getRowCount}
+			ref={treeRef}
+			id={htmlID.current + '-progress-queue-table'}
+			renderItem={rowToTreeItem}
+			showHeader={true}
+			columns={tableColumns}
+			onActivate={onActivate}
 		/>
 	);
 };

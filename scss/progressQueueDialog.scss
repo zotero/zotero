@@ -1,4 +1,10 @@
-@import 'abstracts/mixins';
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
 
 @include macOS-normalize-controls;
 

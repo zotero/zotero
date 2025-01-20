@@ -1755,7 +1755,9 @@ function renderCheckboxCell(index, data, column, dir = null) {
 	span.setAttribute('role', 'checkbox');
 	span.setAttribute('aria-checked', data);
 	if (data) {
-		span.appendChild(getCSSIcon('IconTick'));
+		let tickIcon = getCSSIcon('tick');
+		tickIcon.classList.add('icon-16');
+		span.appendChild(tickIcon);
 	}
 	return span;
 }
