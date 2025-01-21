@@ -149,7 +149,7 @@
 					}
 				}
 
-				&.colored + .colored {
+				&.colored+.colored {
 					background:
 						url("chrome://zotero/skin/tag-crescent.svg") no-repeat center/100%,
 						url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/0;
@@ -282,6 +282,13 @@ $-trashableObjectIcons: (
 	"search"
 );
 
+// Few icons that appear in color in the item tree
+$-coloredIcons: (
+	cross: --accent-red,
+	tick: --accent-green,
+	refresh: --fill-secondary
+);
+
 .icon-item-type {
 	width: 16px;
 	height: 16px;
@@ -327,15 +334,29 @@ $-trashableObjectIcons: (
 
 		@each $itemAttachmentIcon in $-attachmentIcons {
 			$itemType: camelCase(str-replace(str-replace($itemAttachmentIcon, "pdf", "PDF"), "epub", "EPUB"));
+
 			.icon-attachment-type[data-item-type=#{$itemType}] {
 				@include svgicon($itemAttachmentIcon, $color, "12", "item-type", false);
 				background-origin: content-box;
 			}
 		}
-		
+
 		@each $icon in $-trashableObjectIcons {
 			.icon-css.icon-#{$icon} {
 				@include svgicon($icon, $color, "16", "collection-tree");
+			}
+		}
+
+		@each $icon, $colorVar in $-coloredIcons {
+			.icon-#{$icon} {
+				@include svgicon($icon, "universal", "16");
+				@if $color =="white" {
+					fill: var(--accent-white);
+				}
+			
+				@else {
+					fill: var($colorVar);
+				}
 			}
 		}
 	}

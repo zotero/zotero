@@ -2799,7 +2799,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let retracted = "";
 		let retractedAriaLabel = "";
 		if (Zotero.Retractions.isRetracted(item)) {
-			retracted = getCSSIcon("IconCross");
+			retracted = getCSSIcon("cross");
+			retracted.classList.add("icon-16");
 			retracted.classList.add("retracted");
 			retractedAriaLabel = Zotero.getString('retraction.banner');
 		}

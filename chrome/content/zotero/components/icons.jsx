@@ -49,26 +49,6 @@ CSSItemTypeIcon.propTypes = {
 
 module.exports = { Icon, CSSIcon, CSSItemTypeIcon };
 
-// Icons cache for a few remaining png icons till they are replaced
-let legacyIconsCache = {};
-
-function i(name, svgOrSrc, hasHiDPI = true) {
-	if (typeof svgOrSrc == 'string' && hasHiDPI && window.devicePixelRatio >= 1.25) {
-		// N.B. In Electron we can use css-image-set
-		let parts = svgOrSrc.split('.');
-		parts[parts.length - 2] = parts[parts.length - 2] + '@2x';
-		svgOrSrc = parts.join('.');
-	}
-	legacyIconsCache[`Icon${name}`] = svgOrSrc;
-}
-
-/* eslint-disable max-len */
-
-i('Cross', "chrome://zotero/skin/cross.png");
-i('Tick', "chrome://zotero/skin/tick.png");
-i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
-
-
 let cssIconsCache = new Map();
 
 module.exports.getCSSIcon = function (key) {
@@ -77,11 +57,6 @@ module.exports.getCSSIcon = function (key) {
 		iconEl.classList.add('icon');
 		iconEl.classList.add('icon-css');
 		iconEl.classList.add(`icon-${key}`);
-		// Temporarily set background image for a few remaining png icons
-		if (legacyIconsCache[key]) {
-			iconEl.style.backgroundImage = `url(${legacyIconsCache[key]})`;
-			iconEl.classList.add("icon-bg");
-		}
 		cssIconsCache.set(key, iconEl);
 	}
 
