@@ -1560,23 +1560,19 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		citation, this.style.opt.sort_citations,
 		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
+	io.isCitingNotes = addNote;
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
 
-	var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-		? 'popup' : 'alwaysRaised')+',resizable=false';
-	if (addNote) {
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xhtml',
-			mode, io, "citation");
-	}
-	else if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xhtml',
-			'alwaysRaised,resizable', io, "citation");
+	var mode = "chrome,centerscreen,resizable=true";
+	if (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+		mode += ",popup";
 	}
 	else {
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xhtml',
-			mode, io, "citation");
+		mode += ",alwaysRaised";
 	}
+
+	Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationDialog.xhtml', mode, io, "citation");
 
 	// -------------------
 	// io.promise resolves when the citation dialog is closed
@@ -3621,10 +3617,10 @@ Zotero.Integration.Progress = class {
 		this.segmentIdx = 0;
 	}
 	show() {
-		var options = 'chrome,centerscreen';
+		if (this.dontDisplay) return;
+		var options = 'chrome,centerscreen,resizable=false';
 		// without this, Firefox gets raised with our windows under Compiz
 		if (Zotero.isLinux) options += ',dialog=no';
-		if (Zotero.isMac) options += ',resizable=false';
 		
 		var io = {onLoad: function(onProgress) {
 			this.onProgress = onProgress;

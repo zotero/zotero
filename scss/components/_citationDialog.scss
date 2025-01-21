@@ -1,7 +1,686 @@
-#citation-dialog {
+#citation-dialog, #progress-bar {
 	min-width: 800px;
+	height: 100%;
+
+	body {
+		height: inherit;
+		margin: 0;
+		color: var(--fill-primary);
+		background: var(--material-background);
+		overflow-y: hidden;
+		-moz-window-dragging: drag;
+	}
+
+	[hidden] {
+		display: none !important;
+	}
 	
 	.layout {
 		display: contents;
+	}
+	
+	.btn-icon {
+		@include focus-ring;
+		border: none;
+		width: 28px;
+		height: 28px;
+		max-height: 28px;
+		padding: 0;
+		color: var(--fill-secondary);
+		background-size: 60% !important;
+		background-repeat: no-repeat;
+		border-radius: 5px;
+		margin: 0;
+		&:hover:not([disabled]) {
+			cursor: pointer;
+			background-color: var(--fill-quinary) !important;
+		}
+		&:active:not([disabled]) {
+			background-color: var(--fill-quarternary) !important;
+		}
+		&:disabled {
+			opacity: 0.5;
+		}
+	}
+
+	#accept-button {
+		@include svgicon("arrow-right", "universal", "20");
+	}
+	#cancel-button {
+		@include svgicon("x", "universal", "20");
+	}
+
+	#search-row {
+		margin: 9px 8px 9px 0;
+
+		#z-icon-container {
+			width: 36px; // same as left margin on .library-other-items
+			#z-icon {
+				background-image: url(chrome://zotero/skin/z.svg);
+				width: 16px;
+				height: 16px;
+  				margin-top: 7px;
+				margin-left: 12px;
+			}
+		}
+		#progress {
+			flex: 1;
+		}
+
+		#top-level-btn-group {
+			display: flex;
+			width: 73px;
+  			justify-content: end;
+			align-items: center;
+			gap: 8px;
+			-moz-window-dragging: no-drag;
+			// same height as a single row of bubbles so that this group is not stretched
+			// when there are multiple rows of bubbles and buttons do not shift
+			height: 30px;
+
+			#loading-spinner {
+				width: 28px;
+				height: 28px;
+				background-size: 60%;
+				background-repeat: no-repeat;
+				display: none;
+				&[status="animate"] {
+					display: inline-block;
+				}
+			}
+			.vertical-separator {
+				border-inline-end: 1px solid var(--fill-quarternary);
+				height: 20px;
+			}
+		}
+	}
+
+	.divider {
+		border-bottom: 1px solid var(--color-panedivider);
+		margin: 0;
+	}
+
+	.add-all {
+		@include focus-ring(true);
+		border-radius: 5px;
+		font-weight: 400;
+		text-decoration: underline;
+		margin-left: auto;
+		-moz-window-dragging: no-drag;
+		&:hover {
+			cursor: pointer;
+		}
+	}
+
+	// alternative to var(--accent-blue10) without opacity
+	// which causes issues with stacked item cards in library mode
+	--selected-item-background: #EBF0FC;
+	@media (prefers-color-scheme: dark) {
+		--selected-item-background: #28375A;
+	}
+
+	#library-layout {
+		#library-other-items {
+
+			height: 82px;
+			flex-shrink: 0; // make sure suggested items do not get shrunk when window is resized
+
+			--item-width: 210px;
+			--item-padding-horizontal: 4px;
+			--item-margin: 4px;
+			--item-horizontal-size: calc(var(--item-width) + 2*var(--item-padding-horizontal) + 2px);
+
+			position: relative;
+			overflow-x: auto;
+			overflow-y: hidden;
+			// no vertical scrollbar for selected/opened/cited items
+			scrollbar-width: none;
+			// add fade effect on the edges of
+			mask-image: linear-gradient(to right, transparent, black 10px, black calc(100% - 10px), transparent);
+			// padding and margin needed to allow space for fade effect
+			// without it being visible at initial scroll position
+			padding-inline: 8px;
+			margin-inline: 4px;
+
+			// wrapper for horizontal scrollable suggested items
+			.search-items {
+				display: flex;	
+				padding: 8px 0;
+
+				.section {
+					&:not(:last-of-type) {
+						margin-inline-end: 16px;
+					}	
+					// hide vertical divider
+					.divider {
+						display: none;
+					}
+					.header {
+						height: 20px;
+						color: var(--fill-secondary);
+						// keep header stuck to the top left corner as the user scrolls
+						position: sticky;
+						top: 0;
+						left: 0;
+						width: var(--item-horizontal-size);
+						-moz-user-select: none;
+						// ensure long headers in non-english locales do not break the layout
+						text-wrap: nowrap;
+						text-overflow: ellipsis;
+						overflow: hidden;
+						display: block;
+					}
+			
+					.itemsContainer {
+						flex-direction: row;
+						display: flex;
+						margin-top: 2px;
+						gap: var(--item-margin);
+						transition: gap 0.2s ease-in-out;
+						border-radius: 5px;
+			
+						.item {
+							@include focus-ring(true);
+							height: 42px;
+							flex-shrink: 0;
+							width: var(--item-width);
+							overflow: hidden;
+							white-space: nowrap;
+							border: 1px solid var(--fill-quarternary);
+							border-radius: 5px;
+			
+							display: flex;
+							flex-direction: column;
+							justify-content: center;
+			
+							cursor: default;
+							padding: 0 var(--item-padding-horizontal);
+							line-height: 18px;
+							-moz-user-select: none;
+	
+							transform: translateX(0);
+							transition: transform 0.2s ease-in-out;//, margin-inline 0.3s ease-in-out;
+							
+							// color has to be without opacity to the selected items deck
+							background-color: var(--color-background);
+							-moz-window-dragging: no-drag;
+			
+							.title {
+								overflow: hidden;
+								text-overflow: ellipsis;
+							}
+			
+							.description {
+								color: var(--fill-secondary);
+								font-size: 12px;
+								line-height: 16px;
+								overflow: hidden;
+								text-overflow: ellipsis;
+							}
+	
+							&.selected {
+								background-color: var(--selected-item-background) !important;
+							}
+						}
+					}
+	
+					// handle sections that can be expanded or collapsed
+					&.expandable {
+						transition: width 0.2s ease-in-out;
+						width: calc((var(--item-horizontal-size) * var(--deck-length)) + (var(--item-margin) * (var(--deck-length) - 1)));
+	
+						.header {
+							display: flex;
+							justify-content: space-between;
+							.header-label {
+								// make sure header text does not overlap with buttons
+								max-width: 160px;
+								text-overflow: ellipsis;
+								overflow: hidden;
+							}
+
+							.header-btn-group {
+								display: flex;
+								flex-direction: row;
+								align-items: center;
+								gap: 4px;
+								flex: 1;
+								margin-inline-start: 2px;
+								.collapse-section-btn {
+									@include focus-ring(true);
+									@include svgicon("chevron-12-double", "universal", "16");
+									color: var(--fill-primary);
+									width: 16px;
+									height: 16px;
+									margin-top: 1px; // nicer alignment with the section header
+									-moz-window-dragging: no-drag;
+								}
+							}
+						}
+						.item {
+							z-index: calc(var(--deck-length) - var(--deck-index));
+						}
+						// collapsed sections move all items under the top first item
+						&:not(.expanded) {
+							// collapsed deck's width = width of an item + 5px for each item peaking behind the top one (max of 2)
+							width: calc(var(--item-horizontal-size) + 5px * min(2, var(--deck-length)));
+							.itemsContainer {
+								@include focus-ring(true);
+								gap: 0;
+							}
+							.item:nth-child(1) {
+								box-shadow: 2px 0px 4px 0px rgba(0, 0, 0, 0.10)
+							}
+							// 2nd and 3rd children are moved behind the first item, shrunk slightly and moved a bit to the right
+							// (by 16px and 32px) so their edge peaks out behind the top item
+							.item:nth-child(2) {
+								transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size)) + 16px)) scale(0.9);
+								box-shadow: 2px 0px 4px 0px rgba(0, 0, 0, 0.10)
+							}
+							.item:nth-child(3) {
+								transform:  translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size)) + 32px)) scale(0.8);
+								box-shadow: 2px 0px 4px 0px rgba(0, 0, 0, 0.10)
+							}
+							// remaining item cards are just hidden behind the top item
+							.item:nth-child(n + 4) {
+								transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size))));
+							}
+							// no button to collapse the dection when it is already collapsed
+							.collapse-section-btn {
+								display: none;
+							}
+						}
+					}
+					// separate items get a hover effect, unless they are in
+					// a collapsed expandable group, in which case the whole group is hovered
+					&:not(.expandable), &.expandable.expanded {
+						.item:hover {
+							background-color: var(--color-quinary-on-background);
+						}
+					}
+					&.expandable:not(.expanded) {
+						.itemsContainer:hover {
+							.item {
+								background-color: var(--color-quinary-on-background);
+							}
+						}
+					}	
+				}
+			}
+			#library-no-suggested-items-message {
+				align-self: center;
+				width: 100%;
+				text-align: center;
+				font-size: 13px;
+				color: var(--fill-secondary);
+				-moz-user-select: none;
+			}
+		}
+		#library-trees {
+			min-height: 200px;
+			flex: 1;
+			-moz-user-select: none;
+			-moz-window-dragging: no-drag;
+	
+			#collections-tree-container {
+				min-width: 200px;
+				min-height: 100%;
+				border-inline-end: var(--material-panedivider);
+				& > #zotero-collections-tree {
+					background: var(--material-sidepane) !important;
+				}
+				.virtualized-table-body {
+					padding-top: 8px;
+				}
+			}
+		
+			#item-tree-container {
+				min-height: 100%;
+				flex: 1; /* expand all the way to the right */
+
+				// the column with the + button
+				.clickable {
+					// make sure the button is centered
+					display: flex;
+					justify-content: center;
+					padding: 0;
+
+					// the actual clickable button
+					.icon-action {
+						display: flex;
+						justify-content: center;
+						width: 20px;
+						height: 20px;
+						align-items: center;
+						border-radius: 6px;
+						.icon {
+							width: 16px;
+							height: 16px;
+						}
+						// class to handle hover and active effect, since :hover is applied to the entire row
+						&.hover:not([disabled]) {
+							background-color: var(--fill-quinary);
+						}
+						&.active:not([disabled]) {
+							background-color: var(--fill-quarternary);
+						}
+						&[disabled] {
+							color: var(--color-gray-50);
+						}
+					}
+				}
+				// lighter hover and active effects on + buttons in selected rows
+				.row.selected {
+					.icon-action {
+						&.hover:not([disabled]) {
+							background-color: #ffffff1a;
+						}
+						&.active:not([disabled]) {
+							background-color: #ffffff33;
+						}
+					}
+				}
+				.row.highlighted {
+					border-radius: 0;
+					
+				}
+				.row.first-highlighted {
+					border-top-left-radius: 5px;
+					border-top-right-radius: 5px;
+				}
+				.row.last-highlighted {
+					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: 5px;
+				}
+			}
+		}
+	}
+
+	#list-layout {
+		#list-layout-wrapper {
+			-moz-user-select: none;
+			overflow-y: auto;
+			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+			height: 100%;
+			padding-top: 4px;
+			padding-bottom: 8px;
+			.section {
+				// show dividers except for on the last section
+				.divider {
+					margin: 4px 16px;
+					border-bottom: 1px solid var(--fill-quinary);
+				}
+				&:last-child {
+					.divider {
+						display: none;
+					}
+				}
+				.header {
+					font-weight: 700;
+					font-size: 13px;
+					color: var(--fill-secondary);
+					padding: 4px 8px 4px 16px;
+				}
+				.item {
+					@include focus-ring(true);
+					margin: 0 8px;
+					padding: 4px 8px;
+					border-radius: 5px;
+					color: var(--fill-primary);
+					cursor: default;
+					-moz-window-dragging: no-drag;
+					&:hover {
+						background-color: var(--fill-quinary);
+					}
+					&.selected {
+						background-color: var(--selected-item-background);
+						border-radius: 0;
+						
+					}
+					&.selected-first {
+						border-top-left-radius: 5px;
+						border-top-right-radius: 5px;
+					}
+					&.selected-last {
+						border-bottom-left-radius: 5px;
+						border-bottom-right-radius: 5px;
+					}
+
+					.icon {
+						margin-top: -4px;
+						margin-inline-end: 4px;
+						flex-shrink: 0;
+						&.retracted {
+							width: 12px;
+							height: 12px;
+							color: var(--accent-red);
+							@include svgicon("cross", "universal", "16");
+						}
+					}
+					.description {
+						// Needed to have empty item row description to still occupy height
+						white-space: pre;
+						margin-inline-start: 20px;
+						overflow: hidden;
+  						text-overflow: ellipsis;
+					}
+					.title {
+						overflow: hidden;
+						text-wrap: nowrap;
+						text-overflow: ellipsis;
+					}
+				}
+				&.expandable {
+					// styling for expandable header with a twisty
+					.header {
+						display: flex;
+						justify-content: space-between;
+
+						.header-label {
+							@include focus-ring;
+							border-radius: 5px;
+							&:hover {
+								cursor: pointer;
+								text-decoration: underline;
+							}
+							&::before {
+								@include svgicon("chevron-8", "universal", "8");
+								width: 8px;
+								height: 8px;
+								display: inline-block;
+								content: "";
+								white-space: pre;
+								margin-inline-end: 3px;
+
+								transform: rotate(0deg);
+								transform-origin: center;
+								transition: transform 0.2s ease-in-out;
+								vertical-align: middle;
+								margin-bottom: 3px;
+							}
+						}
+					}
+					&.expanded {
+						.header-label::before {
+							transform: rotate(180deg);
+						}
+					}
+					// item container has no height when it is collapsed
+					.itemsContainer {
+						transition: height 0.3s ease;
+						overflow: hidden;
+						// add small padding at the top and bottom to make sure the focus-ring (if it appear) is not
+						// cutoff by the overflow:hidden. Negative margin is to preserve spacing set by other components.
+						padding: 1px 0;
+						margin: -1px 0;
+					}
+					&:not(.expanded) {
+						.itemsContainer {
+							height: 0 !important; // important to override inline height with items displayed
+						}
+					}
+				}
+			}
+		}
+		&.empty {
+			#list-layout-wrapper {
+				padding: 0;
+			}
+		}
+	}
+
+	#bottom-area-wrapper {
+		border-top: var(--material-panedivider);
+		padding: 4px 8px 4px 12px;
+
+		#bottom-btn-group {
+			gap: 8px;
+			-moz-window-dragging: no-drag;
+			#mode-button {
+				&[mode="library"] {
+					@include svgicon("dialog-search-list", "universal", "16");
+				}
+				&[mode="list"] {
+					@include svgicon("dialog-search-library", "universal", "16");
+				}
+			}
+			#settings-button {
+				@include svgicon("dialog-options", "universal", "16");
+			}
+			
+		}
+	}
+
+	#popups {
+		panel {
+			padding: 0;
+			.popup {
+				padding: 16px;
+			}
+		}
+		.overlay {
+			position: absolute;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.1);
+			z-index: 1000;
+		}
+		#settings-popup {
+			top: 35px;
+			right: 5px;
+
+			.title {
+				font-size: 13px;
+				font-weight: 700;
+				padding-bottom: 8px;
+			}
+		}
+		#itemDetails {
+			width: 400px;
+			.popup {
+				.details-header {
+					.icon {
+						margin-inline-end: 5px;
+						margin-top: 2px;
+						flex-shrink: 0;
+					}
+				}
+				.details {
+					margin: 16px 0;
+					display: flex;
+					flex-direction: column;
+					justify-content: space-between;
+					gap: 8px;
+
+					.row {
+						display: flex;
+						flex-direction: row;
+						align-items: center;
+						justify-content: end;
+					}
+					.details-data {
+						@media not (-moz-platform: windows) {
+							@include focus-ring;
+						}
+						margin-inline-end: 0;
+						padding-inline-start: 5px;
+						border-radius: 5px;
+						border: none;
+						box-shadow: 0px 0.5px 2.5px 0px rgba(0, 0, 0, 0.3);
+						width: 250px;
+						@media (-moz-platform: linux) {
+							width: 240px;
+						}
+					}
+					#suppress-author-row {
+						justify-content: start;
+						padding-inline-start: 100px;
+					}
+					#label {
+						flex: 1;
+						@media (-moz-platform: macos) {
+							height: 22px;
+						}
+						@media (-moz-platform: windows) {
+							border: 1px solid var(--color-border);
+							border-radius: 3px;
+							height: 25px;
+						}
+					}
+				}
+				button.done {
+					float: right;
+				}
+				button.remove {
+					color: var(--accent-red);
+				}
+			}
+		}
+	}
+
+	.description {
+		color: var(--fill-secondary);
+		font-size: 12px;
+		// add comma between description <span>s
+		span:not(:last-child):not([no-comma])::after {
+			content: ", ";
+		}
+	}
+
+	.aria-hidden {
+		position: absolute;
+		top: -1000px;
+		left: -1000px;
+		visibility: hidden;
+	}
+
+	input[type="checkbox"], select, button {
+		// other platforms already get a standard focusring
+		@media (-moz-platform: linux) {
+			@include focus-ring;
+		}
+	}
+	.drag-image-wrapper {
+		position: absolute;
+		top: -1000px;
+		height: 200px;
+		width: 100%;
+	}
+}
+
+#progress-bar {
+	body {
+		justify-content: center;
+	}
+	#search-row {
+		margin-top: 9px;
+		#z-icon-container {
+			display: flex;
+			justify-content: center;
+			#z-icon {
+				margin: 0 !important;
+			}
+		}
 	}
 }

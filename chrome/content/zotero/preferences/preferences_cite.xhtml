@@ -46,6 +46,20 @@
 			</hbox>
 		</groupbox>
 		
+		<groupbox aria-labelledby="citation-dialog-title">
+			<label><html:h2 id="citation-dialog-title" data-l10n-id="preferences-citation-dialog"></html:h2></label>
+			<groupbox aria-labelledby="citation-dialog-mode-label">
+				<hbox align="center">
+					<label id="citation-dialog-mode-label" data-l10n-id="preferences-citation-dialog-mode">:</label>
+					<radiogroup orient="horizontal" id="citation-dialog-mode" preference="extensions.zotero.integration.citationDialogMode">
+						<radio data-l10n-id="preferences-citation-dialog-mode-last-closed" value="last-closed"/>
+						<radio data-l10n-id="preferences-citation-dialog-mode-library" value="library"/>
+						<radio data-l10n-id="preferences-citation-dialog-mode-list" value="list"/>
+					</radiogroup>
+				</hbox>
+			</groupbox>
+		</groupbox>
+
 		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
 			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
 			
@@ -73,7 +87,5 @@
 		<html:h1>&zotero.preferences.cite.wordProcessors;</html:h1>
 		
 		<vbox id="wordProcessorInstallers"/>
-
-		<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="extensions.zotero.integration.useClassicAddCitationDialog" native="true"/>
 	</vbox>
 </vbox>
