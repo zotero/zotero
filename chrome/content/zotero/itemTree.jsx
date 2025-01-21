@@ -107,7 +107,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
-		multiSelect: true
+		getExtraField: noop
 	};
 
 	static propTypes = {
@@ -124,7 +124,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: PropTypes.func,
 		onActivate: PropTypes.func,
 		emptyMessage: PropTypes.string,
-		multiSelect: PropTypes.bool,
+		getExtraField: PropTypes.func,
 	};
 	
 	constructor(props) {
@@ -1043,7 +1043,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Select the first row when the tree is focused by the keyboard.
 	 */
 	handleKeyUp = (event) => {
-		if (!Zotero.locked && event.code === 'Tab' && this.selection.count == 0) {
+		if (!Zotero.locked && (event.code === 'Tab' || event.key.includes("Arrow")) && this.selection.count == 0) {
 			this.selection.select(this.selection.focused);
 		}
 	};
@@ -1447,6 +1447,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 			
 			default:
+				let extraField = this.props.getExtraField(row.ref, field);
+				if (extraField !== undefined) return extraField;
 				// Get from row.getField() to allow for custom fields
 				return row.getField(field, false, true);
 			}
@@ -3107,6 +3109,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('context-row', !!rowData.contextRow);
 		div.classList.toggle('unread', !!rowData.unread);
 		div.classList.toggle('highlighted', this._highlightedRows.has(rowData.id));
+		let nextRowID = this.getRow(index + 1)?.id;
+		let prevRowID = this.getRow(index - 1)?.id;
+		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
+		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
+		
 		if (this._dropRow == index) {
 			let span;
 			if (Zotero.DragDrop.currentOrientation != 0) {
@@ -3302,7 +3309,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let key = col.dataKey;
 			let val = row[key];
 			if (val === undefined) {
-				val = treeRow.getField(key);
+				let customRowValue = this.props.getExtraField(treeRow.ref, key);
+				if (customRowValue !== undefined) {
+					val = customRowValue;
+				}
+				else {
+					val = treeRow.getField(key);
+				}
 			}
 			
 			switch (key) {
