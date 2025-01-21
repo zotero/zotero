@@ -53,13 +53,13 @@ function getImageByStatus(status) {
 const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 	const treeRef = useRef(null);
 	const htmlID = useRef(nextHTMLID());
-
+	
 	const getRowCount = useCallback(() => progressQueue.getTotal(), [progressQueue]);
-
+	
 	const rowToTreeItem = useCallback((index, selection, oldDiv = null, columns) => {
 		let rows = progressQueue.getRows();
 		let row = rows[index];
-
+		
 		let div;
 		if (oldDiv) {
 			div = oldDiv;
