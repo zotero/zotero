@@ -322,7 +322,6 @@
 
 		async asyncRender() {
 			if (!this.item) return;
-			if (this._asyncRendering) return;
 			if (!this._section.open) return;
 			if (this._isAlreadyRendered("async")) {
 				if (this._previewDiscarded) {
