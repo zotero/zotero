@@ -996,6 +996,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 */
 	this.launchFile = function (file) {
 		file = Zotero.File.pathToFile(file);
+		
+		Zotero.Utilities.Internal.Environment.clearMozillaVariables();
+		
 		try {
 			Zotero.debug("Launching " + file.path);
 			file.launch();
@@ -1038,6 +1041,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				);
 			}
 		}
+		finally {
+			Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
+		}
 	};
 	
 	
@@ -1062,8 +1068,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			args = [filePath];
 		}
 		
+		Zotero.Utilities.Internal.Environment.clearMozillaVariables();
+		
 		// Async, but we don't want to block
-		Zotero.Utilities.Internal.exec(applicationPath, args);
+		var promise = Zotero.Utilities.Internal.exec(applicationPath, args);
+		
+		promise.finally(() => Zotero.Utilities.Internal.Environment.restoreMozillaVariables());
 	};
 	
 	
@@ -1093,12 +1103,29 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				if (!found.value) {
 					throw new Error(`Handler not found for '${scheme}' URLs`);
 				}
-				svc.loadURI(Services.io.newURI(url, null, null));
+				try {
+					if (!Zotero.isWin) {
+						Zotero.Utilities.Internal.Environment.clearMozillaVariables();
+					}
+					
+					svc.loadURI(Services.io.newURI(url, null, null));
+				}
+				finally {
+					if (!Zotero.isWin) {
+						Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
+					}
+				}
 				return;
 			}
 		}
 		
+		var mozCleared = false;
 		try {
+			if (!Zotero.isWin) {
+				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
+				mozCleared = true;
+			}
+			
 			var uri = Services.io.newURI(url, null, null);
 			var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 							.getService(Components.interfaces.nsIExternalProtocolService)
@@ -1123,12 +1150,22 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					+ "check extensions.zotero." + pref + " in about:config");
 			}
 			
+			if (!mozCleared) {
+				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
+				mozCleared = true;
+			}
+			
 			var proc = Components.classes["@mozilla.org/process/util;1"]
 							.createInstance(Components.interfaces.nsIProcess);
 			proc.init(exec);
 			
 			var args = [url];
 			proc.runw(false, args, args.length);
+		}
+		finally {
+			if (mozCleared) {
+				Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
+			}
 		}
 	}
 	
