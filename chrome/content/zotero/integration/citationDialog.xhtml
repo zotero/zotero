@@ -24,54 +24,120 @@
     ***** END LICENSE BLOCK *****
 -->
 
-<!DOCTYPE html SYSTEM "chrome://zotero/locale/zotero.dtd">
-
 <html
 	id="citation-dialog"
 	class="vbox flex"
 	persist="screenX screenY width height sizemode"
 	xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	drawintitlebar="true"
+	drawintitlebar-platforms="mac,win"
 	resizable="false">
 	<head>
-		<title>&zotero.integration.quickFormatDialog.title;</title>
+		<title data-l10n-id="integration-citationDialog"></title>
 		<link rel="localization" href="zotero.ftl"/>
 		<link rel="stylesheet" href="chrome://global/skin/global.css" />
 		<link rel="stylesheet" href="chrome://zotero/skin/zotero.css" />
+		<link rel="stylesheet" href="chrome://zotero/skin/overlay.css" />
 		<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css" />
 		<script src="../include.js"/>
 		<script src="../customElements.js"/>
 		<script src="citationDialog.js"/>
+		<script src="../titlebar.js" type="text/javascript"/>
 	</head>
 	<body class="vbox flex">
 		<div id="search-area" class="layout">
 			<div id="search-row" class="hbox">
-				<div id="z-icon"></div>
-				<xul:bubble-input class="flex" placeholder="Type to search, or add selected and open items"/>
-				<xul:button id="mode-button" class="icon icon-css icon-citation-dialog-library"/>
-				<xul:button id="settings-button" class="icon icon-css icon-citation-dialog-library"/>
+				<div id="z-icon-container">
+					<div id="z-icon"></div>
+				</div>
+				<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabindex="10" tabindex="-1"/>
+				<progress id="progress" max="100" hidden="true"></progress>
+				<div id="top-level-btn-group">
+					<image id="loading-spinner" class="zotero-spinner-16"/>
+					<button id="accept-button" class="btn-icon icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept"/>
+					<div class="vertical-separator"></div>
+					<button id="cancel-button" class="btn-icon icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel"/>
+				</div>
 			</div>
-			<div id="notification" style="display: none;"></div>
 		</div>
 		
-		<div id="list-layout" class="layout">
-			<div id="list-selected-items"></div>
-			<div id="list-open-items"></div>
-			<div id="list-cited-items"></div>
-			<div id="list-found-items"></div>
+		<div id="list-layout" class="layout" hidden="true">
+			<div class="divider"></div>
+			<div id="list-layout-wrapper" class="vbox search-items" data-arrow-nav="vertical" data-multiselectable="true" role="listbox" aria-describedby="item-description"></div>
 		</div>
 		
-		<div id="library-layout" class="layout" style="display: none;">
-			<div id="library-other-items" class="hbox">
-				<div id="library-selected-items"></div>
-				<div id="library-open-items"></div>
-				<div id="library-cited-items"></div>
+		<div id="library-layout" class="layout" hidden="true">
+			<div class="secondary-divider"></div>
+			<div id="library-other-items" class="hbox"  data-arrow-nav="horizontal" data-multiselectable="true" role="listbox" aria-orientation="horizontal" aria-describedby="item-description">
+				<div class="search-items"/>
+				<span id="library-no-suggested-items-message" data-l10n-id="integration-citationDialog-lib-no-items"/>
 			</div>
-			<div id="library-trees">
-				
+			<div class="divider"></div>
+			<div id="library-trees" class="hbox">			
+				<div id="collections-tree-container" class="vbox virtualized-table-container">
+					<div id="zotero-collections-tree" data-tabindex="50"/>
+				</div>
+				<div id="item-tree-container" class="hbox virtualized-table-container">
+					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
+				</div>
 			</div>
+		</div>
+
+		<div id="bottom-area" class="layout">
+			<div id="bottom-area-wrapper" class="hbox">
+				<div class="hbox" style="flex:1"></div>
+				<div id="bottom-btn-group" class="hbox">
+					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-tabindex="71"/>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="72"/>
+				</div>
+			</div>
+		</div>
+
+		<div id="popups">
+			<xul:panel id="itemDetails" focus-target-id="locator">
+				<div class="vbox popup">
+					<div class="details-header hbox">
+						<span class="icon icon-item-type"></span>
+						<div id="itemDetails-combinedInfo" class="vbox">
+							<div id="itemTitle"></div>
+						</div>
+					</div>
+					<div class="details" role="group">
+							<div class="row">
+								<!--fx128: size="0" forces select have default native style -->
+								<select name="locator" id="label" class="details-label" size="0"></select>
+								<input id="locator" class="details-data" aria-labelledby="label" aria-describedby="itemDetails-combinedInfo"/>
+							</div>
+							<div class="row">
+								<label class="details-label" for="prefix" data-l10n-id="integration-citationDialog-details-prefix"></label>
+								<input id="prefix" class="details-data"/>					
+							</div>
+							<div class="row">
+								<label class="details-label" for="suffix" data-l10n-id="integration-citationDialog-details-suffix"></label>
+								<input id="suffix" class="details-data"/>
+							</div>
+							<div id="suppress-author-row" class="row">
+								<input id="suppress-author" type="checkbox" class="keyboard-clickable"/>
+								<label for="suppress-author" data-l10n-id="integration-citationDialog-details-suppressAuthor"></label>
+							</div>				
+					</div>
+					<div class="buttons">
+						<button class="remove" data-l10n-id="integration-citationDialog-details-remove"></button>
+						<button class="show" data-l10n-id="integration-citationDialog-details-showInLibrary"></button>
+						<!-- use xul button for native primary style -->
+						<xul:button class="done" default="true" data-l10n-id="integration-citationDialog-details-done"></xul:button>
+					</div>
+				</div>	
+			</xul:panel>
+			<xul:panel id="settings-popup">
+				<div class="vbox popup">
+					<div class="title" data-l10n-id="integration-citationDialog-settings-title"></div>
+					<div class="hbox">
+						<input id="keepSorted" type="checkbox" class="keyboard-clickable"/>
+						<label for="keepSorted" data-l10n-id="integration-citationDialog-settings-keepSorted"></label>
+					</div>
+				</div>
+			</xul:panel>
 		</div>
 	</body>
 </html>

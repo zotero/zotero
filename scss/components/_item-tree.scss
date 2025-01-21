@@ -202,7 +202,12 @@
 		}
 	}
 }
-	
+
+item-tree-menu-bar[inactive] {
+	max-height: 0 !important;
+	overflow: hidden;
+}
+
 $-itemTypesIcons: (
 	artwork,
 	attachment-epub,
@@ -284,7 +289,8 @@ $-trashableObjectIcons: (
 $-coloredIcons: (
 	cross: --accent-red,
 	tick: --accent-green,
-	refresh: --fill-secondary
+	refresh: --fill-secondary,
+	plus-circle: --fill-secondary
 );
 
 .icon-item-type {

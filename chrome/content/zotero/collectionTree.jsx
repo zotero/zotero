@@ -113,7 +113,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	async makeVisible() {
 		await this.refresh();
-		var lastViewedID = Zotero.Prefs.get('lastViewedFolder');
+		var lastViewedID = this.props.initialFolder || Zotero.Prefs.get('lastViewedFolder');
 		if (lastViewedID) {
 			var selected = await this.selectByID(lastViewedID);
 		}
@@ -472,7 +472,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
 
 				onKeyDown: this.handleKeyDown,
-				onActivate: this.handleActivate,
+				onActivate: (...args) => (this.props.onActivate ? this.props.onActivate(...args) : this.handleActivate(...args)),
 
 				role: 'tree',
 				label: Zotero.getString('pane.collections.title')
@@ -514,7 +514,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			libraryIncluded = this._includedInTree({ libraryID: Zotero.Libraries.userLibraryID });
 			if (libraryIncluded) {
 				newRows.splice(added++, 0,
-					new Zotero.CollectionTreeRow(this, 'library', { libraryID: Zotero.Libraries.userLibraryID }));
+					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.userLibrary));
 				newRows[0].isOpen = true;
 				added += await this._expandRow(newRows, 0);
 			}
