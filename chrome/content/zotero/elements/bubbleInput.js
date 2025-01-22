@@ -111,10 +111,18 @@
 				let input = this._createInputElem();
 				this._body.prepend(input);
 			}
-			// Add placeholder to the first input when there are no bubbles
-			let isOnlyOneInput = this.getAllBubbles().length == 0;
-			this._body.firstChild.classList.toggle("full-width", isOnlyOneInput);
-			document.l10n.setAttributes(this._body.firstChild, isOnlyOneInput ? "integration-citationDialog-onlyInput" : "");
+			// Add placeholder and a special aria-description to the first input when there are no bubbles
+			let isOnlyInput = this.getAllBubbles().length == 0;
+			this._body.firstChild.classList.toggle("full-width", isOnlyInput);
+			if (isOnlyInput) {
+				document.l10n.setAttribute(this._body.firstChild, "integration-citationDialog-aria-single-input")
+			}
+			// otherwise, add a regular aria descriptions and placeholders to all inputs
+			else {
+				for (let input of [...this.querySelectorAll(".input")]) {
+					document.l10n.setAttributes(input, "integration-citationDialog-aria-input");
+				}
+			}
 			// If any two inputs end up next to each other (e.g. after bubble is deleted),
 			// have them merged
 			Utils.combineNeighboringInputs(this._body.firstChild);
@@ -141,21 +149,6 @@
 			input.focus();
 			input.setSelectionRange(input.value.length, input.value.length);
 			return input;
-		}
-
-		/**
-		 * Set on inputs which item is currently selected for screen readers to
-		 * announce.
-		 */
-		ariaSetCurrentItem(id) {
-			for (let input of [...this.querySelectorAll(".input")]) {
-				if (id) {
-					input.setAttribute("aria-activedescendant", id);
-				}
-				else {
-					input.removeAttribute("aria-activedescendant");
-				}
-			}
 		}
 		
 		/**
@@ -233,7 +226,7 @@
 			bubble.setAttribute("draggable", "true");
 			bubble.setAttribute("role", "button");
 			bubble.setAttribute("tabindex", "0");
-			bubble.setAttribute("aria-describedby", "bubble-description");
+			bubble.setAttribute("data-l10n-id", "integration-citationDialog-aria-bubble");
 			bubble.setAttribute("aria-haspopup", true);
 			bubble.setAttribute("dialogReferenceID", dialogReferenceID);
 			bubble.setAttribute("data-arrow-nav-enabled", true);
@@ -345,9 +338,8 @@
 			// hide windows appearance from _input.scss
 			input.setAttribute("no-windows-native", true);
 			input.setAttribute("data-arrow-nav-enabled", true);
-			input.setAttribute("role", "combobox");
 			input.className = "input empty";
-			input.setAttribute("aria-describedby", "input-description");
+			input.setAttribute("data-l10n-id", "integration-citationDialog-aria-input");
 			input.addEventListener("input", (_) => {
 				// .full-width class is used on first input to fully display placeholder
 				// in that case, resizing does not happen
