@@ -5323,18 +5323,9 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	// https://github.com/zotero/zotero/issues/1504#issuecomment-572415083
 	if (!strict && extraFields.size) {
 		for (let field of setFields.keys()) {
-			let baseField;
-			if (Zotero.ItemFields.isBaseField(field)) {
-				baseField = field;
-			}
-			else {
-				let baseFieldID = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
-				if (baseFieldID) {
-					baseField = baseFieldID;
-				}
-			}
-			if (baseField) {
-				let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
+			let baseFieldID = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
+			if (baseFieldID) {
+				let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseFieldID, true);
 				for (let mappedField of mappedFieldNames) {
 					if (extraFields.has(mappedField)) {
 						extraFields.delete(mappedField);
