@@ -2731,7 +2731,7 @@ describe("Zotero.Item", function () {
 		});
 		
 		describe("not-strict mode", function () {
-			it("should handle Extra in non-strict mode", function () {
+			it("should preserve Extra", function () {
 				var json = {
 					itemType: "journalArticle",
 					title: "Test",
@@ -2832,6 +2832,45 @@ describe("Zotero.Item", function () {
 				var item = new Zotero.Item;
 				item.fromJSON(json);
 				assert.equal(item.getField('extra'), '');
+			});
+			
+			it("should use a Zotero item type stored in Extra", async function () {
+				var json = {
+					itemType: "document",
+					title: "Test",
+					extra: "Type: dataset\nCitation Key: abc123\nFoo: Bar"
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'dataset');
+				// Move a valid field out of Extra
+				assert.equal(item.getField('citationKey'), 'abc123');
+				assert.equal(item.getField('extra'), 'Foo: Bar');
+			});
+			
+			it("should use a CSL item type stored in Extra", async function () {
+				var json = {
+					itemType: "journalArticle",
+					title: "Test",
+					extra: "Type: song"
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('audioRecording'));
+			});
+			
+			it("should move a now-invalid existing field to Extra when using Type from Extra", async function () {
+				var json = {
+					itemType: "journalArticle",
+					title: "Test",
+					pages: "123",
+					extra: "Type: audioRecording"
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('audioRecording'));
+				// 'pages' should've been moved to Extra, since it's not valid for the new type
+				assert.equal(item.getField('extra'), 'Pages: 123');
 			});
 			
 			it("should ignore some redundant fields from RDF translator (temporary)", function () {
@@ -2940,6 +2979,28 @@ describe("Zotero.Item", function () {
 					item.fromJSON(json, { strict: true });
 				};
 				assert.throws(f, /^Invalid creator type/);
+			});
+			
+			it("should ignore item type in Extra", function () {
+				var json = {
+					itemType: "document",
+					title: "",
+					extra: "Type: preprint"
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json, { strict: true });
+				assert.equal(item.getField('extra'), "Type: preprint");
+			});
+			
+			it("should ignore valid field in Extra", function () {
+				var json = {
+					itemType: "journalArticle",
+					title: "",
+					extra: "DOI: 10.1234/abcd"
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json, { strict: true });
+				assert.equal(item.getField('extra'), "DOI: 10.1234/abcd");
 			});
 		});
 		
