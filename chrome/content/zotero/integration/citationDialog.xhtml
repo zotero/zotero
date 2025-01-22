@@ -103,11 +103,11 @@
 							<div id="itemTitle"></div>
 						</div>
 					</div>
-					<div class="details" aria-labelledby="itemDetails-combinedInfo" role="group">
+					<div class="details" role="group">
 							<div class="row">
 								<!--fx128: size="0" forces select have default native style -->
 								<select name="locator" id="label" class="details-label" size="0"></select>
-								<input id="locator" class="details-data" aria-describedby="label"/>
+								<input id="locator" class="details-data" aria-labelledby="label" aria-describedby="itemDetails-combinedInfo"/>
 							</div>
 							<div class="row">
 								<label class="details-label" for="prefix" data-l10n-id="integration-citationDialog-details-prefix"></label>
@@ -139,12 +139,6 @@
 					</div>
 				</div>
 			</xul:panel>
-		</div>
-
-		<div id="a11y-instructions" class="aria-hidden" >
-			<div id="bubble-description" role="tooltip" data-l10n-id="integration-citationDialog-aria-bubble"></div>
-			<div id="input-description" role="tooltip" data-l10n-id="integration-citationDialog-aria-input"></div>
-			<html:div id="item-description" role="tooltip" data-l10n-id="integration-citationDialog-aria-item"></html:div>
 		</div>
 	</body>
 </html>

@@ -141,12 +141,14 @@ export class CitationDialogHelpers {
 		section.append(header, itemContainer, divider);
 
 		if (isCollapsible) {
+			headerSpan.id = `header_${id}`;
 			section.classList.add("expandable");
 			section.style.setProperty('--deck-length', deckLength);
-			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabindex': 22 }, "add-all keyboard-clickable");
+			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabindex': 22, role: "button", "aria-describedby": headerSpan.id }, "add-all keyboard-clickable");
 			this.doc.l10n.setAttributes(addAllBtn, "integration-citationDialog-add-all");
 			header.append(addAllBtn);
 			
+			headerSpan.setAttribute("role", "button");
 			headerSpan.setAttribute("tabindex", -1);
 			headerSpan.setAttribute("data-tabindex", 21);
 			headerSpan.classList.add("keyboard-clickable");

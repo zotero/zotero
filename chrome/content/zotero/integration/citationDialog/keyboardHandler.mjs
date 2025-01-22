@@ -126,13 +126,13 @@ export class CitationDialogKeyboardHandler {
 			else if (!group.hidden) {
 				this._navigateGroup({ group, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
 			}
-			else {
+			else if (this._id("zotero-items-tree").querySelector(".row")) {
 				this._id("zotero-items-tree").querySelector("[tabindex]").focus();
 			}
 			handled = true;
 		}
 		// arrow down from suggested items in library mode will focus items table
-		else if (!this._id("library-layout").hidden && event.key == "ArrowDown" && event.target.closest(".itemsContainer") && noModifiers) {
+		else if (!this._id("library-layout").hidden && event.key == "ArrowDown" && event.target.closest(".itemsContainer") && noModifiers && this._id("zotero-items-tree").querySelector(".row")) {
 			this._id("zotero-items-tree").querySelector("[tabindex]").focus();
 		}
 		// arrow up/down from bubble-input in list mode will move selection in the items list
@@ -256,7 +256,6 @@ export class CitationDialogKeyboardHandler {
 		
 		current?.classList.remove("current");
 		nextNode.classList.add("current");
-		this.doc.querySelector("#bubble-input").ariaSetCurrentItem(nextNode.id);
 		// if the node is not being focused in list mode, make sure we scroll to it so it is visible
 		if (!shouldFocus) {
 			let wrapperRect = this._id("list-layout-wrapper").getBoundingClientRect();

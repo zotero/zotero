@@ -188,8 +188,6 @@ class Layout {
 		_id(`${this.type}-layout`).querySelector(".search-items").replaceChildren(...sections);
 		// Update which bubbles need to be highlighted
 		this.updateSelectedItems();
-		// Clear the record of currently selected item from inputs
-		_id("bubble-input").ariaSetCurrentItem(null);
 		// Pre-select the item to be added on Enter of an input
 		IOManager.markPreSelected();
 		// If the previously focused node is no longer a part of the DOM, try to restore focus
@@ -258,7 +256,12 @@ class LibraryLayout extends Layout {
 
 	// Create item node for an item group and store item ids in itemIDs attribute
 	async createItemNode(item, index = null) {
-		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option", "data-tabindex": 30, "data-arrow-nav-enabled": true }, "item keyboard-clickable");
+		let itemNode = Helpers.createNode("div", {
+			tabindex: "-1",
+			"data-l10n-id": "integration-citationDialog-aria-item-library",
+			role: "option",
+			"data-tabindex": 30,
+			"data-arrow-nav-enabled": true }, "item keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
@@ -400,6 +403,13 @@ class LibraryLayout extends Layout {
 					// (e.g. when citing notes, parent items are displayed but not included)
 					icon = getCSSIcon("");
 				}
+				// add aria-label for screen readers to announce if this item is added
+				else if (inCitation) {
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added")
+				}
+				else {
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
+				}
 				iconWrapper.append(icon);
 				return cell;
 			}
@@ -451,6 +461,7 @@ class LibraryLayout extends Layout {
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
 			onActivate: () => {}
 		});
+		doc.l10n.setAttributes(_id("collection-tree"), "integration-citationDialog-collections-table");	
 	}
 	
 	async _onCollectionSelection() {
@@ -584,7 +595,13 @@ class ListLayout extends Layout {
 
 	// Create item node for an item group and store item ids in itemIDs attribute
 	async createItemNode(item) {
-		let itemNode = Helpers.createNode("div", { tabindex: "-1", "aria-describedby": "item-description", role: "option", "data-tabindex": 30, "data-arrow-nav-enabled": true }, "item vbox keyboard-clickable");
+		let itemNode = Helpers.createNode("div", {
+			tabindex: "-1",
+			"data-l10n-id": "integration-citationDialog-aria-item-list",
+			role: "option",
+			"data-tabindex": 30,
+			"data-arrow-nav-enabled": true
+		}, "item vbox keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
@@ -846,7 +863,6 @@ const IOManager = {
 		let somethingIsTyped = _id("bubble-input").isSomethingTyped();
 		if (!somethingIsTyped || !firstItemNode) return;
 		firstItemNode.classList.add("current");
-		_id("bubble-input").ariaSetCurrentItem(firstItemNode.id);
 		this.selectItemNodesRange(firstItemNode);
 	},
 
@@ -977,6 +993,7 @@ const IOManager = {
 				container.classList.remove("selected", "current");
 			}
 		}
+		section.querySelector(".header-label").setAttribute("aria-expanded", section.classList.contains("expanded"));
 	},
 
 
