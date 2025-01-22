@@ -913,14 +913,25 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}
 	
 	
-	this.end = Zotero.Promise.coroutine(function* (options) {
+	this.end = async function (options) {
 		_syncInProgress = false;
-		yield this.checkErrors(_errors, options);
+		await this.checkErrors(_errors, options);
 		if (!options.restartSync) {
 			this.updateIcons(_errors);
+			
+			// If foreground sync, trigger dialog button immediately for some errors
+			// (e.g., long tag fixer)
+			if (!options.background && _errors.length) {
+				if (_errors[0].dialogButtonImmediate) {
+					let maybePromise = _errors[0].dialogButtonCallback();
+					if (maybePromise && maybePromise.then) {
+						await maybePromise;
+					}
+				}
+			}
 		}
 		_errors = [];
-	});
+	};
 	
 	
 	/**
@@ -1253,6 +1264,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 							
 							options.restartSync = true;
 						});
+						e.dialogButtonImmediate = true;
 					}
 					else {
 						// Note too long
@@ -1294,14 +1306,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 							var win = wm.getMostRecentWindow("navigator:browser");
 							win.ZoteroPane.selectItem(object.id);
 						};
-					}
-				}
-				
-				// If not a background sync, show dialog immediately
-				if (!options.background && e.dialogButtonCallback) {
-					let maybePromise = e.dialogButtonCallback();
-					if (maybePromise && maybePromise.then) {
-						yield maybePromise;
 					}
 				}
 			}
