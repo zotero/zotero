@@ -63,6 +63,7 @@
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
 			this._switchedModeOfCreator = null;
+			this._popupNode = null;
 
 			this._lastUpdateCustomRows = "";
 			// Keep in sync with itemPaneManager.js
@@ -125,7 +126,7 @@
 		init() {
 			this.initCollapsibleSection();
 			this._creatorTypeMenu.addEventListener('command', async (event) => {
-				var typeBox = document.popupNode;
+				var typeBox = this._popupNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 				
 				var typeID = event.explicitOriginalTarget.getAttribute('typeid');
@@ -144,7 +145,7 @@
 			});
 
 			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (_event) => {
-				var row = document.popupNode.closest('.meta-row');
+				var row = this._popupNode.closest('.meta-row');
 				var typeBox = row.querySelector('.creator-type-label').parentNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 				var item = this.item;
@@ -182,7 +183,7 @@
 			});
 
 			this._id('zotero-creator-transform-menu').addEventListener('command', async (event) => {
-				var row = document.popupNode.closest('.meta-row');
+				var row = this._popupNode.closest('.meta-row');
 				var typeBox = row.querySelector('.creator-type-label').parentNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 				
@@ -666,11 +667,12 @@
 				}
 				if (addLinkContextMenu) {
 					rowData.oncontextmenu = (event) => {
-						this._linkMenu.dataset.link = link;
-						this._linkMenu.dataset.val = val;
-						document.popupNode = rowLabel.parentElement;
+						let menupopup = this._linkMenu;
+
+						menupopup.dataset.link = link;
+						menupopup.dataset.val = val;
+						this._popupNode = rowLabel.parentElement;
 						
-						let menupopup = this._id('zotero-link-menu');
 						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target);
 						this.handlePopupOpening(event, menupopup);
 					};
@@ -1189,7 +1191,7 @@
 				span.className = 'creator-type-dropmarker';
 				labelWrapper.appendChild(span);
 				labelWrapper.addEventListener('click', (e) => {
-					document.popupNode = rowLabel;
+					this._popupNode = rowLabel;
 					this._creatorTypeMenu.openPopup(rowLabel);
 					// If the creator menu is opened via mouse-click, add a special attribute to
 					// blur the focused field so that icons do not show up after the menu is closed.
@@ -1296,7 +1298,7 @@
 			optionsButton.setAttribute('id', `creator-${rowIndex}-options`);
 			optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 			let triggerPopup = (e) => {
-				document.popupNode = firstlast;
+				this._popupNode = firstlast;
 
 				let menupopup = this._id('zotero-creator-transform-menu');
 				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, e.target.closest('input'));
@@ -2390,7 +2392,7 @@
 		 * @return {Promise}
 		 */
 		async swapNames(_event) {
-			var row = document.popupNode.closest('.meta-row');
+			var row = this._popupNode.closest('.meta-row');
 			var typeBox = row.querySelector('[fieldname]');
 			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 			var fields = this.getCreatorFields(row);
@@ -2415,7 +2417,7 @@
 		 * @return {Promise}
 		 */
 		async capitalizeCreatorName(_event) {
-			var row = document.popupNode.closest('.meta-row');
+			var row = this._popupNode.closest('.meta-row');
 			let label = row.querySelector('.meta-label');
 			var creatorIndex = parseInt(label.getAttribute('fieldname').split('-')[1]);
 			let [lastName, firstName] = [...row.querySelectorAll("editable-text")];
