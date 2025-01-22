@@ -1549,12 +1549,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						cb();
 						panel.hidePopup();
 					});
-
-					button.addEventListener("keydown", (event) => {
-						if (event.key !== ' ' && event.key !== 'Enter') return;
-						cb();
-						panel.hidePopup();
-					});
 				}
 				
 				let button = doc.createXULElement('button');
