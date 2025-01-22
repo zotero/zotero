@@ -5124,6 +5124,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
  */
 Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	var strict = !!options.strict;
+	var migrateExtra = !strict;
 	
 	if (!json.itemType && !this._itemTypeID) {
 		throw new Error("itemType property not provided");
@@ -5139,28 +5140,33 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	
 	var isValidForType = {};
 	var setFields = new Set();
-	var { itemType, fields: extraFields, creators: extraCreators, extra } =
-		Zotero.Utilities.Internal.extractExtraFields(
-			json.extra || '',
-			this,
-			Object.keys(json)
-				// TEMP until we move creator lines to real creators
-				.concat('creators')
-		);
-	// If a different item type was parsed out of Extra, use that instead
-	if (itemType && json.itemType != itemType) {
-		itemTypeID = Zotero.ItemTypes.getID(itemType);
-		this.setType(itemTypeID);
+	
+	var extraFields = new Map();
+	var extraCreators = [];
+	var extra = json.extra || '';
+	// Transfer valid fields from Extra to regular fields
+	if (migrateExtra) {
+		let itemType;
+		({ itemType, fields: extraFields, creators: extraCreators, extra } =
+			Zotero.Utilities.Internal.extractExtraFields(
+				extra,
+				this,
+				Object.keys(json)
+					// TEMP until we move creator lines to real creators
+					.concat('creators')
+			));
+		// If a different item type was parsed out of Extra, use that instead
+		if (itemType && json.itemType != itemType) {
+			itemTypeID = Zotero.ItemTypes.getID(itemType);
+			this.setType(itemTypeID);
+		}
+		for (let [field, value] of extraFields) {
+			this.setField(field, value);
+			setFields.add(field);
+			extraFields.delete(field);
+		}
 	}
 	var invalidFieldLogLines = new Map();
-	
-	// Transfer valid fields from Extra to regular fields
-	// Currently disabled
-	/*for (let [field, value] of extraFields) {
-		this.setField(field, value);
-		setFields.add(field);
-		extraFields.delete(field);
-	}*/
 	
 	for (let field in json) {
 		let val = json[field];
