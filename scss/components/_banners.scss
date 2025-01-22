@@ -43,53 +43,53 @@
 
 #post-upgrade-container {
 	background: var(--material-background);
-}
-
-#post-upgrade-banner {
-	background: var(--accent-blue30);
-	color: var(--fill-primary);
-	flex-wrap: wrap;
-	gap: 8px;
-	padding: 6px 8px;
-
-	.link {
-		color: var(--accent-blue);
-		text-decoration: underline;
-		cursor: pointer;
-	}
 	
-	#post-upgrade-centered {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	#post-upgrade-banner {
+		background: var(--accent-blue30);
+		color: var(--fill-primary);
 		flex-wrap: wrap;
 		gap: 8px;
-		flex: 1 auto;
-
-		#post-upgrade-density {
-			@media (-moz-platform: windows) {
-				radio {
-					height: 24px;
-					margin: 0;
+		padding: 6px 8px;
+	
+		.link {
+			color: var(--accent-blue);
+			text-decoration: underline;
+			cursor: pointer;
+		}
+		
+		#post-upgrade-centered {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-wrap: wrap;
+			gap: 8px;
+			flex: 1 auto;
+	
+			#post-upgrade-density {
+				@media (-moz-platform: windows) {
+					radio {
+						height: 24px;
+						margin: 0;
+					}
 				}
 			}
 		}
-	}
+		
+		#post-upgrade-new-features-link {
+			font-weight: bold;
+		}
+		
+		#post-upgrade-buttons {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-inline-start: auto;
 	
-	#post-upgrade-new-features-link {
-		font-weight: bold;
-	}
-	
-	#post-upgrade-buttons {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin-inline-start: auto;
-
-		@media (-moz-platform: windows) {
-			button {
-				height: 24px;
-				margin: 0 !important;
+			@media (-moz-platform: windows) {
+				button {
+					height: 24px;
+					margin: 0 !important;
+				}
 			}
 		}
 	}
