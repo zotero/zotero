@@ -333,7 +333,7 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 	
 	if (type == 'upload') {
 		if (!(yield item.fileExists())) {
-			Zotero.debug("File " + item.libraryKey + " not yet available to upload -- skipping");
+			Zotero.debug("File " + item.libraryKey + " not available to upload -- skipping");
 			return;
 		}
 	}
