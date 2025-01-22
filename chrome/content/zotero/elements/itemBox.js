@@ -671,7 +671,7 @@
 						document.popupNode = rowLabel.parentElement;
 						
 						let menupopup = this._id('zotero-link-menu');
-						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('input'));
+						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target);
 						this.handlePopupOpening(event, menupopup);
 					};
 				}
