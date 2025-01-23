@@ -3725,11 +3725,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 			}
 		}
 		
-		else if (contentType == 'text/html') {
-			str = await Zotero.File.getContentsAsync(path);
-			str = Zotero.Utilities.unescapeHTML(str);
-		}
-		
 		else if (contentType == 'text/plain') {
 			str = await Zotero.File.getContentsAsync(path);
 		}
