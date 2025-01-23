@@ -965,7 +965,7 @@ const IOManager = {
 		IOManager.sectionExpandedStatus[section.id] = section.classList.contains("expanded") ? "expanded" : "collapsed";
 		// When section is expanded by a click via keyboard, navigate into the section
 		if (IOManager._clicked !== event.target && section.classList.contains("expanded")) {
-			KeyboardHandler.navigateGroup({ group: section, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
+			KeyboardHandler._navigateGroup({ group: section, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
 		}
 	},
 
