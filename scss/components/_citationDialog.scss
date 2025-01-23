@@ -631,4 +631,11 @@
 		left: -1000px;
 		visibility: hidden;
 	}
+
+	input[type="checkbox"] {
+		// other platforms already get a standard focusring
+		@media (-moz-platform: linux) {
+			@include focus-ring;
+		}
+	}
 }
