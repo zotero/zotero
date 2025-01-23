@@ -344,6 +344,12 @@ class LibraryLayout extends Layout {
 				this.lastHeight = null;
 			}, 10);
 		}
+		// on linux, the sizing of the window may be off upon initial load
+		// despite the minHeight on relevant components
+		// to handle that, explicitly resize the window to make sure it's not too small
+		else if (Zotero.isLinux && window.outerHeight < minHeight) {
+			window.resizeTo(window.innerWidth, minHeight);
+		}
 	}
 
 	// handle click on the items container
@@ -515,7 +521,7 @@ class LibraryLayout extends Layout {
 			let clickedItem = this.itemsView.getRow(rowIndex).ref;
 			hoveredOverIcon.classList.remove("active");
 			let rowTopBeforeRefresh = row.getBoundingClientRect().top;
-			IOManager.addItemsToCitation([clickedItem], { noInputRefocus: false }).then(() => {
+			IOManager.addItemsToCitation([clickedItem], { noInputRefocus: true }).then(() => {
 				// after an item is added, bubble-input's height may increase and push the itemTree down
 				// scroll it back up so that the mouse remains over the same row as before click
 				// do not do it on click of the first row, since then the mouse will be on a header
@@ -1035,6 +1041,7 @@ const IOManager = {
 			item.citationItem.locator = locator.locator;
 			item.citationItem.label = locator.label;
 			input.value = "";
+			input.dispatchEvent(new Event('input', { bubbles: true }));
 			this.updateBubbleInput();
 			return;
 		}
@@ -1130,8 +1137,12 @@ const IOManager = {
 	_restorePreClickFocus() {
 		if (doc.contains(IOManager._focusedBeforeClick)) {
 			IOManager._focusedBeforeClick.focus();
-			return;
+			// If the focus was moved, stop
+			if (doc.activeElement == IOManager._focusedBeforeClick) {
+				return;
+			}
 		}
+		// If the focus did not set, or there is no node to focus, refocus bubble-input
 		_id("bubble-input").refocusInput();
 	},
 
@@ -1375,4 +1386,4 @@ const CitationDataManager = {
 // Top level listeners
 window.addEventListener("load", onLoad);
 // When the dialog is re-focused, run the search again in case selected or opened items changed
-window.addEventListener("focus", () => currentLayout.search(SearchHandler.lastSearchValue));
+window.addEventListener("focus", () => currentLayout?.search(SearchHandler.lastSearchValue));

@@ -115,7 +115,7 @@
 			let isOnlyInput = this.getAllBubbles().length == 0;
 			this._body.firstChild.classList.toggle("full-width", isOnlyInput);
 			if (isOnlyInput) {
-				document.l10n.setAttribute(this._body.firstChild, "integration-citationDialog-aria-single-input")
+				document.l10n.setAttributes(this._body.firstChild, "integration-citationDialog-aria-single-input")
 			}
 			// otherwise, add a regular aria descriptions and placeholders to all inputs
 			else {

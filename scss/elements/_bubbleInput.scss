@@ -52,7 +52,9 @@ bubble-input {
 	}
 	
 	.bubble {
-		@include focus-ring(true);
+		@media not (-moz-platform: windows) {
+			@include focus-ring(true);
+		}
 		height: var(--bubble-height);
 		border-radius: 5px;
 		border: 1px solid var(--fill-quarternary);
