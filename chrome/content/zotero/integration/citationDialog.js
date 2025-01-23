@@ -1395,4 +1395,16 @@ const CitationDataManager = {
 // Top level listeners
 window.addEventListener("load", onLoad);
 // When the dialog is re-focused, run the search again in case selected or opened items changed
-window.addEventListener("focus", () => currentLayout?.search(SearchHandler.lastSearchValue));
+let windowLostFocusOn = 0;
+window.addEventListener("blur", () => {
+	windowLostFocusOn = (new Date()).getTime();
+});
+window.addEventListener("focus", () => {
+	let now = (new Date()).getTime();
+	// On linux, resizing the dialog causes the window to loose and immediately regain focus.
+	// Do not run the search if the window lost focus less than 100 ms ago.
+	if (Zotero.isLinux && now - windowLostFocusOn < 100) {
+		return;
+	}
+	currentLayout?.search(SearchHandler.lastSearchValue)
+});
