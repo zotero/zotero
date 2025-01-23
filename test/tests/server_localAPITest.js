@@ -142,6 +142,25 @@ describe("Local API Server", function () {
 					{ responseType: 'text', followRedirects: false });
 				assert.isTrue(request.getResponseHeader('Location').startsWith('file:'));
 			});
+
+			it("should return full-text data from /fulltext", async function () {
+				let { response } = await apiGet(`/users/0/items/${subcollectionAttachment.key}/fulltext`);
+				assert.deepEqual(response, {
+					content: 'Zotero [zoh-TAIR-oh] is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.',
+					indexedPages: 1,
+					totalPages: 1,
+				});
+			});
+
+			it("should return a 404 from /fulltext when attachment has no full-text content", async function () {
+				let tempAttachment = await importFileAttachment('empty.pdf');
+				let { response } = await apiGet(`/users/0/items/${tempAttachment.key}/fulltext`, {
+					successCodes: [404],
+					responseType: 'text'
+				});
+				assert.equal(response, 'Not found');
+				await tempAttachment.eraseTx();
+			});
 		});
 		
 		describe("?itemType", function () {
@@ -280,7 +299,14 @@ describe("Local API Server", function () {
 			assert.equal(response[0].meta.numItems, 1);
 		});
 	});
-	
+
+	describe("<userOrGroupPrefix>/fulltext?since=", function () {
+		it("should return items with full-text content", async function () {
+			let { response } = await apiGet('/users/0/fulltext?since=-1');
+			assert.deepEqual(Object.entries(response), [[subcollectionAttachment.key, subcollectionAttachment.version]]);
+		});
+	});
+
 	describe("/groups/<groupID>", function () {
 		it("should return 404 for unknown group", async function () {
 			let { response } = await apiGet(

@@ -741,6 +741,63 @@ Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/file/view/url"] = Zot
 Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view/url"] = Zotero.Server.LocalAPI.ItemFile;
 
 
+Zotero.Server.LocalAPI.ItemFulltext = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	async run({ pathParams, libraryID }) {
+		let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, pathParams.itemKey);
+		if (!item || !item.isFileAttachment() || !Zotero.Fulltext.isCachedMIMEType(item.attachmentContentType)) {
+			return _404;
+		}
+		let file = Zotero.Fulltext.getItemCacheFile(item);
+		if (!file.exists()) {
+			return _404;
+		}
+		let { indexedPages, totalPages, indexedChars, totalChars, version } = await Zotero.DB.rowQueryAsync(
+			"SELECT indexedPages, totalPages, indexedChars, totalChars, version FROM fulltextItems WHERE itemID=?",
+			item.id
+		);
+		return [200, {
+			'Content-Type': 'application/json',
+			'Last-Modified-Version': version,
+		}, JSON.stringify({
+			content: await Zotero.File.getContentsAsync(file),
+			indexedPages: indexedPages ?? undefined,
+			totalPages: totalPages ?? undefined,
+			indexedChars: indexedChars ?? undefined,
+			totalChars: totalChars ?? undefined,
+		}, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFulltext;
+Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFulltext;
+
+
+Zotero.Server.LocalAPI.Fulltext = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	async run({ searchParams, libraryID }) {
+		let since = parseInt(searchParams.get('since'));
+		if (Number.isNaN(since)) {
+			return [400, 'text/plain', `Invalid 'since' value '${searchParams.get('since')}'`];
+		}
+		let rows = await Zotero.DB.queryAsync(
+			"SELECT I.key, FI.version "
+				+ "FROM fulltextItems FI JOIN items I USING (itemID) "
+				+ "WHERE libraryID=? AND FI.version>?",
+			[libraryID, since]
+		);
+		let obj = {};
+		for (let row of rows) {
+			obj[row.key] = row.version;
+		}
+		return [200, 'application/json', JSON.stringify(obj, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/fulltext"] = Zotero.Server.LocalAPI.Fulltext;
+Zotero.Server.Endpoints["/api/groups/:groupID/fulltext"] = Zotero.Server.LocalAPI.Fulltext;
+
+
 Zotero.Server.LocalAPI.Searches = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
 
@@ -790,6 +847,19 @@ Zotero.Server.LocalAPI.Tag = class extends LocalAPIEndpoint {
 Zotero.Server.Endpoints["/api/users/:userID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
 Zotero.Server.Endpoints["/api/groups/:groupID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
 
+
+Zotero.Server.LocalAPI.Tag = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	async run({ pathParams, libraryID }) {
+		let tag = decodeURIComponent(pathParams.tag.replaceAll('+', '%20'));
+		let json = await Zotero.Tags.toResponseJSON(libraryID, [{ tag }]);
+		if (!json) return _404;
+		return { data: json };
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
+Zotero.Server.Endpoints["/api/groups/:groupID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
 
 /**
  * Convert a {@link Zotero.DataObject}, or an array of DataObjects, to response JSON
