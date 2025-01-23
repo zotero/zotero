@@ -842,11 +842,10 @@ const IOManager = {
 		// If the last input has a locator, add it into the item
 		let input = _id("bubble-input").getCurrentInput();
 		let locator = Helpers.extractLocator(input.value || "");
-		if (locator) {
-			for (let item of items) {
-				item.label = locator.label;
-				item.locator = locator.locator;
-			}
+		// If there is no locator, make sure we clear it from the citation item
+		for (let item of items) {
+			item.label = locator?.label || null;
+			item.locator = locator?.locator || null;
 		}
 		// Add the item at a position based on current input
 		let bubblePosition = null;
@@ -1009,6 +1008,13 @@ const IOManager = {
 			}
 		}
 		section.querySelector(".header-label").setAttribute("aria-expanded", section.classList.contains("expanded"));
+		// in list mode, if the section collapsed so that there is empty space left, resize the window
+		if (currentLayout.type == "list") {
+			// give the content a moment to expand before window resizing
+			setTimeout(() => {
+				currentLayout.resizeWindow();
+			}, 250);
+		}
 	},
 
 
@@ -1103,14 +1109,14 @@ const IOManager = {
 	},
 
 	_handleInput({ query, debounce }) {
-		// Do not rerun search if the search value is the same
-		// (e.g. focus returns into the last input)
-		if (query == SearchHandler.lastSearchValue) return;
 		// If there is a locator typed, exclude it from the query
 		let locator = Helpers.extractLocator(query);
 		if (locator) {
 			query = query.replace(locator.fullLocatorString, "");
 		}
+		// Do not rerun search if the search value is the same
+		// (e.g. focus returns into the last input)
+		if (query == SearchHandler.lastSearchValue) return;
 		// Run search within the current layout
 		if (debounce) {
 			currentLayout.searchDebounced(query);
