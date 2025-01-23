@@ -202,7 +202,12 @@
 		}
 	}
 }
-	
+
+item-tree-menu-bar[inactive] {
+	max-height: 0 !important;
+	overflow: hidden;
+}
+
 $-itemTypesIcons: (
 	artwork,
 	attachment-epub,
