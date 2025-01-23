@@ -576,13 +576,18 @@
 						justify-content: end;
 					}
 					.details-data {
-						@include focus-ring;
+						@media not (-moz-platform: windows) {
+							@include focus-ring;
+						}
 						margin-inline-end: 0;
 						padding-inline-start: 5px;
 						border-radius: 5px;
 						border: none;
 						box-shadow: 0px 0.5px 2.5px 0px rgba(0, 0, 0, 0.3);
 						width: 250px;
+						@media (-moz-platform: linux) {
+							width: 240px;
+						}
 					}
 					#suppress-author-row {
 						justify-content: start;

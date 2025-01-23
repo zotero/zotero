@@ -387,7 +387,7 @@ integration-citationDialog-btn-cancel =
     .title = { general-cancel }
 
 integration-citationDialog-general-instructions = Use Left/Right Arrow to navigate the items of this citation. Press Tab to select items to add into this citation.
-Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
+Press Shift - { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
 integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
 
 integration-citationDialog-aria-bubble =
