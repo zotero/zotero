@@ -433,7 +433,11 @@ class LibraryLayout extends Layout {
 				// Enter event from reaching KeyboardHandler which would accept the dialog
 				event.preventDefault();
 				event.stopPropagation();
-				IOManager.addItemsToCitation(items, { noInputRefocus: true });
+				let row = event.target;
+				let rowTopBeforeRefresh = row.getBoundingClientRect().top;
+				IOManager.addItemsToCitation(items, { noInputRefocus: true }).then(() => {
+					this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
+				});
 			},
 			emptyMessage: Zotero.getString('pane.items.loading'),
 			columns: itemColumns,
@@ -522,16 +526,7 @@ class LibraryLayout extends Layout {
 			hoveredOverIcon.classList.remove("active");
 			let rowTopBeforeRefresh = row.getBoundingClientRect().top;
 			IOManager.addItemsToCitation([clickedItem], { noInputRefocus: true }).then(() => {
-				// after an item is added, bubble-input's height may increase and push the itemTree down
-				// scroll it back up so that the mouse remains over the same row as before click
-				// do not do it on click of the first row, since then the mouse will be on a header
-				if (rowIndex === 0) return;
-				let rowAfterRefresh = doc.querySelector(`#zotero-items-tree #${row.id}`);
-				let rowTopAfterRefresh = rowAfterRefresh.getBoundingClientRect().top;
-				let delta = rowTopAfterRefresh - rowTopBeforeRefresh;
-				if (delta > 0.1) {
-					rowAfterRefresh.closest(".virtualized-table-body").scrollTop += delta;
-				}
+				this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
 			});
 		}
 		else if (event.type == "mousedown") {
@@ -590,6 +585,20 @@ class LibraryLayout extends Layout {
 		if (event.deltaY !== 0 && event.deltaX === 0) {
 			_id("library-other-items").scrollLeft += event.deltaY;
 			event.preventDefault();
+		}
+	}
+
+	// after an item is added, bubble-input's height may increase and push the itemTree down
+	// scroll it back up so that the mouse remains over the same row as before click
+	// do not do it on click of the first row, since then the mouse will be on a header
+	_scrollItemTreeToRow(rowID, rowTopBeforeRefresh) {
+		let rowIndex = rowID.split("-")[4];
+		if (rowIndex === 0) return;
+		let rowAfterRefresh = doc.querySelector(`#zotero-items-tree #${rowID}`);
+		let rowTopAfterRefresh = rowAfterRefresh.getBoundingClientRect().top;
+		let delta = rowTopAfterRefresh - rowTopBeforeRefresh;
+		if (delta > 0.1) {
+			rowAfterRefresh.closest(".virtualized-table-body").scrollTop += delta;
 		}
 	}
 }
