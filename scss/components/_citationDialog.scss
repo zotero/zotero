@@ -632,7 +632,7 @@
 		visibility: hidden;
 	}
 
-	input[type="checkbox"] {
+	input[type="checkbox"], select, button {
 		// other platforms already get a standard focusring
 		@media (-moz-platform: linux) {
 			@include focus-ring;
