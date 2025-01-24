@@ -87,15 +87,11 @@ browser,
 	background: var(--material-toolbar);
 }
 
-#appcontent {
-	padding: 16px;
-}
-
 #left-tabbox {
 	flex: 1;
 	min-width: 500px;
 	margin: 0 5px 5px 5px;
-	padding-top: 5px; // padding at the top for focus-ring of tabs to not cutoff tabs focusring
+	padding: 16px 0 16px 16px;
 	overflow: clip;
 	
 	tabpanel {
@@ -107,12 +103,9 @@ browser,
 
 #right-pane {
 	min-width: 350px;
-	margin: -16px;
-	margin-inline-start: 0;
 	border-inline-start: var(--material-panedivider);
 
 	#output {
-		width: 100%;
 		height: 100%;
 		background: var(--material-background);
 		outline: none;
