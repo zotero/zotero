@@ -217,8 +217,6 @@
 			this.addEventListener("keypress", this._handleKeypress);
 			this.setAttribute("data-preview-type", "unknown");
 			this._notifierID = Zotero.Notifier.registerObserver(this, ["item"], "attachmentPreview");
-			this._prefObserver = Zotero.Prefs.registerObserver("reader.contentDarkMode", this._handleContentDarkModeChange);
-			this._handleContentDarkModeChange(Zotero.Prefs.get("reader.contentDarkMode"));
 		}
 
 		destroy() {
@@ -651,10 +649,6 @@
 			!scaleRatio && (scaleRatio = defaultSize);
 			this.style.setProperty("--width-height-ratio", scaleRatio);
 		}
-
-		_handleContentDarkModeChange = (useDarkMode) => {
-			this.querySelector(".btn-container").classList.toggle("dark", useDarkMode);
-		};
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
