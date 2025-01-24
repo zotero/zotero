@@ -427,7 +427,6 @@ const ZoteroStandalone = new function() {
 			}
 			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.splitType === 'vertical');
 			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.splitType === 'horizontal');
-			this.updateMenuItemCheckmark('view-menuitem-use-dark-mode-for-content', Zotero.Prefs.get('reader.contentDarkMode'));
 			this.updateMenuItemEnabled('view-menuitem-use-dark-mode-for-content', window.matchMedia('(prefers-color-scheme: dark)').matches);
 		}
 	

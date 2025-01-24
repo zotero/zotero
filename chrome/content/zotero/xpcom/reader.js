@@ -207,7 +207,9 @@ class ReaderInstance {
 			},
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
-			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
+			customThemes: JSON.parse(Zotero.Prefs.get('reader.customThemes')),
+			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
+			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			hyphenation: Zotero.Prefs.get('reader.ebookHyphenate'),
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
@@ -544,6 +546,15 @@ class ReaderInstance {
 				else {
 					this._iframe.parentElement.style.zIndex = 'unset';
 				}
+			},
+			onSaveCustomThemes: (customThemes) => {
+				Zotero.Prefs.set('reader.customThemes', JSON.stringify(customThemes));
+			},
+			onSetLightTheme: (themeName) => {
+				Zotero.Prefs.set('reader.lightTheme', themeName || false);
+			},
+			onSetDarkTheme: (themeName) => {
+				Zotero.Prefs.set('reader.darkTheme', themeName || false);
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 
@@ -555,7 +566,9 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
 			Zotero.Prefs.registerObserver('reader.textSelectionAnnotationMode', this._handleTextSelectionAnnotationModeChange),
-			Zotero.Prefs.registerObserver('reader.contentDarkMode', this._handleContentDarkModeChange),
+			Zotero.Prefs.registerObserver('reader.customThemes', this._handleCustomThemesChange),
+			Zotero.Prefs.registerObserver('reader.lightTheme', this._handleLightThemeChange),
+			Zotero.Prefs.registerObserver('reader.darkTheme', this._handleDarkThemeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.ebookHyphenate', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
@@ -1011,8 +1024,17 @@ class ReaderInstance {
 		this._internalReader.setTextSelectionAnnotationMode(Zotero.Prefs.get('reader.textSelectionAnnotationMode'));
 	};
 
-	_handleContentDarkModeChange = () => {
-		this._internalReader.useDarkModeForContent(Zotero.Prefs.get('reader.contentDarkMode'));
+	_handleCustomThemesChange = () => {
+		let customThemes = JSON.parse(Zotero.Prefs.get('reader.customThemes'));
+		this._internalReader.setCustomThemes(Components.utils.cloneInto(customThemes, this._iframeWindow));
+	};
+
+	_handleLightThemeChange = () => {
+		this._internalReader.setLightTheme(Zotero.Prefs.get('reader.lightTheme'));
+	};
+
+	_handleDarkThemeChange = () => {
+		this._internalReader.setDarkTheme(Zotero.Prefs.get('reader.darkTheme'));
 	};
 
 	_handleEbookPrefChange = () => {
@@ -1464,8 +1486,6 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this._internalReader.splitType === 'vertical');
 		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this._internalReader.splitType === 'horizontal');
-		this._window.document.getElementById('view-menuitem-use-dark-mode-for-content').setAttribute('checked', Zotero.Prefs.get('reader.contentDarkMode'));
-		this._window.document.getElementById('view-menuitem-use-dark-mode-for-content').setAttribute('disabled', !this._window.matchMedia('(prefers-color-scheme: dark)').matches);
 	}
 
 	_onGoMenuOpen() {
