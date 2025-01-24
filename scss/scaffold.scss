@@ -29,20 +29,30 @@ $scaffold-toolbarbutton-icons: (
 	}
 };
 
+#scaffold, #zotero-select-item-dialog {
+	@include contain-richlistbox;
+	@include macOS-normalize-controls;
+}
+
 #scaffold {
 	min-height: 600px;
-	@include contain-richlistbox;
 }
 
 #zotero-select-item-dialog {
 	max-width: 400px;
+	min-height: 330px;
 	max-height: 330px;
-	@include contain-richlistbox;
 }
 
-// Prevent contain-richlistbox from squishing the buttons
+#zotero-selectitems-links {
+	flex: 1 1 0;
+}
+
 #zotero-select-items-buttons {
+	// Prevent contain-richlistbox from squishing the buttons
 	flex-shrink: 0;
+	gap: 6px;
+	padding-top: 4px;
 }
 
 .menubar-container {

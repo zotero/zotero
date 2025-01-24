@@ -43,8 +43,8 @@ Zotero_Ingester_Interface_SelectItems.init = function () {
 		() => Zotero_Ingester_Interface_SelectItems.acceptSelection());
 
 	// Set font size from pref
-	var sbc = document.getElementById('zotero-select-items-container');
-	Zotero.UIProperties.registerRoot(sbc);
+	var dialog = document.querySelector('dialog');
+	Zotero.UIProperties.registerRoot(dialog);
 	
 	this.io = window.arguments[0];
 	var listbox = document.getElementById("zotero-selectitems-links");

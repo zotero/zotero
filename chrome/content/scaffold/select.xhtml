@@ -48,14 +48,10 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 	</script>
 	
-	<vbox id="zotero-select-items-container" flex="1">
-		<box flex="1">
-			<richlistbox id="zotero-selectitems-links" flex="1"></richlistbox>
-		</box>
-		<hbox id="zotero-select-items-buttons">
-			<button label="Select All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll()"/>
-			<button label="Deselect All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll(true)"/>
-		</hbox>
-	</vbox>
+	<richlistbox id="zotero-selectitems-links"></richlistbox>
+	<hbox id="zotero-select-items-buttons">
+		<button label="Select All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll()"/>
+		<button label="Deselect All" oncommand="Zotero_Ingester_Interface_SelectItems.selectAll(true)"/>
+	</hbox>
 </dialog>
 </window>
