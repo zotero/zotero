@@ -471,7 +471,18 @@ class LibraryLayout extends Layout {
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
 			onActivate: () => {}
 		});
-		doc.l10n.setAttributes(_id("collection-tree"), "integration-citationDialog-collections-table");	
+		// Add aria-description with instructions on what this collection tree is for
+		// Voiceover announces the description placed on the actual tree when focus enters it
+		if (Zotero.isMac) {
+			doc.l10n.setAttributes(_id("collection-tree"), "integration-citationDialog-collections-table");
+		}
+		// JAWS does not. It will announce the description and label of the parent with role=group
+		// on JAWS+Tab keypress. So on windows, place aria-label and description on the rows' container.
+		else {
+			let rowsContainer = doc.querySelector("#collection-tree .windowed-list");
+			doc.l10n.setAttributes(rowsContainer, "integration-citationDialog-collections-table");
+			rowsContainer.setAttribute("role", "group");
+		}
 	}
 	
 	async _onCollectionSelection() {
