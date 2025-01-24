@@ -299,24 +299,27 @@ class TranslationChild extends JSWindowActorChild {
 		const contentWindow = this.contentWindow;
 		const document = this.document;
 
-		function readyEnough() {
-			return document.readyState === "complete" || document.readyState === "interactive";
-		}
-
-		if (readyEnough()) {
+		if (document.readyState === "complete") {
 			return Promise.resolve();
 		}
 		return new Promise((resolve, reject) => {
+			function ready() {
+				document.removeEventListener("readystatechange", onChange);
+				contentWindow.removeEventListener("pagehide", onChange);
+				resolve();
+			}
+			
 			function onChange(event) {
 				if (event.type === "pagehide") {
 					document.removeEventListener("readystatechange", onChange);
 					contentWindow.removeEventListener("pagehide", onChange);
 					reject(new Error("document unloaded before it was ready"));
 				}
-				else if (readyEnough()) {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					resolve();
+				else if (document.readyState === "complete") {
+					ready();
+				}
+				else if (document.readyState === "interactive") {
+					setTimeout(ready, 100);
 				}
 			}
 			document.addEventListener("readystatechange", onChange);
