@@ -248,11 +248,13 @@ class RemoteTranslate {
 	/**
 	 * Create a test on the browser's current page.
 	 *
+	 * @param {Object} [testInit]
+	 * @param {boolean | number} [testInit.defer]
 	 * @return {Promise<Object | null>} Resolves to the created test object (null on error)
 	 */
-	newTest() {
+	newTest(testInit) {
 		let actor = this._browser.browsingContext.currentWindowGlobal.getActor("Translation");
-		return actor.sendQuery("newTest", { translator: this._translator, id: this._id });
+		return actor.sendQuery("newTest", { translator: this._translator, testInit, id: this._id });
 	}
 
 	/**

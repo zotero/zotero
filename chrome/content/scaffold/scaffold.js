@@ -2113,20 +2113,6 @@ var Scaffold = new function () {
 					requireSuccessfulStatus: true
 				});
 
-				if (test.defer) {
-					_logOutput("Waiting " + (Zotero_TranslatorTester.DEFER_DELAY / 1000)
-						+ " second(s) for page content to settle");
-					await Zotero.Promise.delay(Zotero_TranslatorTester.DEFER_DELAY);
-				}
-				else {
-					// Wait just a bit for things to settle
-					await Zotero.Promise.delay(1000);
-				}
-
-				if (browser.currentURI.spec != test.url) {
-					_logOutput("Page URL differs from test. Will be updated. " + browser.currentURI.spec);
-				}
-
 				let translate = new RemoteTranslate({ disableErrorReporting: true });
 				try {
 					await translate.setBrowser(browser);
@@ -2136,10 +2122,11 @@ var Scaffold = new function () {
 					translate.setHandler("error", _error);
 					translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
 					
-					let newTest = await translate.newTest();
+					let newTest = await translate.newTest({ defer: test.defer });
 					newTest = _sanitizeItemsInTest(newTest);
-					if (test.defer) {
-						newTest.defer = true;
+
+					if (newTest.url != test.url) {
+						_logOutput("Page URL differs from test. Will be updated. " + newTest.url);
 					}
 					
 					this.newTests.push(newTest);

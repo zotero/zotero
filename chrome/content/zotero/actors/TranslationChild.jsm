@@ -115,7 +115,7 @@ class TranslationChild extends JSWindowActorChild {
 				}
 			}
 			case 'newTest': {
-				let { translator, id } = data;
+				let { translator, testInit, id } = data;
 				let { Zotero_TranslatorTester } = this._sandbox;
 				try {
 					let tester = new Zotero_TranslatorTester(
@@ -124,6 +124,7 @@ class TranslationChild extends JSWindowActorChild {
 						(_tester, obj) => this._debug(id, obj),
 						this._makeTranslatorProvider(id),
 					);
+					await tester.waitForDeferDelay(testInit?.defer);
 					return await new Promise((resolve) => {
 						tester.newTest(
 							this.contentWindow.document,
