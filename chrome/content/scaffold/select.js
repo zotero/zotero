@@ -61,11 +61,13 @@ Zotero_Ingester_Interface_SelectItems.init = function () {
 			title = item;
 		}
 
-		let itemNode = document.createXULElement("richlistitem");
 		let checkbox = document.createXULElement("checkbox");
 		checkbox.checked = checked;
 		checkbox.label = title;
-		itemNode.setAttribute("value", i);
+		checkbox.setAttribute('native', 'true');
+
+		let itemNode = document.createXULElement("richlistitem");
+		itemNode.value = i;
 		itemNode.append(checkbox);
 		itemNode.addEventListener('click', (event) => {
 			if (event.target == itemNode) {
