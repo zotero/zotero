@@ -1693,6 +1693,35 @@ Zotero.Utilities.Internal = {
 		elem.appendChild(menu);
 		return menu;
 	},
+
+	/**
+	 * Adding many top level menuitems specifically with icons freezes UI on macOS.
+	 * To fix it, hide the icons from all menuitems except for the first few and insert them into the DOM.
+	 * Then, run a job through requestIdleCallback to make icons visible on remaining menuitems whenever the browser is free.
+	 * @param {Node<menupopup>} popup containing menuitems with icons
+	 */
+	showIconsDynamically(popup) {
+		// Here, the images are removed from all menuitems but the first 30 
+		let menuItemsWithHiddenIcon = [...popup.childNodes].filter(n => n.getAttribute("image")).slice(30);
+		for (let node of menuItemsWithHiddenIcon) {
+			node.setAttribute("hidden-image", node.getAttribute("image"));
+			node.removeAttribute("image");
+		}
+		// Job to re-add the image ran whenever the browser is free
+		let currentIndex = 0;
+		function showNextBatchOfIcons(deadline) {
+			while (deadline.timeRemaining() > 0 && currentIndex < menuItemsWithHiddenIcon.length) {
+			  let menuitem = menuItemsWithHiddenIcon[currentIndex++];
+			  menuitem.setAttribute("image", menuitem.getAttribute("hidden-image"));
+			  menuitem.removeAttribute("hidden-image");
+			}
+			if (currentIndex < menuItemsWithHiddenIcon.length) {
+			  requestIdleCallback(showNextBatchOfIcons);
+			}
+		  }
+		
+		requestIdleCallback(showNextBatchOfIcons);
+	},
 	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {

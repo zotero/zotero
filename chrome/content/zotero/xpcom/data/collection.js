@@ -490,7 +490,7 @@ Zotero.Collection.prototype.hasItem = function (item) {
 
 
 Zotero.Collection.prototype.hasDescendent = function (type, id) {
-	var descendents = this.getDescendents();
+	var descendents = this.getDescendents(false, type);
 	for (var i=0, len=descendents.length; i<len; i++) {
 		if (descendents[i].type == type && descendents[i].id == id) {
 			return true;

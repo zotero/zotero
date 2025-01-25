@@ -4054,6 +4054,8 @@ var ZoteroPane = new function()
 		
 		// Build menus for each top-level collection of this library
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		let children = selected.getDescendents(true, "collection");
+		let childIDs = new Set(children.map(col => col.id));
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
@@ -4070,9 +4072,12 @@ var ZoteroPane = new function()
 					// can't move collection into itself, its parent or its children
 					return selected == target
 						|| selected.parentKey == target.key
-						|| selected.hasDescendent('collection', target.id);
+						|| childIDs.has(target.id);
 				}
 			);
+			if (Zotero.isMac) {
+				Zotero.Utilities.Internal.showIconsDynamically(popup);
+			}
 			popup.append(menuItem);
 		}
 	};
@@ -4156,6 +4161,9 @@ var ZoteroPane = new function()
 			);
 			popup.append(menuItem);
 		}
+		if (Zotero.isMac) {
+			Zotero.Utilities.Internal.showIconsDynamically(popup);
+		}
 	};
 
 	this.buildAddItemToCollectionMenu = function (event, items = this.getSelectedItems()) {
@@ -4179,7 +4187,7 @@ var ZoteroPane = new function()
 		if (items.some(item => item.libraryID !== libraryID)) {
 			throw new Error('All items must be the same library');
 		}
-		
+
 		let collections = Zotero.Collections.getByLibrary(libraryID);
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
@@ -4197,6 +4205,9 @@ var ZoteroPane = new function()
 			popup.append(menuItem);
 		}
 
+		if (Zotero.isMac) {
+			Zotero.Utilities.Internal.showIconsDynamically(popup);
+		}
 		separator.hidden = !collections.length;
 	};
 
