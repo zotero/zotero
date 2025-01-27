@@ -4523,19 +4523,13 @@ var ZoteroPane = new function()
 		var libraryID;
 		if (Zotero_Tabs.selectedType === 'library') {
 			let collectionTreeRow = this.getCollectionTreeRow();
-			if (link) {
-				if (collectionTreeRow.isWithinGroup()) {
-					Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
-					return null;
-				}
-				else if (collectionTreeRow.isPublications()) {
-					Zotero.alert(
-						null,
-						Zotero.getString('general.error'),
-						Zotero.getString('publications.error.linkedFilesCannotBeAdded')
-					);
-					return null;
-				}
+			if (link && collectionTreeRow.isPublications()) {
+				Zotero.alert(
+					null,
+					Zotero.getString('general.error'),
+					Zotero.getString('publications.error.linkedFilesCannotBeAdded')
+				);
+				return null;
 			}
 			libraryID = collectionTreeRow.ref.libraryID;
 		}
@@ -4550,6 +4544,10 @@ var ZoteroPane = new function()
 		// TODO: disable in menu
 		if (!this.canEditFiles()) {
 			this.displayCannotEditLibraryFilesMessage();
+			return null;
+		}
+		if (link && Zotero.Libraries.get(libraryID).isGroup) {
+			Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
 			return null;
 		}
 		
