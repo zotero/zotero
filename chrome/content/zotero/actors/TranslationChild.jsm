@@ -124,7 +124,9 @@ class TranslationChild extends JSWindowActorChild {
 						(_tester, obj) => this._debug(id, obj),
 						this._makeTranslatorProvider(id),
 					);
-					await tester.waitForDeferDelay(testInit?.defer);
+					if (testInit) {
+						await tester.waitForDeferDelay(testInit);
+					}
 					return await new Promise((resolve) => {
 						tester.newTest(
 							this.contentWindow.document,
