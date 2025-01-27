@@ -5652,12 +5652,13 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 				return (await IOUtils.stat(path)).size;
 			}
 			catch (e) {
-				if (e.name != 'NotFoundError') {
+				if (e.name != 'NotFoundError'
+						&& !(e.name == 'OperationError' && e.message.includes('NS_ERROR_FILE_UNRECOGNIZED_PATH'))) {
 					throw e;
 				}
 			}
 		}
-		return undefined
+		return undefined;
 	}
 	
 	let json = this.toResponseJSON(options);

@@ -3147,4 +3147,17 @@ describe("Zotero.Item", function () {
 			}
 		});
 	});
+
+	describe("#toResponseJSONAsync()", function () {
+		it("should not throw when attachment path is invalid", async function () {
+			let item = await createDataObject('item');
+			let attachment = new Zotero.Item('attachment');
+			attachment.parentItemID = item.id;
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_LINKED_FILE;
+			attachment.attachmentPath = '\\Invalid//Path/:C:/Users/Bad/\\Documents\\./paper.pdf';
+			await attachment.saveTx();
+
+			assert.isUndefined((await item.toResponseJSONAsync()).links.attachment.attachmentSize);
+		});
+	});
 });
