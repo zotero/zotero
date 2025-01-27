@@ -1,5 +1,5 @@
 .banner-container > .banner {
-	@include macOS-normalize-controls;;
+	@include macOS-normalize-controls;
 
 	display: flex;
 	justify-content: center;
@@ -8,7 +8,15 @@
 	position: relative;
 	white-space: nowrap;
 	overflow: hidden;
-
+	
+	line-height: 2.2em;
+	font-size: 13.5px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-inline-start: 1em;
+	padding-inline-end: 8px;
+	font-weight: 600;
+	
 	label[is="text-link"], .link {
 		color: inherit;
 		border: none;
@@ -39,67 +47,66 @@
 	}
 }
 
-#post-upgrade-container {
+// Add drop shadow after banner that's followed by another
+//
+// We set a z-index in ZoteroPane.setBannerZIndexes() to make this work
+.banner-container:has(~ .banner-container:not([collapsed="true"])) {
+	box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+#post-upgrade-container, #mac-word-plugin-install-container {
 	background: var(--material-background);
+}
+
+#post-upgrade-banner {
+	background: var(--accent-blue30);
+	color: var(--fill-primary);
+	flex-wrap: wrap;
+	gap: 8px;
+	font-weight: normal;
 	
-	#post-upgrade-banner {
-		background: var(--accent-blue30);
-		color: var(--fill-primary);
+	.link {
+		color: var(--accent-blue);
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	
+	#post-upgrade-centered {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		flex-wrap: wrap;
 		gap: 8px;
-		padding: 6px 8px;
-	
-		.link {
-			color: var(--accent-blue);
-			text-decoration: underline;
-			cursor: pointer;
-		}
-		
-		#post-upgrade-centered {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-wrap: wrap;
-			gap: 8px;
-			flex: 1 auto;
-	
-			#post-upgrade-density {
-				@media (-moz-platform: windows) {
-					radio {
-						height: 24px;
-						margin: 0;
-					}
-				}
-			}
-		}
-		
-		#post-upgrade-new-features-link {
-			font-weight: bold;
-			padding-inline: unset;
-		}
-		
-		#post-upgrade-buttons {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-			margin-inline-start: auto;
-	
+		flex: 1 auto;
+
+		#post-upgrade-density {
 			@media (-moz-platform: windows) {
-				button {
+				radio {
 					height: 24px;
-					margin: 0 !important;
+					margin: 0;
 				}
 			}
 		}
 	}
-}
+	
+	#post-upgrade-new-features-link {
+		font-weight: bold;
+		padding-inline: unset;
+	}
+	
+	#post-upgrade-buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-inline-start: auto;
 
-#retracted-items-banner, #sync-reminder-banner, #architecture-warning-banner,
-#mac-word-plugin-install-warning {
-	line-height: 2.2em;
-	font-size: 13.5px;
-	padding: 0 1em;
-	font-weight: 600;
+		@media (-moz-platform: windows) {
+			button {
+				height: 24px;
+				margin: 0 !important;
+			}
+		}
+	}
 }
 
 #retracted-items-banner {
@@ -115,12 +122,11 @@
 	}
 }
 
-#mac-word-plugin-install-warning {
+#mac-word-plugin-install-banner {
 	background: var(--accent-blue30);
 	color: var(--fill-primary);
 	font-weight: normal;
 	border-bottom: #a9a9a9 .5px solid;
-	line-height: 2.5em;
 }
 
 #mac-word-plugin-install-remind-later {

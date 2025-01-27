@@ -630,6 +630,7 @@ var ZoteroPane = new function()
 		}
 		
 		setTimeout(function () {
+			ZoteroPane.setBannerZIndexes();
 			ZoteroPane.showPostUpgradeBanner();
 			ZoteroPane.showRetractionBanner();
 			ZoteroPane.showArchitectureWarning();
@@ -6344,6 +6345,19 @@ var ZoteroPane = new function()
 		}
 	}
 	
+	
+	/**
+	 * Set descending z-index on banner containers so drop-shadow works when multiple are visible
+	 */
+	this.setBannerZIndexes = function () {
+		var containers = document.querySelectorAll('.banner-container');
+		var max = containers.length;
+		for (let container of containers) {
+			container.style.zIndex = max--;
+		}
+	};
+	
+	
 	/**
 	 * Show a retraction banner if there are retracted items that we haven't warned about
 	 */
@@ -6429,7 +6443,7 @@ var ZoteroPane = new function()
 	 */
 	this.showMacWordPluginInstallWarning = function () {
 		return new Promise((resolve) => {
-			const panel = document.getElementById('mac-word-plugin-install-warning');
+			const panel = document.getElementById('mac-word-plugin-install-container');
 			const action = document.getElementById('mac-word-plugin-install-action');
 			const remind = document.getElementById('mac-word-plugin-install-remind-later');
 			const dontAskAgain = document.getElementById('mac-word-plugin-install-dont-ask-again');
@@ -6454,7 +6468,7 @@ var ZoteroPane = new function()
 	};
 	
 	this.hideMacWordPluginInstallWarning = function () {
-		document.querySelector('#mac-word-plugin-install-warning').setAttribute('collapsed', true);
+		document.querySelector('#mac-word-plugin-install-container').setAttribute('collapsed', true);
 	};
 
 	this.showArchitectureWarning = async function () {
