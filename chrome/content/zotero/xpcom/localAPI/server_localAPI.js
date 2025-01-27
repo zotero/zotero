@@ -856,19 +856,6 @@ Zotero.Server.Endpoints["/api/users/:userID/tags/:tag"] = Zotero.Server.LocalAPI
 Zotero.Server.Endpoints["/api/groups/:groupID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
 
 
-Zotero.Server.LocalAPI.Tag = class extends LocalAPIEndpoint {
-	supportedMethods = ['GET'];
-
-	async run({ pathParams, libraryID }) {
-		let tag = decodeURIComponent(pathParams.tag.replaceAll('+', '%20'));
-		let json = await Zotero.Tags.toResponseJSON(libraryID, [{ tag }]);
-		if (!json) return _404;
-		return { data: json };
-	}
-};
-Zotero.Server.Endpoints["/api/users/:userID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
-Zotero.Server.Endpoints["/api/groups/:groupID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
-
 /**
  * Convert a {@link Zotero.DataObject}, or an array of DataObjects, to response JSON
  * 		with appropriate included data based on the 'include' query parameter.
