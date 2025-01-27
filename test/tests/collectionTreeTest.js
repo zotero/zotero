@@ -691,6 +691,23 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(cv.selection.focused, 0);
 			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item1.id, item2.id]);
 		});
+		
+		it("should switch to trash if item is in trash", async function () {
+			var item = await createDataObject('item', { deleted: true });
+			await cv.selectItems([item.id]);
+			await waitForItemsLoad(win);
+			assert.isTrue(zp.getCollectionTreeRow().isTrash());
+			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item.id]);
+		});
+		
+		it("should switch to trash if parent of child note is in trash", async function () {
+			var item = await createDataObject('item', { deleted: true });
+			var note = await createDataObject('item', { itemType: 'note', parentItemID: item.id });
+			await cv.selectItems([note.id]);
+			await waitForItemsLoad(win);
+			assert.isTrue(zp.getCollectionTreeRow().isTrash());
+			assert.sameMembers(zp.itemsView.getSelectedItems(true), [note.id]);
+		});
 	});
 	
 	describe("#onDrop()", function () {
