@@ -757,16 +757,24 @@ Zotero.Server.LocalAPI.ItemFullText = class extends LocalAPIEndpoint {
 			"SELECT indexedPages, totalPages, indexedChars, totalChars, version FROM fulltextItems WHERE itemID=?",
 			item.id
 		);
-		return [200, {
-			'Content-Type': 'application/json',
-			'Last-Modified-Version': version,
-		}, JSON.stringify({
-			content: await Zotero.File.getContentsAsync(file),
-			indexedPages: indexedPages ?? undefined,
-			totalPages: totalPages ?? undefined,
-			indexedChars: indexedChars ?? undefined,
-			totalChars: totalChars ?? undefined,
-		}, null, 4)];
+		return [
+			200,
+			{
+				'Content-Type': 'application/json',
+				'Last-Modified-Version': version,
+			},
+			JSON.stringify(
+				{
+					content: await Zotero.File.getContentsAsync(file),
+					indexedPages: indexedPages ?? undefined,
+					totalPages: totalPages ?? undefined,
+					indexedChars: indexedChars ?? undefined,
+					totalChars: totalChars ?? undefined,
+				},
+				null,
+				4
+			)
+		];
 	}
 };
 Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFullText;
