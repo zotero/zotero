@@ -736,9 +736,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return numSelected;
 		}
 		
-		// If there's a single item and it's in the trash, switch to that
-		if (items.length == 1 && items[0].deleted) {
-			Zotero.debug("Item is deleted; switching to trash");
+		// If there's a single item and it or an ancestor are in the trash, switch to that
+		if (items.length == 1 && items[0].isInTrash()) {
+			Zotero.debug("Item is in trash; switching to trash");
 			await this.selectTrash(libraryID);
 		}
 		else {

@@ -2183,6 +2183,22 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 }
 
 
+/**
+ * Determine whether the item or any of its ancestors is in the trash
+ *
+ * @return {Boolean}
+ */
+Zotero.Item.prototype.isInTrash = function () {
+	if (this.deleted) {
+		return true;
+	}
+	if (this.isTopLevelItem()) {
+		return false;
+	}
+	return this.parentItem.isInTrash();
+};
+
+
 ////////////////////////////////////////////////////////
 //
 //
