@@ -741,7 +741,7 @@ Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/file/view/url"] = Zot
 Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view/url"] = Zotero.Server.LocalAPI.ItemFile;
 
 
-Zotero.Server.LocalAPI.ItemFulltext = class extends LocalAPIEndpoint {
+Zotero.Server.LocalAPI.ItemFullText = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
 
 	async run({ pathParams, libraryID }) {
@@ -769,11 +769,11 @@ Zotero.Server.LocalAPI.ItemFulltext = class extends LocalAPIEndpoint {
 		}, null, 4)];
 	}
 };
-Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFulltext;
-Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFulltext;
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFullText;
+Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/fulltext"] = Zotero.Server.LocalAPI.ItemFullText;
 
 
-Zotero.Server.LocalAPI.Fulltext = class extends LocalAPIEndpoint {
+Zotero.Server.LocalAPI.FullText = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
 
 	async run({ searchParams, libraryID }) {
@@ -794,8 +794,8 @@ Zotero.Server.LocalAPI.Fulltext = class extends LocalAPIEndpoint {
 		return [200, 'application/json', JSON.stringify(obj, null, 4)];
 	}
 };
-Zotero.Server.Endpoints["/api/users/:userID/fulltext"] = Zotero.Server.LocalAPI.Fulltext;
-Zotero.Server.Endpoints["/api/groups/:groupID/fulltext"] = Zotero.Server.LocalAPI.Fulltext;
+Zotero.Server.Endpoints["/api/users/:userID/fulltext"] = Zotero.Server.LocalAPI.FullText;
+Zotero.Server.Endpoints["/api/groups/:groupID/fulltext"] = Zotero.Server.LocalAPI.FullText;
 
 
 Zotero.Server.LocalAPI.Searches = class extends LocalAPIEndpoint {
