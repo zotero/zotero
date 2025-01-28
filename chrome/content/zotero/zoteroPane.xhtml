@@ -1025,6 +1025,9 @@
 				oncommand="ZoteroPane.tagSelector.openTagSplitterWindow(event)"/>
 			<menuitem label="&zotero.tagSelector.deleteTag;"
 				oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
+			<menuseparator/>
+			<menuitem id="tag-menu-exclude-tag" data-l10n-id="tagselector-exclude-tag"
+				oncommand="ZoteroPane.tagSelector.excludeTag(); event.stopPropagation();"/>
 		</menupopup>
 		<menupopup id="tag-selector-view-settings-menu"
 			onpopupshowing="

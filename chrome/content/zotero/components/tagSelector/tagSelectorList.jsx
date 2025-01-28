@@ -175,6 +175,9 @@ class TagList extends React.PureComponent {
 		if (tag.disabled) {
 			className += ' disabled';
 		}
+		if (tag.excluded) {
+			className += ' excluded';
+		}
 		if (Zotero.Utilities.Internal.containsEmoji(tag.name)) {
 			className += ' emoji';
 		}
@@ -199,6 +202,13 @@ class TagList extends React.PureComponent {
 		props.role = "checkbox";
 		props['aria-checked'] = tag.selected;
 		props['aria-disabled'] = tag.disabled;
+		// Add a note to excluded tags to differentiate them from just selected
+		if (tag.excluded) {
+			props['data-l10n-id'] = "tag-excluded";
+		}
+		else {
+			props['aria-description'] = '';
+		}
 		// Don't specify explicit width unless we're truncating, because for some reason the width
 		// from canvas can sometimes be slightly smaller than the actual width, resulting in an
 		// unnecessary ellipsis.
@@ -305,6 +315,11 @@ class TagList extends React.PureComponent {
 	};
 
 	async handleKeyDown(e) {
+		if (e.key == "Backspace") {
+			let tag = e.target.textContent;
+			this.props.excludeTag(tag);
+			return;
+		}
 		if (!["ArrowRight", "ArrowLeft"].includes(e.key)) return;
 		// If the windowing kicks in, the node of the initially-focused tag may not
 		// exist, so first we may need to scroll to it.
@@ -393,6 +408,7 @@ class TagList extends React.PureComponent {
 		onSelect: PropTypes.func,
 		onKeyDown: PropTypes.func,
 		onTagContext: PropTypes.func,
+		excludeTag: PropTypes.func,
 		loaded: PropTypes.bool,
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
