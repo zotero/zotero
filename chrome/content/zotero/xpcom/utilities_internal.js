@@ -1700,7 +1700,7 @@ Zotero.Utilities.Internal = {
 	 * Then, run a job through requestIdleCallback to make icons visible on remaining menuitems whenever the browser is free.
 	 * @param {Node<menupopup>} popup containing menuitems with icons
 	 */
-	showIconsDynamically(popup) {
+	showMenuIconsOnIdle(popup) {
 		// Here, the images are removed from all menuitems but the first 30
 		let menuItemsWithHiddenIcon = [...popup.childNodes].filter(n => n.getAttribute("image")).slice(30);
 		for (let node of menuItemsWithHiddenIcon) {

@@ -4076,7 +4076,7 @@ var ZoteroPane = new function()
 				}
 			);
 			if (Zotero.isMac) {
-				Zotero.Utilities.Internal.showIconsDynamically(popup);
+				Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
 			}
 			popup.append(menuItem);
 		}
@@ -4162,7 +4162,7 @@ var ZoteroPane = new function()
 			popup.append(menuItem);
 		}
 		if (Zotero.isMac) {
-			Zotero.Utilities.Internal.showIconsDynamically(popup);
+			Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
 		}
 	};
 
@@ -4206,7 +4206,7 @@ var ZoteroPane = new function()
 		}
 
 		if (Zotero.isMac) {
-			Zotero.Utilities.Internal.showIconsDynamically(popup);
+			Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
 		}
 		separator.hidden = !collections.length;
 	};
