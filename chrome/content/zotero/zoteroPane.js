@@ -4187,7 +4187,7 @@ var ZoteroPane = new function()
 		if (items.some(item => item.libraryID !== libraryID)) {
 			throw new Error('All items must be the same library');
 		}
-
+		
 		let collections = Zotero.Collections.getByLibrary(libraryID);
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
