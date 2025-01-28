@@ -1713,14 +1713,14 @@ Zotero.Utilities.Internal = {
 		let currentIndex = 0;
 		function showNextBatchOfIcons(deadline) {
 			while (deadline.timeRemaining() > 0 && currentIndex < menuItemsWithHiddenIcon.length) {
-			  let menuitem = menuItemsWithHiddenIcon[currentIndex++];
-			  menuitem.setAttribute("image", menuitem.getAttribute("hidden-image"));
-			  menuitem.removeAttribute("hidden-image");
+				let menuitem = menuItemsWithHiddenIcon[currentIndex++];
+				menuitem.setAttribute("image", menuitem.getAttribute("hidden-image"));
+				menuitem.removeAttribute("hidden-image");
 			}
 			if (currentIndex < menuItemsWithHiddenIcon.length) {
-			  requestIdleCallback(showNextBatchOfIcons);
+				requestIdleCallback(showNextBatchOfIcons);
 			}
-		  }
+		}
 		
 		requestIdleCallback(showNextBatchOfIcons);
 	},
