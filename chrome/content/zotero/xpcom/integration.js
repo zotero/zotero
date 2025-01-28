@@ -1529,6 +1529,13 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	Zotero.debug(JSON.stringify(citation.toJSON()));
 
 	var mode = "chrome,centerscreen,resizable=true";
+	if (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+		mode += ",popup";
+	}
+	else {
+		mode += ",alwaysRaised";
+	}
+
 	Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationDialog.xhtml', mode, io);
 
 	// -------------------
