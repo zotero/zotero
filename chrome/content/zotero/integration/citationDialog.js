@@ -57,7 +57,7 @@ function onLoad() {
 	// Initial height for the dialog (search row with no bubbles)
 	window.resizeTo(window.innerWidth, Helpers.getSearchRowHeight());
 
-	_id("keepSorted").disabled = !io.sortable;
+	_id("keepSorted").disabled = !io.sortable || isCitingNotes;
 	_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
 	let visibleSettings = !!_id("settings-popup").querySelector("input:not([disabled])");
 	_id("settings-button").hidden = !visibleSettings;
@@ -81,6 +81,13 @@ function onLoad() {
 		IOManager.updateBubbleInput();
 		IOManager.setInitialDialogMode();
 	});
+
+	// Disabled all multiselect when citing notes
+	if (isCitingNotes) {
+		for (let multiselectable of [...doc.querySelectorAll("[data-multiselectable]")]) {
+			delete multiselectable.dataset.multiselectable;
+		}
+	}
 }
 
 
@@ -429,6 +436,7 @@ class LibraryLayout extends Layout {
 				libraryLayout.updateSelectedItems();
 			},
 			regularOnly: !isCitingNotes,
+			multiSelect: !isCitingNotes,
 			onActivate: (event, items) => {
 				// Enter event from reaching KeyboardHandler which would accept the dialog
 				event.preventDefault();
@@ -942,13 +950,14 @@ const IOManager = {
 
 	handleItemClick(event) {
 		let targetItem = event.target.closest(".item");
+		let multiselectable = targetItem.closest("[data-multiselectable]");
 		// Cmd/Ctrl + mouseclick toggles selected item node
-		if ((Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) {
+		if (multiselectable && (Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) {
 			IOManager.toggleItemNodeSelect(targetItem);
 			return;
 		}
 		// Shift + click selects a range
-		if (event.shiftKey) {
+		if (multiselectable && event.shiftKey) {
 			let itemNodes = [..._id(`${currentLayout.type}-layout`).querySelectorAll(".item")];
 			let firstNode = _id(`${currentLayout.type}-layout`).querySelector(".item.selected") || itemNodes[0];
 			IOManager.selectItemNodesRange(firstNode, targetItem);
