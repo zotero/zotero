@@ -1695,10 +1695,12 @@ Zotero.Utilities.Internal = {
 	},
 
 	/**
-	 * Adding many top level menuitems specifically with icons freezes UI on macOS.
-	 * To fix it, hide the icons from all menuitems except for the first few and insert them into the DOM.
-	 * Then, run a job through requestIdleCallback to make icons visible on remaining menuitems whenever the browser is free.
-	 * @param {Node<menupopup>} popup containing menuitems with icons
+	 * Adding many top-level menuitems with icons freezes the UI on macOS. To fix it, hide the icons
+	 * from all menuitems except for the first few and insert them into the DOM. Then, run a job
+	 * through requestIdleCallback to make icons visible on remaining menuitems whenever the browser
+	 * is free.
+	 *
+	 * @param {Node<menupopup>} popup
 	 */
 	showMenuIconsOnIdle(popup) {
 		// Here, the images are removed from all menuitems but the first 30
