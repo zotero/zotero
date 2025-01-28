@@ -5508,24 +5508,21 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			}
 			
 			if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
-				if (options.syncedStorageProperties) {
-					let mtime = this.attachmentSyncedModificationTime;
-					// There's never a reason to include these if they're null. This can happen if
-					// we're restoring to server from a copy of the database that was never
-					// file-synced. We don't want to clear the remote file associations when that
-					// happens.
-					if (mtime !== null) {
-						obj.mtime = mtime;
-					}
-					let md5 = this.attachmentSyncedHash;
-					if (md5 !== null) {
-						obj.md5 = md5;
-					}
+				// Add synced storage properties even if syncedStorageProperties is false,
+				// since we can't get the local properties synchronously
+				// We'll overwrite them in toResponseJSONAsync() if possible
+				
+				let mtime = this.attachmentSyncedModificationTime;
+				// There's never a reason to include these if they're null. This can happen if
+				// we're restoring to server from a copy of the database that was never
+				// file-synced. We don't want to clear the remote file associations when that
+				// happens.
+				if (mtime !== null) {
+					obj.mtime = mtime;
 				}
-				else {
-					// TEMP
-					//obj.mtime = (yield this.attachmentModificationTime) || null;
-					//obj.md5 = (yield this.attachmentHash) || null;
+				let md5 = this.attachmentSyncedHash;
+				if (md5 !== null) {
+					obj.md5 = md5;
 				}
 			}
 		}
@@ -5670,6 +5667,12 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 	else if (this.isImportedAttachment()) {
 		json.links.enclosure.length = await getFileSize(this);
 	}
+	
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
+		json.data.mtime = await this.attachmentModificationTime ?? null;
+		json.data.md5 = await this.attachmentHash ?? null;
+	}
+	
 	return json;
 };
 
