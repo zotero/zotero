@@ -4075,10 +4075,10 @@ var ZoteroPane = new function()
 						|| childIDs.has(target.id);
 				}
 			);
-			if (Zotero.isMac) {
-				Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
-			}
 			popup.append(menuItem);
+		}
+		if (Zotero.isMac) {
+			Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
 		}
 	};
 
@@ -4172,9 +4172,13 @@ var ZoteroPane = new function()
 
 		items = Zotero.Items.keepTopLevel(items);
 		
-		let newCollectionMenuitem = document.createXULElement('menuitem');
-		document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
-		newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
+		let newCollectionMenuitem = popup.querySelector(`[data-l10n-id="menu-new-collection"]`);
+		// Do not recreate new collections menu on subsequent calls 
+		if (!newCollectionMenuitem) {
+			newCollectionMenuitem = document.createXULElement('menuitem');
+			document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
+			newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
+		}
 		let separator = document.createXULElement('menuseparator');
 		popup.replaceChildren(newCollectionMenuitem, separator);
 		
