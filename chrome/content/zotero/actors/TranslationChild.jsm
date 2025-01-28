@@ -131,7 +131,12 @@ class TranslationChild extends JSWindowActorChild {
 						tester.newTest(
 							this.contentWindow.document,
 							Cu.exportFunction(
-								(_, test) => resolve(test),
+								(_, test) => {
+									if (testInit?.defer) {
+										test.defer = testInit.defer;
+									}
+									resolve(test);
+								},
 								this._sandbox
 							),
 							Cu.exportFunction(
