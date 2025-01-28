@@ -881,7 +881,8 @@ async function toResponseJSON(dataObjectOrObjects, searchParams) {
 	let responseJSON = dataObject.toResponseJSONAsync
 		? await dataObject.toResponseJSONAsync({
 			apiURL: `http://localhost:${Zotero.Server.port}/api/`,
-			includeGroupDetails: true
+			includeGroupDetails: true,
+			syncedVersionProperty: false,
 		})
 		: dataObject;
 	
