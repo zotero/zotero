@@ -269,7 +269,7 @@ describe("Item pane", function () {
 			
 			var menupopup = itemBox.querySelector('#zotero-creator-transform-menu');
 			// Fake a right-click
-			doc.popupNode = parent;
+			itemBox._popupNode = parent;
 			menupopup.openPopup(
 				parent, "after_start", 0, 0, true, false, new MouseEvent('click', { button: 2 })
 			);
@@ -298,7 +298,7 @@ describe("Item pane", function () {
 			var firstlast = label.closest('.creator-type-value');
 			var menupopup = itemBox.querySelector('#zotero-creator-transform-menu');
 			// Fake a right-click
-			doc.popupNode = firstlast;
+			itemBox._popupNode = firstlast;
 			menupopup.openPopup(
 				firstlast, "after_start", 0, 0, true, false, new MouseEvent('click', { button: 2 })
 			);
