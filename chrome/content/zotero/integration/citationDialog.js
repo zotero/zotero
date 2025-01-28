@@ -88,6 +88,13 @@ function onLoad() {
 			delete multiselectable.dataset.multiselectable;
 		}
 	}
+
+	// Move dialog towards the center (it's needed even though we open the dialog with centerscreen param)
+	let targetX = Math.floor((window.screen.width - window.outerWidth) / 2);
+	let targetY = window.screen.height / 3;
+	setTimeout(() => {
+		window.moveTo(targetX, targetY);
+	});
 }
 
 
