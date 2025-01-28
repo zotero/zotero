@@ -52,6 +52,61 @@ describe("Zotero.DataObject", function() {
 		})
 	})
 	
+	describe("#clientVersion", function () {
+		it("should be set to library clientVersion after creating object", async function () {
+			for (let type of types) {
+				let obj = await createDataObject(type);
+				assert.equal(obj.clientVersion, obj.library.clientVersion);
+				await obj.eraseTx();
+			}
+		});
+
+		it("should increase after modifying object", async function () {
+			for (let type of types) {
+				let obj = await createDataObject(type);
+				let clientVersion = obj.clientVersion;
+
+				await modifyDataObject(obj);
+				
+				assert.isAbove(obj.clientVersion, clientVersion);
+				assert.equal(obj.clientVersion, obj.library.clientVersion);
+				
+				await obj.eraseTx();
+			}
+		});
+
+		it("should increase once per library per transaction", async function () {
+			for (let type of types) {
+				let obj1 = await createDataObject(type);
+				let obj2 = await createDataObject(type);
+				
+				let group = await getGroup();
+				let obj3 = await createDataObject(type, { libraryID: group.libraryID });
+				
+				assert.isBelow(obj1.clientVersion, obj2.clientVersion);
+				assert.equal(obj2.clientVersion, Zotero.Libraries.userLibrary.clientVersion);
+				
+				await modifyDataObject(obj1);
+				assert.isAbove(obj1.clientVersion, obj2.clientVersion);
+				assert.equal(obj1.clientVersion, Zotero.Libraries.userLibrary.clientVersion);
+				
+				let libraryVersionBefore = Zotero.Libraries.userLibrary.clientVersion;
+				let groupVersionBefore = group.clientVersion;
+				await Zotero.DB.executeTransaction(async () => {
+					await modifyDataObject(obj1);
+					await modifyDataObject(obj2);
+					await modifyDataObject(obj3);
+				});
+				assert.equal(obj1.clientVersion, Zotero.Libraries.userLibrary.clientVersion);
+				assert.equal(obj1.clientVersion, obj2.clientVersion);
+				assert.notEqual(obj1.clientVersion, libraryVersionBefore);
+				
+				assert.equal(obj3.clientVersion, group.clientVersion);
+				assert.notEqual(obj3.clientVersion, groupVersionBefore);
+			}
+		});
+	});
+	
 	describe("#synced", function () {
 		it("should be set to false after creating object", function* () {
 			for (let type of types) {

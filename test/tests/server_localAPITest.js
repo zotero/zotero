@@ -268,11 +268,25 @@ describe("Local API Server", function () {
 		
 		describe("?since", function () {
 			it("should filter the results", async function () {
-				let { response: response1 } = await apiGet('/users/0/items?since=' + (Zotero.Libraries.userLibrary.libraryVersion + 1));
+				let version = Zotero.Libraries.userLibrary.clientVersion;
+				
+				let { response: response1 } = await apiGet('/users/0/items?since=' + version);
 				assert.isEmpty(response1);
 
 				let { response: response2 } = await apiGet('/users/0/items?since=0');
 				assert.lengthOf(response2, allItems.length);
+
+				let tempItem = await createDataObject('item');
+				let { response: response3 } = await apiGet('/users/0/items?since=' + version);
+				assert.lengthOf(response3, 1);
+				assert.equal(response3[0].key, tempItem.key);
+				assert.equal(response3[0].version, tempItem.clientVersion);
+				assert.equal(tempItem.clientVersion, version + 1);
+				
+				await tempItem.eraseTx();
+
+				let { response: response4 } = await apiGet('/users/0/items?since=' + version);
+				assert.lengthOf(response4, 0);
 			});
 		});
 

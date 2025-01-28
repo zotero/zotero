@@ -125,8 +125,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	enumerable: false
 });
 
-for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
-		'createdByUserID', 'lastModifiedByUserID']) {
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'clientVersion',
+		'synced', 'createdByUserID', 'lastModifiedByUserID']) {
 	let prop = '_' + name;
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
 		get: function () { return this[prop]; },
