@@ -91,8 +91,10 @@ class LocalAPIEndpoint {
 			return this.makeResponse(403, 'text/plain', 'Local API is not enabled');
 		}
 		
+		requestData.headers = new Headers(requestData.headers);
+		
 		let apiVersion = parseInt(
-			requestData.headers['Zotero-API-Version']
+			requestData.headers.get('Zotero-API-Version')
 				|| requestData.searchParams.get('v')
 				|| LOCAL_API_VERSION
 		);
@@ -217,7 +219,7 @@ class LocalAPIEndpoint {
 			if (lastModifiedVersion !== undefined) {
 				headers['Last-Modified-Version'] = lastModifiedVersion;
 			}
-			let ifModifiedSinceVersion = requestData.headers['If-Modified-Since-Version'];
+			let ifModifiedSinceVersion = requestData.headers.get('If-Modified-Since-Version');
 			if (ifModifiedSinceVersion) {
 				ifModifiedSinceVersion = parseInt(ifModifiedSinceVersion);
 				if (ifModifiedSinceVersion !== 0 && lastModifiedVersion <= ifModifiedSinceVersion) {
@@ -244,7 +246,7 @@ class LocalAPIEndpoint {
 		let links = {};
 		
 		let buildURL = (searchParams) => {
-			let url = new URL(requestData.pathname, 'http://' + requestData.headers['Host']);
+			let url = new URL(requestData.pathname, 'http://' + requestData.headers.get('Host'));
 			url.search = searchParams.toString();
 			return url.toString();
 		};
