@@ -4172,12 +4172,14 @@ var ZoteroPane = new function()
 
 		items = Zotero.Items.keepTopLevel(items);
 		
-		let newCollectionMenuitem = popup.querySelector(`[data-l10n-id="menu-new-collection"]`);
-		// Do not recreate new collections menu on subsequent calls 
-		if (!newCollectionMenuitem) {
-			newCollectionMenuitem = document.createXULElement('menuitem');
-			document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
-			newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
+		let existingNewCollectionMenuItem = popup.querySelector(`[data-l10n-id="menu-new-collection"]`);
+		let newCollectionMenuitem = document.createXULElement('menuitem');
+		document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
+		newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
+		// If the "New Collection..." menuitem already exists, copy over its label so it
+		// appears immediately and not after the icons are rendered
+		if (existingNewCollectionMenuItem) {
+			newCollectionMenuitem.label = existingNewCollectionMenuItem.label;
 		}
 		let separator = document.createXULElement('menuseparator');
 		popup.replaceChildren(newCollectionMenuitem, separator);
