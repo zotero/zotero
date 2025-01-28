@@ -268,7 +268,7 @@ describe("Local API Server", function () {
 		
 		describe("?since", function () {
 			it("should filter the results", async function () {
-				let { response: response1 } = await apiGet('/users/0/items?since=' + Zotero.Libraries.userLibrary.libraryVersion);
+				let { response: response1 } = await apiGet('/users/0/items?since=' + (Zotero.Libraries.userLibrary.libraryVersion + 1));
 				assert.isEmpty(response1);
 
 				let { response: response2 } = await apiGet('/users/0/items?since=0');
