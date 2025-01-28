@@ -139,7 +139,9 @@ class LocalAPIEndpoint {
 				if (Number.isNaN(since)) {
 					return this.makeResponse(400, 'text/plain', `Invalid 'since' value '${requestData.searchParams.get('since')}'`);
 				}
-				response.data = response.data.filter(dataObject => dataObject.version > since);
+				if (since !== 0) {
+					response.data = response.data.filter(dataObject => dataObject.version > since);
+				}
 			}
 			
 			if (dataIsArray && response.data.length > 1) {
@@ -215,9 +217,12 @@ class LocalAPIEndpoint {
 			if (lastModifiedVersion !== undefined) {
 				headers['Last-Modified-Version'] = lastModifiedVersion;
 			}
-			if (requestData.headers['If-Modified-Since-Version']
-					&& lastModifiedVersion <= parseInt(requestData.headers['If-Modified-Since-Version'])) {
-				return this.makeResponse(304, headers, '');
+			let ifModifiedSinceVersion = requestData.headers['If-Modified-Since-Version'];
+			if (ifModifiedSinceVersion) {
+				ifModifiedSinceVersion = parseInt(ifModifiedSinceVersion);
+				if (ifModifiedSinceVersion !== 0 && lastModifiedVersion <= ifModifiedSinceVersion) {
+					return this.makeResponse(304, headers, '');
+				}
 			}
 			return this.makeDataObjectResponse(requestData, response.data, headers);
 		}
@@ -792,7 +797,7 @@ Zotero.Server.LocalAPI.FullText = class extends LocalAPIEndpoint {
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT I.key, FI.version "
 				+ "FROM fulltextItems FI JOIN items I USING (itemID) "
-				+ "WHERE libraryID=? AND FI.version>?",
+				+ "WHERE libraryID=?1 AND (?2=0 OR FI.version>?2)",
 			[libraryID, since]
 		);
 		let obj = {};

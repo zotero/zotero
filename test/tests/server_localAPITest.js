@@ -271,7 +271,7 @@ describe("Local API Server", function () {
 				let { response: response1 } = await apiGet('/users/0/items?since=' + Zotero.Libraries.userLibrary.libraryVersion);
 				assert.isEmpty(response1);
 
-				let { response: response2 } = await apiGet('/users/0/items?since=-1');
+				let { response: response2 } = await apiGet('/users/0/items?since=0');
 				assert.lengthOf(response2, allItems.length);
 			});
 		});
@@ -302,7 +302,7 @@ describe("Local API Server", function () {
 
 	describe("<userOrGroupPrefix>/fulltext?since=", function () {
 		it("should return items with full-text content", async function () {
-			let { response } = await apiGet('/users/0/fulltext?since=-1');
+			let { response } = await apiGet('/users/0/fulltext?since=0');
 			assert.deepEqual(Object.entries(response), [[subcollectionAttachment.key, subcollectionAttachment.version]]);
 		});
 	});
