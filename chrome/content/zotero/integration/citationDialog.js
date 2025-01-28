@@ -589,7 +589,9 @@ class LibraryLayout extends Layout {
 	// Highlight/de-highlight selected rows
 	_refreshItemsViewHighlightedRows() {
 		let selectedIDs = CitationDataManager.items.map(({ zoteroItem }) => zoteroItem.id).filter(id => !!id);
-		this.itemsView.setHighlightedRows(selectedIDs);
+		if (this.itemsView.tree) {
+			this.itemsView.setHighlightedRows(selectedIDs);
+		}
 	}
 
 	_scrollHorizontallyOnWheel(event) {
