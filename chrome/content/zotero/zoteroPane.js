@@ -4054,7 +4054,7 @@ var ZoteroPane = new function()
 		
 		// Build menus for each top-level collection of this library
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
-		let children = selected.getDescendents(true, "collection");
+		let children = selected.getDescendents(false, "collection");
 		let childIDs = new Set(children.map(col => col.id));
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
