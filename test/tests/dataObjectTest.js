@@ -93,9 +93,9 @@ describe("Zotero.DataObject", function() {
 				let libraryVersionBefore = Zotero.Libraries.userLibrary.clientVersion;
 				let groupVersionBefore = group.clientVersion;
 				await Zotero.DB.executeTransaction(async () => {
-					await modifyDataObject(obj1);
-					await modifyDataObject(obj2);
-					await modifyDataObject(obj3);
+					await modifyDataObject(obj1, undefined, { tx: false });
+					await modifyDataObject(obj2, undefined, { tx: false });
+					await modifyDataObject(obj3, undefined, { tx: false });
 				});
 				assert.equal(obj1.clientVersion, Zotero.Libraries.userLibrary.clientVersion);
 				assert.equal(obj1.clientVersion, obj2.clientVersion);
