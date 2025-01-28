@@ -1715,7 +1715,7 @@ Zotero.Utilities.Internal = {
             return longest;
         }, null);
 		// The images are removed from all menuitems but the first few
-		let menuItemsWithHiddenIcon = menuItemsWithIcons.slice(75);
+		let menuItemsWithHiddenIcon = menuItemsWithIcons.slice(100);
 		for (let node of menuItemsWithHiddenIcon) {
 			// Do not hide the image of the longest row so the menu has the right width from the start
 			if (node == longestNode) continue;
