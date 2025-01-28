@@ -1260,6 +1260,12 @@ class EditorInstance {
 		// if(options) allOptions += ','+options;
 
 		var mode = 'chrome,centerscreen,resizable=true';
+		if (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+			mode += ",popup";
+		}
+		else {
+			mode += ",alwaysRaised";
+		}
 
 		win = that._quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 		.getService(Components.interfaces.nsIWindowWatcher)
