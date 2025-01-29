@@ -229,10 +229,7 @@ var Zotero_File_Interface = new function() {
 	 */
 	function exportItems() {
 		var exporter = new Zotero_File_Exporter();
-		let itemIDs = ZoteroPane_Local.getSelectedItems(true);
-		// Get selected item IDs in the item tree order
-		itemIDs = ZoteroPane_Local.getSortedItems(true).filter(id => itemIDs.includes(id));
-		exporter.items = Zotero.Items.get(itemIDs);
+		exporter.items = ZoteroPane.getSelectedItems({ inSortOrder: true });
 		if(!exporter.items || !exporter.items.length) throw("no items currently selected");
 		
 		exporter.save();

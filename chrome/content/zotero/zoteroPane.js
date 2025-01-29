@@ -2652,12 +2652,7 @@ var ZoteroPane = new function()
 	
 	
 	this.copySelectedItemsToClipboard = function (asCitations) {
-		var items = [];
-		let itemIDs = this.getSelectedItems(true);
-		// Get selected item IDs in the item tree order
-		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
-		items = Zotero.Items.get(itemIDs);
-		
+		var items = this.getSelectedItems({ inSortOrder: true });
 		if (!items.length) {
 			return;
 		}
@@ -2720,28 +2715,7 @@ var ZoteroPane = new function()
 			throw new Error('toWebLibrary is only valid for item links');
 		}
 		
-		let items = [];
-		let selectedAnnotation = null;
-		if (Zotero_Tabs.selectedID != 'zotero-pane') {
-			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-			if (reader) {
-				let item = Zotero.Items.get(reader.itemID);
-				items = [item];
-
-				let selectedAnnotationKeys = reader.selectedAnnotationKeys;
-				if (selectedAnnotationKeys.length === 1) {
-					selectedAnnotation = Zotero.Items.getByLibraryAndKey(item.libraryID, selectedAnnotationKeys[0]);
-				}
-			}
-		}
-		else {
-			let itemIDs = this.getSelectedItems(true);
-			// Get selected item IDs in the item tree order
-			itemIDs = this.getSortedItems(true)
-				.filter(id => itemIDs.includes(id));
-			items = Zotero.Items.get(itemIDs);
-		}
-
+		let items = this.getSelectedItems({ asChildren: true, inSortOrder: true });
 		if (!items.length) {
 			return;
 		}
@@ -3126,26 +3100,37 @@ var ZoteroPane = new function()
 	};
 	
 	
-	/*
+	/**
 	 * Return an array of Item objects for selected items
 	 *
-	 * If asIDs is true, return an array of itemIDs instead
+	 * @param {Object | boolean} [options] If boolean, sets asIDs
+	 * @param {boolean} [options.asIDs]
+	 * @param {boolean} [options.asChildren] In reader tabs, return the attachment, not the parent item
+	 * @param {boolean} [options.inSortOrder] In library tabs, return the items in the order they appear in the view
 	 */
-	this.getSelectedItems = function (asIDs) {
+	this.getSelectedItems = function (options = {}) {
+		if (typeof options === 'boolean') {
+			options = { asIDs: options };
+		}
 		switch (Zotero_Tabs.selectedType) {
-			case 'library':
+			case 'library': {
 				if (!this.itemsView) {
 					return [];
 				}
-				return this.itemsView.getSelectedItems(asIDs);
+				let items = this.itemsView.getSelectedItems(options.asIDs);
+				if (options.inSortOrder) {
+					return this.itemsView.getSortedItems(options.asIDs).filter(item => items.includes(item));
+				}
+				return items;
+			}
 			case 'reader': {
 				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 				if (reader) {
 					let item = Zotero.Items.get(reader.itemID);
-					if (item.parentItem) {
+					if (!options.asChildren && item.parentItem) {
 						item = item.parentItem;
 					}
-					return asIDs ? [item.id] : [item];
+					return options.asIDs ? [item.id] : [item];
 				}
 				return [];
 			}
@@ -3168,7 +3153,7 @@ var ZoteroPane = new function()
 				}
 				return this.itemsView.getSortedItems(asIDs);
 			default:
-				// ALl non-library tabs: Visible items == "selected" items
+				// All non-library tabs: Visible items == "selected" items
 				return this.getSelectedItems(asIDs);
 		}
 	};
