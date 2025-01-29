@@ -526,7 +526,7 @@ var gUpdates = {
 	 * @param	 aCallback
 	 *					A callback to pass the <wizardpage> object to be displayed first to.
 	 */
-	getStartPageID(aCallback) {
+	async getStartPageID(aCallback) {
 		if ("arguments" in window && window.arguments[0]) {
 			var arg0 = window.arguments[0];
 			if (arg0 instanceof Ci.nsIUpdate) {
@@ -600,7 +600,7 @@ var gUpdates = {
 			var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 				Ci.nsIUpdateManager
 			);
-			let activeUpdate = um.internal.downloadingUpdate || um.internal.readyUpdate;
+			let activeUpdate = await um.getDownloadingUpdate() || await um.getReadyUpdate();
 			if (activeUpdate) {
 				this.setUpdate(activeUpdate);
 				aCallback("downloading");
@@ -738,8 +738,8 @@ var gCheckingPage = {
 				LOG("gCheckingPage:onPageShow - Got user approval. Proceeding with download");
 				// If we resolved because of `aus.stateTransition`, we may actually be
 				// downloading a different update now.
-				if (this.um.internal.downloadingUpdate) {
-					this.#update = this.um.internal.downloadingUpdate;
+				if (await this.um.getDownloadingUpdate()) {
+					this.#update = await this.um.getDownloadingUpdate();
 				}
 			} else {
 				LOG(
@@ -919,7 +919,7 @@ var gDownloadingPage = {
 	/**
 	 * Initialize
 	 */
-	onPageShow() {
+	async onPageShow() {
 		this._downloadStatus = document.getElementById("downloadStatus");
 		this._downloadProgress = document.getElementById("downloadProgress");
 		this._label_downloadStatus = this._downloadStatus.textContent;
@@ -927,7 +927,7 @@ var gDownloadingPage = {
 		var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		var activeUpdate = um.internal.downloadingUpdate || um.internal.readyUpdate;
+		var activeUpdate = await um.getDownloadingUpdate() || await um.getReadyUpdate();
 		if (activeUpdate) {
 			gUpdates.setUpdate(activeUpdate);
 
