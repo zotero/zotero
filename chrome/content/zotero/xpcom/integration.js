@@ -3617,10 +3617,10 @@ Zotero.Integration.Progress = class {
 		this.segmentIdx = 0;
 	}
 	show() {
-		var options = 'chrome,centerscreen';
+		if (this.dontDisplay) return;
+		var options = 'chrome,centerscreen,resizable=false';
 		// without this, Firefox gets raised with our windows under Compiz
 		if (Zotero.isLinux) options += ',dialog=no';
-		if (Zotero.isMac) options += ',resizable=false';
 		
 		var io = {onLoad: function(onProgress) {
 			this.onProgress = onProgress;

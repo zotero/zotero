@@ -107,9 +107,12 @@ function accept() {
 	_id("bubble-input").hidden = true;
 	_id("bottom-area").hidden = true;
 	_id("progress").hidden = false;
-	document.documentElement.style.removeProperty("min-height");
 	let progressHeight = Helpers.getSearchRowHeight();
-	window.resizeTo(window.innerWidth, progressHeight);
+	// The minHeight is not just removed so that windows doesn't make the window too small
+	document.documentElement.style.minHeight = progressHeight + "px";
+	setTimeout(() => {
+		window.resizeTo(window.innerWidth, progressHeight);
+	});
 	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.ref.treeViewID);
@@ -231,6 +234,7 @@ class Layout {
 
 	// Run search and refresh items list immediately
 	async search(value) {
+		if (accepted) return;
 		_id("loading-spinner").setAttribute("status", "animate");
 		_id("accept-button").hidden = true;
 		SearchHandler.searching = true;

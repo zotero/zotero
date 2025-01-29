@@ -1,4 +1,4 @@
-#citation-dialog {
+#citation-dialog, #progress-bar {
 	min-width: 800px;
 	height: 100%;
 
@@ -61,6 +61,9 @@
   				margin-top: 7px;
 				margin-left: 12px;
 			}
+		}
+		#progress {
+			flex: 1;
 		}
 
 		#top-level-btn-group {
@@ -636,6 +639,22 @@
 		// other platforms already get a standard focusring
 		@media (-moz-platform: linux) {
 			@include focus-ring;
+		}
+	}
+}
+
+#progress-bar {
+	body {
+		justify-content: center;
+	}
+	#search-row {
+		margin-top: 8px;
+		#z-icon-container {
+			display: flex;
+			justify-content: center;
+			#z-icon {
+				margin: 0 !important;
+			}
 		}
 	}
 }
