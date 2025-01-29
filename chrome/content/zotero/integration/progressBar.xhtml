@@ -24,8 +24,8 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
@@ -44,8 +44,6 @@
 	<script src="progressBar.js" type="text/javascript"/>
 	
 	<box orient="horizontal" class="citation-dialog entry">
-		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
-			<html:progress class="citation-dialog progress-meter" max="100"/>
-		</deck>
+		<html:progress class="citation-dialog progress-meter downloadProgress" max="100"/>
 	</box>
 </window>

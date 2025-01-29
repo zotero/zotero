@@ -1295,10 +1295,10 @@ var Zotero_QuickFormat = new function () {
 			editor.style.width = `${editorDesiredWidth}px`;
 		}
 	}
-	async function _resizeWindow() {
+	async function _resizeWindow(height, width) {
 		let box = document.querySelector(".citation-dialog.entry");
-		let height = box.getBoundingClientRect().height;
-		let width = WINDOW_WIDTH;
+		height = height || box.getBoundingClientRect().height;
+		width = width || WINDOW_WIDTH;
 		// Force resizing if there is no max height set on the window
 		let maySkip = !!document.documentElement.style.maxHeight;
 		if (Math.abs(height - window.innerHeight) < 5 && maySkip) {
@@ -1524,9 +1524,12 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Called when progress changes
 	 */
-	function _onProgress(percent) {
+	async function _onProgress(percent) {
 		var meter = document.querySelector(".citation-dialog.progress-meter");
-		if(percent === null) {
+		meter.style.display = "";
+		await Zotero.Promise.delay(10);
+		_resizeWindow(meter.parentElement.parentElement.getBoundingClientRect().height);
+		if (percent === null) {
 			meter.removeAttribute('value');
 		} else {
 			meter.value = Math.round(percent);
@@ -1542,6 +1545,7 @@ var Zotero_QuickFormat = new function () {
 		try {
 			_updateCitationObject();
 			document.querySelector(".citation-dialog.deck").selectedIndex = 1;
+			_onProgress(null);
 			io.accept(_onProgress);
 		} catch(e) {
 			Zotero.debug(e);

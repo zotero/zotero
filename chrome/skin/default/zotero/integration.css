@@ -216,8 +216,12 @@ span.zotero-bubble-input {
 	-moz-window-dragging: no-drag;
 }
 
-.citation-dialog.progress-meter[value] {
+.citation-dialog progress {
 	visibility: visible;
+	border-radius: 10px;
+	margin: 0;
+	flex: 1;
+	height: 10px;
 }
 
 .citation-dialog .accept-button {
