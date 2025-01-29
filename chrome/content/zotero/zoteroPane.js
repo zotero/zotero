@@ -2728,21 +2728,6 @@ var ZoteroPane = new function()
 			links = items.map((item) => {
 				let itemPath = Zotero.API.getLibraryPrefix(item.libraryID) + '/items/' + item.key;
 				if (type === 'reader') {
-					if (items.length === 1 && selectedAnnotation && selectedAnnotation.annotationPosition) {
-						let { annotationPosition, key } = selectedAnnotation;
-						annotationPosition = JSON.parse(annotationPosition);
-						// See Note HTML/Markdown translators
-						if (annotationPosition.type === 'FragmentSelector') {
-							itemPath += '?cfi=' + encodeURIComponent(annotationPosition.value);
-						}
-						else if (annotationPosition.type === 'CssSelector') {
-							itemPath += '?sel=' + encodeURIComponent(annotationPosition.value);
-						}
-						else {
-							itemPath += '?page=' + (annotationPosition.pageIndex + 1);
-						}
-						itemPath += '&annotation=' + key;
-					}
 					return 'zotero://open/' + itemPath;
 				}
 				else {
