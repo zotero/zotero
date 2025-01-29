@@ -600,7 +600,7 @@ var gUpdates = {
 			var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 				Ci.nsIUpdateManager
 			);
-			let activeUpdate = um.downloadingUpdate || um.readyUpdate;
+			let activeUpdate = um.internal.downloadingUpdate || um.internal.readyUpdate;
 			if (activeUpdate) {
 				this.setUpdate(activeUpdate);
 				aCallback("downloading");
@@ -738,8 +738,8 @@ var gCheckingPage = {
 				LOG("gCheckingPage:onPageShow - Got user approval. Proceeding with download");
 				// If we resolved because of `aus.stateTransition`, we may actually be
 				// downloading a different update now.
-				if (this.um.downloadingUpdate) {
-					this.#update = this.um.downloadingUpdate;
+				if (this.um.internal.downloadingUpdate) {
+					this.#update = this.um.internal.downloadingUpdate;
 				}
 			} else {
 				LOG(
@@ -927,7 +927,7 @@ var gDownloadingPage = {
 		var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		var activeUpdate = um.downloadingUpdate || um.readyUpdate;
+		var activeUpdate = um.internal.downloadingUpdate || um.internal.readyUpdate;
 		if (activeUpdate) {
 			gUpdates.setUpdate(activeUpdate);
 
@@ -1085,7 +1085,7 @@ var gDownloadingPage = {
 		var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		um.readyUpdate = gUpdates.update;
+		um.internal.readyUpdate = gUpdates.update;
 
 		// Continue download in the background at full speed.
 		LOG(
@@ -1480,7 +1480,7 @@ var gFinishedPage = {
 		let um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		um.cleanupActiveUpdate();
+		um.cleanupActiveUpdates();
 		gUpdates.never();
 		gUpdates.wiz.cancel();
 	},
