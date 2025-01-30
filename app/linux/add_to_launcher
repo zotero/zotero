@@ -2,10 +2,11 @@
 set -euo pipefail
 
 APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_NAME="Zotero"
 XDG_DESKTOP_ENTRY="zotero.desktop"
 
 DESKTOP_CONTENT="""[Desktop Entry]
-Name=Zotero
+Name=${APP_NAME}
 Exec=${APPDIR}/zotero -url %U
 Icon=${APPDIR}/icons/icon128.png
 Type=Application
@@ -53,7 +54,7 @@ if [ -n "$REFRESH_COMMAND" ]; then
 fi
 
 echo
-echo "Zotero installation complete!"
+echo "${APP_NAME} installation complete!"
 echo
 echo "Desktop file created at ${DESKTOP_TARGET}"
 echo
@@ -62,4 +63,4 @@ echo "	${APPDIR}"
 echo
 echo "If you move or delete this folder, the launcher icon will no longer work."
 echo
-echo "You can now search for and launch Zotero from your applications menu."
+echo "You can now search for and launch ${APP_NAME} from your applications menu."
