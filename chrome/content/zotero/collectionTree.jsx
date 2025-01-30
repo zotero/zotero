@@ -1326,6 +1326,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return this.getRow(this.selection.focused).editable;
 	}
 	
+	/**
+	 * Returns TRUE if the underlying view is editable
+	 */
+	get filesEditable() {
+		return this.getRow(this.selection.focused).filesEditable;
+	}
+	
 	getRowString(index) {
 		// During filtering, context rows return an empty string to not be selectable
 		// with key-based navigation

@@ -27,14 +27,14 @@ const CONNECTOR_API_VERSION = 2;
 Zotero.Server.Connector = {
 	_waitingForSelection: {},
 	
-	getSaveTarget: function (allowReadOnly) {
+	getSaveTarget: function (allowReadOnly, allowFilesReadOnly=true) {
 		var zp = Zotero.getActiveZoteroPane();
 		var library = null;
 		var collection = null;
 		var editable = null;
 		
 		if (zp && zp.collectionsView) {
-			if (zp.collectionsView.editable || allowReadOnly) {
+			if (allowReadOnly || zp.collectionsView.editable && allowFilesReadOnly || zp.collectionsView.filesEditable) {
 				library = Zotero.Libraries.get(zp.getSelectedLibraryID());
 				collection = zp.getSelectedCollection();
 				editable = zp.collectionsView.editable;
@@ -110,301 +110,6 @@ Zotero.Server.Connector = {
 		return { library, collection, editable };
 	}
 };
-/*
-
-Zotero.Server.Connector.SessionManager = {
-	_sessions: new Map(),
-
-	get: function (id) {
-		return this._sessions.get(id);
-	},
-
-	create: function (id, action, requestData) {
-		// Legacy connector
-		if (!id) {
-			Zotero.debug("No session id provided by client", 2);
-			id = Zotero.Utilities.randomString();
-		}
-		if (this._sessions.has(id)) {
-			throw new Error(`Session ID ${id} exists`);
-		}
-		Zotero.debug("Creating connector save session " + id);
-		var session = new Zotero.Server.Connector.SaveSession(id, action, requestData);
-		this._sessions.set(id, session);
-		this.gc();
-		return session;
-	},
-
-	gc: function () {
-		// Delete sessions older than 10 minutes, or older than 1 minute if more than 10 sessions
-		var ttl = this._sessions.size >= 10 ? 60 : 600;
-		var deleteBefore = new Date() - ttl * 1000;
-
-		for (let session of this._sessions) {
-			if (session.created < deleteBefore) {
-				this._session.delete(session.id);
-			}
-		}
-	}
-};
-
-
-Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
-	this.id = id;
-	this.created = new Date();
-	this.savingDone = false;
-	this.pendingAttachments = [];
-	this._action = action;
-	this._requestData = requestData;
-	this._items = new Set();
-
-	this._progressItems = {};
-	this._orderedProgressItems = [];
-};
-
-
-Zotero.Server.Connector.SaveSession.prototype.addSnapshotContent = function (snapshotContent) {
-	this._requestData.data.snapshotContent = snapshotContent;
-};
-
-
-Zotero.Server.Connector.SaveSession.prototype.onProgress = function (item, progress, error) {
-	if (item.id === null || item.id === undefined) {
-		throw new Error("ID not provided");
-	}
-
-	// Child item
-	if (item.parent) {
-		let progressItem = this._progressItems[item.parent];
-		if (!progressItem) {
-			throw new Error(`Parent progress item ${item.parent} not found `
-				+ `for attachment ${item.id}`);
-		}
-		let a = progressItem.attachments.find(a => a.id == item.id);
-		if (!a) {
-			a = {
-				id: item.id
-			};
-			progressItem.attachments.push(a);
-		}
-		a.title = item.title;
-		a.contentType = item.mimeType;
-		a.progress = progress;
-		return;
-	}
-
-	// Top-level item
-	var o = this._progressItems[item.id];
-	if (!o) {
-		o = {
-			id: item.id
-		};
-		this._progressItems[item.id] = o;
-		this._orderedProgressItems.push(item.id);
-	}
-	o.title = item.title;
-	// PDF being converted to a top-level item after recognition
-	if (o.itemType == 'attachment' && item.itemType != 'attachment') {
-		delete o.progress;
-		delete o.contentType;
-	}
-	if (o.itemType === item.itemType) {
-		o.progress = progress;
-		return;
-	}
-	o.itemType = item.itemType;
-	o.attachments = item.attachments;
-};
-
-Zotero.Server.Connector.SaveSession.prototype.isSavingDone = function () {
-	return this.savingDone
-		|| Object.values(this._progressItems).every(i => i.progress === 100 || typeof i.progress !== "number")
-		&& Object.values(this._progressItems).every((i) => {
-			return !i.attachments || i.attachments.every(a => a.progress === 100 || typeof i.progress !== "number");
-		});
-};
-
-Zotero.Server.Connector.SaveSession.prototype.getProgressItem = function (id) {
-	return this._progressItems[id];
-};
-
-Zotero.Server.Connector.SaveSession.prototype.getAllProgress = function () {
-	return this._orderedProgressItems.map(id => this._progressItems[id]);
-};
-
-Zotero.Server.Connector.SaveSession.prototype.addItem = async function (item) {
-	return this.addItems([item]);
-};
-
-Zotero.Server.Connector.SaveSession.prototype.addItems = async function (items) {
-	for (let item of items) {
-		this._items.add(item);
-	}
-
-	// Update the items with the current target data, in case it changed since the save began
-	await this._updateItems(items);
-};
-
-Zotero.Server.Connector.SaveSession.prototype.remove = function () {
-	delete Zotero.Server.Connector.SessionManager._sessions[this.id];
-}
-
-/!**
- * Change the target data for this session and update any items that have already been saved
- *!/
-Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID, tags) {
-	var previousTargetID = this._currentTargetID;
-	this._currentTargetID = targetID;
-	this._currentTags = tags || "";
-
-	// Select new destination in collections pane
-	var zp = Zotero.getActiveZoteroPane();
-	if (zp && zp.collectionsView) {
-		await zp.collectionsView.selectByID(targetID);
-	}
-	// If window is closed, select target collection re-open
-	else {
-		Zotero.Prefs.set('lastViewedFolder', targetID);
-	}
-
-	// If moving from a non-filesEditable library to a filesEditable library, resave from
-	// original data, since there might be files that weren't saved or were removed
-	if (previousTargetID && previousTargetID != targetID) {
-		let { library: oldLibrary } = Zotero.Server.Connector.resolveTarget(previousTargetID);
-		let { library: newLibrary } = Zotero.Server.Connector.resolveTarget(targetID);
-		if (oldLibrary != newLibrary && !oldLibrary.filesEditable && newLibrary.filesEditable) {
-			Zotero.debug("Resaving items to filesEditable library");
-			if (this._action == 'saveItems' || this._action == 'saveSnapshot') {
-				// Delete old items
-				for (let item of this._items) {
-					await item.eraseTx();
-				}
-				let actionUC = Zotero.Utilities.capitalize(this._action);
-				// saveItems has a different signature with the session as the first argument
-				let params = [targetID, this._requestData];
-				if (this._action == 'saveItems') {
-					params.unshift(this);
-				}
-				let newItems = await Zotero.Server.Connector[actionUC].prototype[this._action].apply(
-					Zotero.Server.Connector[actionUC], params
-				);
-				// saveSnapshot only returns a single item
-				if (this._action == 'saveSnapshot') {
-					newItems = [newItems];
-				}
-				this._items = new Set(newItems);
-			}
-		}
-	}
-
-	await this._updateItems(this._items);
-
-	// If a single item was saved, select it (or its parent, if it now has one)
-	if (zp && zp.collectionsView && this._items.size == 1) {
-		let item = Array.from(this._items)[0];
-		item = item.isTopLevelItem() ? item : item.parentItem;
-		// Don't select if in trash
-		if (!item.deleted) {
-			await zp.selectItem(item.id);
-		}
-	}
-};
-
-/!**
- * Update the passed items with the current target and tags
- *!/
-Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async function (items) {
-	if (items.length == 0) {
-		return;
-	}
-
-	var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(this._currentTargetID);
-	var libraryID = library.libraryID;
-
-	var tags = this._currentTags.trim();
-	tags = tags ? tags.split(/\s*,\s*!/).filter(x => x) : [];
-
-	Zotero.debug("Updating items for connector save session " + this.id);
-
-	for (let item of items) {
-		let newLibrary = Zotero.Libraries.get(library.libraryID);
-
-		if (item.libraryID != libraryID) {
-			let newItem = await item.moveToLibrary(libraryID);
-			// Check pending attachments and switch parent ID
-			for (let i = 0; i < this.pendingAttachments.length; ++i) {
-				if (this.pendingAttachments[i][0] === item.id) {
-					this.pendingAttachments[i][0] = newItem.id;
-				}
-			}
-			// Replace item in session
-			this._items.delete(item);
-			this._items.add(newItem);
-		}
-
-		// If the item is now a child item (e.g., from Retrieve Metadata), update the
-		// parent item instead
-		if (!item.isTopLevelItem()) {
-			item = item.parentItem;
-		}
-		// Skip deleted items
-		if (!Zotero.Items.exists(item.id)) {
-			Zotero.debug(`Item ${item.id} in save session no longer exists`);
-			continue;
-		}
-		// Keep automatic tags
-		let originalTags = item.getTags().filter(tag => tag.type == 1);
-		item.setTags(originalTags.concat(tags));
-		item.setCollections(collection ? [collection.id] : []);
-		await item.saveTx();
-	}
-
-	this._updateRecents();
-});
-
-
-Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
-	var targetID = this._currentTargetID;
-	try {
-		let numRecents = 7;
-		let recents = Zotero.Prefs.get('recentSaveTargets') || '[]';
-		recents = JSON.parse(recents);
-		// If there's already a target from this session in the list, update it
-		for (let recent of recents) {
-			if (recent.sessionID == this.id) {
-				recent.id = targetID;
-				break;
-			}
-		}
-		// If a session is found with the same target, move it to the end without changing
-		// the sessionID. This could be the current session that we updated above or a different
-		// one. (We need to leave the old sessionID for the same target or we'll end up removing
-		// the previous target from the history if it's changed in the current one.)
-		let pos = recents.findIndex(r => r.id == targetID);
-		if (pos != -1) {
-			recents = [
-				...recents.slice(0, pos),
-				...recents.slice(pos + 1),
-				recents[pos]
-			];
-		}
-		// Otherwise just add this one to the end
-		else {
-			recents = recents.concat([{
-				id: targetID,
-				sessionID: this.id
-			}]);
-		}
-		recents = recents.slice(-1 * numRecents);
-		Zotero.Prefs.set('recentSaveTargets', JSON.stringify(recents));
-	}
-	catch (e) {
-		Zotero.logError(e);
-		Zotero.Prefs.clear('recentSaveTargets');
-	}
-};
-
-*/
 
 /**
  * Lists all available translators, including code for translators that should be run on every page
@@ -647,7 +352,9 @@ Zotero.Server.Connector.SavePage.prototype = {
 				translate.setTranslator(translators[0]);
 			}
 			let items = await translate.translate({libraryID, collections: collection ? [collection.id] : false});
-			session.addItems(items);
+			items.forEach((item, index) => {
+				session.addItem(data.items[index].id, item);
+			});
 		}.bind(this));
 	},
 
@@ -840,10 +547,7 @@ Zotero.Server.Connector.SaveStandaloneAttachment.prototype = {
 		if (!sessionID) {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
 		}
-		var { library, collection } = Zotero.Server.Connector.getSaveTarget();
-		if (!library.filesEditable) {
-			return [200, 'text/plain', 'Library is not editable.'];
-		}
+		var { library, collection } = Zotero.Server.Connector.getSaveTarget(false, false);
 		var libraryID = library.libraryID;
 		var targetID = collection ? collection.treeViewID : library.treeViewID;
 
@@ -981,8 +685,6 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
 		}
 
-		// We do this after adding to session because if we switch to a `filesEditable`
-		// library we need to have access to the snapshotContent.
 		let { library } = Zotero.Server.Connector.getSaveTarget();
 		if (!library.filesEditable) {
 			return [200, 'text/plain', 'Library files are not editable.'];
@@ -1081,9 +783,9 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
  *		sessionID - A session ID previously passed to /saveItems
  *		itemID - The ID of the item to save alternative attachment for
  */
-Zotero.Server.Connector.HasOAAttachments = function () {};
-Zotero.Server.Endpoints["/connector/hasOAAttachments"] = Zotero.Server.Connector.HasOAAttachments;
-Zotero.Server.Connector.HasOAAttachments.prototype = {
+Zotero.Server.Connector.HasAttachmentResolvers = function () {};
+Zotero.Server.Endpoints["/connector/hasAttachmentResolvers"] = Zotero.Server.Connector.HasAttachmentResolvers;
+Zotero.Server.Connector.HasAttachmentResolvers.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
@@ -1109,11 +811,11 @@ Zotero.Server.Connector.HasOAAttachments.prototype = {
  * Returns:
  * 		400 - Bad params
  * 		201 - Created and attachment title
- * 		503 - Failed to save
+ * 		500 - Failed to save
  */
-Zotero.Server.Connector.SaveOAAttachment = function () {};
-Zotero.Server.Endpoints["/connector/saveOAAttachment"] = Zotero.Server.Connector.SaveOAAttachment;
-Zotero.Server.Connector.SaveOAAttachment.prototype = {
+Zotero.Server.Connector.SaveAttachmentFromResolver = function () {};
+Zotero.Server.Endpoints["/connector/saveAttachmentFromResolver"] = Zotero.Server.Connector.SaveAttachmentFromResolver;
+Zotero.Server.Connector.SaveAttachmentFromResolver.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
@@ -1133,7 +835,7 @@ Zotero.Server.Connector.SaveOAAttachment.prototype = {
 			return [201, "text/plain", attachment.getDisplayTitle()];
 		}
 		else {
-			return [503, "text/plain", "Failed to save an attachment"];
+			return [500, "text/plain", "Failed to save an attachment"];
 		}
 	}
 }
