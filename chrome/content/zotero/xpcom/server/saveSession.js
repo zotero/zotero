@@ -180,38 +180,6 @@ Zotero.Server.Connector.SaveSession = class {
 			Zotero.Prefs.set('lastViewedFolder', targetID);
 		}
 		
-		// If moving from a non-filesEditable library to a filesEditable library, resave from
-		// original data, since there might be files that weren't saved or were removed
-		if (previousTargetID && previousTargetID != targetID) {
-			let { library: oldLibrary } = Zotero.Server.Connector.resolveTarget(previousTargetID);
-			let { library: newLibrary } = Zotero.Server.Connector.resolveTarget(targetID);
-			if (oldLibrary != newLibrary && !oldLibrary.filesEditable && newLibrary.filesEditable) {
-				// TODO
-				throw new Error("Changing from non-filesEditables to editable libraries not supported")
-				Zotero.debug("Resaving items to filesEditable library");
-				if (this._action == 'saveItems' || this._action == 'saveSnapshot') {
-					// Delete old items
-					for (let item of Object.values(this._items)) {
-						await item.eraseTx();
-					}
-					let actionUC = Zotero.Utilities.capitalize(this._action);
-					// saveItems has a different signature with the session as the first argument
-					let params = [targetID, this._requestData];
-					if (this._action == 'saveItems') {
-						params.unshift(this);
-					}
-					let newItems = await Zotero.Server.Connector[actionUC].prototype[this._action].apply(
-						Zotero.Server.Connector[actionUC], params
-					);
-					// saveSnapshot only returns a single item
-					if (this._action == 'saveSnapshot') {
-						newItems = [newItems];
-					}
-					this._items = new Set(newItems);
-				}
-			}
-		}
-		
 		await this._updateItems(this._items);
 		
 		// If a single item was saved, select it (or its parent, if it now has one)
@@ -243,21 +211,24 @@ Zotero.Server.Connector.SaveSession = class {
 		
 		for (let key in items) {
 			let item = items[key];
-			if (item.libraryID != libraryID) {
-				let newItem = await item.moveToLibrary(libraryID);
-				this._items[key] = newItem;
-			}
 			
 			// If the item is now a child item (e.g., from Retrieve Metadata), update the
 			// parent item instead
 			if (!item.isTopLevelItem()) {
 				item = item.parentItem;
 			}
+			
 			// Skip deleted items
 			if (!Zotero.Items.exists(item.id)) {
 				Zotero.debug(`Item ${item.id} in save session no longer exists`);
 				continue;
 			}
+			
+			if (item.libraryID != libraryID) {
+				let newItem = await item.moveToLibrary(libraryID);
+				this._items[key] = newItem;
+			}
+			
 			// Keep automatic tags
 			let originalTags = item.getTags().filter(tag => tag.type == 1);
 			item.setTags(originalTags.concat(tags));
