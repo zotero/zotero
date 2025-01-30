@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+XDG_DESKTOP_ENTRY="zotero.desktop"
+
+DESKTOP_CONTENT="""[Desktop Entry]
+Name=Zotero
+Exec=${APPDIR}/zotero -url %U
+Icon=${APPDIR}/icons/icon128.png
+Type=Application
+Terminal=false
+Categories=Office;
+MimeType=text/plain;x-scheme-handler/zotero;application/x-research-info-systems;text/x-research-info-systems;text/ris;application/x-endnote-refer;application/x-inst-for-Scientific-info;application/mods+xml;application/rdf+xml;application/x-bibtex;text/x-bibtex;application/marc;application/vnd.citationstyles.style+xml
+X-GNOME-SingleWindow=true
+"""
+
+# Check for XDG_DATA_HOME, fall back to ~/.local/share
+if [ -z "${XDG_DATA_HOME:-}" ]; then
+	XDG_DATA_HOME="$HOME/.local/share"
+fi
+DESKTOP_FOLDER="${XDG_DATA_HOME:-}/applications"
+
+# If the folder doesn't exist, bail
+if [ ! -d "${DESKTOP_FOLDER}" ]; then
+	echo "${DESKTOP_FOLDER} does not exist!"
+	echo
+	echo "A desktop entry could not be created automatically."
+	echo
+	echo "Here's the .desktop file that would have been created:"
+	echo
+	echo "${DESKTOP_CONTENT}"
+	exit 0
+fi
+
+# Write the .desktop file
+DESKTOP_TARGET="${DESKTOP_FOLDER}/${XDG_DESKTOP_ENTRY}"
+cat <<EOF > "${DESKTOP_TARGET}"
+${DESKTOP_CONTENT}
+EOF
+
+# Make sure the .desktop file is user-executable (some desktops might require this)
+chmod 755 "${DESKTOP_TARGET}"
+
+# Attempt to refresh the desktop database
+REFRESH_COMMAND=""
+if command -v update-desktop-database &> /dev/null; then
+	REFRESH_COMMAND="update-desktop-database ${DESKTOP_FOLDER}"
+fi
+if [ -n "$REFRESH_COMMAND" ]; then
+	echo "Refreshing desktop database..."
+	$REFRESH_COMMAND || echo "Warning: Failed to refresh desktop database. You may need to update your launcher manually."
+fi
+
+echo
+echo "Zotero installation complete!"
+echo
+echo "Desktop file created at ${DESKTOP_TARGET}"
+echo
+echo "The desktop file points to the following folder:"
+echo "	${APPDIR}"
+echo
+echo "If you move or delete this folder, the launcher icon will no longer work."
+echo
+echo "You can now search for and launch Zotero from your applications menu."
