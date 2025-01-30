@@ -61,5 +61,6 @@ annotation-row {
 	.tags {
 		border-top: 1px solid var(--fill-quinary);
 		padding: 3px 8px;
+		word-break: break-word;
 	}
 }
