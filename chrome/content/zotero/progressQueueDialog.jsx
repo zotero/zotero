@@ -62,7 +62,7 @@ async function _handleActivate(event, indices) {
 		
 		let win = Services.wm.getMostRecentWindow("navigator:browser");
 		if (win) {
-			win.ZoteroPane.selectItem(itemID, { inLibraryRoot: true });
+			win.ZoteroPane.selectItem(itemID, { inLibraryRoot: false });
 			win.focus();
 		}
 	}
