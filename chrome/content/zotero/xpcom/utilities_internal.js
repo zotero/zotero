@@ -2481,6 +2481,112 @@ Zotero.Utilities.Internal = {
 		}
 
 		return textContent;
+	},
+
+	/**
+	 * 
+	 * @param {Element} targetElement
+	 * @returns {[number, number]} clientX and clientY
+	 */
+	getContextMenuPosition(targetElement) {
+		let selection;
+		if (targetElement.editor?.selection) {
+			selection = targetElement.editor.selection;
+			if (!selection.rangeCount) {
+				selection = null;
+			}
+		}
+		else {
+			selection = targetElement.ownerDocument.getSelection();
+			if (!selection.rangeCount || !targetElement.contains(selection.getRangeAt(0).startContainer)) {
+				selection = null;
+			}
+		}
+
+		let rect;
+		let anchorToBottom;
+		let anchorToEnd;
+		if (selection) {
+			let range = selection.getRangeAt(0);
+			if (range.getClientRects().length) {
+				rect = range.getBoundingClientRect();
+			}
+			// If the selection is between lines in an editor, it'll be
+			// inside the editor's native anonymous text node and won't
+			// have any rects for some reason.
+			// If that's the case, use the text node's bounds.
+			else if (range.startContainer === range.endContainer && range.startContainer.isNativeAnonymous
+					&& range.startContainer.firstChild?.nodeType === Node.TEXT_NODE) {
+				let quads = range.startContainer.firstChild.getBoxQuads();
+				rect = quads[quads.length - 1].getBounds();
+			}
+			else {
+				rect = range.commonAncestorContainer.getBoundingClientRect();
+			}
+			anchorToBottom = !range.collapsed;
+			anchorToEnd = range.collapsed;
+		}
+		else {
+			rect = targetElement.getBoundingClientRect();
+			anchorToBottom = true;
+			anchorToEnd = false;
+		}
+
+		let clientX;
+		if (Zotero.rtl) {
+			clientX = rect.x + (anchorToEnd ? 0 : rect.width - 3);
+		}
+		else {
+			clientX = rect.x + (anchorToEnd ? rect.width + 3 : 0);
+		}
+		let clientY = rect.y + (anchorToBottom ? rect.height + 8 : 5);
+		return [clientX, clientY];
+	},
+
+	/**
+	 * Query the API to determine if the passed items all exist remotely.
+	 * If the client is not logged in, the items are assumed not to exist.
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @returns {Promise<Boolean>}
+	 */
+	async checkItemsExistRemotely(items) {
+		// Feed items can't exist remotely, so filter them out first
+		items = items.filter(item => !item.isFeedItem);
+		if (!items.length) {
+			return false;
+		}
+		let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+		if (!apiKey) {
+			return false;
+		}
+		let apiClient = Zotero.Sync.Runner.getAPIClient({ apiKey });
+		
+		// We need to query once per library, so group the items
+		let itemsByLibrary = new Map();
+		for (let item of items) {
+			if (itemsByLibrary.has(item.library)) {
+				itemsByLibrary.get(item.library).push(item);
+			}
+			else {
+				itemsByLibrary.set(item.library, [item]);
+			}
+		}
+		
+		for (let [library, libraryItems] of itemsByLibrary.entries()) {
+			let result = await apiClient.getVersions(
+				library.libraryType,
+				library.libraryTypeID,
+				'item',
+				{ itemKey: libraryItems.map(item => item.key).join(',') }
+			);
+			
+			// Doesn't matter what the versions are for our purposes, just that the items have at some point been synced
+			if (Object.keys(result.versions).length < libraryItems.length) {
+				return false;
+			}
+		}
+		return true;
 	}
 };
 

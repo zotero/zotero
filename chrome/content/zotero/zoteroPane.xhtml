@@ -367,26 +367,45 @@
 							<menuitem id="menu_copy"
 									key="key_copy"
 									command="cmd_copy" data-l10n-id="text-action-copy"/>
-							<menuitem id="menu_copyCitation"
-									label="&copyCitationCmd.label;"
-									command="cmd_zotero_copyCitation"
-									key="key_copyCitation"
-									hidden="true"/>
-							<menuitem id="menu_copyBibliography"
-									label="&copyBibliographyCmd.label;"
-									command="cmd_zotero_copyBibliography"
-									key="key_copyBibliography"
-									hidden="true"/>
-							<menuitem id="menu_copyExport"
-									class="menu-type-library"
-									key="key_copyBibliography"
-									command="cmd_zotero_copyBibliography"
-									hidden="true"/>
-							<menuitem id="menu_copyNote"
-									label="&copyNoteCmd.label;"
-									command="cmd_zotero_copyBibliography"
-									key="key_copyBibliography"
-									hidden="true"/>
+							<menu id="menu_copyAs" data-l10n-id="menu-copy-as">
+								<menupopup>
+									<menuitem id="menu_copyCitation"
+											label="&copyCitationCmd.label;"
+											command="cmd_zotero_copyCitation"
+											key="key_copyCitation"
+											hidden="true"/>
+									<menuitem id="menu_copyBibliography"
+											label="&copyBibliographyCmd.label;"
+											command="cmd_zotero_copyBibliography"
+											key="key_copyBibliography"
+											hidden="true"/>
+									<menuitem id="menu_copyExport"
+											class="menu-type-library"
+											key="key_copyBibliography"
+											command="cmd_zotero_copyBibliography"
+											hidden="true"/>
+									<menuseparator/>
+									<menuitem id="menu_copyNote"
+											label="&copyNoteCmd.label;"
+											command="cmd_zotero_copyBibliography"
+											key="key_copyBibliography"
+											hidden="true"/>
+									<menu id="menu_copyLocalLink" data-l10n-id="menu-copy-local-link" hidden="true">
+										<menupopup>
+											<menuitem id="menu_copyLocalItemLink"
+													data-l10n-id="menu-copy-local-item-link"
+													oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ type: 'item' })"/>
+											<menuitem id="menu_copyLocalReaderLink"
+													data-l10n-id="menu-copy-local-reader-link"
+													oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ type: 'reader' })"/>
+										</menupopup>
+									</menu>
+									<menuitem id="menu_copyWebLibraryLink"
+											data-l10n-id="menu-copy-web-library-link"
+											oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ type: 'item', toWebLibrary: true })"
+											hidden="true"/>
+								</menupopup>
+							</menu>
 							<menuitem id="menu_paste"
 									key="key_paste"
 									command="cmd_paste" data-l10n-id="text-action-paste"/>
