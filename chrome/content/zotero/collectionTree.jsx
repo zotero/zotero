@@ -107,6 +107,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._filterInitialCollapsedRows = [];
 		this._treeWasFocused = false;
 		this._hiddenFocusedRow = null;
+		this._expandedRowsOnDrag = new Set();
 		
 		this.onLoad = this.createEventBinding('load', true, true);
 	}
@@ -1446,7 +1447,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			event.preventDefault();
 			var previousOrientation = Zotero.DragDrop.currentOrientation;
 			Zotero.DragDrop.currentOrientation = getDragTargetOrient(event);
-			
+
+			// Expand collapsed collections and groups when they are dragged over
+			if (!this.isContainerEmpty(index) && !treeRow.isOpen && !this._expandedRowsOnDrag.has(treeRow.id)) {
+				this._expandedRowsOnDrag.add(treeRow.id);
+				this.toggleOpenState(index);
+			}
 			if (!this.canDropCheck(index, Zotero.DragDrop.currentOrientation, event.dataTransfer)) {
 				this.setDropEffect(event, "none");
 				return;
@@ -2143,6 +2149,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		if (dataType == 'zotero/collection') {
 			var droppedCollection = await Zotero.Collections.getAsync(data[0]);
+			// After the operation is completed and selection changes, auto-expanded collections will collapse
+			this.closeContainersExpandedOnDrag(true);
 			// Collection drag between libraries
 			if (targetLibraryID != droppedCollection.libraryID) {
 				await this.executeCollectionCopy({
@@ -2377,6 +2385,34 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			
 			// Automatically retrieve metadata for PDFs and ebooks
 			Zotero.RecognizeDocument.autoRecognizeItems(addedItems);
+		}
+	}
+
+	async closeContainersExpandedOnDrag(waitForSelect) {
+		// Clear the set of expanded rows so it is not processed
+		// by a subsequent call without waiting for selection to settle
+		let expandedRows = [...this._expandedRowsOnDrag];
+		this._expandedRowsOnDrag.clear();
+		if (waitForSelect) {
+			await this.waitForSelect();
+		}
+		if (!expandedRows.length) return;
+		// Record the ancestors of the currently selected collection to not collapse them
+		let col = this.selectedTreeRow.ref;
+		let parentIDs = new Set();
+		parentIDs.add(Zotero.Libraries.get(col.libraryID).treeViewID);
+		while (col.parentID) {
+			col = Zotero.Collections.get(col.parentID);
+			parentIDs.add(col.treeViewID);
+		}
+
+		// Collapse all remaining rows that were expanded during drag-drop
+		for (let rowID of expandedRows) {
+			let index = this.getRowIndexByID(rowID);
+			let row = this._rows[index];
+			if (row && row.isOpen && !parentIDs.has(row.ref.treeViewID)) {
+				this.toggleOpenState(index);
+			}
 		}
 	}
 
