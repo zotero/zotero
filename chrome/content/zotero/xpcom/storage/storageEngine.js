@@ -149,7 +149,9 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	// full check of this library, check only files that were previously modified or opened
 	// recently
 	else if (this.background
-			&& !this.firstInSession
+			// TEMP: Don't check all files at startup
+			// https://github.com/zotero/zotero/issues/5025
+			//&& !this.firstInSession
 			&& this.local.lastFullFileCheck[libraryID]
 			&& (this.local.lastFullFileCheck[libraryID]
 				+ (this.maxCheckAge * 1000)) > new Date().getTime()) {

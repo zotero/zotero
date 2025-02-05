@@ -230,7 +230,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					}
 				}.bind(this),
 				background: !!options.background,
-				firstInSession: _firstInSession,
+				firstInSession: options.firstInSession,
 				resetMode: options.resetMode
 			};
 			
