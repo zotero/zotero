@@ -2059,6 +2059,7 @@
 				"lastName": "Institutional Author"
 			}
 		],
+		"date": "1999-12-31",
 		"dateAdded": "2015-04-26 06:40:48",
 		"dateModified": "2015-04-26 06:40:48",
 		"episodeNumber": "3",
@@ -2082,6 +2083,7 @@
 		"uniqueFields": {
 			"abstractNote": "Abstract note",
 			"accessDate": "1997-06-13 23:59:58",
+			"date": "1999-12-31",
 			"extra": "Extra",
 			"language": "en-US",
 			"medium": "Medium",
