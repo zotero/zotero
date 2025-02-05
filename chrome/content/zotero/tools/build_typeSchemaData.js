@@ -80,7 +80,7 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
         schemaFile.append("zoteroTypeSchemaData.js");
         await Zotero.File.putContentsAsync(
             schemaFile,
-            `var ZOTERO_TYPE_SCHEMA = ${JSON.stringify(schema)};\n\n`
+            `var ZOTERO_TYPE_SCHEMA = ${JSON.stringify(schema, null, '\t')};\n\n`
                  + "if (typeof module !== 'undefined') {\n\tmodule.exports = ZOTERO_TYPE_SCHEMA;\n}\n"
         );
         resultElem.innerHTML = `<p>Wrote ${schemaFile.path} successfully.</p>`;
