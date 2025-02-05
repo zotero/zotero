@@ -1,7 +1,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Version of Gecko to build with
-GECKO_VERSION_MAC="128.6.0esr"
+GECKO_VERSION_MAC="128.7.0esr"
 GECKO_VERSION_LINUX="128.6.0esr"
 GECKO_VERSION_WIN="128.6.0esr"
 RUST_VERSION=1.78.0
