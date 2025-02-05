@@ -1355,6 +1355,7 @@
 				"name": "Institutional Author"
 			}
 		],
+		"date": "1999-12-31",
 		"dateAdded": "2015-04-12T09:00:22Z",
 		"dateModified": "2015-04-12T09:00:22Z",
 		"episodeNumber": "3",

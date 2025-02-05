@@ -1198,6 +1198,7 @@
 				"lastName": "Institutional Author"
 			}
 		],
+		"date": "1999-12-31",
 		"extra": "Extra",
 		"itemType": "podcast",
 		"language": "en-US",
