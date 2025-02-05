@@ -5713,14 +5713,7 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 		var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
 			originalExtra,
 			this,
-			[
-				// Skip 'publisher-place' and 'event-place' for now, since the mappings will be changed
-				// https://github.com/citation-style-language/zotero-bits/issues/6
-				'place',
-				// Skip 'issued' for now, since we don't support date ranges in Date
-				// https://github.com/zotero/zotero/issues/3030
-				'date'
-			]
+			Zotero.Items.MIGRATE_EXTRA_FIELDS_SKIP_FIELDS,
 		);
 		if (itemType) {
 			let originalType = this.itemTypeID;
@@ -5773,6 +5766,24 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 	
 	return true;
 }
+
+
+Zotero.Item.prototype.canMigrateExtraFields = function () {
+	try {
+		let originalExtra = this.getField('extra');
+		let { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
+			originalExtra,
+			this,
+			Zotero.Items.MIGRATE_EXTRA_FIELDS_SKIP_FIELDS,
+		);
+		return !!(itemType || fields.size || creators.length || extra !== originalExtra);
+	}
+	catch (e) {
+		Zotero.logError(e);
+		return false;
+	}
+};
+
 
 
 /**

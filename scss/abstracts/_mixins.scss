@@ -227,6 +227,13 @@
 			border-radius: 2px;
 		}
 	}
+	
+	label.row-action {
+		grid-column: 2;
+		font-size: 0.9em;
+		margin: 0;
+		padding: 0 var(--editable-text-padding-inline);
+	}
 }
 
 /* Hide icons on macOS. We use :is() to work around weird behavior in Fx101 where a regular child
