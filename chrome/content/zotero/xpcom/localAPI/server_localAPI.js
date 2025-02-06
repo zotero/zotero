@@ -87,6 +87,18 @@ const exportFormats = new Map([
  */
 class LocalAPIEndpoint {
 	async init(requestData) {
+		try {
+			return await this._initInternal(requestData);
+		}
+		catch (e) {
+			if (!(e instanceof BadRequestError)) {
+				throw e;
+			}
+			return this.makeResponse(400, 'text/plain', e.message);
+		}
+	}
+	
+	async _initInternal(requestData) {
 		if (!Zotero.Prefs.get('httpServer.localAPI.enabled')) {
 			return this.makeResponse(403, 'text/plain', 'Local API is not enabled');
 		}
@@ -929,19 +941,29 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 	
 	// Filter out attachments, annotations, and notes, which we can't generate citations for
 	items = items.filter(item => item.isRegularItem());
-	let styleID = searchParams.get('style') || 'chicago-note-bibliography';
+	let styleIDOrURL = searchParams.get('style') || 'chicago-note-bibliography';
 	let locale = searchParams.get('locale') || 'en-US';
 	let linkWrap = searchParams.get('linkwrap') == '1';
 	
-	if (!styleID.startsWith('http://www.zotero.org/styles/')) {
-		styleID = 'http://www.zotero.org/styles/' + styleID;
-	}
-	let style = Zotero.Styles.get(styleID);
+	let style = Zotero.Styles.get(styleIDOrURL);
 	if (!style) {
 		// The client wants a style we don't have locally, so download it
-		let url = styleID.replace('http', 'https');
-		await Zotero.Styles.install({ url }, url, true);
-		style = Zotero.Styles.get(styleID);
+		// If they didn't pass an absolute URL, resolve relative to the style repo base
+		try {
+			let styleURL = new URL(styleIDOrURL, 'https://www.zotero.org/styles/');
+			if (styleURL.protocol === 'http:' && styleURL.host === 'www.zotero.org') {
+				styleURL.protocol = 'https:';
+			}
+			styleURL = styleURL.toString();
+			let { styleID } = await Zotero.Styles.install({ url: styleURL }, styleURL, true);
+			style = Zotero.Styles.get(styleID);
+		}
+		catch (e) {
+			throw new BadRequestError(`Invalid style: ${styleIDOrURL} (${e.message})`);
+		}
+	}
+	if (!style) {
+		throw new Error(`Unable to install style: ${styleIDOrURL}`);
 	}
 	
 	let cslEngine = style.getCiteProc(locale, 'html');
@@ -996,3 +1018,5 @@ function evaluateSearchSyntax(searchStrings, items, predicate) {
 	}
 	return items;
 }
+
+class BadRequestError extends Error {}
