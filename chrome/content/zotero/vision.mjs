@@ -58,9 +58,11 @@ export function recognizeTextInImage(imageBytes) {
 
 		return observations.map((obs) => {
 			let text = obs.topCandidates(1).firstObject;
-			let string = text.string;
+			let string = text.string.js;
 			let boundingRect = toIntegerRect(obs);
 			let chars = [];
+			// TODO: Make sure we're counting characters the same way Vision does
+			// I can't get it to recognize any emoji to test this
 			for (let i = 0; i < string.length; i++) {
 				let range = $.NSMakeRange(i, 1);
 				let rect = text.boundingBoxForRangeError(range, $());
@@ -71,12 +73,12 @@ export function recognizeTextInImage(imageBytes) {
 					break;
 				}
 				chars.push({
-					char: string.substringWithRange(range).js,
+					char: string[i],
 					rect: toIntegerRect(rect),
 				});
 			}
 			return {
-				string: string.js,
+				string,
 				boundingRect,
 				chars,
 			};
