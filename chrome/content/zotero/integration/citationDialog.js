@@ -257,6 +257,8 @@ class LibraryLayout extends Layout {
 		this._initItemTree();
 		this._initCollectionTree();
 		this.lastHeight = null;
+		// on mouse scrollwheel in suggested items, scroll the list horizontally
+		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 	}
 
 	// After the search is run, library layout updates the itemsView filter
@@ -303,8 +305,6 @@ class LibraryLayout extends Layout {
 		_id("library-layout").querySelector(".secondary-divider").hidden = _id("library-other-items").hidden;
 		this.resizeWindow();
 		if (!_id("library-other-items").hidden) {
-			// on mouse scrollwheel in suggested items, scroll the list horizontally
-			_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 			// clicking on the collapsed deck of items will add all of them
 			let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
 			for (let collapsibleDeck of collapsibleDecks) {
