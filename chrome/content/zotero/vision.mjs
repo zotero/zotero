@@ -33,6 +33,7 @@ export function recognizeTextInImage(imageBytes) {
 				observations = request.results.js;
 			}
 		});
+		request.automaticallyDetectsLanguage = true;
 		requestHandler.performRequestsError($.NSArray.arrayWithObjects(request), error);
 
 		if (!error.isNil()) {
