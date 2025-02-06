@@ -153,7 +153,9 @@
 				}
 
 				.section {
-					margin-inline-end: 16px;
+					&:not(:last-of-type) {
+						margin-inline-end: 16px;
+					}	
 					// hide vertical divider
 					.divider {
 						display: none;
