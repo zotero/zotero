@@ -120,6 +120,7 @@ export class CitationDialogPopupsHandler {
 				this._getNode("#label").appendChild(option);
 			}
 		}
+		this._getNode("#itemDetails .show").hidden = !this.item.id;
 
 		// Add header and fill inputs with their values
 		let description = itemDescription;
