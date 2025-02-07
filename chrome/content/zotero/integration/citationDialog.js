@@ -115,7 +115,7 @@ function accept() {
 	});
 	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
-		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.ref.treeViewID);
+		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
 	io.accept((percent) => {
 		_id("progress").value = Math.round(percent);
@@ -127,7 +127,7 @@ function cancel() {
 	accepted = true;
 	io.citation.citationItems = [];
 	if (currentLayout.type == "library") {
-		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.ref.treeViewID);
+		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
 	io.accept();
 	window.close();
