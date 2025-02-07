@@ -824,10 +824,6 @@ const IOManager = {
 
 		_id("mode-button").setAttribute("mode", newMode);
 		doc.l10n.setAttributes(_id("mode-button"), "integration-citationDialog-btn-mode", { mode: newMode });
-		// save the library layout's height to restore it if we switch back
-		if (currentLayout?.type == "library") {
-			currentLayout.lastHeight = window.innerHeight;
-		}
 
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
 		// do not show View menubar with itemTree-specific options in list mode
@@ -836,6 +832,27 @@ const IOManager = {
 			// when switching from library to list, make sure all selected items are de-selected
 			libraryLayout.itemsView?.selection.clearSelection();
 			currentLayout.updateSelectedItems();
+			// save the library layout's height to restore it if we switch back
+			libraryLayout.lastHeight = window.innerHeight;
+		}
+		// After switchingto list mode, the window is often resized, which causes the virtualized table
+		// to redraw and remove most of .row nodes. Then, if one switches back to library mode, the rows
+		// may or may not get redrawn again. For example, if the window's height does not change - they won't
+		// and the tree will look fully or partially empty until the user scrolls.
+		// In this workaround, we wait just enough to give tables a chance to redraw, and check if they have
+		// enough rendered rows. If there are too few nodes, the tree is redrawn.
+		if (currentLayout.type == "library") {
+			setTimeout(() => {
+				let rowCutoff = 5;
+				let collectionRows = doc.querySelectorAll("#zotero-collections-tree .row");
+				if (collectionRows.length < rowCutoff) {
+					libraryLayout.collectionsView.tree.invalidate();
+				}
+				let itemTreeRows = doc.querySelectorAll("#zotero-items-tree .row");
+				if (itemTreeRows.length < rowCutoff) {
+					libraryLayout.itemsView.tree.invalidate();
+				}
+			}, 250);
 		}
 		currentLayout.refreshItemsList();
 	},
