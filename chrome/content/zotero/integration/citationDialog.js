@@ -839,19 +839,13 @@ const IOManager = {
 		// to redraw and remove most of .row nodes. Then, if one switches back to library mode, the rows
 		// may or may not get redrawn again. For example, if the window's height does not change - they won't
 		// and the tree will look fully or partially empty until the user scrolls.
-		// In this workaround, we wait just enough to give tables a chance to redraw, and check if they have
-		// enough rendered rows. If there are too few nodes, the tree is redrawn.
+		// There are other, harder to reproduce, instances when the tree is initially not fullly drawn.
+		// In this workaround, the trees are invalidated after a delay to make sure
+		// the trees get rendered no matter what.
 		if (currentLayout.type == "library") {
 			setTimeout(() => {
-				let rowCutoff = 5;
-				let collectionRows = doc.querySelectorAll("#zotero-collections-tree .row");
-				if (collectionRows.length < rowCutoff) {
-					libraryLayout.collectionsView.tree.invalidate();
-				}
-				let itemTreeRows = doc.querySelectorAll("#zotero-items-tree .row");
-				if (itemTreeRows.length < rowCutoff) {
-					libraryLayout.itemsView.tree.invalidate();
-				}
+				libraryLayout.collectionsView.tree.invalidate();
+				libraryLayout.itemsView.tree.invalidate();
 			}, 250);
 		}
 		currentLayout.refreshItemsList();
