@@ -1118,6 +1118,14 @@ describe("Zotero.CollectionTree", function() {
 				
 				assert.isTrue(droppedItem.deleted);
 			})
+
+			it("can delete an item by dropping it into the trash", async function () {
+				var item = await createDataObject('item', false, { skipSelect: true });
+				var deferred = Zotero.Promise.defer();
+				deferred.resolve();
+				await onDrop('item', 'T' + userLibraryID, [item.id], deferred.promise);
+				assert.isTrue(item.deleted);
+			});
 		})
 		
 		
@@ -1373,6 +1381,14 @@ describe("Zotero.CollectionTree", function() {
 				await group1.eraseTx();
 				await group2.eraseTx();
 			});
+
+			it("can delete a collection by dropping it into the trash", async function () {
+				var collection = await createDataObject('collection');
+				var deferred = Zotero.Promise.defer();
+				deferred.resolve();
+				await onDrop('collection', 'T' + userLibraryID, [collection.id], deferred.promise);
+				assert.isTrue(collection.deleted);
+			})
 		})
 
 
@@ -1430,6 +1446,16 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(treeRow.ref.id, item.id);
 			})
 		})
+
+		describe("with searches", function () {
+			it("can delete a saved search by dropping it into the trash", async function () {
+				var search = await createDataObject('search');
+				var deferred = Zotero.Promise.defer();
+				deferred.resolve();
+				await onDrop('search', 'T' + userLibraryID, [search.id], deferred.promise);
+				assert.isTrue(search.deleted);
+			})
+		});
 	})
 
 	describe("Feeds pseudo-library", function () {
