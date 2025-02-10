@@ -44,7 +44,7 @@ var { CitationDialogKeyboardHandler } = ChromeUtils.importESModule('chrome://zot
 //
 // Initialization of all handlers and top-level functions
 //
-function onLoad() {
+async function onLoad() {
 	doc = document;
 	io = window.arguments[0].wrappedJSObject;
 	isCitingNotes = !!io.isCitingNotes;
@@ -75,12 +75,21 @@ function onLoad() {
 	// handling of user's IO
 	IOManager.init();
 
-	// build the citation items based on io
-	// then create bubbles and set the initial dialog mode
-	CitationDataManager.buildCitation().then(() => {
-		IOManager.updateBubbleInput();
-		IOManager.setInitialDialogMode();
+	// Move dialog towards the center (it's needed even though we open the dialog with centerscreen param)
+	let targetX = Math.floor((window.screen.width - window.outerWidth) / 2);
+	let targetY = window.screen.height / 3;
+	setTimeout(() => {
+		window.moveTo(targetX, targetY);
 	});
+
+	// citation has to be built before libraryLayout.init to so itemTree knows which items to highlight
+	await CitationDataManager.buildCitation();
+	IOManager.updateBubbleInput();
+	// init library layout after bubble input is built since bubble-input's height is a factor
+	// determining initial library layout height
+	await libraryLayout.init();
+	// set initial dialog mode when everything is loaded
+	IOManager.setInitialDialogMode();
 
 	// Disabled all multiselect when citing notes
 	if (isCitingNotes) {
@@ -88,13 +97,6 @@ function onLoad() {
 			delete multiselectable.dataset.multiselectable;
 		}
 	}
-
-	// Move dialog towards the center (it's needed even though we open the dialog with centerscreen param)
-	let targetX = Math.floor((window.screen.width - window.outerWidth) / 2);
-	let targetY = window.screen.height / 3;
-	setTimeout(() => {
-		window.moveTo(targetX, targetY);
-	});
 }
 
 
@@ -126,6 +128,7 @@ function cancel() {
 	if (accepted) return;
 	accepted = true;
 	io.citation.citationItems = [];
+	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
@@ -254,9 +257,14 @@ class Layout {
 class LibraryLayout extends Layout {
 	constructor() {
 		super("library");
-		this._initItemTree();
-		this._initCollectionTree();
 		this.lastHeight = null;
+	}
+
+	async init() {
+		// Set initial height of the dialog such that the collection/itemTrees get at least 400px
+		this.lastHeight = Math.max(500, Helpers.getSearchRowHeight() + 400);
+		await this._initItemTree();
+		await this._initCollectionTree();
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 	}
@@ -301,8 +309,8 @@ class LibraryLayout extends Layout {
 
 	async refreshItemsList() {
 		await super.refreshItemsList();
-		_id("library-other-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
-		_id("library-layout").querySelector(".secondary-divider").hidden = _id("library-other-items").hidden;
+		_id("library-other-items").querySelector(".search-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
+		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
 		this.resizeWindow();
 		if (!_id("library-other-items").hidden) {
 			// clicking on the collapsed deck of items will add all of them
@@ -316,7 +324,7 @@ class LibraryLayout extends Layout {
 
 	// Refresh itemTree to properly display +/- icons column
 	async refreshItemsView() {
-		this._refreshItemsViewHighlightedRows();
+		await this._refreshItemsViewHighlightedRows();
 		// Save selected items, clear selection to not scroll after refresh
 		let selectedItemIDs = this.itemsView.getSelectedItems(true);
 		this.itemsView.selection.clearSelection();
@@ -356,11 +364,8 @@ class LibraryLayout extends Layout {
 
 		// if there is lastHeight recorded, resize to that
 		if (this.lastHeight) {
-			// timeout is likely required to let updated minHeight to settle
-			setTimeout(() => {
-				window.resizeTo(window.innerWidth, this.lastHeight);
-				this.lastHeight = null;
-			}, 10);
+			window.resizeTo(window.innerWidth, this.lastHeight);
+			this.lastHeight = null;
 		}
 		// on linux, the sizing of the window may be off upon initial load
 		// despite the minHeight on relevant components
@@ -449,10 +454,18 @@ class LibraryLayout extends Layout {
 			regularOnly: !isCitingNotes,
 			multiSelect: !isCitingNotes,
 			onActivate: (event, items) => {
-				// Enter event from reaching KeyboardHandler which would accept the dialog
+				// Prevent Enter event from reaching KeyboardHandler which would accept the dialog
 				event.preventDefault();
 				event.stopPropagation();
 				let row = event.target;
+				// on Enter, event lands on the table itself, so try to find
+				// the last item's row and make sure is remains visible after items are added
+				if (!row.classList.contains("row")) {
+					let lastItemID = items[items.length - 1].id;
+					let rowIndex = this.itemsView.getRowIndexByID(lastItemID);
+					row = doc.querySelector(`#item-tree-citationDialog-row-${rowIndex}`);
+					if (!row) return;
+				}
 				let rowTopBeforeRefresh = row.getBoundingClientRect().top;
 				IOManager.addItemsToCitation(items, { noInputRefocus: true }).then(() => {
 					this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
@@ -606,11 +619,13 @@ class LibraryLayout extends Layout {
 	}
 
 	// Highlight/de-highlight selected rows
-	_refreshItemsViewHighlightedRows() {
+	async _refreshItemsViewHighlightedRows() {
 		let selectedIDs = CitationDataManager.items.map(({ zoteroItem }) => zoteroItem.id).filter(id => !!id);
-		if (this.itemsView.tree) {
-			this.itemsView.setHighlightedRows(selectedIDs);
+		// Wait for the tree to fully load to avoid a logged error that the tree is undefined
+		while (!this.itemsView.tree) {
+			await Zotero.Promise.delay(10);
 		}
+		this.itemsView.setHighlightedRows(selectedIDs);
 	}
 
 	_scrollHorizontallyOnWheel(event) {
@@ -825,10 +840,12 @@ const IOManager = {
 		_id("mode-button").setAttribute("mode", newMode);
 		doc.l10n.setAttributes(_id("mode-button"), "integration-citationDialog-btn-mode", { mode: newMode });
 
+		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
 		// do not show View menubar with itemTree-specific options in list mode
 		doc.querySelector("item-tree-menu-bar").suppressed = currentLayout.type == "list";
-		if (currentLayout.type == "list") {
+		// switching from library to list mode initiated by the user (not via setInitialDialogMode on load)
+		if (currentLayout.type == "list" && !isInitialModeSetting) {
 			// when switching from library to list, make sure all selected items are de-selected
 			libraryLayout.itemsView?.selection.clearSelection();
 			currentLayout.updateSelectedItems();
@@ -844,8 +861,8 @@ const IOManager = {
 		// the trees get rendered no matter what.
 		if (currentLayout.type == "library") {
 			setTimeout(() => {
-				libraryLayout.collectionsView.tree.invalidate();
-				libraryLayout.itemsView.tree.invalidate();
+				libraryLayout.collectionsView?.tree.forceUpdate();
+				libraryLayout.itemsView.tree?.forceUpdate();
 			}, 250);
 		}
 		currentLayout.refreshItemsList();
@@ -1087,6 +1104,10 @@ const IOManager = {
 		if (desiredMode == "last-closed") {
 			desiredMode = Zotero.Prefs.get("integration.citationDialogLastClosedMode");
 		}
+		// When the dialog is opened for the very first time, default to list mode
+		if (!desiredMode) {
+			desiredMode = "list";
+		}
 		this.toggleDialogMode(desiredMode);
 	},
 
@@ -1160,7 +1181,14 @@ const IOManager = {
 		}
 		// Do not rerun search if the search value is the same
 		// (e.g. focus returns into the last input)
-		if (query == SearchHandler.lastSearchValue) return;
+		if (query == SearchHandler.lastSearchValue) {
+			// reset pre-selected item if the search is not being run
+			// only after debounce (meaning the user stopped typing vs just returned focus into an input)
+			if (debounce) {
+				IOManager.markPreSelected();
+			}
+			return;
+		}
 		// Run search within the current layout
 		if (debounce) {
 			currentLayout.searchDebounced(query);
@@ -1456,5 +1484,5 @@ window.addEventListener("focus", () => {
 	if (Zotero.isLinux && now - windowLostFocusOn < 100) {
 		return;
 	}
-	currentLayout?.search(SearchHandler.lastSearchValue)
+	currentLayout?.search(SearchHandler.lastSearchValue);
 });
