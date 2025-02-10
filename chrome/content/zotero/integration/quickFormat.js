@@ -1544,7 +1544,8 @@ var Zotero_QuickFormat = new function () {
 		accepted = true;
 		try {
 			_updateCitationObject();
-			document.querySelector(".citation-dialog.deck").selectedIndex = 1;
+			document.querySelector(".citation-dialog.main").hidden = true;
+			document.querySelector(".citation-dialog.progress-container").hidden = false;
 			_onProgress(null);
 			io.accept(_onProgress);
 		} catch(e) {
