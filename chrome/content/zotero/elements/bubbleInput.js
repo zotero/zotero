@@ -171,7 +171,7 @@
 		isSomethingTyped() {
 			let input = this.getCurrentInput();
 			if (!input) return false;
-			return input.value.length > 0;
+			return input.value.trim().length > 0;
 		}
 
 		/**
