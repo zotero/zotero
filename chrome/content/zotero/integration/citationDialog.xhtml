@@ -54,7 +54,9 @@
 				<progress id="progress" max="100" hidden="true"></progress>
 				<div id="top-level-btn-group">
 					<image id="loading-spinner" class="zotero-spinner-16"/>
-					<button id="accept-button" class="btn-icon icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept" tabindex="-1"/>
+					<button id="cancel-button" class="btn-icon icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel"/>
+					<div class="vertical-separator"></div>
+					<button id="accept-button" class="btn-icon icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept"/>
 				</div>
 			</div>
 		</div>
@@ -84,10 +86,9 @@
 		<div id="bottom-area" class="layout">
 			<div id="bottom-area-wrapper" class="hbox">
 				<div class="hbox" style="flex:1"></div>
-				<div id="bottom-btn-group" class="hbox">
-					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" data-tabindex="70" tabindex="-1"/>
-					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" data-tabindex="80" tabindex="-1"/>
-					<button id="cancel-button" class="btn-icon icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel" data-tabindex="90" tabindex="-1"/>
+				<div id="bottom-btn-group" class="hbox" data-arrow-nav="horizontal"  data-tabindex="70">
+					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-arrow-nav-enabled="true"/>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-arrow-nav-enabled="true"/>
 				</div>
 			</div>
 		</div>

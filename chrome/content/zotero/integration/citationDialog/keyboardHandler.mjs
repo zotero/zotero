@@ -169,7 +169,8 @@ export class CitationDialogKeyboardHandler {
 			let group = current.closest("[data-arrow-nav]");
 			if (arrowDirection == "horizontal") {
 				if (!(event.key === Zotero.arrowNextKey || event.key === Zotero.arrowPreviousKey)) return false;
-				let shouldSelect = !this._id("bubble-input").contains(event.target); // selections only apply to items, not bubbles
+				// selections only happens with items
+				let shouldSelect = event.target.classList.contains("item") || event.target.classList.contains("itemsContainer");
 				handled = this._navigateGroup({ group, current, forward: event.key == Zotero.arrowNextKey, shouldSelect, shouldFocus: true, multiSelect });
 			}
 			if (arrowDirection == "vertical") {
@@ -202,11 +203,14 @@ export class CitationDialogKeyboardHandler {
 				let bSelected = b.classList.contains("current") ? -1 : 0;
 				return aSelected - bSelected;
 			}
-			if (forward) {
-				return parseInt(a.dataset.tabindex) - parseInt(b.dataset.tabindex);
-			}
-			return parseInt(b.dataset.tabindex) - parseInt(a.dataset.tabindex);
+			return parseInt(a.dataset.tabindex) - parseInt(b.dataset.tabindex);
 		});
+
+		// When going backwards, reverse the array after sorting
+		if (!forward) {
+			tabIndexedNodes.reverse();
+		}
+
 		let nodeToFocus;
 		for (let node of tabIndexedNodes) {
 			let tabIndex = parseInt(node.dataset.tabindex);
@@ -215,9 +219,9 @@ export class CitationDialogKeyboardHandler {
 				break;
 			}
 		}
+		// If no node was found, wrap around to the first/last node
 		if (!nodeToFocus && startingTabIndex === null) {
-			tabIndexedNodes[0].focus();
-			return tabIndexedNodes[0];
+			nodeToFocus = tabIndexedNodes[0];
 		}
 
 		// if node to focus is a part of arrow-navigation group (e.g. suggested items)
