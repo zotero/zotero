@@ -61,6 +61,7 @@
     "react-virtualized": "^9.22.4",
     "sass": "^1.69.5",
     "sinon": "^7.3.2",
+    "terser": "^5.38.2",
     "universalify": "^0.1.1"
   }
 }
