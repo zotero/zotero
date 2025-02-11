@@ -64,7 +64,7 @@ export class CitationDialogKeyboardHandler {
 			let rowIndex = focusedRow.id.split("-")[4];
 			if (rowIndex !== "0") return;
 			// if there are suggested items, focus them
-			if (!this._id("library-other-items").hidden) {
+			if (this._id("library-other-items").querySelector(".item")) {
 				let current = this.doc.querySelector(".selected.current");
 				if (current) {
 					current.focus();
@@ -123,7 +123,7 @@ export class CitationDialogKeyboardHandler {
 			if (current) {
 				current.focus();
 			}
-			else if (!group.hidden) {
+			else if (group.querySelector(".item")) {
 				this._navigateGroup({ group, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
 			}
 			else if (this._id("zotero-items-tree").querySelector(".row")) {
