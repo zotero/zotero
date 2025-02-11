@@ -68,8 +68,9 @@
 
 		#top-level-btn-group {
 			display: flex;
-			width: 30px;
+			width: 65px;
   			justify-content: end;
+			gap: 4px;
 
 			#loading-spinner {
 				width: 28px;
@@ -80,6 +81,10 @@
 				&[status="animate"] {
 					display: inline-block;
 				}
+			}
+			.vertical-separator {
+				border-inline-end: 1px solid var(--fill-quinary);
+				height: 28px;
 			}
 		}
 	}

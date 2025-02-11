@@ -224,14 +224,20 @@ class Layout {
 	// update itemsList.
 	async searchDebounced(value) {
 		_id("loading-spinner").setAttribute("status", "animate");
-		_id("accept-button").hidden = true;
+		for (let node of _id("top-level-btn-group").childNodes) {
+			if (node.id !== "loading-spinner") {
+				node.hidden = true;
+			}
+		}
 		SearchHandler.searching = true;
 		// This is called on each typed character, so refresh item list when typing stopped
 		SearchHandler.refreshDebounced(value, () => {
 			this.refreshItemsList();
 			SearchHandler.searching = false;
 			_id("loading-spinner").removeAttribute("status");
-			_id("accept-button").hidden = false;
+			for (let node of _id("top-level-btn-group").childNodes) {
+				node.hidden = false;
+			}
 		});
 	}
 
@@ -239,13 +245,19 @@ class Layout {
 	async search(value) {
 		if (accepted) return;
 		_id("loading-spinner").setAttribute("status", "animate");
-		_id("accept-button").hidden = true;
+		for (let node of _id("top-level-btn-group").childNodes) {
+			if (node.id !== "loading-spinner") {
+				node.hidden = true;
+			}
+		}
 		SearchHandler.searching = true;
 		await SearchHandler.refresh(value);
 		this.refreshItemsList();
 		SearchHandler.searching = false;
 		_id("loading-spinner").removeAttribute("status");
-		_id("accept-button").hidden = false;
+		for (let node of _id("top-level-btn-group").childNodes) {
+			node.hidden = false;
+		}
 	}
 
 	// implemented by layouts
