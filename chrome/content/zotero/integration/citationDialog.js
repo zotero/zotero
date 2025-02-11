@@ -882,6 +882,10 @@ const IOManager = {
 
 	// pass current items in the citation to bubble-input to have it update the bubbles
 	updateBubbleInput() {
+		// re-generate the bubble string for each item, in case a locator/prefix/suffix/etc. was changed
+		for (let item of CitationDataManager.items) {
+			item.bubbleString = Helpers.buildBubbleString({ citationItem: item.citationItem, zoteroItem: item.zoteroItem });
+		}
 		_id("bubble-input").refresh(CitationDataManager.items);
 	},
 
