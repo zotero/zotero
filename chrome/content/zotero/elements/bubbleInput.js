@@ -64,10 +64,9 @@
 				}
 			}
 			// Ensure each item in the citation has a bubble in the right position
-			for (let [index, { citationItem, zoteroItem, dialogReferenceID }] of Object.entries(combinedItems)) {
+			for (let [index, { dialogReferenceID, bubbleString }] of Object.entries(combinedItems)) {
 				let allBubbles = this.getAllBubbles();
 				let bubbleNode = allBubbles.find(candidate => candidate.getAttribute("dialogReferenceID") == dialogReferenceID);
-				let bubbleString = Utils.buildBubbleString({ citationItem, zoteroItem });
 				// Create bubble if it does not exist and append to the input
 				if (!bubbleNode) {
 					bubbleNode = this._createBubble(bubbleString, dialogReferenceID);
@@ -216,7 +215,7 @@
 		
 		/**
 		 * Create a bubble node representing item present in the citation
-		 * @param {String} content - textual content of the bubbl built via buildBubbleString
+		 * @param {String} content - textual content of the bubble
 		 * Contains Item's title/author/locator/prefix/suffix/etc.
 		 * @param {String} dialogReferenceID - ID used by citationDialog to relate bubbles to cited items
 		 * @returns {Node} - bubble node
@@ -583,53 +582,6 @@
 			/* eslint-enable array-element-newline */
 		
 			return !nonPrintableKeys.includes(event.key);
-		},
-
-		buildBubbleString({ citationItem, zoteroItem }) {
-			// Creator
-			var title;
-			var str = zoteroItem.getField("firstCreator");
-			
-			// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
-			title = zoteroItem.getDisplayTitle();
-			title = title.substr(0, 32) + (title.length > 32 ? "…" : "");
-			if (!str && title) {
-				str = Zotero.getString("punctuation.openingQMark") + title + Zotero.getString("punctuation.closingQMark");
-			}
-			else if (!str) {
-				str = Zotero.getString("integration-citationDialog-bubble-empty");
-			}
-			
-			// Date
-			var date = zoteroItem.getField("date", true, true);
-			if (date && (date = date.substr(0, 4)) !== "0000") {
-				str += ", " + parseInt(date);
-			}
-			
-			// Locator
-			if (citationItem.locator) {
-				// Try to fetch the short form of the locator label. E.g. "p." for "page"
-				// If there is no locator label, default to "page" for now
-				let label = (Zotero.Cite.getLocatorString(citationItem.label || 'page', 'short') || '').toLocaleLowerCase();
-				
-				str += `, ${label} ${citationItem.locator}`;
-			}
-			
-			// Prefix
-			if (citationItem.prefix && Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP) {
-				let prefix = citationItem.prefix.substr(0, 10) + (citationItem.prefix.length > 10 ? "…" : "");
-				str = prefix
-					+ (Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? " " : "")
-					+ str;
-			}
-			
-			// Suffix
-			if (citationItem.suffix && Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP) {
-				let suffix = citationItem.suffix.substr(0, 10) + (citationItem.suffix.length > 10 ? "…" : "");
-				str += (Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? " " : "") + suffix;
-			}
-			
-			return str;
 		},
 
 		getContentWidth(input) {
