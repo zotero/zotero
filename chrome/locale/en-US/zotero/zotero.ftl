@@ -26,6 +26,8 @@ general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-accept = Accept
+general-cancel = Cancel
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -351,6 +353,67 @@ integration-editBibliography-wrapper =
     { -integration-editBibliography-edit-reference }
 integration-quickFormatDialog-window =
     .title = { -app-name } - Quick Format Citation
+integration-citationDialog = Citation Dialog
+integration-citationDialog-section-open = Open Documents ({ $count })
+integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-cited = Cited Items ({ $count })
+integration-citationDialog-details-suffix =  Suffix
+integration-citationDialog-details-prefix =  Prefix
+integration-citationDialog-details-suppressAuthor = Omit Author
+integration-citationDialog-details-remove = { general-remove }
+integration-citationDialog-details-done =
+    .label = { general-done }
+integration-citationDialog-details-showInLibrary = Show in Library
+integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-lib-no-matches = No selected, opened, or cited items match the current query.
+integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-btn-settings =
+    .title = { general-open-settings }
+integration-citationDialog-btn-mode =
+    .title = {
+        $mode ->
+            [library] Switch to List Mode
+            [list] Switch to Library Mode
+            *[other] Switch Mode
+    }
+    .aria-label = {
+        $mode ->
+            [library] The dialog is in Library mode. Click to switch to List mode.
+            [list] The dialog is in List mode. Click to switch to Library mode.
+            *[other] Switch Mode
+    }
+integration-citationDialog-btn-accept = 
+    .title = { general-accept }
+integration-citationDialog-btn-cancel = 
+    .title = { general-cancel }
+
+integration-citationDialog-general-instructions = Use Left/Right Arrow to navigate the items of this citation. Press Tab to select items to add into this citation.
+Press Shift - { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
+integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
+
+integration-citationDialog-aria-bubble =
+    .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
+integration-citationDialog-aria-single-input =
+    .placeholder = Type to search or add selected and open items
+    .aria-description = Press Tab to select items to add into this citation. Press Escape to discard the changes and close the dialog.
+integration-citationDialog-aria-input =
+    .placeholder = Type to search for an item to include in this citation.
+    .aria-description = { integration-citationDialog-general-instructions }
+integration-citationDialog-aria-item-list =
+    .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+integration-citationDialog-aria-item-library =
+    .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+integration-citationDialog-collections-table =
+    .aria-label = Collections.
+    .aria-description = Select a collection and press Tab to navigate its items.
+integration-citationDialog-items-table =
+    .aria-label = { integration-citationDialog-enter-to-add-item }
+integration-citationDialog-items-table-added =
+    .aria-label = This item has been added into the citation. Press { return-or-enter } to add it again or Backspace to remove it.
+integration-citationDialog-add-all = Add all
+integration-citationDialog-bubble-empty = (no title)
+integration-citationDialog-duplicates-warning-title = Add a potential duplicate item into the citation?
+integration-citationDialog-duplicates-warning-message = This citation already has an item with this title and creator. Add anyway?
 
 styleEditor-locatorType =
     .aria-label = Locator type

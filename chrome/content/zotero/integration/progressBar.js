@@ -23,25 +23,19 @@
     ***** END LICENSE BLOCK *****
 */
 
-Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
-
 var Zotero_ProgressBar = new function () {
-	var initialized, io;
-	
 	/**
 	 * Pre-initialization, when the dialog has loaded but has not yet appeared
 	 */
 	this.onDOMContentLoaded = function(event) {
 		if(event.target === document) {
 			initialized = true;
-			io = window.arguments[0].wrappedJSObject;
+			let io = window.arguments[0].wrappedJSObject;
 			if (io.onLoad) {
 				io.onLoad(_onProgress);
 			}
-			
-			if (io.isNote) {
-				document.documentElement.classList.add('note-dialog');
-			}
+			// Same height that citation dialog would occupy while loading
+			window.resizeTo(800, 42);
 		}
 	};
 	
@@ -64,51 +58,13 @@ var Zotero_ProgressBar = new function () {
 	 * Called when progress changes
 	 */
 	function _onProgress(percent) {
-		var meter = document.querySelector(".citation-dialog.progress-meter");
+		var meter = document.getElementById("progress");
 		if(percent === null) {
 			meter.removeAttribute('value');
 		} else {
 			meter.value = Math.round(percent);
 		}
 	}
-	
-	/**
-	 * Resizes windows
-	 * @constructor
-	 */
-	var Resizer = function(panel, targetWidth, targetHeight, pixelsPerStep, stepsPerSecond) {
-		this.panel = panel;
-		this.curWidth = panel.clientWidth;
-		this.curHeight = panel.clientHeight;
-		this.difX = (targetWidth ? targetWidth - this.curWidth : 0);
-		this.difY = (targetHeight ? targetHeight - this.curHeight : 0);
-		this.step = 0;
-		this.steps = Math.ceil(Math.max(Math.abs(this.difX), Math.abs(this.difY))/pixelsPerStep);
-		this.timeout = (1000/stepsPerSecond);
-		
-		var me = this;
-		this._animateCallback = function() { me.animate() };
-	};
-	
-	/**
-	 * Performs a step of the animation
-	 */
-	Resizer.prototype.animate = function() {
-		if(this.stopped) return;
-		this.step++;
-		this.panel.sizeTo(this.curWidth+Math.round(this.step*this.difX/this.steps),
-			this.curHeight+Math.round(this.step*this.difY/this.steps));
-		if(this.step !== this.steps) {
-			window.setTimeout(this._animateCallback, this.timeout);
-		}
-	};
-	
-	/**
-	 * Halts resizing
-	 */
-	Resizer.prototype.stop = function() {
-		this.stopped = true;
-	};
 }
 
 window.addEventListener("DOMContentLoaded", Zotero_ProgressBar.onDOMContentLoaded, false);
