@@ -38,15 +38,9 @@ export class CitationDialogPopupsHandler {
 	}
 
 	setupListeners() {
-		// Display overlay when a panel appears
-		this.doc.addEventListener("popuphidden", (event) => {
-			if (event.target.tagName !== "xul:panel") return;
-			this._getNode(".overlay").hidden = true;
-		});
 		this.doc.addEventListener("popupshown", (event) => {
 			// make sure overlay doesn't appear on tooltips and etc.
 			if (event.target.tagName !== "xul:panel") return;
-			this._getNode(".overlay").hidden = false;
 			// focus specified target
 			let potentialFocusTarget = event.target.getAttribute("focus-target-id");
 			if (potentialFocusTarget) {
@@ -56,10 +50,6 @@ export class CitationDialogPopupsHandler {
 			if (!event.target.contains(this.doc.activeElement)) {
 				Services.focus.moveFocus(this.doc.defaultView, event.target, Services.focus.MOVEFOCUS_FORWARD, 0);
 			}
-		});
-		// just to make sure we never end up with a stuck overlay if something goes wrong with popups
-		this._getNode(".overlay").addEventListener("mousedown", () => {
-			this._getNode(".overlay").hidden = true;
 		});
 
 		this._getNode("#itemDetails").addEventListener("popuphidden", this.handleItemDetailsClosure.bind(this));
