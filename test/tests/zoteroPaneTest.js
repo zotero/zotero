@@ -1692,6 +1692,38 @@ describe("ZoteroPane", function() {
 			assert.equal(parentItem.getAttachments().length, 4);
 			assert.equal(epubAttachment.getField('title'), Zotero.getString('file-type-ebook'));
 		});
+
+		describe("Linked file renaming", function () {
+			before(() => {
+				Zotero.Prefs.set('autoRenameFiles.linked', true);
+			});
+
+			after(() => {
+				Zotero.Prefs.clear('autoRenameFiles.linked');
+			});
+
+			it("should only rename and change the title of the first PDF attachment", async function () {
+				let testFile = getTestDataDirectory();
+				testFile.append('test.pdf');
+
+				let tempDir = await getTempDirectory();
+				let copy1 = PathUtils.join(tempDir, 'copy1.pdf');
+				let copy2 = PathUtils.join(tempDir, 'copy2.pdf');
+
+				await IOUtils.copy(testFile.path, copy1);
+				await IOUtils.copy(testFile.path, copy2);
+
+				let parentItem = await createDataObject('item', { title: 'Foo' });
+
+				let [attachment1] = await zp.addAttachmentFromDialog(false, parentItem.id, [copy1]);
+				assert.equal(attachment1.getField('title'), Zotero.getString('file-type-pdf'));
+				assert.equal(attachment1.attachmentFilename, 'Foo.pdf');
+
+				let [attachment2] = await zp.addAttachmentFromDialog(false, parentItem.id, [copy2]);
+				assert.equal(attachment2.getField('title'), 'copy2');
+				assert.equal(attachment2.attachmentFilename, 'copy2.pdf');
+			});
+		});
 	});
 
 	describe("#createParentItemsFromSelected()", function () {
