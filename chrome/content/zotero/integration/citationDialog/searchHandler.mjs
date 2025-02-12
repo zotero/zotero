@@ -36,7 +36,7 @@ export class CitationDialogSearchHandler {
 		this.isCitingNotes = isCitingNotes;
 		this.io = io;
 
-		this.lastSearchValue;
+		this.lastSearchValue = null;
 		this.results = {
 			found: [],
 			open: [],
@@ -132,8 +132,7 @@ export class CitationDialogSearchHandler {
 		this._deduplicate();
 	}
 
-	// Run the actual search query and record all matches in this.searchResultIDs
-	async _updateSearchResults(str) {
+	cleanSearchQuery(str) {
 		str = str.replace(/ (?:&|and) /g, " ", "g").replace(/^,/, '');
 		str = this._cleanYear(str);
 
@@ -141,6 +140,12 @@ export class CitationDialogSearchHandler {
 		if (str.trim().length < MIN_QUERY_LENGTH) {
 			str = "";
 		}
+		return str;
+	}
+
+	// Run the actual search query and record all matches in this.searchResultIDs
+	async _updateSearchResults(str) {
+		str = this.cleanSearchQuery(str);
 
 		var s = new Zotero.Search();
 		Zotero.Feeds.getAll().forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));

@@ -1207,7 +1207,7 @@ const IOManager = {
 		}
 		// Do not rerun search if the search value is the same
 		// (e.g. focus returns into the last input)
-		if (query == SearchHandler.lastSearchValue) {
+		if (SearchHandler.cleanSearchQuery(query) == SearchHandler.lastSearchValue) {
 			// reset pre-selected item if the search is not being run
 			// only after debounce (meaning the user stopped typing vs just returned focus into an input)
 			if (debounce) {
