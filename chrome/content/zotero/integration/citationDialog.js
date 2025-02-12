@@ -320,17 +320,26 @@ class LibraryLayout extends Layout {
 	}
 
 	async refreshItemsList() {
+		let otherItemsHeight = _id(`library-other-items`).getBoundingClientRect().height;
 		await super.refreshItemsList();
 		_id("library-other-items").querySelector(".search-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
+		// If the scrollbar setting is set to always show, the height of the message
+		// will be smaller than the height of the items container because the scrollbar would not be there.
+		// To avoid itemTree shifting up, explicitly make the height of the message the same as the height of the items
+		// before filtering
+		if (!_id("library-no-suggested-items-message").hidden) {
+			_id("library-other-items").style.height = `${otherItemsHeight}px`;
+		}
+		else {
+			_id("library-other-items").style.removeProperty("height");
+		}
 		this.resizeWindow();
-		if (!_id("library-other-items").hidden) {
-			// clicking on the collapsed deck of items will add all of them
-			let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
-			for (let collapsibleDeck of collapsibleDecks) {
-				collapsibleDeck.querySelector(".itemsContainer").addEventListener("click", this._captureItemsContainerClick, true);
-				collapsibleDeck.querySelector(".itemsContainer").classList.add("keyboard-clickable");
-			}
+		// clicking on the collapsed deck of items will add all of them
+		let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
+		for (let collapsibleDeck of collapsibleDecks) {
+			collapsibleDeck.querySelector(".itemsContainer").addEventListener("click", this._captureItemsContainerClick, true);
+			collapsibleDeck.querySelector(".itemsContainer").classList.add("keyboard-clickable");
 		}
 	}
 
@@ -1085,13 +1094,14 @@ const IOManager = {
 			}
 		}
 		section.querySelector(".header-label").setAttribute("aria-expanded", section.classList.contains("expanded"));
-		// in list mode, if the section collapsed so that there is empty space left, resize the window
-		if (currentLayout.type == "list") {
-			// give the content a moment to expand before window resizing
-			setTimeout(() => {
-				currentLayout.resizeWindow();
-			}, 250);
-		}
+		// In list mode, if the section is collapsed, there may be empty space left.
+		// In library mode, when horizontal section is expanded with "Show scroll bars: always" setting,
+		// scrollbar may appear and push content down.
+		// To handle these edge cases, the window should be resized to fit the content
+		// after a small delay to let everything settle
+		setTimeout(() => {
+			currentLayout.resizeWindow();
+		}, 250);
 	},
 
 

@@ -119,7 +119,10 @@
 	#library-layout {
 		#library-other-items {
 
-			height: 82px;
+			// height is generally 82px but can be increased by a scrollbar
+			// on macOS if "Show scroll bars" setting is set to "Always"
+			min-height: 82px;
+			max-height: 90px;
 			margin-left: 17px;
 			margin-inline-end: 16px;
 			flex-shrink: 0; // make sure suggested items do not get shrunk when window is resized
@@ -130,7 +133,9 @@
 			--item-horizontal-size: calc(var(--item-width) + 2*var(--item-padding-horizontal) + 2px);
 
 			position: relative;
-			overflow-x: scroll;
+			overflow-x: auto;
+			overflow-y: hidden;
+			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 
 			// wrapper for horizontal scrollable suggested items
 			.search-items {
@@ -144,7 +149,7 @@
 					position: sticky;
 					top: 0;
 					width: 20px;
-					height: 100%;
+					height: 66px;
 					pointer-events: none;
 					z-index: 100; 
 				}
@@ -400,7 +405,8 @@
 	#list-layout {
 		#list-layout-wrapper {
 			-moz-user-select: none;
-			overflow-y: scroll;
+			overflow-y: auto;
+			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 			height: 100%;
 			padding-top: 4px;
 			padding-bottom: 8px;
