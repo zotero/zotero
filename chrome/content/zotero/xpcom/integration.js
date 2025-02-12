@@ -276,7 +276,7 @@ Zotero.Integration = new function() {
 			}
 			Zotero.Integration.currentDoc = document = await documentPromise;
 			
-			[session, documentImported] = await Zotero.Integration.getSession(application, document, agent, command == 'addNote');
+			[session, documentImported] = await Zotero.Integration.getSession(application, document, agent, command);
 			Zotero.Integration.currentSession = session;
 			// TODO: figure this out
 			// Zotero.Notifier.trigger('delete', 'collection', 'document');
@@ -441,7 +441,7 @@ Zotero.Integration = new function() {
 		// So we make sure cleanup is finished before the dialog is closed, but otherwise
 		// we should not delay the dialog display
 		let cleanupPromise = Zotero.Integration.currentDoc.cleanup();
-		Zotero.Integration.currentSession && await Zotero.Integration.currentSession.progressBar.hide(true);
+		await Zotero.Integration.currentSession?.progressBar.hide(true);
 		
 		var allOptions = 'chrome,centerscreen';
 		// without this, Firefox gets raised with our windows under Compiz
@@ -471,14 +471,8 @@ Zotero.Integration = new function() {
 		window.addEventListener("unload", listener, false);
 
 		await deferred.promise;
+		Zotero.Integration.currentSession?.progressBar.show();
 		await cleanupPromise;
-		// We do not want to redisplay the progress bar if this window close
-		// was the final close of the integration command
-		await Zotero.Promise.delay(10);
-		if (Zotero.Integration.currentDoc && Zotero.Integration.currentSession
-				&& Zotero.Integration.currentSession.progressBar) {
-			Zotero.Integration.currentSession.progressBar.show();
-		}
 	};
 	
 	/**
@@ -486,11 +480,16 @@ Zotero.Integration = new function() {
 	 * Either loads a cached session if doc communicated since restart or creates a new one
 	 * @return {Zotero.Integration.Session} Promise
 	 */
-	this.getSession = async function (app, doc, agent, isNote) {
+	this.getSession = async function (app, doc, agent, command) {
 		let documentImported = false;
 		try {
-			var progressBar = new Zotero.Integration.Progress(4, isNote, Zotero.isMac && agent != 'http');
-			progressBar.show();
+			var progressBar = new Zotero.Integration.Progress(4, command == "addNote");
+			// Avoid showing the progress bar on macOS when initiating commands that
+			// display an UI interface, otherwise the Zotero window is brought to the front
+			// along with the UI when the progress bar is closed.
+			if (!Zotero.isMac || ["refresh", "removeCodes", "addEditBibliography"].includes(command)) {
+				progressBar.show();
+			}
 			
 			var dataString = await doc.getDocumentData(),
 				data, session;
@@ -3464,19 +3463,11 @@ Zotero.Integration.Timer = class {
 Zotero.Integration.Progress = class {
 	/**
 	 * @param {Number} segmentCount
-	 * @param {Boolean} dontDisplay
-	 *		On macOS closing an application window switches focus to the topmost window of the same application
-	 *		instead of the previous window of any application. Since the progress window is opened and closed
-	 *		between showing other integration windows, macOS will switch focus to the main Zotero window (and
-	 *		move the word processor window to the background). Thus we avoid showing the progress window on macOS
-	 *		except for http agents (i.e. google docs), where even opening the citation dialog may potentially take
-	 *		a long time and having no indication of progress is worse than bringing the Zotero window to the front
 	 */
-	constructor(segmentCount=4, isNote=false, dontDisplay=false) {
+	constructor(segmentCount=4, isNote=false) {
 		this.segments = Array.from({length: segmentCount}, () => undefined);
 		this.timer = new Zotero.Integration.Timer();
 		this.segmentIdx = 0;
-		this.dontDisplay = dontDisplay;
 		this.isNote = isNote;
 	}
 	
@@ -3506,7 +3497,6 @@ Zotero.Integration.Progress = class {
 		this.segmentIdx = 0;
 	}
 	show() {
-		if (this.dontDisplay) return;
 		var options = 'chrome,centerscreen';
 		// without this, Firefox gets raised with our windows under Compiz
 		if (Zotero.isLinux) options += ',dialog=no';
@@ -3524,7 +3514,7 @@ Zotero.Integration.Progress = class {
 		Zotero.Utilities.Internal.activate(this.window);
 	}
 	async hide(fast=false) {
-		if (this.dontDisplay || !this.window) return;
+		if (!this.window) return;
 		if (!fast) {
 			this.onProgress && this.onProgress(100);
 			this.onProgress = null;

@@ -1,65 +1,76 @@
-// From https://dxr.mozilla.org/mozilla-esr60/source/browser/themes/shared/downloads/progressmeter.inc.css
+//// From https://dxr.mozilla.org/mozilla-esr60/source/browser/themes/shared/downloads/progressmeter.inc.css
+
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /*** Common-styled progressmeter ***/
+
+:root {
+  --download-progress-fill-color: AccentColor;
+  --download-progress-paused-color: GrayText;
+  --download-progress-flare-color: rgba(255,255,255,0.75);
+}
+
+@media (prefers-color-scheme: dark) {
+  #contentAreaDownloadsView {
+    --download-progress-fill-color: var(--in-content-item-selected);
+  }
+}
+
+/*
+ * Styling "html:progress" is limited by the fact that a number of properties
+ * are intentionally locked at the UA stylesheet level. We have to use a border
+ * instead of an outline because the latter would be drawn over the progress
+ * bar and we cannot change its z-index. This means we have to use a negative
+ * margin, except when the value is zero, and adjust the width calculation for
+ * the indeterminate state.
+ */
+
 .downloadProgress {
-  height: 8px;
-  border-radius: 1px;
-  margin: 4px 0 0;
-  margin-inline-end: 12px;
-
-  /* for overriding rules in progressmeter.css */
-  -moz-appearance: none;
-  border-style: none;
-  background-color: transparent;
-  min-width: initial;
-  min-height: initial;
+  appearance: none;
+  display: flex;
+  margin-block: 5px 1px;
+  /* This value is kinda odd, it's used to align with the edge of the badge,
+   * if shown, which is inside the edge of the image (the image gets 16px
+   * margin). */
+  margin-inline-end: 18px;
+  border: none;
+  height: 4px;
+  border-radius: 2px;
+  background-color: color-mix(in srgb, currentColor 15%, transparent);
 }
 
-.downloadProgress[mode="undetermined"] {
-  /* for overriding rules on global.css in Linux. */
-  -moz-binding: url("chrome://global/content/bindings/progressmeter.xml#progressmeter");
+/* Ensure we have contrast in selected download items */
+#downloadsListBox.allDownloadsListBox richlistitem[selected] .downloadProgress::-moz-progress-bar {
+  --download-progress-fill-color: currentColor;
+  --download-progress-flare-color: AccentColor;
 }
 
-.downloadProgress > .progress-bar {
-  background-color: Highlight;
-
-  /* for overriding rules in progressmeter.css */
-  -moz-appearance: none;
+.downloadProgress::-moz-progress-bar {
+  appearance: none;
+  background-color: var(--download-progress-fill-color);
+  border-radius: 2px;
 }
 
-.downloadProgress[paused="true"] > .progress-bar {
-  background-color: GrayText;
+.downloadProgress[paused]::-moz-progress-bar {
+  background-color: var(--download-progress-paused-color);
 }
 
-.downloadProgress[mode="undetermined"] > .progress-bar {
+.downloadProgress:indeterminate::-moz-progress-bar {
+  width: calc(100% + 2px);
   /* Make a white reflecting animation.
-     Create a gradient with 2 identical pattern, and enlarge the size to 200%.
+     Create a gradient with 2 identical patterns, and enlarge the size to 200%.
      This allows us to animate background-position with percentage. */
+  background-color: var(--download-progress-fill-color);
   background-image: linear-gradient(90deg, transparent 0%,
-          rgba(255,255,255,0.5) 25%,
-          transparent 50%,
-          rgba(255,255,255,0.5) 75%,
-          transparent 100%);
-  background-blend-mode: lighten;
+                                           var(--download-progress-flare-color) 25%,
+                                           transparent 50%,
+                                           var(--download-progress-flare-color) 75%,
+                                           transparent 100%);
+  background-blend-mode: normal;
   background-size: 200% 100%;
   animation: downloadProgressSlideX 1.5s linear infinite;
-}
-
-.downloadProgress > .progress-remainder {
-  border: solid ButtonShadow;
-  border-block-start-width: 1px;
-  border-block-end-width: 1px;
-  border-inline-start-width: 0;
-  border-inline-end-width: 1px;
-  background-color: ButtonFace;
-}
-
-.downloadProgress[value="0"] > .progress-remainder {
-  border-width: 1px;
-}
-
-.downloadProgress > .progress-remainder[mode="undetermined"] {
-  border: none;
 }
 
 @keyframes downloadProgressSlideX {

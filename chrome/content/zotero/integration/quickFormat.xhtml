@@ -54,32 +54,32 @@
 	</linkset>
 
 	<box orient="horizontal" class="citation-dialog entry">
-		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
-			<hbox class="citation-dialog main" flex="1" align="start">
-				<hbox flex="1">
-					<vbox class="citation-dialog icons start">
-						<toolbarbutton id="zotero-icon" data-l10n-id="quickformat-citation-options" type="menu" tabindex="0" disabled="true">
-							<menupopup>
-								<menuitem id="keep-sorted" label="&zotero.citation.keepSorted.label;"
-										oncommand="Zotero_QuickFormat.onKeepSortedCommand()" type="checkbox"
-										hidden="true"/>
-								<menuitem id="show-editor" label="&zotero.integration.showEditor.label;"
-										oncommand="Zotero_QuickFormat.onShowEditorCommand()" type="checkbox"
-										hidden="true"/>
-								<menuitem id="classic-view" label="&zotero.integration.classicView.label;"
-										oncommand="Zotero_QuickFormat.onClassicViewCommand()"/>
-							</menupopup>
-						</toolbarbutton>
-					</vbox>
-					<html:div flex="1" spellcheck="false" class="citation-dialog editor" role="application"></html:div>
-					<vbox class="citation-dialog icons end">
-						<image class="icon zotero-spinner-16"/>
-						<toolbarbutton class="icon accept-button" onclick="Zotero_QuickFormat.accept()" data-l10n-id="quickformat-accept"></toolbarbutton>
-					</vbox>
-				</hbox>
+		<hbox class="citation-dialog main" flex="1" align="start">
+			<hbox flex="1">
+				<vbox class="citation-dialog icons start">
+					<toolbarbutton id="zotero-icon" data-l10n-id="quickformat-citation-options" type="menu" tabindex="0" disabled="true">
+						<menupopup>
+							<menuitem id="keep-sorted" label="&zotero.citation.keepSorted.label;"
+									oncommand="Zotero_QuickFormat.onKeepSortedCommand()" type="checkbox"
+									hidden="true"/>
+							<menuitem id="show-editor" label="&zotero.integration.showEditor.label;"
+									oncommand="Zotero_QuickFormat.onShowEditorCommand()" type="checkbox"
+									hidden="true"/>
+							<menuitem id="classic-view" label="&zotero.integration.classicView.label;"
+									oncommand="Zotero_QuickFormat.onClassicViewCommand()"/>
+						</menupopup>
+					</toolbarbutton>
+				</vbox>
+				<html:div flex="1" spellcheck="false" class="citation-dialog editor" role="application"></html:div>
+				<vbox class="citation-dialog icons end">
+					<image class="icon zotero-spinner-16"/>
+					<toolbarbutton class="icon accept-button" onclick="Zotero_QuickFormat.accept()" data-l10n-id="quickformat-accept"></toolbarbutton>
+				</vbox>
 			</hbox>
-			<html:progress class="citation-dialog progress-meter" max="100"/>
-		</deck>
+		</hbox>
+		<hbox class="citation-dialog progress-container" hidden="true">
+			<html:progress class="citation-dialog progress-meter downloadProgress" max="100"/>
+		</hbox>
 	</box>
 	<html:div id="bubble-description" class="aria-hidden" role="tooltip" data-l10n-id="quickformat-aria-bubble"></html:div>
 	<html:div id="input-description" class="aria-hidden" role="tooltip" data-l10n-id="quickformat-aria-input"></html:div>

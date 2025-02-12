@@ -55,17 +55,17 @@
 	</linkset>
 	
 	<box orient="horizontal" class="citation-dialog entry">
-		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
-			<hbox class="citation-dialog main" flex="1" align="start">
-				<hbox flex="1">
-					<html:div flex="1" spellcheck="false" class="citation-dialog editor insert-note" role="application"></html:div>
-					<vbox class="citation-dialog icons end">
-						<image class="icon zotero-spinner-16"/>
-					</vbox>
-				</hbox>
+		<hbox class="citation-dialog main" flex="1" align="start">
+			<hbox flex="1">
+				<html:div flex="1" spellcheck="false" class="citation-dialog editor insert-note" role="application"></html:div>
+				<vbox class="citation-dialog icons end">
+					<image class="icon zotero-spinner-16"/>
+				</vbox>
 			</hbox>
-			<html:progress class="citation-dialog progress-meter" max="100"/>
-		</deck>
+		</hbox>
+		<hbox class="citation-dialog progress-container" hidden="true">
+			<html:progress class="citation-dialog progress-meter downloadProgress" style="display: none" max="100"/>
+		</hbox>
 	</box>
 	<panel class="citation-dialog reference-panel" noautofocus="true" norestorefocus="true"
 		   height="0" width="0" flip="none">
