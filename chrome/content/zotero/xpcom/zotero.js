@@ -2082,6 +2082,11 @@ Zotero.DragDrop = {
 			let ids = dt.getData('zotero/item').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
+		else if (dt.types.includes('zotero/search')) {
+			dragData.dataType = 'zotero/search';
+			let ids = dt.getData('zotero/search').split(",").map(id => parseInt(id));
+			dragData.data = ids;
+		}
 		else {
 			if (dt.types.includes('application/x-moz-file')) {
 				dragData.dataType = 'application/x-moz-file';

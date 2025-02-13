@@ -1426,11 +1426,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			event.dataTransfer.effectAllowed = 'copyMove';
 		}
 		
-		if (!treeRow.isCollection()) {
+		if (!treeRow.isCollection() && !treeRow.isSearch()) {
 			return;
 		}
-		event.dataTransfer.setData("zotero/collection", treeRow.ref.id);
-		Zotero.debug("Dragging collection " + treeRow.id);
+		let type = treeRow.isCollection() ? "zotero/collection" : "zotero/search";
+		event.dataTransfer.setData(type, treeRow.ref.id);
+		Zotero.debug(`Dragging ${type} ` + treeRow.id);
 	}
 
 	onDragOver(event, index) {
@@ -1567,6 +1568,21 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Directly on a row
 		if (orient === 0) {
 			if (!treeRow.editable) {
+				// Can drop collections, searches, and items into trash of their own library
+				if (treeRow.isTrash()) {
+					let objects = [];
+					if (dataType === 'zotero/item') {
+						objects = Zotero.Items.get(data);
+					}
+					else if (dataType === 'zotero/collection') {
+						objects = Zotero.Collections.get(data);
+					}
+					else if (dataType === 'zotero/search') {
+						objects = Zotero.Searches.get(data);
+					}
+					let allInSameLibrary = objects.every(object => object.libraryID === treeRow.ref.libraryID);
+					return allInSameLibrary;
+				}
 				// Zotero.debug("Drop target not editable");
 				return false;
 			}
@@ -2096,6 +2112,27 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
 			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
 		};
+
+		// Dropping items, collections, or searches into trash
+		if (targetTreeRow.isTrash()) {
+			let objects = [];
+			if (dataType == 'zotero/collection') {
+				objects = await Zotero.Collections.getAsync(data);
+			}
+			else if (dataType == 'zotero/search') {
+				objects = await Zotero.Searches.getAsync(data);
+			}
+			else if (dataType == 'zotero/item') {
+				objects = await Zotero.Items.getAsync(data);
+			}
+			await Zotero.DB.executeTransaction(async function () {
+				for (let obj of objects) {
+					obj.deleted = true;
+					await obj.save();
+				}
+			});
+			return;
+		}
 		
 		var targetLibraryID = targetTreeRow.ref.libraryID;
 		var targetCollectionID = targetTreeRow.isCollection() ? targetTreeRow.ref.id : false;
