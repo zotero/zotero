@@ -8,7 +8,6 @@ const multimatch = require('multimatch');
 const options = JSON.parse(fs.readFileSync('.babelrc'));
 const cluster = require('cluster');
 const { comparePaths } = require('./utils');
-const { minify_sync } = require('terser');
 
 /* exported onmessage */
 async function babelWorker(ev) {
@@ -76,12 +75,6 @@ async function babelWorker(ev) {
 			if (transformed.length === contents.length) {
 				return postError('Failed to patch tsWorker.js');
 			}
-			// We symlinked the unminified tsWorker.js in order to apply this
-			// patch, but it's huge. Use Terser to minify it.
-			({ code: transformed } = minify_sync(transformed, {
-				compress: false,
-				mangle: false,
-			}));
 		}
 
 		else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
