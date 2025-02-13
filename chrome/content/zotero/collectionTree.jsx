@@ -1568,20 +1568,20 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Directly on a row
 		if (orient === 0) {
 			if (!treeRow.editable) {
-				// Can drop collections, searches and items into trash
+				// Can drop collections, searches, and items into trash of their own library
 				if (treeRow.isTrash()) {
-					if (dataType == 'zotero/item') {
-						var items = Zotero.Items.get(data);
-						let allInSameLibrary = !items.find(item => item.libraryID != treeRow.ref.libraryID);
-						// Cannot drop items from another library
-						return allInSameLibrary;
+					let objects = [];
+					if (dataType === 'zotero/item') {
+						objects = Zotero.Items.get(data);
 					}
-					if (dataType == 'zotero/search' || dataType == 'zotero/collection') {
-						// Can only drop collections and searches into trash of their library
-						let id = data[0];
-						let obj = dataType == 'zotero/collection' ? Zotero.Collections.get(id) : Zotero.Searches.get(id);
-						return treeRow.ref.libraryID == obj.libraryID;
+					else if (dataType === 'zotero/collection') {
+						objects = Zotero.Collections.get(data);
 					}
+					else if (dataType === 'zotero/search') {
+						objects = Zotero.Searches.get(data);
+					}
+					let allInSameLibrary = objects.every(object => object.libraryID === treeRow.ref.libraryID);
+					return allInSameLibrary;
 				}
 				// Zotero.debug("Drop target not editable");
 				return false;
@@ -2113,17 +2113,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
 		};
 
-		// Droppping items, collections or searches into trash
+		// Dropping items, collections, or searches into trash
 		if (targetTreeRow.isTrash()) {
 			let objects = [];
 			if (dataType == 'zotero/collection') {
 				objects = await Zotero.Collections.getAsync(data);
 			}
-			else if (dataType == 'zotero/item') {
-				objects = await Zotero.Items.getAsync(data);
-			}
 			else if (dataType == 'zotero/search') {
 				objects = await Zotero.Searches.getAsync(data);
+			}
+			else if (dataType == 'zotero/item') {
+				objects = await Zotero.Items.getAsync(data);
 			}
 			await Zotero.DB.executeTransaction(async function () {
 				for (let obj of objects) {
