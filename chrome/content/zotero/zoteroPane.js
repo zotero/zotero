@@ -4517,7 +4517,7 @@ var ZoteroPane = new function()
 	/**
 	 * @param {Boolean} [link]
 	 * @param {Number} [parentItemID]
-	 * @param {nsIFile[]} [files] Used instead of showing a file picker - for tests
+	 * @param {String[]} [files] Used instead of showing a file picker - for tests
 	 * @returns {Promise<Zotero.Item[] | null>}
 	 */
 	this.addAttachmentFromDialog = async function (link, parentItemID, files = null) {

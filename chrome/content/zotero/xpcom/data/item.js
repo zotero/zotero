@@ -2556,12 +2556,15 @@ Zotero.Item.prototype.numNonHTMLFileAttachments = function () {
 };
 
 
-Zotero.Item.prototype.numFileAttachmentsWithContentType = function (contentType) {
+Zotero.Item.prototype.getFileAttachmentsWithContentType = function (contentType) {
 	this._requireData('childItems');
-	return this.getAttachments()
-		.map(itemID => Zotero.Items.get(itemID))
-		.filter(item => item.isFileAttachment() && item.attachmentContentType == contentType)
-		.length;
+	return Zotero.Items.get(this.getAttachments())
+		.filter(item => item.isFileAttachment() && item.attachmentContentType == contentType);
+};
+
+
+Zotero.Item.prototype.numFileAttachmentsWithContentType = function (contentType) {
+	return this.getFileAttachmentsWithContentType(contentType).length;
 };
 
 
@@ -3969,7 +3972,8 @@ Zotero.Item.prototype.setAutoAttachmentTitle = function ({ ignoreAutoRenamePrefs
 	// If this is the only attachment of its type on the parent item and the
 	// file is being renamed, give it a default title ("PDF", "Webpage", etc.)
 	let isFirstOfType = this.parentItemID
-		&& this.parentItem.numFileAttachmentsWithContentType(this.attachmentContentType) <= 1;
+		&& this.parentItem.getFileAttachmentsWithContentType(this.attachmentContentType)
+			.every(item => item === this);
 	let isBeingRenamed = ignoreAutoRenamePrefs || Zotero.Attachments.shouldAutoRenameAttachment(this);
 	if (isFirstOfType && isBeingRenamed) {
 		let defaultTitle = this._getDefaultTitleForAttachmentContentType();
