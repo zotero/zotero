@@ -26,6 +26,8 @@
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
 export class DocumentManager {
+	_editorName;
+	
 	_onSave;
 	
 	_currentState;
@@ -35,8 +37,13 @@ export class DocumentManager {
 	_metadata;
 	
 	_unloaded = false;
-	
-	constructor(onSave) {
+
+	/**
+	 * @param {string} editorName
+	 * @param {() => (Promise<void> | void)} onSave
+	 */
+	constructor({ editorName, onSave }) {
+		this._editorName = editorName;
 		this._onSave = onSave;
 	}
 	
@@ -125,8 +132,8 @@ export class DocumentManager {
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
 			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_DONT_SAVE;
 		let index = ps.confirmEx(null,
-			title,
-			description,
+			Zotero.isMac ? title : this._editorName,
+			Zotero.isMac ? description : title,
 			buttonFlags,
 			null,
 			null,

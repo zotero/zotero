@@ -87,7 +87,10 @@ var Scaffold = new function () {
 		if (e.target !== document) return;
 		
 		_browser = document.getElementById('browser');
-		_docManager = new DocumentManager(() => this.save());
+		_docManager = new DocumentManager({
+			editorName: 'Scaffold',
+			onSave: () => this.save(),
+		});
 		_docManager.attach(window);
 		document.querySelector('#metadata-grid').addEventListener('command', () => _updateDocManagerState());
 

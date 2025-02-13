@@ -28,7 +28,10 @@ var { DocumentManager } = ChromeUtils.importESModule("chrome://zotero/content/do
 
 var Zotero_CSL_Editor = new function () {
 	let monaco, editor;
-	var docManager = new DocumentManager(() => this.save());
+	var docManager = new DocumentManager({
+		editorName: 'Style Editor', // Tools -> Style Editor is not localized
+		onSave: () => this.save(),
+	});
 	var styleObject;
 
 	this.init = async function () {
