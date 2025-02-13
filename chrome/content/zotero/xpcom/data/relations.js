@@ -29,6 +29,7 @@ Zotero.Relations = new function () {
 	Zotero.defineProperty(this, 'relatedItemPredicate', {value: 'dc:relation'});
 	Zotero.defineProperty(this, 'linkedObjectPredicate', {value: 'owl:sameAs'});
 	Zotero.defineProperty(this, 'replacedItemPredicate', {value: 'dc:replaces'});
+	Zotero.defineProperty(this, 'primaryAttachmentPredicate', { value: 'zotero:primaryAttachment' });
 	
 	this._namespaces = {
 		dc: 'http://purl.org/dc/elements/1.1/',
