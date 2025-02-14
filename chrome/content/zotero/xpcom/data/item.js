@@ -3844,12 +3844,46 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 		rows.sort((a, b) => collation.compareString(1, a.title, b.title));
 	}
 	var ids = rows.map(row => row.itemID);
-	// If there is a primary attachment for this item, move it to the
-	// top of the array
-	if (primaryAttachmentKey) {
-		let primaryAttachment = Zotero.Items.getByLibraryAndKey(this.libraryID, primaryAttachmentKey);
-		ids = ids.filter(id => id !== primaryAttachment.id);
-		ids.unshift(primaryAttachment.id);
+	
+	// The id of the best attachment should be placed at the top of the array, so the best attachment
+	// appears as the first itemTree child row. This sorts the ids arrays with the same
+	// logic as in getBestAttachment, but synchronously without querying the DB.
+	// Then, the best attachmentID is moved to the start of the ids array to not interfere
+	// with other sorting preferences
+	let idsCopy = ids.concat();
+	idsCopy.sort((a, b) => {
+		let itemA = Zotero.Items.get(a);
+		let itemB = Zotero.Items.get(b);
+		
+		// Item whose key is pointed at by the primary attachment relations is first
+		let parentAttachmentKey = this.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+		if (itemA.key === parentAttachmentKey) return -1;
+		if (itemB.key === parentAttachmentKey) return 1;
+		
+		// PDFs are sorted before other attachment types
+		let pdfA = itemA.attachmentContentType === 'application/pdf';
+		let pdfB = itemB.attachmentContentType === 'application/pdf';
+		if (pdfA && !pdfB) return -1;
+		if (!pdfA && pdfB) return 1;
+		
+		// Attachment with the same URL as the parent have the next priority
+		let urlA = itemA.getField('url');
+		let urlB = itemB.getField('url');
+		let parentUrl = this.getField('url');
+		let matchesParentUrlA = urlA === parentUrl;
+		let matchesParentUrlB = urlB === parentUrl;
+		if (matchesParentUrlA && !matchesParentUrlB) return -1;
+		if (!matchesParentUrlA && matchesParentUrlB) return 1;
+
+		// Finally, sort by date added
+		let dateAddedA = new Date(itemA.getField('dateAdded') || null);
+		let dateAddedB = new Date(itemB.getField('dateAdded') || null);
+		return dateAddedA - dateAddedB;
+	});
+	let bestAttachmentID = idsCopy[0];
+	if (bestAttachmentID) {
+		ids = ids.filter(id => id !== bestAttachmentID);
+		ids.unshift(bestAttachmentID);
 	}
 	this._attachments[cacheKey] = ids;
 	return ids;
