@@ -94,7 +94,7 @@ export class CitationDialogPopupsHandler {
 		let bubble = this._getNode(`[dialogReferenceID='${dialogReferenceID}']`);
 		let bubbleRect = bubble.getBoundingClientRect();
 		let popup = this._getNode("#itemDetails");
-		popup.openPopup(bubble, "after_start", bubble.clientWidth / 2, 0, false, false, null);
+		popup.openPopup(bubble, "after_start", 0, 0, false, false, null);
 		// popup should be cenetered on the bubble
 		popup.style.left = `${Math.max(10, bubbleRect.left + (bubbleRect.width / 2) - (popup.offsetWidth / 2))}px`;
 		popup.style.top = `${bubbleRect.bottom + 10}px`;
