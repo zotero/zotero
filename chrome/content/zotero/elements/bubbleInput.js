@@ -114,12 +114,12 @@
 			let isOnlyInput = this.getAllBubbles().length == 0;
 			this._body.firstChild.classList.toggle("full-width", isOnlyInput);
 			if (isOnlyInput) {
-				document.l10n.setAttributes(this._body.firstChild, "integration-citationDialog-aria-single-input")
+				document.l10n.setAttributes(this._body.firstChild, "integration-citationDialog-single-input");
 			}
 			// otherwise, add a regular aria descriptions and placeholders to all inputs
 			else {
 				for (let input of [...this.querySelectorAll(".input")]) {
-					document.l10n.setAttributes(input, "integration-citationDialog-aria-input");
+					document.l10n.setAttributes(input, "integration-citationDialog-input");
 				}
 			}
 			// If any two inputs end up next to each other (e.g. after bubble is deleted),
@@ -338,7 +338,7 @@
 			input.setAttribute("no-windows-native", true);
 			input.setAttribute("data-arrow-nav-enabled", true);
 			input.className = "input empty";
-			input.setAttribute("data-l10n-id", "integration-citationDialog-aria-input");
+			input.setAttribute("data-l10n-id", "integration-citationDialog-input");
 			input.addEventListener("input", (_) => {
 				// .full-width class is used on first input to fully display placeholder
 				// in that case, resizing does not happen

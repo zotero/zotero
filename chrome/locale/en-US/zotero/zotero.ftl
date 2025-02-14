@@ -365,7 +365,10 @@ integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = Show in Library
 integration-citationDialog-settings-title = Citation Settings
-integration-citationDialog-lib-no-matches = No selected, opened, or cited items match the current query.
+integration-citationDialog-lib-no-items = { $search ->
+    [true] No selected, opened, or cited items match the current search
+   *[other] No selected, or opened items 
+}
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -393,11 +396,11 @@ integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add 
 
 integration-citationDialog-aria-bubble =
     .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
-integration-citationDialog-aria-single-input =
-    .placeholder = Type to search or add selected and open items
+integration-citationDialog-single-input =
+    .placeholder = Search for items
     .aria-description = Press Tab to select items to add into this citation. Press Escape to discard the changes and close the dialog.
-integration-citationDialog-aria-input =
-    .placeholder = Type to search for an item to include in this citation.
+integration-citationDialog-input =
+    .placeholder = Search for items
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-aria-item-list =
     .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }

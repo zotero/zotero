@@ -330,6 +330,7 @@ class LibraryLayout extends Layout {
 		// before filtering
 		if (!_id("library-no-suggested-items-message").hidden) {
 			_id("library-other-items").style.height = `${otherItemsHeight}px`;
+			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), "integration-citationDialog-lib-no-items", { search: SearchHandler.lastSearchValue.length > 0 });
 		}
 		else {
 			_id("library-other-items").style.removeProperty("height");
