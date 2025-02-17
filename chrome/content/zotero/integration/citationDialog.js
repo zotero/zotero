@@ -489,7 +489,7 @@ class LibraryLayout extends Layout {
 					if (!row) return;
 				}
 				let rowTopBeforeRefresh = row.getBoundingClientRect().top;
-				IOManager.addItemsToCitation(items, { noInputRefocus: true }).then(() => {
+				IOManager.addItemsToCitation(items).then(() => {
 					this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
 				});
 			},
