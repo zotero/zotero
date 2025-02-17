@@ -244,24 +244,25 @@ describe("Local API Server", function () {
 				});
 				
 				describe("&style", function () {
-					it("should use the given citation style, even if not yet installed", async function () {
-						let styleID = 'http://www.zotero.org/styles/cell';
-						if (Zotero.Styles.get(styleID)) {
-							await Zotero.Styles.get(styleID).remove();
-						}
-
-						let styleString = await Zotero.File.getContentsAsync(
-							Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'cell.csl')));
-						
-						let stub = sinon.stub(Zotero.Styles, 'install');
-						stub.callsFake(() => stub.wrappedMethod({ string: styleString }, 'cell.csl', true));
-
-						let { response } = await apiGet(`/users/0/items/${collectionItem1.key}?include=citation&style=${encodeURIComponent(styleID)}`);
-						assert.isTrue(stub.called);
-						assert.equal(response.citation, '(Person)');
-						
-						stub.restore();
-					});
+					for (let [styleID, type] of [['cell', 'name'], ['https://www.zotero.org/styles/cell', 'URL']]) {
+						it(`should install the given citation style by ${type} if not yet installed`, async function () {
+							if (Zotero.Styles.get(styleID)) {
+								await Zotero.Styles.get(styleID).remove();
+							}
+	
+							let styleString = await Zotero.File.getContentsAsync(
+								Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'cell.csl')));
+							
+							let stub = sinon.stub(Zotero.Styles, 'install');
+							stub.callsFake(() => stub.wrappedMethod({ string: styleString }, 'cell.csl', true));
+	
+							let { response } = await apiGet(`/users/0/items/${collectionItem1.key}?include=citation&style=${encodeURIComponent(styleID)}`);
+							assert.isTrue(stub.called);
+							assert.equal(response.citation, '(Person)');
+							
+							stub.restore();
+						});
+					}
 				});
 			});
 		});

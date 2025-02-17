@@ -946,6 +946,10 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 	let linkWrap = searchParams.get('linkwrap') == '1';
 	
 	let style = Zotero.Styles.get(styleIDOrURL);
+	// If not a URI, try with standard prefix
+	if (!style && !styleIDOrURL.includes(':')) {
+		style = Zotero.Styles.get('http://www.zotero.org/styles/' + styleIDOrURL);
+	}
 	if (!style) {
 		// The client wants a style we don't have locally, so download it
 		// If they didn't pass an absolute URL, resolve relative to the style repo base
