@@ -25,6 +25,7 @@
 
 Zotero.Styles = new function() {
 	var _initialized = false;
+	var _initializationDeferred = false;
 	var _styles, _visibleStyles;
 	
 	var _renamedStyles = null;
@@ -42,20 +43,31 @@ Zotero.Styles = new function() {
 	/**
 	 * Initializes styles cache, loading metadata for styles into memory
 	 */
-	this.init = Zotero.Utilities.Internal.serial(async function (options = {}) {
+	this.init = Zotero.Promise.coroutine(function* (options = {}) {
 		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
-			await Zotero.CiteprocRs.init();
+			yield Zotero.CiteprocRs.init();
 		}
 		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
-			await Zotero.Schema.schemaUpdatePromise;
+			yield Zotero.Schema.schemaUpdatePromise;
 		}
 		
-		if (_initialized && !options.reinit) {
-			return;
+		// If an initialization has already started, a regular init() call should return the promise
+		// for that (which may already be resolved). A reinit should yield on that but then continue
+		// with reinitialization.
+		if (_initializationDeferred) {
+			let promise = _initializationDeferred.promise;
+			if (options.reinit) {
+				yield promise;
+			}
+			else {
+				return promise;
+			}
 		}
+		
+		_initializationDeferred = Zotero.Promise.defer();
 		
 		Zotero.debug("Initializing styles");
 		var start = new Date;
@@ -73,12 +85,12 @@ Zotero.Styles = new function() {
 		
 		// main dir
 		var dir = Zotero.getStylesDirectory().path;
-		var num = await _readStylesFromDirectory(dir, false);
+		var num = yield _readStylesFromDirectory(dir, false);
 		
 		// hidden dir
 		var hiddenDir = OS.Path.join(dir, 'hidden');
-		if (await OS.File.exists(hiddenDir)) {
-			num += await _readStylesFromDirectory(hiddenDir, true);
+		if (yield OS.File.exists(hiddenDir)) {
+			num += yield _readStylesFromDirectory(hiddenDir, true);
 		}
 		
 		// Sort visible styles by title
@@ -95,7 +107,7 @@ Zotero.Styles = new function() {
 		var locales = {};
 		var primaryDialects = {};
 		localeFile = JSON.parse(
-			await Zotero.File.getResourceAsync("chrome://zotero/content/locale/csl/locales.json")
+			yield Zotero.File.getResourceAsync("chrome://zotero/content/locale/csl/locales.json")
 		);
 		
 		primaryDialects = localeFile["primary-dialects"];
@@ -110,9 +122,10 @@ Zotero.Styles = new function() {
 		
 		// Load renamed styles
 		_renamedStyles = JSON.parse(
-			await Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
+			yield Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
 		);
 
+		_initializationDeferred.resolve();
 		_initialized = true;
 		
 		// Styles are fully loaded, but we still need to trigger citeproc reloads in Integration
@@ -125,7 +138,7 @@ Zotero.Styles = new function() {
 	};
 	
 	// This is used by bibliography.js to work around a weird interaction between Bluebird and modal
-	// dialogs in tests. Calling `await Zotero.Styles.init()` from `Zotero_File_Interface_Bibliography.init()`
+	// dialogs in tests. Calling `yield Zotero.Styles.init()` from `Zotero_File_Interface_Bibliography.init()`
 	// in the modal Create Bibliography dialog results in a hang, so instead use a synchronous check for
 	// initialization. The hang doesn't seem to happen (at least in the same way) outside of tests.
 	this.initialized = function () {
@@ -136,13 +149,13 @@ Zotero.Styles = new function() {
 	 * Reads all styles from a given directory and caches their metadata
 	 * @private
 	 */
-	var _readStylesFromDirectory = async function (dir, hidden) {
+	var _readStylesFromDirectory = Zotero.Promise.coroutine(function* (dir, hidden) {
 		var numCached = 0;
 		
 		var iterator = new OS.File.DirectoryIterator(dir);
 		try {
 			while (true) {
-				let entries = await iterator.nextBatch(10); // TODO: adjust as necessary
+				let entries = yield iterator.nextBatch(10); // TODO: adjust as necessary
 				if (!entries.length) break;
 				
 				for (let i = 0; i < entries.length; i++) {
@@ -154,7 +167,7 @@ Zotero.Styles = new function() {
 							|| entry.isDir) continue;
 					
 					try {
-						let code = await Zotero.File.getContentsAsync(path);
+						let code = yield Zotero.File.getContentsAsync(path);
 						var style = new Zotero.Style(code, path);
 					}
 					catch (e) {
@@ -182,7 +195,7 @@ Zotero.Styles = new function() {
 			iterator.close();
 		}
 		return numCached;
-	};
+	});
 	
 	/**
 	 * Gets a style with a given ID
@@ -262,7 +275,7 @@ Zotero.Styles = new function() {
 	 *     displayed in dialogs referencing the style
 	 * @param {Boolean} [silent=false] Skip prompts
 	 */
-	this.install = async function (style, origin, silent=false) {
+	this.install = Zotero.Promise.coroutine(function* (style, origin, silent=false) {
 		var warnDeprecated;
 		if (style instanceof Components.interfaces.nsIFile) {
 			warnDeprecated = true;
@@ -277,12 +290,12 @@ Zotero.Styles = new function() {
 		
 		try {
 			if (style.file) {
-				style.string = await Zotero.File.getContentsAsync(style.file);
+				style.string = yield Zotero.File.getContentsAsync(style.file);
 			}
 			else if (style.url) {
-				style.string = await Zotero.File.getContentsFromURLAsync(style.url);
+				style.string = yield Zotero.File.getContentsFromURLAsync(style.url);
 			}
-			var { styleTitle, styleID } = await _install(style.string, origin, false, silent);
+			var { styleTitle, styleID } = yield _install(style.string, origin, false, silent);
 		}
 		catch (error) {
 			// Unless user cancelled, show an alert with the error
@@ -305,7 +318,7 @@ Zotero.Styles = new function() {
 			}
 		}
 		return { styleTitle, styleID };
-	};
+	});
 	
 	/**
 	 * Installs a style
@@ -316,8 +329,8 @@ Zotero.Styles = new function() {
 	 * @param {Boolean} [silent=false] Skip prompts
 	 * @return {Promise}
 	 */
-	var _install = async function (style, origin, hidden, silent=false) {
-		if (!_initialized) await Zotero.Styles.init();
+	var _install = Zotero.Promise.coroutine(function* (style, origin, hidden, silent=false) {
+		if (!_initialized) yield Zotero.Styles.init();
 		
 		var existingFile, destFile, source;
 		
@@ -417,7 +430,7 @@ Zotero.Styles = new function() {
 			}
 		}
 		
-		await Zotero.Styles.validate(style)
+		yield Zotero.Styles.validate(style)
 		.catch(function(validationErrors) {
 			Zotero.logError("Style from " + origin + " failed to validate:\n\n" + validationErrors);
 			
@@ -444,8 +457,8 @@ Zotero.Styles = new function() {
 			// Need to fetch source
 			if(source.substr(0, 7) === "http://" || source.substr(0, 8) === "https://") {
 				try {
-					let xmlhttp = await Zotero.HTTP.request("GET", source);
-					await _install(xmlhttp.responseText, origin, true);
+					let xmlhttp = yield Zotero.HTTP.request("GET", source);
+					yield _install(xmlhttp.responseText, origin, true);
 				}
 				catch (e) {
 					if (typeof e === "object" && e instanceof Zotero.Exception.Alert) {
@@ -470,23 +483,23 @@ Zotero.Styles = new function() {
 		// Remove any existing file with a different name
 		if(existingFile) existingFile.remove(false);
 		
-		await Zotero.File.putContentsAsync(destFile, style);
+		yield Zotero.File.putContentsAsync(destFile, style);
 		
-		await Zotero.Styles.reinit();
+		yield Zotero.Styles.reinit();
 		
 		// Refresh preferences windows
 		var enumerator = Services.wm.getEnumerator("zotero:pref");
 		while(enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(win.Zotero_Preferences.Cite) {
-				await win.Zotero_Preferences.Cite.refreshStylesList(styleID);
+				yield win.Zotero_Preferences.Cite.refreshStylesList(styleID);
 			}
 		}
 		return {
 			styleTitle: existingTitle || title,
 			styleID: styleID
 		};
-	};
+	});
 	
 	/**
 	 * Populate menulist with locales
@@ -898,7 +911,7 @@ Zotero.Style.prototype.getXML = function() {
 /**
  * Deletes a style
  */
-Zotero.Style.prototype.remove = async function () {
+Zotero.Style.prototype.remove = Zotero.Promise.coroutine(function* () {
 	if (!this.path) {
 		throw new Error("Cannot delete a style with no associated file")
 	}
@@ -917,11 +930,11 @@ Zotero.Style.prototype.remove = async function () {
 	if(dependentStyles) {
 		// copy dependent styles to hidden directory
 		let hiddenDir = OS.Path.join(Zotero.getStylesDirectory().path, 'hidden');
-		await Zotero.File.createDirectoryIfMissingAsync(hiddenDir);
-		await OS.File.move(this.path, OS.Path.join(hiddenDir, PathUtils.filename(this.path)));
+		yield Zotero.File.createDirectoryIfMissingAsync(hiddenDir);
+		yield OS.File.move(this.path, OS.Path.join(hiddenDir, PathUtils.filename(this.path)));
 	} else {
 		// remove defunct files
-		await OS.File.remove(this.path);
+		yield OS.File.remove(this.path);
 	}
 	
 	// check to see if this style depended on a hidden one
@@ -942,10 +955,10 @@ Zotero.Style.prototype.remove = async function () {
 			
 			// if it was only this style with the dependency, delete the source
 			if(deleteSource) {
-				await source.remove();
+				yield source.remove();
 			}
 		}
 	}
 	
 	return Zotero.Styles.reinit();
-};
+});
