@@ -172,7 +172,7 @@ class Layout {
 			else {
 				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
 			}
-			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group.length, this.type == "library");
+			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group.length, this.type);
 			let itemContainer = section.querySelector(".itemsContainer");
 	
 			let items = [];
@@ -189,8 +189,6 @@ class Layout {
 			itemContainer.replaceChildren(...items);
 			sections.push(section);
 			if (isGroupCollapsible) {
-				// just collapse/expand items when section header is clicked
-				section.querySelector(".header-label").addEventListener("click", event => IOManager.handleCollapsibleSectionHeaderClick(section, event));
 				// handle click on "Add all"
 				section.querySelector(".add-all").addEventListener("click", () => IOManager.addItemsToCitation(group));
 				// if the user explicitly expanded or collapsed the section, keep it as such
@@ -399,33 +397,17 @@ class LibraryLayout extends Layout {
 
 	// handle click on the items container
 	_captureItemsContainerClick(event) {
-		// only handle clicks without a modifier or meta/ctrl+click
-		let withModifier = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
-		if (withModifier && !(Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) return;
-
 		let section = event.target.closest(".section");
-		// if the section is expanded, do nothing
+		// expand the deck of items if it is collapsed
 		if (section.classList.contains("expanded")) return;
 		event.stopPropagation();
-		// on meta/ctrl+click, toggle selected status of all items in the container
-		if (withModifier) {
-			for (let item of [...section.querySelectorAll(".item")]) {
-				IOManager.toggleItemNodeSelect(item);
-			}
-			currentLayout.updateSelectedItems();
-			return;
+		IOManager.toggleSectionCollapse(section, "expanded", true);
+		// if the click is keyboard-initiated, focus the first item
+		if (event.layerX == 0 && event.layerY == 0) {
+			let firstItem = section.querySelector(".item");
+			IOManager.selectItemNodesRange(firstItem);
+			section.querySelector(".item").focus();
 		}
-		// on click without modifier, if all items in the container are selected, add all selected items.
-		// otherwise, add just items from this container
-		let selectedIDs = [];
-		if (section.querySelector(".item").classList.contains("selected")) {
-			let selectedItemNodes = _id(`${currentLayout.type}-layout`).querySelectorAll(".item.selected");
-			selectedIDs = [...selectedItemNodes].map(node => node.getAttribute("itemID"));
-		}
-		else {
-			selectedIDs = [...section.querySelectorAll(".item")].map(node => node.getAttribute("itemID"));
-		}
-		IOManager.addItemsToCitation(Zotero.Items.get(selectedIDs));
 	}
 
 	async _initItemTree() {
@@ -717,6 +699,11 @@ class ListLayout extends Layout {
 		for (let container of [..._id("list-layout").querySelectorAll(".itemsContainer")]) {
 			container.style.height = `${container.scrollHeight}px`;
 		}
+		// collapse/expand collapsible section when header is clicked
+		let collapsibleSection = doc.querySelector(".section.expandable");
+		if (collapsibleSection) {
+			collapsibleSection.querySelector(".header-label").addEventListener("click", () => IOManager.toggleSectionCollapse(collapsibleSection, null, true));
+		}
 		this.resizeWindow();
 	}
 
@@ -816,8 +803,6 @@ const IOManager = {
 		doc.addEventListener("move-item", ({ detail: { dialogReferenceID, index } }) => this._moveItem(dialogReferenceID, index));
 		// display details popup for the bubble
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
-		// handle expansion of collapsed decks initiated from other components
-		doc.addEventListener("expand-section", ({ detail: { section } }) => this.toggleSectionCollapse(section, "expanded"));
 		// mark item nodes as selected to highlight them and mark relevant bubbles
 		doc.addEventListener("select-items", ({ detail: { startNode, endNode } }) => this.selectItemNodesRange(startNode, endNode));
 		
@@ -974,16 +959,9 @@ const IOManager = {
 		}
 		if (startNode === null) return;
 
-		// handle special case if one of the nodes is a container of items
-		if (startNode.classList.contains("itemsContainer")) {
-			let items = [...startNode.querySelectorAll(".item")];
-			startNode = items[0];
-			endNode = endNode || items[items.length - 1];
-		}
-		if (endNode && endNode.classList.contains("itemsContainer")) {
-			let items = [...endNode.querySelectorAll(".item")];
-			endNode = items[0];
-		}
+		// can't select the collapsed deck of items
+		if (startNode.classList.contains("itemsContainer")) return;
+
 		let startIndex = itemNodes.indexOf(startNode);
 		let endIndex = endNode ? itemNodes.indexOf(endNode) : startIndex;
 
@@ -1044,18 +1022,7 @@ const IOManager = {
 		IOManager.addItemsToCitation(itemsToAdd, { noInputRefocus: (isMouseClick && currentLayout.type == "library") });
 	},
 
-	handleCollapsibleSectionHeaderClick(section, event) {
-		IOManager.toggleSectionCollapse(section);
-		// Record if the user explicitly expanded or collapsed the section to not undo it
-		// during next refresh
-		IOManager.sectionExpandedStatus[section.id] = section.classList.contains("expanded") ? "expanded" : "collapsed";
-		// When section is expanded by a click via keyboard, navigate into the section
-		if (IOManager._clicked !== event.target && section.classList.contains("expanded")) {
-			KeyboardHandler._navigateGroup({ group: section, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
-		}
-	},
-
-	toggleSectionCollapse(section, status) {
+	toggleSectionCollapse(section, status, userInitiated) {
 		// set desired class
 		if (status == "expanded" && !section.classList.contains("expanded")) {
 			section.classList.add("expanded");
@@ -1065,6 +1032,10 @@ const IOManager = {
 		}
 		else if (!status) {
 			section.classList.toggle("expanded");
+		}
+		// Record if the user explicitly expanded or collapsed the section to not undo it during next refresh
+		if (userInitiated) {
+			IOManager.sectionExpandedStatus[section.id] = section.classList.contains("expanded") ? "expanded" : "collapsed";
 		}
 		// mark collapsed items as unfocusable
 		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {

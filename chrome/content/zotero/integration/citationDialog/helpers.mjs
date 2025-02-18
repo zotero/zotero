@@ -130,7 +130,7 @@ export class CitationDialogHelpers {
 	}
 
 	// build a container for the item nodes in both layouts
-	buildItemsSection(id, headerText, isCollapsible, deckLength, isFocusableContainer) {
+	buildItemsSection(id, headerText, isCollapsible, deckLength, dialogMode) {
 		let section = this.createNode("div", { id }, "section");
 		let header = this.createNode("div", {}, "header");
 		let headerSpan = this.createNode("span", {}, "header-label");
@@ -148,11 +148,13 @@ export class CitationDialogHelpers {
 			this.doc.l10n.setAttributes(addAllBtn, "integration-citationDialog-add-all");
 			header.append(addAllBtn);
 			
-			headerSpan.setAttribute("role", "button");
-			headerSpan.setAttribute("tabindex", -1);
-			headerSpan.setAttribute("data-tabindex", 21);
-			headerSpan.classList.add("keyboard-clickable");
-			if (isFocusableContainer) {
+			if (dialogMode == "list") {
+				headerSpan.setAttribute("role", "button");
+				headerSpan.setAttribute("tabindex", -1);
+				headerSpan.setAttribute("data-tabindex", 21);
+				headerSpan.classList.add("keyboard-clickable");
+			}
+			if (dialogMode == "library") {
 				itemContainer.setAttribute("tabindex", -1);
 				itemContainer.setAttribute("data-tabindex", 30);
 			}
