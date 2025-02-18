@@ -358,9 +358,13 @@ Zotero.Integration = new function() {
 				Zotero.Utilities.Internal.activate();
 				Zotero.Integration.currentWindow.focus();
 				// Prompt user that changes will be lost in the existing dialog
-				let result = ps.confirm(null, Zotero.getString('integration.error.title'),
-					Zotero.getString(`integration-warning-${Zotero.Integration.currentWindowType}-changes-will-be-lost`));
-				if (result === false) {
+				let result = Zotero.Prompt.confirm({
+					title: Zotero.getString('general.warning'),
+					text: Zotero.getString(`integration-warning-${Zotero.Integration.currentWindowType}-changes-will-be-lost`),
+					button0: Zotero.getString('integration-warning-discard-changes'),
+					button1: Zotero.Prompt.BUTTON_TITLE_CANCEL
+				});
+				if (result == 1) {
 					return true;
 				}
 			}

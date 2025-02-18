@@ -387,9 +387,10 @@ integration-prefs-exportDocument =
 
 integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 
-integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue. Do you want to discard your changes?
-integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue. Do you want to discard your changes?
-integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue. Do you want to discard your changes?
+integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
+integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
+integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
+integration-warning-discard-changes = Discard Changes
 
 integration-warning-command-is-running = A word processor integration command is already running.
 
