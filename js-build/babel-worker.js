@@ -59,6 +59,23 @@ async function babelWorker(ev) {
 			transformed = contents.replace('globalThis.Set', 'Set')
 				.replace('globalThis.Map', 'Map');
 		}
+		// Patch Monaco's embedded TypeScript compiler
+		else if (sourcefile === 'resource/vs/language/typescript/tsWorker.js') {
+			// Infer types based on standard translator variable/parameter names
+			transformed = contents.replace('function getTypeOfSymbol(symbol) {', `function getTypeOfSymbol(symbol) {
+				  switch (symbol.escapedName) {
+					  case "doc":
+						  return getGlobalType("Document", 0, true);
+					  case "url":
+						  return stringType;
+					  case "checkOnly":
+						  return booleanType;
+				  }
+			`);
+			if (transformed.length === contents.length) {
+				return postError('Failed to patch tsWorker.js');
+			}
+		}
 
 		else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
 			transformed = contents;

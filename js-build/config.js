@@ -51,16 +51,9 @@ const symlinkFiles = [
 	'!resource/feeds/*.idl',
 	'!chrome/skin/default/zotero/**/*.scss',
 	'!resource/citeproc_rs_wasm.js',
-	// We only need a few Monaco languages
-	'!resource/vs/**/*',
-	'resource/vs/loader.js',
-	'resource/vs/editor/editor.main.{js,css,nls.js}',
-	'resource/vs/base/**/*',
-	'resource/vs/basic-languages/javascript/*.js',
-	'resource/vs/basic-languages/typescript/*.js',
-	'resource/vs/basic-languages/xml/*.js',
-	'resource/vs/language/typescript/*.js',
-	'resource/vs/language/json/*.js',
+	'resource/vs/**/*',
+	// Patched in babel-worker.js
+	'!resource/vs/language/typescript/tsWorker.js',
 	'version',
 ];
 
@@ -118,6 +111,7 @@ const jsFiles = [
 	'resource/react-virtualized.js',
 	'resource/SingleFile/lib/single-file.js',
 	'resource/citeproc_rs_wasm.js',
+	'resource/vs/language/typescript/tsWorker.js',
 ];
 
 const scssFiles = [

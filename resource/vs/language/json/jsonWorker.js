@@ -1,0 +1,1 @@
+../../../../node_modules/monaco-editor/min/vs/language/json/jsonWorker.js
