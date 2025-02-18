@@ -569,9 +569,9 @@ describe("Zotero.Integration", function () {
 			});
 
 			it('should display a confirmation dialog if an integration dialog is open and not pristine', async function () {
-				let stub = sinon.stub().returns(true);
+				let stub = sinon.stub().returns(0);
 				let promptService = Services.prompt;
-				Services.prompt = { confirm: stub };
+				Services.prompt = { confirmEx: stub };
 				try {
 					await insertMultipleCitations.call(this);
 					let docID = this.test.fullTitle();
