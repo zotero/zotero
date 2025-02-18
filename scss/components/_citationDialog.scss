@@ -177,6 +177,7 @@
 						top: 0;
 						left: 20px; // same as the width of sticky faded edges pseudo-elements
 						width: var(--item-horizontal-size);
+						-moz-user-select: none;
 					}
 			
 					.itemsContainer {
@@ -236,39 +237,9 @@
 						transition: width 0.2s ease-in-out;
 						width: calc((var(--item-horizontal-size) * var(--deck-length)) + (var(--item-margin) * (var(--deck-length) - 1)));
 	
-						// header has underline effect on hover and has an icon before it
-						// indicating current state
 						.header {
-							-moz-user-select: none;
-	
 							display: flex;
 							justify-content: space-between;
-					
-							.header-label {
-								@include focus-ring;
-								border-radius: 5px;
-								// align icon of the label with bubbles' left edges
-								margin-inline-start: -1px;
-								&:hover {
-									cursor: pointer;
-									text-decoration: underline;
-								}
-								&::before {
-									@include svgicon("expand-horizontal", "universal", "16");
-									width: 16px;
-									height: 16px;
-									display: inline-block;
-									content: "";
-									white-space: pre;
-									margin-inline-end: 3px;
-									vertical-align: bottom;
-								}
-							}
-						}
-						&.expanded {
-							.header-label::before {
-								@include svgicon("collapse-horizontal", "universal", "16");
-							}
 						}
 						.item {
 							z-index: calc(var(--deck-length) - var(--deck-index));
@@ -304,7 +275,7 @@
 					// a collapsed expandable group, in which case the whole group is hovered
 					&:not(.expandable), &.expandable.expanded {
 						.item:hover {
-							background-color: var(--fill-quinary);
+							background-color: var(--color-quinary-on-background);
 						}
 					}
 					&.expandable:not(.expanded) {
@@ -478,7 +449,6 @@
 				&.expandable {
 					// styling for expandable header with a twisty
 					.header {
-						-moz-user-select: none;
 						display: flex;
 						justify-content: space-between;
 

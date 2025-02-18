@@ -141,10 +141,11 @@ export class CitationDialogKeyboardHandler {
 			let current = group.querySelector(".current");
 			let firstRow = group.querySelector('[data-arrow-nav-enabled="true"][tabindex]');
 			// on arrowUp from the first row, clear selection
-			if (current === firstRow && event.key == "ArrowUp") {
+			if (current === firstRow && event.key == "ArrowUp" && !event.shiftKey) {
 				this._selectItems(null);
 				firstRow.classList.remove("current");
 				group.scrollTo(0, 0);
+				this._multiselectStart = null;
 			}
 			else if (current || event.key == "ArrowDown") {
 				// Arrow down from input will just change the selected item without moving focus
@@ -160,7 +161,7 @@ export class CitationDialogKeyboardHandler {
 			this._id("bubble-input").refocusInput();
 			handled = true;
 		}
-		// handle handle focus and selection movement within bubble-input and item groups
+		// handle focus and selection movement within bubble-input and item groups
 		else if (event.key.includes("Arrow") && onlyShiftModifierPossible) {
 			let arrowDirection = event.target.closest("[data-arrow-nav]")?.getAttribute("data-arrow-nav");
 			if (!arrowDirection) return false;
@@ -170,7 +171,7 @@ export class CitationDialogKeyboardHandler {
 			if (arrowDirection == "horizontal") {
 				if (!(event.key === Zotero.arrowNextKey || event.key === Zotero.arrowPreviousKey)) return false;
 				// selections only happens with items
-				let shouldSelect = event.target.classList.contains("item") || event.target.classList.contains("itemsContainer");
+				let shouldSelect = event.target.closest(".itemsContainer");
 				handled = this._navigateGroup({ group, current, forward: event.key == Zotero.arrowNextKey, shouldSelect, shouldFocus: true, multiSelect });
 			}
 			if (arrowDirection == "vertical") {
@@ -254,6 +255,10 @@ export class CitationDialogKeyboardHandler {
 		}
 		if (nextFocusableIndex < 0 || nextFocusableIndex >= allFocusableWithinGroup.length) return false;
 		let nextNode = allFocusableWithinGroup[nextFocusableIndex];
+		// multiselect only allowed within the same group: no overlap between selected and opened items
+		// mainly to avoid questionable handling of multi-selected collapsed deck of item cards in library mode
+		if (multiSelect && current && current.parentNode !== nextNode.parentNode) return current;
+
 		if (shouldFocus) {
 			nextNode.focus();
 		}
