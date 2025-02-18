@@ -101,7 +101,7 @@ async function onLoad() {
 
 
 function accept() {
-	if (accepted || SearchHandler.searching) return;
+	if (accepted || SearchHandler.searching || !CitationDataManager.items.length) return;
 	accepted = true;
 	CitationDataManager.updateCitationObject(true);
 	_id("library-layout").hidden = true;
@@ -115,10 +115,7 @@ function accept() {
 	setTimeout(() => {
 		window.resizeTo(window.innerWidth, progressHeight);
 	});
-	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
-	if (currentLayout.type == "library") {
-		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
-	}
+	cleanupBeforeDialogClosing();
 	io.accept((percent) => {
 		_id("progress").value = Math.round(percent);
 	});
@@ -128,12 +125,18 @@ function cancel() {
 	if (accepted) return;
 	accepted = true;
 	io.citation.citationItems = [];
+	cleanupBeforeDialogClosing();
+	io.accept();
+	window.close();
+}
+
+function cleanupBeforeDialogClosing() {
 	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
-	io.accept();
-	window.close();
+	libraryLayout.collectionsView.unregister();
+	libraryLayout.itemsView.unregister();
 }
 
 // shortcut used for brevity
@@ -318,20 +321,12 @@ class LibraryLayout extends Layout {
 	}
 
 	async refreshItemsList() {
-		let otherItemsHeight = _id(`library-other-items`).getBoundingClientRect().height;
 		await super.refreshItemsList();
 		_id("library-other-items").querySelector(".search-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
-		// If the scrollbar setting is set to always show, the height of the message
-		// will be smaller than the height of the items container because the scrollbar would not be there.
-		// To avoid itemTree shifting up, explicitly make the height of the message the same as the height of the items
-		// before filtering
+		// When there are no matches, show a message
 		if (!_id("library-no-suggested-items-message").hidden) {
-			_id("library-other-items").style.height = `${otherItemsHeight}px`;
 			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), "integration-citationDialog-lib-no-items", { search: SearchHandler.lastSearchValue.length > 0 });
-		}
-		else {
-			_id("library-other-items").style.removeProperty("height");
 		}
 		this.resizeWindow();
 		let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
@@ -885,6 +880,7 @@ const IOManager = {
 			item.bubbleString = Helpers.buildBubbleString({ citationItem: item.citationItem, zoteroItem: item.zoteroItem });
 		}
 		_id("bubble-input").refresh(CitationDataManager.items);
+		_id("accept-button").disabled = !CitationDataManager.items.length;
 	},
 
 	async addItemsToCitation(items, { noInputRefocus } = {}) {
@@ -1069,14 +1065,12 @@ const IOManager = {
 			}
 		}
 		section.querySelector(".header-label").setAttribute("aria-expanded", section.classList.contains("expanded"));
-		// In list mode, if the section is collapsed, there may be empty space left.
-		// In library mode, when horizontal section is expanded with "Show scroll bars: always" setting,
-		// scrollbar may appear and push content down.
-		// To handle these edge cases, the window should be resized to fit the content
-		// after a small delay to let everything settle
-		setTimeout(() => {
-			currentLayout.resizeWindow();
-		}, 250);
+		// In list mode, there may be some empty space left after section collapse
+		if (currentLayout.type == "list") {
+			setTimeout(() => {
+				currentLayout.resizeWindow();
+			}, 300);
+		}
 	},
 
 
