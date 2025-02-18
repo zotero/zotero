@@ -151,7 +151,6 @@ function setupAsyncEndpoints() {
 }
 
 describe("Zotero.Translate", function() {
-	let win;
 	let serverURL
 	let htmlURL;
 	
@@ -164,10 +163,6 @@ describe("Zotero.Translate", function() {
 		yield Zotero.Translators.init();
 		
 		setupAttachmentEndpoints();
-		win = yield loadBrowserWindow();
-	});
-	after(function () {
-		win.close();
 	});
 
 	describe("Zotero.Item", function() {

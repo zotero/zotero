@@ -40,7 +40,7 @@ describe("Zotero.FeedReader", function () {
 	
 	before(async function() {
 		// Browser window is needed as parent window to load the feed reader scripts.
-		win = await loadBrowserWindow();
+		win = await loadZoteroWindow();
 	});
 
 	after(async function() {

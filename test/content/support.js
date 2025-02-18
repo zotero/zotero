@@ -81,27 +81,6 @@ function loadWindow(winurl, argument) {
 }
 
 /**
- * Open a browser window and return a promise for the window
- *
- * @return {Promise<ChromeWindow>}
- */
-function loadBrowserWindow() {
-	var win = window.openDialog("chrome://browser/content/browser.xhtml", "", "all,height=700,width=1000");
-	return waitForDOMEvent(win, "load").then(function() {
-		return new Zotero.Promise((resolve) => {
-			if (!browserWindowInitialized) {
-				setTimeout(function () {
-					browserWindowInitialized = true;
-					resolve(win);
-				}, 1000);
-				return;
-			}
-			resolve(win);
-		});
-	});
-}
-
-/**
  * Open a Zotero window and return a promise for the window
  *
  * @return {Promise<ChromeWindow>}

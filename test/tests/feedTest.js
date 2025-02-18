@@ -315,7 +315,7 @@ describe("Zotero.Feed", function() {
 		
 		before(async function() {
 			// Browser window is needed as parent window to load the feed reader scripts.
-			win = await loadBrowserWindow();
+			win = await loadZoteroWindow();
 			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck').resolves();
 		});
 		
