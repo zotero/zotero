@@ -590,7 +590,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 		var win;
 		
 		before(function* () {
-			win = yield loadBrowserWindow();
+			win = yield loadZoteroWindow();
 		});
 		
 		after(function () {

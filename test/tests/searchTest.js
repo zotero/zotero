@@ -123,7 +123,6 @@ describe("Zotero.Search", function() {
 	});
 
 	describe("#search()", function () {
-		var win;
 		var userLibraryID;
 		var fooItem;
 		var foobarItem;
@@ -138,9 +137,6 @@ describe("Zotero.Search", function() {
 				skipBundledFiles: true
 			});
 			
-			// Hidden browser, which requires a browser window, needed for charset detection
-			// (until we figure out a better way)
-			win = await loadBrowserWindow();
 			fooItem = await importFileAttachment("search/foo.html");
 			foobarItem = await importFileAttachment("search/foobar.html");
 			bazItem = await importFileAttachment("search/baz.pdf");
@@ -153,9 +149,6 @@ describe("Zotero.Search", function() {
 		});
 
 		after(function* () {
-			if (win) {
-				win.close();
-			}
 			yield fooItem.eraseTx();
 			yield foobarItem.eraseTx();
 			yield bazItem.eraseTx();

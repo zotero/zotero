@@ -1,17 +1,4 @@
 describe("Zotero.FullText", function () {
-	var win;
-	
-	before(function* () {
-		// Hidden browser, which requires a browser window, needed for charset detection
-		// (until we figure out a better way)
-		win = yield loadBrowserWindow();
-	});
-	after(function () {
-		if (win) {
-			win.close();
-		}
-	});
-	
 	describe("Indexing", function () {
 		beforeEach(function () {
 			Zotero.Prefs.clear('fulltext.textMaxLength');
