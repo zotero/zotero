@@ -597,20 +597,28 @@
 		// If a bubble is removed between two inputs we need to combine them
 		combineNeighboringInputs(startingNode) {
 			let node = startingNode;
+			let initiallyFocusedInputValue = this.isInput(document.activeElement) ? document.activeElement.value : "";
 			while (node && node.nextElementSibling) {
-				if (this.isInput(node)
-					&& this.isInput(node.nextElementSibling)) {
-					let secondInputValue = node.nextElementSibling.value;
-					node.value += `${node.value.length ? ' ' : ''}${secondInputValue}`;
-					// Make sure focus is not lost when two inputs are combined
-					if (node.nextElementSibling == document.activeElement) {
-						node.focus();
+				if (this.isInput(node) && this.isInput(node.nextElementSibling)) {
+					// Place the string in the input that has focus (if either of them does)
+					// to avoid triggering search rerun due to focus change
+					let combinedValue = `${node.value}${node.value.length ? ' ' : ''}${node.nextElementSibling.value}`;
+					let remainingInput = node;
+					let inputToDelete = node.nextElementSibling;
+					if (document.activeElement == node.nextElementSibling) {
+						remainingInput = node.nextElementSibling;
+						inputToDelete = node;
 					}
-					node.nextElementSibling.remove();
+					remainingInput.value = combinedValue;
+					inputToDelete.remove();
 					// Ensure the width of the combined input is correct
-					node.style.width = Utils.getContentWidth(node) + 'px';
+					remainingInput.style.width = Utils.getContentWidth(node) + 'px';
 				}
 				node = node.nextElementSibling;
+			}
+			// Rerun the search in the end if the focused input has a different value than before
+			if (this.isInput(document.activeElement) && document.activeElement.value !== initiallyFocusedInputValue) {
+				this.notifyDialog("handle-input", { query: document.activeElement.value, debounce: false });
 			}
 		}
 	};

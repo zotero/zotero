@@ -8,6 +8,11 @@ option-or-alt =
         [macos] { general-key-option }
         *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+        *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
@@ -391,7 +396,7 @@ integration-citationDialog-btn-cancel =
     .title = { general-cancel }
 
 integration-citationDialog-general-instructions = Use Left/Right Arrow to navigate the items of this citation. Press Tab to select items to add into this citation.
-Press Shift - { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
+Press { command-or-control } - { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
 integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
 
 integradion-citationDialog-search-for-items = Search for items

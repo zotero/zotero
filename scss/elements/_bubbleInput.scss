@@ -34,7 +34,7 @@ bubble-input {
 	input {
 		outline: none;
 		border: none !important;
-		height: 22px; // bubble height
+		height: calc(var(--bubble-height) + 2px); // 2px to account for the border
 		/* Keep the background and text color unchanged in dark mode */
 		background-color: transparent !important;
 		padding: 0;

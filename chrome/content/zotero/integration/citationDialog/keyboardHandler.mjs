@@ -48,8 +48,9 @@ export class CitationDialogKeyboardHandler {
 	// capturing keydown listener to handle keypresses regardless of if they are handled by
 	// lower level components
 	captureKeydown(event) {
-		// Shift-Enter will always accept the dialog regardless of the target (unless within a panel)
-		if (event.key == "Enter" && event.shiftKey && !event.target.closest("panel")) {
+		let cmdOrCtrl = Zotero.isMac ? event.metaKey : event.ctrlKey;
+		// Cmd/Ctrl-Enter will always accept the dialog regardless of the target (unless within a panel)
+		if (event.key == "Enter" && cmdOrCtrl && !event.target.closest("panel")) {
 			this.doc.dispatchEvent(new CustomEvent("dialog-accepted"));
 			event.stopPropagation();
 			event.preventDefault();
@@ -151,7 +152,7 @@ export class CitationDialogKeyboardHandler {
 				// Arrow down from input will just change the selected item without moving focus
 				// Arrow down from a bubble in the lowest row will move focus
 				let shouldFocus = event.target.classList.contains("bubble");
-				let multiSelect = !!group.querySelector("[data-multiselectable]") && event.shiftKey;
+				let multiSelect = event.shiftKey;
 				this._navigateGroup({ group, current, forward: event.key == "ArrowDown", shouldSelect: true, shouldFocus, multiSelect });
 			}
 			handled = true;

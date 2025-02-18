@@ -37,6 +37,9 @@
 		&:active:not([disabled]) {
 			background-color: var(--fill-quarternary) !important;
 		}
+		&:disabled {
+			opacity: 0.5;
+		}
 	}
 
 	#accept-button {
@@ -119,10 +122,7 @@
 	#library-layout {
 		#library-other-items {
 
-			// height is generally 82px but can be increased by a scrollbar
-			// on macOS if "Show scroll bars" setting is set to "Always"
-			min-height: 82px;
-			max-height: 90px;
+			height: 82px;
 			margin-left: 17px;
 			margin-inline-end: 16px;
 			flex-shrink: 0; // make sure suggested items do not get shrunk when window is resized
@@ -135,7 +135,8 @@
 			position: relative;
 			overflow-x: auto;
 			overflow-y: hidden;
-			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+			// no vertical scrollbar for selected/opened/cited items
+			scrollbar-width: none;
 
 			// wrapper for horizontal scrollable suggested items
 			.search-items {
@@ -310,6 +311,7 @@
 				width: 100%;
 				text-align: center;
 				font-size: 14px;
+				color: var(--fill-secondary);
 			}
 		}
 		#library-trees {
@@ -417,7 +419,7 @@
 					padding: 4px 8px 4px 16px;
 				}
 				.item {
-					@include focus-ring;
+					@include focus-ring(true);
 					margin: 0 8px;
 					padding: 4px 8px;
 					border-radius: 5px;
@@ -502,10 +504,14 @@
 					// item container has no height when it is collapsed
 					.itemsContainer {
 						transition: height 0.3s ease;
+						overflow: hidden;
+						// add small padding at the top and bottom to make sure the focus-ring (if it appear) is not
+						// cutoff by the overflow:hidden. Negative margin is to preserve spacing set by other components.
+						padding: 1px 0;
+						margin: -1px 0;
 					}
 					&:not(.expanded) {
 						.itemsContainer {
-							overflow: hidden;
 							height: 0 !important; // important to override inline height with items displayed
 						}
 					}
