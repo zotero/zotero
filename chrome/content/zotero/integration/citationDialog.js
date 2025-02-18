@@ -334,11 +334,14 @@ class LibraryLayout extends Layout {
 			_id("library-other-items").style.removeProperty("height");
 		}
 		this.resizeWindow();
-		// clicking on the collapsed deck of items will add all of them
 		let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
 		for (let collapsibleDeck of collapsibleDecks) {
 			collapsibleDeck.querySelector(".itemsContainer").addEventListener("click", this._captureItemsContainerClick, true);
 			collapsibleDeck.querySelector(".itemsContainer").classList.add("keyboard-clickable");
+			collapsibleDeck.querySelector(".collapse-section-btn").addEventListener("click", () => {
+				IOManager.toggleSectionCollapse(collapsibleDeck, "collapsed", true);
+				collapsibleDeck.querySelector(".itemsContainer").focus();
+			});
 		}
 	}
 

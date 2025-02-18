@@ -144,9 +144,12 @@ export class CitationDialogHelpers {
 			headerSpan.id = `header_${id}`;
 			section.classList.add("expandable");
 			section.style.setProperty('--deck-length', deckLength);
+			let buttonGroup = this.createNode("div", { }, "header-btn-group");
+			header.append(buttonGroup);
+
 			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabindex': 22, role: "button", "aria-describedby": headerSpan.id }, "add-all keyboard-clickable");
 			this.doc.l10n.setAttributes(addAllBtn, "integration-citationDialog-add-all");
-			header.append(addAllBtn);
+			buttonGroup.append(addAllBtn);
 			
 			if (dialogMode == "list") {
 				headerSpan.setAttribute("role", "button");
@@ -157,6 +160,10 @@ export class CitationDialogHelpers {
 			if (dialogMode == "library") {
 				itemContainer.setAttribute("tabindex", -1);
 				itemContainer.setAttribute("data-tabindex", 30);
+
+				let collapseSectionBtn = this.createNode("button", { tabindex: -1, 'data-tabindex': 23, "aria-describedby": headerSpan.id }, "btn-icon collapse-section-btn keyboard-clickable");
+				this.doc.l10n.setAttributes(collapseSectionBtn, "integration-citationDialog-collapse-section");
+				buttonGroup.append(collapseSectionBtn);
 			}
 		}
 		return section;
