@@ -193,7 +193,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 
 		document.querySelector("#exportDocument")?.addEventListener("command", this.exportDocument.bind(this));
 
-		this.onDocPrefsWindowStyleChange(Zotero.Styles.get(styleConfigurator.style));
+		this.onDocPrefsWindowStyleChange(Zotero.Styles.get(styleConfigurator.style), true);
 
 		// If any advanced options are checked, expand the advanced options section
 		let hasCheckedAdvancedOption
@@ -238,9 +238,9 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		citations.dataset.l10nArgs = `{"type": "${style.class}"}`;
 	};
 
-	this.onDocPrefsWindowStyleChange = function (style) {
-		window.isPristine = false;
+	this.onDocPrefsWindowStyleChange = function (style, init = false) {
 		if (windowType !== "docPrefs") return;
+		window.isPristine = init;
 
 		let isNote = style.class == "note";
 		// update status of formatUsing box based on style class
