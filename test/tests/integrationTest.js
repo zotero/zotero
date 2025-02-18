@@ -387,11 +387,11 @@ describe("Zotero.Integration", function () {
 		});
 		
 		displayDialogStub = sinon.stub(Zotero.Integration, 'displayDialog');
-		displayDialogStub.callsFake(async function(dialogName, prefs, io) {
+		displayDialogStub.callsFake(async function(dialogName, prefs, io, windowType) {
 			Zotero.debug(`Display dialog: ${dialogName}`, 2);
 			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-6)];
 			if (typeof ioResult == 'function') {
-				await ioResult(dialogName, io);
+				await ioResult(dialogName, io, windowType);
 			} else {
 				Object.assign(io, ioResult);
 			}
@@ -515,6 +515,86 @@ describe("Zotero.Integration", function () {
 					styleInstallStub.restore();
 					styleGetStub.restore();	
 				});
+			});
+		});
+		
+		describe('#shouldAbortCommand', function () {
+			it('should return false if no command is running', async function () {
+				assert.isFalse(await Zotero.Integration.shouldAbortCommand());
+			});
+
+			it('should return false if an integration dialog is open but is pristine', async function () {
+				await insertMultipleCitations.call(this);
+				let docID = this.test.fullTitle();
+				let quickFormatOpenedDeferred = Zotero.Promise.defer();
+				let quickFormatCancelledDeferred = Zotero.Promise.defer();
+				dialogResults.quickFormat = async function(dialogName, io) {
+					Zotero.Integration.currentWindow = { isPristine: true, focus: () => 0, cancel: quickFormatCancelledDeferred.resolve };
+					quickFormatOpenedDeferred.resolve();
+					await quickFormatCancelledDeferred.promise;
+					io._acceptDeferred.resolve(() => {});
+					Zotero.Integration.currentWindow = null;
+				};
+				let firstCommandPromise = execCommand('addEditCitation', docID);
+				await quickFormatOpenedDeferred.promise;
+				assert.isFalse(await Zotero.Integration.shouldAbortCommand());
+				await quickFormatCancelledDeferred.promise;
+				await firstCommandPromise;
+			});
+			
+			it('should display an alert and return true if an integration command without a dialog is running', async function () {
+				let stub = sinon.stub();
+				let promptService = Services.prompt;
+				Services.prompt = { alert: stub };
+				try {
+					await insertMultipleCitations.call(this);
+					let docID = this.test.fullTitle();
+					let quickFormatOpenedDeferred = Zotero.Promise.defer();
+					let quickFormatDeferred = Zotero.Promise.defer();
+					dialogResults.quickFormat = async function (dialogName, io) {
+						quickFormatOpenedDeferred.resolve();
+						await quickFormatDeferred.promise;
+						io._acceptDeferred.resolve(() => {});
+					};
+					let firstCommandPromise = execCommand('addEditCitation', docID);
+					await quickFormatOpenedDeferred.promise;
+					assert.isTrue(await Zotero.Integration.shouldAbortCommand());
+					assert.isTrue(stub.called);
+					quickFormatDeferred.resolve({});
+					await firstCommandPromise;
+				}
+				finally {
+					Services.prompt = promptService;
+				}
+			});
+
+			it('should display a confirmation dialog if an integration dialog is open and not pristine', async function () {
+				let stub = sinon.stub().returns(0);
+				let promptService = Services.prompt;
+				Services.prompt = { confirmEx: stub };
+				try {
+					await insertMultipleCitations.call(this);
+					let docID = this.test.fullTitle();
+					let quickFormatOpenedDeferred = Zotero.Promise.defer();
+					let quickFormatCancelledDeferred = Zotero.Promise.defer();
+					dialogResults.quickFormat = async function(dialogName, io, windowType) {
+						Zotero.Integration.currentWindow = { isPristine: false, focus: () => 0, cancel: quickFormatCancelledDeferred.resolve };
+						Zotero.Integration.currentWindowType = windowType;
+						quickFormatOpenedDeferred.resolve();
+						await quickFormatCancelledDeferred.promise;
+						io._acceptDeferred.resolve(() => {});
+						Zotero.Integration.currentWindow = null;
+					};
+					let firstCommandPromise = execCommand('addEditCitation', docID);
+					await quickFormatOpenedDeferred.promise;
+					assert.isFalse(await Zotero.Integration.shouldAbortCommand());
+					assert.isTrue(stub.called);
+					await quickFormatCancelledDeferred.promise;
+					await firstCommandPromise;
+				}
+				finally {
+					Services.prompt = promptService;
+				}
 			});
 		});
 		

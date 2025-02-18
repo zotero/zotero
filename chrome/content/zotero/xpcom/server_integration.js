@@ -32,12 +32,19 @@ Zotero.Server.Endpoints['/integration/macWordCommand'].prototype = {
 		// Some dark magic to fix incorrectly encoded unicode characters here
 		// from https://stackoverflow.com/questions/5396560/how-do-i-convert-special-utf-8-chars-to-their-iso-8859-1-equivalent-using-javasc
 		const document = decodeURIComponent(escape(data.searchParams.get('document')));
-		Zotero.Integration.execCommand(
-			data.searchParams.get('agent'),
-			data.searchParams.get('command'),
-			document,
-			data.searchParams.get('templateVersion')
-		);
+		
+		// Run this in the next event loop (making sure we first send the 200 response)
+		// otherwise if a blocking command (alert) runs in execCommand before an await call
+		// it makes the Word call to Zotero timeout and display an error
+		setTimeout(() => {
+			Zotero.Integration.execCommand(
+				data.searchParams.get('agent'),
+				data.searchParams.get('command'),
+				document,
+				data.searchParams.get('templateVersion')
+			);
+		});
+		
 		return 200;
 	},
 };

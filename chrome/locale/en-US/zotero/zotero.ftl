@@ -387,6 +387,13 @@ integration-prefs-exportDocument =
 
 integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 
+integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
+integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
+integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
+integration-warning-discard-changes = Discard Changes
+
+integration-warning-command-is-running = A word processor integration command is already running.
+
 publications-intro-page = My Publications
 
 publications-intro = Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.

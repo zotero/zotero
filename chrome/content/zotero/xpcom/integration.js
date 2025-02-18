@@ -82,6 +82,7 @@ Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/AddonManager.jsm");
 	
 	this.currentWindow = false;
+	this.currentCommandPromise = Zotero.Promise.resolve();
 	this.sessions = {};
 	var upgradeTemplateNotNowTime = 0;
 
@@ -246,14 +247,13 @@ Zotero.Integration = new function() {
 		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`)
 		if (Zotero.Integration.warnOutdatedTemplate(agent, templateVersion)) return;
 
-		if (Zotero.Integration.currentDoc) {
-			Zotero.Utilities.Internal.activate();
-			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
-				Zotero.Integration.currentWindow.focus();
-			}
+		let shouldAbort = await this.shouldAbortCommand();
+		if (shouldAbort) {
 			Zotero.debug("Integration: Request already in progress; not executing "+agent+" "+command);
 			return;
 		}
+		let deferred = Zotero.Promise.defer();
+		Zotero.Integration.currentCommandPromise = deferred.promise;
 		Zotero.Integration.currentDoc = true;
 
 		var startTime = (new Date()).getTime();
@@ -342,7 +342,43 @@ Zotero.Integration = new function() {
 			}
 			
 			Zotero.Integration.currentDoc = Zotero.Integration.currentWindow = false;
+			deferred.resolve();
 		}
+	};
+
+	/**
+	 * @returns {Promise<boolean>} Whether the new integration command should be aborted or continue
+	 */
+	this.shouldAbortCommand = async function () {
+		const ps = Services.prompt;
+		if (!Zotero.Integration.currentDoc) return false;
+		
+		if (Zotero.Integration.currentWindow) {
+			if (!Zotero.Integration.currentWindow.isPristine) {
+				Zotero.Utilities.Internal.activate();
+				Zotero.Integration.currentWindow.focus();
+				// Prompt user that changes will be lost in the existing dialog
+				let result = Zotero.Prompt.confirm({
+					title: Zotero.getString('general.warning'),
+					text: Zotero.getString(`integration-warning-${Zotero.Integration.currentWindowType}-changes-will-be-lost`),
+					button0: Zotero.getString('integration-warning-discard-changes'),
+					button1: Zotero.Prompt.BUTTON_TITLE_CANCEL
+				});
+				if (result == 1) {
+					return true;
+				}
+			}
+			Zotero.Integration.currentWindow.cancel();
+			await Zotero.Integration.currentCommandPromise;
+		}
+		else {
+			// Prompt the user that an integration command is already running
+			let ps = Services.prompt;
+			ps.alert(null, Zotero.getString('general.warning'),
+				Zotero.getString('integration-warning-command-is-running'));
+			return true;
+		}
+		return false;
 	};
 	
 	this._handleCommandError = async function (document, session, e) {
@@ -429,7 +465,7 @@ Zotero.Integration = new function() {
 	 * @param {String} [io] Data to pass to the window
 	 * @return {Promise} Promise resolved when the window is closed
 	 */
-	this.displayDialog = async function displayDialog(url, options, io) {
+	this.displayDialog = async function displayDialog(url, options, io, windowType) {
 		Zotero.debug(`Integration: Displaying dialog ${url}`);
 		// On macOS (and potentially in the future with Word JS)
 		// we can only run request sequentially (native async field fetching was dropped
@@ -442,6 +478,7 @@ Zotero.Integration = new function() {
 		// we should not delay the dialog display
 		let cleanupPromise = Zotero.Integration.currentDoc.cleanup();
 		await Zotero.Integration.currentSession?.progressBar.hide(true);
+		Zotero.Integration.currentWindowType = windowType;
 		
 		var allOptions = 'chrome,centerscreen';
 		// without this, Firefox gets raised with our windows under Compiz
@@ -1500,15 +1537,15 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		? 'popup' : 'alwaysRaised')+',resizable=false';
 	if (addNote) {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xhtml',
-			mode, io);
+			mode, io, "citation");
 	}
 	else if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xhtml',
-			'alwaysRaised,resizable', io);
+			'alwaysRaised,resizable', io, "citation");
 	}
 	else {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xhtml',
-			mode, io);
+			mode, io, "citation");
 	}
 
 	// -------------------
@@ -1702,6 +1739,14 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	},
 	
 	/**
+	 * Cancel changes to the citation
+	 */
+	cancel: function () {
+		this.citation.citationItems = [];
+		return this.accept();
+	},
+	
+	/**
 	 * Get a list of items used in the current document
 	 * @return {Promise} A promise resolved by the items
 	 */
@@ -1892,7 +1937,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = async function (showImportExp
 	
 	// Make sure styles are initialized for new docs
 	await Zotero.Styles.init();
-	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xhtml', '', io);
+	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xhtml', '', io, "documentPreferences");
 
 	if (io.exportDocument) {
 		return this.exportDocument();
@@ -2365,7 +2410,7 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
  */
 Zotero.Integration.Session.prototype.editBibliography = async function (bibliography) {
 	if (!Object.keys(this.citationsByIndex).length) {
-		throw new Error('Integration.Session.editBibliography: called without loaded citations');	
+		throw new Error('Integration.Session.editBibliography: called without loaded citations');
 	}
 	// Update citeproc with citations in the doc
 	await this._updateCitations();
@@ -2374,7 +2419,7 @@ Zotero.Integration.Session.prototype.editBibliography = async function (bibliogr
 	
 	var bibliographyEditor = new Zotero.Integration.BibliographyEditInterface(bibliography, this.citationsByItemID, this.style);
 	
-	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xhtml', 'resizable', bibliographyEditor);
+	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xhtml', 'resizable', bibliographyEditor, "bibliography");
 	if (bibliographyEditor.cancelled) throw new Zotero.Exception.UserCancelled("bibliography editing");
 	
 	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;

@@ -25,6 +25,8 @@
 
 import { getCSSItemTypeIcon } from 'components/icons';
 
+window.isPristine = true;
+
 var Zotero_Bibliography_Dialog = new function () {
 	var bibEditInterface;
 	var _lastSelectedItemID = false;
@@ -153,6 +155,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Adds references to the reference list
 	 */
 	this.add = function() {
+		window.isPristine = false;
 		for (let itemID of itemsView.getSelectedItems(true)) {
 			bibEditInterface.add(itemID);
 		}
@@ -176,6 +179,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		);
 		
 		if(regenerate != 0) return;
+		window.isPristine = false;
 		
 		bibEditInterface.revertAll();
 		
@@ -199,6 +203,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		);
 		
 		if(regenerate != 0) return;
+		window.isPristine = false;
 		
 		for (let itemID of _getSelectedListItemIDs()) {
 			bibEditInterface.revert(itemID);
@@ -231,6 +236,7 @@ var Zotero_Bibliography_Dialog = new function () {
 			);
 			if(regenerate != 0) return;
 		}
+		window.isPristine = false;
 		
 		// remove
 		for (let itemID of selectedListItemIDs) {
@@ -244,6 +250,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 */
 	this.textChanged = function() {
 		_revertButton.disabled = _revertAllButton.disabled = false;
+		window.isPristine = false;
 	}
 	
 	/**
@@ -253,6 +260,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		if(_accepted) return;
 		_updatePreview(true);
 		_accepted = true;
+		window.close();
 	}
 	
 	/**
@@ -262,6 +270,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		if(_accepted) return;
 		bibEditInterface.cancel();
 		_accepted = true;
+		window.close();
 	}
 	
 	/**
@@ -341,3 +350,5 @@ var Zotero_Bibliography_Dialog = new function () {
 		_updatePreview();
 	}
 }
+
+window.cancel = Zotero_Bibliography_Dialog.close;
