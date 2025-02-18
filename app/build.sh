@@ -232,6 +232,47 @@ elif [ $BUILD_LINUX == 1 ]; then
 fi
 set -e
 cd $omni_dir
+
+# Remove Firefox files that we don't need
+rm actors/AboutLogins{Parent,Child}.sys.mjs
+rm actors/AboutMessagePreview{Parent,Child}.sys.mjs
+rm actors/AboutNewTab{Parent,Child}.sys.mjs
+rm actors/AboutPocket{Parent,Child}.sys.mjs
+rm actors/AboutPrivateBrowsing{Parent,Child}.sys.mjs
+rm actors/AboutProtections{Parent,Child}.sys.mjs
+rm actors/AboutReader{Parent,Child}.sys.mjs
+rm actors/AboutTabCrashed{Parent,Child}.sys.mjs
+rm actors/AboutWelcome{Parent,Child}.sys.mjs
+rm actors/ASRouter{Parent,Child}.sys.mjs
+rm actors/BackupUI{Parent,Child}.sys.mjs
+rm actors/BlockedSite{Parent,Child}.sys.mjs
+rm actors/BrowserProcessChild.sys.mjs
+rm actors/BrowserTabChild.sys.mjs
+rm actors/ClickHandler{Parent,Child}.sys.mjs
+rm actors/ContentSearch{Parent,Child}.sys.mjs
+rm actors/DecoderDoctor{Parent,Child}.sys.mjs
+rm actors/DOMFullscreen{Parent,Child}.sys.mjs
+rm actors/EncryptedMedia{Parent,Child}.sys.mjs
+rm actors/FormValidation{Parent,Child}.sys.mjs
+rm actors/LinkHandler{Parent,Child}.sys.mjs
+rm actors/MigrationWizard{Parent,Child}.sys.mjs
+rm actors/PageData{Parent,Child}.sys.mjs # Not our PageData actor
+rm actors/PageInfoChild.sys.mjs
+rm actors/PageStyle{Parent,Child}.sys.mjs
+rm actors/Plugin{Parent,Child}.sys.mjs # GMP plugins, which we remove
+rm actors/PointerLock{Parent,Child}.sys.mjs
+rm actors/RFPHelper{Parent,Child}.sys.mjs
+rm actors/ScreenshotsComponentChild.sys.mjs
+rm actors/SearchSERPTelemetry{Parent,Child}.sys.mjs
+rm actors/ShoppingSidebar{Parent,Child}.sys.mjs
+rm actors/SpeechDispatcher{Parent,Child}.sys.mjs
+rm actors/WebRTC{Parent,Child}.sys.mjs
+
+mv chrome/browser/content/browser/license.html chrome/browser_license.html
+rm -r chrome/browser # We want Firefox, just not the browser part
+
+rm modules/SearchSERPTelemetry.sys.mjs
+
 # Move some Firefox files that would be overwritten out of the way
 mv chrome.manifest chrome.manifest-fx
 mv defaults defaults-fx
@@ -292,9 +333,6 @@ elif [ $BUILD_LINUX == 1 ]; then
 	# https://bugzilla.mozilla.org/show_bug.cgi?id=1747208
 	perl -pi -e 's/pref\("general\.autoScroll", false\);/pref\("general.autoScroll", true);/' $prefs_file
 fi
-
-# Clear list of built-in add-ons
-echo '{"dictionaries": {"en-US": "dictionaries/en-US.dic"}, "system": []}' > chrome/browser/content/browser/built_in_addons.json
 
 # chrome.manifest
 mv chrome.manifest zotero.manifest
@@ -378,9 +416,6 @@ export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets
 
 # Don't try to initialize Places, since we've removed its files
 replace_line 'this._placesInitialized = true;' 'if (true) return; this._placesInitialized = true;' modules/BrowserGlue.sys.mjs
-
-# Prevent color scheme getting reset to 'light' during printing
-replace_line 'new LightweightThemeConsumer\(document\);' '\/\/new LightweightThemeConsumer\(document\);'  chrome/browser/content/browser/browser-init.js
 
 # Move test files to root directory
 if [ $include_tests -eq 1 ]; then
