@@ -196,7 +196,8 @@ export class CitationDialogKeyboardHandler {
 			currentTabIndex = parseInt(tabindexNode.dataset.tabindex);
 		}
 		let tabIndexedNodes = [...this.doc.querySelectorAll("[data-tabindex]")];
-		tabIndexedNodes = tabIndexedNodes.filter(node => (node.getAttribute("tabindex") || node.querySelector("[tabindex]")) && !node.closest("[hidden]") && !node.disabled);
+		// filter out invisible, not focusable or disabled nodes
+		tabIndexedNodes = tabIndexedNodes.filter(node => (node.getAttribute("tabindex") || node.querySelector("[tabindex]")) && !node.disabled && node.getBoundingClientRect().width);
 		tabIndexedNodes = tabIndexedNodes.sort((a, b) => {
 			if (a.dataset.tabindex == b.dataset.tabindex) {
 				// make sure that if there's a "current" node, it will have priority

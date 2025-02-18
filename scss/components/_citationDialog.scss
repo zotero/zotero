@@ -240,6 +240,20 @@
 						.header {
 							display: flex;
 							justify-content: space-between;
+
+							.header-btn-group {
+								display: flex;
+								flex-direction: row;
+								align-items: center;
+								gap: 4px;
+								.collapse-section-btn {
+									@include svgicon("chevron-8", "universal", "8");
+									transform: rotate(90deg);
+									transform-origin: center;
+									width: 14px;
+									height: 14px;
+								}
+							}
 						}
 						.item {
 							z-index: calc(var(--deck-length) - var(--deck-index));
@@ -268,6 +282,10 @@
 							// remaining item cards are just hidden behind the top item
 							.item:nth-child(n + 4) {
 								transform: translateX(calc(-1 * var(--deck-index) * (var(--item-horizontal-size))));
+							}
+							// no button to collapse the dection when it is already collapsed
+							.collapse-section-btn {
+								display: none;
 							}
 						}
 					}
