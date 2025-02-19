@@ -19,6 +19,9 @@ jobs:
           node-version: 18
           #cache: npm
       
+      - name: Install dbus-glib
+        run: sudo apt-get update && sudo apt-get install -y libdbus-glib-1-2
+      
       # On GitHub
       - name: Install xvfb
         if: env.ACT != 'true'
