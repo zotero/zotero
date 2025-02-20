@@ -312,6 +312,13 @@
 				delete autocompleteParams.popup;
 				delete autocompleteParams.search;
 				Object.assign(this._input, autocompleteParams);
+				
+				this._input.onTextEntered = () => {
+					if (this.onTextEntered) {
+						return this.onTextEntered();
+					}
+					return false;
+				};
 			}
 
 			// Set text direction automatically if user has enabled bidi utilities
