@@ -309,7 +309,7 @@ class LibraryLayout extends Layout {
 		itemNode.id = id;
 		let title = Helpers.createNode("div", {}, "title");
 		let description = Helpers.buildItemDescription(item);
-		title.textContent = item.getDisplayTitle();
+		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), title);
 
 		itemNode.append(title, description);
 
@@ -460,9 +460,11 @@ class LibraryLayout extends Layout {
 				event.preventDefault();
 				event.stopPropagation();
 				let row = event.target;
-				// on Enter, event lands on the table itself, so try to find
-				// the last item's row and make sure is remains visible after items are added
-				if (!row.classList.contains("row")) {
+				let isClick = event.type == "dblclick";
+				// on Enter, clear the selection and try to find
+				// the last item's row to keep it visible after items are added
+				if (!isClick) {
+					this.itemsView.selection.clearSelection();
 					let lastItemID = items[items.length - 1].id;
 					let rowIndex = this.itemsView.getRowIndexByID(lastItemID);
 					row = doc.querySelector(`#item-tree-citationDialog-row-${rowIndex}`);
@@ -570,7 +572,8 @@ class LibraryLayout extends Layout {
 			let clickedItem = this.itemsView.getRow(rowIndex).ref;
 			hoveredOverIcon.classList.remove("active");
 			let rowTopBeforeRefresh = row.getBoundingClientRect().top;
-			IOManager.addItemsToCitation([clickedItem], { noInputRefocus: true }).then(() => {
+			this.itemsView.selection.clearSelection();
+			IOManager.addItemsToCitation([clickedItem]).then(() => {
 				this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
 			});
 		}
@@ -643,6 +646,7 @@ class LibraryLayout extends Layout {
 	_scrollItemTreeToRow(rowID, rowTopBeforeRefresh) {
 		let rowIndex = rowID.split("-")[4];
 		if (rowIndex === 0) return;
+		this.itemsView.ensureRowIsVisible(rowIndex);
 		let rowAfterRefresh = doc.querySelector(`#zotero-items-tree #${rowID}`);
 		let rowTopAfterRefresh = rowAfterRefresh.getBoundingClientRect().top;
 		let delta = rowTopAfterRefresh - rowTopBeforeRefresh;
@@ -677,7 +681,7 @@ class ListLayout extends Layout {
 		let title = Helpers.createNode("div", {}, "title");
 		let titleContent = Helpers.createNode("span", {}, "");
 		let description = Helpers.buildItemDescription(item);
-		titleContent.textContent = item.getDisplayTitle();
+		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), titleContent);
 		title.append(icon, titleContent);
 		itemNode.append(title, description);
 		if (Zotero.Retractions.isRetracted(item)) {
@@ -1015,10 +1019,7 @@ const IOManager = {
 			}
 		}
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
-		// after mouse click, return focus to where it was previously (e.g. itemTree)
-		// but on click via keyboard, always refocus input
-		let isMouseClick = event.clickX !== 0 && event.clickY !== 0;
-		IOManager.addItemsToCitation(itemsToAdd, { noInputRefocus: (isMouseClick && currentLayout.type == "library") });
+		IOManager.addItemsToCitation(itemsToAdd);
 	},
 
 	toggleSectionCollapse(section, status, userInitiated) {

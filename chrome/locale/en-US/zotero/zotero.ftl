@@ -399,7 +399,7 @@ integration-citationDialog-general-instructions = Use Left/Right Arrow to naviga
 Press { command-or-control } - { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
 integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
 
-integradion-citationDialog-search-for-items = Search for items
+integradion-citationDialog-search-for-items = Search for items to add to the citation
 integration-citationDialog-aria-bubble =
     .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input =
