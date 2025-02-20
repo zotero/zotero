@@ -50,7 +50,7 @@
 	}
 
 	#search-row {
-		margin: 6px 8px 6px 0;
+		margin: 8px 8px 8px 0;
 
 		#z-icon-container {
 			width: 36px; // same as left margin on .library-other-items
@@ -61,7 +61,7 @@
 				height: 16px;
 				pointer-events: all;
 				align-self: baseline;
-  				margin-top: 7px;
+  				margin-top: 6px;
 				margin-left: 12px;
 			}
 		}
@@ -107,6 +107,7 @@
 		border-radius: 5px;
 		font-weight: 400;
 		text-decoration: underline;
+		margin-left: auto;
 		&:hover {
 			cursor: pointer;
 		}
@@ -179,6 +180,11 @@
 						left: 20px; // same as the width of sticky faded edges pseudo-elements
 						width: var(--item-horizontal-size);
 						-moz-user-select: none;
+						// ensure long headers in non-english locales do not break the layout
+						text-wrap: nowrap;
+						text-overflow: ellipsis;
+						overflow: hidden;
+						display: block;
 					}
 			
 					.itemsContainer {
@@ -241,18 +247,28 @@
 						.header {
 							display: flex;
 							justify-content: space-between;
+							.header-label {
+								// make sure header text does not overlap with buttons
+								max-width: 160px;
+								text-overflow: ellipsis;
+								overflow: hidden;
+							}
 
 							.header-btn-group {
 								display: flex;
 								flex-direction: row;
 								align-items: center;
 								gap: 4px;
+								flex: 1;
+								margin-inline-start: 2px;
 								.collapse-section-btn {
-									@include svgicon("chevron-8", "universal", "8");
+									@include svgicon("chevron-12-double", "universal", "16");
+									color: var(--fill-primary);
 									transform: rotate(90deg);
 									transform-origin: center;
 									width: 14px;
 									height: 14px;
+									margin-top: 1px; // nicer alignment with the section header
 								}
 							}
 						}
@@ -310,7 +326,7 @@
 				align-self: center;
 				width: 100%;
 				text-align: center;
-				font-size: 14px;
+				font-size: 13px;
 				color: var(--fill-secondary);
 			}
 		}

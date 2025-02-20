@@ -161,9 +161,9 @@ export class CitationDialogHelpers {
 				itemContainer.setAttribute("tabindex", -1);
 				itemContainer.setAttribute("data-tabindex", 30);
 
-				let collapseSectionBtn = this.createNode("button", { tabindex: -1, 'data-tabindex': 23, "aria-describedby": headerSpan.id }, "btn-icon collapse-section-btn keyboard-clickable");
+				let collapseSectionBtn = this.createNode("button", { tabindex: -1, 'data-tabindex': 21, "aria-describedby": headerSpan.id }, "btn-icon collapse-section-btn keyboard-clickable");
 				this.doc.l10n.setAttributes(collapseSectionBtn, "integration-citationDialog-collapse-section");
-				buttonGroup.append(collapseSectionBtn);
+				buttonGroup.prepend(collapseSectionBtn);
 			}
 		}
 		return section;
