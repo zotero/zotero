@@ -1150,6 +1150,14 @@ class EditorInstance {
 			},
 
 			/**
+			 * Cancel changes to the citation
+			 */
+			cancel: function () {
+				this.citation.citationItems = [];
+				return this.accept();
+			},
+
+			/**
 			 * Get a list of items used in the current document
 			 * @return {Promise} A promise resolved by the items
 			 */
