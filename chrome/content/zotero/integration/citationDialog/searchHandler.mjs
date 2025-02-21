@@ -25,7 +25,6 @@
 
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
-const SEARCH_TIMEOUT = 500;
 const MIN_QUERY_LENGTH = 2;
 
 // Contains all search-related logic. Last search results are stored in SearchHandler.results
@@ -36,15 +35,22 @@ export class CitationDialogSearchHandler {
 		this.isCitingNotes = isCitingNotes;
 		this.io = io;
 
-		this.lastSearchValue = null;
+		this.searchValue = "";
 		this.results = {
 			found: [],
 			open: [],
 			cited: [],
 			selected: [],
 		};
+		this.minQueryLengthEnforced = false;;
 		this.searching = false;
 		this.searchResultIDs = [];
+		this._nonLibraryItems = {};
+	}
+
+	setSearchValue(str, enforceMinQueryLength) {
+		this.minQueryLengthEnforced = !!enforceMinQueryLength;
+		this.searchValue = this.cleanSearchQuery(str);
 	}
 
 	// get item by a given id from the list of search results
@@ -61,15 +67,12 @@ export class CitationDialogSearchHandler {
 		return null;
 	}
 
-
-	refreshDebounced = Zotero.Utilities.debounce(async (str, callback) => {
-		await this.refresh(str);
-		callback();
-	}, SEARCH_TIMEOUT);
-
 	// how many selected items there are without applying the filter
 	allSelectedItemsCount() {
-		return this._getSelectedLibraryItems(true).length;
+		if (this._nonLibraryItems.selected !== undefined) {
+			return this._nonLibraryItems.selected.length;
+		}
+		return this._getSelectedLibraryItems().length;
 	}
 
 	// Return results in a more helpful formatfor rendering.
@@ -119,17 +122,53 @@ export class CitationDialogSearchHandler {
 		return result;
 	}
 
-	async refresh(str = "") {
-		await this._updateSearchResults(str);
-
-		this.results = {
-			found: this.isCitingNotes ? (await this._getMatchingNotes()) : (await this._getMatchingLibraryItems()),
-			open: this.isCitingNotes ? [] : await this._getMatchingReaderOpenItems(),
-			cited: this.isCitingNotes ? [] : await this._getMatchingCitedItems(),
-			selected: this.isCitingNotes ? this._getSelectedNotes() : this._getSelectedLibraryItems(),
-		};
-		// Ensure no dupliate items across groups
+	// Refresh selected/opened/cited items. 
+	// These items are searched for separately from actual library matches
+	// because it is much faster for large libraries, so we don't have to wait
+	// for the library search to complete to show these results.
+	async refreshNonLibraryItems() {
+		// Use cached selected/cited/open items if available to not
+		// re-fetch them every time
+		if (!Object.keys(this._nonLibraryItems).length) {
+			this._nonLibraryItems = {
+				open: this._getReaderOpenItems(),
+				cited: await this._getCitedItems(),
+				selected: this._getSelectedLibraryItems(),
+			};
+		}
+		let { open, cited, selected } = this._nonLibraryItems;
+		
+		// apply filtering to item groups
+		this.results.open = this.searchValue ? this._filterNonMatchingItems(open) : open;
+		this.results.selected = this.searchValue ? this._filterNonMatchingItems(selected) : selected;
+		// clear matching library items to make sure items stale results are not showing
+		this.results.found = [];
+		// if "ibid" is typed, return all cited items
+		if (this.searchValue.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
+			this.results.cited = cited;
+		}
+		else {
+			this.results.cited = this.searchValue ? this._filterNonMatchingItems(cited) : [];
+		}
+		// Ensure dupliates across groups before library items are found
 		this._deduplicate();
+	}
+
+	// Refresh the list of matching library items for the list mode.
+	async refreshLibraryItems() {
+		if (!this.searchValue) {
+			this.results.found = [];
+			return;
+		}
+		this.results.found = await this._getMatchingLibraryItems();
+		// Ensure dupliates across groups after library items are found
+		this._deduplicate();
+	}
+
+	// clear selected/open/cited items cache to re-fetch those items
+	// after they may have changed
+	clearNonLibraryItemsCache() {
+		this._nonLibraryItems = {};
 	}
 
 	cleanSearchQuery(str) {
@@ -137,31 +176,10 @@ export class CitationDialogSearchHandler {
 		str = this._cleanYear(str);
 
 		// If the query is very short, treat it as empty
-		if (str.trim().length < MIN_QUERY_LENGTH) {
+		if (this.minQueryLengthEnforced && str.trim().length < MIN_QUERY_LENGTH) {
 			str = "";
 		}
 		return str;
-	}
-
-	// Run the actual search query and record all matches in this.searchResultIDs
-	async _updateSearchResults(str) {
-		str = this.cleanSearchQuery(str);
-
-		var s = new Zotero.Search();
-		Zotero.Feeds.getAll().forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
-		if (this.io.filterLibraryIDs) {
-			this.io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
-		}
-		let realInputRegex = /[\w\u007F-\uFFFF]/;
-		if (this.isCitingNotes) {
-			s.addCondition("quicksearch-titleCreatorYearNote", "contains", str);
-		}
-		else if (realInputRegex.test(str)) {
-			s.addCondition("quicksearch-titleCreatorYear", "contains", str);
-			s.addCondition("itemType", "isNot", "attachment");
-		}
-		this.lastSearchValue = str;
-		this.searchResultIDs = await s.search();
 	}
 
 	// make sure that each item appears only in one group.
@@ -177,19 +195,37 @@ export class CitationDialogSearchHandler {
 		this.results.cited = this.results.cited.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id));
 		this.results.found = this.results.found.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id) && !citedIDs.has(item.id));
 	}
-	
-	async _getMatchingCitedItems() {
-		if (!this.lastSearchValue) return [];
-		// Fetch all cited items in the document, not just items currently in the dialog
-		let citedItems = await this.io.getItems();
-		// if "ibid" is typed, return all items
-		if (this.lastSearchValue.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
-			return citedItems;
+		
+	// Run the actual search query and find all items matching query across all libraries
+	async _getMatchingLibraryItems() {
+		var s = new Zotero.Search();
+		Zotero.Feeds.getAll().forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
+		if (this.io.filterLibraryIDs) {
+			this.io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
 		}
-		return this._filterNonMatchingItems(citedItems);
+		let realInputRegex = /[\w\u007F-\uFFFF]/;
+		if (this.isCitingNotes) {
+			s.addCondition("quicksearch-titleCreatorYearNote", "contains", this.searchValue);
+		}
+		else if (realInputRegex.test(this.searchValue)) {
+			s.addCondition("quicksearch-titleCreatorYear", "contains", this.searchValue);
+			s.addCondition("itemType", "isNot", "attachment");
+		}
+		let searchResultIDs = await s.search();
+		// Search results might be in an unloaded library, so get items asynchronously and load necessary data
+		var items = await Zotero.Items.getAsync(searchResultIDs);
+		await Zotero.Items.loadDataTypes(items);
+		return items;
 	}
 
-	async _getMatchingReaderOpenItems() {
+	async _getCitedItems() {
+		if (this.isCitingNotes) return [];
+		// Fetch all cited items in the document, not just items currently in the dialog
+		let citedItems = await this.io.getItems();
+		return citedItems;
+	}
+
+	_getReaderOpenItems() {
 		if (this.isCitingNotes) return [];
 		let win = Zotero.getMainWindow();
 		let tabs = win.Zotero_Tabs.getState();
@@ -212,67 +248,20 @@ export class CitationDialogSearchHandler {
 			}
 			return Zotero.Cite.getItem(itemID);
 		});
-		if (!this.lastSearchValue) return items;
-		return this._filterNonMatchingItems(items);
+		return items;
 	}
 
-	_getSelectedLibraryItems(noFilter) {
-		let win = Zotero.getMainWindow();
-		if (win.Zotero_Tabs.selectedType !== "library") return [];
-		let selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isRegularItem());
-		if (!this.lastSearchValue || noFilter) return selectedItems;
-		return this._filterNonMatchingItems(selectedItems);
+	_getSelectedLibraryItems() {
+		if (this.isCitingNotes) {
+			return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isNote()) || [];
+		}
+		return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isRegularItem()) || [];
 	}
 	
-	async _getMatchingLibraryItems(skipSelected = true) {
-		if (this.isCitingNotes) {
-			throw new Error("Not available when citing notes");
-		}
-
-		if (!this.searchResultIDs.length || !this.lastSearchValue) {
-			return [];
-		}
-			
-		// Search results might be in an unloaded library, so get items asynchronously and load
-		// necessary data
-		var items = await Zotero.Items.getAsync(this.searchResultIDs);
-		await Zotero.Items.loadDataTypes(items);
-		if (skipSelected) {
-			let win = Zotero.getMainWindow();
-			let selectedIDs = win.ZoteroPane.getSelectedItems().filter(i => i.isRegularItem()).map(item => item.id);
-			items = items.filter(item => !selectedIDs.includes(item.id));
-		}
-
-		return items;
-	}
-
-	_getSelectedNotes() {
-		return Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isNote());
-	}
-
-	// Return notes matching the search query. If the query is empty, return all notes
-	// sorted by last date modified.
-	async _getMatchingNotes(skipSelected = true) {
-		if (!this.isCitingNotes) {
-			throw new Error("_getMatchingNotes should only be used while citing a note");
-		}
-
-		if (!this.searchResultIDs.length) return [];
-
-		// Search results might be in an unloaded library, so get items asynchronously and load
-		// necessary data
-		var items = await Zotero.Items.getAsync(this.searchResultIDs);
-		await Zotero.Items.loadDataTypes(items);
-		if (skipSelected) {
-			let selectedIDs = this._getSelectedNotes().map(note => note.id);
-			items = items.filter(item => !selectedIDs.includes(item.id));
-		}
-		return items;
-	}
 
 	_filterNonMatchingItems(items) {
 		let matchedItems = new Set();
-		let splits = Zotero.Fulltext.semanticSplitter(this.lastSearchValue || "");
+		let splits = Zotero.Fulltext.semanticSplitter(this.searchValue);
 		for (let item of items) {
 			// Generate a string to search for each item
 			let itemStr = item.getCreators()
@@ -290,7 +279,7 @@ export class CitationDialogSearchHandler {
 
 	// Generate sort function for items
 	_createItemsSort() {
-		let searchString = (this.lastSearchValue || "").toLowerCase();
+		let searchString = (this.searchValue).toLowerCase();
 		let searchParts = Zotero.SearchConditions.parseSearchString(searchString);
 		var collation = Zotero.getLocaleCollation();
 		return ((a, b) => {

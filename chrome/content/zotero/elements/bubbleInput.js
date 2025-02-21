@@ -165,15 +165,6 @@
 		}
 
 		/**
-		 * Determine if there is anything typed in the current input.
-		 */
-		isSomethingTyped() {
-			let input = this.getCurrentInput();
-			if (!input) return false;
-			return input.value.trim().length > 0;
-		}
-
-		/**
 		 * Get the index that a bubble inserted after current input would have.
 		 * Used by CitationDialog to know at which index to save the newly added item.
 		 */
@@ -347,13 +338,13 @@
 					input.style.width = Utils.getContentWidth(input) + 'px';
 				}
 				input.classList.toggle("empty", input.value.length == 0);
-				Utils.notifyDialog("handle-input", { query: input.value, debounce: true });
+				Utils.notifyDialog("handle-input", { query: input.value, eventType: "input" });
 			});
 			input.addEventListener("keydown", e => this._onInputKeydown(input, e));
 			input.addEventListener("focus", (_) => {
 				// When input is re-focused, tell citationDialog that search can be rerun
 				// without debounce
-				Utils.notifyDialog("handle-input", { query: input.value, debounce: false });
+				Utils.notifyDialog("handle-input", { query: input.value, eventType: "focus" });
 			});
 			input.addEventListener("blur", async (event) => {
 				// record this input as last focused if it's not empty OR if the focus left bubbleInput altogether
@@ -618,7 +609,7 @@
 			}
 			// Rerun the search in the end if the focused input has a different value than before
 			if (this.isInput(document.activeElement) && document.activeElement.value !== initiallyFocusedInputValue) {
-				this.notifyDialog("handle-input", { query: document.activeElement.value, debounce: false });
+				this.notifyDialog("handle-input", { query: document.activeElement.value, eventType: "focus" });
 			}
 		}
 	};
