@@ -333,9 +333,12 @@ class LibraryLayout extends Layout {
 		for (let collapsibleDeck of collapsibleDecks) {
 			collapsibleDeck.querySelector(".itemsContainer").addEventListener("click", this._captureItemsContainerClick, true);
 			collapsibleDeck.querySelector(".itemsContainer").classList.add("keyboard-clickable");
-			collapsibleDeck.querySelector(".collapse-section-btn").addEventListener("click", () => {
+			collapsibleDeck.querySelector(".collapse-section-btn").addEventListener("click", (event) => {
 				IOManager.toggleSectionCollapse(collapsibleDeck, "collapsed", true);
-				collapsibleDeck.querySelector(".itemsContainer").focus();
+				// on mouse click, move focus from the button that will disappear onto the collapsed deck
+				if (!event.clientX && !event.clientY) {
+					collapsibleDeck.querySelector(".itemsContainer").focus();
+				}
 			});
 		}
 	}
