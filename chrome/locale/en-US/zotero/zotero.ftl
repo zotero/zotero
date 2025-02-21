@@ -26,6 +26,7 @@ general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-enable = Enable
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -773,3 +774,16 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+sync-reminder-setUp-message = Back up your library with { -app-name } syncing.
+sync-reminder-setUp-action = Set Up Syncing
+sync-reminder-autoSync-message = { -app-name } hasn’t synced in a while. Do you want to enable automatic syncing?
+sync-reminder-autoSync-action = { general-enable }
+sync-reminder-quotaError-message = { $libraryType ->
+   *[user] You have reached your Zotero File Storage quota. Files you add may not sync.
+   [group] The owner of “{ $libraryName }” has reached their Zotero File Storage quota. Files in the group may not sync.
+}
+sync-reminder-quotaError-action = { $libraryType ->
+    [user] Open Account Settings
+    *[group] Show Group
+}

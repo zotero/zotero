@@ -1183,6 +1183,26 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						}, 1);
 					}
 					break;
+				case Zotero.Error.ERROR_ZFS_OVER_QUOTA: {
+					const PREF_KEY = 'sync.reminder.quotaError.lastErrors';
+					let timestamp = Math.round(Date.now() / 1000);
+					let lastErrors;
+					try {
+						lastErrors = [
+							...JSON.parse(Zotero.Prefs.get(PREF_KEY)),
+							{
+								timestamp,
+								libraryID: e.libraryID,
+							}
+						].slice(-5); // Keep the last five errors
+					}
+					catch (jsonError) {
+						Zotero.logError(jsonError);
+						lastErrors = [timestamp];
+					}
+					Zotero.Prefs.set(PREF_KEY, JSON.stringify(lastErrors));
+					break;
+				}
 			}
 		}
 		else if (e.name && e.name == 'ZoteroObjectUploadError') {
