@@ -108,9 +108,7 @@ function modify_omni {
 	# It's not clear that most of these do anything anymore when not compiled in, but just in case
 	replace_line 'MOZ_REQUIRE_SIGNING:' 'MOZ_REQUIRE_SIGNING: false \&\&' modules/AppConstants.sys.mjs
 	replace_line 'MOZ_DATA_REPORTING:' 'MOZ_DATA_REPORTING: false \&\&' modules/AppConstants.sys.mjs
-	replace_line 'MOZ_SERVICES_HEALTHREPORT:' 'MOZ_SERVICES_HEALTHREPORT: false \&\&' modules/AppConstants.sys.mjs
 	replace_line 'MOZ_TELEMETRY_REPORTING:' 'MOZ_TELEMETRY_REPORTING: false \&\&' modules/AppConstants.sys.mjs
-	replace_line 'MOZ_TELEMETRY_ON_BY_DEFAULT:' 'MOZ_TELEMETRY_ON_BY_DEFAULT: false \&\&' modules/AppConstants.sys.mjs
 	replace_line 'MOZ_CRASHREPORTER:' 'MOZ_CRASHREPORTER: false \&\&' modules/AppConstants.sys.mjs
 	replace_line 'MOZ_UPDATE_CHANNEL:.+' 'MOZ_UPDATE_CHANNEL: "none",' modules/AppConstants.sys.mjs
 	replace_line '"https:\/\/[^\/]+mozilla.com.+"' '""' modules/AppConstants.sys.mjs
