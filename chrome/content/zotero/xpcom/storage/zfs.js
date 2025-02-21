@@ -449,6 +449,18 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						debug: true
 					}
 				);
+				// Don't merge me! Simulate a quota error for testing:
+				Object.defineProperty(req, 'status', { value: 413 });
+				let getResponseHeader = ((original, obj) => ((header) => {
+					if (header === 'Zotero-Storage-Usage') {
+						return 999;
+					}
+					if (header === 'Zotero-Storage-Quota') {
+						return 1000;
+					}
+					return original.call(obj, header);
+				}))(req.getResponseHeader, req);
+				Object.defineProperty(req, 'getResponseHeader', { value: getResponseHeader });
 			}
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
@@ -1085,7 +1097,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			"ZFS_OVER_QUOTA",
 			{
 				dialogButtonText: buttonText,
-				dialogButtonCallback: buttonCallback
+				dialogButtonCallback: buttonCallback,
+				libraryID: item.libraryID,
 			}
 		);
 		e.errorType = 'warning';
