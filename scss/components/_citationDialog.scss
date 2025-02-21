@@ -103,7 +103,7 @@
 	}
 
 	.add-all {
-		@include focus-ring;
+		@include focus-ring(true);
 		border-radius: 5px;
 		font-weight: 400;
 		text-decoration: underline;
@@ -173,6 +173,7 @@
 						display: none;
 					}
 					.header {
+						height: 20px;
 						color: var(--fill-secondary);
 						// keep header stuck to the top left corner as the user scrolls
 						position: sticky;
@@ -190,7 +191,7 @@
 					.itemsContainer {
 						flex-direction: row;
 						display: flex;
-						margin-top: 4px;
+						margin-top: 2px;
 						gap: var(--item-margin);
 						transition: gap 0.2s ease-in-out;
 						border-radius: 5px;
@@ -262,12 +263,11 @@
 								flex: 1;
 								margin-inline-start: 2px;
 								.collapse-section-btn {
+									@include focus-ring(true);
 									@include svgicon("chevron-12-double", "universal", "16");
 									color: var(--fill-primary);
-									transform: rotate(90deg);
-									transform-origin: center;
-									width: 14px;
-									height: 14px;
+									width: 16px;
+									height: 16px;
 									margin-top: 1px; // nicer alignment with the section header
 								}
 							}
