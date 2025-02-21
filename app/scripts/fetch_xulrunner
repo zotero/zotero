@@ -395,15 +395,15 @@ function modify_omni {
 		<html:link rel="stylesheet" href="chrome:\/\/zotero-platform\/content\/zotero.css"' \
 		chrome/toolkit/content/global/commonDialog.xhtml
 	# commonDialog.xhtml can be opened via Services.prompt in the Profile Manager, so check for a profile first
-	replace_line '<script>' \
-		'<script>
+	replace_line 'function commonDialogOnLoad\(\) \{' \
+		'function commonDialogOnLoad() {
 		try {
 			Services.dirsvc.get(\"ProfD\", Ci.nsIFile);
 			Services.scriptloader.loadSubScript(\"chrome:\/\/zotero\/content\/include.js\", this);
 			Services.scriptloader.loadSubScript(\"chrome:\/\/zotero\/content\/titlebar.js\", this);
 			Services.scriptloader.loadSubScript(\"chrome:\/\/zotero\/content\/customElements.js\", this);
 		} catch (e) {}' \
-		chrome/toolkit/content/global/commonDialog.xhtml
+		chrome/toolkit/content/global/commonDialog.js
 	
 	# Use native checkbox instead of Firefox-themed version in prompt dialogs
 	replace_line '<xul:checkbox' '<xul:checkbox native=\"true\"' chrome/toolkit/content/global/commonDialog.xhtml
@@ -623,34 +623,43 @@ if [ $BUILD_LINUX == 1 ]; then
 	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
 
 
-	# Include 32-bit build if not in CI
-	if [[ "${CI:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
+	# CI only needs x86_64
+	if [[ "${CI:-}" = "1" ]]; then
 		arches="x86_64"
+	# Specific architecture (used by dir_build)
+	elif [[ -n "${ARCH:-}" ]]; then
+		arches="$ARCH"
+	# Not specified; fetch all
 	else
-		arches="i686 x86_64"
+		arches="i686 x86_64 arm64"
 	fi
 	for arch in $arches; do
 		xdir="firefox-$arch"
 		rm -rf $xdir
 		
-		archived_file="firefox-$GECKO_VERSION-$arch.tar.bz2"
+		archived_file="firefox-$GECKO_VERSION-$arch.tar.xz"
 		if [ -e "$archived_file" ]; then
 			echo "Using $archived_file"
-			cp "$archived_file" "firefox-$GECKO_VERSION.tar.bz2"
+			cp "$archived_file" "firefox-$GECKO_VERSION.tar.xz"
 		else
-			curl -O "$DOWNLOAD_URL/linux-$arch/en-US/firefox-$GECKO_VERSION.tar.bz2"
+			if [ $arch = "arm64" ]; then
+				moz_arch=aarch64
+			else
+				moz_arch=$arch
+			fi
+			curl -O "$DOWNLOAD_URL/linux-$moz_arch/en-US/firefox-$GECKO_VERSION.tar.xz"
 			# Store local copy of unmodified app
-			cp "firefox-$GECKO_VERSION.tar.bz2" "$archived_file"
+			cp "firefox-$GECKO_VERSION.tar.xz" "$archived_file"
 		fi
 
-		tar xvf firefox-$GECKO_VERSION.tar.bz2
+		tar xvf firefox-$GECKO_VERSION.tar.xz
 		mv firefox firefox-$arch
 
 		pushd firefox-$arch
 		modify_omni $arch
 		popd
 		echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
-		rm "firefox-$GECKO_VERSION.tar.bz2"
+		rm "firefox-$GECKO_VERSION.tar.xz"
 	done
 fi
 

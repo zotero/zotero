@@ -925,7 +925,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ "${ZOTERO_TEST:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
 		archs="x86_64"
 	else
-		archs="i686 x86_64"
+		archs="i686 x86_64 arm64"
 	fi
 	
 	for arch in $archs; do
@@ -982,9 +982,9 @@ if [ $BUILD_LINUX == 1 ]; then
 		
 		if [ $PACKAGE == 1 ]; then
 			# Create tar
-			rm -f "$DIST_DIR/Zotero-${VERSION}_linux-$arch.tar.bz2"
+			rm -f "$DIST_DIR/Zotero-${VERSION}_linux-$arch.tar.xz"
 			cd "$STAGE_DIR"
-			tar -cjf "$DIST_DIR/Zotero-${VERSION}_linux-$arch.tar.bz2" "Zotero_linux-$arch"
+			tar -cJf "$DIST_DIR/Zotero-${VERSION}_linux-$arch.tar.xz" "Zotero_linux-$arch"
 		fi
 	done
 fi
