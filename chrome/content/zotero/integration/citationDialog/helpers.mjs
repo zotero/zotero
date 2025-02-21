@@ -148,7 +148,6 @@ export class CitationDialogHelpers {
 			header.append(buttonGroup);
 
 			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabindex': 22, role: "button", "aria-describedby": headerSpan.id }, "add-all keyboard-clickable");
-			this.doc.l10n.setAttributes(addAllBtn, "integration-citationDialog-add-all");
 			buttonGroup.append(addAllBtn);
 			
 			if (dialogMode == "list") {

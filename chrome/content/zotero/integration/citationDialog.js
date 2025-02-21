@@ -35,6 +35,7 @@ var currentLayout, libraryLayout, listLayout;
 var Helpers, SearchHandler, PopupsHandler, KeyboardHandler;
 
 const ITEM_LIST_MAX_ITEMS = 50;
+const SEARCH_TIMEOUT = 250;
 
 var { CitationDialogHelpers } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/helpers.mjs');
 var { CitationDialogSearchHandler } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/searchHandler.mjs');
@@ -88,6 +89,9 @@ async function onLoad() {
 	// init library layout after bubble input is built since bubble-input's height is a factor
 	// determining initial library layout height
 	await libraryLayout.init();
+	// fetch opened/selected/cited items so they are known
+	// before refreshing items list after dialog mode setting
+	await SearchHandler.refreshNonLibraryItems();
 	// set initial dialog mode when everything is loaded
 	IOManager.setInitialDialogMode();
 
@@ -149,6 +153,7 @@ function _id(id) {
 class Layout {
 	constructor(type) {
 		this.type = type;
+		this._searchDebouncePromise = null;
 	}
 
 	// Re-render the items based on search rersults
@@ -194,14 +199,17 @@ class Layout {
 			if (isGroupCollapsible) {
 				// handle click on "Add all"
 				section.querySelector(".add-all").addEventListener("click", () => IOManager.addItemsToCitation(group));
+				// await for "All all" label so it does not appear blank for a moment after render
+				let addAllLabel = await doc.l10n.formatValue("integration-citationDialog-add-all");
+				section.querySelector(".add-all").textContent = addAllLabel;
 				// if the user explicitly expanded or collapsed the section, keep it as such
 				if (IOManager.sectionExpandedStatus[section.id]) {
 					IOManager.toggleSectionCollapse(section, IOManager.sectionExpandedStatus[section.id]);
 				}
 				// otherwise, expand the section if something is typed or whenever the list layout is opened
 				else {
-					let isSomethingTyped = _id("bubble-input").isSomethingTyped();
-					IOManager.toggleSectionCollapse(section, (isSomethingTyped || this.type == "list") ? "expanded" : "collapsed");
+					let activeSearch = SearchHandler.searchValue.length > 0;
+					IOManager.toggleSectionCollapse(section, (activeSearch || this.type == "list") ? "expanded" : "collapsed");
 				}
 			}
 		}
@@ -221,29 +229,9 @@ class Layout {
 	// It's different for list and library modes, so it is implemented by layouts.
 	async createItemNode() {}
 
-	// Regardless of which layout we are in, we need to run the search and
-	// update itemsList.
-	async searchDebounced(value) {
-		_id("loading-spinner").setAttribute("status", "animate");
-		for (let node of _id("top-level-btn-group").childNodes) {
-			if (node.id !== "loading-spinner") {
-				node.hidden = true;
-			}
-		}
-		SearchHandler.searching = true;
-		// This is called on each typed character, so refresh item list when typing stopped
-		SearchHandler.refreshDebounced(value, () => {
-			this.refreshItemsList();
-			SearchHandler.searching = false;
-			_id("loading-spinner").removeAttribute("status");
-			for (let node of _id("top-level-btn-group").childNodes) {
-				node.hidden = false;
-			}
-		});
-	}
 
-	// Run search and refresh items list immediately
-	async search(value) {
+	// Run search and refresh items list
+	async search(value, { skipDebounce = false } = {}) {
 		if (accepted) return;
 		_id("loading-spinner").setAttribute("status", "animate");
 		for (let node of _id("top-level-btn-group").childNodes) {
@@ -252,8 +240,32 @@ class Layout {
 			}
 		}
 		SearchHandler.searching = true;
-		await SearchHandler.refresh(value);
-		this.refreshItemsList();
+		// search for selected/opened/cited items
+		// only enforce min query length in list mode
+		SearchHandler.setSearchValue(value, this.type == "list");
+		await SearchHandler.refreshNonLibraryItems();
+		await this.refreshItemsList();
+
+		// debounce to not rerun sql search until typing is probably done
+		if (this._searchDebouncePromise && this._searchDebouncePromise.isPending()) {
+			this._searchDebouncePromise.cancel();
+		}
+		if (!skipDebounce) {
+			this._searchDebouncePromise = Zotero.Promise.delay(SEARCH_TIMEOUT);
+			await this._searchDebouncePromise;
+		}
+		this._searchDebouncePromise = null;
+
+		// in list mode, search for matches across libraries
+		// in library mode, set filter on itemTree
+		if (this.type == "list") {
+			await SearchHandler.refreshLibraryItems();
+			await this.refreshItemsList();
+		}
+		else {
+			await this.itemsView.setFilter('search', value);
+		}
+
 		SearchHandler.searching = false;
 		_id("loading-spinner").removeAttribute("status");
 		for (let node of _id("top-level-btn-group").childNodes) {
@@ -280,19 +292,6 @@ class LibraryLayout extends Layout {
 		await this._initCollectionTree();
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
-	}
-
-	// After the search is run, library layout updates the itemsView filter
-	async search(value) {
-		super.search(value);
-		// Make sure itemTree is fully loaded
-		if (!this.itemsView?.collectionTreeRow) return;
-		this.itemsView.setFilter('search', value);
-	}
-
-	async searchDebounced(value) {
-		super.searchDebounced(value);
-		this.itemsView?.setFilter('search', value);
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
@@ -326,7 +325,7 @@ class LibraryLayout extends Layout {
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
 		// When there are no matches, show a message
 		if (!_id("library-no-suggested-items-message").hidden) {
-			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), "integration-citationDialog-lib-no-items", { search: SearchHandler.lastSearchValue.length > 0 });
+			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), "integration-citationDialog-lib-no-items", { search: SearchHandler.searchValue.length > 0 });
 		}
 		this.resizeWindow();
 		let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
@@ -554,7 +553,7 @@ class LibraryLayout extends Layout {
 			isSearchMode: () => true,
 			setSearch: str => collectionTreeRow.setSearch(str)
 		});
-		await this.itemsView.setFilter('search', SearchHandler.lastSearchValue);
+		await this.itemsView.setFilter('search', SearchHandler.searchValue);
 		
 		this.itemsView.clearItemsPaneMessage();
 	}
@@ -799,7 +798,7 @@ const IOManager = {
 
 	init() {
 		// handle input receiving focus or something being typed
-		doc.addEventListener("handle-input", ({ detail: { query, debounce } }) => this._handleInput({ query, debounce }));
+		doc.addEventListener("handle-input", ({ detail: { query, eventType } }) => this._handleInput({ query, eventType }));
 		// handle input keypress on an input of bubbleInput. It's handled here and not in bubbleInput
 		// because we may need to set a locator or add a pre-selected item to the citation
 		doc.addEventListener("input-enter", ({ detail: { input } }) => this._handleInputEnter(input));
@@ -938,7 +937,7 @@ const IOManager = {
 
 		this.updateBubbleInput();
 		// Always refresh items list to make sure the opened and selected items are up to date
-		currentLayout.refreshItemsList();
+		await currentLayout.refreshItemsList();
 		if (!noInputRefocus) {
 			_id("bubble-input").refocusInput();
 		}
@@ -951,8 +950,8 @@ const IOManager = {
 			itemNode.classList.remove("current");
 		}
 		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item`);
-		let somethingIsTyped = _id("bubble-input").isSomethingTyped();
-		if (!somethingIsTyped || !firstItemNode) return;
+		let activeSearch = SearchHandler.searchValue.length > 0;
+		if (!activeSearch || !firstItemNode) return;
 		firstItemNode.classList.add("current");
 		this.selectItemNodesRange(firstItemNode);
 	},
@@ -1172,7 +1171,7 @@ const IOManager = {
 		PopupsHandler.openItemDetails(dialogReferenceID, zoteroItem, citationItem, Helpers.buildItemDescription(zoteroItem));
 	},
 
-	_handleInput({ query, debounce }) {
+	_handleInput({ query, eventType }) {
 		// If there is a locator typed, exclude it from the query
 		let locator = Helpers.extractLocator(query);
 		if (locator) {
@@ -1180,21 +1179,10 @@ const IOManager = {
 		}
 		// Do not rerun search if the search value is the same
 		// (e.g. focus returns into the last input)
-		if (SearchHandler.cleanSearchQuery(query) == SearchHandler.lastSearchValue) {
-			// reset pre-selected item if the search is not being run
-			// only after debounce (meaning the user stopped typing vs just returned focus into an input)
-			if (debounce) {
-				IOManager.markPreSelected();
-			}
+		if (SearchHandler.cleanSearchQuery(query) == SearchHandler.searchValue) {
 			return;
 		}
-		// Run search within the current layout
-		if (debounce) {
-			currentLayout.searchDebounced(query);
-		}
-		else {
-			currentLayout.search(query);
-		}
+		currentLayout.search(query, { skipDebounce: eventType == "focus" });
 	},
 
 	_handleMenuBarAppearance() {
@@ -1483,5 +1471,6 @@ window.addEventListener("focus", () => {
 	if (Zotero.isLinux && now - windowLostFocusOn < 100) {
 		return;
 	}
-	currentLayout?.search(SearchHandler.lastSearchValue);
+	SearchHandler.clearNonLibraryItemsCache();
+	currentLayout?.search(SearchHandler.searchValue);
 });
