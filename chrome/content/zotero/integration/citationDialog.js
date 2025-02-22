@@ -263,6 +263,11 @@ class Layout {
 			await this.refreshItemsList();
 		}
 		else {
+			// Make sure the collectionTreeRow is defined to
+			// avoid errors thrown when filter is set on first load
+			while (!this.itemsView.collectionTreeRow) {
+				await Zotero.Promise.delay(10);
+			}
 			await this.itemsView.setFilter('search', value);
 		}
 
@@ -876,7 +881,7 @@ const IOManager = {
 				libraryLayout.itemsView.tree?.forceUpdate();
 			}, 250);
 		}
-		currentLayout.refreshItemsList();
+		currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 	},
 
 	// pass current items in the citation to bubble-input to have it update the bubbles
