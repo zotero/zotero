@@ -882,14 +882,11 @@ class ReaderInstance {
 		zp.exportPDF(this._item.id);
 	}
 
-	showInLibrary() {
-		let win = Zotero.getMainWindow();
-		if (win) {
-			let item = Zotero.Items.get(this._item.id);
-			let id = item.parentID || item.id;
-			win.ZoteroPane.selectItems([id]);
-			win.focus();
-		}
+	async showInLibrary() {
+		let zp = await Zotero.getOrOpenZoteroPane();
+		let item = Zotero.Items.get(this._item.id);
+		let id = item.parentID || item.id;
+		zp.selectItems([id]);
 	}
 
 	async _setState(state) {
