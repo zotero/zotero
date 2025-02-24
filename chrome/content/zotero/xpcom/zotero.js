@@ -2097,6 +2097,16 @@ Zotero.DragDrop = {
 						continue;
 					}
 					file.QueryInterface(Components.interfaces.nsIFile);
+					if (Zotero.isMac && /%[0-9A-F]{2}/.test(file.path) && !file.exists()) {
+						// On macOS, Firefox reads a file URL from `public.file-url`,
+						// constructs an NSURL from it, then gets its unescaped path using
+						// stringByReplacingPercentEscapesUsingEncoding:
+						//   https://searchfox.org/mozilla-central/rev/fcfb558f/widget/cocoa/nsCocoaUtils.mm#1668-1673
+						// But that function uses a strict URI parser that chokes on things
+						// like errant brackets in the file path, and when it chokes, the
+						// URI is left escaped. Unescape it ourselves.
+						file = Zotero.File.pathToFile(decodeURIComponent(file.path));
+					}
 					// Don't allow folder drag
 					if (file.isDirectory()) {
 						continue;
