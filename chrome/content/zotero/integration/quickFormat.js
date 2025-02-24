@@ -2336,7 +2336,7 @@ var Zotero_QuickFormat = new function () {
 	this.showInLibrary = async function (itemID) {
 		let citationItem = JSON.parse(panelRefersToBubble?.dataset.citationItem || "{}");
 		var id = itemID || citationItem.id;
-		Zotero.Utilities.Internal.showInLibrary(id);
+		await Zotero.Utilities.Internal.showInLibrary(id);
 	}
 	
 	/**

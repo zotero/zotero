@@ -1743,19 +1743,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Zotero.DataObject} - Data object (e.g., Zotero.Item) to select
 	 */
 	showInLibrary: async function (dataObject) {
-		var pane = Zotero.getActiveZoteroPane();
-		// Open main window if it's not open (Mac)
-		if (!pane) {
-			let win = Zotero.openMainWindow();
-			await new Zotero.Promise((resolve) => {
-				let onOpen = function () {
-					win.removeEventListener('load', onOpen);
-					resolve();
-				};
-				win.addEventListener('load', onOpen);
-			});
-			pane = win.ZoteroPane;
-		}
+		var pane = await Zotero.getActiveZoteroPaneAsync();
 		if (dataObject instanceof Zotero.Item) {
 			pane.selectItem(dataObject.id);
 		}
@@ -1763,8 +1751,6 @@ Zotero.Utilities.Internal = {
 			throw new Error("Unimplemented");
 		}
 		
-		// Pull window to foreground
-		Zotero.Utilities.Internal.activate(pane.document.defaultView);
 		pane.document.ownerGlobal.focus();
 	},
 	
