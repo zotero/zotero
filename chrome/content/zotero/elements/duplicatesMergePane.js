@@ -115,7 +115,7 @@
 			
 			let alternatives = oldestItem.multiDiff(otherItems, this._ignoreFields);
 			if (alternatives) {
-				// Populate menulist with Date Added values from all items
+				// Populate richlistbox with Date Added values from all items
 				let dateList = document.getElementById('zotero-duplicates-merge-original-date');
 				dateList.innerHTML = '';
 				
