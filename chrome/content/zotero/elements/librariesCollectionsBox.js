@@ -157,7 +157,12 @@ import { getCSSIcon } from 'components/icons';
 			if (!disableClicky) {
 				box.addEventListener('click', async () => {
 					await ZoteroPane.collectionsView.selectByID(obj.treeViewID);
-					await ZoteroPane.selectItem(contextItem.id);
+					// Do not try to view deleted items in a collection.
+					// They do not appear outside of trash, and selecting a deleted item
+					// will re-open trash in collectionTree.
+					if (!contextItem.deleted) {
+						await ZoteroPane.selectItem(contextItem.id);
+					}
 				});
 			}
 
