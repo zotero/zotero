@@ -269,7 +269,16 @@ rm actors/SpeechDispatcher{Parent,Child}.sys.mjs
 rm actors/WebRTC{Parent,Child}.sys.mjs
 
 mv chrome/browser/content/browser/license.html chrome/browser_license.html
+
+# Keep this file for web-ext
+mkdir -p chrome-fx/browser/content/browser/parent
+mv chrome/browser/content/browser/parent/ext-browser.js chrome-fx/browser/content/browser/parent/ext-browser.js
+
 rm -r chrome/browser # We want Firefox, just not the browser part
+
+# Restore files that we need
+mv chrome-fx/* chrome/
+rm -r chrome-fx
 
 rm modules/SearchSERPTelemetry.sys.mjs
 
