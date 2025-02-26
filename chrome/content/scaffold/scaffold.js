@@ -660,41 +660,34 @@ var Scaffold = new function () {
 		// No translator was selected in the dialog.
 		if (!translator) return false;
 
-		for (var id in _propertyMap) {
+		for (let id in _propertyMap) {
 			document.getElementById(id).value = translator[_propertyMap[id]] || "";
 		}
 
-		//Strip JSON metadata
-		var code = await _translatorProvider.getCodeForTranslator(translator);
-		var lastUpdatedIndex = code.indexOf('"lastUpdated"');
-		var header = code.substr(0, lastUpdatedIndex + 50);
-		var m = /^\s*{[\S\s]*?}\s*?[\r\n]+/.exec(header);
-		var fixedCode = code.substr(m[0].length);
-		// adjust the first line number when there are an unusual number of metadata lines
-		_linesOfMetadata = m[0].split('\n').length;
-		// load tests into test editing pane
-		_loadTestsFromTranslator(fixedCode);
-		// clear selection
+		let rawCode = await _translatorProvider.getCodeForTranslator(translator);
+		let { metadata, code, testCases } = _splitTranslator(rawCode);
+		// Adjust the first line number
+		_linesOfMetadata = metadata.split('\n').length;
+		
+		// Convert whitespace to tabs
+		_editors.code.setValue(code);
+		// Then go to line 1
+		_editors.code.setPosition({ lineNumber: 1, column: 1 });
+		
+		// We don't use _writeTestsToPane here because we want to avoid _stringifyTests,
+		// which assumes valid test data and will choke on/incorrectly "fix"
+		// weird inputs that the user might want to fix manually.
+		_writeToEditor(_editors.tests, testCases);
+		// Clear selection
 		_editors.tests.setSelection({
 			startLineNumber: 1,
 			endLineNumber: 1,
 			startColumn: 1,
 			endColumn: 1
 		});
-
 		// Set up the test running pane
 		this.populateTests();
 
-		// remove tests from the translator code before loading into the code editor
-		var testStart = fixedCode.indexOf("/** BEGIN TEST CASES **/");
-		var testEnd = fixedCode.indexOf("/** END TEST CASES **/");
-		if (testStart !== -1 && testEnd !== -1) fixedCode = fixedCode.substr(0, testStart) + fixedCode.substr(testEnd + 23);
-		
-		// Convert whitespace to tabs
-		_editors.code.setValue(normalizeWhitespace(fixedCode.trimEnd()));
-		// Then go to line 1
-		_editors.code.setPosition({ lineNumber: 1, column: 1 });
-		
 		// Set Test Input editor language based on translator metadata
 		let language = 'plaintext';
 		if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.import) {
@@ -1363,30 +1356,39 @@ var Scaffold = new function () {
 	/*
 	 * loads the translator's tests from the translator code
 	 */
-	function _loadTestsFromTranslator(code) {
+	function _splitTranslator(code) {
+		let metadata = code.substr(0, code.indexOf('"lastUpdated"') + 50)
+			.match(/^\s*\{[\S\s]*?}\s*?[\r\n]+/)[0];
+		code = code.substring(metadata.length);
+
 		var testStart = code.indexOf("/** BEGIN TEST CASES **/");
 		var testEnd = code.indexOf("/** END TEST CASES **/");
+
+		let testCases;
 		if (testStart !== -1 && testEnd !== -1) {
-			code = code.substring(testStart + 24, testEnd);
+			testCases = code.substring(testStart + 24, testEnd);
+			code = code.substring(0, testStart).trimEnd();
+		}
+		else {
+			testCases = 'var testCases = [];';
 		}
 
-		code = code.replace(/var testCases = /, '').trim();
+		testCases = testCases.replace(/^\s*var testCases = /, '').trim();
 		// The JSON parser doesn't like final semicolons
-		if (code.lastIndexOf(';') == code.length - 1) {
-			code = code.slice(0, -1);
+		if (testCases.endsWith(';')) {
+			testCases = testCases.slice(0, -1);
 		}
 
 		try {
-			var testObject = JSON.parse(code);
+			testCases = JSON.stringify(JSON.parse(testCases), null, '\t');
 		}
 		catch (e) {
-			testObject = [];
+			Zotero.logError(e);
 		}
-
-		// We don't use _writeTestsToPane here because we want to avoid _stringifyTests,
-		// which assumes valid test data and will choke on/incorrectly "fix"
-		// weird inputs that the user might want to fix manually.
-		_writeToEditor(_editors.tests, JSON.stringify(testObject, null, "\t"));
+		
+		code = normalizeWhitespace(code);
+		
+		return { metadata, code, testCases };
 	}
 
 	/*
