@@ -278,7 +278,7 @@ rm -r chrome/browser # We want Firefox, just not the browser part
 
 # Restore files that we need
 mv chrome-fx/* chrome/
-rm -r chrome-fx
+rmdir chrome-fx
 
 rm modules/SearchSERPTelemetry.sys.mjs
 
