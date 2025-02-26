@@ -37,26 +37,6 @@ ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 		.then(s => s.trimEnd());
 });
 
-// Fix JSON stringify 2028/2029 "bug"
-// Borrowed from http://stackoverflow.com/questions/16686687/json-stringify-and-u2028-u2029-check
-if (JSON.stringify(["\u2028\u2029"]) !== '["\\u2028\\u2029"]') {
-	JSON.stringify = function (stringify) {
-		return function () {
-			var str = stringify.apply(this, arguments);
-			if (str && str.indexOf('\u2028') != -1) str = str.replace(/\u2028/g, '\\u2028');
-			if (str && str.indexOf('\u2029') != -1) str = str.replace(/\u2029/g, '\\u2029');
-			return str;
-		};
-	}(JSON.stringify);
-}
-
-// To be used elsewhere (e.g. varDump)
-function fix2028(str) {
-	if (str.indexOf('\u2028') != -1) str = str.replace(/\u2028/g, '\\u2028');
-	if (str.indexOf('\u2029') != -1) str = str.replace(/\u2029/g, '\\u2029');
-	return str;
-}
-
 var Scaffold = new function () {
 	var _browser;
 	var _translatorsLoadedPromise;
@@ -1268,7 +1248,7 @@ var Scaffold = new function () {
 		var output = document.getElementById('output');
 
 		if (typeof string != "string") {
-			string = fix2028(Zotero.Utilities.varDump(string));
+			string = Zotero.Utilities.varDump(string);
 		}
 
 		// Put off actually building the log message and appending it to the console until the next animation frame
