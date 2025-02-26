@@ -1681,7 +1681,7 @@
 					if (labelWrapper.nextSibling.contains(document.activeElement)) {
 						// click on label when value field is already focused
 						// will refocus itemTree in library tab or reader content in reader tab
-						if (Zotero_Tabs.selectedIndex === 0) {
+						if (Zotero_Tabs.selectedType === "library") {
 							ZoteroPane.itemsView.focus();
 						}
 						else {
