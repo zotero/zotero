@@ -224,7 +224,6 @@ pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
 
 // Reader
 pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");
-pref("extensions.zotero.reader.customThemes", "[]");
 pref("extensions.zotero.reader.lightTheme", "");
 pref("extensions.zotero.reader.darkTheme", "dark");
 pref("extensions.zotero.reader.ebookFontFamily", "Georgia, serif");
