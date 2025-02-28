@@ -592,7 +592,18 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 
 		let search = new Zotero.Search();
 		search.libraryID = libraryID;
-		search.addCondition('noChildren', isTop ? 'true' : 'false');
+		
+		if (isTop) {
+			search.addCondition('noChildren', 'true');
+		}
+		else {
+			search.addCondition('includeChildren', 'true');
+		}
+		
+		if (!pathParams.collectionKey) {
+			search.addCondition('includeAnnotations', 'true');
+		}
+		
 		if (pathParams.collectionKey) {
 			search.addCondition('collectionID', 'is',
 				Zotero.Collections.getIDFromLibraryAndKey(libraryID, pathParams.collectionKey));
@@ -600,7 +611,6 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		else if (pathParams.itemKey) {
 			// We'll filter out the parent later
 			search.addCondition('key', 'is', pathParams.itemKey);
-			search.addCondition('includeChildren', 'true');
 		}
 		else if (pathname.endsWith('/trash')) {
 			search.addCondition('deleted', 'true');
@@ -617,21 +627,22 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		if (pathParams.searchKey) {
 			savedSearch = Zotero.Searches.getByLibraryAndKey(libraryID, pathParams.searchKey);
 			if (!savedSearch) return _404;
-			search.setScope(savedSearch);
+			search.setScope(savedSearch, true, true);
 		}
 		
 		if (searchParams.has('itemKey')) {
 			let scope = new Zotero.Search();
 			if (savedSearch) {
-				scope.setScope(savedSearch);
+				scope.setScope(savedSearch, true, true);
 			}
 			scope.libraryID = libraryID;
 			scope.addCondition('joinMode', 'any');
+			scope.addCondition('includeAnnotations', 'true');
 			let keys = new Set(searchParams.get('itemKey').split(','));
 			for (let key of keys) {
 				scope.addCondition('key', 'is', key);
 			}
-			search.setScope(scope);
+			search.setScope(scope, true, true);
 		}
 
 		let q = searchParams.get(isTags ? 'itemQ' : 'q');
@@ -641,8 +652,20 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 			search.addCondition('quicksearch-' + (qMode || 'titleCreatorYear'), 'contains', q);
 		}
 
+		// Add conditions that use the API search syntax
+		search = buildSearchFromSearchSyntax(
+			search,
+			searchParams.getAll('itemType'),
+			'itemType'
+		);
+		search = buildSearchFromSearchSyntax(
+			search,
+			searchParams.getAll(isTags ? 'itemTag' : 'tag'),
+			'tag'
+		);
+
 		Zotero.debug('Executing local API search');
-		Zotero.debug(search.toJSON());
+		Zotero.debug(searchToDebugJSON(search));
 		// Searches sometimes return duplicate IDs; de-duplicate first
 		// TODO: Fix in search.js
 		let uniqueResultIDs = [...new Set(await search.search())];
@@ -653,18 +676,6 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 			items = items.filter(item => item.key != pathParams.itemKey);
 		}
 
-		// Now evaluate the API's search syntax on the search results
-		items = evaluateSearchSyntax(
-			searchParams.getAll('itemType'),
-			items,
-			(item, itemType) => item.itemType == itemType
-		);
-		items = evaluateSearchSyntax(
-			searchParams.getAll(isTags ? 'itemTag' : 'tag'),
-			items,
-			(item, tag) => item.hasTag(tag)
-		);
-		
 		if (isTags) {
 			let tmpTable = await Zotero.Search.idsToTempTable(items.map(item => item.id));
 			try {
@@ -983,6 +994,9 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
  * @returns {Promise<String>}
  */
 function exportItems(items, translatorID) {
+	// Filter out annotations, which we can't export
+	items = items.filter(item => !item.isAnnotation());
+
 	return new Promise((resolve, reject) => {
 		let translation = new Zotero.Translate.Export();
 		translation.setItems(items.slice());
@@ -1000,14 +1014,11 @@ function exportItems(items, translatorID) {
 /**
  * Evaluate the API's search syntax: https://www.zotero.org/support/dev/web_api/v3/basics#search_syntax
  *
+ * @param {Zotero.Search} parentSearch
  * @param {String[]} searchStrings The search strings provided by the client as query parameters
- * @param {Object[]} items The items to search on. Can be of any type.
- * @param {(item: Object, attribute: String) => Boolean} predicate Returns whether an item has an attribute.
- * 		For a call evaluating the 'tag' query parameter, for example, the predicate should return whether the item
- * 		has the attribute as one of its tags.
- * @returns {Object[]} A filtered array of items
+ * @param {String} condition The search condition name
  */
-function evaluateSearchSyntax(searchStrings, items, predicate) {
+function buildSearchFromSearchSyntax(parentSearch, searchStrings, condition) {
 	for (let searchString of searchStrings) {
 		let negate = false;
 		if (searchString[0] == '-') {
@@ -1017,10 +1028,33 @@ function evaluateSearchSyntax(searchStrings, items, predicate) {
 		if (searchString[0] == '\\' && searchString[1] == '-') {
 			searchString = searchString.substring(1);
 		}
+		
+		let childSearch = new Zotero.Search();
+		childSearch.libraryID = parentSearch.libraryID;
+		childSearch.setScope(parentSearch, true, true);
+		childSearch.addCondition('joinMode', 'any');
+		childSearch.addCondition('includeAnnotations', 'true');
+		
 		let ors = searchString.split('||').map(or => or.trim());
-		items = items.filter(item => ors.some(or => predicate(item, or) == !negate));
+		for (let or of ors) {
+			childSearch.addCondition(condition, negate ? 'isNot' : 'is', or);
+		}
+		
+		parentSearch = childSearch;
 	}
-	return items;
+	return parentSearch;
+}
+
+function searchToDebugJSON(search) {
+	return {
+		conditions: Object.values(search.conditions).map(condition => ({
+			condition: condition.condition,
+			operator: condition.operator,
+			value: condition.value
+		})),
+		libraryID: search.libraryID,
+		scope: search.scope ? searchToDebugJSON(search.scope) : undefined
+	};
 }
 
 class BadRequestError extends Error {}

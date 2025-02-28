@@ -155,6 +155,14 @@ Zotero.SearchConditions = new function(){
 				}
 			},
 			
+			{
+				name: 'includeAnnotations',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
+			
 			// Search recursively within collections
 			{
 				name: 'recursive',
