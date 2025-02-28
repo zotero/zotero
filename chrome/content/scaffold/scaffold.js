@@ -2327,7 +2327,9 @@ var Scaffold = new function () {
 			return JSON.parse(lintOutput);
 		}
 		catch (e) {
-			Zotero.logError(e);
+			if (!(e instanceof SyntaxError)) {
+				Zotero.logError(e);
+			}
 		}
 		return [];
 	}
