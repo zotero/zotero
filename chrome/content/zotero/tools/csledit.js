@@ -24,14 +24,17 @@
 */
 
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+var { DocumentManager } = ChromeUtils.importESModule("chrome://zotero/content/documentManager.mjs");
 
 var Zotero_CSL_Editor = new function () {
 	let monaco, editor;
+	var docManager = new DocumentManager({
+		editorName: 'Style Editor', // Tools -> Style Editor is not localized
+		onSave: () => this.save(),
+	});
+	var styleObject;
 
-	this.init = init;
-	this.loadCSL = loadCSL;
-
-	async function init() {
+	this.init = async function () {
 		await Zotero.Schema.schemaUpdatePromise;
 
 		const isDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
@@ -77,6 +80,15 @@ var Zotero_CSL_Editor = new function () {
 		editor.getModel().onDidChangeContent(Zotero.Utilities.debounce(() => {
 			this.onStyleModified();
 		}, 250));
+		
+		editor.getModel().onDidChangeContent(() => {
+			docManager.setState(
+				editor.getModel().getVersionId(),
+				{ title: styleObject?.title || styleObject?.styleID }
+			);
+		});
+		
+		docManager.attach(window);
 
 		if (currentStyle) {
 			// Call asynchronously, see note in Zotero.Styles
@@ -87,9 +99,14 @@ var Zotero_CSL_Editor = new function () {
 			monaco.editor.setTheme(ev.matches ? 'vs-dark' : 'vs-light');
 			this.refresh();
 		});
-	}
+	};
 	
-	this.onStyleSelected = function (styleID) {
+	this.onStyleSelected = async function (styleID) {
+		if (styleObject && !(await docManager.confirmClose())) {
+			document.getElementById('zotero-csl-list').selectedIndex = -1;
+			return;
+		}
+
 		Zotero.Prefs.set('export.lastStyle', styleID);
 		let style = Zotero.Styles.get(styleID);
 		Zotero.Styles.updateLocaleList(
@@ -98,7 +115,7 @@ var Zotero_CSL_Editor = new function () {
 			Zotero.Prefs.get('export.lastLocale')
 		);
 		
-		loadCSL(style.styleID);
+		this.loadCSL(style.styleID);
 		this.refresh();
 	};
 	
@@ -128,14 +145,16 @@ var Zotero_CSL_Editor = new function () {
 		if (rv == fp.returnOK || rv == fp.returnReplace) {
 			let outputFile = fp.file;
 			Zotero.File.putContentsAsync(outputFile, style);
+			docManager.setClean();
 		}
 	};
 	
-	function loadCSL(cslID) {
+	this.loadCSL = function (cslID) {
 		var style = Zotero.Styles.get(cslID);
 		editor.setValue(style.getXML());
+		docManager.setClean();
 		document.getElementById('zotero-csl-list').value = cslID;
-	}
+	};
 	
 	this.loadStyleFromEditor = function () {
 		var styleObject;
@@ -164,7 +183,7 @@ var Zotero_CSL_Editor = new function () {
 			cslList.selectedIndex = -1;
 		}
 		
-		let styleObject = this.loadStyleFromEditor();
+		styleObject = this.loadStyleFromEditor();
 		
 		Zotero.Styles.updateLocaleList(
 			document.getElementById("locale-menu"),

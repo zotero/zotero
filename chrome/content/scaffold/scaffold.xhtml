@@ -81,8 +81,6 @@
 	</script>
 
 	<commandset id="mainCommandSet">
-		<command id="cmd_close" oncommand="window.close();"/>
-
 		<command id="cmd_undo" oncommand="Scaffold.trigger('undo', 'cmd_undo')"/>
 		<command id="cmd_redo" oncommand="Scaffold.trigger('redo', 'cmd_redo')"/>
 		<command id="cmd_find" oncommand="Scaffold.trigger('actions.find', 'cmd_find')"/>
@@ -370,7 +368,7 @@
 				/>
 			<toolbarbutton class="titlebar-button titlebar-close"
 				titlebar-btn="close"
-				oncommand="window.close();"
+				command="cmd_close"
 				data-l10n-id="browser-window-close-button"
 				aria-hidden="true"
 				/>
@@ -548,6 +546,6 @@
 	</vbox>
 	
 	<keyset>
-		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
 	</keyset>
 </window>
