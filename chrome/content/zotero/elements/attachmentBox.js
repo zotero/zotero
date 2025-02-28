@@ -700,7 +700,7 @@
 			
 			let labelWrapper = event.target.closest(".meta-label");
 			if (labelWrapper.nextSibling.contains(document.activeElement)) {
-				document.activeElement.blur();
+				ZoteroPane.itemsView.focus();
 			}
 			else if (!labelWrapper.nextSibling.firstChild.readOnly) {
 				labelWrapper.nextSibling.firstChild.focus();
