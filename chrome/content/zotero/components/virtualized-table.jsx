@@ -1258,7 +1258,8 @@ class VirtualizedTable extends React.Component {
 			onMouseLeave: e => this._handleMouseLeave(e),
 			className: cx(["virtualized-table", {
 				resizing: this.state.resizing,
-				'multi-select': this.props.multiSelect
+				'multi-select': this.props.multiSelect,
+				'no-alternating-rows': Zotero.Prefs.get('ui.noAlternatingRows'),
 			}]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,
