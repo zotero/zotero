@@ -101,7 +101,7 @@ Zotero.HTTP = new function() {
 		}
 		Zotero.debug(`HTTP ${method} ${url}${logBody}`);
 
-		var xmlhttp = new XMLHttpRequest();
+		var xmlhttp = new XMLHttpRequest({ mozAnon: false });
 		xmlhttp.timeout = options.timeout;
 		var promise = Zotero.HTTP._attachHandlers(url, xmlhttp, options);
 
