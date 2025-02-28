@@ -249,7 +249,7 @@ Zotero.Intl = new function () {
 			// passing manually?
 			let locales = Services.locale.appLocalesAsBCP47;
 			var collator = new Intl.Collator(locales, {
-				numeric: true,
+				numeric:  Zotero.Prefs.get('sortCollectionsNaturally'),
 				sensitivity: 'base'
 			});
 		}
@@ -260,7 +260,7 @@ Zotero.Intl = new function () {
 			try {
 				Zotero.logError("Falling back to en-US sorting");
 				collator = new Intl.Collator(['en-US'], {
-					numeric: true,
+					numeric: Zotero.Prefs.get('sortCollectionsNaturally'),
 					sensitivity: 'base'
 				});
 			}
