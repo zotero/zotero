@@ -965,10 +965,31 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.openMainWindow = function () {
 		var chromeURI = AppConstants.BROWSER_CHROME_URL;
 		var flags = "chrome,all,dialog=no,resizable=yes";
-		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
-			.getService(Components.interfaces.nsIWindowWatcher);
-		ww.openWindow(null, chromeURI, '_blank', flags, null);
-	}
+		return Services.ww.openWindow(null, chromeURI, '_blank', flags, null);
+	};
+	
+	
+	this.getOrOpenMainWindow = function () {
+		let existing = this.getMainWindow();
+		if (existing) {
+			Zotero.Utilities.Internal.activate(existing);
+			return existing;
+		}
+		return this.openMainWindow();
+	};
+	
+	
+	this.getOrOpenZoteroPane = async function () {
+		let win = this.getOrOpenMainWindow();
+		if (win.document.readyState !== 'complete') {
+			await new Promise(
+				resolve => win.addEventListener('load', resolve, { once: true })
+			);
+		}
+		let zp = win.ZoteroPane;
+		await zp.waitForLoad();
+		return zp;
+	};
 	
 	
 	this.openCheckForUpdatesWindow = function ({ modal } = {}) {

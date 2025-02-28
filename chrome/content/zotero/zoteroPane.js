@@ -38,7 +38,6 @@ var ZoteroPane = new function()
 	this._listeners = {};
 	this.__defineGetter__('loaded', function () { return _loaded; });
 	var _lastSelectedItems = [];
-	var lastFocusedElement = null;
 	this.lastKeyPress = null;
 	
 	//Privileged methods
@@ -68,6 +67,8 @@ var ZoteroPane = new function()
 		_loaded = false, _madeVisible = false,
 		titlebarcolorState, titleState, observerService,
 		_reloadFunctions = [], _beforeReloadFunctions = [];
+	
+	var loadDeferred = Zotero.Promise.defer();
 	
 	/**
 	 * Called when the window containing Zotero pane is open
@@ -158,6 +159,13 @@ var ZoteroPane = new function()
 		// continue loading pane
 		_loadPane();
 		setUpKeyboardNavigation();
+	};
+
+	/**
+	 * @returns {Promise<void>} Resolves once pane and trees are completely loaded
+	 */
+	this.waitForLoad = function () {
+		return loadDeferred.promise;
 	};
 
 	function setUpKeyboardNavigation() {
@@ -550,6 +558,15 @@ var ZoteroPane = new function()
 		await ZoteroPane.initCollectionsTree();
 		await ZoteroPane.initItemsTree();
 		ZoteroPane.initCollectionTreeSearch();
+		
+		// Pane and trees are theoretically loaded at this point, but the
+		// collection tree doesn't have a selection yet. Once it gets one,
+		// the item tree's waitForLoad() promise will reset, and we'll need
+		// to await that before we can tell the rest of the world that the
+		// pane is actually fully loaded.
+		ZoteroPane.collectionsView.waitForSelect().then(() => {
+			ZoteroPane.itemsView.waitForLoad().then(loadDeferred.resolve);
+		});
 		
 		// Add a default progress window
 		ZoteroPane.progressWindow = new Zotero.ProgressWindow({ window });
