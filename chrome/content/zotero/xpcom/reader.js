@@ -1555,7 +1555,7 @@ class ReaderPreview extends ReaderInstance {
 		}
 		@media (prefers-color-scheme: light) {
 			body #viewerContainer {
-				background-color: #f2f2f2;
+				background-color: #f2f2f2 !important;
 			}
 			.pdfViewer .page::before {
 				box-shadow: inset 0 0 0px 1px #0000001a;
@@ -1563,7 +1563,7 @@ class ReaderPreview extends ReaderInstance {
 		}
 		@media (prefers-color-scheme: dark) {
 			body #viewerContainer {
-				background-color: #303030;
+				background-color: #303030 !important;
 			}
 			.pdfViewer .page::before {
 				box-shadow: inset 0 0 0px 1px #ffffff1f;
