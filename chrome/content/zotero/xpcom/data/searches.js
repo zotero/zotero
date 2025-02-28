@@ -36,6 +36,7 @@ Zotero.Searches = function() {
 		libraryID: "O.libraryID",
 		key: "O.key",
 		version: "O.version",
+		clientVersion: "O.clientVersion",
 		synced: "O.synced",
 		deleted: "DS.savedSearchID IS NOT NULL AS deleted",
 	}
