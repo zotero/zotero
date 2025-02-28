@@ -150,8 +150,18 @@ function modify_omni {
 	# Disable unwanted components
 	remove_line '(RemoteSettings|services-|telemetry|Telemetry|URLDecorationAnnotationsService)' components/components.manifest
 	
+	file="modules/ActorManagerParent.sys.mjs"
+	# Remove deleted actors
+	remove_between 'AboutTranslations: \{' '^  },' $file
+	remove_between 'CookieBanner: \{' '^  },' $file
+	remove_between 'PictureInPictureLauncher: \{' '^  },' $file
+	remove_between 'PictureInPictureToggle: \{' '^  },' $file
+	remove_between 'PictureInPicture: \{' '^  },' $file
+	remove_between 'Thumbnails: \{' '^  },' $file
+	remove_between 'Translations: \{' '^  },' $file
+	remove_between 'TranslationsEngine: \{' '^  },' $file
 	# Do not trigger LoginManager event that logs an error on autocomplete submission
-	remove_line 'DOMInputPasswordAdded: \{\},' modules/ActorManagerParent.sys.mjs
+	remove_line 'DOMInputPasswordAdded: \{\},' $file
 	
 	# On Mac/Linux, ignore relative paths in PATH in Subprocess.pathSearch(), used when a bare command is passed to Utilities.Internal.subprocess()
 	if [[ $platform != win* ]]; then
