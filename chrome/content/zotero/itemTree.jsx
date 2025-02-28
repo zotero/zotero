@@ -1048,7 +1048,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		</div>);
 
 		let virtualizedTable = (<div style={{display: showMessage ? 'none' : 'flex'}}
-			className="virtualized-table" key="virtualized-table-stub"></div>);
+			className="virtualized-table focus-states-target" key="virtualized-table-stub"></div>);
 		if (this.collectionTreeRow) {
 			virtualizedTable = React.createElement(VirtualizedTable,
 				{

@@ -368,7 +368,7 @@
 	}
 }
 
-.virtualized-table {
+.virtualized-table.focus-states-target {
 	.row .twisty.icon-css {
 		@include focus-states using ($color) {
 			@if $color =="white" {
