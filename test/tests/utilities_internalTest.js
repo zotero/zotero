@@ -328,6 +328,36 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(fields.size, 0);
 			assert.strictEqual(extra, str);
 		});
+
+		it("should not extract a date field containing a simple range", function () {
+			var str = 'Date: 2020/2024';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 0);
+			assert.equal(extra, 'Date: 2020/2024');
+		});
+
+		it("should not extract a date field containing a complicated range", function () {
+			var str = 'Date: 1985-08-01 / 2000-11-11';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 0);
+			assert.equal(extra, 'Date: 1985-08-01 / 2000-11-11');
+		});
+
+		it("should extract a slash-separated date field with two parts", function () {
+			var str = 'Date: 2024/01';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('date'), '2024/01');
+			assert.strictEqual(extra, '');
+		});
+
+		it("should extract a slash-separated date field with three parts", function () {
+			var str = 'Date: 01/10/2025';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('date'), '01/10/2025');
+			assert.strictEqual(extra, '');
+		});
 	});
 	
 	describe("#combineExtraFields", function () {
