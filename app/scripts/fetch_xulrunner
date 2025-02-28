@@ -332,6 +332,7 @@ function modify_omni {
 	replace_line 'Manage Your Extensions' 'Manage Your Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line '= Extensions' '= Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Add-on' 'Plugin' localization/en-US/toolkit/about/aboutAddons.ftl
+	replace_line 'Select add-on to install' 'Select plugin to install' localization/en-US/toolkit/about/aboutAddons.ftl
 	
 	# Hide Recommendations tab in sidebar and recommendations in main pane
 	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' chrome/toolkit/content/mozapps/extensions/aboutaddonsCommon.js
