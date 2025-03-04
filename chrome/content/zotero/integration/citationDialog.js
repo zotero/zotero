@@ -218,7 +218,7 @@ class Layout {
 		// Update which bubbles need to be highlighted
 		this.updateSelectedItems();
 		// Pre-select the item to be added on Enter of an input
-		IOManager.markPreSelected();
+		this.markPreSelected();
 		// If the previously focused node is no longer a part of the DOM, try to restore focus
 		if (!doc.contains(selectedNow) || doc.activeElement.tagName == "body") {
 			IOManager._restorePreClickFocus();
@@ -282,6 +282,24 @@ class Layout {
 	resizeWindow() {}
 
 	updateSelectedItems() {}
+
+	// Mark initially selected item that can be selected on Enter in an input
+	// Item is pre-selected when there is an active search OR when there are no
+	// items in the citation yet
+	markPreSelected() {
+		for (let itemNode of [...doc.querySelectorAll(".item.selected")]) {
+			itemNode.classList.remove("selected");
+			itemNode.classList.remove("current");
+		}
+		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item`);
+		if (!firstItemNode) return;
+		let activeSearch = SearchHandler.searchValue.length > 0;
+		let noBubbles = !CitationDataManager.items.length;
+		if (activeSearch || noBubbles) {
+			firstItemNode.classList.add("current");
+			IOManager.selectItemNodesRange(firstItemNode);
+		}
+	}
 }
 
 class LibraryLayout extends Layout {
@@ -948,19 +966,6 @@ const IOManager = {
 		}
 	},
 
-	// Mark initially selected item that can be selected on Enter in an input
-	markPreSelected() {
-		for (let itemNode of [...doc.querySelectorAll(".item.selected")]) {
-			itemNode.classList.remove("selected");
-			itemNode.classList.remove("current");
-		}
-		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item`);
-		let activeSearch = SearchHandler.searchValue.length > 0;
-		if (!activeSearch || !firstItemNode) return;
-		firstItemNode.classList.add("current");
-		this.selectItemNodesRange(firstItemNode);
-	},
-
 	// select all items between startNode and endNode
 	selectItemNodesRange(startNode, endNode = null) {
 		let itemNodes = [...doc.querySelectorAll(".item")];
@@ -1091,7 +1096,7 @@ const IOManager = {
 		let itemsShouldRemainSelected = focused.classList.contains("input") || _id("library-other-items").contains(focused);
 		if (itemsShouldRemainSelected) {
 			if (!doc.querySelector(".item.selected")) {
-				IOManager.markPreSelected();
+				currentLayout.markPreSelected();
 			}
 			return;
 		}
