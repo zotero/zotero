@@ -18,6 +18,11 @@ return-or-enter =
         [macos] Return
         *[other] Enter
     }
+backsace-or-delete =
+    { PLATFORM() ->
+        [macos] Delete
+        *[other] Backspace
+    }
 
 general-print = Print
 general-remove = Remove
@@ -33,6 +38,7 @@ general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
 general-accept = Accept
 general-cancel = Cancel
+general-show-in-library = Show in Library
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -362,13 +368,13 @@ integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
 integration-citationDialog-section-cited = Cited Items ({ $count })
-integration-citationDialog-details-suffix =  Suffix
-integration-citationDialog-details-prefix =  Prefix
+integration-citationDialog-details-suffix = Suffix
+integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = Omit Author
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
-integration-citationDialog-details-showInLibrary = Show in Library
+integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Citation Settings
 integration-citationDialog-lib-no-items = { $search ->
     [true] No selected, open, or cited items match the current search
@@ -386,8 +392,8 @@ integration-citationDialog-btn-mode =
     }
     .aria-label = {
         $mode ->
-            [library] The dialog is in Library mode. Click to switch to List mode.
-            [list] The dialog is in List mode. Click to switch to Library mode.
+            [library] The dialog is in Library mode. Click to switch to List Mode.
+            [list] The dialog is in List mode. Click to switch to Library Mode.
             *[other] Switch Mode
     }
 integration-citationDialog-btn-accept = 
@@ -418,12 +424,12 @@ integration-citationDialog-collections-table =
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
-    .aria-label = This item has been added into the citation. Press { return-or-enter } to add it again or Backspace to remove it.
+    .aria-label = This item has been added into the citation. Press { return-or-enter } to add it again or { backsace-or-delete } to remove it.
 integration-citationDialog-add-all = Add all
 integration-citationDialog-collapse-section = 
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-duplicates-warning-title = Add a potential duplicate item into the citation?
+integration-citationDialog-duplicates-warning-title = Potential Duplicate Item
 integration-citationDialog-duplicates-warning-message = This citation already has an item with this title and creator. Add anyway?
 
 styleEditor-locatorType =

@@ -46,19 +46,8 @@
 			</hbox>
 		</groupbox>
 		
-		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
-			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
-			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="export-citePaperJournalArticleURL"/>
-			<!-- This doesn't wrap without an explicit width, for some reason -->
-			<label id="export-citePaperJournalArticleURL" width="45em">
-				&zotero.preferences.export.citePaperJournalArticleURL.description;
-			</label>
-		</groupbox>
-
 		<groupbox aria-labelledby="citation-dialog-title">
 			<label><html:h2 id="citation-dialog-title" data-l10n-id="preferences-citation-dialog"></html:h2></label>
-
 			<groupbox aria-labelledby="citation-dialog-mode-labe">
 				<hbox align="center">
 					<label id="citation-dialog-mode-label" data-l10n-id="preferences-citation-dialog-mode">:</label>
@@ -69,7 +58,16 @@
 					</radiogroup>
 				</hbox>
 			</groupbox>
+		</groupbox>
 
+		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
+			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
+			
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="export-citePaperJournalArticleURL"/>
+			<!-- This doesn't wrap without an explicit width, for some reason -->
+			<label id="export-citePaperJournalArticleURL" width="45em">
+				&zotero.preferences.export.citePaperJournalArticleURL.description;
+			</label>
 		</groupbox>
 		
 		<groupbox aria-label="&zotero.general.tools;">

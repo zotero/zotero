@@ -25,7 +25,7 @@
 
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
-// Handle the logic of opening popups and saving/discarding edits to the citaiton items
+// Handle the logic of opening popups and saving/discarding edits to the citation items
 export class CitationDialogPopupsHandler {
 	constructor({ doc }) {
 		this.doc = doc;
@@ -34,10 +34,10 @@ export class CitationDialogPopupsHandler {
 		this.citationItem = null;
 		this.discardItemDetailsEdits = false;
 
-		this.setupListeners();
+		this.setUpListeners();
 	}
 
-	setupListeners() {
+	setUpListeners() {
 		this.doc.addEventListener("popupshown", (event) => {
 			// make sure overlay doesn't appear on tooltips and etc.
 			if (event.target.tagName !== "xul:panel") return;
