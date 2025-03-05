@@ -144,7 +144,6 @@ const xpcomFilesLocal = [
 	'storage/storageRequest',
 	'storage/storageResult',
 	'storage/storageUtilities',
-	'storage/streamListener',
 	'storage/zfs',
 	'storage/webdav',
 	'syncedSettings',

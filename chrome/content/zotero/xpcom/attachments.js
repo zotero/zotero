@@ -921,20 +921,7 @@ Zotero.Attachments = new function () {
 				}
 			}
 			else {
-				Zotero.debug("Saving file with saveURI()");
-				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-					.createInstance(nsIWBP);
-				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_FROM_CACHE;
-				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-					.getService(Components.interfaces.nsIIOService);
-				var nsIURL = ioService.newURI(url, null, null);
-				var deferred = Zotero.Promise.defer();
-				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
-					deferred.resolve();
-				});
-				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
-				yield deferred.promise;
+				yield Zotero.HTTP.download(url, tmpFile);
 			}
 			
 			var attachmentItem;
@@ -1100,20 +1087,18 @@ Zotero.Attachments = new function () {
 		
 		let enforcingFileType = false;
 		try {
-			await new Zotero.Promise(function (resolve) {
-				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-					.createInstance(Components.interfaces.nsIWebBrowserPersist);
-				if (options.cookieSandbox) {
-					options.cookieSandbox.attachToInterfaceRequestor(wbp);
+			let headers = {};
+			if (options.referrer) {
+				headers.Referer = options.referrer;
+			}
+			await Zotero.HTTP.download(
+				url,
+				path,
+				{
+					headers,
+					cookieSandbox: options.cookieSandbox
 				}
-				
-				wbp.progressListener = new Zotero.WebProgressFinishListener(() => resolve());
-				var headers = {};
-				if (options.referrer) {
-					headers.Referer = options.referrer;
-				}
-				Zotero.Utilities.Internal.saveURI(wbp, url, path, headers);
-			});
+			);
 			
 			if (options.enforceFileType) {
 				enforcingFileType = true;

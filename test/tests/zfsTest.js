@@ -103,6 +103,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 		httpd.stop(() => defer.resolve());
 		yield defer.promise;
 		win.close();
+		Zotero.HTTP.disableErrorRetry = false;
 	})
 	
 	after(function* () {
@@ -211,6 +212,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
 			
+			Zotero.HTTP.disableErrorRetry = true;
 			httpd.registerPathHandler(
 				`/users/1/items/${item.key}/file`,
 				{
