@@ -49,6 +49,7 @@ async function onLoad() {
 	doc = document;
 	io = window.arguments[0].wrappedJSObject;
 	isCitingNotes = !!io.isCitingNotes;
+	window.isPristine = true;
 
 	Helpers = new CitationDialogHelpers({ doc, io });
 	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io });
@@ -141,6 +142,11 @@ function cleanupBeforeDialogClosing() {
 	}
 	libraryLayout.collectionsView.unregister();
 	libraryLayout.itemsView.unregister();
+}
+
+// register that something changed in the dialog
+function dialogNotPristine() {
+	window.isPristine = false;
 }
 
 // shortcut used for brevity
@@ -968,6 +974,7 @@ const IOManager = {
 		if (!noInputRefocus) {
 			_id("bubble-input").refocusInput();
 		}
+		dialogNotPristine();
 	},
 
 	// select all items between startNode and endNode
@@ -1170,6 +1177,7 @@ const IOManager = {
 				IOManager._restorePreClickFocus();
 			}
 		});
+		dialogNotPristine();
 	},
 
 	_moveItem(dialogReferenceID, newIndex) {
@@ -1178,6 +1186,7 @@ const IOManager = {
 			_id("keepSorted").checked = false;
 		}
 		this.updateBubbleInput();
+		dialogNotPristine();
 	},
 
 	_openItemDetailsPopup(dialogReferenceID) {
@@ -1197,6 +1206,7 @@ const IOManager = {
 			return;
 		}
 		currentLayout.search(query, { skipDebounce: eventType == "focus" });
+		dialogNotPristine();
 	},
 
 	_handleMenuBarAppearance() {

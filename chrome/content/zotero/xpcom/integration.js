@@ -1572,7 +1572,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		mode += ",alwaysRaised";
 	}
 
-	Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationDialog.xhtml', mode, io);
+	Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationDialog.xhtml', mode, io, "citation");
 
 	// -------------------
 	// io.promise resolves when the citation dialog is closed
