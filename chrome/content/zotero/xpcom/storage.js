@@ -78,6 +78,10 @@ Zotero.Sync.Storage = new function () {
 		var libraryID, key;
 		[libraryID, key] = libraryKey.split("/");
 		var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+		// Item may not longer exist in tests
+		if (Zotero.test && !item) {
+			return;
+		}
 		// TODO: yield or switch to queue
 		Zotero.Notifier.trigger('redraw', 'item', item.id, { column: "hasAttachment" });
 		
