@@ -110,7 +110,7 @@ var ZoteroCommandLineHandler = {
 		}
 		// Only open main window if we aren't handling an integration command
 		else {
-			Zotero.getOrOpenMainWindow();
+			Zotero.Utilities.Internal.activate(Zotero.getMainWindow());
 		}
 		
 		await Zotero.CommandLineIngester.ingest();

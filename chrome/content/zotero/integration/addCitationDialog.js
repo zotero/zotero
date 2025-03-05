@@ -853,7 +853,7 @@ var Zotero_Citation_Dialog = new function () {
 	}
 	
 	async function _showItemInLibrary(id) {
-		var pane = await Zotero.getOrOpenZoteroPane();
+		var pane = await Zotero.getActiveZoteroPaneAsync();
 		pane.selectItem(id);
 	}
 }

@@ -883,7 +883,7 @@ class ReaderInstance {
 	}
 
 	async showInLibrary() {
-		let zp = await Zotero.getOrOpenZoteroPane();
+		let zp = await Zotero.getActiveZoteroPaneAsync();
 		let item = Zotero.Items.get(this._item.id);
 		let id = item.parentID || item.id;
 		zp.selectItems([id]);
