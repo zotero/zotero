@@ -38,10 +38,10 @@ pref("extensions.zotero.autoRenameFiles.fileTypes", "application/pdf,application
 pref("extensions.zotero.attachmentRenameTemplate", "{{ firstCreator suffix=\" - \" }}{{ year suffix=\" - \" }}{{ title truncate=\"100\" }}");
 pref("extensions.zotero.capitalizeTitles", false);
 pref("extensions.zotero.launchNonNativeFiles", false);
+pref("extensions.zotero.naturalSorting", true);
 pref("extensions.zotero.sortNotesChronologically", false);
 pref("extensions.zotero.sortNotesChronologically.reader", true);
 pref("extensions.zotero.sortAttachmentsChronologically", false);
-pref("extensions.zotero.sortCollectionsNaturally", true); // If false, use conventional alphabetic sorting.
 pref("extensions.zotero.showTrashWhenEmpty", true);
 pref("extensions.zotero.trashAutoEmptyDays", 30);
 pref("extensions.zotero.viewOnDoubleClick", true);
