@@ -33,6 +33,7 @@ export default [
 				ChromeUtils: "readonly",
 				Components: "readonly",
 				ConcurrentCaller: "readonly",
+				Cr: "readonly",
 				ctypes: "readonly",
 				OS: "readonly",
 				MozXULElement: "readonly",
