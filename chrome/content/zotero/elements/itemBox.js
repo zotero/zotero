@@ -1679,7 +1679,15 @@
 					
 					let labelWrapper = label.closest(".meta-label");
 					if (labelWrapper.nextSibling.contains(document.activeElement)) {
-						document.activeElement.blur();
+						// click on label when value field is already focused
+						// will refocus itemTree in library tab or reader content in reader tab
+						if (Zotero_Tabs.selectedType === "library") {
+							ZoteroPane.itemsView.focus();
+						}
+						else {
+							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+							reader.focus();
+						}
 					}
 					else {
 						let valueField = labelWrapper.nextSibling.firstChild;
