@@ -42,7 +42,7 @@ export class CitationDialogSearchHandler {
 			cited: [],
 			selected: [],
 		};
-		this.minQueryLengthEnforced = false;;
+		this.minQueryLengthEnforced = false;
 		this.searching = false;
 		this.searchResultIDs = [];
 		this._nonLibraryItems = {};
@@ -156,7 +156,7 @@ export class CitationDialogSearchHandler {
 
 	// Refresh the list of matching library items for the list mode.
 	async refreshLibraryItems() {
-		if (!this.searchValue) {
+		if (!this.searchValue && !this.isCitingNotes) {
 			this.results.found = [];
 			return;
 		}
