@@ -2206,6 +2206,8 @@
 				textbox.setAttribute("min-lines", 1);
 			}
 			var value = textbox.value.trim();
+			// Remove trailing whitespaces from editable-text in case itemBox is not refreshed
+			textbox.value = value;
 			
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			
