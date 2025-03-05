@@ -1353,8 +1353,8 @@ describe("Connector Server", function () {
 			var origRequest = Zotero.HTTP.request.bind(Zotero.HTTP);
 			var called = 0;
 			var stub = sinon.stub(Zotero.HTTP, 'request').callsFake(function (method, url, options) {
-				// Forward saveSnapshot request
-				if (url.endsWith('saveSnapshot')) {
+				// Forward saveSnapshot and PDF requests
+				if (url.endsWith('saveSnapshot') || url.endsWith('test.pdf')) {
 					return origRequest(...arguments);
 				}
 				
