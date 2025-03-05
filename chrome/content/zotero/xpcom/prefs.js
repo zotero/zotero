@@ -148,10 +148,10 @@ Zotero.Prefs = new function() {
 					case 13:
 						Zotero.Prefs.clear('ui.popup.disable_autohide', true);
 						break;
-					// Convert from `reader.customThemes` pref to `readerCustomThemes` in sync settings
+					// Convert from `reader.customThemes` pref to `readerCustomThemes` synced setting
 					case 14: {
-						// Store the pref in a closure and clear it. Migrate to sync settings when ready.
-						// Try/Catch block to prevent migration from failing if the JSON is invalid
+						// Store the pref in a closure and clear it. Migrate to synced setting when ready.
+						// try/catch block to prevent migration from failing if the JSON is invalid
 						try {
 							let readerCustomThemes = JSON.parse(this.get('reader.customThemes') ?? '[]');
 							if (readerCustomThemes?.length) {
