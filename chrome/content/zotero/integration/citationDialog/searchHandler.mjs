@@ -83,7 +83,7 @@ export class CitationDialogSearchHandler {
 	// by the number of results in each library.
 	// Items/notes in the libraries group are sorted via _createItemsSort/_createNotesSort comparators.
 	// Takes citedItems as a parameter to filter them out from Selected, Opened and Cited groups.
-	getOrderedSearchResultGroups(citedItems) {
+	getOrderedSearchResultGroups(citedItems = []) {
 		let removeItemsIncludedInCitation = (items) => {
 			let citedItemsIDs = new Set(citedItems.map(item => item.cslItemID || item.id));
 			return items.filter(i => !citedItemsIDs.has(i.cslItemID ? i.cslItemID : i.id));
@@ -122,7 +122,7 @@ export class CitationDialogSearchHandler {
 		return result;
 	}
 
-	// Refresh selected/opened/cited items. 
+	// Refresh selected/opened/cited items.
 	// These items are searched for separately from actual library matches
 	// because it is much faster for large libraries, so we don't have to wait
 	// for the library search to complete to show these results.

@@ -534,6 +534,11 @@
 				}
 			}
 		}
+		&.empty {
+			#list-layout-wrapper {
+				padding: 0;
+			}
+		}
 	}
 
 	#bottom-area-wrapper {

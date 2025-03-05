@@ -164,7 +164,6 @@ class Layout {
 		let citedItems = CitationDataManager.getCitationItems();
 		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(citedItems);
 		for (let { key, group, isLibrary } of searchResultGroups) {
-			if (isLibrary && this.type == "library") break;
 			// selected items become a collapsible deck/list if there are multiple items
 			let isGroupCollapsible = key == "selected" && group.length > 1;
 			
@@ -244,7 +243,9 @@ class Layout {
 		// only enforce min query length in list mode
 		SearchHandler.setSearchValue(value, this.type == "list");
 		await SearchHandler.refreshNonLibraryItems();
-		await this.refreshItemsList();
+		// Never resize window of list layout here to avoid flickering
+		// The window will always be resized after the second items list update below
+		await this.refreshItemsList({ skipWindowResize: true });
 
 		// debounce to not rerun sql search until typing is probably done
 		if (this._searchDebouncePromise && this._searchDebouncePromise.isPending()) {
@@ -717,11 +718,12 @@ class ListLayout extends Layout {
 		return itemNode;
 	}
 
-	async refreshItemsList() {
+	async refreshItemsList(options = {}) {
 		await super.refreshItemsList();
 
-		// Hide the entire list layout if there is not a single item to show
-		_id("list-layout").hidden = !_id("list-layout").querySelector(".section:not([hidden])");
+		// Hide padding of list layout if there is not a single item to show
+		let isEmpty = !_id("list-layout").querySelector(".section:not([hidden])");
+		_id("list-layout").classList.toggle("empty", isEmpty);
 		// Explicitly set the height of the container so the transition works when container is collapssed
 		for (let container of [..._id("list-layout").querySelectorAll(".itemsContainer")]) {
 			container.style.height = `${container.scrollHeight}px`;
@@ -731,7 +733,9 @@ class ListLayout extends Layout {
 		if (collapsibleSection) {
 			collapsibleSection.querySelector(".header-label").addEventListener("click", () => IOManager.toggleSectionCollapse(collapsibleSection, null, true));
 		}
-		this.resizeWindow();
+		if (!options.skipWindowResize) {
+			this.resizeWindow();
+		}
 	}
 
 	updateSelectedItems() {
@@ -773,7 +777,7 @@ class ListLayout extends Layout {
 		
 		// set min height and resize the window
 		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
-		let minHeight = bubbleInputHeight + bottomHeight + (_id("list-layout").hidden ? 0 : 80);
+		let minHeight = bubbleInputHeight + bottomHeight;
 		doc.documentElement.style.minHeight = `${minHeight}px`;
 		
 		// Timeout is required likely to allow minHeight update to settle
