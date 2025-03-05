@@ -44,8 +44,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		
 		_attachment = null;
 		
-		_listenerAdded = false;
-		
 		static get observedAttributes() {
 			return ['attachment-id'];
 		}
