@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 13;
+		var toVersion = 14;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -148,6 +148,23 @@ Zotero.Prefs = new function() {
 					case 13:
 						Zotero.Prefs.clear('ui.popup.disable_autohide', true);
 						break;
+					// Convert from `reader.customThemes` pref to `readerCustomThemes` synced setting
+					case 14: {
+						// Store the pref in a closure and clear it. Migrate to synced setting when ready.
+						// try/catch block to prevent migration from failing if the JSON is invalid
+						try {
+							let readerCustomThemes = JSON.parse(this.get('reader.customThemes') ?? '[]');
+							if (readerCustomThemes?.length) {
+								Zotero.initializationPromise.then(() => {
+									Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'readerCustomThemes', readerCustomThemes);
+								});
+							}
+						}
+						finally {
+							this.clear('reader.customThemes');
+						}
+						break;
+					}
 				}
 			}
 			this.set('prefVersion', toVersion);

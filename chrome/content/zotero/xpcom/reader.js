@@ -150,6 +150,8 @@ class ReaderInstance {
 		// Set `ReaderTab` title as fast as possible
 		this.updateTitle();
 
+		await Zotero.SyncedSettings.loadAll(Zotero.Libraries.userLibraryID);
+
 		let data = await this._getData();
 		let annotationItems = this._item.getAnnotations();
 		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
@@ -207,7 +209,7 @@ class ReaderInstance {
 			},
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
-			customThemes: JSON.parse(Zotero.Prefs.get('reader.customThemes')),
+			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],
 			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
 			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
@@ -547,8 +549,13 @@ class ReaderInstance {
 					this._iframe.parentElement.style.zIndex = 'unset';
 				}
 			},
-			onSaveCustomThemes: (customThemes) => {
-				Zotero.Prefs.set('reader.customThemes', JSON.stringify(customThemes));
+			onSaveCustomThemes: async (customThemes) => {
+				if (customThemes?.length) {
+					await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'readerCustomThemes', customThemes);
+				}
+				else {
+					await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, 'readerCustomThemes');
+				}
 			},
 			onSetLightTheme: (themeName) => {
 				Zotero.Prefs.set('reader.lightTheme', themeName || false);
@@ -566,7 +573,6 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
 			Zotero.Prefs.registerObserver('reader.textSelectionAnnotationMode', this._handleTextSelectionAnnotationModeChange),
-			Zotero.Prefs.registerObserver('reader.customThemes', this._handleCustomThemesChange),
 			Zotero.Prefs.registerObserver('reader.lightTheme', this._handleLightThemeChange),
 			Zotero.Prefs.registerObserver('reader.darkTheme', this._handleDarkThemeChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
@@ -1022,11 +1028,6 @@ class ReaderInstance {
 
 	_handleTextSelectionAnnotationModeChange = () => {
 		this._internalReader.setTextSelectionAnnotationMode(Zotero.Prefs.get('reader.textSelectionAnnotationMode'));
-	};
-
-	_handleCustomThemesChange = () => {
-		let customThemes = JSON.parse(Zotero.Prefs.get('reader.customThemes'));
-		this._internalReader.setCustomThemes(Components.utils.cloneInto(customThemes, this._iframeWindow));
 	};
 
 	_handleLightThemeChange = () => {
@@ -1792,7 +1793,7 @@ class Reader {
 		this._sidebarOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
-		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'reader');
+		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab'], 'reader');
 		this._registeredListeners = [];
 		this.onChangeSidebarWidth = null;
 		this.onToggleSidebar = null;
@@ -1984,6 +1985,17 @@ class Reader {
 						}
 					}
 				}
+			}
+		}
+		else if (type === 'setting') {
+			let id = ids[0];
+			if (id === `${Zotero.Libraries.userLibraryID}/readerCustomThemes`) {
+				let newCustomThemes = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [];
+				this._readers.forEach((reader) => {
+					reader._internalReader.setCustomThemes(
+						Components.utils.cloneInto(newCustomThemes, reader._iframeWindow)
+					);
+				});
 			}
 		}
 	}
