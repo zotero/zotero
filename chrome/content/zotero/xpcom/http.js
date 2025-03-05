@@ -3,6 +3,7 @@
  * @namespace
  */
 Zotero.HTTP = new function() {
+	this.disableErrorRetry = false;
 	var _errorDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 	var _errorDelayMax = 60 * 60 * 1000; // 1 hour
 
@@ -169,7 +170,7 @@ Zotero.HTTP = new function() {
 							continue;
 						}
 						// Don't retry if errorDelayMax is 0
-						if (options.errorDelayMax === 0) {
+						if (options.errorDelayMax === 0 || Zotero.HTTP.disableErrorRetry) {
 							throw e;
 						}
 						// Automatically retry other 5xx errors by default
@@ -269,7 +270,10 @@ Zotero.HTTP = new function() {
 		
 		var deferred = Zotero.Promise.defer();
 		
-		if (!this.mock || url.startsWith('resource://') || url.startsWith('chrome://')) {
+		if (!this.mock
+				|| options.noMock
+				|| url.startsWith('resource://')
+				|| url.startsWith('chrome://')) {
 			var xmlhttp = new XMLHttpRequest();
 		}
 		else {
@@ -324,11 +328,13 @@ Zotero.HTTP = new function() {
 				channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 			}
 			
-			// Don't follow redirects
+			let notificationCallbacks = options.notificationCallbacks || {};
 			if (options.followRedirects === false) {
-				channel.notificationCallbacks = {
-					QueryInterface: ChromeUtils.generateQI([Ci.nsIInterfaceRequestor, Ci.nsIChannelEventSync]),
-					getInterface: ChromeUtils.generateQI([Ci.nsIChannelEventSink]),
+				if (notificationCallbacks.asyncOnChannelRedirect) {
+					throw new Error("Can't set asyncOnChannelRedirect and followRedirects = false");
+				}
+				notificationCallbacks = {
+					...notificationCallbacks,
 					asyncOnChannelRedirect: function (oldChannel, newChannel, flags, callback) {
 						redirectStatus = (flags & Ci.nsIChannelEventSink.REDIRECT_PERMANENT) ? 301 : 302;
 						redirectLocation = newChannel.URI.spec;
@@ -336,6 +342,9 @@ Zotero.HTTP = new function() {
 						callback.onRedirectVerifyCallback(Cr.NS_BINDING_ABORTED);
 					}
 				};
+			}
+			if (notificationCallbacks) {
+				channel.notificationCallbacks = wrapNotificationCallbacks(notificationCallbacks);
 			}
 		}
 		
@@ -544,6 +553,61 @@ Zotero.HTTP = new function() {
 		
 		return deferred.promise;
 	};
+	
+	
+	/**
+	 * Create an nsIInterfaceRequestor object based on the callbacks provided
+	 */
+	function wrapNotificationCallbacks(callbacks) {
+		return {
+			QueryInterface: ChromeUtils.generateQI(["nsIInterfaceRequestor"]),
+			
+			getInterface(aIID) {
+				// Handle nsIProgressEventSink (for onProgress, onStatus)
+				if (aIID.equals(Ci.nsIProgressEventSink) && (callbacks.onProgress || callbacks.onStatus)) {
+					return {
+						onProgress: callbacks.onProgress || function () {},
+						onStatus: callbacks.onStatus || function () {},
+					};
+				}
+				
+				// Handle nsIChannelEventSink (for asyncOnChannelRedirect)
+				if (aIID.equals(Ci.nsIChannelEventSink) && callbacks.asyncOnChannelRedirect) {
+					return {
+						asyncOnChannelRedirect: callbacks.asyncOnChannelRedirect,
+					};
+				}
+				
+				throw Components.Exception("No interface available", Cr.NS_ERROR_NO_INTERFACE);
+			}
+		};
+	}
+	
+	
+	/**
+	 * Download a file
+	 *
+	 * @param {nsIURI|String} url - URL to request
+	 * @param {String} path - Path to save file to
+	 * @param {Object} [options] - See `Zotero.HTTP.request()`
+	 */
+	this.download = async function(uri, path, options = {}) {
+		// TODO: Convert request() to fetch() and use ReadableStream
+		var req = await this.request(
+			'GET',
+			uri,
+			{
+				...options,
+				responseType: 'blob',
+				// Downloads can have channel notification callbacks, etc., so always do them for real
+				noMock: true
+			}
+		);
+		var bytes = await IOUtils.write(path, await req.response.bytes());
+		Zotero.debug(`Saved file to ${path} (${bytes} byte${bytes != 1 ? 's' : ''})`);
+		return req;
+	};
+	
 	
 	/**
 	 * Send an HTTP GET request via XMLHTTPRequest
@@ -1087,6 +1151,9 @@ Zotero.HTTP = new function() {
 	
 	
 	this.getDisplayURI = function (uri, noCredentials) {
+		if (typeof uri == 'string') {
+			uri = NetUtil.newURI(uri);
+		}
 		if (!uri.password) return uri;
 		uri = uri.mutate();
 		if (noCredentials) {

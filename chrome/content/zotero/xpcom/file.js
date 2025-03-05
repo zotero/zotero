@@ -448,15 +448,14 @@ Zotero.File = new function(){
 
 	this.download = async function (uri, path) {
 		var uriStr = uri.spec || uri;
+		
 		const isHTTP = uriStr.startsWith('http');
+		if (uriStr.startsWith('http')) {
+			Zotero.warn("Zotero.File.download() is deprecated for HTTP(S) URLs -- use Zotero.HTTP.download()");
+			return Zotero.HTTP.download(uri, path);
+		}
 		
 		Zotero.debug(`Saving ${uriStr} to ${path.pathQueryRef || path}`);
-		
-		if (isHTTP && Zotero.HTTP.browserIsOffline()) {
-			let msg = `Download failed: ${Zotero.appName} is currently offline`;
-			Zotero.debug(msg, 2);
-			throw new Error(msg);
-		}
 		
 		var deferred = Zotero.Promise.defer();
 		const inputChannel = NetUtil.newChannel({

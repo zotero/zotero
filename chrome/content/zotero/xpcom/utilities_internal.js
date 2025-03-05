@@ -459,6 +459,8 @@ Zotero.Utilities.Internal = {
 	 * @param {Zotero.CookieSandbox} [cookieSandbox]
 	 */
 	saveURI: function (wbp, uri, target, headers, cookieSandbox) {
+		Zotero.warn("Zotero.Utilities.Internal.saveURI() is deprecated -- use Zotero.HTTP.download()");
+		
 		// Handle gzip encoding
 		wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 		// If not explicitly using cache, skip it

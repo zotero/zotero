@@ -49,7 +49,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	 * @param {Zotero.Sync.Storage.Request} request
 	 * @return {Promise<Zotero.Sync.Storage.Result>}
 	 */
-	downloadFile: Zotero.Promise.coroutine(function* (request) {
+	downloadFile: async function (request) {
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
 		if (!item) {
 			throw new Error("Item '" + request.name + "' not found");
@@ -63,195 +63,147 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		var destPath = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.tmp');
 		
-		// saveURI() below appears not to create empty files for Content-Length: 0,
-		// so we create one here just in case, which also lets us check file access
+		// Create an empty file to check file access
 		try {
-			yield IOUtils.write(destPath, new Uint8Array());
+			await IOUtils.write(destPath, new Uint8Array());
 		}
 		catch (e) {
 			Zotero.File.checkFileAccessError(e, destPath, 'create');
 		}
 		
-		var deferred = Zotero.Promise.defer();
 		var requestData = {item};
-		
-		var listener = new Zotero.Sync.Storage.StreamListener(
-			{
-				onStart: function (req) {
-					if (request.isFinished()) {
-						Zotero.debug("Download request " + request.name
-							+ " stopped before download started -- closing channel");
-						req.cancel(Components.results.NS_BINDING_ABORTED);
-						deferred.resolve(new Zotero.Sync.Storage.Result);
-					}
-				},
-				onChannelRedirect: Zotero.Promise.coroutine(function* (oldChannel, newChannel, flags) {
-					// These will be used in processDownload() if the download succeeds
-					oldChannel.QueryInterface(Components.interfaces.nsIHttpChannel);
-					
-					Zotero.debug("CHANNEL HERE FOR " + item.libraryKey + " WITH " + oldChannel.status);
-					Zotero.debug(oldChannel.URI.spec);
-					Zotero.debug(newChannel.URI.spec);
-					
-					var header;
-					try {
-						header = "Zotero-File-Modification-Time";
-						requestData.mtime = parseInt(oldChannel.getResponseHeader(header));
-						header = "Zotero-File-MD5";
-						requestData.md5 = oldChannel.getResponseHeader(header);
-						header = "Zotero-File-Compressed";
-						requestData.compressed = oldChannel.getResponseHeader(header) == 'Yes';
-					}
-					catch (e) {
-						deferred.reject(new Error(`${header} header not set in file request for ${item.libraryKey}`));
-						return false;
-					}
-					
-					if (!(yield OS.File.exists(path))) {
-						return true;
-					}
-					
-					var updateHash = false;
-					var fileModTime = yield item.attachmentModificationTime;
-					if (requestData.mtime == fileModTime) {
-						Zotero.debug("File mod time matches remote file -- skipping download of "
-							+ item.libraryKey);
-					}
-					// If not compressed, check hash, in case only timestamp changed
-					else if (!requestData.compressed && (yield item.attachmentHash) == requestData.md5) {
-						Zotero.debug("File hash matches remote file -- skipping download of "
-							+ item.libraryKey);
-						updateHash = true;
-					}
-					else {
-						return true;
-					}
-					
-					// Update local metadata and stop request, skipping file download
-					yield OS.File.setDates(path, null, new Date(requestData.mtime));
-					item.attachmentSyncedModificationTime = requestData.mtime;
-					if (updateHash) {
-						item.attachmentSyncedHash = requestData.md5;
-					}
-					item.attachmentSyncState = "in_sync";
-					yield item.saveTx({ skipAll: true });
-					
-					deferred.resolve(new Zotero.Sync.Storage.Result({
-						localChanges: true
-					}));
-					
-					return false;
-				}),
-				onProgress: function (req, progress, progressMax) {
-					request.onProgress(progress, progressMax);
-				},
-				onStop: function (req, status, res) {
-					request.setChannel(false);
-					
-					if (status != 200) {
-						if (status == 404) {
-							Zotero.debug("Remote file not found for item " + item.libraryKey);
-							// Don't refresh item pane rows when nothing happened
-							request.skipProgressBarUpdate = true;
-							deferred.resolve(new Zotero.Sync.Storage.Result);
-							return;
-						}
-						
-						// Check for SSL certificate error
-						if (status == 0) {
-							try {
-								Zotero.HTTP.checkSecurity(req);
-							}
-							catch (e) {
-								deferred.reject(e);
-								return;
-							}
-						}
-						
-						// If S3 connection is interrupted, delay and retry, or bail if too many
-						// consecutive failures
-						if (status == 0 || status == 500 || status == 503) {
-							if (++this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
-								let libraryKey = item.libraryKey;
-								let msg = "S3 returned 0 for " + libraryKey + " -- retrying download"
-								Components.utils.reportError(msg);
-								Zotero.debug(msg, 1);
-								if (this._s3Backoff < this._maxS3Backoff) {
-									this._s3Backoff *= 2;
-								}
-								Zotero.debug("Delaying " + libraryKey + " download for "
-									+ this._s3Backoff + " seconds", 2);
-								Zotero.Promise.delay(this._s3Backoff * 1000)
-								.then(function () {
-									deferred.resolve(this.downloadFile(request));
-								}.bind(this));
-								return;
-							}
-							
-							Zotero.debug(this._s3ConsecutiveFailures
-								+ " consecutive S3 failures -- aborting", 1);
-							this._s3ConsecutiveFailures = 0;
-						}
-						
-						var msg = "Unexpected status code " + status + " for GET " + uri;
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg);
-						// Output saved content, in case an error was captured
-						try {
-							let sample = Zotero.File.getContents(destPath, null, 4096);
-							if (sample) {
-								Zotero.debug(sample, 1);
-							}
-						}
-						catch (e) {
-							Zotero.debug(e, 1);
-						}
-						deferred.reject(new Error(Zotero.Sync.Storage.defaultError));
-						return;
-					}
-					
-					// Don't try to process if the request has been cancelled
-					if (request.isFinished()) {
-						Zotero.debug("Download request " + request.name
-							+ " is no longer running after file download", 2);
-						deferred.resolve(new Zotero.Sync.Storage.Result);
-						return;
-					}
-					
-					Zotero.debug("Finished download of " + destPath);
-					
-					try {
-						deferred.resolve(
-							Zotero.Sync.Storage.Local.processDownload(requestData)
-						);
-					}
-					catch (e) {
-						deferred.reject(e);
-					}
-				}.bind(this),
-				onCancel: function (req, status) {
-					Zotero.debug("Request cancelled");
-					if (deferred.promise.isPending()) {
-						deferred.resolve(new Zotero.Sync.Storage.Result);
-					}
-				}
-			}
-		);
 		
 		var params = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
 		var uri = this.apiClient.buildRequestURI(params);
-		var headers = this.apiClient.getHeaders();
 		
-		Zotero.debug('Saving ' + uri);
-		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-		var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-			.createInstance(nsIWBP);
-		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
-		wbp.progressListener = listener;
-		Zotero.Utilities.Internal.saveURI(wbp, uri, destPath, headers);
-		
-		return deferred.promise;
-	}),
+		return new Promise(async (resolve, reject) => {
+			try {
+				let req = await Zotero.HTTP.download(
+					uri,
+					destPath,
+					{
+						successCodes: [200, 404],
+						headers: this.apiClient.getHeaders(),
+						noCache: true,
+						notificationCallbacks: {
+							asyncOnChannelRedirect: async function (oldChannel, newChannel, flags, callback) {
+								// These will be used in processDownload() if the download succeeds
+								oldChannel.QueryInterface(Components.interfaces.nsIHttpChannel);
+								
+								Zotero.debug(`Handling ${oldChannel.responseStatus} redirect for ${item.libraryKey}`);
+								Zotero.debug(oldChannel.URI.spec);
+								Zotero.debug(newChannel.URI.spec);
+								
+								var header;
+								try {
+									header = "Zotero-File-Modification-Time";
+									requestData.mtime = parseInt(oldChannel.getResponseHeader(header));
+									header = "Zotero-File-MD5";
+									requestData.md5 = oldChannel.getResponseHeader(header);
+									header = "Zotero-File-Compressed";
+									requestData.compressed = oldChannel.getResponseHeader(header) == 'Yes';
+								}
+								catch (_e) {
+									reject(new Error(`${header} header not set in file request for ${item.libraryKey}`));
+									callback.onRedirectVerifyCallback(Cr.NS_ERROR_ABORT);
+									return;
+								}
+								
+								if (!(await IOUtils.exists(path))) {
+									callback.onRedirectVerifyCallback(Cr.NS_OK);
+									return;
+								}
+								
+								var updateHash = false;
+								var fileModTime = await item.attachmentModificationTime;
+								if (requestData.mtime == fileModTime) {
+									Zotero.debug("File mod time matches remote file -- skipping download of "
+										+ item.libraryKey);
+								}
+								// If not compressed, check hash, in case only timestamp changed
+								else if (!requestData.compressed && (await item.attachmentHash) == requestData.md5) {
+									Zotero.debug("File hash matches remote file -- skipping download of "
+										+ item.libraryKey);
+									updateHash = true;
+								}
+								else {
+									callback.onRedirectVerifyCallback(Cr.NS_OK);
+									return;
+								}
+								
+								// Update local metadata and stop request, skipping file download
+								await OS.File.setDates(path, null, new Date(requestData.mtime));
+								item.attachmentSyncedModificationTime = requestData.mtime;
+								if (updateHash) {
+									item.attachmentSyncedHash = requestData.md5;
+								}
+								item.attachmentSyncState = "in_sync";
+								await item.saveTx({ skipAll: true });
+								
+								resolve(new Zotero.Sync.Storage.Result({
+									localChanges: true
+								}));
+								
+								callback.onRedirectVerifyCallback(Cr.NS_ERROR_ABORT);
+							},
+							
+							onProgress: function (req, progress, progressMax) {
+								request.onProgress(progress, progressMax);
+							},
+						},
+					}
+				);
+				
+				if (req.status == 404) {
+					Zotero.debug("Remote file not found for item " + item.libraryKey);
+					// Don't refresh item pane rows when nothing happened
+					request.skipProgressBarUpdate = true;
+					resolve(new Zotero.Sync.Storage.Result);
+					return;
+				}
+				
+				// Don't try to process if the request has been cancelled
+				if (request.isFinished()) {
+					Zotero.debug(`Download request ${request.name} is no longer running after file download`, 2);
+					resolve(new Zotero.Sync.Storage.Result);
+					return;
+				}
+				
+				Zotero.debug("Finished download of " + destPath);
+				
+				resolve(await Zotero.Sync.Storage.Local.processDownload(requestData));
+			}
+			catch (e) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+					// If S3 connection is interrupted, delay and retry, or bail if too many
+					// consecutive failures
+					if (e.xmlhttp.status == 0) {
+						if (++this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
+							let libraryKey = item.libraryKey;
+							let msg = "S3 returned 0 for " + libraryKey + " -- retrying download";
+							Zotero.logError(msg);
+							if (this._s3Backoff < this._maxS3Backoff) {
+								this._s3Backoff *= 2;
+							}
+							Zotero.debug("Delaying " + libraryKey + " download for "
+								+ this._s3Backoff + " seconds", 2);
+							Zotero.Promise.delay(this._s3Backoff * 1000)
+							.then(function () {
+								resolve(this.downloadFile(request));
+							}.bind(this));
+							return;
+						}
+						
+						Zotero.debug(this._s3ConsecutiveFailures
+							+ " consecutive S3 failures -- aborting", 1);
+						this._s3ConsecutiveFailures = 0;
+					}
+				}
+				Zotero.logError(e);
+				reject(new Error(Zotero.Sync.Storage.defaultError));
+			}
+		});
+	},
 	
 	
 	uploadFile: Zotero.Promise.coroutine(function* (request) {
