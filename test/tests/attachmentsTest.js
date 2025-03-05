@@ -924,7 +924,8 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 2);
+			// doi.org, publisher, download
+			assert.equal(requestStub.callCount, 3);
 			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -960,7 +961,8 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 2);
+			// doi.org, publisher, download
+			assert.equal(requestStub.callCount, 3);
 			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -978,7 +980,8 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 1);
+			// URL, download
+			assert.equal(requestStub.callCount, 2);
 			assert.isTrue(requestStub.calledWith('GET', url));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -995,6 +998,7 @@ describe("Zotero.Attachments", function() {
 			item.setField('url', url);
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
+			// URL, redirect target URL
 			assert.equal(requestStub.callCount, 2);
 			var call = requestStub.getCall(0);
 			assert.isTrue(call.calledWith('GET', url));
@@ -1016,7 +1020,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 3);
+			assert.equal(requestStub.callCount, 4);
 			var call1 = requestStub.getCall(0);
 			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
 			var call2 = requestStub.getCall(1);
@@ -1040,7 +1044,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 4);
+			assert.equal(requestStub.callCount, 5);
 			// Check the DOI (and get nothing)
 			var call = requestStub.getCall(0);
 			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
@@ -1096,8 +1100,9 @@ describe("Zotero.Attachments", function() {
 			
 			var attachments = await Zotero.Attachments.addAvailableFiles([item1, item2]);
 			
-			assert.equal(requestStub.callCount, 2);
-			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 998);
+			// 2 URLs and 2 downloads
+			assert.equal(requestStub.callCount, 4);
+			assert.isAbove(requestStubCallTimes[2] - requestStubCallTimes[0], 998);
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 1);
@@ -1118,7 +1123,7 @@ describe("Zotero.Attachments", function() {
 			item2.setField('url', url2);
 			await item2.saveTx();
 			
-			// DOI URL resolves to 'website2' domain without PDF
+			// DOI URL resolves to 'website2' domain with PDF
 			var url3 = doiPrefix + doi6;
 			var item3 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item3.setField('title', 'Test');
@@ -1127,19 +1132,22 @@ describe("Zotero.Attachments", function() {
 			
 			var attachments = await Zotero.Attachments.addAvailableFiles([item1, item2, item3]);
 			
-			assert.equal(requestStub.callCount, 6);
+			assert.equal(requestStub.callCount, 8);
 			assert.equal(requestStub.getCall(0).args[1], doiPrefix + doi1);
 			assert.equal(requestStub.getCall(1).args[1], pageURL1);
-			assert.equal(requestStub.getCall(2).args[1], doiPrefix + doi4);
+			assert.equal(requestStub.getCall(2).args[1], pdfURL);
+			
+			assert.equal(requestStub.getCall(3).args[1], doiPrefix + doi4);
 			// Should skip ahead to the next DOI
-			assert.equal(requestStub.getCall(3).args[1], doiPrefix + doi6);
+			assert.equal(requestStub.getCall(4).args[1], doiPrefix + doi6);
 			// which is on a new domain
-			assert.equal(requestStub.getCall(4).args[1], pageURL8);
+			assert.equal(requestStub.getCall(5).args[1], pageURL8);
+			assert.equal(requestStub.getCall(6).args[1], pdfURL);
 			// and then return to make 'website' request for DOI 4
-			assert.equal(requestStub.getCall(5).args[1], pageURL4);
+			assert.equal(requestStub.getCall(7).args[1], pageURL4);
 			
 			// 'website' requests should be a second apart
-			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 995);
+			assert.isAbove(requestStubCallTimes[7] - requestStubCallTimes[1], 995);
 			
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 0);
@@ -1161,10 +1169,13 @@ describe("Zotero.Attachments", function() {
 			
 			var attachments = await Zotero.Attachments.addAvailableFiles([item1, item2]);
 			
-			assert.equal(requestStub.callCount, 3);
+			// 429, URL9, download, URL3, download
+			assert.equal(requestStub.callCount, 5);
 			assert.equal(requestStub.getCall(0).args[1], pageURL9);
 			assert.equal(requestStub.getCall(1).args[1], pageURL9);
-			assert.equal(requestStub.getCall(2).args[1], pageURL3);
+			assert.equal(requestStub.getCall(2).args[1], pdfURL);
+			assert.equal(requestStub.getCall(3).args[1], pageURL3);
+			assert.equal(requestStub.getCall(4).args[1], pdfURL);
 			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 1999);
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
@@ -1179,9 +1190,10 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 2);
+			assert.equal(requestStub.callCount, 3);
 			assert.equal(requestStub.getCall(0).args[1], pageURL10)
 			assert.equal(requestStub.getCall(1).args[1], pageURL1)
+			assert.equal(requestStub.getCall(2).args[1], pdfURL)
 			assert.ok(attachment);
 			var json = attachment.toJSON();
 			assert.equal(json.url, pdfURL);
@@ -1227,7 +1239,7 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 4);
+			assert.equal(requestStub.callCount, 5);
 			var call = requestStub.getCall(0);
 			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
 			var call = requestStub.getCall(1);
@@ -1265,7 +1277,7 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 4);
+			assert.equal(requestStub.callCount, 5);
 			var call = requestStub.getCall(0);
 			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
 			var call = requestStub.getCall(1);
@@ -1301,7 +1313,7 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 4);
+			assert.equal(requestStub.callCount, 5);
 			var call = requestStub.getCall(0);
 			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
 			call = requestStub.getCall(1);
@@ -1341,7 +1353,7 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailableFile(item);
 			
-			assert.equal(requestStub.callCount, 5);
+			assert.equal(requestStub.callCount, 6);
 			var call = requestStub.getCall(0);
 			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
 			call = requestStub.getCall(1);
