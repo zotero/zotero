@@ -362,7 +362,7 @@ window.ZoteroDocumentCitations = {
 			this.onItemRelink();
 		}
 		else {
-			await Zotero.Utilities.Internal.showInLibrary(item.id);
+			await Zotero.Utilities.Internal.showInLibrary(item);
 		}
 	},
 
