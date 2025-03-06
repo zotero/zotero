@@ -225,29 +225,6 @@ export class CitationDialogPopupsHandler {
 		return true;
 	}
 
-	async showDuplicateItemWarning() {
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
-		
-		let [title, message] = await this.doc.l10n.formatValues([
-			"integration-citationDialog-duplicates-warning-title",
-			"integration-citationDialog-duplicates-warning-message"
-		]);
-		let result = ps.confirmEx(
-			null,
-			title,
-			message,
-			buttonFlags,
-			Zotero.getString('general.continue'),
-			"", "", "", {}
-		);
-		// Cancel
-		if (result == 1) return false;
-		return true;
-	}
-
-
 	_getNode(selector) {
 		return this.doc.querySelector(selector);
 	}
