@@ -2465,11 +2465,13 @@ Zotero.Utilities.Internal = {
 							let discardedNode = nodeStack.pop();
 							if (discardedMarkup.beginsTag === markup.endsTag) {
 								nodeStack[nodeStack.length - 1].append(discardedNode);
-								break;
 							}
 							else {
 								nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
 							}
+						}
+						if (discardedMarkup.beginsTag === markup.endsTag) {
+							break;
 						}
 					}
 
