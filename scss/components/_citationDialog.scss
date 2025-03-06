@@ -8,6 +8,7 @@
 		color: var(--fill-primary);
 		background: var(--material-background);
 		overflow-y: hidden;
+		-moz-window-dragging: drag;
 	}
 
 	[hidden] {
@@ -54,7 +55,6 @@
 
 		#z-icon-container {
 			width: 36px; // same as left margin on .library-other-items
-			-moz-window-dragging: drag;
 			#z-icon {
 				background-image: url(chrome://zotero/skin/z.svg);
 				width: 16px;
@@ -74,6 +74,7 @@
 			width: 65px;
   			justify-content: end;
 			gap: 4px;
+			-moz-window-dragging: no-drag;
 
 			#loading-spinner {
 				width: 28px;
@@ -108,6 +109,7 @@
 		font-weight: 400;
 		text-decoration: underline;
 		margin-left: auto;
+		-moz-window-dragging: no-drag;
 		&:hover {
 			cursor: pointer;
 		}
@@ -220,6 +222,7 @@
 							
 							// color has to be without opacity to the selected items deck
 							background-color: var(--color-background);
+							-moz-window-dragging: no-drag;
 			
 							.title {
 								overflow: hidden;
@@ -269,6 +272,7 @@
 									width: 16px;
 									height: 16px;
 									margin-top: 1px; // nicer alignment with the section header
+									-moz-window-dragging: no-drag;
 								}
 							}
 						}
@@ -328,12 +332,14 @@
 				text-align: center;
 				font-size: 13px;
 				color: var(--fill-secondary);
+				-moz-user-select: none;
 			}
 		}
 		#library-trees {
 			min-height: 200px;
 			flex: 1;
 			-moz-user-select: none;
+			-moz-window-dragging: no-drag;
 	
 			#collections-tree-container {
 				min-width: 200px;
@@ -441,6 +447,7 @@
 					border-radius: 5px;
 					color: var(--fill-primary);
 					cursor: default;
+					-moz-window-dragging: no-drag;
 					&:hover {
 						background-color: var(--fill-quinary);
 					}
@@ -544,7 +551,6 @@
 	#bottom-area-wrapper {
 		border-top: var(--material-panedivider);
 		padding: 4px 8px 4px 12px;
-		-moz-window-dragging: drag;
 
 		#bottom-btn-group {
 			gap: 8px;
