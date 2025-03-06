@@ -6,6 +6,10 @@ pref("javascript.options.showInConsole", true);
 
 // Don't retrieve unrequested links when performing standalone translation
 pref("network.prefetch-next", false);
+// Don't make DNS requests for links in snapshots
+pref("network.dns.disablePrefetch", true);
+// Don't open TCP connection when clicking on a link in a snapshot
+pref("network.http.speculative-parallel-limit", 0);
 
 // Let operations run as long as necessary
 pref("dom.max_chrome_script_run_time", 0);
