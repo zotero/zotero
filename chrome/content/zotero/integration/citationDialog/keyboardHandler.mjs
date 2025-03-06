@@ -46,7 +46,7 @@ export class CitationDialogKeyboardHandler {
 	}
 
 	// capturing keydown listener to handle keypresses regardless of if they are handled by
-	// lower level components
+	// lower-level components
 	captureKeydown(event) {
 		let cmdOrCtrl = Zotero.isMac ? event.metaKey : event.ctrlKey;
 		// Cmd/Ctrl-Enter will always accept the dialog regardless of the target (unless within a panel)
@@ -227,7 +227,7 @@ export class CitationDialogKeyboardHandler {
 			nodeToFocus = tabIndexedNodes[0];
 		}
 
-		// if node to focus is a part of arrow-navigation group (e.g. suggested items)
+		// if node to focus is a part of arrow-navigation group (e.g., suggested items)
 		// and we are not re-focusing a previously selected item,
 		// navigate into that group to also have the item marked as selected.
 		if (nodeToFocus.dataset.arrowNavEnabled && !nodeToFocus.classList.contains("current")) {
