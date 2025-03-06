@@ -18,10 +18,6 @@
 	path = test/resource/mocha
 	url = https://github.com/mochajs/mocha.git
 	branch = master
-[submodule "test/resource/chai-as-promised"]
-	path = test/resource/chai-as-promised
-	url = https://github.com/domenic/chai-as-promised.git
-	branch = master
 [submodule "resource/schema/global"]
 	path = resource/schema/global
 	url = https://github.com/zotero/zotero-schema.git
