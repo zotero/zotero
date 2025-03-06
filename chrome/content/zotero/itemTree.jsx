@@ -1133,7 +1133,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Obviously this is not ideal and would be best refactored so that collection
 		// tree row dependencies are specified separately
 		// and there's a separate method to refresh the items.
-		if (collectionTreeRow.constructor.name === Object.name) {
+		if (collectionTreeRow.constructor.name == "Object") {
 			collectionTreeRow = Object.assign({}, STUB_COLLECTION_TREE_ROW, collectionTreeRow);
 		}
 		if (this._locked) return;
