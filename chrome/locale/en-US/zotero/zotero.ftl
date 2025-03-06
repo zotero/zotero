@@ -378,7 +378,7 @@ integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Citation Settings
 integration-citationDialog-lib-no-items = { $search ->
     [true] No selected, open, or cited items match the current search
-   *[other] No selected, or open items 
+   *[other] No selected or open items
 }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
