@@ -776,4 +776,132 @@ describe("Zotero.Utilities.Internal", function () {
 			});
 		});
 	});
+
+	describe("#renderItemTitle()", function () {
+		function renderToElement(title) {
+			let elem = new DOMParser().parseFromString('<div></div>', 'text/html')
+				.querySelector('div');
+			Zotero.Utilities.Internal.renderItemTitle(title, elem);
+			return elem;
+		}
+		
+		function renderToHTML(title) {
+			return renderToElement(title).innerHTML;
+		}
+		
+		function renderToTextViaHTML(title) {
+			return renderToElement(title).textContent;
+		}
+		
+		function renderToText(title) {
+			return Zotero.Utilities.Internal.renderItemTitle(title);
+		}
+		
+		it("should render a title without tags unchanged", function () {
+			assert.equal(renderToHTML('My Title'), 'My Title');
+			assert.equal(renderToHTML('1 < 2'), '1 &lt; 2');
+			assert.equal(renderToHTML('<<ATTENTION>> READ THIS'), '&lt;&lt;ATTENTION&gt;&gt; READ THIS');
+		});
+
+		it("should render single-level tags", function () {
+			let examples = [
+				'My <i>Title</i> XYZ',
+				'My <b>Title</b> XYZ',
+				'My <sub>Title</sub> XYZ',
+				'My <sup>Title</sup> XYZ',
+			];
+			for (let example of examples) {
+				assert.equal(renderToHTML(example), example);
+			}
+
+			assert.equal(renderToHTML('My <span class="nocase">Title</span> XYZ'), 'My <span>Title</span> XYZ');
+			// Citeproc wants no space, DOM output includes space. Confusing!
+			assert.equal(
+				renderToHTML('My <span style="font-variant:small-caps;">Title</span> XYZ'),
+				'My <span style="font-variant: small-caps;">Title</span> XYZ'
+			);
+		});
+
+		it("should render a tag nested inside a different tag", function () {
+			let examples = [
+				'My <i><b>Title</b></i> XYZ',
+				'My <b><i>Title</i></b> XYZ',
+				'My <sub><i>Title</i></sub> XYZ',
+			];
+			for (let example of examples) {
+				assert.equal(renderToHTML(example), example);
+			}
+		});
+
+		it("should preserve mismatched opening and closing tags", function () {
+			assert.equal(
+				renderToHTML('My <i><b>Title</i> XYZ'),
+				'My <i>&lt;b&gt;Title</i> XYZ'
+			);
+			assert.equal(
+				renderToHTML('My <b>Title</i></b> XYZ'),
+				'My <b>Title&lt;/i&gt;</b> XYZ'
+			);
+			assert.equal(
+				renderToHTML('My <sub><span class="font-variant:small-caps;">Title</sub> XYZ'),
+				'My <sub>&lt;span class="font-variant:small-caps;"&gt;Title</sub> XYZ'
+			);
+			assert.equal(
+				renderToHTML('My <sub><span class="font-variant:small-caps;">Title</sub></span> XYZ'),
+				'My <sub>&lt;span class="font-variant:small-caps;"&gt;Title</sub>&lt;/span&gt; XYZ'
+			);
+		});
+
+		it("should preserve matched but unsupported tags", function () {
+			assert.equal(
+				renderToHTML('My <em>Title</em> XYZ'),
+				'My &lt;em&gt;Title&lt;/em&gt; XYZ'
+			);
+			assert.equal(
+				renderToHTML('My <strong>Title</strong> XYZ'),
+				'My &lt;strong&gt;Title&lt;/strong&gt; XYZ'
+			);
+			assert.equal(
+				renderToHTML('My <span class="font-variant: small-caps;">Title</span> XYZ'), // Extra space
+				'My &lt;span class="font-variant: small-caps;"&gt;Title&lt;/span&gt; XYZ'
+			);
+			assert.equal(
+				renderToHTML('My <span>Title</span> XYZ'), // Extra space
+				'My &lt;span&gt;Title&lt;/span&gt; XYZ'
+			);
+		});
+
+		it("should invert a tag nested inside itself", function () {
+			assert.equal(
+				renderToHTML('<i>A <i>Title</i> in Italics</i>'),
+				'<i>A <span style="font-style: normal;">Title</span> in Italics</i>'
+			);
+			assert.equal(
+				renderToHTML('<b>A <b>Title</b> in Bold</b>'),
+				'<b>A <span style="font-weight: normal;">Title</span> in Bold</b>'
+			);
+		});
+
+		it("should invert a tag nested inside itself, with a different tag in between", function () {
+			assert.equal(
+				renderToHTML('<i>A <span class="nocase"><i>Title</i></span> in Italics</i>'),
+				'<i>A <span><span style="font-style: normal;">Title</span></span> in Italics</i>'
+			);
+		});
+
+		it("should render the same text directly and via DOM", function () {
+			let examples = [
+				'Basic Title',
+				'Complicated <i>Title</i>',
+				'Complicated <i>Title</i> With More Text',
+				'Nested <i>T<b>i</b>tle</i> With More Text',
+				'Self-Nested <i>T<i>i</i>tle</i> With More Text',
+				'Fe<sub>1−<i>x</i></sub>O',
+				'Title with <marquee>INVALID TAGS</marquee> <strong>like this</strong>',
+			];
+			for (let example of examples) {
+				assert.equal(renderToTextViaHTML(example), renderToText(example));
+			}
+		});
+	});
 });
