@@ -1584,7 +1584,7 @@ describe("Zotero.ItemTree", function() {
 				cellText = win.document.querySelector('#zotero-items-tree .row.selected .cell.title .cell-text');
 			}
 			while (!cellText);
-			assert.equal(cellText.innerHTML, 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <i style="font-style: normal;">B<sub>oo</sub>k</i> &lt;another-tag/&gt;</i>');
+			assert.equal(cellText.innerHTML, 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <span style="font-style: normal;">B<sub>oo</sub>k</span> &lt;another-tag/&gt;</i>');
 		});
 	});
 })

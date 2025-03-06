@@ -2437,12 +2437,16 @@ Zotero.Utilities.Internal = {
 				let markup = this._titleMarkup[token];
 				if (markup.beginsTag) {
 					if (targetNode) {
-						let node = targetNode.ownerDocument.createElement(markup.beginsTag);
-						if (markup.style) {
-							Object.assign(node.style, markup.style);
-						}
+						let node;
 						if (markup.inverseStyle && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
+							node = targetNode.ownerDocument.createElement('span');
 							Object.assign(node.style, markup.inverseStyle);
+						}
+						else {
+							node = targetNode.ownerDocument.createElement(markup.beginsTag);
+							if (markup.style) {
+								Object.assign(node.style, markup.style);
+							}
 						}
 						nodeStack.push(node);
 					}
