@@ -33,6 +33,7 @@ export class CitationDialogPopupsHandler {
 		this.item = null;
 		this.citationItem = null;
 		this.discardItemDetailsEdits = false;
+		this.itemDetailsWhenOpened = {};
 
 		this.setUpListeners();
 	}
@@ -51,6 +52,8 @@ export class CitationDialogPopupsHandler {
 				Services.focus.moveFocus(this.doc.defaultView, event.target, Services.focus.MOVEFOCUS_FORWARD, 0);
 			}
 		});
+		// Update bubbles in citation dialog as one makes edits
+		this._getNode("#itemDetails").addEventListener("input", this.handleItemDetailsChange.bind(this));
 
 		this._getNode("#itemDetails").addEventListener("popuphidden", this.handleItemDetailsClosure.bind(this));
 		// Item details Remove btn
@@ -90,6 +93,14 @@ export class CitationDialogPopupsHandler {
 		this.item = item;
 		this.citationItem = citationItem;
 		this.dialogReferenceID = dialogReferenceID;
+		// record initial properties when popup is opened to be able to discard edits on Escape
+		this.itemDetailsWhenOpened = {
+			label: citationItem.label,
+			locator: citationItem.locator,
+			prefix: citationItem.prefix,
+			suffix: citationItem.suffix,
+			suppressAuthor: citationItem["suppress-author"]
+		};
 
 		let bubble = this._getNode(`[dialogReferenceID='${dialogReferenceID}']`);
 		let bubbleRect = bubble.getBoundingClientRect();
@@ -133,15 +144,17 @@ export class CitationDialogPopupsHandler {
 		let bubble = this._getNode(`[dialogReferenceID='${this.dialogReferenceID}']`);
 		if (!bubble) return;
 		bubble.classList.remove("showingDetails");
+		// Restore properties to what they were when popup opened
 		if (this.discardItemDetailsEdits) {
 			this.discardItemDetailsEdits = false;
-			return;
+			this.citationItem.label = this.itemDetailsWhenOpened.label;
+			this.citationItem.locator = this.itemDetailsWhenOpened.locator;
+			this.citationItem.prefix = this.itemDetailsWhenOpened.prefix;
+			this.citationItem.suffix = this.itemDetailsWhenOpened.suffix;
+			this.citationItem["suppress-author"] = this.itemDetailsWhenOpened.suppressAuthor;
+			this.itemDetailsWhenOpened = {};
+			this.notifyCitationDialogOfChange();
 		}
-		this.citationItem.label = this._getNode("#locator").value ? this._getNode("#label").value : null;
-		this.citationItem.locator = this._getNode("#locator").value;
-		this.citationItem.prefix = this._getNode("#prefix").value;
-		this.citationItem.suffix = this._getNode("#suffix").value;
-		this.citationItem["suppress-author"] = this._getNode("#suppress-author").checked;
 	}
 
 	captureItemDetailsKeyDown(event) {
@@ -158,6 +171,27 @@ export class CitationDialogPopupsHandler {
 			this._getNode("#itemDetails").setAttribute("refocus-input", true);
 			this._getNode("#itemDetails").hidePopup();
 		}
+	}
+
+	// Update item details and notify citation dialog about changes
+	handleItemDetailsChange() {
+		this.citationItem.label = this._getNode("#locator").value ? this._getNode("#label").value : null;
+		this.citationItem.locator = this._getNode("#locator").value;
+		this.citationItem.prefix = this._getNode("#prefix").value;
+		this.citationItem.suffix = this._getNode("#suffix").value;
+		this.citationItem["suppress-author"] = this._getNode("#suppress-author").checked;
+		this.notifyCitationDialogOfChange();
+	}
+
+	// Tell citation dialog that the item has been updated to refresh the bubble
+	notifyCitationDialogOfChange() {
+		let event = new CustomEvent("item-details-updated", {
+			bubbles: true,
+			detail: {
+				dialogReferenceID: this.dialogReferenceID
+			}
+		});
+		this.doc.dispatchEvent(event);
 	}
 
 	showRetractedWarning(item) {

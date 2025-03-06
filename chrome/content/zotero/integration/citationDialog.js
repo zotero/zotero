@@ -842,6 +842,8 @@ const IOManager = {
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
 		// mark item nodes as selected to highlight them and mark relevant bubbles
 		doc.addEventListener("select-items", ({ detail: { startNode, endNode } }) => this.selectItemNodesRange(startNode, endNode));
+		// update bubbles after citation item is updated by itemDetails popup
+		doc.addEventListener("item-details-updated", () => this.updateBubbleInput());
 		
 		// accept/cancel events emitted by keyboardHandler
 		doc.addEventListener("dialog-accepted", accept);
@@ -849,8 +851,6 @@ const IOManager = {
 
 		doc.addEventListener("DOMMenuBarActive", () => this._handleMenuBarAppearance());
 
-		// after item details popup closes, item may have been updated, so refresh bubble input
-		_id("itemDetails").addEventListener("popuphidden", () => this.updateBubbleInput());
 		// if keep sorted was unchecked and then checked, resort items and update bubbles
 		_id("keepSorted").addEventListener("change", () => this._resortItems());
 
