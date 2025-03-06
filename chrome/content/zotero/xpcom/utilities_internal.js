@@ -1737,7 +1737,12 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	showInLibrary: async function (itemID) {
+	/**
+	 * Select an object in the library tab of the main window
+	 *
+	 * @param {Zotero.DataObject} - Data object (e.g., Zotero.Item) to select
+	 */
+	showInLibrary: async function (dataObject) {
 		var pane = Zotero.getActiveZoteroPane();
 		// Open main window if it's not open (Mac)
 		if (!pane) {
@@ -1751,7 +1756,12 @@ Zotero.Utilities.Internal = {
 			});
 			pane = win.ZoteroPane;
 		}
-		pane.selectItem(itemID);
+		if (dataObject instanceof Zotero.Item) {
+			pane.selectItem(dataObject.id);
+		}
+		else {
+			throw new Error("Unimplemented");
+		}
 		
 		// Pull window to foreground
 		Zotero.Utilities.Internal.activate(pane.document.defaultView);

@@ -71,7 +71,7 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#itemDetails .show").addEventListener("click", (_) => {
 			this.discardItemDetailsEdits = true;
 			this._getNode("#itemDetails").hidePopup();
-			Zotero.Utilities.Internal.showInLibrary(this.item.id);
+			Zotero.Utilities.Internal.showInLibrary(this.item);
 		});
 		this._getNode("#itemDetails .done").addEventListener("click", (_) => {
 			this._getNode("#itemDetails").hidePopup();
@@ -232,7 +232,7 @@ export class CitationDialogPopupsHandler {
 		}
 		// Show in library
 		if (result == 2) {
-			Zotero.Utilities.Internal.showInLibrary(item.id);
+			Zotero.Utilities.Internal.showInLibrary(item);
 			return false;
 		}
 		// Checked "Do not warn about this item"
