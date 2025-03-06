@@ -246,7 +246,7 @@ export class CitationDialogKeyboardHandler {
 
 	// Navigate the group by moving selection or focus between nodes in a group
 	_navigateGroup({ group, current, forward, multiSelect, shouldFocus, shouldSelect }) {
-		// navigatable nodes have to be marked with data-arrow-nav-enabled
+		// navigable nodes have to be marked with data-arrow-nav-enabled
 		let allFocusableWithinGroup = [...group.querySelectorAll("[tabindex][data-arrow-nav-enabled]")];
 		let nextFocusableIndex = 0;
 		for (let i = 0; i < allFocusableWithinGroup.length; i++) {
@@ -278,7 +278,7 @@ export class CitationDialogKeyboardHandler {
 		}
 		
 		if (multiSelect) {
-			// on arrow keypressees while holding shift, move focus and also perform multiselect
+			// on arrow keypress while holding shift, move focus and also perform multiselect
 			if (this._multiselectStart === null || !this.doc.contains(this._multiselectStart)) {
 				this._multiselectStart = current || nextNode;
 			}
