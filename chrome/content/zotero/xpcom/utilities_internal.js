@@ -1737,6 +1737,11 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	/**
+	 * Select an object in the library tab of the main window
+	 *
+	 * @param {Zotero.DataObject} - Data object (e.g., Zotero.Item) to select
+	 */
 	showInLibrary: async function (dataObject) {
 		var pane = Zotero.getActiveZoteroPane();
 		// Open main window if it's not open (Mac)
