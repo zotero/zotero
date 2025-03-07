@@ -2940,9 +2940,9 @@ var ZoteroPane = new function()
 
 		this.showSyncReminder('quotaError', {
 			library,
-			showActionLink: library.libraryType !== 'group'
+			hideActionLink: library.libraryType === 'group'
 			// TODO:
-			//   || error.ownerID === Zotero.Users.getCurrentUserID()
+			//   && error.ownerID !== Zotero.Users.getCurrentUserID()
 		});
 	};
 
@@ -2953,7 +2953,7 @@ var ZoteroPane = new function()
 	 * @param {'setUp' | 'autoSync' | 'quotaError'} reminderType
 	 * @param {Object} [options]
 	 * @param {String} [options.learnMoreURL] - Show "Learn More" link to this URL
-	 * @param {Boolean} [options.showActionLink] - Show action link
+	 * @param {Boolean} [options.hideActionLink]
 	 * @param {Zotero.Library} [options.library]
 	 */
 	this.showSyncReminder = function (reminderType, options = {}) {
@@ -2971,7 +2971,10 @@ var ZoteroPane = new function()
 		});
 
 		let actionLink = document.getElementById('sync-reminder-action');
-		if (options.showActionLink) {
+		if (!options.hideActionLink) {
+			actionLink.hidden = true;
+		}
+		else {
 			actionLink.hidden = false;
 			document.l10n.setAttributes(actionLink, `sync-reminder-${reminderType}-action`);
 			actionLink.onclick = () => {
@@ -2989,9 +2992,6 @@ var ZoteroPane = new function()
 						break;
 				}
 			};
-		}
-		else {
-			actionLink.hidden = true;
 		}
 
 		let learnMoreLink = document.getElementById('sync-reminder-learn-more');
