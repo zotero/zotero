@@ -2983,7 +2983,7 @@ var ZoteroPane = new function()
 						this.collectionsView.selectLibrary(options.library.libraryID);
 					}
 					else {
-						Zotero.launchURL('https://www.zotero.org/settings/storage');
+						Zotero.launchURL(ZOTERO_CONFIG.STORAGE_SETTINGS_URL);
 					}
 					break;
 			}
