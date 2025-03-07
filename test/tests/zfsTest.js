@@ -891,7 +891,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			await engine.start();
 			assert.equal(requests, Zotero.Prefs.get('sync.storage.maxUploads'));
 			
-			Zotero.Sync.Storage.Local.storageRemainingForLibrary.delete(items[0].libraryID);
+			Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.delete(items[0].libraryID);
 		});
 		
 		
@@ -911,7 +911,10 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				items.push(item);
 			}
 			
-			Zotero.Sync.Storage.Local.storageRemainingForLibrary.set(items[0].libraryID, 0);
+			Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.set(items[0].libraryID, {
+				remaining: 0,
+				userID: Zotero.Users.getCurrentUserID(),
+			});
 			
 			var spy = sinon.spy(engine.controller, 'uploadFile');
 			await engine.start()
@@ -919,7 +922,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(spy.callCount, Zotero.Prefs.get('sync.storage.maxUploads'));
 			spy.restore();
 			
-			Zotero.Sync.Storage.Local.storageRemainingForLibrary.delete(items[0].libraryID);
+			Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.delete(items[0].libraryID);
 		});
 	})
 	

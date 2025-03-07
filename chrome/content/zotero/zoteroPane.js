@@ -2908,43 +2908,41 @@ var ZoteroPane = new function()
 		
 		let now = Math.round(Date.now() / 1000);
 		let sevenDaysAgo = now - sevenDays;
+		
+		let reminderType = error.userID === Zotero.Users.getCurrentUserID()
+			? 'ownQuotaError'
+			: 'groupOwnerQuotaError';
 
 		// Reasons not to show reminder:
 		// - User turned reminder off
 		// - Sync is not enabled
-		if (!Zotero.Prefs.get('sync.reminder.quotaError.enabled')
+		if (!Zotero.Prefs.get(`sync.reminder.${reminderType}.enabled`)
 				|| !Zotero.Sync.Runner.enabled) {
 			return;
 		}
 
 		// Check lastDisplayed was 7+ days ago
-		let lastDisplayed = Zotero.Prefs.get('sync.reminder.quotaError.lastDisplayed');
+		let lastDisplayed = Zotero.Prefs.get(`sync.reminder.${reminderType}.lastDisplayed`);
 		if (lastDisplayed > sevenDaysAgo) {
 			return;
 		}
 		
 		let library = Zotero.Libraries.get(error.libraryID);
 
-		// Check that remaining storage is still very low
-		if (Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(library.libraryID)
-				>= Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
-			return;
-		}
-
-		this.showSyncReminder('quotaError', { library });
+		this.showSyncReminder(reminderType, { library });
 	};
 
 
 	/**
 	 * Configure the UI and show the sync reminder panel for a given type of reminder
 	 *
-	 * @param {'setUp' | 'autoSync' | 'quotaError'} reminderType
+	 * @param {'setUp' | 'autoSync' | 'ownQuotaError' | 'groupOwnerQuotaError'} reminderType
 	 * @param {Object} [options]
 	 * @param {String} [options.learnMoreURL] - Show "Learn More" link to this URL
 	 * @param {Zotero.Library} [options.library]
 	 */
 	this.showSyncReminder = function (reminderType, options = {}) {
-		if (!['setUp', 'autoSync', 'quotaError'].includes(reminderType)) {
+		if (!['setUp', 'autoSync', 'ownQuotaError', 'groupOwnerQuotaError'].includes(reminderType)) {
 			throw new Error(`Invalid reminder type: ${reminderType}`);
 		}
 
@@ -2958,29 +2956,28 @@ var ZoteroPane = new function()
 		});
 
 		let actionLink = document.getElementById('sync-reminder-action');
-		document.l10n.setAttributes(actionLink, `sync-reminder-${reminderType}-action`, {
-			libraryType: options.library?.libraryType,
-		});
-		actionLink.onclick = () => {
-			this.hideSyncReminder();
+		if (reminderType === 'groupOwnerQuotaError') {
+			actionLink.hidden = true;
+		}
+		else {
+			actionLink.hidden = false;
+			document.l10n.setAttributes(actionLink, `sync-reminder-${reminderType}-action`);
+			actionLink.onclick = () => {
+				this.hideSyncReminder();
 
-			switch (reminderType) {
-				case 'setUp':
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
-					break;
-				case 'autoSync':
-					Zotero.Prefs.set(`sync.autoSync`, true);
-					break;
-				case 'quotaError':
-					if (options.library instanceof Zotero.Group) {
-						this.collectionsView.selectLibrary(options.library.libraryID);
-					}
-					else {
+				switch (reminderType) {
+					case 'setUp':
+						Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+						break;
+					case 'autoSync':
+						Zotero.Prefs.set(`sync.autoSync`, true);
+						break;
+					case 'ownQuotaError':
 						Zotero.launchURL(ZOTERO_CONFIG.STORAGE_SETTINGS_URL);
-					}
-					break;
-			}
-		};
+						break;
+				}
+			};
+		}
 
 		let learnMoreLink = document.getElementById('sync-reminder-learn-more');
 		learnMoreLink.textContent = Zotero.getString('general.learnMore');

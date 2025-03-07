@@ -736,11 +736,9 @@ sync-reminder-setUp-message = Back up your library with { -app-name } syncing.
 sync-reminder-setUp-action = Set Up Syncing
 sync-reminder-autoSync-message = { -app-name } hasn’t synced in a while. Do you want to enable automatic syncing?
 sync-reminder-autoSync-action = { general-enable }
-sync-reminder-quotaError-message = { $libraryType ->
+sync-reminder-ownQuotaError-message = { $libraryType ->
    *[user] You have reached your Zotero Storage quota. Files you add may not sync.
-   [group] The owner of “{ $libraryName }” has reached their Zotero Storage quota. Files in the group may not sync.
+   [group] You have reached your Zotero Storage quota. Files added to “{ $libraryName }” may not sync.
 }
-sync-reminder-quotaError-action = { $libraryType ->
-    [user] Open Account Settings
-    *[group] Show Group
-}
+sync-reminder-ownQuotaError-action = Open Account Settings
+sync-reminder-groupOwnerQuotaError-message = The owner of “{ $libraryName }” has reached their Zotero Storage quota. Files in the group may not sync.

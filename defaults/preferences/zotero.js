@@ -176,8 +176,10 @@ pref("extensions.zotero.sync.reminder.setUp.enabled", true);
 pref("extensions.zotero.sync.reminder.setUp.lastDisplayed", 0);
 pref("extensions.zotero.sync.reminder.autoSync.enabled", true);
 pref("extensions.zotero.sync.reminder.autoSync.lastDisplayed", 0);
-pref("extensions.zotero.sync.reminder.quotaError.enabled", true);
-pref("extensions.zotero.sync.reminder.quotaError.lastDisplayed", 0);
+pref("extensions.zotero.sync.reminder.ownQuotaError.enabled", true);
+pref("extensions.zotero.sync.reminder.ownQuotaError.lastDisplayed", 0);
+pref("extensions.zotero.sync.reminder.groupOwnerQuotaError.enabled", true);
+pref("extensions.zotero.sync.reminder.groupOwnerQuotaError.lastDisplayed", 0);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);
