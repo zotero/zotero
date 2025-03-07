@@ -483,7 +483,7 @@ class LibraryLayout extends Layout {
 		});
 		this.itemsView = await ItemTree.init(itemsTree, {
 			id: "citationDialog",
-			dragAndDrop: false,
+			dragAndDrop: !isCitingNotes,
 			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: () => {
@@ -843,7 +843,7 @@ const IOManager = {
 		// handle a bubble being moved or deleted
 		doc.addEventListener("delete-item", ({ detail: { dialogReferenceID } }) => this._deleteItem(dialogReferenceID));
 		doc.addEventListener("move-item", ({ detail: { dialogReferenceID, index } }) => this._moveItem(dialogReferenceID, index));
-		doc.addEventListener("add-dragged-item", ({ detail: { index } }) => this._handleItemDrop(index));
+		doc.addEventListener("add-dragged-item", ({ detail: { itemIDs, index } }) => this._handleItemDrop(itemIDs, index));
 		// display details popup for the bubble
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
 		// mark item nodes as selected to highlight them and mark relevant bubbles
@@ -1164,18 +1164,21 @@ const IOManager = {
 		let offsetX = event.clientX - rect.left;
 		let offsetY = event.clientY - rect.top;
 		event.dataTransfer.setDragImage(wrapper, offsetX, offsetY);
-		IOManager._draggedItemsIDs = selectedItems.map(node => node.getAttribute("itemID"));
-		event.dataTransfer.setData("application/json", JSON.stringify({ type: 'add-citation-item' }));
+		// Same format as with drag-drop of items in itemTree via Zotero.Utilities.Internal.onDragItems
+		let draggedItemIDs = selectedItems.map(node => node.getAttribute("itemID")).join(",");
+		event.dataTransfer.setData("zotero/item", draggedItemIDs);
 		setTimeout(() => {
 			itemNode.parentNode.removeChild(wrapper);
 		});
 	},
 
 	// add into the citation items drag-dropped into the bubble-input
-	_handleItemDrop(index) {
-		let items = IOManager._draggedItemsIDs.map(id => SearchHandler.getItem(id));
+	_handleItemDrop(itemIDs, index) {
+		// fetch items based on their IDs. Check SearchHandler for cited items and
+		// search results. Items dragged from itemTree would not be in SearchHandler.results,
+		// so check Zotero.Items as a fallback
+		let items = itemIDs.map(id => SearchHandler.getItem(id) || Zotero.Items.get(id));
 		this.addItemsToCitation(items, { index });
-		IOManager._draggedItemsIDs = [];
 	},
 
 	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.

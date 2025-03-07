@@ -396,12 +396,13 @@
 			this.bubbleInput = bubbleInput;
 			this.dragBubble = null;
 			this.dragOver = null;
+			this.doc = bubbleInput.ownerDocument;
 
 			bubbleInput.addEventListener("dragstart", this.handleDragStart.bind(this));
 			bubbleInput.addEventListener("dragenter", this.handleDragEnter.bind(this));
 			bubbleInput.addEventListener("dragover", this.handleDragOver.bind(this));
 			bubbleInput.addEventListener("drop", this.handleDrop.bind(this));
-			bubbleInput.addEventListener("dragend", this.handleDragEnd.bind(this));
+			this.doc.addEventListener("dragend", this.handleDragEnd.bind(this));
 		},
 
 		handleDragStart(event) {
@@ -443,11 +444,11 @@
 		handleDrop(event) {
 			event.preventDefault();
 			event.stopPropagation();
-			let data = event.dataTransfer.getData("application/json");
+			let itemIDs = event.dataTransfer.getData("zotero/item");
 			// Handle drag-drop of items from the citationDialog into bubble-input to add them
-			if (data) {
-				data = JSON.parse(data);
-				if (data.type !== "add-citation-item") return;
+			if (itemIDs) {
+				itemIDs = itemIDs.split(",");
+				console.log(itemIDs);
 				let newIndex = 0;
 				if (this.dragOver) {
 					newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);
@@ -455,7 +456,7 @@
 						newIndex++;
 					}
 				}
-				Utils.notifyDialog('add-dragged-item', { index: newIndex });
+				Utils.notifyDialog('add-dragged-item', { itemIDs, index: newIndex });
 				setTimeout(() => {
 					this.handleDragEnd();
 				});
