@@ -2938,7 +2938,12 @@ var ZoteroPane = new function()
 			return;
 		}
 
-		this.showSyncReminder('quotaError', { library });
+		this.showSyncReminder('quotaError', {
+			library,
+			showActionLink: library.libraryType !== 'group'
+			// TODO:
+			//   || error.ownerID === Zotero.Users.getCurrentUserID()
+		});
 	};
 
 
@@ -2948,6 +2953,7 @@ var ZoteroPane = new function()
 	 * @param {'setUp' | 'autoSync' | 'quotaError'} reminderType
 	 * @param {Object} [options]
 	 * @param {String} [options.learnMoreURL] - Show "Learn More" link to this URL
+	 * @param {Boolean} [options.showActionLink] - Show action link
 	 * @param {Zotero.Library} [options.library]
 	 */
 	this.showSyncReminder = function (reminderType, options = {}) {
@@ -2965,29 +2971,28 @@ var ZoteroPane = new function()
 		});
 
 		let actionLink = document.getElementById('sync-reminder-action');
-		document.l10n.setAttributes(actionLink, `sync-reminder-${reminderType}-action`, {
-			libraryType: options.library?.libraryType,
-		});
-		actionLink.onclick = () => {
-			this.hideSyncReminder();
+		if (options.showActionLink) {
+			actionLink.hidden = false;
+			document.l10n.setAttributes(actionLink, `sync-reminder-${reminderType}-action`);
+			actionLink.onclick = () => {
+				this.hideSyncReminder();
 
-			switch (reminderType) {
-				case 'setUp':
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
-					break;
-				case 'autoSync':
-					Zotero.Prefs.set(`sync.autoSync`, true);
-					break;
-				case 'quotaError':
-					if (options.library instanceof Zotero.Group) {
-						this.collectionsView.selectLibrary(options.library.libraryID);
-					}
-					else {
+				switch (reminderType) {
+					case 'setUp':
+						Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+						break;
+					case 'autoSync':
+						Zotero.Prefs.set(`sync.autoSync`, true);
+						break;
+					case 'quotaError':
 						Zotero.launchURL(ZOTERO_CONFIG.STORAGE_SETTINGS_URL);
-					}
-					break;
-			}
-		};
+						break;
+				}
+			};
+		}
+		else {
+			actionLink.hidden = true;
+		}
 
 		let learnMoreLink = document.getElementById('sync-reminder-learn-more');
 		learnMoreLink.textContent = Zotero.getString('general.learnMore');

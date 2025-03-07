@@ -783,7 +783,4 @@ sync-reminder-quotaError-message = { $libraryType ->
    *[user] You have reached your Zotero Storage quota. Files you add may not sync.
    [group] The owner of “{ $libraryName }” has reached their Zotero Storage quota. Files in the group may not sync.
 }
-sync-reminder-quotaError-action = { $libraryType ->
-    [user] Open Account Settings
-    *[group] Show Group
-}
+sync-reminder-quotaError-action = Open Account Settings
