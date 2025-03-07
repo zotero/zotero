@@ -319,7 +319,7 @@
 		}
 
 		/**
-		 * Create input element placed on each sude of a bubble for to accept user input.
+		 * Create input element placed on each side of a bubble to accept user input.
 		*/
 		_createInputElem() {
 			let input = document.createElement('input');

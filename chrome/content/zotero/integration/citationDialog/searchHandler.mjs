@@ -150,7 +150,7 @@ export class CitationDialogSearchHandler {
 		else {
 			this.results.cited = this.searchValue ? this._filterNonMatchingItems(cited) : [];
 		}
-		// Ensure dupliates across groups before library items are found
+		// Ensure duplicates across groups before library items are found
 		this._deduplicate();
 	}
 
@@ -161,7 +161,7 @@ export class CitationDialogSearchHandler {
 			return;
 		}
 		this.results.found = await this._getMatchingLibraryItems();
-		// Ensure dupliates across groups after library items are found
+		// Ensure duplicates across groups after library items are found
 		this._deduplicate();
 	}
 
