@@ -680,6 +680,12 @@
 			@include focus-ring;
 		}
 	}
+	.drag-image-wrapper {
+		position: absolute;
+		top: -1000px;
+		height: 200px;
+		width: 100%;
+	}
 }
 
 #progress-bar {

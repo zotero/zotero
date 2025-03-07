@@ -331,11 +331,15 @@ class LibraryLayout extends Layout {
 			"data-l10n-id": "integration-citationDialog-aria-item-library",
 			role: "option",
 			"data-tabindex": 30,
-			"data-arrow-nav-enabled": true }, "item keyboard-clickable");
+			"data-arrow-nav-enabled": true,
+			draggable: true
+		}, "item keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
+		// items can be dragged into bubble-input to add them into the citation
+		itemNode.addEventListener("dragstart", e => IOManager._handleItemDragStart(e));
 		let title = Helpers.createNode("div", {}, "title");
 		let description = Helpers.buildItemDescription(item);
 		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), title);
@@ -700,12 +704,15 @@ class ListLayout extends Layout {
 			"data-l10n-id": "integration-citationDialog-aria-item-list",
 			role: "option",
 			"data-tabindex": 30,
-			"data-arrow-nav-enabled": true
+			"data-arrow-nav-enabled": true,
+			draggable: true
 		}, "item vbox keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
+		// items can be dragged into bubble-input to add them into the citation
+		itemNode.addEventListener("dragstart", e => IOManager._handleItemDragStart(e));
 		let icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
 		let dataTypeLabel = item.getItemTypeIconName(true);
 		icon.setAttribute("data-item-type", dataTypeLabel);
@@ -838,6 +845,7 @@ const IOManager = {
 		// handle a bubble being moved or deleted
 		doc.addEventListener("delete-item", ({ detail: { dialogReferenceID } }) => this._deleteItem(dialogReferenceID));
 		doc.addEventListener("move-item", ({ detail: { dialogReferenceID, index } }) => this._moveItem(dialogReferenceID, index));
+		doc.addEventListener("add-dragged-item", ({ detail: { index } }) => this._handleItemDrop(index));
 		// display details popup for the bubble
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
 		// mark item nodes as selected to highlight them and mark relevant bubbles
@@ -922,7 +930,7 @@ const IOManager = {
 		_id("accept-button").disabled = !CitationDataManager.items.length;
 	},
 
-	async addItemsToCitation(items, { noInputRefocus } = {}) {
+	async addItemsToCitation(items, { noInputRefocus, index } = { index: null }) {
 		if (accepted || SearchHandler.searching) return;
 		if (!Array.isArray(items)) {
 			items = [items];
@@ -956,13 +964,12 @@ const IOManager = {
 			item.label = locator?.label || null;
 			item.locator = locator?.locator || null;
 		}
-		// Add the item at a position based on current input
-		let bubblePosition = null;
-		if (input) {
-			bubblePosition = _id("bubble-input").getFutureBubbleIndex();
-			input.remove();
+		// Add the item at a position based on current input if it is not explicitly specified
+		if (index === null && input) {
+			index = _id("bubble-input").getFutureBubbleIndex();
 		}
-		await CitationDataManager.addItems({ citationItems: items, index: bubblePosition });
+		input?.remove();
+		await CitationDataManager.addItems({ citationItems: items, index });
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
@@ -1064,6 +1071,7 @@ const IOManager = {
 		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {
 			for (let item of [...section.querySelectorAll(".item")]) {
 				item.removeAttribute("tabindex");
+				item.setAttribute("draggable", false);
 				item.classList.remove("current");
 				item.classList.remove("selected");
 			}
@@ -1081,6 +1089,7 @@ const IOManager = {
 		else {
 			for (let item of [...section.querySelectorAll(".item")]) {
 				item.setAttribute("tabindex", -1);
+				item.setAttribute("draggable", true);
 			}
 			if (currentLayout.type == "library") {
 				let container = section.querySelector(".itemsContainer");
@@ -1128,6 +1137,32 @@ const IOManager = {
 			desiredMode = "list";
 		}
 		this.toggleDialogMode(desiredMode);
+	},
+	
+	// handle drag start of item nodes into bubble-input
+	_handleItemDragStart(event) {
+		let itemNode = event.target;
+		if (!itemNode.classList.contains("item")) return;
+		let selectedItems = itemNode.classList.contains("selected") ? [...doc.querySelectorAll(".item.selected")] : [itemNode];
+		let wrapper = Helpers.createNode("div", {}, "drag-image-wrapper");
+		wrapper.append(...selectedItems.map(node => node.cloneNode(true)));
+		itemNode.parentNode.append(wrapper);
+		let rect = itemNode.getBoundingClientRect();
+		let offsetX = event.clientX - rect.left;
+		let offsetY = event.clientY - rect.top;
+		event.dataTransfer.setDragImage(wrapper, offsetX, offsetY);
+		IOManager._draggedItemsIDs = selectedItems.map(node => node.getAttribute("itemID"));
+		event.dataTransfer.setData("application/json", JSON.stringify({ type: 'add-citation-item' }));
+		setTimeout(() => {
+			itemNode.parentNode.removeChild(wrapper);
+		});
+	},
+
+	// add into the citation items drag-dropped into the bubble-input
+	_handleItemDrop(index) {
+		let items = IOManager._draggedItemsIDs.map(id => SearchHandler.getItem(id));
+		this.addItemsToCitation(items, { index });
+		IOManager._draggedItemsIDs = [];
 	},
 
 	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.

@@ -441,6 +441,21 @@
 		handleDrop(event) {
 			event.preventDefault();
 			event.stopPropagation();
+			let data = event.dataTransfer.getData("application/json");
+			// Handle drag-drop of items from the citationDialog into bubble-input to add them
+			if (data) {
+				data = JSON.parse(data);
+				if (data.type !== "add-citation-item" || !this.dragOver) return;
+				let newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);
+				if (this.dragOver.classList.contains("drop-after")) {
+					newIndex++;
+				}
+				Utils.notifyDialog('add-dragged-item', { index: newIndex });
+				setTimeout(() => {
+					this.handleDragEnd();
+				});
+				return;
+			}
 			if (!this.dragBubble || !this.dragOver) return;
 			
 			if (this.dragOver.classList.contains("drop-after")) {
