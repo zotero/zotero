@@ -374,6 +374,15 @@ class LibraryLayout extends Layout {
 				}
 			});
 		}
+		if (this.forceUpdateTablesAfterRefresh) {
+			this.forceUpdateTablesAfterRefresh = false;
+			setTimeout(() => {
+				libraryLayout.collectionsView?.tree.invalidate();
+				libraryLayout.itemsView.tree?.invalidate();
+				libraryLayout.collectionsView?.tree.forceUpdate();
+				libraryLayout.itemsView.tree?.forceUpdate();
+			}, 250);
+		}
 	}
 
 	// Refresh itemTree to properly display +/- icons column
@@ -907,15 +916,10 @@ const IOManager = {
 		// may or may not get redrawn again. For example, if the window's height does not change - they won't
 		// and the tree will look fully or partially empty until the user scrolls.
 		// There are other, harder to reproduce, instances when the tree is initially not fullly drawn.
-		// In this workaround, the trees are invalidated after a delay to make sure
+		// In this workaround, the trees will be force refreshed after a delay to make sure
 		// the trees get rendered no matter what.
 		if (currentLayout.type == "library") {
-			setTimeout(() => {
-				libraryLayout.collectionsView?.tree.invalidate();
-				libraryLayout.itemsView.tree?.invalidate();
-				libraryLayout.collectionsView?.tree.forceUpdate();
-				libraryLayout.itemsView.tree?.forceUpdate();
-			}, 250);
+			currentLayout.forceUpdateTablesAfterRefresh = true;
 		}
 		currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 	},
