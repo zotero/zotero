@@ -4072,20 +4072,14 @@ var ZoteroPane = new function()
 						event.stopPropagation();
 					}
 				},
-				
-				(target) => {
-					// can't move collection into itself, its parent or its children
-					return selected == target
-						|| selected.parentKey == target.key
-						|| selected.hasDescendent('collection', target.id);
-				}
+				target => !selected.canMoveToTarget(target)
 			);
 			popup.append(menuItem);
 		}
 	};
 
 
-	this.buildCopyCollectionMenu = function (event) {
+	this.buildCopyCollectionMenu = Zotero.Utilities.Internal.serial(async function (event) {
 		if (event.target !== event.currentTarget) return;
 		let popup = document.getElementById("zotero-copy-collection-popup");
 		popup.replaceChildren();
@@ -4094,33 +4088,6 @@ var ZoteroPane = new function()
 		// Fetch all libraries
 		let topLevelEntries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
 
-		// Check which libraries have collections linked to the selected collection
-		// and disable their menuitems. Same logic as in CollectionTree.canDropCheckAsync.
-		let linkedCollectionsExist = {};
-		(async () => {
-			for (let library of topLevelEntries) {
-				if (library.libraryID == selected.libraryID) continue;
-				// Check which library has a collection linked to the selected collection
-				let linkedCollection = await selected.getLinkedCollection(library.libraryID, true);
-				linkedCollectionsExist[library.libraryID] = linkedCollection;
-				// Also check which library has collections linked to a subcollection of the selected collection
-				for (let descendent of selected.getDescendents(false, 'collection')) {
-					let subcollection = Zotero.Collections.get(descendent.id);
-					let linkedSubcollection = await subcollection.getLinkedCollection(library.libraryID, true);
-					if (linkedSubcollection) {
-						linkedCollectionsExist[library.libraryID] = linkedSubcollection;
-					}
-				}
-			}
-			// Libraries that have linked collections have their menus disabled
-			for (let libraryMenuItem of [...popup.childNodes]) {
-				let menuItemLibID = libraryMenuItem.getAttribute("value").substring(1);
-				if (linkedCollectionsExist[menuItemLibID]) {
-					libraryMenuItem.disabled = true;
-				}
-			}
-		})();
-		
 		// If there is only one library, display its collections as top-level menuitems
 		if (topLevelEntries.length == 1) {
 			// Manually add My Library menuitem at the top, so one can still copy into it
@@ -4154,16 +4121,22 @@ var ZoteroPane = new function()
 						event.stopPropagation();
 					}
 				},
-				
-				(target) => {
-					// can't copy collection into itself or into non-editable groups
-					return selected == target
-						|| (target instanceof Zotero.Group && !target.editable);
-				}
+				target => !selected.canMoveToTarget(target)
 			);
 			popup.append(menuItem);
 		}
-	};
+
+		// Disable libraries to which collection cannot be copied
+		if (topLevelEntries[0] instanceof Zotero.Library) {
+			for (let entry of topLevelEntries) {
+				let canCopy = await selected.canMoveToTargetAsync(entry);
+				if (!canCopy) {
+					let menuitem = popup.querySelector(`[value="L${entry.libraryID}"]`);
+					menuitem.disabled = true;
+				}
+			}
+		}
+	});
 
 	this.buildAddItemToCollectionMenu = function (event, items = this.getSelectedItems()) {
 		if (event.target !== event.currentTarget) return;
