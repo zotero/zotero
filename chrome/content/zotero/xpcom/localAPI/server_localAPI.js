@@ -154,7 +154,7 @@ class LocalAPIEndpoint {
 					return this.makeResponse(400, 'text/plain', `Invalid 'since' value '${requestData.searchParams.get('since')}'`);
 				}
 				if (since !== 0) {
-					response.data = response.data.filter(dataObject => dataObject.version > since);
+					response.data = response.data.filter(dataObject => dataObject.clientVersion > since);
 				}
 			}
 			
@@ -226,8 +226,8 @@ class LocalAPIEndpoint {
 				'Link': Object.entries(links).map(([rel, url]) => `<${url}>; rel="${rel}"`).join(', ')
 			};
 			let lastModifiedVersion = dataIsArray
-				? Zotero.Libraries.get(requestData.libraryID).libraryVersion
-				: response.data.version;
+				? Zotero.Libraries.get(requestData.libraryID).clientVersion
+				: response.data.clientVersion;
 			if (lastModifiedVersion !== undefined) {
 				headers['Last-Modified-Version'] = lastModifiedVersion;
 			}
@@ -893,7 +893,9 @@ async function toResponseJSON(dataObjectOrObjects, searchParams) {
 	let responseJSON = dataObject.toResponseJSONAsync
 		? await dataObject.toResponseJSONAsync({
 			apiURL: `http://localhost:${Zotero.Server.port}/api/`,
-			includeGroupDetails: true
+			includeGroupDetails: true,
+			syncedStorageProperties: false,
+			syncedVersionProperty: false,
 		})
 		: dataObject;
 	

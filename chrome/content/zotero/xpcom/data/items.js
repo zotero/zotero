@@ -48,6 +48,7 @@ Zotero.Items = function() {
 				libraryID: "O.libraryID",
 				key: "O.key",
 				version: "O.version",
+				clientVersion: "O.clientVersion",
 				synced: "O.synced",
 				
 				createdByUserID: "createdByUserID",
