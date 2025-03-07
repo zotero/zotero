@@ -2815,9 +2815,19 @@ var ZoteroPane = new function()
 				'api-key');
 		}
 
-		// If all reminders are disabled, we don't need an observer
-		let types = ['setUp', 'autoSync', 'quotaError'];
-		if (types.every(type => !Zotero.Prefs.get(`sync.reminder.${type}.enabled`))) {
+		// If both reminders that show on item modification are disabled,
+		// we don't need an observer
+		if (!Zotero.Prefs.get('sync.reminder.setUp.enabled')
+				&& !Zotero.Prefs.get('sync.reminder.autoSync.enabled')) {
+			if (_syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
+				_syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we are syncing and auto-syncing then no need for observer
+		if (Zotero.Sync.Runner.enabled && Zotero.Prefs.get('sync.autoSync')) {
 			if (_syncRemindersObserverID) {
 				Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
 				_syncRemindersObserverID = null;
@@ -2830,17 +2840,16 @@ var ZoteroPane = new function()
 			return;
 		}
 
-		const eventTypes = new Set(['add', 'modify', 'delete']);
+		const eventTypes = ['add', 'modify', 'delete'];
 		_syncRemindersObserverID = Zotero.Notifier.registerObserver(
 			{
 				notify: (event) => {
-					if (!eventTypes.has(event)) {
+					if (!eventTypes.includes(event)) {
 						return;
 					}
 					setTimeout(() => {
 						this.showSetUpSyncReminder();
 						this.showAutoSyncReminder();
-						this.showQuotaErrorReminder();
 					}, 5000);
 				}
 			},
@@ -2898,7 +2907,10 @@ var ZoteroPane = new function()
 	};
 
 
-	this.showQuotaErrorReminder = function () {
+	/**
+	 * @param {Zotero.Error} error
+	 */
+	this.showQuotaErrorReminder = function (error) {
 		const sevenDays = 60 * 60 * 24 * 7;
 		
 		let now = Math.round(Date.now() / 1000);
@@ -2911,20 +2923,6 @@ var ZoteroPane = new function()
 				|| !Zotero.Sync.Runner.enabled) {
 			return;
 		}
-		
-		let lastErrors;
-		try {
-			lastErrors = JSON.parse(Zotero.Prefs.get('sync.reminder.quotaError.lastErrors'));
-		}
-		catch (jsonError) {
-			Zotero.logError(jsonError);
-			lastErrors = [];
-		}
-		
-		// Check for quota error within 7 days
-		if (!lastErrors.some(x => x.timestamp > sevenDaysAgo)) {
-			return;
-		}
 
 		// Check lastDisplayed was 7+ days ago
 		let lastDisplayed = Zotero.Prefs.get('sync.reminder.quotaError.lastDisplayed');
@@ -2932,16 +2930,15 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		for (let error of lastErrors) {
-			let library = Zotero.Libraries.get(error.libraryID);
+		let library = Zotero.Libraries.get(error.libraryID);
 
-			// Check that remaining storage is still very low
-			if (Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(library.libraryID)
-					< Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
-				this.showSyncReminder('quotaError', { library });
-				break;
-			}
+		// Check that remaining storage is still very low
+		if (Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(library.libraryID)
+				>= Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
+			return;
 		}
+
+		this.showSyncReminder('quotaError', { library });
 	};
 
 

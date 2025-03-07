@@ -176,7 +176,6 @@ pref("extensions.zotero.sync.reminder.autoSync.enabled", true);
 pref("extensions.zotero.sync.reminder.autoSync.lastDisplayed", 0);
 pref("extensions.zotero.sync.reminder.quotaError.enabled", true);
 pref("extensions.zotero.sync.reminder.quotaError.lastDisplayed", 0);
-pref("extensions.zotero.sync.reminder.quotaError.lastErrors", "[]");
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);
