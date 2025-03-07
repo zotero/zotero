@@ -911,9 +911,11 @@ const IOManager = {
 		// the trees get rendered no matter what.
 		if (currentLayout.type == "library") {
 			setTimeout(() => {
+				libraryLayout.collectionsView?.tree.invalidate();
+				libraryLayout.itemsView.tree?.invalidate();
 				libraryLayout.collectionsView?.tree.forceUpdate();
 				libraryLayout.itemsView.tree?.forceUpdate();
-			}, 500);
+			}, 250);
 		}
 		currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 	},
