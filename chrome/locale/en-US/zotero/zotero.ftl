@@ -146,6 +146,12 @@ item-menu-add-url =
      .label = Web Link
 item-menu-change-parent-item =
      .label = Change Parent Item…
+item-menu-mark-as-primary-attachment =
+     .label = {
+        $type ->
+            [unset] Unset as Primary Attachment
+            *[set] Set as Primary Attachment
+    }
 
 view-online = View Online
 item-menu-option-view-online =
