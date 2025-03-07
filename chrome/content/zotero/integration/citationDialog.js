@@ -966,7 +966,11 @@ const IOManager = {
 		if (index === null && input) {
 			index = _id("bubble-input").getFutureBubbleIndex();
 		}
-		input?.remove();
+		// If there was an input used to run the search, clear it
+		if (input) {
+			input.remove();
+		}
+
 		await CitationDataManager.addItems({ citationItems: items, index });
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
