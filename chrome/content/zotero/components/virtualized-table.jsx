@@ -1256,7 +1256,10 @@ class VirtualizedTable extends React.Component {
 			onMouseOver: e => this._handleMouseOver(e),
 			onMouseMove: e => this._handleMouseMove(e),
 			onMouseLeave: e => this._handleMouseLeave(e),
-			className: cx(["virtualized-table", {
+			className: cx(["virtualized-table",
+				// For selected items icon color, see scss mixin svgicon and focus-states
+				"focus-states-target",
+				{
 				resizing: this.state.resizing,
 				'multi-select': this.props.multiSelect
 			}]),
