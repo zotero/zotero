@@ -25,6 +25,7 @@
 
 Zotero.Fulltext = Zotero.FullText = new function(){
 	this.__defineGetter__("fulltextCacheFile", function () { return '.zotero-ft-cache'; });
+	this.__defineGetter__("fulltextSearchCacheFile", function () { return '.zotero-search-cache'; });
 
 	this.INDEX_STATE_UNAVAILABLE = 0;
 	this.INDEX_STATE_UNINDEXED = 1;
@@ -1134,38 +1135,77 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			let mimeType = item.attachmentContentType;
 			let maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
 			let binaryMode = mode && mode.indexOf('Binary') != -1;
-			
-			if (this.isCachedMIMEType(mimeType)) {
-				let file = this.getItemCacheFile(item).path;
-				if (!(yield OS.File.exists(file))) {
-					Zotero.debug("No cache file at " + file, 2);
-					// TODO: Index on-demand?
-					// What about a cleared full-text index?
-					continue;
+
+			let searchCache;
+			let searchCachePath = this.getItemSearchCacheFile(item).path;
+			if (!(yield OS.File.exists(searchCachePath))) {
+				searchCache = {};
+				Zotero.debug("Search cache missing in " + searchCachePath);
+			} else {
+				let searchCacheContent = yield Zotero.File.getContentsAsync(searchCachePath);
+				try {
+					searchCache = JSON.parse(searchCacheContent);
+					Zotero.debug("Search cache found in " + searchCachePath);
 				}
-				
-				Zotero.debug("Searching for text '" + searchText + "' in " + file);
-				content = yield Zotero.File.getContentsAsync(file, 'utf-8', maxLength);
+				catch (e) {
+					searchCache = {};
+					Zotero.debug("Search cache invalid in " + searchCachePath);
+				}
 			}
-			else {
-				// If not binary mode, only scan plaintext files
-				if (!binaryMode) {
-					if (!Zotero.MIME.isTextType(mimeType)) {
-						Zotero.debug('Not scanning MIME type ' + mimeType, 4);
+
+			Zotero.debug("Using search cache '" + JSON.stringify(searchCache) + "' in " + searchCachePath);
+
+			let searchCacheModificationTime = (searchCache['attachmentModificationTime']);
+			let expectedAttachmentModificationTime = yield item.attachmentModificationTime;
+			if(expectedAttachmentModificationTime !== searchCacheModificationTime){
+				Zotero.debug("Search cache is outdated in " + searchCachePath);
+				searchCache = {'attachmentModificationTime': expectedAttachmentModificationTime};
+			}
+
+			let match = (searchCache[mode] ??= {})[searchText];
+
+			Zotero.debug("Found cached value '" + match + "' in " + searchCachePath);
+
+			if(!match){
+				if (this.isCachedMIMEType(mimeType)) {
+					let file = this.getItemCacheFile(item).path;
+					if (!(yield OS.File.exists(file))) {
+						Zotero.debug("No cache file at " + file, 2);
+						// TODO: Index on-demand?
+						// What about a cleared full-text index?
 						continue;
 					}
+
+					Zotero.debug("Searching for text '" + searchText + "' in " + file);
+					content = yield Zotero.File.getContentsAsync(file, 'utf-8', maxLength);
 				}
-				
-				let path = yield item.getFilePathAsync();
-				if (!path) {
-					continue;
+				else {
+					// If not binary mode, only scan plaintext files
+					if (!binaryMode) {
+						if (!Zotero.MIME.isTextType(mimeType)) {
+							Zotero.debug('Not scanning MIME type ' + mimeType, 4);
+							continue;
+						}
+					}
+
+					let path = yield item.getFilePathAsync();
+					if (!path) {
+						continue;
+					}
+
+					Zotero.debug("Searching for text '" + searchText + "' in " + path);
+					content = yield Zotero.File.getContentsAsync(path, item.attachmentCharset, maxLength);
 				}
-				
-				Zotero.debug("Searching for text '" + searchText + "' in " + path);
-				content = yield Zotero.File.getContentsAsync(path, item.attachmentCharset, maxLength);
+
+				match = findTextInString(content, searchText, mode);
+
+				(searchCache[mode] ??= {})[searchText] ??= match;
+		
+				Zotero.debug("Updating search cache '" + JSON.stringify(searchCache) + "' in " + searchCachePath);
+
+				yield Zotero.File.putContentsAsync(searchCachePath, JSON.stringify(searchCache));
 			}
-			
-			let match = findTextInString(content, searchText, mode);
+
 			if (match != -1) {
 				found.push({
 					id: itemID,
@@ -1427,8 +1467,15 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		cacheFile.append(_processorCacheFile);
 		return cacheFile;
 	}
-	
-	
+
+
+	this.getItemSearchCacheFile = function (item) {
+		var cacheFile = Zotero.Attachments.getStorageDirectory(item);
+		cacheFile.append(this.fulltextSearchCacheFile);
+		return cacheFile;
+	}
+
+
 	this.canIndex = function (item) {
 		if (!item.isAttachment()
 				|| item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
