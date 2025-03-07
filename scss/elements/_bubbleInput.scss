@@ -78,8 +78,8 @@ bubble-input {
 		&:hover:not(.showingDetails) {
 			background-color: var(--fill-quarternary);
 			
-			.cross {
-				display: block;
+			.delete-btn {
+				display: flex;
 			}
 			
 			.text {
@@ -111,15 +111,16 @@ bubble-input {
 			background-color: var(--accent-blue10);
 		}
 
-		.cross {
-			@include svgicon("x-8", "universal", "16");
+		.delete-btn {
 			display: none;
-			width: 18px;
-			height: 18px;
-			align-self: center;
+			width: 20px;
+			height: 20px;
+			align-items: center;
+			justify-content: center;
 			border-radius: 5px;
 			position: absolute;
-			right: 2px;
+			right: 4px;
+			color: var(--fill-secondary);
 			&:hover {
 				background-color: var(--fill-quarternary);
 			}

@@ -233,13 +233,16 @@
 			text.className = "text";
 			bubble.append(text);
 			
-			let cross = document.createElement("div");
-			cross.className = "cross";
-			cross.addEventListener("click", (event) => {
+			let deleteBtn = document.createElement("div");
+			deleteBtn.className = "delete-btn";
+			let cross = document.createElement("span");
+			cross.className = "icon icon-css icon-x-8 icon-16";
+			deleteBtn.addEventListener("click", (event) => {
 				this._deleteBubble(bubble);
 				event.stopPropagation();
 			});
-			bubble.append(cross);
+			deleteBtn.appendChild(cross);
+			bubble.append(deleteBtn);
 			
 			return bubble;
 		}
@@ -406,6 +409,11 @@
 		},
 
 		handleDragStart(event) {
+			// No drag on X button
+			if (event.target.closest(".delete-btn")) {
+				event.preventDefault();
+				return;
+			}
 			this.dragBubble = event.target;
 			event.dataTransfer.setData("text/plain", '<span id="zotero-drag"/>');
 			event.stopPropagation();
