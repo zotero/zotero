@@ -422,7 +422,9 @@
 			if (!lastBeforeDrop) {
 				lastBeforeDrop = this.bubbleInput.getAllBubbles()[0];
 			}
-			
+			// There may be no bubbles at all
+			if (!lastBeforeDrop) return;
+
 			this.dragOver?.classList.remove('drop-after', 'drop-before');
 			this.dragOver = lastBeforeDrop;
 
@@ -445,10 +447,13 @@
 			// Handle drag-drop of items from the citationDialog into bubble-input to add them
 			if (data) {
 				data = JSON.parse(data);
-				if (data.type !== "add-citation-item" || !this.dragOver) return;
-				let newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);
-				if (this.dragOver.classList.contains("drop-after")) {
-					newIndex++;
+				if (data.type !== "add-citation-item") return;
+				let newIndex = 0;
+				if (this.dragOver) {
+					newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);
+					if (this.dragOver.classList.contains("drop-after")) {
+						newIndex++;
+					}
 				}
 				Utils.notifyDialog('add-dragged-item', { index: newIndex });
 				setTimeout(() => {
