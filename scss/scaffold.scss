@@ -29,6 +29,10 @@ $scaffold-toolbarbutton-icons: (
 	}
 };
 
+:root {
+	--monospace-font: 0.92em Monaco, Consolas, Inconsolata, monospace;
+}
+
 #scaffold, #zotero-select-item-dialog {
 	@include contain-richlistbox;
 	@include macOS-normalize-controls;
@@ -112,14 +116,21 @@ browser,
 }
 
 #right-pane {
+	display: flex;
+	flex-direction: column;
 	min-width: 350px;
 	border-inline-start: var(--material-panedivider);
 
 	#output {
-		height: 100%;
+		flex: 1;
 		background: var(--material-background);
-		outline: none;
 		border: 0;
+		outline: none;
+		font: var(--monospace-font);
+	}
+	
+	#item-previews {
+		flex: 1;
 	}
 }
 
@@ -225,6 +236,90 @@ browser,
 
 		button {
 			margin: 0;
+		}
+	}
+}
+
+scaffold-item-previews {
+	flex-direction: column;
+	border-top: var(--material-panedivider);
+	overflow-y: auto;
+
+	.switcher {
+		&:not([hidden]) {
+			display: flex;
+		}
+		justify-content: end;
+		align-items: center;
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		padding: 3px;
+		background: var(--material-sidepane);
+		border-bottom: var(--material-border);
+
+		button {
+			appearance: none;
+			margin: 0;
+			padding: 4px;
+			min-width: 0;
+			border-radius: 2px;
+			color: var(--fill-secondary);
+			background-color: transparent;
+
+			&:hover {
+				background-color: var(--fill-quinary);
+			}
+
+			&:active {
+				background-color: var(--fill-quarternary);
+			}
+		}
+	}
+
+	> deck {
+		> :not(.deck-selected) {
+			display: none;
+		}
+	}
+}
+
+scaffold-item-preview {
+	display: flex;
+	flex-direction: column;
+	padding: 6px;
+	
+	.diff {
+		font: var(--monospace-font);
+		user-select: text;
+		
+		div {
+			white-space: pre-wrap;
+			overflow-wrap: anywhere;
+			
+			&.added {
+				background-color: rgb(0 255 0 / 0.1)
+			}
+			
+			&.removed {
+				background-color: rgb(255 0 0 / 0.1)
+			}
+		}
+	}
+	
+	info-box, abstract-box {
+		collapsible-section > .head {
+			display: none;
+		}
+	}
+
+	.attachments-preview, .notes-preview {
+		display: flex;
+		flex-direction: column;
+		padding-block: 6px;
+
+		&:empty {
+			display: none;
 		}
 	}
 }
