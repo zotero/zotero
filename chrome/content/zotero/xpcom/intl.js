@@ -244,12 +244,14 @@ Zotero.Intl = new function () {
 	}
 
 	function getLocaleCollation() {
+		var naturalSorting = Zotero.Prefs.get('naturalSorting');
+		
 		try {
 			// DEBUG: Is this necessary, or will Intl.Collator just default to the same locales we're
 			// passing manually?
 			let locales = Services.locale.appLocalesAsBCP47;
 			var collator = new Intl.Collator(locales, {
-				numeric: true,
+				numeric:  naturalSorting,
 				sensitivity: 'base'
 			});
 		}
@@ -260,7 +262,7 @@ Zotero.Intl = new function () {
 			try {
 				Zotero.logError("Falling back to en-US sorting");
 				collator = new Intl.Collator(['en-US'], {
-					numeric: true,
+					numeric: naturalSorting,
 					sensitivity: 'base'
 				});
 			}
