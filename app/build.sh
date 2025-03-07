@@ -268,17 +268,25 @@ rm actors/ShoppingSidebar{Parent,Child}.sys.mjs
 rm actors/SpeechDispatcher{Parent,Child}.sys.mjs
 rm actors/WebRTC{Parent,Child}.sys.mjs
 
-mv chrome/browser/content/browser/license.html chrome/browser_license.html
-
-# Keep this file for web-ext
-mkdir -p chrome-fx/browser/content/browser/parent
-mv chrome/browser/content/browser/parent/ext-browser.js chrome-fx/browser/content/browser/parent/ext-browser.js
-
-rm -r chrome/browser # We want Firefox, just not the browser part
-
-# Restore files that we need
-mv chrome-fx/* chrome/
-rmdir chrome-fx
+# Keep some essential files from chrome/browser/
+mkdir chrome/browser-fx
+browser_keep=(
+	content/browser/license.html
+	# For web-ext
+	content/browser/parent/ext-browser.js
+)
+if [ $BUILD_WIN == 1 ] || [ $BUILD_LINUX == 1 ]; then
+	# Windows/Linux window controls
+	browser_keep+=(skin/classic/browser/window-controls)
+fi
+for file in "${browser_keep[@]}"; do
+	mkdir -p "$(dirname "chrome/browser-fx/$file")"
+	mv "chrome/browser/$file" "chrome/browser-fx/$file"
+done
+# Delete everything else
+rm -r chrome/browser
+# Move essential files back
+mv chrome/browser-fx chrome/browser
 
 rm modules/SearchSERPTelemetry.sys.mjs
 
