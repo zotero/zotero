@@ -2446,6 +2446,9 @@ Zotero.Attachments = new function () {
 		
 		formatted = Zotero.Utilities.cleanTags(formatted);
 		formatted = Zotero.File.getValidFileName(formatted);
+		if (Zotero.Prefs.get('autoRenameFiles.removeDiacritics')) {
+			formatted = Zotero.Utilities.removeDiacritics(formatted, false);
+		}
 		return formatted;
 	};
 
