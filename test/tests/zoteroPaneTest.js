@@ -1620,7 +1620,8 @@ describe("ZoteroPane", function() {
 
 			doc.activeElement.dispatchEvent(shiftTab);
 			// One of tab buttons in the sidenav
-			assert.equal(doc.activeElement.getAttribute("role"), "tab");
+			let sidenav = doc.querySelector("item-pane-sidenav");
+			assert.isTrue(sidenav.contains(doc.activeElement));
 		});
 
 		it("should tab across the zotero pane", async function () {

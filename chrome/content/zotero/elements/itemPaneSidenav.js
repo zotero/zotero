@@ -28,8 +28,7 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<html:div class="inherit-flex highlight-notes-inactive"
-				tabindex="0" role="tab" data-l10n-id="sidenav-main-btn-grouping">
+			<html:div class="inherit-flex highlight-notes-inactive">
 				<html:div class="pin-wrapper">
 					<toolbarbutton
 						id="sidenav-info-btn"
@@ -233,6 +232,10 @@
 				}
 			}
 			
+			// Make all toolbarbuttons focusable
+			for (let toolbarbutton of this.querySelectorAll("toolbarbutton")) {
+				toolbarbutton.setAttribute("tabindex", 0);
+			}
 			this.querySelector('.zotero-menuitem-pin').addEventListener('command', () => {
 				this.container.scrollToPane(this._contextMenuTarget, 'smooth');
 				this.pinnedPane = this._contextMenuTarget;
@@ -272,7 +275,6 @@
 					continue;
 				}
 				
-				toolbarbutton.closest("[role='tab']").setAttribute('aria-selected', !contextNotesPaneVisible);
 				// No need to set `hidden` here, since it's updated by ItemDetails#_handlePaneStatus
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
@@ -411,33 +413,19 @@
 				event.preventDefault();
 			}
 			if ([" ", "Enter"].includes(event.key)) {
-				// Only handles buttons that change which itemPane deck is visible
-				if (!(event.target == this._buttonContainer || event.target.closest(".highlight-notes-active"))) return;
-				// Click the first itemPane button in a group to switch from notes to item details pane
-				if (event.target === this._buttonContainer && this._contextNotesPaneVisible) {
-					let firstBtn = event.target.querySelector("toolbarbutton");
-					let clickEvent = new MouseEvent('click', {
-						bubbles: true,
-						cancelable: true,
-						detail: 1
-					});
-					firstBtn.dispatchEvent(clickEvent);
+				// Click on the sidenav toolbarbutton
+				event.target.click();
+				event.stopPropagation();
+				let pane = event.target.dataset.pane;
+				// Tab into the notes pane
+				if (pane == "context-notes") {
+					Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
 				}
-				setTimeout(() => {
-					// If notes are visible, tab into them
-					if (this._contextNotesPaneVisible) {
-						Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
-					}
-					// Tab into the pinned section if it exists
-					else if (this.pinnedPane) {
-						Services.focus.moveFocus(window, this.container.getEnabledPane(this.pinnedPane),
-							Services.focus.MOVEFOCUS_FORWARD, 0);
-					}
-					// Otherwise, focus the top-level scrollable itemPane
-					else {
-						this._container.querySelector(".zotero-view-item").focus();
-					}
-				});
+				// Tab into the pane whose sidenav button was clicked
+				else if (event.target.dataset.pane) {
+					let section = this._container.getEnabledPane(pane);
+					Services.focus.moveFocus(window, section, Services.focus.MOVEFOCUS_FORWARD, 0);
+				}
 			}
 		};
 
@@ -487,22 +475,23 @@
 					let pinnable = this.isPanePinnable(pane);
 					let scrollType = this._collapsed ? 'instant' : 'smooth';
 					if (this._collapsed) this._collapsed = false;
-					switch (event.detail) {
-						case 1:
-							if (this._contextNotesPane && this._contextNotesPaneVisible) {
-								this._contextNotesPaneVisible = false;
-								scrollType = 'instant';
-							}
-							this.container.scrollToPane(pane, scrollType);
-							break;
-						case 2:
-							if (this.pinnedPane == pane || !pinnable) {
-								this.pinnedPane = null;
-							}
-							else {
-								this.pinnedPane = pane;
-							}
-							break;
+					// single click via mouse of keypress
+					let isSingledClick = event.detail == 0 || event.detail == 1;
+					let isDoubleClick = event.detail == 2;
+					if (isSingledClick) {
+						if (this._contextNotesPane && this._contextNotesPaneVisible) {
+							this._contextNotesPaneVisible = false;
+							scrollType = 'instant';
+						}
+						this.container.scrollToPane(pane, scrollType);
+					}
+					else if (isDoubleClick) {
+						if (this.pinnedPane == pane || !pinnable) {
+							this.pinnedPane = null;
+						}
+						else {
+							this.pinnedPane = pane;
+						}
 					}
 				}
 			}
