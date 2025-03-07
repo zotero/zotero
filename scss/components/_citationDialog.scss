@@ -74,6 +74,9 @@
 			align-items: center;
 			gap: 8px;
 			-moz-window-dragging: no-drag;
+			// same height as a single row of bubbles so that this group is not stretched
+			// when there are multiple rows of bubbles and buttons do not shift
+			height: 30px;
 
 			#loading-spinner {
 				width: 28px;
