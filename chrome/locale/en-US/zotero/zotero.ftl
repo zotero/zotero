@@ -599,7 +599,16 @@ new-collection-name = Name:
 new-collection-create-in = Create in:
 
 attachment-info-title = Title
+attachment-info-title-help-label = Title is displayed in the { -app-name } items list.
+attachment-info-title-help-link = Learn more about Attachment Title vs. Filename
+    .href = https://www.zotero.org/support/kb/attachment_title_vs_filename
 attachment-info-filename = Filename
+attachment-info-filename-help-label = Zotero automatically renames PDFs and other files saved to your library based on the bibliographic details of the parent item.
+    Filename is not displayed in the { -app-name } items list.
+attachment-info-filename-help-link = Learn more about File Renaming
+    .href = https://www.zotero.org/support/file_renaming
+attachment-info-rename =
+    .tooltiptext = Rename file from parent metadata
 attachment-info-accessed = Accessed
 attachment-info-pages = Pages
 attachment-info-modified = Modified
