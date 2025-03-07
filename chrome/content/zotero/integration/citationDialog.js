@@ -196,6 +196,8 @@ class Layout {
 				// createItemNode implemented by layouts
 				let itemNode = await this.createItemNode(item, isGroupCollapsible ? index : null);
 				itemNode.addEventListener("click", IOManager.handleItemClick);
+				// items can be dragged into bubble-input to add them into the citation
+				itemNode.addEventListener("dragstart", IOManager._handleItemDragStart);
 				items.push(itemNode);
 				index++;
 			}
@@ -338,8 +340,6 @@ class LibraryLayout extends Layout {
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
-		// items can be dragged into bubble-input to add them into the citation
-		itemNode.addEventListener("dragstart", e => IOManager._handleItemDragStart(e));
 		let title = Helpers.createNode("div", {}, "title");
 		let description = Helpers.buildItemDescription(item);
 		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), title);
@@ -711,8 +711,6 @@ class ListLayout extends Layout {
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
-		// items can be dragged into bubble-input to add them into the citation
-		itemNode.addEventListener("dragstart", e => IOManager._handleItemDragStart(e));
 		let icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
 		let dataTypeLabel = item.getItemTypeIconName(true);
 		icon.setAttribute("data-item-type", dataTypeLabel);
@@ -953,7 +951,7 @@ const IOManager = {
 		
 		// If multiple items are being added, only add ones that are not included in the citation
 		if (items.length > 1) {
-			items = items.filter(item => !CitationDataManager.getItems({ zoteroItemID: item.id }).length);
+			items = items.filter(item => !(item.id && CitationDataManager.getItems({ zoteroItemID: item.id }).length));
 		}
 
 		// If the last input has a locator, add it into the item
