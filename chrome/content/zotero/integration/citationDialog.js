@@ -1025,6 +1025,15 @@ const IOManager = {
 	handleItemClick(event) {
 		let targetItem = event.target.closest(".item");
 		let multiselectable = targetItem.closest("[data-multiselectable]");
+		
+		// Debounce double clicks so one does not add multiple items unintentionally
+		if (IOManager._lastClickTime && (new Date()).getTime() - IOManager._lastClickTime < 300) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		IOManager._lastClickTime = (new Date()).getTime();
+
 		// Cmd/Ctrl + mouseclick toggles selected item node
 		if (multiselectable && (Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) {
 			IOManager.toggleItemNodeSelect(targetItem);
