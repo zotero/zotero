@@ -74,6 +74,14 @@ preferences-styleManager-add-button =
     .tooltiptext = Add a style from a file
     .aria-label = { general-add }
     .label = { $label }
+preferences-citation-dialog = Citation Dialog
+preferences-citation-dialog-mode = Citation Dialog Mode:
+preferences-citation-dialog-mode-last-used =
+    .label = Last Used
+preferences-citation-dialog-mode-list =
+    .label = List Mode
+preferences-citation-dialog-mode-library =
+    .label = Library Mode
 
 preferences-advanced-enable-local-api =
     .label = Allow other applications on this computer to communicate with { -app-name }

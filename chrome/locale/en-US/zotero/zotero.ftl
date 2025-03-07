@@ -8,10 +8,20 @@ option-or-alt =
         [macos] { general-key-option }
         *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+        *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
         *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+        *[other] Backspace
     }
 
 general-print = Print
@@ -26,6 +36,9 @@ general-tag = Tag
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-accept = Accept
+general-cancel = Cancel
+general-show-in-library = Show in Library
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -328,30 +341,6 @@ bibliography-outputMethod-print =
     .label = Print
 bibliography-manageStyles-label = Manage Styles…
 
-
-integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
-integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
-integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor = 
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description = { -integration-editBibliography-include-uncited }
-    { -integration-editBibliography-exclude-cited }
-    { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
-
 styleEditor-locatorType =
     .aria-label = Locator type
 styleEditor-locatorInput = Locator input
@@ -361,38 +350,6 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview = 
     .aria-label = Preview
-
-integration-prefs-displayAs-label = Display Citations As:
-integration-prefs-footnotes = 
-    .label = Footnotes
-integration-prefs-endnotes =
-    .label = Endnotes
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.
-integration-prefs-bookmarks-formatNotice = {
-    $show ->
-        [true] The document must be saved as .doc or .docx.
-        *[other] {""}
-}
-integration-prefs-automaticCitationUpdates =
-    .label = Automatically update citations
-    .tooltip = Citations with pending updates will be highlighted in the document
-integration-prefs-automaticCitationUpdates-description = Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Use MEDLINE journal abbreviations
-integration-prefs-automaticJournalAbbeviations-description = The “Journal Abbr” field will be ignored.
-integration-prefs-exportDocument =
-    .label = Switch to a Different Word Processor…
-
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
-
-integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
-integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
-integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
-integration-warning-discard-changes = Discard Changes
-
-integration-warning-command-is-running = A word processor integration command is already running.
 
 publications-intro-page = My Publications
 

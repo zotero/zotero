@@ -298,7 +298,7 @@ describe("Zotero.Integration", function () {
 	
 	var dialogResults = {
 		addCitationDialog: {},
-		quickFormat: {},
+		citationDialog: {},
 		integrationDocPrefs: {},
 		selectItemsDialog: {},
 		editBibliographyDialog: {}
@@ -331,7 +331,7 @@ describe("Zotero.Integration", function () {
 	
 	function setAddEditItems(items) {
 		if (items.length == undefined) items = [items];
-		dialogResults.quickFormat = async function(dialogName, io) {
+		dialogResults.citationDialog = async function(dialogName, io) {
 			io.citation.citationItems = items.map(function(item) {
 				item = Zotero.Cite.getItem(item.id);
 				return {id: item.id, uris: item.cslURIs, itemData: item.cslItemData};
@@ -526,19 +526,19 @@ describe("Zotero.Integration", function () {
 			it('should return false if an integration dialog is open but is pristine', async function () {
 				await insertMultipleCitations.call(this);
 				let docID = this.test.fullTitle();
-				let quickFormatOpenedDeferred = Zotero.Promise.defer();
-				let quickFormatCancelledDeferred = Zotero.Promise.defer();
-				dialogResults.quickFormat = async function(dialogName, io) {
-					Zotero.Integration.currentWindow = { isPristine: true, focus: () => 0, cancel: quickFormatCancelledDeferred.resolve };
-					quickFormatOpenedDeferred.resolve();
-					await quickFormatCancelledDeferred.promise;
+				let citationDialogOpenedDeferred = Zotero.Promise.defer();
+				let citationDialogCancelledDeferred = Zotero.Promise.defer();
+				dialogResults.citationDialog = async function(dialogName, io) {
+					Zotero.Integration.currentWindow = { isPristine: true, focus: () => 0, cancel: citationDialogCancelledDeferred.resolve };
+					citationDialogOpenedDeferred.resolve();
+					await citationDialogCancelledDeferred.promise;
 					io._acceptDeferred.resolve(() => {});
 					Zotero.Integration.currentWindow = null;
 				};
 				let firstCommandPromise = execCommand('addEditCitation', docID);
-				await quickFormatOpenedDeferred.promise;
+				await citationDialogOpenedDeferred.promise;
 				assert.isFalse(await Zotero.Integration.shouldAbortCommand());
-				await quickFormatCancelledDeferred.promise;
+				await citationDialogCancelledDeferred.promise;
 				await firstCommandPromise;
 			});
 			
@@ -549,18 +549,18 @@ describe("Zotero.Integration", function () {
 				try {
 					await insertMultipleCitations.call(this);
 					let docID = this.test.fullTitle();
-					let quickFormatOpenedDeferred = Zotero.Promise.defer();
-					let quickFormatDeferred = Zotero.Promise.defer();
-					dialogResults.quickFormat = async function (dialogName, io) {
-						quickFormatOpenedDeferred.resolve();
-						await quickFormatDeferred.promise;
+					let citationDialogOpenedDeferred = Zotero.Promise.defer();
+					let citationDialogDeferred = Zotero.Promise.defer();
+					dialogResults.citationDialog = async function (dialogName, io) {
+						citationDialogOpenedDeferred.resolve();
+						await citationDialogDeferred.promise;
 						io._acceptDeferred.resolve(() => {});
 					};
 					let firstCommandPromise = execCommand('addEditCitation', docID);
-					await quickFormatOpenedDeferred.promise;
+					await citationDialogOpenedDeferred.promise;
 					assert.isTrue(await Zotero.Integration.shouldAbortCommand());
 					assert.isTrue(stub.called);
-					quickFormatDeferred.resolve({});
+					citationDialogDeferred.resolve({});
 					await firstCommandPromise;
 				}
 				finally {
@@ -575,21 +575,21 @@ describe("Zotero.Integration", function () {
 				try {
 					await insertMultipleCitations.call(this);
 					let docID = this.test.fullTitle();
-					let quickFormatOpenedDeferred = Zotero.Promise.defer();
-					let quickFormatCancelledDeferred = Zotero.Promise.defer();
-					dialogResults.quickFormat = async function(dialogName, io, windowType) {
-						Zotero.Integration.currentWindow = { isPristine: false, focus: () => 0, cancel: quickFormatCancelledDeferred.resolve };
+					let citationDialogOpenedDeferred = Zotero.Promise.defer();
+					let citationDialogCancelledDeferred = Zotero.Promise.defer();
+					dialogResults.citationDialog = async function(dialogName, io, windowType) {
+						Zotero.Integration.currentWindow = { isPristine: false, focus: () => 0, cancel: citationDialogCancelledDeferred.resolve };
 						Zotero.Integration.currentWindowType = windowType;
-						quickFormatOpenedDeferred.resolve();
-						await quickFormatCancelledDeferred.promise;
+						citationDialogOpenedDeferred.resolve();
+						await citationDialogCancelledDeferred.promise;
 						io._acceptDeferred.resolve(() => {});
 						Zotero.Integration.currentWindow = null;
 					};
 					let firstCommandPromise = execCommand('addEditCitation', docID);
-					await quickFormatOpenedDeferred.promise;
+					await citationDialogOpenedDeferred.promise;
 					assert.isFalse(await Zotero.Integration.shouldAbortCommand());
 					assert.isTrue(stub.called);
-					await quickFormatCancelledDeferred.promise;
+					await citationDialogCancelledDeferred.promise;
 					await firstCommandPromise;
 				}
 				finally {

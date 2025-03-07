@@ -23,27 +23,30 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<window
+<html
 	id="progress-bar"
 	class="citation-dialog progress-bar"
 	orient="vertical"
 	title="&zotero.progress.title;"
 	no-titlebar-icon="true"
-	xmlns:html="http://www.w3.org/1999/xhtml"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY">
+	<head>
+		<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css" />
+		<script src="../include.js"/>
+		<script src="progressBar.js" type="text/javascript"/>
+		<script src="../titlebar.js" type="text/javascript"/>
+	</head>
 	
-	<script src="../include.js"/>
-	<script src="progressBar.js" type="text/javascript"/>
-	
-	<box orient="horizontal" class="citation-dialog entry">
-		<html:progress class="citation-dialog progress-meter downloadProgress" max="100"/>
-	</box>
-</window>
+	<body class="vbox flex">
+		<div id="search-row" class="hbox">
+			<div id="z-icon-container">
+				<div id="z-icon"></div>
+			</div>
+			<progress id="progress" max="100"></progress>
+		</div>
+	</body>
+</html>

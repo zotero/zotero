@@ -394,7 +394,7 @@ class VirtualizedTable extends React.Component {
 
 		getRowCount: PropTypes.func.isRequired,
 		
-		renderItem: PropTypes.func,
+		renderItem: PropTypes.func.isRequired,
 		// Row height specified as lines of text per row. Defaults to 1
 		linesPerRow: PropTypes.number,
 		// Do not adjust for Zotero-defined font scaling
@@ -672,7 +672,7 @@ class VirtualizedTable extends React.Component {
 			for (let i = this.selection.focused + 1, checked = 0; checked < rowCount; i++, checked++) {
 				i %= rowCount;
 				let rowString = this.props.getRowString(i);
-				if (rowString.toLowerCase().indexOf(char) == 0) {
+				if (rowString && rowString.toLowerCase().indexOf(char) == 0) {
 					if (i != this.selection.focused) {
 						this.scrollToRow(i);
 						this.onSelection(i);
@@ -854,8 +854,10 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + (aColumn.noPadding ? 0 : COLUMN_PADDING);
-		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + (bColumn.noPadding ? 0 : COLUMN_PADDING);
+		const aColumnPadding = aColumn.iconLabel ? 0 : COLUMN_PADDING;
+		const bColumnPadding = bColumn.iconLabel ? 0 : COLUMN_PADDING;
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + aColumnPadding;
+		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + bColumnPadding;
 		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
@@ -1003,7 +1005,7 @@ class VirtualizedTable extends React.Component {
 	}
 		
 	_handleColumnDragStart = (index, event) => {
-		if (event.button !== 0) return false;
+		if (event.button !== 0 || this.props.staticColumns) return false;
 		// Remember for sorting
 		this._headerMouseDownIndex = index;
 		this.setState({ draggingColumn: index });
@@ -1223,7 +1225,8 @@ class VirtualizedTable extends React.Component {
 					<span
 						key={columnName + '-label'}
 						className={`label ${column.dataKey}`}
-						title={column.iconLabel ? columnName : ""}>
+						{...(column.iconLabel ? { title: columnName } : {})}
+						>
 						{label}
 					</span>
 					{sortIndicator}
@@ -1630,6 +1633,7 @@ var Columns = class {
 			}
 			const column = this._columns.find(column => column.dataKey == dataKey);
 			const styleIndex = this._columnStyleMap[dataKey];
+			const columnPadding = column.iconLabel ? 0 : COLUMN_PADDING;
 			if (storePrefs && !column.fixedWidth) {
 				column.width = width;
 				prefs[dataKey] = this._getColumnPrefsToPersist(column);
@@ -1642,7 +1646,7 @@ var Columns = class {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${width}px`, 'important');
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${width}px`, 'important');
 			} else {
-				width = (width - COLUMN_PADDING);
+				width = (width - columnPadding);
 				Zotero.debug(`Columns ${dataKey} width ${width}`);
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `${width}px`);
 			}
@@ -1740,10 +1744,18 @@ var Columns = class {
 };
 
 function renderCell(index, data, column, dir = null) {
-	column = column || { columnName: "" };
+	column = column || { dataKey: "" };
+	if (column.renderer) {
+		return column.renderer(index, data, column, dir);
+	}
 	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;
-	span.textContent = data;
+	if (column.type == 'html') {
+		span.innerHTML = data.replaceAll('&', '&amp;');
+	}
+	else {
+		span.textContent = data;
+	}
 	if (dir) span.dir = dir;
 	return span;
 }
@@ -1777,6 +1789,7 @@ function makeRowRenderer(getRowData) {
 		div.classList.toggle('selected', selection.isSelected(index));
 		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
+		div.classList.toggle('highlighted', !!rowData.highlighted);
 		let ariaLabel = "";
 		
 		if (columns.length) {

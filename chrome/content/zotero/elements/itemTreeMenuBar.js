@@ -68,10 +68,21 @@ class ItemTreeMenuBar extends XULElement {
 	`, ['chrome://zotero/locale/standalone.dtd']);
 	}
 
+	get suppressed() {
+		return this.hasAttribute("no-menubar");
+	}
+
+	set suppressed(val) {
+		this.toggleAttribute("no-menubar", !!val);
+		for (let menu of this.querySelectorAll("menu")) {
+			menu.hidden = this.suppressed;
+		}
+	}
+
 
 	connectedCallback() {
 		this.append(document.importNode(this.content, true));
-		this.hidden = true;
+		this.setAttribute("inactive", "");
 	}
 
 	// Show View > Columns, Sort By menus for windows that have an itemTree
@@ -119,21 +130,15 @@ class ItemTreeMenuBar extends XULElement {
 			});
 		}
 		if (!Zotero.isMac) {
-			// On Windows and Linux, display and focus menubar on Alt keypress
-			document.addEventListener("keydown", (event) => {
-				if (event.key == "Alt") {
-					this.hidden = !this.hidden;
-					document.getElementById("main-menubar").focus();
-				}
-			}, true);
-			// Hide menubar on click or tab away. If a selected menu is clicked, it will
-			// fire DOMMenuBarInactive event first followed by DOMMenuBarActive.
-			// Listen to both events and hide inactive menu after delay if it is not cancelled.
+			// On Alt keypress, DOMMenuBarActive event is fired. On click or tab away from the menubar, DOMMenuBarInactive is fired.
+			// Handle these event to display/hide menubar accordingly.
+			// If a selected menu is clicked, DOMMenuBarInactive event will fire first followed by DOMMenuBarActive.
+			// To keep the menu visible in that case, hide inactive menu after delay if it is not cancelled.
 			// https://searchfox.org/mozilla-central/source/browser/base/content/browser-customization.js#165
 			document.addEventListener("DOMMenuBarInactive", (_) => {
 				this._inactiveTimeout = setTimeout(() => {
 					this._inactiveTimeout = null;
-					this.hidden = true;
+					this.setAttribute("inactive", "");
 				});
 			});
 			document.addEventListener("DOMMenuBarActive", (_) => {
@@ -141,7 +146,7 @@ class ItemTreeMenuBar extends XULElement {
 					clearTimeout(this._inactiveTimeout);
 					this._inactiveTimeout = null;
 				}
-				this.hidden = false;
+				this.removeAttribute("inactive");
 			});
 		}
 	}

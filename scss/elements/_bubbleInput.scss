@@ -1,0 +1,132 @@
+bubble-input {
+	min-width: 200px;
+	-moz-window-dragging: no-drag;
+
+	--bubble-height: 28px;
+	--bubble-horizontal-margin: 2px;
+	--bubble-rows-gap: 5px;
+	
+	.body {
+		display: flex;
+		flex-flow: row wrap;
+		align-items: center;
+		align-content: start;
+		row-gap: var(--bubble-rows-gap);
+		min-height: 28px;
+		width: 100%;
+		padding-inline-end: 6px;
+		// height is limited to 5.5. rows of bubbles
+		max-height: calc(5.5 * (var(--bubble-height) + var(--bubble-rows-gap)));
+		overflow-y: auto;
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+		// to get proper width by getContentWidth in bubbleInput.js
+		span {
+			white-space: pre;
+		}
+		cursor: text;
+		font-size: 15px;
+
+		-moz-window-dragging: no-drag;
+
+		// increase the clickable area before each bubble a bit
+		padding-inline-start: 5px;
+		margin-inline-start: -5px;
+
+		// a bit of padding so that focusring of bubbles is not cutoff
+		padding-top: 1px;
+		padding-bottom: 1px;
+	}
+	
+	input {
+		outline: none;
+		border: none !important;
+		height: var(--bubble-height);
+		/* Keep the background and text color unchanged in dark mode */
+		background-color: transparent !important;
+		padding: 0;
+		margin: 0;
+		// input occupying the entire width for when there are not bubbles at all
+		&.full-width {
+			width: 100% !important;
+		}
+		// inputs initially occupy no width so they don't misalign bubbles at the
+		// start of each line. On focus, set their width for the cursor to appear
+		// and offset it by negative margin to avoid bubbles shifting
+		&.empty:not(.full-width):focus {
+			min-width: 1px;
+			margin-inline-start: -1px;
+		}
+	}
+	
+	.bubble {
+		@media not (-moz-platform: windows) {
+			@include focus-ring(true);
+		}
+		height: var(--bubble-height);
+		border-radius: 5px;
+		padding: 0 8px;
+		margin: 0 var(--bubble-horizontal-margin);
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		white-space: nowrap;
+		-moz-user-select: none;
+		position: relative;
+		cursor: pointer;
+		background-color: var(--fill-quinary);
+		
+		&:hover:not(.showingDetails) {
+			background-color: var(--fill-quarternary);
+			
+			.delete-btn {
+				display: flex;
+			}
+			
+			.text {
+				mask-image: linear-gradient(to left, transparent 14px, var(--fill-primary) 24px);
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+		&.showingDetails {
+			background-color: var(--fill-quarternary) !important;
+		}
+		
+		&.drop-before::before, &.drop-after::after {
+			content: "";
+			display: block;
+			margin-left: -1px;
+			height: 14px;
+			border-left: 1px solid var(--fill-primary);
+			position: absolute;
+		}
+		&.drop-before::before {
+			left: calc(-1 * var(--bubble-horizontal-margin));
+		}
+		&.drop-after::after {
+			right: calc(-2 * var(--bubble-horizontal-margin));
+		}
+		// highlight bubbles whose item is currently selected by the user
+		&.has-item-selected {
+			background-color: var(--accent-blue10);
+		}
+
+		.delete-btn {
+			display: none;
+			width: 20px;
+			height: 20px;
+			align-items: center;
+			justify-content: center;
+			border-radius: 5px;
+			position: absolute;
+			right: 4px;
+			color: var(--fill-secondary);
+			&:hover {
+				background-color: var(--fill-quarternary);
+			}
+			&:active {
+				background-color: var(--fill-tertiary);
+			}
+		}
+	}
+}
