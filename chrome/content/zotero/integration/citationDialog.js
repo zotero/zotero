@@ -285,6 +285,15 @@ class Layout {
 		for (let node of _id("top-level-btn-group").childNodes) {
 			node.hidden = false;
 		}
+		if (this.forceUpdateTablesAfterRefresh && this.type == "library") {
+			this.forceUpdateTablesAfterRefresh = false;
+			setTimeout(() => {
+				libraryLayout.collectionsView?.tree.invalidate();
+				libraryLayout.itemsView.tree?.invalidate();
+				libraryLayout.collectionsView?.tree.forceUpdate();
+				libraryLayout.itemsView.tree?.forceUpdate();
+			}, 250);
+		}
 	}
 
 	// implemented by layouts
@@ -373,15 +382,6 @@ class LibraryLayout extends Layout {
 					collapsibleDeck.querySelector(".itemsContainer").focus();
 				}
 			});
-		}
-		if (this.forceUpdateTablesAfterRefresh) {
-			this.forceUpdateTablesAfterRefresh = false;
-			setTimeout(() => {
-				libraryLayout.collectionsView?.tree.invalidate();
-				libraryLayout.itemsView.tree?.invalidate();
-				libraryLayout.collectionsView?.tree.forceUpdate();
-				libraryLayout.itemsView.tree?.forceUpdate();
-			}, 250);
 		}
 	}
 
