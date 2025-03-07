@@ -913,7 +913,7 @@ const IOManager = {
 			setTimeout(() => {
 				libraryLayout.collectionsView?.tree.forceUpdate();
 				libraryLayout.itemsView.tree?.forceUpdate();
-			}, 250);
+			}, 500);
 		}
 		currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 	},
