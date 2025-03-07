@@ -2,20 +2,21 @@ bubble-input {
 	min-width: 200px;
 	-moz-window-dragging: no-drag;
 
-	--bubble-height: 22px;
+	--bubble-height: 28px;
 	--bubble-horizontal-margin: 2px;
-	--bubble-vertical-margin: 2px;
+	--bubble-rows-gap: 5px;
 	
 	.body {
 		display: flex;
 		flex-flow: row wrap;
 		align-items: center;
 		align-content: start;
+		row-gap: var(--bubble-rows-gap);
 		min-height: 28px;
 		width: 100%;
 		padding-inline-end: 6px;
 		// height is limited to 5.5. rows of bubbles
-		max-height: calc(5.5 * (var(--bubble-height) + (2* var(--bubble-vertical-margin)) + 2px));
+		max-height: calc(5.5 * (var(--bubble-height) + var(--bubble-rows-gap)));
 		overflow-y: auto;
 		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 		// to get proper width by getContentWidth in bubbleInput.js
@@ -23,22 +24,27 @@ bubble-input {
 			white-space: pre;
 		}
 		cursor: text;
+		font-size: 15px;
 
 		-moz-window-dragging: no-drag;
 
 		// increase the clickable area before each bubble a bit
 		padding-inline-start: 5px;
 		margin-inline-start: -5px;
+
+		// a bit of padding so that focusring of bubbles is not cutoff
+		padding-top: 1px;
+		padding-bottom: 1px;
 	}
 	
 	input {
 		outline: none;
 		border: none !important;
-		height: calc(var(--bubble-height) + 2px); // 2px to account for the border
+		height: var(--bubble-height);
 		/* Keep the background and text color unchanged in dark mode */
 		background-color: transparent !important;
 		padding: 0;
-		margin-inline: 0;
+		margin: 0;
 		// input occupying the entire width for when there are not bubbles at all
 		&.full-width {
 			width: 100% !important;
@@ -58,9 +64,8 @@ bubble-input {
 		}
 		height: var(--bubble-height);
 		border-radius: 5px;
-		border: 1px solid var(--fill-quarternary);
 		padding: 0 8px;
-		margin: var(--bubble-vertical-margin) var(--bubble-horizontal-margin);
+		margin: 0 var(--bubble-horizontal-margin);
 		display: flex;
 		flex-direction: row;
 		align-items: center;
@@ -68,9 +73,10 @@ bubble-input {
 		-moz-user-select: none;
 		position: relative;
 		cursor: pointer;
+		background-color: var(--fill-quinary);
 		
 		&:hover:not(.showingDetails) {
-			background-color: var(--fill-quinary);
+			background-color: var(--fill-quarternary);
 			
 			.cross {
 				display: block;
@@ -83,7 +89,7 @@ bubble-input {
 			}
 		}
 		&.showingDetails {
-			background-color: var(--fill-quinary) !important;
+			background-color: var(--fill-quarternary) !important;
 		}
 		
 		&.drop-before::before, &.drop-after::after {
