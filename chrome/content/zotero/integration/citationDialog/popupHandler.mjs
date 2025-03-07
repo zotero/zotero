@@ -34,6 +34,7 @@ export class CitationDialogPopupsHandler {
 		this.citationItem = null;
 		this.discardItemDetailsEdits = false;
 		this.itemDetailsWhenOpened = {};
+		this.itemDetailsTimeOpened = null;
 
 		this.setUpListeners();
 	}
@@ -42,12 +43,7 @@ export class CitationDialogPopupsHandler {
 		this.doc.addEventListener("popupshown", (event) => {
 			// make sure overlay doesn't appear on tooltips and etc.
 			if (event.target.tagName !== "xul:panel") return;
-			// focus specified target
-			let potentialFocusTarget = event.target.getAttribute("focus-target-id");
-			if (potentialFocusTarget) {
-				this.doc.getElementById(potentialFocusTarget).focus();
-			}
-			// if there was no focus target, just tab into the panel
+			// if focus is not in the panel tab into it
 			if (!event.target.contains(this.doc.activeElement)) {
 				Services.focus.moveFocus(this.doc.defaultView, event.target, Services.focus.MOVEFOCUS_FORWARD, 0);
 			}
@@ -55,7 +51,10 @@ export class CitationDialogPopupsHandler {
 		// Update bubbles in citation dialog as one makes edits
 		this._getNode("#itemDetails").addEventListener("input", this.handleItemDetailsChange.bind(this));
 
+		this._getNode("#itemDetails").addEventListener("popupshown", this.handleItemDetailsShown.bind(this));
 		this._getNode("#itemDetails").addEventListener("popuphidden", this.handleItemDetailsClosure.bind(this));
+		this._getNode("#itemDetails").addEventListener("popuphiding", this.handleItemDetailsClosing.bind(this));
+
 		// Item details Remove btn
 		this._getNode("#itemDetails .remove").addEventListener("click", (_) => {
 			let event = new CustomEvent("delete-item", {
@@ -137,6 +136,24 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#suffix").value = this.citationItem.suffix || "";
 		this._getNode("#suppress-author").checked = !!this.citationItem["suppress-author"];
 		bubble.classList.add("showingDetails");
+		this.itemDetailsTimeOpened = (new Date()).getTime();
+	}
+
+	// do not close the popup within 300ms of opening to account for potential double clicking
+	// on the bubble to open the popup
+	handleItemDetailsClosing(event) {
+		if ((new Date()).getTime() - this.itemDetailsTimeOpened < 300) {
+			event.preventDefault();
+			// return focus to the locator
+			this.doc.defaultView.setTimeout(() => {
+				this._getNode("#locator").focus();
+			}, 10);
+		}
+	}
+
+	handleItemDetailsShown(event) {
+		event.stopPropagation();
+		this._getNode("#locator").focus();
 	}
 
 	// When item details popup is closed, sync it's data to citationItems
