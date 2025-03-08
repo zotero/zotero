@@ -1495,13 +1495,15 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.newCollection = async function (parentKey = null) {
+	this.newCollection = async function (parentKey = null, libraryID = null) {
 		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
 			return null;
 		}
 		
-		var libraryID = this.getSelectedLibraryID();
+		if (!libraryID) {
+			libraryID = this.getSelectedLibraryID();
+		}
 		
 		// Get a unique "Untitled" name for this level in the collection hierarchy
 		var collections;
@@ -4065,19 +4067,19 @@ var ZoteroPane = new function()
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
 				popup,
-				null,
-				(event, collection) => {
-					if (event.target.tagName == 'menuitem') {
-						this.moveCollection(collection);
-						event.stopPropagation();
+				{
+					clickAction: (event, collection) => {
+						if (event.target.tagName == 'menuitem') {
+							this.moveCollection(collection);
+							event.stopPropagation();
+						}
+					},
+					disabledCheck: (target) => {
+						// can't move collection into itself, its parent or its children
+						return selected == target
+							|| selected.parentKey == target.key
+							|| selected.hasDescendent('collection', target.id);
 					}
-				},
-				
-				(target) => {
-					// can't move collection into itself, its parent or its children
-					return selected == target
-						|| selected.parentKey == target.key
-						|| selected.hasDescendent('collection', target.id);
 				}
 			);
 			popup.append(menuItem);
@@ -4147,40 +4149,58 @@ var ZoteroPane = new function()
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				obj,
 				popup,
-				null,
-				(event, collection) => {
-					if (event.target.tagName == 'menuitem') {
-						this.copyCollection(collection);
-						event.stopPropagation();
+				{
+					clickAction: (event, collection) => {
+						if (event.target.tagName == 'menuitem') {
+							this.copyCollection(collection);
+							event.stopPropagation();
+						}
+					},
+					disabledCheck: (target) => {
+						// can't copy collection into itself or into non-editable groups
+						return selected == target
+							|| (target instanceof Zotero.Group && !target.editable);
 					}
-				},
-				
-				(target) => {
-					// can't copy collection into itself or into non-editable groups
-					return selected == target
-						|| (target instanceof Zotero.Group && !target.editable);
 				}
 			);
 			popup.append(menuItem);
 		}
 	};
 
-	this.buildAddItemToCollectionMenu = function (event, items = this.getSelectedItems()) {
+	this.buildAddItemToCollectionMenu = Zotero.Utilities.Internal.serial(async function (event, items = this.getSelectedItems()) {
 		if (event.target !== event.currentTarget) return;
 		let popup = event.target;
+		popup.replaceChildren();
 
 		items = Zotero.Items.keepTopLevel(items);
-		
-		let newCollectionMenuitem = document.createXULElement('menuitem');
-		document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
-		newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
-		let separator = document.createXULElement('menuseparator');
-		popup.replaceChildren(newCollectionMenuitem, separator);
-		
-		if (!items.length) {
-			separator.hidden = true;
-			return;
-		}
+
+		// Helper function to create "New collection" menuitem
+		let addNewCollectionMenuItem = (parent, insertAfter, library) => {
+			let newCollectionMenuitem = document.createXULElement("menuitem");
+			// addToCollectionMenuItem.label = Zotero.getString("zotero.toolbar.newCollection.label");
+			document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
+			newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, library, true));
+			// Set value to be able to find this menuitem if we need to disable it
+			newCollectionMenuitem.value = `new-collection-L${library.libraryID}`;
+			// Insert menuitem in specified location
+			if (insertAfter) {
+				insertAfter.after(newCollectionMenuitem);
+			}
+			else {
+				parent.prepend(newCollectionMenuitem);
+			}
+			// Surround it with separators
+			if (newCollectionMenuitem.previousElementSibling
+				&& newCollectionMenuitem.previousElementSibling.tagName !== "menuseparator") {
+				let topSeparator = document.createXULElement("menuseparator");
+				newCollectionMenuitem.previousElementSibling.after(topSeparator);
+			}
+			if (newCollectionMenuitem.nextElementSibling
+				&& newCollectionMenuitem.nextElementSibling.tagName !== "menuseparator") {
+				let bottomSeparator = document.createXULElement("menuseparator");
+				newCollectionMenuitem.after(bottomSeparator);
+			}
+		};
 
 		let libraryID = items[0].libraryID;
 		if (items.some(item => item.libraryID !== libraryID)) {
@@ -4192,45 +4212,195 @@ var ZoteroPane = new function()
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
 				popup,
-				null,
-				(event, collection) => {
-					if (event.target.tagName == 'menuitem') {
-						this.addItemsToCollection(items, collection);
-						event.stopPropagation();
-					}
-				},
-				collection => items.every(item => collection.hasItem(item))
+				{
+					clickAction: (event, collection) => {
+						if (event.target.tagName == 'menuitem') {
+							this.addItemsToCollection(items, collection);
+							event.stopPropagation();
+						}
+					},
+					disabledCheck: collection => items.every(item => collection.hasItem(item))
+				}
 			);
 			popup.append(menuItem);
 		}
 
-		separator.hidden = !collections.length;
-	};
+		// New Collection
+		addNewCollectionMenuItem(popup, null, Zotero.Libraries.get(Zotero.Libraries.userLibraryID));
+
+		// My Publications
+		let myPublicationMenuItem;
+		if (this.getSelectedLibraryID() == Zotero.Libraries.userLibraryID) {
+			myPublicationMenuItem = document.createXULElement("menuitem");
+			myPublicationMenuItem.setAttribute("label", Zotero.getString("pane.collections.publications"));
+			myPublicationMenuItem.addEventListener("command", (_) => {
+				this.addSelectedItemsToMyPublications();
+			});
+			myPublicationMenuItem.setAttribute("image", "chrome://zotero/skin/16/universal/publications.svg");
+			popup.append(myPublicationMenuItem);
+			// Cannot add top-level notes/attachment or items that are already in my publications
+			let myPublicationsRow = this.collectionsView.getRow(this.collectionsView.getRowIndexByID("P1"));
+			if (items.some(item => !item.canAddToTarget(myPublicationsRow))) {
+				myPublicationMenuItem.disabled = true;
+			}
+		}
+
+		let otherLibraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed || lib.libraryID == this.getSelectedLibraryID()));
+		if (!otherLibraries.length) return;
+
+		// Other Libraries
+		let separator = document.createXULElement("menuseparator");
+		let otherLibrariesMenu = document.createXULElement("menu");
+		let otherLibrariesPopup = document.createXULElement("menupopup");
+		otherLibrariesMenu.appendChild(otherLibrariesPopup);
+		document.l10n.setAttributes(otherLibrariesMenu, "item-menu-other-libraries");
+		popup.append(separator, otherLibrariesMenu);
+
+		for (let library of otherLibraries) {
+			let libraryMenu = Zotero.Utilities.Internal.createMenuForTarget(
+				library,
+				otherLibrariesPopup,
+				{
+					clickAction: (event, collection) => {
+						if (event.target.tagName == 'menuitem') {
+							this.addItemsToCollection(items, collection);
+							event.stopPropagation();
+						}
+					},
+					disabledCheck: (_) => !library.editable,
+					alwaysMenuForLibrary: true
+				}
+			);
+			otherLibrariesPopup.append(libraryMenu);
+			addNewCollectionMenuItem(libraryMenu, libraryMenu.querySelector("menuseparator"), library);
+		}
+		// Disable destinations where items cannot be added
+		for (let library of otherLibraries) {
+			// menuitem to add item to a library (without specifying a collection), mock object for
+			// "New collection" menuitem, and all collections
+			let newCollectionMockObject = new Zotero.Collection;
+			newCollectionMockObject.libraryID = library.libraryID;
+			let objectsForMenuItems = [library, newCollectionMockObject, ...Zotero.Collections.getByLibrary(library.libraryID, true)];
+			for (let obj of objectsForMenuItems) {
+				let disableMenuItem = true;
+				for (let item of items) {
+					let canAdd = await item.canAddToTargetAsync(obj);
+					if (canAdd) {
+						disableMenuItem = false;
+						break;
+					}
+				}
+				// If not a single item can be added to the destination, find the
+				// menuitem matching current object and disable it
+				if (disableMenuItem) {
+					let value;
+					if (obj == newCollectionMockObject) {
+						value = `new-collection-L${library.libraryID}`;
+					}
+					else {
+						value = obj.treeViewID;
+					}
+					popup.querySelector(`menuitem[value="${value}"]`).disabled = true;
+					continue;
+				}
+			}
+		}
+		// Disable menus that have not a single enabled menuitem
+		for (let menu of popup.querySelectorAll("menu")) {
+			let enabledMenuItems = menu.querySelectorAll("menuitem:not([disabled=true])");
+			if (!enabledMenuItems.length) {
+				menu.disabled = true;
+			}
+		}
+	});
 
 
-	this.addItemsToCollection = async function (items, collection, createNew = false) {
+	this.addItemsToCollection = async function (items, target, createNew = false) {
 		items = Zotero.Items.keepTopLevel(items);
 
 		if (createNew) {
-			if (collection) {
-				throw new Error('collection must be null if createNew is true');
+			if (!(target instanceof Zotero.Library)) {
+				throw new Error("To create new collection, target library has to be provided.");
 			}
-			// Only allow targets within the current library for now
-			// TODO: Come back to this once we support copying items between libraries from the Add to Collection menu
-			let id = await this.newCollection();
+			let id = await this.newCollection(null, target.libraryID);
 			if (!id) {
 				return;
 			}
-			collection = Zotero.Collections.get(id);
+			target = Zotero.Collections.get(id);
 		}
 
-		await Zotero.DB.executeTransaction(
-			() => collection.addItems(items.map(item => item.id)));
-	};
+		if (!(target instanceof Zotero.Collection || target instanceof Zotero.Library)) {
+			throw Error("Target has to be a library or a collection");
+		}
 
+		let targetTreeRowID = target instanceof Zotero.Library ? `L${target.libraryID}` : `C${target.id}`;
+		let targetTreeRowIndex = ZoteroPane.collectionsView.getRowIndexByID(targetTreeRowID);
+		let targetTreeRow = ZoteroPane.collectionsView.getRow(targetTreeRowIndex);
+
+		let itemIDs = items.map(item => item.id);
+		// Moving between libraries, largely replicated collectionTree onDrop logic
+		if (items[0].libraryID !== target.libraryID) {
+			let copyOptions = {
+				tags: Zotero.Prefs.get('groups.copyTags'),
+				childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+				childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+				childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+				annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+			};
+			let copiedItemIDs = [];
+			await Zotero.Utilities.Internal.forEachChunkAsync(
+				items,
+				100,
+				function (chunk) {
+					return Zotero.DB.executeTransaction(async () => {
+						for (let item of chunk) {
+							var id = await ZoteroPane.collectionsView._copyItem({
+								item,
+								targetLibraryID: target.libraryID,
+								targetTreeRow,
+								options: copyOptions
+							});
+							// Standalone attachments might not get copied
+							if (!id) {
+								continue;
+							}
+							copiedItemIDs.push(id);
+						}
+					});
+				}
+			);
+			itemIDs = copiedItemIDs;
+		}
+		if (target instanceof Zotero.Collection) {
+			await Zotero.DB.executeTransaction(async () => {
+				let collection = await Zotero.Collections.getAsync(target.id);
+				await Zotero.Items.getAsync(itemIDs);
+				await collection.addItems(itemIDs);
+			});
+		}
+	};
 
 	this.addSelectedItemsToCollection = function (collection, createNew = false) {
 		return this.addItemsToCollection(this.getSelectedItems(), collection, createNew);
+	};
+
+	this.addSelectedItemsToMyPublications = async function () {
+		let items = Zotero.Items.keepTopLevel(this.getSelectedItems());
+		let io = this.showPublicationsWizard(items);
+		if (!io) {
+			return;
+		}
+		let copyOptions = {
+			tags: Zotero.Prefs.get('groups.copyTags'),
+			childNotes: io.includeNotes,
+			childLinks: true,
+			childFileAttachments: io.includeFiles,
+			annotations: false,
+			keepRights: io.keepRights,
+			license: io.license,
+			licenseName: io.licenseName
+		};
+		await Zotero.Items.addToPublications(items, copyOptions);
 	};
 
 	
