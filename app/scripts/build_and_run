@@ -5,8 +5,9 @@ APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 ROOT_DIR="$(dirname $APP_ROOT_DIR)"
 
 # Set ZOTERO_PROFILE environment variable to choose profile
+profile_args=()
 if [ -n "${ZOTERO_PROFILE:-}" ]; then
-	profile="-p $ZOTERO_PROFILE"
+	profile_args=(-p "$ZOTERO_PROFILE")
 fi
 
 REBUILD=0
@@ -82,4 +83,4 @@ else
 	exit 1
 fi
 
-"$APP_ROOT_DIR/staging/$command" $profile -ZoteroDebugText -purgecaches $PARAMS "$@"
+"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -ZoteroDebugText -purgecaches $PARAMS "$@"
