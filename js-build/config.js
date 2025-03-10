@@ -123,7 +123,8 @@ const ftlFileBaseNames = [
 	'zotero',
 	'preferences',
 	'scaffold',
-	'reader'
+	'reader',
+	'integration',
 ];
 
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
