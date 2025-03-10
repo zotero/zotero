@@ -35,6 +35,7 @@
 	<head>
 		<title data-l10n-id="integration-citationDialog"></title>
 		<link rel="localization" href="zotero.ftl"/>
+		<link rel="localization" href="integration.ftl"/>
 		<link rel="stylesheet" href="chrome://global/skin/global.css" />
 		<link rel="stylesheet" href="chrome://zotero/skin/zotero.css" />
 		<link rel="stylesheet" href="chrome://zotero/skin/overlay.css" />
@@ -67,7 +68,7 @@
 		</div>
 		
 		<div id="library-layout" class="layout" hidden="true">
-			<div class="secondary-divider"></div>
+			<div class="divider"></div>
 			<div id="library-other-items" class="hbox"  data-arrow-nav="horizontal" data-multiselectable="true" role="listbox" aria-orientation="horizontal" aria-describedby="item-description">
 				<div class="search-items"/>
 				<span id="library-no-suggested-items-message" data-l10n-id="integration-citationDialog-lib-no-items"/>
@@ -94,7 +95,7 @@
 		</div>
 
 		<div id="popups">
-			<xul:panel id="itemDetails" focus-target-id="locator">
+			<xul:panel id="itemDetails">
 				<div class="vbox popup">
 					<div class="details-header hbox">
 						<span class="icon icon-item-type"></span>

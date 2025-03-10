@@ -84,6 +84,7 @@ Zotero.Intl = new function () {
 			'branding/brand.ftl',
 			'zotero.ftl',
 			'reader.ftl',
+			'integration.ftl',
 			// More FTL files can be hardcoded here, or added later with
 			// Zotero.ftl.addResourceIds(['...'])
 		], true);
