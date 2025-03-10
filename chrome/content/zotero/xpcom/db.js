@@ -418,12 +418,14 @@ Zotero.DBConnection.prototype.getNextName = async function (libraryID, table, fi
 /**
  * @param {Function} func - Async function containing `await Zotero.DB.queryAsync()` and similar
  * @param {Object} [options]
- * @param {Boolean} [options.disableForeignKeys] - Disable foreign key constraints before
- *    transaction and re-enable after. (`PRAGMA foreign_keys=0|1` is a no-op during a transaction.)
+ * @param {Boolean} [options.disableForeignKeys] - Disable foreign key checks before the
+ *    transaction and re-enable after, while preventing any other queries from running.
+ *    `queryAsync()` and similar within `func` must pass `ignoreDBLock: true` or they'll hang.
+ *    (`PRAGMA foreign_keys=OFF|ON` is a no-op during a transaction, so it can't just be set within
+ *    the function.)
  * @return {Promise} - Promise for result of generator function
  */
-Zotero.DBConnection.prototype.executeTransaction = async function (func, options) {
-	options = options || {};
+Zotero.DBConnection.prototype.executeTransaction = async function (func, options = {}) {
 	var resolve;
 	
 	// Set temporary options for this transaction that will be reset at the end
@@ -461,33 +463,48 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 			}
 		}
 		
-		if (options.disableForeignKeys) {
-			await this.queryAsync("PRAGMA foreign_keys = 0");
+		let result;
+		let resolveDBLockPromise;
+		try {
+			let conn = this._getConnection(options) || (await this._getConnectionAsync(options));
+			
+			if (func.constructor.name == 'GeneratorFunction') {
+				throw new Error("Zotero.DB.executeTransaction() no longer takes a generator function "
+					+ "-- pass an async function instead");
+			}
+			
+			if (options.disableForeignKeys) {
+				this._dbLockPromise = new Promise(function () {
+					resolveDBLockPromise = arguments[0];
+				});
+				await this.queryAsync("PRAGMA foreign_keys=OFF", [], { ignoreDBLock: true });
+			}
+			
+			result = await conn.executeTransaction(func);
+			Zotero.debug(`Committed DB transaction ${id}`, 4);
 		}
-		
-		var conn = this._getConnection(options) || (await this._getConnectionAsync(options));
-		
-		if (func.constructor.name == 'GeneratorFunction') {
-			throw new Error("Zotero.DB.executeTransaction() no longer takes a generator function "
-				+ "-- pass an async function instead");
+		finally {
+			if (options.disableForeignKeys) {
+				await this.queryAsync("PRAGMA foreign_keys=ON", [], { ignoreDBLock: true });
+				if (resolveDBLockPromise) {
+					resolveDBLockPromise();
+					this._dbLockPromise = undefined;
+				}
+			}
 		}
-		
-		var result = await conn.executeTransaction(func);
-		Zotero.debug(`Committed DB transaction ${id}`, 4);
 		
 		// Clear transaction time
 		if (this._transactionDate) {
 			this._transactionDate = null;
 		}
 		
+		this._transactionID = null;
+		
 		if (options.vacuumOnCommit) {
 			Zotero.debug('Vacuuming database');
 			await this.queryAsync('VACUUM');
 			Zotero.debug('Done vacuuming');
-			
 		}
-		
-		this._transactionID = null;
 		
 		// Function to run once transaction has been committed but before any
 		// permanent callbacks
@@ -545,10 +562,6 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		throw e;
 	}
 	finally {
-		if (options.disableForeignKeys) {
-			await this.queryAsync("PRAGMA foreign_keys = 1");
-		}
-		
 		// Reset options back to their previous values
 		if (options) {
 			for (let option in options) {
@@ -596,13 +609,19 @@ Zotero.DBConnection.prototype.requireTransaction = function () {
  *                         rows are Proxy objects that return values from the
  *                         underlying mozIStorageRows based on column names.
  */
-Zotero.DBConnection.prototype.queryAsync = async function (sql, params, options) {
+Zotero.DBConnection.prototype.queryAsync = async function (sql, params, options = {}) {
 	try {
 		let onRow = null;
 		let conn = this._getConnection(options) || (await this._getConnectionAsync(options));
 		if (!options || !options.noParseParams) {
 			[sql, params] = this.parseQueryAndParams(sql, params);
 		}
+		
+		if (this._dbLockPromise && !options.ignoreDBLock) {
+			Zotero.debug(`Waiting for DB lock to be released: ${sql}`, 2);
+			await this._dbLockPromise;
+		}
+		
 		if (Zotero.Debug.enabled) {
 			this.logQuery(sql, params, options);
 		}
@@ -718,6 +737,12 @@ Zotero.DBConnection.prototype.valueQueryAsync = async function (sql, params, opt
 	try {
 		let conn = this._getConnection(options) || (await this._getConnectionAsync(options));
 		[sql, params] = this.parseQueryAndParams(sql, params);
+		
+		if (this._dbLockPromise && !options.ignoreDBLock) {
+			Zotero.debug(`Waiting for DB lock to be released: ${sql}`, 2);
+			await this._dbLockPromise;
+		}
+		
 		if (Zotero.Debug.enabled) {
 			this.logQuery(sql, params, options);
 		}
@@ -765,6 +790,12 @@ Zotero.DBConnection.prototype.columnQueryAsync = async function (sql, params, op
 	try {
 		let conn = this._getConnection(options) || (await this._getConnectionAsync(options));
 		[sql, params] = this.parseQueryAndParams(sql, params);
+		
+		if (this._dbLockPromise && !options.ignoreDBLock) {
+			Zotero.debug(`Waiting for DB lock to be released: ${sql}`, 2);
+			await this._dbLockPromise;
+		}
+		
 		if (Zotero.Debug.enabled) {
 			this.logQuery(sql, params, options);
 		}
