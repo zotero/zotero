@@ -2485,10 +2485,8 @@ Zotero.Item.prototype.isEmbeddedImageAttachment = function() {
  * @return {Boolean} - Returns true if item is a snapshot
  */
 Zotero.Item.prototype.isSnapshotAttachment = function () {
-	return this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL
-		&& this.attachmentContentType == 'text/html';
+	return this.isFileAttachment() && this.attachmentContentType == 'text/html';
 };
-
 
 
 /**
@@ -4600,6 +4598,14 @@ Zotero.Item.prototype.getItemTypeIconName = function (skipLinkMode = false) {
 				itemType += 'EPUB';
 			}
 		}
+		else if (this.isSnapshotAttachment()) {
+			if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				itemType += 'WebLink';
+			}
+			else {
+				itemType += 'Snapshot';
+			}
+		}
 		else if (this.isImageAttachment()) {
 			itemType += linkMode == (!skipLinkMode && Zotero.Attachments.LINK_MODE_LINKED_FILE) ? 'ImageLink' : 'Image';
 		}
@@ -4611,9 +4617,6 @@ Zotero.Item.prototype.getItemTypeIconName = function (skipLinkMode = false) {
 		}
 		else if (!skipLinkMode && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 			itemType += "Link";
-		}
-		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-			itemType += "Snapshot";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			itemType += "WebLink";
