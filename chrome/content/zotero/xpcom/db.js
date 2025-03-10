@@ -429,15 +429,6 @@ Zotero.DBConnection.prototype.getNextName = async function (libraryID, table, fi
 Zotero.DBConnection.prototype.executeTransaction = async function (func, options = {}) {
 	var resolve;
 	
-	// Set temporary options for this transaction that will be reset at the end
-	var origOptions = {};
-	if (options) {
-		for (let option in options) {
-			origOptions[option] = this[option];
-			this[option] = options[option];
-		}
-	}
-	
 	var startedTransaction = false;
 	var id = Zotero.Utilities.randomString();
 	
@@ -563,13 +554,6 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		throw e;
 	}
 	finally {
-		// Reset options back to their previous values
-		if (options) {
-			for (let option in options) {
-				this[option] = origOptions[option];
-			}
-		}
-		
 		// Process all resolvers
 		if (resolve) {
 			resolve.call();
