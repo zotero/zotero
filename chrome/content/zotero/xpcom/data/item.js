@@ -3208,16 +3208,16 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentReaderType', {
 		if (!this.isFileAttachment()) {
 			return undefined;
 		}
-		switch (this.attachmentContentType) {
-			case 'application/pdf':
-				return 'pdf';
-			case 'application/epub+zip':
-				return 'epub';
-			case 'text/html':
-				return 'snapshot';
-			default:
-				return undefined;
+		if (this.isPDFAttachment()) {
+			return 'pdf';
 		}
+		else if (this.isEPUBAttachment()) {
+			return 'epub';
+		}
+		else if (this.isSnapshotAttachment()) {
+			return 'snapshot';
+		}
+		return undefined;
 	}
 });
 
