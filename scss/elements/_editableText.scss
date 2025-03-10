@@ -112,6 +112,9 @@ editable-text {
 	&[nowrap] {
 		.input:not(:focus, :hover) {
 			text-overflow: ellipsis;
+			// Remove space before ellipsis by overriding UA style
+			// See fetch_xulrunner patch to chrome/toolkit/res/forms.css
+			--moz-text-control-overflow: hidden;
 		}
 	}
 	&[hidden] {
