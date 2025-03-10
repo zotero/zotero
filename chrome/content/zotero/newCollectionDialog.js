@@ -57,18 +57,19 @@ var Zotero_New_Collection_Dialog = {
 		let createdNode = Zotero.Utilities.Internal.createMenuForTarget(
 			Zotero.Libraries.get(this._libraryID),
 			menupopup,
-			this._parentCollectionID ? 'C' + this._parentCollectionID : 'L' + this._libraryID,
-			(event, libraryOrCollection) => {
-				this._libraryID = libraryOrCollection.libraryID;
-				if (libraryOrCollection.objectType === 'collection') {
-					this._parentCollectionID = libraryOrCollection.id;
+			{
+				currentTarget: this._parentCollectionID ? 'C' + this._parentCollectionID : 'L' + this._libraryID,
+				clickAction: (event, libraryOrCollection) => {
+					this._libraryID = libraryOrCollection.libraryID;
+					if (libraryOrCollection.objectType === 'collection') {
+						this._parentCollectionID = libraryOrCollection.id;
+					}
+					else {
+						this._parentCollectionID = null;
+					}
+					this._updateMenu();
 				}
-				else {
-					this._parentCollectionID = null;
-				}
-				this._updateMenu();
-			},
-			null
+			}
 		);
 		// If createMenuForTarget() built a submenu, replace it with its child menuitems
 		if (createdNode.menupopup) {
