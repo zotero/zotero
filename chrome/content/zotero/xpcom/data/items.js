@@ -1653,19 +1653,19 @@ Zotero.Items = function() {
 	/**
 	 * Purge unused data values
 	 */
-	this.purge = Zotero.Promise.coroutine(function* () {
-		Zotero.DB.requireTransaction();
-		
+	this.purge = async function () {
 		if (!Zotero.Prefs.get('purge.items')) {
 			return;
 		}
 		
-		var sql = "DELETE FROM itemDataValues WHERE valueID NOT IN "
-					+ "(SELECT valueID FROM itemData)";
-		yield Zotero.DB.queryAsync(sql);
+		await Zotero.DB.executeTransaction(async function () {
+			let sql = "DELETE FROM itemDataValues WHERE valueID NOT IN "
+				+ "(SELECT valueID FROM itemData)";
+			await Zotero.DB.queryAsync(sql, [], { ignoreDBLock: true });
+		}, { disableForeignKeys: true });
 		
 		Zotero.Prefs.set('purge.items', false)
-	});
+	};
 	
 	
 	
