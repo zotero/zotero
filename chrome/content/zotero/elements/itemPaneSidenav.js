@@ -163,6 +163,15 @@
 			}
 			return true;
 		}
+
+		isPaneOrderable(paneID) {
+			let orderable =
+				// In the first group
+				this._buttonContainer.querySelector(`.btn[data-pane=${paneID}]`)
+				// Built-in or orderable custom sections
+				&& (this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID));
+			return orderable;
+		}
 		
 		init() {
 			this._buttonContainer = this.querySelector('.inherit-flex');
@@ -294,11 +303,7 @@
 			let order = [];
 			for (let pane of panes) {
 				let paneID = pane.dataset.pane;
-				if (this._builtInPanes.includes(paneID)) {
-					order.push(paneID);
-					continue;
-				}
-				if (Zotero.ItemPaneManager.isSectionOrderable(paneID)) {
+				if (this.isPaneOrderable(paneID)) {
 					order.push(paneID);
 				}
 			}
@@ -357,6 +362,14 @@
 
 				container.hidden = this._defaultStatus || !this.container.getEnabledPane(paneID);
 			}
+
+			if (this.isPaneOrderable(paneID)) {
+				container.draggable = true;
+			} else {
+				// If the pane is not orderable, always insert it at the end
+				this._buttonContainer.appendChild(container);
+				return;
+			}
 			
 			// Insert the new button according to the persisted order.
 			if (order === null) {
@@ -367,9 +380,16 @@
 				let children = Array.from(this._buttonContainer.children);
 				let inserted = false;
 				for (let child of children) {
-					let childPane = child.querySelector('.btn')?.dataset.pane;
-					let childIndex = order.indexOf(childPane);
-					if (childIndex > index) {
+					let comparedPaneID = child.querySelector('.btn')?.dataset.pane;
+					// If the compared pane is not orderable, insert before it
+					if (!this.isPaneOrderable(comparedPaneID)) {
+						this._buttonContainer.insertBefore(container, child);
+						inserted = true;
+						break;
+					}
+					let comparedIndex = order.indexOf(comparedPaneID);
+					// If the compared pane should go after the new pane, insert before it
+					if (comparedIndex > index) {
 						this._buttonContainer.insertBefore(container, child);
 						inserted = true;
 						break;
@@ -381,8 +401,6 @@
 			} else {
 				this._buttonContainer.appendChild(container);
 			}
-			// Make sure the new button’s wrapper is draggable.
-			container.setAttribute('draggable', 'true');
 		}
 
 		removePane(paneID) {
@@ -650,23 +668,25 @@
 		handleButtonContextMenu = (event) => {
 			event.preventDefault();
 			let button = event.target;
-			let pane = button.dataset.pane;
-			if (!pane) return;
-			this._contextMenuTarget = pane;
-
-			// If the button is the first in the group, show reorder options
-			let isInGroup = this._buttonContainer.querySelector(`.btn[data-pane=${pane}]`);
-
-			let isPinnable = this.isPanePinnable(pane);
-			this.querySelector('.zotero-menuitem-pin').hidden = !isPinnable || this.pinnedPane == pane;
-			this.querySelector('.zotero-menuitem-unpin').hidden = !isPinnable || this.pinnedPane != pane;
+			let paneID = button.dataset.pane;
+			if (!paneID) return;
+			this._contextMenuTarget = paneID;
 
 			let wrappers = this._enabledWrappers;
-			let currentWrapper = this.querySelector(`.btn[data-pane=${pane}]`).parentElement;
+			let currentWrapper = this.querySelector(`.btn[data-pane=${paneID}]`).parentElement;
 			let currentIndex = wrappers.indexOf(currentWrapper);
 
-			this.querySelector('.zotero-menuitem-reorder-up').hidden = !isInGroup || currentIndex === 0;
-			this.querySelector('.zotero-menuitem-reorder-down').hidden = !isInGroup || currentIndex === wrappers.length - 1;
+			let isOrderable = this.isPaneOrderable(paneID);
+			let isLast = currentIndex === wrappers.length - 1;
+			let isNextOrderable = !isLast && this.isPaneOrderable(
+				wrappers[currentIndex + 1]?.querySelector(".btn")?.dataset.pane);
+				
+			let isPinnable = this.isPanePinnable(paneID);
+			this.querySelector('.zotero-menuitem-pin').hidden = !isPinnable || this.pinnedPane == paneID;
+			this.querySelector('.zotero-menuitem-unpin').hidden = !isPinnable || this.pinnedPane != paneID;
+
+			this.querySelector('.zotero-menuitem-reorder-up').hidden = !isOrderable || currentIndex === 0;
+			this.querySelector('.zotero-menuitem-reorder-down').hidden = !isOrderable || !isNextOrderable || isLast;
 
 			this.querySelector('.context-menu')
 					.openPopupAtScreen(event.screenX, event.screenY, true);
@@ -675,10 +695,14 @@
 		handleButtonDragStart = (event) => {
 			let wrapper = event.target.closest('.pin-wrapper');
 			if (!wrapper) return;
+			let button = wrapper.querySelector(".btn");
+			if (button.hasAttribute("disabled")) return;
+			let paneID = button.dataset.pane;
+			if (!this.isPaneOrderable(paneID)) return;
 			this._draggedWrapper = wrapper;
-			event.dataTransfer.effectAllowed = "move";
+			event.dataTransfer.dropEffect = "move";
 			// Create a clone for a custom drag image.
-			let clone = wrapper.querySelector(".btn").cloneNode(true);
+			let clone = button.cloneNode(true);
 			clone.style.position = "absolute";
 			clone.style.top = "-1000px";
 			clone.style.left = "-1000px";
@@ -689,7 +713,7 @@
 				clone.remove();
 			}, 0);
 			// Set the data to the pane ID.
-			event.dataTransfer.setData("zotero/sidenav", wrapper.querySelector(".btn").dataset.pane);
+			event.dataTransfer.setData("zotero/sidenav", paneID);
 		};
 
 		handleButtonDragOver = (event) => {
@@ -702,12 +726,23 @@
 			let offset = isStacked ? event.clientX - rect.left : event.clientY - rect.top;
 			let { index, position } = this.computeDropPosition(offset);
 
-			// If the drop position is the same as the dragged button, hide the drop indicator.
 			let currentIndex = this._enabledWrappers.indexOf(this._draggedWrapper);
-			if (currentIndex === index || currentIndex === index - 1) {
+			if (
+				// Dragging the button to the same position
+				currentIndex === index || currentIndex === index - 1
+				// Dragging the button after the non-orderable button
+				|| (
+					index > 0
+					&& !this.isPaneOrderable(this._enabledWrappers[index - 1].querySelector(".btn").dataset.pane)
+				)
+			) {
 				this._dropIndicator?.setAttribute("hidden", "true");
+				// Make pointer forbidden
+				event.dataTransfer.dropEffect = "none";
 				return;
 			}
+
+			event.dataTransfer.dropEffect = "move";
 	
 			// Create a drop indicator if one doesn't exist.
 			if (!this._dropIndicator) {
@@ -730,6 +765,13 @@
 			let isStacked = this.classList.contains("stacked");
 			let offset = isStacked ? event.clientX - rect.left : event.clientY - rect.top;
 			let { index } = this.computeDropPosition(offset);
+
+			// Drop the button after the non-orderable button is not allowed
+			if (
+				index > 0
+				&& !this.isPaneOrderable(this._enabledWrappers[index - 1].querySelector(".btn").dataset.pane)) {
+				return;
+			}
 			let actualIndex = this._wrappers.indexOf(this._enabledWrappers[index]);
 
 			await this.changePaneOrder(paneID, actualIndex);
