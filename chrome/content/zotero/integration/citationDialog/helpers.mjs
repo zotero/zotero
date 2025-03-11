@@ -171,6 +171,7 @@ export class CitationDialogHelpers {
 	// Extract locator from a string and return an object: { label: string, page: string, onlyLocator: bool}
 	// to identify the locator and pass that info to the dialog
 	extractLocator(string) {
+		string = string.trim();
 		// Check for different ways of typing the page locator
 		const pageRegex = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-–]+) *$/;
 		let pageLocator = pageRegex.exec(string);
@@ -182,32 +183,35 @@ export class CitationDialogHelpers {
 				fullLocatorString: pageLocator[0]
 			};
 		}
-		// Check for a generalized way of typing any other locator in full or short form
-		// Capture the first word (e.g. "act") followed by optional : or . with any number of whitespaces.
-		// Then, capture either any text surrounded with " or ' (e.g. book: "Book title")
-		// or just any word (e.g. l. 10)
-		const generalRegex = /(\w+)\s*[:.]?\s*(?:(['"])(.*?)\2|(\w+))$/;
-		let generalLocator = generalRegex.exec(string);
-		if (generalLocator?.length) {
-			let typedLocatorLabel = generalLocator[1].toLowerCase();
-			let existingLocators = Zotero.Cite.labels;
-			for (let existingLocator of existingLocators) {
-				let locatorLabel = Zotero.Cite.getLocatorString(existingLocator).toLowerCase();
-				// strip short locator labels of punctuation, so that e.g. for line locator, "l 10" is still counted as "l. 10"
-				let locatorLabelShort = Zotero.Cite.getLocatorString(existingLocator, "short").replace(/[.,;:{}()]/g, "").toLowerCase();
-				if (typedLocatorLabel == locatorLabel || typedLocatorLabel == locatorLabelShort) {
-					// fetch either text in quotes or the last word without quotes as locator value
-					let locatorValue = generalLocator[3] || generalLocator[4];
-					return {
-						label: existingLocator,
-						locator: locatorValue,
-						onlyLocator: generalLocator[0].length == string.length,
-						fullLocatorString: generalLocator[0]
-					};
-				}
-			}
+
+		// Check for all other locators
+		let words = string.split(" ");
+		let locatorLabel = null;
+		let wordLocatorIndex = 0;
+		// Go through every word and look for a locator label in its full or short form (e.g. "line" or "l" or "l.")
+		for (let word of words) {
+			word = word.toLowerCase();
+			locatorLabel = Zotero.Cite.labels.find((loc) => {
+				let fullLocator = Zotero.Cite.getLocatorString(loc).toLowerCase();
+				let shortLocator = Zotero.Cite.getLocatorString(loc, "short").toLowerCase();
+				let shortLocatorNoPunctuation = shortLocator.replace(".", "").replace(",", "");
+				return fullLocator == word || shortLocator == word || shortLocatorNoPunctuation == word;
+			});
+			if (locatorLabel) break;
+			wordLocatorIndex += 1;
 		}
-		return null;
+		// Fetch the locator value - all strings following the label
+		// e.g. for "history of USA chapter one and two", the locator value is "one and two"
+		let locatorValue = words.slice(wordLocatorIndex + 1).join(" ").trim();
+		if (locatorLabel === null || !locatorValue.length) return null;
+		// The entire locator string - "chapter one and two"
+		let fullLocatorString = words.slice(wordLocatorIndex).join(" ");
+		return {
+			label: locatorLabel,
+			locator: locatorValue,
+			onlyLocator: fullLocatorString.length == string.length,
+			fullLocatorString
+		};
 	}
 
 	// calculate the height of the #search-row accounting for margins and border
