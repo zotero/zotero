@@ -621,6 +621,9 @@
 						flex: 1;
 						@media (-moz-platform: macos) {
 							height: 22px;
+							// <select> with increased height is hard to position but this helps
+							// to align it with <input> better
+							margin-bottom: -2px;
 						}
 						@media (-moz-platform: windows) {
 							border: 1px solid var(--color-border);
