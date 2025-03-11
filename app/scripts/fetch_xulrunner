@@ -398,6 +398,12 @@ function modify_omni {
 	# Remove non-native text input styles
 	remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
 	
+	# Provide a mechanism for non-UA stylesheets to override the overflow property
+	# of a text control's anonymous text node child
+	echo '::placeholder, ::-moz-text-control-editing-root, ::-moz-text-control-preview {
+		overflow: var(--moz-text-control-overflow);
+	}' >> chrome/toolkit/res/forms.css
+	
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
 	cd ..
