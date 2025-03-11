@@ -1838,4 +1838,243 @@ describe("Item pane", function () {
 			itemDetails.pinnedPane = "";
 		});
 	});
+
+	describe("Sidenav", function () {
+		async function waitForSidenav() {
+			await waitForCallback(() => {
+				return !!ZoteroPane.itemPane._itemDetails.sidenav?._initialized;
+			});
+		}
+
+		async function waitForSidenavActive() {
+			await waitForCallback(() => {
+				return !ZoteroPane.itemPane._itemDetails.sidenav._defaultStatus;
+			});
+		}
+
+		function compareOrder(order, targetOrder) {
+			let lastIndex = -1;
+			for (let paneID of order) {
+				let index = targetOrder.indexOf(paneID);
+				if (index === -1) {
+					continue;
+				}
+				if (index < lastIndex) {
+					return false;
+				}
+				lastIndex = index;
+			}
+			return true;
+		}
+
+		function compareButtonOrder(order) {
+			let wrappers = ZoteroPane.itemPane._itemDetails.sidenav._enabledWrappers;
+			let buttonOrder = wrappers.map(wrapper => wrapper.querySelector('.btn').dataset.pane);
+			return compareOrder(buttonOrder, order)
+		}
+
+		function compareSectionOrder(order) {
+			let sections = ZoteroPane.itemPane._itemDetails.getEnabledPanes();
+			let sectionOrder = sections.map(section => section.dataset.pane);
+			return compareOrder(sectionOrder, order)
+		}
+
+		function getSidenavOrder() {
+			return Zotero.Prefs.get('sidenav.order') || ZoteroPane.itemPane._itemDetails.sidenav._builtInPanes.join(',');
+		}
+
+		async function clickSidenavMenu(paneIdx, menuSelector) {
+			let sidenav = ZoteroPane.itemPane._itemDetails.sidenav;
+			if (paneIdx < 0) {
+				paneIdx = sidenav._enabledWrappers.length + paneIdx;
+			}
+			let btn = sidenav._enabledWrappers[paneIdx].querySelector('.btn');
+			let btnRect = btn.getBoundingClientRect();
+			let popup = sidenav.querySelector('.context-menu');
+			let promise = waitForDOMEvent(popup, 'popupshown');
+			sidenav.handleButtonContextMenu({
+				target: btn,
+				preventDefault: function () {},
+				screenX: btnRect.left,
+				screenY: btnRect.top,
+			});
+			await promise;
+			let menu = popup.querySelector(menuSelector);
+			if (!menu || menu.hidden) {
+				popup.hidePopup();
+				return false;
+			}
+			menu.click();
+			popup.hidePopup();
+			return true;
+		}
+
+		it("should reorder section when prefs change", async function () {
+			await waitForSidenav();
+
+			let orderRaw = getSidenavOrder();
+			let order = orderRaw.split(',');
+			let newOrder = order.reverse()
+			let newOrderRaw = newOrder.join(',');
+			Zotero.Prefs.set('sidenav.order', newOrderRaw);
+
+			// If the order is not updated, a timeout exception will be thrown to fail the test
+			await waitForCallback(() => {
+				return compareSectionOrder(newOrder) && compareButtonOrder(newOrder);
+			}
+			, 100, 3);
+		});
+
+		it("should move section up", async function () {
+			await waitForSidenav();
+
+			// Create an item so that the sidenav is active
+			let item = await createDataObject('item');
+			await ZoteroPane.selectItem(item.id);
+
+			await waitForSidenavActive();
+
+			let orderRaw = getSidenavOrder();
+			let order = orderRaw.split(',');
+
+			let promise = waitForPrefsChange('sidenav.order');
+			let menuEnabled = await clickSidenavMenu(1, '.zotero-menuitem-reorder-up');
+			assert.isTrue(menuEnabled);
+			await promise;
+
+			let newOrderRaw = getSidenavOrder();
+
+			let newOrder = newOrderRaw.split(',');
+			let expectedOrder = [...order];
+			// Exchange 0 and 1
+			let temp = expectedOrder[0];
+			expectedOrder[0] = expectedOrder[1];
+			expectedOrder[1] = temp;
+			assert.deepEqual(newOrder, expectedOrder);
+
+			// Remove the temp item
+			await Zotero.Items.erase(item.id);
+		});
+
+		it("should move section down", async function () {
+			await waitForSidenav();
+
+			// Create an item so that the sidenav is active
+			let item = await createDataObject('item');
+			await ZoteroPane.selectItem(item.id);
+
+			await waitForSidenavActive();
+
+			let orderRaw = getSidenavOrder();
+			let order = orderRaw.split(',');
+			let promise = waitForPrefsChange('sidenav.order');
+			let menuEnabled = await clickSidenavMenu(0, '.zotero-menuitem-reorder-down');
+			assert.isTrue(menuEnabled);
+			await promise;
+
+			let newOrderRaw = getSidenavOrder();
+			
+			let newOrder = newOrderRaw.split(',');
+			let expectedOrder = [...order];
+			// Exchange 0 and 1
+			let temp = expectedOrder[0];
+			expectedOrder[0] = expectedOrder[1];
+			expectedOrder[1] = temp;
+			assert.deepEqual(newOrder, expectedOrder);
+
+			// Remove the temp item
+			await Zotero.Items.erase(item.id);
+		});
+
+		it("should not show move up menu for first section", async function () {
+			await waitForSidenav();
+
+			// Create an item so that the sidenav is active
+			let item = await createDataObject('item');
+			await ZoteroPane.selectItem(item.id);
+
+			await waitForSidenavActive();
+
+			let menuEnabled = await clickSidenavMenu(0, '.zotero-menuitem-reorder-up');
+			assert.isFalse(menuEnabled);
+
+			await Zotero.Items.erase(item.id);
+		});
+
+		it("should not show move down menu for last section", async function () {
+			await waitForSidenav();
+
+			// Create an item so that the sidenav is active
+			let item = await createDataObject('item');
+			await ZoteroPane.selectItem(item.id);
+
+			await waitForSidenavActive();
+
+			let menuEnabled = await clickSidenavMenu(-1, '.zotero-menuitem-reorder-down');
+			assert.isFalse(menuEnabled);
+
+			await Zotero.Items.erase(item.id);
+		});
+
+		it("should unpin section if it moves to the top", async function () {
+			await waitForSidenav();
+
+			// Create an item so that the sidenav is active
+			let item = await createDataObject('item');
+			await ZoteroPane.selectItem(item.id);
+
+			await waitForSidenavActive();
+
+			let orderRaw = getSidenavOrder();
+			let order = orderRaw.split(',');
+
+			// Pin the second section
+			ZoteroPane.itemPane._itemDetails.pinnedPane = order[1];
+
+			let promise = waitForPrefsChange('sidenav.order');
+			let menuEnabled = await clickSidenavMenu(1, '.zotero-menuitem-reorder-up');
+			assert.isTrue(menuEnabled);
+			await promise;
+			
+			assert.isEmpty(ZoteroPane.itemPane._itemDetails.pinnedPane);
+
+			await Zotero.Items.erase(item.id);
+		});
+
+		it("should not show reorder menu for custom section with orderable disabled", async function () {
+			await waitForSidenav();
+
+			const registeredID = Zotero.ItemPaneManager.registerSection({
+				paneID: "custom-section-example",
+				pluginID: "example@example.com",
+				header: {
+					l10nID: "example-item-pane-header",
+					icon: "chrome://zotero/skin/16/universal/note.svg",
+				},
+				sidenav: {
+					l10nID: "example-item-pane-header",
+					icon: "chrome://zotero/skin/20/universal/note.svg",
+					// Disable orderable
+					orderable: false,
+				},
+				onRender: ({ body }) => {
+					body.textContent = "Custom section";
+				},
+			});
+
+			// Create an item so that the sidenav is active
+			let item = await createDataObject('item');
+			await ZoteroPane.selectItem(item.id);
+
+			await waitForSidenavActive();
+
+			let menuUpEnabled = await clickSidenavMenu(-1, '.zotero-menuitem-reorder-up');
+			assert.isFalse(menuUpEnabled);
+			let menuDownEnabled = await clickSidenavMenu(-1, '.zotero-menuitem-reorder-down');
+			assert.isFalse(menuDownEnabled);
+
+			await Zotero.Items.erase(item.id);
+			Zotero.ItemPaneManager.unregisterSection(registeredID);
+		});
+	});
 });

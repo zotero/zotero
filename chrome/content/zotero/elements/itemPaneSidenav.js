@@ -64,6 +64,8 @@
 				</menupopup>
 			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
+
+		_initialized = false;
 		
 		_container = null;
 		
@@ -238,6 +240,8 @@
 			this.setAttribute("role", "tablist");
 
 			this._prefObserverID = Zotero.Prefs.registerObserver("sidenav.order", this.handlePaneOrderChange);
+
+			this._initialized = true;
 		}
 
 		destroy() {
@@ -251,6 +255,8 @@
 			this._buttonContainer.removeEventListener('dragend', this.handleButtonDragEnd);
 
 			Zotero.Prefs.unregisterObserver(this._prefObserverID);
+
+			this._initialized = false;
 		}
 
 		render() {
