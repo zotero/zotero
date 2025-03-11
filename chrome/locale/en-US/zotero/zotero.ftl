@@ -169,7 +169,7 @@ item-button-view-online =
 file-renaming-file-renamed-to = File renamed to { $filename }
 
 itembox-button-options =
-    .tooltiptext = Open context menu
+    .tooltiptext = Open Context Menu
 itembox-button-merge =
     .aria-label = Select version of { $field } field
 
