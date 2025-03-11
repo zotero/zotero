@@ -277,7 +277,7 @@ class Layout {
 			while (!this.itemsView.collectionTreeRow) {
 				await Zotero.Promise.delay(10);
 			}
-			await this.itemsView.setFilter('search', value);
+			await this.itemsView.setFilter('citation-search', value);
 		}
 
 		SearchHandler.searching = false;

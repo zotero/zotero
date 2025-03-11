@@ -428,7 +428,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	s2.setScope(s, includeScopeChildren);
 	
 	if (this.searchText) {
-		var cond = 'quicksearch-' + Zotero.Prefs.get('search.quicksearch-mode');
+		let cond = 'quicksearch-'
+			+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
 		s2.addCondition(cond, 'contains', this.searchText);
 	}
 	
@@ -470,9 +471,10 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 };
 
 
-Zotero.CollectionTreeRow.prototype.setSearch = function (searchText) {
+Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
 	Zotero.CollectionTreeCache.clear();
 	this.searchText = searchText;
+	this.searchMode = mode;
 }
 
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
