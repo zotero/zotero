@@ -106,6 +106,7 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			this._section.removeEventListener("toggle", this._handleSectionToggle);
 			this._section = null;
 		}
+		this._resetRenderedFlags()
 	}
 
 	initCollapsibleSection() {
@@ -185,6 +186,11 @@ class ItemPaneSectionElementBase extends XULElementBase {
 
 		_refreshDisabled = true;
 
+		// Cache section l10n ID and args for reconnecting
+		_sectionL10nId = null;
+
+		_sectionL10nArgs = null;
+
 		get content() {
 			let extraButtons = Object.keys(this._sectionButtons).join(",");
 			let content = `
@@ -235,6 +241,9 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			if (this._label) this._section.label = this._label;
 			this.updateSectionIcon();
 
+			if (this._sectionL10nId !== null) this.setL10nID(this._sectionL10nId);
+			if (this._sectionL10nArgs !== null) this.setL10nArgs(this._sectionL10nArgs);
+
 			this._sectionListeners = [];
 
 			let styles = [];
@@ -270,17 +279,19 @@ class ItemPaneSectionElementBase extends XULElementBase {
 
 		destroy() {
 			this._sectionListeners.forEach(data => this._section?.removeEventListener(data.type, data.listener));
+			this._sectionListeners = [];
 
 			this._handleDestroy();
-			this._hooks = null;
 		}
 
 		setL10nID(l10nId) {
 			this._section.dataset.l10nId = l10nId;
+			this._sectionL10nId = l10nId;
 		}
 
 		setL10nArgs(l10nArgs) {
 			this._section.dataset.l10nArgs = l10nArgs;
+			this._sectionL10nArgs = l10nArgs;
 		}
 
 		registerSectionIcon(options) {

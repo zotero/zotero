@@ -456,6 +456,68 @@
 			this.getPanes().forEach(elem => this._sidenav.updatePaneStatus(elem.dataset.pane));
 		}
 
+		initPaneOrder(order) {
+			let panes = this.getPanes();
+			let paneIDs = panes.map(elem => elem.dataset.pane);
+
+			// Compare the order of paneIDs with the given order
+			let isOrderDifferent = false;
+			let lastOrderIdx = -1;
+			for (let paneID of paneIDs) {
+				let idx = order.indexOf(paneID);
+				if (idx == -1) {
+					continue;
+				}
+				if (idx < lastOrderIdx) {
+					isOrderDifferent = true;
+					break;
+				}
+				lastOrderIdx = idx;
+			}
+
+			if (!isOrderDifferent) {
+				return;
+			}
+
+			// Rearrange panes according to the given order. Unordered panes will stay at the end
+			for (let i = order.length - 1; i >= 0; i--) {
+				let paneID = order[i];
+				let idx = paneIDs.indexOf(paneID);
+				if (idx == -1) {
+					continue;
+				}
+				this._paneParent.prepend(panes[idx]);
+			}
+		}
+
+		/**
+		 * Change the order of panes
+		 * @param {string} paneID
+		 * @param {number} newIdx
+		 * @param {Object} options
+		 * @param {boolean} options.render - Whether to rerender panes after reordering
+		 */
+		async changePaneOrder(paneID, newIdx, options = {}) {
+
+			let panes = this.getPanes();
+			let paneIDs = panes.map(elem => elem.dataset.pane);
+			let currentIndex = paneIDs.indexOf(paneID);
+			if (currentIndex == -1) return;
+			if (currentIndex == newIdx || currentIndex == newIdx - 1) return;
+			let currentPane = panes[currentIndex];
+			if (newIdx < panes.length) {
+				this._paneParent.insertBefore(currentPane, panes[newIdx]);
+			}
+			else {
+				this._paneParent.appendChild(currentPane);
+			}
+
+			// Rerender panes after reordering
+			if (options.render !== false) {
+				await this.render();
+			}
+		}
+
 		async scrollToPane(paneID, behavior = 'smooth') {
 			let panes = this.getEnabledPanes();
 			let paneIndex = panes.findIndex(elem => elem.dataset.pane == paneID);

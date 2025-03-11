@@ -198,6 +198,10 @@
 								type: "string",
 								optional: true,
 							},
+							orderable: {
+								type: "boolean",
+								optional: true,
+							},
 						}
 					},
 					sectionButtons: {
@@ -326,6 +330,14 @@
 
 		get customSectionData() {
 			return this._sectionManager.data;
+		}
+
+		isSectionOrderable(paneID) {
+			let option = this._sectionManager._optionsCache[paneID];
+			if (!option) {
+				return false;
+			}
+			return option.sidenav.orderable ?? true;
 		}
 
 		registerInfoRow(options) {

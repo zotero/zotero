@@ -125,142 +125,34 @@
 		
 		init() {
 			this.initCollapsibleSection();
-			this._creatorTypeMenu.addEventListener('command', async (event) => {
-				var typeBox = this._popupNode;
-				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-				
-				var typeID = event.explicitOriginalTarget.getAttribute('typeid');
-				var row = typeBox.parentNode;
-				var fields = this.getCreatorFields(row);
-				fields.creatorTypeID = typeID;
-				typeBox.querySelector("#creator-type-label-inner").textContent = Zotero.getString(
-					'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
-				);
-				typeBox.setAttribute('typeid', typeID);
-				
-				this.modifyCreator(index, fields);
-				if (this.saveOnEdit) {
-					await this.item.saveTx();
-				}
-			});
+			this._creatorTypeMenu.addEventListener('command', this._handleCreatorTypeChange);
 
-			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (_event) => {
-				var row = this._popupNode.closest('.meta-row');
-				var typeBox = row.querySelector('.creator-type-label').parentNode;
-				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-				var item = this.item;
-				var exists = item.hasCreatorAt(index);
-				var fieldMode = row.querySelector("[fieldMode]").getAttribute("fieldMode");
-				
-				var moreCreators = item.numCreators() > index + 1;
-				
-				var hideMoveToTop = !exists || index < 2;
-				var hideMoveUp = !exists || index == 0;
-				var hideMoveDown = !exists || !moreCreators;
-				var hideMoveSep = hideMoveUp && hideMoveDown;
-				var hideNameSwap = fieldMode == '1' || !exists;
-				
-				this._id('creator-transform-swap-names').hidden = hideNameSwap;
-				this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(row);
-				this._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
-				this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
-				this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
-				this._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);
-			});
+			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', this._handleCreatorTransformMenuShowing);
 
-			// Ensure no button is forced to stay visible once the menu is closed
-			this.addEventListener('popuphidden', (event) => {
-				for (let node of this.querySelectorAll('.show-without-hover')) {
-					node.classList.remove('show-without-hover');
-					node.classList.add("show-on-hover");
-				}
-				// Some toolbarbuttons get stuck with open=true if popup is
-				// opened via keyboard (e.g. select version btn in merge mode)
-				let popupParent = event.target.parentElement;
-				if (popupParent?.getAttribute("open") == "true") {
-					popupParent.removeAttribute("open");
-				}
-			});
+			this._id('zotero-creator-transform-menu').addEventListener('command', this._handleCreatorTransformMenuCommand);
 
-			this._id('zotero-creator-transform-menu').addEventListener('command', async (event) => {
-				var row = this._popupNode.closest('.meta-row');
-				var typeBox = row.querySelector('.creator-type-label').parentNode;
-				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-				
-				if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
-					let dir;
-					switch (event.explicitOriginalTarget.id) {
-						case 'zotero-creator-move-to-top':
-							dir = 'top';
-							break;
-						
-						case 'zotero-creator-move-up':
-							dir = 'up';
-							break;
-						
-						case 'zotero-creator-move-down':
-							dir = 'down';
-							break;
-					}
-					this.moveCreator(index, dir);
-				}
-			});
+			this._id('creator-transform-swap-names').addEventListener('command', this._handleCreatorTransformSwapNames);
 
-			this._id('creator-transform-swap-names').addEventListener('command',
-				event => this.swapNames(event));
-
-			this._id('creator-transform-capitalize').addEventListener('command',
-				event => this.capitalizeCreatorName(event));
+			this._id('creator-transform-capitalize').addEventListener('command', this._handleCreatorTransformCapitalize);
 			
-			this._linkMenu.addEventListener('popupshowing', () => {
-				let menu = this._linkMenu;
-				let link = menu.dataset.link;
-				let val = menu.dataset.val;
-
-				let viewOnline = this._id('zotero-link-menu-view-online');
-				let copy = this._id('zotero-link-menu-copy');
-				
-				viewOnline.disabled = !link;
-				copy.disabled = !link;
-				copy.hidden = link === val;
-				
-				let existingCopyMenuitem = menu.querySelector('menuitem[data-action="copy"]');
-				if (existingCopyMenuitem) {
-					existingCopyMenuitem.after(copy);
-				}
-				else {
-					menu.append(copy);
-				}
-			});
+			this._linkMenu.addEventListener('popupshowing', this._handleLinkMenuShowing);
 			
 			this._id('zotero-link-menu-view-online').addEventListener(
 				'command',
-				event => ZoteroPane.loadURI(this._linkMenu.dataset.link, event)
+				this._handleLinkMenuViewOnline
 			);
 			this._id('zotero-link-menu-copy').addEventListener(
 				'command',
-				() => Zotero.Utilities.Internal.copyTextToClipboard(this._linkMenu.dataset.link)
+				this._handleLinkMenuCopy
 			);
 
-			this._infoTable.addEventListener("focusout", async (_) => {
-				await Zotero.Promise.delay();
-				// If the focus leaves the itemBox, clear the last focused element
-				let focused = document.activeElement;
-				if (!this._infoTable.contains(focused)) {
-					this._clearSavedFieldFocus();
-				}
-				// If user moves focus outside of empty unsaved creator row, remove it.
-				let unsavedCreatorRow = this.querySelector(".creator-type-value[unsaved=true]")?.closest(".meta-row");
-				// But not if these parent components receive focus which happens when menus are opened
-				if (["zotero-view-item", "main-window"].includes(focused.id) || !unsavedCreatorRow) return;
-				let focusLeftUnsavedCreatorRow = !unsavedCreatorRow.contains(focused);
-				if (focusLeftUnsavedCreatorRow) {
-					this.removeUnsavedCreatorRow(true);
-				}
-			});
+			this._infoTable.addEventListener("focusout", this._handleFocusout);
+
+			// Ensure no button is forced to stay visible once the menu is closed
+			this.addEventListener('popuphidden', this._handlePopupHidden);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'infobox'], 'itemBox');
-			Zotero.Prefs.registerObserver('fontSize', () => {
+			this._prefsObserverID = Zotero.Prefs.registerObserver('fontSize', () => {
 				this._forceRenderAll();
 			});
 			
@@ -270,6 +162,18 @@
 		
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+
+			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
+
+			this._id('zotero-creator-transform-menu')?.removeEventListener('popupshowing', this._handleCreatorTransformMenuShowing);
+			this._id('zotero-creator-transform-menu')?.removeEventListener('command', this._handleCreatorTransformMenuCommand);
+			this._id('creator-transform-swap-names')?.removeEventListener('command', this._handleCreatorTransformSwapNames);
+			this._id('creator-transform-capitalize')?.removeEventListener('command', this._handleCreatorTransformCapitalize);
+			this._linkMenu?.removeEventListener('popupshowing', this._handleLinkMenuShowing);
+			this._id('zotero-link-menu-view-online')?.removeEventListener('command', this._handleLinkMenuViewOnline);
+			this._id('zotero-link-menu-copy')?.removeEventListener('command', this._handleLinkMenuCopy);
+			this._infoTable?.removeEventListener("focusout", this._handleFocusout);
+			this.removeEventListener('popuphidden', this._handlePopupHidden);
 		}
 		
 		//
@@ -2852,6 +2756,138 @@
 		_id(id) {
 			return this.querySelector(`#${id}`);
 		}
+
+		_handleCreatorTypeChange = async (event) => {
+			var typeBox = this._popupNode;
+			var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+			
+			var typeID = event.explicitOriginalTarget.getAttribute('typeid');
+			var row = typeBox.parentNode;
+			var fields = this.getCreatorFields(row);
+			fields.creatorTypeID = typeID;
+			typeBox.querySelector("#creator-type-label-inner").textContent = Zotero.getString(
+				'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
+			);
+			typeBox.setAttribute('typeid', typeID);
+			
+			this.modifyCreator(index, fields);
+			if (this.saveOnEdit) {
+				await this.item.saveTx();
+			}
+		};
+
+		_handleCreatorTransformMenuShowing = (_event) => {
+			var row = this._popupNode.closest('.meta-row');
+			var typeBox = row.querySelector('.creator-type-label').parentNode;
+			var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+			var item = this.item;
+			var exists = item.hasCreatorAt(index);
+			var fieldMode = row.querySelector("[fieldMode]").getAttribute("fieldMode");
+			
+			var moreCreators = item.numCreators() > index + 1;
+			
+			var hideMoveToTop = !exists || index < 2;
+			var hideMoveUp = !exists || index == 0;
+			var hideMoveDown = !exists || !moreCreators;
+			var hideMoveSep = hideMoveUp && hideMoveDown;
+			var hideNameSwap = fieldMode == '1' || !exists;
+			
+			this._id('creator-transform-swap-names').hidden = hideNameSwap;
+			this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(row);
+			this._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
+			this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
+			this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
+			this._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);
+		};
+
+		_handleCreatorTransformMenuCommand = async (event) => {
+			var row = this._popupNode.closest('.meta-row');
+			var typeBox = row.querySelector('.creator-type-label').parentNode;
+			var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+			
+			if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
+				let dir;
+				switch (event.explicitOriginalTarget.id) {
+					case 'zotero-creator-move-to-top':
+						dir = 'top';
+						break;
+					
+					case 'zotero-creator-move-up':
+						dir = 'up';
+						break;
+					
+					case 'zotero-creator-move-down':
+						dir = 'down';
+						break;
+				}
+				this.moveCreator(index, dir);
+			}
+		};
+
+		_handleCreatorTransformSwapNames = (event) => {
+			this.swapNames(event);
+		};
+
+		_handleCreatorTransformCapitalize = (event) => {
+			this.capitalizeCreatorName(event);
+		}
+
+		_handleLinkMenuShowing = () => {
+			let menu = this._linkMenu;
+			let link = menu.dataset.link;
+			let val = menu.dataset.val;
+
+			let viewOnline = this._id('zotero-link-menu-view-online');
+			let copy = this._id('zotero-link-menu-copy');
+			
+			viewOnline.disabled = !link;
+			copy.disabled = !link;
+			copy.hidden = link === val;
+			
+			let existingCopyMenuitem = menu.querySelector('menuitem[data-action="copy"]');
+			if (existingCopyMenuitem) {
+				existingCopyMenuitem.after(copy);
+			}
+			else {
+				menu.append(copy);
+			}
+		};
+
+		_handleLinkMenuViewOnline = event => ZoteroPane.loadURI(this._linkMenu.dataset.link, event);
+
+		_handleLinkMenuCopy = () => {
+			Zotero.Utilities.Internal.copyTextToClipboard(this._linkMenu.dataset.link);
+		};
+
+		_handlePopupHidden = (event) => {
+			for (let node of this.querySelectorAll('.show-without-hover')) {
+				node.classList.remove('show-without-hover');
+				node.classList.add("show-on-hover");
+			}
+			// Some toolbarbuttons get stuck with open=true if popup is
+			// opened via keyboard (e.g. select version btn in merge mode)
+			let popupParent = event.target.parentElement;
+			if (popupParent?.getAttribute("open") == "true") {
+				popupParent.removeAttribute("open");
+			}
+		};
+
+		_handleFocusout = async (_) => {
+			await Zotero.Promise.delay();
+			// If the focus leaves the itemBox, clear the last focused element
+			let focused = document.activeElement;
+			if (!this._infoTable.contains(focused)) {
+				this._clearSavedFieldFocus();
+			}
+			// If user moves focus outside of empty unsaved creator row, remove it.
+			let unsavedCreatorRow = this.querySelector(".creator-type-value[unsaved=true]")?.closest(".meta-row");
+			// But not if these parent components receive focus which happens when menus are opened
+			if (["zotero-view-item", "main-window"].includes(focused.id) || !unsavedCreatorRow) return;
+			let focusLeftUnsavedCreatorRow = !unsavedCreatorRow.contains(focused);
+			if (focusLeftUnsavedCreatorRow) {
+				this.removeUnsavedCreatorRow(true);
+			}
+		};
 	}
 	customElements.define("info-box", InfoBox);
 }

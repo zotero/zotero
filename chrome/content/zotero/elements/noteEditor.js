@@ -192,13 +192,16 @@
 			}
 
 			if (ids.includes(id) || this._parentItem && ids.includes(this._parentItem.id)) {
-				this._id('links-box').refresh();
+				this._id('links-box')?.refresh();
 			}
 		};
 
 		set notitle(val) {
 			this._notitle = !!val;
-			this._id('links-box').notitle = val;
+			let linksBox = this._id('links-box');
+			if (linksBox) {
+				linksBox.notitle = val;
+			}
 		}
 
 		set navigateHandler(val) {
@@ -407,8 +410,8 @@
 		}
 
 		refresh() {
-			this._id('related').render();
-			this._id('tags').render();
+			this._id('related')?.render();
+			this._id('tags')?.render();
 		}
 
 		_id(id) {
