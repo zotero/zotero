@@ -138,6 +138,15 @@ info-box {
 				inset-inline-end: 0;
 				bottom: var(--editable-text-padding-block);
 			}
+			
+			&.overflowing {
+				--ellipsis: var(--ellipsis-and-comma-character, '…,');
+				
+				&::after {
+					display: none;
+				}
+			}
+			
 			&.focused::after {
 				visibility: hidden;
 			}

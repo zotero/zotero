@@ -266,6 +266,8 @@
 			
 			this.style.setProperty('--comma-character',
 				"'" + Zotero.getString('punctuation.comma') + "'");
+			this.style.setProperty('--ellipsis-and-comma-character',
+				"'" + Zotero.getString('punctuation.ellipsis') + Zotero.getString('punctuation.comma') + "'");
 		}
 		
 		destroy() {
