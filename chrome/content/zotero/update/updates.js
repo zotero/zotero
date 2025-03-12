@@ -644,6 +644,7 @@ var gCheckingPage = {
 	 * this so we can cancel the update check if the user closes the window.
 	 */
 	_checker: null,
+	_checkId: null,
 
 	/**
 	 * Initialize
@@ -657,6 +658,7 @@ var gCheckingPage = {
 				Ci.nsIUpdateChecker
 			);
 			let check = await this._checker.checkForUpdates(this._checker.FOREGROUND_CHECK);
+			this._checkId = check.id
 			let result;
 			try {
 				result = await makeAbortable(check.result);
@@ -664,7 +666,8 @@ var gCheckingPage = {
 			catch (e) {
 				// If we are aborting, stop the update check on our way out.
 				if (e instanceof AbortError) {
-					this._checker.stopCheck(check.id);
+					this._checker.stopCheck(this._checkId);
+					this._checkId = null;
 				}
 				throw e;
 			}
@@ -762,7 +765,8 @@ var gCheckingPage = {
 	 * Manager control, so stop checking for updates.
 	 */
 	onWizardCancel() {
-		this._checker.stopCurrentCheck();
+		this._checker.stopCheck(this._checkId);
+		this._checkId = null;
 	},
 };
 
