@@ -74,9 +74,6 @@ async function onLoad() {
 	// keypress from the top-most row in the items table
 	doc.addEventListener("keydown", event => KeyboardHandler.captureKeydown(event), true);
 
-	// handling of user's IO
-	IOManager.init();
-
 	// Move dialog towards the center (it's needed even though we open the dialog with centerscreen param)
 	let targetX = Math.floor((window.screen.width - window.outerWidth) / 2);
 	let targetY = window.screen.height / 3;
@@ -93,8 +90,13 @@ async function onLoad() {
 	// fetch opened/selected/cited items so they are known
 	// before refreshing items list after dialog mode setting
 	await SearchHandler.refreshNonLibraryItems();
-	// set initial dialog mode when everything is loaded
+	// some nodes (e.g. item-tree-menu-bar) are expected to be present to switch modes
+	// so this has to go after all layouts are loaded
 	IOManager.setInitialDialogMode();
+	// most of IO handling relies on currentLayout being defined so it must follow setInitialDialogMode
+	IOManager.init();
+	// explicitly focus bubble input so one can begin typing right away
+	_id("bubble-input").refocusInput();
 
 	// Disabled all multiselect when citing notes
 	if (isCitingNotes) {
