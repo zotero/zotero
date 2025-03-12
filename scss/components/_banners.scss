@@ -100,7 +100,7 @@
 		gap: 8px;
 		margin-inline-start: auto;
 
-		@media (-moz-platform: windows) {
+		@media (-moz-platform: windows), (-moz-platform: linux) {
 			button {
 				height: 24px;
 				margin: 0 !important;
