@@ -137,6 +137,7 @@ info-box {
 				position: absolute;
 				inset-inline-end: 0;
 				bottom: var(--editable-text-padding-block);
+				pointer-events: none;
 			}
 			
 			&.overflowing {
