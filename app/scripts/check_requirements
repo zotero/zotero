@@ -42,7 +42,7 @@ for lfs_file in $lfs_files; do
 	file_type=$(file -b $lfs_file)
 	echo -n $file_type" "
 	if [ -z "$(echo -n $file_type | grep XZ)" ]; then
-		{ $FAIL_CMD_INLINE; FAILED=1; echo " -- run 'git lfs pull'"; }
+		{ $FAIL_CMD_INLINE; FAILED=1; echo " -- run 'git lfs install; git lfs pull'"; }
 	fi
 	echo
 done
