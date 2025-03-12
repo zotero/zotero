@@ -100,15 +100,15 @@
 					bubble.classList.toggle("has-item-selected", !!itemObj.selected);
 				}
 			}
-			// Make sure that all inputs occupy the right width
-			for (let input of [...this.querySelectorAll(".input")]) {
-				let requiredWidth = Utils.getContentWidth(input);
-				input.style.width = `${requiredWidth}px`;
-			}
 			// Prepend first input
 			if (!this._body.firstChild || !Utils.isInput(this._body.firstChild)) {
 				let input = this._createInputElem();
 				this._body.prepend(input);
+			}
+			// Make sure that all inputs occupy the right width
+			for (let input of [...this.querySelectorAll(".input")]) {
+				let requiredWidth = Utils.getContentWidth(input);
+				input.style.width = `${requiredWidth}px`;
 			}
 			// Add placeholder and a special aria-description to the first input when there are no bubbles
 			let isOnlyInput = this.getAllBubbles().length == 0;
