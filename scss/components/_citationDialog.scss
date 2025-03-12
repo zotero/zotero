@@ -623,7 +623,10 @@
 							height: 22px;
 							// <select> with increased height is hard to position but this helps
 							// to align it with <input> better
-							margin-bottom: -2px;
+							margin-bottom: -3px;
+							// push label text a bit higher 
+							padding-top: 0;
+							padding-bottom: 3px;
 						}
 						@media (-moz-platform: windows) {
 							border: 1px solid var(--color-border);
