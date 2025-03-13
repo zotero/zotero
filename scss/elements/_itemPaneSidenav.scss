@@ -110,6 +110,7 @@ item-pane-sidenav {
 		
 		// Locate button
 		&[data-action="locate"] {
+			color: var(--fill-secondary);
 			@include svgicon-menu("go-to", "universal", "20");
 			
 			&:-moz-locale-dir(rtl) {
@@ -149,7 +150,7 @@ item-pane-sidenav {
 	.drop-indicator {
 		position: absolute;
 		display: block;
-		background-color: var(--fill-primary);
+		background-color: var(--color-accent);
 		z-index: 1000;
 		--drop-indicator-size: 2px;
 
