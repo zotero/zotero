@@ -122,6 +122,15 @@
 	margin-top: 1px;
 }
 
+#zotero-tb-pq-update {
+	list-style-image: url(chrome://zotero/skin/update-metadata.png);
+}
+
+#zotero-tb-pq-update .toolbarbutton-icon {
+	width: 18px;
+	margin-top: 1px;
+}
+
 toolbox {
 	@media (-moz-platform: linux) {
 		background: Menu;

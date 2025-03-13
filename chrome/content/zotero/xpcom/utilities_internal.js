@@ -1077,28 +1077,9 @@ Zotero.Utilities.Internal = {
 		var skipKeys = new Set();
 		var lines = extra.split(/\n/g);
 		
-		var getKeyAndValue = (line) => {
-			let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
-			// Old citeproc.js cheater syntax;
-			if (!parts) {
-				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
-			}
-			if (!parts) {
-				return [null, null];
-			}
-			let [_, originalField, value] = parts;
-			let key = this._normalizeExtraKey(originalField);
-			value = value.trim();
-			// Skip empty values
-			if (value === "") {
-				return [null, null];
-			}
-			return [key, value];
-		};
-		
 		// Extract item type from 'type:' lines
 		lines = lines.filter((line) => {
-			let [key, value] = getKeyAndValue(line);
+			let [key, value] = this.splitExtraLine(line);
 			
 			if (!key
 					|| key != 'type'
@@ -1139,7 +1120,7 @@ Zotero.Utilities.Internal = {
 		});
 		
 		lines = lines.filter((line) => {
-			let [key, value] = getKeyAndValue(line);
+			let [key, value] = this.splitExtraLine(line);
 			
 			if (!key || skipKeys.has(key) || key == 'type') {
 				return true;
@@ -1215,6 +1196,33 @@ Zotero.Utilities.Internal = {
 			creators,
 			extra: lines.join('\n')
 		};
+	},
+
+
+	/**
+	 * Split a line possibly representing a field in Extra text.
+	 *
+	 * @param {String} line The line to split
+	 * @param {Boolean} normalize Whether to normalize to snake-case
+	 * @return {String[]}
+	 */
+	splitExtraLine: function (line, normalize = true) {
+		let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
+		// Old citeproc.js cheater syntax;
+		if (!parts) {
+			parts = line.match(/^{:([a-z -_]+):(.+)}/i);
+		}
+		if (!parts) {
+			return [null, null];
+		}
+		let [_, originalField, value] = parts;
+		let key = normalize ? this._normalizeExtraKey(originalField) : originalField;
+		value = value.trim();
+		// Skip empty values
+		if (value === "") {
+			return [null, null];
+		}
+		return [key, value];
 	},
 	
 	
@@ -1326,30 +1334,48 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
-	 * Run translation on a Document to try to find a PDF URL
+	 * Run translation on a Document and return translated items
 	 *
-	 * @param {doc} Document
-	 * @return {{ title: string, url: string } | false} - PDF attachment title and URL, or false if none found
+	 * @param {Document} doc
+	 * @return {Promise<Object[]|null>} Item metadata in translator format or null on failure
 	 */
-	getFileFromDocument: async function (doc) {
+	translateDocument: async function (doc) {
 		let translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
-		var translators = await translate.getTranslators();
+		let translators = await translate.getTranslators();
 		// TEMP: Until there's a generic webpage translator
 		if (!translators.length) {
-			return false;
+			return [];
 		}
 		translate.setTranslator(translators[0]);
-		var options = {
+		let options = {
 			libraryID: false,
 			saveAttachments: true
 		};
-		let newItems = await translate.translate(options);
+		try {
+			return await translate.translate(options);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		return [];
+	},
+	
+	
+	/**
+	 * Run translation on a Document to try to find an attachment
+	 *
+	 * @param {Document} doc
+	 * @param {string[]} types MIME types
+	 * @return {{ title: string, mimeType: string, url: string } | false} - PDF URL, or false if none found
+	 */
+	getFileFromDocument: async function (doc, types = Zotero.Attachments.FIND_AVAILABLE_FILE_TYPES) {
+		let newItems = await this.translateDocument(doc);
 		if (!newItems.length) {
 			return false;
 		}
 		for (let attachment of newItems[0].attachments) {
-			if (Zotero.Attachments.FIND_AVAILABLE_FILE_TYPES.includes(attachment.mimeType)) {
+			if (types.includes(attachment.mimeType)) {
 				return {
 					title: attachment.title,
 					mimeType: attachment.mimeType,
@@ -1361,9 +1387,309 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	getPDFFromDocument(doc) {
+	async getPDFFromDocument(doc) {
 		Zotero.debug('Zotero.Utilities.Internal.getPDFFromDocument() is deprecated -- use getFileFromDocument()');
-		return this.getFileFromDocument(doc);
+		let attachment = await this.getFileFromDocument(doc, ['application/pdf']);
+		if (attachment) {
+			return attachment.url;
+		}
+		return false;
+	},
+
+
+	/**
+	 * Get an identifier from the item whether it's in 'extra' or a separate field
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Object[]} Identifiers
+	 */
+	getItemIdentifiers: function (item) {
+		// extractExtraFields() only extracts known valid Zotero item fields,
+		// but we need to extract identifiers that don't map to a real field.
+		// So we split lines in extra ourselves here
+		let parsedExtra = new Map();
+		for (let line of item.getField('extra').split(/\n/g)) {
+			let [key, value] = this.splitExtraLine(line, false);
+			if (!key || !value) {
+				if (line.startsWith('arXiv:')) {
+					parsedExtra.set('arXiv', line);
+				}
+				continue;
+			}
+			parsedExtra.set(key, value);
+		}
+
+		let identifiers = [];
+
+		let arXiv = parsedExtra.get('arXiv') || parsedExtra.get('arXiv ID')
+				|| (item.getField('repository').toLowerCase() == 'arxiv' && item.getField('archiveID'));
+		// Use extractIdentifiers() to clean
+		if (arXiv) arXiv = Zotero.Utilities.extractIdentifiers(arXiv).find(x => x.arXiv);
+		if (arXiv) {
+			identifiers.push(arXiv);
+		}
+
+		let DOI = item.getField('DOI') || parsedExtra.get('DOI');
+		if (DOI) {
+			identifiers.push({ DOI });
+		}
+
+		let ISBN = item.getField('ISBN') || parsedExtra.get('ISBN');
+		if (ISBN) {
+			identifiers.push({ ISBN });
+		}
+
+		let PMID = parsedExtra.get('PMID')
+				|| (item.getField('repository').toLowerCase() == 'pubmed' && item.getField('archiveID'));
+		if (PMID) {
+			identifiers.push({ PMID });
+		}
+
+		let adsBibcode = parsedExtra.get('ADS Bibcode');
+		if (adsBibcode) {
+			identifiers.push({ adsBibcode });
+		}
+
+		return identifiers;
+	},
+
+
+	/**
+	 * Resolve an identifier by using fields like title, authors, years, etc.
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise<Object>} Object containing resolved identifiers
+	 */
+	resolveItemIdentifiers: async function (item) {
+		let uri = ZOTERO_CONFIG.SERVICES_URL + 'resolve';
+		let req = await Zotero.HTTP.request(
+			'POST',
+			uri,
+			{
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(item.toJSON())
+			}
+		);
+
+		return JSON.parse(req.response);
+	},
+
+
+	/**
+	 * Translate URL
+	 *
+	 * @param {String} url
+	 * @return {Promise<Object|null>} Item metadata in translator format
+	 */
+	translateURL: async function (url) {
+		let doc = (await Zotero.HTTP.processDocuments(url, doc => doc))[0];
+		let newItems = await this.translateDocument(doc);
+		if (!newItems.length) {
+			return null;
+		}
+		return newItems[0];
+	},
+
+
+	/**
+	 * Gets metadata from identifier APIs and a publisher website.
+	 * Identifier API metadata is used as a base and the missing fields
+	 * are added from a publisher website.
+	 *
+	 * Passed identifier objects must contain exactly one identifier field.
+	 * Searches are rate-limited by identifier.
+	 *
+	 * @param {Object} identifier
+	 * @return {Promise<Object|null>} Item metadata in translator format
+	 */
+	translateIdentifier: function (identifier) {
+		if (Object.keys(identifier).length != 1) {
+			throw new Error('Identifier object must contain one identifier field');
+		}
+
+		let caller = this._getSearchCaller(Object.keys(identifier)[0]);
+		return caller.start(() => this._translateIdentifierNow(identifier));
+	},
+
+
+	_searchCallers: new Map(),
+
+
+	/**
+	 * Return a rate-limiting search caller for the given identifier type.
+	 */
+	_getSearchCaller: function (identifier) {
+		if (this._searchCallers.has(identifier)) {
+			return this._searchCallers.get(identifier);
+		}
+
+		Components.utils.import("resource://zotero/concurrentCaller.js");
+		let caller = new ConcurrentCaller({
+			numConcurrent: 1,
+			// Crossref tolerates 50 queries per second [https://github.com/CrossRef/rest-api-doc/issues/196#issuecomment-297260099]
+			// For all other identifier types, be cautious and limit to two per second.
+			interval: identifier == 'DOI' ? 30 : 500,
+			onError: e => Zotero.logError(e)
+		});
+		this._searchCallers.set(identifier, caller);
+		return caller;
+	},
+
+
+	/**
+	 * Helper function for translateIdentifier. Runs translation without
+	 * any rate limiting.
+	 */
+	_translateIdentifierNow: async function (identifier) {
+		let translate = new Zotero.Translate.Search();
+		translate.setIdentifier(identifier);
+
+		let translators = await translate.getTranslators();
+		translate.setTranslator(translators);
+		let newItems;
+		try {
+			newItems = await translate.translate({
+				libraryID: false,
+				saveAttachments: false
+			});
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+
+		if (!newItems.length) {
+			return null;
+		}
+
+		let newItem;
+		let item1 = newItems[0];
+		let item2 = null;
+
+		// Try to resolve and translate publisher's URL
+		if (identifier.DOI) {
+			try {
+				item2 = await this.translateURL('https://doi.org/' + encodeURIComponent(identifier.DOI));
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+
+		// If both items are translated and item2 is not a random `webpage` item
+		// translated with `Embedded Metadata` translator, use
+		// item2 (publisher item) to fill the missing fields in item1 (API item)
+		if (item1 && item2
+			&& item2.itemType !== 'webpage'
+			&& item1.DOI === item2.DOI
+		) {
+			for (let key in item2) {
+				if (Zotero.Utilities.fieldIsValidForType(key, item1.itemType)) {
+					if (item2[key]
+						// item1 doesn't have the field
+						&& (!item1[key]
+							// item1 field is shorter
+							|| item1[key].length < item2[key].length)) {
+						item1[key] = item2[key];
+					}
+				}
+			}
+
+			let _clen = (c) => c.map(x => (x.firstName || '') + (x.lastName || '')).length;
+			if (item2.creators
+				&& (!item1.creators
+					|| _clen(item1.creators) < _clen(item2.creators))) {
+				item1.creators = item2.creators;
+			}
+
+			newItem = item1;
+		}
+		else {
+			newItem = item1 || item2;
+		}
+
+		return newItem;
+	},
+
+
+	/**
+	 * Get updated metadata.
+	 * Uses the existing item URL or identifiers to get the
+	 * new metadata. Resolves identifiers if doesn't exist.
+	 * Evaluates metadata and picks the best source. Some fields
+	 * (i.e. `Abstract`) might be combined from different sources.
+	 * This doesn't affect the existing item
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise<Object|null>} Item metadata in translator format
+	 */
+	getUpdatedItemMetadata: async function (item) {
+		let newItem;
+		// Get identifiers from the existing item
+		let itemIdentifiers = this.getItemIdentifiers(item);
+		// Try all identifiers until one is successfully translated
+		for (let itemIdentifier of itemIdentifiers) {
+			// Ignore ISBN identifiers
+			if (itemIdentifier.ISBN) {
+				continue;
+			}
+			newItem = await this.translateIdentifier(itemIdentifier);
+			if (newItem) {
+				return newItem;
+			}
+		}
+
+		// Try to update item metadata by re-translating its URL
+		if (item.getField('url')) {
+			// TODO: Avoid querying the same URL if it was already queried through doi.org redirect
+			try {
+				newItem = await this.translateURL(item.getField('url'));
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+
+			if (newItem) {
+				// If the new item has a DOI and the original item didn't,
+				// it might be a now-published preprint. If so, we don't want
+				// to use the preprint server's metadata anymore, so we'll try
+				// translating by DOI first.
+				// (The arXiv translator tries to do this already, but it only
+				// copies certain fields; we're better off using the DOI item
+				// directly.)
+				if (newItem.DOI && !itemIdentifiers.some(id => id.DOI)) {
+					let doiItem = await this.translateIdentifier({ DOI: newItem.DOI });
+					if (doiItem) {
+						return doiItem;
+					}
+				}
+				return newItem;
+			}
+		}
+
+		// Try to resolve identifiers by using item fields
+		let resolvedIdentifiers = await this.resolveItemIdentifiers(item);
+		// Try all resolved identifiers until one is successfully translated
+		for (let resolvedIdentifier of resolvedIdentifiers) {
+			if (
+				// Ignore ISBN identifiers
+				resolvedIdentifier.ISBN
+				// Make sure we don't retry identifiers that already exist in the item
+				|| itemIdentifiers.find(x => JSON.stringify(resolvedIdentifier) === JSON.stringify(x))
+			) {
+				continue;
+			}
+
+			// Translate the resolved identifier
+			newItem = await this.translateIdentifier(resolvedIdentifier);
+			if (newItem) {
+				return newItem;
+			}
+		}
+
+		return null;
 	},
 	
 	
