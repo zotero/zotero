@@ -1207,8 +1207,8 @@ const IOManager = {
 			let items = selectedIDs.map(id => SearchHandler.getItem(id));
 			IOManager.addItemsToCitation(items);
 		}
-		// if there are no selected items in library mode and something was searched for add the first row from items table
-		else if (currentLayout.type == "library" && libraryLayout.itemsView.rowCount > 0 && input.value.length) {
+		// in library mode, if there are no selected/open/cited items but there is a single match in itemTree, add that one matching item
+		else if (currentLayout.type == "library" && libraryLayout.itemsView.rowCount === 1 && input.value.length) {
 			let firstRowID = libraryLayout.itemsView.getRow(0).ref.id;
 			IOManager.addItemsToCitation(Zotero.Items.get(firstRowID));
 		}
