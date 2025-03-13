@@ -39,6 +39,7 @@
 >
 	<wizard id="merge-window" title="">
 		<linkset>
+			<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
 			<html:link rel="localization" href="toolkit/global/wizard.ftl"/>
 		</linkset>
 
@@ -46,6 +47,9 @@
 			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
+			Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/components/annotation.js", this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/merge.js", this);
 		</script>
