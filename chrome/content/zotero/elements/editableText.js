@@ -513,7 +513,7 @@
 				// If we're within a pixel from overflow, calculate the
 				// content's exact size and use that.
 				|| (
-					this._input.scrollWidth - this._input.getBoundingClientRect().width < 1
+					this._input.scrollWidth === Math.round(this._input.getBoundingClientRect().width)
 					&& this._getContentWidth() > this._input.getBoundingClientRect().width
 				)
 			);
