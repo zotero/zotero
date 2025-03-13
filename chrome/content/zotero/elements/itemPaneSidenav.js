@@ -168,10 +168,8 @@
 
 		isPaneOrderable(paneID) {
 			let orderable =
-				// In the first group
-				this._buttonContainer.querySelector(`.btn[data-pane=${paneID}]`)
 				// Built-in or orderable custom sections
-				&& (this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID));
+				this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
 			return orderable;
 		}
 		
