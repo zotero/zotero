@@ -1545,13 +1545,19 @@ let windowLostFocusOn = 0;
 window.addEventListener("blur", () => {
 	windowLostFocusOn = (new Date()).getTime();
 });
-window.addEventListener("focus", () => {
+window.addEventListener("focus", async () => {
 	let now = (new Date()).getTime();
 	// On linux, resizing the dialog causes the window to loose and immediately regain focus.
 	// Do not run the search if the window lost focus less than 100 ms ago.
 	if (Zotero.isLinux && now - windowLostFocusOn < 100) {
 		return;
 	}
+	// Wait a moment to allow close/accept button handling to complete in case they
+	// were clicked when the window was out-of-focus. Without this, clicking X
+	// when the dialog is not focused would just run the search here and the
+	// dialog would not be cancelled.
+	await Zotero.Promise.delay(100);
+	if (accepted) return;
 	SearchHandler.clearNonLibraryItemsCache();
 	currentLayout?.search(SearchHandler.searchValue);
 });
