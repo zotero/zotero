@@ -603,7 +603,9 @@ Zotero.HTTP = new function() {
 				noMock: true
 			}
 		);
-		var bytes = await IOUtils.write(path, await req.response.bytes());
+		var bytes = new Uint8Array(await req.response.arrayBuffer());
+		await IOUtils.write(path, bytes);
+		
 		Zotero.debug(`Saved file to ${path} (${bytes} byte${bytes != 1 ? 's' : ''})`);
 		return req;
 	};
