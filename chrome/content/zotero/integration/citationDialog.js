@@ -586,6 +586,7 @@ class LibraryLayout extends Layout {
 		}
 		
 		await this.itemsView.changeCollectionTreeRow({
+			id: collectionTreeRow.id,
 			getItems: async () => {
 				let items = await collectionTreeRow.getItems();
 				// when citing notes, only keep notes or note parents
