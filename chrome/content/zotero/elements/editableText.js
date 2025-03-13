@@ -504,17 +504,19 @@
 		};
 		
 		_handleInputResize = () => {
+			// Very small floating-point-error allowance
+			const EPSILON = 0.001;
 			this.classList.toggle('overflowing',
 				// We're overflowing if the field can scroll at least a pixel
 				this._input.scrollLeftMax > 0
 				// But sometimes it can scroll a *sub*pixel, and every single
 				// scroll size-related method, including privileged JS hacks,
 				// rounds scroll-related values to the nearest int.
-				// If we're within a pixel from overflow, calculate the
-				// content's exact size and use that.
+				// If integer math puts us within a pixel of overflow,
+				// rerun the calculations using exact floating-point values
 				|| (
-					this._input.scrollWidth === Math.round(this._input.getBoundingClientRect().width)
-					&& this._getContentWidth() > this._input.getBoundingClientRect().width
+					Math.abs(this._input.scrollWidth - this._input.clientWidth) <= 1
+					&& this._getContentWidth() > this._input.getBoundingClientRect().width + EPSILON
 				)
 			);
 		};
