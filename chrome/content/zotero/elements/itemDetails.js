@@ -234,6 +234,8 @@
 
 			this._lastUpdateCustomSection = "";
 
+			this._lastScrollTop = 0;
+
 			// If true, will render on tab select
 			this._pendingRender = false;
 			// If true, will skip render
@@ -306,7 +308,9 @@
 				this.pinnedPane = paneID;
 			}
 			else {
-				this._paneParent.scrollTo(0, 0);
+				// Keep the scroll position after reordering
+				this._paneParent.scrollTo(0, this._lastScrollTop);
+				this._lastScrollTop = 0;
 			}
 
 			// Only execute async render for visible panes
@@ -514,6 +518,7 @@
 
 			// Rerender panes after reordering
 			if (options.render !== false) {
+				this._lastScrollTop = this._paneParent.scrollTop;
 				await this.render();
 			}
 		}

@@ -482,9 +482,9 @@
 			}
 
 			// If no pinned pane, scroll to the new position
-			if (options.scroll !== false) {
-				this.container.scrollToPane(paneID);
-			}
+			// if (options.scroll !== false) {
+			// 	this.container.scrollToPane(paneID);
+			// }
 			if (options.persist !== false) {
 				this.persistOrder();
 			}
