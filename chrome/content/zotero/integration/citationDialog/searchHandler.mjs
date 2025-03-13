@@ -248,7 +248,9 @@ export class CitationDialogSearchHandler {
 			}
 			return Zotero.Cite.getItem(itemID);
 		});
-		return items;
+		// Return deduplicated items since there may be multiple tabs opened per the same
+		// top-levle item (duplicate tabs or a multiple attachments belonging to the same item)
+		return [...new Set(items)];
 	}
 
 	_getSelectedLibraryItems() {
