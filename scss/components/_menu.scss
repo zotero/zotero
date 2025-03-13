@@ -61,6 +61,7 @@ $menu-icons: (
 	unpin: "pin-remove",
 	expand-all: "expand-all",
 	collapse-others: "collapse-others",
+	update-metadata: "magnifier"
 );
 
 @each $cls, $icon in $menu-icons {

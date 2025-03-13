@@ -23,24 +23,26 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React from 'react';
-// TODO: Investigate what causes `import ReactDOM` to fail
-// with https://fb.me/react-invalid-hook-call in `tagsboxTest.js`
-// import ReactDOM from 'react-dom';
-const ReactDOM = require('react-dom');
-import { IntlProvider } from 'react-intl';
+var React = require('react');
+var ReactDOM = require('react-dom');
+
 import DiffTable from 'components/diffTable/table';
 
-Zotero.DiffTable = {
-	init(container, props, callback) {
-		let ref = React.createRef();
-		let elem = (
-			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<DiffTable ref={ref} {...props} />
-			</IntlProvider>
-		);
-		ReactDOM.render(elem, container, () => {
-			callback(ref);
+var Zotero_UpdateMetadataDialog = {
+	init(options) {
+		return new Promise((resolve) => {
+			// Init React diffTable component
+			let diffTableContainer = document.getElementById('diff-table-container');
+			ReactDOM.createRoot(diffTableContainer).render(
+				<DiffTable
+					onToggle={options.onToggle}
+					onExpand={options.onExpand}
+					onIgnore={options.onIgnore}
+					onOpenItem={options.onOpenItem}
+					onApply={options.onApply}
+					ref={ref => resolve(ref)}
+				/>
+			);
 		});
 	}
 };

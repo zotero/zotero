@@ -1,3 +1,15 @@
+@each $icon in (tick, cross, edit) {
+	.icon-css.icon-#{$icon} {
+		@include svgicon($icon, "universal", "16");
+	}
+}
+
+@each $icon in (error) {
+	.icon-css.icon-#{$icon} {
+		@include svgicon($icon, "universal", "20");
+	}
+}
+
 .diff-table-field {
 	display: flex;
 	padding-bottom: 2px;
@@ -62,8 +74,8 @@
 }
 
 .diff-table {
-	background-color: $diff-table-bg;
-	color: $diff-table-color;
+	background: var(--material-background);
+	color: var(--fill-primary);
 	min-width: 0;
 	border: 1px solid gray;
 	cursor: default;
@@ -81,13 +93,17 @@
 			.header {
 				display: flex;
 
-				.icon {
+				.status {
+					display: flex;
 					width: 30px;
-					text-align: center;
+					height: 16px;
+					align-items: center;
+					justify-content: center;
 					flex-shrink: 0;
 
-					&.icon-arrowrotateanimated img {
-						width: 22px;
+					.icon-css {
+						width: 16px;
+						height: 16px;
 					}
 				}
 
@@ -126,7 +142,7 @@
 
 			.separator {
 				width: 100%;
-				border-top: 1px solid $separator-color;
+				border-top: var(--material-border);
 				margin: 6px auto;
 			}
 
@@ -136,5 +152,66 @@
 				}
 			}
 		}
+	}
+}
+
+@media (-moz-platform: macos) {
+	.diff-table {
+		button {
+			-moz-appearance: button;
+			/* The horizontal margin used here come from the Aqua Human Interface
+			   Guidelines, there should be 12 pixels between two buttons. */
+			margin: 5px 6px 3px;
+			min-width: 79px;
+			color: ButtonText;
+			text-shadow: none;
+
+			// Bump font-size up from main window (override -moz-appearance above)
+			font: -moz-dialog !important;
+			// Re-override the font family
+			font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
+			// Reduce the font a titch compared to the window buttons for a clean hierarchy
+			font-size: 0.95em !important;
+		}
+
+		button:not([disabled]):hover:active {
+			color: -moz-mac-buttonactivetext;
+		}
+
+		/* When the window isn't focused, the default button background isn't drawn,
+		 * so don't change the text color then: */
+		button[default]:not([disabled]):not(:-moz-window-inactive) {
+			color: -moz-mac-defaultbuttontext;
+		}
+
+		/* Likewise, when active (mousedown) but not hovering, the default button
+		 * background isn't drawn, override the previous selector for that case: */
+		button[default]:not(:hover):active {
+			color: ButtonText;
+		}
+
+		/* Change this from button-text to button since we don't have a child element
+		 * in XUL. Furthermore, switch from margin to padding. */
+		button {
+			padding: 1px 0 !important;
+			padding-inline-start: 3px !important;
+			padding-inline-end: 2px !important;
+			text-align: center;
+		}
+
+		.button-icon {
+			margin-inline-start: 1px;
+		}
+
+		button[type="default"] {
+			font: menu;
+		}
+
+		/* .......... disabled state .......... */
+
+		button[disabled] {
+			color: GrayText;
+		}
+
 	}
 }

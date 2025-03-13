@@ -24,17 +24,9 @@
 */
 
 import React, { useState, useImperativeHandle } from 'react';
-import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 
-import {
-	IconTick,
-	IconCross,
-	IconArrowRotateAnimated,
-	IconPencil,
-	IconWarning,
-	IconBulletBlueEmpty
-} from '../icons';
+import { CSSIcon } from '../icons';
 
 import Field from './field';
 
@@ -70,12 +62,14 @@ const Table = React.forwardRef((props, ref) => {
 					return (<div key={row.itemID} className="row">
 						<div className="right fields-view">
 							<div className="header" onClick={() => props.onOpenItem(row.itemID)}>
-								{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && isDone && <IconTick/>
-								|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <IconPencil/>
-								|| row.status === Zotero.UpdateMetadata.ROW_PROCESSING && <IconArrowRotateAnimated/>
-								|| row.status === Zotero.UpdateMetadata.ROW_FAILED && <IconCross/>
-								|| row.status === Zotero.UpdateMetadata.ROW_NO_METADATA && <IconWarning/>
-								|| <IconBulletBlueEmpty/>}
+								<div className="status">
+									{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && isDone && <CSSIcon name="tick"/>
+									|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <CSSIcon name="edit"/>
+									|| row.status === Zotero.UpdateMetadata.ROW_PROCESSING && <div className="icon zotero-spinner-16" status="animate"/>
+									|| row.status === Zotero.UpdateMetadata.ROW_FAILED && <CSSIcon name="cross"/>
+									|| row.status === Zotero.UpdateMetadata.ROW_NO_METADATA && <CSSIcon name="error"/>
+									|| <CSSIcon name="aaa"/>}
+								</div>
 								<div className="title">{row.title}</div>
 							</div>
 							{row.message && <div className="message">{row.message}</div>}
@@ -96,16 +90,16 @@ const Table = React.forwardRef((props, ref) => {
 									<button
 										className="toggle-button"
 										onClick={() => props.onToggle(row.itemID)}>
-										<FormattedMessage
-											id={hasPendingChanges ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'}
-										/>
+										{Zotero.getString(
+											hasPendingChanges ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'
+										)}
 									</button>
 									<div className="spacer"></div>
 									<button
 										className="ignore-button"
 										onClick={ () => props.onIgnore(row.itemID) }
 									>
-										<FormattedMessage id="zotero.general.ignore"/>
+										{Zotero.getString('zotero.general.ignore')}
 									</button>
 									<button
 										className="apply-button"
@@ -113,7 +107,7 @@ const Table = React.forwardRef((props, ref) => {
 										disabled={ !hasPendingChanges }
 										onClick={ () => props.onApply(row.itemID) }
 									>
-										<FormattedMessage id="zotero.general.apply"/>
+										{Zotero.getString('zotero.general.apply')}
 									</button>
 								</div>
 							)}

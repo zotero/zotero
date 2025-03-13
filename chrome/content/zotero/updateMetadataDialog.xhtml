@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
-<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
-
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/updateMetadataDialog.css"?>
 <!DOCTYPE window PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 		"chrome://zotero/locale/zotero.dtd">
 
@@ -16,10 +12,16 @@
 		width="650"
 		height="550"
 		style="padding: 10px;font: -moz-dialog !important;">
+	<script>
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/updateMetadataDialog.js", this);
+	</script>
+	
 	<vbox id="update-metadata-container" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
-			<progressmeter id="progress-indicator" mode="determined" flex="1"/>
+			<html:progress id="progress-indicator"/>
 			<button id="cancel-button" label="&zotero.general.cancel;"/>
 			<button id="close-button" label="&zotero.general.done;"/>
 		</hbox>

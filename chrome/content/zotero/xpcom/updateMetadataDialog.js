@@ -40,11 +40,11 @@ Zotero.UpdateMetadataDialog = function (options) {
 
 		let win = Services.wm.getMostRecentWindow('navigator:browser');
 		if (win) {
-			_progressWindow = win.openDialog('chrome://zotero/content/updateMetadataDialog.xul',
+			_progressWindow = win.openDialog('chrome://zotero/content/updateMetadataDialog.xhtml',
 				'', 'chrome,close=yes,resizable=yes,dependent,dialog,centerscreen');
 		}
 		else {
-			_progressWindow = Services.ww.openWindow(null, 'chrome://zotero/content/updateMetadataDialog.xul',
+			_progressWindow = Services.ww.openWindow(null, 'chrome://zotero/content/updateMetadataDialog.xhtml',
 				'', 'chrome,close=yes,resizable=yes,dependent,dialog,centerscreen', null);
 		}
 
@@ -79,7 +79,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 		if (!_diffTable) {
 			return;
 		}
-		_diffTable.current.setRows(rows);
+		_diffTable.setRows(rows);
 		let total = rows.length;
 		let processed = rows.filter(row => [Zotero.UpdateMetadata.ROW_SUCCEEDED,
 			Zotero.UpdateMetadata.ROW_FAILED,
@@ -96,7 +96,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 	 * Attach even listeners and `diffTable`
 	 * @private
 	 */
-	function _onWindowLoaded() {
+	async function _onWindowLoaded() {
 		_progressWindow.document.title = Zotero.getString('updateMetadata.title');
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
 		_progressWindow.document.getElementById('cancel-button')
@@ -128,22 +128,8 @@ Zotero.UpdateMetadataDialog = function (options) {
 			_diffTable = null;
 		});
 
-		// Init React diffTable component
-		let diffTableContainer = _progressWindow.document.getElementById('diff-table-container');
-		Zotero.DiffTable.init(
-			diffTableContainer,
-			{
-				onToggle: options.onToggle,
-				onExpand: options.onExpand,
-				onIgnore: options.onIgnore,
-				onOpenItem: options.onOpenItem,
-				onApply: options.onApply
-			},
-			(ref) => {
-				_diffTable = ref;
-				options.onInit();
-			}
-		);
+		_diffTable = await _progressWindow.Zotero_UpdateMetadataDialog.init(options);
+		options.onInit();
 	}
 
 	/**
@@ -153,7 +139,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 	 * @private
 	 */
 	function _updateProgress(total, processed) {
-		if (!_progressWindow) return;
+		if (!_progressWindow || !total) return;
 		_progressIndicator.value = processed * 100 / total;
 		if (processed === total) {
 			_progressWindow.document.getElementById('cancel-button').hidden = true;
