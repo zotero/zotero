@@ -15,7 +15,9 @@ Zotero.Sync.Storage.Local = {
 	
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
-	storageRemainingForLibrary: new Map(),
+	
+	/** @type {Map<number, { remaining: number, userID: number }>} */
+	lastQuotaErrorForLibrary: new Map(),
 	
 	init: function () {
 		Zotero.Notifier.registerObserver(this, ['group'], 'storageLocal');
@@ -28,8 +30,8 @@ Zotero.Sync.Storage.Local = {
 				if (this.lastFullFileCheck[libraryID]) {
 					delete this.lastFullFileCheck[libraryID];
 				}
-				if (this.storageRemainingForLibrary.has(libraryID)) {
-					this.storageRemainingForLibrary.delete(libraryID);
+				if (this.lastQuotaErrorForLibrary.has(libraryID)) {
+					this.lastQuotaErrorForLibrary.delete(libraryID);
 				}
 			}
 		}

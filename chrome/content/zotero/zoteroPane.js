@@ -2808,7 +2808,8 @@ var ZoteroPane = new function()
 				'api-key');
 		}
 
-		// If both reminders are disabled, we don't need an observer
+		// If both reminders that show on item modification are disabled,
+		// we don't need an observer
 		if (!Zotero.Prefs.get('sync.reminder.setUp.enabled')
 				&& !Zotero.Prefs.get('sync.reminder.autoSync.enabled')) {
 			if (_syncRemindersObserverID) {
@@ -2900,14 +2901,48 @@ var ZoteroPane = new function()
 
 
 	/**
+	 * @param {Zotero.Error} error
+	 */
+	this.showQuotaErrorReminder = function (error) {
+		const sevenDays = 60 * 60 * 24 * 7;
+		
+		let now = Math.round(Date.now() / 1000);
+		let sevenDaysAgo = now - sevenDays;
+		
+		let reminderType = error.userID === Zotero.Users.getCurrentUserID()
+			? 'ownQuotaError'
+			: 'groupOwnerQuotaError';
+
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is not enabled
+		if (!Zotero.Prefs.get(`sync.reminder.${reminderType}.enabled`)
+				|| !Zotero.Sync.Runner.enabled) {
+			return;
+		}
+
+		// Check lastDisplayed was 7+ days ago
+		let lastDisplayed = Zotero.Prefs.get(`sync.reminder.${reminderType}.lastDisplayed`);
+		if (lastDisplayed > sevenDaysAgo) {
+			return;
+		}
+		
+		let library = Zotero.Libraries.get(error.libraryID);
+
+		this.showSyncReminder(reminderType, { library });
+	};
+
+
+	/**
 	 * Configure the UI and show the sync reminder panel for a given type of reminder
 	 *
-	 * @param {String} reminderType - Possible values: 'setUp' or 'autoSync'
+	 * @param {'setUp' | 'autoSync' | 'ownQuotaError' | 'groupOwnerQuotaError'} reminderType
 	 * @param {Object} [options]
 	 * @param {String} [options.learnMoreURL] - Show "Learn More" link to this URL
+	 * @param {Zotero.Library} [options.library]
 	 */
 	this.showSyncReminder = function (reminderType, options = {}) {
-		if (!['setUp', 'autoSync'].includes(reminderType)) {
+		if (!['setUp', 'autoSync', 'ownQuotaError', 'groupOwnerQuotaError'].includes(reminderType)) {
 			throw new Error(`Invalid reminder type: ${reminderType}`);
 		}
 
@@ -2915,31 +2950,34 @@ var ZoteroPane = new function()
 		panel.setAttribute('data-reminder-type', reminderType);
 
 		let message = document.getElementById('sync-reminder-message');
-		message.textContent = Zotero.getString(`sync.reminder.${reminderType}.message`, Zotero.appName);
+		document.l10n.setAttributes(message, `sync-reminder-${reminderType}-message`, {
+			libraryType: options.library?.libraryType,
+			libraryName: options.library?.name,
+		});
 
 		let actionLink = document.getElementById('sync-reminder-action');
-		switch (reminderType) {
-			case 'autoSync':
-				var actionStr = Zotero.getString('general.enable');
-				break;
-			
-			default:
-				var actionStr = Zotero.getString(`sync.reminder.${reminderType}.action`);
-				break;
+		if (reminderType === 'groupOwnerQuotaError') {
+			actionLink.hidden = true;
 		}
-		actionLink.textContent = actionStr;
-		actionLink.onclick = () => {
-			this.hideSyncReminder();
+		else {
+			actionLink.hidden = false;
+			document.l10n.setAttributes(actionLink, `sync-reminder-${reminderType}-action`);
+			actionLink.onclick = () => {
+				this.hideSyncReminder();
 
-			switch (reminderType) {
-				case 'setUp':
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
-					break;
-				case 'autoSync':
-					Zotero.Prefs.set(`sync.autoSync`, true);
-					break;
-			}
-		};
+				switch (reminderType) {
+					case 'setUp':
+						Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+						break;
+					case 'autoSync':
+						Zotero.Prefs.set(`sync.autoSync`, true);
+						break;
+					case 'ownQuotaError':
+						Zotero.launchURL(ZOTERO_CONFIG.STORAGE_SETTINGS_URL);
+						break;
+				}
+			};
+		}
 
 		let learnMoreLink = document.getElementById('sync-reminder-learn-more');
 		learnMoreLink.textContent = Zotero.getString('general.learnMore');

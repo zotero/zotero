@@ -1183,6 +1183,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						}, 1);
 					}
 					break;
+				case Zotero.Error.ERROR_ZFS_OVER_QUOTA: {
+					Zotero.getActiveZoteroPane()?.showQuotaErrorReminder(e);
+					break;
+				}
 			}
 		}
 		else if (e.name && e.name == 'ZoteroObjectUploadError') {

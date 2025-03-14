@@ -134,9 +134,9 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	this.requestsRemaining = 0;
 	
 	// Clear over-quota flag on manual sync
-	if (!this.background && Zotero.Sync.Storage.Local.storageRemainingForLibrary.has(libraryID)) {
+	if (!this.background && Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.has(libraryID)) {
 		Zotero.debug("Clearing over-quota flag for " + this.library.name);
-		Zotero.Sync.Storage.Local.storageRemainingForLibrary.delete(libraryID)
+		Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.delete(libraryID);
 	}
 	
 	// Check for updated files to upload

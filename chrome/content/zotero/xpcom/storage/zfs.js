@@ -213,8 +213,9 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		// If we got a quota error for this library, skip upload for all zipped attachments
 		// and for single-file attachments that are bigger than the remaining space. This is cleared
 		// in storageEngine for manual syncs.
-		var remaining = Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(item.libraryID);
-		if (remaining !== undefined) {
+		var lastQuotaError = Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.get(item.libraryID);
+		if (lastQuotaError !== undefined) {
+			let { remaining, userID } = lastQuotaError;
 			let skip = false;
 			if (isZipUpload) {
 				Zotero.debug("Skipping multi-file upload after quota error");
@@ -240,7 +241,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					Zotero.debug(`${remaining} MB remaining in storage -- skipping further uploads`);
 					request.engine.stop('upload');
 				}
-				throw yield this._getQuotaError(item);
+				throw yield this._getQuotaError(item, { remaining, userID });
 			}
 		}
 		
@@ -258,9 +259,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			// Stop trying to upload files if we hit a quota error and there's very little space
 			// remaining. If there's more space, we keep going, because it might just be a big file.
 			if (request.engine && e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA) {
-				let remaining = Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(item.libraryID);
-				if (remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
-					Zotero.debug(`${remaining} MB remaining in storage -- skipping further uploads`);
+				if (e.remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
+					Zotero.debug(`${e.remaining} MB remaining in storage -- skipping further uploads`);
 					request.engine.stop('upload');
 				}
 			}
@@ -579,11 +579,16 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			
 			// Store the remaining space so that we can skip files bigger than that until the next
 			// manual sync. Values are in megabytes.
-			let usage = req.getResponseHeader('Zotero-Storage-Usage');
-			let quota = req.getResponseHeader('Zotero-Storage-Quota');
-			Zotero.Sync.Storage.Local.storageRemainingForLibrary.set(item.libraryID, quota - usage);
+			let usage = parseFloat(req.getResponseHeader('Zotero-Storage-Usage'));
+			let quota = parseFloat(req.getResponseHeader('Zotero-Storage-Quota'));
+			let userID = parseInt(req.getResponseHeader('Zotero-Storage-UserID'));
 			
-			throw yield this._getQuotaError(item);
+			let properties = {
+				remaining: quota - usage,
+				userID,
+			};
+			Zotero.Sync.Storage.Local.lastQuotaErrorForLibrary.set(item.libraryID, properties);
+			throw yield this._getQuotaError(item, properties);
 		}
 	}),
 	
@@ -1003,7 +1008,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	},
 	
 	
-	_getQuotaError: async function (item) {
+	_getQuotaError: async function (item, { remaining, userID }) {
 		var text, buttonText = null, buttonCallback;
 		var libraryType = item.library.libraryType;
 		
@@ -1037,7 +1042,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			"ZFS_OVER_QUOTA",
 			{
 				dialogButtonText: buttonText,
-				dialogButtonCallback: buttonCallback
+				dialogButtonCallback: buttonCallback,
+				libraryID: item.libraryID,
+				remaining,
+				userID,
 			}
 		);
 		e.errorType = 'warning';
