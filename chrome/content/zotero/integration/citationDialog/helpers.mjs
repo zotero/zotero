@@ -220,7 +220,7 @@ export class CitationDialogHelpers {
 				// Now, check against a two different ways that locator value can be specified.
 
 				// first candidate is numbers with optional punctuation (e.g. chapt.11-12)
-				let numericRegex = /^[^\d]*(\d+(?:[\s,-:]+\d+)*)(?:\s+)?$/;
+				let numericRegex = /^(\d+(?:[\s,-:]+\d+)*)(?:\s+)?$/;
 				let numericMatch = numericRegex.exec(potentialLocatorValue.trim());
 				if (numericMatch) {
 					locatorValue = numericMatch[1].trim();
