@@ -1552,10 +1552,10 @@ window.addEventListener("focus", async () => {
 	if (Zotero.isLinux && now - windowLostFocusOn < 100) {
 		return;
 	}
-	// Wait a moment to allow close/accept button handling to complete in case they
-	// were clicked when the window was out-of-focus. Without this, clicking X
-	// when the dialog is not focused would just run the search here and the
-	// dialog would not be cancelled.
+	// Wait a moment to allow accept button click event to fire.
+	// Without this, clicking accept button when the dialog is not focused
+	// would refocus the dialog, run the search below,
+	// which replaces accept button with the spinner and interrupts the click event.
 	await Zotero.Promise.delay(100);
 	if (accepted) return;
 	SearchHandler.clearNonLibraryItemsCache();
