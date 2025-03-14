@@ -26,10 +26,9 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import Diff from 'diff';
 
-import DMP from 'diff-match-patch';
-
-const dmp = new DMP();
+const diffInstance = new Diff();
 
 const MAX_DIFF_SEGMENT_LENGTH = 60;
 
@@ -101,12 +100,12 @@ const Field = (props) => {
 
 	function getDiff(oldValue, newValue, canAbbreviate) {
 		// As described in https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
-		var a = dmp.diff_wordsToChars_(oldValue, newValue, [' ', ',']);
+		var a = diffInstance.diff_wordsToChars_(oldValue, newValue, [' ', ',']);
 		var lineText1 = a.chars1;
 		var lineText2 = a.chars2;
 		var lineArray = a.lineArray;
-		var diffs = dmp.diff_main(lineText1, lineText2, false);
-		dmp.diff_charsToLines_(diffs, lineArray);
+		var diffs = diffInstance.diff_main(lineText1, lineText2, false);
+		diffInstance.diff_charsToLines_(diffs, lineArray);
 		// dmp.diff_cleanupSemantic(diffs);
 
 		if (!diffs) return [];
