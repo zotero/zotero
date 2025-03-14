@@ -172,7 +172,26 @@
 				this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
 			return orderable;
 		}
-		
+
+		isPaneMovable(paneID, direction) {
+			let wrappers = this._enabledWrappers;
+			let currentWrapper = this.querySelector(`.btn[data-pane=${paneID}]`).parentElement;
+			let currentIndex = wrappers.indexOf(currentWrapper);
+
+			let isOrderable = this.isPaneOrderable(paneID);
+			let isLast = currentIndex === wrappers.length - 1;
+			let isNextOrderable = !isLast && this.isPaneOrderable(
+				wrappers[currentIndex + 1]?.querySelector(".btn")?.dataset.pane);
+			
+			if (direction === 'up') {
+				return isOrderable && currentIndex !== 0;
+				this.querySelector('.zotero-menuitem-reorder-down').hidden = !isOrderable || !isNextOrderable || isLast;
+			}
+			else if (direction === 'down') {
+				return isOrderable && isNextOrderable && !isLast;
+			}
+		}
+
 		init() {
 			this._buttonContainer = this.querySelector('.inherit-flex');
 			this.loadBuiltInButtons();
@@ -212,28 +231,10 @@
 				this.pinnedPane = null;
 			});
 			this.querySelector('.zotero-menuitem-reorder-up').addEventListener('command', () => {
-				let enabledWrappers = this._enabledWrappers;
-				let currentWrapper = this.querySelector(`.btn[data-pane=${this._contextMenuTarget}]`).parentElement;
-				let currentIndex = enabledWrappers.indexOf(currentWrapper);
-				let prevWrapper = enabledWrappers[currentIndex - 1];
-				if (prevWrapper) {
-					// Insert at the index of the previous wrapper
-					this.changePaneOrder(this._contextMenuTarget, this._wrappers.indexOf(prevWrapper));
-				}
+				this.handlePaneMove(this._contextMenuTarget, 'up');
 			});
 			this.querySelector('.zotero-menuitem-reorder-down').addEventListener('command', () => {
-				let enabledWrappers = this._enabledWrappers;
-				let currentWrapper = this.querySelector(`.btn[data-pane=${this._contextMenuTarget}]`).parentElement;
-				let currentIndex = enabledWrappers.indexOf(currentWrapper);
-				let nextWrapper = enabledWrappers[currentIndex + 2];
-				if (nextWrapper) {
-					// Insert after the next wrapper
-					this.changePaneOrder(this._contextMenuTarget, this._wrappers.indexOf(nextWrapper));
-				}
-				else {
-					// Insert at the end
-					this.changePaneOrder(this._contextMenuTarget, this._wrappers.length);
-				}
+				this.handlePaneMove(this._contextMenuTarget, 'down');
 			});
 			this.setAttribute("role", "tablist");
 
@@ -676,25 +677,37 @@
 			if (!paneID) return;
 			this._contextMenuTarget = paneID;
 
-			let wrappers = this._enabledWrappers;
-			let currentWrapper = this.querySelector(`.btn[data-pane=${paneID}]`).parentElement;
-			let currentIndex = wrappers.indexOf(currentWrapper);
-
-			let isOrderable = this.isPaneOrderable(paneID);
-			let isLast = currentIndex === wrappers.length - 1;
-			let isNextOrderable = !isLast && this.isPaneOrderable(
-				wrappers[currentIndex + 1]?.querySelector(".btn")?.dataset.pane);
-				
 			let isPinnable = this.isPanePinnable(paneID);
 			this.querySelector('.zotero-menuitem-pin').hidden = !isPinnable || this.pinnedPane == paneID;
 			this.querySelector('.zotero-menuitem-unpin').hidden = !isPinnable || this.pinnedPane != paneID;
 
-			this.querySelector('.zotero-menuitem-reorder-up').hidden = !isOrderable || currentIndex === 0;
-			this.querySelector('.zotero-menuitem-reorder-down').hidden = !isOrderable || !isNextOrderable || isLast;
+			this.querySelector('.zotero-menuitem-reorder-up').hidden = !this.isPaneMovable(paneID, 'up');
+			this.querySelector('.zotero-menuitem-reorder-down').hidden = !this.isPaneMovable(paneID, 'down');
 
 			this.querySelector('.context-menu')
 					.openPopupAtScreen(event.screenX, event.screenY, true);
 		};
+
+		handlePaneMove = (paneID, direction) => {
+			let enabledWrappers = this._enabledWrappers;
+			let currentWrapper = this.querySelector(`.btn[data-pane=${paneID}]`).parentElement;
+			let currentIndex = enabledWrappers.indexOf(currentWrapper);
+			let targetIndex;
+			if (direction === 'up') {
+				targetIndex = currentIndex - 1;
+			}
+			else if (direction === 'down') {
+				targetIndex = currentIndex + 2;
+			}
+			else {
+				return;
+			}
+			let targetWrapper = enabledWrappers[targetIndex];
+			if (targetWrapper) {
+				// Insert at the index of the previous wrapper
+				this.changePaneOrder(paneID, this._wrappers.indexOf(targetWrapper));
+			}
+		}
 
 		handleButtonDragStart = (event) => {
 			let wrapper = event.target.closest('.pin-wrapper');
