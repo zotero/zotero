@@ -269,11 +269,13 @@ export class CitationDialogSearchHandler {
 			let itemStr = item.getCreators()
 				.map(creator => creator.firstName + " " + creator.lastName)
 				.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
-				.join(" ");
+				.join(" ")
+				.toLowerCase();
 			
-			// See if words match
-			for (let split of splits) {
-				if (itemStr.toLowerCase().includes(split)) matchedItems.add(item);
+			// Include items that match every word that was typed
+			let allMatch = splits.every(split => itemStr.includes(split));
+			if (allMatch) {
+				matchedItems.add(item);
 			}
 		}
 		return Array.from(matchedItems);
