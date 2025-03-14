@@ -2145,6 +2145,13 @@ Zotero.Items = function() {
 	};
 	
 	
+	this.MIGRATE_EXTRA_FIELDS_SKIP_FIELDS = Object.freeze([
+		// Skip 'publisher-place' and 'event-place' for now, since the mappings will be changed
+		// https://github.com/citation-style-language/zotero-bits/issues/6
+		'place'
+	]);
+	
+	
 	Zotero.DataObjects.call(this);
 	
 	return this;

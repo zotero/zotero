@@ -712,6 +712,14 @@
 
 				this.addDynamicRow(rowLabel, rowData);
 				
+				if (this.editable && fieldID && fieldName === 'extra' && this.item.canMigrateExtraFields()) {
+					let migrateFields = document.createXULElement('label', { is: 'zotero-text-link' });
+					document.l10n.setAttributes(migrateFields, 'migrate-fields');
+					migrateFields.classList.add('row-action');
+					migrateFields.addEventListener('click', () => this.handleMigrateFields());
+					this._infoTable.append(migrateFields);
+				}
+
 				let button, popup;
 				// In field merge mode, add a button to switch field versions
 				if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
@@ -2684,6 +2692,19 @@
 			}
 			else {
 				popup.openPopup(event.target);
+			}
+		}
+		
+		handleMigrateFields() {
+			if (
+				!Services.prompt.confirm(null,
+					Zotero.ftl.formatValueSync('migrate-fields-dialog-title'),
+					Zotero.ftl.formatValueSync('migrate-fields-dialog-description'))
+			) {
+				return;
+			}
+			if (this.item.migrateExtraFields()) {
+				this.item.saveTx();
 			}
 		}
 

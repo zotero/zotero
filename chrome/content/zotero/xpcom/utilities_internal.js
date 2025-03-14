@@ -1045,33 +1045,7 @@ Zotero.Utilities.Internal = {
 		var fields = new Map();
 		var creators = [];
 		additionalFields = new Set(additionalFields);
-		
-		//
-		// Build `Map`s of normalized types/fields, including CSL variables, to built-in types/fields
-		//
-		
-		// For fields we use arrays, because there can be multiple possibilities
-		//
-		// Built-in fields
-		var fieldNames = new Map(Zotero.ItemFields.getAll().map(x => [this._normalizeExtraKey(x.name), [x.name]]));
-		// CSL fields
-		for (let map of [Zotero.Schema.CSL_TEXT_MAPPINGS, Zotero.Schema.CSL_DATE_MAPPINGS]) {
-			for (let cslVar in map) {
-				let normalized = this._normalizeExtraKey(cslVar);
-				let existing = fieldNames.get(normalized) || [];
-				// Text fields are one-to-many; date fields are one-to-one
-				let additional = Array.isArray(map[cslVar]) ? map[cslVar] : [map[cslVar]];
-				fieldNames.set(normalized, new Set([...existing, ...additional]));
-			}
-		}
-		
-		// Built-in creator types
-		var creatorTypes = new Map(Zotero.CreatorTypes.getAll().map(x => [this._normalizeExtraKey(x.name), x.name]));
-		// CSL types
-		for (let i in Zotero.Schema.CSL_NAME_MAPPINGS) {
-			let cslType = Zotero.Schema.CSL_NAME_MAPPINGS[i];
-			creatorTypes.set(cslType.toLowerCase(), i);
-		}
+		var { fieldNames, creatorTypes } = this.EXTRA_FIELD_MAPPINGS;
 		
 		// Process Extra lines
 		var skipKeys = new Set();
@@ -1104,7 +1078,7 @@ Zotero.Utilities.Internal = {
 					|| key != 'type'
 					|| skipKeys.has(key)
 					// 1) Ignore 'type: note', 'type: attachment', 'type: annotation'
-					// 2) Ignore 'article' until we have a Preprint item type
+					// 2) Ignore 'article' until we have a Preprint item type (TODO: revisit this)
 					//    (https://github.com/zotero/translators/pull/2248#discussion_r546428184)
 					|| ['note', 'attachment', 'annotation', 'article'].includes(value)
 					// Ignore numeric values
@@ -1161,6 +1135,20 @@ Zotero.Utilities.Internal = {
 								|| additionalFields.has(possibleField)) {
 							return true;
 						}
+					}
+					// Skip date values that look roughly like date ranges and era notations,
+					// which the Zotero date parser doesn't support
+					if (possibleField === 'date' && (
+						value.startsWith('-')
+							|| /BCE?|AD/i.test(value)
+							// This is really rough, because citeproc.js has complicated rules
+							// for matching ranges, but we'll assume it's a range (and not a
+							// slash-separated date) if there's a single slash in the string,
+							// with at least one four-digit number somewhere before it and one
+							// immediately after it
+							|| value.split('/').length === 2 && /\d{4}.*\s*\/\s*\d{4}/.test(value)
+					)) {
+						return true;
 					}
 					fields.set(possibleField, value);
 					added = true;
@@ -3374,6 +3362,42 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage) {
 		Zotero.logError(e + " with '" + format.id + "'");
 	}
 };
+
+ChromeUtils.defineLazyGetter(Zotero.Utilities.Internal, 'EXTRA_FIELD_MAPPINGS', () => {
+	//
+	// Build `Map`s of normalized types/fields, including CSL variables, to built-in types/fields
+	//
+
+	// For fields we use arrays, because there can be multiple possibilities
+	//
+	// Built-in fields
+	var fieldNames = new Map(Zotero.ItemFields.getAll()
+		.map(x => [Zotero.Utilities.Internal._normalizeExtraKey(x.name), [x.name]]));
+	// CSL fields
+	for (let map of [Zotero.Schema.CSL_TEXT_MAPPINGS, Zotero.Schema.CSL_DATE_MAPPINGS]) {
+		for (let cslVar in map) {
+			let normalized = Zotero.Utilities.Internal._normalizeExtraKey(cslVar);
+			let existing = fieldNames.get(normalized) || [];
+			// Text fields are one-to-many; date fields are one-to-one
+			let additional = Array.isArray(map[cslVar]) ? map[cslVar] : [map[cslVar]];
+			fieldNames.set(normalized, new Set([...existing, ...additional]));
+		}
+	}
+
+	// Built-in creator types
+	var creatorTypes = new Map(Zotero.CreatorTypes.getAll()
+		.map(x => [Zotero.Utilities.Internal._normalizeExtraKey(x.name), x.name]));
+	// CSL types
+	for (let i in Zotero.Schema.CSL_NAME_MAPPINGS) {
+		let cslType = Zotero.Schema.CSL_NAME_MAPPINGS[i];
+		creatorTypes.set(cslType.toLowerCase(), i);
+	}
+
+	return {
+		fieldNames,
+		creatorTypes
+	};
+});
 
 if (typeof process === 'object' && process + '' === '[object process]') {
 	module.exports = Zotero.Utilities.Internal;
