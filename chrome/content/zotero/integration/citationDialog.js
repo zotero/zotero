@@ -290,10 +290,13 @@ class Layout {
 		if (this.forceUpdateTablesAfterRefresh && this.type == "library") {
 			this.forceUpdateTablesAfterRefresh = false;
 			setTimeout(() => {
-				libraryLayout.collectionsView?.tree.invalidate();
 				libraryLayout.itemsView.tree?.invalidate();
-				libraryLayout.collectionsView?.tree.forceUpdate();
 				libraryLayout.itemsView.tree?.forceUpdate();
+				// Necessary for the collectionTree to be properly rendered after switching to library mode
+				if (libraryLayout.collectionsView) {
+					let currentCollectionIndex = libraryLayout.collectionsView.tree.selection.focused;
+					libraryLayout.collectionsView.ensureRowIsVisible(currentCollectionIndex);
+				}
 			}, 250);
 		}
 	}
