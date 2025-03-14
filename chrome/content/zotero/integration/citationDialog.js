@@ -243,11 +243,7 @@ class Layout {
 	async search(value, { skipDebounce = false } = {}) {
 		if (accepted) return;
 		_id("loading-spinner").setAttribute("status", "animate");
-		for (let node of _id("top-level-btn-group").childNodes) {
-			if (node.id !== "loading-spinner") {
-				node.hidden = true;
-			}
-		}
+		_id("accept-button").hidden = true;
 		SearchHandler.searching = true;
 		// search for selected/opened/cited items
 		// only enforce min query length in list mode
@@ -284,9 +280,7 @@ class Layout {
 
 		SearchHandler.searching = false;
 		_id("loading-spinner").removeAttribute("status");
-		for (let node of _id("top-level-btn-group").childNodes) {
-			node.hidden = false;
-		}
+		_id("accept-button").hidden = false;
 		if (this.forceUpdateTablesAfterRefresh && this.type == "library") {
 			this.forceUpdateTablesAfterRefresh = false;
 			setTimeout(() => {
