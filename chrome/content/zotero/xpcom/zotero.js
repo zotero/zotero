@@ -74,8 +74,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.initialURL; // used by Schema to show the changelog on upgrades
 	this.Promise = require('resource://zotero/bluebird.js');
 	
-	this.getMainWindow = function () {
-		return Services.wm.getMostRecentWindow("navigator:browser");
+	this.getMainWindow = function ({ noOpen } = {}) {
+		let win = Services.wm.getMostRecentWindow("navigator:browser");
+		if (win) {
+			return win;
+		}
+		
+		if (noOpen) {
+			return null;
+		}
+		return this.openMainWindow();
 	};
 
 	/**
@@ -93,6 +101,26 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.getActiveZoteroPane = function() {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
 		return win ? win.ZoteroPane : null;
+	};
+
+	 /**
+	  * Like above, gets the ZoteroPane object, but this also opens the main
+	  * window if necessary and waits for the pane to load completely before
+	  * resolving.
+	  *
+	  * @returns {Promise<ZoteroPane>}
+	  */
+	this.getActiveZoteroPaneAsync = async function () {
+		let win = this.getMainWindow();
+		await Zotero.Utilities.Internal.activate(win);
+		if (win.document.readyState !== 'complete') {
+			await new Promise(
+				resolve => win.addEventListener('load', resolve, { once: true })
+			);
+		}
+		let zp = win.ZoteroPane;
+		await zp.waitForLoad();
+		return zp;
 	};
 	
 	this.getZoteroPanes = function () {
@@ -965,10 +993,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.openMainWindow = function () {
 		var chromeURI = AppConstants.BROWSER_CHROME_URL;
 		var flags = "chrome,all,dialog=no,resizable=yes";
-		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
-			.getService(Components.interfaces.nsIWindowWatcher);
-		ww.openWindow(null, chromeURI, '_blank', flags, null);
-	}
+		return Services.ww.openWindow(null, chromeURI, '_blank', flags, null);
+	};
 	
 	
 	this.openCheckForUpdatesWindow = function ({ modal } = {}) {
