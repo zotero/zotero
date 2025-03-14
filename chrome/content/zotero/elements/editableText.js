@@ -39,6 +39,8 @@
 	class EditableText extends XULElementBase {
 		_input;
 		
+		_resizeObserver;
+		
 		_ignoredWindowInactiveBlur = false;
 		
 		_focusMousedownEvent = false;
@@ -96,7 +98,6 @@
 		get maxLines() {
 			return this.getAttribute('max-lines') || 0;
 		}
-		
 
 		get multiline() {
 			return this.hasAttribute('multiline');
@@ -189,12 +190,20 @@
 			this._input?.removeAttribute('dir');
 		}
 		
-		sizeToContent = () => {
+		_getContentWidth() {
 			let span = this.constructor._textMeasurementSpan;
 			let { font, paddingLeft, paddingRight, borderLeftWidth, borderRightWidth } = getComputedStyle(this._input);
 			span.style.font = font;
 			span.textContent = this.value || this.placeholder;
-			this.style.maxWidth = `calc(${span.getBoundingClientRect().width}px + ${paddingLeft} + ${paddingRight} + ${borderLeftWidth} + ${borderRightWidth})`;
+			return span.getBoundingClientRect().width
+				+ parseFloat(paddingLeft)
+				+ parseFloat(paddingRight)
+				+ parseFloat(borderLeftWidth)
+				+ parseFloat(borderRightWidth);
+		}
+		
+		sizeToContent = () => {
+			this.style.maxWidth = this._getContentWidth() + 'px';
 		};
 		
 		attributeChangedCallback(name) {
@@ -263,6 +272,12 @@
 				}
 				if (selectionStart !== undefined && selectionEnd !== undefined) {
 					this._input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+				}
+				
+				this._resizeObserver?.disconnect();
+				if (this.noWrap) {
+					this._resizeObserver = new ResizeObserver(this._handleInputResize);
+					this._resizeObserver.observe(this._input);
 				}
 			}
 			this._input.readOnly = this.readOnly;
@@ -486,6 +501,24 @@
 					this._handleInput();
 				});
 			}
+		};
+		
+		_handleInputResize = () => {
+			// Very small floating-point-error allowance
+			const EPSILON = 0.001;
+			this.classList.toggle('overflowing',
+				// We're overflowing if the field can scroll at least a pixel
+				this._input.scrollLeftMax > 0
+				// But sometimes it can scroll a *sub*pixel, and every single
+				// scroll size-related method, including privileged JS hacks,
+				// rounds scroll-related values to the nearest int.
+				// If integer math puts us within a pixel of overflow,
+				// rerun the calculations using exact floating-point values
+				|| (
+					Math.abs(this._input.scrollWidth - this._input.clientWidth) <= 1
+					&& this._getContentWidth() > this._input.getBoundingClientRect().width + EPSILON
+				)
+			);
 		};
 
 		focus(options) {

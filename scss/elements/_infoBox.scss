@@ -120,24 +120,37 @@ info-box {
 	.creator-name-box {
 		flex: 1;
 		display: flex;
+		
 		editable-text input {
 			min-width: 0;
 		}
 
 		// Margin adjusted by inline padding to have 4px between first and last name
-		*[fieldMode="0"]:first-child {
+		editable-text[fieldMode="0"]:first-child {
 			margin-inline-end: calc(max(0px, 4px - var(--editable-text-padding-inline)));
 			flex-grow: 3; // last name should have priority to expand over first name
 		}
+
 		// Add comma when the last name is not focused
-		*[fieldMode="0"]:first-child {
+		editable-text[fieldMode="0"]:first-child {
 			position: relative;
+			
 			&::after {
 				content: var(--comma-character, ',');
 				position: absolute;
 				inset-inline-end: 0;
 				bottom: var(--editable-text-padding-block);
+				pointer-events: none;
 			}
+			
+			&.overflowing {
+				--ellipsis: var(--ellipsis-and-comma-character, '…,');
+				
+				&::after {
+					display: none;
+				}
+			}
+			
 			&.focused::after {
 				visibility: hidden;
 			}
