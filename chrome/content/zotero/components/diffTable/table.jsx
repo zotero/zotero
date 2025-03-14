@@ -98,17 +98,15 @@ const Table = React.forwardRef((props, ref) => {
 									<button
 										className="ignore-button"
 										onClick={ () => props.onIgnore(row.itemID) }
-									>
-										{Zotero.getString('zotero.general.ignore')}
-									</button>
+										data-l10n-id="update-metadata-ignore"
+									/>
 									<button
 										className="apply-button"
 										default={ true }
 										disabled={ !hasPendingChanges }
 										onClick={ () => props.onApply(row.itemID) }
-									>
-										{Zotero.getString('zotero.general.apply')}
-									</button>
+										data-l10n-id="update-metadata-apply"
+									/>
 								</div>
 							)}
 							<div className="separator"></div>

@@ -18,16 +18,24 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/updateMetadataDialog.js", this);
 	</script>
 	
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+		<html:link rel="localization" href="updateMetadata.ftl"/>
+	</linkset>
+	
 	<vbox id="update-metadata-container" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
 			<html:progress id="progress-indicator"/>
-			<button id="cancel-button" label="&zotero.general.cancel;"/>
-			<button id="close-button" label="&zotero.general.done;"/>
+			<button id="cancel-button" data-l10n-id="update-metadata-cancel"/>
+			<button id="close-button" data-l10n-id="update-metadata-done"/>
 		</hbox>
 		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>
 		<hbox align="right">
-			<button id="apply-all-button" default="true" label="&zotero.general.applyUpdates;"/>
+			<button id="apply-all-button" default="true" data-l10n-id="update-metadata-apply-all"/>
 		</hbox>
 	</vbox>
 
