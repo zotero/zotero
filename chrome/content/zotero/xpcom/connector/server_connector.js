@@ -1531,7 +1531,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	init: function(postData, sendResponseCallback) {
+	init: async function(postData, sendResponseCallback) {
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget(true);
 		var response = {
 			libraryID: library.libraryID,
@@ -1548,12 +1548,14 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			response.name = response.libraryName;
 		}
 		
-		// Get list of editable libraries and collections
+		// Get list of editable libraries, collections, and their tags
 		var collections = [];
+		let tags = {};
 		var originalLibraryID = library.libraryID;
 		for (let library of Zotero.Libraries.getAll()) {
 			if (!library.editable) continue;
 			
+			tags[library.treeViewID] = await Zotero.Tags.getAll(library.libraryID);
 			// Add recent: true for recent targets
 			
 			collections.push(
@@ -1570,6 +1572,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			);
 		}
 		response.targets = collections;
+		response.tags = tags;
 		
 		// Mark recent targets
 		try {
