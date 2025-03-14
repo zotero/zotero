@@ -101,12 +101,13 @@ const Field = (props) => {
 	function getDiff(oldValue, newValue, canAbbreviate) {
 		// As described in https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
 		var a = diffInstance.diff_wordsToChars_(oldValue, newValue, [' ', ',']);
-		var lineText1 = a.chars1;
-		var lineText2 = a.chars2;
-		var lineArray = a.lineArray;
-		var diffs = diffInstance.diff_main(lineText1, lineText2, false);
-		diffInstance.diff_charsToLines_(diffs, lineArray);
-		// dmp.diff_cleanupSemantic(diffs);
+		var wordText1 = a.chars1;
+		var wordText2 = a.chars2;
+		var wordArray = a.wordArray;
+		var diffs = diffInstance.diff_main(wordText1, wordText2, false);
+		// We're really converting back to words, not lines, but diff_charsToLines_ does the trick
+		diffInstance.diff_charsToLines_(diffs, wordArray);
+		// diffInstance.diff_cleanupSemantic(diffs);
 
 		if (!diffs) return [];
 
