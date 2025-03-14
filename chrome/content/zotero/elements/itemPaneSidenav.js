@@ -222,6 +222,7 @@
 			this._buttonContainer.addEventListener('dragover', this.handleButtonDragOver);
 			this._buttonContainer.addEventListener('drop', this.handleButtonDrop);
 			this._buttonContainer.addEventListener('dragend', this.handleButtonDragEnd);
+			this._buttonContainer.addEventListener('dragleave', this.handleButtonDragLeave);
 			
 			this.querySelector('.zotero-menuitem-pin').addEventListener('command', () => {
 				this.container.scrollToPane(this._contextMenuTarget, 'smooth');
@@ -252,6 +253,7 @@
 			this._buttonContainer.removeEventListener('dragover', this.handleButtonDragOver);
 			this._buttonContainer.removeEventListener('drop', this.handleButtonDrop);
 			this._buttonContainer.removeEventListener('dragend', this.handleButtonDragEnd);
+			this._buttonContainer.removeEventListener('dragleave', this.handleButtonDragLeave);
 
 			Zotero.Prefs.unregisterObserver(this._prefObserverID);
 
@@ -803,6 +805,12 @@
 			if (this._dropIndicator) {
 				this._dropIndicator.remove();
 				this._dropIndicator = null;
+			}
+		};
+
+		handleButtonDragLeave = (event) => {
+			if (this._dropIndicator) {
+				this._dropIndicator.setAttribute("hidden", "true");
 			}
 		};
 
