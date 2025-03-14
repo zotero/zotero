@@ -860,10 +860,20 @@ Zotero.Utilities.Internal = {
 	 * and notes arrays and optional compatibility mappings for older translators.
 	 *
 	 * @param {Zotero.Item} zoteroItem
-	 * @param {Boolean} legacy Add mappings for legacy (pre-4.0.27) translators
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.legacy] Add mappings for legacy (pre-4.0.27) translators
+	 * @param {Boolean} [options.skipChildItems] Skip attachments and notes arrays
+	 * @param {Boolean} [options.skipBaseFields] Skip adding base fields to legacy mappings
 	 * @return {Object}
 	 */
-	itemToExportFormat: function (zoteroItem, legacy, skipChildItems) {
+	itemToExportFormat: function (zoteroItem, options) {
+		if (typeof options !== 'object') {
+			Zotero.debug("itemToExportFormat() now takes an 'options' object -- update your code");
+			let [, legacy, skipChildItems, skipBaseFields] = arguments;
+			options = { legacy, skipChildItems, skipBaseFields };
+		}
+		let { legacy, skipChildItems, skipBaseFields } = options;
+		
 		function addCompatibilityMappings(item, zoteroItem) {
 			item.uniqueFields = {};
 
@@ -893,16 +903,18 @@ Zotero.Utilities.Internal = {
 					continue;
 				}
 
-				let baseField = Zotero.ItemFields.getName(
-					Zotero.ItemFields.getBaseIDFromTypeAndField(item.itemType, field)
-				);
+				if (!skipBaseFields) {
+					let baseField = Zotero.ItemFields.getName(
+						Zotero.ItemFields.getBaseIDFromTypeAndField(item.itemType, field)
+					);
 
-				if (!baseField || baseField == field) {
-					item.uniqueFields[field] = item[field];
-				}
-				else {
-					item[baseField] = item[field];
-					item.uniqueFields[baseField] = item[field];
+					if (!baseField || baseField == field) {
+						item.uniqueFields[field] = item[field];
+					}
+					else {
+						item[baseField] = item[field];
+						item.uniqueFields[baseField] = item[field];
+					}
 				}
 			}
 
@@ -960,7 +972,9 @@ Zotero.Utilities.Internal = {
 
 		var item = zoteroItem.toJSON();
 
-		item.uri = Zotero.URI.getItemURI(zoteroItem);
+		if (zoteroItem.libraryID) {
+			item.uri = Zotero.URI.getItemURI(zoteroItem);
+		}
 		delete item.key;
 
 		if (!skipChildItems && !zoteroItem.isAttachment() && !zoteroItem.isNote()) {

@@ -38,8 +38,6 @@
 
 		_annotation = null;
 
-		_listenerAdded = false;
-
 		static get observedAttributes() {
 			return ['annotation-id'];
 		}

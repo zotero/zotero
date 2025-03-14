@@ -56,5 +56,10 @@ note-row {
 			float: right;
 			color: var(--fill-secondary);
 		}
+		
+		.note-content {
+			white-space: pre-wrap;
+			overflow-wrap: anywhere;
+		}
 	}
 }
