@@ -74,13 +74,6 @@ async function onLoad() {
 	// keypress from the top-most row in the items table
 	doc.addEventListener("keydown", event => KeyboardHandler.captureKeydown(event), true);
 
-	// Move dialog towards the center (it's needed even though we open the dialog with centerscreen param)
-	let targetX = Math.floor((window.screen.width - window.outerWidth) / 2);
-	let targetY = window.screen.height / 3;
-	setTimeout(() => {
-		window.moveTo(targetX, targetY);
-	});
-
 	// citation has to be built before libraryLayout.init to so itemTree knows which items to highlight
 	await CitationDataManager.buildCitation();
 	IOManager.updateBubbleInput();
