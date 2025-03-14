@@ -1,3 +1,6 @@
+update-metadata-window =
+    .title = Update
+
 update-metadata-cancel =
     .label = { general-cancel }
 update-metadata-done =

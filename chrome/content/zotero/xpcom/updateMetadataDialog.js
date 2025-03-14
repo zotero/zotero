@@ -97,7 +97,6 @@ Zotero.UpdateMetadataDialog = function (options) {
 	 * @private
 	 */
 	async function _onWindowLoaded() {
-		_progressWindow.document.title = Zotero.getString('updateMetadata.title');
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
 		_progressWindow.document.getElementById('cancel-button')
 		.addEventListener('command', () => {
