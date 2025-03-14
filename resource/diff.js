@@ -1455,15 +1455,19 @@ diff_class.prototype.diff_fromDelta = function(text1, delta) {
  * hashes where each Unicode character represents one line.
  * @param {string} text1 First string.
  * @param {string} text2 Second string.
+ * @param {string[]} whiteSpaceChars
  * @return {{chars1: string, chars2: string, lineArray: !Array.<string>}}
  *     An object containing the encoded text1, the encoded text2 and
  *     the array of unique strings.
  *     The zeroth element of the array of unique strings is intentionally blank.
  * @private
  */
-diff_class.prototype.diff_wordsToChars_ = function(text1, text2, whiteSpaces) {
-  var wordArray = [];  // e.g. wordArray[4] == 'Hello\n'
-  var wordHash = {};   // e.g. wordHash['Hello\n'] == 4
+diff_class.prototype.diff_wordsToChars_ = function(text1, text2, whiteSpaceChars) {
+  // Add a capturing group so whitespace is included in split() output
+  var whiteSpaceRe = new RegExp(`([${whiteSpaceChars.join()}])`, 'g');
+  
+  var wordArray = [];  // e.g. wordArray[4] == 'Hello'
+  var wordHash = new Map();   // e.g. wordHash.get('Hello') == 4
 
   // '\x00' is a valid character, but various debuggers don't like it.
   // So we'll insert a junk entry to avoid generating a null character.
@@ -1479,41 +1483,24 @@ diff_class.prototype.diff_wordsToChars_ = function(text1, text2, whiteSpaces) {
    */
   function diff_wordsToCharsMunge_(text) {
     var chars = '';
-    // Walk the text, pulling out a substring for each word.
-    // text.split('\n') would would temporarily double our memory footprint.
-    // Modifying text would create many large strings to garbage collect.
-    var wordStart = 0;
-    var wordEnd = -1;
     // Keeping our own length variable is faster than looking it up.
     var wordArrayLength = wordArray.length;
-    while (wordEnd < text.length - 1) {
-      wordEnd = -1;
-      for (let space of whiteSpaces) {
-        let index = text.indexOf(space, wordStart);
-        if (index >= 0 && (wordEnd === -1 || index < wordEnd)) {
-          wordEnd = index;
-        }
-      }
-      
-      if (wordEnd == -1) {
-        wordEnd = text.length - 1;
-      }
-      var word = text.substring(wordStart, wordEnd + 1);
-
-      if (wordHash.hasOwnProperty(word)) {
-        chars += String.fromCharCode(wordHash[word]);
+    var words = text.split(whiteSpaceRe);
+    for (let i = 0; i < words.length; i++) {
+      let word = words[i];
+      if (wordHash.has(word)) {
+        chars += String.fromCharCode(wordHash.get(word));
       } else {
         if (wordArrayLength == maxWords) {
           // Bail out at 65535 because
           // String.fromCharCode(65536) == String.fromCharCode(0)
-          word = text.substring(wordStart);
-          wordEnd = text.length;
+          word = words.slice(i).join();
+          i = words.length - 1;
         }
         chars += String.fromCharCode(wordArrayLength);
-        wordHash[word] = wordArrayLength;
+        wordHash.set(word, wordArrayLength);
         wordArray[wordArrayLength++] = word;
       }
-      wordStart = wordEnd + 1;
     }
     return chars;
   }
