@@ -584,6 +584,7 @@ Zotero.DBConnection.prototype.requireTransaction = function () {
 	if (!this._transactionID) {
 		throw new Error("Not in transaction");
 	}
+	return this._transactionID;
 };
 
 

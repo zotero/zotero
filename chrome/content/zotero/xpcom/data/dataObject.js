@@ -23,6 +23,13 @@
     ***** END LICENSE BLOCK *****
 */
 
+let lazy = {};
+XPCOMUtils.defineLazyPreferenceGetter(
+	lazy,
+	'shouldTrackClientVersions',
+	'extensions.zotero.httpServer.localAPI.enabled',
+);
+
 /**
  * @property {String} (readOnly) objectType
  * @property {String} (readOnly) libraryKey
@@ -45,6 +52,7 @@ Zotero.DataObject = function () {
 	this._dateAdded = null;
 	this._dateModified = null;
 	this._version = null;
+	this._clientVersion = null;
 	this._synced = null;
 	this._identified = false;
 	this._parentID = null;
@@ -1069,7 +1077,7 @@ Zotero.DataObject.prototype._saveData = function (env) {
 	}
 };
 
-Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
+Zotero.DataObject.prototype._finalizeSave = async function (env) {
 	// Relations
 	if (this._changed.relations) {
 		let toAdd, toRemove;
@@ -1092,10 +1100,10 @@ Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 				+ "(" + this._ObjectsClass.idColumn + ", predicateID, object) VALUES ";
 			// Convert predicates to ids
 			for (let i = 0; i < toAdd.length; i++) {
-				toAdd[i][0] = yield Zotero.RelationPredicates.add(toAdd[i][0]);
+				toAdd[i][0] = await Zotero.RelationPredicates.add(toAdd[i][0]);
 				env.relationsToRegister.push([toAdd[i][0], toAdd[i][1]]);
 			}
-			yield Zotero.Utilities.Internal.forEachChunkAsync(
+			await Zotero.Utilities.Internal.forEachChunkAsync(
 				toAdd,
 				Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 3),
 				async function (chunk) {
@@ -1112,11 +1120,11 @@ Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 			for (let i = 0; i < toRemove.length; i++) {
 				let sql = "DELETE FROM " + this._objectType + "Relations "
 					+ "WHERE " + this._ObjectsClass.idColumn + "=? AND predicateID=? AND object=?";
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					sql,
 					[
 						this.id,
-						(yield Zotero.RelationPredicates.add(toRemove[i][0])),
+						(await Zotero.RelationPredicates.add(toRemove[i][0])),
 						toRemove[i][1]
 					]
 				);
@@ -1139,7 +1147,16 @@ Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 	else if (env.skipCache) {
 		Zotero.logError("skipCache is only for new objects");
 	}
-});
+
+	if (lazy.shouldTrackClientVersions) {
+		let libraryClientVersion = await this.library.incrementClientVersion();
+		await Zotero.DB.queryAsync(
+			`UPDATE ${this.ObjectsClass.table} SET clientVersion = ? WHERE ${this.ObjectsClass.idColumn}=?`,
+			[libraryClientVersion, this.id]
+		);
+		this._clientVersion = libraryClientVersion;
+	}
+};
 
 
 /**
@@ -1325,10 +1342,15 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 
 
 Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
+	// Default to showing synced properties, since that's what the API does, and this function
+	// is generally used to emulate the API
+	options.syncedStorageProperties ??= true;
+	options.syncedVersionProperty ??= true;
+
 	let uri = Zotero.URI.getObjectURI(this);
 	var json = {
 		key: this.key,
-		version: this.version,
+		version: options.syncedVersionProperty ? this.version : this.clientVersion,
 		library: this.library.toResponseJSON({ ...options, includeGroupDetails: false }),
 		links: {
 			self: {
