@@ -288,9 +288,9 @@
 				input.value += event.key;
 				input.dispatchEvent(new Event('input', { bubbles: true }));
 			}
-			// Space on bubble simulates a click
-			if (event.key == " ") {
-				event.target.click();
+			// Space or arrowDown on a bubble open item details popup
+			if (event.key == " " || event.key == "ArrowDown") {
+				Utils.notifyDialog("show-details-popup", { dialogReferenceID: bubble.getAttribute("dialogReferenceID") });
 				event.preventDefault();
 				event.stopPropagation();
 			}
@@ -301,18 +301,6 @@
 			// End - focus the last input
 			if (event.key == "End") {
 				this._body.lastChild.focus();
-			}
-			// Navigate bubble rows on arrow up/down
-			if (["ArrowUp", "ArrowDown"].includes(event.key)) {
-				let { x, y, width } = bubble.getBoundingClientRect();
-				let nextBubble = Utils.getLastBubbleBeforePoint(x + (width / 2), event.key == "ArrowUp" ? y - 25 : y + 30);
-				// Focus the next bubble if it exists. Otherwise, event will propagate to be handled
-				// by keyboardHandler.js of citationDialog.js
-				if (nextBubble) {
-					nextBubble.focus();
-					event.preventDefault();
-					event.stopPropagation();
-				}
 			}
 		}
 		

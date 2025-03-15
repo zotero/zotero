@@ -188,6 +188,12 @@ export class CitationDialogPopupsHandler {
 			this._getNode("#itemDetails").setAttribute("refocus-input", true);
 			this._getNode("#itemDetails").hidePopup();
 		}
+		// Arrow up on anything except for the locator dropdown will close the popup
+		if (event.key == "ArrowUp" && event.target.tagName !== "select") {
+			this._getNode("#itemDetails").hidePopup();
+			event.stopPropagation();
+			event.preventDefault();
+		}
 	}
 
 	// Update item details and notify citation dialog about changes
