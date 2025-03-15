@@ -113,13 +113,13 @@
 	}
 }
 
-#zotero-tb-pq-recognize {
+:is(#zotero-tb-pq-recognize, #zotero-tb-pq-update) {
 	@include svgicon-menu('pdf-search-spinner', 'universal', '20');
-}
 
-#zotero-tb-pq-recognize .toolbarbutton-icon {
-	width: 18px;
-	margin-top: 1px;
+	.toolbarbutton-icon {
+		width: 18px;
+		margin-top: 1px;
+	}
 }
 
 toolbox {

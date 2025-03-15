@@ -1,0 +1,217 @@
+@each $icon in (tick, cross, edit) {
+	.icon-css.icon-#{$icon} {
+		@include svgicon($icon, "universal", "16");
+	}
+}
+
+@each $icon in (error) {
+	.icon-css.icon-#{$icon} {
+		@include svgicon($icon, "universal", "20");
+	}
+}
+
+.diff-table-field {
+	display: flex;
+	padding-bottom: 2px;
+
+	&:hover {
+		opacity: 0.7;
+
+		&.readonly {
+			opacity: 1;
+		}
+	}
+
+	.name {
+		font-weight: bold;
+		width: 120px;
+		text-align: right;
+		flex-shrink: 0;
+		padding-right: 5px;
+		white-space: nowrap;
+		overflow-x: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.value {
+		-moz-user-select: text;
+		white-space: pre-wrap;
+
+		.removed {
+			background-color: #ff8989;
+			text-decoration: line-through;
+		}
+
+		.added {
+			background-color: #a9edae;
+		}
+	}
+
+	&.readonly {
+		.value {
+			.removed {
+				background-color: #ff8989;
+				opacity: 0.4;
+			}
+
+			.added {
+				background-color: rgba(169, 237, 174, 0.6);
+			}
+		}
+	}
+
+	&.disabled {
+		.value {
+			.removed {
+				background-color: #d0d0d0;
+			}
+
+			.added {
+				background-color: #eeeeee;
+			}
+		}
+	}
+}
+
+.diff-table {
+	background: var(--material-background);
+	color: var(--fill-primary);
+	min-width: 0;
+	border: 1px solid gray;
+	cursor: default;
+	user-select: none;
+
+	.body {
+		height: 400px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		padding: 5px;
+
+		.row {
+			padding: 3px 0;
+
+			.header {
+				display: flex;
+
+				.status {
+					display: flex;
+					width: 30px;
+					height: 16px;
+					align-items: center;
+					justify-content: center;
+					flex-shrink: 0;
+
+					.icon-css {
+						width: 16px;
+						height: 16px;
+					}
+				}
+
+				.title {
+					position: relative;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					cursor: pointer;
+
+					&:hover {
+						text-decoration: underline;
+					}
+				}
+			}
+
+			.message {
+				padding-left: 30px;
+				font-size: 0.9em;
+			}
+
+			.fields {
+				font-size: 0.9em;
+				margin-top: 4px;
+				margin-bottom: 5px;
+			}
+
+			.footer {
+				margin-left: 30px;
+				display: flex;
+
+				.spacer {
+					flex: 1;
+				}
+			}
+
+			.separator {
+				width: 100%;
+				border-top: var(--material-border);
+				margin: 6px auto;
+			}
+
+			&:last-child {
+				.separator {
+					display: none;
+				}
+			}
+		}
+	}
+}
+
+@media (-moz-platform: macos) {
+	.diff-table {
+		button {
+			-moz-appearance: button;
+			/* The horizontal margin used here come from the Aqua Human Interface
+			   Guidelines, there should be 12 pixels between two buttons. */
+			margin: 5px 6px 3px;
+			min-width: 79px;
+			color: ButtonText;
+			text-shadow: none;
+
+			// Bump font-size up from main window (override -moz-appearance above)
+			font: -moz-dialog !important;
+			// Re-override the font family
+			font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
+			// Reduce the font a titch compared to the window buttons for a clean hierarchy
+			font-size: 0.95em !important;
+		}
+
+		button:not([disabled]):hover:active {
+			color: -moz-mac-buttonactivetext;
+		}
+
+		/* When the window isn't focused, the default button background isn't drawn,
+		 * so don't change the text color then: */
+		button[default]:not([disabled]):not(:-moz-window-inactive) {
+			color: -moz-mac-defaultbuttontext;
+		}
+
+		/* Likewise, when active (mousedown) but not hovering, the default button
+		 * background isn't drawn, override the previous selector for that case: */
+		button[default]:not(:hover):active {
+			color: ButtonText;
+		}
+
+		/* Change this from button-text to button since we don't have a child element
+		 * in XUL. Furthermore, switch from margin to padding. */
+		button {
+			padding: 1px 0 !important;
+			padding-inline-start: 3px !important;
+			padding-inline-end: 2px !important;
+			text-align: center;
+		}
+
+		.button-icon {
+			margin-inline-start: 1px;
+		}
+
+		button[type="default"] {
+			font: menu;
+		}
+
+		/* .......... disabled state .......... */
+
+		button[disabled] {
+			color: GrayText;
+		}
+
+	}
+}

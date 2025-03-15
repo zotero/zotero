@@ -25,7 +25,7 @@
 
 const React = require('react');
 const ReactDOM = require('react-dom');
-const diff = require('diff');
+const Diff = require('diff');
 const VirtualizedTable = require('components/virtualized-table');
 const { getCSSIcon, IconAttachSmall } = require('components/icons');
 const ItemTree = require('zotero/itemTree');
@@ -259,7 +259,7 @@ window.ZoteroDocumentCitations = {
 				}
 				let title = await citation.field.getText();
 				if (citation.properties.plainCitation != title) {
-					let d = diff(citation.properties.plainCitation, title);
+					let d = new Diff().diff_main(citation.properties.plainCitation, title);
 					title = d.map(([type, text]) => {
 						if (type == 0) return text;
 						if (type == -1) return `<span style="color: red; text-decoration: line-through">${text}</span>`;

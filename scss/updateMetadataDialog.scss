@@ -1,0 +1,15 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+@import "abstracts/split-button";
+@import "abstracts/svgicon";
+
+@import "components/diffTable";
+@import "components/spinner";
+
+#progress-indicator {
+	flex: 1;
+	margin-inline-end: 6px;
+}

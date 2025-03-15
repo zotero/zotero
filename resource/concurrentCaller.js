@@ -148,7 +148,7 @@ ConcurrentCaller.prototype.add = function (func) {
 
 /**
  * @param {Function|Function[]} - One or more functions to run
- * @return {Promise[]} - An array of promises for passed functions, resolved once they have all
+ * @return {Promise|Promise[]} - An array of promises for passed functions, resolved once they have all
  *     finished (even if other functions are still running)
  */
 ConcurrentCaller.prototype.start = function (func) {

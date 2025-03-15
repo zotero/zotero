@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/updateMetadataDialog.css"?>
+<!DOCTYPE window PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+		"chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		id="update-metadata"
+		width="650"
+		height="550"
+		style="padding: 10px;font: -moz-dialog !important;"
+		data-l10n-id="update-metadata-window">
+	<script>
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/updateMetadataDialog.js", this);
+	</script>
+	
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+		<html:link rel="localization" href="updateMetadata.ftl"/>
+	</linkset>
+	
+	<vbox id="update-metadata-container" flex="1">
+		<label id="label" control="progress-indicator" value=""/>
+		<hbox align="center">
+			<html:progress id="progress-indicator"/>
+			<button id="cancel-button" data-l10n-id="update-metadata-cancel"/>
+			<button id="close-button" data-l10n-id="update-metadata-done"/>
+		</hbox>
+		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>
+		<hbox align="right">
+			<button id="apply-all-button" default="true" data-l10n-id="update-metadata-apply-all"/>
+		</hbox>
+	</vbox>
+
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+	</keyset>
+</window>
