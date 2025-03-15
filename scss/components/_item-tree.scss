@@ -163,6 +163,30 @@
 					}
 				}
 			}
+
+			.attachment-progress {
+				appearance: none;
+				background-color: transparent;
+				background-image: conic-gradient(var(--fill-secondary) var(--progress), transparent var(--progress));
+				border-radius: 8px;
+				border: none;
+				display: block;
+				height: 16px;
+				width: 16px;
+
+				@include state(".row.selected") {
+					background-image: conic-gradient(var(--color-accent-text) var(--progress), transparent var(--progress));
+
+					@include state(".virtualized-table:not(:focus-within)") {
+						background-image: conic-gradient(var(--fill-secondary) var(--progress), transparent var(--progress));
+					}
+				}
+
+				&::-moz-progress-bar {
+					appearance: none;
+					background: transparent;
+				}
+			}
 		}
 	
 		.cell.hasAttachment {
