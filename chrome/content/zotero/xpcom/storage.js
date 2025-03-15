@@ -46,9 +46,7 @@ Zotero.Sync.Storage = new function () {
 	}
 	
 	
-	this.getItemDownloadImageNumber = function (item) {
-		var numImages = 64;
-		
+	this.getItemDownloadProgress = function (item) {
 		var lk = item.libraryID + "/" + item.key;
 		
 		if (typeof _itemDownloadPercentages[lk] == 'undefined') {
@@ -56,8 +54,8 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		var percentage = _itemDownloadPercentages[lk];
-		return Math.round(percentage / 100 * (numImages - 1)) + 1;
-	}
+		return percentage;
+	};
 	
 	
 	/**
