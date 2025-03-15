@@ -131,7 +131,7 @@ function cancel() {
 }
 
 function cleanupBeforeDialogClosing() {
-	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
+	Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
@@ -1139,8 +1139,8 @@ const IOManager = {
 	// Set the initial dialog mode per user's preference
 	setInitialDialogMode() {
 		let desiredMode = Zotero.Prefs.get("integration.citationDialogMode");
-		if (desiredMode == "last-closed") {
-			desiredMode = Zotero.Prefs.get("integration.citationDialogLastClosedMode");
+		if (desiredMode == "last-used") {
+			desiredMode = Zotero.Prefs.get("integration.citationDialogLastUsedMode");
 		}
 		// When the dialog is opened for the very first time, default to list mode
 		if (!desiredMode) {
