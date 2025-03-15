@@ -72,12 +72,13 @@
 			this.initCollapsibleSection();
 
 			this._abstractField = this.querySelector('editable-text');
-			this._abstractField.addEventListener('blur', () => this.save());
+			this._abstractField.addEventListener('blur', this._handleFieldBlur);
 			this._abstractField.ariaLabel = Zotero.getString('itemFields.abstractNote');
 			this.render();
 		}
 
 		destroy() {
+			this._abstractField?.removeEventListener('blur', this._handleFieldBlur);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
@@ -192,6 +193,10 @@
 				this._feedAbstractBrowser = null;
 			}
 		}
+
+		_handleFieldBlur = () => {
+			this.save();
+		};
 	}
 	customElements.define("abstract-box", AbstractBox);
 }

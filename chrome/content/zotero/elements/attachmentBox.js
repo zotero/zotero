@@ -243,34 +243,20 @@
 
 			this._body = this.querySelector('.body');
 
-			this._id('url').addEventListener('contextmenu', (event) => {
-				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
-			});
+			this._id('url').addEventListener('contextmenu', this._handleURLContextMenu);
 
-			this._id("title").addEventListener('blur', () => {
-				this.item.setField('title', this._id('title').value);
-				this.item.saveTx();
-			});
+			this._id("title").addEventListener('blur', this._handleTitleBlur);
 
 			let fileName = this._id("fileName");
-			fileName.addEventListener('focus', () => {
-				this._isEditingFilename = true;
-			});
-			fileName.addEventListener('blur', () => {
-				this.editFileName(fileName.value);
-				this._isEditingFilename = false;
-			});
+			fileName.addEventListener('focus', this._handleFileNameFocus);
+			fileName.addEventListener('blur', this._handleFileNameBlur);
 
 			let noteButton = this._id('note-button');
-			noteButton.addEventListener("command", () => {
-				this.convertAttachmentNote();
-			});
+			noteButton.addEventListener("command", this._handleNoteButtonCommand);
 
 			let copyMenuitem = this._id('url-menuitem-copy');
 			copyMenuitem.label = Zotero.getString('general.copy');
-			copyMenuitem.addEventListener('command', () => {
-				Zotero.Utilities.Internal.copyTextToClipboard(this.item.getField('url'));
-			});
+			copyMenuitem.addEventListener('command', this._handleCopyURL);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
 
@@ -280,37 +266,44 @@
 			// reindex button
 			let reindexButton = this._id("indexStatusRow").querySelector(".meta-data toolbarbutton");
 			if (reindexButton) {
-				reindexButton.addEventListener("focusin", function (e) {
-					if (e.target.tagName == "image") {
-						reindexButton.focus();
-						reindexButton.querySelector("image").removeAttribute("tabindex");
-					}
-				});
-				reindexButton.addEventListener("blur", function (_) {
-					setTimeout(() => {
-						if (document.activeElement !== reindexButton) {
-							reindexButton.querySelector("image").setAttribute("tabindex", "0");
-						}
-					});
-				});
+				reindexButton.addEventListener("focusin", this._handleReindexButtonFocus);
+				reindexButton.addEventListener("blur", this._handleReindexButtonBlur);
+				// Prevents the button from getting stuck in active state
+				reindexButton.addEventListener("keydown", this._handleReindexButtonKeydown);
 			}
-			// Prevents the button from getting stuck in active state
-			reindexButton.addEventListener("keydown", (e) => {
-				if (e.key == " ") {
-					e.preventDefault();
-					reindexButton.click();
-				}
-			});
 
 			for (let label of this.querySelectorAll(".meta-label")) {
 				// Prevent default focus/blur behavior - we implement our own below
-				label.addEventListener("mousedown", event => event.preventDefault());
+				label.addEventListener("mousedown", this._handleMetaLabelMousedown);
 				label.addEventListener("click", this._handleMetaLabelClick);
 			}
 		}
 
 		destroy() {
+			this.discard();
+			this._preview?.remove();
+			delete this._preview;
+
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+
+			this._id('url')?.removeEventListener('contextmenu', this._handleURLContextMenu);
+			this._id("title")?.removeEventListener('blur', this._handleTitleBlur);
+			this._id("fileName")?.removeEventListener('focus', this._handleFileNameFocus);
+			this._id("fileName")?.removeEventListener('blur', this._handleFileNameBlur);
+			this._id('note-button')?.removeEventListener("command", this._handleNoteButtonCommand);
+			this._id('url-menuitem-copy')?.removeEventListener('command', this._handleCopyURL);
+
+			let reindexButton = this._id("indexStatusRow")?.querySelector(".meta-data toolbarbutton");
+			if (reindexButton) {
+				reindexButton.removeEventListener("focusin", this._handleReindexButtonFocus);
+				reindexButton.removeEventListener("blur", this._handleReindexButtonBlur);
+				reindexButton.removeEventListener("keydown", this._handleReindexButtonKeydown);
+			}
+
+			for (let label of this.querySelectorAll(".meta-label")) {
+				label.removeEventListener("mousedown", this._handleMetaLabelMousedown);
+				label.removeEventListener("click", this._handleMetaLabelClick);
+			}
 		}
 
 		notify(event, _type, ids, _extraData) {
@@ -739,6 +732,58 @@
 			this._body.prepend(this._preview);
 			this._preview.disableResize = !!this.hidden;
 		}
+
+		_handleURLContextMenu = (event) => {
+			this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
+		};
+
+		_handleTitleBlur = () => {
+			this.item.setField('title', this._id('title').value);
+			this.item.saveTx();
+		};
+
+		_handleFileNameFocus = () => {
+			this._isEditingFilename = true;
+		};
+
+		_handleFileNameBlur = () => {
+			this.editFileName(this._id("fileName").value);
+			this._isEditingFilename = false;
+		};
+
+		_handleNoteButtonCommand = () => {
+			this.convertAttachmentNote();
+		};
+
+		_handleCopyURL = () => {
+			Zotero.Utilities.Internal.copyTextToClipboard(this.item.getField('url'));
+		};
+
+		_handleReindexButtonFocus = (event) => {
+			if (event.target.tagName == "image") {
+				reindexButton.focus();
+				reindexButton.querySelector("image").removeAttribute("tabindex");
+			}
+		};
+
+		_handleReindexButtonBlur = () => {
+			setTimeout(() => {
+				if (document.activeElement !== reindexButton) {
+					reindexButton.querySelector("image").setAttribute("tabindex", "0");
+				}
+			});
+		};
+
+		_handleReindexButtonKeydown = (event) => {
+			if (event.key == " ") {
+				event.preventDefault();
+				reindexButton.click();
+			}
+		};
+
+		_handleMetaLabelMousedown = (event) => {
+			event.preventDefault();
+		};
 	}
 
 	customElements.define("attachment-box", AttachmentBox);

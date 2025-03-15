@@ -47,7 +47,6 @@
 			this._tabDirection = null;
 			this._tagColors = [];
 			this._notifierID = null;
-			this._item = null;
 
 			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAddButtonClick);

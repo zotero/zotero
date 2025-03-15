@@ -245,6 +245,24 @@
 			});
 			contextMenu.append(unpinSection);
 
+			let moveSectionUp = document.createXULElement('menuitem');
+			moveSectionUp.classList.add('menuitem-iconic', 'zotero-menuitem-move-up');
+			moveSectionUp.setAttribute('data-l10n-id', 'sidenav-reorder-up');
+			moveSectionUp.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.handlePaneMove(this.dataset.pane, 'up');
+			});
+			contextMenu.append(moveSectionUp);
+
+			let moveSectionDown = document.createXULElement('menuitem');
+			moveSectionDown.classList.add('menuitem-iconic', 'zotero-menuitem-move-down');
+			moveSectionDown.setAttribute('data-l10n-id', 'sidenav-reorder-down');
+			moveSectionDown.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.handlePaneMove(this.dataset.pane, 'down');
+			});
+			contextMenu.append(moveSectionDown);
+
 			contextMenu.addEventListener('popupshowing', () => {
 				let sections = Array.from(containerRoot.querySelectorAll('collapsible-section'));
 				collapseOtherSections.disabled = sections.every(section => section === this || !section.open);
@@ -261,6 +279,9 @@
 					pinSection.hidden = true;
 					unpinSection.hidden = true;
 				}
+
+				moveSectionUp.hidden = !sidenav?.isPaneMovable(this.dataset.pane, 'up');
+				moveSectionDown.hidden = !sidenav?.isPaneMovable(this.dataset.pane, 'down');
 			});
 			
 			return contextMenu;
@@ -297,6 +318,8 @@
 			this._head.removeEventListener('mousedown', this._handleMouseDown);
 			this._head.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
+
+			this._contextMenu?.remove();
 			
 			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		}
