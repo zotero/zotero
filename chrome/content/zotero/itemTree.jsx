@@ -2937,9 +2937,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const item = this.getRow(index).ref;
 
-		if ((!this.isContainer(index) || !this.isContainerOpen(index))
-			&& Zotero.Sync.Storage.getItemDownloadImageNumber(item)) {
-			return span;
+		if ((!this.isContainer(index) || !this.isContainerOpen(index))) {
+			let progressValue = Zotero.Sync.Storage.getItemDownloadProgress(item);
+			if (progressValue) {
+				let progress = document.createElement('progress');
+				progress.value = progressValue;
+				progress.max = 100;
+				progress.style.setProperty('--progress', `${progressValue}%`);
+				progress.className = 'attachment-progress';
+				span.append(progress);
+				return span;
+			}
 		}
 
 		// TEMP: For now, we use the blue bullet for all non-PDF attachments, but there's
@@ -3276,13 +3284,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		row.hasAttachment = "";
-		// Don't show pie for open parent items, since we show it for the
-		// child item
-		if (!this.isContainer(index) || !this.isContainerOpen(index)) {
-			var num = Zotero.Sync.Storage.getItemDownloadImageNumber(treeRow.ref);
-			row.hasAttachment = num === false ? "pie" : "pie" + num;
-		}
-		
 		// Style unread items in feeds
 		if (treeRow.ref.isFeedItem && !treeRow.ref.isRead) {
 			row.unread = true;
