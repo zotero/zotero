@@ -389,15 +389,54 @@ Zotero.HTTP = new function() {
 			// Convert numbers to string to make Sinon happy
 			xmlhttp.setRequestHeader(header, value);
 		}
-
-		// Set timeout
+		
+		const defaultTimeout = 30000;
+		let requestTimeout;
+		let connectTimeout;
+		let inactivityTimeout;
 		if (options.timeout !== 0) {
-			xmlhttp.timeout = options.timeout || 30000;
+			// For downloads, manually implement connect and inactivity timeouts, since the XHR
+			// `timeout` property applies to the whole request, even if data is being downloaded
+			if (options.isDownload) {
+				// TODO: Try a lower default connect timeout and take a separate option?
+				connectTimeout = options.timeout || defaultTimeout;
+				inactivityTimeout = options.timeout || defaultTimeout;
+			}
+			else {
+				requestTimeout = options.timeout || defaultTimeout;
+			}
 		}
-
-		xmlhttp.ontimeout = function() {
-			deferred.reject(new Zotero.HTTP.TimeoutException(options.timeout));
-		};
+		let connectTimerID = null;
+		let inactivityTimerID = null;
+		let timedOutAfter;
+		
+		function clearConnectTimer() {
+			if (connectTimerID) {
+				clearTimeout(connectTimerID);
+				connectTimerID = null;
+			}
+		}
+		
+		function resetInactivityTimer() {
+			clearTimeout(inactivityTimerID);
+			inactivityTimerID = setTimeout(() => {
+				Zotero.warn(`Inactivity timeout for ${method} ${dispURL} -- aborting request`);
+				timedOutAfter = inactivityTimeout;
+				xmlhttp.abort();
+			}, inactivityTimeout);
+		}
+		
+		if (requestTimeout) {
+			xmlhttp.timeout = requestTimeout;
+			xmlhttp.ontimeout = function() {
+				deferred.reject(new Zotero.HTTP.TimeoutException(requestTimeout));
+			};
+		}
+		else if (inactivityTimeout) {
+			xmlhttp.onprogress = function () {
+				resetInactivityTimer();
+			};
+		}
 		
 		// Provide caller with a callback to cancel a request in progress
 		if (options.cancellerReceiver) {
@@ -411,7 +450,17 @@ Zotero.HTTP = new function() {
 			});
 		}
 		
+		if (connectTimeout || inactivityTimeout) {
+			xmlhttp.onloadstart = () => {
+				clearConnectTimer();
+				resetInactivityTimer();
+			};
+		}
+		
 		xmlhttp.onloadend = async function() {
+			clearConnectTimer();
+			clearTimeout(inactivityTimerID);
+			
 			var status = redirectStatus || xmlhttp.status;
 			
 			try {
@@ -513,6 +562,11 @@ Zotero.HTTP = new function() {
 				}
 				Zotero.debug(msg, 1);
 				
+				if (timedOutAfter) {
+					deferred.reject(new Zotero.HTTP.TimeoutException(timedOutAfter));
+					return;
+				}
+				
 				if (xmlhttp.status == 0) {
 					try {
 						this.checkSecurity(channel, { isProxyAuthRequest: options.isProxyAuthRequest });
@@ -538,18 +592,29 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Send binary data
+		let body;
 		if (compressedBody) {
 			let numBytes = compressedBody.length;
 			let ui8Data = new Uint8Array(numBytes);
 			for (let i = 0; i < numBytes; i++) {
 				ui8Data[i] = compressedBody.charCodeAt(i) & 0xff;
 			}
-			xmlhttp.send(ui8Data);
+			body = ui8Data;
 		}
 		// Send regular request
 		else {
-			xmlhttp.send(options.body || null);
+			body = options.body || null;
 		}
+		
+		if (connectTimeout) {
+			connectTimerID = setTimeout(() => {
+				Zotero.warn(`Connect timeout for ${method} ${dispURL} -- aborting request`);
+				timedOutAfter = connectTimeout;
+				xmlhttp.abort();
+			}, connectTimeout);
+		}
+		
+		xmlhttp.send(body);
 		
 		return deferred.promise;
 	};
@@ -598,6 +663,7 @@ Zotero.HTTP = new function() {
 			uri,
 			{
 				...options,
+				isDownload: true,
 				responseType: 'blob',
 				// Downloads can have channel notification callbacks, etc., so always do them for real
 				noMock: true
