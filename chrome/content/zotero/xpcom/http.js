@@ -671,8 +671,9 @@ Zotero.HTTP = new function() {
 		);
 		var bytes = new Uint8Array(await req.response.arrayBuffer());
 		await IOUtils.write(path, bytes);
+		var byteLength = bytes.byteLength;
 		
-		Zotero.debug(`Saved file to ${path} (${bytes} byte${bytes != 1 ? 's' : ''})`);
+		Zotero.debug(`Saved file to ${path} (${byteLength} byte${byteLength != 1 ? 's' : ''})`);
 		return req;
 	};
 	
