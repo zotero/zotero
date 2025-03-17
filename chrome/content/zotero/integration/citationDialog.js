@@ -67,6 +67,9 @@ async function onLoad() {
 	libraryLayout = new LibraryLayout();
 	listLayout = new ListLayout();
 
+	// initialize most essential IO functionality (e.g. accept/cancel)
+	// remaining listeners that rely on layouts being loaded are added later in IOManager.init
+	IOManager.preInit();
 	// top-level keypress handling and focus navigation across the dialog
 	// keypresses for lower-level bubble-specific behavior are handled in bubbleInput.js
 	doc.addEventListener("keydown", event => KeyboardHandler.handleKeydown(event));
@@ -137,6 +140,7 @@ function cancel() {
 }
 
 function cleanupBeforeDialogClosing() {
+	if (!currentLayout || !libraryLayout) return;
 	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
@@ -862,6 +866,15 @@ class ListLayout extends Layout {
 const IOManager = {
 	sectionExpandedStatus: {},
 
+	// most essential IO functionality that is added immediately on load
+	preInit() {
+		_id("accept-button").addEventListener("click", accept);
+		_id("cancel-button").addEventListener("click", cancel);
+
+		doc.addEventListener("dialog-accepted", accept);
+		doc.addEventListener("dialog-cancelled", cancel);
+	},
+
 	init() {
 		// handle input receiving focus or something being typed
 		doc.addEventListener("handle-input", ({ detail: { query, eventType } }) => this._handleInput({ query, eventType }));
@@ -878,10 +891,6 @@ const IOManager = {
 		doc.addEventListener("select-items", ({ detail: { startNode, endNode } }) => this.selectItemNodesRange(startNode, endNode));
 		// update bubbles after citation item is updated by itemDetails popup
 		doc.addEventListener("item-details-updated", () => this.updateBubbleInput());
-		
-		// accept/cancel events emitted by keyboardHandler
-		doc.addEventListener("dialog-accepted", accept);
-		doc.addEventListener("dialog-cancelled", cancel);
 
 		doc.addEventListener("DOMMenuBarActive", () => this._handleMenuBarAppearance());
 
@@ -892,9 +901,6 @@ const IOManager = {
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
-		// handle accept/cancel buttons
-		_id("accept-button").addEventListener("click", accept);
-		_id("cancel-button").addEventListener("click", cancel);
 
 		// some additional logic to keep focus on relevant nodes during mouse interactions
 		this._initFocusRetention();
