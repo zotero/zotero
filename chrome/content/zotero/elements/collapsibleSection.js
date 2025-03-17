@@ -246,7 +246,7 @@
 			contextMenu.append(unpinSection);
 
 			let moveSectionUp = document.createXULElement('menuitem');
-			moveSectionUp.classList.add('menuitem-iconic', 'zotero-menuitem-move-up');
+			moveSectionUp.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-up');
 			moveSectionUp.setAttribute('data-l10n-id', 'sidenav-reorder-up');
 			moveSectionUp.addEventListener('command', () => {
 				let sidenav = this._getSidenav();
@@ -255,7 +255,7 @@
 			contextMenu.append(moveSectionUp);
 
 			let moveSectionDown = document.createXULElement('menuitem');
-			moveSectionDown.classList.add('menuitem-iconic', 'zotero-menuitem-move-down');
+			moveSectionDown.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-down');
 			moveSectionDown.setAttribute('data-l10n-id', 'sidenav-reorder-down');
 			moveSectionDown.addEventListener('command', () => {
 				let sidenav = this._getSidenav();
