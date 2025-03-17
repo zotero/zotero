@@ -80,9 +80,9 @@ async function onLoad() {
 	// init library layout after bubble input is built since bubble-input's height is a factor
 	// determining initial library layout height
 	await libraryLayout.init();
-	// fetch opened/selected/cited items so they are known
+	// fetch selected items so they are known
 	// before refreshing items list after dialog mode setting
-	await SearchHandler.refreshNonLibraryItems();
+	SearchHandler.refreshSelectedAndOpenItems();
 	// some nodes (e.g. item-tree-menu-bar) are expected to be present to switch modes
 	// so this has to go after all layouts are loaded
 	IOManager.setInitialDialogMode();
@@ -90,6 +90,12 @@ async function onLoad() {
 	IOManager.init();
 	// explicitly focus bubble input so one can begin typing right away
 	_id("bubble-input").refocusInput();
+	// loading cited items can take a long time - start loading them now
+	// and add new nodes when cited items are ready
+	SearchHandler.loadCitedItemsPromise.then(() => {
+		SearchHandler.refreshCitedItems();
+		currentLayout.refreshItemsList({ retainItemsState: true });
+	});
 
 	// Disabled all multiselect when citing notes
 	if (isCitingNotes) {
@@ -157,8 +163,9 @@ class Layout {
 		this._searchDebouncePromise = null;
 	}
 
-	// Re-render the items based on search rersults
-	async refreshItemsList() {
+	// Re-render the items based on search results
+	// @param {Boolean} options.retainItemsState: try to restore focused and selected status of item nodes.
+	async refreshItemsList({ retainItemsState } = {}) {
 		let sections = [];
 
 		// Tell SearchHandler which currently cited items are so they are not included in results
@@ -215,14 +222,30 @@ class Layout {
 				}
 			}
 		}
-		let selectedNow = doc.activeElement;
+		let previouslyFocused = doc.activeElement;
+		let previouslySelected = doc.querySelectorAll(".item.selected");
 		_id(`${this.type}-layout`).querySelector(".search-items").replaceChildren(...sections);
 		// Update which bubbles need to be highlighted
 		this.updateSelectedItems();
+
+		// Keep focus and selection on the same item nodes if specified.
+		// This should only be applicable to refresh after SearchHandler.loadCitedItemsPromise.
+		if (retainItemsState) {
+			doc.getElementById(previouslyFocused.id)?.focus();
+			// Try to retain selected status of items, in case if multiselection was in progress
+			for (let oldNote of previouslySelected) {
+				let itemNode = doc.getElementById(oldNote.id);
+				if (!itemNode) continue;
+				itemNode.classList.add("selected");
+				itemNode.classList.toggle("current", oldNote.classList.contains("current"));
+			}
+		}
 		// Pre-select the item to be added on Enter of an input
-		this.markPreSelected();
-		// If the previously focused node is no longer a part of the DOM, try to restore focus
-		if (!doc.contains(selectedNow) || doc.activeElement.tagName == "body") {
+		else {
+			this.markPreSelected();
+		}
+		// Ensure focus is never lost
+		if (doc.activeElement.tagName == "body") {
 			IOManager._restorePreClickFocus();
 		}
 	}
@@ -238,10 +261,13 @@ class Layout {
 		_id("loading-spinner").setAttribute("status", "animate");
 		_id("accept-button").hidden = true;
 		SearchHandler.searching = true;
-		// search for selected/opened/cited items
+		// search for selected/opened items
 		// only enforce min query length in list mode
 		SearchHandler.setSearchValue(value, this.type == "list");
-		await SearchHandler.refreshNonLibraryItems();
+		SearchHandler.refreshSelectedAndOpenItems();
+		// noop if cited items are not yet loaded
+		SearchHandler.refreshCitedItems();
+		
 		// Never resize window of list layout here to avoid flickering
 		// The window will always be resized after the second items list update below
 		await this.refreshItemsList({ skipWindowResize: true });
@@ -354,8 +380,8 @@ class LibraryLayout extends Layout {
 		return itemNode;
 	}
 
-	async refreshItemsList() {
-		await super.refreshItemsList();
+	async refreshItemsList(options) {
+		await super.refreshItemsList(options);
 		_id("library-other-items").querySelector(".search-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
 		// When there are no matches, show a message
@@ -732,7 +758,7 @@ class ListLayout extends Layout {
 	}
 
 	async refreshItemsList(options = {}) {
-		await super.refreshItemsList();
+		await super.refreshItemsList(options);
 
 		// Hide padding of list layout if there is not a single item to show
 		let isEmpty = !_id("list-layout").querySelector(".section:not([hidden])");

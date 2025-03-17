@@ -137,7 +137,7 @@ export class CitationDialogHelpers {
 		let divider = this.createNode("div", {}, "divider");
 		headerSpan.innerText = headerText;
 		header.append(headerSpan);
-		let itemContainer = this.createNode("div", { role: "group", "aria-label": headerText }, "itemsContainer");
+		let itemContainer = this.createNode("div", { id: `${id}_container`, role: "group", "aria-label": headerText }, "itemsContainer");
 		section.append(header, itemContainer, divider);
 
 		if (isCollapsible) {
