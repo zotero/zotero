@@ -334,8 +334,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						successCodes: [200, 404],
 						noCache: true,
 						notificationCallbacks: {
-							onProgress: function (a, b, c) {
-								request.onProgress(a, b, c)
+							onProgress: function (req, progress, progressMax) {
+								request.onProgress(progress, progressMax)
 							},
 						},
 						errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
