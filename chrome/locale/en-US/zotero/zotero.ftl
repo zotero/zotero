@@ -39,6 +39,7 @@ general-go-back = Go Back
 general-accept = Accept
 general-cancel = Cancel
 general-show-in-library = Show in Library
+general-ignore = Ignore
 
 citation-style-label = Citation Style:
 language-label = Language:
