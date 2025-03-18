@@ -97,7 +97,7 @@ Zotero.Sync.Storage = new function () {
 			}
 			Zotero.Notifier.trigger('redraw', 'item', parentItem.id, { column: "hasAttachment" });
 		}
-	}, 100);
+	}, 25);
 	
 	
 	function error(e) {
