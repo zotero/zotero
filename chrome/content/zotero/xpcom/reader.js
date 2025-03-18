@@ -550,6 +550,19 @@ class ReaderInstance {
 				}
 			},
 			onSaveCustomThemes: async (customThemes) => {
+				// If a custom theme is deleted, clear the theme preference.
+				// This ensures that the correct light/dark theme is auto-picked and also fixes #5070.
+				const lightTheme = Zotero.Prefs.get('reader.lightTheme');
+				const darkTheme = Zotero.Prefs.get('reader.darkTheme');
+
+				if (lightTheme.startsWith('custom') && !customThemes?.some(theme => theme.id === lightTheme)) {
+					Zotero.Prefs.clear('reader.lightTheme');
+				}
+
+				if (darkTheme.startsWith('custom') && !customThemes?.some(theme => theme.id === darkTheme)) {
+					Zotero.Prefs.clear('reader.darkTheme');
+				}
+				
 				if (customThemes?.length) {
 					await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'readerCustomThemes', customThemes);
 				}
