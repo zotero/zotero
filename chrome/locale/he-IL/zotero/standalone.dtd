@@ -43,7 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "ק">
 
 <!ENTITY goMenu.label "קדימה">
-<!ENTITY goMenu.accesskey "G">
+<!ENTITY goMenu.accesskey "ק">
 
 <!ENTITY viewMenu.label "תצוגה">
 <!ENTITY viewMenu.accesskey "ת">
@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "כלים">
 <!ENTITY toolsMenu.accesskey "כ">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "התקנת מגשר דפדפן…">
 <!ENTITY installConnector.accesskey "ש">
 <!ENTITY addons.label "תוספים">
 <!ENTITY developer.label "פיתוח">

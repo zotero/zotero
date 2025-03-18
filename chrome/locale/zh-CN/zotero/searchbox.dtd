@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.search.recursive.label "搜索子分类">
 <!ENTITY zotero.search.noChildren "只显示根级条目">
-<!ENTITY zotero.search.includeParentsAndChildren "包含匹配项的父条目和子条目">
+<!ENTITY zotero.search.includeParentsAndChildren "包含匹配项的上级和子条目">
 
 <!ENTITY zotero.search.textModes.phrase "短语">
 <!ENTITY zotero.search.textModes.phraseBinary "短语（含二进制文件）">

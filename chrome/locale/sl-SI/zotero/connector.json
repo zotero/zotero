@@ -47,6 +47,9 @@
   "itemType_epub": {
     "message": "Priponka EPUB"
   },
+  "itemType_snapshot": {
+    "message": "Posnetek"
+  },
   "itemType_note": {
     "message": "Opomba"
   },
@@ -79,6 +82,15 @@
   },
   "progressWindow_downloadComplete": {
     "message": "Shranjeno: $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Shranjeno $1 za vnos $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Neuspeli prejem $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Neuspeli prejem $1 za element $2"
   },
   "progressWindow_allDone": {
     "message": "Shranjevanje je zaključeno. Pogovorno okno se bo zaprlo."
@@ -113,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "najnovejša različica"
   },
+  "itemSelector_title": {
+    "message": "Izberite vnose, ki bi jih želeli dodati v svojo knjižnico:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 je onemogočen"
+    "message": "Konektor $1 ni na voljo na tej strani"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "Konektor $1 ni na voljo na URL-jih datotek"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 je onemogočen na straneh razširitev"
+    "message": "Konektor $1 ni na voljo na straneh razširitev"
   },
   "appConnector": {
     "message": "Konektor $1"
@@ -132,7 +150,7 @@
     "message": "Konektor $1 vam omogoča <a href=\"$2\">shranjevanje vnosov v $1</a> iz vašega brskalnika z enim samim klikom."
   },
   "firstRun_text2": {
-    "message": "Če tega že niste storili, <a href=\"$2\">prenesite</a> samostojni program $1, da bo vaša izkušnja še boljša."
+    "message": "Če tega že niste storili, <a href=\"$2\">prenesite</a> program $1, da bo vaša izkušnja še boljša."
   },
   "firstRun_acceptButton": {
     "message": "Razumem"

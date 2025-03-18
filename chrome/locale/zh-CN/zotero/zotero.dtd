@@ -146,7 +146,7 @@
 <!ENTITY zotero.lookup.description "输入 ISBN、DOI、PMID、arXiv ID 或 ADS 条码来添加条目到您的文库：">
 <!ENTITY zotero.lookup.button.search "搜索">
 
-<!ENTITY zotero.createParent.title "创建父条目">
+<!ENTITY zotero.createParent.title "创建上级条目">
 <!ENTITY zotero.createParent.button.manual "手动录入">
 
 <!ENTITY zotero.selectitems.title "选择条目">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.charset.label "字符编码">
 <!ENTITY zotero.moreEncodings.label "更多编码">
 
-<!ENTITY zotero.citation.keepSorted.label "保持源分类">
+<!ENTITY zotero.citation.keepSorted.label "保持文献自动排序">
 
 <!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前缀:">
@@ -314,9 +314,9 @@
 <!ENTITY zotero.pdfReader.verticalScrolling "垂直滚动">
 <!ENTITY zotero.pdfReader.horizontalScrolling "水平滚动">
 <!ENTITY zotero.pdfReader.wrappedScrolling "覆盖滚动">
-<!ENTITY zotero.pdfReader.noSpreads "无分布">
-<!ENTITY zotero.pdfReader.oddSpreads "奇数分布">
-<!ENTITY zotero.pdfReader.evenSpreads "偶数分布">
+<!ENTITY zotero.pdfReader.noSpreads "不平铺">
+<!ENTITY zotero.pdfReader.oddSpreads "奇数页起始（无封面）">
+<!ENTITY zotero.pdfReader.evenSpreads "偶数页起始（有封面）">
 <!ENTITY zotero.pdfReader.scrolled "卷轴">
 <!ENTITY zotero.pdfReader.paginated "分页">
 <!ENTITY zotero.pdfReader.zoomIn "放大">

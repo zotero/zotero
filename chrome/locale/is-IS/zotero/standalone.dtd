@@ -22,8 +22,8 @@
 <!ENTITY closeCmd.label "Loka">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Sýsla með viðhengi">
+<!ENTITY convertToStored.label "Umbreyta tengdum skrám í geymdar skrár…">
 <!ENTITY importCmd.label "Flytja inn…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Flytja inn af klippispjaldi">
@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Afrita tilvísun">
 <!ENTITY copyBibliographyCmd.label "Afrita heimildaskrá">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Afrita athugasemd">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Snúa við síðustefnu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -42,29 +42,29 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Fara">
 <!ENTITY goMenu.accesskey "G">
 
-<!ENTITY viewMenu.label "View">
+<!ENTITY viewMenu.label "Skoða">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY layout.label "Framsetning">
+<!ENTITY standardView.label "Stöðluð sýn">
+<!ENTITY stackedView.label "Stöfluð sýn">
+<!ENTITY collectionsPane.label "Safnspjald">
+<!ENTITY itemPane.label "Atriðaspjald">
+<!ENTITY tagSelector.label "Merkjaveljari">
+<!ENTITY recursiveCollections.label "Sýna atriði úr undirsöfnum">
+<!ENTITY fontSize.label "Stærð leturs">
+<!ENTITY noteFontSize.label "Leturstærð athugasemdar">
+<!ENTITY columns.label "Dálkar">
+<!ENTITY sortBy.label "Raða eftir">
 
 <!ENTITY toolsMenu.label "Verkfæri">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Setja upp vafratengingu…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Viðbætur (add-ons)">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Hönnuður">
 
 <!ENTITY bringAllToFront.label "Færa allt framfyrir">
 
@@ -79,7 +79,7 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Upplýsingar um lausn vandamála">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Spjallrásir">
+<!ENTITY helpFeedbackPage.label "Spjallsvæði">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Tilkynna villur...">

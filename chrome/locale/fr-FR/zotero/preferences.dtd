@@ -176,7 +176,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 
 <!ENTITY zotero.preferences.charset "Codage de caractères">
-<!ENTITY zotero.preferences.charset.importCharset "Importer le codage de caractères">
+<!ENTITY zotero.preferences.charset.importCharset "Codage de caractères pour l'import">
 <!ENTITY zotero.preferences.charset.displayExportOption "Afficher l'option de codage de caractères à l'exportation">
 
 <!ENTITY zotero.preferences.dataDir "Emplacement du répertoire de données">

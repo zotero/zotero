@@ -43,7 +43,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 <!ENTITY goMenu.label "Vés-hi">
-<!ENTITY goMenu.accesskey "G">
+<!ENTITY goMenu.accesskey "V">
 
 <!ENTITY viewMenu.label "Visualitza">
 <!ENTITY viewMenu.accesskey "V">
@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Eines">
 <!ENTITY toolsMenu.accesskey "n">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Instal·la el connector del navegador…">
 <!ENTITY installConnector.accesskey "c">
 <!ENTITY addons.label "Complements">
 <!ENTITY developer.label "Desenvolupament">

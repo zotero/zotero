@@ -54,7 +54,7 @@
 <!ENTITY zotero.collections.showRetractedItems "Geri Çekilmiş Eserleri Göster">
 
 <!ENTITY zotero.items.itemType "Eser Türü">
-<!ENTITY zotero.items.creator_column "Yaratan">
+<!ENTITY zotero.items.creator_column "Oluşturan">
 <!ENTITY zotero.items.year_column "Yıl">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
 <!ENTITY zotero.items.moreColumns.label "Diğer Sütunlar">

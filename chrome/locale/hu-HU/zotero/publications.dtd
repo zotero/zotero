@@ -13,7 +13,7 @@
 <!ENTITY zotero.publications.sharing.reserved "Nem, csakis a zotero.org weboldalon publikálható a munkám">
 
 <!ENTITY zotero.publications.chooseLicense.title "Válasszon egy Creative Commons licencet.">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
+<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons licenc lehetővé teszi mások számára, hogy másolják és továbbadják a munkáját, amennyiben megfelelő módon hivatkoznak az eredeti műre és külön hivatkoznak a licencre is, valamint jelzik, hogy milyen változásokat eszközöltek. Az alábbiakban további feltételek is megadhatók.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Engedélyezi az átdolgozott műveinek megosztását?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Igen, amíg mások is hasonlóan osztják meg.">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Engedélyezi kereskedelmi használatra a munkáját?">

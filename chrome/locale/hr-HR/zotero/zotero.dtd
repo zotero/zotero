@@ -15,8 +15,8 @@
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.moreInformation "More Information">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.moreInformation "Još informacija">
+<!ENTITY zotero.general.loading "Učitavanje…">
 <!ENTITY zotero.general.close "Close">
 <!ENTITY zotero.general.minimize "Minimize">
 <!ENTITY zotero.general.other "Other…">
@@ -123,7 +123,7 @@
 <!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
 <!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "Stavka">
 <!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
@@ -308,7 +308,7 @@
 
 <!ENTITY zotero.pdfReader.firstPage "First Page">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Natrag">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">

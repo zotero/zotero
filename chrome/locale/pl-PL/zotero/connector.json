@@ -68,6 +68,9 @@
   "progressWindow_detailsBtnHide": {
     "message": "Ukryj szczegóły"
   },
+  "progressWindow_savingItems": {
+    "message": "Zapisywanie $1 elementów. $2"
+  },
   "progressWindow_savingItem": {
     "message": "Zapisywanie elementu $1"
   },
@@ -76,6 +79,9 @@
   },
   "progressWindow_downloadComplete": {
     "message": "Zapisano $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Zapisano $1 dla elementu $2"
   },
   "progressWindow_downloadFailed": {
     "message": "Pobieranie $1 nie powiodło się"

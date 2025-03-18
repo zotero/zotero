@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Werkzeuge">
 <!ENTITY toolsMenu.accesskey "W">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Browsererweiterungen installieren…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Entwickler">

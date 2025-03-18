@@ -41,14 +41,38 @@
   "general_copyToClipboard": {
     "message": "クリップボードにコピー"
   },
+  "itemType_pdf": {
+    "message": "PDF 添付ファイル"
+  },
+  "itemType_epub": {
+    "message": "EPUB 添付ファイル"
+  },
+  "itemType_snapshot": {
+    "message": "スナップショット"
+  },
   "itemType_note": {
     "message": "ノート"
+  },
+  "itemType_link": {
+    "message": "ウェブリンク"
   },
   "itemType_attachment": {
     "message": "添付ファイル"
   },
   "progressWindow_savingTo": {
     "message": "保存先は"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "詳細を見る"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "詳細を隠す"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "対象コレクションセレクター"
+  },
+  "progressWindow_savingItems": {
+    "message": "アイテム $1 件を保存中 $2"
   },
   "progressWindow_tagPlaceholder": {
     "message": "タグ（コンマで区切り）"

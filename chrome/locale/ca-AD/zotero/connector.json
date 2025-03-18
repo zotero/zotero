@@ -68,6 +68,9 @@
   "progressWindow_detailsBtnHide": {
     "message": "Amaga els detalls"
   },
+  "progressWindow_savingItems": {
+    "message": "S'estan desant $1elements.$2"
+  },
   "progressWindow_savingItem": {
     "message": "S'està desant l'element $1"
   },
@@ -76,6 +79,9 @@
   },
   "progressWindow_downloadComplete": {
     "message": "S'ha desat $1"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "La baixada de $1ha fallat"
   },
   "progressWindow_allDone": {
     "message": "Ja s'ha desat. Tot seguit es tancarà el diàleg."

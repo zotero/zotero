@@ -317,8 +317,8 @@
 <!ENTITY zotero.pdfReader.noSpreads "Pojedyncza strona">
 <!ENTITY zotero.pdfReader.oddSpreads "Dwie strony - nieparzysta">
 <!ENTITY zotero.pdfReader.evenSpreads "Dwie strony - parzysta">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Przewijalny">
+<!ENTITY zotero.pdfReader.paginated "Zawinięty">
 <!ENTITY zotero.pdfReader.zoomIn "Powiększ">
 <!ENTITY zotero.pdfReader.zoomOut "Zmniejsz">
 <!ENTITY zotero.pdfReader.zoomReset "Przywróć powiększenie">
