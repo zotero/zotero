@@ -662,17 +662,9 @@ Zotero.SearchConditions = new function(){
 				continue;
 			}
 			
-			let localized = self.getLocalizedName(i);
-			// Hack to use a different name for "issue" in French locale,
-			// where 'number' and 'issue' are translated the same
-			// https://forums.zotero.org/discussion/14942/
-			if (Zotero.ItemFields.getName(fieldID) == 'issue' && locale.substr(0, 2) == 'fr') {
-				localized = "Num\u00E9ro (p\u00E9riodique)";
-			}
-			
 			_standardConditions.push({
 				name: i,
-				localized: localized,
+				localized: self.getLocalizedName(i),
 				operators: _conditions[i]['operators'],
 				flags: _conditions[i]['flags']
 			});
