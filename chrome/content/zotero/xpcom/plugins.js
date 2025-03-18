@@ -122,6 +122,9 @@ Zotero.Plugins = new function () {
 	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
 	 */
 	function _loadScope(addon) {
+		if (scopes.has(addon.id)) {
+			return;
+		}
 		var scope = new Cu.Sandbox(
 			Services.scriptSecurityManager.getSystemPrincipal(),
 			{
@@ -662,6 +665,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
+			_loadScope(addon);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
