@@ -77,16 +77,6 @@ bubble-input {
 		
 		&:hover:not(.showingDetails) {
 			background-color: var(--fill-quarternary);
-			
-			.delete-btn {
-				display: flex;
-			}
-			
-			.text {
-				mask-image: linear-gradient(to left, transparent 14px, var(--fill-primary) 24px);
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
 		}
 		&.showingDetails {
 			background-color: var(--fill-quarternary) !important;
@@ -111,22 +101,8 @@ bubble-input {
 			background-color: var(--accent-blue10);
 		}
 
-		.delete-btn {
-			display: none;
-			width: 20px;
-			height: 20px;
-			align-items: center;
-			justify-content: center;
-			border-radius: 5px;
-			position: absolute;
-			right: 4px;
-			color: var(--fill-secondary);
-			&:hover {
-				background-color: var(--fill-quarternary);
-			}
-			&:active {
-				background-color: var(--fill-tertiary);
-			}
+		.dropmarker {
+			margin-inline-start: 4px;
 		}
 	}
 }
