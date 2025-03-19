@@ -942,23 +942,26 @@ ZoteroStandalone.DebugOutput = {
 	
 	
 	restartEnabled: function () {
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-				+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-		var index = ps.confirmEx(
-			null,
-			Zotero.getString('zotero.debugOutputLogging'),
-			Zotero.getString('zotero.debugOutputLogging.enabledAfterRestart', [Zotero.clientName]),
-			buttonFlags,
-			Zotero.getString('general.restartNow'),
-			null, Zotero.getString('general.restartLater'), null, {}
-		);
-		if (index != 1) {
-			Zotero.Prefs.set('debug.store', true);
-		}
+		var checkbox = { value: true };
+		var index = Zotero.Prompt.confirm({
+			title: Zotero.getString('zotero.debugOutputLogging'),
+			text: Zotero.getString('zotero.debugOutputLogging.enabledAfterRestart', [Zotero.clientName]),
+			button0: Zotero.getString('general-restartApp'),
+			button1: Services.prompt.BUTTON_TITLE_CANCEL,
+			checkLabel: Zotero.getString('debug-output-logging-restart-in-troubleshooting-mode-checkbox'),
+			checkbox,
+		});
 		if (index == 0) {
-			Zotero.Utilities.Internal.quit(true);
+			Zotero.Prefs.set('debug.store', true);
+			
+			// Restart in Troubleshooting Mode
+			if (checkbox.value) {
+				Services.startup.restartInSafeMode(Ci.nsIAppStartup.eAttemptQuit);
+			}
+			// Restart in normal mode
+			else {
+				Zotero.Utilities.Internal.quit(true);
+			}
 		}
 	},
 	
