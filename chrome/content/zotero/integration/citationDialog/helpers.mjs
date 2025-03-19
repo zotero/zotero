@@ -140,12 +140,13 @@ export class CitationDialogHelpers {
 		let itemContainer = this.createNode("div", { id: `${id}_container`, role: "group", "aria-label": headerText }, "itemsContainer");
 		section.append(header, itemContainer, divider);
 
+		let buttonGroup = this.createNode("div", {}, "header-btn-group");
+		header.append(buttonGroup);
+
 		if (isCollapsible) {
 			headerSpan.id = `header_${id}`;
 			section.classList.add("expandable");
 			section.style.setProperty('--deck-length', deckLength);
-			let buttonGroup = this.createNode("div", { }, "header-btn-group");
-			header.append(buttonGroup);
 
 			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabindex': 22, role: "button", "aria-describedby": headerSpan.id }, "add-all keyboard-clickable");
 			buttonGroup.append(addAllBtn);
@@ -166,6 +167,20 @@ export class CitationDialogHelpers {
 			}
 		}
 		return section;
+	}
+
+	// Create mock item node to use as a the placeholder for cited items that are loading
+	createCitedItemPlaceholder() {
+		let itemNode = this.createNode("div", {
+			role: "option",
+			disabled: true
+		}, "item cited-placeholder");
+		let title = this.createNode("div", {}, "title");
+		let description = this.createNode("div", {}, "description");
+		title.textContent = Zotero.getString("general.loading");
+		description.textContent = " ";
+		itemNode.append(title, description);
+		return itemNode;
 	}
 
 	// Extract locator from a string and return an object: { label: string, page: string, onlyLocator: bool}

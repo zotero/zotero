@@ -107,6 +107,12 @@ export class CitationDialogSearchHandler {
 			if (groupItems.length) {
 				result.push({ key: groupKey, group: groupItems });
 			}
+			// if cited items are being loaded, add their group with no items to indicate
+			// that a placeholder should be displayed
+			let loadingCitedItemsGroup = this.citedItems === null && groupKey === "cited";
+			if (loadingCitedItemsGroup && this.searchValue) {
+				result.push({ key: "cited", group: [] });
+			}
 		}
 		// library items go after
 		let libraryItems = Object.values(this.results.found.reduce((acc, item) => {

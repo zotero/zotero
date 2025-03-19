@@ -65,7 +65,7 @@ export class CitationDialogKeyboardHandler {
 			let rowIndex = focusedRow.id.split("-")[4];
 			if (rowIndex !== "0") return;
 			// if there are suggested items, focus them
-			if (this._id("library-other-items").querySelector(".item")) {
+			if (this._id("library-other-items").querySelector(".item:not([disabled])")) {
 				let current = this.doc.querySelector(".selected.current");
 				if (current) {
 					current.focus();
@@ -124,7 +124,7 @@ export class CitationDialogKeyboardHandler {
 			if (current) {
 				current.focus();
 			}
-			else if (group.querySelector(".item")) {
+			else if (group.querySelector(".item:not([disabled])")) {
 				this._navigateGroup({ group, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
 			}
 			else if (this._id("zotero-items-tree").querySelector(".row")) {
@@ -144,7 +144,7 @@ export class CitationDialogKeyboardHandler {
 			// on arrowUp from the first row, clear selection
 			if (current === firstRow && event.key == "ArrowUp" && !event.shiftKey) {
 				this._selectItems(null);
-				firstRow.classList.remove("current");
+				firstRow?.classList.remove("current");
 				group.scrollTo(0, 0);
 				this._multiselectStart = null;
 			}

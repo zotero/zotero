@@ -207,6 +207,14 @@ class Layout {
 				items.push(itemNode);
 				index++;
 			}
+			// if cited group is present but has no items, cited items must be
+			// still loading, so show a placeholder item card
+			if (group.length === 0 && key == "cited") {
+				let placeholder = Helpers.createCitedItemPlaceholder();
+				items = [placeholder];
+				let spinner = Helpers.createNode("image", { id: "cited-items-spinner", status: "animate" }, "zotero-spinner-16");
+				section.querySelector(".header .header-btn-group").prepend(spinner);
+			}
 			itemContainer.replaceChildren(...items);
 			sections.push(section);
 			if (isGroupCollapsible) {
@@ -331,7 +339,7 @@ class Layout {
 			itemNode.classList.remove("selected");
 			itemNode.classList.remove("current");
 		}
-		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item`);
+		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item:not([disabled])`);
 		if (!firstItemNode) return;
 		let activeSearch = SearchHandler.searchValue.length > 0;
 		let noBubbles = !CitationDataManager.items.length;
@@ -738,7 +746,7 @@ class ListLayout extends Layout {
 			"data-tabindex": 30,
 			"data-arrow-nav-enabled": true,
 			draggable: true
-		}, "item vbox keyboard-clickable");
+		}, "item keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
