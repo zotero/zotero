@@ -31,9 +31,10 @@
 		pointer-events: none;
 	}
 
-	&.stacked-context-placeholder {
+	.stacked-context-placeholder {
 		min-height: 300px;
 	}
+
 	&.standard .stacked-context-placeholder {
 		display: none;
 	}
