@@ -175,6 +175,12 @@ itembox-button-options =
 itembox-button-merge =
     .aria-label = Select version of { $field } field
 
+migrate-fields = Migrate Fields…
+migrate-fields-dialog-title = Migrate Fields from Extra
+migrate-fields-dialog-description = Are you sure you want to migrate fields from Extra?
+    
+    Items with migrated fields may no longer sync with previous versions of { -app-name }.
+
 create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
 
 reader-use-dark-mode-for-content =

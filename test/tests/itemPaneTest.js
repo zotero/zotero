@@ -609,6 +609,46 @@ describe("Item pane", function () {
 			let fieldMode = newCreatorRow.querySelector("editable-text").getAttribute("fieldMode");
 			assert.equal(fieldMode, "0");
 		});
+
+		it("should offer to migrate date from Extra", async function () {
+			let item = await createDataObject('item', { itemType: 'podcast' });
+			item.setField('extra', 'Date: 2024-01-01\nSomething Else: 123\nGarbage');
+			await item.saveTx();
+
+			let infoBox = doc.getElementById('zotero-editpane-info-box');
+			let rowAction = infoBox.querySelector('.meta-row:has([fieldname="extra"]) + .row-action');
+			assert.ok(rowAction);
+			
+			let dialogPromise = waitForDialog();
+			let modifyPromise = waitForItemEvent('modify');
+			rowAction.click();
+			await dialogPromise;
+			await modifyPromise;
+			
+			assert.equal(item.getField('date'), '2024-01-01');
+			assert.equal(item.getField('extra'), 'Something Else: 123\nGarbage');
+		});
+
+		it("should not offer to migrate date range from Extra", async function () {
+			let item = await createDataObject('item', { itemType: 'podcast' });
+			item.setField('extra', 'Date: 2024/2025\nSomething Else: 123\nGarbage');
+			await item.saveTx();
+
+			let infoBox = doc.getElementById('zotero-editpane-info-box');
+			let rowAction = infoBox.querySelector('.meta-row:has([fieldname="extra"]) + .row-action');
+			assert.notOk(rowAction);
+		});
+
+		it("should not offer to migrate date from Extra if item already has date", async function () {
+			let item = await createDataObject('item', { itemType: 'podcast' });
+			item.setField('extra', 'Date: 2000-01-01');
+			item.setField('date', '1999-12-31');
+			await item.saveTx();
+
+			let infoBox = doc.getElementById('zotero-editpane-info-box');
+			let rowAction = infoBox.querySelector('.meta-row:has([fieldname="extra"]) + .row-action');
+			assert.notOk(rowAction);
+		});
 	});
 
 	describe("Libraries and collections pane", function () {
