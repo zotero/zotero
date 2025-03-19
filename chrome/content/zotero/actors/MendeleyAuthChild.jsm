@@ -2,12 +2,14 @@
 
 var EXPORTED_SYMBOLS = ["MendeleyAuthChild"]; // eslint-disable-line no-unused-vars
 
+let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
+
 class MendeleyAuthChild extends JSWindowActorChild { // eslint-disable-line no-unused-vars
 	async receiveMessage(message) {
-		let window = this.contentWindow;
-		let document = window.document;
+		let document = this.document;
 
-		await this.documentIsReady();
+		// Wait for 'complete'
+		await documentIsReady(document);
 
 		switch (message.name) {
 			case "login":
@@ -35,35 +37,5 @@ class MendeleyAuthChild extends JSWindowActorChild { // eslint-disable-line no-u
 		}
 
 		return false;
-	}
-	
-	// From Mozilla's ScreenshotsComponentChild.jsm
-	documentIsReady() {
-		const contentWindow = this.contentWindow;
-		const document = this.document;
-		
-		function readyEnough() {
-			return document.readyState === "complete";
-		}
-		
-		if (readyEnough()) {
-			return Promise.resolve();
-		}
-		return new Promise((resolve, reject) => {
-			function onChange(event) {
-				if (event.type === "pagehide") {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					reject(new Error("document unloaded before it was ready"));
-				}
-				else if (readyEnough()) {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					resolve();
-				}
-			}
-			document.addEventListener("readystatechange", onChange);
-			contentWindow.addEventListener("pagehide", onChange, { once: true });
-		});
 	}
 }

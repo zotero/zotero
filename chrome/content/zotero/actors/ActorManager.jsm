@@ -86,3 +86,9 @@ ChromeUtils.registerWindowActor("MendeleyAuth", {
 		moduleURI: "chrome://zotero/content/actors/MendeleyAuthChild.jsm"
 	}
 });
+
+ChromeUtils.registerWindowActor("DocumentIsReady", {
+	child: {
+		moduleURI: "chrome://zotero/content/actors/DocumentIsReadyChild.jsm"
+	}
+});

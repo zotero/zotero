@@ -22,7 +22,6 @@ describe("HiddenBrowser", function() {
 				'/remote.png',
 				{
 					handle: function (request, response) {
-						Zotero.debug('Something loaded the image')
 						response.setHeader('Content-Type', 'image/png', false);
 						response.setStatusLine(null, 200, 'OK');
 						response.write('');
@@ -46,7 +45,7 @@ describe("HiddenBrowser", function() {
 			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
 			let browser = new HiddenBrowser({ blockRemoteResources: true });
 			await browser.load(path);
-			await browser.getPageData(['characterSet', 'bodyText']);
+			await browser.waitForDocument();
 			browser.destroy();
 			assert.isFalse(pngRequested);
 		});
@@ -55,7 +54,7 @@ describe("HiddenBrowser", function() {
 			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
 			let browser = new HiddenBrowser({ blockRemoteResources: false });
 			await browser.load(path);
-			await browser.getPageData(['characterSet', 'bodyText']);
+			await browser.waitForDocument();
 			browser.destroy();
 			assert.isTrue(pngRequested);
 		});

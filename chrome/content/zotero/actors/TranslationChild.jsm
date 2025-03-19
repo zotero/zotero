@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["TranslationChild"];
 
+let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
 
 const TRANSLATE_SCRIPT_PATHS = [
 	'src/zotero.js',
@@ -43,7 +44,8 @@ class TranslationChild extends JSWindowActorChild {
 	_sandbox = null;
 	
 	async receiveMessage(message) {
-		await this.documentIsReady();
+		// Wait for 'complete', or 'interactive' after a 100ms delay
+		await documentIsReady(this.document, { allowInteractiveAfter: 100 });
 		
 		let { name, data } = message;
 		switch (name) {
@@ -300,39 +302,6 @@ class TranslationChild extends JSWindowActorChild {
 		}
 
 		return sandbox;
-	}
-
-	// From Mozilla's ScreenshotsComponentChild.jsm
-	documentIsReady() {
-		const contentWindow = this.contentWindow;
-		const document = this.document;
-
-		if (document.readyState === "complete") {
-			return Promise.resolve();
-		}
-		return new Promise((resolve, reject) => {
-			function ready() {
-				document.removeEventListener("readystatechange", onChange);
-				contentWindow.removeEventListener("pagehide", onChange);
-				resolve();
-			}
-			
-			function onChange(event) {
-				if (event.type === "pagehide") {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					reject(new Error("document unloaded before it was ready"));
-				}
-				else if (document.readyState === "complete") {
-					ready();
-				}
-				else if (document.readyState === "interactive") {
-					setTimeout(ready, 100);
-				}
-			}
-			document.addEventListener("readystatechange", onChange);
-			contentWindow.addEventListener("pagehide", onChange, { once: true });
-		});
 	}
 
 	didDestroy() {

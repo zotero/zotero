@@ -1,11 +1,13 @@
 var EXPORTED_SYMBOLS = ["SingleFileChild"];
 
+let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
 
 class SingleFileChild extends JSWindowActorChild {
 	async receiveMessage(message) {
 		let window = this.contentWindow;
 
-		await this.documentIsReady();
+		// Wait for 'complete'
+		await documentIsReady(this.document);
 
 		if (message.name !== 'snapshot') {
 			return null;
@@ -178,35 +180,5 @@ class SingleFileChild extends JSWindowActorChild {
 		catch (e) {
 			return true;
 		}
-	}
-
-	// From Mozilla's ScreenshotsComponentChild.jsm
-	documentIsReady() {
-		const contentWindow = this.contentWindow;
-		const document = this.document;
-
-		function readyEnough() {
-			return document.readyState === "complete";
-		}
-
-		if (readyEnough()) {
-			return Promise.resolve();
-		}
-		return new Promise((resolve, reject) => {
-			function onChange(event) {
-				if (event.type === "pagehide") {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					reject(new Error("document unloaded before it was ready"));
-				}
-				else if (readyEnough()) {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					resolve();
-				}
-			}
-			document.addEventListener("readystatechange", onChange);
-			contentWindow.addEventListener("pagehide", onChange, { once: true });
-		});
 	}
 }

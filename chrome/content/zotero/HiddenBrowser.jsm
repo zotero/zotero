@@ -244,6 +244,16 @@ class HiddenBrowser {
 			}
 		}
 	}
+
+	/**
+	 * @param {number | false} [allowInteractiveAfter = false] Delay (in milliseconds) before resolving on 'interactive'.
+	 * 		If false, documentIsReady() won't resolve until 'complete'.
+	 * @returns {Promise<void>}
+	 */
+	waitForDocument({ allowInteractiveAfter = false } = {}) {
+		return this.browsingContext.currentWindowGlobal.getActor('DocumentIsReady')
+			.sendQuery('waitForDocument', { allowInteractiveAfter });
+	}
 	
 	/**
 	 * @param {String[]} props - 'characterSet', 'title', 'bodyText', 'documentHTML', 'cookie', 'channelInfo'
