@@ -1462,6 +1462,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			locale: Zotero.locale,
 		};
 		
+		if (Services.appinfo.inSafeMode) {
+			info.safeMode = true;
+		}
+		
 		var extensions = await Zotero.getInstalledExtensions();
 		info.extensions = extensions.join(', ');
 		
@@ -1521,6 +1525,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				((b.appDisabled || b.userDisabled) ? 1 : 0);
 		});
 		var addons = [];
+		var isSafeMode = Services.appinfo.inSafeMode;
 		for (let addon of installed) {
 			if (addon.type == "theme") {
 				continue;
@@ -1528,7 +1533,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			addons.push(addon.name + " (" + addon.version
 				+ (addon.type != 2 ? ", " + addon.type : "")
-				+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
+				+ ((addon.appDisabled || addon.userDisabled || isSafeMode) ? ", disabled" : "")
 				+ ")");
 		}
 		
