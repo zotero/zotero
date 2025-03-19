@@ -39,6 +39,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 					<html:span class="icon"/>
 					<html:span class="label"/>
 				</html:div>
+				<toolbarbutton class="zotero-clicky zotero-clicky-minus" tabindex="0" data-l10n-id="section-button-remove" disabled="false">
+					<image class="toolbarbutton-icon"/>
+					<label class="toolbarbutton-text" />
+				</toolbarbutton>
 			</html:div>
 		`);
 		
@@ -75,9 +79,14 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		init() {
 			this._attachmentButton = this.querySelector('.attachment-btn');
 			this._annotationButton = this.querySelector('.annotation-btn');
+			this._removeButton = this.querySelector('.zotero-clicky-minus');
 
 			this._attachmentButton.addEventListener('click', this._handleAttachmentClick);
 			this._annotationButton.addEventListener('click', this._handleAnnotationClick);
+
+			if (this.editable) {
+				this._removeButton.addEventListener('command', this._handleRemove);
+			}
 
 			this.render();
 		}
@@ -108,6 +117,14 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			}
 		};
 
+		_handleRemove = async () => {
+			const promptTitle = Zotero.getString('pane.items.trash.title');
+			const promptMessage = await Zotero.ftl.formatValue('section-attachments-move-to-trash-message', { title: this._attachment.getField('title') });
+			if (Services.prompt.confirm(window, promptTitle, promptMessage)) {
+				await Zotero.Items.trashTx([this._attachment.id]);
+			}
+		};
+
 		render() {
 			if (!this.initialized) return;
 			
@@ -118,6 +135,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._annotationButton.setAttribute('data-l10n-args', JSON.stringify({ count: annotationCount }));
 			this._annotationButton.hidden = annotationCount == 0;
 			this._annotationButton.querySelector(".label").textContent = annotationCount;
+			this._removeButton.hidden = !this.editable;
 		}
 	}
 

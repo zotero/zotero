@@ -320,6 +320,7 @@
 			let hidden = !this.inTrash && attachment.deleted;
 			row.attachment = attachment;
 			row.hidden = hidden;
+			row.editable = this.editable;
 		}
 
 		async _updateAttachmentIDs() {
