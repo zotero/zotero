@@ -3,6 +3,7 @@
 	@include contain-richlistbox;
 	
 	#button-bar, #button-bar > hbox {
+		justify-content: flex-end;
 		display: flex;
 		gap: 6px;
 	}
