@@ -37,7 +37,7 @@ describe("Document Recognition", function() {
 		}
 		
 		queue.cancel();
-		Zotero.RecognizeDocument.recognizeStub = null;
+		Zotero.RecognizeDocument._recognize.restore && Zotero.RecognizeDocument._recognize.restore();
 		Zotero.Prefs.clear('autoRenameFiles.linked');
 	});
 	
@@ -223,9 +223,9 @@ describe("Document Recognition", function() {
 		it("should rename a linked file attachment using parent metadata if no existing file attachments and pref enabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', true);
 			var itemTitle = Zotero.Utilities.randomString();
-			Zotero.RecognizeDocument.recognizeStub = async function () {
+			sinon.stub(Zotero.RecognizeDocument, "_recognize").callsFake(() => {
 				return createDataObject('item', { title: itemTitle });
-			};
+			});
 			
 			// Link to the PDF
 			var tempDir = await getTempDirectory();
@@ -263,9 +263,9 @@ describe("Document Recognition", function() {
 			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'x-nonexistent/type');
 			
 			var itemTitle = Zotero.Utilities.randomString();
-			Zotero.RecognizeDocument.recognizeStub = async function () {
+			sinon.stub(Zotero.RecognizeDocument, "_recognize").callsFake(() => {
 				return createDataObject('item', { title: itemTitle });
-			};
+			});
 
 			var attachment = await importPDFAttachment();
 			assert.equal(attachment.getField('title'), 'test');
@@ -291,9 +291,9 @@ describe("Document Recognition", function() {
 		it("shouldn't rename a linked file attachment using parent metadata if pref disabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', false);
 			var itemTitle = Zotero.Utilities.randomString();
-			Zotero.RecognizeDocument.recognizeStub = async function () {
+			sinon.stub(Zotero.RecognizeDocument, "_recognize").callsFake(() => {
 				return createDataObject('item', { title: itemTitle });
-			};
+			});
 			
 			// Link to the PDF
 			var tempDir = await getTempDirectory();
