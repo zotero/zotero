@@ -517,11 +517,14 @@ class LibraryLayout extends Layout {
 			// getExtraField helps itemTree fetch the data for a column that's
 			// not a part of actual item properties
 			getExtraField: (item, key) => {
-				if (key == "removeFromCitation" || key == "addToCitation") {
+				if (key == "addToCitation") {
 					if (!(item instanceof Zotero.Item)) return null;
 					if (isCitingNotes && !item.isNote()) return null;
 					if (!isCitingNotes && !item.isRegularItem()) return null;
-					return CitationDataManager.itemAddedCache.has(item.id);
+					// The returned value needs to be a string due to a call to .toLowerCase()
+					// in _handleTyping of virtualized-table. Otherwise, errors are thrown if you type
+					// when the addToCitation column is used for sorting.
+					return CitationDataManager.itemAddedCache.has(item.id) ? " " : "";
 				}
 				return undefined;
 			}
@@ -587,7 +590,8 @@ class LibraryLayout extends Layout {
 			},
 			isSearch: () => true,
 			isSearchMode: () => true,
-			setSearch: str => collectionTreeRow.setSearch(str)
+			setSearch: str => collectionTreeRow.setSearch(str),
+			ref: collectionTreeRow.ref
 		});
 		await this.itemsView.setFilter('search', SearchHandler.searchValue);
 		
