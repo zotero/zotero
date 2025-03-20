@@ -533,6 +533,10 @@ class LibraryLayout extends Layout {
 		itemsTree.addEventListener("mousemove", event => this._handleItemsViewMouseMove(event));
 		// handle backspace to remove an item from citation
 		itemsTree.addEventListener("keypress", event => this._handleItemsViewKeyPress(event));
+		// only highlight bubbles of selected rows when the focus is in itemTree
+		// when focus leaves the items table, bubbles highlighting is removed
+		itemsTree.addEventListener("focusin", this.updateSelectedItems);
+		itemsTree.addEventListener("focusout", this._clearSelectedBubbles);
 		this._refreshItemsViewHighlightedRows();
 	}
 	
@@ -691,6 +695,14 @@ class LibraryLayout extends Layout {
 		if (delta > 0.1) {
 			rowAfterRefresh.closest(".virtualized-table-body").scrollTop += delta;
 		}
+	}
+
+	// remove selected highlight from all bubbles
+	_clearSelectedBubbles() {
+		for (let itemObj of CitationDataManager.items) {
+			itemObj.selected = false;
+		}
+		IOManager.updateBubbleInput();
 	}
 }
 
