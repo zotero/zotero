@@ -268,7 +268,7 @@ Zotero.RecognizeDocument = new function () {
 			}
 		}
 		
-		let parentItem = await _recognize(attachment);
+		let parentItem = await Zotero.RecognizeDocument._recognize(attachment);
 		if (!parentItem) {
 			throw new Zotero.Exception.Alert("recognizePDF.noMatches");
 		}
@@ -388,11 +388,7 @@ Zotero.RecognizeDocument = new function () {
 	 * @param {Zotero.Item} item
 	 * @return {Promise<Zotero.Item>} - New item
 	 */
-	async function _recognize(item) {
-		if (Zotero.RecognizeDocument.recognizeStub) {
-			return Zotero.RecognizeDocument.recognizeStub(item);
-		}
-		
+	this._recognize = async function (item) {
 		let filePath = await item.getFilePath();
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
