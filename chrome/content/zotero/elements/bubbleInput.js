@@ -74,8 +74,8 @@
 					allBubbles = this.getAllBubbles();
 				}
 				// Update bubble string
-				if (bubbleNode.textContent !== bubbleString) {
-					bubbleNode.textContent = bubbleString;
+				if (bubbleNode.querySelector(".text").textContent !== bubbleString) {
+					bubbleNode.querySelector(".text").textContent = bubbleString;
 				}
 				// Move bubble if it's index does not correspond to the position of the item
 				let expectedIndex = allBubbles.indexOf(bubbleNode);
