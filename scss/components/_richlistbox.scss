@@ -58,4 +58,8 @@ richlistbox {
 // Let it expand to the edge of the container.
 panel[type="autocomplete-richlistbox"] {
 	--panel-width: unset !important;
+	
+	.autocomplete-richlistbox {
+		scrollbar-gutter: stable;
+	}
 }
