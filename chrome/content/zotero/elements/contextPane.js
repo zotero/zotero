@@ -217,7 +217,7 @@
 			}
 			// Focus reader pages view if context pane note editor is not selected
 			if (Zotero_Tabs.selectedID == reader.tabID
-				&& !Zotero_Tabs.isTabsMenuVisible()
+				&& !Zotero_Tabs.tabsMenuPanel.visible
 				&& (!document.activeElement
 					|| !document.activeElement.closest('.context-node iframe[id="editor-view"]'))) {
 				if (!Zotero_Tabs.focusOptions?.keepTabFocused) {

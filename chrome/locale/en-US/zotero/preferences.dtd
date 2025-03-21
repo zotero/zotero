@@ -134,6 +134,7 @@
 <!ENTITY zotero.preferences.keys.newItem					"Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote					"Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleAllRead				"Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleTabsMenu				"Toggle Tabs Menu">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard		"Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard		"Import from Clipboard">
