@@ -233,6 +233,10 @@
 							&.selected {
 								background-color: var(--selected-item-background) !important;
 							}
+							// no visible border around the placeholder
+							&[disabled] {
+								border: 1px solid transparent;
+							}
 						}
 					}
 	
