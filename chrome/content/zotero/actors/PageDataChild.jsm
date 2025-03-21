@@ -1,5 +1,7 @@
 var EXPORTED_SYMBOLS = ["PageDataChild"];
 
+let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
+
 class PageDataChild extends JSWindowActorChild {
 	async receiveMessage(message) {
 		// Special case for loadURI: don't wait for document to be ready,
@@ -8,10 +10,10 @@ class PageDataChild extends JSWindowActorChild {
 			return this.loadURI(message.data.uri);
 		}
 		
-		let window = this.contentWindow;
-		let document = window.document;
+		let document = this.document;
 		
-		await this.documentIsReady();
+		// Wait for 'interactive' or 'complete'
+		await documentIsReady(document, { allowInteractiveAfter: 0 });
 		
 		switch (message.name) {
 			case "characterSet":
@@ -73,35 +75,5 @@ class PageDataChild extends JSWindowActorChild {
 		catch (e) {
 			return false;
 		}
-	}
-	
-	// From Mozilla's ScreenshotsComponentChild.jsm
-	documentIsReady() {
-		const contentWindow = this.contentWindow;
-		const document = this.document;
-		
-		function readyEnough() {
-			return document.readyState === "complete" || document.readyState === "interactive";
-		}
-		
-		if (readyEnough()) {
-			return Promise.resolve();
-		}
-		return new Promise((resolve, reject) => {
-			function onChange(event) {
-				if (event.type === "pagehide") {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					reject(new Error("document unloaded before it was ready"));
-				}
-				else if (readyEnough()) {
-					document.removeEventListener("readystatechange", onChange);
-					contentWindow.removeEventListener("pagehide", onChange);
-					resolve();
-				}
-			}
-			document.addEventListener("readystatechange", onChange);
-			contentWindow.addEventListener("pagehide", onChange, { once: true });
-		});
 	}
 }
