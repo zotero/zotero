@@ -45,6 +45,10 @@
 		<script src="citationDialog.js"/>
 		<script src="../titlebar.js" type="text/javascript"/>
 	</head>
+
+	<!-- do not wait for itemTree to add the menubar, otherwise it does not appear on the first dialog open -->
+	<xul:item-tree-menu-bar/>
+
 	<body class="vbox flex">
 		<div id="search-area" class="layout">
 			<div id="search-row" class="hbox">
