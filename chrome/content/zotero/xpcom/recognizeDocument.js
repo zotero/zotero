@@ -58,8 +58,8 @@ Zotero.RecognizeDocument = new function () {
 	async function _processQueue() {
 		await Zotero.Schema.schemaUpdatePromise;
 		
-		if (_queueProcessing) return;
-		_queueProcessing = true;
+		if (_queueProcessing) return _queueProcessing.promise;
+		_queueProcessing = Zotero.Promise.defer();
 		
 		while (1) {
 			// While all current progress queue usages are related with
@@ -99,6 +99,7 @@ Zotero.RecognizeDocument = new function () {
 			}
 		}
 		
+		_queueProcessing.resolve();
 		_queueProcessing = false;
 		_processingItemID = null;
 	}
@@ -253,6 +254,7 @@ Zotero.RecognizeDocument = new function () {
 	 * @return {Promise} A promise that resolves to a newly created, recognized parent item
 	 */
 	async function _processItem(attachment) {
+		Zotero.debug(`RecognizeDocument: Recognizing attachment ${attachment.getDisplayTitle()}`);
 		// Make sure the attachment still doesn't have a parent
 		if (attachment.parentItemID) {
 			throw new Error('Already has parent');
@@ -268,10 +270,12 @@ Zotero.RecognizeDocument = new function () {
 			}
 		}
 		
-		let parentItem = await _recognize(attachment);
+		let parentItem = await Zotero.RecognizeDocument._recognize(attachment);
 		if (!parentItem) {
+			Zotero.debug(`RecognizeDocument: No matches for attachment ${attachment.getDisplayTitle()}`);
 			throw new Zotero.Exception.Alert("recognizePDF.noMatches");
 		}
+		Zotero.debug(`RecognizeDocument: Recognized attachment ${attachment.getDisplayTitle()}`);
 		
 		// Put new item in same collections as the old one
 		let collections = attachment.getCollections();
@@ -388,11 +392,7 @@ Zotero.RecognizeDocument = new function () {
 	 * @param {Zotero.Item} item
 	 * @return {Promise<Zotero.Item>} - New item
 	 */
-	async function _recognize(item) {
-		if (Zotero.RecognizeDocument.recognizeStub) {
-			return Zotero.RecognizeDocument.recognizeStub(item);
-		}
-		
+	this._recognize = async function (item) {
 		let filePath = await item.getFilePath();
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
