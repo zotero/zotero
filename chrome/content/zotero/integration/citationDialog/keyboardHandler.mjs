@@ -102,6 +102,10 @@ export class CitationDialogKeyboardHandler {
 			handled = true;
 			this.doc.dispatchEvent(new CustomEvent("dialog-cancelled"));
 		}
+		else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
+			handled = true;
+			this._id("bubble-input").focus();
+		}
 		if (handled) {
 			event.preventDefault();
 			event.stopPropagation();
