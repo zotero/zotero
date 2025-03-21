@@ -71,7 +71,7 @@ Zotero.Prompt = {
 			Zotero.warn("Zotero.Prompt.confirm() option 'delayButtons' is deprecated -- use 'buttonDelay'");
 			buttonDelay = true;
 		}
-		let flags = (buttonDelay && !Zotero.automatedTest) ? Services.prompt.BUTTON_DELAY_ENABLE : 0;
+		let flags = (buttonDelay && !Zotero.test) ? Services.prompt.BUTTON_DELAY_ENABLE : 0;
 		if (typeof button0 == 'number') flags += Services.prompt.BUTTON_POS_0 * button0;
 		else if (typeof button0 == 'string') flags += Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING;
 		if (typeof button1 == 'number') flags += Services.prompt.BUTTON_POS_1 * button1;
