@@ -44,8 +44,6 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		
 		_attachment = null;
 		
-		_listenerAdded = false;
-		
 		static get observedAttributes() {
 			return ['attachment-id'];
 		}
@@ -65,7 +63,9 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		
 		set attachment(attachment) {
 			this._attachment = attachment;
-			this.setAttribute('attachment-id', attachment.id);
+			if (attachment.id) {
+				this.setAttribute('attachment-id', attachment.id);
+			}
 		}
 		
 		get attachmentTitle() {
