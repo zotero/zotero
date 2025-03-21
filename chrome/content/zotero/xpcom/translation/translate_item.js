@@ -214,13 +214,15 @@ Zotero.Translate.ItemSaver.prototype = {
 		if (snapshotContent) {
 			attachment.snapshotContent = snapshotContent;
 		}
-		new Promise(async (resolve, reject) => {
+		await new Promise(async (resolve, reject) => {
 			await this._saveAttachment(
 				attachment,
 				parentItemID,
 				(attachment, progress, e) => {
 					if (e) reject(e);
-					resolve(progress);
+					if (progress === 100) {
+						resolve(progress);
+					}
 				}
 			);
 		});
@@ -595,7 +597,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				newAttachment = yield this._saveAttachmentFile.apply(this, arguments);
 			}
 			else {
-				Zotero.debug('Translate: Ignoring attachment due to ATTACHMENT_MODE_IGNORE');
+				Zotero.debug(`Translate: Ignoring attachment ${attachment.title} due to ATTACHMENT_MODE_IGNORE`);
 			}
 			
 			if (!newAttachment) return false; // attachmentCallback should not have been called in this case
