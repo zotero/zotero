@@ -52,3 +52,14 @@ richlistbox {
 		}
 	}
 }
+
+// autocomplete-richlistbox tries to be smart and size itself based on the
+// source input, but we don't want that on our narrow info-box inputs.
+// Let it expand to the edge of the container.
+panel[type="autocomplete-richlistbox"] {
+	--panel-width: unset !important;
+	
+	.autocomplete-richlistbox {
+		scrollbar-gutter: stable;
+	}
+}
