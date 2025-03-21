@@ -45,6 +45,9 @@ general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
 citation-style-label = Citation Style:
 language-label = Language:
 
+menu-custom-group-submenu =
+    .label = More Options...
+
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
