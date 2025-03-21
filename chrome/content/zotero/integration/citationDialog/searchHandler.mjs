@@ -45,7 +45,15 @@ export class CitationDialogSearchHandler {
 		this.minQueryLengthEnforced = false;
 		this.searching = false;
 		this.searchResultIDs = [];
-		this._nonLibraryItems = {};
+
+		// cache selected/open/cited items
+		this.selectedItems = null;
+		this.openItems = null;
+		this.citedItems = null;
+
+		this.loadCitedItemsPromise = this._getCitedItems().then((citedItems) => {
+			this.citedItems = citedItems;
+		});
 	}
 
 	setSearchValue(str, enforceMinQueryLength) {
@@ -69,10 +77,10 @@ export class CitationDialogSearchHandler {
 
 	// how many selected items there are without applying the filter
 	allSelectedItemsCount() {
-		if (this._nonLibraryItems.selected !== undefined) {
-			return this._nonLibraryItems.selected.length;
+		if (this.selectedItems === null) {
+			this.selectedItems = this._getSelectedLibraryItems();
 		}
-		return this._getSelectedLibraryItems().length;
+		return this.selectedItems.length;
 	}
 
 	// Return results in a more helpful formatfor rendering.
@@ -99,6 +107,12 @@ export class CitationDialogSearchHandler {
 			if (groupItems.length) {
 				result.push({ key: groupKey, group: groupItems });
 			}
+			// if cited items are being loaded, add their group with no items to indicate
+			// that a placeholder should be displayed
+			let loadingCitedItemsGroup = this.citedItems === null && groupKey === "cited";
+			if (loadingCitedItemsGroup && this.searchValue) {
+				result.push({ key: "cited", group: [] });
+			}
 		}
 		// library items go after
 		let libraryItems = Object.values(this.results.found.reduce((acc, item) => {
@@ -122,34 +136,23 @@ export class CitationDialogSearchHandler {
 		return result;
 	}
 
-	// Refresh selected/opened/cited items.
+	// Refresh selected/opened items.
 	// These items are searched for separately from actual library matches
 	// because it is much faster for large libraries, so we don't have to wait
 	// for the library search to complete to show these results.
-	async refreshNonLibraryItems() {
-		// Use cached selected/cited/open items if available to not
-		// re-fetch them every time
-		if (!Object.keys(this._nonLibraryItems).length) {
-			this._nonLibraryItems = {
-				open: this._getReaderOpenItems(),
-				cited: await this._getCitedItems(),
-				selected: this._getSelectedLibraryItems(),
-			};
+	refreshSelectedAndOpenItems() {
+		if (this.openItems === null) {
+			this.openItems = this._getReaderOpenItems();
 		}
-		let { open, cited, selected } = this._nonLibraryItems;
+		if (this.selectedItems === null) {
+			this.selectedItems = this._getSelectedLibraryItems();
+		}
 		
 		// apply filtering to item groups
-		this.results.open = this.searchValue ? this._filterNonMatchingItems(open) : open;
-		this.results.selected = this.searchValue ? this._filterNonMatchingItems(selected) : selected;
+		this.results.open = this.searchValue ? this._filterNonMatchingItems(this.openItems) : this.openItems;
+		this.results.selected = this.searchValue ? this._filterNonMatchingItems(this.selectedItems) : this.selectedItems;
 		// clear matching library items to make sure items stale results are not showing
 		this.results.found = [];
-		// if "ibid" is typed, return all cited items
-		if (this.searchValue.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
-			this.results.cited = cited;
-		}
-		else {
-			this.results.cited = this.searchValue ? this._filterNonMatchingItems(cited) : [];
-		}
 		// Ensure duplicates across groups before library items are found
 		this._deduplicate();
 	}
@@ -165,10 +168,24 @@ export class CitationDialogSearchHandler {
 		this._deduplicate();
 	}
 
-	// clear selected/open/cited items cache to re-fetch those items
+	async refreshCitedItems() {
+		if (this.citedItems === null) {
+			return;
+		}
+		// if "ibid" is typed, return all cited items
+		if (this.searchValue.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
+			this.results.cited = this.citedItems;
+		}
+		else {
+			this.results.cited = this.searchValue ? this._filterNonMatchingItems(this.citedItems) : [];
+		}
+	}
+
+	// clear selected/open items cache to re-fetch those items
 	// after they may have changed
 	clearNonLibraryItemsCache() {
-		this._nonLibraryItems = {};
+		this.selectedItems = null;
+		this.openItems = null;
 	}
 
 	cleanSearchQuery(str) {
@@ -183,17 +200,14 @@ export class CitationDialogSearchHandler {
 	}
 
 	// make sure that each item appears only in one group.
-	// Items that are selected are removed from opened and cited.
-	// Items that are opened are removed from cited.
-	// Items that are selected or opened or cited are removed from library results.
+	// Items that are selected are removed from opened.
+	// Items that are selected or opened are removed from library results.
 	_deduplicate() {
 		let selectedIDs = new Set(this.results.selected.map(item => item.id));
 		let openIDs = new Set(this.results.open.map(item => item.id));
-		let citedIDs = new Set(this.results.cited.filter(item => item.id).map(item => item.id));
 
 		this.results.open = this.results.open.filter(item => !selectedIDs.has(item.id));
-		this.results.cited = this.results.cited.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id));
-		this.results.found = this.results.found.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id) && !citedIDs.has(item.id));
+		this.results.found = this.results.found.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id));
 	}
 		
 	// Run the actual search query and find all items matching query across all libraries

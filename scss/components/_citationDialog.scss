@@ -81,12 +81,6 @@
 			#loading-spinner {
 				width: 28px;
 				height: 28px;
-				background-size: 60%;
-				background-repeat: no-repeat;
-				display: none;
-				&[status="animate"] {
-					display: inline-block;
-				}
 			}
 			.vertical-separator {
 				border-inline-end: 1px solid var(--fill-quarternary);
@@ -110,6 +104,20 @@
 		&:hover {
 			cursor: pointer;
 		}
+	}
+
+	.zotero-spinner-16 {
+		background-size: 60%;
+		background-repeat: no-repeat;
+		display: none;
+		&[status="animate"] {
+			display: inline-block;
+		}
+	}
+
+	#cited-items-spinner {
+		width: 20px;
+		height: 20px;
 	}
 
 	// alternative to var(--accent-blue10) without opacity
@@ -168,7 +176,11 @@
 						text-wrap: nowrap;
 						text-overflow: ellipsis;
 						overflow: hidden;
-						display: block;
+						display: flex;
+						.header-btn-group {
+							display: flex;
+							align-items: center;
+						}
 					}
 			
 					.itemsContainer {
@@ -230,8 +242,6 @@
 						width: calc((var(--item-horizontal-size) * var(--deck-length)) + (var(--item-margin) * (var(--deck-length) - 1)));
 	
 						.header {
-							display: flex;
-							justify-content: space-between;
 							.header-label {
 								// make sure header text does not overlap with buttons
 								max-width: 160px;
@@ -240,9 +250,6 @@
 							}
 
 							.header-btn-group {
-								display: flex;
-								flex-direction: row;
-								align-items: center;
 								gap: 4px;
 								flex: 1;
 								margin-inline-start: 2px;
@@ -294,7 +301,7 @@
 					// separate items get a hover effect, unless they are in
 					// a collapsed expandable group, in which case the whole group is hovered
 					&:not(.expandable), &.expandable.expanded {
-						.item:hover {
+						.item:not([disabled]):hover {
 							background-color: var(--color-quinary-on-background);
 						}
 					}
@@ -420,6 +427,12 @@
 					font-size: 13px;
 					color: var(--fill-secondary);
 					padding: 4px 8px 4px 16px;
+					display: flex;
+					.header-btn-group {
+						display: flex;
+						align-items: center;
+						height: 17px;
+					}
 				}
 				.item {
 					@include focus-ring(true);
@@ -429,7 +442,7 @@
 					color: var(--fill-primary);
 					cursor: default;
 					-moz-window-dragging: no-drag;
-					&:hover {
+					&:not([disabled]):hover {
 						background-color: var(--fill-quinary);
 					}
 					&.selected {
@@ -479,6 +492,7 @@
 						.header-label {
 							@include focus-ring;
 							border-radius: 5px;
+							-moz-window-dragging: no-drag;
 							&:hover {
 								cursor: pointer;
 								text-decoration: underline;

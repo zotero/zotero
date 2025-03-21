@@ -67,6 +67,9 @@ async function onLoad() {
 	libraryLayout = new LibraryLayout();
 	listLayout = new ListLayout();
 
+	// initialize most essential IO functionality (e.g. accept/cancel)
+	// remaining listeners that rely on layouts being loaded are added later in IOManager.init
+	IOManager.preInit();
 	// top-level keypress handling and focus navigation across the dialog
 	// keypresses for lower-level bubble-specific behavior are handled in bubbleInput.js
 	doc.addEventListener("keydown", event => KeyboardHandler.handleKeydown(event));
@@ -80,9 +83,9 @@ async function onLoad() {
 	// init library layout after bubble input is built since bubble-input's height is a factor
 	// determining initial library layout height
 	await libraryLayout.init();
-	// fetch opened/selected/cited items so they are known
+	// fetch selected items so they are known
 	// before refreshing items list after dialog mode setting
-	await SearchHandler.refreshNonLibraryItems();
+	SearchHandler.refreshSelectedAndOpenItems();
 	// some nodes (e.g. item-tree-menu-bar) are expected to be present to switch modes
 	// so this has to go after all layouts are loaded
 	IOManager.setInitialDialogMode();
@@ -90,6 +93,12 @@ async function onLoad() {
 	IOManager.init();
 	// explicitly focus bubble input so one can begin typing right away
 	_id("bubble-input").refocusInput();
+	// loading cited items can take a long time - start loading them now
+	// and add new nodes when cited items are ready
+	SearchHandler.loadCitedItemsPromise.then(() => {
+		SearchHandler.refreshCitedItems();
+		currentLayout.refreshItemsList({ retainItemsState: true });
+	});
 
 	// Disabled all multiselect when citing notes
 	if (isCitingNotes) {
@@ -131,6 +140,7 @@ function cancel() {
 }
 
 function cleanupBeforeDialogClosing() {
+	if (!currentLayout || !libraryLayout) return;
 	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
@@ -157,8 +167,9 @@ class Layout {
 		this._searchDebouncePromise = null;
 	}
 
-	// Re-render the items based on search rersults
-	async refreshItemsList() {
+	// Re-render the items based on search results
+	// @param {Boolean} options.retainItemsState: try to restore focused and selected status of item nodes.
+	async refreshItemsList({ retainItemsState } = {}) {
 		let sections = [];
 
 		// Tell SearchHandler which currently cited items are so they are not included in results
@@ -196,6 +207,14 @@ class Layout {
 				items.push(itemNode);
 				index++;
 			}
+			// if cited group is present but has no items, cited items must be
+			// still loading, so show a placeholder item card
+			if (group.length === 0 && key == "cited") {
+				let placeholder = Helpers.createCitedItemPlaceholder();
+				items = [placeholder];
+				let spinner = Helpers.createNode("image", { id: "cited-items-spinner", status: "animate" }, "zotero-spinner-16");
+				section.querySelector(".header .header-btn-group").prepend(spinner);
+			}
 			itemContainer.replaceChildren(...items);
 			sections.push(section);
 			if (isGroupCollapsible) {
@@ -215,14 +234,30 @@ class Layout {
 				}
 			}
 		}
-		let selectedNow = doc.activeElement;
+		let previouslyFocused = doc.activeElement;
+		let previouslySelected = doc.querySelectorAll(".item.selected");
 		_id(`${this.type}-layout`).querySelector(".search-items").replaceChildren(...sections);
 		// Update which bubbles need to be highlighted
 		this.updateSelectedItems();
+
+		// Keep focus and selection on the same item nodes if specified.
+		// This should only be applicable to refresh after SearchHandler.loadCitedItemsPromise.
+		if (retainItemsState) {
+			doc.getElementById(previouslyFocused.id)?.focus();
+			// Try to retain selected status of items, in case if multiselection was in progress
+			for (let oldNote of previouslySelected) {
+				let itemNode = doc.getElementById(oldNote.id);
+				if (!itemNode) continue;
+				itemNode.classList.add("selected");
+				itemNode.classList.toggle("current", oldNote.classList.contains("current"));
+			}
+		}
 		// Pre-select the item to be added on Enter of an input
-		this.markPreSelected();
-		// If the previously focused node is no longer a part of the DOM, try to restore focus
-		if (!doc.contains(selectedNow) || doc.activeElement.tagName == "body") {
+		else {
+			this.markPreSelected();
+		}
+		// Ensure focus is never lost
+		if (doc.activeElement.tagName == "body") {
 			IOManager._restorePreClickFocus();
 		}
 	}
@@ -238,10 +273,13 @@ class Layout {
 		_id("loading-spinner").setAttribute("status", "animate");
 		_id("accept-button").hidden = true;
 		SearchHandler.searching = true;
-		// search for selected/opened/cited items
+		// search for selected/opened items
 		// only enforce min query length in list mode
 		SearchHandler.setSearchValue(value, this.type == "list");
-		await SearchHandler.refreshNonLibraryItems();
+		SearchHandler.refreshSelectedAndOpenItems();
+		// noop if cited items are not yet loaded
+		SearchHandler.refreshCitedItems();
+		
 		// Never resize window of list layout here to avoid flickering
 		// The window will always be resized after the second items list update below
 		await this.refreshItemsList({ skipWindowResize: true });
@@ -301,7 +339,7 @@ class Layout {
 			itemNode.classList.remove("selected");
 			itemNode.classList.remove("current");
 		}
-		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item`);
+		let firstItemNode = _id(`${currentLayout.type}-layout`).querySelector(`.item:not([disabled])`);
 		if (!firstItemNode) return;
 		let activeSearch = SearchHandler.searchValue.length > 0;
 		let noBubbles = !CitationDataManager.items.length;
@@ -354,8 +392,8 @@ class LibraryLayout extends Layout {
 		return itemNode;
 	}
 
-	async refreshItemsList() {
-		await super.refreshItemsList();
+	async refreshItemsList(options) {
+		await super.refreshItemsList(options);
 		_id("library-other-items").querySelector(".search-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
 		// When there are no matches, show a message
@@ -720,7 +758,7 @@ class ListLayout extends Layout {
 			"data-tabindex": 30,
 			"data-arrow-nav-enabled": true,
 			draggable: true
-		}, "item vbox keyboard-clickable");
+		}, "item keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
@@ -744,7 +782,7 @@ class ListLayout extends Layout {
 	}
 
 	async refreshItemsList(options = {}) {
-		await super.refreshItemsList();
+		await super.refreshItemsList(options);
 
 		// Hide padding of list layout if there is not a single item to show
 		let isEmpty = !_id("list-layout").querySelector(".section:not([hidden])");
@@ -848,6 +886,15 @@ class ListLayout extends Layout {
 const IOManager = {
 	sectionExpandedStatus: {},
 
+	// most essential IO functionality that is added immediately on load
+	preInit() {
+		_id("accept-button").addEventListener("click", accept);
+		_id("cancel-button").addEventListener("click", cancel);
+
+		doc.addEventListener("dialog-accepted", accept);
+		doc.addEventListener("dialog-cancelled", cancel);
+	},
+
 	init() {
 		// handle input receiving focus or something being typed
 		doc.addEventListener("handle-input", ({ detail: { query, eventType } }) => this._handleInput({ query, eventType }));
@@ -864,10 +911,6 @@ const IOManager = {
 		doc.addEventListener("select-items", ({ detail: { startNode, endNode } }) => this.selectItemNodesRange(startNode, endNode));
 		// update bubbles after citation item is updated by itemDetails popup
 		doc.addEventListener("item-details-updated", () => this.updateBubbleInput());
-		
-		// accept/cancel events emitted by keyboardHandler
-		doc.addEventListener("dialog-accepted", accept);
-		doc.addEventListener("dialog-cancelled", cancel);
 
 		doc.addEventListener("DOMMenuBarActive", () => this._handleMenuBarAppearance());
 
@@ -878,9 +921,6 @@ const IOManager = {
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
-		// handle accept/cancel buttons
-		_id("accept-button").addEventListener("click", accept);
-		_id("cancel-button").addEventListener("click", cancel);
 
 		// some additional logic to keep focus on relevant nodes during mouse interactions
 		this._initFocusRetention();

@@ -23,7 +23,10 @@ integration-quickFormatDialog-window =
 integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
-integration-citationDialog-section-cited = Cited Items ({ $count })
+integration-citationDialog-section-cited = { $count ->
+    [0] Cited Items
+    *[other] Cited Items ({ $count })
+}
 integration-citationDialog-details-suffix = Suffix
 integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = Omit Author
