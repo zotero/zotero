@@ -191,6 +191,7 @@ export class CitationDialogSearchHandler {
 	cleanSearchQuery(str) {
 		str = str.replace(/ (?:&|and) /g, " ", "g").replace(/^,/, '');
 		str = this._cleanYear(str);
+		str = str.trim();
 
 		// If the query is very short, treat it as empty
 		if (this.minQueryLengthEnforced && str.trim().length < MIN_QUERY_LENGTH) {
