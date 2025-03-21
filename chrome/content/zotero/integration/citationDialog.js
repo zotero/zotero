@@ -30,6 +30,9 @@ const { COLUMNS } = require('zotero/itemTreeColumns');
 
 var doc, io, isCitingNotes, accepted;
 
+// used for tests
+var loaded = false;
+
 var currentLayout, libraryLayout, listLayout;
 
 var Helpers, SearchHandler, PopupsHandler, KeyboardHandler;
@@ -106,6 +109,7 @@ async function onLoad() {
 			delete multiselectable.dataset.multiselectable;
 		}
 	}
+	loaded = true;
 }
 
 
@@ -133,15 +137,19 @@ function accept() {
 function cancel() {
 	if (accepted) return;
 	accepted = true;
-	io.citation.citationItems = [];
 	cleanupBeforeDialogClosing();
-	io.accept();
+	io.cancel();
 	window.close();
+}
+// handle dialog being cancelled via window.close() (e.g. clicking X icon on windows)
+function onUnload() {
+	if (this.accepted) return;
+	cancel();
 }
 
 function cleanupBeforeDialogClosing() {
 	if (!currentLayout || !libraryLayout) return;
-	Zotero.Prefs.set("integration.citationDialogLastClosedMode", currentLayout.type);
+	Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
 	if (currentLayout.type == "library") {
 		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
@@ -1191,8 +1199,8 @@ const IOManager = {
 	// Set the initial dialog mode per user's preference
 	setInitialDialogMode() {
 		let desiredMode = Zotero.Prefs.get("integration.citationDialogMode");
-		if (desiredMode == "last-closed") {
-			desiredMode = Zotero.Prefs.get("integration.citationDialogLastClosedMode");
+		if (desiredMode == "last-used") {
+			desiredMode = Zotero.Prefs.get("integration.citationDialogLastUsedMode");
 		}
 		// When the dialog is opened for the very first time, default to list mode
 		if (!desiredMode) {
@@ -1583,6 +1591,7 @@ const CitationDataManager = {
 
 // Top level listeners
 window.addEventListener("load", onLoad);
+window.addEventListener("unload", onUnload);
 // When the dialog is re-focused, run the search again in case selected or opened items changed
 let windowLostFocusOn = 0;
 window.addEventListener("blur", () => {

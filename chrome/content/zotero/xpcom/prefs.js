@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 14;
+		var toVersion = 15;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -164,6 +164,21 @@ Zotero.Prefs = new function() {
 							this.clear('reader.customThemes');
 						}
 						break;
+					}
+					case 15: {
+						// If classic citation dialog was used before the redesigned citation dialog was implemented,
+						// set new dialog's last used mode to "library"
+						if (this.get('integration.useClassicAddCitationDialog')) {
+							this.set('integration.citationDialogLastUsedMode', 'library');
+							this.clear('integration.useClassicAddCitationDialog');
+						}
+						// pref citationDialogLastClosedMode was renamed to citationDialogLastUsedMode
+						// when the dialog was in beta. If the old pref is found, migrate and clear it
+						let lastClosed = this.get('integration.citationDialogLastClosedMode');
+						if (lastClosed) {
+							this.set('integration.citationDialogLastUsedMode', lastClosed);
+							this.clear('integration.citationDialogLastClosedMode');
+						}
 					}
 				}
 			}
