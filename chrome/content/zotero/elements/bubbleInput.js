@@ -74,8 +74,8 @@
 					allBubbles = this.getAllBubbles();
 				}
 				// Update bubble string
-				if (bubbleNode.textContent !== bubbleString) {
-					bubbleNode.textContent = bubbleString;
+				if (bubbleNode.querySelector(".text").textContent !== bubbleString) {
+					bubbleNode.querySelector(".text").textContent = bubbleString;
 				}
 				// Move bubble if it's index does not correspond to the position of the item
 				let expectedIndex = allBubbles.indexOf(bubbleNode);
@@ -233,16 +233,10 @@
 			text.className = "text";
 			bubble.append(text);
 			
-			let deleteBtn = document.createElement("div");
-			deleteBtn.className = "delete-btn";
-			let cross = document.createElement("span");
-			cross.className = "icon icon-css icon-x-8 icon-16";
-			deleteBtn.addEventListener("click", (event) => {
-				this._deleteBubble(bubble);
-				event.stopPropagation();
-			});
-			deleteBtn.appendChild(cross);
-			bubble.append(deleteBtn);
+			// Add a dropmarker to indicate that the bubble is clickable
+			let dropmarker = document.createElement("span");
+			dropmarker.className = "icon icon-css icon-chevron-6 icon-8 dropmarker";
+			bubble.append(dropmarker);
 			
 			return bubble;
 		}
@@ -397,11 +391,6 @@
 		},
 
 		handleDragStart(event) {
-			// No drag on X button
-			if (event.target.closest(".delete-btn")) {
-				event.preventDefault();
-				return;
-			}
 			this.dragBubble = event.target;
 			event.dataTransfer.setData("text/plain", '<span id="zotero-drag"/>');
 			event.stopPropagation();
