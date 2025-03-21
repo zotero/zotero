@@ -853,23 +853,8 @@ var Zotero_Citation_Dialog = new function () {
 	}
 	
 	async function _showItemInLibrary(id) {
-		var pane = Zotero.getActiveZoteroPane();
-		// Open main window if it's not open (Mac)
-		if (!pane) {
-			let win = Zotero.openMainWindow();
-			await new Zotero.Promise((resolve) => {
-				let onOpen = function () {
-					win.removeEventListener('load', onOpen);
-					resolve();
-				};
-				win.addEventListener('load', onOpen);
-			});
-			pane = win.ZoteroPane;
-		}
+		var pane = await Zotero.getActiveZoteroPaneAsync();
 		pane.selectItem(id);
-		
-		// Pull window to foreground
-		Zotero.Utilities.Internal.activate(pane.document.defaultView);
 	}
 }
 
