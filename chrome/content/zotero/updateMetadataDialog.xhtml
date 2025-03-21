@@ -9,9 +9,6 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		id="update-metadata"
-		width="650"
-		height="550"
-		style="padding: 10px;font: -moz-dialog !important;"
 		data-l10n-id="update-metadata-window">
 	<script>
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
@@ -34,7 +31,7 @@
 			<button id="cancel-button" data-l10n-id="update-metadata-cancel"/>
 			<button id="close-button" data-l10n-id="update-metadata-done"/>
 		</hbox>
-		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>
+		<html:div id="diff-table-container"></html:div>
 		<hbox align="right">
 			<button id="apply-all-button" default="true" data-l10n-id="update-metadata-apply-all"/>
 		</hbox>

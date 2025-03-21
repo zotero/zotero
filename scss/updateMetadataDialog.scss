@@ -9,7 +9,25 @@
 @import "components/diffTable";
 @import "components/spinner";
 
+$-width: 650px;
+$-height: 550px;
+
+:root {
+	min-width: $-width;
+	min-height: $-height;
+	width: $-width;
+	height: $-height;
+	max-width: $-width;
+	max-height: $-height;
+	padding: 10px;
+}
+
 #progress-indicator {
 	flex: 1;
 	margin-inline-end: 6px;
+}
+
+#diff-table-container {
+	padding: 5px;
+	min-width: 100px;
 }
