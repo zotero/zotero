@@ -1017,6 +1017,11 @@
 
 		<!-- Tag Selector -->
 		<menupopup id="tag-menu">
+			<menuitem id="tag-menu-include-tag" data-l10n-id="tagselector-include-tag"
+				oncommand="ZoteroPane.tagSelector.handleTagSelected(); event.stopPropagation();"/>
+			<menuitem id="tag-menu-exclude-tag" data-l10n-id="tagselector-exclude-tag"
+				oncommand="ZoteroPane.tagSelector.excludeTag(); event.stopPropagation();"/>
+			<menuseparator/>
 			<menuitem label="&zotero.tagSelector.assignColor;"
 				oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
 			<menuitem label="&zotero.tagSelector.renameTag;"
@@ -1026,8 +1031,6 @@
 			<menuitem label="&zotero.tagSelector.deleteTag;"
 				oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
 			<menuseparator/>
-			<menuitem id="tag-menu-exclude-tag" data-l10n-id="tagselector-exclude-tag"
-				oncommand="ZoteroPane.tagSelector.excludeTag(); event.stopPropagation();"/>
 		</menupopup>
 		<menupopup id="tag-selector-view-settings-menu"
 			onpopupshowing="

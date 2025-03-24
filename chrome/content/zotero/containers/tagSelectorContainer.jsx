@@ -583,8 +583,12 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			true
 		);
 		this.contextTag = tag;
-		// Disable "Exclude tag" for disabled tags
+		// Disable options for disabled tags, mark if the tag is included vs excluded
+		let tagSelected = this.selectedTags.get(this.contextTag.name);
 		tagContextMenu.querySelector("#tag-menu-exclude-tag").disabled = tag.disabled;
+		tagContextMenu.querySelector("#tag-menu-exclude-tag").setAttribute("checked", tagSelected?.excluded);
+		tagContextMenu.querySelector("#tag-menu-include-tag").disabled = tag.disabled;
+		tagContextMenu.querySelector("#tag-menu-include-tag").setAttribute("checked", tagSelected && !tagSelected.excluded);
 	}
 
 	handleSettings = (ev) => {
@@ -595,9 +599,17 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 	handleTagSelected = (tag) => {
 		let selectedTags = this.selectedTags;
-		if(selectedTags.has(tag)) {
+		let viaClick = true;
+		if (!tag) {
+			tag = this.contextTag.name;
+			viaClick = false;
+		}
+		// remove tag from selection on click or on context-menu selection if it is not excluded
+		if (selectedTags.has(tag) && (viaClick || !selectedTags.get(tag).excluded)) {
 			selectedTags.delete(tag);
-		} else {
+		}
+		// otherwise, select the tag
+		else {
 			selectedTags.set(tag, {});
 		}
 
@@ -809,8 +821,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		if (!tag) {
 			tag = this.contextTag.name;
 		}
-		this.selectedTags.set(tag, { excluded: true })
-		if (typeof(this.props.onSelection) === 'function') {
+		// If the tag is already excluded - remove it from selection
+		if (this.selectedTags.get(tag)?.excluded) {
+			this.selectedTags.delete(tag);
+		}
+		else {
+			this.selectedTags.set(tag, { excluded: true });
+		}
+		if (typeof (this.props.onSelection) === 'function') {
 			this.props.onSelection(this.selectedTags);
 		}
 	}
