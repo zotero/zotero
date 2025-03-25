@@ -212,8 +212,6 @@ class Layout {
 			if (group.length === 0 && key == "cited") {
 				let placeholder = Helpers.createCitedItemPlaceholder();
 				items = [placeholder];
-				let spinner = Helpers.createNode("image", { id: "cited-items-spinner", status: "animate" }, "zotero-spinner-16");
-				section.querySelector(".header .header-btn-group").prepend(spinner);
 			}
 			itemContainer.replaceChildren(...items);
 			sections.push(section);
