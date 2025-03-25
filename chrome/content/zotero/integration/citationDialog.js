@@ -1398,12 +1398,6 @@ const IOManager = {
 			let popup = event.target;
 			if (!["xul:panel"].includes(popup.tagName)) return;
 			IOManager._noRefocusing = false;
-			// after item details popup closes on Enter, refocus the last input
-			if (popup.id == "itemDetails" && popup.getAttribute("refocus-input")) {
-				_id("bubble-input").refocusInput();
-				popup.removeAttribute("refocus-input");
-				return;
-			}
 			if (IOManager._focusBeforePanelShow) {
 				IOManager._focusBeforePanelShow.focus();
 			}

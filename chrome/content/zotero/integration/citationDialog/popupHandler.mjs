@@ -183,9 +183,8 @@ export class CitationDialogPopupsHandler {
 	}
 
 	handleItemDetailsKeypress(event) {
-		// Enter on a an input will save changes, hide the popup and refocus last input
+		// Enter on a an input will save changes and hide the popup
 		if (event.key == "Enter" && ["input"].includes(event.target.tagName) && !event.target.getAttribute("type")) {
-			this._getNode("#itemDetails").setAttribute("refocus-input", true);
 			this._getNode("#itemDetails").hidePopup();
 		}
 	}
