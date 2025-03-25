@@ -564,6 +564,7 @@ class LibraryLayout extends Layout {
 				return undefined;
 			}
 		});
+		doc.querySelector("item-tree-menu-bar").init(this.itemsView);
 		// handle icon click to add/remove items
 		itemsTree.addEventListener("mousedown", event => this._handleItemsViewRowClick(event), true);
 		itemsTree.addEventListener("mouseup", event => this._handleItemsViewRowClick(event), true);
