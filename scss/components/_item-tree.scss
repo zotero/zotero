@@ -167,7 +167,8 @@
 			.attachment-progress {
 				appearance: none;
 				background-color: transparent;
-				background-image: conic-gradient(var(--fill-secondary) var(--progress), transparent var(--progress));
+				background-image: conic-gradient(var(--color-accent) var(--progress), var(--fill-quarternary) var(--progress), var(--fill-quarternary) 100%);
+				mask-image: radial-gradient(circle at center, transparent 5px, black 6px);
 				border-radius: 8px;
 				border: none;
 				display: block;
@@ -176,9 +177,10 @@
 
 				@include state(".row.selected") {
 					background-image: conic-gradient(var(--color-accent-text) var(--progress), transparent var(--progress));
+					background-image: conic-gradient(var(--accent-white) var(--progress), #ffffff33 var(--progress), #ffffff33 100%);
 
 					@include state(".virtualized-table:not(:focus-within)") {
-						background-image: conic-gradient(var(--fill-secondary) var(--progress), transparent var(--progress));
+						background-image: conic-gradient(var(--color-accent) var(--progress), var(--fill-quarternary) var(--progress), var(--fill-quarternary) 100%);
 					}
 				}
 
