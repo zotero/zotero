@@ -1667,7 +1667,7 @@ var Columns = class {
 		});
 
 		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+		this.onResize(Object.fromEntries(this._columns.filter(c => !c.hidden).map(c => [c.dataKey, c.width])));
 
 		let prefs = this._getPrefs();
 		// reassign columns their ordinal values and set the prefs
@@ -1697,7 +1697,7 @@ var Columns = class {
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
 		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+		this.onResize(Object.fromEntries(this._columns.filter(c => !c.hidden).map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
@@ -1710,8 +1710,23 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
+
+		let header = document.querySelector(`#${this._virtualizedTable.props.id} .virtualized-table-header`);
+		let headerRect = header.getBoundingClientRect();
+		const headerPadding = parseInt(window.getComputedStyle(header).paddingLeft) + parseInt(window.getComputedStyle(header).paddingRight);
+		const availableWidth = headerRect.width - headerPadding;
+		let nextVisibleColumns = this._columns.filter(c => !c.hidden);
+		let totalVisibleWidths = nextVisibleColumns.reduce((accumulator, column) => accumulator += column.width, 0);
+		let columnFractions = nextVisibleColumns.map(column => column.width / totalVisibleWidths);
+		let resizeData = {};
+		for (let i = 0; i < nextVisibleColumns.length; i++) {
+			let column = nextVisibleColumns[i];
+			let width = availableWidth * columnFractions[i];
+			resizeData[column.dataKey] = width;
+		}
+
 		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+		this.onResize(resizeData);
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
