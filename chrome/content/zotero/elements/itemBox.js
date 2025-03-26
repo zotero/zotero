@@ -1221,7 +1221,7 @@
 			labelWrapper.appendChild(label);
 			
 			var rowData = document.createElement("div");
-			rowData.className = 'creator-type-value';
+			rowData.classList.add('creator-type-value', 'autocomplete-popup-width-container');
 			
 			// Name
 			var firstlast = document.createElement("span");

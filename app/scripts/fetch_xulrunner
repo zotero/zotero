@@ -404,6 +404,12 @@ function modify_omni {
 		overflow: var(--moz-text-control-overflow);
 	}' >> chrome/toolkit/res/forms.css
 	
+	# By default, an autocomplete popup's width is calculated based on the input that opened it.
+	# Allow an ancestor to designate itself as the width container instead. (For creator inputs.)
+	replace_line 'aElement.getBoundingClientRect\(\).width' \
+		'(aElement.closest(".autocomplete-popup-width-container") || aElement).getBoundingClientRect().width' \
+		chrome/toolkit/content/global/elements/autocomplete-popup.js
+	
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
 	cd ..
