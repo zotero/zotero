@@ -85,7 +85,7 @@ async function onLoad() {
 	await libraryLayout.init();
 	// fetch selected items so they are known
 	// before refreshing items list after dialog mode setting
-	SearchHandler.refreshSelectedAndOpenItems();
+	await SearchHandler.refreshSelectedAndOpenItems();
 	// some nodes (e.g. item-tree-menu-bar) are expected to be present to switch modes
 	// so this has to go after all layouts are loaded
 	IOManager.setInitialDialogMode();
@@ -276,7 +276,7 @@ class Layout {
 		// search for selected/opened items
 		// only enforce min query length in list mode
 		SearchHandler.setSearchValue(value, this.type == "list");
-		SearchHandler.refreshSelectedAndOpenItems();
+		await SearchHandler.refreshSelectedAndOpenItems();
 		// noop if cited items are not yet loaded
 		SearchHandler.refreshCitedItems();
 		
@@ -584,7 +584,8 @@ class LibraryLayout extends Layout {
 			onSelectionChange: this._onCollectionSelection.bind(this),
 			hideSources: ['duplicates', 'trash', 'feeds'],
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
-			onActivate: () => {}
+			onActivate: () => {},
+			filterLibraryIDs: io.filterLibraryIDs
 		});
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it

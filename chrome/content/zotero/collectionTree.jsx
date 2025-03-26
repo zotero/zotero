@@ -118,7 +118,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var selected = await this.selectByID(lastViewedID);
 		}
 		if (!selected) {
-			await this.selectByID('L' + Zotero.Libraries.userLibraryID);
+			// If the last viewed folder was not selected, default to the first library from
+			// filterLibraryIDs (if any), or the user library
+			let libraryToSelect = ((this.props.filterLibraryIDs || [])[0] || Zotero.Libraries.userLibraryID);
+			await this.selectByID('L' + libraryToSelect);
 		}
 		if (this.selection.selectEventsSuppressed) {
 			let promise = this.waitForSelect();
