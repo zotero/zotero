@@ -490,10 +490,11 @@ class LibraryLayout extends Layout {
 			column.hidden = !['title', 'firstCreator', 'date'].includes(column.dataKey);
 			return column;
 		});
+		let columnLabel = Zotero.getString('integration-citationDialog-add-to-citation');
 		// Add + column to add an item to the citation on click
 		itemColumns.push({
 			dataKey: 'addToCitation',
-			label: 'Add to citation',
+			label: columnLabel,
 			htmlLabel: ' ', // space for column label to appear empty
 			width: 26,
 			staticWidth: true,
