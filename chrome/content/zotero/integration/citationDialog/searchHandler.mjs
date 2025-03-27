@@ -140,9 +140,9 @@ export class CitationDialogSearchHandler {
 	// These items are searched for separately from actual library matches
 	// because it is much faster for large libraries, so we don't have to wait
 	// for the library search to complete to show these results.
-	refreshSelectedAndOpenItems() {
+	async refreshSelectedAndOpenItems() {
 		if (this.openItems === null) {
-			this.openItems = this._getReaderOpenItems();
+			this.openItems = await this._getReaderOpenItems();
 		}
 		if (this.selectedItems === null) {
 			this.selectedItems = this._getSelectedLibraryItems();
@@ -151,6 +151,11 @@ export class CitationDialogSearchHandler {
 		// apply filtering to item groups
 		this.results.open = this.searchValue ? this._filterNonMatchingItems(this.openItems) : this.openItems;
 		this.results.selected = this.searchValue ? this._filterNonMatchingItems(this.selectedItems) : this.selectedItems;
+		// if a specific library ID is specified, only keep items from that library
+		if (this.io.filterLibraryIDs) {
+			this.results.open = this.results.open.filter(item => this.io.filterLibraryIDs.includes(item.libraryID));
+			this.results.selected = this.results.selected.filter(item => this.io.filterLibraryIDs.includes(item.libraryID));
+		}
 		// clear matching library items to make sure items stale results are not showing
 		this.results.found = [];
 		// Ensure duplicates across groups before library items are found
@@ -239,7 +244,7 @@ export class CitationDialogSearchHandler {
 		return citedItems;
 	}
 
-	_getReaderOpenItems() {
+	async _getReaderOpenItems() {
 		if (this.isCitingNotes) return [];
 		let win = Zotero.getMainWindow();
 		let tabs = win.Zotero_Tabs.getState();
@@ -255,13 +260,16 @@ export class CitationDialogSearchHandler {
 		}).map(t => t.data.itemID);
 		if (!itemIDs.length) return [];
 
-		let items = itemIDs.map((itemID) => {
-			let item = Zotero.Items.get(itemID);
+		// Fetch top-most items and load necessary data, in case tabs belong to an unloaded library
+		let items = [];
+		for (let itemID of itemIDs) {
+			let item = await Zotero.Items.getAsync(itemID);
 			if (item && item.parentItemID) {
-				itemID = item.parentItemID;
+				item = await Zotero.Items.getAsync(item.parentItemID);
 			}
-			return Zotero.Cite.getItem(itemID);
-		});
+			items.push(item);
+		}
+		await Zotero.Items.loadDataTypes(items);
 		// Return deduplicated items since there may be multiple tabs opened for the same
 		// top-level item (duplicate tabs or a multiple attachments belonging to the same item)
 		return [...new Set(items)];
