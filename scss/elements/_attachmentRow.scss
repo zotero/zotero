@@ -42,16 +42,7 @@ attachment-row {
 				color: var(--fill-secondary);
 			}
 		}
-
-		.zotero-clicky-minus {
-			margin-inline-start: auto;
-			& > image {
-				visibility: hidden;
-			}
-		}
-
-		&:is(:hover, :focus-within) .zotero-clicky-minus > image {
-			visibility: visible;
-		}
 	}
+	
+	@include contains-toolbarbutton-show-on-hover;
 }
