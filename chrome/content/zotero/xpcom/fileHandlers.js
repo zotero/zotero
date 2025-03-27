@@ -313,11 +313,13 @@ Zotero.FileHandlers = {
 						switch (appPath.toLowerCase()) {
 							case 'okular':
 								appPath = '/usr/bin/okular';
+								break;
 
 							// It's "Document Viewer" on stock Ubuntu
 							case 'document viewer':
 							case 'evince':
 								appPath = '/usr/bin/evince';
+								break;
 						}
 					}
 					else if (await IOUtils.exists('/usr/bin/okular')) {
