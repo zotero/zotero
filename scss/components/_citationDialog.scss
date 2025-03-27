@@ -115,11 +115,6 @@
 		}
 	}
 
-	#cited-items-spinner {
-		width: 20px;
-		height: 20px;
-	}
-
 	// alternative to var(--accent-blue10) without opacity
 	// which causes issues with stacked item cards in library mode
 	--selected-item-background: #EBF0FC;
@@ -232,6 +227,11 @@
 	
 							&.selected {
 								background-color: var(--selected-item-background) !important;
+							}
+							// no visible border around the placeholder
+							&.cited-placeholder {
+								border: 1px solid transparent;
+								padding: 0;
 							}
 						}
 					}
