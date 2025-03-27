@@ -183,46 +183,92 @@ export class CitationDialogHelpers {
 		return itemNode;
 	}
 
-	// Extract locator from a string and return an object: { label: string, page: string, onlyLocator: bool}
-	// to identify the locator and pass that info to the dialog
+	// Extract locator from a string and return an object: { label: string, page: string, fullLocatorString:string, onlyLocator: bool}
+	// to identify the locator and pass that info to the dialog. If no locator is found, return null.
+	// Locator can be given in its full or short form (with or without trailing period).
+	// Locator must be followed by numbers (e.g. page 10-30) or a string in quotes (e.g. chapter "one two three").
+	// Locators are excluded from the search query, so quotes are required for textual locators to
+	// avoid conflicts with actual search terms.
+	// Whitespace between the locator and the value is not required. These are equivalent:
+	// p10-15, p.10-15, p. 10-15, p 10-15, page10-15, page 10-15, p."testing testing", page "testing testing"
+	// Locators should always be in the end of the string, to avoid conflicts with actual search terms,
+	// so page10-15 in 'history of the US page10-15 and something else' will not be treated as a locator.
 	extractLocator(string) {
-		// Check for different ways of typing the page locator
-		const pageRegex = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-–]+) *$/;
-		let pageLocator = pageRegex.exec(string);
-		if (pageLocator && pageLocator.length) {
-			return {
-				label: "page",
-				locator: pageLocator[2],
-				onlyLocator: pageLocator[0].length == string.length,
-				fullLocatorString: pageLocator[0]
-			};
-		}
-		// Check for a generalized way of typing any other locator in full or short form
-		// Capture the first word (e.g. "act") followed by optional : or . with any number of whitespaces.
-		// Then, capture either any text surrounded with " or ' (e.g. book: "Book title")
-		// or just any word (e.g. l. 10)
-		const generalRegex = /(\w+)\s*[:.]?\s*(?:(['"])(.*?)\2|(\w+))$/;
-		let generalLocator = generalRegex.exec(string);
-		if (generalLocator?.length) {
-			let typedLocatorLabel = generalLocator[1].toLowerCase();
-			let existingLocators = Zotero.Cite.labels;
-			for (let existingLocator of existingLocators) {
-				let locatorLabel = Zotero.Cite.getLocatorString(existingLocator).toLowerCase();
-				// strip short locator labels of punctuation, so that e.g. for line locator, "l 10" is still counted as "l. 10"
-				let locatorLabelShort = Zotero.Cite.getLocatorString(existingLocator, "short").replace(/[.,;:{}()]/g, "").toLowerCase();
-				if (typedLocatorLabel == locatorLabel || typedLocatorLabel == locatorLabelShort) {
-					// fetch either text in quotes or the last word without quotes as locator value
-					let locatorValue = generalLocator[3] || generalLocator[4];
-					return {
-						label: existingLocator,
-						locator: locatorValue,
-						onlyLocator: generalLocator[0].length == string.length,
-						fullLocatorString: generalLocator[0]
-					};
+		string = string.trim();
+		let words = string.split(" ");
+		let locatorLabel, locatorLabelString, locatorValue;
+		let wordLocatorIndex = 0;
+		// Go through every word
+		for (let word of words) {
+			word = word.toLowerCase();
+			// Check if the current word has a locator label
+			for (let labelCandidate of Zotero.Cite.labels) {
+				let { fullLocator, shortLocator, shortLocatorNoPunctuation } = this.getLocatorLabels(labelCandidate);
+				// Potential locator value is a substring from the current word till the end
+				let potentialLocatorValue = words.slice(wordLocatorIndex).join(" ").trim();
+
+				// Check if this word has a locator label in its full or short form (e.g. "line" or "l" or "l.")
+				// If a locator string is found, check if the string without it is a valid locator value.
+				if (potentialLocatorValue.startsWith(fullLocator)) {
+					// e.g. 'US history chapter "one and two" '
+					locatorLabelString = fullLocator;
+					// potential locator value: "one and two"
+					potentialLocatorValue = potentialLocatorValue.substring(fullLocator.length).trim();
+				}
+				else if (potentialLocatorValue.startsWith(shortLocator)) {
+					// e.g. 'US history chapt."one and two" '
+					locatorLabelString = shortLocator;
+					// potential locator value: "one and two"
+					potentialLocatorValue = potentialLocatorValue.substring(shortLocator.length).trim();
+				}
+				else if (potentialLocatorValue.startsWith(shortLocatorNoPunctuation)) {
+					// e.g. 'US history chapt11-12 '
+					locatorLabelString = shortLocatorNoPunctuation;
+					// potential locator value: 11-12
+					potentialLocatorValue = potentialLocatorValue.substring(shortLocatorNoPunctuation.length).trim();
+				}
+				else {
+					continue;
+				}
+
+				// At this point, potentialLocatorValue should be a string following one of the locator labels
+				// Now, check against a two different ways that locator value can be specified.
+
+				// first candidate is numbers with optional punctuation (e.g. chapt.11-12)
+				let numericRegex = /^(\d+(?:[\s,-:]+\d+)*)(?:\s+)?$/;
+				let numericMatch = numericRegex.exec(potentialLocatorValue.trim());
+				if (numericMatch) {
+					locatorValue = numericMatch[1].trim();
+					locatorLabel = labelCandidate;
+					break;
+				}
+
+				// next candidate is text in quotes (e.g. chapter "one and two")
+				let quoteRegex = /^((?:"[^"]+"|'[^']+'))(?:\s*)$/;
+				let quoteMatch = quoteRegex.exec(potentialLocatorValue.trim());
+				if (quoteMatch) {
+					locatorValue = quoteMatch[1];
+					locatorLabel = labelCandidate;
+					break;
 				}
 			}
+			if (locatorLabel) break;
+			wordLocatorIndex += 1;
 		}
-		return null;
+		if (!locatorLabel || !locatorValue || !locatorLabelString) return null;
+
+		// find the entire locator string - "chapter 'one and two'" ensuring
+		// that fullLocatorString is strictly a part of the larger string (including whitespaces and etc.)
+		let wordsWithLocator = words.slice(wordLocatorIndex).join(" ");
+		let locatorLabelIndex = wordsWithLocator.indexOf(locatorLabelString);
+		let locatorValueIndex = wordsWithLocator.indexOf(locatorValue);
+		let fullLocatorString = wordsWithLocator.substring(locatorLabelIndex, locatorValueIndex + locatorValue.length);
+		return {
+			label: locatorLabel,
+			locator: locatorValue.replace(/['"]/g, ""),
+			onlyLocator: fullLocatorString.length == string.length,
+			fullLocatorString
+		};
 	}
 
 	// calculate the height of the #search-row accounting for margins and border
@@ -281,5 +327,13 @@ export class CitationDialogHelpers {
 		}
 		
 		return str;
+	}
+
+	getLocatorLabels(loc) {
+		return {
+			fullLocator: Zotero.Cite.getLocatorString(loc).toLowerCase(),
+			shortLocator: Zotero.Cite.getLocatorString(loc, "short").toLowerCase(),
+			shortLocatorNoPunctuation: Zotero.Cite.getLocatorString(loc, "short").toLowerCase().replace(/[.,]/g, "")
+		};
 	}
 }
