@@ -76,6 +76,26 @@ async function babelWorker(ev) {
 				return postError('Failed to patch tsWorker.js');
 			}
 		}
+		// Patch monacopilot imports
+		else if (sourcefile === 'resource/monacopilot.mjs') {
+			transformed = contents.replace('from\'@monacopilot/core\'', 'from\'./monacopilot-core.mjs\'');
+			if (transformed.length === contents.length) {
+				return postError('Failed to patch monacopilot.mjs');
+			}
+			transformed = `
+				import { setTimeout, clearTimeout } from "resource://gre/modules/Timer.sys.mjs";
+			` + transformed;
+		}
+		// Patch monacopilot-core imports and API endpoint
+		else if (sourcefile === 'resource/monacopilot-core.mjs') {
+			transformed = contents.replace('api.mistral.ai', 'codestral.mistral.ai');
+			if (transformed.length === contents.length) {
+				return postError('Failed to patch monacopilot-core.mjs');
+			}
+			transformed = `
+				import { setTimeout, clearTimeout } from "resource://gre/modules/Timer.sys.mjs";
+			` + transformed;
+		}
 
 		else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
 			transformed = contents;
