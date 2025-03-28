@@ -116,20 +116,10 @@
 			this._addPopup = this.querySelector('.add-popup');
 			
 			let [addFile, addLink, addWebLink] = this._addPopup.children;
-			this._addPopup.addEventListener('popupshowing', () => {
-				let canAddAny = this.item?.isRegularItem() && this.item.library.editable;
-				addFile.disabled = addLink.disabled = !(canAddAny && this.item.library.filesEditable);
-				addWebLink.disabled = !canAddAny;
-			});
-			addFile.addEventListener('command', () => {
-				ZoteroPane.addAttachmentFromDialog(false, this.item.id);
-			});
-			addLink.addEventListener('command', () => {
-				ZoteroPane.addAttachmentFromDialog(true, this.item.id);
-			});
-			addWebLink.addEventListener('command', () => {
-				ZoteroPane.addAttachmentFromURI(true, this.item.id);
-			});
+			this._addPopup.addEventListener('popupshowing', this._handleAddPopupShowing);
+			addFile.addEventListener('command', this._handleAddFile);
+			addLink.addEventListener('command', this._handleAddLink);
+			addWebLink.addEventListener('command', this._handleAddWebLink);
 			
 			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 
@@ -144,8 +134,22 @@
 		}
 
 		destroy() {
-			this._section?.removeEventListener('add', this._handleAdd);
+			this.discard();
+			this._preview?.remove();
+			delete this._preview;
+
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+
+			this._section?.removeEventListener('add', this._handleAdd);
+			if (this._addPopup) {
+				this._addPopup.removeEventListener('popupshowing', this._handleAddPopupShowing);
+				let [addFile, addLink, addWebLink] = this._addPopup.children;
+				addFile?.removeEventListener('command', this._handleAddFile);
+				addLink?.removeEventListener('command', this._handleAddLink);
+				addWebLink?.removeEventListener('command', this._handleAddWebLink);
+			}
+			
+			this._section?._contextMenu?.removeEventListener('popupshowing', this._handleContextMenu);
 		}
 
 		notify(action, type, ids) {
@@ -291,6 +295,24 @@
 		_handleAdd = (event) => {
 			this._section.open = true;
 			this._addPopup.openPopup(event.detail.button, 'after_end');
+		};
+
+		_handleAddPopupShowing = () => {
+			let canAddAny = this.item?.isRegularItem() && this.item.library.editable;
+				addFile.disabled = addLink.disabled = !(canAddAny && this.item.library.filesEditable);
+				addWebLink.disabled = !canAddAny;
+		};
+
+		_handleAddFile = () => {
+			ZoteroPane.addAttachmentFromDialog(false, this.item.id);
+		};
+
+		_handleAddLink = () => {
+			ZoteroPane.addAttachmentFromDialog(true, this.item.id);
+		};
+
+		_handleAddWebLink = () => {
+			ZoteroPane.addAttachmentFromURI(true, this.item.id);
 		};
 
 		_handleTogglePreview = () => {
