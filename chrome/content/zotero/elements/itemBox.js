@@ -93,6 +93,7 @@
 									<menuitem id="zotero-link-menu-view-online" data-l10n-id="item-menu-option-view-online"/>
 									<menuitem id="zotero-link-menu-copy" label="&zotero.item.copyAsURL;"/>
 								</menupopup>
+								<menupopup id="zotero-field-menu"></menupopup>
 								<guidance-panel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 							</popupset>
 							<div id="retraction-box" hidden="hidden">
@@ -664,19 +665,26 @@
 				let rowData = document.createElement('div');
 				rowData.className = "meta-data";
 				rowData.appendChild(valueElement);
+
+				// Called when row's context menu should show up
+				let onContextMenu = (event) => {
+					let menupopup = this._id("zotero-field-menu");
+					Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('editable-text')?._input);
+					this.handlePopupOpening(event, menupopup, fieldName);
+				};
+
 				if (openLinkButton) {
 					rowData.appendChild(openLinkButton);
 				}
 				if (addLinkContextMenu) {
-					rowData.oncontextmenu = (event) => {
-						let menupopup = this._linkMenu;
-
-						menupopup.dataset.link = link;
-						menupopup.dataset.val = val;
-						this._popupNode = rowLabel.parentElement;
+					onContextMenu = (event) => {
+						this._linkMenu.dataset.link = link;
+						this._linkMenu.dataset.val = val;
+						document.popupNode = rowLabel.parentElement;
 						
-						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target);
-						this.handlePopupOpening(event, menupopup);
+						let menupopup = this._id('zotero-link-menu');
+						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('editable-text')?._input);
+						this.handlePopupOpening(event, menupopup, fieldName);
 					};
 				}
 				
@@ -689,7 +697,7 @@
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					optionsButton.id = `itembox-field-${fieldName}-options`;
 					// eslint-disable-next-line no-loop-func
-					let triggerPopup = (e) => {
+					onContextMenu = (e) => {
 						let menupopup = ZoteroPane.buildFieldTransformMenu({
 							target: valueElement,
 							onTransform: (newValue) => {
@@ -700,15 +708,16 @@
 						menupopup.addEventListener('popuphidden', () => {
 							menupopup.remove();
 						});
-						this.handlePopupOpening(e, menupopup);
+						this.handlePopupOpening(e, menupopup, fieldName);
 					};
 					// Same popup triggered for right-click and options button click
-					optionsButton.addEventListener("click", triggerPopup);
+					optionsButton.addEventListener("click", onContextMenu);
 					rowData.appendChild(optionsButton);
-					rowData.oncontextmenu = triggerPopup;
 					// Options button is always created for focus management but if the field is empty, it is hidden
 					if (!val) optionsButton.hidden = true;
 				}
+
+				rowData.oncontextmenu = onContextMenu;
 
 				this.addDynamicRow(rowLabel, rowData);
 				
@@ -1305,7 +1314,7 @@
 				let menupopup = this._id('zotero-creator-transform-menu');
 				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, e.target.closest('input'));
 				
-				this.handlePopupOpening(e, menupopup);
+				this.handlePopupOpening(e, menupopup, fieldName);
 			};
 			rowData.appendChild(optionsButton);
 
@@ -2662,7 +2671,7 @@
 			return activeField.blur();
 		}
 
-		handlePopupOpening(event, popup) {
+		handlePopupOpening(event, popup, fieldName) {
 			event.preventDefault();
 			event.stopPropagation();
 			
@@ -2673,6 +2682,25 @@
 				target.classList.add("show-without-hover");
 				target.classList.remove("show-on-hover");
 			}
+
+			let targetElem = event.target.closest("editable-text")?._input;
+
+			Zotero.MenuManager.updateMenuPopup(
+				popup,
+				"itemPane/info/row",
+				{
+					event: undefined,
+					getContext: () => ({
+						items: [this.item],
+						tabType: this.tabType,
+						editable: this.editable,
+						fieldName,
+						// Do not expose the original ref to avoid memory leak
+						targetElem: targetElem ? new WeakRef(targetElem) : undefined,
+					})
+				}
+			);
+
 			// On click, we have x/y coordinates so use that
 			// On keyboard click, open it next to the target
 			if (event.screenX) {
