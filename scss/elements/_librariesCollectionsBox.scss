@@ -42,17 +42,7 @@ libraries-collections-box {
 				}
 			}
 
-			toolbarbutton {
-				margin-inline-start: auto;
-				border-radius: 2px;
-				& > image {
-					visibility: hidden;
-				}
-			}
-
-			&:is(:hover, :focus-within) toolbarbutton > image {
-				visibility: visible;
-			}
+			@include contains-toolbarbutton-show-on-hover;
 		}
 	}
 

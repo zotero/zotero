@@ -462,6 +462,7 @@ section-attachments-annotations =
                  [one] { $count } Annotation
                  *[other] { $count } Annotations
              }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label = { $count ->
                  [one] { $count } Note

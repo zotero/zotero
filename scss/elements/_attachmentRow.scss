@@ -42,7 +42,7 @@ attachment-row {
 				color: var(--fill-secondary);
 			}
 		}
-
-		
 	}
+	
+	@include contains-toolbarbutton-show-on-hover;
 }
