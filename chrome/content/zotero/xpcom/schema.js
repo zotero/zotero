@@ -3477,6 +3477,13 @@ Zotero.Schema = new function(){
 				await Zotero.DB.queryAsync("CREATE INDEX itemData_valueID ON itemData(valueID)");
 			}
 			
+			else if (i == 124) {
+				let clientVersionTables = ['items', 'collections', 'savedSearches', 'libraries', 'groups'];
+				for (let table of clientVersionTables) {
+					await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
+				}
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
