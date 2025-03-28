@@ -1017,11 +1017,13 @@ var Scaffold = new function () {
 		if (functionToRun.endsWith('Export')) {
 			let numItems = Zotero.getActiveZoteroPane().getSelectedItems().length;
 			_logOutput(`Exporting ${numItems} item${numItems == 1 ? '' : 's'} selected in library`);
-			_run(functionToRun, input, _selectItems, () => {}, _getTranslatorsHandler(functionToRun), _myExportDone);
+			await _run(functionToRun, input, _selectItems, () => {}, _getTranslatorsHandler(functionToRun), _myExportDone);
 		}
 		else {
-			_run(functionToRun, input, _selectItems, _myItemDone, _getTranslatorsHandler(functionToRun));
+			await _run(functionToRun, input, _selectItems, _myItemDone, _getTranslatorsHandler(functionToRun));
 		}
+		
+		_logOutput('Done');
 	};
 
 	/*
@@ -1186,19 +1188,19 @@ var Scaffold = new function () {
 	/*
 	 * logs item output
 	 */
-	function _myItemDone(obj, item) {
-		delete item.id;
-		if (Array.isArray(item.attachments)) {
-			for (let attachment of item.attachments) {
-				if (attachment.document) {
-					attachment.mimeType = 'text/html';
-					attachment.url = attachment.document.location?.href;
-					delete attachment.document;
-				}
-				delete attachment.complete;
-			}
+	function _myItemDone(obj, jsonItem) {
+		// If the pane hasn't been resized, it won't have a fixed width,
+		// so it'll grow when wrapping text is added. Fix its width now.
+		let rightPane = document.querySelector('#right-pane');
+		rightPane.style.width = rightPane.getBoundingClientRect().width + 'px';
+		
+		let itemPreviews = document.querySelector('#item-previews');
+		if (itemPreviews.hidden) {
+			itemPreviews.hidden = false;
+			itemPreviews.jsonItems = [];
 		}
-		_logOutput("Returned item:\n" + Zotero_TranslatorTester._generateDiff(item, _sanitizeItemForDisplay(item)));
+		itemPreviews.jsonItems.push(jsonItem);
+		itemPreviews.render();
 	}
 
 	/*
@@ -1427,166 +1429,6 @@ var Scaffold = new function () {
 			'Add test ensuring that detection always fails on this page?');
 	}
 
-	/**
-	 * Mimics most of the behavior of Zotero.Item#fromJSON. Most importantly,
-	 * extracts valid fields from item.extra and inserts invalid fields into
-	 * item.extra.
-	 *
-	 * For example,
-	 *   { itemType: 'journalArticle', extra: 'DOI: foo' }
-	 * becomes
-	 *   { itemType: 'journalArticle', DOI: 'foo' }
-	 * and
-	 *   { itemType: 'book', DOI: 'foo' }
-	 * becomes
-	 *   { itemType: 'book', extra: 'DOI: foo' }
-	 *
-	 * @param {any} item
-	 * @return {any}
-	 */
-	function _sanitizeItemForDisplay(item) {
-		// try to convert to JSON and back to get rid of undesirable undeletable elements; this may fail
-		try {
-			item = JSON.parse(JSON.stringify(item));
-		}
-		catch (e) {}
-		
-		let itemTypeID = Zotero.ItemTypes.getID(item.itemType);
-		
-		var setFields = new Set();
-		var { itemType, fields: extraFields, /* creators: extraCreators, */ extra }
-			= Zotero.Utilities.Internal.extractExtraFields(
-				item.extra || '',
-				null,
-				Object.keys(item)
-					// TEMP until we move creator lines to real creators
-					.concat('creators')
-			);
-		// If a different item type was parsed out of Extra, use that instead
-		if (itemType && item.itemType != itemType) {
-			item.itemType = itemType;
-			itemTypeID = Zotero.ItemTypes.getID(itemType);
-		}
-		
-		for (let [field, value] of extraFields) {
-			item[field] = value;
-			setFields.add(field);
-			extraFields.delete(field);
-		}
-		
-		for (let [field, val] of Object.entries(item)) {
-			switch (field) {
-				case 'itemType':
-				case 'accessDate':
-				case 'creators':
-				case 'attachments':
-				case 'notes':
-				case 'seeAlso':
-					break;
-
-				case 'extra':
-					// We set this later
-					delete item[field];
-					break;
-
-				case 'tags':
-					item[field] = Zotero.Translate.Base.prototype._cleanTags(val);
-					break;
-
-				// Item fields
-				default: {
-					let fieldID = Zotero.ItemFields.getID(field);
-					if (!fieldID) {
-						if (typeof val == 'string') {
-							extraFields.set(field, val);
-							break;
-						}
-						delete item[field];
-						continue;
-					}
-					// Convert to base-mapped field if necessary, so that setFields has the base-mapped field
-					// when it's checked for values from getUsedFields() below
-					let origFieldID = fieldID;
-					let origField = field;
-					fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID;
-					if (origFieldID != fieldID) {
-						field = Zotero.ItemFields.getName(fieldID);
-					}
-					if (!Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
-						extraFields.set(field, val);
-						delete item[field];
-						continue;
-					}
-					if (origFieldID != fieldID) {
-						item[field] = item[origField];
-						delete item[origField];
-					}
-					setFields.add(field);
-				}
-			}
-		}
-		
-		if (extraFields.size) {
-			for (let field of setFields.keys()) {
-				let baseField;
-				if (Zotero.ItemFields.isBaseField(field)) {
-					baseField = field;
-				}
-				else if (Zotero.ItemFields.isValidForType(Zotero.ItemFields.getID(field), itemTypeID)) {
-					let baseFieldID = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
-					if (baseFieldID) {
-						baseField = baseFieldID;
-					}
-				}
-
-				if (baseField) {
-					let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
-					for (let mappedField of mappedFieldNames) {
-						if (extraFields.has(mappedField)) {
-							extraFields.delete(mappedField);
-						}
-					}
-				}
-			}
-			
-			//
-			// Deduplicate remaining Extra fields
-			//
-			// For each invalid-for-type base field, remove any mapped fields with the same value
-			let baseFields = [];
-			for (let field of extraFields.keys()) {
-				if (Zotero.ItemFields.getID(field) && Zotero.ItemFields.isBaseField(field)) {
-					baseFields.push(field);
-				}
-			}
-			for (let baseField of baseFields) {
-				let value = extraFields.get(baseField);
-				let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
-				for (let mappedField of mappedFieldNames) {
-					if (extraFields.has(mappedField) && extraFields.get(mappedField) === value) {
-						extraFields.delete(mappedField);
-					}
-				}
-			}
-			
-			// Remove Type-mapped fields from Extra, since 'Type' is mapped to Item Type by citeproc-js
-			// and Type values mostly aren't going to be useful for item types without a Type-mapped field.
-			let typeFieldNames = Zotero.ItemFields.getTypeFieldsFromBase('type', true)
-				.concat('audioFileType');
-			for (let typeFieldName of typeFieldNames) {
-				if (extraFields.has(typeFieldName)) {
-					extraFields.delete(typeFieldName);
-				}
-			}
-		}
-		
-		if (extra || extraFields.size) {
-			item.extra = Zotero.Utilities.Internal.combineExtraFields(extra, extraFields);
-		}
-		
-		return item;
-	}
-	
 	/* sanitizes all items in a test
 	 */
 	function _sanitizeItemsInTest(test) {
@@ -2167,6 +2009,8 @@ var Scaffold = new function () {
 	 */
 	function _clearOutput() {
 		document.getElementById('output').value = '';
+		let itemPane = document.querySelector('#item-previews');
+		itemPane.hidden = true;
 	}
 
 	/*

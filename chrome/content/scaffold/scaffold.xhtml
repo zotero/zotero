@@ -76,6 +76,8 @@
 
 		// Custom elements
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://scaffold/content/scaffoldItemPreview.js", this);
+		Services.scriptloader.loadSubScript("chrome://scaffold/content/scaffoldItemPreviews.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/menuAccessKey.js", this);
 	</script>
@@ -542,6 +544,7 @@
 			<splitter id="pane-splitter" resizeafter="farthest" />
 			<vbox id="right-pane">
 				<html:textarea id="output" readonly="true" data-l10n-id="scaffold-translator-output"/>
+				<scaffold-item-previews id="item-previews" hidden="true"/>
 			</vbox>
 		</hbox>
 
