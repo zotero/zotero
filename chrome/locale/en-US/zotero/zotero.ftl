@@ -735,3 +735,11 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+connector-version-warning = An update is available for the { -app-name } Connector.
+
+    You can update the { -app-name } Connector by visiting { $updatePage }
+
+connector-version-save-warning = You need to update the { -app-name } Connector to be able to save to Zotero.
+
+    You can update the { -app-name } Connector by visiting { $updatePage }

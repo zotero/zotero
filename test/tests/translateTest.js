@@ -1,5 +1,5 @@
 new function() {
-Components.utils.import("resource://zotero-unit/httpd.js");
+var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
 
 const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');
 
