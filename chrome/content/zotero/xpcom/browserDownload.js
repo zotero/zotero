@@ -212,6 +212,10 @@ Zotero.BrowserDownload = {
 		// make sure that you are using the browser you are claiming to be.
 		delete options.cookieSandbox?.userAgent;
 		
+		if (uri.host.includes("sciencedirect")) {
+			await this._waitForSciencedirectCookies(uri, options.cookieSandbox);
+		}
+		
 		try {
 			wmListener = {
 				onOpenWindow(xulWindow) {
@@ -265,4 +269,24 @@ Zotero.BrowserDownload = {
 			}
 		}
 	},
+
+	// Going to the URL of a sciencedirect PDF immediately opens a page with captcha stuck in
+	// an infinite loop. Opening a home page first and waiting a bit before redirecting to the PDF file
+	// seems to not trigger the captcha and should successfully download the PDF.
+	// When homepage opens, CF sets a number of cookies (like cf_clearance) which are
+	// indicators that this is a real user and are required for the PDF to be downloaded.
+	async _waitForSciencedirectCookies(uri, cookieSandbox) {
+		if (!uri.host.includes("sciencedirect") || !cookieSandbox) return;
+		let homepage = "https://" + uri.host;
+		let win = Zotero.openInViewer(homepage, { cookieSandbox: cookieSandbox });
+		let loopCount = 0;
+		let receivedCookies = cookieSandbox.getCookiesForURI(Services.io.newURI(homepage)) || {};
+		let initialCfClearance = receivedCookies.cf_clearance;
+		// wait for cf_clearance cookie to be updated but not more than 10 seconds
+		do {
+			await Zotero.Promise.delay(100);
+			receivedCookies = cookieSandbox.getCookiesForURI(Services.io.newURI(homepage)) || {};
+		} while (initialCfClearance == receivedCookies.cf_clearance && loopCount++ < 100);
+		win.close();
+	}
 };
