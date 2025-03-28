@@ -128,7 +128,7 @@ Zotero.Intl = new function () {
 		try {
 			var l10n;
 			if (params != undefined) {
-				if (typeof params != 'object'){
+				if (typeof params != 'object') {
 					params = [params];
 				}
 				l10n = bundle.formatStringFromName(name, params, params.length);
