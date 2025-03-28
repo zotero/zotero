@@ -668,9 +668,9 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
  *		sessionID - A session ID previously passed to /saveItems
  *		itemID - The ID of the item to save alternative attachment for
  */
-Zotero.Server.Connector.HasOAAttachments = function () {};
-Zotero.Server.Endpoints["/connector/hasOAAttachments"] = Zotero.Server.Connector.HasOAAttachments;
-Zotero.Server.Connector.HasOAAttachments.prototype = {
+Zotero.Server.Connector.HasAttachmentResolvers = function () {};
+Zotero.Server.Endpoints["/connector/hasAttachmentResolvers"] = Zotero.Server.Connector.HasAttachmentResolvers;
+Zotero.Server.Connector.HasAttachmentResolvers.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
@@ -696,11 +696,11 @@ Zotero.Server.Connector.HasOAAttachments.prototype = {
  * Returns:
  * 		400 - Bad params
  * 		201 - Created and attachment title
- * 		503 - Failed to save
+ * 		500 - Failed to save
  */
-Zotero.Server.Connector.SaveOAAttachment = function () {};
-Zotero.Server.Endpoints["/connector/saveOAAttachment"] = Zotero.Server.Connector.SaveOAAttachment;
-Zotero.Server.Connector.SaveOAAttachment.prototype = {
+Zotero.Server.Connector.SaveAttachmentFromResolver = function () {};
+Zotero.Server.Endpoints["/connector/saveAttachmentFromResolver"] = Zotero.Server.Connector.SaveAttachmentFromResolver;
+Zotero.Server.Connector.SaveAttachmentFromResolver.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
@@ -720,7 +720,7 @@ Zotero.Server.Connector.SaveOAAttachment.prototype = {
 			return [201, "text/plain", attachment.getDisplayTitle()];
 		}
 		else {
-			return [503, "text/plain", "Failed to save an attachment"];
+			return [500, "text/plain", "Failed to save an attachment"];
 		}
 	}
 }
