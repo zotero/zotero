@@ -1373,7 +1373,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			
 			if (asStrings) {
-				errors.push(altMessage || msg.message)
+				let message = altMessage || msg.message;
+				// Stringify exceptions object instead of just returning "Object"
+				if (message.includes('uncaught exception: Object') && typeof msg.exception == "object") {
+					message = "[JavaScript Error:" + JSON.stringify(msg.exception);
+				}
+				errors.push(message);
 			}
 			else {
 				errors.push(msg);
