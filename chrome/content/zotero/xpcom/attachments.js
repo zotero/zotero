@@ -1010,21 +1010,27 @@ Zotero.Attachments = new function () {
 		let collections = options.collections;
 		let title = options.title;
 		let saveOptions = options.saveOptions;
-		
-		if (!title) {
-			// TODO Better attachment name
-			title = Zotero.getString('itemFields.attachmentPDF');
-		}
 
 		if (parentItemID && collections) {
 			throw new Error("parentItemID and collections cannot both be provided");
+		}
+		
+		// Create a temporary file
+		let filename;
+		if (parentItemID) {
+			let parentItem = Zotero.Items.get(parentItemID);
+			let fileBaseName = this.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
+			let ext = this._getExtensionFromURL(url, contentType);
+			filename = fileBaseName + (ext != '' ? '.' + ext : '');
+		}
+		else {
+			filename = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
 		}
 		
 		let tmpDirectory = (await this.createTemporaryStorageDirectory()).path;
 		let destDirectory;
 		let attachmentItem;
 		try {
-			let filename = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
 			let tmpFile = OS.Path.join(tmpDirectory, filename);
 			await Zotero.File.putNetworkStream(tmpFile, stream, options.byteCount);
 
