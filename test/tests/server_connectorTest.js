@@ -2829,4 +2829,150 @@ describe("Connector Server", function () {
 			assert.equal(JSON.parse(req.response).status, 200);
 		});
 	});
+
+	describe('/connector/cancel', function () {
+		var sessionID, body;
+
+		beforeEach(() => {
+			sessionID = Zotero.Utilities.randomString();
+			httpd.registerPathHandler(
+				"/attachment",
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write("<html><head><title>Title</title><body>Body</body></html>");
+					}
+				}
+			);
+			body = {
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Title!",
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: [
+							{
+								title: "Attachment",
+								url: `${testServerPath}/attachment`,
+								mimeType: "text/html"
+							}
+						]
+					}
+				],
+				uri: "http://example.com",
+				sessionID: sessionID
+			};
+		});
+
+		it('should delete saved items if called after everything is saved', async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+
+			// Save the item as if by the connector
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+
+			// Make sure the item got added and is selected
+			let item = win.ZoteroPane.getSelectedItems()[0];
+			assert.equal(item.getDisplayTitle(), "Title!");
+			
+			// Wait for attachment handling to be done
+			let isDone = false;
+			do {
+				await Zotero.Promise.delay(100);
+				let checkProgress = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/sessionProgress",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({ sessionID })
+					}
+				);
+				let data = JSON.parse(checkProgress.response);
+				isDone = data.done;
+			}
+			while (!isDone);
+
+			// Cancel the session
+			let cancelReq = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + '/connector/cancel',
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ sessionID })
+				}
+			);
+			assert.equal(cancelReq.status, 200);
+			// The item should be deleted
+			let deletedItem = await Zotero.Items.getAsync(item.id);
+			assert.isFalse(deletedItem);
+		});
+
+		it('should delete saved items if called during saving process', async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+
+			// Save the item as if by the connector
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+
+			// Fetch the item that got added
+			let item = win.ZoteroPane.getSelectedItems()[0];
+			assert.equal(item.getDisplayTitle(), "Title!");
+
+			// When /connector/cancel is called and save session is not done,
+			// it will call a few session methods that we spy on to check for their completion
+			let session = Zotero.Server.Connector.SessionManager.get(sessionID);
+			let eraseItemsWhenDoneSpy = sinon.spy(session, 'eraseItemsWhenDone');
+			let trashItemsSpy = sinon.spy(session, 'trashItems');
+
+			// Cancel the session
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + '/connector/cancel',
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ sessionID })
+				}
+			);
+
+			// Soon after the /cancel call, the item should be moved into the trash
+			await trashItemsSpy.returnValues[0];
+			session.trashItems.restore();
+
+			assert.isTrue(item.deleted);
+
+			// Wait for the method to complete
+			await eraseItemsWhenDoneSpy.returnValues[0];
+			session.eraseItemsWhenDone.restore();
+
+			// The item should be erased in the end
+			let deletedItem = await Zotero.Items.getAsync(item.id);
+			assert.isFalse(deletedItem);
+		});
+	});
 });
