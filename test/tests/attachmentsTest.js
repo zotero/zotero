@@ -1755,6 +1755,87 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
+		it("should be possible to count authors", function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: '{{ authorsCount }}' }),
+				'4'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: '{{ editorsCount }}' }),
+				'3'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: '{{ creatorsCount }}' }),
+				'7'
+			);
+			// relational operators produce empty strings for false, preserve value for true
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: 'test{{ authorsCount isGreaterThan="4" prefix="-" }}' }),
+				'test'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: 'test{{ authorsCount isGreaterThanOrEqualTo="4" prefix="-" }}' }),
+				'test-4'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: 'test{{ editorsCount isLessThanOrEqualTo="4" prefix="-" }}' }),
+				'test-3'
+			);
+		});
+
+		it("should be possible to test number of authors using equality operator", function () {
+			const template = `{{ if {{ authorsCount == "2" }} }}two{{ else }}not two{{ endif }}`;
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: template }),
+				'not two'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: template }),
+				'two'
+			);
+		});
+
+		it("should be possible to test number of authors using relational operators", function () {
+			const template = `{{ if {{ authorsCount isGreaterThan="2" }} }}
+{{ authors max="1" suffix=" et al" }}
+{{ else }}
+{{ authors join=" & " }}
+{{ endif }}`;
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: template }),
+				'Author et al'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: template }),
+				'Barius & Pixelus'
+			);
+		});
+
+		it("should treat multiple relational operators as AND", function () {
+			const template1 = '{{ if {{ editorsCount isGreaterThanOrEqualTo="3" isLessThan="4" }} }}exactly 3 editors{{ else }}many editors{{ endif }}';
+			const template2 = '{{ if {{ authorsCount isGreaterThanOrEqualTo="3" isLessThan="4" }} }}exactly 3 authors{{ else }}many authors{{ endif }}';
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: template1 }),
+				'exactly 3 editors'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, { formatString: template2 }),
+				'many authors'
+			);
+		});
+
+		it("should handle zero in relational operators", function () {
+			const template = '{{ if {{ authorsCount isGreaterThan="0" }} }}more than zero{{ elseif {{ authorsCount isLessThanOrEqualTo="0" }} }}zero{{ endif }}';
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: template }),
+				'more than zero'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemIncomplete, { formatString: template }),
+				'zero'
+			);
+		});
+
 		it("should perform regex in a case-insensitive way, unless configured otherwise", function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ title match="lorem" }}' }),

@@ -2339,6 +2339,24 @@ Zotero.Attachments = new function () {
 			return value;
 		};
 
+		const relationalOperators = (value, { isGreaterThan = null, isGreaterThanOrEqualTo = null, isLessThan = null, isLessThanOrEqualTo = null } = {}) => {
+			let out = true;
+			
+			if (isGreaterThan !== null) {
+				out &&= value > isGreaterThan;
+			}
+			if (isGreaterThanOrEqualTo !== null) {
+				out &&= value >= isGreaterThanOrEqualTo;
+			}
+			if (isLessThan !== null) {
+				out &&= value < isLessThan;
+			}
+			if (isLessThanOrEqualTo !== null) {
+				out &&= value <= isLessThanOrEqualTo;
+			}
+			return out ? value : '';
+		};
+
 		const initializeFn = (name, shouldInitialize, initializeWith) => (shouldInitialize ? name.slice(0, 1).toUpperCase() + initializeWith : name);
 
 		const transformName = (creator, { name, namePartSeparator, initialize, initializeWith } = {}) => {
@@ -2397,6 +2415,9 @@ Zotero.Attachments = new function () {
 		const creatorFields = ['authors', 'editors', 'creators'].reduce((obj, name) => {
 			obj[name] = (args) => {
 				return common(commonCreators(name, args), args);
+			};
+			obj[`${name}Count`] = (args) => {
+				return common(relationalOperators(getSlicedCreatorsOfType(name, Infinity).length, args).toString(), args);
 			};
 			return obj;
 		}, {});
