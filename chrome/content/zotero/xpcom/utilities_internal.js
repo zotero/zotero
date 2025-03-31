@@ -2219,14 +2219,32 @@ Zotero.Utilities.Internal = {
 			return [operator, args];
 		};
 
+		// We allow unquoted numbers in conditions, e.g. `a == 1` or `a == 1.0`  but not `a == 1.0.0` or `a == 1st edition`
+		const asNumber = (string) => {
+			if (typeof string === 'number') {
+				return string;
+			}
+			const number = parseFloat(string);
+			if (!Number.isNaN(number) && string?.trim().match(/^[+-]?\d+(\.\d+)?$/)) {
+				return number;
+			}
+			return null;
+		};
+
 		// evaluates a condition (e.g. `a == "b"`) into a boolean value
 		const evaluateCondition = (condition) => {
-			const comparators = ['==', '!='];
+			const comparators = ['==', '!=', "<=", ">=", '<', '>'];
 			condition = condition.trim();
-
-			// match[1] if left is statement, match[3] if left is literal, match[4] if left is identifier
-			// match[6] if right is statement, match[8] if right is literal, match[9] if right is identifier
-			// match[2] and match[7] are used to match the quotes around the literal (and then check that the other quote is the same)
+			
+			// Regular expression breakdown for condition matching:
+			// - `match[1]`: Left operand if it's a statement enclosed in `{{...}}`.
+			// - `match[3]`: Left operand if it's a string literal, extracted without quotes.
+			// - `match[4]`: Left operand if it's a standalone identifier (e.g., a variable) or a number
+			// - `match[6]`: Right operand if it's a statement enclosed in `{{...}}`.
+			// - `match[8]`: Right operand if it's a string literal, extracted without quotes.
+			// - `match[9]`: Right operand if it's a standalone identifier or a number.
+			// - `match[2]` and `match[7]`: Captured quotes around string literals, used to ensure matching pairs.
+			// - `match[5]`: The comparator (e.g., `==`, `!=`, `<`, `>`, etc.), extracted from `comparators.join('|')`.
 			const match = condition.match(new RegExp(String.raw`(?:{{(.*?)}}|(?:(['"])(.*?)\2)|([^ ]+)) *(${comparators.join('|')}) *(?:{{(.*?)}}|(?:(['"])(.*?)\7)|([^ ]+))`));
 			
 			if (!match) {
@@ -2238,16 +2256,24 @@ Zotero.Utilities.Internal = {
 				return !!evaluateIdentifier(condition);
 			}
 
-			const left = match[1] ? evaluateStatement(match[1]) : match[3] ?? evaluateIdentifier(match[4]) ?? '';
+			const left = match[1] ? evaluateStatement(match[1]) : match[3] ?? asNumber(match[4]) ?? evaluateIdentifier(match[4]) ?? '';
 			const comparator = match[5];
-			const right = match[6] ? evaluateStatement(match[6]) : match[8] ?? evaluateIdentifier(match[9]) ?? '';
+			const right = match[6] ? evaluateStatement(match[6]) : match[8] ?? asNumber(match[9]) ?? evaluateIdentifier(match[9]) ?? '';
 
 			switch (comparator) {
 				default:
 				case '==':
-					return left.toLowerCase() == right.toLowerCase();
+					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() == right.toLowerCase() : asNumber(left) == asNumber(right);
 				case '!=':
-					return left.toLowerCase() != right.toLowerCase();
+					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() != right.toLowerCase() : asNumber(left) != asNumber(right);
+				case ">=":
+					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() >= right.toLowerCase() : asNumber(left) >= asNumber(right);
+				case "<=":
+					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() <= right.toLowerCase() : asNumber(left) <= asNumber(right);
+				case '>':
+					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() > right.toLowerCase() : asNumber(left) > asNumber(right);
+				case '<':
+					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() < right.toLowerCase() : asNumber(left) < asNumber(right);
 			}
 		};
 
