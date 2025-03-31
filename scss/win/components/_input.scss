@@ -13,6 +13,7 @@
 @mixin windows-input-active {
 	outline: none;
 	background-clip: border-box, padding-box;
+	background-repeat: no-repeat;
 	@media (prefers-color-scheme: light) {
 		border: 1px solid var(--fill-quinary);
 		border-bottom-color: var(--accent-blue);
