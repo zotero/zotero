@@ -140,6 +140,8 @@ Zotero.Server.Connector = {
 			// Don't show again for this browser until restart (unless forced)
 			Zotero.Server.Connector.skipVersionWarning = true;
 			setTimeout(function () {
+				if (this.versionWarningShowing) return;
+				
 				var remindLater = {};
 				let options = {
 					title: Zotero.getString('general.updateAvailable'),
@@ -151,7 +153,9 @@ Zotero.Server.Connector = {
 					options.checkLabel = Zotero.getString('general.remindMeLater');
 					options.checkbox = remindLater;
 				}
+				this.versionWarningShowing = true;
 				const index = Zotero.Prompt.confirm(options)
+				this.versionWarningShowing = false;
 				
 				var nextShowDays;
 				// Remind in a week if checked remind me later
@@ -167,7 +171,7 @@ Zotero.Server.Connector = {
 				if (index == 0) {
 					Zotero.launchURL(ZOTERO_CONFIG.CONNECTORS_URL);
 				}
-			}, 500);
+			}.bind(this), 0);
 
 			return [400, "application/json", JSON.stringify({ error: "CONNECTOR_VERSION_OUTDATED" })];
 		}
