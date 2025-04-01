@@ -1737,8 +1737,13 @@ describe("Zotero.CollectionTree", function() {
 			let colTree = win.document.getElementById('collection-tree');
 			await cv.setFilter("_2");
 			cv.focusFirstMatchingRow();
+			
+			// Escape will trigger setFilter that we need to await for
+			let setFilterSpy = sinon.spy(cv, 'setFilter');
 			colTree.dispatchEvent(keyboardClick("Escape"));
-			await Zotero.Promise.delay(10);
+			await setFilterSpy.returnValues[0];
+			setFilterSpy.restore();
+			
 			assert.equal(cv._filter, "");
 			assert.equal(cv.getSelectedCollection(true), collection2.id);
 		});
