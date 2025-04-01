@@ -137,7 +137,7 @@ Zotero.Server.Connector = {
 				if (showNext && new Date() < new Date(showNext * 1000)) return;
 			}
 			
-			// Don't show again for this browser until restart
+			// Don't show again for this browser until restart (unless forced)
 			Zotero.Server.Connector.skipVersionWarning = true;
 			setTimeout(function () {
 				var remindLater = {};
