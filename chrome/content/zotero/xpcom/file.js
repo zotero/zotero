@@ -500,7 +500,7 @@ Zotero.File = new function(){
 							reject(new Components.Exception("File write operation failed", e));
 						}
 					}
-				}, 0, 0, Ci.nsIAsyncInputStream.WAIT_CLOSURE);
+				}, 0, 0, null);
 			};
 
 			// Start reading the first chunk of data
