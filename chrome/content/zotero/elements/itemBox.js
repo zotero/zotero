@@ -789,7 +789,7 @@
 			// If rowIDs are provided, always update them
 			if (rowIDs?.length > 0) {
 				for (let rowID of rowIDs) {
-					let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${rowID}"]`);
+					let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 					if (!rowElem) continue;
 					this.updateCustomRowData(rowElem);
 				}
@@ -807,7 +807,7 @@
 
 			// Add rows that are in the target rows but not in the current rows
 			for (let row of targetRows) {
-				let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${row.rowID}"]`);
+				let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${CSS.escape(row.rowID)}"]`);
 				if (rowElem) {
 					// If the row is already in the table, and not already updated, update it
 					if (!rowIDs?.includes(row.rowID)) {
