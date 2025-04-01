@@ -6846,7 +6846,7 @@ var ZoteroPane = new function()
 	this.buildFieldTransformMenu = function ({ target, onTransform }) {
 		let doc = target.ownerDocument;
 		let value = target.value;
-		let valueTitleCased = Zotero.Utilities.capitalizeTitle(value.toLowerCase(), true);
+		let valueTitleCased = Zotero.Utilities.capitalizeTitle(value, true);
 		let valueSentenceCased = Zotero.Utilities.sentenceCase(value);
 
 		let menupopup = doc.createXULElement('menupopup');
