@@ -175,7 +175,7 @@
 
 		isPaneMovable(paneID, direction) {
 			let wrappers = this._enabledWrappers;
-			let currentWrapper = this.querySelector(`.btn[data-pane=${paneID}]`).parentElement;
+			let currentWrapper = this.querySelector(`.btn[data-pane=${CSS.escape(paneID)}]`).parentElement;
 			let currentIndex = wrappers.indexOf(currentWrapper);
 
 			let isOrderable = this.isPaneOrderable(paneID);
@@ -185,7 +185,6 @@
 			
 			if (direction === 'up') {
 				return isOrderable && currentIndex !== 0;
-				this.querySelector('.zotero-menuitem-reorder-down').hidden = !isOrderable || !isNextOrderable || isLast;
 			}
 			else if (direction === 'down') {
 				return isOrderable && isNextOrderable && !isLast;
@@ -262,6 +261,13 @@
 
 		render() {
 			if (!this.container) return;
+
+			for (let paneElem of this.container.getPanes()) {
+				let paneID = paneElem.dataset.pane;
+				this.addPane(paneID);
+				this.updatePaneStatus(paneID);
+			}
+
 			let contextNotesPaneVisible = this._contextNotesPaneVisible;
 			let pinnedPane = this.pinnedPane;
 			for (let button of this.querySelectorAll('.btn[data-pane]')) {
@@ -326,11 +332,20 @@
 				let paneID = prevOrder[notExistingIdx];
 				let idx = notExistingIdx;
 
-				// Record the next pane ID for next iteration after early exit
-				for (let i = notExistingIdx + 1; i < prevOrder.length; i++) {
-					if (currentOrder.includes(prevOrder[i])) {
-						notExistingIdx = i;
-						break;
+				if (notExistingIdx == prevOrder.length - 1) {
+					// If this is the last one, mark the next anchor pane ID as false
+					nextAnchorPaneID = false;
+					notExistingIdx = -1;
+				}
+				else {
+					// Record the next pane ID for next iteration after early exit
+					for (let i = notExistingIdx + 1; i < prevOrder.length; i++) {
+						if (currentOrder.includes(prevOrder[i])) {
+							notExistingIdx = i;
+							break;
+						} else {
+							notExistingIdx = -1;
+						}
 					}
 				}
 
@@ -391,7 +406,7 @@
 		}
 
 		addPane(paneID, order = null) {
-			let button = this.querySelector(`.btn[data-pane=${paneID}]`);
+			let button = this.querySelector(`.btn[data-pane=${CSS.escape(paneID)}]`);
 			if (button) {
 				button.parentElement.hidden = false;
 				return;
@@ -471,7 +486,7 @@
 		}
 
 		removePane(paneID) {
-			let button = this.querySelector(`.btn[data-pane=${paneID}]`);
+			let button = this.querySelector(`.btn[data-pane=${CSS.escape(paneID)}]`);
 			if (!button) return;
 			button.parentElement.remove();
 		}
@@ -492,7 +507,7 @@
 				return;
 			}
 
-			let button = this.querySelector(`.btn[data-pane=${paneID}]`);
+			let button = this.querySelector(`.btn[data-pane=${CSS.escape(paneID)}]`);
 			if (!button) return;
 			button.parentElement.hidden = !this.container.getEnabledPane(paneID);
 			if (this.pinnedPane) {
@@ -517,7 +532,7 @@
 		 * @returns {Promise<boolean>} Whether the order was changed
 		 */
 		async changePaneOrder(paneID, newIndex, options = {}) {
-			let button = this.querySelector(`.btn[data-pane=${paneID}]`);
+			let button = this.querySelector(`.btn[data-pane=${CSS.escape(paneID)}]`);
 			if (!button) return false;
 			let wrappers = this._wrappers;
 			let currentWrapper = button.parentElement;
@@ -752,7 +767,7 @@
 
 		handlePaneMove = (paneID, direction) => {
 			let enabledWrappers = this._enabledWrappers;
-			let currentWrapper = this.querySelector(`.btn[data-pane=${paneID}]`).parentElement;
+			let currentWrapper = this.querySelector(`.btn[data-pane=${CSS.escape(paneID)}]`).parentElement;
 			let currentIndex = enabledWrappers.indexOf(currentWrapper);
 			let targetIndex;
 			if (direction === 'up') {
