@@ -126,29 +126,28 @@ Zotero.Intl = new function () {
 	this.getString = function (name, params, num) {
 		try {
 			var l10n;
-			if (typeof params != 'object') {
-				params = [params];
-			}
-			try {
+			if (params != undefined) {
+				if (typeof params != 'object') {
+					params = [params];
+				}
 				l10n = bundle.formatStringFromName(name, params, params.length);
 			}
-			catch (e) {
-				Zotero.debug(e);
-				let ftlString = ftl.formatValueSync(name, params);
+			else {
+				let ftlString = ftl.formatValueSync(name);
 				if (ftlString) {
 					return ftlString;
 				}
-			}
-			// TEMP: The this.strings check prevents "TypeError: this.strings is undefined"
-			// from an early Zotero.getString() call, but I'm not sure why. this.strings is
-			// set using defineLazyGetter, but lazy doesn't mean asynchronous...
-			//
-			// https://forums.zotero.org/discussion/117812/issue-with-installing-zotero-7
-			if (this.strings && this.strings[name]) {
-				return this.strings[name];
-			}
-			else {
-				l10n = bundle.GetStringFromName(name);
+				// TEMP: The this.strings check prevents "TypeError: this.strings is undefined"
+				// from an early Zotero.getString() call, but I'm not sure why. this.strings is
+				// set using defineLazyGetter, but lazy doesn't mean asynchronous...
+				//
+				// https://forums.zotero.org/discussion/117812/issue-with-installing-zotero-7
+				else if (this.strings && this.strings[name]) {
+					return this.strings[name];
+				}
+				else {
+					l10n = bundle.GetStringFromName(name);
+				}
 			}
 			if (num !== undefined) {
 				let availableForms = l10n.split(/;/);

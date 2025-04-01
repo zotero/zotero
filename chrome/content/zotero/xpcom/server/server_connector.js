@@ -128,9 +128,7 @@ Zotero.Server.Connector = {
 			// We are up to date
 			if (apiVersion >= CONNECTOR_API_VERSION) return;
 			
-			var message = Zotero.getString("connector-version-warning", {
-				updatePage: ZOTERO_CONFIG.CONNECTORS_URL,
-			});
+			var message = Zotero.getString("connector-version-warning");
 			
 			if (!force) {
 				var showNext = Zotero.Prefs.get('nextConnectorVersionWarning');
