@@ -314,7 +314,7 @@ class PluginAPIBase {
 		let pluginID = this._getOptionPluginID(option);
 		if (pluginID && mainKey) {
 			// Make sure the return value is valid as class name or element id
-			return CSS.escape(`${pluginID}-${mainKey}`.replace(/[^a-zA-Z0-9-_]/g, "-"));
+			return CSS.escape(`${pluginID}-${mainKey}`);
 		}
 		return mainKey;
 	}

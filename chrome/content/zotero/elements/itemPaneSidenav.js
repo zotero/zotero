@@ -305,17 +305,77 @@
 			this.container.initPaneOrder(this.getPersistedOrder());
 		}
 
-		persistOrder() {
+		async persistOrder() {
 			let panes = Array.from(this._buttonContainer.querySelectorAll('.btn[data-pane]'));
-			let order = [];
+			let currentOrder = [];
 			for (let pane of panes) {
 				let paneID = pane.dataset.pane;
 				if (this.isPaneOrderable(paneID)) {
-					order.push(paneID);
+					currentOrder.push(paneID);
 				}
 			}
-			Zotero.Prefs.set("sidenav.order", order.join(","));
+
+			// Restore the order from installed plugins but not registered in the current order
+			let prevOrder = this.getPersistedOrder();
+			let notExistingIdx = prevOrder.findIndex((paneID) => {
+				return !currentOrder.includes(paneID);
+			});
+			let installedPluginIDs = undefined;
+			let nextAnchorPaneID = undefined;
+			while (notExistingIdx != -1) {
+				let paneID = prevOrder[notExistingIdx];
+				let idx = notExistingIdx;
+
+				// Record the next pane ID for next iteration after early exit
+				for (let i = notExistingIdx + 1; i < prevOrder.length; i++) {
+					if (currentOrder.includes(prevOrder[i])) {
+						notExistingIdx = i;
+						break;
+					}
+				}
+
+				// Load the plugin IDs if not already loaded
+				if (!installedPluginIDs) {
+					installedPluginIDs = (await Zotero.Plugins.getAllPluginIDs()).map(
+						// Escape the plugin ID to match the pane ID generation
+						id => CSS.escape(id)
+					);
+				}
+
+				// If the pane is not installed, skip it
+				if (!installedPluginIDs.find(id => paneID.startsWith(id))) {
+					continue;
+				}
+
+				// If no next anchor pane ID, add the current pane ID to the end and exit
+				if (nextAnchorPaneID === false) {
+					currentOrder.push(paneID);
+					continue;
+				}
+
+				// Find the next anchor pane ID in the current order
+				for (let i = idx + 1; i < prevOrder.length; i++) {
+					if (currentOrder.includes(prevOrder[i])) {
+						nextAnchorPaneID = prevOrder[i];
+						break;
+					}
+				}
+
+				// If the next pane ID is not in the current order, add it to the end
+				if (!nextAnchorPaneID) {
+					currentOrder.push(paneID);
+					// Mark the next anchor pane ID as false to skip searching in the following iterations
+					nextAnchorPaneID = false;
+				}
+				// If the next pane ID is in the current order, add before it
+				else {
+					let nextIndex = currentOrder.indexOf(nextAnchorPaneID);
+					currentOrder.splice(nextIndex, 0, paneID);
+				}
+			}
+			Zotero.Prefs.set("sidenav.order", currentOrder.join(","));
 		}
+		
 
 		getPersistedOrder(value = null) {
 			if (value === null) {
@@ -489,7 +549,7 @@
 			// 	this.container.scrollToPane(paneID);
 			// }
 			if (options.persist !== false) {
-				this.persistOrder();
+				await this.persistOrder();
 			}
 			return true;
 		}

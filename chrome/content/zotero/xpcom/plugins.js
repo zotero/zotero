@@ -306,6 +306,12 @@ Zotero.Plugins = new function () {
 	};
 
 
+	this.getAllPluginIDs = async function () {
+		let addons = await AddonManager.getAddonsByTypes(["extension"]);
+		return addons.map(addon => addon.id);
+	}
+
+
 	/**
 	 * @param {String} id
 	 * @param {Number} idealSize In logical pixels (scaled automatically on hiDPI displays)
