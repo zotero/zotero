@@ -150,7 +150,12 @@ Zotero.Server.Connector = {
 					button1: Zotero.getString('general.notNow'),
 				}
 				if (!force) {
-					options.checkLabel = Zotero.getString('general.remindMeLater');
+					const SHOW_AGAIN_DAYS = 7;
+					options.checkLabel = Zotero.getString(
+						'general.dontShowAgainFor',
+						SHOW_AGAIN_DAYS,
+						SHOW_AGAIN_DAYS
+					);
 					options.checkbox = remindLater;
 				}
 				this.versionWarningShowing = true;
