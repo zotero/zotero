@@ -139,9 +139,6 @@ Zotero.Server.Connector = {
 			
 			// Don't show again for this browser until restart
 			Zotero.Server.Connector.skipVersionWarning = true;
-			var ps = Services.prompt;
-			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 			setTimeout(function () {
 				var remindLater = {};
 				let options = {
