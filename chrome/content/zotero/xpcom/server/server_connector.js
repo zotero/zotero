@@ -131,11 +131,6 @@ Zotero.Server.Connector = {
 			var message = Zotero.getString("connector-version-warning", {
 				updatePage: ZOTERO_CONFIG.CONNECTORS_URL,
 			});
-			if (force) {
-				message = Zotero.getString("connector-version-save-warning", {
-					updatePage: ZOTERO_CONFIG.CONNECTORS_URL,
-				});
-			}
 			
 			if (!force) {
 				var showNext = Zotero.Prefs.get('nextConnectorVersionWarning');
