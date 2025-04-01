@@ -61,6 +61,7 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-unpin" data-l10n-id="unpin-section"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reorder zotero-menuitem-reorder-up" data-l10n-id="sidenav-reorder-up"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reorder zotero-menuitem-reorder-down" data-l10n-id="sidenav-reorder-down"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-reorder zotero-menuitem-reorder-reset" data-l10n-id="sidenav-reorder-reset"/>
 				</menupopup>
 			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
@@ -191,6 +192,26 @@
 			}
 		}
 
+		isOrderChanged() {
+			let order = this.getPersistedOrder().filter((paneID) => {
+				return this._builtInPanes.includes(paneID);
+			});
+			// If no order is set, return false
+			if (!order.length) {
+				return false;
+			}
+			// Check if the order is different from the default order
+			if (order.length !== this._builtInPanes.length) {
+				return true;
+			}
+			for (let i = 0; i < order.length; i++) {
+				if (order[i] !== this._builtInPanes[i]) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		init() {
 			this._buttonContainer = this.querySelector('.inherit-flex');
 			this.loadBuiltInButtons();
@@ -235,6 +256,9 @@
 			});
 			this.querySelector('.zotero-menuitem-reorder-down').addEventListener('command', () => {
 				this.handlePaneMove(this._contextMenuTarget, 'down');
+			});
+			this.querySelector('.zotero-menuitem-reorder-reset').addEventListener('command', () => {
+				this.resetPaneOrder();
 			});
 			this.setAttribute("role", "tablist");
 
@@ -311,13 +335,15 @@
 			this.container.initPaneOrder(this.getPersistedOrder());
 		}
 
-		async persistOrder() {
+		async persistOrder(currentOrder = undefined) {
 			let panes = Array.from(this._buttonContainer.querySelectorAll('.btn[data-pane]'));
-			let currentOrder = [];
-			for (let pane of panes) {
-				let paneID = pane.dataset.pane;
-				if (this.isPaneOrderable(paneID)) {
-					currentOrder.push(paneID);
+			if (currentOrder === undefined) {
+				currentOrder = [];
+				for (let pane of panes) {
+					let paneID = pane.dataset.pane;
+					if (this.isPaneOrderable(paneID)) {
+						currentOrder.push(paneID);
+					}
 				}
 			}
 
@@ -340,7 +366,7 @@
 				else {
 					// Record the next pane ID for next iteration after early exit
 					for (let i = notExistingIdx + 1; i < prevOrder.length; i++) {
-						if (currentOrder.includes(prevOrder[i])) {
+						if (!currentOrder.includes(prevOrder[i])) {
 							notExistingIdx = i;
 							break;
 						} else {
@@ -519,6 +545,13 @@
 			else {
 				this.querySelector(".pin-wrapper.pinned")?.classList.remove("pinned");
 			}
+
+			if (this._defaultStatus && this._defaultPanes.includes(paneID)) {
+				button.setAttribute("disabled", "true");
+			}
+			else {
+				button.removeAttribute("disabled");
+			}
 		}
 
 		/**
@@ -567,6 +600,10 @@
 				await this.persistOrder();
 			}
 			return true;
+		}
+
+		async resetPaneOrder() {
+			await this.persistOrder([...this._builtInPanes]);
 		}
 
 		toggleDefaultStatus(isDefault) {
@@ -760,6 +797,7 @@
 
 			this.querySelector('.zotero-menuitem-reorder-up').hidden = !this.isPaneMovable(paneID, 'up');
 			this.querySelector('.zotero-menuitem-reorder-down').hidden = !this.isPaneMovable(paneID, 'down');
+			this.querySelector('.zotero-menuitem-reorder-reset').hidden = !this.isOrderChanged();
 
 			this.querySelector('.context-menu')
 					.openPopupAtScreen(event.screenX, event.screenY, true);

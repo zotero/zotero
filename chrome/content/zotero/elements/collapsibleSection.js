@@ -263,6 +263,15 @@
 			});
 			contextMenu.append(moveSectionDown);
 
+			let resetSectionOrder = document.createXULElement('menuitem');
+			resetSectionOrder.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-reset');
+			resetSectionOrder.setAttribute('data-l10n-id', 'sidenav-reorder-reset');
+			resetSectionOrder.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.resetPaneOrder();
+			});
+			contextMenu.append(resetSectionOrder);
+
 			contextMenu.addEventListener('popupshowing', () => {
 				let sections = Array.from(containerRoot.querySelectorAll('collapsible-section'));
 				collapseOtherSections.disabled = sections.every(section => section === this || !section.open);
@@ -282,6 +291,7 @@
 
 				moveSectionUp.hidden = !sidenav?.isPaneMovable(this.dataset.pane, 'up');
 				moveSectionDown.hidden = !sidenav?.isPaneMovable(this.dataset.pane, 'down');
+				resetSectionOrder.hidden = !sidenav?.isOrderChanged();
 			});
 			
 			return contextMenu;

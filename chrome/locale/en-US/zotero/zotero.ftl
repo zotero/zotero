@@ -522,6 +522,8 @@ sidenav-reorder-up =
     .label = Move Section Up
 sidenav-reorder-down =
     .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
 
 pin-section =
     .label = Pin Section

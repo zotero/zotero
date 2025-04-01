@@ -386,6 +386,7 @@
 				elem.setL10nArgs(header.l10nArgs);
 				this._intersectionOb.observe(elem);
 				this.sidenav.addPane(paneID);
+				this.sidenav.updatePaneStatus(paneID);
 			}
 			// Update pending pinned pane
 			if (this._pendingPinnedPane && this.getEnabledPane(this._pendingPinnedPane)) {
