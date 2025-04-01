@@ -1019,7 +1019,7 @@ Zotero.Attachments = new function () {
 		let parentItem = Zotero.Items.get(parentItemID);
 		let fileBaseName = this.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
 		let ext = this._getExtensionFromURL(url, contentType);
-		let filename = Zotero.File.truncateFileName(`${fileBaseName}.${ext}`, 100);
+		var filename = fileBaseName + (ext != '' ? '.' + ext : '');
 		
 		let tmpDirectory = (await this.createTemporaryStorageDirectory()).path;
 		let destDirectory;
