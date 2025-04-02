@@ -18,8 +18,6 @@ integration-editBibliography-wrapper =
     .aria-description = { -integration-editBibliography-include-uncited }
     { -integration-editBibliography-exclude-cited }
     { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })

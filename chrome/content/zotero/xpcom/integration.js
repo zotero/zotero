@@ -1719,7 +1719,7 @@ Zotero.Integration.Session.prototype._insertItemsIntoDocument = async function (
 };
 
 /**
- * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
+ * Citation editing functions and propertiesaccessible to citationDialog.js
  */
 Zotero.Integration.CitationEditInterface = function(items, sortable, fieldIndexPromise,
 		citationsByItemIDPromise, previewFn){
@@ -1729,7 +1729,7 @@ Zotero.Integration.CitationEditInterface = function(items, sortable, fieldIndexP
 	this._fieldIndexPromise = fieldIndexPromise;
 	this._citationsByItemIDPromise = citationsByItemIDPromise;
 	
-	// Not available in quickFormat.js if this unspecified
+	// Not available in citationDialog.js if this unspecified
 	this.wrappedJSObject = this;
 
 	this._acceptDeferred = Zotero.Promise.defer();

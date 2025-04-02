@@ -585,25 +585,6 @@ toggle-preview =
             *[unknown] Toggle
     } Attachment Preview
 
-quickformat-general-instructions = Use Left/Right Arrow to navigate the items of this citation. {
-    $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-        *[other] { "" }
-} Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept = 
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value =  Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
 quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
@@ -666,12 +647,6 @@ architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best
 architecture-warning-action = Download 64-bit { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-
-first-run-guidance-quickFormat = Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
 
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 

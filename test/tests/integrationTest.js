@@ -485,7 +485,7 @@ describe("Zotero.Integration", function () {
 						displayAlertStub.resolves(0);
 						yield execCommand('addEditCitation', docID);
 						assert.isTrue(displayAlertStub.calledOnce);
-						// Prefs to select a new style and quickFormat
+						// Prefs to select a new style
 						assert.isTrue(displayDialogStub.calledTwice);
 						assert.isNotOk(Zotero.Styles.get(style.styleID));
 					});	
