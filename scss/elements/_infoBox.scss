@@ -75,6 +75,10 @@ info-box {
 	.meta-label > .single-creator-grippy {
 		visibility: hidden !important;
 	}
+	// Avoids shifting itemBox columns when the svg is initially loaded
+	.meta-label > .zotero-clicky-grippy {
+		width: 18px !important;
+	}
 
 	textarea {
 		font: inherit;
