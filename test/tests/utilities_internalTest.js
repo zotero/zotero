@@ -682,13 +682,13 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(out4, '100 is more than 99');
 
 			// This is undocumented and unsupported behavior, but comparing strings should work
-			const template5 = `{{if "test" > v2}}"t" is after "f" in the alphabet{{else}}no{{endif}}`;
+			const template5 = `{{if "test" > v2}}"test" > "foo"{{else}}no{{endif}}`;
 			const out5 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template5, vars);
-			assert.equal(out5, '"t" is after "f" in the alphabet');
+			assert.equal(out5, '"test" > "foo"');
 
-			const template6 = `{{if "bar" < v2 }}"f" is before "b" in the alphabet{{else}}no{{endif}}`;
+			const template6 = `{{if "bar" < v2 }}"bar" < "foo"{{else}}no{{endif}}`;
 			const out6 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template6, vars);
-			assert.equal(out6, '"f" is before "b" in the alphabet');
+			assert.equal(out6, '"bar" < "foo"');
 		});
 
 		it("should accept hyphen-case variables and attributes", function () {
