@@ -13,6 +13,7 @@
 @mixin windows-input-active {
 	outline: none;
 	background-clip: border-box, padding-box;
+	background-repeat: no-repeat;
 	@media (prefers-color-scheme: light) {
 		border: 1px solid var(--fill-quinary);
 		border-bottom-color: var(--accent-blue);
@@ -49,13 +50,17 @@
 }
 
 
-input:is([type=color], [type=date], [type=datetime-local], [type=email], [type=month],
-	[type=number], [type=password], [type=search], [type=tel], [type=text], [type=time],
-	[type=url], [type=week], [type=autocomplete]):not([no-windows-native]),
-input:not([type], [no-windows-native]),
-textbox:not([no-windows-native]),
-search-textbox:not([no-windows-native]),
-textarea:not([no-windows-native]) {
+:is(
+	input:where(
+		[type=color], [type=date], [type=datetime-local], [type=email], [type=month],
+		[type=number], [type=password], [type=search], [type=tel], [type=text], [type=time],
+		[type=url], [type=week], [type=autocomplete],
+		:not([type])
+	),
+	textbox,
+	search-textbox,
+	textarea
+):where(:not([no-windows-native])) {
 	appearance: none;
 	height: 26px;
 	padding: 0;
