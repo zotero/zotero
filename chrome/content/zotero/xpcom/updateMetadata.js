@@ -457,8 +457,11 @@ Zotero.UpdateMetadata = new function () {
 			// Field is not changed
 			oldValue === newValue
 
-			// `abstract` disappears (typical for Crossref)
-			|| fieldName === 'abstract' && !newValue
+			// `abstractNote` disappears (typical for Crossref)
+			|| fieldName === 'abstractNote' && !newValue
+
+			// `abstractNote` has meaningless spacing changes (common when data source changes, e.g. PubMed -> Crossref)
+			|| fieldName === 'abstractNote' && oldValue.replace(/\s/g, '') === newValue.replace(/\s/g, '')
 
 			// New metadata source has no automatic tags
 			|| fieldName === 'tags' && !newValue
