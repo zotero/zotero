@@ -2488,6 +2488,9 @@ Zotero.Attachments = new function () {
 			obj[name] = (args) => {
 				return common(commonCreators(name, args), args);
 			};
+			obj[`${name}Count`] = (args) => {
+				return common(getSlicedCreatorsOfType(name, Infinity).length.toString(), args);
+			};
 			return obj;
 		}, {});
 
