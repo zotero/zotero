@@ -243,8 +243,8 @@
 			});
 			contextMenu.append(expandAllSections);
 			
-			let pinUnpinSeparator = document.createXULElement('menuseparator');
-			contextMenu.append(pinUnpinSeparator);
+			let reorderSeparator = document.createXULElement('menuseparator');
+			contextMenu.append(reorderSeparator);
 
 			let moveSectionUp = document.createXULElement('menuitem');
 			moveSectionUp.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-up');
@@ -280,19 +280,23 @@
 
 				let sidenav = this._getSidenav();
 				if (sidenav?.isPanePinnable(this.dataset.pane)) {
-					pinUnpinSeparator.hidden = false;
 					pinSection.hidden = sidenav.pinnedPane == this.dataset.pane;
 					unpinSection.hidden = sidenav.pinnedPane != this.dataset.pane;
 				}
 				else {
-					pinUnpinSeparator.hidden = true;
 					pinSection.hidden = true;
 					unpinSection.hidden = true;
 				}
 
-				moveSectionUp.hidden = !sidenav?.isPaneMovable(this.dataset.pane, 'up');
-				moveSectionDown.hidden = !sidenav?.isPaneMovable(this.dataset.pane, 'down');
-				resetSectionOrder.hidden = !sidenav?.isOrderChanged();
+				let canMoveUp = sidenav?.isPaneMovable(this.dataset.pane, 'up');
+				let canMoveDown = sidenav?.isPaneMovable(this.dataset.pane, 'down');
+				let canReset = sidenav?.isOrderChanged();
+
+				moveSectionUp.hidden = !canMoveUp;
+				moveSectionDown.hidden = !canMoveDown;
+				resetSectionOrder.hidden = !canReset;
+
+				reorderSeparator.hidden = !canMoveUp && !canMoveDown && !canReset;				
 			});
 			
 			return contextMenu;
