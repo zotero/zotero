@@ -119,7 +119,7 @@ Zotero.Server.Connector = {
 				if (!Zotero.Prefs.get('showConnectorVersionWarning')) return;
 				if (Zotero.Server.Connector.skipVersionWarning) return;
 			}
-			if (!req.headers) return;
+			if (!req.headers || !req.headers['X-Zotero-Connector-API-Version']) return;
 			
 			const appName = ZOTERO_CONFIG.CLIENT_NAME;
 			const domain = ZOTERO_CONFIG.DOMAIN_NAME;
