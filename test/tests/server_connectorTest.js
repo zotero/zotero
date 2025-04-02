@@ -324,7 +324,7 @@ describe("Connector Server", function () {
 
 			// Check attachment html file
 			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
-			let path = OS.Path.join(attachmentDirectory, 'test.html');
+			let path = OS.Path.join(attachmentDirectory, item.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getContentsAsync(path);
 			let expectedContents = await Zotero.File.getContentsAsync(indexPath);
@@ -409,7 +409,7 @@ describe("Connector Server", function () {
 
 			// Check attachment html file
 			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
-			let path = OS.Path.join(attachmentDirectory, 'attachment.html');
+			let path = OS.Path.join(attachmentDirectory, item.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getContentsAsync(path);
 			let expectedContents = await Zotero.File.getContentsAsync(indexPath);
@@ -609,14 +609,14 @@ describe("Connector Server", function () {
 
 			// Verify attachment content
 			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(attachment1).path;
-			let path = OS.Path.join(attachmentDirectory, 'attachment1.pdf');
+			let path = OS.Path.join(attachmentDirectory, attachment1.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getSample(path);
 			assert.equal(contents, pdfSample);
 		});
 	});
 
-	describe("/connector/hasOAAttachments", function () {
+	describe("/connector/hasAttachmentResolvers", function () {
 		it("should respond with 'true' if the item has OA attachments", async function () {
 			const sessionID = Zotero.Utilities.randomString();
 			const itemID = Zotero.Utilities.randomString();
@@ -647,7 +647,7 @@ describe("Connector Server", function () {
 			
 			response = await httpRequest(
 				"POST",
-				connectorServerPath + "/connector/hasOAAttachments",
+				connectorServerPath + "/connector/hasAttachmentResolvers",
 				{
 					headers: {
 						"Content-Type": "application/json"
@@ -692,7 +692,7 @@ describe("Connector Server", function () {
 			
 			response = await httpRequest(
 				"POST",
-				connectorServerPath + "/connector/hasOAAttachments",
+				connectorServerPath + "/connector/hasAttachmentResolvers",
 				{
 					headers: {
 						"Content-Type": "application/json"
@@ -709,7 +709,7 @@ describe("Connector Server", function () {
 		});
 	});
 
-	describe("/connector/saveOAAttachment", function () {
+	describe("/connector/saveAttachmentFromResolver", function () {
 		it("should save an OA attachment for the specified item and return 201 if OA attachment is available", async function () {
 			let stub = sinon.stub(Zotero.Attachments, 'addFileFromURLs').returns({
 				id: Zotero.Utilities.randomString(),
@@ -745,7 +745,7 @@ describe("Connector Server", function () {
 				
 				response = await httpRequest(
 					"POST",
-					connectorServerPath + "/connector/saveOAAttachment",
+					connectorServerPath + "/connector/saveAttachmentFromResolver",
 					{
 						headers: {
 							"Content-Type": "application/json"
@@ -765,7 +765,7 @@ describe("Connector Server", function () {
 			}
 		});
 
-		it("should return 503 if OA attachment is not available", async function () {
+		it("should return 500 if OA attachment is not available", async function () {
 			let stub = sinon.stub(Zotero.Attachments, 'addFileFromURLs').returns(null);
 			try {
 				const sessionID = Zotero.Utilities.randomString();
@@ -797,7 +797,7 @@ describe("Connector Server", function () {
 				
 				response = await httpRequest(
 					"POST",
-					connectorServerPath + "/connector/saveOAAttachment",
+					connectorServerPath + "/connector/saveAttachmentFromResolver",
 					{
 						headers: {
 							"Content-Type": "application/json"
@@ -810,7 +810,7 @@ describe("Connector Server", function () {
 					}
 				);
 				
-				assert.equal(response.status, 503);
+				assert.equal(response.status, 500);
 				assert.equal(response.responseText, "Failed to save an attachment");
 			}
 			finally {
@@ -859,7 +859,7 @@ describe("Connector Server", function () {
 			assert.equal(item.getField("url"), attachmentInfo.url);
 			// Check content
 			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
-			let path = OS.Path.join(attachmentDirectory, 'test1.pdf');
+			let path = OS.Path.join(attachmentDirectory, item.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getSample(path);
 			assert.equal(contents, pdfSample);
@@ -900,7 +900,7 @@ describe("Connector Server", function () {
 			assert.equal(item.getField("url"), attachmentInfo.url);
 			// Check content
 			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
-			let path = OS.Path.join(attachmentDirectory, 'test.png');
+			let path = OS.Path.join(attachmentDirectory, item.attachmentFilename);
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getSample(path);
 			assert.equal(contents, imageSample);
