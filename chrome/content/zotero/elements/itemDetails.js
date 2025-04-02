@@ -392,6 +392,10 @@
 			if (this._pendingPinnedPane && this.getEnabledPane(this._pendingPinnedPane)) {
 				this.pinnedPane = this._pendingPinnedPane;
 			}
+
+			if (this.sidenav) {
+				this.initPaneOrder(this.sidenav.getPersistedOrder());
+			}
 		}
 
 		renderCustomHead(callback) {
