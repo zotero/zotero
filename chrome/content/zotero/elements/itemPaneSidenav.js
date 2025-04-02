@@ -193,19 +193,9 @@
 		}
 
 		isOrderChanged() {
-			let order = this.getPersistedOrder().filter((paneID) => {
-				return this._builtInPanes.includes(paneID);
-			});
-			// If no order is set, return false
-			if (!order.length) {
-				return false;
-			}
-			// Check if the order is different from the default order
-			if (order.length !== this._builtInPanes.length) {
-				return true;
-			}
-			for (let i = 0; i < order.length; i++) {
-				if (order[i] !== this._builtInPanes[i]) {
+			let order = this.getPersistedOrder();
+			for (let i = 0; i < this._builtInPanes.length; i++) {
+				if (this._builtInPanes[i] != order[i]) {
 					return true;
 				}
 			}
