@@ -655,6 +655,42 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(out15, 'yes');
 		});
 
+		it("should support relational operators", function () {
+			const vars = {
+				sum: ({ a, b }) => (parseInt(a) + parseInt(b)).toString(),
+				v1: '1',
+				v2: 'foo',
+				v3: '100',
+				v4: '99',
+				π: '3.14',
+			};
+
+			const template1 = `{{if v1 > π}}more than π{{elseif v1 <= π}}less or equal to π{{endif}}`;
+			const out1 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template1, vars);
+			assert.equal(out1, 'less or equal to π');
+
+			const template2 = `{{if {{ sum a="2" b="3" }} > π}}more than π{{else}}less or equal to π{{endif}}`;
+			const out2 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template2, vars);
+			assert.equal(out2, 'more than π');
+
+			const template3 = `{{if 3.14 >= π}}more than or equal to π{{else}}less than π{{endif}}`;
+			const out3 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template3, vars);
+			assert.equal(out3, 'more than or equal to π');
+
+			const template4 = `{{if v3 > v4}}100 is more than 99{{else}}string "100" would be sorted before "99"{{endif}}`;
+			const out4 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template4, vars);
+			assert.equal(out4, '100 is more than 99');
+
+			// This is undocumented and unsupported behavior, but comparing strings should work
+			const template5 = `{{if "test" > v2}}"t" is after "f" in the alphabet{{else}}no{{endif}}`;
+			const out5 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template5, vars);
+			assert.equal(out5, '"t" is after "f" in the alphabet');
+
+			const template6 = `{{if "bar" < v2 }}"f" is before "b" in the alphabet{{else}}no{{endif}}`;
+			const out6 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template6, vars);
+			assert.equal(out6, '"f" is before "b" in the alphabet');
+		});
+
 		it("should accept hyphen-case variables and attributes", function () {
 			const vars = {
 				fooBar: ({ isFoo }) => (isFoo === 'true' ? 'foo' : 'bar'),
