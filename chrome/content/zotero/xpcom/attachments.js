@@ -1016,10 +1016,16 @@ Zotero.Attachments = new function () {
 		}
 		
 		// Create a temporary file
-		let parentItem = Zotero.Items.get(parentItemID);
-		let fileBaseName = this.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
-		let ext = this._getExtensionFromURL(url, contentType);
-		var filename = fileBaseName + (ext != '' ? '.' + ext : '');
+		let filename;
+		if (parentItemID) {
+			let parentItem = Zotero.Items.get(parentItemID);
+			let fileBaseName = this.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
+			let ext = this._getExtensionFromURL(url, contentType);
+			filename = fileBaseName + (ext != '' ? '.' + ext : '');
+		}
+		else {
+			filename = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
+		}
 		
 		let tmpDirectory = (await this.createTemporaryStorageDirectory()).path;
 		let destDirectory;
