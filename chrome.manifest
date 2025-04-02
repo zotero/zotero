@@ -7,7 +7,6 @@ content	zotero-platform		chrome/content/zotero-platform/unix/      os=FreeBSD
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
 
 content	zotero-platform-version chrome/content/zotero-platform/default-version/
-content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=Darwin osversion>=11
 
 resource zotero				resource/
 

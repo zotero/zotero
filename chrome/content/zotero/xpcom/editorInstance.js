@@ -66,7 +66,7 @@ class EditorInstance {
 		this._state = options.state;
 		this._disableSaving = false;
 		this._subscriptions = [];
-		this._quickFormatWindow = null;
+		this._citationDialogWindow = null;
 		this._citationItemsList = [];
 		this._initPromise = new Promise((resolve, reject) => {
 			this._resolveInitPromise = resolve;
@@ -205,9 +205,9 @@ class EditorInstance {
 
 	async uninit() {
 		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
-		if (this._quickFormatWindow) {
-			this._quickFormatWindow.close();
-			this._quickFormatWindow = null;
+		if (this._citationDialogWindow) {
+			this._citationDialogWindow.close();
+			this._citationDialogWindow = null;
 		}
 		this._iframeWindow.removeEventListener('message', this._messageHandler);
 		this.saveSync();
@@ -628,7 +628,7 @@ class EditorInstance {
 						}
 					}
 					let libraryID = this._item.libraryID;
-					this._openQuickFormatDialog(nodeID, citation, [libraryID], openedEmpty);
+					this._openCitationDialog(nodeID, citation, [libraryID], openedEmpty);
 					return;
 				}
 				case 'importImages': {
@@ -1038,14 +1038,13 @@ class EditorInstance {
 		});
 	}
 
-	// TODO: Allow only one quickFormat dialog
-	async _openQuickFormatDialog(nodeID, citationData, filterLibraryIDs, openedEmpty) {
+	async _openCitationDialog(nodeID, citationData, filterLibraryIDs, openedEmpty) {
 		await Zotero.Styles.init();
 		let that = this;
 		let win;
 		
 		/**
-		 * Citation editing functions and properties accessible to quickFormat.js and addCitationDialog.js
+		 * Citation editing functions and properties accessible to citationDialog.js
 		 */
 		let CI = function (citation) {
 			this.citation = citation;
@@ -1059,10 +1058,10 @@ class EditorInstance {
 		CI.prototype = {
 		
 			/**
-			 * 1) Provide `quickFormat` dialog with items created from
+			 * 1) Provide citation dialog with items created from
 			 * `itemData`, without dealing with `Zotero.Integration.sessions`
 			 *
-			 * 2) Allow to pick already cited item from `quickFormat` dropdown
+			 * 2) Allow to pick already cited item from citation dialog
 			 *
 			 * @param citationItem
 			 * @returns {Zotero.Item|undefined}
@@ -1072,7 +1071,7 @@ class EditorInstance {
 				let citedItem = typeof citationItem.id === 'string'
 					&& this.citedItems[parseInt(citationItem.id.split('cited:')[1])];
 				
-				// Return cited item picked in `quickFormat` dropdown
+				// Return cited item picked in citation dialog
 				if (citedItem) {
 					return citedItem.item;
 				}
@@ -1179,7 +1178,7 @@ class EditorInstance {
 								let item = new Zotero.Item();
 								Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
 								// This is the only way to pass our custom id for already cited
-								// items, without modifying `quickFormat` dialog too much.
+								// items, without modifying citationDialog.js too much.
 								// Must not contain `/`
 								item.cslItemID = 'cited:' + items.length;
 								items.push({ item, citationItem });
@@ -1244,9 +1243,9 @@ class EditorInstance {
 			}
 		};
 
-		if (that._quickFormatWindow) {
-			that._quickFormatWindow.close();
-			that._quickFormatWindow = null;
+		if (that._citationDialogWindow) {
+			that._citationDialogWindow.close();
+			that._citationDialogWindow = null;
 		}
 
 		let citation = new Citation();
@@ -1267,7 +1266,7 @@ class EditorInstance {
 			mode += ",alwaysRaised";
 		}
 
-		win = that._quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+		win = that._citationDialogWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, 'chrome://zotero/content/integration/citationDialog.xhtml', '', mode, {
 			wrappedJSObject: io
@@ -1630,7 +1629,7 @@ class EditorInstanceUtilities {
 	}
 
 	/**
-	 * Build citation item preview string (based on _buildBubbleString in quickFormat.js)
+	 * Build citation item preview string (based on buildBubbleString in citationDialog/helpers.js)
 	 * TODO: Try to avoid duplicating this code here and inside note-editor
 	 */
 	_formatCitationItemPreview(citationItem) {
