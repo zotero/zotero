@@ -199,6 +199,26 @@
 			let containerRoot = this.closest('.zotero-view-item-container, context-notes-list');
 			
 			let contextMenu = document.createXULElement('menupopup');
+
+			let pinSection, unpinSection;
+			pinSection = document.createXULElement('menuitem');
+			pinSection.classList.add('menuitem-iconic', 'zotero-menuitem-pin');
+			pinSection.setAttribute('data-l10n-id', 'pin-section');
+			pinSection.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.container.scrollToPane(this.dataset.pane, 'smooth');
+				sidenav.pinnedPane = this.dataset.pane;
+			});
+			contextMenu.append(pinSection);
+
+			unpinSection = document.createXULElement('menuitem');
+			unpinSection.classList.add('menuitem-iconic', 'zotero-menuitem-unpin');
+			unpinSection.setAttribute('data-l10n-id', 'unpin-section');
+			unpinSection.addEventListener('command', () => {
+				this._getSidenav().pinnedPane = null;
+			});
+			contextMenu.append(unpinSection);
+
 			let collapseOtherSections = document.createXULElement('menuitem');
 			collapseOtherSections.classList.add('menuitem-iconic', 'zotero-menuitem-collapse-others');
 			collapseOtherSections.setAttribute('data-l10n-id', 'collapse-other-sections');
@@ -223,27 +243,8 @@
 			});
 			contextMenu.append(expandAllSections);
 			
-			let pinSection, unpinSection;
 			let pinUnpinSeparator = document.createXULElement('menuseparator');
 			contextMenu.append(pinUnpinSeparator);
-
-			pinSection = document.createXULElement('menuitem');
-			pinSection.classList.add('menuitem-iconic', 'zotero-menuitem-pin');
-			pinSection.setAttribute('data-l10n-id', 'pin-section');
-			pinSection.addEventListener('command', () => {
-				let sidenav = this._getSidenav();
-				sidenav.container.scrollToPane(this.dataset.pane, 'smooth');
-				sidenav.pinnedPane = this.dataset.pane;
-			});
-			contextMenu.append(pinSection);
-
-			unpinSection = document.createXULElement('menuitem');
-			unpinSection.classList.add('menuitem-iconic', 'zotero-menuitem-unpin');
-			unpinSection.setAttribute('data-l10n-id', 'unpin-section');
-			unpinSection.addEventListener('command', () => {
-				this._getSidenav().pinnedPane = null;
-			});
-			contextMenu.append(unpinSection);
 
 			let moveSectionUp = document.createXULElement('menuitem');
 			moveSectionUp.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-up');
