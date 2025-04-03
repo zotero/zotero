@@ -59,6 +59,7 @@
 				<menupopup class="context-menu">
 					<menuitem class="menuitem-iconic zotero-menuitem-pin" data-l10n-id="pin-section"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-unpin" data-l10n-id="unpin-section"/>
+					<menuseparator class="zotero-menuitem-pin-separator"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reorder zotero-menuitem-reorder-up" data-l10n-id="sidenav-reorder-up"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reorder zotero-menuitem-reorder-down" data-l10n-id="sidenav-reorder-down"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reorder zotero-menuitem-reorder-reset" data-l10n-id="sidenav-reorder-reset"/>
@@ -741,6 +742,7 @@
 			let isPinnable = this.isPanePinnable(paneID);
 			this.querySelector('.zotero-menuitem-pin').hidden = !isPinnable || this.pinnedPane == paneID;
 			this.querySelector('.zotero-menuitem-unpin').hidden = !isPinnable || this.pinnedPane != paneID;
+			this.querySelector('.zotero-menuitem-pin-separator').hidden = !isPinnable;
 
 			this.querySelector('.zotero-menuitem-reorder-up').hidden = !this.isPaneMovable(paneID, 'up');
 			this.querySelector('.zotero-menuitem-reorder-down').hidden = !this.isPaneMovable(paneID, 'down');

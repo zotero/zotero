@@ -219,6 +219,9 @@
 			});
 			contextMenu.append(unpinSection);
 
+			let pinSeparator = document.createXULElement('menuseparator');
+			contextMenu.append(pinSeparator);
+
 			let collapseOtherSections = document.createXULElement('menuitem');
 			collapseOtherSections.classList.add('menuitem-iconic', 'zotero-menuitem-collapse-others');
 			collapseOtherSections.setAttribute('data-l10n-id', 'collapse-other-sections');
@@ -282,10 +285,12 @@
 				if (sidenav?.isPanePinnable(this.dataset.pane)) {
 					pinSection.hidden = sidenav.pinnedPane == this.dataset.pane;
 					unpinSection.hidden = sidenav.pinnedPane != this.dataset.pane;
+					pinSeparator.hidden = false;
 				}
 				else {
 					pinSection.hidden = true;
 					unpinSection.hidden = true;
+					pinSeparator.hidden = true;
 				}
 
 				let canMoveUp = sidenav?.isPaneMovable(this.dataset.pane, 'up');
