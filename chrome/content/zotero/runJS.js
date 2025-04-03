@@ -29,7 +29,15 @@ async function run() {
 		return;
 	}
 	resultTextbox.classList.remove('error');
-	resultTextbox.textContent = typeof result == 'string' ? result : Zotero.Utilities.varDump(result);
+	if (typeof result == 'string') {
+		resultTextbox.textContent = result;
+	}
+	else if (result !== undefined) {
+		resultTextbox.textContent = Zotero.Utilities.varDump(result);
+	}
+	else {
+		resultTextbox.textContent = "Completed successfully";
+	}
 }
 
 // eslint-disable-next-line no-unused-vars
