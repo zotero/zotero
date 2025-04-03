@@ -44,7 +44,7 @@ async function run() {
 		resultTextbox.textContent = Zotero.Utilities.varDump(result);
 	}
 	else {
-		document.l10n.setAttributes(resultTextbox, "runJS-completed");
+		resultTextbox.textContent = Zotero.getString("runJS-completed");
 	}
 }
 
