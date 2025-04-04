@@ -1024,7 +1024,8 @@ const IOManager = {
 
 		// If the last input has a locator, add it into the item
 		let input = _id("bubble-input").getCurrentInput();
-		let locator = Helpers.extractLocator(input.value || "");
+		let inputValue = SearchHandler.cleanSearchQuery(input?.value || "");
+		let locator = Helpers.extractLocator(inputValue);
 		// If there is no locator, make sure we clear it from the citation item
 		for (let item of items) {
 			item.label = locator?.label || null;
@@ -1312,6 +1313,7 @@ const IOManager = {
 	},
 
 	_handleInput({ query, eventType }) {
+		query = SearchHandler.cleanSearchQuery(query);
 		// If there is a locator typed, exclude it from the query
 		let locator = Helpers.extractLocator(query);
 		if (locator) {
@@ -1319,7 +1321,7 @@ const IOManager = {
 		}
 		// Do not rerun search if the search value is the same
 		// (e.g. focus returns into the last input)
-		if (SearchHandler.cleanSearchQuery(query) == SearchHandler.searchValue) {
+		if (query == SearchHandler.searchValue) {
 			return;
 		}
 		currentLayout.search(query, { skipDebounce: eventType == "focus" });
