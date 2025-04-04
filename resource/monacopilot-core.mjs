@@ -1,0 +1,1 @@
+../node_modules/@monacopilot/core/build/index.mjs
