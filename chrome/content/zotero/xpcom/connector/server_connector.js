@@ -160,6 +160,7 @@ Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
 	
 	this._progressItems = {};
 	this._orderedProgressItems = [];
+	this._userAddedNotes = {};
 };
 
 
@@ -252,10 +253,11 @@ Zotero.Server.Connector.SaveSession.prototype.remove = function () {
 /**
  * Change the target data for this session and update any items that have already been saved
  */
-Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID, tags) {
+Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID, tags, note) {
 	var previousTargetID = this._currentTargetID;
 	this._currentTargetID = targetID;
 	this._currentTags = tags || "";
+	this._currentNote = note || "";
 	
 	// Select new destination in collections pane
 	var zp = Zotero.getActiveZoteroPane();
@@ -340,6 +342,14 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 			// Replace item in session
 			this._items.delete(item);
 			this._items.add(newItem);
+			// Update cache of user-added note items, since IDs are different in a new library
+			if (this._currentNote) {
+				delete this._userAddedNotes[item.id];
+				let userNote = Zotero.Items.get(newItem.getNotes()).find(note => note.getNote() == this._currentNote);
+				if (userNote) {
+					this._userAddedNotes[newItem.id] = userNote.id;
+				}
+			}
 		}
 		
 		// If the item is now a child item (e.g., from Retrieve Metadata), update the
@@ -357,6 +367,28 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 		item.setTags(originalTags.concat(tags));
 		item.setCollections(collection ? [collection.id] : []);
 		await item.saveTx();
+
+		// If a note is passed, add it as a child item
+		if (this._currentNote) {
+			// If the note item already exists, update it. Otherwise, create a new one.
+			let existingItemNoteID = this._userAddedNotes[item.id];
+			let noteItem = existingItemNoteID && Zotero.Items.get(existingItemNoteID);
+			if (!noteItem) {
+				noteItem = new Zotero.Item('note');
+			}
+			noteItem.setNote(this._currentNote);
+			noteItem.parentID = item.id;
+			noteItem.libraryID = item.libraryID;
+			await noteItem.saveTx();
+			// Record which of the notes (there could be multiple) is added by the user
+			this._userAddedNotes[item.id] = noteItem.id;
+		}
+		// If the note was typed and then erased, delete it
+		else if (this._userAddedNotes[item.id]) {
+			let noteItem = Zotero.Items.get(this._userAddedNotes[item.id]);
+			await noteItem.eraseTx();
+			delete this._userAddedNotes[item.id];
+		}
 	}
 	
 	this._updateRecents();
@@ -1249,6 +1281,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
  *		sessionID - A session ID previously passed to /saveItems
  *		target - A treeViewID (L1, C23, etc.) for the library or collection to save to
  *		tags - A string of tags separated by commas
+ *		note - A string to turn into a child note
  *
  * Returns:
  *		200 response on successful change
@@ -1277,6 +1310,7 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		// Parse treeViewID
 		var [type, id] = [data.target[0], parseInt(data.target.substr(1))];
 		var tags = data.tags;
+		let note = data.note;
 		
 		if (type == 'C') {
 			let collection = await Zotero.Collections.getAsync(id);
@@ -1285,7 +1319,7 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 			}
 		}
 		
-		await session.update(data.target, tags);
+		await session.update(data.target, tags, note);
 		
 		return [200, "application/json", JSON.stringify({})];
 	}
@@ -1702,7 +1736,8 @@ Zotero.Server.Connector.Ping.prototype = {
 					googleDocsAddNoteEnabled: true,
 					googleDocsCitationExplorerEnabled: false,
 					translatorsHash,
-					sortedTranslatorHash
+					sortedTranslatorHash,
+					canUserAddNote: true
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {
