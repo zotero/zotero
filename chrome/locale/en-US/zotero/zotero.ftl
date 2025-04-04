@@ -716,3 +716,7 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+document-manager-confirm-dialog-title = Do you want to save the changes you made to { $title }?
+document-manager-confirm-dialog-title-new = Do you want to save this file?
+document-manager-confirm-dialog-description = Your changes will be lost if you don’t save them.

@@ -30,6 +30,7 @@ var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/Content
 
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+var { DocumentManager } = ChromeUtils.importESModule("chrome://zotero/content/documentManager.mjs");
 
 var lazy = {};
 ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
@@ -43,6 +44,7 @@ var Scaffold = new function () {
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
 	var _needRebuildTranslatorSuggestions = true;
+	var _docManager;
 
 	this.browser = () => _browser;
 	
@@ -63,7 +65,14 @@ var Scaffold = new function () {
 
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
+		
 		_browser = document.getElementById('browser');
+		_docManager = new DocumentManager({
+			editorName: 'Scaffold',
+			onSave: () => this.save(),
+		});
+		_docManager.attach(window);
+		document.querySelector('#metadata-grid').addEventListener('command', () => _updateDocManagerState());
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
 			document.getElementById("browser-url").value = data.url;
@@ -291,7 +300,6 @@ var Scaffold = new function () {
 		monaco.languages.registerCodeLensProvider('javascript', this.createRunCodeLensProvider(monaco, editor));
 		monaco.languages.registerHoverProvider('javascript', this.createHoverProvider(monaco, editor));
 		monaco.languages.registerCompletionItemProvider('javascript', this.createCompletionProvider(monaco, editor));
-		model.onDidChangeContent(() => this.updateModelMarkers());
 
 		let tsLib = await Zotero.File.getContentsAsync(
 			PathUtils.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
@@ -300,10 +308,23 @@ var Scaffold = new function () {
 		// this would allow peeking:
 		//   monaco.editor.createModel(tsLib, 'typescript', monaco.Uri.parse(tsLibPath));
 		// but it doesn't currently seem to work
+
+		model.onDidChangeContent(() => this.updateModelMarkers());
+		model.onDidChangeContent(Zotero.Utilities.debounce(() => _updateDocManagerState(), 200));
 	};
 
 	this.initTestsEditor = function () {
 		let monaco = _editors.testsGlobal, editor = _editors.tests;
+
+		let model = editor.getModel();
+
+		model.updateOptions({
+			insertSpaces: false
+		});
+		editor.updateOptions({
+			links: false,
+			stickyScroll: { enabled: false }
+		});
 
 		monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
 			validate: true,
@@ -312,20 +333,10 @@ var Scaffold = new function () {
 			schemaValidation: 'error'
 		});
 
-		editor.getModel().updateOptions({
-			insertSpaces: false
-		});
-
-		editor.getModel().onDidChangeContent((_) => {
-			this.populateTests();
-		});
-
-		editor.updateOptions({
-			links: false,
-			stickyScroll: { enabled: false }
-		});
-
 		monaco.languages.registerCodeLensProvider('json', this.createTestCodeLensProvider(monaco, editor));
+
+		model.onDidChangeContent((_) => this.populateTests());
+		model.onDidChangeContent(() => _updateDocManagerState());
 	};
 
 	this.createRunCodeLensProvider = function (monaco, editor) {
@@ -594,22 +605,8 @@ var Scaffold = new function () {
 	};
 
 	this.newTranslator = async function (skipSavePrompt) {
-		if (!skipSavePrompt && _editors.code.getValue()) {
-			let ps = Services.prompt;
-			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-			let label = document.getElementById('textbox-label').value;
-			let index = ps.confirmEx(null,
-				"Scaffold",
-				`Do you want to save the changes you made to ${label}?`,
-				buttonFlags,
-				Zotero.getString('general.no'),
-				Zotero.getString('general.yes'),
-				null, null, {}
-			);
-			if (index == 1 && !await this.save()) {
-				return;
-			}
+		if (!skipSavePrompt && !(await _docManager.confirmClose())) {
+			return;
 		}
 
 		this.generateTranslatorID();
@@ -635,7 +632,9 @@ var Scaffold = new function () {
 
 		document.getElementById('textbox-label').focus();
 		_showTab('metadata');
+
 		_updateTitle();
+		_docManager.setClean();
 	};
 
 	/*
@@ -735,6 +734,7 @@ var Scaffold = new function () {
 		Zotero.Prefs.set('scaffold.lastTranslatorID', translator.translatorID);
 		
 		_updateTitle();
+		_docManager.setClean();
 		return true;
 	};
 
@@ -826,6 +826,7 @@ var Scaffold = new function () {
 
 		_lastModifiedTime = new Date().getTime();
 
+		_docManager.setClean();
 		await this.reloadTranslators();
 	};
 
@@ -903,7 +904,6 @@ var Scaffold = new function () {
 	// Add special keydown handling for the editors
 	this.addEditorKeydownHandlers = function (editor) {
 		let doc = editor.getDomNode().ownerDocument;
-		let tabbox = document.getElementById("left-tabbox");
 		// On shift-tab from the start of the first line, tab out of the editor.
 		// Use capturing listener, since Shift-Tab keydown events do not propagate to the document.
 		doc.addEventListener("keydown", (event) => {
@@ -2259,6 +2259,11 @@ var Scaffold = new function () {
 		}
 		
 		document.title = title;
+	}
+	
+	function _updateDocManagerState() {
+		let label = document.getElementById('textbox-label').value;
+		_docManager.setState(JSON.stringify(_getTranslatorFromPane()), { title: label });
 	}
 };
 
