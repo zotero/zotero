@@ -1598,6 +1598,10 @@ var Columns = class {
 		this._virtualizedTable.props.storeColumnPrefs(prefs);
 	}
 
+	// Injects extra width into the first column if that column has
+	// `staticWidth` or `minWidth` configured, in order to accommodate space for
+	// the item type icon and the chevron.The original width is restored if the
+	// column is reordered to a different position.
 	_adjustColumnWidths = () => {
 		if (!this._virtualizedTable.props.firstColumnExtraWidth) {
 			return;
@@ -1614,6 +1618,55 @@ var Columns = class {
 				column.width = isFirstColumn ? Math.max(parseInt(column.width) ?? 0, column.minWidth) : column.width;
 			}
 		});
+	};
+
+	// Measures the current width of the table header and redistributes the
+	// available width among visible columns. Static- and fixed-width columns
+	// preserve their stored width, while the remaining space is distributed
+	// proportionally among other columns based on each column's width property.
+	// This resolves an issue where the flex model causes slight column
+	// misalignment (see #4993).
+	_redistributeColumnWidths = () => {
+		let header = document.querySelector(`#${this._virtualizedTable.props.id} .virtualized-table-header`);
+		let headerRect = header.getBoundingClientRect();
+		const headerPadding = parseInt(window.getComputedStyle(header).paddingLeft) + parseInt(window.getComputedStyle(header).paddingRight);
+		const headerWidth = headerRect.width - headerPadding;
+		let nextVisibleColumns = this._columns.filter(c => !c.hidden);
+
+		// Normalize widths. Calculate widths for columns without a set value using the flex property.
+		nextVisibleColumns = nextVisibleColumns.map((column) => {
+			let width = parseFloat(column.width);
+			if (isNaN(width)) {
+				width = Math.max((headerWidth / nextVisibleColumns.length * (column.flex || 1)), column.minWidth || COLUMN_MIN_WIDTH);
+			}
+			return { ...column, width };
+		});
+
+		// Calculate the combined width of fixed and static columns, then subtract it from the header width to determine the available space.
+		let fixedColumns = nextVisibleColumns.filter(c => c.staticWidth || c.fixedWidth);
+		let fixedColumnsTotalWidth = fixedColumns.reduce((accumulator, column) => accumulator += column.width, 0);
+		let availableWidth = Math.max(headerWidth - fixedColumnsTotalWidth, 1); // safety catch for extreme case where fixed columns take up all the space
+
+		// Calculate the total width of the other columns
+		let otherColumns = nextVisibleColumns.filter(c => !c.staticWidth && !c.fixedWidth);
+		let otherColumnsTotalWidth = otherColumns.reduce((accumulator, column) => accumulator += column.width, 0);
+		
+		// Calculate the fraction of space each non-fixed column should occupy. This iterates over all visible columns to keep the indexes, but calculations for fixed and static columns will be discarded
+		let otherColumnsFractions = nextVisibleColumns.map(column => column.width / otherColumnsTotalWidth);
+		let resizeData = {};
+
+		for (let i = 0; i < nextVisibleColumns.length; i++) {
+			let column = nextVisibleColumns[i];
+			if (column.staticWidth || column.fixedWidth) {
+				resizeData[column.dataKey] = column.width;
+			}
+			else {
+				const width = availableWidth * otherColumnsFractions[i];
+				resizeData[column.dataKey] = width;
+			}
+		}
+
+		this.onResize(resizeData);
 	};
 
 	/**
@@ -1667,7 +1720,7 @@ var Columns = class {
 		});
 
 		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+		this.onResize(Object.fromEntries(this._columns.filter(c => !c.hidden).map(c => [c.dataKey, c.width])));
 
 		let prefs = this._getPrefs();
 		// reassign columns their ordinal values and set the prefs
@@ -1697,7 +1750,7 @@ var Columns = class {
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
 		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+		this.onResize(Object.fromEntries(this._columns.filter(c => !c.hidden).map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
@@ -1710,8 +1763,9 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
+
 		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
+		this._redistributeColumnWidths();
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
