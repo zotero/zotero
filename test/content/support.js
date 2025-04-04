@@ -621,7 +621,7 @@ var modifyDataObject = function (obj, params = {}, saveOptions) {
 	default:
 		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 	}
-	return obj.saveTx(saveOptions);
+	return obj.save({ tx: true, ...saveOptions });
 };
 
 /**

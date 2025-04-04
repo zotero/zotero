@@ -86,6 +86,10 @@ Zotero.defineProperty(Zotero.Search.prototype, 'version', {
 	get: function() { return this._get('version'); },
 	set: function(val) { return this._set('version', val); }
 });
+Zotero.defineProperty(Zotero.Search.prototype, 'clientVersion', {
+	get: function() { return this._get('clientVersion'); },
+	set: function(val) { return this._set('clientVersion', val); }
+});
 Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
 	get: function() { return this._get('synced'); },
 	set: function(val) { return this._set('synced', val); }
