@@ -3289,7 +3289,12 @@ Zotero.Utilities.Internal.OpenURL = {
 	},
 };
 
-Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage) {
+/**
+ * @param {DragEvent} event
+ * @param {number[]} itemIDs
+ * @param {Element} [dragImage]
+ */
+Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = event.currentTarget) {
 	// See note in LibraryTreeView::setDropEffect()
 	if (Zotero.isWin || Zotero.isLinux) {
 		event.dataTransfer.effectAllowed = 'copyMove';

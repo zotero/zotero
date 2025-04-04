@@ -144,6 +144,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 						row.append(remove);
 					}
 
+					row.addEventListener('dragstart', (event) => {
+						Zotero.Utilities.Internal.onDragItems(event, [id]);
+					});
+
 					body.append(row);
 				}
 				this._updateCount();
