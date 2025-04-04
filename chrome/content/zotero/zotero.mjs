@@ -105,6 +105,7 @@ const xpcomFilesLocal = [
 	'feedReader',
 	'fileDragDataProvider',
 	'fulltext',
+	'httpIntegrationClient',
 	'id',
 	'integration',
 	'locale',
@@ -124,8 +125,12 @@ const xpcomFilesLocal = [
 	'retractions',
 	'router',
 	'schema',
-	'server',
-	'server_integration',
+	'server/server',
+	'server/server_integration',
+	'server/server_connector',
+	'server/server_connectorIntegration',
+	'server/server_localAPI',
+	'server/saveSession',
 	'session',
 	'streamer',
 	'style',
@@ -152,10 +157,6 @@ const xpcomFilesLocal = [
 	'users',
 	'translation/translate_item',
 	'translation/translators',
-	'connector/httpIntegrationClient',
-	'connector/server_connector',
-	'connector/server_connectorIntegration',
-	'localAPI/server_localAPI',
 ];
 
 Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
