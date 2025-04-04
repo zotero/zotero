@@ -94,6 +94,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 
 		destroy() {
 			this._attachmentButton.removeEventListener('click', this._handleAttachmentClick);
+			this._attachmentButton.removeEventListener('dragstart', this._handleAttachmentDragStart);
 			this._annotationButton.removeEventListener('click', this._handleAnnotationClick);
 		}
 		
