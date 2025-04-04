@@ -44,6 +44,14 @@
         line-height: 1.5;
     }
 
+	.result-header {
+		justify-content: start;
+	}
+
+	#loading-spinner {
+		margin-inline-start: 5px;
+	}
+
     .textbox-label {
         font-size: 15px;
     }

@@ -14,6 +14,8 @@ async function run() {
 	var isAsync = document.getElementById('run-as-async').checked;
 	var result;
 	var resultTextbox = document.getElementById('result');
+	var spinner = document.getElementById("loading-spinner");
+	spinner.setAttribute("status", "animate");
 	try {
 		if (isAsync) {
 			code = '(async function () {' + code + '})()';
@@ -28,8 +30,22 @@ async function run() {
 		resultTextbox.textContent = e;
 		return;
 	}
+	// Hide the spinner after a small delay so it briefly appears even
+	// if the code runs fast to indicate that everything did run
+	setTimeout(() => {
+		spinner.removeAttribute("status");
+	}, 100);
+	
 	resultTextbox.classList.remove('error');
-	resultTextbox.textContent = typeof result == 'string' ? result : Zotero.Utilities.varDump(result);
+	if (typeof result == 'string') {
+		resultTextbox.textContent = result;
+	}
+	else if (result !== undefined) {
+		resultTextbox.textContent = Zotero.Utilities.varDump(result);
+	}
+	else {
+		resultTextbox.textContent = Zotero.getString("runJS-completed");
+	}
 }
 
 // eslint-disable-next-line no-unused-vars
