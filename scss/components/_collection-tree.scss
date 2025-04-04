@@ -3,11 +3,25 @@ $icons: (
 	library-group, publications, trash-full, trash, unfiled, retracted, search,
 );
 
-@each $icon in $icons {
-	.icon-css.icon-#{$icon} {
-		@include focus-states using ($color) {
-			@include svgicon($icon, $color, "16", "collection-tree");
+@mixin -icon-collection-type-rules {
+	@each $icon in $icons {
+		.icon-css.icon-#{$icon} {
+			@include focus-states using ($color) {
+				@include svgicon($icon, $color, "16", "collection-tree");
+			}
 		}
+	}
+}
+
+// Universal icon rules
+@include focus-states using ($color) {
+	@include -icon-collection-type-rules;
+}
+
+// Selection and focus aware icon rules
+.focus-states-target {
+	.row {
+		@include -icon-collection-type-rules;
 	}
 }
 
@@ -48,7 +62,10 @@ $icons: (
 	
 			@each $icon in $icons {
 				.icon-css.icon-#{$icon} {
-					@include focus-states using ($color) {
+					@include focus-states(
+						".row.selected",
+						".virtualized-table:focus-within"
+					) using ($color) {
 						@include svgicon($icon, $color, "16", "collection-tree");
 					}
 				}
