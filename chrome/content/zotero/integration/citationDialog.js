@@ -645,7 +645,7 @@ class LibraryLayout extends Layout {
 			},
 			isSearch: () => true,
 			isSearchMode: () => true,
-			setSearch: str => collectionTreeRow.setSearch(str),
+			setSearch: (searchText, mode) => collectionTreeRow.setSearch(searchText, mode),
 			ref: collectionTreeRow.ref
 		});
 		await this.itemsView.setFilter('search', SearchHandler.searchValue);

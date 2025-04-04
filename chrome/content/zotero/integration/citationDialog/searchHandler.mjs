@@ -195,7 +195,12 @@ export class CitationDialogSearchHandler {
 
 	cleanSearchQuery(str) {
 		str = str.replace(/ (?:&|and) /g, " ", "g").replace(/^,/, '');
-		str = this._cleanYear(str);
+		let isbn = Zotero.Utilities.cleanISBN(str);
+		let doi = Zotero.Utilities.cleanDOI(str);
+		// if the string looks like an identifier, do not try to extract the year
+		if (!(isbn || doi)) {
+			str = this._cleanYear(str);
+		}
 		str = str.trim();
 
 		// If the query is very short, treat it as empty
@@ -228,8 +233,20 @@ export class CitationDialogSearchHandler {
 			s.addCondition("quicksearch-titleCreatorYearNote", "contains", this.searchValue);
 		}
 		else if (realInputRegex.test(this.searchValue)) {
-			s.addCondition("quicksearch-titleCreatorYear", "contains", this.searchValue);
-			s.addCondition("itemType", "isNot", "attachment");
+			// search for the identifier if it is provided,
+			// otherwise look up by title, creator and year
+			let isDOI = Zotero.Utilities.cleanDOI(this.searchValue);
+			let isISBN = Zotero.Utilities.cleanISBN(this.searchValue);
+			if (isDOI) {
+				s.addCondition("DOI", "contains", this.searchValue);
+			}
+			else if (isISBN) {
+				s.addCondition("ISBN", "contains", this.searchValue);
+			}
+			else {
+				s.addCondition("quicksearch-titleCreatorYear", "contains", this.searchValue);
+				s.addCondition("itemType", "isNot", "attachment");
+			}
 		}
 		let searchResultIDs = await s.search();
 		// Search results might be in an unloaded library, so get items asynchronously and load necessary data
