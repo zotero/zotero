@@ -120,6 +120,7 @@ const xpcomFilesLocal = [
 	'progressQueueDialog',
 	'quickCopy',
 	'recognizeDocument',
+	'recognizeReference',
 	'report',
 	'retractions',
 	'router',
