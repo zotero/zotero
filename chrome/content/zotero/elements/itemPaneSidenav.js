@@ -767,10 +767,14 @@
 				return;
 			}
 			let targetWrapper = enabledWrappers[targetIndex];
+			let actualIndex;
 			if (targetWrapper) {
-				// Insert at the index of the previous wrapper
-				this.changePaneOrder(paneID, this._wrappers.indexOf(targetWrapper));
+				actualIndex = this._wrappers.indexOf(targetWrapper);
+			} else {
+				actualIndex = this._wrappers.length;
 			}
+			// Insert at the index of the previous wrapper
+			this.changePaneOrder(paneID, actualIndex);
 		}
 
 		handleButtonDragStart = (event) => {
