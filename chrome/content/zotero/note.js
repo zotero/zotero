@@ -86,6 +86,7 @@ window.onEditorError = function () {
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
 	noteEditor.saveSync();
+	Zotero.WindowHistory.addToHistory(noteEditor.item.id, document.title, "note");
 }
 
 var NotifyCallback = {
