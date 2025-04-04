@@ -89,7 +89,7 @@ describe("Plugin API", function () {
 			let result = await getDataPromise;
 
 			// Should render custom row
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			assert.exists(rowElem);
 
 			// Should call onGetData and render
@@ -113,7 +113,7 @@ describe("Plugin API", function () {
 			
 			let rowID = await waitForRegister(option);
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			// Should call onSetData on value change
@@ -152,7 +152,7 @@ describe("Plugin API", function () {
 			let rowID = await waitForRegister(option);
 			let result = await itemChangePromise;
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			// Should be enabled and editable
@@ -192,7 +192,7 @@ describe("Plugin API", function () {
 			result = await itemChangePromise;
 
 			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
-			rowElem = itemDetails.getPane("info").querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = itemDetails.getPane("info").querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			// Should not be enabled in non-library tab
@@ -219,14 +219,14 @@ describe("Plugin API", function () {
 
 			// Row at start
 			let rowID = await waitForRegister(startOption);
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 
 			assert.notExists(rowElem.previousElementSibling);
 			await waitForUnregister(rowID);
 
 			// Row after creator rows
 			rowID = await waitForRegister(afterCreatorsOption);
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 
 			assert.exists(rowElem.previousElementSibling.querySelector(".creator-type-value"));
 			assert.notExists(rowElem.nextElementSibling.querySelector(".creator-type-value"));
@@ -234,7 +234,7 @@ describe("Plugin API", function () {
 
 			// Row at end
 			rowID = rowID = await waitForRegister(endOption);
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 
 			assert.exists(rowElem.nextElementSibling.querySelector("*[fieldname=dateAdded]"));
 			await waitForUnregister(rowID);
@@ -254,7 +254,7 @@ describe("Plugin API", function () {
 
 			let rowID = await waitForRegister(defaultOption);
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			assert.isFalse(valueElem.readOnly);
@@ -263,7 +263,7 @@ describe("Plugin API", function () {
 
 			rowID = await waitForRegister(editableOption);
 
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			assert.isFalse(valueElem.readOnly);
@@ -272,7 +272,7 @@ describe("Plugin API", function () {
 
 			rowID = await waitForRegister(notEditableOption);
 
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			assert.isTrue(valueElem.readOnly);
@@ -294,7 +294,7 @@ describe("Plugin API", function () {
 			
 			let rowID = await waitForRegister(defaultOption);
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			assert.isFalse(valueElem.multiline);
@@ -303,7 +303,7 @@ describe("Plugin API", function () {
 
 			rowID = await waitForRegister(multilineOption);
 
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			assert.isTrue(valueElem.multiline);
@@ -312,7 +312,7 @@ describe("Plugin API", function () {
 
 			rowID = await waitForRegister(notMultilineOption);
 
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			assert.isFalse(valueElem.multiline);
@@ -334,7 +334,7 @@ describe("Plugin API", function () {
 			
 			let rowID = await waitForRegister(defaultOption);
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			assert.isFalse(valueElem.noWrap);
@@ -343,7 +343,7 @@ describe("Plugin API", function () {
 
 			rowID = await waitForRegister(noWrapOption);
 
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			assert.isTrue(valueElem.noWrap);
@@ -352,7 +352,7 @@ describe("Plugin API", function () {
 
 			rowID = await waitForRegister(wrapOption);
 
-			rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			valueElem = rowElem.querySelector(".value");
 
 			assert.isFalse(valueElem.noWrap);
@@ -367,7 +367,7 @@ describe("Plugin API", function () {
 			
 			let rowID = await waitForRegister(defaultOption);
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			let oldValue = valueElem.value;
@@ -397,7 +397,7 @@ describe("Plugin API", function () {
 			
 			let rowID = await waitForRegister(defaultOption);
 
-			let rowElem = infoSection.querySelector(`[data-custom-row-id="${rowID}"]`);
+			let rowElem = infoSection.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
 			let valueElem = rowElem.querySelector(".value");
 
 			let value = valueElem.value;
@@ -458,7 +458,7 @@ describe("Plugin API", function () {
 
 			// Wait for column header to render
 			await waitForCallback(
-				() => !!doc.querySelector(`#zotero-items-tree .virtualized-table-header .cell.${dataKey}`),
+				() => !!doc.querySelector(`#zotero-items-tree .virtualized-table-header .cell.${CSS.escape(dataKey)}`),
 				100, 3);
 		};
 
@@ -470,7 +470,7 @@ describe("Plugin API", function () {
 		};
 
 		let getSelectedRowCell = (dataKey) => {
-			let cell = doc.querySelector(`#zotero-items-tree .row.selected .${dataKey}`);
+			let cell = doc.querySelector(`#zotero-items-tree .row.selected .${CSS.escape(dataKey)}`);
 			return cell;
 		};
 

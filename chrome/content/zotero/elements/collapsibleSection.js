@@ -199,6 +199,29 @@
 			let containerRoot = this.closest('.zotero-view-item-container, context-notes-list');
 			
 			let contextMenu = document.createXULElement('menupopup');
+
+			let pinSection, unpinSection;
+			pinSection = document.createXULElement('menuitem');
+			pinSection.classList.add('menuitem-iconic', 'zotero-menuitem-pin');
+			pinSection.setAttribute('data-l10n-id', 'pin-section');
+			pinSection.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.container.scrollToPane(this.dataset.pane, 'smooth');
+				sidenav.pinnedPane = this.dataset.pane;
+			});
+			contextMenu.append(pinSection);
+
+			unpinSection = document.createXULElement('menuitem');
+			unpinSection.classList.add('menuitem-iconic', 'zotero-menuitem-unpin');
+			unpinSection.setAttribute('data-l10n-id', 'unpin-section');
+			unpinSection.addEventListener('command', () => {
+				this._getSidenav().pinnedPane = null;
+			});
+			contextMenu.append(unpinSection);
+
+			let pinSeparator = document.createXULElement('menuseparator');
+			contextMenu.append(pinSeparator);
+
 			let collapseOtherSections = document.createXULElement('menuitem');
 			collapseOtherSections.classList.add('menuitem-iconic', 'zotero-menuitem-collapse-others');
 			collapseOtherSections.setAttribute('data-l10n-id', 'collapse-other-sections');
@@ -223,27 +246,35 @@
 			});
 			contextMenu.append(expandAllSections);
 			
-			let pinSection, unpinSection;
-			let pinUnpinSeparator = document.createXULElement('menuseparator');
-			contextMenu.append(pinUnpinSeparator);
+			let reorderSeparator = document.createXULElement('menuseparator');
+			contextMenu.append(reorderSeparator);
 
-			pinSection = document.createXULElement('menuitem');
-			pinSection.classList.add('menuitem-iconic', 'zotero-menuitem-pin');
-			pinSection.setAttribute('data-l10n-id', 'pin-section');
-			pinSection.addEventListener('command', () => {
+			let moveSectionUp = document.createXULElement('menuitem');
+			moveSectionUp.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-up');
+			moveSectionUp.setAttribute('data-l10n-id', 'sidenav-reorder-up');
+			moveSectionUp.addEventListener('command', () => {
 				let sidenav = this._getSidenav();
-				sidenav.container.scrollToPane(this.dataset.pane, 'smooth');
-				sidenav.pinnedPane = this.dataset.pane;
+				sidenav.handlePaneMove(this.dataset.pane, 'up');
 			});
-			contextMenu.append(pinSection);
+			contextMenu.append(moveSectionUp);
 
-			unpinSection = document.createXULElement('menuitem');
-			unpinSection.classList.add('menuitem-iconic', 'zotero-menuitem-unpin');
-			unpinSection.setAttribute('data-l10n-id', 'unpin-section');
-			unpinSection.addEventListener('command', () => {
-				this._getSidenav().pinnedPane = null;
+			let moveSectionDown = document.createXULElement('menuitem');
+			moveSectionDown.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-down');
+			moveSectionDown.setAttribute('data-l10n-id', 'sidenav-reorder-down');
+			moveSectionDown.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.handlePaneMove(this.dataset.pane, 'down');
 			});
-			contextMenu.append(unpinSection);
+			contextMenu.append(moveSectionDown);
+
+			let resetSectionOrder = document.createXULElement('menuitem');
+			resetSectionOrder.classList.add('menuitem-iconic', 'zotero-menuitem-reorder-reset');
+			resetSectionOrder.setAttribute('data-l10n-id', 'sidenav-reorder-reset');
+			resetSectionOrder.addEventListener('command', () => {
+				let sidenav = this._getSidenav();
+				sidenav.resetPaneOrder();
+			});
+			contextMenu.append(resetSectionOrder);
 
 			contextMenu.addEventListener('popupshowing', () => {
 				let sections = Array.from(containerRoot.querySelectorAll('collapsible-section'));
@@ -252,15 +283,25 @@
 
 				let sidenav = this._getSidenav();
 				if (sidenav?.isPanePinnable(this.dataset.pane)) {
-					pinUnpinSeparator.hidden = false;
 					pinSection.hidden = sidenav.pinnedPane == this.dataset.pane;
 					unpinSection.hidden = sidenav.pinnedPane != this.dataset.pane;
+					pinSeparator.hidden = false;
 				}
 				else {
-					pinUnpinSeparator.hidden = true;
 					pinSection.hidden = true;
 					unpinSection.hidden = true;
+					pinSeparator.hidden = true;
 				}
+
+				let canMoveUp = sidenav?.isPaneMovable(this.dataset.pane, 'up');
+				let canMoveDown = sidenav?.isPaneMovable(this.dataset.pane, 'down');
+				let canReset = sidenav?.isOrderChanged();
+
+				moveSectionUp.hidden = !canMoveUp;
+				moveSectionDown.hidden = !canMoveDown;
+				resetSectionOrder.hidden = !canReset;
+
+				reorderSeparator.hidden = !canMoveUp && !canMoveDown && !canReset;				
 			});
 			
 			return contextMenu;
@@ -297,6 +338,8 @@
 			this._head.removeEventListener('mousedown', this._handleMouseDown);
 			this._head.removeEventListener('keydown', this._handleKeyDown);
 			this._head.removeEventListener('contextmenu', this._handleContextMenu);
+
+			this._contextMenu?.remove();
 			
 			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		}

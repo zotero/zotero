@@ -353,6 +353,17 @@ function waitForNotifierEvent(event, type) {
 	return deferred.promise;
 }
 
+async function waitForPrefsChange(key, global) {
+	var deferred = Zotero.Promise.defer();
+	let observerID;
+	var observer = function() {
+		Zotero.Prefs.unregisterObserver(observerID);
+		deferred.resolve();
+	};
+	observerID = Zotero.Prefs.registerObserver(key, observer, global);
+	return deferred.promise;
+}
+
 /**
  * Hang tests for manual inspection
  */

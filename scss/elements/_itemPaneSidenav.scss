@@ -65,7 +65,7 @@ item-pane-sidenav {
 		}
 	}
 
-	toolbarbutton {
+	.btn {
 		// TODO: Extract button styles?
 		
 		width: 28px;
@@ -73,16 +73,29 @@ item-pane-sidenav {
 		margin: 0;
 		padding: 4px;
 		pointer-events: all;
+		background-repeat: no-repeat;
+		background-position: center;
+		-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+		border-radius: 5px;
+		box-sizing: border-box;
 
 		&:disabled,
 		&[disabled="true"] {
 			opacity: 60%;
 			pointer-events: none;
 		}
+
+		&:hover {
+			background-color: var(--fill-quinary);
+		}
+
+		&:active {
+			background-color: var(--fill-quarternary);
+		}
 		
 		@each $pane, $color in $item-pane-sections {
 			&[data-pane="#{$pane}"] {
-				list-style-image: url("chrome://zotero/skin/itempane/20/#{$pane}.svg");
+				background-image: url("chrome://zotero/skin/itempane/20/#{$pane}.svg");
 				fill: $color;
 				stroke: $color;
 			}
@@ -90,13 +103,14 @@ item-pane-sidenav {
 
 		// Notes context pane button
 		&[data-pane="context-notes"] {
-			list-style-image: url("chrome://zotero/skin/itempane/20/notes.svg");
+			background-image: url("chrome://zotero/skin/itempane/20/notes.svg");
 			fill: map.get($item-pane-sections, "notes");
 			stroke: map.get($item-pane-sections, "notes");
 		}
 		
 		// Locate button
 		&[data-action="locate"] {
+			color: var(--fill-secondary);
 			@include svgicon-menu("go-to", "universal", "20");
 			
 			&:-moz-locale-dir(rtl) {
@@ -106,10 +120,10 @@ item-pane-sidenav {
 
 		&[custom] {
 			@media (prefers-color-scheme: light) {
-				list-style-image: var(--custom-sidenav-icon-light);
+				background-image: var(--custom-sidenav-icon-light);
 			}
 			@media (prefers-color-scheme: dark) {
-				list-style-image: var(--custom-sidenav-icon-dark);
+				background-image: var(--custom-sidenav-icon-dark);
 			}
 			fill: var(--fill-secondary);
 			stroke: var(--fill-secondary);
@@ -131,5 +145,33 @@ item-pane-sidenav {
 
 	.context-menu {
 		@include macOS-hide-menu-icons;
+	}
+
+	.drop-indicator {
+		position: absolute;
+		display: block;
+		background-color: var(--color-accent);
+		z-index: 1000;
+		--drop-indicator-size: 2px;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	&.stacked .drop-indicator {
+		left: var(--drop-indicator-offset);
+		top: 0;
+		width: var(--drop-indicator-size);
+		height: 28px;
+		margin-block: 4px;
+	}
+
+	&:not(.stacked) .drop-indicator {
+		top: var(--drop-indicator-offset);
+		left: 0;
+		width: 28px;
+		height: var(--drop-indicator-size);
+		margin-inline: 4px;
 	}
 }

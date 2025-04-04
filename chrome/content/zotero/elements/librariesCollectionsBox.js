@@ -66,15 +66,14 @@ import { getCSSIcon } from 'components/icons';
 			this._body = this.querySelector('.body');
 			this.initCollapsibleSection();
 			this._addPopup = this.querySelector('.add-popup');
-			this._addPopup.addEventListener('popupshowing', (event) => {
-				ZoteroPane.buildAddItemToCollectionMenu(event, [this._item]);
-			});
+			this._addPopup.addEventListener('popupshowing', this._handleAddPopupShowing);
 			this._section.addEventListener('add', this._handleAdd);
 		}
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 			this._section?.removeEventListener('add', this._handleAdd);
+			this._addPopup?.removeEventListener('popupshowing', this._handleAddPopupShowing);
 		}
 
 		notify(action, type, ids) {
@@ -278,6 +277,10 @@ import { getCSSIcon } from 'components/icons';
 				true
 			);
 			this._section.open = true;
+		};
+
+		_handleAddPopupShowing = (event) => {
+			ZoteroPane.buildAddItemToCollectionMenu(event, [this._item]);
 		};
 	}
 	customElements.define("libraries-collections-box", LibrariesCollectionsBox);

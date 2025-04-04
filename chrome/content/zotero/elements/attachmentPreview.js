@@ -220,7 +220,12 @@
 		}
 
 		destroy() {
-			this._reader?.uninit();
+			try {
+				this._reader?.uninit();
+			}
+			catch (e) {
+				this._debug("Error uninitializing reader", e);
+			}
 			this._resizeOb.disconnect();
 			this.removeEventListener("DOMContentLoaded", this._handleReaderLoad);
 			this.removeEventListener("mouseenter", this.updateGoto);
