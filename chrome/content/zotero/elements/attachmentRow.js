@@ -82,6 +82,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._removeButton = this.querySelector('.zotero-clicky-minus');
 
 			this._attachmentButton.addEventListener('click', this._handleAttachmentClick);
+			this._attachmentButton.addEventListener('dragstart', this._handleAttachmentDragStart);
 			this._annotationButton.addEventListener('click', this._handleAnnotationClick);
 
 			if (this.editable) {
@@ -98,6 +99,10 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		
 		_handleAttachmentClick = (event) => {
 			ZoteroPane.viewAttachment(this._attachment.id, event);
+		};
+
+		_handleAttachmentDragStart = (event) => {
+			Zotero.Utilities.Internal.onDragItems(event, [this._attachment.id]);
 		};
 
 		_handleAnnotationClick = () => {
