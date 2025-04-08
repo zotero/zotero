@@ -700,15 +700,18 @@ var ZoteroPane = new function()
 				localized: Zotero.ItemTypes.getLocalizedString(type.id)
 			};
 		});
+
+		let allItemTypes = [...primaryItemTypes, ...secondaryItemTypes];
+		
 		var collation = Zotero.getLocaleCollation();
 		primaryItemTypes.sort(function (a, b) {
 			return collation.compareString(1, a.localized, b.localized);
 		});
-		secondaryItemTypes.sort(function (a, b) {
+		allItemTypes.sort(function (a, b) {
 			return collation.compareString(1, a.localized, b.localized);
 		});
-		let lastPrimaryType = primaryItemTypes[primaryItemTypes.length - 1];
-		let itemTypes = primaryItemTypes.concat(secondaryItemTypes);
+		// The array of all item types with MRU prepended to the top
+		let itemTypes = primaryItemTypes.concat(allItemTypes);
 		for (let itemType of itemTypes) {
 			let menuitem = document.createXULElement("menuitem");
 			menuitem.setAttribute("label", itemType.localized);
@@ -719,7 +722,7 @@ var ZoteroPane = new function()
 			});
 			addMenu.appendChild(menuitem);
 			// Add a separator between primary and secondary types
-			if (lastPrimaryType.id == type) {
+			if (addMenu.childElementCount == primaryItemTypes.length) {
 				let separator = document.createXULElement("menuseparator");
 				addMenu.appendChild(separator);
 			}
