@@ -1287,6 +1287,18 @@ Zotero.Item.prototype.addRelatedItem = function (item) {
 	return this.addRelation(Zotero.Relations.relatedItemPredicate, Zotero.URI.getItemURI(item));
 }
 
+/**
+ * Removes primary attachment relations of this item if it exists.
+ */
+Zotero.Item.prototype._removePrimaryAttachmentRelation = async function (env) {
+	let primaryAttachmentFor = (await Zotero.Relations.getByPredicateAndObject(
+		'item', Zotero.Relations.primaryAttachmentPredicate, this.key
+	))[0];
+	if (primaryAttachmentFor) {
+		primaryAttachmentFor.removeRelation(Zotero.Relations.primaryAttachmentPredicate, this.key);
+		await primaryAttachmentFor.save({ skipEditCheck: env.options.skipEditCheck, skipDateModifiedUpdate: true });
+	}
+}
 
 /**
  * @param {Zotero.Item}
@@ -1580,6 +1592,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	if (this._changed.parentKey) {
 		if (parentItemKey && parentItemKey == this.key) {
 			throw new Error("Item cannot be set as parent of itself");
+		}
+		// If the file is moved, make sure the primary file relation
+		// of this file is removed.
+		if (this.isFileAttachment()) {
+			yield this._removePrimaryAttachmentRelation(env);
 		}
 		
 		// Make sure parent is a regular item
@@ -3807,7 +3824,11 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	
 	var cacheKey = (Zotero.Prefs.get('sortAttachmentsChronologically') ? 'chronological' : 'alphabetical')
 		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
-	
+
+	let primaryAttachmentKey = this.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+	if (primaryAttachmentKey) {
+		cacheKey += `_primary=${primaryAttachmentKey}`;
+	}
 	if (this._attachments[cacheKey]) {
 		return this._attachments[cacheKey];
 	}
@@ -3823,15 +3844,56 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 		rows.sort((a, b) => collation.compareString(1, a.title, b.title));
 	}
 	var ids = rows.map(row => row.itemID);
+	
+	// The id of the best attachment should be placed at the top of the array, so the best attachment
+	// appears as the first itemTree child row. This sorts the ids arrays with the same
+	// logic as in getBestAttachment, but synchronously without querying the DB.
+	// Then, the best attachmentID is moved to the start of the ids array to not interfere
+	// with other sorting preferences
+	let idsCopy = ids.concat();
+	idsCopy.sort((a, b) => {
+		let itemA = Zotero.Items.get(a);
+		let itemB = Zotero.Items.get(b);
+		
+		// Item whose key is pointed at by the primary attachment relations is first
+		let parentAttachmentKey = this.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+		if (itemA.key === parentAttachmentKey) return -1;
+		if (itemB.key === parentAttachmentKey) return 1;
+		
+		// PDFs are sorted before other attachment types
+		let pdfA = itemA.attachmentContentType === 'application/pdf';
+		let pdfB = itemB.attachmentContentType === 'application/pdf';
+		if (pdfA && !pdfB) return -1;
+		if (!pdfA && pdfB) return 1;
+		
+		// Attachment with the same URL as the parent have the next priority
+		let urlA = itemA.getField('url');
+		let urlB = itemB.getField('url');
+		let parentUrl = this.getField('url');
+		let matchesParentUrlA = urlA === parentUrl;
+		let matchesParentUrlB = urlB === parentUrl;
+		if (matchesParentUrlA && !matchesParentUrlB) return -1;
+		if (!matchesParentUrlA && matchesParentUrlB) return 1;
+
+		// Finally, sort by date added
+		let dateAddedA = new Date(itemA.getField('dateAdded') || null);
+		let dateAddedB = new Date(itemB.getField('dateAdded') || null);
+		return dateAddedA - dateAddedB;
+	});
+	let bestAttachmentID = idsCopy[0];
+	if (bestAttachmentID) {
+		ids = ids.filter(id => id !== bestAttachmentID);
+		ids.unshift(bestAttachmentID);
+	}
 	this._attachments[cacheKey] = ids;
 	return ids;
 }
 
 
 /**
- * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
- * oldest non-PDF attachment matching parent URL, oldest PDF attachment not matching URL,
- * old non-PDF attachment not matching URL
+ * Looks for attachment in the following order: oattachment marked as a primary attachment,
+ * oldest PDF attachment matching parent URL, oldest non-PDF attachment matching parent URL,
+ * oldest PDF attachment not matching URL, old non-PDF attachment not matching URL
  *
  * @return {Promise<Zotero.Item|FALSE>} - A promise for attachment item or FALSE if none
  */
@@ -3849,9 +3911,9 @@ Zotero.Item.prototype.getBestAttachment = Zotero.Promise.coroutine(function* () 
 
 
 /**
- * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
- * oldest PDF attachment not matching parent URL, oldest non-PDF attachment matching parent URL,
- * old non-PDF attachment not matching parent URL
+ * Looks for attachment in the following order: attachment marked as a primary attachment,
+ * oldest PDF attachment matching parent URL, oldest PDF attachment not matching parent URL,
+ * oldest non-PDF attachment matching parent URL, old non-PDF attachment not matching parent URL
  *
  * @return {Promise<Zotero.Item[]>} - A promise for an array of Zotero items
  */
@@ -3862,13 +3924,14 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 	
 	var url = this.getField('url');
 	var urlFieldID = Zotero.ItemFields.getID('url');
-	
+	var primaryAttachmentPredicateID = Zotero.RelationPredicates.getID('zotero:primaryAttachment');
 	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
 		+ `LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=${urlFieldID}) `
 		+ "LEFT JOIN itemDataValues IDV ON (ID.valueID=IDV.valueID) "
+		+ `LEFT JOIN itemRelations IR ON (IA.parentItemID = IR.itemID AND IR.predicateID = ${primaryAttachmentPredicateID} AND I.key = IR.object)`
 		+ `WHERE parentItemID=? AND linkMode NOT IN (${Zotero.Attachments.LINK_MODE_LINKED_URL}) `
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
-		+ "ORDER BY contentType='application/pdf' DESC, value=? DESC, dateAdded ASC";
+		+ "ORDER BY (IR.predicateID IS NOT NULL) DESC, contentType='application/pdf' DESC, value=? DESC, dateAdded ASC";
 	var itemIDs = yield Zotero.DB.columnQueryAsync(sql, [this.id, url]);
 	return this.ObjectsClass.get(itemIDs);
 });
@@ -5068,6 +5131,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 			if (id) {
 				yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 			}
+			yield this._removePrimaryAttachmentRelation(env);
 		}
 		
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
