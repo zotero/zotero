@@ -294,6 +294,7 @@ runJS-title = Run JavaScript
 runJS-editor-label = Code:
 runJS-run = Run
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result = {
     $type ->
         [async] Return value:
