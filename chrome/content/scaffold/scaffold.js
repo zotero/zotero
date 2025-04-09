@@ -31,6 +31,8 @@ var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/Content
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
+var { CompletionCopilot, registerCompletion } = ChromeUtils.importESModule('resource://zotero/monacopilot.mjs');
+
 var lazy = {};
 ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 	return Zotero.Utilities.Internal.subprocess(Services.env.get('SHELL'), ['-c', 'echo $PATH'])
@@ -43,8 +45,8 @@ var Scaffold = new function () {
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
 	var _needRebuildTranslatorSuggestions = true;
-
-	this.browser = () => _browser;
+	var _copilot;
+	var _prefsObserverID;
 	
 	var _editors = {};
 
@@ -61,8 +63,7 @@ var Scaffold = new function () {
 
 	var _linesOfMetadata = 15;
 
-	this.onLoad = async function (e) {
-		if (e.target !== document) return;
+	this.handleLoad = async function () {
 		_browser = document.getElementById('browser');
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
@@ -183,6 +184,12 @@ var Scaffold = new function () {
 				}
 			});
 		}
+		
+		_prefsObserverID = Zotero.Prefs.registerObserver('scaffold.completions.mistralAPIKey', _handleAPIKeyChange);
+	};
+	
+	this.handleUnload = function () {
+		Zotero.Prefs.unregisterObserver(_prefsObserverID);
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
@@ -300,6 +307,46 @@ var Scaffold = new function () {
 		// this would allow peeking:
 		//   monaco.editor.createModel(tsLib, 'typescript', monaco.Uri.parse(tsLibPath));
 		// but it doesn't currently seem to work
+
+		registerCompletion(monaco, editor, {
+			language: 'javascript',
+			endpoint: 'dummy',
+			async requestHandler({ body }) {
+				if (!_copilot) {
+					return { completion: null };
+				}
+				
+				let metadata = _getMetadataObject();
+				Object.assign(body.completionMetadata, {
+					filename: `${metadata.label}.js [body]`,
+					technologies: ['zotero/translators'],
+					relatedFiles: [
+						{
+							path: 'index.d.ts',
+							content: tsLib
+						},
+						{
+							path: `${metadata.label}.js [metadata]`,
+							content: JSON.stringify(metadata, null, '\t')
+						},
+						metadata.translatorType & Zotero.Translator.TRANSLATOR_TYPES.import && {
+							path: `example_import.${metadata.target || 'dat'}`,
+							content: _getImport()
+						},
+						metadata.translatorType & Zotero.Translator.TRANSLATOR_TYPES.search && {
+							path: `example_search.json`,
+							content: _getImport()
+						},
+						{
+							path: _browser.currentURI.spec,
+							content: await _browser.browsingContext.currentWindowGlobal.getActor('PageData')
+								.sendQuery('documentHTML')
+						}
+					].filter(Boolean)
+				});
+				return _copilot.complete({ body });
+			},
+		});
 	};
 
 	this.initTestsEditor = function () {
@@ -2260,8 +2307,20 @@ var Scaffold = new function () {
 		
 		document.title = title;
 	}
+	
+	function _handleAPIKeyChange() {
+		let apiKey = Zotero.Prefs.get('scaffold.completions.mistralAPIKey');
+		if (apiKey) {
+			_copilot = new CompletionCopilot(apiKey, {
+				provider: 'mistral',
+				model: 'codestral'
+			});
+		}
+		else {
+			_copilot = null;
+		}
+	}
 };
 
-window.addEventListener("load", function (e) {
-	Scaffold.onLoad(e);
-}, false);
+window.addEventListener('load', e => e.target === document && Scaffold.handleLoad(e));
+window.addEventListener('unload', e => e.target === document && Scaffold.handleUnload(e));

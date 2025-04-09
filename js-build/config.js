@@ -54,6 +54,8 @@ const symlinkFiles = [
 	'resource/vs/**/*',
 	// Patched in babel-worker.js
 	'!resource/vs/language/typescript/tsWorker.js',
+	'!resource/monacopilot.mjs',
+	'!resource/monacopilot-core.mjs',
 	'version',
 ];
 
@@ -112,6 +114,8 @@ const jsFiles = [
 	'resource/SingleFile/lib/single-file.js',
 	'resource/citeproc_rs_wasm.js',
 	'resource/vs/language/typescript/tsWorker.js',
+	'resource/monacopilot.mjs',
+	'resource/monacopilot-core.mjs',
 ];
 
 const scssFiles = [
