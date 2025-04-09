@@ -28,6 +28,7 @@ async function run() {
 	catch (e) {
 		resultTextbox.classList.add('error');
 		resultTextbox.textContent = e;
+		spinner.removeAttribute("status");
 		return;
 	}
 	// Hide the spinner after a small delay so it briefly appears even
@@ -44,7 +45,9 @@ async function run() {
 		resultTextbox.textContent = Zotero.Utilities.varDump(result);
 	}
 	else {
-		resultTextbox.textContent = Zotero.getString("runJS-completed");
+		// when nothing is returned, log undefined as the return value but
+		// for clarity also add a note that the JS run was successful
+		resultTextbox.textContent = `===>undefined<=== (${Zotero.getString("runJS-completed")})`;
 	}
 }
 
