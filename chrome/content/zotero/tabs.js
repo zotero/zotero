@@ -228,7 +228,8 @@ var Zotero_Tabs = new function () {
 		});
 	};
 
-	this.restoreState = function (tabs) {
+	this.restoreState = async function (tabs) {
+		let itemIDs = [];
 		for (let i = 0; i < tabs.length; i++) {
 			let tab = tabs[i];
 			if (tab.type === 'library') {
@@ -250,11 +251,17 @@ var Zotero_Tabs = new function () {
 						data: tab.data,
 						select: tab.selected
 					});
+					itemIDs.push(tab.data.itemID);
 				}
 			}
 		}
 		// Unset the previously selected tab id, because it was set when restoring tabs
 		this._prevSelectedID = null;
+		// Some items may belong to groups that are not yet loaded. Load them here so that
+		// every component related to tabs (e.g. tabs menu) does not have to handle
+		// potentially not-yet-loaded items.
+		let items = await Zotero.Items.getAsync(itemIDs);
+		await Zotero.Items.loadDataTypes(items);
 	};
 	
 	/**
