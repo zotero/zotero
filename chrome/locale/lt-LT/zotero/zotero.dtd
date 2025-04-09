@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumento nuostatos">
 <!ENTITY zotero.integration.addEditCitation.title "Pridėti/redaguoti citavimą">
 <!ENTITY zotero.integration.editBibliography.title "Redaguoti bibliografiją">
-<!ENTITY zotero.integration.quickFormatDialog.title "Greitasis citavimo formatavimas">
 
 <!ENTITY zotero.progress.title "Eiga">
 

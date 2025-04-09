@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Tilvísun">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ritvinnsluforrit">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Nota hefðbundið viðmót við að bæta við tilvísunum">
 <!ENTITY zotero.preferences.styleEditor "Breyta stíl">
 <!ENTITY zotero.preferences.stylePreview "Forskoðun stíls">
 

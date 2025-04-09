@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "文档首选项">
 <!ENTITY zotero.integration.addEditCitation.title "添加/编辑引注">
 <!ENTITY zotero.integration.editBibliography.title "编辑参考文献表">
-<!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引注">
 
 <!ENTITY zotero.progress.title "进度">
 

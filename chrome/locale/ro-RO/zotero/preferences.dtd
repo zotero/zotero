@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Citează">
 <!ENTITY zotero.preferences.cite.wordProcessors "Procesoare de text">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Folosește caseta clasică de dialog Adaugă citare">
 <!ENTITY zotero.preferences.styleEditor "Editor de stil">
 <!ENTITY zotero.preferences.stylePreview "Previzualizare stil">
 

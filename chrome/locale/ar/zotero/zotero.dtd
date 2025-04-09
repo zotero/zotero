@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
 <!ENTITY zotero.integration.addEditCitation.title "اضافة/تحرير استشهاد مرجعي">
 <!ENTITY zotero.integration.editBibliography.title "تحرير ببليوجرافية">
-<!ENTITY zotero.integration.quickFormatDialog.title "صياغة سريعة للاستشهاد">
 
 <!ENTITY zotero.progress.title "التقدم">
 

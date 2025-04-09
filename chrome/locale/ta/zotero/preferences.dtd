@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "மேற்கோள்">
 <!ENTITY zotero.preferences.cite.wordProcessors "சொல் செயலிகள்">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "பழமையான சேர் மேற்கோள் உரையாடலைப் பயன்படுத்தவும்">
 <!ENTITY zotero.preferences.styleEditor "பாணி ஆசிரியர்">
 <!ENTITY zotero.preferences.stylePreview "பாணி முன்னோட்டம்">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.wordProcessors "文档编辑软件">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用经典版“添加引注”对话框">
 <!ENTITY zotero.preferences.styleEditor "样式编辑器">
 <!ENTITY zotero.preferences.stylePreview "样式预览">
 

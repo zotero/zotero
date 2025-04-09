@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "Kjörstillingar skjals">
 <!ENTITY zotero.integration.addEditCitation.title "Bæta við/breyta tilvitnun">
 <!ENTITY zotero.integration.editBibliography.title "Breyta heimildaskrá">
-<!ENTITY zotero.integration.quickFormatDialog.title "Flýtiformun tilvitnana">
 
 <!ENTITY zotero.progress.title "Framvinda">
 

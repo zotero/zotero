@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Navod">
 <!ENTITY zotero.preferences.cite.wordProcessors "Programi za obradu teksta">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Koristi klasični dijaloški okvir Dodaj navod">
 <!ENTITY zotero.preferences.styleEditor "Uređivač stila">
 <!ENTITY zotero.preferences.stylePreview "Preglednik stila">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Citeren">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstverwerkers">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gebruik het klassieke “Citaat Toevoegen”-dialoogvenster">
 <!ENTITY zotero.preferences.styleEditor "Stijlbewerker">
 <!ENTITY zotero.preferences.stylePreview "Stijlvoorbeeld">
 

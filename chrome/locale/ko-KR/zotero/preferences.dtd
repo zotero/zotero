@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "인용">
 <!ENTITY zotero.preferences.cite.wordProcessors "워드 프로세서">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "클래식 인용 대화창 사용">
 <!ENTITY zotero.preferences.styleEditor "스타일 편집기">
 <!ENTITY zotero.preferences.stylePreview "스타일 미리보기">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Hivatkozás">
 <!ENTITY zotero.preferences.cite.wordProcessors "Szövegszerkesztők">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "A klasszikus Add Citation ablak használata">
 <!ENTITY zotero.preferences.styleEditor "Stílus szerkesztő">
 <!ENTITY zotero.preferences.stylePreview "Stílus előnézet">
 

@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "Innstillinger for dokument">
 <!ENTITY zotero.integration.addEditCitation.title "Legg til/endre henvisning">
 <!ENTITY zotero.integration.editBibliography.title "Rediger bibliografi">
-<!ENTITY zotero.integration.quickFormatDialog.title "Hurtigformater henvisning">
 
 <!ENTITY zotero.progress.title "Framgang">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Citiraj">
 <!ENTITY zotero.preferences.cite.wordProcessors "Urejevalniki besedil">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Uporabi klasično pogovorno okno Dodaj citat">
 <!ENTITY zotero.preferences.styleEditor "Urejevalnik sloga">
 <!ENTITY zotero.preferences.stylePreview "Predogled sloga">
 

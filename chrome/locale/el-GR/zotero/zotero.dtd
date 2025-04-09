@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "Προτιμήσεις εγγράφου">
 <!ENTITY zotero.integration.addEditCitation.title "Προσθήκη/Επεξεργασία Παραπομπής">
 <!ENTITY zotero.integration.editBibliography.title "Επεξεργασία Βιβλιογραφίας">
-<!ENTITY zotero.integration.quickFormatDialog.title "Παραπομπή γρήγορης μορφής">
 
 <!ENTITY zotero.progress.title "Πρόοδος">
 

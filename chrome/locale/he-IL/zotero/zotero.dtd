@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "העדפות מסמך">
 <!ENTITY zotero.integration.addEditCitation.title "הוספת/עריכת ציטוט">
 <!ENTITY zotero.integration.editBibliography.title "עריכת ביבליוגרפיה">
-<!ENTITY zotero.integration.quickFormatDialog.title "עיצוב ציטוט מהיר">
 
 <!ENTITY zotero.progress.title "תהליך">
 

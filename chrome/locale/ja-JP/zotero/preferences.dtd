@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.wordProcessors "ワード・プロセッサ">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "旧式の出典表記追加ダイアログを使用する">
 <!ENTITY zotero.preferences.styleEditor "引用スタイルエディタ">
 <!ENTITY zotero.preferences.stylePreview "引用スタイルプレビュー">
 

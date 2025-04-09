@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "Asiakirjan asetukset">
 <!ENTITY zotero.integration.addEditCitation.title "Lisää/muokkaa viitettä">
 <!ENTITY zotero.integration.editBibliography.title "Muokkaa lähdeluetteloa">
-<!ENTITY zotero.integration.quickFormatDialog.title "Viitteen pikamuotoilu">
 
 <!ENTITY zotero.progress.title "Tilanne">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Cita">
 <!ENTITY zotero.preferences.cite.wordProcessors "Processadors de textos">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utilitza el diàleg clàssic Afegeix cita">
 <!ENTITY zotero.preferences.styleEditor "Editor d'estils">
 <!ENTITY zotero.preferences.stylePreview "Previsualitza l'estil">
 

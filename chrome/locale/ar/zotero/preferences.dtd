@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "استشهاد">
 <!ENTITY zotero.preferences.cite.wordProcessors "معالجات النصوص">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استخدم المربع الحواري التقليدي لاضافة استشهاد">
 <!ENTITY zotero.preferences.styleEditor "محرر النمط">
 <!ENTITY zotero.preferences.stylePreview "عرض النمط">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Citar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Processadores de Texto">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Usar a caixa de diálogo Adicionar Citação clássica">
 <!ENTITY zotero.preferences.styleEditor "Editor de Estilos">
 <!ENTITY zotero.preferences.stylePreview "Antevisão de Estilos">
 

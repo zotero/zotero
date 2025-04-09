@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Trích dẫn">
 <!ENTITY zotero.preferences.cite.wordProcessors "Các phần mềm soạn thảo">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Dùng màn hình Thêm trích dẫn kiểu cũ">
 <!ENTITY zotero.preferences.styleEditor "Bộ soạn thảo style">
 <!ENTITY zotero.preferences.stylePreview "Xem trước style">
 

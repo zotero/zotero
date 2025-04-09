@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитиране">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстови процесори / редактори">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Използване на класически &quot;Добавяне на бележка&quot; диалогов прозорец">
 <!ENTITY zotero.preferences.styleEditor "Редактор на стилове">
 <!ENTITY zotero.preferences.stylePreview "Визуализиране на стил">
 

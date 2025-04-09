@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Viitamine">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstiredaktorid">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Tavaline tsitaadi lisamise vorm">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 

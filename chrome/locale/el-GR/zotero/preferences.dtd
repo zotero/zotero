@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Παράθεση/Παραπομπή">
 <!ENTITY zotero.preferences.cite.wordProcessors "Επεξεργαστές κειμένου">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Χρήση του κλασικού διαλόγου Προσθήκης παραπομπής">
 <!ENTITY zotero.preferences.styleEditor "Επεξεργασία στυλ">
 <!ENTITY zotero.preferences.stylePreview "Προεπισκόπιση στυλ">
 

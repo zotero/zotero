@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Aipatu">
 <!ENTITY zotero.preferences.cite.wordProcessors "Testu prozesatzaileak">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Erabili Aipua gehitu elkarrizketa klasikoa">
 <!ENTITY zotero.preferences.styleEditor "Estilo editorea">
 <!ENTITY zotero.preferences.stylePreview "Estiloen aurrebista">
 

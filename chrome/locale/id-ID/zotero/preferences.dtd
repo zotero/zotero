@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Mengutip">
 <!ENTITY zotero.preferences.cite.wordProcessors "Pengolah Kata">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gunakan kotak dialog Tambahkan Sitasi klasik">
 <!ENTITY zotero.preferences.styleEditor "Editor Gaya">
 <!ENTITY zotero.preferences.stylePreview "Pratinjau Gaya">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитування">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстові редактори">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Використовувати стандартний спосіб Додавання цитат">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 

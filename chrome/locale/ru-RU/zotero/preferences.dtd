@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитирование">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстовые редакторы">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Использовать старый диалог «Добавление цитаты»">
 <!ENTITY zotero.preferences.styleEditor "Редактор стилей цитирования">
 <!ENTITY zotero.preferences.stylePreview "Просмотр стилей">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "អាគតដ្ឋាន">
 <!ENTITY zotero.preferences.cite.wordProcessors "កម្មវិធីវាយអត្ថបទ">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "ប្រើទម្រង់អាគតដ្ឋានបែបបុរាណ">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 

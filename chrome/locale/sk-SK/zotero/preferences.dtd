@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Citovanie">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textové editory">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použiť klasické okno pridávania citácií">
 <!ENTITY zotero.preferences.styleEditor "Editor štýlov">
 <!ENTITY zotero.preferences.stylePreview "Ukážka štýlov">
 

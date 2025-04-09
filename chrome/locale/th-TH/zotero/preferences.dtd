@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "อ้างอิง">
 <!ENTITY zotero.preferences.cite.wordProcessors "โปรแกรมประมวลคำ">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "ใช้หน้าจอการอ้างอิงแบบคลาสสิก">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 

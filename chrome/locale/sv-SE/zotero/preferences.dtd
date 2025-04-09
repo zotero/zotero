@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Källhänvisa">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ordbehandlare">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Använd äldre dialogruta för att lägga till nya källor">
 <!ENTITY zotero.preferences.styleEditor "Stilredigerare">
 <!ENTITY zotero.preferences.stylePreview "Förhandsvisa stil">
 

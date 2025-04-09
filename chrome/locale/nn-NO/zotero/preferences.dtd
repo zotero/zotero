@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Sitering">
 <!ENTITY zotero.preferences.cite.wordProcessors "Teksthandsamarar">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Bruk klassisk Legg til sitering-dialog">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "ציטוט">
 <!ENTITY zotero.preferences.cite.wordProcessors "מעבדי תמלילים">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "להשתמש בחלונית הוספת הציטוט הקלסית">
 <!ENTITY zotero.preferences.styleEditor "עורך סגנונות">
 <!ENTITY zotero.preferences.stylePreview "תצוגה מקדימה של סגנון">
 

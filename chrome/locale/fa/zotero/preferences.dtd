@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "یادکرد">
 <!ENTITY zotero.preferences.cite.wordProcessors "واژه‌پردازها">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استفاده از پنجره استناد‌کننده کلاسیک">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 

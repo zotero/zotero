@@ -169,7 +169,6 @@
 <!ENTITY zotero.integration.docPrefs.title "Preferințe document">
 <!ENTITY zotero.integration.addEditCitation.title "Adaugă/Editează citarea">
 <!ENTITY zotero.integration.editBibliography.title "Editează bibliografia">
-<!ENTITY zotero.integration.quickFormatDialog.title "Formatare rapidă a citării">
 
 <!ENTITY zotero.progress.title "Progres">
 

@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Alıntı Yap">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Alıntı Ekleme İletişim Kutusunu kullan">
 <!ENTITY zotero.preferences.styleEditor "Stil Düzenleyicisi">
 <!ENTITY zotero.preferences.stylePreview "Stil Önizleyicisi">
 

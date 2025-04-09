@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Citavimas">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstų rengyklės">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Naudoti klasikinį citatų įdėjimo langą">
 <!ENTITY zotero.preferences.styleEditor "Stilių rengyklė">
 <!ENTITY zotero.preferences.stylePreview "Stilių peržiūra">
 

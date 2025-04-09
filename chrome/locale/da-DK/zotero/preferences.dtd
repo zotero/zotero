@@ -118,7 +118,6 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Henvis">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstbehandlere">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Brug den klassiske dialog til Tilføj Henvisning">
 <!ENTITY zotero.preferences.styleEditor "Håndtering af bibliografiske formater">
 <!ENTITY zotero.preferences.stylePreview "Forhåndsvisning af bibliografisk format">
 
