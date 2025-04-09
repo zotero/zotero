@@ -209,19 +209,19 @@ export class CitationDialogHelpers {
 
 				// Check if this word has a locator label in its full or short form (e.g. "line" or "l" or "l.")
 				// If a locator string is found, check if the string without it is a valid locator value.
-				if (potentialLocatorValue.startsWith(fullLocator)) {
+				if (potentialLocatorValue.toLowerCase().startsWith(fullLocator)) {
 					// e.g. 'US history chapter "one and two" '
 					locatorLabelString = fullLocator;
 					// potential locator value: "one and two"
 					potentialLocatorValue = potentialLocatorValue.substring(fullLocator.length).trim();
 				}
-				else if (potentialLocatorValue.startsWith(shortLocator)) {
+				else if (potentialLocatorValue.toLowerCase().startsWith(shortLocator)) {
 					// e.g. 'US history chapt."one and two" '
 					locatorLabelString = shortLocator;
 					// potential locator value: "one and two"
 					potentialLocatorValue = potentialLocatorValue.substring(shortLocator.length).trim();
 				}
-				else if (potentialLocatorValue.startsWith(shortLocatorNoPunctuation)) {
+				else if (potentialLocatorValue.toLowerCase().startsWith(shortLocatorNoPunctuation)) {
 					// e.g. 'US history chapt11-12 '
 					locatorLabelString = shortLocatorNoPunctuation;
 					// potential locator value: 11-12

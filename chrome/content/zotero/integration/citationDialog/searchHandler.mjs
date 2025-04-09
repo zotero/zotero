@@ -194,7 +194,14 @@ export class CitationDialogSearchHandler {
 	}
 
 	cleanSearchQuery(str) {
-		str = str.replace(/ (?:&|and) /g, " ", "g").replace(/^,/, '');
+		// Remove brackets, some punctuation, "et al", and localized "and" from the search string.
+		// This allows one to paste an existing citation like "(Smith et al., 2020)" and
+		// still get appropriate search results.
+		str = str.replace(/[()]/g, '').replace(/[&,.:;]/g, '');
+		str = str.replace(" " + Zotero.getString("general.and") + " ", " ");
+		let etAl = Zotero.getString("general.etAl").replace(/\./g, "");
+		str = str.replace(new RegExp(" " + etAl + "(?:.\\s*|\\s+|$)", "g"), " ");
+
 		let isbn = Zotero.Utilities.cleanISBN(str);
 		let doi = Zotero.Utilities.cleanDOI(str);
 		// if the string looks like an identifier, do not try to extract the year
