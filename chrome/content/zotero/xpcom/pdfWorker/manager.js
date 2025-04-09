@@ -105,7 +105,7 @@ class PDFWorker {
 							{ responseType: 'arraybuffer' }
 						);
 						respData = {
-							compressionType: 1,
+							isCompressed: true,
 							cMapData: new Uint8Array(response.response)
 						};
 					}
