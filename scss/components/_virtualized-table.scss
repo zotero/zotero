@@ -150,7 +150,7 @@
 			font-weight: 600;
 		}
 
-		&.context-row {
+		&.context-row:not(.selected) {
 			color: var(--fill-secondary);
 		}
 
