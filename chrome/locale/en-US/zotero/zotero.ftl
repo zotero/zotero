@@ -95,6 +95,10 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-view-recently-closed-tabs =
+    .label = Recently Closed Tabs
+menu-view-recently-closed-windows =
+    .label = Recently Closed Windows
 
 main-window-command =
     .label = Library
