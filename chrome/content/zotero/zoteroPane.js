@@ -2985,15 +2985,20 @@ var ZoteroPane = new function()
 	};
 
 
-	this.selectItem = async function (itemID, inLibraryRoot) {
+	this.selectItem = async function (itemID, options) {
 		if (!itemID) {
 			return false;
 		}
-		return this.selectItems([itemID], inLibraryRoot);
+		return this.selectItems([itemID], options);
 	};
 	
 	
-	this.selectItems = async function (itemIDs, inLibraryRoot) {
+	this.selectItems = async function (itemIDs, options = {}) {
+		if (typeof options == "boolean") {
+			Zotero.warn("ZoteroPane.selectItems() now takes an 'options' object -- update your code");
+			options = { inLibraryRoot: options };
+		}
+		let { inLibraryRoot, noTabSwitch } = options;
 		if (!itemIDs.length) {
 			return false;
 		}
@@ -3019,7 +3024,10 @@ var ZoteroPane = new function()
 			document.getElementById(ZoteroPane.itemsView.id).focus();
 		}
 		
-		Zotero_Tabs.select('zotero-pane', false, { focusElementID: ZoteroPane.itemsView.id });
+		if (!noTabSwitch) {
+			Zotero_Tabs.select('zotero-pane', false, { focusElementID: ZoteroPane.itemsView.id });
+		}
+		return true;
 	};
 	
 	
