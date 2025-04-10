@@ -208,14 +208,14 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 	}
 	var libraryID = this.ref.libraryID;
 	if (this.isGroup()) {
-		return this.ref.filesEditable;
+		return this.ref.editable && this.ref.filesEditable;
 	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRetracted()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 			var group = Zotero.Groups.get(groupID);
-			return group.filesEditable;
+			return group.editable && group.filesEditable;
 		}
 		throw ("Unknown library type '" + type + "' in Zotero.CollectionTreeRow.filesEditable");
 	}

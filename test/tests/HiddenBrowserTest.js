@@ -1,4 +1,5 @@
 describe("HiddenBrowser", function() {
+	var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
 	const { HiddenBrowser } = ChromeUtils.import(
 		"chrome://zotero/content/HiddenBrowser.jsm"
 	);
@@ -11,7 +12,6 @@ describe("HiddenBrowser", function() {
 		var pngRequested = false;
 
 		before(function () {
-			Cu.import("resource://zotero-unit/httpd.js");
 			httpd = new HttpServer();
 			httpd.start(port);
 		});
@@ -92,7 +92,6 @@ describe("HiddenBrowser", function() {
 		}
 
 		before(function () {
-			Cu.import("resource://zotero-unit/httpd.js");
 			httpd = new HttpServer();
 			httpd.start(port);
 
@@ -175,7 +174,6 @@ describe("HiddenBrowser", function() {
 		var baseURL2 = `http://127.0.0.1:${port2}/`;
 
 		before(function () {
-			Cu.import("resource://zotero-unit/httpd.js");
 			// Create two servers with two separate origins
 			httpd1 = new HttpServer();
 			httpd1.start(port1);
