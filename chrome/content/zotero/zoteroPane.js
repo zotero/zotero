@@ -2999,8 +2999,7 @@ var ZoteroPane = new function()
 	
 	this.selectItems = async function (itemIDs, options = {}) {
 		if (typeof options == "boolean") {
-			Zotero.warn("ZoteroPane.selectItems() with inLibraryRoot boolean param is deprecated."
-				+ " -- New usage: ZoteroPane.selectItems(itemIDs, { inLibraryRoot, noTabSwitch })");
+			Zotero.warn("ZoteroPane.selectItems() now takes an 'options' object -- update your code");
 			options = { inLibraryRoot: options };
 		}
 		let { inLibraryRoot, noTabSwitch } = options;
