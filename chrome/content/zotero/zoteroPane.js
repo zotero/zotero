@@ -1957,7 +1957,10 @@ var ZoteroPane = new function()
 		});
 	}
 	
-	this.updateAddAttachmentMenu = function (popup) {
+	this.updateAddAttachmentMenu = function (event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
 		if (!this.canEdit()) {
 			for (let node of popup.childNodes) {
 				if (node.tagName == 'menuitem') {
@@ -1980,16 +1983,41 @@ var ZoteroPane = new function()
 		for (let command of commandsEnabled) {
 			document.getElementById(command[0]).setAttribute('disabled', !command[1]);
 		}
+
+		Zotero.MenuManager.updateMenuPopup(
+			popup,
+			"main/library/addAttachment",
+			{
+				event,
+				getContext: () => ({
+					items,
+				})
+			}
+		);
 	};
 	
 	/**
 	 * @return {Promise}
 	 */
-	this.updateNewNoteMenu = function () {
+	this.updateNewNoteMenu = function (event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
 		var items = ZoteroPane_Local.getSelectedItems();
 		var cmd = document.getElementById('cmd_zotero_newChildNote');
 		cmd.setAttribute("disabled", !this.canEdit() ||
 			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem())));
+		
+		Zotero.MenuManager.updateMenuPopup(
+			popup,
+			"main/library/addNote",
+			{
+				event,
+				getContext: () => ({
+					items,
+				})
+			}
+		);
 	};
 	
 	/**
@@ -3161,7 +3189,7 @@ var ZoteroPane = new function()
 	this.onCollectionContextMenuSelect = function (event) {
 		event.stopPropagation();
 		var o = _collectionContextMenuOptions.find(o => o.id == event.target.id)
-		if (o.oncommand) {
+		if (o?.oncommand) {
 			o.oncommand();
 		}
 	};
@@ -3549,6 +3577,16 @@ var ZoteroPane = new function()
 		for (let id of disable) {
 			m[id].setAttribute('disabled', true);
 		}
+
+		Zotero.MenuManager.updateMenuPopup(
+			menu,
+			"main/library/collection",
+			{
+				getContext: () => ({
+					collectionTreeRow,
+				})
+			}
+		);
 	};
 	
 	
@@ -3881,8 +3919,10 @@ var ZoteroPane = new function()
 				}
 				
 				// Update attachment submenu
-				var popup = document.getElementById('zotero-add-attachment-popup')
-				this.updateAddAttachmentMenu(popup);
+				var popup = document.getElementById('zotero-add-attachment-popup');
+				popup.addEventListener('popupshowing', (event) => {
+					this.updateAddAttachmentMenu(event, popup);
+				});
 				
 				// Block certain actions on files if no access
 				if (item.isFileAttachment() && !collectionTreeRow.filesEditable) {
@@ -4034,6 +4074,17 @@ var ZoteroPane = new function()
 		
 		// add locate menu options
 		yield Zotero_LocateMenu.buildContextMenu(menu, true);
+
+		Zotero.MenuManager.updateMenuPopup(
+			menu,
+			"main/library/item",
+			{
+				getContext: () => ({
+					collectionTreeRow,
+					items,
+				})
+			}
+		);
 	});
 
 
