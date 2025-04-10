@@ -197,7 +197,7 @@ var ZoteroAdvancedSearch = new function() {
 			return;
 		}
 		
-		lastWin.ZoteroPane.selectItems(items.map(item => item.id), { inLibraryRoot: false });
+		lastWin.ZoteroPane.selectItems(items.map(item => item.id));
 		lastWin.focus();
 	}
 }
