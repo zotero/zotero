@@ -748,6 +748,11 @@ const ZoteroStandalone = new function() {
 			ZoteroPane.loadURI(ZOTERO_CONFIG.SUPPORT_URL);
 		}
 	}
+
+	this.renameFilesBasedOnMetadata = function () {
+		Services.ww.openWindow(null, "chrome://zotero/content/renameFiles.xhtml",
+			"renameFiles", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", {});
+	};
 	
 	/**
 	 * Checks for updates
