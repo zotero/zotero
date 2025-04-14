@@ -186,6 +186,7 @@ var Scaffold = new function () {
 		}
 		
 		_prefsObserverID = Zotero.Prefs.registerObserver('scaffold.completions.mistralAPIKey', _handleAPIKeyChange);
+		_handleAPIKeyChange();
 	};
 	
 	this.handleUnload = function () {
