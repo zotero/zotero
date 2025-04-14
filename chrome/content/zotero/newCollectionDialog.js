@@ -48,17 +48,18 @@ var Zotero_New_Collection_Dialog = {
 	_updateMenu() {
 		let createInField = document.querySelector('#create-in');
 		let menupopup = createInField.firstElementChild;
-		let id = menupopup.id;
-		// Fascinatingly, clearing the children of the menupopup isn't enough here.
-		// We have to completely recreate it or it will no longer be willing to open.
-		menupopup.replaceWith(menupopup = document.createXULElement('menupopup'));
-		menupopup.id = id;
+		menupopup.replaceChildren();
 
 		let createdNode = Zotero.Utilities.Internal.createMenuForTarget(
 			Zotero.Libraries.get(this._libraryID),
 			menupopup,
 			this._parentCollectionID ? 'C' + this._parentCollectionID : 'L' + this._libraryID,
 			(event, libraryOrCollection) => {
+				// if a menu for a collection with children is clicked, close the entire menu,
+				// otherwise it oddly remains open
+				if (event.target.tagName == "menu") {
+					menupopup.hidePopup();
+				}
 				this._libraryID = libraryOrCollection.libraryID;
 				if (libraryOrCollection.objectType === 'collection') {
 					this._parentCollectionID = libraryOrCollection.id;
@@ -66,7 +67,7 @@ var Zotero_New_Collection_Dialog = {
 				else {
 					this._parentCollectionID = null;
 				}
-				this._updateMenu();
+				this._updateSelectedCollectionLabel();
 			},
 			null
 		);
@@ -75,7 +76,13 @@ var Zotero_New_Collection_Dialog = {
 			createdNode.replaceWith(...createdNode.menupopup.children);
 		}
 
-		let checkedItem = menupopup.querySelector('[checked="true"]');
+		this._updateSelectedCollectionLabel();
+	},
+
+	_updateSelectedCollectionLabel() {
+		let createInField = document.querySelector('#create-in');
+		let selectedID = this._parentCollectionID ? 'C' + this._parentCollectionID : 'L' + this._libraryID;
+		let checkedItem = createInField.querySelector(`[value="${selectedID}"]`);
 		createInField.setAttribute('label', checkedItem?.label || '');
 		createInField.image = checkedItem?.image;
 	}
