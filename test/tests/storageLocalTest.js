@@ -1,14 +1,6 @@
 "use strict";
 
 describe("Zotero.Sync.Storage.Local", function () {
-	beforeEach(function* () {
-		yield resetDB({
-			thisArg: this,
-			skipBundledFiles: true
-		})
-	})
-	
-	
 	describe("#checkForUpdatedFiles()", function () {
 		it("should flag modified file for upload and return it", function* () {
 			// Create attachment
@@ -31,13 +23,13 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			// File should be returned
 			var libraryID = Zotero.Libraries.userLibraryID;
-			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
+			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID, [item.id]);
 			
 			yield item.eraseTx();
 			
 			assert.equal(changed, true);
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
-		})
+		});
 		
 		it("should skip a file if mod time hasn't changed", function* () {
 			// Create attachment
@@ -52,7 +44,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield item.saveTx({ skipAll: true });
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
-			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
+			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID, [item.id]);
 			var syncState = item.attachmentSyncState;
 			
 			yield item.eraseTx();
@@ -80,7 +72,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield OS.File.setDates(path);
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
-			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
+			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID, [item.id]);
 			var syncState = item.attachmentSyncState;
 			var syncedModTime = item.attachmentSyncedModificationTime;
 			var newModTime = yield item.attachmentModificationTime;
@@ -614,8 +606,13 @@ describe("Zotero.Sync.Storage.Local", function () {
 	describe("#resolveConflicts()", function () {
 		var win;
 		
-		before(function* () {
-			win = yield loadZoteroWindow();
+		before(async function () {
+			await resetDB({
+				thisArg: this,
+				skipBundledFiles: true
+			});
+			
+			win = await loadZoteroWindow();
 		});
 		
 		after(function () {
