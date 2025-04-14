@@ -6650,6 +6650,12 @@ var ZoteroPane = new function()
 						&& Zotero.Prefs.get('reopenPanesOnRestart')) {
 					continue;
 				}
+				// For some reason, the persisted state of the splitter is empty. This will cause
+				// the splitter to behave unexpectedly. We set it to 'collapsed' here.
+				if (["zotero-context-splitter-stacked", "zotero-context-splitter"].includes(el.id)
+						&& attr === 'state' && elValues[attr] === '') {
+					elValues[attr] = 'collapsed';
+				}
 				// Ignore attributes that are no longer persisted for the element
 				if (!allowedAttributes.includes(attr)) {
 					Zotero.debug(`Not restoring '${attr}' for #${id}`);
