@@ -330,20 +330,20 @@ Zotero.Sync.Storage.Local = {
 		var fileName = PathUtils.filename(path);
 		
 		try {
-			// If file is already marked for upload, skip check. Even if the file was changed
-			// both locally and remotely, conflicts are checked at upload time, so we don't need
-			// to worry about it here.
-			//
-			// This is after open() so that a missing file is properly marked for download.
-			if (item.attachmentSyncState == this.SYNC_STATE_TO_UPLOAD) {
-				Zotero.debug("File is already marked for upload");
-				return false;
-			}
-			
 			let { lastModified: fmtime } = yield IOUtils.stat(path);
 			//Zotero.debug("Memory usage: " + memmgr.resident);
 			
 			//Zotero.debug("File modification time for item " + lk + " is " + fmtime);
+			
+			// If file is already marked for upload, skip check. Even if the file was changed
+			// both locally and remotely, conflicts are checked at upload time, so we don't need
+			// to worry about it here.
+			//
+			// This is after stat() so that a missing file is properly marked for download.
+			if (item.attachmentSyncState == this.SYNC_STATE_TO_UPLOAD) {
+				Zotero.debug("File is already marked for upload");
+				return false;
+			}
 			
 			if (fmtime < 0) {
 				Zotero.debug("File mod time " + fmtime + " is less than 0 -- interpreting as 0", 2);

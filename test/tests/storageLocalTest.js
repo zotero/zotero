@@ -90,7 +90,32 @@ describe("Zotero.Sync.Storage.Local", function () {
 			assert.isFalse(changed);
 			assert.equal(syncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC);
 			assert.equal(syncedModTime, newModTime);
-		})
+		});
+		
+		it("should flag a missing local file for download if already marked for upload", async function () {
+			// Create attachment
+			let item = await importFileAttachment('test.png');
+			var hash = await item.attachmentHash;
+			var mtime = await item.attachmentModificationTime;
+			
+			// Mark as synced, so it will be checked
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = hash;
+			item.attachmentSyncState = "to_upload";
+			await item.saveTx({ skipAll: true });
+			
+			// Delete local file
+			await IOUtils.remove(item.getFilePath());
+			
+			// File should be marked for download and not returned
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var changed = await Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID, [item.id]);
+			
+			await item.eraseTx();
+			
+			assert.isTrue(changed);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+		});
 	})
 	
 	describe("#updateSyncStates()", function () {
