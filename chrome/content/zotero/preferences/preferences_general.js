@@ -272,15 +272,8 @@ Zotero_Preferences.General = {
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 		const shouldRenameExisting = ps.confirmEx(null, title, description, buttonFlags, yes, no, null, null, {}) === 0;
 		if (shouldRenameExisting) {
-			let win = Services.wm.getMostRecentWindow("navigator:browser");
-			if (win) {
-				win.openDialog("chrome://zotero/content/renameFiles.xhtml",
-					"renameFiles", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", {});
-			}
-			else {
-				Services.ww.openWindow(null, "chrome://zotero/content/renameFiles.xhtml",
-					"renameFiles", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", {});
-			}
+			const { renameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			renameFiles();
 		}
 	},
 	

@@ -750,8 +750,8 @@ const ZoteroStandalone = new function() {
 	}
 
 	this.renameFilesBasedOnMetadata = function () {
-		Services.ww.openWindow(null, "chrome://zotero/content/renameFiles.xhtml",
-			"renameFiles", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", {});
+		const { renameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+		renameFiles();
 	};
 	
 	/**
