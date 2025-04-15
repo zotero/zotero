@@ -136,13 +136,12 @@ Zotero.Server.Connector.SessionManager = {
 	},
 	
 	gc: function () {
-		// Delete sessions older than 10 minutes, or older than 1 minute if more than 10 sessions
+		// Delete cancelled sessions and sessions older than 10 minutes, or older than 1 minute if more than 10 sessions
 		var ttl = this._sessions.size >= 10 ? 60 : 600;
 		var deleteBefore = new Date() - ttl * 1000;
-		
-		for (let session of this._sessions) {
-			if (session.created < deleteBefore) {
-				this._session.delete(session.id);
+		for (let [_, session] of this._sessions.entries()) {
+			if (session.created < deleteBefore || session.cancelled) {
+				this._sessions.delete(session.id);
 			}
 		}
 	}
@@ -153,6 +152,7 @@ Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
 	this.id = id;
 	this.created = new Date();
 	this.savingDone = false;
+	this.cancelled = false;
 	this.pendingAttachments = [];
 	this._action = action;
 	this._requestData = requestData;
@@ -220,7 +220,7 @@ Zotero.Server.Connector.SaveSession.prototype.isSavingDone = function () {
 	return this.savingDone
 		|| Object.values(this._progressItems).every(i => i.progress === 100 || typeof i.progress !== "number")
 		&& Object.values(this._progressItems).every((i) => {
-			return !i.attachments || i.attachments.every(a => a.progress === 100 || typeof i.progress !== "number");
+			return !i.attachments || i.attachments.every(a => a.progress === 100 || typeof a.progress !== "number");
 		});
 };
 
@@ -246,7 +246,7 @@ Zotero.Server.Connector.SaveSession.prototype.addItems = async function (items) 
 };
 
 Zotero.Server.Connector.SaveSession.prototype.remove = function () {
-	delete Zotero.Server.Connector.SessionManager._sessions[this.id];
+	Zotero.Server.Connector.SessionManager._sessions.delete(this.id);
 }
 
 /**
@@ -402,6 +402,65 @@ Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 		Zotero.logError(e);
 		Zotero.Prefs.clear('recentSaveTargets');
 	}
+};
+
+// Erase all items from the session.
+Zotero.Server.Connector.SaveSession.prototype.eraseItems = async function () {
+	await Zotero.DB.executeTransaction(async () => {
+		for (let item of [...this._items]) {
+			await item.erase();
+		}
+	});
+	this._items = new Set();
+};
+
+// Wait for all items to finish saving and delete them after. Used to undo the save session
+// without interfering with the translation or save process.
+Zotero.Server.Connector.SaveSession.prototype.eraseItemsWhenDone = function () {
+	return new Zotero.Promise(async (resolve) => {
+		// If the function was already called before, do nothing
+		if (this.eraseIntervalID) {
+			resolve(false);
+			return;
+		}
+
+		// Trash items so that they immediately leave the current view
+		await this.trashItems();
+	
+		let checkCount = 0;
+		const intervalDelay = 100;
+		const maxMinutes = 3;
+		// Every once in a while, check if saving is done, and when it is - delete all session items
+		this.eraseIntervalID = setInterval(async () => {
+			// In case any additional top-level items are added, make sure they are trashed too
+			await this.trashItems();
+			if (this.isSavingDone()) {
+				await this.eraseItems();
+				clearInterval(this.eraseIntervalID);
+				resolve(true);
+			}
+			// Ensure that even if something goes wrong, the loop breaks after 3 minutes
+			checkCount += 1;
+			if (checkCount > maxMinutes * 60 * 1000 / intervalDelay) {
+				clearInterval(this.eraseIntervalID);
+				resolve(false);
+			}
+		}, intervalDelay);
+	});
+};
+
+// Move all top-level items into trash. Used to cancel initiated saving of items from the connector.
+Zotero.Server.Connector.SaveSession.prototype.trashItems = async function () {
+	let topLevelItems = [...this._items].filter(item => item.isTopLevelItem() && !item.deleted);
+	if (topLevelItems.length === 0) return;
+	await Zotero.DB.executeTransaction(async () => {
+		for (let item of topLevelItems) {
+			item.deleted = true;
+			await item.save({
+				skipSelect: true
+			});
+		}
+	});
 };
 
 
@@ -1702,7 +1761,8 @@ Zotero.Server.Connector.Ping.prototype = {
 					googleDocsAddNoteEnabled: true,
 					googleDocsCitationExplorerEnabled: false,
 					translatorsHash,
-					sortedTranslatorHash
+					sortedTranslatorHash,
+					supportsSaveCancelling: true
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {
@@ -1944,5 +2004,40 @@ Zotero.Server.Connector.Request.prototype = {
 			headers,
 			body
 		})];
+	}
+};
+
+Zotero.Server.Connector.Cancel = function() {};
+Zotero.Server.Endpoints["/connector/cancel"] = Zotero.Server.Connector.Cancel;
+Zotero.Server.Connector.Cancel.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	
+	init: async function (request) {
+		let { sessionID } = request.data;
+		var session = Zotero.Server.Connector.SessionManager.get(sessionID);
+
+		// Session might not exist if the cancel button is clicked before any of /connector/save*
+		// endpoints are invoked, in which case the session is never created, so there's nothing to cancel
+		if (!session) {
+			return [200, "application/json", JSON.stringify({ status: "NO_SESSION" })];
+		}
+
+		if (session.cancelled) {
+			return [409, "application/json", JSON.stringify({ status: "ALREADY_CANCELLED" })];
+		}
+
+		session.cancelled = true;
+		let allDone = session.isSavingDone();
+		// If all items have been saved, delete them now
+		if (allDone) {
+			await session.eraseItems();
+		}
+		// Otherwise, wait for all items to finish saving and delete them then
+		else {
+			session.eraseItemsWhenDone();
+		}
+
+		return [200, "application/json", JSON.stringify({ status: allDone ? "CANCELLED" : "WILL_CANCEL" })];
 	}
 };
