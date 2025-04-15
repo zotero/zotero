@@ -59,7 +59,7 @@
 			let removeAllItemTags = this._id('remove-all-item-tags');
 			this._id('remove-all-item-tags').addEventListener('command', this.removeAll);
 			this.querySelector('.body').addEventListener('contextmenu', (event) => {
-				removeAllItemTags.disabled = !this.count;
+				removeAllItemTags.disabled = !this.editable || !this.count;
 				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 			// Register our observer with priority 101 (after Zotero.Tags) so we get updated tag colors
