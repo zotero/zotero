@@ -33,6 +33,7 @@
 			<abstract-box/>
 			<html:div class="attachments-preview"/>
 			<html:div class="notes-preview"/>
+			<tags-box/>
 		`);
 
 		_jsonItem = null;
@@ -68,10 +69,11 @@
 			if (!this.initialized) return;
 
 			let zoteroItem = new Zotero.Item();
+			zoteroItem.libraryID = Zotero.Libraries.userLibraryID;
 			zoteroItem.fromJSON(this._jsonItem);
 
-			let [diffBox, infoBox, abstractBox, attachmentsPreview, notesPreview] = this.children;
-			for (let box of [infoBox, abstractBox]) {
+			let [diffBox, infoBox, abstractBox, attachmentsPreview, notesPreview, tagsBox] = this.children;
+			for (let box of [infoBox, abstractBox, tagsBox]) {
 				box.mode = 'view';
 				box.editable = false;
 				box.item = zoteroItem;
