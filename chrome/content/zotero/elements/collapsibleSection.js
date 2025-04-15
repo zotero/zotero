@@ -372,11 +372,11 @@
 		}
 		
 		get _disableCollapsing() {
-			return !!this.closest('panel, menupopup, merge-pane');
+			return !!this.closest('panel, menupopup, merge-pane, scaffold-item-preview');
 		}
 
 		get _disableSavingOpenState() {
-			return !!this.closest('merge-pane');
+			return !!this.closest('merge-pane, scaffold-item-preview');
 		}
 
 		_handleClick = (event) => {
