@@ -4066,7 +4066,7 @@ for (let name of ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel',
 					break;
 				
 				case 'sortIndex':
-					if (!/^(\d{5}\|\d{6}\|\d{5}|\d{5}\|\d{8}|\d{8})$/.test(value)) {
+					if (!/^(\d{5}\|\d{6}\|\d{5}|\d{5}\|\d{8}|\d{7,8})$/.test(value)) {
 						throw new Error(`Invalid sortIndex '${value}'`);
 					}
 					break;
