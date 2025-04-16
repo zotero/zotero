@@ -717,3 +717,6 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
+note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
