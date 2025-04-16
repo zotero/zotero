@@ -3167,7 +3167,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Accessibility
 		div.setAttribute('role', 'treeitem');
 		div.setAttribute('aria-level', this.getLevel(index) + 1);
-		if (!this.isContainerEmpty(index)) {
+		if (this.isContainerEmpty(index)) {
+			div.removeAttribute('aria-expanded');
+		}
+		else {
 			div.setAttribute('aria-expanded', this.isContainerOpen(index));
 		}
 		if (rowData.contextRow) {
