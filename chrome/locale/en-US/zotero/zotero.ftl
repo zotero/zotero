@@ -160,6 +160,8 @@ item-menu-add-url =
      .label = Web Link
 item-menu-change-parent-item =
      .label = Change Parent Item…
+item-menu-update-metadata =
+     .label = Update Info
 
 view-online = View Online
 item-menu-option-view-online =

@@ -9,8 +9,10 @@
 @import "components/diffTable";
 @import "components/spinner";
 
-$-width: 650px;
-$-height: 550px;
+$-width: 700px;
+$-height: 450px;
+
+@include macOS-normalize-controls;
 
 :root {
 	min-width: $-width;
@@ -19,15 +21,37 @@ $-height: 550px;
 	height: $-height;
 	max-width: $-width;
 	max-height: $-height;
-	padding: 10px;
+	
+	padding: 16px;
 }
 
-#progress-indicator {
-	flex: 1;
-	margin-inline-end: 6px;
+label {
+	margin: 0;
+}
+
+#update-metadata-container {
+	gap: 8px;
+	padding-bottom: 16px;
+}
+
+#heuristic-group {
+	flex-direction: row;
 }
 
 #diff-table-container {
-	padding: 5px;
-	min-width: 100px;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	
+	> .diff-table {
+		flex: 1;
+	}
+}
+
+#button-bar {
+	gap: 8px;
+}
+
+#collapse-all-button {
+	margin-inline-end: auto;
 }

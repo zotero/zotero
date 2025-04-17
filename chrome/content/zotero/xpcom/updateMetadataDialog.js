@@ -98,25 +98,26 @@ Zotero.UpdateMetadataDialog = function (options) {
 	 */
 	async function _onWindowLoaded() {
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
-		_progressWindow.document.getElementById('cancel-button')
-		.addEventListener('command', () => {
+		
+		_progressWindow.document.getElementById('expand-all-button').addEventListener('command', () => {
+			options.onSetOpen(null, true);
+		});
+		_progressWindow.document.getElementById('collapse-all-button').addEventListener('command', () => {
+			options.onSetOpen(null, false);
+		});
+		
+		_progressWindow.document.getElementById('cancel-button').addEventListener('command', () => {
 			this.close();
 			options.onCancel();
 		}, false);
 
-		_progressWindow.document.getElementById('close-button')
-		.addEventListener('command', () => {
-			this.close();
-			options.onClose();
-		}, false);
-
-		_applyAll = _progressWindow.document.getElementById('apply-all-button');
+		_applyAll = _progressWindow.document.getElementById('apply-updates-button');
 		_applyAll.addEventListener('command', () => {
 			options.onApplyAll();
 		}, false);
 
-		_progressWindow.addEventListener('keypress', function (e) {
-			if (e.keyCode === _progressWindow.KeyEvent.DOM_VK_ESCAPE) {
+		_progressWindow.addEventListener('keypress', (e) => {
+			if (e.key === 'Escape') {
 				options.onPressEscape();
 			}
 		});
@@ -142,12 +143,10 @@ Zotero.UpdateMetadataDialog = function (options) {
 		_progressIndicator.value = processed * 100 / total;
 		if (processed === total) {
 			_progressWindow.document.getElementById('cancel-button').hidden = true;
-			_progressWindow.document.getElementById('close-button').hidden = false;
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.finished');
 		}
 		else {
 			_progressWindow.document.getElementById('cancel-button').hidden = false;
-			_progressWindow.document.getElementById('close-button').hidden = true;
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.processing');
 		}
 	}

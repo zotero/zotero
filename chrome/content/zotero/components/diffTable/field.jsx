@@ -33,7 +33,7 @@ const diffInstance = new Diff();
 const MAX_DIFF_SEGMENT_LENGTH = 60;
 
 const Field = (props) => {
-	const { itemID, field, readonly, onToggle, onExpand } = props;
+	const { itemID, field, readonly, onSetDisabled, onExpand } = props;
 	const { fieldName, fieldLabel, oldLabel, newLabel, isDisabled, canAbbreviate = true } = field;
 
 	function cut(str, index) {
@@ -58,44 +58,35 @@ const Field = (props) => {
 	}
 
 	function shrink(str, pos) {
+		let ellipsis = Zotero.getString('punctuation.ellipsis');
 		if (pos === 'start' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
-			return [
-				<a key={0} href="#" onClick={expand}>…</a>,
-				str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).replace(/^\s+/, '')
-			];
+			return ellipsis
+				+ str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).replace(/^\s+/, '');
 		}
 		else if (pos === 'middle' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
-			return [
-				str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)),
-				<a key={0} href="#" onClick={expand}>[…]</a>,
-				str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1))
-			];
+			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1))
+				+ ellipsis
+				+ str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
 		}
 		else if (pos === 'end' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
-			return [
-				str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)),
-				<a key={0} href="#" onClick={expand}>…</a>
-			];
+			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1))
+				+ ellipsis;
 		}
 		else if (pos === 'single' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
-			return [
-				str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH - 1)),
-				<a key={0} href="#" onClick={expand}>…</a>
-			];
+			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH - 1))
+				+ ellipsis;
 		}
 
 		return str;
 	}
 
 	function handleClick(event) {
-		if (!readonly && !event.target.closest('a')) {
-			onToggle(itemID, fieldName, !isDisabled);
-		}
-	}
-
-	function expand(event) {
 		onExpand(itemID, fieldName);
 		event.preventDefault();
+	}
+
+	function handleCheckboxChange(event) {
+		onSetDisabled(itemID, fieldName, !event.target.checked);
 	}
 
 	function getDiff(oldValue, newValue, canAbbreviate) {
@@ -147,13 +138,20 @@ const Field = (props) => {
 
 	let diff = useMemo(() => getDiff(oldLabel, newLabel, canAbbreviate), [oldLabel, newLabel, canAbbreviate]);
 
+	let id = `${itemID}-${fieldName}`;
 	return (
-		<div
-			className={cx('diff-table-field', { disabled: isDisabled, readonly: readonly })}
-			onClick={handleClick}
-		>
-			<div className="name">{newLabel ? fieldLabel + ':' : <s>{fieldLabel}:</s>}</div>
-			<div className="value">{diff}</div>
+		<div className={cx('diff-table-field', { disabled: isDisabled, readonly: readonly })}>
+			<div className="checkbox-name-wrapper">
+				<input
+					id={id}
+					className="checkbox"
+					type="checkbox"
+					checked={!isDisabled}
+					onChange={handleCheckboxChange}
+				/>
+				<label className="name" htmlFor={id}>{fieldLabel}</label>
+			</div>
+			<div className="value" onClick={handleClick}>{diff}</div>
 		</div>
 	);
 };
@@ -162,7 +160,7 @@ Field.propTypes = {
 	itemID: PropTypes.number.isRequired,
 	readonly: PropTypes.bool.isRequired,
 	field: PropTypes.object.isRequired,
-	onToggle: PropTypes.func.isRequired,
+	onSetDisabled: PropTypes.func.isRequired,
 	onExpand: PropTypes.func.isRequired
 };
 

@@ -12,7 +12,6 @@
 		data-l10n-id="update-metadata-window">
 	<script>
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/updateMetadataDialog.js", this);
 	</script>
 	
@@ -26,16 +25,22 @@
 	
 	<vbox id="update-metadata-container" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
-		<hbox align="center">
-			<html:progress id="progress-indicator"/>
-			<button id="cancel-button" data-l10n-id="update-metadata-cancel"/>
-			<button id="close-button" data-l10n-id="update-metadata-done"/>
-		</hbox>
+		<html:progress id="progress-indicator"/>
+		<radiogroup id="heuristic-group">
+			<label id="label-heuristic" control="heuristic-group">Update:</label>
+			<radio label="Everything"/>
+			<radio label="Avoid Clearing Existing Fields"/>
+		</radiogroup>
 		<html:div id="diff-table-container"></html:div>
-		<hbox align="right">
-			<button id="apply-all-button" default="true" data-l10n-id="update-metadata-apply-all"/>
-		</hbox>
 	</vbox>
+	
+	<hbox id="button-bar">
+		<button id="expand-all-button" data-l10n-id="update-metadata-expand-all"/>
+		<button id="collapse-all-button" data-l10n-id="update-metadata-collapse-all"/>
+		
+		<button id="cancel-button" data-l10n-id="update-metadata-cancel"/>
+		<button id="apply-updates-button" data-l10n-id="update-metadata-apply-updates" default="true"/>
+	</hbox>
 
 	<keyset>
 		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>

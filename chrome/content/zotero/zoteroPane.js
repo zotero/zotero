@@ -106,7 +106,7 @@ var ZoteroPane = new function()
 		}
 
 		// A toolbar icon for the update metadata dialog
-		let button = document.createElement('toolbarbutton');
+		let button = document.createXULElement('toolbarbutton');
 		button.id = 'zotero-tb-pq-update';
 		button.hidden = Zotero.UpdateMetadata.getRowsCount() < 1;
 		button.addEventListener('command', function () {
@@ -4024,7 +4024,6 @@ var ZoteroPane = new function()
 
 		// Set labels, plural if necessary
 		menu.childNodes[m.findFile].setAttribute('label', Zotero.getString('pane.items.menu.findAvailableFile'));
-		menu.childNodes[m.updateMetadata].setAttribute('label', Zotero.getString('pane.items.menu.updateMetadata' + multiple));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete'));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString(`pane.items.menu.export${noteExport ? 'Note' : ''}` + multiple));

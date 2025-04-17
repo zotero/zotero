@@ -35,11 +35,7 @@ var Zotero_UpdateMetadataDialog = {
 			let diffTableContainer = document.getElementById('diff-table-container');
 			ReactDOM.createRoot(diffTableContainer).render(
 				<DiffTable
-					onToggle={options.onToggle}
-					onExpand={options.onExpand}
-					onIgnore={options.onIgnore}
-					onOpenItem={options.onOpenItem}
-					onApply={options.onApply}
+					{...options}
 					ref={ref => resolve(ref)}
 				/>
 			);

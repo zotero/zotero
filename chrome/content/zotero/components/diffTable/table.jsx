@@ -23,10 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React, { useState, useImperativeHandle } from 'react';
+import React, { useState, useImperativeHandle, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-
-import { CSSIcon } from '../icons';
+import cx from 'classnames';
 
 import Field from './field';
 
@@ -37,92 +36,147 @@ const Table = React.forwardRef((props, ref) => {
 		setRows
 	}));
 
-	function handleFieldToggle(itemID, fieldName) {
-		props.onToggle(itemID, fieldName);
-	}
-
-	function handleFieldExpand(itemID, fieldName) {
-		props.onExpand(itemID, fieldName);
-	}
-
-	function handleMouseDown(event) {
-		if (!event.target.closest('.value')) {
-			let win = event.target.ownerDocument.defaultView;
-			win.getSelection().removeAllRanges();
-		}
-	}
-
 	return (
-		<div className="diff-table" onMouseDown={handleMouseDown}>
+		<div className="diff-table">
 			<div className="body">
-				{rows.map((row) => {
-					const isDone = row.fields.length === 0 || row.isDone;
-					const hasPendingChanges = row.fields.find(field => !field.isDisabled);
-
-					return (<div key={row.itemID} className="row">
-						<div className="right fields-view">
-							<div className="header" onClick={() => props.onOpenItem(row.itemID)}>
-								<div className="status">
-									{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && isDone && <CSSIcon name="tick"/>
-									|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <CSSIcon name="edit"/>
-									|| row.status === Zotero.UpdateMetadata.ROW_PROCESSING && <div className="icon zotero-spinner-16" status="animate"/>
-									|| row.status === Zotero.UpdateMetadata.ROW_FAILED && <CSSIcon name="cross"/>
-									|| row.status === Zotero.UpdateMetadata.ROW_NO_METADATA && <CSSIcon name="error"/>
-									|| <CSSIcon name="aaa"/>}
-								</div>
-								<div className="title">{row.title}</div>
-							</div>
-							{row.message && <div className="message">{row.message}</div>}
-							<div className="fields">
-								{row.fields.map(field => (
-									<Field
-										key={field.fieldName}
-										itemID={row.itemID}
-										readonly={row.isDone}
-										field={field}
-										onToggle={handleFieldToggle}
-										onExpand={handleFieldExpand}
-									/>
-								))}
-							</div>
-							{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && !isDone && (
-								<div className="footer">
-									<button
-										className="toggle-button"
-										onClick={() => props.onToggle(row.itemID)}>
-										{Zotero.getString(
-											hasPendingChanges ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'
-										)}
-									</button>
-									<div className="spacer"></div>
-									<button
-										className="ignore-button"
-										onClick={ () => props.onIgnore(row.itemID) }
-										data-l10n-id="update-metadata-ignore"
-									/>
-									<button
-										className="apply-button"
-										default={ true }
-										disabled={ !hasPendingChanges }
-										onClick={ () => props.onApply(row.itemID) }
-										data-l10n-id="update-metadata-apply"
-									/>
-								</div>
-							)}
-							<div className="separator"></div>
-						</div>
-					</div>);
-				})}
+				{rows.map(row => (
+					<TableRow
+						key={row.itemID}
+						row={row}
+						onSetOpen={props.onSetOpen}
+						onSetDisabled={props.onSetDisabled}
+						onExpand={props.onExpand}
+					/>
+				))}
 			</div>
 		</div>
 	);
 });
 
 Table.propTypes = {
-	onToggle: PropTypes.func,
-	onApply: PropTypes.func,
-	onIgnore: PropTypes.func,
-	onOpenItem: PropTypes.func
+	onSetOpen: PropTypes.func,
+	onSetDisabled: PropTypes.func,
+	onExpand: PropTypes.func,
+};
+
+const TableRow = (props) => {
+	let { row, onSetOpen, onSetDisabled, onExpand } = props;
+
+	const isEmpty = !row.fields.length;
+	const isOpen = !isEmpty && row.isOpen;
+	const numEnabledFields = row.fields.filter(field => !field.isDisabled).length;
+
+	let checkboxRef = useRef();
+
+	function handleToggleOpen() {
+		onSetOpen(row.itemID, !row.isOpen);
+	}
+	
+	function handleCheckboxChange() {
+		onSetDisabled(row.itemID, null, !checkboxRef.current.checked);
+	}
+
+	function handleFieldSetDisabled(itemID, fieldName, disabled) {
+		onSetDisabled(itemID, fieldName, disabled);
+	}
+
+	function handleFieldExpand(itemID, fieldName) {
+		onExpand(itemID, fieldName);
+	}
+	
+	useEffect(() => {
+		let checkbox = checkboxRef.current;
+		if (!checkbox) {
+			return;
+		}
+		if (numEnabledFields === 0) {
+			checkbox.indeterminate = false;
+			checkbox.checked = false;
+		}
+		else if (numEnabledFields === row.fields.length) {
+			checkbox.indeterminate = false;
+			checkbox.checked = true;
+		}
+		else {
+			checkbox.indeterminate = true;
+			checkbox.checked = false;
+		}
+	});
+	
+	return (<div key={row.itemID} className="row">
+		{row.status === Zotero.UpdateMetadata.ROW_PROCESSING && (
+			<div className="controls processing">
+				<div className="icon zotero-spinner-16" status="animate"/>
+			</div>
+		)}
+		{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && !isEmpty && (
+			<div className="controls succeeded">
+				<div
+					className={cx('twisty', { open: isOpen })}
+					onClick={handleToggleOpen}
+				/>
+				<input
+					type="checkbox"
+					onChange={handleCheckboxChange}
+					ref={checkboxRef}
+				/>
+			</div>
+		)}
+		<div
+			className="title"
+			role={isEmpty ? '' : 'button'}
+			aria-expanded={isOpen}
+			onClick={handleToggleOpen}
+		>
+			{row.title}
+		</div>
+		{!isOpen && <div className="message">
+			{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && !isEmpty
+				? <Summary fields={row.fields}/>
+				: row.message}
+		</div>}
+		{isOpen && <div className="fields">
+			{row.fields.map(field => (
+				<Field
+					key={field.fieldName}
+					itemID={row.itemID}
+					readonly={row.isDone}
+					field={field}
+					onSetDisabled={handleFieldSetDisabled}
+					onExpand={handleFieldExpand}
+				/>
+			))}
+		</div>}
+	</div>);
+};
+
+TableRow.propTypes = {
+	row: PropTypes.object.isRequired,
+	onSetOpen: PropTypes.func,
+	onSetDisabled: PropTypes.func.isRequired,
+	onExpand: PropTypes.func.isRequired,
+};
+
+const Summary = (props) => {
+	let { fields } = props;
+	
+	return <div className="summary">
+		{fields.flatMap((field, i) => {
+			let label = field.isDisabled
+				? <s key={i}>{field.fieldLabel}</s>
+				: field.fieldLabel;
+			if (i < fields.length - 1) {
+				return [label, ', '];
+			}
+			else {
+				return [label];
+			}
+		})}
+	</div>;
+};
+
+Summary.propTypes = {
+	fields: PropTypes.array.isRequired,
 };
 
 export default Table;

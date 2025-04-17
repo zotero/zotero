@@ -35,17 +35,32 @@ Zotero.UpdateMetadata = new function () {
 		onInit() {
 			_update();
 		},
-		onToggle(itemID, fieldName) {
+		onSetOpen(itemID, isOpen) {
+			// Open/close all if no itemID passed
+			if (!itemID) {
+				for (let row of _rows) {
+					row.isOpen = isOpen;
+				}
+				_update();
+			}
+			else {
+				let row = _rows.find(row => row.itemID === itemID);
+				if (row) {
+					row.isOpen = isOpen;
+					_update();
+				}
+			}
+		},
+		onSetDisabled(itemID, fieldName, disabled) {
 			let row = _rows.find(row => row.itemID === itemID);
 			if (row) {
 				// Toggle all if no field is passed or item type is changed
 				if (!fieldName || _isItemTypeChanged(row)) {
-					let hasEnabledFields = row.fields.find(field => !field.isDisabled);
-					row.fields.forEach(field => field.isDisabled = hasEnabledFields);
+					row.fields.forEach(field => field.isDisabled = disabled);
 				}
 				else {
 					let field = row.fields.find(x => x.fieldName === fieldName);
-					field.isDisabled = !field.isDisabled;
+					field.isDisabled = disabled;
 				}
 			}
 			_update();
@@ -58,34 +73,10 @@ Zotero.UpdateMetadata = new function () {
 			}
 			_update();
 		},
-		onIgnore(itemID) {
-			let row = _rows.find(row => row.itemID === itemID);
-			if (row) {
-				// If we click ignore, set all fields to disabled since we are not
-				// making any changes
-				for (let field of row.fields) {
-					field.isDisabled = true;
-				}
-				row.isDone = true;
-				_update();
-			}
-		},
-		onOpenItem(itemID) {
-			let win = Services.wm.getMostRecentWindow('navigator:browser');
-			if (win) {
-				win.ZoteroPane.selectItem(itemID, false, true);
-				win.focus();
-			}
-		},
-		async onApply(itemID) {
-			let row = _rows.find(row => row.itemID === itemID);
-			if (row) {
-				await _apply(row);
-				_update();
-			}
-		},
 		async onApplyAll() {
 			await Zotero.Promise.all(_rows.map(row => _apply(row)));
+			_dialog.close();
+			_rows = [];
 			_update();
 		},
 		onCancel() {
@@ -170,8 +161,7 @@ Zotero.UpdateMetadata = new function () {
 		for (let item of items) {
 			let existingRowIdx = _rows.findIndex(row => row.itemID === item.id);
 			if (!this.canUpdate(item)
-				|| existingRowIdx >= 0
-				&& _rows[existingRowIdx].status === Zotero.UpdateMetadata.ROW_PROCESSING) {
+				|| existingRowIdx >= 0 && _rows[existingRowIdx].status === Zotero.UpdateMetadata.ROW_PROCESSING) {
 				continue;
 			}
 
@@ -181,8 +171,7 @@ Zotero.UpdateMetadata = new function () {
 				message: '',
 				title: item.getField('title', false, true),
 				fields: [],
-				accepted: {},
-				isDone: false
+				isOpen: false,
 			};
 
 			if (existingRowIdx >= 0) {
@@ -760,7 +749,6 @@ Zotero.UpdateMetadata = new function () {
 			}
 		}
 		await item.saveTx();
-		row.isDone = true;
 	}
 };
 
