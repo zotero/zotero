@@ -72,6 +72,13 @@ const TableRow = (props) => {
 		onSetOpen(row.itemID, !row.isOpen);
 	}
 	
+	function handleToggleKeyDown(event) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			handleToggleOpen();
+		}
+	}
+	
 	function handleCheckboxChange() {
 		onSetDisabled(row.itemID, null, !checkboxRef.current.checked);
 	}
@@ -126,7 +133,9 @@ const TableRow = (props) => {
 			className="title"
 			role={isEmpty ? '' : 'button'}
 			aria-expanded={isOpen}
+			tabIndex={0}
 			onClick={handleToggleOpen}
+			onKeyDown={handleToggleKeyDown}
 		>
 			{row.title}
 		</div>
