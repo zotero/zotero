@@ -3945,16 +3945,6 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		// Remove irrelevant options when all nnotations are selected
-		let allAnnotations = items.every(item => item.isAnnotation());
-		if (allAnnotations) {
-			show.delete(m.exportItems);
-			show.delete(m.createBib);
-			show.delete(m.loadReport);
-			show.delete(m.moveToTrash);
-			show.delete(m.duplicateItem);
-		}
-		
 		// Disable Create Bibliography if no regular items
 		if (show.has(m.createBib) && !items.some(item => item.isRegularItem())) {
 			show.delete(m.createBib);
@@ -4030,6 +4020,17 @@ var ZoteroPane = new function()
 			show.add(m.changeParentItem);
 		}
 
+		// Only keep annotations-specitic options if annotations are selected
+		let annotationsSelected = items.some(item => item.isAnnotation());
+		if (annotationsSelected) {
+			for (let i in m) {
+				if (i == 'createNoteFromAnnotations') {
+					continue;
+				}
+				show.delete(m[i]);
+			}
+		}
+
 		// Set labels, plural if necessary
 		menu.childNodes[m.findFile].setAttribute('label', Zotero.getString('pane.items.menu.findAvailableFile'));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
@@ -4056,7 +4057,10 @@ var ZoteroPane = new function()
 		for (let x of show) {
 			menu.childNodes[x].setAttribute('hidden', false);
 		}
-		
+
+		// No locate menu options if annotations are selected
+		if (annotationsSelected) return;
+
 		// add locate menu options
 		yield Zotero_LocateMenu.buildContextMenu(menu, true);
 	});
