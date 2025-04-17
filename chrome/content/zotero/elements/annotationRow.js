@@ -84,20 +84,18 @@
 			if (['image', 'ink'].includes(this._annotation.annotationType)) {
 				let imagePath = Zotero.Annotations.getCacheImagePath(this._annotation);
 				if (imagePath) {
-					// If the file actually exists, display it. Otherwise, show a placeholder.
-					let file = Zotero.File.pathToFile(imagePath);
-					if (file.exists()) {
-						let img = document.createElement('img');
-						img.src = Zotero.File.pathToFileURI(imagePath);
-						img.draggable = false;
-						this._body.append(img);
-					}
-					else {
+					let img = document.createElement('img');
+					img.src = Zotero.File.pathToFileURI(imagePath);
+					img.draggable = false;
+					this._body.append(img);
+					// if the image could not be loaded for some reason (e.g. file is not there),
+					// show a placeholder text
+					img.addEventListener('error', () => {
 						let placeholder = document.createElement('div');
 						placeholder.classList.add('comment');
 						document.l10n.setAttributes(placeholder, 'annotation-image-not-found');
-						this._body.append(placeholder);
-					}
+						this._body.replaceChildren(placeholder);
+					});
 				}
 			}
 			
