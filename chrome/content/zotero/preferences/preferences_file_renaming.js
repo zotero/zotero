@@ -1,9 +1,9 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
     
-    Copyright © Corporation for Digital Scholarship
-                Vienna, Virginia, USA
-                https://www.zotero.org
+	Copyright © Corporation for Digital Scholarship
+				Vienna, Virginia, USA
+				https://www.zotero.org
     
 	This file is part of Zotero.
     
@@ -27,22 +27,29 @@
 Zotero_Preferences.FileRenaming = {
 	mockItem: null,
 	defaultExt: 'pdf',
-	origTemplate: null,
-	
+	hasPromptedOrIsRenaming: false,
+
 	init: function () {
 		this.origTemplate = Zotero.Prefs.get('attachmentRenameTemplate');
+		this.isTemplateInSync = Zotero.Prefs.get('autoRenameFiles.done');
 		this.inputEl = document.getElementById('file-renaming-format-template');
 		this.backButtonEl = document.getElementById('prefs-subpane-back-button');
 		this.navigationEl = document.getElementById('prefs-navigation');
 		this.renameNowBtnEl = document.getElementById('file-renaming-rename-now');
+
 		this.updatePreview();
-		this.inputEl.addEventListener('input', this.updatePreview.bind(this));
+		this.inputEl.addEventListener('input', this.handleInputChange.bind(this));
 		this.inputEl.addEventListener('blur', this.handleInputBlur.bind(this));
+		this.renameNowBtnEl.addEventListener('command', this.renameNow.bind(this));
+		this.renameNowBtnEl.setAttribute('disabled', Zotero.Prefs.get('autoRenameFiles.done'));
+		this.prevFormatString = this.inputEl.value;
 
 		this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
 		this._updatePreview = this.updatePreview.bind(this);
 		this._promptReplace = this.promptReplace.bind(this);
-		this._renameNow = this.renameNow.bind(this);
+		this._handleDonePrefChange = this.handleDonePrefChange.bind(this);
+
+		Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleDonePrefChange);
 
 		if (this._itemsView) {
 			this._itemsView.onSelect.addListener(this._updatePreview);
@@ -53,22 +60,52 @@ Zotero_Preferences.FileRenaming = {
 		if (this.navigationEl) {
 			this.navigationEl.addEventListener('select', this._promptReplace);
 		}
-		if (this.renameNowBtnEl) {
-			this.renameNowBtnEl.addEventListener('command', this._renameNow);
-		}
 	},
 
 	uninit: function () {
 		this._itemsView.onSelect.removeListener(this._updatePreview);
 		this.backButtonEl.removeEventListener('command', this._promptReplace);
 		this.navigationEl.removeEventListener('select', this._promptReplace);
-		this.renameNowBtnEl.removeEventListener('command', this._renameNow);
+		Zotero.Prefs.unregisterObserver('autoRenameFiles.done', this._handleDonePrefChange);
 		this.promptReplace();
 	},
 
-	promptReplace: function () {
-		if (this.inputEl.value !== this.origTemplate) {
+	handleInputChange() {
+		const formatString = this.inputEl.value;
+		if (formatString.trim() === this.prevFormatString.trim()) {
+			return;
+		}
+		this.updatePreview();
+		// reset 'done' to enable the rename button, set it to `false` if the
+		// template is out of sync (e.g., the user changed it and declined
+		// renaming) or if the new template has changed
+		Zotero.Prefs.set('autoRenameFiles.done', this.isTemplateInSync ? formatString === this.origTemplate : false);
+	},
+
+	handleInputBlur() {
+		const formatString = this.inputEl.value;
+		const prefKey = this.inputEl.getAttribute('preference');
+		if (formatString.replace(/\s/g, '') === '') {
+			Zotero.Prefs.clear(prefKey, true);
+			this.updatePreview();
+		}
+	},
+
+	handleDonePrefChange(newValue) {
+		this.renameNowBtnEl.setAttribute('disabled', newValue);
+
+		// renaming has finished, store the new value of the template and reset the flags
+		if (newValue) {
 			this.origTemplate = Zotero.Prefs.get('attachmentRenameTemplate');
+			this.isTemplateInSync = true;
+			this.hasPromptedOrIsRenaming = false;
+		}
+	},
+
+	promptReplace: function () {
+		if (!this.hasPromptedOrIsRenaming && !Zotero.Prefs.get('autoRenameFiles.done')) {
+			// Set the flag to avoid repeating the prompt while renaming is in progress or user declined renaming
+			this.hasPromptedOrIsRenaming = true;
 			Zotero_Preferences.General.promptAutoRenameFiles();
 		}
 	},
@@ -99,17 +136,8 @@ Zotero_Preferences.FileRenaming = {
 	async renameNow() {
 		const { renameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 		this.renameNowBtnEl.setAttribute('disabled', 'true');
+		this.hasPromptedOrIsRenaming = true;
 		await renameFiles();
-		this.renameNowBtnEl.removeAttribute('disabled');
-	},
-
-	handleInputBlur() {
-		const formatString = this.inputEl.value;
-		const prefKey = this.inputEl.getAttribute('preference');
-		if (formatString.replace(/\s/g, '') === '') {
-			Zotero.Prefs.clear(prefKey, true);
-			this.updatePreview();
-		}
 	},
 
 	makeMockItem() {

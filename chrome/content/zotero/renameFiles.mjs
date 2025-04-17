@@ -29,7 +29,7 @@ const clamp = (val, min = 0, max = 1.0) => Math.min(Math.max(val, min), max);
 
 export async function renameFiles() {
 	const t1 = Date.now();
-	let progress = 0;	
+	let progress = 0;
 	let adjustProgressBy = (additionalProgress) => {
 		progress = clamp(progress + additionalProgress);
 		Zotero.updateZoteroPaneProgressMeter(
@@ -95,5 +95,6 @@ export async function renameFiles() {
 	}
 	const t2 = Date.now();
 	Zotero.debug(`Renamed ${count} attachments in ${((t2 - t1) / 1000).toFixed(2)} seconds`);
+	Zotero.Prefs.set('autoRenameFiles.done', true);
 	Zotero.hideZoteroPaneOverlays();
 };
