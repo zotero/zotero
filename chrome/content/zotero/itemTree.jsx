@@ -1778,10 +1778,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			let item = this.getRow(i).ref;
 			let attachments = item.isRegularItem() ? item.getAttachments() : [];
-			if (attachments.some(id => searchParentIDs.has(id))) {
-				this.toggleOpenState(i, true);
-			}
-			if (searchParentIDs.has(item.id)) {
+			// expand item row if it is a parent of a match
+			// OR if it has a child that is a parent of a match
+			let shouldBeOpened = searchParentIDs.has(item.id) || attachments.some(id => searchParentIDs.has(id));
+			if (shouldBeOpened) {
 				this.toggleOpenState(i, true);
 			}
 		}
