@@ -592,6 +592,8 @@ toggle-preview =
             *[unknown] Toggle
     } Attachment Preview
 
+annotation-image-not-found = [Image not available]
+
 quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
