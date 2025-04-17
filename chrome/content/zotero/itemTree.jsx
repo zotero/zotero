@@ -2323,6 +2323,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return false;
 					}
 
+					// Disallow drop of annotation items
+					if (item.isAnnotation()) {
+						return false;
+					}
+
 					// Disallow cross-library child drag
 					if (item.libraryID != collectionTreeRow.ref.libraryID) {
 						return false;
@@ -2342,6 +2347,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				for (let item of items) {
 					// Don't allow drag if any top-level items
 					if (item.isTopLevelItem()) {
+						return false;
+					}
+
+					// Disallow drop of annotation items
+					if (item.isAnnotation()) {
 						return false;
 					}
 
