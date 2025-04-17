@@ -28,6 +28,8 @@ preferences-file-renaming-customize-button =
 preferences-file-renaming-auto-rename-prompt-title = Rename existing files?
 preferences-file-renaming-auto-rename-prompt-body = { -app-name } can rename existing files in your library. Would you like to rename existing files now?
 preferences-file-renaming-auto-rename-prompt-yes = Rename Files
+preferences-file-renaming-rename-now =
+    .label = Rename Files Now
     
 
 preferences-file-renaming-format-title = Filename Format

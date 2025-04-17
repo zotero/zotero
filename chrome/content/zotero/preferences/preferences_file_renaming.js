@@ -34,6 +34,7 @@ Zotero_Preferences.FileRenaming = {
 		this.inputEl = document.getElementById('file-renaming-format-template');
 		this.backButtonEl = document.getElementById('prefs-subpane-back-button');
 		this.navigationEl = document.getElementById('prefs-navigation');
+		this.renameNowBtnEl = document.getElementById('file-renaming-rename-now');
 		this.updatePreview();
 		this.inputEl.addEventListener('input', this.updatePreview.bind(this));
 		this.inputEl.addEventListener('blur', this.handleInputBlur.bind(this));
@@ -41,6 +42,7 @@ Zotero_Preferences.FileRenaming = {
 		this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
 		this._updatePreview = this.updatePreview.bind(this);
 		this._promptReplace = this.promptReplace.bind(this);
+		this._renameNow = this.renameNow.bind(this);
 
 		if (this._itemsView) {
 			this._itemsView.onSelect.addListener(this._updatePreview);
@@ -51,12 +53,16 @@ Zotero_Preferences.FileRenaming = {
 		if (this.navigationEl) {
 			this.navigationEl.addEventListener('select', this._promptReplace);
 		}
+		if (this.renameNowBtnEl) {
+			this.renameNowBtnEl.addEventListener('command', this._renameNow);
+		}
 	},
 
 	uninit: function () {
 		this._itemsView.onSelect.removeListener(this._updatePreview);
 		this.backButtonEl.removeEventListener('command', this._promptReplace);
 		this.navigationEl.removeEventListener('select', this._promptReplace);
+		this.renameNowBtnEl.removeEventListener('command', this._renameNow);
 		this.promptReplace();
 	},
 
@@ -88,6 +94,13 @@ Zotero_Preferences.FileRenaming = {
 		const formatString = this.inputEl.value;
 		const preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
 		document.getElementById('file-renaming-format-preview').innerText = `${preview}.${ext}`;
+	},
+
+	async renameNow() {
+		const { renameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+		this.renameNowBtnEl.setAttribute('disabled', 'true');
+		await renameFiles();
+		this.renameNowBtnEl.removeAttribute('disabled');
 	},
 
 	handleInputBlur() {

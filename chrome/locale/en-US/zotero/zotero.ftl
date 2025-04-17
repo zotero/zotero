@@ -717,6 +717,3 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-
-rename-files-based-on-metadata =
-    .label = Rename Files Based on Metadata
