@@ -75,7 +75,15 @@ const TableRow = (props) => {
 	function handleToggleKeyDown(event) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			handleToggleOpen();
+			onSetOpen(row.itemID, !row.isOpen);
+		}
+		else if (event.key === Zotero.arrowPreviousKey) {
+			event.preventDefault();
+			onSetOpen(row.itemID, false);
+		}
+		else if (event.key === Zotero.arrowNextKey) {
+			event.preventDefault();
+			onSetOpen(row.itemID, true);
 		}
 	}
 	
