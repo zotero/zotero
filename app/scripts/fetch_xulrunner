@@ -398,6 +398,9 @@ function modify_omni {
 	# Remove non-native text input styles
 	remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
 	
+	# Prevent window dragging on scrollbars
+	echo 'scrollbar { -moz-window-dragging: no-drag; }' >> chrome/toolkit/res/scrollbars.css
+	
 	# Provide a mechanism for non-UA stylesheets to override the overflow property
 	# of a text control's anonymous text node child
 	echo '::placeholder, ::-moz-text-control-editing-root, ::-moz-text-control-preview {
