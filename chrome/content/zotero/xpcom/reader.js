@@ -55,6 +55,7 @@ class ReaderInstance {
 		});
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
+		this._resolvedReferences = new Map();
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -575,6 +576,81 @@ class ReaderInstance {
 			},
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
+			},
+			onRecognizeReference: async (reference, callback) => {
+				let item = await Zotero.RecognizeReference.match(reference, this._item.libraryID);
+				if (!item) {
+					let text = reference.map(item => item.text).join('');
+					item = this._resolvedReferences.get(text);
+					if (!item) {
+						item = await Zotero.RecognizeReference.resolve(reference, this._item.libraryID);
+						if (item) {
+							this._resolvedReferences.set(text, item);
+						}
+					}
+				}
+				if (item) {
+					let attachment = await item.getBestAttachment();
+					let attachmentID;
+					if (attachment) {
+						attachmentID = attachment.id;
+					}
+					item = {
+						itemID: item.itemID,
+						title: item.getField('title'),
+						creator: item.getField('firstCreator'),
+						year: item.getField('year'),
+						url: item.getField('url'),
+						abstract: item.getField('abstractNote'),
+						attachmentID,
+					};
+				}
+				item = Components.utils.cloneInto(item, this._iframeWindow);
+				callback(item);
+			},
+			onAddToLibrary: async (reference, callback) => {
+				let text = reference.map(item => item.text).join('');
+				let item = this._resolvedReferences.get(text);
+				if (item) {
+					item = item.clone();
+					item.libraryID = this._item.libraryID;
+					await item.saveTx();
+					await Zotero.Attachments.addAvailableFile(item);
+					let attachment = await item.getBestAttachment();
+					let attachmentID;
+					if (attachment) {
+						attachmentID = attachment.id;
+					}
+					item = {
+						itemID: item.id,
+						title: item.getField('title'),
+						creator: item.getField('firstCreator'),
+						year: item.getField('year'),
+						url: item.getField('url'),
+						abstract: item.getField('abstractNote'),
+						attachmentID
+					};
+					item = Components.utils.cloneInto(item, this._iframeWindow);
+					callback(item);
+					return;
+				}
+				callback();
+			},
+			onShowInLibrary: async (itemID) => {
+				let win = Zotero.getMainWindow();
+				if (win) {
+					win.ZoteroPane.selectItems([itemID]);
+					win.focus();
+				}
+			},
+			onOpenInReader: async(attachmentID) => {
+				let zp = Zotero.getActiveZoteroPane();
+				if (zp) {
+					let item = await Zotero.Items.get(attachmentID);
+					if (item) {
+						zp.viewPDF(item.id);
+					}
+				}
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 
