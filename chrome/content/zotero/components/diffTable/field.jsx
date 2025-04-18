@@ -98,7 +98,7 @@ const Field = (props) => {
 		var diffs = diffInstance.diff_main(wordText1, wordText2, false);
 		// We're really converting back to words, not lines, but diff_charsToLines_ does the trick
 		diffInstance.diff_charsToLines_(diffs, wordArray);
-		// diffInstance.diff_cleanupSemantic(diffs);
+		diffInstance.diff_cleanupSemantic(diffs);
 
 		if (!diffs) return [];
 
