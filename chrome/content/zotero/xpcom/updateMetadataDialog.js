@@ -142,11 +142,9 @@ Zotero.UpdateMetadataDialog = function (options) {
 		if (!_progressWindow || !total) return;
 		_progressIndicator.value = processed * 100 / total;
 		if (processed === total) {
-			_progressWindow.document.getElementById('cancel-button').hidden = true;
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.finished');
 		}
 		else {
-			_progressWindow.document.getElementById('cancel-button').hidden = false;
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.processing');
 		}
 	}
