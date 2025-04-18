@@ -717,3 +717,5 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+annotation-image-not-found = [Image not available]
