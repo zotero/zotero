@@ -676,6 +676,8 @@ find-pdf-files-added = { $count ->
     *[other] { $count } files added
 }
 
+select-items-window =
+    .title = Select Items
 select-items-dialog =
     .buttonlabelaccept = Select
 select-items-convertToStandalone =
