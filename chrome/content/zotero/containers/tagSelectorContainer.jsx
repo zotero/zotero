@@ -65,7 +65,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		// Not stored in state to avoid an unnecessary refresh. Instead, when a tag is selected, we
 		// trigger the selection handler, which updates the visible items, which triggers
 		// onItemViewChanged(), which triggers a refresh with the new tags.
-		this.selectedTags = new Set();
+		this.selectedTags = new Map();
 		this.widths = new Map();
 		this.widthsBold = new Map();
 		
@@ -322,7 +322,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		if (this.displayAllTags) {
 			tags = await Zotero.Tags.getAll(this.libraryID);
 		}
-		
+		else {
+			// Make sure that excluded tags do not disappear
+			for (let [tagName, tagProps] of this.selectedTags.entries()) {
+				if (tagProps.excluded) {
+					tags.push({ tag: tagName })
+				}
+			}
+		}
 		// If tags haven't changed, return previous array without sorting again
 		if (this.state.tags.length == tags.length) {
 			let prevTags = new Set(this.state.tags.map(tag => tag.tag));
@@ -513,8 +520,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				name,
 				width: tag.width
 			};
-			if (this.selectedTags.has(name)) {
+			let selectedTag = this.selectedTags.get(name)
+			if (selectedTag) {
 				tag.selected = true;
+				tag.excluded = selectedTag.excluded;
 			}
 			if (inTagColors && tagColors.has(name)) {
 				tag.color = tagColors.get(name).color;
@@ -524,7 +533,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			}
 			// If we're not displaying all tags, we only need to check the scope for colored tags,
 			// since everything else will be in scope
-			if ((this.displayAllTags || inTagColors) && !this.state.scope.has(name)) {
+			// A tag excluded from search results is not in scope but is part of selected tags so it remains enabled
+			if ((this.displayAllTags || inTagColors) && !(this.state.scope.has(name) || this.selectedTags.get(name))) {
 				tag.disabled = true;
 			}
 			const forceUseDOM = this.state.isHighDensity && i < FORCE_DOM_TAGS_FOR_COUNT;
@@ -543,6 +553,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			dragObserver={this.dragObserver}
 			onSelect={this.handleTagSelected}
 			onTagContext={this.handleTagContext}
+			excludeTag={this.excludeTag.bind(this)}
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}
 			loaded={this.state.loaded}
@@ -572,6 +583,12 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			true
 		);
 		this.contextTag = tag;
+		// Disable options for disabled tags, mark if the tag is included vs excluded
+		let tagSelected = this.selectedTags.get(this.contextTag.name);
+		tagContextMenu.querySelector("#tag-menu-exclude-tag").disabled = tag.disabled;
+		tagContextMenu.querySelector("#tag-menu-exclude-tag").setAttribute("checked", tagSelected?.excluded);
+		tagContextMenu.querySelector("#tag-menu-include-tag").disabled = tag.disabled;
+		tagContextMenu.querySelector("#tag-menu-include-tag").setAttribute("checked", tagSelected && !tagSelected.excluded);
 	}
 
 	handleSettings = (ev) => {
@@ -582,10 +599,18 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 	handleTagSelected = (tag) => {
 		let selectedTags = this.selectedTags;
-		if(selectedTags.has(tag)) {
+		let viaClick = true;
+		if (!tag) {
+			tag = this.contextTag.name;
+			viaClick = false;
+		}
+		// remove tag from selection on click or on context-menu selection if it is not excluded
+		if (selectedTags.has(tag) && (viaClick || !selectedTags.get(tag).excluded)) {
 			selectedTags.delete(tag);
-		} else {
-			selectedTags.add(tag);
+		}
+		// otherwise, select the tag
+		else {
+			selectedTags.set(tag, {});
 		}
 
 		if (typeof(this.props.onSelection) === 'function') {
@@ -662,7 +687,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	clearTagSelection() {
-		this.selectedTags = new Set();
+		this.selectedTags = new Map();
 	}
 	
 	async openColorPickerWindow() {
@@ -749,8 +774,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		
 		let selectedTags = this.selectedTags;
 		if (selectedTags.has(this.contextTag.name)) {
+			let excluded = selectedTags.get(this.contextTag.name).excluded;
 			selectedTags.delete(this.contextTag.name);
-			selectedTags.add(newName.value);
+			selectedTags.set(newName.value, { excluded });
 		}
 		
 		if (Zotero.Tags.getID(this.contextTag.name)) {
@@ -790,6 +816,23 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		}
 	}
 
+	// Inverse of selection for tags. Items with the specified tag do not match search query.
+	async excludeTag(tag) {
+		if (!tag) {
+			tag = this.contextTag.name;
+		}
+		// If the tag is already excluded - remove it from selection
+		if (this.selectedTags.get(tag)?.excluded) {
+			this.selectedTags.delete(tag);
+		}
+		else {
+			this.selectedTags.set(tag, { excluded: true });
+		}
+		if (typeof (this.props.onSelection) === 'function') {
+			this.props.onSelection(this.selectedTags);
+		}
+	}
+
 	async toggleDisplayAllTags(newValue) {
 		newValue = typeof(newValue) === 'undefined' ? !this.displayAllTags : newValue;
 		Zotero.Prefs.set('tagSelector.displayAllTags', newValue);
@@ -804,7 +847,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	deselectAll() {
-		this.selectedTags = new Set();
+		this.selectedTags = new Map();
 		if('onSelection' in this.props && typeof(this.props.onSelection) === 'function') {
 			this.props.onSelection(this.selectedTags);
 		}
