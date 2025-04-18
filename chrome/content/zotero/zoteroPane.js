@@ -1672,9 +1672,6 @@ var ZoteroPane = new function()
 				dragAndDrop: true
 			});
 			collectionsTree.firstChild.addEventListener("focus", ZoteroPane.collectionsView.recordCollectionTreeFocus);
-			// collectionTree will expand containers when they are dragged over
-			// when drag is finished, re-collapse those rows to restore state
-			document.addEventListener("dragend", () => ZoteroPane.collectionsView.closeContainersExpandedOnDrag());
 		}
 		catch (e) {
 			Zotero.logError(e);
