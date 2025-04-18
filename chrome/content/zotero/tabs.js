@@ -69,6 +69,18 @@ var Zotero_Tabs = new function () {
 		get: () => document.getElementById('zotero-tabs-menu-panel')
 	});
 
+	Object.defineProperty(this, 'history', {
+		get: () => this._history.flat().map((obj) => {
+			return {
+				itemID: obj.data.itemID,
+				tabIndex: obj.index,
+				secondViewState: obj.data.secondViewState,
+				title: obj.title,
+				type: "reader"
+			};
+		})
+	});
+
 	this._tabBarRef = React.createRef();
 	this._tabs = [{
 		id: 'zotero-pane',
@@ -368,7 +380,7 @@ var Zotero_Tabs = new function () {
 			if (tab.onClose) {
 				tab.onClose();
 			}
-			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
+			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data, title: tab.title });
 			closedIDs.push(id);
 
 			setTimeout(() => {
@@ -421,6 +433,33 @@ var Zotero_Tabs = new function () {
 				this.jump(maxIndex);
 			}
 		}
+	};
+
+	/**
+	 * Reopen a closed tab from one of entries in this._history
+	 * @param {Integer} itemID - Zotero.Item.id
+	 * @param {Integer} tabIndex - Index of the tab when it was closed
+	 */
+	this.reopenClosedTab = async function (itemID, tabIndex) {
+		for (let i = 0; i < this._history.length; i++) {
+			let historyEntry = this._history[i];
+			if (historyEntry.length == 0) continue;
+			// Find the correct tab in the tabs history (which may be groupped)
+			let historyIndex = historyEntry.findIndex(x => x.data.itemID == itemID && x.index == tabIndex);
+			if (historyIndex == -1) continue;
+			Zotero.Reader.open(itemID,
+				null,
+				{
+					tabIndex: tabIndex,
+					openInBackground: false,
+					allowDuplicate: true
+				}
+			);
+			// Remove the tab from the history entry
+			historyEntry = historyEntry.splice(historyIndex, 1);
+		}
+		// The history entry might be empty now, so remove it
+		this._history = this._history.filter(x => x.length);
 	};
 
 	/**
