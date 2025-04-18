@@ -30,7 +30,7 @@ import Diff from 'diff';
 
 const diffInstance = new Diff();
 
-const MAX_DIFF_SEGMENT_LENGTH = 60;
+const MAX_DIFF_SEGMENT_LENGTH = 150;
 
 const Field = (props) => {
 	const { itemID, field, readonly, onSetDisabled, onExpand } = props;
