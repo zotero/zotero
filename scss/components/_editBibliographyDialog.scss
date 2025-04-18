@@ -1,12 +1,80 @@
 #edit-bibliography-dialog {
 	min-width: 800px;
 	min-height: 450px;
-	
-	.virtualized-table-container {
-		min-height: 100%;
+
+
+	#zotero-edit-bibliography-dialog {
+		max-height: 100vh;
+
+		#zotero-edit-bibliography-dialog-box {
+			// undo the padding of the dialog
+			margin: -14px;
+
+			#zotero-select-items-trees {
+				min-width: 400px;
+				max-width: 700px;
+
+				#zotero-collections-tree-container {
+					min-height: 100%;
+					min-width: 150px;
+			
+					border-inline-end: var(--material-panedivider);
+					& > #zotero-collections-tree {
+						background: var(--material-sidepane) !important;
+					}
+					.virtualized-table-body {
+						padding-top: 8px;
+					}
+				}
+
+				#zotero-item-tree-container {
+					min-width: 0;
+					width: 100%;
+
+					#quick-search-textbox-wrapper {
+						min-height: 30px;
+						margin-bottom: 5px;
+						margin-top: 5px;
+						padding-inline: 5px;
+					}
+
+					#zotero-items-pane-content {
+						min-height: calc(100% - 40px);
+						border-top: var(--material-panedivider);
+						// let splitter set the width
+						min-width: 100px;
+					}
+				}
+
+				#zotero-tb-search {
+					max-width: 200px;
+				}
+			}
+
+			#zotero-reference-items-container {
+				min-width: 265px;
+		
+				#zotero-reference-items-label {
+					height: 40px;
+					justify-content: center;
+					label {
+						align-items: center;
+					}
+				}
+
+				#zotero-items-list {
+					border-top: var(--material-panedivider);
+					.row.highlighted {
+						color: var(--fill-tertiary);
+					}
+				}
+			}
+		}
 	}
 	
-	#zotero-collections-tree-container {
-		min-width: 150px;
+
+	#editor {
+		max-height: 100px;
+		border-top: var(--material-panedivider);
 	}
 }

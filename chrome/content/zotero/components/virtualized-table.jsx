@@ -972,7 +972,7 @@ class VirtualizedTable extends React.Component {
 		// Primary cell will .cell-text child node
 		let textCell = targetCell.querySelector(".cell-text") || targetCell;
 		// If the cell has overflowing content, display the fake tooltip
-		if (textCell.offsetWidth < textCell.scrollWidth) {
+		if (textCell.offsetWidth < textCell.scrollWidth && textCell.textContent) {
 			Zotero_Tooltip.stop();
 			Zotero_Tooltip.start(textCell.textContent);
 		}

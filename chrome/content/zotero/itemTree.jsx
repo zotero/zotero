@@ -167,10 +167,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
 	}
 
-	unregister() {
+	unregister({ skipColumnPrefsSave } = {}) {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
-		this._writeColumnPrefsToFile(true);
+		if (!skipColumnPrefsSave) {
+			this._writeColumnPrefsToFile(true);
+		}
 	}
 
 	componentDidMount() {
@@ -3160,8 +3162,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					this.onDrop(e, index);
 				}, { passive: true });
 			}
-			div.addEventListener('mousedown', this._handleRowMouseUpDown, { passive: true });
-			div.addEventListener('mouseup', this._handleRowMouseUpDown, { passive: true });
+			div.addEventListener('mousedown', this._handleRowMouseUpDown, true);
+			div.addEventListener('mouseup', this._handleRowMouseUpDown, true);
+			div.addEventListener("mousemove", this._handleRowMouseOver, { passive: true });
 		}
 
 		// Accessibility
@@ -3196,6 +3199,55 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this.collectionTreeRow.isDuplicates() && !modifierIsPressed) {
 			this.duplicateMouseSelection = true;
 		}
+
+		// Handle mouseup and mousedown events on a row in itemTree to enable clicking on +/- button
+		// On mousedown, add .active effect to the +/- button
+		// On mouseup, add/remove the clicked item from the citation
+		// This specific handling is required, since :active effect fires on the row and not the child button
+		if (event.button !== 0) return;
+		let row = event.target;
+		// find which icon we hovered over, stop if no icon is involved
+		let hoveredOverIcon = row.querySelector(".icon-action.hover");
+		if (!hoveredOverIcon) return;
+		if (event.type == "mouseup") {
+			hoveredOverIcon.classList.remove("active");
+			let cell = hoveredOverIcon.closest(".cell");
+			let columnClass = [...cell.classList].find(cls => cls.includes(this.id));
+			let columnName = columnClass.split("-")[0];
+			let column = this.getColumns().find(col => col.dataKey == columnName);
+			let rowIndex = row.id.replace(this.id, "").split("-")[2];
+			let clickedItem = this.getRow(rowIndex).ref;
+			column.actionHandler(clickedItem, row);
+		}
+		else if (event.type == "mousedown") {
+			hoveredOverIcon.classList.add("active");
+		}
+		// stop propagation to not select the row
+		event.stopPropagation();
+		// do not move focus into the table
+		event.preventDefault();
+	};
+
+	_handleRowMouseOver = (event) => {
+		let { clientY, clientX, target } = event;
+		let actionIcons = [...event.target.querySelectorAll(".icon-action")];
+		if (!actionIcons.length) return;
+		// find which icon we hovered over
+		let hoveredOverIcon = actionIcons.find((icon) => {
+			let iconRect = icon.getBoundingClientRect();
+			// event.target is the actual row, so check if the click happened
+			// within the bounding box of the +/- icon and handle it same as a double click
+			let overIcon = clientX > iconRect.left && clientX < iconRect.right
+				&& clientY > iconRect.top && clientY < iconRect.bottom;
+			return overIcon;
+		});
+		if (!target.classList.contains("row") || !hoveredOverIcon) {
+			let table = event.target.closest(".virtualized-table-body");
+			table.querySelector(".icon-action.hover")?.classList.remove("hover");
+			table.querySelector(".icon-action.active")?.classList.remove("active");
+			return;
+		}
+		hoveredOverIcon.classList.add("hover");
 	}
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
