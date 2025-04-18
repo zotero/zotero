@@ -748,7 +748,7 @@ const ZoteroStandalone = new function() {
 			ZoteroPane.loadURI(ZOTERO_CONFIG.SUPPORT_URL);
 		}
 	}
-	
+
 	/**
 	 * Checks for updates
 	 */
