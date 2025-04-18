@@ -30,7 +30,8 @@ Zotero_Preferences.FileRenaming = {
 	hasPromptedOrIsRenaming: false,
 
 	init: function () {
-		this.origTemplate = Zotero.Prefs.get('attachmentRenameTemplate');
+		const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+		this.lastFormatString = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 		this.isTemplateInSync = Zotero.Prefs.get('autoRenameFiles.done');
 		this.inputEl = document.getElementById('file-renaming-format-template');
 		this.backButtonEl = document.getElementById('prefs-subpane-back-button');
@@ -42,7 +43,7 @@ Zotero_Preferences.FileRenaming = {
 		this.inputEl.addEventListener('blur', this.handleInputBlur.bind(this));
 		this.renameNowBtnEl.addEventListener('command', this.renameNow.bind(this));
 		this.renameNowBtnEl.setAttribute('disabled', Zotero.Prefs.get('autoRenameFiles.done'));
-		this.prevFormatString = this.inputEl.value;
+		this.inputEl.value = this.lastFormatString;
 
 		this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
 		this._updatePreview = this.updatePreview.bind(this);
@@ -72,14 +73,13 @@ Zotero_Preferences.FileRenaming = {
 
 	handleInputChange() {
 		const formatString = this.inputEl.value;
-		if (formatString.trim() === this.prevFormatString.trim()) {
-			return;
-		}
 		this.updatePreview();
+		Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', formatString);
+		
 		// reset 'done' to enable the rename button, set it to `false` if the
 		// template is out of sync (e.g., the user changed it and declined
 		// renaming) or if the new template has changed
-		Zotero.Prefs.set('autoRenameFiles.done', this.isTemplateInSync ? formatString === this.origTemplate : false);
+		Zotero.Prefs.set('autoRenameFiles.done', this.isTemplateInSync ? formatString === this.lastFormatString : false);
 	},
 
 	handleInputBlur() {
@@ -96,7 +96,7 @@ Zotero_Preferences.FileRenaming = {
 
 		// renaming has finished, store the new value of the template and reset the flags
 		if (newValue) {
-			this.origTemplate = Zotero.Prefs.get('attachmentRenameTemplate');
+			this.lastFormatString = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate');
 			this.isTemplateInSync = true;
 			this.hasPromptedOrIsRenaming = false;
 		}

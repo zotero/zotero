@@ -27,6 +27,8 @@ var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs"
 
 const clamp = (val, min = 0, max = 1.0) => Math.min(Math.max(val, min), max);
 
+export const DEFAULT_ATTACHMENT_RENAME_TEMPLATE = "{{ firstCreator suffix=\" - \" }}{{ year suffix=\" - \" }}{{ title truncate=\"100\" }}";
+
 export async function renameFiles() {
 	const t1 = Date.now();
 	let progress = 0;
@@ -46,7 +48,7 @@ export async function renameFiles() {
 
 	// We only rename files in group libraries if user has NOT changed the rename template.
 	// See comments in https://github.com/zotero/zotero/pull/3860
-	const shouldRenameInGroupLibraries = !Zotero.Prefs.prefHasUserValue('attachmentRenameTemplate');
+	const shouldRenameInGroupLibraries = false; // TODO
 
 	for (let library of libraries) {
 		if (library.libraryType === 'user' || (shouldRenameInGroupLibraries && library.libraryType === 'group')) {

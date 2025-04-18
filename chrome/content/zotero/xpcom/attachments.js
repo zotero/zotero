@@ -2188,7 +2188,7 @@ Zotero.Attachments = new function () {
 	 * based on the metadata of the specified item and a format string
 	 *
 	 * (Optional) |formatString| specifies the format string -- otherwise
-	 * the 'attachmentRenameTemplate' pref is used
+	 * the 'attachmentRenameTemplate' synced setting for the user's library is used
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} formatString
@@ -2205,7 +2205,8 @@ Zotero.Attachments = new function () {
 		let { formatString = null, attachmentTitle = '' } = options;
 
 		if (!formatString) {
-			formatString = Zotero.Prefs.get('attachmentRenameTemplate');
+			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			formatString = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 		}
 
 		let chunks = [];
