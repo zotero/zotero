@@ -125,8 +125,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	enumerable: false
 });
 
-for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
-		'createdByUserID', 'lastModifiedByUserID']) {
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'clientVersion',
+		'synced', 'createdByUserID', 'lastModifiedByUserID']) {
 	let prop = '_' + name;
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
 		get: function () { return this[prop]; },
@@ -5512,24 +5512,21 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			}
 			
 			if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
-				if (options.syncedStorageProperties) {
-					let mtime = this.attachmentSyncedModificationTime;
-					// There's never a reason to include these if they're null. This can happen if
-					// we're restoring to server from a copy of the database that was never
-					// file-synced. We don't want to clear the remote file associations when that
-					// happens.
-					if (mtime !== null) {
-						obj.mtime = mtime;
-					}
-					let md5 = this.attachmentSyncedHash;
-					if (md5 !== null) {
-						obj.md5 = md5;
-					}
+				// Add synced storage properties even if syncedStorageProperties is false,
+				// since we can't get the local properties synchronously
+				// We'll overwrite them in toResponseJSONAsync() if possible
+				
+				let mtime = this.attachmentSyncedModificationTime;
+				// There's never a reason to include these if they're null. This can happen if
+				// we're restoring to server from a copy of the database that was never
+				// file-synced. We don't want to clear the remote file associations when that
+				// happens.
+				if (mtime !== null) {
+					obj.mtime = mtime;
 				}
-				else {
-					// TEMP
-					//obj.mtime = (yield this.attachmentModificationTime) || null;
-					//obj.md5 = (yield this.attachmentHash) || null;
+				let md5 = this.attachmentSyncedHash;
+				if (md5 !== null) {
+					obj.md5 = md5;
 				}
 			}
 		}
@@ -5608,12 +5605,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 
 
 Zotero.Item.prototype.toResponseJSON = function (options = {}) {
-	// Default to showing synced storage properties, since that's what the API does, and this function
-	// is generally used to emulate the API
-	if (options.syncedStorageProperties === undefined) {
-		options.syncedStorageProperties = true;
-	}
-	
 	var json = this.constructor._super.prototype.toResponseJSON.call(this, options);
 	
 	// creatorSummary
@@ -5680,6 +5671,12 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 	else if (this.isImportedAttachment()) {
 		json.links.enclosure.length = await getFileSize(this);
 	}
+	
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
+		json.data.mtime = await this.attachmentModificationTime ?? null;
+		json.data.md5 = await this.attachmentHash ?? null;
+	}
+	
 	return json;
 };
 

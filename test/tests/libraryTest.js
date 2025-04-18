@@ -63,6 +63,27 @@ describe("Zotero.Library", function() {
 		});
 	});
 	
+	describe("#clientVersion", function() {
+		it("should be settable to increasing values", function() {
+			let library = new Zotero.Library();
+			assert.throws(() => library.clientVersion = -2);
+			assert.throws(() => library.clientVersion = "a");
+			assert.throws(() => library.clientVersion = 1.1);
+			assert.doesNotThrow(() => library.clientVersion = 0);
+			assert.doesNotThrow(() => library.clientVersion = 5);
+		});
+		it("should not be possible to decrement", function() {
+			let library = new Zotero.Library();
+			library.clientVersion = 5;
+			assert.throws(() => library.clientVersion = 0);
+		});
+		it("should not be possible to set to -1", function() {
+			let library = new Zotero.Library();
+			library.clientVersion = 5;
+			assert.throws(() => library.clientVersion = -1);
+		});
+	});
+	
 	describe("#editable", function() {
 		it("should return editable status", function() {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
