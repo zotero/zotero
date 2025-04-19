@@ -1473,7 +1473,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							this._flashingRow = index;
 							this.tree.invalidateRow(index);
 							// wait for the flashing to finish and then expand the container
-							await Zotero.Promise.delay(300);
+							await Zotero.Promise.delay(300); // 0.2s CSS animation length * 1.5 runs
 							this._flashingRow = null;
 							this._expandedRowsOnDrag.add(treeRow.id);
 							if (!this.isContainerOpen(index)) {

@@ -56,11 +56,11 @@ $icons: (
 		}
 
 		.row.flashing:not(.drop) {
-			animation: row-flash 0.1s ease-in-out 3;
+			animation: row-flash 0.2s ease-in-out 2;
 		}
 		
 		.row.flashing.drop {
-			animation: row-flash-selected 0.1s ease-in-out 3;
+			animation: row-flash-selected 0.2s ease-in-out 2;
 		}
 	}
 
