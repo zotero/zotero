@@ -107,7 +107,7 @@
 		box-sizing: border-box;
 		border-radius: 5px;
 
-		&.drop {
+		&.drop:not(.flashing) {
 			color: var(--material-background) !important;
 			background: var(--fill-secondary) !important;
 

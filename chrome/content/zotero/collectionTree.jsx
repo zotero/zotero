@@ -97,6 +97,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._editing = null;
 		this._editingInput = null;
 		this._dropRow = null;
+		this._dragoverRow = null;
+		this._flashingRow = null;
 		this._typingTimeout = null;
 		this._customRowHeights = [];
 		this._separatorHeight = 8;
@@ -107,6 +109,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._filterInitialCollapsedRows = [];
 		this._treeWasFocused = false;
 		this._hiddenFocusedRow = null;
+		this._expandedRowsOnDrag = new Set();
+		this._expandRowOnHoverTimer = null;
+		this._collapseExpandedRowsTimer = null;
 		
 		this.onLoad = this.createEventBinding('load', true, true);
 	}
@@ -135,6 +140,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	componentDidMount() {
 		this.selection.select(0);
 		this.makeVisible();
+		if (this.props.dragAndDrop) {
+			this.domEl.addEventListener('dragleave', this.onDragLeaveFromTheTree);
+		}
 	}
 	
 	componentDidUpdate() {
@@ -304,6 +312,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		div.classList.toggle('selected', selection.isSelected(index));
 		div.classList.toggle('highlighted', this._highlightedRows.has(treeRow.id));
 		div.classList.toggle('drop', this._dropRow == index);
+		div.classList.toggle('flashing', this._flashingRow == index);
 		div.classList.toggle('unread', treeRow.ref && treeRow.ref.unreadCount > 0);
 		let { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(treeRow.ref);
 		div.classList.toggle('context-row', !matchesFilter && hasChildMatchingFilter);
@@ -1441,11 +1450,46 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	onDragOver(event, index) {
 		if (!event.currentTarget.classList.contains('row')) return;
 		const treeRow = this.getRow(index);
+		let previousDragoverRow = this._dragoverRow;
+		this._dragoverRow = index;
 		try {
 			// Prevent modifier keys from doing their normal things
 			event.preventDefault();
 			var previousOrientation = Zotero.DragDrop.currentOrientation;
 			Zotero.DragDrop.currentOrientation = getDragTargetOrient(event);
+
+			// Expand collapsed collections and groups when they are dragged over for 1 second
+			if (!this.isContainerEmpty(index) && !this.isContainerOpen(index)) {
+				// If dragged over row has changed, clear the timer
+				if (this._expandRowOnHoverTimer && previousDragoverRow !== index) {
+					clearTimeout(this._expandRowOnHoverTimer);
+					this._expandRowOnHoverTimer = null;
+				}
+				// set a new timer for currently hovered row if it does not yet exist
+				if (!this._expandRowOnHoverTimer) {
+					this._expandRowOnHoverTimer = setTimeout(async () => {
+						// if the dragged over row is still the same after delay, expand it
+						if (!this.isContainerOpen(index) && this._dragoverRow == index) {
+							this._flashingRow = index;
+							this.tree.invalidateRow(index);
+							// wait for the flashing to finish and then expand the container
+							await Zotero.Promise.delay(300); // 0.2s CSS animation length * 1.5 runs
+							this._flashingRow = null;
+							this._expandedRowsOnDrag.add(treeRow.id);
+							if (!this.isContainerOpen(index)) {
+								this.toggleOpenState(index);
+							}
+						}
+						this._expandRowOnHoverTimer = null;
+					}, 1000);
+				}
+			}
+			// If the expanded rows were to be collapsed after the mouse left collectionTree,
+			// don't do it because now the mouse is back in the collectionTree
+			if (this._collapseExpandedRowsTimer) {
+				clearTimeout(this._collapseExpandedRowsTimer);
+				this._collapseExpandedRowsTimer = null;
+			}
 			
 			if (!this.canDropCheck(index, Zotero.DragDrop.currentOrientation, event.dataTransfer)) {
 				this.setDropEffect(event, "none");
@@ -1554,8 +1598,23 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (!e.currentTarget.classList.contains('row')) return;
 		let dropRow = this._dropRow;
 		this._dropRow = null;
+		this._dragoverRow = null;
 		this.tree.invalidateRow(dropRow);
 	}
+
+	// when something is dragged over the container rows, they may be expanded.
+	// if the mouse then leaves the collectionTree, collapse all expanded rows after delay
+	// (unless onDragOver is called soon, which will clear the timeout)
+	onDragLeaveFromTheTree = (e) => {
+		if (!e.relatedTarget) return;
+		let fromOutOfTree = this.domEl.contains(e.target) && !this.domEl.contains(e.relatedTarget);
+		if (fromOutOfTree && !this._collapseExpandedRowsTimer) {
+			this._collapseExpandedRowsTimer = setTimeout(() => {
+				this.closeContainersExpandedOnDrag();
+				this._collapseExpandedRowsTimer = null;
+			}, 1000);
+		}
+	};
 
 	canDropCheck = (row, orient, dataTransfer) => {
 		const treeRow = this.getRow(row);
@@ -2094,6 +2153,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let row = this._rowMap[treeRow.id];
 		let dataTransfer = event.dataTransfer;
 		
+		// Prevent potential container row opening and flashing started in onDragOver
+		clearTimeout(this._expandRowOnHoverTimer);
+		this._expandRowOnHoverTimer = null;
+		let oldFlashing = this._flashingRow;
+		this._flashingRow = null;
+		this.tree.invalidateRow(oldFlashing);
+
 		if (!dataTransfer.dropEffect || dataTransfer.dropEffect == "none"
 				|| !(await this.canDropCheckAsync(row, orient, dataTransfer))) {
 			return false;
@@ -2377,6 +2443,30 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			
 			// Automatically retrieve metadata for PDFs and ebooks
 			Zotero.RecognizeDocument.autoRecognizeItems(addedItems);
+		}
+		this.closeContainersExpandedOnDrag();
+	}
+
+	async closeContainersExpandedOnDrag() {
+		let expandedRows = [...this._expandedRowsOnDrag];
+		if (!expandedRows.length) return;
+		this._expandedRowsOnDrag.clear();
+		// Record the ancestors of the currently selected collection to not collapse them
+		let col = this.selectedTreeRow.ref;
+		let parentIDs = new Set();
+		parentIDs.add(Zotero.Libraries.get(col.libraryID).treeViewID);
+		while (col.parentID) {
+			col = Zotero.Collections.get(col.parentID);
+			parentIDs.add(col.treeViewID);
+		}
+
+		// Collapse all remaining rows that were expanded during drag-drop
+		for (let rowID of expandedRows) {
+			let index = this.getRowIndexByID(rowID);
+			let row = this._rows[index];
+			if (row && row.isOpen && !parentIDs.has(row.ref.treeViewID)) {
+				this.toggleOpenState(index);
+			}
 		}
 	}
 
