@@ -1,5 +1,3 @@
-DeepTutorZotero
-
 [DeepTutor](https://deeptutor.knowhiz.us/) is an AI Study Buddy for Smarter, Faster Research
 
 ### **DeepTutor: Transforming Document Comprehension with AI-Driven Intelligence**
@@ -57,9 +55,6 @@ Documents today contain more than just text—**charts, diagrams, and visual dat
 - Translates complex visual data into **easy-to-understand text-based summaries and Q&A responses**.
 
 This ensures users can **leverage both textual and visual information** in their research, leading to more **comprehensive insights and better decision-making**.
-
-======
-[![CI](https://github.com/zotero/zotero/actions/workflows/ci.yml/badge.svg)](https://github.com/zotero/zotero/actions/workflows/ci.yml)
 
 [Zotero](https://www.zotero.org/) is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.
 
