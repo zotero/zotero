@@ -367,17 +367,8 @@ class ReaderInstance {
 					if (fromText) {
 						return;
 					}
-					for (let annotation of annotations) {
-						if (annotation.image && !annotation.imageAttachmentKey) {
-							annotation.imageAttachmentKey = 'none';
-							delete annotation.image;
-						}
-					}
-					let res = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
-					let tmpNote = new Zotero.Item('note');
-					tmpNote.libraryID = Zotero.Libraries.userLibraryID;
-					tmpNote.setNote(res.html);
-					let items = [tmpNote];
+					// annotations are wrapped in a temp note for translation
+					let items = [Zotero.QuickCopy.wrapAnnotationsAsNote(annotations)];
 					let format = Zotero.QuickCopy.getNoteFormat();
 					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${format}`);
 					format = Zotero.QuickCopy.unserializeSetting(format);

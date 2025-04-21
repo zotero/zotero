@@ -3359,6 +3359,12 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 		format = Zotero.QuickCopy.getNoteFormat();
 	}
 
+	// If all items are annotations, wrap them in a note object for translation
+	if (items.every(item => item.isAnnotation())) {
+		format = Zotero.QuickCopy.getNoteFormat();
+		items = [Zotero.QuickCopy.wrapAnnotationsAsNote(items)];
+	}
+
 	Zotero.debug("Dragging with format " + format);
 	format = Zotero.QuickCopy.unserializeSetting(format);
 	try {

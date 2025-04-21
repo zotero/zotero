@@ -308,7 +308,44 @@ Zotero.QuickCopy = new function() {
 		
 		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
 	};
-	
+
+	/**
+	 * Generate a note item from an array of annotations.
+	 * This is a workaround to be able to translate annotations in getContentFromItems
+	 * even though annotations do not have a cslType.
+	 * @param {Zotero.Item|Object[]} annotations - Array of JSON annotations or Zotero.Item annotations.
+	 * If an array of Zotero.Items is passed, they will be converted to JSON.
+	 * @returns {Zotero.Item} - A note item with the annotations serialized as HTML.
+	 */
+	this.wrapAnnotationsAsNote = function (annotations) {
+		let jsonAnnotations = [];
+		for (let annotation of annotations) {
+			if (annotation instanceof Zotero.Item) {
+				// Skip ink and image annotations because fetching them
+				// requires await-ing for Zotero.Annotations.toJSON
+				if (["ink", "image"].includes(annotation.type)) {
+					continue;
+				}
+				let json = Zotero.Annotations.toJSONSync(annotation);
+				json.attachmentItemID = annotation.parentItemID;
+				jsonAnnotations.push(json);
+			}
+			else {
+				jsonAnnotations.push(annotation);
+			}
+		}
+		for (let annotation of jsonAnnotations) {
+			if (annotation.image && !annotation.imageAttachmentKey) {
+				annotation.imageAttachmentKey = 'none';
+				delete annotation.image;
+			}
+		}
+		let res = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations);
+		let tmpNote = new Zotero.Item('note');
+		tmpNote.libraryID = Zotero.Libraries.userLibraryID;
+		tmpNote.setNote(res.html);
+		return tmpNote;
+	};
 	
 	/**
 	 * If an export translator is the selected output format, load its code (which must be done

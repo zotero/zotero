@@ -2009,7 +2009,7 @@ var ZoteroPane = new function()
 			let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 			format = Zotero.QuickCopy.unserializeSetting(format);
 			if (format.mode == 'bibliography') {
-				canCopy = selectedItems.some(item => item.isRegularItem());
+				canCopy = selectedItems.some(item => item.isRegularItem() || item.isAnnotation());
 			}
 			else {
 				canCopy = true;
@@ -2018,6 +2018,7 @@ var ZoteroPane = new function()
 		
 		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopy);
 		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopy);
+		document.getElementById('cmd_zotero_copyAnnotation').setAttribute('disabled', !canCopy);
 	};
 	
 	
@@ -2672,6 +2673,11 @@ var ZoteroPane = new function()
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		if (items.every(item => item.isNote() || item.isAttachment())) {
 			format = Zotero.QuickCopy.getNoteFormat();
+		}
+		// to copy annotations, they are wrapped in a temp note
+		if (items.every(item => item.isAnnotation())) {
+			format = Zotero.QuickCopy.getNoteFormat();
+			items = [Zotero.QuickCopy.wrapAnnotationsAsNote(items)];
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		

@@ -96,6 +96,9 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 
+menu-edit-copy-annotation =
+    .label = Copy Annotation
+
 main-window-command =
     .label = Library
 main-window-key =

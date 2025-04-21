@@ -116,7 +116,7 @@ Zotero.Annotations = new function () {
 	};
 	
 	
-	this.toJSON = async function (item) {
+	this.toJSONSync = function (item) {
 		var o = {};
 		o.libraryID = item.libraryID;
 		o.key = item.key;
@@ -141,12 +141,6 @@ Zotero.Annotations = new function () {
 		o.readOnly = o.isExternal || !isAuthor;
 		if (['highlight', 'underline'].includes(o.type)) {
 			o.text = item.annotationText;
-		}
-		else if (['image', 'ink'].includes(o.type)) {
-			let file = this.getCacheImagePath(item);
-			if (await OS.File.exists(file)) {
-				o.image = await Zotero.File.generateDataURI(file, 'image/png');
-			}
 		}
 		o.comment = item.annotationComment;
 		o.pageLabel = item.annotationPageLabel;
@@ -182,6 +176,17 @@ Zotero.Annotations = new function () {
 		}
 		
 		o.dateModified = Zotero.Date.sqlToISO8601(item.dateModified);
+		return o;
+	};
+
+	this.toJSON = async function (item) {
+		var o = this.toJSONSync(item);
+		if (['image', 'ink'].includes(o.type)) {
+			let file = this.getCacheImagePath(item);
+			if (await OS.File.exists(file)) {
+				o.image = await Zotero.File.generateDataURI(file, 'image/png');
+			}
+		}
 		return o;
 	};
 	
