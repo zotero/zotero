@@ -274,6 +274,8 @@ browser_keep=(
 	content/browser/license.html
 	# For web-ext
 	content/browser/parent/ext-browser.js
+	# For spellchecking
+	content/browser/built_in_addons.json
 )
 if [ $BUILD_WIN == 1 ] || [ $BUILD_LINUX == 1 ]; then
 	# Windows/Linux window controls
@@ -350,6 +352,9 @@ elif [ $BUILD_LINUX == 1 ]; then
 	# https://bugzilla.mozilla.org/show_bug.cgi?id=1747208
 	perl -pi -e 's/pref\("general\.autoScroll", false\);/pref\("general.autoScroll", true);/' $prefs_file
 fi
+
+# Clear list of built-in add-ons, but leave the en-US dictionary
+echo '{"dictionaries": {"en-US": "dictionaries/en-US.dic"}, "system": []}' > chrome/browser/content/browser/built_in_addons.json
 
 # chrome.manifest
 mv chrome.manifest zotero.manifest
