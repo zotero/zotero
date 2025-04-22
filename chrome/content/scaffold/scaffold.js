@@ -136,7 +136,11 @@ var Scaffold = new function () {
 				_editors.codeGlobal = monaco;
 				_editors.code = editor;
 			}),
-			testsWin.loadMonaco({ language: 'json' }).then(({ monaco, editor }) => {
+			testsWin.loadMonaco({
+				language: 'json',
+				// Tests might contain \u2028/\u2029 - don't pop up a warning
+				unusualLineTerminators: 'off',
+			}).then(({ monaco, editor }) => {
 				_editors.testsGlobal = monaco;
 				_editors.tests = editor;
 			}),
