@@ -407,6 +407,8 @@
 				if (type == 'itempane') {
 					this.renderCustomSections();
 				}
+				// Keep the scroll position after refresh
+				this._lastScrollTop = this._paneParent.scrollTop;
 				await this.render();
 			}
 
