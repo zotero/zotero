@@ -54,6 +54,14 @@ $icons: (
 				}
 			}
 		}
+
+		.row.flashing:not(.drop) {
+			animation: row-flash 0.2s ease-in-out 2;
+		}
+		
+		.row.flashing.drop {
+			animation: row-flash-selected 0.2s ease-in-out 2;
+		}
 	}
 
 	.virtualized-table-body {
@@ -100,4 +108,16 @@ $icons: (
 			min-width: 16px;
 		}
 	}
+}
+
+// flashing effect applied to the row container when it is about to be expanded on dragover
+// two different background colors are used for containers with .drop class and without
+@keyframes row-flash {
+	0%, 100% { background-color: transparent; }
+	50% { background-color: var(--accent-azure); }
+}
+
+@keyframes row-flash-selected {
+	0%, 100% { background-color: var(--fill-secondary); }
+	50% { background-color:  var(--accent-blue50); }
 }
