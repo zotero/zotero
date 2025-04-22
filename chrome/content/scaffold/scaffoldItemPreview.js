@@ -44,17 +44,21 @@
 
 		set jsonItem(jsonItem) {
 			// Don't pass this any objects you really care about
+			
+			// Delete ID (meaningless)
 			delete jsonItem.id;
+			
+			// _itemDone() sets 'title' in addition to the item type's mapped
+			// title field for some reason. Delete it so it doesn't show up in the diff.
+			let titleField = Zotero.ItemFields.getName(
+				Zotero.ItemFields.getFieldIDFromTypeAndBase(jsonItem.itemType, 'title')
+			);
+			if (titleField !== 'title' && jsonItem[titleField]) {
+				delete jsonItem.title;
+			}
+			
 			if (jsonItem.accessDate === 'CURRENT_TIMESTAMP') {
 				jsonItem.accessDate = Zotero.Date.dateToISO(new Date());
-			}
-			for (let attachment of jsonItem.attachments) {
-				if (attachment.document) {
-					attachment.mimeType = 'text/html';
-					attachment.url = attachment.document.location?.href;
-					delete attachment.document;
-				}
-				delete attachment.complete;
 			}
 			
 			this._jsonItem = jsonItem;
@@ -116,6 +120,7 @@
 			delete postCleaning.relations;
 			delete postCleaning.collections;
 			delete postCleaning.uniqueFields;
+			delete postCleaning.uri;
 			for (let [key, value] of Object.entries(postCleaning)) {
 				if (value === null) {
 					delete postCleaning[key];
