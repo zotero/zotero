@@ -39,6 +39,7 @@ $scaffold-toolbarbutton-icons: (
 }
 
 #scaffold {
+	min-width: 800px;
 	min-height: 600px;
 }
 
@@ -118,18 +119,10 @@ browser,
 #right-pane {
 	display: flex;
 	flex-direction: column;
-	min-width: 350px;
+	min-width: 450px;
 	border-inline-start: var(--material-panedivider);
 
-	#output {
-		flex: 1;
-		background: var(--material-background);
-		border: 0;
-		outline: none;
-		font: var(--monospace-font);
-	}
-	
-	#item-previews {
+	#toolbox-iframe, #item-previews {
 		flex: 1;
 	}
 }

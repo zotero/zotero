@@ -38,6 +38,7 @@ const TRANSLATE_SCRIPT_PATHS = [
 const OTHER_SCRIPT_URIS = [
 	'chrome://zotero/content/actors/translation/http.js',
 	'chrome://zotero/content/actors/translation/translate_item.js',
+	'chrome://zotero/content/actors/translation/console.js',
 ];
 
 class TranslationChild extends JSWindowActorChild {
