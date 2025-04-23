@@ -918,6 +918,7 @@ describe("Item pane", function () {
 
 			// Unpin
 			itemDetails.pinnedPane = "";
+			itemDetails._paneParent.scrollTo(0, 0);
 		});
 
 		it("should keep attachments pane preview status after switching tab", async function () {
@@ -1061,6 +1062,7 @@ describe("Item pane", function () {
 
 			// Unpin
 			itemDetails.pinnedPane = "";
+			itemDetails._paneParent.scrollTo(0, 0);
 		});
 
 		it("should open attachment on clicking attachment row", async function () {
@@ -1195,6 +1197,7 @@ describe("Item pane", function () {
 			assert.isTrue(await isPreviewDisplayed(attachmentsBox));
 
 			itemDetails.pinnedPane = "";
+			itemDetails._paneParent.scrollTo(0, 0);
 		});
 
 		it("should not load preview iframe before becoming visible", async function () {
@@ -1205,14 +1208,16 @@ describe("Item pane", function () {
 			let height = doc.documentElement.clientHeight;
 			win.resizeTo(null, 100);
 
-			// Remove any existing preview to ensure the test is valid
-			attachmentsBox._preview?.remove();
-			attachmentsBox._preview = null;
-
 			let item = await createDataObject('item');
 			await importFileAttachment('test.pdf', { parentID: item.id });
 
 			await ZoteroPane.selectItem(item.id);
+
+			itemDetails._paneParent.scrollTo(0, 0);
+
+			// Remove any existing preview to ensure the test is valid
+			attachmentsBox._preview?.remove();
+			attachmentsBox._preview = null;
 
 			assert.notExists(attachmentsBox._preview);
 			assert.notExists(attachmentsBox.querySelector("#preview"));
@@ -1836,6 +1841,7 @@ describe("Item pane", function () {
 			);
 
 			itemDetails.pinnedPane = "";
+			itemDetails._paneParent.scrollTo(0, 0);
 		});
 	});
 
