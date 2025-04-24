@@ -195,10 +195,11 @@ const init = settings => {
 	actions.forEach(action => {
 		const button = createElement('button')
 		button.className = classes.button
+		button.setAttribute('data-action', action.title.toLowerCase());
 		button.innerHTML = action.icon
 		button.title = action.title
 		button.setAttribute('type', 'button')
-		button.onclick = () => action.result() && content.focus()
+		button.onclick = () => action.result() && (button.getAttribute("tabindex") != -1 ? content.focus() : null);
 
 		if (action.state) {
 			const handler = () => button.classList[action.state() ? 'add' : 'remove'](classes.selected)
@@ -573,6 +574,26 @@ window.editor = {
 	
 	setEnabled(enabled) {
 		editorContents.setAttribute('contenteditable', !!enabled);
+	},
+	
+	hideActionBar() {
+		document.querySelector('.zotero-simpleEditor-actionbar').classList.add('hidden');
+		document.querySelector('.zotero-simpleEditor-content').classList.add('no-actionbar');
+		let buttons = [...document.querySelectorAll('.zotero-simpleEditor-actionbar button')];
+		for (let button of buttons) {
+			button.setAttribute("tabindex", "-1");
+		}
+	},
+	
+	toggleAction(action, enabled) {
+		let btn = document.querySelector(`button[data-action="${action}"]`);
+		if (enabled === true && btn.className.includes("selected")) return;
+		if (enabled === false && !btn.className.includes("selected")) return;
+		btn.click();
+	},
+
+	getContentHeight() {
+		return editorContents.scrollHeight;
 	}
 }
 
