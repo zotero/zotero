@@ -2677,7 +2677,7 @@ var ZoteroPane = new function()
 		// to copy annotations, they are wrapped in a temp note
 		if (items.every(item => item.isAnnotation())) {
 			format = Zotero.QuickCopy.getNoteFormat();
-			items = [Zotero.QuickCopy.wrapAnnotationsAsNote(items)];
+			items = [Zotero.QuickCopy.annotationsToNote(items)];
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		

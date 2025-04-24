@@ -368,7 +368,7 @@ class ReaderInstance {
 						return;
 					}
 					// annotations are wrapped in a temp note for translation
-					let items = [Zotero.QuickCopy.wrapAnnotationsAsNote(annotations)];
+					let items = [Zotero.QuickCopy.annotationsToNote(annotations)];
 					let format = Zotero.QuickCopy.getNoteFormat();
 					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${format}`);
 					format = Zotero.QuickCopy.unserializeSetting(format);

@@ -317,7 +317,7 @@ Zotero.QuickCopy = new function() {
 	 * If an array of Zotero.Items is passed, they will be converted to JSON.
 	 * @returns {Zotero.Item} - A note item with the annotations serialized as HTML.
 	 */
-	this.wrapAnnotationsAsNote = function (annotations) {
+	this.annotationsToNote = function (annotations) {
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
 			if (annotation instanceof Zotero.Item) {
