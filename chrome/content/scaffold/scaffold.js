@@ -33,6 +33,12 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
 
 var { CompletionCopilot, registerCompletion } = ChromeUtils.importESModule('resource://zotero/monacopilot.mjs');
 
+let { require } = ChromeUtils.import('resource://devtools/shared/loader/Loader.jsm');
+let { Toolbox } = require('resource://devtools/client/framework/toolbox.js');
+let { CommandsFactory } = require('resource://devtools/shared/commands/commands-factory.js');
+let { gDevTools } = require('resource://devtools/client/framework/devtools.js');
+let { TYPES } = require("resource://devtools/shared/commands/resource/resource-command.js");
+
 var lazy = {};
 ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 	return Zotero.Utilities.Internal.subprocess(Services.env.get('SHELL'), ['-c', 'echo $PATH'])
@@ -292,13 +298,21 @@ var Scaffold = new function () {
 	};
 	
 	this.initToolbox = async function (iframe) {
-		let { require } = ChromeUtils.import('resource://devtools/shared/loader/Loader.jsm');
-		let { Toolbox } = require('resource://devtools/client/framework/toolbox.js');
-		let { CommandsFactory } = require('resource://devtools/shared/commands/commands-factory.js');
-		let { gDevTools } = require('resource://devtools/client/framework/devtools.js');
+		let command = await CommandsFactory.forRemoteTab(_browser.browserId);
+		// Patch ResourceCommand#watchResources() to intercept and filter console output
+		let watchResourcesOriginal = command.resourceCommand.watchResources.bind(command.resourceCommand);
+		command.resourceCommand.watchResources = (resources, options) => watchResourcesOriginal(resources, {
+			...options,
+			onAvailable(updates, updateOptions) {
+				options.onAvailable(
+					updates.filter(_isResourceRelevant),
+					updateOptions
+				);
+			}
+		});
 
 		Scaffold.toolbox = await gDevTools.showToolbox(
-			await CommandsFactory.forRemoteTab(_browser.browserId),
+			command,
 			{
 				toolId: 'webconsole',
 				hostType: Toolbox.HostType.PAGE,
@@ -323,33 +337,76 @@ var Scaffold = new function () {
 		let rootDoc = iframe.contentDocument;
 		let styleSheet = new iframe.contentWindow.CSSStyleSheet();
 		styleSheet.replaceSync(`
-				.debug-target-info,
-				 #toolbox-meatball-menu-button {
-					display: none;
-				}
-			`);
+			.debug-target-info,
+			#toolbox-meatball-menu-button {
+				display: none;
+			}
+		`);
 		rootDoc.adoptedStyleSheets.push(styleSheet);
+
+		// Patch Console styles to remove (i) icon from info lines
+		// Don't wait for 'webconsole-ready' because it doesn't fire when the
+		// console is the initial tab
+		let consoleDoc = rootDoc.querySelector('#toolbox-panel-iframe-webconsole').contentDocument;
+		let style = consoleDoc.createElement('style');
+		style.textContent = `
+			.message.info > .icon {
+				visibility: hidden;
+			}
+		`;
+		consoleDoc.head.append(style);
 
 		// Patch Inspector styles to remove CSS inspector and color picker
 		Scaffold.toolbox.once('inspector-ready', () => {
 			let inspectorDoc = rootDoc.querySelector('#toolbox-panel-iframe-inspector').contentDocument;
 			let style = inspectorDoc.createElement('style');
 			style.textContent = `
-					#inspector-splitter-box > .inspector-sidebar-splitter > :not(:first-child),
-					#inspector-eyedropper-toggle {
-						display: none;
-					}
-				`;
+				#inspector-splitter-box > .inspector-sidebar-splitter > :not(:first-child),
+				#inspector-eyedropper-toggle {
+					display: none;
+				}
+			`;
 			inspectorDoc.head.append(style);
 		});
 
-		// Switch to Browser when element picker is clicked
+		// Switch to Browser when the element picker is clicked
 		Scaffold.toolbox.nodePicker.on('picker-starting', () => {
 			_showTab('browser');
 		});
 
 		// Remove Accel-R shortcut - conflicts with Run
 		Scaffold.toolbox.shortcuts.keys.delete('CmdOrCtrl+R');
+	};
+	
+	function _isResourceRelevant(resource) {
+		switch (resource.resourceType) {
+			case TYPES.CONSOLE_MESSAGE:
+				// Child-process console messages:
+				// Allow messages sent by the debugger and JSWindowActors
+				if (resource.message.filename === 'debugger eval code') {
+					return true;
+				}
+				if (resource.message.chromeContext) {
+					// Clear meaningless debug.js line numbers
+					resource.message.filename = '';
+					resource.message.lineNumber = 0;
+					resource.message.columnNumber = 0;
+					return true;
+				}
+				return false;
+			case TYPES.ERROR_MESSAGE:
+				// "Error" messages (Services.console.logMessage()):
+				// Allow our own messages
+				return resource.pageError?.category === 'Scaffold';
+			case TYPES.CSS_MESSAGE:
+				// CSS error/warning messages:
+				// Allow none
+				return false;
+			default:
+				// Resources that aren't messages:
+				// Allow all
+				return true;
+		}
 	}
 
 	this.initImportEditor = function () {
