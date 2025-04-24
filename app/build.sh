@@ -667,10 +667,10 @@ if [ $BUILD_MAC == 1 ]; then
 			# Extract entitlements, which differ from parent app
 			/usr/bin/codesign -d --entitlements "$BUILD_DIR/safari-entitlements.plist" --xml "$SAFARI_APPEX"
 			
-			# Add suffix to appex bundle identifier
-			if [ $UPDATE_CHANNEL == "beta" ] || [ $UPDATE_CHANNEL == "dev" ] || [ $UPDATE_CHANNEL == "source" ]; then
-				perl -pi -e "s/org\.zotero\.SafariExtensionApp\.SafariExtension/org.zotero.SafariExtensionApp.SafariExtension-$UPDATE_CHANNEL/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
-			fi
+			# Change appex bundle identifier to have same prefix as parent app
+			bundle_identifier=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APPDIR/Contents/Info.plist")
+			perl -pi -e "s/org\.zotero\.SafariExtensionApp\.SafariExtension/$bundle_identifier.SafariExtension/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
+
 			find "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 			/usr/bin/codesign --force --options runtime --entitlements "$BUILD_DIR/safari-entitlements.plist" --sign "$DEVELOPER_ID" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
 		fi
