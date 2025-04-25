@@ -372,11 +372,11 @@
 		}
 		
 		get _disableCollapsing() {
-			return !!this.closest('panel, menupopup, merge-pane, scaffold-item-preview');
+			return !!this.closest('panel, menupopup, merge-pane, scaffold-item-preview, annotation-items-pane');
 		}
 
 		get _disableSavingOpenState() {
-			return !!this.closest('merge-pane, scaffold-item-preview');
+			return !!this.closest('merge-pane, scaffold-item-preview, annotation-items-pane');
 		}
 
 		_handleClick = (event) => {
