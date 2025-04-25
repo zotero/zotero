@@ -1021,8 +1021,7 @@ var ZoteroPane = new function()
 			}
 		}
 
-		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
-		if ((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey) {
+		if (Zotero.isMac ? event.metaKey : event.ctrlKey) {
 			let command = Zotero.Keys.getCommand(event.key);
 			if (command === "toggleTabsMenu") {
 				Zotero_Tabs.toggleTabsMenu();
