@@ -97,7 +97,10 @@ menu-view-columns-move-right =
     .label = Move Column Right
 
 menu-edit-copy-annotation =
-    .label = Copy Annotation
+    .label = { $count ->
+        [one] Copy Annotation
+        *[other] Copy { $count } Annotations 
+    }
 
 main-window-command =
     .label = Library

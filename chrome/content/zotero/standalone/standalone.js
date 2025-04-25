@@ -339,6 +339,7 @@ const ZoteroStandalone = new function() {
 		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
 		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
 		copyAnnotation.hidden = !selected.length || format.mode != 'export' || !exportingAnnotations;
+		document.l10n.setAttributes(copyAnnotation, "menu-edit-copy-annotation", { count: selected.length });
 		
 		if (format.mode == 'export') {
 			try {
