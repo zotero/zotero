@@ -1950,8 +1950,15 @@ class Reader {
 				}
 			}
 			else if (event === 'select') {
+				for (let reader of this._readers) {
+					if (reader instanceof ReaderTab) {
+						reader._iframe.docShellIsActive = false;
+					}
+				}
+
 				let reader = Zotero.Reader.getByTabID(ids[0]);
 				if (reader) {
+					reader._iframe.docShellIsActive = true;
 					this.triggerAnnotationsImportCheck(reader.itemID);
 				}
 			}
