@@ -321,6 +321,18 @@ var Scaffold = new function () {
 				},
 			}
 		);
+		
+		// The SourceMapLoader worker hangs shutdown, even if you manually terminate it.
+		// There isn't anything special about it, so it's unclear what the problem is,
+		// but we don't really need source maps in Scaffold anyway. Make it into a no-op.
+		// TODO: Revisit after next Fx upgrade
+		let sourceMapLoader = Scaffold.toolbox.sourceMapLoader;
+		sourceMapLoader.start = () => {};
+		for (let field of Object.keys(sourceMapLoader)) {
+			if (String(sourceMapLoader[field]) === '(...args) => push(args)') {
+				sourceMapLoader[field] = () => Promise.resolve();
+			}
+		}
 
 		// Remove panels that aren't relevant to translators
 		let irrelevantPanelIDs = [
