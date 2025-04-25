@@ -339,10 +339,10 @@ Zotero.QuickCopy = new function() {
 				delete annotation.image;
 			}
 		}
-		let res = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations);
+		let { html } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations);
 		let tmpNote = new Zotero.Item('note');
 		tmpNote.libraryID = Zotero.Libraries.userLibraryID;
-		tmpNote.setNote(res.html);
+		tmpNote.setNote(html);
 		return tmpNote;
 	};
 	
