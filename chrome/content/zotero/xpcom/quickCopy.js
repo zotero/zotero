@@ -310,19 +310,18 @@ Zotero.QuickCopy = new function() {
 	};
 
 	/**
-	 * Generate a note item from an array of annotations.
-	 * This is a workaround to be able to translate annotations in getContentFromItems
-	 * even though annotations do not have a cslType.
-	 * @param {Zotero.Item|Object[]} annotations - Array of JSON annotations or Zotero.Item annotations.
-	 * If an array of Zotero.Items is passed, they will be converted to JSON.
-	 * @returns {Zotero.Item} - A note item with the annotations serialized as HTML.
+	 * Generate a note item to pass to getContentFromItems() from an array of annotations
+	 *
+	 * @param {Zotero.Item[]|Object[]} annotations - An array of Zotero.Item annotations or JSON
+	 *    annotations from Zotero.Annotations.toJSON()
+	 * @return {Zotero.Item} - A note item with the annotations serialized as HTML
 	 */
 	this.annotationsToNote = function (annotations) {
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
 			if (annotation instanceof Zotero.Item) {
 				// Skip ink and image annotations because fetching them
-				// requires await-ing for Zotero.Annotations.toJSON
+				// requires awaiting Zotero.Annotations.toJSON()
 				if (["ink", "image"].includes(annotation.type)) {
 					continue;
 				}
