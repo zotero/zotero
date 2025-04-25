@@ -93,7 +93,7 @@
 					img.addEventListener('error', () => {
 						let placeholder = document.createElement('div');
 						placeholder.classList.add('comment');
-						document.l10n.setAttributes(placeholder, 'annotation-image-not-found');
+						document.l10n.setAttributes(placeholder, 'annotation-image-not-available');
 						this._body.replaceChildren(placeholder);
 					});
 				}
