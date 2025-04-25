@@ -2674,7 +2674,7 @@ var ZoteroPane = new function()
 		if (items.every(item => item.isNote() || item.isAttachment())) {
 			format = Zotero.QuickCopy.getNoteFormat();
 		}
-		// to copy annotations, they are wrapped in a temp note
+		// To copy annotations, wrap them in a temp note
 		if (items.every(item => item.isAnnotation())) {
 			format = Zotero.QuickCopy.getNoteFormat();
 			items = [Zotero.QuickCopy.annotationsToNote(items)];
@@ -4026,7 +4026,7 @@ var ZoteroPane = new function()
 			show.add(m.changeParentItem);
 		}
 
-		// Only keep annotations-specitic options if annotations are selected
+		// Only keep annotation-specific options if annotations are selected
 		let annotationsSelected = items.some(item => item.isAnnotation());
 		if (annotationsSelected) {
 			for (let i in m) {

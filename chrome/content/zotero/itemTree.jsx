@@ -2323,7 +2323,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return false;
 					}
 
-					// Disallow drop of annotation items
+					// Disallow drag of annotation items
 					if (item.isAnnotation()) {
 						return false;
 					}
@@ -2350,7 +2350,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return false;
 					}
 
-					// Disallow drop of annotation items
+					// Disallow drag of annotation items
 					if (item.isAnnotation()) {
 						return false;
 					}
@@ -3208,8 +3208,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		let item = this.getRow(index).ref;
 		for (let column of columns) {
-			// special treatment for annotation item
-			if (column.hidden || item.isAnnotation()) continue;
+			if (column.hidden) continue;
+			// Annotation rows have a single cell, created below
+			if (item.isAnnotation()) continue;
+			
 			div.appendChild(this._renderCell(index, rowData[column.dataKey], column, column === firstColumn));
 		}
 
@@ -3254,7 +3256,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		// Special treatment for annotation rows whose title and comment do not correspond to existing columns
+		// Render annotation rows as a single cell with title/text and comment
 		div.classList.toggle("annotation-row", item.isAnnotation());
 		div.classList.remove("tight");
 		if (item.isAnnotation()) {

@@ -52,7 +52,7 @@
 			if (action == 'modify') {
 				for (let id of ids) {
 					let updatedItem = Zotero.Items.get(id);
-					// If a selected annotation is renamed, re-render it's annotation row
+					// If a selected annotation is renamed, re-render its annotation row
 					if (updatedItem.isAnnotation()) {
 						let row = this.querySelector(`annotation-row[annotation-id="${id}"]`);
 						if (row) {

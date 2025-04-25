@@ -1593,7 +1593,7 @@ describe("Zotero.ItemTree", function() {
 		});
 	});
 	
-	describe("annotations", function() {
+	describe("Annotations", function() {
 		let toplevelItem, attachment, highlight, underline, ink, image, note;
 	
 		before(async () => {
@@ -1674,7 +1674,7 @@ describe("Zotero.ItemTree", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(inkID));
 		});
 
-		it("should add note from selected annotation rows of the same parent item ", async () => {
+		it("should add note from selected annotation rows of the same parent item", async () => {
 			zp.itemsView.expandAllRows();
 
 			// make sure underline has some text, just like highlight
@@ -1695,7 +1695,7 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(text.split("<p>").length - 1, 2);
 		});
 
-		it("should create note from selected annotation rows of different parent items ", async () => {
+		it("should create note from selected annotation rows of different parent items", async () => {
 			let toplevelItemTwo = await createDataObject('item', { title: "Another entry" });
 			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF two', parentItemID: toplevelItemTwo.id });
 			let highlightTwo = await createAnnotation('highlight', attachmentTwo);
