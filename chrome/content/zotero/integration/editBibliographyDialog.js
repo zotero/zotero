@@ -381,6 +381,11 @@ const BibliographyListUI = {
 			listItem.scrollIntoView({ behavior: "smooth", block: "center" });
 			listItem.classList.add("highlighted");
 		}
+	},
+
+	onSplitterDrag: function () {
+		collectionsView.tree.invalidate();
+		itemsView.tree.invalidate();
 	}
 };
 

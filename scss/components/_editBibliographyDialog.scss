@@ -56,7 +56,8 @@
 		}
 		
 		#zotero-reference-items-list-wrapper {
-			max-height: 300px;
+			min-height: 100px;
+			height: 100px;
 			overflow: auto;
 			border-top: var(--material-panedivider);
 
@@ -182,10 +183,15 @@
 
 		}
 
+		#zotero-edit-bib-splitter {
+			cursor: row-resize;
+			margin-bottom: -9px;
+		}
+
 		#zotero-edit-bibliography-dialog-bottom {
 			border-top: var(--material-panedivider);
 			background: var(--material-sidepane);
-			height: 80px;
+			height: 80px !important; // make sure it's not affected by splitter
 			padding: 8px 16px 16px 16px;
 
 			#zotero-editor-warning {
