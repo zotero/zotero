@@ -225,23 +225,28 @@ describe("Zotero.ItemTree", function() {
 			var note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
 			var note2 = await createDataObject('item', { itemType: 'note', parentID: item2.id });
 			var note3 = await createDataObject('item', { itemType: 'note', parentID: item3.id });
+
+			// one of the items has an attachment with annotations
+			var attachment = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item1.id });
+			var highlight = await createAnnotation('highlight', attachment);
+			var underline = await createAnnotation('underline', attachment);
 			
-			var toSelect = [note1.id, note2.id, note3.id];
+			var toSelect = [note1.id, note2.id, note3.id, highlight.id, underline.id];
 			itemsView.collapseAllRows();
 
 			var numSelected = await itemsView.selectItems(toSelect);
-			assert.equal(numSelected, 3);
+			assert.equal(numSelected, 5);
 			var selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 3);
+			assert.lengthOf(selected, 5);
 			assert.sameMembers(selected, toSelect);
 			
 			// Again with the ids given in reverse order
 			itemsView.collapseAllRows();
 			toSelect = toSelect.reverse();
-			var numSelected = await itemsView.selectItems(toSelect);
-			assert.equal(numSelected, 3);
-			var selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 3);
+			numSelected = await itemsView.selectItems(toSelect);
+			assert.equal(numSelected, 5);
+			selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 5);
 			assert.sameMembers(selected, toSelect);
 		});
 	});
@@ -1585,6 +1590,135 @@ describe("Zotero.ItemTree", function() {
 			}
 			while (!cellText);
 			assert.equal(cellText.innerHTML, 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <span style="font-style: normal;">B<sub>oo</sub>k</span> &lt;another-tag/&gt;</i>');
+		});
+	});
+	
+	describe("Annotations", function() {
+		let toplevelItem, attachment, highlight, underline, ink, image, note;
+	
+		before(async () => {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+		});
+
+		beforeEach(async () => {
+			toplevelItem = await createDataObject('item', { title: "Item" });
+			attachment = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: toplevelItem.id });
+			highlight = await createAnnotation('highlight', attachment);
+			underline = await createAnnotation('underline', attachment);
+			ink = await createAnnotation('ink', attachment);
+			image = await createAnnotation('image', attachment);
+			note = await createAnnotation('image', attachment);
+		});
+
+		it("should display annotations as child rows of attachments", async () => {
+			zp.itemsView.expandAllRows();
+
+			var attachmentRowIndex = zp.itemsView.getRowIndexByID(attachment.id);
+
+			let offset = 0;
+			for (let annotation of attachment.getAnnotations()) {
+				let annotationRowIndex = zp.itemsView.getRowIndexByID(annotation.id);
+				offset += 1;
+				assert.equal(annotationRowIndex, attachmentRowIndex + offset);
+			}
+		});
+
+		it("should preserve order of annotation rows after sorting", async () => {
+			let itemAboveOne = await createDataObject('item', { title: "AAA" });
+			let itemAboveTwo = await createDataObject('item', { title: "BBB" });
+			let itemBelowOne = await createDataObject('item', { title: "ZZZ" });
+
+			// Initially, everything is sorted by title
+			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			await zp.itemsView.tree._columns.toggleSort(colIndex);
+
+			// Expand annotations
+			var itemRowIndex = zp.itemsView.getRowIndexByID(toplevelItem.id);
+			await zp.itemsView.toggleOpenState(itemRowIndex);
+
+			var attachmentRowIndex = zp.itemsView.getRowIndexByID(attachment.id);
+			await zp.itemsView.toggleOpenState(attachmentRowIndex);
+			
+			// Record sequence of items
+			let rowIDs = zp.itemsView._rows.map(row => row.id);
+
+			// Sort by title in reverse
+			await zp.itemsView.tree._columns.toggleSort(colIndex);
+
+			attachmentRowIndex = zp.itemsView.getRowIndexByID(attachment.id);
+			// Make sure annotations appear after the attachment
+			let offset = 0;
+			for (let annotation of attachment.getAnnotations()) {
+				let annotationRowIndex = zp.itemsView.getRowIndexByID(annotation.id);
+				offset += 1;
+				assert.equal(annotationRowIndex, attachmentRowIndex + offset);
+			}
+
+			// Sort back and make sure the order of rows is the same as in the beginning
+			await zp.itemsView.tree._columns.toggleSort(colIndex);
+			assert.deepEqual(rowIDs, zp.itemsView._rows.map(row => row.id));
+		});
+
+		it("should erase annotation on escape when row is selected", async () => {
+			zp.itemsView.expandAllRows();
+
+			// Select and delete ink annotation
+			let inkID = ink.id;
+			await zp.itemsView.selectItems([inkID]);
+
+			await zp.itemsView.deleteSelection();
+
+			// Make sure it is deleted and the row is gone
+			assert.isFalse(Zotero.Items.get(inkID));
+			assert.isFalse(zp.itemsView.getRowIndexByID(inkID));
+		});
+
+		it("should add note from selected annotation rows of the same parent item", async () => {
+			zp.itemsView.expandAllRows();
+
+			// make sure underline has some text, just like highlight
+			underline.annotationText = "underline";
+			await underline.saveTx();
+			await zp.itemsView.selectItems([highlight.id, underline.id]);
+
+			// Click button in the header of annotations pane
+			win.document.querySelector("annotation-items-pane .custom-head button").click();
+			await waitForItemEvent('add');
+			await waitForItemEvent('modify');
+
+			// Make sure note is created as a child of top level item
+			let note = Zotero.Items.get(toplevelItem.getNotes()[0]);
+			assert.exists(note);
+			let text = note.getNote();
+			// Only two paragraphs, one for each annotation, should be added
+			assert.equal(text.split("<p>").length - 1, 2);
+		});
+
+		it("should create note from selected annotation rows of different parent items", async () => {
+			let toplevelItemTwo = await createDataObject('item', { title: "Another entry" });
+			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF two', parentItemID: toplevelItemTwo.id });
+			let highlightTwo = await createAnnotation('highlight', attachmentTwo);
+
+			zp.itemsView.expandAllRows();
+
+			await zp.itemsView.selectItems([highlight.id, highlightTwo.id]);
+
+			// Click button in the header of annotations pane
+			win.document.querySelector("annotation-items-pane .custom-head button").click();
+			await waitForItemEvent('add');
+			await waitForItemEvent('modify');
+
+			let note = zp.getSelectedItems()[0];
+			assert.isTrue(note.isNote());
+			assert.isFalse(note.parentID);
+
+			let text = note.getNote();
+			// Only two paragraphs, one for each annotation, should be added
+			assert.equal(text.split("<p>").length - 1, 2);
+			// Headers of both top level items are present
+			assert.include(text, toplevelItem.getDisplayTitle());
+			assert.include(text, toplevelItemTwo.getDisplayTitle());
 		});
 	});
 })

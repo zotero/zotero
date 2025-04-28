@@ -2009,7 +2009,7 @@ var ZoteroPane = new function()
 			let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 			format = Zotero.QuickCopy.unserializeSetting(format);
 			if (format.mode == 'bibliography') {
-				canCopy = selectedItems.some(item => item.isRegularItem());
+				canCopy = selectedItems.some(item => item.isRegularItem() || item.isAnnotation());
 			}
 			else {
 				canCopy = true;
@@ -2018,6 +2018,7 @@ var ZoteroPane = new function()
 		
 		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopy);
 		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopy);
+		document.getElementById('cmd_zotero_copyAnnotation').setAttribute('disabled', !canCopy);
 	};
 	
 	
@@ -2177,6 +2178,13 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isShare()) {
 			return false;
 		}
+		// If multiple items are selected, some are annotations and some are not, do nothing,
+		// since annotations have different treatment from other items
+		let selected = this.itemsView.getSelectedItems();
+		if (!selected.every(item => item.isAnnotation())
+			&& selected.some(item => item.isAnnotation())) {
+			return false;
+		}
 		return true;
 	};
 
@@ -2226,15 +2234,19 @@ var ZoteroPane = new function()
 		if (!this.canDeleteSelectedItems()) {
 			return;
 		}
-		
-		if (collectionTreeRow.isPublications()) {
+		var prompt;
+		// Backspace on annotation items = prompt to erase
+		if (this.itemsView.getSelectedItems().every(item => item.isAnnotation())) {
+			prompt = toDelete;
+		}
+		else if (collectionTreeRow.isPublications()) {
 			let toRemoveFromPublications = {
 				title: Zotero.getString('pane.items.removeFromPublications.title'),
 				text: Zotero.getString(
 					'pane.items.removeFromPublications' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
 				)
 			};
-			var prompt = force ? toTrash : toRemoveFromPublications;
+			prompt = force ? toTrash : toRemoveFromPublications;
 		}
 		else if (collectionTreeRow.isLibrary(true)
 				|| collectionTreeRow.isSearch()
@@ -2242,11 +2254,11 @@ var ZoteroPane = new function()
 				|| collectionTreeRow.isRetracted()
 				|| collectionTreeRow.isDuplicates()) {
 			// In library, don't prompt if meta key was pressed
-			var prompt = (force && !fromMenu) ? false : toTrash;
+			prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (collectionTreeRow.isCollection()) {
 			if (force) {
-				var prompt = toTrash;
+				prompt = toTrash;
 			}
 			else {
 				// Ignore unmodified action if only child items are selected
@@ -2275,12 +2287,12 @@ var ZoteroPane = new function()
 					}
 				}
 				else {
-					var prompt = toRemove;
+					prompt = toRemove;
 				}
 			}
 		}
 		else if (collectionTreeRow.isTrash() || collectionTreeRow.isBucket()) {
-			var prompt = toDelete;
+			prompt = toDelete;
 		}
 		
 		if (!prompt || Services.prompt.confirm(window, prompt.title, prompt.text)) {
@@ -2661,6 +2673,11 @@ var ZoteroPane = new function()
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		if (items.every(item => item.isNote() || item.isAttachment())) {
 			format = Zotero.QuickCopy.getNoteFormat();
+		}
+		// To copy annotations, wrap them in a temp note
+		if (items.every(item => item.isAnnotation())) {
+			format = Zotero.QuickCopy.getNoteFormat();
+			items = [Zotero.QuickCopy.annotationsToNote(items)];
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
@@ -3699,7 +3716,8 @@ var ZoteroPane = new function()
 						&& !collectionTreeRow.isDuplicates()
 						&& !collectionTreeRow.isFeedsOrFeed()) {
 					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)
-							|| items.some(item => isAttachmentWithExtractableAnnotations(item))) {
+							|| items.some(item => isAttachmentWithExtractableAnnotations(item))
+							|| items.some(item => item.isAnnotation())) {
 						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
 						show.add(m.createNoteFromAnnotations);
 						let key;
@@ -3789,7 +3807,7 @@ var ZoteroPane = new function()
 						}
 					}
 					// Show "(Create|Add) Note from Annotations" on attachment with extractable annotations
-					else if (isAttachmentWithExtractableAnnotations(item)) {
+					else if (isAttachmentWithExtractableAnnotations(item) || item.isAnnotation()) {
 						show.add(m.createNoteFromAnnotations);
 						show.add(m.sep2);
 					}
@@ -3851,6 +3869,9 @@ var ZoteroPane = new function()
 						if (showSep5) {
 							show.add(m.sep5);
 						}
+					}
+					else if (item.isAnnotation()) {
+						// Some annotation specific menus?
 					}
 					else if (item.isFeedItem) {
 						show.add(m.toggleRead);
@@ -4005,6 +4026,17 @@ var ZoteroPane = new function()
 			show.add(m.changeParentItem);
 		}
 
+		// Only keep annotation-specific options if annotations are selected
+		let annotationsSelected = items.some(item => item.isAnnotation());
+		if (annotationsSelected) {
+			for (let i in m) {
+				if (i == 'createNoteFromAnnotations') {
+					continue;
+				}
+				show.delete(m[i]);
+			}
+		}
+
 		// Set labels, plural if necessary
 		menu.childNodes[m.findFile].setAttribute('label', Zotero.getString('pane.items.menu.findAvailableFile'));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
@@ -4031,7 +4063,10 @@ var ZoteroPane = new function()
 		for (let x of show) {
 			menu.childNodes[x].setAttribute('hidden', false);
 		}
-		
+
+		// No locate menu options if annotations are selected
+		if (annotationsSelected) return;
+
 		// add locate menu options
 		yield Zotero_LocateMenu.buildContextMenu(menu, true);
 	});
@@ -4955,6 +4990,9 @@ var ZoteroPane = new function()
 			else if (item.isAttachment()) {
 				yield this.viewAttachment(item.id, event);
 			}
+			else if (item.isAnnotation()) {
+				this.viewPDF(item.parentItemID, { annotationID: item.key });
+			}
 		}
 	});
 	
@@ -5741,6 +5779,7 @@ var ZoteroPane = new function()
 		}
 		
 		var attachments = [];
+		var annotations = [];
 		for (let item of items) {
 			if (item.isRegularItem()) {
 				// Find all child items with extractable annotations
@@ -5752,17 +5791,19 @@ var ZoteroPane = new function()
 			else if (isAttachmentWithExtractableAnnotations(item)) {
 				attachments.push(item);
 			}
+			else if (item.isAnnotation() && item.annotationType != 'ink') {
+				annotations.push(item);
+			}
 			else {
 				continue;
 			}
 		}
 		
-		if (!attachments.length) {
+		if (!attachments.length && !annotations.length) {
 			Zotero.debug("No attachments found", 2);
 			return;
 		}
 		
-		var annotations = [];
 		for (let attachment of attachments) {
 			if (attachment.isPDFAttachment()) {
 				try {
@@ -5858,6 +5899,9 @@ var ZoteroPane = new function()
 			else if (isAttachmentWithExtractableAnnotations(item)) {
 				attachments.push(item);
 			}
+			else if (item.isAnnotation()) {
+				annotations.push(item);
+			}
 			else {
 				continue;
 			}
@@ -5870,7 +5914,7 @@ var ZoteroPane = new function()
 						Zotero.logError(e);
 					}
 				}
-				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
+				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink' && x.annotationType != 'image'));
 			}
 		}
 		

@@ -113,7 +113,9 @@
 			}
 
 			.icon-item-type + .tag-swatch,
-			.icon-item-type + .colored-tag-swatches {
+			.icon-item-type + .colored-tag-swatches,
+			.annotation-icon + .tag-swatch,
+			.annotation-icon + .colored-tag-swatches {
 				margin-inline-start: 4px;
 			}
 
@@ -217,6 +219,40 @@
 			.icon-missing-file {
 				opacity: 0.4;
 			}
+		}
+
+		.annotation-row {
+			.cell {
+				font-size: $font-size-small;
+				max-width: fit-content;
+				// Do not italicize CJK characters
+				font-synthesis: none;
+				&.title {
+					flex-grow: 1;
+					flex-basis: 0;
+					max-width: fit-content;
+					.cell-text::before {
+						content: attr(q-mark-open)
+					}
+					&::after {
+						content: attr(q-mark-close)
+					}
+					.italics {
+						font-style: italic;
+					}
+				}
+				&.annotation-comment {
+					flex-grow: 2;
+					flex-basis: 0;
+				}
+			}
+			&.tight .cell {
+				padding: 0 2px;
+			}
+		}
+		
+		.cell .annotation-icon {
+			-moz-context-properties: fill;
 		}
 		
 		.numNotes, .hasAttachment {

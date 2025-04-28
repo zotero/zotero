@@ -268,8 +268,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					.concat(await this.collectionTreeRow.getTrashedCollections())
 					.concat(await Zotero.Searches.getDeleted(this.collectionTreeRow.ref.libraryID));
 			}
-			// TEMP: Hide annotations
-			newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
 			// Remove notes and attachments if necessary
 			if (this.props.regularOnly) {
 				newSearchItems = newSearchItems.filter((item) => {
@@ -309,7 +307,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (row.ref instanceof Zotero.Item && row.ref.parentID) {
 						continue;
 					}
-					let isSearchParent = newSearchParentIDs.has(row.ref.treeViewID);
+					let attachments = row.ref.isRegularItem() ? row.ref.getAttachments() : [];
+					let isSearchParent = newSearchParentIDs.has(row.ref.treeViewID) || attachments.some(id => newSearchParentIDs.has(id));
 					// If not showing children or no children match the search, close
 					if (this.props.regularOnly || !isSearchParent) {
 						row.isOpen = false;
@@ -333,8 +332,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				else if (skipChildren) {
 					continue;
 				}
-				newRows.push(row);
-				allItemIDs.add(row.ref.treeViewID);
+				if (!allItemIDs.has(row.ref.id)) {
+					newRows.push(row);
+					allItemIDs.add(row.ref.treeViewID);
+				}
 			}
 			
 			// Add new items
@@ -348,6 +349,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 						continue;
 					}
 					item = Zotero.Items.get(parentItemID);
+					// Go up one more level to check for parents of annotation rows
+					let parentsParent = item.parentItemID;
+					if (parentsParent) {
+						if (allItemIDs.has(parentsParent)) {
+							continue;
+						}
+						item = Zotero.Items.get(parentsParent);
+					}
 				}
 				// Parent item may have already been added from child
 				else if (allItemIDs.has(item.treeViewID)) {
@@ -356,9 +365,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				// Add new top-level items
 				let row = new ItemTreeRow(item, 0, false);
-				newRows.push(row);
-				allItemIDs.add(item.treeViewID);
-				addedItemIDs.add(item.treeViewID);
+				if (!allItemIDs.has(item.treeViewID)) {
+					newRows.push(row);
+					allItemIDs.add(item.treeViewID);
+					addedItemIDs.add(item.treeViewID);
+				}
 			}
 			
 			this._rows = newRows;
@@ -1231,15 +1242,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				continue;
 			}
 			
-			// Get the row of the parent, if there is one
-			let parent = item.parentItemID;
-			let parentRow = parent && this._rowMap[parent];
-			
 			// If row with id isn't visible, check to see if it's hidden under a parent
 			if (row == undefined) {
-				if (!parent || parentRow === undefined) {
-					// No parent -- it's not here
-					
+				await this.expandToItem(id);
+				if (!this._rowMap[id]) {
+					// The row is still not found
 					// Clear the quick search and tag selection and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
 						let cleared1 = await window.ZoteroPane.clearQuicksearch();
@@ -1253,13 +1260,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					Zotero.debug(`Couldn't find row for item ${id} -- not selecting`);
 					continue;
 				}
-				
-				// If parent is already open and we haven't found the item, the child
-				// hasn't yet been added to the view, so close parent to allow refresh
-				await this._closeContainer(parentRow);
-				
-				// Open the parent
-				await this.toggleOpenState(parentRow);
 			}
 			
 			// Since we're opening containers, we still need to reference by id
@@ -1276,7 +1276,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			rowsToSelect.push(row);
 		}
-		
 		if (!rowsToSelect.length) {
 			return 0;
 		}
@@ -1713,10 +1712,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		//Get children
 		var includeTrashed = this.collectionTreeRow.isTrash();
-		var attachments = item.getAttachments(includeTrashed);
-		var notes = item.getNotes(includeTrashed);
+		var attachments = item.isRegularItem() ? item.getAttachments(includeTrashed) : [];
+		var notes = item.isRegularItem() ? item.getNotes(includeTrashed) : [];
+		var annotations = [];
 
-		var newRows;
+		if (item.isFileAttachment()) {
+			annotations = item.getAnnotations();
+		}
+		var newRows = [];
 		if (attachments.length && notes.length) {
 			newRows = notes.concat(attachments);
 		}
@@ -1726,10 +1729,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else if (notes.length) {
 			newRows = notes;
 		}
+		if (annotations.length) {
+			newRows = newRows.concat(annotations);
+		}
 
 		if (newRows) {
-			newRows = Zotero.Items.get(newRows);
-
+			if (!item.isFileAttachment()) {
+				newRows = Zotero.Items.get(newRows);
+			}
 			for (let i = 0; i < newRows.length; i++) {
 				count++;
 				this._addRow(
@@ -1766,8 +1773,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var savedSelection = this.getSelectedObjects();
 		for (var i=0; i<this.rowCount; i++) {
-			var id = this.getRow(i).ref.id;
-			if (searchParentIDs.has(id) && this.isContainer(i) && !this.isContainerOpen(i)) {
+			if (!this.isContainer(i) || this.isContainerOpen(i)) {
+				continue;
+			}
+			let item = this.getRow(i).ref;
+			let attachments = item.isRegularItem() ? item.getAttachments() : [];
+			// expand item row if it is a parent of a match
+			// OR if it has a child that is a parent of a match
+			let shouldBeOpened = searchParentIDs.has(item.id) || attachments.some(id => searchParentIDs.has(id));
+			if (shouldBeOpened) {
 				this.toggleOpenState(i, true);
 			}
 		}
@@ -1885,7 +1899,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			let collectionTreeRow = this.collectionTreeRow;
 
-			if (collectionTreeRow.isBucket()) {
+			// If all selected items are annotations, for now erase them skipping trash
+			if (selectedItems.length && selectedItems.every(item => item.isAnnotation())) {
+				await Zotero.Items.erase(selectedItemIDs);
+			}
+			else if (collectionTreeRow.isBucket()) {
 				collectionTreeRow.ref.deleteItems(ids);
 			}
 			else if (collectionTreeRow.isTrash()) {
@@ -2061,8 +2079,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	};
 	
 	isContainer = (index) => {
-		return this.getRow(index).ref.isRegularItem();
-	};
+		let item = this.getRow(index).ref;
+		return item.isRegularItem() || item.isFileAttachment();
+	}
 
 	isContainerOpen = (index) => {
 		return this.getRow(index).isOpen;
@@ -2074,11 +2093,46 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		var item = this.getRow(index).ref;
+		if (item.isFileAttachment()) {
+			return item.numAnnotations() == 0;
+		}
 		if (!item.isRegularItem()) {
 			return true;
 		}
 		var includeTrashed = this.collectionTreeRow.isTrash();
 		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
+	};
+
+	// Expand all ancestors of the specified item id
+	expandToItem = async (id) => {
+		let item = Zotero.Items.get(id);
+		// Stop if the row already exists of if the item is not found
+		if (this._rowMap[id] || !item) return;
+		let toExpand = [];
+		// Collect all ancestors of the item
+		while (item.parentItemID) {
+			item = Zotero.Items.get(item.parentItemID);
+			toExpand.push(item.id);
+		}
+		if (!this.getRow(this._rowMap[item.id])) return;
+		// Go through ancestors starting from the top-most one
+		// and expand them if needed
+		while (toExpand.length > 0) {
+			let ancestorID = toExpand.pop();
+			let ancestorRow = this._rowMap[ancestorID];
+
+			// If the row for the next ancestor already exists, just move one
+			if (toExpand.length > 0) {
+				let nextAncestorID = toExpand[toExpand.length - 1];
+				let nextAncestorRow = this._rowMap[nextAncestorID];
+				if (this.getRow(nextAncestorRow)) continue;
+			}
+			
+			// Close and re-open the ancestor to reveal the next row until
+			// we reach the desired item
+			await this._closeContainer(ancestorRow);
+			await this.toggleOpenState(ancestorRow);
+		}
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -2269,6 +2323,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return false;
 					}
 
+					// Disallow drag of annotation items
+					if (item.isAnnotation()) {
+						return false;
+					}
+
 					// Disallow cross-library child drag
 					if (item.libraryID != collectionTreeRow.ref.libraryID) {
 						return false;
@@ -2288,6 +2347,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				for (let item of items) {
 					// Don't allow drag if any top-level items
 					if (item.isTopLevelItem()) {
+						return false;
+					}
+
+					// Disallow drag of annotation items
+					if (item.isAnnotation()) {
 						return false;
 					}
 
@@ -3142,8 +3206,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				: acc;
 		}, { lowestOrdinal: Infinity, firstColumn: null });
 
+		let item = this.getRow(index).ref;
 		for (let column of columns) {
 			if (column.hidden) continue;
+			// Annotation rows have a single cell, created below
+			if (item.isAnnotation()) continue;
+			
 			div.appendChild(this._renderCell(index, rowData[column.dataKey], column, column === firstColumn));
 		}
 
@@ -3188,6 +3256,46 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		// Render annotation rows as a single cell with title/text and comment
+		div.classList.toggle("annotation-row", item.isAnnotation());
+		div.classList.remove("tight");
+		if (item.isAnnotation()) {
+			// Use "title" column  as a blueprint to render the first part of annotation row
+			let titleRowData = Object.assign({}, columns.find(column => column.dataKey == "title"));
+			titleRowData.className = "title";
+			let title;
+			// Strip html tags from annotation comment and text until the algorithm
+			// for safe rendering of relevant html tags is carried over from the reader
+			let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+			let plainText = parserUtils.convertToPlainText(item.annotationText || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
+			let plainComment = parserUtils.convertToPlainText(item.annotationComment || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
+			if (["highlight", "underline"].includes(item.annotationType)) {
+				title = this._renderCell(index, plainText, titleRowData, true);
+				let titleCell = title.querySelector(".cell-text");
+				// Quote text is in italics
+				titleCell.classList.add("italics");
+				// Add quotation marks around the quoted text
+				titleCell.setAttribute("q-mark-open", Zotero.getString("punctuation.openingQMark"));
+				title.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
+				if (item.annotationComment) {
+					let comment = renderCell(null, plainComment, { className: "annotation-comment" });
+					div.appendChild(comment);
+				}
+				// only keep default wider spacing if there are CJK characters
+				let containsCJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(item.annotationText);
+				div.classList.toggle("tight", !containsCJK);
+			}
+			else if (item.annotationComment) {
+				// If there is a comment for image, ink, note annotations, use that as the title
+				title = this._renderCell(index, plainComment, titleRowData, true);
+			}
+			else {
+				// Catch all - use annotation type as the title
+				let annotationTypeName = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+				title = this._renderCell(index, annotationTypeName, titleRowData, true);
+			}
+			div.prepend(title);
+		}
 		return div;
 	};
 	
@@ -3682,6 +3790,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_saveOpenState(close) {
 		if (!this.tree) return [];
 		var itemIDs = [];
+		var toClose = [];
 		if (close) {
 			if (!this.selection.selectEventsSuppressed) {
 				var unsuppress = this.selection.selectEventsSuppressed = true;
@@ -3689,13 +3798,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		for (var i=0; i<this._rows.length; i++) {
 			if (this.isContainer(i) && this.isContainerOpen(i)) {
-				itemIDs.push(this.getRow(i).ref.id);
-				if (close) {
-					this._closeContainer(i, true);
+				let row = this.getRow(i);
+				itemIDs.push(row.ref.id);
+				if (close && row.level == 0) {
+					toClose.push(this.getRow(i).ref.id);
 				}
 			}
 		}
 		if (close) {
+			for (i = toClose.length - 1; i >= 0; i--) {
+				let row = this._rowMap[toClose[i]];
+				this._closeContainer(row, true);
+			}
 			this._refreshRowMap();
 			if (unsuppress) {
 				this.selection.selectEventsSuppressed = false;
@@ -3704,13 +3818,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return itemIDs;
 	}
 
-	_rememberOpenState(itemIDs) {
+	_rememberOpenState(itemIDs, secondLevel = false) {
 		if (!this.tree) return;
 		var rowsToOpen = [];
+		var nextLevelToOpen = [];
 		for (let id of itemIDs) {
 			var row = this._rowMap[id];
 			// Item may not still exist
 			if (row == undefined) {
+				if (!secondLevel) {
+					nextLevelToOpen.push(id);
+				}
 				continue;
 			}
 			rowsToOpen.push(row);
@@ -3727,6 +3845,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.toggleOpenState(rowsToOpen[i], true);
 		}
 		this._refreshRowMap();
+
+		if (nextLevelToOpen.length) {
+			this._rememberOpenState(nextLevelToOpen, true);
+		}
 		if (unsuppress) {
 			this.selection.selectEventsSuppressed = false;
 		}
@@ -3940,6 +4062,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return icon;
 		}
 		
+		if (item.isAnnotation()) {
+			let img = document.createElement("img");
+			img.className = "annotation-icon";
+			let type = item.annotationType;
+			if (type == 'image') {
+				type = 'area';
+			}
+			img.src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
+			img.style.fill = item.annotationColor;
+			return img;
+		}
 		var itemType = item.getItemTypeIconName();
 		return getCSSItemTypeIcon(itemType);
 	}

@@ -96,6 +96,12 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 
+menu-edit-copy-annotation =
+    .label = { $count ->
+        [one] Copy Annotation
+        *[other] Copy { $count } Annotations 
+    }
+
 main-window-command =
     .label = Library
 main-window-key =
@@ -591,6 +597,8 @@ toggle-preview =
             [collapsed] Show
             *[unknown] Toggle
     } Attachment Preview
+
+annotation-image-not-available = [Image not available]
 
 quicksearch-mode =
     .aria-label = Quick Search mode

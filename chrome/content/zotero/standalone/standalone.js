@@ -322,7 +322,8 @@ const ZoteroStandalone = new function() {
 
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		var exportingNotes = selected.every(item => item.isNote() || item.isAttachment());
-		if (exportingNotes) {
+		var exportingAnnotations = selected.every(item => item.isAnnotation());
+		if (exportingNotes || exportingAnnotations) {
 			format = Zotero.QuickCopy.getNoteFormat();
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
@@ -331,11 +332,15 @@ const ZoteroStandalone = new function() {
 		var copyBibliography = document.getElementById('menu_copyBibliography');
 		var copyExport = document.getElementById('menu_copyExport');
 		var copyNote = document.getElementById('menu_copyNote');
+		var copyAnnotation = document.getElementById('menu_copyAnnotation');
 		
 		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
 		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
 		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
 		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
+		copyAnnotation.hidden = !selected.length || format.mode != 'export' || !exportingAnnotations;
+		document.l10n.setAttributes(copyAnnotation, "menu-edit-copy-annotation", { count: selected.length });
+		
 		if (format.mode == 'export') {
 			try {
 				let obj = Zotero.Translators.get(format.id);

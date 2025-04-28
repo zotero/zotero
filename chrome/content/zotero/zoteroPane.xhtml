@@ -110,6 +110,9 @@
 		<command id="cmd_zotero_copyBibliography"
 				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
 				 disabled="true"/>
+		<command id="cmd_zotero_copyAnnotation"
+				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
+				 disabled="true"/>
 		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
 		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xhtml', 'rtfScan', 'chrome,centerscreen')"/>
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection()?.key)"/>
@@ -386,6 +389,11 @@
 							<menuitem id="menu_copyNote"
 									label="&copyNoteCmd.label;"
 									command="cmd_zotero_copyBibliography"
+									key="key_copyBibliography"
+									hidden="true"/>
+							<menuitem id="menu_copyAnnotation"
+									data-l10n-id="menu-edit-copy-annotation"
+									command="cmd_zotero_copyAnnotation"
 									key="key_copyBibliography"
 									hidden="true"/>
 							<menuitem id="menu_paste"

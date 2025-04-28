@@ -308,7 +308,43 @@ Zotero.QuickCopy = new function() {
 		
 		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
 	};
-	
+
+	/**
+	 * Generate a note item to pass to getContentFromItems() from an array of annotations
+	 *
+	 * @param {Zotero.Item[]|Object[]} annotations - An array of Zotero.Item annotations or JSON
+	 *    annotations from Zotero.Annotations.toJSON()
+	 * @return {Zotero.Item} - A note item with the annotations serialized as HTML
+	 */
+	this.annotationsToNote = function (annotations) {
+		let jsonAnnotations = [];
+		for (let annotation of annotations) {
+			if (annotation instanceof Zotero.Item) {
+				// Skip ink and image annotations because fetching them
+				// requires awaiting Zotero.Annotations.toJSON()
+				if (["ink", "image"].includes(annotation.type)) {
+					continue;
+				}
+				let json = Zotero.Annotations.toJSONSync(annotation);
+				json.attachmentItemID = annotation.parentItemID;
+				jsonAnnotations.push(json);
+			}
+			else {
+				jsonAnnotations.push(annotation);
+			}
+		}
+		for (let annotation of jsonAnnotations) {
+			if (annotation.image && !annotation.imageAttachmentKey) {
+				annotation.imageAttachmentKey = 'none';
+				delete annotation.image;
+			}
+		}
+		let { html } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations);
+		let tmpNote = new Zotero.Item('note');
+		tmpNote.libraryID = Zotero.Libraries.userLibraryID;
+		tmpNote.setNote(html);
+		return tmpNote;
+	};
 	
 	/**
 	 * If an export translator is the selected output format, load its code (which must be done

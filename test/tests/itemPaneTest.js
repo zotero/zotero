@@ -2083,4 +2083,45 @@ describe("Item pane", function () {
 			Zotero.ItemPaneManager.unregisterSection(registeredID);
 		});
 	});
+
+	describe("AnnotationItemsPane", function () {
+		it("should display selected annotations groupped by parent item", async () => {
+			let toplevelItemOne = await createDataObject('item', { title: "Item one" });
+			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: toplevelItemOne.id });
+			let highlightOne = await createAnnotation('highlight', attachmentOne);
+			
+			let toplevelItemTwo = await createDataObject('item', { title: "Item two" });
+			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: toplevelItemTwo.id });
+			let highlightTwo = await createAnnotation('highlight', attachmentTwo);
+
+			ZoteroPane.itemsView.expandAllRows();
+
+			await ZoteroPane.itemsView.selectItems([highlightOne.id, highlightTwo.id]);
+
+			let sections = [...win.document.querySelectorAll("annotation-items-pane collapsible-section")];
+			// Top level items' titles are in section summaries
+			assert.equal(sections[0].summary, toplevelItemOne.getDisplayTitle());
+			assert.equal(sections[1].summary, toplevelItemTwo.getDisplayTitle());
+			// Each item's section contains its annotation
+			assert.equal(sections[0].querySelector("annotation-row").annotation.id, highlightOne.id);
+			assert.equal(sections[1].querySelector("annotation-row").annotation.id, highlightTwo.id);
+		});
+
+		it("should refresh when annotation is updated", async () => {
+			let toplevelItemOne = await createDataObject('item', { title: "Item one" });
+			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: toplevelItemOne.id });
+			let highlightOne = await createAnnotation('highlight', attachmentOne);
+
+			highlightOne.annotationText = "Annotation";
+			await highlightOne.saveTx();
+			
+			ZoteroPane.itemsView.expandAllRows();
+			await ZoteroPane.itemsView.selectItems([highlightOne.id]);
+
+			assert.equal(win.document.querySelector("annotation-items-pane annotation-row .quote").textContent, "Annotation");
+			highlightOne.annotationText = "Updated";
+			await highlightOne.saveTx();
+			assert.equal(win.document.querySelector("annotation-items-pane annotation-row .quote").textContent, "Updated");
+		});
+	});
 });
