@@ -384,6 +384,12 @@ if [ $DEVTOOLS -eq 1 ]; then
 	replace_line 'let command = Services.dirsvc.get\("XREExeF", Ci.nsIFile\).path;' \
 		'let command = Services.dirsvc.get("XREExeF", Ci.nsIFile).path; command = command.replace("zotero-bin", "zotero");' \
 		chrome/devtools/modules/devtools/client/framework/browser-toolbox/Launcher.sys.mjs
+	
+	# Make Scaffold console messages unfilterable
+	replace_line 'function isUnfilterable\(message\) {' \
+		'function isUnfilterable(message) {
+			if (message.frame?.source === "chrome:\/\/scaffold\/content\/scaffold.xhtml") return true;' \
+		chrome/devtools/modules/devtools/client/webconsole/reducers/messages.js
 fi
 
 # 5.0.96.3 / 5.0.97-beta.37+ddc7be75c

@@ -305,7 +305,9 @@ var Scaffold = new function () {
 			...options,
 			onAvailable(updates, updateOptions) {
 				options.onAvailable(
-					updates.filter(_isResourceRelevant),
+					updates
+						.filter(_isResourceRelevant)
+						.map(_transformResource),
 					updateOptions
 				);
 			}
@@ -345,7 +347,7 @@ var Scaffold = new function () {
 		Scaffold.toolbox.panelDefinitions = Scaffold.toolbox.panelDefinitions
 			.filter(p => !irrelevantPanelIDs.includes(p.id));
 
-		// Patch root styles to remove URL bar and settings/documentation menu
+		// Patch root styles to remove the URL bar and settings/documentation menu
 		let rootDoc = iframe.contentDocument;
 		let styleSheet = new iframe.contentWindow.CSSStyleSheet();
 		styleSheet.replaceSync(`
@@ -356,14 +358,14 @@ var Scaffold = new function () {
 		`);
 		rootDoc.adoptedStyleSheets.push(styleSheet);
 
-		// Patch Console styles to remove (i) icon from info lines
-		// Don't wait for 'webconsole-ready' because it doesn't fire when the
-		// console is the initial tab
+		// Patch Console styles to hide filter buttons and remove source links
+		// from Scaffold messages
 		let consoleDoc = rootDoc.querySelector('#toolbox-panel-iframe-webconsole').contentDocument;
 		let style = consoleDoc.createElement('style');
 		style.textContent = `
-			.message.info > .icon {
-				visibility: hidden;
+			.message .message-location[data-url="${document.location.href}"],
+			.webconsole-filterbar-secondary > :not([data-category="netxhr"], [data-category="net"]) {
+				display: none;
 			}
 		`;
 		consoleDoc.head.append(style);
@@ -395,17 +397,8 @@ var Scaffold = new function () {
 			case TYPES.CONSOLE_MESSAGE:
 				// Child-process console messages:
 				// Allow messages sent by the debugger and JSWindowActors
-				if (resource.message.filename === 'debugger eval code') {
-					return true;
-				}
-				if (resource.message.chromeContext) {
-					// Clear meaningless debug.js line numbers
-					resource.message.filename = '';
-					resource.message.lineNumber = 0;
-					resource.message.columnNumber = 0;
-					return true;
-				}
-				return false;
+				return resource.message.filename === 'debugger eval code'
+					|| resource.message.chromeContext;
 			case TYPES.ERROR_MESSAGE:
 				// "Error" messages (Services.console.logMessage()):
 				// Allow our own messages
@@ -418,6 +411,47 @@ var Scaffold = new function () {
 				// Resources that aren't messages:
 				// Allow all
 				return true;
+		}
+	}
+
+	function _transformResource(resource) {
+		switch (resource.resourceType) {
+			case TYPES.CONSOLE_MESSAGE:
+				// Mark remaining console messages as coming from us so the
+				// isUnfilterable() patch in build.sh makes them unfilterable
+				return {
+					message: {
+						...resource.message,
+						filename: document.location.href, // Checked by patch
+						lineNumber: 0,
+						columnNumber: 0,
+					},
+					resourceId: resource.resourceId,
+					resourceType: resource.resourceType,
+					targetFront: resource.targetFront,
+				};
+			case TYPES.ERROR_MESSAGE:
+				// Convert our "error" messages (Services.console.logMessage())
+				// to console messages and make them unfilterable
+				return {
+					message: {
+						arguments: [resource.pageError.errorMessage],
+						chromeContext: true,
+						sourceId: null,
+						timeStamp: resource.pageError.timeStamp,
+						innerWindowId: _browser.browsingContext.currentWindowGlobal.innerWindowId,
+						level: 'log',
+						filename: document.location.href, // Checked by patch
+						lineNumber: 0,
+						columnNumber: 0,
+					},
+					resourceId: resource.resourceId,
+					resourceType: TYPES.CONSOLE_MESSAGE,
+					targetFront: resource.targetFront,
+				};
+			default:
+				// Leave all other resources along
+				return resource;
 		}
 	}
 
