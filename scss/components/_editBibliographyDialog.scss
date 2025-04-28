@@ -1,16 +1,18 @@
 #zotero-edit-bibliography-dialog {
 	min-width: 800px;
-	min-height: 450px;
+	min-height: 600px;
+	--excluded-color: #FAA7004D; // accent-yellow with 30% opacity
+	--uncited-color: #59ADC44D; // accent-teal with 30% opacity
 
 	#zotero-edit-bibliography-dialog-box {
 		height: 100%;
 		background: var(--material-background);
 
 		#zotero-select-items-trees {
-			min-height: 0;
+			min-height: 250px;
 			#zotero-collections-tree-container {
 				min-height: 100%;
-				min-width: 150px;
+				min-width: 200px;
 		
 				border-inline-end: var(--material-panedivider);
 				& > #zotero-collections-tree {
@@ -38,10 +40,10 @@
 					
 					#zotero-items-tree {
 						.row:not(.selected).highlighted[highlighted-class="uncited"] {
-							background-color: #39BF684D !important;
+							background-color: var(--uncited-color) !important;
 						}
 						.row:not(.selected).highlighted[highlighted-class="excluded"] {
-							background-color: #FF794C4D !important;
+							background-color: var(--excluded-color) !important;
 						}
 						.row:not(.selected).highlighted[highlighted-class="bib"] {
 							background-color: var(--accent-blue30) !important;
@@ -92,7 +94,7 @@
 			}
 			
 			#zotero-reference-items-list {
-				padding: 0 8px;
+				padding: 8px;
 				overflow-y: scroll;
 
 				.list-item {
@@ -101,7 +103,7 @@
 					border-radius: 5px;
 
 					&.highlighted {
-						background-color: var(--accent-blue30);
+						outline: 1px dashed var(--accent-blue);
 					}
 					
 					.reference-editor {
@@ -109,7 +111,7 @@
 						width: 100%;
 					}
 					.item-buttons {
-						min-width: 48px;
+						min-width: 52px;
 						align-items: flex-start;
 						justify-content: flex-end;
 						margin-top: 6px;
@@ -123,6 +125,7 @@
 							border-radius: 5px;
 							background-size: 80% !important;
 							color: var(--fill-secondary);
+							margin-left: 8px;
 
 							&:hover {
 								background-color: var(--fill-quinary) !important;
@@ -136,7 +139,6 @@
 							@include svgicon("revert", "universal", "16");
 						}
 						.toggle-status-button[action="remove"] {
-							margin-left: 8px;
 							@include svgicon("minus-circle", "universal", "16");
 						}
 						.toggle-status-button[action="add"] {
@@ -145,7 +147,7 @@
 					}
 
 					.item-labels {
-						min-width: 60px;
+						min-width: 0;
 						align-items: flex-start;
 						justify-content: flex-end;
 						margin-top: 7px;
@@ -157,10 +159,10 @@
 							display: none;
 
 							&.excluded {
-								background: #FF794C4D; // accent-orange with 30% opacity
+								background: var(--excluded-color);
 							}
 							&.uncited {
-								background: #39BF684D; // accent-green with 30% opacity
+								background: var(--uncited-color);
 							}
 						}
 					}
