@@ -70,11 +70,17 @@
 			// Notes pane deck
 			this._notesPaneDeck = this.querySelector('#zotero-context-pane-notes-deck');
 
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'contextPane');
+			this._notifierIDs = [
+				Zotero.Notifier.registerObserver(this, ['item'], 'contextPane'),
+				// We want to be notified quickly about tab events
+				Zotero.Notifier.registerObserver(this, ['tab'], 'contextPane', 20),
+			];
 		}
 
 		destroy() {
-			Zotero.Notifier.unregisterObserver(this._notifierID);
+			for (let id of this._notifierIDs) {
+				Zotero.Notifier.unregisterObserver(id);
+			}
 		}
 
 		notify(action, type, ids, extraData) {
