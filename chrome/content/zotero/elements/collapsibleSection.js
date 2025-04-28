@@ -380,7 +380,7 @@
 		}
 
 		get _disableContextMenu() {
-			return !this._getSidenav || !!this.closest(' annotation-items-pane');
+			return !this._getSidenav() || !!this.closest('annotation-items-pane');
 		}
 
 		_handleClick = (event) => {
