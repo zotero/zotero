@@ -138,6 +138,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._needsSort = false;
 		this._introText = null;
+		this._searchItemIDs = new Set();
 		
 		this._rowCache = {};
 		this._highlightedRows = new Set();
@@ -650,7 +651,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 
 			// If saved search, publications, or trash, just re-run search
-			if (collectionTreeRow.isSearch()
+			// unless items are being modified in search mode (which is processed lower)
+			if ((collectionTreeRow.isSearch() && type !== "item")
 				|| collectionTreeRow.isPublications()
 				|| collectionTreeRow.isTrash()
 				|| hasQuickSearch) {
@@ -662,6 +664,65 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (!collectionTreeRow.isTrash()) {
 					sort = true;
 				}
+			}
+			// If items are modified during a search, manually add or remove relevant rows
+			// to avoid rerunning the entire search to update only a limited number of rows
+			else if (collectionTreeRow.isSearch() && type == "item") {
+				// Re-run search on given ids scoped to current search object
+				let currentSearchObject = collectionTreeRow.ref;
+				let s = new Zotero.Search();
+				s.setScope(currentSearchObject);
+				s.addCondition('joinMode', 'any');
+				for (let id of ids) {
+					s.addCondition('itemID', 'is', id);
+				}
+				// Update the set of search matches to account for recent update
+				let searchResultsSet = new Set(await s.search());
+				for (let id of ids) {
+					if (searchResultsSet.has(id)) {
+						this._searchItemIDs.add(id);
+					}
+					else {
+						this._searchItemIDs.delete(id);
+					}
+				}
+
+				// Now process every modified itemID to add/remove/collapse/expand rows as needed
+				for (let id of ids) {
+					// Find the top-level item
+					let topLevelItem = Zotero.Items.get(id);
+					while (topLevelItem.parentItemID) {
+						topLevelItem = Zotero.Items.get(topLevelItem.parentItemID);
+					}
+					// Fetch the desired state of the top-level row and its children
+					let { itemMatches, expandItem, expandChildren } = this.getRowsExpandedStatus(topLevelItem.id);
+					let anyChildrenExpanded = Object.keys(expandChildren).some(childID => expandChildren[childID]);
+					let rowShouldExist = itemMatches || expandItem || anyChildrenExpanded;
+					let topItemsRowIndex = this.getRowIndexByID(topLevelItem.id);
+					if (rowShouldExist) {
+						// If row should exist but it does not - add that row
+						if (topItemsRowIndex === false) {
+							this._addRow(new ItemTreeRow(topLevelItem, 0, false), this.rowCount);
+							topItemsRowIndex = this.getRowIndexByID(topLevelItem.id);
+						}
+						// Set expanded state of top level item
+						await this.setOpenState(topItemsRowIndex, expandItem);
+						if (expandItem) {
+							// Expand attachments with matching annotations and collapse those without
+							for (let childID of Object.keys(expandChildren)) {
+								let childRowIndex = this.getRowIndexByID(childID);
+								await this.setOpenState(childRowIndex, expandChildren[childID]);
+							}
+						}
+					}
+					else if (topItemsRowIndex !== false) {
+						// If row should not exist but it does - collapse and remove it
+						await this.setOpenState(topItemsRowIndex);
+						this._removeRow(topItemsRowIndex);
+					}
+				}
+				madeChanges = true;
+				sort = true;
 			}
 			else if (collectionTreeRow.isFeedsOrFeed()) {
 				// Moved to itemPane CE
@@ -1765,6 +1826,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._lastToggleOpenStateIndex = null;
 	}
 
+	async setOpenState(index, open, skipRowMapRefresh = false) {
+		if (this.isContainerOpen(index) === open) return;
+		await this.toggleOpenState(index, skipRowMapRefresh);
+	}
+
 	expandMatchParents(searchParentIDs) {
 		// Expand parents of child matches
 		if (!this._searchMode) {
@@ -1853,6 +1919,34 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	}
+
+	// Given a top-level itemID, find out what is the desired expanded status
+	// of its row and all of its nested child rows during a search
+	getRowsExpandedStatus = (itemID) => {
+		if (!this._searchMode) return {};
+		let item = Zotero.Items.get(itemID);
+		let childIDs = item.getNotes().concat(item.getAttachments());
+		// If the item has matching notes or annotations, it should be expanded
+		let expandItem = childIDs.some(childID => this._searchItemIDs.has(childID));
+		let expandChildren = {};
+		// Go through attachments to see if they have matching annotations
+		for (let childID of childIDs) {
+			expandChildren[childID] = false;
+			let childItem = Zotero.Items.get(childID);
+			if (!childItem.isAttachment()) continue;
+			// If some annotations match the search, the attachment should be expanded
+			let annotationsMatch = childItem.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+			if (annotationsMatch) {
+				expandItem = true; // ensure the parent is expanded regardless of if it has matching attachments
+				expandChildren[childID] = true;
+			}
+		}
+		return {
+			itemMatches: this._searchItemIDs.has(item.id),
+			expandItem,
+			expandChildren
+		};
+	};
 
 	// //////////////////////////////////////////////////////////////////////////////
 	//
