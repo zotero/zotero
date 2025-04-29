@@ -991,8 +991,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 		let conditionData = Zotero.SearchConditions.get(name);
 		
 		// Has a table (or 'savedSearch', which doesn't have a table but isn't special)
-		// TEMP: Or 'tag', which needs to match annotation parents
-		if (conditionData.table || name == 'savedSearch' || name == 'tempTable' || name == 'tag') {
+		if (conditionData.table || name == 'savedSearch' || name == 'tempTable') {
 			// For conditions with an inline filter using 'is'/'isNot', combine with last condition
 			// if the same
 			if (lastCondition
@@ -1224,13 +1223,6 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
 					
-					// TEMP: Don't match annotations for negation operators, since it would result in
-					// all parent attachments being returned
-					if (isNegationOperator) {
-						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
-							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
-					}
-					
 					switch (condition.name) {
 						case 'tag':
 							condSQL += "SELECT itemID FROM itemTags "
@@ -1370,8 +1362,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							condSQL += 'collectionID IN (' + ids.join(', ') + ')';
 							let attachmentSQL = `) UNION SELECT itemID from itemAttachments WHERE parentItemID IN (${condSQL})`;
 							let noteSQL = `) UNION SELECT itemID from itemNotes WHERE parentItemID IN (${condSQL})`;
+							let annotationSQL = `) UNION SELECT itemID from itemAnnotations WHERE parentItemID IN (SELECT itemID from itemAttachments WHERE parentItemID IN (${condSQL}))`;
 							condSQL += attachmentSQL;
 							condSQL += noteSQL;
+							condSQL += annotationSQL;
 						}
 						// Saved search
 						else {
@@ -1746,16 +1740,31 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							+ "itemID IN (SELECT parentItemID FROM itemAttachments "
 								+ "WHERE itemID IN (" + condSQL + ")) "
 							+ "OR itemID IN (SELECT parentItemID FROM itemNotes "
-								+ "WHERE itemID IN (" + condSQL + ")) ";
-						var parentSQLParams = condSQLParams.concat(condSQLParams);
+								+ "WHERE itemID IN (" + condSQL + ")) "
+							// include attachment of matching annotations
+							+ "OR itemID IN (SELECT itemID  FROM itemAttachments "
+								+ "WHERE itemID IN (SELECT parentItemID FROM itemAnnotations "
+									+ "WHERE itemID IN (" + condSQL + "))) "
+							// include top-level item of matching annotations
+							+ "OR itemID IN (SELECT parentItemID FROM itemAttachments "
+								+ "WHERE itemID IN (SELECT parentItemID FROM itemAnnotations "
+									+ "WHERE itemID IN (" + condSQL + ")))";
+						var parentSQLParams = condSQLParams.concat(condSQLParams).concat(condSQLParams).concat(condSQLParams);
 					}
 					
 					if (includeParentsAndChildren || includeChildren) {
 						var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
 							+ "parentItemID IN (" + condSQL + ") UNION "
 							+ "SELECT itemID FROM itemNotes "
-							+ "WHERE parentItemID IN (" + condSQL + ")";
-						var childSQLParams = condSQLParams.concat(condSQLParams);
+							+ "WHERE parentItemID IN (" + condSQL + ") UNION "
+							// include annotations of matching top-level items
+							+ "SELECT itemID FROM itemAnnotations "
+								+ "WHERE parentItemID IN (SELECT itemID FROM itemAttachments "
+								+ "WHERE parentItemID IN (" + condSQL + ")) UNION "
+							// include annotations of matching attachments
+							+ "SELECT itemID FROM itemAnnotations "
+								+ "WHERE parentItemID IN (" + condSQL + ")";
+						var childSQLParams = condSQLParams.concat(condSQLParams).concat(condSQLParams).concat(condSQLParams);
 					}
 					
 					if (includeParentsAndChildren || includeParents) {
