@@ -843,9 +843,9 @@ class VirtualizedTable extends React.Component {
 		const result = this._getResizeColumns();
 		if (!result) return;
 		const [aColumn, bColumn, resizingColumn] = result;
-		const a = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${aColumn.dataKey}`);
-		const b = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${bColumn.dataKey}`);
-		const resizing = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${resizingColumn.dataKey}`);
+		const a = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(aColumn.dataKey)}`);
+		const b = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(bColumn.dataKey)}`);
+		const resizing = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(resizingColumn.dataKey)}`);
 		const aRect = a.getBoundingClientRect();
 		const bRect = b.getBoundingClientRect();
 		const resizingRect = resizing.getBoundingClientRect();
@@ -997,7 +997,7 @@ class VirtualizedTable extends React.Component {
 		if (!result) return;
 		let resizeData = {};
 		for (const column of result) {
-			const elem = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${column.dataKey}`)
+			const elem = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(column.dataKey)}`)
 			resizeData[column.dataKey] = elem.getBoundingClientRect().width;
 		}
 		this._columns.onResize(resizeData, true);
@@ -1554,7 +1554,7 @@ var Columns = class {
 				let column = this._virtualizedTable.props.columns[i];
 				if (column.dataKey in this._columnStyleMap) continue;
 				const ruleIndex = Object.keys(this._columnStyleMap).length;
-				this._stylesheet.sheet.insertRule(`.${column.dataKey + this._cssSuffix} {flex-basis: 100px}`, ruleIndex);
+				this._stylesheet.sheet.insertRule(`.${window.CSS.escape(column.dataKey) + this._cssSuffix} {flex-basis: 100px}`, ruleIndex);
 				this._columnStyleMap[column.dataKey] = ruleIndex;
 			}
 		} else {
@@ -1564,7 +1564,7 @@ var Columns = class {
 			this._columnStyleMap = {};
 			for (let i = 0; i < this._virtualizedTable.props.columns.length; i++) {
 				let column = this._virtualizedTable.props.columns[i];
-				this._stylesheet.sheet.insertRule(`.${column.dataKey + this._cssSuffix} {flex-basis: 100px}`, i);
+				this._stylesheet.sheet.insertRule(`.${window.CSS.escape(column.dataKey) + this._cssSuffix} {flex-basis: 100px}`, i);
 				this._columnStyleMap[column.dataKey] = i;
 			}
 		}
