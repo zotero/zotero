@@ -604,14 +604,6 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			);
 		}
 		
-		// Find all current attachments with relative attachment paths
-		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
-		var params = [
-			Zotero.Attachments.LINK_MODE_LINKED_FILE,
-			Zotero.Attachments.BASE_PATH_PLACEHOLDER + "%"
-		];
-		var oldRelativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
-		
 		//Find all attachments on the new base path
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=?";
 		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
