@@ -142,8 +142,20 @@
 			}
 		}
 
-		&.highlighted:not(.selected) {
+		&.highlighted:not(.selected):not([highlighted-class]) {
 			background: var(--highlight-color, var(--accent-highlight)) !important;
+		}
+		&.highlighted {
+			border-radius: 0;
+			
+		}
+		&.first-highlighted {
+			border-top-left-radius: 5px;
+			border-top-right-radius: 5px;
+		}
+		&.last-highlighted {
+			border-bottom-left-radius: 5px;
+			border-bottom-right-radius: 5px;
 		}
 
 		&.unread {
