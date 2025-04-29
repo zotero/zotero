@@ -636,21 +636,19 @@ Zotero_Preferences.Attachment_Base_Directory = {
 					// Use platform-specific slashes, which PathUtils.joinRelative() requires below
 					relPath = Zotero.Attachments.fixPathSlashes(relPath);
 				}
-			}
-			catch (e) {
-				// Don't deal with bad attachment paths. Just skip them.
-				Zotero.debug(e, 2);
-				continue;
-			}
-			
-			// If a file with the same relative path exists within the new base directory,
-			// don't touch the attachment, since it will continue to work
-			if (relPath) {
+
+				// If a file with the same relative path exists within the new base directory,
+				// don't touch the attachment, since it will continue to work
 				if (yield IOUtils.exists(PathUtils.joinRelative(basePath, relPath))) {
 					Zotero.debug(`${relPath} found within new base path -- skipping`);
 					numNewAttachments++;
 					continue;
 				}
+			}
+			catch (e) {
+				// Don't deal with bad attachment paths. Just skip them.
+				Zotero.debug(e, 2);
+				continue;
 			}
 			
 			// Files within the new base directory need to be updated to use
