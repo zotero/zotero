@@ -112,7 +112,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 			}
 		}
 
-		if (_io.supportedNotes?.length < 1) {
+		if (_io.supportedNotes?.length < 2) {
 			styleConfigurator.toggleAttribute("no-multi-notes", true);
 		}
 
