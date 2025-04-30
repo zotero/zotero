@@ -126,7 +126,13 @@
 			this.style.setProperty('--annotation-color', this._annotation.annotationColor);
 			// A11y - make focusable + add screen reader's labels
 			this.setAttribute("tabindex", 0);
-			this.setAttribute("aria-label", this.annotation.getDisplayTitle());
+			let annotationTypeStr = Zotero.getString(`pdfReader.${this.annotation.annotationType}Annotation`);
+			let a11yLabel = this._annotation.annotationText ? `${Zotero.getString('pdfReader.annotationText')}: ${this._annotation.annotationText}.` : annotationTypeStr;
+			let ariaComment = this._annotation.annotationComment ? `${Zotero.getString('pdfReader.annotationComment')}: ${this._annotation.annotationComment}.` : '';
+			let ariaTags = tags.length ? `${Zotero.getString('itemFields.tags')}: ${tags.map(tag => tag.tag).join(', ')}.` : '';
+			let a11yDescription = `${ariaComment} ${ariaTags}`;
+			this.setAttribute("aria-label", a11yLabel);
+			this.setAttribute("aria-description", a11yDescription);
 		}
 	}
 

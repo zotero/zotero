@@ -379,6 +379,10 @@
 			return !!this.closest('merge-pane, scaffold-item-preview, annotation-items-pane');
 		}
 
+		get _disableContextMenu() {
+			return !this._getSidenav() || !!this.closest('annotation-items-pane');
+		}
+
 		_handleClick = (event) => {
 			if (this._disableCollapsing) return;
 			if (event.target.closest('.section-custom-button, menupopup')) return;
@@ -410,7 +414,7 @@
 			}
 			// Space/Enter toggle section open/closed.
 			// ArrowLeft/ArrowRight on actual header will close/open (depending on locale direction)
-			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key)) {
+			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key) && !this._disableCollapsing) {
 				stopEvent();
 				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == Zotero.arrowNextKey);
 				event.target.focus();
@@ -439,7 +443,7 @@
 		};
 		
 		_handleContextMenu = (event) => {
-			if (!this._getSidenav() || event.target.closest('.section-custom-button')) return;
+			if (this._disableContextMenu || event.target.closest('.section-custom-button')) return;
 			event.preventDefault();
 			this._contextMenu?.openPopupAtScreen(event.screenX, event.screenY, true);
 		};
