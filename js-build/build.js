@@ -5,7 +5,7 @@ const getCopy = require('./copy');
 const getJS = require('./js');
 const getSass = require('./sass');
 const getSymlinks = require('./symlinks');
-const getPDFReader = require('./pdf-reader');
+const getReader = require('./reader');
 const getPDFWorker = require('./pdf-worker');
 const getZoteroNoteEditor = require('./note-editor');
 const { formatDirsForMatcher, getSignatures, writeSignatures, cleanUp, onSuccess, onError} = require('./utils');
@@ -36,7 +36,7 @@ if (require.main === module) {
 				...scssFiles.map(scf => getSass(scf, { ignore: ignoreMask }, signatures)),
 				getSymlinks(symlinks, { nodir: true, ignore: ignoreMask }, signatures),
 				getSymlinks(symlinkDirs, { ignore: ignoreMask }, signatures),
-				getPDFReader(signatures),
+				getReader(signatures),
 				getPDFWorker(signatures),
 				getZoteroNoteEditor(signatures)
 			]);

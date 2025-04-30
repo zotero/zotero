@@ -20,7 +20,7 @@ async function getZoteroNoteEditor(signatures) {
 		try {
 			const filename = hash + '.zip';
 			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'note-editor');
-			const url = buildsURL + 'client-note-editor/' + filename;
+			const url = buildsURL + 'note-editor/' + filename;
 
 			await fs.remove(targetDir);
 			await fs.ensureDir(targetDir);
@@ -36,6 +36,7 @@ async function getZoteroNoteEditor(signatures) {
 			await fs.remove(path.join(targetDir, 'zotero'));
 		}
 		catch (e) {
+			console.error(e);
 			await exec('npm ci', { cwd: modulePath });
 			await exec('npm run build', { cwd: modulePath });
 			await fs.copy(path.join(modulePath, 'build', 'zotero'), targetDir);

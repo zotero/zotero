@@ -7,7 +7,7 @@ const exec = util.promisify(require('child_process').exec);
 const { getSignatures, writeSignatures, onSuccess, onError } = require('./utils');
 const { buildsURL } = require('./config');
 
-async function getPDFReader(signatures) {
+async function getReader(signatures) {
 	const t1 = Date.now();
 
 	const modulePath = path.join(__dirname, '..', 'reader');
@@ -20,7 +20,7 @@ async function getPDFReader(signatures) {
 		try {
 			const filename = hash + '.zip';
 			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'reader');
-			const url = buildsURL + 'client-reader/' + filename;
+			const url = buildsURL + 'reader/' + filename;
 
 			await fs.remove(targetDir);
 			await fs.ensureDir(targetDir);
@@ -36,6 +36,7 @@ async function getPDFReader(signatures) {
 			await fs.remove(path.join(targetDir, 'zotero'));
 		}
 		catch (e) {
+			console.error(e);
 			await exec('npm ci', { cwd: modulePath });
 			await exec('npm run build', { cwd: modulePath });
 			await fs.copy(path.join(modulePath, 'build', 'zotero'), targetDir);
@@ -53,13 +54,13 @@ async function getPDFReader(signatures) {
 	};
 }
 
-module.exports = getPDFReader;
+module.exports = getReader;
 
 if (require.main === module) {
 	(async () => {
 		try {
 			const signatures = await getSignatures();
-			onSuccess(await getPDFReader(signatures));
+			onSuccess(await getReader(signatures));
 			await writeSignatures(signatures);
 		}
 		catch (err) {

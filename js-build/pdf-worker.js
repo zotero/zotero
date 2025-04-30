@@ -20,7 +20,7 @@ async function getPDFWorker(signatures) {
 		try {
 			const filename = hash + '.zip';
 			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'pdf-worker');
-			const url = buildsURL + 'client-pdf-worker/' + filename;
+			const url = buildsURL + 'document-worker/' + filename;
 
 			await fs.remove(targetDir);
 			await fs.ensureDir(targetDir);
@@ -33,6 +33,7 @@ async function getPDFWorker(signatures) {
 			);
 		}
 		catch (e) {
+			console.error(e);
 			await exec('npm ci', { cwd: modulePath });
 			await exec('npm run build', { cwd: modulePath });
 			await fs.copy(path.join(modulePath, 'build', 'worker.js'), path.join(targetDir, 'worker.js'));
