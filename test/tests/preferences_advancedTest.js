@@ -128,6 +128,30 @@ describe("Advanced Preferences", function () {
 					Zotero.Attachments.BASE_PATH_PLACEHOLDER + 'test.png'
 				);
 			});
+
+			it("should ignore attachment with invalid relative path", async function () {
+				var file = getTestDataDirectory();
+				file.append('test.pdf');
+				file = file.path;
+				
+				var attachment = createUnsavedDataObject('item', { itemType: 'attachment' });
+				attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_LINKED_FILE;
+				attachment.attachmentPath = 'attachments:/test.pdf'; // Invalid
+				await attachment.saveTx();
+
+				var basePath = getTestDataDirectory().path;
+				await setBaseDirectory(basePath);
+
+				var newBasePath = await getTempDirectory();
+				await IOUtils.copy(file, PathUtils.joinRelative(newBasePath, 'test.pdf'));
+
+				await setBaseDirectory(newBasePath);
+
+				assert.equal(
+					attachment.attachmentPath,
+					Zotero.Attachments.BASE_PATH_PLACEHOLDER + '/test.pdf'
+				);
+			});
 		})
 	})
 })

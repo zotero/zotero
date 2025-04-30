@@ -593,7 +593,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	},
 	
 	
-	changePath: Zotero.Promise.coroutine(function* (basePath) {
+	changePath: async function (basePath) {
 		Zotero.debug(`New base directory is ${basePath}`);
 		
 		if (Zotero.File.directoryContains(Zotero.DataDirectory.dir, basePath)) {
@@ -605,53 +605,42 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			);
 		}
 		
-		// Find all current attachments with relative attachment paths
-		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
-		var params = [
-			Zotero.Attachments.LINK_MODE_LINKED_FILE,
-			Zotero.Attachments.BASE_PATH_PLACEHOLDER + "%"
-		];
-		var oldRelativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
-		
-		//Find all attachments on the new base path
+		// Find all attachments on the new base path
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=?";
 		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
-		var allAttachments = yield Zotero.DB.columnQueryAsync(sql, params);
+		var allAttachments = await Zotero.DB.columnQueryAsync(sql, params);
 		var newAttachmentPaths = {};
 		var numNewAttachments = 0;
 		var numOldAttachments = 0;
-		for (let i=0; i<allAttachments.length; i++) {
-			let attachmentID = allAttachments[i];
+		for (let attachmentID of allAttachments) {
 			let attachmentPath;
-			let relPath = false
+			let relPath;
 			
 			try {
-				let attachment = yield Zotero.Items.getAsync(attachmentID);
+				let attachment = await Zotero.Items.getAsync(attachmentID);
 				// This will return FALSE for relative paths if base directory
 				// isn't currently set
 				attachmentPath = attachment.getFilePath();
 				// Get existing relative path
 				let storedPath = attachment.attachmentPath;
 				if (storedPath.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
-					relPath = storedPath.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length);
+					relPath = storedPath.substring(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length);
 					// Use platform-specific slashes, which PathUtils.joinRelative() requires below
 					relPath = Zotero.Attachments.fixPathSlashes(relPath);
+				}
+
+				// If a file with the same relative path exists within the new base directory,
+				// don't touch the attachment, since it will continue to work
+				if (await IOUtils.exists(PathUtils.joinRelative(basePath, relPath))) {
+					Zotero.debug(`${relPath} found within new base path -- skipping`);
+					numNewAttachments++;
+					continue;
 				}
 			}
 			catch (e) {
 				// Don't deal with bad attachment paths. Just skip them.
 				Zotero.debug(e, 2);
 				continue;
-			}
-			
-			// If a file with the same relative path exists within the new base directory,
-			// don't touch the attachment, since it will continue to work
-			if (relPath) {
-				if (yield IOUtils.exists(PathUtils.joinRelative(basePath, relPath))) {
-					Zotero.debug(`${relPath} found within new base path -- skipping`);
-					numNewAttachments++;
-					continue;
-				}
 			}
 			
 			// Files within the new base directory need to be updated to use
@@ -674,7 +663,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			}
 		}
 		
-		//Confirm change of the base path
+		// Confirm change of the base path
 		var ps = Services.prompt;
 		
 		var chooseStrPrefix = 'attachmentBasePath.chooseNewPath.';
@@ -730,7 +719,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		Zotero.Prefs.set('saveRelativeAttachmentPath', true);
 		// Resave all attachments on base path (so that their paths become relative)
 		// and all other relative attachments (so that their paths become absolute)
-		yield Zotero.Utilities.Internal.forEachChunkAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(
 			Object.keys(newAttachmentPaths),
 			100,
 			function (chunk) {
@@ -747,12 +736,12 @@ Zotero_Preferences.Attachment_Base_Directory = {
 							skipDateModifiedUpdate: true
 						});
 					}
-				})
+				});
 			}
 		);
 		
 		return true;
-	}),
+	},
 	
 	
 	clearPath: Zotero.Promise.coroutine(function* () {
