@@ -652,10 +652,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			// If saved search, publications, or trash, just re-run search
 			// unless items are being modified in search mode (which is processed lower)
-			if ((collectionTreeRow.isSearch() && type !== "item")
+			if (((collectionTreeRow.isSearch() || hasQuickSearch) && type !== "item")
 				|| collectionTreeRow.isPublications()
-				|| collectionTreeRow.isTrash()
-				|| hasQuickSearch) {
+				|| collectionTreeRow.isTrash()) {
 				await this.refresh();
 				refreshed = true;
 				madeChanges = true;
@@ -667,9 +666,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// If items are modified during a search, manually add or remove relevant rows
 			// to avoid rerunning the entire search to update only a limited number of rows
-			else if (collectionTreeRow.isSearch() && type == "item") {
+			else if (collectionTreeRow.isSearchMode() && type == "item") {
 				// Re-run search on given ids scoped to current search object
-				let currentSearchObject = collectionTreeRow.ref;
+				let currentSearchObject = collectionTreeRow.isSearch() ? collectionTreeRow.ref : (await collectionTreeRow.getSearchObject());
 				let s = new Zotero.Search();
 				s.setScope(currentSearchObject);
 				s.addCondition('joinMode', 'any');
@@ -717,7 +716,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 					else if (topItemsRowIndex !== false) {
 						// If row should not exist but it does - collapse and remove it
-						await this.setOpenState(topItemsRowIndex);
+						await this.setOpenState(topItemsRowIndex, false);
 						this._removeRow(topItemsRowIndex);
 					}
 				}
@@ -1933,7 +1932,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (let childID of childIDs) {
 			expandChildren[childID] = false;
 			let childItem = Zotero.Items.get(childID);
-			if (!childItem.isAttachment()) continue;
+			if (!childItem.isFileAttachment()) continue;
 			// If some annotations match the search, the attachment should be expanded
 			let annotationsMatch = childItem.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
 			if (annotationsMatch) {
