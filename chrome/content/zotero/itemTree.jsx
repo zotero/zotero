@@ -686,10 +686,27 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 				}
 
+				// Process regular items first, so that if a child attachment is
+				// moved to be a standalone attachment during search, it's old parent
+				// is processed first, removing the child attachment row before standalone
+				// row is added.
+				let regularIDsFirst = [...ids];
+				regularIDsFirst.sort((idA, idB) => {
+					let itemOne = Zotero.Items.get(idA);
+					let itemTwo = Zotero.Items.get(idB);
+					if (itemOne.isRegularItem() && !itemTwo.isRegularItem()) {
+						return -1;
+					}
+					if (!itemOne.isRegularItem() && itemTwo.isRegularItem()) {
+						return 1;
+					}
+					return 0;
+				});
 				// Now process every modified itemID to add/remove/collapse/expand rows as needed
-				for (let id of ids) {
+				for (let id of regularIDsFirst) {
+					let item = Zotero.Items.get(id);
 					// Find the top-level item
-					let topLevelItem = Zotero.Items.get(id);
+					let topLevelItem = item;
 					while (topLevelItem.parentItemID) {
 						topLevelItem = Zotero.Items.get(topLevelItem.parentItemID);
 					}
@@ -699,12 +716,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 					let rowShouldExist = itemMatches || expandItem || anyChildrenExpanded;
 					let topItemsRowIndex = this.getRowIndexByID(topLevelItem.id);
 					if (rowShouldExist) {
+						// If there is a top-level row for an item that has a parent, a standalone note/attachment
+						// must have been moved to be a child item. Remove that row.
+						let leftOverTopLevelRowIndex = this._rows.findIndex(row => row.ref.id == id && row.level == 0 && item.parentItemID);
+						if (leftOverTopLevelRowIndex !== -1) {
+							this._removeRow(leftOverTopLevelRowIndex);
+							topItemsRowIndex = this.getRowIndexByID(topLevelItem.id);
+						}
 						// If row should exist but it does not - add that row
 						if (topItemsRowIndex === false) {
 							this._addRow(new ItemTreeRow(topLevelItem, 0, false), this.rowCount);
 							topItemsRowIndex = this.getRowIndexByID(topLevelItem.id);
 						}
-						// Set expanded state of top level item
+						// Collapse containers to refresh their children
+						await this._closeContainer(topItemsRowIndex);
+						// And expand them, if there are child matches
 						await this.setOpenState(topItemsRowIndex, expandItem);
 						if (expandItem) {
 							// Expand attachments with matching annotations and collapse those without
@@ -1924,7 +1950,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	getRowsExpandedStatus = (itemID) => {
 		if (!this._searchMode) return {};
 		let item = Zotero.Items.get(itemID);
-		let childIDs = item.getNotes().concat(item.getAttachments());
+		let childIDs = item.isRegularItem() ? item.getAttachments().concat(item.getNotes()) : [];
 		// If the item has matching notes or annotations, it should be expanded
 		let expandItem = childIDs.some(childID => this._searchItemIDs.has(childID));
 		let expandChildren = {};
