@@ -519,13 +519,10 @@
 			}
 
 
-			// Hide the rename button for cases where it's not possible to rename from parent
 			const isRenamePossible = this._item.isAttachment() && !this._item.isTopLevelItem();
-			this._id("rename-from-parent").hidden = !isRenamePossible;
-			
-			// Disable the rename button if the file name would not be changed, not editable, or the file does not exist
-			const canRename = await canRenameFileFromParent(this._item);
-			this._id("rename-from-parent").setAttribute("disabled", !canRename || !this.editable || !fileExists);
+
+			// Hide the rename button for cases where it's not possible to rename from parent, not editable, the file does not exist, or the file name would not be changed
+			this._id("rename-from-parent").hidden = !isRenamePossible || !this.editable || !fileExists || !(await canRenameFileFromParent(this._item));
 		}
 
 		async updatePreview() {

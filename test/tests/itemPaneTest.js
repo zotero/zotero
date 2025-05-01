@@ -1714,7 +1714,7 @@ describe("Item pane", function () {
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
 
-		it("should disable the rename from parent button if already renamed", async function () {
+		it("should hide the rename from parent button if already renamed", async function () {
 			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'application/pdf');
 			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
 			let file = getTestDataDirectory();
@@ -1735,8 +1735,8 @@ describe("Item pane", function () {
 			let label = itemBox._id('fileName');
 			let button = itemBox._id('rename-from-parent');
 			
-			// File is auto-renamed during import, button should be disabled
-			assert.isTrue(button.disabled);
+			// File is auto-renamed during import, button should be hidden
+			assert.isTrue(button.hidden);
 			assert.equal(label.value, "Lorem Ipsum.pdf");
 			
 			await attachment.eraseTx();
@@ -1744,7 +1744,7 @@ describe("Item pane", function () {
 			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
 		});
 
-		it("should disable the rename from parent button, after file was renamed", async function () {
+		it("should hide the rename from parent button, after file was renamed", async function () {
 			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'x-nonexistent/type');
 			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
 			let file = getTestDataDirectory();
@@ -1761,13 +1761,13 @@ describe("Item pane", function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			await zp.selectItems([attachment.id]);
 			await itemDetails._renderPromise;
-			assert.isFalse(button.disabled);
+			assert.isFalse(button.hidden);
 
 			button.click();
 			assert.equal(await waitForItemEvent('modify'), attachment.id);
 			assert.equal(await waitForItemEvent('modify'), attachment.id);
 
-			assert.equal(button.disabled, true);
+			assert.isTrue(button.hidden);
 			assert.equal(label.value, "Lorem Ipsum.txt");
 			
 			await attachment.eraseTx();
