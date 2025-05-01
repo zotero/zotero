@@ -221,6 +221,10 @@
 			if (!(val instanceof Zotero.Item)) {
 				throw new Error("'item' must be a Zotero.Item");
 			}
+			// Blur editable-text of old attachment so it is not refocused for new attachment after refresh
+			if (this._item && val.id != this._item.id && document.activeElement.closest("editable-text")) {
+				document.activeElement.blur();
+			}
 			if (val.isAttachment()) {
 				this._item = val;
 				this.hidden = false;
