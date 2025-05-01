@@ -688,7 +688,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						let parentIndex = this.getParentIndex(row);
 
 						// Top-level item
-						if (this.isContainer(row)) {
+						if (item.isTopLevelItem()) {
 							// If Unfiled Items and itm was added to a collection, remove from view
 							if (collectionTreeRow.isUnfiled() && item.getCollections().length) {
 								this._removeRow(row);
