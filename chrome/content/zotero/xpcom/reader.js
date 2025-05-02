@@ -1076,6 +1076,17 @@ class ReaderInstance {
 
 	_openTagsPopup(item, x, y) {
 		let tagsPopup = this._window.document.createXULElement('panel');
+		tagsPopup.className = 'tags-popup';
+		let tagsbox = this._window.document.createXULElement('tags-box');
+		tagsPopup.appendChild(tagsbox);
+		tagsbox.setAttribute('flex', '1');
+		this._popupset.appendChild(tagsPopup);
+		tagsbox.editable = true;
+		tagsbox.item = item;
+		tagsbox.render();
+		// remove unnecessary tabstop from the section header
+		tagsbox.querySelector(".head").removeAttribute("tabindex");
+
 		// <panel> completely takes over Escape keydown event, by attaching a capturing keydown
 		// listener to document which just closes the popup. It leads to unwanted edits being saved.
 		// Attach our own listener to this._window.document to properly handle Escape on edited tags
@@ -1095,27 +1106,9 @@ class ReaderInstance {
 			// now that all tags values are reset, close the popup
 			tagsPopup.hidePopup();
 		};
-		tagsPopup.addEventListener('popuphidden', (event) => {
-			if (event.target === tagsPopup) {
-				tagsPopup.remove();
-			}
-			this._window.document.removeEventListener("keydown", handleKeyDown, true);
-		});
 		this._window.document.addEventListener("keydown", handleKeyDown, true);
-		tagsPopup.className = 'tags-popup';
-		let tagsbox = this._window.document.createXULElement('tags-box');
-		tagsPopup.appendChild(tagsbox);
-		tagsbox.setAttribute('flex', '1');
-		this._popupset.appendChild(tagsPopup);
-		let rect = this._iframe.getBoundingClientRect();
-		x += rect.left;
-		y += rect.top;
-		tagsbox.editable = true;
-		tagsbox.item = item;
-		tagsbox.render();
-		// remove unnecessary tabstop from the section header
-		tagsbox.querySelector(".head").removeAttribute("tabindex");
-		tagsPopup.addEventListener("popupshown", (_) => {
+		
+		tagsPopup.addEventListener("popupshown", () => {
 			// Ensure tagsbox is open
 			tagsbox.open = true;
 			if (tagsbox.count == 0) {
@@ -1127,6 +1120,18 @@ class ReaderInstance {
 			}
 			tagsbox.collapsible = false;
 		});
+
+		tagsPopup.addEventListener("popuphidden", (event) => {
+			if (event.target !== tagsPopup) {
+				return;
+			}
+			this._window.document.removeEventListener("keydown", handleKeyDown, true);
+			tagsPopup.remove();
+		});
+
+		let rect = this._iframe.getBoundingClientRect();
+		x += rect.left;
+		y += rect.top;
 		tagsPopup.openPopup(null, 'before_start', x, y, true);
 	}
 
