@@ -4991,7 +4991,7 @@ var ZoteroPane = new function()
 				yield this.viewAttachment(item.id, event);
 			}
 			else if (item.isAnnotation()) {
-				this.viewPDF(item.parentItemID, { annotationID: item.key });
+				this.viewAttachment(item.parentItemID, event, false, { location: { annotationID: item.key } });
 			}
 		}
 	});
