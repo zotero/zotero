@@ -785,14 +785,138 @@ describe("Zotero.ItemTree", function() {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			var collection = await createDataObject('collection');
 			var item = await createDataObject('item', { title: "Unfiled Item" });
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
 			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
 			assert.equal(zp.getCollectionTreeRow().id, 'U' + userLibraryID);
 			await waitForItemsLoad(win);
-			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+			let rowIndex = zp.itemsView.getRowIndexByID(item.id);
+			assert.isNumber(rowIndex);
+			await zp.itemsView.toggleOpenState(rowIndex);
+			let attachmentRowIndex = zp.itemsView.getRowIndexByID(attachment.id);
+			assert.isNumber(attachmentRowIndex);
 			await Zotero.DB.executeTransaction(async function () {
 				await collection.addItem(item.id);
 			});
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+			// Ensure there is no leftover ghost attachment row
+			assert.isFalse(zp.itemsView.getRowIndexByID(attachment.id));
+		});
+
+		describe("Change parent item", function () {
+			let item1, item2, attachment1, highlight1;
+			
+			beforeEach(async function () {
+				// Two top-level items
+				item1 = await createDataObject('item', { title: "Parent Item 1" });
+				item2 = await createDataObject('item', { title: "Parent Item 2" });
+				
+				// A child attachment with an annotation for the first item
+				attachment1 = await importFileAttachment('test.pdf', { title: 'Attachment 1', parentItemID: item1.id });
+				highlight1 = await createAnnotation('highlight', attachment1);
+				
+				// Make sure tree is expanded to show all items
+				zp.itemsView.expandAllRows();
+			});
+			
+			it("should leave no ghost child rows after changing attachment's parent", async function () {
+				// Change attachment parent
+				attachment1.parentID = item2.id;
+				await attachment1.saveTx();
+
+				let secondItemRowIndex = itemsView.getRowIndexByID(item2.id);
+				let attachmentRowIndex = itemsView.getRowIndexByID(attachment1.id);
+				let annotationRowIndex = itemsView.getRowIndexByID(highlight1.id);
+
+				// Verify that the attachment has been moved into the item
+				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+				assert.equal(attachmentRowIndex, secondItemRowIndex + 1);
+				assert.equal(itemsView.getRow(attachmentRowIndex).level, 1);
+				// Verify there is no leftover annotation row
+				assert.isFalse(annotationRowIndex);
+			});
+		
+			it("should leave no ghost rows after making an attachment top level", async function () {
+				// Make attachment top level
+				attachment1.parentID = null;
+				await attachment1.saveTx();
+
+				let attachmentRowIndex = itemsView.getRowIndexByID(attachment1.id);
+				let annotationRowIndex = itemsView.getRowIndexByID(highlight1.id);
+
+				// Verify that the attachment has been moved to top level
+				assert.equal(itemsView.getRow(attachmentRowIndex).level, 0);
+				// Verify there is no leftover annotation row
+				assert.isFalse(annotationRowIndex);
+			});
+		
+			it("should leave no ghost rows after making a top-level attachment a child", async function () {
+				// Make a top-level attachment
+				let topLevelAttachment = await importFileAttachment('test.pdf', { title: 'Top Level Attachment', parentItemID: null });
+				let highlightOfTopLevel = await createAnnotation('highlight', topLevelAttachment);
+
+				// Move top-level attachment into item
+				topLevelAttachment.parentID = item2.id;
+				await topLevelAttachment.saveTx();
+
+				let secondItemRowIndex = itemsView.getRowIndexByID(item2.id);
+				let attachmentRowIndex = itemsView.getRowIndexByID(topLevelAttachment.id);
+				let annotationRowIndex = itemsView.getRowIndexByID(highlightOfTopLevel.id);
+
+				// Verify that the attachment has been moved into the item
+				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+				assert.equal(attachmentRowIndex, secondItemRowIndex + 1);
+				assert.equal(itemsView.getRow(attachmentRowIndex).level, 1);
+				// Verify there is no leftover annotation row
+				assert.isFalse(annotationRowIndex);
+			});
+		
+			it("should not loose note row after making it top-level", async function () {
+				let note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
+				let itemRowIndex = itemsView.getRowIndexByID(item1.id);
+				let noteRowIndex = itemsView.getRowIndexByID(note1.id);
+				assert.equal(noteRowIndex, itemRowIndex + 1);
+
+				// Make the note top level
+				note1.parentID = null;
+				await note1.saveTx();
+
+				noteRowIndex = itemsView.getRowIndexByID(note1.id);
+				// Verify that the note has been moved to top level
+				assert.equal(itemsView.getRow(noteRowIndex).level, 0);
+			});
+		
+			it("should not loose note row after making it a child", async function () {
+				// Make a top-level note
+				let note = await createDataObject('item', { itemType: 'note', parentID: null });
+
+				// Move top-level note into item
+				note.parentID = item2.id;
+				await note.saveTx();
+
+				let secondItemRowIndex = itemsView.getRowIndexByID(item2.id);
+				let noteRowIndex = itemsView.getRowIndexByID(note.id);
+
+				// Verify that the note row has been moved into the item
+				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+				assert.equal(noteRowIndex, secondItemRowIndex + 1);
+			});
+
+			it("should not loose note row after moving it between items", async function () {
+				let note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
+				let itemRowIndex = itemsView.getRowIndexByID(item1.id);
+				let noteRowIndex = itemsView.getRowIndexByID(note1.id);
+				assert.equal(noteRowIndex, itemRowIndex + 1);
+
+				// Move to another parent
+				note1.parentID = item2.id;
+				await note1.saveTx();
+
+				let secondItemRowIndex = itemsView.getRowIndexByID(item2.id);
+				noteRowIndex = itemsView.getRowIndexByID(note1.id);
+				// Verify that the note row has been moved into the item
+				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+				assert.equal(noteRowIndex, secondItemRowIndex + 1);
+			});
 		});
 		
 		describe("Trash", function () {
