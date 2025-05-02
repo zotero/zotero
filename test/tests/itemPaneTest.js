@@ -609,6 +609,25 @@ describe("Item pane", function () {
 			let fieldMode = newCreatorRow.querySelector("editable-text").getAttribute("fieldMode");
 			assert.equal(fieldMode, "0");
 		});
+
+		it("should save updated title when switching between items", async function () {
+			let itemOne = new Zotero.Item('book');
+			let itemTwo = new Zotero.Item('book');
+			itemOne.setField('title', 'Title_one');
+			await itemOne.saveTx();
+			await itemTwo.saveTx();
+			await ZoteroPane.selectItem(itemOne.id);
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let infoBox = itemDetails.getPane("info");
+
+			let titleField = infoBox.querySelector("#itembox-field-value-title");
+			titleField.focus();
+			titleField.value = "Updated title";
+			await ZoteroPane.selectItem(itemTwo.id);
+			await waitForNotifierEvent('modify', 'item');
+			assert.equal(itemOne.getDisplayTitle(), "Updated title");
+		});
 	});
 
 	describe("Libraries and collections pane", function () {
@@ -1659,9 +1678,8 @@ describe("Item pane", function () {
 			let attachmentBox = itemDetails.getPane(paneID);
 
 			attachmentBox.querySelector("#title").focus();
-			await Zotero.Promise.delay(10);
 			await ZoteroPane.selectItem(attachmentTwo.id);
-			await Zotero.Promise.delay(10);
+			await waitForNotifierEvent('modify', 'item');
 			assert.equal(attachmentTwo.getDisplayTitle(), "PDF_two");
 		});
 	});
