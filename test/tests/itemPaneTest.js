@@ -1648,6 +1648,22 @@ describe("Item pane", function () {
 
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
+
+		it("should not transfer focused title while switching between items", async function () {
+			let item = new Zotero.Item('book');
+			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF_one', parentItemID: item.id });
+			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF_two', parentItemID: item.id });
+			await ZoteroPane.selectItem(attachmentOne.id);
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentBox = itemDetails.getPane(paneID);
+
+			attachmentBox.querySelector("#title").focus();
+			await Zotero.Promise.delay(10);
+			await ZoteroPane.selectItem(attachmentTwo.id);
+			await Zotero.Promise.delay(10);
+			assert.equal(attachmentTwo.getDisplayTitle(), "PDF_two");
+		});
 	});
 	
 	
