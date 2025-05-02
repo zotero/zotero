@@ -13,6 +13,11 @@ command-or-control =
         [macos] { general-key-command }
         *[other] { general-key-control }
     }
+command-or-control-shift =
+    { PLATFORM() ->
+        [macos] { general-key-command } + { general-key-shift }
+        *[other] { general-key-control } + { general-key-shift }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
@@ -732,25 +737,25 @@ connector-version-warning = The { -app-name } Connector must be updated to work 
 
 tabs-menu-row =
     .aria-description = You are currently on tab { $index } of { $total }.
-    To search for tabs, type the keyword. To jump to the currently selected tab, press Enter.
+    To search for tabs, type part of its name. To jump to the currently selected tab, press { return-or-enter }.
     To navigate to the 
     {
         $isFirst ->
             [true] last
             *[other] previous
     }
-    tab, press Arrow Up.
+    tab, press Up Arrow.
     To navigate to the 
     {
         $isLast ->
             [true] first
             *[other] next
     }
-    tab, press Arrow Down.
+    tab, press Down Arrow.
     .aria-label = { $title }
     
 tabs-menu-row-empty =
-    .aria-description = The search did not match any tabs. To search for tabs, type the keyword.
+    .aria-description = The search did not match any tabs. To search for tabs, type part of its name.
 tabs-menu-row-empty-label = No matching tabs
     .aria-label = No matching tabs
 

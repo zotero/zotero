@@ -99,3 +99,30 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = Default location
+
+preferences-advanced-keys =
+    .aria-label = Shortcuts
+preferences-advanced-keys-title = Shortcuts
+preferences-advanced-keys-newItem =
+    .value = Create a New Item
+preferences-advanced-keys-newNote =
+    .value = Create a New Note
+preferences-advanced-keys-focusLibrariesPane =
+    .value = Focus Libraries Pane
+preferences-advanced-keys-quicksearch =
+    .value = Quick Search
+preferences-advanced-keys-copySelectedItemCitationsToClipboard =
+    .value = Copy Selected Item Citations to Clipboard
+preferences-advanced-keys-copySelectedItemsToClipboard =
+    .value = Copy Selected Items to Clipboard
+preferences-advanced-keys-toggleAllRead =
+    .value = Mark All Feed Items As Read/Unread
+preferences-advanced-keys-showTabsMenu =
+    .value = Show Tabs Menu
+preferences-advanced-keys-changesTakeEffect =
+    .value = Changes take effect after restart
+preferences-advanced-keys-modifier =
+    .value = { $modifierType ->
+        [ctrl] { command-or-control } + 
+        *[ctrl-shift] { command-or-control-shift } + 
+    }

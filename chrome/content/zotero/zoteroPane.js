@@ -1025,8 +1025,8 @@ var ZoteroPane = new function()
 
 		if (Zotero.isMac ? event.metaKey : event.ctrlKey) {
 			let command = Zotero.Keys.getCommand(event.key);
-			if (command === "toggleTabsMenu") {
-				Zotero_Tabs.toggleTabsMenu();
+			if (command === "showTabsMenu") {
+				Zotero_Tabs.showTabsMenu();
 			}
 		}
 	}

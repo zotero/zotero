@@ -815,7 +815,7 @@ var Zotero_Tabs = new function () {
 		}
 	};
 
-	this.toggleTabsMenu = function (visibility = undefined, button = undefined) {
+	this.showTabsMenu = function (visibility = undefined, button = undefined) {
 		if (visibility === undefined) {
 			visibility = !this.tabsMenuPanel.visible;
 		}

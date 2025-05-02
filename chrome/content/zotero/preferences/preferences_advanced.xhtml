@@ -151,48 +151,48 @@
 		</groupbox>
 	</vbox>
 
-	<html:div class="main-section" id="zotero-prefpane-advanced-keys-tab" role="group" aria-label="&zotero.preferences.advanced.keys;">
-		<html:h1>&zotero.preferences.advanced.keys;</html:h1>
+	<html:div class="main-section" id="zotero-prefpane-advanced-keys-tab" role="group" data-l10n-id="preferences-advanced-keys">
+		<html:h1 data-l10n-id="preferences-advanced-keys-title"></html:h1>
 	
 		<html:div id="zotero-keys-grid">
-			<html:label for="textbox-newItem">&zotero.preferences.keys.newItem;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-newItem" data-l10n-id="preferences-advanced-keys-newItem"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-newItem" maxlength="1" size="1" preference="extensions.zotero.keys.newItem"/>
 
-			<html:label for="textbox-newNote">&zotero.preferences.keys.newNote;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-newNote" data-l10n-id="preferences-advanced-keys-newNote"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-newNote" maxlength="1" size="1" preference="extensions.zotero.keys.newNote"/>
 
-			<html:label for="textbox-library">&zotero.preferences.keys.focusLibrariesPane;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-library" data-l10n-id="preferences-advanced-keys-focusLibrariesPane"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-library" maxlength="1" size="1" preference="extensions.zotero.keys.library"/>
 
-			<html:label for="textbox-quicksearch">&zotero.preferences.keys.quicksearch;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-quicksearch" data-l10n-id="preferences-advanced-keys-quicksearch"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-quicksearch" maxlength="1" size="1" preference="extensions.zotero.keys.quicksearch"/>
 
-			<html:label for="textbox-copySelectedItemCitationsToClipboard">&zotero.preferences.keys.copySelectedItemCitationsToClipboard;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-copySelectedItemCitationsToClipboard" data-l10n-id="preferences-advanced-keys-copySelectedItemCitationsToClipboard"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1"
 					preference="extensions.zotero.keys.copySelectedItemCitationsToClipboard"
 					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 
-			<html:label for="textbox-copySelectedItemsToClipboard">&zotero.preferences.keys.copySelectedItemsToClipboard;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-copySelectedItemsToClipboard" data-l10n-id="preferences-advanced-keys-copySelectedItemsToClipboard"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1"
 					preference="extensions.zotero.keys.copySelectedItemsToClipboard"
 					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 
-			<html:label for="textbox-toggleAllRead">&zotero.preferences.keys.toggleAllRead;</html:label>
-			<html:label class="modifier"/>
+			<label for="textbox-toggleAllRead" data-l10n-id="preferences-advanced-keys-toggleAllRead"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier"/>
 			<html:input type="text" id="textbox-toggleAllRead" maxlength="1" size="1" preference="extensions.zotero.keys.toggleAllRead"/>
 
-			<html:label for="textbox-toggleTabsMenu">&zotero.preferences.keys.toggleTabsMenu;</html:label>
-			<html:label class="modifier" data-modifier-type="ctrl"/>
-			<html:input type="text" id="textbox-toggleTabsMenu" maxlength="1" size="1" preference="extensions.zotero.keys.toggleTabsMenu"/>
+			<label for="textbox-showTabsMenu" data-l10n-id="preferences-advanced-keys-showTabsMenu"></label>
+			<label data-l10n-id="preferences-advanced-keys-modifier" data-l10n-args='{"modifierType": "ctrl"}'/>
+			<html:input type="text" id="textbox-showTabsMenu" maxlength="1" size="1" preference="extensions.zotero.keys.showTabsMenu"/>
 		</html:div>
 		
-		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+		<label class="statusLine" data-l10n-id="preferences-advanced-keys-changesTakeEffect"/>
 		
 		<separator/>
 	</html:div>

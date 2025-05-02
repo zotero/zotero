@@ -831,24 +831,6 @@ Zotero_Preferences.Attachment_Base_Directory = {
 
 Zotero_Preferences.Keys = {
 	init: function () {
-		for (let label of document.querySelectorAll('#zotero-keys-grid .modifier')) {
-			let modifierType = label.dataset.modifierType || 'ctrlShift';
-			let strKey = '';
-			switch (modifierType) {
-				case 'ctrl': {
-					strKey = `general.keys.${Zotero.isMac ? 'cmd' : 'ctrl'}`;
-					break;
-				}
-				case 'ctrlShift':
-				default: {
-					strKey = `general.keys.${Zotero.isMac ? 'cmdShift' : 'ctrlShift'}`;
-					break;
-				}
-			}
-			// Display the appropriate modifier keys for the platform
-			label.textContent = Zotero.getString(strKey);
-		}
-		
 		var textboxes = document.querySelectorAll('#zotero-keys-grid input');
 		for (let i=0; i<textboxes.length; i++) {
 			let textbox = textboxes[i];
