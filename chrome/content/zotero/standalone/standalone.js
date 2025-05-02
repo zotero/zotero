@@ -468,6 +468,36 @@ const ZoteroStandalone = new function() {
 			Zotero.Prefs.get('recursiveCollections')
 		);
 	};
+
+	this.onItemPaneOpen = function () {
+		var itemPane = document.getElementById('zotero-item-pane');
+		// Show
+		if (itemPane.getAttribute('collapsed') == 'true') {
+			document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
+			itemPane.setAttribute('collapsed', false);
+		}
+		// Hide
+		else {
+			document.getElementById('zotero-items-splitter').setAttribute('state', 'collapsed');
+			itemPane.setAttribute('collapsed', true);
+		}
+		ZoteroPane.updateLayoutConstraints();
+	}
+
+	this.onDeepTutorPaneOpen = function () {
+		var deepTutorPane = document.getElementById('deep-tutor-pane');
+		// Show
+		if (deepTutorPane.getAttribute('collapsed') == 'true') {
+			document.getElementById('zotero-deeptutor-splitter').setAttribute('state', 'open');
+			deepTutorPane.setAttribute('collapsed', false);
+		}	
+		// Hide
+		else {
+			document.getElementById('zotero-deeptutor-splitter').setAttribute('state', 'collapsed');
+			deepTutorPane.setAttribute('collapsed', true);
+		}
+		ZoteroPane.updateLayoutConstraints();
+	}
 	
 	
 	this.onViewMenuItemClick = function (event) {

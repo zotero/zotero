@@ -816,6 +816,18 @@
 		</html:div>
 		
 		<hbox class="titlebar-buttonbox titlebar-color">
+			<toolbarbutton class="titlebar-button deeptutorstatus"
+				oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
+				tooltip="Deep Tutor"
+				label="DeepTutor"
+				area-hidden="true"
+			/>
+			<toolbarbutton class="titlebar-button itempanestatus"
+				oncommand="ZoteroStandalone.onItemPaneOpen()"
+				tooltip="Item Pane Status"
+				label="ItemPane"
+				area-hidden="true"
+			/>
 			<toolbarbutton class="titlebar-button titlebar-min"
 				oncommand="window.minimize();"
 				data-l10n-id="browser-window-minimize-button"
@@ -1231,7 +1243,7 @@
 									<grippy id="zotero-collections-grippy"/>
 								</splitter>
 								
-								<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient">
+								<box id="zotero-layout-switcher" orient="horizontal" flex="1" zotero-persist="orient">
 									<vbox id="zotero-items-pane-container">
 										<toolbar id="zotero-toolbar-item-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
 											<hbox id="zotero-items-toolbar" align="center" flex="1">
@@ -1343,9 +1355,16 @@
 											<html:div id="zotero-items-tree"></html:div>
 										</hbox>
 									</vbox>
-									
-				
+
 									<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" orient="horizontal" zotero-persist="state orient"
+											  onmousemove="ZoteroPane.updateLayoutConstraints()"
+											  oncommand="ZoteroPane.updateLayoutConstraints()">
+										<grippy id="zotero-items-grippy"/>
+									</splitter>
+
+									<deep-tutor-pane id="deep-tutor-pane" flex="1" zotero-persist="width height"/>
+				
+									<splitter id="zotero-deeptutor-splitter" resizebefore="closest" resizeafter="closest" collapse="before" orient="horizontal" zotero-persist="state orient"
 										onmousemove="ZoteroPane.updateLayoutConstraints()"
 										oncommand="ZoteroPane.updateLayoutConstraints()">
 										<grippy id="zotero-items-grippy"/>
