@@ -495,6 +495,19 @@ var Zotero_Tabs = new function () {
 				selectedTab.timeUnselected = Zotero.Date.getUnixTimestamp();
 			}
 		}
+
+		// If the current tab left behind open popups, they'll remain as empty
+		// ghosts in the new tab. Close them.
+		if (this.deck.selectedPanel) {
+			try {
+				for (let popup of this.deck.selectedPanel.querySelectorAll('panel, menupopup')) {
+					popup.hidePopup();
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
 		
 		// If the last focus data was recorded for a different item, discard it
 		if (!this._focusOptions.itemID || this._focusOptions.itemID != tab?.data?.itemID) {
