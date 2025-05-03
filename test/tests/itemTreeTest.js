@@ -798,7 +798,7 @@ describe("Zotero.ItemTree", function() {
 				await collection.addItem(item.id);
 			});
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
-			// Ensure there is no leftover ghost attachment row
+			// Ensure there is no leftover attachment row
 			assert.isFalse(zp.itemsView.getRowIndexByID(attachment.id));
 		});
 
@@ -818,7 +818,7 @@ describe("Zotero.ItemTree", function() {
 				zp.itemsView.expandAllRows();
 			});
 			
-			it("should leave no ghost child rows after changing attachment's parent", async function () {
+			it("should remove old attachment and annotation rows on attachment parent change", async function () {
 				// Change attachment parent
 				attachment1.parentID = item2.id;
 				await attachment1.saveTx();
@@ -835,7 +835,7 @@ describe("Zotero.ItemTree", function() {
 				assert.isFalse(annotationRowIndex);
 			});
 		
-			it("should leave no ghost rows after making an attachment top level", async function () {
+			it("should remove old attachment and annotation rows after a child attachment is moved to top level", async function () {
 				// Make attachment top level
 				attachment1.parentID = null;
 				await attachment1.saveTx();
@@ -849,7 +849,7 @@ describe("Zotero.ItemTree", function() {
 				assert.isFalse(annotationRowIndex);
 			});
 		
-			it("should leave no ghost rows after making a top-level attachment a child", async function () {
+			it("should remove old attachment and annotation rows after a top-level attachment is made a child", async function () {
 				// Make a top-level attachment
 				let topLevelAttachment = await importFileAttachment('test.pdf', { title: 'Top Level Attachment', parentItemID: null });
 				let highlightOfTopLevel = await createAnnotation('highlight', topLevelAttachment);
@@ -870,7 +870,7 @@ describe("Zotero.ItemTree", function() {
 				assert.isFalse(annotationRowIndex);
 			});
 		
-			it("should not loose note row after making it top-level", async function () {
+			it("should handle child note being moved to top level", async function () {
 				let note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
 				let itemRowIndex = itemsView.getRowIndexByID(item1.id);
 				let noteRowIndex = itemsView.getRowIndexByID(note1.id);
@@ -885,7 +885,7 @@ describe("Zotero.ItemTree", function() {
 				assert.equal(itemsView.getRow(noteRowIndex).level, 0);
 			});
 		
-			it("should not loose note row after making it a child", async function () {
+			it("should handle top-level note being made a child note", async function () {
 				// Make a top-level note
 				let note = await createDataObject('item', { itemType: 'note', parentID: null });
 
@@ -901,7 +901,7 @@ describe("Zotero.ItemTree", function() {
 				assert.equal(noteRowIndex, secondItemRowIndex + 1);
 			});
 
-			it("should not loose note row after moving it between items", async function () {
+			it("should handle child note being moved between items", async function () {
 				let note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
 				let itemRowIndex = itemsView.getRowIndexByID(item1.id);
 				let noteRowIndex = itemsView.getRowIndexByID(note1.id);
