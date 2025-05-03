@@ -221,9 +221,9 @@
 			if (!(val instanceof Zotero.Item)) {
 				throw new Error("'item' must be a Zotero.Item");
 			}
-			// Blur editable-text of old attachment. Otherwise, _handleTitleBlur would fire after
-			// the new item is set but before updateInfo sets the title field to have the new item's value.
-			// Such race condition would cause the old item's title to be set on the new item.
+			// Blur editable-text of old attachment. Otherwise, _handleTitleBlur() would fire after
+			// the new item is set but before updateInfo() sets the title field to have the new
+			// item's value, causing the old item's title to be set on the new item.
 			if (this._item && val.id != this._item.id && document.activeElement.closest("editable-text")) {
 				document.activeElement.blur();
 			}
