@@ -686,24 +686,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (row !== undefined) {
 						let parentItemID = this.getRow(row).ref.parentItemID;
 						let parentIndex = this.getParentIndex(row);
-
-						// Top-level item
-						if (item.isTopLevelItem()) {
-							// If Unfiled Items and itm was added to a collection, remove from view
-							if (collectionTreeRow.isUnfiled() && item.getCollections().length) {
-								this._removeRow(row);
-							}
-							// Otherwise just resort
-							else {
-								sort = true;
-							}
-						}
-						// If item moved from top-level to under another item, remove the old row.
-						else if (parentIndex == -1 && parentItemID) {
+						
+						// If item moved from top level to under another item, remove the old row
+						if (parentIndex == -1 && parentItemID) {
+							this._closeContainer(row);
 							this._removeRow(row);
 						}
 						// If moved from under another item to top level, remove old row and add new one
 						else if (parentIndex != -1 && !parentItemID) {
+							this._closeContainer(row);
 							this._removeRow(row);
 
 							let beforeRow = this.rowCount;
@@ -711,9 +702,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 							sort = true;
 						}
-						// If item was moved from one parent to another, remove from old parent
+						// If moved from one parent to another, remove from old parent
 						else if (parentItemID && parentIndex != -1 && this._rowMap[parentItemID] != parentIndex) {
+							this._closeContainer(row);
 							this._removeRow(row);
+						}
+						// If Unfiled Items and item was added to a collection, remove from view
+						else if (this.isContainer(row) && collectionTreeRow.isUnfiled() && item.getCollections().length) {
+							this._closeContainer(row);
+							this._removeRow(row);
+						}
+						// Resort everything if a container is updated, just in case
+						else if (this.isContainer(row)) {
+							sort = true;
 						}
 						// If not moved from under one item to another, just resort the row,
 						// which also invalidates it and refreshes it
