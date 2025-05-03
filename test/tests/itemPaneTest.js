@@ -609,6 +609,25 @@ describe("Item pane", function () {
 			let fieldMode = newCreatorRow.querySelector("editable-text").getAttribute("fieldMode");
 			assert.equal(fieldMode, "0");
 		});
+
+		it("should save updated title when switching between items", async function () {
+			let itemOne = new Zotero.Item('book');
+			let itemTwo = new Zotero.Item('book');
+			itemOne.setField('title', 'Title_one');
+			await itemOne.saveTx();
+			await itemTwo.saveTx();
+			await ZoteroPane.selectItem(itemOne.id);
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let infoBox = itemDetails.getPane("info");
+
+			let titleField = infoBox.querySelector("#itembox-field-value-title");
+			titleField.focus();
+			titleField.value = "Updated title";
+			await ZoteroPane.selectItem(itemTwo.id);
+			await waitForNotifierEvent('modify', 'item');
+			assert.equal(itemOne.getDisplayTitle(), "Updated title");
+		});
 	});
 
 	describe("Libraries and collections pane", function () {
@@ -1647,6 +1666,21 @@ describe("Item pane", function () {
 			assert.isFalse(attachmentBox._preview._isReaderInitialized);
 
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
+		});
+
+		it("should not transfer focused title while switching between items", async function () {
+			let item = new Zotero.Item('book');
+			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF_one', parentItemID: item.id });
+			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF_two', parentItemID: item.id });
+			await ZoteroPane.selectItem(attachmentOne.id);
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentBox = itemDetails.getPane(paneID);
+
+			attachmentBox.querySelector("#title").focus();
+			await ZoteroPane.selectItem(attachmentTwo.id);
+			await waitForNotifierEvent('modify', 'item');
+			assert.equal(attachmentTwo.getDisplayTitle(), "PDF_two");
 		});
 	});
 	
