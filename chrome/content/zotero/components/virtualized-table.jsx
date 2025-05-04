@@ -842,7 +842,10 @@ class VirtualizedTable extends React.Component {
 		event.stopPropagation();
 		const result = this._getResizeColumns();
 		if (!result) return;
+		const columns = this._getVisibleColumns();
 		const [aColumn, bColumn, resizingColumn] = result;
+		const isFirstColumn = columns[0].dataKey === aColumn.dataKey;
+		const firstColumnExtraWidth = isFirstColumn ? (this.props.firstColumnExtraWidth || 0) : 0;
 		const a = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(aColumn.dataKey)}`);
 		const b = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(bColumn.dataKey)}`);
 		const resizing = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(resizingColumn.dataKey)}`);
@@ -856,7 +859,7 @@ class VirtualizedTable extends React.Component {
 		const widthSum = aRect.width + bRect.width;
 		const aColumnPadding = aColumn.iconLabel ? 0 : COLUMN_PADDING;
 		const bColumnPadding = bColumn.iconLabel ? 0 : COLUMN_PADDING;
-		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + aColumnPadding;
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + aColumnPadding + firstColumnExtraWidth;
 		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + bColumnPadding;
 		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
@@ -864,7 +867,7 @@ class VirtualizedTable extends React.Component {
 		onResizeData[aColumn.dataKey] = aColumnWidth;
 		onResizeData[bColumn.dataKey] = bColumnWidth;
 		this._columns.onResize(onResizeData);
-	}
+	};
 	
 	/**
 	 * Get all columns including hidden ones
