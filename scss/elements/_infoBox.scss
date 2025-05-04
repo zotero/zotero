@@ -162,15 +162,14 @@ info-box {
 	}
 
 	.creator-type-dropmarker {
-		display: inline-block;
-		background-image: url('chrome://zotero/skin/16/universal/chevron-12.svg');
-		background-size: contain;
-		width: 8px;
-		height: 8px;
-		background-repeat: no-repeat;
-		padding-right: 4px;
+		@include svgicon("chevron-8", "universal", "8");
 		align-self: center;
+		color: var(--fill-secondary);
+		display: inline-block;
+		height: 8px;
+		padding-right: 4px;
 		visibility: hidden;
+		width: 8px;
 	}
 
 	.comma {
