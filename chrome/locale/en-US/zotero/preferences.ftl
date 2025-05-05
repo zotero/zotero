@@ -122,7 +122,7 @@ preferences-advanced-keys-showTabsMenu =
 preferences-advanced-keys-changesTakeEffect =
     .value = Changes take effect after restart
 preferences-advanced-keys-modifier =
-    .value = { $modifierType ->
-        [ctrl] { command-or-control } + 
-        *[ctrl-shift] { command-or-control-shift } + 
+    { $modifier ->
+        [without-shift] { command-or-control }{ shortcut-separator }
+        *[with-shift] { command-or-control-shift }{ shortcut-separator }
     }

@@ -15,8 +15,13 @@ command-or-control =
     }
 command-or-control-shift =
     { PLATFORM() ->
-        [macos] { general-key-command } + { general-key-shift }
-        *[other] { general-key-control } + { general-key-shift }
+        [macos] { general-key-command }{ shortcut-separator }{ general-key-shift }
+        *[other] { general-key-control }{ shortcut-separator }{ general-key-shift }
+    }
+shortcut-separator =
+    { PLATFORM() ->
+        [macos] -
+        *[other] {" "}+{" "}
     }
 return-or-enter =
     { PLATFORM() ->
