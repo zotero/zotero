@@ -1088,6 +1088,7 @@ class VirtualizedTable extends React.Component {
 	
 		this._setXulTooltip();
 
+		this._topDiv.style.setProperty("--firstColumnExtraWidth", `${this.props.firstColumnExtraWidth || 0}px`);
 		window.addEventListener("resize", () => {
 			this._debouncedRerender();
 		});

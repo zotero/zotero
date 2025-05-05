@@ -30,15 +30,9 @@
 		.cell.numNotes {
 			padding: 0;
 			text-align: center;
-
-			&.first-column {
-				padding-inline-start: 32px;
-			}
 		}
 
 		.first-column {
-			padding-inline-start: 36px;
-
 			&::before {
 				content: "";
 				display: inline-block;
