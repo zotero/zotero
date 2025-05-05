@@ -2365,21 +2365,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return false;
 					}
 
-					// Don't allow children to be dragged within their own parents
 					var parentItemID = item.parentItemID;
 					var parentIndex = this._rowMap[parentItemID];
-					if (row != -1 && this.getLevel(row) > 0) {
-						if (this.getRow(this.getParentIndex(row)).ref.id == parentItemID) {
-							return false;
-						}
-					}
-					// Including immediately after the parent
+					let targetItem = this.getRow(row)?.ref;
+					// Can only drop before or after a top-level item
+					if (targetItem && !targetItem.isTopLevelItem()) return false;
+					// Cannot drop between an opened container and the first child row
 					if (orient == 1) {
-						if (row == parentIndex) {
+						if (this.getRow(row)?.isOpen) {
 							return false;
 						}
 					}
-					// And immediately before the next parent
+					// Cannot drop after the last child of a parent container
 					if (orient == -1) {
 						var nextParentIndex = null;
 						for (var i = parentIndex + 1; i < this.rowCount; i++) {
