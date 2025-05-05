@@ -78,8 +78,7 @@ const COLUMNS = [
 		dataKey: "itemType",
 		label: "zotero.items.itemType",
 		showInColumnPicker: true,
-		width: "56",
-		staticWidth: true,
+		width: "40",
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
