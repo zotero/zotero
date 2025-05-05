@@ -40,7 +40,10 @@
 	}
 	
 	.cell {
-		padding: 0 8px;
+		// NOTE: To avoid the complexities of dealing with padding in the
+		// flexbox model, `.cell` padding must be identical in the header and
+		// body. See #5198, #5162.
+		padding: 0 8px; 
 		min-width: 30px;
 		cursor: default;
 		white-space: nowrap;
@@ -50,6 +53,11 @@
 		&.label {
 			padding-inline-start: 0;
 			padding-inline-end: 4px;
+		}
+
+		&.first-column {
+			padding-inline-start: 0;
+			min-width: calc(var(--firstColumnExtraWidth, 0px) + 30px);
 		}
 
 		&.first-column,
@@ -278,6 +286,13 @@
 		text-align: center;
 	}
 
+	.first-column {
+		> :first-child {
+			// offset header's column label/icon to align with the text in the first column, without introducing padding to the cell itself to avoid flexbox issues
+			padding-inline-start: calc(var(--firstColumnExtraWidth, 0px) + 8px);
+		}
+	}
+
 	.cell {
 		display: flex;
 		position: relative;
@@ -352,6 +367,7 @@
 	padding: 4px 8px 8px;
 
 	.cell {
+		// NOTE: Do not add padding here. See #5198
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-height: 100%;
@@ -361,10 +377,6 @@
 		// pointer-events are enabled, and we need to rerender the rows for selection
 		// before dragging.
 		pointer-events: none;
-
-		&.first-column {
-			padding-inline-start: 0;
-		}
 	}
 }
 
