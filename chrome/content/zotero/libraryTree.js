@@ -155,11 +155,12 @@ var LibraryTree = class LibraryTree extends React.Component {
 	 * Remove a row from the main array and parent row children arrays,
 	 * delete the row from the map, and optionally update all rows above it in the map
 	 */
-	_removeRow(index, skipMapUpdate) {
+	_removeRow(index, skipMapUpdate, skipSelectionUpdate) {
 		var id = this.getRow(index).id;
 		let level = this.getLevel(index);
 
-		if (index <= this.selection.focused) {
+		// Maintain selection unless specified otherwise
+		if (!skipSelectionUpdate && index <= this.selection.focused) {
 			this.selection.select(this.selection.focused - 1);
 		}
 
