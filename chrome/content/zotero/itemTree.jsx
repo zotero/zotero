@@ -3346,7 +3346,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
 			// Skip the map update here and just refresh the whole map below,
 			// since we might be removing multiple rows
-			this._removeRow(index + 1, true);
+			// Also, do not update the selection with each row removal for better performance
+			// when attachment with many annotations is being closed if the selection
+			// is already being restored in the end
+			this._removeRow(index + 1, true, !skipRowMapRefresh);
 			count++;
 		}
 
