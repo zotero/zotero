@@ -28,6 +28,14 @@
 {
 	class ItemPaneSidenav extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
+			<!-- Standard mode only: Toggle Item/Context Pane button -->
+			<toolbarbutton class="btn"
+				data-action="toggle-pane"
+				tabindex="0"
+			/>
+			
+			<html:div class="divider"/>
+			
 			<html:div class="inherit-flex highlight-notes-inactive" tabindex="0" role="tab" data-l10n-id="sidenav-main-btn-grouping">
 				<!-- Buttons will be added dynamically -->
 			</html:div>
@@ -215,6 +223,11 @@
 			for (let button of this.querySelectorAll('.btn[data-action]')) {
 				let action = button.dataset.action;
 				
+				if (action === 'toggle-pane') {
+					button.addEventListener('command', () => {
+						this._collapsed = !this._collapsed;
+					});
+				}
 				if (action === 'locate') {
 					button.addEventListener('mousedown', async (event) => {
 						if (event.button !== 0 || button.open) {
@@ -313,8 +326,14 @@
 			for (let button of this.querySelectorAll('.btn[data-action]')) {
 				let action = button.dataset.action;
 				
-				if (action == 'locate') {
+				if (action == 'toggle-pane' || action == 'locate') {
 					button.parentElement.hidden = false;
+				}
+				if (action == 'toggle-pane') {
+					document.l10n.setAttributes(button,
+						Zotero_Tabs.selectedType === 'library'
+							? 'toggle-item-pane'
+							: 'toggle-context-pane');
 				}
 			}
 			
@@ -601,7 +620,7 @@
 			return {
 				index,
 				position: index === 0 ? 0 : index * (btnSize + btnGap) + btnGap / 2
-			}
+			};
 		};
 
 		handleKeyDown = (event) => {
