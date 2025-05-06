@@ -472,6 +472,8 @@ const ZoteroStandalone = new function() {
 			'view-menuitem-recursive-collections',
 			Zotero.Prefs.get('recursiveCollections')
 		);
+		document.getElementById("view-menu-recently-closed-windows").disabled = Zotero.WindowHistory.history.length == 0;
+		document.getElementById("view-menu-recently-closed-tabs").disabled = Zotero_Tabs.history.length == 0;
 	};
 	
 	

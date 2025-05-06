@@ -2227,3 +2227,40 @@ Zotero.JSON = new function() {
 		return JSON.parse(arg);
 	}
 }
+
+Zotero.WindowHistory = new function () {
+	this.history = [];
+
+	// Record recently closed windows. Keep track of the last 25.
+	this.addToHistory = (itemID, title, type) => {
+		let index = this.history.findIndex(obj => obj.itemID == itemID && obj.type == type);
+		if (index !== -1) {
+			this.history.splice(index, 1);
+		}
+		this.history.push({ itemID, type, title });
+		if (this.history.length > 25) {
+			this.history.shift();
+		}
+	};
+
+	// Reopen a window from history
+	this.reopenWindow = (index) => {
+		let historyEntry = this.history[index];
+		if (historyEntry.type == "note") {
+			let zp = Zotero.getActiveZoteroPane();
+			zp.openNoteWindow(historyEntry.itemID);
+		}
+		else if (historyEntry.type == "reader") {
+			Zotero.Reader.open(historyEntry.itemID,
+				null,
+				{
+					openInWindow: true,
+					allowDuplicate: true,
+					secondViewState: historyEntry.secondViewState,
+				}
+			);
+		}
+		// Remove the window from history
+		Zotero.WindowHistory.history.splice(index, 1);
+	};
+};

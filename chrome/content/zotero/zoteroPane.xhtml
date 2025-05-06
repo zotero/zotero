@@ -671,6 +671,20 @@
 								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"
 								type="checkbox"
 							/>
+							<menuseparator class="menu-type-library menu-type-reader"/>
+							<menu id="view-menu-recently-closed-tabs"
+								class="menu-type-library menu-type-reader"
+								data-l10n-id="menu-view-recently-closed-tabs"
+								onpopupshowing="ZoteroPane.onRecentlyClosedPopupShowing(event)">
+						  		<menupopup/>
+					  		</menu>
+							<menu id="view-menu-recently-closed-windows"
+							  class="menu-type-library menu-type-reader"
+							  data-l10n-id="menu-view-recently-closed-windows"
+							  onpopupshowing="ZoteroPane.onRecentlyClosedPopupShowing(event)"
+							  onpopuphiding="document.getElementById('view-menu-recently-closed-windows').firstChild.replaceChildren();">
+								<menupopup/>
+							</menu>
 						</menupopup>
 					</menu>
 					

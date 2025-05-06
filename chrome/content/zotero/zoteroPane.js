@@ -6855,6 +6855,33 @@ var ZoteroPane = new function()
 		this.itemPane.handleResize();
 	}
 
+	// Display recently closed windows/tabs in their menus
+	this.onRecentlyClosedPopupShowing = function (event) {
+		let menu = event.target.closest(".menu-type-library");
+		let isClosedWindows = !!event.target.closest("#view-menu-recently-closed-windows");
+		let recentlyClosed = isClosedWindows ? Zotero.WindowHistory.history : Zotero_Tabs.history;
+		// only display the last 25 records
+		recentlyClosed = recentlyClosed.slice(-25);
+		let menuitems = [];
+		for (let [index, obj] of recentlyClosed.entries()) {
+			let menuitem = document.createXULElement("menuitem");
+			menuitem.label = obj.title;
+			// cutoff the label at 50 characters
+			if (menuitem.label.length > 50) {
+				menuitem.label = menuitem.label.slice(0, 50) + "…";
+			}
+			menuitem.addEventListener("command", () => {
+				if (isClosedWindows) {
+					Zotero.WindowHistory.reopenWindow(index);
+				}
+				else {
+					Zotero_Tabs.reopenClosedTab(obj.itemID, obj.tabIndex);
+				}
+			});
+			menuitems.push(menuitem);
+		}
+		menu.menupopup.replaceChildren(...menuitems);
+	};
 	
 	// Set the label of the dynamic tooltip. Can be used when we cannot set .tooltiptext
 	// property, e.g. if we don't want the tooltip to be announced by screenreaders.

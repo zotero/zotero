@@ -1444,6 +1444,7 @@ class ReaderWindow extends ReaderInstance {
 		this.uninit();
 		this._window.close();
 		this._onClose();
+		Zotero.WindowHistory.addToHistory(this._item.id, this._window.document.title, "reader");
 	}
 
 	_setTitleValue(title) {
