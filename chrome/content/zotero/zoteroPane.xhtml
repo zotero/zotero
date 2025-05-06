@@ -126,6 +126,8 @@
 		<command id="cmd_zotero_newChildURLAttachment" oncommand="ZoteroPane.addAttachmentFromURI(true, ZoteroPane.getSelectedItems()[0].id)"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
+		
+		<command id="cmd_zotero_showAllTabs" oncommand="Zotero_Tabs.showTabsMenu()"/>
 	</commandset>
 
 	<commandset id="macCommandSet"> <!-- was mainCommandSet -->
@@ -176,6 +178,9 @@
 				modifiers="accel,shift"/>
 		<key id="key_back"/>
 		<key id="key_forward"/>
+		<key id="key_showAllTabs"
+				command="cmd_zotero_showAllTabs"
+				modifiers="accel"/>
 	</keyset>
 
 	<keyset id="editMenuKeys">
@@ -651,6 +656,11 @@
 										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
 								</menupopup>
 							</menu>
+							<menuitem id="show-all-tabs"
+								data-l10n-id="menu-view-show-all-tabs"
+								command="cmd_zotero_showAllTabs"
+								key="key_showAllTabs"
+							/>
 							<menuseparator class="menu-type-library" />
 							<menu id="column-picker-submenu"
 								  class="menu-type-library"
