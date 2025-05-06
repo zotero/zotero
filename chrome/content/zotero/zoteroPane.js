@@ -161,14 +161,14 @@ var ZoteroPane = new function()
 	};
 
 	function setUpKeyboardNavigation() {
-		let collectionTreeToolbar = this.document.getElementById("zotero-toolbar-collection-tree");
-		let itemTreeToolbar = this.document.getElementById("zotero-toolbar-item-tree");
-		let titleBar = this.document.getElementById("zotero-title-bar");
-		let itemTree = this.document.getElementById("zotero-items-tree");
-		let collectionsTree = this.document.getElementById("zotero-collections-tree");
-		let tagSelector = this.document.getElementById("zotero-tag-selector");
-		let tagContainer = this.document.getElementById('zotero-tag-selector-container');
-		let collectionsPane = this.document.getElementById("zotero-collections-pane");
+		let collectionTreeToolbar = document.getElementById("zotero-toolbar-collection-tree");
+		let itemTreeToolbar = document.getElementById("zotero-toolbar-item-tree");
+		let titleBar = document.getElementById("zotero-title-bar");
+		let itemTree = document.getElementById("zotero-items-tree");
+		let collectionsTree = document.getElementById("zotero-collections-tree");
+		let tagSelector = document.getElementById("zotero-tag-selector");
+		let tagContainer = document.getElementById('zotero-tag-selector-container');
+		let collectionsPane = document.getElementById("zotero-collections-pane");
 
 		// function to handle actual focusing based on a given event
 		// and a mapping of event targets + keys to the focus destinations
