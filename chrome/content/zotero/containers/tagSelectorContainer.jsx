@@ -610,6 +610,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				return;
 			}
 			
+			// Cannot add tags via drag-drop from trash
+			if (Zotero.DragDrop.currentDragSource.isTrash()) return;
+
 			elem.classList.add('dragged-over');
 			event.preventDefault();
 			// Don't show + cursor when removing tags

@@ -306,6 +306,10 @@
 			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
 			
 			let targetItem = parentID ? Zotero.Items.get(parentID) : item;
+			// If the parent item or the attachment itself is in trash, itemPane is not editable
+			if (targetItem.deleted || item.deleted) {
+				editable = false;
+			}
 	
 			let itemDetails = document.createXULElement('item-details');
 			itemDetails.id = tabID + '-context';

@@ -1663,6 +1663,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					return true;
 				}
 
+				// Cannot add items to collections from trash
+				if (Zotero.DragDrop.currentDragSource.isTrash()) return false;
+
 				var ids = data;
 				var items = Zotero.Items.get(ids);
 				items = Zotero.Items.keepTopLevel(items);
