@@ -760,6 +760,7 @@ describe("Zotero.CollectionTree", function() {
 		var canDrop = Zotero.Promise.coroutine(function* (objectType, targetRowID, ids) {
 			var row = cv.getRowIndexByID(targetRowID);
 			
+			Zotero.DragDrop.currentDragSource = objectType == "item" && zp.itemsView.collectionTreeRow;
 			var dt = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
@@ -774,6 +775,7 @@ describe("Zotero.CollectionTree", function() {
 			if (canDrop) {
 				canDrop = yield cv.canDropCheckAsync(row, 0, dt);
 			}
+			Zotero.DragDrop.currentDragSource = null;
 			return canDrop;
 		});
 		
