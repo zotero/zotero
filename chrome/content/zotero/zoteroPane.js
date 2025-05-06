@@ -227,7 +227,8 @@ var ZoteroPane = new function()
 				// If desired target is hidden/disabled, create a fake event
 				// and dispatch it on the hidden target to rerun moveFocus
 				// and place focus on the next non-hidden node
-				if (target.disabled || target.hidden || target.parentNode.hidden) {
+				if (target.disabled || target.hidden || target.parentNode.hidden
+						|| getComputedStyle(target).display === 'none') {
 					event.target = target;
 					let fakeEventCopy = new KeyboardEvent('keydown', {
 						key: event.key,
@@ -405,14 +406,18 @@ var ZoteroPane = new function()
 					ShiftTab: () => {
 						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
 					},
-					Tab: () => itemTree.querySelector(".virtualized-table")
+					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked")
 				},
 				'zotero-tb-search-dropmarker': {
 					ArrowNext: () => null,
 					ArrowPrevious: () => null,
 					Tab: () => document.getElementById("zotero-tb-search-textbox"),
 					ShiftTab: () => document.getElementById('zotero-tb-add')
-				}
+				},
+				'zotero-tb-toggle-item-pane-stacked': {
+					Tab: () => itemTree.querySelector(".virtualized-table"),
+					ShiftTab: () => document.getElementById("zotero-tb-search-textbox")
+				},
 			};
 			moveFocus(actionsMap, event, true);
 		});
@@ -441,7 +446,7 @@ var ZoteroPane = new function()
 		itemTree.addEventListener("keydown", (event) => {
 			let actionsMap = {
 				'item-tree-main-default': {
-					ShiftTab: () => document.getElementById('zotero-tb-search-textbox')
+					ShiftTab: () => document.getElementById('zotero-tb-toggle-item-pane-stacked')
 				}
 			};
 			moveFocus(actionsMap, event);
