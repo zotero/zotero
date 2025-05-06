@@ -77,7 +77,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		// DeeptutorZ: add chatbot pane
 		['deep-tutor-pane', 'chrome://zotero/content/elements/DeepTutorPane.js'],
 		['deep-tutor-box', 'chrome://zotero/content/elements/deepTutorBox.js'],
-		['model-selection', 'chrome://zotero/content/elements/modelSelection.js']
+		['model-selection', 'chrome://zotero/content/elements/modelSelection.js'],
+		['session-history-box', 'chrome://zotero/content/elements/sessionHistoryBox.js']
 	]) {
 		customElements.setElementCreationCallback(tag, () => {
 			Services.scriptloader.loadSubScript(script, window);

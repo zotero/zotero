@@ -1,0 +1,68 @@
+.highlight-button {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 4px;
+}
+
+.highlight-button:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.highlight {
+    background-color: #ffeb3b;
+    border-radius: 2px;
+    padding: 0 2px;
+    margin: 0 -2px;
+}
+
+.highlight.selected {
+    background-color: #fdd835;
+}
+
+/* Color variants */
+.highlight.yellow { background-color: #ffeb3b; }
+.highlight.pink { background-color: #f48fb1; }
+.highlight.blue { background-color: #90caf9; }
+.highlight.green { background-color: #a5d6a7; }
+
+/* Highlight popup */
+.highlight-popup {
+    position: absolute;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 8px;
+    z-index: 1000;
+}
+
+.highlight-popup button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.highlight-popup button:hover {
+    background-color: #f8f9fa;
+}
+
+.highlight-popup .icon {
+    width: 16px;
+    height: 16px;
+}
+
+.highlight-popup .title {
+    font-size: 14px;
+} 
