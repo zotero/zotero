@@ -402,17 +402,17 @@ var ZoteroPane = new function()
 					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
-				'zotero-tb-search-textbox': {
-					ShiftTab: () => {
-						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
-					},
-					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked")
-				},
 				'zotero-tb-search-dropmarker': {
 					ArrowNext: () => null,
 					ArrowPrevious: () => null,
 					Tab: () => document.getElementById("zotero-tb-search-textbox"),
 					ShiftTab: () => document.getElementById('zotero-tb-add')
+				},
+				'zotero-tb-search-textbox': {
+					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked"),
+					ShiftTab: () => {
+						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
+					}
 				},
 				'zotero-tb-toggle-item-pane-stacked': {
 					Tab: () => itemTree.querySelector(".virtualized-table"),
