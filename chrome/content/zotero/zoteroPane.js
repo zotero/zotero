@@ -6853,14 +6853,8 @@ var ZoteroPane = new function()
 		this.handleTagSelectorResize();
 
 		this.itemPane.handleResize();
-	};
-	
-	
-	this.toggleItemPane = function () {
-		this.itemPane.collapsed = !this.itemPane.collapsed;
-		this.updateLayoutConstraints();
-	};
-	
+	}
+
 	
 	// Set the label of the dynamic tooltip. Can be used when we cannot set .tooltiptext
 	// property, e.g. if we don't want the tooltip to be announced by screenreaders.

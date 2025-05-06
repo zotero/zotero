@@ -201,7 +201,6 @@ class ReaderInstance {
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
-			contextPaneOpen: this._contextPaneOpen,
 			rtl: Zotero.rtl,
 			fontSize: Zotero.Prefs.get('fontSize'),
 			localizedStrings: {
@@ -1237,7 +1236,6 @@ class ReaderTab extends ReaderInstance {
 		super(options);
 		this._sidebarWidth = options.sidebarWidth;
 		this._sidebarOpen = options.sidebarOpen;
-		this._contextPaneOpen = options.bottomPlaceholderHeight;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showContextPaneToggle = true;
 		this._onToggleSidebarCallback = options.onToggleSidebar;
@@ -1390,7 +1388,6 @@ class ReaderWindow extends ReaderInstance {
 		super(options);
 		this._sidebarWidth = options.sidebarWidth;
 		this._sidebarOpen = options.sidebarOpen;
-		this._contextPaneOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._onClose = options.onClose;
 
@@ -1803,7 +1800,6 @@ class Reader {
 	constructor() {
 		this._sidebarWidth = 240;
 		this._sidebarOpen = false;
-		this._contextPaneOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
 		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab'], 'reader');
@@ -1928,14 +1924,6 @@ class Reader {
 			reader.toggleSidebar(open);
 		}
 		this._setSidebarState();
-	}
-
-	setContextPaneOpen(open) {
-		this._contextPaneOpen = open;
-		let readers = this._readers.filter(r => r instanceof ReaderTab);
-		for (let reader of readers) {
-			reader.setContextPaneOpen(open);
-		}
 	}
 	
 	setBottomPlaceholderHeight(height) {
@@ -2119,7 +2107,6 @@ class Reader {
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
-				contextPaneOpen: this._contextPaneOpen,
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight,
 				preventJumpback: preventJumpback,
 				onToggleSidebar: (open) => {

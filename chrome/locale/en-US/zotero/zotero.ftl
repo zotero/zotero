@@ -537,11 +537,6 @@ sidenav-reorder-down =
 sidenav-reorder-reset =
     .label = Reset Section Order
 
-toggle-item-pane =
-    .tooltiptext = Toggle Item Pane
-toggle-context-pane =
-    .tooltiptext = Toggle Context Pane
-
 pin-section =
     .label = Pin Section
 unpin-section =

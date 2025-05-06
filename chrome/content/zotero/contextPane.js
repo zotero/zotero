@@ -57,9 +57,11 @@ var ZoteroContextPane = new function () {
 			_contextPaneInner.setAttribute('collapsed', !!collapsed);
 			_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
 			_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
-			this.update();
+			_update();
 		}
 	});
+
+	this.update = _update;
 
 	this.focus = () => {
 		return _contextPaneInner.handleFocus();
@@ -68,6 +70,10 @@ var ZoteroContextPane = new function () {
 	this.showLoadingMessage = (isShow) => {
 		_loadingMessageContainer.classList.toggle('hidden', !isShow);
 	};
+
+	this.updateAddToNote = _updateAddToNote;
+
+	this.togglePane = _togglePane;
 
 	this.init = function () {
 		if (!Zotero) {
@@ -87,18 +93,18 @@ var ZoteroContextPane = new function () {
 
 		this.context = _contextPaneInner;
 
-		window.addEventListener('resize', this.update);
-		Zotero.Reader.onChangeSidebarWidth = this._updatePaneWidth;
-		Zotero.Reader.onToggleSidebar = this._updatePaneWidth;
+		window.addEventListener('resize', _update);
+		Zotero.Reader.onChangeSidebarWidth = _updatePaneWidth;
+		Zotero.Reader.onToggleSidebar = _updatePaneWidth;
 	};
 
 	this.destroy = function () {
-		window.removeEventListener('resize', this.update);
+		window.removeEventListener('resize', _update);
 		Zotero.Reader.onChangeSidebarWidth = () => {};
 		Zotero.Reader.onToggleSidebar = () => {};
 	};
 
-	this.updateAddToNote = () => {
+	function _updateAddToNote() {
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
 			let editor = ZoteroContextPane.activeEditor;
@@ -107,28 +113,34 @@ var ZoteroContextPane = new function () {
 				&& (editor.item.deleted || editor.item.parentItem && editor.item.parentItem.deleted);
 			reader.enableAddToNote(!!editor && !libraryReadOnly && !noteReadOnly);
 		}
-	};
+	}
 	
-	this._updatePaneWidth = () => {
+	function _updatePaneWidth() {
 		let stacked = _isStacked();
-		let readerSidebarWidth = (Zotero.Reader.getSidebarOpen() ? Zotero.Reader.getSidebarWidth() : 0)
-			+ 'px';
+		let width = Zotero.Reader.getSidebarWidth() + 'px';
+		if (!Zotero.Reader.getSidebarOpen()) {
+			width = 0;
+		}
 		let contextPaneWidth = _contextPane.getAttribute("width");
 		if (contextPaneWidth && !_contextPane.style.width) {
 			_contextPane.style.width = `${contextPaneWidth}px`;
 		}
 		if (Zotero.rtl) {
 			_contextPane.style.left = 0;
-			_contextPane.style.right = stacked ? readerSidebarWidth : 'unset';
+			_contextPane.style.right = stacked ? width : 'unset';
 		}
 		else {
-			_contextPane.style.left = stacked ? readerSidebarWidth : 'unset';
+			_contextPane.style.left = stacked ? width : 'unset';
 			_contextPane.style.right = 0;
 		}
-	};
+	}
 
-	this.update = () => {
-		if (Zotero_Tabs.selectedType === 'library') {
+	function _isStacked() {
+		return Zotero.Prefs.get('layout') == 'stacked';
+	}
+
+	function _update() {
+		if (Zotero_Tabs.selectedIndex == 0) {
 			return;
 		}
 		if (_isStacked()) {
@@ -162,32 +174,28 @@ var ZoteroContextPane = new function () {
 			_contextPane.style.width = `${_contextPane.getAttribute("width")}px`;
 		}
 		
-		Zotero.Reader.setContextPaneOpen(!this.collapsed);
-		
-		var height = null;
-		if (_isStacked()) {
-			height = 0;
-			if (_contextPane.getAttribute('collapsed') != 'true') {
-				height = _contextPaneInner.getBoundingClientRect().height;
+		if (Zotero_Tabs.selectedIndex > 0) {
+			var height = null;
+			if (_isStacked()) {
+				height = 0;
+				if (_contextPane.getAttribute('collapsed') != 'true') {
+					height = _contextPaneInner.getBoundingClientRect().height;
+				}
 			}
+			Zotero.Reader.setBottomPlaceholderHeight(height);
 		}
-		Zotero.Reader.setBottomPlaceholderHeight(height);
 		
-		this._updatePaneWidth();
-		this.updateAddToNote();
+		_updatePaneWidth();
+		_updateAddToNote();
 
 		ZoteroPane.updateLayoutConstraints();
-	};
-
-	this.togglePane = () => {
-		this.collapsed = !this.collapsed;
-	};
-
-	function _isStacked() {
-		return Zotero.Prefs.get('layout') == 'stacked';
 	}
-
+	
 	function _isLibraryReadOnly(libraryID) {
 		return !Zotero.Libraries.get(libraryID).editable;
+	}
+
+	function _togglePane() {
+		this.collapsed = !this.collapsed;
 	}
 };

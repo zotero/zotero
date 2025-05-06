@@ -74,7 +74,6 @@ $toolbarbutton-icons: (
 	tabs-menu: "chevron",
 	sync-error: "error",
 	sync: "sync",
-	toggle-item-pane-stacked: "sidebar-bottom",
 );
 
 @each $cls, $icon in $toolbarbutton-icons {
