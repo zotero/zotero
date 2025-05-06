@@ -2345,6 +2345,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			// In library, allow children to be dragged out of parent
 			else if (collectionTreeRow.isLibrary(true) || collectionTreeRow.isCollection()) {
+				let targetRow = row !== -1 ? this.getRow(row) : null;
 				for (let item of items) {
 					// Don't allow drag if any top-level items
 					if (item.isTopLevelItem()) {
@@ -2365,19 +2366,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return false;
 					}
 
-					var parentItemID = item.parentItemID;
-					var parentIndex = this._rowMap[parentItemID];
-					let targetItem = this.getRow(row)?.ref;
+					// Can always drop into empty space
+					if (!targetRow) continue;
 					// Can only drop before or after a top-level item
-					if (targetItem && !targetItem.isTopLevelItem()) return false;
+					if (!targetRow.ref.isTopLevelItem()) return false;
 					// Cannot drop between an opened container and the first child row
-					if (orient == 1) {
-						if (this.getRow(row)?.isOpen) {
-							return false;
-						}
-					}
+					if (orient == 1 && targetRow.isOpen) return false;
 					// Cannot drop after the last child of a parent container
 					if (orient == -1) {
+						var parentIndex = this._rowMap[item.parentItemID];
 						var nextParentIndex = null;
 						for (var i = parentIndex + 1; i < this.rowCount; i++) {
 							if (this.getLevel(i) == 0) {
