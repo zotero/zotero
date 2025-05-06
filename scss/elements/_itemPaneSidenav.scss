@@ -108,13 +108,32 @@ item-pane-sidenav {
 			stroke: map.get($item-pane-sections, "notes");
 		}
 		
-		// Locate button
-		&[data-action="locate"] {
+		&[data-action="locate"], &[data-action="toggle-pane"] {
 			color: var(--fill-secondary);
+		}
+
+		&[data-action="locate"] {
 			@include svgicon-menu("go-to", "universal", "20");
-			
+
+			// Locate is flipped in RTL
 			&:-moz-locale-dir(rtl) {
 				transform: scaleX(-1);
+			}
+		}
+
+		&[data-action="toggle-pane"] {
+			@include svgicon-menu("sidebar", "universal", "20");
+
+			// ...And Toggle Item/Context Pane is flipped in LTR
+			&:-moz-locale-dir(ltr) {
+				transform: scaleX(-1);
+			}
+
+			// Hide in Stacked mode, since we show it in the toolbar instead
+			@include state("item-pane-sidenav.stacked") {
+				&, & + .divider {
+					display: none;
+				}
 			}
 		}
 

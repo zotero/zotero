@@ -122,6 +122,20 @@
 	margin-top: 1px;
 }
 
+#zotero-tb-toggle-item-pane-stacked {
+	// Hidden except in Stacked mode
+	display: none;
+}
+
+#main-window.stacked #zotero-toolbar-item-tree {
+	padding-inline-end: 0;
+	
+	#zotero-tb-toggle-item-pane-stacked { // Keep nested for specificity
+		display: flex;
+		margin-inline-start: 9px;
+	}
+}
+
 toolbox {
 	@media (-moz-platform: linux) {
 		background: Menu;

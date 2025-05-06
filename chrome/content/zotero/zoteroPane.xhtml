@@ -1344,6 +1344,15 @@
 														onkeydown="ZoteroPane_Local.handleSearchKeypress(this, event)"
 														oninput="ZoteroPane_Local.handleSearchInput(this, event)"
 														oncommand="ZoteroPane_Local.search()"/>
+												
+												<!-- Stacked mode only: Toggle Item Pane button -->
+												<toolbarbutton
+													id="zotero-tb-toggle-item-pane-stacked"
+													class="zotero-tb-button"
+													tabindex="-1"
+													data-l10n-id="toggle-item-pane"
+													oncommand="ZoteroPane.toggleItemPane()"
+												/>
 											</hbox>
 											
 										</toolbar>
