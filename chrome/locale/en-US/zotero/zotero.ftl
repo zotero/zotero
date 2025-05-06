@@ -13,16 +13,6 @@ command-or-control =
         [macos] { general-key-command }
         *[other] { general-key-control }
     }
-command-or-control-shift =
-    { PLATFORM() ->
-        [macos] { general-key-command }{ shortcut-separator }{ general-key-shift }
-        *[other] { general-key-control }{ shortcut-separator }{ general-key-shift }
-    }
-shortcut-separator =
-    { PLATFORM() ->
-        [macos] -
-        *[other] {" "}+{" "}
-    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
@@ -739,28 +729,3 @@ mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
-
-tabs-menu-row =
-    .aria-description = You are currently on tab { $index } of { $total }.
-    To search for tabs, type part of its name. To jump to the currently selected tab, press { return-or-enter }.
-    To navigate to the 
-    {
-        $isFirst ->
-            [true] last
-            *[other] previous
-    }
-    tab, press Up Arrow.
-    To navigate to the 
-    {
-        $isLast ->
-            [true] first
-            *[other] next
-    }
-    tab, press Down Arrow.
-    .aria-label = { $title }
-    
-tabs-menu-row-empty =
-    .aria-description = The search did not match any tabs. To search for tabs, type part of its name.
-tabs-menu-row-empty-label = No matching tabs
-    .aria-label = No matching tabs
-

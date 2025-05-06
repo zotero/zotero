@@ -14,13 +14,6 @@
 	display: grid;
 	align-items: center;
 	grid-template-columns: 1fr max-content max-content;
-
-	.zotero-keys-modifier {
-		text-align: end;
-		@media (-moz-platform: macos) {
-			margin-inline-end: 0;
-		}
-	}
 }
 
 #command-line-data-dir description {

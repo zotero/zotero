@@ -127,6 +127,17 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl		"CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles			"Get additional styles…">
 
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane		"Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.quicksearch				"Quick Search">
+<!ENTITY zotero.preferences.keys.newItem					"Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote					"Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleAllRead				"Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard		"Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard		"Import from Clipboard">
+<!ENTITY zotero.preferences.keys.changesTakeEffect             "Changes take effect after restart">
+
 <!ENTITY zotero.preferences.prefpane.proxies				"Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions			"Proxy Options">
@@ -152,6 +163,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced				"Advanced">
 <!ENTITY zotero.preferences.advanced.filesAndFolders		"Files and Folders">
+<!ENTITY zotero.preferences.advanced.keys					"Shortcuts">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 

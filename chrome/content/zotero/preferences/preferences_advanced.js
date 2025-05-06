@@ -831,6 +831,11 @@ Zotero_Preferences.Attachment_Base_Directory = {
 
 Zotero_Preferences.Keys = {
 	init: function () {
+		for (let label of document.querySelectorAll('#zotero-keys-grid .modifier')) {
+			// Display the appropriate modifier keys for the platform
+			label.textContent = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
+		}
+		
 		var textboxes = document.querySelectorAll('#zotero-keys-grid input');
 		for (let i=0; i<textboxes.length; i++) {
 			let textbox = textboxes[i];
