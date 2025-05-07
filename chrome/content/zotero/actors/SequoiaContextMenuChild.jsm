@@ -7,8 +7,6 @@ var EXPORTED_SYMBOLS = ["SequoiaContextMenuChild"];
  * See platformKeys.js for the chrome implementation.
  */
 class SequoiaContextMenuChild extends JSWindowActorChild {
-	_lastPreventedContextMenuTime = 0;
-	
 	async receiveMessage({ name }) {
 		switch (name) {
 			case "handleContextMenuEvent": {
