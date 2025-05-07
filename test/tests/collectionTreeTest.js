@@ -730,7 +730,9 @@ describe("Zotero.CollectionTree", function() {
 				var { row, orient } = targetRow;
 			}
 			
-			Zotero.DragDrop.currentDragSource = objectType == "item" && zp.itemsView.collectionTreeRow;
+			Zotero.DragDrop.currentDragSource = objectType == "item"
+				? zp.itemsView.collectionTreeRow
+				: null;
 			
 			if (!promise) {
 				promise = waitForNotifierEvent("add", objectType);
