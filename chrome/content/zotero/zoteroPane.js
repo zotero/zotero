@@ -2178,9 +2178,8 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isShare()) {
 			return false;
 		}
-		// If multiple items are selected, some are annotations and some are not, do nothing,
-		// since annotations have different treatment from other items,
-		// unless we are in the trash, in which case any selected item can be erased
+		// If multiple items are selected and only some are annotations, disallow delete unless we
+		// are in the trash, in which case any selected item can be erased
 		let selected = this.itemsView.getSelectedItems();
 		if (!selected.every(item => item.isAnnotation())
 			&& selected.some(item => item.isAnnotation())) {
