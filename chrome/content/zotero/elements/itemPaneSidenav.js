@@ -127,7 +127,7 @@
 		}
 
 		get _collapsed() {
-			return this.container?._collapsed;
+			return !!this.container?._collapsed;
 		}
 
 		set _collapsed(val) {

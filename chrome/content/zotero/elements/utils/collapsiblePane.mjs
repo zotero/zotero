@@ -30,10 +30,11 @@
  * @returns {boolean}
  */
 export function isPaneCollapsed(pane) {
-	if (pane.previousElementSibling?.localName !== 'splitter') {
+	let collapsibleParent = pane.closest('splitter:not([hidden="true"]) + *');
+	if (collapsibleParent.previousElementSibling?.localName !== 'splitter') {
 		return false;
 	}
-	return pane.getAttribute('collapsed') === 'true';
+	return collapsibleParent.getAttribute('collapsed') === 'true';
 }
 
 /**
@@ -43,20 +44,21 @@ export function isPaneCollapsed(pane) {
  * @param {boolean} collapsed
  */
 export function setPaneCollapsed(pane, collapsed) {
-	let splitter = pane.previousElementSibling;
-	if (splitter.localName !== 'splitter') {
+	let collapsibleParent = pane.closest('splitter:not([hidden="true"]) + *');
+	if (!collapsibleParent) {
 		return;
 	}
+	let splitter = collapsibleParent.previousElementSibling;
 
 	if (collapsed) {
-		pane.setAttribute('collapsed', 'true');
-		pane.removeAttribute('width');
-		pane.removeAttribute('height');
+		collapsibleParent.setAttribute('collapsed', 'true');
+		collapsibleParent.removeAttribute('width');
+		collapsibleParent.removeAttribute('height');
 		splitter.setAttribute('state', 'collapsed');
 		splitter.setAttribute('substate', 'after');
 	}
 	else {
-		pane.removeAttribute('collapsed');
+		collapsibleParent.removeAttribute('collapsed');
 		splitter.setAttribute('state', '');
 		splitter.setAttribute('substate', 'after');
 	}

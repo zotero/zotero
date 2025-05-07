@@ -164,7 +164,7 @@
 		 * @returns {boolean}
 		 */
 		get _collapsed() {
-			let parentPane = this.closest('splitter:not([hidden="true"]) + *');
+			let parentPane = this.closest('item-pane, context-pane');
 			if (!parentPane) {
 				return false;
 			}
@@ -176,7 +176,7 @@
 		 * @param {boolean} val
 		 */
 		set _collapsed(val) {
-			let parentPane = this.closest('splitter:not([hidden="true"]) + *');
+			let parentPane = this.closest('item-pane, context-pane');
 			if (!parentPane) {
 				return;
 			}
