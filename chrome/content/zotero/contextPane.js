@@ -145,6 +145,9 @@ var ZoteroContextPane = new function () {
 			// needed for standard layout
 			_contextPane.style.width = 'auto';
 			_contextPaneInner.style.removeProperty("min-height");
+
+			// Propagate state to standard splitter
+			_contextPaneSplitter.setAttribute('state', this.collapsed ? 'collapsed' : 'open');
 		}
 		else {
 			_contextPaneSplitter.setAttribute('hidden', false);
@@ -160,6 +163,9 @@ var ZoteroContextPane = new function () {
 			// force it to occupy all height available
 			_contextPaneInner.style.minHeight = `100%`;
 			_contextPane.style.width = `${_contextPane.getAttribute("width")}px`;
+
+			// Propagate state to stacked splitter
+			_contextPaneSplitterStacked.setAttribute('state', this.collapsed ? 'collapsed' : 'open');
 		}
 		
 		Zotero.Reader.setContextPaneOpen(!this.collapsed);
