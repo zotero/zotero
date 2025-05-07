@@ -33,7 +33,8 @@ annotation-items-pane {
 	collapsible-section > .head .title-box .summary {
 		opacity: 1 !important;
 		width: 0;
-		white-space: nowrap;
+		white-space: wrap;
+  		word-break: break-all;
 		display: inline;
 	}
 
