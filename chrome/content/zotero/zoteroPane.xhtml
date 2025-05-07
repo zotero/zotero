@@ -656,11 +656,6 @@
 										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
 								</menupopup>
 							</menu>
-							<menuitem id="show-all-tabs"
-								data-l10n-id="menu-view-show-all-tabs"
-								command="cmd_zotero_showAllTabs"
-								key="key_showAllTabs"
-							/>
 							<menuseparator class="menu-type-library" />
 							<menu id="column-picker-submenu"
 								  class="menu-type-library"
@@ -680,6 +675,12 @@
 								label="&recursiveCollections.label;"
 								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"
 								type="checkbox"
+							/>
+							<menuseparator/>
+							<menuitem id="show-all-tabs"
+								data-l10n-id="menu-view-show-all-tabs"
+								command="cmd_zotero_showAllTabs"
+								key="key_showAllTabs"
 							/>
 						</menupopup>
 					</menu>
