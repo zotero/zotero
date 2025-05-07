@@ -127,7 +127,7 @@
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
 		
-		<command id="cmd_zotero_showAllTabs" oncommand="Zotero_Tabs.showTabsMenu()"/>
+		<command id="cmd_zotero_showTabsMenu" oncommand="Zotero_Tabs.showTabsMenu()"/>
 	</commandset>
 
 	<commandset id="macCommandSet"> <!-- was mainCommandSet -->
@@ -178,8 +178,8 @@
 				modifiers="accel,shift"/>
 		<key id="key_back"/>
 		<key id="key_forward"/>
-		<key id="key_showAllTabs"
-				command="cmd_zotero_showAllTabs"
+		<key id="key_showTabsMenu"
+				command="cmd_zotero_showTabsMenu"
 				modifiers="accel"/>
 	</keyset>
 
@@ -677,10 +677,10 @@
 								type="checkbox"
 							/>
 							<menuseparator/>
-							<menuitem id="show-all-tabs"
+							<menuitem id="show-tabs-menu"
 								data-l10n-id="menu-show-tabs-menu"
-								command="cmd_zotero_showAllTabs"
-								key="key_showAllTabs"
+								command="cmd_zotero_showTabsMenu"
+								key="key_showTabsMenu"
 							/>
 						</menupopup>
 					</menu>
