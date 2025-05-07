@@ -420,7 +420,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	},
 
 	updateFocus() {
-		(this.wizard.currentPage.querySelector('radiogroup:not([disabled]),checkbox:not([disabled])') ?? this.wizard.currentPage).focus();
+		Services.focus.moveFocus(window, null, Services.focus.MOVEFOCUS_FIRST, 0);
 	},
 
 	async startImport() {
