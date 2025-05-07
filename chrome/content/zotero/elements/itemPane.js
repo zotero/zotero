@@ -404,7 +404,7 @@
 		renderAnnotationsHead(data) {
 			let { doc, append } = data;
 			let button = doc.createXULElement("button");
-			button.disabled = this.collectionTreeRow.isTrash();
+			button.disabled = !this.collectionTreeRow.editable;
 			button.id = 'zotero-item-pane-note-from-annotations';
 			if (Zotero.Items.getTopLevel(this.data).length == 1) {
 				button.label = Zotero.getString('pane.items.menu.addNoteFromAnnotations');
