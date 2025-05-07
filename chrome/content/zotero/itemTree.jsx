@@ -2374,9 +2374,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (orient == 1 && targetRow.isOpen) return false;
 					// Cannot drop after the last child of a parent container
 					if (orient == -1) {
-						var parentIndex = this._rowMap[item.parentItemID];
-						var nextParentIndex = null;
-						for (var i = parentIndex + 1; i < this.rowCount; i++) {
+						let parentIndex = this._rowMap[item.parentItemID];
+						let nextParentIndex = null;
+						for (let i = parentIndex + 1; i < this.rowCount; i++) {
 							if (this.getLevel(i) == 0) {
 								nextParentIndex = i;
 								break;
