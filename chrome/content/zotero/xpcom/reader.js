@@ -669,6 +669,11 @@ class ReaderInstance {
 		setTimeout(() => this._iframeWindow.focus());
 	}
 
+	async setContextPaneOpen(open) {
+		await this._initPromise;
+		this._internalReader.setContextPaneOpen(open);
+	}
+
 	async setBottomPlaceholderHeight(height) {
 		await this._initPromise;
 		this._internalReader.setBottomPlaceholderHeight(height);
