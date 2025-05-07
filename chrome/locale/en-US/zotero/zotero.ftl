@@ -96,6 +96,9 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+
 menu-edit-copy-annotation =
     .label = { $count ->
         [one] Copy Annotation
