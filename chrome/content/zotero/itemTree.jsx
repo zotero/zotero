@@ -2345,7 +2345,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			// In library, allow children to be dragged out of parent
 			else if (collectionTreeRow.isLibrary(true) || collectionTreeRow.isCollection()) {
-				let targetRow = row !== -1 ? this.getRow(row) : null;
+				let targetRow = row != -1 ? this.getRow(row) : null;
 				for (let item of items) {
 					// Don't allow drag if any top-level items
 					if (item.isTopLevelItem()) {
