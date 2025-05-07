@@ -25,6 +25,10 @@
 
 
 {
+	let { isPaneCollapsed, setPaneCollapsed } = ChromeUtils.importESModule(
+		'chrome://zotero/content/elements/utils/collapsiblePane.mjs'
+	);
+	
 	class ItemPane extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<deck id="zotero-item-pane-content" class="zotero-item-pane-content" selectedIndex="0" flex="1">
@@ -105,6 +109,14 @@
 		 */
 		set mode(type) {
 			this.setAttribute("view-type", type);
+		}
+
+		get collapsed() {
+			return isPaneCollapsed(this);
+		}
+
+		set collapsed(val) {
+			setPaneCollapsed(this, val);
 		}
 
 		render() {

@@ -25,6 +25,10 @@
 
 
 {
+	let { isPaneCollapsed, setPaneCollapsed } = ChromeUtils.importESModule(
+		'chrome://zotero/content/elements/utils/collapsiblePane.mjs'
+	);
+
 	class ContextPane extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<deck id="zotero-context-pane-deck" flex="1" selectedIndex="0">
@@ -61,6 +65,14 @@
 		get activeEditor() {
 			let currentContext = this._getCurrentNotesContext();
 			return currentContext?._getCurrentEditor();
+		}
+
+		get collapsed() {
+			return isPaneCollapsed(this);
+		}
+
+		set collapsed(val) {
+			setPaneCollapsed(this, val);
 		}
 
 		init() {
@@ -329,9 +341,7 @@
 		}
 	
 		handleFocus() {
-			let splitter = ZoteroContextPane.splitter;
-	
-			if (splitter.getAttribute('state') != 'collapsed') {
+			if (!this.collapsed) {
 				if (this.mode == "item") {
 					let header = this._itemPaneDeck.selectedPanel.querySelector("item-pane-header");
 					// Focus the first focusable node after header
