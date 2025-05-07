@@ -98,6 +98,10 @@ const ZoteroStandalone = new function() {
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
 			document.getElementById('key_showTabsMenu')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('showTabsMenu'));
+			// Force menu to update with shortcut key at startup -- as of fx128, this is necessary
+			// to get the shortcut to reliably appear for the menu item without switching tabs
+			document.getElementById('show-tabs-menu').hidden = true;
+			document.getElementById('show-tabs-menu').hidden = false;
 			
 			if (Zotero.isMac) {
 				document.getElementById('menu_openHelp').setAttribute('key', 'key_openHelpMac');
