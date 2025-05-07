@@ -2158,4 +2158,159 @@ describe("Item pane", function () {
 			assert.equal(win.document.querySelector("annotation-items-pane annotation-row .quote").textContent, "Updated");
 		});
 	});
+
+	describe("Collapsing", function () {
+		function isCollapsed() {
+			if (Zotero_Tabs.selectedType === 'reader') {
+				return ZoteroContextPane.collapsed;
+			}
+			else {
+				return ZoteroPane.itemPane.collapsed;
+			}
+		}
+		
+		function getVisibleToggle() {
+			let isVisible = el => el
+				&& !!el.clientWidth
+				&& getComputedStyle(el).visibility === 'visible'
+				// Really over the top, but the visibility of deck descendants
+				// with a `display set in CSS seemingly can't be detected any
+				// way but this:
+				&& (!el.closest('deck') || el.closest('deck').selectedPanel === el.closest('deck > *'));
+			
+			if (isVisible(doc.querySelector('#zotero-view-item-sidenav toolbarbutton[data-action="toggle-pane"]'))) {
+				return 'item pane sidenav';
+			}
+			
+			if (isVisible(doc.querySelector('#zotero-context-pane-sidenav toolbarbutton[data-action="toggle-pane"]'))) {
+				return 'context pane sidenav';
+			}
+			
+			if (isVisible(doc.querySelector('#zotero-tb-toggle-item-pane-stacked'))) {
+				return 'item tree toolbar';
+			}
+			
+			if (
+				Zotero.Reader._readers.some(
+					r => isVisible(r._iframe.contentDocument.querySelector('.toolbar-button.context-pane-toggle'))
+				)
+			) {
+				return 'reader toolbar';
+			}
+			
+			return 'none';
+		}
+		
+		async function waitForToggle(togglePosition) {
+			while (getVisibleToggle() !== togglePosition) {
+				await Zotero.Promise.delay(100);
+			}
+		}
+		
+		let attachment;
+		
+		before(async () => {
+			attachment = await importPDFAttachment();
+		});
+		
+		beforeEach(() => {
+			// Make the window wide enough not to automatically enter Stacked mode
+			win.resizeTo(1000, 800);
+			Zotero.Prefs.set('layout', 'standard');
+			
+			Zotero_Tabs.select('zotero-pane');
+			ZoteroPane.itemPane.collapsed = false;
+			ZoteroContextPane.collapsed = true;
+		});
+
+		it("should initially show sidenav toggle", async function () {
+			assert.isFalse(isCollapsed());
+			assert.equal(getVisibleToggle(), 'item pane sidenav');
+		});
+
+		it("should still show sidenav toggle after collapse in library", function () {
+			assert.isFalse(isCollapsed());
+			ZoteroPane.itemPane.collapsed = true;
+			assert.isTrue(isCollapsed());
+			assert.equal(getVisibleToggle(), 'item pane sidenav');
+		});
+
+		it("should switch to item tree toolbar toggle in Stacked mode", function () {
+			assert.isFalse(isCollapsed());
+			Zotero.Prefs.set('layout', 'stacked');
+			assert.isFalse(isCollapsed());
+			assert.equal(getVisibleToggle(), 'item tree toolbar');
+		});
+
+		it("should remain visible in Stacked mode after collapsing", function () {
+			Zotero.Prefs.set('layout', 'stacked');
+			ZoteroPane.itemPane.collapsed = true;
+			assert.isTrue(isCollapsed());
+			assert.equal(getVisibleToggle(), 'item tree toolbar');
+		});
+
+		it("should keep collapsed state after switching from Standard to Stacked", function () {
+			assert.isFalse(isCollapsed());
+			ZoteroPane.itemPane.collapsed = true;
+			assert.isTrue(isCollapsed());
+			Zotero.Prefs.set('layout', 'stacked');
+			assert.isTrue(isCollapsed());
+		});
+
+		it("should keep collapsed state after switching from Stacked to Standard", function () {
+			Zotero.Prefs.set('layout', 'stacked');
+			assert.isFalse(isCollapsed());
+			ZoteroPane.itemPane.collapsed = true;
+			assert.isTrue(isCollapsed());
+			Zotero.Prefs.set('layout', 'standard');
+			assert.isTrue(isCollapsed());
+		});
+
+		it("should show in reader toolbar when collapsed in Standard mode", async function () {
+			await ZoteroPane.viewItems([attachment]);
+			await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)._waitForReader();
+
+			assert.isTrue(isCollapsed());
+			await waitForToggle('reader toolbar');
+		});
+
+		it("should show in reader sidenav when expanded in Standard mode", async function () {
+			await ZoteroPane.viewItems([attachment]);
+			await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)._waitForReader();
+
+			ZoteroContextPane.collapsed = false;
+			await waitForToggle('context pane sidenav');
+		});
+
+		it("should return to reader toolbar after collapsing in Standard mode", async function () {
+			await ZoteroPane.viewItems([attachment]);
+			await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)._waitForReader();
+			
+			ZoteroContextPane.collapsed = false;
+			ZoteroContextPane.collapsed = true;
+			await waitForToggle('reader toolbar');
+		});
+
+		it("should show in reader toolbar when collapsed in Stacked mode", async function () {
+			await ZoteroPane.viewItems([attachment]);
+			await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)._waitForReader();
+
+			assert.isTrue(isCollapsed());
+			Zotero.Prefs.set('layout', 'stacked');
+			assert.isTrue(isCollapsed());
+			await waitForToggle('reader toolbar');
+		});
+
+		it("should stay in reader toolbar when expanded in Stacked mode", async function () {
+			await ZoteroPane.viewItems([attachment]);
+			await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)._waitForReader();
+
+			assert.isTrue(isCollapsed());
+			Zotero.Prefs.set('layout', 'stacked');
+			assert.isTrue(isCollapsed());
+			ZoteroContextPane.collapsed = false;
+			assert.isFalse(isCollapsed());
+			await waitForToggle('reader toolbar');
+		});
+	});
 });
