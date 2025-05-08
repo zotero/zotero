@@ -639,6 +639,7 @@ var ZoteroPane = new function () {
 			ZoteroPane.showPostUpgradeBanner();
 			ZoteroPane.showRetractionBanner();
 			ZoteroPane.showArchitectureWarning();
+			ZoteroPane.showFileRenamingBanner();
 			ZoteroPane.initSyncReminders(true);
 		});
 		
@@ -6746,6 +6747,34 @@ var ZoteroPane = new function () {
 		}
 	};
 
+	this.showFileRenamingBanner = function () {
+		if (Zotero.Prefs.get('autoRenameFiles.bannerShown')) {
+			return;
+		}
+		if (Zotero.Prefs.get('autoRenameFiles.done')) {
+			// If user had a custom `attachmentRenameTemplate` (now a synced
+			// setting), `autoRenameFiles.done` was set to `false` during
+			// migration. Otherwise, it's `true` (the default), and no banner
+			// is needed.
+			return;
+		}
+
+		document.getElementById('file-renaming-settings-action').onclick = () => {
+			Zotero.Utilities.Internal.openPreferences();
+			this.hideFileRenamingBanner();
+		};
+
+		this.document.getElementById('file-renaming-banner-close').onclick = () => {
+			this.hideFileRenamingBanner();
+		};
+
+		this.document.getElementById('file-renaming-banner-container').removeAttribute('collapsed');
+	};
+
+	this.hideFileRenamingBanner = function () {
+		document.getElementById('file-renaming-banner-container').setAttribute('collapsed', true);
+		Zotero.Prefs.set('autoRenameFiles.bannerShown', true);
+	};
 
 	/**
 	 * Sets the layout to either a three-vertical-pane layout and a layout where itemsPane is above itemPane
