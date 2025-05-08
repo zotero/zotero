@@ -107,20 +107,8 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		};
 
 		_handleAnnotationClick = () => {
-			// TODO: jump to annotations pane
-			let pane;
-			if (ZoteroContextPane) {
-				pane = ZoteroContextPane.sidenav?.container.querySelector(`:scope > [data-pane="attachment-annotations"]`);
-			}
-			if (pane) {
-				pane._section.open = true;
-			}
-			let win = Zotero.getMainWindow();
-			if (win) {
-				win.ZoteroPane.selectItem(this._attachment.id);
-				win.Zotero_Tabs.select('zotero-pane');
-				win.focus();
-			}
+			Zotero_Tabs.select('zotero-pane');
+			ZoteroPane.selectItems(this._attachment.getAnnotations().map(a => a.id));
 		};
 
 		_handleRemove = async () => {
