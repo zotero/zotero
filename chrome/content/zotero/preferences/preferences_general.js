@@ -249,7 +249,7 @@ Zotero_Preferences.General = {
 	},
 	
 	handleAutoRenameChange: function () {
-		if (!Zotero.Prefs.get('autoRenameFiles') && document.getElementById('auto-rename-files').checked) {
+		if (Zotero.Prefs.get('autoRenameFiles')) {
 			this.promptAutoRenameFiles();
 		}
 	},
