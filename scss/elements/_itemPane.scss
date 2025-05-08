@@ -9,21 +9,11 @@ item-pane {
 		min-height: $width-sidenav;
 		max-width: $width-sidenav;
 
-		&[view-type=note] {
-			min-width: 0;
-			width: 0px !important;
-		}
-
 		visibility: inherit;
 
 		&.stacked {
 			max-width: unset;
 			max-height: $width-sidenav;
-
-			&[view-type=note] {
-				min-height: 0;
-				height: 0px !important;
-			}
 		}
 
 		#zotero-item-pane-content {

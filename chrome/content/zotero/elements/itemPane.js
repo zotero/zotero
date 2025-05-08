@@ -121,7 +121,6 @@
 
 		render() {
 			if (!this.data) return false;
-			let hideSidenav = false;
 			let renderStatus = false;
 			// Only annotations selected
 			if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
@@ -136,7 +135,6 @@
 					renderStatus = this.renderMessage();
 				}
 				else if (item.isNote()) {
-					hideSidenav = true;
 					renderStatus = this.renderNoteEditor(item);
 				}
 				else {
@@ -147,7 +145,6 @@
 			else {
 				renderStatus = this.renderMessage();
 			}
-			this._sidenav.hidden = hideSidenav;
 			return renderStatus;
 		}
 
