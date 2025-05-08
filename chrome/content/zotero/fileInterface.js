@@ -242,7 +242,7 @@ var Zotero_File_Interface = new function() {
 	/*
 	 * exports items to clipboard
 	 */
-	function exportItemsToClipboard(items, format) {
+	function exportItemsToClipboard(items, format, annotationsToExport = []) {
 		function _translate(items, format, callback) {
 			let translation = new Zotero.Translate.Export();
 			translation.setItems(items.slice());
@@ -276,6 +276,8 @@ var Zotero_File_Interface = new function() {
 					// copy to clipboard
 					let transferable = Components.classes['@mozilla.org/widget/transferable;1']
 						.createInstance(Components.interfaces.nsITransferable);
+					// Important: without this, custom mime types like zotero/annotation do not work
+					transferable.init(window.docShell.QueryInterface(Components.interfaces.nsILoadContext));
 					let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
 						.getService(Components.interfaces.nsIClipboard);
 
@@ -293,6 +295,16 @@ var Zotero_File_Interface = new function() {
 					transferable.addDataFlavor('text/html');
 					transferable.setTransferData('text/html', str, html.length * 2);
 
+					// If annotations are being exported, add special zotero/annotation mimeType
+					// which note-editor uses to add citations on paste
+					if (annotationsToExport.length) {
+						let jsonAnnotations = JSON.stringify(annotationsToExport.map(item => Zotero.Annotations.toJSONSync(item, true)));
+						str = Components.classes["@mozilla.org/supports-string;1"]
+							.createInstance(Components.interfaces.nsISupportsString);
+						str.data = jsonAnnotations;
+						transferable.addDataFlavor("zotero/annotation");
+						transferable.setTransferData("zotero/annotation", str, jsonAnnotations.length * 2);
+					}
 					clipboardService.setData(
 						transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard
 					);
@@ -316,6 +328,26 @@ var Zotero_File_Interface = new function() {
 					.getService(Components.interfaces.nsIClipboardHelper)
 					.copyString(text.replace(/\r\n/g, '\n'));
 			});
+		}
+	}
+
+	this.getDataFromClipboard = function (mimeType) {
+		let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+			.createInstance(Components.interfaces.nsITransferable);
+		transferable.init(window.docShell.QueryInterface(Components.interfaces.nsILoadContext));
+		transferable.addDataFlavor(mimeType);
+		Services.clipboard.getData(transferable, Components.interfaces.nsIClipboard.kGlobalClipboard);
+
+		let data = {};
+		try {
+			transferable.getTransferData(mimeType, data);
+			if (data && data.value) {
+				return data.value.toString();
+			}
+			return null;
+		}
+		catch (e) {
+			return null;
 		}
 	}
 	

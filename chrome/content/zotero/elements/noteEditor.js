@@ -83,6 +83,18 @@
 						'zotero/item': event.dataTransfer.getData('zotero/item')
 					}, this._iframe.contentWindow);
 				}, true);
+
+				// If annotations are copies from itemTree, zotero/annotation will not
+				// be included in event.clipboardData, so we fetch it manually
+				// from the clipboard and provide it to the note-editor
+				this._iframe.contentWindow.addEventListener('paste', (event) => {
+					let stringifiedAnnotations = Zotero_File_Interface.getDataFromClipboard("zotero/annotation");
+					console.log('paste', stringifiedAnnotations);
+					if (!stringifiedAnnotations) return;
+					this._iframe.contentWindow.wrappedJSObject.clipboardData = Components.utils.cloneInto({
+						'zotero/annotation': stringifiedAnnotations,
+					}, this._iframe.contentWindow);
+				}, true);
 				this._initialized = true;
 			});
 			this.append(content);
