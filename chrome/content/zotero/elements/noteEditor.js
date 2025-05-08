@@ -89,7 +89,6 @@
 				// from the clipboard and provide it to the note-editor
 				this._iframe.contentWindow.addEventListener('paste', (event) => {
 					let stringifiedAnnotations = Zotero_File_Interface.getDataFromClipboard("zotero/annotation");
-					console.log('paste', stringifiedAnnotations);
 					if (!stringifiedAnnotations) return;
 					this._iframe.contentWindow.wrappedJSObject.clipboardData = Components.utils.cloneInto({
 						'zotero/annotation': stringifiedAnnotations,
