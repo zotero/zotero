@@ -299,8 +299,9 @@
 
 		_handleAddPopupShowing = () => {
 			let canAddAny = this.item?.isRegularItem() && this.item.library.editable;
-				addFile.disabled = addLink.disabled = !(canAddAny && this.item.library.filesEditable);
-				addWebLink.disabled = !canAddAny;
+			let [addFile, addLink, addWebLink] = this._addPopup.children;
+			addFile.disabled = addLink.disabled = !(canAddAny && this.item.library.filesEditable);
+			addWebLink.disabled = !canAddAny;
 		};
 
 		_handleAddFile = () => {
