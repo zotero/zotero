@@ -22,7 +22,10 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
+<vbox id="zotero-prefpane-general"
+	onload="Zotero_Preferences.General.init()"
+	onunload="Zotero_Preferences.General.uninit()"
+>
 	<vbox class="main-section">
 		<groupbox aria-labelledby="preferences-appearance-title">
 			<label><html:h2 id="preferences-appearance-title" data-l10n-id="preferences-appearance-title"/></label>
@@ -152,12 +155,19 @@
 					preference="extensions.zotero.autoRenameFiles.linked"
 					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"
 				/>
-
-				<button id="file-renaming-customize-button"
-					data-l10n-id="preferences-file-renaming-customize-button"
-					data-search-strings="preferences-file-renaming-format-title, preferences-file-renaming-format-template"
-					oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"
-				/>
+				<hbox id="file-renaming-buttons">
+					<button id="file-renaming-customize-button"
+						data-l10n-id="preferences-file-renaming-customize-button"
+						data-search-strings="preferences-file-renaming-format-title, preferences-file-renaming-format-template"
+						oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"
+					/>
+					<button
+						hidden="true"
+						id="file-renaming-general-rename-now"
+						data-l10n-id="preferences-file-renaming-rename-now"
+						oncommand="Zotero_Preferences.General.renameFilesNow()"
+					/>
+				</hbox>
 			</vbox>
 		</groupbox>
 		
