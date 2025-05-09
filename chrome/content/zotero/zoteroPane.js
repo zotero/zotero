@@ -6751,14 +6751,7 @@ var ZoteroPane = new function () {
 		if (Zotero.Prefs.get('autoRenameFiles.bannerShown')) {
 			return;
 		}
-		if (Zotero.Prefs.get('autoRenameFiles.done')) {
-			// If user had a custom `attachmentRenameTemplate` (now a synced
-			// setting), `autoRenameFiles.done` was set to `false` during
-			// migration. Otherwise, it's `true` (the default), and no banner
-			// is needed.
-			return;
-		}
-
+		
 		document.getElementById('file-renaming-settings-action').onclick = () => {
 			Zotero.Utilities.Internal.openPreferences();
 			this.hideFileRenamingBanner();
