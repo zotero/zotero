@@ -56,6 +56,7 @@ general-and = and
 general-et-al = et al.
 general-previous = Previous
 general-next = Next
+general-learn-more = Learn More
 
 general-red = Red
 general-orange = Orange
@@ -777,8 +778,7 @@ mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
 
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
-file-renaming-banner-button =
-    .label = { general-open-settings }
+file-renaming-banner-link = { general-learn-more }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 

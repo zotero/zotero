@@ -6752,9 +6752,8 @@ var ZoteroPane = new function () {
 			return;
 		}
 		
-		document.getElementById('file-renaming-settings-action').onclick = () => {
-			Zotero.Utilities.Internal.openPreferences();
-			this.hideFileRenamingBanner();
+		document.getElementById('file-renaming-settings-link').onclick = () => {
+			Zotero.launchURL("https://www.zotero.org/support/file_renaming");
 		};
 
 		this.document.getElementById('file-renaming-banner-close').onclick = () => {
