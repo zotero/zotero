@@ -84,8 +84,6 @@ export class CitationDialogPopupsHandler {
 			if (this._getNode("#itemDetails").state !== "open") return;
 			this.captureItemDetailsKeyDown(event);
 		}, true);
-		// Handle remaining keypress events with a usual bubbling listener
-		this._getNode("#itemDetails").addEventListener("keypress", this.handleItemDetailsKeypress.bind(this));
 	}
 
 	openItemDetails(dialogReferenceID, item, citationItem, itemDescription) {
@@ -179,13 +177,6 @@ export class CitationDialogPopupsHandler {
 			this.discardItemDetailsEdits = true;
 			event.stopPropagation();
 			event.preventDefault();
-		}
-	}
-
-	handleItemDetailsKeypress(event) {
-		// Enter on a an input will save changes and hide the popup
-		if (event.key == "Enter" && ["input"].includes(event.target.tagName) && !event.target.getAttribute("type")) {
-			this._getNode("#itemDetails").hidePopup();
 		}
 	}
 

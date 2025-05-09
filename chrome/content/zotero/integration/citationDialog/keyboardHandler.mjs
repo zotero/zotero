@@ -49,8 +49,8 @@ export class CitationDialogKeyboardHandler {
 	// lower-level components
 	captureKeydown(event) {
 		let cmdOrCtrl = Zotero.isMac ? event.metaKey : event.ctrlKey;
-		// Cmd/Ctrl-Enter will always accept the dialog regardless of the target (unless within a panel)
-		if (event.key == "Enter" && cmdOrCtrl && !event.target.closest("panel")) {
+		// Cmd/Ctrl-Enter will always accept the dialog regardless of the target
+		if (event.key == "Enter" && cmdOrCtrl) {
 			this.doc.dispatchEvent(new CustomEvent("dialog-accepted"));
 			event.stopPropagation();
 			event.preventDefault();
@@ -91,6 +91,11 @@ export class CitationDialogKeyboardHandler {
 		if (["Enter", " "].includes(event.key) && isKeyboardClickable) {
 			tgt.click();
 			handled = true;
+		}
+		// Unhandled Enter in a panel will close it
+		else if (event.key == "Enter" && tgt.closest("panel")) {
+			handled = true;
+			tgt.closest("panel").hidePopup();
 		}
 		// Unhandled Enter will accept the existing dialog's state
 		else if (event.key == "Enter" && !tgt.closest("panel")) {
