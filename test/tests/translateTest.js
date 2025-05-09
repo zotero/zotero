@@ -1423,6 +1423,23 @@ describe("Zotero.Translate", function() {
 			assert.equal(newItems[0].getField('title'), 'Untitled');
 		});
 
+		it('should return detection result passed to Zotero.done() synchronously', async function () {
+			var translator = buildDummyTranslator('web', `
+				function detectWeb() {
+					Zotero.done('book');
+				}
+			`);
+
+			var translate = new Zotero.Translate.Web();
+			translate.setDocument(doc);
+			// This is the "internal hack" that Scaffold and TranslatorTester use
+			translate._potentialTranslators = [translator];
+			translate._foundTranslators = [];
+			translate._currentState = "detect";
+			let detectResult = await translate._detect();
+			assert.equal(detectResult, "book");
+		});
+
 		it('should support async doWeb', async function () {
 			var translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
