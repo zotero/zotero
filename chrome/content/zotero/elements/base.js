@@ -23,47 +23,63 @@
     ***** END LICENSE BLOCK *****
 */
 
-class XULElementBase extends XULElement {
-	initialized = false;
-	
-	/**
-	 * @return {DocumentFragment | null}
-	 */
-	get content() {
-		return null;
-	}
+/**
+ * Add utility functions to XULElement or a subclass.
+ * @param {{ new(): XULElement }} Class
+ */
+function XULElementMixin(Class) {
+	return class extends Class {
+		initialized = false;
 
-	init() {}
-
-	destroy() {}
-
-	connectedCallback() {
-		let content = this.content;
-		if (content) {
-			content = document.importNode(content, true);
-			this.append(content);
+		/**
+		 * @return {DocumentFragment | null}
+		 */
+		get content() {
+			return null;
 		}
 
-		MozXULElement.insertFTLIfNeeded("branding/brand.ftl");
-		MozXULElement.insertFTLIfNeeded("zotero.ftl");
-		if (document.l10n && this.shadowRoot) {
-			document.l10n.connectRoot(this.shadowRoot);
+		init() {}
+
+		destroy() {}
+
+		connectedCallback() {
+			if (typeof super.connectedCallback === 'function') {
+				super.connectedCallback();
+			}
+			
+			let content = this.content;
+			if (content) {
+				content = document.importNode(content, true);
+				this.append(content);
+			}
+
+			MozXULElement.insertFTLIfNeeded("branding/brand.ftl");
+			MozXULElement.insertFTLIfNeeded("zotero.ftl");
+			if (document.l10n && this.shadowRoot) {
+				document.l10n.connectRoot(this.shadowRoot);
+			}
+
+			window.addEventListener("unload", this._handleWindowUnload);
+
+			this.initialized = true;
+			this.init();
 		}
 
-		window.addEventListener("unload", this._handleWindowUnload);
+		disconnectedCallback() {
+			if (typeof super.disconnectedCallback === 'function') {
+				super.disconnectedCallback();
+			}
 
-		this.initialized = true;
-		this.init();
-	}
+			this.replaceChildren();
+			this.destroy();
+			window.removeEventListener("unload", this._handleWindowUnload);
+			this.initialized = false;
+		}
 
-	disconnectedCallback() {
-		this.replaceChildren();
-		this.destroy();
-		window.removeEventListener("unload", this._handleWindowUnload);
-		this.initialized = false;
-	}
-
-	_handleWindowUnload = () => {
-		this.disconnectedCallback();
+		_handleWindowUnload = () => {
+			this.disconnectedCallback();
+		};
 	};
 }
+
+var XULElementBase = XULElementMixin(XULElement);

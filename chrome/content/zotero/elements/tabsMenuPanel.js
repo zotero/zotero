@@ -30,7 +30,7 @@
 		delete document.createXULElement("panel");
 	}
 	const XULPanelElement = customElements.get("panel");
-	class TabsMenuPanel extends XULPanelElement {
+	class TabsMenuPanel extends XULElementMixin(XULPanelElement) {
 		content = MozXULElement.parseXULToFragment(`
 		<vbox id="zotero-tabs-menu-wrapper" class="focus-states-target">
 			<html:input id="zotero-tabs-menu-filter"
@@ -87,36 +87,6 @@
 
 		show(elem) {
 			this.openPopup(elem, "after_start", -20, -2, false, false);
-		}
-
-		// From XULElementBase
-		connectedCallback() {
-			super.connectedCallback();
-			let content = this.content;
-			if (content) {
-				content = document.importNode(content, true);
-				this.append(content);
-			}
-
-			MozXULElement.insertFTLIfNeeded("branding/brand.ftl");
-			MozXULElement.insertFTLIfNeeded("zotero.ftl");
-			if (document.l10n && this.shadowRoot) {
-				document.l10n.connectRoot(this.shadowRoot);
-			}
-
-			window.addEventListener("unload", this._handleWindowUnload);
-
-			this.initialized = true;
-			this.init();
-		}
-
-		// From XULElementBase
-		disconnectedCallback() {
-			super.disconnectedCallback();
-			this.replaceChildren();
-			this.destroy();
-			window.removeEventListener("unload", this._handleWindowUnload);
-			this.initialized = false;
 		}
 
 		/**
@@ -373,11 +343,6 @@
 			}
 			this._filterInput.focus();
 		}
-
-		// From XULElementBase
-		_handleWindowUnload = () => {
-			this.disconnectedCallback();
-		};
 
 		_handleShowing = (event) => {
 			if (event.originalTarget !== this) return;
