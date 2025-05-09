@@ -31,7 +31,7 @@
  */
 export function isPaneCollapsed(pane) {
 	let collapsibleParent = pane.closest('splitter:not([hidden="true"]) + *');
-	if (collapsibleParent.previousElementSibling?.localName !== 'splitter') {
+	if (!collapsibleParent) {
 		return false;
 	}
 	return collapsibleParent.getAttribute('collapsed') === 'true';
