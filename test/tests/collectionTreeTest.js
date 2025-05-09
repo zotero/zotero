@@ -730,7 +730,9 @@ describe("Zotero.CollectionTree", function() {
 				var { row, orient } = targetRow;
 			}
 			
-			Zotero.DragDrop.currentDragSource = objectType == "item" && zp.itemsView.collectionTreeRow;
+			Zotero.DragDrop.currentDragSource = objectType == "item"
+				? zp.itemsView.collectionTreeRow
+				: null;
 			
 			if (!promise) {
 				promise = waitForNotifierEvent("add", objectType);
@@ -760,6 +762,9 @@ describe("Zotero.CollectionTree", function() {
 		var canDrop = Zotero.Promise.coroutine(function* (objectType, targetRowID, ids) {
 			var row = cv.getRowIndexByID(targetRowID);
 			
+			Zotero.DragDrop.currentDragSource = objectType == "item"
+				? zp.itemsView.collectionTreeRow
+				: null;
 			var dt = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
@@ -774,6 +779,7 @@ describe("Zotero.CollectionTree", function() {
 			if (canDrop) {
 				canDrop = yield cv.canDropCheckAsync(row, 0, dt);
 			}
+			Zotero.DragDrop.currentDragSource = null;
 			return canDrop;
 		});
 		

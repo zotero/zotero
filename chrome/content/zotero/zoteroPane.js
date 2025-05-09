@@ -2186,12 +2186,12 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isShare()) {
 			return false;
 		}
-		// If multiple items are selected, some are annotations and some are not, do nothing,
-		// since annotations have different treatment from other items
+		// If multiple items are selected and only some are annotations, disallow delete unless we
+		// are in the trash, in which case any selected item can be erased
 		let selected = this.itemsView.getSelectedItems();
 		if (!selected.every(item => item.isAnnotation())
 			&& selected.some(item => item.isAnnotation())) {
-			return false;
+			return collectionTreeRow.isTrash();
 		}
 		return true;
 	};
@@ -4037,10 +4037,12 @@ var ZoteroPane = new function()
 		// Only keep annotation-specific options if annotations are selected
 		let annotationsSelected = items.some(item => item.isAnnotation());
 		if (annotationsSelected) {
+			let menuItemsForAnnotations = [
+				'createNoteFromAnnotations',
+				'deleteFromLibrary'
+			];
 			for (let i in m) {
-				if (i == 'createNoteFromAnnotations') {
-					continue;
-				}
+				if (menuItemsForAnnotations.includes(i)) continue;
 				show.delete(m[i]);
 			}
 		}

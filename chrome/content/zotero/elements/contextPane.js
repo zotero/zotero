@@ -312,12 +312,15 @@
 				return;
 			}
 			libraryID = item.libraryID;
-			let editable = Zotero.Libraries.get(libraryID).editable;
 			let parentID = item.parentID;
 	
 			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
 			
 			let targetItem = parentID ? Zotero.Items.get(parentID) : item;
+			
+			let editable = Zotero.Libraries.get(libraryID).editable
+				// If the parent item or the attachment itself is in trash, itemPane is not editable
+				&& !item.deleted && !targetItem.deleted;
 	
 			let itemDetails = document.createXULElement('item-details');
 			itemDetails.id = tabID + '-context';

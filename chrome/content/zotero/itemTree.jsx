@@ -554,9 +554,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 					let row = this.getRowIndexByID(id);
 					if (row === false) continue;
 					let item = Zotero.Items.get(id);
-					// Remove parent row if it isn't deleted and doesn't have any deleted children
-					// (shown by the numChildren including deleted being the same as numChildren not including deleted)
-					if (!item.deleted && (!item.isRegularItem() || item.numChildren(true) == item.numChildren(false))) {
+					let isParentTrashed = item.parentItemID
+						? Zotero.Items.get(item.parentItemID).deleted
+						: false;
+					// Remove parent row if it isn't deleted, its parent isn't deleted, and it
+					// doesn't have any deleted children (shown by numChildren including deleted
+					// being the same as numChildren not including deleted)
+					if (!item.deleted && !isParentTrashed
+							&& (!item.isRegularItem() || item.numChildren(true) == item.numChildren(false))) {
 						rows.push(row);
 						// And all its children in the tree
 						for (let child = row + 1; child < this.rowCount && this.getLevel(child) > this.getLevel(row); child++) {

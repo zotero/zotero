@@ -433,6 +433,7 @@
 			else {
 				fileNameRow.hidden = true;
 			}
+			this._id("title").toggleAttribute("readonly", (!this.editable || !fileExists));
 			this._id("fileName").toggleAttribute("readonly", (!this.editable || !fileExists));
 
 			// Page count
