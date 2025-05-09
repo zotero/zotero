@@ -776,7 +776,7 @@ mac-word-plugin-install-remind-later-button =
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
 
-file-renaming-banner-message = Zotero now automatically keeps filenames in sync as you make changes to items.
+file-renaming-banner-message = { -app-name } now automatically keeps filenames in sync as you make changes to items.
 file-renaming-banner-button =
     .label = { general-open-settings }
 
