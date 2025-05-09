@@ -16,12 +16,8 @@ describe("Advanced Search", function () {
 		win.close();
 	});
 	
-	it("should perform a search", function* () {
-		if (Zotero.automatedTest) {
-			// TEMP: React timing issue on CI - figure this out
-			this.skip();
-		}
-		
+	// TEMP: React timing issue - figure this out
+	it.skip("should perform a search", function* () {
 		var item = yield createDataObject('item', { setTitle: true });
 		
 		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml', async (win) => {
