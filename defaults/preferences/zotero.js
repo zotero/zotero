@@ -37,6 +37,7 @@ pref("extensions.zotero.autoRenameFiles.linked", false);
 pref("extensions.zotero.autoRenameFiles.fileTypes", "application/pdf,application/epub+zip");
 pref("extensions.zotero.autoRenameFiles.onMetadataChange", true);
 pref("extensions.zotero.autoRenameFiles.done", true);
+pref("extensions.zotero.autoRenameFiles.bannerShown", true);
 pref("extensions.zotero.capitalizeTitles", false);
 pref("extensions.zotero.launchNonNativeFiles", false);
 pref("extensions.zotero.naturalSorting", true);
