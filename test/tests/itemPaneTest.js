@@ -56,7 +56,10 @@ describe("Item pane", function () {
 		ZoteroContextPane = win.ZoteroContextPane;
 		itemsView = win.ZoteroPane.itemsView;
 	});
+	
 	after(function () {
+		Zotero_Tabs.select("zotero-pane");
+		Zotero_Tabs.closeAll();
 		win.close();
 	});
 
