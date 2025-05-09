@@ -25,6 +25,10 @@
 
 
 {
+	let { isPaneCollapsed, setPaneCollapsed } = ChromeUtils.importESModule(
+		'chrome://zotero/content/elements/utils/collapsiblePane.mjs'
+	);
+	
 	class ItemPane extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<deck id="zotero-item-pane-content" class="zotero-item-pane-content" selectedIndex="0" flex="1">
@@ -107,9 +111,16 @@
 			this.setAttribute("view-type", type);
 		}
 
+		get collapsed() {
+			return isPaneCollapsed(this);
+		}
+
+		set collapsed(val) {
+			setPaneCollapsed(this, val);
+		}
+
 		render() {
 			if (!this.data) return false;
-			let hideSidenav = false;
 			let renderStatus = false;
 			// Only annotations selected
 			if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
@@ -124,7 +135,6 @@
 					renderStatus = this.renderMessage();
 				}
 				else if (item.isNote()) {
-					hideSidenav = true;
 					renderStatus = this.renderNoteEditor(item);
 				}
 				else {
@@ -135,7 +145,6 @@
 			else {
 				renderStatus = this.renderMessage();
 			}
-			this._sidenav.hidden = hideSidenav;
 			return renderStatus;
 		}
 

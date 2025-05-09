@@ -1,0 +1,5 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 15V16.25L14 16.25V15L6 15Z" fill="context-fill"/>
+<path d="M6 12.75V14L12 14V12.75L6 12.75Z" fill="context-fill"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M17 17.75C17 18.4404 16.4404 19 15.75 19L4.25 19C3.55964 19 3 18.4404 3 17.75L3 2.25C3 1.55964 3.55964 1 4.25 1L15.75 1C16.4404 1 17 1.55964 17 2.25L17 17.75ZM15.75 2.25L15.75 10L4.25 10L4.25 2.25L15.75 2.25ZM15.75 17.75L15.75 11.25L4.25 11.25L4.25 17.75L15.75 17.75Z" fill="context-fill"/>
+</svg>

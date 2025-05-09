@@ -161,14 +161,14 @@ var ZoteroPane = new function()
 	};
 
 	function setUpKeyboardNavigation() {
-		let collectionTreeToolbar = this.document.getElementById("zotero-toolbar-collection-tree");
-		let itemTreeToolbar = this.document.getElementById("zotero-toolbar-item-tree");
-		let titleBar = this.document.getElementById("zotero-title-bar");
-		let itemTree = this.document.getElementById("zotero-items-tree");
-		let collectionsTree = this.document.getElementById("zotero-collections-tree");
-		let tagSelector = this.document.getElementById("zotero-tag-selector");
-		let tagContainer = this.document.getElementById('zotero-tag-selector-container');
-		let collectionsPane = this.document.getElementById("zotero-collections-pane");
+		let collectionTreeToolbar = document.getElementById("zotero-toolbar-collection-tree");
+		let itemTreeToolbar = document.getElementById("zotero-toolbar-item-tree");
+		let titleBar = document.getElementById("zotero-title-bar");
+		let itemTree = document.getElementById("zotero-items-tree");
+		let collectionsTree = document.getElementById("zotero-collections-tree");
+		let tagSelector = document.getElementById("zotero-tag-selector");
+		let tagContainer = document.getElementById('zotero-tag-selector-container');
+		let collectionsPane = document.getElementById("zotero-collections-pane");
 
 		// function to handle actual focusing based on a given event
 		// and a mapping of event targets + keys to the focus destinations
@@ -227,7 +227,8 @@ var ZoteroPane = new function()
 				// If desired target is hidden/disabled, create a fake event
 				// and dispatch it on the hidden target to rerun moveFocus
 				// and place focus on the next non-hidden node
-				if (target.disabled || target.hidden || target.parentNode.hidden) {
+				if (target.disabled || target.hidden || target.parentNode.hidden
+						|| getComputedStyle(target).display === 'none') {
 					event.target = target;
 					let fakeEventCopy = new KeyboardEvent('keydown', {
 						key: event.key,
@@ -401,18 +402,22 @@ var ZoteroPane = new function()
 					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
-				'zotero-tb-search-textbox': {
-					ShiftTab: () => {
-						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
-					},
-					Tab: () => itemTree.querySelector(".virtualized-table")
-				},
 				'zotero-tb-search-dropmarker': {
 					ArrowNext: () => null,
 					ArrowPrevious: () => null,
 					Tab: () => document.getElementById("zotero-tb-search-textbox"),
 					ShiftTab: () => document.getElementById('zotero-tb-add')
-				}
+				},
+				'zotero-tb-search-textbox': {
+					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked"),
+					ShiftTab: () => {
+						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
+					}
+				},
+				'zotero-tb-toggle-item-pane-stacked': {
+					Tab: () => itemTree.querySelector(".virtualized-table"),
+					ShiftTab: () => document.getElementById("zotero-tb-search-textbox")
+				},
 			};
 			moveFocus(actionsMap, event, true);
 		});
@@ -441,7 +446,7 @@ var ZoteroPane = new function()
 		itemTree.addEventListener("keydown", (event) => {
 			let actionsMap = {
 				'item-tree-main-default': {
-					ShiftTab: () => document.getElementById('zotero-tb-search-textbox')
+					ShiftTab: () => document.getElementById('zotero-tb-toggle-item-pane-stacked')
 				}
 			};
 			moveFocus(actionsMap, event);
@@ -6856,8 +6861,14 @@ var ZoteroPane = new function()
 		this.handleTagSelectorResize();
 
 		this.itemPane.handleResize();
-	}
-
+	};
+	
+	
+	this.toggleItemPane = function () {
+		this.itemPane.collapsed = !this.itemPane.collapsed;
+		this.updateLayoutConstraints();
+	};
+	
 	
 	// Set the label of the dynamic tooltip. Can be used when we cannot set .tooltiptext
 	// property, e.g. if we don't want the tooltip to be announced by screenreaders.

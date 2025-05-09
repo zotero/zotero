@@ -157,29 +157,30 @@
 			this._paneParent.style.setProperty('--min-scroll-height', val + 'px');
 		}
 
+		/**
+		 * Convenience getter that delegates to our <item-pane> / <context-pane>
+		 * parent. This exists because the sidenav controls us, not the <item-pane>,
+		 * but needs to get/set its collapsed state.
+		 * @returns {boolean}
+		 */
 		get _collapsed() {
-			let collapsible = this.closest('splitter:not([hidden="true"]) + *');
-			if (!collapsible) return false;
-			return collapsible.getAttribute('collapsed') === 'true';
+			let parentPane = this.closest('item-pane, context-pane');
+			if (!parentPane) {
+				return false;
+			}
+			return parentPane.collapsed;
 		}
 		
+		/**
+		 * Convenience setter for collapsed state. See above.
+		 * @param {boolean} val
+		 */
 		set _collapsed(val) {
-			let collapsible = this.closest('splitter:not([hidden="true"]) + *');
-			if (!collapsible) return;
-			let splitter = collapsible.previousElementSibling;
-			if (val) {
-				collapsible.setAttribute('collapsed', 'true');
-				collapsible.removeAttribute("width");
-				collapsible.removeAttribute("height");
-				splitter.setAttribute('state', 'collapsed');
-				splitter.setAttribute('substate', 'after');
+			let parentPane = this.closest('item-pane, context-pane');
+			if (!parentPane) {
+				return;
 			}
-			else {
-				collapsible.removeAttribute('collapsed');
-				splitter.setAttribute('state', '');
-				splitter.setAttribute('substate', 'after');
-			}
-			window.dispatchEvent(new Event('resize'));
+			parentPane.collapsed = val;
 		}
 
 		get sidenav() {
