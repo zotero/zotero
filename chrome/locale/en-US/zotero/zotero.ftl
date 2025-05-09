@@ -41,6 +41,7 @@ general-cancel = Cancel
 general-show-in-library = Show in Library
 general-restartApp = Restart { -app-name }
 general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-learn-more = Learn More
 
 citation-style-label = Citation Style:
 language-label = Language:
@@ -737,7 +738,6 @@ mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
 
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
-file-renaming-banner-button =
-    .label = { general-open-settings }
+file-renaming-banner-link = { general-learn-more }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
