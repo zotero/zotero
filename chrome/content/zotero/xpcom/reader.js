@@ -1242,7 +1242,7 @@ class ReaderTab extends ReaderInstance {
 		super(options);
 		this._sidebarWidth = options.sidebarWidth;
 		this._sidebarOpen = options.sidebarOpen;
-		this._contextPaneOpen = options.bottomPlaceholderHeight;
+		this._contextPaneOpen = options.contextPaneOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showContextPaneToggle = true;
 		this._onToggleSidebarCallback = options.onToggleSidebar;
