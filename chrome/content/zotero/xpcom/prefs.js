@@ -182,8 +182,13 @@ Zotero.Prefs = new function() {
 						break;
 					}
 					case 16: {
+						if (this.get('autoRenameFiles')) {
+							// If the user has `autoRenameFiles` enabled, show a banner informing that file names are now kept in sync
+							this.set('autoRenameFiles.bannerShown', false);
+						}
 						let attachmentRenameTemplate = this.get('attachmentRenameTemplate');
 						if (this.prefHasUserValue('attachmentRenameTemplate')) {
+							// If the user has a custom template, reset `autoRenameFiles.done` so that the "Rename Files Now" button appears in preferences
 							Zotero.initializationPromise.then(() => {
 								Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', attachmentRenameTemplate);
 								this.set('autoRenameFiles.done', false);
