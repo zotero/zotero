@@ -86,11 +86,18 @@ export class CitationDialogKeyboardHandler {
 	_handleTopLevelKeydown(event) {
 		let handled = false;
 		let tgt = event.target;
-		let isKeyboardClickable = tgt.classList.contains("keyboard-clickable") || tgt.tagName.includes("button");
-		// Space/Enter will click on a button or keyboard-clickable components
+		// Space/Enter will click on keyboard-clickable components.
+		// On macOS, focused buttons are only clickable with Space (not Enter),
+		// and on Windows they are clickable with both.
+		let isKeyboardClickable = tgt.classList.contains("keyboard-clickable") || (Zotero.isWin && tgt.localName == "button");
 		if (["Enter", " "].includes(event.key) && isKeyboardClickable) {
 			tgt.click();
 			handled = true;
+		}
+		// Unhandled Enter in a panel will close it
+		else if (event.key == "Enter" && tgt.closest("panel")) {
+			handled = true;
+			tgt.closest("panel").hidePopup();
 		}
 		// Unhandled Enter will accept the existing dialog's state
 		else if (event.key == "Enter" && !tgt.closest("panel")) {
