@@ -90,7 +90,7 @@ export class CitationDialogKeyboardHandler {
 		// On macOS, focused buttons are only clickable with Space (not Enter),
 		// and on Windows they are clickable with both.
 		// This distinction determines if Enter on a button in a panel will perform a click or close it.
-		let isKeyboardClickable = tgt.classList.contains("keyboard-clickable") || (Zotero.isWin && tgt.tagName.localName == "button");
+		let isKeyboardClickable = tgt.classList.contains("keyboard-clickable") || (Zotero.isWin && tgt.localName == "button");
 		if (["Enter", " "].includes(event.key) && isKeyboardClickable) {
 			tgt.click();
 			handled = true;
