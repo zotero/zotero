@@ -98,8 +98,6 @@
 			}
 			this._selectedIndex = null;
 
-			// Empty existing nodes
-			this._tabsList.replaceChildren();
 			let selectedIndex = null;
 			let index = 0;
 			let validTabs = Zotero_Tabs._tabs.filter(
@@ -111,6 +109,19 @@
 				}
 			);
 			let tabsCount = validTabs.length;
+
+			let prevTabID = this._tabsList.querySelector(".selected")?.dataset.tabId;
+			let selectedTabID = Zotero_Tabs.selectedID;
+			let prevFocusCls = null;
+			if (prevTabID && validTabs.some(tab => tab.id == prevTabID)) {
+				selectedTabID = prevTabID;
+				if (document.activeElement.classList.contains("close")) {
+					prevFocusCls = "close";
+				}
+			}
+
+			// Empty existing nodes
+			this._tabsList.replaceChildren();
 
 			// If no tabs are open, show an empty row with a message
 			if (tabsCount === 0) {
@@ -132,7 +143,6 @@
 				return;
 			}
 
-			let selectedTabID = Zotero_Tabs.selectedID;
 			for (let tab of validTabs) {
 				// Top-level entry of the opened tabs array
 				let row = document.createElement('div');
@@ -219,6 +229,10 @@
 
 			if (selectedIndex !== null) {
 				this._selectRow(selectedIndex);
+
+				if (prevFocusCls) {
+					this._tabsList.querySelector(`.selected > .${prevFocusCls}`).focus();
+				}
 			}
 			else {
 				this.moveSelection("first");
@@ -458,6 +472,13 @@
 				event.preventDefault();
 				event.stopPropagation();
 			}
+			else if (event.key === " ") {
+				if (document.activeElement.classList.contains("close")) {
+					event.preventDefault();
+					event.stopPropagation();
+					this._handleCloseClick(event, { focusNextCloseButton: true });
+				}
+			}
 		};
 
 		/**
@@ -498,14 +519,22 @@
 			Zotero_Tabs.select(tabID);
 		};
 
-		_handleCloseClick = (event) => {
+		_handleCloseClick = (event, options = {}) => {
+			let { focusNextCloseButton } = options;
 			let row = event.target.closest(".row");
 			let tabID = row.dataset.tabId;
 			if (!tabID) {
 				return;
 			}
+			if (focusNextCloseButton) {
+				this.moveSelection("next");
+				let currentRow = this._tabsList.querySelector(".selected");
+				currentRow?.querySelector(".close")?.focus();
+			}
+			else {
+				this._focusInput();
+			}
 			Zotero_Tabs.close(tabID);
-			this._focusInput();
 		};
 
 		_handleRowDragStart = (event) => {
