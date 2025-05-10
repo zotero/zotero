@@ -41,6 +41,17 @@ attachment-box {
 				color: var(--fill-secondary);
 			}
 		}
+
+		#rename-from-parent {
+			height: 22px;
+			width: 22px;
+			padding: 4px;
+			margin-left: 4px;
+			@include svgicon-menu("rename-from-parent", "universal", "16");
+			&:not([disabled='true']) {
+				color: var(--fill-secondary);
+			}
+		}
 	}
 
 	#url
