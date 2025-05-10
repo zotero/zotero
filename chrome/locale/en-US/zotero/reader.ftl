@@ -25,7 +25,7 @@ pdfReader-a11yAnnotationPopupAppeared = Use Tab to navigate the annotation popup
 pdfReader-a11yAnnotationCreated = { $type } created.
 pdfReader-a11yAnnotationSelected = { $type } selected.
 
--pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use "{ pdfReader-find-in-document }" to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
 -pdfReader-a11yAnnotationInstruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
 
 pdfReader-toolbar-highlight =
@@ -47,6 +47,8 @@ pdfReader-toolbar-draw =
     .aria-description = This annotation type cannot be created via the keyboard.
     .title = { pdfReader-draw }
 
+pdfReader-toggleDeepTutorPane = Toggle DeepTutor Pane
+
 pdfReader-findInDocumentInput =
     .title = Find
     .placeholder = { pdfReader-find-in-document }
@@ -67,7 +69,7 @@ pdfReader-import-from-epub-no-annotations-current-file =
     
     { -app-name } can import ebook annotations created in Calibre and KOReader.
 pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    "{ $filename }" does not appear to contain any Calibre or KOReader annotations.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
+    If this ebook has been annotated with KOReader, try selecting a "metadata.epub.lua" file directly.
 pdfReader-import-from-epub-select-other = Select Other File…

@@ -1,4 +1,36 @@
 {
+        // Session Status Enum
+    const SessionStatus = {
+        CREATED: 'CREATED',
+        READY: 'READY',
+        PROCESSING_ERROR: 'PROCESSING_ERROR',
+        FINAL_PROCESSING_ERROR: 'FINAL_PROCESSING_ERROR',
+        PROCESSING: 'PROCESSING',
+        DELETED: 'DELETED'
+    };
+
+    // Session Type Enum
+    const SessionType = {
+        LITE: 'LITE',
+        BASIC: 'BASIC',
+        ADVANCED: 'ADVANCED'
+    };
+
+    // Session Status Event Interface (as a class for JavaScript)
+    class SessionStatusEvent {
+        constructor(effectiveTime, status) {
+            this.effectiveTime = effectiveTime;
+            this.status = status;
+        }
+    }
+
+    // PresignedUrl Interface (as a class for JavaScript)
+    class PresignedUrl {
+        constructor(preSignedUrl, preSignedReadUrl) {
+            this.preSignedUrl = preSignedUrl;
+            this.preSignedReadUrl = preSignedReadUrl;
+        }
+    }
     class DeepTutorSession {
         constructor({
             id = 123,

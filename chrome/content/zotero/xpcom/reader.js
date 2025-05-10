@@ -196,6 +196,7 @@ class ReaderInstance {
 			location,
 			readOnly: this._isReadOnly(),
 			preview,
+			platform: 'zotero',
 			authorName: this._item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
 			showContextPaneToggle: this._showContextPaneToggle,
 			sidebarWidth: this._sidebarWidth,

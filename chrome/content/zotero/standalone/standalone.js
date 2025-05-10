@@ -486,17 +486,23 @@ const ZoteroStandalone = new function() {
 
 	this.onDeepTutorPaneOpen = function () {
 		var deepTutorPane = document.getElementById('deep-tutor-pane');
+		Zotero.debug('Standalone: DeepTutor pane toggle triggered');
+		Zotero.debug('Standalone: Current collapsed state: ' + deepTutorPane.getAttribute('collapsed'));
+		
 		// Show
 		if (deepTutorPane.getAttribute('collapsed') == 'true') {
+			Zotero.debug('Standalone: Opening DeepTutor pane');
 			document.getElementById('zotero-deeptutor-splitter').setAttribute('state', 'open');
 			deepTutorPane.setAttribute('collapsed', false);
 		}	
 		// Hide
 		else {
+			Zotero.debug('Standalone: Closing DeepTutor pane');
 			document.getElementById('zotero-deeptutor-splitter').setAttribute('state', 'collapsed');
 			deepTutorPane.setAttribute('collapsed', true);
 		}
 		ZoteroPane.updateLayoutConstraints();
+		Zotero.debug('Standalone: Layout constraints updated');
 	}
 	
 	

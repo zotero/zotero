@@ -72,6 +72,7 @@
 
             // manage file list
             this._fileList = [];
+            this._originalFileList = [];
 
             // Add click handlers for model type buttons
             this._liteBtn.addEventListener('click', () => this._handleTypeSelection('lite'));
@@ -174,7 +175,8 @@
             return {
                 fileList: this._fileList,
                 name: this._modelName.value,
-                type: this._selectedType
+                type: this._selectedType,
+                originalFileList: this._originalFileList
             };
         }
 
@@ -221,6 +223,8 @@
                 Zotero.debug("No PDF attachments found in selected items");
                 return;
             }
+            this._originalFileList = pdfAttachments;
+
 
             // Process all PDFs concurrently using Promise.all
             const pdfProcessingPromises = pdfAttachments.map(async (pdf) => {

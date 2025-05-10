@@ -816,10 +816,10 @@ var ZoteroPane = new function()
 					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 				var text = "Zotero was unable to access your Firefox profile to check for "
 					+ "existing Zotero data.\n\n"
-					+ "If you’ve upgraded from Zotero 4.0 for Firefox and don’t see the data "
+					+ "If you've upgraded from Zotero 4.0 for Firefox and don't see the data "
 					+ "you expect, it may be located elsewhere on your computer. "
-					+ "Click “More Information” for help restoring your previous data.\n\n"
-					+ "If you’re new to Zotero, you can ignore this message.";
+					+ "Click More Information for help restoring your previous data.\n\n"
+					+ "If you're new to Zotero, you can ignore this message.";
 				var url = 'https://www.zotero.org/support/kb/data_missing_after_zotero_5_upgrade';
 				var dontShowAgain = {};
 				let index = ps.confirmEx(null,
@@ -6743,6 +6743,7 @@ var ZoteroPane = new function()
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
+		var deepTutorPane = document.getElementById("deep-tutor-pane");
 		let layoutModeMenus = [
 			document.getElementById("view-menuitem-standard"),
 			document.getElementById("view-menuitem-stacked"),
@@ -6751,20 +6752,21 @@ var ZoteroPane = new function()
 		let isStackedMode = Zotero.Prefs.get('layout') === 'stacked';
 		let isTempStackedMode = Zotero.Prefs.get('tempStackedMode');
 		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
+		let isDeepTutorPaneCollapsed = deepTutorPane.getAttribute('collapsed') === 'true';
 
-		// Keep in sycn with abstracts/variables.scss > $min-width-collections-pane
+		// Keep in sync with abstracts/variables.scss > $min-width-collections-pane
 		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
-		// Keep in sycn with abstracts/variables.scss > $min-width-item-pane
-		// DeeptutorZ: to accomodate new pane, reduce from 320 to 250
+		// Keep in sync with abstracts/variables.scss > $min-width-item-pane
 		const itemPaneMinWidth = (isStackedMode || isItemPaneCollapsed) ? 0 : 250;
 		const libraryItemPaneMinWidth = (isStackedMode || ZoteroPane.itemPane.collapsed) ? 0 : 320;
-		// Keep in sycn with abstracts/variables.scss > $width-sidenav
+		// Keep in sync with abstracts/variables.scss > $width-sidenav
 		const sideNavMinWidth = isStackedMode ? 0 : 37;
-		// Keep in sycn with abstracts/variables.scss > $min-width-items-pane
-		// DeeptutorZ: to accomodate new pane, reduce from 370 to 300
+		// Keep in sync with abstracts/variables.scss > $min-width-items-pane
 		const itemsPaneMinWidth = 300;
+		// DeepTutor pane minimum width
+		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 250;
 
-		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth;
+		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth + deepTutorPaneMinWidth;
 
 		// Calculate the heights of the components that aren't able to shrink automatically
 		// when the window is resized
