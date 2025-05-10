@@ -86,8 +86,8 @@ export class CitationDialogKeyboardHandler {
 	_handleTopLevelKeydown(event) {
 		let handled = false;
 		let tgt = event.target;
-		let isKeyboardClickable = tgt.classList.contains("keyboard-clickable") || tgt.tagName.includes("button");
-		// Space/Enter will click on a button or keyboard-clickable components
+		let isKeyboardClickable = tgt.classList.contains("keyboard-clickable") || (Zotero.isWin && tgt.tagName.includes("button"));
+		// Space/Enter will click on keyboard-clickable components
 		if (["Enter", " "].includes(event.key) && isKeyboardClickable) {
 			tgt.click();
 			handled = true;
