@@ -7,6 +7,11 @@ let httpRequest = (method, url, options) => {
 	if (!('errorDelayMax' in options)) {
 		options.errorDelayMax = 0;
 	}
+	if (!options.testBrowserRequest) {
+		options.headers = new Headers(options.headers || {});
+		options.headers.set('User-Agent', 'Some-API-Client/1.0');
+	}
+	delete options.testBrowserRequest;
 	return Zotero.HTTP.request(method, url, options);
 }
 
@@ -56,6 +61,32 @@ describe("Connector Server", function () {
 		win.close();
 	});
 
+	describe("/connector/ping", function () {
+		it("should reject browser requests", async function () {
+			let reqPromise = httpRequest(
+				'GET',
+				connectorServerPath + "/connector/ping",
+				{
+					testBrowserRequest: true,
+				}
+			);
+			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
+		});
+		
+		it("should allow browser request if page is loaded directly", async function () {
+			let { response } = await httpRequest(
+				'GET',
+				connectorServerPath + "/connector/ping",
+				{
+					headers: {
+						'Sec-Fetch-Mode': 'navigate',
+					},
+					testBrowserRequest: true,
+				}
+			);
+			assert.include(response, 'Zotero is running');
+		});
+	});
 
 	describe('/connector/getTranslatorCode', function() {
 		it('should respond with translator code', function* () {
@@ -1489,7 +1520,8 @@ describe("Connector Server", function () {
 						"Content-Type": "text/plain",
 						"X-Zotero-Connector-API-Version": "2"
 					},
-					body: style
+					body: style,
+					testBrowserRequest: true,
 				}
 			);
 			assert.equal(response.status, 201);
@@ -1503,7 +1535,8 @@ describe("Connector Server", function () {
 						"Content-Type": "text/plain",
 						"Zotero-Allowed-Request": "1"
 					},
-					body: style
+					body: style,
+					testBrowserRequest: true,
 				}
 			);
 			assert.equal(response.status, 201);
@@ -1512,7 +1545,7 @@ describe("Connector Server", function () {
 		});
 		
 		it('should reject text/plain request without X-Zotero-Connector-API-Version', async function () {
-			var req = await httpRequest(
+			var reqPromise = httpRequest(
 				'POST',
 				endpoint,
 				{
@@ -1520,10 +1553,11 @@ describe("Connector Server", function () {
 						"Content-Type": "text/plain"
 					},
 					body: style,
-					successCodes: [403]
+					successCodes: [403],
+					testBrowserRequest: true,
 				}
 			);
-			assert.equal(req.status, 403);
+			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
 		});
 	});
 	
@@ -1553,17 +1587,18 @@ describe("Connector Server", function () {
 		
 		it('should reject requests without X-Zotero-Connector-API-Version', async function () {
 			const sessionID = Zotero.Utilities.randomString();
-			var req = await httpRequest(
+			var reqPromise = httpRequest(
 				'POST',
 				endpoint + `?session=${sessionID}`,
 				{
 					headers: {
 						"Content-Type": "text/plain"
 					},
-					successCodes: [403]
+					successCodes: [403],
+					testBrowserRequest: true,
 				}
 			);
-			assert.equal(req.status, 403);
+			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
 		});
 		
 		it('should import resources (BibTeX) into selected collection', async function () {

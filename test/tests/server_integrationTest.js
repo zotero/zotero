@@ -20,6 +20,11 @@ describe("MacOS Integration Server", function () {
 				await Zotero.HTTP.request(
 					'GET',
 					`${serverURL}/macWordCommand?agent=httpTest&command=httpTestCommand&document=docName&templateVersion=-1`,
+					{
+						headers: {
+							'User-Agent': 'MacWord2016'
+						}
+					}
 				);
 				
 				assert.isTrue(stub.calledOnce);
