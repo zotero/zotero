@@ -333,7 +333,8 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 				// Allow browser requests to /connector/ping as long as they come
 				// from navigation, not XHR/fetch()/resource loading
 				&& !(this.pathname === '/connector/ping' && this.headers['sec-fetch-mode'] === 'navigate')) {
-			this._requestFinished(this._generateResponse(403, "text/plain", "Request not allowed\n"));
+			Zotero.debug('Preventing request from browser');
+			this._cancelResponse();
 			return;
 		}
 		
@@ -464,7 +465,23 @@ Zotero.Server.RequestHandler.prototype._requestFinished = function (responseBody
 	finally {
 		this.response.finish();
 	}
-}
+};
+
+Zotero.Server.RequestHandler.prototype._cancelResponse = function () {
+	// Close the connection without sending anything back, so web content can't
+	// get any information about whether Zotero is running.
+	//
+	// This causes fetch() to throw a TypeError with the message
+	// "NetworkError when attempting to fetch resource.", exactly the same as
+	// when no server is running on our port.
+	if (this._responseSent) {
+		Zotero.debug('Request already finished; not cancelling');
+		return;
+	}
+	Zotero.debug('Cancelling without sending a response');
+	this._responseSent = true;
+	this.response.finish();
+};
 
 Zotero.Server.RequestHandler.prototype._decodeMultipartData = function(data) {
 	const contentDispositionRe = /^Content-Disposition:\s*(.*)$/i;
