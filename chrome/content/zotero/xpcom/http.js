@@ -1535,7 +1535,7 @@ Zotero.HTTP = new function () {
 			super();
 			if (init) {
 				let iter;
-				if (Array.isArray(init) || init instanceof Headers) {
+				if (Symbol.iterator in init) {
 					iter = init;
 				}
 				else {
