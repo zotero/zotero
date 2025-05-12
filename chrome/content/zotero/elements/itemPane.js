@@ -539,7 +539,7 @@
 			if (!mode) {
 				// Guess a mode from the current data
 				// Only annotation items selected
-				if (this.data.every(item => item.isAnnotation())) {
+				if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
 					mode = "annotations";
 				}
 				// No/multiple objects are selected OR selected object is a trashed collection/search

@@ -209,6 +209,30 @@ describe("Item pane", function () {
 			assert.isFalse(doc.querySelector('item-pane-header .title').hidden);
 			assert.isFalse(doc.querySelector('item-pane-header .creator-year').hidden);
 		});
+
+		it("should update custom header for items in the trash", async function () {
+			var item1 = await createDataObject('item', { deleted: true });
+			var item2 = await createDataObject('item', { deleted: true });
+			
+			await selectTrash(win);
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+			
+			let restoreButton = win.document.querySelector('#zotero-item-message .custom-head .item-restore-button');
+			assert.exists(restoreButton);
+			assert.exists(win.document.querySelector('#zotero-item-message .custom-head .item-delete-button'));
+
+			await restoreButton.click();
+			let ids = await waitForItemEvent('modify');
+			assert.equal(ids.length, 2);
+			await waitForFrame();
+			
+			assert.notExists(win.document.querySelector('#zotero-item-message .custom-head .item-restore-button'));
+			
+			await item1.eraseTx();
+			await item2.eraseTx();
+			await selectLibrary(win);
+		});
 	});
 	
 	describe("Info pane", function () {
