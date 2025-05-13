@@ -3908,7 +3908,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 						if (expandCollapsedParents) {
 							await this._closeContainer(this._rowMap[parent]);
 							await this.toggleOpenState(this._rowMap[parent]);
-							toggleSelect(selection[i].treeViewID);
+							// Re-select original row if it exists
+							if (this._rowMap[selection[i].treeViewID] != null) {
+								toggleSelect(selection[i].treeViewID);
+							}
+							// If it does not (e.g. child item moved to trash), select the parent
+							else {
+								toggleSelect(parent);
+							}
 						}
 						else {
 							!this.selection.isSelected(this._rowMap[parent]) &&
