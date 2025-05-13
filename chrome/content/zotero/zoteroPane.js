@@ -2961,7 +2961,7 @@ var ZoteroPane = new function () {
 				if (event !== 'modify') {
 					return;
 				}
-				
+
 				for (let id of ids) {
 					const parentItem = await Zotero.Items.getAsync(id);
 					if (!parentItem.isTopLevelItem() || !parentItem.isRegularItem()) {
@@ -2977,8 +2977,51 @@ var ZoteroPane = new function () {
 					if (!Zotero.Attachments.shouldAutoRenameAttachment(attachmentItem)) {
 						continue;
 					}
-					
-					renameFileFromParent(attachmentItem);
+
+					if (!_extraData?.[id]?.changed) {
+						continue;
+					}
+
+					let changes = Object.entries(_extraData[id].changed).filter(([key, _value]) => {
+						if (['tags', 'collections'].includes(key)) {
+							return false; // Don't care about tags or collections
+						}
+						return true;
+					});
+
+					if (changes.length === 0) {
+						continue; // No relevant changes
+					}
+
+					let parentItemBefore = parentItem.clone(null, { skipTags: true, includeCollections: false });
+					let validFields = Zotero.ItemFields.getItemTypeFields(parentItem.itemTypeID).map(fieldID => Zotero.ItemFields.getName(fieldID));
+					for (let [key, value] of changes) {
+						if (key === 'itemType') {
+							parentItemBefore.setType(value);
+						}
+						else if (key === 'creators') {
+							parentItemBefore.setCreators(value);
+						}
+						else if (validFields.includes(key)) {
+							parentItemBefore.setField(key, value);
+						}
+					}
+
+					let previousMetadataBaseName = Zotero.Attachments.getFileBaseNameFromItem(
+						parentItemBefore, { attachmentTitle: attachmentItem.getField('title') }
+					);
+					let currentBaseName = attachmentItem.attachmentFilename?.replace(/\.[^.]+$/, '') ?? '';
+
+					if (previousMetadataBaseName === currentBaseName) {
+						// Filename appears to be derived from the metadata, so update it to match the latest metadata.
+						renameFileFromParent(attachmentItem);
+					}
+					else {
+						// Filename has most likely been manually changed, so
+						// don’t rename it. Reset `autoRenameFiles.done` so that
+						// "Rename Files Now" appears in Preferences.
+						Zotero.Prefs.set('autoRenameFiles.done', false);
+					}
 				}
 			}
 		}, ['item'], 'autoRenameFileFromParent', 150); // lower priority than the other item observers
