@@ -1123,9 +1123,25 @@
                 const mainContainer = this.querySelector('#main-container');
                 if (mainContainer) {
                     if (newValue === 'true') {
-                        mainContainer.style.display = 'none';
+                        // When collapsing, set width to 0 and hide content
+                        this.style.width = '0';
+                        this.style.minWidth = '0';
+                        mainContainer.style.width = '0';
+                        mainContainer.style.minWidth = '0';
+                        mainContainer.style.overflow = 'hidden';
+                        mainContainer.style.opacity = '0';
+                        mainContainer.style.transition = 'width 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                        mainContainer.style.visibility = 'hidden';
                     } else {
-                        mainContainer.style.display = 'flex';
+                        // When expanding, restore dimensions and show content
+                        this.style.width = '100%';
+                        this.style.minWidth = '0';
+                        mainContainer.style.width = '100%';
+                        mainContainer.style.minWidth = '0';
+                        mainContainer.style.overflow = 'visible';
+                        mainContainer.style.opacity = '1';
+                        mainContainer.style.transition = 'width 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                        mainContainer.style.visibility = 'visible';
                     }
                 }
             }

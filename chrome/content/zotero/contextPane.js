@@ -56,7 +56,9 @@ var ZoteroContextPane = new function () {
 			_contextPane.setAttribute('collapsed', !!collapsed);
 			_contextPaneInner.setAttribute('collapsed', !!collapsed);
 			_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_contextPaneSplitter.setAttribute('collapse', 'after');
 			_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
+			_contextPaneSplitterStacked.setAttribute('collapse', 'after');
 			_update();
 		}
 	});

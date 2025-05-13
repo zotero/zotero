@@ -820,13 +820,16 @@
 				oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
 				tooltip="Deep Tutor"
 				label="DeepTutor"
-				area-hidden="true"
 			/>
 			<toolbarbutton class="titlebar-button itempanestatus"
 				oncommand="ZoteroStandalone.onItemPaneOpen()"
 				tooltip="Item Pane Status"
 				label="ItemPane"
-				area-hidden="true"
+			/>
+			<toolbarbutton class="titlebar-button deeptutortwostatus"
+				oncommand="ZoteroStandalone.onDeepTutorPaneTwoOpen()"
+				tooltip="DeepTutorTwo"
+				label="DeepTutorTwo"
 			/>
 			<toolbarbutton class="titlebar-button titlebar-min"
 				oncommand="window.minimize();"
@@ -1361,14 +1364,6 @@
 											  oncommand="ZoteroPane.updateLayoutConstraints()">
 										<grippy id="zotero-items-grippy"/>
 									</splitter>
-
-									<deep-tutor-pane id="deep-tutor-pane" flex="1" zotero-persist="width height"/>
-				
-									<splitter id="zotero-deeptutor-splitter" resizebefore="closest" resizeafter="closest" collapse="before" orient="horizontal" zotero-persist="state orient"
-										onmousemove="ZoteroPane.updateLayoutConstraints()"
-										oncommand="ZoteroPane.updateLayoutConstraints()">
-										<grippy id="zotero-deeptutor-grippy"/>
-									</splitter>
 				
 									<!-- itemPane.xul -->
 									<item-pane id="zotero-item-pane" zotero-persist="width height"/>
@@ -1376,7 +1371,22 @@
 							</hbox>
 						</vbox>
 					</deck>
-		
+
+					<splitter id="zotero-deeptutor-splitter" 
+						state="collapsed"
+						resizebefore="closest" 
+						resizeafter="closest" 
+						collapse="after" 
+						orient="horizontal" 
+						zotero-persist="state orient"
+						onmousemove="ZoteroPane.updateLayoutConstraints()"
+						oncommand="ZoteroPane.updateLayoutConstraints()">
+						<grippy id="zotero-deeptutor-grippy"/>
+					</splitter>
+
+					<box id="new-deep-tutor-pane-container" style="min-width: 0px; max-width: 450px; transition: width 0.3s ease-in-out;">
+						<deep-tutor-pane id="deep-tutor-pane" collapsed="true" class="pane" style="min-width: 0px; max-width: 450px; transition: width 0.3s ease-in-out; visibility: inherit;"></deep-tutor-pane>
+					</box>
 					<splitter id="zotero-context-splitter"
 							  hidden="true"
 							  state="collapsed"

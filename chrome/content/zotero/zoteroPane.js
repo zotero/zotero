@@ -6765,6 +6765,7 @@ var ZoteroPane = new function()
 		const itemsPaneMinWidth = 300;
 		// DeepTutor pane minimum width
 		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 250;
+		const deepTutorPaneMaxWidth = 600;
 
 		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth + deepTutorPaneMinWidth;
 
@@ -6773,6 +6774,15 @@ var ZoteroPane = new function()
 		let fixedComponentHeight = titlebar.scrollHeight + trees.scrollHeight - itemsPaneContainer.scrollHeight;
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
+
+		// Update DeepTutor pane container dimensions
+		if (!isDeepTutorPaneCollapsed) {
+			let deepTutorContainer = document.getElementById('new-deep-tutor-pane-container');
+			if (deepTutorContainer) {
+				deepTutorContainer.style.minWidth = `${deepTutorPaneMinWidth}px`;
+				deepTutorContainer.style.maxWidth = `${deepTutorPaneMaxWidth}px`;
+			}
+		}
 
 		let layoutChanged = false;
 		// Collections pane + items pane + items pane + sidenav + 3px for draggability
@@ -6806,7 +6816,7 @@ var ZoteroPane = new function()
 		// This is important to avoid other panes be pushed out of the window
 		collectionsPane.style.setProperty(
 			"--max-width-collections-pane",
-			`${window.innerWidth - libraryItemPaneMinWidth - sideNavMinWidth - itemsPaneMinWidth}px`);
+			`${window.innerWidth - libraryItemPaneMinWidth - sideNavMinWidth - itemsPaneMinWidth - deepTutorPaneMinWidth}px`);
 
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
