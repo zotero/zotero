@@ -287,7 +287,7 @@ function modify_omni {
 					return;
 				}
 				else {
-					logger.error(`AddonUpdateChecker: addon ]${aId} with discontinue flag not found or cannot be uninstalled`);
+					logger.error(`AddonUpdateChecker: addon \${aId} with discontinue flag not found or cannot be uninstalled`);
 					sendUpdateAvailableMessages(this, null);
 					return;
 				}
