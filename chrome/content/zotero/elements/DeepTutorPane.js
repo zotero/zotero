@@ -322,13 +322,14 @@
                overflow: hidden;
                display: flex;
                flex-direction: column;
+               font-family: 'Roboto', sans-serif;
            ">
                <hbox id="top-bar" style="margin-bottom: 12px; gap: 8px; align-items: center; background: #e9ecef; padding: 2px 6px; border-radius: 6px; width: fit-content; height: 28px;">
-                   <button id="tab1-btn" label="Tab 1" style="min-width: 48px; background: #dedede; border: none; border-radius: 4px; padding: 2px 12px; font-size: 0.95em; margin-right: 2px; height: 22px;" />
-                   <button id="tab2-btn" label="Tab 2" style="min-width: 48px; background: #dedede; border: none; border-radius: 4px; padding: 2px 12px; font-size: 0.95em; margin-right: 8px; height: 22px;" />
-                   <button id="model-btn" class="nav-button" label="+" style="background: none; border: none; font-size: 1em; margin-right: 4px; padding: 0 4px; min-width: 20px; height: 20px;" />
-                   <button id="history-btn" class="nav-button" label="\u21bb" style="background: none; border: none; font-size: 1em; margin-right: 4px; padding: 0 4px; min-width: 20px; height: 20px;" />
-                   <button id="close-btn" label="\u2715" style="background: none; border: none; font-size: 1em; padding: 0 4px; min-width: 20px; height: 20px;" />
+                   <button id="tab1-btn" label="Tab 1" style="min-width: 48px; background: #0687E5; color: #000000; border: none; border-radius: 4px; padding: 2px 12px; font-size: 0.95em; margin-right: 2px; height: 22px; font-family: 'Roboto', sans-serif;" />
+                   <button id="tab2-btn" label="Tab 2" style="min-width: 48px; background: #0687E5; color: #000000; border: none; border-radius: 4px; padding: 2px 12px; font-size: 0.95em; margin-right: 8px; height: 22px; font-family: 'Roboto', sans-serif;" />
+                   <button id="model-btn" class="nav-button" label="+" style="background: #0687E5; color: #000000; border: none; font-size: 1em; margin-right: 4px; padding: 0 4px; min-width: 20px; height: 20px; font-family: 'Roboto', sans-serif;" />
+                   <button id="history-btn" class="nav-button" label="\u21bb" style="background: #0687E5; color: #000000; border: none; font-size: 1em; margin-right: 4px; padding: 0 4px; min-width: 20px; height: 20px; font-family: 'Roboto', sans-serif;" />
+                   <button id="close-btn" label="\u2715" style="background: #0687E5; color: #000000; border: none; font-size: 1em; padding: 0 4px; min-width: 20px; height: 20px; font-family: 'Roboto', sans-serif;" />
                </hbox>
                <description value="DeepTutor" style="
                    font-size: 1.2em;
@@ -346,9 +347,10 @@
                    border-radius: 8px;
                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                ">
-                   <button id="tutor-btn" class="nav-button" label="Tutor" />
-                   <button id="notes-btn" class="nav-button" label="Notes" />
-                   <button id="settings-btn" class="nav-button" label="Settings" />
+                   <button id="tutor-btn" class="nav-button" label="Tutor" style="background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;" />
+                   <button id="notes-btn" class="nav-button" label="Notes" style="background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;" />
+                   <button id="settings-btn" class="nav-button" label="Settings" style="background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;" />
+                   <button id="no-login-btn" class="nav-button" label="No Login" style="background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;" />
                </hbox>
                <vbox id="content-container" flex="1" style="width: 100%; height: 100%; overflow: hidden;">
                    <deep-tutor-box id="tutor-component" style="height: 100%; width: 100%;" />
@@ -356,6 +358,7 @@
                    <deep-settings-box id="settings-component" style="height: 100%; width: 100%; display: none;" />
                    <session-history-box id="history-component" style="height: 100%; width: 100%; display: none;" />
                    <model-selection id="model-component" style="height: 100%; width: 100%; display: none;" />
+                   <no-login-page id="no-login-component" style="height: 100%; width: 100%; display: none;" />
                </vbox>
            </vbox>
         `);
@@ -494,6 +497,13 @@
 
             // Load sessions
             this.loadSession();
+
+            // Add event listener for SignInClicked from noLoginPage
+            this.addEventListener('SignInClicked', () => {
+                this._toggleSignUpPopup(true);
+            });
+            // Add a close handler for the popup (delegated)
+            this._ensureSignUpPopup();
         }
 
         loadSession() {
@@ -1189,11 +1199,16 @@
             const buttons = this.querySelectorAll('.nav-button');
             buttons.forEach(btn => {
                 if (btn.id === buttonId && buttonChoice === 'open') {
-                    btn.style.backgroundColor = '#e9ecef';
-                    btn.style.fontWeight = '600';
+                    Zotero.debug('DeepTutorPaneKKKK: Updating button styles for open button #0687E5');
+                    btn.style.backgroundColor = '#0687E5';
+                    btn.style.color = '#FFFFFF';
+                    btn.style.fontFamily = 'Roboto, sans-serif';
+                    btn.style.fontWeight = 'bold';
                 } else {
-                    btn.style.backgroundColor = 'transparent';
-                    btn.style.fontWeight = 'normal';
+                    btn.style.backgroundColor = '#F8F6F7';
+                    btn.style.color = '#000000';
+                    btn.style.fontFamily = 'Roboto, sans-serif';
+                    btn.style.fontWeight = 'bold';
                 }
             });
         }
@@ -1203,6 +1218,44 @@
             // You can store it, process it, or update the UI as needed
             Zotero.debug(`Received PDF data update with ${pdfDataList.length} items`);
             // Add your custom handling logic here
+        }
+
+        _ensureSignUpPopup() {
+            // Only create once
+            if (this._signUpPopup) return;
+            const mainContainer = this.querySelector('#main-container');
+            if (!mainContainer) return;
+            // Create the popup container
+            const popup = document.createXULElement('vbox');
+            popup.setAttribute('id', 'signup-popup');
+            popup.setAttribute('style', `
+                display: none;
+                position: absolute;
+                left: 50%;
+                top: 120px;
+                transform: translateX(-50%);
+                z-index: 9999;
+                background: transparent;
+                align-items: center;
+                justify-content: flex-start;
+                width: 100%;
+                pointer-events: none;
+            `);
+            // Simple: Render dpt-signup-page directly
+            const signUpPage = document.createElement('dpt-signup-page');
+            signUpPage.addEventListener('CloseSignUp', () => {
+                this._toggleSignUpPopup(false);
+            });
+            popup.appendChild(signUpPage);
+            mainContainer.appendChild(popup);
+            this._signUpPopup = popup;
+        }
+
+        _toggleSignUpPopup(show) {
+            this._ensureSignUpPopup();
+            if (this._signUpPopup) {
+                this._signUpPopup.style.display = show ? 'flex' : 'none';
+            }
         }
     }
 

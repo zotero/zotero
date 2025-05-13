@@ -10,8 +10,8 @@
                 <!-- Upload Button Section -->
                 <hbox style="width: 100%; align-items: center; margin-bottom: 2px;">
                     <button id="popup-upload-btn" label="Upload" style="
-                        background: #2c25ac;
-                        color: #fff;
+                        background: #0687E5;
+                        color: #000000;
                         border: none;
                         border-radius: 4px;
                         font-weight: 600;
@@ -20,6 +20,7 @@
                         cursor: pointer;
                         min-width: 0;
                         min-height: 0;
+                        font-family: 'Roboto', sans-serif;
                     " />
                 </hbox>
 
@@ -28,8 +29,9 @@
                     max-height: 100px;
                     border: 1px solid #e0e0e0;
                     border-radius: 4px;
-                    background: white;
+                    background: #F8F6F7;
                     padding: 4px;
+                    font-family: 'Roboto', sans-serif;
                 ">
                     <vbox id="file-list-container" style="gap: 4px;"/>
                 </scrollbox>
@@ -37,22 +39,22 @@
                 <!-- Model Name Section -->
                 <vbox>
                     <label value="Model Name" style="font-weight: bold; margin-bottom: 4px;"/>
-                    <editable-text id="model-name" style="width: 100%;"/>
+                    <editable-text id="model-name" style="width: 100%; background: #F8F6F7; font-family: 'Roboto', sans-serif;"/>
                 </vbox>
 
                 <!-- Model Type Buttons -->
                 <vbox>
                     <label value="Model Type" style="font-weight: bold; margin-bottom: 4px;"/>
                     <hbox style="gap: 8px;">
-                        <button id="lite-btn" label="Lite" style="flex: 1;"/>
-                        <button id="normal-btn" label="Normal" style="flex: 1;"/>
-                        <button id="advanced-btn" label="Advanced" style="flex: 1;"/>
+                        <button id="lite-btn" label="Lite" style="flex: 1; background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;"/>
+                        <button id="normal-btn" label="Normal" style="flex: 1; background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;"/>
+                        <button id="advanced-btn" label="Advanced" style="flex: 1; background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;"/>
                     </hbox>
                 </vbox>
 
                 <!-- Submit Button Section -->
                 <hbox style="justify-content: center; margin-top: 16px;">
-                    <button id="submit-btn" label="Submit" style="min-width: 120px;"/>
+                    <button id="submit-btn" label="Submit" style="min-width: 120px; background: #0687E5; color: #000000; font-family: 'Roboto', sans-serif;"/>
                 </hbox>
             </vbox>
         `);
@@ -98,15 +100,19 @@
                 advanced: this._advancedBtn
             };
 
-            // Reset all buttons
-            Object.values(buttons).forEach(btn => {
-                btn.style.backgroundColor = '#e0e0e0';
-                btn.style.color = '#444';
+            Object.entries(buttons).forEach(([type, btn]) => {
+                if (type === this._selectedType) {
+                    btn.style.backgroundColor = '#0687E5';
+                    btn.style.color = '#FFFFFF';
+                    btn.style.fontFamily = 'Roboto, sans-serif';
+                    btn.style.fontWeight = 'bold';
+                } else {
+                    btn.style.backgroundColor = '#F8F6F7';
+                    btn.style.color = '#000000';
+                    btn.style.fontFamily = 'Roboto, sans-serif';
+                    btn.style.fontWeight = 'bold';
+                }
             });
-
-            // Highlight selected button
-            buttons[this._selectedType].style.backgroundColor = '#2c25ac';
-            buttons[this._selectedType].style.color = '#fff';
         }
 
         _createFileButton(file) {

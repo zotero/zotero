@@ -288,6 +288,7 @@ Experiment putting deeptutor chat box out
                height: 100%;
                display: flex;
                flex-direction: column;
+               font-family: 'Roboto', sans-serif;
            ">
                <description id="session-name" value="Session: None" style="
                    font-size: 1em;
@@ -306,11 +307,12 @@ Experiment putting deeptutor chat box out
                        border-radius: 8px;
                        padding: 12px;
                        overflow-y: auto;
-                       background: white;
+                       background: #F8F6F7;
                        height: 100%;
                        max-height: 400px;
                        width: 100%;
                        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+                       font-family: 'Roboto', sans-serif;
                    " />
                </hbox> 
 
@@ -332,12 +334,13 @@ Experiment putting deeptutor chat box out
                                padding: 6px 10px;
                                border: 1px solid #495057;
                                border-radius: 6px;
-                               background: #fff;
+                               background: #F8F6F7;
                                color: #1a65b0;
                                min-height: 32px;
                                max-height: 80px;
                                font-size: 13px;
                                overflow-y: auto;
+                               font-family: 'Roboto', sans-serif;
                            " />
                        </html:div>
                    </hbox>
@@ -347,8 +350,8 @@ Experiment putting deeptutor chat box out
                        <!-- Model Button and Popup at left -->
                        <vbox style="position: relative;">
                            <button id="model-btn" label="Model" style="
-                               background: #e0e0e0;
-                               color: #444;
+                               background: #0687E5;
+                               color: #000000;
                                border: none;
                                border-radius: 4px;
                                font-weight: 500;
@@ -358,6 +361,7 @@ Experiment putting deeptutor chat box out
                                font-size: 11px;
                                min-width: 0;
                                min-height: 0;
+                               font-family: 'Roboto', sans-serif;
                            " />
                            <vbox id="model-popup" style="
                                display: none;
@@ -383,7 +387,7 @@ Experiment putting deeptutor chat box out
                        <hbox style="align-items: center; gap: 4px;">
                            <vbox style="position: relative;">
                                <button id="image-btn" style="
-                                   background: #e0e0e0;
+                                   background: #0687E5;
                                    border: none;
                                    border-radius: 4px;
                                    width: 24px;
@@ -396,6 +400,7 @@ Experiment putting deeptutor chat box out
                                    min-width: 0;
                                    min-height: 0;
                                    padding: 0;
+                                   font-family: 'Roboto', sans-serif;
                                ">
                                    <html:img src="chrome://zotero/skin/image-icon.svg" style="width: 14px; height: 14px;" />
                                </button>
@@ -414,8 +419,8 @@ Experiment putting deeptutor chat box out
                                "></vbox>
                            </vbox>
                            <button id="send-btn" style="
-                               background: #2c25ac;
-                               color: #fff;
+                               background: #0687E5;
+                               color: #000000;
                                border: none;
                                border-radius: 50%;
                                width: 26px;
@@ -428,6 +433,7 @@ Experiment putting deeptutor chat box out
                                min-width: 0;
                                min-height: 0;
                                padding: 0;
+                               font-family: 'Roboto', sans-serif;
                            ">
                                <html:img src="chrome://zotero/skin/send-icon.svg" style="width: 13px; height: 13px;" />
                            </button>

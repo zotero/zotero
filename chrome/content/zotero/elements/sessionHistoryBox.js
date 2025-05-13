@@ -161,10 +161,11 @@
                             padding: 6px 10px;
                             border: 1px solid #495057;
                             border-radius: 6px;
-                            background: #fff;
+                            background: #F8F6F7;
                             color: #1a65b0;
                             min-height: 32px;
                             font-size: 13px;
+                            font-family: 'Roboto', sans-serif;
                         " />
                     </html:div>
                 </hbox>
@@ -174,8 +175,9 @@
                     border-radius: 8px;
                     padding: 8px;
                     overflow-y: auto;
-                    background: white;
+                    background: #F8F6F7;
                     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+                    font-family: 'Roboto', sans-serif;
                 " />
             </vbox>
         `);
@@ -219,14 +221,15 @@
                     width: 100%;
                     padding: 8px 12px;
                     margin: 4px 0;
-                    background: #f8f9fa;
+                    background: #0687E5;
                     border: 1px solid #e9ecef;
                     border-radius: 6px;
                     text-align: left;
                     font-size: 13px;
-                    color: #2c3e50;
+                    color: #000000;
                     cursor: pointer;
                     transition: background-color 0.2s;
+                    font-family: 'Roboto', sans-serif;
                 `);
                 button.addEventListener("click", () => this.loadSession(session.sessionName));
                 this._sessionList.appendChild(button);
