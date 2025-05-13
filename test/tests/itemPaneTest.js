@@ -1694,12 +1694,12 @@ describe("Item pane", function () {
 		});
 
 		it("should hide the rename from parent button if already renamed", async function () {
-			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'application/pdf');
 			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
 			let attachment = await Zotero.Attachments.importFromFile({
 				file: file,
+				fileBaseName: "Lorem Ipsum", // Simulate auto-renaming, normally code would call getRenamedFileBaseNameIfAllowedType to generate fileBaseName
 				parentItemID: item.id
 			});
 
@@ -1720,11 +1720,9 @@ describe("Item pane", function () {
 			
 			await attachment.eraseTx();
 			await item.eraseTx();
-			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
 		});
 
 		it("should hide the rename from parent button, after file was renamed", async function () {
-			Zotero.Prefs.set('autoRenameFiles.fileTypes', 'x-nonexistent/type');
 			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
 			let file = getTestDataDirectory();
 			file.append('test.txt');
@@ -1751,7 +1749,6 @@ describe("Item pane", function () {
 			
 			await attachment.eraseTx();
 			await item.eraseTx();
-			Zotero.Prefs.clear('autoRenameFiles.fileTypes');
 		});
 
 		it("should hide the rename from parent button for top-level items", async function () {
