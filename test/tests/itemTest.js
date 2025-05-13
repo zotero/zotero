@@ -1999,6 +1999,47 @@ describe("Zotero.Item", function () {
 			assert.lengthOf(item.getNotes(), 1);
 		});
 		
+		it("should include changed field data in notifier extraData", async function () {
+			var item = await createDataObject('item', { title: 'old value' });
+			
+			var promise = waitForNotifierEvent('modify', 'item');
+			item.setField('title', 'new value');
+			await item.saveTx();
+			
+			var { ids, extraData } = await promise;
+			
+			assert.deepPropertyVal(extraData[ids[0]], 'changed', { title: 'old value' });
+		});
+		
+		// 'deleted' and 'tags' use a different, newer mechanism for marking changes
+		it("should include changed 'deleted' value in notifier extraData", async function () {
+			var item = await createDataObject('item');
+			
+			var promise = waitForNotifierEvent('modify', 'item');
+			item.deleted = true;
+			await item.saveTx();
+			
+			var { ids, extraData } = await promise;
+			
+			assert.deepPropertyVal(extraData[ids[0]], 'changed', { deleted: false });
+		});
+		
+		it("should include changed tags in notifier extraData", async function () {
+			var item = await createDataObject('item', { tags: ['old tag 1', 'old tag 2'] });
+			
+			var promise = waitForNotifierEvent('modify', 'item');
+			item.setTags(['new tag 1', 'new tag 2']);
+			await item.saveTx();
+			
+			var { ids, extraData } = await promise;
+			
+			assert.deepPropertyVal(
+				extraData[ids[0]],
+				'changed',
+				{ tags: [{ tag: 'old tag 1' }, { tag: 'old tag 2' }] }
+			);
+		});
+		
 		// Make sure we're updating annotations rather than replacing and triggering ON DELETE CASCADE
 		it("should update attachment without deleting child annotations", async function () {
 			var attachment = await importFileAttachment('test.pdf');

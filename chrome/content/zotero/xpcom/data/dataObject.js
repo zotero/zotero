@@ -930,7 +930,10 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 			}
 		}
 		if (!env.isNew) {
-			env.changed = this._previousData;
+			env.notifierData.changed = Object.assign({}, this._previousData);
+			for (let field in this._changedData) {
+				env.notifierData.changed[field] = this['_' + field];
+			}
 		}
 		
 		// Create transaction

@@ -235,13 +235,13 @@ Zotero.Notifier = new function () {
 			// If just a single id, extra data can be keyed by id or passed directly
 			if (ids.length == 1) {
 				let id = ids[0];
-				queue[type][event].data[id] = extraData[id] ? extraData[id] : extraData;
+				queue[type][event].data[id] = extraData[id] !== undefined ? extraData[id] : extraData;
 			}
 			// For multiple ids, check for data keyed by the id
 			else {
 				for (let i = 0; i < ids.length; i++) {
 					let id = ids[i];
-					if (extraData[id]) {
+					if (extraData[id] !== undefined) {
 						queue[type][event].data[id] = extraData[id];
 					}
 				}
