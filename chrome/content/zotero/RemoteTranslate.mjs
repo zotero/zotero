@@ -80,8 +80,7 @@ export class RemoteTranslate {
 	 * Set a handler on the proxied Zotero.Translate instance.
 	 * The handler function is passed this RemoteTranslate as its first argument.
 	 *
-	 * Supports all Zotero.Translate handlers in addition to newTestDetectionFailed, which can be called from
-	 * {@link newTest} if detection fails to confirm the creation of an expected-fail test.
+	 * Supports all Zotero.Translate handlers.
 	 *
 	 * @param {String} name
 	 * @param {Function} handler

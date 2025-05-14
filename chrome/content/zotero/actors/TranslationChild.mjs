@@ -30,7 +30,6 @@ const TRANSLATE_SCRIPT_PATHS = [
 	'src/rdf/n3parser.js',
 	'src/rdf/rdfparser.js',
 	'src/rdf/serialize.js',
-	'testTranslators/translatorTester.js',
 ];
 
 const OTHER_SCRIPT_URIS = [
@@ -82,72 +81,6 @@ export class TranslationChild extends JSWindowActorChild {
 						translate.setTranslator(Cu.cloneInto(translator, this._sandbox));
 					}
 					return await translate.translate();
-				}
-				catch (e) {
-					this._error(id, e);
-					return null;
-				}
-			}
-			case 'runTest': {
-				let { translator, test, id } = data;
-				let { Zotero_TranslatorTester } = this._sandbox;
-				try {
-					let tester = new Zotero_TranslatorTester(
-						Cu.cloneInto(translator, this._sandbox),
-						test.type,
-						(_tester, obj) => this._debug(id, obj),
-						this._makeTranslatorProvider(id),
-					);
-					return await new Promise((resolve) => {
-						tester.runTest(
-							Cu.cloneInto(test, this._sandbox),
-							this.contentWindow.document,
-							Cu.exportFunction(
-								(_, test, status, message) => resolve({ test, status, message }),
-								this._sandbox
-							)
-						);
-					});
-				}
-				catch (e) {
-					this._error(id, e);
-					return null;
-				}
-			}
-			case 'newTest': {
-				let { translator, testInit, id } = data;
-				let { Zotero_TranslatorTester } = this._sandbox;
-				try {
-					let tester = new Zotero_TranslatorTester(
-						Cu.cloneInto(translator, this._sandbox),
-						'web',
-						(_tester, obj) => this._debug(id, obj),
-						this._makeTranslatorProvider(id),
-					);
-					if (testInit) {
-						await tester.waitForDeferDelay(testInit);
-					}
-					return await new Promise((resolve) => {
-						tester.newTest(
-							this.contentWindow.document,
-							Cu.exportFunction(
-								(_, test) => {
-									if (testInit?.defer) {
-										test.defer = testInit.defer;
-									}
-									resolve(test);
-								},
-								this._sandbox
-							),
-							Cu.exportFunction(
-								() => this._sendQuerySafe('Translate:runHandler', {
-									id,
-									name: 'newTestDetectionFailed'
-								}),
-								this._sandbox
-							)
-						);
-					});
 				}
 				catch (e) {
 					this._error(id, e);
@@ -248,7 +181,7 @@ export class TranslationChild extends JSWindowActorChild {
 			}
 			else if (name == 'select') {
 				handler = (_, items, callback) => {
-					this.sendQuery('Translate:runHandler', { id, name, arg: items }).then(items => {
+					this.sendQuery('Translate:runHandler', { id, name, arg: items }).then((items) => {
 						callback(Cu.cloneInto(items, this._sandbox));
 					});
 				};
