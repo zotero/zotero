@@ -349,7 +349,12 @@ var Zotero_LocateMenu = new function() {
 		var selectedItems = [];
 		while (selectedItems.length < 50 && allSelectedItems.length) {
 			var item = allSelectedItems.shift();
-			if (!item.isNote() && !item.isAnnotation()) selectedItems.push(item);
+			if (item.isAnnotation()) {
+				selectedItems.push(item.parentItem);
+			}
+			else if (!item.isNote()) {
+				selectedItems.push(item);
+			}
 		}
 		return selectedItems;
 	}
