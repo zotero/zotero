@@ -328,7 +328,7 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 				&& !endpoint.allowRequestsFromUnsafeWebContent
 				&& !this.headers['x-zotero-connector-api-version']
 				&& !this.headers['zotero-allowed-request']
-				// Allow browser requests test endpoints
+				// Allow browser requests to test endpoints
 				&& !this.pathname.startsWith('/test/')
 				// Allow browser requests to /connector/ping as long as they come
 				// from navigation, not XHR/fetch()/resource loading
