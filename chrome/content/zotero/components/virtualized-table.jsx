@@ -1692,6 +1692,16 @@ var Columns = class {
 			}
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
+
+		// Recover from scenarios where a plugin disables the "title" column and
+		// does not provide its own primary column, or is later removed and the
+		// "title" column is never restored.
+		let hasPrimaryColumn = this._columns.some(c => c.primary && !c.hidden);
+		if (!hasPrimaryColumn) {
+			Zotero.debug(`VirtualizedTable: Missing primary column, re-enabling the "title" column.`);
+			this._columns.find(c => c.dataKey === 'title').hidden = false;
+		}
+		
 		this._adjustColumnWidths();
 		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
