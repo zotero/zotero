@@ -2682,8 +2682,11 @@ var ZoteroPane = new function()
 		if (items.every(item => item.isNote() || item.isAttachment())) {
 			format = Zotero.QuickCopy.getNoteFormat();
 		}
+		let annotationsToExport = [];
 		// To copy annotations, wrap them in a temp note
 		if (items.every(item => item.isAnnotation())) {
+			// Record original annotation items to add them as zotero/annotation in exportItemsToClipboard
+			annotationsToExport = items;
 			format = Zotero.QuickCopy.getNoteFormat();
 			items = [Zotero.QuickCopy.annotationsToNote(items)];
 		}
@@ -2722,7 +2725,7 @@ var ZoteroPane = new function()
 				return;
 			}
 			else {
-				Zotero_File_Interface.exportItemsToClipboard(items, format);
+				Zotero_File_Interface.exportItemsToClipboard(items, format, annotationsToExport);
 			}
 		}
 	}

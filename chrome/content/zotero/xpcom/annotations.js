@@ -116,7 +116,7 @@ Zotero.Annotations = new function () {
 	};
 	
 	
-	this.toJSONSync = function (item) {
+	this.toJSONSync = function (item, addSerializationFields) {
 		var o = {};
 		o.libraryID = item.libraryID;
 		o.key = item.key;
@@ -176,6 +176,12 @@ Zotero.Annotations = new function () {
 		}
 		
 		o.dateModified = Zotero.Date.sqlToISO8601(item.dateModified);
+		// Convenience shortcut to add fields needed for annotation
+		// serialization in Zotero.EditorInstanceUtilities.serializeAnnotations
+		if (addSerializationFields) {
+			o.attachmentItemID = item.parentItemID;
+			o.id = item.key;
+		}
 		return o;
 	};
 
