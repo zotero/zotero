@@ -510,6 +510,75 @@ Zotero.ItemTypes = new function() {
 
 		return "chrome://zotero/skin/item-type/16/" + (isDark ? 'dark' : 'light') + "/document" + suffix + ".svg";
 	}
+
+	this.getImageSrcAlt = function (itemType, isDark) {
+		var suffix = Zotero.hiDPISuffix;
+
+		if (this.isCustom(itemType)) {
+			var id = this.getID(itemType) - this.customIDOffset;
+			if (!_customImages[id]) {
+				throw new Error("Image not available for custom field " + itemType);
+			}
+			return _customImages[id];
+		}
+
+		switch (itemType) {
+			// Use treeitem.png
+			case 'attachmentFile':
+			case 'document':
+				break;
+
+			// HiDPI images available
+			case 'attachmentLink':
+			case 'attachmentPDF':
+			case 'attachmentPDFLink':
+			case 'attachmentEPUB':
+			case 'attachmentEPUBLink':
+			case 'attachmentSnapshot':
+			case 'attachmentWebLink':
+			case 'artwork':
+			case 'audioRecording':
+			case 'bill':
+			case 'blogPost':
+			case 'book':
+			case 'bookSection':
+			case 'case':
+			case 'computerProgram':
+			case 'conferencePaper':
+			case 'dataset':
+			case 'dictionaryEntry':
+			case 'email':
+			case 'encyclopediaArticle':
+			case 'film':
+			case 'forumPost':
+			case 'hearing':
+			case 'instantMessage':
+			case 'interview':
+			case 'journalArticle':
+			case 'letter':
+			case 'magazineArticle':
+			case 'manuscript':
+			case 'map':
+			case 'newspaperArticle':
+			case 'note':
+			case 'patent':
+			case 'podcast':
+			case 'preprint':
+			case 'presentation':
+			case 'radioBroadcast':
+			case 'report':
+			case 'standard':
+			case 'statute':
+			case 'thesis':
+			case 'tvBroadcast':
+			case 'videoRecording':
+			case 'webpage':
+				itemType = itemType.replace(/(?<=^|[^A-Z])([A-Z])/g, '-$1').toLowerCase();
+				return "chrome://zotero/skin/item-type/16/" + (isDark ? 'dark' : 'light') + "/" + itemType + suffix + ".svg";
+		}
+
+		return "chrome://zotero/skin/item-type/16/" + (isDark ? 'dark' : 'light') + "/document" + suffix + ".svg";
+	}
 }
 
 
