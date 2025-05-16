@@ -40,7 +40,7 @@ var Zotero_LocateMenu = new function() {
 			locateMenu.removeChild(locateMenu.firstChild);
 		}
 		
-		var selectedItems = _getSelectedItems();
+		var selectedItems = await _getSelectedItems();
 		
 		if(selectedItems.length) {
 			await _addViewOptions(locateMenu, selectedItems, true, true, true);
@@ -99,7 +99,7 @@ var Zotero_LocateMenu = new function() {
 	 */
 	this.buildContextMenu = Zotero.Promise.coroutine(function* (menu, showIcons) {
 		// get selected items
-		var selectedItems = _getSelectedItems();
+		var selectedItems = yield _getSelectedItems();
 		
 		// if no items selected or >20 items selected, stop now
 		if(!selectedItems.length || selectedItems.length > 20) return;
@@ -298,9 +298,9 @@ var Zotero_LocateMenu = new function() {
 	/**
 	 * Locate selected items
 	 */
-	this.locateItem = function(event, selectedItems) {
+	this.locateItem = async function(event, selectedItems) {
 		if(!selectedItems) {
-			selectedItems = _getSelectedItems();
+			selectedItems = await _getSelectedItems();
 		}
 		
 		// find selected engine
@@ -344,12 +344,23 @@ var Zotero_LocateMenu = new function() {
 	/**
 	 * Get the first 50 selected items
 	 */
-	function _getSelectedItems() {
+	async function _getSelectedItems() {
 		var allSelectedItems = ZoteroPane.getSelectedItems();
 		var selectedItems = [];
 		while (selectedItems.length < 50 && allSelectedItems.length) {
 			var item = allSelectedItems.shift();
-			if (!item.isNote() && !item.isAnnotation()) selectedItems.push(item);
+			if (item.isAnnotation()) {
+				let attachment = item.parentItem;
+				if (attachment.parentItem && attachment === await attachment.parentItem.getBestAttachment()) {
+					selectedItems.push(attachment.parentItem);
+				}
+				else {
+					selectedItems.push(attachment);
+				}
+			}
+			else if (!item.isNote()) {
+				selectedItems.push(item);
+			}
 		}
 		return selectedItems;
 	}
