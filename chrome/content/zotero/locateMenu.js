@@ -351,7 +351,7 @@ var Zotero_LocateMenu = new function() {
 			var item = allSelectedItems.shift();
 			if (item.isAnnotation()) {
 				let attachment = item.parentItem;
-				if (attachment.parentItem && attachment.id === await attachment.parentItem.getBestAttachment()?.id) {
+				if (attachment.parentItem && attachment === await attachment.parentItem.getBestAttachment()) {
 					selectedItems.push(attachment.parentItem);
 				}
 				else {
