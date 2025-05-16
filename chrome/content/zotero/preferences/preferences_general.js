@@ -53,12 +53,18 @@ Zotero_Preferences.General = {
 		}
 		document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', resolverName);
 		
+		Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleRenameFilesDonePrefChange);
 		this.refreshLocale();
 		this._initItemPaneHeaderUI();
 		this.updateAutoRenameFilesUI();
+		this.prepareAutoRenamePrompt();
 		this._updateFileHandlerUI();
 		this._initEbookFontFamilyMenu();
 		this._initAutoDisableToolCheckbox();
+	},
+
+	uninit: function () {
+		Zotero.Prefs.unregisterObserver('autoRenameFiles.done', this._handleRenameFilesDonePrefChange);
 	},
 
 	_getAutomaticLocaleMenuLabel: function () {
@@ -233,6 +239,7 @@ Zotero_Preferences.General = {
 			}
 		}
 		Zotero.Prefs.set('autoRenameFiles.fileTypes', [...enabledTypes].join(','));
+		Zotero.Prefs.set('autoRenameFiles.done', false);
 	},
 	
 	updateAutoRenameFilesUI: function () {
@@ -245,6 +252,48 @@ Zotero_Preferences.General = {
 			checkbox.disabled = disabled;
 		}
 		document.getElementById('rename-linked-files').disabled = disabled;
+		document.getElementById('file-renaming-general-rename-now').setAttribute('hidden', Zotero.Prefs.get('autoRenameFiles.done'));
+	},
+	
+	handleAutoRenameChange: function () {
+		if (Zotero.Prefs.get('autoRenameFiles')) {
+			this.promptAutoRenameFiles();
+		}
+	},
+
+	_handleRenameFilesDonePrefChange: function (newValue) {
+		document.getElementById('file-renaming-general-rename-now').setAttribute('hidden', newValue);
+	},
+
+	renameFilesNow: function () {
+		const { renameFilesFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+		renameFilesFromParent();
+	},
+
+	prepareAutoRenamePrompt: async function () {
+		let [title, description, yes] = await document.l10n.formatValues([
+			'preferences-file-renaming-auto-rename-prompt-title',
+			'preferences-file-renaming-auto-rename-prompt-body',
+			'preferences-file-renaming-auto-rename-prompt-yes'
+		]);
+		let no = Zotero.getString('general.no');
+		this._autoRenamePrompt = { title, description, yes, no };
+	},
+
+	// NOTE: This function is reused in preferences_file_renaming.js. It must be synchronous, because it is also used onunload.
+	promptAutoRenameFiles: function () {
+		let ps = Services.prompt;
+		let { title, description, yes, no } = this._autoRenamePrompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+		const shouldRenameExisting = ps.confirmEx(null, title, description, buttonFlags, yes, no, null, null, {}) === 0;
+		if (shouldRenameExisting) {
+			const { renameFilesFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			renameFilesFromParent();
+		}
+		else {
+			Zotero.Prefs.set('autoRenameFiles.done', false);
+		}
 	},
 	
 	//
