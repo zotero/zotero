@@ -234,6 +234,10 @@ function modify_omni {
 	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line 'lazy.AddonManagerPrivate.webExtensionsMinPlatformVersion' '"7.0"' modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line 'result.targetApplications.push' 'false && result.targetApplications.push' modules/addons/AddonUpdateChecker.sys.mjs
+	# Set uninstall flag to true if the update config has it set
+	replace_line 'targetApplications: \[appEntry\],' \
+		'targetApplications: \[appEntry\],
+		uninstall: getProperty(update, "uninstall", "boolean"),' modules/addons/AddonUpdateChecker.sys.mjs
 	
 	# Prevent automatic installation of default theme
 	# (chrome/toolkit/content/mozapps/extensions/default-theme, removed above)
@@ -266,6 +270,29 @@ function modify_omni {
 	replace_line 'AddonManagerPrivate.callAddonListeners' 'await AddonManagerPrivate.callAddonListeners' modules/addons/XPIInstall.sys.mjs
 	replace_line 'let uninstall = \(\) => \{' 'let uninstall = async () => {' modules/addons/XPIInstall.sys.mjs
 	replace_line 'cancelUninstallAddon\(aAddon\)' 'async cancelUninstallAddon(aAddon)' modules/addons/XPIInstall.sys.mjs
+	# Check for `uninstall` flag in update config and uninstall the addon if set
+	replace_line 'if \(update && !this.addon.location.locked\) \{' \
+		'if (update && !this.addon.location.locked) {
+			if (update.uninstall) {
+				let aId = this.addon.id;
+				logger.debug(`AddonUpdateChecker: uninstall addon \${aId} with uninstall flag`);
+				let addon = await AddonManager.getAddonByID(aId);
+				if (addon && (addon.permissions & AddonManager.PERM_CAN_UNINSTALL)) {
+					try {
+						addon.uninstall();
+					} catch (err) {
+						logger.error(`AddonUpdateChecker: error uninstalling addon \${aId} with uninstall flag`, err);
+					}
+					sendUpdateAvailableMessages(this, null);
+					return;
+				}
+				else {
+					logger.error(`AddonUpdateChecker: addon \${aId} with uninstall flag not found or cannot be uninstalled`);
+					sendUpdateAvailableMessages(this, null);
+					return;
+				}
+			}
+			' modules/addons/XPIInstall.sys.mjs
 	
 	# Prevent login manager from trying to load FxAccountsCommon.sys.mjs
 	replace_line 'return login.hostname == lazy.FXA_PWDMGR_HOST;' 'return false;' modules/storage-json.sys.mjs
