@@ -209,7 +209,7 @@ browser,
 
 				&:not(.needs-update) {
 					.added, .removed {
-						color: var(--fill-secondary);
+						opacity: 0.8;
 					}
 				}
 
@@ -234,12 +234,6 @@ browser,
 		
 		&:focus richlistitem[selected] {
 			.status {
-				&:not(.needs-update) {
-					.added, .removed {
-						filter: invert(1);
-					}
-				}
-
 				&.needs-update {
 					.text {
 						color: var(--color-accent-text);
