@@ -1841,7 +1841,7 @@ var Scaffold = new function () {
 			}
 			else {
 				statusText = reason;
-				needsUpdate = true;
+				needsUpdate = !!updatedTest;
 				_logOutput(logPrefix + statusText);
 			}
 
@@ -1876,7 +1876,7 @@ var Scaffold = new function () {
 
 			statusLabel.replaceChildren(textElem, addedElem, removedElem);
 			
-			if (needsUpdate && updatedTest) {
+			if (needsUpdate) {
 				listItem.dataset.updatedTestString = _stringifyTests(updatedTest.toJSON(), 1);
 			}
 			else {
