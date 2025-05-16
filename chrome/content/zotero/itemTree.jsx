@@ -165,6 +165,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
+		this._openedRowsCache = new Set();
 	}
 
 	unregister() {
@@ -259,6 +260,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		try {
 			Zotero.CollectionTreeCache.clear();
+			this._openedRowsCache.clear();
 			// Get the full set of items we want to show
 			let newSearchItems = await this.collectionTreeRow.getItems();
 			if (this.collectionTreeRow.isTrash()) {
@@ -699,6 +701,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 							let beforeRow = this.rowCount;
 							this._addRow(new ItemTreeRow(item, 0, false), beforeRow);
+							// If the child attachment row was expanded by the user, keep the top-level row open as well
+							if (this._openedRowsCache.has(id)) {
+								this.toggleOpenState(beforeRow);
+							}
 
 							sort = true;
 						}
@@ -1557,6 +1563,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var savedSelection = this.getSelectedObjects();
 		
 		// Save open state and close containers before sorting
+		// Even though we keep track of opened/closed rows in this._openedRowsCache,
+		// it records opened rows by the user and would no have rows closed/opened in other
+		// ways. For example, opened container becomes closed after all of its children are removed
+		// but it still counts as open in _openedRowsCache. So it's best to use _saveOpenState here.
 		var openItemIDs = this._saveOpenState(true);
 		
 		// Sort specific items
@@ -1695,6 +1705,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._lastToggleOpenStateIndex = index;
 
 		if (this.isContainerOpen(index)) {
+			this._openedRowsCache.delete(this.getRow(index).ref.id);
 			await this._closeContainer(index, skipRowMapRefresh, true);
 			this._lastToggleOpenStateIndex = null;
 			return;
@@ -1748,11 +1759,23 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		this._openedRowsCache.add(this.getRow(index).ref.id);
 		this._rows[index].isOpen = true;
 
 		if (count == 0) {
 			this._lastToggleOpenStateIndex = null;
 			return;
+		}
+
+		// If child rows were added, check if those they were opened by the user
+		// in the past, and if so - open them as well.
+		// Rows are opened in reverse order, so that addded rows do not affect
+		// the indices of items that are not yet expanded.
+		for (let i = index + count; i > index; i--) {
+			let newRowRefID = this.getRow(i).ref.id;
+			if (this._openedRowsCache.has(newRowRefID)) {
+				this.toggleOpenState(i, true);
+			}
 		}
 
 		if (!skipRowMapRefresh) {
@@ -3840,6 +3863,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		// Reopen from bottom up
 		for (var i=rowsToOpen.length-1; i>=0; i--) {
+			// If the row is already open, do nothing
+			if (this.isContainerOpen(rowsToOpen[i])) continue;
 			this.toggleOpenState(rowsToOpen[i], true);
 		}
 		this._refreshRowMap();
