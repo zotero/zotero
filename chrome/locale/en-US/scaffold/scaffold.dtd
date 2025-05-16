@@ -71,7 +71,7 @@
 <!ENTITY scaffold.testing.save							"Save">
 <!ENTITY scaffold.testing.delete						"Delete">
 <!ENTITY scaffold.testing.run							"Run">
-<!ENTITY scaffold.testing.update						"Run and Update">
+<!ENTITY scaffold.testing.applyUpdates					"Apply Updates">
 <!ENTITY scaffold.testing.rememberCookies				"Remember cookies">
 <!ENTITY scaffold.testing.create.web					"Create Web Test">
 <!ENTITY scaffold.testing.create.import					"Create Import Test">
