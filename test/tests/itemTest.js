@@ -2000,15 +2000,26 @@ describe("Zotero.Item", function () {
 		});
 		
 		it("should include changed field data in notifier extraData", async function () {
-			var item = await createDataObject('item', { title: 'old value' });
+			var item = await createDataObject('item', { title: 'first' });
 			
 			var promise = waitForNotifierEvent('modify', 'item');
-			item.setField('title', 'new value');
+			item.setField('title', 'second');
+			item.setField('extra', 'extra');
 			await item.saveTx();
 			
 			var { ids, extraData } = await promise;
 			
-			assert.deepPropertyVal(extraData[ids[0]], 'changed', { title: 'old value' });
+			// "first" -> "second", old value is "first" and "extra" was empty
+			assert.deepPropertyVal(extraData[ids[0]], 'changed', { title: 'first', extra: false });
+
+			var promise = waitForNotifierEvent('modify', 'item');
+			item.setField('title', 'third');
+			await item.saveTx();
+
+			var { ids, extraData } = await promise;
+
+			// "second" -> "third", old value is "second", and we don't notify about "extra" because it's not changed this time
+			assert.deepPropertyVal(extraData[ids[0]], 'changed', { title: 'second' });
 		});
 		
 		// 'deleted' and 'tags' use a different, newer mechanism for marking changes
