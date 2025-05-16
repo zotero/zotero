@@ -30,8 +30,7 @@ export class CitationDialogPopupsHandler {
 	constructor({ doc }) {
 		this.doc = doc;
 
-		this.item = null;
-		this.citationItem = null;
+		this.bubbleItem = null;
 		this.discardItemDetailsEdits = false;
 		this.itemDetailsWhenOpened = {};
 		this.itemDetailsTimeOpened = null;
@@ -60,7 +59,7 @@ export class CitationDialogPopupsHandler {
 			let event = new CustomEvent("delete-item", {
 				bubbles: true,
 				detail: {
-					dialogReferenceID: this.dialogReferenceID
+					dialogReferenceID: this.bubbleItem.dialogReferenceID
 				}
 			});
 			this.doc.dispatchEvent(event);
@@ -71,7 +70,7 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#itemDetails .show").addEventListener("click", (_) => {
 			this.discardItemDetailsEdits = true;
 			this._getNode("#itemDetails").hidePopup();
-			Zotero.Utilities.Internal.showInLibrary(this.item);
+			Zotero.Utilities.Internal.showInLibrary(this.bubbleItem.item);
 		});
 		this._getNode("#itemDetails .done").addEventListener("click", (_) => {
 			this._getNode("#itemDetails").hidePopup();
@@ -88,20 +87,18 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#itemDetails").addEventListener("keypress", this.handleItemDetailsKeypress.bind(this));
 	}
 
-	openItemDetails(dialogReferenceID, item, citationItem, itemDescription) {
-		this.item = item;
-		this.citationItem = citationItem;
-		this.dialogReferenceID = dialogReferenceID;
+	openItemDetails(bubbleItem, itemDescription) {
+		this.bubbleItem = bubbleItem;
 		// record initial properties when popup is opened to be able to discard edits on Escape
 		this.itemDetailsWhenOpened = {
-			label: citationItem.label,
-			locator: citationItem.locator,
-			prefix: citationItem.prefix,
-			suffix: citationItem.suffix,
-			suppressAuthor: citationItem["suppress-author"]
+			label: bubbleItem.label,
+			locator: bubbleItem.locator,
+			prefix: bubbleItem.prefix,
+			suffix: bubbleItem.suffix,
+			suppressAuthor: bubbleItem.suppressAuthor
 		};
 
-		let bubble = this._getNode(`[dialogReferenceID='${dialogReferenceID}']`);
+		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
 		let bubbleRect = bubble.getBoundingClientRect();
 		let popup = this._getNode("#itemDetails");
 		popup.openPopup(bubble, "after_start", 0, 4, false, false, null);
@@ -120,21 +117,21 @@ export class CitationDialogPopupsHandler {
 				this._getNode("#label").appendChild(option);
 			}
 		}
-		this._getNode("#itemDetails .show").hidden = !this.item.id;
+		this._getNode("#itemDetails .show").hidden = !this.bubbleItem.item.id;
 
 		// Add header and fill inputs with their values
 		let description = itemDescription;
 		this._getNode("#itemDetails").querySelector(".description")?.remove();
-		this._getNode("#itemTitle").textContent = this.item.getDisplayTitle();
+		this._getNode("#itemTitle").textContent = this.bubbleItem.item.getDisplayTitle();
 		this._getNode("#itemTitle").after(description);
-		let dataTypeLabel = this.item.getItemTypeIconName(true);
+		let dataTypeLabel = this.bubbleItem.item.getItemTypeIconName(true);
 		this._getNode("#itemDetails").querySelector(".icon").setAttribute("data-item-type", dataTypeLabel);
 
-		this._getNode("#label").value = this.citationItem.label || "page";
-		this._getNode("#locator").value = this.citationItem.locator || "";
-		this._getNode("#prefix").value = this.citationItem.prefix || "";
-		this._getNode("#suffix").value = this.citationItem.suffix || "";
-		this._getNode("#suppress-author").checked = !!this.citationItem["suppress-author"];
+		this._getNode("#label").value = this.bubbleItem.label || "page";
+		this._getNode("#locator").value = this.bubbleItem.locator || "";
+		this._getNode("#prefix").value = this.bubbleItem.prefix || "";
+		this._getNode("#suffix").value = this.bubbleItem.suffix || "";
+		this._getNode("#suppress-author").checked = !!this.bubbleItem.suppressAuthor;
 		bubble.classList.add("showingDetails");
 		this.itemDetailsTimeOpened = (new Date()).getTime();
 	}
@@ -158,17 +155,17 @@ export class CitationDialogPopupsHandler {
 
 	// When item details popup is closed, sync it's data to citationItems
 	handleItemDetailsClosure() {
-		let bubble = this._getNode(`[dialogReferenceID='${this.dialogReferenceID}']`);
+		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
 		if (!bubble) return;
 		bubble.classList.remove("showingDetails");
 		// Restore properties to what they were when popup opened
 		if (this.discardItemDetailsEdits) {
 			this.discardItemDetailsEdits = false;
-			this.citationItem.label = this.itemDetailsWhenOpened.label;
-			this.citationItem.locator = this.itemDetailsWhenOpened.locator;
-			this.citationItem.prefix = this.itemDetailsWhenOpened.prefix;
-			this.citationItem.suffix = this.itemDetailsWhenOpened.suffix;
-			this.citationItem["suppress-author"] = this.itemDetailsWhenOpened.suppressAuthor;
+			this.bubbleItem.label = this.itemDetailsWhenOpened.label;
+			this.bubbleItem.locator = this.itemDetailsWhenOpened.locator;
+			this.bubbleItem.prefix = this.itemDetailsWhenOpened.prefix;
+			this.bubbleItem.suffix = this.itemDetailsWhenOpened.suffix;
+			this.bubbleItem.suppressAuthor = this.itemDetailsWhenOpened.suppressAuthor;
 			this.itemDetailsWhenOpened = {};
 			this.notifyCitationDialogOfChange();
 		}
@@ -191,11 +188,11 @@ export class CitationDialogPopupsHandler {
 
 	// Update item details and notify citation dialog about changes
 	handleItemDetailsChange() {
-		this.citationItem.label = this._getNode("#locator").value ? this._getNode("#label").value : null;
-		this.citationItem.locator = this._getNode("#locator").value;
-		this.citationItem.prefix = this._getNode("#prefix").value;
-		this.citationItem.suffix = this._getNode("#suffix").value;
-		this.citationItem["suppress-author"] = this._getNode("#suppress-author").checked;
+		this.bubbleItem.label = this._getNode("#locator").value ? this._getNode("#label").value : null;
+		this.bubbleItem.locator = this._getNode("#locator").value;
+		this.bubbleItem.prefix = this._getNode("#prefix").value;
+		this.bubbleItem.suffix = this._getNode("#suffix").value;
+		this.bubbleItem.suppressAuthor = this._getNode("#suppress-author").checked;
 		this.notifyCitationDialogOfChange();
 	}
 
@@ -204,7 +201,7 @@ export class CitationDialogPopupsHandler {
 		let event = new CustomEvent("item-details-updated", {
 			bubbles: true,
 			detail: {
-				dialogReferenceID: this.dialogReferenceID
+				dialogReferenceID: this.bubbleItem.dialogReferenceID
 			}
 		});
 		this.doc.dispatchEvent(event);
