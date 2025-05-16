@@ -91,10 +91,9 @@ export class CitationDialogSearchHandler {
 	// by the number of results in each library.
 	// Items/notes in the libraries group are sorted via _createItemsSort/_createNotesSort comparators.
 	// Takes citedItems as a parameter to filter them out from Selected, Opened and Cited groups.
-	getOrderedSearchResultGroups(citedItems = []) {
+	getOrderedSearchResultGroups(citedItemIDs = new Set()) {
 		let removeItemsIncludedInCitation = (items) => {
-			let citedItemsIDs = new Set(citedItems.map(item => item.cslItemID || item.id));
-			return items.filter(i => !citedItemsIDs.has(i.cslItemID ? i.cslItemID : i.id));
+			return items.filter(i => !citedItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		};
 		let result = [];
 		// selected/open/cited go first
@@ -184,6 +183,7 @@ export class CitationDialogSearchHandler {
 		else {
 			this.results.cited = this.searchValue ? this._filterNonMatchingItems(this.citedItems) : [];
 		}
+		this._deduplicate();
 	}
 
 	// clear selected/open items cache to re-fetch those items
@@ -219,13 +219,16 @@ export class CitationDialogSearchHandler {
 
 	// make sure that each item appears only in one group.
 	// Items that are selected are removed from opened.
-	// Items that are selected or opened are removed from library results.
+	// Items that are selected or opened are removed from cited.
+	// Items that are selected or opened or cited are removed from library results.
 	_deduplicate() {
 		let selectedIDs = new Set(this.results.selected.map(item => item.id));
 		let openIDs = new Set(this.results.open.map(item => item.id));
+		let citedIDs = new Set(this.results.cited.map(item => item.id));
 
 		this.results.open = this.results.open.filter(item => !selectedIDs.has(item.id));
-		this.results.found = this.results.found.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id));
+		this.results.cited = this.results.cited.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id));
+		this.results.found = this.results.found.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id) && !citedIDs.has(item.id));
 	}
 		
 	// Run the actual search query and find all items matching query across all libraries

@@ -181,8 +181,8 @@ class Layout {
 		let sections = [];
 
 		// Tell SearchHandler which currently cited items are so they are not included in results
-		let citedItems = CitationDataManager.getCitationItems();
-		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(citedItems);
+		let citedIDs = CitationDataManager.getCitedLibraryItemIDs();
+		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(citedIDs);
 		for (let { key, group, isLibrary } of searchResultGroups) {
 			// selected items become a collapsible deck/list if there are multiple items
 			let isGroupCollapsible = key == "selected" && group.length > 1;
@@ -440,13 +440,8 @@ class LibraryLayout extends Layout {
 	updateSelectedItems() {
 		if (!libraryLayout.itemsView) return;
 		let selectedItemIDs = new Set(libraryLayout.itemsView.getSelectedItems().map(item => item.id));
-		for (let itemObj of CitationDataManager.items) {
-			if (selectedItemIDs.has(itemObj.zoteroItem.id)) {
-				itemObj.selected = true;
-			}
-			else {
-				itemObj.selected = false;
-			}
+		for (let bubbleItem of CitationDataManager.items) {
+			bubbleItem.selected = selectedItemIDs.has(bubbleItem.id);
 		}
 		IOManager.updateBubbleInput();
 	}
@@ -711,10 +706,9 @@ class LibraryLayout extends Layout {
 		if (event.key == "Backspace") {
 			let itemsToRemove = this.itemsView.getSelectedItems();
 			for (let item of itemsToRemove) {
-				let citationItems = CitationDataManager.getItems({ zoteroItemID: item.id });
-				for (let citationItem of citationItems) {
-					let { dialogReferenceID } = citationItem;
-					IOManager._deleteItem(dialogReferenceID);
+				let items = CitationDataManager.getItems({ itemID: item.id });
+				for (let item of items) {
+					IOManager._deleteItem(item.dialogReferenceID);
 				}
 			}
 		}
@@ -722,12 +716,12 @@ class LibraryLayout extends Layout {
 
 	// Highlight/de-highlight selected rows
 	async _refreshItemsViewHighlightedRows() {
-		let selectedIDs = CitationDataManager.items.map(({ zoteroItem }) => zoteroItem.id).filter(id => !!id);
+		let selectedIDs = CitationDataManager.getCitedLibraryItemIDs();
 		// Wait for the tree to fully load to avoid a logged error that the tree is undefined
 		while (!this.itemsView.tree) {
 			await Zotero.Promise.delay(10);
 		}
-		this.itemsView.setHighlightedRows(selectedIDs);
+		this.itemsView.setHighlightedRows([...selectedIDs]);
 	}
 
 	_scrollHorizontallyOnWheel(event) {
@@ -820,13 +814,8 @@ class ListLayout extends Layout {
 
 	updateSelectedItems() {
 		let selectedIDs = new Set([...doc.querySelectorAll(".item.selected")].map(node => parseInt(node.getAttribute("itemID"))));
-		for (let itemObj of CitationDataManager.items) {
-			if (selectedIDs.has(itemObj.zoteroItem.id)) {
-				itemObj.selected = true;
-			}
-			else {
-				itemObj.selected = false;
-			}
+		for (let bubbleItem of CitationDataManager.items) {
+			bubbleItem.selected = selectedIDs.has(bubbleItem.id);
 		}
 		IOManager.updateBubbleInput();
 	}
@@ -950,6 +939,10 @@ const IOManager = {
 			let mode = _id("mode-button").getAttribute("mode");
 			newMode = mode == "library" ? "list" : "library";
 		}
+		// Do nothing if switching to a mode that is already active
+		let currentMode = _id("mode-button").getAttribute("mode");
+		if (currentMode == newMode) return;
+		
 		_id("list-layout").hidden = newMode == "library";
 		_id("library-layout").hidden = newMode == "list";
 
@@ -990,9 +983,15 @@ const IOManager = {
 	updateBubbleInput() {
 		// re-generate the bubble string for each item, in case a locator/prefix/suffix/etc. was changed
 		for (let item of CitationDataManager.items) {
-			item.bubbleString = Helpers.buildBubbleString({ citationItem: item.citationItem, zoteroItem: item.zoteroItem });
+			item.updateBubbleString();
 		}
-		_id("bubble-input").refresh(CitationDataManager.items);
+		_id("bubble-input").refresh(CitationDataManager.items.map((item) => {
+			return {
+				dialogReferenceID: item.dialogReferenceID,
+				bubbleString: item.bubbleString,
+				selected: item.selected,
+			};
+		}));
 		_id("accept-button").disabled = !CitationDataManager.items.length;
 	},
 
@@ -1005,7 +1004,8 @@ const IOManager = {
 		if (isCitingNotes) {
 			if (!items[0].isNote()) return;
 			CitationDataManager.items = [];
-			await CitationDataManager.addItems({ citationItems: items });
+			let bubbleItem = BubbleItem.fromItem(items[0]);
+			await CitationDataManager.addItems({ bubbleItems: [bubbleItem] });
 			accept();
 			return;
 		}
@@ -1019,18 +1019,13 @@ const IOManager = {
 		
 		// If multiple items are being added, only add ones that are not included in the citation
 		if (items.length > 1) {
-			items = items.filter(item => !(item.id && CitationDataManager.getItems({ zoteroItemID: item.id }).length));
+			items = items.filter(item => !(item.id && CitationDataManager.getItems({ itemID: item.id }).length));
 		}
 
 		// If the last input has a locator, add it into the item
 		let input = _id("bubble-input").getCurrentInput();
 		let inputValue = SearchHandler.cleanSearchQuery(input?.value || "");
 		let locator = Helpers.extractLocator(inputValue);
-		// If there is no locator, make sure we clear it from the citation item
-		for (let item of items) {
-			item.label = locator?.label || null;
-			item.locator = locator?.locator || null;
-		}
 		// Add the item at a position based on current input if it is not explicitly specified
 		if (index === null && input) {
 			index = _id("bubble-input").getFutureBubbleIndex();
@@ -1040,7 +1035,15 @@ const IOManager = {
 			input.remove();
 		}
 
-		await CitationDataManager.addItems({ citationItems: items, index });
+		// Add entries into the citation with the current locator if specified
+		let bubbleItems = items.map(item => BubbleItem.fromItem(item));
+		if (locator) {
+			for (let bubbleItem of bubbleItems) {
+				bubbleItem.locator = locator.locator;
+				bubbleItem.label = locator.label;
+			}
+		}
+		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
@@ -1255,8 +1258,8 @@ const IOManager = {
 		let bubble = input.previousElementSibling;
 		let item = CitationDataManager.getItem({ dialogReferenceID: bubble?.getAttribute("dialogReferenceID") });
 		if (item && locator && locator.onlyLocator && bubble) {
-			item.citationItem.locator = locator.locator;
-			item.citationItem.label = locator.label;
+			item.locator = locator.locator;
+			item.label = locator.label;
 			input.value = "";
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 			this.updateBubbleInput();
@@ -1308,8 +1311,8 @@ const IOManager = {
 	},
 
 	_openItemDetailsPopup(dialogReferenceID) {
-		let { zoteroItem, citationItem } = CitationDataManager.getItem({ dialogReferenceID });
-		PopupsHandler.openItemDetails(dialogReferenceID, zoteroItem, citationItem, Helpers.buildItemDescription(zoteroItem));
+		let bubbleItem = CitationDataManager.getItem({ dialogReferenceID });
+		PopupsHandler.openItemDetails(bubbleItem, Helpers.buildItemDescription(bubbleItem.item));
 	},
 
 	_handleInput({ query, eventType }) {
@@ -1425,27 +1428,112 @@ const IOManager = {
 	}
 };
 
+// Representation of a single entry in the citation.
+class BubbleItem {
+	// Can be created from either Zotero.Item or citation item from io.citation.citationItems
+	static fromItem(item) {
+		let citationItem = {};
+		return new BubbleItem({ item, citationItem });
+	}
+
+	static fromCitationItem(citationItem) {
+		let item;
+		if (io.customGetItem) {
+			item = io.customGetItem(citationItem);
+		}
+		if (!item) {
+			item = Zotero.Cite.getItem(citationItem.id);
+		}
+		return new BubbleItem({ item, citationItem });
+	}
+
+	constructor({ item, citationItem }) {
+		if (!item || !citationItem) {
+			throw new Error("Both Zotero.Item and citation item must be provided");
+		}
+		this.item = item;
+		this.cslItemID = item.cslItemID;
+		this.cslItemData = item.cslItemData;
+		this.cslURIs = item.cslURIs;
+
+		this.locator = citationItem.locator;
+		this.label = citationItem.label;
+		this.suffix = citationItem.suffix;
+		this.prefix = citationItem.prefix;
+		this.suppressAuthor = citationItem["suppress-author"];
+		
+		this.bubbleString = "";
+		this.selected = false;
+		// Add a new ID to our citation item and set the same ID on the bubble
+		// so we have a reliable way to identify which bubble refers to which citationItem.
+		this.dialogReferenceID = Zotero.Utilities.randomString(5);
+		this.updateBubbleString();
+	}
+
+	get id() {
+		return this.cslItemID || this.item.id;
+	}
+
+	updateBubbleString() {
+		this.bubbleString = Helpers.buildBubbleString(this);
+	}
+
+	// Return an object with relevant fields that cipeproc can consume.
+	// Can optionally include dialogReferenceID for sorting in CitationDataManager.sort()
+	getCitationItem({ includeDialogReferenceID } = {}) {
+		let citationItem = {
+			id: this.id,
+		};
+		if (this.locator) {
+			citationItem.locator = this.locator;
+			citationItem.label = this.label;
+		}
+		if (this.suffix) {
+			citationItem.suffix = this.suffix;
+		}
+
+		if (this.prefix) {
+			citationItem.prefix = this.prefix;
+		}
+		if (this.suppressAuthor) {
+			citationItem["suppress-author"] = this.suppressAuthor;
+		}
+		if (this.cslItemData) {
+			citationItem.itemData = this.cslItemData;
+		}
+		if (this.cslURIs) {
+			citationItem.uris = this.cslURIs;
+		}
+		if (includeDialogReferenceID) {
+			citationItem.dialogReferenceID = this.dialogReferenceID;
+		}
+		return citationItem;
+	}
+}
+
 //
 // Singleton to store and handle items in this citation.
-// CitationDataManager.items is an array of { zoteroItem, citationItem } objects,
-// where zoteroItem is Zotero.Item and citationItem is a citation item provided by io.
-// They are stored as a pair to make it easier to access both item properties (e.g. item.getDisplayTitle())
-// and properties of citation item (e.g. locator) across different components.
+// CitationDataManager.items is an array of BubbleItem objects, which maps
+// directly to the bubbles in the citation.
 //
 const CitationDataManager = {
 	items: [],
 	itemAddedCache: new Set(),
 
-	getCitationItems() {
-		return this.items.map(item => item.citationItem);
+	getCitedLibraryItemIDs() {
+		return new Set(this.items.map(item => item.item.id).filter(id => id));
+	},
+
+	getSelectedIDs() {
+		return this.items.filter(item => item.selected).map(item => item.id);
 	},
 
 	getItem({ dialogReferenceID }) {
-		return this.items.find(item => item.dialogReferenceID === dialogReferenceID);
+		return this.items.find(bubbleItem => bubbleItem.dialogReferenceID === dialogReferenceID);
 	},
 
-	getItems({ zoteroItemID }) {
-		return this.items.filter(item => item.zoteroItem.id === zoteroItemID);
+	getItems({ itemID }) {
+		return this.items.filter(bubbleItem => bubbleItem.item.id === itemID);
 	},
 
 	getItemIndex({ dialogReferenceID }) {
@@ -1454,28 +1542,28 @@ const CitationDataManager = {
 
 	updateItemAddedCache() {
 		this.itemAddedCache = new Set();
-		for (let { zoteroItem } of this.items) {
-			if (!zoteroItem.id) continue;
-			this.itemAddedCache.add(zoteroItem.id);
+		for (let bubbleItem of this.items) {
+			if (!bubbleItem.item.id) continue;
+			this.itemAddedCache.add(bubbleItem.item.id.id);
 		}
 	},
-	
-	// Include specified items into the citation
-	async addItems({ citationItems = [], index = null }) {
-		for (let item of citationItems) {
-			let zoteroItem = this._citationItemToZoteroItem(item);
-			// Add a new ID to our citation item and set the same ID on the bubble
-			// so we have a reliable way to identify which bubble refers to which citationItem.
-			let dialogReferenceID = Zotero.Utilities.randomString(5);
-			let toInsert = { citationItem: item, zoteroItem: zoteroItem, dialogReferenceID };
+ 	
+	/**
+	 * Include specified items into the citation.
+
+	 */
+	async addItems({ bubbleItems = [], index = null }) {
+		for (let bubbleItem of bubbleItems) {
 			if (index !== null) {
-				this.items.splice(index, 0, toInsert);
+				this.items.splice(index, 0, bubbleItem);
 				index += 1;
 			}
 			else {
-				this.items.push(toInsert);
+				this.items.push(bubbleItem);
 			}
 		}
+		// No sorting happens when citing notes, since the dialog is accepted right after
+		if (isCitingNotes) return;
 		await this.sort();
 		this.updateItemAddedCache();
 	},
@@ -1499,33 +1587,7 @@ const CitationDataManager = {
 
 	// Update io citation object based on Citation.items array
 	updateCitationObject(final = false) {
-		let result = [];
-		for (let item of this.items) {
-			let dialogReferenceID = item.dialogReferenceID;
-			item = item.citationItem;
-			if (item instanceof Zotero.Item) {
-				let ioResult = { id: item.cslItemID || item.id };
-				if (typeof ioResult.id === "string" && ioResult.id.indexOf("/") !== -1) {
-					let item = Zotero.Cite.getItem(ioResult.id);
-					ioResult.uris = item.cslURIs;
-					ioResult.itemData = item.cslItemData;
-				}
-				ioResult.label = item.label || null;
-				ioResult.locator = item.locator || null;
-				ioResult.prefix = item.prefix || null;
-				ioResult.suffix = item.suffix || null;
-				ioResult['suppress-author'] = item["suppress-author"] || null;
-				result.push(ioResult);
-			}
-			else {
-				result.push(item);
-			}
-			if (!final) {
-				result[result.length - 1].dialogReferenceID = dialogReferenceID;
-			}
-		}
-		io.citation.citationItems = result;
-
+		io.citation.citationItems = this.items.map(item => item.getCitationItem({ includeDialogReferenceID: !final }));
 		if (final && io.sortable) {
 			io.citation.properties.unsorted = !_id("keepSorted").checked;
 		}
@@ -1546,53 +1608,23 @@ const CitationDataManager = {
 	
 	// Construct citation upon initial load
 	async buildCitation() {
+		let citationItems = [];
 		if (!io.citation.properties.unsorted
 				&& _id("keepSorted").checked
 				&& io.citation.sortedItems?.length) {
-			await this.addItems({ citationItems: io.citation.sortedItems.map(entry => entry[1]) });
+			citationItems = io.citation.sortedItems.map(entry => entry[1]);
 		}
 		else {
-			await this.addItems({ citationItems: io.citation.citationItems });
+			citationItems = io.citation.citationItems;
 		}
+		let bubbleItems = citationItems.map(item => BubbleItem.fromCitationItem(item));
+		await this.addItems({ bubbleItems });
 	},
-
-	// Check if two given items are the same to prevent an item being inserted more
-	// than once into the citation. Compare firstCreator and title fields, instead of just
-	// itemIDs to account for cited items that may not have ids.
-	potentialDuplicateExists(targetZoteroItem) {
-		if (!(targetZoteroItem instanceof Zotero.Item)) {
-			targetZoteroItem = this._citationItemToZoteroItem(targetZoteroItem);
-		}
-		for (let item of this.items) {
-			let sameCreator = item.zoteroItem.getField("firstCreator") === targetZoteroItem.getField("firstCreator");
-			let sameTitle = item.zoteroItem.getDisplayTitle() === targetZoteroItem.getDisplayTitle();
-			if (sameCreator && sameTitle) return true;
-		}
-		return false;
-	},
-
-	// check if items have the same id, comparing .cslItemID for cited items or .id for
-	// usual items
-	_itemsHaveSameID(itemOne, itemTwo) {
-		let itemOneID = itemOne.cslItemID || itemOne.id;
-		let itemTwoID = itemTwo.cslItemID || itemTwo.id;
-		if (!itemOneID || !itemTwoID) return false;
-		return itemOneID == itemTwoID;
-	},
-
-	// Shortcut to fetch Zotero.Item based on citationItem
-	_citationItemToZoteroItem(citationItem) {
-		if (citationItem instanceof Zotero.Item) return citationItem;
-		if (io.customGetItem) {
-			let item = io.customGetItem(citationItem);
-			if (item) return item;
-		}
-		if (citationItem.id) {
-			return Zotero.Cite.getItem(citationItem.id);
-		}
-		return null;
-	}
 };
+
+// Explicitly expose singletons to global window for tests
+window.CitationDataManager = CitationDataManager;
+window.IOManager = IOManager;
 
 // Top level listeners
 window.addEventListener("load", onLoad);

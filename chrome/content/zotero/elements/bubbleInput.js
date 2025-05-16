@@ -50,21 +50,20 @@
 		 * are not present, remove bubbles whose citation items were removed, rearrange bubbles
 		 * if the items were moved, update bubble text if locator/prefix/suffix was changed.
 		 * Make sure that there is an input for user to type in before and after every bubble.
-		 * @param {Object[]} combinedItems - array of objects { zoteroItem, citationItem, dialogReferenceID, selected }.
-		 * zoteroItem - Zotero.Item, citationItem - object from io.citation.citationItems
-		 * dialogReferenceID - String ID of this citation entry, selected - Boolean indicator if bubble should be highlighted
+		 * @param {Object[]} bubblesConfig - array of objects { dialogReferenceID, bubbleString, selected}
+		 * representing each bubble.
 		 */
-		refresh(combinedItems) {
+		refresh(bubblesConfig) {
 			// Remove bubbles of items that are no longer in the citations
 			for (let bubble of this.getAllBubbles()) {
 				let bubbleDialogReferenceID = bubble.getAttribute("dialogReferenceID");
-				let itemExistsForBubble = combinedItems.find(({ dialogReferenceID }) => dialogReferenceID == bubbleDialogReferenceID);
+				let itemExistsForBubble = bubblesConfig.find(({ dialogReferenceID }) => dialogReferenceID == bubbleDialogReferenceID);
 				if (!itemExistsForBubble) {
 					bubble.remove();
 				}
 			}
 			// Ensure each item in the citation has a bubble in the right position
-			for (let [index, { dialogReferenceID, bubbleString }] of Object.entries(combinedItems)) {
+			for (let [index, { dialogReferenceID, bubbleString }] of Object.entries(bubblesConfig)) {
 				let allBubbles = this.getAllBubbles();
 				let bubbleNode = allBubbles.find(candidate => candidate.getAttribute("dialogReferenceID") == dialogReferenceID);
 				// Create bubble if it does not exist and append to the input
@@ -95,7 +94,7 @@
 			// Highlight bubbles selected in the library view
 			for (let bubble of this.getAllBubbles()) {
 				let bubbleDialogReferenceID = bubble.getAttribute("dialogReferenceID");
-				let itemObj = combinedItems.find(({ dialogReferenceID }) => dialogReferenceID == bubbleDialogReferenceID);
+				let itemObj = bubblesConfig.find(({ dialogReferenceID }) => dialogReferenceID == bubbleDialogReferenceID);
 				if (itemObj) {
 					bubble.classList.toggle("has-item-selected", !!itemObj.selected);
 				}

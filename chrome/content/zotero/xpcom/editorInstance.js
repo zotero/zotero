@@ -1079,6 +1079,10 @@ class EditorInstance {
 				else if (!citationItem.id && citationItem.itemData) {
 					let item = new Zotero.Item();
 					Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
+					// Add csl data in the same format as in Zotero.Integration.Citation.loadItemData
+					item.cslItemID = citationItem.id;
+					item.cslURIs = citationItem.uris;
+					item.cslItemData = citationItem.itemData;
 					return item;
 				}
 				// Otherwise returns `undefined` which makes this function to be
