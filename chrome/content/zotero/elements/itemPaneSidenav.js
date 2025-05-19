@@ -680,8 +680,8 @@
 					Services.focus.moveFocus(window, this.container.getEnabledPane(this.pinnedPane),
 						Services.focus.MOVEFOCUS_FORWARD, 0);
 				}
-				// Otherwise, focus the top-level scrollable itemPane if visible
-				else if (!this.container._collapsed) {
+				// Otherwise, focus the top-level scrollable itemPane
+				else {
 					this._container.querySelector(".zotero-view-item").focus();
 				}
 			}
