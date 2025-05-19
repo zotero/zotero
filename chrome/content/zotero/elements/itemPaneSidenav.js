@@ -605,12 +605,14 @@
 		 * @property {number} position Position of the drop indicator
 		 */
 		computeDropPosition(offset) {
-			let isStacked = this.classList.contains("stacked");
-			let baseSize = isStacked ? 0 : 42;
-
 			// Keep in sync with _itemPaneSidenav.scss
 			let btnSize = 28;
 			let btnGap = 6;
+			let btnToggleSize = 42;
+
+			let isStacked = this.classList.contains("stacked");
+			let baseSize = isStacked ? 0 : btnToggleSize;
+
 			// Before the center of the button, insert before it; otherwise, insert after it.
 			let index = 0;
 			if (offset < btnSize / 2) {
