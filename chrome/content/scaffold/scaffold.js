@@ -1729,9 +1729,12 @@ var Scaffold = new function () {
 			});
 			item.appendChild(wrapWithHBox(defer, { pack: 'center', width: 75 }));
 
+			// Remove updatedTestString if the test changed or updates have been applied
+			if (item.dataset.testString !== testString || item.dataset.updatedTestString === testString) {
+				delete item.dataset.updatedTestString;
+			}
 			item.dataset.testString = testString;
 			item.dataset.testType = test.type;
-			delete item.dataset.updatedTestString;
 
 			if (testIndex >= count) {
 				listBox.appendChild(item);
