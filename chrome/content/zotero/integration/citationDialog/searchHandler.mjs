@@ -50,10 +50,6 @@ export class CitationDialogSearchHandler {
 		this.selectedItems = null;
 		this.openItems = null;
 		this.citedItems = null;
-
-		this.loadCitedItemsPromise = this._getCitedItems().then((citedItems) => {
-			this.citedItems = citedItems;
-		});
 	}
 
 	setSearchValue(str, enforceMinQueryLength) {
@@ -174,8 +170,9 @@ export class CitationDialogSearchHandler {
 
 	async refreshCitedItems() {
 		if (this.citedItems === null) {
-			return;
+			this.citedItems = await this._getCitedItems();
 		}
+		if (!this.citedItems) return;
 		// if "ibid" is typed, return all cited items
 		if (this.searchValue.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
 			this.results.cited = this.citedItems;
@@ -267,6 +264,8 @@ export class CitationDialogSearchHandler {
 
 	async _getCitedItems() {
 		if (this.isCitingNotes) return [];
+		// Noop until io loads all cited data
+		if (!this.io.allCitedDataLoadedDeferred.promise.isResolved()) return null;
 		// Fetch all cited items in the document, not just items currently in the dialog
 		let citedItems = await this.io.getItems();
 		return citedItems;

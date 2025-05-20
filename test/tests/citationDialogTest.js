@@ -12,7 +12,8 @@ describe("Citation Dialog", function () {
 		},
 		getItems() {
 			return [];
-		}
+		},
+		allCitedDataLoadedDeferred: Zotero.Promise.defer(),
 	};
 	let dialog, win, IOManager, CitationDataManager, SearchHandler;
 
@@ -25,6 +26,7 @@ describe("Citation Dialog", function () {
 		IOManager = dialog.IOManager;
 		CitationDataManager = dialog.CitationDataManager;
 		SearchHandler = dialog.SearchHandler;
+		io.allCitedDataLoadedDeferred.resolve();
 		// wait for everything (e.g. itemTree/collectionTree) inside of the dialog to be loaded.
 		while (!dialog.loaded) {
 			await Zotero.Promise.delay(10);
@@ -460,6 +462,50 @@ describe("Citation Dialog", function () {
 				let node = dialog.document.querySelector(`.item[id="${itemID}"]`);
 				assert.isOk(node);
 			}
+		});
+	});
+
+	describe("Dialog loading", function () {
+		let newDialog;
+
+		after(() => {
+			newDialog.close();
+		});
+
+		it("the dialog should be interactable even if io functions are not loaded", async function () {
+			let io = {
+				accept() {},
+				cancel() {},
+				sortable: true,
+				citation: {
+					citationItems: [],
+					properties: {
+						unsorted: false,
+					}
+				},
+				// allCitedDataLoadedDeferred is what citation dialog checks
+				// but make all functions unresolved promises just to be sure
+				sort() {
+					return Zotero.Promise.defer().promise;
+				},
+				getItems() {
+					return Zotero.Promise.defer().promise;
+				},
+				allCitedDataLoadedDeferred: Zotero.Promise.defer(),
+			};
+
+			let newDialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
+			Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", io);
+			newDialog = await newDialogPromise;
+
+			while (!newDialog.loaded || newDialog.SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			let item = await createDataObject('item', { title: "test" });
+			await newDialog.IOManager.addItemsToCitation([item]);
+			// verify that the new bubbles was added
+			let addedBubble = newDialog.document.querySelector(".bubble");
+			assert.isOk(addedBubble);
 		});
 	});
 
