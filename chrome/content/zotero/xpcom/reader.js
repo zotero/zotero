@@ -678,7 +678,7 @@ class ReaderInstance {
 		if (!open && this._window.document.activeElement.dataset.action == "toggle-pane") {
 			// Context pane collapsed when sidenav button is focused - try to focus btn in reader toolbar
 			setTimeout(() => {
-				this._iframeWindow.document.querySelector(".context-pane-toggle").focus();
+				this._iframeWindow.document.querySelector(".context-pane-toggle").focus({ focusVisible: true });
 			});
 		}
 		else if (open && this._iframeWindow.document.activeElement.classList.contains("context-pane-toggle")) {
@@ -686,7 +686,7 @@ class ReaderInstance {
 			// Try to focus the sidenav button, if reader's button was hidden
 			setTimeout(() => {
 				if (this._iframeWindow.document.querySelector("context-pane-toggle")) return;
-				this._window.document.querySelector("#zotero-context-pane-sidenav .btn[data-action='toggle-pane']").focus();
+				this._window.document.querySelector("#zotero-context-pane-sidenav .btn[data-action='toggle-pane']").focus({ focusVisible: true });
 			});
 		}
 
