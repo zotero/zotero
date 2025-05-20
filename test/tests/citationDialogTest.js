@@ -13,7 +13,7 @@ describe("Citation Dialog", function () {
 		getItems() {
 			return [];
 		},
-		allCitedDataLoadedDeferred: Zotero.Promise.defer(),
+		allCitedDataLoadedPromise: Zotero.Promise.resolve(),
 	};
 	let dialog, win, IOManager, CitationDataManager, SearchHandler;
 
@@ -26,7 +26,6 @@ describe("Citation Dialog", function () {
 		IOManager = dialog.IOManager;
 		CitationDataManager = dialog.CitationDataManager;
 		SearchHandler = dialog.SearchHandler;
-		io.allCitedDataLoadedDeferred.resolve();
 		// wait for everything (e.g. itemTree/collectionTree) inside of the dialog to be loaded.
 		while (!dialog.loaded) {
 			await Zotero.Promise.delay(10);
@@ -483,15 +482,15 @@ describe("Citation Dialog", function () {
 						unsorted: false,
 					}
 				},
-				// allCitedDataLoadedDeferred is what citation dialog checks
+				// allCitedDataLoadedPromise is what citation dialog checks
 				// but make all functions unresolved promises just to be sure
 				sort() {
-					return Zotero.Promise.defer().promise;
+					return new Zotero.Promise(() => {});
 				},
 				getItems() {
-					return Zotero.Promise.defer().promise;
+					return new Zotero.Promise(() => {});
 				},
-				allCitedDataLoadedDeferred: Zotero.Promise.defer(),
+				allCitedDataLoadedPromise: new Zotero.Promise(() => {}),
 			};
 
 			let newDialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");

@@ -1736,10 +1736,7 @@ Zotero.Integration.CitationEditInterface = function(items, sortable, fieldIndexP
 	this.promise = this._acceptDeferred.promise;
 
 	// Resolve when all data needed to run getItems() or sort() is loaded
-	this.allCitedDataLoadedDeferred = Zotero.Promise.defer();
-	Promise.all([fieldIndexPromise, citationsByItemIDPromise]).then(() => {
-		this.allCitedDataLoadedDeferred.resolve();
-	});
+	this.allCitedDataLoadedPromise = Zotero.Promise.all([fieldIndexPromise, citationsByItemIDPromise]);
 }
 
 Zotero.Integration.CitationEditInterface.prototype = {

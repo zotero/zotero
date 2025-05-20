@@ -51,12 +51,11 @@ var { CitationDialogKeyboardHandler } = ChromeUtils.importESModule('chrome://zot
 async function onLoad() {
 	doc = document;
 	io = window.arguments[0].wrappedJSObject;
-	ioReadyPromise = io.allCitedDataLoadedDeferred.promise;
+	ioReadyPromise = io.allCitedDataLoadedPromise;
 	// if io did not send the promise indiciating when io.sort() and io.getItems() will be ready to run,
 	// use an immediately resolved promise
 	if (!ioReadyPromise) {
-		ioReadyPromise = Zotero.Promise.defer();
-		ioReadyPromise.resolve();
+		ioReadyPromise = Zotero.Promise.resolve();
 	}
 	isCitingNotes = !!io.isCitingNotes;
 	window.isPristine = true;
