@@ -28,7 +28,7 @@ const ItemTree = require('zotero/itemTree');
 const { getCSSIcon } = require('components/icons');
 const { COLUMNS } = require('zotero/itemTreeColumns');
 
-var doc, io, isCitingNotes, accepted;
+var doc, io, ioReadyPromise, isCitingNotes, accepted;
 
 // used for tests
 var loaded = false;
@@ -51,6 +51,13 @@ var { CitationDialogKeyboardHandler } = ChromeUtils.importESModule('chrome://zot
 async function onLoad() {
 	doc = document;
 	io = window.arguments[0].wrappedJSObject;
+	ioReadyPromise = io.allCitedDataLoadedDeferred.promise;
+	// if io did not send the promise indiciating when io.sort() and io.getItems() will be ready to run,
+	// use an immediately resolved promise
+	if (!ioReadyPromise) {
+		ioReadyPromise = Zotero.Promise.defer();
+		ioReadyPromise.resolve();
+	}
 	isCitingNotes = !!io.isCitingNotes;
 	window.isPristine = true;
 
@@ -101,7 +108,7 @@ async function onLoad() {
 	// explicitly focus bubble input so one can begin typing right away
 	_id("bubble-input").refocusInput();
 	// wait to call functions that rely on io.getItems() or io.sort() till all cited data is loaded
-	io.allCitedDataLoadedDeferred.promise.then(async () => {
+	ioReadyPromise.then(async () => {
 		if (accepted) return;
 		Zotero.debug("Citation Dialog: io loaded cited data");
 		await SearchHandler.refreshCitedItems();
@@ -142,7 +149,7 @@ async function accept() {
 	// Otherwise, if the dialog is opened again, bubbles will not be in the correct
 	// order, even though the citation itself will look right.
 	if (_id("keepSorted").checked) {
-		await io.allCitedDataLoadedDeferred.promise;
+		await ioReadyPromise;
 		await CitationDataManager.sort();
 	}
 	CitationDataManager.updateCitationObject(true);
@@ -1623,7 +1630,7 @@ const CitationDataManager = {
 		// It can take arbitrarily long time for documents with many cited items to load
 		// all data necessary to run io.sort().
 		// Do nothing if io.sort() is not yet ready to run.
-		if (!io.allCitedDataLoadedDeferred.promise.isResolved()) return;
+		if (!ioReadyPromise.isResolved()) return;
 		Zotero.debug("Citation Dialog: sorting items");
 		this.updateCitationObject();
 		await io.sort();
