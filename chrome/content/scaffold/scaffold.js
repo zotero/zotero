@@ -1750,7 +1750,7 @@ var Scaffold = new function () {
 		var indicesToRemove = [...listbox.selectedItems].map(item => listbox.getIndexOfItem(item));
 
 		let tests = _loadTestsFromPane();
-		indicesToRemove.forEach(i => tests.splice(i, 1));
+		tests = tests.filter((_, i) => !indicesToRemove.includes(i));
 		_writeTestsToPane(tests);
 
 		this.populateTests();
