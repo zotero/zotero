@@ -708,7 +708,7 @@
 			}
 		};
 
-		handleButtonClick = (event) => {
+		handleButtonClick = async (event) => {
 			let button = event.target;
 			let pane = button.dataset.pane;
 			if (!pane) return;
@@ -728,14 +728,14 @@
 					}
 					let pinnable = this.isPanePinnable(pane);
 					let scrollType = this._collapsed ? 'instant' : 'smooth';
-					if (this._collapsed) this._collapsed = false;
 					switch (event.detail) {
 						case 1:
 							if (this._contextNotesPane && this._contextNotesPaneVisible) {
 								this._contextNotesPaneVisible = false;
 								scrollType = 'instant';
 							}
-							this.container.scrollToPane(pane, scrollType);
+							// Call scrolling before expanding the pane to avoid flickering
+							await this.container.scrollToPane(pane, scrollType);
 							break;
 						case 2:
 							if (this.pinnedPane == pane || !pinnable) {
@@ -746,6 +746,7 @@
 							}
 							break;
 					}
+					if (this._collapsed) this._collapsed = false;
 				}
 			}
 			this.render();
