@@ -592,7 +592,6 @@
 					optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover";
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					optionsButton.id = `itembox-field-${fieldName}-options`;
-					// eslint-disable-next-line no-loop-func
 					let triggerPopup = (e) => {
 						let menupopup = ZoteroPane.buildFieldTransformMenu({
 							target: valueElement,
@@ -600,7 +599,7 @@
 								this._setFieldTransformedValue(valueElement, newValue);
 							}
 						});
-						this.querySelector('popupset').append(menupopup);
+						this.querySelector('#info-box > popupset').append(menupopup);
 						menupopup.addEventListener('popuphidden', () => {
 							menupopup.remove();
 						});
