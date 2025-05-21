@@ -56,11 +56,15 @@
 				}
 			});
 
+			let menupopup = this._id('tags-context-menu');
 			let removeAllItemTags = this._id('remove-all-item-tags');
-			this._id('remove-all-item-tags').addEventListener('command', this.removeAll);
+			removeAllItemTags.addEventListener('command', this.removeAll);
 			this.querySelector('.body').addEventListener('contextmenu', (event) => {
+				event.preventDefault();
+
+				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('editable-text'));
 				removeAllItemTags.disabled = !this.editable || !this.count;
-				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
+				menupopup.openPopupAtScreen(event.screenX, event.screenY, true);
 			});
 			// Register our observer with priority 101 (after Zotero.Tags) so we get updated tag colors
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item-tag', 'setting'], 'tagsBox', 101);
@@ -442,18 +446,13 @@
 			}
 			// Multiple tags
 			else if (tags.length > 1) {
-				if (!isNew) {
-					// If old tag isn't in array, remove it
-					if (tags.indexOf(oldValue) == -1) {
-						this.item.removeTag(oldValue);
-					}
-					// If old tag is staying, restore the textbox
-					// immediately. This isn't strictly necessary, but it
-					// makes the transition nicer.
-					else {
-						textbox.value = textbox.initialValue;
-						textbox.blur();
-					}
+				if (isNew) {
+					this.removeRow(row);
+				}
+				// Remove old tag
+				else {
+					this.item.removeTag(oldValue);
+					textbox.value = textbox.initialValue;
 				}
 
 				tags.forEach(tag => this.item.addTag(tag));
@@ -480,10 +479,7 @@
 				}
 			}
 			
-			// If we didn't remove the textbox, make it single-line
-			if (textbox.parentElement) {
-				this.makeSingleLine(textbox);
-			}
+			this.makeSingleLine(textbox);
 		};
 
 		newTag() {
@@ -550,9 +546,10 @@
 
 		// Remove the row and update tab indexes
 		removeRow(row) {
-			var origRow = row;
-			origRow.parentNode.removeChild(origRow);
-			this.updateCount(this.count - 1);
+			row.remove();
+			if (!row.hasAttribute('isNew')) {
+				this.updateCount(this.count - 1);
+			}
 		}
 
 		removeAll = () => {
