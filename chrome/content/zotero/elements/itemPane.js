@@ -193,11 +193,11 @@
 			this._itemDetails.item = item;
 			this._itemDetails.collectionTreeRow = this.collectionTreeRow;
 
+			this._itemDetails.render();
+
 			if (this.getAttribute("collapsed") == "true") {
 				return true;
 			}
-
-			this._itemDetails.render();
 			
 			if (item.isFeedItem) {
 				let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');

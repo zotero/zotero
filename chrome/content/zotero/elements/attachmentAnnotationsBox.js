@@ -47,6 +47,14 @@
 
 		set item(item) {
 			super.item = (item instanceof Zotero.Item && item.isFileAttachment()) ? item : null;
+			if (item.isFileAttachment()) {
+				this._annotationItems = item.getAnnotations();
+				this.updateCount();
+			}
+			else {
+				this._annotationItems = [];
+				this._count = 0;
+			}
 			this._updateHidden();
 		}
 
@@ -87,10 +95,7 @@
 			this.updateCount();
 		}
 
-		render() {
-			this._annotationItems = this.item.getAnnotations();
-			this.updateCount();
-		}
+		render() {}
 
 		async asyncRender() {
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
@@ -140,11 +145,12 @@
 			if (count === 0) {
 				this.hidden = true;
 			}
+			this._count = count;
 			return count;
 		}
 
 		_updateHidden() {
-			this.hidden = !this.item || this.tabType == "reader";
+			this.hidden = !this.item || this.tabType == "reader" || this._count == 0;
 		}
 	}
 	customElements.define("attachment-annotations-box", AttachmentAnnotationsBox);
