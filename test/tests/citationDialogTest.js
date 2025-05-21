@@ -12,7 +12,8 @@ describe("Citation Dialog", function () {
 		},
 		getItems() {
 			return [];
-		}
+		},
+		allCitedDataLoadedPromise: Zotero.Promise.resolve(),
 	};
 	let dialog, win, IOManager, CitationDataManager, SearchHandler;
 
@@ -460,6 +461,50 @@ describe("Citation Dialog", function () {
 				let node = dialog.document.querySelector(`.item[id="${itemID}"]`);
 				assert.isOk(node);
 			}
+		});
+	});
+
+	describe("Dialog loading", function () {
+		let newDialog;
+
+		after(() => {
+			newDialog.close();
+		});
+
+		it("the dialog should be interactable even if io functions are not loaded", async function () {
+			let io = {
+				accept() {},
+				cancel() {},
+				sortable: true,
+				citation: {
+					citationItems: [],
+					properties: {
+						unsorted: false,
+					}
+				},
+				// allCitedDataLoadedPromise is what citation dialog checks
+				// but make all functions unresolved promises just to be sure
+				sort() {
+					return new Zotero.Promise(() => {});
+				},
+				getItems() {
+					return new Zotero.Promise(() => {});
+				},
+				allCitedDataLoadedPromise: new Zotero.Promise(() => {}),
+			};
+
+			let newDialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
+			Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", io);
+			newDialog = await newDialogPromise;
+
+			while (!newDialog.loaded || newDialog.SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			let item = await createDataObject('item', { title: "test" });
+			await newDialog.IOManager.addItemsToCitation([item]);
+			// verify that the new bubbles was added
+			let addedBubble = newDialog.document.querySelector(".bubble");
+			assert.isOk(addedBubble);
 		});
 	});
 
