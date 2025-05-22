@@ -37,7 +37,6 @@
 			<html:div class="body">
 				<html:img/>
 				<html:div class="quote"/>
-				<html:div class="comment keyboard-clickable" tabindex="0" role="button"/>
 			</html:div>
 			<html:div class="tags keyboard-clickable" tabindex="0"/>
 		`);
@@ -85,10 +84,16 @@
 			this._body = this.querySelector('.body');
 			this._tags = this.querySelector('.tags');
 			this._options = this.querySelector('.head toolbarbutton');
-			this._comment = this.querySelector('.comment');
 			this._img = this.querySelector('img');
 			this._quote = this.querySelector('.quote');
 			this._commentInEditor = null;
+
+			// <html:div> placed directly in content string will strip all
+			// html tags when .innerHTML is set. But a node created dynamically won't.
+			this._comment = document.createElement('div');
+			this._comment.className = "comment keyboard-clickable";
+			this._comment.setAttribute('role', 'button');
+			this._quote.after(this._comment);
 
 			this.addEventListener('keydown', this._handleKeyDown.bind(this));
 			this._tags.addEventListener('click', this._handleTagsClick.bind(this));
@@ -174,7 +179,6 @@
 			let content = this._annotation.annotationComment;
 			if (!content) return "";
 			content = content.replace(/\n/g, '<br/>');
-			content = content.replace(/ /g, '&nbsp;');
 			return content;
 		};
 
@@ -380,7 +384,7 @@
 			// let plainComment = parserUtils.convertToPlainText(this._annotation.annotationComment, Ci.nsIDocumentEncoder.OutputRaw, 0) || "Add comment";
 			if (this._annotation.annotationComment) {
 				this._comment.hidden = false;
-				this._comment.innerHTML = this._annotation.annotationComment;
+				this._comment.innerHTML = this._commentToHTML();
 			}
 			else if (this.isEditable) {
 				this._comment.hidden = false;
