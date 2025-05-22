@@ -344,43 +344,6 @@ richlistitem[selected="true"] {
 	grid-template-columns: max-content 1fr;
 }
 
-.zotero-simpleEditor {
-	box-sizing: border-box;
-	font-size: 14px;
-	height: 100%;
-}
-
-.zotero-simpleEditor-content {
-	box-sizing: border-box;
-	outline: 0;
-	overflow-y: auto;
-	padding: 36px 10px 10px 10px;
-}
-
-.zotero-simpleEditor-actionbar {
-	background-color: #fff;
-	border-bottom: 1px solid rgba(10, 10, 10, 0.1);
-	position: fixed;
-	width: 100%;
-}
-
-.zotero-simpleEditor-button {
-	background-color: transparent;
-	border: 1px solid transparent;
-	cursor: pointer;
-	height: 30px;
-	outline: 0;
-	width: 30px;
-	vertical-align: bottom;
-}
-
-.zotero-simpleEditor-button:focus-visible {
-	border: 1px solid #598bec;
-}
-
-.zotero-simpleEditor-button-selected {
-	background-color: #f0f0f0;
-}
 
 panel button .button-text {
 	margin: 0 !important;

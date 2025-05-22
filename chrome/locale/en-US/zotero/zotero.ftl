@@ -647,6 +647,12 @@ toggle-preview =
     } Attachment Preview
 
 annotation-image-not-available = [Image not available]
+annotation-change-color =
+    .tooltiptext = Change annotation color
+annotation-not-editable-external =
+    .tooltiptext = Cannot edit annotations created outside of Zotero
+annotation-not-editable-other-user =
+    .tooltiptext = Cannot edit other user's annotations
 
 quicksearch-mode =
     .aria-label = Quick Search mode

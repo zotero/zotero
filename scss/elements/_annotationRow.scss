@@ -24,6 +24,11 @@ annotation-row {
 		.title {
 			font-weight: 600;
 		}
+
+		// if context menu is disabled, show lock icon
+		.button[disabled] {
+			@include svgicon-menu("lock", "universal", "16");
+		}
 	}
 	
 	.body {
@@ -59,6 +64,22 @@ annotation-row {
 			@include comfortable {
 				margin-block: 4px;
 			}
+
+			&.hidden {
+				display: none;
+			}
+		}
+
+		.comment.editable {
+			margin-inline: 4px;
+			padding: 2px 0 0 0;
+			max-width: 100%;
+			iframe {
+				border: 1px solid var(--fill-quinary);
+				border-radius: 5px;
+				width: 100%;
+			}
+
 		}
 	}
 	
@@ -66,5 +87,33 @@ annotation-row {
 		border-top: 1px solid var(--fill-quinary);
 		padding: 3px 8px;
 		word-break: break-word;
+		font-size: 13px;
+	}
+
+	.tags-popup {
+		font-size: 13px;
+		min-width: 300px;
+	}
+
+	.annotations-options-popup {
+		width: 150px;
+		padding-inline: 5px;
+		.menu-option  {
+			height: 30px;
+			padding-inline: 25px;
+			align-items: center;
+			border-radius: 5px;
+			font-size: 12px;
+			&.color {
+				.color-swatch {
+					width: 16px;
+					height: 16px;
+					border-radius: 5px;
+				}
+			}
+			&:hover {
+				background: var(--fill-quinary);
+			}
+		}
 	}
 }
