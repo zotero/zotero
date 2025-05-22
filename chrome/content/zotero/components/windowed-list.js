@@ -203,8 +203,10 @@ module.exports = class {
 	/**
 	 * Scroll the scrollbox to a specified item. No-op if already in view
 	 * @param index
+	 * @param forceScrollToTop {Boolean} if true, the row will be scrolled to the top of the scrollbox
+	 * even if it is below the current scroll position.
 	 */
-	scrollToRow(index) {
+	scrollToRow(index, forceScrollToTop = false) {
 		const { scrollOffset } = this;
 		const itemCount = this._getItemCount();
 		const height = this.getWindowHeight();
@@ -216,7 +218,7 @@ module.exports = class {
 			this.scrollTo(startPosition);
 		}
 		else if (endPosition > scrollOffset + height) {
-			this.scrollTo(endPosition - height - 1);
+			this.scrollTo(forceScrollToTop ? startPosition : endPosition - height - 1);
 		}
 	}
 	
