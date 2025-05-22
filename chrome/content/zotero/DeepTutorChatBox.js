@@ -7,6 +7,7 @@ import {
   subscribeToChat 
 } from './api/libs/api';
 import { viewAttachment } from './elements/callZoteroPane';
+import ReactMarkdown from 'react-markdown';
 
 // Enums
 const SessionStatus = {
@@ -852,7 +853,62 @@ const DeepTutorChatBox = ({
                     </span>
                     {message.subMessages.map((subMessage, subIndex) => (
                         <div key={subIndex} style={styles.messageText}>
-                            {`[${index}] `}{subMessage.text}
+                            {`[${index}] `}
+                            <ReactMarkdown
+                                className="markdown mb-0 flex flex-col"
+                                components={{
+                                    h3: ({ children }) => (
+                                        <h3 style={{ fontSize: '24px' }}>{children}</h3>
+                                    ),
+                                    ul: ({ children }) => (
+                                        <ul style={{
+                                            fontSize: '16px',
+                                            marginTop: '0.5em',
+                                            marginBottom: '0.5em',
+                                            padding: '5',
+                                        }}>
+                                            {children}
+                                        </ul>
+                                    ),
+                                    li: ({ children }) => (
+                                        <li style={{
+                                            marginBottom: '0.2em',
+                                            fontSize: '16px',
+                                            padding: '0',
+                                        }}>
+                                            {children}
+                                        </li>
+                                    ),
+                                    code: ({ className, children, ...props }) => (
+                                        <code
+                                            className={className}
+                                            style={{
+                                                fontSize: '14px',
+                                                fontFamily: 'Courier, monospace',
+                                                whiteSpace: 'pre-wrap',
+                                                wordBreak: 'break-word',
+                                            }}
+                                            {...props}
+                                        >
+                                            {children}
+                                        </code>
+                                    ),
+                                    p: ({ children, ...props }) => (
+                                        <p
+                                            style={{
+                                                margin: '0.1',
+                                                padding: '0',
+                                                lineHeight: '1.5',
+                                            }}
+                                            {...props}
+                                        >
+                                            {children}
+                                        </p>
+                                    ),
+                                }}
+                            >
+                                {subMessage.text || ''}
+                            </ReactMarkdown>
                             {subMessage.sources && subMessage.sources.length > 0 && (
                                 <div style={styles.sourcesContainer}>
                                     {subMessage.sources.map((source, sourceIndex) => (
@@ -941,6 +997,53 @@ const DeepTutorChatBox = ({
             whiteSpace: 'pre-wrap'
         }
     };
+
+    // Add new useEffect after the existing one
+    useEffect(() => {
+        const openFirstDocument = async () => {
+            if (documentIds && documentIds.length > 0 && sessionId) {
+                Zotero.debug(`DeepTutorChatBox: Opening first document - sessionId: ${sessionId}, documentId: ${documentIds[0]}`);
+                
+                try {
+                    // Try to get the mapping from local storage
+                    const storageKey = `deeptutor_mapping_${sessionId}`;
+                    let zoteroAttachmentId = documentIds[0];
+
+                    const mappingStr = Zotero.Prefs.get(storageKey);
+                    Zotero.debug('DeepTutorChatBox: Get data mapping:', Zotero.Prefs.get(storageKey));
+                    if (mappingStr) {
+                        const mapping = JSON.parse(mappingStr);
+                        Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
+                        
+                        // If we have a mapping for this document ID, use it
+                        if (mapping[documentIds[0]]) {
+                            zoteroAttachmentId = mapping[documentIds[0]];
+                            Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId}`);
+                        }
+                    }
+
+                    // Get the item and open it
+                    const item = Zotero.Items.get(zoteroAttachmentId);
+                    if (!item) {
+                        Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}`);
+                        return;
+                    }
+
+                    // Open the document in the reader
+                    await Zotero.FileHandlers.open(item, {
+                        location: {
+                            pageIndex: 0 // Start at first page
+                        }
+                    });
+                    Zotero.debug(`DeepTutorChatBox: Opened document ${zoteroAttachmentId} in reader`);
+                } catch (error) {
+                    Zotero.debug(`DeepTutorChatBox: Error opening first document: ${error.message}`);
+                    Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+                }
+            }
+        };
+        openFirstDocument();
+    }, [documentIds, sessionId]); // Dependencies array
 
     return (
         <div style={updatedStyles.container}>

@@ -29,7 +29,12 @@
     "react-autosuggest": "^10.1.0",
     "react-dom": "^18.3.1",
     "react-intl": "^3.4.0",
+    "react-markdown": "5.0.3",
     "react-select": "^3.0.8",
+    "rehype-katex": "4.0.0",
+    "rehype-raw": "5.1.0",
+    "remark-gfm": "1.0.0",
+    "remark-math": "5.1.1",
     "url": "^0.11.0"
   },
   "devDependencies": {

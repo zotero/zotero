@@ -1,3 +1,5 @@
+const React = require('react');
+
 const StreamingStates = {
     Default: 0,
     Id: 1,
@@ -65,4 +67,4 @@ const StreamingStatusTag = ({ streamState, isCurrentTag }) => {
     );
 };
 
-export { StreamingStates, StreamingStatusTag };
+module.exports = { StreamingStates, StreamingStatusTag };

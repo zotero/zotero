@@ -323,6 +323,7 @@ const styles = {
 		width: '100%',
 		background: '#f8f9fa',
 		fontFamily: 'Roboto, Inter, Arial, sans-serif',
+		position: 'relative',
 	},
 	top: {
 		display: 'flex',
@@ -530,10 +531,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this.state = {
 			currentPane: 'main',
 			sessions: [],
-			sesNamToObj: new Map(), // Map to store session name to session object mapping
+			sesNamToObj: new Map(),
 			isLoading: false,
 			error: null,
 			showProfilePopup: false,
+			showSignInPopup: false,
+			showSignUpPopup: false,
+			showUpgradePopup: false,
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -586,6 +590,24 @@ var DeepTutor = class DeepTutor extends React.Component {
 	toggleProfilePopup = () => {
 		this.setState(prevState => ({
 			showProfilePopup: !prevState.showProfilePopup
+		}));
+	};
+
+	toggleSignInPopup = () => {
+		this.setState(prevState => ({
+			showSignInPopup: !prevState.showSignInPopup
+		}));
+	};
+
+	toggleSignUpPopup = () => {
+		this.setState(prevState => ({
+			showSignUpPopup: !prevState.showSignUpPopup
+		}));
+	};
+
+	toggleUpgradePopup = () => {
+		this.setState(prevState => ({
+			showUpgradePopup: !prevState.showUpgradePopup
 		}));
 	};
 
@@ -722,7 +744,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					</div>
 				</div>
 
-				{/* Middle Section: Pane List Holder */}
+				{/* Middle Section */}
 				<div style={styles.middle}>
 					<div style={styles.paneList}>
 						{this.state.currentPane === 'main' && <DeepTutorChatBox 
@@ -737,45 +759,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 							documentIds={this.state.documentIds}
 							currentSession={this.state.currentSession}
 						/>}
-						{this.state.currentPane === 'modelSelection' && 
-							<ModelSelection 
-								onSubmit={async (sessionId) => {
-									try {
-										// Fetch session details using centralized API
-										const sessionData = await getSessionById(sessionId);
-										const session = new DeepTutorSession(sessionData);
-
-										// Create new Map with the new session
-										const newSesNamToObj = new Map(this.state.sesNamToObj);
-										newSesNamToObj.set(session.sessionName, session);
-
-										// Update state with new session
-										await new Promise(resolve => {
-											this.setState({
-												currentSession: session,
-												messages: [],
-												documentIds: session.documentIds || [],
-												sesNamToObj: newSesNamToObj,
-												sessions: [...this.state.sessions, session]
-											}, resolve);
-										});
-
-										// Call handleSessionSelect with the session name
-										Zotero.debug(`DeepTutor: Calling handleSessionSelect with session name: ${session.sessionName}`);
-										await this.handleSessionSelect(session.sessionName);
-
-										// Switch to main pane
-										this.switchPane('main');
-
-										// Call onNewSession on the tutor box
-										Zotero.debug(`DeepTutor: Attempting to call onNewSession on tutor box`);
-
-									} catch (error) {
-										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
-									}
-								}}
-							/>
-						}
 						{this.state.currentPane === 'sessionHistory' && 
 							<SessionHistory 
 								sessions={this.state.sessions} 
@@ -784,14 +767,240 @@ var DeepTutor = class DeepTutor extends React.Component {
 								error={this.state.error}
 							/>
 						}
-						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.switchPane('signIn')} />}
+						{this.state.currentPane === 'modelSelection' && 
+							<ModelSelection 
+								onSubmit={async (sessionId) => {
+									try {
+										const sessionData = await getSessionById(sessionId);
+										const session = new DeepTutorSession(sessionData);
+										const newSesNamToObj = new Map(this.state.sesNamToObj);
+										newSesNamToObj.set(session.sessionName, session);
+										
+										await this.setState({
+											currentSession: session,
+											messages: [],
+											documentIds: session.documentIds || [],
+											sesNamToObj: newSesNamToObj,
+											sessions: [...this.state.sessions, session]
+										});
+
+										await this.handleSessionSelect(session.sessionName);
+										this.switchPane('main');
+									} catch (error) {
+										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
+									}
+								}}
+							/>
+						}
+						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} />}
 						{this.state.currentPane === 'signIn' && <DeepTutorSignIn />}
-						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => this.switchPane('signIn')} />}
-						{this.state.currentPane === 'upgrade' && <DeepTutorUpgradePremium />}
+						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => this.toggleSignInPopup()} />}
 					</div>
 				</div>
 
-				{/* Bottom Section: Utility Buttons */}
+				{/* Upgrade Premium Popup */}
+				{this.state.showUpgradePopup && (
+					<div style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+					}}>
+						<div style={{
+							position: 'relative',
+							width: '430px',
+							background: '#FFFFFF',
+							borderRadius: '10px',
+							padding: '20px',
+						}}>
+							<div style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								alignItems: 'center',
+								marginBottom: '20px',
+							}}>
+								<div style={{
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '1.5em',
+								}}>
+									Upgrade Your Plan
+								</div>
+								<button
+									onClick={this.toggleUpgradePopup}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										padding: '4px',
+										fontSize: '24px',
+										color: '#666',
+										width: '32px',
+										height: '32px',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: '50%',
+									}}
+								>
+									✕
+								</button>
+							</div>
+							<DeepTutorUpgradePremium />
+						</div>
+					</div>
+				)}
+
+				{/* Sign In Popup */}
+				{this.state.showSignInPopup && (
+					<div style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+						overflow: 'hidden',
+					}}>
+						<div style={{
+							position: 'relative',
+							width: '430px',
+							background: '#FFFFFF',
+							borderRadius: '10px',
+							padding: '20px',
+						}}>
+							<div style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								alignItems: 'center',
+								marginBottom: '20px',
+							}}>
+								<div style={{
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '1.5em',
+								}}>
+									Sign in
+								</div>
+								<button
+									onClick={this.toggleSignInPopup}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										padding: '4px',
+										fontSize: '24px',
+										color: '#666',
+										width: '32px',
+										height: '32px',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: '50%',
+										transition: 'background-color 0.2s',
+										':hover': {
+											background: '#f0f0f0'
+										}
+									}}
+								>
+									✕
+								</button>
+							</div>
+							<DeepTutorSignIn />
+						</div>
+					</div>
+				)}
+
+				{/* Sign Up Popup */}
+				{this.state.showSignUpPopup && (
+					<div style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+						overflow: 'hidden',
+					}}>
+						<div style={{
+							position: 'relative',
+							width: '430px',
+							background: '#FFFFFF',
+							borderRadius: '10px',
+							padding: '20px',
+						}}>
+							<div style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								alignItems: 'center',
+								marginBottom: '20px',
+							}}>
+								<div style={{
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '1.5em',
+								}}>
+									Sign up
+								</div>
+								<button
+									onClick={this.toggleSignUpPopup}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										padding: '4px',
+										fontSize: '24px',
+										color: '#666',
+										width: '32px',
+										height: '32px',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: '50%',
+										transition: 'background-color 0.2s',
+										':hover': {
+											background: '#f0f0f0'
+										}
+									}}
+								>
+									✕
+								</button>
+							</div>
+							<DeepTutorSignUp onSignUpSignIn={() => {
+								this.toggleSignUpPopup();
+								this.toggleSignInPopup();
+							}} />
+						</div>
+					</div>
+				)}
+
+				{/* Bottom Section */}
 				<div style={styles.bottom}>
 					<div style={styles.bottomLeft}>
 						<button style={styles.textButton}>
@@ -859,7 +1068,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 											...(this.state.currentPane === 'signIn' ? styles.componentButtonActive : {})
 										}}
 										onClick={() => {
-											this.switchPane('signIn');
+											this.toggleSignInPopup();
 											this.toggleProfilePopup();
 										}}
 									>
@@ -871,29 +1080,17 @@ var DeepTutor = class DeepTutor extends React.Component {
 											...(this.state.currentPane === 'signUp' ? styles.componentButtonActive : {})
 										}}
 										onClick={() => {
-											this.switchPane('signUp');
+											this.toggleSignUpPopup();
 											this.toggleProfilePopup();
 										}}
 									>
 										Sign Up
 									</button>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'upgrade' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.switchPane('upgrade');
-											this.toggleProfilePopup();
-										}}
-									>
-										Upgrade
-									</button>
 								</div>
 							)}
 						</div>
 					</div>
-					<button style={styles.upgradeButton} onClick={() => this.switchPane('upgrade')}>Upgrade</button>
+					<button style={styles.upgradeButton} onClick={this.toggleUpgradePopup}>Upgrade</button>
 				</div>
 			</div>
 		);

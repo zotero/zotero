@@ -1,22 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import { StreamingStatusTag, StreamingStates } from './StreamingStatusTag';
+const React = require('react');
+const ReactMarkdown = require('react-markdown');
+const { StreamingStatusTag, StreamingStates } = require('./StreamingStatusTag');
 
 const StreamingComponent = ({ streamText, hideStreamResponse }) => {
-    const [streamingState, setStreamingState] = useState(StreamingStates.Default);
-    const [thinkingText, setThinkingText] = useState('');
-    const [responseText, setResponseText] = useState('');
-    const [pastStatuses, setPastStatuses] = useState([]);
+    const [streamingState, setStreamingState] = React.useState(StreamingStates.Default);
+    const [thinkingText, setThinkingText] = React.useState('');
+    const [responseText, setResponseText] = React.useState('');
+    const [pastStatuses, setPastStatuses] = React.useState([]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         setPastStatuses([...pastStatuses, streamingState]);
     }, [streamingState]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (streamText.includes('</appendix> ')) {
             setStreamingState(StreamingStates.Appendix);
         } else if (streamText.includes('<followup_question>')) {
@@ -50,7 +46,7 @@ const StreamingComponent = ({ streamText, hideStreamResponse }) => {
         return currentString;
     };
 
-    useEffect(() => {
+    React.useEffect(() => {
         const thinkingIndex = streamText.includes('<thinking>')
             ? streamText.indexOf('<thinking>') + '<thinking>'.length
             : -1;
@@ -129,8 +125,6 @@ const StreamingComponent = ({ streamText, hideStreamResponse }) => {
                 >
                     <ReactMarkdown
                         className="markdown mb-0 flex flex-col text-sm"
-                        remarkPlugins={[remarkMath, remarkGfm]}
-                        rehypePlugins={[rehypeKatex, rehypeRaw]}
                         children={formatResponseForMarkdown(thinkingText || '')}
                         components={{
                             h3: ({ children }) => (
@@ -209,8 +203,6 @@ const StreamingComponent = ({ streamText, hideStreamResponse }) => {
                     >
                         <ReactMarkdown
                             className="markdown mb-0 flex flex-col"
-                            remarkPlugins={[remarkMath, remarkGfm]}
-                            rehypePlugins={[rehypeKatex, rehypeRaw]}
                             children={formatResponseForMarkdown(responseText || '')}
                             components={{
                                 h3: ({ children }) => (
@@ -284,4 +276,4 @@ const StreamingComponent = ({ streamText, hideStreamResponse }) => {
     );
 };
 
-export default StreamingComponent;
+module.exports = StreamingComponent;

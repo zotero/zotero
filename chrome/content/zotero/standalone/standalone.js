@@ -490,6 +490,8 @@ const ZoteroStandalone = new function() {
 	this.onDeepTutorPaneOpen = function () {
 		var deepTutorPane = document.getElementById('deep-tutor-pane');
 		var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+		var itemPane = document.getElementById('zotero-item-pane');
+		var itemsSplitter = document.getElementById('zotero-items-splitter');
 		Zotero.debug('Standalone: DeepTutor pane toggle triggered');
 		Zotero.debug('Standalone: Current collapsed state: ' + deepTutorPane.getAttribute('collapsed'));
 		
@@ -499,6 +501,11 @@ const ZoteroStandalone = new function() {
 			deeptutorSplitter.setAttribute('state', 'open');
 			deeptutorSplitter.setAttribute('collapse', 'before');
 			deepTutorPane.setAttribute('collapsed', false);
+			
+			// Collapse item pane
+			itemsSplitter.setAttribute('state', 'collapsed');
+			itemsSplitter.setAttribute('collapse', 'after');
+			itemPane.setAttribute('collapsed', true);
 		}	
 		// Hide
 		else {
