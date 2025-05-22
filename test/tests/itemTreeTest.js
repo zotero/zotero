@@ -177,6 +177,21 @@ describe("Zotero.ItemTree", function() {
 			await itemsView._refreshPromise;
 			assert.equal(quicksearch.value, "test");
 		});
+
+		it("should not loose selection when a child item is deleted during search", async function () {
+			let item = await createDataObject('item', { title: "test" });
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await itemsView.selectItem(note.id);
+
+			quicksearch.value = "test";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+
+			note.deleted = true;
+			await note.saveTx();
+
+			assert.isFalse(isNaN(itemsView.selection.focused));
+		});
 	});
 	
 	describe("#selectItem()", function () {
