@@ -41,6 +41,8 @@ Zotero.Prefs = new function() {
 		if (Zotero.addShutdownListener) {
 			Zotero.addShutdownListener(this.unregister.bind(this));
 		}
+		
+		this._checkUserJS();
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
@@ -541,5 +543,39 @@ Zotero.Prefs = new function() {
 
 			return `{{ ${[field, truncate, prefix, suffix].filter(f => f !== null).join(' ')} }}`;
 		});
+	};
+
+	/**
+	 * Preferences set in <profile>/user.js override prefs.js, so they can't
+	 * be changed via the UI and may be hard to locate and remove. Warn if
+	 * user.js contains user_pref() directives.
+	 */
+	this._checkUserJS = async function () {
+		let userJSPath = PathUtils.join(Zotero.Profile.dir, 'user.js');
+		let userJS;
+		try {
+			userJS = await Zotero.File.getContentsAsync(userJSPath);
+		}
+		catch {
+			return;
+		}
+		
+		const PREF_RE = /^\s*user_pref\s*\(\s*['"]extensions\.zotero\..+$/gm;
+		if (PREF_RE.test(userJS)) {
+			Zotero.debug('user.js contains prefs:');
+			Zotero.debug(userJS);
+			
+			await Zotero.File.putContentsAsync(userJSPath, userJS.replace(PREF_RE, ''));
+			
+			Zotero.alert(null,
+				Zotero.getString('general-error'),
+				Zotero.getString('userjs-pref-warning'
+					+ (userJS.toLowerCase().includes('scholaread') ? '-program' : ''))
+			);
+			Services.startup.quit(
+				Components.interfaces.nsIAppStartup.eAttemptQuit
+				| Components.interfaces.nsIAppStartup.eRestart
+			);
+		}
 	};
 };
