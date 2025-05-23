@@ -55,6 +55,7 @@ class ReaderInstance {
 		});
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
+		this._processedReferences = new Map();
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -567,6 +568,114 @@ class ReaderInstance {
 			},
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
+			},
+			onRecognizeReference: async (reference, type, callback) => {
+				callback({});
+				let text = reference.map(item => item.text).join('');
+				let processedReference = this._processedReferences.get(text);
+				if (processedReference) {
+					// Wait for other operations
+					await processedReference.promise;
+				}
+				else {
+					processedReference = {};
+					this._processedReferences.set(text, processedReference);
+				}
+				let resolvePromise;
+				processedReference.promise = new Promise((resolve) => resolvePromise = resolve);
+				try {
+					if (!processedReference.status) {
+						let item = await Zotero.RecognizeReference.match(reference, this._item.libraryID);
+						if (item) {
+							processedReference.status = 'matched';
+							processedReference.item = item;
+						}
+						else {
+							processedReference.status = 'unmatched';
+						}
+					}
+					if (processedReference.status === 'unmatched' && type !== 'match') {
+						let item = await Zotero.RecognizeReference.resolve(
+							reference,
+							this._item.libraryID, async (item) => {
+								item = await Zotero.RecognizeReference.itemToJSON(item);
+								delete item.abstract;
+								item.status = 'recognized';
+								item = Components.utils.cloneInto(item, this._iframeWindow);
+								callback(item);
+							}
+						);
+						if (item) {
+							processedReference.status = 'recognized';
+							processedReference.item = item;
+						}
+						else {
+							processedReference.status = 'unrecognized';
+						}
+					}
+					let jsonItem = {};
+					if (processedReference.item) {
+						jsonItem = await Zotero.RecognizeReference.itemToJSON(processedReference.item);
+					}
+					jsonItem.status = processedReference.status;
+					jsonItem = Components.utils.cloneInto(jsonItem, this._iframeWindow);
+					callback(jsonItem);
+				} finally {
+					resolvePromise();
+				}
+			},
+			onAddToLibrary: async (reference, callback) => {
+				let text = reference.map(item => item.text).join('');
+				let processedReference = this._processedReferences.get(text);
+				if (!processedReference) {
+					return;
+				}
+				// Wait for other operations
+				await processedReference.promise;
+				let resolvePromise;
+				processedReference.promise = new Promise((resolve) => resolvePromise = resolve);
+				try {
+					if (processedReference.status !== 'recognized') {
+						let jsonItem = await Zotero.RecognizeReference.itemToJSON(processedReference.item);
+						jsonItem = Components.utils.cloneInto(jsonItem, this._iframeWindow);
+						callback(jsonItem);
+						return;
+					}
+					let item = processedReference.item.clone();
+					item.libraryID = this._item.libraryID;
+					await item.saveTx();
+					processedReference.item = item;
+					processedReference.status = 'matched';
+					try {
+						await Zotero.Attachments.addAvailableFile(item);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+					let jsonItem = await Zotero.RecognizeReference.itemToJSON(item);
+					jsonItem.status = 'matched';
+					jsonItem = Components.utils.cloneInto(jsonItem, this._iframeWindow);
+					callback(jsonItem);
+				}
+				finally {
+					resolvePromise();
+				}
+			},
+			onShowInLibrary: async (itemID) => {
+				let win = Zotero.getMainWindow();
+				if (win) {
+					win.ZoteroPane.selectItems([itemID]);
+					win.focus();
+				}
+			},
+			onOpenInReader: async(attachmentID) => {
+				let zp = Zotero.getActiveZoteroPane();
+				if (zp) {
+					let item = await Zotero.Items.get(attachmentID);
+					if (item) {
+						zp.viewPDF(item.id);
+					}
+				}
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 

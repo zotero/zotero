@@ -38,6 +38,7 @@ Zotero.Translators = new function() {
 	this.TRANSLATOR_ID_NOTE_MARKDOWN = '1412e9e2-51e1-42ec-aa35-e036a895534b';
 	this.TRANSLATOR_ID_NOTE_HTML = '897a81c2-9f60-4bec-ae6b-85a5030b8be5';
 	this.TRANSLATOR_ID_RDF = '5e3ad958-ac79-463d-812b-a86a9235c28f';
+	this.TRANSLATOR_ID_CROSSREF_REST = '0a61e167-de9a-4f93-a68a-628b48855909';
 	
 	this._translatorsHash = null;
 	this._sortedTranslatorHash = null;
