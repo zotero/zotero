@@ -174,7 +174,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
-		Zotero.Notifier.unregisterObserver(this._prefsObserverID);
+		Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		this._writeColumnPrefsToFile(true);
 	}
 
