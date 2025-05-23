@@ -35,55 +35,66 @@
 			</html:div>
 			<deck/>
 		`);
+
+		_deck;
 		
-		_jsonItems = [];
+		_switcher;
 
-		get jsonItems() {
-			return this._jsonItems;
-		}
-
-		set jsonItems(jsonItems) {
-			this._jsonItems = jsonItems;
-			this.render();
-		}
+		_itemPairs = [];
 
 		init() {
+			this._deck = this.querySelector('deck');
+			this._switcher = this.querySelector('.switcher');
+			
 			this.querySelector('.previous').addEventListener('command', () => {
-				this.querySelector('deck').selectedIndex--;
-				this.render();
+				this._deck.selectedIndex--;
+				this._renderSwitcher();
 			});
 			this.querySelector('.next').addEventListener('command', () => {
-				this.querySelector('deck').selectedIndex++;
-				this.render();
+				this._deck.selectedIndex++;
+				this._renderSwitcher();
 			});
+		}
+		
+		clearItemPairs() {
+			this._itemPairs = [];
+			this._deck.selectedIndex = 0;
+			this._deck.replaceChildren();
+			this._renderSwitcher();
 			
-			this.render();
+			this.hidden = true;
 		}
 
-		render() {
-			if (!this.initialized) return;
+		/**
+		 * @param {any} preItem JSON item
+		 * @param {any} [postItem] JSON item (defaults to cleaned version of preItem)
+		 * @returns {ScaffoldItemPreview}
+		 */
+		addItemPair(preItem, postItem) {
+			let preview = document.createXULElement('scaffold-item-preview');
+			preview.itemPair = [preItem, postItem];
+			this._deck.append(preview);
+			this._renderSwitcher();
 			
-			let deck = this.querySelector('deck');
-			for (let [i, jsonItem] of this._jsonItems.entries()) {
-				if (deck.children[i]?.jsonItem === jsonItem) {
-					continue;
+			if (this.hidden) {
+				let splitterPane = this.closest('splitter + *');
+				if (splitterPane) {
+					// If the pane hasn't been resized, it won't have a fixed width,
+					// so it'll grow when wrapping text is added. Fix its width now.
+					splitterPane.style.width = splitterPane.getBoundingClientRect().width + 'px';
 				}
-				let preview = document.createXULElement('scaffold-item-preview');
-				preview.jsonItem = jsonItem;
-				deck.append(preview);
-			}
-			while (deck.children.length > this._jsonItems.length) {
-				deck.lastElementChild.remove();
-			}
-			if (deck.selectedIndex >= deck.children.length) {
-				deck.selectedIndex = 0;
+				this.hidden = false;
 			}
 			
+			return preview;
+		}
+		
+		_renderSwitcher() {
 			let switcher = this.querySelector('.switcher');
-			if (deck.children.length > 1) {
+			if (this._deck.children.length > 1) {
 				switcher.hidden = false;
-				switcher.querySelector('.current').textContent = deck.selectedIndex + 1;
-				switcher.querySelector('.max').textContent = deck.children.length;
+				switcher.querySelector('.current').textContent = this._deck.selectedIndex + 1;
+				switcher.querySelector('.max').textContent = this._deck.children.length;
 			}
 			else {
 				switcher.hidden = true;
