@@ -922,13 +922,11 @@ fi
 # Linux
 if [ $BUILD_LINUX == 1 ]; then
 	# Skip 32-bit build in tests
-	if [[ "${ZOTERO_TEST:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
-		archs="x86_64"
-	else
-		archs="i686 x86_64"
+	if [[ "${ZOTERO_TEST:-}" = "1" ]]; then
+		ARCHS="x86_64"
 	fi
 	
-	for arch in $archs; do
+	for arch in ${ARCHS:-i686 x86_64}; do
 		runtime_path="${LINUX_RUNTIME_PATH_PREFIX}${arch}"
 		
 		# Set up directory
