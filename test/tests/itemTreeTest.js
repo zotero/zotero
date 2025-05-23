@@ -1844,5 +1844,23 @@ describe("Zotero.ItemTree", function() {
 			assert.include(text, toplevelItem.getDisplayTitle());
 			assert.include(text, toplevelItemTwo.getDisplayTitle());
 		});
+
+		it("should exclude context annotation rows if hideContextAnnotationRows=true", async () => {
+			Zotero.Prefs.set("hideContextAnnotationRows", true);
+
+			highlight.annotationText = "highlight";
+			underline.annotationText = "underline";
+			await highlight.saveTx();
+			await underline.saveTx();
+
+			await zp.itemsView.setFilter("search", "highlight");
+
+			zp.itemsView.expandAllRows();
+
+			let highlightRowIndex = zp.itemsView.getRowIndexByID(highlight.id);
+			assert.isNumber(highlightRowIndex);
+			let underlineRowIndex = zp.itemsView.getRowIndexByID(underline.id);
+			assert.isFalse(underlineRowIndex);
+		});
 	});
 })
