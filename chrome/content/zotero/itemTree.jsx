@@ -154,6 +154,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				'itemTreeView',
 				50
 			);
+			this._prefsObserverID = Zotero.Prefs.registerObserver('hideContextAnnotationRows', async () => {
+				await this.refresh();
+				this.tree.invalidate();
+			});
 		}
 		
 		this._itemsPaneMessage = null;
@@ -170,6 +174,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
+		Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		this._writeColumnPrefsToFile(true);
 	}
 
@@ -1724,6 +1729,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		if (item.isFileAttachment()) {
 			annotations = item.getAnnotations();
+			if (Zotero.Prefs.get("hideContextAnnotationRows") && this._searchMode) {
+				annotations = annotations.filter(annotation => this._searchItemIDs.has(annotation.id));
+			}
 		}
 		var newRows = [];
 		if (attachments.length && notes.length) {
@@ -2100,6 +2108,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var item = this.getRow(index).ref;
 		if (item.isFileAttachment()) {
+			if (Zotero.Prefs.get("hideContextAnnotationRows") && this._searchMode) {
+				return !item.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+			}
 			return item.numAnnotations() == 0;
 		}
 		if (!item.isRegularItem()) {
