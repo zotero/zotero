@@ -33,6 +33,8 @@ import DeepTutorWelcomePane from './DeepTutorWelcomePane.js';
 import DeepTutorSignIn from './DeepTutorSignIn.js';
 import DeepTutorSignUp from './DeepTutorSignUp.js';
 import DeepTutorUpgradePremium from './DeepTutorUpgradePremium.js';
+import DeepTutorTopSection from './DeepTutorTopSection.js';
+import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 import { 
 	getUserById, 
 	getSessionsByUserId, 
@@ -529,7 +531,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			currentPane: 'main',
+			currentPane: 'welcome',
 			sessions: [],
 			sesNamToObj: new Map(),
 			isLoading: false,
@@ -538,6 +540,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignInPopup: false,
 			showSignUpPopup: false,
 			showUpgradePopup: false,
+			collapsed: false
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -546,14 +549,17 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this._loadingPromise = new Promise(resolve => {
 			this._loadingPromiseResolve = resolve;
 		});
+		this.containerRef = React.createRef();
 	}
 
 	componentDidMount() {
 		this._initialized = true;
 		this._loadingPromiseResolve();
 		Zotero.debug("DeepTutor: Component mounted");
-		// Load sessions when component mounts
-		this.loadSession();
+		// Only load sessions if we're not in welcome pane
+		if (this.state.currentPane !== 'welcome') {
+			this.loadSession();
+		}
 	}
 
 	waitForLoad() {
@@ -610,6 +616,16 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showUpgradePopup: !prevState.showUpgradePopup
 		}));
 	};
+
+	toggleCollapse = () => {
+		this.setState(prevState => ({
+			collapsed: !prevState.collapsed
+		}), () => {
+			if (window.ZoteroPane && typeof window.ZoteroPane.updateLayoutConstraints === 'function') {
+				window.ZoteroPane.updateLayoutConstraints();
+			}
+		});
+	}
 
 	async loadSession() {
 		try {
@@ -709,54 +725,38 @@ var DeepTutor = class DeepTutor extends React.Component {
 	render() {
 		Zotero.debug("DeepTutor: Render called");
 		
+		const containerStyle = {
+			...styles.container,
+			width: this.state.collapsed ? '0' : '470px',
+			minWidth: this.state.collapsed ? '0' : '320px',
+			maxWidth: this.state.collapsed ? '0' : '905px',
+			transition: 'width 0.3s ease-in-out',
+			overflow: 'hidden',
+			display: 'flex',
+			flexDirection: 'column',
+			height: '100%'
+		};
+		
 		return (
-			<div style={styles.container}>
-				{/* Top Section */}
-				<div style={styles.top}>
-					<img src={logoPath} alt="DeepTutor Logo" style={styles.logo} />
-					<div style={styles.topRight}>
-						<button
-							style={{
-								...styles.iconButton,
-								...(this.state.currentPane === 'sessionHistory' ? styles.iconButtonActive : {})
-							}}
-							onClick={() => this.switchPane('sessionHistory')}
-						>
-							<img 
-								src={HistoryIconPath}
-								alt="History" 
-								style={styles.iconImage}
-							/>
-						</button>
-						<button
-							style={{
-								...styles.iconButton,
-								...(this.state.currentPane === 'modelSelection' ? styles.iconButtonActive : {})
-							}}
-							onClick={() => this.switchPane('modelSelection')}
-						>
-							<img 
-								src={PlusIconPath}
-								alt="New Session" 
-								style={styles.iconImage}
-							/>
-						</button>
-					</div>
-				</div>
+			<div 
+				ref={this.containerRef}
+				style={containerStyle}
+				id="zotero-deep-tutor-pane"
+				collapsed={this.state.collapsed.toString()}
+			>
+				<DeepTutorTopSection
+					currentPane={this.state.currentPane}
+					onSwitchPane={this.switchPane}
+					logoPath={logoPath}
+					HistoryIconPath={HistoryIconPath}
+					PlusIconPath={PlusIconPath}
+				/>
 
 				{/* Middle Section */}
 				<div style={styles.middle}>
 					<div style={styles.paneList}>
 						{this.state.currentPane === 'main' && <DeepTutorChatBox 
 							ref={ref => this._tutorBox = ref}
-							onSessionIdUpdate={(sessionId) => {
-								Zotero.debug(`DeepTutor: Session ID updated to ${sessionId}`);
-							}}
-							onUserIdUpdate={(userId) => {
-								Zotero.debug(`DeepTutor: User ID updated to ${userId}`);
-							}}
-							messages={this.state.messages}
-							documentIds={this.state.documentIds}
 							currentSession={this.state.currentSession}
 						/>}
 						{this.state.currentPane === 'sessionHistory' && 
@@ -793,8 +793,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 							/>
 						}
 						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} />}
-						{this.state.currentPane === 'signIn' && <DeepTutorSignIn />}
-						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => this.toggleSignInPopup()} />}
+						{this.state.currentPane === 'signIn' && <DeepTutorSignIn 
+							onSignInSignUp={() => this.toggleSignUpPopup()} 
+							onSignInSuccess={() => {
+								this.loadSession();
+								this.switchPane('sessionHistory');
+								this.toggleSignInPopup();
+							}}
+						/>}
+						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => {
+							this.toggleSignUpPopup();
+							this.toggleSignInPopup();
+						}} />}
 					</div>
 				</div>
 
@@ -885,21 +895,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								justifyContent: 'flex-end',
 								alignItems: 'center',
 								marginBottom: '20px',
 							}}>
-								<div style={{
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5em',
-								}}>
-									Sign in
-								</div>
 								<button
 									onClick={this.toggleSignInPopup}
 									style={{
@@ -915,16 +914,19 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
-										transition: 'background-color 0.2s',
-										':hover': {
-											background: '#f0f0f0'
-										}
 									}}
 								>
 									✕
 								</button>
 							</div>
-							<DeepTutorSignIn />
+							<DeepTutorSignIn 
+								onSignInSignUp={() => this.toggleSignUpPopup()} 
+								onSignInSuccess={() => {
+									this.loadSession();
+									this.switchPane('main');
+									this.toggleSignInPopup();
+								}}
+							/>
 						</div>
 					</div>
 				)}
@@ -1002,96 +1004,19 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Bottom Section */}
 				<div style={styles.bottom}>
-					<div style={styles.bottomLeft}>
-						<button style={styles.textButton}>
-							<img src={FeedIconPath} alt="Feedback" style={styles.buttonIcon} />
-							Feedback
-						</button>
-						<div style={styles.profileButtonContainer}>
-							<button style={styles.textButton} onClick={this.toggleProfilePopup}>
-								<img src={PersonIconPath} alt="Profile" style={styles.buttonIcon} />
-								Profile
-							</button>
-							{this.state.showProfilePopup && (
-								<div style={styles.profilePopup}>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'main' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.switchPane('main');
-											this.toggleProfilePopup();
-										}}
-									>
-										Main
-									</button>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'modelSelection' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.switchPane('modelSelection');
-											this.toggleProfilePopup();
-										}}
-									>
-										Model Selection
-									</button>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'sessionHistory' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.switchPane('sessionHistory');
-											this.toggleProfilePopup();
-										}}
-									>
-										Session History
-									</button>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'welcome' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.switchPane('welcome');
-											this.toggleProfilePopup();
-										}}
-									>
-										Welcome
-									</button>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'signIn' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.toggleSignInPopup();
-											this.toggleProfilePopup();
-										}}
-									>
-										Sign In
-									</button>
-									<button
-										style={{
-											...styles.componentButton,
-											...(this.state.currentPane === 'signUp' ? styles.componentButtonActive : {})
-										}}
-										onClick={() => {
-											this.toggleSignUpPopup();
-											this.toggleProfilePopup();
-										}}
-									>
-										Sign Up
-									</button>
-								</div>
-							)}
-						</div>
-					</div>
-					<button style={styles.upgradeButton} onClick={this.toggleUpgradePopup}>Upgrade</button>
+					<DeepTutorBottomSection
+						currentPane={this.state.currentPane}
+						onSwitchPane={this.switchPane}
+						onToggleProfilePopup={this.toggleProfilePopup}
+						onToggleSignInPopup={this.toggleSignInPopup}
+						onToggleSignUpPopup={this.toggleSignUpPopup}
+						onToggleUpgradePopup={this.toggleUpgradePopup}
+						showProfilePopup={this.state.showProfilePopup}
+						feedIconPath={FeedIconPath}
+						personIconPath={PersonIconPath}
+					/>
 				</div>
+
 			</div>
 		);
 	}

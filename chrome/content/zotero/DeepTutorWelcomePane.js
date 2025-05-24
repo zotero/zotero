@@ -40,44 +40,62 @@ const styles = {
   },
   folderBg: {
     position: 'absolute',
-    left: '18%',
-    bottom: '18%',
-    width: 140,
-    opacity: 0.13,
+    width: '123.47px',
+    height: '94.37px',
+    top: '611.75px',
+    left: '105px',
+    opacity: 0.2,
     zIndex: 0,
   },
   pageBg: {
     position: 'absolute',
-    right: '18%',
-    top: '18%',
-    width: 120,
-    opacity: 0.13,
+    width: '89px',
+    height: '107.33px',
+    top: '306px',
+    left: '309.68px',
+    opacity: 0.2,
     zIndex: 0,
   },
-  mainText: {
-    marginTop: 120,
-    marginBottom: 16,
-    fontWeight: 700,
-    fontSize: '1.25em',
-    color: '#222',
-    textAlign: 'center',
+  textSection: {
+    position: 'absolute',
+    width: '346px',
+    height: '183px',
+    top: '362px',
+    left: '62px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '30px',
     zIndex: 1,
+  },
+  mainText: {
+    width: '346px',
+    height: '28px',
+    fontWeight: 700,
+    fontSize: '20px',
+    lineHeight: '100%',
+    letterSpacing: '0%',
+    textAlign: 'center',
+    color: '#292929',
   },
   subText: {
-    fontWeight: 500,
-    fontSize: '1.1em',
-    color: '#222',
+    width: '346px',
+    height: '19px',
+    fontWeight: 600,
+    fontSize: '15px',
+    lineHeight: '100%',
+    letterSpacing: '0%',
     textAlign: 'center',
-    marginBottom: 8,
-    zIndex: 1,
+    color: '#292929',
   },
   descText: {
+    width: '346px',
+    height: '38px',
     fontWeight: 400,
-    fontSize: '1em',
-    color: '#444',
+    fontSize: '12px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
     textAlign: 'center',
-    marginBottom: 32,
-    zIndex: 1,
+    color: '#292929',
   },
   signInButton: {
     background: SKY,
@@ -85,10 +103,10 @@ const styles = {
     fontWeight: 700,
     fontSize: '1.1em',
     border: 'none',
-    borderRadius: 10,
-    padding: '14px 0',
-    width: 240,
-    margin: '0 auto',
+    borderRadius: '10px',
+    width: '346px',
+    height: '48px',
+    padding: '10px 20px',
     cursor: 'pointer',
     boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
@@ -108,14 +126,16 @@ export default function DeepTutorWelcomePane({ onWelcomeSignIn }) {
       {/* Background Images */}
       <img src={FolderImg} alt="Folder" style={styles.folderBg} />
       <img src={PageImg} alt="Page" style={styles.pageBg} />
-      {/* Main Text */}
-      <div style={styles.mainText}>Start Chatting with DeepTutor.</div>
-      <div style={styles.subText}>Sign in to read papers more <b>efficiently</b></div>
-      <div style={styles.descText}>
-        ask questions, get instant explanations and summaries,<br />
-        and save your chat history for future reference.
+      {/* Text Section */}
+      <div style={styles.textSection}>
+        <div style={styles.mainText}>Start Chatting with DeepTutor.</div>
+        <div style={styles.subText}>Sign in to read papers more efficiently</div>
+        <div style={styles.descText}>
+          ask questions, get instant explanations and summaries,<br />
+          and save your chat history for future reference.
+        </div>
+        <button style={styles.signInButton} onClick={onWelcomeSignIn}>Sign in</button>
       </div>
-      <button style={styles.signInButton} onClick={onWelcomeSignIn}>Sign in</button>
     </div>
   );
 } 

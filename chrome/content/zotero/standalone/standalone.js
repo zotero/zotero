@@ -488,7 +488,7 @@ const ZoteroStandalone = new function() {
 	}
 
 	this.onDeepTutorPaneOpen = function () {
-		var deepTutorPane = document.getElementById('deep-tutor-pane');
+		var deepTutorPane = document.getElementById('zotero-deep-tutor-pane');
 		var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
 		var itemPane = document.getElementById('zotero-item-pane');
 		var itemsSplitter = document.getElementById('zotero-items-splitter');
@@ -499,7 +499,7 @@ const ZoteroStandalone = new function() {
 		if (deepTutorPane.getAttribute('collapsed') == 'true') {
 			Zotero.debug('Standalone: Opening DeepTutor pane');
 			deeptutorSplitter.setAttribute('state', 'open');
-			deeptutorSplitter.setAttribute('collapse', 'before');
+			deeptutorSplitter.setAttribute('collapse', 'after');
 			deepTutorPane.setAttribute('collapsed', false);
 			
 			// Collapse item pane
@@ -511,7 +511,7 @@ const ZoteroStandalone = new function() {
 		else {
 			Zotero.debug('Standalone: Closing DeepTutor pane');
 			deeptutorSplitter.setAttribute('state', 'collapsed');
-			deeptutorSplitter.setAttribute('collapse', 'before');
+			deeptutorSplitter.setAttribute('collapse', 'after');
 			deepTutorPane.setAttribute('collapsed', true);
 		}
 		ZoteroPane.updateLayoutConstraints();

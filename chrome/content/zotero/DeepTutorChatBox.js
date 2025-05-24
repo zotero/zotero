@@ -19,6 +19,28 @@ const SessionStatus = {
     DELETED: 'DELETED'
 };
 
+class Conversation {
+	constructor({
+		userId = null,
+		sessionId = null,
+		ragSessionId = null,
+		storagePaths = [],
+		history = [],
+		message = null,
+		streaming = false,
+		type = SessionType.BASIC
+	} = {}) {
+		this.userId = userId;
+		this.sessionId = sessionId;
+		this.ragSessionId = ragSessionId;
+		this.storagePaths = storagePaths;
+		this.history = history;
+		this.message = message;
+		this.streaming = streaming;
+		this.type = type;
+	}
+}
+
 const SessionType = {
     LITE: 'LITE',
     BASIC: 'BASIC',
@@ -216,26 +238,172 @@ const styles = {
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Send.png';
 
-const DeepTutorChatBox = ({ 
-    onSessionIdUpdate, 
-    onUserIdUpdate, 
-    messages: propMessages, 
-    documentIds: propDocumentIds, 
-    currentSession 
-}) => {
+const DeepTutorChatBox = ({ currentSession }) => {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [sessionId, setSessionId] = useState(null);
     const [userId, setUserId] = useState(null);
     const [documentIds, setDocumentIds] = useState([]);
-    const [curDocumentFiles, setCurDocumentFiles] = useState([]);
-    const [curSessionObj, setCurSessionObj] = useState(null);
     const [latestMessageId, setLatestMessageId] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [storagePathsState, setStoragePathsState] = useState([]);
+    const chatLogRef = useRef(null);
+
+    // Simple popup component
+    const LoadingPopup = () => (
+        <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+            textAlign: 'center',
+            fontFamily: 'Roboto, sans-serif',
+            minWidth: '200px',
+        }}>
+            <div style={{ marginBottom: '15px' }}>
+                Please wait for 10 seconds
+            </div>
+            <button
+                onClick={() => setIsLoading(false)}
+                style={{
+                    background: '#0687E5',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    transition: 'background-color 0.2s',
+                    ':hover': {
+                        background: '#0570c0'
+                    }
+                }}
+            >
+                Close
+            </button>
+        </div>
+    );
+
+    // Handle session changes
+    useEffect(() => {
+        const loadSessionData = async () => {
+            if (!currentSession?.id) return;
+
+            try {
+                // Update session and user IDs
+                setSessionId(currentSession.id);
+                setUserId(currentSession.userId);
+                setDocumentIds(currentSession.documentIds || []);
+
+                // Fetch document information
+                const newDocumentFiles = [];
+                for (const documentId of currentSession.documentIds || []) {
+                    try {
+                        const docData = await getDocumentById(documentId);
+                        newDocumentFiles.push(docData);
+                    } catch (error) {
+                        Zotero.debug(`DeepTutorChatBox: Error fetching document ${documentId}: ${error.message}`);
+                    }
+                }
+                Zotero.debug(`DeepTutorChatBox: ATTENTION New Document Files: ${JSON.stringify(newDocumentFiles)}`);
+                setStoragePathsState(newDocumentFiles.map(doc => doc.storagePath));
+                Zotero.debug(`DeepTutorChatBox: ATTENTION Storage Paths: ${JSON.stringify(storagePathsState)}`);
+
+            } catch (error) {
+                Zotero.debug(`DeepTutorChatBox: Error loading session data: ${error.message}`);
+            }
+        };
+
+        loadSessionData();
+    }, [currentSession]);
+
+    // Handle conversation updates when sessionId changes
+    useEffect(() => {
+        if (!sessionId) return;
+
+        setConversation(prev => ({
+            ...prev,
+            userId: userId,
+            sessionId: sessionId,
+            documentIds: documentIds,
+            history: [],
+            message: null,
+            streaming: true,
+            type: SessionType.BASIC,
+            storagePaths: storagePathsState
+        }));
+        Zotero.debug(`DeepTutorChatBox: Conversation state updated with sessionId: ${sessionId}, userId: ${userId}`);
+
+    }, [sessionId, userId, documentIds]);
+
+    // Handle message updates
+    useEffect(() => {
+        const loadMessages = async () => {
+            if (!sessionId) return;
+
+            try {
+                const sessionMessages = await getMessagesBySessionId(sessionId);
+                setMessages(sessionMessages);
+                
+                if (sessionMessages.length > 0) {
+                    setLatestMessageId(sessionMessages[sessionMessages.length - 1].id);
+                    
+                    // Process and append each message
+                    for (const message of sessionMessages) {
+                        const sender = message.role === MessageRole.USER ? 'You' : 'DeepTutor';
+                        await _appendMessage(sender, message);
+                    }
+
+                    // Update conversation history with loaded messages
+                    setConversation(prev => ({
+                        ...prev,
+                        history: sessionMessages
+                    }));
+                } else {
+                    // Show loading popup
+                    setIsLoading(true);
+                    let shouldSendInitialMessage = true;
+                    
+                    // Wait for 10 seconds
+                    Zotero.debug(`DeepTutorChatBox: Waiting 8 seconds before sending initial message`);
+                    await new Promise(resolve => setTimeout(resolve, 8000));
+                    
+                    // Check if we should proceed with initial message
+                    Zotero.debug(`DeepTutorChatBox: Checking if should send initial message: ${shouldSendInitialMessage}`);
+                    if (shouldSendInitialMessage) {
+                        setIsLoading(false);
+                        // Send initial message
+                        Zotero.debug(`DeepTutorChatBox: Sending initial message`);
+                        await userSendMessage("Can you give me a summary of this document?");
+                    }
+                }
+
+                // Scroll to bottom after messages are loaded
+                if (chatLogRef.current) {
+                    setTimeout(() => {
+                        chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+                    }, 100);
+                }
+            } catch (error) {
+                Zotero.debug(`DeepTutorChatBox: Error loading messages: ${error.message}`);
+                setIsLoading(false);
+            }
+        };
+
+        loadMessages();
+    }, [sessionId]);
+
+    const [curSessionObj, setCurSessionObj] = useState(null);
     const [pdfDataList, setPdfDataList] = useState([]);
     const [showModelPopup, setShowModelPopup] = useState(false);
     const [showImagePopup, setShowImagePopup] = useState(false);
 
-    const chatLogRef = useRef(null);
     const modelSelectionRef = useRef(null);
 
     // Conversation state
@@ -250,39 +418,6 @@ const DeepTutorChatBox = ({
         type: SessionType.BASIC
     });
 
-    // Handle session ID updates
-    useEffect(() => {
-        if (onSessionIdUpdate) {
-            onSessionIdUpdate(sessionId);
-        }
-    }, [sessionId, onSessionIdUpdate]);
-
-    // Handle user ID updates
-    useEffect(() => {
-        if (onUserIdUpdate) {
-            onUserIdUpdate(userId);
-        }
-    }, [userId, onUserIdUpdate]);
-
-    // Handle message loading when session changes
-    useEffect(() => {
-        if (currentSession?.id && propMessages && propDocumentIds) {
-            Zotero.debug(`DeepTutorChatBox: Session changed to ${currentSession.id}, loading messages`);
-            loadMessages(propMessages, propDocumentIds, currentSession);
-        }
-    }, [currentSession?.id]); // Only depend on session ID changes
-
-    // Send initial message when conditions are met
-    useEffect(() => {
-        const sendInitialMessage = async () => {
-            if (messages.length === 0 && sessionId && userId) {
-                Zotero.debug(`DeepTutorChatBox: Sending initial message - sessionId: ${sessionId}, userId: ${userId}`);
-                await userSendMessage("Can you give me a summary of this document?");
-            }
-        };
-        sendInitialMessage();
-    }, [messages.length, sessionId, userId]);
-
     useEffect(() => {
         // Scroll to bottom when messages change
         if (chatLogRef.current) {
@@ -293,7 +428,6 @@ const DeepTutorChatBox = ({
     const userSendMessage = async (messageString) => {
         if (!messageString.trim()) return;
         setUserId('67f5b836cb8bb15b67a1149e');
-        Zotero.debug(`USERSENDMESSAGE DeepTutorChatBox: User ID: ${userId}, sessionId: ${sessionId}`);
 
         try {
             if (!sessionId) throw new Error("No active session ID");
@@ -322,36 +456,17 @@ const DeepTutorChatBox = ({
                 role: MessageRole.USER
             };
 
-            Zotero.debug(`DeepTutorChatBox: Created user message: ${JSON.stringify(userMessage)}`);
-
             // Add user message to state and append to chatbox
             await _appendMessage("You", userMessage);
-            Zotero.debug(`1111111111 DeepTutorChatBox: last message in messages: ${JSON.stringify(messages[messages.length - 1])}`);
             setLatestMessageId(userMessage.id);
 
-            // Update conversation with only the new message
-            setConversation(prev => ({
-                ...prev,
-                message: userMessage
-            }));
-
             // Send to API and handle response
+            Zotero.debug(`DeepTutorChatBox: Sending message to API: ${JSON.stringify(userMessage)}`);
             const response = await sendToAPI(userMessage);
+            Zotero.debug(`DeepTutorChatBox: Response from API: ${JSON.stringify(response)}`);
             
-            // Add bot response to messages and append to chatbox
-            setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = response;
-                return newMessages;
-            });
-            Zotero.debug(`2222222222 DeepTutorChatBox: last message in messages: ${JSON.stringify(messages[messages.length - 1])}`);
-            setLatestMessageId(response.id);
 
-            // Update conversation with only the new response
-            setConversation(prev => ({
-                ...prev,
-                message: response
-            }));
+
 
             // Scroll to bottom after messages are added
             if (chatLogRef.current) {
@@ -389,46 +504,42 @@ const DeepTutorChatBox = ({
     const sendToAPI = async (message) => {
         try {
             // Send message to API
-            const responseData = await createMessage(message);
-            Zotero.debug(`DeepTutorChatBox: API response for input message: ${JSON.stringify(responseData)}`);
+            const responseData = await createMessage(message)
+            Zotero.debug(`DeepTutorChatBox: Create Message Response from API: ${JSON.stringify(responseData)}`);
+            const newDocumentFiles2 = [];
+            for (const documentId of currentSession.documentIds || []) {
+                try {
+                    const docData = await getDocumentById(documentId);
+                    newDocumentFiles2.push(docData);
+                } catch (error) {
+                    Zotero.debug(`DeepTutorChatBox: Error fetching document ${documentId}: ${error.message}`);
+                }
+            }
+            Zotero.debug(`DeepTutorChatBox: ATTENTION New Document Files: ${JSON.stringify(newDocumentFiles2)}`);
             
-            // Create a promise to ensure conversation state is updated
-            await new Promise(resolve => {
-                setConversation(prev => {
-                    const newState = {
-                        ...prev,
-                        userId: userId,
-                        sessionId: sessionId,
-                        documentIds: documentIds,
-                        history: [...prev.history, responseData],
-                        message: responseData,
-                        streaming: true,
-                        type: SessionType.BASIC
-                    };
-                    resolve();
-                    return newState;
-                });
+            // Update conversation state
+            const newState = new Conversation({
+                userId: userId,
+                sessionId: sessionId,
+                ragSessionId: null,
+                storagePaths: newDocumentFiles2.map(doc => doc.storagePath),
+                history: messages,
+                message: responseData,
+                streaming: true,
+                type: SessionType.BASIC
             });
             
-            Zotero.debug(`DeepTutorChatBox: Conversation state updated successfully`);
+            setConversation(newState);
 
             // Subscribe to chat stream with timeout
-            Zotero.debug(`DeepTutorChatBox: Sending API request to: https://api.staging.deeptutor.knowhiz.us/api/chat/subscribe`);
-            Zotero.debug(`DeepTutorChatBox: Request body: ${JSON.stringify(conversation)}`);
-
-            const streamResponse = await Promise.race([
-                subscribeToChat(conversation),
-                new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Stream subscription timeout')), 30000)
-                )
-            ]);
+            Zotero.debug(`DeepTutorChatBox: Subscribing to chat with conversation: ${JSON.stringify(newState)}`);
+            
+            const streamResponse = await subscribeToChat(newState);
+            Zotero.debug(`DeepTutorChatBox: Stream Response from API: ${JSON.stringify(streamResponse)}`);
 
             if (!streamResponse.ok) {
                 throw new Error(`Stream request failed: ${streamResponse.status}`);
             }
-
-            Zotero.debug(`DeepTutorChatBox: Starting stream processing with response status: ${streamResponse.status}`);
-            Zotero.debug(`DeepTutorChatBox: Checking streamResponse.body: ${streamResponse.body ? 'exists' : 'null'}`);
             
             if (!streamResponse.body) {
                 throw new Error('Stream response body is null');
@@ -441,6 +552,7 @@ const DeepTutorChatBox = ({
             let lastDataTime = Date.now();
 
             // Create initial empty message for TUTOR
+            Zotero.debug(`DeepTutorChatBox: Creating initial empty message for TUTOR`);
             const initialTutorMessage = {
                 subMessages: [{
                     text: "",
@@ -484,9 +596,13 @@ const DeepTutorChatBox = ({
                     if (!event.startsWith('data:')) return;
 
                     const jsonStr = event.slice(5);
+                    // Skip empty or whitespace-only strings
+                    if (!jsonStr || !jsonStr.trim()) return;
+
                     try {
                         const parsed = JSON.parse(jsonStr);
                         const output = parsed.msg_content;
+                        Zotero.debug(`DeepTutorChatBox: Received data: ${output}`);
                         if (output && output.length > 0) {
                             hasReceivedData = true;
                             streamText += output;
@@ -519,13 +635,23 @@ const DeepTutorChatBox = ({
             }
 
             // Fetch message history for the session
+            Zotero.debug(`DeepTutorChatBox: Waiting 3 seconds before fetching message history`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
             Zotero.debug(`DeepTutorChatBox: Fetching message history for session ${sessionId}`);
             const historyData = await getMessagesBySessionId(sessionId);
-            Zotero.debug(`DeepTutorChatBox: API response data: ${JSON.stringify(historyData)}`);
+            setMessages(historyData);
+            setLatestMessageId(historyData[historyData.length - 1].id);
+            Zotero.debug(`DeepTutorChatBox: FINAL History Data: ${JSON.stringify(historyData)}`);
+
+            // Update conversation with the latest history
+            setConversation(prev => ({
+                ...prev,
+                history: historyData,
+            }));
             
             // Get only the last message from the response
             const lastMessage = historyData.length > 0 ? historyData[historyData.length - 2] : null;
-            Zotero.debug(`DeepTutorChatBox: Last message from history: ${JSON.stringify(lastMessage)}`);
             return lastMessage;
 
         } catch (error) {
@@ -557,7 +683,6 @@ const DeepTutorChatBox = ({
         }
 
         setDocumentIds(newDocumentIds || []);
-        setCurDocumentFiles([]);
         setCurSessionObj(sessionObj);
         setUserId(sessionObj.userId || null);
         setSessionId(sessionObj.id || null);
@@ -578,7 +703,6 @@ const DeepTutorChatBox = ({
                 Zotero.debug(`DeepTutorChatBox: Error fetching document ${documentId}: ${error.message}`);
             }
         }
-        setCurDocumentFiles(newDocumentFiles);
 
         // Update conversation state
         setConversation(prev => ({
@@ -1047,12 +1171,7 @@ const DeepTutorChatBox = ({
 
     return (
         <div style={updatedStyles.container}>
-            <div style={updatedStyles.sessionInfo}>
-                Session: {curSessionObj?.sessionName || 'None'}
-            </div>
-            <div style={updatedStyles.sessionInfo}>
-                File: {curDocumentFiles[0]?.filename || 'None'}
-            </div>
+            {isLoading && <LoadingPopup />}
             
             <div ref={chatLogRef} style={updatedStyles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
@@ -1084,10 +1203,6 @@ const DeepTutorChatBox = ({
 };
 
 DeepTutorChatBox.propTypes = {
-    onSessionIdUpdate: PropTypes.func,
-    onUserIdUpdate: PropTypes.func,
-    messages: PropTypes.array,
-    documentIds: PropTypes.array,
     currentSession: PropTypes.object
 };
 

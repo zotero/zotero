@@ -15,6 +15,16 @@ const styles = {
     justifyContent: 'center',
     padding: '32px 0',
   },
+  titleSection: {
+    position: 'absolute',
+    width: '390px',
+    height: '28px',
+    top: '20px',
+    left: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+  },
   title: {
     background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
     WebkitBackgroundClip: 'text',
@@ -22,17 +32,20 @@ const styles = {
     backgroundClip: 'text',
     color: SKY, // fallback
     fontWeight: 700,
-    fontSize: '1.5em',
+    fontSize: '24px',
+    lineHeight: '100%',
+    letterSpacing: '0%',
     textAlign: 'center',
-    marginBottom: 32,
-    letterSpacing: 0.2,
   },
   form: {
-    width: '100%',
-    maxWidth: 340,
+    position: 'absolute',
+    width: '390px',
+    height: '256px',
+    top: '78px',
+    left: '30px',
     display: 'flex',
     flexDirection: 'column',
-    gap: 18,
+    gap: '20px',
     alignItems: 'center',
   },
   label: {
@@ -147,13 +160,30 @@ const styles = {
 
 const GoogleImg = 'chrome://zotero/content/DeepTutorMaterials/SignIn/Google.png';
 
-export default function DeepTutorSignIn() {
+export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      // Here you would typically make an API call to authenticate
+      // For now, we'll just simulate a successful sign-in
+      if (email && password) {
+        // Call the success callback
+        onSignInSuccess();
+      }
+    } catch (error) {
+      console.error('Sign in failed:', error);
+    }
+  };
+
   return (
     <div style={styles.container}>
-      <div style={styles.title}>Sign in</div>
-      <form style={styles.form} autoComplete="off">
+      <div style={styles.titleSection}>
+        <div style={styles.title}>Sign in</div>
+      </div>
+      <form style={styles.form} autoComplete="off" onSubmit={handleSignIn}>
         <label style={styles.label}>Email address</label>
         <input
           style={styles.input}
@@ -171,7 +201,11 @@ export default function DeepTutorSignIn() {
           onChange={e => setPassword(e.target.value)}
         />
         <button style={styles.forgot} type="button">Forgot your password?</button>
-        <button style={styles.signInButton} type="button">Sign in</button>
+        <button 
+          style={styles.signInButton} 
+          type="submit"
+          onClick={handleSignIn}
+        >Sign in</button>
         <div style={styles.dividerRow}>
           <hr style={styles.divider} />
           <span style={styles.orText}>or</span>
@@ -183,7 +217,7 @@ export default function DeepTutorSignIn() {
         </button>
         <div style={styles.bottomRow}>
           Don't have an account?
-          <button style={styles.signUpLink} type="button">Sign up here</button>
+          <button style={styles.signUpLink} type="button" onClick={onSignInSignUp}>Sign up here</button>
         </div>
       </form>
     </div>

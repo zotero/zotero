@@ -6764,7 +6764,7 @@ var ZoteroPane = new function()
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
-		var deepTutorPane = document.getElementById("deep-tutor-pane");
+		var deepTutorPane = document.getElementById("zotero-deep-tutor-pane");
 		let layoutModeMenus = [
 			document.getElementById("view-menuitem-standard"),
 			document.getElementById("view-menuitem-stacked"),
