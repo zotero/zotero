@@ -930,7 +930,8 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	init: function(postData, sendResponseCallback) {
-		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget(true);
+		let allowReadOnly = (postData.hasOwnProperty("switchToReadableLibrary")) ? !postData.switchToReadableLibrary : true;
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget(allowReadOnly);
 		var response = {
 			libraryID: library.libraryID,
 			libraryName: library.name,
