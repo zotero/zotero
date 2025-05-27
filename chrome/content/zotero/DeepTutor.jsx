@@ -316,6 +316,7 @@ const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/History.png'
 const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Plus.png';
 const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Feedback.png';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Person.png';
+const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Microscope.png';
 
 const styles = {
 	container: {
@@ -373,11 +374,12 @@ const styles = {
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'flex-start',
 		position: 'relative',
 		background: '#f8f9fa',
 		minHeight: 0,
 		width: '100%',
+		padding: '0',
 	},
 	paneList: {
 		width: '100%',
@@ -385,9 +387,9 @@ const styles = {
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'flex-start',
 		position: 'relative',
-		padding: '0 16px',
+		padding: '0',
 	},
 	bottom: {
 		display: 'flex',
@@ -540,6 +542,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignInPopup: false,
 			showSignUpPopup: false,
 			showUpgradePopup: false,
+			showModelSelectionPopup: false,
 			collapsed: false
 		};
 		this._initialized = false;
@@ -614,6 +617,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 	toggleUpgradePopup = () => {
 		this.setState(prevState => ({
 			showUpgradePopup: !prevState.showUpgradePopup
+		}));
+	};
+
+	toggleModelSelectionPopup = () => {
+		this.setState(prevState => ({
+			showModelSelectionPopup: !prevState.showModelSelectionPopup
 		}));
 	};
 
@@ -747,9 +756,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 				<DeepTutorTopSection
 					currentPane={this.state.currentPane}
 					onSwitchPane={this.switchPane}
+					onToggleModelSelectionPopup={this.toggleModelSelectionPopup}
 					logoPath={logoPath}
 					HistoryIconPath={HistoryIconPath}
 					PlusIconPath={PlusIconPath}
+					MicroscopeIconPath={MicroscopeIconPath}
 				/>
 
 				{/* Middle Section */}
@@ -786,6 +797,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 										await this.handleSessionSelect(session.sessionName);
 										this.switchPane('main');
+										this.toggleModelSelectionPopup();
 									} catch (error) {
 										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
 									}
@@ -955,21 +967,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								justifyContent: 'flex-end',
 								alignItems: 'center',
 								marginBottom: '20px',
 							}}>
-								<div style={{
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5em',
-								}}>
-									Sign up
-								</div>
 								<button
 									onClick={this.toggleSignUpPopup}
 									style={{
@@ -985,10 +986,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
-										transition: 'background-color 0.2s',
-										':hover': {
-											background: '#f0f0f0'
-										}
 									}}
 								>
 									✕
@@ -1002,21 +999,95 @@ var DeepTutor = class DeepTutor extends React.Component {
 					</div>
 				)}
 
-				{/* Bottom Section */}
-				<div style={styles.bottom}>
-					<DeepTutorBottomSection
-						currentPane={this.state.currentPane}
-						onSwitchPane={this.switchPane}
-						onToggleProfilePopup={this.toggleProfilePopup}
-						onToggleSignInPopup={this.toggleSignInPopup}
-						onToggleSignUpPopup={this.toggleSignUpPopup}
-						onToggleUpgradePopup={this.toggleUpgradePopup}
-						showProfilePopup={this.state.showProfilePopup}
-						feedIconPath={FeedIconPath}
-						personIconPath={PersonIconPath}
-					/>
-				</div>
+				{/* Model Selection Popup */}
+				{this.state.showModelSelectionPopup && (
+					<div style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+						overflow: 'hidden',
+					}}>
+						<div style={{
+							position: 'relative',
+							width: '430px',
+							background: '#FFFFFF',
+							borderRadius: '10px',
+							padding: '20px',
+						}}>
+							<div style={{
+								display: 'flex',
+								justifyContent: 'flex-end',
+								alignItems: 'center',
+								marginBottom: '20px',
+							}}>
+								<button
+									onClick={this.toggleModelSelectionPopup}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										padding: '4px',
+										fontSize: '24px',
+										color: '#666',
+										width: '32px',
+										height: '32px',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: '50%',
+									}}
+								>
+									✕
+								</button>
+							</div>
+							<ModelSelection 
+								onSubmit={async (sessionId) => {
+									try {
+										const sessionData = await getSessionById(sessionId);
+										const session = new DeepTutorSession(sessionData);
+										const newSesNamToObj = new Map(this.state.sesNamToObj);
+										newSesNamToObj.set(session.sessionName, session);
+										
+										await this.setState({
+											currentSession: session,
+											messages: [],
+											documentIds: session.documentIds || [],
+											sesNamToObj: newSesNamToObj,
+											sessions: [...this.state.sessions, session]
+										});
 
+										await this.handleSessionSelect(session.sessionName);
+										this.switchPane('main');
+										this.toggleModelSelectionPopup();
+									} catch (error) {
+										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
+									}
+								}}
+							/>
+						</div>
+					</div>
+				)}
+
+				{/* Bottom Section */}
+
+				<DeepTutorBottomSection
+					currentPane={this.state.currentPane}
+					onSwitchPane={this.switchPane}
+					onToggleProfilePopup={this.toggleProfilePopup}
+					onToggleSignInPopup={this.toggleSignInPopup}
+					onToggleSignUpPopup={this.toggleSignUpPopup}
+					onToggleUpgradePopup={this.toggleUpgradePopup}
+					showProfilePopup={this.state.showProfilePopup}
+					feedIconPath={FeedIconPath}
+					personIconPath={PersonIconPath}
+				/>
 			</div>
 		);
 	}

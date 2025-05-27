@@ -7,7 +7,7 @@ import {
   subscribeToChat 
 } from './api/libs/api';
 import { viewAttachment } from './elements/callZoteroPane';
-import ReactMarkdown from 'react-markdown';
+// import ReactMarkdown from 'react-markdown';
 
 // Enums
 const SessionStatus = {
@@ -69,15 +69,18 @@ const MessageRole = {
 // Styles
 const styles = {
     container: {
-        padding: '16px',
-        background: '#F8F6F7',
+        padding: '0 16px 16px 16px',
+        background: '#F2F2F2',
         borderRadius: '8px',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         height: '100%',
-        width: '85%',
+        maxHeight: '720px',
+        width: '430px',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'Roboto, sans-serif',
+        position: 'relative',
+        overflow: 'hidden',
     },
     sessionInfo: {
         fontSize: '1em',
@@ -87,16 +90,19 @@ const styles = {
         fontFamily: 'Roboto, sans-serif',
     },
     chatLog: {
-        borderRadius: '8px',
-        padding: '12px',
+        borderRadius: '10px',
+        padding: '12px 15px',
         overflowY: 'auto',
-        background: 'white',
+        background: '#F2F2F2',
         height: '100%',
-        maxHeight: '400px',
         width: '100%',
-        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+        boxShadow: 'none',
         marginBottom: '16px',
         fontFamily: 'Roboto, sans-serif',
+        flex: 1,
+        marginTop: '0',
+        gap: '10px',
+        borderWidth: '1px',
     },
     bottomBar: {
         marginTop: 'auto',
@@ -108,6 +114,10 @@ const styles = {
         flexDirection: 'column',
         gap: '4px',
         fontFamily: 'Roboto, sans-serif',
+        width: '100%',
+        position: 'relative',
+        zIndex: 1,
+        minHeight: '80px',
     },
     inputContainer: {
         width: '100%',
@@ -116,6 +126,10 @@ const styles = {
         justifyContent: 'space-between',
         marginBottom: '2px',
         gap: '8px',
+        background: '#FFFFFF',
+        borderRadius: '8px',
+        padding: '8px',
+        border: '1px solid #495057',
     },
     textInput: {
         flex: 1,
@@ -978,6 +992,7 @@ const DeepTutorChatBox = ({ currentSession }) => {
                     {message.subMessages.map((subMessage, subIndex) => (
                         <div key={subIndex} style={styles.messageText}>
                             {`[${index}] `}
+                            {/* Commented out ReactMarkdown implementation
                             <ReactMarkdown
                                 className="markdown mb-0 flex flex-col"
                                 components={{
@@ -1033,6 +1048,16 @@ const DeepTutorChatBox = ({ currentSession }) => {
                             >
                                 {subMessage.text || ''}
                             </ReactMarkdown>
+                            */}
+                            <div style={{
+                                fontSize: '14px',
+                                lineHeight: '1.5',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                fontFamily: 'Roboto, sans-serif',
+                            }}>
+                                {subMessage.text || ''}
+                            </div>
                             {subMessage.sources && subMessage.sources.length > 0 && (
                                 <div style={styles.sourcesContainer}>
                                     {subMessage.sources.map((source, sourceIndex) => (
@@ -1170,10 +1195,10 @@ const DeepTutorChatBox = ({ currentSession }) => {
     }, [documentIds, sessionId]); // Dependencies array
 
     return (
-        <div style={updatedStyles.container}>
+        <div style={styles.container}>
             {isLoading && <LoadingPopup />}
             
-            <div ref={chatLogRef} style={updatedStyles.chatLog}>
+            <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
             </div>
 

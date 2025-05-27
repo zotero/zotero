@@ -2,14 +2,23 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const containerStyle = {
-  padding: 16,
+  width: '470px',
+  padding: '20px',
+  gap: '4px',
+  borderWidth: '1px',
   background: '#F2F2F2',
   borderRadius: 8,
   height: '100%',
-  width: '85%',
+  marginTop: '8px',
   display: 'flex',
   flexDirection: 'column',
   fontFamily: 'Roboto, Inter, Arial, sans-serif',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  overflow: 'auto',
 };
 
 const searchSectionStyle = {
@@ -19,6 +28,18 @@ const searchSectionStyle = {
   borderRadius: 6,
   boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   display: 'flex',
+};
+
+const sessionListTitleStyle = {
+  fontSize: 14,
+  fontWeight: 400,
+  lineHeight: '135%',
+  letterSpacing: '0%',
+  verticalAlign: 'middle',
+  color: '#757575',
+  padding: '8px 12px',
+  margin: '4px 0',
+  marginBottom: '0px',
 };
 
 const searchInputStyle = {
@@ -46,16 +67,19 @@ const sessionListStyle = {
 
 const sessionButtonStyle = {
   width: '100%',
+  fontFamily: 'Roboto, sans-serif',
   padding: '8px 12px',
   margin: '4px 0',
   background: '#F2F2F2',
   border: 'none',
   borderRadius: 6,
   textAlign: 'left',
-  fontSize: 13,
-  color: '#2c3e50',
+  fontWeight: 600,
+  fontSize: '16px',
+  lineHeight: '100%',
+  letterSpacing: '0%',
+  color: '#292929',
   cursor: 'pointer',
-  fontWeight: 700,
 };
 
 const loadingStyle = {
@@ -112,6 +136,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
           style={searchInputStyle}
         />
       </div>
+      <div style={sessionListTitleStyle}>Sessions</div>
       {/* Session List Section */}
       <div style={sessionListStyle}>
         {filteredSessions.length === 0 && (

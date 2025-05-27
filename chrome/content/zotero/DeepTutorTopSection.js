@@ -20,7 +20,7 @@ const styles = {
         justifyContent: 'space-between',
         padding: '6px 8px 3px 8px',
         minHeight: '64px',
-        background: '#D9D9D9',
+        background: '#F2F2F2',
         width: '100%',
         boxSizing: 'border-box',
     },
@@ -84,7 +84,7 @@ class DeepTutorTopSection extends React.Component {
                     </button>
                     <button
                         style={this.getIconButtonStyle(this.props.currentPane === 'modelSelection')}
-                        onClick={() => this.props.onSwitchPane('modelSelection')}
+                        onClick={this.props.onToggleModelSelectionPopup}
                     >
                         <img 
                             src={this.props.PlusIconPath}
@@ -120,7 +120,7 @@ class DeepTutorTopSection extends React.Component {
                     </button>
                     <button
                         style={this.getIconButtonStyle(this.props.currentPane === 'modelSelection')}
-                        onClick={() => this.props.onSwitchPane('modelSelection')}
+                        onClick={this.props.onToggleModelSelectionPopup}
                     >
                         <img 
                             src={this.props.PlusIconPath}
