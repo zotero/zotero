@@ -59,6 +59,9 @@ preferences-locate-library-lookup-intro = Library Lookup can find a resource onl
 preferences-locate-resolver = Resolver:
 preferences-locate-base-url = Base URL:
 
+preferences-tags-fuzzy-autocomplete =
+    .label = Fuzzy tags autocomplete
+
 preferences-quickCopy-minus =
     .aria-label = { general-remove }
     .label = { $label }
