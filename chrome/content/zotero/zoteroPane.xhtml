@@ -427,6 +427,12 @@
 							<menuseparator id="menu_EditPreferencesSeparator"/>
 							<menuitem id="menu_EditPreferencesItem"
 								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-settings"/>
+							<menuseparator/>
+							<menuitem id="menu_deeptutor"
+								label="DeepTutor"
+								tooltip="Deep Tutor"
+								oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
+							/>
 						</menupopup>
 					</menu>
 					
@@ -820,6 +826,7 @@
 				oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
 				tooltip="Deep Tutor"
 				label="DeepTutor"
+				style="position: static; margin: 0 10px; -moz-appearance: none;"
 			/>
 			<toolbarbutton class="titlebar-button itempanestatus"
 				oncommand="ZoteroStandalone.onItemPaneOpen()"
@@ -1357,6 +1364,8 @@
 										<hbox id="zotero-items-pane" class="virtualized-table-container" flex="1" clickthrough="never">
 											<html:div id="zotero-items-tree"></html:div>
 										</hbox>
+
+
 									</vbox>
 
 									<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" orient="horizontal" zotero-persist="state orient"
@@ -1383,9 +1392,13 @@
 						oncommand="ZoteroPane.updateLayoutConstraints()">
 						<grippy id="zotero-deeptutor-grippy"/>
 					</splitter>
+					
+
+					
 
 					<box id="new-deep-tutor-pane-container" style="min-width: 0px; max-width: 450px; transition: width 0.3s ease-in-out;">
-						<deep-tutor-pane id="deep-tutor-pane" collapsed="true" class="pane" style="min-width: 0px; max-width: 450px; transition: width 0.3s ease-in-out; visibility: inherit;"></deep-tutor-pane>
+						<deep-tutor-pane id="deep-tutor-pane" collapsed="true" class="pane" style="min-width: 0px; max-width: 0px; transition: width 0.3s ease-in-out; visibility: inherit;"></deep-tutor-pane>
+						<html:div id="zotero-deep-tutor-pane" style="width: 100%; height: 100%;"></html:div>
 					</box>
 					<splitter id="zotero-context-splitter"
 							  hidden="true"

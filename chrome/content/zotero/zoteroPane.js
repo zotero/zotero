@@ -549,6 +549,7 @@ var ZoteroPane = new function()
 		ZoteroContextPane.init();
 		await ZoteroPane.initCollectionsTree();
 		await ZoteroPane.initItemsTree();
+		await ZoteroPane.initDeepTutorPane();
 		ZoteroPane.initCollectionTreeSearch();
 		
 		// Add a default progress window
@@ -1636,6 +1637,26 @@ var ZoteroPane = new function()
 		var io = {dataIn: {search: s}, dataOut: null};
 		window.openDialog('chrome://zotero/content/advancedSearch.xhtml', '', 'chrome,dialog=no,centerscreen', io);
 	};
+
+	this.initDeepTutorPane = async function () {
+		try {
+			Zotero.debug("DPTDPTDEBUG!! Starting DeepTutor pane initialization");
+			const DeepTutor = require('zotero/DeepTutor');
+			var deepTutor = document.getElementById('zotero-deep-tutor-pane');
+			Zotero.debug("DPTDPTDEBUG!! Found deep tutor pane element:", deepTutor);
+			
+			ZoteroPane.deepTutorPane = await DeepTutor.init(deepTutor, {
+				id: "main"
+			});
+			Zotero.debug("DPTDPTDEBUG!! DeepTutor pane initialization completed");
+		}
+		catch (e) {
+			Zotero.debug("DPTDPTDEBUG!! Error in DeepTutor pane initialization:", e);
+			Zotero.logError(e);
+			Zotero.debug(e, 1);
+		}
+	};
+	
 
 	this.initItemsTree = async function () {
 		try {

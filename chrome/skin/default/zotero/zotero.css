@@ -105,3 +105,29 @@ zoterosearch .menulist-icon {
 	display: grid;
 	grid-template-columns: max-content 1fr;
 }
+
+/* DeepTutor button styles */
+.deeptutorstatus {
+    -moz-appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 8px !important;
+    margin: 0 10px !important;
+    color: var(--zotero-text-color) !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+}
+
+.deeptutorstatus:hover {
+    background-color: var(--zotero-hover-color) !important;
+    border-radius: 4px !important;
+}
+
+/* macOS specific styles */
+@media (-moz-platform: macos) {
+    .deeptutorstatus {
+        position: static !important;
+        margin-left: 80px !important; /* Space for window controls */
+        display: inline-block !important;
+    }
+}

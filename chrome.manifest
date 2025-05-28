@@ -5,6 +5,7 @@ content	zotero-platform		chrome/content/zotero-platform/unix/      os=Linux
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=SunOS
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=FreeBSD
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
+content	zotero-session-data		chrome/content/zotero/sessionDocData/
 
 content	zotero-platform-version chrome/content/zotero-platform/default-version/
 
