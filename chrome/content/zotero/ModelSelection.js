@@ -5,6 +5,8 @@ import {
   createSession 
 } from './api/libs/api';
 
+const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/Delete.png';
+
 // Session Status Enum
 const SessionStatus = {
     CREATED: 'CREATED',
@@ -31,19 +33,27 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 20,
-    width: '100%',
+    gap: 30,
+    width: 430,
     height: '100%',
-    maxHeight: 'calc(100vh - 100px)', // Account for Zotero pane header
+    maxHeight: '650px',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
     borderRadius: 10,
     boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
-    padding: '16px',
+    padding: '0 20px 20px 20px',
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflowY: 'auto',
     overflowX: 'hidden',
+    position: 'relative',
+  },
+  titleSection: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    paddingTop: '20px',
   },
   title: {
     background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
@@ -52,11 +62,10 @@ const styles = {
     backgroundClip: 'text',
     color: SKY,
     fontWeight: 700,
-    fontSize: '1.2em',
+    fontSize: '24px',
+    lineHeight: '100%',
+    letterSpacing: '0%',
     textAlign: 'center',
-    marginBottom: 4,
-    letterSpacing: 0.2,
-    width: '100%',
   },
   section: {
     width: '100%',
@@ -66,32 +75,39 @@ const styles = {
     gap: 8,
   },
   label: {
-    fontWeight: 500,
+    fontWeight: 400,
+    fontSize: '14px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
+    verticalAlign: 'middle',
     color: '#000000',
     marginBottom: 2,
-    fontSize: '1em',
   },
   input: {
-    width: '100%',
-    padding: '16px',
-    borderRadius: 10,
+    width: 350,
+    borderRadius: '10px',
+    gap: '10px',
+    borderWidth: '1px',
+    paddingTop: '12px',
+    paddingRight: '15px',
+    paddingBottom: '12px',
+    paddingLeft: '15px',
     border: `1px solid ${LIGHT_GREY2}`,
     background: PEARL,
-    fontSize: '1em',
-    fontFamily: 'Roboto, sans-serif',
+    fontSize: '14px',
     outline: 'none',
   },
   searchArea: {
     width: '100%',
-    maxWidth: 390,
+    maxWidth: 350,
     background: PEARL,
     borderRadius: 10,
     border: `1px solid ${LIGHT_GREY2}`,
     display: 'flex',
     alignItems: 'center',
     padding: '12px 15px',
-    margin: '8px 0',
-    fontSize: '1em',
+    margin: '4px 0',
+    fontSize: '14px',
     color: '#292929',
     gap: 10,
   },
@@ -130,15 +146,25 @@ const styles = {
     minHeight: 0,
   },
   orText: {
-    color: '#888',
-    fontWeight: 500,
-    fontSize: '1em',
+    fontWeight: 400,
+    fontSize: '14px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
     textAlign: 'center',
-    minWidth: 32,
+    verticalAlign: 'middle',
+    color: '#888',
+    margin: '4px 0',
   },
   dragArea: {
+    width: 390,
+    borderRadius: '10px',
+    gap: '5px',
+    borderWidth: '1px',
+    paddingTop: '12px',
+    paddingRight: '15px',
+    paddingBottom: '12px',
+    paddingLeft: '15px',
     border: `1.5px dashed ${LIGHT_GREY2}`,
-    borderRadius: 10,
     background: PEARL,
     minHeight: 91,
     display: 'flex',
@@ -146,10 +172,8 @@ const styles = {
     justifyContent: 'center',
     color: '#888',
     fontSize: '1em',
-    margin: '8px 0',
-    width: '100%',
+    margin: '4px 0',
     flexDirection: 'column',
-    gap: 6,
     transition: 'border-color 0.2s, background 0.2s',
   },
   dragAreaActive: {
@@ -165,12 +189,19 @@ const styles = {
     marginBottom: 8,
   },
   modelTypeButton: {
-    flex: 1,
-    padding: '12px 0',
+    width: 130,
+    height: 48,
+    borderRadius: '10px',
+    paddingTop: '12px',
+    paddingRight: '15px',
+    paddingBottom: '12px',
+    paddingLeft: '15px',
     border: 'none',
-    borderRadius: 10,
-    fontWeight: 700,
-    fontSize: '1em',
+    fontWeight: 400,
+    fontSize: '16px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
+    verticalAlign: 'middle',
     cursor: 'pointer',
     background: PEARL,
     color: '#292929',
@@ -181,9 +212,13 @@ const styles = {
     gap: 5,
   },
   modelTypeButtonSelected: {
-    background: '#0AE2FF',
+    background: AQUA,
     color: '#292929',
-    fontWeight: 700,
+    fontWeight: 400,
+    fontSize: '16px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
+    verticalAlign: 'middle',
   },
   createButton: {
     width: '100%',
@@ -208,22 +243,36 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: 5,
+    width: 390,
+    height: 143,
   },
   modelFeature: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 5,
-    fontSize: '0.9em',
+    fontSize: '14px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
     color: '#000000',
+    height: 'auto',
+    width: '100%',
   },
   modelIcon: {
     width: 16,
     height: 16,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1.5,
   },
   modelLimitations: {
     marginTop: 5,
     color: '#000000',
-    fontSize: '0.9em',
+    fontSize: '14px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
+    width: 363,
+    height: 76,
   },
   searchContainer: {
     position: 'relative',
@@ -310,6 +359,40 @@ const styles = {
     color: '#888',
     fontSize: '0.9em',
     textAlign: 'center',
+  },
+  newFileList: {
+    width: '302px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    marginBottom: '10px',
+  },
+  newFileListItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '10px',
+    borderRadius: '10px',
+    border: '1px solid #D9D9D9',
+    backgroundColor: '#FFFFFF',
+  },
+  newFileListName: {
+    fontSize: '14px',
+    lineHeight: '135%',
+    letterSpacing: '0%',
+    verticalAlign: 'middle',
+    color: '#000000',
+    fontWeight: 400,
+    flex: 1,
+    marginRight: '10px',
+  },
+  newFileListDelete: {
+    width: '24px',
+    height: '24px',
+    cursor: 'pointer',
+    padding: 0,
+    border: 'none',
+    background: 'transparent',
   },
 };
 
@@ -748,7 +831,9 @@ function ModelSelection({ onSubmit }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.title}>Create a new session</div>
+      <div style={styles.titleSection}>
+        <div style={styles.title}>Create a new session</div>
+      </div>
 
       <div style={styles.section}>
         <label style={styles.label}>Name Your Session</label>
@@ -763,6 +848,21 @@ function ModelSelection({ onSubmit }) {
 
       <div style={styles.section}>
         <label style={styles.label}>Add Context</label>
+        {fileList.length > 0 && (
+          <div style={styles.newFileList}>
+            {fileList.map(file => (
+              <div key={file.id} style={styles.newFileListItem}>
+                <span style={styles.newFileListName}>{file.name}</span>
+                <button 
+                  style={styles.newFileListDelete}
+                  onClick={() => handleRemoveFile(file.id)}
+                >
+                  <img src={DeleteImg} alt="Delete" width="24" height="24" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <div style={styles.searchContainer}>
           <div style={styles.searchArea}>
             <svg style={styles.searchIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -795,39 +895,7 @@ function ModelSelection({ onSubmit }) {
             </div>
           )}
         </div>
-        <div style={styles.contextRow}>
-          <button style={styles.uploadButton}>Upload</button>
-          <span style={styles.orText}>or</span>
-          <button style={styles.uploadButton}>Upload2</button>
-          <span style={styles.orText}>or</span>
-          <div style={{ position: 'relative' }}>
-            <button 
-              style={styles.fileListButton}
-              onClick={() => setShowFileList(!showFileList)}
-            >
-              File List
-            </button>
-            {showFileList && (
-              <div style={styles.fileListPopup}>
-                {fileList.length > 0 ? (
-                  fileList.map(file => (
-                    <div key={file.id} style={styles.fileListItem}>
-                      <span>{file.name}</span>
-                      <span 
-                        style={styles.fileListRemove}
-                        onClick={() => handleRemoveFile(file.id)}
-                      >
-                        ×
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <div style={styles.fileListEmpty}>No files selected</div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+        <div style={styles.orText}>or</div>
         <div 
           style={{
             ...styles.dragArea,
@@ -841,7 +909,6 @@ function ModelSelection({ onSubmit }) {
           Drag an Item Here
         </div>
       </div>
-
       <div style={styles.section}>
         <label style={styles.label}>Select Your Model</label>
         <div style={styles.modelTypeRow}>
@@ -879,24 +946,18 @@ function ModelSelection({ onSubmit }) {
         {selectedType === 'lite' && (
           <div style={styles.modelDescription}>
             <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>⚡</span>
-              Our quickest model - for a quick grasp of the content.
+              <span style={styles.modelIcon}>🙌</span>
+              <span>Popular model - Great for most papers</span>
             </div>
             <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Free for all users
+              <span style={styles.modelIcon}>💰</span>
+              <span>Free for all users</span>
             </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Process raw text the fastest
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Source content highlight
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Multiple files understanding
+            <div style={styles.modelLimitations}>
+              ❌ No summary<br />
+              ❌ No image understanding<br />
+              ❌ No advanced model like graphRAG<br />
+              ❌ No source content
             </div>
           </div>
         )}
@@ -904,55 +965,36 @@ function ModelSelection({ onSubmit }) {
           <div style={styles.modelDescription}>
             <div style={styles.modelFeature}>
               <span style={styles.modelIcon}>🙌</span>
-              Popular model - Great for most papers
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Image understanding
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Inference mode with DeepSeek
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Higher quality summary
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Markdown based RAG model
+              <span>Popular model - Great for most papers</span>
             </div>
             <div style={styles.modelFeature}>
               <span style={styles.modelIcon}>💰</span>
-              Available with Premium Subscription
+              <span>Available with Premium Subscription</span>
+            </div>
+            <div style={styles.modelLimitations}>
+              ✅ Image understanding<br />
+              ✅ Inference mode with DeepSeek<br />
+              ✅ High quality summary<br />
+              ✅ Source content highlight<br />
+              ✅ Markdown based RAG model
             </div>
           </div>
         )}
         {selectedType === 'advanced' && (
           <div style={styles.modelDescription}>
             <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>⚡</span>
-              Deep but Slow - Our most powerful model. It will take 5 - 10 min to prepare the content
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Everything in standard mode
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Deeper understanding on figures, equations, tables and graphs
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              Further enhanced context relavency
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>✅</span>
-              More advanced model using GraphRAG
+              <span style={styles.modelIcon}>🙌</span>
+              <span>Deep but Slow - Our most powerful model.<br />Take 5 - 10 min to prepare the content</span>
             </div>
             <div style={styles.modelFeature}>
               <span style={styles.modelIcon}>💰</span>
-              Available with Premium Subscription
+              <span>Available with Premium Subscription</span>
+            </div>
+            <div style={styles.modelLimitations}>
+              ✅ Everything in standard mode<br />
+              🌟 Deeper understanding on figures, equations, and tables<br />
+              🌟 Further enhanced context relavency<br />
+              🌟 More advanced model using GraphRAG
             </div>
           </div>
         )}

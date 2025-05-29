@@ -843,21 +843,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								justifyContent: 'flex-end',
 								alignItems: 'center',
-								marginBottom: '20px',
+								padding: '20px 20px 0 0',
 							}}>
-								<div style={{
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5em',
-								}}>
-									Upgrade Your Plan
-								</div>
 								<button
 									onClick={this.toggleUpgradePopup}
 									style={{

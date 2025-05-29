@@ -12,58 +12,90 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: '32px 0',
+    justifyContent: 'flex-start',
+    padding: '0',
+  },
+  titleSection: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    paddingTop: '12px',
+    paddingLeft: '20px',
+    paddingRight: '20px',
+    marginBottom: '8px',
   },
   title: {
     background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
-    color: SKY, // fallback
+    color: SKY,
     fontWeight: 700,
-    fontSize: '1.35em',
+    fontSize: '24px',
+    lineHeight: '100%',
+    letterSpacing: '0%',
     textAlign: 'center',
-    marginBottom: 18,
-    letterSpacing: 0.2,
+  },
+  contentFrame: {
+    width: 350,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 20,
+    padding: '0 20px',
+  },
+  headerFrame: {
+    width: 350,
+    height: 85,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
   },
   premium: {
     color: SKY,
     fontWeight: 700,
-    fontSize: '1.1em',
-    marginBottom: 8,
-    textAlign: 'center',
+    fontSize: '16px',
+    lineHeight: '23px',
+    textAlign: 'left',
+    width: '100%',
+  },
+  priceFrame: {
+    width: 229,
+    height: 52,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
   },
   price: {
     fontWeight: 700,
-    fontSize: '2.3em',
-    color: '#222',
-    marginBottom: 2,
-    textAlign: 'center',
-    lineHeight: 1.1,
+    fontSize: '36px',
+    lineHeight: '52px',
+    color: '#333333',
+    margin: 0,
   },
   monthly: {
-    color: '#444',
+    color: '#AFAFAF',
     fontWeight: 500,
-    fontSize: '1em',
-    marginBottom: 18,
-    textAlign: 'center',
+    fontSize: '14px',
+    lineHeight: '19px',
+    margin: 0,
+    paddingBottom: '8px',
   },
   featureList: {
-    width: '100%',
-    maxWidth: 340,
-    margin: '0 auto 24px auto',
+    width: 279,
     display: 'flex',
     flexDirection: 'column',
-    gap: 12,
+    gap: 10,
   },
   featureRow: {
     display: 'flex',
     alignItems: 'center',
-    fontSize: '1.08em',
-    color: '#222',
+    fontSize: '14px',
+    lineHeight: '22px',
+    color: '#000000',
     fontWeight: 500,
-    gap: 10,
+    gap: 8,
   },
   greenSquare: {
     width: 18,
@@ -77,33 +109,40 @@ const styles = {
     background: SKY,
     color: '#fff',
     fontWeight: 700,
-    fontSize: '1.1em',
+    fontSize: '16px',
     border: 'none',
     borderRadius: 10,
     padding: '14px 0',
     width: 320,
-    margin: '0 auto',
+    margin: '18px auto',
     cursor: 'pointer',
     boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
     letterSpacing: 0.2,
     display: 'block',
-    marginTop: 18,
   },
 };
 
 export default function DeepTutorUpgradePremium() {
   return (
     <div style={styles.container}>
-      <div style={styles.title}>Upgrade Your Plan</div>
-      <div style={styles.premium}>Premium</div>
-      <div style={styles.price}>$14.99</div>
-      <div style={styles.monthly}>monthly</div>
-      <div style={styles.featureList}>
-        <div style={styles.featureRow}><span style={styles.greenSquare}></span>Unlimited Lite Mode</div>
-        <div style={styles.featureRow}><span style={styles.greenSquare}></span>Unlimited Standard Mode sessions</div>
-        <div style={styles.featureRow}><span style={styles.greenSquare}></span>Unlimited Advanced Mode sessions</div>
-        <div style={styles.featureRow}><span style={styles.greenSquare}></span>Up to 100 pages and 30Mb/file</div>
+      <div style={styles.titleSection}>
+        <div style={styles.title}>Upgrade Your Plan</div>
+      </div>
+      <div style={styles.contentFrame}>
+        <div style={styles.headerFrame}>
+          <div style={styles.premium}>Premium</div>
+          <div style={styles.priceFrame}>
+            <div style={styles.price}>$14.99</div>
+            <div style={styles.monthly}>monthly</div>
+          </div>
+        </div>
+        <div style={styles.featureList}>
+          <div style={styles.featureRow}>✅ Unlimited Lite Mode</div>
+          <div style={styles.featureRow}>✅ Unlimited Standard Mode sessions</div>
+          <div style={styles.featureRow}>✅ Unlimited Advanced Mode sessions</div>
+          <div style={styles.featureRow}>✅ Up to 100 pages and 30Mb/file</div>
+        </div>
       </div>
       <button style={styles.button}>Get Premium</button>
     </div>

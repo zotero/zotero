@@ -9,7 +9,7 @@ const styles = {
         justifyContent: 'space-between',
         padding: '6px 8px 3px 8px',
         minHeight: '64px',
-        background: '#fff',
+        background: '#F2F2F2',
         width: '100%',
         boxSizing: 'border-box',
     },

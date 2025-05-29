@@ -60,7 +60,7 @@ const styles = {
     position: 'absolute',
     width: '346px',
     height: '183px',
-    top: '362px',
+    top: '298px',
     left: '62px',
     display: 'flex',
     flexDirection: 'column',
