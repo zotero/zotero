@@ -202,8 +202,8 @@ module.exports = class {
 
 	/**
 	 * Scroll the scrollbox to a specified item. No-op if already in view
-	 * @param index
-	 * @param forceScrollToTop {Boolean} if true, the row will be scrolled to the top of the scrollbox
+	 * @param {Integer} index
+	 * @param {Boolean} forceScrollToTop  If true, the row will be scrolled to the top of the scrollbox
 	 * even if it is below the current scroll position.
 	 */
 	scrollToRow(index, forceScrollToTop = false) {
