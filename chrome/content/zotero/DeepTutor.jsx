@@ -736,12 +736,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 		
 		const containerStyle = {
 			...styles.container,
-			width: this.state.collapsed ? '0' : '470px',
+			width: this.state.collapsed ? '0' : '100%',
 			minWidth: this.state.collapsed ? '0' : '320px',
 			maxWidth: this.state.collapsed ? '0' : '905px',
-			transition: 'width 0.3s ease-in-out',
+			transition: 'all 0.3s ease-in-out',
 			overflow: 'hidden',
 			display: 'flex',
+			flex: '1',
 			flexDirection: 'column',
 			height: '100%'
 		};
