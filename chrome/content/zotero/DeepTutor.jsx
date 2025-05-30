@@ -316,7 +316,7 @@ const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/History.png'
 const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Plus.png';
 const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Feedback.png';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Person.png';
-const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Microscope.png';
+const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/Search.png';
 
 const styles = {
 	container: {
@@ -543,7 +543,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignUpPopup: false,
 			showUpgradePopup: false,
 			showModelSelectionPopup: false,
-			collapsed: false
+			collapsed: false,
+			showSearch: true
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -634,6 +635,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 				window.ZoteroPane.updateLayoutConstraints();
 			}
 		});
+	}
+
+	toggleSearch = () => {
+		this.setState(prevState => ({
+			showSearch: !prevState.showSearch
+		}));
 	}
 
 	async loadSession() {
@@ -757,6 +764,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentPane={this.state.currentPane}
 					onSwitchPane={this.switchPane}
 					onToggleModelSelectionPopup={this.toggleModelSelectionPopup}
+					onToggleSearch={this.toggleSearch}
 					logoPath={logoPath}
 					HistoryIconPath={HistoryIconPath}
 					PlusIconPath={PlusIconPath}
@@ -780,6 +788,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								onSessionSelect={this.handleSessionSelect}
 								isLoading={this.state.isLoading}
 								error={this.state.error}
+								showSearch={this.state.showSearch}
 							/>
 						}
 						{this.state.currentPane === 'modelSelection' && 

@@ -109,8 +109,10 @@ class DeepTutorTopSection extends React.Component {
                 <img src={this.props.logoPath} alt="DeepTutor Logo" style={styles.logo} />
                 <div style={styles.topRight}>
                     <button
-                        style={this.getIconButtonStyle(true)}
-                        onClick={() => this.props.onSwitchPane('sessionHistory')}
+                        style={this.getIconButtonStyle(this.props.currentPane === 'modelSelection')}
+                        onClick={() => {
+                            this.props.onToggleSearch && this.props.onToggleSearch();
+                        }}
                     >
                         <img 
                             src={this.props.MicroscopeIconPath}
@@ -160,6 +162,7 @@ DeepTutorTopSection.propTypes = {
     HistoryIconPath: PropTypes.string.isRequired,
     PlusIconPath: PropTypes.string.isRequired,
     MicroscopeIconPath: PropTypes.string.isRequired,
+    onToggleSearch: PropTypes.func,
 };
 
 export default DeepTutorTopSection; 
