@@ -3752,7 +3752,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (row === false) {
 			return;
 		}
-		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0));
+		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0), true);
 	}
 
 	/**
