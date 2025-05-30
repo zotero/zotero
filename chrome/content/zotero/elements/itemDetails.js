@@ -236,6 +236,7 @@
 			this._lastUpdateCustomSection = "";
 
 			this._lastScrollTop = 0;
+			this._lastScrollPaneID = '';
 
 			// If true, will render on tab select
 			this._pendingRender = false;
@@ -283,6 +284,8 @@
 			// Checking flags in _handleIntersection is not reliable because it's async.
 			this._toggleIntersectionObserver(false);
 
+			let collapsed = this._collapsed;
+
 			for (let box of [this._header, ...panes]) {
 				box.editable = this.editable;
 				box.tabID = this.tabID;
@@ -294,40 +297,48 @@
 					box.discard();
 				}
 				// Execute sync render immediately
-				if (!box.hidden && box.render) {
+				if (!collapsed && !box.hidden && box.render) {
 					box.render();
 				}
 			}
 
-			let pinnedPaneElem = this.getEnabledPane(this.pinnedPane);
-			let pinnedIndex = panes.indexOf(pinnedPaneElem);
-			
-			this._paneParent.style.paddingBottom = '';
-			if (pinnedPaneElem) {
-				let paneID = pinnedPaneElem.dataset.pane;
-				await this.scrollToPane(paneID, 'instant');
-				this.pinnedPane = paneID;
-			}
-			else {
-				// Keep the scroll position after reordering
-				this._paneParent.scrollTo(0, this._lastScrollTop);
-				this._lastScrollTop = 0;
-			}
+			if (!collapsed) {
+				let scrollPaneElem = this.getEnabledPane(this._lastScrollPaneID);
+				// If the last scroll pane is not found, try the pinned pane
+				if (!scrollPaneElem) {
+					scrollPaneElem = this.getEnabledPane(this.pinnedPane);
+				}
 
-			// Only execute async render for visible panes
-			for (let box of panes) {
-				if (!box.asyncRender) {
-					continue;
+				let scrollPaneIndex = panes.indexOf(scrollPaneElem);
+				
+				this._paneParent.style.paddingBottom = '';
+
+				if (scrollPaneIndex > -1) {
+					let paneID = scrollPaneElem.dataset.pane;
+					await this.scrollToPane(paneID, 'instant');
+					this._lastScrollPaneID = '';
 				}
-				if (pinnedIndex > -1 && panes.indexOf(box) < pinnedIndex) {
-					continue;
+				else {
+					// Keep the scroll position after reordering
+					this._paneParent.scrollTo(0, this._lastScrollTop);
+					this._lastScrollTop = 0;
 				}
-				if (!this.isPaneVisible(box.dataset.pane)) {
-					continue;
+
+				// Only execute async render for visible panes
+				for (let box of panes) {
+					if (!box.asyncRender) {
+						continue;
+					}
+					if (scrollPaneIndex > -1 && panes.indexOf(box) < scrollPaneIndex) {
+						continue;
+					}
+					if (!this.isPaneVisible(box.dataset.pane)) {
+						continue;
+					}
+					await waitNoLongerThan(box.asyncRender(), 500);
+					// Make sure the layout is updated for next isPaneVisible check
+					await waitDOMUpdate();
 				}
-				await waitNoLongerThan(box.asyncRender(), 500);
-				// Make sure the layout is updated for next isPaneVisible check
-				await waitDOMUpdate();
 			}
 
 			if (this.item.id == item.id) {
@@ -510,7 +521,6 @@
 		 * @param {boolean} options.render - Whether to rerender panes after reordering
 		 */
 		async changePaneOrder(paneID, newIdx, options = {}) {
-
 			let panes = this.getPanes();
 			let paneIDs = panes.map(elem => elem.dataset.pane);
 			let currentIndex = paneIDs.indexOf(paneID);
@@ -542,6 +552,7 @@
 			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
 			// when itemPane is expanded.
 			if (this._collapsed) {
+				this._lastScrollPaneID = paneID;
 				return null;
 			}
 
