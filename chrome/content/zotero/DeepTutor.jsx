@@ -697,7 +697,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				Zotero.debug(`DeepTutor: Messages content: ${JSON.stringify(messages)}`);
 
 				// Update state with current session and messages
-				this.setState({
+				await this.setState({
 					currentSession: session,
 					messages: messages,
 					documentIds: session.documentIds || []
@@ -766,10 +766,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 				{/* Middle Section */}
 				<div style={styles.middle}>
 					<div style={styles.paneList}>
-						{this.state.currentPane === 'main' && <DeepTutorChatBox 
-							ref={ref => this._tutorBox = ref}
-							currentSession={this.state.currentSession}
-						/>}
+						{this.state.currentPane === 'main' && (
+							<DeepTutorChatBox 
+								ref={ref => this._tutorBox = ref}
+								currentSession={this.state.currentSession}
+								key={this.state.currentSession?.id}
+								onSessionSelect={this.handleSessionSelect}
+							/>
+						)}
 						{this.state.currentPane === 'sessionHistory' && 
 							<SessionHistory 
 								sessions={this.state.sessions} 

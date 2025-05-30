@@ -204,6 +204,10 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       // Here you would typically make an API call to authenticate
       // For now, we'll just simulate a successful sign-in
       if (email && password) {
+        // Clear recent sessions storage
+        Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify({}));
+        Zotero.debug('DeepTutorSignIn: Cleared recent sessions storage');
+        
         // Call the success callback
         onSignInSuccess();
       }
