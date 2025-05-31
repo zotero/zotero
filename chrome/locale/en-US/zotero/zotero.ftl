@@ -133,7 +133,7 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 menu-view-hide-context-rows =
-    .label = Show Only Matching Items
+    .label = Hide Non-Matching Items
 
 
 menu-show-tabs-menu =
