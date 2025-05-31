@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 15;
+		var toVersion = 16;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -179,12 +179,27 @@ Zotero.Prefs = new function() {
 							this.set('integration.citationDialogLastUsedMode', lastClosed);
 							this.clear('integration.citationDialogLastClosedMode');
 						}
+						break;
+					}
+					case 16: {
+						if (this.get('autoRenameFiles')) {
+							// If the user has `autoRenameFiles` enabled, show a banner informing that file names are now kept in sync
+							this.set('autoRenameFiles.bannerShown', false);
+						}
+						let attachmentRenameTemplate = this.get('attachmentRenameTemplate');
+						if (this.prefHasUserValue('attachmentRenameTemplate')) {
+							// If the user has a custom template, reset `autoRenameFiles.done` so that the "Rename Files Now" button appears in preferences
+							Zotero.initializationPromise.then(() => {
+								Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', attachmentRenameTemplate);
+								this.set('autoRenameFiles.done', false);
+							});
+						}
 					}
 				}
 			}
 			this.set('prefVersion', toVersion);
 		}
-	}
+	};
 	
 	
 	/**
