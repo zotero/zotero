@@ -1091,15 +1091,17 @@ Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 		}
 		
 		if (toAdd.length) {
+			// Convert predicates to ids
+			let toAddConverted = [];
+			for (let rel of toAdd) {
+				let predicateID = yield Zotero.RelationPredicates.add(rel[0]);
+				let object = rel[1];
+				toAddConverted.push([predicateID, object]);
+			}
 			let sql = "INSERT INTO " + this._objectType + "Relations "
 				+ "(" + this._ObjectsClass.idColumn + ", predicateID, object) VALUES ";
-			// Convert predicates to ids
-			for (let i = 0; i < toAdd.length; i++) {
-				toAdd[i][0] = yield Zotero.RelationPredicates.add(toAdd[i][0]);
-				env.relationsToRegister.push([toAdd[i][0], toAdd[i][1]]);
-			}
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
-				toAdd,
+				toAddConverted,
 				Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 3),
 				async function (chunk) {
 					await Zotero.DB.queryAsync(
@@ -1109,6 +1111,7 @@ Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 					);
 				}.bind(this)
 			);
+			env.relationsToRegister = toAdd;
 		}
 		
 		if (toRemove.length) {
