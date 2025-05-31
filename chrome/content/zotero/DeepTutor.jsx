@@ -1082,10 +1082,30 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'flex-end',
+								justifyContent: 'space-between',
 								alignItems: 'center',
 								marginBottom: '20px',
+								minHeight: '64px',
+								padding: '0 16px',
+								position: 'relative',
 							}}>
+								<div style={{
+									position: 'absolute',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '24px',
+									lineHeight: '100%',
+									letterSpacing: '0%',
+									textAlign: 'center',
+								}}>
+									Create a new session
+								</div>
 								<button
 									onClick={this.toggleModelSelectionPopup}
 									style={{
@@ -1101,6 +1121,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
+										marginLeft: 'auto',
 									}}
 								>
 									✕
