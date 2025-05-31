@@ -6,47 +6,25 @@ const PEARL = '#F2F2F2';
 const styles = {
   container: {
     width: '100%',
-    minHeight: 480,
+    minHeight: '80%',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '32px 0',
-  },
-  titleSection: {
-    position: 'absolute',
-    width: '390px',
-    height: '28px',
-    top: '20px',
-    left: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '15px',
-  },
-  title: {
-    background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-    color: SKY, // fallback
-    fontWeight: 700,
-    fontSize: '24px',
-    lineHeight: '100%',
-    letterSpacing: '0%',
-    textAlign: 'center',
+    padding: '16px 0 16px 0px',
+    position: 'relative',
   },
   form: {
-    position: 'absolute',
-    width: '390px',
-    height: '256px',
-    top: '78px',
-    left: '30px',
+    position: 'relative',
+    width: '90%',
+    height: '80%',
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
-    alignItems: 'center',
+    gap: '10px',
+    alignItems: 'flex-start',
+    padding: '0 8px',
   },
   label: {
     fontWeight: 400,
@@ -56,18 +34,19 @@ const styles = {
     verticalAlign: 'middle',
     color: '#222',
     marginBottom: 4,
-    alignSelf: 'flex-start',
+    width: '100%',
   },
   input: {
-    width: 390,
-    height: 48,
+    width: '100%',
+    height: '10%',
+    minHeight: '32px',
     borderRadius: 10,
     gap: 10,
     border: `1px solid #DADCE0`,
-    paddingTop: 12,
-    paddingRight: 15,
-    paddingBottom: 12,
-    paddingLeft: 15,
+    paddingTop: 6,
+    paddingRight: 8,
+    paddingBottom: 6,
+    paddingLeft: 8,
     background: PEARL,
     fontSize: '1em',
     fontFamily: 'Roboto, sans-serif',
@@ -96,8 +75,9 @@ const styles = {
     padding: 0,
   },
   signInButton: {
-    width: 390,
-    height: 39,
+    width: '100%',
+    height: '10%',
+    minHeight: '39px',
     borderRadius: 10,
     paddingTop: 10,
     paddingRight: 20,
@@ -134,8 +114,9 @@ const styles = {
     fontSize: '1em',
   },
   googleButton: {
-    width: 390,
-    height: 44,
+    width: '100%',
+    height: '10%',
+    minHeight: '44px',
     borderRadius: 10,
     gap: 10,
     border: `1px solid ${PEARL}`,
@@ -214,9 +195,6 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.titleSection}>
-        <div style={styles.title}>Sign in</div>
-      </div>
       <form style={styles.form} autoComplete="off" onSubmit={handleSignIn}>
         <label style={styles.label}>Email address</label>
         <input
