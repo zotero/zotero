@@ -125,7 +125,7 @@ const styles = {
   },
 };
 
-export default function DeepTutorUpgradePremium() {
+export default function DeepTutorUpgradePremium({ onUpgradeSuccess }) {
   return (
     <div style={styles.container}>
       <div style={styles.contentFrame}>
@@ -143,7 +143,7 @@ export default function DeepTutorUpgradePremium() {
           <div style={styles.featureRow}>✅ Up to 100 pages and 30Mb/file</div>
         </div>
       </div>
-      <button style={styles.button}>Get Premium</button>
+      <button style={styles.button} onClick={onUpgradeSuccess}>Get Premium</button>
     </div>
   );
 } 
