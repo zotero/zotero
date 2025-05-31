@@ -743,12 +743,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 		
 		const containerStyle = {
 			...styles.container,
-			width: this.state.collapsed ? '0' : '470px',
+			width: this.state.collapsed ? '0' : '100%',
 			minWidth: this.state.collapsed ? '0' : '320px',
 			maxWidth: this.state.collapsed ? '0' : '905px',
-			transition: 'width 0.3s ease-in-out',
+			transition: 'all 0.3s ease-in-out',
 			overflow: 'hidden',
 			display: 'flex',
+			flex: '1',
 			flexDirection: 'column',
 			height: '100%'
 		};
@@ -849,17 +850,38 @@ var DeepTutor = class DeepTutor extends React.Component {
 					}}>
 						<div style={{
 							position: 'relative',
-							width: '430px',
+							width: '80%',
+							maxWidth: '430px',
+							maxHeight: '80%',
 							background: '#FFFFFF',
 							borderRadius: '10px',
 							padding: '20px',
+							overflow: 'auto'
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'flex-end',
+								justifyContent: 'space-between',
 								alignItems: 'center',
-								padding: '20px 20px 0 0',
+								marginBottom: '20px',
+								minHeight: '64px',
+								padding: '0 16px',
 							}}>
+								<div style={{
+									position: 'absolute',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '16px',
+									lineHeight: '100%',
+									letterSpacing: '0%',
+								}}>
+									Upgrade Your Plan
+								</div>
 								<button
 									onClick={this.toggleUpgradePopup}
 									style={{
@@ -875,6 +897,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
+										marginLeft: 'auto',
 									}}
 								>
 									✕
@@ -902,17 +925,38 @@ var DeepTutor = class DeepTutor extends React.Component {
 					}}>
 						<div style={{
 							position: 'relative',
-							width: '430px',
+							width: '80%',
+							maxWidth: '430px',
+							maxHeight: '80%',
 							background: '#FFFFFF',
 							borderRadius: '10px',
 							padding: '20px',
+							overflow: 'auto'
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'flex-end',
+								justifyContent: 'space-between',
 								alignItems: 'center',
 								marginBottom: '20px',
+								minHeight: '64px',
+								padding: '0 16px',
 							}}>
+								<div style={{
+									position: 'absolute',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '24px',
+									lineHeight: '100%',
+									letterSpacing: '0%',
+								}}>
+									Sign in
+								</div>
 								<button
 									onClick={this.toggleSignInPopup}
 									style={{
@@ -928,6 +972,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
+										marginLeft: 'auto',
 									}}
 								>
 									✕
@@ -962,17 +1007,38 @@ var DeepTutor = class DeepTutor extends React.Component {
 					}}>
 						<div style={{
 							position: 'relative',
-							width: '430px',
+							width: '80%',
+							maxWidth: '430px',
+							maxHeight: '80%',
 							background: '#FFFFFF',
 							borderRadius: '10px',
 							padding: '20px',
+							overflow: 'auto'
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'flex-end',
+								justifyContent: 'space-between',
 								alignItems: 'center',
 								marginBottom: '20px',
+								minHeight: '64px',
+								padding: '0 16px',
 							}}>
+								<div style={{
+									position: 'absolute',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '24px',
+									lineHeight: '100%',
+									letterSpacing: '0%',
+								}}>
+									Sign up
+								</div>
 								<button
 									onClick={this.toggleSignUpPopup}
 									style={{
@@ -988,6 +1054,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
+										marginLeft: 'auto',
 									}}
 								>
 									✕
@@ -1018,17 +1085,40 @@ var DeepTutor = class DeepTutor extends React.Component {
 					}}>
 						<div style={{
 							position: 'relative',
-							width: '430px',
+							width: '80%',
+							maxWidth: '430px',
+							maxHeight: '80%',
 							background: '#FFFFFF',
 							borderRadius: '10px',
 							padding: '20px',
+							overflow: 'auto'
 						}}>
 							<div style={{
 								display: 'flex',
-								justifyContent: 'flex-end',
+								justifyContent: 'space-between',
 								alignItems: 'center',
 								marginBottom: '20px',
+								minHeight: '64px',
+								padding: '0 16px',
+								position: 'relative',
 							}}>
+								<div style={{
+									position: 'absolute',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '24px',
+									lineHeight: '100%',
+									letterSpacing: '0%',
+									textAlign: 'center',
+								}}>
+									Create a new session
+								</div>
 								<button
 									onClick={this.toggleModelSelectionPopup}
 									style={{
@@ -1044,6 +1134,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: '50%',
+										marginLeft: 'auto',
 									}}
 								>
 									✕

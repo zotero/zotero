@@ -6,14 +6,15 @@ const GREEN = '#22C55E';
 const styles = {
   container: {
     width: '100%',
-    minHeight: 400,
+    minHeight: '80%',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    padding: '0',
+    padding: '16px 0',
+    position: 'relative',
   },
   titleSection: {
     width: '100%',
@@ -38,18 +39,19 @@ const styles = {
     textAlign: 'center',
   },
   contentFrame: {
-    width: 350,
+    width: '90%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 20,
-    padding: '0 20px',
+    gap: '20px',
+    padding: '0 8px',
   },
   headerFrame: {
-    width: 350,
-    height: 85,
+    width: '100%',
+    height: '15%',
+    minHeight: '85px',
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: '10px',
   },
   premium: {
     color: SKY,
@@ -60,12 +62,12 @@ const styles = {
     width: '100%',
   },
   priceFrame: {
-    width: 229,
-    height: 52,
+    width: '100%',
+    height: '52px',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 10,
+    gap: '10px',
   },
   price: {
     fontWeight: 700,
@@ -83,10 +85,10 @@ const styles = {
     paddingBottom: '8px',
   },
   featureList: {
-    width: 279,
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: '10px',
   },
   featureRow: {
     display: 'flex',
@@ -95,15 +97,15 @@ const styles = {
     lineHeight: '22px',
     color: '#000000',
     fontWeight: 500,
-    gap: 8,
+    gap: '8px',
   },
   greenSquare: {
-    width: 18,
-    height: 18,
+    width: '18px',
+    height: '18px',
     background: GREEN,
-    borderRadius: 4,
+    borderRadius: '4px',
     display: 'inline-block',
-    marginRight: 8,
+    marginRight: '8px',
   },
   button: {
     background: SKY,
@@ -111,9 +113,9 @@ const styles = {
     fontWeight: 700,
     fontSize: '16px',
     border: 'none',
-    borderRadius: 10,
+    borderRadius: '10px',
     padding: '14px 0',
-    width: 320,
+    width: '90%',
     margin: '18px auto',
     cursor: 'pointer',
     boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
@@ -126,9 +128,6 @@ const styles = {
 export default function DeepTutorUpgradePremium() {
   return (
     <div style={styles.container}>
-      <div style={styles.titleSection}>
-        <div style={styles.title}>Upgrade Your Plan</div>
-      </div>
       <div style={styles.contentFrame}>
         <div style={styles.headerFrame}>
           <div style={styles.premium}>Premium</div>

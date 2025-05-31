@@ -2,34 +2,37 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const containerStyle = {
-  width: '470px',
-  padding: '20px',
+  width: '100%',
+  minHeight: '80%',
+  padding: '16px 0',
   gap: '4px',
   borderWidth: '1px',
   background: '#F2F2F2',
-  borderRadius: 8,
+  borderRadius: '8px',
   height: '100%',
   marginTop: '8px',
   display: 'flex',
   flexDirection: 'column',
   fontFamily: 'Roboto, Inter, Arial, sans-serif',
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  position: 'relative',
   overflow: 'auto',
 };
 
 const searchSectionStyle = {
-  marginBottom: 16,
-  padding: 8,
-  background: '#F2F2F2',
+  width: '90%',
+  marginBottom: '16px',
+  padding: '8px',
+  background: 'white',
+  borderRadius: '6px',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   display: 'flex',
+  alignSelf: 'flex-start',
+  marginLeft: '5%',
 };
 
 const sessionListTitleStyle = {
-  fontSize: 14,
+  width: '90%',
+  fontSize: '14px',
   fontWeight: 400,
   lineHeight: '135%',
   letterSpacing: '0%',
@@ -38,29 +41,34 @@ const sessionListTitleStyle = {
   padding: '8px 12px',
   margin: '4px 0',
   marginBottom: '0px',
+  alignSelf: 'flex-start',
+  marginLeft: '5%',
 };
 
 const searchInputStyle = {
   flex: 1,
   width: '100%',
   padding: '6px 10px',
-  border: '2px solid #0687E5',
-  borderRadius: 6,
+  border: '1px solid #495057',
+  borderRadius: '6px',
   background: '#fff',
   color: '#1a65b0',
-  minHeight: 32,
-  fontSize: 13,
+  minHeight: '32px',
+  fontSize: '13px',
 };
 
 const sessionListStyle = {
-  borderRadius: 8,
-  padding: 8,
+  width: '90%',
+  borderRadius: '8px',
+  padding: '8px',
   overflowY: 'auto',
   background: '#F2F2F2',
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: 4,
+  gap: '4px',
+  alignSelf: 'flex-start',
+  marginLeft: '5%',
 };
 
 const sessionButtonStyle = {
@@ -70,7 +78,7 @@ const sessionButtonStyle = {
   margin: '4px 0',
   background: '#F2F2F2',
   border: 'none',
-  borderRadius: 6,
+  borderRadius: '6px',
   textAlign: 'left',
   fontWeight: 600,
   fontSize: '16px',
@@ -81,21 +89,25 @@ const sessionButtonStyle = {
 };
 
 const loadingStyle = {
+  width: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   height: '100%',
   color: '#666',
-  fontSize: 14,
+  fontSize: '14px',
 };
 
 const errorStyle = {
+  width: '90%',
   color: '#dc3545',
-  padding: 12,
+  padding: '12px',
   background: '#fff',
-  borderRadius: 6,
-  margin: '8px 0',
-  fontSize: 13,
+  borderRadius: '6px',
+  margin: '8px auto',
+  fontSize: '13px',
+  alignSelf: 'flex-start',
+  marginLeft: '5%',
 };
 
 function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true }) {
