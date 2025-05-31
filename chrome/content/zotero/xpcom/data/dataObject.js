@@ -819,7 +819,36 @@ Zotero.DataObject.prototype.hasChanged = function() {
 Zotero.DataObject.prototype._clearChanged = function (dataType) {
 	if (dataType) {
 		delete this._changed[dataType];
-		delete this._previousData[dataType];
+		
+		// Unlike _changed, which has primary/item data under .primaryData/.itemData properties,
+		// _previousData has individual top-level fields regardless of category, so when clearing
+		// 'primaryData'/'itemData', check whether each stored field is a primary data or item field
+		// and clear if so
+		switch (dataType) {
+			case 'primaryData':
+			case 'itemData':
+				let toDelete = [];
+				for (let field of Object.keys(this._previousData)) {
+					if (dataType == 'primaryData') {
+						if (this.ObjectsClass.isPrimaryField(field)) {
+							toDelete.push(field);
+						}
+					}
+					else if (dataType == 'itemData') {
+						if (Zotero.ItemFields.getID(field)) {
+							toDelete.push(field);
+						}
+					}
+				}
+				for (let field of toDelete) {
+					delete this._previousData[field];
+				}
+				break;
+			
+			default:
+				delete this._previousData[dataType];
+		}
+		
 		delete this._changedData[dataType];
 	}
 	else {
