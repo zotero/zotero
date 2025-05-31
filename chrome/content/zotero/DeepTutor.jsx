@@ -316,7 +316,7 @@ const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/History.png'
 const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Plus.png';
 const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Feedback.png';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Person.png';
-const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Microscope.png';
+const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/Search.png';
 
 const styles = {
 	container: {
@@ -543,7 +543,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignUpPopup: false,
 			showUpgradePopup: false,
 			showModelSelectionPopup: false,
-			collapsed: false
+			collapsed: false,
+			showSearch: true
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -636,6 +637,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 		});
 	}
 
+	toggleSearch = () => {
+		this.setState(prevState => ({
+			showSearch: !prevState.showSearch
+		}));
+	}
+
 	async loadSession() {
 		try {
 			this.setState({ isLoading: true, error: null });
@@ -697,7 +704,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				Zotero.debug(`DeepTutor: Messages content: ${JSON.stringify(messages)}`);
 
 				// Update state with current session and messages
-				this.setState({
+				await this.setState({
 					currentSession: session,
 					messages: messages,
 					documentIds: session.documentIds || []
@@ -758,6 +765,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentPane={this.state.currentPane}
 					onSwitchPane={this.switchPane}
 					onToggleModelSelectionPopup={this.toggleModelSelectionPopup}
+					onToggleSearch={this.toggleSearch}
 					logoPath={logoPath}
 					HistoryIconPath={HistoryIconPath}
 					PlusIconPath={PlusIconPath}
@@ -767,16 +775,21 @@ var DeepTutor = class DeepTutor extends React.Component {
 				{/* Middle Section */}
 				<div style={styles.middle}>
 					<div style={styles.paneList}>
-						{this.state.currentPane === 'main' && <DeepTutorChatBox 
-							ref={ref => this._tutorBox = ref}
-							currentSession={this.state.currentSession}
-						/>}
+						{this.state.currentPane === 'main' && (
+							<DeepTutorChatBox 
+								ref={ref => this._tutorBox = ref}
+								currentSession={this.state.currentSession}
+								key={this.state.currentSession?.id}
+								onSessionSelect={this.handleSessionSelect}
+							/>
+						)}
 						{this.state.currentPane === 'sessionHistory' && 
 							<SessionHistory 
 								sessions={this.state.sessions} 
 								onSessionSelect={this.handleSessionSelect}
 								isLoading={this.state.isLoading}
 								error={this.state.error}
+								showSearch={this.state.showSearch}
 							/>
 						}
 						{this.state.currentPane === 'modelSelection' && 

@@ -4,7 +4,8 @@ import {
   createMessage, 
   getMessagesBySessionId, 
   getDocumentById, 
-  subscribeToChat 
+  subscribeToChat,
+  getSessionById 
 } from './api/libs/api';
 import { viewAttachment } from './elements/callZoteroPane';
 // import ReactMarkdown from 'react-markdown';
@@ -260,11 +261,69 @@ const styles = {
         fontFamily: 'Roboto, sans-serif',
         gap: '10px',
     },
+    sessionTabBar: {
+        height: '29px',
+        background: '#F2F2F2',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 8px',
+        gap: '4px',
+        borderBottom: '1px solid #E0E0E0',
+    },
+    sessionTab: {
+        width: '136.6666717529297px',
+        height: '29px',
+        gap: '5px',
+        borderRadius: '3px',
+        padding: '5px 10px',
+        background: '#D9D9D9',
+        fontSize: '13px',
+        color: '#292929',
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        '&:hover': {
+            background: '#F8F6F7',
+        },
+    },
+    activeSessionTab: {
+        background: '#FFFFFF',
+        color: '#292929',
+        border: 'none',
+    },
+    sessionPopup: {
+        position: 'absolute',
+        top: '29px',
+        right: '8px',
+        background: '#FFFFFF',
+        border: '1px solid #E0E0E0',
+        borderRadius: '4px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        zIndex: 1000,
+        minWidth: '150px',
+    },
+    sessionPopupItem: {
+        padding: '8px 12px',
+        fontSize: '13px',
+        color: '#292929',
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        '&:hover': {
+            background: '#F8F6F7',
+        },
+    },
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Send.png';
 
-const DeepTutorChatBox = ({ currentSession }) => {
+const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [sessionId, setSessionId] = useState(null);
@@ -273,7 +332,28 @@ const DeepTutorChatBox = ({ currentSession }) => {
     const [latestMessageId, setLatestMessageId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [storagePathsState, setStoragePathsState] = useState([]);
+    const [recentSessions, setRecentSessions] = useState(new Map());
+    const [showSessionPopup, setShowSessionPopup] = useState(false);
+    const MAX_VISIBLE_SESSIONS = 2;
     const chatLogRef = useRef(null);
+
+    // Load recent sessions from preferences on component mount
+    useEffect(() => {
+        const loadRecentSessions = () => {
+            try {
+                const storedSessions = Zotero.Prefs.get('deeptutor.recentSessions');
+                if (storedSessions) {
+                    const parsedSessions = JSON.parse(storedSessions);
+                    const sessionsMap = new Map(Object.entries(parsedSessions));
+                    setRecentSessions(sessionsMap);
+                    Zotero.debug(`DeepTutorChatBox: Loaded ${sessionsMap.size} recent sessions from preferences`);
+                }
+            } catch (error) {
+                Zotero.debug(`DeepTutorChatBox: Error loading recent sessions from preferences: ${error.message}`);
+            }
+        };
+        loadRecentSessions();
+    }, []);
 
     // Simple popup component
     const LoadingPopup = () => (
@@ -319,13 +399,22 @@ const DeepTutorChatBox = ({ currentSession }) => {
     // Handle session changes
     useEffect(() => {
         const loadSessionData = async () => {
-            if (!currentSession?.id) return;
+            if (!currentSession?.id) {
+                Zotero.debug(`DeepTutorChatBox: No current session ID available`);
+                return;
+            }
 
             try {
+                Zotero.debug(`DeepTutorChatBox: Loading session data for session ${currentSession.id}`);
                 // Update session and user IDs
                 setSessionId(currentSession.id);
                 setUserId(currentSession.userId);
                 setDocumentIds(currentSession.documentIds || []);
+
+                // Update recent sessions immediately
+                Zotero.debug(`Current recent sessions TTT: ${JSON.stringify(recentSessions)}`);
+                await updateRecentSessions(currentSession.id);
+                Zotero.debug(`DeepTutorChatBox: Updated recent sessions for session ${currentSession.id}`);
 
                 // Fetch document information
                 const newDocumentFiles = [];
@@ -1206,9 +1295,130 @@ const DeepTutorChatBox = ({ currentSession }) => {
         openFirstDocument();
     }, [documentIds, sessionId]); // Dependencies array
 
+    const updateRecentSessions = async (sessionId) => {
+        try {
+            const session = await getSessionById(sessionId);
+            if (!session) {
+                Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
+                return;
+            }
+
+            Zotero.debug(`DeepTutorChatBox: Updating recent sessions with session ${sessionId}`);
+            setRecentSessions(prev => {
+                const newMap = new Map(prev);
+                // Only add if not already present or if it's a different session
+                if (!newMap.has(sessionId)) {
+                    newMap.set(sessionId, {
+                        name: session.sessionName || `Session ${sessionId.slice(0, 8)}`,
+                        lastUpdatedTime: session.lastUpdatedTime
+                    });
+                    Zotero.debug(`DeepTutorChatBox: Added new session to recent sessions map, now has ${newMap.size} sessions`);
+                } else {
+                    // Update the existing session's lastUpdatedTime
+                    const existingSession = newMap.get(sessionId);
+                    newMap.set(sessionId, {
+                        ...existingSession,
+                        lastUpdatedTime: session.lastUpdatedTime
+                    });
+                    Zotero.debug(`DeepTutorChatBox: Updated existing session in recent sessions map`);
+                }
+
+                // Store in preferences
+                const sessionsObject = Object.fromEntries(newMap);
+                Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
+                Zotero.debug(`DeepTutorChatBox: Stored ${newMap.size} sessions in preferences`);
+
+                return newMap;
+            });
+        } catch (error) {
+            Zotero.debug(`DeepTutorChatBox: Error updating recent sessions: ${error.message}`);
+        }
+    };
+
+    // Add SessionTabBar component
+    const SessionTabBar = () => {
+        // Convert Map to sorted array
+        const sortedSessions = Array.from(recentSessions.entries())
+            .sort((a, b) => new Date(b[1].lastUpdatedTime) - new Date(a[1].lastUpdatedTime));
+
+        Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
+        const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
+        const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
+
+        const handleSessionClick = async (sessionId) => {
+            try {
+                // Get the session data
+                const session = await getSessionById(sessionId);
+                if (!session) {
+                    Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
+                    return;
+                }
+
+                // Update recent sessions
+                await updateRecentSessions(sessionId);
+
+                // Update the current session through props
+                if (currentSession?.id !== sessionId) {
+                    Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
+                    // Use the onSessionSelect prop to switch sessions
+                    if (onSessionSelect) {
+                        onSessionSelect(session.sessionName);
+                    }
+                }
+            } catch (error) {
+                Zotero.debug(`DeepTutorChatBox: Error handling session click: ${error.message}`);
+            }
+        };
+
+        return (
+            <div style={styles.sessionTabBar}>
+                {visibleSessions.map(([sessionId, sessionData]) => (
+                    <button
+                        key={sessionId}
+                        style={{
+                            ...styles.sessionTab,
+                            ...(sessionId === currentSession?.id ? styles.activeSessionTab : {})
+                        }}
+                        onClick={() => handleSessionClick(sessionId)}
+                    >
+                        {sessionData.name}
+                    </button>
+                ))}
+                {hiddenSessions.length > 0 && (
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            style={styles.sessionTab}
+                            onClick={() => setShowSessionPopup(!showSessionPopup)}
+                        >
+                            More ({hiddenSessions.length})
+                        </button>
+                        {showSessionPopup && (
+                            <div style={styles.sessionPopup}>
+                                {hiddenSessions.map(([sessionId, sessionData]) => (
+                                    <div
+                                        key={sessionId}
+                                        style={styles.sessionPopupItem}
+                                        onClick={() => {
+                                            handleSessionClick(sessionId);
+                                            setShowSessionPopup(false);
+                                        }}
+                                    >
+                                        {sessionData.name}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div style={styles.container}>
             {isLoading && <LoadingPopup />}
+            
+            <SessionTabBar />
             
             <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
@@ -1240,7 +1450,8 @@ const DeepTutorChatBox = ({ currentSession }) => {
 };
 
 DeepTutorChatBox.propTypes = {
-    currentSession: PropTypes.object
+    currentSession: PropTypes.object,
+    onSessionSelect: PropTypes.func
 };
 
 export default DeepTutorChatBox;

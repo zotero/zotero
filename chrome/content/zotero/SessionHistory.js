@@ -110,7 +110,7 @@ const errorStyle = {
   marginLeft: '5%',
 };
 
-function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null }) {
+function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true }) {
   const [search, setSearch] = useState('');
 
   // Filter and sort sessions
@@ -137,15 +137,17 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
   return (
     <div style={containerStyle}>
       {/* Search Bar Section */}
-      <div style={searchSectionStyle}>
-        <input
-          type="text"
-          placeholder="Search sessions..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={searchInputStyle}
-        />
-      </div>
+      {showSearch && (
+        <div style={searchSectionStyle}>
+          <input
+            type="text"
+            placeholder="Search sessions..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={searchInputStyle}
+          />
+        </div>
+      )}
       <div style={sessionListTitleStyle}>Sessions</div>
       {/* Session List Section */}
       <div style={sessionListStyle}>
@@ -174,7 +176,8 @@ SessionHistory.propTypes = {
   })),
   onSessionSelect: PropTypes.func,
   isLoading: PropTypes.bool,
-  error: PropTypes.string
+  error: PropTypes.string,
+  showSearch: PropTypes.bool
 };
 
 export default SessionHistory;

@@ -464,8 +464,23 @@ function ModelSelection({ onSubmit }) {
       // Add to fileList with correct name property
       const fileName = item.getField('title') || item.name || item.attachmentFilename;
       Zotero.debug(`BBBBB: Using file name: ${fileName}`);
-      setFileList(prev => [...prev, { id: item.id, name: fileName }]);
-      setOriginalFileList(prev => [...prev, item]);
+      
+      setFileList(prev => {
+        // Check if file ID already exists in the current list
+        if (prev.some(existingFile => existingFile.id === item.id)) {
+          Zotero.debug(`BBBBB: File ${fileName} already exists in fileList, skipping`);
+          return prev;
+        }
+        return [...prev, { id: item.id, name: fileName }];
+      });
+      
+      setOriginalFileList(prev => {
+        // Check if file already exists in originalFileList
+        if (prev.some(existingFile => existingFile.id === item.id)) {
+          return prev;
+        }
+        return [...prev, item];
+      });
       
       // Clear search
       setSearchValue('');
@@ -554,13 +569,24 @@ function ModelSelection({ onSubmit }) {
       
       // Filter out any null results and update fileList
       const validResults = results.filter(result => result !== null);
-      setFileList(prev => [
-        ...prev,
-        ...validResults.map(result => ({ 
-          id: result.id,
-          name: result.name
-        }))
-      ]);
+      setFileList(prev => {
+        // Filter out results that already exist in the current fileList
+        const newResults = validResults.filter(result => 
+          !prev.some(existingFile => existingFile.id === result.id)
+        );
+        
+        Zotero.debug(`BBBBB: Filtered out ${validResults.length - newResults.length} duplicate files`);
+        
+        const newList = [
+          ...prev,
+          ...newResults.map(result => ({ 
+            id: result.id,
+            name: result.name
+          }))
+        ];
+        Zotero.debug(`BBBBB: Updated fileList length: ${newList.length}`);
+        return newList;
+      });
 
       Zotero.debug(`ModelSelection: Successfully processed ${validResults.length} PDFs`);
     } catch (error) {
@@ -783,9 +809,16 @@ function ModelSelection({ onSubmit }) {
         Zotero.debug(`BBBBB: Found ${validResults.length} valid results after processing`);
         
         setFileList(prev => {
+          // Filter out results that already exist in the current fileList
+          const newResults = validResults.filter(result => 
+            !prev.some(existingFile => existingFile.id === result.id)
+          );
+          
+          Zotero.debug(`BBBBB: Filtered out ${validResults.length - newResults.length} duplicate files`);
+          
           const newList = [
             ...prev,
-            ...validResults.map(result => ({ 
+            ...newResults.map(result => ({ 
               id: result.id,
               name: result.name
             }))
