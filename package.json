@@ -19,6 +19,7 @@
   "dependencies": {
     "@citeproc-rs/wasm": "^0.2.0",
     "ace-builds": "^1.4.12",
+    "amazon-cognito-identity-js": "^6.3.12",
     "bluebird": "^3.7.2",
     "classnames": "^2.2.6",
     "monaco-editor": "^0.47.0",

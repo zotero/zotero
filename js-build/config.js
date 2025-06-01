@@ -77,6 +77,13 @@ const browserifyConfigs = [
 		}
 	},
 	{
+		src: 'node_modules/amazon-cognito-identity-js/lib/index.js',
+		dest: 'resource/amazon-cognito-identity-js.js',
+		config: {
+			standalone: 'AmazonCognitoIdentity'
+		}
+	},
+	{
 		src: 'node_modules/sinon/lib/sinon.js',
 		dest: 'test/resource/sinon.js',
 		config: {

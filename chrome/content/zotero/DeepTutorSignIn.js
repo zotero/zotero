@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { signIn, signInWithGoogle, forgotPassword } from './auth/cognitoAuth.js';
 
 const AQUA = '#0AE2FF';
 const SKY = '#0687E5';
@@ -95,6 +96,10 @@ const styles = {
     display: 'block',
     marginTop: 8,
   },
+  signInButtonDisabled: {
+    background: '#ccc',
+    cursor: 'not-allowed',
+  },
   dividerRow: {
     width: '100%',
     display: 'flex',
@@ -171,6 +176,20 @@ const styles = {
     marginLeft: 4,
     padding: 0,
   },
+  errorMessage: {
+    color: '#dc3545',
+    fontSize: '14px',
+    marginTop: '8px',
+    textAlign: 'center',
+    width: '100%',
+  },
+  successMessage: {
+    color: '#28a745',
+    fontSize: '14px',
+    marginTop: '8px',
+    textAlign: 'center',
+    width: '100%',
+  },
 };
 
 const GoogleImg = 'chrome://zotero/content/DeepTutorMaterials/SignIn/Google.png';
@@ -178,62 +197,169 @@ const GoogleImg = 'chrome://zotero/content/DeepTutorMaterials/SignIn/Google.png'
 export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please enter email and password');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
     try {
-      // Here you would typically make an API call to authenticate
-      // For now, we'll just simulate a successful sign-in
-      if (email && password) {
-        // Clear recent sessions storage
-        Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify({}));
-        Zotero.debug('DeepTutorSignIn: Cleared recent sessions storage');
-        
-        // Call the success callback
+      Zotero.debug('DeepTutor SignIn: Attempting to sign in with Cognito');
+      const result = await signIn(email, password);
+      
+      Zotero.debug('DeepTutor SignIn: Sign in successful');
+      setMessage('Login successful!');
+      
+      // Call the success callback after a short delay
+      setTimeout(() => {
         onSignInSuccess();
-      }
+      }, 1000);
+      
     } catch (error) {
-      console.error('Sign in failed:', error);
+      Zotero.debug(`DeepTutor SignIn: Sign in failed: ${error.message}`);
+      
+      // Handle specific Cognito errors
+      let errorMessage = 'Login failed, please try again';
+      
+      if (error.code === 'NotAuthorizedException') {
+        errorMessage = 'Incorrect email or password';
+      } else if (error.code === 'UserNotConfirmedException') {
+        errorMessage = 'Please verify your email address first';
+      } else if (error.code === 'UserNotFoundException') {
+        errorMessage = 'User does not exist';
+      } else if (error.code === 'TooManyRequestsException') {
+        errorMessage = 'Too many requests, please try again later';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      setMessage('');
+      
+      Zotero.debug('DeepTutor SignIn: Attempting Google sign in');
+      await signInWithGoogle();
+      setMessage('Redirecting to Google login...');
+      
+    } catch (error) {
+      Zotero.debug(`DeepTutor SignIn: Google sign in failed: ${error.message}`);
+      setError('Google login failed, please try again');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter email address first');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError('');
+      setMessage('');
+      
+      Zotero.debug('DeepTutor SignIn: Sending forgot password email');
+      await forgotPassword(email);
+      setMessage('Password reset email sent, please check your email');
+      
+    } catch (error) {
+      Zotero.debug(`DeepTutor SignIn: Forgot password failed: ${error.message}`);
+      setError('Failed to send reset email, please try again');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
+      <div style={styles.titleSection}>
+        <div style={styles.title}>Sign In</div>
+      </div>
       <form style={styles.form} autoComplete="off" onSubmit={handleSignIn}>
-        <label style={styles.label}>Email address</label>
+        <label style={styles.label}>Email Address</label>
         <input
           style={styles.input}
           type="email"
           placeholder="example@email.com"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          disabled={isLoading}
         />
         <label style={styles.label}>Password</label>
         <input
           style={styles.input}
           type="password"
-          placeholder="Must be at least 8 characters"
+          placeholder="At least 8 characters"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          disabled={isLoading}
         />
-        <button style={styles.forgot} type="button">Forgot your password?</button>
         <button 
-          style={styles.signInButton} 
+          style={styles.forgot} 
+          type="button" 
+          onClick={handleForgotPassword}
+          disabled={isLoading}
+        >
+          Forgot Password?
+        </button>
+        <button 
+          style={{
+            ...styles.signInButton,
+            ...(isLoading ? styles.signInButtonDisabled : {})
+          }}
           type="submit"
-          onClick={handleSignIn}
-        >Sign in</button>
+          disabled={isLoading}
+        >
+          {isLoading ? 'Signing in...' : 'Sign In'}
+        </button>
+        
+        {error && <div style={styles.errorMessage}>{error}</div>}
+        {message && <div style={styles.successMessage}>{message}</div>}
+        
         <div style={styles.dividerRow}>
           <hr style={styles.divider} />
           <span style={styles.orText}>or</span>
           <hr style={styles.divider} />
         </div>
-        <button style={styles.googleButton} type="button">
+        <button 
+          style={styles.googleButton} 
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={isLoading}
+        >
           <img src={GoogleImg} alt="Google" style={styles.googleIcon} />
           Sign in with Google
         </button>
         <div style={styles.bottomRow}>
           Don't have an account?
-          <button style={styles.signUpLink} type="button" onClick={onSignInSignUp}>Sign up here</button>
+          <button 
+            style={styles.signUpLink} 
+            type="button" 
+            onClick={onSignInSignUp}
+            disabled={isLoading}
+          >
+            Sign up here
+          </button>
         </div>
       </form>
     </div>
