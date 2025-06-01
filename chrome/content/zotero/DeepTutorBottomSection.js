@@ -106,6 +106,37 @@ const styles = {
         background: '#0687E5',
         color: '#fff',
     },
+    profileInfo: {
+        padding: '8px 0',
+        borderBottom: '1px solid #e9ecef',
+        marginBottom: '8px',
+    },
+    userEmail: {
+        fontSize: '14px',
+        fontWeight: 500,
+        color: '#333',
+        marginBottom: '4px',
+    },
+    userStatus: {
+        fontSize: '12px',
+        color: '#666',
+    },
+    signOutButton: {
+        background: '#dc3545',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
+        padding: '6px 12px',
+        fontSize: '14px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        width: '100%',
+        marginTop: '8px',
+        transition: 'background 0.2s',
+        ':hover': {
+            background: '#c82333'
+        }
+    },
 };
 
 class DeepTutorBottomSection extends React.Component {
@@ -116,6 +147,41 @@ class DeepTutorBottomSection extends React.Component {
         };
     }
 
+    renderProfilePopup() {
+        if (!this.props.showProfilePopup) return null;
+
+        return (
+            <div style={styles.profilePopup}>
+                {this.props.isAuthenticated && this.props.currentUser ? (
+                    <>
+                        <div style={styles.profileInfo}>
+                            <div style={styles.userEmail}>
+                                {this.props.currentUser.username || 'User'}
+                            </div>
+                            <div style={styles.userStatus}>Logged in</div>
+                        </div>
+                        <button 
+                            style={styles.signOutButton}
+                            onClick={this.props.onSignOut}
+                        >
+                            Sign out
+                        </button>
+                    </>
+                ) : (
+                    <div style={styles.profileInfo}>
+                        <div style={styles.userStatus}>Not logged in</div>
+                        <button 
+                            style={{...styles.componentButton, marginTop: '8px'}}
+                            onClick={this.props.onToggleSignInPopup}
+                        >
+                            Sign in
+                        </button>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     renderMain() {
         return (
             <>
@@ -124,10 +190,13 @@ class DeepTutorBottomSection extends React.Component {
                         <img src={this.props.feedIconPath} alt="Feedback" style={styles.buttonIcon} />
                         Feedback
                     </button>
-                    <button style={styles.textButton} onClick={this.props.onToggleProfilePopup}>
-                        <img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
-                        Profile
-                    </button>
+                    <div style={styles.profileButtonContainer}>
+                        <button style={styles.textButton} onClick={this.props.onToggleProfilePopup}>
+                            <img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
+                            Profile
+                        </button>
+                        {this.renderProfilePopup()}
+                    </div>
                 </div>
                 <button style={styles.upgradeButton} onClick={this.props.onToggleUpgradePopup}>Upgrade</button>
             </>
@@ -174,6 +243,15 @@ DeepTutorBottomSection.propTypes = {
     showProfilePopup: PropTypes.bool.isRequired,
     feedIconPath: PropTypes.string.isRequired,
     personIconPath: PropTypes.string.isRequired,
+    isAuthenticated: PropTypes.bool,
+    currentUser: PropTypes.object,
+    onSignOut: PropTypes.func,
+};
+
+DeepTutorBottomSection.defaultProps = {
+    isAuthenticated: false,
+    currentUser: null,
+    onSignOut: () => {},
 };
 
 export default DeepTutorBottomSection; 

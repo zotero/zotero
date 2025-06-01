@@ -43,6 +43,12 @@ import {
 	getMessagesBySessionId,
 	getSessionById 
 } from './api/libs/api';
+import { 
+	useAuthState, 
+	getCurrentUser, 
+	refreshSession, 
+	signOut 
+} from './auth/cognitoAuth.js';
 
 // Enums
 const SessionStatus = {
@@ -556,6 +562,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSearch: true,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false
+			// Auth state
+			isAuthenticated: false,
+			currentUser: null,
+			authError: null
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -565,15 +575,102 @@ var DeepTutor = class DeepTutor extends React.Component {
 			this._loadingPromiseResolve = resolve;
 		});
 		this.containerRef = React.createRef();
+		
+		// Bind auth state change handler
+		this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
 		this._initialized = true;
 		this._loadingPromiseResolve();
 		Zotero.debug("DeepTutor: Component mounted");
-		// Only load sessions if we're not in welcome pane
-		if (this.state.currentPane !== 'welcome') {
+		
+		// Initialize auth state
+		await this.initializeAuthState();
+		
+		// Add auth state listener
+		const authState = useAuthState();
+		authState.addListener(this.handleAuthStateChange);
+	}
+
+	componentWillUnmount() {
+		// Remove auth state listener
+		const authState = useAuthState();
+		authState.removeListener(this.handleAuthStateChange);
+	}
+
+	async initializeAuthState() {
+		try {
+			Zotero.debug("DeepTutor: Initializing auth state");
+			
+			// Try to get current user from stored session
+			const currentUserData = await getCurrentUser();
+			
+			if (currentUserData) {
+				Zotero.debug("DeepTutor: User is authenticated");
+				this.setState({
+					isAuthenticated: true,
+					currentUser: currentUserData.user,
+					currentPane: 'sessionHistory'
+				});
+				
+				// Load sessions for authenticated user
+				await this.loadSession();
+			} else {
+				Zotero.debug("DeepTutor: User is not authenticated");
+				this.setState({
+					isAuthenticated: false,
+					currentUser: null,
+					currentPane: 'welcome'
+				});
+			}
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Auth initialization error: ${error.message}`);
+			
+			// Try to refresh session
+			try {
+				const refreshedData = await refreshSession();
+				Zotero.debug("DeepTutor: Session refreshed successfully");
+				this.setState({
+					isAuthenticated: true,
+					currentUser: refreshedData.user,
+					currentPane: 'sessionHistory'
+				});
+				await this.loadSession();
+			} catch (refreshError) {
+				Zotero.debug(`DeepTutor: Session refresh failed: ${refreshError.message}`);
+				this.setState({
+					isAuthenticated: false,
+					currentUser: null,
+					currentPane: 'welcome',
+					authError: 'Session expired, please sign in again'
+				});
+			}
+		}
+	}
+
+	handleAuthStateChange(isAuthenticated, user) {
+		Zotero.debug(`DeepTutor: Auth state changed - authenticated: ${isAuthenticated}`);
+		
+		this.setState({
+			isAuthenticated,
+			currentUser: user,
+			authError: null
+		});
+
+		if (isAuthenticated) {
+			// User signed in, load sessions
 			this.loadSession();
+			this.switchPane('sessionHistory');
+		} else {
+			// User signed out, clear data and show welcome
+			this.setState({
+				sessions: [],
+				sesNamToObj: new Map(),
+				currentSession: null,
+				messages: []
+			});
+			this.switchPane('welcome');
 		}
 	}
 
@@ -666,12 +763,32 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}));
 	}
 
+	handleSignOut = async () => {
+		try {
+			Zotero.debug("DeepTutor: Signing out user");
+			await signOut();
+			
+			// Close profile popup
+			this.setState({ showProfilePopup: false });
+			
+			Zotero.debug("DeepTutor: Sign out successful");
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Sign out error: ${error.message}`);
+		}
+	};
+
 	async loadSession() {
+		// Only load sessions if user is authenticated
+		if (!this.state.isAuthenticated) {
+			Zotero.debug("DeepTutor: Cannot load sessions - user not authenticated");
+			return;
+		}
+
 		try {
 			this.setState({ isLoading: true, error: null });
 			Zotero.debug("DeepTutor: Loading sessions...");
 
-			// Fetch user data using centralized API
+			// Use hardcoded user ID for now - in production, get from Cognito user attributes
 			const userData = await getUserById('67f5b836cb8bb15b67a1149e');
 			
 			// Fetch sessions using centralized API
@@ -705,10 +822,21 @@ var DeepTutor = class DeepTutor extends React.Component {
 			Zotero.debug(`DeepTutor: Successfully loaded ${sessions.length} sessions`);
 		} catch (error) {
 			Zotero.debug(`DeepTutor: Error loading sessions: ${error.message}`);
-			this.setState({ 
-				error: error.message,
-				isLoading: false
-			});
+			
+			// Check if it's an authentication error
+			if (error.message === 'Authentication required') {
+				this.setState({
+					isAuthenticated: false,
+					currentUser: null,
+					currentPane: 'welcome',
+					authError: 'Please sign in to continue'
+				});
+			} else {
+				this.setState({ 
+					error: error.message,
+					isLoading: false
+				});
+			}
 		}
 	}
 
@@ -1069,11 +1197,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 								</button>
 							</div>
 							<DeepTutorSignIn 
-								onSignInSignUp={() => this.toggleSignUpPopup()} 
-								onSignInSuccess={() => {
-									this.loadSession();
-									this.switchPane('main');
+								onSignInSignUp={() => {
 									this.toggleSignInPopup();
+									this.toggleSignUpPopup();
+								}} 
+								onSignInSuccess={() => {
+									this.toggleSignInPopup();
+									// Auth state change will be handled by the listener
 								}}
 							/>
 						</div>
@@ -1259,7 +1389,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 				)}
 
 				{/* Bottom Section */}
-
 				<DeepTutorBottomSection
 					currentPane={this.state.currentPane}
 					onSwitchPane={this.switchPane}
@@ -1270,6 +1399,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 					showProfilePopup={this.state.showProfilePopup}
 					feedIconPath={FeedIconPath}
 					personIconPath={PersonIconPath}
+					isAuthenticated={this.state.isAuthenticated}
+					currentUser={this.state.currentUser}
+					onSignOut={this.handleSignOut}
 				/>
 			</div>
 		);
