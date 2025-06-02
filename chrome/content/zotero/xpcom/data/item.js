@@ -4579,6 +4579,11 @@ Zotero.Item.prototype.getImageSrc = function() {
 	return Zotero.ItemTypes.getImageSrc(itemType);
 }
 
+Zotero.Item.prototype.getImageSrcAlt = function() {
+	let itemType = this.getItemTypeIconName();
+	return Zotero.ItemTypes.getImageSrc(itemType);
+}
+
 
 Zotero.Item.prototype.getItemTypeIconName = function (skipLinkMode = false) {
 	var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
