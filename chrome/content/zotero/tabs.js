@@ -144,9 +144,6 @@ var Zotero_Tabs = new function () {
 		let panel = this.tabsMenuPanel;
 		if (panel.visible) {
 			panel.refreshList();
-			if (document.activeElement.id !== "zotero-tabs-menu-filter") {
-				panel.focusEntry();
-			}
 		}
 	};
 
