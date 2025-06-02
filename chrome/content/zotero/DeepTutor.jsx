@@ -561,7 +561,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			collapsed: false,
 			showSearch: true,
 			showSubscriptionConfirmPopup: false,
-			showManageSubscriptionPopup: false
+			showManageSubscriptionPopup: false,
 			// Auth state
 			isAuthenticated: false,
 			currentUser: null,
