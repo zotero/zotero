@@ -35,6 +35,8 @@ import DeepTutorSignUp from './DeepTutorSignUp.js';
 import DeepTutorUpgradePremium from './DeepTutorUpgradePremium.js';
 import DeepTutorTopSection from './DeepTutorTopSection.js';
 import DeepTutorBottomSection from './DeepTutorBottomSection.js';
+import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
+import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
 import { 
 	getUserById, 
 	getSessionsByUserId, 
@@ -324,6 +326,13 @@ const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Feedback.png';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Person.png';
 const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/Search.png';
 
+const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/LITE.png';
+const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/BASIC.png';
+const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/ADVANCED.png';
+const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/DRAG.png';
+const SubscriptionConfirmBookPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SubscriptionConfirmBook.png';
+const SubscriptionManageMarkPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SubscriptionManageMark.png';
+
 const styles = {
 	container: {
 		display: 'flex',
@@ -551,6 +560,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showModelSelectionPopup: false,
 			collapsed: false,
 			showSearch: true,
+			showSubscriptionConfirmPopup: false,
+			showManageSubscriptionPopup: false
 			// Auth state
 			isAuthenticated: false,
 			currentUser: null,
@@ -721,6 +732,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 	toggleModelSelectionPopup = () => {
 		this.setState(prevState => ({
 			showModelSelectionPopup: !prevState.showModelSelectionPopup
+		}));
+	};
+
+	toggleSubscriptionConfirmPopup = () => {
+		this.setState(prevState => ({
+			showSubscriptionConfirmPopup: !prevState.showSubscriptionConfirmPopup
+		}));
+	};
+
+	toggleManageSubscriptionPopup = () => {
+		this.setState(prevState => ({
+			showManageSubscriptionPopup: !prevState.showManageSubscriptionPopup
 		}));
 	};
 
@@ -1031,7 +1054,74 @@ var DeepTutor = class DeepTutor extends React.Component {
 									✕
 								</button>
 							</div>
-							<DeepTutorUpgradePremium />
+							<DeepTutorUpgradePremium onUpgradeSuccess={() => {
+								this.setState({ showUpgradePopup: false, showSubscriptionConfirmPopup: true });
+							}} />
+						</div>
+					</div>
+				)}
+
+				{/* Subscription Confirm Popup */}
+				{this.state.showSubscriptionConfirmPopup && (
+					<div style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+					}}>
+						<div style={{
+							position: 'relative',
+							width: '80%',
+							maxWidth: '430px',
+							maxHeight: '80%',
+							background: '#FFFFFF',
+							borderRadius: '10px',
+							padding: '20px',
+							overflow: 'auto'
+						}}>
+							<DeepTutorSubscriptionConfirm
+								imagePath={SubscriptionConfirmBookPath}
+								onClose={() => this.setState({ showSubscriptionConfirmPopup: false, showManageSubscriptionPopup: true })}
+							/>
+						</div>
+					</div>
+				)}
+
+				{/* Manage Subscription Popup */}
+				{this.state.showManageSubscriptionPopup && (
+					<div style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 1000,
+					}}>
+						<div style={{
+							position: 'relative',
+							width: '80%',
+							maxWidth: '430px',
+							maxHeight: '80%',
+							background: '#FFFFFF',
+							borderRadius: '10px',
+							padding: '20px',
+							overflow: 'auto'
+						}}>
+							<DeepTutorManageSubscription
+								imagePath={SubscriptionManageMarkPath}
+								onManage={() => this.setState({ showManageSubscriptionPopup: false })}
+								onCancel={() => this.setState({ showManageSubscriptionPopup: false })}
+							/>
 						</div>
 					</div>
 				)}
