@@ -355,17 +355,20 @@
 				row.querySelector(".close").setAttribute("tabindex", "0");
 				this._filterInput.setAttribute("aria-activedescendant", row.id);
 			}
-			this._resetFocus();
+			this.resetFocus();
 		}
 
-		_resetFocus() {
+		resetFocus() {
 			let row = this._tabsList.querySelector(".selected");
 			if (this._prevFocusCls) {
 				let focusTarget = row.querySelector(`.${this._prevFocusCls}`);
-				if (focusTarget) {
+				if (focusTarget && !focusTarget.hidden) {
 					focusTarget.focus();
-					return;
 				}
+				else {
+					this._filterInput.focus();
+				}
+				return;
 			}
 			if (document.activeElement == this._filterInput) {
 				return;
@@ -427,7 +430,7 @@
 		};
 		
 		_handleShown = () => {
-			this._resetFocus();
+			this.resetFocus();
 		};
 
 		_handleHiding = (event) => {
@@ -522,7 +525,7 @@
 				// If not title or close button, prevent the blur
 				event.preventDefault();
 				event.stopPropagation();
-				this._resetFocus();
+				this.resetFocus();
 			});
 		};
 
@@ -545,7 +548,7 @@
 			if (!tabID) {
 				return;
 			}
-			this._resetFocus();
+			this.resetFocus();
 			Zotero_Tabs.close(tabID);
 			this._prevFocusCls = null;
 		};
@@ -610,7 +613,7 @@
 			if (document.getElementById("zotero-tabs-menu-dragged")) {
 				this.refreshList();
 			}
-			this._resetFocus();
+			this.resetFocus();
 		};
 	}
 
