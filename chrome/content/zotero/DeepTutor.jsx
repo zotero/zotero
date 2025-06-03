@@ -635,8 +635,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated: true,
 					currentUser: refreshedData.user,
 					currentPane: 'sessionHistory'
+				}, async () => {
+					await this.loadSession();
 				});
-				await this.loadSession();
 			} catch (refreshError) {
 				Zotero.debug(`DeepTutor: Session refresh failed: ${refreshError.message}`);
 				this.setState({
@@ -656,22 +657,22 @@ var DeepTutor = class DeepTutor extends React.Component {
 			isAuthenticated,
 			currentUser: user,
 			authError: null
+		}, async () => {
+			if (isAuthenticated) {
+				// User signed in, load sessions
+				this.loadSession();
+				this.switchPane('sessionHistory');
+			} else {
+				// User signed out, clear data and show welcome
+				this.setState({
+					sessions: [],
+					sesNamToObj: new Map(),
+					currentSession: null,
+					messages: []
+				});
+				this.switchPane('welcome');
+			}
 		});
-
-		if (isAuthenticated) {
-			// User signed in, load sessions
-			this.loadSession();
-			this.switchPane('sessionHistory');
-		} else {
-			// User signed out, clear data and show welcome
-			this.setState({
-				sessions: [],
-				sesNamToObj: new Map(),
-				currentSession: null,
-				messages: []
-			});
-			this.switchPane('welcome');
-		}
 	}
 
 	waitForLoad() {
@@ -789,6 +790,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			Zotero.debug("DeepTutor: Loading sessions...");
 
 			// Use hardcoded user ID for now - in production, get from Cognito user attributes
+			// TODO_DEEPTUTOR: Get user ID from Cognito user attributes
 			const userData = await getUserById('67f5b836cb8bb15b67a1149e');
 			
 			// Fetch sessions using centralized API

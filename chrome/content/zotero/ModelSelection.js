@@ -611,6 +611,7 @@ function ModelSelection({ onSubmit }) {
 
     try {
       // Get user ID from API
+      // TODO_DEEPTUTOR: Get user ID from Cognito user attributes, such as sending user object/userid from DeepTutor.jsx
       const userData = await getUserById('67f5b836cb8bb15b67a1149e');
       Zotero.debug('ModelSelection: Fetched user data:', userData);
 

@@ -542,6 +542,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
     const userSendMessage = async (messageString) => {
         if (!messageString.trim()) return;
+        // TODO_DEEPTUTOR: Get user ID from Cognito user attributes, such as sending user object/userid from DeepTutor.jsx
         setUserId('67f5b836cb8bb15b67a1149e');
 
         try {
