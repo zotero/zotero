@@ -868,6 +868,12 @@
 			<toolbarbutton id="zotero-tb-tabs-menu" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-tabs-menu" type="panel"
 				oncommand="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showTabsMenu(this)"/>
 			<div xmlns="http://www.w3.org/1999/xhtml" class="zotero-tb-separator"></div>
+			<toolbarbutton id="zotero-tb-deeptutor-toggle" class="zotero-tb-button" tabindex="-1" 
+				oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
+				tooltip="Toggle DeepTutor"
+				label="DeepTutor">
+				<image src="chrome://zotero/content/DeepTutorMaterials/favicon-32x32.png" style="width:20px;height:20px;"/>
+			</toolbarbutton>
 			<panel id="zotero-tabs-menu-panel" type="arrow" 
 					onpopuphiding="Zotero_Tabs.handleTabsMenuHiding(event)"
 					onpopupshowing="Zotero_Tabs.handleTabsMenuShowing(event)"
