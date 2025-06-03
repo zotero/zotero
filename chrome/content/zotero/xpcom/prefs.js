@@ -560,22 +560,34 @@ Zotero.Prefs = new function() {
 			return;
 		}
 		
-		const PREF_RE = /^\s*user_pref\s*\(\s*['"]extensions\.zotero\..+$/gm;
-		if (PREF_RE.test(userJS)) {
-			Zotero.debug('user.js contains prefs:');
-			Zotero.debug(userJS);
-			
-			await Zotero.File.putContentsAsync(userJSPath, userJS.replace(PREF_RE, ''));
-			
-			Zotero.alert(null,
-				Zotero.getString('general-error'),
-				Zotero.getString('userjs-pref-warning'
-					+ (userJS.toLowerCase().includes('scholaread') ? '-program' : ''))
-			);
-			Services.startup.quit(
-				Components.interfaces.nsIAppStartup.eAttemptQuit
-				| Components.interfaces.nsIAppStartup.eRestart
-			);
+		const PREF_RE = /^\s*user_pref\s*\(\s*['"]extensions\.zotero\..+$/g;
+		
+		let updatedUserJS = userJS
+			.split('\n')
+			.filter((prefLine) => {
+				if (PREF_RE.test(prefLine)
+						&& prefLine.includes('extensions.zotero.fileHandler.')
+						&& prefLine.toLowerCase().includes('scholaread')) {
+					Zotero.debug('user.js contains disallowed pref: ' + prefLine);
+					return false;
+				}
+				return true;
+			})
+			.join('\n');
+		
+		if (updatedUserJS === userJS) {
+			return;
 		}
+		
+		await Zotero.File.putContentsAsync(userJSPath, updatedUserJS);
+		
+		Zotero.alert(null,
+			Zotero.getString('general-error'),
+			Zotero.getString('userjs-pref-warning')
+		);
+		Services.startup.quit(
+			Components.interfaces.nsIAppStartup.eAttemptQuit
+			| Components.interfaces.nsIAppStartup.eRestart
+		);
 	};
 };
