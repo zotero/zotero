@@ -1,17 +1,17 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2019 Corporation for Digital Scholarship
                      Vienna, Virginia, USA
 					http://zotero.org
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -19,7 +19,7 @@
 
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -37,17 +37,17 @@ import DeepTutorTopSection from './DeepTutorTopSection.js';
 import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
 import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
-import { 
-	getUserById, 
-	getSessionsByUserId, 
+import {
 	getMessagesBySessionId,
-	getSessionById 
-} from './api/libs/api';
-import { 
-	useAuthState, 
-	getCurrentUser, 
-	refreshSession, 
-	signOut 
+	getSessionById,
+	getSessionsByUserId,
+	getUserByProviderUserId
+} from './api/libs/api.js';
+import {
+	useAuthState,
+	getCurrentUser,
+	refreshSession,
+	signOut
 } from './auth/cognitoAuth.js';
 
 // Enums
@@ -294,17 +294,17 @@ class DeepTutorSession {
 }
 
 class DeepTutorMessage {
-	constructor({ 
-		id = null, 
-		parentMessageId = null, 
-		userId = null, 
-		sessionId = null, 
-		subMessages = [], 
-		followUpQuestions = [], 
-		creationTime = new Date().toISOString(), 
-		lastUpdatedTime = new Date().toISOString(), 
-		status = 'active', 
-		role = 'user' 
+	constructor({
+		id = null,
+		parentMessageId = null,
+		userId = null,
+		sessionId = null,
+		subMessages = [],
+		followUpQuestions = [],
+		creationTime = new Date().toISOString(),
+		lastUpdatedTime = new Date().toISOString(),
+		status = 'active',
+		role = 'user'
 	} = {}) {
 		this.id = id;
 		this.parentMessageId = parentMessageId;
@@ -524,7 +524,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		Zotero.debug("DPTDPTDEBUG!! DeepTutor initialization complete");
 		return ref;
 	}
-	
+
 	static defaultProps = {
 		onSelectionChange: () => {},
 		onContextMenu: () => {},
@@ -544,7 +544,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		onSendMessage: PropTypes.func,
 		onSwitchComponent: PropTypes.func
 	};
-	
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -565,7 +565,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			// Auth state
 			isAuthenticated: false,
 			currentUser: null,
-			authError: null
+			authError: null,
+			// Prevent infinite loops
+			isLoadingSessions: false
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -575,7 +577,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			this._loadingPromiseResolve = resolve;
 		});
 		this.containerRef = React.createRef();
-		
+
 		// Bind auth state change handler
 		this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
 	}
@@ -584,10 +586,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this._initialized = true;
 		this._loadingPromiseResolve();
 		Zotero.debug("DeepTutor: Component mounted");
-		
+
 		// Initialize auth state
 		await this.initializeAuthState();
-		
+
 		// Add auth state listener
 		const authState = useAuthState();
 		authState.addListener(this.handleAuthStateChange);
@@ -602,20 +604,23 @@ var DeepTutor = class DeepTutor extends React.Component {
 	async initializeAuthState() {
 		try {
 			Zotero.debug("DeepTutor: Initializing auth state");
-			
+
 			// Try to get current user from stored session
 			const currentUserData = await getCurrentUser();
-			
+
 			if (currentUserData) {
 				Zotero.debug("DeepTutor: User is authenticated");
+				Zotero.debug("DeepTutor: Current user data:", currentUserData);
 				this.setState({
 					isAuthenticated: true,
 					currentUser: currentUserData.user,
 					currentPane: 'sessionHistory'
 				});
-				
-				// Load sessions for authenticated user
-				await this.loadSession();
+
+				// Load sessions for authenticated user (only once during initialization)
+				if (!this.state.isLoadingSessions) {
+					await this.loadSession();
+				}
 			} else {
 				Zotero.debug("DeepTutor: User is not authenticated");
 				this.setState({
@@ -626,8 +631,19 @@ var DeepTutor = class DeepTutor extends React.Component {
 			}
 		} catch (error) {
 			Zotero.debug(`DeepTutor: Auth initialization error: ${error.message}`);
-			
-			// Try to refresh session
+
+			// Don't attempt refresh for rate limiting errors
+			if (error.message && error.message.includes('Rate')) {
+				this.setState({
+					isAuthenticated: false,
+					currentUser: null,
+					currentPane: 'welcome',
+					authError: 'Rate limit exceeded - please wait a moment'
+				});
+				return;
+			}
+
+			// Try to refresh session for other errors
 			try {
 				const refreshedData = await refreshSession();
 				Zotero.debug("DeepTutor: Session refreshed successfully");
@@ -636,7 +652,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentUser: refreshedData.user,
 					currentPane: 'sessionHistory'
 				}, async () => {
-					await this.loadSession();
+					if (!this.state.isLoadingSessions) {
+						await this.loadSession();
+					}
 				});
 			} catch (refreshError) {
 				Zotero.debug(`DeepTutor: Session refresh failed: ${refreshError.message}`);
@@ -652,15 +670,23 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 	handleAuthStateChange(isAuthenticated, user) {
 		Zotero.debug(`DeepTutor: Auth state changed - authenticated: ${isAuthenticated}`);
-		
+
+		// Prevent infinite loops by checking if we're already loading sessions
+		if (this.state.isLoadingSessions) {
+			Zotero.debug("DeepTutor: Session loading already in progress, skipping auth state change");
+			return;
+		}
+
 		this.setState({
 			isAuthenticated,
 			currentUser: user,
 			authError: null
 		}, async () => {
 			if (isAuthenticated) {
-				// User signed in, load sessions
-				this.loadSession();
+				// User signed in, load sessions (only if not already loading)
+				if (!this.state.isLoadingSessions) {
+					await this.loadSession();
+				}
 				this.switchPane('sessionHistory');
 			} else {
 				// User signed out, clear data and show welcome
@@ -668,7 +694,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 					sessions: [],
 					sesNamToObj: new Map(),
 					currentSession: null,
-					messages: []
+					messages: [],
+					isLoadingSessions: false
 				});
 				this.switchPane('welcome');
 			}
@@ -768,10 +795,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 		try {
 			Zotero.debug("DeepTutor: Signing out user");
 			await signOut();
-			
+
 			// Close profile popup
 			this.setState({ showProfilePopup: false });
-			
+
 			Zotero.debug("DeepTutor: Sign out successful");
 		} catch (error) {
 			Zotero.debug(`DeepTutor: Sign out error: ${error.message}`);
@@ -785,14 +812,61 @@ var DeepTutor = class DeepTutor extends React.Component {
 			return;
 		}
 
+		// Prevent multiple simultaneous calls
+		if (this.state.isLoadingSessions) {
+			Zotero.debug("DeepTutor: Session loading already in progress");
+			return;
+		}
+
 		try {
-			this.setState({ isLoading: true, error: null });
+			this.setState({ isLoading: true, error: null, isLoadingSessions: true });
 			Zotero.debug("DeepTutor: Loading sessions...");
 
-			// Use hardcoded user ID for now - in production, get from Cognito user attributes
-			// TODO_DEEPTUTOR: Get user ID from Cognito user attributes
-			const userData = await getUserById('67f5b836cb8bb15b67a1149e');
-			
+			// Get user ID from Cognito user attributes.sub as providerUserId and call getUserByProviderUserId
+			const currentUserData = await getCurrentUser();
+			if (!currentUserData || !currentUserData.user) {
+				throw new Error('No current user found');
+			}
+
+			// Get user attributes to retrieve the 'sub' field (Cognito User ID)
+			const userData = await new Promise((resolve, reject) => {
+				currentUserData.user.getUserAttributes((err, attributes) => {
+					if (err) {
+						Zotero.debug(`DeepTutor: Error getting user attributes: ${err.message}`);
+						
+						// Handle rate limiting specifically
+						if (err.message && err.message.includes('Rate exceeded')) {
+							Zotero.debug("DeepTutor: Rate limit exceeded, will retry later");
+							reject(new Error('Rate limit exceeded - please wait a moment'));
+							return;
+						}
+						
+						reject(err);
+						return;
+					}
+
+					// Find the 'sub' attribute which is the Cognito User ID
+					const subAttribute = attributes.find(attr => attr.getName() === 'sub');
+					if (!subAttribute) {
+						reject(new Error('No sub attribute found in user attributes'));
+						return;
+					}
+
+					const providerUserId = subAttribute.getValue();
+					Zotero.debug(`DeepTutor: Using provider user ID: ${providerUserId}`);
+
+					// Get user data using the provider user ID (sub)
+					getUserByProviderUserId(providerUserId)
+						.then(userData => {
+							resolve(userData);
+						})
+						.catch(error => {
+							Zotero.debug(`DeepTutor: Error getting user by provider ID: ${error.message}`);
+							reject(error);
+						});
+				});
+			});
+
 			// Fetch sessions using centralized API
 			const sessionsData = await getSessionsByUserId(userData.id);
 			Zotero.debug(`DeepTutor: Fetched ${sessionsData.length} sessions`);
@@ -807,10 +881,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 			});
 
 			// Update state with new sessions
-			this.setState({ 
+			this.setState({
 				sessions,
 				sesNamToObj,
-				isLoading: false
+				isLoading: false,
+				isLoadingSessions: false
 			});
 
 			// If no sessions, switch to model selection pane
@@ -824,19 +899,33 @@ var DeepTutor = class DeepTutor extends React.Component {
 			Zotero.debug(`DeepTutor: Successfully loaded ${sessions.length} sessions`);
 		} catch (error) {
 			Zotero.debug(`DeepTutor: Error loading sessions: ${error.message}`);
-			
+
+			// Handle rate limiting errors specifically - don't trigger auth state changes
+			if (error.message && error.message.includes('Rate')) {
+				this.setState({
+					error: 'Rate limit exceeded - please wait a moment',
+					isLoading: false,
+					isLoadingSessions: false
+				});
+				
+				// Don't trigger auth state changes for rate limiting
+				return;
+			}
+
 			// Check if it's an authentication error
 			if (error.message === 'Authentication required') {
 				this.setState({
 					isAuthenticated: false,
 					currentUser: null,
 					currentPane: 'welcome',
-					authError: 'Please sign in to continue'
+					authError: 'Please sign in to continue',
+					isLoadingSessions: false
 				});
 			} else {
-				this.setState({ 
+				this.setState({
 					error: error.message,
-					isLoading: false
+					isLoading: false,
+					isLoadingSessions: false
 				});
 			}
 		}
@@ -893,7 +982,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 	render() {
 		Zotero.debug("DeepTutor: Render called");
-		
+
 		const containerStyle = {
 			...styles.container,
 			width: this.state.collapsed ? '0' : '100%',
@@ -906,9 +995,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			flexDirection: 'column',
 			height: '100%'
 		};
-		
+
 		return (
-			<div 
+			<div
 				ref={this.containerRef}
 				style={containerStyle}
 				id="zotero-deep-tutor-pane"
@@ -929,31 +1018,31 @@ var DeepTutor = class DeepTutor extends React.Component {
 				<div style={styles.middle}>
 					<div style={styles.paneList}>
 						{this.state.currentPane === 'main' && (
-							<DeepTutorChatBox 
+							<DeepTutorChatBox
 								ref={ref => this._tutorBox = ref}
 								currentSession={this.state.currentSession}
 								key={this.state.currentSession?.id}
 								onSessionSelect={this.handleSessionSelect}
 							/>
 						)}
-						{this.state.currentPane === 'sessionHistory' && 
-							<SessionHistory 
-								sessions={this.state.sessions} 
+						{this.state.currentPane === 'sessionHistory' &&
+							<SessionHistory
+								sessions={this.state.sessions}
 								onSessionSelect={this.handleSessionSelect}
 								isLoading={this.state.isLoading}
 								error={this.state.error}
 								showSearch={this.state.showSearch}
 							/>
 						}
-						{this.state.currentPane === 'modelSelection' && 
-							<ModelSelection 
+						{this.state.currentPane === 'modelSelection' &&
+							<ModelSelection
 								onSubmit={async (sessionId) => {
 									try {
 										const sessionData = await getSessionById(sessionId);
 										const session = new DeepTutorSession(sessionData);
 										const newSesNamToObj = new Map(this.state.sesNamToObj);
 										newSesNamToObj.set(session.sessionName, session);
-										
+
 										await this.setState({
 											currentSession: session,
 											messages: [],
@@ -972,8 +1061,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 							/>
 						}
 						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} />}
-						{this.state.currentPane === 'signIn' && <DeepTutorSignIn 
-							onSignInSignUp={() => this.toggleSignUpPopup()} 
+						{this.state.currentPane === 'signIn' && <DeepTutorSignIn
+							onSignInSignUp={() => this.toggleSignUpPopup()}
 							onSignInSuccess={() => {
 								this.loadSession();
 								this.switchPane('sessionHistory');
@@ -1198,11 +1287,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 									✕
 								</button>
 							</div>
-							<DeepTutorSignIn 
+							<DeepTutorSignIn
 								onSignInSignUp={() => {
 									this.toggleSignInPopup();
 									this.toggleSignUpPopup();
-								}} 
+								}}
 								onSignInSuccess={() => {
 									this.toggleSignInPopup();
 									// Auth state change will be handled by the listener
@@ -1362,14 +1451,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 									✕
 								</button>
 							</div>
-							<ModelSelection 
+							<ModelSelection
 								onSubmit={async (sessionId) => {
 									try {
 										const sessionData = await getSessionById(sessionId);
 										const session = new DeepTutorSession(sessionData);
 										const newSesNamToObj = new Map(this.state.sesNamToObj);
 										newSesNamToObj.set(session.sessionName, session);
-										
+
 										await this.setState({
 											currentSession: session,
 											messages: [],

@@ -3,7 +3,7 @@
 
 
    Copyright © 2024 Corporation for Digital Scholarship
-                Vienna, Virginia, USA
+                Virginia, Virginia, USA
                 https://www.zotero.org
 
 
@@ -28,6 +28,27 @@
 
    ***** END LICENSE BLOCK *****
 */
+
+if (typeof window === "undefined") {
+	this.XULElementBase = require("resource://zotero/browser-shims.js").XULElementBase;
+	this.MozXULElement = require("resource://zotero/browser-shims.js").MozXULElement;
+} else {
+	this.XULElementBase = XULElementBase;
+	this.MozXULElement = MozXULElement;
+}
+
+// Import API functions
+import {
+	getUserByProviderUserId,
+	getMessagesBySessionId,
+	getUserById,
+	getSessionsByUserId,
+	getPreSignedUrl,
+	uploadFileToAzure,
+	createSession,
+	createMessage,
+	subscribeToChat
+} from '../api/libs/api.js';
 
 {
     // Session Status Enum
@@ -265,11 +286,11 @@
             this.documentIds = documentIds;
             this.generateHash = generateHash;
         }
-    
+
         update() {
             this.lastUpdatedTime = new Date().toISOString();
         }
-    
+
         toJSON() {
             return {
                 id: this.id,
@@ -287,17 +308,17 @@
     }
 
     class DeepTutorMessage {
-        constructor({ 
-            id = null, 
-            parentMessageId = null, 
-            userId = null, 
-            sessionId = null, 
-            subMessages = [], 
-            followUpQuestions = [], 
-            creationTime = new Date().toISOString(), 
-            lastUpdatedTime = new Date().toISOString(), 
-            status = 'active', 
-            role = 'user' 
+        constructor({
+            id = null,
+            parentMessageId = null,
+            userId = null,
+            sessionId = null,
+            subMessages = [],
+            followUpQuestions = [],
+            creationTime = new Date().toISOString(),
+            lastUpdatedTime = new Date().toISOString(),
+            status = 'active',
+            role = 'user'
         } = {}) {
             this.id = id;
             this.parentMessageId = parentMessageId;
@@ -363,13 +384,82 @@
            </vbox>
         `);
 
+        // Helper function to get authenticated user ID
+        async _getAuthenticatedUserId() {
+            try {
+                // Try to get the user ID from the DeepTutor component if it's available
+                const deepTutorComponent = document.querySelector('deep-tutor');
+                if (deepTutorComponent && deepTutorComponent.getCurrentUserId) {
+                    const userId = await deepTutorComponent.getCurrentUserId();
+                    if (userId) {
+                        Zotero.debug(`DeepTutorPane: Got user ID from DeepTutor component: ${userId}`);
+                        return userId;
+                    }
+                }
+
+                // Try to access authentication through window or global scope
+                if (window.DeepTutorAuth && window.DeepTutorAuth.getCurrentUser) {
+                    const currentUserData = await window.DeepTutorAuth.getCurrentUser();
+                    if (currentUserData && currentUserData.user) {
+                        // Get user attributes to retrieve the 'sub' field (Cognito User ID)
+                        return new Promise((resolve, reject) => {
+                            currentUserData.user.getUserAttributes((err, attributes) => {
+                                if (err) {
+                                    Zotero.debug(`DeepTutorPane: Error getting user attributes: ${err.message}`);
+                                    reject(err);
+                                    return;
+                                }
+
+                                // Find the 'sub' attribute which is the Cognito User ID
+                                const subAttribute = attributes.find(attr => attr.getName() === 'sub');
+                                if (!subAttribute) {
+                                    reject(new Error('No sub attribute found in user attributes'));
+                                    return;
+                                }
+
+                                const providerUserId = subAttribute.getValue();
+                                Zotero.debug(`DeepTutorPane: Using provider user ID: ${providerUserId}`);
+
+                                // Get user data using the provider user ID (sub)
+                                this._getUserByProviderUserId(providerUserId)
+                                    .then(userData => {
+                                        resolve(userData.id);
+                                    })
+                                    .catch(error => {
+                                        Zotero.debug(`DeepTutorPane: Error getting user by provider ID: ${error.message}`);
+                                        reject(error);
+                                    });
+                            });
+                        });
+                    }
+                }
+
+                throw new Error('No authentication method available');
+            } catch (error) {
+                Zotero.debug(`DeepTutorPane: Error in _getAuthenticatedUserId: ${error.message}`);
+                // Fallback to hardcoded ID if authentication fails
+                return '67f5b836cb8bb15b67a1149e';
+            }
+        }
+
+        // Helper function to get user by provider user ID via API call
+        async _getUserByProviderUserId(providerUserId) {
+            try {
+                const userData = await getUserByProviderUserId(providerUserId);
+                return userData;
+            } catch (error) {
+                Zotero.debug(`DeepTutorPane: Error in _getUserByProviderUserId: ${error.message}`);
+                throw error;
+            }
+        }
+
         init() {
             this.render();
             this.setupEventListeners();
-            
+
             // Get reference to the DeepTutorBox component
             this._tutorBox = this.querySelector('#tutor-component');
-            
+
             // Listen for data updates from DeepTutorBox
             this._tutorBox.addEventListener('deepTutorDataUpdate', (event) => {
                 // Handle the data update
@@ -383,7 +473,7 @@
                     Zotero.debug(`DeepTutorPane: HistorySessionSelected event received for session: ${event.detail.sessionName}`);
                     const sessionName = event.detail.sessionName;
                     const sessionObj = this.sesNamToObj.get(sessionName);
-                    
+
                     if (!sessionObj) {
                         Zotero.debug(`DeepTutorPane: No session object found for: ${sessionName}`);
                         return;
@@ -391,25 +481,14 @@
 
                     Zotero.debug(`DeepTutorPane: Fetching messages for session: ${sessionName}`);
                     try {
-                        const response = await fetch(`https://api.staging.deeptutor.knowhiz.us/api/message/bySession/${sessionObj.id}`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`Failed to fetch messages: ${response.status} ${response.statusText}`);
-                        }
-
-                        const messages = await response.json();
+                        const messages = await getMessagesBySessionId(sessionObj.id);
                         Zotero.debug(`DeepTutorPane: Successfully fetched ${messages.length} messages`);
                         Zotero.debug(`DeepTutorPane: Messages content: ${JSON.stringify(messages)}`);
-                        
+
                         this.curSesName = sessionName;
                         const documentIds = sessionObj?.documentIds || [];
                         Zotero.debug(`DeepTutorPane: Loading messages with ${documentIds.length} document IDs`);
-                        
+
                         await this._tutorBox._LoadMessage(messages, documentIds, sessionObj);
                         Zotero.debug(`DeepTutorPane: Messages loaded successfully`);
 
@@ -432,7 +511,7 @@
                                 Zotero.debug(`DeepTutorPane: Dispatched UserIdUpdate event with ID: ${sessionObj.userId}`);
                             }
                         }
-                        
+
                         if (this.sesNamToObj.get(sessionName)) {
                             let tempSes = this.sesNamToObj.get(sessionName);
                             Zotero.debug(`DeepTutorPane: Loading attachments for session: ${sessionName}`);
@@ -564,39 +643,19 @@
         async sampleSessions() {
             try {
                 Zotero.debug('DeepTutorPane: Starting sampleSessions function');
-                
-                // Get user ID from API first
+
+                // Get authenticated user ID
+                const authenticatedUserId = await this._getAuthenticatedUserId();
+                Zotero.debug(`DeepTutorPane: Using authenticated user ID: ${authenticatedUserId}`);
+
+                // Get user ID from API
                 Zotero.debug('DeepTutorPane: Attempting to fetch user data...');
-                const userResponse = await fetch('https://api.staging.deeptutor.knowhiz.us/api/users/byUserId/67f5b836cb8bb15b67a1149e', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!userResponse.ok) {
-                    Zotero.debug(`DeepTutorPane: Failed to fetch user data. Status: ${userResponse.status}, StatusText: ${userResponse.statusText}`);
-                    throw new Error(`Failed to fetch user: ${userResponse.status} ${userResponse.statusText}`);
-                }
-                
-                const userData = await userResponse.json();
-                Zotero.debug(`DeepTutorPane: Successfully fetched user data: ${JSON.stringify(userData)}`);
+                const userData = await getUserById(authenticatedUserId);
+                Zotero.debug(`DeepTutorPane: Fetched user data: ${JSON.stringify(userData)}`);
 
                 // Get sessions by userId
                 Zotero.debug(`DeepTutorPane: Attempting to fetch sessions for user ID: ${userData.id}`);
-                const sessionsResponse = await fetch(`https://api.staging.deeptutor.knowhiz.us/api/session/byUser/${userData.id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!sessionsResponse.ok) {
-                    Zotero.debug(`DeepTutorPane: Failed to fetch sessions. Status: ${sessionsResponse.status}, StatusText: ${sessionsResponse.statusText}`);
-                    throw new Error(`Failed to fetch sessions: ${sessionsResponse.status} ${sessionsResponse.statusText}`);
-                }
-
-                const sessionsData = await sessionsResponse.json();
+                const sessionsData = await getSessionsByUserId(userData.id);
                 Zotero.debug(`DeepTutorPane: Successfully fetched ${sessionsData.length} sessions: ${JSON.stringify(sessionsData)}`);
 
                 // Convert API sessions to DeepTutorSession objects
@@ -629,35 +688,38 @@
             } catch (error) {
                 Zotero.debug(`DeepTutorPane: Error in sampleSessions: ${error.message}`);
                 Zotero.debug('DeepTutorPane: Falling back to default sessions...');
-                
+
+                // Get fallback user ID
+                const fallbackUserId = await this._getAuthenticatedUserId();
+
                 // Fallback to default sessions if API calls fail
                 const session1 = new DeepTutorSession({
                     sessionName: "Session 1",
                     creationTime: new Date().toISOString(),
                     lastUpdatedTime: new Date().toISOString(),
-                    userId: "67f5b836cb8bb15b67a1149e"
+                    userId: fallbackUserId
                 });
                 Zotero.debug('DeepTutorPane: Created fallback session 1');
-                
+
                 const session2 = new DeepTutorSession({
                     sessionName: "Session 2",
                     creationTime: new Date().toISOString(),
                     lastUpdatedTime: new Date().toISOString(),
-                    userId: "67f5b836cb8bb15b67a1149e"
+                    userId: fallbackUserId
                 });
                 Zotero.debug('DeepTutorPane: Created fallback session 2');
-                
+
                 const session3 = new DeepTutorSession({
                     sessionName: "Session 3",
                     creationTime: new Date().toISOString(),
                     lastUpdatedTime: new Date().toISOString(),
-                    userId: "67f5b836cb8bb15b67a1149e"
+                    userId: fallbackUserId
                 });
                 Zotero.debug('DeepTutorPane: Created fallback session 3');
 
                 this.sessions = [session1, session2, session3];
                 Zotero.debug('DeepTutorPane: Set fallback sessions array');
-                
+
                 this.sessions.forEach(session => {
                     this.sesNamToObj.set(session.sessionName, session);
                 });
@@ -668,19 +730,11 @@
 
         async newEmptySession(eventDetail) {
             try {
+                // Get authenticated user ID
+                const authenticatedUserId = await this._getAuthenticatedUserId();
+
                 // Get user ID from API
-                const userResponse = await fetch('https://api.staging.deeptutor.knowhiz.us/api/users/byUserId/67f5b836cb8bb15b67a1149e', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!userResponse.ok) {
-                    throw new Error(`Failed to fetch user: ${userResponse.status} ${userResponse.statusText}`);
-                }
-                
-                const userData = await userResponse.json();
+                const userData = await getUserById(authenticatedUserId);
                 Zotero.debug(`DeepTutorPane: Fetched user data: ${JSON.stringify(userData)}`);
 
                 // Create file-document mapping
@@ -704,18 +758,7 @@
                             Zotero.debug(`DeepTutorPane: Processing file: ${fileName}`);
 
                             // 1. Get pre-signed URL for the file
-                            const preSignedUrlResponse = await fetch(`https://api.staging.deeptutor.knowhiz.us/api/document/preSignedUrl/${userData.id}/${fileName}`, {
-                                method: 'GET',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            });
-
-                            if (!preSignedUrlResponse.ok) {
-                                throw new Error(`Failed to get pre-signed URL: ${preSignedUrlResponse.status} ${preSignedUrlResponse.statusText}`);
-                            }
-
-                            const preSignedUrlData = await preSignedUrlResponse.json();
+                            const preSignedUrlData = await getPreSignedUrl(userData.id, fileName);
                             Zotero.debug(`DeepTutorPane: Got pre-signed URL: ${JSON.stringify(preSignedUrlData)}`);
 
                             // Store the preSignedUrlData in fileDocumentMap
@@ -732,24 +775,13 @@
                             const blob = await response.blob();
 
                             // 2. Upload file to Azure Blob Storage
-                            const uploadResponse = await fetch(preSignedUrlData.preSignedUrl, {
-                                method: 'PUT',
-                                headers: {
-                                    'x-ms-blob-type': 'BlockBlob',
-                                    'Content-Type': 'application/pdf'
-                                },
-                                body: blob
-                            });
-
-                            if (!uploadResponse.ok) {
-                                throw new Error(`Failed to upload file: ${uploadResponse.status} ${uploadResponse.statusText}`);
-                            }
+                            await uploadFileToAzure(preSignedUrlData.preSignedUrl, blob);
 
                             Zotero.debug(`DeepTutorPane: File uploaded successfully: ${fileName}`);
-                            
+
                             // Add mapping between file, document ID, and original file ID
                             uploadedDocumentIds.push(preSignedUrlData.documentId);
-                            
+
                         } catch (fileError) {
                             Zotero.debug(`DeepTutorPane: Error uploading file ${fileId}: ${fileError.message}`);
                             // Continue with other files even if one fails
@@ -771,26 +803,14 @@
                     generateHash: null
                 };
 
-                const sessionResponse = await fetch('https://api.staging.deeptutor.knowhiz.us/api/session/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(sessionData)
-                });
-
-                if (!sessionResponse.ok) {
-                    throw new Error(`Failed to create session: ${sessionResponse.status} ${sessionResponse.statusText}`);
-                }
-
-                const createdSession = await sessionResponse.json();
-                Zotero.debug(`DeepTutorPane: Session created successfully: ${JSON.stringify(createdSession)}`);
+                const sessionResponse = await createSession(sessionData);
+                Zotero.debug(`DeepTutorPane: Session created successfully: ${JSON.stringify(sessionResponse)}`);
 
                 const messageStart = {
                     id: null,
                     parentMessageId: null,
-                    userId: createdSession.userId,
-                    sessionId: createdSession.id,
+                    userId: sessionResponse.userId,
+                    sessionId: sessionResponse.id,
                     subMessages: [{
                         text: "Can you give me a summary of this document?",
                         image: null,
@@ -807,26 +827,13 @@
                 };
 
                 Zotero.debug(`DeepTutorPane: Created initial message: ${JSON.stringify(messageStart)}`);
-                const response2 = await fetch("https://api.staging.deeptutor.knowhiz.us/api/message/create", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(messageStart)
-                });
-
-                if (!response2.ok) {
-                    const errorText = await response2.text();
-                    Zotero.debug(`DeepTutorPane: API error response: ${errorText}`);
-                    throw new Error(`API request failed: ${response2.status} ${response2.statusText}\nResponse: ${errorText}`);
-                }
-                const responseData2 = await response2.json();
+                const responseData2 = await createMessage(messageStart);
                 Zotero.debug(`DeepTutorPane: API response for initial message: ${JSON.stringify(responseData2)}`);
 
                 Zotero.debug(`DeepTutorPane: KKKKK File names: ${fileDocumentMap.getAllFileNames()}`);
                 let startConversation = new Conversation({
-                    userId: createdSession.userId,
-                    sessionId: createdSession.id,
+                    userId: sessionResponse.userId,
+                    sessionId: sessionResponse.id,
                     ragSessionId: null,
                     storagePaths: fileDocumentMap.getAllFileNames().map(fileName => {
                         const documentId = fileDocumentMap.getDocumentId(fileName);
@@ -840,46 +847,13 @@
 
                 Zotero.debug(`DeepTutorPane: Sending API request to: https://api.staging.deeptutor.knowhiz.us/api/chat/subscribe`);
                 Zotero.debug(`DeepTutorPane: Request body: ${JSON.stringify(startConversation)}`);
-                
-                const response3 = await fetch("https://api.staging.deeptutor.knowhiz.us/api/chat/subscribe", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(startConversation)
-                });
 
-                const reader = response3.body.getReader();
-                const decoder = new TextDecoder();
-                let streamText = "";
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const data = decoder.decode(value);
-                    data.split('\n\n').forEach((event) => {
-                        Zotero.debug('DeepTutorPane: event:', event);
-                        if (!event.startsWith('data:')) return;
-        
-                        const jsonStr = event.slice(5);
-                        Zotero.debug('DeepTutorPane: jsonStr:', jsonStr);
-                        try {
-                            const parsed = JSON.parse(jsonStr);
-                            const output = parsed.msg_content;
-                            Zotero.debug('DeepTutorPane: output:', output);
-                            if (output && output.length > 0) {
-                                streamText += output;
-                            }
-                        } catch (error) {
-                            Zotero.debug('DeepTutorPane: parse SSE data:', error);
-                        }
-                    });
-                }
+                const response3 = await subscribeToChat(startConversation);
 
                 // Create local session object
                 const session = new DeepTutorSession({
                     ...sessionData,
-                    id: createdSession.id
+                    id: sessionResponse.id
                 });
 
                 // Store the file-document mapping in the session's metadata
@@ -893,13 +867,16 @@
 
             } catch (error) {
                 Zotero.debug(`DeepTutorPane: Error in newEmptySession: ${error.message}`);
+                // Get fallback user ID
+                const fallbackUserId = await this._getAuthenticatedUserId();
+
                 // Fallback to local session creation if API calls fail
                 const session = new DeepTutorSession({
                     sessionName: eventDetail.name || "New Session",
                     creationTime: new Date().toISOString(),
                     lastUpdatedTime: new Date().toISOString(),
                     documentIds: eventDetail.fileList ? eventDetail.fileList.map(file => file.id) : [],
-                    userId: "67f5b836cb8bb15b67a1149e",
+                    userId: fallbackUserId,
                     type: eventDetail.type || 'default',
                     status: eventDetail.status || 'active'
                 });
@@ -912,40 +889,19 @@
         async pushMessageToAPI(message) {
             try {
                 Zotero.debug(`DeepTutorPane: Attempting to push message to API: ${JSON.stringify(message)}`);
-                // Use the special WSL-to-Windows host address
-                const response = await fetch('https://api.staging.deeptutor.knowhiz.us/api/message/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(message)
-                });
-                if (!response.ok) {
-                    throw new Error(`Failed to create message: ${response.status} ${response.statusText}`);
-                }
-                const responseData = await response.json();
+                const responseData = await createMessage(message);
                 Zotero.debug(`DeepTutorPane: API response received: ${JSON.stringify(responseData)}`);
                 return responseData;
             } catch (error) {
-                Zotero.debug(`DeepTutorPane: Error with host.docker.internal: ${error.message}`);
-                // Try alternative WSL-to-Windows address
+                Zotero.debug(`DeepTutorPane: Error with primary API call: ${error.message}`);
+                // Try alternative call
                 try {
-                    Zotero.debug(`DeepTutorPane: Trying alternative WSL-to-Windows address...`);
-                    const altResponse = await fetch('https://api.staging.deeptutor.knowhiz.us/api/message/create', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(message)
-                    });
-                    if (!altResponse.ok) {
-                        throw new Error(`Failed to create message: ${altResponse.status} ${altResponse.statusText}`);
-                    }
-                    const altResponseData = await altResponse.json();
-                    Zotero.debug(`DeepTutorPane: Alternative WSL-to-Windows response: ${JSON.stringify(altResponseData)}`);
+                    Zotero.debug(`DeepTutorPane: Trying alternative API call...`);
+                    const altResponseData = await createMessage(message);
+                    Zotero.debug(`DeepTutorPane: Alternative API response: ${JSON.stringify(altResponseData)}`);
                     return altResponseData;
                 } catch (altError) {
-                    Zotero.debug(`DeepTutorPane: Error with alternative WSL-to-Windows address: ${altError.message}`);
+                    Zotero.debug(`DeepTutorPane: Error with alternative API call: ${altError.message}`);
                     return null;
                 }
             }
@@ -954,7 +910,7 @@
         async sampleMessages() {
             try {
                 Zotero.debug(`DeepTutorPane: Starting sampleMessages...`);
-                
+
                 // Get the current session
                 const currentSession = this.sesNamToObj.get(this.curSesName);
                 if (!currentSession) {
@@ -988,7 +944,7 @@
                 // Push message to API and get response
                 const apiResponse = await this.pushMessageToAPI(initialMessage);
                 Zotero.debug(`DeepTutorPane: API response in sampleMessages: ${JSON.stringify(apiResponse)}`);
-                
+
                 // Create messages array with consistent structure
                 const messages = [
                     new DeepTutorMessage({
@@ -1015,7 +971,7 @@
                         parentMessageId: initialMessage.id,
                         userId: currentSession.userId,
                         sessionId: currentSession.id,
-                        subMessages: [new SubMessage({ 
+                        subMessages: [new SubMessage({
                             text: apiResponse ? apiResponse.text : "Of course! I'd be happy to help you understand the paper. Could you please share the title or key points you'd like me to focus on?",
                             image: null,
                             audio: null,
@@ -1034,14 +990,18 @@
                 return messages;
             } catch (error) {
                 Zotero.debug(`DeepTutorPane: Error in sampleMessages: ${error.message}`);
+
+                // Get fallback user ID
+                const fallbackUserId = await this._getAuthenticatedUserId();
+
                 // Return default messages if API call fails
                 const defaultMessages = [
                     new DeepTutorMessage({
                         id: null,
                         parentMessageId: null,
-                        userId: "67f5b836cb8bb15b67a1149e", // Default user ID
+                        userId: fallbackUserId,
                         sessionId: "default_session",
-                        subMessages: [new SubMessage({ 
+                        subMessages: [new SubMessage({
                             text: "Can you help me understand the main concepts in this paper?",
                             image: null,
                             audio: null,
@@ -1058,9 +1018,9 @@
                     new DeepTutorMessage({
                         id: null,
                         parentMessageId: `msg_${Date.now()}`,
-                        userId: "67f5b836cb8bb15b67a1149e", // Default user ID
+                        userId: fallbackUserId,
                         sessionId: "default_session",
-                        subMessages: [new SubMessage({ 
+                        subMessages: [new SubMessage({
                             text: "Of course! I'd be happy to help you understand the paper. Could you please share the title or key points you'd like me to focus on?",
                             image: null,
                             audio: null,
