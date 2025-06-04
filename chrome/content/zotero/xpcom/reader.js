@@ -513,6 +513,16 @@ class ReaderInstance {
 			onToggleContextPane: () => {
 				Zotero.debug('toggle context pane');
 				let win = Zotero.getMainWindow();
+				
+				// Close DeepTutor pane if it's open
+				let deepTutorPane = win.document.getElementById('new-deep-tutor-pane-container');
+				let deeptutorSplitter = win.document.getElementById('zotero-deeptutor-splitter');
+				if (deepTutorPane && !deepTutorPane.hidden) {
+					Zotero.debug('Closing DeepTutor pane before opening context pane');
+					deepTutorPane.hidden = true;
+					deeptutorSplitter.setAttribute('state', 'collapsed');
+				}
+				
 				win.ZoteroContextPane.togglePane();
 			},
 			onToolbarShiftTab: () => {
