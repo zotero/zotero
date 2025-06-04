@@ -498,6 +498,8 @@
 				if (document.activeElement.classList.contains("close")) {
 					event.preventDefault();
 					event.stopPropagation();
+					// Move selection to the next tab to make sure the next tab's close button is focused
+					this.moveSelection("next");
 					this._prevFocusCls = "close";
 					this._handleCloseClick(event);
 				}
