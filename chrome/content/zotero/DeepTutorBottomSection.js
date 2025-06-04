@@ -7,66 +7,89 @@ const styles = {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '18px 32px 24px 32px',
+        padding: '0 1.25rem 1.25rem 1.25rem',
         background: '#F2F2F2',
         width: '100%',
         boxSizing: 'border-box',
         position: 'relative',
-        gap: '10px',
         bottom: 0,
         left: 0,
         right: 0,
         margin: 0,
         zIndex: 1,
     },
+    contentWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        gap: '0.3125rem',
+    },
     bottomLeft: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px',
+        alignItems: 'center',
+        gap: '0.3125rem',
+        width: '100%',
+    },
+    feedbackBox: {
+        display: 'flex',
+        alignItems: 'center',
+        height: '1.5rem',
+        width: '100%',
+    },
+    buttonsBox: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '1.5rem',
+        width: '100%',
     },
     textButton: {
         background: '#F2F2F2',
         border: 'none',
         color: '#0687E5',
         fontWeight: 500,
-        fontSize: '16px',
+        fontSize: '1rem',
         lineHeight: '100%',
         letterSpacing: '0%',
         fontFamily: 'Roboto, sans-serif',
         cursor: 'pointer',
-        padding: '8px 16px',
+        padding: '0.5rem 1rem',
         margin: 0,
-        borderRadius: '4px',
+        borderRadius: '0.25rem',
         width: 'fit-content',
         textAlign: 'left',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '0.5rem',
         transition: 'background-color 0.2s ease',
         ':hover': {
             background: '#D9D9D9'
         }
     },
     buttonIcon: {
-        width: '19px',
-        height: '18.53849983215332px',
+        width: '1.1875rem',
+        height: '1.1587rem',
         objectFit: 'contain',
     },
     upgradeButton: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '106px',
-        height: '39px',
-        padding: '10px 20px',
+        width: '6.625rem',
+        height: '2.4375rem',
+        padding: '0.625rem 1.25rem',
         background: '#0687E5',
         border: 'none',
-        borderRadius: '10px',
+        borderRadius: '0.625rem',
         fontWeight: 600,
-        fontSize: '16px',
+        fontSize: '1rem',
         color: '#ffffff',
         cursor: 'pointer',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+        boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.03)',
         transition: 'background 0.2s',
         fontFamily: 'Roboto, sans-serif',
     },
@@ -75,20 +98,20 @@ const styles = {
         bottom: '100%',
         left: 0,
         background: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        padding: '12px',
-        marginBottom: '8px',
+        borderRadius: '0.5rem',
+        boxShadow: '0 0.125rem 0.5rem rgba(0,0,0,0.15)',
+        padding: '0.75rem',
+        marginBottom: '0.5rem',
         zIndex: 1000,
-        minWidth: '200px',
+        minWidth: '12.5rem',
     },
     profileButtonContainer: {
         position: 'relative',
     },
     componentButton: {
-        padding: '6px 18px',
-        borderRadius: 6,
-        border: '1px solid #0687E5',
+        padding: '0.375rem 1.125rem',
+        borderRadius: '0.375rem',
+        border: '0.0625rem solid #0687E5',
         background: '#fff',
         color: '#0687E5',
         fontWeight: 600,
@@ -96,7 +119,7 @@ const styles = {
         fontFamily: 'Roboto, Inter, Arial, sans-serif',
         width: '100%',
         textAlign: 'left',
-        marginBottom: '4px',
+        marginBottom: '0.25rem',
         transition: 'all 0.2s ease',
         '&:hover': {
             background: '#f0f9ff',
@@ -107,31 +130,31 @@ const styles = {
         color: '#fff',
     },
     profileInfo: {
-        padding: '8px 0',
-        borderBottom: '1px solid #e9ecef',
-        marginBottom: '8px',
+        padding: '0.5rem 0',
+        borderBottom: '0.0625rem solid #e9ecef',
+        marginBottom: '0.5rem',
     },
     userEmail: {
-        fontSize: '14px',
+        fontSize: '0.875rem',
         fontWeight: 500,
         color: '#333',
-        marginBottom: '4px',
+        marginBottom: '0.25rem',
     },
     userStatus: {
-        fontSize: '12px',
+        fontSize: '0.75rem',
         color: '#666',
     },
     signOutButton: {
         background: '#dc3545',
         color: '#fff',
         border: 'none',
-        borderRadius: '4px',
-        padding: '6px 12px',
-        fontSize: '14px',
+        borderRadius: '0.25rem',
+        padding: '0.375rem 0.75rem',
+        fontSize: '0.875rem',
         fontWeight: 500,
         cursor: 'pointer',
         width: '100%',
-        marginTop: '8px',
+        marginTop: '0.5rem',
         transition: 'background 0.2s',
         ':hover': {
             background: '#c82333'
@@ -184,28 +207,32 @@ class DeepTutorBottomSection extends React.Component {
 
     renderMain() {
         return (
-            <>
+            <div style={styles.contentWrapper}>
                 <div style={styles.bottomLeft}>
-                    <button style={styles.textButton}>
-                        <img src={this.props.feedIconPath} alt="Feedback" style={styles.buttonIcon} />
-                        Feedback
-                    </button>
-                    <div style={styles.profileButtonContainer}>
-                        <button style={styles.textButton} onClick={this.props.onToggleProfilePopup}>
-                            <img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
-                            Profile
+                    <div style={styles.feedbackBox}>
+                        <button style={styles.textButton}>
+                            <img src={this.props.feedIconPath} alt="Feedback" style={styles.buttonIcon} />
+                            Feedback
                         </button>
-                        {this.renderProfilePopup()}
+                    </div>
+                    <div style={styles.buttonsBox}>
+                        <div style={styles.profileButtonContainer}>
+                            <button style={styles.textButton} onClick={this.props.onToggleProfilePopup}>
+                                <img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
+                                Profile
+                            </button>
+                            {this.renderProfilePopup()}
+                        </div>
+                        <button style={styles.upgradeButton} onClick={this.props.onToggleUpgradePopup}>Upgrade</button>
                     </div>
                 </div>
-                <button style={styles.upgradeButton} onClick={this.props.onToggleUpgradePopup}>Upgrade</button>
-            </>
+            </div>
         );
     }
 
     renderWelcome() {
         return (
-            <div style={{ ...styles.bottom, background: '#F2F2F2' }}>
+            <div style={styles.contentWrapper}>
             </div>
         );
     }

@@ -33,66 +33,88 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '32px',
     width: '100%',
     height: '100%',
     maxHeight: '80vh',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
-    borderRadius: '10px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
-    padding: '20px',
+    borderRadius: '0.625rem',
+    boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.08)',
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflowY: 'auto',
     overflowX: 'hidden',
     position: 'relative',
     boxSizing: 'border-box',
+    padding: '1.25rem',
   },
   section: {
     width: '100%',
-    maxWidth: '390px',
+    maxWidth: '21.875rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
     boxSizing: 'border-box',
+    marginBottom: '1.875rem',
+  },
+  nameSection: {
+    width: '100%',
+    maxWidth: '21.875rem',
+    display: 'flex',
+    flexDirection: 'column',
+    boxSizing: 'border-box',
+    marginBottom: '1.875rem',
+  },
+  contextSection: {
+    width: '100%',
+    maxWidth: '21.875rem',
+    display: 'flex',
+    flexDirection: 'column',
+    boxSizing: 'border-box',
+    marginBottom: '1.25rem',
+  },
+  modelSection: {
+    width: '100%',
+    maxWidth: '21.875rem',
+    display: 'flex',
+    flexDirection: 'column',
+    boxSizing: 'border-box',
+    marginBottom: '0.625rem',
   },
   label: {
     fontWeight: 400,
-    fontSize: '14px',
+    fontSize: '0.875rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     verticalAlign: 'middle',
     color: '#000000',
-    marginBottom: '2px',
+    marginBottom: '0.625rem',
   },
   input: {
     width: '100%',
-    borderRadius: '10px',
-    gap: '10px',
-    borderWidth: '1px',
-    padding: '12px 15px',
-    border: `1px solid ${LIGHT_GREY2}`,
+    borderRadius: '0.625rem',
+    borderWidth: '0.0625rem',
+    padding: '0.75rem 0.9375rem',
+    border: `0.0625rem solid ${LIGHT_GREY2}`,
     background: PEARL,
-    fontSize: '14px',
+    fontSize: '0.875rem',
     outline: 'none',
   },
   searchArea: {
     width: '100%',
     background: PEARL,
-    borderRadius: '10px',
-    border: `1px solid ${LIGHT_GREY2}`,
+    borderRadius: '0.625rem',
+    border: `0.0625rem solid ${LIGHT_GREY2}`,
     display: 'flex',
     alignItems: 'center',
-    padding: '12px 15px',
-    margin: '4px 0',
-    fontSize: '14px',
+    padding: '0.75rem 0.9375rem',
+    margin: '0.25rem 0',
+    fontSize: '0.875rem',
     color: '#292929',
-    gap: '10px',
+    gap: '0.625rem',
   },
   searchIcon: {
-    width: '24px',
-    height: '24px',
+    width: '1.5rem',
+    height: '1.5rem',
     opacity: 0.6,
   },
   searchInput: {
@@ -100,24 +122,17 @@ const styles = {
     border: 'none',
     outline: 'none',
     background: 'transparent',
-    fontSize: '16px',
+    fontSize: '1rem',
     fontFamily: 'Roboto, sans-serif',
     color: '#292929',
-  },
-  contextRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    width: '100%',
-    margin: '8px 0',
   },
   uploadButton: {
     background: SKY,
     color: '#fff',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: '0.5rem',
     fontWeight: 600,
-    padding: '8px 18px',
+    padding: '0.5rem 1.125rem',
     fontSize: '1em',
     cursor: 'pointer',
     fontFamily: 'Roboto, sans-serif',
@@ -126,29 +141,28 @@ const styles = {
   },
   orText: {
     fontWeight: 400,
-    fontSize: '14px',
+    fontSize: '0.875rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     textAlign: 'center',
     verticalAlign: 'middle',
     color: '#888',
-    margin: '4px 0',
+    marginBottom: '0.625rem',
   },
   dragArea: {
     width: '100%',
-    borderRadius: '10px',
-    gap: '5px',
-    borderWidth: '1px',
-    padding: '12px 15px',
-    border: `1.5px dashed ${LIGHT_GREY2}`,
+    borderRadius: '0.625rem',
+    borderWidth: '0.0625rem',
+    padding: '0.75rem 0.9375rem',
+    border: `0.09375rem dashed ${LIGHT_GREY2}`,
     background: PEARL,
-    minHeight: '91px',
+    minHeight: '5.6875rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     color: '#888',
-    fontSize: '16px',
-    margin: '4px 0',
+    fontSize: '1rem',
+    marginBottom: '1.875rem',
     flexDirection: 'column',
     transition: 'border-color 0.2s, background 0.2s',
   },
@@ -159,20 +173,19 @@ const styles = {
   modelTypeRow: {
     display: 'flex',
     flexDirection: 'row',
-    gap: '8px',
+    gap: '0.5rem',
     width: '100%',
-    marginTop: '8px',
-    marginBottom: '8px',
+    marginBottom: '1.25rem',
     justifyContent: 'space-between',
   },
   modelTypeButton: {
     flex: '1 1 0',
-    height: '48px',
-    borderRadius: '10px',
-    padding: '12px 15px',
+    height: '3rem',
+    borderRadius: '0.625rem',
+    padding: '0.75rem 0.9375rem',
     border: 'none',
     fontWeight: 400,
-    fontSize: '16px',
+    fontSize: '1rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     verticalAlign: 'middle',
@@ -183,14 +196,14 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '5px',
+    gap: '0.3125rem',
     minWidth: 0,
   },
   modelTypeButtonSelected: {
     background: AQUA,
     color: '#292929',
     fontWeight: 400,
-    fontSize: '16px',
+    fontSize: '1rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     verticalAlign: 'middle',
@@ -198,34 +211,34 @@ const styles = {
   createButton: {
     width: '100%',
     maxWidth: '90%',
-    margin: '32px auto 0 auto',
-    padding: '14px 0',
+    margin: '2rem auto 0 auto',
+    padding: '0.875rem 0',
     background: SKY,
     color: '#fff',
     fontWeight: 700,
-    fontSize: '17.6px',
+    fontSize: '1.1rem',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '0.625rem',
     cursor: 'pointer',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+    boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
     letterSpacing: 0.2,
     transition: 'background 0.2s',
     display: 'block',
   },
   modelDescription: {
-    marginTop: '5px',
+    marginBottom: '1.25rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px',
+    gap: '0.3125rem',
     width: '90%',
     height: 'auto',
   },
   modelFeature: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '5px',
-    fontSize: '14px',
+    gap: '0.3125rem',
+    fontSize: '0.875rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     color: '#000000',
@@ -233,17 +246,17 @@ const styles = {
     width: '100%',
   },
   modelIcon: {
-    width: '16px',
-    height: '16px',
+    width: '1rem',
+    height: '1rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: '1.5px',
+    marginTop: '0.09375rem',
   },
   modelLimitations: {
-    marginTop: '5px',
+    marginTop: '0.3125rem',
     color: '#000000',
-    fontSize: '14px',
+    fontSize: '0.875rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     width: '90%',
@@ -252,23 +265,24 @@ const styles = {
   searchContainer: {
     position: 'relative',
     width: '100%',
+    marginBottom: '0.625rem',
   },
   searchPopup: {
     position: 'absolute',
     top: '100%',
     left: 0,
     right: 0,
-    maxHeight: '200px',
+    maxHeight: '12.5rem',
     overflowY: 'auto',
     background: '#FFFFFF',
-    border: `1px solid ${LIGHT_GREY2}`,
-    borderRadius: 8,
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    border: `0.0625rem solid ${LIGHT_GREY2}`,
+    borderRadius: '0.5rem',
+    boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
     zIndex: 1000,
-    marginTop: 4,
+    marginTop: '0.25rem',
   },
   searchItem: {
-    padding: '8px 12px',
+    padding: '0.5rem 0.75rem',
     cursor: 'pointer',
     fontSize: '0.9em',
     color: '#292929',
@@ -281,7 +295,7 @@ const styles = {
     background: PEARL,
   },
   noResults: {
-    padding: '8px 12px',
+    padding: '0.5rem 0.75rem',
     color: '#888',
     fontSize: '0.9em',
     textAlign: 'center',
@@ -290,9 +304,9 @@ const styles = {
     background: SKY,
     color: '#fff',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: '0.5rem',
     fontWeight: 600,
-    padding: '8px 18px',
+    padding: '0.5rem 1.125rem',
     fontSize: '1em',
     cursor: 'pointer',
     fontFamily: 'Roboto, sans-serif',
@@ -303,20 +317,20 @@ const styles = {
     position: 'absolute',
     top: '100%',
     right: 0,
-    width: '300px',
-    maxHeight: '300px',
+    width: '18.75rem',
+    maxHeight: '18.75rem',
     overflowY: 'auto',
     background: '#FFFFFF',
-    border: `1px solid ${LIGHT_GREY2}`,
-    borderRadius: 8,
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    border: `0.0625rem solid ${LIGHT_GREY2}`,
+    borderRadius: '0.5rem',
+    boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
     zIndex: 1000,
-    marginTop: 4,
-    padding: '8px',
+    marginTop: '0.25rem',
+    padding: '0.5rem',
   },
   fileListItem: {
-    padding: '8px',
-    borderBottom: `1px solid ${LIGHT_GREY2}`,
+    padding: '0.5rem',
+    borderBottom: `0.0625rem solid ${LIGHT_GREY2}`,
     fontSize: '0.9em',
     color: '#292929',
     display: 'flex',
@@ -327,10 +341,10 @@ const styles = {
     color: '#ff4444',
     cursor: 'pointer',
     fontSize: '1.2em',
-    padding: '0 4px',
+    padding: '0 0.25rem',
   },
   fileListEmpty: {
-    padding: '8px',
+    padding: '0.5rem',
     color: '#888',
     fontSize: '0.9em',
     textAlign: 'center',
@@ -339,35 +353,43 @@ const styles = {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
-    marginBottom: '10px',
+    gap: '0.625rem',
+    marginBottom: '0.625rem',
   },
   newFileListItem: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px',
-    borderRadius: '10px',
-    border: '1px solid #D9D9D9',
+    padding: '0.625rem',
+    borderRadius: '0.625rem',
+    border: '0.0625rem solid #D9D9D9',
     backgroundColor: '#FFFFFF',
   },
   newFileListName: {
-    fontSize: '14px',
+    fontSize: '0.875rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     verticalAlign: 'middle',
     color: '#000000',
     fontWeight: 400,
     flex: 1,
-    marginRight: '10px',
+    marginRight: '0.625rem',
   },
   newFileListDelete: {
-    width: '24px',
-    height: '24px',
+    width: '1.5rem',
+    height: '1.5rem',
     cursor: 'pointer',
     padding: 0,
     border: 'none',
     background: 'transparent',
+  },
+  contextLabel: {
+    width: '100%',
+    marginBottom: '0.3125rem',
+  },
+  fileListContainer: {
+    width: '100%',
+    marginBottom: '0.3125rem',
   },
 };
 
@@ -840,7 +862,7 @@ function ModelSelection({ onSubmit }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.section}>
+      <div style={styles.nameSection}>
         <label style={styles.label}>Name Your Session</label>
         <input
           type="text"
@@ -851,23 +873,29 @@ function ModelSelection({ onSubmit }) {
         />
       </div>
 
-      <div style={styles.section}>
-        <label style={styles.label}>Add Context</label>
-        {fileList.length > 0 && (
-          <div style={styles.newFileList}>
-            {fileList.map(file => (
-              <div key={file.id} style={styles.newFileListItem}>
-                <span style={styles.newFileListName}>{file.name}</span>
-                <button 
-                  style={styles.newFileListDelete}
-                  onClick={() => handleRemoveFile(file.id)}
-                >
-                  <img src={DeleteImg} alt="Delete" width="24" height="24" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+      <div style={styles.contextSection}>
+        <div style={styles.contextLabel}>
+          <label style={styles.label}>Add Context</label>
+        </div>
+
+        <div style={styles.fileListContainer}>
+          {fileList.length > 0 && (
+            <div style={styles.newFileList}>
+              {fileList.map(file => (
+                <div key={file.id} style={styles.newFileListItem}>
+                  <span style={styles.newFileListName}>{file.name}</span>
+                  <button 
+                    style={styles.newFileListDelete}
+                    onClick={() => handleRemoveFile(file.id)}
+                  >
+                    <img src={DeleteImg} alt="Delete" width="24" height="24" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div style={styles.searchContainer}>
           <div style={styles.searchArea}>
             <svg style={styles.searchIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -914,7 +942,7 @@ function ModelSelection({ onSubmit }) {
           Drag an Item Here
         </div>
       </div>
-      <div style={styles.section}>
+      <div style={styles.modelSection}>
         <label style={styles.label}>Select Your Model</label>
         <div style={styles.modelTypeRow}>
           <button

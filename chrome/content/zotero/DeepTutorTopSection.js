@@ -7,8 +7,8 @@ const styles = {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '6px 8px 3px 8px',
-        minHeight: '64px',
+        padding: '1.25rem 1.25rem 1.875rem 1.25rem',
+        minHeight: '4rem',
         background: '#F2F2F2',
         width: '100%',
         boxSizing: 'border-box',
@@ -18,44 +18,52 @@ const styles = {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '6px 8px 3px 8px',
-        minHeight: '64px',
+        padding: '1.25rem 1.25rem 1.875rem 1.25rem',
+        minHeight: '4rem',
         background: '#F2F2F2',
         width: '100%',
         boxSizing: 'border-box',
     },
     logo: {
-        height: '28px',
+        height: '1.75rem',
         width: 'auto',
         display: 'block',
-        marginTop: '20px',
-        marginLeft: '20px',
     },
     topRight: {
         display: 'flex',
         flexDirection: 'row',
-        gap: '12px',
+        gap: '0.75rem',
+        height: '1.75rem',
+        alignItems: 'center',
     },
     iconButton: {
-        width: '40px',
-        height: '40px',
+        width: '2.5rem',
+        height: '2.5rem',
         background: '#F8F6F7',
         border: 'none',
-        borderRadius: '6px',
+        borderRadius: '0.375rem',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         transition: 'background-color 0.2s ease',
-        padding: '8px',
+        padding: '0.5rem',
     },
     iconButtonActive: {
         background: '#F2F2F2',
     },
     iconImage: {
-        width: '24px',
-        height: '24px',
+        width: '1.5rem',
+        height: '1.5rem',
         objectFit: 'contain',
+    },
+    contentWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        height: '1.75rem',
     },
 };
 
@@ -69,7 +77,7 @@ class DeepTutorTopSection extends React.Component {
 
     renderMain() {
         return (
-            <>
+            <div style={styles.contentWrapper}>
                 <img src={this.props.logoPath} alt="DeepTutor Logo" style={styles.logo} />
                 <div style={styles.topRight}>
                     <button
@@ -93,19 +101,21 @@ class DeepTutorTopSection extends React.Component {
                         />
                     </button>
                 </div>
-            </>
+            </div>
         );
     }
 
     renderWelcome() {
         return (
-            <img src={this.props.logoPath} alt="DeepTutor Logo" style={styles.logo} />
+            <div style={styles.contentWrapper}>
+                <img src={this.props.logoPath} alt="DeepTutor Logo" style={styles.logo} />
+            </div>
         );
     }
 
     renderSessionHistory() {
         return (
-            <>
+            <div style={styles.contentWrapper}>
                 <img src={this.props.logoPath} alt="DeepTutor Logo" style={styles.logo} />
                 <div style={styles.topRight}>
                     <button
@@ -131,7 +141,7 @@ class DeepTutorTopSection extends React.Component {
                         />
                     </button>
                 </div>
-            </>
+            </div>
         );
     }
 

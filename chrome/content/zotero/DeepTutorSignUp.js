@@ -13,198 +13,173 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '16px 0',
     position: 'relative',
-  },
-  iconRow: {
-    width: '100%',
-    maxWidth: 400,
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  blueSquare: {
-    width: 28,
-    height: 28,
-    background: SKY,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  subtitle: {
-    fontWeight: 400,
-    fontSize: '1.08em',
-    color: '#4a4a4a',
-    marginBottom: '18px',
-    fontFamily: 'Roboto, sans-serif',
-    width: '90%',
-    textAlign: 'center',
   },
   form: {
     position: 'relative',
     width: '90%',
-    height: '80%',
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    alignItems: 'center',
+    margin: '0 auto',
+  },
+  mainContent: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: '1.875rem',
+  },
+  inputGroup: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     alignItems: 'flex-start',
-    padding: '0 8px',
+    marginBottom: '1.25rem',
   },
   label: {
     fontWeight: 400,
-    fontSize: '14px',
+    fontSize: '0.875rem',
     lineHeight: '135%',
-    letterSpacing: '0%',
-    verticalAlign: 'middle',
-    color: '#000000',
-    marginBottom: 4,
-    width: '100%',
+    color: '#222',
+    marginBottom: '0.625rem',
   },
   input: {
     width: '100%',
-    height: '10%',
-    minHeight: '32px',
-    borderRadius: 10,
-    gap: 10,
+    minHeight: '2rem',
+    borderRadius: '0.625rem',
     border: `1px solid #DADCE0`,
-    paddingTop: 6,
-    paddingRight: 8,
-    paddingBottom: 6,
-    paddingLeft: 8,
+    padding: '0.375rem 0.5rem',
     background: PEARL,
-    fontSize: '1em',
+    fontSize: '1rem',
     fontFamily: 'Roboto, sans-serif',
     outline: 'none',
-    marginBottom: 2,
   },
   signUpButton: {
     width: '100%',
-    height: '10%',
-    minHeight: '32px',
-    borderRadius: 10,
-    paddingTop: 6,
-    paddingRight: 8,
-    paddingBottom: 6,
-    paddingLeft: 8,
+    minHeight: '2.4375rem',
+    borderRadius: '0.625rem',
+    padding: '0.625rem 1.25rem',
     background: SKY,
     color: '#fff',
     fontWeight: 700,
-    fontSize: '1.1em',
+    fontSize: '1.1rem',
     border: 'none',
     cursor: 'pointer',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+    boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
     letterSpacing: 0.2,
-    display: 'block',
-    marginTop: 8,
+    marginTop: '1.25rem',
   },
   signUpButtonDisabled: {
     background: '#ccc',
     cursor: 'not-allowed',
   },
-  dividerRow: {
+  dividerContainer: {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    margin: '18px 0 10px 0',
+    margin: '1.3125rem 0 0',
   },
   divider: {
     flex: 1,
-    height: 1,
+    height: '0.0625rem',
     background: PEARL,
     border: 'none',
   },
   orText: {
-    margin: '0 12px',
+    margin: '0 0.75rem',
     color: '#888',
     fontWeight: 500,
-    fontSize: '1em',
+    fontSize: '1rem',
+    marginBottom: '1.875rem',
+  },
+  googleContainer: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '1.875rem',
   },
   googleButton: {
     width: '100%',
-    height: '10%',
-    minHeight: '32px',
-    borderRadius: 10,
-    gap: 10,
+    minHeight: '2.75rem',
+    borderRadius: '0.625rem',
     border: `1px solid ${PEARL}`,
-    paddingTop: 6,
-    paddingRight: 8,
-    paddingBottom: 6,
-    paddingLeft: 8,
+    padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontWeight: 600,
-    fontSize: '1.05em',
+    fontSize: '1.05rem',
     color: '#222',
     cursor: 'pointer',
-    marginBottom: 8,
-    marginTop: 0,
   },
   googleIcon: {
-    width: 22,
-    height: 22,
+    width: '1.375rem',
+    height: '1.375rem',
     objectFit: 'contain',
-    marginRight: 2,
+    marginRight: '0.125rem',
   },
-  bottomRow: {
+  bottomContainer: {
     width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bottomText: {
     fontWeight: 500,
-    fontSize: '14px',
-    lineHeight: '100%',
-    letterSpacing: '0%',
-    textAlign: 'center',
-    verticalAlign: 'middle',
+    fontSize: '0.875rem',
     color: '#888',
-    marginTop: 10,
   },
   signInLink: {
     fontWeight: 500,
-    fontSize: '14px',
-    lineHeight: '100%',
-    letterSpacing: '0%',
-    textAlign: 'center',
-    verticalAlign: 'middle',
+    fontSize: '0.875rem',
     textDecoration: 'underline',
-    textDecorationStyle: 'solid',
-    textDecorationOffset: '0%',
-    textDecorationThickness: '0%',
-    textDecorationSkipInk: 'auto',
     color: SKY,
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    marginLeft: 4,
+    marginLeft: '0.25rem',
     padding: 0,
   },
   errorMessage: {
     color: '#dc3545',
-    fontSize: '14px',
-    marginTop: '8px',
+    fontSize: '0.875rem',
+    marginTop: '0.625rem',
     textAlign: 'center',
     width: '100%',
   },
   successMessage: {
     color: '#28a745',
-    fontSize: '14px',
-    marginTop: '8px',
+    fontSize: '0.875rem',
+    marginTop: '0.625rem',
     textAlign: 'center',
     width: '100%',
+  },
+  subtitle: {
+    fontWeight: 400,
+    fontSize: '1.08rem',
+    color: '#4a4a4a',
+    marginBottom: '1.125rem',
+    fontFamily: 'Roboto, sans-serif',
+    width: '90%',
+    textAlign: 'center',
   },
   confirmationSection: {
     width: '100%',
-    maxWidth: 400,
+    maxWidth: '25rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: 18,
+    gap: '1.125rem',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: '1.25rem',
   },
   confirmationText: {
-    fontSize: '14px',
+    fontSize: '0.875rem',
     color: '#4a4a4a',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: '0.625rem',
   },
 };
 
@@ -411,68 +386,77 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.titleSection}>
-        <div style={styles.title}>Sign Up</div>
-      </div>
       <div style={styles.subtitle}>Create a free account to start your unique learning experience</div>
       <form style={styles.form} autoComplete="off" onSubmit={handleSignUp}>
-        <label style={styles.label}>Your Name</label>
-        <input
-          style={styles.input}
-          type="text"
-          placeholder=""
-          value={name}
-          onChange={e => setName(e.target.value)}
-          disabled={isLoading}
-        />
-        <label style={styles.label}>Email Address</label>
-        <input
-          style={styles.input}
-          type="email"
-          placeholder="example@email.com"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          disabled={isLoading}
-        />
-        <label style={styles.label}>Create Password</label>
-        <input
-          style={styles.input}
-          type="password"
-          placeholder="At least 8 characters"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          disabled={isLoading}
-        />
-        <button 
-          style={{
-            ...styles.signUpButton,
-            ...(isLoading ? styles.signUpButtonDisabled : {})
-          }}
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Signing up...' : 'Sign Up Free'}
-        </button>
+        <div style={styles.mainContent}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Your Name</label>
+            <input
+              style={styles.input}
+              type="text"
+              placeholder=""
+              value={name}
+              onChange={e => setName(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Email Address</label>
+            <input
+              style={styles.input}
+              type="email"
+              placeholder="example@email.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Create Password</label>
+            <input
+              style={styles.input}
+              type="password"
+              placeholder="At least 8 characters"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <button 
+            style={{
+              ...styles.signUpButton,
+              ...(isLoading ? styles.signUpButtonDisabled : {})
+            }}
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing up...' : 'Sign Up Free'}
+          </button>
+          
+          {error && <div style={styles.errorMessage}>{error}</div>}
+          {message && <div style={styles.successMessage}>{message}</div>}
+        </div>
         
-        {error && <div style={styles.errorMessage}>{error}</div>}
-        {message && <div style={styles.successMessage}>{message}</div>}
-        
-        <div style={styles.dividerRow}>
+        <div style={styles.dividerContainer}>
           <hr style={styles.divider} />
           <span style={styles.orText}>or</span>
           <hr style={styles.divider} />
         </div>
-        <button 
-          style={styles.googleButton} 
-          type="button"
-          onClick={handleGoogleSignUp}
-          disabled={isLoading}
-        >
-          <img src={GoogleImg} alt="Google" style={styles.googleIcon} />
-          Sign up with Google
-        </button>
-        <div style={styles.bottomRow}>
-          Already have an account?
+
+        <div style={styles.googleContainer}>
+          <button 
+            style={styles.googleButton} 
+            type="button"
+            onClick={handleGoogleSignUp}
+            disabled={isLoading}
+          >
+            <img src={GoogleImg} alt="Google" style={styles.googleIcon} />
+            Sign up with Google
+          </button>
+        </div>
+
+        <div style={styles.bottomContainer}>
+          <span style={styles.bottomText}>Already have an account?</span>
           <button 
             style={styles.signInLink} 
             type="button" 

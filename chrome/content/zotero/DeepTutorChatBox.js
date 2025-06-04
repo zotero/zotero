@@ -72,10 +72,9 @@ const styles = {
     container: {
         width: '100%',
         minHeight: '80%',
-        padding: '16px 0',
         background: '#F2F2F2',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        borderRadius: '0.5rem',
+        boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -95,103 +94,109 @@ const styles = {
     },
     chatLog: {
         width: '90%',
-        borderRadius: '10px',
-        padding: '12px 15px',
+        borderRadius: '0.625rem',
+        padding: '0.75rem 0.9375rem',
         overflowY: 'auto',
         background: '#F2F2F2',
         height: '100%',
         boxShadow: 'none',
-        marginBottom: '16px',
         fontFamily: 'Roboto, sans-serif',
         flex: 1,
-        marginTop: '0',
-        gap: '10px',
-        borderWidth: '1px',
-        alignSelf: 'flex-start',
-        marginLeft: '5%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        margin: '1.875rem 1.25rem',
     },
     bottomBar: {
         width: '90%',
-        marginTop: 'auto',
-        padding: '10px 10px 6px 10px',
-        background: '#F2F2F2',
-        borderRadius: '12px 12px 0 0',
-        boxShadow: '0 -1px 3px rgba(0,0,0,0.08)',
+        background: '#F8F6F7',
+        boxShadow: '0 -0.0625rem 0.1875rem rgba(0,0,0,0.08)',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '4px',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
         fontFamily: 'Roboto, sans-serif',
         position: 'relative',
         zIndex: 1,
-        minHeight: '80px',
-        alignSelf: 'flex-start',
-        marginLeft: '5%',
+        minHeight: '5rem',
+        margin: '0 1.25rem 1.875rem 1.25rem',
+        border: '0.0625rem solid #D9D9D9',
+        padding: '0.4rem',
+        borderRadius: '0.5rem',
+        gap: '0.625rem',
+        boxSizing: 'border-box',
     },
     inputContainer: {
         width: '100%',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
-        marginBottom: '2px',
-        gap: '8px',
-        background: '#F2F2F2',
-        borderRadius: '8px',
-        padding: '8px',
+        background: '#F8F6F7',
+        borderRadius: '0.5rem',
+        padding: '0.5rem',
+        height: 'auto',
+        gap: '0.625rem',
+        boxSizing: 'border-box',
     },
     textInput: {
         flex: 1,
-        padding: '12px 15px',
+        padding: '0.75rem 0.9375rem',
         border: 'none',
-        borderRadius: '10px',
+        borderRadius: '0.625rem',
         background: '#F8F6F7',
         color: '#1a65b0',
-        minHeight: '32px',
-        maxHeight: '80px',
-        fontSize: '13px',
+        minHeight: '2rem',
+        maxHeight: '5rem',
+        fontSize: '0.8125rem',
         overflowY: 'auto',
         fontFamily: 'Roboto, sans-serif',
-        gap: '10px',
+        resize: 'none',
+        height: 'auto',
+        marginRight: '0.625rem',
     },
     sendButton: {
         background: '#F8F6F7',
         border: 'none',
-        borderRadius: '20px',
-        width: '50px',
-        height: '50px',
+        borderRadius: '50%',
+        aspectRatio: '1',
+        height: '3rem',
+        width: '3rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        padding: '3px',
-        gap: '10px',
+        padding: '0.125rem',
         transition: 'background-color 0.2s ease',
+        flexShrink: 0,
         ':hover': {
             background: '#D9D9D9'
         }
     },
     sendIcon: {
-        width: '28px',
-        height: '28px',
+        width: '2.5rem',
+        height: '2.5rem',
         objectFit: 'contain',
     },
     messageContainer: {
         width: '100%',
-        margin: '8px 0',
+        margin: '0.5rem 0',
     },
     messageBubble: {
-        padding: '12px 16px',
-        borderRadius: '16px',
+        padding: '0.625rem 1.25rem',
+        borderRadius: '0.625rem',
         maxWidth: '85%',
         boxShadow: 'none',
-        animation: 'slideIn 0.3s ease-out forwards'
+        animation: 'slideIn 0.3s ease-out forwards',
+        height: 'auto',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
     },
     userMessage: {
-        backgroundColor: '#0AE2FF',
+        backgroundColor: '#0687E5',
         color: 'white',
         marginLeft: 'auto',
-        borderBottomRightRadius: '4px',
-        borderRadius: '16px',
+        borderRadius: '0.625rem',
         fontWeight: 500,
+        textAlign: 'left',
     },
     botMessage: {
         backgroundColor: '#F8F6F7',
@@ -236,39 +241,38 @@ const styles = {
         width: '100%',
         margin: '8px 0',
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         gap: '12px',
         flexWrap: 'wrap',
     },
     questionButton: {
         background: '#FFFFFF',
         color: '#000',
-        border: '1px solid #0687E5',
-        borderRadius: '10px',
-        padding: '10px 20px',
-        minWidth: '220px',
-        minHeight: '32px',
+        border: '0.0625rem solid #0687E5',
+        borderRadius: '0.625rem',
+        padding: '0.625rem 1.25rem',
+        minWidth: '13.75rem',
         fontWeight: 500,
-        fontSize: '16px',
-        lineHeight: '100%',
-        letterSpacing: '0%',
-        verticalAlign: 'middle',
+        fontSize: '1rem',
+        lineHeight: '1.5',
         cursor: 'pointer',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
         transition: 'background 0.2s, border 0.2s',
-        margin: '4px 0',
-        textAlign: 'center',
+        margin: '0.25rem 0',
+        textAlign: 'left',
         fontFamily: 'Roboto, sans-serif',
-        gap: '10px',
+        height: 'auto',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
     },
     sessionTabBar: {
-        height: '29px',
+        height: '1.8125rem',
         background: '#F2F2F2',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 8px',
-        gap: '4px',
-        borderBottom: '1px solid #E0E0E0',
+        padding: '0 0.5rem',
+        gap: '0.25rem',
+        borderBottom: '0.0625rem solid #E0E0E0',
     },
     sessionTab: {
         width: '136.6666717529297px',
@@ -1426,25 +1430,23 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             </div>
 
             <div style={styles.bottomBar}>
-                <div style={styles.inputContainer}>
-                    <textarea
-                        style={styles.textInput}
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Type your message..."
-                        rows={1}
+                <textarea
+                    style={styles.textInput}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Type your message..."
+                    rows={1}
+                />
+                <button
+                    style={styles.sendButton}
+                    onClick={handleSend}
+                >
+                    <img 
+                        src={SendIconPath}
+                        alt="Send" 
+                        style={styles.sendIcon}
                     />
-                    <button
-                        style={styles.sendButton}
-                        onClick={handleSend}
-                    >
-                        <img 
-                            src={SendIconPath}
-                            alt="Send" 
-                            style={styles.sendIcon}
-                        />
-                    </button>
-                </div>
+                </button>
             </div>
         </div>
     );
