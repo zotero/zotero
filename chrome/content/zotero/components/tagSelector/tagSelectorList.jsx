@@ -181,7 +181,7 @@ class TagList extends React.PureComponent {
 		
 		let props = {
 			className,
-			onClick: ev => !tag.disabled && this.props.onSelect(tag.name, ev),
+			onClick: ev => !tag.disabled && this.props.onSelect({ tag: tag.name }, ev),
 			onContextMenu: ev => this.props.onTagContext(tag, ev),
 			onDragOver,
 			onDragExit,

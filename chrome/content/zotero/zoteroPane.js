@@ -1732,9 +1732,8 @@ var ZoteroPane = new function()
 	 * Sets the tag filter on the items view
 	 */
 	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
-		if (this.itemsView) {
-			yield this.itemsView.setFilter('tags', ZoteroPane_Local.tagSelector.getTagSelection());
-		}
+		if (!this.itemsView) return;
+		yield this.itemsView.setFilter('annotation-tags', ZoteroPane_Local.tagSelector.getSelection());
 	});
 	
 	
@@ -1813,12 +1812,12 @@ var ZoteroPane = new function()
 		// Clear quick search and tag selector when switching views
 		document.getElementById('zotero-tb-search-textbox').value = "";
 		if (ZoteroPane.tagSelector) {
-			ZoteroPane.tagSelector.clearTagSelection();
+			ZoteroPane.tagSelector.clearSelection();
 		}
 		
 		collectionTreeRow.setSearch('');
 		if (ZoteroPane.tagSelector) {
-			collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
+			collectionTreeRow.setAnnotationTagFilters(ZoteroPane.tagSelector.getSelection());
 		}
 		
 		this._updateEnabledActionsForRow(collectionTreeRow);

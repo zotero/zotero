@@ -28,14 +28,90 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const TagList = require('./tagSelector/tagSelectorList');
+const AnnotationFiltersSelector = require('./tagSelector/annotationFiltersSelector');
 const { Button } = require('./button');
 const { CSSIcon } = require('./icons');
 const Search = require('./search');
 
 class TagSelector extends React.PureComponent {
+	constructor(props) {
+		super(props);
+		this.state = {
+			annotationSectionHeight: 40,
+			isDragging: false,
+			dragStartY: 0,
+			dragStartHeight: 0
+		};
+	}
+
+	handleSplitterMouseDown = (e) => {
+		if (!this.props.annotationAuthors.length) return;
+		e.preventDefault();
+		this.setState({
+			isDragging: true,
+			dragStartY: e.clientY,
+			dragStartHeight: this.state.annotationSectionHeight
+		});
+		
+		document.addEventListener('mousemove', this.handleSplitterMouseMove);
+		document.addEventListener('mouseup', this.handleSplitterMouseUp);
+	};
+
+	handleSplitterMouseMove = (e) => {
+		if (!this.state.isDragging) return;
+		
+		let deltaY = e.clientY - this.state.dragStartY;
+		// always leave at least 40px for annotations and 150px for the tags
+		let newHeight = Math.max(40, Math.min(this.props.height - 150, this.state.dragStartHeight + deltaY));
+		
+		this.setState({ annotationSectionHeight: newHeight });
+	};
+
+	handleSplitterMouseUp = () => {
+		this.setState({ isDragging: false });
+		document.removeEventListener('mousemove', this.handleSplitterMouseMove);
+		document.removeEventListener('mouseup', this.handleSplitterMouseUp);
+	};
+
 	render() {
+		const splitterHeight = 4;
+		const annotationColorsHeight = 28;
+
+		let hasAnnotationColors = this.props.annotationColors?.length > 0;
+		let hasAnnotationAuthors = this.props.annotationAuthors?.length > 0;
+		let hasAnnotationData = hasAnnotationColors || hasAnnotationAuthors;
+		
+		let annotationSelectorHeight;
+		if (hasAnnotationAuthors) {
+			annotationSelectorHeight = this.state.annotationSectionHeight + splitterHeight;
+		}
+		else if (hasAnnotationColors) {
+			annotationSelectorHeight = annotationColorsHeight + splitterHeight;
+		}
+		else {
+			annotationSelectorHeight = 0;
+		}
+		
+		let availableTagsHeight = this.props.height - annotationSelectorHeight;
+
 		return (
 			<div className="tag-selector">
+				{hasAnnotationData && (
+					<>
+						<AnnotationFiltersSelector
+							ref={this.props.annotationFiltersSelectorRef}
+							annotationColors={this.props.annotationColors}
+							annotationAuthors={this.props.annotationAuthors}
+							onSelect={this.props.onSelect}
+							height={annotationSelectorHeight}
+						/>
+						<div
+							className={`horizontal-splitter ${this.state.isDragging ? 'dragging' : ''} ${hasAnnotationAuthors ? '' : 'disabled'}`}
+							onMouseDown={this.handleSplitterMouseDown}
+						/>
+					</>
+				)}
+
 				<TagList
 					ref={this.props.tagListRef}
 					tags={this.props.tags}
@@ -45,7 +121,7 @@ class TagSelector extends React.PureComponent {
 					onTagContext={this.props.onTagContext}
 					loaded={this.props.loaded}
 					width={this.props.width}
-					height={this.props.height}
+					height={availableTagsHeight}
 					fontSize={this.props.fontSize}
 					lineHeight={this.props.lineHeight}
 					uiDensity={this.props.uiDensity}
@@ -58,6 +134,7 @@ class TagSelector extends React.PureComponent {
 							onSearch={this.props.onSearch}
 							className="tag-selector-filter"
 							data-l10n-id="tagselector-search"
+							data-l10n-args={`{"annotationsFilter": "${hasAnnotationAuthors ? 'yes' : 'no'}"}`}
 						/>
 						<Button
 							icon={<CSSIcon name="filter" className="icon-16" />}
@@ -76,12 +153,21 @@ class TagSelector extends React.PureComponent {
 TagSelector.propTypes = {
 	// TagList
 	tagListRef: PropTypes.object,
+	annotationFiltersSelectorRef: PropTypes.object,
 	tags: PropTypes.arrayOf(PropTypes.shape({
 		name: PropTypes.string,
 		selected: PropTypes.bool,
 		color: PropTypes.string,
 		disabled: PropTypes.bool,
 		width: PropTypes.number
+	})),
+	annotationColors: PropTypes.arrayOf(PropTypes.shape({
+		color: PropTypes.string,
+		name: PropTypes.string,
+	})),
+	annotationAuthors: PropTypes.arrayOf(PropTypes.shape({
+		label: PropTypes.string,
+		userID: PropTypes.string
 	})),
 	dragObserver: PropTypes.shape({
 		onDragOver: PropTypes.func,
@@ -105,15 +191,23 @@ TagSelector.propTypes = {
 	
 	// Button
 	onSettings: PropTypes.func,
+
+	// Annotation Filters
+	onAnnotationColorSelected: PropTypes.func,
+	onAnnotationAuthorSelected: PropTypes.func,
 };
 
 TagSelector.defaultProps = {
 	tags: [],
+	annotationColors: [],
+	annotationAuthors: [],
 	searchString: '',
 	onSelect: () => Promise.resolve(),
 	onTagContext: () => Promise.resolve(),
 	onSearch: () => Promise.resolve(),
-	onSettings: () => Promise.resolve()
+	onSettings: () => Promise.resolve(),
+	onAnnotationColorSelected: () => Promise.resolve(),
+	onAnnotationAuthorSelected: () => Promise.resolve(),
 };
 
 module.exports = TagSelector;

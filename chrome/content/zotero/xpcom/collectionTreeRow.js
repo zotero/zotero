@@ -349,12 +349,11 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(f
  *
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
-Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(function* () {
+Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(function* (options = {}) {
 	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
-	
-	if(Zotero.CollectionTreeCache.lastSearch) {
+	if(Zotero.CollectionTreeCache.lastSearch && !options.skipCache) {
 		return Zotero.CollectionTreeCache.lastSearch;
 	}	
 	
@@ -439,8 +438,25 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		}
 	}
 	
-	Zotero.CollectionTreeCache.lastTreeRow = this;
-	Zotero.CollectionTreeCache.lastSearch = s2;
+	if (!options.skipAnnotationAuthors && this.annotationAuthors?.length) {
+		s2.addCondition('blockStart');
+		for (let annotationAuthor of this.annotationAuthors) {
+			s2.addCondition('annotationAuthor', 'is', annotationAuthor);
+		}
+		s2.addCondition('blockEnd');
+	}
+
+	if (!options.skipAnnotationColors && this.annotationColors?.length) {
+		s2.addCondition('blockStart');
+		for (let annotationColor of this.annotationColors) {
+			s2.addCondition('annotationColor', 'is', annotationColor);
+		}
+		s2.addCondition('blockEnd');
+	}
+	if (!options.skipCache) {
+		Zotero.CollectionTreeCache.lastTreeRow = this;
+		Zotero.CollectionTreeCache.lastSearch = s2;
+	}
 	return s2;
 });
 
@@ -470,6 +486,21 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 	return Zotero.Tags.getAllWithin({ tmpTable: results, types, tagIDs });
 };
 
+Zotero.CollectionTreeRow.prototype.getAnnotationColors = async function () {
+	let searchObject = await this.getSearchObject({ skipCache: true, skipAnnotationAuthors: false, skipAnnotationColors: true });
+	let searchResultIDs = await searchObject.search();
+	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
+	let usedColors = new Set(annotations.map(annotation => annotation.annotationColor));
+	return new Set(Zotero.Annotations.COLORS.filter(c => usedColors.has(c.color)).map(c => c.color));
+};
+
+Zotero.CollectionTreeRow.prototype.getAnnotationAuthors = async function () {
+	let searchObject = await this.getSearchObject({ skipCache: true, skipAnnotationAuthors: true, skipAnnotationColors: false });
+	let searchResultIDs = await searchObject.search();
+	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
+	let authorIDs = new Set(annotations.map(annotation => annotation.createdByUserID));
+	return authorIDs;
+};
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
 	Zotero.CollectionTreeCache.clear();
@@ -477,10 +508,12 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 	this.searchMode = mode;
 }
 
-Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
+Zotero.CollectionTreeRow.prototype.setAnnotationTagFilters = function ({ annotationAuthors, annotationColors, tags } = {}) {
 	Zotero.CollectionTreeCache.clear();
-	this.tags = tags;
-}
+	this.tags = tags || this.tags;
+	this.annotationAuthors = annotationAuthors || this.annotationAuthors;
+	this.annotationColors = annotationColors || this.annotationColors;
+};
 
 /*
  * Returns TRUE if saved search, quicksearch or tag filter
@@ -499,7 +532,14 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
 	}
 	
 	// Tag filter
-	if (this.tags && this.tags.size) {
+	if (this.tags && this.tags.length) {
+		return true;
+	}
+
+	if (this.annotationAuthors && this.annotationAuthors.length) {
+		return true;
+	}
+	if (this.annotationColors && this.annotationColors.length) {
 		return true;
 	}
 }

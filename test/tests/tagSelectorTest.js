@@ -139,7 +139,7 @@ describe("Tag Selector", function () {
 		});
 	});
 	
-	describe("#handleTagSelected()", function () {
+	describe("#handleSelection()", function () {
 		it("should remove tags not on matching items on tag click", function* () {
 			var collection = yield createDataObject('collection');
 			yield select(win, collection);
@@ -172,7 +172,7 @@ describe("Tag Selector", function () {
 			});
 			yield promise;
 			
-			tagSelector.handleTagSelected('A');
+			tagSelector.handleSelection({ tag: 'A' });
 			yield waitForTagSelector(win);
 			
 			var tags = getRegularTags();
@@ -610,7 +610,7 @@ describe("Tag Selector", function () {
 			});
 			await promise;
 			
-			tagSelector.handleTagSelected(tag1);
+			tagSelector.handleSelection({ tag: tag1 });
 			await waitForTagSelector(win);
 			
 			// Tag selector should show the selected tag
@@ -626,7 +626,7 @@ describe("Tag Selector", function () {
 			
 			// Removed tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), tag1);
-			assert.notInclude(Array.from(tagSelector.getTagSelection()), tag1);
+			assert.notInclude(tagSelector.getSelection().tags, tag1);
 			// Other tags should be shown again
 			assert.include(getRegularTags(), tag2);
 		});
@@ -645,7 +645,7 @@ describe("Tag Selector", function () {
 			});
 			await promise;
 			
-			tagSelector.handleTagSelected(tag1);
+			tagSelector.handleSelection({ tag: tag1 });
 			await waitForTagSelector(win);
 			
 			// Tag selector should show the selected tag
@@ -660,7 +660,7 @@ describe("Tag Selector", function () {
 			
 			// Deleted tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), tag1);
-			assert.notInclude(Array.from(tagSelector.getTagSelection()), tag1);
+			assert.notInclude(tagSelector.getSelection().tags, tag1);
 			// Other tags should be shown again
 			assert.include(getRegularTags(), tag2);
 		});
