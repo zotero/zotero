@@ -57,7 +57,7 @@
 
 		_filterInput;
 
-		_prevFocusCls = null;
+		_prevFocusClass = null;
 
 		get visible() {
 			return ["showing", "open"].includes(this.state);
@@ -94,7 +94,7 @@
 		/**
 		 * Create the list of opened tabs in tabs menu.
 		 * @param {Object} [options] - Options for refreshing the list
-		 * @param {boolean} [options.ignorePrevSelection=false] - If true, ignore the previous selection and select the currently selected tab
+		 * @param {boolean} [options.ignorePreviousSelection=false] - If true, ignore the previous selection and select the currently selected tab
 		 * @returns {void}
 		 */
 		refreshList(options = {}) {
@@ -104,8 +104,8 @@
 			this._selectedIndex = null;
 
 			let activeElement = document.activeElement;
-			if (this.contains(activeElement) && !activeElement.classList.contains(this._prevFocusCls)) {
-				this._prevFocusCls = null;
+			if (this.contains(activeElement) && !activeElement.classList.contains(this._prevFocusClass)) {
+				this._prevFocusClass = null;
 			}
 
 			let selectedIndex = null;
@@ -121,7 +121,7 @@
 			let tabsCount = validTabs.length;
 
 			let selectedTabID = Zotero_Tabs.selectedID;
-			if (!options.ignorePrevSelection) {
+			if (!options.ignorePreviousSelection) {
 				let prevTabID = this._tabsList.querySelector(".selected")?.dataset.tabId;
 				if (prevTabID && validTabs.some(tab => tab.id == prevTabID)) {
 					selectedTabID = prevTabID;
@@ -238,8 +238,8 @@
 			if (selectedIndex !== null) {
 				this._selectRow(selectedIndex);
 
-				if (this._prevFocusCls) {
-					this._tabsList.querySelector(`.selected > .${this._prevFocusCls}`).focus();
+				if (this._prevFocusClass) {
+					this._tabsList.querySelector(`.selected > .${this._prevFocusClass}`).focus();
 				}
 			}
 			else {
@@ -360,8 +360,8 @@
 
 		resetFocus() {
 			let row = this._tabsList.querySelector(".selected");
-			if (this._prevFocusCls) {
-				let focusTarget = row.querySelector(`.${this._prevFocusCls}`);
+			if (this._prevFocusClass) {
+				let focusTarget = row.querySelector(`.${this._prevFocusClass}`);
 				if (focusTarget && !focusTarget.hidden) {
 					focusTarget.focus();
 				}
@@ -379,7 +379,7 @@
 		_handleShowing = (event) => {
 			if (event.originalTarget !== this) return;
 
-			this.refreshList({ ignorePrevSelection: true });
+			this.refreshList({ ignorePreviousSelection: true });
 
 			// Make sure that if the menu is very long, there is a small
 			// gap left between the top/bottom of the menu and the edge of the screen
@@ -444,7 +444,7 @@
 			this._filterInput.removeEventListener("input", this._handleFilterInput);
 			this._filterInput.removeEventListener("blur", this._handleFilterBlur);
 
-			this._prevFocusCls = null;
+			this._prevFocusClass = null;
 			this._selectedIndex = null;
 		};
 
@@ -500,7 +500,7 @@
 					event.stopPropagation();
 					// Move selection to the next tab to make sure the next tab's close button is focused
 					this.moveSelection("next");
-					this._prevFocusCls = "close";
+					this._prevFocusClass = "close";
 					this._handleCloseClick(event);
 				}
 			}
@@ -552,7 +552,7 @@
 			}
 			this.resetFocus();
 			Zotero_Tabs.close(tabID);
-			this._prevFocusCls = null;
+			this._prevFocusClass = null;
 		};
 
 		_handleRowDragStart = (event) => {
