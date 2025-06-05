@@ -655,10 +655,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 
 			// If saved search, publications, or trash, just re-run search
-			if (collectionTreeRow.isSearch()
-				|| collectionTreeRow.isPublications()
-				|| collectionTreeRow.isTrash()
-				|| hasQuickSearch) {
+			if (collectionTreeRow.isSearchMode()) {
 				await this.refresh();
 				refreshed = true;
 				madeChanges = true;

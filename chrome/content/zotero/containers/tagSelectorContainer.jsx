@@ -146,6 +146,12 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	
 		newState.annotationColors = await this.collectionTreeRow.getAnnotationColors();
 		newState.annotationAuthors = await this.collectionTreeRow.getAnnotationAuthors();
+		// Uncheck selected annotation color that do not have matching any annotations left
+		for (let color of [...this.selectedAnnotationColors]) {
+			if (!newState.annotationColors.has(color)) {
+				this.selectedAnnotationColors.delete(color);
+			}
+		}
 		this.setState(newState);
 	}
 	
