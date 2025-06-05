@@ -498,7 +498,7 @@ Zotero.CollectionTreeRow.prototype.getAnnotationAuthors = async function () {
 	let searchObject = await this.getSearchObject({ skipCache: true, skipAnnotationAuthors: true, skipAnnotationColors: false });
 	let searchResultIDs = await searchObject.search();
 	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
-	let authorIDs = new Set(annotations.map(annotation => annotation.createdByUserID));
+	let authorIDs = new Set(annotations.map(annotation => annotation.createdByUserID).filter(userID => userID !== null));
 	return authorIDs;
 };
 

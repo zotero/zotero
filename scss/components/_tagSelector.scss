@@ -196,7 +196,6 @@
 
 .horizontal-splitter {
 	padding: 4px 10px;
-	margin-top: -4px;
 	&:not(.disabled) {
 		cursor: row-resize;
 	}
@@ -251,7 +250,8 @@
 
 			.annotation-author-item {
 				border-radius: 5px;
-				padding: 2px 4px;
+				height: 20px;
+				padding: 1px 4px;
 				display: flex;
 				align-items: center;
 				cursor: pointer;

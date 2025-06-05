@@ -33,11 +33,18 @@ const { Button } = require('./button');
 const { CSSIcon } = require('./icons');
 const Search = require('./search');
 
+const annotationColorsHeight = 20;
+const minTagsListHeight = 150;
+const annotationsVerticalPadding = 14;
+const annotationsFirstRow = 22 + 6; // 22px for first row, 6px for margin between colors and authors
+const minAnnotationSectionHeight = annotationColorsHeight + annotationsFirstRow;
+const splitterHeight = 9;
+
 class TagSelector extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
-			annotationSectionHeight: 40,
+			annotationSectionHeight: minAnnotationSectionHeight,
 			isDragging: false,
 			dragStartY: 0,
 			dragStartHeight: 0
@@ -61,10 +68,13 @@ class TagSelector extends React.PureComponent {
 		if (!this.state.isDragging) return;
 		
 		let deltaY = e.clientY - this.state.dragStartY;
-		// always leave at least 40px for annotations and 150px for the tags
-		let newHeight = Math.max(40, Math.min(this.props.height - 150, this.state.dragStartHeight + deltaY));
 		
-		this.setState({ annotationSectionHeight: newHeight });
+		// Ensure min-heights for annotation section and tags list are respected
+		let newAnnotationSectionHeight = this.state.dragStartHeight + deltaY;
+		newAnnotationSectionHeight = Math.min(this.props.height - minTagsListHeight, newAnnotationSectionHeight);
+		newAnnotationSectionHeight = Math.max(minAnnotationSectionHeight, newAnnotationSectionHeight);
+		
+		this.setState({ annotationSectionHeight: newAnnotationSectionHeight });
 	};
 
 	handleSplitterMouseUp = () => {
@@ -73,40 +83,43 @@ class TagSelector extends React.PureComponent {
 		document.removeEventListener('mouseup', this.handleSplitterMouseUp);
 	};
 
-	render() {
-		const splitterHeight = 4;
-		const annotationColorsHeight = 28;
-
-		let hasAnnotationColors = this.props.annotationColors?.length > 0;
-		let hasAnnotationAuthors = this.props.annotationAuthors?.length > 0;
-		let hasAnnotationData = hasAnnotationColors || hasAnnotationAuthors;
+	componentDidUpdate() {
+		if (this.state.isDragging) return;
+		let newHeight = 0;
 		
-		let annotationSelectorHeight;
-		if (hasAnnotationAuthors) {
-			annotationSelectorHeight = this.state.annotationSectionHeight + splitterHeight;
+		if (this.props.annotationAuthors.length > 0) {
+			newHeight = Math.max(this.state.annotationSectionHeight, minAnnotationSectionHeight);
 		}
-		else if (hasAnnotationColors) {
-			annotationSelectorHeight = annotationColorsHeight + splitterHeight;
+		else if (this.props.annotationColors.length > 0) {
+			newHeight = annotationColorsHeight + annotationsVerticalPadding;
 		}
-		else {
-			annotationSelectorHeight = 0;
+		if (newHeight !== this.state.annotationSectionHeight) {
+			this.setState({ annotationSectionHeight: newHeight });
+		}
+	}
+
+	render() {
+		let annotationSelectorHeight = 0;
+		
+		if (this.props.annotationAuthors.length > 0 || this.props.annotationColors.length > 0) {
+			annotationSelectorHeight = this.state.annotationSectionHeight + splitterHeight + annotationsVerticalPadding;
 		}
 		
 		let availableTagsHeight = this.props.height - annotationSelectorHeight;
 
 		return (
 			<div className={`tag-selector ${this.state.isDragging ? 'splitter-drag' : ''}`}>
-				{hasAnnotationData && (
+				{annotationSelectorHeight > 0 && (
 					<>
 						<AnnotationFiltersSelector
 							ref={this.props.annotationFiltersSelectorRef}
 							annotationColors={this.props.annotationColors}
 							annotationAuthors={this.props.annotationAuthors}
 							onSelect={this.props.onSelect}
-							height={annotationSelectorHeight}
+							height={this.state.annotationSectionHeight}
 						/>
 						<div onMouseDown={this.handleSplitterMouseDown}
-							className={`horizontal-splitter ${this.state.isDragging ? 'dragging' : ''} ${hasAnnotationAuthors ? '' : 'disabled'}`}>
+							className={`horizontal-splitter ${this.state.isDragging ? 'dragging' : ''} ${this.props.annotationAuthors?.length > 0 ? '' : 'disabled'}`}>
 							<div className="grippy"></div>
 						</div>
 					</>
@@ -134,7 +147,7 @@ class TagSelector extends React.PureComponent {
 							onSearch={this.props.onSearch}
 							className="tag-selector-filter"
 							data-l10n-id="tagselector-search"
-							data-l10n-args={`{"annotationsFilter": "${hasAnnotationAuthors ? 'yes' : 'no'}"}`}
+							data-l10n-args={`{"annotationsFilter": "${this.props.annotationAuthors?.length > 0 ? 'yes' : 'no'}"}`}
 						/>
 						<Button
 							icon={<CSSIcon name="filter" className="icon-16" />}
