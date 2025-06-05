@@ -54,10 +54,10 @@ class AnnotationFiltersSelector extends React.PureComponent {
 				{this.props.annotationColors.map((colorObj, index) => (
 					<div key={index}
 						className={`color ${colorObj.selected ? 'selected' : ''} ${colorObj.enabled ? '' : ' disabled'}`}
-						style={{ backgroundColor: colorObj.color }}
 						title={Zotero.getString(`general.${colorObj.name}`)}
-						onClick={() => this._handleColorsClick(colorObj)}
-					/>
+						onClick={() => this._handleColorsClick(colorObj)}>
+						<span className="color-box" style={{ backgroundColor: colorObj.color }}/>
+					</div>
 				))}
 			</div>
 		);
@@ -79,8 +79,8 @@ class AnnotationFiltersSelector extends React.PureComponent {
 					return (
 						<div key={`author_${index}_${author.userID}`}
 							className={className}
-							onClick={() => this.props.onSelect(author)}
-						>
+							onClick={() => this.props.onSelect(author)}>
+							<span className="icon icon-css icon-user-8 icon-8"></span>
 							<span>{author.name}</span>
 						</div>
 					);

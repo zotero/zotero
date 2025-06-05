@@ -95,7 +95,7 @@ class TagSelector extends React.PureComponent {
 		let availableTagsHeight = this.props.height - annotationSelectorHeight;
 
 		return (
-			<div className="tag-selector">
+			<div className={`tag-selector ${this.state.isDragging ? 'splitter-drag' : ''}`}>
 				{hasAnnotationData && (
 					<>
 						<AnnotationFiltersSelector
@@ -105,10 +105,10 @@ class TagSelector extends React.PureComponent {
 							onSelect={this.props.onSelect}
 							height={annotationSelectorHeight}
 						/>
-						<div
-							className={`horizontal-splitter ${this.state.isDragging ? 'dragging' : ''} ${hasAnnotationAuthors ? '' : 'disabled'}`}
-							onMouseDown={this.handleSplitterMouseDown}
-						/>
+						<div onMouseDown={this.handleSplitterMouseDown}
+							className={`horizontal-splitter ${this.state.isDragging ? 'dragging' : ''} ${hasAnnotationAuthors ? '' : 'disabled'}`}>
+							<div className="grippy"></div>
+						</div>
 					</>
 				)}
 
