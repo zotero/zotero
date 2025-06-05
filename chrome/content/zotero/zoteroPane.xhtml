@@ -428,11 +428,6 @@
 							<menuitem id="menu_EditPreferencesItem"
 								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-settings"/>
 							<menuseparator/>
-							<menuitem id="menu_deeptutor"
-								label="DeepTutor"
-								tooltip="Deep Tutor"
-								oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
-							/>
 						</menupopup>
 					</menu>
 					
@@ -822,22 +817,6 @@
 		</html:div>
 		
 		<hbox class="titlebar-buttonbox titlebar-color">
-			<toolbarbutton class="titlebar-button deeptutorstatus"
-				oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
-				tooltip="Deep Tutor"
-				label="DeepTutor"
-				style="position: static; margin: 0 10px; -moz-appearance: none;"
-			/>
-			<toolbarbutton class="titlebar-button itempanestatus"
-				oncommand="ZoteroStandalone.onItemPaneOpen()"
-				tooltip="Item Pane Status"
-				label="ItemPane"
-			/>
-			<toolbarbutton class="titlebar-button deeptutortwostatus"
-				oncommand="ZoteroStandalone.onContextPaneOpen()"
-				tooltip="Context Pane"
-				label="Context"
-			/>
 			<toolbarbutton class="titlebar-button titlebar-min"
 				oncommand="window.minimize();"
 				data-l10n-id="browser-window-minimize-button"

@@ -503,31 +503,6 @@ const ZoteroStandalone = new function() {
 		ZoteroPane.updateLayoutConstraints();
 		Zotero.debug('Standalone: Layout constraints updated');
 	};
-
-	this.onDeepTutorPaneTwoOpen = function () {
-		var deepTutorPane = document.getElementById('deep-tutor-pane-two');
-		var deeptutorSplitter = document.getElementById('zotero-deeptutor-tabs-splitter');
-		Zotero.debug('Standalone2222: DeepTutor pane toggle triggered');
-		Zotero.debug('Standalone2222: Current collapsed state: ' + deepTutorPane.getAttribute('collapsed'));
-		
-		// Show
-		if (deepTutorPane.getAttribute('collapsed') == 'true') {
-			Zotero.debug('Standalone: Opening DeepTutor pane');
-			deeptutorSplitter.setAttribute('state', 'open');
-			deeptutorSplitter.setAttribute('collapse', 'before');
-			deepTutorPane.setAttribute('collapsed', false);
-		}	
-		// Hide
-		else {
-			Zotero.debug('Standalone: Closing DeepTutor pane');
-			deeptutorSplitter.setAttribute('state', 'collapsed');
-			deeptutorSplitter.setAttribute('collapse', 'before');
-			deepTutorPane.setAttribute('collapsed', true);
-		}
-		ZoteroPane.updateLayoutConstraints();
-		Zotero.debug('Standalone: Layout constraints updated');
-	}
-	
 	
 	this.onViewMenuItemClick = function (event) {
 		var menuitem = event.originalTarget;
