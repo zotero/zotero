@@ -57,6 +57,8 @@
 
 		_filterInput;
 
+		_prevFocusClass = null;
+
 		get visible() {
 			return ["showing", "open"].includes(this.state);
 		}
@@ -91,15 +93,21 @@
 
 		/**
 		 * Create the list of opened tabs in tabs menu.
+		 * @param {Object} [options] - Options for refreshing the list
+		 * @param {boolean} [options.ignorePreviousSelection=false] - If true, ignore the previous selection and select the currently selected tab
+		 * @returns {void}
 		 */
-		refreshList() {
+		refreshList(options = {}) {
 			if (!this.visible) {
 				return;
 			}
 			this._selectedIndex = null;
 
-			// Empty existing nodes
-			this._tabsList.replaceChildren();
+			let activeElement = document.activeElement;
+			if (this.contains(activeElement) && !activeElement.classList.contains(this._prevFocusClass)) {
+				this._prevFocusClass = null;
+			}
+
 			let selectedIndex = null;
 			let index = 0;
 			let validTabs = Zotero_Tabs._tabs.filter(
@@ -111,6 +119,17 @@
 				}
 			);
 			let tabsCount = validTabs.length;
+
+			let selectedTabID = Zotero_Tabs.selectedID;
+			if (!options.ignorePreviousSelection) {
+				let prevTabID = this._tabsList.querySelector(".selected")?.dataset.tabId;
+				if (prevTabID && validTabs.some(tab => tab.id == prevTabID)) {
+					selectedTabID = prevTabID;
+				}
+			}
+
+			// Empty existing nodes
+			this._tabsList.replaceChildren();
 
 			// If no tabs are open, show an empty row with a message
 			if (tabsCount === 0) {
@@ -132,7 +151,6 @@
 				return;
 			}
 
-			let selectedTabID = Zotero_Tabs.selectedID;
 			for (let tab of validTabs) {
 				// Top-level entry of the opened tabs array
 				let row = document.createElement('div');
@@ -219,6 +237,10 @@
 
 			if (selectedIndex !== null) {
 				this._selectRow(selectedIndex);
+
+				if (this._prevFocusClass) {
+					this._tabsList.querySelector(`.selected > .${this._prevFocusClass}`).focus();
+				}
 			}
 			else {
 				this.moveSelection("first");
@@ -333,11 +355,21 @@
 				row.querySelector(".close").setAttribute("tabindex", "0");
 				this._filterInput.setAttribute("aria-activedescendant", row.id);
 			}
-			this._focusInput();
+			this.resetFocus();
 		}
 
-
-		_focusInput() {
+		resetFocus() {
+			let row = this._tabsList.querySelector(".selected");
+			if (this._prevFocusClass) {
+				let focusTarget = row.querySelector(`.${this._prevFocusClass}`);
+				if (focusTarget && !focusTarget.hidden) {
+					focusTarget.focus();
+				}
+				else {
+					this._filterInput.focus();
+				}
+				return;
+			}
 			if (document.activeElement == this._filterInput) {
 				return;
 			}
@@ -347,7 +379,7 @@
 		_handleShowing = (event) => {
 			if (event.originalTarget !== this) return;
 
-			this.refreshList();
+			this.refreshList({ ignorePreviousSelection: true });
 
 			// Make sure that if the menu is very long, there is a small
 			// gap left between the top/bottom of the menu and the edge of the screen
@@ -398,7 +430,7 @@
 		};
 		
 		_handleShown = () => {
-			this._focusInput();
+			this.resetFocus();
 		};
 
 		_handleHiding = (event) => {
@@ -411,6 +443,9 @@
 
 			this._filterInput.removeEventListener("input", this._handleFilterInput);
 			this._filterInput.removeEventListener("blur", this._handleFilterBlur);
+
+			this._prevFocusClass = null;
+			this._selectedIndex = null;
 		};
 
 		/**
@@ -426,6 +461,7 @@
 		 * - Home/PageUp focuses the filter field
 		 * - End/PageDown focues the last tab title
 		 * - CMD-f will focus the input field
+		 * - Space on the close button will close the tab and select the next tab's close button
 		 */
 		_handleKeydown = (event) => {
 			if (["Home", "PageUp"].includes(event.key)) {
@@ -458,6 +494,16 @@
 				event.preventDefault();
 				event.stopPropagation();
 			}
+			else if (event.key === " ") {
+				if (document.activeElement.classList.contains("close")) {
+					event.preventDefault();
+					event.stopPropagation();
+					// Move selection to the next tab to make sure the next tab's close button is focused
+					this.moveSelection("next");
+					this._prevFocusClass = "close";
+					this._handleCloseClick(event);
+				}
+			}
 		};
 
 		/**
@@ -481,7 +527,7 @@
 				// If not title or close button, prevent the blur
 				event.preventDefault();
 				event.stopPropagation();
-				this._focusInput();
+				this.resetFocus();
 			});
 		};
 
@@ -504,8 +550,9 @@
 			if (!tabID) {
 				return;
 			}
+			this.resetFocus();
 			Zotero_Tabs.close(tabID);
-			this._focusInput();
+			this._prevFocusClass = null;
 		};
 
 		_handleRowDragStart = (event) => {
@@ -568,7 +615,7 @@
 			if (document.getElementById("zotero-tabs-menu-dragged")) {
 				this.refreshList();
 			}
-			this._focusInput();
+			this.resetFocus();
 		};
 	}
 

@@ -144,9 +144,6 @@ var Zotero_Tabs = new function () {
 		let panel = this.tabsMenuPanel;
 		if (panel.visible) {
 			panel.refreshList();
-			if (document.activeElement.id !== "zotero-tabs-menu-filter") {
-				panel.focusEntry();
-			}
 		}
 	};
 
@@ -346,7 +343,15 @@ var Zotero_Tabs = new function () {
 				continue;
 			}
 			if (tab.id == this._selectedID) {
-				this.select(this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+				let selectOptions = {};
+				// If the tabs menu is visible, let the tab bar handle focus
+				if (this.tabsMenuPanel.visible) {
+					selectOptions.keepTabFocused = true;
+				}
+				this.select(
+					this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id,
+					false, selectOptions
+				);
 			}
 			if (tab.id == this._prevSelectedID) {
 				this._prevSelectedID = null;
@@ -453,10 +458,13 @@ var Zotero_Tabs = new function () {
 			// Small delay to make sure the focus does not remain on the actual
 			// tab after mouse click
 			setTimeout(() => {
-				if (tab.lastFocusedElement) {
+				if (this.tabsMenuPanel.visible) {
+					this.tabsMenuPanel.resetFocus();
+				}
+				else if (tab.lastFocusedElement) {
 					tab.lastFocusedElement.focus();
 				}
-				if (document.activeElement !== tab.lastFocusedElement) {
+				else if (document.activeElement !== tab.lastFocusedElement) {
 					ZoteroPane_Local.itemsView.focus();
 				}
 				tab.lastFocusedElement = null;
