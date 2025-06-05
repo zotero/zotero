@@ -1673,6 +1673,31 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(pdfAttachment2.parentItemID, parentItem.id);
 			assert.equal(pdfAttachment2.getField('title'), 'test');
 		});
+
+		it("should select attachment after a file is dragged onto a top-level item", async function () {
+			let item = await createDataObject('item', { title: "Top-level Item" });
+			// a file is dropped onto an existing item 
+			let itemIndex = zp.itemsView.getRowIndexByID(item.id);
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+
+			drop(itemIndex, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			});
+			await waitForNotifierEvent('add', 'item');
+			// the top-level item should be expanded
+			assert.isTrue(zp.itemsView.isContainerOpen(itemIndex));
+			// the child attachment that was added should be selected
+			assert.equal(zp.itemsView.selection.focused, itemIndex + 1);
+		});
 	});
 	
 	

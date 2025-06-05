@@ -4546,7 +4546,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
+	this.addAttachmentFromURI = async function (link, itemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -4556,12 +4556,13 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/attachLink.xhtml',
 			'zotero-attach-uri-dialog', 'centerscreen, modal', io);
 		if (!io.out) return;
-		return Zotero.Attachments.linkFromURL({
+		await Zotero.Attachments.linkFromURL({
 			url: io.out.link,
 			parentItemID: itemID,
 			title: io.out.title
 		});
-	});
+		await this.selectItem(item.id);
+	};
 	
 	/**
 	 * @param {Boolean} [link]
@@ -4681,6 +4682,10 @@ var ZoteroPane = new function()
 			addedItems.push(item);
 		}
 		
+		// Select added child attachments
+		if (parentItemID && addedItems.length) {
+			await this.selectItems(addedItems.map(item => item.id));
+		}
 		// Automatically retrieve metadata for top-level PDFs
 		if (!parentItemID) {
 			Zotero.RecognizeDocument.autoRecognizeItems(addedItems);

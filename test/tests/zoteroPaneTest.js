@@ -1693,6 +1693,19 @@ describe("ZoteroPane", function() {
 			assert.equal(epubAttachment.getField('title'), Zotero.getString('file-type-ebook'));
 		});
 
+		it("should select added file attachment", async function () {
+			let parentItem = await createDataObject('item');
+			
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let [pdfAttachment1] = await zp.addAttachmentFromDialog(false, parentItem.id, [file.path]);
+
+			let parentItemIndex = zp.itemsView.getRowIndexByID(parentItem.id);
+			assert.equal(zp.itemsView.selection.focused, parentItemIndex + 1);
+			let selected = zp.itemsView.getSelectedItems()[0];
+			assert.equal(selected.id, pdfAttachment1.id);
+		});
+
 		describe("Linked file renaming", function () {
 			before(() => {
 				Zotero.Prefs.set('autoRenameFiles.linked', true);

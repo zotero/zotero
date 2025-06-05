@@ -2680,6 +2680,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 						addedItems.push(item);
 					}
 				}
+				// Select children created after drag-drop onto a top-level item
+				if (parentItemID && addedItems.length) {
+					await this.selectItems(addedItems.map(item => item.id));
+				}
 			}
 			finally {
 				await Zotero.Notifier.commit(notifierQueue);
