@@ -37,6 +37,7 @@ const styles = {
     lineHeight: '135%',
     color: '#222',
     marginBottom: '0.625rem',
+    marginLeft: '0.25rem',
   },
   input: {
     width: '100%',
@@ -291,7 +292,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
             <input
               style={styles.input}
               type="password"
-              placeholder="At least 8 characters"
+              placeholder="At least 8 characters to Your password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               disabled={isLoading}

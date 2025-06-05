@@ -6,6 +6,10 @@ import {
 } from './api/libs/api';
 
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/Delete.png';
+const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/LITE.png';
+const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/STANDARD.png';
+const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/ADVANCED.png';
+const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/DRAG.png';
 
 // Session Status Enum
 const SessionStatus = {
@@ -74,7 +78,6 @@ const styles = {
   },
   modelSection: {
     width: '100%',
-    maxWidth: '21.875rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
@@ -173,7 +176,6 @@ const styles = {
   modelTypeRow: {
     display: 'flex',
     flexDirection: 'row',
-    gap: '0.5rem',
     width: '100%',
     marginBottom: '1.25rem',
     justifyContent: 'space-between',
@@ -182,7 +184,6 @@ const styles = {
     flex: '1 1 0',
     height: '3rem',
     borderRadius: '0.625rem',
-    padding: '0.75rem 0.9375rem',
     border: 'none',
     fontWeight: 400,
     fontSize: '1rem',
@@ -191,13 +192,16 @@ const styles = {
     verticalAlign: 'middle',
     cursor: 'pointer',
     background: PEARL,
-    color: '#292929',
+    color: '#757575',
     transition: 'background 0.2s, color 0.2s',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.3125rem',
     minWidth: 0,
+    width: '8.125rem',
+    maxWidth: '10rem',
+    minPadding: '0.75rem 0.9375rem',
   },
   modelTypeButtonSelected: {
     background: AQUA,
@@ -938,7 +942,7 @@ function ModelSelection({ onSubmit }) {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <span style={{fontSize: '1.2em', opacity: 0.7}}>📄</span>
+          <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
           Drag an Item Here
         </div>
       </div>
@@ -952,7 +956,7 @@ function ModelSelection({ onSubmit }) {
             }}
             onClick={() => handleTypeSelection('lite')}
           >
-            <span>🚫</span>
+            <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
             LITE
           </button>
           <button
@@ -962,7 +966,7 @@ function ModelSelection({ onSubmit }) {
             }}
             onClick={() => handleTypeSelection('normal')}
           >
-            <span>➕</span>
+            <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
             STANDARD
           </button>
           <button
@@ -972,7 +976,7 @@ function ModelSelection({ onSubmit }) {
             }}
             onClick={() => handleTypeSelection('advanced')}
           >
-            <span>⚡</span>
+            <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
             ADVANCED
           </button>
         </div>

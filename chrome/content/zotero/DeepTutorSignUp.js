@@ -151,7 +151,7 @@ const styles = {
     width: '100%',
   },
   successMessage: {
-    color: '#28a745',
+    color: '#dc3545',
     fontSize: '0.875rem',
     marginTop: '0.625rem',
     textAlign: 'center',

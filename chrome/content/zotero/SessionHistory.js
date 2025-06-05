@@ -65,7 +65,6 @@ const sessionListStyle = {
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.625rem',
   alignSelf: 'flex-start',
   marginLeft: '5%',
 };
@@ -73,7 +72,7 @@ const sessionListStyle = {
 const sessionButtonStyle = {
   width: '100%',
   fontFamily: 'Roboto, sans-serif',
-  padding: '0',
+  padding: '0.625rem',
   margin: '0.25rem 0',
   background: '#F2F2F2',
   border: 'none',
@@ -111,6 +110,7 @@ const errorStyle = {
 
 function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true }) {
   const [search, setSearch] = useState('');
+  const [hoveredButton, setHoveredButton] = useState(null);
 
   // Filter and sort sessions
   const filteredSessions = sessions
@@ -156,8 +156,13 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
         {filteredSessions.map(session => (
           <button
             key={session.id || session.sessionName}
-            style={sessionButtonStyle}
+            style={{
+              ...sessionButtonStyle,
+              background: hoveredButton === session.id ? '#D9D9D9' : '#F2F2F2'
+            }}
             onClick={() => onSessionSelect && onSessionSelect(session.sessionName)}
+            onMouseEnter={() => setHoveredButton(session.id)}
+            onMouseLeave={() => setHoveredButton(null)}
           >
             {session.sessionName || 'Unnamed Session'}
           </button>
