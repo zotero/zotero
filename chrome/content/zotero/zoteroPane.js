@@ -4546,7 +4546,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
+	this.addAttachmentFromURI = async function (link, itemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -4556,15 +4556,13 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/attachLink.xhtml',
 			'zotero-attach-uri-dialog', 'centerscreen, modal', io);
 		if (!io.out) return;
-		Zotero.Attachments.linkFromURL({
+		await Zotero.Attachments.linkFromURL({
 			url: io.out.link,
 			parentItemID: itemID,
 			title: io.out.title
-		})
-		.then((item) => {
-			this.selectItem(item.id);
 		});
-	});
+		await this.selectItem(item.id);
+	};
 	
 	/**
 	 * @param {Boolean} [link]
