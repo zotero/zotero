@@ -1106,7 +1106,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 								alignItems: 'center',
 								marginBottom: '2rem',
 								minHeight: '4rem',
-								padding: '0 1rem',
 							}}>
 								<div style={{
 									position: 'absolute',
@@ -1130,7 +1129,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										padding: '0.25rem',
 										fontSize: '1.5rem',
 										color: '#666',
 										width: '2rem',
@@ -1182,7 +1180,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 								alignItems: 'center',
 								marginBottom: '1.25rem',
 								minHeight: '4rem',
-								padding: '0 1rem',
 							}}>
 								<div style={{
 									position: 'absolute',
@@ -1206,7 +1203,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										padding: '0.25rem',
 										fontSize: '1.5rem',
 										color: '#666',
 										width: '2rem',
@@ -1259,7 +1255,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 								alignItems: 'center',
 								marginBottom: '1.25rem',
 								minHeight: '4rem',
-								padding: '0 1rem',
 							}}>
 								<div style={{
 									position: 'absolute',
@@ -1283,7 +1278,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										padding: '0.25rem',
 										fontSize: '1.5rem',
 										color: '#666',
 										width: '2rem',
@@ -1338,7 +1332,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 								alignItems: 'center',
 								marginBottom: '1.5rem',
 								minHeight: '4rem',
-								padding: '0 1rem',
 							}}>
 								<div style={{
 									position: 'absolute',
@@ -1362,7 +1355,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										padding: '0.25rem',
 										fontSize: '1.5rem',
 										color: '#666',
 										width: '2rem',
@@ -1500,7 +1492,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 								alignItems: 'center',
 								marginBottom: '2rem',
 								minHeight: '4rem',
-								padding: '0 1rem',
 								position: 'relative',
 							}}>
 								<div style={{
@@ -1526,7 +1517,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										padding: '0.25rem',
 										fontSize: '1.5rem',
 										color: '#666',
 										width: '2rem',

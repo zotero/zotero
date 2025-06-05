@@ -127,7 +127,7 @@ const styles = {
     borderRadius: '0.625rem',
     width: '100%',
     maxWidth: '21.625rem',
-    height: '3rem',
+    minHeight: '3rem',
     padding: '0.625rem 1.25rem',
     cursor: 'pointer',
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',

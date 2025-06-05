@@ -257,13 +257,13 @@ const styles = {
         lineHeight: '1.5',
         cursor: 'pointer',
         boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
-        transition: 'background 0.2s, border 0.2s',
         margin: '0.25rem 0',
         textAlign: 'left',
         fontFamily: 'Roboto, sans-serif',
         height: 'auto',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
+        transition: 'background 0.2s',
     },
     sessionTabBar: {
         height: '1.8125rem',
@@ -340,6 +340,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [showSessionPopup, setShowSessionPopup] = useState(false);
     const MAX_VISIBLE_SESSIONS = 2;
     const chatLogRef = useRef(null);
+    const [hoveredQuestion, setHoveredQuestion] = useState(null);
 
     // Load recent sessions from preferences on component mount
     useEffect(() => {
@@ -1086,7 +1087,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         };
         
         return (
-            <div key={index} style={messageStyle}>
+            <div key={message.id || index} style={styles.messageStyle}>
                 <div style={{
                     ...styles.messageBubble,
                     ...(isUser ? styles.userMessage : styles.botMessage),
@@ -1185,8 +1186,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         {message.followUpQuestions.map((question, qIndex) => (
                             <button
                                 key={qIndex}
-                                style={styles.questionButton}
+                                style={{
+                                    ...styles.questionButton,
+                                    background: hoveredQuestion === qIndex ? '#D9D9D9' : '#FFFFFF'
+                                }}
                                 onClick={() => handleQuestionClick(question)}
+                                onMouseEnter={() => setHoveredQuestion(qIndex)}
+                                onMouseLeave={() => setHoveredQuestion(null)}
                             >
                                 {question}
                             </button>
