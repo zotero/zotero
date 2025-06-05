@@ -325,7 +325,7 @@ const styles = {
     },
 };
 
-const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Send.png';
+const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
 
 const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [messages, setMessages] = useState([]);

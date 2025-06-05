@@ -84,6 +84,8 @@ const sessionButtonStyle = {
   letterSpacing: '0%',
   color: '#292929',
   cursor: 'pointer',
+  whiteSpace: 'normal',
+  wordWrap: 'break-word',
 };
 
 const loadingStyle = {

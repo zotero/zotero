@@ -5,11 +5,12 @@ import {
   createSession 
 } from './api/libs/api';
 
-const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/Delete.png';
-const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/LITE.png';
-const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/STANDARD.png';
-const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/ADVANCED.png';
-const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/DRAG.png';
+const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
+const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_LITE.svg';
+const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_STANDARD.svg';
+const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_ADVANCED.svg';
+const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DRAG.svg';
+const RegisSearchPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_SEARCH.svg';
 
 // Session Status Enum
 const SessionStatus = {
@@ -42,19 +43,16 @@ const styles = {
     maxHeight: '80vh',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
-    borderRadius: '0.625rem',
-    boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.08)',
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflowY: 'auto',
     overflowX: 'hidden',
     position: 'relative',
     boxSizing: 'border-box',
-    padding: '1.25rem',
   },
   section: {
     width: '100%',
-    maxWidth: '21.875rem',
+    maxWidth: '26rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
@@ -62,7 +60,7 @@ const styles = {
   },
   nameSection: {
     width: '100%',
-    maxWidth: '21.875rem',
+    maxWidth: '26rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
@@ -70,7 +68,7 @@ const styles = {
   },
   contextSection: {
     width: '100%',
-    maxWidth: '21.875rem',
+    maxWidth: '26rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
@@ -101,6 +99,7 @@ const styles = {
     background: PEARL,
     fontSize: '0.875rem',
     outline: 'none',
+    boxSizing: 'border-box',
   },
   searchArea: {
     width: '100%',
@@ -114,6 +113,7 @@ const styles = {
     fontSize: '0.875rem',
     color: '#292929',
     gap: '0.625rem',
+    boxSizing: 'border-box',
   },
   searchIcon: {
     width: '1.5rem',
@@ -168,6 +168,7 @@ const styles = {
     marginBottom: '1.875rem',
     flexDirection: 'column',
     transition: 'border-color 0.2s, background 0.2s',
+    boxSizing: 'border-box',
   },
   dragAreaActive: {
     borderColor: SKY,
@@ -214,7 +215,7 @@ const styles = {
   },
   createButton: {
     width: '100%',
-    maxWidth: '90%',
+    minHeight: '2.4375rem',
     margin: '2rem auto 0 auto',
     padding: '0.875rem 0',
     background: SKY,
@@ -902,10 +903,7 @@ function ModelSelection({ onSubmit }) {
 
         <div style={styles.searchContainer}>
           <div style={styles.searchArea}>
-            <svg style={styles.searchIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="11" cy="11" r="7" stroke="#0687E5" strokeWidth="2" />
-              <line x1="16.2" y1="16.2" x2="20" y2="20" stroke="#0687E5" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+            <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
             <input
               style={styles.searchInput}
               type="text"

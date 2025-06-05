@@ -41,20 +41,20 @@ const styles = {
   },
   folderBg: {
     position: 'absolute',
-    width: '25%',
+    width: '18%',
     height: 'auto',
-    bottom: '30%',
-    left: '10%',
-    opacity: 0.2,
+    bottom: '25%',
+    left: '31%',
+    opacity: 0.8,
     zIndex: 0,
   },
   pageBg: {
     position: 'absolute',
     width: '15%',
     height: 'auto',
-    top: '40%',
+    top: '35%',
     right: '25%',
-    opacity: 0.2,
+    opacity: 0.8,
     zIndex: 0,
   },
   contentWrapper: {
@@ -140,8 +140,8 @@ const styles = {
   },
 };
 
-const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/Folder.png';
-const PageImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/Page.png';
+const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_FOLDER.svg';
+const PageImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_PAGE.svg';
 
 export default function DeepTutorWelcomePane({ onWelcomeSignIn }) {
   return (

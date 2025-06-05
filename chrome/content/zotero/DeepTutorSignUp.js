@@ -17,7 +17,7 @@ const styles = {
   },
   form: {
     position: 'relative',
-    width: '90%',
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -54,6 +54,7 @@ const styles = {
     fontSize: '1rem',
     fontFamily: 'Roboto, sans-serif',
     outline: 'none',
+    boxSizing: 'border-box',
   },
   signUpButton: {
     width: '100%',
