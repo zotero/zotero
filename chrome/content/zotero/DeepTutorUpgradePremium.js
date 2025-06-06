@@ -60,7 +60,6 @@ const styles = {
     fontSize: '0.875rem',
     lineHeight: '1.1875rem',
     margin: 0,
-    paddingBottom: '0.5rem',
   },
   featureList: {
     width: '100%',
@@ -96,7 +95,6 @@ const styles = {
     padding: '0.75rem 1rem',
     minHeight: '3rem',
     width: '90%',
-    margin: '1.125rem auto',
     cursor: 'pointer',
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',

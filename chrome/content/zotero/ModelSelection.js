@@ -202,6 +202,7 @@ const styles = {
     maxWidth: '10rem',
     minPadding: '0.75rem 0.9375rem',
     minHeight: '3rem',
+    gap: '0.1rem',
   },
   modelTypeButtonSelected: {
     background: '#D9D9D9',
@@ -249,6 +250,7 @@ const styles = {
     color: '#000000',
     height: 'auto',
     width: '100%',
+    fontWeight: 'bold',
   },
   modelIcon: {
     width: '1rem',

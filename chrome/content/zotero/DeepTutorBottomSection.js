@@ -71,6 +71,7 @@ const styles = {
         alignItems: 'center',
         gap: '0.5rem',
         transition: 'background-color 0.2s ease',
+        textDecoration: 'underline',
         ':hover': {
             background: '#D9D9D9'
         }
@@ -84,13 +85,13 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '6.625rem',
-        height: '2.4375rem',
+        width: '7rem',
+        height: '2.65rem',
         padding: '0.625rem 1.25rem',
         background: '#0687E5',
         border: 'none',
         borderRadius: '0.625rem',
-        fontWeight: 600,
+        fontWeight: 500,
         fontSize: '1rem',
         color: '#ffffff',
         cursor: 'pointer',
@@ -217,8 +218,8 @@ class DeepTutorBottomSection extends React.Component {
                 <div style={styles.bottomLeft}>
                     <div style={styles.feedbackBox}>
                         <button style={styles.textButton}>
-                            <img src={this.props.feedIconPath} alt="Feedback" style={styles.buttonIcon} />
-                            Feedback
+                            <img src={this.props.feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
+                            Give Us Feedback
                         </button>
                     </div>
                     <div style={styles.buttonsBox}>

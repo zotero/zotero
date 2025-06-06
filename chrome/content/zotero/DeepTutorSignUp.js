@@ -64,7 +64,7 @@ const styles = {
     background: SKY,
     color: '#fff',
     fontWeight: 700,
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     border: 'none',
     cursor: 'pointer',
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
@@ -83,7 +83,7 @@ const styles = {
   },
   divider: {
     flex: 1,
-    height: '0.0625rem',
+    height: '0.15rem',
     background: PEARL,
     border: 'none',
   },
@@ -103,7 +103,7 @@ const styles = {
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
-    border: `1px solid ${PEARL}`,
+    border: `2px solid ${PEARL}`,
     padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',
@@ -129,13 +129,13 @@ const styles = {
   bottomText: {
     fontWeight: 500,
     fontSize: '0.875rem',
-    color: '#888',
+    color: '#757575',
   },
   signInLink: {
     fontWeight: 500,
     fontSize: '0.875rem',
     textDecoration: 'underline',
-    color: SKY,
+    color: '#757575',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
@@ -428,7 +428,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing up...' : 'Sign Up Free'}
+            {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
           
           {error && <div style={styles.errorMessage}>{error}</div>}
@@ -461,7 +461,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             onClick={onSignUpSignIn}
             disabled={isLoading}
           >
-            Sign in
+            Sign in here
           </button>
         </div>
       </form>
