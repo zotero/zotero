@@ -944,6 +944,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	handleActivate = (event, indices) => {
+		if (!indices.length) return;
 		// Ignore double-clicks in duplicates view on everything except attachments
 		let items = indices.map(index => this.getRow(index).ref);
 		if (event.button == 0 && this.collectionTreeRow.isDuplicates()) {
@@ -1116,6 +1117,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 					label: Zotero.getString('pane.items.title'),
 				}
 			);
+		}
+		// Close DeepTutor pane when activating items
+		Zotero.debug('06062025: handleActivate() is called!!!!!');
+		let mainWindow = Zotero.getMainWindow();
+		if (mainWindow && mainWindow.ZoteroStandalone) {
+			Zotero.debug('06062025: ZoteroStandalone is defined and used!!!!!');
+			mainWindow.ZoteroStandalone.closeDeepTutorPane();
 		}
 		Zotero.debug(`itemTree.render(). Displaying ${showMessage ? "Item Pane Message" : "Item Tree"}`);
 
