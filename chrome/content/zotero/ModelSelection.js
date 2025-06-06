@@ -5,11 +5,12 @@ import {
   createSession 
 } from './api/libs/api';
 
-const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/Delete.png';
-const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/LITE.png';
-const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/STANDARD.png';
-const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/ADVANCED.png';
-const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/DRAG.png';
+const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
+const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_LITE.svg';
+const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_STANDARD.svg';
+const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_ADVANCED.svg';
+const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DRAG.svg';
+const RegisSearchPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_SEARCH.svg';
 
 // Session Status Enum
 const SessionStatus = {
@@ -38,23 +39,19 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    height: '100%',
-    maxHeight: '80vh',
+    maxHeight: '100%',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
-    borderRadius: '0.625rem',
-    boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.08)',
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflowY: 'auto',
     overflowX: 'hidden',
     position: 'relative',
     boxSizing: 'border-box',
-    padding: '1.25rem',
   },
   section: {
     width: '100%',
-    maxWidth: '21.875rem',
+    maxWidth: '26rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
@@ -62,7 +59,7 @@ const styles = {
   },
   nameSection: {
     width: '100%',
-    maxWidth: '21.875rem',
+    maxWidth: '26rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
@@ -70,11 +67,11 @@ const styles = {
   },
   contextSection: {
     width: '100%',
-    maxWidth: '21.875rem',
+    maxWidth: '26rem',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    marginBottom: '1.25rem',
+    marginBottom: '1.875rem',
   },
   modelSection: {
     width: '100%',
@@ -101,6 +98,7 @@ const styles = {
     background: PEARL,
     fontSize: '0.875rem',
     outline: 'none',
+    boxSizing: 'border-box',
   },
   searchArea: {
     width: '100%',
@@ -113,12 +111,12 @@ const styles = {
     margin: '0.25rem 0',
     fontSize: '0.875rem',
     color: '#292929',
-    gap: '0.625rem',
+    boxSizing: 'border-box',
   },
   searchIcon: {
-    width: '1.5rem',
-    height: '1.5rem',
-    opacity: 0.6,
+    width: '1rem',
+    height: '1rem',
+    opacity: 0.7,
   },
   searchInput: {
     flex: 1,
@@ -165,9 +163,10 @@ const styles = {
     justifyContent: 'center',
     color: '#888',
     fontSize: '1rem',
-    marginBottom: '1.875rem',
     flexDirection: 'column',
     transition: 'border-color 0.2s, background 0.2s',
+    boxSizing: 'border-box',
+    gap: '0.5rem',
   },
   dragAreaActive: {
     borderColor: SKY,
@@ -179,6 +178,7 @@ const styles = {
     width: '100%',
     marginBottom: '1.25rem',
     justifyContent: 'space-between',
+    gap: '0.25rem',
   },
   modelTypeButton: {
     flex: '1 1 0',
@@ -191,30 +191,32 @@ const styles = {
     letterSpacing: '0%',
     verticalAlign: 'middle',
     cursor: 'pointer',
-    background: PEARL,
+    background: '#F8F6F7',
     color: '#757575',
     transition: 'background 0.2s, color 0.2s',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '0.3125rem',
     minWidth: 0,
     width: '8.125rem',
     maxWidth: '10rem',
     minPadding: '0.75rem 0.9375rem',
+    minHeight: '3rem',
+    gap: '0.1rem',
   },
   modelTypeButtonSelected: {
-    background: AQUA,
+    background: '#D9D9D9',
     color: '#292929',
     fontWeight: 400,
     fontSize: '1rem',
     lineHeight: '135%',
     letterSpacing: '0%',
+    minHeight: '3rem',
     verticalAlign: 'middle',
   },
   createButton: {
     width: '100%',
-    maxWidth: '90%',
+    minHeight: '2.4375rem',
     margin: '2rem auto 0 auto',
     padding: '0.875rem 0',
     background: SKY,
@@ -248,6 +250,7 @@ const styles = {
     color: '#000000',
     height: 'auto',
     width: '100%',
+    fontWeight: 'bold',
   },
   modelIcon: {
     width: '1rem',
@@ -269,6 +272,7 @@ const styles = {
   searchContainer: {
     position: 'relative',
     width: '100%',
+    padding: '0',
     marginBottom: '0.625rem',
   },
   searchPopup: {
@@ -394,6 +398,8 @@ const styles = {
   fileListContainer: {
     width: '100%',
     marginBottom: '0.3125rem',
+    maxHeight: '7.5rem',
+    overflowY: 'auto',
   },
 };
 
@@ -867,7 +873,7 @@ function ModelSelection({ onSubmit }) {
   return (
     <div style={styles.container}>
       <div style={styles.nameSection}>
-        <label style={styles.label}>Name Your Session</label>
+        <label style={styles.label}>Session Name</label>
         <input
           type="text"
           value={modelName}
@@ -901,17 +907,20 @@ function ModelSelection({ onSubmit }) {
         </div>
 
         <div style={styles.searchContainer}>
-          <div style={styles.searchArea}>
-            <svg style={styles.searchIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="11" cy="11" r="7" stroke="#0687E5" strokeWidth="2" />
-              <line x1="16.2" y1="16.2" x2="20" y2="20" stroke="#0687E5" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+          <div 
+            style={styles.searchArea}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => e.preventDefault()}
+          >
+            <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
             <input
               style={styles.searchInput}
               type="text"
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
               placeholder="Search for an Item"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => e.preventDefault()}
             />
           </div>
           {showSearchPopup && (

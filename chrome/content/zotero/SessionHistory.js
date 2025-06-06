@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 const containerStyle = {
   width: '100%',
-  minHeight: '80%',
+  minHeight: '100%',
   padding: '0',
   gap: '0.25rem',
   borderWidth: '1px',
@@ -32,14 +32,14 @@ const searchSectionStyle = {
 
 const sessionListTitleStyle = {
   width: '90%',
-  fontSize: '0.875rem',
-  fontWeight: 400,
+  fontSize: '1rem',
+  fontWeight: 500,
   lineHeight: '135%',
   letterSpacing: '0%',
   verticalAlign: 'middle',
   color: '#757575',
   padding: '0',
-  margin: '0.25rem 0',
+  margin: '0.30rem 0',
   marginBottom: '0.625rem',
   alignSelf: 'flex-start',
   marginLeft: '5%',
@@ -72,8 +72,8 @@ const sessionListStyle = {
 const sessionButtonStyle = {
   width: '100%',
   fontFamily: 'Roboto, sans-serif',
-  padding: '0.625rem',
   margin: '0.25rem 0',
+  padding: '0.75rem 0',
   background: '#F2F2F2',
   border: 'none',
   borderRadius: '0.375rem',
@@ -84,6 +84,8 @@ const sessionButtonStyle = {
   letterSpacing: '0%',
   color: '#292929',
   cursor: 'pointer',
+  whiteSpace: 'normal',
+  wordWrap: 'break-word',
 };
 
 const loadingStyle = {

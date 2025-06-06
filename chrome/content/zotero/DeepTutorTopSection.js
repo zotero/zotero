@@ -25,7 +25,7 @@ const styles = {
         boxSizing: 'border-box',
     },
     logo: {
-        height: '1.75rem',
+        height: '2rem',
         width: 'auto',
         display: 'block',
     },
@@ -39,7 +39,7 @@ const styles = {
     iconButton: {
         width: '2.5rem',
         height: '2.5rem',
-        background: '#F8F6F7',
+        background: '#F2F2F2',
         border: 'none',
         borderRadius: '0.375rem',
         cursor: 'pointer',

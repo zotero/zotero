@@ -319,19 +319,15 @@ class DeepTutorMessage {
 	}
 }
 
-const logoPath = 'chrome://zotero/content/DeepTutorMaterials/DPTLogo.png';
-const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/History.png';
-const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Plus.png';
-const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Feedback.png';
-const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Person.png';
-const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/Search.png';
-
-const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/LITE.png';
-const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/BASIC.png';
-const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/ADVANCED.png';
-const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/DRAG.png';
-const SubscriptionConfirmBookPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SubscriptionConfirmBook.png';
-const SubscriptionManageMarkPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SubscriptionManageMark.png';
+const logoPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_DPTLOGO.svg';
+const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY.svg';
+const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS.svg';
+const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
+const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE.svg';
+const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_SEARCH.svg';
+const SubscriptionConfirmBookPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SUB_SUCCESS.svg';
+const SubscriptionManageMarkPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SUB_MANAGEMENT.svg';
+const PopupClosePath = 'chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg';
 
 const styles = {
 	container: {
@@ -559,7 +555,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showUpgradePopup: false,
 			showModelSelectionPopup: false,
 			collapsed: false,
-			showSearch: true,
+			showSearch: false,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false,
 			// Auth state
@@ -1100,17 +1096,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 							padding: '1.25rem',
 							overflow: 'auto'
 						}}>
+							{/* Upgrade Premium Popup header */}
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								width: '100%',
 								alignItems: 'center',
 								marginBottom: '2rem',
-								minHeight: '4rem',
+								minHeight: '1rem',
+								position: 'relative',
 							}}>
 								<div style={{
-									position: 'absolute',
-									left: '50%',
-									transform: 'translateX(-50%)',
+									width: '100%',
+									textAlign: 'center',
 									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
 									WebkitBackgroundClip: 'text',
 									WebkitTextFillColor: 'transparent',
@@ -1129,18 +1126,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										fontSize: '1.5rem',
-										color: '#666',
-										width: '2rem',
-										height: '2rem',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										borderRadius: '50%',
-										marginLeft: 'auto',
 									}}
 								>
-									✕
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 								</button>
 							</div>
 							<DeepTutorUpgradePremium onUpgradeSuccess={() => {
@@ -1174,17 +1171,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 							padding: '1.25rem',
 							overflow: 'auto'
 						}}>
+							{/* Subscription Confirm Popup header */}
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								width: '100%',
 								alignItems: 'center',
 								marginBottom: '1.25rem',
-								minHeight: '4rem',
+								minHeight: '1rem',
+								position: 'relative',
 							}}>
 								<div style={{
-									position: 'absolute',
-									left: '50%',
-									transform: 'translateX(-50%)',
+									width: '100%',
+									textAlign: 'center',
 									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
 									WebkitBackgroundClip: 'text',
 									WebkitTextFillColor: 'transparent',
@@ -1192,7 +1190,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									color: '#0687E5',
 									fontWeight: 700,
 									fontSize: '1rem',
-									lineHeight: '100%',
+									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
 									Upgrade Your Plan
@@ -1203,18 +1201,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										fontSize: '1.5rem',
-										color: '#666',
-										width: '2rem',
-										height: '2rem',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										borderRadius: '50%',
-										marginLeft: 'auto',
 									}}
 								>
-									✕
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 								</button>
 							</div>
 							<DeepTutorSubscriptionConfirm
@@ -1249,17 +1247,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 							padding: '1.25rem',
 							overflow: 'auto'
 						}}>
+							{/* Manage Subscription Popup header */}
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								width: '100%',
 								alignItems: 'center',
 								marginBottom: '1.25rem',
-								minHeight: '4rem',
+								minHeight: '1rem',
+								position: 'relative',
 							}}>
 								<div style={{
-									position: 'absolute',
-									left: '50%',
-									transform: 'translateX(-50%)',
+									width: '100%',
+									textAlign: 'center',
 									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
 									WebkitBackgroundClip: 'text',
 									WebkitTextFillColor: 'transparent',
@@ -1267,7 +1266,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									color: '#0687E5',
 									fontWeight: 700,
 									fontSize: '1rem',
-									lineHeight: '100%',
+									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
 									Upgrade Your Plan
@@ -1278,18 +1277,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										fontSize: '1.5rem',
-										color: '#666',
-										width: '2rem',
-										height: '2rem',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										borderRadius: '50%',
-										marginLeft: 'auto',
 									}}
 								>
-									✕
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 								</button>
 							</div>
 							<DeepTutorManageSubscription
@@ -1326,17 +1325,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 							padding: '1.25rem',
 							overflow: 'auto'
 						}}>
+							{/* Sign In Popup header */}
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								width: '100%',
 								alignItems: 'center',
-								marginBottom: '1.5rem',
-								minHeight: '4rem',
+								marginBottom: '2rem',
+								minHeight: '1rem',
+								position: 'relative',
 							}}>
 								<div style={{
-									position: 'absolute',
-									left: '50%',
-									transform: 'translateX(-50%)',
+									width: '100%',
+									textAlign: 'center',
 									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
 									WebkitBackgroundClip: 'text',
 									WebkitTextFillColor: 'transparent',
@@ -1355,18 +1355,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										fontSize: '1.5rem',
-										color: '#666',
-										width: '2rem',
-										height: '2rem',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										borderRadius: '50%',
-										marginLeft: 'auto',
 									}}
 								>
-									✕
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 								</button>
 							</div>
 							<DeepTutorSignIn
@@ -1408,18 +1408,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 							padding: '1.25rem',
 							overflow: 'auto'
 						}}>
+							{/* Sign Up Popup header */}
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								width: '100%',
 								alignItems: 'center',
 								marginBottom: '2rem',
-								minHeight: '4rem',
-								padding: '0 1rem',
+								minHeight: '1rem',
+								position: 'relative',
 							}}>
 								<div style={{
-									position: 'absolute',
-									left: '50%',
-									transform: 'translateX(-50%)',
+									width: '100%',
+									textAlign: 'center',
 									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
 									WebkitBackgroundClip: 'text',
 									WebkitTextFillColor: 'transparent',
@@ -1438,19 +1438,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										padding: '0.25rem',
-										fontSize: '1.5rem',
-										color: '#666',
-										width: '2rem',
-										height: '2rem',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										borderRadius: '50%',
-										marginLeft: 'auto',
 									}}
 								>
-									✕
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 								</button>
 							</div>
 							<DeepTutorSignUp onSignUpSignIn={() => {
@@ -1480,34 +1479,33 @@ var DeepTutor = class DeepTutor extends React.Component {
 							position: 'relative',
 							width: '80%',
 							maxWidth: '26.875rem',
-							maxHeight: '80%',
+							maxHeight: '99%',
 							background: '#FFFFFF',
 							borderRadius: '0.625rem',
 							padding: '1.25rem',
 							overflow: 'auto'
 						}}>
+							{/* Model Selection Popup header */}
 							<div style={{
 								display: 'flex',
-								justifyContent: 'space-between',
+								width: '100%',
 								alignItems: 'center',
 								marginBottom: '2rem',
-								minHeight: '4rem',
+								minHeight: '1rem',
 								position: 'relative',
 							}}>
 								<div style={{
-									position: 'absolute',
-									left: '50%',
-									transform: 'translateX(-50%)',
+									width: '100%',
+									textAlign: 'center',
 									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
 									WebkitBackgroundClip: 'text',
 									WebkitTextFillColor: 'transparent',
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '1.5rem',
+									fontSize: '1.2rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
-									textAlign: 'center',
 								}}>
 									Create a new session
 								</div>
@@ -1517,18 +1515,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',
-										fontSize: '1.5rem',
-										color: '#666',
-										width: '2rem',
-										height: '2rem',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										borderRadius: '50%',
-										marginLeft: 'auto',
 									}}
 								>
-									✕
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 								</button>
 							</div>
 							<ModelSelection

@@ -2,6 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const styles = {
+    divider: {
+        width: 'calc(100% - 2.5rem)',
+        height: '0.0625rem',
+        background: '#D9D9D9',
+        margin: '0 1.25rem',
+    },
     bottom: {
         display: 'flex',
         flexDirection: 'row',
@@ -20,9 +26,9 @@ const styles = {
     },
     contentWrapper: {
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         width: '100%',
         gap: '0.3125rem',
     },
@@ -36,23 +42,22 @@ const styles = {
     feedbackBox: {
         display: 'flex',
         alignItems: 'center',
-        height: '1.5rem',
         width: '100%',
+        marginBottom: '0.3125rem',
     },
     buttonsBox: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: '1.5rem',
         width: '100%',
     },
     textButton: {
         background: '#F2F2F2',
         border: 'none',
-        color: '#0687E5',
+        color: '#292929',
         fontWeight: 500,
-        fontSize: '1rem',
+        fontSize: '1.2rem',
         lineHeight: '100%',
         letterSpacing: '0%',
         fontFamily: 'Roboto, sans-serif',
@@ -66,26 +71,27 @@ const styles = {
         alignItems: 'center',
         gap: '0.5rem',
         transition: 'background-color 0.2s ease',
+        textDecoration: 'underline',
         ':hover': {
             background: '#D9D9D9'
         }
     },
     buttonIcon: {
-        width: '1.1875rem',
-        height: '1.1587rem',
+        width: '1.25rem',
+        height: '1.25rem',
         objectFit: 'contain',
     },
     upgradeButton: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '6.625rem',
-        height: '2.4375rem',
+        width: '7rem',
+        height: '2.65rem',
         padding: '0.625rem 1.25rem',
         background: '#0687E5',
         border: 'none',
         borderRadius: '0.625rem',
-        fontWeight: 600,
+        fontWeight: 500,
         fontSize: '1rem',
         color: '#ffffff',
         cursor: 'pointer',
@@ -208,11 +214,12 @@ class DeepTutorBottomSection extends React.Component {
     renderMain() {
         return (
             <div style={styles.contentWrapper}>
+                <div style={styles.divider} />
                 <div style={styles.bottomLeft}>
                     <div style={styles.feedbackBox}>
                         <button style={styles.textButton}>
-                            <img src={this.props.feedIconPath} alt="Feedback" style={styles.buttonIcon} />
-                            Feedback
+                            <img src={this.props.feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
+                            Give Us Feedback
                         </button>
                     </div>
                     <div style={styles.buttonsBox}>

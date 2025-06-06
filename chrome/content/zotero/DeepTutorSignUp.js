@@ -17,7 +17,7 @@ const styles = {
   },
   form: {
     position: 'relative',
-    width: '90%',
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -54,6 +54,7 @@ const styles = {
     fontSize: '1rem',
     fontFamily: 'Roboto, sans-serif',
     outline: 'none',
+    boxSizing: 'border-box',
   },
   signUpButton: {
     width: '100%',
@@ -63,13 +64,12 @@ const styles = {
     background: SKY,
     color: '#fff',
     fontWeight: 700,
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     border: 'none',
     cursor: 'pointer',
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
     letterSpacing: 0.2,
-    marginTop: '1.25rem',
   },
   signUpButtonDisabled: {
     background: '#ccc',
@@ -79,20 +79,19 @@ const styles = {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    margin: '1.3125rem 0 0',
+    marginBottom: '1.875rem',
   },
   divider: {
     flex: 1,
-    height: '0.0625rem',
+    height: '0.15rem',
     background: PEARL,
     border: 'none',
   },
   orText: {
-    margin: '0 0.75rem',
+    margin: '0 0.625rem',
     color: '#888',
     fontWeight: 500,
     fontSize: '1rem',
-    marginBottom: '1.875rem',
   },
   googleContainer: {
     width: '100%',
@@ -104,7 +103,7 @@ const styles = {
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
-    border: `1px solid ${PEARL}`,
+    border: `2px solid ${PEARL}`,
     padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',
@@ -130,13 +129,13 @@ const styles = {
   bottomText: {
     fontWeight: 500,
     fontSize: '0.875rem',
-    color: '#888',
+    color: '#757575',
   },
   signInLink: {
     fontWeight: 500,
     fontSize: '0.875rem',
     textDecoration: 'underline',
-    color: SKY,
+    color: '#757575',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
@@ -386,7 +385,6 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.subtitle}>Create a free account to start your unique learning experience</div>
       <form style={styles.form} autoComplete="off" onSubmit={handleSignUp}>
         <div style={styles.mainContent}>
           <div style={styles.inputGroup}>
@@ -394,7 +392,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             <input
               style={styles.input}
               type="text"
-              placeholder=""
+              placeholder="Your Name"
               value={name}
               onChange={e => setName(e.target.value)}
               disabled={isLoading}
@@ -430,7 +428,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing up...' : 'Sign Up Free'}
+            {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
           
           {error && <div style={styles.errorMessage}>{error}</div>}
@@ -463,7 +461,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             onClick={onSignUpSignIn}
             disabled={isLoading}
           >
-            Sign in
+            Sign in here
           </button>
         </div>
       </form>
