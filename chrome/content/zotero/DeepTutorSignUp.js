@@ -70,7 +70,6 @@ const styles = {
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
     letterSpacing: 0.2,
-    marginTop: '1.25rem',
   },
   signUpButtonDisabled: {
     background: '#ccc',
@@ -80,7 +79,7 @@ const styles = {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    margin: '1.3125rem 0 0',
+    marginBottom: '1.875rem',
   },
   divider: {
     flex: 1,
@@ -89,11 +88,10 @@ const styles = {
     border: 'none',
   },
   orText: {
-    margin: '0 0.75rem',
+    margin: '0 0.625rem',
     color: '#888',
     fontWeight: 500,
     fontSize: '1rem',
-    marginBottom: '1.875rem',
   },
   googleContainer: {
     width: '100%',
@@ -387,7 +385,6 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.subtitle}>Create a free account to start your unique learning experience</div>
       <form style={styles.form} autoComplete="off" onSubmit={handleSignUp}>
         <div style={styles.mainContent}>
           <div style={styles.inputGroup}>
@@ -395,7 +392,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             <input
               style={styles.input}
               type="text"
-              placeholder=""
+              placeholder="Your Name"
               value={name}
               onChange={e => setName(e.target.value)}
               disabled={isLoading}

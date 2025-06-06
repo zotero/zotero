@@ -555,7 +555,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showUpgradePopup: false,
 			showModelSelectionPopup: false,
 			collapsed: false,
-			showSearch: true,
+			showSearch: false,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false,
 			// Auth state
@@ -1479,7 +1479,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							position: 'relative',
 							width: '80%',
 							maxWidth: '26.875rem',
-							maxHeight: '80%',
+							maxHeight: '99%',
 							background: '#FFFFFF',
 							borderRadius: '0.625rem',
 							padding: '1.25rem',
@@ -1503,7 +1503,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '1.5rem',
+									fontSize: '1.2rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>

@@ -63,7 +63,6 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     padding: 0,
-    marginTop: '1.25rem',
     marginBottom: '1.25rem',
   },
   signInButton: {
@@ -89,7 +88,7 @@ const styles = {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    margin: '1.3125rem 0 0',
+    margin: '1.875rem 0 0',
   },
   divider: {
     flex: 1,
@@ -98,7 +97,7 @@ const styles = {
     border: 'none',
   },
   orText: {
-    margin: '0 0.75rem',
+    margin: '0 0.625rem',
     color: '#888',
     fontWeight: 500,
     fontSize: '1rem',

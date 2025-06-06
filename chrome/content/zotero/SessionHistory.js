@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 const containerStyle = {
   width: '100%',
-  minHeight: '80%',
+  minHeight: '100%',
   padding: '0',
   gap: '0.25rem',
   borderWidth: '1px',

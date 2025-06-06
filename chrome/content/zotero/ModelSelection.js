@@ -39,8 +39,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    height: '100%',
-    maxHeight: '80vh',
+    maxHeight: '100%',
     background: '#FFFFFF',
     fontFamily: 'Roboto, sans-serif',
     alignItems: 'center',
@@ -72,7 +71,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    marginBottom: '1.25rem',
+    marginBottom: '1.875rem',
   },
   modelSection: {
     width: '100%',
@@ -112,13 +111,12 @@ const styles = {
     margin: '0.25rem 0',
     fontSize: '0.875rem',
     color: '#292929',
-    gap: '0.625rem',
     boxSizing: 'border-box',
   },
   searchIcon: {
-    width: '1.5rem',
-    height: '1.5rem',
-    opacity: 0.6,
+    width: '1rem',
+    height: '1rem',
+    opacity: 0.7,
   },
   searchInput: {
     flex: 1,
@@ -165,10 +163,10 @@ const styles = {
     justifyContent: 'center',
     color: '#888',
     fontSize: '1rem',
-    marginBottom: '1.875rem',
     flexDirection: 'column',
     transition: 'border-color 0.2s, background 0.2s',
     boxSizing: 'border-box',
+    gap: '0.5rem',
   },
   dragAreaActive: {
     borderColor: SKY,
@@ -180,6 +178,7 @@ const styles = {
     width: '100%',
     marginBottom: '1.25rem',
     justifyContent: 'space-between',
+    gap: '0.25rem',
   },
   modelTypeButton: {
     flex: '1 1 0',
@@ -192,25 +191,26 @@ const styles = {
     letterSpacing: '0%',
     verticalAlign: 'middle',
     cursor: 'pointer',
-    background: PEARL,
+    background: '#F8F6F7',
     color: '#757575',
     transition: 'background 0.2s, color 0.2s',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '0.3125rem',
     minWidth: 0,
     width: '8.125rem',
     maxWidth: '10rem',
     minPadding: '0.75rem 0.9375rem',
+    minHeight: '3rem',
   },
   modelTypeButtonSelected: {
-    background: AQUA,
+    background: '#D9D9D9',
     color: '#292929',
     fontWeight: 400,
     fontSize: '1rem',
     lineHeight: '135%',
     letterSpacing: '0%',
+    minHeight: '3rem',
     verticalAlign: 'middle',
   },
   createButton: {
@@ -270,6 +270,7 @@ const styles = {
   searchContainer: {
     position: 'relative',
     width: '100%',
+    padding: '0',
     marginBottom: '0.625rem',
   },
   searchPopup: {
@@ -395,6 +396,8 @@ const styles = {
   fileListContainer: {
     width: '100%',
     marginBottom: '0.3125rem',
+    maxHeight: '7.5rem',
+    overflowY: 'auto',
   },
 };
 
@@ -868,7 +871,7 @@ function ModelSelection({ onSubmit }) {
   return (
     <div style={styles.container}>
       <div style={styles.nameSection}>
-        <label style={styles.label}>Name Your Session</label>
+        <label style={styles.label}>Session Name</label>
         <input
           type="text"
           value={modelName}
@@ -902,7 +905,11 @@ function ModelSelection({ onSubmit }) {
         </div>
 
         <div style={styles.searchContainer}>
-          <div style={styles.searchArea}>
+          <div 
+            style={styles.searchArea}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => e.preventDefault()}
+          >
             <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
             <input
               style={styles.searchInput}
@@ -910,6 +917,8 @@ function ModelSelection({ onSubmit }) {
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
               placeholder="Search for an Item"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => e.preventDefault()}
             />
           </div>
           {showSearchPopup && (
