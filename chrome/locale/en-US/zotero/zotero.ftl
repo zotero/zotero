@@ -738,4 +738,5 @@ mac-word-plugin-install-dont-ask-again-button =
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 
-userjs-pref-warning = A program on your computer attempted to override { -app-name }’s settings using an unsupported method. { -app-name } will undo the changes and restart.
+userjs-pref-warning = Your { -app-name } profile directory contains settings in a nonstandard location. { -app-name } will remove them and restart.
+userjs-pref-warning-program = A program on your computer attempted to override { -app-name }’s settings using an unsupported method. { -app-name } will undo the changes and restart.
