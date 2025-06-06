@@ -37,7 +37,7 @@ const defaults = {
 	tags: [],
 	scope: null,
 	annotationColors: new Set(),
-	annotationAuthors: [],
+	annotationAuthors: new Set(),
 	showAutomatic: Zotero.Prefs.get('tagSelector.showAutomatic'),
 	showAnnotationFilters: Zotero.Prefs.get('tagSelector.showAnnotationFilters'),
 	searchString: '',
@@ -89,6 +89,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 	focusTagList() {
 		this.tagListRef.current.focus();
+	}
+
+	focusAnnotationColors() {
+		this.annotationFiltersSelectorRef.current.focusColor();
 	}
 
 	isTagListEmpty() {
@@ -581,6 +585,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			onTagContext={this.handleTagContext}
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}
+			container={this.props.container}
 			loaded={this.state.loaded}
 			width={this.state.width}
 			height={this.state.height}

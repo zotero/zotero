@@ -391,7 +391,6 @@ class TagList extends React.PureComponent {
 			onDrop: PropTypes.func
 		}),
 		onSelect: PropTypes.func,
-		onKeyDown: PropTypes.func,
 		onTagContext: PropTypes.func,
 		loaded: PropTypes.bool,
 		width: PropTypes.number.isRequired,

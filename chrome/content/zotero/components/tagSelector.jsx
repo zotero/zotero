@@ -51,6 +51,21 @@ class TagSelector extends React.PureComponent {
 		};
 	}
 
+	componentDidUpdate() {
+		if (this.state.isDragging) return;
+		let newHeight = 0;
+		
+		if (this.props.annotationAuthors.length > 0) {
+			newHeight = Math.max(this.state.annotationSectionHeight, minAnnotationSectionHeight);
+		}
+		else if (this.props.annotationColors.length > 0) {
+			newHeight = annotationColorsHeight + annotationsVerticalPadding;
+		}
+		if (newHeight !== this.state.annotationSectionHeight) {
+			this.setState({ annotationSectionHeight: newHeight });
+		}
+	}
+
 	handleSplitterMouseDown = (e) => {
 		if (!this.props.annotationAuthors.length) return;
 		e.preventDefault();
@@ -83,20 +98,61 @@ class TagSelector extends React.PureComponent {
 		document.removeEventListener('mouseup', this.handleSplitterMouseUp);
 	};
 
-	componentDidUpdate() {
-		if (this.state.isDragging) return;
-		let newHeight = 0;
+
+	_handleTab = (event) => {
+		if (event.key !== "Tab") return;
+		var container = document.getElementById(this.props.container);
+		// Only include visible components in the focus sequence
+		let focusSequence = [];
+		if (this.props.annotationColors.length) {
+			focusSequence.push('annotation-color');
+		}
+		if (this.props.annotationAuthors.length) {
+			focusSequence.push('annotation-author');
+		}
+		if (this.props.tags.length) {
+			focusSequence.push('tag-selector-item');
+		}
+		focusSequence.push("search-input");
+		focusSequence.push("tag-selector-actions");
 		
-		if (this.props.annotationAuthors.length > 0) {
-			newHeight = Math.max(this.state.annotationSectionHeight, minAnnotationSectionHeight);
+		if (event.shiftKey) {
+			focusSequence.reverse();
 		}
-		else if (this.props.annotationColors.length > 0) {
-			newHeight = annotationColorsHeight + annotationsVerticalPadding;
+		
+		// If for some reason it's not apparent where in the sequence we are, let
+		// tab propagate higher
+		let currentIndex = focusSequence.findIndex(cls => event.target.classList.contains(cls));
+		if (currentIndex === -1 || currentIndex === focusSequence.length - 1) return;
+		
+		let nextClass = focusSequence[currentIndex + 1];
+		let handled = false;
+		// Special handling to refocus the last tag that was focused
+		if (nextClass == "tag-selector-item") {
+			this.props.tagListRef.current.focus();
+			handled = true;
 		}
-		if (newHeight !== this.state.annotationSectionHeight) {
-			this.setState({ annotationSectionHeight: newHeight });
+		else if (nextClass == "annotation-color") {
+			this.props.annotationFiltersSelectorRef.current.focusColor();
+			handled = true;
 		}
-	}
+		else if (nextClass == "annotation-author") {
+			this.props.annotationFiltersSelectorRef.current.focusAuthor();
+			handled = true;
+		}
+		else {
+			let nextElement = container.querySelector(`.${nextClass}`);
+			if (nextElement) {
+				nextElement.focus();
+				handled = true;
+			}
+		}
+		if (handled) {
+			event.stopPropagation();
+			event.preventDefault();
+		}
+	};
+
 
 	render() {
 		let annotationSelectorHeight = 0;
@@ -108,7 +164,7 @@ class TagSelector extends React.PureComponent {
 		let availableTagsHeight = this.props.height - annotationSelectorHeight;
 
 		return (
-			<div className={`tag-selector ${this.state.isDragging ? 'splitter-drag' : ''}`}>
+			<div className={`tag-selector ${this.state.isDragging ? 'splitter-drag' : ''}`} onKeyDown={this._handleTab.bind(this)}>
 				{annotationSelectorHeight > 0 && (
 					<>
 						<AnnotationFiltersSelector
@@ -130,7 +186,6 @@ class TagSelector extends React.PureComponent {
 					tags={this.props.tags}
 					dragObserver={this.props.dragObserver}
 					onSelect={this.props.onSelect}
-					onKeyDown={this.props.onKeyDown}
 					onTagContext={this.props.onTagContext}
 					loaded={this.props.loaded}
 					width={this.props.width}
@@ -174,6 +229,7 @@ TagSelector.propTypes = {
 		disabled: PropTypes.bool,
 		width: PropTypes.number
 	})),
+	container: PropTypes.string,
 	annotationColors: PropTypes.arrayOf(PropTypes.shape({
 		color: PropTypes.string,
 		name: PropTypes.string,

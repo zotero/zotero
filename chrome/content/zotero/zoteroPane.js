@@ -430,6 +430,10 @@ var ZoteroPane = new function()
 						if (tagContainer.getAttribute('collapsed') == "true") {
 							return document.getElementById('zotero-tb-add');
 						}
+						if (tagSelector.querySelector('.annotation-color')) {
+							ZoteroPane.tagSelector.focusAnnotationColors();
+							return null;
+						}
 						// If tag selector is collapsed, go to "New item" button, otherwise focus tag selector
 						if (ZoteroPane.tagSelector.isTagListEmpty()) {
 							return tagSelector.querySelector(".search-input");
@@ -454,28 +458,15 @@ var ZoteroPane = new function()
 
 		tagSelector.addEventListener("keydown", (e) => {
 			let actionsMap = {
-				'search-input': {
-					Tab: () => tagSelector.querySelector('.tag-selector-actions'),
-					ShiftTab: () => {
-						if (ZoteroPane.tagSelector.isTagListEmpty()) {
-							return document.getElementById("collection-tree");
-						}
-						ZoteroPane.tagSelector.focusTagList();
-						return null;
-					},
-				},
 				'tag-selector-item': {
-					Tab: () => tagSelector.querySelector(".search-input"),
+					ShiftTab: () => document.getElementById("collection-tree"),
+				},
+				'annotation-color': {
 					ShiftTab: () => document.getElementById("collection-tree"),
 				},
 				'tag-selector-actions': {
-					Tab: () => document.getElementById('zotero-tb-add'),
-					ShiftTab: () => tagSelector.querySelector(".search-input")
+					Tab: () => document.getElementById('zotero-tb-add')
 				},
-				'tag-selector-list': {
-					Tab: () => tagSelector.querySelector(".search-input"),
-					ShiftTab: () => document.getElementById("collection-tree"),
-				}
 			};
 			moveFocus(actionsMap, e);
 		});

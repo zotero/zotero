@@ -186,8 +186,8 @@
 // cursor will flash quickly switching between different modes.
 .tag-selector.splitter-drag {
 	cursor: row-resize !important;
-	.annotation-author-item,
-	.annotation-colors-section .color,
+	.annotation-author,
+	.annotation-colors-section .annotation-color,
 	.tag-selector-item {
 		cursor: row-resize !important;
 	}
@@ -215,7 +215,7 @@
 			flex-wrap: wrap;
 			gap: 1px;
 
-			.color {
+			.annotation-color {
 				width: 20px;
 				height: 20px;
 				border-radius: 5px;
@@ -248,7 +248,7 @@
 			flex-wrap: wrap;
 			gap: 2px;
 
-			.annotation-author-item {
+			.annotation-author {
 				border-radius: 5px;
 				height: 20px;
 				padding: 1px 4px;

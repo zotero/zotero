@@ -31,7 +31,8 @@ class AnnotationFiltersSelector extends React.PureComponent {
 		super(props);
 		this.authorCollectionRef = React.createRef();
 		this.state = {
-			authorScrollToCell: null
+			lastFocusedAuthor: null,
+			lastFocusedColor: null
 		};
 	}
 
@@ -40,9 +41,52 @@ class AnnotationFiltersSelector extends React.PureComponent {
 		this.props.onSelect(colorObj);
 	};
 
-	_hasAnnotationAuthors() {
-		return this.props.annotationAuthors?.length > 0;
+	_getAnnotationsHeight() {
+		if (this.props.annotationAuthors?.length > 0) {
+			return this.props.height;
+		}
+		return 'auto';
 	}
+
+	_handleArrowKey = (event) => {
+		let nextTarget;
+		if (event.key == "ArrowLeft") {
+			nextTarget = event.target.previousElementSibling;
+		}
+		else if (event.key == "ArrowRight") {
+			nextTarget = event.target.nextElementSibling;
+		}
+		if (!nextTarget) return;
+		nextTarget.focus();
+		if (nextTarget.classList.contains('annotation-color')) {
+			this.setState({ lastFocusedColor: nextTarget.dataset.color });
+		}
+		else if (nextTarget.classList.contains('annotation-author')) {
+			this.setState({ lastFocusedAuthor: nextTarget.dataset.userId });
+		}
+	};
+
+	focusAuthor = () => {
+		if (this.state.lastFocusedAuthor) {
+			let lastAuthor = document.querySelector(`.tag-selector .annotation-author[data-user-id="${this.state.lastFocusedAuthor}"]`);
+			if (lastAuthor) {
+				lastAuthor.focus();
+				return;
+			}
+		}
+		document.querySelector('.tag-selector .annotation-author')?.focus();
+	};
+
+	focusColor = () => {
+		if (this.state.lastFocusedColor) {
+			let lastColor = document.querySelector(`.tag-selector .annotation-color[data-color="${this.state.lastFocusedColor}"]`);
+			if (lastColor) {
+				lastColor.focus();
+				return;
+			}
+		}
+		document.querySelector('.tag-selector .annotation-color')?.focus();
+	};
 
 	// Render annotation colors with click handlers
 	renderAnnotationColors() {
@@ -52,10 +96,12 @@ class AnnotationFiltersSelector extends React.PureComponent {
 		return (
 			<div className="annotation-colors-section">
 				{this.props.annotationColors.map((colorObj, index) => (
-					<div key={index}
-						className={`color ${colorObj.selected ? 'selected' : ''} ${colorObj.enabled ? '' : ' disabled'}`}
+					<div key={`color_${index}_${colorObj.color}`}
+						className={`annotation-color ${colorObj.selected ? 'selected' : ''} ${colorObj.enabled ? '' : ' disabled'}`}
 						title={Zotero.getString(`general.${colorObj.name}`)}
-						onClick={() => this._handleColorsClick(colorObj)}>
+						onClick={() => this._handleColorsClick(colorObj)}
+						tabIndex={0}
+						data-color={colorObj.color}>
 						<span className="color-box" style={{ backgroundColor: colorObj.color }}/>
 					</div>
 				))}
@@ -71,7 +117,7 @@ class AnnotationFiltersSelector extends React.PureComponent {
 		return (
 			<div className="annotation-authors-section">
 				{this.props.annotationAuthors.map((author, index) => {
-					var className = 'annotation-author-item keyboard-clickable';
+					var className = 'annotation-author keyboard-clickable';
 					if (author.selected) {
 						className += ' selected';
 					}
@@ -79,7 +125,9 @@ class AnnotationFiltersSelector extends React.PureComponent {
 					return (
 						<div key={`author_${index}_${author.userID}`}
 							className={className}
-							onClick={() => this.props.onSelect(author)}>
+							onClick={() => this.props.onSelect(author)}
+							tabIndex={0}
+							data-user-id={author.userID}>
 							<span className="icon icon-css icon-user-8 icon-8"></span>
 							<span>{author.name}</span>
 						</div>
@@ -92,7 +140,7 @@ class AnnotationFiltersSelector extends React.PureComponent {
 	render() {
 		return (
 			<div className="annotation-selector">
-				<div className="annotation-data" style={{ height: this._hasAnnotationAuthors() ? this.props.height : 'auto' }}>
+				<div className="annotation-data" onKeyDown={this._handleArrowKey} style={{ height: this._getAnnotationsHeight() }}>
 					{this.renderAnnotationColors()}
 					{this.renderAnnotationAuthors()}
 				</div>
