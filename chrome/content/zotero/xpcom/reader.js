@@ -33,6 +33,8 @@ const ZipReader = Components.Constructor(
 	"open"
 );
 
+Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
@@ -1186,6 +1188,148 @@ class ReaderInstance {
 		setTimeout(() => popup.openPopupAtScreen(rect.x, rect.y, true));
 	}
 
+	_handleReaderTextboxContextMenuOpen = (event) => {
+		this._window.goUpdateGlobalEditMenuItems(true);
+
+		let iframeWindow = event.target.ownerGlobal;
+
+		this._window.MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
+		this._window.MozXULElement.insertFTLIfNeeded("browser/menubar.ftl");
+
+		let popup = this._window.document.createXULElement('menupopup');
+		this._popupset.appendChild(popup);
+
+		popup.addEventListener('popuphidden', (event) => {
+			if (event.target !== popup) {
+				return;
+			}
+			popup.remove();
+		});
+
+		popup.appendChild(
+			this._window.MozXULElement.parseXULToFragment(`
+			  <menuitem data-l10n-id="text-action-undo" command="cmd_undo" data-action="undo"></menuitem>
+			  <menuitem data-l10n-id="text-action-redo" command="cmd_redo" data-action="redo"></menuitem>
+			  <menuseparator></menuseparator>
+			  <menuitem data-l10n-id="text-action-cut" command="cmd_cut" data-action="cut"></menuitem>
+			  <menuitem data-l10n-id="text-action-copy" command="cmd_copy" data-action="copy"></menuitem>
+			  <menuitem data-l10n-id="text-action-paste" command="cmd_paste" data-action="paste"></menuitem>
+			  <menuitem data-l10n-id="text-action-delete" command="cmd_delete" data-action="delete"></menuitem>
+			  <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll" data-action="selectAll"></menuitem>
+			  <menuseparator></menuseparator>
+			  <menuitem data-l10n-id="menu-edit-bidi-switch-text-direction" command="cmd_switchTextDirection" data-action="switchTextDirection"></menuitem>
+			`)
+		);
+
+		let menuitemSwitchTextDirection = popup.querySelector("[command='cmd_switchTextDirection']");
+		let showSwitchTextDirection = Services.prefs.getBoolPref("bidi.browser.ui", false);
+		menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
+		menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
+
+		let selection = event.target.ownerGlobal.getSelection();
+		if (!selection || !selection.anchorNode) {
+			return;
+		}
+		let node = selection.anchorNode.nodeType === Node.ELEMENT_NODE
+			? selection.anchorNode
+			: selection.anchorNode.parentElement;
+
+		let insideContentEditable = node && node.closest('[contenteditable]') !== null;
+		if (insideContentEditable) {
+			let editingSession = iframeWindow.docShell.editingSession;
+			let spellChecker = new InlineSpellChecker(
+				editingSession.getEditorForWindow(iframeWindow)
+			);
+
+			// Separator
+			var separator = popup.ownerDocument.createXULElement('menuseparator');
+			popup.appendChild(separator);
+			// Check Spelling
+			var menuitem = popup.ownerDocument.createXULElement('menuitem');
+			menuitem.setAttribute('data-l10n-id', 'text-action-spell-check-toggle');
+			menuitem.setAttribute('checked', !!Zotero.Prefs.get('layout.spellcheckDefault', true));
+			menuitem.setAttribute('type', 'checkbox');
+			menuitem.addEventListener('command', () => {
+				spellChecker.toggleEnabled();
+				// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes
+				Zotero.Prefs.set('layout.spellcheckDefault', !!Zotero.Prefs.get('layout.spellcheckDefault', true) ? 0 : 1, true);
+			});
+			popup.append(menuitem);
+
+			if (spellChecker.enabled) {
+				// Languages menu
+				var menu = popup.ownerDocument.createXULElement('menu');
+				menu.setAttribute('data-l10n-id', 'text-action-spell-dictionaries');
+				popup.append(menu);
+				// Languages menu popup
+				var menupopup = popup.ownerDocument.createXULElement('menupopup');
+				menu.append(menupopup);
+
+				spellChecker.addDictionaryListToMenu(menupopup, null);
+
+				// The menu is prepopulated with names from InlineSpellChecker::getDictionaryDisplayName(),
+				// which will be in English, so swap in native locale names where we have them
+				for (var menuitem of menupopup.children) {
+					// 'spell-check-dictionary-en-US'
+					let locale = menuitem.id.slice(23);
+					let label = Zotero.Dictionaries.getBestDictionaryName(locale);
+					if (label && label != locale) {
+						menuitem.setAttribute('label', label);
+					}
+				}
+
+				// Separator
+				var separator = popup.ownerDocument.createXULElement('menuseparator');
+				menupopup.appendChild(separator);
+				// Add Dictionaries
+				var menuitem = popup.ownerDocument.createXULElement('menuitem');
+				menuitem.setAttribute('data-l10n-id', 'text-action-spell-add-dictionaries');
+				menuitem.addEventListener('command', () => {
+					Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xhtml",
+						"dictionary-manager", "chrome,centerscreen", {});
+				});
+				menupopup.append(menuitem);
+
+				let selection = iframeWindow.getSelection();
+				if (selection) {
+					spellChecker.initFromEvent(selection.anchorNode, selection.anchorOffset);
+				}
+
+				let firstElementChild = popup.firstElementChild;
+				let showSeparator = false;
+				let suggestionCount = spellChecker.addSuggestionsToMenuOnParent(popup, firstElementChild, 5);
+				if (suggestionCount) {
+					showSeparator = true;
+				}
+
+				if (spellChecker.overMisspelling) {
+					let addToDictionary = popup.ownerDocument.createXULElement('menuitem');
+					addToDictionary.setAttribute('data-l10n-id', 'text-action-spell-add-to-dictionary');
+					addToDictionary.addEventListener('command', () => {
+						spellChecker.addToDictionary();
+					});
+					popup.insertBefore(addToDictionary, firstElementChild);
+					showSeparator = true;
+				}
+				if (spellChecker.canUndo()) {
+					let undo = popup.ownerDocument.createXULElement('menuitem');
+					undo.setAttribute('data-l10n-id', 'text-action-spell-undo-add-to-dictionary');
+					undo.addEventListener('command', () => {
+						spellChecker.undoAddToDictionary();
+					});
+					popup.insertBefore(undo, firstElementChild);
+					showSeparator = true;
+				}
+
+				if (showSeparator) {
+					let separator = popup.ownerDocument.createXULElement('menuseparator');
+					popup.insertBefore(separator, firstElementChild);
+				}
+			}
+		}
+		popup.openPopupAtScreen(event.screenX, event.screenY, true);
+	};
+
 	_updateSecondViewState() {
 		if (this.tabID) {
 			let win = Zotero.getMainWindow();
@@ -1270,14 +1414,13 @@ class ReaderTab extends ReaderInstance {
 			this.tabID = id;
 			this._tabContainer = container;
 		}
-		
+
 		this._iframe = this._window.document.createXULElement('browser');
 		this._iframe.setAttribute('class', 'reader');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
 		this._iframe.setAttribute('transparent', 'true');
 		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
-		this._iframe.setAttribute('context', 'textbox-contextmenu');
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
 		
@@ -1287,8 +1430,6 @@ class ReaderTab extends ReaderInstance {
 		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
 		this._window.addEventListener('pointerdown', this._handlePointerDown);
 		this._window.addEventListener('pointerup', this._handlePointerUp);
-
-		this._window.goBuildEditContextMenu();
 
 		this._iframe.setAttribute('tooltip', 'html-tooltip');
 
@@ -1309,19 +1450,7 @@ class ReaderTab extends ReaderInstance {
 			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
 			this._iframeWindow = this._iframe.contentWindow;
 			this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
-
-			// Disable text direction switching option because it tries to change direction
-			// for the whole window and crashes it
-			this._iframeWindow.addEventListener('contextmenu', () => {
-				let popup = this._window.goBuildEditContextMenu();
-				this._window.goUpdateGlobalEditMenuItems(true);
-				popup.addEventListener('popupshowing', (e) => {
-					let menuitemSwitchTextDirection = e.target.querySelector("[command='cmd_switchTextDirection']");
-					if (menuitemSwitchTextDirection) {
-						menuitemSwitchTextDirection.hidden = true;
-					}
-				}, { once: true });
-			});
+			this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
 		}
 	};
 
@@ -1420,18 +1549,7 @@ class ReaderWindow extends ReaderInstance {
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 				this._iframeWindow = this._window.document.getElementById('reader').contentWindow;
 				this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
-				this._window.goBuildEditContextMenu();
-				// Disable text direction switching option because it changes direction for the whole window
-				this._iframeWindow.addEventListener('contextmenu', () => {
-					let popup = this._window.goBuildEditContextMenu();
-					this._window.goUpdateGlobalEditMenuItems(true);
-					popup.addEventListener('popupshowing', (e) => {
-						let menuitemSwitchTextDirection = e.target.querySelector("[command='cmd_switchTextDirection']");
-						if (menuitemSwitchTextDirection) {
-							menuitemSwitchTextDirection.hidden = true;
-						}
-					}, { once: true });
-				});
+				this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
 			}
 
 			this._switchReaderSubtype(this._type);
