@@ -1118,13 +1118,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			);
 		}
-		// Close DeepTutor pane when activating items
-		Zotero.debug('06062025: handleActivate() is called!!!!!');
-		let mainWindow = Zotero.getMainWindow();
-		if (mainWindow && mainWindow.ZoteroStandalone) {
-			Zotero.debug('06062025: ZoteroStandalone is defined and used!!!!!');
-			mainWindow.ZoteroStandalone.closeDeepTutorPane();
-		}
 		Zotero.debug(`itemTree.render(). Displaying ${showMessage ? "Item Pane Message" : "Item Tree"}`);
 
 		return [

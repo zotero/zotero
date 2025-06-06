@@ -83,6 +83,30 @@ var ZoteroPane = new function()
 		// so handleBlur gets triggered when any field, not just the document, looses focus
 		document.addEventListener('focusout', ZoteroPane.handleBlur);
 		
+		// Add observer for item pane collapsed state changes
+		this.itemPane = document.querySelector("#zotero-item-pane");
+		if (this.itemPane) {
+			let observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (mutation.attributeName === 'collapsed') {
+						let isCollapsed = this.itemPane.getAttribute('collapsed') === 'true';
+						if (!isCollapsed) {
+							// Item pane is being opened, close DeepTutor pane
+							let deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+							let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+							if (deepTutorPane && !deepTutorPane.hidden) {
+								Zotero.debug('06062025-Standalone: Closing DeepTutor pane due to item pane opening');
+								deepTutorPane.hidden = true;
+								deeptutorSplitter.setAttribute('state', 'collapsed');
+								ZoteroPane.updateLayoutConstraints();
+							}
+						}
+					}
+				});
+			});
+			observer.observe(this.itemPane, { attributes: true });
+		}
+		
 		// Init toolbar buttons for all progress queues
 		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
 		let progressQueues = Zotero.ProgressQueues.getAll();
