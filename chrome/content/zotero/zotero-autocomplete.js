@@ -70,7 +70,8 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 		
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS id FROM tags WHERE name LIKE ? ESCAPE '\\'";
-			var sqlParams = [Zotero.DB.escapeSQLExpression(searchString) + '%'];
+			var prefix = Zotero.Prefs.get("tagsFuzzyAutocomplete") ? "%" : "";
+			var sqlParams = [prefix + Zotero.DB.escapeSQLExpression(searchString) + '%'];
 			if (searchParams.libraryID) {
 				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
 					+ "WHERE libraryID=?)";
@@ -246,9 +247,16 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 	var onRow = null;
 	// If there's a result callback (e.g., for sorting), don't use a row handler
 	if (!resultsCallback) {
+		let currentSearchString = this._result.searchString;
 		onRow = function (row, cancel) {
 			if (this._cancelled) {
 				Zotero.debug("Cancelling query");
+				cancel();
+				return;
+			}
+			// Ignore results from queries that are no longer relevant
+			// (e.g. if user types "test", ignore results that came from when they just typed "te")
+			if (currentSearchString != this._result.searchString) {
 				cancel();
 				return;
 			}
