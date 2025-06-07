@@ -360,6 +360,7 @@ const styles = {
 		gap: '0.75rem',
 	},
 	iconButton: {
+		all: 'revert',
 		width: '2.5rem',
 		height: '2.5rem',
 		background: '#F8F6F7',
@@ -417,6 +418,7 @@ const styles = {
 		gap: '0.5rem',
 	},
 	textButton: {
+		all: 'revert',
 		background: '#F8F6F7',
 		border: 'none',
 		color: '#0687E5',
@@ -443,6 +445,7 @@ const styles = {
 		objectFit: 'contain',
 	},
 	upgradeButton: {
+		all: 'revert',
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -476,6 +479,7 @@ const styles = {
 		position: 'relative',
 	},
 	componentButton: {
+		all: 'revert',
 		padding: '0.375rem 1.125rem',
 		borderRadius: '0.375rem',
 		border: '0.0625rem solid #0687E5',
@@ -1512,6 +1516,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								<button
 									onClick={this.toggleModelSelectionPopup}
 									style={{
+										all: 'revert',
 										background: 'none',
 										border: 'none',
 										cursor: 'pointer',

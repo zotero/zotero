@@ -145,6 +145,7 @@ const styles = {
         }
     },
     sendButton: {
+        all: 'revert',
         background: '#F8F6F7',
         border: 'none',
         borderRadius: '50%',
@@ -212,6 +213,7 @@ const styles = {
         flexWrap: 'wrap',
     },
     sourceButton: {
+        all: 'revert',
         background: '#0AE2FF',
         color: 'white',
         border: 'none',
@@ -229,6 +231,7 @@ const styles = {
         transition: 'background 0.2s',
     },
     questionContainer: {
+        all: 'revert',
         width: '100%',
         margin: '8px 0',
         display: 'flex',
@@ -237,6 +240,7 @@ const styles = {
         flexWrap: 'wrap',
     },
     questionButton: {
+        all: 'revert',
         background: '#FFFFFF',
         color: '#000',
         border: '0.0625rem solid #0687E5',
@@ -268,6 +272,7 @@ const styles = {
         marginRight: '1.25rem',
     },
     sessionTab: {
+        all: 'revert',
         gap: '0.625rem',
         borderRadius: '0.1875rem',
         padding: '0.3125rem 0.625rem',
@@ -294,6 +299,7 @@ const styles = {
         boxSizing: 'border-box',
     },
     sessionTabClose: {
+        all: 'revert',
         width: '0.5825rem',
         height: '0.5825rem',
         marginLeft: '0.3125rem',

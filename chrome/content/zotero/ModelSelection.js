@@ -215,6 +215,7 @@ const styles = {
     verticalAlign: 'middle',
   },
   createButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.4375rem',
     margin: '2rem auto 0 auto',

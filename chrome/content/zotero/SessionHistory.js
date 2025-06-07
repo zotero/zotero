@@ -70,6 +70,7 @@ const sessionListStyle = {
 };
 
 const sessionButtonStyle = {
+  all: 'revert',
   width: '100%',
   fontFamily: 'Roboto, sans-serif',
   margin: '0.25rem 0',
