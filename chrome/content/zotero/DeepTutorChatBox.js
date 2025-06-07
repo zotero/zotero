@@ -262,19 +262,19 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         padding: '0 0.5rem',
-        gap: '0.25rem',
+        gap: '0.625rem',
         borderBottom: '0.0625rem solid #E0E0E0',
         marginLeft: '1.25rem',
         marginRight: '1.25rem',
     },
     sessionTab: {
-        width: '136.6666717529297px',
-        height: '29px',
-        gap: '5px',
-        borderRadius: '3px',
-        padding: '5px 10px',
+        gap: '0.625rem',
+        borderRadius: '0.1875rem',
+        padding: '0.3125rem 0.625rem',
+        minWidth: 'fit-content',
         background: '#D9D9D9',
-        fontSize: '13px',
+        fontSize: '0.8125rem',
+        fontWeight: 400,
         color: '#292929',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -282,16 +282,33 @@ const styles = {
         textOverflow: 'ellipsis',
         border: 'none',
         display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        '&:hover': {
-            background: '#F8F6F7',
-        },
+        boxSizing: 'border-box'
     },
     activeSessionTab: {
         background: '#FFFFFF',
-        color: '#292929',
+        color: '#1C1B1F',
         border: 'none',
+        boxSizing: 'border-box',
+    },
+    sessionTabClose: {
+        width: '0.5825rem',
+        height: '0.5825rem',
+        marginLeft: '0.3125rem',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0',
+        background: 'none',
+        border: 'none'
+    },
+    sessionTabCloseIcon: {
+        width: '0.5825rem',
+        height: '0.5825rem',
+        objectFit: 'contain'
     },
     sessionPopup: {
         position: 'absolute',
@@ -319,6 +336,7 @@ const styles = {
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
+const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
 
 const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [messages, setMessages] = useState([]);
@@ -1314,15 +1332,15 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 if (!newMap.has(sessionId)) {
                     newMap.set(sessionId, {
                         name: session.sessionName || `Session ${sessionId.slice(0, 8)}`,
-                        lastUpdatedTime: session.lastUpdatedTime
+                        lastUpdatedTime: new Date().toISOString() // Use current time for new sessions
                     });
                     Zotero.debug(`DeepTutorChatBox: Added new session to recent sessions map, now has ${newMap.size} sessions`);
                 } else {
-                    // Update the existing session's lastUpdatedTime
+                    // Update the existing session's lastUpdatedTime with current time
                     const existingSession = newMap.get(sessionId);
                     newMap.set(sessionId, {
                         ...existingSession,
-                        lastUpdatedTime: session.lastUpdatedTime
+                        lastUpdatedTime: new Date().toISOString() // Use current time for updates
                     });
                     Zotero.debug(`DeepTutorChatBox: Updated existing session in recent sessions map`);
                 }
@@ -1341,13 +1359,21 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
     // Add SessionTabBar component
     const SessionTabBar = () => {
-        // Convert Map to sorted array
+        // Convert Map to sorted array and sort by lastUpdatedTime
         const sortedSessions = Array.from(recentSessions.entries())
-            .sort((a, b) => new Date(b[1].lastUpdatedTime) - new Date(a[1].lastUpdatedTime));
+            .sort((a, b) => {
+                const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
+                const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
+                return timeB - timeA; // Sort in descending order (most recent first)
+            });
 
         Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
         const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
         const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
+
+        const truncateSessionName = (name) => {
+            return name.length > 11 ? name.substring(0, 11) + '...' : name;
+        };
 
         const handleSessionClick = async (sessionId) => {
             try {
@@ -1358,7 +1384,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     return;
                 }
 
-                // Update recent sessions
+                // Update recent sessions with new timestamp
                 await updateRecentSessions(sessionId);
 
                 // Update the current session through props
@@ -1374,6 +1400,47 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             }
         };
 
+        const handleCloseSession = async (sessionId, event) => {
+            event.stopPropagation(); // Prevent session click when closing
+            
+            // Check if we're closing the active session
+            const isActiveSession = sessionId === currentSession?.id;
+            
+            setRecentSessions(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(sessionId);
+                
+                // Store in preferences
+                const sessionsObject = Object.fromEntries(newMap);
+                Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
+                
+                return newMap;
+            });
+
+            // If we closed the active session and there are other sessions, load the next one
+            if (isActiveSession) {
+                const remainingSessions = Array.from(recentSessions.entries())
+                    .filter(([id]) => id !== sessionId)
+                    .sort((a, b) => {
+                        const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
+                        const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
+                        return timeB - timeA;
+                    });
+
+                if (remainingSessions.length > 0) {
+                    const [nextSessionId, nextSessionData] = remainingSessions[0];
+                    try {
+                        const session = await getSessionById(nextSessionId);
+                        if (session && onSessionSelect) {
+                            onSessionSelect(session.sessionName);
+                        }
+                    } catch (error) {
+                        Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
+                    }
+                }
+            }
+        };
+
         return (
             <div style={styles.sessionTabBar}>
                 {visibleSessions.map(([sessionId, sessionData]) => (
@@ -1385,7 +1452,17 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         }}
                         onClick={() => handleSessionClick(sessionId)}
                     >
-                        {sessionData.name}
+                        {truncateSessionName(sessionData.name)}
+                        <button
+                            style={styles.sessionTabClose}
+                            onClick={(e) => handleCloseSession(sessionId, e)}
+                        >
+                            <img 
+                                src={SessionTabClosePath}
+                                alt="Close" 
+                                style={styles.sessionTabCloseIcon}
+                            />
+                        </button>
                     </button>
                 ))}
                 {hiddenSessions.length > 0 && (
@@ -1407,7 +1484,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                             setShowSessionPopup(false);
                                         }}
                                     >
-                                        {sessionData.name}
+                                        {truncateSessionName(sessionData.name)}
                                     </div>
                                 ))}
                             </div>
