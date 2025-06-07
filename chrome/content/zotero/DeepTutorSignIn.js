@@ -201,6 +201,10 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       
       Zotero.debug('DeepTutor SignIn: Sign in successful');
       setMessage('Login successful!');
+
+      // Initialize empty Map for recent sessions
+      const emptyMap = new Map();
+      Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(Object.fromEntries(emptyMap)));
       
       // Call the success callback after a short delay
       setTimeout(() => {
