@@ -183,6 +183,12 @@ browser,
 	flex: 1;
 	max-width: 100%;
 	gap: 8px;
+	
+	listheader {
+		// Keep aligned with item columns when scrollbars are visible
+		scrollbar-gutter: stable;
+		overflow-y: hidden;
+	}
 
 	richlistbox {
 		min-width: 200px;
@@ -191,15 +197,53 @@ browser,
 		richlistitem {
 			padding: 0;
 			align-items: center;
+			
+			&:nth-child(odd):not([selected]) {
+				background: var(--material-stripe);
+			}
+			
+			.status {
+				display: flex;
+				align-items: center;
+				gap: 0.5em;
+
+				&:not(.needs-update) {
+					.added, .removed {
+						opacity: 0.8;
+					}
+				}
+
+				&.needs-update {
+					cursor: pointer;
+					
+					.text {
+						color: LinkText;
+						text-decoration: underline;
+					}
+					
+					.added {
+						color: rgb(40 161 40 / 0.8);
+					}
+
+					.removed {
+						color: rgb(210 50 50 / 0.8);
+					}
+				}
+			}
 		}
-	}
+		
+		&:focus richlistitem[selected] {
+			.status {
+				&.needs-update {
+					.text {
+						color: var(--color-accent-text);
+					}
 
-	#testing-buttons {
-		gap: 8px;
-
-		button,
-		checkbox {
-			margin: 0;
+					.added, .removed {
+						filter: brightness(1.5);
+					}
+				}
+			}
 		}
 	}
 
@@ -298,11 +342,11 @@ scaffold-item-preview {
 			overflow-wrap: anywhere;
 			
 			&.added {
-				background-color: rgb(0 255 0 / 0.1)
+				background-color: rgb(0 255 0 / 0.1);
 			}
 			
 			&.removed {
-				background-color: rgb(255 0 0 / 0.1)
+				background-color: rgb(255 0 0 / 0.1);
 			}
 		}
 	}
