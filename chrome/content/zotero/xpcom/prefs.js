@@ -582,8 +582,7 @@ Zotero.Prefs = new function() {
 
 			Zotero.alert(null,
 				Zotero.getString('general-error'),
-				Zotero.getString('userjs-pref-warning'
-					+ (userJS.toLowerCase().includes('scholaread') ? '-program' : ''))
+				Zotero.getString('userjs-pref-warning')
 			);
 			Services.startup.quit(
 				Components.interfaces.nsIAppStartup.eAttemptQuit
