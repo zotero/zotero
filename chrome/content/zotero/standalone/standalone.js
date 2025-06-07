@@ -512,6 +512,7 @@ const ZoteroStandalone = new function() {
 			return;
 		}
 		id = id.substr(prefix.length);
+		Zotero.debug('06062025 Standalone: View menu item clicked: ' + id);
 		
 		switch (id) {
 			case 'standard':
@@ -546,18 +547,24 @@ const ZoteroStandalone = new function() {
 				break;
 			
 			case 'item-pane':
+				Zotero.debug('06062025_2 Standalone: Item pane toggle triggered before');
 				var itemPane = document.getElementById('zotero-item-pane');
+				Zotero.debug('06062025_2 Standalone: Item pane toggle triggered');
+				
 				// Show
 				if (itemPane.getAttribute('collapsed') == 'true') {
+					Zotero.debug('Standalone: Opening item pane');
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
 					itemPane.setAttribute('collapsed', false);
 				}
 				// Hide
 				else {
+					Zotero.debug('Standalone: Closing item pane');
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'collapsed');
 					itemPane.setAttribute('collapsed', true);
 				}
 				ZoteroPane.updateLayoutConstraints();
+				Zotero.debug('Standalone: Layout constraints updated for item pane');
 				break;
 			
 			case 'tag-selector':
