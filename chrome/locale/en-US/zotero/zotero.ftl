@@ -737,3 +737,5 @@ mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
