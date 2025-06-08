@@ -41,6 +41,8 @@ Zotero.Prefs = new function() {
 		if (Zotero.addShutdownListener) {
 			Zotero.addShutdownListener(this.unregister.bind(this));
 		}
+		
+		this._checkUserJS();
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
@@ -541,5 +543,54 @@ Zotero.Prefs = new function() {
 
 			return `{{ ${[field, truncate, prefix, suffix].filter(f => f !== null).join(' ')} }}`;
 		});
+	};
+
+	/**
+	 * Preferences set in <profile>/user.js override prefs.js, so they can't
+	 * be changed via the UI and may be hard to locate and remove. Warn if
+	 * user.js contains user_pref() directives.
+	 */
+	this._checkUserJS = async function () {
+		let userJSPath = PathUtils.join(Zotero.Profile.dir, 'user.js');
+		let userJS;
+		try {
+			userJS = await Zotero.File.getContentsAsync(userJSPath);
+		}
+		catch {
+			return;
+		}
+		
+		const DISALLOWED_PREF_RE = /^\s*user_pref\s*\(\s*['"]extensions\.zotero\.fileHandler\..+$/g;
+		
+		let updatedUserJS = userJS
+			.split('\n')
+			.filter((prefLine) => {
+				if (DISALLOWED_PREF_RE.test(prefLine)) {
+					Zotero.debug('user.js contains disallowed pref: ' + prefLine);
+					return false;
+				}
+				return true;
+			})
+			.join('\n');
+		
+		if (updatedUserJS === userJS) {
+			return;
+		}
+		
+		try {
+			await Zotero.File.putContentsAsync(userJSPath, updatedUserJS);
+
+			Zotero.alert(null,
+				Zotero.getString('general-error'),
+				Zotero.getString('userjs-pref-warning')
+			);
+			Services.startup.quit(
+				Components.interfaces.nsIAppStartup.eAttemptQuit
+				| Components.interfaces.nsIAppStartup.eRestart
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	};
 };
