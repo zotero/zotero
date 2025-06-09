@@ -975,7 +975,7 @@ describe("Connector Server", function () {
 	
 	
 	describe("/connector/updateSession", function () {
-		it("should update collections and tags of item saved via /saveItems", async function () {
+		it("should update collections, tags, and notes of item saved via /saveItems", async function () {
 			var collection1 = await createDataObject('collection');
 			var collection2 = await createDataObject('collection');
 			await select(win, collection2);
@@ -1054,7 +1054,8 @@ describe("Connector Server", function () {
 					body: JSON.stringify({
 						sessionID,
 						target: collection1.treeViewID,
-						tags: "A, B"
+						tags: "A, B",
+						note: "Test note"
 					})
 				}
 			);
@@ -1063,6 +1064,8 @@ describe("Connector Server", function () {
 			assert.isTrue(collection1.hasItem(item.id));
 			assert.isTrue(item.hasTag("A"));
 			assert.isTrue(item.hasTag("B"));
+			let note = Zotero.Items.get(item.getNotes())[0];
+			assert.equal(note.getNote(), "Test note");
 		});
 		
 		it("should update collections and tags of a PDF saved via /saveStandaloneAttachment", async function () {
@@ -1183,7 +1186,8 @@ describe("Connector Server", function () {
 					body: JSON.stringify({
 						sessionID,
 						target: collection1.treeViewID,
-						tags: "A, B"
+						tags: "A, B",
+						note: "Test note"
 					})
 				}
 			);
@@ -1192,6 +1196,8 @@ describe("Connector Server", function () {
 			assert.isTrue(collection1.hasItem(item.id));
 			assert.isTrue(item.hasTag("A"));
 			assert.isTrue(item.hasTag("B"));
+			let note = Zotero.Items.get(item.getNotes())[0];
+			assert.equal(note.getNote(), "Test note");
 		});
 		
 		it("should move item saved via /saveItems to another library", async function () {
@@ -1252,6 +1258,24 @@ describe("Connector Server", function () {
 			// Attachment save returns with 200 since library files are not editable
 			assert.equal(req.status, 200);
 			assert.equal(req.responseText, "Library files are not editable.");
+
+			// Add a note
+			await httpRequest(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID,
+						note: "Test note"
+					})
+				}
+			);
+			var note1ID = item1.getNotes()[0];
+			assert.isNumber(note1ID);
 			
 			// Move item to user library where we can save files
 			reqPromise = httpRequest(
@@ -1282,6 +1306,13 @@ describe("Connector Server", function () {
 			assert.isFalse(Zotero.Items.exists(item1.id));
 			assert.equal(item2.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(item2.numAttachments(), 1);
+			// Make sure the child note remains
+			assert.equal(item2.getNotes().length, 1);
+			let note = Zotero.Items.get(item2.getNotes())[0];
+			let note2ID = note.id;
+			assert.equal(note.getNote(), "Test note");
+			// Make sure the child note from another group is gone
+			assert.isFalse(Zotero.Items.get(note1ID));
 			
 			// Move back to the file-editing restricted group
 			reqPromise = httpRequest(
@@ -1293,7 +1324,8 @@ describe("Connector Server", function () {
 					},
 					body: JSON.stringify({
 						sessionID,
-						target: group.treeViewID
+						target: group.treeViewID,
+						note: note.getNote()
 					})
 				}
 			);
@@ -1306,6 +1338,12 @@ describe("Connector Server", function () {
 			assert.isFalse(Zotero.Items.exists(item2.id));
 			assert.equal(item3.libraryID, group.libraryID);
 			assert.equal(item3.numAttachments(), 0);
+			// Make sure the child note remains
+			assert.equal(item3.getNotes().length, 1);
+			note = Zotero.Items.get(item3.getNotes())[0];
+			assert.equal(note.getNote(), "Test note");
+			// Make sure the child note from another group is gone
+			assert.isFalse(Zotero.Items.get(note2ID));
 		});
 		
 		it("should move item saved via /saveSnapshot to another library", async function () {
@@ -1403,6 +1441,74 @@ describe("Connector Server", function () {
 			assert.isFalse(Zotero.Items.exists(item2.id));
 			assert.equal(item3.libraryID, group.libraryID);
 			assert.equal(item3.numAttachments(), 0);
+		});
+
+		it("should delete added child note if its content is erased", async function () {
+			let collection = await createDataObject('collection');
+			await select(win, collection);
+
+			let sessionID = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Note Test",
+						creators: [
+							{ firstName: "First", lastName: "Last", creatorType: "author" }
+						],
+						attachments: []
+					}
+				],
+				uri: "http://example.com"
+			};
+
+			let promise = waitForItemEvent('add');
+			// Create item
+			await httpRequest(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload)
+				}
+			);
+			let ids = await promise;
+			let item = Zotero.Items.get(ids[0]);
+
+			// Add a note
+			await httpRequest(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						sessionID,
+						target: collection.treeViewID,
+						note: "Test note"
+					})
+				}
+			);
+			let notes = Zotero.Items.get(item.getNotes());
+			assert.isNotEmpty(notes);
+			assert.equal(notes[0].getNote(), "Test note");
+
+			// Erase the note
+			await httpRequest(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						sessionID,
+						target: collection.treeViewID,
+						note: ""
+					})
+				}
+			);
+			// Make sure the child note is removed
+			notes = Zotero.Items.get(item.getNotes());
+			assert.equal(notes.length, 0);
 		});
 	});
 	
