@@ -353,9 +353,20 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
-	if(Zotero.CollectionTreeCache.lastSearch && !options.skipCache) {
+
+	if (options.skipAnnotationAuthors) {
+		if (Zotero.CollectionTreeCache.lastSearchNoAnnotationAuthors) {
+			return Zotero.CollectionTreeCache.lastSearchNoAnnotationAuthors;
+		}
+	}
+	else if (options.skipAnnotationColors) {
+		if (Zotero.CollectionTreeCache.lastSearchNoAnnotationColors) {
+			return Zotero.CollectionTreeCache.lastSearchNoAnnotationColors;
+		}
+	}
+	else if (Zotero.CollectionTreeCache.lastSearch) {
 		return Zotero.CollectionTreeCache.lastSearch;
-	}	
+	}
 	
 	var includeScopeChildren = false;
 	
@@ -453,8 +464,14 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		}
 		s2.addCondition('blockEnd');
 	}
-	if (!options.skipCache) {
-		Zotero.CollectionTreeCache.lastTreeRow = this;
+	Zotero.CollectionTreeCache.lastTreeRow = this;
+	if (options.skipAnnotationAuthors) {
+		Zotero.CollectionTreeCache.lastSearchNoAnnotationAuthors = s2;
+	}
+	else if (options.skipAnnotationColors) {
+		Zotero.CollectionTreeCache.lastSearchNoAnnotationColors = s2;
+	}
+	else {
 		Zotero.CollectionTreeCache.lastSearch = s2;
 	}
 	return s2;
@@ -487,7 +504,7 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 };
 
 Zotero.CollectionTreeRow.prototype.getAnnotationColors = async function () {
-	let searchObject = await this.getSearchObject({ skipCache: true, skipAnnotationAuthors: false, skipAnnotationColors: true });
+	let searchObject = await this.getSearchObject({ skipAnnotationAuthors: false, skipAnnotationColors: true });
 	let searchResultIDs = await searchObject.search();
 	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
 	let usedColors = new Set(annotations.map(annotation => annotation.annotationColor));
@@ -495,11 +512,10 @@ Zotero.CollectionTreeRow.prototype.getAnnotationColors = async function () {
 };
 
 Zotero.CollectionTreeRow.prototype.getAnnotationAuthors = async function () {
-	let searchObject = await this.getSearchObject({ skipCache: true, skipAnnotationAuthors: true, skipAnnotationColors: false });
+	let searchObject = await this.getSearchObject({ skipAnnotationAuthors: true, skipAnnotationColors: false });
 	let searchResultIDs = await searchObject.search();
 	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
-	let authorIDs = new Set(annotations.map(annotation => annotation.createdByUserID).filter(userID => userID !== null));
-	return authorIDs;
+	return new Set(annotations.map(annotation => annotation.createdByUserID).filter(userID => userID !== null));
 };
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
@@ -548,6 +564,8 @@ Zotero.CollectionTreeCache = {
 	"lastTreeRow":null,
 	"lastTempTable":null,
 	"lastSearch":null,
+	"lastSearchNoAnnotationAuthors":null,
+	"lastSearchNoAnnotationColors":null,
 	"lastResults":null,
 
 	"clear": function () {
@@ -564,5 +582,7 @@ Zotero.CollectionTreeCache = {
 		}
 		this.lastTempTable = null;
 		this.lastResults = null;
+		this.lastSearchNoAnnotationAuthors = null;
+		this.lastSearchNoAnnotationColors = null;
 	}
 }

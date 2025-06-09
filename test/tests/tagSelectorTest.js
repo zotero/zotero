@@ -619,7 +619,7 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), tag2);
 			
 			// Remove tag from item
-			promise = waitForTagSelector(win, 2);
+			promise = waitForTagSelector(win, 3);
 			item1.removeTag(tag1);
 			await item1.saveTx();
 			await promise;

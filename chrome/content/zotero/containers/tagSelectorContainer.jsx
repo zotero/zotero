@@ -150,11 +150,20 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	
 		newState.annotationColors = await this.collectionTreeRow.getAnnotationColors();
 		newState.annotationAuthors = await this.collectionTreeRow.getAnnotationAuthors();
-		// Uncheck selected annotation color that do not have matching any annotations left
-		for (let color of [...this.selectedAnnotationColors]) {
-			if (!newState.annotationColors.has(color)) {
-				this.selectedAnnotationColors.delete(color);
-			}
+
+		// After the last item with a selected color is removed, un-select the color.
+		// If, after that, there are no selected colors left, refresh the
+		// itemTree to remove the color conditions, otherwise, itemTree will be just empty.
+		// Same logic for the authors
+		let prevColors = new Set([...this.selectedAnnotationColors]);
+		this.selectedAnnotationColors = new Set([...this.selectedAnnotationColors].filter(color => newState.annotationColors.has(color)));
+		if (prevColors.size && !this.selectedAnnotationColors.size) {
+			this.props.onSelection();
+		}
+		let prevAuthors = new Set([...this.selectedAnnotationAuthors]);
+		this.selectedAnnotationAuthors = new Set([...this.selectedAnnotationAuthors].filter(userID => newState.annotationAuthors.has(userID)));
+		if (prevAuthors.size && !this.selectedAnnotationAuthors.size) {
+			this.props.onSelection();
 		}
 		this.setState(newState);
 	}
@@ -561,6 +570,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			if (this.state.searchString) {
 				annotationAuthors = annotationAuthors.filter(author => author.name.toLowerCase().includes(this.state.searchString.toLowerCase()));
 			}
+			annotationAuthors.sort((a, b) => a.name.localeCompare(b.name));
 			annotationColors = Zotero.Annotations.COLORS.map(color => ({
 				...color,
 				enabled: this.state.annotationColors.has(color.color),
