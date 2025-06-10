@@ -408,6 +408,7 @@ function ModelSelection({ onSubmit }) {
   const [fileList, setFileList] = useState([]);
   const [originalFileList, setOriginalFileList] = useState([]);
   const [modelName, setModelName] = useState('');
+  const [backupModelName, setBackupModelName] = useState('Default Session');
   const [selectedType, setSelectedType] = useState('normal');
   const [searchValue, setSearchValue] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -415,6 +416,7 @@ function ModelSelection({ onSubmit }) {
   const [filteredAttachments, setFilteredAttachments] = useState([]);
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [showFileList, setShowFileList] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Add debug logging for fileList changes
   useEffect(() => {
@@ -422,6 +424,23 @@ function ModelSelection({ onSubmit }) {
     fileList.forEach((file, index) => {
       Zotero.debug(`ModelSelection: fileList[${index}] - id: ${file.id}, name: ${file.name}`);
     });
+    
+    // Clear error message when files are added
+    if (fileList.length > 0 && errorMessage) {
+      setErrorMessage('');
+    }
+  }, [fileList, errorMessage]);
+
+  // Update model name based on first file in fileList
+  useEffect(() => {
+    if (fileList.length > 0) {
+      const firstName = fileList[0].name;
+      setBackupModelName(firstName);
+      Zotero.debug(`ModelSelection: Updated model name to: ${firstName}`);
+    } else {
+      setBackupModelName('Default Session');
+      Zotero.debug('ModelSelection: Reset model name to Default Session');
+    }
   }, [fileList]);
 
   // Load attachment names when component mounts
@@ -637,10 +656,19 @@ function ModelSelection({ onSubmit }) {
   };
 
   const handleSubmit = async () => {
-    if (!modelName.trim()) {
-      Zotero.debug("ModelSelection: Model name is required");
+    // Check if no files are selected
+    if (fileList.length === 0) {
+      Zotero.debug("ModelSelection: No files selected");
+      setErrorMessage("Please add at least one file to create a session");
       return;
     }
+
+    // Clear any existing error message
+    setErrorMessage('');
+
+    // Determine the final session name
+    const finalSessionName = modelName.trim() || backupModelName || "Default Session";
+    Zotero.debug(`ModelSelection: Using session name: ${finalSessionName}`);
 
     try {
       // Get user ID from API
@@ -698,7 +726,7 @@ function ModelSelection({ onSubmit }) {
       // Create session data
       const sessionData = {
         userId: userData.id,
-        sessionName: modelName || "New Session",
+        sessionName: finalSessionName,
         type: selectedType === 'lite' ? SessionType.LITE : 
               selectedType === 'advanced' ? SessionType.ADVANCED : 
               SessionType.BASIC,
@@ -742,6 +770,7 @@ function ModelSelection({ onSubmit }) {
 
     } catch (error) {
       Zotero.debug('ModelSelection: Error creating session:', error);
+      setErrorMessage('Failed to create session. Please try again.');
     }
   };
 
@@ -880,7 +909,7 @@ function ModelSelection({ onSubmit }) {
           value={modelName}
           onChange={e => setModelName(e.target.value)}
           style={styles.input}
-          placeholder="Default Name According to the Paper Title"
+          placeholder={backupModelName}
         />
       </div>
 
@@ -956,6 +985,7 @@ function ModelSelection({ onSubmit }) {
           Drag an Item Here
         </div>
       </div>
+
       <div style={styles.modelSection}>
         <label style={styles.label}>Select Your Model</label>
         <div style={styles.modelTypeRow}>
@@ -1050,6 +1080,23 @@ function ModelSelection({ onSubmit }) {
       <button style={styles.createButton} onClick={handleSubmit}>
         Create
       </button>
+
+      {errorMessage && (
+        <div style={{
+          width: '100%',
+          maxWidth: '26rem',
+          padding: '0.75rem',
+          marginBottom: '1rem',
+          backgroundColor: '#FEF2F2',
+          border: '1px solid #FECACA',
+          borderRadius: '0.5rem',
+          color: '#DC2626',
+          fontSize: '0.875rem',
+          textAlign: 'center'
+        }}>
+          {errorMessage}
+        </div>
+      )}
     </div>
   );
 }
