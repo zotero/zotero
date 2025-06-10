@@ -1727,6 +1727,7 @@ class ReaderWindow extends ReaderInstance {
 			event,
 			tabType,
 			tabSubType,
+			tabID: undefined,
 			getContext: () => ({
 				items: this._item ? [this._item] : [],
 				tabType,

@@ -2606,6 +2606,13 @@
 			}
 
 			let targetElem = event.target.closest("editable-text")?._input;
+			let tabID;
+			let tabSubType;
+			if (typeof Zotero_Tabs != 'undefined') {
+				let { id, subType } = Zotero_Tabs.getTabInfo();
+				tabID = id;
+				tabSubType = subType;
+			}
 
 			Zotero.MenuManager.updateMenuPopup(
 				popup,
@@ -2614,7 +2621,9 @@
 					event: undefined,
 					getContext: () => ({
 						items: [this.item],
+						tabID,
 						tabType: this.tabType,
+						tabSubType,
 						editable: this.editable,
 						fieldName,
 						// Do not expose the original ref to avoid memory leak

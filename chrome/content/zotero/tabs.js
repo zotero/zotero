@@ -876,4 +876,19 @@ var Zotero_Tabs = new function () {
 			this.tabsMenuPanel.hidePopup();
 		}
 	};
+
+	this.getTabInfo = function (tabID) {
+		if (!tabID) {
+			tabID = this._selectedID;
+		}
+		let { tab } = this._getTab(tabID);
+		let info = Object.assign({}, tab);
+		if (info.type !== 'library') {
+			let item = Zotero.Items.get(info.data?.itemID);
+			if (item && item.isAttachment()) {
+				info.subType = item.attachmentReaderType;
+			}
+		}
+		return info;
+	};
 };
