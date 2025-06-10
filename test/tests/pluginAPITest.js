@@ -1107,5 +1107,35 @@ describe("Plugin API", function () {
 
 			reader.close();
 		});
+
+		it("should group custom menus", async function () {
+			let option = Object.assign({}, defaultOption, {
+				target: "main/library/item",
+				menus: Array.from({length: 100}, () => ({
+					menuType: "menuitem",
+					l10nID: "menu-print",
+				})),
+			});
+
+			initCache("onShowing");
+			initCache("onCommand");
+
+			let menuID = Zotero.MenuManager.registerMenu(option);
+			assert.isString(menuID);
+
+			let popup = doc.querySelector("#zotero-itemmenu");
+
+			let promise = new Promise((resolve) => {
+				popup.addEventListener("popupshown", resolve, { once: true });
+			});
+
+			ZoteroPane.onItemsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
+			await promise;
+
+			let groupedMenus = popup.querySelector(".zotero-custom-menu-group-submenu");
+			assert.exists(groupedMenus, "Grouped menus should be created");
+
+			assert.isTrue(Zotero.MenuManager.unregisterMenu(menuID));
+		});
 	});
 });
