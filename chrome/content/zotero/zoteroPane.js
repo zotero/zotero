@@ -5929,7 +5929,7 @@ var ZoteroPane = new function()
 						Zotero.logError(e);
 					}
 				}
-				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink' && x.annotationType != 'image'));
+				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
 			}
 		}
 		
