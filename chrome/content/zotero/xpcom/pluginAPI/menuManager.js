@@ -336,6 +336,13 @@
 			let { event, getContext, tabType, tabSubType, skipGrouping } = args;
 
 			if (!menus || menus.length === 0) {
+				// If no menus are provided, clear the popup and return
+				let toRemove = Array.from(popupElem.querySelectorAll(
+					`& > .${CUSTOM_MENU_CLASS}`
+				));
+				for (let elem of toRemove) {
+					elem.remove();
+				}
 				return;
 			}
 			
