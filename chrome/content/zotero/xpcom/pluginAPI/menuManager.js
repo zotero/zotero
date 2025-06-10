@@ -639,7 +639,7 @@
 					}
 					this.updateMenuPopup(ev.target, menuData.menus, targetType, {
 						event: ev,
-						getContext: wrappedGetContext,
+						getContext,
 						tabType,
 						tabSubType,
 						// Skip grouping for submenus
