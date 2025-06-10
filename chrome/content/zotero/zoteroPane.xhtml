@@ -236,7 +236,7 @@
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">		
 					<!-- File menu -->
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
-							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
+							onpopupshowing="ZoteroStandalone.onFileMenuOpen(event)">
 						<menupopup id="menu_FilePopup">
 							<menu id="menu_newItem" class="menu-type-library" label="&zotero.toolbar.newItem.label;">
 								<menupopup id="menu_NewItemPopup"
@@ -251,7 +251,7 @@
 									id="menu_attachmentAdd"
 									class="menu-type-library"
 									data-l10n-id="menu-add-attachment">
-								<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(this)">
+								<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(event, this)">
 									<menuitem
 										data-l10n-id="menu-add-standalone-file-attachment"
 										command="cmd_zotero_newStandaloneFileAttachment"
@@ -279,7 +279,7 @@
 									id="menu_noteAdd"
 									class="menu-type-library"
 									data-l10n-id="menu-new-note">
-								<menupopup onpopupshowing="ZoteroPane_Local.updateNewNoteMenu()">
+								<menupopup onpopupshowing="ZoteroPane_Local.updateNewNoteMenu(event, this)">
 									<menuitem
 										data-l10n-id="menu-new-standalone-note"
 										command="cmd_zotero_newStandaloneNote"
@@ -360,9 +360,8 @@
 					</menu>
 					
 					<menu id="edit-menu" data-l10n-id="menu-edit">
-						<!-- goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused -->
 						<menupopup id="menu_EditPopup"
-									onpopupshowing="ZoteroStandalone.updateQuickCopyOptions();goUpdateGlobalEditMenuItems(true)">
+									onpopupshowing="ZoteroStandalone.onEditMenuOpen(event)">
 							<menuitem id="menu_undo"
 									key="key_undo"
 									command="cmd_undo" data-l10n-id="text-action-undo"/>
@@ -446,7 +445,7 @@
 					<menu id="view-menu"
 							label="&viewMenu.label;"
 							accesskey="&viewMenu.accesskey;"
-							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
+							onpopupshowing="ZoteroStandalone.onViewMenuOpen(event)">
 						<menupopup id="menu_viewPopup">
 							<menuitem
 								id="view-menuitem-hand-tool"
@@ -690,7 +689,7 @@
 						class="menu-type-reader"
 						label="&goMenu.label;"
 						accesskey="&goMenu.accesskey;"
-						onpopupshowing="ZoteroStandalone.onGoMenuOpen()"
+						onpopupshowing="ZoteroStandalone.onGoMenuOpen(event)"
 					>
 						<menupopup id="menu_goPopup">
 							<menuitem
@@ -722,7 +721,7 @@
 					</menu>
 					
 					<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
-						<menupopup id="menu_ToolsPopup">
+						<menupopup id="menu_ToolsPopup" onpopupshowing="ZoteroStandalone.onToolsMenuOpen(event)">
 							<menuitem id="menu_rtfScan" class="menu-type-library" label="&zotero.toolbar.rtfScan.label;"
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator class="menu-type-library"/>
@@ -771,7 +770,7 @@
 					<menu id="helpMenu"
 							label="&helpMenu.label;"
 							accesskey="&helpMenu.accesskey;">
-						<menupopup id="menu_HelpPopup">
+						<menupopup id="menu_HelpPopup" onpopupshowing="ZoteroStandalone.onHelpMenuOpen(event)">
 							<menuitem id="menu_openHelp"
 									  oncommand="ZoteroStandalone.openHelp();"
 									  label="&productHelp.label;"
@@ -1292,7 +1291,7 @@
 														data-l10n-id="toolbar-add-attachment"
 														type="menu"
 														wantdropmarker="true">
-													<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(this)">
+													<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(event, this)">
 														<menuitem
 															data-l10n-id="menu-add-standalone-file-attachment"
 															command="cmd_zotero_newStandaloneFileAttachment"
@@ -1322,7 +1321,7 @@
 														type="menu"
 														tabindex="-1"
 														wantdropmarker="true">
-													<menupopup onpopupshowing="ZoteroPane.updateNewNoteMenu()">
+													<menupopup onpopupshowing="ZoteroPane.updateNewNoteMenu(event, this)">
 														<menuitem
 															data-l10n-id="menu-new-standalone-note"
 															command="cmd_zotero_newStandaloneNote"

@@ -1571,8 +1571,10 @@ class ReaderWindow extends ReaderInstance {
 			if (event.target === this._window.document) {
 				this._popupset = this._window.document.getElementById('zotero-reader-popupset');
 				this._window.onFileMenuOpen = this._onFileMenuOpen.bind(this);
+				this._window.onEditMenuOpen = this._onEditMenuOpen.bind(this);
 				this._window.onGoMenuOpen = this._onGoMenuOpen.bind(this);
 				this._window.onViewMenuOpen = this._onViewMenuOpen.bind(this);
+				this._window.onWindowMenuOpen = this._onWindowMenuOpen.bind(this);
 				this._window.reader = this;
 				this._iframe = this._window.document.getElementById('reader');
 				this._iframe.docShell.windowDraggingAllowed = true;
@@ -1611,7 +1613,10 @@ class ReaderWindow extends ReaderInstance {
 		this._window.document.title = Zotero.Utilities.Internal.renderItemTitle(title);
 	}
 
-	_onFileMenuOpen() {
+	_onFileMenuOpen(event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
 		let item = Zotero.Items.get(this._item.id);
 		let library = Zotero.Libraries.get(item.libraryID);
 		
@@ -1631,9 +1636,23 @@ class ReaderWindow extends ReaderInstance {
 			transferFromPDFMenuitem.setAttribute('disabled', true);
 			importFromEPUBMenuitem.setAttribute('disabled', true);
 		}
+
+		this.onUpdateCustomMenus(event, 'file', popup);
 	}
 
-	_onViewMenuOpen() {
+	_onEditMenuOpen(event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
+		this._window.goUpdateGlobalEditMenuItems(true);
+
+		this.onUpdateCustomMenus(event, 'edit', popup);
+	}
+
+	_onViewMenuOpen(event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
 		if (this._type === 'pdf' || this._type === 'epub') {
 			this._window.document.getElementById('view-menuitem-no-spreads').setAttribute('checked', this._internalReader.spreadMode === 0);
 			this._window.document.getElementById('view-menuitem-odd-spreads').setAttribute('checked', this._internalReader.spreadMode === 1);
@@ -1654,9 +1673,14 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this._internalReader.splitType === 'vertical');
 		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this._internalReader.splitType === 'horizontal');
+
+		this.onUpdateCustomMenus(event, 'view', popup);
 	}
 
-	_onGoMenuOpen() {
+	_onGoMenuOpen(event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
 		let keyBack = this._window.document.getElementById('key_back');
 		let keyForward = this._window.document.getElementById('key_forward');
 
@@ -1684,7 +1708,32 @@ class ReaderWindow extends ReaderInstance {
 		}
 		this._window.document.getElementById('go-menuitem-back').setAttribute('disabled', !this._internalReader.canNavigateBack);
 		this._window.document.getElementById('go-menuitem-forward').setAttribute('disabled', !this._internalReader.canNavigateForward);
+
+		this.onUpdateCustomMenus(event, 'go', popup);
 	}
+
+	_onWindowMenuOpen(event, popup) {
+		if (event.target !== popup) {
+			return;
+		}
+
+		this.onUpdateCustomMenus(event, 'window', popup);
+	}
+
+	onUpdateCustomMenus = function (event, type, popup) {
+		let tabType = "reader";
+		let tabSubType = this._type;
+		Zotero.MenuManager.updateMenuPopup(popup, `reader/menubar/${type}`, {
+			event,
+			tabType,
+			tabSubType,
+			getContext: () => ({
+				items: this._item ? [this._item] : [],
+				tabType,
+				tabSubType,
+			})
+		});
+	};
 }
 
 

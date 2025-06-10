@@ -236,6 +236,22 @@
 						event.preventDefault();
 						let menu = button.querySelector('menupopup');
 						await Zotero_LocateMenu.buildLocateMenu(menu);
+
+						Zotero.MenuManager.updateMenuPopup(menu, "sidenav/locate", {
+							event: undefined,
+							getContext: () => {
+								let ret = {
+									items: []
+								};
+								if (this.container) {
+									ret.items = [this.container.item];
+									ret.tabType = this.container.tabType;
+									ret.tabID = this.container.tabID;
+								}
+								return ret;
+							}
+						});
+
 						await document.l10n.translateFragment(menu);
 						button.open = true;
 					});
