@@ -180,7 +180,7 @@ class DeepTutorBottomSection extends React.Component {
         if (!this.props.showProfilePopup) return null;
 
         return (
-            <div style={styles.profilePopup}>
+            <div style={styles.profilePopup} onClick={(e) => e.stopPropagation()}>
                 {this.props.isAuthenticated && this.props.currentUser ? (
                     <>
                         <div style={styles.profileInfo}>
@@ -301,7 +301,10 @@ class DeepTutorBottomSection extends React.Component {
                     </div>
                     <div style={styles.buttonsBox}>
                         <div style={styles.profileButtonContainer}>
-                            <button style={styles.textButton} onClick={this.props.onToggleProfilePopup}>
+                            <button style={styles.textButton} onClick={(e) => {
+                                e.stopPropagation();
+                                this.props.onToggleProfilePopup();
+                            }}>
                                 <img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
                                 Profile
                             </button>
