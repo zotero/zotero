@@ -504,14 +504,7 @@ const ZoteroStandalone = new function () {
 	};
 
 	this.onUpdateCustomMenus = function (event, type) {
-		let [tabType, _] = Zotero_Tabs.selectedType.split("-");
-		let readerType;
-		if (tabType !== 'library') {
-			let item = Zotero.Items.get(Zotero_Tabs._getTab(Zotero_Tabs.selectedID).tab?.data?.itemID);
-			if (item && item.isAttachment()) {
-				readerType = item.attachmentReaderType;
-			}
-		}
+		let { type: tabType, subType: tabSubType, id: tabID } = Zotero_Tabs.getTabInfo();
 
 		const POPUP_SELECTOR_MAP = {
 			file: '#menu_FilePopup',
@@ -527,14 +520,15 @@ const ZoteroStandalone = new function () {
 		}
 		Zotero.MenuManager.updateMenuPopup(popup, `main/menubar/${type}`, {
 			event,
+			tabID,
 			tabType,
-			tabSubType: readerType,
+			tabSubType,
 			getContext: () => ({
 				items: tabType === 'library'
 					? ZoteroPane.getSelectedItems()
 					: [Zotero.Items.get(Zotero_Tabs._getTab(Zotero_Tabs.selectedID).tab?.data?.itemID)],
 				tabType,
-				tabSubType: readerType,
+				tabSubType,
 				tabID: Zotero_Tabs.selectedID
 			})
 		});
