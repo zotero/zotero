@@ -217,7 +217,84 @@ class DeepTutorBottomSection extends React.Component {
                 <div style={styles.divider} />
                 <div style={styles.bottomLeft}>
                     <div style={styles.feedbackBox}>
-                        <button style={styles.textButton}>
+                        <button 
+                            style={styles.textButton}
+                            onClick={() => {
+                                Zotero.debug("DeepTutor: Feedback button clicked");
+                                const url = 'https://docs.google.com/forms/d/e/1FAIpQLSdOZgoMsM4Th2nAAMv8CvhA2TsqTqWq_psQpdfuadoiVsus6g/viewform';
+                                Zotero.debug(`DeepTutor: Attempting to open feedback URL: ${url}`);
+                                
+                                try {
+                                    // Primary: Use Zotero's proper API for opening external URLs
+                                    Zotero.debug("DeepTutor: Trying primary method - Zotero.launchURL");
+                                    Zotero.launchURL(url);
+                                    Zotero.debug("DeepTutor: Successfully called Zotero.launchURL");
+                                } catch (error) {
+                                    Zotero.debug(`DeepTutor: Primary method failed - Zotero.launchURL: ${error.message}`);
+                                    
+                                    // Fallback 1: Try Zotero.Utilities.Internal.launchURL
+                                    try {
+                                        if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
+                                            Zotero.debug("DeepTutor: Trying Fallback 1 - Zotero.Utilities.Internal.launchURL");
+                                            Zotero.Utilities.Internal.launchURL(url);
+                                            Zotero.debug("DeepTutor: Successfully called Zotero.Utilities.Internal.launchURL");
+                                        } else {
+                                            throw new Error("Zotero.Utilities.Internal.launchURL not available");
+                                        }
+                                    } catch (fallback1Error) {
+                                        Zotero.debug(`DeepTutor: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
+                                        
+                                        // Fallback 2: Try Zotero.HTTP.loadDocuments
+                                        try {
+                                            if (Zotero.HTTP && Zotero.HTTP.loadDocuments) {
+                                                Zotero.debug("DeepTutor: Trying Fallback 2 - Zotero.HTTP.loadDocuments");
+                                                Zotero.HTTP.loadDocuments([url]);
+                                                Zotero.debug("DeepTutor: Successfully called Zotero.HTTP.loadDocuments");
+                                            } else {
+                                                throw new Error("Zotero.HTTP.loadDocuments not available");
+                                            }
+                                        } catch (fallback2Error) {
+                                            Zotero.debug(`DeepTutor: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
+                                            
+                                            // Fallback 3: Try XPCOM nsIExternalProtocolService
+                                            try {
+                                                if (typeof Cc !== 'undefined' && typeof Ci !== 'undefined') {
+                                                    Zotero.debug("DeepTutor: Trying Fallback 3 - XPCOM nsIExternalProtocolService (using Cc/Ci shortcuts)");
+                                                    const extps = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+                                                        .getService(Ci.nsIExternalProtocolService);
+                                                    const uri = Cc["@mozilla.org/network/io-service;1"]
+                                                        .getService(Ci.nsIIOService)
+                                                        .newURI(url, null, null);
+                                                    extps.loadURI(uri);
+                                                    Zotero.debug("DeepTutor: Successfully opened URL via XPCOM nsIExternalProtocolService");
+                                                } else {
+                                                    throw new Error("XPCOM Cc/Ci shortcuts not available");
+                                                }
+                                            } catch (fallback3Error) {
+                                                Zotero.debug(`DeepTutor: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
+                                                
+                                                // Final fallback: Copy URL to clipboard
+                                                if (navigator.clipboard) {
+                                                    Zotero.debug("DeepTutor: Trying final fallback - copy URL to clipboard");
+                                                    navigator.clipboard.writeText(url)
+                                                        .then(() => {
+                                                            Zotero.debug("DeepTutor: Successfully copied feedback URL to clipboard");
+                                                            Zotero.alert(null, "DeepTutor", 'Feedback form URL copied to clipboard!\nPlease paste it in your browser to access the form.');
+                                                        })
+                                                        .catch((clipboardError) => {
+                                                            Zotero.debug(`DeepTutor: Failed to copy to clipboard: ${clipboardError.message}`);
+                                                            Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
+                                                        });
+                                                } else {
+                                                    Zotero.debug("DeepTutor: Clipboard API not available, showing alert with URL");
+                                                    Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }}
+                        >
                             <img src={this.props.feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
                             Give Us Feedback
                         </button>
