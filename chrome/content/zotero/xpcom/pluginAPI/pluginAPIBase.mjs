@@ -326,7 +326,7 @@ class PluginAPIBase {
 		if (!this._config.notifyType || this._config.notifyType === "unknown") {
 			return;
 		}
-		this._lastUpdateID = `${new Date().getTime()}-${lazy.Zotero.Utilities.randomString()}`;
+		this._lastUpdateID = this._generateRandomKey();
 		await lazy.Zotero.DB.executeTransaction(async () => {
 			lazy.Zotero.Notifier.queue(
 				this._config.notifyAction,
@@ -382,6 +382,10 @@ class PluginAPIBase {
 
 	_getOptionMainKey(option) {
 		return option[this._config.mainKeyName];
+	}
+
+	_generateRandomKey() {
+		return `${lazy.Zotero.Utilities.randomString()}-${new Date().getTime()}`;
 	}
 }
 

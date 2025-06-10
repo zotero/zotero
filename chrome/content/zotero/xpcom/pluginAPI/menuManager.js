@@ -59,6 +59,11 @@
 		"sidenav/locate",
 	];
 
+	const GROUPED_TARGETS = [
+		"main/library/collection",
+		"main/library/item",
+	];
+
 	const VALID_MENU_TYPES = [
 		"menuitem",
 		"separator",
@@ -209,8 +214,16 @@
 			}
 
 			if (option.menus?.length === 0) {
-				this._log(`Invalid menu: ${option} - 'menus' property must not be empty`, "warn");
+				this._log("Invalid menu: 'menus' property must not be empty", "warn");
 				return false;
+			}
+
+			// For automatic grouping, top-level separators are not allowed
+			if (GROUPED_TARGETS.includes(option.target)) {
+				if (option.menus.find(menu => menu.menuType === "separator")) {
+					this._log(`Invalid menu: top-level separators are not allowed for target ${option.target}`, "warn");
+					return false;
+				}
 			}
 
 			// Validate nested menus recursively
@@ -240,6 +253,9 @@
 			}
 			menuData = selfResult.obj;
 
+			// Add unique key to the menu data
+			menuData._key = `zotero-custom-menu-${this._generateRandomKey()}`;
+
 			// Only check for submenu type here, as submenus can have nested menus
 			if (menuData?.menuType !== "submenu") {
 				return {
@@ -249,7 +265,7 @@
 			}
 			// Submenu must have a 'menus' property
 			if (!menuData.menus) {
-				this._log(`Invalid submenu: ${menuData} - missing 'menus' property`, "warn");
+				this._log(`Invalid submenu: ${path} missing 'menus' property`, "warn");
 				return {
 					valid: false,
 				};
@@ -295,7 +311,7 @@
 		 * @param {string} targetType - The target type of the menu
 		 * @returns {MenuOptions[]} - The custom menu data for the target type
 		 */
-		_getCustomMenuOptions(targetType) {
+		getCustomMenuOptions(targetType) {
 			return this.options
 				.filter(option => option.target === targetType)
 				// Sort to ensure consistent ordering
@@ -305,6 +321,7 @@
 		/**
 		 * Update the popup element with the custom menu items for the target type
 		 * @param {XULPopupElement} popupElem - The popup element to update
+		 * @param {MenuData[]} menus - An array of menu data
 		 * @param {string} targetType - The target type of the menu
 		 * @param {object} [args] - Additional options
 		 * @param {Event} [args.event] - The event that triggered the menu creation
@@ -313,10 +330,15 @@
 		 * @param {function} [args.getContext] - The function to get the context object for the menu
 		 * @param {string} [args.tabType] - The type of the tab, only for main window menubar menus
 		 * @param {string} [args.tabSubType] - The subtype of the tab/reader type, only for main window menubar menus and reader window menubar menus
+		 * @param {boolean} [args.skipGrouping] - Whether to skip grouping the menus
 		 */
-		updateMenuPopup(popupElem, targetType, args = {}) {
-			let { event, getContext, tabType, tabSubType } = args;
-			let options = this._getCustomMenuOptions(targetType);
+		updateMenuPopup(popupElem, menus, targetType, args = {}) {
+			let { event, getContext, tabType, tabSubType, skipGrouping } = args;
+
+			if (!menus || menus.length === 0) {
+				return;
+			}
+			
 			// let win = popupElem.ownerGlobal;
 			// let doc = popupElem.ownerDocument;
 
@@ -329,18 +351,28 @@
 			// 	}
 			// }
 
-			// Remove all existing custom menu items
-			let customMenuItems = Array.from(popupElem.querySelectorAll(`.${CUSTOM_MENU_CLASS}`));
-			for (let item of customMenuItems) {
-				item.remove();
+			if (!skipGrouping) {
+				// Group menus if needed
+				menus = this._groupMenus(popupElem, targetType, menus);
+			}
+
+			// Remove no longer existing menu items
+			let toRemove = Array.from(popupElem.querySelectorAll(
+				// Construct the query selector like ".CUSTOM_MENU_CLASS:not(.key1):not(.key2):not(.key3)"
+				`& > .${CUSTOM_MENU_CLASS}${menus.map(menu => `:not(.${menu._key})`).join("")}`
+			));
+			for (let elem of toRemove) {
+				elem.remove();
 			}
 
 			// Add custom menu items
-			for (let option of options) {
-				// TODO: maybe we want to add a separator before and after the menu group
-				for (let menuData of option.menus) {
-					this._createMenu(menuData, popupElem, this._getOptionMainKey(option), targetType, event, getContext, tabType, tabSubType);
-				}
+			for (let menuData of menus) {
+				this._initMenu(menuData, popupElem, targetType, {
+					event,
+					getContext,
+					tabType,
+					tabSubType,
+				});
 			}
 		}
 
@@ -348,56 +380,99 @@
 		 * Initialize the menu element
 		 * @param {MenuData} menuData - The menu data to create the element
 		 * @param {XULPopupElement} popupElem - The popup element to which the menu item should be added
-		 * @param {string} menuID - The unique ID of the menu
 		 * @param {string} targetType - The target type of the menu
-		 * @param {Event & null} event - The event that triggered the menu creation
-		 * @param {function} getContext - The function to get the context object for the menu
-		 * @param {string} [tabType] - The type of the tab
-		 * @param {string} [tabSubType] - The subtype of the tab/reader type
+		 * @param {object} args - Additional options
+		 * @param {Event} [args.event] - The event that triggered the menu creation
+		 * @param {function} [args.getContext] - The function to get the context object for the menu
+		 * @param {string} [args.tabType] - The type of the tab, only for main window menubar menus
+		 * @param {string} [args.tabSubType] - The subtype of the tab/reader type,
+		 * only for main window menubar menus and reader window menubar menus
 		 * @returns {XULElement} - The created menu element
 		 */
-		_createMenu(menuData, popupElem, menuID, targetType, event, getContext, tabType, tabSubType) {
+		_initMenu(menuData, popupElem, targetType, args) {
+			let { event, getContext, tabType, tabSubType } = args;
 			let doc = popupElem.ownerDocument;
-			let menuElem;
+			let menuElem = popupElem.querySelector(`& > .${CUSTOM_MENU_CLASS}.${menuData._key}`);
 			let subPopupElem;
-			switch (menuData.menuType) {
-				case "menuitem": {
-					menuElem = doc.createXULElement("menuitem");
-					break;
-				}
-				case "separator": {
-					menuElem = doc.createXULElement("menuseparator");
-					break;
-				}
-				case "submenu": {
-					menuElem = doc.createXULElement("menu");
-					subPopupElem = doc.createXULElement("menupopup");
-					menuElem.appendChild(subPopupElem);
-					break;
-				}
-			}
-			menuElem.classList.add(CUSTOM_MENU_CLASS, menuID);
 
-			// Init label and icon for non-separator menu items
-			if (menuData.menuType !== "separator") {
-				if (menuData.l10nID) {
-					menuElem.dataset.l10nId = menuData.l10nID;
-				}
-				if (menuData.l10nArgs) {
-					menuElem.dataset.l10nArgs = JSON.stringify(menuData.l10nArgs);
-				}
-				if (menuData.icon || menuData.darkIcon) {
-					if (menuData.menuType === "menuitem") {
-						menuElem.classList.add("menuitem-iconic");
-					}
-					else if (menuData.menuType === "submenu") {
-						menuElem.classList.add("menu-iconic");
-					}
-					menuElem.style.setProperty("--custom-menu-icon-light", `url(${menuData.icon})`);
-					// Use the dark icon if available, otherwise use the light icon
-					menuElem.style.setProperty("--custom-menu-icon-dark", `url(${menuData.darkIcon || menuData.icon})`);
+			// Initialize submenu popup element if it exists
+			if (menuElem) {
+				subPopupElem = menuElem.querySelector("& > menupopup");
+				if (menuData.menuType === "submenu" && !subPopupElem) {
+					// If the menu doesn't have a popup, it's not usable
+					menuElem.remove();
+					menuElem = null;
 				}
 			}
+
+			// Create the menu element if it doesn't exist
+			if (!menuElem) {
+				switch (menuData.menuType) {
+					case "menuitem": {
+						menuElem = doc.createXULElement("menuitem");
+						break;
+					}
+					case "separator": {
+						menuElem = doc.createXULElement("menuseparator");
+						break;
+					}
+					case "submenu": {
+						menuElem = doc.createXULElement("menu");
+						subPopupElem = doc.createXULElement("menupopup");
+						menuElem.appendChild(subPopupElem);
+						break;
+					}
+				}
+				menuElem.classList.add(CUSTOM_MENU_CLASS, menuData._key);
+
+				// Init label and icon for non-separator menu items
+				if (menuData.menuType !== "separator") {
+					if (menuData.l10nID) {
+						menuElem.dataset.l10nId = menuData.l10nID;
+					}
+					if (menuData.l10nArgs) {
+						menuElem.dataset.l10nArgs = JSON.stringify(menuData.l10nArgs);
+					}
+					if (menuData.icon || menuData.darkIcon) {
+						if (menuData.menuType === "menuitem") {
+							menuElem.classList.add("menuitem-iconic");
+						}
+						else if (menuData.menuType === "submenu") {
+							menuElem.classList.add("menu-iconic");
+						}
+						menuElem.style.setProperty("--custom-menu-icon-light", `url(${menuData.icon})`);
+						// Use the dark icon if available, otherwise use the light icon
+						menuElem.style.setProperty("--custom-menu-icon-dark", `url(${menuData.darkIcon || menuData.icon})`);
+					}
+				}
+			}
+
+			this._updateMenuClasses(menuElem, menuData, targetType, { tabType, tabSubType });
+
+			this._updateMenuEvents(menuElem, popupElem, menuData, targetType, {
+				event,
+				getContext,
+				subPopupElem,
+				tabType,
+				tabSubType,
+			});
+		}
+
+		/**
+		 * Update the menu element classes
+		 * @param {XULElement} menuElem - The menu element to update
+		 * @param {MenuData} menuData - The menu data to update the element
+		 * @param {string} targetType - The target type of the menu
+		 * @param {object} args - Additional options
+		 * @param {string} [args.tabType] - The type of the tab, only for main window menubar menus
+		 * @param {string} [args.tabSubType] - The subtype of the tab/reader type, only
+		 * for main window menubar menus and reader window menubar menus
+		 * @returns {void}
+		 */
+		_updateMenuClasses(menuElem, menuData, targetType, args) {
+			let { tabType, tabSubType } = args;
+			// Update dynamic classes of the menu item
+			let cachedDynamicClasses = new Set();
 
 			// Init the menu based on the content type for main window tabs and reader window
 			if ((targetType.startsWith("main/menubar") || targetType.startsWith("reader/menubar"))
@@ -406,16 +481,20 @@
 				let shouldHide = true;
 				for (let type of menuData.enableForTabTypes) {
 					let [_tabType, _tabSubType] = type.split("/");
+
 					// Only show the menu item if the tab type matches
-					menuElem.classList.add(`menu-type-${_tabType}`);
+					cachedDynamicClasses.add(`menu-type-${_tabType}`);
+
 					if (_tabSubType) {
 						if (_tabType === "reader" && _tabSubType === "*") {
 							// Show the menu item for all reader types
-							menuElem.classList.add("pdf", "epub", "snapshot");
+							cachedDynamicClasses.add("pdf");
+							cachedDynamicClasses.add("epub");
+							cachedDynamicClasses.add("snapshot");
 						}
 						else {
 							// Only show the menu item if the tab subtype (reader type) matches
-							menuElem.classList.add(_tabSubType);
+							cachedDynamicClasses.add(_tabSubType);
 						}
 					}
 
@@ -430,6 +509,39 @@
 				}
 			}
 
+			// Remove previous dynamic classes
+			if (menuElem.dataset.dynamicClasses) {
+				let previousDynamicClasses = menuElem.dataset.dynamicClasses.split(",");
+				for (let dynamicClass of previousDynamicClasses) {
+					if (dynamicClass && !cachedDynamicClasses.has(dynamicClass)) {
+						menuElem.classList.remove(dynamicClass);
+					}
+				}
+			}
+			// Add new dynamic classes
+			for (let dynamicClass of cachedDynamicClasses) {
+				menuElem.classList.add(dynamicClass);
+			}
+			menuElem.dataset.dynamicClasses = Array.from(cachedDynamicClasses).join(",");
+		}
+
+		/**
+		 * Update the menu events and submenus
+		 * @param {XULElement} menuElem - The menu element to update
+		 * @param {XULPopupElement} popupElem - The popup element to which the menu item should be added
+		 * @param {MenuData} menuData - The menu data to update the element
+		 * @param {string} targetType - The target type of the menu
+		 * @param {object} args - Additional options
+		 * @param {XULPopupElement} [args.subPopupElem] - The submenu popup element
+		 * @param {Event} [args.event] - The event that triggered the menu creation
+		 * @param {function} [args.getContext] - The function to get the context object for the menu
+		 * @param {string} [args.tabType] - The type of the tab, only for main window menubar menus
+		 * @param {string} [args.tabSubType] - The subtype of the tab/reader type, only
+		 * for main window menubar menus and reader window menubar menus
+		 * @returns {void}
+		 */
+		_updateMenuEvents(menuElem, popupElem, menuData, targetType, args) {
+			let { tabType, tabSubType, event, getContext, subPopupElem } = args;
 			// Init hooks
 			const HOOK_MAP = {
 				// Since this is triggered by the popupshowing event, it's too late to add listener for it
@@ -444,12 +556,11 @@
 				HOOK_MAP.popupshowing = "onShowing";
 			}
 
-			// Keep a reference to the menu element to avoid memory leaks
+			// Keep a weak reference to the menu element to avoid memory leaks
 			let menuElemRef = new WeakRef(menuElem);
 
 			// Wrap getContext to include the default context variables
 			let defaultContext = {
-				menuID,
 				get menuElem() {
 					return menuElemRef.deref();
 				},
@@ -485,7 +596,7 @@
 				},
 			};
 			let wrappedGetContext = () => {
-				return Object.assign({}, defaultContext, getContext());
+				return Object.assign({}, defaultContext, getContext ? getContext() : {});
 			};
 
 			// Add hooks
@@ -494,29 +605,57 @@
 			}
 
 			if (menuData.onCommand) {
-				menuElem.addEventListener("command", (ev) => {
-					if (ev.target !== menuElem) {
+				let menuCommandListener = (ev) => {
+					if (ev.target !== ev.currentTarget) {
 						return;
 					}
 					menuData.onCommand(ev, wrappedGetContext());
+				};
+				menuElem.addEventListener("command", menuCommandListener, {
+					once: true,
 				});
+				let removeMenuCommandListener = (ev) => {
+					if (ev.target !== ev.currentTarget) {
+						return;
+					}
+					menuElem.removeEventListener("command", menuCommandListener);
+					ev.target.removeEventListener("popuphidden", removeMenuCommandListener);
+				};
+				popupElem.addEventListener("popuphidden", removeMenuCommandListener);
 			}
 
 			// Init submenus
 			if (menuData.menuType === "submenu" && menuData.menus) {
-				for (let submenuData of menuData.menus) {
-					this._createMenu(submenuData, subPopupElem, menuID, targetType, null, wrappedGetContext, tabType, tabSubType);
-				}
+				let subMenuInitListener = (ev) => {
+					if (ev.target !== ev.currentTarget) {
+						return;
+					}
+					this.updateMenuPopup(ev.target, menuData.menus, targetType, {
+						event: ev,
+						getContext: wrappedGetContext,
+						tabType,
+						tabSubType,
+						// Skip grouping for submenus
+						skipGrouping: true,
+					});
+				};
+				subPopupElem.addEventListener("popupshowing", subMenuInitListener);
+				let removeSubMenuInitListener = (ev) => {
+					if (ev.target !== ev.currentTarget) {
+						return;
+					}
+					subPopupElem.removeEventListener("popupshowing", subMenuInitListener);
+					ev.target.removeEventListener("popuphidden", removeSubMenuInitListener);
+				};
+				popupElem.addEventListener("popuphidden", removeSubMenuInitListener);
 			}
 
 			popupElem.appendChild(menuElem);
 
-			// Run the onShowing hook after the menu item is added to the popup if needed
+			// Run the onShowing hook after the menu item is created to the popup if needed
 			if (event && menuData.onShowing) {
 				menuData.onShowing(event, wrappedGetContext());
 			}
-
-			return menuElem;
 		}
 
 		_addMenuHook(popupElem, eventName, menuData, hookName, getContext) {
@@ -524,13 +663,102 @@
 				return;
 			}
 			popupElem.addEventListener(eventName, (ev) => {
-				if (ev.target !== popupElem) {
+				if (ev.target !== ev.currentTarget) {
 					return;
 				}
 				menuData[hookName](ev, getContext());
 			}, {
+				// The lifecycle hooks are always recreated when the menu is updated, only run once
 				once: true,
 			});
+		}
+
+		/**
+		 * Group the menus if needed
+		 * @param {XULPopupElement} popupElem - The popup element to which the menu items should be added
+		 * @param {string} targetType - The target type of the menu
+		 * @param {MenuData[]} menus - The menu data for the target type
+		 * @returns {MenuData[]} - The grouped menu data
+		 */
+		_groupMenus(popupElem, targetType, menus) {
+			if (!GROUPED_TARGETS.includes(targetType)) {
+				return menus;
+			}
+
+			if (menus.length === 0) {
+				return [];
+			}
+
+			let groupedMenus = [];
+			// Add separator
+			groupedMenus.push({
+				menuType: "separator",
+				_key: "zotero-custom-menu-group-separator",
+			});
+			
+			let ungroupedCount = this._computeAvailableMenuNum(popupElem);
+
+			if (ungroupedCount >= menus.length) {
+				// If all menus can be shown, show them without grouping
+				groupedMenus.push(...menus);
+				return groupedMenus;
+			}
+
+			// Show the first ungroupedCount menus
+			groupedMenus.push(...menus.slice(0, ungroupedCount));
+
+			// Group the remaining menus
+			groupedMenus.push({
+				menuType: "submenu",
+				l10nID: "menu-custom-group-submenu",
+				_key: "zotero-custom-menu-group-submenu",
+				menus: [...menus.slice(ungroupedCount)],
+			});
+			return groupedMenus;
+		}
+
+		/**
+		 * Compute the number of available menus that can be shown in the popup
+		 * @param {XULPopupElement} popupElem - The popup element to compute the available menu count
+		 * @returns {number} - The number of available menus
+		 */
+		_computeAvailableMenuNum(popupElem) {
+			// Compute the height of current screen
+			let screenHeight = popupElem.ownerGlobal.screen.availHeight;
+			let maxMenuHeight = screenHeight * 0.8;
+
+			let menuCount = popupElem.querySelectorAll(`& > :is(menuitem, menu):not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length;
+			// An additional separator is added before the group
+			let separatorCount = popupElem.querySelectorAll(`& > menuseparator:not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length + 1;
+
+			let menuHeight, separatorHeight, popupPadding;
+
+			if (Zotero.isMac) {
+				menuHeight = 22;
+				separatorHeight = 11;
+				popupPadding = 5 * 2;
+			}
+
+			if (Zotero.isWin) {
+				menuHeight = 26;
+				separatorHeight = 9;
+				popupPadding = 4 * 2;
+			}
+
+			// For Linux, we only roughly estimate the height, as it varies a lot
+			if (Zotero.isLinux) {
+				menuHeight = 24;
+				separatorHeight = 9;
+				popupPadding = 4 * 2;
+			}
+
+			let availableHeight = maxMenuHeight - popupPadding
+				- separatorHeight * separatorCount
+				- menuHeight * menuCount;
+
+			// The grouped menus do not have top-level separators
+			let availableMenuCount = Math.floor(availableHeight / menuHeight);
+			return availableMenuCount;
 		}
 	}
 
@@ -547,7 +775,13 @@
 		}
 
 		updateMenuPopup(popupElem, targetType, args) {
-			this._menuManager.updateMenuPopup(popupElem, targetType, args);
+			let options = this._menuManager.getCustomMenuOptions(targetType);
+			// Flatten the menus array
+			let menus = [];
+			for (let option of options) {
+				menus.push(...option.menus);
+			}
+			this._menuManager.updateMenuPopup(popupElem, menus, targetType, args);
 		}
 	}
 
