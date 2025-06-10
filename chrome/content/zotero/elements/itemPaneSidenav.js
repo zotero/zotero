@@ -241,7 +241,10 @@
 							event: undefined,
 							getContext: () => {
 								let ret = {
-									items: []
+									items: [],
+									tabType: undefined,
+									tabID: undefined,
+									tabSubType: undefined
 								};
 								if (this.container) {
 									ret.items = [this.container.item];

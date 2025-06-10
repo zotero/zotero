@@ -587,6 +587,17 @@ describe("Plugin API", function () {
 			}]
 		};
 
+		let defaultContextKeys = [
+			"menuElem",
+			"setEnabled",
+			"setIcon",
+			"setL10nArgs",
+			"setVisible",
+			"tabID",
+			"tabType",
+			"tabSubType",
+		];
+
 		// From https://searchfox.org/mozilla-esr128/source/browser/base/content/test/menubar/browser_file_close_tabs.js
 		async function simulateMenuOpen(menu) {
 			return new Promise((resolve) => {
@@ -612,7 +623,7 @@ describe("Plugin API", function () {
 			});
 		}
 
-		async function checkMenuContext(option, popupSelector, targetDoc) {
+		async function checkMenuContext(option, popupSelector, contextKeys, targetDoc) {
 			if (!targetDoc) {
 				targetDoc = doc;
 			}
@@ -635,7 +646,12 @@ describe("Plugin API", function () {
 			assert.exists(popup, `Popup for target ${target} should exist`);
 
 			let context = await getCache("onShowing");
-			assert.exists(context.menuElem, `Menu context for ${target} should have menuElem`);
+
+			if (contextKeys) {
+				for (let key of contextKeys) {
+					assert.property(context, key, `Context of ${target} should have key: ${key}`);
+				}
+			}
 
 			if (typeof popupSelector === "function") {
 				popup.hidePopup();
@@ -905,53 +921,123 @@ describe("Plugin API", function () {
 				"main/menubar/go": "#menu_goPopup",
 				"main/menubar/tools": "#menu_ToolsPopup",
 				"main/menubar/help": "#menu_HelpPopup",
-				"main/library/item": () => {
-					ZoteroPane.onItemsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
-					return doc.querySelector("#zotero-itemmenu");
+			};
+			
+			let contextKeys = [
+				...defaultContextKeys,
+				"items",
+			];
+
+			for (let [target, popupSelector] of Object.entries(menuTargetMap)) {
+				await checkMenuContext({ target }, popupSelector, contextKeys);
+			}
+		});
+
+		it("should register library menu", async function () {
+			let menuTargetMap = {
+				"main/library/item": {
+					popupSelector: () => {
+						ZoteroPane.onItemsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
+						return doc.querySelector("#zotero-itemmenu");
+					},
+					contextKeys: [
+						...defaultContextKeys,
+						"items",
+						"collectionTreeRow",
+					]
 				},
-				"main/library/collection": () => {
-					ZoteroPane.onCollectionsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
-					return doc.querySelector("#zotero-collectionmenu");
+				"main/library/collection": {
+					popupSelector: () => {
+						ZoteroPane.onCollectionsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
+						return doc.querySelector("#zotero-collectionmenu");
+					},
+					contextKeys: [
+						...defaultContextKeys,
+						"collectionTreeRow",
+					]
 				},
-				"main/library/addAttachment": "#menu_attachmentAdd > menupopup",
-				"main/library/addNote": "#menu_noteAdd > menupopup",
-				"main/tab": async () => {
-					let tabID = Zotero_Tabs.selectedID;
-					return Zotero_Tabs._openMenu(0, 0, tabID);
+				"main/library/addAttachment": {
+					popupSelector: "#menu_attachmentAdd > menupopup",
+					contextKeys: [
+						...defaultContextKeys,
+						"items",
+					]
 				},
-				"itemPane/info/row": async () => {
-					let item = new Zotero.Item('book');
-					await item.saveTx();
-					await ZoteroPane.selectItem(item.id);
-					let itemDetails = ZoteroPane.itemPane._itemDetails;
-					let infoBox = itemDetails.getPane("info");
-					let row = infoBox.querySelector("#itembox-field-value-title");
-					let event = new MouseEvent("contextmenu", {
-						bubbles: true,
-						cancelable: true,
-					});
-					row.dispatchEvent(event);
-					let popup = infoBox.querySelector("#zotero-field-menu");
-					return popup;
-				},
-				"sidenav/locate": async () => {
-					let item = new Zotero.Item('book');
-					await item.saveTx();
-					await ZoteroPane.selectItem(item.id);
-					let sidenav = ZoteroPane.itemPane._sidenav;
-					let button = sidenav.querySelector("toolbarbutton[data-action='locate']");
-					let event = new MouseEvent("mousedown", {
-						bubbles: true,
-						cancelable: true,
-					});
-					button.dispatchEvent(event);
-					let popup = button.querySelector("menupopup");
-					return popup;
+				"main/library/addNote": {
+					popupSelector: "#menu_noteAdd > menupopup",
+					contextKeys: [
+						...defaultContextKeys,
+						"items",
+					]
 				}
 			};
 
-			for (let [target, popupSelector] of Object.entries(menuTargetMap)) {
-				await checkMenuContext({ target }, popupSelector);
+			for (let [target, { popupSelector, contextKeys }] of Object.entries(menuTargetMap)) {
+				await checkMenuContext({ target }, popupSelector, contextKeys);
+			}
+		});
+
+		it("should register other main window menus", async function () {
+			let menuTargetMap = {
+				"main/tab": {
+					popupSelector: async () => {
+						let tabID = Zotero_Tabs.selectedID;
+						return Zotero_Tabs._openMenu(0, 0, tabID);
+					},
+					contextKeys: [
+						...defaultContextKeys,
+						"items"
+					]
+				},
+				"itemPane/info/row": {
+					popupSelector: async () => {
+						let item = new Zotero.Item('book');
+						await item.saveTx();
+						await ZoteroPane.selectItem(item.id);
+						let itemDetails = ZoteroPane.itemPane._itemDetails;
+						let infoBox = itemDetails.getPane("info");
+						let row = infoBox.querySelector("#itembox-field-value-title");
+						let event = new MouseEvent("contextmenu", {
+							bubbles: true,
+							cancelable: true,
+						});
+						row.dispatchEvent(event);
+						let popup = infoBox.querySelector("#zotero-field-menu");
+						return popup;
+					},
+					contextKeys: [
+						...defaultContextKeys,
+						"items",
+						"editable",
+						"fieldName",
+						"targetElem"
+					]
+				},
+				"sidenav/locate": {
+					popupSelector: async () => {
+						let item = new Zotero.Item('book');
+						await item.saveTx();
+						await ZoteroPane.selectItem(item.id);
+						let sidenav = ZoteroPane.itemPane._sidenav;
+						let button = sidenav.querySelector("toolbarbutton[data-action='locate']");
+						let event = new MouseEvent("mousedown", {
+							bubbles: true,
+							cancelable: true,
+						});
+						button.dispatchEvent(event);
+						let popup = button.querySelector("menupopup");
+						return popup;
+					},
+
+					contextKeys: [
+						...defaultContextKeys,
+						"items",
+					]
+				}
+			};
+
+			for (let [target, { popupSelector, contextKeys }] of Object.entries(menuTargetMap)) {
+				await checkMenuContext({ target }, popupSelector, contextKeys);
 			}
 		});
 
@@ -1016,7 +1102,7 @@ describe("Plugin API", function () {
 			let readerDoc = readerWin.document;
 
 			for (let [target, popupSelector] of Object.entries(mainMenubarTargetMap)) {
-				await checkMenuContext({ target }, popupSelector, readerDoc);
+				await checkMenuContext({ target }, popupSelector, undefined, readerDoc);
 			}
 
 			reader.close();
