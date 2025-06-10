@@ -108,8 +108,8 @@
 <!ENTITY zotero.item.textTransform "تغيير حالة النص">
 <!ENTITY zotero.item.textTransform.titlecase "حرف كبير في بداية كل كلمة">
 <!ENTITY zotero.item.textTransform.sentencecase "حالة الجملة">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "مبادلة الأول/الأخير">
+<!ENTITY zotero.item.creatorTransform.fixCase "تصحيح حالة الأحرف">
 <!ENTITY zotero.item.copyAsURL "نسخ كمسار انترنت">
 <!ENTITY zotero.item.deletePermanently "حذف نهائي...">
 
@@ -135,7 +135,7 @@
 <!ENTITY zotero.tagSelector.assignColor "تخصيص اللون...">
 <!ENTITY zotero.tagSelector.renameTag "تغيير اسم الوسم...">
 <!ENTITY zotero.tagSelector.deleteTag "حذف الوسم...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "تقسيم...">
 
 <!ENTITY zotero.tagColorChooser.title "اختار لون وموقع الوسم">
 <!ENTITY zotero.tagColorChooser.color "لون:">
@@ -143,11 +143,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "ضبط اللون">
 <!ENTITY zotero.tagColorChooser.removeColor "ازالة اللون">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "أدخل أرقام ISBN أو DOI أو PMID أو arXiv ID أو ADS Bibcode لإضافتها إلى مكتبتك:">
 <!ENTITY zotero.lookup.button.search "بحث">
 
 <!ENTITY zotero.createParent.title "انشئ عنصر رئيسي">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.button.manual "الإدخال اليدوي">
 
 <!ENTITY zotero.selectitems.title "تحديد العناصر">
 <!ENTITY zotero.selectitems.intro.label "حدد العناصر التي تريد إضافتها لمكتبتك">
@@ -175,15 +175,15 @@
 <!ENTITY zotero.import "استيراد">
 <!ENTITY zotero.import.whereToImportFrom "من أين تريد الاستيراد؟">
 <!ENTITY zotero.import.source.file " ملف (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "مجلد من ملفات ال PDFs أو ملفات أخرى">
+<!ENTITY zotero.import.onlineImport "الاستيراد عبر الإنترنت">
 <!ENTITY zotero.import.importing "استيراد...">
 <!ENTITY zotero.import.database "قاعدة البيانات">
 <!ENTITY zotero.import.lastModified "آخر تعديل">
 <!ENTITY zotero.import.size "حجم">
 <!ENTITY zotero.import.createCollection "ضع المجموعات المستوردة والمواد في مجموعة جديدة">
 <!ENTITY zotero.import.fileHandling "معاملة الملف">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "تحميل العناصر الجديدة فقط؛ لا تقم بتحديث العناصر التي تم استيرادها مسبقاً">
 
 <!ENTITY zotero.exportOptions.title "تصدير...">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">
@@ -194,7 +194,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "الحفاظ على المصادر مرتبة">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "حذف المؤلف">
 <!ENTITY zotero.citation.prefix.label "بادئة:">
 <!ENTITY zotero.citation.suffix.label "لاحقة:">
 <!ENTITY zotero.citation.editorWarning.label "تحذير: إذا قمت بتحرير استشهاد في المحرر فلن يتم تحديثه ليعكس التغييرات في قاعدة بياناتك أو نمط الاستشهاد.">
@@ -301,33 +301,33 @@
 <!ENTITY zotero.attachLink.label.link "رابط:">
 <!ENTITY zotero.attachLink.label.title "عنوان:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "إضافة ملاحظة على العنصر">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "إضافة ملاحظة العنصر من التعليقات التوضيحية">
+<!ENTITY zotero.context.addStandaloneNote "إضافة ملاحظة مستقلة بذاتها">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "إضافة ملاحظة مستقلة من التعليقات التوضيحية">
+<!ENTITY zotero.context.editInWindow "التحرير في نافذة منفصلة">
 
 <!ENTITY zotero.pdfReader.firstPage "الصفحة الأولى">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.lastPage "الصفحة الأخيرة">
+<!ENTITY zotero.pdfReader.back "ارجع">
+<!ENTITY zotero.pdfReader.forward "إلى الأمام">
+<!ENTITY zotero.pdfReader.handTool "الأداة اليدوية">
+<!ENTITY zotero.pdfReader.verticalScrolling "التمرير العمودي">
+<!ENTITY zotero.pdfReader.horizontalScrolling "التمرير الأفقي">
+<!ENTITY zotero.pdfReader.wrappedScrolling "التمرير الملتف">
+<!ENTITY zotero.pdfReader.noSpreads "عرض الصفحة الواحدة فقط">
+<!ENTITY zotero.pdfReader.oddSpreads "صفحات متقابلة ببداية فردية">
+<!ENTITY zotero.pdfReader.evenSpreads "صفحات متقابلة ببداية زوجية">
+<!ENTITY zotero.pdfReader.scrolled "تم التمرير">
+<!ENTITY zotero.pdfReader.paginated "مقسمة إلى صفحات">
+<!ENTITY zotero.pdfReader.zoomIn "تكبير">
+<!ENTITY zotero.pdfReader.zoomOut "تصغير">
+<!ENTITY zotero.pdfReader.zoomReset "إرجاع التكبير إلى الوضع الأصلي">
+<!ENTITY zotero.pdfReader.zoomAuto "تعديل الحجم تلقائيًا">
+<!ENTITY zotero.pdfReader.zoomPageWidth "التكبير ليتناسب مع عرض الصفحة">
+<!ENTITY zotero.pdfReader.zoomPageHeight "التكبير ليتناسب مع طول الصفحة">
+<!ENTITY zotero.pdfReader.splitVertically "تقسيم عمودي">
+<!ENTITY zotero.pdfReader.splitHorizontally "تقسيم أفقي">
+<!ENTITY zotero.pdfReader.transferFromPDF "استيراد الشروح التوضيحية...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "تدوير الصفحة لليسار">
+<!ENTITY zotero.pdfReader.rotatePageRight "تدوير الصفحة لليمين">

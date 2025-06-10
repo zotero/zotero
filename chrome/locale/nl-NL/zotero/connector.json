@@ -2,6 +2,12 @@
   "general_more": {
     "message": "Meer…"
   },
+  "general_moreInfo": {
+    "message": "Meer informatie..."
+  },
+  "general_needHelp": {
+    "message": "Hulp nodig?"
+  },
   "general_done": {
     "message": "Klaar"
   },
@@ -35,8 +41,20 @@
   "general_copyToClipboard": {
     "message": "Kopieer naar klembord"
   },
+  "itemType_pdf": {
+    "message": "PDF bijlage"
+  },
+  "itemType_epub": {
+    "message": "EPUB bijlage"
+  },
+  "itemType_snapshot": {
+    "message": "Momentopname"
+  },
   "itemType_note": {
     "message": "Notitie"
+  },
+  "itemType_link": {
+    "message": "Web link"
   },
   "itemType_attachment": {
     "message": "Bijlage"
@@ -44,14 +62,41 @@
   "progressWindow_savingTo": {
     "message": "Opslaan in"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Details bekijken"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Details verbergen"
+  },
+  "progressWindow_savingItem": {
+    "message": "Item $1 word opgeslagen"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 is opgeslagen"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Downloaden van $1 is mislukt"
+  },
+  "progressWindow_allDone": {
+    "message": "Opslaan voltooid. De popup word nu gesloten."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Items van de pagina zijn al opgeslagen."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Labels (gescheiden door komma’s)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Verzameling Filteren"
   },
   "progressWindow_error_translation": {
     "message": "Er is een fout opgetreden bij het opslaan van dit item. Bekijk $1 voor meer informatie."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Probleemoplosser voor Vertaler"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Beperkte Site Toegang"
   },
   "progressWindow_error_fallback": {
     "message": "Opslaan mislukt met $1. Probeer het opnieuw op te slaan met $2."
@@ -62,11 +107,32 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "laatste versie"
   },
+  "itemSelector_title": {
+    "message": "Selecteer de items die u aan uw bibliotheek wilt toevoegen:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 Connector is niet beschikbaar op deze pagina"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Connector is niet beschikbaar op het bestand URL"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 Connector is niet beschikbaar op deze pagina"
+  },
   "appConnector": {
     "message": "$1 Connector"
   },
   "upgradeApp": {
     "message": "Bijwerken $1"
+  },
+  "firstRun_title": {
+    "message": "U heeft de $1 connector geinstalleerd!"
+  },
+  "firstRun_acceptButton": {
+    "message": "Begrepen"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Is $1 actief?"
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Activeer opslaan naar online bibliotheek"
@@ -79,6 +145,12 @@
   },
   "integration_googleDocs_updating": {
     "message": "1$1 is uw document aan het bijwerken."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Verwijzing Herlinken"
+  },
+  "reloadVia": {
+    "message": "Herladen via $1"
   },
   "general_saveTo": {
     "message": "Opslaan in $1"

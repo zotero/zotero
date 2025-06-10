@@ -56,12 +56,12 @@
 <!ENTITY recursiveCollections.label "Εμφάνιση Στοιχείων από τις Υποσυλλογές">
 <!ENTITY fontSize.label "Μέγεθος Γραμματοσειράς">
 <!ENTITY noteFontSize.label "Μέγεθος γραμματοσειράς σημείωσης">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Στήλες">
+<!ENTITY sortBy.label "Ταξινόμηση Με">
 
 <!ENTITY toolsMenu.label "Εργαλεία">
 <!ENTITY toolsMenu.accesskey "Τ">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Εγκατάσταση σύνδεσης προγράμματος περιήγησης…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Πρόσθετα">
 <!ENTITY developer.label "Προγραμματιστής">

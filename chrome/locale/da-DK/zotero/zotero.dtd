@@ -135,7 +135,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Tilknyt farve...">
 <!ENTITY zotero.tagSelector.renameTag "Omdøb mærket ...">
 <!ENTITY zotero.tagSelector.deleteTag "Slet mærket...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Split...">
 
 <!ENTITY zotero.tagColorChooser.title "Vælg en farve og placering">
 <!ENTITY zotero.tagColorChooser.color "Farve:">

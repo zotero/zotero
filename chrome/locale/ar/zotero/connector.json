@@ -1,6 +1,12 @@
 {
   "general_more": {
-    "message": "المزيد..."
+    "message": "المزيد ..."
+  },
+  "general_moreInfo": {
+    "message": "مزيدٌ من المعلومات ..."
+  },
+  "general_needHelp": {
+    "message": "أتحتاج إلى مساعدة؟"
   },
   "general_done": {
     "message": "تم"
@@ -29,26 +35,86 @@
   "general_deselectAll": {
     "message": "إلغاء تحديد الكل"
   },
+  "general_pleaseWait": {
+    "message": "يُرجى الانتظار ..."
+  },
   "general_copyToClipboard": {
     "message": "انسخ إلى الحافظة"
+  },
+  "itemType_pdf": {
+    "message": "مُرفق بصيغة PDF"
+  },
+  "itemType_epub": {
+    "message": "مُرفق بصيغة EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "صورة فوريّة"
   },
   "itemType_note": {
     "message": "ملاحظة"
   },
+  "itemType_link": {
+    "message": "رابط ويب"
+  },
   "itemType_attachment": {
-    "message": "مرفق"
+    "message": "مُرفق"
   },
   "progressWindow_savingTo": {
     "message": "الحفظ في"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "استعراض التفاصيل"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "إخفاء التفاصيل"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "تحديد المجموعة المستهدفة"
+  },
+  "progressWindow_savingItems": {
+    "message": "جارٍ حفظ $1العناصر. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "جارٍ حفظ العنصر $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "العنصر $1 : $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "تم الحفظ$1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "تم حفظ $1 للعنصر $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "فشل في تنزيل $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "فشل في تنزيل $1 للعنصر $2"
+  },
+  "progressWindow_allDone": {
+    "message": "اكتمل الحفظ. سيتم إغلاق النافذة الآن."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "تم حفظ العناصر من هذه الصفحة مسبقًا."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "وسوم ( مفصولة بفواصل)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "تصفية العناصر"
   },
   "progressWindow_error_translation": {
     "message": "حدث خطأ أثناء حفظ هذا العنصر. راجع $1 لمزيد من المعلومات."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "حدث خطأ أثناء حفظ هذا العنصر. $1 قد يكون هناك حد لعدد العناصر التي يمكن حفظها دفعة واحدة.  للمزيد من  المعلومات $2"
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "اكتشاف واصلاح مشاكل المترجمات"
+    "message": "استكشاف مشاكل المترجم وإصلاحها"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "قيود الوصول إلى الموقع"
   },
   "progressWindow_error_fallback": {
     "message": "حدث خطأ اثناء الحفظ باستخدام $1. محاولة الحفظ باستخدام $2 بدلاً من ذلك."
@@ -59,11 +125,35 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "الإصدار الأخير"
   },
+  "itemSelector_title": {
+    "message": "اختر العناصر التي ترغب في إضافتها إلى مكتبتك:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 الموصل غير متاح في هذه الصفحة."
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 الموصل غير متاح لروابط الملفات."
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 الموصِّل غير متوفر على صفحات الإضافة"
+  },
   "appConnector": {
     "message": "موصل $1"
   },
   "upgradeApp": {
     "message": "ترقية $1"
+  },
+  "firstRun_title": {
+    "message": "لقد قمت بتثبيت $1 موصل!"
+  },
+  "firstRun_text1": {
+    "message": "يمكّنك الموصّل $1 من <a href=\"$2\">حفظ العناصر$1</a> من متصفحك بنقرة واحدة."
+  },
+  "firstRun_text2": {
+    "message": "إذا لم تكن قد فعلت ذلك بعد، فقم <a href=\"$2\">بتنزيل</a> تطبيق $1 للحصول على أفضل تجربة."
+  },
+  "firstRun_acceptButton": {
+    "message": "فهمت"
   },
   "error_connection_isAppRunning": {
     "message": "هل $1 يعمل؟"
@@ -76,6 +166,15 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "تمكين الحفظ إلى مكتبة الشبكة"
+  },
+  "reports_report_submitted": {
+    "message": "تم إرسال تقرير الخطأ الخاص بك.\n\nمعرف التقرير: $1\n\nيرجى نشر رسالة إلى منتديات زوتيرو مع معرف التقرير هذا، ووصف للمشكلة، وأي خطوات ضرورية لإعادة إنتاجها.\n\nلا تتم مراجعة تقارير الأخطاء ما لم تتم الإشارة إليها في المنتديات."
+  },
+  "reports_debug_output_submitted": {
+    "message": "تم إرسال إخراج التصحيح الخاص بك.\n\nمعرف التصحيح هو $1."
+  },
+  "reports_submission_failed": {
+    "message": "حدث خطأ في إرسال تقريرك.\n\n$1\n\nيرجى التحقق من اتصالك بالإنترنت. إذا استمرت المشكلة، أرسل رسالة إلى منتديات زوتيرو."
   },
   "integration_error_clientUpgrade": {
     "message": "الاستشهاد المستند على الشبكة يتطلب $1 أو أحدث."
@@ -91,6 +190,48 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "حمل النسخة المرتبطة على كل حال."
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 يقوم بتحديث المستند الخاص بك."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": " لا تتوفر خاصية التكامل $1 عند تحرير ملفات Microsoft Word .docx مباشرةً في محرّر مستندات Google. اختر ملف → حفظ كمحرر مستندات Google لتمكين هذه الوظيفة. <br/><br/>إذا كنت تريد نقل مستند Word مع $1 الاستشهادات إلى مستندات Google، راجع<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\"> نقل المستندات بين معالجات Word.</a>"
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "يتم تحرير استشهادات المستند من قبل مستخدم $1 آخر. يرجى المحاولة مرة أخرى لاحقاً."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 أقفل المستند لمنع عدة مستخدمين من تحرير الاستشهادات في نفس الوقت. قد يؤدي تحرير الاستشهادات المتزامن في المستند إلى تلف الاستشهاد أو المستند. قد تؤدي بعض الظروف غير المتوقعة، مثل أعطال الشبكة، إلى قفل المستند بشكل دائم. إذا كنت تعتقد أن هذا قد حدث، يمكنك تجاوز التأمين. <br/><br/>هل ترغب في تجاوز تأمين المستند؟"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 يحتاج إلى إذن لتحرير مستندات Google Docs الخاصة بك من أجل إدراج الاستشهادات. يرجى المحاولة مرة أخرى، وتأكد من السماح ل$1 بالاطلاع على مستندات Google Docs الخاصة بك وتعديلها وإنشائها وحذفها."
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "حساب جوجل الذي حددته لا يملك صلاحية تحرير هذا المستند. يُرجى المحاولة مرة أخرى، وتأكد من اختيار الحساب الذي لديه صلاحية التحرير."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "إظهار استشهادات $1 غير المرتبطة"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "أصبح الاستشهاد الذي تحاول تحريره غير مرتبط بـ $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "إعادة ربط الاستشهاد"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "لقد أصبحت هذه الاستشهادات <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">غير مرتبطة من $1</a>. ستحتاج إلى إعادة ربطها قبل أن يتم تحديثها أو ظهورها في قائمة المراجع الخاصة بك."
+  },
+  "copyUnproxiedLink": {
+    "message": "نسخ رابط غير مرفق"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "نسخ عنوان URL للصفحة غير المربوطة"
+  },
+  "reloadViaProxy": {
+    "message": "إعادة التحميل عبر الوكيل"
+  },
+  "reloadVia": {
+    "message": "إعادة التحميل عبر $1"
   },
   "general_saveTo": {
     "message": "احفظ في $1"

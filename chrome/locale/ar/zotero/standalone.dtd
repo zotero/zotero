@@ -32,9 +32,9 @@
 <!ENTITY quitApplicationCmd.label "إنهاء">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-<!ENTITY copyCitationCmd.label "نسخ الاقتباس">
+<!ENTITY copyCitationCmd.label "نسخ الاستشهاد">
 <!ENTITY copyBibliographyCmd.label "نسخ قائمة المراجع">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "نسخ الملاحظة">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "تغيير اتجاه الصفحة">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -42,7 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "اذهب إلى">
 <!ENTITY goMenu.accesskey "G">
 
 <!ENTITY viewMenu.label "عرض">
@@ -56,12 +56,12 @@
 <!ENTITY recursiveCollections.label "إظهار العناصر من المجموعات الفرعية">
 <!ENTITY fontSize.label "حجم الخط">
 <!ENTITY noteFontSize.label "حجم خط الملاحظات">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "الأعمدة">
+<!ENTITY sortBy.label "الترتيب حسب">
 
 <!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "تثبيت موصل المتصفح...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "ملحقات">
 <!ENTITY developer.label "المطور">

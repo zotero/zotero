@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Felhasználói felület">
 <!ENTITY zotero.preferences.fileHandling "Fájlkezelés">
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">

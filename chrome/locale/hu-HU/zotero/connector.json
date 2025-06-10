@@ -59,6 +59,15 @@
   "progressWindow_savingTo": {
     "message": "Mentés"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Részletek megjelenítése"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Részletek elrejtése"
+  },
+  "progressWindow_savingItems": {
+    "message": "Elemek $1 mentése. $2"
+  },
   "progressWindow_savingItem": {
     "message": "Elem mentése $1"
   },
@@ -68,8 +77,20 @@
   "progressWindow_downloadComplete": {
     "message": "$1 mentve"
   },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Elmentve $1 elemehez $2"
+  },
   "progressWindow_downloadFailed": {
     "message": "Sikertelen letöltése a(z) $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Sikertelen letöltése a(z) $1 elemhez $2"
+  },
+  "progressWindow_allDone": {
+    "message": "A mentés befejeződött. A párbeszédpanel most bezárul."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Az ezen a weboldalon található elemek már el lettek mentve."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Címkék (vesszővel elválasztva)"
@@ -92,11 +113,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "legfrissebb verzió"
   },
+  "itemSelector_title": {
+    "message": "Válassza ki, hogy mely elemeket szeretné hozzáadni a könyvtárához:"
+  },
   "extensionIsDisabled": {
     "message": "$1 Csatlakozó nem használható ezen az oldalon"
   },
   "extensionIsDisabled_fileURL": {
     "message": "$1 Csatlakozó nem érhető el a fájl URL-címeken"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 Connector nem érhető el a kiterjesztési oldalakon"
   },
   "appConnector": {
     "message": "$1Connector"
@@ -163,6 +190,12 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Ezek az idézetek már nem <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">kapcsolódnak $1 </a>. Újra kell kapcsolnia őket, mielőtt frissülnének vagy megjelennének az irodalomjegyzékben."
+  },
+  "reloadViaProxy": {
+    "message": "Újratöltés proxyn keresztül"
+  },
+  "reloadVia": {
+    "message": "Újratölteni a(z) $1"
   },
   "general_saveTo": {
     "message": "Mentés $1-ba(n)"

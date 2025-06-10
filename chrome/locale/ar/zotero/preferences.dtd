@@ -9,12 +9,12 @@
 
 <!ENTITY zotero.preferences.prefpane.general "عام">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "واجهة">
 <!ENTITY zotero.preferences.fileHandling "معاملة الملف">
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "الارفاق التلقائي لملفات PDF والملفات الاخرى عند اضافة عنصر جديد من صفحة ويب">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "إعادة تسمية الملفات المرتبطة">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "افتح ملفات بي دي إف مستخدماً">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "افتح ملفات PDF مستخدماً">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "افتراضي النظام">
 
 <!ENTITY zotero.preferences.miscellaneous "أخرى">
@@ -26,24 +26,24 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "الافراغ التلقائي لسلة المحذوفات. ازالة اللملفات المحذوفة منذ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "يوم">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "إظهار علامات التبويب ك">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "المؤلف - السنة - العنوان">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "العنوان - المؤلف - السنة">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "اسم الملف">
 
 <!ENTITY zotero.preferences.groups "المجموعات">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "عند نسخ العناصر بين المكتبات، يجب ان تتضمن العناصر على:">
 <!ENTITY zotero.preferences.groups.childNotes "الملاحظات الفرعية">
 <!ENTITY zotero.preferences.groups.childFiles "اللقطات الفرعية والملفات المستوردة">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "تعليقات توضيحية">
 <!ENTITY zotero.preferences.groups.childLinks "الروابط الفرعية">
 <!ENTITY zotero.preferences.groups.tags "سمات">
 
-<!ENTITY zotero.preferences.feeds "الملقمات">
+<!ENTITY zotero.preferences.feeds "الخلاصات">
 <!ENTITY zotero.preferences.feeds.sorting.label "الفرز">
 <!ENTITY zotero.preferences.feeds.sorting.newest "العناصر الأحدث أولاً">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "العناصر الأقدم أولاً">
-<!ENTITY zotero.preferences.feeds.feedDefaults "افتراضيات التلقيم">
+<!ENTITY zotero.preferences.feeds.feedDefaults "إعدادات الخلاصة الافتراضية">
 
 <!ENTITY zotero.preferences.prefpane.sync "التزامن">
 <!ENTITY zotero.preferences.sync.username "اسم المستخدم:">
@@ -83,7 +83,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "إعادة تعيين ملف سجل المزامنة">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "مقارنة جميع الملفات المرفقة مع خدمة التخزين">
 <!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "إظهار خيارات إعادة الضبط">
 <!ENTITY zotero.preferences.sync.reset.button "إعادة التعيين...">
 
 
@@ -106,8 +106,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "عند تعطيل هذه الخاصية، يقوم زوتيرو بتضمين روابط الويب فقط عند توثيق مقالات (الدوريات أو المجلات أو الجرائد) التي لم يعين لها مدى للصفحات.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "النسخ السريع">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "صيغة العنصر:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "صيغة الملاحظة:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "نسخ كترميز HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "إعدادات خاصة حسب الموقع:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "نطاق الانترنت/المسار">

@@ -218,6 +218,12 @@
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Te cytaty zostały <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">odłączone od $1</a>. Musisz ponownie połączyć je, zanim zostaną zaktualizowane lub pojawią się w Twojej bibliografii."
   },
+  "copyUnproxiedLink": {
+    "message": "Skopiuj link bez proxy"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Skopiuj URL strony bez proxy"
+  },
   "reloadViaProxy": {
     "message": "Wczytaj ponownie przez serwer pośredniczący"
   },

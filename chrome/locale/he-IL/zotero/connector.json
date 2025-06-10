@@ -128,6 +128,15 @@
   "itemSelector_title": {
     "message": "נא לבחור אילו פריטים להוסיף לספריה שלך:"
   },
+  "extensionIsDisabled": {
+    "message": "מחבר $1 לא זמין בעמוד הזה"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "מחבר $1 לא זמין בכתובות הקבצים"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "מחבר $1 לא זמין בעמוד ההורדות"
+  },
   "appConnector": {
     "message": "מגשר $1"
   },
@@ -141,7 +150,7 @@
     "message": "מגשר $1 מאפשר לך <a href=\"$2\">לשמור פריטים אל $1</a> מהדפדפן שלך בלחיצה אחת."
   },
   "firstRun_text2": {
-    "message": "אם טרם עשית זאת, יש <a href=\"$2\">להוריד</a> את היישום העצמאי $1 לחוויה מיטבית."
+    "message": "אם טרם עשית זאת, יש <a href=\"$2\">להוריד</a> את היישום $1 לחוויה מיטבית."
   },
   "firstRun_acceptButton": {
     "message": "הבנתי"
@@ -194,6 +203,9 @@
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 נועל את המסמך שלך כדי למנוע ממספר משתמשים לערוך ציטוטים בו־זמנית. עריכת ציטוטים במקביל במסמך עשויה להוביל למסמך או ציטוטים פגומים. נסיבות בלתי נשלטות כגון תקלות תקשורת עשויים לגרום למסמך שלך להפוך לנעול לצמיתות. אם לדעתך זה מה שקרה אפשר לעקוף את הנעילה.<br/><br/>לעקוף את נעילת המסמך?"
   },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 צריך הרשאות כדי לערוך את המסמכים שלך ב־Google Docs כדי להוסיף להם ציטוטים. נא לנסות שוב ולוודא שהרשאית ל־$1 לצפות, לערוך, ליצור ולמחוק את המסמכים שלך ב־Google Docs."
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "לחשבון ה־Google שבחרת אין הרשאה לערוך את המסמך הזה. נא לנסות שוב ולוודא שבחרת חשבון עם גישה לעריכה."
   },
@@ -208,6 +220,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "הציטוטים האלו <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">נותקו מ־$1</a>. יהיה עליך לקשר אותם מחדש בטרם יעודכנו או יופיעו בביבליוגרפיה שלך."
+  },
+  "copyUnproxiedLink": {
+    "message": "העתקת קישור ללא מתווך"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "העתקת כתובת לעמוד ללא מתווך"
+  },
+  "reloadViaProxy": {
+    "message": "רענון דרך מתווך"
+  },
+  "reloadVia": {
+    "message": "רענון דרך $1"
   },
   "general_saveTo": {
     "message": "שמירה אל $1"

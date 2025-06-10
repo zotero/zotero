@@ -42,29 +42,29 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Mine">
 <!ENTITY goMenu.accesskey "G">
 
-<!ENTITY viewMenu.label "View">
+<!ENTITY viewMenu.label "Vaade">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
+<!ENTITY layout.label "Paigutus">
+<!ENTITY standardView.label "Tavavaade">
 <!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
+<!ENTITY collectionsPane.label "Kogu plokk">
 <!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
+<!ENTITY tagSelector.label "Sildi valija">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
+<!ENTITY fontSize.label "Teksti suurus">
 <!ENTITY noteFontSize.label "Note Font Size">
-<!ENTITY columns.label "Columns">
+<!ENTITY columns.label "Veerud">
 <!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "Tööriistad">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lisad">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Arendaja">
 
 <!ENTITY bringAllToFront.label "Kõik nähtavale tuua">
 

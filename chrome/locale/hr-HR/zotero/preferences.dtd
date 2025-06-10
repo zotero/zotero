@@ -196,6 +196,6 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Provjera integriteta baze">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Poništi prevoditelje i stilove…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Poništi prevoditelje…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Poništi stilove...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Poništi stilove…">
 
 <!ENTITY zotero.preferences.configEditor "Uređivač postavki">

@@ -137,7 +137,7 @@
 <!ENTITY zotero.tagSelector.deleteTag "Borrar etiqueta...">
 <!ENTITY zotero.tagSelector.splitTag "Dividir...">
 
-<!ENTITY zotero.tagColorChooser.title "Escoje un color y posición de la etiqueta">
+<!ENTITY zotero.tagColorChooser.title "Elige un color y una posición para la etiqueta">
 <!ENTITY zotero.tagColorChooser.color "Color:">
 <!ENTITY zotero.tagColorChooser.position "Posición:">
 <!ENTITY zotero.tagColorChooser.setColor "Establecer color">

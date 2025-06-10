@@ -68,17 +68,41 @@
   "progressWindow_detailsBtnHide": {
     "message": "Скрыть подробности"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Выбор целевой коллекции"
+  },
   "progressWindow_savingItems": {
     "message": "Сохранение $1 записей. $2"
   },
   "progressWindow_savingItem": {
     "message": "Сохранение записи $1"
   },
+  "progressWindow_saveItem": {
+    "message": "Запись $1: $2"
+  },
   "progressWindow_downloadComplete": {
     "message": "Сохранен $1"
   },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Сохранено $1 для записи $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Сбой при загрузке $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Сбой при загрузке $1 для записи $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Сохренение завершено. Диалоговое окно будет закрыто сейчас."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Записи на этой веб-странице уже были сохранены."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Теги (через запятую)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Отфильтровать коллекции"
   },
   "progressWindow_error_translation": {
     "message": "Произошла ошибка при сохранении этой записи. Смотрите $1 для получения дополнительной информации."
@@ -99,13 +123,19 @@
     "message": "Эта возможность не поддерживается версией $1, установленной у вас. Пожалуйста, обновитесь до $2."
   },
   "progressWindow_error_upgradeClient_latestVersion": {
-    "message": "Последняя версия"
+    "message": "последняя версия"
+  },
+  "itemSelector_title": {
+    "message": "Выберите какие записи вы бы хотели добавить в свою библиотеку:"
   },
   "extensionIsDisabled": {
-    "message": "$1 отключено"
+    "message": "$1 Коннектор недоступен на этой странице"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Коннектор недоступен для URL указывающих на файл"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 отключено на странице расширения"
+    "message": "$1 Коннектор недоступен для страниц расширений "
   },
   "appConnector": {
     "message": "Коннектор $1"
@@ -120,7 +150,7 @@
     "message": "Коннектор $1 одним щелчком сохраняет просматриваемые страницы из браузера <a href=\"$2\"> в $1</a>."
   },
   "firstRun_text2": {
-    "message": "Если вы ещё не <a href=\"$2\">загрузили</a> автономное $1 приложение для большего удобства."
+    "message": "Если вы ещё не <a href=\"$2\">загрузили</a> $1 приложение для большего удобства."
   },
   "firstRun_acceptButton": {
     "message": "Понял"
@@ -172,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 блокирует ваш документ для предотвращения одновременной правки цитирования несколькими пользователями. Одновременная правка цитирования может испортить цитирование или документ. Непредвиденные обстоятельства, например разрывы соединения, могут привести к постоянной блокировке документа. Если вы убеждены что произошло именно это, то можете снять блокировку принудительно.<br/><br/>Желаете снять блокировку документа принудительно?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 требует разрешение на редактирование доекументов в вашем Google Docs чтобы добавлять цитирования. Пожалуйстыв, попробуйте еще ращ, и убедитесь что разрешили $1 просмотр, редактирование, создание и уделание документов в вашем Google Docs."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "Выбранная вами учётная запись Google не имеет разрешения на редактирование этого документа. Пожалуйста, повторите позже, и убедитесь что выбрали учётную запись с разрешением на редактирование."

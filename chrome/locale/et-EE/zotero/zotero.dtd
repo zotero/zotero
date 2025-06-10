@@ -11,12 +11,12 @@
 <!ENTITY zotero.general.cancel "Tühistada">
 <!ENTITY zotero.general.refresh "Värskenda">
 <!ENTITY zotero.general.saveAs "Salvestada kui...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Valikud">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.tools "Tööriistad">
 <!ENTITY zotero.general.more "Veel">
-<!ENTITY zotero.general.moreInformation "More Information">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.moreInformation "Lisainfo">
+<!ENTITY zotero.general.loading "Laadimine...">
 <!ENTITY zotero.general.close "Sulge">
 <!ENTITY zotero.general.minimize "Minimeerida">
 <!ENTITY zotero.general.other "Other…">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.copyAsURL "Kopeerida URL kujul">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "Kustuta jäädavalt...">
 
 <!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
 
@@ -123,7 +123,7 @@
 <!ENTITY zotero.toolbar.attachment.add "Faili koopia salvestamine...">
 <!ENTITY zotero.toolbar.attachment.weblink "Salvestada link käesolevale leheküljele">
 <!ENTITY zotero.toolbar.attachment.snapshot "Teha käesolevast leheküljest momentülesvõte">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "Kirje">
 <!ENTITY zotero.toolbar.context.notes "Märkused">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Lipikud puuduvad">
@@ -177,10 +177,10 @@
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
 <!ENTITY zotero.import.onlineImport "online import">
-<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.importing "Importimine...">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.size "Suurus">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
@@ -260,7 +260,7 @@
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignoreerida">
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.saveButton.label "Salvesta">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "Pealkiri:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
@@ -303,11 +303,11 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.editInWindow "Muuda eraldi aknas">
 
 <!ENTITY zotero.pdfReader.firstPage "Esimene lehekülg">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Tagasi">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
