@@ -570,4 +570,18 @@ describe("Plugin API", function () {
 			await waitForUnregister(columnKey);
 		});
 	});
+
+	describe("Custom menu", function () {
+		let defaultOption = {
+			menuID: "default-test",
+			pluginID: "zotero@zotero.org",
+			menus: [{
+				menuType: "menu",
+				l10nID: "menu-print",
+				onCommand: (event, context) => {
+					updateCache("onCommand", context);
+				}
+			}]
+		};
+	});
 });

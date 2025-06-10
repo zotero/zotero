@@ -97,3 +97,15 @@ menupopup image {
 		fill: currentColor;
 	}
 }
+
+menuitem,
+menu {
+	&.zotero-custom-menu-item {
+		@media (prefers-color-scheme: light) {
+			list-style-image: var(--custom-menu-icon-light);
+		}
+		@media (prefers-color-scheme: dark) {
+			list-style-image: var(--custom-menu-icon-dark);
+		}
+	}
+}
