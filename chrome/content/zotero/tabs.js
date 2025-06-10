@@ -839,6 +839,7 @@ var Zotero_Tabs = new function () {
 		);
 
 		popup.openPopupAtScreen(x, y, true);
+		return popup;
 	};
 
 	// Used to move focus back or sidenav from the tabs.
