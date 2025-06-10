@@ -42,7 +42,7 @@
 		"main/library/addAttachment",
 		// Main window toolbar & file menu submenu: "New note"
 		"main/library/addNote",
-		// Main window tab context menus - NOT IMPLEMENTED YET
+		// Main window tab context menus
 		"main/tab",
 		// Reader window menubar menus
 		"reader/menubar/file",

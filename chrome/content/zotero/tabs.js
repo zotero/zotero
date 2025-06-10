@@ -724,14 +724,12 @@ var Zotero_Tabs = new function () {
 			menuitem.setAttribute('label', Zotero.getString('general.showInLibrary'));
 			menuitem.addEventListener('command', () => {
 				let { tab } = this._getTab(id);
-				if (tab && (tab.type === 'reader' || tab.type === 'reader-unloaded')) {
-					let itemID = tab.data.itemID;
-					let item = Zotero.Items.get(itemID);
-					if (item && item.parentItemID) {
-						itemID = item.parentItemID;
-					}
-					ZoteroPane_Local.selectItem(itemID);
+				let itemID = tab.data.itemID;
+				let item = Zotero.Items.get(itemID);
+				if (item && item.parentItemID) {
+					itemID = item.parentItemID;
 				}
+				ZoteroPane_Local.selectItem(itemID);
 			});
 			popup.appendChild(menuitem);
 			// Move tab
@@ -756,30 +754,33 @@ var Zotero_Tabs = new function () {
 				this.move(id, this._tabs.length);
 			});
 			menupopup.appendChild(menuitem);
-			// Move to new window
-			menuitem = document.createXULElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
-			menuitem.setAttribute('disabled', false);
-			menuitem.addEventListener('command', () => {
-				let { tab } = this._getTab(id);
-				if (tab && (tab.type === 'reader' || tab.type === 'reader-unloaded')) {
-					this.close(id);
-					let { itemID, secondViewState } = tab.data;
-					Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
-				}
-			});
-			menupopup.appendChild(menuitem);
-			// Duplicate tab
-			menuitem = document.createXULElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
-			menuitem.addEventListener('command', () => {
-				if (tab.data.itemID) {
-					tabIndex++;
-					let { secondViewState } = tab.data;
-					Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true, secondViewState });
-				}
-			});
-			popup.appendChild(menuitem);
+
+			if (tab.type === 'reader' || tab.type === 'reader-unloaded') {
+				// Move to new window
+				menuitem = document.createXULElement('menuitem');
+				menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
+				menuitem.setAttribute('disabled', false);
+				menuitem.addEventListener('command', () => {
+					let { tab } = this._getTab(id);
+					if (tab && (tab.type === 'reader' || tab.type === 'reader-unloaded')) {
+						this.close(id);
+						let { itemID, secondViewState } = tab.data;
+						Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
+					}
+				});
+				menupopup.appendChild(menuitem);
+				// Duplicate tab
+				menuitem = document.createXULElement('menuitem');
+				menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
+				menuitem.addEventListener('command', () => {
+					if (tab.data.itemID) {
+						tabIndex++;
+						let { secondViewState } = tab.data;
+						Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true, secondViewState });
+					}
+				});
+				popup.appendChild(menuitem);
+			}
 			// Separator
 			popup.appendChild(document.createXULElement('menuseparator'));
 		}
@@ -802,21 +803,41 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		// Undo close
-		menuitem = document.createXULElement('menuitem');
-		menuitem.setAttribute(
-			'label',
-			Zotero.getString(
-				'tabs.undoClose',
-				[],
-				// If not disabled, show proper plural for tabs to reopen
-				this._history.length ? this._history[this._history.length - 1].length : 1
-			)
+		if (['reader', 'reader-unloaded'].includes(tab.type)) {
+			menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute(
+				'label',
+				Zotero.getString(
+					'tabs.undoClose',
+					[],
+					// If not disabled, show proper plural for tabs to reopen
+					this._history.length ? this._history[this._history.length - 1].length : 1
+				)
+			);
+			menuitem.setAttribute('disabled', !this._history.length);
+			menuitem.addEventListener('command', () => {
+				this.undoClose();
+			});
+			popup.appendChild(menuitem);
+		}
+
+		Zotero.MenuManager.updateMenuPopup(
+			popup,
+			"main/tab",
+			{
+				getContext: () => {
+					let item = Zotero.Items.get(tab.data.itemID);
+					let ret = {
+						items: [item],
+						tabType: tab.type,
+						tabID: id,
+						tabSubType: item.attachmentReaderType,
+					};
+					return ret;
+				}
+			}
 		);
-		menuitem.setAttribute('disabled', !this._history.length);
-		menuitem.addEventListener('command', () => {
-			this.undoClose();
-		});
-		popup.appendChild(menuitem);
+
 		popup.openPopupAtScreen(x, y, true);
 	};
 
