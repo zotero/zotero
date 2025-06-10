@@ -235,9 +235,9 @@
 				<menubar id="main-menubar"
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">		
 					<!-- File menu -->
-					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
-							onpopupshowing="ZoteroStandalone.onFileMenuOpen(event)">
-						<menupopup id="menu_FilePopup">
+					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+						<menupopup id="menu_FilePopup"
+									onpopupshowing="ZoteroStandalone.onFileMenuOpen(event)">
 							<menu id="menu_newItem" class="menu-type-library" label="&zotero.toolbar.newItem.label;">
 								<menupopup id="menu_NewItemPopup"
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
@@ -444,9 +444,9 @@
 					
 					<menu id="view-menu"
 							label="&viewMenu.label;"
-							accesskey="&viewMenu.accesskey;"
-							onpopupshowing="ZoteroStandalone.onViewMenuOpen(event)">
-						<menupopup id="menu_viewPopup">
+							accesskey="&viewMenu.accesskey;">
+						<menupopup id="menu_viewPopup"
+									onpopupshowing="ZoteroStandalone.onViewMenuOpen(event)">
 							<menuitem
 								id="view-menuitem-hand-tool"
 								class="menu-type-reader pdf"
@@ -688,10 +688,9 @@
 						id="go-menu"
 						class="menu-type-reader"
 						label="&goMenu.label;"
-						accesskey="&goMenu.accesskey;"
-						onpopupshowing="ZoteroStandalone.onGoMenuOpen(event)"
-					>
-						<menupopup id="menu_goPopup">
+						accesskey="&goMenu.accesskey;">
+						<menupopup id="menu_goPopup"
+									onpopupshowing="ZoteroStandalone.onGoMenuOpen(event)">
 							<menuitem
 								id="go-menuitem-first-page"
 								class="menu-type-reader pdf epub"
