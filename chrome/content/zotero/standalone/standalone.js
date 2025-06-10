@@ -503,7 +503,16 @@ const ZoteroStandalone = new function () {
 		this.onUpdateCustomMenus(event, 'help');
 	};
 
-	this.onUpdateCustomMenus = function (event, type, tabType, readerType) {
+	this.onUpdateCustomMenus = function (event, type) {
+		let [tabType, _] = Zotero_Tabs.selectedType.split("-");
+		let readerType;
+		if (tabType !== 'library') {
+			let item = Zotero.Items.get(Zotero_Tabs._getTab(Zotero_Tabs.selectedID).tab?.data?.itemID);
+			if (item && item.isAttachment()) {
+				readerType = item.attachmentReaderType;
+			}
+		}
+
 		const POPUP_SELECTOR_MAP = {
 			file: '#menu_FilePopup',
 			edit: '#menu_EditPopup',
