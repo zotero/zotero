@@ -335,9 +335,10 @@ const styles = {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        '&:hover': {
-            background: '#F8F6F7',
-        },
+        background: '#FFFFFF',
+        border: 'none',
+        width: '100%',
+        textAlign: 'left',
     },
 };
 
@@ -358,6 +359,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const MAX_VISIBLE_SESSIONS = 2;
     const chatLogRef = useRef(null);
     const [hoveredQuestion, setHoveredQuestion] = useState(null);
+    const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
 
     // Load recent sessions from preferences on component mount
     useEffect(() => {
@@ -1484,11 +1486,16 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                 {hiddenSessions.map(([sessionId, sessionData]) => (
                                     <div
                                         key={sessionId}
-                                        style={styles.sessionPopupItem}
+                                        style={{
+                                            ...styles.sessionPopupItem,
+                                            background: hoveredPopupSession === sessionId ? '#D9D9D9' : '#FFFFFF'
+                                        }}
                                         onClick={() => {
                                             handleSessionClick(sessionId);
                                             setShowSessionPopup(false);
                                         }}
+                                        onMouseEnter={() => setHoveredPopupSession(sessionId)}
+                                        onMouseLeave={() => setHoveredPopupSession(null)}
                                     >
                                         {truncateSessionName(sessionData.name)}
                                     </div>

@@ -55,6 +55,11 @@ const searchInputStyle = {
   color: '#1a65b0',
   minHeight: '2rem',
   fontSize: '0.8125rem',
+  ':focus': {
+    outline: 'none',
+    border: 'none',
+    boxShadow: 'none'
+}
 };
 
 const sessionListStyle = {

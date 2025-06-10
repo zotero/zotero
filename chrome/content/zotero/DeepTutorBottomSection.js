@@ -57,7 +57,7 @@ const styles = {
         border: 'none',
         color: '#292929',
         fontWeight: 500,
-        fontSize: '1.2rem',
+        fontSize: '1rem',
         lineHeight: '100%',
         letterSpacing: '0%',
         fontFamily: 'Roboto, sans-serif',
@@ -77,8 +77,8 @@ const styles = {
         }
     },
     buttonIcon: {
-        width: '1.25rem',
-        height: '1.25rem',
+        width: '1.1rem',
+        height: '1.1rem',
         objectFit: 'contain',
     },
     upgradeButton: {
