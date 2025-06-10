@@ -576,12 +576,450 @@ describe("Plugin API", function () {
 			menuID: "default-test",
 			pluginID: "zotero@zotero.org",
 			menus: [{
-				menuType: "menu",
+				menuType: "menuitem",
 				l10nID: "menu-print",
+				onShowing: (event, context) => {
+					updateCache("onShowing", context);
+				},
 				onCommand: (event, context) => {
 					updateCache("onCommand", context);
 				}
 			}]
 		};
+
+		// From https://searchfox.org/mozilla-esr128/source/browser/base/content/test/menubar/browser_file_close_tabs.js
+		async function simulateMenuOpen(menu) {
+			return new Promise((resolve) => {
+				menu.addEventListener("popupshown", resolve, { once: true });
+				menu.dispatchEvent(new MouseEvent("popupshowing"));
+				menu.dispatchEvent(new MouseEvent("popupshown"));
+			});
+		}
+
+		async function simulateMenuClosed(menu) {
+			return new Promise((resolve) => {
+				menu.addEventListener("popuphidden", resolve, { once: true });
+				menu.dispatchEvent(new MouseEvent("popuphiding"));
+				menu.dispatchEvent(new MouseEvent("popuphidden"));
+			});
+		}
+
+		async function simulateMenuItemClick(menuitem) {
+			return new Promise((resolve) => {
+				menuitem.addEventListener("command", resolve, { once: true });
+				menuitem.dispatchEvent(new MouseEvent("click"));
+				menuitem.dispatchEvent(new MouseEvent("command"));
+			});
+		}
+
+		async function checkMenuContext(option, popupSelector, targetDoc) {
+			if (!targetDoc) {
+				targetDoc = doc;
+			}
+
+			option = Object.assign({}, defaultOption, option);
+			let target = option.target;
+
+			initCache("onShowing");
+			let menuID = Zotero.MenuManager.registerMenu(option);
+			assert.isString(menuID);
+
+			let popup;
+			if (typeof popupSelector === "function") {
+				popup = await popupSelector();
+			}
+			else {
+				popup = targetDoc.querySelector(popupSelector);
+				await simulateMenuOpen(popup);
+			}
+			assert.exists(popup, `Popup for target ${target} should exist`);
+
+			let context = await getCache("onShowing");
+			assert.exists(context.menuElem, `Menu context for ${target} should have menuElem`);
+
+			if (typeof popupSelector === "function") {
+				popup.hidePopup();
+			}
+			else {
+				await simulateMenuClosed(popup);
+			}
+
+			assert.isTrue(Zotero.MenuManager.unregisterMenu(menuID));
+		}
+
+		beforeEach(async function () {
+			resetCaches();
+		});
+
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+			Zotero_Tabs.closeAll();
+		});
+
+		it("should register custom menu and call hooks", async function () {
+			let option = Object.assign({}, defaultOption, {
+				target: "main/menubar/file",
+				menus: [{
+					menuType: "menuitem",
+					l10nID: "menu-print",
+					onShowing: (event, context) => {
+						updateCache("onShowing", context);
+					},
+					onShown: (event, context) => {
+						updateCache("onShown", context);
+					},
+					onHiding: (event, context) => {
+						updateCache("onHiding", context);
+					},
+					onHidden: (event, context) => {
+						updateCache("onHidden", context);
+					},
+					onCommand: (event, context) => {
+						updateCache("onCommand", context);
+					}
+				}]
+			});
+			initCache("onShowing");
+			initCache("onShown");
+			initCache("onHiding");
+			initCache("onHidden");
+			initCache("onCommand");
+			let menuID = Zotero.MenuManager.registerMenu(option);
+			assert.isString(menuID);
+
+			let popup = doc.querySelector("#menu_FilePopup");
+			await simulateMenuOpen(popup);
+			let context = await getCache("onShowing");
+			await getCache("onShown");
+
+			assert.exists(context.menuElem);
+			assert.equal(context.menuElem.parentNode, popup);
+
+			await simulateMenuItemClick(context.menuElem);
+			context = await getCache("onCommand");
+			assert.exists(context);
+
+			await simulateMenuClosed(popup);
+			await Promise.all([
+				getCache("onHiding"),
+				getCache("onHidden")
+			]);
+
+			// Unregister the menu
+			assert.isTrue(Zotero.MenuManager.unregisterMenu(menuID));
+
+			// After unregistering and re-opening the popup, the menu should not exist
+			popup.addEventListener("popupshown", () => {
+				assert.notExists(popup.querySelector('.zotero-custom-menu-item'));
+			}, { once: true });
+
+			// Since the event is manually dispatched, the above listener will be triggered before the promise resolves
+			await simulateMenuOpen(popup);
+		});
+
+		it("should hide custom menu when not enabled for tab type", async function () {
+			let option = Object.assign({}, defaultOption, {
+				target: "main/menubar/file",
+				menus: [
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-library");
+						},
+						enableForTabTypes: ["library"]
+					},
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-pdf");
+						},
+						enableForTabTypes: ["reader/pdf"]
+					},
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-epub");
+						},
+						enableForTabTypes: ["reader/epub"]
+					},
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-snapshot");
+						},
+						enableForTabTypes: ["reader/snapshot"]
+					},
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-anyReader");
+						},
+						enableForTabTypes: ["reader/*"]
+					}
+				]
+			});
+
+			// Create items for different tab types
+			let pdfItem = await importFileAttachment('test.pdf');
+			let epubItem = await importFileAttachment('stub.epub');
+			let snapshotItem = await importFileAttachment('test.html');
+
+			let menuID = Zotero.MenuManager.registerMenu(option);
+			assert.isString(menuID);
+			let popup = doc.querySelector("#menu_FilePopup");
+
+			function assertMenuVisibility(popup, visibilities) {
+				for (let [className, visible] of Object.entries(visibilities)) {
+					let menuItem = popup.querySelector(`.test-menu-${className}`);
+					if (visible) {
+						assert.isFalse(menuItem.hidden, `Menu item ${className} should be visible`);
+					}
+					else {
+						assert.isTrue(menuItem.hidden, `Menu item ${className} should be hidden`);
+					}
+				}
+			}
+
+			// Open the menu in library tab
+			await simulateMenuOpen(popup);
+			// Should show library menu item
+			assertMenuVisibility(popup, {
+				library: true,
+				pdf: false,
+				epub: false,
+				snapshot: false,
+				anyReader: false
+			});
+			await simulateMenuClosed(popup);
+
+			// Switch to PDF tab
+			await ZoteroPane.viewItems([pdfItem]);
+			let pdfTabID = Zotero_Tabs.selectedID;
+			await Zotero.Reader.getByTabID(pdfTabID)._initPromise;
+			await simulateMenuOpen(popup);
+			// Should show PDF and anyReader menu items
+			assertMenuVisibility(popup, {
+				library: false,
+				pdf: true,
+				epub: false,
+				snapshot: false,
+				anyReader: true
+			});
+			await simulateMenuClosed(popup);
+
+			// Switch to EPUB tab
+			await ZoteroPane.viewItems([epubItem]);
+			let epubTabID = Zotero_Tabs.selectedID;
+			await Zotero.Reader.getByTabID(epubTabID)._initPromise;
+			await simulateMenuOpen(popup);
+			// Should show EPUB and anyReader menu items
+			assertMenuVisibility(popup, {
+				library: false,
+				pdf: false,
+				epub: true,
+				snapshot: false,
+				anyReader: true
+			});
+			await simulateMenuClosed(popup);
+
+			// Switch to Snapshot tab
+			await ZoteroPane.viewItems([snapshotItem]);
+			let snapshotTabID = Zotero_Tabs.selectedID;
+			await Zotero.Reader.getByTabID(snapshotTabID)._initPromise;
+			await simulateMenuOpen(popup);
+			// Should show Snapshot and anyReader menu items
+			assertMenuVisibility(popup, {
+				library: false,
+				pdf: false,
+				epub: false,
+				snapshot: true,
+				anyReader: true
+			});
+			await simulateMenuClosed(popup);
+
+			// Unregister the menu
+			assert.isTrue(Zotero.MenuManager.unregisterMenu(menuID));
+		});
+
+		it("should register recursive submenu", async function () {
+			let testMenuClass = "test-recursive-submenu";
+			let option = Object.assign({}, defaultOption, {
+				target: "main/menubar/file",
+				menus: [{
+					menuType: "submenu",
+					l10nID: "menu-print",
+					onShowing: (event, context) => {
+						context.menuElem?.classList.add(testMenuClass);
+					},
+					menus: [{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							updateCache("onShowing", context);
+						},
+						onCommand: (event, context) => {
+							updateCache("onCommand", context);
+						}
+					}]
+				}]
+			});
+
+			initCache("onCommand");
+			initCache("onShowing");
+
+			let menuID = Zotero.MenuManager.registerMenu(option);
+			assert.isString(menuID);
+
+			let popup = doc.querySelector("#menu_FilePopup");
+
+			await simulateMenuOpen(popup);
+
+			// The onShowing hook of child menu should not be called yet
+			assert.isEmpty(caches.onShowing.result, "Child menu onShowing should not be called yet");
+
+			let submenu = popup.querySelector(`.${testMenuClass}`);
+			assert.exists(submenu, "Submenu should be created");
+
+			let submenuPopup = submenu.querySelector("menupopup");
+			await simulateMenuOpen(submenuPopup);
+			let context = await getCache("onShowing");
+			assert.exists(context.menuElem, "Submenu onShowing context should have menuElem");
+
+			await simulateMenuItemClick(context.menuElem);
+			context = await getCache("onCommand");
+			assert.exists(context, "Submenu command context should exist");
+
+			assert.isTrue(Zotero.MenuManager.unregisterMenu(menuID));
+		});
+
+		it("should register main window menu", async function () {
+			let menuTargetMap = {
+				"main/menubar/file": "#menu_FilePopup",
+				"main/menubar/edit": "#menu_EditPopup",
+				"main/menubar/view": "#menu_viewPopup",
+				"main/menubar/go": "#menu_goPopup",
+				"main/menubar/tools": "#menu_ToolsPopup",
+				"main/menubar/help": "#menu_HelpPopup",
+				"main/library/item": () => {
+					ZoteroPane.onItemsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
+					return doc.querySelector("#zotero-itemmenu");
+				},
+				"main/library/collection": () => {
+					ZoteroPane.onCollectionsContextMenuOpen(new MouseEvent("contextmenu"), 0, 0);
+					return doc.querySelector("#zotero-collectionmenu");
+				},
+				"main/library/addAttachment": "#menu_attachmentAdd > menupopup",
+				"main/library/addNote": "#menu_noteAdd > menupopup",
+				"main/tab": async () => {
+					let tabID = Zotero_Tabs.selectedID;
+					return Zotero_Tabs._openMenu(0, 0, tabID);
+				},
+				"itemPane/info/row": async () => {
+					let item = new Zotero.Item('book');
+					await item.saveTx();
+					await ZoteroPane.selectItem(item.id);
+					let itemDetails = ZoteroPane.itemPane._itemDetails;
+					let infoBox = itemDetails.getPane("info");
+					let row = infoBox.querySelector("#itembox-field-value-title");
+					let event = new MouseEvent("contextmenu", {
+						bubbles: true,
+						cancelable: true,
+					});
+					row.dispatchEvent(event);
+					let popup = infoBox.querySelector("#zotero-field-menu");
+					return popup;
+				},
+				"sidenav/locate": async () => {
+					let item = new Zotero.Item('book');
+					await item.saveTx();
+					await ZoteroPane.selectItem(item.id);
+					let sidenav = ZoteroPane.itemPane._sidenav;
+					let button = sidenav.querySelector("toolbarbutton[data-action='locate']");
+					let event = new MouseEvent("mousedown", {
+						bubbles: true,
+						cancelable: true,
+					});
+					button.dispatchEvent(event);
+					let popup = button.querySelector("menupopup");
+					return popup;
+				}
+			};
+
+			for (let [target, popupSelector] of Object.entries(menuTargetMap)) {
+				await checkMenuContext({ target }, popupSelector);
+			}
+		});
+
+		it("should register note context menu", async function () {
+			let menuTargetMap = {
+				"notesPane/addItemNote": async () => {
+					let button = notesList.querySelector(".item-notes .section-custom-button.add");
+					let event = new MouseEvent("command", {
+						bubbles: true,
+						cancelable: true,
+					});
+					button.dispatchEvent(event);
+					let popup = doc.querySelector("#context-pane-add-child-note-button-popup");
+					return popup;
+				},
+				"notesPane/addStandaloneNote": async () => {
+					let button = notesList.querySelector(".all-notes .section-custom-button.add");
+					let event = new MouseEvent("command", {
+						bubbles: true,
+						cancelable: true,
+					});
+					button.dispatchEvent(event);
+					let popup = doc.querySelector("#context-pane-add-standalone-note-button-popup");
+					return popup;
+				}
+			};
+			
+			let item = new Zotero.Item('book');
+			await item.saveTx();
+			let pdfItem = await importFileAttachment('test.pdf', {
+				parentItemID: item.id
+			});
+			await ZoteroPane.viewItems([pdfItem]);
+			await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)._initPromise;
+			ZoteroContextPane.collapsed = false;
+			ZoteroContextPane.sidenav._contextNotesPaneVisible = true;
+			let contextPane = ZoteroContextPane.context;
+			let notesContext = contextPane._getCurrentNotesContext();
+			let notesList = notesContext.notesList;
+
+			for (let [target, popupSelector] of Object.entries(menuTargetMap)) {
+				await checkMenuContext({ target }, popupSelector);
+			}
+		});
+
+		it("should register reader window menu", async function () {
+			let mainMenubarTargetMap = {
+				"reader/menubar/file": "#menu_FilePopup",
+				"reader/menubar/edit": "#menu_EditPopup",
+				"reader/menubar/view": "#menu_viewPopup",
+				"reader/menubar/go": "#menu_goPopup",
+				"reader/menubar/window": "#windowPopup",
+			};
+
+			let pdfAttachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(pdfAttachment.id, undefined, {
+				openInWindow: true,
+			});
+			await reader._initPromise;
+			
+			let readerWin = reader._window;
+			let readerDoc = readerWin.document;
+
+			for (let [target, popupSelector] of Object.entries(mainMenubarTargetMap)) {
+				await checkMenuContext({ target }, popupSelector, readerDoc);
+			}
+
+			reader.close();
+		});
 	});
 });
