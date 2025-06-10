@@ -1523,7 +1523,14 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     style={styles.textInput}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type your message..."
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault(); // Prevent adding a new line
+                            handleSend();
+                        }
+                        // Shift+Enter allows new line (default behavior)
+                    }}
+                    placeholder="Type your message... (Shift+Enter for new line)"
                     rows={1}
                 />
                 <button

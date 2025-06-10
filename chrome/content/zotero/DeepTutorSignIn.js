@@ -41,7 +41,7 @@ const styles = {
   },
   input: {
     width: '100%',
-    minHeight: '2rem',
+    minHeight: '3rem',
     borderRadius: '0.625rem',
     border: `1px solid #DADCE0`,
     padding: '0.375rem 0.5rem',
