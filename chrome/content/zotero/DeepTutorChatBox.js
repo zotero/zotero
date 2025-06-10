@@ -1203,6 +1203,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     };
 
     const handleSourceClick = async (source) => {
+        console.log('handleSourceClick', source);
         if (!source || source.refinedIndex === undefined || source.refinedIndex < 0 || source.refinedIndex >= documentIds.length) {
             Zotero.debug(`DeepTutorChatBox: Invalid source or refinedIndex: ${JSON.stringify(source)}`);
             return;
@@ -1241,48 +1242,37 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 return;
             }
 
+            // Open the document and navigate to the specific page
             await Zotero.FileHandlers.open(item, {
                 location: {
-                    pageIndex: source.page - 1, // Convert to 0-based index
-                    annotationID: source.annotationId
+                    pageIndex: source.page - 1 // Convert to 0-based index
                 }
             });
-            Zotero.debug(`DeepTutorChatBox: Opened PDF with page ${source.page} and annotation ${source.annotationId}`);
-            
-            // Find and focus on the annotation
-            const attachment = Zotero.Items.get(zoteroAttachmentId);
-            if (attachment) {
-                Zotero.debug(`DeepTutorChatBox: Found attachment, retrieving annotations`);
-                const annotations = await attachment.getAnnotations();
-                Zotero.debug(`DeepTutorChatBox: Found ${annotations.length} annotations`);
-                
-                // Find highlight annotation for the specific page
-                const highlight = annotations.find(a => 
-                    a.type === 'highlight' && 
-                    a.page === source.page &&
-                    a.text === source.referenceString
-                );
-                
-                if (highlight) {
-                    Zotero.debug(`DeepTutorChatBox: Found matching highlight annotation ${highlight.id}, focusing on it`);
-                    await Zotero.Annotations.focusAnnotation(highlight);
-                    Zotero.debug(`DeepTutorChatBox: Focused on highlight annotation`);
-                } else {
-                    Zotero.debug(`DeepTutorChatBox: No matching highlight found for page ${source.page}, creating new highlight`);
-                    // Create new highlight if not found
-                    const newHighlight = await _createHighlightAnnotation(zoteroAttachmentId, source.page, source.referenceString);
-                    if (newHighlight) {
-                        Zotero.debug(`DeepTutorChatBox: Created new highlight annotation ${newHighlight.id}`);
-                        await Zotero.Annotations.focusAnnotation(newHighlight);
-                        Zotero.debug(`DeepTutorChatBox: Focused on new highlight annotation`);
-                    }
+            Zotero.debug(`DeepTutorChatBox: Opened PDF with page ${source.page}`);
+
+            // Trigger search for the reference string if it exists
+            if (source.referenceString) {
+                Zotero.debug(`DeepTutorChatBox: Triggering search for reference string: ${source.referenceString}`);
+                // Get the PDF viewer instance
+                const pdfViewer = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+                console.log('pdfViewer', pdfViewer);
+                if (pdfViewer) {
+                    // Set find state to search for the reference string
+                    pdfViewer.setFindState({
+                        active: true,
+                        query: source.referenceString,
+                        highlightAll: true,
+                        caseSensitive: false,
+                        entireWord: false
+                    });
+                    // Trigger find next to highlight the first occurrence
+                    pdfViewer.findNext();
                 }
-            } else {
-                Zotero.debug(`DeepTutorChatBox: No attachment found for ID ${zoteroAttachmentId}`);
             }
         } catch (error) {
-            Zotero.debug(`DeepTutorChatBox: Error handling source click: ${error.message}`);
-            Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+            
+            console.log(`DeepTutorChatBox: Error handling source click: ${error.message}`);
+            console.log(`DeepTutorChatBox: Error stack: ${error.stack}`);
         }
     };
 
