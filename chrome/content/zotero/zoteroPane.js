@@ -1999,6 +1999,9 @@ var ZoteroPane = new function()
 				event,
 				getContext: () => ({
 					items,
+					tabType: "library",
+					tabSubType: undefined,
+					tabID: "zotero-pane",
 				})
 			}
 		);
@@ -2023,6 +2026,9 @@ var ZoteroPane = new function()
 				event,
 				getContext: () => ({
 					items,
+					tabType: "library",
+					tabSubType: undefined,
+					tabID: "zotero-pane",
 				})
 			}
 		);
@@ -3609,6 +3615,9 @@ var ZoteroPane = new function()
 			{
 				getContext: () => ({
 					collectionTreeRow,
+					tabType: "library",
+					tabSubType: undefined,
+					tabID: "zotero-pane",
 				})
 			}
 		);
@@ -4127,6 +4136,9 @@ var ZoteroPane = new function()
 				getContext: () => ({
 					collectionTreeRow,
 					items,
+					tabType: "library",
+					tabSubType: undefined,
+					tabID: "zotero-pane",
 				})
 			}
 		);

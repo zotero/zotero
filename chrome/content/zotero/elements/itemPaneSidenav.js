@@ -248,6 +248,10 @@
 									ret.tabType = this.container.tabType;
 									ret.tabID = this.container.tabID;
 								}
+								if (typeof Zotero_Tabs !== 'undefined') {
+									let { subType: tabSubType } = Zotero_Tabs.getTabInfo();
+									ret.tabSubType = tabSubType;
+								}
 								return ret;
 							}
 						});
