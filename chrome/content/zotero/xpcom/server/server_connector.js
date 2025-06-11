@@ -731,6 +731,7 @@ Zotero.Server.Connector.SaveAttachmentFromResolver.prototype = {
  *		sessionID - A session ID previously passed to /saveItems
  *		target - A treeViewID (L1, C23, etc.) for the library or collection to save to
  *		tags - A string of tags separated by commas
+ *		note - A string to turn into a child note
  *
  * Returns:
  *		200 response on successful change
@@ -759,6 +760,7 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		// Parse treeViewID
 		var [type, id] = [data.target[0], parseInt(data.target.substr(1))];
 		var tags = data.tags;
+		var note = data.note;
 		
 		if (type == 'C') {
 			let collection = await Zotero.Collections.getAsync(id);
@@ -767,7 +769,7 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 			}
 		}
 		
-		await session.update(data.target, tags);
+		await session.update(data.target, tags, note);
 		
 		return [200, "application/json", JSON.stringify({})];
 	}
@@ -1104,6 +1106,7 @@ Zotero.Server.Connector.Ping.prototype = {
 					downloadAssociatedFiles: Zotero.Prefs.get("downloadAssociatedFiles"),
 					supportsAttachmentUpload: true,
 					googleDocsAddNoteEnabled: true,
+					canUserAddNote: true,
 					googleDocsCitationExplorerEnabled: false,
 					translatorsHash,
 					sortedTranslatorHash

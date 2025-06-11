@@ -69,6 +69,7 @@ Zotero.Server.Connector.SaveSession = class {
 		
 		this._progressItems = {};
 		this._orderedProgressItems = [];
+		this._userAddedNotes = {};
 	}
 
 	async saveItems(target) {
@@ -165,10 +166,11 @@ Zotero.Server.Connector.SaveSession = class {
 	/**
 	 * Change the target data for this session and update any items that have already been saved
 	 */
-	async update(targetID, tags) {
+	async update(targetID, tags, note) {
 		var previousTargetID = this._currentTargetID;
 		this._currentTargetID = targetID;
 		this._currentTags = tags || "";
+		this._currentNote = note || "";
 		
 		// Select new destination in collections pane
 		var zp = Zotero.getActiveZoteroPane();
@@ -227,18 +229,57 @@ Zotero.Server.Connector.SaveSession = class {
 			if (item.libraryID != libraryID) {
 				let newItem = await item.moveToLibrary(libraryID);
 				this._items[key] = newItem;
+				// Update cache of user-added note items, since IDs are different in a new library
+				if (this._currentNote) {
+					delete this._userAddedNotes[item.id];
+					let userNote = Zotero.Items.get(newItem.getNotes()).find(note => note.getNote() == this._currentNote);
+					if (userNote) {
+						this._userAddedNotes[newItem.id] = userNote.id;
+					}
+				}
+				// Apply following tags/collections/notes changes to the new item
+				item = newItem;
 			}
-			
 			// Keep automatic tags
 			let originalTags = item.getTags().filter(tag => tag.type == 1);
 			item.setTags(originalTags.concat(tags));
 			item.setCollections(collection ? [collection.id] : []);
 			await item.saveTx();
+
+			await this._updateNote(item);
 		}
 		
 		this._updateRecents();
 	});
 
+	/**
+	 * Update, create or delete note for an item based on session note state
+	 */
+	async _updateNote(item) {
+		// If a note is passed, add it as a child item
+		if (this._currentNote) {
+			// If the note item already exists, update it. Otherwise, create a new one.
+			let existingItemNoteID = this._userAddedNotes[item.id];
+			let noteItem = existingItemNoteID && Zotero.Items.get(existingItemNoteID);
+			if (!noteItem) {
+				noteItem = new Zotero.Item('note');
+			}
+			noteItem.setNote(this._currentNote);
+			noteItem.parentID = item.id;
+			noteItem.libraryID = item.libraryID;
+			await noteItem.saveTx();
+			// Record which of the notes is added by the user to this item
+			this._userAddedNotes[item.id] = noteItem.id;
+		}
+		// If the note was typed and then erased, delete it
+		else if (this._userAddedNotes[item.id]) {
+			let noteItem = Zotero.Items.get(this._userAddedNotes[item.id]);
+			if (noteItem) {
+				await noteItem.eraseTx();
+			}
+			delete this._userAddedNotes[item.id];
+		}
+	}
 
 	_updateRecents() {
 		var targetID = this._currentTargetID;
