@@ -3023,7 +3023,7 @@ var ZoteroPane = new function()
 			Zotero.warn("ZoteroPane.selectItems() now takes an 'options' object -- update your code");
 			options = { inLibraryRoot: options };
 		}
-		let { inLibraryRoot, noTabSwitch } = options;
+		let { inLibraryRoot, noTabSwitch, noWindowRestore } = options;
 		if (!itemIDs.length) {
 			return false;
 		}
@@ -3034,7 +3034,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Restore window if it's in the dock
-		if (window.windowState == window.STATE_MINIMIZED) {
+		if (window.windowState == window.STATE_MINIMIZED && !noWindowRestore) {
 			window.restore();
 		}
 		

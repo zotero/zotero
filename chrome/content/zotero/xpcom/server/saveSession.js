@@ -188,7 +188,7 @@ Zotero.Server.Connector.SaveSession = class {
 			item = item.isTopLevelItem() ? item : item.parentItem;
 			// Don't select if in trash
 			if (!item.deleted) {
-				await zp.selectItem(item.id);
+				await zp.selectItem(item.id, { noTabSwitch: true, noWindowRestore: true });
 			}
 		}
 	}
