@@ -81,6 +81,7 @@ const styles = {
         fontFamily: 'Roboto, sans-serif',
         position: 'relative',
         overflow: 'hidden',
+        padding: '1.875rem 1.25rem',
     },
     sessionInfo: {
         width: '90%',
@@ -93,10 +94,11 @@ const styles = {
         marginLeft: '5%',
     },
     chatLog: {
-        width: '90%',
+        width: '100%',
         borderRadius: '0.625rem',
         padding: '0.75rem 0.9375rem',
         overflowY: 'auto',
+        overflowX: 'hidden',
         background: '#F2F2F2',
         height: '100%',
         boxShadow: 'none',
@@ -104,8 +106,8 @@ const styles = {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        margin: '1.875rem 1.25rem',
+        alignItems: 'stretch',
+        boxSizing: 'border-box',
     },
     bottomBar: {
         width: '90%',
@@ -171,6 +173,10 @@ const styles = {
     messageContainer: {
         width: '100%',
         margin: '0.5rem 0',
+        boxSizing: 'border-box',
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
     },
     messageBubble: {
         padding: '0.625rem 1.25rem',
@@ -181,22 +187,29 @@ const styles = {
         height: 'auto',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
+        boxSizing: 'border-box',
+        minWidth: 0,
+        overflowWrap: 'break-word',
     },
     userMessage: {
         backgroundColor: '#0687E5',
         color: 'white',
         marginLeft: 'auto',
+        marginRight: 0,
         borderRadius: '0.625rem',
         fontWeight: 500,
         textAlign: 'left',
+        alignSelf: 'flex-end',
     },
     botMessage: {
         backgroundColor: '#F8F6F7',
         color: '#212529',
         marginRight: 'auto',
+        marginLeft: 0,
         borderBottomLeftRadius: '4px',
         borderRadius: '16px',
         fontWeight: 400,
+        alignSelf: 'flex-start',
     },
     senderLabel: {
         fontWeight: 'bold',
@@ -211,6 +224,9 @@ const styles = {
         display: 'flex',
         gap: '8px',
         flexWrap: 'wrap',
+        width: '100%',
+        boxSizing: 'border-box',
+        minWidth: 0,
     },
     sourceButton: {
         all: 'revert',
@@ -238,6 +254,8 @@ const styles = {
         justifyContent: 'flex-start',
         gap: '12px',
         flexWrap: 'wrap',
+        boxSizing: 'border-box',
+        minWidth: 0,
     },
     questionButton: {
         all: 'revert',
@@ -246,19 +264,24 @@ const styles = {
         border: '0.0625rem solid #0687E5',
         borderRadius: '0.625rem',
         padding: '0.625rem 1.25rem',
-        minWidth: '13.75rem',
+        minWidth: '8rem',
+        maxWidth: '100%',
         fontWeight: 500,
         fontSize: '1rem',
         lineHeight: '1.5',
         cursor: 'pointer',
         boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
-        margin: '0.25rem 0',
         textAlign: 'left',
         fontFamily: 'Roboto, sans-serif',
         height: 'auto',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
         transition: 'background 0.2s',
+        boxSizing: 'border-box',
+        overflowWrap: 'break-word',
+        alignSelf: 'flex-start',
+        marginLeft: '0',
+        marginRight: 'auto',
     },
     sessionTabBar: {
         height: '1.8125rem',
@@ -1112,12 +1135,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     ...(isUser ? styles.userMessage : styles.botMessage),
                     animation: 'slideIn 0.3s ease-out'
                 }}>
-                    <span style={styles.senderLabel}>
-                        {isUser ? 'You' : 'DeepTutor'}
-                    </span>
                     {message.subMessages.map((subMessage, subIndex) => (
                         <div key={subIndex} style={styles.messageText}>
-                            {`[${index}] `}
                             {/* Commented out ReactMarkdown implementation
                             <ReactMarkdown
                                 className="markdown mb-0 flex flex-col"
@@ -1181,6 +1200,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                 whiteSpace: 'pre-wrap',
                                 wordBreak: 'break-word',
                                 fontFamily: 'Roboto, sans-serif',
+                                width: '100%',
+                                boxSizing: 'border-box',
+                                overflowWrap: 'break-word',
+                                minWidth: 0,
                             }}>
                                 {subMessage.text || ''}
                             </div>
@@ -1200,7 +1223,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         </div>
                     ))}
                 </div>
-                {message.followUpQuestions && message.followUpQuestions.length > 0 && (
+                {index === messages.length - 1 && message.followUpQuestions && message.followUpQuestions.length > 0 && (
                     <div style={styles.questionContainer}>
                         {message.followUpQuestions.map((question, qIndex) => (
                             <button
