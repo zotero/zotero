@@ -41,6 +41,27 @@ general-cancel = Cancel
 general-show-in-library = Show in Library
 general-restartApp = Restart { -app-name }
 general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-save = Save
+general-clear = Clear
+general-update = Update
+general-back = Back
+general-edit = Edit
+general-back = Back
+general-copy = Copy
+general-delete = Delete
+
+general-red = Red
+general-orange = Orange
+general-yellow = Yellow
+general-green = Green
+general-teal = Teal
+general-blue = Blue
+general-purple = Purple
+general-magenta = Magenta
+general-violet = Violet
+general-maroon = Maroon
+general-gray = Gray
+general-black = Black
 
 citation-style-label = Citation Style:
 language-label = Language:

@@ -795,7 +795,7 @@ class ReaderInstance {
 		
 		let selectFile = async () => {
 			let fp = new FilePicker();
-			fp.init(this._window, Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'), fp.modeOpen);
+			fp.init(this._window, Zotero.ftl.formatValueSync('reader-import-from-epub-prompt-title'), fp.modeOpen);
 			fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
 			if (await fp.show() !== fp.returnOK) {
 				return null;
@@ -837,8 +837,8 @@ class ReaderInstance {
 					+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 				let index = ps.confirmEx(
 					this._window,
-					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
-					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-text', {
+					Zotero.ftl.formatValueSync('reader-import-from-epub-prompt-title'),
+					Zotero.ftl.formatValueSync('reader-import-from-epub-prompt-text', {
 						count: stats.count,
 						lastModifiedRelative: Zotero.Date.toRelativeDate(stats.lastModified),
 						tool: stats === koReaderStats ? 'KOReader' : 'Calibre',
@@ -846,7 +846,7 @@ class ReaderInstance {
 					buttonFlags,
 					Zotero.getString('general.import'),
 					'',
-					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
+					Zotero.ftl.formatValueSync('reader-import-from-epub-select-other'),
 					'', {}
 				);
 				if (index === 0) {
@@ -873,16 +873,16 @@ class ReaderInstance {
 					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 				
 				let message = isOpenFile
-					? Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations-current-file')
-					: Zotero.ftl.formatValueSync('pdfReader-import-from-epub-no-annotations-other-file', {
+					? Zotero.ftl.formatValueSync('reader-import-from-epub-no-annotations-current-file')
+					: Zotero.ftl.formatValueSync('reader-import-from-epub-no-annotations-other-file', {
 						filename: PathUtils.filename(path)
 					});
 				let index = ps.confirmEx(
 					this._window,
-					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-prompt-title'),
+					Zotero.ftl.formatValueSync('reader-import-from-epub-prompt-title'),
 					message,
 					buttonFlags,
-					Zotero.ftl.formatValueSync('pdfReader-import-from-epub-select-other'),
+					Zotero.ftl.formatValueSync('reader-import-from-epub-select-other'),
 					'', '', '', {}
 				);
 				if (index === 1) {
