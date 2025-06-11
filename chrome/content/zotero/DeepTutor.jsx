@@ -1552,7 +1552,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '1.2rem',
+									fontSize: '1.5rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>

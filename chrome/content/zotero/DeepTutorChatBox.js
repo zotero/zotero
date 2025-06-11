@@ -206,8 +206,8 @@ const styles = {
         maxWidth: '75%',
     },
     botMessage: {
-        backgroundColor: '#F8F6F7',
-        color: '#212529',
+        backgroundColor: '#F2F2F2',
+        color: '#000000',
         marginRight: 'auto',
         marginLeft: 0,
         borderBottomLeftRadius: '4px',
@@ -1538,8 +1538,6 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     return (
         <div style={styles.container}>
             {isLoading && <LoadingPopup />}
-            
-            <SessionTabBar />
             
             <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
