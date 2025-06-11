@@ -320,8 +320,8 @@ class DeepTutorMessage {
 }
 
 const logoPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_DPTLOGO.svg';
-const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY.svg';
-const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS.svg';
+const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_NEW.svg';
+const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
 const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE.svg';
 const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_SEARCH.svg';

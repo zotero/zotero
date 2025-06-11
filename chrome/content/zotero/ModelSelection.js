@@ -49,6 +49,14 @@ const styles = {
     position: 'relative',
     boxSizing: 'border-box',
   },
+  mainSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    maxHeight: '53rem',
+    overflowY: 'auto',
+    boxSizing: 'border-box',
+  },
   section: {
     width: '100%',
     maxWidth: '26rem',
@@ -63,7 +71,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    marginBottom: '1.875rem',
+    margin: '0 auto 1.875rem auto',
   },
   contextSection: {
     width: '100%',
@@ -71,14 +79,14 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    marginBottom: '1.875rem',
+    margin: '0 auto 1.875rem auto',
   },
   modelSection: {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    marginBottom: '0.625rem',
+    margin: '0 auto 0.625rem auto',
   },
   label: {
     fontWeight: 400,
@@ -91,6 +99,7 @@ const styles = {
   },
   input: {
     width: '100%',
+    height: '3rem',
     borderRadius: '0.625rem',
     borderWidth: '0.0625rem',
     padding: '0.75rem 0.9375rem',
@@ -108,7 +117,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     padding: '0.75rem 0.9375rem',
-    margin: '0.25rem 0',
+    marginBottom: '0.625rem',
     fontSize: '0.875rem',
     color: '#292929',
     boxSizing: 'border-box',
@@ -155,7 +164,7 @@ const styles = {
     borderRadius: '0.625rem',
     borderWidth: '0.0625rem',
     padding: '0.75rem 0.9375rem',
-    border: `0.09375rem dashed ${LIGHT_GREY2}`,
+    border: `0.0625rem solid ${LIGHT_GREY2}`,
     background: PEARL,
     minHeight: '5.6875rem',
     display: 'flex',
@@ -239,14 +248,14 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.3125rem',
-    width: '90%',
-    height: 'auto',
+    width: '100%',
+    height: '11rem',
   },
   modelFeature: {
     display: 'flex',
     alignItems: 'flex-start',
     gap: '0.3125rem',
-    fontSize: '0.875rem',
+    fontSize: '1rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     color: '#000000',
@@ -265,7 +274,7 @@ const styles = {
   modelLimitations: {
     marginTop: '0.3125rem',
     color: '#000000',
-    fontSize: '0.875rem',
+    fontSize: '1rem',
     lineHeight: '135%',
     letterSpacing: '0%',
     width: '90%',
@@ -274,6 +283,7 @@ const styles = {
   searchContainer: {
     position: 'relative',
     width: '100%',
+    height: '3rem',
     padding: '0',
     marginBottom: '0.625rem',
   },
@@ -374,6 +384,7 @@ const styles = {
     borderRadius: '0.625rem',
     border: '0.0625rem solid #D9D9D9',
     backgroundColor: '#FFFFFF',
+    height: '2.75rem',
   },
   newFileListName: {
     fontSize: '0.875rem',
@@ -400,7 +411,6 @@ const styles = {
   fileListContainer: {
     width: '100%',
     marginBottom: '0.3125rem',
-    maxHeight: '7.5rem',
     overflowY: 'auto',
   },
 };
@@ -903,179 +913,181 @@ function ModelSelection({ onSubmit }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.nameSection}>
-        <label style={styles.label}>Session Name</label>
-        <input
-          type="text"
-          value={modelName}
-          onChange={e => setModelName(e.target.value)}
-          style={styles.input}
-          placeholder={backupModelName}
-        />
-      </div>
-
-      <div style={styles.contextSection}>
-        <div style={styles.contextLabel}>
-          <label style={styles.label}>Add Context</label>
+      <div style={styles.mainSection}>
+        <div style={styles.nameSection}>
+          <label style={styles.label}>Session Name</label>
+          <input
+            type="text"
+            value={modelName}
+            onChange={e => setModelName(e.target.value)}
+            style={styles.input}
+            placeholder={backupModelName}
+          />
         </div>
 
-        <div style={styles.fileListContainer}>
-          {fileList.length > 0 && (
-            <div style={styles.newFileList}>
-              {fileList.map(file => (
-                <div key={file.id} style={styles.newFileListItem}>
-                  <span style={styles.newFileListName}>{file.name}</span>
-                  <button 
-                    style={styles.newFileListDelete}
-                    onClick={() => handleRemoveFile(file.id)}
-                  >
-                    <img src={DeleteImg} alt="Delete" width="24" height="24" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <div style={styles.contextSection}>
+          <div style={styles.contextLabel}>
+            <label style={styles.label}>Add Context</label>
+          </div>
 
-        <div style={styles.searchContainer}>
-          <div 
-            style={styles.searchArea}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => e.preventDefault()}
-          >
-            <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
-            <input
-              style={styles.searchInput}
-              type="text"
-              value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
-              placeholder="Search for an Item"
+          <div style={styles.fileListContainer}>
+            {fileList.length > 0 && (
+              <div style={styles.newFileList}>
+                {fileList.map(file => (
+                  <div key={file.id} style={styles.newFileListItem}>
+                    <span style={styles.newFileListName}>{file.name}</span>
+                    <button 
+                      style={styles.newFileListDelete}
+                      onClick={() => handleRemoveFile(file.id)}
+                    >
+                      <img src={DeleteImg} alt="Delete" width="24" height="24" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={styles.searchContainer}>
+            <div 
+              style={styles.searchArea}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => e.preventDefault()}
-            />
+            >
+              <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
+              <input
+                style={styles.searchInput}
+                type="text"
+                value={searchValue}
+                onChange={e => setSearchValue(e.target.value)}
+                placeholder="Search for an Item"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => e.preventDefault()}
+              />
+            </div>
+            {showSearchPopup && (
+              <div style={styles.searchPopup}>
+                {filteredAttachments.length > 0 ? (
+                  filteredAttachments.map(attachment => (
+                    <div
+                      key={attachment.id}
+                      style={styles.searchItem}
+                      onClick={() => handleSearchItemClick(attachment)}
+                    >
+                      {attachment.name}
+                    </div>
+                  ))
+                ) : (
+                  <div style={styles.noResults}>No matching attachments found</div>
+                )}
+              </div>
+            )}
           </div>
-          {showSearchPopup && (
-            <div style={styles.searchPopup}>
-              {filteredAttachments.length > 0 ? (
-                filteredAttachments.map(attachment => (
-                  <div
-                    key={attachment.id}
-                    style={styles.searchItem}
-                    onClick={() => handleSearchItemClick(attachment)}
-                  >
-                    {attachment.name}
-                  </div>
-                ))
-              ) : (
-                <div style={styles.noResults}>No matching attachments found</div>
-              )}
+          <div style={styles.orText}>or</div>
+          <div 
+            style={{
+              ...styles.dragArea,
+              ...(isDragging ? styles.dragAreaActive : {})
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
+            Drag an Item Here
+          </div>
+        </div>
+
+        <div style={styles.modelSection}>
+          <label style={styles.label}>Select Your Model</label>
+          <div style={styles.modelTypeRow}>
+            <button
+              style={{
+                ...styles.modelTypeButton,
+                ...(selectedType === 'lite' ? styles.modelTypeButtonSelected : {})
+              }}
+              onClick={() => handleTypeSelection('lite')}
+            >
+              <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
+              LITE
+            </button>
+            <button
+              style={{
+                ...styles.modelTypeButton,
+                ...(selectedType === 'normal' ? styles.modelTypeButtonSelected : {})
+              }}
+              onClick={() => handleTypeSelection('normal')}
+            >
+              <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
+              STANDARD
+            </button>
+            <button
+              style={{
+                ...styles.modelTypeButton,
+                ...(selectedType === 'advanced' ? styles.modelTypeButtonSelected : {})
+              }}
+              onClick={() => handleTypeSelection('advanced')}
+            >
+              <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
+              ADVANCED
+            </button>
+          </div>
+          {selectedType === 'lite' && (
+            <div style={styles.modelDescription}>
+              <div style={styles.modelFeature}>
+                <span style={styles.modelIcon}>🙌</span>
+                <span>Popular model - Great for most papers</span>
+              </div>
+              <div style={styles.modelFeature}>
+                <span style={styles.modelIcon}>💰</span>
+                <span>Free for all users</span>
+              </div>
+              <div style={styles.modelLimitations}>
+                ❌ No summary<br />
+                ❌ No image understanding<br />
+                ❌ No advanced model like graphRAG<br />
+                ❌ No source content
+              </div>
+            </div>
+          )}
+          {selectedType === 'normal' && (
+            <div style={styles.modelDescription}>
+              <div style={styles.modelFeature}>
+                <span style={styles.modelIcon}>🙌</span>
+                <span>Popular model - Great for most papers</span>
+              </div>
+              <div style={styles.modelFeature}>
+                <span style={styles.modelIcon}>💰</span>
+                <span>Available with Premium Subscription</span>
+              </div>
+              <div style={styles.modelLimitations}>
+                ✅ Image understanding<br />
+                ✅ Inference mode with DeepSeek<br />
+                ✅ High quality summary<br />
+                ✅ Source content highlight<br />
+                ✅ Markdown based RAG model
+              </div>
+            </div>
+          )}
+          {selectedType === 'advanced' && (
+            <div style={styles.modelDescription}>
+              <div style={styles.modelFeature}>
+                <span style={styles.modelIcon}>🙌</span>
+                <span>Deep but Slow - Our most powerful model.<br />Take 5 - 10 min to prepare the content</span>
+              </div>
+              <div style={styles.modelFeature}>
+                <span style={styles.modelIcon}>💰</span>
+                <span>Available with Premium Subscription</span>
+              </div>
+              <div style={styles.modelLimitations}>
+                ✅ Everything in standard mode<br />
+                🌟 Deeper understanding on figures, equations, and tables<br />
+                🌟 Further enhanced context relavency<br />
+                🌟 More advanced model using GraphRAG
+              </div>
             </div>
           )}
         </div>
-        <div style={styles.orText}>or</div>
-        <div 
-          style={{
-            ...styles.dragArea,
-            ...(isDragging ? styles.dragAreaActive : {})
-          }}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
-          Drag an Item Here
-        </div>
-      </div>
-
-      <div style={styles.modelSection}>
-        <label style={styles.label}>Select Your Model</label>
-        <div style={styles.modelTypeRow}>
-          <button
-            style={{
-              ...styles.modelTypeButton,
-              ...(selectedType === 'lite' ? styles.modelTypeButtonSelected : {})
-            }}
-            onClick={() => handleTypeSelection('lite')}
-          >
-            <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
-            LITE
-          </button>
-          <button
-            style={{
-              ...styles.modelTypeButton,
-              ...(selectedType === 'normal' ? styles.modelTypeButtonSelected : {})
-            }}
-            onClick={() => handleTypeSelection('normal')}
-          >
-            <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
-            STANDARD
-          </button>
-          <button
-            style={{
-              ...styles.modelTypeButton,
-              ...(selectedType === 'advanced' ? styles.modelTypeButtonSelected : {})
-            }}
-            onClick={() => handleTypeSelection('advanced')}
-          >
-            <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
-            ADVANCED
-          </button>
-        </div>
-        {selectedType === 'lite' && (
-          <div style={styles.modelDescription}>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>🙌</span>
-              <span>Popular model - Great for most papers</span>
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>💰</span>
-              <span>Free for all users</span>
-            </div>
-            <div style={styles.modelLimitations}>
-              ❌ No summary<br />
-              ❌ No image understanding<br />
-              ❌ No advanced model like graphRAG<br />
-              ❌ No source content
-            </div>
-          </div>
-        )}
-        {selectedType === 'normal' && (
-          <div style={styles.modelDescription}>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>🙌</span>
-              <span>Popular model - Great for most papers</span>
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>💰</span>
-              <span>Available with Premium Subscription</span>
-            </div>
-            <div style={styles.modelLimitations}>
-              ✅ Image understanding<br />
-              ✅ Inference mode with DeepSeek<br />
-              ✅ High quality summary<br />
-              ✅ Source content highlight<br />
-              ✅ Markdown based RAG model
-            </div>
-          </div>
-        )}
-        {selectedType === 'advanced' && (
-          <div style={styles.modelDescription}>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>🙌</span>
-              <span>Deep but Slow - Our most powerful model.<br />Take 5 - 10 min to prepare the content</span>
-            </div>
-            <div style={styles.modelFeature}>
-              <span style={styles.modelIcon}>💰</span>
-              <span>Available with Premium Subscription</span>
-            </div>
-            <div style={styles.modelLimitations}>
-              ✅ Everything in standard mode<br />
-              🌟 Deeper understanding on figures, equations, and tables<br />
-              🌟 Further enhanced context relavency<br />
-              🌟 More advanced model using GraphRAG
-            </div>
-          </div>
-        )}
       </div>
 
       <button style={styles.createButton} onClick={handleSubmit}>

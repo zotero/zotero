@@ -81,7 +81,7 @@ const styles = {
         fontFamily: 'Roboto, sans-serif',
         position: 'relative',
         overflow: 'hidden',
-        padding: '1.875rem 1.25rem',
+        padding: '1.875rem 1.25rem 0 1.25rem',
         boxSizing: 'border-box',
     },
     sessionInfo: {
