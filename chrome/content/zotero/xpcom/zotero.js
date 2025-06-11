@@ -2015,7 +2015,7 @@ Zotero.VersionHeader = {
 			}
 			else {
 				// Use "Firefox/[version]" in user agent if not a proxy check or file sync request
-				let s3RE = /(zoteroproxycheck|zoterofilestorage(test)?)\.s3\.(us-east-1\.)?amazonaws\.com/;
+				let s3RE = /(zoteroproxycheck|zoterofilestorage(test)?)\.s3\.(us-east-1\.)?amazonaws\.com|files\.zotero\.net/;
 				let isAppNameDomain = s3RE.test(domain);
 				if (!isAppNameDomain) {
 					let ua = channel.getRequestHeader('User-Agent');
