@@ -1737,8 +1737,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			annotations = annotations.filter(annotation => this._searchItemIDs.has(annotation.id));
 			notes = notes.filter(note => this._searchItemIDs.has(note));
 			attachments = attachments.filter((attachmentID) => {
+				let attachment = Zotero.Items.get(attachmentID);
 				let attachmentMatchesSearch = this._searchItemIDs.has(attachmentID);
-				let annotationsMatchSearch = Zotero.Items.get(attachmentID).getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+				if (!attachment.isFileAttachment()) return attachmentMatchesSearch;
+				let annotationsMatchSearch = attachment.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
 				return attachmentMatchesSearch || annotationsMatchSearch;
 			});
 		}
@@ -2130,7 +2132,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let hasMatchingNotes = item.getNotes(includeTrashed).some(note => this._searchItemIDs.has(note));
 			let hasMatchingAttachments = item.getAttachments(includeTrashed).some(attachment => this._searchItemIDs.has(attachment));
 			let hasMatchingAnnotations = item.getAttachments(includeTrashed).some((attachmentID) => {
-				return Zotero.Items.get(attachmentID).getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+				let attachment = Zotero.Items.get(attachmentID);
+				if (!attachment.isFileAttachment()) return false;
+				return attachment.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
 			});
 			return !(hasMatchingNotes || hasMatchingAttachments || hasMatchingAnnotations);
 		}
