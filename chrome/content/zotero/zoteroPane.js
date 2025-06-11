@@ -4556,7 +4556,7 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/attachLink.xhtml',
 			'zotero-attach-uri-dialog', 'centerscreen, modal', io);
 		if (!io.out) return;
-		await Zotero.Attachments.linkFromURL({
+		let item = await Zotero.Attachments.linkFromURL({
 			url: io.out.link,
 			parentItemID: itemID,
 			title: io.out.title
