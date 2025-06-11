@@ -1377,7 +1377,7 @@ describe("Zotero.Attachments", function() {
 	
 	describe("#getFileBaseNameFromItem()", function () {
 		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection, itemSpaces, itemSuffixes, itemKeepHyphens,
-			itemNoRepeatedHyphens, itemNoRepeatedUnderscores;
+			itemNoRepeatedHyphens, itemNoRepeatedUnderscores, itemLowerCase, itemMixedCase, itemUnicode;
 
 		before(() => {
 			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
@@ -1430,6 +1430,9 @@ describe("Zotero.Attachments", function() {
 			itemNoRepeatedHyphens.setField('publicationTitle', "no- repeated- hyphens");
 			itemNoRepeatedUnderscores = createUnsavedDataObject('item', { title: 'no _ repeated _ underscores', itemType: 'journalArticle' });
 			itemNoRepeatedUnderscores.setField('publicationTitle', "no_ repeated_ underscores");
+			itemLowerCase = createUnsavedDataObject('item', { title: 'lower case title', itemType: 'journalArticle' });
+			itemMixedCase = createUnsavedDataObject('item', { title: 'Old MacDonald Had a Farm', itemType: 'journalArticle' });
+			itemUnicode = createUnsavedDataObject('item', { title: '金毛猎犬 - Golden Retriever', itemType: 'journalArticle' });
 		});
 		
 		it('should strip HTML tags from title', function () {
@@ -1596,6 +1599,41 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ publicationTitle case="snake" }}' }),
 				'best_publications_place'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ publicationTitle case="pascal" }}' }),
+				'BestPublicationsPlace'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemLowerCase, { formatString: '{{ title case="pascal" }}' }),
+				'LowerCaseTitle'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemMixedCase, { formatString: '{{ title case="pascal" }}' }),
+				'OldMacdonaldHadAFarm'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemNoRepeatedHyphens, { formatString: '{{ title case="camel" }}' }),
+				'noRepeatedHyphens'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemNoRepeatedHyphens, { formatString: '{{ title case="pascal" }}' }),
+				'NoRepeatedHyphens'
+			);
+		});
+
+		it('should preserve unicode characters', async function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title case="camel" }}' }),
+				'金毛猎犬GoldenRetriever'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title case="pascal" }}' }),
+				'金毛猎犬GoldenRetriever'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title case="hyphen" }}' }),
+				'金毛猎犬-golden-retriever'
 			);
 		});
 
