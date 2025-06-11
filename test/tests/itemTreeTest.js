@@ -184,6 +184,12 @@ describe("Zotero.ItemTree", function () {
 
 			let item = await createDataObject('item', { title: "Item" });
 			let note = await createDataObject('item', { itemType: 'note', parentID: item.id, note: "te" });
+			// Ensure that non-file attachments that cannot have annotations do not cause any issues
+			await Zotero.Attachments.linkFromURL({
+				url: 'https://example.com',
+				title: 'Example',
+				parentItemID: item.id
+			});
 
 			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item.id });
 			let highlightOne = await createAnnotation('highlight', attachmentOne, { comment: "Highlight te" });
