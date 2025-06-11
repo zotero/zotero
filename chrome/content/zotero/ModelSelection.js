@@ -195,6 +195,7 @@ const styles = {
     color: '#757575',
     transition: 'background 0.2s, color 0.2s',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 0,

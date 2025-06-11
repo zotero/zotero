@@ -82,6 +82,7 @@ const styles = {
         position: 'relative',
         overflow: 'hidden',
         padding: '1.875rem 1.25rem',
+        boxSizing: 'border-box',
     },
     sessionInfo: {
         width: '90%',
@@ -96,7 +97,6 @@ const styles = {
     chatLog: {
         width: '100%',
         borderRadius: '0.625rem',
-        padding: '0.75rem 0.9375rem',
         overflowY: 'auto',
         overflowX: 'hidden',
         background: '#F2F2F2',
@@ -108,21 +108,24 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'stretch',
         boxSizing: 'border-box',
+        marginBottom: '1.25rem',
     },
     bottomBar: {
-        width: '90%',
+        width: '100%',
         background: '#F8F6F7',
         boxShadow: '0 -0.0625rem 0.1875rem rgba(0,0,0,0.08)',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'space-between',
         fontFamily: 'Roboto, sans-serif',
         position: 'relative',
         zIndex: 1,
-        margin: '0 1.25rem 1.875rem 1.25rem',
         border: '0.0625rem solid #D9D9D9',
         borderRadius: '0.5rem',
         boxSizing: 'border-box',
+        minHeight: '2.5rem',
+        maxHeight: '3.5rem',
+        padding: '0.5rem',
     },
     textInput: {
         flex: 1,
@@ -132,14 +135,15 @@ const styles = {
         borderRadius: '0.625rem',
         background: '#F8F6F7',
         color: '#1a65b0',
-        minHeight: '2.5rem',
-        maxHeight: '3rem',
-        fontSize: '0.8125rem',
+        minHeight: '1.5rem',
+        maxHeight: '2rem',
+        fontSize: '0.95rem',
         overflowY: 'auto',
         fontFamily: 'Roboto, sans-serif',
         resize: 'none',
         height: 'auto',
         marginRight: '0.625rem',
+        alignSelf: 'stretch',
         ':focus': {
             outline: 'none',
             border: 'none',
@@ -152,8 +156,8 @@ const styles = {
         border: 'none',
         borderRadius: '50%',
         aspectRatio: '1',
-        height: '2.5rem',
-        width: '2.5rem',
+        height: '1.8rem',
+        width: '1.8rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -161,34 +165,33 @@ const styles = {
         padding: '0.125rem',
         transition: 'background-color 0.2s ease',
         flexShrink: 0,
+        alignSelf: 'center',
         ':hover': {
             background: '#D9D9D9'
         }
     },
     sendIcon: {
-        width: '2.5rem',
-        height: '2.5rem',
+        width: '1.5rem',
+        height: '1.5rem',
         objectFit: 'contain',
     },
     messageContainer: {
         width: '100%',
         margin: '0.5rem 0',
         boxSizing: 'border-box',
-        minWidth: 0,
         display: 'flex',
         flexDirection: 'column',
     },
     messageBubble: {
         padding: '0.625rem 1.25rem',
         borderRadius: '0.625rem',
-        maxWidth: '85%',
+        maxWidth: '100%',
         boxShadow: 'none',
         animation: 'slideIn 0.3s ease-out forwards',
         height: 'auto',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
         boxSizing: 'border-box',
-        minWidth: 0,
         overflowWrap: 'break-word',
     },
     userMessage: {
@@ -200,6 +203,7 @@ const styles = {
         fontWeight: 500,
         textAlign: 'left',
         alignSelf: 'flex-end',
+        maxWidth: '75%',
     },
     botMessage: {
         backgroundColor: '#F8F6F7',
@@ -218,6 +222,9 @@ const styles = {
     },
     messageText: {
         display: 'block',
+        maxWidth: '100%',
+        overflowWrap: 'break-word',
+        wordBreak: 'break-word',
     },
     sourcesContainer: {
         marginTop: '8px',
@@ -226,7 +233,6 @@ const styles = {
         flexWrap: 'wrap',
         width: '100%',
         boxSizing: 'border-box',
-        minWidth: 0,
     },
     sourceButton: {
         all: 'revert',
@@ -255,7 +261,6 @@ const styles = {
         gap: '12px',
         flexWrap: 'wrap',
         boxSizing: 'border-box',
-        minWidth: 0,
     },
     questionButton: {
         all: 'revert',
@@ -265,7 +270,7 @@ const styles = {
         borderRadius: '0.625rem',
         padding: '0.625rem 1.25rem',
         minWidth: '8rem',
-        maxWidth: '100%',
+        maxWidth: '90%',
         fontWeight: 500,
         fontSize: '1rem',
         lineHeight: '1.5',
@@ -291,8 +296,8 @@ const styles = {
         padding: '0 0.5rem',
         gap: '0.625rem',
         borderBottom: '0.0625rem solid #E0E0E0',
-        marginLeft: '1.25rem',
-        marginRight: '1.25rem',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     sessionTab: {
         all: 'revert',
@@ -1203,7 +1208,6 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                 width: '100%',
                                 boxSizing: 'border-box',
                                 overflowWrap: 'break-word',
-                                minWidth: 0,
                             }}>
                                 {subMessage.text || ''}
                             </div>
@@ -1270,7 +1274,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             ...styles.messageBubble,
             padding: '12px 16px',
             borderRadius: '16px',
-            maxWidth: '85%',
+            maxWidth: '75%',
             boxShadow: 'none',
             animation: 'slideIn 0.3s ease-out forwards'
         },
