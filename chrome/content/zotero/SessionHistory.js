@@ -4,66 +4,58 @@ import PropTypes from 'prop-types';
 const containerStyle = {
   width: '100%',
   minHeight: '100%',
-  padding: '0',
-  gap: '0.25rem',
+  padding: '0 1.25rem 1.875rem 1.25rem',
   borderWidth: '1px',
   background: '#F2F2F2',
   borderRadius: '0.5rem',
   height: '100%',
-  margin: '0 1.25rem 1.875rem 1.25rem',
   display: 'flex',
   flexDirection: 'column',
   fontFamily: 'Roboto, Inter, Arial, sans-serif',
   position: 'relative',
   overflow: 'auto',
+  boxSizing: 'border-box',
 };
 
 const searchSectionStyle = {
-  width: '90%',
-  marginBottom: '1rem',
+  width: '100%',
+  marginBottom: '0.875rem',
   padding: '0',
   background: 'white',
   borderRadius: '0.375rem',
   boxShadow: '0 0.0625rem 0.1875rem rgba(0,0,0,0.1)',
   display: 'flex',
   alignSelf: 'flex-start',
-  marginLeft: '5%',
 };
 
 const sessionListTitleStyle = {
-  width: '90%',
+  width: '100%',
   fontSize: '1rem',
   fontWeight: 500,
   lineHeight: '135%',
   letterSpacing: '0%',
   verticalAlign: 'middle',
   color: '#757575',
-  padding: '0',
-  margin: '0.30rem 0',
-  marginBottom: '0.625rem',
+  padding: '0.875rem',
   alignSelf: 'flex-start',
-  marginLeft: '5%',
 };
 
 const searchInputStyle = {
   flex: 1,
   width: '100%',
   padding: '0',
-  border: '1px solid #495057',
+  border: 'none',
   borderRadius: '0.375rem',
   background: '#fff',
   color: '#1a65b0',
   minHeight: '2rem',
   fontSize: '0.8125rem',
-  ':focus': {
-    outline: 'none',
-    border: 'none',
-    boxShadow: 'none'
-}
+  outline: 'none',
+  boxShadow: 'none'
 };
 
 const sessionListStyle = {
-  width: '90%',
+  width: '100%',
   borderRadius: '0.5rem',
   overflowY: 'auto',
   background: '#F2F2F2',
@@ -71,15 +63,13 @@ const sessionListStyle = {
   display: 'flex',
   flexDirection: 'column',
   alignSelf: 'flex-start',
-  marginLeft: '5%',
 };
 
 const sessionButtonStyle = {
   all: 'revert',
   width: '100%',
   fontFamily: 'Roboto, sans-serif',
-  margin: '0.25rem 0',
-  padding: '0.75rem 0',
+  padding: '0.875rem',
   background: '#F2F2F2',
   border: 'none',
   borderRadius: '0.375rem',
@@ -90,8 +80,9 @@ const sessionButtonStyle = {
   letterSpacing: '0%',
   color: '#292929',
   cursor: 'pointer',
-  whiteSpace: 'normal',
-  wordWrap: 'break-word',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 };
 
 const loadingStyle = {

@@ -3,17 +3,17 @@ import PropTypes from 'prop-types';
 
 const styles = {
     divider: {
-        width: 'calc(100% - 2.5rem)',
+        width: '100%',
         height: '0.0625rem',
         background: '#D9D9D9',
-        margin: '0 1.25rem',
+        marginBottom: '0.625rem',
     },
     bottom: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1.25rem 1.25rem 1.25rem',
+        padding: '1.5rem 1.25rem 1.25rem 1.25rem',
         background: '#F2F2F2',
         width: '100%',
         boxSizing: 'border-box',
