@@ -13,7 +13,8 @@ const containerStyle = {
   flexDirection: 'column',
   fontFamily: 'Roboto, Inter, Arial, sans-serif',
   position: 'relative',
-  overflow: 'auto',
+  overflowX: 'hidden',
+  overflowY: 'auto',
   boxSizing: 'border-box',
 };
 
@@ -63,6 +64,7 @@ const sessionListStyle = {
   display: 'flex',
   flexDirection: 'column',
   alignSelf: 'flex-start',
+  boxSizing: 'border-box',
 };
 
 const sessionButtonStyle = {
@@ -83,6 +85,7 @@ const sessionButtonStyle = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  boxSizing: 'border-box',
 };
 
 const loadingStyle = {
