@@ -760,6 +760,11 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		// Parse treeViewID
 		var [type, id] = [data.target[0], parseInt(data.target.substr(1))];
 		var tags = data.tags;
+		// Older connector versions send tags as one string with comma as delimiter
+		// To account for tags that contain commas, later versions send an array of strings
+		if (typeof tags === 'string') {
+			tags = tags.split(",");
+		}
 		var note = data.note;
 		
 		if (type == 'C') {
@@ -931,7 +936,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	init: function(postData, sendResponseCallback) {
+	init: async function(postData, sendResponseCallback) {
 		let allowReadOnly = (postData.hasOwnProperty("switchToReadableLibrary")) ? !postData.switchToReadableLibrary : true;
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget(allowReadOnly);
 		var response = {
@@ -950,12 +955,14 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			response.name = response.libraryName;
 		}
 		
-		// Get list of editable libraries and collections
+		// Get list of editable libraries, collections, and tags
 		var collections = [];
+		let tags = {};
 		var originalLibraryID = library.libraryID;
 		for (let library of Zotero.Libraries.getAll()) {
 			if (!library.editable) continue;
 			
+			tags[library.treeViewID] = await Zotero.Tags.getAll(library.libraryID);
 			// Add recent: true for recent targets
 			
 			collections.push(
@@ -974,6 +981,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			);
 		}
 		response.targets = collections;
+		response.tags = tags;
 		
 		// Mark recent targets
 		try {
@@ -1105,6 +1113,7 @@ Zotero.Server.Connector.Ping.prototype = {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
 					downloadAssociatedFiles: Zotero.Prefs.get("downloadAssociatedFiles"),
 					supportsAttachmentUpload: true,
+					supportsTagsAutocomplete: true,
 					googleDocsAddNoteEnabled: true,
 					canUserAddNote: true,
 					googleDocsCitationExplorerEnabled: false,
