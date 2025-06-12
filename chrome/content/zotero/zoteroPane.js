@@ -94,9 +94,11 @@ var ZoteroPane = new function()
 							// Item pane is being opened, close DeepTutor pane
 							let deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
 							let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
-							if (deepTutorPane && !deepTutorPane.hidden) {
+							let isDeepTutorOpen = deepTutorPane && !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true';
+							if (isDeepTutorOpen) {
 								Zotero.debug('06062025-Standalone: Closing DeepTutor pane due to item pane opening');
 								deepTutorPane.hidden = true;
+								deepTutorPane.setAttribute('collapsed', 'true');
 								deeptutorSplitter.setAttribute('state', 'collapsed');
 								ZoteroPane.updateLayoutConstraints();
 							}
@@ -6788,7 +6790,7 @@ var ZoteroPane = new function()
 		var itemsPaneContainer = document.getElementById('zotero-items-pane-container');
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var tagSelector = document.getElementById("zotero-tag-selector");
-		var deepTutorPane = document.getElementById("zotero-deep-tutor-pane");
+		var deepTutorPane = document.getElementById("new-deep-tutor-pane-container");
 		let layoutModeMenus = [
 			document.getElementById("view-menuitem-standard"),
 			document.getElementById("view-menuitem-stacked"),
@@ -6797,7 +6799,7 @@ var ZoteroPane = new function()
 		let isStackedMode = Zotero.Prefs.get('layout') === 'stacked';
 		let isTempStackedMode = Zotero.Prefs.get('tempStackedMode');
 		let isItemPaneCollapsed = ZoteroPane.itemPane.collapsed && ZoteroContextPane.collapsed;
-		let isDeepTutorPaneCollapsed = deepTutorPane.getAttribute('collapsed') === 'true';
+		let isDeepTutorPaneCollapsed = deepTutorPane.hidden || deepTutorPane.getAttribute('collapsed') === 'true';
 
 		// Keep in sync with abstracts/variables.scss > $min-width-collections-pane
 		const collectionsPaneMinWidth = collectionsPane.hasAttribute("collapsed") ? 0 : 200;
@@ -6862,6 +6864,28 @@ var ZoteroPane = new function()
 		collectionsPane.style.setProperty(
 			"--max-width-collections-pane",
 			`${window.innerWidth - libraryItemPaneMinWidth - sideNavMinWidth - itemsPaneMinWidth - deepTutorPaneMinWidth}px`);
+		
+		// Handle context pane width constraints in reader mode
+		var contextPane = document.getElementById("zotero-context-pane");
+		if (contextPane) {
+			if (!contextPane.getAttribute('collapsed')) {
+				// When context pane is open and DeepTutor is closed, give context pane more space
+				let availableWidth = window.innerWidth - itemsPaneMinWidth - sideNavMinWidth;
+				if (isDeepTutorPaneCollapsed) {
+					// DeepTutor is closed, context pane can use its space
+					contextPane.style.maxWidth = `${Math.min(availableWidth * 0.6, 800)}px`;
+					contextPane.style.minWidth = `320px`;
+				} else {
+					// DeepTutor is open, context pane gets less space
+					contextPane.style.maxWidth = `${Math.min(availableWidth * 0.3, 400)}px`;
+					contextPane.style.minWidth = `250px`;
+				}
+			} else {
+				// Context pane is collapsed, clear width constraints
+				contextPane.style.removeProperty('maxWidth');
+				contextPane.style.removeProperty('minWidth');
+			}
+		}
 
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
