@@ -6,6 +6,7 @@ describe("Item Tags Box", function () {
 	before(function* () {
 		win = yield loadZoteroPane();
 		doc = win.document;
+		win.Zotero_Tabs.select("zotero-pane")
 		
 		// Wait for things to settle
 		yield Zotero.Promise.delay(100);
