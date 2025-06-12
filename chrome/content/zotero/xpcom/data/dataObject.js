@@ -1190,8 +1190,6 @@ Zotero.DataObject.prototype._postSave = function (env) {
 		let rel = env.relationsToUnregister[i];
 		Zotero.Relations.unregister(this._objectType, this.id, rel[0], rel[1]);
 	}
-	this._changed = {};
-	this._previousData = {};
 };
 
 
