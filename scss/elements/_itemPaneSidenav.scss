@@ -93,9 +93,21 @@ item-pane-sidenav {
 			background-color: var(--fill-quarternary);
 		}
 		
-		@each $pane, $color in $item-pane-sections {
+		@each $pane, $data in $item-pane-sections {
+			$color: if(
+				type-of($data) == 'map' and map-has-key($data, 'color'),
+				map-get($data, 'color'),
+				$data
+			);
+
+			$icon: if(
+				type-of($data) == 'map' and map-has-key($data, 'icon'),
+				map-get($data, 'icon'),
+				$pane
+			);
+
 			&[data-pane="#{$pane}"] {
-				background-image: url("chrome://zotero/skin/itempane/20/#{$pane}.svg");
+				background-image: url("chrome://zotero/skin/itempane/20/#{$icon}.svg");
 				fill: $color;
 				stroke: $color;
 			}
