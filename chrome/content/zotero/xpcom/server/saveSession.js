@@ -169,7 +169,7 @@ Zotero.Server.Connector.SaveSession = class {
 	async update(targetID, tags, note) {
 		var previousTargetID = this._currentTargetID;
 		this._currentTargetID = targetID;
-		this._currentTags = tags || "";
+		this._currentTags = tags || [];
 		this._currentNote = note || "";
 		
 		// Select new destination in collections pane
@@ -206,8 +206,7 @@ Zotero.Server.Connector.SaveSession = class {
 		var { library, collection } = Zotero.Server.Connector.resolveTarget(this._currentTargetID);
 		var libraryID = library.libraryID;
 		
-		var tags = this._currentTags.trim();
-		tags = tags ? tags.split(/\s*,\s*/).filter(x => x) : [];
+		var tags = this._currentTags.map(tag => tag.trim()).filter(tag => tag);
 		
 		Zotero.debug("Updating items for connector save session " + this.id);
 		
