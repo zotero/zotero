@@ -53,11 +53,12 @@ const citationColumns = [
 		staticWidth: true,
 		fixedWidth: true,
 		renderCell: (index, data, column) => {
-			let icon = getCSSIcon('IconCross');
+			let icon = getCSSIcon('cross');
 			if (data) {
-				icon = getCSSIcon('IconTick');
+				icon = getCSSIcon('tick');
 			}
-			icon.className += ` cell ${column.className}`;
+
+			icon.className += ` cell icon-16 ${column.className}`;
 			return icon;
 		}
 	},
@@ -77,11 +78,11 @@ itemColumns.push({
 	staticWidth: true,
 	fixedWidth: true,
 	renderCell: (index, data, column) => {
-		let icon = getCSSIcon('IconCross');
+		let icon = getCSSIcon('cross');
 		if (data) {
-			icon = getCSSIcon('IconTick');
+			icon = getCSSIcon('tick');
 		}
-		icon.className += ` cell ${column.className}`;
+		icon.className += ` cell icon-16 ${column.className}`;
 		return icon;
 	}
 });
