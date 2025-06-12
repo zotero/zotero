@@ -1133,34 +1133,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 subMessages: await Promise.all(message.subMessages.map(async (subMessage) => {
                     // Process sources if they exist
                     if (subMessage.sources && subMessage.sources.length > 0) {
-                        Zotero.debug(`DeepTutorChatBox: Found ${subMessage.sources.length} sources in subMessage`);
-                        
-                        // Process each source
-                        const processedSources = await Promise.all(subMessage.sources.map(async (source) => {
-                            Zotero.debug(`DeepTutorBox: Processing source - index: ${source.index}, page: ${source.page}`);
-                            
-                            if (source.index >= 0 && source.index < documentIds.length) {
-                                const attachmentId = documentIds[source.index];
-                                Zotero.debug(`DeepTutorBox: Found valid attachment ID: ${attachmentId} for source index ${source.index}`);
-                                
-                                // Create highlight annotation
-                                const annotation = await _createHighlightAnnotation(attachmentId, source.page, source.referenceString);
-                                
-                                if (annotation) {
-                                    Zotero.debug(`DeepTutorBox: Created source button for annotation ${annotation.id}`);
-                                    return {
-                                        ...source,
-                                        attachmentId,
-                                        annotationId: annotation.id
-                                    };
-                                }
-                            }
-                            return source;
-                        }));
-
+                        // Annotation workflow removed — simply pass sources through unchanged
                         return {
                             ...subMessage,
-                            sources: processedSources.filter(source => source !== null)
+                            sources: subMessage.sources
                         };
                     }
                     return subMessage;
@@ -1179,108 +1155,75 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         }
     };
 
-    const _createHighlightAnnotation = async (attachmentId, page, referenceString) => {
-        try {
-            const attachment = Zotero.Items.get(attachmentId);
-            if (!attachment) {
-                Zotero.debug(`DeepTutorChatBox: No attachment found for ID ${attachmentId}`);
-                return null;
-            }
-
-            // Create highlight annotation
-            const annotation = await Zotero.Annotations.createHighlightAnnotation(attachment, {
-                page,
-                text: referenceString,
-                color: '#ffeb3b'
-            });
-
-            Zotero.debug(`DeepTutorChatBox: Created highlight annotation ${annotation.id}`);
-            return annotation;
-        } catch (error) {
-            Zotero.debug(`DeepTutorChatBox: Error creating highlight annotation: ${error.message}`);
-            return null;
-        }
-    };
-
     const handleSourceClick = async (source) => {
-        console.log('handleSourceClick', source);
-        if (!source || source.refinedIndex === undefined || source.refinedIndex < 0 || source.refinedIndex >= documentIds.length) {
-            Zotero.debug(`DeepTutorChatBox: Invalid source or refinedIndex: ${JSON.stringify(source)}`);
+        if (!source) {
+            Zotero.debug("DeepTutorChatBox: Source button clicked with empty source object");
             return;
         }
 
-        const attachmentId = documentIds[source.refinedIndex];
+        // Determine which attachment the source refers to
+        const docIdx =
+            (source.refinedIndex !== undefined && source.refinedIndex !== null)
+                ? source.refinedIndex
+                : source.index;
+
+        if (docIdx === undefined || docIdx === null || docIdx < 0 || docIdx >= documentIds.length) {
+            Zotero.debug(`DeepTutorChatBox: Invalid source index (index=${source.index}, refinedIndex=${source.refinedIndex})`);
+            return;
+        }
+
+        const attachmentId = documentIds[docIdx];
         if (!attachmentId) {
-            Zotero.debug(`DeepTutorChatBox: No attachment ID found for refinedIndex ${source.refinedIndex}`);
+            Zotero.debug(`DeepTutorChatBox: No attachment ID found for docIdx ${docIdx}`);
             return;
         }
 
         Zotero.debug(`DeepTutorChatBox: Source button clicked for attachment ${attachmentId}, page ${source.page}`);
-        
+
         try {
-            // Try to get the mapping from local storage
             const storageKey = `deeptutor_mapping_${sessionId}`;
             let zoteroAttachmentId = attachmentId;
 
             const mappingStr = Zotero.Prefs.get(storageKey);
-            Zotero.debug('ModelSelection0521AA: Get data mapping:', Zotero.Prefs.get(storageKey));
             if (mappingStr) {
                 const mapping = JSON.parse(mappingStr);
-                Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
-                
-                // If we have a mapping for this document ID, use it
                 if (mapping[attachmentId]) {
                     zoteroAttachmentId = mapping[attachmentId];
-                    Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId}`);
                 }
             }
 
-            // View the attachment using our new function
             const item = Zotero.Items.get(zoteroAttachmentId);
             if (!item) {
                 Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}`);
                 return;
             }
 
-            // Open the document and navigate to the specific page
+            // Open the PDF on the correct page
             await Zotero.FileHandlers.open(item, {
-                location: {
-                    pageIndex: source.page - 1 // Convert to 0-based index
-                }
+                location: { pageIndex: source.page - 1 }
             });
-            Zotero.debug(`DeepTutorChatBox: Opened PDF with page ${source.page}`);
-            
-            // Trigger search for the reference string if it exists
+            Zotero.debug(`DeepTutorChatBox: Opened PDF at page ${source.page}`);
+
+            // Use the reader's find functionality to highlight the reference string
             if (source.referenceString) {
-                Zotero.debug(`DeepTutorChatBox: Triggering search for reference string: ${source.referenceString}`);
-                // Get the PDF viewer instance from the window context
                 const win = Zotero.getMainWindow();
-                const pdfViewer = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
-                await pdfViewer._primaryView.initializedPromise;
-                console.log('pdfViewer', pdfViewer);
-                console.log('source.referenceString', source.referenceString);
-                if (pdfViewer) {
-                    // Set find state to search for the reference string
-                    pdfViewer._handleFindStateChange(false,{
-                        popupOpen:true,
-                        active: true,
-                        query: source.referenceString,
-                        highlightAll: true,
-                        caseSensitive: false,
-                        entireWord: false,
-                        result: null,
-                    });
-                    // Trigger find next to highlight the first occurrence
-                    // pdfViewer.findNext();
-                    setTimeout(() => {
-                        // 3. jump to, and highlight, the first occurrence
-                        pdfViewer.findNext(true);         // true  ⇒ primary view
-                    }, 500);
-                }
+                const reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+                await reader._primaryView?.initializedPromise;
+
+                reader._handleFindStateChange(true, {
+                    popupOpen: true,
+                    active: true,
+                    query: source.referenceString,
+                    highlightAll: true,
+                    caseSensitive: false,
+                    entireWord: false,
+                    result: null
+                });
+
+                reader.findNext(true);
             }
         } catch (error) {
-            console.log(`DeepTutorChatBox: Error handling source click: ${error.message}`);
-            console.log(`DeepTutorChatBox: Error stack: ${error.stack}`);
+            Zotero.debug(`DeepTutorChatBox: Error handling source click: ${error.message}`);
         }
     };
 
