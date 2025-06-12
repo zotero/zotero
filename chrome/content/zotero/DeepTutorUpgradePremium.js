@@ -16,10 +16,12 @@ const styles = {
     position: 'relative',
   },
   contentFrame: {
-    width: '90%',
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    padding: '0 1.25rem',
+    marginBottom: '1.875rem',
   },
   headerFrame: {
     width: '100%',
@@ -66,7 +68,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.625rem',
-    marginBottom: '1.875rem',
   },
   featureRow: {
     display: 'flex',
@@ -94,7 +95,7 @@ const styles = {
     borderRadius: '0.625rem',
     padding: '0.75rem 1rem',
     minHeight: '3rem',
-    width: '90%',
+    width: '100%',
     cursor: 'pointer',
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',

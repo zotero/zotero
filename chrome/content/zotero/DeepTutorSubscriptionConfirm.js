@@ -11,8 +11,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: '16px 0',
+    justifyContent: 'center',
     position: 'relative',
   },
   title: {
@@ -22,7 +21,7 @@ const styles = {
     backgroundClip: 'text',
     color: SKY,
     fontWeight: 700,
-    fontSize: '24px',
+    fontSize: '1.5rem',
     lineHeight: '100%',
     letterSpacing: '0%',
     textAlign: 'center',
@@ -30,32 +29,32 @@ const styles = {
     marginTop: '8px',
   },
   image: {
-    width: '110px',
-    height: '110px',
+    width: '6.875rem',
+    height: '6.875rem',
     objectFit: 'contain',
-    margin: '0 auto 18px auto',
+    margin: '0 auto 20px auto',
     display: 'block',
   },
   text: {
-    fontSize: '17px',
+    fontSize: '1.25rem',
     color: '#222',
     textAlign: 'center',
-    margin: '0 0 18px 0',
+    margin: '0 0 30px 0',
     fontFamily: 'Roboto, sans-serif',
-    fontWeight: 400,
-    lineHeight: '1.5',
+    fontWeight: 500,
+    lineHeight: '1.35',
   },
   button: {
     background: SKY,
     color: '#fff',
-    width: '90%',
+    width: '100%',
     minHeight: '2.4375rem',
     fontWeight: 700,
-    fontSize: '16px',
+    fontSize: '1rem',
     border: 'none',
-    borderRadius: '10px',
-    padding: '14px 0',
-    margin: '18px auto 0 auto',
+    borderRadius: '0.625rem',
+    padding: '0.875rem 0',
+    margin: '0 auto 0 auto',
     cursor: 'pointer',
     boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
     fontFamily: 'Roboto, sans-serif',
@@ -67,7 +66,6 @@ const styles = {
 export default function DeepTutorSubscriptionConfirm({ onClose, imagePath }) {
   return (
     <div style={styles.container}>
-      <div style={styles.title}>Upgrade Successfully!</div>
       <img src={imagePath} alt="Subscription Confirm" style={styles.image} />
       <div style={styles.text}>Your Support for DeepTutor<br />is greatly appreciated!</div>
       <button style={styles.button} onClick={onClose}>Start Using Premium</button>

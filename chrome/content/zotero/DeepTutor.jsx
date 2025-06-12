@@ -1182,7 +1182,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								display: 'flex',
 								width: '100%',
 								alignItems: 'center',
-								marginBottom: '2rem',
+								marginBottom: '1.875rem',
 								minHeight: '1rem',
 								position: 'relative',
 							}}>
@@ -1195,7 +1195,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '1rem',
+									fontSize: '1.5rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
@@ -1263,7 +1263,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								display: 'flex',
 								width: '100%',
 								alignItems: 'center',
-								marginBottom: '1.25rem',
+								marginBottom: '1.875rem',
 								minHeight: '1rem',
 								position: 'relative',
 							}}>
@@ -1276,14 +1276,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '1rem',
+									fontSize: '1.5rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
-									Upgrade Your Plan
+									Upgrade Successfully!
 								</div>
 								<button
-									onClick={this.toggleUpgradePopup}
+									onClick={this.toggleSubscriptionConfirmPopup}
 									style={{
 										background: 'none',
 										border: 'none',
@@ -1345,7 +1345,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								display: 'flex',
 								width: '100%',
 								alignItems: 'center',
-								marginBottom: '1.25rem',
+								marginBottom: '1.875rem',
 								minHeight: '1rem',
 								position: 'relative',
 							}}>
@@ -1358,14 +1358,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '1rem',
+									fontSize: '1.5rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
-									Upgrade Your Plan
+									Manage Subscription
 								</div>
 								<button
-									onClick={this.toggleUpgradePopup}
+									onClick={this.toggleManageSubscriptionPopup}
 									style={{
 										background: 'none',
 										border: 'none',
