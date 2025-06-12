@@ -568,7 +568,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			currentUser: null,
 			authError: null,
 			// Prevent infinite loops
-			isLoadingSessions: false
+			isLoadingSessions: false,
+			// Store backend user data
+			userData: null
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -616,12 +618,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated: true,
 					currentUser: currentUserData.user,
 					currentPane: this.getSessionHistoryPaneOrNoSession()
+				}, async () => {
+					// Fetch backend user data
+					await this.fetchUserData(currentUserData.user);
+					// Load sessions once userData is available
+					if (!this.state.isLoadingSessions) {
+						await this.loadSession();
+					}
 				});
-
-				// Load sessions for authenticated user (only once during initialization)
-				if (!this.state.isLoadingSessions) {
-					await this.loadSession();
-				}
 			} else {
 				Zotero.debug("DeepTutor: User is not authenticated");
 				this.setState({
@@ -653,6 +657,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentUser: refreshedData.user,
 					currentPane: this.getSessionHistoryPaneOrNoSession()
 				}, async () => {
+					await this.fetchUserData(refreshedData.user);
 					if (!this.state.isLoadingSessions) {
 						await this.loadSession();
 					}
@@ -684,6 +689,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			authError: null
 		}, async () => {
 			if (isAuthenticated) {
+				// Fetch backend user data
+				await this.fetchUserData(user);
+
 				// User signed in, load sessions (only if not already loading)
 				if (!this.state.isLoadingSessions) {
 					await this.loadSession();
@@ -912,6 +920,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 				this.switchPane('sessionHistory');
 			}
 
+			// Save backend user data if not already set or has changed
+			if (!this.state.userData || (userData && userData.id !== this.state.userData.id)) {
+				this.setState({ userData });
+			}
+
 			Zotero.debug(`DeepTutor: Successfully loaded ${sessions.length} sessions`);
 		} catch (error) {
 			Zotero.debug(`DeepTutor: Error loading sessions: ${error.message}`);
@@ -996,6 +1009,44 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	}
 
+	// Helper to fetch backend user data using Cognito user object
+	fetchUserData = async (cognitoUser) => {
+		try {
+			if (!cognitoUser) {
+				Zotero.debug('DeepTutor: fetchUserData called with no cognitoUser');
+				return null;
+			}
+
+			// Get user attributes to retrieve the 'sub' attribute
+			const attributes = await new Promise((resolve, reject) => {
+				cognitoUser.getUserAttributes((err, attrs) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+					resolve(attrs);
+				});
+			});
+
+			const subAttr = attributes.find(attr => attr.getName() === 'sub');
+			if (!subAttr) {
+				throw new Error('sub attribute not found on Cognito user');
+			}
+			const providerUserId = subAttr.getValue();
+			Zotero.debug(`DeepTutor: fetchUserData providerUserId: ${providerUserId}`);
+
+			const userData = await getUserByProviderUserId(providerUserId);
+			Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
+
+			// Save to state
+			this.setState({ userData });
+			return userData;
+		} catch (error) {
+			Zotero.debug(`DeepTutor: fetchUserData error: ${error.message}`);
+			return null;
+		}
+	};
+
 	render() {
 		Zotero.debug("DeepTutor: Render called");
 
@@ -1078,6 +1129,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
 									}
 								}}
+								user={this.state.userData}
 							/>
 						}
 						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} />}
@@ -1612,6 +1664,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
 									}
 								}}
+								user={this.state.userData}
 							/>
 						</div>
 					</div>
@@ -1632,6 +1685,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentUser={this.state.currentUser}
 					onSignOut={this.handleSignOut}
 					onSwitchNoSession={() => this.switchPane('noSession')}
+					userData={this.state.userData}
 				/>
 			</div>
 		);

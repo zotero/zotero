@@ -64,7 +64,6 @@ const sessionListStyle = {
   display: 'flex',
   flexDirection: 'column',
   alignSelf: 'flex-start',
-  boxSizing: 'border-box',
 };
 
 const sessionButtonStyle = {
@@ -85,7 +84,6 @@ const sessionButtonStyle = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  boxSizing: 'border-box',
 };
 
 const loadingStyle = {
