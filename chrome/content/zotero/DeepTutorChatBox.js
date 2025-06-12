@@ -1249,28 +1249,36 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 }
             });
             Zotero.debug(`DeepTutorChatBox: Opened PDF with page ${source.page}`);
-
+            
             // Trigger search for the reference string if it exists
             if (source.referenceString) {
                 Zotero.debug(`DeepTutorChatBox: Triggering search for reference string: ${source.referenceString}`);
-                // Get the PDF viewer instance
-                const pdfViewer = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+                // Get the PDF viewer instance from the window context
+                const win = Zotero.getMainWindow();
+                const pdfViewer = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+                await pdfViewer._primaryView.initializedPromise;
                 console.log('pdfViewer', pdfViewer);
+                console.log('source.referenceString', source.referenceString);
                 if (pdfViewer) {
                     // Set find state to search for the reference string
-                    pdfViewer.setFindState({
+                    pdfViewer._handleFindStateChange(false,{
+                        popupOpen:true,
                         active: true,
                         query: source.referenceString,
                         highlightAll: true,
                         caseSensitive: false,
-                        entireWord: false
+                        entireWord: false,
+                        result: null,
                     });
                     // Trigger find next to highlight the first occurrence
-                    pdfViewer.findNext();
+                    // pdfViewer.findNext();
+                    setTimeout(() => {
+                        // 3. jump to, and highlight, the first occurrence
+                        pdfViewer.findNext(true);         // true  ⇒ primary view
+                    }, 500);
                 }
             }
         } catch (error) {
-            
             console.log(`DeepTutorChatBox: Error handling source click: ${error.message}`);
             console.log(`DeepTutorChatBox: Error stack: ${error.stack}`);
         }
