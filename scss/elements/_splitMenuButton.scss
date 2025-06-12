@@ -3,6 +3,7 @@
 	align-items: center;
 	padding-right: 0;
 	gap: 6px;
+	flex-grow: 1;
 
 	& [anonid="button-image-and-text-box"] {
 		flex: 1;
