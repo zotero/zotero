@@ -179,14 +179,31 @@ class DeepTutorBottomSection extends React.Component {
     renderProfilePopup() {
         if (!this.props.showProfilePopup) return null;
 
+        // Determine display name/email
+        let displayName = 'User';
+        if (this.props.userData) {
+            const { name, firstName, lastName, email } = this.props.userData;
+            if (name && name.trim()) {
+                displayName = name;
+            } else if ((firstName || lastName)) {
+                displayName = `${firstName || ''} ${lastName || ''}`.trim();
+            } else if (email) {
+                displayName = email;
+            }
+        } else if (this.props.currentUser) {
+            // Cognito user object may expose username/email differently
+            displayName = (this.props.currentUser.username 
+                || (typeof this.props.currentUser.getUsername === 'function' && this.props.currentUser.getUsername())
+                || this.props.currentUser.email 
+                || displayName);
+        }
+
         return (
             <div style={styles.profilePopup} onClick={(e) => e.stopPropagation()}>
-                {this.props.isAuthenticated && this.props.currentUser ? (
+                {this.props.isAuthenticated ? (
                     <>
                         <div style={styles.profileInfo}>
-                            <div style={styles.userEmail}>
-                                {this.props.currentUser.username || 'User'}
-                            </div>
+                            <div style={styles.userEmail}>{displayName}</div>
                             <div style={styles.userStatus}>Logged in</div>
                         </div>
                         <button 
@@ -360,12 +377,14 @@ DeepTutorBottomSection.propTypes = {
     isAuthenticated: PropTypes.bool,
     currentUser: PropTypes.object,
     onSignOut: PropTypes.func,
+    userData: PropTypes.object,
 };
 
 DeepTutorBottomSection.defaultProps = {
     isAuthenticated: false,
     currentUser: null,
     onSignOut: () => {},
+    userData: null,
 };
 
 export default DeepTutorBottomSection; 

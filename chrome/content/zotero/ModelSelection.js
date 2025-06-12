@@ -4,6 +4,7 @@ import {
   getPreSignedUrl, 
   createSession 
 } from './api/libs/api';
+import { getCurrentUser } from './auth/cognitoAuth';
 
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
 const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_LITE.svg';
@@ -415,7 +416,7 @@ const styles = {
   },
 };
 
-function ModelSelection({ onSubmit }) {
+function ModelSelection({ onSubmit, user }) {
   const [fileList, setFileList] = useState([]);
   const [originalFileList, setOriginalFileList] = useState([]);
   const [modelName, setModelName] = useState('');
@@ -674,6 +675,12 @@ function ModelSelection({ onSubmit }) {
       return;
     }
 
+    // Check if user is provided
+    if (!user) {
+      setErrorMessage("Please sign in to create a session");
+      return;
+    }
+
     // Clear any existing error message
     setErrorMessage('');
 
@@ -682,11 +689,6 @@ function ModelSelection({ onSubmit }) {
     Zotero.debug(`ModelSelection: Using session name: ${finalSessionName}`);
 
     try {
-      // Get user ID from API
-      // TODO_DEEPTUTOR: Get user ID from Cognito user attributes, such as sending user object/userid from DeepTutor.jsx
-      const userData = await getUserById('67f5b836cb8bb15b67a1149e');
-      Zotero.debug('ModelSelection: Fetched user data:', userData);
-
       // Handle file uploads if fileList exists
       const uploadedDocumentIds = [];
       if (fileList.length > 0) {
@@ -707,7 +709,7 @@ function ModelSelection({ onSubmit }) {
             Zotero.debug('ModelSelection: Converted file to Blob:', blob);
 
             // 1. Get pre-signed URL for the file
-            const preSignedUrlData = await getPreSignedUrl(userData.id, fileName);
+            const preSignedUrlData = await getPreSignedUrl(user.id, fileName);
             Zotero.debug('ModelSelection: Got pre-signed URL:', preSignedUrlData);
 
             // 2. Upload file to Azure Blob Storage
@@ -736,7 +738,7 @@ function ModelSelection({ onSubmit }) {
 
       // Create session data
       const sessionData = {
-        userId: userData.id,
+        userId: user.id,
         sessionName: finalSessionName,
         type: selectedType === 'lite' ? SessionType.LITE : 
               selectedType === 'advanced' ? SessionType.ADVANCED : 
