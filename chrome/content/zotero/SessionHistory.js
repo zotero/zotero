@@ -13,7 +13,8 @@ const containerStyle = {
   flexDirection: 'column',
   fontFamily: 'Roboto, Inter, Arial, sans-serif',
   position: 'relative',
-  overflow: 'auto',
+  overflowX: 'hidden',
+  overflowY: 'auto',
   boxSizing: 'border-box',
 };
 

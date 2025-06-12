@@ -37,6 +37,7 @@ import DeepTutorTopSection from './DeepTutorTopSection.js';
 import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
 import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
+import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import {
 	getMessagesBySessionId,
 	getSessionById,
@@ -616,7 +617,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				this.setState({
 					isAuthenticated: true,
 					currentUser: currentUserData.user,
-					currentPane: 'sessionHistory'
+					currentPane: this.getSessionHistoryPaneOrNoSession()
 				}, async () => {
 					// Fetch backend user data
 					await this.fetchUserData(currentUserData.user);
@@ -654,7 +655,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				this.setState({
 					isAuthenticated: true,
 					currentUser: refreshedData.user,
-					currentPane: 'sessionHistory'
+					currentPane: this.getSessionHistoryPaneOrNoSession()
 				}, async () => {
 					await this.fetchUserData(refreshedData.user);
 					if (!this.state.isLoadingSessions) {
@@ -695,7 +696,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				if (!this.state.isLoadingSessions) {
 					await this.loadSession();
 				}
-				this.switchPane('sessionHistory');
+				// this.switchPane(this.getSessionHistoryPaneOrNoSession());
 			} else {
 				// User signed out, clear data and show welcome
 				this.setState({
@@ -739,6 +740,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 	// Placeholder for pane switching logic
 	switchPane = (pane) => {
 		this.setState({ currentPane: pane });
+	};
+
+	// Helper method to determine if sessions exist
+	getSessionHistoryPaneOrNoSession = () => {
+		return (this.state.sessions && this.state.sessions.length > 0) ? 'sessionHistory' : 'noSession';
 	};
 
 	toggleProfilePopup = () => {
@@ -905,11 +911,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 			});
 
 			// If no sessions, switch to model selection pane
+			Zotero.debug(`DeepTutor: Switching to model selection pane: ${sessions}`);
+			Zotero.debug(`DeepTutor: Sessions length: ${sessions.length}`);
 			if (sessions.length === 0) {
-				this.switchPane('modelSelection');
+				this.switchPane('noSession');
 			} else {
 				// If sessions exist, switch to main pane
-				this.switchPane('main');
+				this.switchPane('sessionHistory');
 			}
 
 			// Save backend user data if not already set or has changed
@@ -1094,6 +1102,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 								showSearch={this.state.showSearch}
 							/>
 						}
+						{this.state.currentPane === 'noSession' &&
+							<DeepTutorNoSessionPane onCreateNewSession={this.toggleModelSelectionPopup} />
+						}
 						{this.state.currentPane === 'modelSelection' &&
 							<ModelSelection
 								onSubmit={async (sessionId) => {
@@ -1126,7 +1137,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 							onSignInSignUp={() => this.toggleSignUpPopup()}
 							onSignInSuccess={() => {
 								this.loadSession();
-								this.switchPane('sessionHistory');
 								this.toggleSignInPopup();
 							}}
 						/>}
@@ -1463,10 +1473,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 									this.toggleSignInPopup();
 									this.toggleSignUpPopup();
 								}}
-								onSignInSuccess={() => {
-									this.toggleSignInPopup();
-									// Auth state change will be handled by the listener
-								}}
+															onSignInSuccess={() => {
+								this.toggleSignInPopup();
+								// Auth state change will be handled by the listener
+							}}
 							/>
 						</div>
 					</div>
@@ -1674,6 +1684,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated={this.state.isAuthenticated}
 					currentUser={this.state.currentUser}
 					onSignOut={this.handleSignOut}
+					onSwitchNoSession={() => this.switchPane('noSession')}
 					userData={this.state.userData}
 				/>
 			</div>

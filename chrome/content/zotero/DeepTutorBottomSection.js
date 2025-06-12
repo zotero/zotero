@@ -212,6 +212,15 @@ class DeepTutorBottomSection extends React.Component {
                         >
                             Sign out
                         </button>
+                        <button 
+                            style={{...styles.componentButton, marginTop: '8px', background: '#6c757d', color: '#fff', borderColor: '#6c757d'}}
+                            onClick={() => {
+                                this.props.onSwitchNoSession();
+                                this.props.onToggleProfilePopup(); // Close the popup after switching
+                            }}
+                        >
+                            No Session
+                        </button>
                     </>
                 ) : (
                     <div style={styles.profileInfo}>
@@ -377,6 +386,7 @@ DeepTutorBottomSection.propTypes = {
     isAuthenticated: PropTypes.bool,
     currentUser: PropTypes.object,
     onSignOut: PropTypes.func,
+    onSwitchNoSession: PropTypes.func,
     userData: PropTypes.object,
 };
 
