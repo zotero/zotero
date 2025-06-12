@@ -114,6 +114,22 @@ window.ZoteroDocumentCitations = {
 		citations = Object.values(io.citations);
 		items = io.items;
 		uncitedItems = io.uncitedItems;
+		
+		// Load library data for all items
+		let librariesNeeded = new Set();
+		for (let item of [...items, ...uncitedItems]) {
+			if (item.libraryID) {
+				librariesNeeded.add(item.libraryID);
+			}
+		}
+		for (let libraryID of librariesNeeded) {
+			let library = Zotero.Libraries.get(libraryID);
+			if (!library.getDataLoaded('item')) {
+				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				await library.waitForDataLoad('item');
+			}
+		}
+		
 		await this._initMappings();
 		await this.refreshCitationList();
 		await this.refreshItemList();
@@ -392,6 +408,15 @@ window.ZoteroDocumentCitations = {
 	
 	async addToLibraryAndLink() {
 		var collectionID = _addToTarget.objectType == 'collection' ? _addToTarget.id : undefined;
+		
+		// Load library data
+		let targetLibraryID = _addToTarget.libraryID || _addToTarget.library.libraryID;
+		let library = Zotero.Libraries.get(targetLibraryID);
+		if (!library.getDataLoaded('item')) {
+			Zotero.debug("Waiting for items to load for library " + library.libraryID);
+			await library.waitForDataLoad('item');
+		}
+		
 		for (let index of itemList.selection.selected) {
 			let treeRow = itemList.getRow(index);
 			const oldItemID = treeRow.id;
