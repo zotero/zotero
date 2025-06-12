@@ -388,6 +388,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const chatLogRef = useRef(null);
     const [hoveredQuestion, setHoveredQuestion] = useState(null);
     const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
+    const [iniWait, setInitWait] = useState(false);
+    const [isStreaming, setIsStreaming] = useState(false);
 
     // Load recent sessions from preferences on component mount
     useEffect(() => {
@@ -536,6 +538,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     // Show loading popup
                     setIsLoading(true);
                     let shouldSendInitialMessage = true;
+                    setInitWait(true);
                     
                     // Wait for 10 seconds
                     Zotero.debug(`DeepTutorChatBox: Waiting 8 seconds before sending initial message`);
@@ -549,6 +552,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         Zotero.debug(`DeepTutorChatBox: Sending initial message`);
                         await userSendMessage("Can you give me a summary of this document?");
                     }
+                    setInitWait(false);
                 }
 
                 // Scroll to bottom after messages are loaded
@@ -671,6 +675,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
     const sendToAPI = async (message) => {
         try {
+            setIsStreaming(true); // Set streaming to true at start
             // Send message to API
             const responseData = await createMessage(message)
             Zotero.debug(`DeepTutorChatBox: Create Message Response from API: ${JSON.stringify(responseData)}`);
@@ -706,10 +711,12 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             Zotero.debug(`DeepTutorChatBox: Stream Response from API: ${JSON.stringify(streamResponse)}`);
 
             if (!streamResponse.ok) {
+                setIsStreaming(false); // Set streaming to false on error
                 throw new Error(`Stream request failed: ${streamResponse.status}`);
             }
             
             if (!streamResponse.body) {
+                setIsStreaming(false); // Set streaming to false if no body
                 throw new Error('Stream response body is null');
             }
 
@@ -747,11 +754,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 
                 // Check for timeout
                 if (Date.now() - lastDataTime > 30000) {
+                    setIsStreaming(false); // Set streaming to false on timeout
                     throw new Error('Stream timeout - no data received for 30 seconds');
                 }
                 
                 if (done) {
                     if (!hasReceivedData) {
+                        setIsStreaming(false); // Set streaming to false if no data received
                         throw new Error('Stream closed without receiving any data');
                     }
                     break;
@@ -820,9 +829,11 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             
             // Get only the last message from the response
             const lastMessage = historyData.length > 0 ? historyData[historyData.length - 2] : null;
+            setIsStreaming(false); // Set streaming to false when done
             return lastMessage;
 
         } catch (error) {
+            setIsStreaming(false); // Set streaming to false on any error
             Zotero.debug(`DeepTutorChatBox: Error in sendToAPI: ${error.message}`);
             throw error;
         }
@@ -1545,11 +1556,15 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
             <div style={styles.bottomBar}>
                 <textarea
-                    style={styles.textInput}
+                    style={{
+                        ...styles.textInput,
+                        opacity: isStreaming || iniWait ? 0.5 : 1,
+                        cursor: isStreaming || iniWait ? 'not-allowed' : 'text'
+                    }}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        if (e.key === 'Enter' && !e.shiftKey && !isStreaming && !iniWait) {
                             e.preventDefault(); // Prevent adding a new line
                             handleSend();
                         }
@@ -1557,10 +1572,16 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     }}
                     placeholder="Type your message... (Shift+Enter for new line)"
                     rows={1}
+                    disabled={isStreaming || iniWait}
                 />
                 <button
-                    style={styles.sendButton}
+                    style={{
+                        ...styles.sendButton,
+                        opacity: isStreaming || iniWait ? 0.5 : 1,
+                        cursor: isStreaming || iniWait ? 'not-allowed' : 'pointer'
+                    }}
                     onClick={handleSend}
+                    disabled={isStreaming || iniWait}
                 >
                     <img 
                         src={SendIconPath}
