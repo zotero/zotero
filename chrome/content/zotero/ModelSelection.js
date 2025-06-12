@@ -444,9 +444,7 @@ function ModelSelection({ onSubmit, user }) {
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [showFileList, setShowFileList] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [containerWidth, setContainerWidth] = useState(null);
   const [buttonWidth, setButtonWidth] = useState(null);
-  const containerRef = useRef(null);
   const [buttonLayout, setButtonLayout] = useState('row');
   const buttonRef = useRef(null);
 
@@ -460,7 +458,7 @@ function ModelSelection({ onSubmit, user }) {
         if (width !== buttonWidth) {
           setButtonWidth(width);
           Zotero.debug(`ModelSelection: Button width: ${width}`);
-          setButtonLayout(width < 100 ? 'column' : 'row');
+          setButtonLayout(width < 107 ? 'column' : 'row');
         }
       }
       animationFrameId = requestAnimationFrame(checkWidth);
@@ -967,7 +965,7 @@ function ModelSelection({ onSubmit, user }) {
   };
 
   return (
-    <div style={styles.container} ref={containerRef}>
+    <div style={styles.container}>
       <div style={styles.mainSection}>
         <div style={styles.nameSection}>
           <label style={styles.label}>Session Name</label>
