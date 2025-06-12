@@ -112,7 +112,7 @@ const styles = {
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
-    border: `1px solid ${PEARL}`,
+    border: `1px solid #BDBDBD`,
     padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',
