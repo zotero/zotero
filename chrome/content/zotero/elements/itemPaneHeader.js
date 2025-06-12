@@ -195,6 +195,14 @@
 			}
 			if (this._isAlreadyRendered()) return;
 
+			let noHeader = this._item.isAnnotation() || this._item.length > 0;
+			this.querySelector(".title-head").hidden = noHeader;
+			if (noHeader) {
+				this.classList.add('no-head');
+				return;
+			}
+			this.classList.remove('no-head');
+
 			let headerMode = Zotero.Prefs.get('itemPaneHeader');
 			if (this._item.isAttachment()) {
 				headerMode = 'title';

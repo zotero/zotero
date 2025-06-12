@@ -70,6 +70,8 @@
 						
 						<libraries-collections-box id="zotero-editpane-libraries-collections" class="zotero-editpane-libraries-collections" data-pane="libraries-collections"/>
 
+						<annotation-box id="zotero-editpane-annotation" class="zotero-editpane-annotation" data-pane="annotation"/>
+
 						<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags" data-pane="tags"/>
 
 						<related-box id="zotero-editpane-related" class="zotero-editpane-related" data-pane="related"/>

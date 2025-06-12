@@ -5,7 +5,11 @@ item-pane-header {
 	flex-direction: column;
 	align-items: stretch;
 	padding: 8px;
-	border-bottom: 1px solid var(--fill-quinary);
+	border-bottom: var(--material-border-quinary);
+
+	&.no-head {
+		border-bottom: var(--material-panedivider);
+	}
 	
 	max-height: 25%;
 	overflow-y: auto;
@@ -63,6 +67,8 @@ item-pane-header {
 			flex-direction: row;
 			align-self: stretch;
 			gap: 8px;
+			background: var(--material-sidepane);
+			align-items: center;
 
 			@media (-moz-platform: macos) {
 				// The extent of the button is about 2px wider than its optical width
@@ -85,6 +91,7 @@ item-pane-header {
 				@media (-moz-platform: macos) {
 					height: 24px;
 					padding: 3px 0px 1px 0px;
+					margin: 0px -2px;
 
 					&:is(.split-menu-button) {
 						padding: 3px 2px 1px 3px;

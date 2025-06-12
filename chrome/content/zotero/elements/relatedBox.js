@@ -51,7 +51,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 
 		set item(val) {
-			this.hidden = val?.isFeedItem;
+			this.hidden = val?.isFeedItem || val?.isAnnotation();
 			this._item = val;
 		}
 
