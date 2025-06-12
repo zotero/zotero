@@ -46,7 +46,6 @@ general-clear = Clear
 general-update = Update
 general-back = Back
 general-edit = Edit
-general-back = Back
 general-copy = Copy
 general-delete = Delete
 
