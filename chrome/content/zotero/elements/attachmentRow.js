@@ -106,9 +106,20 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			Zotero.Utilities.Internal.onDragItems(event, [this._attachment.id]);
 		};
 
-		_handleAnnotationClick = () => {
-			Zotero_Tabs.select('zotero-pane');
-			ZoteroPane.selectItems(this._attachment.getAnnotations().map(a => a.id));
+		_handleAnnotationClick = async () => {
+			let paneID = "attachment-annotations";
+			let win = Zotero.getMainWindow();
+			if (win) {
+				win.Zotero_Tabs.select('zotero-pane');
+				let itemDetails = win.ZoteroContextPane.sidenav?.container;
+				let pane = itemDetails?.getPane(paneID);
+				if (pane) {
+					pane._section.open = true;
+					await itemDetails?.scrollToPane(paneID, 'instant', { pendingScroll: true });
+				}
+				await win.ZoteroPane.selectItem(this._attachment.id);
+				win.focus();
+			}
 		};
 
 		_handleRemove = async () => {
