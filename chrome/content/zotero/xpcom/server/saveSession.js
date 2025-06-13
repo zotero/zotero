@@ -49,9 +49,9 @@ Zotero.Server.Connector.SessionManager = {
 		var ttl = this._sessions.size >= 10 ? 60 : 600;
 		var deleteBefore = new Date() - ttl * 1000;
 
-		for (let session of this._sessions) {
+		for (let [_, session] of this._sessions.entries()) {
 			if (session.created < deleteBefore) {
-				this._session.delete(session.id);
+				this._sessions.delete(session.id);
 			}
 		}
 	}
@@ -63,6 +63,7 @@ Zotero.Server.Connector.SaveSession = class {
 	constructor(id, action, requestData) {
 		this.id = id;
 		this.created = new Date();
+		this.cancelled = false;
 		this._action = action;
 		this._requestData = requestData;
 		this._items = {};
@@ -112,6 +113,8 @@ Zotero.Server.Connector.SaveSession = class {
 	}
 
 	async saveSnapshot(target) {
+		// This should not be called if session is cancelled but just in case
+		if (this.cancelled) return;
 		var { library, collection } = Zotero.Server.Connector.resolveTarget(target);
 		var libraryID = library.libraryID;
 		var data = this._requestData.data;
@@ -160,7 +163,14 @@ Zotero.Server.Connector.SaveSession = class {
 	}
 
 	remove() {
-		delete Zotero.Server.Connector.SessionManager._sessions[this.id];
+		Zotero.Server.Connector.SessionManager._sessions.delete(this.id);
+	}
+
+	async cancel() {
+		this.cancelled = true;
+		for (let item of Object.values(this._items)) {
+			await item.eraseTx();
+		}
 	}
 
 	/**
@@ -202,6 +212,8 @@ Zotero.Server.Connector.SaveSession = class {
 		if (Object.values(items).length == 0) {
 			return;
 		}
+		// This should not be called if session is cancelled but just in case
+		if (this.cancelled) return;
 		
 		var { library, collection } = Zotero.Server.Connector.resolveTarget(this._currentTargetID);
 		var libraryID = library.libraryID;
