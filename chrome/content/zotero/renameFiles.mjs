@@ -108,7 +108,10 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 		
 		let out = {};
 		const renamed = await attachmentItem.renameAttachmentFile(ext.length ? `${newName}.${ext}` : newName, { updateTitle: true, out });
-		if (renamed === true && !out.noChange) {
+		if (out.noChange) {
+			continue;
+		}
+		if (renamed === true) {
 			count++;
 		}
 		else {
