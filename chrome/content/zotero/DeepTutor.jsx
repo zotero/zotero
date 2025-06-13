@@ -696,7 +696,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				if (!this.state.isLoadingSessions) {
 					await this.loadSession();
 				}
-				// this.switchPane(this.getSessionHistoryPaneOrNoSession());
+				this.switchPane(this.getSessionHistoryPaneOrNoSession());
 			} else {
 				// User signed out, clear data and show welcome
 				this.setState({
@@ -1166,6 +1166,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							onSignInSignUp={() => this.toggleSignUpPopup()}
 							onSignInSuccess={() => {
 								this.loadSession();
+								this.switchPane(this.getSessionHistoryPaneOrNoSession());
 								this.toggleSignInPopup();
 							}}
 						/>}
@@ -1502,10 +1503,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 									this.toggleSignInPopup();
 									this.toggleSignUpPopup();
 								}}
-															onSignInSuccess={() => {
-								this.toggleSignInPopup();
-								// Auth state change will be handled by the listener
-							}}
+								onSignInSuccess={() => {
+								    this.toggleSignInPopup();
+								    // Auth state change will be handled by the listener
+							    }}
 							/>
 						</div>
 					</div>
