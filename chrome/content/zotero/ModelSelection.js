@@ -46,7 +46,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflowY: 'auto',
-    overflowX: 'hidden',
     position: 'relative',
     boxSizing: 'border-box',
   },
@@ -56,7 +55,6 @@ const styles = {
     width: '100%',
     maxHeight: '53rem',
     overflowY: 'auto',
-    overflowX: 'hidden',
     boxSizing: 'border-box',
   },
   section: {
