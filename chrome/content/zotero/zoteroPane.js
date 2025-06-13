@@ -1792,6 +1792,11 @@ var ZoteroPane = new function()
 
 			// Update enabled actions, in case editability has changed
 			this._updateEnabledActionsForRow(collectionTreeRow);
+			// Make sure the itemsView has the most current instanced of
+			// collectionTree, so that annotation color and authors filters
+			// get enabled/disabled in sync with itemTree.
+			this.itemsView.collectionTreeRow = collectionTreeRow;
+			collectionTreeRow.setAnnotationTagFilters(ZoteroPane.tagSelector.getSelection());
 			return;
 		}
 		
