@@ -1481,9 +1481,9 @@ describe("Zotero.Attachments", function () {
 			itemNoRepeatedHyphens.setField('publicationTitle', "no- repeated- hyphens");
 			itemNoRepeatedUnderscores = createUnsavedDataObject('item', { title: 'no _ repeated _ underscores', itemType: 'journalArticle', libraryID: 1 });
 			itemNoRepeatedUnderscores.setField('publicationTitle', "no_ repeated_ underscores");
-			itemLowerCase = createUnsavedDataObject('item', { title: 'lower case title', itemType: 'journalArticle' });
-			itemMixedCase = createUnsavedDataObject('item', { title: 'Old MacDonald Had a Farm', itemType: 'journalArticle' });
-			itemUnicode = createUnsavedDataObject('item', { title: '金毛猎犬 - Golden Retriever', itemType: 'journalArticle' });
+			itemLowerCase = createUnsavedDataObject('item', { title: 'lower case title', itemType: 'journalArticle', libraryID: 1 });
+			itemMixedCase = createUnsavedDataObject('item', { title: 'Old MacDonald Had a Farm', itemType: 'journalArticle', libraryID: 1 });
+			itemUnicode = createUnsavedDataObject('item', { title: '金毛猎犬 - Golden Retriever', itemType: 'journalArticle', libraryID: 1 });
 		});
 		
 		it('should strip HTML tags from title', function () {
