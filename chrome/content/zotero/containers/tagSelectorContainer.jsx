@@ -151,20 +151,6 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		newState.annotationColors = await this.collectionTreeRow.getAnnotationColors();
 		newState.annotationAuthors = await this.collectionTreeRow.getAnnotationAuthors();
 
-		// After the last item with a selected color is removed, un-select the color.
-		// If, after that, there are no selected colors left, refresh the
-		// itemTree to remove the color conditions, otherwise, itemTree will be just empty.
-		// Same logic for the authors
-		let prevColors = new Set([...this.selectedAnnotationColors]);
-		this.selectedAnnotationColors = new Set([...this.selectedAnnotationColors].filter(color => newState.annotationColors.has(color)));
-		if (prevColors.size && !this.selectedAnnotationColors.size) {
-			this.props.onSelection();
-		}
-		let prevAuthors = new Set([...this.selectedAnnotationAuthors]);
-		this.selectedAnnotationAuthors = new Set([...this.selectedAnnotationAuthors].filter(userID => newState.annotationAuthors.has(userID)));
-		if (prevAuthors.size && !this.selectedAnnotationAuthors.size) {
-			this.props.onSelection();
-		}
 		this.setState(newState);
 	}
 	
@@ -562,7 +548,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		let annotationAuthors = [];
 		let annotationColors = [];
 		if (this.state.showAnnotationFilters) {
-			annotationAuthors = [...this.state.annotationAuthors].map(userID => ({
+			let matchingAndSelectedAuthors = Array.from(new Set([
+				...this.state.annotationAuthors,
+				...this.selectedAnnotationAuthors
+			]));
+			annotationAuthors = matchingAndSelectedAuthors.map(userID => ({
 				userID,
 				name: Zotero.Users.getName(userID),
 				selected: this.selectedAnnotationAuthors.has(userID)

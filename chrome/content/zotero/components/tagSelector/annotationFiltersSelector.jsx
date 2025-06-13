@@ -37,7 +37,7 @@ class AnnotationFiltersSelector extends React.PureComponent {
 	}
 
 	_handleColorsClick = (colorObj) => {
-		if (!colorObj.enabled) return;
+		if (!colorObj.enabled && !colorObj.selected) return;
 		this.props.onSelect(colorObj);
 	};
 
@@ -97,7 +97,7 @@ class AnnotationFiltersSelector extends React.PureComponent {
 			<div className="annotation-colors-section">
 				{this.props.annotationColors.map((colorObj, index) => (
 					<div key={`color_${index}_${colorObj.color}`}
-						className={`annotation-color ${colorObj.selected ? 'selected' : ''} ${colorObj.enabled ? '' : ' disabled'}`}
+						className={`annotation-color ${colorObj.selected ? 'selected' : ''} ${(colorObj.enabled || colorObj.selected) ? '' : ' disabled'}`}
 						title={Zotero.getString(`general.${colorObj.name}`)}
 						onClick={() => this._handleColorsClick(colorObj)}
 						tabIndex={0}
