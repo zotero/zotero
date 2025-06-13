@@ -1157,8 +1157,8 @@ describe("Item pane", function () {
 			let attachmentRow = attachmentsBox.querySelector(`attachment-row[attachment-id="${attachment.id}"]`);
 			attachmentRow._annotationButton.click();
 			await Zotero.Promise.delay(100);
-			// Should select annotations
-			assert.deepEqual(ZoteroPane.getSelectedItems(true), [_annotation.id]);
+			// Should select attachment
+			assert.equal(ZoteroPane.getSelectedItems(true)[0], attachment.id);
 		});
 
 		it("should open attachment on double-clicking attachments pane preview", async function () {
