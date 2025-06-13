@@ -1596,7 +1596,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         }
                         // Shift+Enter allows new line (default behavior)
                     }}
-                    placeholder="Type your message... (Shift+Enter for new line)"
+                    placeholder="Type your message..."
                     rows={1}
                 />
                 <button
