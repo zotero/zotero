@@ -48,6 +48,7 @@ general-back = Back
 general-edit = Edit
 general-copy = Copy
 general-delete = Delete
+general-learn-more = Learn More
 
 general-red = Red
 general-orange = Orange
@@ -755,6 +756,9 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-link = { general-learn-more }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 
