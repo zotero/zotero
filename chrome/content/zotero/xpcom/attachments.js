@@ -2335,8 +2335,11 @@ Zotero.Attachments = new function () {
 	 * @param {String} formatString
 	 */
 	this.getFileBaseNameFromItem = function (item, options = {}) {
-		if (!(item instanceof Zotero.Item) || item.libraryID === null) {
+		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
+		}
+		if (!item.libraryID) {
+			throw new Error("Item must have a libraryID");
 		}
 		if (typeof options === 'string') {
 			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments.getFileBaseNameFromItem(item, options)");
