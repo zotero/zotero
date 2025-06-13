@@ -284,10 +284,13 @@ Zotero_Preferences.General = {
 	promptAutoRenameFiles: function () {
 		let ps = Services.prompt;
 		let { title, description, yes, no } = this._autoRenamePrompt;
-		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-		const shouldRenameExisting = ps.confirmEx(null, title, description, buttonFlags, yes, no, null, null, {}) === 0;
-		if (shouldRenameExisting) {
+		let index = Zotero.Prompt.confirm({
+			title,
+			text: description,
+			button0: yes,
+			button1: no
+		});
+		if (index == 0) {
 			const { renameFilesFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 			renameFilesFromParent();
 		}
