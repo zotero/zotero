@@ -24,13 +24,14 @@
 */
 /* global Zotero_Preferences: false */
 
+const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+
 Zotero_Preferences.FileRenaming = {
 	mockItem: null,
 	defaultExt: 'pdf',
 	hasPromptedOrIsRenaming: false,
 
 	init: function () {
-		const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 		this.lastFormatString = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 		this.isTemplateInSync = Zotero.Prefs.get('autoRenameFiles.done');
 		this.inputEl = document.getElementById('file-renaming-format-template');
@@ -71,10 +72,14 @@ Zotero_Preferences.FileRenaming = {
 		this.promptReplace();
 	},
 
-	handleInputChange() {
+	async handleInputChange() {
 		const formatString = this.inputEl.value;
+		// Ignore empty value, which we'll reset in handleInputBlur() if necessary
+		if (formatString.replace(/\s/g, '') === '') {
+			return;
+		}
 		this.updatePreview();
-		Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', formatString);
+		await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', formatString);
 		
 		// reset 'done' to enable the rename button, set it to `false` if the
 		// template is out of sync (e.g., the user changed it and declined
@@ -82,12 +87,12 @@ Zotero_Preferences.FileRenaming = {
 		Zotero.Prefs.set('autoRenameFiles.done', this.isTemplateInSync ? formatString === this.lastFormatString : false);
 	},
 
-	handleInputBlur() {
+	async handleInputBlur() {
 		const formatString = this.inputEl.value;
-		const prefKey = this.inputEl.getAttribute('preference');
 		if (formatString.replace(/\s/g, '') === '') {
-			Zotero.Prefs.clear(prefKey, true);
+			this.inputEl.value = this.lastFormatString = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 			this.updatePreview();
+			await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate');
 		}
 	},
 
