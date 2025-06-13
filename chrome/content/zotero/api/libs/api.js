@@ -1,6 +1,6 @@
 // Access ZOTERO_CONFIG from the global scope
-const API_BASE_URL = 'https://api.staging.deeptutor.knowhiz.us/api';
-// const API_BASE_URL = 'http://localhost:8081/api';
+// const API_BASE_URL = 'https://api.staging.deeptutor.knowhiz.us/api';
+const API_BASE_URL = 'http://localhost:8081/api';
 
 // Import auth state to get access token
 import { authState } from '../../auth/cognitoAuth.js';

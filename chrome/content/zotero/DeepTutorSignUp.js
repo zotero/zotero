@@ -197,7 +197,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    
+
     if (!name || !email || !password) {
       setError('Please fill in all required fields');
       return;
@@ -215,10 +215,10 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
     try {
       Zotero.debug('DeepTutor SignUp: Attempting to sign up with Cognito');
       const result = await signUp(email, password, name);
-      
+
       Zotero.debug('DeepTutor SignUp: Sign up successful');
       setUserSub(result.userSub);
-      
+
       if (!result.userConfirmed) {
         setNeedsConfirmation(true);
         setMessage('Registration successful! Please check your email and enter verification code.');
@@ -228,13 +228,13 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
           onSignUpSignIn();
         }, 2000);
       }
-      
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignUp: Sign up failed: ${error.message}`);
-      
+
       // Handle specific Cognito errors
       let errorMessage = 'Registration failed, please try again';
-      
+
       if (error.code === 'UsernameExistsException') {
         errorMessage = 'This email is already registered';
       } else if (error.code === 'InvalidPasswordException') {
@@ -246,7 +246,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -255,7 +255,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
   const handleConfirmSignUp = async (e) => {
     e.preventDefault();
-    
+
     if (!confirmationCode) {
       setError('Please enter verification code');
       return;
@@ -268,19 +268,19 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
     try {
       Zotero.debug('DeepTutor SignUp: Attempting to confirm sign up');
       await confirmSignUp(email, confirmationCode);
-      
+
       Zotero.debug('DeepTutor SignUp: Email confirmation successful');
       setMessage('Email verification successful! You can now sign in.');
-      
+
       setTimeout(() => {
         onSignUpSignIn();
       }, 2000);
-      
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignUp: Confirmation failed: ${error.message}`);
-      
+
       let errorMessage = 'Verification failed, please try again';
-      
+
       if (error.code === 'CodeMismatchException') {
         errorMessage = 'Incorrect verification code';
       } else if (error.code === 'ExpiredCodeException') {
@@ -290,7 +290,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -302,11 +302,22 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
       setIsLoading(true);
       setError('');
       setMessage('');
-      
+
       Zotero.debug('DeepTutor SignUp: Attempting Google sign up');
-      await signInWithGoogle();
-      setMessage('Redirecting to Google registration...');
-      
+      const result = await signInWithGoogle();
+
+      Zotero.debug('DeepTutor SignUp: Google sign up successful');
+      setMessage('Google registration successful!');
+
+      // Initialize empty Map for recent sessions
+      const emptyMap = new Map();
+      Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(Object.fromEntries(emptyMap)));
+
+      // Redirect to sign in after successful Google registration
+      setTimeout(() => {
+        onSignUpSignIn();
+      }, 1000);
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignUp: Google sign up failed: ${error.message}`);
       setError('Google registration failed, please try again');
@@ -320,11 +331,11 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
       setIsLoading(true);
       setError('');
       setMessage('');
-      
+
       // Re-trigger sign up to resend confirmation code
       await signUp(email, password, name);
       setMessage('Verification code resent, please check your email');
-      
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignUp: Resend confirmation failed: ${error.message}`);
       setError('Failed to resend verification code, please try again');
@@ -353,7 +364,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             disabled={isLoading}
             maxLength={6}
           />
-          <button 
+          <button
             style={{
               ...styles.signUpButton,
               ...(isLoading ? styles.signUpButtonDisabled : {})
@@ -363,15 +374,15 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
           >
             {isLoading ? 'Verifying...' : 'Verify Email'}
           </button>
-          
+
           {error && <div style={styles.errorMessage}>{error}</div>}
           {message && <div style={styles.successMessage}>{message}</div>}
-          
+
           <div style={styles.bottomRow}>
             Didn't receive verification code?
-            <button 
-              style={styles.signInLink} 
-              type="button" 
+            <button
+              style={styles.signInLink}
+              type="button"
               onClick={resendConfirmationCode}
               disabled={isLoading}
             >
@@ -420,7 +431,7 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
               disabled={isLoading}
             />
           </div>
-          <button 
+          <button
             style={{
               ...styles.signUpButton,
               ...(isLoading ? styles.signUpButtonDisabled : {})
@@ -430,11 +441,11 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
           >
             {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
-          
+
           {error && <div style={styles.errorMessage}>{error}</div>}
           {message && <div style={styles.successMessage}>{message}</div>}
         </div>
-        
+
         <div style={styles.dividerContainer}>
           <hr style={styles.divider} />
           <span style={styles.orText}>or</span>
@@ -442,8 +453,8 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
         </div>
 
         <div style={styles.googleContainer}>
-          <button 
-            style={styles.googleButton} 
+          <button
+            style={styles.googleButton}
             type="button"
             onClick={handleGoogleSignUp}
             disabled={isLoading}
@@ -455,9 +466,9 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
         <div style={styles.bottomContainer}>
           <span style={styles.bottomText}>Already have an account?</span>
-          <button 
-            style={styles.signInLink} 
-            type="button" 
+          <button
+            style={styles.signInLink}
+            type="button"
             onClick={onSignUpSignIn}
             disabled={isLoading}
           >
@@ -467,4 +478,4 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
       </form>
     </div>
   );
-} 
+}
