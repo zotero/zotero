@@ -2690,7 +2690,8 @@ Zotero.Attachments = new function () {
 	
 	this.shouldAutoRenameAttachment = function (attachment) {
 		return Zotero.Attachments.shouldAutoRenameFile(attachment.isLinkedFileAttachment(), attachment.libraryID)
-			&& Zotero.Attachments.isRenameAllowedForType(attachment.attachmentContentType, attachment.libraryID);
+			&& Zotero.Attachments.isRenameAllowedForType(attachment.attachmentContentType, attachment.libraryID)
+			&& !attachment.isSnapshotAttachment();
 	};
 	
 	
