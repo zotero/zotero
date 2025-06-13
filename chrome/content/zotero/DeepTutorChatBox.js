@@ -1205,23 +1205,37 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             Zotero.debug(`DeepTutorChatBox: Opened PDF at page ${source.page}`);
 
             // Use the reader's find functionality to highlight the reference string
-            if (source.referenceString) {
-                const win = Zotero.getMainWindow();
-                const reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
-                await reader._primaryView?.initializedPromise;
+            const pdfView = Zotero.Reader.getByTabID(Zotero.getMainWindow().Zotero_Tabs.selectedID)?._primaryView;
+            await pdfView?.initializedPromise;
 
-                reader._handleFindStateChange(true, {
-                    popupOpen: true,
-                    active: true,
-                    query: source.referenceString,
-                    highlightAll: true,
-                    caseSensitive: false,
-                    entireWord: false,
-                    result: null
-                });
-
-                reader.findNext(true);
+            const findController = pdfView?._findController;
+            if (!findController) {
+                Zotero.debug("DeepTutorChatBox: findController not available");
+                return;
             }
+            console.log('findController', findController);
+            // 2. Perform the search and immediately jump to the first match
+            findController.find({
+                type: "find",
+                //query: source.referenceString,
+                query: "variable",
+                phraseSearch: true,
+                caseSensitive: false,
+                entireWord: false,
+                highlightAll: true,
+                findPrevious: false,
+            });
+
+            // // Advance to the located match explicitly to mirror previous behaviour
+            // findController.find({
+            //     type: "again",
+            //     query: source.referenceString,
+            //     phraseSearch: true,
+            //     caseSensitive: false,
+            //     entireWord: false,
+            //     highlightAll: true,
+            //     findPrevious: false,
+            // });
         } catch (error) {
             Zotero.debug(`DeepTutorChatBox: Error handling source click: ${error.message}`);
         }
