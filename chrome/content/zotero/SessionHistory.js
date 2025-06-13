@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
+const SKY = '#0687E5';
+
 const containerStyle = {
   width: '100%',
   minHeight: '100%',
@@ -16,6 +18,34 @@ const containerStyle = {
   overflowX: 'hidden',
   overflowY: 'auto',
   boxSizing: 'border-box',
+};
+
+const createSessionButtonStyle = {
+  background: '#fff',
+  color: SKY,
+  fontWeight: 700,
+  fontSize: '1em',
+  border: 'none',
+  borderRadius: '0.625rem',
+  width: '100%',
+  maxWidth: '21.625rem',
+  minHeight: '3rem',
+  padding: '0.625rem 1.25rem',
+  cursor: 'pointer',
+  boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
+  fontFamily: 'Roboto, sans-serif',
+  letterSpacing: 0.2,
+  zIndex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '0.5rem',
+  marginBottom: '0.875rem',
+};
+
+const plusIconStyle = {
+  width: '1rem',
+  height: '1rem',
 };
 
 const searchSectionStyle = {
@@ -108,7 +138,9 @@ const errorStyle = {
   marginLeft: '5%',
 };
 
-function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true }) {
+const plusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
+
+function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true, onCreateNewSession }) {
   const [search, setSearch] = useState('');
   const [hoveredButton, setHoveredButton] = useState(null);
 
@@ -135,6 +167,10 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 
   return (
     <div style={containerStyle}>
+      <button style={createSessionButtonStyle} onClick={onCreateNewSession}>
+        Create a New Session
+        <img src={plusIconPath} alt="Plus" style={plusIconStyle} />
+      </button>
       {/* Search Bar Section */}
       {showSearch && (
         <div style={searchSectionStyle}>
@@ -181,7 +217,8 @@ SessionHistory.propTypes = {
   onSessionSelect: PropTypes.func,
   isLoading: PropTypes.bool,
   error: PropTypes.string,
-  showSearch: PropTypes.bool
+  showSearch: PropTypes.bool,
+  onCreateNewSession: PropTypes.func
 };
 
 export default SessionHistory;

@@ -183,6 +183,8 @@ export default function DeepTutorWelcomePane({ onWelcomeSignIn, onWelcomeSignUp 
         </div>
         <div style={styles.buttonWrapper}>
           <button style={styles.signInButton} onClick={onWelcomeSignIn}>Sign in</button>
+        </div>
+        <div style={styles.buttonWrapper}>
           <button style={styles.signUpButton} onClick={onWelcomeSignUp}>Create a new account</button>
         </div>
       </div>

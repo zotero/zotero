@@ -84,6 +84,16 @@ const styles = {
         padding: '1.875rem 1.25rem 0 1.25rem',
         boxSizing: 'border-box',
     },
+    sessionNameDiv: {
+        width: '100%',
+        padding: '0 0.5rem',
+        marginBottom: '0.75rem',
+        color: '#000000',
+        fontWeight: 500,
+        fontSize: '1rem',
+        lineHeight: '100%',
+        fontFamily: 'Roboto, sans-serif',
+    },
     sessionInfo: {
         width: '90%',
         fontSize: '1em',
@@ -1550,6 +1560,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         <div style={styles.container}>
             {isLoading && <LoadingPopup />}
             
+            <div style={styles.sessionNameDiv}>
+                {currentSession?.sessionName || 'New Session'}
+            </div>
+
             <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
             </div>
