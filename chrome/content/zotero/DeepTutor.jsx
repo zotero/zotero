@@ -1161,7 +1161,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								user={this.state.userData}
 							/>
 						}
-						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} />}
+						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} onWelcomeSignUp={() => this.toggleSignUpPopup()} />}
 						{this.state.currentPane === 'signIn' && <DeepTutorSignIn
 							onSignInSignUp={() => this.toggleSignUpPopup()}
 							onSignInSuccess={() => {

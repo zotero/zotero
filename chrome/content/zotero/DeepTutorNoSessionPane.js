@@ -55,6 +55,12 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
   },
+  descTextWrapper: {
+    width: '100%',
+    marginBottom: '1.875rem',
+    display: 'flex',
+    justifyContent: 'center',
+  },
   buttonWrapper: {
     width: '100%',
     display: 'flex',
@@ -74,6 +80,15 @@ const styles = {
     fontWeight: 600,
     fontSize: '1rem',
     lineHeight: '100%',
+    letterSpacing: '0%',
+    textAlign: 'center',
+    color: '#292929',
+  },
+  descText: {
+    width: '100%',
+    fontWeight: 400,
+    fontSize: '0.875rem',
+    lineHeight: '135%',
     letterSpacing: '0%',
     textAlign: 'center',
     color: '#292929',
@@ -118,10 +133,16 @@ export default function DeepTutorNoSessionPane({ onCreateNewSession }) {
       {/* Content Section */}
       <div style={styles.contentWrapper}>
         <div style={styles.mainTextWrapper}>
-          <div style={styles.mainText}>Start Your Journey</div>
+          <div style={styles.mainText}>Begin Your DeepTutor Journey</div>
         </div>
         <div style={styles.subTextWrapper}>
-          <div style={styles.subText}>(STILL IN DESIGN PROCESS) Get accurate ...</div>
+          <div style={styles.subText}>Create a session to chat with our AI tuto</div>
+        </div>
+        <div style={styles.descTextWrapper}>
+          <div style={styles.descText}>
+          Get accurate answers and deep summaries, and save<br />
+          reading history to build a personalized learning tool. 
+          </div>
         </div>
         <div style={styles.buttonWrapper}>
           <button style={styles.createSessionButton} onClick={onCreateNewSession}>
