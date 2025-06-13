@@ -119,7 +119,9 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 		}
 	}
 	const t2 = Date.now();
-	Zotero.debug(`Renaming ${count} attachments in ${librariesWithAttachmentsToRename.length} libraries took ${((t2 - t1) / 1000).toFixed(2)} seconds. (rename in the user library: ${userLibrary}, rename in group libraries: ${groupLibrary})`);
+	Zotero.debug(`Renaming ${count} attachments in ${librariesWithAttachmentsToRename.length} `
+		+ `libraries took ${((t2 - t1) / 1000).toFixed(2)} seconds `
+		+ `(user library: ${userLibrary}, group libraries: ${groupLibrary})`);
 	Zotero.Prefs.set('autoRenameFiles.done', true);
 	Zotero.hideZoteroPaneOverlays();
 };
