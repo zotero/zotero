@@ -1723,7 +1723,7 @@ describe("Item pane", function () {
 			yield new Zotero.Promise((resolve, reject) => {
 				noteEditor.onInit(() => resolve());
 			});
-			assert.equal(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync(), null);
+			assert.equal(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html, "");
 			item.setNote('<p>Test</p>');
 			yield item.saveTx();
 			
