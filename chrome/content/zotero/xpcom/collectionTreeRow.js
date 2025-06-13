@@ -354,17 +354,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		Zotero.CollectionTreeCache.clear();
 	}
 
-	if (options.skipAnnotationAuthors) {
-		if (Zotero.CollectionTreeCache.lastSearchNoAnnotationAuthors) {
-			return Zotero.CollectionTreeCache.lastSearchNoAnnotationAuthors;
-		}
-	}
-	else if (options.skipAnnotationColors) {
-		if (Zotero.CollectionTreeCache.lastSearchNoAnnotationColors) {
-			return Zotero.CollectionTreeCache.lastSearchNoAnnotationColors;
-		}
-	}
-	else if (Zotero.CollectionTreeCache.lastSearch) {
+	// Do not use cache to get search object if some conditions are being skipped
+	if (Zotero.CollectionTreeCache.lastSearch && !options.skipAnnotationAuthors && !options.skipAnnotationColors) {
 		return Zotero.CollectionTreeCache.lastSearch;
 	}
 	
@@ -465,13 +456,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		s2.addCondition('blockEnd');
 	}
 	Zotero.CollectionTreeCache.lastTreeRow = this;
-	if (options.skipAnnotationAuthors) {
-		Zotero.CollectionTreeCache.lastSearchNoAnnotationAuthors = s2;
-	}
-	else if (options.skipAnnotationColors) {
-		Zotero.CollectionTreeCache.lastSearchNoAnnotationColors = s2;
-	}
-	else {
+	if (!options.skipAnnotationAuthors && !options.skipAnnotationColors) {
 		Zotero.CollectionTreeCache.lastSearch = s2;
 	}
 	return s2;
@@ -564,8 +549,6 @@ Zotero.CollectionTreeCache = {
 	"lastTreeRow":null,
 	"lastTempTable":null,
 	"lastSearch":null,
-	"lastSearchNoAnnotationAuthors":null,
-	"lastSearchNoAnnotationColors":null,
 	"lastResults":null,
 
 	"clear": function () {
@@ -582,7 +565,5 @@ Zotero.CollectionTreeCache = {
 		}
 		this.lastTempTable = null;
 		this.lastResults = null;
-		this.lastSearchNoAnnotationAuthors = null;
-		this.lastSearchNoAnnotationColors = null;
 	}
 }
