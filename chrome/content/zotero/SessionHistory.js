@@ -21,14 +21,14 @@ const containerStyle = {
 };
 
 const createSessionButtonStyle = {
+  all: 'revert',
   background: '#fff',
   color: SKY,
   fontWeight: 700,
   fontSize: '1em',
-  border: 'none',
+  border: '0.0625rem solid #0687E5',
   borderRadius: '0.625rem',
   width: '100%',
-  maxWidth: '21.625rem',
   minHeight: '3rem',
   padding: '0.625rem 1.25rem',
   cursor: 'pointer',
@@ -40,7 +40,7 @@ const createSessionButtonStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: '0.5rem',
-  marginBottom: '0.875rem',
+  marginBottom: '1.25rem',
 };
 
 const plusIconStyle = {
@@ -49,14 +49,19 @@ const plusIconStyle = {
 };
 
 const searchSectionStyle = {
+  all: 'revert',
   width: '100%',
   marginBottom: '0.875rem',
-  padding: '0',
-  background: 'white',
-  borderRadius: '0.375rem',
+  padding: '0.375rem 0.5rem',
+  background: '#F8F6F7',
+  borderRadius: '0.625rem',
   boxShadow: '0 0.0625rem 0.1875rem rgba(0,0,0,0.1)',
   display: 'flex',
   alignSelf: 'flex-start',
+  alignItems: 'center',
+  border: '1px solid #BDBDBD',
+  minHeight: '3rem',
+  boxSizing: 'border-box',
 };
 
 const sessionListTitleStyle = {
@@ -72,17 +77,21 @@ const sessionListTitleStyle = {
 };
 
 const searchInputStyle = {
+  all: 'revert',
   flex: 1,
   width: '100%',
   padding: '0',
   border: 'none',
-  borderRadius: '0.375rem',
-  background: '#fff',
-  color: '#1a65b0',
-  minHeight: '2rem',
-  fontSize: '0.8125rem',
+  borderRadius: '0.625rem',
+  background: '#F8F6F7',
+  color: '#757575',
+  fontSize: '1rem',
+  fontWeight: 400,
+  lineHeight: '180%',
   outline: 'none',
-  boxShadow: 'none'
+  boxShadow: 'none',
+  display: 'flex',
+  alignItems: 'center',
 };
 
 const sessionListStyle = {
@@ -100,7 +109,7 @@ const sessionButtonStyle = {
   all: 'revert',
   width: '100%',
   fontFamily: 'Roboto, sans-serif',
-  padding: '0.875rem',
+  padding: '1.2rem',
   background: '#F2F2F2',
   border: 'none',
   borderRadius: '0.375rem',
@@ -114,6 +123,8 @@ const sessionButtonStyle = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  display: 'flex',
+  alignItems: 'center',
 };
 
 const loadingStyle = {
@@ -138,11 +149,21 @@ const errorStyle = {
   marginLeft: '5%',
 };
 
-const plusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
+const plusIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_BLUE_PLUS.svg';
+const searchIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_SEARCH.svg';
 
 function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true, onCreateNewSession }) {
   const [search, setSearch] = useState('');
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [isCreateSessionHovered, setIsCreateSessionHovered] = useState(false);
+
+  const handleCreateSessionMouseEnter = () => setIsCreateSessionHovered(true);
+  const handleCreateSessionMouseLeave = () => setIsCreateSessionHovered(false);
+
+  const createSessionButtonDynamicStyle = {
+    ...createSessionButtonStyle,
+    background: isCreateSessionHovered ? '#F8F6F7' : '#fff',
+  };
 
   // Filter and sort sessions
   const filteredSessions = sessions
@@ -167,16 +188,22 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 
   return (
     <div style={containerStyle}>
-      <button style={createSessionButtonStyle} onClick={onCreateNewSession}>
+      <button
+        style={createSessionButtonDynamicStyle}
+        onClick={onCreateNewSession}
+        onMouseEnter={handleCreateSessionMouseEnter}
+        onMouseLeave={handleCreateSessionMouseLeave}
+      >
         Create a New Session
         <img src={plusIconPath} alt="Plus" style={plusIconStyle} />
       </button>
       {/* Search Bar Section */}
       {showSearch && (
         <div style={searchSectionStyle}>
+          <img src={searchIconPath} alt="Search Icon" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
           <input
             type="text"
-            placeholder="Search sessions..."
+            placeholder="Search for a Session..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={searchInputStyle}

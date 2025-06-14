@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const PEARL = '#F2F2F2';
 const SKY = '#0687E5';
@@ -116,6 +116,7 @@ const styles = {
     color: '#292929',
   },
   signInButton: {
+    all: 'revert',
     background: SKY,
     color: '#fff',
     fontWeight: 700,
@@ -136,6 +137,7 @@ const styles = {
     justifyContent: 'center',
   },
   signUpButton: {
+    all: 'revert',
     background: '#fff',
     color: SKY,
     fontWeight: 700,
@@ -162,6 +164,25 @@ const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_FO
 const PageImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_PAGE.svg';
 
 export default function DeepTutorWelcomePane({ onWelcomeSignIn, onWelcomeSignUp }) {
+  const [isSignInHovered, setIsSignInHovered] = useState(false);
+  const [isSignUpHovered, setIsSignUpHovered] = useState(false);
+
+  const handleSignInMouseEnter = () => setIsSignInHovered(true);
+  const handleSignInMouseLeave = () => setIsSignInHovered(false);
+
+  const handleSignUpMouseEnter = () => setIsSignUpHovered(true);
+  const handleSignUpMouseLeave = () => setIsSignUpHovered(false);
+
+  const signInButtonStyle = {
+    ...styles.signInButton,
+    background: isSignInHovered ? '#007BD5' : SKY,
+  };
+
+  const signUpButtonStyle = {
+    ...styles.signUpButton,
+    background: isSignUpHovered ? '#F8F6F7' : '#fff',
+  };
+
   return (
     <div style={styles.container}>
       {/* Background Images */}
@@ -182,10 +203,24 @@ export default function DeepTutorWelcomePane({ onWelcomeSignIn, onWelcomeSignUp 
           </div>
         </div>
         <div style={styles.buttonWrapper}>
-          <button style={styles.signInButton} onClick={onWelcomeSignIn}>Sign in</button>
+          <button
+            style={signInButtonStyle}
+            onMouseEnter={handleSignInMouseEnter}
+            onMouseLeave={handleSignInMouseLeave}
+            onClick={onWelcomeSignIn}
+          >
+            Sign in
+          </button>
         </div>
         <div style={styles.buttonWrapper}>
-          <button style={styles.signUpButton} onClick={onWelcomeSignUp}>Create a new account</button>
+          <button
+            style={signUpButtonStyle}
+            onMouseEnter={handleSignUpMouseEnter}
+            onMouseLeave={handleSignUpMouseLeave}
+            onClick={onWelcomeSignUp}
+          >
+            Create a new account
+          </button>
         </div>
       </div>
     </div>

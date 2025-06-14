@@ -383,6 +383,7 @@ const styles = {
         textAlign: 'left',
     },
     viewContextButton: {
+        all: 'revert',
         width: '100%',
         gap: '0.625rem',
         padding: '0.625rem 1.25rem',

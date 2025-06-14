@@ -1130,6 +1130,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								isLoading={this.state.isLoading}
 								error={this.state.error}
 								showSearch={this.state.showSearch}
+								onCreateNewSession={this.toggleModelSelectionPopup}
 							/>
 						}
 						{this.state.currentPane === 'noSession' &&

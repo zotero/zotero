@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const PEARL = '#F2F2F2';
 const SKY = '#0687E5';
@@ -94,6 +94,7 @@ const styles = {
     color: '#292929',
   },
   createSessionButton: {
+    all: 'revert',
     background: SKY,
     color: '#fff',
     fontWeight: 700,
@@ -122,9 +123,19 @@ const styles = {
 
 const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_FOLDER.svg';
 const PageImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_PAGE.svg';
-const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
+const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/NoSession/NOS_WHITE_PLUS.svg';
 
 export default function DeepTutorNoSessionPane({ onCreateNewSession }) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const buttonStyle = {
+    ...styles.createSessionButton,
+    background: isHovered ? '#007BD5' : SKY,
+  };
+
   return (
     <div style={styles.container}>
       {/* Background Images */}
@@ -145,7 +156,12 @@ export default function DeepTutorNoSessionPane({ onCreateNewSession }) {
           </div>
         </div>
         <div style={styles.buttonWrapper}>
-          <button style={styles.createSessionButton} onClick={onCreateNewSession}>
+          <button
+            style={buttonStyle}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={onCreateNewSession}
+          >
             Create a New Session
             <img src={PlusIconPath} alt="Plus" style={styles.plusIcon} />
           </button>
