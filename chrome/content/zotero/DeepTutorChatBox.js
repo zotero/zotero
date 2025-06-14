@@ -86,8 +86,7 @@ const styles = {
     },
     sessionNameDiv: {
         width: '100%',
-        padding: '0 0.5rem',
-        marginBottom: '0.75rem',
+        marginBottom: '1.25rem',
         color: '#000000',
         fontWeight: 500,
         fontSize: '1rem',
@@ -98,8 +97,8 @@ const styles = {
         width: '90%',
         fontSize: '1em',
         color: '#495057',
-        marginBottom: '4px',
-        paddingLeft: '4px',
+        marginBottom: '0.25rem',
+        paddingLeft: '0.25rem',
         fontFamily: 'Roboto, sans-serif',
         alignSelf: 'flex-start',
         marginLeft: '5%',
@@ -205,29 +204,34 @@ const styles = {
         overflowWrap: 'break-word',
     },
     userMessage: {
-        backgroundColor: '#0687E5',
-        color: 'white',
+        backgroundColor: 'white',
+        color: '#1C1B1F',
         marginLeft: 'auto',
         marginRight: 0,
         borderRadius: '0.625rem',
-        fontWeight: 500,
+        fontWeight: 400,
         textAlign: 'left',
         alignSelf: 'flex-end',
         maxWidth: '75%',
+        fontSize: '0.875rem',
+        lineHeight: '1.35',
+        padding: '0.625rem 1.25rem',
+        gap: '0.625rem',
+        minHeight: '2.4375rem',
     },
     botMessage: {
         backgroundColor: '#F2F2F2',
         color: '#000000',
         marginRight: 'auto',
         marginLeft: 0,
-        borderBottomLeftRadius: '4px',
-        borderRadius: '16px',
+        borderBottomLeftRadius: '0.25rem',
+        borderRadius: '1rem',
         fontWeight: 400,
         alignSelf: 'flex-start',
     },
     senderLabel: {
         fontWeight: 'bold',
-        marginBottom: '4px',
+        marginBottom: '0.25rem',
         display: 'block',
     },
     messageText: {
@@ -237,9 +241,9 @@ const styles = {
         wordBreak: 'break-word',
     },
     sourcesContainer: {
-        marginTop: '8px',
+        marginTop: '0.5rem',
         display: 'flex',
-        gap: '8px',
+        gap: '0.5rem',
         flexWrap: 'wrap',
         width: '100%',
         boxSizing: 'border-box',
@@ -250,25 +254,25 @@ const styles = {
         color: 'white',
         border: 'none',
         borderRadius: '50%',
-        width: '32px',
-        height: '32px',
+        width: '2rem',
+        height: '2rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontWeight: 600,
-        fontSize: '14px',
+        fontSize: '0.875rem',
         cursor: 'pointer',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+        boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
         padding: 0,
         transition: 'background 0.2s',
     },
     questionContainer: {
         all: 'revert',
         width: '100%',
-        margin: '8px 0',
+        margin: '0.5rem 0',
         display: 'flex',
         justifyContent: 'flex-start',
-        gap: '12px',
+        gap: '0.75rem',
         flexWrap: 'wrap',
         boxSizing: 'border-box',
     },
@@ -280,7 +284,7 @@ const styles = {
         borderRadius: '0.625rem',
         padding: '0.625rem 1.25rem',
         minWidth: '8rem',
-        maxWidth: '90%',
+        maxWidth: '85%',
         fontWeight: 500,
         fontSize: '1rem',
         lineHeight: '1.5',
@@ -294,9 +298,9 @@ const styles = {
         transition: 'background 0.2s',
         boxSizing: 'border-box',
         overflowWrap: 'break-word',
-        alignSelf: 'flex-start',
-        marginLeft: '0',
-        marginRight: 'auto',
+        alignSelf: 'flex-end',
+        marginLeft: 'auto',
+        marginRight: '0',
     },
     sessionTabBar: {
         height: '1.8125rem',
@@ -356,18 +360,18 @@ const styles = {
     },
     sessionPopup: {
         position: 'absolute',
-        top: '29px',
-        right: '8px',
+        top: '1.8125rem',
+        right: '0.5rem',
         background: '#FFFFFF',
-        border: '1px solid #E0E0E0',
-        borderRadius: '4px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        border: '0.0625rem solid #E0E0E0',
+        borderRadius: '0.25rem',
+        boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
         zIndex: 1000,
-        minWidth: '150px',
+        minWidth: '9.375rem',
     },
     sessionPopupItem: {
-        padding: '8px 12px',
-        fontSize: '13px',
+        padding: '0.5rem 0.75rem',
+        fontSize: '0.8125rem',
         color: '#292929',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -378,10 +382,30 @@ const styles = {
         width: '100%',
         textAlign: 'left',
     },
+    viewContextButton: {
+        width: '100%',
+        gap: '0.625rem',
+        padding: '0.625rem 1.25rem',
+        border: '0.0625rem solid #BDBDBD',
+        borderRadius: '0.625rem',
+        height: '3rem',
+        background: '#F8F6F7',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxSizing: 'border-box',
+    },
+    viewContextText: {
+        fontSize: '1rem',
+        fontWeight: 500,
+        color: '#757575',
+        lineHeight: '100%',
+    },
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
 const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
+const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
 
 const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [messages, setMessages] = useState([]);
@@ -1563,6 +1587,11 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             <div style={styles.sessionNameDiv}>
                 {currentSession?.sessionName || 'New Session'}
             </div>
+
+            <button style={styles.viewContextButton}>
+                <span style={styles.viewContextText}>View Context</span>
+                <img src={ArrowDownPath} alt="Arrow Down" />
+            </button>
 
             <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}

@@ -696,7 +696,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				if (!this.state.isLoadingSessions) {
 					await this.loadSession();
 				}
-				this.switchPane(this.getSessionHistoryPaneOrNoSession());
+				// this.switchPane(this.getSessionHistoryPaneOrNoSession());
 			} else {
 				// User signed out, clear data and show welcome
 				this.setState({
@@ -744,6 +744,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 	// Helper method to determine if sessions exist
 	getSessionHistoryPaneOrNoSession = () => {
+		Zotero.debug(`DeepTutor06130613: getSessionHistoryPaneOrNoSession: ${this.state.sessions.length}`);
 		return (this.state.sessions && this.state.sessions.length > 0) ? 'sessionHistory' : 'noSession';
 	};
 
@@ -940,8 +941,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			});
 
 			// If no sessions, switch to model selection pane
-			Zotero.debug(`DeepTutor: Switching to model selection pane: ${sessions}`);
-			Zotero.debug(`DeepTutor: Sessions length: ${sessions.length}`);
+			Zotero.debug(`DeepTutor061306130613: Switching to model selection pane: ${sessions}`);
+			Zotero.debug(`DeepTutor061306130613: Sessions length: ${sessions.length}`);
 			if (sessions.length === 0) {
 				this.switchPane('noSession');
 			} else {
