@@ -48,7 +48,9 @@ import {
 	useAuthState,
 	getCurrentUser,
 	refreshSession,
-	signOut
+	signOut,
+	initializeAuthState,
+	forceSignOut
 } from './auth/cognitoAuth.js';
 
 // Enums
@@ -590,7 +592,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this._loadingPromiseResolve();
 		Zotero.debug("DeepTutor: Component mounted");
 
-		// Initialize auth state
+		// First, initialize the auth state from storage
+		await initializeAuthState();
+
+		// Then initialize the component's auth state
 		await this.initializeAuthState();
 
 		// Add auth state listener
@@ -607,6 +612,25 @@ var DeepTutor = class DeepTutor extends React.Component {
 	async initializeAuthState() {
 		try {
 			Zotero.debug("DeepTutor: Initializing auth state");
+
+			// First, check if auth state has already been restored from storage
+			const authStateInstance = useAuthState();
+			if (authStateInstance.isAuthenticated && authStateInstance.user) {
+				Zotero.debug("DeepTutor: User already authenticated from restored state");
+				this.setState({
+					isAuthenticated: true,
+					currentUser: authStateInstance.user,
+					currentPane: this.getSessionHistoryPaneOrNoSession()
+				}, async () => {
+					// Fetch backend user data
+					await this.fetchUserData(authStateInstance.user);
+					// Load sessions once userData is available
+					if (!this.state.isLoadingSessions) {
+						await this.loadSession();
+					}
+				});
+				return;
+			}
 
 			// Try to get current user from stored session
 			const currentUserData = await getCurrentUser();
@@ -847,12 +871,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 			// Get user ID from Cognito user attributes.sub as providerUserId and call getUserByProviderUserId
 			Zotero.debug("DeepTutor: Calling getCurrentUser()...");
 			const currentUserData = await getCurrentUser();
-			
+
 			Zotero.debug(`DeepTutor: getCurrentUser() result: ${currentUserData ? 'found' : 'null'}`);
 			if (currentUserData && currentUserData.user) {
 				Zotero.debug(`DeepTutor: Current user data: ${JSON.stringify(currentUserData.user, null, 2)}`);
 			}
-			
+
 			if (!currentUserData || !currentUserData.user) {
 				throw new Error('No current user found');
 			}
@@ -882,14 +906,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 				currentUserData.user.getUserAttributes((err, attributes) => {
 					if (err) {
 						Zotero.debug(`DeepTutor: Error getting user attributes: ${err.message}`);
-						
+
 						// Handle rate limiting specifically
 						if (err.message && err.message.includes('Rate exceeded')) {
 							Zotero.debug("DeepTutor: Rate limit exceeded, will retry later");
 							reject(new Error('Rate limit exceeded - please wait a moment'));
 							return;
 						}
-						
+
 						reject(err);
 						return;
 					}
@@ -965,7 +989,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isLoading: false,
 					isLoadingSessions: false
 				});
-				
+
 				// Don't trigger auth state changes for rate limiting
 				return;
 			}
@@ -1046,23 +1070,39 @@ var DeepTutor = class DeepTutor extends React.Component {
 				return null;
 			}
 
-			// Get user attributes to retrieve the 'sub' attribute
-			const attributes = await new Promise((resolve, reject) => {
-				cognitoUser.getUserAttributes((err, attrs) => {
-					if (err) {
-						reject(err);
-						return;
-					}
-					resolve(attrs);
-				});
-			});
+			let providerUserId = null;
 
-			const subAttr = attributes.find(attr => attr.getName() === 'sub');
-			if (!subAttr) {
-				throw new Error('sub attribute not found on Cognito user');
+			// Check if this is a restored user with sub directly available
+			if (cognitoUser.sub) {
+				providerUserId = cognitoUser.sub;
+				Zotero.debug(`DeepTutor: fetchUserData - Using provider user ID from restored user: ${providerUserId}`);
 			}
-			const providerUserId = subAttr.getValue();
-			Zotero.debug(`DeepTutor: fetchUserData providerUserId: ${providerUserId}`);
+			// Check if this is a Google OAuth user (has attributes directly)
+			else if (cognitoUser.attributes && cognitoUser.attributes.sub) {
+				providerUserId = cognitoUser.attributes.sub;
+				Zotero.debug(`DeepTutor: fetchUserData - Using provider user ID from Google OAuth: ${providerUserId}`);
+			}
+			// For regular Cognito users, get user attributes
+			else if (cognitoUser.getUserAttributes && typeof cognitoUser.getUserAttributes === 'function') {
+				const attributes = await new Promise((resolve, reject) => {
+					cognitoUser.getUserAttributes((err, attrs) => {
+						if (err) {
+							reject(err);
+							return;
+						}
+						resolve(attrs);
+					});
+				});
+
+				const subAttr = attributes.find(attr => attr.getName() === 'sub');
+				if (!subAttr) {
+					throw new Error('sub attribute not found on Cognito user');
+				}
+				providerUserId = subAttr.getValue();
+				Zotero.debug(`DeepTutor: fetchUserData - Using provider user ID from regular Cognito: ${providerUserId}`);
+			} else {
+				throw new Error('Cannot extract provider user ID from user object');
+			}
 
 			const userData = await getUserByProviderUserId(providerUserId);
 			Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
@@ -1072,6 +1112,24 @@ var DeepTutor = class DeepTutor extends React.Component {
 			return userData;
 		} catch (error) {
 			Zotero.debug(`DeepTutor: fetchUserData error: ${error.message}`);
+
+			// If the error suggests authentication issues, clear the stored auth state
+			if (error.message && (
+				error.message.includes('Authentication required') ||
+				error.message.includes('Unauthorized') ||
+				error.message.includes('Invalid token') ||
+				error.message.includes('Token expired')
+			)) {
+				Zotero.debug('DeepTutor: Authentication error detected, clearing stored auth state');
+				await forceSignOut(); // This will clear the stored auth state
+				this.setState({
+					isAuthenticated: false,
+					currentUser: null,
+					currentPane: 'welcome',
+					authError: 'Session expired, please sign in again'
+				});
+			}
+
 			return null;
 		}
 	};
@@ -1178,7 +1236,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Upgrade Premium Popup */}
 				{this.state.showUpgradePopup && (
-					<div 
+					<div
 						style={{
 							position: 'absolute',
 							top: 0,
@@ -1193,7 +1251,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}
 						onClick={this.toggleUpgradePopup}
 					>
-						<div 
+						<div
 							style={{
 								position: 'relative',
 								width: '80%',
@@ -1259,7 +1317,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Subscription Confirm Popup */}
 				{this.state.showSubscriptionConfirmPopup && (
-					<div 
+					<div
 						style={{
 							position: 'absolute',
 							top: 0,
@@ -1274,7 +1332,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}
 						onClick={this.toggleSubscriptionConfirmPopup}
 					>
-						<div 
+						<div
 							style={{
 								position: 'relative',
 								width: '80%',
@@ -1341,7 +1399,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Manage Subscription Popup */}
 				{this.state.showManageSubscriptionPopup && (
-					<div 
+					<div
 						style={{
 							position: 'absolute',
 							top: 0,
@@ -1356,7 +1414,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}
 						onClick={this.toggleManageSubscriptionPopup}
 					>
-						<div 
+						<div
 							style={{
 								position: 'relative',
 								width: '80%',
@@ -1424,7 +1482,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Sign In Popup */}
 				{this.state.showSignInPopup && (
-					<div 
+					<div
 						style={{
 							position: 'absolute',
 							top: 0,
@@ -1440,7 +1498,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}
 						onClick={this.toggleSignInPopup}
 					>
-						<div 
+						<div
 							style={{
 								position: 'relative',
 								width: '80%',
@@ -1513,7 +1571,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Sign Up Popup */}
 				{this.state.showSignUpPopup && (
-					<div 
+					<div
 						style={{
 							position: 'absolute',
 							top: 0,
@@ -1529,7 +1587,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}
 						onClick={this.toggleSignUpPopup}
 					>
-						<div 
+						<div
 							style={{
 								position: 'relative',
 								width: '80%',
@@ -1596,7 +1654,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				{/* Model Selection Popup */}
 				{this.state.showModelSelectionPopup && (
-					<div 
+					<div
 						style={{
 							position: 'absolute',
 							top: 0,
@@ -1612,7 +1670,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}}
 						onClick={this.toggleModelSelectionPopup}
 					>
-						<div 
+						<div
 							style={{
 								position: 'relative',
 								width: '80%',

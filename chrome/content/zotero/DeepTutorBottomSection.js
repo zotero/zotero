@@ -192,9 +192,9 @@ class DeepTutorBottomSection extends React.Component {
             }
         } else if (this.props.currentUser) {
             // Cognito user object may expose username/email differently
-            displayName = (this.props.currentUser.username 
+            displayName = (this.props.currentUser.username
                 || (typeof this.props.currentUser.getUsername === 'function' && this.props.currentUser.getUsername())
-                || this.props.currentUser.email 
+                || this.props.currentUser.email
                 || displayName);
         }
 
@@ -206,13 +206,13 @@ class DeepTutorBottomSection extends React.Component {
                             <div style={styles.userEmail}>{displayName}</div>
                             <div style={styles.userStatus}>Logged in</div>
                         </div>
-                        <button 
+                        <button
                             style={styles.signOutButton}
                             onClick={this.props.onSignOut}
                         >
                             Sign out
                         </button>
-                        <button 
+                        <button
                             style={{...styles.componentButton, marginTop: '8px', background: '#6c757d', color: '#fff', borderColor: '#6c757d'}}
                             onClick={() => {
                                 this.props.onSwitchNoSession();
@@ -225,7 +225,7 @@ class DeepTutorBottomSection extends React.Component {
                 ) : (
                     <div style={styles.profileInfo}>
                         <div style={styles.userStatus}>Not logged in</div>
-                        <button 
+                        <button
                             style={{...styles.componentButton, marginTop: '8px'}}
                             onClick={this.props.onToggleSignInPopup}
                         >
@@ -243,13 +243,13 @@ class DeepTutorBottomSection extends React.Component {
                 <div style={styles.divider} />
                 <div style={styles.bottomLeft}>
                     <div style={styles.feedbackBox}>
-                        <button 
+                        <button
                             style={styles.textButton}
                             onClick={() => {
                                 Zotero.debug("DeepTutor: Feedback button clicked");
                                 const url = 'https://docs.google.com/forms/d/e/1FAIpQLSdOZgoMsM4Th2nAAMv8CvhA2TsqTqWq_psQpdfuadoiVsus6g/viewform';
                                 Zotero.debug(`DeepTutor: Attempting to open feedback URL: ${url}`);
-                                
+
                                 try {
                                     // Primary: Use Zotero's proper API for opening external URLs
                                     Zotero.debug("DeepTutor: Trying primary method - Zotero.launchURL");
@@ -257,7 +257,7 @@ class DeepTutorBottomSection extends React.Component {
                                     Zotero.debug("DeepTutor: Successfully called Zotero.launchURL");
                                 } catch (error) {
                                     Zotero.debug(`DeepTutor: Primary method failed - Zotero.launchURL: ${error.message}`);
-                                    
+
                                     // Fallback 1: Try Zotero.Utilities.Internal.launchURL
                                     try {
                                         if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
@@ -269,7 +269,7 @@ class DeepTutorBottomSection extends React.Component {
                                         }
                                     } catch (fallback1Error) {
                                         Zotero.debug(`DeepTutor: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
-                                        
+
                                         // Fallback 2: Try Zotero.HTTP.loadDocuments
                                         try {
                                             if (Zotero.HTTP && Zotero.HTTP.loadDocuments) {
@@ -281,7 +281,7 @@ class DeepTutorBottomSection extends React.Component {
                                             }
                                         } catch (fallback2Error) {
                                             Zotero.debug(`DeepTutor: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
-                                            
+
                                             // Fallback 3: Try XPCOM nsIExternalProtocolService
                                             try {
                                                 if (typeof Cc !== 'undefined' && typeof Ci !== 'undefined') {
@@ -298,7 +298,7 @@ class DeepTutorBottomSection extends React.Component {
                                                 }
                                             } catch (fallback3Error) {
                                                 Zotero.debug(`DeepTutor: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
-                                                
+
                                                 // Final fallback: Copy URL to clipboard
                                                 if (navigator.clipboard) {
                                                     Zotero.debug("DeepTutor: Trying final fallback - copy URL to clipboard");
@@ -397,4 +397,4 @@ DeepTutorBottomSection.defaultProps = {
     userData: null,
 };
 
-export default DeepTutorBottomSection; 
+export default DeepTutorBottomSection;
