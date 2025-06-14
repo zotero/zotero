@@ -147,7 +147,7 @@ export default function DeepTutorNoSessionPane({ onCreateNewSession }) {
           <div style={styles.mainText}>Begin Your DeepTutor Journey</div>
         </div>
         <div style={styles.subTextWrapper}>
-          <div style={styles.subText}>Create a session to chat with our AI tuto</div>
+          <div style={styles.subText}>Create a session to chat with our AI tutor</div>
         </div>
         <div style={styles.descTextWrapper}>
           <div style={styles.descText}>
