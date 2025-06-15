@@ -223,7 +223,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
               ...sessionButtonStyle,
               background: hoveredButton === session.id ? '#D9D9D9' : '#F2F2F2'
             }}
-            onClick={() => onSessionSelect && onSessionSelect(session.sessionName)}
+            onClick={() => onSessionSelect && onSessionSelect(session.id)}
             onMouseEnter={() => setHoveredButton(session.id)}
             onMouseLeave={() => setHoveredButton(null)}
           >

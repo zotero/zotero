@@ -1473,7 +1473,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
                     // Use the onSessionSelect prop to switch sessions
                     if (onSessionSelect) {
-                        onSessionSelect(session.sessionName);
+                        onSessionSelect(session.id);
                     }
                 }
             } catch (error) {
@@ -1513,7 +1513,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     try {
                         const session = await getSessionById(nextSessionId);
                         if (session && onSessionSelect) {
-                            onSessionSelect(session.sessionName);
+                            onSessionSelect(session.id);
                         }
                     } catch (error) {
                         Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);

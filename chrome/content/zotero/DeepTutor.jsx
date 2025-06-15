@@ -553,7 +553,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this.state = {
 			currentPane: 'welcome',
 			sessions: [],
-			sesNamToObj: new Map(),
+			sesIdToObj: new Map(),
 			isLoading: false,
 			error: null,
 			showProfilePopup: false,
@@ -725,7 +725,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				// User signed out, clear data and show welcome
 				this.setState({
 					sessions: [],
-					sesNamToObj: new Map(),
+					sesIdToObj: new Map(),
 					currentSession: null,
 					messages: [],
 					isLoadingSessions: false
@@ -951,15 +951,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 			const sessions = sessionsData.map(sessionData => new DeepTutorSession(sessionData));
 
 			// Update session name to object mapping
-			const sesNamToObj = new Map();
+			const sesIdToObj = new Map();
 			sessions.forEach(session => {
-				sesNamToObj.set(session.sessionName, session);
+				sesIdToObj.set(session.id, session);
 			});
 
 			// Update state with new sessions
 			this.setState({
 				sessions,
-				sesNamToObj,
+				sesIdToObj,
 				isLoading: false,
 				isLoadingSessions: false
 			});
@@ -1014,15 +1014,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	}
 
-	handleSessionSelect = async (sessionName) => {
+	handleSessionSelect = async (sessionId) => {
 		try {
-			const session = this.state.sesNamToObj.get(sessionName);
+			const session = this.state.sesIdToObj.get(sessionId);
 			if (!session) {
-				Zotero.debug(`DeepTutor: No session object found for: ${sessionName}`);
+				Zotero.debug(`DeepTutor: No session object found for: ${sessionId}`);
 				return;
 			}
 
-			Zotero.debug(`DeepTutor: Fetching messages for session: ${sessionName}`);
+			Zotero.debug(`DeepTutor: Fetching messages for session: ${sessionId}`);
 			try {
 				const messages = await getMessagesBySessionId(session.id);
 				Zotero.debug(`DeepTutor: Successfully fetched ${messages.length} messages`);
@@ -1200,18 +1200,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 									try {
 										const sessionData = await getSessionById(sessionId);
 										const session = new DeepTutorSession(sessionData);
-										const newSesNamToObj = new Map(this.state.sesNamToObj);
-										newSesNamToObj.set(session.sessionName, session);
+										const newsesIdToObj = new Map(this.state.sesIdToObj);
+										newsesIdToObj.set(session.id, session);
 
 										await this.setState({
 											currentSession: session,
 											messages: [],
 											documentIds: session.documentIds || [],
-											sesNamToObj: newSesNamToObj,
+											sesIdToObj: newsesIdToObj,
 											sessions: [...this.state.sessions, session]
 										});
 
-										await this.handleSessionSelect(session.sessionName);
+										await this.handleSessionSelect(session.id);
 										this.switchPane('main');
 										this.toggleModelSelectionPopup();
 									} catch (error) {
@@ -1736,18 +1736,18 @@ var DeepTutor = class DeepTutor extends React.Component {
 									try {
 										const sessionData = await getSessionById(sessionId);
 										const session = new DeepTutorSession(sessionData);
-										const newSesNamToObj = new Map(this.state.sesNamToObj);
-										newSesNamToObj.set(session.sessionName, session);
+										const newsesIdToObj = new Map(this.state.sesIdToObj);
+										newsesIdToObj.set(session.id, session);
 
 										await this.setState({
 											currentSession: session,
 											messages: [],
 											documentIds: session.documentIds || [],
-											sesNamToObj: newSesNamToObj,
+											sesIdToObj: newsesIdToObj,
 											sessions: [...this.state.sessions, session]
 										});
 
-										await this.handleSessionSelect(session.sessionName);
+										await this.handleSessionSelect(session.id);
 										this.switchPane('main');
 										this.toggleModelSelectionPopup();
 									} catch (error) {
