@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   getUserById, 
   getPreSignedUrl, 
@@ -46,7 +46,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflowY: 'auto',
-    overflowX: 'hidden',
     position: 'relative',
     boxSizing: 'border-box',
   },
@@ -98,17 +97,25 @@ const styles = {
     color: '#000000',
     marginBottom: '0.625rem',
   },
-  input: {
+  inputContainer: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    boxSizing: 'border-box',
+    padding: 0,
+    margin: 0,
+  },
+  input1: {
     width: '100%',
     height: '3rem',
     borderRadius: '0.625rem',
-    borderWidth: '0.0625rem',
-    padding: '0.75rem 0.9375rem',
+    padding: '0.375rem 0.5rem',
     border: `0.0625rem solid ${LIGHT_GREY2}`,
     background: PEARL,
     fontSize: '0.875rem',
     outline: 'none',
     boxSizing: 'border-box',
+    margin: 0,
   },
   searchArea: {
     width: '100%',
@@ -159,6 +166,7 @@ const styles = {
     verticalAlign: 'middle',
     color: '#888',
     marginBottom: '0.625rem',
+    boxSizing: 'border-box',
   },
   dragArea: {
     width: '100%',
@@ -189,10 +197,11 @@ const styles = {
     marginBottom: '1.25rem',
     justifyContent: 'space-between',
     gap: '0.25rem',
+    boxSizing: 'border-box',
   },
   modelTypeButton: {
     flex: '1 1 0',
-    height: '3rem',
+    minHeight: '3rem',
     borderRadius: '0.625rem',
     border: 'none',
     fontWeight: 400,
@@ -205,15 +214,14 @@ const styles = {
     color: '#757575',
     transition: 'background 0.2s, color 0.2s',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 0,
     width: '8.125rem',
     maxWidth: '10rem',
     minPadding: '0.75rem 0.9375rem',
-    minHeight: '3rem',
-    gap: '0.1rem',
+    gap: '0.5rem',
   },
   modelTypeButtonSelected: {
     background: '#D9D9D9',
@@ -331,6 +339,7 @@ const styles = {
     fontFamily: 'Roboto, sans-serif',
     minWidth: 0,
     minHeight: 0,
+    boxSizing: 'border-box',
   },
   fileListPopup: {
     position: 'absolute',
@@ -355,6 +364,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    boxSizing: 'border-box',
   },
   fileListRemove: {
     color: '#ff4444',
@@ -374,6 +384,7 @@ const styles = {
     flexDirection: 'column',
     gap: '0.625rem',
     marginBottom: '0.625rem',
+    boxSizing: 'border-box',
   },
   newFileListItem: {
     display: 'flex',
@@ -384,6 +395,7 @@ const styles = {
     border: '0.0625rem solid #D9D9D9',
     backgroundColor: '#FFFFFF',
     height: '2.75rem',
+    boxSizing: 'border-box',
   },
   newFileListName: {
     fontSize: '0.875rem',
@@ -411,6 +423,7 @@ const styles = {
     width: '100%',
     marginBottom: '0.3125rem',
     overflowY: 'auto',
+    boxSizing: 'border-box',
   },
 };
 
@@ -427,8 +440,44 @@ function ModelSelection({ onSubmit, user }) {
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [showFileList, setShowFileList] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [buttonWidth, setButtonWidth] = useState(null);
+  const [buttonLayout, setButtonLayout] = useState('row');
   const [isCreateHovered, setIsCreateHovered] = useState(false);
   const [hoveredSearchItem, setHoveredSearchItem] = useState(null);
+  const buttonRef = useRef(null);
+
+  // Use requestAnimationFrame to track button width
+  useEffect(() => {
+    let animationFrameId;
+
+    const checkWidth = () => {
+      if (buttonRef.current) {
+        const width = buttonRef.current.getBoundingClientRect().width;
+        if (width !== buttonWidth) {
+          setButtonWidth(width);
+          Zotero.debug(`ModelSelection: Button width: ${width}`);
+          setButtonLayout(width < 107 ? 'column' : 'row');
+        }
+      }
+      animationFrameId = requestAnimationFrame(checkWidth);
+    };
+
+    checkWidth();
+
+    // Cleanup
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [buttonWidth]);
+
+  // Function to get dynamic button styles based on layout
+  const getModelTypeButtonStyle = (isSelected) => {
+    return {
+      ...styles.modelTypeButton,
+      ...(isSelected ? styles.modelTypeButtonSelected : {}),
+      flexDirection: buttonLayout,
+    };
+  };
 
   // Add debug logging for fileList changes
   useEffect(() => {
@@ -441,7 +490,7 @@ function ModelSelection({ onSubmit, user }) {
     if (fileList.length > 0 && errorMessage) {
       setErrorMessage('');
     }
-  }, [fileList, errorMessage]);
+  }, [fileList, errorMessage]); 
 
   // Update model name based on first file in fileList
   useEffect(() => {
@@ -929,13 +978,16 @@ function ModelSelection({ onSubmit, user }) {
       <div style={styles.mainSection}>
         <div style={styles.nameSection}>
           <label style={styles.label}>Session Name</label>
-          <input
-            type="text"
-            value={modelName}
-            onChange={e => setModelName(e.target.value)}
-            style={styles.input}
-            placeholder={backupModelName}
-          />
+          <div style={styles.inputContainer}>
+            <input
+              type="text"
+              value={modelName}
+              onChange={e => setModelName(e.target.value)}
+              style={styles.input1}
+              placeholder={backupModelName}
+            />
+          </div>
+
         </div>
 
         <div style={styles.contextSection}>
@@ -1020,30 +1072,24 @@ function ModelSelection({ onSubmit, user }) {
           <label style={styles.label}>Select Your Model</label>
           <div style={styles.modelTypeRow}>
             <button
-              style={{
-                ...styles.modelTypeButton,
-                ...(selectedType === 'lite' ? styles.modelTypeButtonSelected : {})
-              }}
+              ref={buttonRef}
+              style={getModelTypeButtonStyle(selectedType === 'lite')}
               onClick={() => handleTypeSelection('lite')}
             >
               <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
               LITE
             </button>
             <button
-              style={{
-                ...styles.modelTypeButton,
-                ...(selectedType === 'normal' ? styles.modelTypeButtonSelected : {})
-              }}
+              ref={buttonRef}
+              style={getModelTypeButtonStyle(selectedType === 'normal')}
               onClick={() => handleTypeSelection('normal')}
             >
               <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
               STANDARD
             </button>
             <button
-              style={{
-                ...styles.modelTypeButton,
-                ...(selectedType === 'advanced' ? styles.modelTypeButtonSelected : {})
-              }}
+              ref={buttonRef}
+              style={getModelTypeButtonStyle(selectedType === 'advanced')}
               onClick={() => handleTypeSelection('advanced')}
             >
               <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
