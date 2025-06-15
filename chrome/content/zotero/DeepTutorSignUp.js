@@ -105,7 +105,7 @@ const styles = {
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
-    border: `2px solid ${PEARL}`,
+    border: `2px solid #BDBDBD`,
     padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',

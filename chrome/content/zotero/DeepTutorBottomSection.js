@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 
 const styles = {
     divider: {
-        width: '100%',
+        position: 'absolute',
+        left: 0,
+        right: 0,
         height: '0.0625rem',
         background: '#D9D9D9',
         marginBottom: '0.625rem',

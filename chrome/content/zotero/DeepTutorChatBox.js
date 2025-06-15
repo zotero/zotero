@@ -557,9 +557,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 
                 if (sessionMessages.length > 0) {
                     setLatestMessageId(sessionMessages[sessionMessages.length - 1].id);
+
                     
                     // Process and append each message
-                    for (const message of sessionMessages) {
+                    for (const [index, message] of sessionMessages.entries()) {
                         const sender = message.role === MessageRole.USER ? 'You' : 'DeepTutor';
                         await _appendMessage(sender, message);
                     }
@@ -571,13 +572,38 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     }));
                 } else {
                     // Show loading popup
-                    setIsLoading(true);
+                    setIsLoading(false);
                     let shouldSendInitialMessage = true;
                     setInitWait(true);
                     
+                    // Show loading message
+                    const loadingMessage = {
+                        id: null,
+                        parentMessageId: latestMessageId,
+                        userId: userId,
+                        sessionId: sessionId,
+                        subMessages: [{
+                            text: "Loading...Please wait for a few seconds",
+                            image: null,
+                            audio: null,
+                            contentType: ContentType.TEXT,
+                            creationTime: new Date().toISOString(),
+                            sources: []
+                        }],
+                        followUpQuestions: [],
+                        creationTime: new Date().toISOString(),
+                        lastUpdatedTime: new Date().toISOString(),
+                        status: MessageStatus.UNVIEW,
+                        role: MessageRole.TUTOR
+                    };
+                    await _appendMessage("DeepTutor", loadingMessage);
+
                     // Wait for 10 seconds
                     Zotero.debug(`DeepTutorChatBox: Waiting 8 seconds before sending initial message`);
                     await new Promise(resolve => setTimeout(resolve, 8000));
+                    
+                    // Clear messages
+                    setMessages([]);
                     
                     // Check if we should proceed with initial message
                     Zotero.debug(`DeepTutorChatBox: Checking if should send initial message: ${shouldSendInitialMessage}`);
@@ -591,11 +617,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 }
 
                 // Scroll to bottom after messages are loaded
+                
                 if (chatLogRef.current) {
                     setTimeout(() => {
                         chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
                     }, 100);
                 }
+                
             } catch (error) {
                 Zotero.debug(`DeepTutorChatBox: Error loading messages: ${error.message}`);
                 setIsLoading(false);
@@ -624,12 +652,14 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         type: SessionType.BASIC
     });
 
+    /*
     useEffect(() => {
         // Scroll to bottom when messages change
         if (chatLogRef.current) {
             chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
         }
     }, [messages]);
+    */
 
     const userSendMessage = async (messageString) => {
         if (!messageString.trim()) return;
@@ -664,6 +694,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             };
 
             // Add user message to state and append to chatbox
+            // if it is the first message, don't append it to the chatbox
             await _appendMessage("You", userMessage);
             setLatestMessageId(userMessage.id);
 
@@ -676,11 +707,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
 
             // Scroll to bottom after messages are added
+            /*
             if (chatLogRef.current) {
                 setTimeout(() => {
                     chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
                 }, 100);
             }
+            */
 
         } catch (error) {
             Zotero.debug(`DeepTutorChatBox: Error in userSendMessage: ${error.message}`);
@@ -704,8 +737,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     };
 
     const handleSend = async () => {
-        await userSendMessage(inputValue);
         setInputValue('');
+        await userSendMessage(inputValue);
     };
 
     const sendToAPI = async (message) => {
@@ -953,11 +986,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         }
 
         // Scroll to bottom after all messages are loaded
+        /*
         if (chatLogRef.current) {
             setTimeout(() => {
                 chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
             }, 100);
         }
+        */
     };
 
     const _updateSessionInfo = (newSessionId, newDocumentIds) => {
@@ -1015,7 +1050,6 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
             // Update messages state with only the new message
             setMessages(prev => [...prev, processedMessage]);
-            
             // Update conversation with only the new message
             setConversation(prev => ({
                 ...prev,
@@ -1023,11 +1057,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             }));
 
             // Scroll to bottom after message is added
+            /*
             if (chatLogRef.current) {
                 setTimeout(() => {
                     chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
                 }, 100);
             }
+            */
         }
     };
 
@@ -1173,6 +1209,11 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     };
 
     const renderMessage = (message, index) => {
+        // Return nothing if it's the first message and from user
+        if (index === 0 && message.role === MessageRole.USER) {
+            return null;
+        }
+        
         const isUser = message.role === MessageRole.USER;
         const messageStyle = {
             ...styles.messageContainer,
@@ -1614,7 +1655,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         }
                         // Shift+Enter allows new line (default behavior)
                     }}
-                    placeholder="Type your message... (Shift+Enter for new line)"
+                    placeholder="Type your message..."
                     rows={1}
                     disabled={isStreaming || iniWait}
                 />

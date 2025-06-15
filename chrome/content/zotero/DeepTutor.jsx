@@ -1256,7 +1256,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					>
 						<div
 							style={{
-								position: 'relative',
+								position: 'relative',										
 								width: '80%',
 								maxWidth: '26.875rem',
 								maxHeight: '80%',
