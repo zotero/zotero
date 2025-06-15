@@ -227,10 +227,10 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       const emptyMap = new Map();
       Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(Object.fromEntries(emptyMap)));
 
-      // Call the success callback after a short delay
+      // Wait a moment for auth state to be properly saved
       setTimeout(() => {
         onSignInSuccess();
-      }, 1000);
+      }, 500);
 
     } catch (error) {
       Zotero.debug(`DeepTutor SignIn: Sign in failed: ${error.message}`);
@@ -272,10 +272,10 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       const emptyMap = new Map();
       Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(Object.fromEntries(emptyMap)));
 
-      // Call the success callback after a short delay
+      // Wait a moment for auth state to be properly saved
       setTimeout(() => {
         onSignInSuccess();
-      }, 1000);
+      }, 500);
 
     } catch (error) {
       Zotero.debug(`DeepTutor SignIn: Google sign in failed: ${error.message}`);

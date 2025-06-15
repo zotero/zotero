@@ -154,6 +154,66 @@ class AuthState {
 		Zotero.Prefs.set('deeptutor.auth.refreshToken', this.refreshToken);
 		Zotero.Prefs.set('deeptutor.auth.isAuthenticated', true);
 
+		// Store complete user data for restoration
+		try {
+			let completeUserData;
+
+			if (user.attributes) {
+				// For Google OAuth users - already has attributes
+				completeUserData = {
+					username: user.username || user.attributes.email,
+					attributes: user.attributes,
+					isGoogleOAuth: true,
+					email: user.attributes.email,
+					name: user.attributes.name,
+					sub: user.attributes.sub
+				};
+			} else {
+				// For regular Cognito users - extract what we need
+				completeUserData = {
+					username: user.username,
+					attributes: {
+						email: user.username, // Cognito uses username as email
+						sub: user.username    // Will be updated if we can get real attributes
+					},
+					isGoogleOAuth: false,
+					email: user.username
+				};
+
+				// Try to get additional user attributes for regular Cognito users
+				if (user.getUserAttributes && typeof user.getUserAttributes === 'function') {
+					user.getUserAttributes((err, attributes) => {
+						if (!err && attributes) {
+							const attrs = {};
+							attributes.forEach(attr => {
+								attrs[attr.getName()] = attr.getValue();
+							});
+							completeUserData.attributes = attrs;
+							completeUserData.email = attrs.email || user.username;
+							completeUserData.name = attrs.name;
+							completeUserData.sub = attrs.sub;
+
+							// Update stored data with complete attributes
+							const userDataString = JSON.stringify(completeUserData);
+							Zotero.Prefs.set('deeptutor.auth.userData', userDataString);
+							Zotero.debug(`DeepTutor Auth: Updated user data with attributes: ${userDataString}`);
+						}
+					});
+				}
+			}
+
+			const userDataString = JSON.stringify(completeUserData);
+			Zotero.Prefs.set('deeptutor.auth.userData', userDataString);
+			Zotero.debug(`DeepTutor Auth: Saved complete user data to preferences: ${userDataString}`);
+		} catch (error) {
+			Zotero.debug(`DeepTutor Auth: Error saving user data: ${error.message}`);
+		}
+
+		// Verify data was saved
+		const savedIsAuth = Zotero.Prefs.get('deeptutor.auth.isAuthenticated');
+		const savedUserData = Zotero.Prefs.get('deeptutor.auth.userData');
+		Zotero.debug(`DeepTutor Auth: Verification - isAuthenticated: ${savedIsAuth}, userData: ${savedUserData}`);
+
 		this.notifyListeners();
 	}
 
@@ -170,6 +230,7 @@ class AuthState {
 		Zotero.Prefs.clear('deeptutor.auth.idToken');
 		Zotero.Prefs.clear('deeptutor.auth.refreshToken');
 		Zotero.Prefs.clear('deeptutor.auth.isAuthenticated');
+		Zotero.Prefs.clear('deeptutor.auth.userData');
 
 		this.notifyListeners();
 	}
@@ -177,23 +238,56 @@ class AuthState {
 	// Restore auth state from stored preferences
 	async restoreFromStorage() {
 		const isAuthenticated = Zotero.Prefs.get('deeptutor.auth.isAuthenticated');
+		Zotero.debug(`DeepTutor Auth: Checking stored authentication state - isAuthenticated: ${isAuthenticated}`);
+
 		if (isAuthenticated) {
+			Zotero.debug('DeepTutor Auth: Restoring authentication state from storage');
+
 			this.isAuthenticated = true;
 			this.accessToken = Zotero.Prefs.get('deeptutor.auth.accessToken');
 			this.idToken = Zotero.Prefs.get('deeptutor.auth.idToken');
 			this.refreshToken = Zotero.Prefs.get('deeptutor.auth.refreshToken');
 
-			// Try to get current user
+			Zotero.debug(`DeepTutor Auth: Restored tokens - accessToken: ${this.accessToken ? 'present' : 'missing'}, idToken: ${this.idToken ? 'present' : 'missing'}, refreshToken: ${this.refreshToken ? 'present' : 'missing'}`);
+
+			// Restore user data directly from storage
 			try {
-				await loadCognitoLibrary();
-				const pool = initializeUserPool();
-				const currentUser = pool.getCurrentUser();
-				if (currentUser) {
-					this.user = currentUser;
+				const userDataStr = Zotero.Prefs.get('deeptutor.auth.userData');
+				Zotero.debug(`DeepTutor Auth: Raw user data from preferences: ${userDataStr}`);
+
+				if (userDataStr) {
+					const storedUserData = JSON.parse(userDataStr);
+					Zotero.debug(`DeepTutor Auth: Parsed user data: ${JSON.stringify(storedUserData)}`);
+
+					// Create a user object that can be used directly without Cognito methods
+					this.user = {
+						username: storedUserData.username,
+						attributes: storedUserData.attributes,
+						email: storedUserData.email,
+						name: storedUserData.name,
+						sub: storedUserData.sub,
+						isGoogleOAuth: storedUserData.isGoogleOAuth
+					};
+
+					Zotero.debug(`DeepTutor Auth: Restored user from storage: ${storedUserData.isGoogleOAuth ? 'Google OAuth' : 'Regular Cognito'} user`);
+				} else {
+					Zotero.debug('DeepTutor Auth: No user data found in preferences');
+					// If no user data, clear authentication state
+					this.setUnauthenticated();
+					return;
 				}
 			} catch (error) {
-				Zotero.debug(`DeepTutor Auth: Error restoring user from storage: ${error.message}`);
+				Zotero.debug(`DeepTutor Auth: Error restoring user data from storage: ${error.message}`);
+				// If we can't parse user data, clear authentication state
+				this.setUnauthenticated();
+				return;
 			}
+
+			// Notify listeners that auth state has been restored
+			this.notifyListeners();
+			Zotero.debug('DeepTutor Auth: Authentication state restored successfully');
+		} else {
+			Zotero.debug('DeepTutor Auth: No authentication state found in storage');
 		}
 	}
 
@@ -221,14 +315,26 @@ class AuthState {
 // Global auth state instance
 const authState = new AuthState();
 
-// Initialize auth state from storage on module load (async)
-(async () => {
+// Initialize auth state function - to be called when needed
+async function initializeAuthState() {
 	try {
+		Zotero.debug('DeepTutor Auth: Initializing auth state...');
 		await authState.restoreFromStorage();
+		Zotero.debug('DeepTutor Auth: Auth state initialization complete');
 	} catch (error) {
-		Zotero.debug(`DeepTutor Auth: Error during initial auth state restoration: ${error.message}`);
+		Zotero.debug(`DeepTutor Auth: Error during auth state initialization: ${error.message}`);
 	}
-})();
+}
+
+// Export the initialization function
+export { initializeAuthState };
+
+// Force clear authentication state - used when API calls fail due to auth issues
+export const forceSignOut = async () => {
+	Zotero.debug('DeepTutor Auth: Force clearing authentication state');
+	authState.setUnauthenticated();
+	return Promise.resolve();
+};
 
 // Sign up function
 export const signUp = async (email, password, name) => {
