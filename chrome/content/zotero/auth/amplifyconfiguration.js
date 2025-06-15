@@ -29,4 +29,4 @@ export default {
     "passwordPolicyCharacters": []
   },
   "aws_cognito_verification_mechanisms": ["EMAIL"]
-}; 
+};

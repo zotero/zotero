@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const styles = {
@@ -129,9 +129,6 @@ const styles = {
         textAlign: 'left',
         marginBottom: '0.25rem',
         transition: 'all 0.2s ease',
-        '&:hover': {
-            background: '#f0f9ff',
-        },
     },
     componentButtonActive: {
         background: '#0687E5',
@@ -171,6 +168,21 @@ const styles = {
 };
 
 class DeepTutorBottomSection extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isUpgradeHovered: false,
+        };
+    }
+
+    handleUpgradeMouseEnter = () => {
+        this.setState({ isUpgradeHovered: true });
+    };
+
+    handleUpgradeMouseLeave = () => {
+        this.setState({ isUpgradeHovered: false });
+    };
+
     getComponentButtonStyle(isActive) {
         return {
             ...styles.componentButton,
@@ -240,6 +252,12 @@ class DeepTutorBottomSection extends React.Component {
     }
 
     renderMain() {
+        const { isUpgradeHovered } = this.state;
+        const upgradeButtonDynamicStyle = {
+            ...styles.upgradeButton,
+            background: isUpgradeHovered ? '#007BD5' : '#0687E5',
+        };
+
         return (
             <div style={styles.contentWrapper}>
                 <div style={styles.divider} />
@@ -338,7 +356,14 @@ class DeepTutorBottomSection extends React.Component {
                             </button>
                             {this.renderProfilePopup()}
                         </div>
-                        <button style={styles.upgradeButton} onClick={this.props.onToggleUpgradePopup}>Upgrade</button>
+                        <button
+                            style={upgradeButtonDynamicStyle}
+                            onClick={this.props.onToggleUpgradePopup}
+                            onMouseEnter={this.handleUpgradeMouseEnter}
+                            onMouseLeave={this.handleUpgradeMouseLeave}
+                        >
+                            Upgrade
+                        </button>
                     </div>
                 </div>
             </div>
