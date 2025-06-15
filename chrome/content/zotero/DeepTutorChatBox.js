@@ -84,12 +84,21 @@ const styles = {
         padding: '1.875rem 1.25rem 0 1.25rem',
         boxSizing: 'border-box',
     },
+    sessionNameDiv: {
+        width: '100%',
+        marginBottom: '1.25rem',
+        color: '#000000',
+        fontWeight: 500,
+        fontSize: '1rem',
+        lineHeight: '100%',
+        fontFamily: 'Roboto, sans-serif',
+    },
     sessionInfo: {
         width: '90%',
         fontSize: '1em',
         color: '#495057',
-        marginBottom: '4px',
-        paddingLeft: '4px',
+        marginBottom: '0.25rem',
+        paddingLeft: '0.25rem',
         fontFamily: 'Roboto, sans-serif',
         alignSelf: 'flex-start',
         marginLeft: '5%',
@@ -195,29 +204,34 @@ const styles = {
         overflowWrap: 'break-word',
     },
     userMessage: {
-        backgroundColor: '#0687E5',
-        color: 'white',
+        backgroundColor: 'white',
+        color: '#1C1B1F',
         marginLeft: 'auto',
         marginRight: 0,
         borderRadius: '0.625rem',
-        fontWeight: 500,
+        fontWeight: 400,
         textAlign: 'left',
         alignSelf: 'flex-end',
         maxWidth: '75%',
+        fontSize: '0.875rem',
+        lineHeight: '1.35',
+        padding: '0.625rem 1.25rem',
+        gap: '0.625rem',
+        minHeight: '2.4375rem',
     },
     botMessage: {
         backgroundColor: '#F2F2F2',
         color: '#000000',
         marginRight: 'auto',
         marginLeft: 0,
-        borderBottomLeftRadius: '4px',
-        borderRadius: '16px',
+        borderBottomLeftRadius: '0.25rem',
+        borderRadius: '1rem',
         fontWeight: 400,
         alignSelf: 'flex-start',
     },
     senderLabel: {
         fontWeight: 'bold',
-        marginBottom: '4px',
+        marginBottom: '0.25rem',
         display: 'block',
     },
     messageText: {
@@ -227,9 +241,9 @@ const styles = {
         wordBreak: 'break-word',
     },
     sourcesContainer: {
-        marginTop: '8px',
+        marginTop: '0.5rem',
         display: 'flex',
-        gap: '8px',
+        gap: '0.5rem',
         flexWrap: 'wrap',
         width: '100%',
         boxSizing: 'border-box',
@@ -240,25 +254,25 @@ const styles = {
         color: 'white',
         border: 'none',
         borderRadius: '50%',
-        width: '32px',
-        height: '32px',
+        width: '2rem',
+        height: '2rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontWeight: 600,
-        fontSize: '14px',
+        fontSize: '0.875rem',
         cursor: 'pointer',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+        boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
         padding: 0,
         transition: 'background 0.2s',
     },
     questionContainer: {
         all: 'revert',
         width: '100%',
-        margin: '8px 0',
+        margin: '0.5rem 0',
         display: 'flex',
         justifyContent: 'flex-start',
-        gap: '12px',
+        gap: '0.75rem',
         flexWrap: 'wrap',
         boxSizing: 'border-box',
     },
@@ -270,7 +284,7 @@ const styles = {
         borderRadius: '0.625rem',
         padding: '0.625rem 1.25rem',
         minWidth: '8rem',
-        maxWidth: '90%',
+        maxWidth: '85%',
         fontWeight: 500,
         fontSize: '1rem',
         lineHeight: '1.5',
@@ -284,9 +298,9 @@ const styles = {
         transition: 'background 0.2s',
         boxSizing: 'border-box',
         overflowWrap: 'break-word',
-        alignSelf: 'flex-start',
-        marginLeft: '0',
-        marginRight: 'auto',
+        alignSelf: 'flex-end',
+        marginLeft: 'auto',
+        marginRight: '0',
     },
     sessionTabBar: {
         height: '1.8125rem',
@@ -346,18 +360,18 @@ const styles = {
     },
     sessionPopup: {
         position: 'absolute',
-        top: '29px',
-        right: '8px',
+        top: '1.8125rem',
+        right: '0.5rem',
         background: '#FFFFFF',
-        border: '1px solid #E0E0E0',
-        borderRadius: '4px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        border: '0.0625rem solid #E0E0E0',
+        borderRadius: '0.25rem',
+        boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
         zIndex: 1000,
-        minWidth: '150px',
+        minWidth: '9.375rem',
     },
     sessionPopupItem: {
-        padding: '8px 12px',
-        fontSize: '13px',
+        padding: '0.5rem 0.75rem',
+        fontSize: '0.8125rem',
         color: '#292929',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -368,10 +382,31 @@ const styles = {
         width: '100%',
         textAlign: 'left',
     },
+    viewContextButton: {
+        all: 'revert',
+        width: '100%',
+        gap: '0.625rem',
+        padding: '0.625rem 1.25rem',
+        border: '0.0625rem solid #BDBDBD',
+        borderRadius: '0.625rem',
+        height: '3rem',
+        background: '#F8F6F7',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxSizing: 'border-box',
+    },
+    viewContextText: {
+        fontSize: '1rem',
+        fontWeight: 500,
+        color: '#757575',
+        lineHeight: '100%',
+    },
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
 const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
+const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
 
 const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [messages, setMessages] = useState([]);
@@ -388,6 +423,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const chatLogRef = useRef(null);
     const [hoveredQuestion, setHoveredQuestion] = useState(null);
     const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
+    const [iniWait, setInitWait] = useState(false);
+    const [isStreaming, setIsStreaming] = useState(false);
 
     // Load recent sessions from preferences on component mount
     useEffect(() => {
@@ -520,9 +557,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 
                 if (sessionMessages.length > 0) {
                     setLatestMessageId(sessionMessages[sessionMessages.length - 1].id);
+
                     
                     // Process and append each message
-                    for (const message of sessionMessages) {
+                    for (const [index, message] of sessionMessages.entries()) {
                         const sender = message.role === MessageRole.USER ? 'You' : 'DeepTutor';
                         await _appendMessage(sender, message);
                     }
@@ -534,12 +572,38 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     }));
                 } else {
                     // Show loading popup
-                    setIsLoading(true);
+                    setIsLoading(false);
                     let shouldSendInitialMessage = true;
+                    setInitWait(true);
                     
+                    // Show loading message
+                    const loadingMessage = {
+                        id: null,
+                        parentMessageId: latestMessageId,
+                        userId: userId,
+                        sessionId: sessionId,
+                        subMessages: [{
+                            text: "Loading...Please wait for a few seconds",
+                            image: null,
+                            audio: null,
+                            contentType: ContentType.TEXT,
+                            creationTime: new Date().toISOString(),
+                            sources: []
+                        }],
+                        followUpQuestions: [],
+                        creationTime: new Date().toISOString(),
+                        lastUpdatedTime: new Date().toISOString(),
+                        status: MessageStatus.UNVIEW,
+                        role: MessageRole.TUTOR
+                    };
+                    await _appendMessage("DeepTutor", loadingMessage);
+
                     // Wait for 10 seconds
                     Zotero.debug(`DeepTutorChatBox: Waiting 8 seconds before sending initial message`);
                     await new Promise(resolve => setTimeout(resolve, 8000));
+                    
+                    // Clear messages
+                    setMessages([]);
                     
                     // Check if we should proceed with initial message
                     Zotero.debug(`DeepTutorChatBox: Checking if should send initial message: ${shouldSendInitialMessage}`);
@@ -549,14 +613,17 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         Zotero.debug(`DeepTutorChatBox: Sending initial message`);
                         await userSendMessage("Can you give me a summary of this document?");
                     }
+                    setInitWait(false);
                 }
 
                 // Scroll to bottom after messages are loaded
+                
                 if (chatLogRef.current) {
                     setTimeout(() => {
                         chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
                     }, 100);
                 }
+                
             } catch (error) {
                 Zotero.debug(`DeepTutorChatBox: Error loading messages: ${error.message}`);
                 setIsLoading(false);
@@ -585,12 +652,14 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         type: SessionType.BASIC
     });
 
+    /*
     useEffect(() => {
         // Scroll to bottom when messages change
         if (chatLogRef.current) {
             chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
         }
     }, [messages]);
+    */
 
     const userSendMessage = async (messageString) => {
         if (!messageString.trim()) return;
@@ -625,6 +694,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             };
 
             // Add user message to state and append to chatbox
+            // if it is the first message, don't append it to the chatbox
             await _appendMessage("You", userMessage);
             setLatestMessageId(userMessage.id);
 
@@ -637,11 +707,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
 
             // Scroll to bottom after messages are added
+            /*
             if (chatLogRef.current) {
                 setTimeout(() => {
                     chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
                 }, 100);
             }
+            */
 
         } catch (error) {
             Zotero.debug(`DeepTutorChatBox: Error in userSendMessage: ${error.message}`);
@@ -665,12 +737,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     };
 
     const handleSend = async () => {
-        await userSendMessage(inputValue);
         setInputValue('');
+        await userSendMessage(inputValue);
     };
 
     const sendToAPI = async (message) => {
         try {
+            setIsStreaming(true); // Set streaming to true at start
             // Send message to API
             const responseData = await createMessage(message)
             Zotero.debug(`DeepTutorChatBox: Create Message Response from API: ${JSON.stringify(responseData)}`);
@@ -706,10 +779,12 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             Zotero.debug(`DeepTutorChatBox: Stream Response from API: ${JSON.stringify(streamResponse)}`);
 
             if (!streamResponse.ok) {
+                setIsStreaming(false); // Set streaming to false on error
                 throw new Error(`Stream request failed: ${streamResponse.status}`);
             }
             
             if (!streamResponse.body) {
+                setIsStreaming(false); // Set streaming to false if no body
                 throw new Error('Stream response body is null');
             }
 
@@ -747,11 +822,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 
                 // Check for timeout
                 if (Date.now() - lastDataTime > 30000) {
+                    setIsStreaming(false); // Set streaming to false on timeout
                     throw new Error('Stream timeout - no data received for 30 seconds');
                 }
                 
                 if (done) {
                     if (!hasReceivedData) {
+                        setIsStreaming(false); // Set streaming to false if no data received
                         throw new Error('Stream closed without receiving any data');
                     }
                     break;
@@ -820,9 +897,11 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             
             // Get only the last message from the response
             const lastMessage = historyData.length > 0 ? historyData[historyData.length - 2] : null;
+            setIsStreaming(false); // Set streaming to false when done
             return lastMessage;
 
         } catch (error) {
+            setIsStreaming(false); // Set streaming to false on any error
             Zotero.debug(`DeepTutorChatBox: Error in sendToAPI: ${error.message}`);
             throw error;
         }
@@ -907,11 +986,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         }
 
         // Scroll to bottom after all messages are loaded
+        /*
         if (chatLogRef.current) {
             setTimeout(() => {
                 chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
             }, 100);
         }
+        */
     };
 
     const _updateSessionInfo = (newSessionId, newDocumentIds) => {
@@ -969,7 +1050,6 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
             // Update messages state with only the new message
             setMessages(prev => [...prev, processedMessage]);
-            
             // Update conversation with only the new message
             setConversation(prev => ({
                 ...prev,
@@ -977,11 +1057,13 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             }));
 
             // Scroll to bottom after message is added
+            /*
             if (chatLogRef.current) {
                 setTimeout(() => {
                     chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
                 }, 100);
             }
+            */
         }
     };
 
@@ -1127,6 +1209,11 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     };
 
     const renderMessage = (message, index) => {
+        // Return nothing if it's the first message and from user
+        if (index === 0 && message.role === MessageRole.USER) {
+            return null;
+        }
+        
         const isUser = message.role === MessageRole.USER;
         const messageStyle = {
             ...styles.messageContainer,
@@ -1427,7 +1514,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
                     // Use the onSessionSelect prop to switch sessions
                     if (onSessionSelect) {
-                        onSessionSelect(session.sessionName);
+                        onSessionSelect(session.id);
                     }
                 }
             } catch (error) {
@@ -1467,7 +1554,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     try {
                         const session = await getSessionById(nextSessionId);
                         if (session && onSessionSelect) {
-                            onSessionSelect(session.sessionName);
+                            onSessionSelect(session.id);
                         }
                     } catch (error) {
                         Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
@@ -1539,28 +1626,47 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         <div style={styles.container}>
             {isLoading && <LoadingPopup />}
             
+            <div style={styles.sessionNameDiv}>
+                {currentSession?.sessionName || 'New Session'}
+            </div>
+
+            <button style={styles.viewContextButton}>
+                <span style={styles.viewContextText}>View Context</span>
+                <img src={ArrowDownPath} alt="Arrow Down" />
+            </button>
+
             <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
             </div>
 
             <div style={styles.bottomBar}>
                 <textarea
-                    style={styles.textInput}
+                    style={{
+                        ...styles.textInput,
+                        opacity: isStreaming || iniWait ? 0.5 : 1,
+                        cursor: isStreaming || iniWait ? 'not-allowed' : 'text'
+                    }}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        if (e.key === 'Enter' && !e.shiftKey && !isStreaming && !iniWait) {
                             e.preventDefault(); // Prevent adding a new line
                             handleSend();
                         }
                         // Shift+Enter allows new line (default behavior)
                     }}
-                    placeholder="Type your message... (Shift+Enter for new line)"
+                    placeholder="Type your message..."
                     rows={1}
+                    disabled={isStreaming || iniWait}
                 />
                 <button
-                    style={styles.sendButton}
+                    style={{
+                        ...styles.sendButton,
+                        opacity: isStreaming || iniWait ? 0.5 : 1,
+                        cursor: isStreaming || iniWait ? 'not-allowed' : 'pointer'
+                    }}
                     onClick={handleSend}
+                    disabled={isStreaming || iniWait}
                 >
                     <img 
                         src={SendIconPath}

@@ -66,6 +66,7 @@ const styles = {
     marginBottom: '1.25rem',
   },
   signInButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.4375rem',
     borderRadius: '0.625rem',
@@ -109,10 +110,11 @@ const styles = {
     marginTop: '1.875rem',
   },
   googleButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
-    border: `1px solid ${PEARL}`,
+    border: `2px solid ${PEARL}`,
     padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',
@@ -182,10 +184,29 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [isSignInHovered, setIsSignInHovered] = useState(false);
+  const [isGoogleHovered, setIsGoogleHovered] = useState(false);
+
+  const handleSignInMouseEnter = () => setIsSignInHovered(true);
+  const handleSignInMouseLeave = () => setIsSignInHovered(false);
+
+  const handleGoogleMouseEnter = () => setIsGoogleHovered(true);
+  const handleGoogleMouseLeave = () => setIsGoogleHovered(false);
+
+  const signInButtonDynamicStyle = {
+    ...styles.signInButton,
+    background: isSignInHovered ? '#007BD5' : SKY,
+    ...(isLoading ? styles.signInButtonDisabled : {})
+  };
+
+  const googleButtonDynamicStyle = {
+    ...styles.googleButton,
+    background: isGoogleHovered ? '#F8F6F7' : '#fff',
+  };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       setError('Please enter email and password');
       return;
@@ -198,25 +219,25 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
     try {
       Zotero.debug('DeepTutor SignIn: Attempting to sign in with Cognito');
       const result = await signIn(email, password);
-      
+
       Zotero.debug('DeepTutor SignIn: Sign in successful');
       setMessage('Login successful!');
 
       // Initialize empty Map for recent sessions
       const emptyMap = new Map();
       Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(Object.fromEntries(emptyMap)));
-      
-      // Call the success callback after a short delay
+
+      // Wait a moment for auth state to be properly saved
       setTimeout(() => {
         onSignInSuccess();
-      }, 1000);
-      
+      }, 500);
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignIn: Sign in failed: ${error.message}`);
-      
+
       // Handle specific Cognito errors
       let errorMessage = 'Login failed, please try again';
-      
+
       if (error.code === 'NotAuthorizedException') {
         errorMessage = 'Incorrect email or password';
       } else if (error.code === 'UserNotConfirmedException') {
@@ -228,7 +249,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -240,11 +261,22 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       setIsLoading(true);
       setError('');
       setMessage('');
-      
+
       Zotero.debug('DeepTutor SignIn: Attempting Google sign in');
-      await signInWithGoogle();
-      setMessage('Redirecting to Google login...');
-      
+      const result = await signInWithGoogle();
+
+      Zotero.debug('DeepTutor SignIn: Google sign in successful');
+      setMessage('Google login successful!');
+
+      // Initialize empty Map for recent sessions
+      const emptyMap = new Map();
+      Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(Object.fromEntries(emptyMap)));
+
+      // Wait a moment for auth state to be properly saved
+      setTimeout(() => {
+        onSignInSuccess();
+      }, 500);
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignIn: Google sign in failed: ${error.message}`);
       setError('Google login failed, please try again');
@@ -263,11 +295,11 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       setIsLoading(true);
       setError('');
       setMessage('');
-      
+
       Zotero.debug('DeepTutor SignIn: Sending forgot password email');
       await forgotPassword(email);
       setMessage('Password reset email sent, please check your email');
-      
+
     } catch (error) {
       Zotero.debug(`DeepTutor SignIn: Forgot password failed: ${error.message}`);
       setError('Failed to send reset email, please try again');
@@ -302,29 +334,28 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
               disabled={isLoading}
             />
           </div>
-          <button 
-            style={styles.forgot} 
-            type="button" 
+          <button
+            style={styles.forgot}
+            type="button"
             onClick={handleForgotPassword}
             disabled={isLoading}
           >
             Forgot Your Password?
           </button>
-          <button 
-            style={{
-              ...styles.signInButton,
-              ...(isLoading ? styles.signInButtonDisabled : {})
-            }}
+          <button
+            style={signInButtonDynamicStyle}
             type="submit"
             disabled={isLoading}
+            onMouseEnter={handleSignInMouseEnter}
+            onMouseLeave={handleSignInMouseLeave}
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
-          
+
           {error && <div style={styles.errorMessage}>{error}</div>}
           {message && <div style={styles.successMessage}>{message}</div>}
         </div>
-        
+
         <div style={styles.dividerContainer}>
           <hr style={styles.divider} />
           <span style={styles.orText}>or</span>
@@ -332,11 +363,13 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
         </div>
 
         <div style={styles.googleContainer}>
-          <button 
-            style={styles.googleButton} 
+          <button
+            style={googleButtonDynamicStyle}
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
+            onMouseEnter={handleGoogleMouseEnter}
+            onMouseLeave={handleGoogleMouseLeave}
           >
             <img src={GoogleImg} alt="Google" style={styles.googleIcon} />
             Sign in with Google
@@ -345,9 +378,9 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
 
         <div style={styles.bottomContainer}>
           <span style={styles.bottomText}>Don't have an account?</span>
-          <button 
-            style={styles.signUpLink} 
-            type="button" 
+          <button
+            style={styles.signUpLink}
+            type="button"
             onClick={onSignInSignUp}
             disabled={isLoading}
           >
@@ -357,4 +390,4 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
       </form>
     </div>
   );
-} 
+}
