@@ -131,3 +131,32 @@ zoterosearch .menulist-icon {
         display: inline-block !important;
     }
 }
+
+/* DeepTutor pane collapsed state styles */
+#new-deep-tutor-pane-container[collapsed="true"] {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    flex: 0 0 0 !important;
+    transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
+}
+
+#new-deep-tutor-pane-container[collapsed="true"] * {
+    visibility: hidden !important;
+}
+
+/* DeepTutor pane open state styles */
+#new-deep-tutor-pane-container:not([collapsed="true"]) {
+    transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
+}
+
+/* Ensure context pane can resize properly when DeepTutor is collapsed */
+#zotero-context-pane {
+    flex-shrink: 1 !important;
+}
+
+#new-deep-tutor-pane-container[collapsed="true"] + #zotero-context-splitter + #zotero-context-pane {
+    flex-grow: 1 !important;
+}

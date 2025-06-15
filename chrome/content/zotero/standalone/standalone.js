@@ -478,10 +478,12 @@ const ZoteroStandalone = new function() {
 		var contextSplitter = document.getElementById('zotero-context-splitter');
 		Zotero.debug('Standalone: DeepTutor pane toggle triggered');
 		
+		// Check current state using both hidden and collapsed for compatibility
+		var isCollapsed = deepTutorPane.hidden || deepTutorPane.getAttribute('collapsed') === 'true';
+		
 		// Show DeepTutor pane
-		if (deepTutorPane.hidden) {
+		if (isCollapsed) {
 			// Stagger the hiding of other panes for smoother transition
-
 			if (!itemPane.getAttribute('collapsed')) {
 				itemsSplitter.setAttribute('state', 'collapsed');
 				itemPane.setAttribute('collapsed', true);
@@ -493,14 +495,18 @@ const ZoteroStandalone = new function() {
 
 			Zotero.debug('Standalone: Opening DeepTutor pane');
 			
-			// Start DeepTutor show animation
+			// Use collapsed attribute for proper CSS handling, keep hidden=false for React compatibility
 			deepTutorPane.hidden = false;
+			deepTutorPane.removeAttribute('collapsed');
 			deeptutorSplitter.setAttribute('state', 'open');
 		}	
 		// Hide DeepTutor pane
 		else {
 			Zotero.debug('Standalone: Closing DeepTutor pane');
+			
+			// Use both hidden and collapsed for maximum compatibility
 			deepTutorPane.hidden = true;
+			deepTutorPane.setAttribute('collapsed', 'true');
 			deeptutorSplitter.setAttribute('state', 'collapsed');
 		}
 		ZoteroPane.updateLayoutConstraints();

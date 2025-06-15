@@ -55,6 +55,7 @@ const styles = {
     width: '100%',
     maxHeight: '53rem',
     overflowY: 'auto',
+    overflowX: 'hidden',
     boxSizing: 'border-box',
   },
   section: {
