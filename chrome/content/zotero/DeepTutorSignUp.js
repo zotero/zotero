@@ -57,6 +57,7 @@ const styles = {
     boxSizing: 'border-box',
   },
   signUpButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.4375rem',
     borderRadius: '0.625rem',
@@ -100,6 +101,7 @@ const styles = {
     marginBottom: '1.875rem',
   },
   googleButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
@@ -194,6 +196,25 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
   const [message, setMessage] = useState('');
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [userSub, setUserSub] = useState('');
+  const [isSignUpHovered, setIsSignUpHovered] = useState(false);
+  const [isGoogleHovered, setIsGoogleHovered] = useState(false);
+
+  const handleSignUpMouseEnter = () => setIsSignUpHovered(true);
+  const handleSignUpMouseLeave = () => setIsSignUpHovered(false);
+
+  const handleGoogleMouseEnter = () => setIsGoogleHovered(true);
+  const handleGoogleMouseLeave = () => setIsGoogleHovered(false);
+
+  const signUpButtonDynamicStyle = {
+    ...styles.signUpButton,
+    background: isSignUpHovered ? '#007BD5' : SKY,
+    ...(isLoading ? styles.signUpButtonDisabled : {})
+  };
+
+  const googleButtonDynamicStyle = {
+    ...styles.googleButton,
+    background: isGoogleHovered ? '#F8F6F7' : '#fff',
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -365,12 +386,11 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             maxLength={6}
           />
           <button
-            style={{
-              ...styles.signUpButton,
-              ...(isLoading ? styles.signUpButtonDisabled : {})
-            }}
+            style={signUpButtonDynamicStyle}
             type="submit"
             disabled={isLoading}
+            onMouseEnter={handleSignUpMouseEnter}
+            onMouseLeave={handleSignUpMouseLeave}
           >
             {isLoading ? 'Verifying...' : 'Verify Email'}
           </button>
@@ -432,12 +452,11 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
             />
           </div>
           <button
-            style={{
-              ...styles.signUpButton,
-              ...(isLoading ? styles.signUpButtonDisabled : {})
-            }}
+            style={signUpButtonDynamicStyle}
             type="submit"
             disabled={isLoading}
+            onMouseEnter={handleSignUpMouseEnter}
+            onMouseLeave={handleSignUpMouseLeave}
           >
             {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
@@ -454,10 +473,12 @@ export default function DeepTutorSignUp({ onSignUpSignIn }) {
 
         <div style={styles.googleContainer}>
           <button
-            style={styles.googleButton}
+            style={googleButtonDynamicStyle}
             type="button"
             onClick={handleGoogleSignUp}
             disabled={isLoading}
+            onMouseEnter={handleGoogleMouseEnter}
+            onMouseLeave={handleGoogleMouseLeave}
           >
             <img src={GoogleImg} alt="Google" style={styles.googleIcon} />
             Sign up with Google

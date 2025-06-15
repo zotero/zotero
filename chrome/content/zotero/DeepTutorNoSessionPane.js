@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const PEARL = '#F2F2F2';
 const SKY = '#0687E5';
@@ -55,6 +55,12 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
   },
+  descTextWrapper: {
+    width: '100%',
+    marginBottom: '1.875rem',
+    display: 'flex',
+    justifyContent: 'center',
+  },
   buttonWrapper: {
     width: '100%',
     display: 'flex',
@@ -78,7 +84,17 @@ const styles = {
     textAlign: 'center',
     color: '#292929',
   },
+  descText: {
+    width: '100%',
+    fontWeight: 400,
+    fontSize: '0.875rem',
+    lineHeight: '135%',
+    letterSpacing: '0%',
+    textAlign: 'center',
+    color: '#292929',
+  },
   createSessionButton: {
+    all: 'revert',
     background: SKY,
     color: '#fff',
     fontWeight: 700,
@@ -107,9 +123,19 @@ const styles = {
 
 const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_FOLDER.svg';
 const PageImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_PAGE.svg';
-const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
+const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/NoSession/NOS_WHITE_PLUS.svg';
 
 export default function DeepTutorNoSessionPane({ onCreateNewSession }) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const buttonStyle = {
+    ...styles.createSessionButton,
+    background: isHovered ? '#007BD5' : SKY,
+  };
+
   return (
     <div style={styles.container}>
       {/* Background Images */}
@@ -118,13 +144,24 @@ export default function DeepTutorNoSessionPane({ onCreateNewSession }) {
       {/* Content Section */}
       <div style={styles.contentWrapper}>
         <div style={styles.mainTextWrapper}>
-          <div style={styles.mainText}>Start Your Journey</div>
+          <div style={styles.mainText}>Begin Your DeepTutor Journey</div>
         </div>
         <div style={styles.subTextWrapper}>
-          <div style={styles.subText}>(STILL IN DESIGN PROCESS) Get accurate ...</div>
+          <div style={styles.subText}>Create a session to chat with our AI tutor</div>
+        </div>
+        <div style={styles.descTextWrapper}>
+          <div style={styles.descText}>
+          Get accurate answers and deep summaries, and save<br />
+          reading history to build a personalized learning tool. 
+          </div>
         </div>
         <div style={styles.buttonWrapper}>
-          <button style={styles.createSessionButton} onClick={onCreateNewSession}>
+          <button
+            style={buttonStyle}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={onCreateNewSession}
+          >
             Create a New Session
             <img src={PlusIconPath} alt="Plus" style={styles.plusIcon} />
           </button>

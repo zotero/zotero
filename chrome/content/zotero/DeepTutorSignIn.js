@@ -66,6 +66,7 @@ const styles = {
     marginBottom: '1.25rem',
   },
   signInButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.4375rem',
     borderRadius: '0.625rem',
@@ -109,10 +110,11 @@ const styles = {
     marginTop: '1.875rem',
   },
   googleButton: {
+    all: 'revert',
     width: '100%',
     minHeight: '2.75rem',
     borderRadius: '0.625rem',
-    border: `1px solid ${PEARL}`,
+    border: `2px solid ${PEARL}`,
     padding: '0.625rem 1.25rem',
     background: '#fff',
     display: 'flex',
@@ -182,6 +184,25 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [isSignInHovered, setIsSignInHovered] = useState(false);
+  const [isGoogleHovered, setIsGoogleHovered] = useState(false);
+
+  const handleSignInMouseEnter = () => setIsSignInHovered(true);
+  const handleSignInMouseLeave = () => setIsSignInHovered(false);
+
+  const handleGoogleMouseEnter = () => setIsGoogleHovered(true);
+  const handleGoogleMouseLeave = () => setIsGoogleHovered(false);
+
+  const signInButtonDynamicStyle = {
+    ...styles.signInButton,
+    background: isSignInHovered ? '#007BD5' : SKY,
+    ...(isLoading ? styles.signInButtonDisabled : {})
+  };
+
+  const googleButtonDynamicStyle = {
+    ...styles.googleButton,
+    background: isGoogleHovered ? '#F8F6F7' : '#fff',
+  };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -322,12 +343,11 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
             Forgot Your Password?
           </button>
           <button
-            style={{
-              ...styles.signInButton,
-              ...(isLoading ? styles.signInButtonDisabled : {})
-            }}
+            style={signInButtonDynamicStyle}
             type="submit"
             disabled={isLoading}
+            onMouseEnter={handleSignInMouseEnter}
+            onMouseLeave={handleSignInMouseLeave}
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -344,10 +364,12 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
 
         <div style={styles.googleContainer}>
           <button
-            style={styles.googleButton}
+            style={googleButtonDynamicStyle}
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
+            onMouseEnter={handleGoogleMouseEnter}
+            onMouseLeave={handleGoogleMouseLeave}
           >
             <img src={GoogleImg} alt="Google" style={styles.googleIcon} />
             Sign in with Google

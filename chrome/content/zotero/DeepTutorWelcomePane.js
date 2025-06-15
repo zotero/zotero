@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const PEARL = '#F2F2F2';
 const SKY = '#0687E5';
@@ -116,6 +116,7 @@ const styles = {
     color: '#292929',
   },
   signInButton: {
+    all: 'revert',
     background: SKY,
     color: '#fff',
     fontWeight: 700,
@@ -135,12 +136,53 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  signUpButton: {
+    all: 'revert',
+    background: '#fff',
+    color: SKY,
+    fontWeight: 700,
+    fontSize: '1em',
+    border: `0.0625rem solid ${SKY}`,
+    borderRadius: '0.625rem',
+    width: '100%',
+    maxWidth: '21.625rem',
+    minHeight: '3rem',
+    padding: '0.625rem 1.25rem',
+    cursor: 'pointer',
+    boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
+    fontFamily: 'Roboto, sans-serif',
+    letterSpacing: 0.2,
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '0.625rem',
+  },
 };
 
 const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_FOLDER.svg';
 const PageImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_PAGE.svg';
 
-export default function DeepTutorWelcomePane({ onWelcomeSignIn }) {
+export default function DeepTutorWelcomePane({ onWelcomeSignIn, onWelcomeSignUp }) {
+  const [isSignInHovered, setIsSignInHovered] = useState(false);
+  const [isSignUpHovered, setIsSignUpHovered] = useState(false);
+
+  const handleSignInMouseEnter = () => setIsSignInHovered(true);
+  const handleSignInMouseLeave = () => setIsSignInHovered(false);
+
+  const handleSignUpMouseEnter = () => setIsSignUpHovered(true);
+  const handleSignUpMouseLeave = () => setIsSignUpHovered(false);
+
+  const signInButtonStyle = {
+    ...styles.signInButton,
+    background: isSignInHovered ? '#007BD5' : SKY,
+  };
+
+  const signUpButtonStyle = {
+    ...styles.signUpButton,
+    background: isSignUpHovered ? '#F8F6F7' : '#fff',
+  };
+
   return (
     <div style={styles.container}>
       {/* Background Images */}
@@ -149,19 +191,36 @@ export default function DeepTutorWelcomePane({ onWelcomeSignIn }) {
       {/* Content Section */}
       <div style={styles.contentWrapper}>
         <div style={styles.mainTextWrapper}>
-          <div style={styles.mainText}>Start Chatting with DeepTutor.</div>
+          <div style={styles.mainText}>Start Chatting with DeepTutor</div>
         </div>
         <div style={styles.subTextWrapper}>
           <div style={styles.subText}>Sign in to read papers more efficiently</div>
         </div>
         <div style={styles.descTextWrapper}>
           <div style={styles.descText}>
-            ask questions, get instant explanations and summaries,<br />
-            and save your chat history for future reference.
+            Get accurate answers and deep summaries, and save<br />
+            reading history to build a personalized learning tool.
           </div>
         </div>
         <div style={styles.buttonWrapper}>
-          <button style={styles.signInButton} onClick={onWelcomeSignIn}>Sign in</button>
+          <button
+            style={signInButtonStyle}
+            onMouseEnter={handleSignInMouseEnter}
+            onMouseLeave={handleSignInMouseLeave}
+            onClick={onWelcomeSignIn}
+          >
+            Sign in
+          </button>
+        </div>
+        <div style={styles.buttonWrapper}>
+          <button
+            style={signUpButtonStyle}
+            onMouseEnter={handleSignUpMouseEnter}
+            onMouseLeave={handleSignUpMouseLeave}
+            onClick={onWelcomeSignUp}
+          >
+            Create a new account
+          </button>
         </div>
       </div>
     </div>

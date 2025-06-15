@@ -768,6 +768,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 	// Helper method to determine if sessions exist
 	getSessionHistoryPaneOrNoSession = () => {
+		Zotero.debug(`DeepTutor06130613: getSessionHistoryPaneOrNoSession: ${this.state.sessions.length}`);
 		return (this.state.sessions && this.state.sessions.length > 0) ? 'sessionHistory' : 'noSession';
 	};
 
@@ -964,8 +965,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			});
 
 			// If no sessions, switch to model selection pane
-			Zotero.debug(`DeepTutor: Switching to model selection pane: ${sessions}`);
-			Zotero.debug(`DeepTutor: Sessions length: ${sessions.length}`);
+			Zotero.debug(`DeepTutor061306130613: Switching to model selection pane: ${sessions}`);
+			Zotero.debug(`DeepTutor061306130613: Sessions length: ${sessions.length}`);
 			if (sessions.length === 0) {
 				this.switchPane('noSession');
 			} else {
@@ -1187,6 +1188,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								isLoading={this.state.isLoading}
 								error={this.state.error}
 								showSearch={this.state.showSearch}
+								onCreateNewSession={this.toggleModelSelectionPopup}
 							/>
 						}
 						{this.state.currentPane === 'noSession' &&
@@ -1219,11 +1221,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 								user={this.state.userData}
 							/>
 						}
-						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} />}
+						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} onWelcomeSignUp={() => this.toggleSignUpPopup()} />}
 						{this.state.currentPane === 'signIn' && <DeepTutorSignIn
 							onSignInSignUp={() => this.toggleSignUpPopup()}
 							onSignInSuccess={() => {
 								this.loadSession();
+								this.switchPane(this.getSessionHistoryPaneOrNoSession());
 								this.toggleSignInPopup();
 							}}
 						/>}
@@ -1560,10 +1563,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 									this.toggleSignInPopup();
 									this.toggleSignUpPopup();
 								}}
-															onSignInSuccess={() => {
-								this.toggleSignInPopup();
-								// Auth state change will be handled by the listener
-							}}
+								onSignInSuccess={() => {
+								    this.toggleSignInPopup();
+								    // Auth state change will be handled by the listener
+							    }}
 							/>
 						</div>
 					</div>
