@@ -206,7 +206,7 @@ const styles = {
     border: 'none',
     fontWeight: 400,
     fontSize: '1rem',
-    lineHeight: '135%',
+    lineHeight: '180%',
     letterSpacing: '0%',
     verticalAlign: 'middle',
     cursor: 'pointer',
@@ -228,7 +228,7 @@ const styles = {
     color: '#292929',
     fontWeight: 400,
     fontSize: '1rem',
-    lineHeight: '135%',
+    lineHeight: '180%',
     letterSpacing: '0%',
     minHeight: '3rem',
     verticalAlign: 'middle',
@@ -265,12 +265,12 @@ const styles = {
     alignItems: 'flex-start',
     gap: '0.3125rem',
     fontSize: '1rem',
-    lineHeight: '135%',
+    lineHeight: '100%',
     letterSpacing: '0%',
     color: '#000000',
     height: 'auto',
     width: '100%',
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
   modelIcon: {
     width: '1rem',
@@ -284,7 +284,8 @@ const styles = {
     marginTop: '0.3125rem',
     color: '#000000',
     fontSize: '1rem',
-    lineHeight: '135%',
+    lineHeight: '180%',
+    fontWeight: '400',
     letterSpacing: '0%',
     width: '90%',
     height: 'auto',
@@ -316,9 +317,6 @@ const styles = {
     fontSize: '0.9em',
     color: '#292929',
     transition: 'background 0.2s',
-    '&:hover': {
-      background: PEARL,
-    },
   },
   searchItemSelected: {
     background: PEARL,
@@ -444,6 +442,8 @@ function ModelSelection({ onSubmit, user }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [buttonWidth, setButtonWidth] = useState(null);
   const [buttonLayout, setButtonLayout] = useState('row');
+  const [isCreateHovered, setIsCreateHovered] = useState(false);
+  const [hoveredSearchItem, setHoveredSearchItem] = useState(null);
   const buttonRef = useRef(null);
 
   // Use requestAnimationFrame to track button width
@@ -962,6 +962,17 @@ function ModelSelection({ onSubmit, user }) {
     }
   };
 
+  const handleCreateMouseEnter = () => setIsCreateHovered(true);
+  const handleCreateMouseLeave = () => setIsCreateHovered(false);
+
+  const createButtonDynamicStyle = {
+    ...styles.createButton,
+    background: isCreateHovered ? '#007BD5' : SKY,
+  };
+
+  const handleSearchItemMouseEnter = (id) => setHoveredSearchItem(id);
+  const handleSearchItemMouseLeave = () => setHoveredSearchItem(null);
+
   return (
     <div style={styles.container}>
       <div style={styles.mainSection}>
@@ -1025,8 +1036,13 @@ function ModelSelection({ onSubmit, user }) {
                   filteredAttachments.map(attachment => (
                     <div
                       key={attachment.id}
-                      style={styles.searchItem}
+                      style={{
+                        ...styles.searchItem,
+                        background: hoveredSearchItem === attachment.id ? PEARL : 'transparent',
+                      }}
                       onClick={() => handleSearchItemClick(attachment)}
+                      onMouseEnter={() => handleSearchItemMouseEnter(attachment.id)}
+                      onMouseLeave={handleSearchItemMouseLeave}
                     >
                       {attachment.name}
                     </div>
@@ -1138,7 +1154,12 @@ function ModelSelection({ onSubmit, user }) {
         </div>
       </div>
 
-      <button style={styles.createButton} onClick={handleSubmit}>
+      <button
+        style={createButtonDynamicStyle}
+        onClick={handleSubmit}
+        onMouseEnter={handleCreateMouseEnter}
+        onMouseLeave={handleCreateMouseLeave}
+      >
         Create
       </button>
 
