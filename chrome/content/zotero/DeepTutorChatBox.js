@@ -284,7 +284,7 @@ const styles = {
         borderRadius: '0.625rem',
         padding: '0.625rem 1.25rem',
         minWidth: '8rem',
-        maxWidth: '85%',
+        maxWidth: '100%',
         fontWeight: 500,
         fontSize: '1rem',
         lineHeight: '1.5',
