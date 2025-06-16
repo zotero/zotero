@@ -1558,9 +1558,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                             Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId} for document ${documentId}`);
                         }
 
-                        // Try to get the Zotero item to get the document name
+                        // Try to get the Zotero item to get the document name and path
                         const item = Zotero.Items.get(zoteroAttachmentId);
                         let documentName = documentId; // fallback to documentId
+                        let filePath = null;
 
                         if (item) {
                             // Try to get the title from the item or its parent
@@ -1579,6 +1580,26 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                 documentName = item.attachmentFilename;
                                 Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
                             }
+
+                            // Get the file path if it's an attachment
+                            if (item.isAttachment && item.isAttachment()) {
+                                try {
+                                    filePath = await item.getFilePathAsync();
+                                    if (filePath) {
+                                        Zotero.debug(`DeepTutorChatBox: Found file path: ${filePath}`);
+                                        // Optionally truncate long paths for display
+                                        const maxPathLength = 60;
+                                        if (filePath.length > maxPathLength) {
+                                            const pathParts = filePath.split(/[/\\]/);
+                                            const filename = pathParts[pathParts.length - 1];
+                                            const pathPrefix = filePath.substring(0, maxPathLength - filename.length - 3);
+                                            filePath = pathPrefix + '...' + filename;
+                                        }
+                                    }
+                                } catch (error) {
+                                    Zotero.debug(`DeepTutorChatBox: Error getting file path for ${zoteroAttachmentId}: ${error.message}`);
+                                }
+                            }
                         } else {
                             Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}, using document ID as name`);
                         }
@@ -1586,7 +1607,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         contextDocs.push({
                             documentId: documentId,
                             zoteroAttachmentId: zoteroAttachmentId,
-                            name: documentName
+                            name: documentName,
+                            filePath: filePath // Add file path to the context document object
                         });
 
                     } catch (error) {
@@ -1595,7 +1617,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         contextDocs.push({
                             documentId: documentId,
                             zoteroAttachmentId: documentId,
-                            name: documentId
+                            name: documentId,
+                            filePath: null
                         });
                     }
                 }
@@ -1838,14 +1861,46 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                     style={{
                                         ...styles.contextDocumentButton,
                                         ...(hoveredContextDoc === index ? styles.contextDocumentButtonHover : {}),
-                                        borderBottom: index === contextDocuments.length - 1 ? 'none' : '0.0625rem solid #E0E0E0'
+                                        borderBottom: index === contextDocuments.length - 1 ? 'none' : '0.0625rem solid #E0E0E0',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                        padding: '0.75rem 0.9375rem',
+                                        minHeight: contextDoc.filePath ? '3rem' : 'auto',
+                                        background: '#FFFFFF',
+                                        gap: '0.3125rem'
                                     }}
                                     onClick={() => handleContextDocumentClick(contextDoc)}
                                     onMouseEnter={() => setHoveredContextDoc(index)}
                                     onMouseLeave={() => setHoveredContextDoc(null)}
-                                    title={contextDoc.name} // Show full name on hover
+                                    title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : contextDoc.name} // Show full info on hover
                                 >
-                                    {contextDoc.name}
+                                    <div style={{
+                                        fontSize: '1rem',
+                                        fontWeight: 400,
+                                        color: '#1C1B1F',
+                                        lineHeight: '180%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        width: '100%'
+                                    }}>
+                                        {contextDoc.name}
+                                    </div>
+                                    {contextDoc.filePath && (
+                                        <div style={{
+                                            fontSize: '0.875rem',
+                                            fontWeight: 400,
+                                            color: '#757575',
+                                            lineHeight: '135%',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            width: '100%',
+                                            fontStyle: 'italic'
+                                        }}>
+                                            {contextDoc.filePath}
+                                        </div>
+                                    )}
                                 </button>
                             ))
                         ) : (
