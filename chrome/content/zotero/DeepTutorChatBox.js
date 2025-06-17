@@ -421,8 +421,9 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [showSessionPopup, setShowSessionPopup] = useState(false);
     const MAX_VISIBLE_SESSIONS = 2;
     const chatLogRef = useRef(null);
-    const [hoveredQuestion, setHoveredQuestion] = useState(null);
-    const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
+    // Removed hoveredQuestion and hoveredPopupSession states - these were causing unnecessary re-renders
+    // const [hoveredQuestion, setHoveredQuestion] = useState(null);
+    // const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
     const [iniWait, setInitWait] = useState(false);
     const [isStreaming, setIsStreaming] = useState(false);
 
@@ -1319,13 +1320,14 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                         {message.followUpQuestions.map((question, qIndex) => (
                             <button
                                 key={qIndex}
-                                style={{
-                                    ...styles.questionButton,
-                                    background: hoveredQuestion === qIndex ? '#D9D9D9' : '#FFFFFF'
-                                }}
+                                style={styles.questionButton}
                                 onClick={() => handleQuestionClick(question)}
-                                onMouseEnter={() => setHoveredQuestion(qIndex)}
-                                onMouseLeave={() => setHoveredQuestion(null)}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = '#D9D9D9';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = '#FFFFFF';
+                                }}
                             >
                                 {question}
                             </button>
@@ -1600,16 +1602,17 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                                 {hiddenSessions.map(([sessionId, sessionData]) => (
                                     <div
                                         key={sessionId}
-                                        style={{
-                                            ...styles.sessionPopupItem,
-                                            background: hoveredPopupSession === sessionId ? '#D9D9D9' : '#FFFFFF'
-                                        }}
+                                        style={styles.sessionPopupItem}
                                         onClick={() => {
                                             handleSessionClick(sessionId);
                                             setShowSessionPopup(false);
                                         }}
-                                        onMouseEnter={() => setHoveredPopupSession(sessionId)}
-                                        onMouseLeave={() => setHoveredPopupSession(null)}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.background = '#D9D9D9';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.background = '#FFFFFF';
+                                        }}
                                     >
                                         {truncateSessionName(sessionData.name)}
                                     </div>
