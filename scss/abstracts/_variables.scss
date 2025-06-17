@@ -97,15 +97,15 @@ $item-pane-sections: (
 );
 
 $tagColorsLookup: (
-	'#ff6666': --tag-red,
-	'#ff8c19': --tag-orange,
-	'#999999': --tag-gray,
-	'#5fb236': --tag-green,
-	'#009980': --tag-teal,
-	'#2ea8e5': --tag-blue,
-	'#576dd9': --tag-indigo,
-	'#a28ae5': --tag-purple,
-	'#a6507b': --tag-plum,
+	'#ff6666': --tag-red-opaque,
+	'#ff8c19': --tag-orange-opaque,
+	'#999999': --tag-gray-opaque,
+	'#5fb236': --tag-green-opaque,
+	'#009980': --tag-teal-opaque,
+	'#2ea8e5': --tag-blue-opaque,
+	'#576dd9': --tag-indigo-opaque,
+	'#a28ae5': --tag-purple-opaque,
+	'#a6507b': --tag-plum-opaque,
 );
 
 // Layout constants

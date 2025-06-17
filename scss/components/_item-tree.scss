@@ -137,7 +137,7 @@
 						}
 					}
 
-					@include focus-states using($color) {
+					@include focus-states('.row.selected', '.virtualized-table:focus-within') using($color) {
 						@if $color =="white" {
 							background: url("chrome://zotero/skin/tag-circle-border.svg") no-repeat center/contain;
 							stroke: var(--accent-white);

@@ -357,6 +357,11 @@
 		#{color.alpha(map.get($colors, "color-menu")) * color.blue(map.get($colors, "color-menu"))}
 	);
 
+	// opaque tag colors for tag swatches
+	@each $tag in "blue", "gray", "green", "indigo", "magenta", "orange", "plum", "purple", "red", "teal", "yellow", {
+		--tag-#{$tag}-opaque: #{color.change(map.get($colors, "tag-#{$tag}"), $alpha: 1)};
+	}
+
 	// background materials
 	--material-background: var(--color-background);
 	--material-background50: var(--color-background50);
