@@ -325,8 +325,7 @@ Zotero.QuickCopy = new function() {
 				if (["ink", "image"].includes(annotation.type)) {
 					continue;
 				}
-				let json = Zotero.Annotations.toJSONSync(annotation);
-				json.attachmentItemID = annotation.parentItemID;
+				let json = Zotero.Annotations.toJSONSync(annotation, true);
 				jsonAnnotations.push(json);
 			}
 			else {
