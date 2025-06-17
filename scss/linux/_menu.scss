@@ -1,3 +1,12 @@
+menu,
+menuitem {
+	:is([type="checkbox"], [checked="true"]):not([image]) {
+		.menu-iconic-icon {
+			-moz-default-appearance: none;
+		}
+	}
+}
+
 @each $cls, $icon in $menu-icons {
 	.zotero-menuitem-#{$cls} {
 		// If icon starts with "light-dark:", use light and dark icon
