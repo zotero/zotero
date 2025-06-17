@@ -165,6 +165,21 @@ export const getSessionsByUserId = async (userId) => {
 	return handledResponse.json();
 };
 
+export const deleteSessionById = async (sessionId) => {
+	const requestConfig = {
+		method: 'DELETE',
+		headers: getAuthHeaders()
+	};
+
+	const response = await window.fetch(`${API_BASE_URL}/session/delete/${sessionId}`, requestConfig);
+	const handledResponse = await handleApiResponse(response, {
+		url: `${API_BASE_URL}/session/delete/${sessionId}`,
+		...requestConfig
+	});
+
+	return handledResponse.json();
+};
+
 // User related API calls
 export const getUserById = async (userId) => {
 	const requestConfig = {

@@ -42,7 +42,8 @@ import {
 	getMessagesBySessionId,
 	getSessionById,
 	getSessionsByUserId,
-	getUserByProviderUserId
+	getUserByProviderUserId,
+	deleteSessionById
 } from './api/libs/api.js';
 import {
 	useAuthState,
@@ -1063,6 +1064,58 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	}
 
+	handleDeleteSession = async (sessionId) => {
+		try {
+			Zotero.debug(`DeepTutor: Deleting session: ${sessionId}`);
+
+			// Call the API to delete the session
+			await deleteSessionById(sessionId);
+			Zotero.debug(`DeepTutor: Session ${sessionId} deleted successfully from backend`);
+
+			// Update local state by removing the session
+			const updatedSessions = this.state.sessions.filter(session => session.id !== sessionId);
+			const updatedSesIdToObj = new Map(this.state.sesIdToObj);
+			updatedSesIdToObj.delete(sessionId);
+
+			// Check if the deleted session was the current session
+			const wasCurrentSession = this.state.currentSession && this.state.currentSession.id === sessionId;
+
+			// Update state
+			const newState = {
+				sessions: updatedSessions,
+				sesIdToObj: updatedSesIdToObj
+			};
+
+			// If we deleted the current session, clear it and switch panes
+			if (wasCurrentSession) {
+				newState.currentSession = null;
+				newState.messages = [];
+				newState.documentIds = [];
+			}
+
+			this.setState(newState, () => {
+				// If we deleted the current session or if no sessions remain, switch to appropriate pane
+				if (wasCurrentSession || updatedSessions.length === 0) {
+					if (updatedSessions.length === 0) {
+						this.switchPane('noSession');
+					} else {
+						this.switchPane('sessionHistory');
+					}
+				}
+			});
+
+			Zotero.debug(`DeepTutor: Session ${sessionId} removed from local state`);
+
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Error deleting session ${sessionId}: ${error.message}`);
+			
+			// You might want to show an error message to the user here
+			this.setState({
+				error: `Failed to delete session: ${error.message}`
+			});
+		}
+	}
+
 	// Helper to fetch backend user data using Cognito user object
 	fetchUserData = async (cognitoUser) => {
 		try {
@@ -1189,6 +1242,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								error={this.state.error}
 								showSearch={this.state.showSearch}
 								onCreateNewSession={this.toggleModelSelectionPopup}
+								onDeleteSession={this.handleDeleteSession}
 							/>
 						}
 						{this.state.currentPane === 'noSession' &&
