@@ -33,6 +33,12 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
 
 var { CompletionCopilot, registerCompletion } = ChromeUtils.importESModule('resource://zotero/monacopilot.mjs');
 
+let { require } = ChromeUtils.import('resource://devtools/shared/loader/Loader.jsm');
+let { Toolbox } = require('resource://devtools/client/framework/toolbox.js');
+let { CommandsFactory } = require('resource://devtools/shared/commands/commands-factory.js');
+let { gDevTools } = require('resource://devtools/client/framework/devtools.js');
+let { TYPES } = require("resource://devtools/shared/commands/resource/resource-command.js");
+
 var lazy = {};
 ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 	return Zotero.Utilities.Internal.subprocess(Services.env.get('SHELL'), ['-c', 'echo $PATH'])
@@ -65,6 +71,14 @@ var Scaffold = new function () {
 
 	this.handleLoad = async function () {
 		_browser = document.getElementById('browser');
+
+		let toolboxIframe = document.getElementById('toolbox-iframe');
+		toolboxIframe.style.visibility = 'hidden';
+		toolboxIframe.addEventListener('DOMContentLoaded', async () => {
+			await this.initToolbox(toolboxIframe);
+			toolboxIframe.style.visibility = '';
+		}, { once: true });
+		toolboxIframe.src = `about:devtools-toolbox`;
 
 		window.messageManager.addMessageListener('Scaffold:Load', ({ data }) => {
 			document.getElementById("browser-url").value = data.url;
@@ -282,6 +296,164 @@ var Scaffold = new function () {
 		
 		_updateTitle();
 	};
+	
+	this.initToolbox = async function (iframe) {
+		let command = await CommandsFactory.forRemoteTab(_browser.browserId);
+		// Patch ResourceCommand#watchResources() to intercept and filter console output
+		let watchResourcesOriginal = command.resourceCommand.watchResources.bind(command.resourceCommand);
+		command.resourceCommand.watchResources = (resources, options) => watchResourcesOriginal(resources, {
+			...options,
+			onAvailable(updates, updateOptions) {
+				options.onAvailable(
+					updates
+						.filter(_isResourceRelevant)
+						.map(_transformResource),
+					updateOptions
+				);
+			}
+		});
+
+		Scaffold.toolbox = await gDevTools.showToolbox(
+			command,
+			{
+				toolId: 'webconsole',
+				hostType: Toolbox.HostType.PAGE,
+				hostOptions: {
+					customIframe: iframe,
+				},
+			}
+		);
+		
+		// The SourceMapLoader worker hangs shutdown, even if you manually terminate it.
+		// There isn't anything special about it, so it's unclear what the problem is,
+		// but we don't really need source maps in Scaffold anyway. Make it into a no-op.
+		// TODO: Revisit after next Fx upgrade
+		let sourceMapLoader = Scaffold.toolbox.sourceMapLoader;
+		sourceMapLoader.start = () => {};
+		for (let field of Object.keys(sourceMapLoader)) {
+			if (String(sourceMapLoader[field]) === '(...args) => push(args)') {
+				sourceMapLoader[field] = () => Promise.resolve();
+			}
+		}
+
+		// Remove panels that aren't relevant to translators
+		let irrelevantPanelIDs = [
+			'styleeditor',
+			'memory',
+			'storage',
+			'accessibility',
+			'application',
+		];
+		Scaffold.toolbox.panelDefinitions = Scaffold.toolbox.panelDefinitions
+			.filter(p => !irrelevantPanelIDs.includes(p.id));
+
+		// Patch root styles to remove the URL bar and settings/documentation menu
+		let rootDoc = iframe.contentDocument;
+		let styleSheet = new iframe.contentWindow.CSSStyleSheet();
+		styleSheet.replaceSync(`
+			.debug-target-info,
+			#toolbox-meatball-menu-button {
+				display: none;
+			}
+		`);
+		rootDoc.adoptedStyleSheets.push(styleSheet);
+
+		// Patch Console styles to hide filter buttons and remove source links
+		// from Scaffold messages
+		let consoleDoc = rootDoc.querySelector('#toolbox-panel-iframe-webconsole').contentDocument;
+		let style = consoleDoc.createElement('style');
+		style.textContent = `
+			.message .message-location[data-url="${document.location.href}"],
+			.webconsole-filterbar-secondary > :not([data-category="netxhr"], [data-category="net"]) {
+				display: none;
+			}
+		`;
+		consoleDoc.head.append(style);
+
+		// Patch Inspector styles to remove CSS inspector and color picker
+		Scaffold.toolbox.once('inspector-ready', () => {
+			let inspectorDoc = rootDoc.querySelector('#toolbox-panel-iframe-inspector').contentDocument;
+			let style = inspectorDoc.createElement('style');
+			style.textContent = `
+				#inspector-splitter-box > .inspector-sidebar-splitter > :not(:first-child),
+				#inspector-eyedropper-toggle {
+					display: none;
+				}
+			`;
+			inspectorDoc.head.append(style);
+		});
+
+		// Switch to Browser when the element picker is clicked
+		Scaffold.toolbox.nodePicker.on('picker-starting', () => {
+			_showTab('browser');
+		});
+
+		// Remove Accel-R shortcut - conflicts with Run
+		Scaffold.toolbox.shortcuts.keys.delete('CmdOrCtrl+R');
+	};
+	
+	function _isResourceRelevant(resource) {
+		switch (resource.resourceType) {
+			case TYPES.CONSOLE_MESSAGE:
+				// Child-process console messages:
+				// Allow messages sent by the debugger and JSWindowActors
+				return resource.message.filename === 'debugger eval code'
+					|| resource.message.chromeContext;
+			case TYPES.ERROR_MESSAGE:
+				// "Error" messages (Services.console.logMessage()):
+				// Allow our own messages
+				return resource.pageError?.category === 'Scaffold';
+			case TYPES.CSS_MESSAGE:
+				// CSS error/warning messages:
+				// Allow none
+				return false;
+			default:
+				// Resources that aren't messages:
+				// Allow all
+				return true;
+		}
+	}
+
+	function _transformResource(resource) {
+		switch (resource.resourceType) {
+			case TYPES.CONSOLE_MESSAGE:
+				// Mark remaining console messages as coming from us so the
+				// isUnfilterable() patch in build.sh makes them unfilterable
+				return {
+					message: {
+						...resource.message,
+						filename: document.location.href, // Checked by patch
+						lineNumber: 0,
+						columnNumber: 0,
+					},
+					resourceId: resource.resourceId,
+					resourceType: resource.resourceType,
+					targetFront: resource.targetFront,
+				};
+			case TYPES.ERROR_MESSAGE:
+				// Convert our "error" messages (Services.console.logMessage())
+				// to console messages and make them unfilterable
+				return {
+					message: {
+						arguments: [resource.pageError.errorMessage],
+						chromeContext: true,
+						sourceId: null,
+						timeStamp: resource.pageError.timeStamp,
+						innerWindowId: _browser.browsingContext.currentWindowGlobal.innerWindowId,
+						level: 'log',
+						filename: document.location.href, // Checked by patch
+						lineNumber: 0,
+						columnNumber: 0,
+					},
+					resourceId: resource.resourceId,
+					resourceType: TYPES.CONSOLE_MESSAGE,
+					targetFront: resource.targetFront,
+				};
+			default:
+				// Leave all other resources along
+				return resource;
+		}
+	}
 
 	this.initImportEditor = function () {
 		let monaco = _editors.importGlobal, editor = _editors.import;
@@ -999,11 +1171,12 @@ var Scaffold = new function () {
 	this.addTemplate = async function (template, second) {
 		switch (template) {
 			case "templateNewItem":
-				document.getElementById('output').value = this.listFieldsForItemType(second);
+				_clearOutput();
+				_logOutput(this.listFieldsForItemType(second));
 				break;
 			case "templateAllTypes":
 				var typeNames = Zotero.ItemTypes.getTypes().map(t => t.name);
-				document.getElementById('output').value = JSON.stringify(typeNames, null, '\t');
+				_logOutput(JSON.stringify(typeNames, null, '\t'));
 				break;
 			default: {
 				//newWeb, scrapeEM, scrapeRIS, scrapeBibTeX, scrapeMARC
@@ -1109,8 +1282,12 @@ var Scaffold = new function () {
 			translate.setSearch(input);
 		}
 		translate.setTranslatorProvider(_translatorProvider);
+		// If we aren't running translation remotely inside the iframe,
+		// we need to manually rig up debug output
+		if (!isRemoteWeb) {
+			translate.setHandler("debug", _debug);
+		}
 		translate.setHandler("error", _error);
-		translate.setHandler("debug", _debug);
 		if (done) {
 			translate.setHandler("done", done);
 		}
@@ -1291,26 +1468,24 @@ var Scaffold = new function () {
 	 * logs debug info (instead of console)
 	 */
 	function _logOutput(string) {
-		var date = new Date();
-		var output = document.getElementById('output');
-
 		if (typeof string != "string") {
 			string = Zotero.Utilities.varDump(string);
 		}
 
-		// Put off actually building the log message and appending it to the console until the next animation frame
-		// so as not to slow down translation with repeated layout recalculations triggered by appending text
-		// and accessing scrollHeight
-		// requestAnimationFrame() callbacks are guaranteed to be called in the order they were set
-		requestAnimationFrame(() => {
-			if (output.value) output.value += "\n";
-			output.value += Zotero.Utilities.lpad(date.getHours(), '0', 2)
-				+ ":" + Zotero.Utilities.lpad(date.getMinutes(), '0', 2)
-				+ ":" + Zotero.Utilities.lpad(date.getSeconds(), '0', 2)
-				+ " " + string.replace(/\n/g, "\n         ");
-			// move to end
-			output.scrollTop = output.scrollHeight;
-		});
+		var consoleMsg = Cc["@mozilla.org/scripterror;1"].createInstance(
+			Ci.nsIScriptError
+		);
+		consoleMsg.initWithSanitizedSource(
+			string,
+			'',
+			'',
+			0,
+			0,
+			Ci.nsIScriptError.infoFlag,
+			'Scaffold',
+			_browser.browsingContext.currentWindowGlobal.innerWindowId,
+		);
+		Services.console.logMessage(consoleMsg);
 	}
 
 	/*
@@ -1622,7 +1797,6 @@ var Scaffold = new function () {
 	};
 
 	this.constructTestFromCurrent = async function (type) {
-		_clearOutput();
 		if ((type === "web" && !document.getElementById('checkbox-web').checked)
 			|| (type === "import" && !document.getElementById('checkbox-import').checked)
 			|| (type === "search" && !document.getElementById('checkbox-search').checked)) {
@@ -1642,7 +1816,6 @@ var Scaffold = new function () {
 				await translate.setBrowser(_browser);
 				await translate.setTranslatorProvider(_translatorProvider);
 				translate.setTranslator(_getTranslatorFromPane());
-				translate.setHandler("debug", _debug);
 				translate.setHandler("error", _error);
 				translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
 				let newTest = await translate.newTest();
@@ -2056,13 +2229,16 @@ var Scaffold = new function () {
 		});
 	}
 
-	/*
-	 * Clear output pane
-	 */
 	function _clearOutput() {
-		document.getElementById('output').value = '';
-		let itemPane = document.querySelector('#item-previews');
-		itemPane.hidden = true;
+		// Switch to Console tab. No way to prevent focus...
+		let previousActiveElement = document.activeElement;
+		Scaffold.toolbox.selectTool('webconsole');
+		previousActiveElement?.focus();
+
+		Scaffold.toolbox.getPanel('webconsole').hud.ui.clearOutput();
+		
+		document.querySelector('#item-previews')
+			.hidden = true;
 	}
 
 	/*
