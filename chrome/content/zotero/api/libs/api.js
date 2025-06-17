@@ -1,6 +1,10 @@
 // Access ZOTERO_CONFIG from the global scope
-const API_BASE_URL = 'https://api.staging.deeptutor.knowhiz.us/api';
-// const API_BASE_URL = 'http://localhost:8081/api';
+const DT_BASE_URL = 'staging.deeptutor.knowhiz.us';
+// const DT_BASE_URL = 'deeptutor.knowhiz.us';
+// const DT_BASE_URL = 'localhost:8081';
+
+const API_BASE_URL = DT_BASE_URL.includes('localhost') ? `http://${DT_BASE_URL}/api` : `https://api.${DT_BASE_URL}/api`;
+export const DT_SIGN_UP_URL = DT_BASE_URL.includes('localhost') ? `http://${DT_BASE_URL}` : `https://${DT_BASE_URL}`;
 
 // Import auth state to get access token
 import { authState } from '../../auth/cognitoAuth.js';
