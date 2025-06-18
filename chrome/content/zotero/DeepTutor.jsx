@@ -42,7 +42,8 @@ import {
 	getMessagesBySessionId,
 	getSessionById,
 	getSessionsByUserId,
-	getUserByProviderUserId
+	getUserByProviderUserId,
+	DT_SIGN_UP_URL
 } from './api/libs/api.js';
 import {
 	useAuthState,
@@ -852,6 +853,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	};
 
+	handleOpenSignUpPage = () => {
+		// Open sign up page in default browser
+		Zotero.launchURL(DT_SIGN_UP_URL);
+	};
+
 	async loadSession() {
 		// Only load sessions if user is authenticated
 		if (!this.state.isAuthenticated) {
@@ -1054,7 +1060,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 				}
 
 				Zotero.debug(`DeepTutor: Messages loaded successfully`);
-
 			} catch (error) {
 				Zotero.debug(`DeepTutor: Error in fetching messages: ${error.message}`);
 			}
@@ -1221,9 +1226,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 								user={this.state.userData}
 							/>
 						}
-						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} onWelcomeSignUp={() => this.toggleSignUpPopup()} />}
+						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} onWelcomeSignUp={this.handleOpenSignUpPage} />}
 						{this.state.currentPane === 'signIn' && <DeepTutorSignIn
-							onSignInSignUp={() => this.toggleSignUpPopup()}
+							onSignInSignUp={this.handleOpenSignUpPage}
 							onSignInSuccess={() => {
 								this.loadSession();
 								this.switchPane(this.getSessionHistoryPaneOrNoSession());
@@ -1231,7 +1236,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 							}}
 						/>}
 						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => {
-							this.toggleSignUpPopup();
 							this.toggleSignInPopup();
 						}} />}
 					</div>
@@ -1256,7 +1260,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					>
 						<div
 							style={{
-								position: 'relative',										
+								position: 'relative',
 								width: '80%',
 								maxWidth: '26.875rem',
 								maxHeight: '80%',
@@ -1560,8 +1564,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 							</div>
 							<DeepTutorSignIn
 								onSignInSignUp={() => {
+									this.handleOpenSignUpPage();
 									this.toggleSignInPopup();
-									this.toggleSignUpPopup();
 								}}
 								onSignInSuccess={() => {
 								    this.toggleSignInPopup();
@@ -1766,7 +1770,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					onSwitchPane={this.switchPane}
 					onToggleProfilePopup={this.toggleProfilePopup}
 					onToggleSignInPopup={this.toggleSignInPopup}
-					onToggleSignUpPopup={this.toggleSignUpPopup}
+					onToggleSignUpPopup={this.handleOpenSignUpPage}
 					onToggleUpgradePopup={this.toggleUpgradePopup}
 					showProfilePopup={this.state.showProfilePopup}
 					feedIconPath={FeedIconPath}
