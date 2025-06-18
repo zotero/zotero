@@ -53,8 +53,8 @@ const styles = {
         background: '#F2F2F2',
     },
     iconImage: {
-        width: '1.8rem',
-        height: '1.8rem',
+        width: '1.0625rem',
+        height: '1.0625rem',
         objectFit: 'contain',
     },
     contentWrapper: {
