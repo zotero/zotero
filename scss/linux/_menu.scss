@@ -1,9 +1,7 @@
 menu,
 menuitem {
-	:is([type="checkbox"], [checked="true"]):not([image]) {
-		.menu-iconic-icon {
-			-moz-default-appearance: none;
-		}
+	.menu-iconic-icon[src] {
+		-moz-default-appearance: none;
 	}
 }
 
