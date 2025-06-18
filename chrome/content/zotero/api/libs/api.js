@@ -24,6 +24,22 @@ const getAuthHeaders = () => {
 	return headers;
 };
 
+// Helper function to create backend user object
+export const createBackendUser = ({ name, email, providerUserId }) => {
+	const currentTime = new Date().toISOString();
+	return {
+		name,
+		email,
+		passwordHash: '',
+		profilePictureUrl: '',
+		createdAt: currentTime,
+		updatedAt: currentTime,
+		provider: 'COGNITO_EMAIL',
+		providerId: 'COGNITO',
+		providerUserId,
+	};
+};
+
 // Helper function to handle API responses with token refresh
 const handleApiResponse = async (response, originalRequest) => {
 	if (response.status === 401) {
@@ -200,7 +216,6 @@ export const getUserById = async (userId) => {
 	return handledResponse.json();
 };
 
-// User related API calls
 export const getUserByProviderUserId = async (providerUserId) => {
 	const requestConfig = {
 		method: 'GET',
@@ -210,6 +225,22 @@ export const getUserByProviderUserId = async (providerUserId) => {
 	const response = await window.fetch(`${API_BASE_URL}/users/byProviderUserId/${providerUserId}`, requestConfig);
 	const handledResponse = await handleApiResponse(response, {
 		url: `${API_BASE_URL}/users/byProviderUserId/${providerUserId}`,
+		...requestConfig
+	});
+
+	return handledResponse.json();
+};
+
+export const registerUser = async (newUser) => {
+	const requestConfig = {
+		method: 'POST',
+		headers: getAuthHeaders(),
+		body: JSON.stringify(newUser)
+	};
+
+	const response = await window.fetch(`${API_BASE_URL}/users/register`, requestConfig);
+	const handledResponse = await handleApiResponse(response, {
+		url: `${API_BASE_URL}/users/register`,
 		...requestConfig
 	});
 

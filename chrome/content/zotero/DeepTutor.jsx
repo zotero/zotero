@@ -43,6 +43,8 @@ import {
 	getSessionById,
 	getSessionsByUserId,
 	getUserByProviderUserId,
+	registerUser,
+	createBackendUser,
 	deleteSessionById,
 	DT_SIGN_UP_URL
 } from './api/libs/api.js';
@@ -903,9 +905,34 @@ var DeepTutor = class DeepTutor extends React.Component {
 							Zotero.debug('DeepTutor: getUserByProviderUserId successful');
 							resolve(userData);
 						})
-						.catch(error => {
+						.catch(async error => {
 							Zotero.debug(`DeepTutor: Error getting user by provider ID: ${error.message}`);
-							reject(error);
+
+							// If user not found, try to register them
+							if (error.message && (error.message.includes('404') || error.message.includes('Not Found'))) {
+								try {
+									Zotero.debug('DeepTutor: User not found, attempting to register new user');
+
+									// Create new user object
+									const newUser = createBackendUser({
+										name: currentUserData.user.attributes?.name || currentUserData.user.username || 'DeepTutor User',
+										email: currentUserData.user.attributes?.email || currentUserData.user.username,
+										providerUserId: providerUserId
+									});
+
+									// Register the user
+									const registeredUser = await registerUser(newUser);
+									Zotero.debug('DeepTutor: User registration successful from Google OAuth');
+									Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(registeredUser)}`);
+
+									resolve(registeredUser);
+								} catch (registerError) {
+									Zotero.debug(`DeepTutor: Error registering user: ${registerError.message}`);
+									reject(registerError);
+								}
+							} else {
+								reject(error);
+							}
 						});
 					return;
 				}
@@ -933,8 +960,17 @@ var DeepTutor = class DeepTutor extends React.Component {
 						return;
 					}
 
+					// Find the 'email' attribute for the actual email address
+					const emailAttribute = attributes.find(attr => attr.getName() === 'email');
+					const userEmail = emailAttribute ? emailAttribute.getValue() : currentUserData.user.username;
+
+					// Find the 'name' attribute for the user's name
+					const nameAttribute = attributes.find(attr => attr.getName() === 'name');
+					const userName = nameAttribute ? nameAttribute.getValue() : currentUserData.user.username;
+
 					const providerUserId = subAttribute.getValue();
 					Zotero.debug('DeepTutor: Using provider user ID from getUserAttributes');
+					Zotero.debug(`DeepTutor: User email: ${userEmail}, name: ${userName}`);
 
 					// Get user data using the provider user ID (sub)
 					Zotero.debug('DeepTutor: Calling getUserByProviderUserId with providerUserId');
@@ -943,9 +979,34 @@ var DeepTutor = class DeepTutor extends React.Component {
 							Zotero.debug('DeepTutor: getUserByProviderUserId successful');
 							resolve(userData);
 						})
-						.catch(error => {
+						.catch(async error => {
 							Zotero.debug(`DeepTutor: Error getting user by provider ID: ${error.message}`);
-							reject(error);
+
+							// If user not found, try to register them
+							if (error.message && (error.message.includes('404') || error.message.includes('Not Found'))) {
+								try {
+									Zotero.debug('DeepTutor: User not found, attempting to register new user');
+
+									// Create new user object
+									const newUser = createBackendUser({
+										name: userName || 'DeepTutor User',
+										email: userEmail,
+										providerUserId: providerUserId
+									});
+
+									// Register the user
+									const registeredUser = await registerUser(newUser);
+									Zotero.debug('DeepTutor: User registration successful from regular Cognito');
+									Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(registeredUser)}`);
+
+									resolve(registeredUser);
+								} catch (registerError) {
+									Zotero.debug(`DeepTutor: Error registering user: ${registerError.message}`);
+									reject(registerError);
+								}
+							} else {
+								reject(error);
+							}
 						});
 				});
 			});
@@ -1157,14 +1218,55 @@ var DeepTutor = class DeepTutor extends React.Component {
 				if (!subAttr) {
 					throw new Error('sub attribute not found on Cognito user');
 				}
+
+				// Store all necessary attributes for later use
+				const emailAttr = attributes.find(attr => attr.getName() === 'email');
+				const nameAttr = attributes.find(attr => attr.getName() === 'name');
+
+				// Add attributes to cognitoUser for later use in registration
+				cognitoUser.fetchedAttributes = {
+					email: emailAttr ? emailAttr.getValue() : cognitoUser.username,
+					name: nameAttr ? nameAttr.getValue() : cognitoUser.username
+				};
+
 				providerUserId = subAttr.getValue();
 				Zotero.debug(`DeepTutor: fetchUserData - Using provider user ID from regular Cognito: ${providerUserId}`);
+				Zotero.debug(`DeepTutor: fetchUserData - Fetched attributes: email=${cognitoUser.fetchedAttributes.email}, name=${cognitoUser.fetchedAttributes.name}`);
 			} else {
 				throw new Error('Cannot extract provider user ID from user object');
 			}
 
-			const userData = await getUserByProviderUserId(providerUserId);
-			Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
+			let userData;
+			try {
+				userData = await getUserByProviderUserId(providerUserId);
+				Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
+			} catch (getUserError) {
+				Zotero.debug(`DeepTutor: fetchUserData getUserByProviderUserId error: ${getUserError.message}`);
+
+				// If user not found, try to register them
+				if (getUserError.message && (getUserError.message.includes('404') || getUserError.message.includes('Not Found'))) {
+					try {
+						Zotero.debug('DeepTutor: User not found in fetchUserData, attempting to register new user');
+
+						// Create new user object
+						const newUser = createBackendUser({
+							name: cognitoUser.attributes?.name || cognitoUser.fetchedAttributes?.name || cognitoUser.name || cognitoUser.username || 'DeepTutor User',
+							email: cognitoUser.attributes?.email || cognitoUser.fetchedAttributes?.email || cognitoUser.email || cognitoUser.username || 'user@deeptutor.com',
+							providerUserId: providerUserId
+						});
+
+						// Register the user
+						userData = await registerUser(newUser);
+						Zotero.debug('DeepTutor: User registration successful in fetchUserData');
+						Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(userData)}`);
+					} catch (registerError) {
+						Zotero.debug(`DeepTutor: Error registering user in fetchUserData: ${registerError.message}`);
+						throw registerError;
+					}
+				} else {
+					throw getUserError;
+				}
+			}
 
 			// Save to state
 			this.setState({ userData });
