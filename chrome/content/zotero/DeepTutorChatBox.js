@@ -478,6 +478,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     // const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
     const [iniWait, setInitWait] = useState(false);
     const [isStreaming, setIsStreaming] = useState(false);
+    const isAutoScrollingRef = useRef(true);
     const [showContextPopup, setShowContextPopup] = useState(false);
     const [contextDocuments, setContextDocuments] = useState([]);
 
@@ -685,13 +686,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                     setInitWait(false);
                 }
 
-                // Scroll to bottom after messages are loaded
-                
-                if (chatLogRef.current) {
-                    setTimeout(() => {
-                        chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-                    }, 100);
-                }
+                // Auto-scrolling is now handled by useEffect hooks
                 
             } catch (error) {
                 Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - ERROR loading messages for session ${sessionId}: ${error.message}`);
@@ -722,14 +717,55 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         type: currentSession?.type || SessionType.BASIC
     });
 
-    /*
+    // Auto-scroll when messages change
     useEffect(() => {
-        // Scroll to bottom when messages change
-        if (chatLogRef.current) {
+        if (chatLogRef.current && isAutoScrollingRef.current) {
             chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+            Zotero.debug(`DeepTutorChatBox: Auto-scrolled to bottom due to messages change`);
+        } else if (chatLogRef.current) {
+            Zotero.debug(`DeepTutorChatBox: Auto-scroll SKIPPED (disabled) on messages change`);
         }
     }, [messages]);
-    */
+
+    // Auto-scroll during streaming
+    useEffect(() => {
+        if (chatLogRef.current && isAutoScrollingRef.current) {
+            chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+            Zotero.debug(`DeepTutorChatBox: Auto-scrolled to bottom due to streaming change`);
+        } else if (chatLogRef.current) {
+            Zotero.debug(`DeepTutorChatBox: Auto-scroll SKIPPED (disabled) on streaming change`);
+        }
+    }, [messages, isStreaming]);
+
+    // Handle manual scrolling - disable auto-scroll when user scrolls up
+    const handleWheel = () => {
+        if (chatLogRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = chatLogRef.current;
+            const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 100; // 100px tolerance
+            
+            // Only disable auto-scrolling if user is NOT at bottom
+            if (!isAtBottom && isAutoScrollingRef.current) {
+                isAutoScrollingRef.current = false;
+                Zotero.debug(`DeepTutorChatBox: Auto-scrolling DISABLED by wheel event (not at bottom)`);
+            } else if (isAtBottom) {
+                Zotero.debug(`DeepTutorChatBox: Wheel event ignored - still at bottom`);
+            }
+        }
+    };
+
+    // Handle scroll to detect if user scrolled back to bottom
+    const handleScroll = () => {
+        if (chatLogRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = chatLogRef.current;
+            const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 100; // 100px tolerance
+            Zotero.debug(`DeepTutorChatBox: Scroll - scrollHeight: ${scrollHeight}, scrollTop: ${scrollTop}, clientHeight: ${clientHeight}, isAtBottom: ${isAtBottom}, autoScroll: ${isAutoScrollingRef.current}`)
+            
+            if (isAtBottom && !isAutoScrollingRef.current) {
+                isAutoScrollingRef.current = true;
+                Zotero.debug(`DeepTutorChatBox: Auto-scrolling RE-ENABLED by scroll to bottom`);
+            }
+        }
+    };
 
     const userSendMessage = async (messageString) => {
         Zotero.debug(`DeepTutorChatBox: userSendMessage CALLED with message: "${messageString}" for session ${sessionId}`);
@@ -739,6 +775,10 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         }
         // TODO_DEEPTUTOR: Get user ID from Cognito user attributes, such as sending user object/userid from DeepTutor.jsx
         setUserId('67f5b836cb8bb15b67a1149e');
+        
+        // Always enable auto-scrolling when user sends a message (which will trigger streaming)
+        isAutoScrollingRef.current = true;
+        Zotero.debug(`DeepTutorChatBox: Auto-scrolling enabled for new user message`);
 
         try {
             if (!sessionId) throw new Error("No active session ID");
@@ -782,14 +822,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
 
 
-            // Scroll to bottom after messages are added
-            /*
-            if (chatLogRef.current) {
-                setTimeout(() => {
-                    chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-                }, 100);
-            }
-            */
+            // Auto-scrolling is handled by useEffect hooks
 
         } catch (error) {
             Zotero.debug(`DeepTutorChatBox: userSendMessage - ERROR sending message "${messageString}": ${error.message}`);
@@ -820,6 +853,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const sendToAPI = async (message) => {
         try {
             setIsStreaming(true); // Set streaming to true at start
+            isAutoScrollingRef.current = true; // Re-enable auto-scrolling for new stream
+            Zotero.debug(`DeepTutorChatBox: Auto-scrolling FORCE ENABLED for streaming`);
             // Send message to API
             const responseData = await createMessage(message)
             Zotero.debug(`DeepTutorChatBox: Create Message Response from API: ${JSON.stringify(responseData)}`);
@@ -1140,14 +1175,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 message: processedMessage
             }));
 
-            // Scroll to bottom after message is added
-            /*
-            if (chatLogRef.current) {
-                setTimeout(() => {
-                    chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-                }, 100);
-            }
-            */
+            // Auto-scrolling is handled by useEffect hooks
         }
     };
 
@@ -1959,7 +1987,12 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 )}
             </div>
 
-            <div ref={chatLogRef} style={styles.chatLog}>
+            <div 
+                ref={chatLogRef} 
+                style={styles.chatLog}
+                onWheel={handleWheel}
+                onScroll={handleScroll}
+            >
                 {messages.map((message, index) => renderMessage(message, index))}
             </div>
 

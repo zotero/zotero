@@ -1262,6 +1262,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							style={{
 								position: 'relative',
 								width: '80%',
+								minWidth: '21.25rem',
 								maxWidth: '26.875rem',
 								maxHeight: '80%',
 								background: '#FFFFFF',
@@ -1343,6 +1344,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							style={{
 								position: 'relative',
 								width: '80%',
+								minWidth: '21.25rem',
 								maxWidth: '26.875rem',
 								maxHeight: '80%',
 								background: '#FFFFFF',
@@ -1425,6 +1427,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							style={{
 								position: 'relative',
 								width: '80%',
+								minWidth: '21.25rem',
 								maxWidth: '26.875rem',
 								maxHeight: '80%',
 								background: '#FFFFFF',
@@ -1509,6 +1512,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							style={{
 								position: 'relative',
 								width: '80%',
+								minWidth: '21.25rem',
 								maxWidth: '30rem',
 								maxHeight: '80%',
 								background: '#FFFFFF',
@@ -1598,6 +1602,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							style={{
 								position: 'relative',
 								width: '80%',
+								minWidth: '21.25rem',
 								maxWidth: '30rem',
 								maxHeight: '80%',
 								background: '#FFFFFF',
@@ -1681,6 +1686,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 							style={{
 								position: 'relative',
 								width: '80%',
+								minWidth: '21.25rem',
 								maxWidth: '26.875rem',
 								maxHeight: '99%',
 								background: '#FFFFFF',
