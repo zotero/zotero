@@ -382,6 +382,11 @@ const styles = {
         width: '100%',
         textAlign: 'left',
     },
+    viewContextContainer: {
+        position: 'relative',
+        width: '100%',
+        marginBottom: '1.25rem',
+    },
     viewContextButton: {
         all: 'revert',
         width: '100%',
@@ -395,12 +400,57 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'space-between',
         boxSizing: 'border-box',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+    },
+    viewContextButtonHover: {
+        background: '#FFFFFF',
     },
     viewContextText: {
         fontSize: '1rem',
         fontWeight: 500,
         color: '#757575',
         lineHeight: '100%',
+    },
+    contextPopup: {
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        right: 0,
+        background: '#F2F2F2',
+        border: '0.0625rem solid #E0E0E0',
+        borderRadius: '0.5rem',
+        boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
+        zIndex: 1000,
+        maxHeight: '10rem',
+        overflowY: 'auto',
+        marginTop: '0.25rem',
+        boxSizing: 'border-box',
+    },
+    contextDocumentButton: {
+        all: 'revert',
+        width: '100%',
+        padding: '0.75rem',
+        background: '#F8F6F7',
+        border: 'none',
+        borderBottom: '0.0625rem solid #E0E0E0',
+        color: '#292929',
+        fontSize: '0.875rem',
+        fontWeight: 400,
+        cursor: 'pointer',
+        textAlign: 'left',
+        fontFamily: 'Roboto, sans-serif',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        transition: 'background-color 0.2s',
+        boxSizing: 'border-box',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
+    contextDocumentButtonHover: {
+        background: '#FFFFFF',
     },
 };
 
@@ -421,11 +471,15 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
     const [showSessionPopup, setShowSessionPopup] = useState(false);
     const MAX_VISIBLE_SESSIONS = 2;
     const chatLogRef = useRef(null);
+    const contextPopupRef = useRef(null);
+    const [hoveredContextDoc, setHoveredContextDoc] = useState(null);
     // Removed hoveredQuestion and hoveredPopupSession states - these were causing unnecessary re-renders
     // const [hoveredQuestion, setHoveredQuestion] = useState(null);
     // const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
     const [iniWait, setInitWait] = useState(false);
     const [isStreaming, setIsStreaming] = useState(false);
+    const [showContextPopup, setShowContextPopup] = useState(false);
+    const [contextDocuments, setContextDocuments] = useState([]);
 
     // Load recent sessions from preferences on component mount
     useEffect(() => {
@@ -1212,6 +1266,39 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         await userSendMessage(question);
     };
 
+    const handleContextButtonClick = () => {
+        Zotero.debug(`DeepTutorChatBox: Context button clicked, current popup state: ${showContextPopup}`);
+        setShowContextPopup(!showContextPopup);
+    };
+
+    const handleContextDocumentClick = async (contextDoc) => {
+        Zotero.debug(`DeepTutorChatBox: Context document clicked: ${contextDoc.name} (ID: ${contextDoc.zoteroAttachmentId})`);
+        
+        try {
+            // Get the item and open it
+            const item = Zotero.Items.get(contextDoc.zoteroAttachmentId);
+            if (!item) {
+                Zotero.debug(`DeepTutorChatBox: No item found for ID ${contextDoc.zoteroAttachmentId}`);
+                return;
+            }
+
+            // Open the document in the reader at first page
+            await Zotero.FileHandlers.open(item, {
+                location: {
+                    pageIndex: 0 // Start at first page
+                }
+            });
+            Zotero.debug(`DeepTutorChatBox: Opened document ${contextDoc.name} in reader`);
+            
+            // Close the popup after opening document
+            setShowContextPopup(false);
+            
+        } catch (error) {
+            Zotero.debug(`DeepTutorChatBox: Error opening context document: ${error.message}`);
+            Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+        }
+    };
+
     const onNewSession = async (newSession) => {
         try {
             Zotero.debug(`DeepTutorChatBox: onNewSession CALLED for session ${newSession?.id || 'null'}: ${JSON.stringify(newSession)}`);
@@ -1479,6 +1566,132 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         openFirstDocument();
     }, [documentIds, sessionId]); // Dependencies array
 
+    // Load context documents when documentIds change
+    useEffect(() => {
+        const loadContextDocuments = async () => {
+            if (!documentIds || documentIds.length === 0 || !sessionId) {
+                Zotero.debug(`DeepTutorChatBox: No documentIds or sessionId available for context loading`);
+                setContextDocuments([]);
+                return;
+            }
+
+            Zotero.debug(`DeepTutorChatBox: Loading context documents for ${documentIds.length} documents`);
+            
+            try {
+                // Try to get the mapping from local storage
+                const storageKey = `deeptutor_mapping_${sessionId}`;
+                const mappingStr = Zotero.Prefs.get(storageKey);
+                let mapping = {};
+                
+                if (mappingStr) {
+                    mapping = JSON.parse(mappingStr);
+                    Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
+                }
+
+                const contextDocs = [];
+                for (const documentId of documentIds) {
+                    try {
+                        // Get the actual Zotero attachment ID
+                        let zoteroAttachmentId = documentId;
+                        if (mapping[documentId]) {
+                            zoteroAttachmentId = mapping[documentId];
+                            Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId} for document ${documentId}`);
+                        }
+
+                        // Try to get the Zotero item to get the document name and path
+                        const item = Zotero.Items.get(zoteroAttachmentId);
+                        let documentName = documentId; // fallback to documentId
+                        let filePath = null;
+
+                        if (item) {
+                            // Try to get the title from the item or its parent
+                            if (item.getDisplayTitle) {
+                                documentName = item.getDisplayTitle();
+                                Zotero.debug(`DeepTutorChatBox: Found item title: ${documentName}`);
+                            } else if (item.parentItem) {
+                                const parentItem = Zotero.Items.get(item.parentItem);
+                                if (parentItem && parentItem.getDisplayTitle) {
+                                    documentName = parentItem.getDisplayTitle();
+                                    Zotero.debug(`DeepTutorChatBox: Found parent item title: ${documentName}`);
+                                }
+                            }
+                            // If we still don't have a good name, try using the filename
+                            if (documentName === documentId && item.attachmentFilename) {
+                                documentName = item.attachmentFilename;
+                                Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
+                            }
+
+                            // Get the file path if it's an attachment
+                            if (item.isAttachment && item.isAttachment()) {
+                                try {
+                                    filePath = await item.getFilePathAsync();
+                                    if (filePath) {
+                                        Zotero.debug(`DeepTutorChatBox: Found file path: ${filePath}`);
+                                        // Optionally truncate long paths for display
+                                        const maxPathLength = 60;
+                                        if (filePath.length > maxPathLength) {
+                                            const pathParts = filePath.split(/[/\\]/);
+                                            const filename = pathParts[pathParts.length - 1];
+                                            const pathPrefix = filePath.substring(0, maxPathLength - filename.length - 3);
+                                            filePath = pathPrefix + '...' + filename;
+                                        }
+                                    }
+                                } catch (error) {
+                                    Zotero.debug(`DeepTutorChatBox: Error getting file path for ${zoteroAttachmentId}: ${error.message}`);
+                                }
+                            }
+                        } else {
+                            Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}, using document ID as name`);
+                        }
+
+                        contextDocs.push({
+                            documentId: documentId,
+                            zoteroAttachmentId: zoteroAttachmentId,
+                            name: documentName,
+                            filePath: filePath // Add file path to the context document object
+                        });
+
+                    } catch (error) {
+                        Zotero.debug(`DeepTutorChatBox: Error processing document ${documentId}: ${error.message}`);
+                        // Add with fallback name
+                        contextDocs.push({
+                            documentId: documentId,
+                            zoteroAttachmentId: documentId,
+                            name: documentId,
+                            filePath: null
+                        });
+                    }
+                }
+
+                Zotero.debug(`DeepTutorChatBox: Loaded ${contextDocs.length} context documents`);
+                setContextDocuments(contextDocs);
+
+            } catch (error) {
+                Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
+                setContextDocuments([]);
+            }
+        };
+
+        loadContextDocuments();
+    }, [documentIds, sessionId]);
+
+    // Handle click outside context popup
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (contextPopupRef.current && !contextPopupRef.current.contains(event.target)) {
+                Zotero.debug(`DeepTutorChatBox: Clicked outside context popup, closing`);
+                setShowContextPopup(false);
+            }
+        };
+
+        if (showContextPopup) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }
+    }, [showContextPopup]);
+
     const updateRecentSessions = async (sessionId) => {
         try {
             const session = await getSessionById(sessionId);
@@ -1671,10 +1884,80 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 {currentSession?.sessionName || 'New Session'}
             </div>
 
-            <button style={styles.viewContextButton}>
-                <span style={styles.viewContextText}>View Context</span>
-                <img src={ArrowDownPath} alt="Arrow Down" />
-            </button>
+            <div style={styles.viewContextContainer} ref={contextPopupRef}>
+                <button 
+                    style={styles.viewContextButton}
+                    onClick={handleContextButtonClick}
+                >
+                    <span style={styles.viewContextText}>View Context</span>
+                    <img src={ArrowDownPath} alt="Arrow Down" />
+                </button>
+                
+                {showContextPopup && (
+                    <div style={styles.contextPopup}>
+                        {contextDocuments.length > 0 ? (
+                            contextDocuments.map((contextDoc, index) => (
+                                <button
+                                    key={contextDoc.documentId}
+                                    style={{
+                                        ...styles.contextDocumentButton,
+                                        ...(hoveredContextDoc === index ? styles.contextDocumentButtonHover : {}),
+                                        borderBottom: index === contextDocuments.length - 1 ? 'none' : '0.0625rem solid #E0E0E0',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                        padding: '0.75rem 0.9375rem',
+                                        minHeight: contextDoc.filePath ? '3rem' : 'auto',
+                                        background: '#FFFFFF',
+                                        gap: '0.3125rem'
+                                    }}
+                                    onClick={() => handleContextDocumentClick(contextDoc)}
+                                    onMouseEnter={() => setHoveredContextDoc(index)}
+                                    onMouseLeave={() => setHoveredContextDoc(null)}
+                                    title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : contextDoc.name} // Show full info on hover
+                                >
+                                    <div style={{
+                                        fontSize: '1rem',
+                                        fontWeight: 400,
+                                        color: '#1C1B1F',
+                                        lineHeight: '180%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        width: '100%'
+                                    }}>
+                                        {contextDoc.name}
+                                    </div>
+                                    {contextDoc.filePath && (
+                                        <div style={{
+                                            fontSize: '0.875rem',
+                                            fontWeight: 400,
+                                            color: '#757575',
+                                            lineHeight: '135%',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            width: '100%',
+                                            fontStyle: 'italic'
+                                        }}>
+                                            {contextDoc.filePath}
+                                        </div>
+                                    )}
+                                </button>
+                            ))
+                        ) : (
+                            <div style={{
+                                padding: '0.75rem',
+                                color: '#757575',
+                                fontSize: '0.875rem',
+                                textAlign: 'center',
+                                fontStyle: 'italic'
+                            }}>
+                                No documents available
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <div ref={chatLogRef} style={styles.chatLog}>
                 {messages.map((message, index) => renderMessage(message, index))}
