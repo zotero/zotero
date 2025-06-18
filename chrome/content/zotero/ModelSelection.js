@@ -53,7 +53,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    maxHeight: '53rem',
+    maxHeight: '65vh',
     overflowY: 'auto',
     overflowX: 'hidden',
     boxSizing: 'border-box',

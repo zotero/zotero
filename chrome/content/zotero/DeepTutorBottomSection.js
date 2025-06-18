@@ -150,20 +150,16 @@ const styles = {
         color: '#666',
     },
     signOutButton: {
-        background: '#dc3545',
-        color: '#fff',
-        border: 'none',
+        background: '#fff',
+        color: '#dc3545',
+        border: '0.0625rem solid #dc3545',
         borderRadius: '0.25rem',
         padding: '0.375rem 0.75rem',
-        fontSize: '0.875rem',
+        fontSize: '1rem',
         fontWeight: 500,
         cursor: 'pointer',
         width: '100%',
-        marginTop: '0.5rem',
         transition: 'background 0.2s',
-        ':hover': {
-            background: '#c82333'
-        }
     },
 };
 
