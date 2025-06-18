@@ -29,7 +29,7 @@ class Conversation {
 		history = [],
 		message = null,
 		streaming = false,
-		type = SessionType.BASIC
+		type = null
 	} = {}) {
 		this.userId = userId;
 		this.sessionId = sessionId;
@@ -505,6 +505,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 Zotero.debug(`Current recent sessions TTT: ${JSON.stringify(recentSessions)}`);
                 await updateRecentSessions(currentSession.id);
                 Zotero.debug(`DeepTutorChatBox: Updated recent sessions for session ${currentSession.id}`);
+                Zotero.debug(`333333333333DeepTutorChatBox: Current session type: ${currentSession.type}`);
 
                 // Fetch document information
                 const newDocumentFiles = [];
@@ -540,12 +541,12 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             history: [],
             message: null,
             streaming: true,
-            type: SessionType.BASIC,
+            type: currentSession?.type || SessionType.BASIC,
             storagePaths: storagePathsState
         }));
         Zotero.debug(`DeepTutorChatBox: Conversation state updated with sessionId: ${sessionId}, userId: ${userId}`);
 
-    }, [sessionId, userId, documentIds]);
+    }, [sessionId, userId, documentIds, currentSession]);
 
     // Handle message updates
     useEffect(() => {
@@ -560,7 +561,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Fetching messages for session ${sessionId}`);
                 const sessionMessages = await getMessagesBySessionId(sessionId);
                 Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Retrieved ${sessionMessages.length} messages for session ${sessionId}`);
-                setMessages(sessionMessages);
+                setMessages([]);
                 
                 if (sessionMessages.length > 0) {
                     Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Session ${sessionId} has existing messages, processing them`);
@@ -664,7 +665,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         history: [],
         message: null,
         streaming: true,
-        type: SessionType.BASIC
+        type: currentSession?.type || SessionType.BASIC
     });
 
     /*
@@ -788,7 +789,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 history: messages,
                 message: responseData,
                 streaming: true,
-                type: SessionType.BASIC
+                type: currentSession?.type || SessionType.BASIC
             });
             
             setConversation(newState);
@@ -936,6 +937,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
         // Implementation for model selection
     };
 
+    /*
     const loadMessages = async (newMessages, newDocumentIds, sessionObj) => {
         Zotero.debug(`DeepTutorChatBox: loadMessages FUNCTION called with ${newMessages.length} messages, ${newDocumentIds?.length || 0} document IDs, sessionObj: ${sessionObj?.id || 'null'}`);
         
@@ -980,6 +982,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
             sessionId: sessionObj?.id || null,
             documentIds: newDocumentFiles.map(doc => doc.fileId),
             storagePaths: newDocumentFiles.map(doc => doc.storagePath),
+            type: sessionObj?.type || SessionType.BASIC,
             history: [] // Will be populated by _appendMessage
         }));
 
@@ -1018,8 +1021,9 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
             }, 100);
         }
-        */
+        
     };
+    */
 
     const _updateSessionInfo = (newSessionId, newDocumentIds) => {
         Zotero.debug(`DeepTutorChatBox: Updating session info - Session ID: ${newSessionId}, Document IDs: ${newDocumentIds?.length || 0}`);
