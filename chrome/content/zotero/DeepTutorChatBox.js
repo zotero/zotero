@@ -250,7 +250,8 @@ const styles = {
     },
     sourceButton: {
         all: 'revert',
-        background: '#0AE2FF',
+        background: '#0687E5',
+        opacity: 0.4,
         color: 'white',
         border: 'none',
         borderRadius: '50%',

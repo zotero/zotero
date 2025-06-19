@@ -257,14 +257,14 @@ const styles = {
     marginBottom: '1.25rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.3125rem',
+    gap: '0.625rem',
     width: '100%',
     height: '11rem',
   },
   modelFeature: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '0.3125rem',
+    gap: '0.625rem',
     fontSize: '1rem',
     lineHeight: '100%',
     letterSpacing: '0%',
@@ -282,14 +282,17 @@ const styles = {
     marginTop: '0.09375rem',
   },
   modelLimitations: {
-    marginTop: '0.3125rem',
     color: '#000000',
+    gap: '0.625rem',
     fontSize: '1rem',
-    lineHeight: '180%',
+    lineHeight: '100%',
     fontWeight: '400',
     letterSpacing: '0%',
-    width: '90%',
+    width: '100%',
     height: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   searchContainer: {
     position: 'relative',
@@ -1006,7 +1009,7 @@ function ModelSelection({ onSubmit, user }) {
                       style={styles.newFileListDelete}
                       onClick={() => handleRemoveFile(file.id)}
                     >
-                      <img src={DeleteImg} alt="Delete" width="24" height="24" />
+                      <img src={DeleteImg} alt="Delete" width="15" height="17" />
                     </button>
                   </div>
                 ))}
@@ -1108,10 +1111,10 @@ function ModelSelection({ onSubmit, user }) {
                 <span>Free for all users</span>
               </div>
               <div style={styles.modelLimitations}>
-                ❌ No summary<br />
-                ❌ No image understanding<br />
-                ❌ No advanced model like graphRAG<br />
-                ❌ No source content
+                <span>❌ No summary</span>
+                <span>❌ No image understanding</span>
+                <span>❌ No advanced model like graphRAG</span>
+                <span>❌ No source content</span>
               </div>
             </div>
           )}
@@ -1126,11 +1129,11 @@ function ModelSelection({ onSubmit, user }) {
                 <span>Available with Premium Subscription</span>
               </div>
               <div style={styles.modelLimitations}>
-                ✅ Image understanding<br />
-                ✅ Inference mode with DeepSeek<br />
-                ✅ High quality summary<br />
-                ✅ Source content highlight<br />
-                ✅ Markdown based RAG model
+                <span>✅ Image understanding</span>
+                <span>✅ Inference mode with DeepSeek</span>
+                <span>✅ High quality summary</span>
+                <span>✅ Source content highlight</span>
+                <span>✅ Markdown based RAG model</span>
               </div>
             </div>
           )}
@@ -1145,10 +1148,10 @@ function ModelSelection({ onSubmit, user }) {
                 <span>Available with Premium Subscription</span>
               </div>
               <div style={styles.modelLimitations}>
-                ✅ Everything in standard mode<br />
-                🌟 Deeper understanding on figures, equations, and tables<br />
-                🌟 Further enhanced context relavency<br />
-                🌟 More advanced model using GraphRAG
+                <span>✅ Everything in standard mode</span>
+                <span>🌟 Deeper understanding on figures, equations, and tables</span>
+                <span>🌟 Further enhanced context relavency</span>
+                <span>🌟 More advanced model using GraphRAG</span>
               </div>
             </div>
           )}

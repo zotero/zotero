@@ -38,6 +38,7 @@ import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
 import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
+import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
 import {
 	getMessagesBySessionId,
 	getSessionById,
@@ -563,8 +564,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignUpPopup: false,
 			showUpgradePopup: false,
 			showModelSelectionPopup: false,
+			showDeletePopup: false,
+			sessionToDelete: null,
+			sessionNameToDelete: '',
 			collapsed: false,
-			showSearch: false,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false,
 			// Auth state
@@ -824,6 +827,42 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}));
 	};
 
+	toggleDeletePopup = () => {
+		this.setState(prevState => ({
+			showDeletePopup: !prevState.showDeletePopup,
+			sessionToDelete: prevState.showDeletePopup ? null : prevState.sessionToDelete,
+			sessionNameToDelete: prevState.showDeletePopup ? '' : prevState.sessionNameToDelete
+		}));
+	};
+
+	handleShowDeletePopup = (sessionId) => {
+		const session = this.state.sesIdToObj.get(sessionId);
+		const sessionName = session ? session.sessionName || 'Unnamed Session' : 'this session';
+		
+		this.setState({
+			sessionToDelete: sessionId,
+			sessionNameToDelete: sessionName,
+			showDeletePopup: true
+		});
+	};
+
+	handleConfirmDelete = (sessionId) => {
+		this.handleDeleteSession(sessionId);
+		this.setState({
+			showDeletePopup: false,
+			sessionToDelete: null,
+			sessionNameToDelete: ''
+		});
+	};
+
+	handleCancelDelete = () => {
+		this.setState({
+			showDeletePopup: false,
+			sessionToDelete: null,
+			sessionNameToDelete: ''
+		});
+	};
+
 	toggleCollapse = () => {
 		this.setState(prevState => ({
 			collapsed: !prevState.collapsed
@@ -832,12 +871,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 				window.ZoteroPane.updateLayoutConstraints();
 			}
 		});
-	}
-
-	toggleSearch = () => {
-		this.setState(prevState => ({
-			showSearch: !prevState.showSearch
-		}));
 	}
 
 	handleSignOut = async () => {
@@ -856,7 +889,79 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 	handleOpenSignUpPage = () => {
 		// Open sign up page in default browser
-		Zotero.launchURL(DT_SIGN_UP_URL);
+		Zotero.debug("DeepTutor: Sign up button clicked");
+		const url = DT_SIGN_UP_URL;
+		Zotero.debug(`DeepTutor: Attempting to open sign up URL: ${url}`);
+		
+		try {
+			// Primary: Use Zotero's proper API for opening external URLs
+			Zotero.debug("DeepTutor: Trying primary method - Zotero.launchURL");
+			Zotero.launchURL(url);
+			Zotero.debug("DeepTutor: Successfully called Zotero.launchURL");
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Primary method failed - Zotero.launchURL: ${error.message}`);
+			
+			// Fallback 1: Try Zotero.Utilities.Internal.launchURL
+			try {
+				if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
+					Zotero.debug("DeepTutor: Trying Fallback 1 - Zotero.Utilities.Internal.launchURL");
+					Zotero.Utilities.Internal.launchURL(url);
+					Zotero.debug("DeepTutor: Successfully called Zotero.Utilities.Internal.launchURL");
+				} else {
+					throw new Error("Zotero.Utilities.Internal.launchURL not available");
+				}
+			} catch (fallback1Error) {
+				Zotero.debug(`DeepTutor: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
+				
+				// Fallback 2: Try Zotero.HTTP.loadDocuments
+				try {
+					if (Zotero.HTTP && Zotero.HTTP.loadDocuments) {
+						Zotero.debug("DeepTutor: Trying Fallback 2 - Zotero.HTTP.loadDocuments");
+						Zotero.HTTP.loadDocuments([url]);
+						Zotero.debug("DeepTutor: Successfully called Zotero.HTTP.loadDocuments");
+					} else {
+						throw new Error("Zotero.HTTP.loadDocuments not available");
+					}
+				} catch (fallback2Error) {
+					Zotero.debug(`DeepTutor: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
+					
+					// Fallback 3: Try XPCOM nsIExternalProtocolService
+					try {
+						if (typeof Cc !== 'undefined' && typeof Ci !== 'undefined') {
+							Zotero.debug("DeepTutor: Trying Fallback 3 - XPCOM nsIExternalProtocolService (using Cc/Ci shortcuts)");
+							const extps = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+								.getService(Ci.nsIExternalProtocolService);
+							const uri = Cc["@mozilla.org/network/io-service;1"]
+								.getService(Ci.nsIIOService)
+								.newURI(url, null, null);
+							extps.loadURI(uri);
+							Zotero.debug("DeepTutor: Successfully opened URL via XPCOM nsIExternalProtocolService");
+						} else {
+							throw new Error("XPCOM Cc/Ci shortcuts not available");
+						}
+					} catch (fallback3Error) {
+						Zotero.debug(`DeepTutor: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
+						
+						// Final fallback: Copy URL to clipboard
+						if (navigator.clipboard) {
+							Zotero.debug("DeepTutor: Trying final fallback - copy URL to clipboard");
+							navigator.clipboard.writeText(url)
+								.then(() => {
+									Zotero.debug("DeepTutor: Successfully copied sign up URL to clipboard");
+									Zotero.alert(null, "DeepTutor", 'Sign up URL copied to clipboard!\nPlease paste it in your browser to access the sign up page.');
+								})
+								.catch((clipboardError) => {
+									Zotero.debug(`DeepTutor: Failed to copy to clipboard: ${clipboardError.message}`);
+									Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
+								});
+						} else {
+							Zotero.debug("DeepTutor: Clipboard API not available, showing alert with URL");
+							Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
+						}
+					}
+				}
+			}
+		}
 	};
 
 	async loadSession() {
@@ -1221,11 +1326,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentPane={this.state.currentPane}
 					onSwitchPane={this.switchPane}
 					onToggleModelSelectionPopup={this.toggleModelSelectionPopup}
-					onToggleSearch={this.toggleSearch}
 					logoPath={logoPath}
 					HistoryIconPath={HistoryIconPath}
 					PlusIconPath={PlusIconPath}
-					MicroscopeIconPath={MicroscopeIconPath}
 				/>
 
 				{/* Middle Section */}
@@ -1245,9 +1348,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 								onSessionSelect={this.handleSessionSelect}
 								isLoading={this.state.isLoading}
 								error={this.state.error}
-								showSearch={this.state.showSearch}
 								onCreateNewSession={this.toggleModelSelectionPopup}
-								onDeleteSession={this.handleDeleteSession}
+								onShowDeletePopup={this.handleShowDeletePopup}
 							/>
 						}
 						{this.state.currentPane === 'noSession' &&
@@ -1714,6 +1816,92 @@ var DeepTutor = class DeepTutor extends React.Component {
 								this.toggleSignUpPopup();
 								this.toggleSignInPopup();
 							}} />
+						</div>
+					</div>
+				)}
+
+				{/* Delete Session Popup */}
+				{this.state.showDeletePopup && (
+					<div
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							backgroundColor: 'rgba(0, 0, 0, 0.5)',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							zIndex: 1000,
+							overflow: 'hidden',
+						}}
+						onClick={this.handleCancelDelete}
+					>
+						<div
+							style={{
+								position: 'relative',
+								width: '80%',
+								minWidth: '21.25rem',
+								maxWidth: '26.875rem',
+								maxHeight: '80%',
+								background: '#FFFFFF',
+								borderRadius: '0.625rem',
+								padding: '1.25rem',
+								overflow: 'auto'
+							}}
+							onClick={(e) => e.stopPropagation()}
+						>
+							{/* Delete Session Popup header */}
+							<div style={{
+								display: 'flex',
+								width: '100%',
+								alignItems: 'center',
+								marginBottom: '1.25rem',
+								minHeight: '1rem',
+								position: 'relative',
+							}}>
+								<div style={{
+									width: '100%',
+									textAlign: 'center',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '1.5rem',
+									lineHeight: '1.2',
+									letterSpacing: '0%',
+								}}>
+									Confirm Session Deletion?
+								</div>
+								<button
+									onClick={this.handleCancelDelete}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
+								</button>
+							</div>
+							<DeepTutorSessionDelete
+								sessionToDelete={this.state.sessionToDelete}
+								sessionName={this.state.sessionNameToDelete}
+								onConfirmDelete={this.handleConfirmDelete}
+								onCancelDelete={this.handleCancelDelete}
+							/>
 						</div>
 					</div>
 				)}

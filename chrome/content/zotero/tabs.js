@@ -511,6 +511,29 @@ var Zotero_Tabs = new function () {
 			// never return focus to another tab or <window>
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
+		
+		// FIX0618: Collapse deeptutor pane when switching to reader mode
+		/*
+		if (tab.type === 'reader' || tab.type === 'reader-unloaded' || tab.type === 'reader-loading') {
+			let deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+			let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+			
+			if (deepTutorPane && deeptutorSplitter) {
+				let isDeepTutorOpen = !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true';
+				if (isDeepTutorOpen) {
+					Zotero.debug('Tabs: Collapsing DeepTutor pane when switching to reader mode');
+					deepTutorPane.hidden = true;
+					deepTutorPane.setAttribute('collapsed', 'true');
+					deeptutorSplitter.setAttribute('state', 'collapsed');
+					// Update layout constraints after collapsing
+					if (typeof ZoteroPane !== 'undefined' && ZoteroPane.updateLayoutConstraints) {
+						ZoteroPane.updateLayoutConstraints();
+					}
+				}
+			}
+		}
+		*/
+		
 		if (tab.type === 'reader-unloaded') {
 			tab.type = "reader-loading";
 			// Make sure the loading message is displayed first.
