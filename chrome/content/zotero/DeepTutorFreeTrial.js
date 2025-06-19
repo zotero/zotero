@@ -49,13 +49,21 @@ const styles = {
 		gap: '0.625rem',
 		marginBottom: '1.25rem',
 	},
-	price: {
+	oldPrice: {
+		fontWeight: 500,
+		fontSize: "1.125rem",
+		color: "#AFAFAF",
+		textDecoration: "line-through",
+		marginRight: "0.5rem",
+		display: "flex",
+		alignItems: "center",
+	},
+	newPrice: {
 		fontWeight: 700,
-		fontSize: '2.25rem',
-		color: '#333333',
-		margin: 0,
-		display: 'flex',
-		alignItems: 'center',
+		fontSize: "2.75rem",
+		color: "#333333",
+		marginBottom: "-0.5rem",
+		display: "flex",
 	},
 	monthly: {
 		color: '#AFAFAF',
@@ -107,15 +115,15 @@ const styles = {
 	},
 };
 
-export default function DeepTutorUpgradePremium({ onGetPremium }) {
-
+export default function DeepTutorFreeTrial({ onStartTrial }) {
 	return (
 		<div style={styles.container}>
 			<div style={styles.contentFrame}>
 				<div style={styles.headerFrame}>
 					<div style={styles.premium}>Premium</div>
 					<div style={styles.priceFrame}>
-						<div style={styles.price}>$14.99</div>
+						<div style={styles.oldPrice}>$14.99</div>
+						<div style={styles.newPrice}>$0</div>
 						<div style={styles.monthly}>monthly</div>
 					</div>
 				</div>
@@ -124,13 +132,13 @@ export default function DeepTutorUpgradePremium({ onGetPremium }) {
 					<div style={styles.featureRow}>✅ Unlimited Standard Mode sessions</div>
 					<div style={styles.featureRow}>✅ Unlimited Advanced Mode sessions</div>
 					<div style={styles.featureRow}>✅ Up to 100 pages and 30Mb/file</div>
+					<div style={styles.featureRow}>✅ No payment method needed</div>
 				</div>
 			</div>
-			<button style={styles.button} onClick={onGetPremium}>Get Premium</button>
-		</div>
-	);
+			<button style={styles.button} onClick={onStartTrial}>Start 30 Days Free Trial</button>
+		</div>);
 }
 
-DeepTutorUpgradePremium.propTypes = {
+DeepTutorFreeTrial.propTypes = {
 	onUpgradeSuccess: PropTypes.func.isRequired
 };

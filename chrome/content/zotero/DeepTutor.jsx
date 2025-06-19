@@ -32,11 +32,12 @@ import DeepTutorChatBox from './DeepTutorChatBox.js';
 import DeepTutorWelcomePane from './DeepTutorWelcomePane.js';
 import DeepTutorSignIn from './DeepTutorSignIn.js';
 import DeepTutorSignUp from './DeepTutorSignUp.js';
-import DeepTutorUpgradePremium from './DeepTutorUpgradePremium.js';
+import DeepTutorSubscription from './DeepTutorSubscription.js';
+// import DeepTutorUpgradePremium from './DeepTutorUpgradePremium.js';
 import DeepTutorTopSection from './DeepTutorTopSection.js';
 import DeepTutorBottomSection from './DeepTutorBottomSection.js';
-import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
-import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
+// import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
+// import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
 import {
@@ -44,7 +45,11 @@ import {
 	getSessionById,
 	getSessionsByUserId,
 	getUserByProviderUserId,
+	registerUser,
+	createBackendUser,
 	deleteSessionById,
+	getActiveUserSubscriptionByUserId,
+	getLatestUserSubscriptionByUserId,
 	DT_SIGN_UP_URL
 } from './api/libs/api.js';
 import {
@@ -189,7 +194,7 @@ class Message {
 		status = MessageStatus.UNVIEW,
 		role = MessageRole.USER
 	} = {}) {
-		this.id = null;  // Always set id to null
+		this.id = null; // Always set id to null
 		this.parentMessageId = parentMessageId;
 		this.userId = userId;
 		this.sessionId = sessionId;
@@ -331,8 +336,6 @@ const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_N
 const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE.svg';
 const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_SEARCH.svg';
-const SubscriptionConfirmBookPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SUB_SUCCESS.svg';
-const SubscriptionManageMarkPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SUB_MANAGEMENT.svg';
 const PopupClosePath = 'chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg';
 
 const styles = {
@@ -476,7 +479,7 @@ const styles = {
 		background: '#fff',
 		borderRadius: '0.5rem',
 		boxShadow: '0 0.125rem 0.5rem rgba(0,0,0,0.15)',
-		padding: '0.75rem',
+		padding: '0.25rem 0.5rem 0.5rem 0.5rem',
 		marginBottom: '0.5rem',
 		zIndex: 1000,
 		minWidth: '12.5rem',
@@ -515,7 +518,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 	 * @param {Object} opts - Options to pass as props
 	 * @returns {Promise<DeepTutor>}
 	 */
-	static async init(domEl, opts={}) {
+	static async init(domEl, opts = {}) {
 		Zotero.debug("DPTDPTDEBUG!! DeepTutor.init called with options:", opts);
 		var ref;
 		opts.domEl = domEl;
@@ -562,7 +565,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showProfilePopup: false,
 			showSignInPopup: false,
 			showSignUpPopup: false,
-			showUpgradePopup: false,
 			showModelSelectionPopup: false,
 			showDeletePopup: false,
 			sessionToDelete: null,
@@ -570,6 +572,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			collapsed: false,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false,
+			showSearch: false,
+			showSubscriptionPopup: false,
 			// Auth state
 			isAuthenticated: false,
 			currentUser: null,
@@ -577,13 +581,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 			// Prevent infinite loops
 			isLoadingSessions: false,
 			// Store backend user data
-			userData: null
+			userData: null,
+			userSubscribed: false,
+			isFreeTrial: true
 		};
 		this._initialized = false;
 		this._selection = null;
 		this._messages = [];
 		this._currentSession = null;
-		this._loadingPromise = new Promise(resolve => {
+		this._loadingPromise = new Promise((resolve) => {
 			this._loadingPromiseResolve = resolve;
 		});
 		this.containerRef = React.createRef();
@@ -655,7 +661,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 						await this.loadSession();
 					}
 				});
-			} else {
+			}
+			else {
 				Zotero.debug("DeepTutor: User is not authenticated");
 				this.setState({
 					isAuthenticated: false,
@@ -663,7 +670,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 					currentPane: 'welcome'
 				});
 			}
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Auth initialization error: ${error.message}`);
 
 			// Don't attempt refresh for rate limiting errors
@@ -691,7 +699,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 						await this.loadSession();
 					}
 				});
-			} catch (refreshError) {
+			}
+			catch (refreshError) {
 				Zotero.debug(`DeepTutor: Session refresh failed: ${refreshError.message}`);
 				this.setState({
 					isAuthenticated: false,
@@ -726,7 +735,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 					await this.loadSession();
 				}
 				// this.switchPane(this.getSessionHistoryPaneOrNoSession());
-			} else {
+			}
+			else {
 				// User signed out, clear data and show welcome
 				this.setState({
 					sessions: [],
@@ -756,15 +766,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 	handleNewSession = () => {
 		this.props.onNewSession();
-	}
+	};
 
 	handleSendMessage = () => {
 		this.props.onSendMessage();
-	}
+	};
 
 	handleSwitchComponent = (componentId) => {
 		this.props.onSwitchComponent(componentId);
-	}
+	};
 
 	// Placeholder for pane switching logic
 	switchPane = (pane) => {
@@ -800,12 +810,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 	toggleSignUpPopup = () => {
 		this.setState(prevState => ({
 			showSignUpPopup: !prevState.showSignUpPopup
-		}));
-	};
-
-	toggleUpgradePopup = () => {
-		this.setState(prevState => ({
-			showUpgradePopup: !prevState.showUpgradePopup
 		}));
 	};
 
@@ -871,7 +875,94 @@ var DeepTutor = class DeepTutor extends React.Component {
 				window.ZoteroPane.updateLayoutConstraints();
 			}
 		});
-	}
+	};
+
+	toggleSearch = () => {
+		this.setState(prevState => ({
+			showSearch: !prevState.showSearch
+		}));
+	};
+
+	toggleSubscriptionPopup = () => {
+		this.setState(prevState => ({
+			showSubscriptionPopup: !prevState.showSubscriptionPopup
+		}));
+	};
+
+	/**
+	 * Handles subscription status change from DeepTutorSubscription component
+	 * @param {boolean} hasActiveSubscription - Whether user has active subscription
+	 */
+	handleSubscriptionStatusChange = async (hasActiveSubscription) => {
+		try {
+			Zotero.debug(`DeepTutor: Subscription status changed to: ${hasActiveSubscription}`);
+			
+			// Update the subscription status in state
+			this.setState({ userSubscribed: hasActiveSubscription });
+			
+			// If user now has subscription, also update isFreeTrial status
+			if (hasActiveSubscription) {
+				this.setState({ isFreeTrial: false });
+			} else {
+				// If user doesn't have active subscription, check if they have any subscription history
+				if (this.state.userData?.id) {
+					try {
+						const latestSubscription = await getLatestUserSubscriptionByUserId(this.state.userData.id);
+						this.setState({ isFreeTrial: !latestSubscription });
+					} catch (error) {
+						Zotero.debug(`DeepTutor: Error checking latest subscription: ${error.message}`);
+						this.setState({ isFreeTrial: true });
+					}
+				}
+			}
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Error handling subscription status change: ${error.message}`);
+		}
+	};
+
+	/**
+	 * Refreshes subscription data from the server
+	 */
+	refreshSubscriptionData = async () => {
+		try {
+			if (!this.state.userData?.id) {
+				Zotero.debug("DeepTutor: Cannot refresh subscription data - no user ID");
+				return;
+			}
+
+			Zotero.debug("DeepTutor: Refreshing subscription data from server");
+
+			// Check active subscription
+			let userSubscribed = false;
+			try {
+				const activeSubscription = await getActiveUserSubscriptionByUserId(this.state.userData.id);
+				userSubscribed = !!activeSubscription;
+				Zotero.debug('DeepTutor: Active subscription status:', userSubscribed);
+			} catch (error) {
+				Zotero.debug('DeepTutor: Error checking active subscription:', error);
+			}
+
+			// Check latest subscription
+			let isFreeTrial = true;
+			try {
+				const latestSubscription = await getLatestUserSubscriptionByUserId(this.state.userData.id);
+				isFreeTrial = !latestSubscription;
+				Zotero.debug('DeepTutor: Latest subscription status:', isFreeTrial);
+			} catch (error) {
+				Zotero.debug('DeepTutor: Error checking latest subscription:', error);
+			}
+
+			// Update state with fresh subscription data
+			this.setState({
+				userSubscribed,
+				isFreeTrial
+			});
+
+			Zotero.debug("DeepTutor: Subscription data refreshed successfully");
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Error refreshing subscription data: ${error.message}`);
+		}
+	};
 
 	handleSignOut = async () => {
 		try {
@@ -882,7 +973,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			this.setState({ showProfilePopup: false });
 
 			Zotero.debug("DeepTutor: Sign out successful");
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Sign out error: ${error.message}`);
 		}
 	};
@@ -1004,13 +1096,38 @@ var DeepTutor = class DeepTutor extends React.Component {
 					// Get user data using the provider user ID (sub)
 					Zotero.debug('DeepTutor: Calling getUserByProviderUserId with providerUserId');
 					getUserByProviderUserId(providerUserId)
-						.then(userData => {
+						.then((userData) => {
 							Zotero.debug('DeepTutor: getUserByProviderUserId successful');
 							resolve(userData);
 						})
-						.catch(error => {
+						.catch(async (error) => {
 							Zotero.debug(`DeepTutor: Error getting user by provider ID: ${error.message}`);
-							reject(error);
+
+							// If user not found, try to register them
+							if (error.message && (error.message.includes('404') || error.message.includes('Not Found'))) {
+								try {
+									Zotero.debug('DeepTutor: User not found, attempting to register new user');
+
+									// Create new user object
+									const newUser = createBackendUser({
+										name: currentUserData.user.attributes?.name || currentUserData.user.username || 'DeepTutor User',
+										email: currentUserData.user.attributes?.email || currentUserData.user.username,
+										providerUserId: providerUserId
+									});
+
+									// Register the user
+									const registeredUser = await registerUser(newUser);
+									Zotero.debug('DeepTutor: User registration successful from Google OAuth');
+									Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(registeredUser)}`);
+
+									resolve(registeredUser);
+								} catch (registerError) {
+									Zotero.debug(`DeepTutor: Error registering user: ${registerError.message}`);
+									reject(registerError);
+								}
+							} else {
+								reject(error);
+							}
 						});
 					return;
 				}
@@ -1038,19 +1155,53 @@ var DeepTutor = class DeepTutor extends React.Component {
 						return;
 					}
 
+					// Find the 'email' attribute for the actual email address
+					const emailAttribute = attributes.find(attr => attr.getName() === 'email');
+					const userEmail = emailAttribute ? emailAttribute.getValue() : currentUserData.user.username;
+
+					// Find the 'name' attribute for the user's name
+					const nameAttribute = attributes.find(attr => attr.getName() === 'name');
+					const userName = nameAttribute ? nameAttribute.getValue() : currentUserData.user.username;
+
 					const providerUserId = subAttribute.getValue();
 					Zotero.debug('DeepTutor: Using provider user ID from getUserAttributes');
+					Zotero.debug(`DeepTutor: User email: ${userEmail}, name: ${userName}`);
 
 					// Get user data using the provider user ID (sub)
 					Zotero.debug('DeepTutor: Calling getUserByProviderUserId with providerUserId');
 					getUserByProviderUserId(providerUserId)
-						.then(userData => {
+						.then((userData) => {
 							Zotero.debug('DeepTutor: getUserByProviderUserId successful');
 							resolve(userData);
 						})
-						.catch(error => {
+						.catch(async (error) => {
 							Zotero.debug(`DeepTutor: Error getting user by provider ID: ${error.message}`);
-							reject(error);
+
+							// If user not found, try to register them
+							if (error.message && (error.message.includes('404') || error.message.includes('Not Found'))) {
+								try {
+									Zotero.debug('DeepTutor: User not found, attempting to register new user');
+
+									// Create new user object
+									const newUser = createBackendUser({
+										name: userName || 'DeepTutor User',
+										email: userEmail,
+										providerUserId: providerUserId
+									});
+
+									// Register the user
+									const registeredUser = await registerUser(newUser);
+									Zotero.debug('DeepTutor: User registration successful from regular Cognito');
+									Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(registeredUser)}`);
+
+									resolve(registeredUser);
+								} catch (registerError) {
+									Zotero.debug(`DeepTutor: Error registering user: ${registerError.message}`);
+									reject(registerError);
+								}
+							} else {
+								reject(error);
+							}
 						});
 				});
 			});
@@ -1064,7 +1215,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 			// Update session name to object mapping
 			const sesIdToObj = new Map();
-			sessions.forEach(session => {
+			sessions.forEach((session) => {
 				sesIdToObj.set(session.id, session);
 			});
 
@@ -1081,7 +1232,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			Zotero.debug(`DeepTutor061306130613: Sessions length: ${sessions.length}`);
 			if (sessions.length === 0) {
 				this.switchPane('noSession');
-			} else {
+			}
+			else {
 				// If sessions exist, switch to main pane
 				this.switchPane('sessionHistory');
 			}
@@ -1091,8 +1243,39 @@ var DeepTutor = class DeepTutor extends React.Component {
 				this.setState({ userData });
 			}
 
+			// Check active subscription
+			let userSubscribed = false;
+			try {
+				const activeSubscription = await getActiveUserSubscriptionByUserId(userData.id);
+				userSubscribed = !!activeSubscription;
+				Zotero.debug('DeepTutor: Active subscription status:', userSubscribed);
+			}
+			catch (error) {
+				Zotero.debug('DeepTutor: Error checking active subscription:', error);
+			}
+
+			// Check latest subscription
+			let isFreeTrial = true;
+			try {
+				const latestSubscription = await getLatestUserSubscriptionByUserId(userData.id);
+				console.log(latestSubscription);
+				isFreeTrial = !latestSubscription;
+				Zotero.debug('DeepTutor: Latest subscription status:', isFreeTrial);
+			}
+			catch (error) {
+				Zotero.debug('DeepTutor: Error checking latest subscription:', error);
+			}
+
+			// Save to state
+			this.setState({
+				userData,
+				userSubscribed,
+				isFreeTrial
+			});
+
 			Zotero.debug(`DeepTutor: Successfully loaded ${sessions.length} sessions`);
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Error loading sessions: ${error.message}`);
 
 			// Handle rate limiting errors specifically - don't trigger auth state changes
@@ -1116,7 +1299,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 					authError: 'Please sign in to continue',
 					isLoadingSessions: false
 				});
-			} else {
+			}
+			else {
 				this.setState({
 					error: error.message,
 					isLoading: false,
@@ -1166,13 +1350,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 				}
 
 				Zotero.debug(`DeepTutor: Messages loaded successfully`);
-			} catch (error) {
+			}
+			catch (error) {
 				Zotero.debug(`DeepTutor: Error in fetching messages: ${error.message}`);
 			}
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Error in handleSessionSelect: ${error.message}`);
 		}
-	}
+	};
 
 	handleDeleteSession = async (sessionId) => {
 		try {
@@ -1262,27 +1448,95 @@ var DeepTutor = class DeepTutor extends React.Component {
 				if (!subAttr) {
 					throw new Error('sub attribute not found on Cognito user');
 				}
+
+				// Store all necessary attributes for later use
+				const emailAttr = attributes.find(attr => attr.getName() === 'email');
+				const nameAttr = attributes.find(attr => attr.getName() === 'name');
+
+				// Add attributes to cognitoUser for later use in registration
+				cognitoUser.fetchedAttributes = {
+					email: emailAttr ? emailAttr.getValue() : cognitoUser.username,
+					name: nameAttr ? nameAttr.getValue() : cognitoUser.username
+				};
+
 				providerUserId = subAttr.getValue();
 				Zotero.debug(`DeepTutor: fetchUserData - Using provider user ID from regular Cognito: ${providerUserId}`);
+				Zotero.debug(`DeepTutor: fetchUserData - Fetched attributes: email=${cognitoUser.fetchedAttributes.email}, name=${cognitoUser.fetchedAttributes.name}`);
 			} else {
 				throw new Error('Cannot extract provider user ID from user object');
 			}
 
-			const userData = await getUserByProviderUserId(providerUserId);
-			Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
+			let userData;
+			try {
+				userData = await getUserByProviderUserId(providerUserId);
+				Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
+			} catch (getUserError) {
+				Zotero.debug(`DeepTutor: fetchUserData getUserByProviderUserId error: ${getUserError.message}`);
+
+				// If user not found, try to register them
+				if (getUserError.message && (getUserError.message.includes('404') || getUserError.message.includes('Not Found'))) {
+					try {
+						Zotero.debug('DeepTutor: User not found in fetchUserData, attempting to register new user');
+
+						// Create new user object
+						const newUser = createBackendUser({
+							name: cognitoUser.attributes?.name || cognitoUser.fetchedAttributes?.name || cognitoUser.name || cognitoUser.username || 'DeepTutor User',
+							email: cognitoUser.attributes?.email || cognitoUser.fetchedAttributes?.email || cognitoUser.email || cognitoUser.username || 'user@deeptutor.com',
+							providerUserId: providerUserId
+						});
+
+						// Register the user
+						userData = await registerUser(newUser);
+						Zotero.debug('DeepTutor: User registration successful in fetchUserData');
+						Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(userData)}`);
+					} catch (registerError) {
+						Zotero.debug(`DeepTutor: Error registering user in fetchUserData: ${registerError.message}`);
+						throw registerError;
+					}
+				} else {
+					throw getUserError;
+				}
+			}
+
+			// Check active subscription
+			let userSubscribed = false;
+			try {
+				const activeSubscription = await getActiveUserSubscriptionByUserId(userData.id);
+				userSubscribed = !!activeSubscription;
+				Zotero.debug('DeepTutor: Active subscription status:', userSubscribed);
+			}
+			catch (error) {
+				Zotero.debug('DeepTutor: Error checking active subscription:', error);
+			}
+
+			// Check latest subscription
+			let isFreeTrial = true;
+			try {
+				const latestSubscription = await getLatestUserSubscriptionByUserId(userData.id);
+				isFreeTrial = !latestSubscription;
+				Zotero.debug('DeepTutor: Latest subscription status:', isFreeTrial);
+			}
+			catch (error) {
+				Zotero.debug('DeepTutor: Error checking latest subscription:', error);
+			}
 
 			// Save to state
-			this.setState({ userData });
+			this.setState({
+				userData,
+				userSubscribed,
+				isFreeTrial
+			});
 			return userData;
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: fetchUserData error: ${error.message}`);
 
 			// If the error suggests authentication issues, clear the stored auth state
 			if (error.message && (
-				error.message.includes('Authentication required') ||
-				error.message.includes('Unauthorized') ||
-				error.message.includes('Invalid token') ||
-				error.message.includes('Token expired')
+				error.message.includes('Authentication required')
+				|| error.message.includes('Unauthorized')
+				|| error.message.includes('Invalid token')
+				|| error.message.includes('Token expired')
 			)) {
 				Zotero.debug('DeepTutor: Authentication error detected, clearing stored auth state');
 				await forceSignOut(); // This will clear the stored auth state
@@ -1342,8 +1596,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 								onSessionSelect={this.handleSessionSelect}
 							/>
 						)}
-						{this.state.currentPane === 'sessionHistory' &&
-							<SessionHistory
+						{this.state.currentPane === 'sessionHistory'
+							&& <SessionHistory
 								sessions={this.state.sessions}
 								onSessionSelect={this.handleSessionSelect}
 								isLoading={this.state.isLoading}
@@ -1352,11 +1606,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 								onShowDeletePopup={this.handleShowDeletePopup}
 							/>
 						}
-						{this.state.currentPane === 'noSession' &&
-							<DeepTutorNoSessionPane onCreateNewSession={this.toggleModelSelectionPopup} />
+						{this.state.currentPane === 'noSession'
+							&& <DeepTutorNoSessionPane onCreateNewSession={this.toggleModelSelectionPopup} />
 						}
-						{this.state.currentPane === 'modelSelection' &&
-							<ModelSelection
+						{this.state.currentPane === 'modelSelection'
+							&& <ModelSelection
 								onSubmit={async (sessionId) => {
 									try {
 										const sessionData = await getSessionById(sessionId);
@@ -1375,7 +1629,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 										await this.handleSessionSelect(session.id);
 										this.switchPane('main');
 										this.toggleModelSelectionPopup();
-									} catch (error) {
+									}
+									catch (error) {
 										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
 									}
 								}}
@@ -1396,9 +1651,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 						}} />}
 					</div>
 				</div>
-
-				{/* Upgrade Premium Popup */}
-				{this.state.showUpgradePopup && (
+				{/* Subscription Popups */}
+				{this.state.showSubscriptionPopup && (
 					<div
 						style={{
 							position: 'absolute',
@@ -1412,235 +1666,27 @@ var DeepTutor = class DeepTutor extends React.Component {
 							justifyContent: 'center',
 							zIndex: 1000,
 						}}
-						onClick={this.toggleUpgradePopup}
+						onClick={this.toggleSubscriptionPopup}
 					>
 						<div
 							style={{
 								position: 'relative',
 								width: '80%',
-								minWidth: '21.25rem',
 								maxWidth: '26.875rem',
 								maxHeight: '80%',
 								background: '#FFFFFF',
 								borderRadius: '0.625rem',
-								padding: '1.25rem',
+								padding: '0.25rem 0.5rem 0.5rem 0.5rem',
 								overflow: 'auto'
 							}}
 							onClick={(e) => e.stopPropagation()}
 						>
-							{/* Upgrade Premium Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '1.875rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Upgrade Your Plan
-								</div>
-								<button
-									onClick={this.toggleUpgradePopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorUpgradePremium onUpgradeSuccess={() => {
-								this.setState({ showUpgradePopup: false, showSubscriptionConfirmPopup: true });
-							}} />
-						</div>
-					</div>
-				)}
-
-				{/* Subscription Confirm Popup */}
-				{this.state.showSubscriptionConfirmPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-						}}
-						onClick={this.toggleSubscriptionConfirmPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '80%',
-								minWidth: '21.25rem',
-								maxWidth: '26.875rem',
-								maxHeight: '80%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto'
-							}}
-							onClick={(e) => e.stopPropagation()}
-						>
-							{/* Subscription Confirm Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '1.875rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Upgrade Successfully!
-								</div>
-								<button
-									onClick={this.toggleSubscriptionConfirmPopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorSubscriptionConfirm
-								imagePath={SubscriptionConfirmBookPath}
-								onClose={() => this.setState({ showSubscriptionConfirmPopup: false, showManageSubscriptionPopup: true })}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* Manage Subscription Popup */}
-				{this.state.showManageSubscriptionPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-						}}
-						onClick={this.toggleManageSubscriptionPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '80%',
-								minWidth: '21.25rem',
-								maxWidth: '26.875rem',
-								maxHeight: '80%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto'
-							}}
-							onClick={(e) => e.stopPropagation()}
-						>
-							{/* Manage Subscription Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '1.875rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Manage Subscription
-								</div>
-								<button
-									onClick={this.toggleManageSubscriptionPopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorManageSubscription
-								imagePath={SubscriptionManageMarkPath}
-								onManage={() => this.setState({ showManageSubscriptionPopup: false })}
-								onCancel={() => this.setState({ showManageSubscriptionPopup: false })}
+							<DeepTutorSubscription
+								userId={this.state.userData?.id}
+								userSubscribed={this.state.userSubscribed}
+								isFreeTrial={this.state.isFreeTrial}
+								toggleSubscriptionPopup={this.toggleSubscriptionPopup}
+								onSubscriptionStatusChange={this.handleSubscriptionStatusChange}
 							/>
 						</div>
 					</div>
@@ -1676,7 +1722,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								padding: '1.25rem',
 								overflow: 'auto'
 							}}
-							onClick={(e) => e.stopPropagation()}
+							onClick={e => e.stopPropagation()}
 						>
 							{/* Sign In Popup header */}
 							<div style={{
@@ -1766,7 +1812,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								padding: '1.25rem',
 								overflow: 'auto'
 							}}
-							onClick={(e) => e.stopPropagation()}
+							onClick={e => e.stopPropagation()}
 						>
 							{/* Sign Up Popup header */}
 							<div style={{
@@ -1936,7 +1982,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								padding: '1.25rem',
 								overflow: 'auto'
 							}}
-							onClick={(e) => e.stopPropagation()}
+							onClick={e => e.stopPropagation()}
 						>
 							{/* Model Selection Popup header */}
 							<div style={{
@@ -2002,7 +2048,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 										await this.handleSessionSelect(session.id);
 										this.switchPane('main');
 										this.toggleModelSelectionPopup();
-									} catch (error) {
+									}
+									catch (error) {
 										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
 									}
 								}}
@@ -2019,7 +2066,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					onToggleProfilePopup={this.toggleProfilePopup}
 					onToggleSignInPopup={this.toggleSignInPopup}
 					onToggleSignUpPopup={this.handleOpenSignUpPage}
-					onToggleUpgradePopup={this.toggleUpgradePopup}
+					onToggleSubscriptionPopup={this.toggleSubscriptionPopup}
 					showProfilePopup={this.state.showProfilePopup}
 					feedIconPath={FeedIconPath}
 					personIconPath={PersonIconPath}
@@ -2028,11 +2075,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 					onSignOut={this.handleSignOut}
 					onSwitchNoSession={() => this.switchPane('noSession')}
 					userData={this.state.userData}
+					userSubscribed={this.state.userSubscribed}
+					isFreeTrial={this.state.isFreeTrial}
 				/>
 			</div>
 		);
 	}
-}
+};
 
 // Add event dispatcher functionality
 Zotero.Utilities.Internal.makeClassEventDispatcher(DeepTutor);
