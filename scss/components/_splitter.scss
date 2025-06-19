@@ -70,7 +70,8 @@ splitter {
 
 #zotero-items-splitter,
 #zotero-context-splitter,
-#zotero-context-splitter-stacked {
+#zotero-context-splitter-stacked,
+#zotero-deeptutor-splitter {
 	&[orient=vertical] {
 		&[state="collapsed"] {
 			margin-bottom: -1px;
