@@ -1191,6 +1191,14 @@ class ReaderInstance {
 	_handleReaderTextboxContextMenuOpen = (event) => {
 		this._window.goUpdateGlobalEditMenuItems(true);
 
+		if (
+			event.view !== this._iframeWindow
+			// For text annotation box
+			&& (this._type !== 'pdf' || event.target?.nodeName !== 'TEXTAREA')
+		) {
+			return;
+		}
+
 		let iframeWindow = event.target.ownerGlobal;
 
 		this._window.MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
