@@ -247,6 +247,36 @@ export const registerUser = async (newUser) => {
 	return handledResponse.json();
 };
 
+export const getActiveUserSubscriptionByUserId = async (userId) => {
+	const requestConfig = {
+		method: 'GET',
+		headers: getAuthHeaders()
+	};
+
+	const response = await window.fetch(`${API_BASE_URL}/subscriptions/activeForUser/${userId}`, requestConfig);
+	const handledResponse = await handleApiResponse(response, {
+		url: `${API_BASE_URL}/users/subscription/${userId}`,
+		...requestConfig
+	});
+
+	return handledResponse.json();
+};
+
+export const getLatestUserSubscriptionByUserId = async (userId) => {
+	const requestConfig = {
+		method: 'GET',
+		headers: getAuthHeaders()
+	};
+	
+	const response = await window.fetch(`${API_BASE_URL}/subscriptions/latestForUser/${userId}`, requestConfig);
+	const handledResponse = await handleApiResponse(response, {
+		url: `${API_BASE_URL}/users/subscription/latest/${userId}`,
+		...requestConfig
+	});
+
+	return handledResponse.json();
+}
+
 // Document related API calls
 export const getDocumentById = async (documentId) => {
 	const requestConfig = {
