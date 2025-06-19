@@ -656,13 +656,22 @@ var Zotero_QuickFormat = new function () {
 		}).map(t => t.data.itemID);
 		if (!itemIDs.length) return [];
 
-		let items = itemIDs.map((itemID) => {
-			let item = Zotero.Items.get(itemID);
+		// Fetch top-most items and load necessary data, in case tabs belong to an unloaded library
+		let items = [];
+		for (let itemID of itemIDs) {
+			let item = await Zotero.Items.getAsync(itemID);
 			if (item && item.parentItemID) {
-				itemID = item.parentItemID;
+				item = await Zotero.Items.getAsync(item.parentItemID);
 			}
-			return Zotero.Cite.getItem(itemID);
-		});
+			// Ignore tabs from libraries that are not specified
+			if (io.filterLibraryIDs) {
+				let itemInLibrary = io.filterLibraryIDs.some(id => id === item.libraryID);
+				if (!itemInLibrary) continue;
+			}
+			items.push(item);
+		}
+		await Zotero.Items.loadDataTypes(items);
+
 		let matchedItems = new Set(items);
 		if (options.searchString) {
 			Zotero.debug("QuickFormat: Searching open tabs");
