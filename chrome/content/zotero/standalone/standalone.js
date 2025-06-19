@@ -478,6 +478,12 @@ const ZoteroStandalone = new function() {
 			'view-menuitem-recursive-collections',
 			Zotero.Prefs.get('recursiveCollections')
 		);
+		
+		// Hide context rows
+		this.updateMenuItemCheckmark(
+			'view-menuitem-hide-context-rows',
+			Zotero.Prefs.get('hideContextRows')
+		);
 	};
 	
 	
@@ -568,6 +574,10 @@ const ZoteroStandalone = new function() {
 			
 			case 'recursive-collections':
 				this.toggleBooleanPref('recursiveCollections');
+				break;
+
+			case 'hide-context-rows':
+				this.toggleBooleanPref('hideContextRows');
 				break;
 		}
 	};
