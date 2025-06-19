@@ -13,7 +13,7 @@ describe("Zotero.HTTP", function () {
 	
 	before(function* () {
 		// Real HTTP server
-		Components.utils.import("resource://zotero-unit/httpd.js");
+		var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");;
 		httpd = new HttpServer();
 		httpd.start(port);
 		httpd.registerPathHandler(

@@ -1268,7 +1268,7 @@ describe("Zotero.Attachments", function() {
 			var resolvers = [{
 				name: 'Custom',
 				method: 'get',
-				// Registered with httpd.js in beforeEach()
+				// Registered with HTTPD.jsm in beforeEach()
 				url: baseURL + "{doi}",
 				mode: 'html',
 				selector: '#pdf-link',

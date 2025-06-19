@@ -446,6 +446,68 @@ Zotero.File = new function(){
 		});
 	};
 
+	/**
+	 * Asynchronously writes data from an nsIAsyncInputStream to a file.
+	 *
+	 * Designed to handle input streams where data may not be
+	 * immediately or fully available, such as network streams.
+	 *
+	 * @param {nsIInputStream} inputStream - The input stream to read from. This
+	 *        stream should implement nsIAsyncInputStream.
+	 * @param {string} path - The file path where the data will be written.
+	 * @param {number} byteCount - The expected number of bytes to write.
+	 *
+	 * @returns {Promise<number>} A promise that resolves with the number of bytes
+	 *          written when the operation is complete, or rejects with an error
+	 *          if any issues occur during reading or writing.
+	 */
+	this.putNetworkStream = async function (path, stream, byteCount) {
+		return new Promise((resolve, reject) => {
+			let bytesRead = 0;
+			var os = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
+
+			let binaryInputStream = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
+			binaryInputStream.setInputStream(stream);
+
+			let readNextChunk = () => {
+				stream.asyncWait({
+					onInputStreamReady: (input) => {
+						try {
+							// Check available data in the stream
+							let available = input.available();
+							if (available > 0) {
+								os.write(binaryInputStream.readBytes(available), available);
+								bytesRead += available;
+
+								if (bytesRead < byteCount) {
+									// Continue reading
+									readNextChunk();
+								}
+								else {
+									// Finished writing all expected bytes
+									FileUtils.closeSafeFileOutputStream(os);
+									resolve(bytesRead);
+								}
+							}
+							else {
+								// No more data, finish the stream
+								FileUtils.closeSafeFileOutputStream(os);
+								resolve(bytesRead);
+							}
+						}
+						catch (e) {
+							os.close();
+							reject(new Components.Exception("File write operation failed", e));
+						}
+					}
+				}, 0, 0, null);
+			};
+
+			// Start reading the first chunk of data
+			readNextChunk();
+		});
+	};
+
 	this.download = async function (uri, path) {
 		var uriStr = uri.spec || uri;
 		

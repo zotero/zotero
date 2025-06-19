@@ -23,7 +23,7 @@ describe('Zotero_Import_Mendeley', function () {
 		Components.utils.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
 
 		// A real HTTP server is used to deliver a Bitcoin PDF so that annotations can be processed during import.
-		Components.utils.import("resource://zotero-unit/httpd.js");
+		var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");;
 		const port = 16213;
 		httpd = new HttpServer();
 		httpdURL = `http://127.0.0.1:${port}`;

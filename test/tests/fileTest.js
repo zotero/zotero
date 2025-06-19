@@ -469,7 +469,7 @@ describe("Zotero.File", function () {
 
 		before(async function () {
 			// Real HTTP server
-			Components.utils.import("resource://zotero-unit/httpd.js");
+			var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");;
 			port = 16213;
 			httpd = new HttpServer();
 			baseURL = `http://127.0.0.1:${port}`;

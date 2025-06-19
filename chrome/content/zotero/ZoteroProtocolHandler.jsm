@@ -969,99 +969,6 @@ function ZoteroProtocolHandler() {
 		}
 	};
 	
-	var ConnectorChannel = function(uri, data) {
-		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-			.getService(Components.interfaces.nsIScriptSecurityManager);
-		
-		this.name = uri;
-		this.URI = ios.newURI(uri, "UTF-8", null);
-		this.owner = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(this.URI);
-		this._isPending = true;
-		
-		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-			createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-		converter.charset = "UTF-8";
-		this._stream = converter.convertToInputStream(data);
-		this.contentLength = this._stream.available();
-	}
-	
-	ConnectorChannel.prototype.contentCharset = "UTF-8";
-	ConnectorChannel.prototype.contentType = "text/html";
-	ConnectorChannel.prototype.notificationCallbacks = null;
-	ConnectorChannel.prototype.securityInfo = null;
-	ConnectorChannel.prototype.status = 0;
-	ConnectorChannel.prototype.loadGroup = null;
-	ConnectorChannel.prototype.loadFlags = 393216;
-	
-	ConnectorChannel.prototype.__defineGetter__("originalURI", function() { return this.URI });
-	ConnectorChannel.prototype.__defineSetter__("originalURI", function() { });
-	
-	ConnectorChannel.prototype.asyncOpen = function(streamListener) {
-		if(this.loadGroup) this.loadGroup.addRequest(this, null);
-		streamListener.onStartRequest(this);
-		streamListener.onDataAvailable(this, this._stream, 0, this.contentLength);
-		streamListener.onStopRequest(this, this.status);
-		this._isPending = false;
-		if(this.loadGroup) this.loadGroup.removeRequest(this, null, 0);
-	}
-	
-	ConnectorChannel.prototype.isPending = function() {
-		return this._isPending;
-	}
-	
-	ConnectorChannel.prototype.cancel = function(status) {
-		this.status = status;
-		this._isPending = false;
-		if(this._stream) this._stream.close();
-	}
-	
-	ConnectorChannel.prototype.suspend = function() {}
-	
-	ConnectorChannel.prototype.resume = function() {}
-	
-	ConnectorChannel.prototype.open = function() {
-		return this._stream;
-	}
-	
-	ConnectorChannel.prototype.QueryInterface = function(iid) {
-		if (!iid.equals(Components.interfaces.nsIChannel) && !iid.equals(Components.interfaces.nsIRequest) &&
-				!iid.equals(Components.interfaces.nsISupports)) {
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		}
-		return this;
-	}
-	
-	/**
-	 * zotero://connector/
-	 *
-	 * URI spoofing for transferring page data across boundaries
-	 */
-	var ConnectorExtension = new function() {
-		this.loadAsChrome = false;
-		
-		this.newChannel = function(uri) {
-			var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-				.getService(Components.interfaces.nsIScriptSecurityManager);
-			var Zotero = Components.classes["@zotero.org/Zotero;1"]
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
-			
-			try {
-				var originalURI = uri.pathQueryRef.substr('zotero://connector/'.length);
-				originalURI = decodeURIComponent(originalURI);
-				if(!Zotero.Server.Connector.Data[originalURI]) {
-					return null;
-				} else {
-					return new ConnectorChannel(originalURI, Zotero.Server.Connector.Data[originalURI]);
-				}
-			} catch(e) {
-				Zotero.debug(e);
-				throw e;
-			}
-		}
-	};
-	
-	
 	/*
 		zotero://pdf.js/viewer.html
 		zotero://pdf.js/pdf/1/ABCD5678
@@ -1249,7 +1156,6 @@ function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://timeline"] = TimelineExtension;
 	this._extensions[ZOTERO_SCHEME + "://select"] = SelectExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
-	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
 	this._extensions[ZOTERO_SCHEME + "://pdf.js"] = PDFJSExtension;
 	this._extensions[ZOTERO_SCHEME + "://open"] = OpenExtension;
 	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenExtension;
