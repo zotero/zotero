@@ -513,15 +513,26 @@ var Zotero_Tabs = new function () {
 		}
 		
 		// FIX0618: Collapse deeptutor pane when switching to reader mode
-		/*
-		if (tab.type === 'reader' || tab.type === 'reader-unloaded' || tab.type === 'reader-loading') {
+		// Only collapse if switching FROM non-reader tab TO reader tab
+		let currentTabIsReader = tab.type === 'reader' || tab.type === 'reader-unloaded' || tab.type === 'reader-loading';
+		let prevTabIsReader = false;
+		
+		if (this._prevSelectedID) {
+			let prevTab = this._getTab(this._prevSelectedID).tab;
+			if (prevTab) {
+				prevTabIsReader = prevTab.type === 'reader' || prevTab.type === 'reader-unloaded' || prevTab.type === 'reader-loading';
+			}
+		}
+		
+		// Only collapse DeepTutor pane when switching from non-reader to reader, not reader to reader
+		if (currentTabIsReader && !prevTabIsReader) {
 			let deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
 			let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
 			
 			if (deepTutorPane && deeptutorSplitter) {
 				let isDeepTutorOpen = !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true';
 				if (isDeepTutorOpen) {
-					Zotero.debug('Tabs: Collapsing DeepTutor pane when switching to reader mode');
+					Zotero.debug('Tabs: Collapsing DeepTutor pane when switching from library to reader mode');
 					deepTutorPane.hidden = true;
 					deepTutorPane.setAttribute('collapsed', 'true');
 					deeptutorSplitter.setAttribute('state', 'collapsed');
@@ -532,7 +543,6 @@ var Zotero_Tabs = new function () {
 				}
 			}
 		}
-		*/
 		
 		if (tab.type === 'reader-unloaded') {
 			tab.type = "reader-loading";
