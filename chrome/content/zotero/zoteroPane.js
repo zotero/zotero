@@ -6811,7 +6811,7 @@ var ZoteroPane = new function()
 		// Keep in sync with abstracts/variables.scss > $min-width-items-pane
 		const itemsPaneMinWidth = 300;
 		// DeepTutor pane minimum width
-		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 250;
+		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 380;
 		const deepTutorPaneMaxWidth = 600;
 
 		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth + deepTutorPaneMinWidth;
@@ -6835,7 +6835,7 @@ var ZoteroPane = new function()
 		
 		// Auto-collapse DeepTutor pane when window becomes too narrow
 		// Calculate minimum required width with DeepTutor pane open
-		const deepTutorRequiredWidth = collectionsPaneMinWidth + itemsPaneMinWidth + sideNavMinWidth + itemsPaneMinWidth + deepTutorPaneMinWidth + 50; // 50px margin for splitters
+		const deepTutorRequiredWidth = collectionsPaneMinWidth + itemsPaneMinWidth + sideNavMinWidth + itemsPaneMinWidth + deepTutorPaneMinWidth + 25; // 50px margin for splitters
 		
 		// Track previous state to restore DeepTutor when window becomes wide enough
 		let deepTutorWasAutoCollapsed = deepTutorPane.getAttribute('data-auto-collapsed') === 'true';
@@ -6853,6 +6853,7 @@ var ZoteroPane = new function()
 			}
 			layoutChanged = true;
 		}
+		/*
 		else if (deepTutorWasAutoCollapsed && window.innerWidth >= deepTutorRequiredWidth) {
 			// Window is now wide enough and DeepTutor was auto-collapsed, restore it
 			Zotero.debug('updateLayoutConstraints: Auto-restoring DeepTutor pane due to wider window');
@@ -6866,6 +6867,7 @@ var ZoteroPane = new function()
 			}
 			layoutChanged = true;
 		}
+		*/
 		
 		// Collections pane + items pane + items pane + sidenav + 3px for draggability
 		const windowAutoStackMinWidth = 930;

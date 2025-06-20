@@ -455,6 +455,9 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 */
 	this.select = function (id, reopening, options = {}) {
+		// FIX0618: Capture the currently selected tab ID before any logic runs
+		let previouslySelectedID = this._selectedID;
+		
 		var { tab, tabIndex } = this._getTab(id);
 		// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
 		let focusZoteroPane = () => {
@@ -517,12 +520,14 @@ var Zotero_Tabs = new function () {
 		let currentTabIsReader = tab.type === 'reader' || tab.type === 'reader-unloaded' || tab.type === 'reader-loading';
 		let prevTabIsReader = false;
 		
-		if (this._prevSelectedID) {
-			let prevTab = this._getTab(this._prevSelectedID).tab;
+		// Use the captured previouslySelectedID instead of this._prevSelectedID
+		if (previouslySelectedID) {
+			let prevTab = this._getTab(previouslySelectedID).tab;
 			if (prevTab) {
 				prevTabIsReader = prevTab.type === 'reader' || prevTab.type === 'reader-unloaded' || prevTab.type === 'reader-loading';
 			}
 		}
+		Zotero.debug(`Tabs: currentTabIsReader ${currentTabIsReader}, prevTabIsReader ${prevTabIsReader}`);
 		
 		// Only collapse DeepTutor pane when switching from non-reader to reader, not reader to reader
 		if (currentTabIsReader && !prevTabIsReader) {
