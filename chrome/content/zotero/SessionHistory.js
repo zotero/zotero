@@ -156,79 +156,7 @@ const sessionTextStyle = {
   textOverflow: 'ellipsis',
 };
 
-const popupOverlayStyle = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  background: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-};
 
-const popupContentStyle = {
-  background: '#FFFFFF',
-  borderRadius: '0.625rem',
-  padding: '2rem',
-  width: '20rem',
-  maxWidth: '90%',
-  fontFamily: 'Roboto, sans-serif',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  boxShadow: '0 0.25rem 1rem rgba(0,0,0,0.1)',
-};
-
-const popupTitleStyle = {
-  background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  backgroundClip: 'text',
-  color: SKY,
-  fontWeight: 700,
-  fontSize: '1.25rem',
-  lineHeight: '100%',
-  letterSpacing: '0%',
-  textAlign: 'center',
-  marginBottom: '1.5rem',
-};
-
-const popupButtonStyle = {
-  background: SKY,
-  color: '#fff',
-  fontWeight: 700,
-  fontSize: '1rem',
-  border: 'none',
-  borderRadius: '0.625rem',
-  padding: '0.875rem 0',
-  width: '100%',
-  margin: '0 auto 0.625rem auto',
-  cursor: 'pointer',
-  boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
-  fontFamily: 'Roboto, sans-serif',
-  letterSpacing: 0.2,
-  display: 'block',
-};
-
-const popupCancelButtonStyle = {
-  background: '#fff',
-  color: SKY,
-  fontWeight: 700,
-  fontSize: '1rem',
-  border: `0.125rem solid ${SKY}`,
-  boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
-  borderRadius: '0.625rem',
-  width: '100%',
-  padding: '0.875rem 0',
-  margin: '0.75rem auto 0 auto',
-  cursor: 'pointer',
-  fontFamily: 'Roboto, sans-serif',
-  letterSpacing: 0.2,
-  display: 'block',
-};
 
 const loadingStyle = {
   width: '100%',
@@ -256,38 +184,18 @@ const plusIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_
 const searchIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_SEARCH.svg';
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
 
-function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, showSearch = true, onCreateNewSession, onDeleteSession }) {
+function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, onCreateNewSession, onShowDeletePopup }) {
   const [search, setSearch] = useState('');
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isCreateSessionHovered, setIsCreateSessionHovered] = useState(false);
-  const [showDeletePopup, setShowDeletePopup] = useState(false);
-  const [sessionToDelete, setSessionToDelete] = useState(null);
 
   const handleCreateSessionMouseEnter = () => setIsCreateSessionHovered(true);
   const handleCreateSessionMouseLeave = () => setIsCreateSessionHovered(false);
 
   const handleDeleteClick = (e, sessionId) => {
     e.stopPropagation();
-    setSessionToDelete(sessionId);
-    setShowDeletePopup(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (sessionToDelete && onDeleteSession) {
-      onDeleteSession(sessionToDelete);
-    }
-    setShowDeletePopup(false);
-    setSessionToDelete(null);
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeletePopup(false);
-    setSessionToDelete(null);
-  };
-
-  const handlePopupOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      handleCancelDelete();
+    if (onShowDeletePopup) {
+      onShowDeletePopup(sessionId);
     }
   };
 
@@ -329,18 +237,16 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
         <img src={plusIconPath} alt="Plus" style={plusIconStyle} />
       </button>
       {/* Search Bar Section */}
-      {showSearch && (
-        <div style={searchSectionStyle}>
-          <img src={searchIconPath} alt="Search Icon" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
-          <input
-            type="text"
-            placeholder="Search for a Session..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={searchInputStyle}
-          />
-        </div>
-      )}
+      <div style={searchSectionStyle}>
+        <img src={searchIconPath} alt="Search Icon" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+        <input
+          type="text"
+          placeholder="Search for a Session..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={searchInputStyle}
+        />
+      </div>
       <div style={sessionListTitleStyle}>Sessions</div>
       {/* Session List Section */}
       <div style={sessionListStyle}>
@@ -374,20 +280,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
         ))}
       </div>
 
-      {/* Delete Confirmation Popup */}
-      {showDeletePopup && (
-        <div style={popupOverlayStyle} onClick={handlePopupOverlayClick}>
-          <div style={popupContentStyle}>
-            <div style={popupTitleStyle}>Confirm Session Deletion?</div>
-            <button style={popupButtonStyle} onClick={handleConfirmDelete}>
-              Confirm
-            </button>
-            <button style={popupCancelButtonStyle} onClick={handleCancelDelete}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
@@ -401,9 +294,8 @@ SessionHistory.propTypes = {
   onSessionSelect: PropTypes.func,
   isLoading: PropTypes.bool,
   error: PropTypes.string,
-  showSearch: PropTypes.bool,
   onCreateNewSession: PropTypes.func,
-  onDeleteSession: PropTypes.func
+  onShowDeletePopup: PropTypes.func
 };
 
 export default SessionHistory;

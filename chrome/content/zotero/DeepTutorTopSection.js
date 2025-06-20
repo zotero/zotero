@@ -117,30 +117,6 @@ class DeepTutorTopSection extends React.Component {
         return (
             <div style={styles.contentWrapper}>
                 <img src={this.props.logoPath} alt="DeepTutor Logo" style={styles.logo} />
-                <div style={styles.topRight}>
-                    <button
-                        style={this.getIconButtonStyle(this.props.currentPane === 'modelSelection')}
-                        onClick={() => {
-                            this.props.onToggleSearch && this.props.onToggleSearch();
-                        }}
-                    >
-                        <img 
-                            src={this.props.MicroscopeIconPath}
-                            alt="Microscope" 
-                            style={styles.iconImage}
-                        />
-                    </button>
-                    <button
-                        style={this.getIconButtonStyle(this.props.currentPane === 'modelSelection')}
-                        onClick={this.props.onToggleModelSelectionPopup}
-                    >
-                        <img 
-                            src={this.props.PlusIconPath}
-                            alt="New Session" 
-                            style={styles.iconImage}
-                        />
-                    </button>
-                </div>
             </div>
         );
     }
@@ -171,8 +147,7 @@ DeepTutorTopSection.propTypes = {
     logoPath: PropTypes.string.isRequired,
     HistoryIconPath: PropTypes.string.isRequired,
     PlusIconPath: PropTypes.string.isRequired,
-    MicroscopeIconPath: PropTypes.string.isRequired,
-    onToggleSearch: PropTypes.func,
+    onToggleModelSelectionPopup: PropTypes.func.isRequired,
 };
 
 export default DeepTutorTopSection; 
