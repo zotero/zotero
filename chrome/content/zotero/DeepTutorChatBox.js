@@ -1218,12 +1218,12 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 			}
 			
 			// Use the new public setFindQuery method
-			const searchQuery = "activation"; //source.referenceString || "test";
+			const searchQuery = source.referenceString || "test";
 			Zotero.debug(`DeepTutorChatBox: Setting find query to "${searchQuery}"`);
 			
 			reader._internalReader.setFindQuery(searchQuery, {
 				primary: true,
-				openPopup: true,
+				openPopup: false,
 				activateSearch: true
 			});
 			
