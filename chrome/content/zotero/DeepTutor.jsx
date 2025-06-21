@@ -596,6 +596,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 		// Bind auth state change handler
 		this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
+		
+		// Multi-layer protection flags to prevent infinite loops and blinking
+		// Flag 1: Prevents auth state changes during initial component setup
+		this._isInitializingData = false;
+		// Flag 2: Temporarily blocks auth state changes during data fetch operations
+		this._blockingAuthStateChanges = false;
 	}
 
 	async componentDidMount() {
@@ -623,6 +629,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 	async initializeAuthState() {
 		try {
 			Zotero.debug("DeepTutor: Initializing auth state");
+			
+			// Enable protection flags to prevent auth state change interference during initialization
+			// This prevents the infinite loop where auth state changes trigger more auth state changes
+			this._isInitializingData = true;
+			this._blockingAuthStateChanges = true;
 
 			// First, check if auth state has already been restored from storage
 			const authStateInstance = useAuthState();
@@ -637,13 +648,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 					// Load sessions once userData is available
 					if (!this.state.isLoadingSessions) {
 						await this.loadSession();
-					}
-					// Wait for all operations to complete, then switch pane
-					setTimeout(() => {
-						this.setState({
-							currentPane: this.getSessionHistoryPaneOrNoSession()
-						});
-					}, 150); // Slightly longer delay for initial load
+				    }
+				    // All data loading operations complete - safe to clear protection flags and switch pane
+				    // This ensures only one pane switch happens after all async operations finish
+				    this._isInitializingData = false;
+				    this._blockingAuthStateChanges = false;
+
+				    this.setState({
+					    currentPane: this.getSessionHistoryPaneOrNoSession()
+				    });
 				});
 				return;
 			}
@@ -658,22 +671,26 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated: true,
 					currentUser: currentUserData.user
 				}, async () => {
-					// Fetch backend user data
-					await this.fetchUserData(currentUserData.user);
-					// Load sessions once userData is available
-					if (!this.state.isLoadingSessions) {
-						await this.loadSession();
-					}
-					// Wait for all operations to complete, then switch pane
-					setTimeout(() => {
-						this.setState({
-							currentPane: this.getSessionHistoryPaneOrNoSession()
-						});
-					}, 1500); // Slightly longer delay for initial load
+									// Fetch backend user data
+				await this.fetchUserData(currentUserData.user);
+				// Load sessions once userData is available
+				if (!this.state.isLoadingSessions) {
+					await this.loadSession();
+				}
+				// All data loading operations complete - safe to clear protection flags and switch pane
+				// This ensures only one pane switch happens after all async operations finish
+				this._isInitializingData = false;
+				this._blockingAuthStateChanges = false;
+					this.setState({
+						currentPane: this.getSessionHistoryPaneOrNoSession()
+					});
 				});
 			}
 			else {
 				Zotero.debug("DeepTutor: User is not authenticated");
+				// Clear protection flags since initialization is complete (no auth needed)
+				this._isInitializingData = false;
+				this._blockingAuthStateChanges = false;
 				this.setState({
 					isAuthenticated: false,
 					currentUser: null,
@@ -686,6 +703,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 			// Don't attempt refresh for rate limiting errors
 			if (error.message && error.message.includes('Rate')) {
+				// Clear protection flags on rate limit error (initialization failed)
+				this._isInitializingData = false;
+				this._blockingAuthStateChanges = false;
 				this.setState({
 					isAuthenticated: false,
 					currentUser: null,
@@ -703,20 +723,24 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated: true,
 					currentUser: refreshedData.user
 				}, async () => {
-					await this.fetchUserData(refreshedData.user);
-					if (!this.state.isLoadingSessions) {
-						await this.loadSession();
-					}
-					// Wait for all operations to complete, then switch pane
-					setTimeout(() => {
-						this.setState({
-							currentPane: this.getSessionHistoryPaneOrNoSession()
-						});
-					}, 1500); // Slightly longer delay for initial load
+									await this.fetchUserData(refreshedData.user);
+				if (!this.state.isLoadingSessions) {
+					await this.loadSession();
+				}
+				// All data loading operations complete - safe to clear protection flags and switch pane
+				// This ensures only one pane switch happens after all async operations finish
+				this._isInitializingData = false;
+				this._blockingAuthStateChanges = false;
+					this.setState({
+						currentPane: this.getSessionHistoryPaneOrNoSession()
+					});
 				});
 			}
 			catch (refreshError) {
 				Zotero.debug(`DeepTutor: Session refresh failed: ${refreshError.message}`);
+				// Clear protection flags on refresh failure (initialization failed)
+				this._isInitializingData = false;
+				this._blockingAuthStateChanges = false;
 				this.setState({
 					isAuthenticated: false,
 					currentUser: null,
@@ -727,40 +751,78 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	}
 
+	/**
+	 * Handles authentication state changes with multi-layer protection against infinite loops
+	 * This method is called whenever the auth state changes (sign in, sign out, token refresh, etc.)
+	 * Multiple protection layers prevent the blinking issue caused by recursive auth state changes
+	 */
 	handleAuthStateChange(isAuthenticated, user) {
-		Zotero.debug(`DeepTutor: Auth state changed - authenticated: ${isAuthenticated}`);
+		Zotero.debug(`DeepTutor: Auth state changed - authenticated: ${isAuthenticated}, _isInitializingData: ${this._isInitializingData}, _blockingAuthStateChanges: ${this._blockingAuthStateChanges}`);
 
-		// Prevent infinite loops by checking if we're already loading sessions
+		// Layer 1: Skip if currently initializing component
+		// Prevents interference during the initial authentication setup process
+		if (this._isInitializingData) {
+			Zotero.debug("DeepTutor: Skipping auth state change during initialization");
+			return;
+		}
+
+		// Layer 2: Skip if temporarily blocking auth state changes during data operations
+		// Prevents feedback loops where data fetching triggers more auth state changes
+		if (this._blockingAuthStateChanges) {
+			Zotero.debug("DeepTutor: Skipping auth state change - blocked during data operations");
+			return;
+		}
+
+		// Layer 3: Skip if same user already authenticated (prevents redundant processing)
+		// Avoids unnecessary re-processing when the same user triggers multiple auth events
+		if (isAuthenticated && this.state.isAuthenticated && 
+			user && this.state.currentUser && 
+			user.username === this.state.currentUser.username) {
+			Zotero.debug("DeepTutor: Skipping auth state change - same user already authenticated");
+			return;
+		}
+
+		// Layer 4: Prevent concurrent session loading operations
+		// Ensures only one session loading process runs at a time
 		if (this.state.isLoadingSessions) {
 			Zotero.debug("DeepTutor: Session loading already in progress, skipping auth state change");
 			return;
 		}
 
+		Zotero.debug("DeepTutor: Processing auth state change");
+		// Enable blocking flag to prevent recursive auth state changes during data operations
+		this._blockingAuthStateChanges = true;
+		
 		this.setState({
 			isAuthenticated,
 			currentUser: user,
 			authError: null
 		}, async () => {
-			if (isAuthenticated) {
-				// Fetch backend user data
-				await this.fetchUserData(user);
+			try {
+				if (isAuthenticated) {
+					// Fetch backend user data
+					await this.fetchUserData(user);
 
-				// User signed in, load sessions (only if not already loading)
-				if (!this.state.isLoadingSessions) {
-					await this.loadSession();
+					// User signed in, load sessions (only if not already loading)
+					if (!this.state.isLoadingSessions) {
+						await this.loadSession();
+					}
+					// this.switchPane(this.getSessionHistoryPaneOrNoSession());
 				}
-				// this.switchPane(this.getSessionHistoryPaneOrNoSession());
-			}
-			else {
-				// User signed out, clear data and show welcome
-				this.setState({
-					sessions: [],
-					sesIdToObj: new Map(),
-					currentSession: null,
-					messages: [],
-					isLoadingSessions: false
-				});
-				this.switchPane('welcome');
+				else {
+					// User signed out, clear data and show welcome
+					this.setState({
+						sessions: [],
+						sesIdToObj: new Map(),
+						currentSession: null,
+						messages: [],
+						isLoadingSessions: false
+					});
+					this.switchPane('welcome');
+				}
+			} finally {
+				// Always clear the blocking flag when operations complete (success or failure)
+				this._blockingAuthStateChanges = false;
 			}
 		});
 	}
@@ -1278,18 +1340,16 @@ var DeepTutor = class DeepTutor extends React.Component {
 			});
 
 			// Wait a moment for all setState operations to complete, then switch panes
-			setTimeout(() => {
-				// If no sessions, switch to model selection pane
-				Zotero.debug(`DeepTutor061306130613: Switching to model selection pane: ${sessions}`);
-				Zotero.debug(`DeepTutor061306130613: Sessions length: ${sessions.length}`);
-				if (sessions.length === 0) {
-					this.switchPane('noSession');
-				}
-				else {
-					// If sessions exist, switch to main pane
-					this.switchPane('sessionHistory');
-				}
-			}, 2000); // Small delay to ensure all setState operations complete
+			// If no sessions, switch to model selection pane
+			Zotero.debug(`DeepTutor061306130613: Switching to model selection pane: ${sessions}`);
+			Zotero.debug(`DeepTutor061306130613: Sessions length: ${sessions.length}`);
+			if (sessions.length === 0) {
+				this.switchPane('noSession');
+			}
+			else {
+				// If sessions exist, switch to main pane
+				this.switchPane('sessionHistory');
+			}
 
 			Zotero.debug(`DeepTutor: Successfully loaded ${sessions.length} sessions`);
 		}
