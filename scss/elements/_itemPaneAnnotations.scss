@@ -22,6 +22,8 @@ annotation-items-pane {
 			height: 26px;
 			margin: 0;
 			@media (-moz-platform: macos) {
+				height: 24px;
+				padding: 3px 0px 1px 0px;
 				margin: 0px -2px;
 			}
 			flex-grow: 1;

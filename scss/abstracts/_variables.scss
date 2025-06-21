@@ -92,6 +92,10 @@ $item-pane-sections: (
 	"attachment-preview": #926d70,
 	"attachment-annotations": var(--tag-purple),
 	"libraries-collections": var(--accent-teal),
+	"annotation": (
+		"color": var(--tag-purple),
+		"icon": "attachment-annotations",
+	),
 	"tags": var(--accent-orange),
 	"related": var(--accent-wood),
 );

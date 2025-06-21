@@ -94,7 +94,7 @@
 		}
 
 		get _builtInPanes() {
-			return ["info", "abstract", "attachments", "notes", "attachment-info", "attachment-annotations", "libraries-collections", "tags", "related"];
+			return ["info", "abstract", "attachments", "notes", "attachment-info", "attachment-annotations", "libraries-collections", "annotation", "tags", "related"];
 		}
 
 		get container() {
