@@ -192,6 +192,21 @@
 			this.notesList.addEventListener('add-child', (event) => {
 				document.getElementById('context-pane-add-child-note').setAttribute('disabled', !this.editable);
 				document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', !this.editable);
+				Zotero.MenuManager.updateMenuPopup(addChildNotePopup, "notesPane/addItemNote", {
+					event: undefined,
+					getContext: () => {
+						let ret = {
+							items: [this._getCurrentAttachment()],
+						};
+						if (typeof Zotero_Tabs !== 'undefined') {
+							let { id, type, subType } = Zotero_Tabs.getTabInfo();
+							ret.tabID = id;
+							ret.tabType = type;
+							ret.tabSubType = subType;
+						}
+						return ret;
+					}
+				});
 				addChildNotePopup.openPopup(event.detail.button, 'after_end');
 			});
 			let addStandaloneNotePopup = document.getElementById('context-pane-add-standalone-note-button-popup');
@@ -201,6 +216,21 @@
 			this.notesList.addEventListener('add-standalone', (event) => {
 				document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', !this.editable);
 				document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', !this.editable);
+				Zotero.MenuManager.updateMenuPopup(addStandaloneNotePopup, "notesPane/addStandaloneNote", {
+					event: undefined,
+					getContext: () => {
+						let ret = {
+							items: [this._getCurrentAttachment()],
+						};
+						if (typeof Zotero_Tabs !== 'undefined') {
+							let { id, type, subType } = Zotero_Tabs.getTabInfo();
+							ret.tabID = id;
+							ret.tabType = type;
+							ret.tabSubType = subType;
+						}
+						return ret;
+					}
+				});
 				addStandaloneNotePopup.openPopup(event.detail.button, 'after_end');
 			});
 		}

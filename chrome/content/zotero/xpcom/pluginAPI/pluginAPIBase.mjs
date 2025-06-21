@@ -207,7 +207,7 @@ class PluginAPIBase {
 			for (let key of Object.keys(typeDef)) {
 				let val = obj[key];
 				let requirement = typeDef[key];
-				let fullPath = `${path}${key}`;
+				let fullPath = `${path}["${key}"]`;
 				if (!requirement) {
 					throw new Error(`Unknown option ${fullPath}`);
 				}
@@ -323,7 +323,10 @@ class PluginAPIBase {
 	 * Notify the receiver to update
 	 */
 	async _refresh(ids = [], extraData = {}) {
-		this._lastUpdateID = `${new Date().getTime()}-${lazy.Zotero.Utilities.randomString()}`;
+		if (!this._config.notifyType || this._config.notifyType === "unknown") {
+			return;
+		}
+		this._lastUpdateID = this._generateRandomKey();
 		await lazy.Zotero.DB.executeTransaction(async () => {
 			lazy.Zotero.Notifier.queue(
 				this._config.notifyAction,
@@ -337,17 +340,19 @@ class PluginAPIBase {
 	/**
 	 * Unregister all stored options by pluginID
 	 * @param {string} pluginID - PluginID
+	 * @returns {string[]} - The mainKeys of the unregistered options
 	 */
 	async _unregisterByPluginID(pluginID) {
 		let paneIDs = Object.keys(this._optionsCache).filter(
 			id => this._getOptionPluginID(this._optionsCache[id]) == pluginID);
 		if (paneIDs.length === 0) {
-			return;
+			return [];
 		}
 		// Remove the registrations one by one
 		paneIDs.forEach(id => this._remove(id));
 		this._log(`Registrations for plugin ${pluginID} are unregistered due to shutdown`);
 		await this._refresh();
+		return paneIDs;
 	}
 
 	/**
@@ -377,6 +382,10 @@ class PluginAPIBase {
 
 	_getOptionMainKey(option) {
 		return option[this._config.mainKeyName];
+	}
+
+	_generateRandomKey() {
+		return `${lazy.Zotero.Utilities.randomString()}-${new Date().getTime()}`;
 	}
 }
 
