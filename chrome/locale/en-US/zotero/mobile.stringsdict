@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+  <dict>
+    <key>items.collections_selected</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@collections_selected@</string>
+        <key>collections_selected</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>zero</key>
+            <string>Select a Collection</string>
+            <key>one</key>
+            <string>1 Collection Selected</string>
+            <key>other</key>
+            <string>%d Collections Selected</string>
+        </dict>
+    </dict>
+    <key>items.delete_question</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@delete_question@</string>
+        <key>delete_question</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Are you sure you want to delete the selected item?</string>
+            <key>other</key>
+            <string>Are you sure you want to delete the selected items?</string>
+        </dict>
+    </dict>
+    <key>items.remove_from_collection_question</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@remove_from_collection_question@</string>
+        <key>remove_from_collection_question</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Are you sure you want to remove the selected item from this collection?</string>
+            <key>other</key>
+            <string>Are you sure you want to remove the selected items from this collection?</string>
+        </dict>
+    </dict>
+    <key>items.toolbar_filter</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@toolbar_filter@</string>
+        <key>toolbar_filter</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Filter: 1 item</string>
+            <key>other</key>
+            <string>Filter: %d items</string>
+        </dict>
+    </dict>
+    <key>pdf.search.matches</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@matches@</string>
+        <key>matches</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Found 1 match</string>
+            <key>other</key>
+            <string>Found %d matches</string>
+        </dict>
+    </dict>
+    <key>settings.storage.files_size_and_unit</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@files@ (%.2f %@)</string>
+        <key>files</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>1 file</string>
+            <key>other</key>
+            <string>%d files</string>
+        </dict>
+    </dict>
+    <key>errors.sync_toolbar.errors</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@errors@</string>
+        <key>errors</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>1 issue</string>
+            <key>other</key>
+            <string>%d issues</string>
+        </dict>
+    </dict>
+    <key>tag_picker.tags_selected</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@tags_selected@</string>
+        <key>tags_selected</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>1 tag selected</string>
+            <key>other</key>
+            <string>%d tags selected</string>
+        </dict>
+    </dict>
+    <key>tag_picker.confirm_deletion</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@confirm_deletion@</string>
+        <key>confirm_deletion</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Are you sure you want to delete 1 automatic tag in this library?\n\nThis action cannot be undone.</string>
+            <key>other</key>
+            <string>Are you sure you want to delete %d automatic tags in this library?\n\nThis action cannot be undone.</string>
+        </dict>
+    </dict>
+    <key>settings.lines_logged</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@lines_logged@</string>
+        <key>lines_logged</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>1 line logged</string>
+            <key>other</key>
+            <string>%d lines logged</string>
+        </dict>
+    </dict>
+    <key>settings.lines</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@lines@</string>
+        <key>lines</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>1 line</string>
+            <key>other</key>
+            <string>%d lines</string>
+        </dict>
+    </dict>
+    <key>errors.sync_toolbar.webdav_error2</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@webdav_error2@</string>
+        <key>webdav_error2</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Could not delete 1 file from your WebDAV server</string>
+            <key>other</key>
+            <string>Could not delete %d files from your WebDAV server</string>
+        </dict>
+    </dict>
+    <key>settings.general.after_x_days</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@after_x_days@</string>
+        <key>after_x_days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>After 1 Day</string>
+            <key>other</key>
+            <string>After %d Days</string>
+        </dict>
+    </dict>
+  </dict>
+</plist>
