@@ -82,6 +82,9 @@ var ZoteroContextPane = new function () {
 		_contextPaneSplitterStacked = document.getElementById('zotero-context-splitter-stacked');
 		_librarySidenav = document.querySelector("#zotero-view-item-sidenav");
 		_readerSidenav = document.getElementById('zotero-context-pane-sidenav');
+
+		// Never use default status for the reader sidenav
+		_readerSidenav.toggleDefaultStatus(false);
 		
 		_contextPaneInner.sidenav = _readerSidenav;
 
