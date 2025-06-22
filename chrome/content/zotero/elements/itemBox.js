@@ -677,13 +677,6 @@
 					menuitem.setAttribute("typeid", Zotero.CreatorTypes.getID(i));
 					this._creatorTypeMenu.appendChild(menuitem);
 				}
-				this._creatorTypeMenu.addEventListener('popuphidden', () => {
-					// If the popup was opened with a mouse click, blur the field to hide icons
-					if (this._creatorTypeMenu.getAttribute("blur-on-hidden")) {
-						document.activeElement.blur();
-						this._creatorTypeMenu.removeAttribute("blur-on-hidden");
-					}
-				});
 			}
 			
 			// Creator rows
@@ -1095,14 +1088,14 @@
 				let span = document.createElement('span');
 				span.className = 'creator-type-dropmarker';
 				labelWrapper.appendChild(span);
-				labelWrapper.addEventListener('click', (e) => {
+				// Prevent focus from landing on the dropdown.
+				// Otherwise, when the popup is closed, the row's icons would remain visible.
+				labelWrapper.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+				});
+				labelWrapper.addEventListener('click', (_) => {
 					this._popupNode = rowLabel;
 					this._creatorTypeMenu.openPopup(rowLabel);
-					// If the creator menu is opened via mouse-click, add a special attribute to
-					// blur the focused field so that icons do not show up after the menu is closed.
-					if (e.x !== 0 && e.y !== 0) {
-						this._creatorTypeMenu.setAttribute("blur-on-hidden", "true");
-					}
 				});
 			}
 
@@ -1573,7 +1566,8 @@
 				}
 			}
 			// On click of the label, toggle the focus of the value field
-			if (this.editable) {
+			// Creator rows have their own handling, so it does not apply to them
+			if (this.editable && !id.includes("creator")) {
 				label.addEventListener('mousedown', (event) => {
 					// Prevent default focus/blur behavior - we implement our own below
 					event.preventDefault();
