@@ -329,8 +329,9 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			);
 		}
 		catch (e) {
+			let session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
 			Zotero.debug(e);
-			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
+			return [409, "application/json", JSON.stringify({ error: session?.cancelled ? "SESSION_CANCELLED" : "SESSION_EXISTS" })];
 		}
 		await session.update(targetID);
 		
@@ -508,6 +509,10 @@ Zotero.Server.Connector.SaveAttachment.prototype = {
 			return [200, 'text/plain', 'Library files are not editable.'];
 		}
 
+		if (session.cancelled) {
+			Zotero.debug("Session is cancelled: " + session.sessionID, 1);
+			return [409, "application/json", JSON.stringify({ error: "SESSION_CANCELLED" })];
+		}
 		// Save attachment based on provided parent id from stream
 		let parentItem = session.getItemByConnectorKey(metadata.parentItemID);
 		await Zotero.Attachments.importFromNetworkStream({
@@ -562,6 +567,10 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 		if (!session) {
 			Zotero.debug("Can't find session " + data.sessionID, 1);
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
+		}
+		if (session.cancelled) {
+			Zotero.debug("Session is cancelled: " + data.sessionID, 1);
+			return [409, "application/json", JSON.stringify({ error: "SESSION_CANCELLED" })];
 		}
 
 		let { library } = Zotero.Server.Connector.getSaveTarget();
@@ -635,8 +644,9 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			);
 		}
 		catch (e) {
+			let session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
 			Zotero.debug(e);
-			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
+			return [409, "application/json", JSON.stringify({ error: session?.cancelled ? "SESSION_CANCELLED" : "SESSION_EXISTS" })];
 		}
 		await session.update(collection ? collection.treeViewID : library.treeViewID);
 		
@@ -756,6 +766,10 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 			Zotero.debug("Can't find session " + data.sessionID, 1);
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
 		}
+		if (session.cancelled) {
+			Zotero.debug("Session is cancelled: " + session.sessionID, 1);
+			return [409, "application/json", JSON.stringify({ error: "SESSION_CANCELLED" })];
+		}
 		
 		// Parse treeViewID
 		var [type, id] = [data.target[0], parseInt(data.target.substr(1))];
@@ -775,6 +789,49 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		}
 		
 		await session.update(data.target, tags, note);
+		
+		return [200, "application/json", JSON.stringify({})];
+	}
+};
+
+/**
+ *
+ *
+ * Accepts:
+ *		sessionID - A session ID
+ *
+ * Returns:
+ *		200 response if the session is cancelled
+ *		400 if the session ID is not provided
+ */
+Zotero.Server.Connector.CancelSession = function() {};
+Zotero.Server.Endpoints["/connector/cancelSession"] = Zotero.Server.Connector.CancelSession;
+Zotero.Server.Connector.CancelSession.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	
+	init: async function (requestData) {
+		var data = requestData.data;
+		
+		if (!data.sessionID) {
+			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
+		}
+		
+		var session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
+		// If the session with the specified ID does not exist, create it here so
+		// we can record it as cancelled.
+		if (!session) {
+			session = Zotero.Server.Connector.SessionManager.create(data.sessionID);
+		}
+		// After a session is cancelled, all items added are removed and
+		// subsequent child attachments/notes should no longer be added.
+		// To handle any possible race conditions (e.g. if an item is being added at the same time as
+		// the session is being cancelled), wait a second and try to clear any remaining items again.
+		await session.cancel();
+		setTimeout(() => {
+			session.cancel();
+		}, 1000);
 		
 		return [200, "application/json", JSON.stringify({})];
 	}
@@ -1116,6 +1173,7 @@ Zotero.Server.Connector.Ping.prototype = {
 					supportsTagsAutocomplete: true,
 					googleDocsAddNoteEnabled: true,
 					canUserAddNote: true,
+					supportsSaveCancelling: true,
 					googleDocsCitationExplorerEnabled: false,
 					translatorsHash,
 					sortedTranslatorHash
