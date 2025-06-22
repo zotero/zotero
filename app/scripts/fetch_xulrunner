@@ -548,7 +548,7 @@ if [ $BUILD_WIN == 1 ]; then
 	GECKO_VERSION="$GECKO_VERSION_WIN"
 	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
 	
-	for arch in win32 win-x64 win-arm64; do
+	for arch in ${ARCHS:-win32 win-x64 win-arm64}; do
 		xdir=firefox-$arch
 		
 		rm -rf $xdir
@@ -624,12 +624,10 @@ if [ $BUILD_LINUX == 1 ]; then
 
 
 	# Include 32-bit build if not in CI
-	if [[ "${CI:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
-		arches="x86_64"
-	else
-		arches="i686 x86_64"
+	if [[ "${CI:-}" = "1" ]]; then
+		ARCHS="x86_64"
 	fi
-	for arch in $arches; do
+	for arch in ${ARCHS:-i686 x86_64}; do
 		xdir="firefox-$arch"
 		rm -rf $xdir
 		
