@@ -409,7 +409,7 @@ const styles = {
     },
     viewContextText: {
         fontSize: '1rem',
-        fontWeight: 500,
+        fontWeight: 400,
         color: '#757575',
         lineHeight: '100%',
     },
@@ -1925,54 +1925,65 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
                 {showContextPopup && (
                     <div style={styles.contextPopup}>
                         {contextDocuments.length > 0 ? (
-                            contextDocuments.map((contextDoc, index) => (
-                                <button
-                                    key={contextDoc.documentId}
-                                    style={{
-                                        ...styles.contextDocumentButton,
-                                        ...(hoveredContextDoc === index ? styles.contextDocumentButtonHover : {}),
-                                        borderBottom: index === contextDocuments.length - 1 ? 'none' : '0.0625rem solid #E0E0E0',
-                                        flexDirection: 'column',
-                                        alignItems: 'flex-start',
-                                        padding: '0.75rem 0.9375rem',
-                                        minHeight: contextDoc.filePath ? '3rem' : 'auto',
-                                        background: '#FFFFFF',
-                                        gap: '0.3125rem'
-                                    }}
-                                    onClick={() => handleContextDocumentClick(contextDoc)}
-                                    onMouseEnter={() => setHoveredContextDoc(index)}
-                                    onMouseLeave={() => setHoveredContextDoc(null)}
-                                    title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : contextDoc.name} // Show full info on hover
-                                >
-                                    <div style={{
-                                        fontSize: '1rem',
-                                        fontWeight: 400,
-                                        color: '#1C1B1F',
-                                        lineHeight: '180%',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                        width: '100%'
-                                    }}>
-                                        {contextDoc.name}
-                                    </div>
-                                    {contextDoc.filePath && (
+                            contextDocuments.map((contextDoc, index) => {
+                                // Check if the item exists in Zotero
+                                const itemExists = Zotero.Items.get(contextDoc.zoteroAttachmentId);
+                                Zotero.debug(`NNNNNNNNNNNNNDeepTutorChatBox: Item exists: ${itemExists}`);
+                                const displayName = itemExists ? contextDoc.name : `[Not exist in Zotero] ${contextDoc.name}`;
+        
+
+                                return (
+                                    <button
+                                        key={contextDoc.documentId}
+                                        style={{
+                                            ...styles.contextDocumentButton,
+                                            ...(hoveredContextDoc === index && itemExists ? styles.contextDocumentButtonHover : {}),
+                                            borderBottom: index === contextDocuments.length - 1 ? 'none' : '0.0625rem solid #E0E0E0',
+                                            flexDirection: 'column',
+                                            alignItems: 'flex-start',
+                                            padding: '0.75rem 0.9375rem',
+                                            minHeight: contextDoc.filePath ? '3rem' : 'auto',
+                                            background: itemExists ? '#FFFFFF' : '#F5F5F5',
+                                            gap: '0.3125rem',
+                                            cursor: itemExists ? 'pointer' : 'not-allowed',
+                                            opacity: itemExists ? 1 : 0.6
+                                        }}
+                                        onClick={() => itemExists ? handleContextDocumentClick(contextDoc) : null}
+                                        onMouseEnter={() => itemExists ? setHoveredContextDoc(index) : null}
+                                        onMouseLeave={() => itemExists ? setHoveredContextDoc(null) : null}
+                                        title={contextDoc.filePath ? `${displayName}\n${contextDoc.filePath}` : displayName} // Show full info on hover
+                                        disabled={!itemExists}
+                                    >
                                         <div style={{
-                                            fontSize: '0.875rem',
+                                            fontSize: '1rem',
                                             fontWeight: 400,
-                                            color: '#757575',
-                                            lineHeight: '135%',
+                                            color: itemExists ? '#1C1B1F' : '#757575',
+                                            lineHeight: '180%',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                             whiteSpace: 'nowrap',
-                                            width: '100%',
-                                            fontStyle: 'italic'
+                                            width: '100%'
                                         }}>
-                                            {contextDoc.filePath}
+                                            {displayName}
                                         </div>
-                                    )}
-                                </button>
-                            ))
+                                        {contextDoc.filePath && (
+                                            <div style={{
+                                                fontSize: '0.875rem',
+                                                fontWeight: 400,
+                                                color: itemExists ? '#757575' : '#9E9E9E',
+                                                lineHeight: '135%',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                                width: '100%',
+                                                fontStyle: 'italic'
+                                            }}>
+                                                {contextDoc.filePath}
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })
                         ) : (
                             <div style={{
                                 padding: '0.75rem',
