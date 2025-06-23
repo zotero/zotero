@@ -1324,7 +1324,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 			let isFreeTrial = true;
 			try {
 				const latestSubscription = await getLatestUserSubscriptionByUserId(userData.id);
-				console.log(latestSubscription);
 				isFreeTrial = !latestSubscription;
 				Zotero.debug('DeepTutor: Latest subscription status:', isFreeTrial);
 			}
