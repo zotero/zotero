@@ -148,7 +148,7 @@ def load_exclusion_files():
     for path in EXCLUSION_FILES:
         with open(path, "r") as f:
             for line in f:
-                p = path_sep_to_native(re.sub("\*$", "", line.strip()))
+                p = path_sep_to_native(re.sub(r"\*$", "", line.strip()))
                 excluded_from_imports_prefix.append(p)
 
 
@@ -193,7 +193,7 @@ class GitUtils(VCSUtils):
             jsms.append(jsm)
 
         handled = {}
-        cmd = ["git", "grep", "EXPORTED_SYMBOLS = \[", f"{path}/*.js"]
+        cmd = ["git", "grep", r"EXPORTED_SYMBOLS = \[", f"{path}/*.js"]
         for line in self.run(cmd):
             m = re.search("^([^:]+):", line)
             if not m:
@@ -229,15 +229,14 @@ class GitUtils(VCSUtils):
         return jss
 
 
-class Summary:
-    def __init__(self):
-        self.convert_errors = []
-        self.import_errors = []
-        self.rename_errors = []
-        self.no_refs = []
-
-
 def esmify(path=None, convert=False, imports=False, prefix=""):
+    class Summary:
+        def __init__(self):
+            self.convert_errors = []
+            self.import_errors = []
+            self.rename_errors = []
+            self.no_refs = []
+
     class CommandContext:
         def log(self, level, tag, _, message):
             print(f"{tag}: {message}")
@@ -252,19 +251,19 @@ def esmify(path=None, convert=False, imports=False, prefix=""):
          files to use new APIs
 
     Example 1:
-      # Convert all JSM files inside `browser/components/pagedata` directory,
+      # Convert all JSM files inside `chrome/content/zotero/xpcom` directory,
       # and replace all references for ESM-ified files in the entire tree to use
       # new APIs
 
-      $ ./mach esmify --convert browser/components/pagedata
-      $ ./mach esmify --imports . --prefix=browser/components/pagedata
+      $ python3 scripts/migrate-fx140/migrate.py esmify --convert chrome/content/zotero/xpcom
+      $ python3 scripts/migrate-fx140/migrate.py esmify --imports . --prefix=chrome/content/zotero/xpcom
 
     Example 2:
-      # Convert all JSM files inside `browser` directory, and replace all
-      # references for the JSM files inside `browser` directory to use
+      # Convert all JSM files inside `chrome` directory, and replace all
+      # references for the JSM files inside `chrome` directory to use
       # new APIs
 
-      $ ./mach esmify browser
+      $ python3 scripts/migrate-fx140/migrate.py esmify chrome
     """
 
     def error(text):
@@ -290,18 +289,15 @@ def esmify(path=None, convert=False, imports=False, prefix=""):
         vcs_utils = GitUtils()
     else:
         error(
-            "This script needs to be run inside mozilla-central "
-            "checkout of either mercurial or git."
+            "This script needs to be run inside a zotero-client Git clone."
         )
         return 1
 
     load_exclusion_files()
 
-    info("Setting up jscodeshift...")
-    setup_jscodeshift()
-
     is_single_file = path.is_file()
 
+    modified_files = []
     summary = Summary()
 
     if convert:
@@ -314,13 +310,15 @@ def esmify(path=None, convert=False, imports=False, prefix=""):
         info(f"Found {len(jsms)} file(s) to convert to ESM.")
 
         info("Converting to ESM...")
-        jsms = convert_module(jsms, summary)
+        jsms = esmify_convert_module(jsms, summary)
         if jsms is None:
             error("Failed to rewrite exports.")
             return 1
 
         info("Renaming...")
         esms = rename_jsms(command_context, vcs_utils, jsms, summary)
+
+        modified_files += esms
 
     if imports:
         info("Searching files to rewrite imports...")
@@ -336,11 +334,19 @@ def esmify(path=None, convert=False, imports=False, prefix=""):
 
         info(f"Checking {len(jss)} JS file(s). Rewriting any matching imports...")
 
-        result = rewrite_imports(jss, prefix, summary)
+        result = esmify_rewrite_imports(jss, prefix, summary)
         if result is None:
             return 1
 
         info(f"Rewritten {len(result)} file(s).")
+
+        # Only modified files needs eslint fix
+        modified_files += result
+
+    modified_files = list(set(modified_files))
+
+    info(f"Applying eslint --fix for {len(modified_files)} file(s)...")
+    eslint_fix(command_context, modified_files)
 
     def print_files(f, errors):
         for [path, message] in errors:
@@ -350,12 +356,12 @@ def esmify(path=None, convert=False, imports=False, prefix=""):
 
     if len(summary.convert_errors):
         error("========")
-        error("Following files are not converted into ESM due to error:")
+        error("The following files were not converted into ESM due to errors:")
         print_files(error, summary.convert_errors)
 
     if len(summary.import_errors):
         warn("========")
-        warn("Following files are not rewritten to import ESMs due to error:")
+        warn("The following files were not rewritten to import ESMs due to errors:")
         warn(
             "(NOTE: Errors related to 'private names' are mostly due to "
             " preprocessor macros in the file):"
@@ -364,23 +370,166 @@ def esmify(path=None, convert=False, imports=False, prefix=""):
 
     if len(summary.rename_errors):
         error("========")
-        error("Following files are not renamed due to error:")
+        error("The following files were not renamed due to errors:")
         print_files(error, summary.rename_errors)
 
     if len(summary.no_refs):
         warn("========")
-        warn("Following files are not found in any build files.")
-        warn("Please update references to those files manually:")
+        warn("The following files were not found in any build files.")
+        warn("Please update references to these files manually:")
         print_files(warn, summary.rename_errors)
 
     return 0
+
+
+def esmify_convert_module(jsms, summary):
+    """Replace EXPORTED_SYMBOLS with export declarations, and replace
+    ChromeUtils.importESModule with static import as much as possible,
+    and return the list of successfully rewritten files."""
+
+    if len(jsms) == 0:
+        return []
+
+    env = os.environ.copy()
+
+    stdin = "\n".join(map(str, jsms)).encode()
+
+    ok_files, errors = run_jscodeshift(
+        "use-import-export-declarations.js",
+        env=env,
+        stdin=stdin,
+    )
+
+    if ok_files is None and errors is None:
+        return None
+
+    summary.convert_errors.extend(errors)
+
+    return ok_files
+
+
+def esmify_rewrite_imports(jss, prefix, summary):
+    """Replace import calls for JSM with import calls for ESM or static import
+    for ESM."""
+
+    if len(jss) == 0:
+        return []
+
+    env = os.environ.copy()
+    env["ESMIFY_TARGET_PREFIX"] = prefix
+
+    stdin = "\n".join(map(str, jss)).encode()
+
+    ok_files, errors = run_jscodeshift(
+        "import-to-import_esmodule.js",
+        env=env,
+        stdin=stdin,
+    )
+
+    if ok_files is None and errors is None:
+        return None
+
+    summary.import_errors.extend(errors)
+
+    return ok_files
+
+
+def asyncify(path=None):
+    class Summary:
+        def __init__(self):
+            self.convert_errors = []
+
+    class CommandContext:
+        def log(self, level, tag, _, message):
+            print(f"{tag}: {message}")
+    command_context = CommandContext()
+
+    def error(text):
+        command_context.log(logging.ERROR, "asyncify", {}, f"[ERROR] {text}")
+
+    def warn(text):
+        command_context.log(logging.WARN, "asyncify", {}, f"[WARN] {text}")
+
+    def info(text):
+        command_context.log(logging.INFO, "asyncify", {}, f"[INFO] {text}")
+
+    path = pathlib.Path(path[0])
+
+    if not verify_path(command_context, path):
+        return 1
+
+    if GitUtils.is_available():
+        vcs_utils = GitUtils()
+    else:
+        error(
+            "This script needs to be run inside a zotero-client Git clone."
+        )
+        return 1
+
+    load_exclusion_files()
+
+    is_single_file = path.is_file()
+
+    summary = Summary()
+
+    info("Searching files to rewrite Bluebird methods...")
+
+    if is_single_file:
+        jss = [path]
+    else:
+        jss = vcs_utils.find_all_jss(path)
+    
+    info(f"Checking {len(jss)} JS file(s). Rewriting Bluebird methods...")
+    
+    modified_files = asyncify_rewrite_bluebird_methods(jss, summary)
+    if modified_files is None:
+        return 1
+    
+    info(f"Rewritten {len(modified_files)} file(s).")
+
+    info(f"Applying eslint --fix for {len(modified_files)} file(s)...")
+    eslint_fix(command_context, modified_files)
+
+    def print_files(f, errors):
+        for [path, message] in errors:
+            f(f"  * {path}")
+            if message:
+                f(f"    {message}")
+
+    if len(summary.convert_errors):
+        error("========")
+        error("The following files were not migrated to use async due to errors:")
+        print_files(error, summary.convert_errors)
+
+    return 0
+
+
+def asyncify_rewrite_bluebird_methods(jss, summary):
+    if len(jss) == 0:
+        return []
+
+    env = os.environ.copy()
+    stdin = "\n".join(map(str, jss)).encode()
+
+    ok_files, errors = run_jscodeshift(
+        "bluebird-to-async.js",
+        env=env,
+        stdin=stdin,
+    )
+
+    if ok_files is None and errors is None:
+        return None
+
+    summary.convert_errors.extend(errors)
+
+    return ok_files
 
 
 def verify_path(command_context, path):
     """Check if the path passed to the command is valid relative path."""
 
     def error(text):
-        command_context.log(logging.ERROR, "esmify", {}, f"[ERROR] {text}")
+        command_context.log(logging.ERROR, "migrate", {}, f"[ERROR] {text}")
 
     if not path.exists():
         error(f"{path} does not exist.")
@@ -649,28 +798,15 @@ def rename_jsms(command_context, vcs_utils, jsms, summary):
     return esms
 
 
-npm_prefix = pathlib.Path("scripts") / "esmify"
-path_from_npm_prefix = pathlib.Path("..") / ".."
-
-
-def setup_jscodeshift():
-    """Install jscodeshift."""
+def run_jscodeshift(script, env, stdin):
     cmd = [
-        "npm",
-        "install",
+        "npx",
         "jscodeshift",
-        "--save-dev",
-        "--prefix",
-        str(npm_prefix),
+        "-t",
+        str(npm_prefix / script),
+        "--stdin",
+        "--verbose=2",
     ]
-    subprocess.run(cmd, check=True)
-
-
-def run_npm_command(args, env, stdin):
-    cmd = [
-        "npm",
-        "run",
-    ] + args
     p = subprocess.Popen(cmd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     p.stdin.write(stdin)
     p.stdin.close()
@@ -693,8 +829,7 @@ def run_npm_command(args, env, stdin):
             continue
 
         result = m.group(1)
-        # NOTE: path is written from `tools/esmify`.
-        path = pathlib.Path(m.group(2)).relative_to(path_from_npm_prefix)
+        path = pathlib.Path(m.group(2))
         error = m.group(3)
 
         if result == "OKK":
@@ -709,95 +844,96 @@ def run_npm_command(args, env, stdin):
     return ok_files, errors
 
 
-def convert_module(jsms, summary):
-    """Replace EXPORTED_SYMBOLS with export declarations, and replace
-    ChromeUtils.importESModule with static import as much as possible,
-    and return the list of successfully rewritten files."""
+def eslint_fix(command_context, files):
+    """Run ESLint with a very basic configuration to fix problems introduced by jscodeshift."""
 
-    if len(jsms) == 0:
-        return []
+    def info(text):
+        command_context.log(logging.INFO, "migrate", {}, f"[INFO] {text}")
 
-    env = os.environ.copy()
+    if len(files) == 0:
+        return
 
-    stdin = "\n".join(map(str, paths_from_npm_prefix(jsms))).encode()
+    args = [
+        "npx",
+        "eslint",
+        "--no-config-lookup",
+        # jscodeshift adds extra parentheses in `new function () {...}` expressions,
+        # making them look like `new (function () {...})` -- undo that
+        "--rule",
+        "no-extra-parens: [error, functions]",
+        # jscodeshift doesn't leave a space before the opening paren in a function
+        "--rule",
+        "space-before-function-paren: [warn, { anonymous: always, asyncArrow: always, named: never }]",
+        "--fix",
+    ]
 
-    ok_files, errors = run_npm_command(
-        [
-            "convert_module",
-            "--prefix",
-            str(npm_prefix),
-        ],
-        env=env,
-        stdin=stdin,
-    )
+    remaining = files[0:]
 
-    if ok_files is None and errors is None:
-        return None
+    # There can be too many files for single command line, perform by chunk.
+    max_files = 16
+    while len(remaining) > max_files:
+        info(f"{len(remaining)} files remaining")
 
-    summary.convert_errors.extend(errors)
+        chunk = remaining[0:max_files]
+        remaining = remaining[max_files:]
 
-    return ok_files
+        cmd = args + chunk
+        # Don't check status code or print output -- zotero-client has many unfixable errors
+        subprocess.run(cmd, stdout=subprocess.DEVNULL)
 
-
-def rewrite_imports(jss, prefix, summary):
-    """Replace import calls for JSM with import calls for ESM or static import
-    for ESM."""
-
-    if len(jss) == 0:
-        return []
-
-    env = os.environ.copy()
-    env["ESMIFY_TARGET_PREFIX"] = prefix
-
-    stdin = "\n".join(map(str, paths_from_npm_prefix(jss))).encode()
-
-    ok_files, errors = run_npm_command(
-        [
-            "rewrite_imports",
-            "--prefix",
-            str(npm_prefix),
-        ],
-        env=env,
-        stdin=stdin,
-    )
-
-    if ok_files is None and errors is None:
-        return None
-
-    summary.import_errors.extend(errors)
-
-    return ok_files
+    info(f"{len(remaining)} files remaining")
+    chunk = remaining
+    cmd = args + chunk
+    # Don't check status code or print output -- zotero-client has many unfixable errors
+    subprocess.run(cmd, stdout=subprocess.DEVNULL)
 
 
-def paths_from_npm_prefix(paths):
-    """Convert relative path from mozilla-central to relative path from
-    tools/esmify."""
-    return list(map(lambda path: path_from_npm_prefix / path, paths))
-
+npm_prefix = pathlib.Path("scripts") / "migrate-fx140"
+path_from_npm_prefix = pathlib.Path("..") / ".."
 
 if __name__ == "__main__":
+    if not (npm_prefix / "node_modules").is_dir():
+        cmd = [
+            "npm",
+            "install",
+            "--prefix",
+            str(npm_prefix),
+        ]
+        subprocess.run(cmd, check=True)
+
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "path",
-        nargs=1,
-        help="Path to the JSM file to ESMify, or the directory that contains "
-             "JSM files and/or JS files that imports ESM-ified JSM.",
-    )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(required=True)
+    
+    parser_esmify = subparsers.add_parser("esmify")
+    parser_esmify.set_defaults(func=esmify)
+    parser_esmify.add_argument(
         "--convert",
         action="store_true",
         help="Only perform the step 1 = convert part",
     )
-    parser.add_argument(
+    parser_esmify.add_argument(
         "--imports",
         action="store_true",
         help="Only perform the step 2 = import calls part",
     )
-    parser.add_argument(
+    parser_esmify.add_argument(
         "--prefix",
         default="",
         help="Restrict the target of import in the step 2 to ESM-ified JSM, by the "
              "prefix match for the JSM file's path.  e.g. 'browser/'.",
     )
+
+    parser_asyncify = subparsers.add_parser("asyncify")
+    parser_asyncify.set_defaults(func=asyncify)
+
+    parser.add_argument(
+        "path",
+        nargs=1,
+        help="Path to the JSM file to migrate, or the directory that contains "
+             "JSM files and/or JS files that reference ESM-ified JSM.",
+    )
+
     args = parser.parse_args()
-    esmify(path=args.path, convert=args.convert, imports=args.imports, prefix=args.prefix)
+    func = args.func
+    delattr(args, 'func')
+    func(**vars(args))
