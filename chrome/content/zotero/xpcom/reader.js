@@ -35,6 +35,11 @@ const ZipReader = Components.Constructor(
 
 Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 
+let ftl = [
+	Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`),
+	Zotero.File.getContentsFromURL(`chrome://zotero/locale/reader.ftl`),
+];
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
@@ -206,10 +211,7 @@ class ReaderInstance {
 			contextPaneOpen: this._contextPaneOpen,
 			rtl: Zotero.rtl,
 			fontSize: Zotero.Prefs.get('fontSize'),
-			localizedStrings: {
-				...Zotero.Intl.getPrefixedStrings('general.'),
-				...Zotero.Intl.getPrefixedStrings('pdfReader.')
-			},
+			ftl,
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
 			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],
@@ -456,7 +458,7 @@ class ReaderInstance {
 			onSaveImageAs: async (dataURL) => {
 				try {
 					let fp = new FilePicker();
-					fp.init(this._iframeWindow, Zotero.getString('pdfReader.saveImageAs'), fp.modeSave);
+					fp.init(this._iframeWindow, Zotero.getString('reader-save-image-as'), fp.modeSave);
 					fp.appendFilter("PNG", "*.png");
 					fp.defaultString = Zotero.getString('file-type-image').toLowerCase() + '.png';
 					let rv = await fp.show();
@@ -692,8 +694,8 @@ class ReaderInstance {
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		let index = ps.confirmEx(
 			null,
-			Zotero.getString('pdfReader.promptTransferFromPDF.title'),
-			Zotero.getString('pdfReader.promptTransferFromPDF.text', Zotero.appName),
+			Zotero.ftl.formatValueSync('reader-prompt-transfer-from-pdf-title'),
+			Zotero.ftl.formatValueSync('reader-prompt-transfer-from-pdf-text', { target: Zotero.appName }),
 			buttonFlags,
 			Zotero.getString('general.continue'),
 			null, null, null, {}
@@ -707,12 +709,8 @@ class ReaderInstance {
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		let index = ps.confirmEx(
 			null,
-			Zotero.getString('pdfReader.promptDeletePages.title'),
-			Zotero.getString(
-				'pdfReader.promptDeletePages.text',
-				new Intl.NumberFormat().format(num),
-				num
-			),
+			Zotero.ftl.formatValueSync('reader-prompt-delete-pages-title'),
+			Zotero.ftl.formatValueSync('reader-prompt-delete-pages-text', { count: num }),
 			buttonFlags,
 			Zotero.getString('general.continue'),
 			null, null, null, {}
@@ -733,7 +731,7 @@ class ReaderInstance {
 			catch (e) {
 				if (e.name === 'PasswordException') {
 					Zotero.alert(null, Zotero.getString('general.error'),
-						Zotero.getString('pdfReader.promptPasswordProtected'));
+						Zotero.getString('reader-prompt-password-protected'));
 				}
 				throw e;
 			}
