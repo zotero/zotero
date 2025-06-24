@@ -596,7 +596,10 @@ class ReaderInstance {
 			},
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
-			}
+			},
+			onSetReadAloudVoice: (lang, voice) => {
+				// TODO: Persist
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
