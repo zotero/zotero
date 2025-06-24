@@ -591,8 +591,8 @@
 			}
 		}
 		#itemDetails {
-			width: 400px;
 			.popup {
+				width: 364px; // with padding and border, the panel is 400px
 				.details-header {
 					.icon {
 						margin-inline-end: 5px;
@@ -602,16 +602,12 @@
 				}
 				.details {
 					margin: 16px 0;
-					display: flex;
-					flex-direction: column;
-					justify-content: space-between;
-					gap: 8px;
-
-					.row {
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						justify-content: end;
+					display: grid;
+					grid-template-columns: auto 1fr;
+					gap: 8px 1px;
+					align-items: center;
+					.details-label {
+						text-align: right;
 					}
 					.details-data {
 						@media not (-moz-platform: windows) {
@@ -622,17 +618,14 @@
 						border-radius: 5px;
 						border: none;
 						box-shadow: 0px 0.5px 2.5px 0px rgba(0, 0, 0, 0.3);
-						width: 250px;
-						@media (-moz-platform: linux) {
-							width: 240px;
-						}
 					}
-					#suppress-author-row {
-						justify-content: start;
-						padding-inline-start: 100px;
+					#suppress-author-container {
+						// undo input's left margin to align checkbox with inputs
+						margin-left: -3px;
 					}
 					#label {
-						flex: 1;
+						// align <select>'s end with the end of prefix/suffix labels better
+						margin-inline-end: -3px;
 						@media (-moz-platform: macos) {
 							height: 22px;
 							// <select> with increased height is hard to position but this helps

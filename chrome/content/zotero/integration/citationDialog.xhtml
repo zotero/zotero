@@ -108,23 +108,22 @@
 						</div>
 					</div>
 					<div class="details" role="group">
-							<div class="row">
-								<!--fx128: size="0" forces select have default native style -->
-								<select name="locator" id="label" class="details-label" size="0"></select>
-								<input id="locator" class="details-data" aria-labelledby="label" aria-describedby="itemDetails-combinedInfo"/>
-							</div>
-							<div class="row">
-								<label class="details-label" for="prefix" data-l10n-id="integration-citationDialog-details-prefix"></label>
-								<input id="prefix" class="details-data"/>					
-							</div>
-							<div class="row">
-								<label class="details-label" for="suffix" data-l10n-id="integration-citationDialog-details-suffix"></label>
-								<input id="suffix" class="details-data"/>
-							</div>
-							<div id="suppress-author-row" class="row">
+							<!--fx128: size="0" forces select have default native style -->
+							<select name="locator" id="label" class="details-label" size="0"></select>
+							<input id="locator" class="details-data" aria-labelledby="label" aria-describedby="itemDetails-combinedInfo"/>
+							
+							<label class="details-label" for="prefix" data-l10n-id="integration-citationDialog-details-prefix"></label>
+							<input id="prefix" class="details-data"/>
+							
+							<label class="details-label" for="suffix" data-l10n-id="integration-citationDialog-details-suffix"></label>
+							<input id="suffix" class="details-data"/>
+							
+							<!-- empty div for the left cell, so suppress author appears in the right cell -->
+							<div></div>
+							<div id="suppress-author-container" class="hbox">
 								<input id="suppress-author" type="checkbox"/>
 								<label for="suppress-author" data-l10n-id="integration-citationDialog-details-suppressAuthor"></label>
-							</div>				
+							</div>
 					</div>
 					<div class="buttons">
 						<button class="remove" data-l10n-id="integration-citationDialog-details-remove"></button>
