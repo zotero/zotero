@@ -40,7 +40,7 @@ const createSessionButtonStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: '0.5rem',
-  marginBottom: '1.25rem',
+  marginBottom: '1.875rem',
 };
 
 const plusIconStyle = {
