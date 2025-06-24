@@ -261,10 +261,10 @@ rm actors/PageInfoChild.sys.mjs
 rm actors/PageStyle{Parent,Child}.sys.mjs
 rm actors/Plugin{Parent,Child}.sys.mjs # GMP plugins, which we remove
 rm actors/PointerLock{Parent,Child}.sys.mjs
-rm actors/RFPHelper{Parent,Child}.sys.mjs
+#rm actors/RFPHelper{Parent,Child}.sys.mjs
 rm actors/ScreenshotsComponentChild.sys.mjs
-rm actors/SearchSERPTelemetry{Parent,Child}.sys.mjs
-rm actors/ShoppingSidebar{Parent,Child}.sys.mjs
+#rm actors/SearchSERPTelemetry{Parent,Child}.sys.mjs
+#rm actors/ShoppingSidebar{Parent,Child}.sys.mjs
 rm actors/SpeechDispatcher{Parent,Child}.sys.mjs
 rm actors/WebRTC{Parent,Child}.sys.mjs
 
@@ -277,10 +277,10 @@ browser_keep=(
 	# For spellchecking
 	content/browser/built_in_addons.json
 )
-if [ $BUILD_WIN == 1 ] || [ $BUILD_LINUX == 1 ]; then
-	# Windows/Linux window controls
-	browser_keep+=(skin/classic/browser/window-controls)
-fi
+#if [ $BUILD_WIN == 1 ] || [ $BUILD_LINUX == 1 ]; then
+#	# Windows/Linux window controls
+#	browser_keep+=(skin/classic/browser/window-controls)
+#fi
 for file in "${browser_keep[@]}"; do
 	mkdir -p "$(dirname "chrome/browser-fx/$file")"
 	mv "chrome/browser/$file" "chrome/browser-fx/$file"
@@ -290,7 +290,7 @@ rm -r chrome/browser
 # Move essential files back
 mv chrome/browser-fx chrome/browser
 
-rm modules/SearchSERPTelemetry.sys.mjs
+#rm modules/SearchSERPTelemetry.sys.mjs
 
 # Move some Firefox files that would be overwritten out of the way
 mv chrome.manifest chrome.manifest-fx
@@ -437,7 +437,7 @@ replace_line 'handle: function bch_handle\(cmdLine\) {' 'handle: function bch_ha
 export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets/commandLineHandler.js"; $replacement = <$fh>; close $fh; } s/\/\/ TEST_OPTIONS_PLACEHOLDER/$replacement/' modules/BrowserContentHandler.sys.mjs
 
 # Don't try to initialize Places, since we've removed its files
-replace_line 'this._placesInitialized = true;' 'if (true) return; this._placesInitialized = true;' modules/BrowserGlue.sys.mjs
+#replace_line 'this._placesInitialized = true;' 'if (true) return; this._placesInitialized = true;' components/places/PlacesBrowserStartup.sys.mjs
 
 # Move test files to root directory
 if [ $include_tests -eq 1 ]; then
