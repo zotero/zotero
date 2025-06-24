@@ -950,8 +950,8 @@ if [ $BUILD_LINUX == 1 ]; then
 		
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
 		check_lfs_file "$CALLDIR/linux/updater.tar.xz"
-		tar xf "$CALLDIR/linux/updater.tar.xz" --to-stdout updater-$arch > "$APPDIR/updater"
-		chmod 755 "$APPDIR/updater"
+		#tar xf "$CALLDIR/linux/updater.tar.xz" --to-stdout updater-$arch > "$APPDIR/updater"
+		#chmod 755 "$APPDIR/updater"
 
 		# Copy app files
 		rsync -a "$base_dir/" "$APPDIR/"
