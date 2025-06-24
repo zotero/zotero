@@ -51,6 +51,12 @@ reader-prompt-delete-pages-text =
         [one] Are you sure you want to delete { $count } page from the PDF file?
         *[other] Are you sure you want to delete { $count } pages from the PDF file?
     }
+reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-text =
+    { $count ->
+        [one] Are you sure you want to delete the selected annotation?
+        *[other] Are you sure you want to delete the selected annotations?
+    }
 reader-rotate-left = Rotate Left
 reader-rotate-right = Rotate Right
 reader-edit-page-number = Edit Page Number…
@@ -64,11 +70,6 @@ reader-this-page = This page
 reader-this-page-and-later-pages = This page and later pages
 reader-all-pages = All pages
 reader-auto-detect = Auto-Detect
-reader-delete-annotation-text =
-    { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-        *[other] Are you sure you want to delete the selected annotations?
-    }
 reader-enter-password = Enter the password to open this PDF file
 reader-include-annotations = Include annotations
 reader-preparing-document-for-printing = Preparing document for printing…
