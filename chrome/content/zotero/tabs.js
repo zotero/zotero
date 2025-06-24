@@ -455,6 +455,9 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 */
 	this.select = function (id, reopening, options = {}) {
+		// FIX0618: Capture the currently selected tab ID before any logic runs
+		let previouslySelectedID = this._selectedID;
+		
 		var { tab, tabIndex } = this._getTab(id);
 		// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
 		let focusZoteroPane = () => {
@@ -513,15 +516,28 @@ var Zotero_Tabs = new function () {
 		}
 		
 		// FIX0618: Collapse deeptutor pane when switching to reader mode
-		/*
-		if (tab.type === 'reader' || tab.type === 'reader-unloaded' || tab.type === 'reader-loading') {
+		// Only collapse if switching FROM non-reader tab TO reader tab
+		let currentTabIsReader = tab.type === 'reader' || tab.type === 'reader-unloaded' || tab.type === 'reader-loading';
+		let prevTabIsReader = false;
+		
+		// Use the captured previouslySelectedID instead of this._prevSelectedID
+		if (previouslySelectedID) {
+			let prevTab = this._getTab(previouslySelectedID).tab;
+			if (prevTab) {
+				prevTabIsReader = prevTab.type === 'reader' || prevTab.type === 'reader-unloaded' || prevTab.type === 'reader-loading';
+			}
+		}
+		Zotero.debug(`Tabs: currentTabIsReader ${currentTabIsReader}, prevTabIsReader ${prevTabIsReader}`);
+		
+		// Only collapse DeepTutor pane when switching from non-reader to reader, not reader to reader
+		if (currentTabIsReader && !prevTabIsReader) {
 			let deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
 			let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
 			
 			if (deepTutorPane && deeptutorSplitter) {
 				let isDeepTutorOpen = !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true';
 				if (isDeepTutorOpen) {
-					Zotero.debug('Tabs: Collapsing DeepTutor pane when switching to reader mode');
+					Zotero.debug('Tabs: Collapsing DeepTutor pane when switching from library to reader mode');
 					deepTutorPane.hidden = true;
 					deepTutorPane.setAttribute('collapsed', 'true');
 					deeptutorSplitter.setAttribute('state', 'collapsed');
@@ -532,7 +548,6 @@ var Zotero_Tabs = new function () {
 				}
 			}
 		}
-		*/
 		
 		if (tab.type === 'reader-unloaded') {
 			tab.type = "reader-loading";
