@@ -1500,50 +1500,63 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
 	// Add new useEffect after the existing one
 	useEffect(() => {
-		const openFirstDocument = async () => {
+		const openAllDocuments = async () => {
 			if (documentIds && documentIds.length > 0 && sessionId) {
-				Zotero.debug(`DeepTutorChatBox: Opening first document - sessionId: ${sessionId}, documentId: ${documentIds[0]}`);
+				Zotero.debug(`DeepTutorChatBox: Opening all documents - sessionId: ${sessionId}, ${documentIds.length} documents`);
                 
-				try {
-					// Try to get the mapping from local storage
-					const storageKey = `deeptutor_mapping_${sessionId}`;
-					let zoteroAttachmentId = documentIds[0];
+				// Try to get the mapping from local storage
+				const storageKey = `deeptutor_mapping_${sessionId}`;
+				const mappingStr = Zotero.Prefs.get(storageKey);
+				let mapping = {};
+				
+				if (mappingStr) {
+					mapping = JSON.parse(mappingStr);
+					Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
+				}
 
-					const mappingStr = Zotero.Prefs.get(storageKey);
-					Zotero.debug('DeepTutorChatBox: Get data mapping:', Zotero.Prefs.get(storageKey));
-					if (mappingStr) {
-						const mapping = JSON.parse(mappingStr);
-						Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
-                        
+				// Open all documents in order
+				for (let i = 0; i < documentIds.length; i++) {
+					const documentId = documentIds[i];
+					try {
+						let zoteroAttachmentId = documentId;
+
 						// If we have a mapping for this document ID, use it
-						if (mapping[documentIds[0]]) {
-							zoteroAttachmentId = mapping[documentIds[0]];
-							Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId}`);
+						if (mapping[documentId]) {
+							zoteroAttachmentId = mapping[documentId];
+							Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId} for document ${documentId}`);
+						}
+
+						// Get the item and open it
+						const item = Zotero.Items.get(zoteroAttachmentId);
+						if (!item) {
+							Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}`);
+							continue; // Skip this document and continue with the next one
+						}
+
+						// Open the document in the reader
+						await Zotero.FileHandlers.open(item, {
+							location: {
+								pageIndex: 0 // Start at first page
+							}
+						});
+						Zotero.debug(`DeepTutorChatBox: Opened document ${i + 1}/${documentIds.length}: ${zoteroAttachmentId} in reader`);
+						
+						// Add a small delay between opening documents to avoid overwhelming the UI
+						if (i < documentIds.length - 1) {
+							await new Promise(resolve => setTimeout(resolve, 500));
 						}
 					}
-
-					// Get the item and open it
-					const item = Zotero.Items.get(zoteroAttachmentId);
-					if (!item) {
-						Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}`);
-						return;
+					catch (error) {
+						Zotero.debug(`DeepTutorChatBox: Error opening document ${documentId}: ${error.message}`);
+						Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+						// Continue with the next document even if this one fails
 					}
-
-					// Open the document in the reader
-					await Zotero.FileHandlers.open(item, {
-						location: {
-							pageIndex: 0 // Start at first page
-						}
-					});
-					Zotero.debug(`DeepTutorChatBox: Opened document ${zoteroAttachmentId} in reader`);
 				}
-				catch (error) {
-					Zotero.debug(`DeepTutorChatBox: Error opening first document: ${error.message}`);
-					Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
-				}
+				
+				Zotero.debug(`DeepTutorChatBox: Finished opening all ${documentIds.length} documents`);
 			}
 		};
-		openFirstDocument();
+		openAllDocuments();
 	}, [documentIds, sessionId]); // Dependencies array
 
 	// Load context documents when documentIds change

@@ -658,8 +658,14 @@ function ModelSelection({ onSubmit, user }) {
 
       Zotero.debug(`ModelSelection: Found ${pdfAttachments.length} PDF attachments`);
       
-      // Store original PDF attachments
-      setOriginalFileList(pdfAttachments);
+      // Store original PDF attachments (append to existing list)
+      setOriginalFileList(prev => {
+        // Filter out PDFs that already exist in the current originalFileList
+        const newPdfs = pdfAttachments.filter(pdf => 
+          !prev.some(existingFile => existingFile.id === pdf.id)
+        );
+        return [...prev, ...newPdfs];
+      });
 
       // Process all PDFs concurrently using Promise.all
       const pdfProcessingPromises = pdfAttachments.map(async (pdf) => {
@@ -744,6 +750,8 @@ function ModelSelection({ onSubmit, user }) {
     try {
       // Handle file uploads if fileList exists
       const uploadedDocumentIds = [];
+      Zotero.debug(`ModelSelection: fileList length: ${fileList.length}`);
+      Zotero.debug(`ModelSelection: originalFileList length: ${originalFileList.length}`);
       if (fileList.length > 0) {
         for (const file of originalFileList) {
           try {
@@ -781,6 +789,7 @@ function ModelSelection({ onSubmit, user }) {
 
             Zotero.debug('ModelSelection: File uploaded successfully:', fileName);
             uploadedDocumentIds.push(preSignedUrlData.documentId);
+            Zotero.debug(`ModelSelection: Uploaded document IDs: ${uploadedDocumentIds}`);
             
           } catch (fileError) {
             Zotero.debug('ModelSelection: Error uploading file:', fileError);
@@ -903,8 +912,14 @@ function ModelSelection({ onSubmit, user }) {
         Zotero.debug(`BBBBB: Found ${pdfAttachments.length} total PDF attachments from dropped items`);
         Zotero.debug(`BBBBB: Current fileList length before update: ${fileList.length}`);
         
-        // Store original PDF attachments
-        setOriginalFileList(pdfAttachments);
+        // Store original PDF attachments (append to existing list)
+        setOriginalFileList(prev => {
+          // Filter out PDFs that already exist in the current originalFileList
+          const newPdfs = pdfAttachments.filter(pdf => 
+            !prev.some(existingFile => existingFile.id === pdf.id)
+          );
+          return [...prev, ...newPdfs];
+        });
         Zotero.debug("BBBBB: Updated originalFileList with PDF attachments");
 
         // Process all PDFs concurrently using Promise.all
