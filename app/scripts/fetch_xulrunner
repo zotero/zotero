@@ -93,7 +93,7 @@ function modify_omni {
 	rm -r chrome/pdfjs
 	
 	rm -r modules/narrate
-	rm -r modules/translation
+	#rm -r modules/translation
 	
 	rm actors/AboutTranslations{Parent,Child}.sys.mjs
 	rm actors/CookieBanner{Parent,Child}.sys.mjs
