@@ -111,7 +111,86 @@ class DeepTutorSubscription extends React.Component {
 	};
 
 	handleShowProcessing = () => {
-		Zotero.launchURL('https://staging.deeptutor.knowhiz.us/dzSubscription');
+		const url = 'https://staging.deeptutor.knowhiz.us/dzSubscription';
+		
+		try {
+			// Primary: Use Zotero's proper API for opening external URLs
+			Zotero.debug("DeepTutorSubscription: Trying primary method - Zotero.launchURL");
+			Zotero.launchURL(url);
+			Zotero.debug("DeepTutorSubscription: Successfully called Zotero.launchURL");
+		}
+		catch (error) {
+			Zotero.debug(`DeepTutorSubscription: Primary method failed - Zotero.launchURL: ${error.message}`);
+			
+			// Fallback 1: Try Zotero.Utilities.Internal.launchURL
+			try {
+				if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
+					Zotero.debug("DeepTutorSubscription: Trying Fallback 1 - Zotero.Utilities.Internal.launchURL");
+					Zotero.Utilities.Internal.launchURL(url);
+					Zotero.debug("DeepTutorSubscription: Successfully called Zotero.Utilities.Internal.launchURL");
+				}
+				else {
+					throw new Error("Zotero.Utilities.Internal.launchURL not available");
+				}
+			}
+			catch (fallback1Error) {
+				Zotero.debug(`DeepTutorSubscription: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
+				
+				// Fallback 2: Try Zotero.HTTP.loadDocuments
+				try {
+					if (Zotero.HTTP && Zotero.HTTP.loadDocuments) {
+						Zotero.debug("DeepTutorSubscription: Trying Fallback 2 - Zotero.HTTP.loadDocuments");
+						Zotero.HTTP.loadDocuments([url]);
+						Zotero.debug("DeepTutorSubscription: Successfully called Zotero.HTTP.loadDocuments");
+					}
+					else {
+						throw new Error("Zotero.HTTP.loadDocuments not available");
+					}
+				}
+				catch (fallback2Error) {
+					Zotero.debug(`DeepTutorSubscription: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
+					
+					// Fallback 3: Try XPCOM nsIExternalProtocolService
+					try {
+						if (typeof Cc !== 'undefined' && typeof Ci !== 'undefined') {
+							Zotero.debug("DeepTutorSubscription: Trying Fallback 3 - XPCOM nsIExternalProtocolService (using Cc/Ci shortcuts)");
+							const extps = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+								.getService(Ci.nsIExternalProtocolService);
+							const uri = Cc["@mozilla.org/network/io-service;1"]
+								.getService(Ci.nsIIOService)
+								.newURI(url, null, null);
+							extps.loadURI(uri);
+							Zotero.debug("DeepTutorSubscription: Successfully opened URL via XPCOM nsIExternalProtocolService");
+						}
+						else {
+							throw new Error("XPCOM Cc/Ci shortcuts not available");
+						}
+					}
+					catch (fallback3Error) {
+						Zotero.debug(`DeepTutorSubscription: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
+						
+						// Final fallback: Copy URL to clipboard
+						if (navigator.clipboard) {
+							Zotero.debug("DeepTutorSubscription: Trying final fallback - copy URL to clipboard");
+							navigator.clipboard.writeText(url)
+								.then(() => {
+									Zotero.debug("DeepTutorSubscription: Successfully copied subscription URL to clipboard");
+									Zotero.alert(null, "DeepTutor Subscription", 'Subscription URL copied to clipboard!\nPlease paste it in your browser to access the subscription page.');
+								})
+								.catch((clipboardError) => {
+									Zotero.debug(`DeepTutorSubscription: Failed to copy to clipboard: ${clipboardError.message}`);
+									Zotero.alert(null, "DeepTutor Subscription", `Please manually visit this URL:\n${url}`);
+								});
+						}
+						else {
+							Zotero.debug("DeepTutorSubscription: Clipboard API not available, showing alert with URL");
+							Zotero.alert(null, "DeepTutor Subscription", `Please manually visit this URL:\n${url}`);
+						}
+					}
+				}
+			}
+		}
+		
 		this.setState({ currentPanel: "processing" });
 	};
 

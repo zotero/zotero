@@ -6811,7 +6811,7 @@ var ZoteroPane = new function()
 		// Keep in sync with abstracts/variables.scss > $min-width-items-pane
 		const itemsPaneMinWidth = 300;
 		// DeepTutor pane minimum width
-		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 250;
+		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 380;
 		const deepTutorPaneMaxWidth = 600;
 
 		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth + deepTutorPaneMinWidth;
@@ -6832,6 +6832,43 @@ var ZoteroPane = new function()
 		}
 
 		let layoutChanged = false;
+		
+		// Auto-collapse DeepTutor pane when window becomes too narrow
+		// Calculate minimum required width with DeepTutor pane open
+		const deepTutorRequiredWidth = collectionsPaneMinWidth + itemsPaneMinWidth + sideNavMinWidth + itemsPaneMinWidth + deepTutorPaneMinWidth + 25; // 50px margin for splitters
+		
+		// Track previous state to restore DeepTutor when window becomes wide enough
+		let deepTutorWasAutoCollapsed = deepTutorPane.getAttribute('data-auto-collapsed') === 'true';
+		
+		if (!isDeepTutorPaneCollapsed && window.innerWidth < deepTutorRequiredWidth) {
+			// Window is too narrow for DeepTutor pane, auto-collapse it
+			Zotero.debug('updateLayoutConstraints: Auto-collapsing DeepTutor pane due to narrow window');
+			let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+			
+			deepTutorPane.hidden = true;
+			deepTutorPane.setAttribute('collapsed', 'true');
+			deepTutorPane.setAttribute('data-auto-collapsed', 'true'); // Mark as auto-collapsed
+			if (deeptutorSplitter) {
+				deeptutorSplitter.setAttribute('state', 'collapsed');
+			}
+			layoutChanged = true;
+		}
+		/*
+		else if (deepTutorWasAutoCollapsed && window.innerWidth >= deepTutorRequiredWidth) {
+			// Window is now wide enough and DeepTutor was auto-collapsed, restore it
+			Zotero.debug('updateLayoutConstraints: Auto-restoring DeepTutor pane due to wider window');
+			let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+			
+			deepTutorPane.hidden = false;
+			deepTutorPane.removeAttribute('collapsed');
+			deepTutorPane.removeAttribute('data-auto-collapsed'); // Remove auto-collapsed marker
+			if (deeptutorSplitter) {
+				deeptutorSplitter.setAttribute('state', 'open');
+			}
+			layoutChanged = true;
+		}
+		*/
+		
 		// Collections pane + items pane + items pane + sidenav + 3px for draggability
 		const windowAutoStackMinWidth = 930;
 		if (window.innerWidth < windowAutoStackMinWidth) {

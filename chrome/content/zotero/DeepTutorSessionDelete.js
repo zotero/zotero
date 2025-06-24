@@ -52,7 +52,7 @@ const styles = {
     all: 'revert',
     background: '#dc3545',
     color: '#fff',
-    minHeight: '2.4375rem',
+    minHeight: '3rem',
     fontWeight: 700,
     fontSize: '1rem',
     border: 'none',
@@ -73,7 +73,7 @@ const styles = {
     color: SKY,
     fontWeight: 700,
     fontSize: '1rem',
-    minHeight: '2.4375rem',
+    minHeight: '3rem',
     border: `0.125rem solid ${SKY}`,
     boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
     borderRadius: '0.625rem',
@@ -142,7 +142,7 @@ export default function DeepTutorSessionDelete({
             onMouseEnter={() => setIsConfirmHovered(true)}
             onMouseLeave={() => setIsConfirmHovered(false)}
           >
-            Confirm
+            Delete
           </button>
           <button 
             style={cancelButtonDynamicStyle}

@@ -29,7 +29,9 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
+    marginLeft: '0',
     marginBottom: '1.25rem',
+    boxSizing: 'border-box',
   },
   label: {
     fontWeight: 400,
@@ -37,11 +39,12 @@ const styles = {
     lineHeight: '135%',
     color: '#222',
     marginBottom: '0.625rem',
-    marginLeft: '0.25rem',
+    marginLeft: '0',
   },
   input: {
     width: '100%',
     minHeight: '3rem',
+    marginLeft: '0',
     borderRadius: '0.625rem',
     border: `1px solid #DADCE0`,
     padding: '0.375rem 0.5rem',
@@ -328,7 +331,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess }) {
             <input
               style={styles.input}
               type="password"
-              placeholder="At least 8 characters to Your password"
+              placeholder="your password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               disabled={isLoading}
