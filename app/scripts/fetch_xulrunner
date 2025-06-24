@@ -415,7 +415,7 @@ function modify_omni {
          popupset = document.createXULElement("popupset");
          document.documentElement.appendChild(popupset);
        }
-       popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
+       popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.mjs
 	
 	# Remove aria-autocomplete unnecessarily added to search-textbox to not confuse screen readers
 	remove_line 'this.inputField.setAttribute\("aria-autocomplete' chrome/toolkit/content/global/elements/search-textbox.js
