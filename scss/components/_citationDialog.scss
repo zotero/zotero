@@ -606,8 +606,8 @@
 					grid-template-columns: auto 1fr;
 					gap: 8px 1px;
 					align-items: center;
-					.details-label {
-						text-align: right;
+					.details-label:not(select) {
+						text-align: end;
 					}
 					.details-data {
 						@media not (-moz-platform: windows) {
