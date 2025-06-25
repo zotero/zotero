@@ -5,3 +5,4 @@ build/
 tmp
 app/win/codesign
 .cursor/rules/
+**/*:Zone.Identifier
