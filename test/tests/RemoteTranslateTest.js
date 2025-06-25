@@ -6,7 +6,10 @@ const { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTr
 describe("RemoteTranslate", function () {
 	let dummyTranslator;
 	let translatorProvider;
-	before(function () {
+	let httpd;
+	let port = 16213;
+
+	before(async function () {
 		dummyTranslator = buildDummyTranslator('web', `
 			function detectWeb() {
 				Zotero.debug("test string");
@@ -36,6 +39,29 @@ describe("RemoteTranslate", function () {
 				return translators;
 			}
 		});
+
+		var { HttpServer } = ChromeUtils.import("chrome://remote/content/server/HTTPD.jsm");
+		httpd = new HttpServer();
+		httpd.start(port);
+		httpd.registerPathHandler(
+			'/readCookie',
+			{
+				handle: function (request, response) {
+					if (request.getHeader('Cookie') === 'sessionID=1') {
+						response.setStatusLine(null, 200, 'OK');
+						response.write('OK');
+					}
+					else {
+						response.setStatusLine(null, 403, 'Forbidden');
+						response.write('Header not set');
+					}
+				}
+			}
+		);
+	});
+	
+	after(async function () {
+		await new Promise(resolve => httpd.stop(resolve));
 	});
 	
 	describe("#setHandler()", function () {
@@ -141,7 +167,7 @@ describe("RemoteTranslate", function () {
 		});
 		
 		it("should support DOMParser", async function () {
-			let domParserDummy = buildDummyTranslator('web', `
+			let dummy = buildDummyTranslator('web', `
 				function detectWeb() {
 					return "book";
 				}
@@ -157,7 +183,7 @@ describe("RemoteTranslate", function () {
 			let browser = new HiddenBrowser();
 			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
-			translate.setTranslator(domParserDummy);
+			translate.setTranslator(dummy);
 
 			let items = await translate.translate({ libraryID: false });
 			assert.equal(items[0].title, 'content');
@@ -167,7 +193,7 @@ describe("RemoteTranslate", function () {
 		});
 		
 		it("should be able to access hidden prefs", async function () {
-			let domParserDummy = buildDummyTranslator('web', `
+			let dummy = buildDummyTranslator('web', `
 				function detectWeb() {
 					return "book";
 				}
@@ -185,10 +211,38 @@ describe("RemoteTranslate", function () {
 			let browser = new HiddenBrowser();
 			await browser.load(getTestDataUrl('test.html'));
 			await translate.setBrowser(browser);
-			translate.setTranslator(domParserDummy);
+			translate.setTranslator(dummy);
 
 			let items = await translate.translate({ libraryID: false });
 			assert.equal(items[0].title, 'Test value');
+
+			browser.destroy();
+			translate.dispose();
+		});
+		
+		it("should send cookies", async function () {
+			let dummy = buildDummyTranslator('web', `
+				function detectWeb() {
+					return "book";
+				}
+				
+				async function doWeb() {
+					let item = new Zotero.Item("book");
+					item.title = await requestText("http://localhost:${port}/readCookie", {
+						headers: { Cookie: "sessionID=1" },
+					});
+					item.complete();
+				}
+			`);
+
+			let translate = new RemoteTranslate();
+			let browser = new HiddenBrowser();
+			await browser.load(getTestDataUrl('test.html'));
+			await translate.setBrowser(browser);
+			translate.setTranslator(dummy);
+
+			let items = await translate.translate({ libraryID: false });
+			assert.equal(items[0].title, 'OK');
 
 			browser.destroy();
 			translate.dispose();
