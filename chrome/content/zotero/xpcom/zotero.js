@@ -716,6 +716,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Zotero.Streamer.init();
 			
 			Zotero.MIMETypeHandler.init();
+			Zotero.CookieSandbox.init();
 			yield Zotero.Proxies.init();
 			
 			// Initialize keyboard shortcuts
