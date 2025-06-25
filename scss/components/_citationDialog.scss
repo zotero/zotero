@@ -604,7 +604,7 @@
 					margin: 16px 0;
 					display: grid;
 					grid-template-columns: auto 1fr;
-					gap: 8px 2px;
+					gap: 8px 1px;
 					align-items: center;
 					.details-label:not(select) {
 						text-align: end;
@@ -625,7 +625,7 @@
 					}
 					#label {
 						// align <select>'s end with the end of prefix/suffix labels better
-						margin-inline-end: -3px;
+						margin-inline-end: -1px;
 						@media (-moz-platform: macos) {
 							height: 22px;
 							// <select> with increased height is hard to position but this helps
