@@ -35,11 +35,6 @@ const ZipReader = Components.Constructor(
 
 Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 
-let ftl = [
-	Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`),
-	Zotero.File.getContentsFromURL(`chrome://zotero/locale/reader.ftl`),
-];
-
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
@@ -211,7 +206,10 @@ class ReaderInstance {
 			contextPaneOpen: this._contextPaneOpen,
 			rtl: Zotero.rtl,
 			fontSize: Zotero.Prefs.get('fontSize'),
-			ftl,
+			ftl: [
+				Zotero.File.getContentsFromURL('chrome://zotero/locale/zotero.ftl'),
+				Zotero.File.getContentsFromURL('chrome://zotero/locale/reader.ftl'),
+			],
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
 			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],
