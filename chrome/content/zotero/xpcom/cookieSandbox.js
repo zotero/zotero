@@ -60,6 +60,10 @@ Zotero.CookieSandbox = function (browser, uri, cookieData, userAgent) {
 	}
 };
 
+Zotero.CookieSandbox.init = function () {
+	Zotero.CookieSandbox.Observer.register();
+};
+
 /**
  * Normalizes the host string: lower-case, remove leading period, some more cleanup
  * @param {String} host;
@@ -232,8 +236,8 @@ Zotero.CookieSandbox.prototype = {
 			cookies = {}, found = false, secure = uri.scheme.toUpperCase() == 'HTTPS';
 		
 		// Fetch cookies starting from the highest level domain
-		var cookieHost = '.' + hostParts[hostParts.length-1];
-		for(var i=hostParts.length-2; i>=0; i--) {
+		var cookieHost = '';
+		for(var i=hostParts.length-1; i>=0; i--) {
 			cookieHost = '.' + hostParts[i] + cookieHost;
 			if(this._cookies[cookieHost]) {
 				found = this._getCookiesForPath(cookies, this._cookies[cookieHost], pathParts, secure, i==0) || found;
