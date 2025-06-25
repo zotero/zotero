@@ -118,13 +118,17 @@ const styles = {
 		alignItems: 'stretch',
 		boxSizing: 'border-box',
 		marginBottom: '1.25rem',
+		userSelect: 'text',
+		WebkitUserSelect: 'text',
+		MozUserSelect: 'text',
+		msUserSelect: 'text',
 	},
 	bottomBar: {
 		width: '100%',
 		background: '#F8F6F7',
 		boxShadow: '0 -0.0625rem 0.1875rem rgba(0,0,0,0.08)',
 		display: 'flex',
-		alignItems: 'center',
+		alignItems: 'flex-end', // Changed from 'center' to 'flex-end' to align with textarea
 		justifyContent: 'space-between',
 		fontFamily: 'Roboto, sans-serif',
 		position: 'relative',
@@ -133,7 +137,7 @@ const styles = {
 		borderRadius: '0.5rem',
 		boxSizing: 'border-box',
 		minHeight: '2.5rem',
-		maxHeight: '3.5rem',
+		maxHeight: '10rem', // Increased to accommodate larger textarea (7rem + padding)
 		padding: '0.5rem',
 	},
 	textInput: {
@@ -145,19 +149,17 @@ const styles = {
 		background: '#F8F6F7',
 		color: '#1a65b0',
 		minHeight: '1.5rem',
-		maxHeight: '2rem',
+		maxHeight: '7rem', // Approximately 5 lines of text at 0.95rem font size
 		fontSize: '0.95rem',
 		overflowY: 'auto',
 		fontFamily: 'Roboto, sans-serif',
 		resize: 'none',
-		height: 'auto',
+		height: '24px', // Start with minHeight (1.5rem)
 		marginRight: '0.625rem',
-		alignSelf: 'stretch',
-		':focus': {
-			outline: 'none',
-			border: 'none',
-			boxShadow: 'none'
-		}
+		alignSelf: 'flex-end',
+		lineHeight: '1.4',
+		wordWrap: 'break-word',
+		whiteSpace: 'pre-wrap'
 	},
 	sendButton: {
 		all: 'revert',
@@ -202,6 +204,10 @@ const styles = {
 		wordBreak: 'break-word',
 		boxSizing: 'border-box',
 		overflowWrap: 'break-word',
+		userSelect: 'text',
+		WebkitUserSelect: 'text',
+		MozUserSelect: 'text',
+		msUserSelect: 'text',
 	},
 	userMessage: {
 		backgroundColor: 'white',
@@ -239,6 +245,11 @@ const styles = {
 		maxWidth: '100%',
 		overflowWrap: 'break-word',
 		wordBreak: 'break-word',
+		userSelect: 'text',
+		WebkitUserSelect: 'text',
+		MozUserSelect: 'text',
+		msUserSelect: 'text',
+		cursor: 'text',
 	},
 	sourcesContainer: {
 		marginTop: '0.5rem',
@@ -473,6 +484,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 	const MAX_VISIBLE_SESSIONS = 2;
 	const chatLogRef = useRef(null);
 	const contextPopupRef = useRef(null);
+	const textareaRef = useRef(null);
 	const [hoveredContextDoc, setHoveredContextDoc] = useState(null);
 	// Removed hoveredQuestion and hoveredPopupSession states - these were causing unnecessary re-renders
 	// const [hoveredQuestion, setHoveredQuestion] = useState(null);
@@ -482,6 +494,50 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 	const isAutoScrollingRef = useRef(true);
 	const [showContextPopup, setShowContextPopup] = useState(false);
 	const [contextDocuments, setContextDocuments] = useState([]);
+
+	// Function to adjust textarea height based on content
+	const adjustTextareaHeight = () => {
+		const textarea = textareaRef.current;
+		if (textarea) {
+			// Reset height to get the correct scrollHeight
+			textarea.style.height = 'auto';
+			
+			// Calculate the new height
+			const scrollHeight = textarea.scrollHeight;
+			const maxHeight = 83; // 10rem converted to pixels (assuming 16px base)
+			
+			// For empty or single-line content, use a fixed minimum height
+			// We detect single-line by checking if textarea value has newlines or if it's empty
+			const isEmpty = !textarea.value.trim();
+			const hasMultipleLines = textarea.value.includes('\n');
+			
+			let newHeight;
+			
+			if (isEmpty || (!hasMultipleLines && scrollHeight <= 50)) {
+				// Use minimum height for empty or short single-line content
+				newHeight = 24; // 1.5rem in pixels
+				Zotero.debug(`DeepTutorChatBox: Using minimum height ${newHeight}px for single-line content`);
+			} else {
+				// Use scrollHeight for multi-line content, but cap at maxHeight
+				newHeight = Math.min(scrollHeight, maxHeight);
+				Zotero.debug(`DeepTutorChatBox: Using scroll height ${newHeight}px for multi-line content`);
+			}
+			
+			textarea.style.height = newHeight + 'px';
+			
+			// Show/hide scrollbar based on content
+			if (scrollHeight > maxHeight) {
+				textarea.style.overflowY = 'scroll';
+			} else {
+				textarea.style.overflowY = 'hidden';
+			}
+		}
+	};
+
+	// Adjust textarea height on mount and when inputValue changes
+	useEffect(() => {
+		adjustTextareaHeight();
+	}, [inputValue]);
 
 	// Load recent sessions from preferences on component mount
 	useEffect(() => {
@@ -850,9 +906,24 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 		}
 	};
 
+	const handleInputChange = (e) => {
+		setInputValue(e.target.value);
+		// Adjust height after the value is set
+		setTimeout(adjustTextareaHeight, 0);
+	};
+
 	const handleSend = async () => {
-		setInputValue('');
-		await userSendMessage(inputValue);
+		const trimmedValue = inputValue.replace(/\s+$/, ''); // Remove trailing spaces
+		if (trimmedValue.trim()) { // Only send if there's actual content after trimming
+			setInputValue('');
+			// Reset textarea height after clearing
+			setTimeout(adjustTextareaHeight, 0);
+			await userSendMessage(trimmedValue);
+		} else {
+			setInputValue(''); // Clear input even if empty
+			// Reset textarea height after clearing
+			setTimeout(adjustTextareaHeight, 0);
+		}
 	};
 
 	const sendToAPI = async (message) => {
@@ -1400,6 +1471,11 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 								width: '100%',
 								boxSizing: 'border-box',
 								overflowWrap: 'break-word',
+								userSelect: 'text',
+								WebkitUserSelect: 'text',
+								MozUserSelect: 'text',
+								msUserSelect: 'text',
+								cursor: 'text',
 							}}>
 								{subMessage.text || ''}
 							</div>
@@ -1970,13 +2046,14 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
 			<div style={styles.bottomBar}>
 				<textarea
+					ref={textareaRef}
 					style={{
 						...styles.textInput,
 						opacity: isStreaming || iniWait ? 0.5 : 1,
 						cursor: isStreaming || iniWait ? 'not-allowed' : 'text'
 					}}
 					value={inputValue}
-					onChange={e => setInputValue(e.target.value)}
+					onChange={handleInputChange}
 					onKeyDown={(e) => {
 						if (e.key === 'Enter' && !e.shiftKey && !isStreaming && !iniWait) {
 							e.preventDefault(); // Prevent adding a new line
