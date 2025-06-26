@@ -46,8 +46,16 @@ general-clear = Clear
 general-update = Update
 general-back = Back
 general-edit = Edit
+general-cut = Cut
 general-copy = Copy
+general-paste = Paste
+general-find = Find
 general-delete = Delete
+general-insert = Insert
+general-and	= and
+general-et-al = et al.
+general-previous = Previous
+general-next = Next
 
 general-red = Red
 general-orange = Orange

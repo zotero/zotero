@@ -148,7 +148,7 @@ class EditorInstance {
 			}
 			let ext = Zotero.MIME.getPrimaryExtension(mime, '');
 			let fp = new FilePicker();
-			fp.init(this._iframeWindow, Zotero.getString('noteEditor.saveImageAs'), fp.modeSave);
+			fp.init(this._iframeWindow, Zotero.getString('note-editor-save-image-as'), fp.modeSave);
 			fp.appendFilters(fp.filterImages);
 			fp.defaultString = Zotero.getString('file-type-image').toLowerCase() + '.' + ext;
 			let rv = await fp.show();
@@ -190,12 +190,11 @@ class EditorInstance {
 			font: this._getFont(),
 			style,
 			smartQuotes: Zotero.Prefs.get('note.smartQuotes'),
-			localizedStrings: {
-				// Figure out a better way to pass this
-				'zotero.appName': Zotero.appName,
-				...Zotero.Intl.getPrefixedStrings('general.'),
-				...Zotero.Intl.getPrefixedStrings('noteEditor.')
-			}
+			ftl: [
+				'-app-name = ' + Zotero.appName,
+				Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`),
+				Zotero.File.getContentsFromURL(`chrome://zotero/locale/note-editor.ftl`),
+			]
 		});
 		
 		if (!this._item.isAttachment()) {
@@ -1352,7 +1351,7 @@ class EditorInstance {
 		}
 
 		let vars = {
-			title: Zotero.getString('pdfReader.annotations'),
+			title: Zotero.getString('reader-annotations'),
 			date: new Date().toLocaleString()
 		};
 		let html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
