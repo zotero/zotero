@@ -58,6 +58,7 @@ general-et-al = et al.
 general-previous = Previous
 general-next = Next
 general-learn-more = Learn More
+general-warning = Warning
 
 general-red = Red
 general-orange = Orange
