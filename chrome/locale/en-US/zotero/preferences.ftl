@@ -99,3 +99,9 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = Default location
+
+preferences-sync-reset-restore-to-server-body = { -app-name } will replace data in “{ $libraryName }” on { $domain } with data from this computer. { $remoteItemsDeletedCount ->
+    [0] { "" }
+    *[other] { $remoteItemsDeletedCount } items in the online library will be deleted!
+}
+preferences-sync-reset-restore-to-server-yes = Replace Data in Online Library

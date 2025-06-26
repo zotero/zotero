@@ -831,21 +831,24 @@ Zotero_Preferences.Sync = {
 				}
 				break;*/
 			
-			case 'restore-to-server':
-				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-					+ ps.BUTTON_POS_1_DEFAULT;
-				var index = ps.confirmEx(
-					null,
-					Zotero.getString('general.warning'),
-					Zotero.getString(
-						'zotero.preferences.sync.reset.restoreToServer',
-						[Zotero.clientName, library.name, ZOTERO_CONFIG.DOMAIN_NAME]
-					),
-					buttonFlags,
-					Zotero.getString('zotero.preferences.sync.reset.restoreToServer.button'),
-					null, null, null, {}
-				);
+			case 'restore-to-server': {
+				let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+				let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+				var keyInfo = await Zotero.Sync.Runner.checkAccess(client, { timeout: 5000 });
+				let { keys: remoteKeysArray } = await client.getKeys('user', keyInfo.userID, { target: 'items/top' });
+				let remoteKeys = new Set(remoteKeysArray);
+				let localKeys = new Set(await Zotero.Items.getAll(Zotero.Libraries.userLibraryID, true, false, false, true));
+				let remoteButNotLocal = remoteKeys.difference(localKeys); // NOTE: `difference` requires FF 127
+				let remoteItemsDeletedCount = remoteButNotLocal.size;
+				
+				let [title, text, yes, no] = await document.l10n.formatValues([
+					'general-warning',
+					{ id: 'preferences-sync-reset-restore-to-server-body', args: { libraryName: library.name, domain: ZOTERO_CONFIG.DOMAIN_NAME, remoteItemsDeletedCount } },
+					'preferences-sync-reset-restore-to-server-yes',
+					'general-no'
+				]);
+
+				let index = Zotero.Prompt.confirm({ title, text, button0: yes, button1: no });
 				
 				switch (index) {
 					case 0:
@@ -868,7 +871,7 @@ Zotero_Preferences.Sync = {
 				}
 				
 				break;
-			
+			}
 			
 			case 'reset-file-sync-history':
 				var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING

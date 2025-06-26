@@ -115,10 +115,15 @@ Zotero.Items = function() {
 	 * @param  {Boolean}  [onlyTopLevel=false]   If true, don't include child items
 	 * @param  {Boolean}  [includeDeleted=false] If true, include deleted items
 	 * @param  {Boolean}  [asIDs=false] 		 If true, resolves only with IDs
+	 * @param  {Boolean}  [asKeys=false] 		 If true, resolves only with keys
 	 * @return {Promise<Array<Zotero.Item|Integer>>}
 	 */
-	this.getAll = Zotero.Promise.coroutine(function* (libraryID, onlyTopLevel, includeDeleted, asIDs=false) {
-		var sql = 'SELECT A.itemID FROM items A';
+	this.getAll = Zotero.Promise.coroutine(function* (libraryID, onlyTopLevel, includeDeleted, asIDs = false, asKeys = false) {
+		if (asKeys && asIDs) {
+			throw new Error("Cannot use both asKeys and asIDs options");
+		}
+		
+		var sql = `SELECT ${asKeys ? 'A.key' : 'A.itemID'} FROM items A`;
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
 			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
@@ -131,11 +136,11 @@ Zotero.Items = function() {
 			sql += " AND A.itemID NOT IN (SELECT itemID FROM deletedItems)";
 		}
 		sql += " AND libraryID=?";
-		var ids = yield Zotero.DB.columnQueryAsync(sql, libraryID);
-		if (asIDs) {
-			return ids;
+		var idsOrKeys = yield Zotero.DB.columnQueryAsync(sql, libraryID);
+		if (asIDs || asKeys) {
+			return idsOrKeys;
 		}
-		return this.getAsync(ids);
+		return this.getAsync(idsOrKeys);
 	});
 	
 	

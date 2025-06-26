@@ -48,6 +48,9 @@ general-back = Back
 general-edit = Edit
 general-copy = Copy
 general-delete = Delete
+general-warning = Warning
+general-yes = Yes
+general-no = No
 
 general-red = Red
 general-orange = Orange
