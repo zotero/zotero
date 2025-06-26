@@ -31,6 +31,10 @@
 		background-repeat: no-repeat;
 		border-radius: 5px;
 		margin: 0;
+		&.small {
+			width: 14px;
+			height: 14px;
+		}
 		&:hover:not([disabled]) {
 			cursor: pointer;
 			background-color: var(--fill-quinary) !important;
@@ -124,8 +128,12 @@
 
 	#library-layout {
 		#library-other-items {
-
+			// constant height is so the message can appear/disappear without shifting the layout
 			height: 82px;
+			&.tall {
+				// to accomodate taller annotation item cards
+				height: 98px;
+			}
 			flex-shrink: 0; // make sure suggested items do not get shrunk when window is resized
 
 			--item-width: 210px;
@@ -192,7 +200,7 @@
 							flex-shrink: 0;
 							width: var(--item-width);
 							overflow: hidden;
-							white-space: nowrap;
+							white-space: pre;
 							border: 1px solid var(--fill-quarternary);
 							border-radius: 5px;
 			
@@ -215,6 +223,24 @@
 							.title {
 								overflow: hidden;
 								text-overflow: ellipsis;
+
+								&.annotation-quote {
+									width: min-content;
+									max-width: 100%;
+									position: relative;
+									.title-text {
+										font-style: italic;
+										padding-inline-end: 6px;
+										&::before {
+											content: attr(q-mark-open);
+										}
+									}
+									&::after {
+										content: attr(q-mark-close);
+										position: absolute;
+										right: 0px;
+									}
+								}
 							}
 			
 							.description {
@@ -232,6 +258,10 @@
 							&.cited-placeholder {
 								border: 1px solid transparent;
 								padding: 0;
+							}
+							&.tall {
+								// annotation item cards are taller
+								height: 58px;
 							}
 						}
 					}
@@ -460,7 +490,6 @@
 					}
 
 					.icon {
-						margin-top: -4px;
 						margin-inline-end: 4px;
 						flex-shrink: 0;
 						&.retracted {
@@ -468,6 +497,15 @@
 							height: 12px;
 							color: var(--accent-red);
 							@include svgicon("cross", "universal", "16");
+						}
+						&.annotation-icon {
+							-moz-context-properties: fill;
+						}
+						&.twisty {
+							@include svgicon("chevron-8", "universal", "8");
+							transform: rotate(180deg);
+							transform-origin: center;
+							transition: transform 0.2s ease-in-out;
 						}
 					}
 					.description {
@@ -478,9 +516,40 @@
   						text-overflow: ellipsis;
 					}
 					.title {
+						display: flex;
+						align-items: center;
+						.title-text {
+							text-wrap: nowrap;
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+					}
+				}
+				// collapsible item (e.g. top-level item with annotations)
+				.item-with-children {
+					.children {
+						transition: max-height 0.3s ease;
 						overflow: hidden;
-						text-wrap: nowrap;
-						text-overflow: ellipsis;
+						max-height: calc(42px * var(--children-count)); // 42px is max height of a child item
+						// small padding at the top and bottom to make sure the focus-ring is not cutoff by the overflow:hidden.
+						// negative margin preserves spacing set by other components.
+						padding: 1px 0;
+						margin: -1px 0;
+						.item {
+							padding-inline-start: 36px;
+						}
+					}
+					&:not(.expanded) {
+						.children {
+							max-height: 0 !important; // important to override max-height above
+						}
+						.twisty {
+							transform: rotate(0deg);
+						}
+					}
+					.parent .description {
+						// additional 16px inline margin to account for twisty icon
+						margin-inline-start: 36px;
 					}
 				}
 				&.expandable {
@@ -521,8 +590,9 @@
 					}
 					// item container has no height when it is collapsed
 					.itemsContainer {
-						transition: height 0.3s ease;
+						transition: max-height 0.3s ease;
 						overflow: hidden;
+						max-height: calc(var(--children-count) * 42px); // 42px is max height of a child item
 						// add small padding at the top and bottom to make sure the focus-ring (if it appear) is not
 						// cutoff by the overflow:hidden. Negative margin is to preserve spacing set by other components.
 						padding: 1px 0;
@@ -530,7 +600,8 @@
 					}
 					&:not(.expanded) {
 						.itemsContainer {
-							height: 0 !important; // important to override inline height with items displayed
+							max-height: 0 !important; // important to override inline height with items displayed
+							padding: 0;
 						}
 					}
 				}

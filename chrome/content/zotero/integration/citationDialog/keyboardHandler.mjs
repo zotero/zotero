@@ -166,6 +166,18 @@ export class CitationDialogKeyboardHandler {
 			}
 			handled = true;
 		}
+		// arrow right/left on expandable item will expand/collapse its children
+		else if (!this._id("list-layout").hidden && ["ArrowRight", "ArrowLeft"].includes(event.key) && noModifiers && event.target.parentElement.classList.contains("item-with-children")) {
+			let container = event.target.closest(".item-with-children");
+			let twisty = container.querySelector(".twisty");
+			if (event.key == "ArrowRight" && !container.classList.contains("expanded")) {
+				twisty.click();
+			}
+			if (event.key == "ArrowLeft" && container.classList.contains("expanded")) {
+				twisty.click();
+			}
+			handled = true;
+		}
 		// arrowUp from the first item will refocus bubbleInput
 		else if (event.key == "ArrowUp" && this._shouldRefocusBubbleInputOnArrowUp() && noModifiers) {
 			this._id("bubble-input").refocusInput();

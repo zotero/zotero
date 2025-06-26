@@ -28,7 +28,7 @@ const ItemTree = require('zotero/itemTree');
 const { getCSSIcon } = require('components/icons');
 const { COLUMNS } = require('zotero/itemTreeColumns');
 
-var doc, io, ioReadyPromise, isCitingNotes, accepted;
+var doc, io, ioReadyPromise, isCitingNotes, isAddingAnnotations, accepted;
 
 // used for tests
 var loaded = false;
@@ -38,6 +38,7 @@ var currentLayout, libraryLayout, listLayout;
 var Helpers, SearchHandler, PopupsHandler, KeyboardHandler;
 
 const ITEM_LIST_MAX_ITEMS = 50;
+const ITEM_LIST_MAX_CHILDREN = 50;
 const SEARCH_TIMEOUT = 250;
 
 var { CitationDialogHelpers } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/helpers.mjs');
@@ -58,6 +59,7 @@ async function onLoad() {
 		ioReadyPromise = Zotero.Promise.resolve();
 	}
 	isCitingNotes = !!io.isCitingNotes;
+	isAddingAnnotations = !!io.isAddingAnnotations;
 	window.isPristine = true;
 
 	Zotero.debug("Citation Dialog: initializing");
@@ -65,15 +67,15 @@ async function onLoad() {
 	timer.start();
 
 	Helpers = new CitationDialogHelpers({ doc, io });
-	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io });
+	SearchHandler = new CitationDialogSearchHandler({ io });
 	PopupsHandler = new CitationDialogPopupsHandler({ doc });
 	KeyboardHandler = new CitationDialogKeyboardHandler({ doc });
 
 	// Initial height for the dialog (search row with no bubbles)
 	window.resizeTo(window.innerWidth, Helpers.getSearchRowHeight());
 
-	_id("keepSorted").disabled = !io.sortable || isCitingNotes;
-	_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
+	_id("keepSorted").disabled = !io.sortable || isCitingNotes || isAddingAnnotations;
+	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	let visibleSettings = !!_id("settings-popup").querySelector("input:not([disabled])");
 	_id("settings-button").hidden = !visibleSettings;
 
@@ -227,19 +229,7 @@ class Layout {
 			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group.length, this.type);
 			let itemContainer = section.querySelector(".itemsContainer");
 	
-			let items = [];
-			let index = 0;
-			for (let item of group) {
-				// do not add an unreasonable number of nodes into the DOM
-				if (index >= ITEM_LIST_MAX_ITEMS) break;
-				// createItemNode implemented by layouts
-				let itemNode = await this.createItemNode(item, isGroupCollapsible ? index : null);
-				itemNode.addEventListener("click", IOManager.handleItemClick);
-				// items can be dragged into bubble-input to add them into the citation
-				itemNode.addEventListener("dragstart", IOManager._handleItemDragStart);
-				items.push(itemNode);
-				index++;
-			}
+			let items = await this.createItemNodes(group, isGroupCollapsible);
 			// if cited group is present but has no items, cited items must be
 			// still loading, so show a placeholder item card
 			if (group.length === 0 && key == "cited") {
@@ -256,12 +246,12 @@ class Layout {
 				section.querySelector(".add-all").textContent = addAllLabel;
 				// if the user explicitly expanded or collapsed the section, keep it as such
 				if (IOManager.sectionExpandedStatus[section.id]) {
-					IOManager.toggleSectionCollapse(section, IOManager.sectionExpandedStatus[section.id]);
+					IOManager.toggleContainerCollapse(section, IOManager.sectionExpandedStatus[section.id]);
 				}
 				// otherwise, expand the section if something is typed or whenever the list layout is opened
 				else {
 					let activeSearch = SearchHandler.searchValue.length > 0;
-					IOManager.toggleSectionCollapse(section, (activeSearch || this.type == "list") ? "expanded" : "collapsed");
+					IOManager.toggleContainerCollapse(section, (activeSearch || this.type == "list") ? "expanded" : "collapsed");
 				}
 			}
 		}
@@ -295,6 +285,9 @@ class Layout {
 	// Create the node for selected/cited/opened item groups.
 	// It's different for list and library modes, so it is implemented by layouts.
 	async createItemNode() {}
+
+	// Create all item nodes to display. Implemented by layouts.
+	async createItemNodes() {}
 
 
 	// Run search and refresh items list
@@ -398,6 +391,28 @@ class LibraryLayout extends Layout {
 		await this._initCollectionTree();
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
+		if (isAddingAnnotations) {
+			// Annotaiton item cards are taller than regular, so suggested items area needs to be taller
+			_id("library-other-items").classList.add("tall");
+		}
+	}
+
+	// Create one node per item
+	async createItemNodes(items, isCollapsible) {
+		let itemNodes = [];
+		let index = 0;
+		for (let item of items) {
+			// do not add an unreasonable number of nodes into the DOM
+			if (index >= ITEM_LIST_MAX_ITEMS) break;
+			// createItemNode implemented by layouts
+			let itemNode = await this.createItemNode(item, isCollapsible ? index : null);
+			itemNode.addEventListener("click", IOManager.handleItemClick);
+			// items can be dragged into bubble-input to add them into the citation
+			itemNode.addEventListener("dragstart", IOManager._handleItemDragStart);
+			itemNodes.push(itemNode);
+			index++;
+		}
+		return itemNodes;
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
@@ -409,16 +424,25 @@ class LibraryLayout extends Layout {
 			"data-tabindex": 30,
 			"data-arrow-nav-enabled": true,
 			draggable: true
-		}, "item keyboard-clickable");
+		}, "item keyboard-clickable hide-on-collapse");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
-		let title = Helpers.createNode("div", {}, "title");
-		let description = Helpers.buildItemDescription(item);
-		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), title);
-
+		let title = Helpers.buildItemTitle(item);
+		let description = Helpers.buildItemDescription(item, true);
 		itemNode.append(title, description);
+
+		if (isAddingAnnotations) {
+			itemNode.classList.add("tall");
+			if (item.isAnnotation()) {
+				let attachment = Zotero.Items.get(item.parentItemID);
+				let topLevelItem = attachment.parentItemID ? Zotero.Items.get(attachment.parentItemID) : attachment;
+				let topLevelItemTitle = Helpers.buildItemTitle(topLevelItem);
+				topLevelItemTitle.classList.add("description");
+				itemNode.prepend(topLevelItemTitle);
+			}
+		}
 
 		if (index !== null) {
 			itemNode.style.setProperty('--deck-index', index);
@@ -441,7 +465,7 @@ class LibraryLayout extends Layout {
 			collapsibleDeck.querySelector(".itemsContainer").addEventListener("click", this._captureItemsContainerClick, true);
 			collapsibleDeck.querySelector(".itemsContainer").classList.add("keyboard-clickable");
 			collapsibleDeck.querySelector(".collapse-section-btn").addEventListener("click", (event) => {
-				IOManager.toggleSectionCollapse(collapsibleDeck, "collapsed", true);
+				IOManager.toggleContainerCollapse(collapsibleDeck, "collapsed", true);
 				// on mouse click, move focus from the button that will disappear onto the collapsed deck
 				if (!event.clientX && !event.clientY) {
 					collapsibleDeck.querySelector(".itemsContainer").focus();
@@ -504,7 +528,7 @@ class LibraryLayout extends Layout {
 		// expand the deck of items if it is collapsed
 		if (section.classList.contains("expanded")) return;
 		event.stopPropagation();
-		IOManager.toggleSectionCollapse(section, "expanded", true);
+		IOManager.toggleContainerCollapse(section, "expanded", true);
 		// if the click is keyboard-initiated, focus the first item
 		if (event.layerX == 0 && event.layerY == 0) {
 			let firstItem = section.querySelector(".item");
@@ -522,44 +546,46 @@ class LibraryLayout extends Layout {
 		});
 		let columnLabel = Zotero.getString('integration-citationDialog-add-to-citation');
 		// Add + column to add an item to the citation on click
-		itemColumns.push({
-			dataKey: 'addToCitation',
-			label: columnLabel,
-			htmlLabel: ' ', // space for column label to appear empty
-			width: 26,
-			staticWidth: true,
-			fixedWidth: true,
-			showInColumnPicker: false,
-			renderer: (index, inCitation, column) => {
-				let cell = Helpers.createNode("span", {}, `cell ${column.className} clickable`);
-				let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
-				cell.append(iconWrapper);
-				let icon = getCSSIcon('plus-circle');
-				if (inCitation === null) {
-					// no icon should be shown when an item cannot be added
-					// (e.g. when citing notes, parent items are displayed but not included)
-					icon = getCSSIcon("");
+		if (!isAddingAnnotations) {
+			itemColumns.push({
+				dataKey: 'addToCitation',
+				label: columnLabel,
+				htmlLabel: ' ', // space for column label to appear empty
+				width: 26,
+				staticWidth: true,
+				fixedWidth: true,
+				showInColumnPicker: false,
+				renderer: (index, inCitation, column) => {
+					let cell = Helpers.createNode("span", {}, `cell ${column.className} clickable`);
+					let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
+					cell.append(iconWrapper);
+					let icon = getCSSIcon('plus-circle');
+					if (inCitation === null) {
+						// no icon should be shown when an item cannot be added
+						// (e.g. when citing notes, parent items are displayed but not included)
+						icon = getCSSIcon("");
+					}
+					// add aria-label for screen readers to announce if this item is added
+					else if (inCitation) {
+						doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added")
+					}
+					else {
+						doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
+					}
+					iconWrapper.append(icon);
+					return cell;
 				}
-				// add aria-label for screen readers to announce if this item is added
-				else if (inCitation) {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added")
-				}
-				else {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
-				}
-				iconWrapper.append(icon);
-				return cell;
-			}
-		});
+			});
+		}
 		this.itemsView = await ItemTree.init(itemsTree, {
 			id: "citationDialog",
-			dragAndDrop: !isCitingNotes,
+			dragAndDrop: !(isCitingNotes || isAddingAnnotations),
 			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
 			},
-			regularOnly: !isCitingNotes,
+			regularOnly: !(isCitingNotes || isAddingAnnotations),
 			multiSelect: !isCitingNotes,
 			onActivate: (event, items) => {
 				// Prevent Enter event from reaching KeyboardHandler which would accept the dialog
@@ -664,6 +690,10 @@ class LibraryLayout extends Layout {
 				// when citing notes, only keep notes or note parents
 				if (isCitingNotes) {
 					items = items.filter(item => item.isNote() || item.getNotes().length);
+				}
+				// when adding annotations, only keep annotations, their attachments, and their top-level items
+				if (isAddingAnnotations) {
+					return SearchHandler.keepItemsWithAnnotations(items);
 				}
 				return items;
 			},
@@ -789,6 +819,58 @@ class ListLayout extends Layout {
 		super("list");
 	}
 
+	// Create a node of each item, accounting for the fact that some items
+	// are top-level items, and some are child notes or annotations, which
+	// need to be displayed as child nodes within their ancestor.
+	async createItemNodes(items) {
+		let itemNodes = [];
+		let index = 0;
+		if (isAddingAnnotations || isCitingNotes) {
+			// all child items have to be groupped by their top-level item
+			items = Helpers.groupByTopLevelItems(items);
+		}
+		else {
+			// if not citing notes or adding annotations, items are already top-level
+			items = items.map(item => ({ item, children: [] }));
+		}
+		// create a node for the top-level item
+		for (let { item, children } of items) {
+			// do not add an unreasonable number of items
+			if (index >= ITEM_LIST_MAX_ITEMS) break;
+			let itemNode = await this.createItemNode(item);
+			// at most ITEM_LIST_MAX_CHILDREN child nodes per item
+			children = children.slice(0, ITEM_LIST_MAX_CHILDREN);
+			if (children.length) {
+				// If there are child items that need to be displayed, created their nodes too
+				let childNodes = [];
+				for (let child of children) {
+					let childNode = await this.createItemNode(child);
+					childNode.addEventListener("click", IOManager.handleItemClick);
+					childNodes.push(childNode);
+				}
+				// Then wrap the parent item and child nodes into one collapsible item
+				let collapsibleItem = Helpers.makeItemCollapsible(itemNode, item.id, childNodes);
+				collapsibleItem.querySelector(".twisty").addEventListener("click", (event) => {
+					event.stopPropagation();
+					IOManager.toggleContainerCollapse(collapsibleItem, null, true);
+				});
+				let initialItemStatus = IOManager.sectionExpandedStatus[collapsibleItem.id] || "expanded";
+				IOManager.toggleContainerCollapse(collapsibleItem, initialItemStatus, false);
+				itemNodes.push(collapsibleItem);
+			}
+			else {
+				itemNodes.push(itemNode);
+			}
+			itemNode.addEventListener("click", IOManager.handleItemClick);
+			if (!(isCitingNotes || isAddingAnnotations)) {
+				// items can be dragged into bubble-input to add them into the citation
+				itemNode.addEventListener("dragstart", IOManager._handleItemDragStart);
+			}
+			index++;
+		}
+		return itemNodes;
+	}
+
 	// Create item node for an item group and store item ids in itemIDs attribute
 	async createItemNode(item) {
 		let itemNode = Helpers.createNode("div", {
@@ -798,20 +880,29 @@ class ListLayout extends Layout {
 			"data-tabindex": 30,
 			"data-arrow-nav-enabled": true,
 			draggable: true
-		}, "item keyboard-clickable");
+		}, "item keyboard-clickable hide-on-collapse");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
-		let icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
-		let dataTypeLabel = item.getItemTypeIconName(true);
-		icon.setAttribute("data-item-type", dataTypeLabel);
+		let icon = null;
+		if (item.isAnnotation()) {
+			icon = Helpers.createNode("img", {}, "icon annotation-icon");
+			let type = item.annotationType == "image" ? "area" : item.annotationType;
+			icon.src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
+			icon.style.fill = item.annotationColor;
+		}
+		else {
+			icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
+			let dataTypeLabel = item.getItemTypeIconName(true);
+			icon.setAttribute("data-item-type", dataTypeLabel);
+		}
 
-		let title = Helpers.createNode("div", {}, "title");
+		let title = Helpers.buildItemTitle(item);
 		let titleContent = Helpers.createNode("span", {}, "");
 		let description = Helpers.buildItemDescription(item);
 		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), titleContent);
-		title.append(icon, titleContent);
+		title.prepend(icon);
 		itemNode.append(title, description);
 		if (Zotero.Retractions.isRetracted(item)) {
 			let retractedIcon = getCSSIcon("cross");
@@ -827,14 +918,15 @@ class ListLayout extends Layout {
 		// Hide padding of list layout if there is not a single item to show
 		let isEmpty = !_id("list-layout").querySelector(".section:not([hidden])");
 		_id("list-layout").classList.toggle("empty", isEmpty);
-		// Explicitly set the height of the container so the transition works when container is collapssed
-		for (let container of [..._id("list-layout").querySelectorAll(".itemsContainer")]) {
-			container.style.height = `${container.scrollHeight}px`;
+		// Record number of children to set max-height based on that for the expand/collapse transition
+		for (let container of [..._id("list-layout").querySelectorAll(".section.expandable .itemsContainer")]) {
+			let addedChildrenCount = container.querySelectorAll(".item").length;
+			container.style.setProperty('--children-count', addedChildrenCount);
 		}
 		// collapse/expand collapsible section when header is clicked
 		let collapsibleSection = doc.querySelector(".section.expandable");
 		if (collapsibleSection) {
-			collapsibleSection.querySelector(".header-label").addEventListener("click", () => IOManager.toggleSectionCollapse(collapsibleSection, null, true));
+			collapsibleSection.querySelector(".header-label").addEventListener("click", () => IOManager.toggleContainerCollapse(collapsibleSection, null, true));
 		}
 		if (!options.skipWindowResize) {
 			this.resizeWindow();
@@ -1030,6 +1122,44 @@ const IOManager = {
 		if (!Array.isArray(items)) {
 			items = [items];
 		}
+		// one can select the annotations themselves or their ancestors,
+		// in which case all of their child annotations are added
+		if (isAddingAnnotations) {
+			CitationDataManager.items = [];
+			let annotations = [];
+			// create BubbleItem for every selected (or child) annotation
+			for (let item of items) {
+				if (item.isAnnotation()) {
+					annotations.push(BubbleItem.fromItem(item));
+				}
+				else if (item.isFileAttachment()) {
+					let attachmentAnnotations = item.getAnnotations();
+					for (let attachmentAnnotation of attachmentAnnotations) {
+						// if one selects an annotation and its attachment, make sure the selected
+						// annotation row is ignored and the annotation appears only once
+						// in the correct order relative to other annotations of the attachment
+						let addedEarlierIndex = annotations.findIndex(a => a.id == attachmentAnnotation.id);
+						if (addedEarlierIndex > -1) {
+							annotations.splice(addedEarlierIndex, 1);
+						}
+						annotations.push(BubbleItem.fromItem(attachmentAnnotation));
+					}
+				}
+				else if (item.isRegularItem()) {
+					items.push(...Zotero.Items.get(item.getAttachments()));
+				}
+			}
+			// Sort annotations but only within the same attachment
+			annotations.sort((a, b) => {
+				if (a.item.parentItemID !== b.item.parentItemID) return 0;
+				return (a.item.annotationSortIndex > b.item.annotationSortIndex) - (a.item.annotationSortIndex < b.item.annotationSortIndex);
+			});
+			// if no annotations are selected, do nothing
+			if (annotations.length == 0) return;
+			await CitationDataManager.addItems({ bubbleItems: annotations });
+			accept();
+			return;
+		}
 		// if selecting a note, add it and immediately accept the dialog
 		if (isCitingNotes) {
 			if (!items[0].isNote()) return;
@@ -1165,57 +1295,67 @@ const IOManager = {
 		IOManager.addItemsToCitation(itemsToAdd);
 	},
 
-	toggleSectionCollapse(section, status, userInitiated) {
+	// Expand/collapse an expandable section (e.g. "Selected items")
+	// or an expandable item (e.g. a regular item with annotations in list mode)
+	// container - expandable node
+	// state - "expanded", "collapsed", or null to toggle
+	// userInitiated - Boolean, true if called by a user action
+	toggleContainerCollapse(container, status, userInitiated) {
 		// set desired class
-		if (status == "expanded" && !section.classList.contains("expanded")) {
-			section.classList.add("expanded");
+		if (status == "expanded" && !container.classList.contains("expanded")) {
+			container.classList.add("expanded");
 		}
-		else if (status == "collapsed" && section.classList.contains("expanded")) {
-			section.classList.remove("expanded");
+		else if (status == "collapsed" && container.classList.contains("expanded")) {
+			container.classList.remove("expanded");
 		}
 		else if (!status) {
-			section.classList.toggle("expanded");
+			container.classList.toggle("expanded");
 		}
-		// Record if the user explicitly expanded or collapsed the section to not undo it during next refresh
+		// Record if the user explicitly expanded or collapsed the container to not undo it during next refresh
 		if (userInitiated) {
-			IOManager.sectionExpandedStatus[section.id] = section.classList.contains("expanded") ? "expanded" : "collapsed";
+			IOManager.sectionExpandedStatus[container.id] = container.classList.contains("expanded") ? "expanded" : "collapsed";
 		}
+		let isCollapsed = !container.classList.contains("expanded");
 		// mark collapsed items as unfocusable
-		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {
-			for (let item of [...section.querySelectorAll(".item")]) {
+		if (isCollapsed) {
+			for (let item of [...container.querySelectorAll(".item.hide-on-collapse")]) {
 				item.removeAttribute("tabindex");
 				item.setAttribute("draggable", false);
 				item.classList.remove("current");
 				item.classList.remove("selected");
 			}
-			// in library, the items deck itself becomes focusable
-			if (currentLayout.type == "library") {
-				section.querySelector(".itemsContainer").setAttribute("tabindex", -1);
-				section.querySelector(".itemsContainer").dataset.arrowNavEnabled = true;
-				// if an item if focused, focus the collapsed container for smoother transition
-				if (doc.activeElement.classList.contains("item")) {
-					section.querySelector(".itemsContainer").focus();
-				}
-			}
 		}
 		// when expanded, make them focusable again
 		else {
-			for (let item of [...section.querySelectorAll(".item")]) {
+			for (let item of [...container.querySelectorAll(".item.hide-on-collapse")]) {
 				item.setAttribute("tabindex", -1);
 				item.setAttribute("draggable", true);
 			}
-			if (currentLayout.type == "library") {
-				let container = section.querySelector(".itemsContainer");
-				container.removeAttribute("tabindex");
-				container.classList.remove("selected", "current");
-			}
 		}
-		section.querySelector(".header-label").setAttribute("aria-expanded", section.classList.contains("expanded"));
+		container.querySelector("[aria-expanded]").setAttribute("aria-expanded", container.classList.contains("expanded"));
 		// In list mode, there may be some empty space left after section collapse
 		if (currentLayout.type == "list") {
 			setTimeout(() => {
 				currentLayout.resizeWindow();
 			}, 300);
+		}
+		// Additional handling for selected items section in library mode
+		else if (container.classList.contains("section")) {
+			let itemsContainer = container.querySelector(".itemsContainer");
+			// the items deck itself becomes focusable
+			if (isCollapsed) {
+				itemsContainer.setAttribute("tabindex", -1);
+				itemsContainer.dataset.arrowNavEnabled = true;
+				// if an item if focused, focus the collapsed container for smoother transition
+				if (doc.activeElement.classList.contains("item")) {
+					itemsContainer.focus();
+				}
+			}
+			else {
+				container.dataset.arrowNavEnabled = false;
+				container.removeAttribute("tabindex");
+				container.classList.remove("selected", "current");
+			}
 		}
 	},
 
@@ -1593,7 +1733,7 @@ const CitationDataManager = {
 			}
 		}
 		// No sorting happens when citing notes, since the dialog is accepted right after
-		if (isCitingNotes) return;
+		if (isCitingNotes || isAddingAnnotations) return;
 		await this.sort();
 		this.updateItemAddedCache();
 	},

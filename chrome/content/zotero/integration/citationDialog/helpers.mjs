@@ -41,8 +41,30 @@ export class CitationDialogHelpers {
 		return node;
 	}
 
+	buildItemTitle(item) {
+		let titleWrapper = this.createNode("div", {}, "title");
+		let titleNode = this.createNode("span", {}, "title-text");
+		titleWrapper.appendChild(titleNode);
+		let title = "";
+		if (!item.isAnnotation()) {
+			title = item.getDisplayTitle();
+		}
+		else if (item.annotationText) {
+			title = Zotero.Utilities.unescapeHTML(item.annotationText.trim().slice(0, 500));
+			titleWrapper.classList.add("annotation-quote");
+			// Add quotation marks around the quoted text
+			titleNode.setAttribute("q-mark-open", Zotero.getString("punctuation.openingQMark"));
+			titleWrapper.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
+		}
+		else {
+			title = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+		}
+		Zotero.Utilities.Internal.renderItemTitle(title, titleNode);
+		return titleWrapper;
+	}
+
 	// build and return a node with the description (e.g. creator/published/date/etc) of an item
-	buildItemDescription(item) {
+	buildItemDescription(item, ensureNonEmpty) {
 		let descriptionWrapper = this.doc.createElement("div");
 		descriptionWrapper.classList = "description";
 		let wrapTextInSpan = (text, styles = {}) => {
@@ -76,6 +98,20 @@ export class CitationDialogHelpers {
 			}
 			descriptionWrapper.appendChild(dateLabel);
 			addPeriodIfNeeded(descriptionWrapper);
+			return descriptionWrapper;
+		}
+
+		if (item.isAnnotation()) {
+			let comment = Zotero.Utilities.unescapeHTML((item.annotationComment || "").trim());
+			comment = comment.slice(0, 500);
+			let parts = comment.split('\n').map(x => x.trim()).filter(x => x.length);
+			if (parts[0]) {
+				let commentSpan = wrapTextInSpan(parts[0]);
+				descriptionWrapper.appendChild(commentSpan);
+			}
+			else if (ensureNonEmpty) {
+				descriptionWrapper.innerText = " ";
+			}
 			return descriptionWrapper;
 		}
 
@@ -122,11 +158,29 @@ export class CitationDialogHelpers {
 		addPeriodIfNeeded(descriptionWrapper);
 
 		// If no info, add a space so the rows are of the same length
-		if (descriptionWrapper.childElementCount === 0) {
+		if (ensureNonEmpty && descriptionWrapper.childElementCount === 0) {
 			descriptionWrapper.innerText = " ";
 		}
 
 		return descriptionWrapper;
+	}
+
+	// Wrap node of a top-level item and its desired children (e.g. annotations) into a collapsible container
+	makeItemCollapsible(itemNode, itemID, childNodes) {
+		let mainItemWrapper = this.createNode("div", { id: `container-item-${itemID}` }, "item-with-children expandable");
+		let childWrapper = this.createNode("div", {}, "children");
+		mainItemWrapper.append(itemNode, childWrapper);
+
+		itemNode.classList.add("parent");
+		itemNode.setAttribute("aria-expanded", "true");
+		for (let child of childNodes) {
+			child.classList.add("child", "hide-on-collapse");
+			childWrapper.appendChild(child);
+		}
+		let twisty = this.createNode("button", {}, "icon btn-icon small twisty");
+		itemNode.querySelector(".title").prepend(twisty);
+		childWrapper.style.setProperty('--children-count', childNodes.length);
+		return mainItemWrapper;
 	}
 
 	// build a container for the item nodes in both layouts
@@ -155,11 +209,13 @@ export class CitationDialogHelpers {
 				headerSpan.setAttribute("role", "button");
 				headerSpan.setAttribute("tabindex", -1);
 				headerSpan.setAttribute("data-tabindex", 21);
+				headerSpan.setAttribute("aria-expanded", "true");
 				headerSpan.classList.add("keyboard-clickable");
 			}
 			if (dialogMode == "library") {
 				itemContainer.setAttribute("tabindex", -1);
 				itemContainer.setAttribute("data-tabindex", 30);
+				itemContainer.setAttribute("aria-expanded", "true");
 
 				let collapseSectionBtn = this.createNode("button", { tabindex: -1, 'data-tabindex': 21, "aria-describedby": headerSpan.id }, "btn-icon collapse-section-btn keyboard-clickable");
 				this.doc.l10n.setAttributes(collapseSectionBtn, "integration-citationDialog-collapse-section");
@@ -335,5 +391,30 @@ export class CitationDialogHelpers {
 			shortLocator: Zotero.Cite.getLocatorString(loc, "short").toLowerCase(),
 			shortLocatorNoPunctuation: Zotero.Cite.getLocatorString(loc, "short").toLowerCase().replace(/[.,]/g, "")
 		};
+	}
+
+	// Given an array of Zotero.Item objects that can be top-level items, attachments or annotations,
+	// return an array of objects in the form: [{ item: Zotero.Item, children: Zotero.Item[] }]
+	// In the array, `item` is the top-level item that may or may not be in the original items array.
+	// `children` is an array of child items of the top-level item from the original items array.
+	groupByTopLevelItems(items) {
+		let topLevelMap = new Map();
+		for (let origItem of items) {
+			let item = origItem;
+			let ancestors = [];
+			while (item.parentItemID) {
+				ancestors.push(item);
+				item = Zotero.Items.get(item.parentItemID);
+			}
+			let topID = item.id;
+			if (!topLevelMap.has(topID)) {
+				topLevelMap.set(topID, { item, children: [] });
+			}
+			// Only add origItem as a child if it's not the top-level item itself
+			if (origItem.id !== item.id) {
+				topLevelMap.get(topID).children.push(origItem);
+			}
+		}
+		return Array.from(topLevelMap.values());
 	}
 }

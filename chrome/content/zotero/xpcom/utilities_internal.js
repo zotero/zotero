@@ -2611,6 +2611,7 @@ Zotero.Utilities.Internal.activate = new function () {
 			if (!windowTitle) {
 				windowTitle = win.document.title
 			}
+			dump(` --- Bringing to foreground: ${windowTitle}\n`);
 			if (!windowTitle) {
 				throw new Error(`Could not find window title for ${win.location.href}`);
 			}
@@ -2756,6 +2757,7 @@ Zotero.Utilities.Internal.activate = new function () {
 			}
 		}
 		else if (Zotero.isLinux && !isWayland && win) {
+			dump(` --- Activating non-wayland window. X11: ${_x11}\n`);
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 
 			if (_x11 === false) return;
@@ -2968,11 +2970,15 @@ Zotero.Utilities.Internal.activate = new function () {
 			}, false);
 		}
 		else if ((Zotero.isWin || Zotero.isLinux) && win) {
+			dump(" --- Activating windows or wayland window\n");
 			// Try to focus the window. This is necessary as focusing a node inside
 			// of the window may not necessarily activate the window.
 			win.focus();
 			// If the window is in the background, flash the icon
 			win.getAttention();
+		}
+		else {
+			dump(" --- No window activation happened\n");
 		}
 	};
 };
