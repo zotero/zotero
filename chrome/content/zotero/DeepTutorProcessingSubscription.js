@@ -24,7 +24,7 @@ const styles = {
 	text: {
 		fontSize: "1.25rem",
 		color: "#222",
-		textAlign: "center",
+		textAlign: "left",
 		margin: "0 0 30px 0",
 		fontFamily: "Roboto, sans-serif",
 		fontWeight: 500,

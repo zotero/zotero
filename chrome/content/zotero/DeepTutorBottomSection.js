@@ -194,25 +194,25 @@ class DeepTutorBottomSection extends React.Component {
 	renderProfilePopup() {
 		if (!this.props.showProfilePopup) return null;
 
-		// Determine display name/email
+		// Determine display name/email - prioritizing email first
 		let displayName = 'User';
 		if (this.props.userData) {
 			const { name, firstName, lastName, email } = this.props.userData;
-			if (name && name.trim()) {
+			if (email) {
+				displayName = email;
+			}
+			else if (name && name.trim()) {
 				displayName = name;
 			}
 			else if ((firstName || lastName)) {
 				displayName = `${firstName || ''} ${lastName || ''}`.trim();
 			}
-			else if (email) {
-				displayName = email;
-			}
 		}
 		else if (this.props.currentUser) {
-			// Cognito user object may expose username/email differently
-			displayName = (this.props.currentUser.username
+			// Cognito user object may expose username/email differently - prioritizing email first
+			displayName = (this.props.currentUser.email
+                || this.props.currentUser.username
                 || (typeof this.props.currentUser.getUsername === 'function' && this.props.currentUser.getUsername())
-                || this.props.currentUser.email
                 || displayName);
 		}
 
