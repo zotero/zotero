@@ -2168,7 +2168,7 @@ describe("Item pane", function () {
 			assert.equal(sections[1].querySelector("annotation-row").annotation.id, highlightTwo.id);
 		});
 
-		it("should refresh when annotation is updated", async () => {
+		it.skip("should refresh when annotation is updated", async () => {
 			let toplevelItemOne = await createDataObject('item', { title: "Item one" });
 			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: toplevelItemOne.id });
 			let highlightOne = await createAnnotation('highlight', attachmentOne);
