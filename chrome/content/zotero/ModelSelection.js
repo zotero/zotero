@@ -524,7 +524,7 @@ function ModelSelection({ onSubmit, user }) {
         
         const attachments = items.reduce((arr, item) => {
           if (item.isAttachment() && item.isPDFAttachment()) {
-            const fileName = item.getField('title') || item.name || item.attachmentFilename;
+            const fileName = item.getField('filename') || item.getField('title') || item.name || item.attachmentFilename;
             Zotero.debug(`BBBBB: Found PDF attachment: ${fileName}`);
             return arr.concat([{ id: item.id, name: fileName }]);
           }
@@ -535,7 +535,7 @@ function ModelSelection({ onSubmit, user }) {
                 .filter(x => x.isPDFAttachment())
                 .map(x => ({ 
                   id: x.id, 
-                  name: x.getField('title') || x.name || x.attachmentFilename 
+                  name: x.getField('filename') || x.getField('title') || x.name || x.attachmentFilename 
                 }))
             );
           }
@@ -582,7 +582,7 @@ function ModelSelection({ onSubmit, user }) {
       }
 
       // Add to fileList with correct name property
-      const fileName = item.getField('title') || item.name || item.attachmentFilename;
+      const fileName = item.getField('filename') || item.getField('title') || item.name || item.attachmentFilename;
       Zotero.debug(`BBBBB: Using file name: ${fileName}`);
       
       setFileList(prev => {
@@ -675,7 +675,7 @@ function ModelSelection({ onSubmit, user }) {
         try {
           const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
           if (text) {
-            const fileName = pdf.getField('title') || pdf.name || pdf.attachmentFilename;
+            const fileName = pdf.getField('filename') || pdf.getField('title') || pdf.name || pdf.attachmentFilename;
             Zotero.debug(`NNNNN ModelSelection: Using file name: ${fileName}`);
             return {
               id: pdf.id,
@@ -931,7 +931,7 @@ function ModelSelection({ onSubmit, user }) {
             Zotero.debug(`BBBBB: Processing PDF: ${pdf.name}`);
             const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
             if (text) {
-              const fileName = pdf.getField('title') || pdf.name || pdf.attachmentFilename;
+              const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name || pdf.attachmentFilename;
               Zotero.debug(`BBBBBF: Successfully extracted text from PDF: ${fileName}`);
               return {
                 id: pdf.id,
@@ -1122,17 +1122,13 @@ function ModelSelection({ onSubmit, user }) {
             <div style={styles.modelDescription}>
               <div style={styles.modelFeature}>
                 <span style={styles.modelIcon}>🙌</span>
-                <span>Popular model - Great for most papers</span>
-              </div>
-              <div style={styles.modelFeature}>
-                <span style={styles.modelIcon}>💰</span>
-                <span>Free for all users</span>
+                <span>Our quickest model - for a quick grasp of the content.</span>
               </div>
               <div style={styles.modelLimitations}>
-                <span>❌ No summary</span>
-                <span>❌ No image understanding</span>
-                <span>❌ No advanced model like graphRAG</span>
-                <span>❌ No source content</span>
+                <span>✅ Free for all users</span>
+                <span>✅ Process raw text the fastest</span>
+                <span>✅ Source content highlight</span>
+                <span>✅ Multiple files understanding</span>
               </div>
             </div>
           )}
@@ -1142,16 +1138,12 @@ function ModelSelection({ onSubmit, user }) {
                 <span style={styles.modelIcon}>🙌</span>
                 <span>Popular model - Great for most papers</span>
               </div>
-              <div style={styles.modelFeature}>
-                <span style={styles.modelIcon}>💰</span>
-                <span>Available with Premium Subscription</span>
-              </div>
               <div style={styles.modelLimitations}>
                 <span>✅ Image understanding</span>
                 <span>✅ Inference mode with DeepSeek</span>
-                <span>✅ High quality summary</span>
-                <span>✅ Source content highlight</span>
+                <span>✅ Higher quality summary</span>
                 <span>✅ Markdown based RAG model</span>
+                <span>✅ Available with Premium Subscription</span>
               </div>
             </div>
           )}
@@ -1159,17 +1151,14 @@ function ModelSelection({ onSubmit, user }) {
             <div style={styles.modelDescription}>
               <div style={styles.modelFeature}>
                 <span style={styles.modelIcon}>🙌</span>
-                <span>Deep but Slow - Our most powerful model.<br />Take 5 - 10 min to prepare the content</span>
-              </div>
-              <div style={styles.modelFeature}>
-                <span style={styles.modelIcon}>💰</span>
-                <span>Available with Premium Subscription</span>
+                <span>Deep but Slow - Our most powerful model. It will take 5 - 10 min to prepare the content</span>
               </div>
               <div style={styles.modelLimitations}>
                 <span>✅ Everything in standard mode</span>
-                <span>🌟 Deeper understanding on figures, equations, and tables</span>
-                <span>🌟 Further enhanced context relavency</span>
-                <span>🌟 More advanced model using GraphRAG</span>
+                <span>✅ Deeper understanding on figures, equations, tables and graphs</span>
+                <span>✅ Further enhanced context relavency</span>
+                <span>✅ More advanced model using GraphRAG</span>
+                <span>✅ Available with Premium Subscription</span>
               </div>
             </div>
           )}
