@@ -28,6 +28,7 @@ pref("extensions.zotero.downloadAssociatedFiles",true);
 pref("extensions.zotero.findPDFs.resolvers", '[]');
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.automaticTags",true);
+pref("extensions.zotero.unboundedTagSearch",false);
 pref("extensions.zotero.fontSize", "1.00");
 pref("extensions.zotero.layout", "standard");
 pref("extensions.zotero.recursiveCollections", false);
