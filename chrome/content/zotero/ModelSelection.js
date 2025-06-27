@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { 
   getUserById, 
   getPreSignedUrl, 
@@ -434,7 +434,7 @@ const styles = {
   },
 };
 
-function ModelSelection({ onSubmit, user }) {
+const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
   const [fileList, setFileList] = useState([]);
   const [originalFileList, setOriginalFileList] = useState([]);
   const [modelName, setModelName] = useState('');
@@ -451,6 +451,7 @@ function ModelSelection({ onSubmit, user }) {
   const [buttonLayout, setButtonLayout] = useState('row');
   const [isCreateHovered, setIsCreateHovered] = useState(false);
   const [hoveredSearchItem, setHoveredSearchItem] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(false);
   const buttonRef = useRef(null);
 
   // Use requestAnimationFrame to track button width
@@ -743,8 +744,9 @@ function ModelSelection({ onSubmit, user }) {
       return;
     }
 
-    // Clear any existing error message
+    // Clear any existing error message and start initializing
     setErrorMessage('');
+    setIsInitializing(true);
 
     // Determine the final session name
     const finalSessionName = modelName.trim() || backupModelName || "Default Session";
@@ -932,6 +934,7 @@ function ModelSelection({ onSubmit, user }) {
     } catch (error) {
       Zotero.debug('ModelSelection: Error creating session:', error);
       setErrorMessage('Failed to create session. Please try again.');
+      setIsInitializing(false);
     }
   };
 
@@ -1078,6 +1081,16 @@ function ModelSelection({ onSubmit, user }) {
   const handleSearchItemMouseEnter = (id) => setHoveredSearchItem(id);
   const handleSearchItemMouseLeave = () => setHoveredSearchItem(null);
 
+  // Public method to reset initializing state when component is about to close
+  const resetInitializingState = () => {
+    setIsInitializing(false);
+  };
+
+  // Expose public methods via ref
+  useImperativeHandle(ref, () => ({
+    resetInitializingState
+  }));
+
   return (
     <div style={styles.container}>
       <div style={styles.mainSection}>
@@ -1088,8 +1101,13 @@ function ModelSelection({ onSubmit, user }) {
               type="text"
               value={modelName}
               onChange={e => setModelName(e.target.value)}
-              style={styles.input1}
+              style={{
+                ...styles.input1,
+                opacity: isInitializing ? 0.5 : 1,
+                cursor: isInitializing ? 'not-allowed' : 'text'
+              }}
               placeholder={backupModelName}
+              disabled={isInitializing}
             />
           </div>
 
@@ -1107,8 +1125,13 @@ function ModelSelection({ onSubmit, user }) {
                   <div key={file.id} style={styles.newFileListItem}>
                     <span style={styles.newFileListName}>{file.name}</span>
                     <button 
-                      style={styles.newFileListDelete}
-                      onClick={() => handleRemoveFile(file.id)}
+                      style={{
+                        ...styles.newFileListDelete,
+                        opacity: isInitializing ? 0.5 : 1,
+                        cursor: isInitializing ? 'not-allowed' : 'pointer'
+                      }}
+                      onClick={() => !isInitializing && handleRemoveFile(file.id)}
+                      disabled={isInitializing}
                     >
                       <img src={DeleteImg} alt="Delete" width="15" height="17" />
                     </button>
@@ -1126,16 +1149,21 @@ function ModelSelection({ onSubmit, user }) {
             >
               <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
               <input
-                style={styles.searchInput}
+                style={{
+                  ...styles.searchInput,
+                  opacity: isInitializing ? 0.5 : 1,
+                  cursor: isInitializing ? 'not-allowed' : 'text'
+                }}
                 type="text"
                 value={searchValue}
-                onChange={e => setSearchValue(e.target.value)}
+                onChange={e => !isInitializing && setSearchValue(e.target.value)}
                 placeholder="Search for an Item"
+                disabled={isInitializing}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => e.preventDefault()}
               />
             </div>
-            {showSearchPopup && (
+            {showSearchPopup && !isInitializing && (
               <div style={styles.searchPopup}>
                 {filteredAttachments.length > 0 ? (
                   filteredAttachments.map(attachment => (
@@ -1162,14 +1190,16 @@ function ModelSelection({ onSubmit, user }) {
           <div 
             style={{
               ...styles.dragArea,
-              ...(isDragging ? styles.dragAreaActive : {})
+              ...(isDragging && !isInitializing ? styles.dragAreaActive : {}),
+              opacity: isInitializing ? 0.5 : 1,
+              cursor: isInitializing ? 'not-allowed' : 'default'
             }}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            onDragOver={!isInitializing ? handleDragOver : (e) => e.preventDefault()}
+            onDragLeave={!isInitializing ? handleDragLeave : (e) => e.preventDefault()}
+            onDrop={!isInitializing ? handleDrop : (e) => e.preventDefault()}
           >
             <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
-            Drag an Item Here
+            {isInitializing ? 'Initializing Session...' : 'Drag an Item Here'}
           </div>
         </div>
 
@@ -1178,24 +1208,39 @@ function ModelSelection({ onSubmit, user }) {
           <div style={styles.modelTypeRow}>
             <button
               ref={buttonRef}
-              style={getModelTypeButtonStyle(selectedType === 'lite')}
-              onClick={() => handleTypeSelection('lite')}
+              style={{
+                ...getModelTypeButtonStyle(selectedType === 'lite'),
+                opacity: isInitializing ? 0.5 : 1,
+                cursor: isInitializing ? 'not-allowed' : 'pointer'
+              }}
+              onClick={() => !isInitializing && handleTypeSelection('lite')}
+              disabled={isInitializing}
             >
               <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
               LITE
             </button>
             <button
               ref={buttonRef}
-              style={getModelTypeButtonStyle(selectedType === 'normal')}
-              onClick={() => handleTypeSelection('normal')}
+              style={{
+                ...getModelTypeButtonStyle(selectedType === 'normal'),
+                opacity: isInitializing ? 0.5 : 1,
+                cursor: isInitializing ? 'not-allowed' : 'pointer'
+              }}
+              onClick={() => !isInitializing && handleTypeSelection('normal')}
+              disabled={isInitializing}
             >
               <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
               STANDARD
             </button>
             <button
               ref={buttonRef}
-              style={getModelTypeButtonStyle(selectedType === 'advanced')}
-              onClick={() => handleTypeSelection('advanced')}
+              style={{
+                ...getModelTypeButtonStyle(selectedType === 'advanced'),
+                opacity: isInitializing ? 0.5 : 1,
+                cursor: isInitializing ? 'not-allowed' : 'pointer'
+              }}
+              onClick={() => !isInitializing && handleTypeSelection('advanced')}
+              disabled={isInitializing}
             >
               <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
               ADVANCED
@@ -1249,12 +1294,18 @@ function ModelSelection({ onSubmit, user }) {
       </div>
 
       <button
-        style={createButtonDynamicStyle}
-        onClick={handleSubmit}
-        onMouseEnter={handleCreateMouseEnter}
-        onMouseLeave={handleCreateMouseLeave}
+        style={{
+          ...createButtonDynamicStyle,
+          opacity: isInitializing ? 0.8 : 1,
+          cursor: isInitializing ? 'not-allowed' : 'pointer',
+          background: isInitializing ? '#6B7B84' : (isCreateHovered ? '#007BD5' : SKY)
+        }}
+        onClick={!isInitializing ? handleSubmit : undefined}
+        onMouseEnter={!isInitializing ? handleCreateMouseEnter : undefined}
+        onMouseLeave={!isInitializing ? handleCreateMouseLeave : undefined}
+        disabled={isInitializing}
       >
-        Create
+        {isInitializing ? 'Initializing...' : 'Create'}
       </button>
 
       {errorMessage && (
@@ -1275,6 +1326,6 @@ function ModelSelection({ onSubmit, user }) {
       )}
     </div>
   );
-}
+});
 
 export default ModelSelection;
