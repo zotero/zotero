@@ -1009,9 +1009,9 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 				const { done, value } = await reader.read();
                 
 				// Check for timeout
-				if (Date.now() - lastDataTime > 30000) {
+				if (Date.now() - lastDataTime > 300000) {
 					setIsStreaming(false); // Set streaming to false on timeout
-					throw new Error('Stream timeout - no data received for 30 seconds');
+					throw new Error('Stream timeout - no data received for 300 seconds');
 				}
                 
 				if (done) {

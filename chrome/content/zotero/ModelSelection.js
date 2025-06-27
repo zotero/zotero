@@ -761,16 +761,99 @@ function ModelSelection({ onSubmit, user }) {
             const fileName = file.name;
             Zotero.debug('ModelSelection: Processing file:', fileName);
 
-            // Get the file as a Data URL and convert to Blob
-            const dataURI = await file.attachmentDataURI;
-            if (!dataURI) {
-                throw new Error(`Failed to get file data for: ${fileName}`);
+            // Direct file reading approach (more memory-efficient than dataURI + fetch)
+            Zotero.debug(`ModelSelection: ========== Starting direct file reading for: ${fileName} ==========`);
+            const processStartTime = Date.now();
+            
+            let blob;
+            try {
+                // Get file path and check if file exists
+                Zotero.debug(`ModelSelection: Getting file path for item ID: ${file.id}`);
+                const pathStartTime = Date.now();
+                
+                const filePath = await file.getFilePathAsync();
+                const pathDuration = Date.now() - pathStartTime;
+                
+                Zotero.debug(`ModelSelection: File path retrieved in ${pathDuration}ms: ${filePath}`);
+                
+                if (!filePath) {
+                    throw new Error(`No file path available for: ${fileName}`);
+                }
+                
+                // Check file existence
+                Zotero.debug(`ModelSelection: Checking if file exists: ${filePath}`);
+                const existsStartTime = Date.now();
+                
+                const fileExists = await IOUtils.exists(filePath);
+                const existsDuration = Date.now() - existsStartTime;
+                
+                Zotero.debug(`ModelSelection: File existence check completed in ${existsDuration}ms - exists: ${fileExists}`);
+                
+                if (!fileExists) {
+                    throw new Error(`File not found on disk: ${filePath}`);
+                }
+                
+                // Check file size to avoid memory issues
+                Zotero.debug(`ModelSelection: Getting file statistics...`);
+                const statStartTime = Date.now();
+                
+                const fileStats = await IOUtils.stat(filePath);
+                const statDuration = Date.now() - statStartTime;
+                
+                const fileSizeBytes = fileStats.size;
+                const fileSizeMB = fileSizeBytes / (1024 * 1024);
+                
+                Zotero.debug(`ModelSelection: File stats retrieved in ${statDuration}ms`);
+                Zotero.debug(`ModelSelection: File size: ${fileSizeBytes} bytes (${fileSizeMB.toFixed(2)} MB)`);
+                Zotero.debug(`ModelSelection: File modified: ${new Date(fileStats.lastModified).toISOString()}`);
+                
+                // Set reasonable size limit (100MB for now, can be adjusted)
+                const MAX_FILE_SIZE_MB = 100;
+                if (fileSizeMB > MAX_FILE_SIZE_MB) {
+                    throw new Error(`File too large: ${fileSizeMB.toFixed(2)}MB (max: ${MAX_FILE_SIZE_MB}MB)`);
+                }
+                
+                // Read file data directly
+                Zotero.debug(`ModelSelection: Starting direct file read operation...`);
+                const readStartTime = Date.now();
+                
+                const fileData = await IOUtils.read(filePath);
+                const readDuration = Date.now() - readStartTime;
+                
+                Zotero.debug(`ModelSelection: File read completed in ${readDuration}ms`);
+                Zotero.debug(`ModelSelection: Read ${fileData.length} bytes from disk`);
+                Zotero.debug(`ModelSelection: File data type: ${fileData.constructor.name}`);
+                Zotero.debug(`ModelSelection: Read speed: ${(fileSizeMB / (readDuration / 1000)).toFixed(2)} MB/s`);
+                
+                // Create blob directly from file data
+                Zotero.debug(`ModelSelection: Creating blob from file data...`);
+                const blobStartTime = Date.now();
+                
+                // Use Blob constructor from main window (required in Zotero's XPCOM context)
+                const BlobConstructor = Zotero.getMainWindow().Blob;
+                blob = new BlobConstructor([fileData], { type: 'application/pdf' });
+                const blobDuration = Date.now() - blobStartTime;
+                const totalDuration = Date.now() - processStartTime;
+                
+                Zotero.debug(`ModelSelection: Blob created in ${blobDuration}ms`);
+                Zotero.debug(`ModelSelection: Final blob - size: ${blob.size} bytes, type: ${blob.type}`);
+                Zotero.debug(`ModelSelection: Data integrity check - original: ${fileSizeBytes}, blob: ${blob.size}, match: ${fileSizeBytes === blob.size}`);
+                Zotero.debug(`ModelSelection: ========== Direct file reading completed in ${totalDuration}ms ==========`);               
+            } catch (fileError) {
+                // Limit error message size to prevent log overflow
+                const errorMsg = fileError.message.length > 500 
+                    ? fileError.message.substring(0, 500) + '...[truncated]'
+                    : fileError.message;
+                const errorStack = fileError.stack && fileError.stack.length > 1000
+                    ? fileError.stack.substring(0, 1000) + '...[truncated]'
+                    : fileError.stack;
+                
+                Zotero.debug(`ModelSelection: Direct file reading ERROR - ${errorMsg}`);
+                if (errorStack) {
+                    Zotero.debug(`ModelSelection: File reading stack: ${errorStack}`);
+                }
+                throw new Error(`Failed to read file data: ${errorMsg}`);
             }
-
-            // Convert Data URL to Blob
-            const response = await window.fetch(dataURI);
-            const blob = await response.blob();
-            Zotero.debug('ModelSelection: Converted file to Blob:', blob);
 
             // 1. Get pre-signed URL for the file
             const preSignedUrlData = await getPreSignedUrl(user.id, fileName);
