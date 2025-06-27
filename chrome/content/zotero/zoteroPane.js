@@ -6812,7 +6812,8 @@ var ZoteroPane = new function()
 		const itemsPaneMinWidth = 300;
 		// DeepTutor pane minimum width
 		const deepTutorPaneMinWidth = isDeepTutorPaneCollapsed ? 0 : 380;
-		const deepTutorPaneMaxWidth = 600;
+		// DeepTutor pane maximum width: max(905px, 30% of window width)
+		const deepTutorPaneMaxWidth = Math.max(905, window.innerWidth * 0.3);
 
 		let fixedComponentWidth = collectionsPaneMinWidth + itemPaneMinWidth + sideNavMinWidth + deepTutorPaneMinWidth;
 
