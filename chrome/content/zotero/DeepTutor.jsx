@@ -583,7 +583,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			// Store backend user data
 			userData: null,
 			userSubscribed: false,
-			isFreeTrial: true
+			isFreeTrial: true,
+			// Model selection freezing state
+			modelSelectionFrozen: false
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -602,6 +604,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this._isInitializingData = false;
 		// Flag 2: Temporarily blocks auth state changes during data fetch operations
 		this._blockingAuthStateChanges = false;
+
+		// Timer reference for model selection freeze
+		this._modelSelectionFreezeTimer = null;
 	}
 
 	async componentDidMount() {
@@ -624,6 +629,11 @@ var DeepTutor = class DeepTutor extends React.Component {
 		// Remove auth state listener
 		const authState = useAuthState();
 		authState.removeListener(this.handleAuthStateChange);
+
+		// Clear any pending timer
+		if (this._modelSelectionFreezeTimer) {
+			clearTimeout(this._modelSelectionFreezeTimer);
+		}
 	}
 
 	async initializeAuthState() {
@@ -1629,6 +1639,32 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	};
 
+	// Handle iniWait state changes from DeepTutorChatBox
+	handleInitWaitChange = (iniWait) => {
+		Zotero.debug(`DeepTutor: Received iniWait state change: ${iniWait}`);
+		
+		if (iniWait) {
+			// Freeze model selection immediately
+			this.setState({ modelSelectionFrozen: true });
+			Zotero.debug(`DeepTutor: Model selection frozen due to iniWait=true`);
+			
+			// Clear any existing timer
+			if (this._modelSelectionFreezeTimer) {
+				clearTimeout(this._modelSelectionFreezeTimer);
+			}
+			
+			// Set 10-second timer to unfreeze model selection
+			this._modelSelectionFreezeTimer = setTimeout(() => {
+				this.setState({ modelSelectionFrozen: false });
+				Zotero.debug(`DeepTutor: Model selection unfrozen after 10-second timer`);
+				this._modelSelectionFreezeTimer = null;
+			}, 10000);
+		} else {
+			// iniWait became false, but keep frozen until timer expires
+			Zotero.debug(`DeepTutor: iniWait became false, but keeping model selection frozen until timer expires`);
+		}
+	};
+
 	render() {
 		Zotero.debug("DeepTutor: Render called");
 
@@ -1671,6 +1707,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								currentSession={this.state.currentSession}
 								key={this.state.currentSession?.id}
 								onSessionSelect={this.handleSessionSelect}
+								onInitWaitChange={this.handleInitWaitChange}
 							/>
 						)}
 						{this.state.currentPane === 'sessionHistory'
@@ -1712,6 +1749,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									}
 								}}
 								user={this.state.userData}
+								externallyFrozen={this.state.modelSelectionFrozen}
 							/>
 						}
 						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} onWelcomeSignUp={this.handleOpenSignUpPage} />}
@@ -2131,6 +2169,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									}
 								}}
 								user={this.state.userData}
+								externallyFrozen={this.state.modelSelectionFrozen}
 							/>
 						</div>
 					</div>

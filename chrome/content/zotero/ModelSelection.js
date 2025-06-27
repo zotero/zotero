@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { 
   getUserById, 
   getPreSignedUrl, 
@@ -434,7 +434,7 @@ const styles = {
   },
 };
 
-function ModelSelection({ onSubmit, user }) {
+const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false }, ref) => {
   const [fileList, setFileList] = useState([]);
   const [originalFileList, setOriginalFileList] = useState([]);
   const [modelName, setModelName] = useState('');
@@ -451,7 +451,19 @@ function ModelSelection({ onSubmit, user }) {
   const [buttonLayout, setButtonLayout] = useState('row');
   const [isCreateHovered, setIsCreateHovered] = useState(false);
   const [hoveredSearchItem, setHoveredSearchItem] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(false);
   const buttonRef = useRef(null);
+
+  // Combine internal initialization state with external freeze state
+  const isEffectivelyFrozen = isInitializing || externallyFrozen;
+
+  // Debug logging for external freeze state changes
+  useEffect(() => {
+    if (externallyFrozen !== undefined) {
+      Zotero.debug(`ModelSelection: External freeze state changed to: ${externallyFrozen}`);
+      Zotero.debug(`ModelSelection: Effective frozen state: ${isEffectivelyFrozen}`);
+    }
+  }, [externallyFrozen, isEffectivelyFrozen]);
 
   // Use requestAnimationFrame to track button width
   useEffect(() => {
@@ -743,8 +755,9 @@ function ModelSelection({ onSubmit, user }) {
       return;
     }
 
-    // Clear any existing error message
+    // Clear any existing error message and start initializing
     setErrorMessage('');
+    setIsInitializing(true);
 
     // Determine the final session name
     const finalSessionName = modelName.trim() || backupModelName || "Default Session";
@@ -932,6 +945,7 @@ function ModelSelection({ onSubmit, user }) {
     } catch (error) {
       Zotero.debug('ModelSelection: Error creating session:', error);
       setErrorMessage('Failed to create session. Please try again.');
+      setIsInitializing(false);
     }
   };
 
@@ -1078,6 +1092,16 @@ function ModelSelection({ onSubmit, user }) {
   const handleSearchItemMouseEnter = (id) => setHoveredSearchItem(id);
   const handleSearchItemMouseLeave = () => setHoveredSearchItem(null);
 
+  // Public method to reset initializing state when component is about to close
+  const resetInitializingState = () => {
+    setIsInitializing(false);
+  };
+
+  // Expose public methods via ref
+  useImperativeHandle(ref, () => ({
+    resetInitializingState
+  }));
+
   return (
     <div style={styles.container}>
       <div style={styles.mainSection}>
@@ -1088,8 +1112,13 @@ function ModelSelection({ onSubmit, user }) {
               type="text"
               value={modelName}
               onChange={e => setModelName(e.target.value)}
-              style={styles.input1}
+              style={{
+                ...styles.input1,
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'text'
+              }}
               placeholder={backupModelName}
+              disabled={isEffectivelyFrozen}
             />
           </div>
 
@@ -1107,8 +1136,13 @@ function ModelSelection({ onSubmit, user }) {
                   <div key={file.id} style={styles.newFileListItem}>
                     <span style={styles.newFileListName}>{file.name}</span>
                     <button 
-                      style={styles.newFileListDelete}
-                      onClick={() => handleRemoveFile(file.id)}
+                      style={{
+                        ...styles.newFileListDelete,
+                        opacity: isEffectivelyFrozen ? 0.5 : 1,
+                        cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
+                      }}
+                      onClick={() => !isEffectivelyFrozen && handleRemoveFile(file.id)}
+                      disabled={isEffectivelyFrozen}
                     >
                       <img src={DeleteImg} alt="Delete" width="15" height="17" />
                     </button>
@@ -1126,16 +1160,21 @@ function ModelSelection({ onSubmit, user }) {
             >
               <img src={RegisSearchPath} alt="Search" style={styles.searchIcon} />
               <input
-                style={styles.searchInput}
+                style={{
+                  ...styles.searchInput,
+                  opacity: isEffectivelyFrozen ? 0.5 : 1,
+                  cursor: isEffectivelyFrozen ? 'not-allowed' : 'text'
+                }}
                 type="text"
                 value={searchValue}
-                onChange={e => setSearchValue(e.target.value)}
+                onChange={e => !isEffectivelyFrozen && setSearchValue(e.target.value)}
                 placeholder="Search for an Item"
+                disabled={isEffectivelyFrozen}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => e.preventDefault()}
               />
             </div>
-            {showSearchPopup && (
+            {showSearchPopup && !isEffectivelyFrozen && (
               <div style={styles.searchPopup}>
                 {filteredAttachments.length > 0 ? (
                   filteredAttachments.map(attachment => (
@@ -1162,14 +1201,16 @@ function ModelSelection({ onSubmit, user }) {
           <div 
             style={{
               ...styles.dragArea,
-              ...(isDragging ? styles.dragAreaActive : {})
+              ...(isDragging && !isEffectivelyFrozen ? styles.dragAreaActive : {}),
+              opacity: isEffectivelyFrozen ? 0.5 : 1,
+              cursor: isEffectivelyFrozen ? 'not-allowed' : 'default'
             }}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            onDragOver={!isEffectivelyFrozen ? handleDragOver : (e) => e.preventDefault()}
+            onDragLeave={!isEffectivelyFrozen ? handleDragLeave : (e) => e.preventDefault()}
+            onDrop={!isEffectivelyFrozen ? handleDrop : (e) => e.preventDefault()}
           >
             <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
-            Drag an Item Here
+            {isEffectivelyFrozen ? 'Initializing Session...' : 'Drag an Item Here'}
           </div>
         </div>
 
@@ -1178,24 +1219,39 @@ function ModelSelection({ onSubmit, user }) {
           <div style={styles.modelTypeRow}>
             <button
               ref={buttonRef}
-              style={getModelTypeButtonStyle(selectedType === 'lite')}
-              onClick={() => handleTypeSelection('lite')}
+              style={{
+                ...getModelTypeButtonStyle(selectedType === 'lite'),
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
+              }}
+              onClick={() => !isEffectivelyFrozen && handleTypeSelection('lite')}
+              disabled={isEffectivelyFrozen}
             >
               <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
               LITE
             </button>
             <button
               ref={buttonRef}
-              style={getModelTypeButtonStyle(selectedType === 'normal')}
-              onClick={() => handleTypeSelection('normal')}
+              style={{
+                ...getModelTypeButtonStyle(selectedType === 'normal'),
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
+              }}
+              onClick={() => !isEffectivelyFrozen && handleTypeSelection('normal')}
+              disabled={isEffectivelyFrozen}
             >
               <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
               STANDARD
             </button>
             <button
               ref={buttonRef}
-              style={getModelTypeButtonStyle(selectedType === 'advanced')}
-              onClick={() => handleTypeSelection('advanced')}
+              style={{
+                ...getModelTypeButtonStyle(selectedType === 'advanced'),
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
+              }}
+              onClick={() => !isEffectivelyFrozen && handleTypeSelection('advanced')}
+              disabled={isEffectivelyFrozen}
             >
               <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
               ADVANCED
@@ -1249,12 +1305,18 @@ function ModelSelection({ onSubmit, user }) {
       </div>
 
       <button
-        style={createButtonDynamicStyle}
-        onClick={handleSubmit}
-        onMouseEnter={handleCreateMouseEnter}
-        onMouseLeave={handleCreateMouseLeave}
+        style={{
+          ...createButtonDynamicStyle,
+          opacity: isEffectivelyFrozen ? 0.8 : 1,
+          cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer',
+          background: isEffectivelyFrozen ? '#6B7B84' : (isCreateHovered ? '#007BD5' : SKY)
+        }}
+        onClick={!isEffectivelyFrozen ? handleSubmit : undefined}
+        onMouseEnter={!isEffectivelyFrozen ? handleCreateMouseEnter : undefined}
+        onMouseLeave={!isEffectivelyFrozen ? handleCreateMouseLeave : undefined}
+        disabled={isEffectivelyFrozen}
       >
-        Create
+        {isEffectivelyFrozen ? 'Initializing...' : 'Create'}
       </button>
 
       {errorMessage && (
@@ -1275,6 +1337,6 @@ function ModelSelection({ onSubmit, user }) {
       )}
     </div>
   );
-}
+});
 
 export default ModelSelection;
