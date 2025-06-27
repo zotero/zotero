@@ -34,9 +34,4 @@ var ZOTERO_CONFIG = {
 	NEW_FEATURES_URL: 'https://www.zotero.org/blog/zotero-7/'
 };
 
-if (typeof exports === 'object' && typeof module !== 'undefined') {
-	module.exports = ZOTERO_CONFIG;
-}
-else {
-	var EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];
-}
+export default ZOTERO_CONFIG;
