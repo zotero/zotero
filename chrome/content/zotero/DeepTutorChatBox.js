@@ -470,7 +470,7 @@ const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.s
 const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
 
-const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
+const DeepTutorChatBox = ({ currentSession, key, onSessionSelect, onInitWaitChange }) => {
 	const [messages, setMessages] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [sessionId, setSessionId] = useState(null);
@@ -1952,6 +1952,14 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 		);
 	};
 
+	// Communicate iniWait state changes to parent component
+	useEffect(() => {
+		if (onInitWaitChange) {
+			onInitWaitChange(iniWait);
+			Zotero.debug(`DeepTutorChatBox: Communicated iniWait state change to parent: ${iniWait}`);
+		}
+	}, [iniWait, onInitWaitChange]);
+
 	return (
 		<div style={styles.container}>
 			{isLoading && <LoadingPopup />}
@@ -2087,7 +2095,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect }) => {
 
 DeepTutorChatBox.propTypes = {
 	currentSession: PropTypes.object,
-	onSessionSelect: PropTypes.func
+	onSessionSelect: PropTypes.func,
+	onInitWaitChange: PropTypes.func
 };
 
 export default DeepTutorChatBox;

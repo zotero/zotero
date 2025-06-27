@@ -434,7 +434,7 @@ const styles = {
   },
 };
 
-const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
+const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false }, ref) => {
   const [fileList, setFileList] = useState([]);
   const [originalFileList, setOriginalFileList] = useState([]);
   const [modelName, setModelName] = useState('');
@@ -453,6 +453,17 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
   const [hoveredSearchItem, setHoveredSearchItem] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const buttonRef = useRef(null);
+
+  // Combine internal initialization state with external freeze state
+  const isEffectivelyFrozen = isInitializing || externallyFrozen;
+
+  // Debug logging for external freeze state changes
+  useEffect(() => {
+    if (externallyFrozen !== undefined) {
+      Zotero.debug(`ModelSelection: External freeze state changed to: ${externallyFrozen}`);
+      Zotero.debug(`ModelSelection: Effective frozen state: ${isEffectivelyFrozen}`);
+    }
+  }, [externallyFrozen, isEffectivelyFrozen]);
 
   // Use requestAnimationFrame to track button width
   useEffect(() => {
@@ -1103,11 +1114,11 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
               onChange={e => setModelName(e.target.value)}
               style={{
                 ...styles.input1,
-                opacity: isInitializing ? 0.5 : 1,
-                cursor: isInitializing ? 'not-allowed' : 'text'
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'text'
               }}
               placeholder={backupModelName}
-              disabled={isInitializing}
+              disabled={isEffectivelyFrozen}
             />
           </div>
 
@@ -1127,11 +1138,11 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
                     <button 
                       style={{
                         ...styles.newFileListDelete,
-                        opacity: isInitializing ? 0.5 : 1,
-                        cursor: isInitializing ? 'not-allowed' : 'pointer'
+                        opacity: isEffectivelyFrozen ? 0.5 : 1,
+                        cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
                       }}
-                      onClick={() => !isInitializing && handleRemoveFile(file.id)}
-                      disabled={isInitializing}
+                      onClick={() => !isEffectivelyFrozen && handleRemoveFile(file.id)}
+                      disabled={isEffectivelyFrozen}
                     >
                       <img src={DeleteImg} alt="Delete" width="15" height="17" />
                     </button>
@@ -1151,19 +1162,19 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
               <input
                 style={{
                   ...styles.searchInput,
-                  opacity: isInitializing ? 0.5 : 1,
-                  cursor: isInitializing ? 'not-allowed' : 'text'
+                  opacity: isEffectivelyFrozen ? 0.5 : 1,
+                  cursor: isEffectivelyFrozen ? 'not-allowed' : 'text'
                 }}
                 type="text"
                 value={searchValue}
-                onChange={e => !isInitializing && setSearchValue(e.target.value)}
+                onChange={e => !isEffectivelyFrozen && setSearchValue(e.target.value)}
                 placeholder="Search for an Item"
-                disabled={isInitializing}
+                disabled={isEffectivelyFrozen}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => e.preventDefault()}
               />
             </div>
-            {showSearchPopup && !isInitializing && (
+            {showSearchPopup && !isEffectivelyFrozen && (
               <div style={styles.searchPopup}>
                 {filteredAttachments.length > 0 ? (
                   filteredAttachments.map(attachment => (
@@ -1190,16 +1201,16 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
           <div 
             style={{
               ...styles.dragArea,
-              ...(isDragging && !isInitializing ? styles.dragAreaActive : {}),
-              opacity: isInitializing ? 0.5 : 1,
-              cursor: isInitializing ? 'not-allowed' : 'default'
+              ...(isDragging && !isEffectivelyFrozen ? styles.dragAreaActive : {}),
+              opacity: isEffectivelyFrozen ? 0.5 : 1,
+              cursor: isEffectivelyFrozen ? 'not-allowed' : 'default'
             }}
-            onDragOver={!isInitializing ? handleDragOver : (e) => e.preventDefault()}
-            onDragLeave={!isInitializing ? handleDragLeave : (e) => e.preventDefault()}
-            onDrop={!isInitializing ? handleDrop : (e) => e.preventDefault()}
+            onDragOver={!isEffectivelyFrozen ? handleDragOver : (e) => e.preventDefault()}
+            onDragLeave={!isEffectivelyFrozen ? handleDragLeave : (e) => e.preventDefault()}
+            onDrop={!isEffectivelyFrozen ? handleDrop : (e) => e.preventDefault()}
           >
             <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
-            {isInitializing ? 'Initializing Session...' : 'Drag an Item Here'}
+            {isEffectivelyFrozen ? 'Initializing Session...' : 'Drag an Item Here'}
           </div>
         </div>
 
@@ -1210,11 +1221,11 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
               ref={buttonRef}
               style={{
                 ...getModelTypeButtonStyle(selectedType === 'lite'),
-                opacity: isInitializing ? 0.5 : 1,
-                cursor: isInitializing ? 'not-allowed' : 'pointer'
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
               }}
-              onClick={() => !isInitializing && handleTypeSelection('lite')}
-              disabled={isInitializing}
+              onClick={() => !isEffectivelyFrozen && handleTypeSelection('lite')}
+              disabled={isEffectivelyFrozen}
             >
               <img src={LitePath} alt="Lite" style={{ width: '1.5rem', height: '1.5rem' }} />
               LITE
@@ -1223,11 +1234,11 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
               ref={buttonRef}
               style={{
                 ...getModelTypeButtonStyle(selectedType === 'normal'),
-                opacity: isInitializing ? 0.5 : 1,
-                cursor: isInitializing ? 'not-allowed' : 'pointer'
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
               }}
-              onClick={() => !isInitializing && handleTypeSelection('normal')}
-              disabled={isInitializing}
+              onClick={() => !isEffectivelyFrozen && handleTypeSelection('normal')}
+              disabled={isEffectivelyFrozen}
             >
               <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
               STANDARD
@@ -1236,11 +1247,11 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
               ref={buttonRef}
               style={{
                 ...getModelTypeButtonStyle(selectedType === 'advanced'),
-                opacity: isInitializing ? 0.5 : 1,
-                cursor: isInitializing ? 'not-allowed' : 'pointer'
+                opacity: isEffectivelyFrozen ? 0.5 : 1,
+                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
               }}
-              onClick={() => !isInitializing && handleTypeSelection('advanced')}
-              disabled={isInitializing}
+              onClick={() => !isEffectivelyFrozen && handleTypeSelection('advanced')}
+              disabled={isEffectivelyFrozen}
             >
               <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
               ADVANCED
@@ -1296,16 +1307,16 @@ const ModelSelection = forwardRef(({ onSubmit, user }, ref) => {
       <button
         style={{
           ...createButtonDynamicStyle,
-          opacity: isInitializing ? 0.8 : 1,
-          cursor: isInitializing ? 'not-allowed' : 'pointer',
-          background: isInitializing ? '#6B7B84' : (isCreateHovered ? '#007BD5' : SKY)
+          opacity: isEffectivelyFrozen ? 0.8 : 1,
+          cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer',
+          background: isEffectivelyFrozen ? '#6B7B84' : (isCreateHovered ? '#007BD5' : SKY)
         }}
-        onClick={!isInitializing ? handleSubmit : undefined}
-        onMouseEnter={!isInitializing ? handleCreateMouseEnter : undefined}
-        onMouseLeave={!isInitializing ? handleCreateMouseLeave : undefined}
-        disabled={isInitializing}
+        onClick={!isEffectivelyFrozen ? handleSubmit : undefined}
+        onMouseEnter={!isEffectivelyFrozen ? handleCreateMouseEnter : undefined}
+        onMouseLeave={!isEffectivelyFrozen ? handleCreateMouseLeave : undefined}
+        disabled={isEffectivelyFrozen}
       >
-        {isInitializing ? 'Initializing...' : 'Create'}
+        {isEffectivelyFrozen ? 'Initializing...' : 'Create'}
       </button>
 
       {errorMessage && (
