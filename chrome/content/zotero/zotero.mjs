@@ -159,7 +159,6 @@ const xpcomFilesLocal = [
 	'translation/translators',
 ];
 
-Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
 const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 
 var instanceID = (new Date()).getTime();
@@ -169,8 +168,6 @@ var initCallbacks = [];
 
 var ZoteroContext = function() {}
 ZoteroContext.prototype = {
-	require,
-	
 	/**
 	 * Shuts down Zotero, calls a callback (that may return a promise),
 	 * then reinitializes Zotero. Returns a promise that is resolved
@@ -193,16 +190,13 @@ ZoteroContext.prototype = {
 	}
 };
 
-const { XPCOMUtils } = ChromeUtils.import(
-	"resource://gre/modules/XPCOMUtils.jsm"
-);
-XPCOMUtils.defineLazyModuleGetters(ZoteroContext.prototype, {
-	setTimeout: "resource://gre/modules/Timer.jsm",
-	clearTimeout: "resource://gre/modules/Timer.jsm",
-	setInterval: "resource://gre/modules/Timer.jsm",
-	clearInterval: "resource://gre/modules/Timer.jsm",
-	requestIdleCallback: "resource://gre/modules/Timer.jsm",
-	cancelIdleCallback: "resource://gre/modules/Timer.jsm",
+ChromeUtils.defineESModuleGetters(ZoteroContext.prototype, {
+	setTimeout: "resource://gre/modules/Timer.sys.mjs",
+	clearTimeout: "resource://gre/modules/Timer.sys.mjs",
+	setInterval: "resource://gre/modules/Timer.sys.mjs",
+	clearInterval: "resource://gre/modules/Timer.sys.mjs",
+	requestIdleCallback: "resource://gre/modules/Timer.sys.mjs",
+	cancelIdleCallback: "resource://gre/modules/Timer.sys.mjs",
 });
 
 /**

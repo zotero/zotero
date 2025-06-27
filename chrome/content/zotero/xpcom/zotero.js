@@ -23,18 +23,18 @@
     ***** END LICENSE BLOCK *****
 */
 
+const BluebirdShimPromise = ChromeUtils.importESModule('chrome://zotero/content/xpcom/bluebirdShim.mjs');
+const ZOTERO_CONFIG = ChromeUtils.importESModule('resource://zotero/config.mjs');
+
 // Commonly used imports accessible anywhere
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
-Components.utils.import("resource://zotero/config.js");
 var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-XPCOMUtils.defineLazyModuleGetters(globalThis, {
-	AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
-	AppConstants: "resource://gre/modules/AppConstants.jsm",
+ChromeUtils.defineESModuleGetters(globalThis, {
+	AsyncShutdown: "resource://gre/modules/AsyncShutdown.sys.mjs",
+	AppConstants: "resource://gre/modules/AppConstants.sys.mjs",
 });
 const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
-Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
 /*
  * Core functions
@@ -72,7 +72,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.isMac;
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
-	this.Promise = require('resource://zotero/bluebird.js');
+	this.Promise = BluebirdShimPromise;
 	
 	this.getMainWindow = function () {
 		return Services.wm.getMostRecentWindow("navigator:browser");
