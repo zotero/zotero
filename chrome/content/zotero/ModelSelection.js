@@ -524,7 +524,7 @@ function ModelSelection({ onSubmit, user }) {
         
         const attachments = items.reduce((arr, item) => {
           if (item.isAttachment() && item.isPDFAttachment()) {
-            const fileName = item.getField('title') || item.name || item.attachmentFilename;
+            const fileName = item.getField('filename') || item.getField('title') || item.name || item.attachmentFilename;
             Zotero.debug(`BBBBB: Found PDF attachment: ${fileName}`);
             return arr.concat([{ id: item.id, name: fileName }]);
           }
@@ -535,7 +535,7 @@ function ModelSelection({ onSubmit, user }) {
                 .filter(x => x.isPDFAttachment())
                 .map(x => ({ 
                   id: x.id, 
-                  name: x.getField('title') || x.name || x.attachmentFilename 
+                  name: x.getField('filename') || x.getField('title') || x.name || x.attachmentFilename 
                 }))
             );
           }
@@ -582,7 +582,7 @@ function ModelSelection({ onSubmit, user }) {
       }
 
       // Add to fileList with correct name property
-      const fileName = item.getField('title') || item.name || item.attachmentFilename;
+      const fileName = item.getField('filename') || item.getField('title') || item.name || item.attachmentFilename;
       Zotero.debug(`BBBBB: Using file name: ${fileName}`);
       
       setFileList(prev => {
@@ -675,7 +675,7 @@ function ModelSelection({ onSubmit, user }) {
         try {
           const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
           if (text) {
-            const fileName = pdf.getField('title') || pdf.name || pdf.attachmentFilename;
+            const fileName = pdf.getField('filename') || pdf.getField('title') || pdf.name || pdf.attachmentFilename;
             Zotero.debug(`NNNNN ModelSelection: Using file name: ${fileName}`);
             return {
               id: pdf.id,
@@ -761,16 +761,99 @@ function ModelSelection({ onSubmit, user }) {
             const fileName = file.name;
             Zotero.debug('ModelSelection: Processing file:', fileName);
 
-            // Get the file as a Data URL and convert to Blob
-            const dataURI = await file.attachmentDataURI;
-            if (!dataURI) {
-                throw new Error(`Failed to get file data for: ${fileName}`);
+            // Direct file reading approach (more memory-efficient than dataURI + fetch)
+            Zotero.debug(`ModelSelection: ========== Starting direct file reading for: ${fileName} ==========`);
+            const processStartTime = Date.now();
+            
+            let blob;
+            try {
+                // Get file path and check if file exists
+                Zotero.debug(`ModelSelection: Getting file path for item ID: ${file.id}`);
+                const pathStartTime = Date.now();
+                
+                const filePath = await file.getFilePathAsync();
+                const pathDuration = Date.now() - pathStartTime;
+                
+                Zotero.debug(`ModelSelection: File path retrieved in ${pathDuration}ms: ${filePath}`);
+                
+                if (!filePath) {
+                    throw new Error(`No file path available for: ${fileName}`);
+                }
+                
+                // Check file existence
+                Zotero.debug(`ModelSelection: Checking if file exists: ${filePath}`);
+                const existsStartTime = Date.now();
+                
+                const fileExists = await IOUtils.exists(filePath);
+                const existsDuration = Date.now() - existsStartTime;
+                
+                Zotero.debug(`ModelSelection: File existence check completed in ${existsDuration}ms - exists: ${fileExists}`);
+                
+                if (!fileExists) {
+                    throw new Error(`File not found on disk: ${filePath}`);
+                }
+                
+                // Check file size to avoid memory issues
+                Zotero.debug(`ModelSelection: Getting file statistics...`);
+                const statStartTime = Date.now();
+                
+                const fileStats = await IOUtils.stat(filePath);
+                const statDuration = Date.now() - statStartTime;
+                
+                const fileSizeBytes = fileStats.size;
+                const fileSizeMB = fileSizeBytes / (1024 * 1024);
+                
+                Zotero.debug(`ModelSelection: File stats retrieved in ${statDuration}ms`);
+                Zotero.debug(`ModelSelection: File size: ${fileSizeBytes} bytes (${fileSizeMB.toFixed(2)} MB)`);
+                Zotero.debug(`ModelSelection: File modified: ${new Date(fileStats.lastModified).toISOString()}`);
+                
+                // Set reasonable size limit (100MB for now, can be adjusted)
+                const MAX_FILE_SIZE_MB = 100;
+                if (fileSizeMB > MAX_FILE_SIZE_MB) {
+                    throw new Error(`File too large: ${fileSizeMB.toFixed(2)}MB (max: ${MAX_FILE_SIZE_MB}MB)`);
+                }
+                
+                // Read file data directly
+                Zotero.debug(`ModelSelection: Starting direct file read operation...`);
+                const readStartTime = Date.now();
+                
+                const fileData = await IOUtils.read(filePath);
+                const readDuration = Date.now() - readStartTime;
+                
+                Zotero.debug(`ModelSelection: File read completed in ${readDuration}ms`);
+                Zotero.debug(`ModelSelection: Read ${fileData.length} bytes from disk`);
+                Zotero.debug(`ModelSelection: File data type: ${fileData.constructor.name}`);
+                Zotero.debug(`ModelSelection: Read speed: ${(fileSizeMB / (readDuration / 1000)).toFixed(2)} MB/s`);
+                
+                // Create blob directly from file data
+                Zotero.debug(`ModelSelection: Creating blob from file data...`);
+                const blobStartTime = Date.now();
+                
+                // Use Blob constructor from main window (required in Zotero's XPCOM context)
+                const BlobConstructor = Zotero.getMainWindow().Blob;
+                blob = new BlobConstructor([fileData], { type: 'application/pdf' });
+                const blobDuration = Date.now() - blobStartTime;
+                const totalDuration = Date.now() - processStartTime;
+                
+                Zotero.debug(`ModelSelection: Blob created in ${blobDuration}ms`);
+                Zotero.debug(`ModelSelection: Final blob - size: ${blob.size} bytes, type: ${blob.type}`);
+                Zotero.debug(`ModelSelection: Data integrity check - original: ${fileSizeBytes}, blob: ${blob.size}, match: ${fileSizeBytes === blob.size}`);
+                Zotero.debug(`ModelSelection: ========== Direct file reading completed in ${totalDuration}ms ==========`);               
+            } catch (fileError) {
+                // Limit error message size to prevent log overflow
+                const errorMsg = fileError.message.length > 500 
+                    ? fileError.message.substring(0, 500) + '...[truncated]'
+                    : fileError.message;
+                const errorStack = fileError.stack && fileError.stack.length > 1000
+                    ? fileError.stack.substring(0, 1000) + '...[truncated]'
+                    : fileError.stack;
+                
+                Zotero.debug(`ModelSelection: Direct file reading ERROR - ${errorMsg}`);
+                if (errorStack) {
+                    Zotero.debug(`ModelSelection: File reading stack: ${errorStack}`);
+                }
+                throw new Error(`Failed to read file data: ${errorMsg}`);
             }
-
-            // Convert Data URL to Blob
-            const response = await window.fetch(dataURI);
-            const blob = await response.blob();
-            Zotero.debug('ModelSelection: Converted file to Blob:', blob);
 
             // 1. Get pre-signed URL for the file
             const preSignedUrlData = await getPreSignedUrl(user.id, fileName);
@@ -931,7 +1014,7 @@ function ModelSelection({ onSubmit, user }) {
             Zotero.debug(`BBBBB: Processing PDF: ${pdf.name}`);
             const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
             if (text) {
-              const fileName = pdf.getField('title') || pdf.name || pdf.attachmentFilename;
+              const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name || pdf.attachmentFilename;
               Zotero.debug(`BBBBBF: Successfully extracted text from PDF: ${fileName}`);
               return {
                 id: pdf.id,
@@ -1122,17 +1205,13 @@ function ModelSelection({ onSubmit, user }) {
             <div style={styles.modelDescription}>
               <div style={styles.modelFeature}>
                 <span style={styles.modelIcon}>🙌</span>
-                <span>Popular model - Great for most papers</span>
-              </div>
-              <div style={styles.modelFeature}>
-                <span style={styles.modelIcon}>💰</span>
-                <span>Free for all users</span>
+                <span>Our quickest model - for a quick grasp of the content.</span>
               </div>
               <div style={styles.modelLimitations}>
-                <span>❌ No summary</span>
-                <span>❌ No image understanding</span>
-                <span>❌ No advanced model like graphRAG</span>
-                <span>❌ No source content</span>
+                <span>✅ Free for all users</span>
+                <span>✅ Process raw text the fastest</span>
+                <span>✅ Source content highlight</span>
+                <span>✅ Multiple files understanding</span>
               </div>
             </div>
           )}
@@ -1142,16 +1221,12 @@ function ModelSelection({ onSubmit, user }) {
                 <span style={styles.modelIcon}>🙌</span>
                 <span>Popular model - Great for most papers</span>
               </div>
-              <div style={styles.modelFeature}>
-                <span style={styles.modelIcon}>💰</span>
-                <span>Available with Premium Subscription</span>
-              </div>
               <div style={styles.modelLimitations}>
                 <span>✅ Image understanding</span>
                 <span>✅ Inference mode with DeepSeek</span>
-                <span>✅ High quality summary</span>
-                <span>✅ Source content highlight</span>
+                <span>✅ Higher quality summary</span>
                 <span>✅ Markdown based RAG model</span>
+                <span>✅ Available with Premium Subscription</span>
               </div>
             </div>
           )}
@@ -1159,17 +1234,14 @@ function ModelSelection({ onSubmit, user }) {
             <div style={styles.modelDescription}>
               <div style={styles.modelFeature}>
                 <span style={styles.modelIcon}>🙌</span>
-                <span>Deep but Slow - Our most powerful model.<br />Take 5 - 10 min to prepare the content</span>
-              </div>
-              <div style={styles.modelFeature}>
-                <span style={styles.modelIcon}>💰</span>
-                <span>Available with Premium Subscription</span>
+                <span>Deep but Slow - Our most powerful model. It will take 5 - 10 min to prepare the content</span>
               </div>
               <div style={styles.modelLimitations}>
                 <span>✅ Everything in standard mode</span>
-                <span>🌟 Deeper understanding on figures, equations, and tables</span>
-                <span>🌟 Further enhanced context relavency</span>
-                <span>🌟 More advanced model using GraphRAG</span>
+                <span>✅ Deeper understanding on figures, equations, tables and graphs</span>
+                <span>✅ Further enhanced context relavency</span>
+                <span>✅ More advanced model using GraphRAG</span>
+                <span>✅ Available with Premium Subscription</span>
               </div>
             </div>
           )}
