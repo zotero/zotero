@@ -167,13 +167,6 @@ var isFirstLoadThisSession = true;
 var zContext = null;
 var initCallbacks = [];
 
-// Components.utils.import('resource://zotero/require.js');
-// Not using Cu.import here since we don't want the require module to be cached
-// for includes within ZoteroPane or other code, where we want the window instance available to modules.
-Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Components.interfaces.mozIJSSubScriptLoader)
-	.loadSubScript('resource://zotero/require.js');
-
 var ZoteroContext = function() {}
 ZoteroContext.prototype = {
 	require,
