@@ -536,7 +536,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
         
         const attachments = items.reduce((arr, item) => {
           if (item.isAttachment() && item.isPDFAttachment()) {
-            const fileName = item.getField('filename') || item.getField('title') || item.name || item.attachmentFilename;
+            const fileName = item.attachmentFilename || item.getField('filename') || item.getField('title') || item.name;
             Zotero.debug(`BBBBB: Found PDF attachment: ${fileName}`);
             return arr.concat([{ id: item.id, name: fileName }]);
           }
@@ -547,7 +547,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
                 .filter(x => x.isPDFAttachment())
                 .map(x => ({ 
                   id: x.id, 
-                  name: x.getField('filename') || x.getField('title') || x.name || x.attachmentFilename 
+                  name: x.attachmentFilename || x.getField('filename') || x.getField('title') || x.name 
                 }))
             );
           }
@@ -594,7 +594,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
       }
 
       // Add to fileList with correct name property
-      const fileName = item.getField('filename') || item.getField('title') || item.name || item.attachmentFilename;
+      const fileName = item.attachmentFilename || item.getField('filename') || item.getField('title') || item.name;
       Zotero.debug(`BBBBB: Using file name: ${fileName}`);
       
       setFileList(prev => {
@@ -687,7 +687,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
         try {
           const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
           if (text) {
-            const fileName = pdf.getField('filename') || pdf.getField('title') || pdf.name || pdf.attachmentFilename;
+            const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name;
             Zotero.debug(`NNNNN ModelSelection: Using file name: ${fileName}`);
             return {
               id: pdf.id,
@@ -1028,7 +1028,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
             Zotero.debug(`BBBBB: Processing PDF: ${pdf.name}`);
             const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
             if (text) {
-              const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name || pdf.attachmentFilename;
+              const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name;
               Zotero.debug(`BBBBBF: Successfully extracted text from PDF: ${fileName}`);
               return {
                 id: pdf.id,
