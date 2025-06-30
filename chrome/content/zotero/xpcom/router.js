@@ -1,6 +1,5 @@
-Components.utils.import("resource://zotero/pathparser.jsm", Zotero);
-Zotero.Router = Zotero.PathParser;
-delete Zotero.PathParser;
+const { PathParser } = ChromeUtils.importESModule("resource://zotero/pathparser.mjs");
+Zotero.Router = PathParser;
 
 Zotero.Router.Utilities = {
 	convertControllerToObjectType: function (params) {
