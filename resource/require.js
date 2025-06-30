@@ -91,6 +91,10 @@ function ZoteroLoader({
 	});
 
 	this.require = Require(this.loader, { id: "zotero" });
+	
+	let win = typeof window !== "undefined" ? window : {};
+	let doc = win.document ?? {};
+	let navigator = typeof win.navigator !== 'undefined' ? win.navigator : {};
 
 	// Various globals are available from ESM, but not from sandboxes,
 	// inject them into the globals list.
@@ -118,6 +122,15 @@ function ZoteroLoader({
 		WebSocket,
 		WindowGlobalChild,
 		WindowGlobalParent,
+		window: win,
+		document: doc,
+		navigator,
+		setTimeout: win.setTimeout,
+		clearTimeout: win.clearTimeout,
+		setInterval: win.setInterval,
+		clearInterval: win.clearInterval,
+		requestAnimationFrame: win.requestAnimationFrame,
+		cancelAnimationFrame: win.requestAnimationFrame,
 	};
 	for (const name in injectedGlobals) {
 		this.loader.globals[name] = injectedGlobals[name];
